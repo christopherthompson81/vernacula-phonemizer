@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/shan/shan.ts";
 // Myanmar-script variant), TONAL, the fleet's first Shan. A per-syllable scan: onset → medials → rime (vowel signs ×
 // coda) → EXPLICIT tone (unmarked→˨˦, ႇ→˩, ႈ→˧˧˨, visarga း→˥, ႉ→˦˨). Signatures: aspirated ⟨သ⟩→[sʰ], glottal-onset
 // ⟨ဢ⟩→[ʔ]; ⟨ူ⟩→[o] closed / [uː] open; medial ⟨ွ⟩ ROUNDS the inherent rime to [ɔ]; ⟨ိူ⟩→[ɤ], ⟨ို⟩→[ɯ]; the ⟨ႂ⟩ coda
-// →[ɰ]; palatalisation ⟨ၵျ⟩→[d͡ʑ]. Referee: wikipron shn_mymr_broad (2607 human). See docs/investigations/shn_native_bringup_investigation.md.
+// →[ɰ]; palatalisation ⟨ၵျ⟩→[d͡ʑ]. Referee: wikipron shn_mymr_broad (2607 human).
 describe("Shan (Tai Long) canonical IPA", () => {
     test("onsets, tones, and the endonym", () => {
         expect(phonemizeWord("တႆး")).toBe("taj˥"); // 'Tai/Shan' — ⟨ႆ⟩ final-y→[j], visarga း→˥ (high)

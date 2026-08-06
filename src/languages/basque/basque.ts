@@ -1,5 +1,5 @@
 /**
- * Native Basque / euskara (eu) text phonemizer — canonical IPA, espeak-independent. Basque is a LANGUAGE ISOLATE (no
+ * Native Basque / euskara (eu) text phonemizer — canonical IPA. Basque is a LANGUAGE ISOLATE (no
  * living relatives), Latin script, and its orthography is highly phonemic → a left-to-right greedy scan over a digraph
  * + letter table with two context rules (the ⟨r⟩ tap/trill split and the sibilant places).
  *
@@ -14,7 +14,7 @@
  *   silent (southern majority; [h] in the north). Palatal digraphs ⟨tt⟩→[c], ⟨dd⟩→[ɟ], ⟨ll⟩→[ʎ], ⟨ñ⟩→[ɲ]. ⟨g⟩→[ɡ]
  *   always (no soft g). Diphthong offglides ⟨i u⟩→[i̯ u̯] are written as plain vowels (the non-syllabic mark folds).
  *
- * Validated vs wikipron eus_latn broad (20114) + narrow (20079). See docs/investigations/eu_native_bringup_investigation.md.
+ * Validated vs wikipron eus_latn broad (20114) + narrow (20079).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

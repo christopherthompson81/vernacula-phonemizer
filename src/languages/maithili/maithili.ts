@@ -1,5 +1,5 @@
 /**
- * Native Maithili / मैथिली (mai) text phonemizer — canonical IPA, espeak-independent. Eastern Indo-Aryan (Bihari
+ * Native Maithili / मैथिली (mai) text phonemizer — canonical IPA. Eastern Indo-Aryan (Bihari
  * group), Devanagari. Reuses the Hindi Devanagari engine (makeNativeHindi — schwa deletion, weight stress,
  * numbers) with a Maithili data file whose divergences from Hindi are: SHORT e/o (ए→e, ओ→o), the diphthongs
  * ऐ→[əɪ] / औ→[əu], and inherent /ə/. Maithili's signature — a cluster schwa that Hindi DELETES instead reduces to
@@ -7,7 +7,7 @@
  *
  * 🔷 SINGLE-SOURCE: the only referee is wikipron mai_deva narrow (167 human pairs) — small, so this is a
  * single-source-verified bring-up, not a confident convergence. Distinct from the ⛔ Bhojpuri/Awadhi stubs, which
- * have NO referee at all. See docs/investigations/mai_native_bringup_investigation.md.
+ * have NO referee at all.
  */
 /**
  * #583 — NORMALIZER WORDS: Hindi's CLOCK words are confirmed for Maithili; its percent word is NOT, and is

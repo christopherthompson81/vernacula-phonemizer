@@ -9,8 +9,7 @@
  * per-letter consonant mask keeps every output plausible.
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the model — is absent, createDanishTagger()
- * resolves to `undefined` and the async path (daNeural.ts) falls back to the sync rule engine. See
- * docs/investigations/da_nst_ingest_investigation.md.
+ * resolves to `undefined` and the async path (daNeural.ts) falls back to the sync rule engine.
  */
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";

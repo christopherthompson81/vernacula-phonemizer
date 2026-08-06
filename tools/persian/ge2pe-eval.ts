@@ -4,7 +4,7 @@
  * BACKBONE (consonants + long vowels) agreement, overall and per test set (Kasre = ezafe-stress, Homograph =
  * homograph-stress). These are ADVERSARIAL hard-case sets, so the numbers are a lower bound, not a representative
  * accuracy — the value is INDEPENDENT corroboration of the backbone and confirmation of the ezafe/homograph residual
- * (see docs/investigations/fa_shortvowel_restoration_investigation.md Run 27). Run: npx tsx tools/persian/ge2pe-eval.ts
+ * ( Run 27). Run: npx tsx tools/persian/ge2pe-eval.ts
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";

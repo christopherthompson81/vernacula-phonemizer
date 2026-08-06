@@ -13,7 +13,6 @@
  *    don't have; so it can miss the iconic reading, e.g. 那→naj not naz), with no context disambiguation — Sawndip
  *    has no labelled corpus, unlike the cmn homograph case. A text relying on an alternative reading silently gets
  *    the default (the Han-homograph 行 xíng/háng situation).
- * See docs/investigations/za_sawndip_investigation.md.
  */
 import { loadTsvMap } from "../../core/loadTsv.ts";
 

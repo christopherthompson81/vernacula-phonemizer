@@ -5,7 +5,7 @@
 // rule also turns ظ [ðˤ]→[dˤ], since ð is a substring of ðˤ). خ stays [x]. NOTE the deep, DEFERRED story is Darija's
 // vowels: MSA short a/i/u collapse to schwa [ə] or delete entirely (a wholesale restructuring, not a shift table) —
 // the same data-blocked wall as Egyptian, only larger. Historical diphthongs monophthongize (variable/lexical in
-// Darija — some registers raise to iː/uː). Referee: wikipron ary_arab_broad. See docs/investigations/ary_moroccan_bringup_investigation.md.
+// Darija — some registers raise to iː/uː). Referee: wikipron ary_arab_broad.
 {
     "variety": "moroccan",
     "iso": "ary",

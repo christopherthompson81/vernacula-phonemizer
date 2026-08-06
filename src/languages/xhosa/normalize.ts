@@ -60,8 +60,7 @@
  * **No decimal-separator word is asserted.** It is absent from the corpus (`chaphaza` occurs only as the
  * verb *-chaphazela*, ×8), from both xh referees, from `xhosa.jsonc`, from the HSRC Grade 1–3
  * English/isiXhosa maths dictionary (which has *inkqubo yedesimali* for "the decimal system" and nothing
- * for the point), and from isiXhosa Wikipedia — and **espeak-ng has no Xhosa at all**, so there is no
- * `dictsource/xh_list` to read. The rule therefore removes the separator and reads the fractional digits
+ * for the point), and from isiXhosa Wikipedia. The rule therefore removes the separator and reads the fractional digits
  * one at a time. The point is not spoken; it was not spoken before either — before, it was a full stop.
  * This is the Fula lesson applied in the negative: a wrong high-traffic word is worse than a missing one.
  *
@@ -422,7 +421,7 @@ export function normalizeXhosa(input: string): string {
     //     reaching `clausePunctuation` and becoming a SENTENCE BREAK inside a number. The fractional digits
     //     are spaced apart so the number path speaks them one at a time; reading `34` as a number would say
     //     *amashumi amathathu nane*, a different quantity. NO separator word is emitted — see the header:
-    //     none is attested in any source this repo or espeak has, and espeak has no Xhosa at all.
+    //     none is attested in any source this repo has.
     //     Also claims the corpus's ONE decimal comma (`eziyi-2,3 miliyoni`), restricted to a 1–2 digit
     //     tail so the date comma `Novemba 26,2008` cannot be swallowed, and `802.11n`, whose dot was a
     //     full stop too.

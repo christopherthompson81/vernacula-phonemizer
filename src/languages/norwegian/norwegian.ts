@@ -1,12 +1,11 @@
 /**
- * Native Norwegian Bokmål (nb) text phonemizer — canonical IPA, espeak-independent. North Germanic, Latin. Urban East
+ * Native Norwegian Bokmål (nb) text phonemizer — canonical IPA. North Germanic, Latin. Urban East
  * Norwegian (standard østnorsk). A left-to-right rule g2p (norwegian.jsonc = the data) with the deep-orthography
  * machinery: COMPLEMENTARY VOWEL LENGTH on the stressed (first) syllable — open syllable → long V (short C), closed →
  * short V (long C) — which also picks the vowel QUALITY (short ⟨i⟩=ɪ vs long=iː; ⟨o⟩→uː/ʊ; ⟨u⟩→ʉː/ʉ; ⟨å⟩→oː/ɔ);
  * FRONT-VOWEL SOFTENING (sk/k/g before e i y ø æ → ʃ/ç/j) in the stressed onset; the digraphs sj/skj→ʃ, kj/tj→ç, hv→ʋ,
  * ng→ŋ; word-initial silent digraphs hj/gj/lj/dj → j; RETROFLEX r + coronal → ʈ ɳ ɭ ʂ; and SILENT ⟨d⟩ (word-final after
  * a vowel or l/n/r: god→ɡuː, land→lɑn, jord→juːr). Length ː + stress + pitch accent are folded in the referee eval.
- * See docs/investigations/nb_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

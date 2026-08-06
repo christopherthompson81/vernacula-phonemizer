@@ -1,5 +1,5 @@
 /**
- * Korean grapheme→phoneme engine (Seoul standard), espeak-independent. Hangul syllable blocks are decomposed
+ * Korean grapheme→phoneme engine (Seoul standard). Hangul syllable blocks are decomposed
  * algorithmically into initial (L) / medial (V) / final (T) jamo, then Korean's extensive cross-syllable sandhi
  * is applied over the jamo sequence:
  *   - liaison: a coda before a null-onset (ㅇ) vowel moves to onset (국이→kuɡi); ㅎ deletes (좋아→t͡ɕoɐ);
@@ -10,7 +10,7 @@
  *   - nasalization: an obstruent coda + a nasal → nasal coda (국물→kuŋmuɭ… wait kuŋmul; 합니→hɐmni);
  *   - lateralization: ㄴㄹ / ㄹㄴ → ll (신라→siɭɭɐ);
  *   - coda neutralization: the 7 possible codas, obstruents unreleased ̚ (밥→pɐp̚).
- * Contributes ̚ (unreleased) and ͈ (tense). See docs/investigations/ko_native_bringup_investigation.md.
+ * Contributes ̚ (unreleased) and ͈ (tense).
  */
 
 import { MANIFEST } from "./manifest.ts";
@@ -186,7 +186,7 @@ export function phonemizeWord(word: string): string {
             (prevCoda === "" || (prevCoda !== null && isSonorant(prevCoda)));
         if (voiceable && afterSonorant) onPh = VOICE[onPh]!;
         out += onPh;
-        if (i === stressIdx) out += "ˈ"; // ˈ before the whole medial (incl. any onglide j/w — espeak convention)
+        if (i === stressIdx) out += "ˈ"; // ˈ before the whole medial (incl. any onglide j/w)
         out += VOWEL[syls[i]!.V] ?? "";
         // coda
         if (coda[i]) out += CODA_PH[coda[i]!] ?? "";

@@ -3,7 +3,7 @@
 // loanword-heavy → single-source, recorded as a secondaryGap. The backbone folds neutralise the referee's marks the
 // orthography does NOT determine: TONE (H á / L à — Mooré tone is contextual, unwritten → we emit none), SYLLABLE
 // dots, and the geminate notation (CC ~ Cː). Vowel quality/length (⟨ɛ ɩ ʋ⟩, doubling) and NASALISATION (tilde) ARE
-// written and emitted, so they are compared directly — NOT folded. See docs/investigations/mos_native_bringup_investigation.md.
+// written and emitted, so they are compared directly — NOT folded.
 {
     "language": "mos", "name": "Mooré", "script": "Latin",
     "provenance": "Authored greedy g2p + gemination from the Mooré Latin (Burkinabé) orthography. Referee: en.wiktionary Moore (Wiktionary, human).",

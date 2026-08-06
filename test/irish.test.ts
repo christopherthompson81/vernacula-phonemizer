@@ -5,12 +5,12 @@ import { normalizeIrish, ordinalWords } from "../src/languages/irish/normalize.t
 import { numberToWords } from "../src/languages/irish/numbers.ts";
 import { phonemizeWord } from "../src/languages/irish/irish.ts";
 
-// Canonical-IPA goldens for Irish Gaelic (ga) — Standard/Connacht-leaning, espeak-independent. The defining
+// Canonical-IPA goldens for Irish Gaelic (ga) — Standard/Connacht-leaning. The defining
 // axis is BROAD (velarized ˠ, next to a/o/u) vs SLENDER (palatalized ʲ, next to e/i) consonants, determined by
 // the flanking vowel letters ("caol le caol"). Slender velars are the palatal stops c/ɟ; slender s → ʃ. First-
 // syllable stress (marked even on monosyllables); unstressed short vowels reduce to ə. Authored to
-// Standard/Connacht; the espeak-ng-portable ga engine is a LOOSE cross-check — a few goldens deliberately
-// diverge from it (Connacht final -e → ə, silent -dh/-gh, broad bh/mh → w). See docs/investigations/ga_bringup_investigation.md.
+// Standard/Connacht — a few goldens deliberately diverge from the Munster/spelling-pronunciation reading
+// (Connacht final -e → ə, silent -dh/-gh, broad bh/mh → w).
 describe("irish canonical IPA", () => {
     test("broad consonants (velarized ˠ, dental l̪ˠ/n̪ˠ/d̪ˠ/t̪ˠ)", () => {
         expect(phonemizeWord("mór")).toBe("mˠˈoːɾˠ");

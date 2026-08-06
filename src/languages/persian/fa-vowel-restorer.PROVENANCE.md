@@ -12,4 +12,4 @@ cross-script silver (tools/persian/fa-tg-silver.tsv; wikipron/tgwiki CC-BY-SA, I
 the GPU (`/mnt/data/ar-diac-venv`, torch+cuda) via `tools/persian/export_s2s_onnx.py`.
 
 **Measured (held-out UNSEEN words, vs the fold-normalised wikipron reference):** 45.8% exact — ≈3× the fa g2p
-default-[a] baseline (16%). See docs/investigations/fa_shortvowel_restoration_investigation.md.
+default-[a] baseline (16%).

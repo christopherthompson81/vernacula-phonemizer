@@ -1,9 +1,9 @@
 /**
- * Tatar (tt) phonemizer — Татар теле, Kipchak Turkic, CYRILLIC script (official), canonical IPA, espeak-independent.
+ * Tatar (tt) phonemizer — Татар теле, Kipchak Turkic, CYRILLIC script (official), canonical IPA.
  * The fleet's first Tatar. Cyrillic grapheme scan with VOWEL-HARMONY backing: ⟨к⟩→[q]/[г]→[ʁ] next to a BACK vowel
  * (ак→ɑq, җомга→d͡ʒomʁɑ), but [k]/[ɡ] next to a FRONT vowel (көз→køz). 9 vowels with the special letters ⟨ә⟩→[æ],
  * ⟨ө⟩→[ø], ⟨ү⟩→[y], ⟨ы⟩→[ɨ]; the iotated ⟨я ю е ё⟩; the Kazan-standard fricatives ⟨җ⟩→[ʑ] / ⟨ч⟩→[ɕ], ⟨ң⟩→[ŋ], ⟨һ⟩→[h]. Word-final
- * (oxytone) stress, the Turkic default. THIN single-source (kaikki). See docs/investigations/tt_native_bringup_investigation.md.
+ * (oxytone) stress, the Turkic default. THIN single-source (kaikki).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

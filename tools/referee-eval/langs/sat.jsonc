@@ -1,5 +1,5 @@
 // Santali / ᱥᱟᱱᱛᱟᱲᱤ (sat) — Munda (Austroasiatic), the OL CHIKI alphabet. Referee: kaikki Santali (HUMAN, Wiktionary,
-// 490 Ol Chiki headwords with IPA — the ONLY machine referee; no wikipron/epitran sat). See docs/investigations/sat_native_bringup_investigation.md.
+// 490 Ol Chiki headwords with IPA — the ONLY machine referee; no wikipron/epitran sat).
 {
     "language": "sat", "name": "Santali (ᱥᱟᱱᱛᱟᱲᱤ)", "script": "Ol Chiki",
     "provenance": "Authored Ol Chiki→IPA grapheme scan (6 vowels, palatal ⟨ᱪ ᱡ⟩→c/ɟ, retroflex ⟨ᱴ ᱰ ᱬ ᱲ⟩; ⟨ᱷ⟩ aspiration, ⟨ᱹ⟩ vowel-mod ə, ⟨ᱸ⟩ nasal, ⟨ᱼ ᱽ⟩ + word-final checked stops) from Santali phonology; validated against kaikki.",

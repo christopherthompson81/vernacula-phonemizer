@@ -1,5 +1,5 @@
 /**
- * Arabic (ar) phonemizer — canonical IPA (Modern Standard Arabic, broad phonemic), espeak-independent.
+ * Arabic (ar) phonemizer — canonical IPA (Modern Standard Arabic, broad phonemic).
  * Diacritized g2p (g2p.ts) + quantity-sensitive stress. Phase 1 assumes vowelled input; a neural diacritizer
  * pre-pass (permissively-sourced) will restore short vowels for bare text in Phase 2.
  */

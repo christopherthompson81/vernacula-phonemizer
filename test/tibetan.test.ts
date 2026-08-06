@@ -8,8 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // syllable-stack rule engine: TONE from tonogenesis (˥ high / ˩ low), SILENT prefixes/superscripts, onset-cluster
 // realization (ya-btags→palatal, ra-btags→retroflex affricate, subjoined-ha→ɬ), and suffix-driven vowel UMLAUT
 // (a→ɛ o→ø u→y) / LENGTH / NASALIZATION / GLOTTALIZATION. Validated at 97.5% vs the INDEPENDENT hand-curated JIPA
-// 'Central Tibetan (Lhasa)' illustration; 100% coverage on 300k independent TIBMD Lhasa tokens. See
-// docs/investigations/bo_native_bringup_investigation.md.
+// 'Central Tibetan (Lhasa)' illustration; 100% coverage on 300k independent TIBMD Lhasa tokens.
 describe("Tibetan (Standard/Lhasa) canonical IPA", () => {
     test("tonogenesis: voiceless→HIGH ˥, voiced-obstruent→LOW ˩ + aspiration, sonorant tone", () => {
         expect(phonemizeWord("ཁ")).toBe("kʰa˥"); // kha — voiceless aspirate, HIGH

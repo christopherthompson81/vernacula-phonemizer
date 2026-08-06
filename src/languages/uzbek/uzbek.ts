@@ -1,5 +1,5 @@
 /**
- * Native Uzbek / oʻzbekcha (uz) text phonemizer — canonical IPA, espeak-independent. Turkic, modern LATIN
+ * Native Uzbek / oʻzbekcha (uz) text phonemizer — canonical IPA. Turkic, modern LATIN
  * orthography. Uzbek is the Turkic outlier that LOST vowel harmony (Persian/Tajik contact), so the g2p is a flat
  * left-to-right scan with fixed letter values — no harmony machinery. The signature is the vowel split ⟨o⟩→[ɒ]
  * vs ⟨oʻ⟩→[o]. Handles the digraphs sh/ch/ng and the two comma-letters oʻ/gʻ, distinguishing the comma (which

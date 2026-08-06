@@ -1,9 +1,8 @@
 /**
- * Xhosa (xh, isiXhosa) phonemizer — canonical IPA, espeak-independent and AUTHORED beyond-espeak. The Nguni
+ * Xhosa (xh, isiXhosa) phonemizer — canonical IPA (authored). The Nguni
  * sibling of Zulu: it REUSES the shared Zulu g2p scan (zulu/g2p.ts toSegments, longest-match over a rule table)
  * with the Xhosa rule table (xhosa.jsonc — adds ⟨rh⟩→[x]) and the Nguni penultimate-stress-with-lengthening
- * logic. Xhosa tone (lexical, unwritten) is DEFERRED — words are left untoned (the referee eval folds tone). See
- * docs/investigations/xh_native_bringup_investigation.md.
+ * logic. Xhosa tone (lexical, unwritten) is DEFERRED — words are left untoned (the referee eval folds tone).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

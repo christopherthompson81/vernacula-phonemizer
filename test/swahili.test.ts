@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/swahili/swahili.ts";
 // Canonical-IPA goldens for Swahili / Kiswahili (sw) — Bantu, highly phonemic Latin orthography, no tone, regular
 // penultimate stress. Validated against wikipron swa (93.5%) + kaikki swa (97.8%), both human. The distinctive
 // segments: IMPLOSIVE voiced stops (ɓ ɗ ʄ ɠ), PRENASALIZED stops (ᵐb ⁿd ⁿd͡ʒ ᵑɡ), ⟨ng'⟩→ŋ vs ⟨ng⟩→ᵑɡ, syllabic
-// nasals (m̩ n̩), long vowels from ⟨aa⟩ etc., Cʷ labialization. See docs/investigations/sw_native_bringup_investigation.md.
+// nasals (m̩ n̩), long vowels from ⟨aa⟩ etc., Cʷ labialization.
 describe("swahili canonical IPA", () => {
     test("implosives, prenasalized stops, syllabic nasals", () => {
         const cases: [string, string][] = [

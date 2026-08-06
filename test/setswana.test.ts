@@ -7,7 +7,6 @@ import { phonemizeWord, createSetswana } from "../src/languages/setswana/setswan
 // (1955) via Mistry. The greedy longest-match g2p scores 100% folded vs epitran tsn-Latn (tools/referee-eval,
 // 1592 words). Vowels are the standard 7-vowel system /i ɪ ɛ a ɔ ʊ u/ (⟨e⟩→ɪ, ⟨o⟩→ʊ, ⟨ê ô⟩→ɛ ɔ). Tone (H/L,
 // lexical + unwritten) and the ejective realization (post-nasal/dialectal) are deferred.
-// See docs/investigations/tn_native_bringup_investigation.md.
 describe("Setswana canonical IPA — greedy g2p", () => {
     test("digraph signatures: dorsal aspirates, lateral affricates, sibilants, palatals", () => {
         expect(phonemizeWord("kgomo")).toBe("k͡χʰʊmʊ"); // "cow" — ⟨kg⟩ → k͡χʰ (uvular)

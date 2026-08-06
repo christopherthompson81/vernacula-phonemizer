@@ -7,8 +7,7 @@
  * Weight rule (Hayes/Pandey): syllable weights are Light (short open V),
  * Heavy (long/nasal V, or short V + coda), Superheavy (long/nasal V + coda). Primary stress goes to
  * the RIGHTMOST superheavy syllable; else the rightmost NON-FINAL heavy (the final syllable is
- * extrametrical); else the first syllable. Verified against the espeak-derived hi output across
- * light/heavy/superheavy shapes (सरकार final-superheavy stressed; नमस्ते penult-heavy, final CVː skipped).
+ * extrametrical); else the first syllable.
  */
 
 import {
@@ -79,7 +78,7 @@ export function applyWeightStress(ipa: string): string {
         return "L";
     };
 
-    // The stress mark is placed before the NUCLEUS (vowel), matching the espeak/fleet convention
+    // The stress mark is placed before the NUCLEUS (vowel), matching the fleet convention
     // (kˈiː, not the standard-IPA before-onset ˈkiː) so native output is fleet-consistent. `onset` is
     // retained for syllable-weight bookkeeping only.
     void onset;

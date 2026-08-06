@@ -273,7 +273,7 @@ export function normalizeTamil(input: string): string {
     //
     //     The sign is written as a GLYPH in every language's prose, including the wiki, so the word is not
     //     rare in text — it is absent from text by construction, and Runs 1–2 of
-    //     docs/investigations/sign_reading_investigation.md burned both the label tier (Wikidata returns the
+    // burned both the label tier (Wikidata returns the
     //     bare character `+` as ta's own label for "plus sign") and the prose tier on it.
     //
     //     FLEURS ships audio aligned to every transcript, so the sentence containing the sign has a

@@ -1,10 +1,10 @@
 /**
- * Native Tigrinya / ትግርኛ (ti) text phonemizer — canonical IPA, espeak-independent. North Ethiosemitic (~9M,
+ * Native Tigrinya / ትግርኛ (ti) text phonemizer — canonical IPA. North Ethiosemitic (~9M,
  * Eritrea + Tigray), written in the Ge'ez/Fidäl SYLLABARY-abugida. Reads the SHARED Ge'ez engine (core/geez.ts) —
  * the same fidel→CV lookup + epenthetic-ɨ deletion as Amharic — over a Tigrinya fidel table. The split from
  * Amharic is the PRESERVED SEMITIC GUTTURALS: ⟨ሐ ኀ⟩→ħ, ⟨ዐ⟩→ʕ (the pharyngeals Amharic merged to h/ʔ), ⟨አ⟩→ʔ,
  * ⟨ኸ⟩→x, with the guttural 1st-order vowel kept central [ə]. Gemination is unwritten (folded); ejectives kʼ tʼ
- * t͡ʃʼ pʼ t͡sʼ. See docs/investigations/ti_native_bringup_investigation.md.
+ * t͡ʃʼ pʼ t͡sʼ.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

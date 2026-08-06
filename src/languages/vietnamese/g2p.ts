@@ -1,14 +1,13 @@
 /**
- * Vietnamese grapheme→phoneme engine (Northern / Hanoi), espeak-independent. A Vietnamese syllable is
+ * Vietnamese grapheme→phoneme engine (Northern / Hanoi). A Vietnamese syllable is
  * onset + (glide) + nucleus + tone + coda. This engine:
  *   1. extracts the TONE from the vowel diacritic via Unicode NFD (grave/acute/hook/tilde/dot-below →
  *      6 Chao contours), leaving the toneless syllable (â ê ô ă ơ ư preserved);
  *   2. parses the ONSET by longest orthographic match (digraphs ngh/ng/nh/ch/gh/gi/kh/ph/th/tr/qu…),
  *      vowel-initial → glottal ʔ;
  *   3. looks up the RHYME (everything after the onset) in a table (rhymes.tsv, the closed Vietnamese rhyme
- *      set, ~370 entries, derived from espeak-ng-portable);
+ *      set, ~370 entries — an exhaustive closed-class inventory);
  *   4. assembles onset + glide + ˈ + nucleus + tone + coda.
- * See docs/investigations/vi_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";

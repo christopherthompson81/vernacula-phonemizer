@@ -1,11 +1,11 @@
 /**
- * Native Ilocano / Iloko (ilo) text phonemizer — canonical IPA, espeak-independent. Austronesian (Northern Luzon,
+ * Native Ilocano / Iloko (ilo) text phonemizer — canonical IPA. Austronesian (Northern Luzon,
  * Ilocano subgroup — NOT Bisayan). A shallow near-phonemic Latin g2p (reads ilocano.jsonc): trigraphs
  * ⟨gui/gue/qui/que⟩ + digraph ⟨ng⟩→ŋ, then single letters, with a WORD-INITIAL glottal stop [ʔ] before a vowel and
  * PENULTIMATE stress (unwritten, folded by the eval). The Ilocano-distinctive HIATUS: a HIGH vowel ⟨i u⟩ before
  * another vowel GLIDES (dua→dwa, radio→ɾadjo) — unlike Bisayan's uniform glottal hiatus — while a non-high hiatus
  * keeps the glottal (tao→taʔo). ⟨e⟩→[ɛ] (the 6th vowel is [ɯ]~[ɛ], not spelling-predictable → default ɛ, folded);
- * ⟨ll⟩ is a native geminate [lː]. Cardinal numbers use the NATIVE Austronesian set (numbers.ts). See docs/investigations/ilo_native_bringup_investigation.md.
+ * ⟨ll⟩ is a native geminate [lː]. Cardinal numbers use the NATIVE Austronesian set (numbers.ts).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

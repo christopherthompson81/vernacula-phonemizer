@@ -1,6 +1,6 @@
 /**
  * Tibetan (bo) phonemizer — Standard / Lhasa Tibetan (Tournadre's "Standard Spoken Tibetan"), Tibetan script
- * (U+0F00–0FFF), canonical IPA, espeak-independent. The fleet's first Bodish/Tibetic language. One of the DEEPEST
+ * (U+0F00–0FFF), canonical IPA. The fleet's first Bodish/Tibetic language. One of the DEEPEST
  * orthographies in the world: Classical spelling encodes Old Tibetan; the Lhasa reading diverges massively, so this
  * is a RULE ENGINE, not a scan — parse the syllable STACK (prefix · superscript · root · subscript · vowel · suffix ·
  * post-suffix) from the Unicode full (U+0F40–0F6C) vs subjoined (U+0F90–0FBC) distinction, then apply the reading
@@ -9,7 +9,7 @@
  * suffix-driven vowel umlaut / length / nasalization / glottalization. Tone emitted as ˥ (H) / ˩ (L).
  *
  * Referees: hand-curated JIPA "Central Tibetan (Lhasa)" illustration (independent, CC-BY) + TIBMD@MUC (independent)
- * + kaikki/Module:bo-pron (reference-parity, disclosed). See docs/investigations/bo_native_bringup_investigation.md.
+ * + kaikki/Module:bo-pron (reference-parity, disclosed).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

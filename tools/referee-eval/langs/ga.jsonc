@@ -10,7 +10,7 @@
         }
     ],
     "segmentJoin": true,
-    "secondaryGap": "no independent second source; the referee itself mixes 3 dialects. The espeak-ng-portable authored ga engine is the canonical oracle but is not espeak-independent. A single-dialect lexicon would help.",
+    "secondaryGap": "no independent second source; the referee itself mixes 3 dialects. A single-dialect lexicon would help.",
     "folds": [
         {
             "pattern": "ⁱ",

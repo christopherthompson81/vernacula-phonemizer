@@ -6,7 +6,7 @@
  * maps generalise (vs memorise words): 5-fold, derive the onset/rime maps from 4/5 of the referee and predict the
  * held-out 1/5, segment-exact. A word-lookup would score ~0; the real number is ~94%.
  *
- * CAVEAT (see the investigation doc): this shares the referee's ONSET inventory across folds, so it validates
+ * CAVEAT: this shares the referee's ONSET inventory across folds, so it validates
  * unseen rime/tone combinations of KNOWN onsets — it cannot detect onsets absent from the referee (those are
  * spec-filled in the manifest). Run: `npx tsx tools/referee-eval/hmn-heldout-cv.ts`
  */

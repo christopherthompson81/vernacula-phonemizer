@@ -1,9 +1,9 @@
 /**
- * Hungarian (hu, magyar) phonemizer — Uralic, Latin, canonical IPA, espeak-independent. A longest-match scan
+ * Hungarian (hu, magyar) phonemizer — Uralic, Latin, canonical IPA. A longest-match scan
  * (g2p reads the rule table in hungarian.jsonc): trigraphs / geminate-digraphs / digraphs before single letters,
  * then a doubled-single-consonant → Cː gemination pass, then FIXED first-syllable stress (Hungarian). Signature:
  * ⟨s⟩→[ʃ] / ⟨sz⟩→[s], ⟨gy⟩→[ɟ] / ⟨ty⟩→[c], ⟨a⟩→[ɒ], the full long/short vowel system. text() tokenizes words /
- * numbers / punctuation. See docs/investigations/hu_native_bringup_investigation.md.
+ * numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

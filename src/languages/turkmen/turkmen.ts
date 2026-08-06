@@ -1,9 +1,9 @@
 /**
- * Standard Turkmen (tk) phonemizer — Türkmençe, Oghuz Turkic, Latin script, canonical IPA, espeak-independent. The
+ * Standard Turkmen (tk) phonemizer — Türkmençe, Oghuz Turkic, Latin script, canonical IPA. The
  * fleet's first Turkmen. Near-phonemic (no digraphs — one sound per letter), so a direct grapheme scan. The
  * HALLMARK is the INTERDENTAL fricatives ⟨s⟩→[θ] / ⟨z⟩→[ð] (shared with Bashkir). 9 vowels (⟨ä⟩→[æ], ⟨ö⟩→[ø],
  * ⟨ü⟩→[y], ⟨y⟩→[ɯ]) + UNWRITTEN phonemic length (not emitted); ⟨ç⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨ž⟩→ʒ, ⟨ş⟩→ʃ, ⟨ň⟩→ŋ, ⟨ý⟩→j (the
- * glide), ⟨h⟩→x, ⟨w⟩→w, ⟨r⟩→ɾ. Word-final (oxytone) stress, the Turkic default. See docs/investigations/tk_native_bringup_investigation.md.
+ * glide), ⟨h⟩→x, ⟨w⟩→w, ⟨r⟩→ɾ. Word-final (oxytone) stress, the Turkic default.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

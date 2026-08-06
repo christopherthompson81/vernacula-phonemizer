@@ -1,5 +1,5 @@
 /**
- * Thai (th) phonemizer — canonical IPA, espeak-independent (authored). Abugida g2p (g2p.ts) with computed tone;
+ * Thai (th) phonemizer — canonical IPA (authored). Abugida g2p (g2p.ts) with computed tone;
  * words in the frequency corpus are pre-segmented. text() tokenizes Thai runs / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";

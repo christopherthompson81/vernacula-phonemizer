@@ -6,7 +6,7 @@ import { numberToWords } from "../src/languages/aromanian/numbers.ts";
 // Canonical-IPA goldens for Aromanian (rup) — armãneashti, an Eastern (Balkan) Romance sibling of Romanian, the Cunia
 // Latin orthography. Signatures: the Aromanian DIGRAPHS ⟨ts⟩→[t͡s], ⟨dz⟩→[d͡z], ⟨sh⟩→[ʃ], ⟨nj⟩→[ɲ], ⟨lj⟩→[ʎ],
 // ⟨dh⟩→[ð], ⟨th⟩→[θ]; ⟨ã⟩→[ə]; the shared Romance c/g softening + rising diphthongs ⟨ea⟩→[e̯a], ⟨oa⟩→[o̯a] + the
-// word-final ⟨-u⟩ desyllabification. Referee: wikipron rup narrow + kaikki. See docs/investigations/rup_native_bringup_investigation.md.
+// word-final ⟨-u⟩ desyllabification. Referee: wikipron rup narrow + kaikki.
 describe("Aromanian (armãneashti) canonical IPA", () => {
     const rup = createAromanian();
 

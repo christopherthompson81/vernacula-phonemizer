@@ -3,7 +3,7 @@
 // the contrast is ASPIRATION (pre- and post-), which is FOLDED in run 1 (the ʰ modifier + the neutralized ⟨b d g⟩/
 // ⟨p t k⟩ → [p t k]); vowel LENGTH (ː, syllable-quantity) is folded (the Germanic call); DEVOICED SONORANTS (r̥ l̥ n̥,
 // the combining ring) auto-strip in the backbone. Segments (vowels, the epenthetic-stop clusters ⟨ll⟩→tl etc., þ/ð,
-// f→v/p) are compared directly. See docs/investigations/is_native_bringup_investigation.md.
+// f→v/p) are compared directly.
 {
     "language": "is", "name": "Icelandic (íslenska)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (fortis/lenis neutralization ⟨b d g⟩/⟨p t k⟩→[p t k], ⟨k g⟩→[c] before a front vowel, intervocalic ⟨g⟩→[ɣ], the epenthetic-stop clusters ⟨ll⟩→tl ⟨rl⟩→rtl ⟨rn⟩→rtn, ⟨nn⟩→tn after a long vowel, ⟨f⟩→v/p, the vowels á→au é→jɛ ó→ou u→ʏ æ→ai au→øy) from Icelandic phonology; validated against the wikipron isl_latn_broad (10,093) human referee. Aspiration + length folded.",

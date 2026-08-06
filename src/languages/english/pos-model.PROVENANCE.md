@@ -5,7 +5,7 @@ Averaged-perceptron part-of-speech model (drives heteronym selection + de-accent
 
 - **Training data:** Universal Dependencies **English Web Treebank (UD-EWT)** —
   **CC BY-SA 4.0**.
-- **Posture (ADR-0001, training-as-use):** the shipped artifact is learned feature weights; no
+- **Posture (training-as-use):** the shipped artifact is learned feature weights; no
   sentence, token sequence, or annotation from the treebank survives in it, and the treebank's
   protectable selection/arrangement leaves no trace in the weights. The corpus text was
   functional scaffolding for learning POS regularities (linguistic facts). UD-EWT is credited in

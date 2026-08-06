@@ -1,9 +1,8 @@
 // Native canonical-IPA data manifest for Quechua (qu) — Southern Quechua / Runasimi (Qhichwa; Cusco-Collao +
-// Ayacucho), the standardised trilingual Latin orthography. espeak-independent. Quechuan family (the fleet's first).
+// Ayacucho), the standardised trilingual Latin orthography. Quechuan family (the fleet's first).
 // Near-phonemic: a 3-vowel system ⟨a i u⟩, and a THREE-WAY stop series written overtly — plain ⟨p t k q ch⟩,
 // ASPIRATED with ⟨h⟩ (⟨ph th kh qh chh⟩), EJECTIVE with an apostrophe (⟨p' t' k' q' ch'⟩). Uvular ⟨q⟩→[q].
 // A longest-match scan (tri/digraphs before singles) + regular PENULTIMATE stress. Engine: quechua.ts.
-// See docs/investigations/qu_native_bringup_investigation.md.
 {
     "language": "qu",
     "name": "Quechua (Runasimi)",

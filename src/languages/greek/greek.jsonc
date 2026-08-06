@@ -1,9 +1,8 @@
 // Native canonical-IPA data manifest for Modern Greek (el) — Hellenic (Indo-European), the Greek script,
-// espeak-independent. NOT a direct map: Greek needs a CONTEXT-SENSITIVE scan (greek.ts) — palatalisation before
+// NOT a direct map: Greek needs a CONTEXT-SENSITIVE scan (greek.ts) — palatalisation before
 // front vowels, αυ/ευ voicing by the following consonant, σ-voicing, digraph handling, synizesis, double-consonant
 // simplification. The historical spellings all collapse to the 5-vowel system /a e i o u/. Stress (the orthographic
-// tonos) is NOT emitted — the referees (wikipron/kaikki) don't mark it, so we strip the tonos. See
-// docs/investigations/el_native_bringup_investigation.md.
+// tonos) is NOT emitted — the referees (wikipron/kaikki) don't mark it, so we strip the tonos.
 //
 //   • VOWELS: α→a; ε/αι→e; η/ι/υ/ει/οι/υι→i; ο/ω→o; ου→u. (Diaeresis ϊ/ϋ breaks the digraph: αϊ→a.i.)
 //   • PALATALISATION before a front vowel [e i]: κ→c, γ→ʝ, χ→ç, γκ/γγ→ɟ; and synizesis λ→ʎ, ν→ɲ before [i]+vowel.

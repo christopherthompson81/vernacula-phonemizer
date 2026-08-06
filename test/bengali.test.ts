@@ -9,7 +9,7 @@ import {
 // Canonical-IPA goldens for Bengali (bn) — native abugida G2P (bengali.jsonc + core/abugida) + Bengali-specific
 // vowel harmony, inherent-vowel deletion, and phôla gemination. Standard (Kolkata/standard-colloquial) variety:
 // inherent vowel /ɔ/ (raises to [o] by harmony), three sibilants শ ষ স → ʃ, dental t̪/d̪ vs retroflex ʈ/ɖ,
-// ং → ŋ, র → tap ɾ. See docs/investigations/bn_native_bringup_investigation.md.
+// ং → ŋ, র → tap ɾ.
 describe("bengali canonical IPA", () => {
     test("core akshara → IPA (dental/retroflex, sibilant merger, ং→ŋ)", () => {
         const cases: [string, string][] = [

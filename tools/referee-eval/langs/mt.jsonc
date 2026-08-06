@@ -3,7 +3,7 @@
 // distinctive consonants ċ→t͡ʃ ġ→d͡ʒ ħ→ħ q→ʔ x→ʃ z→t͡s ż→z + final devoicing are compared directly), but the vowel
 // LENGTH (~half the referee's lines carry ː) is STRESS-CONDITIONED (Arabic-style weight) + comes from the silent
 // letters ⟨għ h⟩ — a full model needs the weight-based stress rule (deferred) → we emit the short-vowel skeleton and
-// FOLD the length. The ⟨-ija⟩ hiatus/glide + ⟨għ⟩-pharyngealization variants are merged per-headword. See docs/investigations/mt_native_bringup_investigation.md.
+// FOLD the length. The ⟨-ija⟩ hiatus/glide + ⟨għ⟩-pharyngealization variants are merged per-headword.
 {
     "language": "mt", "name": "Maltese (Malti)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (q→ʔ, ċ/ġ/ħ/x/z/ż, silent għ/h + final [ħ], final devoicing + regressive voicing + n→m) from Maltese phonology; validated against the wikipron mlt_latn_broad referee (15,837 human headwords, variants merged).",

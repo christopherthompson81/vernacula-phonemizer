@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/igbo/igbo.ts";
 // independent referee exists (no wikipron/epitran/kaikki ibo) → this hand-adjudicated gold (Emenanjo 1978;
 // Green & Igwe 1963) is the committed anchor. Signature features: labial-velars ⟨gb⟩→ɡ͡b / ⟨kp⟩→k͡p, labialised
 // ⟨nw⟩→ŋʷ ⟨kw⟩→kʷ ⟨gw⟩→ɡʷ, ⟨ny⟩→ɲ, ⟨ch⟩→t͡ʃ, ⟨gh⟩→ɣ; dotted vowels ị→ɪ ọ→ɔ ụ→ʊ (8-vowel harmony); TWO tones
-// (High=acute ˥, Low=grave ˩) read only when MARKED (Igbo orthography usually omits tone). See docs/investigations/ig_native_bringup_investigation.md.
+// (High=acute ˥, Low=grave ˩) read only when MARKED (Igbo orthography usually omits tone).
 describe("igbo canonical IPA", () => {
     test("labial-velars, labialised, palatal, dotted vowels", () => {
         const cases: [string, string][] = [

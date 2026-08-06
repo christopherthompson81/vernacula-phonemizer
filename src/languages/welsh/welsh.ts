@@ -1,10 +1,9 @@
 /**
- * Welsh (cy) phonemizer — canonical IPA, espeak-independent, Northern-leaning. Rule-based g2p (g2p.ts) +
+ * Welsh (cy) phonemizer — canonical IPA, Northern-leaning. Rule-based g2p (g2p.ts) +
  * PENULTIMATE stress + the Welsh vowel-length rule. A stressed monophthong in a long context — open, or before a
  * single voiced/fricative coda — takes full length (ː) in a monosyllable/final syllable (mis → miːs); in a penult
  * it stays SHORT and LAX (pobol → pɔbɔl, nesaf → nɛsav — the NW referee shows lax, not the espeak-tensed [o]/[e]).
  * Elsewhere it stays lax and short (bore → bɔrɛ). Diphthongs and circumflex vowels are already long and untouched.
- * See docs/investigations/cy_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

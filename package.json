@@ -1,7 +1,7 @@
 {
   "name": "vernacula-phonemizer",
   "version": "0.1.0",
-  "description": "Canonical-IPA phonemizer — native, espeak-independent. Hindi, English, Mandarin, Spanish, Arabic.",
+  "description": "Canonical-IPA phonemizer — native, rule- and lexicon-based. Hindi, English, Mandarin, Spanish, Arabic.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"

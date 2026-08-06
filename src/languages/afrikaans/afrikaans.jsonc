@@ -1,13 +1,15 @@
-// Native canonical-IPA data manifest for Afrikaans (af) — Indo-European (West Germanic, daughter of Dutch), ~7M,
-// South Africa/Namibia, Latin script + diacritics. espeak-INDEPENDENT (beyond-espeak canonical IPA). Fairly regular
-// orthography, but with the Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (a single vowel is long/tense in an open
-// syllable, short/lax in a closed one) → the engine (afrikaans.ts) does the length lookahead; this file holds the
-// declarative tables. Referee: en.wiktionary Afrikaans IPA. See docs/investigations/af_afrikaans_bringup_investigation.md.
+// Native canonical-IPA data manifest for Afrikaans (af)
+//
+// Indo-European (West Germanic, daughter of Dutch), ~7M, South Africa/Namibia, Latin script + diacritics.
+//
+// Fairly regular orthography, but with the Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (a single vowel
+// is long/tense in an open syllable, short/lax in a closed one) → the engine (afrikaans.ts) does the length
+// lookahead; this file holds the declarative tables. Referee: en.wiktionary Afrikaans IPA.
 {
     "language": "af",
     "name": "Afrikaans",
     "script": "Latin",
-    "provenance": "Authored greedy g2p for Standard Afrikaans, beyond-espeak canonical IPA. Referee: en.wiktionary Afrikaans IPA (2220 words).",
+    "provenance": "Authored greedy g2p for Standard Afrikaans. Referee: en.wiktionary Afrikaans IPA (2220 words).",
 
     "convention": {
         "vowelLength": "single vowel: LONG/tense in an open syllable (V.CV: ape→ɑː), SHORT/lax in a closed one (VC#/VCC: al→a) — engine lookahead",

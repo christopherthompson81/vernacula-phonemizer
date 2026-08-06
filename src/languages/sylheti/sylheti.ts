@@ -1,11 +1,11 @@
 /**
- * Native Sylheti / ꠍꠤꠟꠐꠤ ꠘꠣꠉꠞꠤ (syl) text phonemizer — canonical IPA, espeak-independent. Eastern Indo-Aryan
+ * Native Sylheti / ꠍꠤꠟꠐꠤ ꠘꠣꠉꠞꠤ (syl) text phonemizer — canonical IPA. Eastern Indo-Aryan
  * (Bengali-Assamese), written in the SYLOTI NAGRI abugida. Read by the generic engine (core/abugida.ts) with the
  * inherent vowel /ɔ/ and Bengali-style inherent-vowel deletion (final drop after a single coda, retain [o] after a
  * cluster; medial Ohala deletion). Sylheti's signature is SPIRANTISATION (ꠇ/ꠈ→x, ꠌ/ꠍ→s, ꠎ→z, ꠙ→ɸ, ꠚ→f, ꠡ→ʃ,
  * ꠢ→ɦ; aspiration lost on the voiced stops) — the split from Bengali, encoded in the grapheme table. Cardinal
  * numbers use the INDIC composer (2-2-3 lakh/crore grouping, fused 21-99). Tone (H/L,
- * developed from lost breathy voice) is UNWRITTEN → deferred. See docs/investigations/syl_native_bringup_investigation.md.
+ * developed from lost breathy voice) is UNWRITTEN → deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

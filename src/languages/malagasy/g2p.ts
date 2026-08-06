@@ -5,7 +5,7 @@
  *   - retroflex affricates ⟨tr⟩ → ʈʂ, ⟨dr⟩ → ɖʐ; ⟨ts⟩ → ts; ⟨j⟩ → dz.
  *   - prenasalized stops: ⟨mb mp nd nt ndr ntr nts ng nk nj⟩ → ᵐb ᵐp ⁿd ⁿt ⁿɖʐ ⁿʈʂ ⁿts ᵑɡ ᵑk ⁿdz (single segments).
  * Penultimate stress and the weak-final vowels (kept full in this broad canonical transcription) are handled
- * downstream (malagasy.ts). See docs/investigations/mg_native_bringup_investigation.md.
+ * downstream (malagasy.ts).
  */
 import { MANIFEST } from "./manifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";

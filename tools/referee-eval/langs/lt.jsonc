@@ -3,8 +3,7 @@
 // (unpredictable from spelling), and vowel LENGTH + the stressed ɑː/æː quality are stress-conditioned — so we emit the
 // phonemic short quality and FOLD: the referee's ¹/² pitch marks, length (ː ˑ), and the stressed/allophonic vowel
 // qualities (ɑ→ɐ, æ→ɛ, ɔ→o loan-⟨o⟩, u-family→ʊ). The BACKBONE already strips the fronting ̟. The PALATALIZATION (ʲ),
-// every consonant place, and the segment skeleton ARE compared directly — that is the real signal here. See
-// docs/investigations/lt_bringup_investigation.md.
+// every consonant place, and the segment skeleton ARE compared directly — that is the real signal here.
 {
     "language": "lt", "name": "Lithuanian (lietuvių)", "script": "Latin",
     "provenance": "Authored rule-based g2p (palatalization + voicing) from Lithuanian phonology; validated against the wikipron lit_latn_narrow referee (15,513 human words).",

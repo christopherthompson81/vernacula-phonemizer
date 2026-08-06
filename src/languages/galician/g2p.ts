@@ -3,7 +3,6 @@
  * left-to-right scan with small context rules — no lexicon. It reuses the Spanish shape (a segment list carrying
  * phoneme + nucleus + written-accent flags; stress, nasal velarization and spirantization are applied downstream).
  * The Galician-specific graphemes vs Spanish: ⟨x⟩/⟨j⟩→ʃ, ⟨g⟩ is always the velar stop (NO jota), ⟨nh⟩→ŋ.
- * See docs/investigations/gl_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

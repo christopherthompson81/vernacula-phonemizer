@@ -3,7 +3,7 @@
  * through the g2p, so the IPA stays consistent with the word engine. Slovene uses the Germanic-style unit-IN-ten
  * inversion — tens+units concatenate into ONE word with the "in" infix (enaindvajset = 21, "one-and-twenty");
  * hundreds and thousands are space-separated. Number agreement uses the Slovene DUAL (2 → milijona). No numeric
- * referee exists → these are the standard forms. See docs/investigations/sl_native_bringup_investigation.md.
+ * referee exists → these are the standard forms.
  */
 import { MANIFEST } from "./manifest.ts";
 

@@ -1,11 +1,12 @@
 // Native canonical-IPA data manifest for Bavarian (bar) — Boarisch, an Upper-German (Austro-Bavarian) group of
 // dialects (~14M, Bavaria/Austria/South Tyrol), Latin script. There is NO codified state orthography, but the
 // Bavarian Wikipedia / Wiktionary uses a de-facto German-derived convention (⟨å⟩ for the dark [ɔ], ⟨ä ö ü⟩, ⟨ß⟩) —
-// that convention is what the wikipron referee transcribes, so the g2p is well-defined against it. espeak-independent.
+// that convention is what the wikipron referee transcribes, so the g2p is well-defined against it.
+//
 // The engine (bavarian.ts) is a greedy longest-match grapheme scan (digraphs/diphthongs first) + code rules the table
 // can't express: r-vocalization (coda r→[ɐ̯], -er→[ɐ]), ch→[ç]/[x] (front/back split), n→[ŋ] before a velar, initial
 // st/sp→ʃt/ʃp, geminate collapse. The referee is a NARROW transcription (lenis under-ring b̥ d̥ ɡ̥, fine vowel qualities,
-// offglides) with ~1.29 dialect variants/headword → heavy folding + the backbone strip. See the investigation doc.
+// offglides) with ~1.29 dialect variants/headword → heavy folding + the backbone strip.
 {
     "language": "bar",
     "name": "Bavarian (Boarisch)",

@@ -1,6 +1,6 @@
 /**
  * Classical Nahuatl / nāhuatlahtōlli (nci) phonemizer — Uto-Aztecan, the language of the Aztec Empire (16th-c.
- * Central Mexico), the traditional Spanish-based Latin orthography, canonical IPA, espeak-independent. The
+ * Central Mexico), the traditional Spanish-based Latin orthography, canonical IPA. The
  * fleet's FIRST UTO-AZTECAN language. The g2p is AUTHORED FROM Andrews, *Introduction to Classical Nahuatl* (§2).
  *   ★ 8 VOWELS /a e i o/ × length (macron ā ē ī ō → [Vː]); LENGTH is UNWRITTEN in traditional texts → we emit
  *     SHORT vowels (the referee's ː is backbone-stripped). No diphthongs. ⟨u⟩ is NEVER a vowel natively (only
@@ -9,7 +9,7 @@
  *     V⟨uc⟩→[kʷ]; ⟨hu⟩+V / V⟨uh⟩→[w]; saltillo ⟨h⟩→[ʔ]; ⟨x⟩→ʃ, ⟨tz⟩→t͡s, ⟨tl⟩→t͡ɬ, ⟨ch⟩→t͡ʃ. ★ THE ⟨chu⟩ TRAP:
  *     ⟨ch⟩ before ⟨u⟩+V is [k]-coda + ⟨hu⟩[w] (cachuah=/kakwa/), NOT the affricate.
  * Stress is regular penultimate (unmarked in the broad referee → not emitted). Syllable-final /l/→[ɬ], /n/→[ŋ]
- * before /k/, and coda /w/→[w̥ ɸ] are allophonic (disclosed/folded). See docs/investigations/nci_native_bringup_investigation.md.
+ * before /k/, and coda /w/→[w̥ ɸ] are allophonic (disclosed/folded).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,6 +1,6 @@
 /**
- * Thai tone computation — ported from espeak-ng-portable src/thaiPron.ts (itself from Wiktionary Module:th-pron,
- * CC-BY-SA, tone facts as provenance). The tone is a deterministic function of initial-consonant CLASS ×
+ * Thai tone computation — from Wiktionary Module:th-pron (CC-BY-SA, tone facts as provenance).
+ * The tone is a deterministic function of initial-consonant CLASS ×
  * syllable LIFE × vowel LENGTH × any tone mark (the "tone triangle").
  */
 import { MANIFEST } from "./manifest.ts";

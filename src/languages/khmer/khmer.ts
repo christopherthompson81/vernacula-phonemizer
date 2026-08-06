@@ -1,6 +1,6 @@
 /**
  * Khmer / ភាសាខ្មែរ (km) text phonemizer — Austroasiatic (Mon-Khmer), the Khmer abugida, canonical IPA,
- * espeak-independent. Cambodia's national language (~18M). NON-tonal but SESQUISYLLABIC.
+ * Cambodia's national language (~18M). NON-tonal but SESQUISYLLABIC.
  *
  * Khmer's defining feature is the TWO CONSONANT SERIES: every base consonant belongs to the a-series (1st,
  * inherent ɑː) or the o-series (2nd, inherent ɔː), and the SAME vowel sign is pronounced differently depending
@@ -16,7 +16,7 @@
  *      last dominant (ចេតនា: ន harmonises to a-series from ត). Bare-vowel syllables: SHORT inherent (ɑ/ɔ) as
  *      an unstressed presyllable or a closed syllable, LONG inherent (ɑː/ɔː) only when stressed-and-open.
  * Series values + the two-reading vowel table were DERIVED from wikipron khm (7107 words). Khmer Unicode is
- * logical-order, so no leading-vowel reorder is needed. See docs/investigations/km_native_bringup_investigation.md.
+ * logical-order, so no leading-vowel reorder is needed.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -85,7 +85,7 @@ const IV_VS = "\u0000";
 // Huffman 1970), so — the Romanian-stress / akan-tone pattern — a mined lexicon carries them and the shipped
 // phonemizeWord consults it dict-first. phonemizeWordRules NEVER reads it, keeping the referee eval non-circular
 // (the lexicon is derived FROM the wikipron referee). Mined by tools/gen/build-km-lexicon.mts. See
-// docs/investigations/km_native_bringup_investigation.md Run 5.
+// Run 5.
 const LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon.tsv", undefined, { optional: true });
 
 /**

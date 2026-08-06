@@ -1,7 +1,7 @@
 // Albanian / Shqip (sq) — Standard (Tosk-based), Latin. PRIMARY: kaikki Albanian (HUMAN, Wiktionary, 6002).
 // SECONDARY: epitran sqi-Latn OUTPUT (INDEPENDENT rule-based G2P, generated over the same wordlist). Two INDEPENDENT
 // sources (the Quechua situation). Digraph-rich but phonemic. Stress (penultimate, unwritten) folded (epitran marks
-// none; kaikki varies). See docs/investigations/sq_native_bringup_investigation.md.
+// none; kaikki varies).
 {
     "language": "sq", "name": "Albanian (Shqip)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (digraphs ⟨dh th sh zh xh⟩→ð θ ʃ ʒ d͡ʒ, palatals ⟨gj q⟩→ɟ c, ⟨nj⟩→ɲ ⟨ll⟩→ɫ ⟨rr⟩→r; ⟨c⟩→t͡s ⟨ç⟩→t͡ʃ ⟨x⟩→d͡z; 7 vowels ⟨e⟩→ɛ ⟨y⟩→y ⟨ë⟩→ə; penultimate stress) from Standard Albanian phonology; validated against kaikki + epitran.",

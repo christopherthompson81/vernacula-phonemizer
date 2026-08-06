@@ -2,8 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 
-// Canonical-IPA goldens for Hindi (Devanagari abugida). Values captured from the native engine; they are
-// byte-identical to the espeak-ng-portable canonical output the engine was lifted from.
+// Canonical-IPA goldens for Hindi (Devanagari abugida). Values captured from the native engine.
 describe("hindi canonical IPA", () => {
     test.each([
         ["भारत", "bʱˈaːɾət̪"], // schwa retained medially (VCəCV blocked by final त̪)

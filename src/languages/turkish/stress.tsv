@@ -1,8 +1,7 @@
 # Turkish stress exceptions — word<TAB>1-based stressed syllable (default is final).
 # Mined from kaikki.org Turkish (Wiktionary, CC-BY-SA): entries whose stress-marked IPA puts primary
-# stress on a NON-final syllable, orthographic-syllable-count-gated (2,103 words; tools note in
-# docs/investigations/tr_native_bringup_investigation.md). Replaces the espeak-ng-portable-seeded list
-# (244 entries; 167/171 position agreement on the overlap). CC-BY-SA-derived; referee-circularity
+# stress on a NON-final syllable, orthographic-syllable-count-gated (2,103 words). Replaces an earlier
+# seeded list (244 entries; 167/171 position agreement on the overlap). CC-BY-SA-derived; referee-circularity
 # caveat: the tr referee (wikipron) shares Wiktionary parentage.
 abrama	2
 abusülvecih	2

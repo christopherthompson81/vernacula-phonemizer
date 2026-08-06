@@ -7,7 +7,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Tatar. Signature: VOWEL-HARMONY backing of ⟨к г⟩ — [q]/[ʁ] next to a BACK vowel (ак→ɑq) but [k]/[ɡ] next to a
 // FRONT vowel (мәктәп→mæktæp); the special letters ⟨ә⟩→[æ], ⟨ө⟩→[ø], ⟨ү⟩→[y], ⟨ы⟩→[ɨ], ⟨җ⟩→[ʑ], ⟨ң⟩→[ŋ], ⟨һ⟩→[h];
 // ⟨а⟩ fronts to [a] in a front-harmony word. Word-final (oxytone) stress. THIN single-source (kaikki, 69) referee —
-// the folded % is deflated by loan noise; validated on the native subset. See docs/investigations/tt_native_bringup_investigation.md.
+// the folded % is deflated by loan noise; validated on the native subset.
 describe("Tatar (Татар теле) canonical IPA", () => {
     test("vowel-harmony backing of ⟨к г⟩: [q ʁ] (back) vs [k ɡ] (front)", () => {
         expect(phonemizeWord("ак")).toBe("ˈɑq"); // 'white' — BACK word: ⟨а⟩→ɑ, ⟨к⟩→q

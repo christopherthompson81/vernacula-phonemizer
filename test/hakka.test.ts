@@ -6,8 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Hakka Chinese / 客家话 (hak), Meixian 梅县 dialect — a distinct Sinitic branch. The
 // signature is the retention of ALL THREE Middle Chinese stop codas -p̚ -t̚ -k̚ (十→səp̚, 月→ŋiat̚, 六→liʊk̚) that
 // separates Hakka from Jin (merged -ʔ) and Mandarin (lost). Six citation tones as Chao contour letters (陰平 ˦˦,
-// 陽平 ˩˩, 上 ˧˩, 去 ˥˧, 陰入 ˩, 陽入 ˥). Readings from Wiktionary/kaikki Meixian Sinological-IPA. See
-// docs/investigations/hakka_native_bringup_investigation.md.
+// 陽平 ˩˩, 上 ˧˩, 去 ˥˧, 陰入 ˩, 陽入 ˥). Readings from Wiktionary/kaikki Meixian Sinological-IPA.
 describe("Hakka Chinese (Meixian) canonical IPA", () => {
     test("single characters — tones as Chao letters", () => {
         expect(phonemizeWord("馬")).toBe("ma˦˦"); // 陰平 44

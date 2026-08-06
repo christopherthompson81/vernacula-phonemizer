@@ -3,7 +3,7 @@
 // over retained [q]) and خ→[χ] (uvular fricative — the referee writes χ, not the Egyptian/Iraqi [x]). Like Iraqi it
 // is CONSERVATIVE on ج (kept [d͡ʒ]) and the interdentals ث/ذ/ظ (KEPT [θ ð ðˤ]). Deferred lexical tails: the Gulf
 // ج→[j] reflex (yaʕal), ق/ك affrication before front vowels (ق→[d͡ʒ], kaškaša ك→[t͡ʃ]) — all conditional/lexical.
-// Historical diphthongs monophthongize. Referee: wikipron afb_arab_broad. See docs/investigations/afb_gulf_bringup_investigation.md.
+// Historical diphthongs monophthongize. Referee: wikipron afb_arab_broad.
 {
     "variety": "gulf",
     "iso": "afb",

@@ -1,12 +1,11 @@
 /**
- * Wolof (wo) phonemizer — Atlantic-Congo (Senegambian), the Latin orthography, canonical IPA, espeak-independent.
+ * Wolof (wo) phonemizer — Atlantic-Congo (Senegambian), the Latin orthography, canonical IPA.
  * The principal language of Senegal (~12M incl. L2). NON-tonal. A greedy longest-match scan over the grapheme
  * table (manifest.ts) with two code rules: CONSONANT GEMINATION — a doubled consonant is a geminate [Cː]
  * (benn→bɛnː, làkk→laːkː) — and NASAL place assimilation — ⟨n⟩→ŋ before g/k (Angale→aŋɡalɛ). Signatures: ATR
  * vowels (⟨e⟩=ɛ / ⟨é⟩=e, ⟨o⟩=ɔ / ⟨ó⟩=o, ⟨ë⟩=ə, ⟨à⟩=aː) with DOUBLING = LENGTH (aa→aː, ée→eː); the palatal STOPS
  * ⟨c⟩=c, ⟨j⟩=ɟ; ⟨x⟩=x, ⟨ñ⟩=ɲ, ⟨ŋ⟩=ŋ, ⟨q⟩=q. The variable word-initial glottal onset [ʔ] is not emitted (folded).
  * Wolof is also written in Arabic (Wolofal) and Garay — those scripts are deferred.
- * See docs/investigations/wo_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

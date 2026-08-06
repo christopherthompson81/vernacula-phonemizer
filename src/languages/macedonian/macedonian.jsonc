@@ -1,9 +1,9 @@
-// Native canonical-IPA data manifest for Macedonian (mk) — македонски, South Slavic (~2M), espeak-independent.
+// Native canonical-IPA data manifest for Macedonian (mk) — македонски, South Slavic (~2M).
 // Macedonian is fully phonemic Cyrillic with NO vowel reduction, so the engine (macedonian.ts) is a left-to-right
 // grapheme scan + the shared South-Slavic phonotactics (the Bulgarian `bg` pattern: dark-l, final devoicing,
 // regressive voicing, n→ŋ). Two Macedonian specifics: the palatals are DISTINCT LETTERS (ѓ ќ љ њ ѕ џ ј — no ь/я/ю
 // palatalization), and STRESS is FIXED on the ANTEPENULT syllable (predictable → emitted). ⟨л⟩ + syllabic ⟨р⟩ are
-// handled in code; every other letter maps here. Format: plain JSONC. See docs/investigations/mk_native_bringup_investigation.md.
+// handled in code; every other letter maps here. Format: plain JSONC.
 {
     "language": "mk",
     "name": "Macedonian (македонски)",

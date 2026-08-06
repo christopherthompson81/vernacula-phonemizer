@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // tones with TWO CHECKED STOP CODAS — -t̚ (from MC -p/-t) and -ʔ (from MC -k) — where Hakka keeps all three
 // -p̚/-t̚/-k̚, Jin keeps only -ʔ, and Xiang lost the coda entirely. Nasal codas are -n/-ŋ (MC -m merged to -n), and
 // Nanchang shows the n→l initial merger (南→lan). Readings from Wiktionary/kaikki Nanchang Sinological-IPA (narrow
-// diacritics kept verbatim). See docs/investigations/gan_native_bringup_investigation.md.
+// diacritics kept verbatim).
 describe("Gan Chinese (Nanchang) canonical IPA", () => {
     test("single characters — tones as Chao letters", () => {
         expect(phonemizeWord("馬")).toBe("ma˨˩˧"); // 上 213

@@ -1,5 +1,5 @@
 /**
- * French (fr) phonemizer — canonical IPA (standard/Parisian), espeak-independent. Primary path is a
+ * French (fr) phonemizer — canonical IPA (standard/Parisian). Primary path is a
  * pronunciation LEXICON (Lexique 3.83, ~125k forms) that carries every irregular as data; the rule-based
  * g2p (g2p.ts) is the out-of-vocabulary fallback for unseen words. text() tokenizes words / numbers /
  * punctuation; French has no lexical stress, so a single phrase-final accent marks each rhythmic group.

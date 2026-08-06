@@ -3,8 +3,7 @@
 // single letters), with the pinyin-style voicing convention (⟨b d g⟩ = the UNASPIRATED voiceless /p t k/, ⟨p t k⟩
 // = aspirated), the implosives ⟨mb⟩→ɓ / ⟨nd⟩→ɗ, and the fricatives ⟨s⟩→θ, ⟨r⟩→ɣ, ⟨c⟩→ɕ, ⟨v⟩→β. Tones are written
 // as syllable-FINAL letters (z j x q h = tones 2-6; none = tone 1; a p/t/k coda = a checked tone) and rendered as
-// Chao contour letters — the eval backbone strips them, so corroboration is segmental. See
-// docs/investigations/za_native_bringup_investigation.md.
+// Chao contour letters — the eval backbone strips them, so corroboration is segmental.
 {
     "language": "za",
     "name": "Zhuang (Vahcuengh)",

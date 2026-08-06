@@ -1,8 +1,8 @@
 /**
- * Native Gujarati (gu) text phonemizer — canonical IPA, espeak-independent. Indo-Aryan, the Gujarati abugida.
+ * Native Gujarati (gu) text phonemizer — canonical IPA. Indo-Aryan, the Gujarati abugida.
  * A thin wrapper: it reuses the generic abugida engine + the entire Hindi orchestration (makeNativeHindi —
  * schwa deletion, weight stress, the Indic number compositor, clause assembly) with a Gujarati-Unicode data file
- * (gujarati.jsonc) and the Gujarati script's word-run + digit constants. See docs/investigations/gu_native_bringup_investigation.md.
+ * (gujarati.jsonc) and the Gujarati script's word-run + digit constants.
  */
 import {
     makeNativeHindi,

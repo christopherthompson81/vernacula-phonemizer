@@ -4,7 +4,6 @@
 // has NO vowel reduction (unlike Russian). Its lexical PITCH ACCENT (4-way rising/falling × short/long) + length
 // are unwritten in normal text and DEFERRED (the referee marks them; the eval backbone folds them). The signature
 // segments: ⟨в/v⟩→ʋ (labiodental approximant), ⟨ђ⟩→d͡ʑ / ⟨ћ⟩→t͡ɕ (alveolo-palatal affricates), syllabic ⟨r⟩.
-// See docs/investigations/sr_native_bringup_investigation.md.
 {
     "language": "sr",
     "name": "Serbian (српски)",

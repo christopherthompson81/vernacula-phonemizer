@@ -3,7 +3,7 @@
  * 7 both render as "දෙසිය එක" = 200·1, and දහස/1000 is truncated to ˈɐhəs), so there is no reliable gold to match.
  * These are the standard Sinhala cardinals; magnitudes ≥100 use the analytic multiplier form (දෙක සියය "two
  * hundred") rather than the fused colloquial forms, which keeps the morphology unambiguous. The words are
- * phonemized by the g2p, so the IPA stays consistent with the word engine. See docs/investigations/si_native_bringup_investigation.md.
+ * phonemized by the g2p, so the IPA stays consistent with the word engine.
  */
 
 import { MANIFEST } from "./manifest.ts";

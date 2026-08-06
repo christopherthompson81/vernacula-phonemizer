@@ -1,9 +1,9 @@
 /**
- * Chichewa / Chinyanja (nya) phonemizer — Bantu (N31), the Latin orthography, canonical IPA, espeak-independent.
+ * Chichewa / Chinyanja (nya) phonemizer — Bantu (N31), the Latin orthography, canonical IPA.
  * A pure greedy longest-match scan over the grapheme table (manifest.ts): Chichewa is open CV with prenasalised
  * clusters as single onset units, so no coda/syllabification logic is needed. Signatures: IMPLOSIVES ⟨b d⟩→ɓ ɗ,
  * the retroflex-tap liquid ⟨l⟩=⟨r⟩→ɽ, PRENASALISED ⟨mb nd ng⟩→ᵐb ⁿd ᵑɡ (⟨ng'⟩→ŋ), aspirates ⟨ph th kh⟩→pʰ tʰ kʰ.
- * Tone (H/L) is unwritten → DEFERRED (segmental output only). See docs/investigations/nya_native_bringup_investigation.md.
+ * Tone (H/L) is unwritten → DEFERRED (segmental output only).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

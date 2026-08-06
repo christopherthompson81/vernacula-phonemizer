@@ -1,11 +1,11 @@
 // Afrikaans (af) — Indo-European (West Germanic), Latin orthography. Referee: en.wiktionary Afrikaans IPA
-// (Wiktionary, HUMAN, 2220 words). Beyond-espeak canonical IPA. The backbone strips the marks the orthography does
+// (Wiktionary, HUMAN, 2220 words).. The backbone strips the marks the orthography does
 // not determine: STRESS (ˈ ˌ — Afrikaans stress is largely first-syllable but unwritten → we emit none), LENGTH ː
 // (the open/closed length is realised by our vowel choice; the referee's ː is redundant), NASALIZATION (ɛ̃ before
 // nasal+C — allophonic, deferred), and the diphthong OFFGLIDE tie ( ̯ ). The language folds below neutralise the
 // referee's syllable dots, the r~ɾ tap/trill, and the optional-schwa parens. NOT folded: the ə~ɛ/ɪ schwa-reduction of
 // UNSTRESSED vowels — that is a real stress-conditioned residual we do not yet model (kept visible, like the Hebrew
-// sheva). See docs/investigations/af_afrikaans_bringup_investigation.md.
+// sheva).
 {
     "language": "af", "name": "Afrikaans", "script": "Latin",
     "provenance": "Authored greedy g2p + open/closed vowel-length rule + final devoicing, from the 2220-word en.wiktionary Afrikaans IPA referee.",

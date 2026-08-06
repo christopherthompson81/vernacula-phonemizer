@@ -4,7 +4,7 @@
 // DIGRAPHS — a palatal series ⟨ky gy hy ny⟩ → t͡ɕ d͡ʑ ɕ ɲ and a LABIALISED series ⟨tw dw kw gw hw nw⟩ → t͡ɕʷ d͡ʑʷ kʷ
 // ɡʷ ɕʷ ŋʷ (the famous Akan labial-palatalisation), plus ⟨ng⟩ → ŋ. Seven written vowels a e ɛ i o ɔ u (the ATR
 // allophones ɪ/ʊ are unwritten → rendered at the phonemic level). TONE (H/L) and nasalisation are largely UNWRITTEN
-// → deferred. Small kaikki human gold; documented from Dolphyne (1988). See docs/investigations/ak_native_bringup_investigation.md.
+// → deferred. Small kaikki human gold; documented from Dolphyne (1988).
 {
     "language": "ak",
     "name": "Akan (Twi)",

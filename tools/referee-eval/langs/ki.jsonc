@@ -4,7 +4,6 @@
 // unwritten → we emit none), DOWNSTEP (ꜜ), SYLLABLE dots, the optional-realisation PARENS ((ː)(ꜜ)(w)), the
 // doubled-vowel length notation (VV ~ Vː), and the prenasal notation (full ŋ before ɡ ~ our superscript ᵑ). Vowel
 // quality/length (⟨ĩ⟩=e/⟨ũ⟩=o, doubling) and the fricativized/prenasalized consonants ARE compared directly.
-// See docs/investigations/ki_native_bringup_investigation.md.
 {
     "language": "ki", "name": "Kikuyu (Gĩkũyũ)", "script": "Latin",
     "provenance": "Authored greedy g2p from the Kikuyu orthography; mapping derived from the 1062-word en.wiktionary Kikuyu IPA referee.",

@@ -13,7 +13,7 @@
  *      j/ʋ are transparent.
  *   5. n → ŋ before a velar k/ɡ.
  * Vowel LENGTH + the stressed ɑː/æː quality are stress-conditioned (stress is lexical) → we emit the phonemic short
- * quality; the referee's length + pitch accents are folded. See docs/investigations/lt_bringup_investigation.md.
+ * quality; the referee's length + pitch accents are folded.
  */
 import { MANIFEST } from "./manifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";

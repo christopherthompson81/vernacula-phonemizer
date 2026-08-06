@@ -8,7 +8,6 @@ import { phonemizeWord } from "../src/languages/serbian/serbian.ts";
 // g2p (Croatian reuses the Serbian engine's phonemizeWord verbatim — the two standards are one phonological system),
 // so word-level output is byte-identical to Serbian. The ONLY Croatian-specific delta is the CARDINAL NUMBER WORDS
 // (Croatian tisuća/milijun/dvjesto vs Serbian hiljada/milion/dvesta). Pitch accent unwritten → deferred (as sr).
-// See docs/investigations/hr_native_bringup_investigation.md.
 describe("Croatian (hr) canonical IPA", () => {
     test("shared Serbo-Croatian g2p: words identical to the Serbian engine", () => {
         for (const w of ["hrvatski", "mlijeko", "čovjek", "đak", "ljubav", "zdravlje", "tisuća", "vrijeme"]) {

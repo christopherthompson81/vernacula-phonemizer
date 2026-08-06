@@ -7,7 +7,6 @@ import { phonemizeWord } from "../src/languages/yoruba/yoruba.ts";
 // Latin orthography. Validated against wikipron yor (89.6%) + kaikki yor (88.8%), both human. Signature features:
 // the labial-velars ⟨gb⟩→ɡ͡b / ⟨p⟩→k͡p, ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→ɾ; dotted vowels ẹ→ɛ ọ→ɔ; coda-⟨n⟩ nasalisation
 // (ọdún→ɔdũ) vs onset n (ẹni→ɛni); and three LEVEL tones as Chao letters — High ˥ / Mid ˧ / Low ˩.
-// See docs/investigations/yo_native_bringup_investigation.md.
 describe("yoruba canonical IPA", () => {
     test("three level tones (High ˥ / Mid ˧ / Low ˩)", () => {
         expect(phonemizeWord("bá")).toBe("ba˥"); // high (acute)

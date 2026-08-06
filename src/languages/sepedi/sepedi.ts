@@ -1,11 +1,10 @@
 /**
  * Native Sepedi / Northern Sotho (nso) phonemizer — Bantu (Sotho-Tswana), Latin orthography, canonical IPA,
- * espeak-independent. A pure greedy longest-match scan over the grapheme table (sepedi.jsonc), the same engine as
+ * A pure greedy longest-match scan over the grapheme table (sepedi.jsonc), the same engine as
  * the sibling Setswana — Sepedi is open CV, so no coda/syllabification logic. Authored beyond any machine referee
  * (kaikki Sotho = 3 words) from standard Sepedi phonology. Signatures: EJECTIVE plain stops ⟨p t k⟩→[pʼ tʼ kʼ]
  * (vs aspirated ⟨ph th kh⟩), ⟨ts⟩→[t͡sʼ], ⟨hl⟩→[ɬ], ⟨a⟩→[ɑ]. Vowel height unwritten (default mid); tone deferred. Cardinal numbers: numbers.ts (citation stems + the
  * CONJUNCTIVE compounds lesometee/masomepedi/makgolopedi — authored from Northern Sotho sources, NOT from st).
- * See docs/investigations/nso_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

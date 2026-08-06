@@ -3,7 +3,7 @@
 # never touches native words. Built by applying the foreign op to our OWN shipped output (inherits our stress +
 # final-ʔ) and keeping it only where all wikipron readings agree AND the op matches the referee. The broader VV/
 # glide/hiatus loanword class is NOT mined (same spelling = native [ij]/hiatus-ʔ vs loanword glide → would corrupt
-# siya/tao). SHIPPED-only: phonemizeWordRules (the eval) skips it → non-circular. See the investigation doc.
+# siya/tao). SHIPPED-only: phonemizeWordRules (the eval) skips it → non-circular.
 abece	ʔabˈese
 abenojar	ʔabenˈohaɾ
 adajar	ʔadˈahaɾ

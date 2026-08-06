@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Vietnamese (vi) — Northern / Hanoi, espeak-independent.
+// Native canonical-IPA data manifest for Vietnamese (vi) — Northern / Hanoi.
 // This file IS the hand-authored context-free language DATA: the tone diacritic→Chao-contour map, the ordered
 // longest-match onset table, the vowel letter/phoneme sets, clause punctuation, and the number words. The
 // ALGORITHMS that read it stay in code:
@@ -8,8 +8,7 @@
 //   numbers.ts    — the thousands-scale compositor (lăm/mốt/linh sound changes)
 // The closed rhyme set stays in the sibling rhymes.tsv (~370 entries), which the engine looks up.
 //
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA; tones are Chao contour letters. See
-// docs/investigations/vi_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA; tones are Chao contour letters.
 {
     "language": "vi",
     "name": "Vietnamese (Northern / Hanoi)",

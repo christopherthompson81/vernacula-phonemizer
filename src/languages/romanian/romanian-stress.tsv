@@ -2,7 +2,7 @@
 # Mined from kaikki Romanian (Wiktionary, CC-BY-SA) — ONLY the words the rule (stressFromEnd) MISPREDICTS: the
 # lexical tail (antepenults, learned words, foreign names, consonant/vowel-final exceptions). The rule handles the
 # rest, so the referee-eval stress number is reported RULE-ONLY (non-circular); this lexicon closes the shipped
-# phonemizeWord for real-world quality. Regenerate: see docs/investigations/ro_native_bringup_investigation.md.
+# phonemizeWord for real-world quality. Regenerate:
 abac	1
 abaca	2
 abacele	3

@@ -17,7 +17,7 @@ RESULT (2026-07-20, seed 1234, held-out UNSEEN words):
   seq2seq (ABJAD in), gold:                      41.4%
   seq2seq (ABJAD in), gold + Tajik:              45.8%   (Tajik +4.4pp — scales UP with the stronger model)
 Nearly 3x the OOV baseline. The lexicon covers seen/frequent words separately. Next: ONNX export to ship, the
-parallel-corpus context for homographs/ezafe, convention-harmonized narrow. See the fa restoration investigation doc.
+parallel-corpus context for homographs/ezafe, convention-harmonized narrow.
 """
 import torch, torch.nn as nn, torch.nn.functional as F
 random.seed(1234); torch.manual_seed(1234)

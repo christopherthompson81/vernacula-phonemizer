@@ -8,7 +8,7 @@
 {
     "language": "nl",
     "name": "Dutch (Northern Standard / Netherlands)",
-    "provenance": "Cleanroom, rule-based g2p (open/closed-syllable vowel length, Dutch diphthongs, final devoicing g→x/ɣ, w→ʋ, h→ɦ) + a cardinal number compositor. espeak-independent. The number words are language facts.",
+    "provenance": "Cleanroom, rule-based g2p (open/closed-syllable vowel length, Dutch diphthongs, final devoicing g→x/ɣ, w→ʋ, h→ɦ) + a cardinal number compositor. The number words are language facts.",
 
     // The canonical-IPA conventions the values below are written in (documentation).
     "convention": {

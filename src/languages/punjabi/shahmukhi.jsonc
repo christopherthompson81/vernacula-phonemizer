@@ -9,7 +9,7 @@
 // low ˨˩, post-vocalic voiced + high ˥˩) — confirmed by the wikipron pan_arab referee (بھا→p äː ˩, باگھ→b ɑ́ː ɡ).
 // The abjad omits most short vowels, so a DEFAULT [ə] stands in between consonants (the shared restoration gap,
 // as for Urdu) — this caps the Shahmukhi score below Gurmukhi (which writes its vowels). Phoneme values match
-// punjabi.jsonc (dental t̪ d̪, retroflex ʈ ɖ ɳ ɽ ɭ, ʋ, long-a = aː). See docs/investigations/pa_native_bringup_investigation.md.
+// punjabi.jsonc (dental t̪ d̪, retroflex ʈ ɖ ɳ ɽ ɭ, ʋ, long-a = aː).
 {
     "language": "pa",
     "name": "Punjabi (Shahmukhi)",

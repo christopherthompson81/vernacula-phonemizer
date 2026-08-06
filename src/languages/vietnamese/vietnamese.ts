@@ -1,8 +1,7 @@
 /**
- * Vietnamese (vi) phonemizer — Northern/Hanoi, canonical IPA, espeak-independent. Vietnamese is written as
+ * Vietnamese (vi) phonemizer — Northern/Hanoi, canonical IPA. Vietnamese is written as
  * space-separated monosyllables; each syllable → onset + glide + nucleus + tone + coda (g2p.ts). Tones are
  * Chao contour letters after the nucleus. text() tokenizes syllables / numbers / punctuation.
- * See docs/investigations/vi_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

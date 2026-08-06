@@ -8,7 +8,7 @@ import { numberToWords } from "../src/languages/bavarian/numbers.ts";
 // Validated against wikipron bar_latn_broad (1380 human headwords, variants merged) — 60.4% FOLDED / 89.9% symbol.
 // The referee is a NARROW transcription of a dialect CONTINUUM (~1.29 variants/headword), so the folded number is
 // dragged by inherent dialect vowel-quality variation; the 89.9% symbol accuracy shows the segments are essentially
-// right. 🔷 single source. See docs/investigations/bar_native_bringup_investigation.md.
+// right. 🔷 single source.
 describe("Bavarian canonical IPA — greedy g2p + falling diphthongs + fortis/lenis neutralization", () => {
     const bar = createBavarian();
 

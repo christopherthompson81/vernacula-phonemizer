@@ -1,13 +1,12 @@
 /**
- * Asturian (ast) phonemizer — asturianu, Astur-Leonese (Ibero-Romance), Latin script, canonical IPA,
- * espeak-independent (beyond-espeak). Close to Spanish/Galician; distinción (c/z → [θ]). A greedy longest-match
- * grapheme scan + code rules:
+ * Asturian (ast) phonemizer — asturianu, Astur-Leonese (Ibero-Romance), Latin script, canonical IPA.
+ * Close to Spanish/Galician; distinción (c/z → [θ]). A greedy longest-match grapheme scan + code rules:
  *   - the Asturian hallmark ⟨x⟩→[ʃ] (Asturian writes ⟨x⟩ for the fricative → ⟨g⟩ stays [ɡ], ⟨j⟩→[h]);
  *   - distinción ⟨c⟩ before e/i → [θ] (else [k]), ⟨z⟩→[θ]; ⟨ll⟩→[ʎ], ⟨ñ⟩→[ɲ], ⟨ch⟩→[t͡ʃ], ⟨y⟩→[ʝ], ⟨v⟩→[b];
  *   - ⟨qu gu⟩ before e/i → [k ɡ] (u silent), ⟨gu gü⟩ before a back vowel → [ɡw]; the RISING glides ⟨i⟩→[j] / ⟨u⟩→[w]
  *     before a vowel; single ⟨r⟩→[ɾ] tap vs ⟨rr⟩/word-initial → [r] trill.
  * There is NO final-consonant deletion. Stress (written accents + the Ibero rule) and SPIRANTIZATION (intervocalic
- * b/d/g→β/ð/ɣ) are folded/deferred. See docs/investigations/ast_native_bringup_investigation.md.
+ * b/d/g→β/ð/ɣ) are folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

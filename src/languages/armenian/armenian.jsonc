@@ -3,7 +3,7 @@
 // nearly one letter ↔ one phoneme; the work is: the three-way STOP/affricate system (voiced / voiceless / aspirated —
 // բ պ փ = b p pʰ; ձ ծ ց = d͡z t͡s t͡sʰ; ջ ճ չ = d͡ʒ t͡ʃ t͡ʃʰ), the UVULARS ⟨խ⟩→χ / ⟨ղ⟩→ʁ, the tap ⟨ր⟩→ɾ vs trill ⟨ռ⟩→r,
 // the ⟨ու⟩→u digraph, and the WORD-INITIAL glides ⟨ե⟩→je / ⟨ո⟩→vo / ⟨և⟩→jev (bare e / o / ev elsewhere). Validated vs
-// wikipron hye_armn_e broad. See docs/investigations/hy_native_bringup_investigation.md.
+// wikipron hye_armn_e broad.
 {
     "language": "hy",
     "name": "Armenian",

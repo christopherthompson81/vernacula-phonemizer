@@ -1,10 +1,10 @@
-// Native canonical-IPA data manifest for Kyrgyz / кыргызча (ky) — Turkic (Kipchak), Cyrillic, espeak-independent.
+// Native canonical-IPA data manifest for Kyrgyz / кыргызча (ky) — Turkic (Kipchak), Cyrillic.
 // Kyrgyz Cyrillic is a shallow near-1:1 orthography with STRICT vowel harmony that is SPELLED (so no harmony needs
 // predicting). kyrgyz.ts reads this file. The context work: (1) the VELAR/UVULAR harmony — ⟨к⟩→[q]/⟨г⟩→[ʁ] next to a
 // BACK vowel (а о у ы), [k]/[ɡ] next to a FRONT vowel (е ө ү и); Kyrgyz does NOT spell this (unlike Kazakh қ/ғ). (2)
 // dark ⟨л⟩→[ɫ] by the same back-harmony, clear [l] by front. (3) LONG vowels — a doubled vowel is [Vː] (тоо→toː,
 // Айсулуу→ɑjsuluː). Signatures: ⟨ж⟩→[d͡ʒ] (affricate, not [ʒ]), ⟨ң⟩→[ŋ], back ⟨а⟩=ɑ, ⟨ы⟩=ɯ, front ⟨ө⟩=ø / ⟨ү⟩=y.
-// Cross-checked vs wikipron kir_cyrl broad. See docs/investigations/ky_native_bringup_investigation.md.
+// Cross-checked vs wikipron kir_cyrl broad.
 {
     "language": "ky",
     "name": "Kyrgyz",

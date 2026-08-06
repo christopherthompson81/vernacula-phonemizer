@@ -8,7 +8,7 @@ import { numberToWords } from "../src/languages/latin/numbers.ts";
 // fleet's first Italic language. Signature features: short-vowel LAXING (⟨e i o u⟩→ɛ ɪ ɔ ʊ) vs macron length (ā→aː);
 // ⟨c⟩ ALWAYS [k], ⟨v⟩→[w], ⟨qu⟩→[kʷ], ⟨x⟩→[ks], ⟨gn⟩→[ŋn]; aspirates ⟨ph th ch⟩; word-initial/intervocalic ⟨i⟩→glide
 // [j]; DARK ⟨l⟩→[ɫ]; ⟨n⟩→[ŋ] before a velar; the WORD-FINAL ⟨-Vm⟩→ nasalized long [Ṽː]; penult/antepenult weight
-// stress. Referee: wikipron lat_latn_clas_narrow (44,907 human). See docs/investigations/la_native_bringup_investigation.md.
+// stress. Referee: wikipron lat_latn_clas_narrow (44,907 human).
 describe("Latin (Classical) canonical IPA", () => {
     test("short-vowel laxing vs macron length; ⟨c⟩→k, ⟨v⟩→w", () => {
         expect(phonemizeWord("rosa")).toBe("ˈrɔsa"); // short ⟨o⟩→ɔ

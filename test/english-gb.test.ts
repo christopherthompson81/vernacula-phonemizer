@@ -6,7 +6,7 @@
  * lexical sets + Jones/Cambridge EPD conventions, NOT mined from the referee) measures what actually matters:
  * whether the GenAm→SSBE transform is right on the core vocabulary + every Wells lexical set.
  *
- * DEFERRED (documented in docs/investigations/en-gb_native_bringup_investigation.md), so excluded here:
+ * DEFERRED (documented in), so excluded here:
  *   • yod-COALESCENCE after /t d/ (tube→t͡ʃuːb, duke→d͡ʒuːk) — a further modern-SSBE step beyond yod-retention.
  *   • idiosyncratic US/UK lexical vowel swaps (tomato→təˈmɑːtəʊ, pasta→ˈpæstə) — not a systematic set.
  */

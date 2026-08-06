@@ -4,7 +4,7 @@
 // neutralise NOTATION only: the low vowel а (our a ~ broad a ~ narrow ä ~ epitran æ), о (our ɔ ~ broad's o),
 // в (our v ~ narrow's allophonic w), ҳ (our h ~ narrow's intervocalic ɦ), х (χ~x), narrow aspiration kʰ/pʰ/tʰ,
 // and narrow's automatic glottal onset ʔ before initial vowels. Length/dental/acute-stress/tie stripped by the
-// shared backbone. See docs/investigations/tg_native_bringup_investigation.md.
+// shared backbone.
 {
     "segmentJoin": true,
     "referees": [

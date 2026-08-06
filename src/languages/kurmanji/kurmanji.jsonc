@@ -3,7 +3,7 @@
 // restoration is needed). A near-phonemic left-to-right scan: the one digraph ⟨xw⟩→[xʷ] (labialised), then single
 // letters. Signature: ⟨c⟩→d͡ʒ / ⟨ç⟩→t͡ʃ (the reverse of Romance), ⟨j⟩→ʒ, ⟨ş⟩→ʃ, ⟨q⟩→q (uvular), ⟨x⟩→x; the vowel
 // system with LONG a/ê/î/o/û (aː eː iː oː uː) vs SHORT e/i/u (ɛ ɪ ʊ). Aspiration (kʰ) and pharyngealisation (ˤ)
-// are allophonic/unwritten → not emitted. See docs/investigations/kmr_native_bringup_investigation.md.
+// are allophonic/unwritten → not emitted.
 {
     "language": "kmr",
     "name": "Kurmanji (Northern Kurdish)",

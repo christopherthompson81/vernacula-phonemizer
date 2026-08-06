@@ -1,7 +1,6 @@
 /**
- * Azerbaijani (az) phonemizer — North Azerbaijani (Latin), canonical IPA, espeak-independent. Rule-based g2p
- * (g2p.ts) + final-syllable stress (the Turkic default). text() tokenizes words / numbers / punctuation. See
- * docs/investigations/az_native_bringup_investigation.md.
+ * Azerbaijani (az) phonemizer — North Azerbaijani (Latin), canonical IPA. Rule-based g2p
+ * (g2p.ts) + final-syllable stress (the Turkic default). text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

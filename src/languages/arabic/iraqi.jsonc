@@ -4,7 +4,7 @@
 // [d͡ʒ], خ stays [x], and the interdentals ث/ذ/ظ are KEPT as [θ ð ðˤ] (the eastern-Bedouin pattern, opposite of
 // Egyptian/Levantine which merge them to stops). Historical diphthongs monophthongize (bajt→[beːt], jawm→[joːm]).
 // [q] survives in learned/MSA-loan words — a lexical tail we don't model (default gilit ɡ). Referee: wikipron
-// acm_arab_broad. See docs/investigations/acm_iraqi_bringup_investigation.md.
+// acm_arab_broad.
 {
     "variety": "iraqi",
     "iso": "acm",

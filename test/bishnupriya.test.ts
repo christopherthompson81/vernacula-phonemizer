@@ -8,7 +8,6 @@ import { getPhonemizer } from "../src/registry.ts";
 // deletion) with BENGALI phoneme values — the referee is Bengali-like, NOT Assamese-like: the ʃ sibilants, the
 // retroflex/dental split, and the affricates are all kept. The one divergence is heightHarmony:false (no ɔ→o
 // raising). Validated 84.2% folded / 95.1% symbol vs the English-Wiktionary bpy category (human, 38 pairs).
-// See docs/investigations/bpy_native_bringup_investigation.md.
 describe("Bishnupriya Manipuri canonical IPA", () => {
     test("Bengali-like sibilants শ/ষ/স → [ʃ] (NOT the Assamese [x])", () => {
         expect(phonemizeWord("সাত")).toBe("ʃat̪"); // স → ʃ, ত → dental t̪ (seven)

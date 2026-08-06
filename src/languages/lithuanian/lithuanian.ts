@@ -1,10 +1,9 @@
 /**
- * Lithuanian / lietuvių (lt) phonemizer — Baltic (Indo-European), Latin script, ~3M, espeak-independent. A RULE-based
+ * Lithuanian / lietuvių (lt) phonemizer — Baltic (Indo-European), Latin script, ~3M. A RULE-based
  * g2p (g2p.ts): a left-to-right scan + the hard/soft PALATALIZATION contrast (consonants → Cʲ before front vowels /
  * the softening ⟨i⟩, spreading through clusters) + regressive VOICING assimilation + n→ŋ before velars. STRESS is
  * lexical + pitch-accented (unpredictable from spelling) → not marked. Numbers are composed by numbers.ts (the
- * Baltic three-way counted-noun concord). See
- * docs/investigations/lt_bringup_investigation.md.
+ * Baltic three-way counted-noun concord).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

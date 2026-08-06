@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/bhojpuri/bhojpuri.ts";
 // (dissertation, Shukla-tradition), whose word→IPA examples were g2p-mined (1623 pairs) as a falsifiable anchor.
 // The grammar CORRECTED the earlier module: Bhojpuri has an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic
 // length (0/1623 mined length marks), and ⟨ऐ ऐ⟩→[ɛ]/⟨औ⟩→[ɔ] are MONOPHTHONGS (NOT the diphthongs previously
-// claimed). Only /s ɦ/ fricatives (श/ष→s), ⟨व⟩→[w] (not Hindi ʋ), ⟨ण ञ⟩→[n]. See docs/investigations/bho_native_bringup_investigation.md.
+// claimed). Only /s ɦ/ fricatives (श/ष→s), ⟨व⟩→[w] (not Hindi ʋ), ⟨ण ञ⟩→[n].
 describe("Bhojpuri canonical IPA — revised from the reference grammar", () => {
     test("the CORRECTIONS: ⟨ऐ⟩→ɛ, ⟨औ⟩→ɔ (MONOPHTHONGS, not diphthongs); no vowel length", () => {
         expect(phonemizeWord("बैल")).toBe("bˈɛl"); // 'ox' — ऐ → ɛ monophthong (was wrongly [ai])

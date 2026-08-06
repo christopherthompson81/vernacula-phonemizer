@@ -1,11 +1,10 @@
 /**
- * Umbundu (umb) phonemizer — Bantu (R11, Angola), the Latin orthography, canonical IPA, espeak-independent. A pure
+ * Umbundu (umb) phonemizer — Bantu (R11, Angola), the Latin orthography, canonical IPA. A pure
  * greedy longest-match scan over the grapheme table (manifest.ts): Umbundu is open CV with prenasalised clusters as
  * single onset units, so no coda/syllabification logic is needed. Signatures: VOICED obstruents ONLY prenasalised
  * (⟨mb nd nj ng⟩→ᵐb ⁿd ᶮd͡ʒ ᵑɡ), ⟨c⟩→t͡ʃ, ⟨v⟩→v, ⟨ñ⟩/⟨ny⟩→ɲ, ⟨ng'⟩→ŋ, ⟨l⟩→l. Tone (H á / L à + downstep) is often
  * unwritten → the accents are STRIPPED (tone DEFERRED); nasal-vowel tildes are kept. Cardinal numbers: numbers.ts (citation
- * forms + the quinary 6–9 nouns + the la/l’ connective). See
- * docs/investigations/umb_native_bringup_investigation.md.
+ * forms + the quinary 6–9 nouns + the la/l’ connective).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -7,7 +7,6 @@
 //   - affricates চ ছ জ → [t͡ʃ t͡ʃʰ d͡ʒ] preserved (the referee writes them retroflex-tinged ʈʃ; folded).
 //   - the retroflex/dental split KEPT: ট ঠ ড ঢ → ʈ… vs ত থ দ ধ → t̪… (Bengali, not the Assamese merger).
 // The ONE divergence from Bengali proper: NO ɔ→o HEIGHT HARMONY (সমুদ্র→ʃɔmudɾo, not ʃomudɾo) → heightHarmony:false.
-// See docs/investigations/bpy_native_bringup_investigation.md.
 {
     "language": "bpy",
     "name": "Bishnupriya Manipuri",

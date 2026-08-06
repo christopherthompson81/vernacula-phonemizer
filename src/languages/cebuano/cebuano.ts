@@ -1,10 +1,10 @@
 /**
- * Native Cebuano / Sinugboanon (ceb) text phonemizer — canonical IPA, espeak-independent. A shallow near-phonemic
+ * Native Cebuano / Sinugboanon (ceb) text phonemizer — canonical IPA. A shallow near-phonemic
  * Philippine (Central Bisayan) Latin orthography → rule transliterator, the Tagalog pattern: the digraph ⟨ng⟩→ŋ
  * (+ nativized loan digraphs) then single letters, with a WORD-INITIAL glottal stop [ʔ] before a vowel, a HIATUS
  * glottal between two vowels (kaon→kaʔon, maayo→maʔajo), and a hyphen → [ʔ]. Stress defaults to PENULTIMATE (it is
  * phonemic but unwritten, and the referee eval folds stress). The unwritten word-final glottal (bata child [bataʔ]
- * vs bata robe [bata]) is phonemic but lexical → a deferred residual. See docs/investigations/ceb_native_bringup_investigation.md.
+ * vs bata robe [bata]) is phonemic but lexical → a deferred residual.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

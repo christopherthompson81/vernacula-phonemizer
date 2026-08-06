@@ -1,5 +1,5 @@
 # Thai lexical dictionary — word<TAB>IPA (Chao tone contours ˩˩˦/˨˩/˧/˦˥/˥˩), for irregulars the rules
-# can't derive. Two sources: (1) espeak-ng-portable data/th/dictionary.jsonl (tone digits→Chao); (2) the kaikki.org
+# can't derive. Two sources: (1) an authored irregulars set (tone digits→Chao); (2) the kaikki.org
 # Wiktionary Thai gold (CC-BY-SA), multi-syllable content words the rules mis-derive, converted by
 # tools/gen/build-th-kaikki-dict.mts (converter 100%-validated on rule-correct words). Wiktionary attribution:
 # https://en.wiktionary.org — Module:th-pron. Regen: npx tsx tools/gen/build-th-kaikki-dict.mts.

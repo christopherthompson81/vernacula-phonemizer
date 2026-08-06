@@ -1,9 +1,9 @@
 /**
- * Mongolian (mn) phonemizer — Standard Khalkha, canonical IPA, espeak-independent. Cyrillic Khalkha is a DEEP
+ * Mongolian (mn) phonemizer — Standard Khalkha, canonical IPA. Cyrillic Khalkha is a DEEP
  * orthography: only the first-syllable vowel is realised full; a written non-initial SHORT vowel reduces to ə, or
  * deletes word-finally (Дани→tän, Сири→sir). Long vowels (doubled) and diphthongs stay full everywhere. On top of
  * the greedy g2p scan (g2p.ts) this module applies that reduction/deletion, final obstruent devoicing (в→f, г→k,
- * ж→t͡ʃ, з→t͡s), and final н→ŋ, then tokenizes words/numbers/punctuation. See docs/investigations/mn_native_bringup_investigation.md.
+ * ж→t͡ʃ, з→t͡s), and final н→ŋ, then tokenizes words/numbers/punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

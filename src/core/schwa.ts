@@ -1,8 +1,8 @@
 /**
- * Medial schwa deletion for Indic-abugida IPA (Ohala 1983 VCəCV rule), extracted from the espeak-ng-portable
- * canonical path. Pure IPA-string in/out: segment into C/V/stress units, then delete a medial ə that sits in
- * a V·C·ə·C·V context (right-to-left), keeping the syllable heavy across a geminate (…ː). Word-FINAL schwa
- * deletion is handled by the caller (it depends on the monosyllable guard). Generic across Indic languages.
+ * Medial schwa deletion for Indic-abugida IPA (Ohala 1983 VCəCV rule). Pure IPA-string in/out: segment into
+ * C/V/stress units, then delete a medial ə that sits in a V·C·ə·C·V context (right-to-left), keeping the
+ * syllable heavy across a geminate (…ː). Word-FINAL schwa deletion is handled by the caller (it depends on
+ * the monosyllable guard). Generic across Indic languages.
  */
 
 const HI_VOWEL_BASES = new Set([..."aeiouɛɔəɪʊoɐɑɒʌæ"]);

@@ -5,7 +5,7 @@
 // radio→ɾadjo, dies→djes) rather than taking a glottal, while non-high hiatus keeps the glottal (tao→taʔo). Its
 // signature vowel is the CLOSE BACK UNROUNDED ⟨e⟩→[ɯ]~[ɛ] (the 6th vowel; not predictable native-vs-loan from
 // spelling → default [ɛ], folded). ⟨ll⟩ is a native GEMINATE [lː] (not the Spanish [lj]). Validated against
-// wikipron ilo_latn + kaikki ilo + epitran ilo-Latn. See docs/investigations/ilo_native_bringup_investigation.md.
+// wikipron ilo_latn + kaikki ilo + epitran ilo-Latn.
 {
     "language": "ilo",
     "name": "Ilocano (Iloko)",

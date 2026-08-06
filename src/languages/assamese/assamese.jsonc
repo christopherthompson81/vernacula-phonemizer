@@ -6,7 +6,6 @@
 //   - DEAFFRICATION: চ ছ → [s], জ ঝ → [z] (Bengali keeps the affricates t͡ʃ/d͡ʒ).
 //   - NO retroflex/dental split: ট ঠ ড ঢ and ত থ দ ধ all → plain ALVEOLAR t tʰ d dʱ (Bengali has ʈ… vs t̪…).
 //   - the two extra Assamese letters ৰ [ɹ] (ra) and ৱ [w] (wa); য → [z].
-// See docs/investigations/as_native_bringup_investigation.md.
 {
     "language": "as",
     "name": "Assamese",

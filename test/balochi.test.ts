@@ -6,7 +6,7 @@ import { phonemizeWord, phonemizeArabic, phonemizeRoman } from "../src/languages
 // Jahani & Korn (2009) + Korn (2005a); the cross-script lexicon is corroborated by ASJP Southern-Balochi (an
 // INDEPENDENT transcriber) at ~97% on the overlapping core vocabulary. The Balochi Arabic abjad under-encodes vowels
 // (short /a i u/ unwritten + ⟨و⟩/⟨ی⟩ conflate uː/oː, iː/eː); the cross-script lexicon recovers the full vowels the
-// abjad loses, and the Roman orthography is phonemic. See docs/investigations/bal_native_bringup_investigation.md.
+// abjad loses, and the Roman orthography is phonemic.
 describe("Balochi (Southern) — cross-script canonical IPA", () => {
     test("cross-script LEXICON recovers the vowels the abjad loses (Arabic input → full IPA)", () => {
         expect(phonemizeWord("خاموش")).toBe("xaːmoːʃ"); // "quiet" — abjad skeleton was xaːmuːʃ (و→uː); lexicon restores oː

@@ -8,7 +8,7 @@
 // the plain voiceless stops are EJECTIVE ⟨p t k⟩→[pʼ tʼ kʼ] (vs aspirated ⟨ph th kh⟩→[pʰ tʰ kʰ]), ⟨ts⟩→[t͡sʼ]
 // ejective affricate, ⟨hl⟩→[ɬ] voiceless lateral fricative, ⟨h⟩→[ɦ] voiced, ⟨a⟩→[ɑ] back. Vowel HEIGHT is
 // unwritten (7-vowel /i e ɛ a ɔ o u/ spelled with 5) → default the mid values [ɛ ɔ]; the [i]/[ʊ] raisings are a
-// documented residual. Tone (H/L) is lexical + unwritten → DEFERRED. See docs/investigations/st_native_bringup_investigation.md.
+// documented residual. Tone (H/L) is lexical + unwritten → DEFERRED.
 {
     "language": "st",
     "name": "Sesotho (Southern Sotho)",

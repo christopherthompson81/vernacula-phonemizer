@@ -3,7 +3,7 @@
  * Arabic (harakat present) and produces canonical IPA — cleanroom, rule-based, no lexicon. Short-vowel
  * restoration for bare text is a separate pre-pass (the neural diacritizer); this engine assumes the vowels
  * are already there. Arabic is stored in logical order = phonetic order, so RTL is a non-issue.
- * See docs/investigations/ar_native_bringup_investigation.md for the convention.
+ * for the convention.
  */
 
 import { MANIFEST } from "./manifest.ts";
@@ -196,7 +196,7 @@ export function toSegments(word: string): Seg[] {
             let ph = CONS[c]!;
             i++;
             const marks = gatherMarks(s, i); // shadda + harakat in any order, then the long-vowel letter
-            if (marks.shadda) ph += "ː"; // gemination → length mark Cː (consistent; espeak vacillates CC/Cː)
+            if (marks.shadda) ph += "ː"; // gemination → length mark C
             pushCons(ph);
             const { v, next } = resolveVowel(marks.hk, s, marks.next);
             pushVowel(v);

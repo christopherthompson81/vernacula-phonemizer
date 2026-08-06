@@ -7,7 +7,7 @@ import { createGalician, phonemizeWord } from "../src/languages/galician/galicia
 // stress). The Galician-specific deltas — all derived empirically from the wikipron glg_latn_broad referee (10,237
 // human words, 90.9% folded / 98.4% symbol accuracy): ⟨x⟩/⟨j⟩→ʃ, ⟨g⟩→ɡ (no Castilian jota), ⟨nh⟩→ŋ, coda/pre-velar
 // ⟨n⟩→ŋ, and the standard RAG distinción (⟨z⟩/⟨c+e,i⟩→θ). The 7-vowel open-mids ɛ/ɔ are lexical + unmarked in
-// spelling → we emit close-mid e/o. See docs/investigations/gl_native_bringup_investigation.md.
+// spelling → we emit close-mid e/o.
 describe("Galician canonical IPA — Spanish-shaped Ibero-Romance engine + Galician deltas", () => {
     const gl = createGalician();
 

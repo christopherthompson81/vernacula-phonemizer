@@ -12,7 +12,7 @@ import { inflect, normalizeSlovenian, ordinalBase, ordinalWords } from "../src/l
 // vowels (quality/length/pitch/schwa are all unwritten) → the vowel axis is folded in the referee eval; these golds
 // lock the CONSONANT skeleton + the Slovene rules: ⟨lj/nj⟩ coda-j-drop, syllabic-r→ər, voicing/devoicing, ⟨v⟩→ʋ. NO
 // stress mark is emitted (Slovene stress is free/lexical + unwritten → deferred). 94.1% folded / 98.7% symbol accuracy
-// vs wikipron slv_latn_broad (5,177 headwords). See docs/investigations/sl_native_bringup_investigation.md.
+// vs wikipron slv_latn_broad (5,177 headwords).
 describe("Slovenian canonical IPA — Slovak-shaped South Slavic engine + Slovene rules", () => {
     const sl = createSlovenian();
 
@@ -63,8 +63,7 @@ describe("Slovenian canonical IPA — Slovak-shaped South Slavic engine + Sloven
 // #562 TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (trap 13 (pin the rule's BRANCHES)): the ordinal
 // table, the tens+units composition and the boundary between them; both count-form paths; the licensor list
 // AND the ending fallback; and the discriminator that decides an ordinal period from a sentence period.
-// Corpus counts are in src/languages/slovenian/normalize.ts and
-// docs/investigations/sl_normalization_investigation.md.
+// Corpus counts are in src/languages/slovenian/normalize.ts and.
 describe("Slovenian #562 — ordinals: the table, the composition, and the boundary between them", () => {
     test("the TABLE branch, 1–19, and its two irregular stems", () => {
         expect(ordinalBase(1)).toBe("prvi");

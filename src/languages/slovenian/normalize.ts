@@ -5,7 +5,7 @@
  * MEASURED over the sl_si FLEURS corpus (1,903 unique cased utterances, column 3 — the CASED original;
  * column 4 is lowercased and stripped of exactly the punctuation this layer exists to read). Every count
  * below was taken from that column and every rule exists because the engine produced something wrong on it;
- * the verbatim before-readings are in docs/investigations/sl_normalization_investigation.md, Run 3.
+ * the verbatim before-readings are in, Run 3.
  *
  *   `N.` ordinals ×95 (steps 6a–6c) — read as a CARDINAL plus a spurious phrase break:
  *       `V 16. stoletju` → [ʋ ʃɛstnajst . stɔlɛtju], `na 190. mesto` → [na stɔ dɛʋɛddɛsɛt . mɛstɔ].

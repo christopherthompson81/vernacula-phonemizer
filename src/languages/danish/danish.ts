@@ -1,5 +1,5 @@
 /**
- * Danish (da) phonemizer — Standard rigsdansk, canonical IPA, espeak-independent. Danish is the DEEPEST European
+ * Danish (da) phonemizer — Standard rigsdansk, canonical IPA. Danish is the DEEPEST European
  * orthography: stressed-vowel QUALITY, soft-d/g realisation, reduction, length, and stød are largely LEXICAL / not
  * recoverable from spelling by rule. So the primary path is a PRONUNCIATION LEXICON (da-lexicon.tsv, ~37k = the NST
  * lexicon ∩ the top-50k OpenSubtitles-da frequency head, Nasjonalbiblioteket / Språkbanken CC0 — the NARROW convention:
@@ -8,7 +8,7 @@
  * (phonemizeWordRules) are the OOV fallbacks. The rule engine is a left-to-right scan with Danish context rules
  * (soft-d ⟨d⟩→ð intervocalic/final; af-→aw glide; coda handling; final-⟨t⟩-after-vowel→d; -er/-et/-en/-el reductions;
  * silent-h before j/v/…; ng→ŋ) + a first-syllable (unstressed-prefix-aware) STRESS model; it folds length/stød/
- * aspiration (the referee eval measures THIS engine — non-circular). See docs/investigations/da_nst_ingest_investigation.md.
+ * aspiration (the referee eval measures THIS engine — non-circular).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

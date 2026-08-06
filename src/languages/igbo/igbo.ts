@@ -1,11 +1,11 @@
 /**
- * Native Igbo / Asụsụ Igbo (ig) text phonemizer — canonical IPA, espeak-independent. Igboid (Volta-Niger,
+ * Native Igbo / Asụsụ Igbo (ig) text phonemizer — canonical IPA. Igboid (Volta-Niger,
  * Niger-Congo), Yoruba's sibling. A phonemic Latin orthography → a rule-based g2p (the tonal-Latin pattern).
  * Signature features: the labial-velars ⟨gb⟩→ɡ͡b / ⟨kp⟩→k͡p, the labialised ⟨nw⟩→ŋʷ ⟨gw⟩→ɡʷ ⟨kw⟩→kʷ, ⟨ny⟩→ɲ,
  * ⟨ch⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ, ⟨gh⟩→ɣ, ⟨r⟩→ɾ; the 8-vowel harmony with dotted ị→ɪ ọ→ɔ ụ→ʊ; syllabic m̩/n̩. TWO tones
  * — High=acute ˥, Low=grave ˩ (Chao letters), downstep=macron ˧ — but Igbo standard orthography usually OMITS
  * tone, so a vowel is toned only when its diacritic is present. NO independent referee exists (no wikipron/epitran/
- * kaikki) → validated against an adjudicated gold. See docs/investigations/ig_native_bringup_investigation.md.
+ * kaikki) → validated against an adjudicated gold.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

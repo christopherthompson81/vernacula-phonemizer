@@ -2,7 +2,7 @@
 // but lost the checked coda). GAP language: NO independent automated referee. No wikipron hsn; epitran ships no
 // Xiang; the only machine-readable Changsha IPA is the Wiktionary Chinese dialectal data — exactly our source
 // (kaikki.org extract), so any automated check is circular with it. Recorded here (not silently omitted) so the
-// gap is explicit; the correctness anchor is the adjudicated gold in test/xiang.test.ts. See docs/investigations/hsn_native_bringup_investigation.md.
+// gap is explicit; the correctness anchor is the adjudicated gold in test/xiang.test.ts.
 {
     "language": "hsn",
     "name": "Xiang Chinese (Changsha)",

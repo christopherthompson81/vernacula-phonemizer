@@ -1,13 +1,13 @@
 /**
  * Mooré (mos) phonemizer — Niger-Congo GUR (Oti-Volta), the Latin (Burkinabé) orthography, canonical IPA,
- * espeak-independent. The largest language of Burkina Faso (~8M) and the FIRST Gur language in the fleet. A greedy
+ * The largest language of Burkina Faso (~8M) and the FIRST Gur language in the fleet. A greedy
  * longest-match scan over the grapheme table (manifest.ts) with two code rules: CONSONANT GEMINATION — a doubled
  * consonant is a geminate [Cː] (yelle→jélːé) — and NASAL place assimilation — ⟨n⟩→[ŋ] before g/k (tenga→teŋɡa).
  * Grounded on TWO independent authorities: the en.wiktionary Moore referee (modern orthography) + the FSI Moré
  * Basic Course (Lehr, Redden & Balima 1966) phonology. Signatures: ATR-ish 9-vowel system with dedicated letters ⟨ɛ⟩=ɛ,
  * ⟨ɩ⟩=ɪ, ⟨ʋ⟩=ʊ (⟨o⟩=o always — no ⟨ɔ⟩ letter); DOUBLING = LENGTH (aa→aː, ʋʋ→ʊː); NASAL = TILDE (ã ẽ ĩ õ ũ);
  * ⟨r⟩=ɾ (tap), ⟨y⟩=j, ⟨ny⟩=ɲ, ⟨ʼ⟩=ʔ. TONE (2-tone H/L) is not written in the orthography (contextual) → not
- * emitted. Numbers are composed in numbers.ts. See docs/investigations/mos_native_bringup_investigation.md.
+ * emitted. Numbers are composed in numbers.ts.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

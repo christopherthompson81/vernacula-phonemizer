@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Luganda / Oluganda (lg) — Bantu (Great Lakes, JE15), the Latin
-// orthography, espeak-independent. The principal language of Uganda (~11M incl. L2). A greedy longest-match scan
+// orthography. The principal language of Uganda (~11M incl. L2). A greedy longest-match scan
 // (luganda.ts) with CONSONANT GEMINATION (doubled → Cː) and VOWEL LENGTHENING before a prenasalised consonant
 // (Buganda → buɡaːnda). Phonology grounded in Wikipedia (Luganda) + the epitran lug-Latn map. Signatures:
 //   • 5 vowels a e i o u; DOUBLING = LENGTH (aa→aː …). Length is phonemic (bana 'four' vs baana 'children').
@@ -8,8 +8,7 @@
 //   • ⟨c⟩=c, ⟨j⟩=ɟ (voiceless/voiced palatal STOPS, Wikipedia — [tʃ]/[dʒ] are allophones before front vowels;
 //     folded c~tʃ, ɟ~dʒ vs the epitran referee). ⟨l⟩=l, ⟨r⟩=ɾ (allophones the orthography already writes).
 // TONE (3-way H/L/falling) is LEXICAL + UNWRITTEN → DEFERRED (not emitted). REFEREE = epitran lug-Latn only, which
-// is itself RULE-based, so the comparison is partly circular (single-source, 🔷). See
-// docs/investigations/lg_native_bringup_investigation.md.
+// is itself RULE-based, so the comparison is partly circular (single-source, 🔷).
 {
     "language": "lg",
     "name": "Luganda (Oluganda)",

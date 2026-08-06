@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Thai (th) — authored beyond-espeak.
+// Native canonical-IPA data manifest for Thai (th) — authored.
 // This file IS the hand-authored context-free DATA: the onset / coda / vowel-quality grapheme→IPA tables, the
 // vowel-length exception sets, and the full tone system (consonant class × mark × life/length → tone → Chao
 // letters). The ALGORITHMS that read it stay in code:
@@ -9,7 +9,6 @@
 // The bulk lexica stay as sibling files (dictionary.tsv irregulars, seg-words.txt segmentation dictionary).
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA (contributes ɤ; tones as Chao contour letters).
-// See docs/investigations/th_native_bringup_investigation.md.
 {
     "language": "th",
     "name": "Thai",

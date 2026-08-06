@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Chichewa / Chinyanja (nya) — Bantu (N31, Malawi/Zambia/Mozambique,
-// ~12M+), the Latin orthography, espeak-independent. A greedy longest-match scan (Shona pattern): Chichewa is
+// ~12M+), the Latin orthography. A greedy longest-match scan (Shona pattern): Chichewa is
 // open CV with prenasalised clusters as single onset units, so a pure left-to-right longest match suffices.
 // Referees: wikipron nya_latn (PRIMARY, HUMAN, narrow) + kaikki nya (2nd, HUMAN — same Wiktionary tradition) +
 // epitran nya-Latn (3rd, INDEPENDENT, broad). Signatures (from the narrow Wiktionary transcription):
@@ -9,7 +9,6 @@
 //   • ASPIRATED ⟨ph th kh⟩ → pʰ tʰ kʰ, ⟨tch⟩ → t͡ʃʰ; AFFRICATES ⟨ch⟩→t͡ʃ, ⟨ts⟩→t͡s, ⟨dz⟩→d͡z, ⟨j⟩→d͡ʒ.
 //   • ⟨Cw⟩ labialisation is written as the glide w (the narrow referees' [ʷ] is folded ʷ~w).
 // Tone (H/L) is phonemic but UNWRITTEN → DEFERRED (the backbone strips the referees' tone/stress marks).
-// See docs/investigations/nya_native_bringup_investigation.md.
 {
     "language": "nya",
     "name": "Chichewa (Chinyanja)",

@@ -3,7 +3,7 @@
 // the digraphs and their GEMINATE forms (written by doubling the digraph's FIRST letter: sz→s but ssz→[sː],
 // gy→ɟ but ggy→[ɟː]). hungarian.ts reads this table, then collapses doubled single consonants to length and adds
 // FIXED first-syllable stress. Signature: ⟨s⟩→[ʃ] / ⟨sz⟩→[s] (the reverse of the intuition), ⟨gy⟩→[ɟ] ⟨ty⟩→[c]
-// (palatal stops), ⟨a⟩→[ɒ], a full long/short vowel system (14 vowels). See docs/investigations/hu_native_bringup_investigation.md.
+// (palatal stops), ⟨a⟩→[ɒ], a full long/short vowel system (14 vowels).
 {
     "language": "hu",
     "name": "Hungarian (magyar)",

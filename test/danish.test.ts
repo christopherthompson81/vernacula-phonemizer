@@ -11,7 +11,7 @@ import { numberToWords } from "../src/languages/danish/numbers.ts";
 // phonemizeDaNeural, trained on the full 199k NST) → the RULE engine (phonemizeWordRules) as the last-tier fallback.
 // NST (Nasjonalbiblioteket / Språkbanken, CC0) is the NARROW convention: r-vocalisation (ɐ),
 // stop lenition (kat→kad), soft-d (ð), length (ː), and STØD (ˀ). The referee-eval measures the rule engine
-// non-circularly (the honest novel-word floor). See docs/investigations/da_nst_ingest_investigation.md.
+// non-circularly (the honest novel-word floor).
 describe("Danish canonical IPA", () => {
     test("lexicon path (NST, narrow): known words at reference quality", () => {
         expect(phonemize("gade", "da").trim()).toBe("ˈɡaːðə"); // soft d → ð, length ː, initial stress

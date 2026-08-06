@@ -4,7 +4,7 @@
  * compositor concatenates tens+units and the hundred-multiplier WITHOUT a space (онбір, жиырмабір, екіжүз) but
  * separates magnitude groups WITH a space (бір мың екіжүз отызтөрт). So this returns finished canonical IPA
  * directly (the atomic forms captured from espeak), rather than routing Kazakh text through the g2p.
- * 100 omits the leading 1 (жүз, not біржүз); 1000 keeps it (бір мің). See docs/investigations/kk_native_bringup_investigation.md.
+ * 100 omits the leading 1 (жүз, not біржүз); 1000 keeps it (бір мің).
  */
 
 import { MANIFEST } from "./manifest.ts";

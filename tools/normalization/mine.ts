@@ -250,7 +250,7 @@ export interface MinedCorpus {
 /**
  * Render the mined corpus as JSONC — the deliverable. Comments carry the provenance and the two warnings
  * a reader of this file needs (why `hard` is not frequency-representative, and why `sample` exists), so
- * the artifact explains itself without the investigation doc beside it.
+ * the artifact explains itself standalone.
  */
 /**
  * Which frequency claim the artifact's `sample` tier can support, decided from its recorded source. A dump is

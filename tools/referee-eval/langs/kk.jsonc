@@ -6,7 +6,7 @@
             "role": "primary"
         }
     ],
-    "secondaryGap": "no human second source wired; wikipron kaz would be a better corroborator than epitran (which merges ө/ү→ʏ and over-marks the е palatal onglide — the espeak-ng-portable kk work used wikipron).",
+    "secondaryGap": "no human second source wired; wikipron kaz would be a better corroborator than epitran (which merges ө/ү→ʏ and over-marks the е palatal onglide; wikipron is the better source).",
     "folds": [
         {
             "pattern": "ɫ",

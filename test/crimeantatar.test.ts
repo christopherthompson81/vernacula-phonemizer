@@ -5,7 +5,7 @@ import { phonemizeWord, createCrimeanTatar } from "../src/languages/crimeantatar
 // Canonical-IPA goldens for Crimean Tatar (crh) — qırımtatar tili, Kipchak+Oghuz Turkic, the Turkish-based LATIN
 // alphabet. Signatures: the WRITTEN uvular ⟨q⟩→[q] / ⟨ğ⟩→[ɣ] (vs velar ⟨k g⟩), the front/back harmony vowels
 // ⟨a o u ı⟩→[ɑ o u ɯ] vs ⟨e ö ü i⟩→[e ø y i], ⟨c⟩→[d͡ʒ] / ⟨ç⟩→[t͡ʃ] / ⟨ş⟩→[ʃ] / ⟨ñ⟩→[ŋ], gemination, and final stress.
-// Referee: English Wiktionary (thin, ~18 pairs). See docs/investigations/crh_native_bringup_investigation.md.
+// Referee: English Wiktionary (thin, ~18 pairs).
 describe("Crimean Tatar (qırımtatar tili) canonical IPA", () => {
     test("the WRITTEN uvular series ⟨q ğ⟩ + back-vowel harmony + final stress", () => {
         expect(phonemizeWord("Qırım")).toBe("qɯˈrɯm"); // 'Crimea' — ⟨q⟩→[q], dotless ⟨ı⟩→[ɯ], Turkish-I casing on capital Q…I

@@ -2,7 +2,7 @@
  * Spanish grapheme→phoneme engine (broad Castilian). Spanish orthography is shallow and near-deterministic,
  * so this is a left-to-right scan with small context rules — no lexicon. Produces a segment list (phoneme +
  * whether it's a syllable nucleus + whether it bears a written accent); stress and spirantization are
- * applied downstream. See docs/investigations/es_native_bringup_investigation.md for the convention.
+ * applied downstream. for the convention.
  */
 
 import { MANIFEST } from "./manifest.ts";

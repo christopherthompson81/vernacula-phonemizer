@@ -1,7 +1,7 @@
 // Haitian Creole (ht) — French-lexified creole, Latin script (the phonemic IPN orthography). Referee: wikipron
 // hat_latn_broad (HUMAN, 1691 headwords, variants merged). `segmentJoin` strips the per-phone spaces. The IPN
 // orthography is near-phonemic, so segments are compared DIRECTLY; only the rhotic ɣ~ʁ~ɰ~w and a few rare loan-nasal
-// variants are folded. Stress (final-syllable) is not emitted. See docs/investigations/ht_native_bringup_investigation.md.
+// variants are folded. Stress (final-syllable) is not emitted.
 {
     "language": "ht", "name": "Haitian Creole (kreyòl ayisyen)", "script": "Latin",
     "provenance": "Authored IPN-orthography grapheme→IPA g2p (⟨ou⟩→u, ⟨r⟩→ɣ, ⟨j⟩→ʒ, ⟨ch⟩→ʃ, ⟨y⟩→j, ⟨è ò⟩→ɛ ɔ, and the nasal-vowel rule ⟨an en on⟩→[ã ɛ̃ ɔ̃] syllable-finally) from Haitian Creole phonology; validated against the wikipron hat_latn_broad (1691) human referee.",

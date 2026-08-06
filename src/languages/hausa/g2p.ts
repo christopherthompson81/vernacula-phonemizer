@@ -1,10 +1,10 @@
 /**
- * Hausa grapheme→phoneme engine (Kano standard, Boko orthography), espeak-independent and AUTHORED
- * beyond-espeak (espeak ships no Hausa). Boko spelling is shallow and near-1:1, so a longest-match scan —
+ * Hausa grapheme→phoneme engine (Kano standard, Boko orthography)  (authored)
+ * Boko spelling is shallow and near-1:1, so a longest-match scan —
  * digraphs/trigraphs (ƙw, 'y, aa, ai, sh, ts, kw, ky…) resolve before the bare letter. Fills the census gaps:
  * implosives ɓ ɗ, ejectives kʼ t͡sʼ, labialization kʷ ɡʷ, glottalized ʔʲ, palatals c ɟ, and ɸ.
  * Tone is NOT written in Boko — it is a lexical FACT overlaid from a Wiktionary-derived lexicon (tone.tsv);
- * out-of-lexicon words are left untoned. Stress is penultimate. See docs/investigations/ha_native_bringup_investigation.md.
+ * out-of-lexicon words are left untoned. Stress is penultimate.
  */
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";

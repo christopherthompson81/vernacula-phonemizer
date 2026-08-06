@@ -1,12 +1,12 @@
 /**
- * Native Bulgarian / български (bg) text phonemizer — canonical IPA, espeak-independent. South Slavic, Cyrillic.
+ * Native Bulgarian / български (bg) text phonemizer — canonical IPA. South Slavic, Cyrillic.
  * Bulgarian is highly phonemic, so a left-to-right grapheme scan + a small set of well-defined post-rules recovers
  * the pronunciation: PALATALISATION (only before ь я ю — not и/е, unlike Russian), DARK-L (л→[l] before a front
  * vowel, [lʲ] before ь/я/ю, [ɫ] elsewhere), the velar nasal (н→ŋ before к/ɡ), FINAL DEVOICING, REGRESSIVE VOICING
  * assimilation (with /v/ voicing-transparent as [v]), SIBILANT assimilation (с/з→ʃ before ʃ/t͡ʃ), and cluster
  * simplification (стк→ск, stop-geminate collapse). STRESS is unwritten (lexical) and Bulgarian vowel reduction is
  * stress-conditioned, so we emit the FULL phonemic vowels and the reduction is folded in the referee eval.
- * Validated against two independent human referees. See docs/investigations/bg_native_bringup_investigation.md.
+ * Validated against two independent human referees.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

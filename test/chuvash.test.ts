@@ -7,7 +7,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Two signatures: (1) ALLOPHONIC VOICING — the voiceless letters ⟨п т к ч с ҫ ш х⟩ voice between vowels or after a
 // nasal (Chuvash has no phonemic voicing contrast), and a GEMINATE blocks it → single long [Cː]; (2) REDUCED-VOWEL
 // STRESS — the reduced vowels ⟨ӑ⟩→[ə], ⟨ӗ⟩→[ɘ] cannot bear stress; it falls on the last full vowel, else the first.
-// Referee: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 human pairs). See docs/investigations/chv_native_bringup_investigation.md.
+// Referee: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 human pairs).
 describe("Chuvash (Чӑвашла) canonical IPA", () => {
     test("★ HALLMARK 1 — allophonic intervocalic / post-nasal VOICING", () => {
         expect(phonemizeWord("апат")).toBe("aˈbat"); // ⟨п⟩→[b] between vowels; final ⟨т⟩ stays [t]

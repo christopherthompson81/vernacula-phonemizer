@@ -3,7 +3,6 @@
  * standalone (ku-), connective (na-) and multiplier (ama-) stems, and 6–9 are isi- nouns; tens/hundreds/
  * thousands are noun classes with an ama-/izi- multiplier. This returns the composed Zulu TEXT (space-separated
  * words) — the phonemizer runs each word through the g2p, so the IPA stays consistent with the word engine.
- * See docs/investigations/zu_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

@@ -1,10 +1,9 @@
 /**
- * Native Sundanese / Basa Sunda (su) text phonemizer — canonical IPA, espeak-independent. Austronesian (West
+ * Native Sundanese / Basa Sunda (su) text phonemizer — canonical IPA. Austronesian (West
  * Java), modern LATIN orthography (+ the revived Aksara Sunda abugida, transliterated to Latin by sundaAksara.ts — identical IPA). Shallow and near-phonemic (the id/jv pattern), so a flat left-to-right scan:
  * digraphs (the central vowel ⟨eu⟩→[ɨ], ng→[ŋ], ny→[ɲ]) then single letters, ⟨e⟩→schwa [ə] / ⟨é⟩→[e], c→[t͡ʃ],
  * j→[d͡ʒ]. Glottal stop is inserted at a word-initial vowel (awi→ʔawi) and in a same-vowel hiatus (naam→naʔam).
- * Penultimate (weak) stress, skipping a schwa nucleus. Validated against kaikki su. See
- * docs/investigations/su_native_bringup_investigation.md.
+ * Penultimate (weak) stress, skipping a schwa nucleus. Validated against kaikki su.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

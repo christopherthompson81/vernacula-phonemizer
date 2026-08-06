@@ -15,7 +15,6 @@
  *
  * The open/close correction lexicon is shared with EP (EP-derived; mostly valid for BP, a small stressed-mid
  * lexical tail differs). No referee-mined data → the eval scores this shipped path directly (non-circular).
- * See docs/investigations/pt-br_native_bringup_investigation.md.
  */
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import type { Phonemizer } from "../../registry.ts";

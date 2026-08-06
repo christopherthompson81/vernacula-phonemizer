@@ -7,8 +7,7 @@ import { phonemizeWord, createLithuanian } from "../src/languages/lithuanian/lit
 // spreading leftward through clusters) + regressive VOICING assimilation + n→ŋ before velars. Scored 85.7% folded /
 // 98.5% symbol against the wikipron lit_latn_narrow referee (HUMAN, 15,513 words) — the folds strip the lexical PITCH
 // accents (¹/²), stress-conditioned length (ː) + vowel quality (ɑ→ɐ, æ→ɛ), and narrow allophony (dark ɫ, v~ʋ, the
-// glide j~ɪ̯). Several golds are referee-verified (exact after folds). Stress is lexical → not marked. See
-// docs/investigations/lt_bringup_investigation.md.
+// glide j~ɪ̯). Several golds are referee-verified (exact after folds). Stress is lexical → not marked.
 describe("Lithuanian canonical IPA — rule g2p (palatalization + voicing)", () => {
     test("PALATALIZATION: consonants → Cʲ before a front vowel ⟨e ę ė i į y⟩", () => {
         expect(phonemizeWord("katinas")).toBe("kɐtʲɪnɐs"); // ⟨t⟩ soft before ⟨i⟩; ⟨k n⟩ hard before ⟨a⟩ (referee-verified)

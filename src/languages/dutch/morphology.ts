@@ -4,8 +4,7 @@
  * boundaries and phonemize each element with its own stress + coda devoicing. The g2p already handles a word's own
  * prefix reduction and suffix schwa, so only stem·stem splits are consumed downstream. The affix lists come from
  * dutch.jsonc; the stem lexicon is a frequency wordlist (nl-stems.txt, hunspell nl.dic base forms). No per-stem
- * Fugen flags → a static linking-element order, and none of German's language-specific quirks apply. See the nl
- * investigation doc.
+ * Fugen flags → a static linking-element order, and none of German's language-specific quirks apply.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

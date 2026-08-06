@@ -1,9 +1,9 @@
 // Native canonical-IPA data manifest for Standard Turkmen (tk) — Türkmençe, Oghuz Turkic, Latin (30 letters,
-// post-1990s). espeak-independent. NO digraphs (one sound per letter). The HALLMARK: the INTERDENTAL fricatives
+// post-1990s). NO digraphs (one sound per letter). The HALLMARK: the INTERDENTAL fricatives
 // ⟨s⟩→[θ] and ⟨z⟩→[ð] (Türkmen shares this with Bashkir — surat→θuːrɑt, göz→ɡœð). 9 vowels ⟨a e ä i o ö u ü y⟩ with
 // ⟨ä⟩→[æ], ⟨ö⟩→[ø], ⟨ü⟩→[y] (front rounded), ⟨y⟩→[ɯ] (close back unrounded) + UNWRITTEN phonemic length (not
 // emitted). ⟨ç⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨ž⟩→ʒ, ⟨ş⟩→ʃ, ⟨ň⟩→ŋ, ⟨ý⟩→j (the glide, vs the vowel ⟨y⟩), ⟨h⟩→x, ⟨w⟩→w, ⟨r⟩→ɾ.
-// A longest-match scan + word-final (oxytone) stress. Engine: turkmen.ts. See docs/investigations/tk_native_bringup_investigation.md.
+// A longest-match scan + word-final (oxytone) stress. Engine: turkmen.ts.
 {
     "language": "tk",
     "name": "Turkmen (Türkmençe)",

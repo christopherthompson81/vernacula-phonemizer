@@ -330,7 +330,7 @@ export function health(all: string[], terms: string[] = []): Health {
 
 /**
  * THE VERDICT. Thresholds are set from measurement, not taste — `de`/`ka` wiki text and the `de_de` FLEURS
- * corpus against `ceb`, recorded in docs/investigations/mined_corpus_health_investigation.md. They are
+ * corpus against `ceb`, recorded in. They are
  * deliberately loose: this check exists to catch a corpus that CANNOT fail, and a false alarm costs one
  * investigation while a false pass costs a language its gate.
  *
@@ -408,9 +408,8 @@ export function histogram(mined: Health, base: Health): Histogram {
 }
 
 /**
- * THE VERDICT. Every threshold below is set from the de/ceb/ka calibration recorded in
- * docs/investigations/mined_corpus_health_investigation.md, and one candidate metric was DROPPED there
- * rather than kept at a flattering threshold — see `lenCV`.
+ * THE VERDICT. Every threshold below is set from the de/ceb/ka calibration, and one candidate metric was
+ * DROPPED there rather than kept at a flattering threshold — see `lenCV`.
  *
  * ⚠ THE FIRST SET OF THRESHOLDS PASSED `ceb`. They were written before the measurement, from the shape of
  * the argument rather than from numbers, and they cleared the one wiki the issue names as the reason this

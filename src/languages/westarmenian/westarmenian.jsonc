@@ -11,7 +11,7 @@
 //   ★ FRONT-ROUNDED vowels from the palatal sequences ⟨յու⟩/⟨իւ⟩→[ʏ] and ⟨յո⟩→[œ] (loan-heavy: Turkish/French names,
 //      and the classical ⟨իւ⟩ spelling kept in Western orthography) — handled as digraphs.
 //
-// Validated vs wikipron hye_armn_w broad (17211) + narrow (17584). See docs/investigations/hyw_native_bringup_investigation.md.
+// Validated vs wikipron hye_armn_w broad (17211) + narrow (17584).
 {
     "language": "hyw",
     "name": "Western Armenian",

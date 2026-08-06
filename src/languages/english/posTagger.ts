@@ -1,11 +1,8 @@
 /**
- * BEYOND-ESPEAK (issue #687): pure-TS averaged-perceptron POS tagger.
+ * Pure-TS averaged-perceptron POS tagger.
  *
  * Drives English homograph disambiguation — the `$verb`/`$noun`/`$past`
- * dictionary conditionals — with a real part-of-speech tagger instead of
- * espeak's shallow `$verbf`/`$nounf`/`$pastf` forward-propagation heuristic
- * (which only fires when a specific trigger word precedes, so it misses
- * imperatives like "wind the clock" and most verb/noun positions).
+ * dictionary conditionals — with a real part-of-speech tagger.
  *
  * Zero runtime dependencies. The model artifact is trained offline by
  * `tools/pos-tagger/train.ts` on UD English-EWT XPOS (Penn Treebank tags) and
@@ -125,10 +122,8 @@ export function isNominalTag(tag: string): boolean {
  * UPOS tags that are VERBAL (#680, Persian verb prefix-stress). Persian verbs
  * are stressed on the FIRST syllable of the whole form — the prefix می/نمی/بـ/نـ
  * when present, else the first stem syllable — with the personal ending
- * (-am/-i/-ad/-im/-id/-and) unstressed. This is the OPPOSITE of the nominal
- * final-stress rule and of espeak's 2R-penult default (which is wrong for both).
- * AUX (auxiliary/copula) is included: Persian compound/auxiliary verbs follow
- * the same initial-stress pattern.
+ * (-am/-i/-ad/-im/-id/-and) unstressed. AUX (auxiliary/copula) is included:
+ * Persian compound/auxiliary verbs follow the same initial-stress pattern.
  */
 export function isVerbalUpos(tag: string): boolean {
     return tag === "VERB" || tag === "AUX";

@@ -2,7 +2,7 @@
  * German (Standard/Hochdeutsch) grapheme→phoneme engine. Latin, largely rule-governed. Handles long/short
  * vowels (from spelling), diphthongs (ei/au/eu → aɪ̯/aʊ̯/ɔʏ̯), the ch ich-laut/ach-laut split, sch and
  * word-initial sp-/st-, final devoicing, r-vocalization, and schwa in unstressed endings. Stress is added
- * downstream (german.ts). See docs/investigations/de_native_bringup_investigation.md.
+ * downstream (german.ts).
  */
 
 import { MANIFEST } from "./manifest.ts";

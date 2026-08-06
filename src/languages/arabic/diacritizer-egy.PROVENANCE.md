@@ -12,7 +12,7 @@ char-level, the same 19-label pausal alphabet as the MSA model. Trained `--pausa
 our pausal-TTS target). **TEST DER 1.63% / WER 4.70%** vs the held-out teacher silver (better than the MSA
 student's 2.17% DER). ONNX-vs-PyTorch argmax parity 100%.
 
-## Provenance — teacher→student distillation (the MSA pattern, ADR-0001)
+## Provenance — teacher→student distillation (the MSA pattern)
 
 - **Teacher:** CAMeL Tools `calima-egy-r13` Egyptian morphological analyzer + `disambig-bert-unfactored-egy`
   (MIT) in-context disambiguator (NYU Abu Dhabi / Habash). The morphology DB is **GPL-2.0** and was used
@@ -26,14 +26,14 @@ student's 2.17% DER). ONNX-vs-PyTorch argmax parity 100%.
 - **No Wiktionary in the model** — the kaikki lexicon is a separate shipped supplement (egyptian-lexicon.tsv),
   not part of this model's training.
 
-## Licence posture (per ADR-0001 — docs/adr/0001-data-licensing-facts-posture.md — project author's reasoned posture, not legal advice)
+## Licence posture (per `LICENCING/licencing_posture.md` — the project author's reasoned posture, not legal advice)
 
 A model trained on silver retains none of the teacher's or corpus's selection/arrangement — only the
 orthographic regularities of Egyptian Arabic, which are facts (Feist). GPL is a copyright license on the teacher
 DATABASE; training a distinct model on its outputs is a use, not a distribution of a derivative, and the student
 weights are not the teacher's protected expression. The chosen corpus is permissive by its own terms (CC-BY-SA
 Wikipedia, MIT dialect corpus). The GPL teacher is offline-only and unshipped. See the arz Phase-2 discussion in
-docs/investigations/arz_egyptian_bringup_investigation.md.
+.
 
 ## Regenerate
 

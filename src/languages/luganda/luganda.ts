@@ -1,12 +1,12 @@
 /**
  * Luganda / Oluganda (lg) phonemizer — Bantu (Great Lakes, JE15), the Latin orthography, canonical IPA,
- * espeak-independent. The principal language of Uganda (~11M incl. L2). A greedy longest-match scan over the
+ * The principal language of Uganda (~11M incl. L2). A greedy longest-match scan over the
  * grapheme table (manifest.ts) with two code rules: CONSONANT GEMINATION — a doubled consonant is a geminate
  * [Cː] (bbiri→bːiri) — and VOWEL LENGTHENING before a prenasalised consonant (Buganda→buɡaːnda). Signatures:
  * 5 vowels with DOUBLING = LENGTH; prenasalised consonants as single units (mb→ᵐb, nd→ⁿd, ng→ᵑɡ); ⟨ng'⟩→ŋ vs
  * ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; labialisation ⟨Cw⟩→Cʷ; the palatal STOPS ⟨c⟩=c, ⟨j⟩=ɟ; ⟨r⟩=ɾ. Tone (3-way H/L/falling) is
  * lexical + unwritten → DEFERRED. Cardinal numbers: numbers.ts (citation/counting series + the mu/na
- * connectives). See docs/investigations/lg_native_bringup_investigation.md.
+ * connectives).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

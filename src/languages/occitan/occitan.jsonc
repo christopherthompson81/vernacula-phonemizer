@@ -1,7 +1,7 @@
 // Native canonical-IPA data manifest for Occitan (oc) — occitan / lenga d'òc, Occitano-Romance (Gallo-Romance) of
-// southern France (~200k). Targets LANGUEDOCIEN (the central reference standard). espeak-independent, beyond-espeak.
+// southern France (~200k). Targets LANGUEDOCIEN (the central reference standard).
 // Signature: final unstressed ⟨a⟩→[ɔ], unstressed ⟨o⟩→[u], ⟨u⟩→[y]; ⟨lh⟩→ʎ, ⟨nh⟩→ɲ, ⟨ch⟩→t͡ʃ. Spirantization +
-// stress folded. Engine: occitan.ts. See docs/investigations/oc_native_bringup_investigation.md.
+// stress folded. Engine: occitan.ts.
 {
     "language": "oc",
     "name": "Occitan (occitan)",

@@ -1,14 +1,14 @@
-// Native canonical-IPA data manifest for Welsh (cy / Cymraeg) — espeak-independent, Northern-leaning (u/clear-y
+// Native canonical-IPA data manifest for Welsh (cy / Cymraeg) — Northern-leaning (u/clear-y
 // → ɨ). Welsh orthography is highly phonemic: the g2p resolves digraphs (ch dd ff ng ll ph rh th) and vowel
 // clusters (the diphthongs carry a superscript offglide) then applies PENULTIMATE stress and the vowel-LENGTH
 // rule. The y-vowel is the one subtlety: obscure ə (non-final syllables + function-word clitics) vs clear ɨ
-// (final syllable) — espeak's raw --ipa mislabels these ʌ/ø; the canonical values are ə/ɨ. ALGORITHMS in
-// g2p.ts (scan) / welsh.ts (stress + length + assembly). See docs/investigations/cy_bringup_investigation.md.
+// (final syllable): the canonical values are ə/ɨ, not ʌ/ø. ALGORITHMS in
+// g2p.ts (scan) / welsh.ts (stress + length + assembly).
 {
     "language": "cy",
     "name": "Welsh (Cymraeg)",
     "script": "Latin",
-    "provenance": "Authored from Welsh orthography + phonology (the standard penultimate-stress + vowel-length system), bootstrapped from the espeak-ng-portable cy canonical phonemize() output over the 50k corpus (its ə/ɨ y-vowel relabel, NOT the raw --ipa ʌ/ø). wikipron cym (NW, dialect-matched) is the independent cross-check.",
+    "provenance": "Authored from Welsh orthography + phonology (the standard penultimate-stress + vowel-length system), bootstrapped over a 50k frequency corpus with the ə/ɨ y-vowel values (not ʌ/ø). wikipron cym (NW, dialect-matched) is the independent cross-check.",
 
     // Digraphs (resolved before single letters). ⟨si⟩+V → ʃ is handled in code (needs a following vowel).
     "digraphs": {

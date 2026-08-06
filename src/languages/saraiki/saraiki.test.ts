@@ -5,7 +5,7 @@ import { phonemizeWordRules } from "./saraiki.ts";
 // (rule-only, default-[ə] for the unwritten abjad short vowels + weight stress); they line up with the wikipron
 // skr_arab referee on the recoverable consonant + long-vowel backbone. The point of this suite is to lock the
 // engine's distinctive Saraiki behaviors: the FOUR implosives, retained voiced aspirates + aspirated sonorants
-// (no Punjabi tonogenesis), and the retroflex nasal ݨ→ɳ. See docs/investigations/skr_native_bringup_investigation.md.
+// (no Punjabi tonogenesis), and the retroflex nasal ݨ→ɳ.
 describe("Saraiki (skr) g2p — diagnostic gold", () => {
     for (const [word, ipa] of [
         ["اٻاسی", "əɓˈaːsiː"], // ٻ → ɓ  bilabial implosive

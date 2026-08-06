@@ -2,8 +2,7 @@
  * Kazakh (kk) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * Kazakh's DEFINING rule (measured over the kk_hr FLEURS corpus — see the investigation doc) is the
- * CASE SUFFIX after a digit, exactly as trap 14 (agreement cannot be applied to digits) predicted:
+ * Kazakh's DEFINING rule (measured over the kk_hr FLEURS corpus — * CASE SUFFIX after a digit, exactly as trap 14 (agreement cannot be applied to digits) predicted:
  *   `N-ші`/`N-шы` ordinals ×16 (190-шы, 60-шы, 19-шы, 1-ші)
  *   bare numbers with a CASE suffix ×36 (200-ге, 8-ден, 80-нен, 60-тан, 1000-нан, 11:00-ден, 9:30-да,
  *     160 км/сағ-қа)

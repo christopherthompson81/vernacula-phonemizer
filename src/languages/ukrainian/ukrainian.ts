@@ -1,5 +1,5 @@
 /**
- * Native Ukrainian / українська (uk) text phonemizer — canonical IPA, espeak-independent. East Slavic, Cyrillic.
+ * Native Ukrainian / українська (uk) text phonemizer — canonical IPA. East Slavic, Cyrillic.
  * Ukrainian has NO vowel reduction (akanye), so — unlike Russian — no stress dictionary is needed for vowel
  * quality: a left-to-right scan with fixed vowel values. The work is PALATALISATION (a consonant → Cʲ before ь,
  * і, or an iotated vowel я/ю/є/ї) + the iotated vowels ([j]+V word-initially / after a vowel / after an

@@ -8,7 +8,7 @@
  * (segmental IPA + a superscript pitch-number tone, narrow Nanchang diacritics kept verbatim), so the front-end is
  * the shared Han-dict engine (hanDictIpa.ts): greedy longest-match segmentation, superscript-tone → Chao contour
  * letters (SURFACE tone after a sandhi arrow ⁻), Han numerals. SINGLE authoritative source (Wiktionary/kaikki
- * Nanchang Sinological-IPA), no independent referee → 🔷. See docs/investigations/gan_native_bringup_investigation.md.
+ * Nanchang Sinological-IPA), no independent referee → 🔷.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

@@ -1,5 +1,5 @@
 // Bashkir / Башҡорт теле (ba) — Kipchak Turkic (sibling of Tatar), CYRILLIC. Referee: kaikki Bashkir (HUMAN, Wiktionary,
-// 2395 pairs, native + Russian loans). Single-source-family. See docs/investigations/ba_native_bringup_investigation.md.
+// 2395 pairs, native + Russian loans). Single-source-family.
 {
     "language": "ba", "name": "Bashkir (Башҡорт теле)", "script": "Cyrillic",
     "provenance": "Authored Cyrillic→IPA scan: interdentals ҫ→θ ҙ→ð, written uvulars ҡ→q ғ→ʁ, the Bashkir vowel shift (и→e о→ʊ у→o~u е→ɪ ы→ɯ ө→ʏ ү→ɵ ә→æ), iotation, final stress. Validated against kaikki Bashkir.",

@@ -8,7 +8,7 @@
  * which are not Malay's. This file runs as a PRE-PASS in front of it (see malay.ts) and claims only the
  * shapes where the ms_my corpus measurably disagrees with Indonesian. Everything else is deliberately left
  * to the inherited layer: a Malay file that re-states Indonesian for no measured reason is worse than the
- * alias. What was NOT duplicated, and why, is in docs/investigations/ms_normalization_investigation.md.
+ * alias. What was NOT duplicated, and why, is in.
  *
  * THE INVERSION THAT SHAPES THIS FILE. Indonesian groups thousands with a PERIOD and writes the decimal
  * COMMA (9.000 / 1,5). The ms_my corpus — translated from the English FLEURS set — uses the ENGLISH

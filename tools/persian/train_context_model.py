@@ -15,7 +15,7 @@ RESULT (2026-07-20, GPU, 15 epochs, 1203 held-out tokens):
   SENTENCE model (CONTEXT):    89.0%   (+18.8pp)
 The context model DECISIVELY beats word-level — the homograph/ezafe ceiling IS broken by sentence context.
 Caveats: IN-DOMAIN (Shahnameh), silver IPA, archaic vocabulary → a demonstration of the context benefit, not a
-shipped model; transfer to modern Persian needs modern contextualized data. See the fa restoration investigation doc.
+shipped model; transfer to modern Persian needs modern contextualized data.
 """
 import torch, torch.nn as nn, torch.nn.functional as F
 random.seed(1234); torch.manual_seed(1234)

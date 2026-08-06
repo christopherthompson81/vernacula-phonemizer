@@ -11,7 +11,7 @@ homograph-exclusion (PHASE B) is finalize-lexicon.ts (it needs our TS g2p). See 
 
 Deps (offline eval, never shipped): phonikud + phonikud-onnx (CC-BY, model thewh1teagle/phonikud-onnx) and
 renikud-onnx (CC-BY, git+github.com/thewh1teagle/renikud#subdirectory=renikud-onnx, model thewh1teagle/renikud).
-Wordlist: a frequency-ranked modern wordlist (e.g. the Hebrew Wikipedia dump via espeak-ng-portable tools/corpus).
+Wordlist: a frequency-ranked modern wordlist (e.g. the Hebrew Wikipedia dump via tools/corpus).
 
   python tools/hebrew/build-lexicon.py WORDLIST.txt PHONIKUD.onnx RENIKUD.onnx > /tmp/lexicon-candidates.tsv
   npx tsx tools/hebrew/finalize-lexicon.ts /tmp/lexicon-candidates.tsv > src/languages/hebrew/he-lexicon.tsv

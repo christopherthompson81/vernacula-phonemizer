@@ -17,7 +17,6 @@
  *
  *   npx tsx tools/persian/tajik-align.ts   # prints the fa-gold validation
  *
- * See docs/investigations/fa_shortvowel_restoration_investigation.md.
  */
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";

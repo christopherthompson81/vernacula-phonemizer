@@ -7,7 +7,6 @@ import { phonemizeWord, createGeorgian } from "../src/languages/georgian/georgia
 // 99.8% folded / 100% symbol against the wikipron kat_geor_narrow referee (HUMAN, 20,894 words) — the folds strip the
 // referee's narrow allophony (ä/e̞/o̞, dark ɫ, the ვ labialisation ʷ, ⟨ყ⟩'s [χʼ]). Signatures: the three-way
 // VOICED / ASPIRATED / EJECTIVE stop contrast, uvulars ღ=ʁ / ხ=χ / ყ=qʼ, and 5 vowels a ɛ i ɔ u. Stress not marked.
-// See docs/investigations/ka_bringup_investigation.md.
 describe("Georgian canonical IPA — greedy g2p (Mkhedruli, three-way stop contrast)", () => {
     test("the three-way stop contrast VOICED / ASPIRATED / EJECTIVE", () => {
         expect(phonemizeWord("ბუ")).toBe("bu"); // ⟨ბ⟩ voiced b

@@ -4,11 +4,10 @@ The central mapping of every data artifact in this repo to its upstream source a
 license**, grouped by license family. Per-file detail lives in the `*.PROVENANCE.md` sidecars and
 data-file headers; this document is the index and the licensing structure.
 
-**Posture doc:** `docs/adr/0001-data-licensing-facts-posture.md` — the project is an original
-work (not an espeak derivative); own work is MIT; third-party-derived data keeps its parent
-license, declared per file; mechanical fact tables and (where applicable) model weights follow
-the facts-not-expression line (*Feist*; *CCH Canadian* 2004 SCC 13) under the conditions stated
-there. Older provenance files' "ADR-0014" citations resolve to ADR-0001.
+**Posture doc:** `LICENCING/licencing_posture.md` — the project is an original work; own work is
+MIT; third-party-derived data keeps its parent license, declared per file; mechanical fact tables
+and (where applicable) model weights follow the facts-not-expression line (*Feist*;
+*CCH Canadian* 2004 SCC 13) under the conditions stated there.
 
 **Shipped vs tools-only:** "shipped" = under `src/`, loaded by the runtime. "tools-only" = under
 `tools/` (referees, collectors, experiments); excluded from any npm package but still distributed
@@ -37,10 +36,10 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `swedish/accent-stress.tsv` | NST Swedish (abstract accent/stress features only) | CC0 |
 | `persian/fa-tagger.int8.onnx`, `fa-pin-vowels.tsv` | HomoRich (MahtaFetrat, HF) | CC0 |
 | `hebrew/he-tagger.int8.onnx` (majority tier) | Nakdimon pre-modern PD subset | PD (modern/wiki slice → §3) |
-| `vietnamese/rhymes.tsv` | exhaustive closed-class rhyme inventory | Facts (ADR-0001) |
-| `mandarin/syllable-ipa.tsv` | exhaustive pinyin-syllable inventory; row-level corroboration vs epitran (MIT) | Facts (ADR-0001) |
-| `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable; own word selection) | Facts (ADR-0001; sidecar) |
-| `irish/lexicon.tsv` | mechanically-generated pronunciation facts over an external frequency wordlist (owner determination in header: not an espeak-1.52 derivative) | Facts (ADR-0001) |
+| `vietnamese/rhymes.tsv` | exhaustive closed-class rhyme inventory | Facts |
+| `mandarin/syllable-ipa.tsv` | exhaustive pinyin-syllable inventory; row-level corroboration vs epitran (MIT) | Facts |
+| `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable; own word selection) | Facts |
+| `irish/lexicon.tsv` | mechanically-generated pronunciation facts over an external frequency wordlist | Facts |
 | `amharic/fidel.tsv`, `tigrinya/fidel.tsv` | hand-authored Ge'ez syllabary tables | Own work |
 | `french/supplement.tsv` | 3 cleanroom pronunciations for words Lexique lacks (celsius, confer, kilowatt), authored here; deliberately NOT merged into `french/lexicon.tsv`, which is CC-BY-SA (§3) — keeping them separate keeps them MIT-safe and keeps Lexique re-importable | Own work |
 | tools: ASJP/Lexibank Swadesh referees (`mto`, `nog`, `smj`) | Lexibank | CC0 |
@@ -95,7 +94,7 @@ data): `languages/perso-arabic/riderDiacritizer.onnx`; `persian/fa-vowel-restore
 `persian/fa-context-restorer.*.onnx` (Tajik component); `french/fr-g2p-tagger.int8.onnx`
 (Lexique). These cannot ship in an MIT-only package; they are fenced like the data.
 
-**Models with share-alike training inputs under the training-as-use posture (ADR-0001):**
+**Models with share-alike training inputs under the training-as-use posture:**
 `arabic/diacritizer.onnx` (arwiki silver), `arabic/diacritizer-egy.onnx` (arzwiki silver + MIT
 dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `english/pos-model.json`
 (UD-EWT CC-BY-SA 4.0; sidecar). Flagged individually in NOTICE with their training-data statements.
@@ -111,7 +110,7 @@ derives from it and it is not wired into referee-eval).
 ## 4. Copyleft — fenced under GPL
 
 1. **`arabic/diacritization.tsv`** — upstream compilation (Tashkeela) is tagged GPL-2.0; the
-   underlying classical texts are PD. Shipped under the ADR-0001 facts posture (mechanical
+   underlying classical texts are PD. Shipped under the facts posture (mechanical
    frequency table; no selection/arrangement reproduced), Tashkeela credited in NOTICE with the
    posture statement. Fallback if the posture is ever revisited: regenerate from PD vocalized
    sources directly.
@@ -143,4 +142,4 @@ derives from it and it is not wired into referee-eval).
 ---
 *Maintenance rules: any new data file or model lands with a `*.PROVENANCE.md` or a header naming
 source + license, plus a row here. This map describes the CURRENT state only — resolved questions
-are removed, not narrated; history lives in git and the investigation docs.*
+are removed, not narrated; history lives in git.*

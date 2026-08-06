@@ -10,7 +10,6 @@
  * Emphatics are pharyngealised (dot-below): ḍ→dˤ, ṭ→tˤ, ṣ→sˤ, ẓ→zˤ, ṛ→rˤ; pharyngeals ḥ→ħ, ɛ→ʕ; uvulars ɣ→ʁ~ɣ,
  * x→χ, q; ⟨c⟩→ʃ, ⟨j⟩→ʒ, ⟨y⟩→j, ⟨e⟩→ə. Validated against wikipron shi_latn + kaikki Tashelhit (both Wiktionary →
  * 🔷 single-source-family, correlated). Vowel-lessness / syllabic consonants are left as-is (Berber allows them).
- * See docs/investigations/shi_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";

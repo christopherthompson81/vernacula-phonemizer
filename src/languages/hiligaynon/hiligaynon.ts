@@ -1,11 +1,11 @@
 /**
- * Native Hiligaynon / Ilonggo (hil) text phonemizer — canonical IPA, espeak-independent. A shallow near-phonemic
+ * Native Hiligaynon / Ilonggo (hil) text phonemizer — canonical IPA. A shallow near-phonemic
  * Philippine (Western Bisayan) Latin orthography → rule transliterator, the Cebuano/Tagalog pattern: the trigraphs
  * ⟨gui/gue/qui/que⟩ and digraph ⟨ng⟩→ŋ first, then single letters, with a WORD-INITIAL glottal stop [ʔ] before a
  * vowel, a HIATUS glottal between two vowels (daan→daʔan), and a hyphen → [ʔ]. Stress defaults to PENULTIMATE
  * (phonemic but unwritten, folded by the referee eval). Shares the Bisayan core with Cebuano; the deltas are the
  * Spanish-loan letters ⟨j⟩→[h] and ⟨f⟩→[p] (see hiligaynon.jsonc). The unwritten word-final glottal (mango→[maŋoʔ])
- * is phonemic but lexical → a deferred residual. Cardinal numbers use the NATIVE Austronesian set (numbers.ts). See docs/investigations/hil_native_bringup_investigation.md.
+ * is phonemic but lexical → a deferred residual. Cardinal numbers use the NATIVE Austronesian set (numbers.ts).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

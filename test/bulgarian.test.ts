@@ -7,7 +7,7 @@ import { normalizeBulgarian } from "../src/languages/bulgarian/normalize.ts";
 // left-to-right g2p + phonotactic post-rules, validated against TWO independent human referees (wikipron
 // bul_cyrl_narrow 99.6% + kaikki bg 99.5%). Stress is unwritten (lexical) and Bulgarian vowel reduction is
 // stress-conditioned, so the full phonemic vowels are emitted (а→a, о→ɔ, у→u, ъ→ɤ) and reduction is folded in the
-// eval. See docs/investigations/bg_native_bringup_investigation.md.
+// eval.
 describe("Bulgarian canonical IPA — phonemic g2p + phonotactics", () => {
     test("final devoicing + regressive voicing assimilation", () => {
         expect(phonemizeWord("град")).toBe("ɡrat"); // final д → t

@@ -1,8 +1,8 @@
 /**
- * Somali (so) phonemizer — Af-Soomaali (1972 Latin orthography), canonical IPA, espeak-independent. Rule-based
+ * Somali (so) phonemizer — Af-Soomaali (1972 Latin orthography), canonical IPA. Rule-based
  * g2p (g2p.ts). Somali prominence is a grammatical pitch-ACCENT (tone), not lexical stress, and it is unwritten,
  * so no stress/tone mark is emitted (segmental output only — tone deferred). text() tokenizes words / numbers /
- * punctuation. See docs/investigations/so_native_bringup_investigation.md.
+ * punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

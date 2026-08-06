@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Tajik / тоҷикӣ (tg) — Cyrillic, espeak-independent.
+// Native canonical-IPA data manifest for Tajik / тоҷикӣ (tg) — Cyrillic.
 // Tajik is a variety of Persian (Iranian, SW) written in a CYRILLIC alphabet that — unlike the Perso-Arabic
 // abjad our `fa` uses — WRITES ALL ITS VOWELS. So this is a near-phonemic left-to-right Cyrillic scan with NO
 // short-vowel restoration (the wall that keeps fa 🟡) — the Kurmanji-vs-Persian advantage.
@@ -8,8 +8,7 @@
 //
 // CANONICAL values are adjudicated from three referees (wikipron tgk_cyrl broad + narrow, both human/Wiktionary;
 // epitran tgk-Cyrl, programmatic): о→ɔ (broad writes o), а→a (narrow ä, epitran æ), ӯ→ɵ, х→χ (fold x), в→v (narrow
-// writes the allophonic w), ҳ→h (narrow's intervocalic ɦ), к→k (narrow marks aspiration kʰ). See
-// docs/investigations/tg_native_bringup_investigation.md.
+// writes the allophonic w), ҳ→h (narrow's intervocalic ɦ), к→k (narrow marks aspiration kʰ).
 {
     "language": "tg",
     "name": "Tajik",

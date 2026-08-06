@@ -4,7 +4,7 @@
  * against. This is the committed, reusable replacement for the throwaway per-language scrapers each bring-up was
  * hand-rolling (mos, ki, …).
  *
- * ── Ported lesson from tools/corpus (espeak-ng-portable): BATCH + CACHE, don't sequential-live-API ─────────────
+ * ── The corpus lesson: BATCH + CACHE, don't sequential-live-API ───────────────────────────────────────────────
  * The naive scraper does one `titles=<word>&prop=revisions` request PER word (1062 words → 1062 round-trips,
  * minutes). Instead this uses the MediaWiki GENERATOR: `generator=categorymembers` + `prop=revisions` fetches up to
  * 50 pages' wikitext IN ONE request, so ki's 1062 members come back in ~22 round-trips (seconds). Each raw batch

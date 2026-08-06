@@ -1,5 +1,5 @@
 /**
- * Native Odia / ଓଡ଼ିଆ (or) text phonemizer — canonical IPA, espeak-independent. Odia is an Eastern Indo-Aryan
+ * Native Odia / ଓଡ଼ିଆ (or) text phonemizer — canonical IPA. Odia is an Eastern Indo-Aryan
  * Brahmic abugida read by the generic engine (core/abugida.ts), like the Dravidian trio (Telugu/Kannada/Malayalam):
  * NO inherent-vowel deletion — every akshara is pronounced, and the inherent vowel is /ɔ/ (ଘର→ɡʱɔɾɔ), like Bengali.
  * odia.ts adds only the light post-processing: geminate → length, ଳ୍ଳ → [ɭː], and

@@ -1,11 +1,11 @@
-// Native canonical-IPA data manifest for Latvian (lv) — latviešu, Baltic (~1.5M), espeak-independent. Sister of
+// Native canonical-IPA data manifest for Latvian (lv) — latviešu, Baltic (~1.5M). Sister of
 // Lithuanian (lt) but a SEPARATE engine: Latvian writes what Lithuanian leaves contextual/prosodic — palatalization
 // is WRITTEN (ģ ķ ļ ņ), vowel LENGTH is WRITTEN (macrons ā ē ī ū), and STRESS is FIXED on the first syllable. So the
 // engine is a direct grapheme→IPA scan + diphthong/offglide handling + voicing, with first-syllable stress emitted.
 //   g2p.ts     — the scan (digraphs, native ⟨o⟩→[uɔ̯], falling diphthongs, palatals), then voicing/devoicing
 //   latvian.ts — first-syllable stress, the tokenizer, numbers
 //   numbers.ts — the cardinal compositor (tens+units space-separated; -padsmit teens)
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/lv_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA.
 {
     "language": "lv",
     "name": "Latvian (latviešu)",

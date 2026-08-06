@@ -1,5 +1,5 @@
 // Abkhaz / аҧсуа бызшәа (ab) — NORTHWEST CAUCASIAN, Cyrillic. Huge consonant inventory + 2 vowels. Referees: wikipron
-// abk_cyrl broad (primary, 205) + kaikki Abkhaz (secondary). See docs/investigations/ab_native_bringup_investigation.md.
+// abk_cyrl broad (primary, 205) + kaikki Abkhaz (secondary).
 {
     "language": "ab", "name": "Abkhaz (аҧсуа бызшәа)", "script": "Cyrillic",
     "provenance": "Authored Cyrillic base+modifier scan for the NW-Caucasian consonant system: ь palatalizes, ә labializes, ' pharyngealizes; three-way voiced/aspirated/ejective stops+affricates; 2 vowels а→a ы→ə. Validated vs wikipron + kaikki.",

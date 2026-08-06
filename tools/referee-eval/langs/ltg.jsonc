@@ -1,5 +1,5 @@
 // Latgalian / latgaļu volūda (ltg) — EASTERN BALTIC, sibling of Latvian, Latin. Referees: wikipron ltg_latn narrow
-// (primary, 488) + kaikki Latgalian (secondary, 516). Both HUMAN (Wiktionary). See docs/investigations/ltg_native_bringup_investigation.md.
+// (primary, 488) + kaikki Latgalian (secondary, 516). Both HUMAN (Wiktionary).
 {
     "language": "ltg", "name": "Latgalian (latgaļu volūda)", "script": "Latin",
     "provenance": "Authored Latin→IPA scan: the ⟨i⟩/⟨y⟩ soft/hard palatalization (front ⟨i ī e ē⟩ palatalize; ⟨y⟩→ɨ doesn't), macron length, háček sibilants č š ž, written palatals ļ ņ ģ ķ ř, Baltic voicing assimilation. Validated vs wikipron + kaikki.",

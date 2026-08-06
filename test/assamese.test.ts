@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Bengali engine (abugida scan + inherent-vowel deletion) with Assamese phoneme values + two disabled Bengali
 // rules (heightHarmony, medialSchwaDeletion). The DEFINING divergences from Bengali: sibilants শ/ষ/স→[x] (velar
 // fricative), deaffrication চ/ছ→[s] জ/ঝ→[z], the alveolar merger (no retroflex/dental split), ৰ→[ɹ], ৱ→[w].
-// Validated ~72.2% vs wikipron asm + 69.2% vs kaikki. See docs/investigations/as_native_bringup_investigation.md.
+// Validated ~72.2% vs wikipron asm + 69.2% vs kaikki.
 describe("Assamese canonical IPA", () => {
     test("sibilants শ/ষ/স → [x] (the Assamese signature)", () => {
         expect(phonemizeWord("অসম")).toBe("ɔxɔm"); // স → x

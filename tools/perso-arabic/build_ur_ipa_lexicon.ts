@@ -10,7 +10,7 @@
  *   3. the existing harakat lexicon (src/languages/urdu/lexicon.tsv), converted to IPA via our g2p, for the tail.
  * Canonical-convention normalisation: strip stress; drop the redundant vowel-nasalisation our Hindi source emits
  * before a full nasal consonant (ə̃nd̪→ənd̪), matching our own g2p (which nasalises via the n→ŋ/m rule, not the vowel)
- * and wikipron; g→ɡ. See docs/investigations/ur_tagger_investigation.md.
+ * and wikipron; g→ɡ.
  *   npx tsx tools/perso-arabic/build_ur_ipa_lexicon.ts   # → src/languages/urdu/lexicon-ipa.tsv
  */
 import { readFileSync, writeFileSync } from "node:fs";

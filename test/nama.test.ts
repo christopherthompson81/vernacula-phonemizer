@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Nama / Khoekhoe (naq) — Khoekhoegowab, a Khoe-Kwadi language; the fleet's FIRST CLICK
 // language. The hallmark is the four click TYPES ⟨ǀ⟩ (dental), ⟨ǁ⟩ (lateral), ⟨ǂ⟩ (palatal), ⟨ǃ⟩ (alveolar) × the
 // ACCOMPANIMENTS: bare→[ᵑ̊_ˀ] (glottalised nasal), ⟨g⟩→[ᵏ_] (tenuis), ⟨kh⟩→[ᵏ_ʰ] (aspirated), ⟨h⟩→[ᵑ̊_ʰ], ⟨n⟩→[ᵑ_]
-// (voiced nasal). Referee: English Wiktionary "Khoekhoe terms with IPA pronunciation". See docs/investigations/naq_native_bringup_investigation.md.
+// (voiced nasal). Referee: English Wiktionary "Khoekhoe terms with IPA pronunciation".
 describe("Nama (Khoekhoe) canonical IPA", () => {
     test("★ THE CLICK SYSTEM — the dental ⟨ǀ⟩ series × 5 accompaniments", () => {
         expect(phonemizeWord("ǀ")).toBe("ᵑ̊ǀˀ"); // BARE click → the glottalised nasal click

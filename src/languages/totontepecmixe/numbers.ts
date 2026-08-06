@@ -3,7 +3,7 @@
  *
  * ★ CRAWFORD DOES NOT COVER NUMERALS. This engine's g2p is authored from Crawford, *Totontepec Mixe
  * Phonotagmemics* (SIL, 1963), but that is a PHONOLOGY — it has no numeral list, and
- * docs/investigations/mto_native_bringup_investigation.md accordingly lists "numbers" among the deferred
+ * accordingly lists "numbers" among the deferred
  * items. So the numeral DATA here cannot be cited to Crawford and is not.
  *
  * SOURCE: "Of Languages and Numbers", *Totontepec Mixe numbers*

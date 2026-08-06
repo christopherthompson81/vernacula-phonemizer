@@ -3,11 +3,11 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/mongolian/mongolian.ts";
 
-// Canonical-IPA goldens for Standard Khalkha Mongolian (mn), Cyrillic, espeak-independent. Cyrillic Khalkha is a
+// Canonical-IPA goldens for Standard Khalkha Mongolian (mn), Cyrillic. Cyrillic Khalkha is a
 // DEEP orthography: only the first-syllable vowel is realised full; a non-initial SHORT vowel reduces to ə or deletes
 // word-finally (final vowel drop + epenthesis into the resulting cluster). Signatures: the ASPIRATED-vs-UNASPIRATED
 // stop system (б=p т=tʰ), л→ɮ (voiced lateral fricative), back-harmony г→ɢ/х→χ, final н→ŋ, final в→f devoicing,
-// doubled vowels → long. See docs/investigations/mn_native_bringup_investigation.md.
+// doubled vowels → long.
 describe("Mongolian (Khalkha) canonical IPA", () => {
     test("consonants: б→p, д→t, т→tʰ, л→ɮ, final н→ŋ, harmony г→ɢ/х→χ", () => {
         expect(phonemizeWord("Монгол")).toBe("mɔŋɢʊɮ"); // back-harmony ɢ, dark ɮ, non-initial о→ʊ

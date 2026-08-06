@@ -1,10 +1,10 @@
 /**
  * Kabuverdianu / kriolu (kea) phonemizer — Cape Verdean Creole (Portuguese-lexified), canonical IPA,
- * espeak-independent. Written in the ALUPEC/AK unified orthography (a standardized PHONEMIC alphabet), so this is a
+ * Written in the ALUPEC/AK unified orthography (a standardized PHONEMIC alphabet), so this is a
  * greedy grapheme scan (digraphs ⟨dj tx nh lh rr⟩ first) + Portuguese-creole NASALIZATION (a coda ⟨n/m⟩ nasalizes the
  * preceding vowel; the nasal is [ŋ] before a velar, else absorbed) + STRESS (a written accent marks the stressed
  * syllable, else penultimate). Targets the Santiago (Sotavento/Badiu) variety. No machine referee exists → authored
- * from ALUPEC + the 7 kaikki IPA anchors. See docs/investigations/kea_native_bringup_investigation.md.
+ * from ALUPEC + the 7 kaikki IPA anchors.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

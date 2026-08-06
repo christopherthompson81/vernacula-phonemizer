@@ -1,9 +1,8 @@
 /**
- * Native English text phonemizer — canonical IPA, espeak-independent. English is irregular, so pronunciation
+ * Native English text phonemizer — canonical IPA. English is irregular, so pronunciation
  * comes from a CMUdict-derived lexicon + a cleanroom n-gram OOV G2P + a POS perceptron for heteronyms
- * (no rules, no espeak). Resolution order per word: heteronym (POS-gated, incl. -s plural) → flat lexicon →
- * possessive 's → OOV G2P. Numbers become words (numberToWords) resolved through the same path. There is NO
- * fallback — an OOV word is G2P'd natively, never handed to espeak.
+ * (no rules). Resolution order per word: heteronym (POS-gated, incl. -s plural) → flat lexicon →
+ * possessive 's → OOV G2P. Numbers become words (numberToWords) resolved through the same path.
  *
  * NOTE: this stage emits per-word CITATION stress + clause-pause marks. Sentence-level de-accenting (the
  * `look over there` → ˌoᶷvɚ demotion) is a following pass (intonation.ts).
@@ -163,7 +162,7 @@ export class EnglishPhonemizer {
         let over = this.lexicon.get(lookupKey);
         if (over === undefined) {
             // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
-            // so contractions/loanwords G2P their letters). No espeak fallback.
+            // so contractions/loanwords G2P their letters).
             const g2pKey = lookupKey.replace(/'/g, "");
             over =
                 oovOverride?.(g2pKey) ??

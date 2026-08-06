@@ -1,5 +1,5 @@
 /**
- * Slovak (sk) grapheme→phoneme engine — West Slavic, Latin script, canonical IPA, espeak-independent. Slovak is
+ * Slovak (sk) grapheme→phoneme engine — West Slavic, Latin script, canonical IPA. Slovak is
  * fairly phonemic; the context systems handled here:
  *   - palatalisation: d/t/n/l → ɟ/c/ɲ/ʎ before i, í and the i-diphthongs ⟨ia ie iu⟩ (deti→ɟeci, list→ʎist). y/ý are
  *     HARD (milý→miliː). Palatalisation before ⟨e⟩ is LEXICAL (deti vs ten) → not modelled by rule.
@@ -9,7 +9,7 @@
  *     ⟨v⟩ is a LIMITED target — it devoices to [f] before a voiceless obstruent (vták→ftaːk) but stays [v] word-finally
  *     (stav→stav, unlike Czech v→f) and before voiced/sonorant (dievča→ɟɪ̯evt͡ʃa); v never triggers. ⟨h⟩=ɦ pairs with ⟨ch⟩=x.
  * Vowels short a e i/y o u → a e i ɔ u, long á é í/ý ó ú → aː eː iː ɔː uː, ⟨ä⟩ → æ. Stress (first-syllable) is
- * applied in slovak.ts. See docs/investigations/sk_native_bringup_investigation.md.
+ * applied in slovak.ts.
  */
 import { MANIFEST } from "./manifest.ts";
 

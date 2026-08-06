@@ -1,5 +1,5 @@
 /**
- * Native Romanian (ro) text phonemizer — canonical IPA, espeak-independent.
+ * Native Romanian (ro) text phonemizer — canonical IPA.
  *
  * Romanian is Eastern Romance with a shallow, near-phonemic Latin orthography (diacritics ă â î ș ț). The letter
  * maps live in romanian.jsonc; the CONTEXTUAL phonology lives here:
@@ -13,7 +13,7 @@
  *   • word-initial ⟨e⟩→je in the copula/pronoun class (este→jeste, el→jel).
  *
  * Stress is UNWRITTEN and lexically unpredictable in Romanian; the broad referee marks none, so it is DEFERRED (no
- * ˈ emitted). Referee: wikipron ron_latn broad (HUMAN, 9285). See docs/investigations/ro_native_bringup_investigation.md.
+ * ˈ emitted). Referee: wikipron ron_latn broad (HUMAN, 9285).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,5 +1,5 @@
 /**
- * Native Telugu (te) text phonemizer — canonical IPA, espeak-independent. Telugu is a Dravidian Brahmic abugida
+ * Native Telugu (te) text phonemizer — canonical IPA. Telugu is a Dravidian Brahmic abugida
  * read by the generic engine (core/abugida.ts); unlike Hindi there is NO inherent-vowel deletion (every akshara
  * is pronounced — inherent /a/). telugu.ts adds only the light post-processing: geminate → length, and the
  * word-final anusvara ం realized as [m] (అంకురం → aŋkuɾam). First-syllable stress (weak; the backbone folds it).

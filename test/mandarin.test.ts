@@ -4,8 +4,8 @@ import { phonemize } from "../src/index.ts";
 
 // Canonical-IPA goldens for Mandarin (cmn) — Phase 1, the pinyin input path. Segmental values come from the
 // project's converged cmn engine (validated vs wikipron + epitran); tones are Chao contour letters at the
-// syllable end, with third-tone sandhi. Anchor values match the espeak-ng-portable canonical integration
-// test (zhong1 guo2, ni3 hao3), with tone placement regularized to syllable-final.
+// syllable end, with third-tone sandhi. Anchor values (zhong1 guo2, ni3 hao3) carry tone placement
+// regularized to syllable-final.
 describe("mandarin canonical IPA — pinyin path", () => {
     test("monosyllables: initials + finals + tones", () => {
         expect(phonemize("zhong1", "cmn")).toBe("ʈ͡ʂoŋ˥˥"); // zh → ʈ͡ʂ, tone 1 = ˥˥

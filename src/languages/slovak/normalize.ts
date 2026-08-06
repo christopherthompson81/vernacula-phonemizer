@@ -4,7 +4,7 @@
  *
  * MEASURED over the sk_sk FLEURS corpus (1,719 unique cased utterances, column 3). Every count below was
  * taken from that column and every rule exists because the engine produced something wrong on it — the
- * verbatim before-readings are in docs/investigations/sk_normalization_investigation.md, Run 4.
+ * verbatim before-readings are in, Run 4.
  *
  *   `N.` ordinals ×66 (see steps 7–8) — read as a CARDINAL plus a spurious phrase break:
  *       `V 16. storočí` → [v ʃˈestnaːsc . stˈɔrɔt͡ʃiː], `na 190. mieste` → [nˈa stˈɔ ɟˈevæɟɟˌesɪ̯at . mˈɪ̯esce].

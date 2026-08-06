@@ -1,11 +1,10 @@
 /**
  * Uyghur / ئۇيغۇرچە (ug) phonemizer — Turkic (Karluk), the Uyghur Arabic alphabet (Ereb Yéziqi), canonical IPA,
- * espeak-independent. ~11M speakers (Xinjiang). The Uyghur Arabic script is a FULL PHONEMIC ALPHABET (it writes
+ * ~11M speakers (Xinjiang). The Uyghur Arabic script is a FULL PHONEMIC ALPHABET (it writes
  * all 8 vowels), so — unlike the Arabic/Persian/Urdu abjads — there is NO short-vowel restoration: a plain greedy
  * letter→IPA scan suffices, plus one code rule (word-final obstruent devoicing). Signatures: ا→ɑ (back a), ە→ɛ,
  * the hamza ئ→ʔ (glottal onset), ⟨چ ج⟩→t͡ʃ d͡ʒ, ⟨غ⟩→ʁ, ⟨خ⟩→χ, ⟨ق⟩→q, ⟨ڭ⟩→ŋ. Non-tonal (Turkic).
  * Cardinal numbers use the TURKIC compositor (units + round-ten words juxtaposed, no connective).
- * See docs/investigations/ug_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

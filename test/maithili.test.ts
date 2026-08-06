@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/maithili/maithili.ts";
 // Hindi engine with the Maithili divergences: SHORT e/o (incl. the dedicated short-e/short-o letters ऎ/ऒ), the
 // diphthongs ऐ→[əɪ] / औ→[əʊ], inherent /ə/. Maithili's signature — a cluster schwa Hindi deletes → Maithili
 // reduces to ULTRASHORT [ᵊ] — is a narrow detail (folded in the eval). 🔷 single-source: only referee is
-// wikipron mai_deva narrow (167, human), measured at 84.4% folded. See docs/investigations/mai_native_bringup_investigation.md.
+// wikipron mai_deva narrow (167, human), measured at 84.4% folded.
 describe("Maithili canonical IPA", () => {
     test("short e/o — incl. the dedicated ऎ (U+090E) / ऒ (U+0912) letters", () => {
         expect(phonemizeWord("एकरा")).toBe("ˈekɾaː"); // ए short e (Hindi would be eː)

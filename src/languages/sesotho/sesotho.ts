@@ -1,11 +1,10 @@
 /**
  * Native Sesotho / Southern Sotho (st) phonemizer — Bantu (Sotho-Tswana), Latin orthography, canonical IPA,
- * espeak-independent. A pure greedy longest-match scan over the grapheme table (sesotho.jsonc), the same engine as
+ * A pure greedy longest-match scan over the grapheme table (sesotho.jsonc), the same engine as
  * the sibling Setswana — Sesotho is open CV, so no coda/syllabification logic. Authored beyond any machine referee
  * (kaikki Sotho = 3 words) from standard Sesotho phonology. Signatures: EJECTIVE plain stops ⟨p t k⟩→[pʼ tʼ kʼ]
  * (vs aspirated ⟨ph th kh⟩), ⟨ts⟩→[t͡sʼ], ⟨hl⟩→[ɬ], ⟨a⟩→[ɑ]. Vowel height unwritten (default mid); tone deferred. Cardinal numbers: numbers.ts (citation stems + the
  * motso/metso compound construction).
- * See docs/investigations/st_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Shona / chiShona (sn) — Bantu (S10, Zezuru-based Standard Shona), the
-// Latin orthography, espeak-independent. A greedy longest-match scan: multi-letter graphemes (whistled sibilants,
+// Latin orthography. A greedy longest-match scan: multi-letter graphemes (whistled sibilants,
 // prenasalized clusters, breathy digraphs, affricates) before single letters. Shona syllables are open CV with a
 // prenasalized cluster as a single onset unit, so no coda/syllabification logic is needed — a pure left-to-right
 // longest-match over the grapheme table suffices. Signature features (grammar-confirmed, Wikipedia Shona phonology):
@@ -9,7 +9,6 @@
 //   • BREATHY ⟨mh nh vh zh⟩ → m̤ n̤ v̤ ʒ; ⟨v⟩→ʋ (approximant).
 // Tone (H/L) is unwritten and DEFERRED; there is no vowel-length/stress marking. Referee: epitran sna-Latn
 // (programmatic, INDEPENDENT — the only substantial Shona source; kaikki has <25 IPA entries) → 🔷 single-source.
-// See docs/investigations/sn_native_bringup_investigation.md.
 {
     "language": "sn",
     "name": "Shona (chiShona)",

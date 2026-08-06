@@ -9,7 +9,7 @@ import { phonemizeWord } from "../src/languages/awadhi/awadhi.ts";
 // Evolution of Awadhi (1937, Lakhimpuri dialect), quoting Bloch, the Eastern-Indo-Aryan phonologies are
 // "perceptibly identical" and distinguished chiefly by GRAMMAR — so this gold targets the DOCUMENTED points of
 // segmental divergence, the axis where a blind Hindi clone would be wrong: the SIBILANT MERGER श/ष→[s] (Saksena
-// §87) and the INTERVOCALIC FLAP ड→[ɽ] except after a nasal. See docs/investigations/awa_native_bringup_investigation.md.
+// §87) and the INTERVOCALIC FLAP ड→[ɽ] except after a nasal.
 describe("Awadhi canonical IPA (Saksena-documented divergences vs Hindi)", () => {
     test("sibilant merger श/ष → [s] (Saksena §87: no /ʃ/ in Awadhi)", () => {
         expect(phonemizeWord("शहर")).toBe("sˈəɦəɾ"); // 'city' — श→s (Hindi: ʃ)

@@ -5,9 +5,8 @@ import { phonemizeWord } from "../src/languages/wu/wu.ts";
 
 // Canonical-IPA goldens for Wu Chinese / Shanghainese (wuu) — the third Sinitic language. Han → Wugniu (zaonhe
 // romanization, rime-wugniu dict.tsv) with greedy longest-match segmentation → IPA (initial + final + Chao
-// tone). Ported from the espeak-ng-portable authoring. No independent referee exists (no wikipron/epitran wuu);
-// these values are the wuuwiki inline-IPA-validated adjudicated gold. Segmental + the left-prominent register
-// sandhi. See docs/investigations/wu_native_bringup_investigation.md.
+// tone). No independent referee exists (no wikipron/epitran wuu); these values are the wuuwiki
+// inline-IPA-validated adjudicated gold. Segmental + the left-prominent register sandhi.
 describe("wu (Shanghainese) canonical IPA", () => {
     test("three-way obstruent contrast + register tone (the Wu signature)", () => {
         // voiceless-unaspirated (yin ˥˧) / aspirated (yin) / VOICED (yang ˩˧) — the retained MC voicing.

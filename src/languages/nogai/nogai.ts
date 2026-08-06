@@ -1,6 +1,6 @@
 /**
  * Nogai (nog) phonemizer — ногай тили, Kipchak Turkic (Kipchak-Nogai / South-Kipchak, close to Kazakh/Karakalpak),
- * CYRILLIC script, ~90k (North Caucasus + Turkey). Canonical IPA, espeak-independent. A near-deterministic Cyrillic
+ * CYRILLIC script, ~90k (North Caucasus + Turkey). Canonical IPA. A near-deterministic Cyrillic
  * grapheme scan — Nogai's orthography WRITES the uvulars (⟨къ⟩→[q], ⟨гъ⟩→[ʁ]) and the velar nasal (⟨нъ⟩→[ŋ]) as
  * DIGRAPHS, so — unlike Kazakh/Tatar, which infer ⟨к⟩→[q] from vowel harmony — ⟨к⟩ is always [k] and ⟨г⟩ always [ɡ]
  * (the Bashkir pattern, no harmony inference needed).
@@ -14,7 +14,7 @@
  *
  * REFEREE-LIMITED (the st/umb/bal mold): Nogai has essentially no orthographic-IPA attestation (1 kaikki word,
  * туькен→tyken; no wikipron/epitran). The g2p is authored from documented Kipchak-Nogai phonology and corroborated
- * (coarsely, inventory-only) by the ASJP Nogai Swadesh list. See docs/investigations/nog_native_bringup_investigation.md.
+ * (coarsely, inventory-only) by the ASJP Nogai Swadesh list.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

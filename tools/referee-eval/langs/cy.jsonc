@@ -10,7 +10,7 @@
         }
     ],
     "segmentJoin": true,
-    "secondaryGap": "wikipron cym SW (South Wales) is a DIFFERENT dialect (i/e for our ɨ, -e for final -au) so not an independent corroborator of the Northern target; the espeak-ng-portable cy engine is the bootstrap oracle but is not espeak-independent.",
+    "secondaryGap": "wikipron cym SW (South Wales) is a DIFFERENT dialect (i/e for our ɨ, -e for final -au) so not an independent corroborator of the Northern target.",
     "folds": [
         {
             "pattern": "ᶤ",

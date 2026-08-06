@@ -1,5 +1,5 @@
 /**
- * Native Nama / Khoekhoe (naq) text phonemizer — Khoekhoegowab, canonical IPA, espeak-independent. Nama (Khoekhoe/
+ * Native Nama / Khoekhoe (naq) text phonemizer — Khoekhoegowab, canonical IPA. Nama (Khoekhoe/
  * Damara) is a KHOE-KWADI language of Namibia/South Africa/Botswana (~250k) — the fleet's FIRST CLICK language. The
  * Khoekhoegowab Latin orthography writes the four click TYPES with the Unicode click letters and their ACCOMPANIMENT
  * (efflux) with a following letter; a greedy scan handles them.
@@ -15,7 +15,7 @@
  *
  * 🔷 thin, largely REFERENCE-PARITY: the referee (English Wiktionary "Khoekhoe terms with IPA pronunciation", 46) is
  * dominated by the click-letter DEFINITIONS (the orthography→IPA spec we implement), with a few real words as an
- * independent check. See docs/investigations/naq_native_bringup_investigation.md.
+ * independent check.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

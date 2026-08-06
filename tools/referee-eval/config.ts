@@ -1,6 +1,6 @@
 /**
  * Per-language referee-eval configuration. Each language lists its INDEPENDENT referees (epitran / wikipron /
- * Wiktionary — none derived from espeak) and the fold classes that neutralise NOTATION or documented ALLOPHONIC
+ * Wiktionary) and the fold classes that neutralise NOTATION or documented ALLOPHONIC
  * differences so the SEGMENTAL BACKBONE can be compared. Every fold must be justified: it either (a) folds a
  * layer we render richer than the referee (tone, length, depressor, ejective) or (b) folds a genuinely
  * allophonic / conventional difference. Whatever remains after folding is the real linguistic signal — a
@@ -21,7 +21,7 @@ export interface Referee {
 }
 
 export interface RefLang {
-    /** Independent (non-espeak) referees, primary first. */
+    /** Independent referees, primary first. */
     referees: Referee[];
     /** When no independent SECONDARY source is wired — an explicit, recorded gap, not a silent omission. */
     secondaryGap?: string;

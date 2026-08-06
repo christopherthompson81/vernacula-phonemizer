@@ -2,8 +2,7 @@
  * Dutch (Northern Standard) grapheme→phoneme engine. Latin, largely rule-governed. Handles the open/closed
  * syllable vowel-length system (tense in an open syllable, lax in a closed one), the Dutch diphthongs
  * (ij/ei→ɛi̯, ui→œy̯, ou/au→ɑu̯, eu→øː, oe→u), the g→ɣ (onset) / x (coda) split, sch→sx, w→ʋ, h→ɦ, and final
- * devoicing (hond→hɔnt, dag→dɑx). Stress is added downstream (dutch.ts). See
- * docs/investigations/nl_native_bringup_investigation.md.
+ * devoicing (hond→hɔnt, dag→dɑx). Stress is added downstream (dutch.ts).
  */
 import { MANIFEST } from "./manifest.ts";
 

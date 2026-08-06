@@ -2,7 +2,7 @@
 // SECONDARY: wikipron tuk_latn_broad (HUMAN, 424, per-phone spaces joined — same Wiktionary tradition, correlated).
 // TERTIARY: epitran tuk-Latn (INDEPENDENT rule-based G2P) — NAIVE on the interdentals (s/z not θ/ð), so we CORRECT
 // it there (the Shona pattern). The HALLMARK: ⟨s⟩→[θ], ⟨z⟩→[ð]. Phonemic vowel LENGTH is UNWRITTEN → not emitted
-// (BACKBONE strips the referees' ː). See docs/investigations/tk_native_bringup_investigation.md.
+// (BACKBONE strips the referees' ː).
 {
     "language": "tk", "name": "Turkmen (Türkmençe)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (the interdentals ⟨s⟩→θ ⟨z⟩→ð; 9 vowels ⟨ä⟩→æ ⟨ö⟩→ø ⟨ü⟩→y ⟨y⟩→ɯ; ⟨ç⟩→t͡ʃ ⟨j⟩→d͡ʒ ⟨ž⟩→ʒ ⟨ş⟩→ʃ ⟨ň⟩→ŋ ⟨ý⟩→j ⟨h⟩→x ⟨w⟩→w ⟨r⟩→ɾ; final stress; unwritten length folded) from Standard Turkmen phonology; validated against kaikki + wikipron + epitran.",

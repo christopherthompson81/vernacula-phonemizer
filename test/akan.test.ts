@@ -9,7 +9,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // ŋʷ), Glide Formation (boa→bwa), coda-nasal + Labial Nasalization (Paster 2010), and ATR harmony. TONE (H/L) and
 // vowel nasality are lexical (unwritten) → carried by a mined lexicon on the SHIPPED phonemizeWord (Chao letters
 // H→˥/L→˩); phonemizeWordRules is the tone-free segmental path. Authored from Dolphyne (1988)/Paster (2010),
-// anchored on kaikki. See docs/investigations/ak_native_bringup_investigation.md.
+// anchored on kaikki.
 describe("Akan (Twi) canonical IPA", () => {
     test("palatal digraph series ⟨ky gy hy ny⟩", () => {
         expect(phonemizeWordRules("kyerɛ")).toBe("t͡ɕɪrɛ"); // ky → t͡ɕ; ⟨e⟩ → [ɪ] via ATR harmony (−ATR word)

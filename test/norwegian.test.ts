@@ -7,7 +7,7 @@ import { normalizeNorwegian } from "../src/languages/norwegian/normalize.ts";
 // (nb-lexicon.tsv, National-Library CC0, ~38k common forms → 98% of real-text tokens, with correct LEXICAL stress)
 // → a rule g2p fallback (phonemizeWordRules: complementary vowel length picks quality, front-vowel softening,
 // retroflexes, silent-d, unstressed ⟨e⟩→ə). Shipped path (lexicon→rules) = 90.4% frequency-weighted vs kaikki
-// (non-circular, NST≠Wiktionary); rules-only floor 63.4%. See docs/investigations/nb_native_bringup_investigation.md.
+// (non-circular, NST≠Wiktionary); rules-only floor 63.4%.
 describe("Norwegian Bokmål canonical IPA", () => {
     test("rule engine — vowel quality via complementary length: ⟨o⟩→uː, ⟨u⟩→ʉː, ⟨å⟩→oː", () => {
         expect(phonemizeWordRules("bok")).toBe("ˈbuːk"); // o → uː (long, open)

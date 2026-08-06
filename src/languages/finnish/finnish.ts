@@ -1,5 +1,5 @@
 /**
- * Finnish (fi) phonemizer — Standard Finnish (yleiskieli), the Latin orthography, canonical IPA, espeak-independent.
+ * Finnish (fi) phonemizer — Standard Finnish (yleiskieli), the Latin orthography, canonical IPA.
  * The national language of Finland (~5.4M). Finnish is one of the most PHONEMICALLY TRANSPARENT orthographies in the
  * world (very nearly one grapheme ↔ one phoneme), so this is a greedy longest-match scan over the grapheme table
  * (manifest.ts) with three code rules: CONSONANT GEMINATION — a doubled consonant → geminate [Cː] (kukka→kukːɑ,
@@ -8,7 +8,6 @@
  * diphthongs mark the 2nd vowel as the non-syllabic offglide (au→ɑu̯, uo→uo̯) in the table; ⟨v⟩=ʋ (approximant),
  * ⟨r⟩=r (trill), ⟨j⟩=j. Consonant GRADATION is already spelled out in the orthography → no gradation logic needed.
  * Fixed word-initial primary stress is predictable + unwritten → not emitted (folded in the referee eval).
- * See docs/investigations/fi_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

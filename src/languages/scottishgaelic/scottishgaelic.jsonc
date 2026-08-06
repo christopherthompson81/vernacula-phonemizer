@@ -1,11 +1,10 @@
 // Native canonical-IPA data manifest for Scottish Gaelic / Gàidhlig (gd) — Goidelic Celtic (sibling of Irish),
-// ~57k (Scotland), Latin. espeak-independent. Shares Irish's BROAD/SLENDER axis ("caol le caol": a consonant is
+// ~57k (Scotland), Latin. Shares Irish's BROAD/SLENDER axis ("caol le caol": a consonant is
 // velarized [Cˠ]/dental next to a/o/u, palatalized [Cʲ] next to e/i), but with the Scottish hallmarks:
 //   - PRE-ASPIRATION: medial/final fortis ⟨p t c⟩ → [hp ht̪ xk] (mac→maxk); initial → aspirated [pʰ t̪ʰ kʰ].
 //   - ⟨b d g⟩ → the UNASPIRATED lenis [p t̪ k] (NOT Irish's voiced [bˠ d̪ˠ ɡ]).
 //   - ⟨ao⟩ → [ɯː] (the signature vowel), ⟨eu⟩→[iaː].
-// ALGORITHMS in scottishgaelic.ts (scan + broad/slender + pre-aspiration + stress). See
-// docs/investigations/gd_native_bringup_investigation.md.
+// ALGORITHMS in scottishgaelic.ts (scan + broad/slender + pre-aspiration + stress).
 {
     "language": "gd",
     "name": "Scottish Gaelic (Gàidhlig)",

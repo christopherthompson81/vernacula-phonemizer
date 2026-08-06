@@ -1,10 +1,10 @@
 /**
- * Native Swahili / Kiswahili (sw) text phonemizer — canonical IPA, espeak-independent. Bantu, but with a highly
+ * Native Swahili / Kiswahili (sw) text phonemizer — canonical IPA. Bantu, but with a highly
  * PHONEMIC shallow Latin orthography and (unusually) NO tone — just regular penultimate stress. A rule-based g2p
  * (the id/tl pattern) with Swahili's distinctive segments: the plain voiced stops are IMPLOSIVES (b→ɓ d→ɗ j→ʄ
  * g→ɠ), PRENASALIZED stops are one segment with a homorganic superscript nasal (mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ),
  * ⟨ng'⟩→ŋ is DISTINCT from ⟨ng⟩→ᵑɡ, a nasal before another consonant is SYLLABIC (mtu→m̩tu, nchi→n̩t͡ʃi), and the
- * Arabic-loan fricatives dh/th/gh/kh→ð/θ/ɣ/x. Vowels [ɑ ɛ i ɔ u]. See docs/investigations/sw_native_bringup_investigation.md.
+ * Arabic-loan fricatives dh/th/gh/kh→ð/θ/ɣ/x. Vowels [ɑ ɛ i ɔ u].
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

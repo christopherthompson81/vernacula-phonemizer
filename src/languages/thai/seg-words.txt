@@ -1,5 +1,5 @@
 # Thai word-segmentation set (ICU thaidict Unicode-DFS-2016 + PyThaiNLP CC0 + curated extra).
-# 64808 words; maxLen 20. One per line. Ported from espeak-ng-portable data/th/seg-words*.
+# 64808 words; maxLen 20. One per line.
 กก
 กกกอด
 กกขนาก

@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Korean (ko) — Seoul standard, espeak-independent.
+// Native canonical-IPA data manifest for Korean (ko) — Seoul standard.
 // This file IS the hand-authored language DATA: the jamo inventories (Unicode decomposition order), the
 // onset / vowel / coda letter→IPA tables, the coda-cluster resolution table, the 7-way neutralisation and
 // sandhi class maps, clause punctuation, and the Sino-Korean number words. The ALGORITHMS that read it stay
@@ -10,7 +10,6 @@
 // The lexical-tensification exceptions stay in the sibling tensification.tsv (append-heavy wikipron data).
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA (contributes ̚ unreleased, ͈ tense).
-// See docs/investigations/ko_native_bringup_investigation.md.
 {
     "language": "ko",
     "name": "Korean (Seoul standard)",

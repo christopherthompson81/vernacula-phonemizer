@@ -13,7 +13,7 @@
 // single-canonical es/ca referees, NOT directly comparable to es 92.5%. What the merge does NOT fold, and IS real
 // signal: the consonant skeleton (x/j→ʃ, nh→ŋ, nasal velarization, ch/ll/ñ), the 7-vowel handling, the glides, and
 // segment count — none vary across the merged alternates, so a match there is genuine. The open-mids ɛ/ɔ (lexical +
-// unmarked) are folded explicitly below; symbol accuracy is the partial-credit cross-check. See docs/investigations/gl_native_bringup_investigation.md.
+// unmarked) are folded explicitly below; symbol accuracy is the partial-credit cross-check.
 {
     "language": "gl", "name": "Galician (galego)", "script": "Latin",
     "provenance": "Authored rule-based g2p (Spanish-shaped Ibero-Romance scan + Galician deltas: x/j→ʃ, g→ɡ, nh→ŋ, nasal velarization) from Galician phonology; validated against the wikipron glg_latn_broad referee (8,091 headwords, dialect variants merged per-headword — see the header note on what that folds).",

@@ -4,11 +4,10 @@
 // complementary-length rule, retroflex assimilation, silent-d, first-syllable stress, number composition) stay in the
 // sibling code (g2p.ts, norwegian.ts, numbers.ts). SEGMENTAL + first-syllable stress; PITCH ACCENT (tonelag 1 vs 2,
 // the referee's ² / circumflex) is lexical + unwritten → DEFERRED (folded in the eval, like Swedish).
-// See docs/investigations/nb_native_bringup_investigation.md.
 {
     "language": "nb",
     "name": "Norwegian Bokmål (Urban East Norwegian)",
-    "provenance": "Cleanroom rule-based g2p authored from Urban East Norwegian phonology (Kristoffersen, The Phonology of Norwegian). espeak-independent; the referee (wikipron nob) is a fallible cross-check.",
+    "provenance": "Cleanroom rule-based g2p authored from Urban East Norwegian phonology (Kristoffersen, The Phonology of Norwegian); the referee (wikipron nob) is a fallible cross-check.",
 
     "convention": {
         "vowelLength": "complementary: a STRESSED syllable is long-V + short-C (bok→buːk) or short-V + long-C (takk→tɑkː). Nine long/short pairs; ⟨o⟩→[uː]/[ʊ] (the o/u split spelling underdetermines), ⟨u⟩→[ʉː]/[ʉ], ⟨å⟩→[oː]/[ɔ].",

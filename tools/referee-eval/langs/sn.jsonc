@@ -1,4 +1,4 @@
-// Shona (sn) — Bantu (S10, Standard Zezuru), Latin orthography, AUTHORED beyond-espeak. Referee: epitran sna-Latn
+// Shona (sn) — Bantu (S10, Standard Zezuru), Latin orthography, AUTHORED. Referee: epitran sna-Latn
 // (programmatic, INDEPENDENT — the ONLY substantial Shona pronunciation source; wikipron has no Shona and kaikki
 // has <25 IPA entries). A single independent source → 🔷 single-source. epitran is a rule g2p, so this measures
 // rule-agreement (a regression guard), not a human gold. The folds neutralise epitran's documented naiveties so

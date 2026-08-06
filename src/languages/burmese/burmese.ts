@@ -1,11 +1,11 @@
 /**
- * Native Burmese / မြန်မာ (my) text phonemizer — canonical IPA, espeak-independent. Sino-Tibetan, the Mon-Burmese
+ * Native Burmese / မြန်မာ (my) text phonemizer — canonical IPA. Sino-Tibetan, the Mon-Burmese
  * abugida (Unicode U+1000–U+109F), stored in LOGICAL order (consonant-first). The g2p scans each syllable:
  * base consonant → optional MEDIALS (ျ/ြ palatalise velars ကျ→t͡ɕ + the velar nasal ငြ→ɲ, ွ adds -w- / rounds the
  * inherent rime to ʊ, ှ devoices sonorants မှ→m̥) → the RIME, whose vowel quality depends on the CODA — open, NASAL
  * (killed ŋ/ɲ/n/m or anusvara ံ → ɴ) or CHECKED (killed k/s/t/p → ʔ): -i open→i, nasal→ɪɴ, checked→ɪʔ. Then the
  * TONE (orthographic, rule-derived: low ˨ / high ˥˩ / creaky ˥ˀ, checked = the ʔ coda) is inserted after the
- * nucleus. DEFERRED: intervocalic voicing sandhi (lexical) + minor-syllable reduction. See docs/investigations/my_native_bringup_investigation.md.
+ * nucleus. DEFERRED: intervocalic voicing sandhi (lexical) + minor-syllable reduction.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink, emitUnclaimed } from "../../core/clauses.ts";

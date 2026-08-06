@@ -5,7 +5,7 @@
 // second referee (wikipron awa 0 lines, no kaikki Awadhi, epitran ships none; a machine Hindi-clone would be
 // circular), so this stays single-source, not multiply-verified. NOT ⛔: Saksena is a real Awadhi-specific source.
 // 93.9% folded (notation folds only). Coverage (LOCAL, permissive corpus): 99.99% of 48.6k awawiki types
-// (frequency-ranked via espeak-ng-portable tools/corpus/build.ts --wiki awa) and 100% of 6.6k Awadhi Shabd-Kosh
+// (frequency-ranked via tools/corpus/build.ts --wiki awa) and 100% of 6.6k Awadhi Shabd-Kosh
 // headwords — real Awadhi vocabulary, not Hindi cognates. The Awadhi Shabd-Kosh (rights-restricted) is used
 // LOCALLY only, to confirm that a Devanagari spelling is a real attested Awadhi word.
 {

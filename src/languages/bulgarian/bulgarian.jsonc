@@ -1,11 +1,10 @@
-// Native canonical-IPA definition for Bulgarian / български (bg) — South Slavic, Cyrillic, espeak-independent.
+// Native canonical-IPA definition for Bulgarian / български (bg) — South Slavic, Cyrillic.
 // Bulgarian is "clean" (highly phonemic), so a left-to-right grapheme scan + a few well-defined post-rules
 // (palatalisation, dark-l, final devoicing, regressive voicing assimilation, sibilant assimilation) recovers the
 // pronunciation. The one thing the orthography does NOT write is STRESS (lexical, unpredictable) — and Bulgarian
 // vowel reduction is stress-conditioned (unstressed /a ɤ/→[ɐ], /ɔ u/→[o]). So we emit the FULL phonemic vowels
 // (а→a, о→ɔ, у→u, ъ→ɤ) and the reduction neutralisation is folded in the referee eval (it can't be placed without
 // stress). Validated against TWO independent human referees: wikipron bul_cyrl_narrow (99.5%) + kaikki bg (98.9%).
-// See docs/investigations/bg_native_bringup_investigation.md.
 {
     "language": "bg",
     "name": "Bulgarian",

@@ -2,8 +2,7 @@
 // Quechua human set (English Wiktionary, 171 headwords after filtering loans/affix-stubs). Near-phonemic 3-vowel
 // orthography with an overt 3-way stop series (plain / aspirated ⟨h⟩ / ejective ⟨'⟩). Wiktionary writes the phonemic
 // /i u/ PHONETICALLY as [ɪ ʊ] and marks syllable dots + penultimate stress (both folded/stripped). epitran quy-Latn
-// is an independent programmatic SECONDARY (fold-heavy — it emits English-ish lax [æ ɪ ʊ]). See
-// docs/investigations/qu_native_bringup_investigation.md.
+// is an independent programmatic SECONDARY (fold-heavy — it emits English-ish lax [æ ɪ ʊ]).
 {
     "language": "qu", "name": "Quechua (Runasimi)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (3 vowels ⟨a i u⟩; plain/aspirated/ejective stops ⟨p t k q ch⟩ · ⟨ph th kh qh chh⟩ · ⟨p' t' k' q' ch'⟩; uvular ⟨q⟩; ⟨ll⟩→ʎ ⟨ñ⟩→ɲ ⟨r⟩→ɾ; penultimate stress) from Southern Quechua phonology; validated against the kaikki Quechua human referee.",

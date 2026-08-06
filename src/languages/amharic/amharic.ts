@@ -1,10 +1,10 @@
 /**
- * Native Amharic / አማርኛ (am) text phonemizer — canonical IPA, espeak-independent. Ethiopian Semitic, written in
+ * Native Amharic / አማርኛ (am) text phonemizer — canonical IPA. Ethiopian Semitic, written in
  * the Ge'ez/Fidäl SYLLABARY-abugida: each codepoint is a whole CV syllable (the vowel is baked into the glyph),
  * so the g2p is a flat lookup (fidel.tsv, one Ethiopic codepoint → its CV) rather than a Brahmic matra/virama
  * engine. Two features are UNWRITTEN: GEMINATION (phonemic but unmarked — rendered single, folded vs the referee)
  * and the 6th-order vowel [ɨ], which is epenthetic and DELETED word-finally (ሁለት→hulət) and before a vowel.
- * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/investigations/am_native_bringup_investigation.md.
+ * Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

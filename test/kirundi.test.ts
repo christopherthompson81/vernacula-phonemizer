@@ -11,7 +11,6 @@ import { numberToWords as rwNum } from "../src/languages/kinyarwanda/numbers.ts"
 // series, with ONE confident delta — ⟨j⟩→d͡ʒ (the Kirundi voiced palatal affricate, vs Kinyarwanda's fricative
 // ⟨j⟩→ʒ). Scores 91.7% folded vs epitran run-Latn (a crude, partly-circular referee we don't blindly follow —
 // its unverified NC-spirantisation mp→mh/nt→nh/nk→ŋx is left as a residual). Tone (H/L, unwritten) deferred.
-// See docs/investigations/rn_native_bringup_investigation.md.
 describe("Kirundi canonical IPA — near-clone of Kinyarwanda with ⟨j⟩→d͡ʒ", () => {
     test("the ⟨j⟩ delta: Kirundi affricate d͡ʒ (vs Kinyarwanda fricative ʒ)", () => {
         expect(rn("ijana")).toBe("id͡ʒana"); // "hundred" — ⟨j⟩ → d͡ʒ

@@ -1,6 +1,6 @@
 /**
  * Lule Sami / julevsámegiella (smj) phonemizer — Uralic (Saami branch), ~700–2000 speakers (Norway/Sweden), the
- * 1983 Latin orthography, canonical IPA, espeak-independent. The g2p is AUTHORED FROM Ylikoski, "Lule Saami"
+ * 1983 Latin orthography, canonical IPA. The g2p is AUTHORED FROM Ylikoski, "Lule Saami"
  * (a published reference chapter — the bho/Crawford grammar-mined mold). A TRANSPARENT SEGMENTAL grapheme scan.
  *   ★ VOWELS /i u e o ɑ/ + diphthongs ⟨ie uo oa⟩: ⟨a⟩→ɑ, ⟨á⟩→ɑː (the one written length contrast), ⟨å⟩→o,
  *     ⟨æ/ä⟩→æ, loan ⟨y⟩→y ⟨ø/ö⟩→ø. Most vowel LENGTH is UNWRITTEN (not emitted — the deferred residual).
@@ -13,8 +13,7 @@
  *     pre-stop ⟨h⟩ (⟨hk hp ht⟩) = the gradation/pre-aspiration marker. Primary stress = the FIRST syllable.
  * The COMPLEX MORPHOPHONOLOGY (3-grade consonant gradation, epenthetic vowels, labial harmony, 2nd-syllable
  * lengthening, unwritten length) is the DEFERRED residual — not recoverable from a segmental scan (§9.2.5).
- * Referee: the curated ASJP×kaikki join (independent, COARSE — an inventory-level check). See
- * docs/investigations/smj_native_bringup_investigation.md.
+ * Referee: the curated ASJP×kaikki join (independent, COARSE — an inventory-level check).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

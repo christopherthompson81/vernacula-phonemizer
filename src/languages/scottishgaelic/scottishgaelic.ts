@@ -1,6 +1,6 @@
 /**
- * Scottish Gaelic / Gàidhlig (gd) phonemizer — Goidelic Celtic (sibling of Irish), canonical IPA, espeak-
- * independent. A rule-based grapheme scan on the BROAD/SLENDER axis ("caol le caol": a consonant is velarized
+ * Scottish Gaelic / Gàidhlig (gd) phonemizer — Goidelic Celtic (sibling of Irish), canonical IPA.
+ * A rule-based grapheme scan on the BROAD/SLENDER axis ("caol le caol": a consonant is velarized
  * [Cˠ]/dental next to a/o/u, palatalized [Cʲ] next to e/i), self-contained (Irish's engine is lexicon-bound and
  * diverges on the values below, so this isolates it). The Scottish hallmarks:
  *   ★★ PRE-ASPIRATION: a medial/final fortis ⟨p t c⟩ → [hp ht̪ xk] (mac→maxk, cat→kʰaht̪); word-initial → the
@@ -9,7 +9,7 @@
  *   ★ ⟨ao⟩ → [ɯː] (the signature vowel).
  * First-syllable stress (native default); unstressed short vowels reduce to [ə]. The data (broad/slender maps,
  * lenition digraphs, vowel clusters) lives in scottishgaelic.jsonc. Referee: wikipron gla_latn_broad (human,
- * MULTI-DIALECT). See docs/investigations/gd_native_bringup_investigation.md.
+ * MULTI-DIALECT).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

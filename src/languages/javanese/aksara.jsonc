@@ -3,7 +3,7 @@
 // then the shared jv phonology (a→ɔ, laxing, final-k→ʔ, stress) applies. Because the script writes pepet (ə) vs
 // taling (e) with distinct signs — and dental vs retroflex with distinct aksara — it is MORE phonemic than the
 // Latin orthography (it resolves the ⟨e⟩ ambiguity). Murda/mahaprana honorific/Sanskrit letters are pronounced
-// like their base. See docs/investigations/jv_native_bringup_investigation.md.
+// like their base.
 {
     // Base consonants (inherent /a/) + murda (honorific) / mahaprana (Sanskrit) variants → IPA (all pronounced
     // as the base — the "aspirate" mahaprana are NOT aspirated in modern Javanese). t̪/d̪ dental vs ʈ/ɖ retroflex.

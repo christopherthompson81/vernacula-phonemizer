@@ -1,5 +1,5 @@
 /**
- * German morpheme-keyed HOLDOUT experiment (docs/investigations/de_morpheme_keyed_investigation.md).
+ * German morpheme-keyed HOLDOUT experiment.
  * For compound referee words that ARE in the whole-word dicts (in-corpus, known answer), compare three ways of
  * phonemizing them AS IF the whole-word entry were absent (OOV simulation):
  *   (c) whole-word  = current phonemizeWord (uses the whole-word dict) — the in-corpus ceiling

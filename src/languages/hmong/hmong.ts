@@ -7,7 +7,7 @@
  * before /i/; a vowel-initial syllable gets a glottal onset [ʔ]. The rich onset system — prenasalised (np→ᵐb,
  * nts→ᶯd͡ʐ), voiceless sonorants (hm→m̥, hl→l̥), retroflex (r→ʈ, ts→t͡ʂ), uvular (q) — lives in hmong.jsonc.
  * Nasal vowels ⟨ee oo⟩→[ẽ ɒ̃]. Maps derived from the wikipron mww_latn_broad referee (~470 pairs) + the documented
- * RPA tables → 🔷 single-source (thin). See docs/investigations/hmn_native_bringup_investigation.md.
+ * RPA tables → 🔷 single-source (thin).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";

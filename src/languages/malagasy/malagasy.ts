@@ -1,7 +1,6 @@
 /**
- * Malagasy (mg) phonemizer — Standard/Official Malagasy (Merina), canonical IPA, espeak-independent. Rule-based
- * g2p (g2p.ts) + penultimate stress (the Malagasy default). text() tokenizes words / numbers / punctuation. See
- * docs/investigations/mg_native_bringup_investigation.md.
+ * Malagasy (mg) phonemizer — Standard/Official Malagasy (Merina), canonical IPA. Rule-based
+ * g2p (g2p.ts) + penultimate stress (the Malagasy default). text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

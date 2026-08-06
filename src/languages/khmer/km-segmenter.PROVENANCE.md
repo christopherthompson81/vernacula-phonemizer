@@ -184,4 +184,4 @@ Rebuild:
     .venv/bin/python tools/khmer/export_km_segmenter_onnx.py src/languages/khmer
     npx tsx tools/khmer/eval_km_segmenter.mts <km-paragraphs.txt> 3000
 
-See `docs/investigations/km_word_segmentation_investigation.md`.
+

@@ -9,8 +9,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // AUTHORED from Montgomery-Anderson, *A Reference Grammar of Oklahoma*. The syllabary is a SHALLOW PHONEMIC
 // SKELETON — it marks no tone, length, aspiration, glottal stop or intrusive-h — so these goldens are the
 // SEGMENTAL melody (obstruents phonemically VOICELESS: aspiration-not-voicing). Both referees (wikipron
-// chr_cher_broad + kaikki) corroborate at ~91% folded / ~97% symbol. See
-// docs/investigations/chr_native_bringup_investigation.md.
+// chr_cher_broad + kaikki) corroborate at ~91% folded / ~97% symbol.
 describe("Cherokee (ᏣᎳᎩ) canonical IPA", () => {
     test("core words", () => {
         expect(phonemizeWord("ᏣᎳᎩ")).toBe("t͡salaki"); // 'Cherokee' — Ꮳtsa Ꮃla Ꭹgi; ⟨ts⟩=[t͡s], g-series=[k]

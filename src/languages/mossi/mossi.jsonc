@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Mossi / Mooré (mos) — Niger-Congo GUR (Oti-Volta), the Latin (Burkinabé)
-// orthography, espeak-independent. The largest language of Burkina Faso (~8M) and the FIRST Gur language in the
+// orthography. The largest language of Burkina Faso (~8M) and the FIRST Gur language in the
 // fleet. A greedy longest-match scan (mossi.ts) with one code rule: CONSONANT GEMINATION (a doubled consonant →
 // Cː: yelle→jélːé). Referee: en.wiktionary Moore (Wiktionary, HUMAN). Signatures:
 //   • ATR-ish 9-vowel system with dedicated letters — ⟨ɛ⟩=ɛ, ⟨ɩ⟩=ɪ, ⟨ʋ⟩=ʊ (alongside plain e i o u a); ⟨o⟩=o
@@ -8,7 +8,7 @@
 //   • NASAL vowels = TILDE (ã ẽ ĩ õ ũ, + ɛ̃ ɩ̃ ʋ̃); the nasal-long digraph ⟨ãa⟩→ãː (esãase→esãːse).
 //   • ⟨r⟩=ɾ (tap), ⟨y⟩=j, ⟨ny⟩=ɲ, ⟨ŋ⟩=ŋ, ⟨g⟩=ɡ, ⟨ʼ⟩=ʔ (glottal stop).
 // TONE (2-tone H/L) is NOT written in the orthography (it is contextual) → not emitted; the referee's tone marks +
-// syllable dots are folded. Numbers deferred. See docs/investigations/mos_native_bringup_investigation.md.
+// syllable dots are folded. Numbers deferred.
 {
     "language": "mos",
     "name": "Mooré",

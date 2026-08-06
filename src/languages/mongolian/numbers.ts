@@ -4,7 +4,6 @@
  * finally, an ATTRIBUTIVE form when another number word follows (гурав→гурван, хорь→хорин, зуу→зуун). We build the
  * word sequence, then render every word ATTRIBUTIVE except the last (арван тав = 15, хорин таван мянга = 25000). A
  * place word (зуу/мянга/сая/тэрбум) is bare for 1× (100=зуу) and takes a multiplier for ≥2 (200=хоёр зуу).
- * See docs/investigations/mn_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 

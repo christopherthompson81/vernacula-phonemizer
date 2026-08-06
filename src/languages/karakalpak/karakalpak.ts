@@ -1,5 +1,5 @@
 /**
- * Native Karakalpak / qaraqalpaq tili (kaa) text phonemizer — canonical IPA, espeak-independent. Karakalpak is KIPCHAK
+ * Native Karakalpak / qaraqalpaq tili (kaa) text phonemizer — canonical IPA. Karakalpak is KIPCHAK
  * Turkic (closely related to Kazakh), ~600k speakers (Karakalpakstan, NW Uzbekistan). Since the 2016 reform the
  * official script is a LATIN alphabet, and it is highly phonemic → a left-to-right greedy scan over a digraph + letter
  * table with word-final (oxytone) stress.
@@ -11,7 +11,7 @@
  *   harmony inference is needed.) Word-final stress backs up over one onset consonant (basqa→[bɑsˈqɑ]).
  *
  * 🔷 thin single-source (English Wiktionary "Karakalpak terms with IPA pronunciation", ~11 usable Latin pairs — no
- * wikipron/kaikki/epitran kaa). See docs/investigations/kaa_native_bringup_investigation.md.
+ * wikipron/kaikki/epitran kaa).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -7,7 +7,7 @@ import { normalizeSlovak, ordinalWords } from "../src/languages/slovak/normalize
 // Slovak (sk) — West Slavic, Latin, sibling of Czech. Rule g2p (g2p.ts): palatalisation d/t/n/l→ɟ/c/ɲ/ʎ before soft
 // vowels i/í/e (y/ý are HARD), the rising diphthongs ⟨ia ie iu⟩→ɪ̯a/ɪ̯e/ɪ̯u and ⟨ô⟩→u̯ɔ, ⟨ä⟩→æ, syllabic l̩/r̩
 // (long ĺ/ŕ), ⟨v⟩ (onset→f before voiceless, coda stays v), ⟨h⟩=ɦ, ⟨ch⟩=x, gemination, voicing + final devoicing.
-// Scored 89.0% folded on wikipron slk_latn_broad (HUMAN, 15950). See docs/investigations/sk_native_bringup_investigation.md.
+// Scored 89.0% folded on wikipron slk_latn_broad (HUMAN, 15950).
 describe("Slovak canonical IPA — rule g2p (Standard Slovak)", () => {
     test("palatalisation d/t/n/l → ɟ/c/ɲ/ʎ before soft vowels; y/ý stay HARD", () => {
         expect(phonemizeWord("deň")).toBe("ɟˈeɲ"); // d→ɟ before e, ň→ɲ
@@ -63,7 +63,7 @@ describe("Slovak canonical IPA — rule g2p (Standard Slovak)", () => {
 
 // #562 TEXT NORMALIZATION — asserted on normalizeSlovak (text→text) so the pins read as Slovak rather than
 // as IPA, plus phonemize() end-to-end where the point is that the pipeline speaks the result.
-// Evidence and counts: docs/investigations/sk_normalization_investigation.md.
+// Evidence and counts:.
 describe("Slovak text normalization (#562)", () => {
     // TRAP 13 — pin the rule's BRANCHES, not the corpus's instances. The ordinal has three: the 1–19
     // TABLE, the tens+units COMPOSITION, and the BOUNDARY between them (the hundreds/thousands prefix,

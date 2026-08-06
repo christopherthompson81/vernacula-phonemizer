@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Kikuyu / Gĩkũyũ (ki) — Niger-Congo BANTU (E51), the Latin orthography,
-// espeak-independent. The largest language of Kenya (~8M). A pure greedy longest-match scan (kikuyu.ts) — no code
+// The largest language of Kenya (~8M). A pure greedy longest-match scan (kikuyu.ts) — no code
 // rules; the fricativization + prenasalization live entirely in the grapheme table. Referee: en.wiktionary Kikuyu
 // (Wiktionary, HUMAN, 1062 words). Signatures:
 //   • 7-vowel ATR system — the TILDE marks vowel QUALITY, not nasalization: ⟨i⟩=i, ⟨ĩ⟩=e, ⟨e⟩=ɛ, ⟨a⟩=a, ⟨o⟩=ɔ,
@@ -9,7 +9,7 @@
 //     ⟨nt⟩=ⁿt, ⟨nj⟩=ᶮdʑ, ⟨nc⟩=ᶮtɕ, ⟨nk⟩=ᵑk, ⟨ng⟩=ᵑɡ; ⟨ng'⟩=ŋ (velar nasal, distinct from ⟨ng⟩); ⟨ny⟩=ɲ.
 //   • DAHL'S LAW is ORTHOGRAPHIC (baked into the spelling: a dissimilated k is written ⟨g⟩→ɣ) → no live rule.
 // TONE (2-tone H/L + downstep) is NOT written (contextual) → not emitted; the referee's tone marks + downstep ꜜ +
-// syllable dots + optional-parens are folded. CARDINAL NUMBERS: the "numbers" block below (citation forms). See docs/investigations/ki_native_bringup_investigation.md.
+// syllable dots + optional-parens are folded. CARDINAL NUMBERS: the "numbers" block below (citation forms).
 {
     "language": "ki",
     "name": "Kikuyu (Gĩkũyũ)",

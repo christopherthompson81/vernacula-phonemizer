@@ -3,7 +3,7 @@
  * through the g2p, so the IPA stays consistent with the word engine. Tens+units concatenate (dvadsaťjeden = 21);
  * hundreds and thousands are space-separated. Slovak thousand/million agreement: 1 tisíc/milión, 2–4 tisíce/milióny,
  * 5+ tisíc/miliónov (paucal 2–4). Both magnitude nouns are MASCULINE INANIMATE, so the multiplier is dva, not dve —
- * see `count` below for the sources. See docs/investigations/sk_native_bringup_investigation.md.
+ * see `count` below for the sources.
  */
 import { MANIFEST } from "./manifest.ts";
 

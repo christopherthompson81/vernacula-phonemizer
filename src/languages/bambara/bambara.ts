@@ -1,13 +1,13 @@
 /**
- * Bambara / Bamanankan (bm) phonemizer — Mande (Manding), the Latin orthography, canonical IPA,
- * espeak-independent. Mali's principal language (~14M incl. L2). A greedy longest-match scan over the grapheme
+ * Bambara / Bamanankan (bm) phonemizer — Mande (Manding), the Latin orthography, canonical IPA.
+ * Mali's principal language (~14M incl. L2). A greedy longest-match scan over the grapheme
  * table (manifest.ts) with ONE piece of code logic — NASALISATION: a syllable-final ⟨n⟩ (word-final or before a
  * consonant) nasalises the preceding vowel [Ṽ] and is dropped (ban→bã, kunun→kunũ), while an onset ⟨n⟩ before a
  * vowel stays [n] (na→na); a word-initial nasal + C is a prenasal onset (mburu→mburu). Signatures: ⟨c⟩→t͡ʃ,
  * ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ, ⟨ny⟩=⟨ɲ⟩→ɲ, ⟨ŋ⟩→ŋ; 7 oral vowels i e ɛ a ɔ o u. Tone (2-level H/L + downstep) and vowel
  * LENGTH are lexical / unwritten in the standard orthography → DEFERRED (segmental + nasal backbone only). N'Ko
  * (ߒߞߏ) is a 2nd script — bambaraNko.ts transliterates it to Latin then the same g2p runs (identical IPA;
- * N'Ko tone marks drop, the engine being toneless). See docs/investigations/bm_native_bringup_investigation.md.
+ * N'Ko tone marks drop, the engine being toneless).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

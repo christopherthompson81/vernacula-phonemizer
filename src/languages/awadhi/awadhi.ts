@@ -1,5 +1,5 @@
 /**
- * Native Awadhi / अवधी (awa) text phonemizer — canonical IPA, espeak-independent. Eastern Hindi (Indo-Aryan),
+ * Native Awadhi / अवधी (awa) text phonemizer — canonical IPA. Eastern Hindi (Indo-Aryan),
  * Devanagari. Reuses the Hindi Devanagari engine (makeNativeHindi — schwa deletion, weight stress, numbers) with
  * an Awadhi data file whose implemented DIVERGENCES from Hindi are drawn from Baburam Saksena's Evolution of
  * Awadhi (1937): the SIBILANT MERGER श/ष→[s] (data file) and the INTERVOCALIC FLAP ड/ढ→[ɽ]/[ɽʱ] except after a
@@ -13,8 +13,7 @@
  * are "perceptibly identical", distinguished chiefly by GRAMMAR, so the Hindi-shared rules hold BY ATTESTATION.
  * MEASURED: 93.9% folded against a Saksena referee (tools/referee-eval/referees/awa.saksena.tsv, 33 of his own
  * transcribed forms; Devanagari confirmed against the Awadhi Shabd-Kosh corpus). Coverage: 99.99% of 48.6k
- * awawiki types + 100% of 6.6k dictionary headwords phonemize (real Awadhi, not Hindi cognates). See
- * docs/investigations/awa_native_bringup_investigation.md.
+ * awawiki types + 100% of 6.6k dictionary headwords phonemize (real Awadhi, not Hindi cognates).
  */
 /**
  * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED, and three of them are now confirmed for Awadhi

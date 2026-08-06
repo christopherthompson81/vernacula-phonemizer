@@ -1,7 +1,7 @@
 // Native canonical-IPA data manifest for Haitian Creole (ht) — kreyòl ayisyen, a French-lexified creole of Haiti
-// (~12M). espeak-independent. The IPN orthography (Pressoir-Faublas 1979) is PHONEMIC, so the engine is a greedy scan
+// (~12M). The IPN orthography (Pressoir-Faublas 1979) is PHONEMIC, so the engine is a greedy scan
 // + the nasal-vowel rule (⟨an en on⟩→[ã ɛ̃ ɔ̃] syllable-finally). Signatures: ⟨ou⟩→u, ⟨r⟩→ɣ, ⟨j⟩→ʒ, ⟨ch⟩→ʃ, ⟨y⟩→j.
-// Stress not emitted. Engine: haitian.ts. See docs/investigations/ht_native_bringup_investigation.md.
+// Stress not emitted. Engine: haitian.ts.
 {
     "language": "ht",
     "name": "Haitian Creole (kreyòl ayisyen)",

@@ -1,6 +1,6 @@
 /**
  * Faroese (fo) phonemizer — føroyskt, North Germanic (Insular Scandinavian, sibling of Icelandic), Latin + ⟨á í ó
- * ú ý æ ø ð⟩, canonical IPA, espeak-independent. One of the DEEPEST orthographies in the fleet. A greedy grapheme
+ * ú ý æ ø ð⟩, canonical IPA. One of the DEEPEST orthographies in the fleet. A greedy grapheme
  * scan where the CORE rule is that vowel LENGTH conditions vowel QUALITY:
  *   ★ a stressed vowel is LONG (often diphthongal) in an OPEN syllable / before ≤1 consonant, SHORT (monophthong)
  *     before a cluster — a→[ɛaː]/[a], á→[ɔaː]/[ɔ], ó→[ɔuː]/[œ], ú→[ʉuː]/[ʏ], í ý→[ʊiː]/[ʊi], etc.
@@ -8,7 +8,7 @@
  *   ★ ⟨ð⟩ is largely SILENT (etymological) — intervocalic ⟨ð⟩ and ⟨g⟩ delete (aðal→ɛaːal, agað→ɛaːa); ⟨g k⟩ →
  *     the affricate [t͡ʃ] before a front vowel (argi→aɹt͡ʃɪ); retroflex r-clusters ⟨rn rt rd rs rl⟩→[ɻɳ ʈ ɖ ʂ ɭ];
  *     ⟨ll⟩→[tl]; ⟨v⟩→[u] before a consonant (diphthong) / [v] intervocalic; ⟨hv⟩→[kv], ⟨hj⟩→[j].
- * Referee: wikipron fao_latn_broad (human, 3024). See docs/investigations/fo_native_bringup_investigation.md.
+ * Referee: wikipron fao_latn_broad (human, 3024).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

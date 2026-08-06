@@ -9,8 +9,7 @@ import { numberToWords } from "../src/languages/kamba/numbers.ts";
 // hand-adjudicated against the phonology (Omniglot Kikamba chart + Wikipedia / Roberts-Kohno 2000) — the 5
 // independently-verified anchors are called out. Kamba shares Kikuyu's 7-vowel ATR where the TILDE is vowel QUALITY
 // (⟨ĩ⟩=e, ⟨ũ⟩=o), but the consonants DIFFER: ⟨v⟩=β (Kamba spells [β] as ⟨v⟩), ⟨sy⟩=ʃ / ⟨ky⟩=tʃ (a palatal series
-// Kikuyu lacks), NO ⟨c⟩/⟨g⟩=ɣ, ⟨nth⟩=ⁿð. TONE (H/L) is not written → not emitted. See
-// docs/investigations/kam_bringup_investigation.md.
+// Kikuyu lacks), NO ⟨c⟩/⟨g⟩=ɣ, ⟨nth⟩=ⁿð. TONE (H/L) is not written → not emitted.
 describe("Kamba canonical IPA — greedy g2p (Bantu, Kikamba orthography)", () => {
     test("the 5 en.wiktionary anchors (HUMAN IPA, tone + prenasal-notation folded)", () => {
         expect(phonemizeWord("mbiti")).toBe("ᵐbiti"); // hyena — ref mbítí

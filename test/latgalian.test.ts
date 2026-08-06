@@ -5,7 +5,7 @@ import { phonemizeWord, createLatgalian } from "../src/languages/latgalian/latga
 // Canonical-IPA goldens for Latgalian (ltg) — latgaļu volūda, an Eastern Baltic sibling of Latvian. The signature is
 // the ⟨i⟩/⟨y⟩ soft/hard split: front ⟨i ī e ē⟩ palatalize the preceding consonant, but ⟨y⟩→[ɨ] (a hard central vowel
 // Latvian lacks) does NOT. Plus macron length, háček sibilants, written palatals, and Baltic voicing assimilation.
-// Referee: wikipron ltg narrow + kaikki. See docs/investigations/ltg_native_bringup_investigation.md.
+// Referee: wikipron ltg narrow + kaikki.
 describe("Latgalian (latgaļu volūda) canonical IPA", () => {
     test("★ the ⟨i⟩/⟨y⟩ SOFT/HARD split (the signature)", () => {
         expect(phonemizeWord("cylvāks")).toBe("t͡sɨlvaːks"); // 'human' — ⟨y⟩→[ɨ] HARD: ⟨c⟩ is NOT palatalized

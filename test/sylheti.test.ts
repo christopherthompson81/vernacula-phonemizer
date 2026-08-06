@@ -7,7 +7,6 @@ import { phonemizeWord } from "../src/languages/sylheti/sylheti.ts";
 // Bengali-style inherent deletion) + Sylheti spirantisation scores 78.1% folded vs the referee (the folds strip
 // the unwritten HIGH tone + notation). Sylheti's signature is SPIRANTISATION: ꠇ/ꠈ→x, ꠌ/ꠍ→s, ꠎ→z, ꠙ→ɸ, ꠚ→f,
 // ꠡ→ʃ, ꠢ→ɦ. Tone (H/L, developed from lost breathy voice) is unwritten → deferred.
-// See docs/investigations/syl_native_bringup_investigation.md.
 describe("Sylheti canonical IPA — Syloti Nagri abugida + spirantisation", () => {
     test("SPIRANTISATION: ꠇ→x, ꠌ/ꠍ→s, ꠎ→z (the split from Bengali)", () => {
         expect(phonemizeWord("ꠀꠇꠟ")).toBe("axɔl"); // ꠇ (ko) → x

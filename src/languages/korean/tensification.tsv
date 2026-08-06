@@ -1,6 +1,5 @@
 # Korean lexical tensification (경음화) — Hangul word<TAB>0-based syllable indices whose onset tenses.
 # NOT rule-derivable (Sino-Korean §26 needs Hanja etymology); sourced from wikipron kor_hang narrow.
-# Ported from espeak-ng-portable koreanTensLexicon.ts. See docs/investigations/ko_native_bringup_investigation.md.
 가능성	2
 가단조	2
 가라앉다	3

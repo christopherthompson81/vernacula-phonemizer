@@ -1,5 +1,5 @@
 /**
- * Lingala / Lingála (ln) text phonemizer — Bantu (C30B), Latin orthography, canonical IPA, espeak-independent.
+ * Lingala / Lingála (ln) text phonemizer — Bantu (C30B), Latin orthography, canonical IPA.
  * A major lingua franca of the Congo basin (~20M native + ~20-25M L2). Authored from Meeuwis (2020) "A Grammatical
  * Overview of Lingála" (Revised & Extended Edition), which describes the prestige KINSHASA variety.
  *
@@ -13,7 +13,7 @@
  *   • TONE (H/L, meaning-distinctive; §2.4) is marked only in careful writing: acute → H (˥), háček → rising (˩˥),
  *     circumflex → falling (˥˩), unmarked → L (˩). Applied per nucleus. Casual (toneless) input → default L.
  *
- * Referee: kaikki Lingala (small human set, tone-marked) → 🔷 single-source. See docs/investigations/ln_native_bringup_investigation.md.
+ * Referee: kaikki Lingala (small human set, tone-marked) → 🔷 single-source.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

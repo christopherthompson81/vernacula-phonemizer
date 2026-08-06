@@ -29,4 +29,4 @@ simplified Han) resolves too.
 
 **Single-source (🔷):** no independent second referee for Meixian Hakka (no wikipron hak; epitran ships no Hakka),
 so this dict is verified only *within* the Wiktionary tradition — a systematic error shared with that source
-would go undetected. See docs/investigations/hakka_native_bringup_investigation.md.
+would go undetected.

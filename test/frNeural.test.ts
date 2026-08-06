@@ -9,7 +9,7 @@ import { createFrenchTagger } from "../src/languages/french/frenchTagger.ts";
 
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back to
 // the sync Lexique + rule-g2p engine, so the fallback contract is testable everywhere; the retagging assertions run
-// only with the model present. See docs/investigations/fr_neural_oov_investigation.md.
+// only with the model present.
 const haveModel = existsSync(join(import.meta.dirname, "../src/languages/french/fr-g2p-tagger.int8.onnx"));
 
 describe("french neural OOV tagger", () => {

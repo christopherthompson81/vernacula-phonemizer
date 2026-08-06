@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Galician (gl) — galego, Ibero-Romance (~2.4M), espeak-independent.
+// Native canonical-IPA data manifest for Galician (gl) — galego, Ibero-Romance (~2.4M).
 // Galician shares the shallow near-phonemic Ibero-Romance orthography of its sibling Spanish, so the ENGINE reuses
 // the Spanish shape (left-to-right scan + vowel-run glide classifier + spirantization + rule-based stress); this
 // file IS the hand-authored context-free DATA. The Galician-specific grapheme mappings live in g2p.ts (⟨x⟩/⟨j⟩→ʃ,
@@ -6,7 +6,7 @@
 //   g2p.ts      — the scan (digraphs ch/ll/rr/nh/qu/gu, context-sensitive c/z→θ, x/j→ʃ), glide classifier
 //   galician.ts — nasal velarization, spirantization, rule-based stress, tokenizer + function-word de-accenting
 //   numbers.ts  — the mil/cento cardinal compositor (connector "e": trinta e un)
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/gl_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA.
 {
     "language": "gl",
     "name": "Galician (galego)",

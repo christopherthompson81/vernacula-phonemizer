@@ -1,8 +1,11 @@
 /**
- * Native Abkhaz / аҧсуа бызшәа (ab) text phonemizer — canonical IPA, espeak-independent. Abkhaz is a NORTHWEST
- * CAUCASIAN language (~190k, Abkhazia), the fleet's FIRST NW-Caucasian language. It has ONE OF THE LARGEST CONSONANT
- * INVENTORIES in the world (~58, with LABIALIZED, PALATALIZED, PHARYNGEALIZED and EJECTIVE series) and only TWO
- * phonemic vowels (⟨а⟩→[a], ⟨ы⟩→[ə]). The Cyrillic alphabet writes the consonants with base letters + MODIFIER letters:
+ * Native Abkhaz / аҧсуа бызшәа (ab) text phonemizer — canonical IPA
+ *
+ * Abkhaz is a NORTHWEST CAUCASIAN language (~190k, Abkhazia). It has ONE OF THE LARGEST CONSONANT INVENTORIES in the
+ * world (~58, with LABIALIZED, PALATALIZED, PHARYNGEALIZED and EJECTIVE series) and only TWO phonemic vowels (⟨а⟩→[a],
+ * ⟨ы⟩→[ə]).
+ *
+ * The Cyrillic alphabet writes the consonants with base letters + MODIFIER letters:
  *   ★ ⟨ь⟩ PALATALIZES to a dorsal+[ʲ] (гь→[ɡʲ], хь→[χʲ]), ⟨ә⟩ LABIALIZES (гә→[ɡʷ], шә→[ʃʷ]), ⟨'⟩ PHARYNGEALIZES (х'→[χˤ]).
  *   ★ THREE-WAY stops/affricates — voiced / aspirated / ejective: ⟨г қ к⟩→[ɡ kʰ kʼ], ⟨д ҭ т⟩→[d tʰ tʼ],
  *     ⟨б ҧ п⟩→[b pʰ pʼ], ⟨ӡ ц ҵ⟩→[d͡z t͡sʰ t͡sʼ], ⟨џ ч ҷ⟩→[d͡ʐ t͡ʃʰ t͡ʃʼ]; the uvular ⟨ҟ⟩→[qʼ], the pharyngeal ⟨ҳ⟩→[ħ].
@@ -11,7 +14,7 @@
  * 99 = ԥшьынҩажәи зеижә (4×20+19); the NON-HUMAN/abstract class series is used as the bare-numeral citation form.
  *
  * 🔷 well-referenced (wikipron abk_cyrl broad + kaikki Abkhaz) BUT the referee is partly the letter/digraph DEFINITIONS
- * (near reference-parity), and its narrow transcriptions are internally inconsistent. See docs/investigations/ab_native_bringup_investigation.md.
+ * (near reference-parity), and its narrow transcriptions are internally inconsistent.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,8 +1,8 @@
 // Native canonical-IPA data manifest for Madurese / Bhâsa Madhurâ (mad) — Austronesian (Malayo-Polynesian),
-// ~14M speakers (Madura, East Java). The 2008-revision Latin orthography, espeak-independent. Authored from
+// ~14M speakers (Madura, East Java). The 2008-revision Latin orthography. Authored from
 // Davies (2010) "A Grammar of Madurese" + the JIPA Illustration (Misnadin & Kirby 2020), which supplies an
 // INDEPENDENT falsifiable gold (the transcribed 'North Wind and the Sun'). No machine referee exists
-// (no wikipron/epitran/kaikki). See docs/investigations/mad_native_bringup_investigation.md.
+// (no wikipron/epitran/kaikki).
 //
 // The engine is NOT a direct map — Madurese has a signature VOWEL-REGISTER HARMONY plus glide/glottal epenthesis,
 // final devoicing, and geminate length, all handled in madurese.ts:

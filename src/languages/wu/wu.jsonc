@@ -1,9 +1,9 @@
 // Wu Chinese / Shanghainese (wuu) — Wugniu (zaonhe) romanization → canonical IPA. wu.ts reads this file. Each
-// dict reading is ONE syllable = [initial] + final + tone-digit. Ported from the espeak-ng-portable authoring
-// (authoring/wuu/wuu_rules + ph_wuu) — the Shanghainese inventory: a THREE-WAY obstruent contrast (voiceless /
+// dict reading is ONE syllable = [initial] + final + tone-digit. The Shanghainese inventory: a THREE-WAY
+// obstruent contrast (voiceless /
 // aspirated / VOICED b d ɡ z dʑ ʑ v ɦ — the yang register), glottalised yin sonorants (ʔm ʔn ʔl ʔŋ), a checked
 // glottal-stop coda (入声 -q → ʔ), front-rounded ø/y, apical ɿ, and nasalised finals. Tones are Chao contour
-// letters. See docs/investigations/wu_native_bringup_investigation.md.
+// letters.
 {
     "language": "wuu",
     "name": "Wu Chinese (Shanghainese)",

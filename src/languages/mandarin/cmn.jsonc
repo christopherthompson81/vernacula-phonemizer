@@ -3,7 +3,7 @@
 // Pipeline: Han text → segment + Hanzi→pinyin (polyphone-aware) → tone sandhi → pinyin→IPA (Chao tones).
 // The pinyin→IPA correspondence is a 424-row lookup table (syllable-ipa.tsv) generated from the project's
 // already-converged cmn engine (validated vs wikipron + epitran); this manifest carries the tone system,
-// sandhi rules, and numbers. No espeak at runtime.
+// sandhi rules, and numbers.
 {
     "language": "cmn",
     "name": "Mandarin Chinese (Standard, Hanyu Pinyin)",

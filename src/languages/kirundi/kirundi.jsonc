@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Kirundi / Ikirundi (rn) — Bantu (JD62, Rwanda-Rundi), the Latin
-// orthography, espeak-independent. The principal language of Burundi (~11M incl. L2). Kirundi is a NEAR-CLONE of
+// orthography. The principal language of Burundi (~11M incl. L2). Kirundi is a NEAR-CLONE of
 // Kinyarwanda (rw) — mutually intelligible; the Cox "Kirundi & Kinyarwanda Comparative Grammar" describes both.
 // This module reuses the rw greedy longest-match g2p + the Cox palatal series verbatim, with ONE confident delta:
 //   • ⟨j⟩ → d͡ʒ (the Kirundi voiced palatal AFFRICATE — the textbook difference from Kinyarwanda's fricative ⟨j⟩→ʒ).
@@ -7,7 +7,7 @@
 // vowel length + ⟨ng⟩→ŋ; we do NOT follow those — the spirantisation is unverified by any independent source
 // (Wikipedia is silent, Cox isn't on hand) and [mp]→[mh] looks over-applied, while length + ⟨ng⟩→ŋ are grounded
 // (Wikipedia confirms phonemic length; Cox gives ⟨ng⟩→ŋ). So epitran run is CRUDE and partly circular → this is a
-// weaker verification than rw. Tone (H/L) unwritten → DEFERRED. See docs/investigations/rn_native_bringup_investigation.md.
+// weaker verification than rw. Tone (H/L) unwritten → DEFERRED.
 {
     "language": "rn",
     "name": "Kirundi (Ikirundi)",

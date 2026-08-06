@@ -1,9 +1,9 @@
 /**
- * Kurmanji / Northern Kurdish (kmr) phonemizer — Iranian, the Latin (Hawar) alphabet, canonical IPA, espeak-
- * independent. A near-phonemic left-to-right scan (the digraph ⟨xw⟩→[xʷ], then single letters) + final-syllable
+ * Kurmanji / Northern Kurdish (kmr) phonemizer — Iranian, the Latin (Hawar) alphabet, canonical IPA.
+ * A near-phonemic left-to-right scan (the digraph ⟨xw⟩→[xʷ], then single letters) + final-syllable
  * stress (Kurmanji default; unwritten, folded by the eval). Signature: ⟨c⟩→d͡ʒ / ⟨ç⟩→t͡ʃ, ⟨j⟩→ʒ, ⟨ş⟩→ʃ, ⟨q⟩→q,
  * ⟨x⟩→x; long a/ê/î/o/û vs short e/i/u. Aspiration/pharyngealisation are allophonic and not emitted. text()
- * tokenizes words / numbers / punctuation. See docs/investigations/kmr_native_bringup_investigation.md.
+ * tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -9,7 +9,7 @@
     "language": "be",
     "name": "Belarusian",
     "script": "Cyrillic",
-    "provenance": "Authored from Belarusian Cyrillic orthography + standard phonology (akanne is spelled → no stress dict); cross-checked vs wikipron bel_cyrl narrow (7259). See docs/investigations/be_native_bringup_investigation.md.",
+    "provenance": "Authored from Belarusian Cyrillic orthography + standard phonology (akanne is spelled → no stress dict); cross-checked vs wikipron bel_cyrl narrow (7259).",
 
     // Plain (hard) vowels — no stress reduction (akanne is orthographic). а→a, о→o, у→u, ы→ɨ, э→ɛ.
     "vowels": { "а": "a", "о": "o", "у": "u", "ы": "ɨ", "э": "ɛ" },

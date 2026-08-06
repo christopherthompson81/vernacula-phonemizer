@@ -8,7 +8,7 @@ import { ROMAN_POLICY } from "./romanOrdinals.ts";
 // Diagnostic gold for the Romanian (ro) g2p — common words, one per signature feature. These are OUR canonical
 // output; they match the wikipron ron_latn referee on the shared backbone (stress is deferred, unwritten). The
 // suite locks the distinctive Romanian behaviors: ă→ə / â→î→ɨ, ș→ʃ / ț→t͡s, c/g softening + ch/gh, the e̯a/o̯a
-// rising diphthongs, i/u glides, final-i palatalisation, and word-initial e→je. See docs/investigations/ro_native_bringup_investigation.md.
+// rising diphthongs, i/u glides, final-i palatalisation, and word-initial e→je.
 describe("Romanian (ro) g2p — diagnostic gold", () => {
     for (const [word, ipa] of [
         ["și", "ˈʃi"], // ș → ʃ ("and")

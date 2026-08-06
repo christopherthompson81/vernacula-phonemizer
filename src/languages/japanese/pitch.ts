@@ -1,5 +1,5 @@
 /**
- * Japanese (Tokyo) lexical pitch accent — Phase 3, ported from espeak-ng-portable. Accent is lexical and
+ * Japanese (Tokyo) lexical pitch accent — Phase 3. Accent is lexical and
  * contrastive (箸 haꜜɕi "chopsticks" vs 端 haɕi "edge"); the accent NUCLEUS is marked with the IPA downstep
  * ꜜ (U+A71C) placed AFTER the nucleus mora. Heiban (accentless, nucleus 0) words carry no mark.
  *
@@ -7,7 +7,6 @@
  * disambiguated (はし→箸=1), then the READING (kana). A bunsetsu is a content word + trailing case/topic
  * particles or copula (橋を, 天気です); the accent sits on the content stem, so we strip those to recover it and
  * apply the nucleus to the full reading. Data: pitch-accent.tsv (merged consensus > inflected > base).
- * See docs/investigations/ja_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";

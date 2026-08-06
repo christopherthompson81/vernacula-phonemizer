@@ -4,8 +4,7 @@
  * over-split guards) lives in the core; this file supplies German's facts: the affix lists + linking elements +
  * validation onsets from the manifest, the content-stem lexicon (lexicon.tsv, word→flags), and German's specific
  * quirks (un- negation, mit- real-word gate, the ⟨sch⟩ digraph guard, the st/sp/sch element-initial seam, the
- * keep-whole -en verb). Output is byte-identical to the former private module. See
- * docs/investigations/de_native_bringup_investigation.md.
+ * keep-whole -en verb). Output is byte-identical to the former private module.
  */
 
 import { MANIFEST } from "./manifest.ts";

@@ -1,5 +1,5 @@
 /**
- * Native Punjabi (pa) text phonemizer — canonical IPA, espeak-independent. Gurmukhi is a Brahmic abugida read
+ * Native Punjabi (pa) text phonemizer — canonical IPA. Gurmukhi is a Brahmic abugida read
  * by the generic engine (core/abugida.ts); on top, punjabi.ts adds the features Hindi's assembly does not share:
  *
  *   1. addak ੱ gemination — the following consonant is long (ਪੱਕਾ → pəkːaː).
@@ -232,7 +232,7 @@ export function loadPunjabiManifest(): PunjabiDef {
 // sister-spelling (kaikki real dual-script pairs; crossscript.tsv). It resolves ALL THREE abjad ambiguities the
 // harakat layer cannot fully reach — short vowels, the majhūl و/ی ([oː]~[uː], [iː]~[eː]), AND ن vs retroflex ݨ
 // (a consonant, not a harakat) — so it takes PRECEDENCE for a covered word. Gurmukhi input never matches (keys are
-// Perso-Arabic). See docs/investigations/pnb_native_bringup_investigation.md.
+// Perso-Arabic).
 let CROSS: ReadonlyMap<string, string> | undefined;
 export function crossScriptLexicon(): ReadonlyMap<string, string> {
     return (CROSS ??= loadTsvMap(import.meta.url, "crossscript.tsv", undefined, { optional: true }));

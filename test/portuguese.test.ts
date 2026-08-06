@@ -6,7 +6,7 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/portuguese/portuguese.ts";
 import { ROMAN_POLICY } from "../src/languages/portuguese/romanOrdinals.ts";
 
-// Canonical-IPA goldens for European Portuguese (pt-PT), espeak-independent. Rule-based g2p → stress → the EP
+// Canonical-IPA goldens for European Portuguese (pt-PT). Rule-based g2p → stress → the EP
 // vowel-REDUCTION pass (unstressed a→ɐ, e→ɨ, o→u) → sibilant voicing. Convention: nasal ɐ̃/ẽ/ĩ/õ/ũ + diphthongs
 // ɐ̃w̃/ɐ̃j̃/õj̃, r single→ɾ / strong→ʁ, coda s/z→ʃ, coda l→ɫ, ç/ss/soft-c fixed /s/. Stressed open/close mid
 // vowels (rosa→ɔ, dorme→ɔ) and grapheme x (exame→z) are the deferred lexical axes — close/ʃ defaults here.

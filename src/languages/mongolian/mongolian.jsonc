@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Standard Khalkha Mongolian (mn) — Cyrillic, espeak-independent.
+// Native canonical-IPA data manifest for Standard Khalkha Mongolian (mn) — Cyrillic.
 // This file IS the hand-authored language DATA: the vowel / long-vowel / diphthong / consonant letter→IPA tables,
 // the back-harmony trigger set, and clause punctuation. The ALGORITHMS that read it stay in code:
 //   g2p.ts        — greedy longest-match Cyrillic scan (diphthongs/long vowels before singles), harmony (г/х/reduced-
@@ -6,12 +6,12 @@
 //   mongolian.ts  — the DEEP-orthography rules: non-initial SHORT-vowel reduction→ə / word-final deletion, final
 //                   obstruent devoicing (в→f, г→k, ж→t͡ʃ, з→t͡s), tokenizer
 // Cyrillic Khalkha is a DEEP orthography: written short vowels in non-first syllables are reduced/deleted in speech,
-// so this is NOT a 1:1 scan. Referee: en.wiktionary Mongolian IPA (narrow). See docs/investigations/mn_native_bringup_investigation.md.
+// so this is NOT a 1:1 scan. Referee: en.wiktionary Mongolian IPA (narrow).
 {
     "language": "mn",
     "name": "Mongolian",
     "script": "Cyrillic",
-    "provenance": "Authored from Khalkha Mongolian Cyrillic orthography + Svantesson et al. (2005) 'The Phonology of Mongolian'. Beyond-espeak canonical IPA. Referee: en.wiktionary Mongolian IPA (1460 words, narrow/phonetic).",
+    "provenance": "Authored from Khalkha Mongolian Cyrillic orthography + Svantesson et al. (2005) 'The Phonology of Mongolian'. Referee: en.wiktionary Mongolian IPA (1460 words, narrow/phonetic).",
 
     "convention": {
         "stops": "the stop/affricate contrast is ASPIRATED vs UNASPIRATED, not voiced/voiceless: б=[p] п=[pʰ], д=[t] т=[tʰ], г=[ɡ~ɢ] к=[kʰ], ж=[t͡ʃ] ч=[t͡ʃʰ], з=[t͡s] ц=[t͡sʰ] — the unaspirated affricates ж/з are emitted VOICELESS [t͡ʃ]/[t͡s] in every position (like б=p, д=t), contrasting with the aspirated ч/ц",

@@ -1,12 +1,11 @@
 /**
  * Luo / Dholuo (luo) phonemizer — Western Nilotic (Luo group), the Latin orthography, canonical IPA,
- * espeak-independent. Spoken around Lake Victoria in Kenya + Tanzania (~4–5M). The FIRST Nilotic language in the repo.
+ * Spoken around Lake Victoria in Kenya + Tanzania (~4–5M). The FIRST Nilotic language in the repo.
  * A greedy longest-match scan over the grapheme table (manifest.ts) with ONE code rule: a high vowel ⟨i u⟩ before
  * another vowel becomes the glide ⟨j w⟩ (dhiang'→ðjaŋ, chieng'→t͡ʃjeŋ). Signatures: the DENTAL vs ALVEOLAR contrast
  * (⟨th dh⟩→θ ð vs ⟨t d⟩→t d); PRENASALISED voiced stops as single units (mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ); ⟨ng'⟩→ŋ vs
  * ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; the palatals ⟨ch⟩→t͡ʃ, ⟨j⟩→d͡ʒ; ⟨r⟩→ɾ. The 9-vowel ±ATR distinction and register TONE (H/L) are
- * UNWRITTEN in the orthography → emitted at a +ATR/toneless default (folded in the eval). See
- * docs/investigations/luo_native_bringup_investigation.md.
+ * UNWRITTEN in the orthography → emitted at a +ATR/toneless default (folded in the eval).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

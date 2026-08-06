@@ -1,8 +1,8 @@
 // Native canonical-IPA data manifest for Maltese (mt) — Malti, the only Semitic language in the LATIN alphabet
-// (Siculo-Arabic core + Sicilian/Italian + English), Malta (~520k), espeak-independent. Maltese orthography is fairly
+// (Siculo-Arabic core + Sicilian/Italian + English), Malta (~520k). Maltese orthography is fairly
 // phonemic, so the engine (maltese.ts) is a greedy grapheme scan (digraphs ⟨ie għ⟩ + the silent-letter rules) + final
 // devoicing + regressive voicing assimilation + n→m before a labial. Vowel LENGTH (stress-conditioned, ~50% of the
-// referee) is folded. Format: plain JSONC. See docs/investigations/mt_native_bringup_investigation.md.
+// referee) is folded. Format: plain JSONC.
 {
     "language": "mt",
     "name": "Maltese (Malti)",

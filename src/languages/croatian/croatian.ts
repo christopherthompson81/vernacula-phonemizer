@@ -1,11 +1,10 @@
 /**
- * Croatian (hr, hrvatski) phonemizer — South Slavic, Gaj's Latin, fully phonemic, espeak-independent. Croatian and
+ * Croatian (hr, hrvatski) phonemizer — South Slavic, Gaj's Latin, fully phonemic. Croatian and
  * Serbian are the pluricentric standards of one phonological system (Serbo-Croatian); the SEGMENTAL grapheme→IPA is
  * IDENTICAL, so this module reuses the Serbian engine's word g2p (phonemizeWord) directly. The only Croatian-specific
  * delta is the CARDINAL NUMBER WORDS (Croatian tisuća/milijun/dvjesto vs Serbian hiljada/milion/dvesta) — a thin
  * numbers override (numbers.ts) over the shared agreement compositor. Croatian is written exclusively in Latin, so
- * the tokenizer is Latin-only. Pitch accent is unwritten and DEFERRED (as in Serbian). See
- * docs/investigations/hr_native_bringup_investigation.md.
+ * the tokenizer is Latin-only. Pitch accent is unwritten and DEFERRED (as in Serbian).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

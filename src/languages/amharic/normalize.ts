@@ -39,7 +39,7 @@
  *     European frame; nothing in the text settles which frame a bare time is in, so converting would be
  *     guessing. Likewise ዓ.ም / እ.ኤ.አ. are left as letter-runs rather than resolved to a calendar.
  *   · **ሚሜ (millimetre) ×10 is left alone.** ኪ.ሜ is expanded because the corpus itself writes ኪሎ ሜትር and
- *     ኪሎሜትሮች in full; ሚሜ has no such in-corpus or espeak attestation, and a wrong expansion is worse
+ *     ኪሎሜትሮች in full; ሚሜ has no such in-corpus attestation, and a wrong expansion is worse
  *     than the written abbreviation.
  *
  * `\b` is ASCII-defined and matches nothing against Ethiopic — every boundary here is an explicit
@@ -49,8 +49,7 @@
 /** Ethiopic syllabary letters, EXCLUDING the punctuation and numeral sub-blocks (U+135F and up). */
 const FID = "[\\u1200-\\u135A]";
 
-/** Amharic decimal point. Source: espeak-ng `dictsource/am_list` line 33, `_dpt  _n'@t`yb` — näṭəb, which
- *  round-trips through this repo's own fidel g2p to nətʼɨb, matching espeak's skeleton n-tʼ-b. */
+/** Amharic decimal point. */
 const POINT = "ነጥብ";
 
 /** Range connective. Corpus-sourced: 70 instances of እስከ, including the explicit "ከ 06:30 እስከ 07:30" and
@@ -235,21 +234,6 @@ export function makeAmharicNormalizer(
         //     corpus's `(UTC+1)` lost it entirely. No text tier could supply the word: `concept.ts` returns the
         //     bare character `+` as Amharic's own label for "plus sign", and prose writes the glyph, so there is
         //     nothing to probe for.
-        //
-        //     Decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft, a PHONEME recognizer — its vocabulary holds
-        //     no `+` and no digits, so unlike a text ASR it cannot echo the orthography back at you. Over
-        //     am_et/train:
-        //       UTC+1   →  m j uː t iː s iː  p l a s  w a n   ·   w eɪ m y t i s i  p l a s  w a n   (2 of 3;
-        //                  the third skips the parenthetical, the reader behaviour also seen in ta, en and zu)
-        //       +30°C   →  s a l a s a d i ɡ l i s e d i s j o s   ·   s a l a s a d i ɡ r i s l i ʃ e ts j o
-        //                  — ሰላሳ ዲግሪ, thirty degrees, with NO plus phones, 2 of 2
-        //
-        //     ⚠ TEXT ASR GOT THIS WRONG IN BOTH DIRECTIONS AND MUST NOT BE USED FOR IT. MMS-1b-all (amh
-        //     adapter) transcribes this corpus accurately but emits `utc+1` — the SIGN — because its vocabulary
-        //     is orthographic; and on the control languages it silently DROPPED a demonstrably spoken plus
-        //     (hi's `प्लस`, ta's `பிளஸ்`). A `+` in a text ASR's output is not evidence that a word was said.
-        //     The phoneme model was validated on hi, where the answer was already known: 4 of 4 correct,
-        //     including reproducing the SILENCE before the temperature.
         //
         //     Both arms, so the sign is read glued to a label or opening the quantity. The measurement position
         //     is voiced too: both am speakers omit it there, but for a TTS target a reader skipping a character

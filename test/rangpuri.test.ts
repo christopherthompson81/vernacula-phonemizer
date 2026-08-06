@@ -8,7 +8,7 @@ import { createRangpuri, phonemizeWord } from "../src/languages/rangpuri/rangpur
 // deaspirate elsewhere); inherent [ɔ], no vowel length, व→w, ण→n.
 // Validated against the Toulmin (2006) Appendix-A Rangpur referee (~370 Deva→IPA pairs) — 63.8% FOLDED / 86.8%
 // symbol (the folded number is a mix of ~two-column-PDF referee noise + residual fine-grained gaps; symbol acc higher).
-// 🔷 single-source. See docs/investigations/rkt_krnb_bringup_investigation.md.
+// 🔷 single-source.
 describe("Rangpuri (KRNB) canonical IPA — Devanagari abugida + KRNB deltas", () => {
     const rkt = createRangpuri();
 

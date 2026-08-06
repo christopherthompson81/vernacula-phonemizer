@@ -6,7 +6,7 @@ import { createHiligaynon, phonemizeWord } from "../src/languages/hiligaynon/hil
 // A shallow rule g2p (the Cebuano/Tagalog pattern) validated against wikipron hil_latn (94.4%) + kaikki hil (94.1%),
 // both human. Shares the Bisayan core with Cebuano; the deltas are the Spanish-loan letters ⟨j⟩→[h] and ⟨f⟩→[p].
 // Stress (penultimate default) is phonemic-but-unwritten (folded by the eval); the word-final glottal and the
-// Spanish rising diphthongs are deferred residuals. See docs/investigations/hil_native_bringup_investigation.md.
+// Spanish rising diphthongs are deferred residuals.
 describe("Hiligaynon canonical IPA — Bisayan rule g2p", () => {
     test("glottal stops: word-initial + hiatus; ⟨ng⟩→ŋ", () => {
         expect(phonemizeWord("anak")).toBe("ʔˈanak"); // word-initial glottal onset

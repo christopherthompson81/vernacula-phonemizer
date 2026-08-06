@@ -6,13 +6,12 @@ import { numberToWords } from "../src/languages/afrikaans/numbers.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Afrikaans (af) — Indo-European (West Germanic, daughter of Dutch), Latin script,
-// Standard Afrikaans, espeak-independent. A greedy digraph-first g2p + the Germanic OPEN/CLOSED-SYLLABLE vowel-length
+// Standard Afrikaans. A greedy digraph-first g2p + the Germanic OPEN/CLOSED-SYLLABLE vowel-length
 // rule + word-final obstruent devoicing. Referee: en.wiktionary Afrikaans IPA (2220 words) — 71.2% folded overall
 // (86% on short native words, 91% monosyllabic); the full-set residual is stress-conditioned vowel reduction on
 // POLYSYLLABLES (no stress model yet) + proper-noun/loan pronunciations (Afrika, Botha, Coetzee — lexical). Folds:
 // stress (unwritten) + syllable dots not emitted, r~ɾ one symbol, ʊ~u / ɪ~i / œy~œi centering-diphthong-onset
 // notation. Signatures below. DEFERRED: a stress/syllable model, a proper-noun lexicon, numbers, nasalization.
-// See docs/investigations/af_afrikaans_bringup_investigation.md.
 describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Standard Afrikaans)", () => {
     test("⟨g⟩ = [χ] fricative + word-final obstruent DEVOICING", () => {
         expect(phonemizeWord("dag")).toBe("daχ"); // ⟨g⟩ = velar/uvular fricative [χ], not [ɡ]
@@ -122,7 +121,7 @@ describe("Afrikaans text normalization", () => {
         expect(normalizeAfrikaans("‘nuwe’ idee")).toBe("‘nuwe’ idee"); // an opening quote on an n-word is not the article
     });
 
-    // Each of these was a live misreading; the corpus counts are in the investigation doc.
+    // Each of these was a live misreading;
     test("the era marker is dot-bound, so it cannot eat the indefinite article", () => {
         expect(normalizeAfrikaans("'n Chinese skip")).toBe("'n Chinese skip"); // was *'na Christushinese*
         expect(normalizeAfrikaans("323 v.C.")).toBe("323 voor Christus.");

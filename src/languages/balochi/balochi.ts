@@ -1,5 +1,5 @@
 /**
- * Native Balochi / بلوچی (bal) text phonemizer — canonical IPA, espeak-independent. Northwestern Iranian; SOUTHERN
+ * Native Balochi / بلوچی (bal) text phonemizer — canonical IPA. Northwestern Iranian; SOUTHERN
  * Balochi. Authored from Jahani & Korn (2009) + Korn (2005a). CROSS-SCRIPT: Balochi is written in both the Balochi
  * ARABIC alphabet (default) and a ROMAN orthography, so this handles either — a token's script is detected and
  * routed. The Arabic script is a DEFECTIVE abjad (short /a i u/ unwritten AND ⟨و⟩/⟨ی⟩ conflate uː/oː, iː/eː), so
@@ -7,8 +7,7 @@
  * vowel). A CROSS-SCRIPT LEXICON (balochi-lexicon.tsv: arabic↔roman↔full-IPA, from Korn/J&K/ASJP) bridges them —
  * a word looked up by EITHER spelling returns the full-voweled IPA the abjad loses; OOV falls back to the per-script
  * g2p. SIGNATURE: retroflex ٹ→ʈ ڈ→ɖ ڑ→ɽ (Indic contact) vs dental ت→t̪ د→d̪; ق→k; unaspirated. Cardinals use
- * the Iranian-core / lakh-crore-magnitude compositor in numbers.ts (Jahani & Korn Table 11.19). See
- * docs/investigations/bal_native_bringup_investigation.md.
+ * the Iranian-core / lakh-crore-magnitude compositor in numbers.ts (Jahani & Korn Table 11.19).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

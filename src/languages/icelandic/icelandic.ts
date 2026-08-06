@@ -1,6 +1,6 @@
 /**
  * Icelandic (is) phonemizer — íslenska, North Germanic (Insular), Latin script + ⟨þ ð æ ö⟩, canonical IPA,
- * espeak-independent. One of the deepest orthographies in the fleet. A greedy longest-match grapheme scan (vowel
+ * One of the deepest orthographies in the fleet. A greedy longest-match grapheme scan (vowel
  * digraphs + the epenthetic-stop / devoiced-sonorant clusters) + code rules:
  *   - NO voicing contrast: ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k] (aspiration folded); ⟨k g gj kj⟩ → PALATAL [c]
  *     before a front vowel ⟨i í y ý æ j⟩ (kýr→ciːr, Bylgja→pɪlca); intervocalic ⟨g⟩ → [ɣ] (dagur→taɣʏr);
@@ -8,8 +8,7 @@
  *   - the EPENTHETIC-STOP clusters ⟨ll⟩→[tl], ⟨rl⟩→[rtl], ⟨rn⟩→[rtn]; ⟨nn⟩→[tn] after a long/accented vowel or a
  *     diphthong (Steinn→steitn) but [n] after a short vowel (Anna→ana); geminate stops collapse;
  *   - a glide [j] between a high front ⟨í i ý y⟩ and a following vowel (Biblía→pɪplija); ⟨f⟩→[v]/[p]/[f].
- * Vowel LENGTH, ASPIRATION (pre/post), and DEVOICED SONORANTS are folded/deferred. See
- * docs/investigations/is_native_bringup_investigation.md.
+ * Vowel LENGTH, ASPIRATION (pre/post), and DEVOICED SONORANTS are folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

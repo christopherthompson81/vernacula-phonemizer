@@ -4,7 +4,7 @@
 // test/kabuverdianu.test.ts. `segmentJoin` strips the per-phone spaces. The folds reconcile the two notation
 // conventions between our output and the kaikki: the kaikki puts ˈ at the syllable ONSET (with syllable dots) while
 // we put it at the NUCLEUS (fleet convention) → strip ˈ and the dots and compare the SEGMENTS; and the kaikki writes
-// single ⟨r⟩ loosely as [r] where it is phonemically the tap [ɾ] → fold r→ɾ. See docs/investigations/kea_native_bringup_investigation.md.
+// single ⟨r⟩ loosely as [r] where it is phonemically the tap [ɾ] → fold r→ɾ.
 {
     "language": "kea", "name": "Kabuverdianu (kriolu)", "script": "Latin",
     "provenance": "Authored ALUPEC phonemic g2p (digraphs + Portuguese-creole nasalization + accent/penult stress) from the ALUPEC orthography + Santiago phonology; anchored on the 7 kaikki IPA words (the only machine pronunciations that exist).",

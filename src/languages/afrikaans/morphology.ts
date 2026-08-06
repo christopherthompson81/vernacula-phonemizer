@@ -4,7 +4,7 @@
  * morphemes lets afrikaans.ts phonemize each element with its own stress + coda devoicing. The affix lists + linking
  * elements + onsets come from afrikaans.jsonc; the stem lexicon is a wordlist (af-stems.txt — afwiki + OpenSubtitles
  * + kaikki union, see af-stems.PROVENANCE.md). Afrikaans has no per-stem Fugen flags → a static linking-element order, and
- * none of German's language-specific quirks (un-/mit-/sch/seams/-en) apply. See the af investigation doc.
+ * none of German's language-specific quirks (un-/mit-/sch/seams/-en) apply.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

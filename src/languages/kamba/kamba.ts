@@ -1,9 +1,9 @@
 /**
  * Kamba / Kikamba (kam) phonemizer — Niger-Congo BANTU (E55), the Latin orthography, canonical IPA,
- * espeak-independent. Kenya (~4M). A PURE greedy longest-match scan over the grapheme table (manifest.ts) — no code
+ * Kenya (~4M). A PURE greedy longest-match scan over the grapheme table (manifest.ts) — no code
  * rules; the Bantu fricativization/prenasalization live entirely in the table (the Kikuyu pattern). The 7-vowel ATR
  * system has the TILDE marking vowel QUALITY not nasalization (⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ). TONE (H/L) is not
- * written → not emitted. Cardinal numbers: numbers.ts (the shared E5x compositor, citation forms). See docs/investigations/kam_bringup_investigation.md.
+ * written → not emitted. Cardinal numbers: numbers.ts (the shared E5x compositor, citation forms).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

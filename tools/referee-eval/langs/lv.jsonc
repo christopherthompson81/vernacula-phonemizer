@@ -4,7 +4,7 @@
 // Latvian orthography DOES encode we emit directly (and do NOT fold): vowel LENGTH (macron ā ē ī ū → ː), the written
 // PALATALS (ģ ķ ļ ņ → ɟ c ʎ ɲ), and the FIXED first-syllable stress (ˈ — predictable, folded here only because the
 // referee marks it as tone on the vowel, not a plain ˈ). Folded: the syllable TONE (combining àáâ, BACKBONE-
-// stripped), the lexical ⟨e⟩ quality æ→ɛ, the glide notation (referee j~i̯, w~u̯), v~w. See docs/investigations/lv_native_bringup_investigation.md.
+// stripped), the lexical ⟨e⟩ quality æ→ɛ, the glide notation (referee j~i̯, w~u̯), v~w.
 {
     "language": "lv", "name": "Latvian (latviešu)", "script": "Latin",
     "provenance": "Authored rule-based g2p (grapheme→IPA scan + written palatals/length + diphthongs + regressive voicing) from Latvian phonology; validated against the wikipron lav_latn_narrow referee (1,657 human headwords).",

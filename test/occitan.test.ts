@@ -8,7 +8,7 @@ import { numberToWords } from "../src/languages/occitan/numbers.ts";
 // central reference standard + the most-likely FLEURS reader dialect). A greedy scan + code rules, validated against
 // wikipron oci_latn_broad (675 human headwords — SMALL + dialect-mixed) — 68.7% FOLDED / 93.0% symbol, with the
 // dialect vowel/rhotic spread + spirantization + stress folded. 🔷 thin single source. Dialect overrides
-// (Gascon/Provençal/Niçard) are DEFERRED (no clean per-dialect data). See docs/investigations/oc_native_bringup_investigation.md.
+// (Gascon/Provençal/Niçard) are DEFERRED (no clean per-dialect data).
 describe("Occitan (Languedocien) canonical IPA — Gallo-Romance g2p", () => {
     const oc = createOccitan();
 

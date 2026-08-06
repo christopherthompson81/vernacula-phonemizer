@@ -1,14 +1,13 @@
-// Native canonical-IPA data manifest for Xhosa (xh, isiXhosa) — Nguni Bantu, Latin script, AUTHORED beyond-espeak.
+// Native canonical-IPA data manifest for Xhosa (xh, isiXhosa) — Nguni Bantu, Latin script, AUTHORED.
 // Xhosa is the sibling of Zulu (zu) — a near-identical click-and-depressor inventory — so it REUSES the Zulu g2p
 // scan (toSegments) and the Nguni penultimate-stress/length logic, differing only in DATA: it adds ⟨rh⟩→[x] (the
 // voiceless velar fricative, from the Khoisan substrate — Zulu lacks it), and carries the Xhosa number words
-// (6–9 differ from Zulu). Every phoneme value is CANONICAL IPA (the census click set ǀ ǃ ǁ). See
-// docs/investigations/xh_native_bringup_investigation.md.
+// (6–9 differ from Zulu). Every phoneme value is CANONICAL IPA (the census click set ǀ ǃ ǁ).
 {
     "language": "xh",
     "name": "Xhosa (isiXhosa)",
     "script": "Latin",
-    "provenance": "Authored beyond-espeak; the Nguni sibling of Zulu. IPA + inventory from the Zulu authored rules (epitran xho-Latn + wikipron xho + kaikki referees) + the Xhosa ⟨rh⟩→[x]. This file IS the language data — the shared Nguni rule engine reads it directly.",
+    "provenance": "Authored; the Nguni sibling of Zulu. IPA + inventory from the Zulu authored rules (epitran xho-Latn + wikipron xho + kaikki referees) + the Xhosa ⟨rh⟩→[x]. This file IS the language data — the shared Nguni rule engine reads it directly.",
 
     "convention": {
         "clicks": "15-way series: c/q/x → kǀ/kǃ/kǁ; aspirated ch/qh/xh; depressor gc/gq/gx; nasal nc/nq/nx; etc.",

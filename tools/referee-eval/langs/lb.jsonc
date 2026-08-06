@@ -3,7 +3,7 @@
 // per-phone spaces. Luxembourgish is a German-derived orthography (⟨w⟩→v, ⟨ch⟩→χ, initial st/sp→ʃt/ʃp) with a
 // distinctive DIPHTHONG system (⟨ei ai⟩→ai̯, ⟨au⟩→æu̯, ⟨ou⟩→əu̯, ⟨é éi⟩→ei̯) — the diphthongs are compared at the
 // SEGMENT level (the offglide diacritic folds in the backbone). Vowel LENGTH (ː) is open/closed-syllable-conditioned
-// (deferred) → folded. See docs/investigations/lb_native_bringup_investigation.md.
+// (deferred) → folded.
 {
     "language": "lb", "name": "Luxembourgish (Lëtzebuergesch)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (the diphthong system ei/ai→ai̯ au→æu̯ ou→əu̯ éi→ei̯ [é alone→eː] ie→iə ue→uə + German-style w→v v→f z→t͡s ch→χ, initial st/sp→ʃt/ʃp, s→z onset, short stressed ⟨e⟩→æ, geminate collapse, final + regressive devoicing, final g→χ after a vowel / k after a consonant) from Luxembourgish phonology; validated against the wikipron ltz_latn_broad (3893) human referee.",

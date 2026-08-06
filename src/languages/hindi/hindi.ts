@@ -1,7 +1,7 @@
 /**
- * Native Hindi text phonemizer — canonical IPA, espeak-independent. Assembles the generic abugida modules
+ * Native Hindi text phonemizer — canonical IPA. Assembles the generic abugida modules
  * (G2P + weight-stress + number compositor) with Hindi's self-describing JSONC definition (hindi.jsonc,
- * beside this file). No espeak rules/tables/dict/numbers.
+ * beside this file).
  *
  * text() handles: Devanagari word runs, number runs (integer + Indian grouping + decimal), clause-
  * terminating punctuation → canonical inline pause marks, symbols (% → प्रतिशत, ₹ stripped), and embedded

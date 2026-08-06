@@ -10,8 +10,7 @@ import { numberToWords } from "../src/languages/luo/numbers.ts";
 // UNWRITTEN), the one-palatal notation, aspiration, and the tap/glide notation. Signatures: the DENTAL vs ALVEOLAR
 // contrast (⟨th dh⟩=θ ð vs ⟨t d⟩=t d); PRENASALIZED voiced stops (⟨mb⟩=ᵐb, ⟨nd⟩=ⁿd, ⟨nj⟩=ⁿd͡ʒ, ⟨ng⟩=ᵑɡ); ⟨ng'⟩=ŋ,
 // ⟨ny⟩=ɲ; the palatals ⟨ch⟩=t͡ʃ, ⟨j⟩=d͡ʒ; the high-vowel glide (⟨i u⟩+V → j/w). The 9-vowel ±ATR distinction and
-// register TONE (H/L) are UNWRITTEN → emitted at a +ATR/toneless default. See
-// docs/investigations/luo_native_bringup_investigation.md.
+// register TONE (H/L) are UNWRITTEN → emitted at a +ATR/toneless default.
 describe("Luo (Dholuo) canonical IPA — greedy g2p (Nilotic: dental contrast + prenasalization)", () => {
     test("DENTAL vs ALVEOLAR: ⟨th dh⟩=θ ð (dental) vs ⟨t d⟩=t d (alveolar)", () => {
         expect(phonemizeWord("dhano")).toBe("ðano"); //"person" — ⟨dh⟩→ð (dental fricative)

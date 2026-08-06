@@ -1,6 +1,5 @@
 // Aromanian / armãneashti (rup) — Eastern (Balkan) Romance, sibling of Romanian, Latin (Cunia/DIARO orthography).
 // Referees: wikipron rup_latn narrow (primary, 196) + kaikki Aromanian (secondary, 201). Both HUMAN (Wiktionary).
-// See docs/investigations/rup_native_bringup_investigation.md.
 {
     "language": "rup",
     "name": "Aromanian (armãneashti)",

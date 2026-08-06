@@ -1,6 +1,5 @@
 // Papiamentu / Papiamento (pap) — Iberian-lexified CREOLE (ABC islands), Curaçao/Bonaire phonemic orthography.
 // Referee: kaikki Papiamentu + English Wiktionary "Papiamentu terms with IPA pronunciation" (thin, ~20 pairs).
-// See docs/investigations/pap_native_bringup_investigation.md.
 {
     "language": "pap",
     "name": "Papiamentu (Papiamento)",

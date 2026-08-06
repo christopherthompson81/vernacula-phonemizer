@@ -3,7 +3,7 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/zulu/zulu.ts";
 import { normalizeZulu } from "../src/languages/zulu/normalize.ts";
 
-describe("Zulu (isiZulu) g2p — authored beyond-espeak", () => {
+describe("Zulu (isiZulu) g2p — authored", () => {
     it("clicks (census ǀ ǃ ǁ), aspirated and nasal variants", () => {
         expect(phonemizeWord("cela")).toBe("kǀˈɛːla"); // c → dental click kǀ
         expect(phonemizeWord("qala")).toBe("kǃˈaːla"); // q → alveolar click kǃ
@@ -40,7 +40,7 @@ describe("Zulu (isiZulu) g2p — authored beyond-espeak", () => {
     });
 
     // The three unit series are distinct and must NOT be conflated: standalone ku- (kuthathu), connective na-
-    // (nantathu), multiplier ama- (amathathu). Source: zulu.jsonc "numbers" (espeak-independent authored table).
+    // (nantathu), multiplier ama- (amathathu). Source: zulu.jsonc "numbers" (authored table).
     // Regression note: 13/15/23/25/… were once reported as failures by a number-audit probe whose sentinel regex
     // was case-insensitive and so matched the legitimate na- forms "NANtathu"/"NANhlanu" as "NaN". The output was
     // correct all along; these goldens pin it.

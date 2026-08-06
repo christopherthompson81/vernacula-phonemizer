@@ -3,7 +3,7 @@
 // ج→[ʒ] (fricative — the Maghrebi neighbour reflex, unlike the eastern [d͡ʒ] of Iraqi/Gulf), plus خ→[χ] (uvular).
 // But it is CONSERVATIVE on the interdentals ث/ذ/ظ — KEPT as [θ ð ðˤ] (the Bedouin pattern, unlike Egyptian/
 // Levantine/Moroccan which merge them to stops). Historical diphthongs monophthongize (ħajtˤ→[ħeːtˤ], jawm→[joːm]).
-// Referee: wikipron ayl_arab_broad. See docs/investigations/ayl_libyan_bringup_investigation.md.
+// Referee: wikipron ayl_arab_broad.
 {
     "variety": "libyan",
     "iso": "ayl",

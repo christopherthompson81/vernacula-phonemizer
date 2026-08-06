@@ -9,7 +9,7 @@ import { ZWSP } from "../src/languages/khmer/khmerSegmenter.ts";
 
 // The word-boundary restorer is gated on the (optional) ONNX model + onnxruntime-node. Absent either, the path IS
 // the sync engine, so the fallback contract is testable everywhere and the restoration assertions run only with the
-// model present. See km-segmenter.PROVENANCE.md and docs/investigations/km_word_segmentation_investigation.md.
+// model present. See km-segmenter.PROVENANCE.md and.
 const haveModel = existsSync(join(import.meta.dirname, "../src/languages/khmer/km-segmenter.int8.onnx"));
 
 describe("khmer neural word-boundary restoration", () => {

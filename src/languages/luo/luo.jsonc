@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Luo / Dholuo (luo) — Western Nilotic (Luo group), Latin orthography,
-// espeak-independent. Spoken around Lake Victoria in Kenya + Tanzania (~4–5M). The FIRST Nilotic language in the repo.
+// Spoken around Lake Victoria in Kenya + Tanzania (~4–5M). The FIRST Nilotic language in the repo.
 // A greedy longest-match scan (luo.ts) with ONE code rule: a high vowel ⟨i u⟩ before another vowel becomes the glide
 // ⟨j w⟩ (dhiang' → ðjaŋ). Phonology grounded in the 17-word en.wiktionary Luo IPA referee + Tucker (1994) 'A Grammar
 // of Kenya Luo (Dholuo)' + Okoth-Okombo (1982) 'Dholuo Morphophonemics'. Signatures:
@@ -14,8 +14,7 @@
 //     UNWRITTEN / harmonic → unrecoverable from spelling. We emit the +ATR (tense) default i e o u and FOLD [±ATR]
 //     (ɪ~i ɛ~e ɔ~o ʊ~u) in the eval — the principled cap, like tone.
 //   • ⟨r⟩ → ɾ (tap, folded r~ɾ). Register TONE (H/L) is UNWRITTEN → DEFERRED (folded). Single-source (🔷): the only
-//     numeric referee is the 17-word Wiktionary set; consonants corroborated by Tucker. See
-//     docs/investigations/luo_native_bringup_investigation.md.
+//     numeric referee is the 17-word Wiktionary set; consonants corroborated by Tucker.
 {
     "language": "luo",
     "name": "Luo (Dholuo)",

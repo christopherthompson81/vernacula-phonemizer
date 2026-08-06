@@ -1,12 +1,12 @@
 /**
- * Native Italian (it) text phonemizer — canonical IPA, espeak-independent. Italian's Latin orthography is shallow
+ * Native Italian (it) text phonemizer — canonical IPA. Italian's Latin orthography is shallow
  * and near-phonemic, so this is a rule-based g2p: c/g soften to t͡ʃ/d͡ʒ before e/i (⟨ci⟩/⟨gi⟩+V drop a silent i),
  * ⟨sc⟩→ʃ, ⟨gl⟩i→ʎ, ⟨gn⟩→ɲ, ⟨ch⟩/⟨gh⟩→k/ɡ, ⟨qu⟩→kw; GEMINATION is written as doubled consonants (gatto→ɡatto —
  * the referee's own convention, and a real Italian contrast the shared backbone would strip if we used ː);
  * intervocalic ʎ/ɲ/ʃ geminate; i/u become glides j/w before a vowel; penultimate stress (written accent overrides).
  * The 7-vowel system a e ɛ i o ɔ u: unstressed mids are close, but STRESSED ⟨e⟩/⟨o⟩ openness (/e/~/ɛ/, /o/~/ɔ/)
  * is LEXICAL and unrecoverable from spelling — as are intervocalic ⟨s⟩ voicing and ⟨z⟩ voicing — so we take a
- * documented default and fold those axes against the referee. See docs/investigations/it_native_bringup_investigation.md.
+ * documented default and fold those axes against the referee.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

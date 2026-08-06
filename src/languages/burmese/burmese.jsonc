@@ -4,7 +4,6 @@
 // ŋ/ɲ/n/m or anusvara → ɴ) or CHECKED (killed k/s/t/p → ʔ) — e.g. -i open→i, nasal→ɪɴ, checked→ɪʔ. Medials
 // palatalise velars (ကျ→t͡ɕ) or add glides -j-/-w-; ⟨ှ⟩ devoices sonorants (မှ→m̥, လှ→ɬ). Phase 1: SEGMENTAL —
 // tones (low à / high á / creaky a̰ / checked) are DEFERRED (the referee's tone diacritics fold in the backbone).
-// See docs/investigations/my_native_bringup_investigation.md.
 {
     "language": "my",
     "name": "Burmese",

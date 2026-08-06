@@ -6,7 +6,7 @@ import { numberToWords } from "../src/languages/papiamento/numbers.ts";
 // Canonical-IPA goldens for Papiamentu (pap) — an Iberian-lexified creole of the ABC islands, the Curaçao phonemic
 // orthography. Signatures: coda-⟨n⟩ RETENTION — word-final ⟨n⟩→[ŋ] (+ vowel nasalization: bon→[bõŋ]), medial ⟨n⟩ kept
 // [n] (kontra→[kontɾa]); the digraphs ⟨ch sh dj zj⟩→[t͡ʃ ʃ d͡ʒ ʒ]; the open-vowel letters ⟨è ò ù⟩→[ɛ ɔ ø] + the ⟨ou⟩
-// diphthong [ɔu]; degemination; acute/penult stress. Referee: kaikki + Wiktionary (thin, ~20). See docs/investigations/pap_native_bringup_investigation.md.
+// diphthong [ɔu]; degemination; acute/penult stress. Referee: kaikki + Wiktionary (thin, ~20).
 describe("Papiamentu (Papiamento) canonical IPA", () => {
     test("★ coda-⟨n⟩ RETENTION — word-final [ŋ] (+ nasal vowel), medial [n]", () => {
         expect(phonemizeWord("bon")).toBe("ˈbõŋ"); // 'good' — word-final ⟨n⟩ → [ŋ], vowel nasalized

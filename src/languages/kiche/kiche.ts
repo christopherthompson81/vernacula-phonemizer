@@ -1,10 +1,10 @@
 /**
  * K'iche' (quc) phonemizer — Qatzijob'al, the largest MAYAN language (~1.1M, Guatemala), Latin script (ALMG
- * orthography), canonical IPA, espeak-independent. The fleet's first Mayan family. ALMG is near-1:1 phonemic, so a
+ * orthography), canonical IPA. The fleet's first Mayan family. ALMG is near-1:1 phonemic, so a
  * longest-match grapheme scan. The Mayan hallmark is the EJECTIVE/glottalized series ⟨b'⟩→[ɓ] (implosive), ⟨t'⟩→[tʼ],
  * ⟨k'⟩→[kʼ], ⟨q'⟩→[qʼ], ⟨tz'⟩→[t͡sʼ], ⟨ch'⟩→[t͡ʃʼ]; the plain voiceless stops are ASPIRATED ⟨p t k q tz ch⟩→[pʰ tʰ kʰ qʰ
  * t͡sʰ t͡ʃʰ]. Uvular ⟨q q'⟩; ⟨x⟩→[ʃ], ⟨j⟩→[x], ⟨w⟩→[ʋ], ⟨r⟩→[ɻ], ⟨'⟩→[ʔ]; the sixth vowel ⟨ä⟩→[ə]. Vowel LENGTH is phonemic but
- * UNWRITTEN (folded); FINAL stress. 🔷 single-source (English Wiktionary, 127). See docs/investigations/quc_native_bringup_investigation.md.
+ * UNWRITTEN (folded); FINAL stress. 🔷 single-source (English Wiktionary, 127).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

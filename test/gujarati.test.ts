@@ -9,7 +9,7 @@ import {
 // Canonical-IPA goldens for Gujarati (gu) — Indo-Aryan, the Gujarati abugida. Reuses the generic abugida engine +
 // the Hindi orchestration (schwa deletion, weight stress, numbers) with a Gujarati-Unicode data file. Validated
 // against wikipron guj (80.4%) + kaikki guj (82.2%), both human. Gujarati has NO phonemic length (ઇ/ઈ→i), ⟨આ⟩=a,
-// the ⟨ે⟩/⟨ો⟩ mids are [e]~[ɛ]/[o]~[ɔ], dental t̪/d̪ vs retroflex ʈ/ɖ, ળ→ɭ, ષ→ʂ. See docs/investigations/gu_native_bringup_investigation.md.
+// the ⟨ે⟩/⟨ો⟩ mids are [e]~[ɛ]/[o]~[ɔ], dental t̪/d̪ vs retroflex ʈ/ɖ, ળ→ɭ, ષ→ʂ.
 const gu = (t: string): string => phonemize(t, "gu");
 
 describe("gujarati canonical IPA", () => {

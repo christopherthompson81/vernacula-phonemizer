@@ -1,9 +1,8 @@
 /**
  * Madurese / Bhâsa Madhurâ (mad) phonemizer — Austronesian, the 2008-revision Latin orthography, canonical IPA,
- * espeak-independent. NOT a direct grapheme map: Madurese has a signature VOWEL-REGISTER HARMONY (vowels raise
+ * NOT a direct grapheme map: Madurese has a signature VOWEL-REGISTER HARMONY (vowels raise
  * a→ɤ, ɛ→i, ə→ɨ, ɔ→u after a voiced OR aspirated stop; low elsewhere; ⟨l r w y⟩ transparent), plus glide/glottal
- * epenthesis between vowels, word-final devoicing, and geminate length. See
- * docs/investigations/mad_native_bringup_investigation.md.
+ * epenthesis between vowels, word-final devoicing, and geminate length.
  *
  * Pipeline: tokenize (greedy longest-match, tracking geminates) → epenthesis (insert ʔ between identical vowels,
  * w/j between different vowels unless height rises) → harmony (a register state machine sets each vowel's height)

@@ -1,13 +1,13 @@
 /**
  * Latin (la) phonemizer — CLASSICAL Latin (the restored/reconstructed pronunciation per Allen, *Vox Latina*), Italic
- * (Indo-European), Latin script with MACRONS marking vowel length, canonical IPA, espeak-independent. The fleet's first
+ * (Indo-European), Latin script with MACRONS marking vowel length, canonical IPA. The fleet's first
  * Italic language. Classical Latin g2p is near-fully deterministic from macronized spelling: short vowels LAX
  * (⟨e i o u⟩→[ɛ ɪ ɔ ʊ]) while macrons give length ([aː eː …]); ⟨c⟩ is ALWAYS [k] (no palatalization), ⟨v⟩→[w],
  * ⟨qu⟩→[kʷ], ⟨x⟩→[ks], ⟨gn⟩→[ŋn], aspirates ⟨ph th ch⟩→[pʰ tʰ kʰ]; word-initial/intervocalic ⟨i j⟩→glide [j]
  * (intervocalic GEMINATE [j j], eius→ɛjjʊs); DARK ⟨l⟩→[ɫ] (clear when geminate/before front); ⟨n⟩→[ŋ] before a velar;
  * and the signature WORD-FINAL ⟨-Vm⟩→ nasalized LONG vowel [Ṽː] (bellum→bɛllũː). Penult/antepenult weight stress is
  * emitted (deterministic; the backbone folds ˈˌ). THIN human single-source-FAMILY (wikipron, 44,907). Ecclesiastical
- * deferred. See docs/investigations/la_native_bringup_investigation.md.
+ * deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

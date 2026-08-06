@@ -3,7 +3,7 @@
  *
  * WHY THIS IS PINNED. The first set of thresholds PASSED `ceb`, the one wiki #585 names as the reason the
  * check exists: they were written from the shape of the argument before anything was measured. The
- * calibration that replaced them lives in docs/investigations/mined_corpus_health_investigation.md, and a
+ * calibration that replaced them lives in, and a
  * future edit that loosens a threshold, changes the shingle width, or swaps the tokenizer can silently
  * restore that state — the tool would keep printing confident output and would stop catching anything.
  *

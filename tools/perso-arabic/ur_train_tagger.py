@@ -2,7 +2,7 @@
 """Urdu STRUCTURAL tagger — port of the fa tagger (tools/persian/train_tagger.py) to the Hindi-phonology
 Urdu inventory. Sentence/word-level BiLSTM labelling each abjad char with its IPA-chunk TAG (consonant COPIED +
 following short vowel ə/ɪ/ʊ). Output length == input length → cannot degenerate. Aimed at short-vowel QUALITY on
-the OOV tail, NOT ezafe (Urdu ambiguity is lexical). See docs/investigations/ur_tagger_investigation.md.
+the OOV tail, NOT ezafe (Urdu ambiguity is lexical).
 
 Modes:
   python ur_train_tagger.py align     # coverage report only (iterate the aligner, no training)

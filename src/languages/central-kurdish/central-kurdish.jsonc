@@ -8,7 +8,7 @@
 // Signatures: the PHARYNGEALS ح→ħ, ع→ʕ; the velarised ڵ→ɫ vs plain ل→l; the trill ڕ→r vs the tap ر→ɾ; ئ→ʔ (the
 // word-initial hamza/glottal onset); ق→q, غ→ɣ, x→خ; ژ→ʒ, چ→t͡ʃ, ج→d͡ʒ. Read by a left-to-right greedy scan (the وو
 // digraph, then single letters) + the و/ی glide resolution + н→ŋ before a velar. Validated against wikipron
-// ckb_arab_broad (94.1%) + kaikki ckb (93.4%), both human. See docs/investigations/ckb_native_bringup_investigation.md.
+// ckb_arab_broad (94.1%) + kaikki ckb (93.4%), both human.
 {
     "language": "ckb",
     "name": "Central Kurdish (Sorani)",

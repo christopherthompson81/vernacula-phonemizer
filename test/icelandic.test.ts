@@ -8,7 +8,7 @@ import { normalizeIcelandic } from "../src/languages/icelandic/normalize.ts";
 // in the fleet: NO voicing contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k];
 // famous epenthetic-stop clusters ⟨ll⟩→[tl] ⟨rn⟩→[rtn]; preaspiration; devoiced-sonorant onsets. A greedy scan +
 // code rules, validated against wikipron isl_latn_broad (10,093 human headwords) — 79.8% FOLDED / 96.7% symbol, with
-// vowel LENGTH + ASPIRATION folded. 🔷 single-source but LARGE. See docs/investigations/is_native_bringup_investigation.md.
+// vowel LENGTH + ASPIRATION folded. 🔷 single-source but LARGE.
 describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization + the epenthetic clusters", () => {
     const is = createIcelandic();
 

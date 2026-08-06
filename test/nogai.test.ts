@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Nogai / ногай тили (nog) — Kipchak Turkic (Kipchak-Nogai), Cyrillic. A near-deterministic
 // grapheme scan: Nogai WRITES the uvulars/velar-nasal as digraphs (къ→q, гъ→ʁ, нъ→ŋ) and the front vowels as
 // digraphs (аь→æ, оь→ø, уь→y), so ⟨к г⟩ are always [k ɡ] (no harmony inference, the Bashkir pattern). Referee-
-// limited (1 kaikki IPA + coarse ASJP); see docs/investigations/nog_native_bringup_investigation.md.
+// limited (1 kaikki IPA + coarse ASJP).
 describe("Nogai (ногай тили) canonical IPA", () => {
     test("the one kaikki attestation + front-vowel digraphs", () => {
         expect(phonemizeWord("туькен")).toBe("tyˈken"); // kaikki /ty.ken/ — ⟨уь⟩→[y], ⟨е⟩ post-consonant→[e]

@@ -1,10 +1,9 @@
 /**
  * Paraguayan Guaraní (gn) phonemizer — Avañe'ẽ, Tupian, Latin script (the achegety), canonical IPA,
- * espeak-independent. The fleet's first Tupian language. Near-phonemic: a longest-match scan over the prenasalized
+ * The fleet's first Tupian language. Near-phonemic: a longest-match scan over the prenasalized
  * prenasalized digraphs ⟨mb nd nt⟩→[ᵐb ⁿd ⁿt] (⟨ng⟩→plain [ŋ]), ⟨ch⟩→[ʃ], ⟨gu⟩→[w], then single graphemes — the 12-vowel system (⟨y⟩→[ɨ],
  * the six nasal vowels ⟨ã ẽ ĩ õ ũ ỹ⟩), ⟨g⟩→[ɰ], ⟨j⟩→[d͡ʒ], ⟨ñ⟩→[ɲ], ⟨'⟩ (puso)→[ʔ]. Stress is final-syllable
- * (oxytone) by default, overridden to an acute-accented vowel; a nasal vowel attracts it otherwise. See
- * docs/investigations/gn_native_bringup_investigation.md.
+ * (oxytone) by default, overridden to an acute-accented vowel; a nasal vowel attracts it otherwise.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

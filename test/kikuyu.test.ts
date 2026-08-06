@@ -10,7 +10,7 @@ import { numberToWords } from "../src/languages/kikuyu/numbers.ts";
 // sibilant/tap notation. Signatures: a 7-vowel ATR system where the TILDE is vowel QUALITY not nasalization
 // (⟨ĩ⟩=e, ⟨ũ⟩=o, ⟨e⟩=ɛ, ⟨o⟩=ɔ); Bantu FRICATIVIZATION (⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ, ⟨c⟩=ɕ); PRENASALIZED digraphs
 // (⟨mb⟩=ᵐb, ⟨nd⟩=ⁿd, ⟨nj⟩=ᶮdʑ, ⟨ng⟩=ᵑɡ); ⟨ng'⟩=ŋ, ⟨ny⟩=ɲ, ⟨r⟩=ɾ. TONE (2-tone H/L + downstep) is not written →
-// not emitted; cardinal numbers are covered in their own describe block below. See docs/investigations/ki_native_bringup_investigation.md.
+// not emitted; cardinal numbers are covered in their own describe block below.
 describe("Kikuyu canonical IPA — greedy g2p (Bantu fricativization + prenasalization)", () => {
     test("7-vowel ATR: the TILDE is vowel QUALITY not nasal — ⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ", () => {
         expect(phonemizeWord("Gĩkũyũ")).toBe("ɣekojo"); // ⟨ĩ⟩→e, ⟨ũ⟩→o (the endonym)

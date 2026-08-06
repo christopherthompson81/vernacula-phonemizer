@@ -1,6 +1,7 @@
 /**
- * Native Akan / Akan kasa (ak) text phonemizer — canonical IPA, espeak-independent. Akan is a Kwa (Niger-Congo)
- * language of Ghana (~20M incl. L2) — the fleet's FIRST Kwa language. It has a shallow, well-standardised Latin
+ * Native Akan / Akan kasa (ak) text phonemizer — canonical IPA.
+ *
+ * Akan is a Kwa (Niger-Congo)language of Ghana (~20M incl. L2). It has a shallow, well-standardised Latin
  * orthography (Bureau of Ghana Languages; the Asante/Akuapem Twi and Fante varieties share it), so a near
  * one-to-one rule g2p. The letter maps live in akan.jsonc; the contextual bits are here:
  *
@@ -20,7 +21,7 @@
  *     exists — so OOV words carry no tone; the SYSTEM is implemented and extensible with more lexicon.
  *   • NUMBERS — standard Twi cardinals (baako, du, aduonu, ɔha, apem), compositional.
  *
- * Small kaikki human gold (no wikipron/epitran Akan) → 🔷 single-source. See docs/investigations/ak_native_bringup_investigation.md.
+ * Small kaikki human gold (no wikipron/epitran Akan) → 🔷 single-source.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

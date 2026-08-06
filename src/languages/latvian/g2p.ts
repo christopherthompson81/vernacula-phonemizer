@@ -1,5 +1,5 @@
 /**
- * Latvian (lv) grapheme→phoneme engine — Baltic, Latin script, canonical IPA, espeak-independent. Latvian writes
+ * Latvian (lv) grapheme→phoneme engine — Baltic, Latin script, canonical IPA. Latvian writes
  * what Lithuanian leaves implicit, so the scan is largely direct: written palatals (ģ ķ ļ ņ → ɟ c ʎ ɲ), written
  * length (macron ā ē ī ū → aː eː iː uː). The context systems:
  *   - native ⟨o⟩ → the falling diphthong [uɔ̯] (loks→luɔ̯ks); loans keep [o] (lexical — see the investigation).
@@ -8,7 +8,7 @@
  *   - ⟨v⟩ vocalizes to [w] in the coda (dievs→diɛws), stays [v] before a vowel (Latvija→latvija).
  *   - VOICING: regressive assimilation within obstruent clusters (draugs→drau̯ks, g→k before s); sonorants +
  *     ⟨v⟩/⟨j⟩ + the vowel offglides are transparent. n → ŋ before a velar.
- * Stress (fixed first-syllable) is applied in latvian.ts. See docs/investigations/lv_native_bringup_investigation.md.
+ * Stress (fixed first-syllable) is applied in latvian.ts.
  */
 import { MANIFEST } from "./manifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";

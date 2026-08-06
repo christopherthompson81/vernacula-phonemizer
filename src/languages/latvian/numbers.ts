@@ -2,7 +2,7 @@
  * Latvian (lv) cardinal number compositor. Returns composed Latvian TEXT (space-separated) that the phonemizer runs
  * through the g2p, so the IPA stays consistent with the word engine. Tens+units are space-separated (divdesmit
  * viens); teens take the -padsmit suffix as one word (vienpadsmit). Hundreds/thousands: (count) simti / tūkstoši.
- * No numeric referee exists → these are the standard Latvian forms. See docs/investigations/lv_native_bringup_investigation.md.
+ * No numeric referee exists → these are the standard Latvian forms.
  */
 import { MANIFEST } from "./manifest.ts";
 

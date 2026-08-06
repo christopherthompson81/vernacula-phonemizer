@@ -1,5 +1,5 @@
 /**
- * Native Armenian text phonemizer — canonical IPA, espeak-independent. Armenian is very nearly one letter ↔ one
+ * Native Armenian text phonemizer — canonical IPA. Armenian is very nearly one letter ↔ one
  * phoneme, so this is a left-to-right greedy scan over a grapheme table with a few code rules: DIGRAPHS (⟨ու⟩→[u], and
  * for Western the ⟨յու⟩/⟨իւ⟩→[ʏ], ⟨յո⟩→[œ] sequences), the WORD-INITIAL glides ⟨ե⟩→[je], ⟨ո⟩→[vo], ⟨և⟩→[jev] (bare
  * [e]/[o]/[ev] elsewhere), the ligature ⟨և⟩→[ev], and schwa epenthesis in initial/final clusters.
@@ -11,7 +11,7 @@
  *     classical aspirate ⟨փ թ ք ց չ⟩ MERGE to voiceless-aspirated [pʰ tʰ kʰ t͡sʰ t͡ʃʰ], while classical voiceless
  *     ⟨պ տ կ ծ ճ⟩ become VOICED [b d ɡ d͡z d͡ʒ]; the ⟨ր⟩/⟨ռ⟩ rhotics neutralise to a single tap [ɾ].
  *
- * Validated vs wikipron hye_armn_e (Eastern) / hye_armn_w (Western). See docs/investigations/hy_native_bringup_investigation.md.
+ * Validated vs wikipron hye_armn_e (Eastern) / hye_armn_w (Western).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

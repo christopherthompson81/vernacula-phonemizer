@@ -1,8 +1,7 @@
 /**
- * Thai word segmentation — ported from espeak-ng-portable src/Normalize/scriptSegmentation.ts (our authored
- * front-end). DAG maximal-matching (fewest tokens) over the seg-words set, with word boundaries constrained to
+ * Thai word segmentation (authored). DAG maximal-matching (fewest tokens) over the seg-words set, with word boundaries constrained to
  * TCC (Thai Character Cluster, PyThaiNLP/Theeramunkong) boundaries so a word never splits mid-cluster. Used to
- * split a corpus token that is actually a compound (ก็คือ → ก็ คือ). See docs/investigations/th_native_bringup_investigation.md.
+ * split a corpus token that is actually a compound (ก็คือ → ก็ คือ).
  */
 import { THAI_TCC_RE } from "./manifest.ts";
 import { segmentByDag, loadSegWords } from "../../core/segment.ts";

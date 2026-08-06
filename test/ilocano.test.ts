@@ -7,7 +7,6 @@ import { createIlocano, phonemizeWord, phonemizeWordRules } from "../src/languag
 // path (a stress-marked-referee lexicon first, then the rule). The rule's Ilocano-distinctive HIATUS: a HIGH vowel
 // ⟨i u⟩ before a vowel GLIDES (dua→dwa, radio→ɾadjo). Whether a high vowel glides vs stays syllabic is LEXICAL
 // (garcia stays but radio glides — identical C-i-V, differ only in lexical stress); the lexicon carries that.
-// See docs/investigations/ilo_native_bringup_investigation.md.
 describe("Ilocano — the RULE g2p (phonemizeWordRules; the non-circular eval path)", () => {
     test("high-vowel GLIDING hiatus: i→j, u→w before a vowel (the split from Bisayan)", () => {
         expect(phonemizeWordRules("dua")).toBe("dwˈa"); // ⟨u⟩ before a → w

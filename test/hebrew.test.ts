@@ -9,7 +9,6 @@ import { phonemizeWord, createHebrew } from "../src/languages/hebrew/hebrew.ts";
 // IPA (2561 words): 87.1% folded, the folds stripping stress (unwritten), the variable glottal ⟨א⟩/⟨ע⟩=ʔ, the
 // velar-nasal allophone, and resh notation. Signatures: bgdkpt dagesh (בּ→b/ב→v, כּ→k/כ→χ, פּ→p/פ→f); ⟨ש⟩ shin/sin;
 // ⟨ו⟩ shuruk וּ→u / holam male וֹ→o; patach genuvah (final guttural's patach surfaces before it, מָשִׁיחַ→maʃiaχ).
-// See docs/investigations/he_native_bringup_investigation.md.
 describe("Hebrew canonical IPA — Phase-1 niqqud→IPA (Modern Israeli)", () => {
     test("bgdkpt dagesh split + ⟨ש⟩ shin/sin + ⟨ו⟩ specials", () => {
         expect(phonemizeWord("בַּיִת")).toBe("bajit"); // dagesh בּ→b; ⟨יִ⟩…⟨ת⟩; yod glide

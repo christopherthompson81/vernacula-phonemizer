@@ -7,8 +7,7 @@ import { normalizePolish, normalizePolishInitialisms } from "../src/languages/po
 
 // Canonical-IPA goldens for Polish (pl) — West Slavic rule g2p, penultimate stress. Digraphs (ch→x, cz→t͡ʂ, sz→ʂ,
 // rz→ʐ, dz/dź/dż), the ⟨i⟩ palatalizer, nasal vowels ą/ę (homorganic nasal by place; ą-final→ɔw̃, ę-final→ɛ),
-// regressive voicing + final devoicing, progressive w/rz devoicing. 98.2% vs wikipron (human, 130k). See
-// docs/investigations/pl_native_bringup_investigation.md.
+// regressive voicing + final devoicing, progressive w/rz devoicing. 98.2% vs wikipron (human, 130k).
 describe("Polish canonical IPA", () => {
     test("digraphs, palatalization, voicing, nasals", () => {
         const cases: [string, string][] = [

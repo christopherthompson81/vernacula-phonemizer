@@ -1,6 +1,6 @@
 // Tatar / Татар теле (tt) — Kipchak Turkic, CYRILLIC (official). ONLY referee: kaikki Tatar (HUMAN, Wiktionary, 69
 // Cyrillic headwords with IPA) — THIN, single-source (no wikipron tt, no epitran tat mapping). Vowel-harmony backing
-// of ⟨к г⟩→[q ʁ] (back) / [k ɡ] (front). See docs/investigations/tt_native_bringup_investigation.md.
+// of ⟨к г⟩→[q ʁ] (back) / [k ɡ] (front).
 {
     "language": "tt", "name": "Tatar (Татар теле)", "script": "Cyrillic",
     "provenance": "Authored Cyrillic→IPA g2p (harmony-driven ⟨к⟩→q/k ⟨г⟩→ʁ/ɡ; ⟨ә⟩→æ ⟨ө⟩→ø ⟨ү⟩→y ⟨ы⟩→ɨ; ⟨җ⟩→d͡ʑ ⟨ң⟩→ŋ ⟨һ⟩→h ⟨ч⟩→t͡ɕ; iotated ⟨я ю ё⟩; final stress) from Standard Tatar phonology; validated against the thin kaikki set.",

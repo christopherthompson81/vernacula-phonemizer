@@ -7,7 +7,7 @@ import { numberToWords } from "../src/languages/ewe/numbers.ts";
 // Signatures: labial-velars ⟨gb kp⟩→[ɡ͡b k͡p], the bilabial ⟨ƒ⟩→[ɸ]/⟨ʋ⟩→[β] (vs labiodental f/v), affricates ⟨dz ts⟩,
 // ⟨ny⟩→[ɲ], ⟨x⟩→[x]; written nasalization (tilde kept); TONELESS (tone unmarked in the orthography). The two non-obvious
 // allophonies (per Jalloh's grammar): ⟨w⟩→[w] before a rounded vowel but [ɰ] before an unrounded one, and ⟨r⟩→[l] in an
-// onset cluster (after a consonant) but [r] elsewhere. Referee: kaikki Ewe (249 human, 100% folded). See docs/investigations/ee_native_bringup_investigation.md.
+// onset cluster (after a consonant) but [r] elsewhere. Referee: kaikki Ewe (249 human, 100% folded).
 describe("Ewe (Eʋegbe) canonical IPA", () => {
     test("labial-velars, bilabials, affricates, ⟨ny⟩", () => {
         expect(phonemizeWord("Eʋegbe")).toBe("eβeɡ͡be"); // the language name — ⟨ʋ⟩→[β], ⟨gb⟩→[ɡ͡b]

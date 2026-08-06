@@ -1,11 +1,11 @@
 /**
  * Kikuyu / Gĩkũyũ (ki) phonemizer — Niger-Congo BANTU (E51), the Latin orthography, canonical IPA,
- * espeak-independent. The largest language of Kenya (~8M). A PURE greedy longest-match scan over the grapheme
+ * The largest language of Kenya (~8M). A PURE greedy longest-match scan over the grapheme
  * table (manifest.ts) — no code rules; the Bantu fricativization and prenasalization live entirely in the table.
  * Signatures: 7-vowel ATR system where the TILDE marks vowel QUALITY not nasalization (⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ);
  * FRICATIVIZATION ⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ, ⟨c⟩=ɕ; PRENASALIZED digraphs ⟨mb⟩=ᵐb, ⟨nd⟩=ⁿd, ⟨nj⟩=ᶮdʑ, ⟨ng⟩=ᵑɡ;
  * ⟨ng'⟩=ŋ, ⟨ny⟩=ɲ, ⟨r⟩=ɾ. DAHL'S LAW is orthographic (a dissimilated k is spelled ⟨g⟩→ɣ). TONE (2-tone H/L +
- * downstep) is not written → not emitted. Cardinal numbers: numbers.ts (the shared E5x compositor, citation forms). See docs/investigations/ki_native_bringup_investigation.md.
+ * downstep) is not written → not emitted. Cardinal numbers: numbers.ts (the shared E5x compositor, citation forms).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

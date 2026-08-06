@@ -6,7 +6,7 @@
  * ⚠ CLASSICAL-Persian scoped. Trained on the aligned-Shahnameh corpus — it is EXCELLENT in-domain (+18.8pp over
  * word-level, nails ezafe) but can HALLUCINATE on short/modern out-of-domain text. It is therefore an OPTIONAL
  * path (createFaContextRestorer + phonemizeFaContext in faNeural.ts), NOT wired into the default modern runtime.
- * Shipping a modern context restorer needs modern contextualised data. See the fa restoration investigation doc
+ * Shipping a modern context restorer needs modern contextualised data.
  * and src/languages/persian/fa-context-restorer.PROVENANCE.md.
  *
  * `onnxruntime-node` is optional (lazy import); createFaContextRestorer() resolves to `undefined` (no-op) if it or

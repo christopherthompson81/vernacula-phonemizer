@@ -4,8 +4,7 @@
 // (Lhasa)" illustration (INDEPENDENT, CC-BY, 40 pairs). SECONDARY = kaikki Lhasa (1281) which is MODULE-GENERATED
 // (Module:bo-pron) → REFERENCE-PARITY, disclosed. Independent COVERAGE separately validated at 100% of tokens on
 // 300k TIBMD@MUC Lhasa syllables (numerals aside). Tone (2-level ˥/˩), length, ties, combining accents are stripped
-// by the shared BACKBONE (segmental cf, like hmn/cdo/yue); tone is asserted in test/tibetan.test.ts. See
-// docs/investigations/bo_native_bringup_investigation.md.
+// by the shared BACKBONE (segmental cf, like hmn/cdo/yue); tone is asserted in test/tibetan.test.ts.
 {
     "language": "bo", "name": "Tibetan (Standard/Lhasa)", "script": "Tibetan",
     "provenance": "Authored syllable-stack g2p from Tournadre's Standard Spoken Tibetan + the JIPA Lhasa illustration (Zhang 2024): tonogenesis (voiceless→HIGH; voiced-obstruent→LOW+aspiration-by-head; sonorant raised by prefix/superscript), ya-btags→palatal / ra-btags→retroflex-affricate, suffix umlaut (a→ɛ o→ø u→y) / length / nasalization / glottalization, Lhasa word-tone template (non-initial syllables default HIGH).",

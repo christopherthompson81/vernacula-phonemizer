@@ -1,5 +1,5 @@
 /**
- * Native Malayalam (ml) text phonemizer — canonical IPA, espeak-independent. Malayalam is a Dravidian Brahmic
+ * Native Malayalam (ml) text phonemizer — canonical IPA. Malayalam is a Dravidian Brahmic
  * abugida read by the generic engine (core/abugida.ts), mirroring Telugu/Kannada: NO inherent-vowel deletion
  * (every akshara is pronounced — inherent /a/). malayalam.ts adds the Malayalam-specific handling the generic
  * engine can't know:

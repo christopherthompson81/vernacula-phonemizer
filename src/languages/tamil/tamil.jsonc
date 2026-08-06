@@ -1,7 +1,7 @@
 {
     // Tamil (ta) abugida definition — consumed by the shared core/abugida.ts interpreter (same engine as Hindi).
     // Base (citation) consonant phonemes; the Dravidian plosive voicing allophony + two-level stress are applied
-    // as a post-pass in tamil.ts (they are context-sensitive, not declarative). See docs/investigations/ta_native_bringup_investigation.md.
+    // as a post-pass in tamil.ts (they are context-sensitive, not declarative).
     "language": "ta",
     "name": "Tamil",
     "script": "Tamil",

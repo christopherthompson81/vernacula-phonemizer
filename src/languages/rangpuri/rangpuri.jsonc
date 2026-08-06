@@ -4,7 +4,6 @@
 // Appendix-A RP (Rangpur) referee. KRNB deltas from Hindi: DEAFFRICATION (च/छ→s, ज→d͡z, झ→d͡zʱ); VOICED aspirates
 // RETAINED (घ झ ढ ध भ → ɡʱ d͡zʱ ɖʱ d̪ʱ bʱ); VOICELESS aspirates positional (ख ठ थ फ keep [ʰ] word-INITIALLY, deaspirate
 // elsewhere — a postRule); inherent vowel [ɔ] (Eastern-Indic), NO phonemic vowel length, ◌ॉ→[æ], व→w, ण→n.
-// See docs/investigations/rkt_krnb_bringup_investigation.md.
 {
     "language": "rkt",
     "name": "Rangpuri (KRNB)",

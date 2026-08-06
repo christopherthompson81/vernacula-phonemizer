@@ -5,7 +5,7 @@
  * consonant carries an inherent /a/, replaced by a sandhangan vowel sign or suppressed by pangkon (virama); medial
  * signs (cakra -r-, pengkal -y-, keret -rə-) insert a glide/liquid; coda signs (cecak -ŋ, layar -r, wignyan -h)
  * close the syllable; taling + tarung = /o/. Because pepet vs taling and dental vs retroflex are written
- * distinctly, this input is MORE phonemic than the Latin. See docs/investigations/jv_native_bringup_investigation.md.
+ * distinctly, this input is MORE phonemic than the Latin.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { Seg } from "./javanese.ts";

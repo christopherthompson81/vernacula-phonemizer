@@ -9,7 +9,7 @@
  * IPA = the Tajik pron via tajik-align + Iranian normalisation (short i→e, u→o, final ه→e).
  *
  * Inputs (regenerate): the Persian crawl (scratchpad crawl_shahnameh.py over Ganjoor cat 33 → fa_shahnameh.txt)
- * and the Tajik text (shahnameh-tajik-corpus parquet → tg_shahnameh.txt). See the fa restoration investigation doc.
+ * and the Tajik text (shahnameh-tajik-corpus parquet → tg_shahnameh.txt).
  *   npx tsx tools/persian/align_shahnameh.ts <dir-with-fa_shahnameh.txt+tg_shahnameh.txt>
  */
 import { readFileSync, writeFileSync } from "node:fs";

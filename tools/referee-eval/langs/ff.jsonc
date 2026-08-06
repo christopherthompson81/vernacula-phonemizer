@@ -1,11 +1,11 @@
 // No wikipron Fula exists (ful/fuf scrapes are empty), so the independent referee is epitran ful-Latn —
-// committed by espeak-ng-portable's Fula bring-up as ff_gold.tsv. Folds = the documented ff↔epitran
+// committed by the Fula bring-up as ff_gold.tsv. Folds = the documented ff↔epitran
 // notation divergences (affricate/implosive spelling, prenasal superscripts, gemination doubling).
 {
     "referees": [
         {
             "file": "ff.epitran-ful-Latn.tsv",
-            "source": "epitran ful-Latn (programmatic; via espeak-ng-portable ff_gold)",
+            "source": "epitran ful-Latn (programmatic; ff_gold)",
             "role": "primary"
         }
     ],

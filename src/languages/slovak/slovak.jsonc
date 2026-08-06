@@ -1,4 +1,4 @@
-// Native canonical-IPA MANIFEST for Slovak (sk) — West Slavic, Latin script, espeak-independent. Sibling of Czech
+// Native canonical-IPA MANIFEST for Slovak (sk) — West Slavic, Latin script. Sibling of Czech
 // (cs) but with its own signatures: palatalisation of d/t/n/l → ɟ/c/ɲ/ʎ before the SOFT vowels i/í (y/ý are HARD,
 // like Czech), the rising diphthongs ⟨ia ie iu⟩ → ɪ̯a ɪ̯e ɪ̯u and ⟨ô⟩ → u̯ɔ, ⟨ä⟩ → æ, the syllabic liquids l̩/r̩
 // (long ⟨ĺ ŕ⟩ → l̩ː/r̩ː), ⟨ľ⟩ = ʎ, ⟨h⟩ = ɦ, ⟨ch⟩ = x, and regressive voicing assimilation + word-final devoicing.
@@ -10,7 +10,7 @@
 {
     "language": "sk",
     "name": "Slovak",
-    "provenance": "Cleanroom rule-based g2p + number compositor (no lexicon). Consonant/vowel maps + number words are language facts. espeak-independent; scored against the wikipron slk_latn_broad HUMAN referee. See docs/investigations/sk_native_bringup_investigation.md.",
+    "provenance": "Cleanroom rule-based g2p + number compositor (no lexicon). Consonant/vowel maps + number words are language facts; scored against the wikipron slk_latn_broad HUMAN referee.",
 
     "convention": {
         "vowels": "short a e i/y o u → a e i ɔ u; long á é í/ý ó ú → aː eː iː ɔː uː; ⟨ä⟩ → æ",
@@ -69,7 +69,7 @@
 
     // LEXICAL: acronyms Slovak spells out letter-by-letter although their lowercase form COULD be read as a
     // word, so no phonotactic rule can derive it (core/initialisms.ts states this limit explicitly). Every
-    // entry occurs in the sk_sk corpus; the counts are in the investigation log, Run 14.
+    // entry occurs in the sk_sk corpus;
     // Tokens with NO VOWEL LETTER need no entry — the shared OOV rule letter-spells them automatically, and
     // that is most of this corpus's inventory: HDP, DVD, USD, GMT, TB, XDR, NHK, VPN, PTWC, GPS, GBP, DSLR,
     // FTIR, FKP, KNP, NMR, NPWS, NSW, TMZ, CCTV, CG, HK, QC, SM, MS, TT, PBS, APS, HJR, PNG.

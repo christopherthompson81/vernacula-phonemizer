@@ -6,7 +6,7 @@ import { phonemizeWord as eastern } from "../src/languages/armenian/armenian.ts"
 // Canonical-IPA goldens for WESTERN Armenian (hyw) — արեւմտահայերէն, the Istanbul/diaspora standard. The signature is
 // the CONSONANT SHIFT: the classical three-way stop/affricate system collapses to a two-way one — classical VOICED
 // ⟨բ դ գ ձ ջ⟩ and classical ASPIRATE ⟨փ թ ք ց չ⟩ both → voiceless-aspirated [pʰ tʰ kʰ t͡sʰ t͡ʃʰ], while classical
-// VOICELESS ⟨պ տ կ ծ ճ⟩ → VOICED [b d ɡ d͡z d͡ʒ]. Referee: wikipron hye_armn_w broad + narrow. See docs/investigations/hyw_native_bringup_investigation.md.
+// VOICELESS ⟨պ տ կ ծ ճ⟩ → VOICED [b d ɡ d͡z d͡ʒ]. Referee: wikipron hye_armn_w broad + narrow.
 describe("Western Armenian (արեւմտահայերէն) canonical IPA", () => {
     test("★ THE CONSONANT SHIFT — classical voiceless ⟨պ տ կ⟩ → VOICED [b d ɡ]", () => {
         expect(phonemizeWord("պատ")).toBe("bɑd"); // 'wall' — ⟨պ⟩→[b], final ⟨տ⟩→[d]

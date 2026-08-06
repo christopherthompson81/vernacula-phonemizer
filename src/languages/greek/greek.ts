@@ -1,5 +1,5 @@
 /**
- * Modern Greek (el) phonemizer — Hellenic, the Greek script, canonical IPA, espeak-independent. A CONTEXT-SENSITIVE
+ * Modern Greek (el) phonemizer — Hellenic, the Greek script, canonical IPA. A CONTEXT-SENSITIVE
  * left-to-right scan (not a table map). The historical spellings collapse to /a e i o u/; the interesting rules:
  *   • VELAR PALATALISATION before a front vowel [e i]: κ→c, γ→ʝ, χ→ç; the γ-nasal digraphs ⟨γγ γκ⟩→ŋɡ (→ŋɟ before
  *     front; word-initial ⟨γκ⟩ has no [ŋ]).
@@ -9,7 +9,7 @@
  *     the consonant (→ʎ ɲ, the [i] absorbed), after κ/γ/χ likewise (→c ʝ ç), after any other consonant it becomes
  *     a glide [ç] (voiceless C) / [ʝ] (voiced C). A STRESSED [í] stays a full vowel (needs the tonos, tracked below).
  *   • ⟨αυ ευ⟩ → a/e + [v]/[f] and ⟨σ⟩ → [z] by the following consonant's voicing; double consonants simplify.
- * Stress itself is not emitted (the referees don't mark it). See docs/investigations/el_native_bringup_investigation.md.
+ * Stress itself is not emitted (the referees don't mark it).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

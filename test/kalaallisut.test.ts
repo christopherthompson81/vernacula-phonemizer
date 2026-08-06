@@ -7,7 +7,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Eskimo-Aleut language. The 1973 orthography is highly phonemic → a near-1:1 scan: the THREE-vowel system
 // /a i u/ (⟨e o⟩ = the uvular-lowered allophones → [i]/[u]), the uvular ⟨q⟩→[q]/⟨r⟩→[ʁ], ⟨ng⟩→[ŋ]/⟨nng⟩→[ŋː],
 // doubled letter → length, loan ⟨b d⟩→[p t]. Validated 94.8% folded / 98.5% symbol vs wikipron kal_latn_broad
-// (human, 1581). See docs/investigations/kl_native_bringup_investigation.md.
+// (human, 1581).
 describe("Kalaallisut (Greenlandic) canonical IPA", () => {
     test("three-vowel /a i u/ + ⟨e o⟩ → [i u] (uvular-lowered allophones)", () => {
         expect(phonemizeWord("nanoq")).toBe("nanuq"); // ⟨o⟩ before ⟨q⟩ → [u] (the phonemic level); ⟨q⟩→[q]

@@ -1,5 +1,5 @@
 /**
- * Spanish (es) phonemizer — canonical IPA, broad Castilian, espeak-independent. Rule-based g2p (g2p.ts) +
+ * Spanish (es) phonemizer — canonical IPA, broad Castilian. Rule-based g2p (g2p.ts) +
  * spirantization + rule-based stress; no lexicon. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";

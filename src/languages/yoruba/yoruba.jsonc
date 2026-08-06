@@ -3,7 +3,7 @@
 // ⟨gb⟩→ɡ͡b and ⟨p⟩→k͡p (Yoruba has NO plain /p/), ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→tap ɾ, ⟨y⟩→j; the dotted-below vowels
 // ẹ→ɛ ọ→ɔ (7 oral vowels i e ɛ a ɔ o u); NASAL vowels from a coda ⟨n⟩ (ọn→ɔ̃; onset n before a vowel stays n);
 // syllabic nasals m̩/n̩; and THREE level tones marked on the vowel: High=acute ˥, Mid=unmarked ˧, Low=grave ˩
-// (Chao letters). Ported from the espeak-ng-portable authoring (epitran-validated). See docs/investigations/yo_native_bringup_investigation.md.
+// (Chao letters). Epitran-validated.
 {
     "language": "yo",
     "name": "Yoruba",
@@ -32,7 +32,7 @@
     // `ẹ̀ẹ́dẹ́gbẹ̀rún mítà (900m)`, and one instance that pins the whole multi-part shape:
     //     ẹgbẹ̀rún lọ́nà méjìlélọ́gbọ̀n lé ẹgbẹ̀rin lé méjìlá  (32,812)   = 1000×32 + 800 + 12
     // 576 such glosses were extracted; 186 numeral phrases are glossed consistently. See
-    // docs/investigations/yo_ig_numbers_investigation.md for the mining and every count.
+    // for the mining and every count.
     //
     // ⚠ AND THE DUMP CONTAINS DUPLICATE PARAGRAPHS (123,405 → 112,738 unique, 8.6%), which inflates exactly the
     // rare forms this table depends on. One gloss, `mẹ́tàdínlọ́gọ́rin (75%)`, appeared four times and looked like

@@ -1,4 +1,5 @@
-# Vietnamese rhyme (toneless orthography after onset) -> IPA (nucleus+coda+glide). Derived from espeak-ng-portable.
+# Vietnamese rhyme (toneless orthography after onset) -> IPA (nucleus+coda+glide). An exhaustive
+# closed-class inventory: every rhyme the orthography admits, one row each.
 a	aː
 ac	aːk
 ach	ek

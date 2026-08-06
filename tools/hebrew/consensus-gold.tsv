@@ -4,7 +4,7 @@
 # (audio-supervised, CC-BY). Unanimity of three different methodologies = high-confidence gold for validating
 # the Phase-1 g2p (a rule change is accepted iff it RAISES agreement here). Where the three disagree, the word
 # is EXCLUDED (genuine ambiguity/convention, not a validation target). Regenerate: tools/hebrew/build-consensus-gold.py.
-# Eval-only (never shipped in the model). See docs/investigations/he_native_bringup_investigation.md Run 11.
+# Eval-only (never shipped in the model). Run 11.
 אֱגוֹז	ʔeɡoz
 אֱדוֹם	ʔadom
 אֱמֶת	ʔemet

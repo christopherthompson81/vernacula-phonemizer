@@ -1,6 +1,6 @@
 // Nama / Khoekhoe (naq) — Khoe-Kwadi, the Khoekhoegowab LATIN orthography (with the Unicode click letters). The
 // fleet's FIRST click language. Referee: English Wiktionary "Khoekhoe terms with IPA pronunciation" (46; dominated
-// by the click-letter definitions). See docs/investigations/naq_native_bringup_investigation.md.
+// by the click-letter definitions).
 {
     "language": "naq",
     "name": "Nama (Khoekhoe)",

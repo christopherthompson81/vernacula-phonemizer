@@ -11,7 +11,7 @@
  * +20.5pp. The residual is dominated by MERGERS Tajik SHARES with Persian and so cannot resolve: Tajik у → fa u
  * 87% / o 13% (the short-u→o vs long-ū→u merger — and the abjad does NOT disambiguate it: both write و, cf. دو
  * 'do'), plus a smaller bidirectional i↔e. So Tajik is a strong restoration SOURCE, with a genuine
- * merger-ambiguity ceiling (not a data-volume problem). See docs/investigations/fa_shortvowel_restoration_investigation.md.
+ * merger-ambiguity ceiling (not a data-volume problem).
  *
  *   npx tsx tools/persian/divergence-analysis.ts
  */

@@ -3,7 +3,7 @@
 // Formation, coda-nasal assimilation). NO wikipron/epitran Akan; the only referee is the SMALL kaikki human set
 // (22 entries, mixed Asante/Fante, tone+nasal marked, phonemic~phonetic mix). TONE (H/L) and ATR allophony are
 // UNWRITTEN in the orthography → deferred → folded here. The correctness anchor is the adjudicated gold in
-// test/akan.test.ts. 🔷 single-source (small human corroboration). See docs/investigations/ak_native_bringup_investigation.md.
+// test/akan.test.ts. 🔷 single-source (small human corroboration).
 {
     "language": "ak",
     "name": "Akan (Twi)",

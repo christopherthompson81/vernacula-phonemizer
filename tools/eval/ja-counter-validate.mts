@@ -5,7 +5,7 @@
  * NOTATION (じゅう vs じゅー): both are routed through kanaToIpa, length marks dropped, and a doubled vowel unit
  * collapsed (d͡ʑɯᵝɯᵝ ≡ d͡ʑɯᵝː). Impossible combos (13月, 32日, 25時) are skipped — OpenJTalk emits garbage for them.
  *
- * GOLD (regenerate — needs pyopenjtalk, BSD; the counter readings are linguistic facts, ADR-0014):
+ * GOLD (regenerate — needs pyopenjtalk, BSD; the counter readings are linguistic facts):
  *   python3 - <<'PY' > ojt_counters.tsv
  *   import pyopenjtalk
  *   COUNTERS = "月時円年人日分本匹杯泊個回階軒歳冊足枚番度台名秒羽頭着丁"

@@ -5,7 +5,7 @@ import { phonemizeWord, createArmenian } from "../src/languages/armenian/armenia
 // Armenian (hy) — Indo-European (own branch), own alphabet. EASTERN Armenian (Yerevan). Left-to-right greedy scan +
 // the ⟨ու⟩=u digraph, word-initial glides (ե→je, ո→vo, և→jev), and schwa epenthesis (word-initial/final clusters).
 // Signatures: the three-way stop/affricate system (b/p/pʰ …), uvulars խ→χ/ղ→ʁ, tap ր→ɾ vs trill ռ→r. Scored 81.1%
-// folded on wikipron hye_armn_e broad (HUMAN, 18090). See docs/investigations/hy_native_bringup_investigation.md.
+// folded on wikipron hye_armn_e broad (HUMAN, 18090).
 describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
     test("three-way stops/affricates + uvulars", () => {
         expect(phonemizeWord("բարև")).toBe("bɑɾev"); // բ=b, ր=ɾ (tap), և=ev

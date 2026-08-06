@@ -1,5 +1,5 @@
-// Native canonical-IPA data manifest for Lithuanian (lt) — Baltic (Indo-European), Latin script, ~3M. espeak-
-// independent. A RULE-based g2p (g2p.ts, the Czech pattern): a left-to-right scan + PALATALIZATION (the load-bearing
+// Native canonical-IPA data manifest for Lithuanian (lt) — Baltic (Indo-European), Latin script, ~3M.
+// A RULE-based g2p (g2p.ts, the Czech pattern): a left-to-right scan + PALATALIZATION (the load-bearing
 // rule: consonants → Cʲ before front vowels / the softening ⟨i⟩, spreading leftward through a cluster) + regressive
 // VOICING assimilation + n→ŋ before velars. Derived + validated against wikipron lit_latn_narrow (HUMAN, 15,513
 // words). Signatures:
@@ -9,7 +9,6 @@
 //   • Vowel LENGTH + the stressed ɑː/æː quality are STRESS-conditioned (stress is lexical/unpredictable) → we emit
 //     the phonemic/short quality and FOLD the length + stressed variants; the referee's ¹/² pitch accents are folded.
 //   • Digraphs: ⟨ch⟩=x, ⟨dz⟩=d͡z, ⟨dž⟩=d͡ʒ; the rising diphthongs ⟨ie⟩=i ɛ, ⟨uo⟩=u ɔ.
-// See docs/investigations/lt_bringup_investigation.md.
 {
     "language": "lt",
     "name": "Lithuanian (lietuvių)",

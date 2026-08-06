@@ -1,10 +1,10 @@
 /**
- * Estonian (et) phonemizer — eesti keel, Uralic (Finnic), Latin orthography, canonical IPA, espeak-independent.
+ * Estonian (et) phonemizer — eesti keel, Uralic (Finnic), Latin orthography, canonical IPA.
  * Estonian is nearly as phonemically transparent as its sibling Finnish at the SEGMENT level, so this is a greedy
  * grapheme scan + gemination (a doubled letter → [Cː]/[Vː]) + FIXED first-syllable stress (predictable → emitted).
  * ⟨b d g⟩ are the voiceless-lenis stops → plain b/d/ɡ (the referee's devoicing ring is BACKBONE-stripped); the 9
  * vowels incl. ⟨õ⟩→ɤ; NO n→ŋ before a velar (king→kinɡ). Palatalization + the Q2/Q3 half-long quantity grade are
- * only partially orthographic → not emitted, folded in the referee eval. See docs/investigations/et_native_bringup_investigation.md.
+ * only partially orthographic → not emitted, folded in the referee eval.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

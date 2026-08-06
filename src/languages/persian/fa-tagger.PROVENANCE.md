@@ -49,7 +49,7 @@ lossless):
 **Independent referee** (non-circular): vs GE2PE Kasre+Homograph (tools/referee-eval/referees/fa.ge2pe-ezafe-
 homograph.tsv; modern Iranian, MIT, Sharif — adversarial hard-case sets), word-level **80.0% full / 88.4% backbone** (raw tagger; **81.4% / 90.2%** with the first-vowel correction)
 (consonants + long vowels). The ~90% plain-word backbone independently corroborates the segmental skeleton; the
-ezafe/homograph gap is the sense/context residual (see the investigation doc). The hiatus retrain lifted this from
+ezafe/homograph gap is the sense/context residual. The hiatus retrain lifted this from
 79.4%/87.8%.
 
 The **canonical** subset is the fair measuring stick: the ~11% of held-out words the aligner rejects are colloquial

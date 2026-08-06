@@ -8,8 +8,8 @@
  * The lazy-load + masked decode loop is the shared `createWordStructuralTagger` (core/structuralTagger.ts); this file
  * supplies only the nb-specific bits: lowercase+NFC preprocess and the single-primary-stress `oneStress` postprocess.
  * A lexicon-covered word is served by the sync lexicon path instead (precedence lexicon → tagger → rules, in the async
- * phonemizeNbNeural). Held-out (full-word incl. stress) far outstrips the perceptron prototype (56.6%). See
- * docs/investigations/nb_native_bringup_investigation.md. `onnxruntime-node` is optional; absent it (or the model),
+ * phonemizeNbNeural). Held-out (full-word incl. stress) far outstrips the perceptron prototype (56.6%).
+ * `onnxruntime-node` is optional; absent it (or the model),
  * createNorwegianTagger() resolves to `undefined` and callers fall back to the sync rule engine.
  */
 import { dirname } from "node:path";

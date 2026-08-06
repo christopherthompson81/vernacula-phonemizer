@@ -3,8 +3,7 @@
  * General-American `en` engine (not a separate language). Reuses the full English G2P (dict + heteronyms + OOV
  * model) and applies a phonological DELTA — a lexical-set transform — to the GenAm output. The legitimate,
  * VERIFIABLE accent-transfer (docs/language-maturity.md "Scope"): the parent's community-adopted orthography + a
- * documented delta, checked against a real RP referee (wikipron eng_latn_uk, 76k). See
- * docs/investigations/en-gb_native_bringup_investigation.md.
+ * documented delta, checked against a real RP referee (wikipron eng_latn_uk, 76k).
  *
  * The delta (GenAm → SSBE), from the referee:
  *   • NON-RHOTICITY: coda /ɹ/ dropped; r-coloured vowels remap — NURSE ɝ→ɜː, lettER ɚ→ə, START ɑːɹ→ɑː, NORTH ɔːɹ→ɔː,

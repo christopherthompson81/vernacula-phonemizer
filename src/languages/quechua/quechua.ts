@@ -1,10 +1,10 @@
 /**
  * Quechua (qu) phonemizer — Southern Quechua / Runasimi (Qhichwa; Cusco-Collao + Ayacucho), Latin script, canonical
- * IPA, espeak-independent. The fleet's first Quechuan language. Near-phonemic: a 3-vowel system ⟨a i u⟩ and a
+ * IPA. The fleet's first Quechuan language. Near-phonemic: a 3-vowel system ⟨a i u⟩ and a
  * THREE-WAY stop series written overtly — plain ⟨p t k q ch⟩, aspirated with ⟨h⟩ (⟨ph th kh qh chh⟩), ejective with
  * an apostrophe (⟨p' t' k' q' ch'⟩); uvular ⟨q⟩→[q]. A longest-match scan (tri/digraphs before single graphemes)
  * suffices, then regular PENULTIMATE stress (the onset of the penult syllable). Apostrophes (ʼ ' ') are normalised
- * to U+0027 before the scan. See docs/investigations/qu_native_bringup_investigation.md.
+ * to U+0027 before the scan.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

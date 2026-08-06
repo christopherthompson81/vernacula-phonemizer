@@ -1,10 +1,10 @@
 /**
- * Native Macedonian / македонски (mk) text phonemizer — canonical IPA, espeak-independent. South Slavic, Cyrillic.
+ * Native Macedonian / македонски (mk) text phonemizer — canonical IPA. South Slavic, Cyrillic.
  * Macedonian is fully phonemic with NO vowel reduction, so a left-to-right grapheme scan + the shared South-Slavic
  * phonotactics recovers the pronunciation. Macedonian specifics vs Bulgarian: the palatals are DISTINCT LETTERS
  * (ѓ ќ љ њ ѕ џ ј → ɟ c ʎ ɲ d͡z d͡ʒ j — no ь/я/ю palatalization), and STRESS is FIXED on the ANTEPENULT syllable
  * (predictable → emitted). Rules: dark-l (⟨л⟩→[l] before е/и/ј, [ɫ] else), syllabic ⟨р⟩→[r̩], n→ŋ before a velar,
- * word-final devoicing, regressive voicing assimilation. See docs/investigations/mk_native_bringup_investigation.md.
+ * word-final devoicing, regressive voicing assimilation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

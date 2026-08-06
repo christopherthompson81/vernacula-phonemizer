@@ -5,7 +5,7 @@ import { phonemizeWord, createAbkhaz } from "../src/languages/abkhaz/abkhaz.ts";
 // Canonical-IPA goldens for Abkhaz (ab) — аҧсуа бызшәа, a Northwest Caucasian language (the fleet's first) with one of
 // the world's largest consonant inventories and just 2 vowels (⟨а⟩→[a], ⟨ы⟩→[ə]). The Cyrillic writes consonants with
 // base letters + MODIFIER letters: ⟨ь⟩ palatalizes, ⟨ә⟩ labializes, ⟨'⟩ pharyngealizes. Three-way voiced/aspirated/
-// ejective stops. Referee: wikipron abk_cyrl broad + kaikki. See docs/investigations/ab_native_bringup_investigation.md.
+// ejective stops. Referee: wikipron abk_cyrl broad + kaikki.
 describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
     test("★ the THREE-WAY stop/affricate series (voiced / aspirated / ejective)", () => {
         expect(phonemizeWord("акы")).toBe("akʼə"); // ⟨к⟩→[kʼ] EJECTIVE; ⟨ы⟩→[ə]

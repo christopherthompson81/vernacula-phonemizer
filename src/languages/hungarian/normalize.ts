@@ -229,10 +229,8 @@ const normalizeSymbols = makeSymbolNormalizer({
      *
      * ONE FORM EACH, because Hungarian takes the SINGULAR after a numeral (öt dollár, not *öt dollárok).
      *
-     * `euró` and `jen` are DELIBERATELY ABSENT: both are 0 in the corpus under a token test, and espeak's
-     * apparent hits are substring noise (`jen` inside *érjen*, `font` inside *fontos* — the latter is why the
-     * first substring count read 211 for a word that occurs 10 times). An unsourced currency word is left
-     * unread rather than guessed.
+     * `euró` and `jen` are DELIBERATELY ABSENT: both are 0 in the corpus under a token test. An unsourced
+     * currency word is left unread rather than guessed.
      */
     currency: { $: ["dollár"], "£": ["font"] },
     units: {

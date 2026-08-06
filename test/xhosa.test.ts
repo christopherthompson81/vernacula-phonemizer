@@ -4,11 +4,11 @@ import { phonemizeWord, createXhosa } from "../src/languages/xhosa/xhosa.ts";
 import { normalizeXhosa } from "../src/languages/xhosa/normalize.ts";
 import { phonemize } from "../src/index.ts";
 
-// Canonical-IPA goldens for Xhosa / isiXhosa (xh) — Nguni Bantu, AUTHORED beyond-espeak. The sibling of Zulu:
+// Canonical-IPA goldens for Xhosa / isiXhosa (xh) — Nguni Bantu, AUTHORED. The sibling of Zulu:
 // it REUSES the shared Zulu g2p scan (the 15-way click series, depressor consonants, implosive b→ɓ, ejective
 // stops) with the Xhosa rule table — the one addition being ⟨rh⟩→[x] (voiceless velar fricative, Zulu lacks it).
 // Nguni penultimate stress with vowel lengthening (ˈ + ː); tone is lexical/unwritten → deferred. Validated at
-// 90.0% vs wikipron xho narrow + 80.2% vs epitran. See docs/investigations/xh_native_bringup_investigation.md.
+// 90.0% vs wikipron xho narrow + 80.2% vs epitran.
 describe("Xhosa canonical IPA", () => {
     test("clicks (c/q/x → kǀ/kǃ/kǁ, xh→kǁʰ) + penult stress/length", () => {
         expect(phonemizeWord("xhosa")).toBe("kǁʰˈɔːsa"); // xh → kǁʰ (aspirated lateral click)

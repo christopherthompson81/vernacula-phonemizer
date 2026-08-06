@@ -1,6 +1,5 @@
 // Chuvash / Чӑвашла (chv) — the SOLE surviving Oghur (Bulgaric) Turkic language, CYRILLIC. Referee: English Wiktionary
 // 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}} pairs; no wikipron/epitran chv). Single-source.
-// See docs/investigations/chv_native_bringup_investigation.md.
 {
     "language": "chv", "name": "Chuvash (Чӑвашла)", "script": "Cyrillic",
     "provenance": "Authored Cyrillic→IPA scan: allophonic intervocalic/post-nasal voicing (п т к ч с ҫ ш х → b d ɡ d͡ʑ z ʑ ʐ ɣ), geminate-blocking → [Cː], two reduced vowels ӑ→ə ӗ→ɘ with reduced-vowel-sensitive stress (last full vowel, else first), iotation, е→je initial. Validated against the Wiktionary human referee.",

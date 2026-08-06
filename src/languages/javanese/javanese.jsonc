@@ -1,15 +1,14 @@
 // Native canonical-IPA definition for Javanese / Basa Jawa (jv) — Austronesian, Latin script. javanese.ts reads
-// this file. Ported from the espeak-ng-portable authored bring-up (authoring/jv). The signature features: the
+// this file. The signature features: the
 // ⟨a⟩→[ɔ] rule (open final syllable + regressive open-penult harmony: apa→ɔpɔ, sanga→sɔŋɔ), the DENTAL vs
 // RETROFLEX stop contrast (⟨t d⟩→t̪ d̪ vs ⟨th dh⟩→ʈ ɖ, NOT aspiration — Indonesian lacks this), closed-syllable
 // laxing (i→ɪ u→ʊ o→ɔ), word-final ⟨k⟩→ʔ. The "voiced" stops are phonetically breathy/slack-voiced (light vs
-// heavy register) — rendered PLAIN voiced (register deferred, folded vs epitran). Tone: none. See
-// docs/investigations/jv_native_bringup_investigation.md.
+// heavy register) — rendered PLAIN voiced (register deferred, folded vs epitran). Tone: none.
 {
     "language": "jv",
     "name": "Javanese",
     "script": "Latin",
-    "provenance": "Ported from the espeak-ng-portable authored jv bring-up (Wikipedia Javanese-phonology + standard references). Validated against kaikki jav (human) + epitran jav-Latn.",
+    "provenance": "Authored from the Wikipedia Javanese-phonology article + standard references. Validated against kaikki jav (human) + epitran jav-Latn.",
 
     // Multi-letter graphemes (longest-first): retroflex th/dh, palatal/velar nasals ny/ng.
     "digraphs": { "th": "ʈ", "dh": "ɖ", "ny": "ɲ", "ng": "ŋ" },

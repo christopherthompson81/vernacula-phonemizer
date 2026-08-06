@@ -72,4 +72,4 @@ to 89.7%. `onnxruntime-node` is an optional dependency
 imported lazily — absent it, `createNorwegianTagger()` resolves to `undefined` and the sync engine (lexicon → rules)
 serves everything, so the tagger is a pure quality add-on with no hard dependency.
 
-See `docs/investigations/nb_native_bringup_investigation.md` Run 4.
+ Run 4.

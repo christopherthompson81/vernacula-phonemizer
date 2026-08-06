@@ -1,8 +1,8 @@
-// Native canonical-IPA data manifest for Azerbaijani / Azərbaycan dili (az) — North Azerbaijani, Latin script,
-// espeak-independent. Turkic, the Oghuz sibling of Turkish, so it reuses the Turkish engine's shape (a shallow
+// Native canonical-IPA data manifest for Azerbaijani / Azərbaycan dili (az) — North Azerbaijani, Latin script.
+// Turkic, the Oghuz sibling of Turkish, so it reuses the Turkish engine's shape (a shallow
 // left-to-right scan: vowel harmony is already in the spelling, k/g palatalize before front vowels, dark/clear l,
 // geminate stops, nasal place assimilation). The DATA differences from Turkish live here; the ALGORITHM differences
-// (ğ→ɣ not lengthening; q→ɡ/x; x→x) are in g2p.ts. See docs/investigations/az_native_bringup_investigation.md.
+// (ğ→ɣ not lengthening; q→ɡ/x; x→x) are in g2p.ts.
 {
     "language": "az",
     "name": "Azerbaijani (North, Latin)",

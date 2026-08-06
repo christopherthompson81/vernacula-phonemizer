@@ -1,9 +1,10 @@
 /**
- * Standard Albanian (sq) phonemizer — Shqip (Tosk-based standard), Latin script, canonical IPA, espeak-independent.
- * The fleet's first Albanian-branch (Indo-European) language. Fairly phonemic: a longest-match scan over the digraph
- * system (⟨dh th sh zh xh⟩→[ð θ ʃ ʒ d͡ʒ], the palatals ⟨gj⟩→[ɟ] / ⟨q⟩→[c], ⟨nj⟩→[ɲ], ⟨ll⟩→[ɫ], ⟨rr⟩→[r]) then single
- * graphemes — the 7-vowel system (⟨e⟩→[ɛ], ⟨y⟩→[y], ⟨ë⟩→[ə]), ⟨c⟩→[t͡s], ⟨ç⟩→[t͡ʃ], ⟨x⟩→[d͡z], ⟨r⟩→[ɾ] (tap).
- * Penultimate stress (unwritten, the Albanian default). See docs/investigations/sq_native_bringup_investigation.md.
+ * Standard Albanian (sq) phonemizer — Shqip (Tosk-based standard), Latin script, canonical IPA.
+ *
+ * Fairly phonemic: a longest-match scan over the digraph system (⟨dh th sh zh xh⟩→[ð θ ʃ ʒ d͡ʒ],
+ * the palatals ⟨gj⟩→[ɟ] / ⟨q⟩→[c], ⟨nj⟩→[ɲ], ⟨ll⟩→[ɫ], ⟨rr⟩→[r]) then single graphemes — the
+ * 7-vowel system (⟨e⟩→[ɛ], ⟨y⟩→[y], ⟨ë⟩→[ə]), ⟨c⟩→[t͡s], ⟨ç⟩→[t͡ʃ], ⟨x⟩→[d͡z], ⟨r⟩→[ɾ] (tap).
+ * Penultimate stress (unwritten, the Albanian default).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

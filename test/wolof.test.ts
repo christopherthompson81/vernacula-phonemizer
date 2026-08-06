@@ -9,7 +9,6 @@ import { numberToWords } from "../src/languages/wolof/numbers.ts";
 // glottal onset. Signatures: ATR vowels (⟨e⟩=ɛ / ⟨é⟩=e, ⟨o⟩=ɔ / ⟨ó⟩=o, ⟨ë⟩=ə, ⟨à⟩=aː), DOUBLING = length /
 // gemination, the palatal STOPS ⟨c⟩=c / ⟨j⟩=ɟ. Numbers are QUINARY (see below); the Arabic (Wolofal) /
 // Garay scripts are deferred.
-// See docs/investigations/wo_native_bringup_investigation.md.
 describe("Wolof canonical IPA — greedy g2p + gemination", () => {
     test("ATR vowels: ⟨e⟩=ɛ / ⟨é⟩=e, ⟨o⟩=ɔ / ⟨ó⟩=o, ⟨ë⟩=ə", () => {
         expect(phonemizeWord("cere")).toBe("cɛrɛ"); // "couscous" — ⟨e⟩ → ɛ

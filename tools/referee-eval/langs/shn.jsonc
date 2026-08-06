@@ -1,6 +1,6 @@
 // Shan / Tai Long (shn) — Southwestern Tai (Tai-Kadai), the SHAN ABUGIDA (Myanmar-script variant). Referee: wikipron
 // shn_mymr_broad (HUMAN, Wiktionary, 2607, space-segmented, WITH tones). Single human source (no epitran shn, no kaikki
-// dump pulled; espeak shn = authored, not attestation). See docs/investigations/shn_native_bringup_investigation.md.
+// dump pulled).
 {
     "language": "shn", "name": "Shan (Tai Long)", "script": "Shan (Myanmar)",
     "provenance": "Authored Shan-abugida→IPA g2p: onset (ၵ→k ၶ→kʰ ၸ→t͡ɕ သ→sʰ ...) → medials (ွ→w, ျ palatalises) → rime (vowel signs × coda) → EXPLICIT tone (unmarked→˨˦, ႇ→˩, ႈ→˧˧˨, visarga→˥, ႉ→˦˨). Validated against wikipron Shan.",
@@ -8,6 +8,6 @@
     "referees": [
         { "file": "shn.wikipron-shn-mymr-broad.tsv", "source": "wikipron shn_mymr_broad (Wiktionary, HUMAN, 2607)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 human single-source — wikipron Shan (2607) is the only machine referee (no epitran shn-Mymr mapping, no kaikki Shan dump pulled; espeak's shn is an authored impl, not independent human attestation).",
+    "secondaryGap": "🔷 human single-source — wikipron Shan (2607) is the only machine referee (no epitran shn-Mymr mapping, no kaikki Shan dump pulled; no independent human attestation).",
     "folds": []
 }

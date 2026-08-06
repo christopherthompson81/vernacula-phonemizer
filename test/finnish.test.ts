@@ -5,7 +5,7 @@ import { phonemizeWord, createFinnish } from "../src/languages/finnish/finnish.t
 // Finnish (fi) — Uralic (Finnic), Latin, one of the most PHONEMICALLY TRANSPARENT orthographies in the world. Greedy
 // longest-match g2p over the grapheme table (8 vowels, ⟨a⟩=ɑ back; long-vowel + 18 diphthong digraphs) + three code
 // rules: gemination (Cː), ⟨ng⟩→ŋː, ⟨nk⟩→ŋk. Scored 96.0% folded on the wikipron fin_latn_broad HUMAN referee
-// (173449 words); the residual is loanwords/foreign names. See docs/investigations/fi_native_bringup_investigation.md.
+// (173449 words); the residual is loanwords/foreign names.
 describe("Finnish canonical IPA — greedy g2p (Standard Finnish)", () => {
     test("back ⟨a⟩=ɑ, vowel length, ⟨v⟩=ʋ", () => {
         expect(phonemizeWord("talo")).toBe("tɑlo"); // house — back a

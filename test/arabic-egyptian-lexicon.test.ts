@@ -4,8 +4,7 @@
  * أنا anā → ana); the lexicon (egyptian-lexicon.tsv, mined from kaikki/Wiktionary Egyptian-Arabic, CC BY-SA)
  * supplies the correct Egyptian vocalization. The referee eval scores the RULE path (lexicon:false) so its 37.3%
  * stays non-circular (kaikki shares Wiktionary with the wikipron-arz referee); this lexicon is a SHIPPED
- * refinement, validated ~88–92% against wikipron-arz at build time. See
- * docs/investigations/arz_egyptian_bringup_investigation.md.
+ * refinement, validated ~88–92% against wikipron-arz at build time.
  *
  * `createArabic("egyptian", true).text(word)` resolves a lexicon hit synchronously (no ONNX diacritizer needed),
  * so these assertions are deterministic.

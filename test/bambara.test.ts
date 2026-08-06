@@ -11,7 +11,6 @@ const phonemizeWord = (w: string) => raw(w).normalize("NFC");
 // (tools/referee-eval, 74 words) — the folds strip TONE (2-level H/L + downstep) and vowel LENGTH, both lexical
 // and absent from the standard orthography. These goldens pin the segmental + nasalisation backbone. Tone,
 // length are deferred (numbers are composed in numbers.ts); N'Ko is a second script, folded to Latin.
-// See docs/investigations/bm_native_bringup_investigation.md.
 describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
     test("affricates and sibilant: ⟨c⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ", () => {
         expect(phonemizeWord("cɔnkɔ")).toBe("t͡ʃɔ̃kɔ".normalize("NFC")); // ⟨c⟩ → t͡ʃ (+ nasal ɔ̃)

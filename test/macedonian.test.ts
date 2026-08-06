@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // grapheme scan + the shared South-Slavic phonotactics (dark-l, final devoicing, regressive voicing, n→ŋ). Two
 // Macedonian specifics: the palatals are DISTINCT LETTERS (ѓ ќ љ њ ѕ џ ј → ɟ c ʎ ɲ d͡z d͡ʒ j — no ь/я/ю), and STRESS is
 // FIXED on the ANTEPENULT syllable (predictable → emitted). 99.0% folded / 99.8% symbol accuracy vs the wikipron
-// mkd_cyrl_narrow referee (63,024 headwords — the residual is letter-name rows). See docs/investigations/mk_native_bringup_investigation.md.
+// mkd_cyrl_narrow referee (63,024 headwords — the residual is letter-name rows).
 describe("Macedonian canonical IPA — phonemic Cyrillic g2p + antepenultimate stress", () => {
     const mk = createMacedonian();
 

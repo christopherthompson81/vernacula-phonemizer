@@ -1,8 +1,8 @@
 /**
- * Catalan (ca) phonemizer — General Eastern/Central Catalan, canonical IPA, espeak-independent. Rule-based g2p
+ * Catalan (ca) phonemizer — General Eastern/Central Catalan, canonical IPA. Rule-based g2p
  * (g2p.ts) → rule stress (2R + written accent) → UNSTRESSED VOWEL REDUCTION (a/e→ə, o→u) → spirantization →
  * palatal nasal assimilation → word-final devoicing + final-r deletion. No lexicon; stressed open/close mids
- * default (lexical ceiling). See docs/investigations/ca_bringup_investigation.md.
+ * default (lexical ceiling).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -14,9 +14,9 @@ import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeCatalan } from "./normalize.ts";
 
-// Lexical stressed mid-vowel HEIGHT (open/close is not spelling-derivable — dona/dóna, os/ós). From the espeak
-// 1.52 Central shim over the 50k corpus; word → "e" (stressed ⟨e⟩ is close /e/) or "o" (stressed ⟨o⟩ is close
-// /o/). The engine defaults to OPEN (ɛ/ɔ), so a flag only marks the close deviations. See tools/gen/build-ca-midvowels.mts.
+// Lexical stressed mid-vowel HEIGHT (open/close is not spelling-derivable — dona/dóna, os/ós).
+// word → "e" (stressed ⟨e⟩ is close /e/) or "o" (stressed ⟨o⟩ is close /o/).
+// The engine defaults to OPEN (ɛ/ɔ), so a flag only marks the close deviations.
 let MID_VOWELS: Map<string, string> | undefined;
 function midVowels(): Map<string, string> {
     if (MID_VOWELS === undefined) MID_VOWELS = loadTsvMap(import.meta.url, "mid-vowels.tsv", undefined, { optional: true });
@@ -24,7 +24,7 @@ function midVowels(): Map<string, string> {
 }
 
 // Words whose intervocalic ⟨bl⟩/⟨gl⟩ GEMINATES (popular: poble→pˈɔbːlə) rather than spirantizes (learned:
-// problema→pɾuβlə, obligar→uβliɣə) — a LEXICAL split from the espeak Central shim. See tools/gen/build-ca-geminate.mts.
+// problema→pɾuβlə, obligar→uβliɣə)
 let GEMINATE: Map<string, string> | undefined;
 function geminates(word: string): boolean {
     if (GEMINATE === undefined) GEMINATE = loadTsvMap(import.meta.url, "bl-gl-geminate.tsv", undefined, { optional: true });
@@ -160,7 +160,7 @@ function finalPass(segs: Seg[], nucleiCount: number): void {
  *  reduction covers every syllable (el→əɫ, del→dəɫ, em→əm). The old approach stripped the ˈ from the
  *  finished IPA, which removed the mark but left the vowel with its stressed quality (ɛɫ) — reduction
  *  had already run with the word's only nucleus at the stress index. The human referee attests the
- *  reduced form (em → "ə m"); espeak agrees (əl). */
+ *  reduced form (em → "ə m"). */
 export function phonemizeWord(word: string, unstressed = false): string {
     const segs = toSegments(word);
     if (segs.length === 0) return "";

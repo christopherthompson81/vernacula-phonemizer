@@ -1,8 +1,8 @@
 # Referee eval — linguistic-correctness validation
 
-vernacula targets **canonical IPA and linguistic correctness**, not espeak parity. The espeak-canonical output
-each language was bootstrapped from is a *regression guard* (it catches accidental drift), but it is **not** the
-definition of correct. This harness measures the other half: does our output agree with **independent** sources?
+vernacula targets **canonical IPA and linguistic correctness**. The bootstrap output each language started from
+is a *regression guard* (it catches accidental drift), but it is **not** the definition of correct. This harness
+measures the other half: does our output agree with **independent** sources?
 
 > **The referee % is not a maturity score** — it is confounded by referee quality and fold ceilings.
 > For "is this language reliable / what work is left?", see [`docs/language-maturity.md`](../../docs/language-maturity.md).
@@ -10,7 +10,7 @@ definition of correct. This harness measures the other half: does our output agr
 ## Method
 
 For each language we compare our phonemizer's **segmental backbone** against one or more **referees** — G2Ps or
-human transcriptions that are *independent of espeak*:
+human transcriptions that are *independently sourced*:
 
 - **epitran** (`zul-Latn`, `kaz-Cyrl`, …) — programmatic, broad coverage, but fallible: drops ejectives, writes
   bare clicks, over-marks allophonic palatalization, merges some vowels.
@@ -74,14 +74,14 @@ we are often the more faithful one — a divergence is a candidate to adjudicate
 
 ## Referee data (`referees/`)
 
-TSVs are `word<TAB>ipa`, independent of espeak, committed (small):
+TSVs are `word<TAB>ipa`, independently sourced, committed (small):
 
-- `zu.epitran-zul-Latn.tsv`, `si.wikipron-sin.tsv` — copied from espeak-ng-portable's committed referee sets.
+- `zu.epitran-zul-Latn.tsv`, `si.wikipron-sin.tsv` — epitran / wikipron referee sets.
 - `kk.epitran-kaz-Cyrl.tsv` — generated from the first 1,400 real Cyrillic corpus words via epitran.
 - `<lang>.wikipron-*.tsv` (en/ha/hi/ja/ko/ta/th/tr/vi) — stride-sampled (~4.5k, alphabetically uniform) from the
   CUNY wikipron scrape; ja/ko/vi are narrow-only (no broad variant), so their extra narrow detail is folded.
-- `ff.epitran-ful-Latn.tsv` — copied from espeak-ng-portable's `tools/qa-compare/ff_gold.tsv` (no wikipron Fula
-  exists); the `.venv-epitran` there is also what generated the ha/tr/vi epitran secondaries.
+- `ff.epitran-ful-Latn.tsv` — an epitran-generated Fula gold (no wikipron Fula exists); the same epitran venv
+  generated the ha/tr/vi epitran secondaries.
 
 **Secondary gaps that are real, not lazy:** epitran Indic G2Ps are not usable corroborators — `hin-Deva` skips
 Hindi schwa-deletion (disagrees with everyone) and `tam-Taml` echoes untransliterated graphemes — so hi/ta

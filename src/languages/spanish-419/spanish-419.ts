@@ -11,8 +11,7 @@
  *
  * Deliberately NOT applied (regional, not part of the neutral standard): coda /s/-aspiration (Caribbean/coastal
  * — Mexican/Andean keep [s], and the referee keeps [s]: gracias → ɡɾasjas), word-final /n/→[ŋ], and voseo. This
- * is the locale that labels the OmniVoice FLEURS `es_419` training audio. See
- * docs/investigations/es-419_native_bringup_investigation.md.
+ * is the locale that labels the OmniVoice FLEURS `es_419` training audio.
  */
 import type { Phonemizer } from "../../registry.ts";
 import {

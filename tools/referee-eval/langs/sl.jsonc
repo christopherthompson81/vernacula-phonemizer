@@ -16,7 +16,6 @@
 //     (devet's final ⟨e⟩ is stressed [eː], dober's is [ə]) → we emit ɛ and fold. Only syllabic-r schwa is rule-emitted.
 //   - PITCH ACCENT (tonemic àáâ / ɛ̀ ɔ́): unwritten → the combining tone diacritics are BACKBONE-stripped; we emit none.
 // The consonant skeleton + the l/lj/nj/r rules + voicing ARE compared directly — that is the real signal.
-// See docs/investigations/sl_native_bringup_investigation.md.
 {
     "language": "sl", "name": "Slovenian (slovenščina)", "script": "Latin",
     "provenance": "Authored rule-based g2p (Slovak-shaped scan + Slovene l-vocalization / lj-nj / syllabic-r + voicing) from Slovene phonology; validated against the wikipron slv_latn_broad referee (5,177 human headwords). The vowel quality/length/pitch/schwa are unwritten → folded (see the header note).",

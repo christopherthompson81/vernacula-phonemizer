@@ -1,5 +1,5 @@
 /**
- * Native Aromanian / armãneashti (rup) text phonemizer — canonical IPA, espeak-independent. Aromanian is an EASTERN
+ * Native Aromanian / armãneashti (rup) text phonemizer — canonical IPA. Aromanian is an EASTERN
  * ROMANCE (Balkan Romance) language, a close sibling of Romanian, spoken across the Balkans (Greece, Albania, North
  * Macedonia, Romania, Bulgaria; ~250k). A near-phonemic Latin orthography (the Cunia/DIARO system) → a greedy
  * left-to-right scan with the shared Romance contextual phonology plus Aromanian's own digraphs.
@@ -12,7 +12,7 @@
  *     softener i); RISING DIPHTHONGS ⟨ea⟩→[e̯a], ⟨oa⟩→[o̯a]; the ⟨i u⟩ GLIDES ([j w] next to another vowel). ⟨r⟩→[r].
  *
  * Stress is unwritten (deferred, not emitted); the word-final desyllabified ⟨-u⟩ ([ʷ]/[ŭ]) is emitted as [u].
- * Referee: wikipron rup_latn narrow (196) + kaikki Aromanian (201). See docs/investigations/rup_native_bringup_investigation.md.
+ * Referee: wikipron rup_latn narrow (196) + kaikki Aromanian (201).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

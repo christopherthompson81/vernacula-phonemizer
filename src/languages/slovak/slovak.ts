@@ -1,7 +1,7 @@
 /**
- * Slovak (sk) phonemizer — canonical IPA, espeak-independent. Rule g2p (g2p.ts) + fixed FIRST-syllable stress with
+ * Slovak (sk) phonemizer — canonical IPA. Rule g2p (g2p.ts) + fixed FIRST-syllable stress with
  * secondary stress on even non-final nuclei (like Czech). Syllabic r̩/l̩ (and long ĺ/ŕ) count as nuclei.
- * text() tokenizes words / numbers / punctuation. See docs/investigations/sk_native_bringup_investigation.md.
+ * text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

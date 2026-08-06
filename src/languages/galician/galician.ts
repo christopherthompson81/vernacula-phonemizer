@@ -1,8 +1,8 @@
 /**
- * Galician (gl) phonemizer — canonical IPA, galego, espeak-independent. Rule-based g2p (g2p.ts) + nasal
+ * Galician (gl) phonemizer — canonical IPA, galego. Rule-based g2p (g2p.ts) + nasal
  * velarization + spirantization + rule-based stress; no lexicon. text() tokenizes words / numbers / punctuation.
  * Galician shares the Ibero-Romance shape with Spanish; the deltas are ⟨x⟩/⟨j⟩→ʃ, ⟨g⟩→ɡ (no jota), ⟨nh⟩→ŋ,
- * and the coda/pre-velar ⟨n⟩→ŋ velarization applied here. See docs/investigations/gl_native_bringup_investigation.md.
+ * and the coda/pre-velar ⟨n⟩→ŋ velarization applied here.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

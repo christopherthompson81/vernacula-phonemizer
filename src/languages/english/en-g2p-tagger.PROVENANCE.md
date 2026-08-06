@@ -25,7 +25,7 @@ is byte-identical to `phonemize(text, "en")`).
 ## Data + training
 
 - **Corpus:** CMUdict (public domain) — `g2p-dict.tsv`, 117,479 ascii-alpha word→ARPABET entries (the same lexicon the
-  sync engine ships). Cleanroom, no espeak.
+  sync engine ships).
 - **Alignment:** hard-EM many-to-{0,1,2} monotonic (grapheme → 0/1/2 ARPABET phones), parallelised across cores
   (`tools/norwegian/nb_tagger_parallel.py::align_parallel`, with `SEP=" "` so a 2-phone chunk keeps its ARPABET token
   boundary — ⟨x⟩ → `K S`, not `KS`).
@@ -44,4 +44,4 @@ EN_PRODUCTION=1 .venv/bin/python -u tools/english/en_g2p_bilstm.py   # held-out 
 `onnxruntime-node` is an OPTIONAL dependency, imported lazily; absent it (or the model), `createEnglishTagger()`
 resolves to `undefined` and `phonemizeEnNeural` returns exactly the sync path (CMUdict + n-gram, no throw). This is a
 SEPARATE async path; the sync engine is untouched. See
-`docs/investigations/en_referee_noise_and_neural_oov_investigation.md` (Runs 3, 6-7).
+ (Runs 3, 6-7).

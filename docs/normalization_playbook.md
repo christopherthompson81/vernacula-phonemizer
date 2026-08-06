@@ -334,7 +334,7 @@ shaped the way it is.
 ## The traps, in order of how often they bit
 
 ⚠ **THE NUMBERS ARE PERMANENT IDENTIFIERS. Do not renumber, merge or delete a trap.** 66 files across this
-repository cite a trap by number — `src/languages/*/normalize.ts` comments, investigation docs, tool headers —
+repository cite a trap by number — `src/languages/*/normalize.ts` comments and tool headers —
 spanning 25 distinct numbers. A merge that renumbers repoints every one of those citations at a different trap
 and nothing detects it, which is the `negative` → `signed-number` rename that left 35 artifacts carrying a dead
 key. **New traps append. A superseded trap keeps its number and says what replaced it.**
@@ -1445,7 +1445,7 @@ is testing the wrong layer. Re-assert through `phonemize`, and note in the test 
 ## The corpus's own AUDIO is a sourcing tier, and it outranks every text tier for a SIGN
 
 Established on #586's plus/minus work, after the text tiers were exhausted twice
-(`docs/investigations/sign_reading_investigation.md`).
+.
 
 **The failure that motivates it.** A written sign — `+`, `−`, `×` — is written as a GLYPH in running prose in
 every language, including Wikipedia. So the word for it is not *rare* in text; it is **absent from text by

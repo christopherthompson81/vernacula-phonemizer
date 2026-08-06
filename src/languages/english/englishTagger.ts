@@ -9,8 +9,7 @@
  *
  * Self-contained in the English module (no C# port exists / is needed — the language is independently portable).
  * `onnxruntime-node` is an OPTIONAL dependency imported lazily; if it — or the model — is absent, createEnglishTagger()
- * resolves to `undefined` and the async path (enNeural.ts) falls back to the sync n-gram engine. See
- * docs/investigations/en_referee_noise_and_neural_oov_investigation.md.
+ * resolves to `undefined` and the async path (enNeural.ts) falls back to the sync n-gram engine.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

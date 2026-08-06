@@ -2,7 +2,7 @@
 // (HUMAN, 348, space-separated → segmentJoin strips the per-phone spaces). SECONDARY: kaikki Paraguayan Guarani
 // (432) — the SAME Wiktionary tradition (correlated, not independent) → 🔷 single-source-family. Near-phonemic:
 // the 12-vowel system + prenasalized ⟨mb nd ng⟩ + the glottal ⟨'⟩. Stress (final-syllable/accent) is folded (the
-// broad referee marks none). See docs/investigations/gn_native_bringup_investigation.md.
+// broad referee marks none).
 {
     "language": "gn", "name": "Guaraní (Avañe'ẽ)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (12 vowels incl. ⟨y⟩→ɨ + 6 nasal; prenasalized ⟨mb nd ng⟩→ᵐb ⁿd ᵑɡ; ⟨ch⟩→ʃ ⟨j⟩→d͡ʒ ⟨g⟩→ɰ ⟨gu⟩→w ⟨ñ⟩→ɲ ⟨'⟩→ʔ ⟨v⟩→ʋ ⟨r⟩→ɾ; oxytone/accent stress) from Paraguayan Guaraní phonology; validated against wikipron gug_latn_broad.",

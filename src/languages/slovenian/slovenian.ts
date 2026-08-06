@@ -1,8 +1,8 @@
 /**
- * Slovenian (sl) phonemizer — canonical IPA, slovenščina, espeak-independent. Rule g2p (g2p.ts): consonant scan +
+ * Slovenian (sl) phonemizer — canonical IPA, slovenščina. Rule g2p (g2p.ts): consonant scan +
  * l-vocalization + lj/nj + syllabic-r + voicing/devoicing. NO stress mark is emitted — Slovene stress is free/lexical
  * and unwritten (a stress lexicon is the deferred fix), and the vowel quality/length/pitch the referee carries are
- * all unwritten too. text() tokenizes words / numbers / punctuation. See docs/investigations/sl_native_bringup_investigation.md.
+ * all unwritten too. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

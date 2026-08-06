@@ -5,7 +5,7 @@ import { ROMAN_POLICY } from "../src/languages/spanish/romanOrdinals.ts";
 
 // Canonical-IPA goldens for Spanish (es) — broad Castilian, rule-based (no lexicon). Convention: distinción
 // (θ), lleísmo (ʎ / ʝ), spirantization (β ð ɣ), rr/r trill/tap, j/ge/gi → x, glides j/w (onset) & ᶦ/ᶷ
-// (offglide). Validated vs the espeak 1.52 shim (93.5% folded) + epitran spa-Latn (95.8% dialect-folded);
+// (offglide). Validated vs epitran spa-Latn (95.8% dialect-folded);
 // vowel laxing (e→ɛ), nasal place assimilation, and secondary stress are folded to broad, matching referees.
 describe("spanish canonical IPA", () => {
     test("core g2p: distinción, lleísmo, j→x, spirantization", () => {

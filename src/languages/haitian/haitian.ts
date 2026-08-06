@@ -1,11 +1,11 @@
 /**
  * Haitian Creole (ht) phonemizer — kreyòl ayisyen, a French-lexified creole of Haiti (~12M), Latin script (the
- * phonemic IPN orthography), canonical IPA, espeak-independent. A greedy longest-match scan + the nasal-vowel rule:
+ * phonemic IPN orthography), canonical IPA. A greedy longest-match scan + the nasal-vowel rule:
  *   - ⟨ou⟩→[u], ⟨ui⟩→[ɥi], ⟨ch⟩→[ʃ]; ⟨è⟩→[ɛ], ⟨ò⟩→[ɔ]; the Haitian ⟨r⟩→[ɣ] (velar fricative), ⟨j⟩→[ʒ], ⟨y⟩→[j];
  *   - the NASAL VOWELS ⟨an en on⟩ (plain a/e/o + ⟨n⟩) → [ã ɛ̃ ɔ̃] when the ⟨n⟩ is syllable-final (before a consonant or
  *     word-end): nan→nã, senk→sɛ̃k, lang→lãɡ. Before a VOWEL the ⟨n⟩ is an oral onset; a DOUBLED ⟨nn⟩ → nasal + [n]
  *     (Enndyana→ɛ̃ndjana). ⟨i⟩ and ⟨ou⟩ do NOT nasalize (machin→maʃin, moun→mun); ⟨è ò⟩ stay oral.
- * Stress (final-syllable, predictable) is not emitted. See docs/investigations/ht_native_bringup_investigation.md.
+ * Stress (final-syllable, predictable) is not emitted.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -10,7 +10,7 @@ Model: input = fa's g2p output (the consonant + long-vowel skeleton with a defau
 BiLSTM per-position tagger predicts the correct IPA vowel at each short slot (copies elsewhere). Trained on the
 GPU (/mnt/data/ar-diac-venv, torch+cuda).
 
-Inputs (regenerate the fa-engine alignment with tsx — see train_shortvowel notes / the investigation doc):
+Inputs (regenerate the fa-engine alignment with tsx — see train_shortvowel notes):
   <fa_gold_aligned.tsv>  word<TAB>fa-engine-ipa<TAB>gold-ipa(|-variants)   (from tools/persian/fa-abjad-ipa-gold.tsv)
   [tg_silver_aligned.tsv]  same shape, from fa-tg-silver.tsv (the Tajik-derived silver)
   /mnt/data/ar-diac-venv/bin/python train_ipa_bilstm.py fa_gold_aligned.tsv [tg_silver_aligned.tsv]
@@ -21,7 +21,7 @@ RESULT (2026-07-20, seed 1234, held-out UNSEEN words):
   BiLSTM IPA-target (gold + Tajik):     32.2%  (+16.2pp — Tajik silver adds +1.5pp; the harakat path lost 59% of it)
 The lexicon handles SEEN/frequent words separately (~exact); this is the OOV generalization tail. A larger model +
 the full 40k-narrow wikipron + the aligned parallel corpus are the next scaling levers.
-See docs/investigations/fa_shortvowel_restoration_investigation.md.
+
 """
 import sys, re, random
 import torch, torch.nn as nn

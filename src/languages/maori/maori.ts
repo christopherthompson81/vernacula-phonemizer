@@ -1,8 +1,8 @@
 /**
- * Māori (mi) phonemizer — te reo Māori, Eastern Polynesian, Latin script, canonical IPA, espeak-independent. One of
+ * Māori (mi) phonemizer — te reo Māori, Eastern Polynesian, Latin script, canonical IPA. One of
  * the simplest orthographies in the fleet: a near-1:1 phonemic grapheme map + the macron = LENGTH + two digraphs
  * (⟨wh⟩→[ɸ], ⟨ng⟩→[ŋ]). Strict CV syllables — no codas, no clusters, no glide formation, so a plain longest-match
- * scan suffices. Stress (mora-based, unwritten) is not emitted. Cardinal numbers: numbers.ts (the modern tekau mā series). See docs/investigations/mi_native_bringup_investigation.md.
+ * scan suffices. Stress (mora-based, unwritten) is not emitted. Cardinal numbers: numbers.ts (the modern tekau mā series).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

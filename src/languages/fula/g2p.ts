@@ -1,10 +1,9 @@
 /**
- * Fula (ff) grapheme→phoneme engine — Fulfulde, espeak-independent and AUTHORED beyond-espeak (espeak ships no
- * Fula). Latin/Adlam-Latin orthography is shallow, so a longest-match scan: prenasalized digraphs (mb→ᵐb,
+ * Fula (ff) grapheme→phoneme engine — Fulfulde.
+ * Latin/Adlam-Latin orthography is shallow, so a longest-match scan: prenasalized digraphs (mb→ᵐb,
  * nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ; nng→ŋːɡ) and geminates (Cː) resolve before the bare letter. Sole census provider of the
  * implosives ʄ (ƴ) / ɠ, plus ɓ ɗ and the prenasalized series. Stress is penultimate.
- * See docs/investigations/ff_native_bringup_investigation.md.
- */
+*/
 
 import { MANIFEST } from "./manifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";

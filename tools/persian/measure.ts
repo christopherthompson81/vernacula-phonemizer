@@ -9,8 +9,7 @@
  *
  *   npx tsx tools/persian/measure.ts
  *
- * Gold: tools/persian/fa-abjad-ipa-gold.tsv (wikipron fas_arab broad, deduped, variants kept). See
- * docs/investigations/fa_shortvowel_restoration_investigation.md.
+ * Gold: tools/persian/fa-abjad-ipa-gold.tsv (wikipron fas_arab broad, deduped, variants kept).
  */
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";

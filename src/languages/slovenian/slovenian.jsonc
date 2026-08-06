@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Slovenian (sl) — slovenščina, South Slavic (~2.5M), espeak-independent.
+// Native canonical-IPA data manifest for Slovenian (sl) — slovenščina, South Slavic (~2.5M).
 // Slovene is NOT part of the Serbo-Croatian shared engine — it has its own phonology (l-vocalization, schwa,
 // no ć/đ/lj-nj palatal phonemes). The engine reuses the SLOVAK shape (scan → syllabic → voicing pipeline: regressive
 // voicing assimilation + word-final devoicing are the shared Slavic machinery), dropping Slovak's palatalization and
@@ -7,7 +7,7 @@
 //   g2p.ts       — the scan (digraphs, l-vocalization, lj/nj, syllabic-r), then voicing/devoicing
 //   slovenian.ts — assembly (NO stress mark: Slovene stress is free/lexical → deferred), tokenizer
 //   numbers.ts   — the cardinal compositor (Germanic-style unit-in-ten inversion: 21 = enaindvajset)
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/sl_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA.
 {
     "language": "sl",
     "name": "Slovenian (slovenščina)",

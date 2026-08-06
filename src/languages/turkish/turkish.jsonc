@@ -1,5 +1,4 @@
-// Native canonical-IPA data manifest for Turkish (tr) — espeak-independent.
-// This file IS the hand-authored context-free language DATA: the vowel letter→IPA table + harmony classes, the
+// Native canonical-IPA data manifest for Turkish (tr) —. // This file IS the hand-authored context-free language DATA: the vowel letter→IPA table + harmony classes, the
 // circumflex fold, the consonant table + geminating-stop set, clause punctuation, and the number words. The
 // ALGORITHMS that read it stay in code:
 //   g2p.ts     — the left-to-right scan (k/g palatalization before front vowels, dark/clear l, ğ lengthening +
@@ -8,7 +7,7 @@
 //   numbers.ts — the thousands-scale cardinal compositor (bir-dropping before yüz/bin)
 // Stress exceptions stay in the sibling stress.tsv (place names / loanwords), which the engine only patches with.
 //
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA. See docs/investigations/tr_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA.
 {
     "language": "tr",
     "name": "Turkish",

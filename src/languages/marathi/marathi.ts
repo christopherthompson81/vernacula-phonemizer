@@ -1,5 +1,5 @@
 /**
- * Native Marathi (mr) text phonemizer — canonical IPA, espeak-independent. Marathi is written in Devanagari
+ * Native Marathi (mr) text phonemizer — canonical IPA. Marathi is written in Devanagari
  * and shares almost all of Hindi's abugida machinery, so it REUSES the generic Hindi engine (makeNativeHindi)
  * with a Marathi data file (marathi.jsonc). The Marathi-specific facts live entirely in the manifest:
  *   - ळ → retroflex lateral [ɭ]; ष → retroflex [ʂ] (Hindi merges it to ʃ);

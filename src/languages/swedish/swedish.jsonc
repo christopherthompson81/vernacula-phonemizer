@@ -5,14 +5,14 @@
 // code modules (g2p.ts, swedish.ts, numbers.ts) and read these tables.
 //
 // Phase 1 is SEGMENTAL: rule g2p + first-syllable stress. Pitch accent (accent 1 vs 2, the referee's ² marker)
-// is deferred to Phase 2 — it is lexical and needs a lexicon. See docs/investigations/sv_bringup_investigation.md.
+// is deferred to Phase 2 — it is lexical and needs a lexicon.
 //
 // LOAD-BEARING blocks (read via manifest.ts): "vowelChars", "frontVowels", "vowels", "digraphs",
 // "clausePunctuation", "numbers". "convention" / "provenance" are documentation.
 {
     "language": "sv",
     "name": "Swedish (Central Standard / rikssvenska)",
-    "provenance": "Cleanroom, rule-based g2p authored from Central Standard Swedish phonology (Elert; Engstrand). espeak-independent, beyond-espeak. The vowel/consonant tables and number words are language facts; the referee (wikipron swe) is a fallible cross-check, not an oracle.",
+    "provenance": "Cleanroom, rule-based g2p authored from Central Standard Swedish phonology (Elert; Engstrand). The vowel/consonant tables and number words are language facts; the referee (wikipron swe) is a fallible cross-check, not an oracle.",
 
     // The canonical-IPA conventions the values below are written in (documentation).
     "convention": {

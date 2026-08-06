@@ -1,16 +1,16 @@
 /**
- * Zulu (zu, isiZulu) grapheme→phoneme engine — Nguni Bantu, Latin script, AUTHORED beyond-espeak (espeak ships
- * only a crude "testing" voice; no click phoneme exists in espeak). A near-clone of Xhosa. Orthography is a
+ * Zulu (zu, isiZulu) grapheme→phoneme engine — Nguni Bantu, Latin script, AUTHORED. A near-clone of
+ * Xhosa. Orthography is a
  * longest-match scan (trigraphs/digraphs before the bare letter) so clicks and affricates resolve as single
- * phonemes with no stray-letter leakage. IPA + phoneme inventory ported from espeak-ng-portable's authored
- * authoring/zu/{zu_rules,ph_zulu} (epitran zul-Latn + kaikki referees). Fills the census click gaps ǀ ǃ ǁ.
+ * phonemes with no stray-letter leakage. IPA + phoneme inventory authored against the epitran zul-Latn +
+ * kaikki referees. Fills the census click gaps ǀ ǃ ǁ.
  *   - 15-way click series: c/q/x → kǀ/kǃ/kǁ, aspirated ch/qh/xh, voiced-depressor gc/gq/gx (ɡ̤ǀ…),
  *     nasal nc/nq/nx (ŋǀ…), breathy-nasal ngc/ngq/ngx (ŋ̤ǀ…), ejective-nasal nkc/nkq/nkx (ŋǀʼ…).
  *   - implosive b → ɓ (plain b only after m: mb=[mb]); plain voiceless stops are EJECTIVE (p/t/k → pʼ/tʼ/kʼ),
  *     aspirates ph/th/kh → pʰ/tʰ/kʰ; voiced obstruents carry the depressor (breathy) diacritic (g→ɡ̤, d→d̤, z→z̤).
  *   - lateral fricatives hl→ɬ, dl→ɮ̤; velar-lateral affricate kl→kxʼ; nasal place-assimilation n→ŋ/ɲ before
  *     velar/palatal (nk→ŋkʼ, nj→ɲdʒ̤, ng→ŋɡ̤).
- * Penultimate stress + length and lexical tone are applied downstream in zulu.ts. See docs/investigations/zu_native_bringup_investigation.md.
+ * Penultimate stress + length and lexical tone are applied downstream in zulu.ts.
  */
 
 import { MANIFEST } from "./manifest.ts";

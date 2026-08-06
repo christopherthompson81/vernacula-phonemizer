@@ -3,8 +3,7 @@
 // Hiligaynon shares the Bisayan core with Cebuano — ⟨ng⟩→ŋ, word-initial + hiatus glottal stop [ʔ], penultimate
 // stress — and differs mainly in its SPANISH-LOAN orthography (this referee is proper-noun-heavy): ⟨j⟩→[h] (the
 // Spanish jota, NOT Cebuano's [d͡ʒ]; Bermejo→beɾmeho) and ⟨f⟩→[p] (nativised; Fuentes→puentes, Demafeliz→demapelis).
-// Validated against wikipron hil_latn (human) + kaikki hil (human). Native cardinal number words: see the "numbers" block below + numbers.ts. See
-// docs/investigations/hil_native_bringup_investigation.md.
+// Validated against wikipron hil_latn (human) + kaikki hil (human). Native cardinal number words: see the "numbers" block below + numbers.ts.
 {
     "language": "hil",
     "name": "Hiligaynon (Ilonggo)",

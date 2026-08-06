@@ -1,9 +1,9 @@
 // Native canonical-IPA data manifest for Paraguayan Guaraní (gn) — Avañe'ẽ, Tupian, co-official in Paraguay (~6.5M).
-// espeak-independent. Near-phonemic Latin orthography (the achegety): 12 vowels — 6 oral ⟨a e i o u y⟩ + 6 NASAL
+// Near-phonemic Latin orthography (the achegety): 12 vowels — 6 oral ⟨a e i o u y⟩ + 6 NASAL
 // ⟨ã ẽ ĩ õ ũ ỹ⟩, with ⟨y⟩ = the high central /ɨ/. PRENASALIZED voiced stops ⟨mb nd⟩→[ᵐb ⁿd] (⟨ng⟩→plain [ŋ]), the GLOTTAL STOP
 // ⟨'⟩ (puso)→[ʔ], ⟨ch⟩→[ʃ], ⟨j⟩→[d͡ʒ], ⟨g⟩→[ɰ] (velar approximant) / ⟨gu⟩→[w], ⟨ñ⟩→[ɲ], ⟨v⟩→[ʋ], ⟨r⟩→[ɾ].
 // A longest-match scan + final-syllable (oxytone) stress, overridden by an acute accent / drawn to a nasal vowel.
-// Engine: guarani.ts. See docs/investigations/gn_native_bringup_investigation.md.
+// Engine: guarani.ts.
 {
     "language": "gn",
     "name": "Guaraní (Avañe'ẽ)",

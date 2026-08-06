@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Umbundu (umb) — Bantu (R11, Benguela/Angola, ~6M), the Latin orthography,
-// espeak-independent. A greedy longest-match scan (the Chichewa/Shona pattern): Umbundu is open CV with prenasalised
+// A greedy longest-match scan (the Chichewa/Shona pattern): Umbundu is open CV with prenasalised
 // clusters as single onset units, so a pure left-to-right longest match suffices. Referee-SCARCE (no wikipron /
 // kaikki / epitran / Wiktionary-IPA); authored from the documented phonology (Wikipedia/Schadeberg) + an ASJP-
 // corroborated curated gold — 🔷 single-source. Signatures:
@@ -7,7 +7,7 @@
 //   • ⟨c⟩ → [t͡ʃ] (the affricate), ⟨v⟩ → [v], ⟨ñ⟩/⟨ny⟩ → [ɲ], ⟨ng'⟩ → [ŋ] (plain velar nasal, ≠ ⟨ng⟩=ᵑɡ), ⟨l⟩ → [l].
 //   • plain stops p t k; fricatives f s h (voiceless) + v (voiced); nasals m n ɲ ŋ; approximants w l j.
 // Tone (H á / L à + downstep) is often unwritten and the accents are STRIPPED (tone deferred; segmental output).
-// Nasal vowels (tilde) are kept. See docs/investigations/umb_native_bringup_investigation.md.
+// Nasal vowels (tilde) are kept.
 {
     "language": "umb",
     "name": "Umbundu",

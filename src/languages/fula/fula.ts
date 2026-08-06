@@ -1,5 +1,5 @@
 /**
- * Fula (ff) phonemizer — Fulfulde, canonical IPA, espeak-independent (authored). Longest-match g2p (g2p.ts) +
+ * Fula (ff) phonemizer — Fulfulde, canonical IPA (authored). Longest-match g2p (g2p.ts) +
  * penultimate stress; no lexicon. text() tokenizes Fula words (incl. ɓ ɗ ŋ ɲ ƴ) / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";

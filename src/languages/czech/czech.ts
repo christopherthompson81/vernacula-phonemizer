@@ -1,10 +1,9 @@
 /**
- * Czech (cs) phonemizer — canonical IPA, espeak-independent. Rule g2p (g2p.ts) + fixed FIRST-syllable stress
+ * Czech (cs) phonemizer — canonical IPA. Rule g2p (g2p.ts) + fixed FIRST-syllable stress
  * with secondary stress on even non-final nuclei (republika→rˈɛpublˌɪka). Syllabic r̩/l̩ count as nuclei.
  * text() pipeline (#562): normalizeCzech (grouping, abbreviations, ordinals with case inflection, clock,
  * dates, ranges, signs) → normalizeCzechInitialisms → the shared symbol tier (units, currency, exponents,
- * rates) → the clause assembler, whose number token carries the decimal comma. See
- * docs/investigations/cs_native_bringup_investigation.md.
+ * rates) → the clause assembler, whose number token carries the decimal comma.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

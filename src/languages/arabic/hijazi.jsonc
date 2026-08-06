@@ -4,7 +4,7 @@
 // (أبجورة→ʔabad͡ʒoːra), and keeps ⟨خ⟩=[x] (not the uvular [χ] of Gulf/Libyan). Urban Hijazi merges the interdentals
 // to stops/sibilants: ث→[t], ذ→[d], ظ→[zˤ] (keeping ض=[dˤ] distinct). Historical diphthongs monophthongize (ay→eː,
 // aw→oː). Interdental retention in learned words (أثاري→ʔaθaːri) is a lexical tail. Referee: wikipron acw_arab_broad
-// (human). See docs/investigations/acw_hijazi_bringup_investigation.md.
+// (human).
 {
     "variety": "hijazi",
     "iso": "acw",

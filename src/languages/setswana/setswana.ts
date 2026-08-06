@@ -1,11 +1,11 @@
 /**
  * Setswana / Tswana (tn) phonemizer — Bantu (Sotho-Tswana, S31), the Latin orthography, canonical IPA,
- * espeak-independent. A pure greedy longest-match scan over the grapheme table (manifest.ts): Setswana is open CV
+ * A pure greedy longest-match scan over the grapheme table (manifest.ts): Setswana is open CV
  * with the syllabic-nasal + C clusters as onset units, so no coda/syllabification logic is needed. Signatures:
  * the uvular-fricative ⟨g⟩→χ (NO /g/ phoneme — a beyond-epitran divergence), dorsal aspirates ⟨kg kh⟩→k͡χʰ kʰ,
  * lateral affricates ⟨tl tlh⟩→t͡ɬ t͡ɬʰ, ⟨tš š⟩→t͡ʃ ʃ, ⟨ny ng⟩→ɲ ŋ. Vowels are the standard 7-vowel system
  * /i ɪ ɛ a ɔ ʊ u/ (⟨e⟩→ɪ, ⟨o⟩→ʊ, ⟨ê ô⟩→ɛ ɔ). Tone (H/L) is lexical + unwritten → DEFERRED (segmental output
- * only). Cardinal numbers via numbers.ts. See docs/investigations/tn_native_bringup_investigation.md.
+ * only). Cardinal numbers via numbers.ts.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -31,7 +31,7 @@ It reads the whole narrow convention from spelling — **r-vocalisation** (`snur
   (X-SAMPA→IPA, narrow; for multi-variant words it picks the fewest-phonemic-segments form but breaks ties toward the
   richest stød+length, so the narrow marks the convention exists for are preserved) emits two artifacts: the tagger's **full ~199k training set** and the
   **shipped ~37k lexicon** (the training set ∩ the top-50k OpenSubtitles-da frequency list, hermitdave FrequencyWords,
-  CC BY-SA). The tagger trains on the FULL set (a trimmed set would re-starve it). Cleanroom, no espeak.
+  CC BY-SA). The tagger trains on the FULL set (a trimmed set would re-starve it).
 - **Alignment:** hard-EM many-to-{0,1,2} monotonic, parallelised (`tools/norwegian/nb_tagger_parallel.py`, `SEP=""` —
   Danish IPA chunks are single-codepoint-ish, length ː / stød ˀ / soft-d ð combine into the preceding chunk).
 - **Model:** char-embedding (64) → 2-layer BiLSTM (256, dropout 0.3) → per-position IPA-chunk tag head; cosine-LR
@@ -45,4 +45,4 @@ lexicon + `/tmp/da_train.tsv`), then `DA_PRODUCTION=1 .venv/bin/python -u tools/
 `onnxruntime-node` is OPTIONAL/lazy → absent it (or the model), `createDanishTagger()` resolves to `undefined` and
 `phonemizeDaNeural` returns exactly the sync path (NST lexicon + rule g2p, no throw). Opt-in (import from
 `src/daNeural.ts`, the bn/nb/en/fr pattern); the sync engine is untouched. See
-`docs/investigations/da_nst_ingest_investigation.md`.
+.

@@ -1,5 +1,6 @@
-// Native canonical-IPA data manifest for Catalan (ca) — General Eastern/Central Catalan (Barcelona standard),
-// espeak-independent. This file IS the hand-authored language DATA (vowel classes + accent map + reduction,
+// Native canonical-IPA data manifest for Catalan (ca) — General Eastern/Central Catalan (Barcelona standard).
+//
+// This file IS the hand-authored language DATA (vowel classes + accent map + reduction,
 // consonant/digraph rules, nasal + spirantization sets, function words, clause punctuation, number words). The
 // ALGORITHMS that read it stay in code:
 //   g2p.ts     — left-to-right scan: digraphs (ny/ll/l·l/tx/tj/tg/ig/ix/qu/gu), context consonants (c/g/x/r/s),
@@ -9,7 +10,7 @@
 //   numbers.ts — the cardinal compositor
 //
 // Central Catalan signature = vowel reduction. Stressed mid-vowel height (ɛ/e, ɔ/o) is LEXICAL (dona/dóna) and
-// left as the documented ceiling. See docs/investigations/ca_bringup_investigation.md.
+// left as the documented ceiling.
 {
     "language": "ca",
     "name": "Catalan (General Eastern / Central)",

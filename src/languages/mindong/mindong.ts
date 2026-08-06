@@ -14,7 +14,6 @@
  * circular), tone sandhi (連讀變調), and initial assimilation (聲母類化). The eval folds tones (Chao letters stripped
  * both sides) and validates the segmental backbone. Referee: BUC↔IPA pairs from the kaikki Chinese dump (Wiktionary
  * Module:cdo-pron output) → 🔷 reference-implementation parity, not independent human attestation.
- * See docs/investigations/cdo_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";

@@ -1,9 +1,8 @@
 /**
- * Native Indonesian (id) text phonemizer — canonical IPA, espeak-independent. Bahasa Indonesia has a shallow,
+ * Native Indonesian (id) text phonemizer — canonical IPA. Bahasa Indonesia has a shallow,
  * near-phonemic Latin orthography, so this is a rule-based transliterator: digraphs (ng→ŋ, ny→ɲ, sy→ʃ, kh→x)
  * then single letters, ⟨e⟩→schwa [ə] by default, closed-syllable lax allophones (i→ɪ, u→ʊ, e→ɛ, o→ɔ), falling
  * diphthongs ai/au/oi, and syllable-final ⟨k⟩ → glottal stop [ʔ]. Penultimate stress (skips a schwa nucleus).
- * See docs/investigations/id_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,7 +1,7 @@
 // Native canonical-IPA data manifest for Māori (mi) — te reo Māori, Eastern Polynesian, New Zealand (~185k).
-// espeak-independent. One of the simplest orthographies in the fleet: a near-1:1 phonemic map + the macron = LENGTH
+// One of the simplest orthographies in the fleet: a near-1:1 phonemic map + the macron = LENGTH
 // + two digraphs (⟨wh⟩→ɸ, ⟨ng⟩→ŋ). Strict CV syllables — no codas, no clusters, no glide formation. Stress
-// (mora-based, unmarked) is not emitted. Engine: maori.ts. See docs/investigations/mi_native_bringup_investigation.md.
+// (mora-based, unmarked) is not emitted. Engine: maori.ts.
 {
     "language": "mi",
     "name": "Māori (te reo Māori)",

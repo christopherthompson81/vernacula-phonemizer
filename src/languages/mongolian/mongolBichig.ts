@@ -5,7 +5,7 @@
  * engine, this transliterates each glyph to its Cyrillic base reading and feeds the existing Cyrillic phonemizer —
  * so the segmental/harmony/reduction machinery is reused. The classical→modern CONTRACTION layer (intervocalic
  * ɣ/g-deletion + long-vowel coalescence) is applied as a light rule pass on the transliteration; the residual is
- * lexical (which vowel wins a contraction isn't fully predictable). See docs/investigations/mn_native_bringup_investigation.md.
+ * lexical (which vowel wins a contraction isn't fully predictable).
  */
 
 // Base glyph → Cyrillic. Vowels carry known ambiguities (ᠣ o~u, ᠥ ö~ü) — we take the base value and let contraction

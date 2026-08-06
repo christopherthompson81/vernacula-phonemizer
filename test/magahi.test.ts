@@ -7,7 +7,7 @@ import { phonemizeWord as bho } from "../src/languages/bhojpuri/bhojpuri.ts";
 // mag→bho alias until a reference revealed a delta): the Bhojpuri engine + phonology, sharing the Bihari core
 // (no vowel length, श/ष→s, ण/ञ→n), PLUS the documented Magahi GLIDE HARDENING (Vinod Kumar 2026, A Comparative
 // Phonological Study of Bihari Languages, §6.2): word-initial व→[b] (वंश→bans), य→[d͡ʒ] (यन्त्र→jantar), where
-// Bhojpuri preserves the glides. See docs/investigations/mag_native_bringup_investigation.md.
+// Bhojpuri preserves the glides.
 describe("Magahi canonical IPA — Bhojpuri base + glide hardening", () => {
     test("the Magahi DELTA from Bhojpuri: word-initial glide hardening व→b, य→d͡ʒ", () => {
         expect(phonemizeWord("वंश")).toBe("bˈə̃s"); // व → b (Magahi; Bhojpuri keeps w)

@@ -1,8 +1,8 @@
-// Native canonical-IPA data manifest for Estonian (et) — eesti keel, Uralic (Finnic, ~1.1M), espeak-independent.
+// Native canonical-IPA data manifest for Estonian (et) — eesti keel, Uralic (Finnic, ~1.1M).
 // Estonian is nearly as phonemic as its sibling Finnish at the SEGMENT level, so the engine (estonian.ts) is a greedy
 // grapheme scan + gemination (double letter → [Cː]/[Vː]) + fixed first-syllable stress. The hard, only-partially-
 // orthographic axes — PALATALIZATION and the three-way QUANTITY (half-long) — are emitted where written and folded
-// in the referee eval where not. Format: plain JSONC. See docs/investigations/et_native_bringup_investigation.md.
+// in the referee eval where not. Format: plain JSONC.
 {
     "language": "et",
     "name": "Estonian (eesti keel)",

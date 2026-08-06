@@ -1,5 +1,5 @@
 /**
- * Native Kannada (kn) text phonemizer — canonical IPA, espeak-independent. Kannada is a Dravidian Brahmic abugida
+ * Native Kannada (kn) text phonemizer — canonical IPA. Kannada is a Dravidian Brahmic abugida
  * read by the generic engine (core/abugida.ts), mirroring Telugu: unlike Hindi there is NO inherent-vowel
  * deletion (every akshara is pronounced — inherent /a/). kannada.ts adds only the light post-processing:
  * geminate → length, ಳ್ಳ → [ɭː], and the word-final anusvara ಂ realized as [m]. First-syllable (weak) stress.

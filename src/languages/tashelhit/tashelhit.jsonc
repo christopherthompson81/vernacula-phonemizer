@@ -5,7 +5,7 @@
 // grapheme scan + two rules — LABIALISATION (a consonant + ⟨ʷ⟩ → Cʷ) and GEMINATION (a doubled letter → a long
 // consonant Cː, phonemic in Berber). Emphatics = pharyngealised (dot-below): ḍ→dˤ ṭ→tˤ ṣ→sˤ ẓ→zˤ ṛ→rˤ; pharyngeals
 // ḥ→ħ ɛ→ʕ; uvulars ɣ→ʁ~ɣ, x→χ, q; ⟨c⟩→ʃ, ⟨j⟩→ʒ, ⟨y⟩→j, ⟨e⟩→ə. Maps derived from wikipron shi_latn + kaikki
-// Tashelhit (both Wiktionary → correlated single-source-family). See docs/investigations/shi_native_bringup_investigation.md.
+// Tashelhit (both Wiktionary → correlated single-source-family).
 {
     "language": "shi",
     "name": "Tashelhit (Shilha / Taclḥit)",

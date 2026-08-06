@@ -1,6 +1,6 @@
 /**
  * Hebrew (he) phonemizer — Afro-Asiatic (Semitic), the Hebrew abjad, MODERN ISRAELI pronunciation,
- * espeak-independent. PHASE 1: a niqqud→IPA segmental g2p over VOCALIZED (pointed) Hebrew — the deterministic
+ * PHASE 1: a niqqud→IPA segmental g2p over VOCALIZED (pointed) Hebrew — the deterministic
  * core. A stateful scan: each consonant carries the trailing points (dagesh, shin/sin dot, a vowel), which it
  * resolves — the bgdkpt dagesh split (ⁿⁿב→b/v, כ→k/χ, פ→p/f), ⟨ש⟩ shin/sin, the ⟨ו⟩ specials (shuruk וּ→u, holam
  * male וֹ→o, else consonant v), quiescent alef / silent final he / mater yod, and patach genuvah (a final guttural's
@@ -8,7 +8,6 @@
  *
  * PHASE 2 (done, hebrewNeural.ts): unvocalized restoration — a sentence-level neural nakdan that supplies the niqqud
  * for bare consonantal text (the reconstructed words come back through this g2p). Digit tokens route to numbers.ts.
- * See docs/investigations/he_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -7,7 +7,7 @@ import { createMinDong, phonemizeWord } from "../src/languages/mindong/mindong.t
 // ⟨b d g⟩ = [p t k], ⟨c⟩=[t͡s], ⟨ch⟩=[t͡sʰ], ⟨ng⟩=[ŋ]. Validated against BUC↔IPA pairs from the kaikki Chinese dump
 // (Wiktionary Module:cdo-pron output) — 99.9% FOLDED / 100.0% symbol, 🔷 reference-implementation parity (the referee
 // is rule-generated, not human). Segmental + citation tone, with the 韻變 (rime alternation) MODELLED (tight/loose
-// by tone register); tone sandhi, initial assimilation, and the Han front-end deferred. See docs/investigations/cdo_native_bringup_investigation.md.
+// by tone register); tone sandhi, initial assimilation, and the Han front-end deferred.
 describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", () => {
     const cdo = createMinDong();
 

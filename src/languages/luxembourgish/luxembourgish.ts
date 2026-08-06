@@ -1,6 +1,6 @@
 /**
  * Luxembourgish (lb) phonemizer — Lëtzebuergesch, West Germanic (Moselle Franconian), Latin script, canonical IPA,
- * espeak-independent. A greedy longest-match grapheme scan (the diphthongs + digraphs, length-desc) + German-style
+ * A greedy longest-match grapheme scan (the diphthongs + digraphs, length-desc) + German-style
  * code rules the table can't express:
  *   - the DIPHTHONGS ⟨ei ai⟩→ai̯, ⟨au⟩→æu̯, ⟨ou⟩→əu̯, ⟨éi⟩→ei̯ (⟨é⟩ alone→eː), ⟨ie⟩→iə, ⟨ue⟩→uə (offglide folds in the backbone);
  *   - ⟨w⟩→v, ⟨v⟩→f, ⟨z⟩→t͡s, ⟨ch⟩→χ, ⟨sch⟩→ʃ, ⟨qu⟩→kv;
@@ -10,7 +10,7 @@
  *     vowel (Dag→daːχ) / [k] after a consonant (Alg→alk); ⟨n⟩→[ŋ] before a velar (Bankrott→baŋkrot);
  *   - intervocalic g-spirantization ⟨g⟩→[ʁ] (Lager→laʁər).
  * Vowel LENGTH (open/closed-syllable-conditioned) is folded/deferred; the French-loan tail (Aubergine, Avion) + the
- * Romance penult-stress class are not modelled. See docs/investigations/lb_native_bringup_investigation.md.
+ * Romance penult-stress class are not modelled.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

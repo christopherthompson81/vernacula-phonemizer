@@ -1,4 +1,4 @@
-// Native canonical-IPA MANIFEST for Fula (ff, Fulfulde) — AUTHORED beyond-espeak (espeak ships no Fula). A
+// Native canonical-IPA MANIFEST for Fula (ff, Fulfulde) — A
 // self-describing description of the language's DATA, matching english.jsonc / arabic.jsonc: the longest-match
 // orthography→IPA rule table and the clause punctuation. The ALGORITHM (the longest-match scan + penultimate
 // stress) stays in code and reads these tables.
@@ -8,7 +8,7 @@
 {
     "language": "ff",
     "name": "Fula (Fulfulde)",
-    "provenance": "Cleanroom, rule-based g2p — Fulfulde Boko/Latin orthography is shallow and near-1:1. Authored beyond-espeak (espeak ships nothing); validated vs the r12a/Wikipedia references + languagesandnumbers. Sole census provider of the implosives ʄ (ƴ) / ɠ.",
+    "provenance": "Cleanroom, rule-based g2p — Fulfulde Boko/Latin orthography is shallow and near-1:1; validated vs the r12a/Wikipedia references + languagesandnumbers. Sole census provider of the implosives ʄ (ƴ) / ɠ.",
 
     // The canonical-IPA conventions the values below are written in (documentation).
     "convention": {

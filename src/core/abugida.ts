@@ -1,5 +1,5 @@
 /**
- * GENERIC abugida grapheme-to-phoneme engine — the divestment path (NO espeak rules/tables/dict).
+ * GENERIC abugida grapheme-to-phoneme engine.
  *
  * All language-specifics live in a plain, self-describing JSONC definition (see
  * `data/native/<lang>.jsonc`); this file is a thin, DECLARATIVE-DRIVEN interpreter of it. That's

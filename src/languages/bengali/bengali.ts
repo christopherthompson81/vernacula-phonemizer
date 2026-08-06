@@ -1,5 +1,5 @@
 /**
- * Native Bengali (bn) text phonemizer — canonical IPA, espeak-independent. Uses the generic abugida G2P
+ * Native Bengali (bn) text phonemizer — canonical IPA. Uses the generic abugida G2P
  * engine (core/abugida.ts) for the systematic akshara→IPA mapping, then layers the Bengali-specific
  * phonology that Hindi's assembly does NOT share:
  *

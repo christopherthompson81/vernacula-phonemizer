@@ -1,5 +1,5 @@
-// Native canonical-IPA data manifest for Bambara / Bamanankan (bm) — Mande (Manding), the Latin orthography,
-// espeak-independent. Mali's principal language (~14M incl. L2). A greedy longest-match scan with a NASALIZATION
+// Native canonical-IPA data manifest for Bambara / Bamanankan (bm) — Mande (Manding), the Latin orthography.
+// Mali's principal language (~14M incl. L2). A greedy longest-match scan with a NASALIZATION
 // rule (bambara.ts): Bambara is open CV; a syllable-final ⟨n⟩ nasalizes the preceding vowel (ban→bã) and is
 // dropped, while an onset ⟨n⟩ before a vowel stays [n] (na→na, kunun→kunũ — only the FINAL n nasalises). Referee:
 // kaikki Bambara (Wiktionary, HUMAN, narrow — tone + nasalisation + length). Signatures:
@@ -7,7 +7,7 @@
 //   • Word-initial prenasal clusters (mb, nk, nt, ns, …) keep the spelled nasal (mburu→mburu); ⟨ng⟩→ŋɡ.
 // TONE (2-level H/L + downstep) and VOWEL LENGTH are marked in the referee but are LEXICAL / not in the standard
 // orthography → DEFERRED (the eval folds tone + length; we emit the segmental + nasalisation backbone). N'Ko (ߒߞߏ) is a 2nd script — bambaraNko.ts
-// transliterates it to Latin before this g2p (identical IPA; N'Ko tone marks drop). See docs/investigations/bm_native_bringup_investigation.md.
+// transliterates it to Latin before this g2p (identical IPA; N'Ko tone marks drop).
 {
     "language": "bm",
     "name": "Bambara (Bamanankan)",

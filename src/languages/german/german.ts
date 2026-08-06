@@ -1,8 +1,8 @@
 /**
- * German (de) phonemizer — Standard German, canonical IPA, espeak-independent. Rule-based g2p (g2p.ts) with
+ * German (de) phonemizer — Standard German, canonical IPA. Rule-based g2p (g2p.ts) with
  * mostly-Germanic stress: the first syllable, or the first syllable after an unstressed prefix (be-/ge-/ver-…);
  * a stress lexicon (stress.tsv, from kaikki) overrides loanwords/exceptions. text() tokenizes words / numbers /
- * punctuation. See docs/investigations/de_native_bringup_investigation.md.
+ * punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -256,7 +256,7 @@ function placeStress(ipa: string, ordinal: number): string {
  *  ordinals — so the length/quality/consonant/er corrections generalize to compounds ABSENT from the whole-word dicts
  *  (Kanzler, Haus, freundlich… are standalone kaikki entries even when the whole compound is not). Re-normalised to a
  *  single primary stress at the stress-part morpheme. Holdout-measured +7.7pp vs the no-correction fallback on OOV
- *  compounds (docs/investigations/de_morpheme_keyed_investigation.md). */
+ *  compounds. */
 function composeMorphemeKeyed(merged: { text: string; kind: string }[], stressPart: number): string {
     const pieces = merged.map((m) => {
         if (m.kind === "prefix" && PREFIX_IPA[m.text]) return PREFIX_IPA[m.text]!;
@@ -272,7 +272,7 @@ function composeMorphemeKeyed(merged: { text: string; kind: string }[], stressPa
     return placeStress(pieces.join("").replace(/[ˈˌ]/gu, ""), countNuclei(before) + localOrd);
 }
 
-// ── Exposed for the morpheme-keyed experiment (docs/investigations/de_morpheme_keyed_investigation.md). These are
+// ── Exposed for the morpheme-keyed experiment. These are
 // the whole-word correction stages + dict accessors; the experiment re-applies them keyed per MORPHEME. ──
 export const _internal = {
     stressDict, lengthDict, qualityDict, consonantDict, erDict,

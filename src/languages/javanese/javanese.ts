@@ -1,11 +1,11 @@
 /**
- * Native Javanese / Basa Jawa (jv) text phonemizer — canonical IPA, espeak-independent. Austronesian, Latin
- * script. Ported from the espeak-ng-portable authored bring-up. A rule-based g2p (like id/tl) plus the three
+ * Native Javanese / Basa Jawa (jv) text phonemizer — canonical IPA. Austronesian, Latin
+ * script. A rule-based g2p (like id/tl) plus the three
  * signature Javanese processes: (1) the ⟨a⟩→[ɔ] rule — /a/ in a word-final OPEN syllable becomes [ɔ] and spreads
  * regressively through open penults (apa→ɔpɔ, sanga→sɔŋɔ, Jawa→d͡ʒɔwɔ); a closed final syllable blocks it
  * (mangan→maŋan); (2) the DENTAL vs RETROFLEX contrast (⟨t d⟩→t̪ d̪, ⟨th dh⟩→ʈ ɖ); (3) closed-syllable laxing
  * (i→ɪ u→ʊ o→ɔ) + word-final ⟨k⟩→ʔ (pitik→pitɪʔ). Bare ⟨e⟩ defaults to pepet /ə/. Penultimate stress. The
- * ngoko NUMBER system is irregular (-likur/-welas, seket/sewidak). See docs/investigations/jv_native_bringup_investigation.md.
+ * ngoko NUMBER system is irregular (-likur/-welas, seket/sewidak).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -161,7 +161,7 @@ export function phonemizeWord(word: string): string {
     return phonemizeWordRules(word);
 }
 
-// ── Numbers (ngoko; irregular) — ported from the espeak-ng-portable compositor ────────────────────────────────
+// ── Numbers (ngoko; irregular) ────────────────────────────────
 /** n in [1,99] → ngoko spelling. */
 function belowHundred(n: number): string {
     if (n < 10) return NUM.units[n]!;

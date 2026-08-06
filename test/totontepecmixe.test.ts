@@ -8,8 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Totontepec Mixe / ayöök (mto) — Mixe-Zoquean (the fleet's FIRST), the modern SIL
 // orthography. AUTHORED from Crawford, *Totontepec Mixe Phonotagmemics* (SIL 1963). The consonants + allophony are
 // Crawford-grounded (the allophony goldens below reproduce his exact transcriptions, e.g. mpahk→[mbahk],
-// cingavus→[tsingavus]); the vowel-orthography mapping is reconstructed from his example words. See
-// docs/investigations/mto_native_bringup_investigation.md.
+// cingavus→[tsingavus]); the vowel-orthography mapping is reconstructed from his example words.
 describe("Totontepec Mixe (ayöök) canonical IPA", () => {
     test("the vowel anchors (Crawford example words)", () => {
         expect(phonemizeWord("kääm")).toBe("kæːm"); // 'pig' — ⟨ä⟩=/æ/ (Crawford /kæːm/); doubled = length

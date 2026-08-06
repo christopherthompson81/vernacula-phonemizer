@@ -1,8 +1,8 @@
 /**
- * Latvian (lv) phonemizer — canonical IPA, latviešu, Baltic, espeak-independent. Rule g2p (g2p.ts) + FIXED
+ * Latvian (lv) phonemizer — canonical IPA, latviešu, Baltic. Rule g2p (g2p.ts) + FIXED
  * first-syllable stress (emitted before the first nucleus — Latvian stress is predictable, unlike Lithuanian).
  * Written length (macrons) + written palatals are emitted directly; the syllable tone the narrow referee carries is
- * unwritten → folded. text() tokenizes words / numbers / punctuation. See docs/investigations/lv_native_bringup_investigation.md.
+ * unwritten → folded. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

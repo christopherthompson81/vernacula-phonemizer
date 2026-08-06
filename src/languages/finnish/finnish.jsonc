@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Finnish / suomi (fi) — Uralic (Finnic), the Latin orthography,
-// espeak-independent. The national language of Finland (~5.4M). Finnish is one of the most PHONEMICALLY TRANSPARENT
+// The national language of Finland (~5.4M). Finnish is one of the most PHONEMICALLY TRANSPARENT
 // orthographies in the world — very nearly one grapheme ↔ one phoneme — so this is a greedy longest-match scan over
 // the grapheme table (finnish.ts) with a small set of code rules: CONSONANT GEMINATION (a doubled consonant → Cː:
 // kukka→kukːɑ, tullut→tulːut), ⟨ng⟩ → ŋː (a long velar nasal: kengät→keŋːæt) and ⟨nk⟩ → ŋk (kunnigas… n→ŋ before k).
@@ -9,7 +9,7 @@
 //   • ⟨g⟩ only in the ⟨ng⟩ digraph (=ŋː) natively; the loan letters b d g f are kept; c q w x z å š ž map to loan values.
 // Consonant GRADATION (kk~k, tt~t, pp~p, nt~nn …) is MORPHOLOGICAL but is already spelled out in the orthography, so
 // the surface g2p needs no gradation logic — it phonemizes the written (graded) form directly. Fixed word-INITIAL
-// primary stress is unwritten and predictable (folded in the referee eval). See docs/investigations/fi_native_bringup_investigation.md.
+// primary stress is unwritten and predictable (folded in the referee eval).
 {
     "language": "fi",
     "name": "Finnish",

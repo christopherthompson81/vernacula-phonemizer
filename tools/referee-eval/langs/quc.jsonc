@@ -1,13 +1,13 @@
 // K'iche' / Qatzijob'al (quc) — the largest MAYAN language, Latin (ALMG orthography). Referee: English Wiktionary
 // "K'iche' terms with IPA pronunciation" (HUMAN, 127, pulled via the MediaWiki API). Single-source. Vowel length +
-// aspiration allophony folded. See docs/investigations/quc_native_bringup_investigation.md.
+// aspiration allophony folded.
 {
     "language": "quc", "name": "K'iche' (Qatzijob'al)", "script": "Latin",
     "provenance": "Authored ALMG→IPA scan: ejectives b'→ɓ t'/k'/q'/tz'/ch', aspirated plain stops p/t/k/q/tz/ch, x→ʃ j→x w→ʋ r→ɻ '→ʔ, sixth-vowel ä→ə, Spanish-loan consonants; length unwritten (folded), final stress. Validated against English Wiktionary quc.",
     "referees": [
         { "file": "quc.wiktionary-kiche.tsv", "source": "English Wiktionary quc IPA (HUMAN, 127)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source — English Wiktionary (127 K'iche' IPA entries, via the MediaWiki API) is the ONLY machine referee (no wikipron/kaikki/epitran quc). espeak's quc is an authored impl, not attestation.",
+    "secondaryGap": "🔷 single-source — English Wiktionary (127 K'iche' IPA entries, via the MediaWiki API) is the ONLY machine referee (no wikipron/kaikki/epitran quc); no independent human attestation.",
     "folds": [
         { "pattern": "ː", "replace": "", "note": "VOWEL LENGTH — phonemic in K'iche' but UNWRITTEN in the ALMG orthography (unrecoverable from spelling); the referee marks it, we don't emit it" },
         { "pattern": "ʰ", "replace": "", "note": "ASPIRATION of the plain voiceless stops [pʰ tʰ kʰ qʰ t͡ʃʰ t͡sʰ] — allophonic and INCONSISTENT in the referee (chaj→t͡ʃ but achaq→t͡ʃʰ); fold it (the ejective ʼ contrast is untouched)" },

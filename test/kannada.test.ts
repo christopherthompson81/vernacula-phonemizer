@@ -8,7 +8,7 @@ import { normalizeKannada } from "../src/languages/kannada/normalize.ts";
 // Canonical-IPA goldens for Kannada (kn) — a Dravidian Brahmic abugida read by the generic engine, mirroring
 // Telugu: NO inherent-vowel deletion (every akshara pronounced, inherent /a/). Dravidian short/long e·o, dental
 // t̪/d̪ vs retroflex ʈ/ɖ, ಳ→ɭ, ಷ→ʂ, geminate→length, final anusvara ಂ→[m], first-syllable stress. Validated
-// against wikipron kan (97.4%) + kaikki kan (96.8%), both human. See docs/investigations/kn_native_bringup_investigation.md.
+// against wikipron kan (97.4%) + kaikki kan (96.8%), both human.
 describe("kannada canonical IPA", () => {
     test("consonants, vowels, gemination, retroflex, anusvara", () => {
         const cases: [string, string][] = [

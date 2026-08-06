@@ -11,7 +11,6 @@ import { phonemizeWord, phonemizeWordRules as phonemize } from "../src/languages
 // reduction, coda assignment, and the nasal-superscript medial-cluster split. These goldens pin the two-series
 // core PLUS one word per structural rule that matches the wikipron referee. Deferred long tail: Pali
 // doubled-consonant loanwords, special digraphs (ហ្វ→f), bantaq vowel-shortening, independent vowels.
-// See docs/investigations/km_native_bringup_investigation.md.
 describe("Khmer canonical IPA — two-series sesquisyllabic core (Phase 2)", () => {
     test("THE two-series contrast: the same vowel sign ⟨ា⟩ reads by the governing series", () => {
         expect(phonemize("កា")).toBe("kaː"); // ក a-series → aː (matches wikipron)

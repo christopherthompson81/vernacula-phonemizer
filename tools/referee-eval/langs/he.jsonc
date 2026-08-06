@@ -3,7 +3,7 @@
 // The backbone folds neutralise marks the (pointed) orthography does not determine: STRESS (ˈ, phonemic but
 // unwritten), SYLLABLE dots, the OPTIONAL-realisation parens ((ʔ)(h)(ʕ) — keep the content, drop the parens), and
 // the variable GLOTTAL (⟨א⟩/⟨ע⟩ = ʔ, Modern Hebrew drops it inconsistently → fold). Vowel quality + the consonant
-// skeleton (dagesh/bgdkpt, shin/sin) are compared directly. See docs/investigations/he_native_bringup_investigation.md.
+// skeleton (dagesh/bgdkpt, shin/sin) are compared directly.
 {
     "language": "he", "name": "Hebrew", "script": "Hebrew",
     "provenance": "Authored niqqud→IPA g2p (Modern Israeli) from the pointed orthography. Referee: en.wiktionary vocalized-form → a=IL IPA.",

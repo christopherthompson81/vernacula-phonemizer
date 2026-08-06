@@ -1,8 +1,8 @@
 /**
- * Russian (ru) phonemizer — standard Moscow Russian, canonical IPA, espeak-independent. Stress is lexical
+ * Russian (ru) phonemizer — standard Moscow Russian, canonical IPA. Stress is lexical
  * (not derivable from spelling), so a stress dictionary (stress.tsv, word → stressed-vowel ordinal) feeds the
  * rule g2p (g2p.ts). Words not in the dictionary fall back to a default (first-vowel) stress. text()
- * tokenizes words / numbers / punctuation. See docs/investigations/ru_native_bringup_investigation.md.
+ * tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";

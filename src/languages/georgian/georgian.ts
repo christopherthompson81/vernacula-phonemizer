@@ -1,12 +1,11 @@
 /**
- * Georgian / ქართული (ka) phonemizer — Kartvelian, the Mkhedruli script, canonical IPA, espeak-independent. Georgia
+ * Georgian / ქართული (ka) phonemizer — Kartvelian, the Mkhedruli script, canonical IPA. Georgia
  * (~4M). Georgian orthography is essentially ONE-LETTER-ONE-PHONEME (a transparent alphabet, no digraphs), so the g2p
  * is a greedy longest-match scan over the 33-letter grapheme table (manifest.ts) + ONE context rule (word-final voiced
  * stop devoicing ბ/დ/გ→pʰ/tʰ/kʰ). Signatures: the
  * three-way stop/affricate contrast VOICED / ASPIRATED / EJECTIVE (ბ b · ფ pʰ · პ pʼ; …), uvulars ღ=ʁ, ხ=χ, ყ=qʼ, and
  * 5 vowels a ɛ i ɔ u. Stress is weak/non-contrastive → not marked. Numbers are VIGESIMAL and composed by
- * numbers.ts (30 = ოცდაათი 20+10, 40 = ორმოცი 2×20, 99 = ოთხმოცდაცხრამეტი 4×20+19). See
- * docs/investigations/ka_bringup_investigation.md.
+ * numbers.ts (30 = ოცდაათი 20+10, 40 = ორმოცი 2×20, 99 = ოთხმოცდაცხრამეტი 4×20+19).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

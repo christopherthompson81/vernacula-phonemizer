@@ -1,13 +1,14 @@
 /**
- * English-native OOV G2P (English divestment, Phase 2). The cleanroom replacement for espeak's en_rules on
- * words NOT in the CMUdict pronunciation lexicon. Compositional-first (real OOV is ~all compounds/
+ * English-native OOV G2P.
+ *
+ * For words NOT in the CMUdict pronunciation lexicon. Compositional-first (real OOV is ~all compounds/
  * inflections of known words), with a joint-sequence n-gram fallback for the non-compositional tail:
  *
  *   compound-split (dict pieces + compound stress) → suffix morphology → joint n-gram beam decode
  *
  * All paths emit stress-bearing ARPABET; {@link arpabetToIpa} renders the SAME canonical convention as the
- * dict, so a sentence mixing dict + G2P words has no seam. Trained cleanroom on CMUdict (public domain, no
- * espeak); the model is built by tools/compile-data/build-en-g2p-ngram.ts (--emit). Pure function of its
+ * dict, so a sentence mixing dict + G2P words has no seam. Trained cleanroom on CMUdict (public domain);
+ * the model is built by tools/compile-data/build-en-g2p-ngram.ts (--emit). Pure function of its
  * injected {model, dict, common, arpabetToIpa} — no filesystem/globals — so it ports trivially to C#.
  */
 
@@ -73,7 +74,7 @@ export interface EnglishG2p {
     /** OOV word (lowercase letters) → canonical IPA. */
     g2p(word: string): string;
     /** Is this a known CMUdict word? A word that is in CMUdict but NOT in the pronunciation lexicon is an
-     *  excluded HOMOGRAPH (read/use/close) — the router keeps espeak's POS-gated output for it rather than
+     *  excluded HOMOGRAPH (read/use/close) — the router keeps the POS-gated output rather than
      *  G2P'ing it. Only genuinely-unknown words (!knownWord) should be routed to {@link g2p}. */
     knownWord(word: string): boolean;
     /** Diagnostic: the ARPABET decomposition + which path produced it (C/M/N). */

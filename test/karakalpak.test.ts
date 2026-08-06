@@ -5,7 +5,7 @@ import { phonemizeWord, createKarakalpak } from "../src/languages/karakalpak/kar
 // Canonical-IPA goldens for Karakalpak (kaa) — qaraqalpaq tili, Kipchak Turkic (close to Kazakh), the 2016 LATIN
 // alphabet. Signatures: the WRITTEN uvular series ⟨q⟩→[q] / ⟨x⟩→[χ] / ⟨ǵ⟩→[ʁ] (vs velar ⟨k g⟩ / ⟨h⟩), the acute FRONT
 // vowels ⟨á ó ú⟩→[æ ø y] (vs back ⟨a o u⟩), the dotless ⟨ı⟩→[ɯ], ⟨ń⟩→[ŋ], ⟨j⟩→[ʒ], and word-final stress.
-// Referee: English Wiktionary (thin, ~11 pairs). See docs/investigations/kaa_native_bringup_investigation.md.
+// Referee: English Wiktionary (thin, ~11 pairs).
 describe("Karakalpak (qaraqalpaq tili) canonical IPA", () => {
     test("the WRITTEN uvular series ⟨q x ǵ⟩ + final stress", () => {
         expect(phonemizeWord("qaraqalpaq")).toBe("qɑrɑqɑlˈpɑq"); // the endonym — ⟨q⟩→[q] uvular throughout, ⟨a⟩→[ɑ]

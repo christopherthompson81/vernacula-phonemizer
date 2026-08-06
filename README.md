@@ -194,8 +194,7 @@ sources — there is no single canonical engine to defer to:
   Turkish 94% once its vowel allophony is folded and *two* referees agree. Where a referee is
   too noisy (Bengali) or absent (the Sinitic dialect stubs, Nigerian Pidgin), a small
   hand-**adjudicated gold** is the clean quality anchor. The honest read of "is this reliable /
-  what's left?" lives in [`docs/language-maturity.md`](docs/language-maturity.md), and each
-  bring-up keeps a chronological log in [`docs/investigations/`](docs/investigations).
+  what's left?" lives in [`docs/language-maturity.md`](docs/language-maturity.md).
 
 ## Canonical IPA conventions
 
@@ -245,9 +244,7 @@ tools/<lang>/           that language's model train/export pipeline (mirrors src
 tools/corpus/           reusable wordlist/referee fetchers
 
 docs/language-maturity.md    per-language reliability + what's outstanding
-docs/PROVENANCE.md           every data artifact → upstream source → parent license
-docs/adr/                    licensing posture and other architecture decisions
-docs/investigations/         per-language bring-up logs
+LICENCING/                   every data artifact → upstream source → parent license, and the posture
 test/                        golden IPA tests
 ```
 
@@ -260,9 +257,6 @@ The engine and this project's own work are **MIT**. Third-party-derived data kee
 license, declared per file — CC0/public-domain (CMUdict, the NST lexicons, HomoRich), permissive
 with attribution (pypinyin, rime-cantonese, Google language-resources, the Sindhi Open Lexicon),
 CC-BY-SA for the Wiktionary-family lexica, and two GPL-lineage data files. Every artifact is
-mapped to its source and license in [`docs/PROVENANCE.md`](docs/PROVENANCE.md); the reasoning —
+mapped to its source and license in [`LICENCING/PROVENANCE.md`](LICENCING/PROVENANCE.md); the reasoning —
 including when a mechanical table of linguistic facts does *not* inherit an upstream license — is
-[`docs/adr/0001-data-licensing-facts-posture.md`](docs/adr/0001-data-licensing-facts-posture.md).
-
-This project is **not** an espeak derivative: it is an original engine, and only linguistic facts
-were carried forward from the author's earlier espeak-based work.
+[`LICENCING/licencing_posture.md`](LICENCING/licencing_posture.md).

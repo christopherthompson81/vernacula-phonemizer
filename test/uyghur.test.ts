@@ -6,7 +6,6 @@ import { phonemizeWord } from "../src/languages/uyghur/uyghur.ts";
 // alphabet — all 8 vowels written, so no short-vowel restoration). Hand-adjudicated against wikipron uig_arab_broad
 // (human, 2673). The greedy letter→IPA g2p + final-stop devoicing scores 98.2% folded vs the referee. Signatures:
 // ا→ɑ (back a), ە→ɛ, the hamza ئ→ʔ (glottal onset), ⟨چ ج⟩→t͡ʃ d͡ʒ, ⟨غ⟩→ʁ, ⟨خ⟩→χ, ⟨ق⟩→q, ⟨ف⟩→p (nativised).
-// See docs/investigations/ug_native_bringup_investigation.md.
 describe("Uyghur canonical IPA — greedy letter g2p", () => {
     test("vowels ا→ɑ / ە→ɛ, the hamza ئ→ʔ glottal onset, ⟨غ⟩→ʁ", () => {
         expect(phonemizeWord("ئۇيغۇر")).toBe("ʔujʁur"); // "Uyghur" — ئ→ʔ onset, ۇ→u, ي→j, غ→ʁ

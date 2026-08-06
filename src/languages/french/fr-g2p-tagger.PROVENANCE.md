@@ -27,7 +27,7 @@ somewhat smaller than 76.6→94.9.
 
 - **Corpus:** Lexique 3.83 (lexique.org; New/Pallier) — **CC BY-SA 4.0** (verified 2026-07-29: lexique.org's
   license statement + openlexicon's bundled LICENSE-CC-BY-SA4.0.txt for Lexique383) — `lexicon.tsv`, ~125k word→IPA forms (the same table the sync
-  engine ships). Cleanroom, no espeak.
+  engine ships).
 - **Alignment:** hard-EM many-to-{0,1,2} monotonic, parallelised (`tools/norwegian/nb_tagger_parallel.py`, `SEP=""` —
   French IPA is single-codepoint, nasal ɔ̃ = ɔ + combining tilde, so no separator needed).
 - **Model:** char-embedding (64) → 2-layer BiLSTM (256, dropout 0.3) → per-position IPA-chunk tag head; cosine-LR.
@@ -39,4 +39,4 @@ Reproduce: `FR_PRODUCTION=1 .venv/bin/python -u tools/french/fr_g2p_bilstm.py` t
 
 `onnxruntime-node` is OPTIONAL/lazy → absent it (or the model), `createFrenchTagger()` resolves to `undefined` and
 `phonemizeFrNeural` returns exactly the sync path (Lexique + rule g2p, no throw). Opt-in (import from `src/frNeural.ts`,
-the bn/nb/en pattern); the sync engine is untouched. See `docs/investigations/fr_neural_oov_investigation.md`.
+the bn/nb/en pattern); the sync engine is untouched.

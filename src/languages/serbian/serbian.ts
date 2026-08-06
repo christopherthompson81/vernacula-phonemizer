@@ -1,9 +1,9 @@
 /**
- * Serbian (sr, српски) phonemizer — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully phonemic, espeak-
- * independent. A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj dj⟩
+ * Serbian (sr, српски) phonemizer — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully phonemic.
+ * A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj dj⟩
  * first, then the single Cyrillic OR Latin letters — every grapheme is one phoneme, no vowel reduction. Serbian's
  * lexical PITCH ACCENT (4-way) + length are unwritten and DEFERRED — no stress/tone mark is emitted (the referee
- * eval folds them). text() tokenizes words / numbers / punctuation. See docs/investigations/sr_native_bringup_investigation.md.
+ * eval folds them). text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

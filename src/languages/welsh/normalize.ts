@@ -4,7 +4,7 @@
  *
  * MEASURED over the 2,009 unique cased cy_gb FLEURS utterances (column 3):
  *   `Nfed`/`Ned`/`Neg`/`Naf`/`Nydd` ordinals ×~80 (1af, 3ydd, 6ed, 7fed, 10fed, 11eg, 15fed, 18fed,
- *     37fed, 60fed, 190fed, 1,000fed — VIGESIMAL, settled by audio in the investigation doc)
+ *     37fed, 60fed, 190fed, 1,000fed — VIGESIMAL)
  *   comma-thousands ×37 (1,400, 19,500, 400,000, 5,000,000 — the TOKEN `\d+` split these on the comma)
  *   decades ×14 (1970au, 1920au, 90au — the Welsh plural -au)
  *   clocks ×21 (11:35 p.m., 06:30 a 07:30, 8:30 p.m., 1:15 a.m. — p.m./a.m. lowercase with dots)

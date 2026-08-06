@@ -17,8 +17,8 @@ const haveDiacritizer = existsSync(
 
 // Canonical-IPA goldens for Arabic (ar) — Phase 1: the DIACRITIZED input path (broad MSA, cleanroom rules,
 // no lexicon). Emphatics sˤ dˤ tˤ ðˤ, pharyngeals ʕ ħ (the census gaps), gemination Cː, al- sun/moon
-// assimilation + hamzat-wasl ʔ, quantity-sensitive stress. Validated vs espeak-portable canonical (2500
-// diacritized words): 96% segments. Short-vowel restoration for bare text is a Phase-2 diacritizer pre-pass.
+// assimilation + hamzat-wasl ʔ, quantity-sensitive stress. Validated over 2500 diacritized words:
+// 96% segments. Short-vowel restoration for bare text is a Phase-2 diacritizer pre-pass.
 describe("arabic canonical IPA — diacritized path", () => {
     test("consonants, emphatics, pharyngeals, gemination, stress", () => {
         expect(phonemizeWord("كَتَبَ")).toBe("kˈataba"); // antepenult stress (all light)

@@ -32,4 +32,4 @@ readings + multi-character word readings, with the Nanchang tone sandhi baked in
 **Single-source (🔷):** no independent second referee for Nanchang Gan (no wikipron gan; epitran ships no Gan), so
 this dict is verified only *within* the Wiktionary tradition — a systematic error shared with that source would go
 undetected. The correctness anchor is the adjudicated gold in `test/gan.test.ts`. See
-docs/investigations/gan_native_bringup_investigation.md.
+.

@@ -4,7 +4,7 @@
 // folded axes are Estonian's only-partially-orthographic parts: PALATALIZATION (ʲ, phonemic but not reliably written)
 // and the three-way QUANTITY (the half-long ˑ = the Q2/Q3 grade the orthography does not encode). The devoicing ring
 // on ⟨b d g⟩ (b̥ d̥ ɡ̊) and the diphthong offglide ̯ are combining diacritics the BACKBONE strips automatically. Stress
-// (fixed first-syllable) is emitted + folded (predictable; the referee marks none). See docs/investigations/et_native_bringup_investigation.md.
+// (fixed first-syllable) is emitted + folded (predictable; the referee marks none).
 {
     "language": "et", "name": "Estonian (eesti keel)", "script": "Latin",
     "provenance": "Authored greedy phonemic g2p (grapheme scan + gemination) + fixed first-syllable stress; validated against the wikipron est_latn_broad referee (2,773 human headwords).",

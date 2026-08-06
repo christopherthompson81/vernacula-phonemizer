@@ -1,7 +1,7 @@
 /**
  * Chuvash (chv) phonemizer — Чӑвашла / Чӑваш чӗлхи, the SOLE surviving Oghur (Bulgaric) Turkic language (the deepest
  * split in Turkic — sister to every Common-Turkic language, tr/az/tk/tt/ba/kk), ~1M (Chuvashia, Russia), CYRILLIC (the
- * Chuvash alphabet + ⟨ӑ ӗ ҫ ӳ⟩). Canonical IPA, espeak-independent. A Cyrillic grapheme scan with two Chuvash signatures:
+ * Chuvash alphabet + ⟨ӑ ӗ ҫ ӳ⟩). Canonical IPA. A Cyrillic grapheme scan with two Chuvash signatures:
  *
  *   ★★ ALLOPHONIC VOICING — Chuvash has NO phonemic voicing contrast: the voiceless letters ⟨п т к ч с ҫ ш х⟩ voice to
  *      [b d ɡ d͡ʑ z ʑ ʐ ɣ] between vowels, after a NASAL/glide, or after a LIQUID before a FULL vowel (апат→aˈbat,
@@ -11,7 +11,7 @@
  *      FULL vowel, else (all-reduced) on the first syllable (вӑлсем→ʋəlˈzem, сӑмах→səˈmax, vs вӑкӑр→ˈvəɡər).
  *
  * 🔷 single-source: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}} pairs;
- * no wikipron/epitran chv). See docs/investigations/chv_native_bringup_investigation.md.
+ * no wikipron/epitran chv).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

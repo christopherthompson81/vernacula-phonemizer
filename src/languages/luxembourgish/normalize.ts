@@ -44,7 +44,6 @@
  * source records; it carries 3 of the 6 corpus currency instances and is flagged in the PR. `St.` is
  * deliberately NOT expanded — *Sankt* is unsourced and the 5 instances are US place names.
  *
- * See docs/investigations/lb_normalization_investigation.md.
  */
 import { applyEifelerRegel, numberToWords } from "./numbers.ts";
 

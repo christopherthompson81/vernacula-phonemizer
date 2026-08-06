@@ -4,7 +4,7 @@
 // case markers, verb agreement — not segmental), so an engine and any Hindi-clone referee would agree trivially,
 // measuring nothing. The committed anchor is instead a hand-adjudicated gold of the DISTINCTIVE features
 // (test/chhattisgarhi.test.ts): श/ष→s (no /ʃ/), ऐ/औ→ai/au diphthongs, no əɦə-lowering — the shared Eastern-Hindi
-// axis where a Hindi clone is demonstrably wrong. See docs/investigations/hne_native_bringup_investigation.md.
+// axis where a Hindi clone is demonstrably wrong.
 {
     "language": "hne",
     "name": "Chhattisgarhi",

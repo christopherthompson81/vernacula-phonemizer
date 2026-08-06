@@ -1,8 +1,8 @@
 /**
- * Native Urdu (ur) text phonemizer — canonical IPA, espeak-independent. Urdu = Hindi phonology in the
+ * Native Urdu (ur) text phonemizer — canonical IPA. Urdu = Hindi phonology in the
  * Perso-Arabic abjad; the g2p (g2p.ts) does the script→IPA mapping, this file layers weight-based stress
  * (shared with Hindi), numbers, clause punctuation, and embedded-Latin routing. Short-vowel restoration for
- * undiacritized text is DEFERRED (the g2p inserts a default [ə]); see docs/investigations/ur_native_bringup_investigation.md.
+ * undiacritized text is DEFERRED (the g2p inserts a default [ə]).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

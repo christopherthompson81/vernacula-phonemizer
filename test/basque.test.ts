@@ -5,7 +5,6 @@ import { phonemizeWord, createBasque } from "../src/languages/basque/basque.ts";
 // Canonical-IPA goldens for Basque (eu) — euskara, a LANGUAGE ISOLATE, Latin script. The hallmark is the THREE-WAY
 // SIBILANT / affricate system: laminal ⟨z⟩→[s̻] / ⟨tz⟩→[t͡s̻], apical ⟨s⟩→[s̺] / ⟨ts⟩→[t͡s̺], postalveolar ⟨x⟩→[ʃ] /
 // ⟨tx⟩→[t͡ʃ]. Plus the ⟨r⟩ tap/trill split and the palatal digraphs. Referee: wikipron eus_latn broad + narrow.
-// See docs/investigations/eu_native_bringup_investigation.md.
 describe("Basque (euskara) canonical IPA", () => {
     test("★ THE HALLMARK — the three-way sibilant contrast (laminal / apical / postalveolar)", () => {
         expect(phonemizeWord("zu")).toBe("s̻u"); // 'you' — ⟨z⟩→[s̻] laminal

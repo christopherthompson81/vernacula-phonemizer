@@ -8,8 +8,7 @@
  *
  * Polyphonic glyphs (one glyph → several Standard-Zhuang words) get a MOST-COMMON DEFAULT via a salience proxy —
  * the candidate word with the most senses, tie-broken by shorter reading then alphabetical (deterministic). This is
- * a reference-parity default, NOT context disambiguation (Sawndip has no labelled corpus). See
- * docs/investigations/za_sawndip_investigation.md.
+ * a reference-parity default, NOT context disambiguation (Sawndip has no labelled corpus).
  *
  * Usage: npx tsx tools/gen/build-za-sawndip.ts [--write]
  */

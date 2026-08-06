@@ -4,7 +4,6 @@
 // is fully phonemic with no vowel reduction, so the segment skeleton is compared almost directly; the only folds are
 // the predictable STRESS (we emit the fixed antepenult ˈ; the referee marks none) and minor notation. The referee's
 // ⟨-ија⟩ hiatus/glide variants (Италија → itali(j)a) were merged per-headword (credit-any, a suprasegmental axis).
-// See docs/investigations/mk_native_bringup_investigation.md.
 {
     "language": "mk", "name": "Macedonian (македонски)", "script": "Cyrillic",
     "provenance": "Authored phonemic grapheme→IPA scan (dark-l, syllabic-r, final devoicing, regressive voicing, n→ŋ) + fixed antepenultimate stress; validated against the wikipron mkd_cyrl_narrow referee (63,024 human headwords).",

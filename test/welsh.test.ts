@@ -4,11 +4,10 @@ import { phonemize } from "../src/index.ts";
 import { normalizeWelsh, ordinalWords, soften } from "../src/languages/welsh/normalize.ts";
 import { phonemizeWord } from "../src/languages/welsh/welsh.ts";
 
-// Canonical-IPA goldens for Welsh (cy) — espeak-independent, Northern-leaning (u/clear-y → ɨ). Welsh spelling is
+// Canonical-IPA goldens for Welsh (cy) —, Northern-leaning (u/clear-y → ɨ). Welsh spelling is
 // highly phonemic: the g2p resolves digraphs (ch→χ dd→ð ll→ɬ rh→r̥ th→θ) and vowel clusters (diphthongs carry a
-// superscript offglide) then applies PENULTIMATE stress and the vowel-LENGTH rule. Bootstrapped from the
-// espeak-ng-portable cy canonical phonemize() output over the 50k corpus (its ə/ɨ y-vowel relabel, NOT the raw
-// --ipa ʌ/ø); every golden below matches that reference. See docs/investigations/cy_bringup_investigation.md.
+// superscript offglide) then applies PENULTIMATE stress and the vowel-LENGTH rule. Bootstrapped over a 50k
+// frequency corpus with the ə/ɨ y-vowel values (not ʌ/ø); every golden below matches that reference.
 describe("welsh canonical IPA", () => {
     test("consonant digraphs (ch→χ dd→ð ff→f ll→ɬ rh→r̥ th→θ) + always-hard c/g", () => {
         expect(phonemizeWord("chwech")).toBe("χwˈeːχ"); // ch → χ

@@ -1,5 +1,5 @@
 /**
- * Slovenian (sl) grapheme→phoneme engine — South Slavic, Latin script, canonical IPA, espeak-independent. Slovene
+ * Slovenian (sl) grapheme→phoneme engine — South Slavic, Latin script, canonical IPA. Slovene
  * spelling is shallow at the consonant level but UNDERSPECIFIES the vowels (quality/length/pitch/schwa are all
  * unwritten). This scan handles the consonant systems; the vowel quality is emitted at the open-mid ɛ/ɔ default and
  * folded downstream. Context systems:
@@ -8,7 +8,6 @@
  *   - syllabic ⟨r⟩: an r with no vowel neighbour takes a preceding schwa → ə r (prst→pərst, vrt→ʋərt).
  *   - voicing: regressive assimilation in obstruent clusters + word-final devoicing (grad→ɡrat, glasba→ɡlazba). ⟨v⟩→ʋ
  *     is sonorant-inert (coda ⟨v⟩ is [w], never [f]); ⟨f⟩ voices to ʋ before a voiced obstruent (Afganistan→aʋɡanistan).
- * See docs/investigations/sl_native_bringup_investigation.md.
  */
 import { MANIFEST } from "./manifest.ts";
 

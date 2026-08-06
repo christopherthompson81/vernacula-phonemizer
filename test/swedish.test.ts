@@ -6,7 +6,7 @@ import {
     hundredsYear, normalizeSwedish, normalizeSwedishInitialisms, ordinal,
 } from "../src/languages/swedish/normalize.ts";
 
-// Canonical-IPA goldens for Central Standard Swedish (rikssvenska), espeak-independent. Phase 2 adds the NST
+// Canonical-IPA goldens for Central Standard Swedish (rikssvenska). Phase 2 adds the NST
 // pitch-accent + stress lexicon (accent-stress.tsv, CC0): word → accent 1|2 + the primary-stress nucleus. The
 // accent-2 grave (combining U+0300) marks the primary-stressed vowel; accent 1 is unmarked. Stress can be
 // non-initial (loanwords). OOV words fall to the rules (first-syllable stress; accent by shape). Segmental

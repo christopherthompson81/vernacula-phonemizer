@@ -7,7 +7,6 @@ import { phonemizeWord } from "../src/languages/urdu/urdu.ts";
 // consonant + LONG-vowel skeleton (aspiration via ھ, retroflex ٹ ڈ ڑ, dental t̪ d̪, long vowels ا/و/ی/ے,
 // nasal place assimilation) with a default [ə] for the omitted SHORT vowels — full short-vowel restoration is
 // the deferred subsystem (🟠). These goldens are long-vowel-dominant words where the skeleton IS the answer.
-// See docs/investigations/ur_native_bringup_investigation.md.
 describe("urdu canonical IPA", () => {
     test("consonant + long-vowel skeleton (aspiration, retroflex, long vowels)", () => {
         const cases: [string, string][] = [

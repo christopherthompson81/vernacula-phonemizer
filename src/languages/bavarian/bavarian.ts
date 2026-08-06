@@ -1,6 +1,7 @@
 /**
- * Bavarian (bar) phonemizer — Boarisch, Upper German (Austro-Bavarian), Latin script, canonical IPA,
- * espeak-independent. Bavarian has no codified state orthography, but the Bavarian Wikipedia / Wiktionary uses a
+ * Bavarian (bar) phonemizer — Boarisch, Upper German (Austro-Bavarian), Latin script, canonical IPA.
+ *
+ * Bavarian has no codified state orthography, but the Bavarian Wikipedia / Wiktionary uses a
  * de-facto German-derived convention (⟨å⟩ for the dark [ɔ], ⟨ä ö ü⟩, ⟨ß⟩); that is what the wikipron referee
  * transcribes, so the g2p is well-defined against it. A greedy longest-match grapheme scan (diphthongs + digraphs,
  * length-desc) + code rules the table can't express:
@@ -11,7 +12,7 @@
  *   - the DORSAL FRICATIVE ⟨ch⟩→[ç] after a front vowel/consonant, [x] after a back vowel (the German ich/ach split);
  *   - initial ⟨st sp⟩→[ʃt ʃp], ⟨n⟩→[ŋ] before a velar, geminate collapse (no coda length contrast).
  * Vowel LENGTH and the fine dialect vowel qualities (ɑ~a~ɒ, e~e̞~ɛ) are folded/deferred; the referee is a NARROW
- * transcription with ~1.29 dialect variants/headword (credited any). See docs/investigations/bar_native_bringup_investigation.md.
+ * transcription with ~1.29 dialect variants/headword (credited any).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

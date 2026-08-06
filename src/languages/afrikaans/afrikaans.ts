@@ -1,11 +1,11 @@
 /**
- * Afrikaans (af) phonemizer — Indo-European (West Germanic), Latin script, Standard Afrikaans, espeak-independent
- * canonical IPA. A greedy longest-match scan over the fixed graphemes (digraphs/consonants, length-desc) PLUS two
+ * Afrikaans (af) phonemizer — Indo-European (West Germanic), Latin script, Standard Afrikaans.
+ *
+ * A greedy longest-match scan over the fixed graphemes (digraphs/consonants, length-desc) PLUS two
  * code rules the table can't express: the Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (a bare vowel is long/tense
  * in an open syllable V.CV, short/lax in a closed one VC#/VCC — via lookahead) and word-final obstruent DEVOICING
  * (b→p, d→t; g→χ and v→f are unconditional). The long mid vowels are centering diphthongs (ee/open-e = iə, oo/open-o
- * = uə). Stress + schwa-reduction of unstressed vowels are not modelled (folded). See
- * docs/investigations/af_afrikaans_bringup_investigation.md.
+ * = uə). Stress + schwa-reduction of unstressed vowels are not modelled (folded).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

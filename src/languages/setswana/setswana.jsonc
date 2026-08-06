@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Setswana / Tswana (tn) — Bantu (Sotho-Tswana, S31; Botswana + South
-// Africa, ~14M), the Latin orthography, espeak-independent. A greedy longest-match scan (Chichewa pattern):
+// Africa, ~14M), the Latin orthography. A greedy longest-match scan (Chichewa pattern):
 // Setswana is open CV with the syllabic-nasal + C clusters as onset units, so a pure left-to-right longest match
 // suffices. Referee: epitran tsn-Latn (INDEPENDENT, programmatic). Phonology from Mistry (Cole 1955) + epitran.
 // Signatures (where we AGREE with epitran): ⟨kg⟩→k͡χʰ, ⟨kh⟩→kʰ, ⟨tlh⟩→t͡ɬʰ, ⟨tl⟩→t͡ɬ, ⟨tsh⟩→t͡sʰ, ⟨tš/š⟩→t͡ʃ/ʃ,
@@ -15,7 +15,6 @@
 //     syllable is H is a lexical fact absent from the spelling, and no toned lexicon exists → not emitted (as nya).
 //   • The EJECTIVE realization of p/t/k/tl/ts is post-nasal strengthening + a seNgwato-dialect trait (Matlhaku
 //     2020), NOT the citation form → we emit PLAIN (epitran-corroborated).
-// See docs/investigations/tn_native_bringup_investigation.md.
 {
     "language": "tn",
     "name": "Setswana (Tswana)",

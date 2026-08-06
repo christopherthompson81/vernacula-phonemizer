@@ -1,11 +1,11 @@
 /**
- * Bosnian (bs, bosanski) phonemizer — South Slavic, the third Serbo-Croatian standard, ~2.5M, espeak-independent.
+ * Bosnian (bs, bosanski) phonemizer — South Slavic, the third Serbo-Croatian standard, ~2.5M.
  * Bosnian, Croatian and Serbian are pluricentric standards of ONE phonological system (Serbo-Croatian); the SEGMENTAL
  * grapheme→IPA is IDENTICAL (the same 30-phoneme inventory + fully-phonemic orthography — a linguistic fact), so this
  * module reuses the Serbian engine's word g2p (phonemizeWord) directly. Bosnian is written in BOTH Gaj's Latin
  * (predominant) and Cyrillic, so the tokenizer admits both scripts. The only Bosnian-specific delta is the CARDINAL
  * NUMBER WORDS (Serbian hiljada/milion lexemes + the ijekavian dvjesta — numbers.ts) over the shared agreement
- * compositor. Pitch accent is unwritten and DEFERRED (as in Serbian/Croatian). See docs/investigations/bs_native_bringup_investigation.md.
+ * compositor. Pitch accent is unwritten and DEFERRED (as in Serbian/Croatian).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

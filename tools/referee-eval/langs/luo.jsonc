@@ -5,7 +5,7 @@
 // what the orthography does NOT determine: the PRECOMPOSED tone-marked citation vowels (à ó ê í), syllable dots, the
 // ±ATR vowel QUALITY (ɪ~i ɛ~e ɔ~o ʊ~u — unwritten harmony, we emit the +ATR default), the one-palatal notation
 // (c ~ t͡ʃ ~ t͡ɕ), the palatalisation glide (ʲ~j), released-final aspiration (ʰ), the low-vowel fronting (æ~a), and the
-// tap notation (r~ɾ). See docs/investigations/luo_native_bringup_investigation.md.
+// tap notation (r~ɾ).
 {
     "language": "luo", "name": "Luo (Dholuo)", "script": "Latin",
     "provenance": "Authored greedy g2p from the Dholuo orthography; mapping from the 17-word en.wiktionary Luo IPA referee + Tucker (1994) / Okoth-Okombo (1982).",

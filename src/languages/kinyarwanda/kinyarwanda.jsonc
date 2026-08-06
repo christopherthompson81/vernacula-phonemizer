@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Kinyarwanda / Ikinyarwanda (rw) — Bantu (JD61, Rwanda-Rundi), the Latin
-// orthography, espeak-independent. A greedy longest-match scan over the grapheme table (Shona pattern): Kinyarwanda
+// orthography. A greedy longest-match scan over the grapheme table (Shona pattern): Kinyarwanda
 // syllables are open CV, so a pure left-to-right longest match suffices. The interest is the rich PALATAL series,
 // authored from the grammar (Wikipedia Kinyarwanda phonology) because the only machine referee (epitran kin-Latn)
 // mis-renders it (sh→[xj] not [ʃ], cy→[kj] not [c]):
@@ -9,8 +9,7 @@
 //   • ⟨r⟩→ɾ (tap), double vowels → long (aa→aː). ⟨Cw⟩/⟨Cy⟩-not-listed fall out as C+w / C+j.
 // Tone (H/L) is unwritten → DEFERRED; the written double-vowel length IS emitted. Referee: epitran kin-Latn
 // (programmatic, INDEPENDENT) — corroborates the BULK (vowels, plain C, prenasals, labialisation, length); the
-// palatal signatures rest on the grammar (epitran is wrong there) → 🔷 single-source. See
-// docs/investigations/rw_native_bringup_investigation.md.
+// palatal signatures rest on the grammar (epitran is wrong there) → 🔷 single-source.
 {
     "language": "rw",
     "name": "Kinyarwanda (Ikinyarwanda)",

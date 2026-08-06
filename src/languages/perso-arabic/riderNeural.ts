@@ -5,7 +5,7 @@
  * restoreHarakat then applies the authoritative gold lexicon) and neural-vocalizes only the rest — so precedence
  * is lexicon → neural → default. When the optional `onnxruntime-node` dep or the .onnx model is absent the pre-pass
  * is a no-op and you get exactly the sync `phonemize(text, lang)` (lexicon + default). Bare Arabic uses the
- * separate `phonemizeArabic`; this is its rider analogue. See docs/investigations/arabic_script_restorer_investigation.md.
+ * separate `phonemizeArabic`; this is its rider analogue.
  */
 import { getPhonemizer } from "../../registry.ts";
 import { createRiderDiacritizer, type RiderDiacritizer } from "./riderDiacritizer.ts";

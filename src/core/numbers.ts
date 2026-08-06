@@ -1,5 +1,5 @@
 /**
- * Native number rendering — GENERAL, not abugida-specific (declarative, portable — no espeak number data).
+ * Native number rendering — GENERAL, not abugida-specific (declarative, portable).
  *
  * Number COMPOSITION is bespoke per numbering system (there is no universal magnitude structure — see the
  * rejected Layer-A number-builder consolidation), so each system contributes its own `<system>NumberWords`

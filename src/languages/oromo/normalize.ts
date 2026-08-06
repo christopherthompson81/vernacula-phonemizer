@@ -56,7 +56,7 @@
  * SECOND pass, and the tier gets `£27tiin` and `$2.3` intact. This is what lets the currency and percent
  * WORDS live in exactly one place (the tier's declaration) instead of being duplicated here.
  *
- * SOURCING. Every word below is traceable; see docs/investigations/om_normalization_investigation.md,
+ * SOURCING. Every word below is traceable,
  * Run 4, for the evidence table. The one word with a single source is `ida’uu` (+), from espeak's
  * `om_list` alone — and `+` has zero corpus instances. The temperature SCALE names (Celsius/Fahrenheit)
  * could not be sourced in any repo source, so `°C` reads *digirii N* and the scale letter is left unread
@@ -67,7 +67,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { numberToWords } from "./numbers.ts";
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
-// DATA — every literal here is corpus- or espeak-attested; the evidence is in the investigation log.
+// DATA — every literal here is corpus- or espeak-attested;
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** The decimal point, from the manifest so there is ONE source of truth (`"decimalWord": "tuqaa"`).

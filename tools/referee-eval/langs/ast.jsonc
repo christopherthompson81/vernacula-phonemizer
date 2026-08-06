@@ -1,7 +1,7 @@
 // Asturian (ast) — Astur-Leonese (Ibero-Romance), Latin script. Referee: wikipron ast_latn_broad (HUMAN, 4170
 // headwords, variants merged). `segmentJoin` strips the per-phone spaces. Close to Spanish/Galician (distinción
 // c/z→[θ]); the Asturian hallmark ⟨x⟩→[ʃ]. STRESS (written accents + the Ibero rule) is folded — the referee marks
-// none; SPIRANTIZATION (intervocalic b/d/g→β/ð/ɣ) is folded to the stops. See docs/investigations/ast_native_bringup_investigation.md.
+// none; SPIRANTIZATION (intervocalic b/d/g→β/ð/ɣ) is folded to the stops.
 {
     "language": "ast", "name": "Asturian (asturianu)", "script": "Latin",
     "provenance": "Authored Ibero-Romance grapheme→IPA g2p (⟨x⟩→ʃ, distinción ⟨c z⟩→θ, ⟨ll⟩→ʎ ⟨ñ⟩→ɲ ⟨ch⟩→t͡ʃ ⟨y⟩→ʝ ⟨j⟩→h ⟨v⟩→b, ⟨qu gu gü⟩, the i/u rising glides, tap/trill r) from Asturian phonology; validated against the wikipron ast_latn_broad (4170) human referee.",

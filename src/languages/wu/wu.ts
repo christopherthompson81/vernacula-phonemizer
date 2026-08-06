@@ -8,8 +8,8 @@
  * Written in Han characters; the front-end maps Han → Wugniu (zaonhe romanization) via dict.tsv (word→reading)
  * with greedy longest-match segmentation, so multi-char words carry their baked sandhi melody (上海 zaon2 he4)
  * and unknown chars fall back to per-char citation tone. The back-end (wu.jsonc) maps each Wugniu syllable →
- * IPA: [initial] + final + one of the tones as Chao contour letters. Ported from the espeak-ng-portable authoring
- * (rime-wugniu dict + wuu_rules/ph_wuu). See docs/investigations/wu_native_bringup_investigation.md.
+ * IPA: [initial] + final + one of the tones as Chao contour letters. The dict is the rime-wugniu zaonhe schema;
+ * the Wugniu→IPA back-end is authored here.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";

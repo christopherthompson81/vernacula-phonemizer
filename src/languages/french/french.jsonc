@@ -11,7 +11,7 @@
 {
     "language": "fr",
     "name": "French (standard / Parisian)",
-    "provenance": "Cleanroom, rule-based g2p (French orthography is deep but rule-governed in the reading direction) + an exception lexicon (lexicon.tsv) + a vigesimal number compositor. espeak-independent. WHICH words are h-aspiré / take liaison, and the number words, are language facts.",
+    "provenance": "Cleanroom, rule-based g2p (French orthography is deep but rule-governed in the reading direction) + an exception lexicon (lexicon.tsv) + a vigesimal number compositor. WHICH words are h-aspiré / take liaison, and the number words, are language facts.",
 
     // The canonical-IPA conventions the values below are written in (documentation).
     "convention": {

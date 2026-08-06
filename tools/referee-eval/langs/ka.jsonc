@@ -3,8 +3,7 @@
 // removes the combining diacritics (ä→a, e̞→e, o̞→o, the devoicing rings b̥/ɡ̊/d̥) and the affricate ties; the folds
 // below neutralise the remaining NARROW allophony the phonemic g2p does not model: the mid-vowel symbol (e/o→ɛ/ɔ),
 // dark ɫ→l, pre-velar n→ŋ, the ვ labialisation glide ʷ→v, ⟨ყ⟩'s narrow [χʼ]→/qʼ/, and final devoicing (v→f, …). The
-// three-way stop contrast (ejective ◌ʼ / aspirate ◌ʰ / voiced) and every consonant place ARE compared directly. See
-// docs/investigations/ka_bringup_investigation.md.
+// three-way stop contrast (ejective ◌ʼ / aspirate ◌ʰ / voiced) and every consonant place ARE compared directly.
 {
     "language": "ka", "name": "Georgian (ქართული)", "script": "Mkhedruli",
     "provenance": "Authored greedy g2p from the Mkhedruli alphabet; the 33-letter table was DERIVED from the wikipron kat_geor_narrow referee (18,350 1:1-aligned words).",

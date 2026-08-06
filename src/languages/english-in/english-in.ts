@@ -22,7 +22,7 @@
  * Deliberately DEFERRED (need a lexical distinction / not recoverable from the GenAm output, and no en-IN referee
  * exists to adjudicate): the TRAP/DRESS ([æ]~[ɛ]) and LOT/THOUGHT vowel qualities, yod-retention (student→stjuːɖənʈ),
  * and the syllable-timed full-vowel restoration in unstressed syllables. Quality anchor = a hand-adjudicated
- * diagnostic gold (english-in.test.ts). See docs/investigations/en-in_native_bringup_investigation.md.
+ * diagnostic gold (english-in.test.ts).
  */
 import { createEnglish, type EnglishPhonemizer } from "../english/english.ts";
 

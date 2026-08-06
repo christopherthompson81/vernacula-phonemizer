@@ -1,9 +1,9 @@
 // Native canonical-IPA data manifest for Luxembourgish (lb) — Lëtzebuergesch, a Moselle-Franconian (West Central
 // German) variety standardized in Luxembourg (~390k), Latin script with a German-derived orthography + French loans.
-// espeak-independent. The engine (luxembourgish.ts) is a greedy longest-match grapheme scan (digraphs/diphthongs
+// The engine (luxembourgish.ts) is a greedy longest-match grapheme scan (digraphs/diphthongs
 // first) + German-style rules: initial st/sp→ʃt/ʃp, s→z (voiced onset), short stressed ⟨e⟩→æ, geminate collapse,
 // final + regressive devoicing, final g→χ (after a vowel) / k (after a consonant). Vowel LENGTH is folded
-// (open/closed-syllable-conditioned, deferred). See docs/investigations/lb_native_bringup_investigation.md.
+// (open/closed-syllable-conditioned, deferred).
 {
     "language": "lb",
     "name": "Luxembourgish (Lëtzebuergesch)",

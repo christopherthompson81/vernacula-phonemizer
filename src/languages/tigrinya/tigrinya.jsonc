@@ -10,7 +10,7 @@
 //   • ⟨ኸ⟩ → [x] (spirantised k), ⟨ቀ⟩ → [kʼ] (velar ejective — the human referee's value; epitran renders it [q]).
 // The guttural 1st-order vowel stays CENTRAL [ə] (kaikki ʔɐf, ʔɐdɾi), NOT lowered to [a] as in Amharic.
 // UNWRITTEN (shared with Amharic): GEMINATION (phonemic, unmarked → single, folded) and the epenthetic 6th-order
-// [ɨ]. Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. See docs/investigations/ti_native_bringup_investigation.md.
+// [ɨ]. Ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ.
 {
     "language": "ti",
     "name": "Tigrinya",

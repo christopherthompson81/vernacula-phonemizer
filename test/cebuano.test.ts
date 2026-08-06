@@ -6,8 +6,7 @@ import { phonemizeWord, createCebuano } from "../src/languages/cebuano/cebuano.t
 // pattern: the digraph ⟨ng⟩→ŋ, a WORD-INITIAL glottal [ʔ] before a vowel, a HIATUS glottal between two vowels
 // (kaon→kaʔon), a hyphen→[ʔ], ⟨y⟩→j, penultimate stress (phonemic but unwritten → folded by the eval). The
 // unwritten word-final glottal (bata child [bataʔ] vs robe [bata]) is deferred. Validated at 87.3% vs wikipron
-// ceb broad (native core ~100%; residual is Spanish-surname proper nouns) + 70.0% vs epitran. See
-// docs/investigations/ceb_native_bringup_investigation.md.
+// ceb broad (native core ~100%; residual is Spanish-surname proper nouns) + 70.0% vs epitran.
 describe("Cebuano canonical IPA", () => {
     test("word-initial + hiatus glottal stop; ng→ŋ; penult stress", () => {
         expect(phonemizeWord("adlaw")).toBe("ʔˈadlaw"); // word-initial ʔ

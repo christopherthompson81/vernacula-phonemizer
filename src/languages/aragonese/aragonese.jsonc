@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Aragonese (an) — aragonés, Ibero-Romance (Pyrenean), Aragon/NE Spain
-// (~25k). espeak-independent. Close to Spanish/Catalan/Occitan. A Spanish-shaped shallow g2p (the Asturian/Galician
+// (~25k). Close to Spanish/Catalan/Occitan. A Spanish-shaped shallow g2p (the Asturian/Galician
 // pattern) with the Aragonese hallmarks:
 //   - ⟨ch⟩→[t͡ʃ] (very common — Aragonese writes ⟨ch⟩ where Spanish has [x]: Chesús, chuego), ⟨ny⟩→[ɲ] (Catalan-style
 //     digraph: Espanya), ⟨x⟩→[ʃ] (baxo→baʃo), ⟨v⟩→[b] (betacism);
@@ -7,7 +7,7 @@
 //     marked minority — Benasquese/Ribagorçan — so [θ] is emitted and the fold normalises the axis); ⟨j⟩/⟨g+e,i⟩→[x];
 //   - WORD-FINAL ⟨-r⟩ APOCOPE: a final ⟨-r⟩ after a vowel is DROPPED (the categorical Aragonese trait, shared with
 //     Catalan/Occitan — cantar→[kanˈta], flor→[flo], sur→[su]; the referee attests the dropped form throughout).
-// Engine: aragonese.ts. See docs/investigations/an_native_bringup_investigation.md.
+// Engine: aragonese.ts.
 {
     "language": "an",
     "name": "Aragonese (aragonés)",

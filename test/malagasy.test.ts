@@ -6,7 +6,7 @@ import { phonemizeWord, createMalagasy } from "../src/languages/malagasy/malagas
 // rule g2p: ⟨o⟩=/u/, ⟨y⟩=final /i/, the retroflex affricates ⟨tr⟩→ʈʂ / ⟨dr⟩→ɖʐ, ⟨j⟩→dz, prenasalized stops
 // (mb→ᵐb, nd→ⁿd, ndr→ⁿɖʐ, ng→ᵑɡ, …), penultimate stress. This is a BROAD canonical transcription that KEEPS the
 // weak final vowels (which the narrow referees delete). Validated at ~78.6% on the verifiable core (final vowels
-// excluded) vs wikipron mlg + kaikki. See docs/investigations/mg_native_bringup_investigation.md.
+// excluded) vs wikipron mlg + kaikki.
 describe("Malagasy canonical IPA", () => {
     test("⟨o⟩ → /u/, ⟨y⟩ → /i/, penultimate stress", () => {
         expect(phonemizeWord("olona")).toBe("ulˈuna"); // both o → u, penult stress

@@ -1,8 +1,8 @@
 // Native canonical-IPA data manifest for Icelandic (is) — íslenska, the most archaic living North Germanic language
-// (~330k), Latin script + ⟨þ ð æ ö⟩. espeak-independent. One of the DEEPEST orthographies in the fleet: no voicing
+// (~330k), Latin script + ⟨þ ð æ ö⟩. One of the DEEPEST orthographies in the fleet: no voicing
 // contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k]; famous epenthetic-stop
 // clusters ⟨ll⟩→[tl] ⟨rl⟩→[rtl] ⟨rn⟩→[rtn]; rich vowel values (á→au, ó→ou, æ→ai, au→øy). Aspiration + length are
-// folded (run 1). Engine: icelandic.ts. See docs/investigations/is_native_bringup_investigation.md.
+// folded (run 1). Engine: icelandic.ts.
 {
     "language": "is",
     "name": "Icelandic (íslenska)",

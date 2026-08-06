@@ -10,7 +10,7 @@ import { normalizeLuxembourgish, ordinalStem } from "../src/languages/luxembourg
 // orthography (⟨w⟩→v, ⟨ch⟩→χ, initial st/sp→ʃt/ʃp) + a distinctive diphthong system + French loans. The engine is a
 // greedy longest-match grapheme scan + German-style rules (stressed ⟨e⟩→æ, geminate collapse, devoicing). Validated
 // against wikipron ltz_latn_broad (3893 human headwords) — 69.3% FOLDED / 92.2% symbol, with vowel LENGTH folded.
-// 🔷 single-source-family. See docs/investigations/lb_native_bringup_investigation.md.
+// 🔷 single-source-family.
 describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + German-style rules", () => {
     const lb = createLuxembourgish();
 
@@ -94,8 +94,7 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
 
 // #562 TEXT NORMALIZATION. Counts are FLEURS lb_lu, column 3, 1,896 utterances. The assertions are on the
 // text→text layer (plus a couple through phonemize, to prove the words reach the g2p rather than a sink),
-// and they pin the rule's BRANCHES rather than the corpus's instances — trap 13 (pin the rule's BRANCHES). See
-// docs/investigations/lb_normalization_investigation.md.
+// and they pin the rule's BRANCHES rather than the corpus's instances — trap 13 (pin the rule's BRANCHES).
 describe("Luxembourgish #562 normalization — the period's four jobs + the Eifeler Regel", () => {
     const lb = createLuxembourgish();
     const N = normalizeLuxembourgish;

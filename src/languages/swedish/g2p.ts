@@ -4,7 +4,7 @@
  * (rt/rd/rn/rs/rl → ʈ/ɖ/ɳ/ʂ/ɭ), word-initial silent digraphs (hj/lj/dj/gj → j), geminate consonants
  * (doubling → Cː + short vowel), and the complementary vowel-length rule on the stressed syllable. A `compound`
  * (NST secondary stress) drives length from an NST-long ordinal set (boundary-safe) and fires softening at the
- * secondary onset too. Stress + clause assembly are added downstream (swedish.ts). See docs/investigations/sv_bringup_investigation.md.
+ * secondary onset too. Stress + clause assembly are added downstream (swedish.ts).
  */
 
 import { MANIFEST } from "./manifest.ts";

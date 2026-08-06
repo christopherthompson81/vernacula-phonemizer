@@ -45,9 +45,8 @@
  * regular cardinal+મ- (પાંચમો, સાતમો, નવમા, દસમા, અગિયારમાં, સોળમુ). NOT corpus-attested and taken as
  * transparent international/arithmetic vocabulary: સેલ્સિયસ, ફેરનહીટ, સેન્ટીમીટર, કિલોગ્રામ, રૂપિયા,
  * ભાગ્યા, and દશાંશ (the manifest's new `decimalWord`, the exact cognate of the दशांश this repo already
- * ships for Marathi). DELIBERATELY OMITTED for want of a source: a word for `+` — espeak-ng's gu_list
- * gives the Hindi પ્રતિશત for `%`, so it is not a usable arbiter here, and the corpus's two `+` signs
- * (`+30°C`, `UTC+1`) lose almost nothing by staying silent. A wrong word is worse than a dropped sign.
+ * ships for Marathi). DELIBERATELY OMITTED for want of a source. A wrong word is worse than a
+ * dropped sign.
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";

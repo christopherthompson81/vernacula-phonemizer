@@ -1,9 +1,9 @@
 /**
- * Thai grapheme→phoneme engine (authored beyond-espeak). The hard structural work — leading-vowel reorder,
+ * Thai grapheme→phoneme engine (authored). The hard structural work — leading-vowel reorder,
  * อักษรนำ leaders, the schwa/inherent-vowel algorithm, syllable segmentation, and computed tone — is done by
- * the ported syllabifier (syllabifier.ts, from our espeak-ng-portable Thai front-end). This module RENDERS the
- * resulting {onset, nucleus, coda, tone} syllable structure to IPA directly (instead of the espeak L2S path).
- * Contributes ɤ. See docs/investigations/th_native_bringup_investigation.md.
+ * the syllabifier (syllabifier.ts). This module RENDERS the
+ * resulting {onset, nucleus, coda, tone} syllable structure to IPA directly.
+ * Contributes ɤ.
  */
 import {
     reorderThaiLeadingVowels,
@@ -18,7 +18,7 @@ import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Lexical dictionary of irregulars (length, silent-ร Sanskrit, cluster-under-leading-vowel) the rules can't
-// derive — word → IPA (Chao). Ported from espeak-ng-portable's Thai dictionary; consulted BEFORE the rule engine.
+// derive — word → IPA (Chao). Consulted BEFORE the rule engine.
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
     if (DICT === undefined)

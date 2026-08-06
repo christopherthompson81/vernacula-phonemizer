@@ -9,7 +9,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // (⟨mb nd ng nz⟩ → ᵐb ⁿd ᵑɡ ⁿz, homorganic), ⟨ny⟩ → ɲ, and — unlike the fleet's other Bantu languages — TONE is
 // WRITTEN (acute=H, háček=rising, circumflex=falling, unmarked=L) so it is rendered per nucleus (Chao letters).
 // No diphthongs (vowel sequences are hiatus, each a tone-bearing nucleus). Anchored on kaikki Lingala (97% folded,
-// tone MEASURED not folded). See docs/investigations/ln_native_bringup_investigation.md.
+// tone MEASURED not folded).
 describe("Lingala canonical IPA", () => {
     test("prenasalised obstruents as single onset units (homorganic)", () => {
         expect(phonemizeWord("mbɔ́tɛ")).toBe("ᵐbɔ˥tɛ˩"); // mb → ᵐb ("hello")

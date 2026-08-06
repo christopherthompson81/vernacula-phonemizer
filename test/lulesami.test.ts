@@ -7,7 +7,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // orthography. AUTHORED from Ylikoski, "Lule Saami". A TRANSPARENT SEGMENTAL scan; the complex morphophonology
 // (consonant gradation, epenthetic vowels, labial harmony, unwritten length) is the deferred residual. The
 // hallmark is the North-Saami-style VOICELESS ⟨b d g⟩→[p t k] (aspiration-not-voicing), ASJP-confirmed.
-// First-syllable stress. See docs/investigations/smj_native_bringup_investigation.md.
+// First-syllable stress.
 describe("Lule Sami (julevsámegiella) canonical IPA", () => {
     test("★ the voiceless ⟨b d g⟩ → [p t k] trap + medial ⟨p t k⟩ stay PLAIN", () => {
         expect(phonemizeWord("bena")).toBe("ˈpenɑ"); // 'dog' — ⟨b⟩→[p] (grammar /peːnə/), NOT [b]; ⟨a⟩→[ɑ]

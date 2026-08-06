@@ -1,9 +1,9 @@
 // Native canonical-IPA data manifest for Kabuverdianu (kea) — kriolu, a Portuguese-lexified creole of Cape Verde
-// (~870k), espeak-independent. Written in the ALUPEC/AK unified orthography (a standardized PHONEMIC alphabet), so
+// (~870k). Written in the ALUPEC/AK unified orthography (a standardized PHONEMIC alphabet), so
 // the engine (kabuverdianu.ts) is a greedy grapheme scan (digraphs first) + Portuguese-creole NASALIZATION + stress
 // (accent-or-penult). Targets the SANTIAGO (Sotavento/Badiu) variety (what the anchor pronunciations attest). No
 // machine referee exists → authored from ALUPEC + the 7 kaikki IPA words (test/kabuverdianu.test.ts). Format: plain
-// JSONC. See docs/investigations/kea_native_bringup_investigation.md.
+// JSONC.
 {
     "language": "kea",
     "name": "Kabuverdianu (kriolu)",

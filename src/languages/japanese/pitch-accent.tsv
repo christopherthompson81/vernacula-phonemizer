@@ -1,6 +1,6 @@
 # Japanese (Tokyo) lexical pitch accent — key<TAB>accent-nucleus mora (0 = heiban, no downstep).
 # Keys: kanji SURFACES + kana READINGS (looked up surface-first for homograph disambiguation).
-# Merged (first-writer-wins) from espeak-ng-portable: consensus(kanjium/OpenJTalk/UniDic vote)
+# Merged (first-writer-wins): consensus(kanjium/OpenJTalk/UniDic vote)
 # > OpenJTalk-inflected > UniDic base. Sources: kanjium (CC BY-SA), OpenJTalk (naist-jdic), UniDic (NINJAL).
 １	2
 １０００円	0

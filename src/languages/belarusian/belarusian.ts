@@ -1,5 +1,5 @@
 /**
- * Native Belarusian / беларуская (be) text phonemizer — canonical IPA, espeak-independent. East Slavic, Cyrillic.
+ * Native Belarusian / беларуская (be) text phonemizer — canonical IPA. East Slavic, Cyrillic.
  * Belarusian orthography is PHONETIC — akanne (unstressed о→а, е→я) is SPELLED, so ⟨о⟩ is only ever stressed → [o]
  * and no stress dictionary is needed for vowel quality. The work is: PALATALISATION (a consonant → Cʲ before ь, or
  * an iotated vowel я/е/ё/ю/і) + the iotated vowels ([j]+V word-initially / after a vowel / after an apostrophe; the

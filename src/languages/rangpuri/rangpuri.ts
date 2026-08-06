@@ -1,5 +1,5 @@
 /**
- * Native Rangpuri (rkt) text phonemizer — canonical IPA, espeak-independent. Rangpuri is the Eastern-Indo-Aryan KRNB
+ * Native Rangpuri (rkt) text phonemizer — canonical IPA. Rangpuri is the Eastern-Indo-Aryan KRNB
  * lect of Rangpur (Bangladesh) + adjacent India, written here in Devanagari (the Kamtapuri/activist script). It shares
  * Hindi's Devanagari abugida machinery, so it REUSES the generic Hindi engine (makeNativeHindi) with a Rangpuri data
  * file (rangpuri.jsonc). The KRNB-specific facts live entirely in the manifest:
@@ -8,11 +8,11 @@
  *     word-initially (ठीक→ʈʰik) but deaspirate elsewhere (आठ→aʈ), via a postRule;
  *   - inherent vowel [ɔ] (Eastern-Indic), NO phonemic vowel length, ◌ॉ → [æ], व → [w], ण → [n].
  * Inherent-schwa deletion is the same shared algorithm as Hindi. Validated against the Toulmin (2006) Appendix-A
- * Rangpur referee (tools/krnb/referees/RP.tsv). See docs/investigations/rkt_krnb_bringup_investigation.md.
+ * Rangpur referee (tools/krnb/referees/RP.tsv).
  */
 /**
- * #583 — NORMALIZER WORDS: NO SOURCE EXISTS, and Rangpuri is the language this issue predicted would diverge
- * most. rkt.wikipedia does not exist, espeak does not ship it, and there is no FLEURS corpus or artifact. The
+ * NORMALIZER WORDS: NO SOURCE EXISTS, and Rangpuri is the language most likely to diverge.
+ * rkt.wikipedia does not exist and there is no FLEURS corpus or artifact. The
  * one source it has — `tools/referee-eval/referees/rkt.toulmin-rp.tsv`, 372 lines from Toulmin's grammar — is a
  * word→IPA list and contains NONE of the candidate words (its only `डॉ` hit is डॉना, a different word).
  *

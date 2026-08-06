@@ -1,12 +1,12 @@
 /**
  * Kirundi / Ikirundi (rn) phonemizer — Bantu (JD62, Rwanda-Rundi), the Latin orthography, canonical IPA,
- * espeak-independent. The principal language of Burundi (~11M incl. L2). A NEAR-CLONE of Kinyarwanda (rw): the same
+ * The principal language of Burundi (~11M incl. L2). A NEAR-CLONE of Kinyarwanda (rw): the same
  * greedy longest-match scan over the grapheme table (manifest.ts) + the Cox comparative-grammar palatal series,
  * with ONE confident Kirundi delta — ⟨j⟩ → d͡ʒ (the voiced palatal AFFRICATE, vs Kinyarwanda's fricative ⟨j⟩→ʒ).
  * Signatures: PALATALISATION ⟨Cy⟩→[Cʲ] (⟨cy⟩→kʲ, ⟨jy⟩→ɡʲ, ⟨shy⟩→ʃʲ, ⟨by⟩→bʲ, ⟨ry⟩→ɾʲ, ⟨my⟩→mʲ; ⟨ny⟩→ɲ), plain
  * ⟨c⟩→t͡ʃ, ⟨sh⟩→ʃ, ⟨ng⟩→ŋ, double vowels → long. Tone (H/L) unwritten → DEFERRED. The referee (epitran run-Latn) is
  * crude and partly circular; we do NOT follow its unverified blanket NC-spirantisation (mp→mh, nt→nh, nk→ŋx) — a
- * weaker verification than rw. See docs/investigations/rn_native_bringup_investigation.md.
+ * weaker verification than rw.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

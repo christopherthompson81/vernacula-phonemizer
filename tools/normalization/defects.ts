@@ -66,7 +66,7 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
     // a designation whose hyphen is correctly silent.
     //
     // ⚠ THE SECOND LOOKBEHIND EXCLUDES A RANGE, and without it this class was measuring almost nothing it
-    // claimed to. Resolved per hit across all 66 artifacts (docs/investigations/sign_reading_investigation.md),
+    // claimed to. Resolved per hit across all 66 artifacts,
     // the 15 dropped "minus" instances were 8 RANGES (`dem 10.-11.`, `(1418 -1450)`, `26 -00`, `1995 -96`,
     // `२०१७ -१७`, `1000 -1300`, `10મી -11મી`, `ngo-26 -00`), 4 DESIGNATIONS (`चंद्रयान -1` in hi/mr/ta,
     // `એચજેઆર -3`), 2 APPOSITION dashes (el's parenthetical `–12 χιλιόμετρα … Σιέμ Ριπ–`, my's
@@ -388,7 +388,7 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * WHAT IS BEING ASSERTED. Not that the drop is harmless — that the reading is already CORRECT. These are
  * product names (`Chandrayaan-1`) and bill numbers (`HJR-3`) whose hyphen is silent in speech, so a silent
  * hyphen is the right output and the differential test is reporting a true fact with a false label. Resolved
- * per hit across all 66 artifacts; see docs/investigations/sign_reading_investigation.md.
+ * per hit across all 66 artifacts.
  *
  * The five are two universal sentences: FLEURS translates ONE English set, so `Chandrayaan-1` and `HJR-3` recur
  * across the fleet, and these five are simply the languages that write a SPACE before the hyphen. Every other

@@ -1,12 +1,12 @@
 /**
- * Native Kyrgyz / кыргызча (ky) text phonemizer — canonical IPA, espeak-independent. Turkic (Kipchak), Cyrillic.
+ * Native Kyrgyz / кыргызча (ky) text phonemizer — canonical IPA. Turkic (Kipchak), Cyrillic.
  * Kyrgyz Cyrillic is a shallow near-1:1 orthography with STRICT, SPELLED vowel harmony, so this is a left-to-right
  * scan (kyrgyz.jsonc = the letter tables) with three code rules: (1) VELAR/UVULAR harmony — ⟨к⟩→[q]/⟨г⟩→[ʁ] next to a
  * BACK vowel (а о у ы), [k]/[ɡ] next to a FRONT vowel (Kyrgyz does not spell this, unlike Kazakh қ/ғ); (2) dark ⟨л⟩→[ɫ]
  * by the same back-harmony, clear [l] by front; (3) LONG vowels — a doubled vowel is [Vː] (тоо→toː, Айсулуу→ɑjsuluː).
  * The governing vowel for (1)/(2) is the NEAREST vowel (the following one if any, else the preceding: Баткен→batken —
  * к is [k] before front е though the word also has back а). Signatures: ⟨ж⟩→[d͡ʒ], ⟨ң⟩→[ŋ], ⟨а⟩=ɑ, ⟨ы⟩=ɯ, ⟨ө⟩=ø, ⟨ү⟩=y.
- * Stress is final-syllable (Turkic default; unmarked in the referee → folded). See docs/investigations/ky_native_bringup_investigation.md.
+ * Stress is final-syllable (Turkic default; unmarked in the referee → folded).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

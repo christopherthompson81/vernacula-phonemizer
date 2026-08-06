@@ -1,7 +1,7 @@
 # Common-English-word membership set (40,000 words) — the frequency gate for compound-piece
 # candidates in the OOV G2P (englishG2p.ts). Regenerated 2026-07-29: CMUdict entries (public
 # domain) in Norvig count_1w frequency order (norvig.com/ngrams, Google Web Trillion Word Corpus
-# counts — a mechanical frequency ranking; ADR-0001 facts). Membership-only; order is cosmetic.
+# counts — a mechanical frequency ranking; linguistic facts). Membership-only; order is cosmetic.
 the
 of
 and

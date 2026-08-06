@@ -18,7 +18,7 @@
  * Deliberately DEFERRED (fine-grained, variable, and no fr-CA pronunciation corpus exists to adjudicate): the
  * NASAL-vowel shifts (/ɛ̃/→[ẽ]~[ẽɪ̯̃], /ɔ̃/→[õ], /ɑ̃/→[ã]~[aɔ̯̃]), long-vowel DIPHTHONGISATION in closed stressed
  * syllables (père→[paɛ̯ʁ], fête→[faɪ̯t]), and the /ɑ/–/a/ lexical distinction (pâte vs patte — merged by the
- * France engine, unrecoverable from its output). See docs/investigations/fr-ca_native_bringup_investigation.md.
+ * France engine, unrecoverable from its output).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { createFrench } from "../french/french.ts";

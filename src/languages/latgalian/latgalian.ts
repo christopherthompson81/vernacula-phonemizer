@@ -1,5 +1,5 @@
 /**
- * Native Latgalian / latgaļu volūda (ltg) text phonemizer — canonical IPA, espeak-independent. Latgalian is an EASTERN
+ * Native Latgalian / latgaļu volūda (ltg) text phonemizer — canonical IPA. Latgalian is an EASTERN
  * BALTIC language (~150k, Latgale in eastern Latvia), a close sibling of Latvian — the fleet's 3rd Baltic language
  * (after Latvian, Lithuanian). A near-phonemic Latin orthography with macron length + háček sibilants; a greedy scan
  * with the Latgalian PALATALIZATION system.
@@ -13,7 +13,7 @@
  * Numbers are composed by numbers.ts (the East-Baltic counted-noun concord + the FEMININE "tyukstūša").
  *
  * Latgalian's pitch ACCENT (level/falling/broken, marked in the narrow referee) is not written → not emitted (folds).
- * Referee: wikipron ltg_latn narrow (488) + kaikki Latgalian (516). See docs/investigations/ltg_native_bringup_investigation.md.
+ * Referee: wikipron ltg_latn narrow (488) + kaikki Latgalian (516).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

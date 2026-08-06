@@ -29,7 +29,7 @@ function split(phone: string): { base: string; stress: number } {
 }
 
 /** Should this unstressed vowel-phone at index `vi` (nucleus number `ni`) surface as the weak vowel ᵻ?
- *  Cleanroom weak-vowel-merger rule from the WORD's morphology (public GenAm phonology, no espeak). */
+ *  Cleanroom weak-vowel-merger rule from the WORD's morphology (public GenAm phonology). */
 function isBarredI(
     word: string,
     P: { base: string; stress: number }[],

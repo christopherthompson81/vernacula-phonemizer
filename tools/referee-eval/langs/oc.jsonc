@@ -1,7 +1,7 @@
 // Occitan (oc) — Occitano-Romance (Gallo-Romance), Latin script. Referee: wikipron oci_latn_broad (HUMAN, 675
 // headwords — SMALL + DIALECT-MIXED, variants merged). `segmentJoin` strips the per-phone spaces. We target
 // LANGUEDOCIEN; the referee mixes dialects (final-⟨a⟩ o~ɔ~o̞~ɒ~a, rhotic ɾ~r~ʁ, ch t͡ʃ~t͡s) → folded. SPIRANTIZATION
-// (intervocalic b/d/g→β/ð/ɣ, allophonic + dialect-variable) is folded to the stops. See docs/investigations/oc_native_bringup_investigation.md.
+// (intervocalic b/d/g→β/ð/ɣ, allophonic + dialect-variable) is folded to the stops.
 {
     "language": "oc", "name": "Occitan (occitan)", "script": "Latin",
     "provenance": "Authored Languedocien grapheme→IPA g2p (unstressed ⟨o⟩→[u], final ⟨a⟩→[ɔ], ⟨u⟩→[y]/[w], ⟨c g⟩ softening, ⟨lh⟩→ʎ ⟨nh⟩→ɲ ⟨ch⟩→t͡ʃ ⟨j⟩→d͡ʒ ⟨v⟩→b, intervocalic ⟨s⟩→z) from Occitan phonology; validated against the wikipron oci_latn_broad (675, dialect-mixed) human referee.",

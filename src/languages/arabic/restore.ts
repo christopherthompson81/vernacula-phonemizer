@@ -6,9 +6,7 @@
  * forbids CCC, so a 3-run marks a dropped short vowel), it overrides that word's vocalization from a Tashkeela-
  * derived PAUSAL lexicon (direct hit, else clitic/suffix strip → stem lookup), falling back to a syllable-aware
  * epenthesis FLOOR so the output is always sayable. It NEVER touches a word the diacritizer already voweled — so
- * it can only improve, never degrade. Ported from espeak-ng-portable's restoreShortVowels.ts.
- *
- * See docs/investigations/ar_referee_investigation.md and diacritization.PROVENANCE.md.
+ * it can only improve, never degrade.
  */
 
 import { toSegments } from "./g2p.ts";

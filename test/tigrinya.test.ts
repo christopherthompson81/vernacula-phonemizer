@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/tigrinya/tigrinya.ts";
 // SHARED Ge'ez engine (core/geez.ts, same as Amharic): flat fidel→CV lookup + epenthetic 6th-order ɨ deletion.
 // Hand-adjudicated against kaikki tir (human) + epitran tir-Ethi. The SPLIT FROM AMHARIC is the preserved Semitic
 // gutturals: ⟨ሐ ኀ⟩→ħ, ⟨ዐ⟩→ʕ (pharyngeals Amharic merged to h/ʔ), ⟨አ⟩→ʔ. Gemination is UNWRITTEN → single (the
-// referee marks tː, folded). See docs/investigations/ti_native_bringup_investigation.md.
+// referee marks tː, folded).
 describe("Tigrinya canonical IPA — Ge'ez syllabary + preserved gutturals", () => {
     test("the PHARYNGEALS — ⟨ሐ⟩→ħ, ⟨ዐ⟩→ʕ (the split from Amharic)", () => {
         expect(phonemizeWord("ሓደ")).toBe("ħadə"); // "one" — ሓ (4th order) → ħa

@@ -8,7 +8,7 @@
  *     Turkish ⟨x⟩=ks / ⟨ğ⟩=lengthening.
  *   - k/g palatalize before a FRONT vowel (k → c: kitab → citɑb; g → ɟ, Azerbaijani ⟨g⟩ being inherently palatal).
  * Dark/clear l, geminate stops, and nasal place assimilation are shared with Turkish. Stress (final-syllable) and
- * number reading are downstream. See docs/investigations/az_native_bringup_investigation.md.
+ * number reading are downstream.
  */
 import { MANIFEST } from "./manifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";

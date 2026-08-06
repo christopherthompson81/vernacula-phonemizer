@@ -1,5 +1,5 @@
 /**
- * Saraiki (skr) text phonemizer — canonical IPA, espeak-independent.
+ * Saraiki (skr) text phonemizer — canonical IPA.
  *
  * Saraiki is a Lahnda (Greater Punjabi) language of the Pakistani south-west (~26M speakers), written in an
  * extended Shahmukhi (Perso-Arabic) abjad with four DEDICATED implosive letters. Engine-wise it is the NON-tonal
@@ -16,7 +16,7 @@
  * them). Short vowels are UNWRITTEN in the abjad → a default [ə] (the shared restoration gap, as for pnb/ur/sd);
  * the referee-eval folds the short-vowel + majhūl axes it cannot recover.
  *
- * Referee: wikipron skr_arab broad (HUMAN, Wiktionary). See docs/investigations/skr_native_bringup_investigation.md.
+ * Referee: wikipron skr_arab broad (HUMAN, Wiktionary).
  */
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { restoreHarakat, loadHarakatLexicon } from "../../core/harakatLexicon.ts";

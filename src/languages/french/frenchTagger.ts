@@ -9,7 +9,6 @@
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the model — is absent,
  * createFrenchTagger() resolves to `undefined` and the async path (frNeural.ts) falls back to the sync rule engine.
- * See docs/investigations/fr_neural_oov_investigation.md.
  */
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";

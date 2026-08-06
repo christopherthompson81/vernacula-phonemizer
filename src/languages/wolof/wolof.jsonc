@@ -1,11 +1,11 @@
 // Native canonical-IPA data manifest for Wolof / Wolof (wo) — Atlantic-Congo (Senegambian), the Latin orthography,
-// espeak-independent. The principal language of Senegal (~12M incl. L2). NON-tonal. A greedy longest-match scan
+// The principal language of Senegal (~12M incl. L2). NON-tonal. A greedy longest-match scan
 // with two code rules (wolof.ts): CONSONANT GEMINATION (a doubled consonant → Cː: benn→bɛnː, làkk→laːkː) and
 // NASAL place assimilation (⟨n⟩→ŋ before g/k: Angale→aŋɡalɛ). Referee: kaikki Wolof (Wiktionary, HUMAN). Signatures:
 //   • ATR vowels — ⟨e⟩=ɛ / ⟨é⟩=e, ⟨o⟩=ɔ / ⟨ó⟩=o, ⟨ë⟩=ə, ⟨à⟩=aː; DOUBLING = LENGTH (aa→aː, ée→eː, oo→ɔː).
 //   • ⟨c⟩=c, ⟨j⟩=ɟ (PALATAL STOPS, not affricates — the Wiktionary convention), ⟨x⟩=x, ⟨ñ⟩=ɲ, ⟨ŋ⟩=ŋ, ⟨q⟩=q, ⟨y⟩=j.
 // The word-initial glottal onset [ʔ] is variable in the referee → folded. Wolof is also written in Arabic (Wolofal)
-// and Garay; those scripts are deferred. See docs/investigations/wo_native_bringup_investigation.md.
+// and Garay; those scripts are deferred.
 {
     "language": "wo",
     "name": "Wolof",

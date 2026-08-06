@@ -28,4 +28,4 @@ citation readings + 2,548 multi-character word readings, with the Changsha tone 
 
 **Single-source (🔷):** no independent second referee for Changsha Xiang (no wikipron hsn; epitran ships no Xiang),
 so this dict is verified only *within* the Wiktionary tradition — a systematic error shared with that source would
-go undetected. See docs/investigations/hsn_native_bringup_investigation.md.
+go undetected.

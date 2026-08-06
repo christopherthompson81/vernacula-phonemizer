@@ -1,11 +1,11 @@
 /**
  * Hawaiian / ʻŌlelo Hawaiʻi (haw) phonemizer — Austronesian (Eastern Polynesian, sibling of Māori), Latin, canonical
- * IPA, espeak-independent. ONE OF THE SIMPLEST phonologies in the world: 5 vowels /a e i o u/ + the MACRON (kahakō)
+ * IPA. ONE OF THE SIMPLEST phonologies in the world: 5 vowels /a e i o u/ + the MACRON (kahakō)
  * = LENGTH, and 8 consonants ⟨p k m n l h w⟩ + the ʻokina ⟨ʻ⟩→[ʔ] (a full glottal-stop consonant). A near-1:1
  * phonemic grapheme scan (no digraphs). Loanwords adapt the non-Hawaiian letters to the nearest phoneme (t→k, s→k,
  * r→l, b→p, d/g→k, v→w). A falling diphthong's 2nd vowel is a non-syllabic offglide [i̯ u̯ …] in the narrow — we
  * emit plain vowels (folded). Stress (penultimate, mora-based, unmarked) is not emitted. Cardinal numbers: numbers.ts (kūmā compounds). Referee: wikipron
- * haw_latn_broad (human, 2152). See docs/investigations/haw_native_bringup_investigation.md.
+ * haw_latn_broad (human, 2152).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

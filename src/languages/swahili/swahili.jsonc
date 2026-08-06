@@ -3,7 +3,7 @@
 // stress. The distinctive features: the plain voiced stops are IMPLOSIVES (b→ɓ d→ɗ j→ʄ g→ɠ, both human referees
 // mark them), PRENASALIZED stops written as a nasal + voiced consonant (mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ) with a
 // homorganic superscript nasal, ⟨ng'⟩→ŋ (velar nasal, DISTINCT from ⟨ng⟩→ᵑɡ), syllabic nasals (mtu→m̩tu), and
-// Arabic-loan fricatives (dh→ð, th→θ, gh→ɣ, kh→x). Vowels are [ɑ ɛ i ɔ u]. See docs/investigations/sw_native_bringup_investigation.md.
+// Arabic-loan fricatives (dh→ð, th→θ, gh→ɣ, kh→x). Vowels are [ɑ ɛ i ɔ u].
 {
     "language": "sw",
     "name": "Swahili",

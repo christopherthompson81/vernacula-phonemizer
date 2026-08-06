@@ -1,11 +1,11 @@
 /**
- * Native Assamese (as) text phonemizer — canonical IPA, espeak-independent. Eastern Indo-Aryan, Bengali-Assamese
+ * Native Assamese (as) text phonemizer — canonical IPA. Eastern Indo-Aryan, Bengali-Assamese
  * script. Reuses the Bengali engine (makeNativeBengali — the generic abugida scan + ɔ→o height harmony +
  * inherent-vowel deletion + geminate→length, all shared Eastern-Indic phonology) with an Assamese manifest whose
  * phoneme values carry the divergences from Bengali: the three sibilants শ/ষ/স → [x] (velar fricative — the
  * signature), deaffrication চ/ছ→[s] জ/ঝ→[z], the alveolar merger (no retroflex/dental split → plain t/tʰ/d/dʱ),
  * and the extra letters ৰ→[ɹ], ৱ→[w]. The Assamese geminate consonants (t/d/s/z/x) that the Bengali engine's
- * geminate set does not cover are collapsed to length here. See docs/investigations/as_native_bringup_investigation.md.
+ * geminate set does not cover are collapsed to length here.
  */
 import {
     makeNativeBengali,

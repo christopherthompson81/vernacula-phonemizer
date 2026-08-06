@@ -10,7 +10,7 @@
  * 92.5% on that same subset, with 0% catastrophic degeneration (the seq2seq's ~1.4% runaway-loop risk) at ~3MB vs
  * ~5MB. A per-char CONSONANT-CONSISTENCY MASK constrains each char to only the tags whose consonant it produced in
  * training (ص→s, never ʃ; غ→ɣ, never the colloquial ɡ), so the output is always canonical. See
- * fa-tagger.PROVENANCE.md and docs/investigations/fa_shortvowel_restoration_investigation.md.
+ * fa-tagger.PROVENANCE.md and.
  *
  * `onnxruntime-node` is optional (lazy import); createFaTagger() resolves to `undefined` (no-op) if it or the model
  * is absent — identical to the seq2seq restorer's contract, so callers fall back to the word-level path.

@@ -1,5 +1,5 @@
 /**
- * Native Papiamentu / Papiamento (pap) text phonemizer — canonical IPA, espeak-independent. Papiamentu is an IBERIAN-
+ * Native Papiamentu / Papiamento (pap) text phonemizer — canonical IPA. Papiamentu is an IBERIAN-
  * (Portuguese/Spanish-) lexified CREOLE of the ABC islands (Aruba, Bonaire, Curaçao), ~340k speakers — the fleet's 4th
  * creole (after Haitian, Cape Verdean, Nigerian Pidgin). This targets the CURAÇAO/BONAIRE phonemic orthography, a
  * greedy longest-match scan with two creole hallmarks:
@@ -14,7 +14,7 @@
  *     Papiamentu's lexical PITCH-ACCENT (H/L on each syllable) is not written and not emitted (it folds).
  *
  * 🔷 thin single-source (kaikki + English Wiktionary "Papiamentu terms with IPA pronunciation", ~20 pairs — no
- * wikipron/epitran pap). See docs/investigations/pap_native_bringup_investigation.md.
+ * wikipron/epitran pap).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

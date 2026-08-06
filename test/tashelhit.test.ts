@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Tashelhit / Shilha (shi) — Taclḥit, a Berber (Amazigh) language of SW Morocco (~7–9M). A near-1:1 phonemic
 // Berber-Latin → IPA converter: emphatics (dot-below) ḍ→dˤ etc., pharyngeals ḥ→ħ / ɛ→ʕ, uvulars ɣ/x→χ/q, c→ʃ;
 // labialisation C+ʷ→Cʷ; gemination (doubling)→Cː. Validated against wikipron shi_latn (97.4% folded / 99.4% symbol)
-// + kaikki Tashelhit (97.8%/99.5%) — both Wiktionary → 🔷 single-source-family. See docs/investigations/shi_native_bringup_investigation.md.
+// + kaikki Tashelhit (97.8%/99.5%) — both Wiktionary → 🔷 single-source-family.
 describe("Tashelhit (Shilha) canonical IPA — Berber Latin → IPA converter", () => {
     const shi = createTashelhit();
 

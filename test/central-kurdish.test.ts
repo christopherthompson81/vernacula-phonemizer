@@ -8,7 +8,7 @@ import { phonemizeWord } from "../src/languages/central-kurdish/central-kurdish.
 // alphabet (a near-FULL alphabet: writes all long vowels + short /a/, only the short /ɪ/ bizroke unwritten).
 // Hand-adjudicated against wikipron ckb_arab_broad (94.9%) + kaikki ckb (94.2%), both human. Signatures: the
 // pharyngeals ح→ħ, ع→ʕ; the velarised ڵ→ɫ; the trill ڕ→r vs tap ر→ɾ; ئ→ʔ (glottal onset). Complements Kurmanji
-// (kmr). See docs/investigations/ckb_native_bringup_investigation.md.
+// (kmr).
 describe("Central Kurdish (Sorani) canonical IPA — Perso-Arabic alphabet", () => {
     test("long vowels + ئ glottal onset (کوردی, ئاشتی, ئاسمان)", () => {
         expect(phonemizeWord("کوردی")).toBe("kuɾdiː"); // "Kurdish" — و→u, ی→iː

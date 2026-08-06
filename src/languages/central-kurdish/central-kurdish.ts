@@ -1,12 +1,12 @@
 /**
- * Native Central Kurdish / Sorani (ckb) text phonemizer — canonical IPA, espeak-independent. Iranian (NW), written
+ * Native Central Kurdish / Sorani (ckb) text phonemizer — canonical IPA. Iranian (NW), written
  * in the SORANI Perso-Arabic alphabet. Unlike the Arabic/Persian/Urdu abjads, Sorani writes all the LONG vowels
  * (ا→aː, ێ→eː, ۆ→oː, وو→uː, ی→iː) + the short /a/ (ە); only the short /ɪ/ (bizroke) is unwritten (epenthetic in
  * clusters) → not emitted here, and folded in the eval. A left-to-right greedy scan (وو digraph, then single
  * letters) resolves the و/ی matres lectionis (glide [w]/[j] next to a vowel, else the vowel [u]/[iː]); ئ→ʔ is the
  * word-initial glottal onset; н→ŋ before a velar. Signatures: pharyngeals ħ/ʕ, velarised ڵ→ɫ, trill ڕ→r vs tap
  * ر→ɾ. Cardinals use the Iranian decimal compositor with the enclitic -u connective (numbers.ts).
- * Complements the Latin-script Kurmanji (kmr). See docs/investigations/ckb_native_bringup_investigation.md.
+ * Complements the Latin-script Kurmanji (kmr).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

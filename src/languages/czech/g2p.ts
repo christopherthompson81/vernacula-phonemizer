@@ -1,5 +1,5 @@
 /**
- * Czech (cs) grapheme→phoneme engine — West Slavic, Latin script, canonical IPA, espeak-independent. Czech
+ * Czech (cs) grapheme→phoneme engine — West Slavic, Latin script, canonical IPA. Czech
  * orthography is fairly phonemic but with three context systems handled here:
  *   - palatalisation: d/t/n → ɟ/c/ɲ before i, í, ě (NOT before y, ý, e): divadlo→ɟɪvadlo, ticho→cɪxo; but
  *     typ→tɪp, den→dɛn.
@@ -10,7 +10,6 @@
  *     voiceless form r̝̊.
  * Vowels short a e i/y o u → a ɛ ɪ o u, long á é í/ý ó ú/ů → aː ɛː iː oː uː; diphthong ou → oᶷ. Syllabic r̩/l̩
  * between consonants (krk→kr̩k, vlk→vl̩k). Stress (first-syllable) is applied in czech.ts.
- * See docs/investigations/cs_native_bringup_investigation.md.
  */
 
 import { MANIFEST } from "./manifest.ts";

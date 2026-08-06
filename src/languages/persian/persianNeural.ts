@@ -8,7 +8,7 @@
  * retained as defence but the tagger's structural word-count invariance means it effectively never fires.
  *
  * This is a SEPARATE async path — the sync engine (and its C#-parity + referee-eval) is untouched. The tagger emits
- * IPA DIRECTLY, so this assembles IPA itself. See docs/investigations/fa_shortvowel_restoration_investigation.md.
+ * IPA DIRECTLY, so this assembles IPA itself.
  */
 import { assembleClauses } from "../../core/clauses.ts";
 import { getPhonemizer } from "../../registry.ts";

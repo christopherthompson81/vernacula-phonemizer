@@ -1,10 +1,10 @@
 /**
- * Native Bhojpuri / भोजपुरी (bho) text phonemizer — canonical IPA, espeak-independent. Indo-Aryan, Devanagari.
+ * Native Bhojpuri / भोजपुरी (bho) text phonemizer — canonical IPA. Indo-Aryan, Devanagari.
  * Reuses the Hindi Devanagari engine (makeNativeHindi — schwa deletion, weight stress) with a Bhojpuri data file.
  * REVISED from "A Grammar of Bhojpuri" (dissertation, Shukla-tradition), whose glossed forms were g2p-mined (1622
  * Devanagari→IPA pairs) as a falsifiable anchor: Bhojpuri has an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic
  * length, ऐ→[ɛ]/औ→[ɔ] MONOPHTHONGS (not the diphthongs earlier claimed), श/ष→[s] (only /s ɦ/ fricatives), व→[w]
- * (not Hindi ʋ), ण/ञ→[n]. 🔷 single published source; see docs/investigations/bho_native_bringup_investigation.md.
+ * (not Hindi ʋ), ण/ञ→[n]. 🔷 single published source.
  */
 /**
  * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Bhojpuri. Evidence from

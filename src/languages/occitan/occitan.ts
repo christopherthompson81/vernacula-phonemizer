@@ -1,6 +1,6 @@
 /**
- * Occitan (oc) phonemizer — occitan / lenga d'òc, Occitano-Romance (Gallo-Romance), Latin script, canonical IPA,
- * espeak-independent (beyond-espeak). Targets LANGUEDOCIEN (the central reference standard). A greedy longest-match
+ * Occitan (oc) phonemizer — occitan / lenga d'òc, Occitano-Romance (Gallo-Romance), Latin script, canonical
+ * IPA. Targets LANGUEDOCIEN (the central reference standard). A greedy longest-match
  * grapheme scan + code rules:
  *   - the signature vowels: unstressed ⟨o⟩→[u], final unstressed ⟨a⟩→[ɔ], ⟨u⟩→[y] ([w] as a diphthong offglide),
  *     ⟨ò⟩→[ɔ], ⟨è⟩→[ɛ];
@@ -8,7 +8,7 @@
  *   - ⟨lh⟩→[ʎ], ⟨nh⟩→[ɲ], ⟨ch⟩→[t͡ʃ], ⟨j⟩→[d͡ʒ], ⟨v⟩→[b] (betacism), ⟨h⟩ silent; intervocalic ⟨s⟩→[z];
  *   - the Languedocien FINAL-CONSONANT DELETION: a word-final ⟨n r⟩ after a vowel drops (Japon→dʒapu, cantar→kanta).
  * SPIRANTIZATION (intervocalic b/d/g→β/ð/ɣ), the rhotic tap/trill, and STRESS (unwritten, not emitted) are
- * folded/deferred. See docs/investigations/oc_native_bringup_investigation.md.
+ * folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

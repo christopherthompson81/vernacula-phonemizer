@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/german/german.ts";
 
-// Canonical-IPA goldens for Standard German (de), espeak-independent. Rule-based g2p (long/short vowels from
+// Canonical-IPA goldens for Standard German (de). Rule-based g2p (long/short vowels from
 // spelling, diphthongs aɪ̯/aʊ̯/ɔʏ̯, ch ich-/ach-laut, sch, sp-/st-→ʃ, final devoicing, r-vocalization ɐ̯,
 // schwa in weak endings) + mostly-Germanic stress (first syllable, or after an unstressed prefix) with a
 // kaikki stress lexicon for loanwords. Stress mark is placed before the stressed VOWEL (repo convention).
@@ -277,7 +277,6 @@ describe("german canonical IPA", () => {
     // per stem — each morpheme keeps its own loanword length/quality/consonant correction + prefix reduction, which
     // the old no-correction fallback lost. Holdout-measured 81.3% vs 68.5% raw on OOV compounds. Known words are
     // unaffected (they take the exact whole-word path — covered by the goldens above + the 78.2% referee).
-    // See docs/investigations/de_morpheme_keyed_investigation.md.
     test("OOV compound fallback: morpheme-keyed corrections compose", () => {
         expect(phonemizeWord("Musikverein")).toBe("muzˈiːkfɛʁaɪ̯n"); // musik: s→z, short u, iː; verein: ver-→fɛʁ
         expect(phonemizeWord("Musikschule")).toBe("muzˈiːkʃuːlə"); // musik loan-corrected + schule

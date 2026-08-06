@@ -1,10 +1,9 @@
 /**
- * Kazakh (kk) phonemizer — canonical IPA, espeak-independent. Rule-based g2p (g2p.ts) + espeak's Kazakh stress
+ * Kazakh (kk) phonemizer — canonical IPA. Rule-based g2p (g2p.ts) + espeak's Kazakh stress
  * algorithm (STRESSPOSN_1RU): default stress is the LAST syllable, but scanning nuclei left-to-right from the
  * second, the first "unstressed" vowel moves stress to the syllable BEFORE it. The only unstressed vowel is ə
  * (ы, and the ə of и=əj) — so a reduced ы between full vowels pulls stress leftward (бойынша→bˈojənʃɑ) while
  * words with no reduced vowel take final stress (Санат→sɑnˈɑt). text() tokenizes words / numbers / punctuation.
- * See docs/investigations/kk_native_bringup_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

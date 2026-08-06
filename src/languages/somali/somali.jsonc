@@ -1,8 +1,8 @@
 // Native canonical-IPA data manifest for Somali / Af-Soomaali (so) — Cushitic (the 2nd, after Oromo), the 1972
-// Latin orthography, espeak-independent. Somali spelling is shallow and near-phonemic, so this is a digraph-aware
+// Latin orthography. Somali spelling is shallow and near-phonemic, so this is a digraph-aware
 // left-to-right scan (g2p.ts). The signature Cushitic consonants: ⟨c⟩ = /ʕ/ (voiced pharyngeal), ⟨x⟩ = /ħ/
 // (voiceless pharyngeal), ⟨dh⟩ = /ɖ/ (retroflex), ⟨q⟩ = /q/ (uvular), ⟨'⟩ = /ʔ/. Doubled letters geminate; doubled
-// vowels are long. Tone (grammatical pitch-accent) is unwritten and DEFERRED. See docs/investigations/so_native_bringup_investigation.md.
+// vowels are long. Tone (grammatical pitch-accent) is unwritten and DEFERRED.
 {
     "language": "so",
     "name": "Somali (Af-Soomaali)",

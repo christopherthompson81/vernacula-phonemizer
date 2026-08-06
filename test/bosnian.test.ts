@@ -10,7 +10,7 @@ import { phonemizeWord } from "../src/languages/serbian/serbian.ts";
 // Bosnian-specific deltas: the retained ⟨h⟩ (lahko/kahva, where Serbian/Croatian drop it), the ijekavian reflex, and
 // the number words (Serbian hiljada/milion + ijekavian dvjesta). The shared g2p is validated against wikipron
 // hbs_latn (98.4%, the Serbo-Croatian macrolanguage referee that contains Bosnian words); these adjudicated golds lock
-// the Bosnian surface. Pitch accent is unwritten → deferred. See docs/investigations/bs_native_bringup_investigation.md.
+// the Bosnian surface. Pitch accent is unwritten → deferred.
 describe("Bosnian canonical IPA — shared Serbo-Croatian g2p + Bosnian deltas", () => {
     const bs = createBosnian();
 

@@ -1,8 +1,7 @@
 /**
- * Dutch (nl) phonemizer — Northern Standard Dutch, canonical IPA, espeak-independent. Rule-based g2p (g2p.ts)
+ * Dutch (nl) phonemizer — Northern Standard Dutch, canonical IPA. Rule-based g2p (g2p.ts)
  * with Germanic initial stress (the first full syllable, or the first after an unstressed prefix be-/ge-/ver-/
- * ont-/her-/te-). text() tokenizes words / numbers / punctuation. See
- * docs/investigations/nl_native_bringup_investigation.md.
+ * ont-/her-/te-). text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,9 +1,9 @@
 /**
- * Native Sindhi (sd) text phonemizer — canonical IPA, espeak-independent. Perso-Arabic (Sindhi) ABJAD → the
+ * Native Sindhi (sd) text phonemizer — canonical IPA. Perso-Arabic (Sindhi) ABJAD → the
  * consonant + LONG-vowel skeleton (incl. the signature IMPLOSIVES ٻɓ ڏɗ ڄʄ ڳɠ and the retroflex series) via a
  * rule g2p; SHORT vowels are usually UNWRITTEN, so a default [ə] stands in (the abjad wall, as for Urdu — folded in
  * the referee eval). ھ aspirates the sonorants + ج/گ (جھ→d͡ʒʰ); و/ي are long vowels after a consonant, glides
- * elsewhere. See docs/investigations/sd_native_bringup_investigation.md.
+ * elsewhere.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";

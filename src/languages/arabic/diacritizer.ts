@@ -4,8 +4,6 @@
  * arabic.ts — so phonemize() stays sync and dependency-free; only this pre-pass touches ONNX. `onnxruntime-
  * node` is an OPTIONAL dependency, imported lazily.
  *
- * Ported from the espeak-ng-portable integration. The shipped .onnx is a permissively-sourced model:
- * CATT teacher (Apache-2.0) → Arabic Wikipedia (CC-BY-SA) silver-only, no NC/GPL. See diacritizer.PROVENANCE.md.
  * Position-preserving: only harakat are inserted after Arabic letters; digits/punctuation/spacing are kept.
  */
 import { readFileSync } from "node:fs";

@@ -12,9 +12,8 @@ the words the neural diacritizer leaves as skeletons, never an already-voweled w
 - **Why not treated as GPL-bound:** each entry is a linguistic FACT (the dominant vocalization of a wordform), and
   the artifact is an unoriginal, purely-mechanical frequency aggregation containing none of the corpus's selection
   or arrangement — no protected expression is reproduced (Feist; CCH Canadian 2004 SCC 13). Same facts-not-
-  expression posture the neural diacritizer already relies on (ADR-0001, docs/adr/0001-data-licensing-facts-posture.md). This mirrors the file espeak-ng-portable
-  ships (`data/ar/diacritization.tsv`); brought into this project by explicit maintainer direction. Not legal
-  advice; revisitable; Tashkeela credited regardless.
+  expression posture the neural diacritizer already relies on (`LICENCING/licencing_posture.md`).
+  Not legal advice; revisitable; Tashkeela credited regardless.
 - **Classical vs modern:** Tashkeela's classical citation-form vocalizations complement the neural diacritizer's
   modern/running-text coverage — the lexicon nails isolated/dictionary headwords the context-trained BiLSTM
-  under-vowels. See docs/investigations/ar_referee_investigation.md.
+  under-vowels.

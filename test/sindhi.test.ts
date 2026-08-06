@@ -13,7 +13,7 @@ import { normalizeSindhi } from "../src/languages/sindhi/normalize.ts";
 
 // Canonical-IPA goldens for Sindhi (sd) — Perso-Arabic ABJAD, Indo-Aryan. The signature is the four-way IMPLOSIVE
 // series ٻ→ɓ, ڏ→ɗ, ڄ→ʄ, ڳ→ɠ (a census gap) + the retroflex series ٽ ٺ ڊ ڍ ڻ ڙ + aspiration (ڀ bʰ, ٿ t̪ʰ,
-// جھ d͡ʒʰ, لھ lʰ). SHORT vowels are unwritten → a default [ə] (the abjad wall). See docs/investigations/sd_native_bringup_investigation.md.
+// جھ d͡ʒʰ, لھ lʰ). SHORT vowels are unwritten → a default [ə] (the abjad wall).
 describe("Sindhi canonical IPA", () => {
     test("the four implosives ٻɓ ڏɗ ڄʄ ڳɠ (the census gap)", () => {
         expect(phonemizeWord("ٻارو")).toBe("ɓˈaːɾoː"); // ٻ → ɓ
@@ -81,7 +81,7 @@ describe("Sindhi weight stress", () => {
 // is the 2-SOURCE-VERIFIED subset — words where kaikki (Wiktionary/standard, our root) AND an INDEPENDENT source,
 // Nihalani's *The Phonetics of Sindhi* (1974), AGREE on the short vowels (7/9 same-word overlap = 78%; the 2
 // disagreements — سالو aː~aɪ, ميز ɛ~e — are documented variety variation). Independently corroborated → this test
-// can genuinely fail (unlike a kaikki-vs-kaikki+wikipron check, which is circular). See the sd investigation doc.
+// can genuinely fail (unlike a kaikki-vs-kaikki+wikipron check, which is circular).
 describe("Sindhi short-vowel restoration — 2-source-verified (kaikki ∩ Nihalani 1974)", () => {
     for (const [word, ipa] of [
         ["اسي", "əsi"], // eighty

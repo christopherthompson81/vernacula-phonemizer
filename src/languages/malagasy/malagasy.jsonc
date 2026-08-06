@@ -1,8 +1,8 @@
 // Native canonical-IPA data manifest for Malagasy / Malagasy (mg) — Standard/Official Malagasy (Merina-based),
-// Latin script, espeak-independent. Austronesian (the westernmost — Madagascar). A shallow rule g2p: the
+// Latin script. Austronesian (the westernmost — Madagascar). A shallow rule g2p: the
 // orthography is fairly regular, the notable points being ⟨o⟩ = /u/, ⟨y⟩ = final /i/, the retroflex affricates
 // ⟨tr⟩/⟨dr⟩, and the prenasalized stops. The ALGORITHM (the left-to-right scan + penultimate stress + weak-final
-// handling) is in code (g2p.ts / malagasy.ts). See docs/investigations/mg_native_bringup_investigation.md.
+// handling) is in code (g2p.ts / malagasy.ts).
 {
     "language": "mg",
     "name": "Malagasy (Standard, Merina)",

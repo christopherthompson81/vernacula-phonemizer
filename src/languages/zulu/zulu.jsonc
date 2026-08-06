@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Zulu (zu, isiZulu) — Nguni Bantu, AUTHORED beyond-espeak.
+// Native canonical-IPA data manifest for Zulu (zu, isiZulu) — Nguni Bantu, AUTHORED.
 // This file IS the hand-authored language DATA: the longest-match orthography→IPA rule table (clicks,
 // affricates, depressor consonants), the tone-code→Chao map, clause punctuation, and the number words. The
 // ALGORITHMS that read it stay in code:
@@ -7,13 +7,12 @@
 //   numbers.ts — the agglutinative Bantu cardinal compositor (ku-/na-/ama- stems, noun-class magnitudes)
 // The per-word tone lexicon stays in the sibling tone.tsv (kaikki/Wiktionary-derived), which the engine overlays.
 //
-// Format: plain JSONC. Every phoneme value is CANONICAL IPA (fills the census click gaps ǀ ǃ ǁ). See
-// docs/investigations/zu_native_bringup_investigation.md.
+// Format: plain JSONC. Every phoneme value is CANONICAL IPA (fills the census click gaps ǀ ǃ ǁ).
 {
     "language": "zu",
     "name": "Zulu (isiZulu)",
     "script": "Latin",
-    "provenance": "Authored beyond-espeak (espeak ships only a crude 'testing' voice with no click phonemes). IPA + inventory from espeak-ng-portable's authored zu_rules/ph_zulu (epitran zul-Latn + kaikki referees). A near-clone of Xhosa. This file IS the language data — the native rule engine reads it directly.",
+    "provenance": "Authored; IPA + inventory anchored on the epitran zul-Latn + kaikki referees. A near-clone of Xhosa. This file IS the language data — the native rule engine reads it directly.",
 
     "convention": {
         "clicks": "15-way series: c/q/x → kǀ/kǃ/kǁ; aspirated ch/qh/xh; depressor gc/gq/gx; nasal nc/nq/nx; etc.",

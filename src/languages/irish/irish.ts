@@ -1,8 +1,8 @@
 /**
- * Irish Gaelic (ga) phonemizer — Standard/Connacht-leaning, canonical IPA, espeak-independent. Rule-based g2p
+ * Irish Gaelic (ga) phonemizer — Standard/Connacht-leaning, canonical IPA. Rule-based g2p
  * (g2p.ts, the broad/slender axis) + first-syllable stress (the native default) + i-offglide and svarabhakti
  * passes, with a Connacht pronunciation lexicon (lexicon.tsv, Run 3) pinning the semi-lexical vowel detail the
- * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV. See docs/investigations/ga_bringup_investigation.md.
+ * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -26,7 +26,7 @@ function lexicon(): Map<string, string> {
 
 // Short vowels reduce to ə when unstressed; long vowels + diphthongs (with ː) keep their quality. ɪ IS reduced:
 // the independent wikipron referee transcribes unstressed short i as ə (féidir → fʲeːdʲəɾʲ, milis → mʲɪlʲəʃ),
-// NOT the oracle's ɪ — espeak keeps the underlying i, but real Connacht centralizes it like a/o/u.
+// NOT the oracle's ɪ — real Connacht centralizes it like a/o/u.
 const SHORT = new Set(["a", "ɛ", "ɪ", "ɔ", "ʊ"]);
 
 // A slender consonant (palatalized, or a palatal). A back vowel before a slender CODA gets an i-offglide.

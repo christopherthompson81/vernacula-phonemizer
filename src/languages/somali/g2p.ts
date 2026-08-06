@@ -5,7 +5,7 @@
  *   - consonant digraphs ⟨sh dh kh⟩ → ʃ ɖ χ (tried before the single letters).
  *   - the signature Cushitic consonants: ⟨c⟩→ʕ, ⟨x⟩→ħ (pharyngeals), ⟨q⟩→q (uvular), ⟨'⟩→ʔ (glottal).
  *   - a doubled consonant geminates to Cː (abbaan → abːaːn).
- * Tone (grammatical pitch-accent) is unwritten and not emitted. See docs/investigations/so_native_bringup_investigation.md.
+ * Tone (grammatical pitch-accent) is unwritten and not emitted.
  */
 import { MANIFEST } from "./manifest.ts";
 

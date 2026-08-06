@@ -1,13 +1,12 @@
 /**
  * Maltese (mt) phonemizer — Malti, the only Semitic language in the Latin alphabet, canonical IPA,
- * espeak-independent. Maltese orthography is fairly phonemic, so this is a greedy grapheme scan (the ⟨ie għ⟩
+ * Maltese orthography is fairly phonemic, so this is a greedy grapheme scan (the ⟨ie għ⟩
  * digraphs + the silent-letter rules) + final devoicing + regressive voicing assimilation + ⟨n⟩→m before a labial.
  *   - ⟨q⟩→ʔ (glottal stop), ⟨ċ⟩→t͡ʃ, ⟨ġ⟩→d͡ʒ, ⟨ħ⟩→ħ, ⟨x⟩→ʃ, ⟨z⟩→t͡s vs ⟨ż⟩→z.
  *   - ⟨għ⟩ is SILENT (historically /ʕ ɣ/; it lengthens/pharyngealizes an adjacent vowel — folded).
  *   - ⟨h⟩ is SILENT word-medially (lengthens the adjacent vowel: deheb→dɛːp) but → [ħ] WORD-FINAL (fih→fiːħ).
  *   - ⟨ie⟩ → the long [ɪː] (folded to ɪ). Adjacent identical vowels (from a dropped silent ⟨h/għ⟩) collapse.
- * Vowel LENGTH (stress-conditioned, ~half the referee) + stress (unwritten) are folded/deferred. See
- * docs/investigations/mt_native_bringup_investigation.md.
+ * Vowel LENGTH (stress-conditioned, ~half the referee) + stress (unwritten) are folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

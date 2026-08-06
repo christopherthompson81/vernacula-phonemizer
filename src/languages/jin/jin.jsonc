@@ -4,7 +4,6 @@
 // (segmental IPA + a superscript pitch-number tone, e.g. ma⁵³, yəʔ²); the runtime only converts the pitch
 // digits → Chao contour letters (1→˩ … 5→˥) and resolves the sandhi arrow ⁻ (underlying⁻surface → surface).
 // SINGLE authoritative source (Wiktionary/kaikki Taiyuan Sinological-IPA) — no independent referee (🔷).
-// See docs/investigations/jin_native_bringup_investigation.md.
 {
     "language": "cjy",
     "name": "Jin Chinese (Taiyuan)",

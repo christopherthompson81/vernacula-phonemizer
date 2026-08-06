@@ -16,7 +16,7 @@
  *
  * RESULT (2026-07-20, 926 unseen words): fa current 45.6% → SHIPPED 49.0% (+3.5pp); on the 559 OOV words the
  * neural serves, 43.8% → 49.6% (+5.7pp). Real, positive, modest — the homograph/ezafe ceiling (the context model /
- * parallel corpus) is the next lever. See docs/investigations/fa_shortvowel_restoration_investigation.md.
+ * parallel corpus) is the next lever.
  */
 import { readFileSync } from "fs";
 import { createFaVowelRestorer } from "../../src/languages/persian/vowelRestorer.ts";

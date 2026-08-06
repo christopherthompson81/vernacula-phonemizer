@@ -9,7 +9,6 @@ import { numberToWords } from "../src/languages/luganda/numbers.ts";
 // lengthening scores 99.1% folded vs epitran lug-Latn (tools/referee-eval, 1500 words) — but epitran is itself
 // rule-based, so that comparison is partly CIRCULAR (single-source). These goldens pin the segmental backbone.
 // Tone (3-way H/L/falling) is lexical + unwritten → deferred.
-// See docs/investigations/lg_native_bringup_investigation.md.
 describe("Luganda canonical IPA — greedy g2p + gemination + prenasal lengthening", () => {
     test("PRENASALISED consonants as units + vowel LENGTHENING before them", () => {
         expect(phonemizeWord("nga")).toBe("ᵑɡa"); // ⟨ng⟩ → ᵑɡ

@@ -9,7 +9,7 @@ import { createNorwegianTagger } from "../src/languages/norwegian/norwegianTagge
 
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back to
 // the sync engine, so the fallback contract is testable everywhere; the retagging assertions run only with the model
-// present. See docs/investigations/nb_native_bringup_investigation.md.
+// present.
 const haveModel = existsSync(join(import.meta.dirname, "../src/languages/norwegian/nb-g2p-tagger.onnx"));
 
 describe("norwegian neural OOV tagger", () => {

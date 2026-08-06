@@ -14,7 +14,7 @@
  *     stoljeća, marka, najvećim (locative), godine.
  *   · prenominal ROMAN ordinals — `I. i II. svjetski rat` (the roman-vs-ordinal seam).
  *
- * MEASURED over the hr_hr FLEURS corpus (see docs/investigations/hr_normalization_investigation.md).
+ * MEASURED over the hr_hr FLEURS corpus.
  *
  * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
  */

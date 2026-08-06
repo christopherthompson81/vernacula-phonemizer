@@ -1,4 +1,4 @@
-// Native canonical-IPA data manifest for Japanese (ja) — Standard/Tokyo, espeak-independent.
+// Native canonical-IPA data manifest for Japanese (ja) — Standard/Tokyo.
 // This file IS the hand-authored language DATA: the kana→mora tables, the extended-katakana (foreign-sound)
 // map, the moraic-ん place-assimilation classes, the Sino-Japanese number words, clause punctuation, and the
 // pitch-accent affix-strip lists. The ALGORITHMS that read it stay in code:
@@ -10,7 +10,7 @@
 // The bulk lexical data stays referenced as sibling files (see "dataFiles"); only authorable tables live here.
 //
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA (narrow Tokyo: centralized ä, compressed ɯᵝ,
-// mid-lowered e̞/o̞, moraic ɴ). See docs/investigations/ja_native_bringup_investigation.md.
+// mid-lowered e̞/o̞, moraic ɴ).
 {
     "language": "ja",
     "name": "Japanese (Standard/Tokyo)",

@@ -1,5 +1,5 @@
 /**
- * vernacula-phonemizer — canonical-IPA, espeak-independent.
+ * vernacula-phonemizer — canonical-IPA.
  *
  *   phonemize("भारत", "hi") → "bʱaːɾət̪"
  *   phonemize("I read a book", "en") → "aᶦ ɹˈɛd ə bˈʊk"

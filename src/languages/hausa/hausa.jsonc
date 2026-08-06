@@ -1,5 +1,5 @@
-// Native canonical-IPA MANIFEST for Hausa (ha, Kano standard, Boko orthography) — AUTHORED beyond-espeak
-// (espeak ships no Hausa). A self-describing description of the language's DATA, matching english.jsonc /
+// Native canonical-IPA MANIFEST for Hausa (ha, Kano standard, Boko orthography) — AUTHORED
+// A self-describing description of the language's DATA, matching english.jsonc /
 // arabic.jsonc: the longest-match orthography→IPA rule table, the tone-code→Chao map, clause punctuation, and
 // the cardinal number words. The ALGORITHM (the longest-match scan + penultimate stress + tone overlay) stays
 // in code; the per-word tone lexicon is a separate file (tone.tsv).
@@ -9,7 +9,7 @@
 {
     "language": "ha",
     "name": "Hausa (Kano standard)",
-    "provenance": "Cleanroom, rule-based g2p — Boko orthography is shallow and near-1:1. Authored beyond-espeak (espeak ships nothing); validated vs epitran hau-Latn + kaikki. Fills census gaps: implosives ɓ ɗ, ejectives kʼ t͡sʼ, labialization kʷ ɡʷ, glottalized ʔʲ, palatals c ɟ, ɸ. Tone is a Wiktionary-derived lexical FACT (tone.tsv).",
+    "provenance": "Cleanroom, rule-based g2p — Boko orthography is shallow and near-1:1; validated vs epitran hau-Latn + kaikki. Fills census gaps: implosives ɓ ɗ, ejectives kʼ t͡sʼ, labialization kʷ ɡʷ, glottalized ʔʲ, palatals c ɟ, ɸ. Tone is a Wiktionary-derived lexical FACT (tone.tsv).",
 
     // The canonical-IPA conventions the values below are written in (documentation).
     "convention": {

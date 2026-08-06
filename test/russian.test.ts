@@ -6,7 +6,7 @@ import { phonemize } from "../src/index.ts";
 import { ROMAN_POLICY } from "../src/languages/russian/romanOrdinals.ts";
 import { phonemizeWord } from "../src/languages/russian/russian.ts";
 
-// Canonical-IPA goldens for Russian (ru) — standard Moscow Russian, espeak-independent. Stress is lexical
+// Canonical-IPA goldens for Russian (ru) — standard Moscow Russian. Stress is lexical
 // (stress.tsv, from kaikki); the rule g2p derives palatalization (Cʲ), iotation (я/е/ё/ю → jV), stress-based
 // reduction (akanye/ikanye), final devoicing + regressive voicing assimilation, and the ɵ/æ/ʉ frontings.
 // Stress mark is placed before the stressed VOWEL (repo convention); monosyllables carry none.

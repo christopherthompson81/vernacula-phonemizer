@@ -1,7 +1,7 @@
 // Māori (mi) — Eastern Polynesian, Latin script. Referee: wikipron mri_latn_broad (HUMAN, 1005 headwords, variants
 // merged). `segmentJoin` strips the per-phone spaces. Māori is a near-1:1 phonemic orthography (macron = length, ⟨wh⟩
 // →ɸ, ⟨ng⟩→ŋ), so the segments are compared DIRECTLY; only the rhotic r~ɾ and the ⟨wh⟩ ɸ~f dialect variants are
-// folded. Stress (mora-based, unwritten) is not emitted (the referee marks none). See docs/investigations/mi_native_bringup_investigation.md.
+// folded. Stress (mora-based, unwritten) is not emitted (the referee marks none).
 {
     "language": "mi", "name": "Māori (te reo Māori)", "script": "Latin",
     "provenance": "Authored grapheme→IPA g2p (5 vowels + macron length, ⟨p t k m n h w⟩, ⟨r⟩→ɾ, ⟨wh⟩→ɸ, ⟨ng⟩→ŋ) from Māori phonology; validated against the wikipron mri_latn_broad (1005) human referee.",

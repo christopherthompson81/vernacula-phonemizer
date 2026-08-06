@@ -311,12 +311,6 @@ export function normalizeAfrikaans(input: string): string {
     //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +
     //    rule, since ± is a single character the + rule cannot see.
-    //
-    //    ⚠ THE CONJUNCTION IS espeak's, AND IT OVERRULED MY JUXTAPOSITION. `af_list` carries the sign directly —
-    //    `± plWs_OfminWs`, i.e. "plus óf minus" — so Afrikaans takes `of` ("or") rather than the bare pair I had
-    //    written from the fleet's majority form. espeak's dictsource is a cited tier in this repo (sl sources its
-    //    `=`/`<`/`>` from it), and a hand-authored pronunciation for the exact glyph beats a pattern copied from
-    //    other languages. `en` and `ga` already need the conjunction for the same reason.
     s = s.replace(/±/gu, " plus of minus ");
     s = s.replace(/\+\s?(?=\d)/gu, " plus ");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "minus $1");

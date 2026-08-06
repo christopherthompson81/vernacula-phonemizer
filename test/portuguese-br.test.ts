@@ -2,8 +2,7 @@
  * pt-BR ("neutral"/paulistano BP) accent DIAGNOSTIC GOLD — the hand-adjudicated quality anchor. Unlike English,
  * the referee number is NOT noise-limited (the `pt` rule engine has real coverage): pt-BR scores 83% vs wikipron
  * por_latn_bz (57k). This gold hand-checks the EP→BP delta on core vocabulary + every signature feature (RP from
- * Cristófaro Silva / Wikipédia BP conventions, corroborated against the wikipron BZ referee). See
- * docs/investigations/pt-br_native_bringup_investigation.md.
+ * Cristófaro Silva / Wikipédia BP conventions, corroborated against the wikipron BZ referee).
  *
  * NOT included (documented lexical tail): open/close stressed-mid words where the shared EP lexicon differs from
  * BP (telefone → EP-lexicon [ɔ] vs BP [o]; beringela [ɛ]); ea-hiatus (Ceará); loanwords.

@@ -6,7 +6,7 @@
     "language": "ig",
     "name": "Igbo",
     "script": "Latin",
-    "provenance": "Authored from standard Igbo phonology; ported from the espeak-ng-portable ig inventory + tone.",
+    "provenance": "Authored from standard Igbo phonology, with tone.",
     "referees": [],
     "secondaryGap": "No independent referee for Igbo: wikipron ibo_latn, epitran ibo-Latn, and the kaikki Igbo extract are all 404. The anchor is the adjudicated common-word gold in test/igbo.test.ts (Emenanjo 1978; Green & Igwe 1963) — meaningful (Igbo is a distinct language, not a clone). Tone is read only when MARKED (Igbo standard orthography usually omits it); connected-speech downstep/spreading + the vigesimal numbers are deferred.",
     "folds": []

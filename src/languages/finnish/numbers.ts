@@ -3,7 +3,7 @@
  * (kaksikymmentäyksi = 21, kaksisataakolmekymmentäneljä = 234), and the magnitude words are joined for ⟨tuhat⟩
  * (kaksituhatta = 2000) but written separately for ⟨miljoona⟩ (kaksi miljoonaa = 2000000) — standard orthography. The
  * partitive stems (kymmentä / sataa / tuhatta / miljoonaa) are used when a count precedes the magnitude. The returned
- * space-separated word(s) are each phonemized downstream by phonemizeWord. See the investigation doc for the convention.
+ * space-separated word(s) are each phonemized downstream by phonemizeWord.
  */
 import { MANIFEST } from "./manifest.ts";
 

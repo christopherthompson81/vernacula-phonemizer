@@ -1,13 +1,12 @@
 /**
- * Kanji → kana reading conversion + bunsetsu segmentation (Phase 2), ported from the espeak-ng-portable
- * Japanese front-end. Two passes drive it:
+ * Kanji → kana reading conversion + bunsetsu segmentation (Phase 2). Two passes drive it:
  *   - segmentText: insert spaces at bunsetsu (phrase) boundaries so a spaceless run is phonemized
  *     phrase-by-phrase (kana→kanji transition = new phrase; case particles が/を/に end a phrase; て-form +
  *     auxiliary splits; adverbs are their own bunsetsu).
  *   - applyReadings: longest-match kanji→kana over a 60k whole-word map (日本語 matches the 3-char key, so
  *     on/kun disambiguation is sidestepped), with a per-kanji on/kun/rendaku fallback for uncovered kanji.
  * The whole-word map handles reading choice; no 14MB Viterbi is needed. Data: readings.tsv / fallback.tsv /
- * adverbs.txt. See docs/investigations/ja_native_bringup_investigation.md.
+ * adverbs.txt.
  */
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
 

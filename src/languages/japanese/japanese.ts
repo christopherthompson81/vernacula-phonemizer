@@ -1,9 +1,9 @@
 /**
- * Japanese (ja) phonemizer — Standard/Tokyo, canonical IPA, espeak-independent.
+ * Japanese (ja) phonemizer — Standard/Tokyo, canonical IPA.
  *   text → segmentText (bunsetsu spaces) → per run: applyReadings (kanji→kana) → kanaToIpa.
  * PHASE 1: native kana/katakana → IPA (kana.ts) + Sino-Japanese numbers. PHASE 2: kanji → kana via a 60k
  * whole-word reading map + per-kanji on/kun/rendaku fallback (kanji.ts), and orthographic bunsetsu
- * segmentation of spaceless text. Pitch accent (ꜜ) is Phase 3. See docs/investigations/ja_native_bringup_investigation.md.
+ * segmentation of spaceless text. Pitch accent (ꜜ) is Phase 3.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

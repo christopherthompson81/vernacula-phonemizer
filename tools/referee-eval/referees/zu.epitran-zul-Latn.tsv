@@ -1,4 +1,4 @@
-# zu_gold.tsv — Zulu epitran zul-Latn REFEREE set (NOT oracle/gold). espeak has no Zulu; epitran is an
+# zu_gold.tsv — Zulu epitran zul-Latn REFEREE set (NOT oracle/gold). epitran is an
 # independent programmatic G2P that corroborates our L2S but is FALLIBLE: it drops ejectives, writes bare
 # clicks (ǀ vs our kǀ), ng→ŋ (not ŋɡ), and ⟨kl⟩ as k+l (not the kx affricate). NB epitran DOES palatalise
 # the homorganic nasal (nj→ɲd͡ʒ) — epitran was RIGHT and ours had the gap (now fixed; convergence Run 2).

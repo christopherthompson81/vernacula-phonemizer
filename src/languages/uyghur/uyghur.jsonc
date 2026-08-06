@@ -1,5 +1,5 @@
 // Native canonical-IPA data manifest for Uyghur / ئۇيغۇرچە (ug) — Turkic (Karluk), the UYGHUR ARABIC alphabet
-// (Ereb Yéziqi), espeak-independent. ~11M speakers, mainly Xinjiang. Unlike the Arabic/Persian/Urdu ABJADS, the
+// (Ereb Yéziqi). ~11M speakers, mainly Xinjiang. Unlike the Arabic/Persian/Urdu ABJADS, the
 // Uyghur Arabic script is a FULL PHONEMIC ALPHABET — it writes ALL EIGHT vowels — so there is NO short-vowel
 // restoration: a plain greedy letter→IPA scan suffices (uyghur.ts). Referees: wikipron uig_arab_broad (PRIMARY,
 // HUMAN) + epitran uig-Arab (INDEPENDENT). Signatures:
@@ -8,7 +8,6 @@
 //   • Consonants ⟨چ ج⟩→t͡ʃ d͡ʒ, ⟨غ⟩→ʁ (uvular), ⟨خ⟩→χ, ⟨ق⟩→q, ⟨ڭ⟩→ŋ, ⟨ژ⟩→ʒ, ⟨ۋ⟩→w (vs و→o vowel).
 //   • Word-final obstruent DEVOICING (د→t, etc.) is applied in code (a real Uyghur rule the referee marks).
 // The Arabic-loan letters (ص ع ذ ظ ح ط ث) are nativised to their plain Uyghur values. Tone: none (Turkic).
-// See docs/investigations/ug_native_bringup_investigation.md.
 {
     "language": "ug",
     "name": "Uyghur (Uyghurche)",

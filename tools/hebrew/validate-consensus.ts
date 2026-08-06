@@ -7,7 +7,7 @@
  *   npx tsx tools/hebrew/validate-consensus.ts            # print the agreement %
  *   npx tsx tools/hebrew/validate-consensus.ts --miss     # + list the disagreements (gold <TAB> ours)
  *
- * See docs/investigations/he_native_bringup_investigation.md (Run 11) and build-consensus-gold.py (regeneration).
+ * (Run 11) and build-consensus-gold.py (regeneration).
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

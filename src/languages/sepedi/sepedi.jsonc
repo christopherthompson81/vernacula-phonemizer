@@ -7,7 +7,6 @@
 // ⟨hl⟩→[ɬ] and lateral affricate ⟨tl⟩→[t͡ɬ]. Plain voiceless stops taken as EJECTIVE ⟨p t k⟩→[pʼ tʼ kʼ] (the
 // Sotho-Tswana pattern, per the Sesotho attestations — UNVERIFIED for Sepedi). No clicks. Vowel height (7-vowel
 // /i e ɛ a ɔ o u/) is unwritten → default mid [ɛ ɔ]. Tone (H/L) lexical + unwritten → DEFERRED. ⛔ cannot-verify.
-// See docs/investigations/nso_native_bringup_investigation.md.
 {
     "language": "nso",
     "name": "Sepedi (Northern Sotho)",

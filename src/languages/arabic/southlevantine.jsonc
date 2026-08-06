@@ -3,7 +3,7 @@
 // stop), ج→[ʒ], and the interdental mergers ث→[t], ذ→[d] — but DIFFERS on ⟨ظ⟩, which South Levantine merges to the
 // SIBILANT [zˤ] (بوظة→buːzˤa, حافظ→ħaːfazˤ) rather than North Levantine's stop [dˤ]; ⟨ض⟩ stays [dˤ], so the two are
 // kept distinct. Historical diphthongs monophthongize (ay→eː, aw→oː). The interdental retention in learned/MSA-loan
-// words (أثاث→ʔaθaːθ) is a lexical tail. Referee: wikipron ajp_arab_broad (human). See docs/investigations/ajp_southlevantine_bringup_investigation.md.
+// words (أثاث→ʔaθaːθ) is a lexical tail. Referee: wikipron ajp_arab_broad (human).
 {
     "variety": "southlevantine",
     "iso": "ajp",

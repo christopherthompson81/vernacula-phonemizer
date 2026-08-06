@@ -293,7 +293,7 @@ ee|Ewe|Niger-Congo (Kwa)|Latin|7||unimplemented||Ghana/Togo.
 ks|Kashmiri|Indo-Aryan (Dardic)|Arabic (Kashmiri)|7||unimplemented||Dardic; vowel-rich abjad.
 mn|Mongolian (Khalkha)|Mongolic|Cyrillic|6||unimplemented||Cyrillic (+ traditional Mongolian script).
 bo|Tibetan|Sino-Tibetan|Tibetan|6||unimplemented||Large orthography-to-sound gap (historical spelling).
-kok|Konkani|Indo-Aryan (Southern)|Devanagari|2||unimplemented||Was in espeak-portable; small.
+kok|Konkani|Indo-Aryan (Southern)|Devanagari|2||unimplemented||Small; deferred.
 """
 
 # The FLEURS-102 speech-benchmark language set, mapped to our codes by the benchmark's ACTUAL recorded variety (not

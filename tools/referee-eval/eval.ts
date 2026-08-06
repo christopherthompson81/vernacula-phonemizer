@@ -1,6 +1,6 @@
 /**
  * Referee eval — validate a vernacula phonemizer's SEGMENTAL BACKBONE against INDEPENDENT referees (epitran /
- * wikipron), not against espeak. espeak-canonical parity is only a regression guard; this measures linguistic
+ * wikipron). Bootstrap parity is only a regression guard; this measures linguistic
  * corroboration. Per referee it reports raw + folded agreement and the top residual divergences — the folded
  * residual is the linguistic signal to adjudicate against published phonology (referees are fallible; a
  * divergence is a candidate, not a verdict). See config.ts for the per-language fold justifications.

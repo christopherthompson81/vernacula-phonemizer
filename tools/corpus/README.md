@@ -1,7 +1,7 @@
 # Corpus / wordlist tooling
 
 Reusable builders for the language data a bring-up needs, so we stop hand-rolling throwaway `/tmp` scrapers.
-Ported forward from the espeak-ng-portable `tools/corpus` engine — with its hard-won lesson baked in:
+With the hard-won lesson baked in:
 
 > **Batch + cache; dumps ≫ sequential live API.** The MediaWiki API rate-limits and paginates; one request per
 > word is minutes of round-trips. Use the API's batch/generator forms (or a dump), and cache every response so a

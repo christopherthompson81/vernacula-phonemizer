@@ -8,7 +8,7 @@ import { phonemizeWord } from "../src/languages/chhattisgarhi/chhattisgarhi.ts";
 // of Eastern Hindi' (1921, rev. Grierson) — its phoneme inventory + the attested UDHR Article-1 sample. That
 // confirmed श/ष→[s] (the inventory has NO /ʃ/) — Chhattisgarhi's SOLE confident segmental divergence from Hindi
 // — and CORRECTED an initial error: ऐ/औ are MONOPHTHONGS [ɛː]/[ɔː] like Hindi (गौरव→[ɡɔrəʋ] in the sample), NOT
-// the Bhojpuri-style diphthongs. See docs/investigations/hne_native_bringup_investigation.md.
+// the Bhojpuri-style diphthongs.
 describe("chhattisgarhi canonical IPA (corroborated vs the 1921 grammar)", () => {
     test("श/ष → [s] — Chhattisgarhi has no /ʃ/ (grammar inventory)", () => {
         expect(phonemizeWord("शहर")).toBe("sˈəɦəɾ"); // 'city' — श→s AND no əɦə→ɛɦɛ lowering (Hindi: ʃɛɦɛɾ)

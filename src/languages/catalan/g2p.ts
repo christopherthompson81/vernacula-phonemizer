@@ -2,7 +2,7 @@
  * Catalan (Central/Eastern) grapheme→phoneme scanner. Left-to-right, small context rules, no lexicon. Produces
  * a segment list; STRESS, unstressed-vowel REDUCTION, spirantization, palatal nasal assimilation and final
  * devoicing are applied downstream (catalan.ts). Each vowel segment carries both its stressed and reduced IPA
- * so the reduction pass can pick once stress is known. See docs/investigations/ca_bringup_investigation.md.
+ * so the reduction pass can pick once stress is known.
  */
 
 import { MANIFEST } from "./manifest.ts";

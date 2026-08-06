@@ -25,7 +25,7 @@
  * not derivable, and the common numeral compounds are already covered by dictionary.tsv (တစ်ဆယ်, တစ်ရာ,
  * နှစ်ရာ …), so composed numerals match the gold as they stand. A systematic rule was implemented and
  * measured against the referee: every variant LOST ground (95.7% → 91.7% minor-syllable-only, → 81.2%
- * intervocalic-only, → 79.0% both), so it was reverted. See the my investigation doc.
+ * intervocalic-only, → 79.0% both), so it was reverted.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 

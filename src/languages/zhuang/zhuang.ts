@@ -1,11 +1,11 @@
 /**
  * Zhuang / Vahcuengh (za) phonemizer — Tai-Kadai, Standard Zhuang (Wuming), the 1982 Latin orthography, canonical
- * IPA, espeak-independent. A longest-match scan: multi-letter onsets (mb→ɓ, nd→ɗ, gv→kʷ, ng→ŋ, …) + vowel digraphs
+ * IPA. A longest-match scan: multi-letter onsets (mb→ɓ, nd→ɗ, gv→kʷ, ng→ŋ, …) + vowel digraphs
  * before single letters; the pinyin-style ⟨b d g⟩=/p t k/ and ⟨s⟩→θ / ⟨r⟩→ɣ / ⟨c⟩→ɕ / ⟨v⟩→β; a word-initial
  * vowel takes a [ʔ] onset. TONES are written as syllable-final letters — ⟨z j x q h⟩ = tones 2-6, none = tone 1,
  * a p/t/k coda = a checked tone — and emitted as Chao contour letters after each syllable's vowel (the referee
  * eval strips them, so corroboration is segmental). ⟨z x q j⟩ are never onsets; ⟨h⟩ is an onset before a vowel and
- * tone-6 otherwise. See docs/investigations/za_native_bringup_investigation.md.
+ * tone-6 otherwise.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

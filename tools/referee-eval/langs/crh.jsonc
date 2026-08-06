@@ -1,6 +1,5 @@
 // Crimean Tatar / qırımtatar tili (crh) — Kipchak+Oghuz Turkic, Turkish-based LATIN alphabet. Referee: English
 // Wiktionary "Crimean Tatar terms with IPA pronunciation" (thin, ~18 Latin pairs; no wikipron/kaikki/epitran).
-// See docs/investigations/crh_native_bringup_investigation.md.
 {
     "language": "crh",
     "name": "Crimean Tatar (qırımtatar tili)",

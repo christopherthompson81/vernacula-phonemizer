@@ -5,7 +5,7 @@ import { phonemizeWord, createKyrgyz } from "../src/languages/kyrgyz/kyrgyz.ts";
 // Kyrgyz (ky) — Turkic (Kipchak), Cyrillic. Left-to-right g2p with SPELLED vowel harmony + three code rules: the
 // velar/uvular harmony (к→q/г→ʁ back, k/ɡ front — a CODA is governed by the preceding vowel: ак→aq), dark-l harmony
 // (л→ɫ back / l front), and long vowels (доubling → Vː). ж→d͡ʒ, ң→ŋ, intervocalic б→β. Scored 90.7% folded on
-// wikipron kir_cyrl broad (HUMAN, 888). See docs/investigations/ky_native_bringup_investigation.md.
+// wikipron kir_cyrl broad (HUMAN, 888).
 describe("Kyrgyz canonical IPA — rule g2p (Standard Kyrgyz)", () => {
     test("velar/uvular harmony: к→q/k, coda governed by preceding vowel", () => {
         expect(phonemizeWord("кыз")).toBe("qɯz"); // onset к before back ы → q

@@ -1,10 +1,10 @@
 /**
- * Mongolian (mn) grapheme→phoneme engine — Cyrillic, canonical IPA, espeak-independent. A greedy longest-match scan
+ * Mongolian (mn) grapheme→phoneme engine — Cyrillic, canonical IPA. A greedy longest-match scan
  * (diphthongs / doubled long vowels before single letters) that emits IPA segments tagged nucleus/short. Context
  * rules the table can't express live here: back-harmony (г→ɢ / х→χ next to back vowels а/о/у, else ɡ / x), the
  * iotated letters е/ё/я/ю → glide+vowel (glide only word-initially or after a vowel), and the soft sign ь which
  * FRONTS the preceding vowel (а→æ, о→œ) and drops. The DEEP-orthography reduction (non-initial short vowels → ə /
- * word-final deletion) and final devoicing are applied downstream in mongolian.ts. See the investigation doc.
+ * word-final deletion) and final devoicing are applied downstream in mongolian.ts.
  */
 import { MANIFEST } from "./manifest.ts";
 

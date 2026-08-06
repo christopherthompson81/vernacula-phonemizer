@@ -8,8 +8,7 @@ import { numberToWords } from "../src/languages/mossi/numbers.ts";
 // + gemination scores 94.9% folded vs the referee (tools/referee-eval, 39 words) — the two residuals are referee
 // artifacts (a gemination-notation inconsistency + a y/j typo), so the segmental backbone is ~100%. Signatures:
 // dedicated ATR letters ⟨ɛ ɩ ʋ⟩, ⟨o⟩=o always (no ⟨ɔ⟩), DOUBLING = length, TILDE = nasal, ⟨r⟩=ɾ, ⟨y⟩=j. TONE
-// (2-tone H/L) is not written in the orthography → not emitted; numbers are composed in numbers.ts. See
-// docs/investigations/mos_native_bringup_investigation.md.
+// (2-tone H/L) is not written in the orthography → not emitted; numbers are composed in numbers.ts.
 describe("Mooré canonical IPA — greedy g2p + gemination", () => {
     test("dedicated ATR letters ⟨ɛ⟩=ɛ, ⟨ɩ⟩=ɪ, ⟨ʋ⟩=ʊ; ⟨o⟩=o always (no ɔ)", () => {
         expect(phonemizeWord("lakrɛ")).toBe("lakɾɛ"); // ⟨ɛ⟩ → ɛ

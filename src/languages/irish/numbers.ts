@@ -16,7 +16,7 @@
  *
  * Uses the DECIMAL series (fiche/tríocha/daichead/…), not the traditional vigesimal one (dhá fhichead = 40):
  * decimal is what modern written Irish uses for bare figures, and every word here is attested in the wikipron
- * referee (ga.wikipron-gle-broad.tsv). See docs/investigations/ga_native_bringup_investigation.md.
+ * referee (ga.wikipron-gle-broad.tsv).
  *
  * KNOWN LIMITATION — a magnitude count in the TEENS. Idiomatic Irish puts `déag` after the counted noun:
  * 11,000 is `aon mhíle dhéag`, not the `a haon déag míle` this emits. Implementing it needs the lenition

@@ -1,5 +1,5 @@
 /**
- * Native Oromo / Afaan Oromoo (om) text phonemizer — canonical IPA, espeak-independent. A shallow near-phonemic
+ * Native Oromo / Afaan Oromoo (om) text phonemizer — canonical IPA. A shallow near-phonemic
  * Latin (Qubee) orthography → rule-based transliterator: digraphs (ch→t͡ʃ, dh→ᶑ, ny→ɲ, ph→pʼ, sh→ʃ) then single
  * letters, with DOUBLED VOWELS = long (aa→aː) and DOUBLED CONSONANTS = geminate (bb→bː); a geminate DIGRAPH doubles
  * its first letter (ddh→[ᶑː], cch→[t͡ʃː]). The apostrophe → glottal stop [ʔ] (buʼaa→buʔaː). Qubee is largely
@@ -181,8 +181,7 @@ const NATIVE_WORD = /^[A-Za-zʼ’']+$/u;
  * `daqiiqaa 3` — the noun, then the number. Count forms are single-entry: an Oromo noun does not
  * inflect for the numeral that counts it (`kiiloo meetira 1600`, `paawundii 1,000`).
  *
- * SOURCING (playbook §5e — a wrong word is worse than a dropped sign; the evidence table is in
- * docs/investigations/om_normalization_investigation.md, Run 4):
+ * SOURCING (playbook §5e — a wrong word is worse than a dropped sign):
  *   parsantii          FLEURS om_et ×3 (`parsantii 3 hanga 5`) + espeak-ng dictsource om_list `%`
  *   doolaara           FLEURS om_et ×1 (`doolaara US biiliyoonotaan`) + epitran referee + om_list `_$`
  *   doolaara Ameerikaa both words corpus-attested; `US$` is declared as a compound key because a bare

@@ -1,11 +1,11 @@
 /**
- * Native Magahi / मगही (mag) text phonemizer — canonical IPA, espeak-independent. Indo-Aryan (Bihari, Magadhan),
+ * Native Magahi / मगही (mag) text phonemizer — canonical IPA. Indo-Aryan (Bihari, Magadhan),
  * Devanagari. Reuses the Hindi/Bhojpuri Devanagari engine (makeNativeHindi — schwa deletion, weight stress) with a
  * Magahi data file. Magahi shares the Bihari core with Bhojpuri — NO phonemic vowel length, single sibilant श/ष→[s],
  * ण/ञ→[n] — but differs in its documented GLIDE HARDENING (Vinod Kumar 2026, A Comparative Phonological Study of
  * Bihari Languages, §6.2): word-initial व→[b] (वंश→bans) and य→[d͡ʒ] (यन्त्र→jantar), where Bhojpuri preserves the
  * glides (व→w, य→j). Single comparative-source delta on the grammar-anchored Bhojpuri base → 🔷. Was a mag→bho
- * alias until the reference revealed the delta. See docs/investigations/mag_native_bringup_investigation.md.
+ * alias until the reference revealed the delta.
  */
 /**
  * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Magahi, one of them by a
