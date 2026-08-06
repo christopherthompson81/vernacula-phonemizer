@@ -65,20 +65,13 @@ describe("punjabi text normalization (#562)", () => {
         expect(phonemize("36", "pa")).toBe("t͡ʃʰˈət̪ːiː"); // ਛੱਤੀ
         expect(phonemize("56", "pa")).toBe("t͡ʃʰəpˈə̃ɲd͡ʒaː"); // ਛਪੰਜਾ
         expect(phonemize("1947", "pa")).toContain("sˈə̃n̪t̪aːɭiː"); // …ਸੰਤਾਲ਼ੀ, was "…ਸੱਤ ਚਾਲੀ"
-        // 61-99: 34 of the 39 values, each resting on two agreeing witnesses out of Wiktionary (spelling
-        // + IPA), the 1833 Starr romanisation, and espeak. See punjabi.jsonc for the per-entry citations.
         expect(phonemize("76", "pa")).toBe("t͡ʃʰˈɪɦət̪ːəɾ"); // ਛਿਹੱਤਰ, was "ਛੇ ਸੱਤਰ" (six seventy)
         expect(phonemize("69", "pa")).toBe("ˈʊɳɦət̪ːəɾ"); // ਉਣ੍ਹੱਤਰ
-        // 61-68 end in ਠ, not espeak's ਟ — refuted by espeak's own 59/60, by the Shahmukhi referee, by
-        // Wiktionary's [ɪ.käːʈʰ˩˥] and by the 1833 book's "ekaha-th". Pinned because it was nearly wrong.
         expect(phonemize("61", "pa")).toBe("ɪkˈaːɦəʈʰ");
-        // 71 carries the ɦ that espeak omits — and is therefore NOT the corpus word ਇਕੱਤਰ "assemble".
         expect(phonemize("71", "pa")).toBe("ˈɪkɦət̪ːəɾ");
         // 85 and 96 are deliberately LEFT OUT (no spelling reaches two witnesses; 96's only Wiktionary
         // title is malformed). They keep the two-word fallback; pinned so a future source shows up here.
         expect(phonemize("96", "pa")).toBe("t͡ʃʰˈeː nˈəbːeː");
-        // Round tens and bare magnitudes were already right; `bareMagnitude` stays OFF (espeak pa_list
-        // renders 100 as 'Ik: s'O — Punjabi genuinely says ਇੱਕ ਸੌ).
         expect(phonemize("100", "pa")).toBe("ˈɪkː sˈɔː");
         expect(phonemize("1000", "pa")).toBe("ˈɪkː ɦəzˈaːɾ");
     });
@@ -124,9 +117,6 @@ describe("punjabi text normalization (#562)", () => {
     });
 
     test("decimals ×13: the dot is neutralised, not spoken", () => {
-        // The defect was the SENTENCE BREAK mid-number ([d̪ˈoː . t̪ˈɪ̃n]). The decimal-point WORD is left
-        // unset: espeak pa_list gives only its pronunciation and the corpus never spells it, so there is
-        // no sourceable Gurmukhi form — dropping the sign beats speaking a word we cannot source.
         expect(phonemize("2.3", "pa")).toBe("d̪ˈoː t̪ˈɪ̃n");
         expect(phonemize("2.3 ਅਰਬ ਡਾਲਰ", "pa")).not.toContain(".");
     });

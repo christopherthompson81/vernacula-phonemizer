@@ -37,7 +37,7 @@ describe("Sinhala abugida g2p", () => {
         expect(phonemizeWord("ඡායාරූප")).toBe("t͡ʃhˈaːjaːrˌuːpə"); // 4 nuclei → ˌ on nucleus 3
     });
 
-    it("cardinal numbers (authored — espeak's si number path is broken)", () => {
+    it("cardinal numbers", () => {
         expect(phonemize("5", "si")).toBe("pˈahə");
         expect(phonemize("10", "si")).toBe("d̪ˈahəjə");
         expect(phonemize("21", "si")).toBe("ʋˈisiˌekə");

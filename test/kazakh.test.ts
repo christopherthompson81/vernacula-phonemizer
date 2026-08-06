@@ -26,11 +26,11 @@ describe("Kazakh Cyrillic g2p", () => {
 
     it("glides and word-initial е → je", () => {
         expect(phonemizeWord("ел")).toBe("jˈel"); // word-initial е → je (stress on the vowel)
-        expect(phonemizeWord("кино").replace(/ˈ/u, "")).toBe("kəjno"); // и → əj (кино is loan-stressed by espeak; assert the segment)
+        expect(phonemizeWord("кино").replace(/ˈ/u, "")).toBe("kəjno"); // и → əj
         expect(phonemizeWord("тау")).toBe("tˈɑw"); // у → glide w
     });
 
-    it("stress: espeak STRESSPOSN_1RU (last syllable before the first reduced ы→ə)", () => {
+    it("stress: last syllable before the first reduced ы→ə)", () => {
         expect(phonemizeWord("Санат")).toBe("sɑnˈɑt"); // no reduced vowel → final
         expect(phonemizeWord("бойынша")).toBe("bˈojənʃɑ"); // ы between full vowels pulls stress left
         expect(phonemizeWord("коды")).toBe("kˈodə");

@@ -18,7 +18,7 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
         expect(normalizeMalay("5,000,000 pelawat")).toBe("5000000 pelawat");
         expect(phonemize("Dari 1,400 orang", "zsm")).toBe("dˈari sərˈibu əmpˈat rˈatus ˈoraŋ");
         expect(phonemize("5,000,000 pelawat", "zsm")).toBe("lˈima d͡ʒˈuta pəlˈawat");
-        // The decimal point is `perpuluhan` (espeak-ng ms `_dpt`), and the fraction is read DIGIT BY DIGIT.
+        // The decimal point is `perpuluhan`, and the fraction is read DIGIT BY DIGIT.
         expect(normalizeMalay("hampir 3.7 juta")).toBe("hampir 3 perpuluhan 7 juta");
         expect(normalizeMalay("selebar 3.50 m")).toBe("selebar 3 perpuluhan 5 0 m");
         expect(phonemize("hampir 3.7 juta", "zsm")).toBe("hˈampir tˈiɡa pərpulˈuhan tˈud͡ʒuh d͡ʒˈuta");

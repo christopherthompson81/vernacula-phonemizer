@@ -18,7 +18,7 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("dona")).toBe("dˈɔnə"); // stressed open ɔ (correct here)
     });
 
-    test("Run 2 — lexical stressed mid-vowel height (open ɛ/ɔ default, close e/o from the espeak-derived lexicon)", () => {
+    test("Run 2 — lexical stressed mid-vowel height (open ɛ/ɔ default, close e/o)", () => {
         expect(phonemizeWord("pedra")).toBe("pˈeðɾə"); // close e (lexicon)
         expect(phonemizeWord("menja")).toBe("mˈeɲʒə"); // close e
         expect(phonemizeWord("por")).toBe("pˈoɾ"); // close o
@@ -115,8 +115,7 @@ describe("catalan canonical IPA", () => {
 
 // Proclitic vowel reduction (found by the FLEURS engine diff, Run 27). De-stressing a function word used to be
 // a post-hoc ˈ strip, applied AFTER reduce() had run with the word's only nucleus at the stress index — the
-// mark vanished but the vowel kept its stressed quality (el → ɛɫ). Central Catalan proclitics are [ə]; the
-// human referee attests em → "ə m", and espeak agrees (əl). Now the whole word reduces (stress = -1).
+// mark vanished but the vowel kept its stressed quality (el → ɛɫ).
 describe("Catalan proclitic reduction", () => {
     test("clitics reduce in running text", () => {
         expect(phonemize("el gat", "ca")).toBe("əɫ ɡˈat");

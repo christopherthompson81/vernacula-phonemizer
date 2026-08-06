@@ -243,9 +243,6 @@ describe("Oromo text normalization", () => {
         expect(phonemize("fakkii 1.1.", "om")).toBe("fakːˈiː tˈokːo tukʼˈaː tˈokːo .");
     });
 
-    // #602 deferred initialisms (64 instances, `PTWC` → [ptʼwt͡ʃʼ]) with the note that espeak's om_list
-    // "carries the full Oromo letter-name inventory, so an initialism pass is sourceable". It does — lines
-    // 42–67, all 26 Qubee CV names — and `sources.ts` now reports the language as WIREABLE-not-wired.
     test("initialisms spell out with the Qubee letter names", () => {
         // OOV: Oromo permits essentially no complex onset, so the phonotactic rule spells these with no
         // data entry at all.

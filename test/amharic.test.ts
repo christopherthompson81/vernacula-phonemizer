@@ -101,8 +101,7 @@ describe("Amharic #562 normalization", () => {
         expect(phonemize("1,400", "am")).toBe("ʃi aɾat məto"); // was "and , aɾat məto"
     });
 
-    // 26 instances; the dot was a full STOP. The fractional tail is read ONE DIGIT AT A TIME. ነጥብ is sourced
-    // from espeak-ng dictsource/am_list `_dpt  _n'@t`yb`.
+    // 26 instances; the dot was a full STOP. The fractional tail is read ONE DIGIT AT A TIME. ነጥብ
     test("decimals take ነጥብ and digit-by-digit fractions", () => {
         expect(phonemize("6.34", "am")).toBe("sɨdɨst nətʼb sost aɾat"); // was "sɨdɨst . səlasa aɾat"
     });

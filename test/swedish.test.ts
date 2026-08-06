@@ -292,9 +292,9 @@ describe("swedish text normalization (#562)", () => {
         // the referee records `ge → j eː` for the VERB). `gé` gives [ɡeː] only because the manifest's
         // frontVowels excludes `é`; this assertion is what makes that coupling non-silent.
         expect(phonemize("GPS", "sv")).toBe("ɡeː peː ɛsː");
-        // W is emitted as TWO tokens so the final `ve` keeps its long vowel (espeak: d'8b@lve:).
+        // W is emitted as TWO tokens so the final `ve` keeps its long vowel.
         expect(phonemize("NSW", "sv")).toBe("ɛnː ɛsː dˈɵbːɛl veː");
-        // LEXICAL, sourced from espeak sv_list (`usa u-Es'A:`): letters although `usa` is pronounceable.
+        // LEXICAL
         expect(phonemize("USA", "sv")).toBe("ʉː ɛsː ɑː");
         // Pronounceable and unlisted → the OOV g2p reads it as a word, which is the seam's default.
         expect(phonemize("NASA", "sv")).toBe("nˈɑ̀ːsa");
@@ -320,7 +320,6 @@ describe("swedish text normalization (#562)", () => {
     });
 
     test("the colon is an inflectional joint, and it respects the same lexical decision", () => {
-        // espeak sv_list records `usa:s u-Es'A:s` — one word, the -s glued to the final letter name.
         expect(phonemize("USA:s president", "sv")).toBe("ʉː ɛsː ɑːs prɛsɪdˈɛnt");
         expect(phonemize("FN:s", "sv")).toBe("ɛfː ɛnːs");
         expect(phonemize("TV:n", "sv")).toBe("teː veːn");

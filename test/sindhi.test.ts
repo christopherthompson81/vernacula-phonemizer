@@ -128,10 +128,6 @@ describe("Sindhi tagger mask — glide-deletion guard", () => {
     });
 });
 
-// The two Sindhi-specific single-codepoint PARTICLES were silently dropped — no lexicon entry, not in the
-// consonant map, so scan() emitted nothing. Between them ~1,900 FLEURS tokens vanished: ۾ "in" (U+06FE,
-// kaikki-attested [mẽ]) and ۽ "and" (U+06FD, espeak-corroborated aẽ). Latin runs and digits also dropped —
-// no tokenizer group / no foreign phonemizer wired (now the ur/hi English route).
 describe("Sindhi: no silent content loss (Run 28)", () => {
     test("the particles ۾ and ۽ are pronounced", () => {
         expect(phonemizeWordShipped("۾").replace(/[ˈˌ]/gu, "")).toBe("mẽ");
@@ -149,8 +145,6 @@ describe("Sindhi: no silent content loss (Run 28)", () => {
         expect(ipa).toContain(phonemize("45", "sd")); // read in Sindhi
     });
 
-    // Every form is two-source verified: Wiktionary orthography cross-checked against espeak-ng's own
-    // Sindhi numeral phonemes (11 يارهن ↔ [ja:raha], 40 چاليهه ↔ [ca:li:ha], 90 نوي ↔ [navve:]).
     test("Sindhi numbers, Indic lakh/crore grouping", () => {
         expect(phonemize("0", "sd")).toBe(phonemize("ٻڙي", "sd"));
         expect(phonemize("19", "sd")).toBe(phonemize("اوڻيهه", "sd"));
@@ -160,16 +154,12 @@ describe("Sindhi: no silent content loss (Run 28)", () => {
         expect(phonemize("٢٠٢٤", "sd")).toBe(phonemize("2024", "sd"));
     });
 
-    // The fused 21–99, from a Sindhi numerals chart, attestation-checked one at a time against
-    // sd.wikipedia and cross-checked against espeak's phonemes. 58 of 72 are attested and authored.
     test("fused 21–99 where the form is attested", () => {
         expect(phonemize("21", "sd")).toBe(phonemize("ايڪيهه", "sd")); // ONE word, not "one twenty"
         expect(phonemize("45", "sd")).toBe(phonemize("پنجيتاليهه", "sd"));
         expect(phonemize("1947", "sd")).toContain(phonemize("ستيتاليهه", "sd"));
     });
 
-    // The third source earned its place: 89 and 98 read as the same word off the chart, and espeak has
-    // 89 [Un.Ia:nave:] against 98 [at.#Ia:nave:] — 89 carries the ūṇ- "one less than" prefix.
     test("89 and 98 are distinct", () => {
         expect(phonemize("89", "sd")).not.toBe(phonemize("98", "sd"));
     });

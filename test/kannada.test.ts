@@ -30,8 +30,7 @@ describe("kannada canonical IPA", () => {
      * Kannada fuses 21-99 into one word, has suppletive round hundreds and takes combining magnitude
      * forms before a remainder; the shared `indicNumberWords` composer expresses none of the last two,
      * so 561 corpus numerals read in a shape no speaker uses. Kannada now composes its own
-     * (src/languages/kannada/numbers.ts). Spellings sourced from espeak-ng dictsource/kn_list, this
-     * corpus and the repo's kaikki referee — see the provenance note in kannada.jsonc.
+     * (src/languages/kannada/numbers.ts).
      */
     test("cardinals: fused 21-99, suppletive hundreds, combining magnitudes", () => {
         const cases: [number, string][] = [
@@ -46,7 +45,7 @@ describe("kannada canonical IPA", () => {
             [150, "ನೂರಾ ಐವತ್ತು"], // COMBINING ನೂರಾ, not the bare ನೂರು
             [200, "ಇನ್ನೂರು"], // SUPPLETIVE — was "ಎರಡು ನೂರು"
             [300, "ಮುನ್ನೂರು"],
-            [400, "ನಾಲ್ಕು ನೂರು"], // no suppletive form in kn_list ⇒ regular, as espeak itself composes it
+            [400, "ನಾಲ್ಕು ನೂರು"],
             [500, "ಐನೂರು"],
             [900, "ಒಂಬೈನೂರು"],
             [1000, "ಸಾವಿರ"],

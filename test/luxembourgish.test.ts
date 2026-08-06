@@ -109,8 +109,8 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
         expect(ordinalStem(8)).toBe("aacht"); // the tt COLLAPSE — aacht + t, unattested in the corpus
         expect(ordinalStem(19)).toBe("nonzéngt"); // the last +t
         expect(ordinalStem(20)).toBe("zwanzegst"); // the first +st — the branch boundary
-        expect(ordinalStem(24)).toBe("véieranzwanzegst"); // compound, matches espeak's own entry
-        expect(ordinalStem(100)).toBe("honnertst"); // matches espeak's own entry
+        expect(ordinalStem(24)).toBe("véieranzwanzegst"); // compound
+        expect(ordinalStem(100)).toBe("honnertst");
         expect(ordinalStem(1922)).toBe("dausend nénghonnertzweeanzwanzegst"); // ending on the LAST word
     });
 
@@ -197,8 +197,7 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
         expect(N("gëtt – duerch")).toBe("gëtt – duerch"); // the PARENTHETICAL dash (×44) is untouched
     });
 
-    // The fraction noun composes as ordinal stem + `el`; espeak's lb_list confirms six of them and records
-    // `véierel` as the one irregular. The corpus writes only `1/5`, so every other branch is unexercised.
+    // The fraction noun composes as ordinal stem + `el`.
     test("fractions: the table, the composition, and the numerator's own n-deletion", () => {
         expect(N("5 mm (1/5 Zoll)")).toBe("5 mm (ee Fënneftel Zoll)"); // the corpus's only fraction
         expect(N("1/3 vum Land")).toBe("een Drëttel vum Land"); // ⟨d⟩ keeps the n — the corpus's own spelling

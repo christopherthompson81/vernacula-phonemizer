@@ -18,7 +18,7 @@ describe("Czech g2p", () => {
 
     it("voicing assimilation (regressive + final devoicing)", () => {
         expect(phonemizeWord("led")).toBe("lˈɛt"); // final devoicing d→t
-        expect(phonemizeWord("kde")).toBe("ɡdˈɛ"); // regressive k→ɡ before d (epitran-corroborated; espeak misses it)
+        expect(phonemizeWord("kde")).toBe("ɡdˈɛ"); // regressive k→ɡ before d
         expect(phonemizeWord("prosba")).toBe("prˈozba"); // s→z before b
         expect(phonemizeWord("vstup")).toBe("fstˈup"); // v→f before st
         expect(phonemizeWord("sníh")).toBe("sɲˈiːx"); // final ɦ→x
@@ -43,7 +43,7 @@ describe("Czech g2p", () => {
         expect(phonemize("5", "cs")).toBe("pjˈɛt");
         expect(phonemize("10", "cs")).toBe("dˈɛsɛt");
         expect(phonemize("100", "cs")).toBe("stˈo");
-        expect(phonemize("1000", "cs")).toBe("cˈɪsiːt͡s"); // first-syllable stress (espeak wrongly stresses the 2nd)
+        expect(phonemize("1000", "cs")).toBe("cˈɪsiːt͡s"); // first-syllable stress
     });
 });
 
