@@ -37,6 +37,7 @@
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { parseJsonc } from "../../src/core/jsonc.ts";
+import { dominantScript } from "./scripts.ts";
 import { join } from "node:path";
 
 const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
@@ -48,7 +49,8 @@ const arg = (n: string, d?: string): string | undefined => {
 };
 
 /** Scripts written without spaces, where the boundary test measures the markup rather than the language. */
-const SPACELESS = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Tibetan}\p{Script=Myanmar}]/u;
+/** The scripts that write no word space — named as `scripts.ts` names them, so the two cannot drift. */
+const SPACELESS_SCRIPTS = new Set(["Han", "Hiragana", "Katakana", "Thai", "Lao", "Khmer", "Tibetan", "Myanmar"]);
 
 /** Every utterance in this language's corpus — the normalized transcript column, one per line. */
 /**
@@ -141,7 +143,24 @@ if (code === undefined || words.length === 0) {
 }
 
 const utts0 = utterances(code);
-const spaceless = utts0.some((u) => SPACELESS.test(u));
+/**
+ * ⚠ IS THIS CORPUS DOMINANTLY A SPACELESS SCRIPT — not "does it contain one such character anywhere".
+ *
+ * This was `utts0.some((u) => SPACELESS.test(u))`, and `some` is catastrophically the wrong quantifier: ONE
+ * katakana character anywhere in the corpus flipped the whole language into spaceless mode, stripping every space
+ * and switching the hit test to substring matching. Igbo — Latin script, spaces and all — tripped it on 2,472 of
+ * 558,991 lines (0.44%), all from a Digimon article quoting デジモン. Its token counts then collapsed (otu 294
+ * tokens instead of thousands) while substring counts inflated to 129,808, and every numeral probe came back
+ * "attested, only 0.2% whole word" — meaningless.
+ *
+ * 69 of the fleet's 154 mined artifacts contain at least one CJK/SEA character, so 69 languages were being measured
+ * this way. Any Wikipedia that mentions a Japanese name qualifies.
+ *
+ * `dominantScript` (scripts.ts) already answers the right question, and answers it from the corpus rather than a
+ * language→script table. Reused here rather than re-deriving it.
+ */
+const dominant = dominantScript(utts0.join("\n").slice(0, 400_000));
+const spaceless = dominant !== undefined && SPACELESS_SCRIPTS.has(dominant);
 /**
  * ⚠ A HAN TRANSCRIPT IS SPACED PER CHARACTER, SO A MULTI-CHARACTER WORD NEVER MATCHES AS WRITTEN. FLEURS
  * writes cmn/yue with a space between EVERY character — "此 格 式 的 長 寬 比 除 以 12" — so probing 除以
