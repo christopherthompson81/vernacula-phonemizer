@@ -54,6 +54,10 @@ porter has no history to tell, so they write what the code does and what will bi
 
 Reference points in the tree: `src/core/hostWord.ts`, `src/languages/maori/normalize.ts`.
 
+⚠ Beware `*/` forming by accident inside a block comment. Markdown-style emphasis around a slashed
+alternative does it — `*tri*/*štiri*` terminates the comment and the rest of the block is parsed as code.
+Typecheck catches it, but the error points at the wrong line.
+
 When you cut comments, **do not touch code in the same commit**. Both files above were verified
 token-identical to their originals; that check is what makes a large comment pass reviewable.
 
