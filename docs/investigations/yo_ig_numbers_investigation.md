@@ -223,3 +223,164 @@ stronger: hi has `दशमलव बिन्दु` ("decimal point") and `द
 *صفر اور اعشاریہ کے بعد 3*, "after zero and the decimal point, 3". So this is an upgrade from "the manifest says
 so" to "a weaker independent tier says the word exists and means something decimal", not a closed sense-check.
 That is the wikipedia tier's documented ceiling, and `[ ok ]` on this line has never meant more than that.
+
+## Run 13 — 2026-08-06 — Yoruba: the corpus glosses its own numerals, which is a labelled test set
+
+Igbo is done; Yoruba is the remaining half of this document's original scope. Fresh 123,405-paragraph dump
+(yowiki-latest, 27 MB of prose). Current state, and it is the worst failure mode in the fleet:
+
+    1945      → wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd fˈɔːɹt̬i fˈaᶦv     fluent ENGLISH inside Yoruba speech
+    60%       → sˈɪksti                                          the sign dropped, the number English
+    ₦500      → fˈaᶦv hˈʌndɹəd
+    25 °C     → twˈɛnti fˈaᶦv k                                  ° dropped, C read as an English letter
+    A & B     → a˧ b
+
+⚠ **MY FIRST PROBE MEASURED THE WRONG POSITIONS AND REPORTED `%` AS ABSENT.** It counted `digitFlanked` (digit on
+both sides) and `leading` (sign then digit) and nothing else — so `60%`, with a digit BEFORE the sign and nothing
+after, fell between the two: `% flanked 0, leading 3`. A postfix sign needs a TRAILING count, and with one added
+the same corpus reports **1,287**. Third instance this session of measuring a position or unit the thing does not
+occupy (after km's writer-delimited tokens and the corpus-words dominance bug), and the first two were caught the
+same way: the number was implausible and the instances were read.
+
+Also `count.ts`'s `leading()` is O(n²) — it slices the whole text per match to strip whitespace — so on `.` and
+`,` (20k+ matches × 21 MB) it never returned. Lookbehind is linear and is what the probe uses.
+
+### The signs, once measured properly
+
+| sign | flanked | trailing | leading | anywhere |
+|---|---|---|---|---|
+| `%` | 0 | **1,287** | 3 | 1,295 |
+| `-` / `–` | 3,378 / 4,159 | 2,210 / 1,866 | 2,042 / 399 | 96,624 / 8,552 |
+| `°` | 55 | **390** | 5 | 475 |
+| `×` | 72 | 18 | 2 | 97 |
+| `+` / `=` | 9 / 7 | 30 / 43 | 61 / 53 | 360 / 993 |
+| `₦` / `$` / `£` / `€` | — | — | 85 / 593+117 / 141 / 95 | — |
+| `&` | 31 | 4 | 5 | 2,093 |
+
+Grouping is COMMA (1,829 lines vs 86 period-grouped) and the decimal separator a PERIOD (3,317 vs 71) — the
+Nigerian convention, same as Igbo.
+
+### ⚠ The corpus glosses its own numerals in digits, and that is a gold set
+
+The dump repeatedly writes a numeral out and then repeats it in figures:
+
+    ẹgbẹ̀rún méjì (2,000)        irinwó ó lé ọgọ́rin (480)        ìdá àádọ́ta nínú ọgọ́rùn-ún (50%)
+    igba ó lé ọgọ́rin (280)      ẹgbẹ̀rún kan (1000)              ọgọ́rùn-ún lọ́nà mẹ́wàá (10%)
+
+576 glosses extracted, 186 numeral phrases glossed CONSISTENTLY. That is a labelled test set written by Yoruba
+writers, and for a vigesimal-subtractive system that no referee here covers it is the only thing that can
+adjudicate a composed numeral. It reads off the machinery directly: magnitude-then-multiplier (`ẹgbẹ̀rún méjì`),
+`kan` as the multiplier-1 irregular, `ó lé` as the additive particle (`irinwó ó lé ọgọ́rin` = 400+80), and the
+`dín`/`lé` subtractive-additive teens and tens (`mẹ́tàdínlógún` = 17, `méjìlélógún` = 22, `mẹ́ẹ̀dógún` = 15).
+
+⚠ **AND THE FIRST TWO ROUNDS OF "CORPUS CONFLICTS" WERE BOTH MY EXTRACTOR, NOT THE CORPUS.** Worth recording
+because in each case the corpus looked unreliable and was not:
+
+1. `ogún` glossed as 20 eight times and 20,000 three times. The 20,000 instances are `ẹgbẹ̀rún lọ́nà ogún` —
+   **`lọ́nà` is the MULTIPLIER particle** ("thousand by twenty"). It was missing from my numeral-word list, so the
+   phrase truncated to its last word. Same for igba (200/200,000), àádọ́ta (50/50,000), ọgọ́rin (80/80,000).
+2. `ọgọ́rùn-ún` glossed as 2, 3, 25, 36, 50, 62, 64, 100 and fourteen other values. `nínú` is not a numeral word,
+   so in `ìdá àádọ́ta nínú ọgọ́rùn-ún (50%)` the suffix truncated to `ọgọ́rùn-ún` and EVERY percent gloss in the
+   corpus keyed onto that one phrase.
+
+Plus two filters that are honest limits rather than bugs: a 4-digit value beside a short numeral is a YEAR
+(`Ìlú kan (1975)` — `kan` is the ordinary word "a/certain", and produced eleven such pairs), 18 excluded; and a
+gloss can be SCALED (`mílíọ̀nù márùn-ún ó lé irinwó ẹgbẹ̀rún (5.4)` is 5,400,000 written as millions), 8 excluded.
+
+### ⚠ Two percent constructions, and the digit form settles which to emit
+
+    ọgọ́rùn-ún lọ́nà mẹ́wàá (10%)       "hundred by ten"            115 instances
+    ìdá X nínú ọgọ́rùn-ún (50%)         "portion X in a hundred"     94 instances (ìdá 79 + ìpín 15)
+
+Near-parity on totals, so counting them settles nothing on its own. What settles it is the form writers use when
+the number is a DIGIT rather than spelled out, which is what a normalizer produces:
+
+    ìdá <digit> nínú ọgọ́rùn-ún    21
+    ọgọ́rùn-ún lọ́nà <digit>        0
+
+All 21 read correctly in context — `ìdá 84 nínú ọgọ́rùn-ún`, `ìdá 30 nínú ọgọ́rùn-ún epo rọ̀bì` — and one glosses
+itself with the sign present: `ìdá 480 nínú ọgọ́rùn ún(480%)`.
+
+⚠ So Yoruba's percent is a **CIRCUMFIX**: a word before the number AND a phrase after it. The shared symbol tier
+supports prefix (`percentPrefix`, Igbo/Turkish) and the default suffix, but not both ends, so this belongs in
+Yoruba's own normalize.ts — the same door Malay used for `peratus`.
+
+## Run 14 — 2026-08-06 — the Yoruba compositor and symbol layer, and four measurement bugs of one family
+
+### 11-99: generate every candidate spelling, then count it
+
+The gold glosses give the SYSTEM (1-4 past a ten add, 5-9 subtract from the ten above) but not the spelling of
+all 89 forms, and Yoruba fuses them into single words with a tone change in the base. So rather than guess the
+fusion rule and ship it, each candidate was generated and counted. Four rounds, and ⚠ **every gap the first three
+rounds reported was MY table, not the corpus**:
+
+| round | gaps | what was actually wrong |
+|---|---|---|
+| 1 | 25 of 89 | `lélógún` missing from the 20-row, so 21-24 generated NO candidates at all — the tell was an empty "tried:" list |
+| 2 | 9 | 1's fusing form is `mọ́kàn-`, not `ọ̀kàn-` (mọ́kànlá 171 : ọ̀kànlá 3; and for 39 and 59 the ọ̀kàn- form is ZERO while the m- form is 12 and 13) |
+| 3 | 3 | the fused àádọ́- base keeps its à — `láàdọ́ta`, not `ládọ́ta`, which had ONE hit and was probably itself a typo |
+| 4 | 3 | 90's fused base drops its final -ún: `láàdọ́rùn` (13 hits) where `láàdọ́rùn-ún` found nothing |
+
+**86 of 89 attested**, and the remaining three (87, 91, 94) sit in the 90-band where every sibling has 1-3 hits,
+with the rule attested on both sides of each gap. Scored end-to-end, **96 of the 99 forms the compositor emits for
+1-99 occur in the corpus**, as do all nine hundreds and every thousand form.
+
+⚠ **AND THE DUMP HAS DUPLICATE PARAGRAPHS — 123,405 → 112,738 unique.** That inflates precisely the rare forms
+this table rests on. The gloss `mẹ́tàdínlọ́gọ́rin (75%)` appeared four times and read like corroboration; it is
+ONE sentence repeated four times, and it contradicts the rule 86 other values support (mẹ́tà-dín-lọ́gọ́rin is
+3-from-80 = 77). Everything above is counted on the deduplicated text.
+
+### The symbol layer
+
+    60%        → ìdá 60 nínú ọgọ́rùn-ún        the CIRCUMFIX (21 digit-form instances : 0 for the alternative)
+    3.5        → 3 àti dásímà 5               `dásímà` = a borrowing of "decimal"; fraction digit-by-digit
+    1967-1970  → 1967 sí 1970                 a digit-flanked dash is a RANGE
+    ₦500       → 500 náírà
+    US$83.33   → 83 àti dásímà 3 3 dọ́là Amẹ́ríkà
+    100,000 km² → 100000 kìlómítà onígun mẹ́rin
+    1945       → ẹgbẹ̀rún kan ó lé ẹ̀ẹ́dẹ́gbẹ̀rún ó lé márùndínláàdọ́ta   (was: wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd…)
+
+⚠ **`dásímà` WAS FOUND BY ACCIDENT.** The decimal candidate list probed native compounds — ààmì, àmì, ẹ̀là,
+pọ́ìntì, ojú, ẹ̀ka — every one 0 between digits, and on that evidence this layer was about to declare the
+separator unreadable. The word surfaced inside a percent extraction I was reading for another reason: 18
+instances, unanimous on the frame `X àti dásímà <digits>`, with the fraction read digit by digit
+(`bílíọ̀nù mẹ́rin àti dásímà ọ̀kan mẹ́rin` = 4.14 billion). **A guessed candidate list is a guess, and its zeros
+measure the list, not the language.** Honest limit: all 18 cluster in one topic, so the frame's other half is what
+supports it beyond that cluster — `àti` separating the halves appears in percent constructions from unrelated
+articles (`ìdá mẹ́fà àti mẹ́ta nínú ọgọ́rùn-ún` = 6.3%).
+
+⚠ **AND `ẹsẹ` WAS FOUND IN A DICTIONARY AND STILL REFUSED**, which is the distinction added to the playbook
+yesterday working in the other direction. Fakinlede's Yoruba–English Mathematics Dictionary (2017) gives
+`Ẹsẹ` = "decimal point" — but that glossary belongs to a project explicitly modernising Yoruba numerals for
+science, and `ẹsẹ`/`ẹsẹ̀` has 478 whole-word hits in this corpus meaning FOOT or LEG in every one (`ẹsẹ̀ rẹ`,
+`ọwọ́ àti ẹsẹ̀`, `ẹsẹ̀ bàtà`). `3.5` would read as "three feet five". A refusal on SENSE stands on the corpus
+alone; it was refusal on SILENCE that needed the dictionary check.
+
+### ⚠ Four measurement bugs, all one family: the tool measured a position or unit the thing does not occupy
+
+1. **`%` reported as absent.** The probe counted `digitFlanked` (digit both sides) and `leading` (sign then
+   digit) and nothing else, so `60%` — digit before, nothing after — fell between them: `% flanked 0, leading 3`.
+   A TRAILING count finds **1,287**.
+2. **`count.ts`'s `leading()` is O(n²)** — it slices the whole text per match to strip whitespace — so on `.` and
+   `,` it never returned. Lookbehind is linear.
+3. **`grep -oE "(^|[^A-Za-z…])igba([^A-Za-z…]|$)"` returned 0** for a word with 21 glossed occurrences: a
+   hand-rolled NEGATED CHARACTER CLASS over multibyte text is byte-wise in ERE, so it matched half a codepoint.
+4. **`[ọ́o]` in the trap-12 guard never matched.** A character class cannot hold `ọ́` — there is no precomposed
+   codepoint, so the class held ọ, a bare combining acute and o as three separate members. The guard silently did
+   nothing and `(60%)` beside a spelled-out circumfix was read twice. Fixed by folding marks away first.
+
+Plus one in the engine wiring: handing a composed multi-word numeral to `phonemizeWord` ran the words together, so
+`1945` came out as one 40-phone blob. One `emit` per word.
+
+Also fixed while here: **`ìlọ́po méjì` is NOT the areal square.** It has 37 hits and looked like a competing
+squared word, but measured against the unit nouns it is 0 after / 1 before, where `onígun mẹ́rin` is 15 after —
+`ìlọ́po méjì` is "double/twice" generally. And **`US$` had to be declared as its own currency key**: the tier is
+letter-bounded on the left so a bare `$` cannot match inside `US$83.33`, which was all six of the artifact's
+dropped currency signs.
+
+`review.ts --lang yo`: 8 of 9 checks pass, the artifact scan down from 58 dropped instances to 8 — 4 isotope
+superscripts (`⁸C`) and 1 currency sign inside English-language spans, and 3 dashes of the `1492 - Francesco de
+Layolle` shape, where a dash separates a year from a title and silence is correct. The foreign-span discriminator
+is inert for a Latin-script language by construction, so those cannot be auto-excluded.
+
+3,086 tests pass.
