@@ -169,3 +169,55 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         expect(phonemizeText("១០លាន$", "km")).toContain("ɗollaː");
     });
 });
+
+// NOTE: in this file `phonemize` is the RULE-ONLY path (imported as `phonemizeWordRules as phonemize`) and
+// `phonemizeWord` is the lexicon-first one. That distinction is load-bearing for the standalone test below.
+describe("independent vowels (#670)", () => {
+    // ⚠ THE SYLLABIFIER USED TO SKIP THESE ENTIRELY, marked "Phase 1" — so all 17 letters U+17A3–U+17B3 were
+    // silently DELETED from every reading in which they were not the whole word. 176,282 occurrences in the mined
+    // corpus, 6.0% of all Khmer-letter tokens, and agreement with wikipron on the 254 referee words containing one
+    // was 0/254. Not 0% accuracy on a hard class — literally every one wrong, because a character vanished.
+    test("an independent vowel before a consonant is READ, not dropped", () => {
+        expect(phonemize("ឬដក")).toContain("rɨː");     // was ɗɑːk — the ឬ gone
+        expect(phonemize("ឯណា")).toContain("ʔae");     // was naː
+        expect(phonemize("ឮ")).toBe("lɨː");
+    });
+
+    test("⚠ the vowel takes a coda from the following consonant, as the dictionary transcribes it", () => {
+        // ឥណ្ឌា is ʔən.ɗiə, not ʔə.ɗiə — the ណ closes the vowel's syllable. This is why an independent-vowel unit
+        // carries a sentinel `vs`: coda assignment asks "does the previous syllable have a WRITTEN vowel", and an
+        // independent vowel's vowel IS written — as the letter.
+        expect(phonemize("ឥណ្ឌា")).toBe("ʔənɗiə");
+        // Exact matches for the two words that attest ឭ in both the dictionary and wikipron (rɔ.lɨk, rum.lɨk).
+        expect(phonemize("រឭក")).toBe("rɔlɨk");
+        expect(phonemize("រំឭក")).toBe("rumlɨk");
+    });
+
+    test("⚠ the STANDALONE reading differs from the in-word one, and the lexicon owns it", () => {
+        // ឧ is ʔoʔ as a word (km-lexicon.tsv and wikipron agree) and ʔu inside one — ឧត្តម ʔuttɑːm. The rule table
+        // carries the in-word value because that is the context it is consulted in; production is lexicon-first, so
+        // both come out right. A future editor "fixing" the rule table to ʔoʔ would break every word in ឧ.
+        expect(phonemizeWord("ឧ")).toBe("ʔoʔ");            // lexicon-first — matches wikipron
+        expect(phonemize("ឧ")).toBe("ʔu");        // rule-only — the in-word value
+        expect(phonemize("ឧត្តម")).toContain("ʔut");
+    });
+
+    test("⚠ ឲ្យ — 54,491 occurrences — reads ʔaoj, via the coeng being skipped", () => {
+        // 98% of all IV+coeng sequences in the corpus are ឲ្យ/ឱ្យ ("to give/let"). An independent vowel cannot
+        // carry a subscript, so the coeng falls through and the ⟨យ⟩ becomes the vowel-syllable's coda. That is the
+        // right answer, but it arrives by omission rather than an explicit branch — hence this pin.
+        expect(phonemize("ឲ្យ")).toBe("ʔaoj");
+        expect(phonemize("ឱ្យ")).toBe("ʔaoj");
+        expect(phonemize("ឲយ")).toBe("ʔaoj");   // same reading without the coeng — the mechanism, made visible
+        expect(phonemize("ឯង")).toBe("ʔaeŋ");   // and an ordinary coda still works
+    });
+
+    test("every one of the 17 letters has a reading", () => {
+        // The class was skipped wholesale, so a partial table would leave a silent deletion behind. All 17 are
+        // sourced — 13 from dictionary word-initial counts, the rest from the standalone sources; see the manifest.
+        for (let cp = 0x17A3; cp <= 0x17B3; cp++) {
+            const v = String.fromCodePoint(cp);
+            expect(phonemize(v + "ក"), v).not.toBe(phonemize("ក"));
+        }
+    });
+});

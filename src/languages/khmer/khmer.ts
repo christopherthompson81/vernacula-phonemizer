@@ -31,6 +31,8 @@ interface KhmerDef {
     vowels: Record<string, [string, string]>;
     vowelCombos: Record<string, [string, string]>;
     codas: Record<string, string>;
+    /** U+17A3–U+17B3 → its IN-WORD reading. See the manifest for provenance and why it is not the letter name. */
+    independentVowels: Record<string, string>;
     inherent: [string, string];
     clausePunctuation: Record<string, string>;
 }
@@ -63,7 +65,20 @@ interface Unit {
     coda: string | null; // coda consonant letter, or null
     shorten: boolean; // a following /bantaq/ coda shortens this syllable's vowel
     codaShort: boolean; // the coda came from a silent-subscript/doubled cluster → short inherent (ចន្ទ can)
+    /** An INDEPENDENT VOWEL's literal IPA — the unit is a whole syllable nucleus with no onset letter. */
+    iv?: string;
 }
+
+/**
+ * The `vs` a unit carries when it IS an independent vowel.
+ *
+ * ⚠ WHY A SENTINEL RATHER THAN `null`. Coda assignment in PASS 2 asks `prev.vs !== null` — "does the previous
+ * syllable already have a WRITTEN vowel, so a bare consonant after it must be its coda rather than a syllable of
+ * its own". An independent vowel's vowel IS written; it is written as the letter. With `vs: null` the rule declined
+ * to attach a coda and ឥណ្ឌា came out *ʔə.ɗiə* instead of *ʔən.ɗiə*, dropping the ណ. This sentinel is never looked
+ * up in `DEF.vowels`, because PASS 3 emits an `iv` unit and moves on before the vowel lookup.
+ */
+const IV_VS = "\u0000";
 
 // Exceptions lexicon (word → canonical IPA) for the RULE-UNPREDICTABLE residual — inherent-vowel length,
 // internal-doubling, Pali/Sanskrit loanword vowels. These are LEXICAL (not derivable from the spelling, per
@@ -90,7 +105,28 @@ export function phonemizeWordRules(word: string): string {
     let i = 0;
     while (i < n) {
         const c = s[i]!;
-        if (!(c in DEF.consonants)) { i += 1; continue; } // independent vowels / stray marks — skip (Phase 1)
+        /**
+         * An INDEPENDENT VOWEL is a complete syllable: emit it as its own unit so PASS 2 can still hand it a coda.
+         *
+         * ⚠ A COENG AFTER ONE IS SKIPPED, AND THAT IS LOAD-BEARING FOR THE COMMONEST SHAPE. `ឲ្យ`/`ឱ្យ` ("to
+         * give/let") is 54,491 corpus occurrences — 98% of all IV+coeng sequences — and reads ʔaoj. An independent
+         * vowel cannot actually carry a subscript, so the coeng falls through as an unrecognised mark and the ⟨យ⟩
+         * becomes this syllable's CODA by the trailing-bare-unit rule in PASS 2. `ឲ្យ` and `ឲយ` therefore give the
+         * same reading, which is the correct one. Pinned by a test, because it happens by omission rather than by
+         * an explicit branch and would be easy to "tidy" away.
+         *
+         * ⚠ AND `ឣ្នក` IS A TYPO, NOT A WORD. U+17A3 ឣ and U+17A2 អ look nearly identical and writers confuse them:
+         * 462 corpus lines write ឣ្នក for អ្នក ("person"). Reading it as ʔɑn… is what the letters say, and a g2p
+         * should not silently repair a misspelling — the reading is phonetically close in any case.
+         */
+        const ivIpa = DEF.independentVowels[c];
+        if (ivIpa !== undefined) {
+            i += 1;
+            units.push({ ons: [], vs: IV_VS, post: null, bantaq: false, ser: null, bp: false,
+                coda: null, shorten: false, codaShort: false, iv: ivIpa });
+            continue;
+        }
+        if (!(c in DEF.consonants)) { i += 1; continue; } // stray marks — nothing to say
         const ons = [c];
         let ser: "a" | "o" | null = null;
         i += 1;
@@ -173,6 +209,13 @@ export function phonemizeWordRules(word: string): string {
     let out = "";
     for (let u = 0; u < units.length; u++) {
         const unit = units[u]!;
+        // An independent vowel carries its whole reading; it has no onset letter to look up, and no series to
+        // govern with, so `lastDom` is left as it was. Emitted before the onset/series logic, which would read
+        // `unit.ons[unit.ons.length - 1]` and find nothing.
+        if (unit.iv !== undefined) {
+            out += unit.iv + (unit.coda ? DEF.codas[unit.coda] ?? "" : "");
+            continue;
+        }
         // onset IPA — ⟨ប⟩ is [p] as the first member of a cluster, [ɓ] as a simple onset
         let onset = "";
         for (let k = 0; k < unit.ons.length; k++) {

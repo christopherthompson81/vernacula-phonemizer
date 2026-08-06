@@ -33,6 +33,40 @@
         "ិំ": ["əm", "em"], "ើះ": ["aəh", "əːh"]
     },
     // Final consonant (coda) → IPA. Khmer final ⟨ស⟩ → [h]; final ⟨រ⟩ is silent.
+    // INDEPENDENT VOWELS (U+17A3–U+17B3) — a letter that IS a syllable: its own onset (ʔ, or r/l for the vocalic
+    // four) plus its own vowel, taking no dependent vowel sign. The syllabifier SKIPPED these entirely, marked
+    // "Phase 1", so every one was silently deleted from the reading: ឬដក read *ɗɑːk*, ឯណា read *naː*. 176,282
+    // occurrences in the mined corpus (#585), 103,144 of them followed by a consonant.
+    //
+    // ⚠ THESE ARE THE IN-WORD READINGS, NOT THE LETTER NAMES, and the two differ. Standing alone as a word ឧ is
+    // ʔoʔ (km-lexicon.tsv and wikipron agree) while inside a word it is ʔu — ឧត្តម ʔutɗɑm. The lexicon already
+    // serves the standalone forms; this table serves the rule engine, so it carries the in-word value.
+    //
+    // Sourced from google/language-resources' Khmer pronunciation dictionary (CC BY 4.0, 69,184 entries) by taking
+    // the first syllable of every word that BEGINS with each vowel and stripping a trailing coda consonant — j and
+    // w are kept, being diphthong off-glides rather than codas, which a first pass wrongly stripped and turned ឦ
+    // (ʔəj) into ʔə. Cross-checked against wikipron's human transcriptions and our own km-lexicon.tsv wherever
+    // those cover a letter; all three agree on every one of the eight they share. `n` is the dictionary count.
+    "independentVowels": {
+        "ឣ": "ʔɑ",      // n=21
+        "ឤ": "ʔaː",     // n=29
+        "ឥ": "ʔə",      // n=85  (standalone ʔeʔ)
+        "ឦ": "ʔəj",     // n=7,  and lexicon + wikipron
+        "ឧ": "ʔu",      // n=239 (standalone ʔoʔ)
+        "ឨ": "ʔao",     // ⚠ THIN: no word-initial entries; from the dictionary's single-letter entry, coda
+                        // stripped. One occurrence in the whole corpus, so nothing rests on it.
+        "ឩ": "ʔuː",     // n=12
+        "ឪ": "ʔəw",     // n=15, and lexicon + wikipron all agree
+        "ឫ": "rɨ",      // n=64 — the vocalic four: ឫ rɨ / ឬ rɨː / ឭ lɨ / ឮ lɨː, short-long and r-l
+        "ឬ": "rɨː",     // lexicon + wikipron + the dictionary's single-letter entry
+        "ឭ": "lɨ",      // រឭក rɔ.lɨk and រំឭក rum.lɨk — dictionary ×3, wikipron ×2
+        "ឮ": "lɨː",     // n=6, and lexicon + wikipron
+        "ឯ": "ʔae",     // n=84, and lexicon + wikipron
+        "ឰ": "ʔaj",     // n=8
+        "ឱ": "ʔao",     // n=80
+        "ឲ": "ʔao",     // an allograph of ឱ; the dictionary gives both the same reading
+        "ឳ": "ʔəw"      // lexicon + wikipron (the dictionary's single-letter entry says ʔaw)
+    },
     "codas": {
         "ក": "k", "ខ": "k", "គ": "k", "ង": "ŋ", "ច": "c", "ជ": "c", "ញ": "ɲ",
         "ដ": "t", "ត": "t", "ថ": "t", "ទ": "t", "ធ": "t", "ណ": "n", "ន": "n",
