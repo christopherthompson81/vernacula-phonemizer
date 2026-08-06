@@ -248,12 +248,79 @@ export function normalizeKhmer(text: string): string {
     // often as right, which is trap 9 (a guard alternative with no attested…)'s misfire generator seen from the other side. The arithmetic reading is
     // the only one the evidence supports.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
+    /**
+     * ⚠ AND A SPACED `=` BETWEEN ANY TWO OPERANDS, which this file refused for two rounds. The refusal was that
+     * the letter-flanked shape is "glosses and code, getting it wrong nearly as often as right" — true of the
+     * shape as a whole, and false once SPACING splits it, the same discriminator the plus above needed:
+     *
+     *     1,649  SPACED, operand-flanked, code operators excluded   ← this rule
+     *              of which 1,546 are on a line containing KHMER (prose) and 103 on Khmer-free markup lines
+     *       239  UNSPACED                                          ← still silent: `ចក្រវាឡរណប=satellite`, `x=-1/2`
+     *       694  code operators `==`, `!=`, `>=`, `<=`             ← still silent, excluded by the lookarounds
+     *
+     * The 1,546 prose sites are three things, and ស្មើ ("equal, the same") reads all three:
+     *   · DEFINITIONAL glosses from dictionary and commentary articles — `ឧបាយកោសល្លបណ្ឌិត = បណ្ឌិត​ព្រោះ​ឈ្លាស…`,
+     *     a term and its explanation. A literal reading of the sign, and it keeps the boundary between them.
+     *   · GRAMMAR formulas — `(កន = នាម + ឈ្នាប់ + នាម)`, "compound = noun + connector + noun".
+     *   · ARITHMETIC whose left operand is algebraic — `12x 2 + 8x + 1 = 0`, which the digit rule cannot see.
+     *
+     * ⚠ THE 103 KHMER-FREE SITES ARE MIS-READ BY THIS RULE, and they are EasyTimeline markup
+     * (`AlignBars = justify`, `BackgroundColors = canvas:c`) that should never have been in a spoken-text corpus.
+     * 6% of the sites, all of them markup rather than language — and `allOccurrencesInMarkup` in defects.ts now
+     * keeps the scan from reporting that class of line as a language defect.
+     */
+    s = s.replace(new RegExp(`(?<![=!<>])(?<=[${D}\\p{L}\\p{M}²³)]) = (?=[${D}\\p{L}\\p{M}(])(?![=<>])`, "gu"), " ស្មើ ");
 
     // ── 5b. plus, and plus-minus ─────────────────────────────────────────────────────────────────────
     // ⚠ THE PLUS RULE EXISTED AND I DELETED IT while restructuring for the shared tier — the tier carries
     // `multiply` but has no plus, so migrating silently dropped a class with 74 digit-flanked instances. Caught
     // by `review.ts` reporting `plus` among the DROPPED sign classes. បូក is corpus-attested (3,338).
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}\\+${SEP}(?=[${D}])`, "gu"), " បូក ");
+    /**
+     * ⚠ AND A SPACED `+` BETWEEN ANY TWO OPERANDS, not only between digits — 274 sites this file used to leave
+     * silent. They were counted once as "leading" pluses and refused as undecidable, on the grounds that "142 of
+     * 254 sites with no number before the sign are LaTeX or C". That measurement was of the wrong population: it
+     * pooled the unspaced `x+3\!` shape with the spaced one. Measured separately on the deduplicated dump, a
+     * SPACED plus between operands has 312 sites and ZERO carry a LaTeX or C marker within ±40 characters.
+     *
+     * What they carry instead is two things a reader voices as បូក:
+     *   · KHMER GRAMMAR FORMULAS, which are most of them — `(នាម + កំនត់ + ពង្រីក)` "noun + determiner +
+     *     modifier", `(សព្វនាម + ឈ្នាប់ + កន្សោមនាម)` "pronoun + conjunction + noun phrase", and etymological
+     *     compounds like `(សមណ + សត្តិ)`. Left silent, the two words run together as one.
+     *   · ALGEBRA from the maths articles — `16x² + 24x + 9 = 0`, `( A + B )² = A² + 2AB + B²`. The left operand
+     *     ends in a LETTER, which is the only reason the digit-flanked rule above could not see them.
+     *
+     * The unspaced form is deliberately NOT included: 169 sites, and that is where `x+3\!` and `printf(…a+b)`
+     * live. Spacing is the discriminator, and it was there to be measured the first time.
+     */
+    // ⚠ EITHER SIDE MAY BE A DIGIT OR A LETTER. The first version required a LETTER on the left, which left the
+    // mixed shape unread — `cos\alpha_1 + isin\alpha_1` has a digit before the sign and a letter after, so
+    // neither this rule nor the digit-flanked one above could see it, and the artifact scan reported four
+    // math-sign drops that were all of that shape.
+    s = s.replace(new RegExp(`(?<=[${D}\\p{L}\\p{M}²³)]) \\+ (?=[${D}\\p{L}\\p{M}(])`, "gu"), " បូក ");
+    /**
+     * ⚠ A LEADING `+` ON A BARE NUMBER READS វិជ្ជមាន ("positive value"), and this one is NOT corpus-sourced —
+     * it is the weaker tier and is marked as such. `វិជ្ជមាន` is attested 419 times as a WORD, but the SIGN never
+     * appears in a sign-value role in this corpus: of 62 sites with no operand before a `+`, 61 are the algebra
+     * above and one is a timezone offset (`16:46:36 +0000`). So the reading rests on the word's attestation plus
+     * the sign's meaning, which is a LEAD rather than a finding in the playbook's terms.
+     *
+     * It is preferred to silence because silence is not neutral here: `review.ts`'s `+5` probe read *pram*, the
+     * bare number, with the sign gone — a reader told "five" where the text says "positive five".
+     *
+     * ⚠ `លើសូន្យ` ("above zero", for temperatures) is NOT implemented. Its pieces are attested — លើ and សូន្យ
+     * (781) — but the compound has ZERO occurrences, and exactly one corpus site (a `+`, a number and a degree
+     * unit) would use it. Composing an unattested compound to read one site is the zu/xh `Kristu` mistake.
+     */
+    // ⚠ `%` AND `)` COUNT AS AN OPERAND for this guard. Without `%` in it, `៥០%+១` ("50% + 1", a voting
+    // threshold) read *haːsəp pʰiəkrɔːj ʋɨcceəmiən muəj* — "fifty percent POSITIVE one" — because a percent sign
+    // is neither a letter nor a digit, so the sign looked like it began a fresh number. An unspaced plus after an
+    // operand is left silent rather than mis-read: that is the LaTeX-risk shape.
+    s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}${D}%‰\\\\)])\\+${SEP}(?=[${D}])`, "gu"), "វិជ្ជមាន ");
+    // ⚠ AND THE TIMEZONE OFFSET, which is the one unspaced shape worth reading: `UTC+7`, `GMT+9`, `JST (UTC+09:00)`
+    // — 11 sites, every one a real offset after an uppercase initialism, no misfires available. A reader says
+    // "UTC plus seven", so the sign carries meaning here where an unspaced `+` inside LaTeX does not.
+    s = s.replace(new RegExp(`(?<=[A-Z]{2,4})\\+(?=[${D}])`, "gu"), " បូក ");
     // ± is 19 digit-flanked instances, every one a scientific tolerance — `១៨៣០ ±៤០ km`, `25,559 ± 4 គីឡូម៉ែត្រ`.
     // I had recorded it as "the sign does not occur in the evidence", which was an artifact of testing with a
     // grep whose `\$sg` escaped to a word boundary rather than a literal.

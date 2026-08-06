@@ -258,17 +258,27 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         exponent: "measured: `sources.ts` reports the sign does not occur in the evidence for this language",
     },
     km: {
-        // Both refusals are argued with a measured distribution in src/languages/khmer/normalize.ts, and in both
-        // cases a rule DOES ship for the shape the corpus supports — it is the probe's shape that is undecidable,
-        // the same structure as gu/kn's minus below.
-        equals: "measured: of 5,844 `=` in the mined corpus, 1,348 are a gloss (`ចក្រវាឡរណប=satellite`), 1,057 "
-            + "are code-shaped (`==`, an assignment, a quoted value) and 9 are URL query strings, against 109 "
-            + "genuine digit-flanked arithmetic — which IS read. Widening to the probe's `x = y` letter-flanked "
-            + "shape would fire on the code and the glosses, getting it wrong about as often as right",
-        plus: "measured: the digit-flanked plus IS read (74 corpus instances → បូក). The probe's LEADING `+5` "
-            + "shape is the undecidable one: of 254 sites with no number before the sign, 142 are LaTeX or C "
-            + "(`x+3\\!`, `\\to +\\infty`, `printf(...a+b)`) against 4 genuine paren-arithmetic instances "
-            + "(`(២១-១)+៤`), because this wiki carries maths articles written in LaTeX and a C tutorial",
+        // ⚠ `plus` WAS HERE AND IS GONE — the refusal was wrong, and it was wrong because it measured the wrong
+        // population. It pooled the unspaced `x+3\!` shape with the spaced one and concluded the leading plus was
+        // undecidable. Measured separately on the deduplicated dump, a SPACED plus between operands has 312 sites
+        // and ZERO carry a LaTeX or C marker; they are Khmer grammar formulas (`នាម + កំនត់ + ពង្រីក`) and
+        // algebra. Both now read បូក, and a bare leading `+5` reads វិជ្ជមាន. See khmer/normalize.ts rule 5b.
+        // ⚠ `equals` WAS HERE TOO AND IS ALSO GONE, for the same reason as `plus`: the refusal described the
+        // SHAPE as a whole ("glosses and code, wrong nearly as often as right") where SPACING splits it. Measured
+        // on the deduplicated dump: 1,649 spaced operand-flanked sites with the code operators excluded, 1,546 of
+        // them on Khmer prose lines — definitional glosses, grammar formulas, algebra — against 239 unspaced
+        // (`ចក្រវាឡរណប=satellite`, `x=-1/2`) and 694 `==`/`!=`/`>=`/`<=`, both still silent. The spaced form now
+        // reads ស្មើ; see khmer/normalize.ts rule 5. The 103 Khmer-free spaced sites are EasyTimeline markup and
+        // are mis-read by it — 6%, all markup rather than language, and `allOccurrencesInMarkup` keeps the scan
+        // from reporting that class as a language defect.
+        //
+        // ⚠ NOTE what remains in the probe's reading: `x = y` gives *ˈɛks smaə wˈaᶦ* — the sign is right and the
+        // LETTER NAMES are English inside a Khmer engine. That is the letter-name seam, and it is its own work.
+        equals: "measured: what is STILL silent is the UNSPACED equals only — 239 sites, and they are a "
+            + "translation gloss (`ចក្រវាឡរណប=satellite`, Khmer joined to its English equivalent) or a solution "
+            + "set (`x=-1/2`), plus 694 code operators `==`/`!=`/`>=`/`<=`. Reading `equal` in a translation gloss "
+            + "would voice a sign that means 'renders as'. The SPACED form — 1,649 sites, 1,546 of them Khmer "
+            + "prose — now reads ស្មើ, so this entry covers the unspaced shape and nothing else",
     },
     gu: {
         // The same undecidable shape as ta, and MEASURED rather than assumed: gu_in carries two spaced
@@ -572,6 +582,38 @@ export const withoutSymbol = (sentence: string, re: RegExp): string => sentence.
  * one after that started over. Measured: `re.test(s1), re.test(s2), re.test(s1)` → true, false, true on the
  * same pattern. A scan was therefore skipping about half its candidate sentences, silently.
  */
+/**
+ * Are ALL occurrences of this sign inside LaTeX or template MARKUP rather than prose?
+ *
+ * ⚠ MARKUP IS NOT A LANGUAGE'S READING GAP. Khmer's artifact carries the complex-number formulas of a maths
+ * article verbatim — `z_1z_2 = r_1r_2[cos(\alpha_1+\alpha_2)+isin(\alpha_1+\alpha_2)]\!` — and their `+` and
+ * `=` were reported as km math-sign defects. Nothing is read there because nothing should be: `\!` is a LaTeX
+ * thin-space and `\alpha_1` a subscripted variable, and a reader voices neither. Asking the author for a Khmer
+ * reading of `\alpha` is asking for the wrong thing.
+ *
+ * The test is per SIGN, not per line: a line may mix a formula with prose, and a dropped sign in the prose half
+ * is still a defect. So every occurrence must be inside a markup neighbourhood for the line to be excused.
+ *
+ * ⚠ AND THE MARKERS ARE BRACE-LESS AS OFTEN AS NOT. `\mathbb{R}` has braces and `\alpha_1`, `\!`, `\,`, `i^2`
+ * do not, which is why the miner's own markup filter (scripts.ts) missed exactly these lines. Subscripts and
+ * superscripts written with `_` and `^` are the giveaway that survives the dump converter.
+ */
+const LATEX = /\\[a-zA-Z]+|\\[!,;:]|[A-Za-z0-9)\]]_[0-9A-Za-z]|[A-Za-z0-9)\]]\^[0-9A-Za-z]/u;
+export function allOccurrencesInMarkup(sentence: string, re: RegExp): boolean {
+    if (!LATEX.test(sentence)) return false;
+    const saved = re.lastIndex;
+    re.lastIndex = 0;
+    let sawOne = false;
+    for (let m = re.exec(sentence); m !== null; m = re.exec(sentence)) {
+        sawOne = true;
+        // A window either side, because a formula's signs sit between its markers rather than beside them.
+        const from = Math.max(0, m.index - 30), to = Math.min(sentence.length, m.index + m[0].length + 30);
+        if (!LATEX.test(sentence.slice(from, to))) { re.lastIndex = saved; return false; }
+    }
+    re.lastIndex = saved;
+    return sawOne;
+}
+
 /**
  * Is this symbol sitting inside a FOREIGN-LANGUAGE SPAN of a bilingual line?
  *

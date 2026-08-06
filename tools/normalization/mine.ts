@@ -38,7 +38,7 @@ import { readFileSync, writeFileSync, appendFileSync, readdirSync, openSync, rea
 import { StringDecoder } from "node:string_decoder";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
+import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allOccurrencesInMarkup, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
 import { CELLS, type Cell } from "./cells.ts";
 import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
 
@@ -683,6 +683,11 @@ if (mode === "scan") {
             if (acceptedSignClass(lang, d.klass, sentence)) { bump(`ACCEPTED-CLASS ${d.klass}`, sentence); continue; }
             if (allOccurrencesForeign(sentence, DROP_RE.get(d.klass) ?? /$^/u, nativeRe)) {
                 bump(`FOREIGN ${d.klass}`, sentence);
+                continue;
+            }
+            // Every occurrence inside LaTeX or template markup — a formula copied into the wiki, not prose.
+            if (allOccurrencesInMarkup(sentence, DROP_RE.get(d.klass) ?? /$^/u)) {
+                bump(`MARKUP ${d.klass}`, sentence);
                 continue;
             }
             bump(`${d.redundant ? "REDUNDANT" : "DROP"} ${d.klass}`, sentence);

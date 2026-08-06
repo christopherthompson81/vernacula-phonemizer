@@ -226,3 +226,54 @@ describe("independent vowels (#670)", () => {
         }
     });
 });
+
+describe("khmer signs the layer used to leave silent", () => {
+    test("⚠ a SPACED plus reads បូក even when the left operand is not a digit", () => {
+        // 274 sites this layer left silent, refused as "undecidable" on a measurement that pooled the unspaced
+        // `x+3\!` LaTeX shape with the spaced one. Measured apart, the spaced shape has 312 sites and ZERO carry
+        // a LaTeX or C marker — they are Khmer GRAMMAR FORMULAS and algebra, both voiced បូក.
+        expect(String(phonemizeText("(នាម + កំនត់)", "km"))).toContain("ɓouk");     // noun + determiner
+        expect(String(phonemizeText("16x² + 24x + 9 = 0", "km"))).toContain("ɓouk");
+        // ⚠ and the UNSPACED shape stays silent — that is where the LaTeX lives.
+        expect(String(phonemizeText("x+3", "km"))).not.toContain("ɓouk");
+    });
+
+    test("⚠ a leading `+` on a bare number reads វិជ្ជមាន, not silence", () => {
+        // review.ts's `+5` probe read *pram* — "five", the sign gone. The word is attested 419 times; the sign
+        // in a sign-value role is not, so this is the weaker tier and is recorded as such.
+        expect(String(phonemizeText("+5", "km"))).toBe("ʋɨcceəmiən pram");
+        expect(String(phonemizeText("+៥", "km"))).toBe("ʋɨcceəmiən pram");
+    });
+
+    test("⚠ but a `+` after a percent is an INFIX, not a sign value", () => {
+        // `៥០%+១` (a voting threshold, "50% + 1") read *fifty percent POSITIVE one* until `%` was added to the
+        // operand guard: a percent sign is neither a letter nor a digit, so the plus looked like a fresh number.
+        expect(String(phonemizeText("៥០%+១", "km"))).not.toContain("ʋɨcceəmiən");
+    });
+
+    test("a timezone offset reads its plus — the one unspaced shape worth reading", () => {
+        // `UTC+7`, `GMT+9`, `JST (UTC+09:00)` — 11 sites, every one a real offset after an uppercase initialism.
+        expect(String(phonemizeText("UTC+7", "km"))).toContain("ɓouk");
+        expect(String(phonemizeText("(UTC+09:00)", "km"))).toContain("ɓouk");
+    });
+
+    test("⚠ a SPACED equals reads ស្មើ — the refusal split on spacing, like the plus", () => {
+        // Refused for two rounds as "glosses and code, wrong nearly as often as right" — true of the shape as a
+        // whole, false once spacing splits it: 1,649 spaced operand-flanked sites with the code operators
+        // excluded, 1,546 of them on Khmer prose lines, against 239 unspaced and 694 code operators.
+        expect(String(phonemizeText("x = y", "km"))).toBe("ˈɛks smaə wˈaᶦ");
+        expect(String(phonemizeText("៤ = ២៤", "km"))).toContain("smaə");
+        // A definitional gloss — a term and its explanation — reads the sign literally, which keeps the boundary.
+        expect(String(phonemizeText("ឧបាយកោសល្ល = បណ្ឌិត", "km"))).toContain("smaə");
+        // Algebra whose left operand the digit rule cannot see.
+        expect(String(phonemizeText("16x² + 24x + 9 = 0", "km"))).toContain("smaə");
+    });
+
+    test("⚠ but a code operator and an UNSPACED equals stay silent", () => {
+        // 694 `==`/`!=`/`>=`/`<=` and 239 unspaced sites — `ចក្រវាឡរណប=satellite` is a translation gloss and
+        // `x=-1/2` is a solution set. Unspaced is the code-and-markup shape in this corpus, as it is for the plus.
+        expect(String(phonemizeText("a == b", "km"))).not.toContain("smaə");
+        expect(String(phonemizeText("x=-1/2", "km"))).not.toContain("smaə");
+        expect(String(phonemizeText("ចក្រវាឡរណប=satellite", "km"))).not.toContain("smaə");
+    });
+});
