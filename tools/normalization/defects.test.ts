@@ -14,7 +14,7 @@
  */
 import { describe, expect, test } from "vitest";
 
-import { CITED_WORDS, acceptedSignClass, allOccurrencesForeign, inForeignSpan } from "./defects.ts";
+import { CITED_WORDS, DROPPABLE, acceptedSignClass, allOccurrencesForeign, inForeignSpan } from "./defects.ts";
 
 describe("a symbol in a FOREIGN-language span is not this language's defect", () => {
     // Mined artifacts contain BILINGUAL lines — legitimately, since most of such a line IS the language — and a
@@ -103,5 +103,32 @@ describe("a citation is sourcing, but only if a reader could go and check it", (
         expect(cite).toMatch(/Nkọwa okwu/u);
         // The zero is part of the claim, not an omission from it — see the playbook's corpus-silence trap.
         expect(cite).toMatch(/ZERO/u);
+    });
+});
+
+describe("⚠ a superscript with nothing before it is not an exponent", () => {
+    const RE = new Map(DROPPABLE).get("exponent")!;
+    const hits = (s: string): string[] => { RE.lastIndex = 0; return [...s.matchAll(new RegExp(RE.source, RE.flags))].map((m) => m[0]); };
+
+    test("isotope notation is not flagged — the superscript is a MASS NUMBER before the element", () => {
+        // Yoruba's residual gate failure was one English sentence about carbon isotopes. `normalizeSymbols.ts`
+        // is right not to read `⁸C`: its own BARE_EXPONENT requires a base. The class was looser than the reader.
+        expect(hits("the shortest-lived of these is ⁸C which decays")).toEqual([]);
+        expect(hits("³He and ¹⁴C dating")).toEqual([]);
+    });
+
+    test("a real exponent IS flagged, run and all", () => {
+        // ⚠ THE WHOLE RUN. A superscript digit is \p{No}, not \p{Nd}, so a per-character pattern anchored on a
+        // base matched only the first character of `10¹⁵` and shortened the sign's extent, which changes what the
+        // differential drop test compares.
+        expect(hits("10¹⁵ formigues")).toEqual(["¹⁵"]);
+        expect(hits("250 km²")).toEqual(["²"]);
+        // Spaced, as corpora write it — and the negative exponent's run begins with the superscript minus.
+        expect(hits("16000km ² of land")).toEqual(["²"]);
+        expect(hits("6.67 × 10 −11 N m² kg⁻²")).toEqual(["²", "⁻²"]);
+    });
+
+    test("a bare footnote marker with no base is not flagged", () => {
+        expect(hits("¹¹ ཚུནི་ཡིས")).toEqual([]);
     });
 });

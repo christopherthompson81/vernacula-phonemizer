@@ -64,6 +64,35 @@ describe("yoruba text normalization", () => {
         expect(normalizeYoruba("$20")).toBe("20 dọ́là");
     });
 
+    test("⚠ temperature is a CIRCUMFIX, and this class was wrongly refused first", () => {
+        // Refused on `dígírí` 0 and `sẹ́lísíọ̀sì` 0 — two Yorubized spellings that do not exist — while the corpus
+        // borrows the scale names unchanged (Celsius 9, Fahrenheit 5) and says `ìwọ̀n` (1,198) for the degree:
+        // `ìwọ̀n 3.4 Celsius`, `ìwọ̀n 36 sí 50 Fahrenheit`. °C is 211 occurrences, °F 144, all read as bare
+        // numbers until now. Third time in this language that a guessed candidate list's zeros measured the list.
+        expect(normalizeYoruba("38°C")).toBe("ìwọ̀n 38 Celsius");
+        expect(normalizeYoruba("2 °C")).toBe("ìwọ̀n 2 Celsius");
+        // ⚠ BEFORE the decimal rule, or the scale attaches to the fraction digit.
+        expect(normalizeYoruba("79.63 °F")).toBe("ìwọ̀n 79 àti dásímà 6 3 Fahrenheit");
+        expect(normalizeYoruba("38°C (100.4°F)")).toBe("ìwọ̀n 38 Celsius (ìwọ̀n 100 àti dásímà 4 Fahrenheit)");
+        // A BARE ° stays unread: 128 occurrences, 55 of them geographic coordinates.
+        expect(normalizeYoruba("7°30′S 3°21′E")).toBe("7°30′S 3°21′E");
+    });
+
+    test("⚠ × is `lọ́nà`, the same particle the compositor multiplies with", () => {
+        // Refusing × as wordless while numbers.ts read `ẹgbẹ̀rún lọ́nà ogún` as 1000×20 was not defensible.
+        expect(normalizeYoruba("4 × 100 mítà")).toBe("4 lọ́nà 100 mítà");
+        expect(normalizeYoruba("1920 × 1080")).toBe("1920 lọ́nà 1080");
+        expect(normalizeYoruba("8×8")).toBe("8 lọ́nà 8");
+    });
+
+    test("a squared unit reads even when a magnitude word separates it from the number", () => {
+        // The tier needs the number against the unit, so `9.83 million km²` kept its sign silent while
+        // `250 km²` did not — and the magnitude form is how the corpus writes large areas.
+        expect(normalizeYoruba("250 km²")).toBe("250 kìlómítà onígun mẹ́rin");
+        expect(normalizeYoruba("9.83 million km²")).toBe("9 àti dásímà 8 3 million kìlómítà onígun mẹ́rin");
+        expect(normalizeYoruba("12.76 km")).toBe("12 àti dásímà 7 6 kìlómítà");     // bare unit still expands
+    });
+
     test("the ampersand is `àti`, the ordinary connective", () => {
         expect(normalizeYoruba("A & B")).toBe("A àti B");
     });

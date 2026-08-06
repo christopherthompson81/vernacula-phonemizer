@@ -120,7 +120,29 @@
         "and": "àti",
         // The SQUARED measure word, which follows the unit noun: `kìlómítà onígun mẹ́rin`. 27 occurrences of
         // the phrase, 9 of them directly after a unit word (kìlómítà/mítà/máìlì).
-        "squared": "onígun mẹ́rin"
+        "squared": "onígun mẹ́rin",
+        // ⚠ TEMPERATURE IS A CIRCUMFIX TOO: `ìwọ̀n` before the number, the scale name after —
+        // `ìwọ̀n 3.4 Celsius`, `ìwọ̀n 36 sí 50 Fahrenheit`, `ìwọ̀n Celsius meji (3.6 ìwọ̀n Fahrenheit)`.
+        //
+        // ⚠ THIS CLASS WAS FIRST REFUSED, AND THE REFUSAL WAS WRONG. It rested on `dígírí` 0 and `sẹ́lísíọ̀sì` 0
+        // — two Yorubized spellings I invented. The corpus borrows the scale names UNCHANGED (Celsius 9,
+        // Fahrenheit 5, Kelvin 17) and uses the ordinary measure word `ìwọ̀n` (1,198) for "degrees", which I had
+        // counted and dismissed as a general quantifier. Meanwhile °C is 211 occurrences and °F 144, all read as
+        // a bare number. Same failure as the decimal word: a guessed candidate list, and its zeros measured the
+        // list rather than the language.
+        //
+        // The Yorubized `digiri` (3) and `dìgírí` (1) exist but are a DIFFERENT sense — three are academic
+        // degrees (`ẹ̀rí digiri (doctorate)`, `masita digiri (MBA)`) and one is angular (`4.34 digiri si
+        // ekilipkiti`). Not temperature, so not used here.
+        "degree": "ìwọ̀n",
+        "scales": { "C": "Celsius", "F": "Fahrenheit", "K": "Kelvin" },
+        // ⚠ `lọ́nà` IS THE MULTIPLICATION WORD, and refusing × while numbers.ts uses this very particle for
+        // multiplication was not defensible. `ẹgbẹ̀rún lọ́nà ogún` is 1000×20 — the same A-times-B relation the
+        // sign writes — with 77 instances after ẹgbẹ̀rún alone. Composing a symbol reading from a particle
+        // attested only between spelled-out numerals is a LEAD rather than a finding (the playbook's zu/xh
+        // `Kristu` case), so this is a judgement: an unidiomatic reading in the right language beats dropping
+        // the sign, which is this project's standing preference everywhere else.
+        "times": "lọ́nà"
     },
 
     "clausePunctuation": {
