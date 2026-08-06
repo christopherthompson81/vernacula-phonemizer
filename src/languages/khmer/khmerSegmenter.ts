@@ -39,6 +39,9 @@ export const ZWSP = "​";
 /** A maximal Khmer run, matching `khmer.ts`'s TOKEN class: letters, marks and signs, excluding ៗ and the digits. */
 const KHMER_RUN = /[ក-៓ៜ-៝]{2,}/gu;
 
+/** Shortest permissible word piece. See the guard's note in the decode loop below. */
+const MIN_PIECE = 2;
+
 interface Meta {
     src: Record<string, number>;
     maxRun: number;
@@ -83,10 +86,17 @@ function build(ort: OrtLike, session: OrtSession, meta: Meta): KhmerSegmenter {
         const logits = out["logits"]?.data;
         if (!(logits instanceof Float32Array) || logits.length < chars.length * 3) return run;
         const parts: string[] = [chars[0]!];
+        let since = 1; // characters emitted since the last boundary — the guard below needs it
         for (let i = 1; i < chars.length; i++) {
             // class 1 = no boundary, class 2 = a word starts here (class 0 is pad/ignore and never decoded)
-            if (logits[i * 3 + 2]! > logits[i * 3 + 1]!) parts.push(ZWSP);
+            const boundary = logits[i * 3 + 2]! > logits[i * 3 + 1]!
+                // ⚠ Same MIN_PIECE decode guard as khmerPerceptron.ts, and for the same measured reason: a
+                // one-character fragment changes a word's PHONEMES (បូកដក → ɓouk ɗɑː kɑː), while an ordinary
+                // extra boundary only adds a word space. One-char words are 0.46% of gold, so the cost is bounded.
+                && since >= MIN_PIECE && chars.length - i >= MIN_PIECE;
+            if (boundary) { parts.push(ZWSP); since = 0; }
             parts.push(chars[i]!);
+            since++;
         }
         return parts.join("");
     };

@@ -20,15 +20,25 @@ import { createKhmer } from "./khmer.ts";
 import { createKhmerSegmenter, type KhmerSegmenter } from "./khmerSegmenter.ts";
 
 let segmenterP: Promise<KhmerSegmenter | undefined> | undefined;
-let sync: ReturnType<typeof createKhmer> | undefined;
+/** BiLSTM boundaries supplied here, so the engine must NOT add the perceptron's on top. */
+let unsegmented: ReturnType<typeof createKhmer> | undefined;
+/** ⚠ The FALLBACK engine still segments. Without the BiLSTM this path must degrade to the ordinary sync path —
+ *  which restores boundaries with the perceptron — not to the unsegmented reading that predates both models. */
+let segmenting: ReturnType<typeof createKhmer> | undefined;
 
 /** Phonemize Khmer text, restoring word boundaries with the neural tagger before the sync engine reads it. */
 export async function phonemizeKmNeural(text: string): Promise<string> {
-    sync ??= createKhmer();
     if (segmenterP === undefined) segmenterP = createKhmerSegmenter();
     const segmenter = await segmenterP;
-    if (!segmenter) return sync.text(text); // no model → today's sync behaviour, unchanged
+    if (!segmenter) {
+        // No BiLSTM → the ordinary sync path, perceptron boundaries and all (end-to-end 76.7% against the
+        // BiLSTM's 80.4%). Falling back to `segment: false` here would silently be the WORST of the three.
+        segmenting ??= createKhmer();
+        return segmenting.text(text);
+    }
+    // segment: false — this path supplies its own (better) boundaries; see createKhmer's note.
+    unsegmented ??= createKhmer({ segment: false });
     // The segmenter inserts U+200B, which `khmer.ts`'s TOKEN already treats as a run break, so the sync engine
     // needs no knowledge of this path at all.
-    return sync.text(await segmenter.restore(text));
+    return unsegmented.text(await segmenter.restore(text));
 }

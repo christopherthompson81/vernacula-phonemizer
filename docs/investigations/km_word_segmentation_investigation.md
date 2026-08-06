@@ -222,3 +222,85 @@ as the same broke count (239 vs 240) and 110 more fixes. The two models agree on
 (+32.0pp of +35.6pp) with NO optional dependency, so it could serve `phonemize` itself rather than only
 `phonemizeAsync`. Promoting either into the sync path changes every Khmer reading and still needs the referee
 before/after pass `segment.ts` names. Both models and both eval paths are committed so that pass can be run.
+
+## Run 9 — 2026-08-05 18:50 · shipped both tiers, and the referee comparison against HUMAN gold
+
+Perceptron wired into the SYNC path (`createKhmer({ segment })`, default on); BiLSTM stays async and passes
+`segment: false` so the two cannot compound each other's splits. The no-model fallback in `khmerNeural.ts` had to
+be fixed to use a SEGMENTING engine — falling back to `segment: false` would have made the async path the worst of
+the three.
+
+**A decode guard was needed, and measuring it was the point.** Wiring the perceptron into sync broke `បូកដក`
+("plus-minus", a word the NORMALIZER emits with a sourced reading): it came out `បូក|ដ|ក` → *ɓouk ɗɑː kɑː* instead
+of *ɓoukɗɑːk*. Contrast the splits that are harmless — `ភាគរយ` → *pʰiək rɔːj* for *pʰiəkrɔːj* and
+`ដុល្លារអាមេរិក` → *ɗollaː ʔaːmeːrək*, identical phonemes with an added word space. The difference is the
+one-character fragment, so both decoders now refuse to emit a piece shorter than 2 characters. Cost is bounded and
+measured: one-character words are **0.46%** of the 2,852,732 labelled gold words.
+
+Blast radius on the suite: 3 of 3,017 tests, all Khmer, and all three were expectations rather than defects —
+two were `toContain` on a joined form that is now word-spaced with identical phonemes, and one had pinned the sync
+DEFECT (`kʰaehpʰiə`) which the sync path now fixes.
+
+### The referee comparison — independent gold, and a soberer number
+
+`tools/khmer/referee_km_segmenter.mts` replaces the self-referential reference. Gold is 7,062 usable **human**
+wikipron transcriptions; pairs are concatenated to construct the situation Khmer presents, then scored on the
+folded segmental backbone with the fleet's own `makeFold`:
+
+| | agreement with the referee's two readings |
+|---|---|
+| each word read in ISOLATION (the ceiling) | 93.5% |
+| concatenated, NO segmentation | **27.3%** |
+| concatenated + perceptron (sync) | 46.2% |
+| concatenated + BiLSTM (async) | **47.8%** |
+
+Gap closed against the ceiling: perceptron 28.6%, BiLSTM 31.1%.
+
+**⚠ THIS IS MUCH LOWER THAN THE CORPUS EVAL'S 44.7% → 80.4%, AND BOTH NUMBERS ARE HONEST.** They measure different
+things. `eval_km_segmenter.mts` compares against `phonemize(a) + phonemize(b)` — the engine's OWN boundary-aware
+output — so a correct segmentation matches it by construction and any word-level error cancels on both sides. The
+referee eval has independent gold, and it also builds ARBITRARY dictionary-word pairs rather than the natural
+collocations a corpus supplies, which is a harder input distribution. The corpus number is the better estimate for
+real text; the referee number is the better estimate of absolute quality. Neither supersedes the other, and the
+gap between them is the value of having both.
+
+The word-level referee gate is unaffected by all of this, because it calls `phonemizeWordRules` directly and never
+sees `text()`.
+
+## Run 10 — 2026-08-05 18:55 · an additional, PERMISSIVELY-LICENSED source for the labels
+
+Searched for more segmentation data. The two obvious corpora are both unusable here:
+
+  · **khPOS** (12,000 manually word-segmented sentences) — **CC BY-NC-SA 4.0**, verified from the repository
+    itself after a search summary wrongly reported Apache-2.0.
+  · **ALT Khmer tokenised data** (NICT/NIPTICT, Zenodo 3937914) — the ALT *parallel corpus* is CC BY 4.0, but the
+    Khmer tokenised portion says CC BY-NC-SA 4.0 in its description while its Zenodo Rights field says CC BY 4.0.
+    An ambiguous licence reads as the restrictive one.
+
+NonCommercial is already excluded by precedent in this tree: `af-stems.PROVENANCE.md` calls CC-BY-NC "incompatible
+with this repo's licensing goals" and the Arabic diacritizer rejected a CC-BY-NC corpus by name.
+
+**What IS usable: `google/language-resources` `km/data/lexicon.tsv`** — the same project that supplied Bengali's
+gold, and the file's own header declares **CC BY 4.0**. 69,430 lines, of which **62,101 pure-Khmer word forms**,
+and **57,577 are new** against our 7,145-entry frequency table (8.7x).
+
+⚠ It is a WORD LIST, not segmented text — which turns out to be worth MORE for this problem than more text would
+be, because it attacks the two known limitations directly. Of the 8,059,105 interior positions currently sitting
+inside all-zero tokens (the unverified negatives that 98.8% of the model's scored precision errors land on):
+
+    token IS a dictionary word → the zeros are CONFIRMED     4,894,141   60.7%
+    token is NOT a word but splits into two → BOUNDARY       1,239,472   15.4%
+    still unresolved                                         1,925,492   23.9%
+
+Validated on the cases both earlier heuristics got wrong, and it settles all of them: `លើក` and `ជាមួយ` are
+dictionary words (so the frequency heuristic's `លើ|ក` was wrong), `ទីក្រុង` is a word (so my pipeline's abstention
+at 11.3% can be resolved), while `ខែមករា`, `ព្រះអង្គ`, `បូកដក` and `មហាក្សត្រ` are not words and split cleanly into
+two that are. The `tok not in lex` guard is what makes the split test safe — it is why `លើក` is not split.
+
+Note `ជាមួយ` and `ដឹកនាំ` are dictionary words yet appear in the model's MISSED list, i.e. the ZWSP labels said
+split and the dictionary says not. Two independent sources disagreeing is the signature of a genuinely contested
+lexicalisation, which matches the finding that 97 of the 301 misses are contested by writers themselves.
+
+**Not implemented.** Adopting it means rebuilding the labels, retraining both models and re-running both evals,
+and it incurs a CC BY 4.0 attribution obligation (the PROVENANCE convention already handles that). It is also a
+pronunciation dictionary, so it could separately feed the Khmer g2p exceptions lexicon.

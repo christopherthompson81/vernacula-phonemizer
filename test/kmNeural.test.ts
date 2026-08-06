@@ -25,11 +25,14 @@ describe("khmer neural word-boundary restoration", () => {
     });
 
     describe.skipIf(!haveModel)("with the ONNX model present", () => {
-        test("⚠ ខែ + month name reads as two words, which the sync path cannot do", async () => {
+        test("⚠ ខែ + month name reads as two words", async () => {
             // The defect that motivated the model. Joined, the syllabifier steals the month's initial consonant as a
             // coda of ខែ and a whole syllable disappears: ខែឧសភា → kʰaehpʰiə, ខែកុម្ភៈ → kʰaekom (truncated).
             // 9 of the 12 month names degrade this way; each is fixed by restoring the boundary.
-            expect(phonemize("ខែឧសភា", "km")).toBe("kʰaehpʰiə");            // the sync defect, pinned
+            // ⚠ THE SYNC PATH NOW FIXES THIS TOO, since the perceptron ships there — this assertion used to pin
+            // `kʰaehpʰiə` as the sync DEFECT. Both tiers restore the boundary now; the async one is simply better
+            // at placing it (referee agreement 47.8% against 46.2%, and 80.4% vs 76.7% on corpus junctions).
+            expect(phonemize("ខែឧសភា", "km")).toBe("kʰae ʔosɑpʰiə");
             expect(await phonemizeKmNeural("ខែឧសភា")).toBe("kʰae ʔosɑpʰiə"); // ខែ + the month's isolated reading
             expect(await phonemizeKmNeural("ខែកុម្ភៈ")).toBe("kʰae kompʰeəʔ");
         });

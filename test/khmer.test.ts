@@ -106,8 +106,12 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         // Measured asymmetry, not an oversight. Of the sites with no number before the sign, all 4 ± are genuine
         // (`±20°` latitude bands, `± 0.1 ឆ្នាំ`) while 142 of 254 + are LaTeX or C from this wiki's maths
         // articles and programming tutorial. Reading the leading + would be a misfire generator.
-        expect(phonemizeText("±២០", "km")).toContain("ɓoukɗɑːk");
-        expect(phonemizeText("១៨៣០±៤០", "km")).toContain("ɓoukɗɑːk");
+        // ⚠ WORD-SPACED, because the sync path now restores word boundaries (khmerPerceptron.ts): បូកដក is a
+        // compound of បូក + ដក and the segmenter separates them. The PHONEMES are unchanged — ɓouk ɗɑːk against
+        // ɓoukɗɑːk — which is the distinction the MIN_PIECE decode guard protects. Before that guard the run was
+        // shredded to បូក|ដ|ក and read *ɓouk ɗɑː kɑː*, which is a different reading rather than a spacing change.
+        expect(phonemizeText("±២០", "km")).toContain("ɓouk ɗɑːk");
+        expect(phonemizeText("១៨៣០±៤០", "km")).toContain("ɓouk ɗɑːk");
     });
 
     test("both spellings of the kilometre abbreviation are read", () => {
@@ -129,8 +133,10 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         // The tier refuses a sign preceded by a Latin letter — the guard that stops a sign being read out of the
         // middle of a Latin word. `US$` appears in ordinary Khmer prose (`ប្រហែល US$3,236`), so it is declared
         // as a multi-character key and matched as a unit.
-        expect(phonemizeText("US$3,236", "km")).toContain("ɗollaːʔaːmeːrək");
-        expect(phonemizeText("ប្រហែល US$ ១,០២៥", "km")).toContain("ɗollaːʔaːmeːrək");
+        // Word-spaced for the same reason: ដុល្លារអាមេរិក is "dollar" + "America" and the boundary restorer
+        // separates them. Identical phonemes, one added word space.
+        expect(phonemizeText("US$3,236", "km")).toContain("ɗollaː ʔaːmeːrək");
+        expect(phonemizeText("ប្រហែល US$ ១,០២៥", "km")).toContain("ɗollaː ʔaːmeːrək");
     });
 
     test("⚠ a magnitude word between the number and a postposed sign still composes", () => {

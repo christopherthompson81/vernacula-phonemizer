@@ -23,6 +23,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { normalizeKhmer } from "./normalize.ts";
+import { restoreBoundaries } from "./khmerPerceptron.ts";
 import { numberToKhmerWords } from "./numbers.ts";
 
 interface KhmerDef {
@@ -222,13 +223,33 @@ export function phonemizeWordRules(word: string): string {
 const TOKEN = /([ក-៓ៜ-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu;
 
 /** Build the Khmer phonemizer. */
-export function createKhmer(): Phonemizer {
+/**
+ * Build the Khmer phonemizer.
+ *
+ * ⚠ `segment` RESTORES THE WORD BOUNDARIES KHMER DOES NOT WRITE, and it defaults ON. Khmer has no inter-word
+ * space, so `TOKEN` takes a maximal Khmer run as one unit and the syllabifier re-parses across boundaries it
+ * cannot see: measured on 4,000 junctions where a writer actually typed U+200B, joining two words corrupts the
+ * reading 54.6% of the time (`នៅ|សតវត្ស` → *nɨwhtɑʋɑt* against *nɨw + sɑtɑʋoət*, a coda stolen and a syllable
+ * lost). `khmerPerceptron.ts` predicts those boundaries and inserts U+200B, which TOKEN already breaks runs on;
+ * end-to-end agreement with the boundary-aware reading goes 44.7% → 76.7%.
+ *
+ * ⚠ AND THE ASYNC PATH MUST PASS `segment: false`. `khmerNeural.ts` restores boundaries with the BiLSTM (80.4%)
+ * before calling this, and running the perceptron over an already-segmented run would let it split the pieces
+ * AGAIN — two models compounding each other's over-splits. The flag exists for that one caller.
+ */
+export function createKhmer(opts: { segment?: boolean } = {}): Phonemizer {
+    const segment = opts.segment ?? true;
     return {
         text(input: string): string {
             // Normalization BEFORE tokenizing: TOKEN is a deliberately minimal three-way split and skips every
             // symbol it does not name, so a symbol has to become a Khmer word before it gets here. See
             // normalize.ts for what each rule reads and where its vocabulary was sourced.
-            return assembleClauses(normalizeKhmer(input), TOKEN, (m, sink) => {
+            //
+            // Boundary restoration comes AFTER normalization, and that order is load-bearing: the normalizer's own
+            // separator class already includes U+200B (it de-groups thousands across one), so inserting boundaries
+            // first would feed its rules a text they were not measured against.
+            const normalized = normalizeKhmer(input);
+            return assembleClauses(segment ? restoreBoundaries(normalized) : normalized, TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) {
                     // Khmer digits ០–៩ (U+17E0–17E9) → ASCII, then compose (see numbers.ts).
