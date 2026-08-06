@@ -106,12 +106,17 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         // Measured asymmetry, not an oversight. Of the sites with no number before the sign, all 4 ± are genuine
         // (`±20°` latitude bands, `± 0.1 ឆ្នាំ`) while 142 of 254 + are LaTeX or C from this wiki's maths
         // articles and programming tutorial. Reading the leading + would be a misfire generator.
-        // ⚠ WORD-SPACED, because the sync path now restores word boundaries (khmerPerceptron.ts): បូកដក is a
-        // compound of បូក + ដក and the segmenter separates them. The PHONEMES are unchanged — ɓouk ɗɑːk against
-        // ɓoukɗɑːk — which is the distinction the MIN_PIECE decode guard protects. Before that guard the run was
-        // shredded to បូក|ដ|ក and read *ɓouk ɗɑː kɑː*, which is a different reading rather than a spacing change.
-        expect(phonemizeText("±២០", "km")).toContain("ɓouk ɗɑːk");
-        expect(phonemizeText("១៨៣០±៤០", "km")).toContain("ɓouk ɗɑːk");
+        // ⚠ THE READING IS "plus OR minus" — ɓouk rɨː ɗɑːk — and the ឬ is load-bearing. An earlier version emitted
+        // បូកដក on a misread attestation: corpus-words.ts reported it "attested ×4", but all four were the SPACED
+        // form inside an enumeration of operations (`ប្រមាណវិធីបូក ដក គុណ ចែក` = add, subtract, multiply, divide),
+        // which is a list, not a compound meaning ±. The unspaced បូកដក has zero corpus occurrences and no
+        // dictionary entry. What IS attested in the ± sense is បូកឬដក, in `ខិតទៅរកបូកឬដកអនន្ត` ("approaching plus
+        // or minus infinity").
+        //
+        // Emitted as three SPACED words because joined it loses a syllable: `បូកឬដក` reads *ɓouk ɗɑːk*, the ឬ
+        // silently dropped by the syllabifier before a consonant — a pre-existing g2p defect, routed around here.
+        expect(phonemizeText("±២០", "km")).toContain("ɓouk rɨː ɗɑːk");
+        expect(phonemizeText("១៨៣០±៤០", "km")).toContain("ɓouk rɨː ɗɑːk");
     });
 
     test("both spellings of the kilometre abbreviation are read", () => {

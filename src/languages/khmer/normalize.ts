@@ -256,14 +256,24 @@ export function normalizeKhmer(text: string): string {
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}\\+${SEP}(?=[${D}])`, "gu"), " បូក ");
     // ± is 19 digit-flanked instances, every one a scientific tolerance — `១៨៣០ ±៤០ km`, `25,559 ± 4 គីឡូម៉ែត្រ`.
     // I had recorded it as "the sign does not occur in the evidence", which was an artifact of testing with a
-    // grep whose `\$sg` escaped to a word boundary rather than a literal. បូកដក is attested ×4 and is the
-    // compositional form of two words that are individually very frequent.
-    s = s.replace(new RegExp(`(?<=[${D}])${SEP}±${SEP}(?=[${D}])`, "gu"), " បូកដក ");
+    // grep whose `\$sg` escaped to a word boundary rather than a literal.
+    //
+    // ⚠ THE READING IS `បូកឬដក` ("plus OR minus") AND NOT `បូកដក`, and the first version had this wrong from a
+    // misread attestation. `corpus-words.ts` reported បូកដក as "attested, phrase ×4" — but as its own banner warns
+    // for a spaceless script, a phrase hit is a SUBSTRING hit. Reading the four: every one is the SPACED form
+    // inside an enumeration of arithmetic operations, `ប្រមាណវិធីបូក ដក គុណ ចែក` ("operations: add, subtract,
+    // multiply, divide"). That is a list of four operations, not a compound meaning ±, and the unspaced បូកដក has
+    // ZERO occurrences in the corpus and no entry in the CC BY 4.0 pronunciation dictionary either.
+    //
+    // What IS attested in the ± sense is `បូក​ឬ​ដក` — in `ខិតទៅរកបូកឬដកអនន្ត`, "approaching plus or minus
+    // infinity", which is exactly the mathematical use. One instance, semantically precise, against four that were
+    // the wrong sense entirely; the precise one wins.
+    s = s.replace(new RegExp(`(?<=[${D}])${SEP}±${SEP}(?=[${D}])`, "gu"), " បូក ឬ ដក ");
     // AND THE LEADING FORM, which is what `review.ts`'s `±5` probe tests. Measured before adding rather than
     // after: stripping whitespace properly, exactly 4 sites in the corpus have a ± with no number before it, and
     // all 4 are genuine — the latitude bands `±20°`, `±60°`, `± 50°` and the tolerance `± 0.1 ឆ្នាំ`. No misfires
     // available, so this is safe in a way the leading PLUS is not (see ACCEPTED_SIGN_SILENCE in defects.ts).
-    s = s.replace(new RegExp(`(?<![${D}])±${SEP}(?=[${D}])`, "gu"), "បូកដក ");
+    s = s.replace(new RegExp(`(?<![${D}])±${SEP}(?=[${D}])`, "gu"), "បូក ឬ ដក ");
 
     // ── 6. minus ─────────────────────────────────────────────────────────────────────────────────────
     // AFTER step 4, which has already claimed every dash BETWEEN two numbers — so what reaches here is
