@@ -144,7 +144,7 @@ describe("mandarin normalization", () => {
     // #586, from the zh.wikipedia fill: Chinese has no spaces, so a unit or sign is normally flanked by Han —
     // and the shared tier's letter-boundary guards were rejecting exactly that. Only punctuation-adjacent
     // instances worked, which is why the FLEURS corpus (units written as words) could never show it.
-    test("a unit or sign survives a Han neighbour (#586)", () => {
+    test("a unit or sign survives a Han neighbour", () => {
         expect(phonemize("38℃很热", "cmn")).toBe("san˥˥ ʂʐ̩˧˥ pɑ˥˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩ xən˨˩˦ ʐɤ˥˩");
         expect(phonemize("20°C很热", "cmn")) // was: the C read as English *sˈiː*
             .toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩ xən˨˩˦ ʐɤ˥˩");
@@ -160,7 +160,7 @@ describe("mandarin normalization", () => {
         expect(phonemize("3/4", "cmn")).toBe("sɹ̩˥˩ fən˥˥ ʈ͡ʂʐ̩˥˥ san˥˥"); // 四分之三
     });
 
-    test("a dropped minus INVERTS a temperature (#586)", () => {
+    test("a dropped minus INVERTS a temperature", () => {
         // The defect this whole pass exists for: `-5 度` read as 五度 — POSITIVE five degrees.
         expect(phonemize("-5 度", "cmn")).toBe("liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ tu˥˩"); // 零下五度, "five below zero"
         expect(phonemize("-5 °C", "cmn")).toBe("liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 零下五摄氏度

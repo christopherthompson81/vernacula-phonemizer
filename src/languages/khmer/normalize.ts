@@ -1,5 +1,5 @@
 /**
- * Khmer text normalization (#585) — symbols and marks the tokenizer cannot see, rewritten as Khmer words.
+ * Khmer text normalization — symbols and marks the tokenizer cannot see, rewritten as Khmer words.
  *
  * WHY THESE DEFECTS EXIST, mechanically. `khmer.ts` tokenizes with
  * `TOKEN = /([ក-៓ៜ-៝]+)|([\d០-៩]+)|([។៕?!,.៖])/gu`, which is a deliberately minimal three-way split: a Khmer

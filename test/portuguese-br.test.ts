@@ -118,7 +118,7 @@ describe("pt-BR Roman-numeral policy — centuries cardinal, prenominal events o
     });
 });
 
-// #562 — the eighth language, structurally the closest to Spanish. Asserted on pt-BR because that is the
+// the eighth language, structurally the closest to Spanish. Asserted on pt-BR because that is the
 // locale of the FLEURS audio these were measured against; the layer is shared with European pt apart from
 // the date rule below.
 describe("portuguese normalization", () => {

@@ -8,12 +8,12 @@ vowel directly keeps ALL of it.
 
 Model: input = fa's g2p output (the consonant + long-vowel skeleton with a default [a] per short slot); a 2-layer
 BiLSTM per-position tagger predicts the correct IPA vowel at each short slot (copies elsewhere). Trained on the
-GPU (/mnt/data/ar-diac-venv, torch+cuda).
+GPU ($ARDIAC_PY, torch+cuda).
 
 Inputs (regenerate the fa-engine alignment with tsx — see train_shortvowel notes):
   <fa_gold_aligned.tsv>  word<TAB>fa-engine-ipa<TAB>gold-ipa(|-variants)   (from tools/persian/fa-abjad-ipa-gold.tsv)
   [tg_silver_aligned.tsv]  same shape, from fa-tg-silver.tsv (the Tajik-derived silver)
-  /mnt/data/ar-diac-venv/bin/python train_ipa_bilstm.py fa_gold_aligned.tsv [tg_silver_aligned.tsv]
+  $ARDIAC_PY train_ipa_bilstm.py fa_gold_aligned.tsv [tg_silver_aligned.tsv]
 
 RESULT (2026-07-20, seed 1234, held-out UNSEEN words):
   baseline (fa [a] default):            16.0%

@@ -59,7 +59,7 @@ describe("Thai numbers", () => {
 // #562 TEXT NORMALIZATION (src/languages/thai/normalize.ts). The count in each `test` name is instances in
 // the FLEURS th_th corpus (1,906 unique utterances, column 3); the comment on a line is what the engine
 // produced BEFORE the layer existed.
-describe("Thai text normalization (#562)", () => {
+describe("Thai text normalization", () => {
     test("ๆ maiyamok repeats the preceding WORD (351 instances / 318 utterances)", () => {
         // was "tˈaː˨˩ŋ" — the reduplication was silently dropped
         expect(phonemize("ต่าง ๆ", "th")).toBe("tˈaː˨˩ŋ tˈaː˨˩ŋ");
@@ -144,12 +144,12 @@ describe("Thai text normalization (#562)", () => {
         expect(phonemize("๒๕", "th")).toBe(phonemize("25", "th"));
     });
 
-    // #586 — `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1. Emitted SPACED although Thai fuses them, because this
+    // `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1. Emitted SPACED although Thai fuses them, because this
     // G2P mis-syllabifies the fused form and drops ลูกบาศก์'s karan: `5 ลูกบาศก์เมตร` → *lˈuːkbaː˧sˌa˨˩meː…*
     // against the spaced *lˈuːkbaː˨˩t mˈeː˦˥t*. That is a pre-existing compound-path defect — the corpus's
     // own `2.2 ล้านตารางกิโลเมตร` already reads it wrong as written — so the space is a G2P hint, not a claim
     // about the orthography.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("783,562 km²", "th")).toContain("tˈaː˧raː˧ŋ kˈi˨˩loː˧mˌeː˦˥t");
         expect(phonemize("120 m³", "th")).toContain("lˈuː˥˩kbaː˨˩t mˈeː˦˥t");
     });

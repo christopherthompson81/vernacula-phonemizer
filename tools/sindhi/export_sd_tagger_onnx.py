@@ -16,7 +16,7 @@ Epoch count is fixed at the CV-converged value; Phase 10 measured 200 epochs and
 accuracy flat 75–78% from epoch 30 onward, so longer is pure overfit.
 
   python3 export_sd_tagger_onnx.py
-Run under /mnt/data/omnivoice_ipa/train_venv/bin/python.
+Run under .venv/bin/python.
 """
 import json, random, shutil
 from collections import Counter

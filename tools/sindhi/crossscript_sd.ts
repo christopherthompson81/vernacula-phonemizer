@@ -27,7 +27,7 @@ import { fileURLToPath } from "node:url";
 import { phonemizeWordRules } from "../../src/languages/sindhi/sindhi.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const KAIKKI = "/mnt/data/kaikki-Sindhi.jsonl";
+const KAIKKI = (process.env["DUMPS"] ?? ".") + "/kaikki-Sindhi.jsonl";
 const OUT = join(HERE, "sd.crossscript.tsv");
 
 // ── Devanagari (Sindhi) → IPA ────────────────────────────────────────────────────────────────────────────

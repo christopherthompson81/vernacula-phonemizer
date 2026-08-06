@@ -89,7 +89,7 @@ export function phonemizeWord(word: string): string {
 
 // #562 Urdu had no symbol tier at all: "3%" read as just "تین", losing the percent.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // اور is ×1476 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -114,7 +114,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
 // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
-// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix.
 const TOKEN = new RegExp(
     `([${URDU_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+(?:[.,][${DIGIT_CLASS}]+)?)|([۔؟،؛.?!,;:])`,
     "gu",
@@ -142,7 +142,7 @@ function number(digits: string): string {
 class UrduPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        // #562: Urdu-specific rewrites (ordinal suffixes, clock, spaced units, signs, fractions) then the
+        // Urdu-specific rewrites (ordinal suffixes, clock, spaced units, signs, fractions) then the
         // shared symbol tier, which Urdu lacked entirely — % and every currency sign were DROPPED.
         return assembleClauses(SYMBOLS(normalize(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));

@@ -49,7 +49,7 @@ describe("swahili canonical IPA", () => {
 
 // #562 TEXT NORMALIZATION (src/languages/swahili/normalize.ts). Every case below is a form attested in the
 // sw_ke FLEURS corpus; the "before" in each comment is what the engine actually produced prior to the pass.
-describe("swahili text normalization (#562)", () => {
+describe("swahili text normalization", () => {
     test("grouped thousands: the comma was a clause pause and the tail a second number", () => {
         // "1,000" → *moja , sifuri* (the tail "000" read as zero). ×44 in the corpus.
         expect(phonemize("1,000", "sw")).toBe("ˈɛlfu mˈɔʄɑ");

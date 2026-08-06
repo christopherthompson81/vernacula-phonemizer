@@ -1,5 +1,5 @@
 /**
- * Shared INITIALISM handling (#562) — decide what to do with an all-caps letter run before the tokenizer.
+ * Shared INITIALISM handling — decide what to do with an all-caps letter run before the tokenizer.
  *
  * THE ARCHITECTURE, which is the whole point of this file being this small: a known acronym's reading is a
  * LEXICAL fact, and an unpronounceable one is an OOV case. Those are the only two things here.

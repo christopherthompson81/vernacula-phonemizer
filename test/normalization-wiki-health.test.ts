@@ -1,5 +1,5 @@
 /**
- * The mined-corpus health check (#585) — that it still fails a template-built corpus and passes prose.
+ * The mined-corpus health check — that it still fails a template-built corpus and passes prose.
  *
  * WHY THIS IS PINNED. The first set of thresholds PASSED `ceb`, the one wiki #585 names as the reason the
  * check exists: they were written from the shape of the argument before anything was measured. The

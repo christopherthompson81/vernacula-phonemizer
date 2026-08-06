@@ -1,4 +1,4 @@
-# Text-normalization playbook (#562)
+# Text-normalization playbook
 
 How to give one language the normalization treatment. Distilled from the first thirteen — en, fr, es, hi,
 cmn, bn, ar, pt, ru, ur, id, de, ja — each of which was done by hand and each of which taught something the
@@ -56,7 +56,7 @@ The artifact does four things no ad-hoc tabulation does:
    to FLEURS, so a language treated from a mined corpus is checkable by exactly the same command as one
    treated from FLEURS.
 4. **It front-loads the second round.** The inventory grows as the sweep proceeds, so every language will
-   need re-checking against the final cell set (#586). With the artifact committed, that re-check is one
+   need re-checking against the final cell set. With the artifact committed, that re-check is one
    command per language instead of a re-investigation.
 
 Then, and only then, read the corpus by hand. `--sample` is the tier to read for a feel of the language;
@@ -67,7 +67,7 @@ CELL in the same commit. That is how `exponent`, `arithmetic`, `ampersand` and `
 and `exponent` was declared in 24 manifests as `exponentWords` while having no cell at all, which is why
 the inventory must be audited against DATA declarations and not only rule comments.
 
-**A REVIEW that finds a defect owes the inventory a cell too**, for the same reason: round two (#586)
+**A REVIEW that finds a defect owes the inventory a cell too**, for the same reason: round two
 re-checks every treated language against the final cell set, so a defect that has no cell will be found
 once and then missed everywhere else. The review passes on uz/af/as added five — `sports-time` (a third
 field is not a clock: `4:41.30`), `version-dot` (`802.11n` vs a decimal glued to its unit, `12.5km`),
@@ -81,7 +81,7 @@ sign doubling a spelled-out currency) and `ordinal-caps` (`11De`, `16-Noyabr`).
 ### 1. Read the corpus before writing any rule
 
 The corpora are FLEURS transcripts under `$FLEURS/<dir>/` (this checkout's are at
-`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data`; set `FLEURS` to wherever yours live).
+the FLEURS transcript tree; set `FLEURS` to wherever yours live).
 **Column 3 (0-indexed 2) is the original cased text. Column 4 is lowercased and stripped of exactly the
 punctuation this layer exists to read** — never judge normalization on column 4.
 
@@ -180,7 +180,7 @@ $ESPEAK_PORTABLE/data/<lang>/dictionary.jsonl  # word entries
 $ESPEAK_NG/dictsource/<lang>_list              # the raw upstream form
 ```
 
-The `espeak-ng-portable` JSONL is the better source: decimal keys instead of `_NN` grepping, and a
+The `$ESPEAK_PORTABLE` JSONL is the better source: decimal keys instead of `_NN` grepping, and a
 pre-tokenized `phonemeTokens` array, which is exactly what a skeleton match wants.
 
 **espeak is PHONETIC and cannot hand you orthography**, so a spelling derived from it must be validated.
@@ -206,7 +206,7 @@ A validated refusal is a result. Record the rate and the failure taxonomy so nob
 
 The leak classes (DIGIT / SLOT-GAP / RAWMARK) detect a character that **survives** into the IPA. They are
 blind by construction to one that **vanishes**, which is why currency was silently dropped in ten treated
-languages and `&` in twelve, including English (#584, #586).
+languages and `&` in twelve, including English.
 
 ```bash
 npx tsx tools/normalization/mine.ts scan --in tools/corpus/mined/<lang>.jsonc --lang <lang>
@@ -230,7 +230,7 @@ unsourced** (see below), and the artifact scan is clean. It then prints the sign
 numeral-agreement probes and the ordinary-text probes for you to judge.
 
 **The `sourcing` line is a PROMPT, not a pass/fail**, and it is the one check that catches a defect the
-whole rest of this document cannot see. Fula (#596) shipped `tere` as BOTH the decimal point and the percent
+whole rest of this document cannot see. Fula shipped `tere` as BOTH the decimal point and the percent
 word; it phonemised cleanly, so the scan, the corpus diff and the referee were all green, and the word
 appears in neither the language's corpus nor its referee's 1,777-word list. One word cannot be both "point"
 and "percent" — both readings were wrong, in the highest-traffic rule the layer had.
@@ -314,7 +314,7 @@ lb   Yen    — in NO source (corpus, artifact, referee, manifest, espeak; wikip
 
 **Read the list. If you cannot say where a word came from, source it or leave the symbol unread.**
 
-This exists because reviewing the Czech layer (#588) found four defects and ALL FOUR were checklist items
+This exists because reviewing the Czech layer found four defects and ALL FOUR were checklist items
 — no tests, three dropped sign classes, a numeral that did not agree with its noun, an uncommitted
 artifact. Nine of the fourteen review minutes went on repeated `vitest` runs and one-probe-per-process
 startup, not on judgement.
@@ -415,7 +415,7 @@ precisely the defect the rule existed to fix. Same family as trap 1: the class w
 orthography. Probe the capitalized variant of every form your rule claims.
 
 **8. Zero corpus instances is not evidence of correctness.** The corpus diff can only see shapes the corpus
-contains. Three of the five defects found reviewing Uzbek (#590) had **zero** corpus hits and were still
+contains. Three of the five defects found reviewing Uzbek had **zero** corpus hits and were still
 wrong for the language: the capitalized ordinal above, `3/4` (the fraction rule tabulated numerator 1, the
 only one attested, so the unattested `3/4` read as two bare cardinals — *uch toʻrt*), and `°F`. **Probe the
 adversarial neighbour of every rule**: the capitalized form, the other numerator, the other unit, the other
@@ -527,7 +527,7 @@ numbers with one** (`200-ге`, `8-ден`, `80-нен`, `60-тан`) and **16 o
 other Turkic corpora, of Irish (lenition after `i`/`do`), and of anything whose preposition governs a case.
 
 **15. THE SAME BOUND SUFFIX IS ALSO WRITTEN WITH A SPACE — count both.** Trap 14 is stated in terms of a
-suffix GLUED to the digits, and every layer that has faced it went looking for exactly that. Oromo (#602)
+suffix GLUED to the digits, and every layer that has faced it went looking for exactly that. Oromo
 shipped a rule covering ~35 glued enclitics and missed **24 unique utterances** where the corpus detaches
 the very same morpheme (`bara 1945 tti`, `sa’aatii 24 f`, `qabxii 2,207 n`) — more sentences than the glued
 form. Detaching a bound postposition is a slip of the orthography, not a word boundary, and the reading is
@@ -546,7 +546,7 @@ a number followed by a short word.
   hyphen instead — the tokenizer skips it, so the reading is unchanged and the shape is unambiguous.
 
 
-**16. BEFORE DECLARING A CLASS OUT OF SCOPE, CHECK WHETHER THE SEAM ALREADY EXISTS.** Slovak (#603) shipped
+**16. BEFORE DECLARING A CLASS OUT OF SCOPE, CHECK WHETHER THE SEAM ALREADY EXISTS.** Slovak shipped
 its largest untreated class — **119 initialisms over 74 acronyms, second only to `N.` ×106** — with the
 reason *"it is a separate seam (`core/initialisms.ts`)"*. That file already existed and about thirty
 languages already wired it, **including Czech, which the same PR calls "the nearest sibling"** and which
@@ -570,7 +570,7 @@ vowel-less clusters, exactly what that seam exists to prevent.
 
 
 **17. A "TOO BIG TO DO HERE" ITEM IS A COUNT, NOT A FEELING.** Trap 16 is about seams that already exist;
-this is about scope estimates that were never measured. Luxembourgish (#604) deferred applying the Eifeler
+this is about scope estimates that were never measured. Luxembourgish deferred applying the Eifeler
 Regel across a cardinal's right edge as *"a behaviour change to every number in the language with its own
 corpus diff to earn"*. Counted: **nine utterances**, all on *siwen*, which is effectively the only lb
 numeral ending in an unstressed ⟨-en⟩ — and the mechanism (`applyEifelerRegel`) already had four callers.
@@ -579,7 +579,7 @@ that one was 31 lost pauses.
 
 - **Count it before deferring it.** One grep separates "every number in the language" from "nine sentences".
 - **A mark that should be a pause and instead VANISHES is in scope**, whatever the seam it lives in. That is
-  the DROP family (#584), not a tokenizer refactor.
+  the DROP family, not a tokenizer refactor.
 - **The inconsistency is the tell.** When a layer applies a sandhi wherever *it* emits a word but not on the
   plain path, the reading is right in the rewritten cases and wrong in the ordinary one — which is worse
   than uniformly wrong, because the tests on the rewritten cases all pass.
@@ -1459,7 +1459,7 @@ recording of a human reading it aloud. What the speaker says in that slot is evi
 and it cannot be laundered by a substring match.
 
 ```
-audio  /mnt/data/omnivoice_ipa/corpus/audio_cache/data/<corpus>/audio/train.tar.gz   (29 corpora)
+audio  $AUDIO_CACHE/data/<corpus>/audio/train.tar.gz   (29 corpora)
 ASR    IndicConformer 600m ONNX, 22 Indic languages, pure onnxruntime (no torch):
        vernacula/scripts/indicconformer_export/validate_indicconformer_package.py
          --package ~/models/indicconformer_600m_onnx --wav X.wav --lang ta

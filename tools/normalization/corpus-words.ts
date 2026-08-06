@@ -1,5 +1,5 @@
 /**
- * TIER-2 WORD COUNTER (#654) — "is this vocabulary real in this language?", asked of the FLEURS corpus.
+ * TIER-2 WORD COUNTER — "is this vocabulary real in this language?", asked of the FLEURS corpus.
  *
  * ## Why this is a separate tool from `attest.ts`
  *
@@ -40,7 +40,7 @@ import { parseJsonc } from "../../src/core/jsonc.ts";
 import { dominantScript } from "./scripts.ts";
 import { join } from "node:path";
 
-const CORPUS_ROOT = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 
 const argv = process.argv.slice(2);
 const arg = (n: string, d?: string): string | undefined => {
@@ -98,7 +98,7 @@ function utterances(code: string): string[] {
 }
 
 /**
- * `--sentence <regex>` — THE PARALLEL-CORPUS MODE, and the strongest sourcing route this issue found (#654).
+ * `--sentence <regex>` — THE PARALLEL-CORPUS MODE, and the strongest sourcing route this issue found.
  *
  * FLEURS is a PARALLEL corpus: the same source sentences, translated and recorded per language. So a sentence
  * that PERFORMS the operation you need to read gives you that reading in every language at once, spoken, in the

@@ -103,7 +103,7 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
     test("#657 accented Latin stays ONE word and is NATIVISED, not routed and not deleted", () => {
         // `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became an unclaimed gap read as
         // an English LETTER NAME: `São Paulo` → *ɛs ˈə o pɔlo* ("ES ə O"), `Cañitas` → *kɔ ˈɛn itas*.
-        // ⚠ NO FOREIGN ROUTING HERE, unlike id (#654) and om (#657). This engine NATIVISES — its header says the
+        // ⚠ NO FOREIGN ROUTING HERE, unlike id and om. This engine NATIVISES — its header says the
         // rule g2p is applied to English-spelled tokens because "nativising is more correct for the creole", and
         // its own output proves it: `water` → wata, `computer` → kampjuta, not English's wˈɔːt̬ɚ / kəmpjˈuːt̬ɚ.
         expect(phonemize("water", "pcm")).toBe("wata");

@@ -85,7 +85,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A word (Turkish letters), an ORDINAL numeral, a number with an optional apostrophe-attached suffix, or
 // clause punctuation. Turkish uses . as thousands sep and , as decimal.
 //
-// #562: the two numeral-attached forms are matched HERE rather than rewritten in normalize.ts because their
+// the two numeral-attached forms are matched HERE rather than rewritten in normalize.ts because their
 // spoken words must go through phonemizeWord(w, /*finalStress*/ true) — the word path mis-stresses sekiz /
 // dokuz / otuz via the -Iz person-ending rule (see normalize.ts's header). Ordering inside the alternation
 // matters: the ordinal branch precedes the number branch, and its lookahead (whitespace + another token) is
@@ -97,7 +97,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:\\.\
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  *
  * ⚠ `İ` IS ADDED, and it is the one letter here that is not a straight lift. Capital İ (U+0130) has no Unicode
  * simple case-fold to `i` — it folds to `i` + COMBINING DOT ABOVE — so the /i/ flag does not make the old class

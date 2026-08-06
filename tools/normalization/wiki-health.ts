@@ -1,5 +1,5 @@
 /**
- * IS THIS WIKI'S TEXT TRUSTWORTHY ENOUGH TO GATE ON? (#585)
+ * IS THIS WIKI'S TEXT TRUSTWORTHY ENOUGH TO GATE ON?
  *
  * #585 extends the normalization diff gate past the 67 FLEURS languages by mining wiki text for the other
  * 121, and it names two risks that have to be measured BEFORE a mined corpus is trusted:
@@ -630,7 +630,7 @@ const REUSE_STABLE_AT = 3000;
 // ── CLI ────────────────────────────────────────────────────────────────────────────────────────────
 /** The known-good side of the symbol histogram: a FLEURS corpus read the way corpus-diff.ts reads it. */
 function baselineSegments(corpus: string): string[] {
-    const root = process.env["FLEURS"] ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+    const root = process.env["FLEURS"] ?? "";
     const dir = join(root, corpus);
     const seen = new Set<string>();
     for (const f of readdirSync(dir).filter((x) => x.endsWith(".tsv")))

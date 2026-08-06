@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  # What `npm publish` would actually ship. Guards the fence in package.json `files`: without it npm falls
+  # back to .gitignore and packs the whole repo, and a `files` allowlist silently overrides .gitignore.
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: pack and assert the fence holds
+        run: |
+          npm pack --dry-run --json > /tmp/pack.json
+          node -e '
+            const files = require("/tmp/pack.json")[0].files.map(f => f.path);
+            const leaked = files.filter(p => /^(docs|tools|test)\//.test(p) || /\.test\.ts$/.test(p));
+            if (leaked.length) { console.error("would publish:\n  " + leaked.join("\n  ")); process.exit(1); }
+            console.log(`ok — ${files.length} files, no docs/ tools/ test/`);
+          '

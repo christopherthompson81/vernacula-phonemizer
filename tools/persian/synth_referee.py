@@ -11,13 +11,16 @@ without resolving the FarsDat terms.
 import sys, csv
 from collections import defaultdict, Counter
 import onnxruntime as ort, numpy as np, json
+
+import os
+REFEREES = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "referee-eval", "referees")
 SP = sys.argv[1]
 def norm_common(ipa):  # collapse the notation diffs that are NOT real distinctions, so sources can be compared
     return ipa.replace("ˈ","").replace("ˌ","").replace("ɣ","q").replace("r","ɾ")  # keep ː and ʔ (real)
 # --- source 1: wikipron (classical-leaning, independent) ---
 WMAP={"r":"ɾ","ɒː":"aː","ɒ":"aː","ɑː":"aː","æ":"a","ɔ":"o","g":"ɡ","dʒ":"d͡ʒ","tʃ":"t͡ʃ"}
 wik=defaultdict(set)
-for l in open(f"{SP}/../vernacula-referees/fa.wikipron-fas-broad.tsv" if False else "/home/chris/Programming/vernacula-phonemizer/tools/referee-eval/referees/fa.wikipron-fas-broad.tsv",encoding="utf8"):
+for l in open(f"{REFEREES}/fa.wikipron-fas-broad.tsv",encoding="utf8"):
     if l.startswith("#") or "\t" not in l: continue
     w,p=l.rstrip("\n").split("\t",1)
     if len(w)<2 or len(p.split())>len(w)+4: continue
@@ -77,7 +80,7 @@ for w,prons in gold.items():
     if any(bbf(p)==bbf(g) for g in prons): bbok+=1
     if p not in prons and len(miss)<12: miss.append(f"{w}: tagger {p} / agreed {list(prons)[:2]}")
 import io
-with open("/home/chris/Programming/vernacula-phonemizer/tools/referee-eval/referees/fa.synth-agreement.tsv","w",encoding="utf8") as f:
+with open(f"{REFEREES}/fa.synth-agreement.tsv","w",encoding="utf8") as f:
     f.write("# fa SYNTHESIZED referee — cross-source AGREEMENT gold (NON-CIRCULAR, convention-neutral).\n")
     f.write("# A word's pronunciation is kept ONLY where >=2 of 3 INDEPENDENT sources agree after normalizing to our\n")
     f.write("# IPA: wikipron-fas (Wiktionary) / GE2PE Kasre+Homograph (Sharif, Rahmati) / FarsDat (old speech corpus).\n")

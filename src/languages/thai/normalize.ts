@@ -1,5 +1,5 @@
 /**
- * Thai (th) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything which is not
+ * Thai (th) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already readable by the Thai g2p into Thai-script words the existing pipeline speaks. Pure text→text;
  * no IPA. Runs inside thai.ts's `text()`, before the tokenizer.
  *
@@ -239,7 +239,7 @@ export function normalizeThai(input: string): string {
     // dropped sign is inaudible, which is the one outcome that cannot be right.
     s = s.replace(/\s*\+\s*(?=\d)/gu, " บวก ");
 
-    // ── 8b2. the MINUS and ±, and the sourcing doubt above is now resolved (#654) ──────────────────
+    // ── 8b2. the MINUS and ±, and the sourcing doubt above is now resolved ──────────────────
     // The note above records that `attest.ts` on ลบ "returns the ADJECTIVE negative — การป้อนกลับทางลบ,
     // negative feedback — not the operator", and so no minus rule was written and `-5 °C` read as five
     // degrees above zero. Probing the SIGN'S NAME rather than the bare word settles it: th.wikipedia's
@@ -263,7 +263,7 @@ export function normalizeThai(input: string): string {
     s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}ลบ `);
 
-    // ── 8bb. the relational and division signs (#654), ALL FOUR FROM THE CORPUS ───────────────────
+    // ── 8bb. the relational and division signs, ALL FOUR FROM THE CORPUS ───────────────────
     // Unusually for this issue, no Wikipedia probe was needed: th_th attests every reading, and the division
     // word is in the slot with a numeral operand.
     //

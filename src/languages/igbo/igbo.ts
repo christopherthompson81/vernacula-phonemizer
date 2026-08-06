@@ -77,7 +77,7 @@ export function phonemizeWord(word: string): string {
             continue;
         }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
-        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins.
         out += latinPhone(c, { initial: i === 0, includeH: true }) ?? "";
         i++;
     }

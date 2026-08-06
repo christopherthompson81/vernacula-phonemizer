@@ -54,7 +54,7 @@ describe("Turkish g2p (segmental)", () => {
 
 // #562 TEXT NORMALIZATION. Counts in the comments are over the 1,876 unique tr_tr FLEURS utterances
 // (column 3, the cased one); see src/languages/turkish/normalize.ts for the full tabulation.
-describe("Turkish text normalization (#562)", () => {
+describe("Turkish text normalization", () => {
     it("ordinal builder: the -(I)ncI suffix under four-way harmony, dört the sole irregular stem", () => {
         const cases: [number, string][] = [
             [1, "birinci"], [2, "ikinci"], [3, "üçüncü"], [4, "dördüncü"], [5, "beşinci"],
@@ -129,11 +129,11 @@ describe("Turkish text normalization (#562)", () => {
         expect(phonemize("UTC+1", "tr")).toBe("ˈu tˈe d͡ʒˈe aɾtˈɯ bˈiɾ");
     });
 
-    // #586 — the SUFFIX exponent position, which exists because of this language. The corpus writes
+    // the SUFFIX exponent position, which exists because of this language. The corpus writes
     // `783.562 kilometrekare` and `120-160 metreküp`: the measure word welds onto the END of the unit noun,
     // which none of the tier's other three positions can spell. Before this, `km²` read as a bare
     // *kilometre* with the power silently gone.
-    it("the squared/cubed measure word (#586)", () => {
+    it("the squared/cubed measure word", () => {
         expect(phonemize("783.562 km²", "tr")).toContain("ciɫometɾekaɾˈe");
         expect(phonemize("120 m³", "tr")).toContain("metɾecˈyp");
     });

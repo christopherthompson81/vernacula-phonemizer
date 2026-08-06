@@ -6,7 +6,8 @@ multiple prons per skeleton) by the SHORT-VOWEL pattern, canonicalising notation
 inflate it. Also: for OOV (unseen) words, is short quality even knowable? (upper-bounded by homograph rate)."""
 from collections import Counter, defaultdict
 import unicodedata
-HERE="/home/chris/Programming/vernacula-phonemizer"
+import os
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 WIKI=f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
 
 def short_pattern(ipa):

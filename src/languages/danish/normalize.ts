@@ -1,5 +1,5 @@
 /**
- * Danish (da) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the Danish g2p
+ * Danish (da) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the Danish g2p
  * cannot already read into Danish words the existing pipeline speaks. Pure text→text, no IPA. Runs inside
  * danish.ts's `text()`, before the tokenizer.
  *
@@ -39,7 +39,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
 /**
- * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only (#586).
+ * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only.
  *
  * WHY THIS LANGUAGE HAD NONE. Danish predates the tier and reads its unit abbreviations from the LEXICON
  * (`da-lexicon.tsv` maps `km` → kiloˈmeːˀdɐ). That works for a TOKEN and can never compose across a slash,

@@ -238,7 +238,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 પ્લસ ");
         s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1પ્લસ ");
 
-        // 8b) THE RELATIONAL AND DIVISION SIGNS, and ± (#654). Sourced from gu_in throughout — gu.wikipedia is
+        // 8b) THE RELATIONAL AND DIVISION SIGNS, and ±. Sourced from gu_in throughout — gu.wikipedia is
         //     thin here (`બરાબર`, `ભાગ્યા`, `વત્તા` are all ×0 in its arithmetic articles), so tier 2 is the
         //     whole of the evidence.
         //

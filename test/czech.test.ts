@@ -47,7 +47,7 @@ describe("Czech g2p", () => {
     });
 });
 
-// #562 — the normalization layer. Counts measured over the FLEURS cs_cz corpus (column 3).
+// the normalization layer. Counts measured over the FLEURS cs_cz corpus (column 3).
 describe("Czech normalization", () => {
     // ★ Czech ordinals inflect for CASE, which is what separates this from every earlier language in the
     // sweep — Norwegian and Danish took one form per number, Icelandic three by gender. The rules key on

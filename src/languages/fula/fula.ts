@@ -21,7 +21,7 @@ export function phonemizeWord(word: string): string {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Fula words in Latin (incl. ɓ ɗ ŋ ɲ ƴ) OR Adlam (letters U+1E900–1E943 + its combining marks U+1E944–1E94A).
 // The number class covers BOTH digit sets the two registered scripts use: ASCII 0–9 and Adlam 𞥐–𞥙 (U+1E950–1E959).
-// #562: the corpus groups thousands with COMMAS (2,243, 100,000) and writes decimals with DOTS (1.5, 3.50);
+// the corpus groups thousands with COMMAS (2,243, 100,000) and writes decimals with DOTS (1.5, 3.50);
 // the TOKEN swallows the separators so the tier can still see the number next to its unit/sign.
 const TOKEN = new RegExp(
     `(${hostWordRun(["Latin", "Adlam"])})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+[\\u{1E950}-\\u{1E959}]*|\\d*[\\u{1E950}-\\u{1E959}]+)|([.!?…,;:])`,
@@ -32,7 +32,7 @@ const TOKEN = new RegExp(
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls (#657).
+ * deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zɓɗŋɲƴñA-ZƁƊŊƝƳÑ\\u{1E900}-\\u{1E94A}]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

@@ -263,7 +263,7 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
         expect(lb.text("0 kg").trim()).toBe(lb.text("0 Kilogramm").trim()); // was *kk*
     });
 
-    // ── REVIEW ADDITIONS (#604) ──────────────────────────────────────────────────────────────────────
+    // ── REVIEW ADDITIONS ──────────────────────────────────────────────────────────────────────
     // The PARENTHETICAL EN DASH was dropped outright in 31 utterances, running two clauses together. It
     // reads as the short break `;` and `:` already map to. The corpus's 54 en dashes are 11 numeric ranges
     // (claimed as `bis` long before the tokenizer) and this.

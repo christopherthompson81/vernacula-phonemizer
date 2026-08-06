@@ -85,7 +85,7 @@ describe("irish canonical IPA", () => {
     });
 });
 
-// Irish numeral composition (#549). The Run-1 stub read every multi-digit number digit-by-digit
+// Irish numeral composition. The Run-1 stub read every multi-digit number digit-by-digit
 // (25 → "dó cúig"). Irish needs a bespoke compositor: two numeral series (counting ceathair vs
 // attributive ceithre), the `a` particle, h-prefix on vowel-initial counting forms, and initial
 // mutation of the magnitude word (2–6 lenite, 7–10 eclipse). Every word below is attested in
@@ -190,11 +190,11 @@ describe("Irish text normalization", () => {
         expect(ph("H5N1")).toBe("hˈeːʃ ˈa kˈuːɟ ˈɛnʲ ˈa hˈeːn̪ˠ"); // héis a cúig ein a haon
     });
 
-    // #586 — `méadar ciúbach` ×3 in the corpus. Bare `m` had to be declared for the cube to have a head
+    // `méadar ciúbach` ×3 in the corpus. Bare `m` had to be declared for the cube to have a head
     // noun at all, and every digit-adjacent `m` here is a metre (`100m agus 200m`, `133 m/s`) — the
     // one-letter-key hazard checked rather than assumed. `ciliméadar cearnach` is ×0, so km² keeps the
     // documented unit-plus-`²` fallback instead of shipping on a Wikidata label alone.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("120 m³", "ga")).toContain("mʲˈeːd̪ˠəɾˠ cˈuːbˠəx");
         expect(phonemize("100m agus 200m", "ga")).toContain("mʲˈeːd̪ˠəɾˠ ˈaɡəsˠ");
     });

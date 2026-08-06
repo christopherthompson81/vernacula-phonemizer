@@ -187,7 +187,7 @@ class MandarinPhonemizer implements Phonemizer {
     }
 
     text(input: string): string {
-        // #562: the Mandarin-specific rewrite (fraction order) before the shared symbol tier.
+        // the Mandarin-specific rewrite (fraction order) before the shared symbol tier.
         input = SYMBOLS(normalizeMandarin(input));
         // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
         if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input))

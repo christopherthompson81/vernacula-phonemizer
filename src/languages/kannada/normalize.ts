@@ -46,7 +46,7 @@ const NA = "(?![\\p{L}\\p{M}])";
  * kannada.ts because its position in the ordering matters and the ordering is this file's job.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // ಮತ್ತು is ×1683 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //

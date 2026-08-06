@@ -7,9 +7,10 @@ the OOV tail, NOT ezafe (Urdu ambiguity is lexical).
 Modes:
   python ur_train_tagger.py align     # coverage report only (iterate the aligner, no training)
   python ur_train_tagger.py train     # train, save ur_tagger.pt, eval on the OOV wikipron held-out
-Run under /home/chris/base/bin/python3 (torch+cuda)."""
+Run under a torch+cuda Python (e.g. the project .venv)."""
 import sys, os, random
-HERE = "/home/chris/Programming/vernacula-phonemizer"
+import os
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 SILVER = f"{HERE}/tools/perso-arabic/silver.hindiurdu.tsv"
 WIKI = f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
 MODE = sys.argv[1] if len(sys.argv) > 1 else "align"

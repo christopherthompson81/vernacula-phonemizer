@@ -1,5 +1,5 @@
 /**
- * GREEK / CYRILLIC LOOK-ALIKES INSIDE LATIN WORDS (#586).
+ * GREEK / CYRILLIC LOOK-ALIKES INSIDE LATIN WORDS.
  *
  * Found by a fix that regressed: bounding Afrikaans' tokenizer to Latin script (so embedded foreign script
  * could reach the router instead of being claimed and dropped) broke two words, because af_za writes

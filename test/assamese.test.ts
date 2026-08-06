@@ -98,9 +98,9 @@ describe("Assamese text normalization", () => {
         expect(ph("৯০শত")).toBe("nɔbːɔi xɔt");
     });
 
-    // #586 — `বৰ্গ কিলোমিটাৰ` ×7 in as_in. The word arrives from the SHARED Bengali symbol tier, read with
+    // `বৰ্গ কিলোমিটাৰ` ×7 in as_in. The word arrives from the SHARED Bengali symbol tier, read with
     // Assamese phoneme values (র → ɹ), which is the same arrangement কিলোমিটাৰ itself already uses.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(getPhonemizer("as").text("19,500 km²").trim()).toContain("bɔɹɡo kilomitaɹ");
     });
 });

@@ -169,14 +169,14 @@ const NATIVE_CLASS = "[A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…—])`, "gu");
 
 // Number words (en, hundre, tusen, …) are all in the lexicon, so they never reach the oovOverride tier — the sync
@@ -191,7 +191,7 @@ class NorwegianPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only) resolves OOV words between the lexicon and the rule engine; the sync path omits
     // it, so tokenizer / numbers / clause assembly are byte-identical to phonemize(text, "nb").
     text(rawInput: string, oovOverride?: OovResolver): string {
-        // #562: everything the g2p cannot read is rewritten to Norwegian words FIRST — see normalize.ts
+        // everything the g2p cannot read is rewritten to Norwegian words FIRST — see normalize.ts
         // for the ordered steps and the three measured disambiguations.
         return assembleClauses(normalizeNorwegian(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]), oovOverride));

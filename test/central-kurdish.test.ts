@@ -29,7 +29,7 @@ describe("Central Kurdish (Sorani) canonical IPA — Perso-Arabic alphabet", () 
     });
 });
 
-// #562 — the normalization layer. Counts are measured over the FLEURS ckb_iq corpus (column 3).
+// the normalization layer. Counts are measured over the FLEURS ckb_iq corpus (column 3).
 describe("central kurdish normalization", () => {
     // ★ THE HEADLINE. The tokenizer's letter class is [ؠ-ۿ] = U+0620–U+06FF, which CONTAINS the
     // Arabic-Indic digits U+0660–U+0669 — so a native digit run was claimed by the LETTER branch and
@@ -68,11 +68,11 @@ describe("central kurdish normalization", () => {
         expect(normalizeCentralKurdish("کوردی زمانێکە.")).toBe("کوردی زمانێکە.");
     });
 
-    // #586 — LATIN unit aliases, which needed no new vocabulary: only a second key onto words this corpus
+    // LATIN unit aliases, which needed no new vocabulary: only a second key onto words this corpus
     // already spells out (کیلۆمەتر ×33, مەتر ×21). `5 km` reached the g2p as the cluster [ˈʊkm] while `5 کم`
     // read correctly. The two measure words are the corpus's own and both FOLLOW the noun — دووجا ×4 from
     // "پارکەکە 19500 کم دووجا", سێجا ×3 from "لونۆ 120-160 مەتر سێجا".
-    test("Latin unit aliases and the exponent words (#586)", () => {
+    test("Latin unit aliases and the exponent words", () => {
         expect(phonemize("19500 km²", "ckb")).toContain("kiːloːmatɾ duːd͡ʒaː");
         expect(phonemize("120 m³", "ckb")).toContain("matɾ seːd͡ʒaː");
         expect(phonemize("5 km", "ckb")).toContain("kiːloːmatɾ"); // was the cluster [ˈʊkm]
@@ -84,12 +84,12 @@ describe("central kurdish normalization", () => {
         expect(phonemize("802.11m", "ckb")).toContain("jak jak ˈɛm");
     });
 
-    // #586 — RATES, in BOTH scripts. The corpus writes the rate with a Perso-Arabic denominator against a
+    // RATES, in BOTH scripts. The corpus writes the rate with a Perso-Arabic denominator against a
     // slash — "480 کم لە کاتژمێر (133 مەتر/چرکە)" — and the slash was silently dropped, so four utterances lost
     // the "per" entirely. `لە` is the per, `کاتژمێر` the hour, `چرکە` the second, all from that sentence.
     // ⚠ The Perso-Arabic arm must accept the ABBREVIATION (`کم`), not just the spelled word: this block runs
     // above the decimal rule to keep the version dot (trap 39 (a local rule that depends on a character…)), and `کم` → `کیلۆمەتر` happens further down.
-    test("the rate, in both scripts (#586)", () => {
+    test("the rate, in both scripts", () => {
         expect(phonemize("120 کم/کاتژمێر", "ckb")).toContain("kiːloːmatɾ la kaːtʒmeːɾ");
         expect(phonemize("120 مەتر/چرکە", "ckb")).toContain("matɾ la t͡ʃɾka");
         expect(phonemize("120 km/h", "ckb")).toContain("kiːloːmatɾ la kaːtʒmeːɾ");

@@ -1,5 +1,5 @@
 /**
- * Norwegian Bokmål (nb) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the
+ * Norwegian Bokmål (nb) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the
  * Norwegian g2p cannot already read into Norwegian words the existing pipeline speaks. Pure text→text,
  * no IPA. Runs inside norwegian.ts's `text()`, before the tokenizer.
  *
@@ -43,7 +43,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
 /**
- * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only (#586).
+ * THE SHARED SYMBOL TIER, adopted for UNITS AND RATES only.
  *
  * WHY THIS LANGUAGE HAD NONE. Norwegian predates the tier and reads its unit abbreviations from the LEXICON,
  * which handles a TOKEN and can never compose across a slash — so `5 km` was right while a rate's denominator
@@ -67,7 +67,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
     // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
     multiply: { times: "ganger" },
-    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `og` ×1135 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     ampersand: "og",

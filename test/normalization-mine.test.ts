@@ -1,5 +1,5 @@
 /**
- * Reproducibility and correctness of the normalization miner (#585).
+ * Reproducibility and correctness of the normalization miner.
  *
  * The miner's output is an ARTIFACT that gets committed and reviewed, so byte-stability across runs is a
  * property worth holding: a selection that reorders itself between runs makes every regeneration look like
@@ -153,7 +153,7 @@ describe("normalization miner", () => {
 });
 
 /**
- * The fill's article fetches are pooled (#586) — 9114 ms serial vs 1304 ms at 4 on a fixed 16-title list.
+ * The fill's article fetches are pooled — 9114 ms serial vs 1304 ms at 4 on a fixed 16-title list.
  * Two properties are load-bearing and neither is visible from the output of a successful run.
  */
 describe("mapPool", () => {

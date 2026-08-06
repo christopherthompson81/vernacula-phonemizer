@@ -1,5 +1,5 @@
 /**
- * THE DEFECT CLASSES, in one place (#586) — what counts as a leak, what counts as a drop, and the
+ * THE DEFECT CLASSES, in one place — what counts as a leak, what counts as a drop, and the
  * REDUNDANT-vs-DROP discrimination that separates a permissible drop from a real one.
  *
  * WHY THIS FILE EXISTS. These tables lived in three copies — `mine.ts scan`, `corpus-diff.ts emit` and
@@ -27,7 +27,7 @@
 export const LEAK_CLASSES: readonly (readonly [string, RegExp])[] = [
     // `\p{Nd}`, NOT `\d`: under the `u` flag `\d` is ASCII 0-9 and nothing else, so this class was blind to
     // a digit leak in every language that writes its own numerals — Burmese ၀-၉, Thai ๐-๙, Bengali ০-৯,
-    // Khmer, Lao. Found while mining a Burmese hard-set (#585).
+    // Khmer, Lao. Found while mining a Burmese hard-set.
     ["DIGIT", /\p{Nd}/u],
     ["SLOT-GAP", /\s{2,}|^\s|\s$/u],
     // NOT `.,;:!?` — those are the CANONICAL inline pause marks every engine emits via clauseSink, so
@@ -179,7 +179,7 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
 };
 
 /**
- * SIGN CLASSES A LANGUAGE IS INTENTIONALLY SILENT ON (#654) — the synthetic-probe counterpart of
+ * SIGN CLASSES A LANGUAGE IS INTENTIONALLY SILENT ON — the synthetic-probe counterpart of
  * `ACCEPTED_SILENT` above, and the difference between the two matters.
  *
  * `ACCEPTED_SILENT` names CORPUS LINES: this exact sentence's hyphen is a designation, so the drop is correct.
@@ -370,7 +370,7 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
 ];
 
 /**
- * DESIGNATIONS ACCEPTED AS CORRECTLY SILENT (#586) — the sweep's permanent residual, named per instance.
+ * DESIGNATIONS ACCEPTED AS CORRECTLY SILENT — the sweep's permanent residual, named per instance.
  *
  * WHY A BASELINE AND NOT A GUARD. The `minus` class above explains why a spaced designation cannot be
  * separated from a real negative by pattern: `चंद्रयान -1` and a real `-5 stupňů` are the same shape — word,
@@ -485,7 +485,7 @@ export function isAcceptedSilent(lang: string, cls: string, line: string, re: Re
  * ISO codes that denote each currency sign.
  *
  * A CURRENCY IS ALSO NAMED BY ITS ISO CODE, which `contribution` cannot see: the code reads as spelled
- * letters, so the sign's own word is nowhere in the IPA and a correct drop still reports. Malay (#601)
+ * letters, so the sign's own word is nowhere in the IPA and a correct drop still reports. Malay
  * writes `$45 juta AUD` — the sign and the code are the same currency stated twice, so saying it once is the
  * right reading and the deletion test cannot pass on it. Sign-keyed rather than a bare three-capitals shape,
  * because that shape is every other initialism in the corpus too.

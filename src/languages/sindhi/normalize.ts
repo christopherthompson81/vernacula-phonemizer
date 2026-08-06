@@ -1,5 +1,5 @@
 /**
- * Sindhi (sd) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the Sindhi g2p
+ * Sindhi (sd) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the Sindhi g2p
  * cannot already read into Sindhi words the existing pipeline speaks. Pure text→text, no IPA. Runs inside
  * sindhi.ts's `text()`, before the tokenizer.
  *
@@ -140,7 +140,7 @@ export function normalizeSindhi(input: string): string {
 
     // 12) ARITHMETIC AND RELATIONAL SIGNS — infix between digits is where arithmetic lives; the
     //     relational signs are read in every position, because a dropped sign is inaudible.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single

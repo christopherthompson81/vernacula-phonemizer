@@ -52,7 +52,7 @@ describe("Serbian canonical IPA", () => {
 // utterances) with the reading the corpus itself licenses; see src/languages/serbian/normalize.ts for the
 // tabulation and the counts. Asserted through the engine's `text()`, not against the normalizer, so the
 // wiring and the ordering are covered too.
-describe("Serbian normalization (#562)", () => {
+describe("Serbian normalization", () => {
     const say = (s: string): string => createSerbian().text(s).trim();
 
     // The dominant defect (×211): Serbian writes an ordinal as numeral + PERIOD, and the engine read the

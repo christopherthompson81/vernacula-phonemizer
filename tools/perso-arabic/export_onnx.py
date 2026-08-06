@@ -4,7 +4,7 @@ tier under the exact-match lexicon). Mirrors the Arabic diacritizer.onnx pipelin
 PyTorch (argmax must match exactly) → int8 dynamic-quantize (keeps the committed model near the Arabic 15 MB
 footprint) → re-check quantized argmax agreement. Writes the .onnx + copies the sidecar meta beside the TS module.
 
-  /mnt/data/ar-diac-venv/bin/python export_onnx.py
+  $ARDIAC_PY export_onnx.py
 """
 import json, os, sys
 import torch, torch.nn as nn
@@ -13,7 +13,7 @@ import onnxruntime as ort
 from onnxruntime.quantization import quantize_dynamic, QuantType
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CKPT = "/mnt/data/ar-diac/bilstm_multilingual.pt"
+CKPT = "$ARDIAC/bilstm_multilingual.pt"
 DEST = os.path.join(HERE, "..", "..", "src", "core")  # beside riderDiacritizer.ts
 FP32 = "/tmp/rider_diac.fp32.onnx"
 INT8 = os.path.join(DEST, "riderDiacritizer.onnx")

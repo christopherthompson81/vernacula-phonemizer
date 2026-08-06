@@ -1,0 +1,10 @@
+# Data, not source — reformatting these would rewrite committed artifacts.
+**/*.tsv
+**/*.txt
+**/*.onnx
+tools/corpus/mined/
+tools/referee-eval/referees/
+src/languages/**/*.json
+LICENSES/*.txt
+node_modules/
+.venv/

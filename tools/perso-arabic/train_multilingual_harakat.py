@@ -8,7 +8,7 @@ rider letters init random). Language conditioning = a per-word language TOKEN pr
 architecture change, so the warm-start stays clean). Trains on the mined manifest (train.tsv/eval.tsv), riders
 upsampled, and reports per-language DER on the held-out split.
 
-  /mnt/data/ar-diac-venv/bin/python train_multilingual_harakat.py [--epochs 20 --upsample 4]
+  $ARDIAC_PY train_multilingual_harakat.py [--epochs 20 --upsample 4]
 """
 import argparse, json, os, sys, copy, random
 import torch, torch.nn as nn
@@ -16,11 +16,11 @@ from torch.nn.utils.rnn import pad_sequence
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ap = argparse.ArgumentParser()
-ap.add_argument("--warm", default="/mnt/data/ar-diac/bilstm_pausal.pt")
+ap.add_argument("--warm", default="$ARDIAC/bilstm_pausal.pt")
 ap.add_argument("--vocab", default=os.path.join(HERE, "multilingual_charvocab.json"))
 ap.add_argument("--train", default=os.path.join(HERE, "train.tsv"))
 ap.add_argument("--eval", default=os.path.join(HERE, "eval.tsv"))
-ap.add_argument("--ckpt", default="/mnt/data/ar-diac/bilstm_multilingual.pt")
+ap.add_argument("--ckpt", default="$ARDIAC/bilstm_multilingual.pt")
 ap.add_argument("--epochs", type=int, default=25)
 ap.add_argument("--upsample", type=int, default=4, help="(legacy uniform rider ×; superseded by --balance)")
 ap.add_argument("--balance", type=int, default=4000, help="size-aware upsampling target: each rider → ~N examples")

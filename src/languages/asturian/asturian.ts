@@ -54,7 +54,7 @@ function scan(word: string): string[] {
         // word-initial ⟨r⟩ → [r] trill (single ⟨r⟩ is the tap [ɾ] via the table; ⟨rr⟩ is the digraph above).
         if (c === "r" && i === 0) { out.push("r"); i += 1; continue; }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
-        // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
+        // Consulted AFTER every digraph and single-letter rule, so it cannot override this language.
         const ph = G[c] ?? latinPhone(c, { initial: i === 0 });
         if (ph !== undefined && ph !== "") out.push(ph);
         i += 1;
@@ -83,7 +83,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'·")})|(\\d+)|([.!?…,;:]
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  *
  * ⚠ NOT QUITE VERBATIM: ḷ Ḷ were REMOVED, because the g2p has no rule for them and DROPPED them outright.
  * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was

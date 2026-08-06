@@ -44,10 +44,10 @@ describe("persian canonical IPA", () => {
     });
 });
 
-// ── TEXT NORMALIZATION (#562) ───────────────────────────────────────────────────────────────────────────────
+// ── TEXT NORMALIZATION ───────────────────────────────────────────────────────────────────────────────
 // src/languages/persian/normalize.ts + the DECIMAL IRANIAN number compositor (persian/numbers.ts). Counts and
 // the before-behaviour these pin are in the normalize.ts header, measured over the fa_ir corpus (1,856 utts).
-describe("persian text normalization (#562)", () => {
+describe("persian text normalization", () => {
     // The compositor. Persian was previously read by the Indic lakh/crore composer, which had the tens and units
     // in Indic order, no ⟨و⟩, and no fused hundreds: 21 "یک بیست", 200 "دو صد", 1,000,000 "ده صد هزار".
     test("cardinals: connective ⟨و⟩ /o/, bare صد/هزار, fused hundreds, million", () => {
@@ -158,12 +158,12 @@ describe("persian text normalization (#562)", () => {
         expect(code).not.toMatch(/\\b/u);
     });
 
-    // #586 — the header records that this corpus writes NO unit abbreviation, which is still true; but
+    // the header records that this corpus writes NO unit abbreviation, which is still true; but
     // `5 km` reached the g2p as the cluster [ˈʊkm] and a phonemizer is handed arbitrary text (the argument
     // step 7b already makes for the currency signs fa_ir also lacks). Every word is the corpus's own:
     // کیلومتر ×65, متر ×45, and the richest measure-word attestation in the sweep — کیلومتر مربع ×16,
     // متر مکعب ×3, both POSTPOSED.
-    test("unit abbreviations and their powers (#586)", () => {
+    test("unit abbreviations and their powers", () => {
         expect(phonemize("19,500 km²", "fa")).toContain("kiːlˈuːmtɾ maɾebˈeʔ");
         expect(phonemize("120 m³", "fa")).toContain("mˈetɾ mˈakʔb");
         expect(phonemize("4892 m", "fa")).toContain("mˈetɾ");
@@ -177,10 +177,10 @@ describe("persian text normalization (#562)", () => {
         expect(phonemize("802.11m", "fa")).toContain("ˈiːk ˈiːk ˈɛm");
     });
 
-    // #586 — RATES. `120 km/h` read the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and `133 m/s` as
+    // RATES. `120 km/h` read the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and `133 m/s` as
     // [ˈɛs]. The construction is spelled out in this corpus's own rate sentence: "480 کیلومتر بر ساعت
     // (133 متر بر ثانیه؛ 300 مایل بر ساعت)" — `بر` is "per", `ساعت` the hour, `ثانیه` the second.
-    test("the rate denominators (#586)", () => {
+    test("the rate denominators", () => {
         expect(phonemize("120 km/h", "fa")).toContain("bˈaɾ saːʔˈet");
         expect(phonemize("133 m/s", "fa")).toContain("bˈaɾ saːnejˈe");
         expect(phonemize("اصطکاک کم است", "fa")).toContain("kˈam ʔˈast"); // the adjective still untouched

@@ -504,7 +504,7 @@ export function normalizeSlovak(input: string): string {
     //     counterpart, and a sign that is dropped turns a negative into a positive — the one outcome that
     //     cannot be right. U+2212 as well as the hyphen; the boundary keeps a hyphenated compound and a
     //     range (already rewritten in step 6) untouched.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single

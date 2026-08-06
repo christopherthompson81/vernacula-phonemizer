@@ -141,7 +141,7 @@ class WuPhonemizer implements Phonemizer {
         // itself; the gap pass covers everything else via the script router (core/scripts.ts).
                 // ⚠ The Latin arm is ALL of Latin plus marks, not `[A-Za-z]+`: the ASCII class ended the token at a
                 // diacritic and left that letter read as an English letter name (`Cañitas` → *kʰˈʌ ˈɛn ˈaᶦt̬əz*). The
-                // engine routes a Latin run to the injected reader, so widening is the whole fix (#657).
+                // engine routes a Latin run to the injected reader, so widening is the whole fix.
                 const tok = new RegExp(`(\\p{Script=Han}+)|(\\d+)|(${LATIN_RUN})|([。，、？！；：.,?!;:])`, "gu");
         
         return assembleClauses(input, tok, (m, sink) => {

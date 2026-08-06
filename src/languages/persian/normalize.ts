@@ -167,7 +167,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(?<![\d.,])([01]?\d|2[0-3])\.([0-5]\d)(?=\s*UTC(?![A-Za-z]))/gu,
             (m: string, h: string, min: string) => clock(m, h, min));
 
-        // 3b) UNIT ABBREVIATIONS AND THEIR POWERS (#586). The header above records that this corpus writes NO
+        // 3b) UNIT ABBREVIATIONS AND THEIR POWERS. The header above records that this corpus writes NO
         //     unit abbreviation, and that is still true — but `5 km` was reaching the g2p as the cluster [ˈʊkm]
         //     and `5 km²` lost the quantity outright, and a phonemizer is handed arbitrary text (the argument
         //     step 7b already makes for the currency signs this corpus also lacks). No word is invented: every
@@ -232,7 +232,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //    tier's percent pattern is ASCII-`%`-only anyway (see the core note in the commit message).
         s = s.replace(new RegExp(`(\\d)\\s?%${NOT_WORD}`, "gu"), `$1 درصد`);
 
-        // 7b) CURRENCY (#584). `$5` read as bare [pˈand͡ʒ] — the sign is in no group of the engine's TOKEN, so
+        // 7b) CURRENCY. `$5` read as bare [pˈand͡ʒ] — the sign is in no group of the engine's TOKEN, so
         //     it was DELETED exactly as the percent signs were, and a dropped sign is worse than a wrong word
         //     because nothing in the output marks the loss. fa_ir contains ZERO `$` against 18 `%`, so the
         //     corpus-driven gate that caught the percent could not reach this one — but the WORDS are in that
@@ -325,7 +325,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 درجه فارنهایت");
         s = s.replace(/(\d)\s?°/gu, "$1 درجه");
 
-        // 7c1) THE MINUS AND ±, both dropped before, so `-5 °C` read as five degrees above zero (#654).
+        // 7c1) THE MINUS AND ±, both dropped before, so `-5 °C` read as five degrees above zero.
         //      ⚠ PERSIAN SPLITS THE SIGN FROM THE OPERATION, as ko and vi do: منفی is the NEGATIVE sign
         //      (×22 token / 9 articles, correct sense throughout) while به اضافه / منها are the operators, and
         //      this file's plus rule already uses the operator form. A sign directly before a digit is the
@@ -344,7 +344,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}منفی `);
 
-        // 7c2) RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE SOURCE IS AN EXPLICIT PRONUNCIATION INSTRUCTION —
+        // 7c2) RELATIONAL AND DIVISION SIGNS. ⚠ THE SOURCE IS AN EXPLICIT PRONUNCIATION INSTRUCTION —
         //      fa.wikipedia's notation article does not merely use these words, it says how each sign is READ,
         //      and lists the alternatives:
         //

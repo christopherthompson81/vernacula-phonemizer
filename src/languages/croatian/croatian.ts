@@ -18,7 +18,7 @@ import { MANIFEST } from "./manifest.ts";
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A Croatian word (Gaj's Latin incl. diacritics č ć š ž đ) / number / punctuation token. Latin-only: modern Croatian
 // is written exclusively in Latin (the Serbian engine's Cyrillic path is not exposed here).
-// #562: the corpus groups thousands with PERIODS (2.500, 40.000) and writes decimals with COMMAS (2,4 Ghz).
+// the corpus groups thousands with PERIODS (2.500, 40.000) and writes decimals with COMMAS (2,4 Ghz).
 // The de-grouping happens in normalize.ts; the TOKEN here swallows the comma so the tier can see the number.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
 
@@ -26,7 +26,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?|\\d+,
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zčćšžđ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

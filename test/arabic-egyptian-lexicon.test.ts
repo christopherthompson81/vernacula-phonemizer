@@ -51,11 +51,11 @@ describe("arz Egyptian g2p rules (diacritized input)", () => {
     }
 });
 
-// #550 — the mined lexicon once glued a Wiktionary entry's phonemic and phonetic transcriptions together
+// the mined lexicon once glued a Wiktionary entry's phonemic and phonetic transcriptions together
 // (كتب → "katab/[kˈatab"), and the raw "/[" reached the IPA output as if it were a phoneme. Two layers now:
 // the DATA is repaired, and the loader DROPS any row carrying a structural delimiter, so a re-mine cannot
 // reintroduce it — such a word falls through to the rule g2p instead (unrefined, but never punctuation).
-describe("Egyptian lexicon — no annotation artifacts (#550)", () => {
+describe("Egyptian lexicon — no annotation artifacts", () => {
     const DELIMITER = /[/[\]~()|\\]/u;
 
     it("ships no entry carrying a structural delimiter", () => {
@@ -118,13 +118,13 @@ describe("Arabic foreign-cluster repair (#560 follow-up)", () => {
     });
 });
 
-// #561 — Egyptian numerals. arz used to read digits with the MSA compositor, producing forms the dialect
+// Egyptian numerals. arz used to read digits with the MSA compositor, producing forms the dialect
 // does not have: 80 → θamaːnuːn, with a /θ/ Egyptian lacks (Egyptian folds it to t/s), and the MSA
 // connector wa. The variety now carries its own attested tables (kaikki arz IPA, wikipron, and
 // en.wiktionary {{arz-numeral}} transliterations; the fused hundreds 300–900 are pedagogical-literature
 // forms, flagged as such in egyptian.jsonc). Composition (units-before-tens, fused hundreds) rides the
 // shared algorithm. Sync path — numberToIpa needs no diacritizer.
-describe("Egyptian numerals (#561)", () => {
+describe("Egyptian numerals", () => {
     it("dialect forms, not MSA", () => {
         expect(arz.text("80")).toBe("tamaniːn"); // the issue's headline — was θamaːnuːn
         expect(arz.text("25")).toBe("xamsa wi ʕiʃriːn"); // wi, not wa

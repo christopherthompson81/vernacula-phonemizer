@@ -4,7 +4,8 @@ could fix. kaikki-urd gives human Urdu IPA with the correct Arabic-template ɪ/�
 short-vowel-layer errors our Hindi-derived readings make. It is INDEPENDENT of wikipron → validates non-circularly.
 Measures: coverage of wikipron, standalone accuracy, and how many of our current covered-misses it fixes."""
 import json, unicodedata
-HERE="/home/chris/Programming/vernacula-phonemizer"
+import os
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 DUMP="/tmp/ur_kaikki.jsonl"
 WIKI=f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
 LEX=f"{HERE}/src/languages/urdu/lexicon-ipa.tsv"

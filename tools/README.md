@@ -35,9 +35,25 @@ A language whose engine has a trained model gets a directory named **exactly lik
 - `language-catalogue/` — the language metadata catalogue (sqlite + TSV) used for planning
   coverage, not for phonemization.
 
+## Environment
+
+Nothing here hardcodes a machine layout — the tools read external data roots from the environment and
+degrade to a clear failure if one is unset. None are needed to build, test, or use the phonemizer
+itself; they matter only when regenerating a committed artifact.
+
+| Variable | What it points at | Used by |
+|---|---|---|
+| `FLEURS` | the FLEURS transcript tree (`<corpus>/<split>.tsv`) | `normalization/` — mining, coverage, review |
+| `DUMPS` | a directory of downloaded kaikki/wiktionary dumps and reference TSVs | `gen/`, `sindhi/`, `perso-arabic/` |
+| `ESPEAK_NG` | an `espeak-ng` checkout, for its `dictsource/` tier | `normalization/sources.ts` |
+| `ESPEAK_PORTABLE` | the reference-engine checkout some one-off distillations were built against | `gen/build-{ca,ga,sv,cs,cy,th}-*` |
+| `AUDIO_CACHE` | the FLEURS audio cache | `corpus/fetch-fleurs-audio.py` |
+| `ARDIAC` / `ARDIAC_PY` | the Arabic-diacritizer staging dir and its torch+CUDA interpreter | `perso-arabic/`, `persian/` |
+| `ARZDIAC` | the Egyptian-diacritizer staging dir | the `arz` pipeline |
+
 ## Conventions
 
-- **Read from `/mnt/data` or the network, write into `src/`** — the source corpora are not
+- **Read from an external data root or the network, write into `src/`** — the source corpora are not
   committed (too large, and often not redistributable); the *derived* artifact is.
 - **A tool that generates a committed file writes a provenance header into it**, naming the tool
   and the upstream license, so a data file is never orphaned from its origin.

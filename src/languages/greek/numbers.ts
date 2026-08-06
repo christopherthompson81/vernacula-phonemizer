@@ -4,7 +4,7 @@
  * modelled. Covers 0 … <10¹²; larger / non-finite → digit-by-digit. Numbers are unmeasured (the referees are
  * word-only) — best-effort.
  *
- * #562: the 10⁶ ceiling was raised because the corpus's `5.000.000` (a period-grouped number, de-grouped by
+ * the 10⁶ ceiling was raised because the corpus's `5.000.000` (a period-grouped number, de-grouped by
  * normalize.ts step 7) fell off it and read as seven digit names — «πέντε μηδέν μηδέν μηδέν μηδέν μηδέν
  * μηδέν». εκατομμύριο/δισεκατομμύριο take the same singular-vs-plural shape as χίλια/χιλιάδες.
  */

@@ -51,7 +51,7 @@ function numberToThaiWords(n: number): string[] {
 
 // #562 symbol normalization — Thai: เปอร์เซ็นต์ (kaikki-attested /pɤː˧.sen˧/), read by the Thai g2p.
 //
-// CURRENCY (#584). `$5` read as bare *hˈaː˥˩*. th_th contains ZERO `$` against 39 `%`, so the corpus-driven
+// CURRENCY. `$5` read as bare *hˈaː˥˩*. th_th contains ZERO `$` against 39 `%`, so the corpus-driven
 // gate that caught the percent could not see this — yet all four words are in that same corpus, spelled out
 // and immediately after a numeral, which is the slot the tier emits into:
 //
@@ -61,13 +61,13 @@ function numberToThaiWords(n: number): string[] {
 //   ยูโร    ×3   "ทำรายได้มากกว่า 10 พันล้านยูโร (14.7 พันล้านดอลลาร์สหรัฐ"
 //
 // One form each: Thai nouns do not inflect for number. Counted by SUBSTRING and that is correct here — Thai
-// is written without spaces, so there is no token boundary to test and the examples are the evidence (#586).
+// is written without spaces, so there is no token boundary to test and the examples are the evidence.
 //
 // `unspacedScript` for the same reason: a currency sign in Thai is normally flanked by Thai letters, and the
 // tier's letter-boundary guard would reject exactly that ordinary case — `$5ของ` dropped the sign while `$5`
 // alone read it.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 — `&` was DROPPED outright, losing the sign from `ที่พักประเภท B&B`. `และ` is the ordinary
+    // `&` was DROPPED outright, losing the sign from `ที่พักประเภท B&B`. `และ` is the ordinary
     // conjunction and the corpus's own word, ×1711 — the most frequent candidate by a wide margin (`กับ`
     // ×674 is "with", and `แอนด์`, the transliterated English "and", is ×0 here).
     // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
@@ -80,7 +80,7 @@ const SYMBOLS = makeSymbolNormalizer({
     multiply: { times: "คูณ" },
     ampersand: "และ",
     percent: ["เปอร์เซ็นต์"],
-    // #586 — `5 km` read as *hˈaː˥˩ ˈʊkm*: no unit was declared. Verified in th_th, each immediately after a
+    // `5 km` read as *hˈaː˥˩ ˈʊkm*: no unit was declared. Verified in th_th, each immediately after a
     // numeral: กิโลเมตร ×25 "ห่างจากบัวโนสไอเรส 50 กิโลเมตร", เมตร ×46 "ยอดเขาวินสันสูง 4,892 เมตร",
     // เซนติเมตร ×1 "อยู่ห่างกันเพียง 69 เซนติเมตร". มิลลิเมตร and กิโลกรัม are ×0 and stay undeclared.
     units: { km: ["กิโลเมตร"], m: ["เมตร"], cm: ["เซนติเมตร"] },

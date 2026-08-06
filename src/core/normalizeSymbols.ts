@@ -1,5 +1,5 @@
 /**
- * Shared SYMBOL normalization (#562) — the language-independent machinery for rewriting %, currency
+ * Shared SYMBOL normalization — the language-independent machinery for rewriting %, currency
  * signs, and unit abbreviations into that language's words, BEFORE its tokenizer. The per-language part
  * is pure data (`SymbolData`); the engine here owns the matching, the number-magnitude hop for currency
  * ($5 million → "5 million dollars"-shaped), and COUNT AGREEMENT — which for Slavic needs more than
@@ -407,7 +407,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // a currency sign — `2,2 Millioune km²`, `2.2 miljoen km2`, `2,2 милиони km2`. Currency has matched
     // `magAlt` on both sides since the Nepali run; the unit path never did, so the number was not adjacent
     // to the unit, the match failed, and the unit reached the IPA AS RAW LETTERS. Reported by the
-    // Luxembourgish run (#604), which measured it and correctly declined to touch core.
+    // Luxembourgish run, which measured it and correctly declined to touch core.
     // Blast radius, measured over every corpus whose language declares both `magnitudes` and `units`:
     // SEVEN utterances, in af, az, nl, el, lb, mk and ta — and all seven are the same FLEURS sentence, the
     // 15-island archipelago. Six languages were shipping the identical defect.

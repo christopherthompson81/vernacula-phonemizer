@@ -48,7 +48,7 @@ export function phonemizeWord(word: string): string {
         }
         // ⚠ NOT SILENTLY: a letter with no grapheme rule here still denotes a sound, and dropping it deletes
         // what the writer typed. Consulted only on the MISS branch, after every grapheme (including every
-        // digraph) has been tried, so it can never override a reading this language has an opinion about (#663).
+        // digraph) has been tried, so it can never override a reading this language has an opinion about.
         if (!matched) {
             out += latinPhone(w[i]!, { initial: i === 0 }) ?? "";
             i += 1;
@@ -64,7 +64,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zàéëóñŋ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

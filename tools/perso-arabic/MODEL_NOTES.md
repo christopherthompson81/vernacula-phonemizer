@@ -4,14 +4,15 @@ Everything needed to understand, reproduce, or extend the neural short-vowel (ha
 to be rediscovered by probing. Two models exist: the **Arabic** diacritizer (shipped) and the **multilingual**
 extension (this line of work). Both are char-level BiLSTMs with the same 19-label harakat scheme.
 
-## Environment (the GPU box — NOT this repo, NOT CI)
-- **Training venv:** `/mnt/data/ar-diac-venv/bin/python` (torch 2.6.0+cu124, CUDA on an RTX 3090). A second venv
-  `/mnt/data/ar-diac/venv` (torch 2.5.1) also works. The user's `~/.local` torch is broken — don't use it.
-- **Staging dir:** `/mnt/data/ar-diac/` — corpora (arwiki dump, ara_news), all `.pt` checkpoints, exported `.onnx`.
-  Big files live here and are **gitignored**; only the `*.meta.json` maps + the TSV data + the scripts are committed.
-- **The Arabic training scripts live in the SIBLING repo:** `~/Programming/espeak-ng-portable/tools/diacritization/`
-  (`train_bilstm_sent.py`, `catt_silver.py`, `export_onnx.py`, …). The multilingual scripts live here in
-  `tools/perso-arabic/`.
+## Environment (offline GPU training — NOT this repo, NOT CI)
+- **Training venv:** any torch+CUDA Python; these models were trained on torch 2.6.0+cu124. Set `$ARDIAC` to a
+  staging directory and `$ARDIAC_PY` to that interpreter — the scripts below read both.
+- **Staging dir (`$ARDIAC`):** corpora (arwiki dump, ara_news), all `.pt` checkpoints, exported `.onnx`. Big files
+  live there and are **gitignored**; only the `*.meta.json` maps + the TSV data + the scripts are committed.
+- **Scope:** the multilingual scripts are here in `tools/perso-arabic/`. The Arabic base model predates this repo
+  and its original training scripts (`train_bilstm_sent.py`, `catt_silver.py`, `export_onnx.py`) are not included;
+  what ships is the trained model plus its provenance. Retraining from scratch means reimplementing that pipeline —
+  the architecture, vocab, label scheme and data sources are all documented below precisely so that is possible.
 
 ## The Arabic base model (`src/languages/arabic/diacritizer.onnx`, gitignored)
 - **Architecture:** char-level **BiLSTM**, emb 128, hidden 512, 3 layers, bidirectional, per-position softmax over
@@ -21,7 +22,7 @@ extension (this line of work). Both are char-level BiLSTMs with the same 19-labe
   labels **Arabic Wikipedia** (CC-BY-SA); trained silver-only. No Tashkeela/Leipzig in the model. See
   `src/languages/arabic/diacritizer.PROVENANCE.md`. (`diacritization.tsv` is a separate 259k Tashkeela-derived
   lexicon used by `restore.ts` as a fallback — Tashkeela is ANCIENT public-domain text, not a licence blocker.)
-- **Checkpoints on /mnt/data** (all emb 39×128, fc 19×1024, 3-layer LSTM): `bilstm_pausal.pt` is the one whose
+- **Checkpoints in `$ARDIAC`** (all emb 39×128, fc 19×1024, 3-layer LSTM): `bilstm_pausal.pt` is the one whose
   char+label maps **exactly match** the committed `diacritizer.meta.json` → **use it for warm-start**. The
   `bilstm_silveronly*.pt` have a different char ordering (labels still match).
 
@@ -68,8 +69,8 @@ Language conditioning = a per-word `<lang:xx>` token prepended to the char seque
 
 ### Train / evaluate
 ```
-/mnt/data/ar-diac-venv/bin/python train_multilingual_harakat.py --epochs 25 --upsample 4
-/mnt/data/ar-diac-venv/bin/python predict_harakat.py --out /tmp/pred.tsv   # defaults --in eval_set.tsv
+$ARDIAC_PY train_multilingual_harakat.py --epochs 25 --upsample 4
+$ARDIAC_PY predict_harakat.py --out /tmp/pred.tsv   # defaults --in eval_set.tsv
 npx tsx eval_endtoend.ts /tmp/pred.tsv
 ```
 - **Warm-start:** copy the 26 vocab-independent lstm/fc tensors directly; copy embedding rows by CHAR IDENTITY
@@ -86,7 +87,7 @@ npx tsx eval_endtoend.ts /tmp/pred.tsv
   (46→67%), **ur +13.9** (50→64% — incl. the یَ→eː win), **pa +2.4**, **ps +0.9** (now positive!). The ADAPTED-WORD
   encodings (damma+waw→uː, ya+fatḥa→eː) closed most of what had looked like the "lexical" tail — the model learns
   them from the mined labels, so the harakat scheme itself is the lexicon-generalizer. Baseline 45.0% is the
-  g2p-COVERAGE floor (the words no harakat can reach — genuinely lexical residue for an optional per-word lexicon). Checkpoint `/mnt/data/ar-diac/bilstm_multilingual.pt`
+  g2p-COVERAGE floor (the words no harakat can reach — genuinely lexical residue for an optional per-word lexicon). Checkpoint `$ARDIAC/bilstm_multilingual.pt`
   (gitignored); `multilingual_diacritizer.meta.json` committed. (An earlier "+18" was a DIFFERENT, moving eval over
   only the invertible subset — not comparable; use the stable `eval_set.tsv` numbers.)
 

@@ -61,7 +61,7 @@ function number(digits: string): string {
 
 // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
 // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
-// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix.
 const TOKEN = new RegExp(
     `([${KANNADA_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+)|([।॥.?!,;:])`,
     "gu",

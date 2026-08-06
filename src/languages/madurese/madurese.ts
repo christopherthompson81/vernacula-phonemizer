@@ -69,7 +69,7 @@ function tokenize(w: string): Seg[] {
         if (!matched) {
             geminate = false;
             // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
-            // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+            // reached when every grapheme (digraphs included) has declined, so the language's own reading wins.
             { const ph = latinPhone(w[i]!, { initial: i === 0, includeH: true });
               if (ph !== undefined) segs.push({ kind: "C", ipa: ph, reg: "low" }); }
             i += 1;
@@ -140,7 +140,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.!?…,;:])`
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zâèéòḍṭ']";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

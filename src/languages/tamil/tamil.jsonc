@@ -89,7 +89,7 @@
 
     // Cardinal number words (Indian grouping: ஆயிரம் 10³ / லட்சம் 10⁵ / கோடி 10⁷). Phonemized by the g2p.
     //
-    // #562 — Tamil numerals are SANDHI-FUSED, not concatenated. Every multi-part numeral changes shape at
+    // Tamil numerals are SANDHI-FUSED, not concatenated. Every multi-part numeral changes shape at
     // the joint, so a compositor with only `units`/`tens`/`hundred` produced readings no Tamil speaker
     // uses: 11 was *பத்து ஒன்று (பதினொன்று), 200 was *இரண்டு நூறு (இருநூறு), 1000 was *ஒன்று ஆயிரம்
     // (ஆயிரம்), and 1995 was *ஒன்று ஆயிரம் ஒன்பது நூறு தொண்ணூறு ஐந்து where Tamil says ஆயிரத்து

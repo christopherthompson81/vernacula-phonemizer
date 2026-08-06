@@ -46,7 +46,7 @@ describe("urdu canonical IPA", () => {
     });
 });
 
-// #562 — the tenth language. As with Bengali, the biggest defects were NOT in the normalization layer:
+// the tenth language. As with Bengali, the biggest defects were NOT in the normalization layer:
 // the numbers data had no fused 21-99 forms, clausePunctuation mapped every mark to a PADDED copy of
 // itself, and the number function leaked ASCII digits for any decimal.
 describe("urdu normalization", () => {
@@ -99,8 +99,8 @@ describe("urdu normalization", () => {
         expect(phonemize("قمری مواد", "ur")).toBe("qˈəmɾiː mʋɑːd̪");
     });
 
-    // #586 — `مربع کلومیٹر` ×9 and `کیوبک میٹر` ×1, both word-FIRST, where Arabic postposes its cognate مربع.
-    test("the squared/cubed measure word (#586)", () => {
+    // `مربع کلومیٹر` ×9 and `کیوبک میٹر` ×1, both word-FIRST, where Arabic postposes its cognate مربع.
+    test("the squared/cubed measure word", () => {
         expect(phonemize("783562 km²", "ur")).toContain("mʊɾˈəbbɑːʔ kɪloːmˈiːʈəɾ");
         expect(phonemize("120 m³", "ur")).toContain("kjˈoːbək mˈiːʈəɾ");
     });

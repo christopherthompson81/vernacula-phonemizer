@@ -1,9 +1,9 @@
 /**
- * Burmese (my) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the Burmese
+ * Burmese (my) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the Burmese
  * g2p cannot already read into Burmese-script words the existing pipeline speaks. Pure text→text, no IPA.
  * Runs inside burmese.ts's `text()`, before the tokenizer.
  *
- * ★ THE FIRST LANGUAGE NORMALIZED WITHOUT A FLEURS CORPUS (#585). Burmese has no FLEURS transcripts, so
+ * ★ THE FIRST LANGUAGE NORMALIZED WITHOUT A FLEURS CORPUS. Burmese has no FLEURS transcripts, so
  * the evidence here is a MINED corpus: 454,821 paragraphs extracted from the my.wikipedia dump, from which
  * tools/normalization/mine.ts selected a hard-set covering all 24 pattern cells
  * (tools/corpus/mined/my.jsonc). Every count below is measured over those paragraphs, and — the part that

@@ -65,11 +65,11 @@ describe("Māori cardinal numbers", () => {
         expect(say(1000000000)).toBe("kotahi piɾiona"); // kotahi piriona
     });
 
-    // #586 — Māori had NO normalization of any kind: `text()` ran the tokenizer straight over raw input, and
+    // Māori had NO normalization of any kind: `text()` ran the tokenizer straight over raw input, and
     // its classes are letters, digits and clause marks, so `%`, `$` and every unit abbreviation were DELETED.
     // Every word here is from mi_nz over its 1,994 unique utterances — ōrau ×8, tāra ×6, pauna ×5,
     // kiromita ×34, mita ×28, pūrua ×18, pūtoru ×3, the rate connective `ia` ×6, me ×726.
-    test("the symbol tier: percent, currency, units and the powers (#586)", () => {
+    test("the symbol tier: percent, currency, units and the powers", () => {
         const mi = createMaori();
         expect(mi.text("88%").trim()).toBe("waɾu tekau maː waɾu oːɾau");      // the % was dropped outright
         expect(mi.text("$5").trim()).toBe("ɾima taːɾa");
@@ -82,7 +82,7 @@ describe("Māori cardinal numbers", () => {
     });
 
     // ⚠ THE TRAPS, each one a word whose count BEATS the word that is right.
-    test("the shape words and tāngata are not units (#586)", () => {
+    test("the shape words and tāngata are not units", () => {
         const mi = createMaori();
         // tapawhā ×12 is a square as in a PLAZA — St Peter's Square — and tapatoru ×5 a triangle. Neither is
         // a power, and both outnumber pūtoru ×3.

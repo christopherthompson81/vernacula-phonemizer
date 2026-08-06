@@ -1,7 +1,7 @@
 /**
  * Khmer word segmentation — the properties the iteration mark ៗ depends on.
  *
- * The vocabulary is harvested from writer-typed U+200B boundaries in a wiki dump (#585), so these fixtures are
+ * The vocabulary is harvested from writer-typed U+200B boundaries in a wiki dump, so these fixtures are
  * real Khmer words with real corpus frequencies behind them, and the counts quoted in comments are from that
  * corpus. What is asserted is deliberately narrow: this module is ~55% accurate on the last boundary against
  * inconsistent human gold, so pinning individual interior splits would pin noise. The tests hold the STRUCTURAL

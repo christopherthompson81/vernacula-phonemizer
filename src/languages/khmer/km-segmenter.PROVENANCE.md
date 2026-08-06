@@ -127,7 +127,7 @@ by the writers themselves (<90% split them).
 
 ## Training data, and the label cleaning that makes it usable
 
-Source: a `km.wikipedia.org` dump converted by `tools/normalization/wikidump-to-text.py` (#585) — 180,782
+Source: a `km.wikipedia.org` dump converted by `tools/normalization/wikidump-to-text.py` — 180,782
 paragraphs. **No external lexicon, no annotation, no other model**: the supervision is the U+200B that Khmer
 writers already type.
 

@@ -1,5 +1,5 @@
 /**
- * DOUBLE-ENCODED UTF-8 REPAIR (#586) — the two-byte arms as a general formula, and the PHANTOM SYMBOLS that
+ * DOUBLE-ENCODED UTF-8 REPAIR — the two-byte arms as a general formula, and the PHANTOM SYMBOLS that
  * half-repaired mojibake manufactures.
  *
  * The phantoms are the reason this file exists. Latin-1 punctuation doubles as a UTF-8 continuation byte, and

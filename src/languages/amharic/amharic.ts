@@ -92,7 +92,7 @@ export type ForeignPhonemizer = (latin: string) => string;
 // `magnitudeConnective`: Amharic takes none (አንድ ሚሊዮን ዶላር). The tier's own `already` guard covers the
 // three corpus cases that write ዶላር/ዶላሮች after the sign, so the noun is not doubled.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // እና is ×1545 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -108,7 +108,7 @@ const SYMBOLS = makeSymbolNormalizer({
     multiply: { times: "በ" },
     percent: ["በመቶ"],
     currency: { "$": ["ዶላር"], "¥": ["የን"], "£": ["ፓውንድ"] },
-    // #586 — `5 km` read as *amɨst ˈʊkm*: no km or m was declared at all. Verified in am_et:
+    // `5 km` read as *amɨst ˈʊkm*: no km or m was declared at all. Verified in am_et:
     // ሜትር ×15 "ከፍታ 15 ሜትር ነው", ኪሎ ሜትር ×3 "ሰባ ኪሎ ሜትር ያህል ርቆ ነበር", ኪሎ ግራም ×3 "(16 ኪሎ ግራም) ይመዝናል".
     // NOTED, NOT CHANGED: the corpus writes ኪሎ ሜትር and ኪሎ ግራም with a SPACE, and the ኪሎግራም already declared
     // here occurs ×0. Both are current Amharic and the space does not change the reading, so the closed

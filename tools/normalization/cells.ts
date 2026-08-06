@@ -1,5 +1,5 @@
 /**
- * THE PATTERN INVENTORY (#586) — the cells every language's artifact is measured against.
+ * THE PATTERN INVENTORY — the cells every language's artifact is measured against.
  *
  * EXTRACTED FROM `mine.ts` so the other tools can read it without running it. `coverage.ts` already imported
  * `CELLS` from there, and because `mine.ts` is a CLI that dispatches on `process.argv` at module scope, that
@@ -109,7 +109,7 @@ export const CELLS: Cell[] = [
     // a lexical fact belongs in data, not in logic.
     { key: "calendar", langs: 6, re: /$^/u, lexical: true },
     // ─── CELLS ADDED FROM THE REVIEW PASSES (#590 uz, #591 af, #592 as). Each exists because a shipped
-    // layer read one of these wrong and NO existing cell would have surfaced it. Round two (#586) is the
+    // layer read one of these wrong and NO existing cell would have surfaced it. Round two is the
     // reason to add them here rather than fix one language and move on.
     //
     // A SPORTS TIME is not a clock, and the clock cell cannot tell them apart: it matches the `4:41` in

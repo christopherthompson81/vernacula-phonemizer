@@ -41,7 +41,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "а-шђјљњћџ")})|(\\d+
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls (#657).
+ * deciding where the script boundary falls.
  *
  * ⚠ `й` IS EXCLUDED, and it is the one part of this that is not a straight lift. The old class used the coarse
  * range `а-ш`, which sweeps up `й` — a RUSSIAN letter that Serbian/Bosnian Cyrillic does not have (this
@@ -49,7 +49,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "а-шђјљњћџ")})|(\\d+
  * rule for `й` and dropped it. Excluding it from the inventory hands it to the fold instead, and `й` DOES
  * decompose — и + combining breve — so `Толстой` now reads with a final /i/ rather than losing the letter.
  * The TOKEN above deliberately stays wide: claiming the whole Cyrillic run is the SCRIPT question, and getting
- * that right is what puts the letter in front of the fold at all (#657).
+ * that right is what puts the letter in front of the fold at all.
  */
 const NATIVE_CLASS = "[а-ик-шђјљњћџa-zčćšžđ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

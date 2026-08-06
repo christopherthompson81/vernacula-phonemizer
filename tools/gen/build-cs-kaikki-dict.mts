@@ -28,7 +28,7 @@ if (!KAIKKI) throw new Error("pass --kaikki <ces-kaikki.tsv> (stream kaikki.org 
 const OUT = new URL("../../src/languages/czech/loanwords.tsv", import.meta.url)
     .pathname;
 const CORPUS =
-    process.env.HOME + "/Programming/espeak-ng-portable/tools/qa-compare/words-50000.cs.txt";
+    (process.env["ESPEAK_PORTABLE"] ?? ".") + "/tools/qa-compare/words-50000.cs.txt";
 
 // A NUCLEUS: a vowel (+ optional length) or a syllabic r̩/l̩ (U+0329). Mirrors g2p's nucleus set + czech.ts stress.
 const NUCLEUS = /[rl]̩|[aeɛiɪoɔuyəäö]ː?/gu;

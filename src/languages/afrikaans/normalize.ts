@@ -306,7 +306,7 @@ export function normalizeAfrikaans(input: string): string {
     //     in this corpus is a RANGE or SCORE (`2-3 km`, `7-2`, `1469-1539`, `35-40mph`), so the rule only
     //     fires when the minus is NOT between two digits (a leading negative) — exactly the DROP-test shape.
     //     `=`, `<`, `>`, `×`, `÷` do not occur in af_za but are read for completeness.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
     //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +

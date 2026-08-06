@@ -53,7 +53,7 @@ describe("Bulgarian canonical IPA — phonemic g2p + phonotactics", () => {
 });
 
 
-// #562 — the normalization layer. Every count is measured over the FLEURS bg_bg corpus (column 3); the
+// the normalization layer. Every count is measured over the FLEURS bg_bg corpus (column 3); the
 // engine is rule-based, so every emitted word was probed through the g2p rather than looked up.
 describe("bulgarian normalization", () => {
     // ★ The largest defect in the language, and nothing like it in the four previous ones: `1767 г.` is
@@ -106,11 +106,11 @@ describe("bulgarian normalization", () => {
         expect(normalizeBulgarian("Българският е език.")).toBe("Българският е език.");
     });
 
-    // #586 — this layer already read `км/ч` as `в час`; two shapes it did not cover.
+    // this layer already read `км/ч` as `в час`; two shapes it did not cover.
     // ⚠ THE AUDIT THAT FOUND THESE FIRST OVER-REPORTED THEM, by probing with LATIN abbreviations against a
     // Cyrillic-writing language. Bulgarian's own forms were already right — `5 км`, `5 м`, `5 км2`, `5 м3`,
     // `120 км/ч` all read correctly before this — so what follows is narrow on purpose.
-    test("the rate denominators this layer had missed (#586)", () => {
+    test("the rate denominators this layer had missed", () => {
         // The corpus's own `133 м/сек` read the denominator as the bare syllable [sɛk]. `в секунда` ×2.
         expect(createBulgarian().text("133 м/сек").trim()).toContain("mɛtra f sɛkunda");
         expect(createBulgarian().text("133 м/с").trim()).toContain("mɛtra f sɛkunda");
@@ -120,11 +120,11 @@ describe("bulgarian normalization", () => {
         expect(createBulgarian().text("120 км/ч").trim()).toContain("kiɫɔmɛtra f t͡ʃas"); // unchanged
     });
 
-    // #586 — THE NUMERO SIGN was dropped outright: "космонавт № 11" read as *космонавт единадесет*, the sign
+    // THE NUMERO SIGN was dropped outright: "космонавт № 11" read as *космонавт единадесет*, the sign
     // silently gone. `номер` ×5 in this corpus, and ru/uk already read it this way, preposed.
     // ⚠ This is the character DELIBERATELY EXCLUDED from the ℃ fold (trap 36 (a compatibility character is a fold)): NFKC maps № to the Latin "No",
     // which a Bulgarian g2p reads as an English word. A compatibility character can need a WORD, not a fold.
-    test("the numero sign reads номер (#586)", () => {
+    test("the numero sign reads номер", () => {
         expect(createBulgarian().text("космонавт № 11").trim()).toContain("nɔmɛr ɛdinajsɛt");
         expect(createBulgarian().text("реактори № 1").trim()).toContain("nɔmɛr");
     });

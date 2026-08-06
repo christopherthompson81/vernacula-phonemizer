@@ -154,18 +154,18 @@ const NATIVE_CLASS = "[a-zA-Z']";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.?!,;:])`, "gu");
 
 /**
- * Shared symbol tier (#562) — PERCENT ONLY, and that is a measured decision, not an omission.
+ * Shared symbol tier — PERCENT ONLY, and that is a measured decision, not an omission.
  *
  * · `percentPrefix` is exactly the Swahili order: the corpus writes *asilimia 31*, *asilimia 93*,
  *   *asilimia 3 hadi 5* (×16 spelled out), so `80%` → `asilimia 80` needs no local rule at all.
@@ -180,12 +180,12 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'")})|(\\d+)|([.?!,;:])`, "
  *   *dola 30*. Swahili therefore handles currency locally in normalize.ts. Recorded as a core limitation
  *   rather than worked around in core.
  */
-// MIGRATION (#562): currency moved off the local rule onto the shared tier, now that `currencyPrefix`
+// MIGRATION: currency moved off the local rule onto the shared tier, now that `currencyPrefix`
 // exists. Swahili puts the measure noun BEFORE the number for every measure it writes out — "dola 30 za
 // Kimarekani", "kilomita 70 kwa saa" — which is why the local rule existed. Verified byte-identical over
 // the whole sw_ke corpus.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // na is ×3577 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -206,7 +206,7 @@ const SYMBOLS = makeSymbolNormalizer({
         "KSh": ["shilingi"], "TSh": ["shilingi"],
     },
     currencyPrefix: true,
-    // #586 — `5 km` read as *tˈɑnɔ kˈm̩*: no unit was declared, and until now none COULD be, because Swahili
+    // `5 km` read as *tˈɑnɔ kˈm̩*: no unit was declared, and until now none COULD be, because Swahili
     // puts the measure noun FIRST and the tier only emitted it after. Counted over sw_ke's four attested unit
     // words: 82 unit-before to 0 unit-after — "Mbuga hiyo inachukua kilomita 19,500 mraba", "mtindo huru wa
     // mita 100 na mita 200". Hence `unitPrefix`, the mirror of the `currencyPrefix` already set above.

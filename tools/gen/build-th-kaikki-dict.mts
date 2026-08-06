@@ -1,6 +1,6 @@
 /**
  * Expand the Thai dictionary (dictionary.tsv) from the kaikki.org Wiktionary Thai gold — the authoritative source
- * for Thai pronunciation — following espeak-ng-portable's methodology: dictionary ONLY the words the rule engine
+ * for Thai pronunciation — dictionary ONLY the words the rule engine
  * cannot derive (the lexical tail: Sanskrit/Pali inserted-vowel + coda-sonorant doubling + length/onset irregulars).
  *
  * CIRCULARITY (accepted, documented): kaikki and the wikipron referee are BOTH Wiktionary, so dictionaried words
@@ -18,7 +18,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { phonemizeWord } from "../../src/languages/thai/g2p.ts";
 
-const EP = process.env.HOME + "/Programming/espeak-ng-portable";
+const EP = process.env["ESPEAK_PORTABLE"] ?? "";
 const KAIKKI = `${EP}/tools/thai-gold/th_kaikki_gold.tsv`;
 const DICT = new URL("../../src/languages/thai/dictionary.tsv", import.meta.url)
     .pathname;

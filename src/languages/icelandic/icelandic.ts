@@ -183,14 +183,14 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:])
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-záéíóúýþðæöA-ZÁÉÍÓÚÝÞÐÆÖ'-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class IcelandicPhonemizer implements Phonemizer {
     text(rawInput: string): string {
-        // #562: everything the g2p cannot read is rewritten to Icelandic words FIRST — see normalize.ts,
+        // everything the g2p cannot read is rewritten to Icelandic words FIRST — see normalize.ts,
         // in particular why the ordinal form is selected by the FOLLOWING noun (Icelandic ordinals agree
         // in gender and case, unlike the Norwegian and Danish single-form tables).
         return assembleClauses(normalizeIcelandic(rawInput), TOKEN, (m, sink) => {

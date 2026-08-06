@@ -1,5 +1,5 @@
 /**
- * Central Kurdish / Sorani (ckb) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites
+ * Central Kurdish / Sorani (ckb) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites
  * everything the Kurdish g2p cannot already read into Kurdish words the existing pipeline speaks. Pure
  * text→text, no IPA. Runs inside central-kurdish.ts's `text()`, before the tokenizer.
  *
@@ -67,7 +67,7 @@ export function normalizeCentralKurdish(input: string): string {
         t = t.replace(/(\d)[,،](\d{3})(?!\d)/gu, "$1$2");
     } while (t !== prev);
 
-    // 2b) LATIN UNIT ALIASES AND THEIR POWERS (#586). and this needs NO NEW VOCABULARY — only a second key onto a word the corpus already
+    // 2b) LATIN UNIT ALIASES AND THEIR POWERS. and this needs NO NEW VOCABULARY — only a second key onto a word the corpus already
     //     attests, which is the same move ru, uk and kk made. `5 km` was reaching the g2p as the cluster
     //     [ˈʊkm] while `5 کم` read correctly: same unit, one spelling handled and the other not. The Latin
     //     run is rare here (`4Ghz`, `1a`, `1b` — no bare `m`), so unlike the Arabic-script `م` a Latin `m`
@@ -141,7 +141,7 @@ export function normalizeCentralKurdish(input: string): string {
     t = t.replace(/(\d)\s*°\s*F(?!\p{L})/giu, "$1 پلەی فەهرەنهایت");
     t = t.replace(/(\d)\s*°/gu, "$1 پلە");
 
-    // 6b) UNIT ABBREVIATIONS (#586). `19500 کم` read the abbreviation as raw letters — the `ˈʊkm` shape found
+    // 6b) UNIT ABBREVIATIONS. `19500 کم` read the abbreviation as raw letters — the `ˈʊkm` shape found
     //     fleet-wide — and the corpus writes them 32 times, EVERY ONE after a numeral:
     //
     //       کم ×30  "پارکەکە 19500 کم دووجا دایپۆشیوە"  ·  "بە نزیکەی 12.8 کم یان 8 میل"

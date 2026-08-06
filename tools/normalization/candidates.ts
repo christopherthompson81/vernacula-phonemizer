@@ -1,5 +1,5 @@
 /**
- * WHICH OF THE UNMINED LANGUAGES CAN BE MINED AT ALL? (#585) — the triage that has to come before the sweep.
+ * WHICH OF THE UNMINED LANGUAGES CAN BE MINED AT ALL? — the triage that has to come before the sweep.
  *
  * #585 proposes extending the normalization diff gate past the 67 FLEURS languages to the rest of the
  * registry, by mining wiki text. Measured when this file was written: **188 registry codes, 67 mined

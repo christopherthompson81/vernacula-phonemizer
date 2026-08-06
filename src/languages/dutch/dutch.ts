@@ -114,7 +114,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A word (Latin letters incl. Dutch diacritics) / number / punctuation token. An optional LEADING apostrophe
 // captures the reduced clitics 't 'n 'k 'm 's (informal Dutch); medial apostrophes handle zo'n, auto's.
 //
-// #562 — Dutch groups thousands with a PERIOD and takes a COMMA decimal. The old class was a bare `(\d+)`, so
+// Dutch groups thousands with a PERIOD and takes a COMMA decimal. The old class was a bare `(\d+)`, so
 // BOTH separators fell through to clausePunctuation: "400.000" read as *vierhonderd . nul* (a phrase break
 // plus a lost magnitude) and "6,5" as *zes , vijf*. Clocks are claimed by normalize.ts first, so a period
 // reaching here is grouping and a comma is the decimal point.

@@ -155,7 +155,7 @@ export function normalizeGerman(input: string): string {
 
     // 6) SIGNS.
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1minus $2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -164,7 +164,7 @@ export function normalizeGerman(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
-    // 6b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE SIGNS ARE UNATTESTED AND THE WORDS ARE NOT, and that
+    // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ THE SIGNS ARE UNATTESTED AND THE WORDS ARE NOT, and that
     //     distinction is the whole sourcing story. Searching de_de for `=`/`<`/`>`/`÷` finds nothing usable — every
     //     `<` in the fleet is an HTML tag — so the first pass at #654 concluded the corpus could not source these
     //     and only Wikipedia could. Wrong question: these readings are ordinary comparative PROSE, and the words

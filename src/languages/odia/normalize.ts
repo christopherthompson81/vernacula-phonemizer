@@ -70,7 +70,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * `unitPer`, because they are written as one token with no slash for the rate machinery to find.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // ଏବଂ is ×975 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -85,7 +85,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // defaults to it — this language does not split dimension from product.
     multiply: { times: "ଗୁଣନ" },
     percent: ["ପ୍ରତିଶତ"],
-    // #586 — `¥` ADDED. Same sentence and same finding as bn: the corpus's `ମୂଲ୍ୟ ପ୍ରାୟ ¥7,000` dropped the
+    // `¥` ADDED. Same sentence and same finding as bn: the corpus's `ମୂଲ୍ୟ ପ୍ରାୟ ¥7,000` dropped the
     // sign, and the or_in speaker voices no currency word either (wav2vec2: `… s a t o h z e r h e b a …` —
     // "sāta hazāra hebā", the amount and then the verb). Voiced regardless, because a typed character is
     // content for TTS; `ୟେନ` is the standard Odia form and is ordinary lexis, not an audio attestation.
@@ -278,7 +278,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //     check it against this string first.
         //     Digit-keyed on the right only: the offset is `UTC+1`, so the sign has a LETTER before it and a
         //     digit after, and a range or a compound hyphen cannot reach this arm.
-        // THE MINUS AND ± (#654). ⚠ MEASURED SAFE: every `-<digit>` in or_in is a range, score or closed
+        // THE MINUS AND ±. ⚠ MEASURED SAFE: every `-<digit>` in or_in is a range, score or closed
         //    designation, and there are ZERO instances of `word · space · hyphen · digit` — the one shape no
         //    guard can reject, and the one that made mr, nl, ta, gu, kn and yue decline this rule.
         //
@@ -294,7 +294,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "ଋଣାତ୍ମକ ");
         s = s.replace(/\+(?=\d)/gu, " ପ୍ଲସ୍ ");
 
-        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from or_in:
+        // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from or_in:
         //
         //   `ସମାନ`        ×41 token  "ଫର୍ମାଟ ସମାନ କିମ୍ବା ଏହି ପରିମାପ ଅନୁପାତର ଅତି ନିକଟତର" — EQUAL TO this ratio
         //   `ଠାରୁ କମ`      ×3 phrase  ·  `ଠାରୁ ଅଧିକ` ×16 phrase — both postposed

@@ -276,7 +276,7 @@ export type ForeignPhonemizer = (latin: string) => string;
 class BurmesePhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(rawInput: string): string {
-        // #562: everything the g2p cannot read is rewritten to Burmese words FIRST — see normalize.ts for
+        // everything the g2p cannot read is rewritten to Burmese words FIRST — see normalize.ts for
         // the ordered steps and the two negative results.
         const input = normalizeBurmese(rawInput);
         const { sink, finish } = clauseSink();

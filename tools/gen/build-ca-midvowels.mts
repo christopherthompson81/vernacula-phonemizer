@@ -5,8 +5,8 @@
  * corpus word, is the STRESSED mid vowel CLOSE (e/o) or OPEN (ɛ/ɔ)? The engine defaults to open, so we emit a
  * flag only for the CLOSE deviations. Restricted to the 50k frequency corpus.
  *
- * Not a runtime step — run once against espeak-ng-portable's shim + corpus, commit the TSV:
- *   1. cd espeak-ng-portable
+ * Not a runtime step — run once against the espeak-ng shim + corpus, commit the TSV:
+ *   1. cd $ESPEAK_PORTABLE
  *   2. awk '{print $0"\n"}' <(grep -iE '^[a-zàèéíòóúüïç·]+$' tools/qa-compare/words-50000.ca.txt) > /tmp/ca-para.txt
  *   3. ./tools/espeak-ng -v ca -q --ipa -f /tmp/ca-para.txt > /tmp/ca.ipa   # one output LINE per word
  *   4. npx tsx tools/gen/build-ca-midvowels.mts /tmp/ca-para.txt /tmp/ca.ipa   (paths: words file, ipa file)

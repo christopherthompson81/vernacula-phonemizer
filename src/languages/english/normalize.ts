@@ -1,5 +1,5 @@
 /**
- * English TEXT NORMALIZATION (#562) — rewrite non-lexical tokens into speakable words BEFORE the
+ * English TEXT NORMALIZATION — rewrite non-lexical tokens into speakable words BEFORE the
  * tokenizer, so the existing number/ordinal/OOV machinery does the pronouncing. Every rule emits plain
  * words and digits the pipeline already handles (e.g. a year becomes two 2-digit numbers), which keeps
  * this layer free of IPA and lets the POS tagger / stress logic see a flat word stream.
@@ -51,7 +51,7 @@ const UNITS: Record<string, [string, string]> = {
     "°c": ["degree Celsius", "degrees Celsius"], "°f": ["degree Fahrenheit", "degrees Fahrenheit"],
     // ℃ and ℉ are SINGLE CODE POINTS (U+2103, U+2109), so the two keys above cannot reach them and `20℃`
     // read as bare "twenty" — the whole unit gone, not merely the sign. They are in the RAWMARK leak class
-    // for exactly this reason. Found while reviewing the cmn/hi loop-back (#586), which had the same gap;
+    // for exactly this reason. Found while reviewing the cmn/hi loop-back, which had the same gap;
     // measured across the fleet, 53 of 65 languages still drop ℃ and each needs its own word.
     "℃": ["degree Celsius", "degrees Celsius"], "℉": ["degree Fahrenheit", "degrees Fahrenheit"],
     "°": ["degree", "degrees"],
@@ -486,7 +486,7 @@ export function normalizeEnglish(input: string): string {
     //    *Arts Sciences*, `B&Bs` read *bee bees*, `Qatar Airways & Turkish Airlines` lost its conjunction.
     //    Three corpus instances of `&`; the relational signs have ZERO, which is not evidence of
     //    correctness (trap 8 (zero corpus instances is not evidence of…)) and is why `review.ts` reports them as DROPPED. A dropped sign is inaudible,
-    //    the one outcome that cannot be right (#584).
+    //    the one outcome that cannot be right.
     //
     //    LAST, deliberately. Every rule above matches on digits or letters adjacent to a symbol — the
     //    currency step keys on `$` beside a number, the unit step on a number beside an abbreviation — and

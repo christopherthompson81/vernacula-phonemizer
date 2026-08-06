@@ -29,7 +29,7 @@ export function phonemizeWord(word: string): string {
 }
 
 /**
- * Shared SYMBOL tier (#562) — %, currency signs and unit abbreviations, matched only when a NUMBER is
+ * Shared SYMBOL tier — %, currency signs and unit abbreviations, matched only when a NUMBER is
  * adjacent, which is why it runs LAST and why the decimal comma is left in the text for it to see.
  *
  * `countForm` is Polish's own, not `slavicCountForm`: Polish sends a compound ending in 1 to the genitive
@@ -40,7 +40,7 @@ export function phonemizeWord(word: string): string {
  * noun ("pięć milionów dolarów"), so `magnitudeConnective` is deliberately omitted.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `i` ×846 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
@@ -62,7 +62,7 @@ const SYMBOLS = makeSymbolNormalizer({
     },
     magnitudes: ["tysiąca", "tysięcy", "miliona", "milionów", "miliarda", "miliardów"],
     units: UNITS,
-    // MIGRATION TEST (#562): km²/mm² composed by the shared tier. The adjective agrees, so it carries the
+    // MIGRATION TEST: km²/mm² composed by the shared tier. The adjective agrees, so it carries the
     // same three count forms the unit nouns do.
     exponentWords: {
         squared: ["kwadratowy", "kwadratowe", "kwadratowych", "kwadratowego"],
@@ -82,14 +82,14 @@ const NATIVE_CLASS = "[A-Za-ząćęłńóśźżĄĆĘŁŃÓŚŹŻ]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:,\\d+)?)|([.?!,;:])`, "gu");
 
 class PolishPhonemizer implements Phonemizer {

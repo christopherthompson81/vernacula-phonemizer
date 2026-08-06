@@ -134,7 +134,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  *
  * ⚠ NOT QUITE VERBATIM: ó è ã à were REMOVED, because the g2p has no rule for them and
  * DROPPED them outright. The old token class listed them anyway, and the word-level fold hid the mismatch — a
@@ -150,7 +150,7 @@ class DanishPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only, daNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
     // path omits it, so behaviour is byte-identical to phonemize(text, "da").
     text(rawInput: string, oovOverride?: OovResolver): string {
-        // #562: everything the g2p cannot read is rewritten to Danish words FIRST — see normalize.ts for
+        // everything the g2p cannot read is rewritten to Danish words FIRST — see normalize.ts for
         // the ordered steps and, in particular, why Danish is NOT Norwegian (the period is a thousands
         // separator here, and there is no space grouping at all).
         return assembleClauses(normalizeDanish(rawInput), TOKEN, (m, sink) => {

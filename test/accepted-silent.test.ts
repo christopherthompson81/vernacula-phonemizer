@@ -1,5 +1,5 @@
 /**
- * THE ACCEPTED-SILENT BASELINE (#586) — proof that it is a baseline and not a quiet gate.
+ * THE ACCEPTED-SILENT BASELINE — proof that it is a baseline and not a quiet gate.
  *
  * `defects.ts` records the judgement that a spaced designation cannot be told from a real negative by pattern
  * (`चंद्रयान -1` and `-5 stupňů` are the same shape) and that "a quiet gate would be worse". So the sweep's

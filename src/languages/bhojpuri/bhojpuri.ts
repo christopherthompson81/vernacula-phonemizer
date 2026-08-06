@@ -7,7 +7,7 @@
  * (not Hindi ʋ), ण/ञ→[n]. 🔷 single published source.
  */
 /**
- * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Bhojpuri. Evidence from
+ * NORMALIZER WORDS: the Hindi defaults are RETAINED and four are confirmed for Bhojpuri. Evidence from
  * bh.wikipedia via `tools/normalization/attest.ts` (`tools/corpus/attest/bho.jsonc`); each sentence's language
  * judged from its morphology (बा, होला, गइल, भइल), since a Devanagari hit on a small wiki is often quoted Hindi:
  *

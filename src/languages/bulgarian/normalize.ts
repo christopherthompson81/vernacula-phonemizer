@@ -1,5 +1,5 @@
 /**
- * Bulgarian (bg) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything the
+ * Bulgarian (bg) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the
  * Bulgarian g2p cannot already read into Bulgarian words the existing pipeline speaks. Pure text→text, no
  * IPA. Runs inside bulgarian.ts's `text()`, before the tokenizer.
  *
@@ -44,7 +44,7 @@
 /**
  * Unit abbreviations → the COUNTING form of the word. Longest first.
  *
- * BOTH SCRIPTS, and the header's claim that "a Latin unit table matches nothing here" is half right (#586).
+ * BOTH SCRIPTS, and the header's claim that "a Latin unit table matches nothing here" is half right.
  * Cyrillic is what the corpus mostly writes — км ×50, см ×5, кг ×4, мм ×3, all after a numeral — but it also
  * writes LATIN abbreviations 14 times, every one of them after a numeral:
  *
@@ -79,7 +79,7 @@ const SQUARED: [RegExp, string][] = [
     // `км2`. This is the third instance of the same trap in two languages (the Romanian rate rule ended
     // `or[ăa]\b`, and the trailing guard in step 8 below is written correctly for exactly this reason).
     // In a non-ASCII orthography `\b` is never the right boundary.
-    // The Latin `km` is accepted here for the same reason it is in `UNITS` (#586): once the plain unit gained
+    // The Latin `km` is accepted here for the same reason it is in `UNITS`: once the plain unit gained
     // a Latin alias, `50 km2` read "километра ДВЕ" — the unit substituted and the exponent left to be spoken
     // as a bare numeral, which is worse than the raw `km` it replaced. The pair must move together.
     // Bulgarian's own one-letter `м` keeps no Latin alias, so `m2` is deliberately not matched.

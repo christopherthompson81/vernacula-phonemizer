@@ -115,7 +115,7 @@ function phonemizeCore(word: string, useTone: boolean): string {
         if (c === TILDE) { if (out.length) out[out.length - 1] += TILDE; i += 1; continue; } // nasalisation on the vowel
         // ⚠ NOT SILENTLY: a letter this g2p has no rule for still denotes a sound, and dropping it deletes
         // content the writer typed. `latinPhone` is consulted HERE, after every digraph and single-letter rule
-        // has been tried, so it can never override a reading this language has an opinion about (#663).
+        // has been tried, so it can never override a reading this language has an opinion about.
         { const p = latinPhone(c, { initial: i === 0 }); if (p !== undefined) out.push(p); }
         i += 1;
     }
@@ -191,14 +191,14 @@ const NATIVE_CLASS = "[A-Za-zɛɔƐƆ̃]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 
 /** Build the Akan phonemizer. `foreign` handles embedded Latin/other runs (none native — Akan IS Latin). */

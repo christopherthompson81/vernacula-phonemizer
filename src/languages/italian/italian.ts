@@ -312,14 +312,14 @@ const NATIVE_CLASS = "[a-zA-ZàèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 
 /**
@@ -339,7 +339,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
     multiply: { times: "per" },
-    // #586 — `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
+    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `e` ×1067 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
     ampersand: "e",
@@ -347,7 +347,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // Only the POSTPOSED sign reaches here — normalize.ts step 10 has already claimed the preposed form,
     // which needs the partitive *di* the shared magnitude hop cannot insert.
     currency: Object.fromEntries(Object.entries(CURRENCY).map(([sign, forms]) => [sign, [...forms]])),
-    // #586 — DECLARED FOR THE UNIT PATH, and the reason it was withheld no longer applies. This list was
+    // DECLARED FOR THE UNIT PATH, and the reason it was withheld no longer applies. This list was
     // deliberately absent so the CURRENCY magnitude hop could not emit `5 milioni dollari` without the
     // partitive. But `magnitudes` also gates `magAltU`, the UNIT path's connective hop — so withholding it to
     // protect currency left the tier unable to cross `milioni di` to reach a unit, and
@@ -372,7 +372,7 @@ const SYMBOLS = makeSymbolNormalizer({
         gb: ["gigabyte"], mb: ["megabyte"], tb: ["terabyte"],
         kw: ["chilowatt"], mw: ["megawatt"], hz: ["hertz"],
     },
-    // MIGRATION TEST (#562): the composite km²/m² keys are gone, composed by the shared tier instead.
+    // MIGRATION TEST: the composite km²/m² keys are gone, composed by the shared tier instead.
     exponentWords: { squared: ["quadrato", "quadrati"], cubed: ["cubo", "cubi"] },
     // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot

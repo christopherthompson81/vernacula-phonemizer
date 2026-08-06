@@ -54,7 +54,7 @@ describe("Xhosa canonical IPA", () => {
 // every rule with a table plus a fallback gets one case from each side, and the cases the corpus does NOT
 // contain (a capitalised ordinal suffix, `°F`, `00:30`, an out-of-range hour, a comma decimal) are pinned
 // deliberately, because zero corpus instances is not evidence of correctness (trap 8 (zero corpus instances is not evidence of…)).
-describe("Xhosa text normalization (#562)", () => {
+describe("Xhosa text normalization", () => {
     test("thousands de-grouping — comma, space, and the two shapes that must NOT de-group", () => {
         expect(normalizeXhosa("eziyi-3,850")).toBe("eziyi-3850");
         expect(normalizeXhosa("ezingama-5,000,000")).toBe("ezingama-5000000");
@@ -202,7 +202,7 @@ describe("Xhosa text normalization (#562)", () => {
         expect(normalizeXhosa("iFigure 1.1.")).toBe("iFigure 1 1.");
     });
 
-    test("relational and arithmetic signs — 0 corpus instances, read anyway (#584)", () => {
+    test("relational and arithmetic signs — 0 corpus instances, read anyway", () => {
         // Every word is the HSRC maths dictionary's own gloss for that SYMBOL; most are corpus tokens too.
         expect(normalizeXhosa("x = y")).toBe("x lilingana ne y");
         expect(normalizeXhosa("5 < 6")).toBe("5 ngaphantsi kuna 6");

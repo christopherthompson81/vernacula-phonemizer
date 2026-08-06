@@ -10,7 +10,7 @@
  * Unlike the earlier SYNTHETIC transliteration (crossscript_pa.ts, which sank on skeleton mismatch), these are the
  * spellings people actually use. A consonant-skeleton GATE drops mis-paired / bad-OCR forms.
  *
- *   curl kaikki Punjabi dump → /mnt/data/kaikki-Punjabi.jsonl ; npx tsx build_gurmukhi_shahmukhi.ts
+ *   curl kaikki Punjabi dump → $DUMPS/kaikki-Punjabi.jsonl ; npx tsx build_gurmukhi_shahmukhi.ts
  * Output: ../../src/languages/punjabi/crossscript.tsv (shahmukhi-word ⇥ gold-IPA) — shipped directly.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 import { phonemizeWordCore } from "../../src/languages/punjabi/punjabi.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DUMP = "/mnt/data/kaikki-Punjabi.jsonl";
+const DUMP = (process.env["DUMPS"] ?? ".") + "/kaikki-Punjabi.jsonl";
 // Diacritics ONLY (harakat + Quranic marks + tatweel) — explicit escapes so no base LETTER range is caught.
 const HARAKAT = /[ؐ-ًؚ-ٰٟۖ-ۭـ]/gu;
 const GURMUKHI = /[਀-੿]/u;

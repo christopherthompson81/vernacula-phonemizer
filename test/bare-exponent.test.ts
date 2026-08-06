@@ -1,5 +1,5 @@
 /**
- * ARBITRARY EXPONENT READING (#586) — squared, cubed, and "to the power of N" on a BARE base.
+ * ARBITRARY EXPONENT READING — squared, cubed, and "to the power of N" on a BARE base.
  *
  * Before this, EVERY language in the fleet dropped an exponent that had no unit to modify. Measured on the
  * same probe across eight: `20²` read as the bare number in all of them — en *twˈɛnti*, de *t͡svˈant͡sɪç*,

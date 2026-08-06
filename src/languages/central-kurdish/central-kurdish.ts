@@ -67,7 +67,7 @@ export type ForeignPhonemizer = (latin: string) => string;
 class CentralKurdishPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        // #562: everything the g2p cannot read is rewritten FIRST — see normalize.ts. Most importantly
+        // everything the g2p cannot read is rewritten FIRST — see normalize.ts. Most importantly
         // the ARABIC-INDIC DIGITS are folded to ASCII there: the letter class above is U+0620–U+06FF,
         // which contains U+0660–U+0669, so a native digit run was claimed by the LETTER branch and read
         // as an empty string. That is the majority digit system in this corpus.

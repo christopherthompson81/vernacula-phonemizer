@@ -173,7 +173,7 @@ const TOKEN = /([а-яёА-ЯЁ']+)|(\d+)|([.!?…,;:—])/gu;
 
 class BulgarianPhonemizer implements Phonemizer {
     text(rawInput: string): string {
-        // #562: everything the g2p cannot read is rewritten to Bulgarian words FIRST — see normalize.ts,
+        // everything the g2p cannot read is rewritten to Bulgarian words FIRST — see normalize.ts,
         // in particular the `N г.` year abbreviation (265 instances, the largest defect) and why there is
         // no ordinal-dot rule here despite it being the largest rule in the Germanic languages.
         return assembleClauses(normalizeBulgarian(rawInput), TOKEN, (m, sink) => {

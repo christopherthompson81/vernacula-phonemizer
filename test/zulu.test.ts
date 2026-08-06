@@ -67,7 +67,7 @@ describe("Zulu (isiZulu) g2p — authored", () => {
  * `phonemize` cases at the end pin the ORDERING against the shared symbol tier, which normalize.ts runs
  * before and which the text assertions cannot see.
  */
-describe("Zulu text normalization (#562)", () => {
+describe("Zulu text normalization", () => {
     it("thousands de-grouping — including the position the first version got wrong", () => {
         expect(normalizeZulu("angu-1,000")).toBe("angu-1000");
         expect(normalizeZulu("u-755,688")).toBe("u-755688");

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Apply the markup residue guard to ALREADY-EXTRACTED paragraph text (#585).
+Apply the markup residue guard to ALREADY-EXTRACTED paragraph text.
 
 WHY THIS EXISTS SEPARATELY FROM THE CONVERTER. Two contamination classes were found after a fleet of dumps
 had already been converted and their .bz2 files deleted:

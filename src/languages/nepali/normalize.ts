@@ -285,7 +285,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //   UTC+1  →  `… j u t i s i p l o s e k …` / `… j u d i s i p l a s e k …`   2 of 3 (third skips it)
         //   +30°C  →  `… t i s d i ɡ r i b o n d a …`  तीस डिग्री, NO plus phones, 2 of 2
         // प्लस reads plˈʌs, matching the decode. BEFORE the degree rule (the ordering zu's `[+]?` taught).
-        // THE MINUS AND ± (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
+        // THE MINUS AND ±. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
         //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
         //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
         //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
@@ -306,7 +306,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 प्लस ");
         s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1प्लस ");
 
-        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from ne_np — one of the few languages in
+        // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from ne_np — one of the few languages in
         // this issue where tier 2 settles all four, with no Wikipedia needed:
         //
         //   `बराबर`      ×5 token    "यस आकार अनुपातको बराबर" — EQUAL TO this aspect ratio

@@ -34,14 +34,14 @@
         "۔": ".", "؟": "?", "،": ",", "؛": ",", ".": ".", "?": "?", ",": ","
     },
 
-    // NUMBERS (#587). Sindhi had NO number composer: sindhi.ts handed every digit run to the foreign
+    // NUMBERS. Sindhi had NO number composer: sindhi.ts handed every digit run to the foreign
     // phonemizer, so `5` was spoken as English "five" and `100` as "one hundred". Sindhi is Indo-Aryan
     // with lakh/crore grouping, so the shared `indicNumberWords` is the right composer.
     "numbers": {
         "units": ["ٻڙي", "هڪ", "ٻه", "ٽي", "چار", "پنج", "ڇهه", "ست", "اٺ", "نو"],
         "teens": ["ڏهه", "يارهن", "ٻارهن", "تيرهن", "چوڏهن", "پندرهن", "سورهن", "سترهن", "ارڙهن", "اوڻيهه"],
         "tens": { "20": "ويهه", "30": "ٽيهه", "40": "چاليهه", "50": "پنجاهه", "60": "سٺ", "70": "ستر", "80": "اسي", "90": "نوي" },
-        // FUSED 21–99 (#587). Sourced from a Sindhi numerals chart (1–100, Sindhi and Urdu columns),
+        // FUSED 21–99. Sourced from a Sindhi numerals chart (1–100, Sindhi and Urdu columns),
         // then ATTESTATION-CHECKED one at a time against sd.wikipedia `insource:` — 58 of the 72
         // non-round values are attested; the 14 that are not appear below in the omission list, NOT here.
         "compound": {

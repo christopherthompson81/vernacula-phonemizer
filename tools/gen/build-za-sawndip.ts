@@ -3,7 +3,7 @@
  * self-consistency: does routing each glyph's chosen reading through the `za` Latin engine reproduce the glyph's
  * kaikki Standard-Zhuang IPA (segmentally, tones folded)?
  *
- * Source (not committed — too big): /mnt/data/kaikki-Zhuang.jsonl (kaikki.org-dictionary-Zhuang.jsonl).
+ * Source (not committed — too big): $DUMPS/kaikki-Zhuang.jsonl (kaikki.org-dictionary-Zhuang.jsonl).
  * Output (committed): src/languages/zhuang/sawndip-readings.tsv  (glyph \t reading).
  *
  * Polyphonic glyphs (one glyph → several Standard-Zhuang words) get a MOST-COMMON DEFAULT via a salience proxy —
@@ -18,7 +18,7 @@ import { fileURLToPath } from "node:url";
 import { phonemizeWord as za } from "../../src/languages/zhuang/zhuang.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const SRC = "/mnt/data/kaikki-Zhuang.jsonl";
+const SRC = (process.env["DUMPS"] ?? ".") + "/kaikki-Zhuang.jsonl";
 const OUT = join(HERE, "../../src/languages/zhuang/sawndip-readings.tsv");
 
 interface Cand { reading: string; ipa: string; senses: number }

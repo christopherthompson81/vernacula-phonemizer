@@ -36,7 +36,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * ("2.3 ਅਰਬ ਡਾਲਰ", corpus).
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // ਅਤੇ is ×1441 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -51,7 +51,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // defaults to it — this language does not split dimension from product.
     multiply: { times: "ਗੁਣਾ" },
     percent: ["ਪ੍ਰਤੀਸ਼ਤ"],
-    // #586 — `5 km` read as *pˈə̃ɲd͡ʒ ˈʊkm*: no unit was declared. Verified in pa_in:
+    // `5 km` read as *pˈə̃ɲd͡ʒ ˈʊkm*: no unit was declared. Verified in pa_in:
     // ਕਿਲੋਮੀਟਰ ×31 "50 ਕਿਲੋਮੀਟਰ (31 ਮੀਲ) ਦੂਰ", ਮੀਟਰ ×17 "4892 ਮੀਟਰ ਮਾਉਂਟ ਵਿਨਸ".
     // ਕਿਲੋਗਰਾਮ is ×0 in the corpus and is left undeclared rather than taken from Wikidata's label alone.
     units: { km: ["ਕਿਲੋਮੀਟਰ"], m: ["ਮੀਟਰ"] },
@@ -180,7 +180,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    Punjabi word for the scale is attested nowhere in this repo (see the header).
         s = s.replace(/(\d)\s?°/gu, "$1 ਡਿਗਰੀ");
 
-        // THE ADDITIVE SIGNS (#654). pa_in gives nothing usable — ਜਮਾਂ is ×0, ਪਲੱਸ appears only inside the brand
+        // THE ADDITIVE SIGNS. pa_in gives nothing usable — ਜਮਾਂ is ×0, ਪਲੱਸ appears only inside the brand
         // name ਮੈਟਰੋਪਲੱਸ, and ਜੋੜ is ×1 token against ×33 SUBSTRING (ਜੋੜੇ, "couples"). pa.wikipedia's arithmetic
         // article settles all of it, naming the sign and then READING an expression with operands:
         //
@@ -202,7 +202,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}ਘਟਾਓ `);
 
-        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from pa_in:
+        // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from pa_in:
         //
         //   `ਬਰਾਬਰ`     ×8 token    "ਬਰਾਬਰ ਜਾਂ ਇਸ ਪੱਖ ਅਨੁਪਾਤ ਦੇ ਲਗਪਗ ਨੇੜੇ" — EQUAL TO this aspect ratio
         //   `ਤੋਂ ਘੱਟ`    ×14 phrase   "ਚੀਜ਼ਾਂ ਤੋਂ ਘੱਟ ਪੁਰਾਣੇ" — less old THAN things

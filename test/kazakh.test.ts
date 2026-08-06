@@ -154,18 +154,18 @@ describe("Kazakh text normalization", () => {
         expect(ph("UTC + 1")).toBe("jˈuː tʰˈiː sˈiː pɫjˈus bˈɪr");
     });
 
-    // #586 — `шаршы километр` ×8 and `текше метр` ×2, word-first. The measure word does not inflect: the
+    // `шаршы километр` ×8 and `текше метр` ×2, word-first. The measure word does not inflect: the
     // corpus's `2,2 миллион шаршы километріне` carries the dative on the HEAD noun, so one form suffices.
-    it("the squared/cubed measure word (#586)", () => {
+    it("the squared/cubed measure word", () => {
         expect(phonemize("2,2 km²", "kk")).toContain("ʃˈɑrʃə kəjlomˈetr");
         expect(phonemize("120 m³", "kk")).toContain("tekʃˈe mˈetr");
     });
 
-    // #586 — THE NUMERO SIGN was dropped: «№ 11 ғарышкер» read as *он бір ғарышкер*. `нөмір` ×1 here, and the
+    // THE NUMERO SIGN was dropped: «№ 11 ғарышкер» read as *он бір ғарышкер*. `нөмір` ×1 here, and the
     // same corpus writes the same content the other way round — `1 және 2 нөмірлі реакторлар`, the postposed
     // adjectival form, which suits a different construction than a preposed sign.
     // ⚠ One instance of each: acted on because the alternative is a silently dropped sign.
-    it("the numero sign reads нөмір (#586)", () => {
+    it("the numero sign reads нөмір", () => {
         expect(phonemize("«№ 11 ғарышкер»", "kk")).toContain("nɵmˈɪr ˈonbˈɪr");
     });
 });

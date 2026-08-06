@@ -22,7 +22,7 @@ for (const line of readFileSync("src/languages/russian/stress.tsv", "utf8").spli
 
 const rows: string[] = [];
 const seen = new Set<string>();
-for (const line of readFileSync("/mnt/data/ru_kaikki.tsv", "utf8").split("\n")) {
+for (const line of readFileSync((process.env["DUMPS"] ?? ".") + "/ru_kaikki.tsv", "utf8").split("\n")) {
   const tab = line.indexOf("\t");
   if (tab < 0) continue;
   const w = line.slice(0, tab).toLowerCase();

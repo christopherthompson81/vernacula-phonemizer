@@ -3,10 +3,10 @@ import { describe, expect, test } from "vitest";
 import { normalizeEnglish } from "../src/languages/english/normalize.ts";
 import { phonemize } from "../src/index.ts";
 
-// #562 — English text normalization: rewrite non-lexical tokens into speakable words BEFORE the
+// English text normalization: rewrite non-lexical tokens into speakable words BEFORE the
 // tokenizer, so the existing number/ordinal/OOV machinery pronounces them. Asserted mostly at the
 // TEXT level (the rewrite is the contract; pronunciation is the number path's own tested concern).
-describe("English text normalization (#562)", () => {
+describe("English text normalization", () => {
     test("percent and currency are no longer silently dropped", () => {
         expect(normalizeEnglish("40% of people")).toBe("40 percent of people");
         expect(normalizeEnglish("$5 million")).toBe("5 million dollars");
@@ -168,7 +168,7 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
         expect(phonemize("20 °C", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs"); // was "twenty see"
         // ℃ / ℉ are SINGLE code points (U+2103, U+2109), so the `°c`/`°f` keys could not reach them and
         // `20℃` read as bare "twenty" — the whole unit gone, not merely the sign. Found while reviewing the
-        // cmn/hi loop-back (#586); 53 of 65 languages still drop ℃, and ja and ko have it in their corpora.
+        // cmn/hi loop-back; 53 of 65 languages still drop ℃, and ja and ko have it in their corpora.
         expect(phonemize("20℃", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs");
         expect(phonemize("20℉", "en")).toBe("twˈɛnti dᵻɡɹˈiːz fˈɛɹənhˌaᶦt");
         expect(phonemize("160 km/h", "en")).toBe("wˈʌn hˈʌndɹəd sˈɪksti kəlˈɑːmʌt̬ɚz pʰɝ ˈaᶷɚ"); // /h was "aitch"
@@ -223,7 +223,7 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
 });
 
 /**
- * LATIN SCHOLARLY ABBREVIATIONS (#562). `i.e.`, `e.g.`, `N.B.`, `a.m.`/`p.m.` and `(sic)` were already
+ * LATIN SCHOLARLY ABBREVIATIONS. `i.e.`, `e.g.`, `N.B.`, `a.m.`/`p.m.` and `(sic)` were already
  * right — they are read as LETTERS or as an ordinary word. These were not: mid-sentence their dot became
  * a phrase break, and two of them were not words at all.
  */

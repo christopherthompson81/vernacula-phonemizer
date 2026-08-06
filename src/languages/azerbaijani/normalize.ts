@@ -288,7 +288,7 @@ export function normalizeAzerbaijani(input: string): string {
     // ¾ is THREE QUARTERS — denominator-locative + numerator, the same shape the slash rule below builds:
     // *dörddə üç*. "üçdə dörd" is 4/3, and the corpus's one instance (`29¾ düym`) read it that way.
     s = s.replace(/(\d+)¾/gu, "$1 dörddə üç");
-    // THE DIVISION SIGN (#654). ⚠ THE SECOND OPERAND TAKES THE DATIVE, so this is not a substitution: az.wikipedia
+    // THE DIVISION SIGN. ⚠ THE SECOND OPERAND TAKES THE DATIVE, so this is not a substitution: az.wikipedia
     //    has `bölünür` ×11 / 7 articles ("is divided") and Azerbaijani states the operation as
     //    "altı üçə bölünür" — six is divided BY three — with -a/-ə on the divisor and the verb last. The
     //    Turkish-style infix `bölü` is ×0 there, so the postposed form is the attested one. FLEURS's parallel

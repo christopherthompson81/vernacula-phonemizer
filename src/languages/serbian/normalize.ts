@@ -245,7 +245,7 @@ const NOT_LETTER = "(?![\\p{L}\\p{M}])";
  * *квадратних километара* out).
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // и is ×255 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -261,7 +261,7 @@ const SYMBOLS = makeSymbolNormalizer({
     multiply: { times: "puta" },
     percent: ["posto"],
     /**
-     * CURRENCY (#584). `$5` read as bare *pet*. sr_rs contains ZERO `$` against 24 `%`, so the corpus-driven
+     * CURRENCY. `$5` read as bare *pet*. sr_rs contains ZERO `$` against 24 `%`, so the corpus-driven
      * gate could not see it — but the words are in that corpus, and they DECLINE, which is why a token test
      * for the bare nominative found nothing and the stem had to be searched instead:
      *
@@ -369,7 +369,7 @@ export function normalizeSerbian(input: string): string {
     //     `… w u t e ts e p l u s t j e d a n …` — "UTC plus jedan", 1 of 2 speakers; the other skips the
     //     parenthetical entirely, the reader behaviour seen in ta, en, am, zu, mi, ne and sw. плус reads
     //     `plus`, matching the decode. BEFORE the degree rules, the ordering coupling zu's `[+]?` taught.
-    // THE MINUS (#654). ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
+    // THE MINUS. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
     //    (1000-1300), a SCORE (6-6), a DESIGNATION (il-76) or a clock range. The rule is written anyway on
     //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
     //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
@@ -396,7 +396,7 @@ export function normalizeSerbian(input: string): string {
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 плус ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1плус ");
 
-    // 3c) THE RELATIONAL AND DIVISION SIGNS (#654). sr.wikipedia's дељење article reads the operation aloud and
+    // 3c) THE RELATIONAL AND DIVISION SIGNS. sr.wikipedia's дељење article reads the operation aloud and
     //     then names the notation, giving two of the four in one sentence:
     //
     //       "двадесет подељено са пет једнако четири. Ово се означава као 20 / 5 = 4"

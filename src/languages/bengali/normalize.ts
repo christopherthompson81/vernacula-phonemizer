@@ -132,7 +132,7 @@ export function makeBengaliNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(new RegExp(`(\\S)\\+\\s?([${D}])`, "gu"), "$1 যোগ $2");
         s = s.replace(new RegExp(`(^|\\s)\\+\\s?([${D}])`, "gu"), "$1যোগ $2");
 
-        // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from bn_in:
+        // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from bn_in:
         //
         //   `সমান`       ×14 token   "রেসিওর সমান বা কাছাকাছি" — EQUAL TO the ratio
         //   `থেকে কম`     ×2 phrase   ·  `থেকে বেশি` ×14 phrase — both postposed, with real operands

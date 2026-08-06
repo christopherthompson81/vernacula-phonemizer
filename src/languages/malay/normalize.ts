@@ -99,7 +99,7 @@ export function normalizeMalay(input: string): string {
 
     // 1) AMPERSAND, including the HTML entity the corpus actually writes (`Seni &amp; Sains`, `Qatar
     //    Airways &amp; Turkish Airlines`, `B&B`). The sign was DROPPED outright — the leak classes are blind
-    //    to a symbol that vanishes (#584), so this is a silent content loss. Malay `dan` ×874.
+    //    to a symbol that vanishes, so this is a silent content loss. Malay `dan` ×874.
     s = s.replace(/\s*(?:&amp;|&(?!\w+;))\s*/gu, " dan ");
 
     // 2) COMMA THOUSANDS — first, before any other rule can read the grouping comma as clause punctuation

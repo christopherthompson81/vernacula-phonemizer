@@ -49,7 +49,7 @@ export function phonemizeWord(word: string): string {
             continue;
         }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed. Only
-        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins (#663).
+        // reached when every grapheme (digraphs included) has declined, so the language's own reading wins.
         const g = G[c] ?? latinPhone(c, { initial: i === 0, includeH: true });
         if (g !== undefined) out.push(g);
         i += 1;
@@ -64,7 +64,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin", "Nko"])})|([\\d\\u{07C0}-\\u{
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls (#657).
+ * deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zɛɔɲŋ\\u{07CA}-\\u{07F5}\\u{07FA}\\u{07FD}]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

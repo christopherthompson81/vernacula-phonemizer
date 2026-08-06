@@ -231,7 +231,7 @@ export function normalizeDutch(input: string): string {
     //    negatives. AFTER step 8, so `+30°C` has already become `+30 graden Celsius`.
     s = s.replace(/\+\s?(?=\d)/gu, " plus ");
 
-    // 9b) ± AND THE RELATIONAL AND DIVISION SIGNS (#654). ± is this language's own two words juxtaposed, and
+    // 9b) ± AND THE RELATIONAL AND DIVISION SIGNS. ± is this language's own two words juxtaposed, and
     //     the `plus` half is lifted from the rule directly above; `min` is not otherwise in this file precisely
     //     because nl_nl has no true minus sign (see the note above), so `min` is the one word here that comes
     //     from the register rather than from the tree. It is the standard Dutch reading of the sign and matches

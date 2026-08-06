@@ -9,7 +9,7 @@ final ه→e).
 
 **Training data (permissive):** wikipron `fas_arab` broad (human, CC-BY-SA) abjad→IPA + a Tajik-derived
 cross-script silver (tools/persian/fa-tg-silver.tsv; wikipron/tgwiki CC-BY-SA, IPA ours). Trained offline on
-the GPU (`/mnt/data/ar-diac-venv`, torch+cuda) via `tools/persian/export_s2s_onnx.py`.
+a torch+cuda GPU environment via `tools/persian/export_s2s_onnx.py`.
 
 **Measured (held-out UNSEEN words, vs the fold-normalised wikipron reference):** 45.8% exact — ≈3× the fa g2p
 default-[a] baseline (16%).

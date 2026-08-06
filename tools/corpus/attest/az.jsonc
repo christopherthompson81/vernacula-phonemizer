@@ -1,4 +1,4 @@
-// WIKIPEDIA WORD ATTESTATION — az (#586). Written by tools/normalization/attest.ts.
+// WIKIPEDIA WORD ATTESTATION — az. Written by tools/normalization/attest.ts.
 //
 // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
 // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's

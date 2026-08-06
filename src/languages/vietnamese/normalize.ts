@@ -1,5 +1,5 @@
 /**
- * Vietnamese (vi) TEXT NORMALIZATION (#562) — the pre-tokenizer pass that rewrites everything which is
+ * Vietnamese (vi) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is
  * not already a pronounceable Vietnamese syllable into Vietnamese words the existing pipeline speaks.
  * Pure text→text; no IPA. Runs inside vietnamese.ts's `text()`, BEFORE the shared symbol tier and before
  * the tokenizer.
@@ -251,7 +251,7 @@ export function normalizeVietnamese(input: string): string {
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 cộng ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1cộng ");
 
-    // ── 11b2. the MINUS and ±, which this file argued for and never had (#654) ────────────────────
+    // ── 11b2. the MINUS and ±, which this file argued for and never had ────────────────────
     // The note above ends "omitting a plus is LOSSLESS while omitting a minus INVERTS" — and then no minus
     // rule followed. Both signs were dropped outright, so `-5 °C` read as *năm độ*, five degrees above zero.
     //
@@ -270,7 +270,7 @@ export function normalizeVietnamese(input: string): string {
     s = s.replace(/(^|[\s(])[-−–](?=\d)/gu, (m0: string, pre: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : `${pre}âm `);
 
-    // ── 11c. the relational and division signs (#654) ────────────────────────────────────────────
+    // ── 11c. the relational and division signs ────────────────────────────────────────────
     // Vietnamese is SVO and all four readings are infix, so this is the ordinary rule shape.
     //
     // ⚠ `bằng` IS THE في TRAP: ×352 TOKEN HITS ON vi.wikipedia AND EVERY ONE THE WRONG SENSE. Vietnamese

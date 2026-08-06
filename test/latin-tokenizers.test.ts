@@ -1,5 +1,5 @@
 /**
- * ACCENTED LATIN IS ONE WORD (#657) — the fleet-wide pin for the tokenizer widening.
+ * ACCENTED LATIN IS ONE WORD — the fleet-wide pin for the tokenizer widening.
  *
  * A word group narrower than Latin ends the token at an out-of-inventory diacritic. That letter becomes an
  * unclaimed gap read as an English LETTER NAME, and the rest of the word starts over — one word becomes three:
@@ -46,7 +46,7 @@ function fragments(lang: string): string {
  */
 const REMAINING = new Set<string>([]);
 
-describe("accented Latin stays one word (#657)", () => {
+describe("accented Latin stays one word", () => {
     test("⚠ the fleet-wide sweep — every code the registry serves", () => {
         const broken: string[] = [];
         const fixed: string[] = [];

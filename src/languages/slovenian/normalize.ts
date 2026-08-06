@@ -783,7 +783,7 @@ export function normalizeSlovenian(input: string): string {
             const [x, y] = [LETTER_NAME[a.toLowerCase()], LETTER_NAME[b.toLowerCase()]];
             return x === undefined || y === undefined ? m0 : `${x} in ${y}`;
         });
-    // THE DIVISION SIGN (#654), and ⚠ IT WAS THE REGISTER RESTRICTION THAT HID IT — the third time in this issue,
+    // THE DIVISION SIGN, and ⚠ IT WAS THE REGISTER RESTRICTION THAT HID IT — the third time in this issue,
     // after pl and ml. `deljeno z` and `delimo z` were both measured ×0 with
     // `attest.ts --context "matematika aritmetika deljenje"` and sl was recorded as unsourceable. Probing the
     // same word with NO restriction returns ×20 token / 10 articles for `deljeno` and ×6 / 4 for `deljeno z`,

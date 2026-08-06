@@ -10,7 +10,7 @@
  * have NO referee at all.
  */
 /**
- * #583 — NORMALIZER WORDS: Hindi's CLOCK words are confirmed for Maithili; its percent word is NOT, and is
+ * NORMALIZER WORDS: Hindi's CLOCK words are confirmed for Maithili; its percent word is NOT, and is
  * retained unconfirmed. Evidence from mai.wikipedia via `tools/normalization/attest.ts`
  * (`tools/corpus/attest/mai.jsonc`). This language is why the reading has to be done per sentence:
  *

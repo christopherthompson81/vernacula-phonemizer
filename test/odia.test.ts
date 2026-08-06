@@ -37,7 +37,7 @@ describe("Odia canonical IPA", () => {
     });
 });
 
-// TEXT NORMALIZATION (#562). Counts and provenance are in src/languages/odia/normalize.ts's header; these
+// TEXT NORMALIZATION. Counts and provenance are in src/languages/odia/normalize.ts's header; these
 // pin the behaviours that the or_in corpus diff (158/1327 utterances changed) actually moved.
 const or = (s: string): string => getPhonemizer("or").text(s).trim();
 

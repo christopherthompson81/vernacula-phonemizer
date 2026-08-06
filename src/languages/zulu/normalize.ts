@@ -262,7 +262,7 @@ export function normalizeZulu(input: string): string {
     //     The `-` is left silent (a prefix marker here, and zu's minus arm requires a digit directly after the
     //     dash, which `-+` does not give).
     // ⚠ ± IS THE ONE READING IN THIS FILE THAT THE AUDIO GIVES DIRECTLY, and it comes from the very decode the
-    //    note above is careful NOT to over-read (#654). That recording is of `kuka-+30°C`, two adjacent marks,
+    //    note above is careful NOT to over-read. That recording is of `kuka-+30°C`, two adjacent marks,
     //    and the reader voiced BOTH: `… kuka p l a s o m aɪ n a s v e d i …`. The note is right that this is no
     //    evidence about a plus before a TEMPERATURE — but `±` is not a temperature question. The sign MEANS
     //    "plus or minus", and what a zu speaker produced when reading a plus and a minus together is exactly

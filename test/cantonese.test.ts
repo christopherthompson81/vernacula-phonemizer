@@ -22,7 +22,7 @@ describe("cantonese canonical IPA", () => {
 
     test("numbers (Han-numeral composition)", () => {
         expect(phonemize("21", "yue")).toBe("jiː˨ sɐp̚˨ jɐt̚˥"); // 二十一
-        // #562: a SYNTHESIZED numeral is read per character, not through word segmentation. The dict has a
+        // a SYNTHESIZED numeral is read per character, not through word segmentation. The dict has a
         // colloquial lexical 十九 = sap1 gau1, and greedy longest-match applied it inside every composed
         // number containing 十九 — 29 came out ji6 sap1 gau1. 18 of the corpus's 208 distinct integers.
         expect(phonemize("29", "yue")).toBe("jiː˨ sɐp̚˨ kɐu˧˥"); // 二十九 ji6 sap6 gau2
@@ -34,7 +34,7 @@ describe("cantonese canonical IPA", () => {
 
 // #562 text normalization. Counts in the comments are instances in FLEURS yue_hant_hk (1,726 utterances);
 // the rules and the ordering they depend on are documented in src/languages/cantonese/normalize.ts.
-describe("cantonese text normalization (#562)", () => {
+describe("cantonese text normalization", () => {
     const yue = (s: string): string => phonemize(s, "yue");
 
     test("4-digit year before 年 reads digit by digit, not as a cardinal (×119)", () => {
@@ -110,9 +110,9 @@ describe("cantonese text normalization (#562)", () => {
         expect(yue("Müslüm")).toBe(phonemize("Müslüm", "en"));
     });
 
-    // #586 — `平方公里` ×4 ("公園占地一萬九千平方公里"), fused and word-first. No cube reading: 立方 is ×0 here and
+    // `平方公里` ×4 ("公園占地一萬九千平方公里"), fused and word-first. No cube reading: 立方 is ×0 here and
     // 米 stays undeclared for the 米勒 ("Miller") reason, so the two gaps are the same gap.
-    test("the squared/cubed measure word (#586)", () => {
+    test("the squared/cubed measure word", () => {
         expect(phonemize("19500 km²", "yue")).toContain("pʰɪŋ˨˩ fɔːŋ˥ kʊŋ˥ lei˩˧");
     });
 });

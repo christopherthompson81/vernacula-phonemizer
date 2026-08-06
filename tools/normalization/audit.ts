@@ -1,5 +1,5 @@
 /**
- * FLEET-WIDE NORMALIZATION AUDIT (#562) — probe every registered language for the defect classes that the
+ * FLEET-WIDE NORMALIZATION AUDIT — probe every registered language for the defect classes that the
  * per-language normalization work kept turning up, so they can be found mechanically instead of one
  * language at a time.
  *

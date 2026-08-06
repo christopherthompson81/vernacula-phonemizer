@@ -232,7 +232,7 @@ function number(digits: string): string {
 }
 // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
 // diacritic and left that letter to be read as an English letter name (`Cañitas` → *ka ˈɛn ˈitas*). This
-// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix (#657).
+// engine ROUTES a foreign word to the injected reader, so widening the class is the whole fix.
 const TOKEN = new RegExp(
     `([${PERSO_ARABIC_WORD}]+)|(${LATIN_RUN})|([${DIGIT_CLASS}]+)|([۔؟،؛.?!,;:])`,
     "gu",
@@ -255,7 +255,7 @@ export function normalizePersianOrthography(text: string): string {
 }
 
 /**
- * TEXT NORMALIZATION (#562) — the pre-tokenizer pass (normalize.ts). Exported because the NEURAL entry points in
+ * TEXT NORMALIZATION — the pre-tokenizer pass (normalize.ts). Exported because the NEURAL entry points in
  * persianNeural.ts do their own tokenization and must see the same rewritten text as the sync path; both call it
  * immediately after `normalizePersianOrthography`. It is idempotent, so the neural path re-entering the sync path
  * for a digit run costs nothing.

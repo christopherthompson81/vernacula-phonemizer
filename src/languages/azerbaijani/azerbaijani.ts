@@ -26,7 +26,7 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// #562 — Azerbaijani groups thousands with a SPACE (400 000) or a PERIOD (1.234 — the old class's "."
+// Azerbaijani groups thousands with a SPACE (400 000) or a PERIOD (1.234 — the old class's "."
 // thousands sep, still the idiomatic reading) and takes a COMMA decimal (6,5). The old class was a bare
 // `(\d+)`, so BOTH the space-group and the comma fell through: "400 000" read *dörd yüz sıfır* and "6,5"
 // *altı , beş*. normalize.ts claims clocks and the version dot first; a comma reaching here is a decimal
@@ -38,7 +38,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+\\.\\d{3}(?:\\.\\d{3})*|\\d+,\\d+|
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  */
 const NATIVE_CLASS = "[a-zçğəıiöşüx]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

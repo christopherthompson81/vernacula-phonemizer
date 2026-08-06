@@ -16,7 +16,7 @@ Reports the model against three baselines so the number means something:
 
   python3 train_sd_tagger.py            # train + eval on a held-out OOV split
   python3 train_sd_tagger.py --folds 5  # 5-fold CV (the honest read at this data size)
-Run under /mnt/data/omnivoice_ipa/train_venv/bin/python (torch + cuda).
+Run under .venv/bin/python (torch + cuda).
 """
 import json, random, sys
 from pathlib import Path

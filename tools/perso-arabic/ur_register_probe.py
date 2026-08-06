@@ -6,7 +6,8 @@ word (diagnostic letters ع ح ذ ض ظ ط ص ث, or ق) borrowed via Persian/Ar
   (2) among register-suspect misses, would adopting the wikipron reading fix them (upper-bound headroom);
   (3) is there an INDEPENDENT Urdu-native fix source — does the Persian (fa) lexicon cover these skeletons?"""
 import unicodedata
-HERE="/home/chris/Programming/vernacula-phonemizer"
+import os
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 WIKI=f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
 LEX=f"{HERE}/src/languages/urdu/lexicon-ipa.tsv"
 HIND=f"{HERE}/tools/perso-arabic/silver.hindiurdu.tsv"

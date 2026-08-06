@@ -341,7 +341,7 @@ export function normalizeWelsh(input: string): string {
 
     // 12) SIGNS. `+30°C` — the plus was dropped. `&` → *a* (and). A TRUE minus (`-5`) reads "minws"; the
     //     corpus's `-\d` are all ranges/scores (6-6, 7-2, 10-60, 35-40) and stay as two bare numbers.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
     //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +
@@ -354,7 +354,7 @@ export function normalizeWelsh(input: string): string {
             `${LETTER_NAME[a.toLowerCase()] ?? a} a ${LETTER_NAME[b.toLowerCase()] ?? b}${pl}`);
     s = s.replace(/\s&\s/gu, " a ");
     s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 yn hafal i $2");
-    // THE DIVISION SIGN (#654), the one sign this file still dropped. cy.wikipedia's Rhannu article states the
+    // THE DIVISION SIGN, the one sign this file still dropped. cy.wikipedia's Rhannu article states the
     // reading and uses this file's own equals word in the same clause — "mae a rhannu â b yn hafal ag c" — and
     // names it again as a quoted expression: 'Gellir ysgrifennu "a rhannu â b" fel a ganlyn'. FLEURS's parallel
     // aspect-ratio sentence gives the same verb ("gan rannu â deuddeg"), so corpus and register agree.

@@ -67,7 +67,7 @@ describe("Vietnamese: foreign tokens are not dropped", () => {
 // #562 TEXT NORMALIZATION (src/languages/vietnamese/normalize.ts). Assertions are on the normalizer's
 // TEXT output where the point is which words are chosen, and on the phonemized output where the point is
 // that no spurious clause pause survives. Corpus counts and the before-behaviour are in the file header.
-describe("Vietnamese normalization (#562)", () => {
+describe("Vietnamese normalization", () => {
     test("dot-grouped thousands: the separator was read as a SENTENCE break", () => {
         // before: "bốn mươi . không" — forty, full stop, zero
         expect(N("40.000 người")).toBe("40000 người");

@@ -160,7 +160,7 @@ export function normalizeJapanese(input: string): string {
     // 8) DEGREES. ℃ is a single character and never decomposed, so the shared symbol tier could not see
     //    it. Japanese says the bare 度 for Celsius — 30℃ is さんじゅうど — and marks Fahrenheit explicitly,
     //    which is the ambiguity 華氏 exists to resolve.
-    // THE TRAILING GUARD MUST REJECT A LATIN LETTER, NOT ANY LETTER (#586). Japanese has no spaces, so what
+    // THE TRAILING GUARD MUST REJECT A LATIN LETTER, NOT ANY LETTER. Japanese has no spaces, so what
     // follows a temperature is normally kana — and kana is `\p{L}`, so the guard rejected the ORDINARY case:
     // `20℃` read 20度 while `20℃を` read "20度 シー を", the scale letter spelled out because this arm failed
     // and the bare `°` rule below claimed the sign alone. The guard exists to stop `°Cm`-style run-ons, which
@@ -171,7 +171,7 @@ export function normalizeJapanese(input: string): string {
 
     // 9) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
     s = s.replace(/(^|[\s(（])[-−–](\d)/gu, "$1マイナス$2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
     //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
     //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
@@ -180,7 +180,7 @@ export function normalizeJapanese(input: string): string {
     s = s.replace(/(^|[\s(（])\+\s?(\d)/gu, "$1プラス$2");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1プラス$2");
 
-    // 9aa) RELATIONAL AND DIVISION SIGNS (#654). ja.wikipedia states two of these outright, which is as direct
+    // 9aa) RELATIONAL AND DIVISION SIGNS. ja.wikipedia states two of these outright, which is as direct
     //      as a sourcing tier gets — an article whose subject IS the sign, saying how it is read:
     //
     //        除算記号 …「日本語では一般に『わる』と読む」        ("generally read as わる in Japanese")
@@ -226,7 +226,7 @@ export function normalizeJapanese(input: string): string {
     //     it cannot bite into a mixed-case word.
     //    ⚠ THE BOUNDARY IS ALL OF LATIN, not `[A-Za-z]`. An ASCII-only lookaround does not see an accented
     //    letter as a letter, so the `S` of `São` passed the isolated-capital test and was spelled out as a
-    //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː* (#657).
+    //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː*.
     s = s.replace(/(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
     //     `pH` and the other listed mixed-case initialisms, which the all-caps rule cannot reach.
     for (const [k, v] of Object.entries(WORD_ACRONYM))

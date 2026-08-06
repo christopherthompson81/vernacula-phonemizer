@@ -53,7 +53,7 @@ export function phonemizeWord(word: string): string {
         }
         // ⚠ NOT SILENTLY: a letter with no grapheme rule here still denotes a sound, and dropping it deletes
         // what the writer typed. Consulted only on the MISS branch, after every grapheme (including every
-        // digraph) has been tried, so it can never override a reading this language has an opinion about (#663).
+        // digraph) has been tried, so it can never override a reading this language has an opinion about.
         if (!matched) {
             out += latinPhone(w[i]!, { initial: i === 0, includeH: true }) ?? "";
             i += 1;

@@ -61,7 +61,7 @@
         "decimalConnector": "кома"
     },
 
-    // LEXICAL (#562): all-caps runs that are SPELLED OUT although they are phonotactically readable, so
+    // LEXICAL: all-caps runs that are SPELLED OUT although they are phonotactically readable, so
     // core/initialisms.ts's OOV test cannot derive them. Everything else in the corpus is handled without a
     // list: США, ДНК, ВВП, ФБР, МРТ, ДВД, СРСР, НБА, ТБ have an illegal onset or no vowel and are spelled
     // automatically; ООН, ЗМІ, АЕС, ВІЛ, ІДІЛ, ОПЕК, ЮНЕСКО, СВАПО are readable AND said as words, so they

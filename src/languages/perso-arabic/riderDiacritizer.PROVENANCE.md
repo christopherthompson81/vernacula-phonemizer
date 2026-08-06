@@ -20,7 +20,7 @@ reproduces the reference IPA under the referee-eval fold. Reference IPA is from 
 a permissive CATT-teacher → Arabic-Wikipedia silver model (see `src/languages/arabic/diacritizer.PROVENANCE.md`).
 
 ## Build
-`tools/perso-arabic/export_onnx.py` — loads `/mnt/data/ar-diac/bilstm_multilingual.pt`, exports fp32 ONNX,
+`tools/perso-arabic/export_onnx.py` — loads `$ARDIAC/bilstm_multilingual.pt`, exports fp32 ONNX,
 verifies argmax parity vs PyTorch (must be exact), int8 dynamic-quantizes (≈4× smaller → 15.3 MB, on par with the
 Arabic model; 98.9% word-level argmax agreement with fp32 on the held-out set), and writes this file +
 `riderDiacritizer.meta.json` (char/label/lang-token maps). The fp32↔int8 gap is ≈1% of words.

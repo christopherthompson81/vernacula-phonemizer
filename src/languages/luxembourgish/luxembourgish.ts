@@ -55,7 +55,7 @@ function scan(word: string): Tok[] {
         }
         const c = w[i]!;
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
-        // Consulted AFTER every digraph and single-letter rule, so it cannot override this language (#663).
+        // Consulted AFTER every digraph and single-letter rule, so it cannot override this language.
         const ph = G[c] ?? latinPhone(c, { initial: i === 0 });
         if (ph !== undefined) toks.push({ ph, sVar: c === "s", eVar: c === "e" }); // single ⟨s⟩→[z], single ⟨e⟩→[æ]/[ə]
         i += 1;
@@ -170,7 +170,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:�
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
  * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls (#657).
+ * is no longer also deciding where the script boundary falls.
  *
  * ⚠ NOT QUITE VERBATIM: à á â ô û ü ö and their capitals were REMOVED, because the g2p has no rule for them and DROPPED them outright.
  * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was

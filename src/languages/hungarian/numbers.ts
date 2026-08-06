@@ -106,7 +106,7 @@ const ORDINAL_KEYS = Object.keys(ORDINAL_MORPH).sort((a, b) => b.length - a.leng
  */
 /**
  * MULTIPLICATIVE (-szor / -szer / -ször), which is how Hungarian reads a dimension `×` — `6 × 6 cm` is
- * *hatszor hat centiméter*. Sourced from the corpus's own audio (#586): facebook/wav2vec2-xlsr-53-espeak-cv-ft
+ * *hatszor hat centiméter*. Sourced from the corpus's own audio: facebook/wav2vec2-xlsr-53-espeak-cv-ft
  * over hu_hu/train gives `h ɔ t s oː r  h ɔ t  ts ɛ n t i m eː ɾ t ə` and
  * `ɔ n y t v ɛ n  h ɔ t s oː r  y t v ɛ n h ɔ t  m i l i m eː t ə r` — hatszor hat, ötvenhatszor ötvenhat.
  *

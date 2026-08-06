@@ -66,7 +66,7 @@ const TE_LETTER = "\\u0C00-\\u0C65\\u0C70-\\u0C7F";
  * shared "A per B" postposed idiom cannot express it. Handled locally in step 7.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
+    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
     // మరియు is ×1003 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
     //
@@ -306,7 +306,7 @@ export function normalizeTelugu(input: string): string {
     //      operand must not get there first. Both arms, so the sign is read glued to a label or opening the
     //      quantity; the measurement position is voiced too because for a TTS target an explicitly typed
     //      character is content, not a reader's habit to copy.
-    // THE MINUS AND ± (#654). ⚠ MEASURED SAFE: every `-<digit>` in te_in is a range, score or closed
+    // THE MINUS AND ±. ⚠ MEASURED SAFE: every `-<digit>` in te_in is a range, score or closed
     //    designation, with ZERO instances of `word · space · hyphen · digit` — the shape no guard can reject and
     //    the reason gu, kn, mr, nl, ta and yue all decline this rule.
     //
@@ -328,7 +328,7 @@ export function normalizeTelugu(input: string): string {
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ప్లస్ ");
 
     // 13) DEGREES, after the decimal step so a temperature like 1.5°C keeps its point. ×2.
-    // THE RELATIONAL AND DIVISION SIGNS (#654), sourced ENTIRELY from te_in:
+    // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from te_in:
     //
     //   `సమానం`        ×3 token   "కారక నిష్పత్తికి సమానంగా" — EQUAL TO the aspect ratio
     //   `కంటే తక్కువ`   ×2 phrase  "బరువు కంటే తక్కువ" — less than the weight

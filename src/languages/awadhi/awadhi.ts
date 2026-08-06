@@ -16,7 +16,7 @@
  * awawiki types + 100% of 6.6k dictionary headwords phonemize (real Awadhi, not Hindi cognates).
  */
 /**
- * #583 — NORMALIZER WORDS: the Hindi defaults are RETAINED, and three of them are now confirmed for Awadhi
+ * NORMALIZER WORDS: the Hindi defaults are RETAINED, and three of them are now confirmed for Awadhi
  * rather than merely inherited. Evidence from awa.wikipedia via `tools/normalization/attest.ts`
  * (`tools/corpus/attest/awa.jsonc`), with each sentence's language judged from its MORPHOLOGY, because a
  * Devanagari token hit on a small wiki is routinely a quoted Hindi passage:

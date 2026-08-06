@@ -1,7 +1,7 @@
 /**
  * Czech (cs) phonemizer — canonical IPA. Rule g2p (g2p.ts) + fixed FIRST-syllable stress
  * with secondary stress on even non-final nuclei (republika→rˈɛpublˌɪka). Syllabic r̩/l̩ count as nuclei.
- * text() pipeline (#562): normalizeCzech (grouping, abbreviations, ordinals with case inflection, clock,
+ * text() pipeline: normalizeCzech (grouping, abbreviations, ordinals with case inflection, clock,
  * dates, ranges, signs) → normalizeCzechInitialisms → the shared symbol tier (units, currency, exponents,
  * rates) → the clause assembler, whose number token carries the decimal comma.
  */
@@ -68,14 +68,14 @@ const NATIVE_CLASS = "[A-Za-zÁáČčĎďÉéĚěÍíŇňÓóŘřŠšŤťÚúŮ�
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:,\\d+)?)|([.!?…,;:])`, "gu");
 
 // #562 symbol normalization — Czech, with the Slavic three-way agreement (1 procento / 2 procenta /

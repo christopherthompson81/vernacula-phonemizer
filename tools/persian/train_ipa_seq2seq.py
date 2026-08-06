@@ -7,9 +7,9 @@ already thrown away the و/ی/ه and word structure. This model reads the ABJAD 
 a BiLSTM encoder + LSTM decoder with dot-product attention. It is no longer constrained to the g2p frame's slots,
 so it also handles ezafe / insertions the tagger cannot.
 
-Trained on the GPU (/mnt/data/ar-diac-venv). Inputs = the aligned TSVs (word<TAB>fa-ipa<TAB>gold-ipa); only the
+Trained on the GPU ($ARDIAC_PY). Inputs = the aligned TSVs (word<TAB>fa-ipa<TAB>gold-ipa); only the
 word (abjad) and the gold IPA are used.
-  /mnt/data/ar-diac-venv/bin/python train_ipa_seq2seq.py fa_gold_aligned.tsv [tg_silver_aligned.tsv]
+  $ARDIAC_PY train_ipa_seq2seq.py fa_gold_aligned.tsv [tg_silver_aligned.tsv]
 
 RESULT (2026-07-20, seed 1234, held-out UNSEEN words):
   baseline (fa [a] default):                    16.0%

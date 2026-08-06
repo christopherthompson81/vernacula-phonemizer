@@ -7,7 +7,8 @@ That headroom is what the blanket-[ə] baseline forfeits and the tagger could wi
 Reuses the fa aligner's tokenizer, extended to the Urdu (Hindi-phonology) inventory."""
 import sys
 from collections import Counter
-HERE = "/home/chris/Programming/vernacula-phonemizer"
+import os
+HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root
 SILVER = f"{HERE}/tools/perso-arabic/silver.hindiurdu.tsv"
 WIKI = f"{HERE}/tools/referee-eval/referees/ur.wikipron-urd-broad.tsv"
 

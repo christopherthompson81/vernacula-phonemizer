@@ -229,7 +229,7 @@ export function normalizeItalian(input: string): string {
     // 8) SIGNS. `+` occurs once (`UTC+1`); `-` does not occur in this corpus, but a dropped minus is silent
     //    content loss that inverts a temperature, and the guards keep it off the ranges that DO occur —
     //    `1894-1895` has a digit before the hyphen, and the football score `26 - 00` has a space after it.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
+    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
     //    the plus and minus rules immediately below, so nothing is invented. The FORM is the one every language
     //    that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the outlier
     //    that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single character, so
@@ -239,7 +239,7 @@ export function normalizeItalian(input: string): string {
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1più $2");
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1meno $2");
 
-    // 8b) RELATIONAL AND DIVISION SIGNS (#654). ⚠ TIER 2 LOOKED SUFFICIENT AND WAS THE WRONG SENSE TWICE —
+    // 8b) RELATIONAL AND DIVISION SIGNS. ⚠ TIER 2 LOOKED SUFFICIENT AND WAS THE WRONG SENSE TWICE —
     //     this language is the clearest case in the issue for why the examples get read rather than the counts.
     //     Both comparatives are attested in it_it as phrases, and neither hit is a comparison:
     //

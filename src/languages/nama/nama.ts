@@ -73,7 +73,7 @@ export function phonemizeWord(word: string): string {
         // WORD-FINAL gender suffix ⟨-b⟩ → [p] (devoicing): ǀgomab→ǀómàp.
         if (cur === "b" && i === chars.length - 1) { segs.push("p"); continue; }
         // ⚠ A letter with no rule here still denotes a sound; dropping it deletes what the writer typed.
-        // Reached only when every rule above has declined, so the language's own reading always wins (#663).
+        // Reached only when every rule above has declined, so the language's own reading always wins.
         const ph = LETTER[cur] ?? latinPhone(cur, { initial: i === 0, includeH: true });
         if (ph !== undefined) segs.push(ph);
         // tone diacritics on vowels, ʼ, etc.: dropped (tone not emitted; it folds)
@@ -91,14 +91,14 @@ const NATIVE_CLASS = "[a-zA-Zǀǁǂǃ]";
 /**
  * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
  * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions (#657).
+ * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
  */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an
 // out-of-inventory diacritic, so that letter became an unclaimed gap read as an English LETTER NAME and the
 // rest of the word started over: `São Paulo` fragmented into three pieces, none of them right. Invisible to
-// every gate: no digit or raw mark survives and nothing VANISHES (#657).
+// every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
 
 class NamaPhonemizer implements Phonemizer {
