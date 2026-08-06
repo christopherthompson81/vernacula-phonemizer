@@ -22,6 +22,12 @@ export interface YorubaManifest {
         and: string;
         /** The squared measure word, emitted AFTER the unit noun: `kìlómítà onígun mẹ́rin`. */
         squared: string;
+        /** ⚠ Temperature is a CIRCUMFIX: `ìwọ̀n` before the number, the scale name after. */
+        degree: string;
+        /** Scale letter → its name, borrowed unchanged from English by this corpus. */
+        scales: Record<string, string>;
+        /** `lọ́nà` — the same multiplicative particle numbers.ts uses (`ẹgbẹ̀rún lọ́nà ogún` = 1000×20). */
+        times: string;
     };
     /** Cardinal numbers — VIGESIMAL, with addition and subtraction. See yoruba.jsonc for the sourcing of each. */
     numbers: {

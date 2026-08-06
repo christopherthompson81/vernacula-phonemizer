@@ -6,13 +6,24 @@
  * HAS referees (wikipron yor, kaikki yor) but they are word→IPA: they can check how a word is PRONOUNCED, never
  * whether it is the right word for a symbol, so the corpus is the evidence for everything below.
  *
- * ⚠ WHAT IS DELIBERATELY NOT READ, each refused on a measurement rather than left as a silent gap:
- *   · DEGREES — ° is 390 trailing a number, and it is the sign this language most conspicuously writes. But
- *     `dígírí` has 0 hits ANYWHERE and `sẹ́lísíọ̀sì` 0, so there is no scale word to say.
- *   · MULTIPLICATION — × is 72 digit-flanked; `ìlọ́po` (75 whole) is never digit-adjacent even once.
- *   · PLUS — + is 9 digit-flanked; `àfikún` (564) is a nominal "addition", digit-adjacent 3 times in prose.
+ * ⚠ TWO CLASSES WERE FIRST REFUSED HERE AND THE REFUSALS WERE WRONG — see rules 6 and 7. `degrees` rested on
+ * `dígírí` 0 and `sẹ́lísíọ̀sì` 0, spellings I invented, while the corpus borrows `Celsius`/`Fahrenheit` unchanged
+ * and says `ìwọ̀n` for the degree; °C alone is 211 occurrences that were being read as a bare number. And `times`
+ * was refused as having no operator word while numbers.ts was already using `lọ́nà` — this language's
+ * multiplicative particle — for exactly that relation. A wall of accepted silences is a smell, and in this
+ * language two of the three highest-frequency entries in it did not survive being re-examined.
+ *
+ * ⚠ WHAT IS STILL NOT READ, each refused on a measurement rather than left as a silent gap. The refusals that
+ * remain are all signs that are BOTH rare AND wordless, which is the distinction the two above failed:
  *   · MINUS — the digit-flanked dash is a RANGE here (see rule 2), so no minus is read at all.
+ *   · A BARE ° with no scale letter — 128 occurrences, of which 55 are digit-flanked geographic coordinates
+ *     (`7°30′`). The angular `digiri` has 1 hit; three of its four total hits are ACADEMIC degrees.
+ *   · PLUS — + is 9 digit-flanked; `àfikún` (564) is a nominal "addition", digit-adjacent 3 times in prose.
+ *   · PLUS-MINUS — ± is 18 digit-flanked and no tolerance word occurs anywhere.
  *   · EQUALS — = is 7 digit-flanked; `dọ́gba` (124) means "is equal", digit-adjacent 9 times, too thin to map.
+ *   · The COMPARATORS — < occurs 13 times and > 39, NEITHER of them ever between digits.
+ *   · DIVIDE — ÷ occurs twice in 21 MB, never between digits.
+ *   · A BARE exponent — ³ is 23 occurrences with no cube word anywhere; the squared UNIT is read (rule 4).
  *
  * ⚠ AND `ẹsẹ` FOR THE DECIMAL POINT WAS FOUND IN A DICTIONARY AND STILL REFUSED, which is the distinction the
  * playbook draws. Fakinlede's Yoruba–English Mathematics Dictionary (2017) gives `Ẹsẹ` = "decimal point" — but
@@ -87,6 +98,13 @@ const PERCENT = /(\d+(?:\.\d+)?)\s*%/gu;
 const fold = (x: string): string => x.normalize("NFD").replace(/\p{M}+/gu, "").toLowerCase();
 const SAID_AFTER = /ninu\s+[oọ]g[oọ]run/u;
 const SAID_BEFORE = /(?:[iì]da|[iì]pin)\s*$/u;
+/** The unit nouns this layer expands, and a squared one with no number necessarily beside it. */
+const UNIT_WORDS: Record<string, string> = { km: "kìlómítà", ha: "hẹ́kítà" };
+const UNIT_SQUARED = /(?<![\p{L}\p{M}])(km|ha)\s*²/gu;
+/** `38°C`, `79.63 °F` — a number, the sign, and a scale letter. The bare ° is refused; see the header. */
+const SCALED_DEGREE = /(\d+(?:\.\d+)?)\s*°\s*([CFK])(?![\p{L}\p{M}])/gu;
+/** A digit-flanked ×: relay legs, dimensions and resolutions. */
+const TIMES = /(\d)\s*×\s*(?=\d)/gu;
 /** A decimal period (3,317 lines, against 71 with a decimal comma). */
 const DECIMAL = /(\d)\.(\d+)/gu;
 
@@ -126,12 +144,46 @@ export function normalizeYoruba(text: string): string {
             ? num
             : `${SYM.percentBefore} ${num} ${SYM.percentAfter}`);
 
+    // ── 4a. a SQUARED UNIT that no number is adjacent to ─────────────────────────────────────────────────
+    // The tier reads `250 km²` and `54.92 km²` because a number sits against the unit, but not
+    // `9.83 million km²` or `3.79 egbegberun km²`, where a MAGNITUDE WORD comes between — and those are how the
+    // corpus writes the large areas. The reading does not depend on the number, so it is claimed here for every
+    // occurrence; the tier then sees the words rather than the sign, and its `units` declaration still serves a
+    // bare `km` (`12.76 km` → `kìlómítà`).
+    s = s.replace(UNIT_SQUARED, (_m, u: string) => `${UNIT_WORDS[u] ?? u} ${SYM.squared}`);
+
     // ── 4. the shared symbol tier (currency, ampersand) ───────────────────────────────────────────────────
     s = SYMBOLS(s);
 
-    // ── 5. the decimal separator ──────────────────────────────────────────────────────────────────────────
-    // ⚠ LAST, AND THE ORDER IS LOAD-BEARING: run before rule 3, this would split `8.3%` into two numbers and
-    // the percent circumfix would wrap only one half.
+    // ── 5. temperature ───────────────────────────────────────────────────────────────────────────────────
+    // ⚠ ANOTHER CIRCUMFIX: `ìwọ̀n` before the number, the scale name after — `ìwọ̀n 3.4 Celsius`,
+    // `ìwọ̀n 36 sí 50 Fahrenheit`. °C is 211 occurrences and °F 144, every one of them previously read as a bare
+    // number with the sign and the scale both silent.
+    //
+    // ⚠ AND THE SCALE NAMES ARE BORROWED UNCHANGED. This class was refused on `dígírí` 0 / `sẹ́lísíọ̀sì` 0 —
+    // Yorubized spellings that do not exist — while the corpus writes `Celsius` (9) and `Fahrenheit` (5) as they
+    // are, with `ìwọ̀n` (1,198) for the degree. Every readable spelled-out temperature in the corpus carries
+    // ìwọ̀n somewhere in the phrase, which is why it is emitted rather than the scale name alone.
+    //
+    // ⚠ BEFORE THE DECIMAL RULE, so `100.4°F` is still one number when the scale is claimed.
+    s = s.replace(SCALED_DEGREE, (_m, num: string, letter: string) =>
+        `${SYM.degree} ${num} ${SYM.scales[letter.toUpperCase()] ?? letter}`);
+
+    // ── 6. multiplication ────────────────────────────────────────────────────────────────────────────────
+    // ⚠ `lọ́nà` IS THIS LANGUAGE'S MULTIPLICATION WORD — numbers.ts uses it for exactly this relation
+    // (`ẹgbẹ̀rún lọ́nà ogún` = 1000×20, 77 instances after that magnitude alone), so refusing × as wordless
+    // while the compositor multiplied with it was not defensible.
+    //
+    // The honest limit: the particle is attested between SPELLED-OUT numerals, never between digits, so this
+    // composes a symbol reading from an attested piece — a lead rather than a finding, in the playbook's terms.
+    // It is preferred to silence because all 72 digit-flanked × are relay legs (`4 × 100 metres`), dimensions
+    // (`2×4`, `8×8`) and resolutions (`1920 × 1080`), where dropping the sign runs two numbers together.
+    s = s.replace(TIMES, `$1 ${SYM.times} `);
+
+    // ── 7. the decimal separator ──────────────────────────────────────────────────────────────────────────
+    // ⚠ LAST, AND THE ORDER IS LOAD-BEARING. Run before rule 3 this splits `8.3%` into two numbers and the
+    // percent circumfix wraps only one half; run before rule 5 it turns `100.4°F` into `100 àti dásímà 4°F` and
+    // the scale attaches to the fraction digit. Every rule that must see a decimal number WHOLE comes first.
     //
     // The separator is `àti dásímà` — "and decimal" — and the fraction is read DIGIT BY DIGIT. Both come from
     // the same 18 instances, which are unanimous on the frame:

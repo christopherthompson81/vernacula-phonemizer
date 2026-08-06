@@ -412,3 +412,69 @@ not the property:
     two tokens, so a 24-digit run with a 5 and a 9 twice emits 28.
 
 `review.ts --lang yo`: 9 of 10 checks pass. 3,089 tests.
+
+## Run 15 — 2026-08-06 — "too much marked intentional", and the fixture was not Yoruba
+
+Two challenges on the PR, both correct.
+
+### ⚠ Nine accepted silences was a smell, and two of the three biggest did not survive re-examination
+
+`degrees` was refused on `dígírí` 0 and `sẹ́lísíọ̀sì` 0 — **two Yorubized spellings I invented**. The corpus
+borrows the scale names UNCHANGED (Celsius 9, Fahrenheit 5, Kelvin 17) and uses the ordinary measure word
+`ìwọ̀n` (1,198) for the degree, which I had counted and dismissed as a general quantifier:
+
+    ìwọ̀n Celsius meji (3.6 ìwọ̀n Fahrenheit)      ìwọ̀n 3.4 Celsius      ìwọ̀n 36 sí 50 Fahrenheit
+
+Against °C 211 and °F 144 occurrences, all read as a bare number. This is the THIRD time in this language's
+work that a guessed candidate list produced zeros that measured the list rather than the language — after
+`dásímà` and after `mọ́kàn-`. The Yorubized `digiri` (3) and `dìgírí` (1) do exist and are a different sense:
+three ACADEMIC degrees (`ẹ̀rí digiri (doctorate)`, `masita digiri (MBA)`) and one angular.
+
+`times` was refused as having no operator word **while numbers.ts was already multiplying with `lọ́nà`** —
+`ẹgbẹ̀rún lọ́nà ogún` is 1000×20, 77 instances after that magnitude alone. Refusing the sign whose relation the
+compositor in the same PR expresses with that particle was not defensible.
+
+Both now read (`ìwọ̀n 38 Celsius`, `4 lọ́nà 100`), and the accepted block is down from nine entries to seven —
+all of them signs that are BOTH rare AND wordless, which is the distinction the two above failed. What remains
+refused: a BARE ° with no scale letter (128, of which 55 are coordinates), + (9 digit-flanked), ± (18), = (7),
+< (0 digit-flanked), > (0), ÷ (2 in 21 MB), and a bare exponent.
+
+### ⚠ The residual gate failure was not Yoruba text at all
+
+Of the 7 exponent instances still reported, **zero are Yoruba**:
+
+    2 English   `There are 15 known isotopes of carbon … is ⁸C`, `(blue, thick) in R³ is a linear subspace`
+    3 GREEK     `yotta Y yotta 10²⁴ εφτάκις εκατομμυριάδα γιοτάμετρο` — an SI-prefix table
+    2 markup    `Ami ikosile R (tabi \mathbb{R} …)`, `bi i ² = &minus;1`
+
+Two separate defects, as the challenge said. **`⁸C` is not an exponent in any language** — it is an isotope mass
+number, superscript BEFORE the element symbol — and `normalizeSymbols.ts` is right not to read it, since its own
+`BARE_EXPONENT` requires a base. The `DROPPABLE` class was a bare `/[²³⁰¹⁴-⁹]/`, looser than the reader, so the
+scan demanded a reading for text no language reads. Fixed to ask what the reader asks, and it took three passes:
+
+  1. `(?<=base)[²³…]` — matched only the FIRST superscript of `10¹⁵`, because a superscript digit is `\p{No}`,
+     not `\p{Nd}`, so the run was silently truncated and the differential test compared the wrong extent.
+  2. adding `[ \t]?` for the spaced form (`16000km ² `) let `is ⁸C` back in — a letter and a space DO precede it.
+  3. what actually identifies isotope notation is a superscript running straight INTO a letter. A power is
+     terminal or followed by punctuation, a space or an operator. Also added `⁻` to the run, since `kg⁻²` begins
+     with it. Fleet: 2,089 flagged → 2,004, the 85 excluded all leading superscripts.
+
+**And the fixture problem is the miner's.** `isNativeSegment` returned `true` unconditionally for a Latin-script
+language, so the filter was wholly inert for ~60 of the fleet — a GREEK SI table sat in a Yoruba hard-set and its
+superscripts reported as Yoruba defects. Now a Latin-script language gets a DOMINANCE test (another script
+outnumbering Latin letters), plus a markup filter, since LaTeX commands and HTML entities survive the dump
+converter and are not spoken text either way. Fleet: 1,169 of 25,209 artifact lines (4.6%) would now be rejected,
+1,069 of them markup.
+
+⚠ **A bug in that fix, caught by measuring**: `dominantScript` returns `undefined` when no script has a clear
+majority — which is every Japanese corpus, since it splits across Han, Hiragana and Katakana — and I had treated
+undefined as Latin, so the dominance test rejected 54 of ja's 54 lines. An unknown script must FAIL OPEN, the
+property `allOccurrencesForeign` already documents.
+
+⚠ **yo's artifact was NOT re-mined**, and that is deliberate. It predates the `command` field, so its flags are
+not recorded; a reconstructed invocation covers 30/35 cells where the current artifact covers more, which is the
+same regression that destroyed km's sample tier and my's coverage earlier in this work. The filter takes effect
+at the next mine; rebuilding these artifacts safely needs the original flags, which pre-`command` artifacts do not
+carry. That is a fleet re-mine, on its own, with a before/after cell count per language.
+
+`review.ts --lang yo`: 9 of 10. 3,089 tests.

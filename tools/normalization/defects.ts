@@ -87,7 +87,39 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
     // the sentence above is it. That claim was made from the two designation hits without resolving the rest.
     ["minus", /(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−–](?=\p{Nd})/gu],
     ["math-sign", /[+±×÷=<>]/gu],
-    ["exponent", /[²³⁰¹⁴-⁹]/gu],
+    /**
+     * ⚠ A SUPERSCRIPT WITH NOTHING BEFORE IT IS NOT AN EXPONENT, and this pattern used to be a bare
+     * `/[²³⁰¹⁴-⁹]/gu` that flagged every one. `⁸C` is an ISOTOPE MASS NUMBER — the superscript precedes the
+     * element symbol — and `³He` the same; no language reads either as a power, and `normalizeSymbols.ts` is
+     * right not to: its own `BARE_EXPONENT` requires a base BEFORE the run. So the scan was reporting a dropped
+     * exponent for text the reader is correct to leave alone, and Yoruba's residual gate failure was one English
+     * sentence about carbon isotopes. The class now asks what the reader asks — is there a base?
+     *
+     * A LOOKBEHIND, not a captured base, because the scan needs the SIGN's own extent to test its removal.
+     *
+     * ⚠ IT MATCHES THE WHOLE RUN AND ALLOWS A SPACE, and both were wrong in the first version. A superscript
+     * digit is `\p{No}`, not `\p{Nd}`, so a per-character pattern anchored on a base matched only the FIRST
+     * superscript of `10¹⁵` and silently shortened the sign's extent; and the corpus writes the sign spaced
+     * (`0,5 ² км`, `16000km ² `), which `normalizeSymbols.ts` reads via its own `\s?`. Measured over the fleet,
+     * the loose version flagged 2,089 and this flags 1,992 — the 97 excluded are leading superscripts
+     * (`⁸C`, a bare `¹¹` footnote marker, `(1)²`), not shortened runs.
+     *
+     * ⚠ AND THE RUN INCLUDES THE SUPERSCRIPT MINUS, because `kg⁻²` is a real exponent whose run begins with it —
+     * `normalizeSymbols.ts` maps `⁻` for exactly that reason ("without it the whole run failed to…"). Leaving it
+     * out truncated every negative exponent to the digits after the sign.
+     *
+     * ⚠ A TRAILING LETTER IS WHAT ACTUALLY IDENTIFIES ISOTOPE NOTATION, and the base test alone does not catch
+     * it. Allowing the space that real spaced exponents need (`16000km ² `) also let `is ⁸C` through, since a
+     * letter and a space do precede that superscript. What no exponent does is run straight into a letter:
+     * `⁸C`, `¹⁴C`, `³He` are a mass number and an element symbol. A power is terminal or followed by
+     * punctuation, a space, or an operator.
+     *
+     * ⚠ THE LOOKAHEAD MUST ALSO EXCLUDE A FOLLOWING SUPERSCRIPT, or BACKTRACKING defeats it. On `¹⁴C` the engine
+     * matched the run `¹⁴`, failed the letter test on `C`, then backtracked to `¹` — where the next character is
+     * `⁴`, not a letter, so the trimmed match succeeded and the isotope was flagged after all. Forbidding a
+     * superscript after the run leaves nothing to backtrack into.
+     */
+    ["exponent", /(?<=[\p{L}\p{M}\p{Nd}][ \t]?)[²³⁰¹⁴-⁹⁻]+(?![\p{L}\p{M}²³⁰¹⁴-⁹⁻])/gu],
     ["ampersand", /[&＆]/gu],
     ["iteration", /[ๆ々〃ヽヾゝゞៗ]/gu],
 ];
@@ -174,13 +206,16 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "dashes sit between digits, and the corpus glosses the reading twice: `ọgọ́rùn-ún méjì sí mẹ́fà "
             + "(200-600 kg)` and, for a scoreline, `góòlù mẹ́rin sí òdo (4–0)`. `sí` IS read for the range, 1,427 "
             + "digit-flanked instances — see ig/nl/mr/ta/yue, which record the same shape",
-        degrees: "measured: ° trails a number 390 times and is the sign this language most conspicuously writes, "
-            + "but there is no scale word to say — `dígírí` 0 hits ANYWHERE, `sẹ́lísíọ̀sì` 0, `fáránháìtì` 0. "
-            + "Most instances are °C/°F in climate tables (`26.46 °C tàbí 79.63 °F`)",
-        times: "measured: × is 72 digit-flanked, but `ìlọ́po` (75 whole-word) is never ONCE digit-adjacent, and "
-            + "`ìlọ́po méjì` (37) means 'double/twice' generally rather than an operator — measured against the "
-            + "unit nouns it is 0 after and 1 before, where the areal `onígun mẹ́rin` is 15 after. "
-            + "`ìsọdipúpọ̀` has 6 hits. No operator word is attested",
+        // ⚠ `degrees` AND `times` WERE HERE AND HAVE BEEN REMOVED — both refusals were wrong, and they were the
+        // two highest-frequency entries in this block. `degrees` rested on `dígírí` 0 and `sẹ́lísíọ̀sì` 0, two
+        // Yorubized spellings that do not exist; the corpus borrows `Celsius`/`Fahrenheit` unchanged and says
+        // `ìwọ̀n` for the degree, so °C (211) and °F (144) are now read. `times` was refused as having no
+        // operator word while numbers.ts was already multiplying with `lọ́nà`, this language's multiplicative
+        // particle. A long accepted-silence block is a smell: re-read it before adding to it.
+        degrees: "measured: only the BARE ° with no scale letter — 128 occurrences, of which 55 are "
+            + "digit-flanked geographic coordinates (`7°30′S 3°21′E`). °C and °F ARE read (`ìwọ̀n 38 Celsius`). "
+            + "The angular `digiri` has 1 hit and three of its four total hits are ACADEMIC degrees "
+            + "(`ẹ̀rí digiri (doctorate)`, `masita digiri (MBA)`)",
         plus: "measured: + is 9 digit-flanked in 21 MB. `àfikún` (564 whole-word) is the nominal 'addition' and "
             + "is digit-adjacent 3 times in running prose, not as an operator; `kún` is a verb 'to fill'",
         "plus-minus": "measured: ± is 18 digit-flanked and NO tolerance word occurs — the sign appears in "

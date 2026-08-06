@@ -86,7 +86,40 @@ export function dominantScript(text: string): string | undefined {
  * native digits says nothing about how the language forms sentences, which is what these artifacts are for.
  */
 export function isNativeSegment(segment: string, script: string | undefined): boolean {
-    if (script === undefined || script === "Latin") return true;
+    /**
+     * ⚠ MARKUP IS NOT SPOKEN TEXT, whatever script it is in. The dump converter strips wikitext, but LaTeX
+     * commands and HTML entities survive it, and a hard-set line carrying them asks a gate to source a reading
+     * for something no reader says: yo's artifact holds `Ami ikosile R (tabi \mathbb{R} tabi Unicode ℝ)` and
+     * `bi i ² = &minus;1`, and both reported as Yoruba exponent defects.
+     */
+    if (/\\[a-zA-Z]+\s*\{|&(?:[a-zA-Z]{2,10}|#\d{2,5});/u.test(segment)) return false;
+    /**
+     * ⚠ A LATIN-SCRIPT LANGUAGE STILL GETS A SCRIPT TEST, and it used to get none — this returned `true` for
+     * every segment, so the filter was wholly inert for the 60-odd Latin-script languages in the fleet. Yoruba's
+     * artifact carried three lines of a GREEK SI-prefix table (`yotta Y yotta 10²⁴ εφτάκις εκατομμυριάδα
+     * γιοτάμετρο`), whose superscripts were reported as Yoruba exponent defects. A segment is foreign when
+     * another script DOMINATES it — the test is dominance, not presence, or a single quoted foreign name would
+     * discard an otherwise native line (the `デジモン` lesson from corpus-words.ts).
+     *
+     * What this CANNOT do is discriminate ENGLISH prose in a Latin-script language's wiki, which is the same
+     * script by definition. That residue is real and is why `inForeignSpan` documents itself as inert here.
+     */
+    /**
+     * ⚠ `undefined` IS NOT "Latin" HERE, and conflating them broke three artifacts. `dominantScript` returns
+     * undefined when no script has a clear majority — which is every Japanese corpus, since it splits across
+     * Han, Hiragana and Katakana — and the dominance test below then rejected 54 of ja's 54 lines as foreign.
+     * An unknown script must FAIL OPEN, the same property `allOccurrencesForeign` documents: thin or mixed
+     * evidence means report, never discard.
+     */
+    if (script === undefined) return true;
+    if (script === "Latin") {
+        const latin = countLetters(segment, /\p{sc=Latn}/u);
+        for (const [name, re] of SCRIPTS) {
+            if (name === "Latin") continue;
+            if (countLetters(segment, re) > latin) return false;
+        }
+        return true;
+    }
     const re = SCRIPTS.find(([name]) => name === script)?.[1];
     if (re === undefined) return true;
     // Char-by-char because JS cannot intersect `\p{Script=…}` with `\p{L}` in one class without the `v` flag.
@@ -94,3 +127,10 @@ export function isNativeSegment(segment: string, script: string | undefined): bo
     return false;
 }
 const LETTER = /\p{L}/u;
+
+/** Letters of one script in a segment. Char-by-char for the same reason `isNativeSegment` is. */
+function countLetters(segment: string, re: RegExp): number {
+    let n = 0;
+    for (const ch of segment) if (re.test(ch) && LETTER.test(ch)) n++;
+    return n;
+}
