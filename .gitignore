@@ -35,4 +35,7 @@ tools/sindhi/sd_deva_pairs.json
 tools/sindhi/sd_airab.json
 
 # Scratch notes — session handoffs and working files, never committed.
-*.scratch.md
+# ⚠ ANY extension, not just .md. The `.scratch.md` pattern was added for session handoffs and let a
+# throwaway measurement script (`tools/normalization/yo-deg.scratch.mts`) into a merge commit — the
+# convention is the `.scratch.` infix, so match on that.
+*.scratch.*
