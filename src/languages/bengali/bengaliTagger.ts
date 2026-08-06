@@ -11,7 +11,7 @@
  * OOV GENERALISATION tier: the words the authoritative Kolkata gold + cross-source consensus lexicon
  * (bengali-lexicon.tsv) miss. A lexicon-covered word is served by the sync lexicon path instead (precedence:
  * lexicon → tagger → rule engine). On the seed-0 held-out (OOV) split it reads ɔ/o 90.5% | full 86.4% vs the rule
- * engine's 62.6% ɔ/o. See bn-g2p-tagger.PROVENANCE.md and bn_native_bringup_investigation.md Run 17-18.
+ * engine's 62.6% ɔ/o.
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx model — is absent,
  * createBengaliTagger() resolves to `undefined` and callers fall back to the sync rule engine (no throw).

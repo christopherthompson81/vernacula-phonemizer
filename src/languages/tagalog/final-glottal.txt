@@ -1,7 +1,7 @@
 # Tagalog word-final GLOTTAL STOP set — phonemic but UNWRITTEN (bata child [bataʔ] vs bata robe [bata]).
 # Sourced from wikipron tgl (all readings end in ʔ AND the rest of our rule output already matches, so the ONLY
 # gap is the final ʔ — homographs, where wikipron gives both ʔ and non-ʔ, are ABSTAINED). The shipped phonemizeWord
-# appends [ʔ] to these; phonemizeWordRules (the referee eval) does NOT — non-circular. See docs/tl_native_bringup_investigation.md.
+# appends [ʔ] to these; phonemizeWordRules (the referee eval) does NOT — non-circular.
 aaa
 abno
 acda

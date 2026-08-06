@@ -10,8 +10,7 @@ consonant-consistency mask limits each letter to the tags it produced in trainin
 Sindhi's short vowels are unwritten; the rule g2p defaults every one to [ə]. That default is only **48.6%**
 correct, and **81.4% of word-FINAL slots are something else** — overwhelmingly the retained grammatical -ʊ
 (masculine nominative), which Urdu lost. That is morphologically conditioned, hence learnable, which is why
-Sindhi succeeds where the Urdu tagger failed (Urdu's always-ə prior is 71.5% and its tagger LOST to it —
-see `ur_tagger_investigation.md`).
+Sindhi succeeds where the Urdu tagger failed (Urdu's always-ə prior is 71.5% and its tagger LOST to it.)
 
 ## Architecture
 Letter embedding (128) → 2-layer **bidirectional** LSTM (hidden 256) → linear → tag logits.

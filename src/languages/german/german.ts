@@ -301,8 +301,8 @@ export function phonemizeWord(word: string): string {
     }
     if (merged.length > 1) {
         // HYBRID: a word with ANY whole-word correction (in-kaikki) uses its exact whole-word entry (unchanged); an
-        // OOV compound — absent from every dict — falls back to MORPHEME-KEYED corrections that compose per stem
-        // (see de_morpheme_keyed_investigation.md). Known words are byte-identical; only novel compounds change.
+        // OOV compound — absent from every dict — falls back to MORPHEME-KEYED corrections that compose per stem.
+        // Known words are byte-identical; only novel compounds change.
         const known = stressDict().has(w) || lengthDict().has(w) || qualityDict().has(w) || consonantDict().has(w) || erDict().has(w);
         if (!known) return composeMorphemeKeyed(merged, d.stressPart);
         const pieces = merged.map((m) => {

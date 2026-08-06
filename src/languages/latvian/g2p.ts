@@ -2,7 +2,7 @@
  * Latvian (lv) grapheme→phoneme engine — Baltic, Latin script, canonical IPA. Latvian writes
  * what Lithuanian leaves implicit, so the scan is largely direct: written palatals (ģ ķ ļ ņ → ɟ c ʎ ɲ), written
  * length (macron ā ē ī ū → aː eː iː uː). The context systems:
- *   - native ⟨o⟩ → the falling diphthong [uɔ̯] (loks→luɔ̯ks); loans keep [o] (lexical — see the investigation).
+ *   - native ⟨o⟩ → the falling diphthong [uɔ̯] (loks→luɔ̯ks); loans keep [o] (lexical).
  *   - falling DIPHTHONGS: a short vowel immediately followed by ⟨i⟩/⟨u⟩ takes it as a non-syllabic offglide, but only
  *     for the real Latvian pairs (ai ei ui / au iu; maize→maizɛ, draugs→drauks); ⟨ie⟩ → [iɛ] (i is the nucleus).
  *   - ⟨v⟩ vocalizes to [w] in the coda (dievs→diɛws), stays [v] before a vowel (Latvija→latvija).

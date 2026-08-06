@@ -4,8 +4,8 @@
  * OOV words the exact-match coverage lexicon (harakatLexicon.ts) misses; a lexicon-covered word should be served
  * by the authoritative sync lexicon path instead (precedence lexicon → neural → default).
  *
- * It targets IPA DIRECTLY, not harakat — the harakat intermediate can't express ezafe / final ه / و (see the fa
- * restoration investigation). Two int8 graphs (encoder + decoder-step) run autoregressively; the output is
+ * It targets IPA DIRECTLY, not harakat — the harakat intermediate can't express ezafe / final ه / و .
+ * Two int8 graphs (encoder + decoder-step) run autoregressively; the output is
  * post-normalised from the training set's classical/Dari convention to Iranian (short i→e, u→o, final ه→e).
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx models — are absent,

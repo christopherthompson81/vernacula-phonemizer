@@ -627,7 +627,7 @@ export function thaiPrep(
  * Scan a prepared Thai word into syllables, computing each one's lexical tone via the
  * Phase-2a tone brain (consonant class × live/dead × length × mark). Drives BOTH the
  * tone list (thaiSyllableTones) and the tone-glyph injection (syllabifyThaiWithTones),
- * so segmental and tonal syllabification can never disagree. See investigation Run 6.
+ * so segmental and tonal syllabification can never disagree.
  */
 export function thaiScanSyllables(
     units: readonly ThaiUnit[],

@@ -72,10 +72,6 @@
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 
-// ─────────────────────────────────────────────────────────────────────────────────────────────────────
-// DATA — every literal here is sourced; see the sourcing table in the PR and Run 3 of the investigation.
-// ─────────────────────────────────────────────────────────────────────────────────────────────────────
-
 /** The manifest's own connective series (`nanye` … `nethoba`): units 1–9 already have their na- form. */
 const NA = MANIFEST.numbers.na;
 

@@ -27,7 +27,7 @@
  *   version dots ×5 (`802.11a/b/g/n`) — the interior dot was a phrase break.
  *
  * THE `N.` DISAMBIGUATION, and why it is NOT Croatian's. Tabulating what follows all 106 `N.` in the
- * corpus (investigation Run 3): 65 lowercase word, 1 comma, 31 END OF UTTERANCE, 2 uppercase word, 1
+ * corpus: 65 lowercase word, 1 comma, 31 END OF UTTERANCE, 2 uppercase word, 1
  * closing quote, 6 immediately-following digit. Fourteen of the 31 utterance-final ones sit right after a
  * YEAR (`v roku 1835.`, `sezóny 2009.`, `za rok 2010.`) — and they are SENTENCE PERIODS, because Slovak
  * reads a year as a CARDINAL and writes it with no ordinal period at all. Croatian #599's year-ordinal
@@ -226,7 +226,7 @@ export function ordinalWords(n: number, slot: Slot): string | undefined {
 
 /**
  * The licensing word after a bare `N.`, and the case it governs. EVERY key follows a `N.` somewhere in the
- * corpus (investigation Run 3) except where marked: the paradigm's other slots are filled in from the same
+ * corpus except where marked: the paradigm's other slots are filled in from the same
  * lexemes so the rule is not correct only where I happened to look (trap 8 (zero corpus instances is not evidence of…)).
  *
  *   storočie is NEUTER — 18. storočia = *osemnásteho storočia* (gen), v 16. storočí = *v šestnástom
@@ -327,7 +327,7 @@ function neutralClock(hv: number, mv: number): string {
 
 /**
  * One clock → words. `slot` is chosen by the GOVERNING PREPOSITION, which 14 of the corpus's 15 real
- * clocks carry (investigation Run 6): o / do / po / od / pred / okolo take loc or gen, syncretic in -ej
+ * clocks carry: o / do / po / od / pred / okolo take loc or gen, syncretic in -ej
  * (*o ôsmej štyridsaťšesť*); medzi takes the instrumental -ou (*medzi šiestou tridsať a siedmou tridsať*).
  * The minutes are a bare cardinal after an ordinal hour, which is the spoken idiom — saying *minút* as
  * well would be the written-out form the corpus never uses in that position.

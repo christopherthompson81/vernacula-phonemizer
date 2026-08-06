@@ -52,7 +52,7 @@ const RATE_ALT = Object.keys(RATE_WORD).sort((a, b) => b.length - a.length).join
 /** Frequency units, glued to their number in the corpus (`2.4Ghz`, `5.0Ghz`) and previously read as `ɣz`.
  *  Unit BORROWINGS: absent from every in-repo Malay source, which is the class §5e excludes from the
  *  sourcing check by measurement — kilogram and millimetre are unattested in some thirty languages and
- *  perfectly correct. Stated in the investigation rather than hidden. */
+ *  perfectly correct. */
 const FREQ_WORD: Readonly<Record<string, string>> = {
     ghz: "gigahertz", mhz: "megahertz", khz: "kilohertz", hz: "hertz",
 };

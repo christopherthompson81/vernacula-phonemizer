@@ -24,7 +24,7 @@ function thaiTccBoundaries(cs: readonly string[]): Set<number> {
  * with word boundaries CONSTRAINED to TCC cluster boundaries (so a dictionary word can
  * neither start nor end mid-cluster, and the fallback never shatters a cluster). An
  * out-of-dictionary run coalesces into ONE token (graceful: the syllabifier then treats
- * it as an unsegmented word). See docs/investigation/thai_bringup_investigation.md Run 18-22.
+ * it as an unsegmented word).
  */
 export function segmentThai(
     text: string,

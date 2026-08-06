@@ -47,7 +47,7 @@ export type ForeignPhonemizer = (latin: string) => string | undefined;
 // (BBC-Pidgin / media style) mostly in ENGLISH spelling, so a known-English word is realised with Naija values:
 // the 7-vowel system /i e ɛ a ɔ o u/ (no schwa reduction, no vowel-length), TH-stopping (θ→t, ð→d), NON-RHOTIC
 // codas (car→ka, water→wata; onset r→ɾ). Lexical mergers inherited from the GenAm source (LOT/PALM, TRAP/BATH)
-// are unresolved — a documented ceiling (see the diaphonemic-source note in pcm_native_bringup_investigation.md).
+// are unresolved — a documented ceiling.
 const V = "iɪeɛæaɑɔoʊuʌəɐ"; // English vowels (for the onset-/r/ lookahead), before nativisation collapses them
 function nativise(en: string): string {
     return en

@@ -35,7 +35,7 @@
  *   hyphen before a unit ×2 (`35-mm`, `360-km`) — the hyphen broke the number–unit adjacency the tier needs.
  *
  * THE ORDINAL PERIOD, and why Slovenian is Slovak and not Croatian. Tabulating what follows all 124 `N.`
- * in the corpus (investigation Run 2): **95 lowercase word, 26 END OF UTTERANCE, 2 uppercase word, 1 comma**.
+ * in the corpus: **95 lowercase word, 26 END OF UTTERANCE, 2 uppercase word, 1 comma**.
  * All 26 utterance-final ones are SENTENCE PERIODS and 18 of them sit right after a YEAR (`leta 2009.`,
  * `do leta 1945.`, `sezone 2009.`) — because Slovene reads a year as a CARDINAL and writes it with NO
  * ordinal period (144 corpus years, not one of them dotted mid-sentence). Croatian #599's year-ordinal rule
@@ -227,7 +227,7 @@ export function ordinalWords(n: number, slot: Slot): string | undefined {
 
 /**
  * The licensing word after a bare `N.`, and the case it governs. EVERY key with a comment count follows an
- * `N.` somewhere in the corpus (investigation Run 4); the other slots of the same lexemes are filled in
+ * `N.` somewhere in the corpus; the other slots of the same lexemes are filled in
  * from the same paradigm so the rule is not correct only where I happened to look (trap 8 (zero corpus instances is not evidence of…)).
  *
  *   stoletje is NEUTER — 19. stoletja = *devetnajstega stoletja* (gen), v 16. stoletju = *v šestnajstem
