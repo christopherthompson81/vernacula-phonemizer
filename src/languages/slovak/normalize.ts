@@ -46,13 +46,6 @@
  * genitive plural (*dvadsaťjeden hodín*, *dvadsaťjeden percent*), never the Russian singular. `skCountForm`
  * below is that selector, and slovak.ts passes it to the shared symbol tier so the two agree everywhere.
  *
- * SOURCING (investigation Run 5). Every word emitted here is attested in the corpus (percent ×11,
- * stupňov ×2, dolárov ×3, kilometrov ×12, hodín ×5, minút ×9, krát ×13, delené, menší, väčší, rovná,
- * libra, "pred naším letopočtom" spelled out, "míľ za hodinu" spelled out) or in espeak's Slovak
- * dictsource, read as a file and never invoked (`_$ dolár`, `€ euro`, `£ libra`, `× krát`, `÷ delené`,
- * `− mínus`, `_, čiarka`, `_. bodka`, `½ polovica`, `¼ štvrtina`). `mínus` is the only word absent from
- * the corpus and comes from espeak.
- *
  * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
@@ -61,10 +54,7 @@ import { SYMBOLS, skCountForm } from "./slovak.ts";
 import { numberToWords } from "./numbers.ts";
 
 /**
- * SLOVAK LETTER NAMES, for the initialism pass. Sourced from espeak-ng `dictsource/sk_list`'s own letter
- * block, transcribed back into Slovak orthography (`b be:` → bé, `f ef` → ef, `ľ el^` → eľ, `w
- * dv'ojite:,ve:` → dvojité vé, `x iks`, `y ipsilon`, `z zet`, `ž Zet`). So USA is [ú es á], OSN [ó es en],
- * HDP [há dé pé] — and not the consonant clusters those three came out as.
+ * SLOVAK LETTER NAMES, for the initialism pass.
  */
 const LETTER_NAME: Readonly<Record<string, string>> = {
     a: "á", á: "dlhé á", ä: "á prehlasované", b: "bé", c: "cé", č: "čé", d: "dé", ď: "ďé",
@@ -310,8 +300,7 @@ const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join(
 
 /** Fraction denominator nouns 2–10, feminine. Slovak derives them from the CARDINAL stem with -ina
  *  (päť → pätina, šesť → šestina), and the three count forms are then the regular -ina / -iny / -ín
- *  paradigm. espeak's Slovak dictsource attests the two it carries (`½ polovica`, `¼ štvrtina`,
- *  `¾ tri štvrtiny`). Denominators above 10 are left untouched rather than derived. */
+ *  paradigm. */
 const DENOMINATOR: Readonly<Record<number, readonly [string, string, string]>> = {
     2: ["polovica", "polovice", "polovíc"],
     3: ["tretina", "tretiny", "tretín"],
@@ -429,7 +418,7 @@ export function normalizeSlovak(input: string): string {
 
     // 5) VERSION / FIGURE DOTS between digits — `802.11a`, `802.11b`, `802.11g`, `802.11n` (×5) broke the
     //    sentence at the interior dot. AFTER the clock (which owns `12.00`) and before the ordinal rules,
-    //    so those never see a digit-dot-digit. "bodka" is espeak's Slovak name for the period.
+    //    so those never see a digit-dot-digit.
     s = s.replace(/(\d)\.(?=\d)/gu, "$1 bodka ");
 
     // 6) NUMERIC RANGES. The dash between two numbers was DROPPED, fusing "1418" and "1450" into one
@@ -510,9 +499,6 @@ export function normalizeSlovak(input: string): string {
     s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu,
         (_m, n: string) => `${n} ${counted(Number(n), STUPEN)} Fahrenheita`);
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), STUPEN)}`);
-    //     `x`/`×` between digits → krát (espeak `× krát`; the corpus writes the word 13 times). Both the
-    //     multiplication sign and the ASCII letter, because the corpus writes `4x4`, `6x6`, `56x56` and
-    //     `36x24` with the letter and none with the sign.
     s = s.replace(/(?<=\d)\s?[x×]\s?(?=\d)/gu, " krát ");
     //     A leading `+`/`−` on a number. The corpus's one instance is `+30°C`; the minus is its
     //     counterpart, and a sign that is dropped turns a negative into a positive — the one outcome that
@@ -532,8 +518,8 @@ export function normalizeSlovak(input: string): string {
     //     every rule that moves digits around, and before step 12 folds the comma into a word.
     s = SYMBOLS(s);
 
-    // 12) DECIMAL COMMA → the word. espeak's Slovak name for the comma, and the same choice Czech made
-    //     for the same separator. Inserted as TEXT so the tokenizer phonemises it (trap 6 (a word your layer emits must come from the…)).
+    // 12) DECIMAL COMMA → the word. Slovak name for the comma, and the same choice Czech made
+    //     for the same separator. Inserted as TEXT so the tokenizer phonemises it.
     s = s.replace(/(?<=\d),(?=\d)/gu, " čiarka ");
 
     // 13) FRACTIONS. Zero corpus instances — the only slash it writes is the SEASON `1995/96`, which the
@@ -552,8 +538,7 @@ export function normalizeSlovak(input: string): string {
 
     // 14) RELATIONAL SIGNS and the ampersand. None of the relational signs occurs in this corpus, but a
     //     phonemizer is handed arbitrary text and a dropped sign is inaudible — the one outcome that
-    //     cannot be right (#584). Words from espeak's Slovak dictsource (`_< menší`, `_> väčší`,
-    //     `÷ delené`, `_≈ približne sa rovná`) and the corpus (rovná, menší ×2, väčší ×7, delené).
+    //     cannot be right.
     s = s.replace(/\s*≈\s*/gu, " približne sa rovná ");
     s = s.replace(/\s*=\s*/gu, " rovná sa ");
     s = s.replace(/\s*<\s*/gu, " menší ako ");

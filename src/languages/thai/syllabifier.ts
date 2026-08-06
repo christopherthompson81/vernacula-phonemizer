@@ -124,9 +124,7 @@ export const THAI_UA_VOWEL = "";
 /**
  * Per-tone IR markers (PUA U+F710-F714) that syllabifyThaiWithTones appends at each
  * syllable's END. th_rules maps each to a ph_shan tone phoneme (rising=1 … falling=5)
- * whose contour IPA is pinned in the th job phonemeIpaOverrides — espeak drops a tone
- * phoneme with no ipa (ipa.ts), so the GLYPH is our declared rendering choice (the
- * standard Thai contour). Keep these codepoints in sync with th_rules.
+ * whose contour IPA is pinned in the th job phonemeIpaOverrides
  */
 
 /**

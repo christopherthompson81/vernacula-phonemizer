@@ -191,24 +191,6 @@
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
     // running these through the same native G2P (no hand-written phonemes). The compositor
     // (core/numbers.ts `indicNumberWords`) assembles them with Indian lakh/crore grouping.
-    //
-    // #562: the `compound` 21-99 map below was MISSING, and Marathi 21-99 are irregular/fused exactly as
-    // Hindi's are (पंचवीस ≠ पाच+वीस). The compositor's documented fallback is a best-effort UNIT+TENS
-    // reading, so over the mr_in FLEURS corpus every two-digit number was read as two words: 25 → "पाच
-    // वीस", 93 → "तीन नव्वद", 1894 → "…आठ शे चार नव्वद". 233 bare two-digit numbers + 171 four-digit
-    // years + 76 three-digit numbers were affected — the single largest defect in the language.
-    //
-    // SOURCES for the 21-99 spellings, in precedence order (nothing here is invented):
-    //   1. tools/referee-eval/referees/mr.wikipron-mar-broad.tsv — this repo's own Marathi arbiter. It
-    //      contains 26 of the 21-49 forms verbatim, plus नव्व्याण्णव (99). Where it disagrees with
-    //      espeak it wins: 41 एकेचाळीस (espeak: एक्केचाळीस), 46 शेहेचाळीस (espeak: सेहेचाळीस).
-    //   2. espeak-ng dictsource/mr_list `_21`.._99` — the hand-authored Marathi voice, an independent
-    //      source that confirms all 26 referee forms phonetically and supplies 50-98, which the referee
-    //      wordlist does not contain.
-    // The `_0C S'e:` entry in that same espeak list is also why `hundred` is शे and not शंभर: Marathi
-    // forms the hundreds as N+शे (दोनशे, आठशे), never *दोन शंभर. See normalize.ts step 9 for the bare-100
-    // case (शंभर), which the compositor cannot express, and the report on the fusion the compositor
-    // cannot do (it emits "दोन शे", two words, where Marathi writes one).
     "numbers": {
         "units": ["शून्य", "एक", "दोन", "तीन", "चार", "पाच", "सहा", "सात", "आठ", "नऊ"],
         "teens": ["दहा", "अकरा", "बारा", "तेरा", "चौदा", "पंधरा", "सोळा", "सतरा", "अठरा", "एकोणीस"],

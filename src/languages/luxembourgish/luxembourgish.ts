@@ -184,28 +184,7 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 /**
  * #562 symbol normalization. Every noun here is invariant in the plural (Kilometer, Meter, Prozent,
- * Dollar), so no `countForm` override is needed. Sourcing, per §5e:
- *   Prozent — corpus ×14 + espeak lb_list · Dollar — corpus ×7 · Euro — corpus ×1 + espeak ·
- *   Kilometer/Meter/Zentimeter/Millimeter/Gramm/Meilen/Stonn/Sekonn — espeak lb_list · Hektar — espeak.
- *   **Yen is attested in NO in-repo source**, re-verified at TOKEN level during review because a
- *   substring grep is what makes this class look sourced when it is not: the lb corpus's 2 apparent hits
- *   are `Libyen` and `Webproxyen`, and espeak lb_list's 19 are all `-yen` plurals (`babyen`, `moyen`,
- *   `libyen`, `whiskyen`). Zero in the wikipron referee. Kept anyway, and this is the whole of the
- *   argument: `¥` carries 3 of the corpus's 6 currency instances and DROPPING it deletes the currency
- *   outright from the only sentence that has one (#584 — an inaudible sign is the one outcome that cannot
- *   be right). The spelling is German's, which lb shares for this loan, and de/nl and seven other shipped
- *   languages carry the identical `??` residue. £ is NOT declared — its sign is absent from the corpus, so
- *   there is no reading to lose and the word would be a pure guess.
- * The two RATE idioms are lifted verbatim from the corpus, which writes both:
- *   `240 Kilometer an der Stonn (149 Meilen an der Stonn)` and `1,5 Kilometer pro Sekonn`.
- * `g`, `t` and `ha` are deliberately NOT declared: `50 Hektar` is written out, there is no bare `\dg`
- * (the `g` in `802.11g` is a version letter), and a one-letter unit key is the Dutch `Il-76s` hazard.
- * NEITHER IS `meile`, and that one was a real defect the corpus diff caught: declaring it so that
- * `Meile/h` could compose also rewrote the corpus's own six spelled-out `(31 Meile)` into `Meilen` — and
- * the corpus's Meile/Meilen alternation is the EIFELER REGEL applied correctly seven times out of seven
- * (`(15 Meilen) nord-` keeps the ⟨n⟩ before ⟨n⟩; `(31 Meile) vu`, `(3 980 Meile) laang`, `(500 Meile)
- * breet` drop it before a consonant). `mph` and `Meile/h` are claimed in normalize.ts instead, where the
- * sandhi can be got right, and a spelled-out `Meile` is now left exactly as the writer set it.
+ * Dollar), so no `countForm` override is needed.
  */
 const SYMBOLS = makeSymbolNormalizer({
     // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new

@@ -28,14 +28,10 @@ function toneLexicon(): Map<string, string> {
 
 const SPLIT = /(?<=.)(?=[A-Z][a-z])/u; // compound boundary: before an internal Titlecase run
 
-/** Phonemize a (possibly camelCase-compound) Zulu word to an array of IPA words. A compound whose FULL form is
- *  in the tone lexicon (isingisi→HLHL) threads those codes across its split parts, since espeak overlays the
- *  compound's tone across the whole word even though it splits on the internal capital. */
+/// Phonemize a (possibly camelCase-compound) Zulu word to an array of IPA words.
 export function phonemizeCompound(word: string): string[] {
     const parts = word.split(SPLIT);
     if (parts.length === 1) return [phonemizeWord(word)];
-    // espeak tones only whole-word lexicon hits: if the full compound isn't listed, the whole word is untoned
-    // (isiTsonga → untoned, even though standalone "isi" carries tone).
     const codes = toneLexicon().get(word.toLowerCase());
     if (codes === undefined) return parts.map((p) => phonemizeWord(p, ""));
     const out: string[] = [];
@@ -134,8 +130,7 @@ class ZuluPhonemizer implements Phonemizer {
             // Compound (noun-class prefix + Titlecase stem, eNingizimu / INingizimu) splits before an internal
             // Titlecase run; a full-word tone-lexicon hit is threaded across the parts.
             if (m[1]) for (const part of phonemizeCompound(nat(m[1]))) sink.emit(part);
-            // Numbers are ordinary Zulu nouns: tone them via the lexicon like any other word (ishumi→toned), rather
-            // than mirroring espeak's untoned number path — the kaikki/Wiktionary referee confirms they carry tone.
+            // Numbers are ordinary Zulu nouns: tone them via the lexicon like any other word (ishumi→toned)
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))
                     sink.emit(phonemizeWord(wd));

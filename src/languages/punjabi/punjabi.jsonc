@@ -92,65 +92,6 @@
 
     // NUMBERS — Gurmukhi spellings; canonical IPA DERIVED via the same G2P. Units + round tens + magnitudes,
     // plus the fused 21-59 (Punjabi's 21-99 are single words: ਇੱਕੀ, not *ਇੱਕ ਵੀਹ).
-    //
-    // SOURCES for the `compound` spellings, in precedence order (nothing here is invented):
-    //   1. tools/referee-eval/referees/pa.wikipron-pan-broad.tsv — this repo's own Punjabi arbiter. All 36
-    //      spellings below appear in it VERBATIM (grep-verified, one row each).
-    //   2. espeak-ng dictsource/pa_list `_21`.._99` — the hand-authored Punjabi voice. It is PHONETIC
-    //      (X-SAMPA), so it cannot supply a spelling, but it confirms 29 of the 36 exactly. Where the two
-    //      disagree the REFEREE WINS: 25 ਪੰਝੀ (espeak: paccī), 29 ਉਣੱਤੀ (espeak has plain n, not ਣ),
-    //      34 ਚੌਤੀ (espeak nasalises, ਚੌਂਤੀ), 42 ਬਤਾਲ਼ੀ (espeak: beāḷī), 46 ਛਤਾਲ਼ੀ (espeak: chiāḷī),
-    //      48 ਅਠਤਾਲ਼ੀ (espeak: aṛtāḷī), and 45 where the referee carries BOTH ਪੰਤਾਲ਼ੀ and ਪੰਜਤਾਲੀ —
-    //      espeak's p@nt'ali picks ਪੰਤਾਲ਼ੀ.
-    //
-    // SOURCES for 61-99, which needed a THIRD leg because espeak alone is not reliable enough here.
-    // Measured, not assumed: deriving spellings from espeak and round-tripping them through our own G2P
-    // reproduces only 19/36 of the referee-attested 21-59 forms. 5 misses are one systematic espeak
-    // under-specification (plain `l` for retroflex ਲ਼) and 4 are the bindi/tippi choice, both settleable
-    // by rule — but the remaining 8/36 = 22% are espeak being wrong about the WORD (ਬੇਆਲੀ vs ਬਤਾਲ਼ੀ,
-    // ਛਿਆਲੀ vs ਛਤਾਲ਼ੀ, ਅੜਤਾਲ਼ੀ vs ਅਠਤਾਲ਼ੀ, ਪੱਚੀ vs ਪੰਝੀ). So each entry below rests on TWO agreeing
-    // witnesses out of three:
-    //   W = en.wiktionary.org/wiki/<the entry itself> — the Gurmukhi SPELLING and a modern IPA. Every one
-    //       was fetched individually and kept only if the page exists, has a Punjabi section, and states
-    //       the right value; a 404 or a wrong value meant the hypothesis was discarded, not adjusted.
-    //   B = "English-Punjabee dictionary and grammar" (Starr, 1833; public domain), ch. IV "The cardinal
-    //       numbers from one to two hundred" — a ROMANISATION, not Gurmukhi, so it constrains the WORD
-    //       rather than the spelling. It writes `t,h` for ʈʰ and `oon-` for ਉਣ-, and has some OCR damage.
-    //       Calibration: it agrees with our referee on ~34/36 of the 21-59 forms and independently
-    //       refutes espeak at 42, 46 and 48 — the same places the referee did. It also lists 25 as
-    //       "punjee or puchee", which is why the referee's ਪੰਝੀ and espeak's ਪੱਚੀ are BOTH real.
-    //   E = espeak-ng-portable/data/pa/fragments.jsonl (parsed dictsource/pa_list) — phoneme skeleton only.
-    //
-    // THE 61-68 CODA, settled against espeak by three independent witnesses. espeak writes `t.` (ʈ → ਟ)
-    // in all eight, but its OWN 59 `Un.'at.#` and 60 `s'Vt.#:` use `t.#` (ʈʰ → ਠ); every Shahmukhi
-    // referee entry in the family ends ٹھ (ترہٹھ ×2, تنہٹھ, تہٹھ, پینہٹھ); Wiktionary gives [ɪ.käːʈʰ˩˥];
-    // and the 1833 book writes "ekaha-th", "bahu-th", "…au-t,h". Taking espeak literally would have
-    // shipped eight wrong final consonants.
-    //
-    // 71 likewise resolves AGAINST espeak: `Ik'Vt:@R` has no H, but Shahmukhi اکہتر carries the ˥˩ tone
-    // that is the residue of a ہ, the book has "huk huttur", and Wiktionary has ਇਕ੍ਹੱਤਰ — so the ɦ is
-    // real. That also keeps 71 distinct from the corpus word ਇਕੱਤਰ "assemble".
-    //
-    // ROUND-TRIP: all 34 entries were run back through this engine's G2P and compared to Wiktionary's
-    // IPA. 24/33 match outright (71 publishes no IPA); the 9 residual differences are entirely two ENGINE
-    // conventions, verified one by one — our G2P renders ਹ as the segment ɦ where Wiktionary renders the
-    // same fact as tone (ਹ is a tone source, see the consonant table), and writes gemination as length Cː
-    // where Wiktionary doubles the consonant. No entry differs at the word level.
-    //
-    // TWO VALUES ARE DELIBERATELY LEFT OUT, and cost 1 corpus occurrence between them:
-    //   85 — B "puchasee" and E `p@c'asi` agree on pacāsī, but ਪਚਾਸੀ 404s and the only Wiktionary
-    //        spelling is ਪੰਜਾਸੀ /pəɲ.d͡ʒäː.siː/ (pañjāsī), i.e. the one attested spelling is the form the
-    //        other two witnesses contradict. Both variants are plausible (cf. 25), but no spelling here
-    //        reaches two witnesses. 0 corpus occurrences.
-    //   96 — B "chéanuwe" and E `c#I'an@ve~` agree on the word, but ਛਿਆਨ੍ਹਵੇਂ 404s and the only
-    //        Wiktionary page for 96 has a MALFORMED title: U+0A1B U+0A3F U+0A3E … = ਛ + ਿ + ਾ, two
-    //        stacked vowel signs where ਆ belongs (cf. 86 ਛਿਆਸੀ, which is well-formed). Shipping a
-    //        malformed spelling would feed the G2P a sequence no Punjabi text contains. 1 occurrence.
-    //
-    // Net: 34 of 39 values added, recovering 53 of the 54 corpus readings that were on the fallback.
-    //
-    // `bareMagnitude` is deliberately NOT set: espeak pa_list renders 100 as 'Ik: s'O and 1000 as
-    // 'Ik: H@J'aR, so Punjabi genuinely says ਇੱਕ ਸੌ / ਇੱਕ ਹਜ਼ਾਰ. The current output is already correct.
     "numbers": {
         "units": ["ਸਿਫ਼ਰ", "ਇੱਕ", "ਦੋ", "ਤਿੰਨ", "ਚਾਰ", "ਪੰਜ", "ਛੇ", "ਸੱਤ", "ਅੱਠ", "ਨੌਂ"],
         "teens": ["ਦਸ", "ਗਿਆਰਾਂ", "ਬਾਰਾਂ", "ਤੇਰਾਂ", "ਚੌਦਾਂ", "ਪੰਦਰਾਂ", "ਸੋਲਾਂ", "ਸਤਾਰਾਂ", "ਅਠਾਰਾਂ", "ਉੱਨੀ"],
@@ -166,43 +107,14 @@
             "46": "ਛਤਾਲ਼ੀ", "47": "ਸੰਤਾਲ਼ੀ", "48": "ਅਠਤਾਲ਼ੀ", "49": "ਉਣੰਜਾ",
             "51": "ਇਕਵੰਜਾ", "52": "ਬਵੰਜਾ", "53": "ਤਰਵੰਜਾ", "54": "ਚੁਰੰਜਾ", "55": "ਪਚਵੰਜਾ",
             "56": "ਛਪੰਜਾ", "57": "ਸਤਵੰਜਾ", "58": "ਅਠਵੰਝਾ", "59": "ਉਣਾਹਠ",
-
-            // 61-99, per the SOURCES note above. W = the linked Wiktionary entry (spelling + IPA),
-            // B = the 1833 book's romanisation, E = espeak. Each line records which witnesses agree.
-            "61": "ਇਕਾਹਠ",      // W ikāhaṭh [ɪ.käːʈʰ˩˥] · B "ekahath" · E Ik'aH@t. (coda ʈ, refuted)
-            "62": "ਬਾਹਠ",       // W bāhaṭh [bäːʈʰ˩˥] · B "bahuth" · E coda refuted
-            "63": "ਤ੍ਰੇਹਠ",     // W trehaṭh [t̪ɾeːʈʰ˩˥] · E t@R'e~H@t. · B "teéhet" (OCR-damaged)
-            "64": "ਚੌਹਠ",       // W cauhaṭh [tʃɔːʈʰ˩˥] · B "chouuth" · E c'O~H@t.
-            "65": "ਪੈਂਹਠ",      // W paĩhaṭh [pɛ̃ːʈʰ˩˥] · B "pyuth" · E p'E~H@t.
-            "66": "ਛਿਆਹਠ",      // W chiāhaṭh [tʃʰɪ.jäːʈʰ˩˥]; B "chéuth" + E c#e'aH@t. suggest a ਛੇਆ- variant
-            "67": "ਸਤਾਹਠ",      // W satāhaṭh [sə.t̪äːʈʰ˩˥] · B "sutaut,h" · E s@t'aH@t.
-            "68": "ਅਠਾਹਠ",      // W aṭhāhaṭh [ə.ʈʰäːʈʰ˩˥] · B "hutaut,h" (OCR onset) · E ,@t.#'aH@t.
-            "69": "ਉਣ੍ਹੱਤਰ",    // W uṇhattar [ʊ˩˥.ɳət̪.t̪əɾᵊ] · B "oon huttur" · E lacks the ɦ
-            "71": "ਇਕ੍ਹੱਤਰ",    // W ikhattar · B "huk huttur" · E lacks the ɦ (refuted; ≠ ਇਕੱਤਰ "assemble")
-            "72": "ਬਹੱਤਰ",      // W bahattar /bə.ɦət̪.t̪əɾ/ · B "buhuttur" · E b@H'Vt:@R
-            "73": "ਤਿਹੱਤਰ",     // W tihattar /t̪ɪ.ɦət̪.t̪əɾ/, surface [t̪eː…] · B "téhuttur" · E t@H'et:@R
-            "74": "ਚੁਹੱਤਰ",     // W cuhattar /t͡ʃʊ.ɦət̪.t̪əɾ/, surface [t͡ʃoː…] · B "chohhuttur" · E cOH'Vt:@R
-            "75": "ਪੰਝੱਤਰ",     // W pañjhattar /pəɲ˥.d͡ʒət̪.t̪əɾ/ · B "punj huttur" · E p@J'Vt:@R
-            "76": "ਛਿਹੱਤਰ",     // W chihattar /t͡ʃʰɪ.ɦət̪.t̪əɾ/ · B "chéhuttur" · E c#IH'Vt:@R
-            "77": "ਸਤੱਤਰ",      // W satattar /sə.t̪ət̪.t̪əɾ/ · B "suthuttur" · E s@t'Vt:@R
-            "78": "ਅਠੱਤਰ",      // W aṭhattar /ə.ʈʰət̪.t̪əɾ/ · B "ut,h huttur" · E Vt.#'Vt:@R
-            "79": "ਉਣਾਸੀ",      // W uṇāsī /ʊ.ɳäː.siː/ · B "oonasee" · E Un.'asi
-            "81": "ਇਕਾਸੀ",      // W ikāsī /ɪ.käː.siː/; B "ikeeasee" + E ,IkI;'asi suggest an ਇਕਿਆ- variant
-            "82": "ਬਿਆਸੀ",      // W biāsī /bɪ.äː.siː/ · B "béasee" · E bI;'asi
-            "83": "ਤਿਰਾਸੀ",     // W tirāsī /t̪ɪ.ɾäː.siː/ · B lists both "téasee, tirasee" · E t,@RI;'asi
-            "84": "ਚੁਰਾਸੀ",     // W curāsī /t͡ʃʊ.ɾäː.siː/ · B "chourasee" · E cUR'asi
-            "86": "ਛਿਆਸੀ",      // W chiāsī /t͡ʃʰɪ.äː.siː/ · B "chéasee" · E c#I;'asi
-            "87": "ਸਤਾਸੀ",      // W satāsī /sə.t̪äː.siː/ · B "sutasee" · E s@t'asi
-            "88": "ਅਠਾਸੀ",      // W aṭhāsī /ə.ʈʰäː.siː/ · B "uthasee" · E Vt.#'asi
-            "89": "ਉਣਾਨਵੇਂ",    // W uṇānvẽ /ʊ.ɳäːn.ʋẽː/ · B "oonanuwee" · E Un'an@v,e~
-            "91": "ਇਕਾਨਵੇਂ",    // W ikānvẽ /ɪ.käːn.ʋẽː/ · B "ikanuwe" · E Ik'an@v,e~
-            "92": "ਬਾਨਵੇਂ",     // W bānvẽ /bäːn.ʋẽː/ · B "banwé" · E b'an@v,e~
-            "93": "ਤਿਰਾਨਵੇਂ",   // W tirānvẽ /t̪ɪ.ɾäːn.ʋẽː/ · B "trénuwé" · E t@R'a~n@v,e~
-            "94": "ਚੁਰ੍ਹਾਨਵੇਂ", // W curhānvẽ /t͡ʃʊɾ.ɦäːn.ʋẽː/ · B "chouranuwe" · E cUR'an@v,e~
-            "95": "ਪਚਾਨਵੇਂ",    // W pacānvẽ /pə.t͡ʃäːn.ʋẽː/ · B "puchanuwe" · E p@c'an@v,e~
-            "97": "ਸਤਾਨਵੇਂ",    // W satānvẽ /sə.t̪äːn.ʋẽː/ · B "sutanuwé" · E s@t'an@ve~
-            "98": "ਅਠਾਨਵੇਂ",    // W aṭhānvẽ /ə.ʈʰäːn.ʋẽː/ · B "uthanuwe" · E Vt.#'an@ve~
-            "99": "ਨੜ੍ਹਿਨਵੇਂ"   // W naṛhinvẽ /nəɽ.ɦɪn.ʋẽː/ · B "nurinwé" (OCR) · E n@R2'I~n@v,e~
+            "61": "ਇਕਾਹਠ", "62": "ਬਾਹਠ", "63": "ਤ੍ਰੇਹਠ", "64": "ਚੌਹਠ", "65": "ਪੈਂਹਠ",
+            "66": "ਛਿਆਹਠ", "67": "ਸਤਾਹਠ", "68": "ਅਠਾਹਠ", "69": "ਉਣ੍ਹੱਤਰ",
+            "71": "ਇਕ੍ਹੱਤਰ", "72": "ਬਹੱਤਰ", "73": "ਤਿਹੱਤਰ","74": "ਚੁਹੱਤਰ", "75": "ਪੰਝੱਤਰ",
+            "76": "ਛਿਹੱਤਰ", "77": "ਸਤੱਤਰ", "78": "ਅਠੱਤਰ", "79": "ਉਣਾਸੀ",
+            "81": "ਇਕਾਸੀ", "82": "ਬਿਆਸੀ", "83": "ਤਿਰਾਸੀ", "84": "ਚੁਰਾਸੀ", "86": "ਛਿਆਸੀ",
+            "87": "ਸਤਾਸੀ", "88": "ਅਠਾਸੀ", "89": "ਉਣਾਨਵੇਂ",
+            "91": "ਇਕਾਨਵੇਂ","92": "ਬਾਨਵੇਂ", "93": "ਤਿਰਾਨਵੇਂ", "94": "ਚੁਰ੍ਹਾਨਵੇਂ", "95": "ਪਚਾਨਵੇਂ",
+            "97": "ਸਤਾਨਵੇਂ", "98": "ਅਠਾਨਵੇਂ", "99": "ਨੜ੍ਹਿਨਵੇਂ"
         }
     }
 }

@@ -52,34 +52,10 @@
     // NUMBERS — Kannada spellings; canonical IPA DERIVED via the same G2P (no hand-written phonemes).
     // The compositor is Kannada's OWN (numbers.ts), not the shared `indicNumberWords`; see that file's
     // header for the three things the shared composer cannot express.
-    //
-    // SOURCES for everything below (nothing here is invented):
-    //   1. espeak-ng dictsource/kn_list — the hand-authored Kannada voice. It carries `_0`.._9`, `_1X`,
-    //      `_11`.._19`, `_2X`.._9X`, ALL 72 of `_21`.._99`, the irregular hundreds `_2C0` 'innu:ru /
-    //      `_3C0` m'unnu:ru / `_5C0` 'aInu:ru / `_9C0` ombainu:ru, their combining `_0C`.._9C` forms
-    //      (n'u:ra: …), `_0M1x` s'a:vira vs `_0M1` s'a:virada, `_0M2x` l'akSa vs `_0M2` l'akSada,
-    //      `_0M3` k'ot.i, and `_dpt` d'as.a:ms.a. It is a PHONEME source, so the orthography here was
-    //      derived and then round-tripped back through this repo's own G2P to confirm it reproduces the
-    //      espeak reading (e.g. ಇಪ್ಪತ್ತೊಂದು → ipːat̪ːõn̪d̪u vs espeak Ip:a't#:ondu). Same precedent as the
-    //      Marathi run, which sourced its 50-98 the same way.
-    //   2. The kn_in FLEURS corpus itself, which writes ಹತ್ತೊಂಬತ್ತು, ಹದಿನೆಂಟು, ಇಪ್ಪತ್ತು, ಮೂವತ್ತು, ನೂರು,
-    //      ಸಾವಿರ, ಲಕ್ಷ, ಕೋಟಿ in words, and attests the FUSION directly in ಇಪ್ಪತ್ನಾಲ್ಕನೇ ("24th").
-    //   3. tools/referee-eval/referees/kn.kaikki-kan.tsv — has ಒಂದು ಎರಡು ಮೂರು ನಾಲ್ಕು ಐದು ಆರು ಏಳು ಎಂಟು
-    //      ಒಂಬತ್ತು ಹತ್ತು ಸೊನ್ನೆ ಇಪ್ಪತ್ತು ನೂರು ಸಾವಿರ ಲಕ್ಷ ಕೋಟಿ verbatim. It has NO 21-99 compound and no
-    //      irregular hundred, which is why source 1 was needed.
     "numbers": {
         "units": ["ಸೊನ್ನೆ", "ಒಂದು", "ಎರಡು", "ಮೂರು", "ನಾಲ್ಕು", "ಐದು", "ಆರು", "ಏಳು", "ಎಂಟು", "ಒಂಬತ್ತು"],
         "teens": ["ಹತ್ತು", "ಹನ್ನೊಂದು", "ಹನ್ನೆರಡು", "ಹದಿಮೂರು", "ಹದಿನಾಲ್ಕು", "ಹದಿನೈದು", "ಹದಿನಾರು", "ಹದಿನೇಳು", "ಹದಿನೆಂಟು", "ಹತ್ತೊಂಬತ್ತು"],
         "tens": { "20": "ಇಪ್ಪತ್ತು", "30": "ಮೂವತ್ತು", "40": "ನಲವತ್ತು", "50": "ಐವತ್ತು", "60": "ಅರವತ್ತು", "70": "ಎಪ್ಪತ್ತು", "80": "ಎಂಬತ್ತು", "90": "ತೊಂಬತ್ತು" },
-
-        // FUSED 21-99. Kannada writes ONE word (ಇಪ್ಪತ್ತೊಂದು), never the two the shared composer's
-        // fallback emits (ಇಪ್ಪತ್ತು ಒಂದು). Formed regularly: the ten's stem (its final -ು dropped) plus
-        // the unit, with the unit's initial VOWEL written as a sign on the stem's last consonant
-        // (ಇಪ್ಪತ್ತ + ಒಂದು → ಇಪ್ಪತ್ತೊಂದು, ಇಪ್ಪತ್ತ + ಐದು → ಇಪ್ಪತ್ತೈದು). All 72 confirmed against espeak
-        // kn_list `_21`.._99`. The two CONSONANT-initial units (ಮೂರು, ನಾಲ್ಕು) keep the stem's inherent
-        // -a as a linking vowel (ಇಪ್ಪತ್ತಮೂರು); espeak's mnemonic elides it (Ip:a't#:m'u:ru) as its kn
-        // transcription elides inherent vowels in clusters generally, and the corpus's single
-        // attestation ಇಪ್ಪತ್ನಾಲ್ಕನೇ is the reduced colloquial spelling. The full written form is used.
         "compound": {
             "21": "ಇಪ್ಪತ್ತೊಂದು", "22": "ಇಪ್ಪತ್ತೆರಡು", "23": "ಇಪ್ಪತ್ತಮೂರು", "24": "ಇಪ್ಪತ್ತನಾಲ್ಕು", "25": "ಇಪ್ಪತ್ತೈದು",
             "26": "ಇಪ್ಪತ್ತಾರು", "27": "ಇಪ್ಪತ್ತೇಳು", "28": "ಇಪ್ಪತ್ತೆಂಟು", "29": "ಇಪ್ಪತ್ತೊಂಬತ್ತು",
@@ -98,12 +74,6 @@
             "91": "ತೊಂಬತ್ತೊಂದು", "92": "ತೊಂಬತ್ತೆರಡು", "93": "ತೊಂಬತ್ತಮೂರು", "94": "ತೊಂಬತ್ತನಾಲ್ಕು", "95": "ತೊಂಬತ್ತೈದು",
             "96": "ತೊಂಬತ್ತಾರು", "97": "ತೊಂಬತ್ತೇಳು", "98": "ತೊಂಬತ್ತೆಂಟು", "99": "ತೊಂಬತ್ತೊಂಬತ್ತು"
         },
-
-        // IRREGULAR ROUND HUNDREDS, keyed by the count of hundreds. Kannada does not say "two hundred" as
-        // two words — 200 is ಇನ್ನೂರು, 300 ಮುನ್ನೂರು, 500 ಐನೂರು, 900 ಒಂಬೈನೂರು (espeak `_2C0`/`_3C0`/
-        // `_5C0`/`_9C0`). 4, 6, 7, 8 have NO entry in that list either, so they fall back to the regular
-        // count + ನೂರು the way espeak's own composer does. `combining` is the form used when a remainder
-        // follows (espeak `_0C`.._9C`): 150 is ನೂರಾ ಐವತ್ತು, not *ನೂರು ಐವತ್ತು.
         "hundredForms": {
             "1": { "bare": "ನೂರು", "combining": "ನೂರಾ" },
             "2": { "bare": "ಇನ್ನೂರು", "combining": "ಇನ್ನೂರಾ" },
@@ -111,11 +81,6 @@
             "5": { "bare": "ಐನೂರು", "combining": "ಐನೂರಾ" },
             "9": { "bare": "ಒಂಬೈನೂರು", "combining": "ಒಂಬೈನೂರಾ" }
         },
-
-        // The magnitude nouns in their bare and combining (remainder-following) forms. espeak keeps the
-        // pair explicitly for the thousand (`_0M1x` ಸಾವಿರ vs `_0M1` ಸಾವಿರದ) and the lakh (`_0M2x` ಲಕ್ಷ
-        // vs `_0M2` ಲಕ್ಷದ); it lists only ಕೋಟಿ for the crore, so that one is invariant here rather than
-        // guessed. 1976 is ಸಾವಿರದ ಒಂಬೈನೂರಾ ಎಪ್ಪತ್ತಾರು — the oblique -ದ is what links the groups.
         "magnitudeForms": {
             "hundred": { "bare": "ನೂರು", "combining": "ನೂರಾ" },
             "thousand": { "bare": "ಸಾವಿರ", "combining": "ಸಾವಿರದ" },
@@ -128,9 +93,6 @@
         "magnitudes": { "hundred": "ನೂರು", "thousand": "ಸಾವಿರ", "lakh": "ಲಕ್ಷ", "crore": "ಕೋಟಿ" },
         "compoundOrder": "tens-unit",
         "bareMagnitude": true,
-
-        // The decimal separator word, from espeak kn_list `_dpt` (d'as.a:ms.a). NOT the English loan
-        // ಪಾಯಿಂಟ್, which this corpus writes 10 times but only ever as a sports/score noun.
         "decimalWord": "ದಶಾಂಶ"
     }
 }

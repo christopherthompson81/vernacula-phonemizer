@@ -24,10 +24,6 @@
  * The migration to the shared composer is BYTE-IDENTICAL over the kn_in corpus (0/1811 utterances
  * changed), which is the gate the playbook sets for lifting a local rule to a shared seam.
  *
- * EVERY SPELLING IS SOURCED — espeak-ng dictsource/kn_list plus this corpus plus the repo's own kaikki
- * referee; the full provenance note lives at the `numbers` block in kannada.jsonc. espeak is a PHONEME
- * source, so each derived orthography was round-tripped back through this repo's G2P and checked to
- * reproduce espeak's reading before it was written down.
  *
  * YEARS NEED NO SPECIAL RULE. Unlike Telugu (which reads 1976 as "nineteen hundred seventy-six" and had
  * to arbitrate that on audio), the ordinary Kannada cardinal already IS the year reading:
@@ -39,7 +35,7 @@ import { MANIFEST } from "./manifest.ts";
 
 const N = MANIFEST.numbers;
 
-/** The decimal separator word (espeak kn_list `_dpt`); read by normalize.ts. */
+/** The decimal separator word */
 export const DECIMAL_WORD = N.decimalWord;
 
 /** Non-negative integer → Kannada words, space-separated. */

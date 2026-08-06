@@ -35,19 +35,11 @@
  * before ⟨n d t z h⟩ and a vowel, dropped otherwise — plus `-er` after the feminine dative `der`. The
  * sandhi is `applyEifelerRegel()` in numbers.ts, the same function the numeral connector uses.
  *
- * ── SOURCING (§5e) ─────────────────────────────────────────────────────────────────────────────────────
- * Every word emitted here is attested in FLEURS lb_lu, in the wikipron referee, or in espeak-ng's
- * `dictsource/lb_list`. `bis` as a numeric infix is corpus-attested (`100 bis 250`, `siwe bis aacht`), the
- * two rate idioms are lifted verbatim (`240 Kilometer an der Stonn`, `1,5 Kilometer pro Sekonn`), and the
- * fraction composition *stem + el* is validated against espeak's own `aachtel drëttel fënneftel néngtel
- * sechstel siwentel` with `véierel` the single irregular. THE ONE EXCEPTION is `Yen`, which no in-repo
- * source records; it carries 3 of the 6 corpus currency instances and is flagged in the PR. `St.` is
- * deliberately NOT expanded — *Sankt* is unsourced and the 5 instances are US place names.
  *
  */
 import { applyEifelerRegel, numberToWords } from "./numbers.ts";
 
-/** All twelve, each attested in the corpus and in espeak's lb_list. `Mee` is capitalised on purpose —
+/** All twelve, each attested in the corpus. `Mee` is capitalised on purpose —
  *  lowercase *mee* is the conjunction "but". */
 const MONTHS = "Januar|Februar|Mäerz|Abrëll|Mee|Juni|Juli|August|September|Oktober|November|Dezember";
 /** The nouns that follow a digit ordinal, from the AFTER table: Joerhonnert ×23, months ×27. */
@@ -82,8 +74,6 @@ const ORDINAL_LIST = new RegExp(
  * TRAP 13 — the branches are the table (1, 3), the `+t` path, the `tt` collapse, the `+st` path and the
  * multi-word carrier (numberToWords joins magnitude groups with a space, so 1922 is *dausend nénghonnert…*
  * and the ending must land on the last word only, which appending to the whole string does for free).
- * Validated against espeak's lb_list, which carries the compounds `véieranzwanzegst`, `nénganzwanzegst`,
- * `néngandrëssegst` and `néngafofzegst` as well as `honnertst`/`dausendst`.
  */
 const IRREGULAR_STEM: Readonly<Record<number, string>> = { 1: "éischt", 3: "drëtt" };
 export function ordinalStem(n: number): string | undefined {
@@ -96,11 +86,9 @@ export function ordinalStem(n: number): string | undefined {
 }
 
 /**
- * Denominator → the fraction NOUN. Composition is *ordinal stem + el*, which espeak's own list confirms
- * for 3, 5, 6, 7, 8 and 9 (`drëttel fënneftel sechstel siwentel aachtel néngtel`). `4` is the one
- * irregular it records — `véierel`, not \**véiertel* — and `2` is not a noun at all but the adjective
- * `hallef`, handled by the caller. Composing rather than tabling is trap 8 (zero corpus instances is not evidence of…)'s constructive half: the
- * corpus writes exactly one fraction (`1/5`).
+ * Denominator → the fraction NOUN. Composition is *ordinal stem + el*. `4` is the one
+ * irregular recorded — `véierel`, not \**véiertel* — and `2` is not a noun at all but the adjective
+ * `hallef`, handled by the caller.
  */
 const FRACTION_NOUN: Readonly<Record<number, string>> = { 4: "Véierel" };
 function fractionNoun(den: number): string | undefined {
@@ -324,16 +312,7 @@ export function normalizeLuxembourgish(input: string): string {
     s = s.replace(PLUS_AFTER_WORD, "$1 plus $2");
     s = s.replace(PLUS_INITIAL, "$1plus $2");
 
-    // RELATIONAL AND ARITHMETIC SIGNS, and the AMPERSAND. `&` has 2 corpus instances — `College of Arts
-    // & Sciences` and `B&B`, both previously silent, the Czech `BB`-vs-`B B` tokenisation case; the other
-    // 90 `&` in this corpus are `&apos;`, already decoded upstream by core/markup.ts (which was written
-    // for lb_lu). `=` `<` `>` `×` `÷` have ZERO instances and are still read, because a phonemizer is
-    // handed arbitrary text and a dropped sign is inaudible — the one outcome that cannot be right
-    // (#584); the Czech layer takes the same position for the same signs. Every word is attested:
-    // `gläich` (espeak lb_list + corpus ×1), `mol` (espeak; corpus `Mol` ×8), `méi` ×220, `ewéi` ×205,
-    // `grouss` ×34, `kleng` ×28, `dividéiert duerch` — the corpus's own phrase, *dividéiert duerch
-    // zwielef*. The ASCII `x` in `75,57 cm x 62,23 cm` is deliberately left alone: it is a LETTER of this
-    // orthography, and claiming it would also claim `4x4` and `36-x-24-mm-Negativ`.
+    // RELATIONAL AND ARITHMETIC SIGNS, and the AMPERSAND.
     s = s.replace(/[  ]*[=≈][  ]*/gu, " ass gläich ");
     s = s.replace(/[  ]*<[  ]*/gu, " méi kleng ewéi ");
     s = s.replace(/[  ]*>[  ]*/gu, " méi grouss ewéi ");

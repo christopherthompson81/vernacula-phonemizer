@@ -1,7 +1,6 @@
 /**
  * Spanish number → words (long scale: millón = 10⁶). The words then phonemize through the same g2p as any
- * other word, so digits read like written Spanish. Covers 0 … <10¹². Matches the espeak forms: no apocope
- * in compounds (21000 → "veintiuno mil"), but "un millón" / cien vs ciento / quinientos.
+ * other word, so digits read like written Spanish. Covers 0 … <10¹².
  */
 
 import { MANIFEST } from "./manifest.ts";

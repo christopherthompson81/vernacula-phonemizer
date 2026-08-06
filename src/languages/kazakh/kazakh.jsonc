@@ -16,7 +16,6 @@
         "eInitial": "word-initial е → je (ел→jel); elsewhere e",
         "darkL": "л → dark ɫ next to back harmony; lightened to l word-wide when the token carries a front vowel",
         "stress": "STRESSPOSN_1RU — last nucleus by default; the first reduced ə (ы, or the ə of и=əj) pulls stress to the syllable before it",
-        "relabels": "vs espeak-mode: ғ→ʁ, х→χ, р→r, ү→ʏ; щ→ʃʃ, ц→t͡s, ч→t͡ʃ; ъ/ь→ʔ",
         "gemination": "doubled consonants stay doubled (кк→kk, сс→ss); no gemination-to-length",
     },
 
@@ -81,8 +80,8 @@
         ":": ",",
     },
 
-    // Cardinal number words as FINISHED canonical IPA (the espeak atoms — irregular stress/segments, so not routed
-    // through the g2p). tens+units and the hundred-multiplier are glued by the compositor; magnitude groups spaced.
+    // Cardinal number words as FINISHED canonical IPA (irregular stress/segments, so not routed through the
+    // g2p). tens+units and the hundred-multiplier are glued by the compositor; magnitude groups spaced.
     "numbers": {
         "units": [
             "nˈøɫ",

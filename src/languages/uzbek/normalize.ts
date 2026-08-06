@@ -55,7 +55,7 @@ const WORD = "[A-Za-zʻ'’‘`ʼ′]";
 /** A number token the ordinal/dot/era rules rewrite (integers; decimals/grouping handled by the symbol tier). */
 const DIGITS = "(\\d+(?:,\\d+)?)";
 
-/** Uzbek letter names (espeak-uz alphabet, 26 letters + oʻ/gʻ/sh/ch/ng which never need spelling). The
+/** Uzbek letter names (26 letters + oʻ/gʻ/sh/ch/ng which never need spelling). The
  *  letter-name convention: consonant names end in the vowel of the letter's sound — be, de, ef, ge, ka, pe.
  *  c/w appear only in unadapted loans and take their Latin-style names. */
 const LETTER_NAME: Readonly<Record<string, string>> = {

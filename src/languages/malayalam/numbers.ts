@@ -17,10 +17,7 @@
  * — five words where Malayalam says three, with the wrong hundred and no linkage at all.
  *
  * YEARS TAKE THE ORDINARY CARDINAL, as in Kannada and unlike Telugu (which reads 1976 as "nineteen
- * hundred seventy-six" and had to arbitrate that on audio). No ml_in audio is cached under
- * corpus/audio_cache/data/, so playbook step 5b could not be run here in any case; espeak's ml voice
- * has no year rule either, and the cardinal ആയിരത്തി തൊള്ളായിരത്തി എഴുപത്തിയാറ് is the reading both
- * that voice and this corpus's own spelled-out numerals support.
+ * hundred seventy-six" and had to arbitrate that on audio).
  */
 import { dravidianNumberWords } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -29,7 +26,7 @@ const N = MANIFEST.numbers;
 const VIRAMA = "്";
 const ANUSVARA = "ം";
 
-/** The decimal separator word (espeak ml_list `_dpt`); read by normalize.ts. */
+/** The decimal separator word; read by normalize.ts. */
 export const DECIMAL_WORD = N.decimalWord;
 
 /** Non-negative integer → Malayalam words, space-separated. */

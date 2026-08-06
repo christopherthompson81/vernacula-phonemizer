@@ -2,8 +2,7 @@
  * Welsh (cy) phonemizer — canonical IPA, Northern-leaning. Rule-based g2p (g2p.ts) +
  * PENULTIMATE stress + the Welsh vowel-length rule. A stressed monophthong in a long context — open, or before a
  * single voiced/fricative coda — takes full length (ː) in a monosyllable/final syllable (mis → miːs); in a penult
- * it stays SHORT and LAX (pobol → pɔbɔl, nesaf → nɛsav — the NW referee shows lax, not the espeak-tensed [o]/[e]).
- * Elsewhere it stays lax and short (bore → bɔrɛ). Diphthongs and circumflex vowels are already long and untouched.
+ * it stays SHORT and LAX (pobol → pɔbɔl, nesaf → nɛsav
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -44,7 +43,7 @@ function applyLength(segs: Seg[], stress: number, isFinal: boolean): void {
     const longContext = coda === 0 || (coda === 1 && LENGTHENS.has(single));
     if (!longContext) return; // lax + short (voiceless stop, m, ŋ, ɬ, cluster, or the deferred n/r/l)
     // Full length ː only in a monosyllable / final syllable; a PENULT keeps its short LAX quality (pobol→pɔbɔl,
-    // nesaf→nɛsav — the NW referee shows lax; the espeak-tensed penult [o]/[e] was an oracle artifact, cf. i→ɨ).
+    // nesaf→nɛsav
     if (isFinal) v.ph = LONG[v.ph] ?? v.ph;
 }
 
@@ -73,10 +72,7 @@ export function phonemizeWord(word: string): string {
     const stress = nucleiIdx[stressN]!;
     applyLength(segs, stress, stressN === nucleiIdx.length - 1);
     // NB: the letter ⟨i⟩ stays FRONT (i/ɪ/iː) everywhere — Northern Welsh centralizes only ⟨u⟩ and clear ⟨y⟩ to
-    // ɨ, keeping the i/ɨ contrast (melin → mɛlɪn, gwin → ɡwiːn). Run 1's i→ɨ rules matched an espeak ARTEFACT the
-    // independent NW referee contradicts, and were removed in Run 3. The residual is now purely n/r/l LENGTH.
-    // Secondary stress on the first syllable when the primary is the 3rd nucleus or later (cymdeithasol →
-    // ˌkəmdəᶦˈθasɔl).
+    // ɨ, keeping the i/ɨ contrast (melin → mɛlɪn, gwin → ɡwiːn).
     // (Final unstressed ⟨e⟩→[a] — bore→bɔra, carreg→karaɡ — is a colloquial NW reduction, but not reliably
     // rule-based: at corpus scale it net-regresses [-3.5%], too many final ⟨e⟩ stay ɛ. Left as a lexical residual.)
     const secondary = stressN >= 2 ? nucleiIdx[0]! : -1;

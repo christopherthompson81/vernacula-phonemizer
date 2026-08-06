@@ -71,20 +71,8 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 export const skCountForm = (n: number): number => (n === 1 ? 0 : n === 2 || n === 3 || n === 4 ? 1 : 2);
 
 /**
- * #562 SYMBOL NORMALIZATION — Slovak. Kept in the ENGINE file (not normalize.ts) so the review tool's
- * sourcing check can read the declaration. Every word here is attested in the sk_sk corpus or in espeak's
- * Slovak dictsource; see the SOURCING paragraph in normalize.ts.
- *
- *   percent  percento / percentá / percent — the corpus writes `percent` 11 times and `percento` once.
- *   currency dolár (corpus: dolárov ×3, doláre ×1; espeak `_$ dolár`), euro / libra / jen from espeak's
- *            `€ euro`, `£ libra`, `¥ jen`. Only `$` occurs in the corpus (×2, POSTPOSED: `11 000 $`).
- *   units    the corpus writes km ×24, mm ×6, cm, m ×3, kg ×3, GHz ×2. `kilometrov` appears 12 times.
- *   rate     `km/h` ×6 → *kilometrov NA hodinu*; `m/s` takes *za sekundu*, which is why unitPer is keyed
- *            by denominator rather than being one word.
- *   exponent `km²` ×2 → *štvorcových kilometrov* — an agreeing adjective BEFORE the noun, as in Russian.
- *
- * COUNT AGREEMENT uses `skCountForm`, not `slavicCountForm`: a Slovak compound ending in 1 takes the
- * genitive plural (*dvadsaťjeden percent*), never the Russian singular.
+ * SYMBOL NORMALIZATION — Slovak. Kept in the ENGINE file (not normalize.ts) so the review tool's
+ * sourcing check can read the declaration.
  */
 export const SYMBOLS = makeSymbolNormalizer({
     // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new

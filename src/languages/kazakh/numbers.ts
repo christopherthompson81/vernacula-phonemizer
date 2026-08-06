@@ -1,9 +1,9 @@
 /**
- * Kazakh (kk) cardinal number compositor. Kazakh number words are lexicalised in espeak (their stress and a few
+ * Kazakh (kk) cardinal number compositor. Kazakh number words are lexical (their stress and a few
  * segments don't follow the regular g2p — жиырма is final-stressed, алпыс has a clear l, нөл has ø), and the
  * compositor concatenates tens+units and the hundred-multiplier WITHOUT a space (онбір, жиырмабір, екіжүз) but
  * separates magnitude groups WITH a space (бір мың екіжүз отызтөрт). So this returns finished canonical IPA
- * directly (the atomic forms captured from espeak), rather than routing Kazakh text through the g2p.
+ * directly, rather than routing Kazakh text through the g2p.
  * 100 omits the leading 1 (жүз, not біржүз); 1000 keeps it (бір мің).
  */
 
@@ -17,7 +17,7 @@ const UNIT = N.units,
     THOUSAND = N.thousand,
     MILLION = N.million;
 
-/** 0–99 → concatenated IPA (tens and units glued, matching espeak). */
+/** 0–99 → concatenated IPA (tens and units glued. */
 function sub100(n: number): string {
     if (n < 10) return UNIT[n]!;
     const t = Math.floor(n / 10),

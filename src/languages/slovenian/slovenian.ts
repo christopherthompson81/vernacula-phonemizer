@@ -86,7 +86,7 @@ const C = (g: "m" | "f", ...forms: readonly string[]): Counted =>
  * SOURCING, token-level against the sl_si corpus unless noted: odstotek ×1 / odstotka ×1 / odstotki ×1 /
  * odstotkov ×11; kilometra ×1 / kilometrov ×6 (kilometer in the wikipron slv referee); metra ×1 /
  * metrov ×7; milimeter in the referee; milje ×3 / milj ×26; stopinj ×2 (`s temperaturami nad 90 stopinj`);
- * dolarjev ×8 (espeak `$ d'o:laR` = dolar); evrov ×1 (evro in the referee); funtov ×5 (funt in the
+ * dolarjev ×8; evrov ×1 (evro in the referee); funtov ×5 (funt in the
  * referee); jenov ×2. The SI stems `centimeter`, `kilogram`, `gigaherc` and `megabit` have no in-repo
  * attestation and are the orthographic expansions of the abbreviations the corpus writes (cm, kg ×2,
  * GHz ×2, Mbit ×1) — see the SOURCING paragraph in normalize.ts.

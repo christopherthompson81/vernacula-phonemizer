@@ -35,8 +35,7 @@ const nVowels = (s: string): number => {
 // verbal-noun -mA, conditional -sA, generalizing copula -DIr, predicative person endings -Im/-Iz/-sInIz — plus
 // one optional trailing suffix (person / case / plural), anchored to the word end. NB the bare 2sg -sIn is
 // deliberately EXCLUDED: it collides with the imperative -sIn (olsun) and possessive+case -sInDA (arasında),
-// costing more than it fixes. Derived as general morphology and net-validated against the espeak gold (stress
-// accuracy 78.5%→90.9% fixes-minus-breaks); NOT a per-word lexicon.
+// costing more than it fixes.
 const PRE_ACCENT =
     "(?:(?:r)?ken|(?:y)?l[ae]|m[ae]|s[ae]|[dt][ıiuü]r|(?:y)?(?:[ıiuü]m|[ıiuü]z|s[ıiuü]n[ıiuü]z))";
 const TAIL = "(?:l[ae]r|[ıiuü][mnz]|n[ıiuü]z|[ae]|y[ae]|d[ae]n?|n[ıiuü]n|)";

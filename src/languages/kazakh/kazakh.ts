@@ -1,9 +1,9 @@
 /**
- * Kazakh (kk) phonemizer — canonical IPA. Rule-based g2p (g2p.ts) + espeak's Kazakh stress
- * algorithm (STRESSPOSN_1RU): default stress is the LAST syllable, but scanning nuclei left-to-right from the
- * second, the first "unstressed" vowel moves stress to the syllable BEFORE it. The only unstressed vowel is ə
- * (ы, and the ə of и=əj) — so a reduced ы between full vowels pulls stress leftward (бойынша→bˈojənʃɑ) while
- * words with no reduced vowel take final stress (Санат→sɑnˈɑt). text() tokenizes words / numbers / punctuation.
+ * Kazakh (kk) phonemizer — canonical IPA. Rule-based g2p (g2p.ts) + Kazakh stress algorithm: default stress
+ * is the LAST syllable, but scanning nuclei left-to-right from the second, the first "unstressed" vowel moves
+ * stress to the syllable BEFORE it. The only unstressed vowel is ə (ы, and the ə of и=əj) — so a reduced ы
+ * between full vowels pulls stress leftward (бойынша→bˈojənʃɑ) while words with no reduced vowel take final
+ * stress (Санат→sɑnˈɑt). text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -22,8 +22,7 @@ const FRONT_VOWEL = new RegExp(`[${MANIFEST.frontVowels}]`, "u"); // vowel harmo
 
 /** One Kazakh word → canonical IPA with a single primary-stress mark (STRESSPOSN_1RU). */
 export function phonemizeWord(word: string): string {
-    // Consonant-only token (abbreviation / letter sequence): espeak spells each letter by name — a consonant's
-    // name is Cə (kk_list). Final stress (км→kəmˈə, РФ→rəfˈə, ж→ʒˈə).
+    // Consonant-only token (abbreviation / letter sequence). Final stress (км→kəmˈə, РФ→rəfˈə, ж→ʒˈə).
     if (!VOWEL_OR_GLIDE.test(word.toLowerCase())) {
         const cons = toSegments(word).map((s) => s.ph);
         if (cons.length === 0) return "";

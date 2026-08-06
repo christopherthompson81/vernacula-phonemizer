@@ -161,30 +161,7 @@
     // और-offglide / अय→ɛj convention.
 
     // NUMBERS — authored Devanagari SPELLINGS (public-fact numerals); the canonical IPA is DERIVED by
-    // running these through the same native G2P (no hand-written phonemes). The
-    // compositor (src/Phonemize/native/abugidaNumbers.ts) assembles them with Indian lakh/crore grouping.
-    // NOTE: like Hindi's, Nepali's 21-99 are IRREGULAR — FUSED single words (एक्काइस ≠ एक + बीस). Without
-    // the `compound` map below, core/numbers.ts degraded to its two-word fallback in the Hindi-belt
-    // unit-then-tens order, so 21 read "ˈek bˈis" ("one twenty"), 35 "pˈãt͡s t̪ˈis" and 1995
-    // "…pˈãt͡s nˈʌbːe". Measured over the ne_np FLEURS corpus: 226 bare two-digit numerals plus 175
-    // four-digit years, i.e. every one of them mis-read. #562.
-    //
-    // PROVENANCE of the 79 spellings (no form here is invented). Candidates were taken from the two
-    // shipped referees, tools/referee-eval/referees/ne.wikipron-deva.tsv and ne.kaikki-ne.tsv, and matched
-    // against espeak-ng's dictsource/ne_list `_21`.._99` pronunciations by a coarse consonant+vowel-class
-    // skeleton; 43 of 79 matched a referee headword EXACTLY and the rest were arbitrated among
-    // referee-attested variants by closest score. Ties were broken in this order: (1) corpus attestation
-    // — छपन्न is written in the ne_np corpus, so it beats छप्पन्न; (2) espeak's consonant inventory —
-    // 47 सतचालीस (espeak has the च) over Hindi-shaped सैंतालीस, 51 एकाउन्न (single k) over एक्काउन्न,
-    // 71/75 -हत्तर (espeak has the h) over -त्तर, 38 अठतीस (two wikipron rows) over अड्तीस.
-    // Where the two spellings are PHONEMICALLY IDENTICAL under this manifest the choice is free and was
-    // taken from wikipron: ि/ी and ं/ँ never contrast here (Nepali has no phonemic vowel length).
-    // The two least-confident rows, where referee and espeak disagreed and the score was the only
-    // arbiter, are 73 तिरत्तर (espeak suggests neither तिरत्तर nor त्रिहत्तर cleanly) and 76 छहत्तर
-    // (espeak's छयहत्तर is not a referee headword; छयत्तर scored lower). Both are referee-attested Nepali.
-    //
-    // `bareMagnitude` is deliberately NOT set: "एक सय" is standard Nepali, and espeak's ne_list confirms
-    // it — it declares only `_0C  s'aj@` (सय) with no `_1C`, so its own composer emits एक + सय too.
+    // running these through the same native G2P (no hand-written phonemes).
     "numbers": {
         "units": ["शून्य", "एक", "दुई", "तीन", "चार", "पाँच", "छ", "सात", "आठ", "नौ"],
         "teens": ["दश", "एघार", "बाह्र", "तेह्र", "चौध", "पन्ध्र", "सोह्र", "सत्र", "अठार", "उन्नाइस"],

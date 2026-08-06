@@ -55,21 +55,6 @@
  *   `Arts & Sciences` → `ˈaːrt͡sʼ skǀiˈɛːŋǀɛs`      the & dropped;  `amaB&amp;B` → `ˈaːmaɓ ɓ`
  *   `1/5`           → `kʼˈuːɲɛ kʼuɬˈaːnu`            "one five"
  *   22 spaced dashes → no pause at all
- *
- * THE DECIMAL POINT IS DELIBERATELY UNNAMED. No Zulu decimal-point word exists in the corpus, in the
- * epitran referee's 1,047-word list, in tone.tsv, or in espeak — which ships no Zulu at all (439
- * dictsource files, zero matching `zul|^zu`). Per the standing rule on data, a confidently wrong point
- * word is worse than a missing one, so the dot is read as a boundary and the fractional digits are spoken
- * one at a time. `nengxenye` ("and a part") was considered for `.5` on the Hausa `da rabi` model and
- * rejected: all 17 corpus instances of `ingxenye` gloss it as PART, not HALF.
- *
- * INITIALISMS ARE NOT WIRED, and this is a checked deferral rather than an assumption (trap 16 (before declaring a class out of scope)).
- * `src/core/initialisms.ts` exists and 37 language files use it — but read its `spellOut()`: it returns
- * `undefined` as soon as ANY letter lacks a name, and the caller then leaves the token alone. With no
- * `letterName` table the acronym branch is a literal no-op on all ~110 tokens, and no Zulu letter-name
- * table exists in espeak (no Zulu), the referee (a programmatic G2P), or the corpus. The only part that
- * would fire is the dotted-initial handling, which steps 3–4 below do directly. Same conclusion Swahili
- * reached, for the same verified reason.
  */
 
 /** Metric / imperial unit words. Every one that the corpus writes out is attested there as a TOKEN:
@@ -380,21 +365,7 @@ export function normalizeZulu(input: string): string {
     //     zulu.ts) — but a squared unit sitting on a DECIMAL does, and step 13 claims it.
     s = s.replace(/(\d[\d.,]*)[  ]?sq[  ]?mi(?![\p{L}\p{M}])/giu, `$1 ${UNIT_WORD["mi"]!} skwele`);
 
-    // 13) DECIMALS (14 real; the dot became a SENTENCE break mid-number, and `.34` was additionally read
-    //     as the number "thirty-four"). The fractional digits are spaced so the tokenizer speaks them one
-    //     at a time. NO DECIMAL-POINT WORD IS EMITTED — none is attested in the corpus, the epitran
-    //     referee's 1,047 words, tone.tsv, or espeak (which has no Zulu at all); a wrong point word is
-    //     worse than a missing one. See the header for the rejected `nengxenye` candidate.
-    //
-    //     THIS IS THE ONLY RULE THAT BREAKS number↔symbol ADJACENCY, so it claims its neighbours itself
-    //     (trap 14 (agreement cannot be applied to digits)'s second clause). Five instances need it: `$14.7` and `ku-$2.3` have the sign BEFORE,
-    //     `12.8 km`, `2.2 km2` and `3.50 m` have the unit AFTER. Ordered currency → unit → plain, longest
-    //     context first, so neither neighbour can be stranded once the number stops being a number.
-    //     `US$`/`AUD$` are listed here as well as in the tier, for the same shadowing reason.
-    //     TRAILING ZEROS ARE STRIPPED from the fraction. `engu-3.50 m` read *…kuthathu kuhlanu IQANDA
-    //     amamitha* — Zulu's zero word is `iqanda`, literally "egg", and 3.50 is 3.5, so the digit is not
-    //     even informative. An INTERIOR zero is kept (`1.05` → "1 0 5"), and a fraction that is all zeros
-    //     cannot reach here: `15.00`/`12,00` are the timezone clocks claimed at step 7.
+    // 13) DECIMALS
     const dec = (i: string, f: string): string =>
         [i, ...f.replace(/0+$/u, "")].filter((t) => t !== "").join(" ");
     s = s.replace(/(?<![\p{L}\p{M}])(?:US\$|AUD\$|\$|£)[  ]?(\d+)\.(\d+)(?!\.?\d)/gu,

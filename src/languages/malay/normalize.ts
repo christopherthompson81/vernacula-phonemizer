@@ -28,7 +28,7 @@
  */
 
 /** Dotted abbreviations where MALAY differs from Indonesian's table. `dsb.`/`dll.` are identical in both and
- *  stay with the inherited layer. Sourced: nombor ×11, doktor ×1 (+ espeak ms_list), Encik ×1 in ms_my. */
+ *  stay with the inherited layer. Sourced: nombor ×11, doktor ×1, Encik ×1 in ms_my. */
 const DOTTED_ABBREV: Readonly<Record<string, string>> = {
     dr: "doktor",   // Indonesian: dokter
     no: "nombor",   // Indonesian: nomor
@@ -306,7 +306,7 @@ export function normalizeMalay(input: string): string {
 
     // 15) DECIMALS, LAST — every rule that consumes a glued unit has run, so a letter still stuck to the
     //     fraction now means a VERSION (`802.11a/b/g/n`, ×5), not a unit. Malay reads the point as
-    //     `perpuluhan` (espeak-ng ms `_dpt`; round-tripped through this repo's g2p), and the fraction digit
+    //     `perpuluhan`; round-tripped through this repo's g2p), and the fraction digit
     //     by digit — hence the space between them, so the tokenizer says *lima kosong* and not *lima puluh*.
     //     `\d{1,3}.000` is EXCLUDED: the corpus's one `9.000 orang` is Indonesian-convention thousands
     //     grouping in a translated sentence, and the inherited tokenizer already reads it as *sembilan
@@ -319,10 +319,7 @@ export function normalizeMalay(input: string): string {
     //     (and still would as `11 g`), the confidently-wrong-word failure the `rateDenominators` note
     //     describes. `11-g` reads the bare letter, which is what the standard's name is.
     //     THE VERSION DOT IS `titik`, NOT `perpuluhan`: `802.11` is not a quantity, so the dot is the
-    //     PUNCTUATION MARK rather than a decimal separator, and Malay names the two separately — espeak-ng
-    //     `dictsource/ms_list:120` gives `_.` → `t'iti?` (the mark) against `:70`'s `_dpt` → `perpuluhan`
-    //     (the separator). The corpus's own 12 `titik` are the "point / spot" noun, a different sense, which
-    //     is why the espeak line and not the corpus count is the citation here.
+    //     PUNCTUATION MARK rather than a decimal separator, and Malay names the two separately.
     s = s.replace(/(?<![\d.])(\d+)\.(\d+)([a-z])(?![\p{L}\p{M}])/gu, "$1 titik $2-$3");
     s = s.replace(/(?<![\d.])(\d+)\.(\d+)(?![\d])/gu, (whole, int: string, frac: string) =>
         int.length <= 3 && frac === "000" ? whole : `${int} perpuluhan ${[...frac].join(" ")}`);

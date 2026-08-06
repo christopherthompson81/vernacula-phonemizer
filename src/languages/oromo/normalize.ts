@@ -55,35 +55,16 @@
  * of the rules that words-ify — the enclitic/ordinal rule and the decimal rule — therefore live in the
  * SECOND pass, and the tier gets `£27tiin` and `$2.3` intact. This is what lets the currency and percent
  * WORDS live in exactly one place (the tier's declaration) instead of being duplicated here.
- *
- * SOURCING. Every word below is traceable,
- * Run 4, for the evidence table. The one word with a single source is `ida’uu` (+), from espeak's
- * `om_list` alone — and `+` has zero corpus instances. The temperature SCALE names (Celsius/Fahrenheit)
- * could not be sourced in any repo source, so `°C` reads *digirii N* and the scale letter is left unread
- * rather than guessed.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
 
-// ─────────────────────────────────────────────────────────────────────────────────────────────────────
-// DATA — every literal here is corpus- or espeak-attested;
-// ─────────────────────────────────────────────────────────────────────────────────────────────────────
-
-/** The decimal point, from the manifest so there is ONE source of truth (`"decimalWord": "tuqaa"`).
- *  espeak `om_list` `_dpt`/`_.` → *tuqaa*; the corpus writes *sirna tuqaalee* (the system of dots =
- *  punctuation) and *tuqaa 76* (points). */
+/** The decimal point */
 const POINT = loadManifest<{ decimalWord: string }>(import.meta.url, "oromo.jsonc").decimalWord;
 
 /**
- * OROMO LETTER NAMES — the Qubee alphabet's own CV names, read straight off espeak-ng `dictsource/om_list`
- * lines 42–67, which carries all 26: `b  ba:`, `c  tS\`a:`, `q  k\`a:`, `x  t\`a:`, `n  na` (short, the one
- * exception). Transcribed back into Qubee orthography, so the g2p produces espeak's own phonemes — verified
- * by round-trip: baa→[bˈaː], caa→[t͡ʃʼˈaː], qaa→[kʼˈaː], xaa→[tʼˈaː].
- *
- * This was #602's largest deferral (64 instances, `PTWC` → [ptʼwt͡ʃʼ]), left with the note that om_list
- * "carries the full Oromo letter-name inventory, so an initialism pass is sourceable". `sources.ts` now
- * reports it as WIREABLE-not-wired, which is what brought it back.
+ * OROMO LETTER NAMES — the Qubee alphabet's own CV names
  */
 const LETTER_NAME: Readonly<Record<string, string>> = {
     a: "aa", b: "baa", c: "caa", d: "daa", e: "ee", f: "faa", g: "gaa", h: "haa", i: "ii",
@@ -208,9 +189,7 @@ const ENCLITIC_SPACED = "tiin|tti|ti|f|n";
 export function normalizeOromo(input: string): string {
     let s = input;
 
-    // 1) AMPERSAND — the corpus's one instance is the HTML entity (`B&amp;B’ootaan`). *fi* = "and":
-    //    espeak `om_list` `_&` → fi, and the corpus writes it several hundred times. FIRST, so the bare
-    //    `&` rule below cannot see a half-decoded entity.
+    // 1) AMPERSAND
     s = s.replace(/&amp;/giu, " fi ");
     s = s.replace(/&/gu, " fi ");
 
@@ -304,14 +283,7 @@ export function normalizeOromo(input: string): string {
     //     (trap 8 (zero corpus instances is not evidence of…)): every numerator and denominator reads the same way here.
     s = s.replace(/(?<![\d/.,])(\d{1,3})\/(\d{1,3})(?![\d/.,])/gu, "$2 keessaa $1");
 
-    // 11) DEGREES — `35°W` (×1), a longitude. *digirii* is corpus-attested (×2, as the academic degree —
-    //     Oromo borrows the one word) and is in the epitran referee. The compass words are all in the
-    //     corpus. °C/°F have ZERO corpus instances and are probed anyway (trap 8 (zero corpus instances is not evidence of…)): the SCALE NAMES are in
-    //     no source this repo has — not the corpus, not either referee, not espeak's `om_list` — so the
-    //     reading stops at *digirii N*. Note what that costs: the `[CF]?` CONSUMES the letter, so the
-    //     scale is dropped, not merely left unnamed. Deliberate, and the lesser of two wrongs — unconsumed,
-    //     a bare `C` reads as the Qubee ejective [t͡ʃʼ], a phoneme rather than a word — but it is a drop,
-    //     and it stays a drop until Celsius/Fahrenheit can be sourced.
+    // 11) DEGREES — `35°W` (×1), a longitude. *digirii* is corpus-attested
     s = s.replace(/(\d+)\s?[°º]\s?([NSEW])(?![\p{L}\p{M}])/gu,
         (_m, n: string, c: string) => `digirii ${n} ${COMPASS[c]!}`);
     s = s.replace(/(\d+)\s?[°º]\s?[CF]?(?![\p{L}\p{M}])/gu, "digirii $1");
@@ -367,21 +339,7 @@ export function normalizeOromo(input: string): string {
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?![\\p{L}\\p{M}’'ʼ])`, "giu"),
         (_m, n: string, u: string) => `${UNIT[u.toLowerCase()]!} ${n}`);
 
-    // 13) MATH SIGNS. Every class was dropped outright. AFTER the range step, so a range hyphen is never
-    //     read as a minus, and after the units step, so `km/h` is not seen as a fraction.
-    //     `=` ×1 — the corpus's instance (`tajaajilu =kan wantoota…`) is a stray typographic dash used as
-    //       a copula; *wal qixa* ("equal", corpus ×1, espeak `=` → *qixedha*) is a tolerable reading of it
-    //       and the only one the sign has.
-    //     `<` `>` — espeak inserts the finite verbs *ni xiqqata* / *ni caala* between the operands, which
-    //       is not how Oromo compares: it is `A B caalaa xiqqaa/guddaa`. The PIECES are what is sourced
-    //       (*caalaa* ×46, *xiqqaa* ×27, *guddaa* ×many), so they are composed into the language's own
-    //       word order rather than espeak's copied (the Fula part-of-speech lesson).
-    //     `×` — *si’a* ("times"), corpus: `gati warqee si’a kuudhanii ol` = "ten TIMES the gold price",
-    //       and it precedes its number there, which is the slot used here.
-    //     `-` and `+` — *hir’isuu* (corpus ×1 `taarifa hir’isuu irratti`; espeak `_-`) and *ida’uu*
-    //       (espeak `+` ONLY — the layer's single-sourced word; `+` has zero corpus instances).
-    //       The minus is claimed only where nothing precedes it, so a compound (`Il-76s`, `HJR-3n`) and a
-    //       score (`5-3`) are both excluded.
+    // 13) MATH SIGNS.
     s = s.replace(/(\d+)\s*<\s*(\d+)/gu, "$1 $2 caalaa xiqqaa");
     s = s.replace(/(\d+)\s*>\s*(\d+)/gu, "$1 $2 caalaa guddaa");
     // ⚠ ASCII `x` TOO: `NxN` outnumbers `×` roughly 85 to 20 in the corpora and the bare `x` was read as its

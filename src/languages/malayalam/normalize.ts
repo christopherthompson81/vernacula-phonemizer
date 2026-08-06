@@ -65,31 +65,6 @@ const ZWJ_CHILLU: Readonly<Record<string, string>> = {
 /**
  * The SHARED symbol tier (percent / currency / units / exponent). Kept in this file rather than in
  * malayalam.ts because its position in the ordering matters and the ordering is this file's job.
- *
- * percent: ശതമാനം, and as a SUFFIX. Two independent sources agree on both facts — espeak ml_list maps
- * `%` to S;at@ma:n@m inline (so, after the number), and this corpus writes ശതമാനം 14 times, always
- * postposed ("8 ശതമാനം വളർച്ച", "80 ശതമാനം സാധനങ്ങൾക്കും"). It does not inflect for count, so one form.
- * One of the four `%` occurrences is "93% ശതമാനം", where the text ALREADY writes the word; the tier's
- * `already` guard (core/normalizeSymbols.ts) is currency-only, so that one is handled at step 7.
- *
- * currency: only the dollar occurs (×5, as `$` and `US$`). ഡോളർ is written out six times in this
- * corpus and always AFTER the amount, which is the tier's default. The magnitudes are this corpus's own
- * running-text spellings (ദശലക്ഷം ×12, മില്യൺ ×4, ബില്യൺ ×2). The rupee sign never occurs — രൂപ appears
- * once as a noun, not as an amount — so no ₹ key is invented.
- *
- * units: `km` (for the two `km2`), `m` and `mm`. Everything else measured here is already written in
- * Malayalam words (കിലോമീറ്റർ ×19, മീറ്റർ ×8, മൈൽ, ഇഞ്ച്, അടി), so more Latin keys would earn nothing
- * and would be actively dangerous — this corpus contains M16, x4, JAS, Il and 802.11-style tokens that
- * a one-letter key is free to claim. `m`/`mm` are safe only because the tier requires a NUMBER
- * immediately before and rejects a following letter or apostrophe (the Dutch `Il-76s` guard).
- *
- * exponent: ചതുരശ്ര, position "before" with a space — the standard Malayalam square-measure adjective,
- * an invariant prefix like Kannada's ಚದರ. `cubed` is NOT declared: no ³ occurs and there is nothing
- * here to source it from, and the seam leaves an undeclared exponent untouched.
- *
- * RATE is deliberately NOT declared (`unitPer` unset): no rate unit occurs in this corpus at all, and
- * Malayalam's rate idiom is a prefix in the dative (മണിക്കൂറിൽ), which the shared postposed "A per B"
- * shape cannot express. Nothing to source, nothing to guess.
  */
 const SYMBOLS = makeSymbolNormalizer({
     // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
@@ -218,11 +193,7 @@ export function normalizeMalayalam(input: string): string {
     //    guard's generalisation to percent is a shared-code change and #562 reports those instead.
     s = s.replace(/ശതമാനം(\s+ശതമാനം)+/gu, "ശതമാനം");
 
-    // 8) DECIMALS (×25), after units and times have taken their share. Before this the separator read
-    //    as a full stop: 6.5 came out ആറ് <pause> അഞ്ച്, a sentence break inside a number. ദശാംശം is
-    //    espeak ml_list's `_dpt`; the fractional digits are read one at a time, as in ta/te/kn. No
-    //    ml_in audio is cached under corpus/audio_cache/data/, so playbook step 5b could not arbitrate
-    //    the digit-by-digit reading — it is sourced from the espeak voice and the sibling languages.
+    // 8) DECIMALS (×25), after units and times have taken their share.
     s = s.replace(
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`,

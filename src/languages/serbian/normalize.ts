@@ -259,8 +259,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
     multiply: { times: "puta" },
-    percent: ["posto"], // INDECLINABLE — corpus посто ×57 against процената ×8 / одсто ×3; espeak's
-    // shared hbs table gives `%` → posto too. One form, so the count selector never has to choose.
+    percent: ["posto"],
     /**
      * CURRENCY (#584). `$5` read as bare *pet*. sr_rs contains ZERO `$` against 24 `%`, so the corpus-driven
      * gate could not see it — but the words are in that corpus, and they DECLINE, which is why a token test
@@ -507,17 +506,13 @@ export function normalizeSerbian(input: string): string {
     //    into a word, and after step 0 has made the integer whole.
     s = SYMBOLS(s);
 
-    // 10) DECIMAL COMMA → the word. Serbian reads the decimal separator as *zarez*; espeak-ng's shared hbs
-    //     table gives `_dpt` (decimal point) → z'a*Ez for all three standards, and the corpus offers no
-    //     counter-example (it spells no decimal out). Until now the comma was clause punctuation, so
-    //     `1,5 километара` was a PHRASE BREAK between "jedan" and "pet".
+    // 10) DECIMAL COMMA → the word. Serbian reads the decimal separator as *zarez*;
     //     LAST among the numeric rules, because it destroys the number: every rule above that needs the
     //     value (units, the clock, the tier's count agreement) has already run.
     s = s.replace(/(?<=\d),(?=\d)/gu, " zarez ");
 
     // 11) SIGNS. `×`/`x` between digits was dropped outright, fusing `4x4`, `6×2` and `36 x 24 mm` into
-    //     two bare numerals; `+` (×1, in `UTC+1`) lost its sign. espeak's shared hbs table gives × → puta
-    //     and + → plus.
+    //     two bare numerals; `+` (×1, in `UTC+1`) lost its sign.
     //     NO MINUS RULE, and that is a measured decision rather than an omission. The first version read a
     //     leading `–`/`−` before a number as a minus sign, the way ru and uk do — and the corpus contains
     //     ZERO negative numbers but eleven `–` used as a PUNCTUATION dash, one of which sits before a

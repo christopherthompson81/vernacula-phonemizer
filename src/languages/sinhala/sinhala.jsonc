@@ -99,7 +99,7 @@
             {
                 "triggers": "කඛගඝඞහ",
                 "nasal": "ඞ්",
-                "note": "velar + h → ŋ (ඟ→m is an espeak quirk)",
+                "note": "velar + h → ŋ",
             },
             { "triggers": "චඡජඣඤ", "nasal": "ඤ්", "note": "palatal → ɲ" },
             { "triggers": "ටඨඩඪණඬ", "nasal": "ණ්", "note": "retroflex → n" },
@@ -117,8 +117,8 @@
         ":": ",",
     },
 
-    // AUTHORED cardinal number words (espeak's si number path is broken → no gold). Magnitudes ≥100 use the
-    // analytic multiplier form (දෙක සියය "two hundred"). The words are phonemized by the g2p.
+    // Cardinal number words. Magnitudes ≥100 use the analytic multiplier form (දෙක සියය "two hundred").
+    // The words are phonemized by the g2p.
     "numbers": {
         "units": [
             "බින්දුව",

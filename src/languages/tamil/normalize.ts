@@ -269,78 +269,12 @@ export function normalizeTamil(input: string): string {
         (_m, int: string, frac: string) => `${int} புள்ளி ${[...frac].join(" ")}`,
     );
 
-    // 8b) PLUS — SOURCED FROM THE CORPUS'S OWN AUDIO, which is the only tier that could answer it.
-    //
-    //     The sign is written as a GLYPH in every language's prose, including the wiki, so the word is not
-    //     rare in text — it is absent from text by construction, and Runs 1–2 of
-    // burned both the label tier (Wikidata returns the
-    //     bare character `+` as ta's own label for "plus sign") and the prose tier on it.
-    //
-    //     FLEURS ships audio aligned to every transcript, so the sentence containing the sign has a
-    //     recording of a human READING IT ALOUD. Three utterances, two sentences, decoded with IndicConformer
-    //     600m (ONNX) over ta_in/train:
-    //
-    //       UTC+1    → "…யூடிசி பிளஸ் ஒன்…"                  2 of 3 speakers
-    //       +30 °C   → "…வெப்பம் பிளஸ் முப்பது டிகிரி சி…"        1 speaker — THE ONLY ROW ta_in HAS
-    //
-    //     So பிளஸ் is the word, in both positions. ⚠ THE WORD IS WHAT THE AUDIO SETTLES, NOT WHETHER TO READ
-    //     THE SIGN: both hi speakers OMIT the plus before a temperature (hi says प्लस in the offset), and for
-    //     a TTS target an omission is a REFEREE signal, not a licence to delete a character the author
-    //     explicitly wrote. hi voices it in both positions too, for that reason — so the divergence the
-    //     recordings show is one of reading HABIT, and the rule follows the text.
-    //
-    //     ⚠ A READER IS NOT A FAITHFUL RENDERER OF THE TEXT, so a single utterance is not an attestation —
-    //     and this corpus proves it in the very sentence it is being used on: the THIRD ta speaker of the
-    //     UTC sentence skipped `(UTC+1)` ENTIRELY. That is why the counts are recorded above rather than a
-    //     bare "the audio says". The offset arm is 2 of 3 and safe; ⚠ THE TEMPERATURE ARM RESTS ON ONE
-    //     SPEAKER, because one row is all ta_in contains for that sentence, and it is the weaker claim of
-    //     the two. It is kept because it agrees with the offset arm (ta does say the word) and nothing
-    //     contradicts it — not because one recording settles anything. A second ta speaker for the
-    //     Montevideo sentence would have to come from a FLEURS split this corpus does not carry.
-    //
-    //     Both arms, so the sign is read whether it is glued to a label (`UTC+1`) or opens the quantity.
-    //     After the decimal step and before degrees: the plus attaches to a number that later rules still
-    //     need to see as a bare numeral.
-    // ⚠ ± FROM espeak's DICTSOURCE — A TIER THIS ISSUE HAD NEVER QUERIED (#654). `ta_list` carries the sign
-    //    itself with its reading, and it is the same pair the wiki attests:
-    //
-    //      ta_list:  ±   k'u:t.t.Vl||k'Vz.ittVl     = கூட்டல் கழித்தல்  (addition subtraction)
-    //      ta.wikipedia: `கூட்டல் கழித்தல்` ×1
-    //
-    //    Two independent tiers agreeing on a reading neither could have settled alone — the wiki hit is ×1,
-    //    which is a lead and not a finding, and espeak's entry is a hand-authored pronunciation rather than
-    //    running prose. Together they are the sourcing this cell needed.
-    //
-    //    ⚠ AND THE SAME FILE CORROBORATES TWO READINGS ALREADY SHIPPED HERE: `= sVmVm // சமம்` and
-    //    `÷ vVgUttVl // வகுத்தல்` are exactly what the wiki's quoted readings gave (see step 8b). Independent
-    //    confirmation of a per-language judgement, from a source consulted after the fact.
-    //
-    //    Both halves are OPERATION nouns rather than polarity words, which is why ± is shippable here while the
-    //    bare minus is not (see ACCEPTED_SIGN_SILENCE): ± names a pair of operations applied to a tolerance, and
-    //    `கழித்தல்` reading a bare `-5` would state a subtraction where the sign marks polarity.
+    // 8b) PLUS — SOURCED FROM THE CORPUS'S OWN AUDIO
     s = s.replace(/±/gu, " கூட்டல் கழித்தல் ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 பிளஸ் $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1பிளஸ் $2");
 
-    // 8b) THE RELATIONAL AND DIVISION SIGNS (#654). ⚠ ta.wikipedia QUOTES THE READING BESIDE THE NOTATION, which
-    //     is the strongest shape tier 4 takes, and it settles the rule shape for two of the four at once:
-    //
-    //       「"3 + 2 = 5" அதாவது, "3 கூட்டல் 2 சமம் 5"」        the equality read INFIX, operands in place
-    //       "a வகுத்தல் b என்பது கீழுள்ளவாறு எழுதப்படுகிறது"    the division read INFIX (வகுத்தல் ×105 / 10 arts)
-    //       "அந்த x 1 ஐ விட அதிகமாக இருக்க வேண்டும்"           x must be GREATER THAN 1 — postposed, with ஐ
-    //
-    //     ⚠ SO TAMIL MIXES THE TWO SHAPES, and that is a fact about the constructions rather than about Tamil
-    //     being SOV: சமம் and வகுத்தல் are nominal ("equal", "division") and sit between the operands, while the
-    //     comparison is a postposition — விட follows the standard, so `A < B` is "A B ஐ விட குறைவாக". An infix
-    //     comparative would read the comparison backwards, exactly as in ja/ko; an infix equality is correct.
-    //     Corpus corroboration: `சமம்` ×2 ("இந்த இயல்பு விகிதத்திற்கு சமம்"), `விட அதிகமாக` ×3, `வகுத்தல்` ×2
-    //     from FLEURS's parallel division sentence ("பன்னிரண்டால் வகுத்தல்").
-    //
-    //     ⚠ THE ACCUSATIVE ஐ IS EMITTED AS ITS OWN TOKEN, not fused to the operand. Tamil writes it fused
-    //     (மூன்றை), and fusing would mean spelling the numeral here and applying its sandhi — the machinery `tr`
-    //     and `ko` needed. Left unfused deliberately: the phones are the same either way, the tokenizer sees a
-    //     word boundary where Tamil would have none, and that is a prosodic imperfection rather than a wrong
-    //     reading. Recorded as a known limitation, not as done.
+    // 8b) THE RELATIONAL AND DIVISION SIGNS
     s = postposedSign(s, "<", "ஐ விட குறைவாக");
     s = postposedSign(s, ">", "ஐ விட அதிகமாக");
     s = s.replace(/\s?=\s?/gu, " சமம் ");

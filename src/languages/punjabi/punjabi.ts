@@ -174,18 +174,14 @@ export function makeNativePunjabi(
         return renderNumber(n, def.numbers, word);
     }
 
-    // #562 normalization: Punjabi-specific rewrites (the shared symbol tier, digit de-grouping, decimals,
+    // Punjabi-specific rewrites (the shared symbol tier, digit de-grouping, decimals,
     // the clock, ordinal suffixes, Gurmukhi unit abbreviations, the era marker and degrees) BEFORE
     // tokenization. Roman numerals need no ordering care: `pa` is not in the registry's ROMAN_NATIVE set,
     // so the shared roman→digit pass has already run at the registry seam. See normalize.ts for the
     // corpus counts and the step-by-step ordering couplings.
     //
     // GATED OFF FOR SARAIKI. skr builds on this same factory (saraiki.ts) and would inherit the whole pass,
-    // but the pass EMITS PUNJABI WORDS — ਪ੍ਰਤੀਸ਼ਤ, ਡਾਲਰ, ਡਿਗਰੀ, ਈਸਾ ਪੂਰਵ — each sourced from the pa_in
-    // corpus and espeak's pa voice, and none of them evidence about Saraiki. Its Gurmukhi-keyed rules
-    // (ordinal suffix, unit abbreviations) could never match Shahmukhi text anyway. Giving skr this layer
-    // is a separate run with its own corpus; putting Punjabi vocabulary in its mouth on no evidence is the
-    // "confidently wrong beats merely missing" failure the playbook warns about.
+    // but the pass EMITS PUNJABI WORDS — ਪ੍ਰਤੀਸ਼ਤ, ਡਾਲਰ, ਡਿਗਰੀ, ਈਸਾ ਪੂਰਵ
     const normalize = opts.saraiki ? (s: string) => s : makePunjabiNormalizer(def.numbers);
 
     function text(input: string): string {

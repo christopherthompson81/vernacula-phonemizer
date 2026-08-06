@@ -2,13 +2,12 @@
  * Kazakh (kk) grapheme→phoneme engine — Cyrillic, canonical IPA. Kazakh Cyrillic is a
  * shallow near-1:1 orthography, so this is a left-to-right scan with a few context rules — no lexicon:
  *   - vowels: а ә е о ө ұ ү ы і э → ɑ æ e o ɵ ʊ ʏ ə ɪ ɛ. Word-INITIAL е → je (ел→jel); elsewhere e.
- *   - iotated / glide letters: и → əj (a diphthong; и=@j in espeak), у → w (glide, not a nucleus:
+ *   - iotated / glide letters: и → əj (a diphthong), у → w (glide, not a nucleus:
  *     су→sw), я → ja, ю → ju, ё → jo.
  *   - consonants are context-free except л, which is DARK ɫ next to a back vowel (а о ұ ы) and clear l next to
  *     a front vowel (ә е ө ү і э) — the ɫ census contribution. г→ɡ and к→k do NOT palatalize (unlike Turkish).
- *   - relabels vs espeak-mode: ғ→ʁ (uvular), х→χ, р→r (not the tap), ү→ʏ. щ→ʃʃ, ц→t͡s, ч→t͡ʃ. ъ/ь→ʔ.
  *   - doubled consonants stay doubled (кк→kk, сс→ss); Kazakh has no gemination-to-length.
- * Stress (espeak's STRESSPOSN_1RU) is applied downstream in kazakh.ts.
+ * Stress is applied downstream in kazakh.ts.
  */
 
 import { MANIFEST } from "./manifest.ts";

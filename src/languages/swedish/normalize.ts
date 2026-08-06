@@ -62,14 +62,6 @@
  * by a lowercase noun (`2-3 km`, `10–60 minuter`, `(1644-1912) styrkor`), and every score by a hyphen,
  * a period or a comma. A score already reads correctly as two bare cardinals (*fem tre*), so declining it
  * is not a gap.
- *
- * SOURCING. Every word emitted here is attested — see the table in the PR. The three that are not
- * literally in a source are COMPOSED from attested pieces: `sextonde`/`sjuttonde`/`nittonde`/`fyrtionde`
- * from the manifest's own cardinals plus the ending the attested `trettonde`/`fjortonde`/`trettionde`
- * demonstrate; `tusentalet` from `tusen` (manifest) + `talet` (corpus ×33); `tidräkning` from `tid` +
- * `räkning`, both in the NST lexicon. The LETTER NAMES come from espeak-ng `dictsource/sv_list:12-36`
- * ("character names") and every one was round-tripped through THIS repo's g2p and checked against
- * espeak's mnemonic — 26 of 29 matched outright; the three that did not are documented at LETTER_NAME.
  */
 
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
@@ -207,29 +199,6 @@ const RELATIONAL: readonly (readonly [RegExp, string])[] = [
     [/÷/gu, " delat med "],
 ];
 
-/**
- * LETTER NAMES, from espeak-ng `dictsource/sv_list:12-36` (its "character names" block — the one place in
- * this repo's reach that records the Swedish letter-name inventory as data).
- *
- * espeak is PHONETIC, so each spelling below was derived, round-tripped through THIS repo's g2p, and
- * checked against espeak's own mnemonic (playbook §5c). 26 of 29 matched outright. The three that did not,
- * and why the spelling here is what it is:
- *
- *   · `m` — the obvious `em` reads [eːm] (a stressed open syllable takes the long vowel), where espeak has
- *     `Em` = /ɛm/. `emm` gives [ɛmː], the complementary short-V + long-C half of the same rule. Same for
- *     `n` → `enn` [ɛnː]; plain `en` happens to be right only because it is in the manifest's
- *     function-word exception map, which is a coincidence and not something to depend on.
- *   · `g` — `ge` reads [jeː], because the g2p softens ⟨g⟩ before a front vowel, and the referee agrees
- *     (`ge  j eː` — that is the VERB "to give"). The letter is /ɡeː/. `gé` gives [ɡeː] exactly, because
- *     the manifest's `frontVowels` is `eiyäöEIYÄÖ` and does NOT include `é`, while its long-vowel table
- *     maps `é` → `eː`. That coupling to the manifest is the reason this is spelled with an acute, and a
- *     test pins `GPS` so a change to `frontVowels` cannot silently un-harden it.
- *   · `w` — `dubbelve` reads [dˈɵ̀bːɛlvɛ] with the final vowel reduced; emitted as TWO tokens
- *     (`dubbel ve`) it is [dˈɵbːɛl veː], which is espeak's `d'8b@lve:`.
- *
- * `o` → [uː] and `å` → [oː] are both correct and both map to espeak's `o:`; espeak comments its `o` and
- * `u` rows out precisely because the letter name equals the ordinary word reading.
- */
 const LETTER_NAME: Readonly<Record<string, string>> = {
     a: "a", b: "be", c: "se", d: "de", e: "e", f: "eff", g: "gé", h: "hå", i: "i", j: "ji",
     k: "kå", l: "ell", m: "emm", n: "enn", o: "o", p: "pe", q: "ku", r: "err", s: "ess", t: "te",
@@ -254,30 +223,7 @@ export const isUnreadableSwedish = makeUnreadableTest({
 
 /**
  * LEXICAL: acronyms read letter-by-letter although their lowercase form is a pronounceable string, so the
- * OOV phonotactic rule cannot tell. Exactly one entry, and it is SOURCED: espeak's `sv_list:328-330`
- * carries `usa  u-Es'A:` and `usa:s  u-Es'A:s`, i.e. /ʉːɛsˈɑː/ — the letter names, not a word. That is
- * also the single most frequent acronym in the corpus (27 instances), and it currently reads [ɵsˈɑː].
- *
- * `OS` (6), `AI` (3) and `USOC` (2) were left out at first, on the grounds that no source records them and
- * that "a wrong letter-reading is confidently wrong where the OOV word-reading is merely bland". Reading
- * what the OOV g2p actually produced inverted that argument:
- *
- *     röstades ur OS 2005     → … ʉːr uːs tvɔtˈʉːsɛn feːm
- *     det luktar os i köket   → … lˈɵ̀ktar uːs iː …
- *
- * BYTE-IDENTICAL. The Olympics reads as *os*, the ordinary Swedish noun for fumes — not a bland reading but
- * a DIFFERENT REAL WORD, which is the very failure that argument was guarding against. `USOC` reads as the
- * nonce word [ˈʉ̀ːsɔk]. And a case-keyed collision between an acronym and a common noun is precisely what
- * `acronymLetters` exists for: core/initialisms.ts names `US` the country versus `us` the pronoun as the
- * thing a pronunciation dictionary cannot express.
- *
- * The reading is not invented. espeak's `usa  u-Es'A:` establishes that Swedish SPELLS this class, the
- * letter names below are already sourced from espeak's own mnemonic (26 of 29 matched outright), so listing
- * adds no data — and the corpus writes `OS-programmet`, `vinter-OS`, `sommar-OS`, hyphenating it into
- * compounds the way an abbreviation behaves and a noun does not.
- *
- * STILL DELIBERATELY SHORT: `EU` is not listed. It already reads [ˈèːˌʉː], which is the letter reading, so
- * an entry would change nothing; and nothing else in the corpus's 92 acronyms collides with a Swedish word.
+ * OOV phonotactic rule cannot tell.
  */
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(["usa", "os", "ai", "usoc"]);
 
@@ -306,23 +252,6 @@ export function normalizeSwedishInitialisms(text: string): string {
  * `USOC:s`, `NBA:s`, `TV:n`, `TT:n`, `Luno:n`. It marks a suffix on an abbreviation or a name, and it is
  * NOT a pause: `USA:s president` read as `ɵsˈɑː , s prɛsɪdˈɛnt` — a sentence-level break and then a bare
  * [s] with no vowel.
- *
- * espeak sources the reading directly: `usa:s  u-Es'A:s`, one word, the `-s` glued onto the final letter
- * name. So the colon is deleted and the suffix left attached; the initialism pass that runs immediately
- * after then spells the capitals and the suffix rides along on the last letter name (`u ess ass`).
- *
- * The pass exists at all only because the main all-caps pattern cannot claim `USA` in `USAs`: it requires
- * the run NOT to be followed by a letter, and after the colon is gone the suffix is one. So the letters are
- * spelled here — **but with the SAME lexical/OOV decision the main pass makes**, which is the whole point
- * of the shared predicates. The first version spelled every all-caps head unconditionally and turned
- * `UNESCO:s` into *u enn e ess se o s* and `NASA:s` into *enn a ess a s*: both are WORDS in Swedish, and
- * the pass had quietly bypassed the readability test that says so. So:
- *   · listed as letters, or phonotactically unreadable → spell the run and glue the suffix to the last
- *     letter name (`USA:s` → *u ess ass*, `FN:s` → *eff enns*, `TV:n` → *te ven*).
- *   · otherwise (a word: `NASA:s`, `UNESCO:s`) or a mixed-case head (`Luno:n`) → delete the colon only,
- *     and the g2p reads *NASAs* / *Lunon* as one inflected word.
- * Suffixes are the attested set only (`s` 13, `n` 3); a wider alternation would start claiming the clause
- * colon in front of a lowercase word, which is 30-odd pauses (trap 9 (a guard alternative with no attested…)).
  */
 function resolveColonInflection(text: string): string {
     return text.replace(

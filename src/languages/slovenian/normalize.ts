@@ -63,21 +63,6 @@
  * post-tier pass that repairs exactly the four affected cells, keyed on the noun forms the tier itself
  * declares. `en odstotek` and `trije`/`štirje`/`dve` are all corpus-attested.
  *
- * SOURCING (investigation Run 5). Every word emitted here is attested as a TOKEN in the sl_si corpus
- * (odstotek/odstotka/odstotki/odstotkov, stopinj, kilometra/kilometrov, metra/metrov, milje/milj, ure/uri/
- * uro, minut, tisoč, milijona/milijonov/milijard/milijarde, dolarjev, evrov, funtov, jenov, kvadratnih,
- * kubičnih, krat, oziroma, številka, doktor, mlajši, in/tako/dalje, na/primer, drugo, do, od, prvi, drugi,
- * tretji, četrti, peti, sedmi, deseti, stoletja/stoletju, en, dve, trije, štirje, plus), or in the
- * wikipron slv referee this repo ships (gospod, gospa, vejica, pika, ura, minuta, sekunda, kilometer,
- * milimeter, evro, funt), or in espeak-ng's Slovenian `dictsource/sl_list` — read as a FILE, never invoked
- * (`% Otst'o:tkOw` = odstotkov, `$ d'o:laR` = dolar, `& 'i:n` = in, `+ plu:s` = plus, `= En'akO` = enako,
- * `< jE||m'a:njSe` = je manjše, `> jE||v'etSjE` = je večje, `_, v'e:jitsa` = vejica, `_. p'i:ka` = pika,
- * and the whole LETTER-NAME block that `LETTER_NAME` below transcribes back into orthography).
- * The four exceptions are named where they are used: `štetje` (the era marker), `Celzija`/`Fahrenheita`
- * (the temperature scales) and the SI unit stems `gigaherc`/`megabit`/`kilogram`/`centimeter` — all of them
- * ORTHOGRAPHIC EXPANSIONS of an abbreviation rather than lexical guesses, i.e. what the abbreviation stands
- * for per Slovenski pravopis, the same footing as Slovak's `tzv. = takzvaný`.
- *
  * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
@@ -88,14 +73,7 @@ import { numberToWords } from "./numbers.ts";
 const N = MANIFEST.numbers;
 
 /**
- * SLOVENE LETTER NAMES, for the initialism pass and for the `&`/glued-letter rules. Sourced from espeak-ng
- * `dictsource/sl_list`'s own letter block, transcribed back into Slovene orthography. Slovene names every
- * consonant letter with a following SCHWA (`b b@`, `c ts@`, `f f@`, `š S@`, `ž Z@`) and Slovene spells the
- * schwa with ⟨e⟩, so the orthographic form is *be, ce, če, de, fe, ge, he, je, ke, le, me, ne, pe, re, se,
- * še, te, ve, ze, že* — this engine folds [ə] to [ɛ] by its own documented convention (slovenian.jsonc,
- * "schwa"), so ⟨be⟩ → [bɛ] is espeak's [bə] under that fold. The vowel letters are their own names
- * (`e e:`, `o o:`), and the four foreign letters are listed outright: `q ku`, `w dv#'ojniv,@` = dvojni ve,
- * `x iks`, `y 'ipsilon`. So BDP is [bɛ dɛ pɛ] and DVD [dɛ ʋɛ dɛ], not the clusters they came out as.
+ * SLOVENE LETTER NAMES, for the initialism pass and for the `&`/glued-letter rules.
  */
 const LETTER_NAME: Readonly<Record<string, string>> = {
     a: "a", b: "be", c: "ce", č: "če", d: "de", e: "e", f: "fe", g: "ge", h: "he", i: "i",
@@ -127,12 +105,6 @@ export const isUnreadableSlovenian = makeUnreadableTest({
  * INITIALISM PASS — 132 instances over 85 distinct acronyms in `sl_si`, the largest untreated shape in this
  * corpus after `N.` ×124, and the readings being shipped were `BDP` → [ptp], `DVD` → [dʋt], `GMT` → [ɡmt],
  * `USGS` → [usks], `NHK` → [nxk], `DNK` → [dnk], `UTC` → [utt͡s], `DSLR` → [tslər], `ZN` → [zn].
- *
- * This wires the SHARED seam (`core/initialisms.ts`), which ~30 languages already use, on the strength of
- * espeak-ng `dictsource/sl_list` carrying a genuine Slovene letter-name table (trap 16: check the seam and
- * check for the data before declaring a class out of scope — Slovak deferred this and was wrong). Slovenian
- * has no pronunciation dictionary — the g2p is rule-based — so `isRecorded` is always false, as in Slovak,
- * Czech and Russian.
  *
  * ORDERING, which the seam's own header states as a hard constraint: this MUST run after the Roman-numeral
  * and regnal rules and after the abbreviation expansions, because an all-caps run is what a Roman numeral
@@ -348,11 +320,11 @@ function keepFinal(expansion: string, matched: string, rest: readonly unknown[])
  * the bare `n. š.` so the *pr-* is read into the instrumental. The final dot is optional (`pr. n. št.!`
  * writes the exclamation instead) and restored by `keepFinal` where it was the sentence period.
  *
- * `štetje` ("counting", hence "era") is the one word in this file with no in-repo attestation — it is not
- * in the sl_si corpus, the wikipron slv referee, or espeak's Slovenian data. It is kept because the
- * expansion of an abbreviation is an ORTHOGRAPHIC fact rather than a lexical guess: `n. š.` stands for
- * *našega štetja* and `pr. n. š.` for *pred našim štetjem* per Slovenski pravopis, the same footing on
- * which Slovak sourced `tzv. = takzvaný`. `pred`, `našega` and the lemma *naš* are all in the corpus.
+ * `štetje` ("counting", hence "era") is the one word in this file with no in-repo attestation. It is kept
+ * because the expansion of an abbreviation is an ORTHOGRAPHIC fact rather than a lexical guess: `n. š.`
+ * stands for *našega štetja* and `pr. n. š.` for *pred našim štetjem* per Slovenski pravopis, the same
+ * footing on which Slovak sourced `tzv. = takzvaný`. `pred`, `našega` and the lemma *naš* are all in the
+ * corpus.
  */
 const MULTI_DOT: ReadonlyArray<readonly [RegExp, string]> = [
     [/(?<![\p{L}\p{M}])pr\.\s?n\.\s?(?:št|š)\.?(?![\p{L}\p{M}])/giu, "pred našim štetjem"],
@@ -542,8 +514,7 @@ export function normalizeSlovenian(input: string): string {
 
     // 4) VERSION / FIGURE DOTS between digits — `802.11a`, `802.11b`, `802.11g`, `802.11n` ×3 and
     //    `Sliko 1.1.` ×1 all broke the sentence at the interior dot. AFTER the clock (which owns `12.00`)
-    //    and BEFORE the ordinal rules, so those never see a digit-dot-digit. "pika" is espeak's Slovene
-    //    name for the period (`_. p'i:ka`) and is in the wikipron referee.
+    //    and BEFORE the ordinal rules, so those never see a digit-dot-digit.
     s = s.replace(/(\d)\.(?=\d)/gu, "$1 pika ");
 
     // 5a) SCORES AND RATIOS, before the range rule — the discriminator is DIRECTION, and it is what the
@@ -710,15 +681,7 @@ export function normalizeSlovenian(input: string): string {
 
     // 11) A LEADING `+`/`−` on a number. The corpus's one instance is `presežejo +30 °C`; the minus is its
     //     counterpart, and a dropped sign turns a negative into a positive — the one outcome that cannot be
-    //     right. espeak's `+ plu:s`; *minus* is the Latin loan Slovene uses and is the only word here with
-    //     no attestation beyond that pairing, which is why the rule is bounded to a sign that is
-    //     unambiguously arithmetic (start of string, or after whitespace or an opening bracket, and the
-    //     ranges of step 5 are already gone). U+2212 as well as the hyphen.
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing (#654). Both halves are lifted from
-    //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
-    //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
-    //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
-    //    character, so the + rule cannot see it, and putting it first keeps the sign audible either way.
+    //     right. 
     s = s.replace(/±/gu, " plus minus ");
     s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
     s = s.replace(/(^|[\s(])[-−]\s?(?=\d)/gu, "$1minus ");
@@ -771,10 +734,7 @@ export function normalizeSlovenian(input: string): string {
         }
     }
 
-    // 16) DECIMAL COMMA → the word ×17. Slovene reads it *vejica* — espeak's own name for the comma
-    //     (`_, v'e:jitsa`) and a headword in the wikipron slv referee. Inserted as TEXT so the tokenizer
-    //     phonemizes it (trap 6 (a word your layer emits must come from the…)), and read from the MANIFEST rather than written here as a literal, which
-    //     is what `numbers.decimalWord` exists for.
+    // 16) DECIMAL COMMA
     s = s.replace(/(?<=\d),(?=\d)/gu, ` ${N.decimalWord} `);
 
     // 17) FRACTIONS ×3, all of them MIXED numbers or a bare ratio: `meri 29 3/4 palca krat 24 1/2 palca`
@@ -807,27 +767,11 @@ export function normalizeSlovenian(input: string): string {
     s = s.replace(/(\d+)½/gu, "$1 in pol");
     s = s.replace(/(\d+)¼/gu, "$1 in ena četrtina");
 
-    // 18) RELATIONAL SIGNS and the AMPERSAND. None of the relational signs occurs in this corpus, but a
-    //     phonemizer is handed arbitrary text and a dropped sign is inaudible — the one outcome that cannot
-    //     be right (#584). The words come from espeak's Slovene dictsource (`= En'akO` = enako,
-    //     `< jE||m'a:njSe` = je manjše, `> jE||v'etSjE` = je večje) plus the corpus's own `od` for the
-    //     comparative's complement, which espeak's formula reading omits (the Fula lesson: check the part
-    //     of speech, not just the word — *je manjše* without *od* is not a Slovene comparison).
-    //     `≈` is deliberately NOT read: *približno enako* is attested in neither the corpus, the referee, nor
-    //     espeak's Slovene data, and the playbook's rule is to leave a symbol unread rather than invent its word.
-    //
-    //     ⚠ THIS NOTE USED TO SAY THE SAME OF `÷`, AND THAT WAS WRONG — see the rule below, which now reads it.
-    //     The claim was true of the haystacks it names (corpus, referee, espeak) and those are the top tiers, so
-    //     it was a reasonable stopping point. What it missed is that sl.wikipedia has `deljeno` ×20 token / 10
-    //     articles including on a numeric operand. The first #654 probe missed it too, for a different reason:
-    //     it searched with a maths-register restriction, which those articles fail because they write the
-    //     notation instead of reading it. Recorded rather than quietly edited, because "attested nowhere" is the
-    //     kind of claim that stops the next search, and this one was three tiers short of nowhere.
+    // 18) RELATIONAL SIGNS and the AMPERSAND.
     s = s.replace(/\s*=\s*/gu, " enako ");
     s = s.replace(/(\d)\s*<\s*(?=\d)/gu, "$1 je manjše od ");
     s = s.replace(/(\d)\s*>\s*(?=\d)/gu, "$1 je večje od ");
-    //     `&` → *in* (espeak `& 'i:n`; the corpus's one instance is `B&B-ji`, where the sign was dropped
-    //     and left [p p]). THE FLANKING LETTERS ARE SPELLED when both are lone capitals, which is what
+    //     `&` → *in*. THE FLANKING LETTERS ARE SPELLED when both are lone capitals, which is what
     //     `B&B` is: joining them alone still left `B in B`, read [p in p] — two bare devoiced stops, not
     //     the letter *be*. Step 20 cannot rescue them, because its all-caps run requires two ADJACENT
     //     capitals. Gating it on the ampersand is what keeps it safe: a general "lone capital → letter

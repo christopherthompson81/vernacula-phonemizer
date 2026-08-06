@@ -180,17 +180,6 @@ const NATIVE_WORD = /^[A-Za-zʼ’']+$/u;
  * `parsantii 3 hanga 5`, `dhibbeentaan tokko`, `doolaara US biiliyoonotaan`, `paawundii 200`,
  * `daqiiqaa 3` — the noun, then the number. Count forms are single-entry: an Oromo noun does not
  * inflect for the numeral that counts it (`kiiloo meetira 1600`, `paawundii 1,000`).
- *
- * SOURCING (playbook §5e — a wrong word is worse than a dropped sign):
- *   parsantii          FLEURS om_et ×3 (`parsantii 3 hanga 5`) + espeak-ng dictsource om_list `%`
- *   doolaara           FLEURS om_et ×1 (`doolaara US biiliyoonotaan`) + epitran referee + om_list `_$`
- *   doolaara Ameerikaa both words corpus-attested; `US$` is declared as a compound key because a bare
- *                      `$` cannot match inside `US$11,000` (the tier is letter-bounded on the left)
- *   paawundii          FLEURS om_et ×5 + om_list `£`. The corpus's five are the WEIGHT noun; Oromo
- *                      borrows one word for both senses, as English does
- *   yuuroo             om_list `€` only — and `€` never occurs in the corpus, so it carries no reading
- * NOT declared: `¥`, which has no source and no instance. UNITS are not declared here at all — the tier
- * can only postpose them, and Oromo puts them first; normalize.ts owns them.
  */
 const SYMBOLS = makeSymbolNormalizer({
     // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a

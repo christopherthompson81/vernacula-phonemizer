@@ -44,36 +44,6 @@
  *   କିଲୋମିଟର   corpus ×13 + kaikki-ori referee      ଡାକ୍ତର corpus ×7 + referee
  *   ମିଟର ×23, ମାଇଲ ×21, ଘଣ୍ଟା ×16 (+referee), ବର୍ଗ ×14 (+referee), ପ୍ରତି ×100 (+referee),
  *   ନମ୍ବର ×6 (+referee), ମିଲିମିଟର ×1, ସେକେଣ୍ଡ ×1, ଡିଗ୍ରୀ ×3, ଖ୍ରୀଷ୍ଟପୂର୍ବ ×2 — all corpus spellings.
- *
- * DELIBERATELY NOT DONE, each after measuring (a wrong word is worse than a dropped sign):
- *   - DECIMAL POINT WORD. espeak's or/fragments.jsonl carries `dpt → _d@s@ml` — the PRONUNCIATION only —
- *     and neither the corpus (ଦଶମିକ ×0) nor the kaikki referee spells the word. Step 5 therefore only
- *     NEUTRALISES the dot; the defect being fixed is the SENTENCE BREAK it produced mid-number.
- *     `numbers.decimalWord` is left unset.
- *   - ¥ (×3) and £ (×1). ୟେନ is attested nowhere in this repo — AND THE AUDIO NOW SHOWS THE SILENCE IS RIGHT,
- *     which turns a reported sourcing failure into a sourced negative. The reader of `¥7,000` says only the
- *     number: facebook/wav2vec2-xlsr-53-espeak-cv-ft over or_in/train gives
- *     `… m u l j o p r a j o  s a t o h z e r  h e b a s o h i t o …` — "mūlya prāya SĀTA HAZĀRA hebā sahita",
- *     seven thousand, with no currency word in the slot. ⚠ One speaker, so this is 1 of 1.
- *     ⚠ AND pa, WHICH HAS THE SAME SENTENCE, GOES THE OTHER WAY — its reader says the loan
- *     (`… h i a r r  j e n  d e v i tʃ …`), so pa now declares ¥ → ਯੇਨ. Same sign, same source sentence,
- *     opposite readings, and neither was decidable from text. Do not copy or's silence to a sibling script.
- *     ପାଉଣ୍ଡ is attested ×5 but every one of them
- *     is the WEIGHT ("200 ପାଉଣ୍ଡ (90 କି.ଗ୍ରା.)"), so declaring it as £'s currency noun would be inferring
- *     the sense, not sourcing it. Both signs stay dropped, as they were.
- *   - କି.ଗ୍ରା. (×2) EXPANDS TO NOTHING. କିଲୋଗ୍ରାମ appears in neither the corpus nor the referee, and the
- *     corpus's four ଗ୍ରାମ are all ପ୍ରୋଗ୍ରାମ or ଗ୍ରାମ "village" (playbook trap #2, live here). Step 6 only
- *     strips its interior dots, which kills the two phrase breaks without inventing a word.
- *   - RANGES `a-b` (×8). A blanket ରୁ connective is wrong for FIVE of them: 1995-96 ×2, 1894-1895 and
- *     AD 1000–1300 are year spans and 6-6 is a sports score; only 2-3 km, 100-200 ମାଇଲ and 10–60 ମିନିଟ୍
- *     are true ranges. Separating them needs a measure-noun list this repo has no source for. The hyphen
- *     is already silent, which is the honest reading.
- *   - ODIA DOTTED INITIALISMS ଏମ.ଇ.ଟି, ଏଫ୍. ବି.ଆଇ. (×3). Unlike the Latin ones (step 9), a dot after a
- *     short Odia syllable is indistinguishable from a sentence period without a lexicon of Odia
- *     abbreviations, which this repo does not carry.
- *   - A BLANKET slash→ପ୍ରତି RULE. 14 of the corpus's 17 slashes sit between Odia words and only FIVE are
- *     rates; the other nine are ଏବଂ/କିମ୍ବା ("and/or"), ନୀତି/ଯୋଗାଯୋଗ, and the place name ଜାକର/ବୁମଥାଙ୍ଗ.
- *     Step 4 is therefore keyed on a closed list of measure nouns on both sides.
  */
 import { postposedSign } from "../../core/postposedSign.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";

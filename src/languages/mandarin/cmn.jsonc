@@ -7,10 +7,9 @@
 {
     "language": "cmn",
     "name": "Mandarin Chinese (Standard, Hanyu Pinyin)",
-    "provenance": "Segmental IPA = a syllable→IPA table lifted from vernacula's converged cmn engine (itself validated against wikipron cmn + epitran cmn-Latn). Hanzi→pinyin = pypinyin (MIT) char + phrase dicts, Unihan kMandarin fallback. Tone system + sandhi + numbers authored from standard descriptions. Non-espeak.",
 
     "convention": {
-        "tones": "Chao contour letters at SYLLABLE END (中 → ʈ͡ʂoŋ˥˥); regularizes espeak's mid-syllable placement",
+        "tones": "Chao contour letters at SYLLABLE END (中 → ʈ͡ʂoŋ˥˥)",
         "toneNumbers": "pinyin tone digit 1–4 = the four lexical tones; 5 or absent = neutral (unmarked)",
         "retroflex": "zh ch sh r → ʈ͡ʂ ʈ͡ʂʰ ʂ ʐ ; the -i after them is the syllabic ʐ̩ (chi → ʈ͡ʂʰʐ̩)",
         "apical": "-i after z c s → syllabic ɹ̩ (si → sɹ̩)",

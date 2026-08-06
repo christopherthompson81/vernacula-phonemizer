@@ -44,31 +44,6 @@ const NA = "(?![\\p{L}\\p{M}])";
 /**
  * The SHARED symbol tier (percent / currency / units / exponent). Kept in this file rather than in
  * kannada.ts because its position in the ordering matters and the ordering is this file's job.
- *
- * percent: ಪ್ರತಿಶತ, and as a SUFFIX. Two sources agree on both facts — espeak kn_list maps the `%`
- * symbol to pratis.ata inline (so, after the number), and this corpus writes ಪ್ರತಿಶತ six times, always
- * postposed ("ನೂರು ಪ್ರತಿಶತ", "5 ಪ್ರತಿಶತದಷ್ಟು"). The corpus's other percent word ಶೇಕಡ (×8) is a PREFIX
- * ("ಶೇಕಡ 8", "ಶೇಕಡಾ ಮೂವತ್ತರಷ್ಟು"); it was rejected only because ಪ್ರತಿಶತ has the second, independent
- * source. Kannada ಪ್ರತಿಶತ does not inflect for count, so one form.
- *
- * currency: only the dollar occurs (×7, as `$` and `US$`). ಡಾಲರ್ is written out three times in this
- * corpus ("ಮಿಲಿಯನ್ ಡಾಲರ್", "ಆಸ್ಟ್ರೇಲಿಯನ್ ಡಾಲರ್‍ಗಳ") and always AFTER the amount, which is the tier's
- * default. The magnitudes are the spellings this corpus itself uses in running text.
- *
- * units: ONLY `km`, and only because the single `km²` needs a numerator. Everything else measured in
- * this corpus is already written in Kannada words (ಮೀಟರ್ ×22, ಕಿಲೋಮೀಟರ್ ×9, ಮೈಲಿ, ಇಂಚು ×5), so the
- * Latin keys would earn nothing — and they are actively dangerous here: this corpus contains 802.11g,
- * 5.0Ghz, 600Mbit/s, JAS 39C, II-76s and 4x4, every one of which a one- or two-letter unit key would be
- * free to claim. Same hazard the Dutch `Il-76s` case recorded in core/normalizeSymbols.ts. `mm` (×2)
- * is left raw for the separate reason in step 6.
- *
- * exponent: ಚದರ, position "before" with a space — this corpus writes ಚದರ ಕಿಲೋಮೀಟರ್ and ಚದರ ಮೈಲಿ seven
- * times, an invariant prefixed adjective plus the noun. `cubed` is NOT declared: no ³ occurs and there
- * is nothing to source it from, and the seam leaves an undeclared exponent untouched.
- *
- * RATE is deliberately NOT declared (`unitPer` unset). Kannada's rate is a PREFIX in the dative, like
- * Telugu's, Tamil's and Korean's — this corpus writes "ಗಂಟೆಗೆ 83 ಕಿಮೀ", "ಪ್ರತಿ ಗಂಟೆಗೆ 160 ಕಿ.ಮೀ" and
- * "ಸೆಕೆಂಡಿಗೆ 1.5 ಕಿಮಿ". The shared postposed "A per B" idiom cannot express it. Handled in step 7.
  */
 const SYMBOLS = makeSymbolNormalizer({
     // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM (#654) — the tier's own `ampersand` note says so,
@@ -143,11 +118,7 @@ function dative(word: string, full: string, offset: number): string {
     return new RegExp(`${word}\\s*$`, "u").test(full.slice(0, offset)) ? "" : `${word} `;
 }
 
-/**
- * Vulgar fractions, from espeak kn_list (`¼` ka:lu, `½` ard#a, `¾` mukka:lu). ×2 here, both after a
- * whole number and before ಇಂಚು (29¾ ಇಂಚು X 24½ ಇಂಚು). Before this they were dropped outright — the
- * tokenizer has no class for them — so "29¾ ಇಂಚು" spoke as plain twenty-nine.
- */
+// Vulgar fractions
 const VULGAR: Readonly<Record<string, string>> = { "¼": "ಕಾಲು", "½": "ಅರ್ಧ", "¾": "ಮುಕ್ಕಾಲು" };
 
 /**
@@ -217,9 +188,6 @@ export function normalizeKannada(input: string): string {
         new RegExp(`^[\\p{L}\\p{M}]`, "u").test(full.slice(off + m.length))
             ? m.replace(/\s*\.\s*/gu, "")
             : "ಕಿಲೋಮೀಟರ್");
-    //    ಮಿ.ಮೀ (×1) loses its dot but is NOT expanded: ಮಿಲಿಮೀಟರ್ appears nowhere in this corpus, in the
-    //    repo's kn referees, or in espeak's kn_list, and #562's standing rule is that a wrong word is
-    //    worse than a raw abbreviation. Same for the two bare Latin `mm`, left for the foreign path.
     s = s.replace(new RegExp(`${NB}ಮಿ\\s*\\.\\s*ಮೀ`, "gu"), "ಮಿಮೀ");
     s = s.replace(INITIALISM_RE, (m) => m.replace(/\s*\.\s*/gu, " ").trim());
 
@@ -235,10 +203,7 @@ export function normalizeKannada(input: string): string {
     s = s.replace(MI_RATE_RE, (_m, n: string, off: number, full: string) =>
         `${dative("ಗಂಟೆಗೆ", full, off)}${n} ಮೈಲಿ`);
 
-    // 8) VULGAR FRACTIONS (×2), before the shared tier so the unit that follows still sees a number
-    //    adjacent, and before the decimal step so no rewrite to 29.75 is needed — Kannada has its own
-    //    words for these (espeak kn_list), so the Telugu trick of routing them through the decimal
-    //    path is unnecessary here.
+    // 8) VULGAR FRACTIONS
     s = s.replace(/(?<=\d)\s?([¼½¾])/gu, (_m, f: string) => ` ${VULGAR[f]!}`);
 
     // 9) The SHARED symbol tier: percent, currency, units, exponent. UNITS BEFORE DECIMALS (step 11) —
@@ -258,58 +223,19 @@ export function normalizeKannada(input: string): string {
     s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
     s = s.replace(/(?<=\d):\s?(?=\d)/gu, " ");
 
-    // 11) DECIMALS (×29), after units and times have taken their share. Before this the separator was
-    //     read as a full stop: 802.11 came out "ಎಂಟು ನೂರು ಎರಡು <pause> ಹನ್ನೊಂದು", a sentence break in
-    //     the middle of a number. ದಶಾಂಶ is espeak kn_list's `_dpt`; the fractional digits are read one
-    //     at a time, as in Tamil and Telugu. NOTE: no kn_in audio is cached under
-    //     corpus/audio_cache/data/, so playbook step 5b could not be run — the reading is sourced from
-    //     the espeak voice alone rather than arbitrated on a speaker.
+    // 11) DECIMALS
     s = s.replace(
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`,
     );
 
-    // 12) DEGREES (×1, "35°W"), last, so a decimal temperature would keep its point. Only the bare sign
-    //     is handled: ಡಿಗ್ರಿ is written out once in this corpus, but ಸೆಲ್ಸಿಯಸ್/ಫ್ಯಾರನ್‌ಹೀಟ್ appear
-    //     nowhere and neither °C nor °F occurs, so no scale words are invented.
-    // THE PLUS → ಪ್ಲಸ್, SOURCED FROM THE CORPUS'S OWN AUDIO. The sign was DROPPED, so the corpus's
-    // `11:00(UTC +1)` lost it. No text tier could supply the word — concept.ts returns the BARE CHARACTER `+`
-    // as Kannada's own label for "plus sign", and prose writes the glyph. Decoded with
-    // facebook/wav2vec2-xlsr-53-espeak-cv-ft, a PHONEME recognizer (392 tokens, no `+`, no digits), over
-    // kn_in/train — BOTH speakers of the sentence, unanimous:
-    //   `… s a m a j a h a n n o n d u  j u t i s i  p l a s w a n  k e ʃ u r u w aɪ t u`
-    // ಪ್ಲಸ್ reads plˈas, which is the decoded string exactly, so no new lexical data was needed.
-    // BEFORE the degree rule — the ordering coupling zu's `[+]?` taught.
+    // 12) DEGREES
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 ಪ್ಲಸ್ ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1ಪ್ಲಸ್ ");
 
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ಡಿಗ್ರಿ ");
 
-    // THE RELATIONAL AND DIVISION SIGNS (#654). ⚠ THE REGISTER SOURCE IS A SYMBOL GLOSSARY — kn.wikipedia's
-    // arithmetic article lists the signs with their Kannada names, which is the most direct tier-4 shape of all:
-    //
-    //   "… ಗುಣಿಸು (ಇನ್'ಟು) ಗುರುತು. ಭಾಗಾಹಾರ ಭಾಗಿಸುವುದು: '÷'  ಸಮ ಎಡ ಮತ್ತು ಬಲದ ಸಂಖ್ಯೆಗಳ ಬೆಲೆ ಸಮ '=' ಸರಿ-ಸಮ,(ಈಕ್ವಲ್ಸ್)"
-    //     …'×' is ಗುಣಿಸು · '÷' is ಭಾಗಿಸುವುದು · '=' is ಸಮ / ಸರಿ-ಸಮ, glossed with the English loan ಈಕ್ವಲ್ಸ್
-    //
-    // ⚠ AND `ಸಮ` IS THE LARGEST SUBSTRING TRAP IN THE ISSUE: ×0 TOKEN / ×399 SUBSTRING in kn_in, inside
-    // ಸಮುದಾಯ (community), ಸಮಾನವಾಗಿ (equally), ಸಮಸ್ಯೆ (problem). It is also a HOMOGRAPH in the right register —
-    // several of its wiki hits are ಸಮ ಸಂಖ್ಯೆ, "EVEN number" — so neither count could have settled it. The
-    // glossary line pairing it with the '=' glyph is the whole of the evidence.
-    //
-    // The comparatives come from kn_in and are POSTPOSITIONAL (ಗಿಂತ fuses to the standard —
-    // ಸಾಮಗ್ರಿಗಳಿಗಿಂತ ಕಡಿಮೆ): `ಗಿಂತ ಕಡಿಮೆ` ×6, `ಗಿಂತ ಹೆಚ್ಚು` ×12. The division word is the corpus's own form from
-    // ⚠ THE DIVISION WORD WAS CHANGED AFTER espeak's DICTSOURCE WAS CONSULTED, and the parallel sentence is why
-    // it was wrong the first time. That sentence gives `ಭಾಗಿಸುವಿಕೆ` ×3 ("ಹನ್ನೆರಡರಿಂದ ಭಾಗಿಸುವಿಕೆ"), a verbal noun
-    // inflected for its own clause — the exact trap recorded for ml, where the harvest supplies the ROOT and not
-    // the FORM. Three sources agree on the neutral term instead:
-    //
-    //   espeak kn_list:  ÷  b#a:ga:ka:ra   = ಭಾಗಾಕಾರ, a hand-authored pronunciation for the GLYPH
-    //   kn.wikipedia:    ಭಾಗಾಕಾರ ×11 / 7 articles, against ಭಾಗಿಸುವಿಕೆ ×0
-    //   and the hit is the FOUR-OPERATIONS article — "ನಾಲ್ಕು ಕ್ರಿಯೆಗಳಲ್ಲಿ ಒಂದಾಗಿದೆ. ಉಳಿದ ಕ್ರಿಯೆಗಳೆಂದರೆ ಸಂಕಲನ,
-    //   ವ್ಯವಕಲನ, ಗುಣಾಕಾರ" (one of the four operations; the others are addition, subtraction, multiplication)
-    //
-    // The corpus is the higher tier in general and is not the better source HERE, because what it contains is
-    // one translator's subordinate clause rather than the language's term for the operation.
+    // THE RELATIONAL AND DIVISION SIGNS
     s = postposedSign(s, "<", "ಗಿಂತ ಕಡಿಮೆ");
     s = postposedSign(s, ">", "ಗಿಂತ ಹೆಚ್ಚು");
     s = s.replace(/\s?=\s?/gu, " ಸಮ ");

@@ -21,28 +21,6 @@
  *
  * ZERO Gurmukhi digits ੦-੯ in the corpus — it writes ASCII throughout, so `foldNativeDigits` (already wired
  * into `text()`) has nothing to do here. The equivalent lead held for Marathi (×597) and not for pa.
- *
- * SOURCES. Every word emitted below is attested, and where it is, it is attested TWICE:
- *   ਪ੍ਰਤੀਸ਼ਤ  corpus ×6 (postposed: "32 ਪ੍ਰਤੀਸ਼ਤ")  + espeak-ng dictsource/pa_list `%  pR'VtIS@t`
- *   ਡਾਲਰ     corpus ×8 (postposed: "30 ਡਾਲਰ")      + pa_list (`$5` → d'Ol@R)
- *   ਡਿਗਰੀ    corpus ×4        ਵਜੇ corpus ×9        ਈਸਾ ਪੂਰਵ corpus ×2 ("323 ਈਸਾ ਪੂਰਵ")
- *   ਕਿਲੋਮੀਟਰ ×22, ਮੀਟਰ ×34, ਮਿਲੀਮੀਟਰ ×1, ਸੈਂਟੀਮੀਟਰ ×1, ਡਾਕਟਰ ×6, ਮਿਲੀਅਨ ×11, ਅਰਬ ×8, ਲੱਖ ×18,
- *   ਕਰੋੜ ×2, ਹਜ਼ਾਰ ×7 — all corpus-attested spellings.
- *
- * DELIBERATELY NOT DONE, each after measuring (a wrong word is worse than a dropped sign):
- *   - DECIMAL POINT WORD. espeak pa_list carries `_dpt  _d@s@ml'o:` — the PRONUNCIATION only — and the
- *     corpus never spells the word (ਦਸ਼ਮਲਵ ×0), so there is no sourceable Gurmukhi spelling in this repo.
- *     Step 3 therefore only NEUTRALISES the dot instead of speaking it. `numbers.decimalWord` is left unset.
- *   - ¥ (×3, the majority of the corpus's currency marks). ਯੇਨ is attested nowhere — not the corpus, not
- *     the referee, not pa_list. Left dropped.
- *   - RANGES `a-b` (×16). A blanket ਤੋਂ connective is wrong for HALF of them: 5-3, 21-20, 26-00, 6-6 and
- *     7-2 are SPORTS SCORES and 1995-96, 1418-1450, 1469-1539 are year spans. Only 8 (100-200 ਮੀਲ, 2-5
- *     ਦਿਨਾਂ, 2-3 ਕਿਲੋਮੀਟਰ, 10-60 ਮਿੰਟ, 35-40 ਮੀਲ, 56-64 ਕਿਲੋਮੀਟਰ, 120-160 ਘਣ ਮੀਟਰ, 4.2-3.9 ਲੱਖ) are true
- *     ranges, and separating them needs a measure-noun list this repo has no source for. The hyphen is
- *     already silent, which is the honest reading.
- *   - °C (×1). ਸੈਲਸੀਅਸ is unattested; step 8 emits ਡਿਗਰੀ and leaves the C to the Latin foreign path.
- *   - ਸੈਮੀ and ਗ੍ਰਾ are NOT unit keys. All ×3 ਸੈਮੀ in the corpus are ਸੈਮੀ ਆਧੁਨਿਕ / ਸੈਮੀਫਾਈਨਲ ("semi-"),
- *     and all ×18 ਗ੍ਰਾ are ਗ੍ਰਾਂਡ / ਫ਼ੋਟੋਗ੍ਰਾਫ਼ੀ / ਗ੍ਰਾਨਵਿਲੇ. Playbook trap #2, live in this corpus.
  */
 import { postposedSign } from "../../core/postposedSign.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
