@@ -420,6 +420,19 @@ const carried = priorBlocks.filter((b) => {
     return w !== undefined && !probed.has(w);
 });
 const replaced = priorBlocks.length - carried.length;
+// ⚠ AND THE CARRY-FORWARD IS CHECKED, because the block pattern above depends on the indentation THIS FILE
+// writes, and a hand-edited cache could defeat it — reintroducing the silent deletion by another route. The
+// word list is matched with a pattern that cannot miss, so any word neither probed nor carried means the
+// block parse failed. Loud, and non-zero exit, because the failure mode is data loss.
+const priorWords = new Set([...prior.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!));
+const carriedWords = new Set(carried.map((b) => /"word":\s*"([^"]+)"/u.exec(b)?.[1]));
+const lost = [...priorWords].filter((w) => !probed.has(w) && !carriedWords.has(w));
+if (lost.length > 0) {
+    console.error(`\n  REFUSING TO WRITE: ${lost.length} existing finding(s) could not be parsed for carry-forward `
+        + `— ${lost.join(", ")}. Writing now would delete them. The block pattern expects the indentation this `
+        + `tool emits; if ${outPath} was hand-edited, restore it from git and re-run.`);
+    process.exit(1);
+}
 const esc = (s: string): string => JSON.stringify(s);
 writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang} (#586). Written by tools/normalization/attest.ts.
 //
