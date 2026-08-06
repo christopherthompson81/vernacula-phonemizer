@@ -268,7 +268,20 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
     // because `%` next to letters is exactly what the percent cell looks for. The `%` in `%lf` is a conversion
     // flag — silence is the CORRECT reading, and a rule that voiced it would be a defect. The line survives the
     // native-script filter legitimately, because its trailing comment really is Khmer.
-    km: { percent: ["%lf"] },
+    km: {
+        percent: ["%lf"],
+        // ⚠ STRIPPED-MARKUP DEBRIS, not operators — the reading is correct BECAUSE these are not signs at all.
+        // A `<` immediately after the Khmer full stop ៕, a `>` standing before a Greek gloss, and a lone `÷` after
+        // ។ are all what a removed tag or a mis-rendered entity leaves behind. Reading any of them as arithmetic
+        // would be the defect.
+        //
+        // ⚠ AND THE PROPER FIX IS UPSTREAM, NOT HERE. These three should never have been mined:
+        // `wikidump-to-text.py`/`filter-markup.py` own the residue guards, and a bare angle bracket adjacent to
+        // sentence punctuation is exactly the shape they exist to catch. Listed here so the gate reads true today,
+        // with the cleaning gap recorded rather than papered over — re-mining km after extending those guards
+        // should let these entries be deleted.
+        "math-sign": ["៕<", "ឈោ្មះ >", "។ ÷"],
+    },
     gu: { minus: ["એચજેઆર -3"] },
     kn: { minus: ["ಎಚ್‌ಜೆಆರ್ -3"] },
     mr: { minus: ["चंद्रयान -1"] },
@@ -432,6 +445,83 @@ export const withoutSymbol = (sentence: string, re: RegExp): string => sentence.
  * one after that started over. Measured: `re.test(s1), re.test(s2), re.test(s1)` → true, false, true on the
  * same pattern. A scan was therefore skipping about half its candidate sentences, silently.
  */
+/**
+ * Is this symbol sitting inside a FOREIGN-LANGUAGE SPAN of a bilingual line?
+ *
+ * ⚠ WHY THIS IS NOT THE SAME AS THE NATIVE-SEGMENT FILTER, and why both are needed. `scripts.ts`'s
+ * `isNativeSegment` discards a mined segment with no native letter at all — a wholly English article quoted in a
+ * non-Latin wiki. It cannot help with a BILINGUAL segment, which is legitimately in the corpus because most of it
+ * IS the language. km's artifact carries `ឧទ្យាន ប៊ីសេន សាងសង់នៅ… It was also envisioned as a leisure destination
+ * …costing SGD$8.5 million to build…`: 73 Khmer letters and 306 Latin ones, with the currency sign inside the
+ * ENGLISH half. A dropped sign there is a fact about English, not about Khmer, and failing a Khmer gate for it
+ * asks the author to source a Khmer reading for a sentence that is not Khmer.
+ *
+ * The test is deliberately conservative — Latin must OUTNUMBER the native script on BOTH sides of the symbol
+ * within a short window — so a native sentence that merely quotes a foreign name still counts as native. And it is
+ * INERT for Latin-script languages: there `nativeRe` matches Latin, so Latin can never outnumber it.
+ */
+export function inForeignSpan(sentence: string, index: number, nativeRe: RegExp, window = 30): boolean {
+    const side = (s: string): [number, number] => {
+        let nat = 0, lat = 0;
+        for (const ch of s) {
+            if (nativeRe.test(ch)) nat++;
+            else if (LATIN.test(ch)) lat++;
+        }
+        return [nat, lat];
+    };
+    const [ln, ll] = side(sentence.slice(Math.max(0, index - window), index));
+    const [rn, rl] = side(sentence.slice(index + 1, index + 1 + window));
+    return ll > ln && rl > rn && ll + rl > 0;
+}
+const LATIN = /\p{sc=Latn}/u;
+
+/**
+ * Do ALL occurrences of this class in the line sit in foreign-language spans? Only then is the drop not this
+ * language's problem — one native-context occurrence makes it a real gap again.
+ */
+export function allOccurrencesForeign(sentence: string, re: RegExp, nativeRe: RegExp | undefined): boolean {
+    if (nativeRe === undefined) return false;
+    re.lastIndex = 0;
+    const idx = [...sentence.matchAll(new RegExp(re.source, re.flags.includes("g") ? re.flags : `${re.flags}g`))]
+        .map((m) => m.index);
+    if (idx.length === 0) return false;
+    return idx.every((i) => inForeignSpan(sentence, i, nativeRe));
+}
+
+/**
+ * Is a drop of this COARSE class an already-argued silence for this language?
+ *
+ * ⚠ WHY THE SCAN HAS TO ASK. `DROPPABLE` is coarse — `math-sign` alone covers `+ ± × ÷ = < >` — while
+ * `ACCEPTED_SIGN_SILENCE` is per SIGN, and records refusals argued at length in a language's own file. The scan
+ * consulted the per-INSTANCE table (`ACCEPTED_SILENT`) but not the per-CLASS one, so km's `=` was simultaneously a
+ * documented refusal (measured: 1,348 glosses and 1,057 code-shaped instances against 109 real arithmetic) and a
+ * hard artifact-scan failure. That is the same inconsistency #586 fixed between `coverage.ts` and `review.ts`,
+ * one level up: two tables disagreeing about the same character.
+ *
+ * A coarse-class drop is accepted only when EVERY sign of that class present in the line belongs to an accepted
+ * class. A line mixing `=` (accepted for km) with `×` (which km reads) is still a defect, because the `×` may be
+ * the one being dropped.
+ */
+export function acceptedSignClass(lang: string, klass: string, sentence: string): boolean {
+    const accepted = ACCEPTED_SIGN_SILENCE[lang];
+    if (accepted === undefined) return false;
+    const present = SIGN_CASES.filter(([, , re]) => { re.lastIndex = 0; return re.test(sentence); }).map(([n]) => n);
+    if (present.length === 0) return false;
+    // Only the signs this coarse class actually covers are relevant.
+    const covered = DROPPABLE.find(([k]) => k === klass)?.[1];
+    if (covered === undefined) return false;
+    const relevant = present.filter((n) => {
+        const re = SIGN_CASES.find(([m]) => m === n)?.[2];
+        if (re === undefined) return false;
+        // does this sign's own character belong to the coarse class's set?
+        const ch = [...sentence].find((c) => { re.lastIndex = 0; return re.test(c); });
+        if (ch === undefined) return false;
+        covered.lastIndex = 0;
+        return covered.test(ch);
+    });
+    return relevant.length > 0 && relevant.every((n) => n in accepted);
+}
+
 export function dropsIn(
     sentence: string,
     ipa: string,

@@ -574,7 +574,12 @@ if (tracked || existsSync(artifact)) {
         // here rather than buried in the scan output, because it is also where a swallowed sign would hide.
         const redundant = out.split("\n").filter((l) => l.startsWith("REDUNDANT")).map((l) => l.split("e.g.")[0]!.trim());
         note("artifact scan", clean,
-            (clean ? "no defects" : out.trim().split("\n").slice(-3).join(" | "))
+            // ⚠ EVERY DEFECT LINE, NOT THE LAST THREE. `slice(-3)` silently hid defects as the number of reported
+            // classes grew — the scan sorts defects before notes, so REDUNDANT/ACCEPTED/FOREIGN notes pushed real
+            // DROP lines out of the window. km was reporting 13 dropped math-signs that this gate did not print,
+            // and the omission fooled the author of this change into recording the class as fixed.
+            (clean ? "no defects" : out.trim().split("\n").filter((l) => /^(DROP|LEAK|THROW)/u.test(l)).join(" | ")
+                || out.trim().split("\n").slice(-3).join(" | "))
             + (redundant.length > 0 ? ` — permissible: ${redundant.join(", ")} (the word is already in the sentence; read them anyway)` : ""));
     } catch { note("artifact scan", null, "scan failed to run"); }
 } else note("artifact scan", null, "no artifact");

@@ -139,6 +139,24 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         expect(phonemizeText("ប្រហែល US$ ១,០២៥", "km")).toContain("ɗollaː ʔaːmeːrək");
     });
 
+    test("⚠ CN¥ reads as yuan, and bare ¥ is deliberately left alone", () => {
+        // The SIGN is ambiguous between yen and yuan; the CODE is not. Reading `CN¥` with the yen word would be
+        // wrong, so the code gets its own key. យូអាន (the loan of "yuan") has ZERO corpus occurrences and came from
+        // google/language-resources' pronunciation dictionary — currency names are loanwords, so corpus frequency
+        // was never going to find it, and the 521 apparent hits for យ័ន were substrings of បាយ័ន/អារ្យ័ន.
+        expect(phonemizeText("CN¥117,500", "km")).toContain("juːʔaːn");
+        expect(phonemizeText("CN¥117,500", "km")).not.toContain("jeːn");   // not the yen
+    });
+
+    test("⚠ STACKED magnitudes compose — Khmer builds large scales from two words", () => {
+        // ពាន់លាន ("thousand million") occurs 324 times directly after a digit and រយកោដិ 17. The tier matches ONE
+        // magnitude between the number and the sign, so a stacked phrase left the number non-adjacent and the sign
+        // was dropped entirely: `១,៦ រយកោដិ$` read with no currency. This was the artifact scan's last defect.
+        expect(phonemizeText("១,៦ រយកោដិ$", "km")).toContain("ɗollaː");
+        expect(phonemizeText("២,៣ ពាន់លាន$", "km")).toContain("ɗollaː");
+        expect(phonemizeText("១ កោដិ$", "km")).toContain("ɗollaː");        // the simple form still works
+    });
+
     test("⚠ a magnitude word between the number and a postposed sign still composes", () => {
         // `១ កោដិ$` — one koti dollars. The postposed pattern needs a NUMBER before the sign, so without the
         // magnitude declared the sign was dropped. This was 9 of the artifact's drops.
