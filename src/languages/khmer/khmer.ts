@@ -88,10 +88,34 @@ const IV_VS = "\u0000";
 // docs/investigations/km_native_bringup_investigation.md Run 5.
 const LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon.tsv", undefined, { optional: true });
 
-/** One Khmer word → canonical IPA. SHIPPED path: the exceptions lexicon first (Huffman-lexical words the rules
- *  cannot predict), else the rule engine. */
+/**
+ * SECOND-TIER lexicon — an INDEPENDENT dictionary, for words no human transcription covers.
+ *
+ * ⚠ IT IS CONSULTED AFTER `LEX` AND MUST STAY THERE. `LEX` is wikipron-verified; this is google/language-resources
+ * under CC BY 4.0, and where the two disagree the verified one wins.
+ *
+ * ⚠ AND IT DELIBERATELY CONTAINS NO WORD THE REFEREE COVERS. `LEX` is an EXCEPTIONS lexicon — it holds the words
+ * where the rules FAIL — so for any referee word absent from it, the rules already match wikipron by construction.
+ * This dictionary agrees with wikipron only 88.1% of the time on those, so including them would be a measured 12pp
+ * regression on exactly the words that can be checked. The generator excludes them; see its header.
+ *
+ * What is left is the population with no human transcription at all — 8.7% of the units the engine looks up — and
+ * there this is the better evidence: on the 5,734 referee words it does cover it agrees with wikipron 78.3% against
+ * the rules' 63.3%.
+ *
+ * ⚠ "THE UNITS THE ENGINE LOOKS UP" MEANS AFTER SEGMENTATION, and measuring it on writer-delimited tokens instead
+ * gave a badly wrong picture: those average 19.7 characters against 4.2 for a covered token, because Khmer writers
+ * delimit inconsistently and an unsegmented run is several words. On the segmented unit lexicon coverage is
+ * 22.5% → 31.3% with only 7.4% of lookups having no evidence anywhere — not the 38.9% a token-level count suggests.
+ * Built by tools/gen/build-km-dict-lexicon.mts.
+ */
+const DICT: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon-dict.tsv", undefined,
+    { optional: true });
+
+/** One Khmer word → canonical IPA. SHIPPED path: the wikipron-verified exceptions lexicon, then the independent
+ *  dictionary, then the rule engine. `phonemizeWordRules` reads NEITHER, so the referee eval stays non-circular. */
 export function phonemizeWord(word: string): string {
-    return LEX.get(word) ?? phonemizeWordRules(word);
+    return LEX.get(word) ?? DICT.get(word) ?? phonemizeWordRules(word);
 }
 
 /** One Khmer word → canonical IPA by RULE ONLY (segmental two-series sesquisyllabic abugida; no lexicon). This is

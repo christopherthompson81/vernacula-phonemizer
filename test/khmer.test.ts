@@ -140,8 +140,13 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         // as a multi-character key and matched as a unit.
         // Word-spaced for the same reason: ដុល្លារអាមេរិក is "dollar" + "America" and the boundary restorer
         // separates them. Identical phonemes, one added word space.
-        expect(phonemizeText("US$3,236", "km")).toContain("ɗollaː ʔaːmeːrək");
-        expect(phonemizeText("ប្រហែល US$ ១,០២៥", "km")).toContain("ɗollaː ʔaːmeːrək");
+        // ⚠ `-rik`, NOT `-rək`, AND THE CHANGE IS THE SECOND-TIER LEXICON EARNING ITS KEEP. អាមេរិក ("America")
+        // is a-me-rik; the rule engine gave ʔaːmeːrək with a schwa. Neither wikipron nor our exceptions lexicon
+        // covers the word — it is exactly the "no human transcription" population km-lexicon-dict.tsv exists for —
+        // and the CC BY 4.0 dictionary supplies ʔaːmeːrik. A concrete instance of the 8.7% of tokens that file
+        // reaches.
+        expect(phonemizeText("US$3,236", "km")).toContain("ɗollaː ʔaːmeːrik");
+        expect(phonemizeText("ប្រហែល US$ ១,០២៥", "km")).toContain("ɗollaː ʔaːmeːrik");
     });
 
     test("⚠ CN¥ reads as yuan, and bare ¥ is deliberately left alone", () => {
