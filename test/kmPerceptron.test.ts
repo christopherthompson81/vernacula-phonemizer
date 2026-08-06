@@ -55,6 +55,17 @@ describe("khmer boundary perceptron", () => {
         for (const [run, want] of FROM_TRAINER) expect(segmentRun(run), run).toEqual(want);
     });
 
+    test("⚠ an INDEPENDENT VOWEL may be a one-character piece; a consonant may not", () => {
+        // MIN_PIECE exists to stop a word being shredded into consonant fragments (បូកដក → បូក|ដ|ក read
+        // *ɓouk ɗɑː kɑː* instead of *ɓoukɗɑːk*). But Khmer independent vowels ARE standalone words — ឬ "or" is
+        // 3,953 one-character gold words, ឯ 2,217 — and blocking them was a false positive. It also fixes readings:
+        // `ឬដក` reads *ɗɑːk* joined, the ឬ silently dropped by the syllabifier, and *rɨː ɗɑːk* split.
+        expect(segmentRun("ឬដក")).toEqual(["ឬ", "ដក"]);
+        expect(segmentRun("ឬក្នុង")).toEqual(["ឬ", "ក្នុង"]);
+        // …and the shredding the guard was built for is still blocked, because ដ and ក are consonants.
+        expect(segmentRun("បូកដក")).toEqual(["បូក", "ដក"]);
+    });
+
     test("it is deterministic — the same run always segments the same way", () => {
         const a = segmentRun("ព្រះរាជាណាចក្រកម្ពុជា");
         expect(segmentRun("ព្រះរាជាណាចក្រកម្ពុជា")).toEqual(a);

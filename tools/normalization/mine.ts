@@ -38,9 +38,9 @@ import { readFileSync, writeFileSync, appendFileSync, readdirSync, openSync, rea
 import { StringDecoder } from "node:string_decoder";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { DROPPABLE, LEAK_CLASSES, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
+import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
 import { CELLS, type Cell } from "./cells.ts";
-import { dominantScript, isNativeSegment } from "./scripts.ts";
+import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
 
 // NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo #602, `bara 1945 tti`).
 // Every per-sentence regex for it — `\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`,
@@ -629,6 +629,14 @@ if (mode === "scan") {
     const lines = [...doc.hard.map((h) => h.text), ...(doc.sample ?? [])];
     /** class name → its detector, so an accepted line is matched on the same pattern the drop used. */
     const DROP_RE = new Map(DROPPABLE);
+    // The script this corpus is WRITTEN in, inferred from the corpus rather than a language→script table (see
+    // scripts.ts). Used only to tell a foreign-language span from a native one; `undefined` (too little evidence,
+    // or a genuine two-script mix) disables the check, which fails toward reporting rather than hiding.
+    const nativeScript = dominantScript(lines.join("\n").slice(0, 200_000));
+    const nativeRe = nativeScript === undefined || nativeScript === "Latin"
+        ? undefined
+        : SCRIPTS.find(([name]) => name === nativeScript)?.[1];
+
     for (const sentence of lines) {
         let ipa: string;
         try { ipa = phonemize(sentence, lang) as string; } catch { bump("THROW", sentence); continue; }
@@ -651,6 +659,21 @@ if (mode === "scan") {
                 bump(`ACCEPTED ${d.klass}`, sentence);
                 continue;
             }
+            // ⚠ A SIGN INSIDE A FOREIGN-LANGUAGE SPAN IS NOT THIS LANGUAGE'S DEFECT. Mined artifacts contain
+            // BILINGUAL lines — legitimately, since most of such a line is the language — and a symbol sitting in
+            // the English half of one tests English. km's gate failed on `SGD$8.5 million to build`, inside a
+            // sentence with 0 Khmer letters either side of it, which asked the author to source a Khmer reading
+            // for English prose. Reported as a NOTE so it stays visible rather than being silently dropped.
+            // A refusal argued at CLASS level in the language's own file is not a per-line defect here either.
+            // Labelled distinctly from the per-INSTANCE acceptance below: the two rest on different arguments —
+            // ACCEPTED-CLASS means "no reading of this sign ships in this language, and the reason is in its own
+            // file"; ACCEPTED means "this exact line's symbol is correctly silent". Printing both as `ACCEPTED`
+            // made it impossible to tell from a gate run which table had spoken.
+            if (acceptedSignClass(lang, d.klass, sentence)) { bump(`ACCEPTED-CLASS ${d.klass}`, sentence); continue; }
+            if (allOccurrencesForeign(sentence, DROP_RE.get(d.klass) ?? /$^/u, nativeRe)) {
+                bump(`FOREIGN ${d.klass}`, sentence);
+                continue;
+            }
             bump(`${d.redundant ? "REDUNDANT" : "DROP"} ${d.klass}`, sentence);
         }
     }
@@ -664,7 +687,9 @@ if (mode === "scan") {
     // hyphen is silent in speech (ACCEPTED_SILENT, per instance). Counting either as a defect made `review.ts`
     // report a permanent hard fail for a decision recorded in defects.ts — mr's `चंद्रयान -1` was accepted by
     // coverage.ts and failed here, in the same repo, on the same line.
-    const isNote = (k: string): boolean => k.startsWith("REDUNDANT") || k.startsWith("ACCEPTED");
+    const isNote = (k: string): boolean =>
+        k.startsWith("REDUNDANT") || k.startsWith("ACCEPTED") || k.startsWith("FOREIGN");
+    // (ACCEPTED-CLASS is covered by the ACCEPTED prefix above.)
     const defects = [...hits.entries()].filter(([k]) => !isNote(k));
     const notes = [...hits.entries()].filter(([k]) => isNote(k));
     if (defects.length === 0) console.log("no defects");

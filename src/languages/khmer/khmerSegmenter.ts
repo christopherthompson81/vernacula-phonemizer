@@ -41,6 +41,8 @@ const KHMER_RUN = /[ក-៓ៜ-៝]{2,}/gu;
 
 /** Shortest permissible word piece. See the guard's note in the decode loop below. */
 const MIN_PIECE = 2;
+/** …except an independent vowel, which IS a standalone Khmer word. Same exception as khmerPerceptron.ts. */
+const STANDALONE_1CHAR = /[\u17A3-\u17B3]/u;
 
 interface Meta {
     src: Record<string, number>;
@@ -93,7 +95,8 @@ function build(ort: OrtLike, session: OrtSession, meta: Meta): KhmerSegmenter {
                 // ⚠ Same MIN_PIECE decode guard as khmerPerceptron.ts, and for the same measured reason: a
                 // one-character fragment changes a word's PHONEMES (បូកដក → ɓouk ɗɑː kɑː), while an ordinary
                 // extra boundary only adds a word space. One-char words are 0.46% of gold, so the cost is bounded.
-                && since >= MIN_PIECE && chars.length - i >= MIN_PIECE;
+                && (since >= MIN_PIECE || (since === 1 && STANDALONE_1CHAR.test(chars[i - 1]!)))
+                && (chars.length - i >= MIN_PIECE || STANDALONE_1CHAR.test(chars[i]!));
             if (boundary) { parts.push(ZWSP); since = 0; }
             parts.push(chars[i]!);
             since++;

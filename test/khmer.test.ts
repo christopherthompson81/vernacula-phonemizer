@@ -106,12 +106,17 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         // Measured asymmetry, not an oversight. Of the sites with no number before the sign, all 4 ± are genuine
         // (`±20°` latitude bands, `± 0.1 ឆ្នាំ`) while 142 of 254 + are LaTeX or C from this wiki's maths
         // articles and programming tutorial. Reading the leading + would be a misfire generator.
-        // ⚠ WORD-SPACED, because the sync path now restores word boundaries (khmerPerceptron.ts): បូកដក is a
-        // compound of បូក + ដក and the segmenter separates them. The PHONEMES are unchanged — ɓouk ɗɑːk against
-        // ɓoukɗɑːk — which is the distinction the MIN_PIECE decode guard protects. Before that guard the run was
-        // shredded to បូក|ដ|ក and read *ɓouk ɗɑː kɑː*, which is a different reading rather than a spacing change.
-        expect(phonemizeText("±២០", "km")).toContain("ɓouk ɗɑːk");
-        expect(phonemizeText("១៨៣០±៤០", "km")).toContain("ɓouk ɗɑːk");
+        // ⚠ THE READING IS "plus OR minus" — ɓouk rɨː ɗɑːk — and the ឬ is load-bearing. An earlier version emitted
+        // បូកដក on a misread attestation: corpus-words.ts reported it "attested ×4", but all four were the SPACED
+        // form inside an enumeration of operations (`ប្រមាណវិធីបូក ដក គុណ ចែក` = add, subtract, multiply, divide),
+        // which is a list, not a compound meaning ±. The unspaced បូកដក has zero corpus occurrences and no
+        // dictionary entry. What IS attested in the ± sense is បូកឬដក, in `ខិតទៅរកបូកឬដកអនន្ត` ("approaching plus
+        // or minus infinity").
+        //
+        // Emitted as three SPACED words because joined it loses a syllable: `បូកឬដក` reads *ɓouk ɗɑːk*, the ឬ
+        // silently dropped by the syllabifier before a consonant — a pre-existing g2p defect, routed around here.
+        expect(phonemizeText("±២០", "km")).toContain("ɓouk rɨː ɗɑːk");
+        expect(phonemizeText("១៨៣០±៤០", "km")).toContain("ɓouk rɨː ɗɑːk");
     });
 
     test("both spellings of the kilometre abbreviation are read", () => {
@@ -137,6 +142,24 @@ describe("Khmer signs, units and currencies (#585 review pass)", () => {
         // separates them. Identical phonemes, one added word space.
         expect(phonemizeText("US$3,236", "km")).toContain("ɗollaː ʔaːmeːrək");
         expect(phonemizeText("ប្រហែល US$ ១,០២៥", "km")).toContain("ɗollaː ʔaːmeːrək");
+    });
+
+    test("⚠ CN¥ reads as yuan, and bare ¥ is deliberately left alone", () => {
+        // The SIGN is ambiguous between yen and yuan; the CODE is not. Reading `CN¥` with the yen word would be
+        // wrong, so the code gets its own key. យូអាន (the loan of "yuan") has ZERO corpus occurrences and came from
+        // google/language-resources' pronunciation dictionary — currency names are loanwords, so corpus frequency
+        // was never going to find it, and the 521 apparent hits for យ័ន were substrings of បាយ័ន/អារ្យ័ន.
+        expect(phonemizeText("CN¥117,500", "km")).toContain("juːʔaːn");
+        expect(phonemizeText("CN¥117,500", "km")).not.toContain("jeːn");   // not the yen
+    });
+
+    test("⚠ STACKED magnitudes compose — Khmer builds large scales from two words", () => {
+        // ពាន់លាន ("thousand million") occurs 324 times directly after a digit and រយកោដិ 17. The tier matches ONE
+        // magnitude between the number and the sign, so a stacked phrase left the number non-adjacent and the sign
+        // was dropped entirely: `១,៦ រយកោដិ$` read with no currency. This was the artifact scan's last defect.
+        expect(phonemizeText("១,៦ រយកោដិ$", "km")).toContain("ɗollaː");
+        expect(phonemizeText("២,៣ ពាន់លាន$", "km")).toContain("ɗollaː");
+        expect(phonemizeText("១ កោដិ$", "km")).toContain("ɗollaː");        // the simple form still works
     });
 
     test("⚠ a magnitude word between the number and a postposed sign still composes", () => {

@@ -431,3 +431,93 @@ coverage gain and no generalisation gain. That conclusion rested on a comparison
 and should be disregarded; the clean/dirty split it was based on is not measurable on natural text at all. What
 survives is Run 11's within-label-set evidence: precision up 4.2pp (BiLSTM) and 3.6pp (perceptron), and corpus
 end-to-end up 3.1pp — none of which depend on the referee harness.
+
+## Run 14 — 2026-08-05 20:00 · the artifact scan's last four defects, and a truncation that hid them
+
+The gate's remaining `DROP currency ×2` turned out to be four separate problems, three of them in the tooling.
+
+**⚠ `review.ts` was printing only the LAST THREE lines of the scan.** `out.trim().split("\n").slice(-3)` — and the
+scan prints defects first, then notes, so REDUNDANT/ACCEPTED lines pushed real DROP lines out of the window. km was
+reporting **13 dropped math-signs the gate never showed**, and earlier in this same investigation I recorded that
+class as fixed on the strength of its absence from this output. A gate that hides defects as it accumulates notes
+is worse than no gate. Now prints every DROP/LEAK line.
+
+**1. A sign in a FOREIGN-LANGUAGE SPAN is not this language's defect.** `SGD$8.5 million to build` sits in an
+English sentence inside a bilingual cell — 0 Khmer letters either side. `scripts.ts`'s native-segment filter cannot
+help, because the cell is legitimately in the corpus: most of it IS Khmer. Added `inForeignSpan`, requiring Latin to
+outnumber the native script on BOTH sides of the symbol, all occurrences, reported as a `FOREIGN` note. Inert for
+Latin-script languages by construction.
+
+**2. A CLASS-level refusal is not a per-line defect.** `ACCEPTED_SIGN_SILENCE` records km's `=` refusal (1,348
+glosses and 1,057 code-shaped against 109 real arithmetic), and the scan did not consult it — the same
+`coverage.ts`/`review.ts` inconsistency #586 fixed, one level up. A coarse-class drop is accepted only when EVERY
+sign of that class in the line is accepted, so a line mixing `=` with `×` (which km reads) still reports. Labelled
+`ACCEPTED-CLASS` to distinguish it from the per-instance table. **Verified inert fleet-wide:** km is the only
+language with a non-zero count; gu/kn/ta/yue/my/mr/hi all report 0.
+
+**3. Three drops were stripped-markup DEBRIS**, not operators: `<` immediately after the Khmer full stop ៕, `>`
+standing before a Greek gloss, and a lone `÷` after ។. Silence is the correct reading because these are not signs.
+Accepted by identity, with the note that the proper fix is upstream in the converter's residue guards.
+
+**4. And the last one was a real reading gap, twice over.**
+  · `CN¥117,500` — recorded earlier as unsourceable. **That was wrong, and the reasoning was wrong.** Currency
+    names are LOANWORDS, so the Khmer form is a transliteration rather than something a corpus must invent —
+    `យូអាន` (j uu . ʔ aa n) is in google/language-resources' pronunciation dictionary with ZERO occurrences in the
+    wiki dump. Corpus frequency could never have found it; the 521 apparent hits for `យ័ន` were substrings of
+    បាយ័ន/អារ្យ័ន. Declared as `CN¥` specifically, since the SIGN is ambiguous between yen and yuan while the CODE
+    is not.
+  · `១,៦ រយកោដិ$` — a STACKED magnitude. Khmer composes large scales from two magnitude words, and the tier matches
+    one, so the number was not adjacent to the sign and the currency vanished. ពាន់លាន ("thousand million") is 324
+    instances directly after a digit; declared with រយពាន់, រយកោដិ, ពាន់កោដិ, រយលាន and ដប់កោដិ. The tier's
+    longest-first sort makes the compounds win over their parts, so no core change was needed.
+
+`review.ts --lang km` now reports **checklist clean** for the first time.
+
+**Method note.** Two of these were only findable because a number moved unexpectedly: the math-signs appeared when
+segmentation stabilised the tokenisation the differential test depends on, and the truncation surfaced because that
+made the list longer than three lines. The scan got MORE sensitive as a side effect of an unrelated change, and
+that is what exposed both.
+
+## Run 15 — 2026-08-05 20:20 · a misread attestation, and a guard whose cost I under-measured
+
+Asked whether the added dictionary contradicted the `plus`/`equals` silent assertions. It did not — both refusals
+are CONTEXT arguments (where the sign occurs), and a word list cannot speak to those. But checking rather than
+reasoning turned up two errors of mine.
+
+**⚠ THE `±` READING WAS SOURCED FROM A MISREAD ATTESTATION.** I declared `បូកដក` on the strength of
+`corpus-words.ts` reporting it "attested, phrase ×4". As that tool's own banner warns for a spaceless script, a
+phrase hit is a SUBSTRING hit — and reading the four shows every one is the SPACED form inside an enumeration of
+arithmetic operations: `ប្រមាណវិធីបូក ដក គុណ ចែក` ("operations: add, subtract, multiply, divide"). That is a list of
+four operations, not a compound meaning ±. The unspaced `បូកដក` has **zero** corpus occurrences and no entry in the
+CC BY 4.0 pronunciation dictionary either.
+
+This is the same trap I had just caught for `យ័ន` (521 hits, all substrings of បាយ័ន/អារ្យ័ន) and documented as a
+lesson — and then fell into one sign class over.
+
+What IS attested in the ± sense is `បូក​ឬ​ដក`, in `ខិតទៅរកបូកឬដកអនន្ត` ("approaching plus or minus infinity") —
+one instance, semantically exact, against four of the wrong sense. Corrected.
+
+**And it exposed a g2p defect.** `បូកឬដក` reads *ɓouk ɗɑːk* — the ឬ silently VANISHES — while `បូក ឬ ដក` reads
+*ɓouk rɨː ɗɑːk*. The independent vowel ឬ (U+17AC) is dropped before a consonant: `ឬដក` → *ɗɑːk*, `ឬក្នុង` → *knoŋ*.
+Pre-existing (identical with `segment: false`), and `ឬ` occurs 25,077 times with 13,686 immediately followed by a
+letter. Filed as #670; the rule emits three spaced words to route around it.
+
+**⚠ AND MY OWN `MIN_PIECE` GUARD WAS BLOCKING A REAL WORD CLASS.** I justified forbidding one-character segments as
+costing "0.46% of gold words", which is arithmetically true and rhetorically misleading: the affected words are not
+noise but a coherent, frequent class. Of 13,576 one-character gold words, **7,250 are Khmer INDEPENDENT VOWELS** —
+genuine standalone words: ឬ ("or") 3,953, ឯ ("as for") 2,217, ឮ ("audible") 809 — while the other 6,326 are
+consonant singletons, which really are abbreviation letters.
+
+Refined both decoders to allow a one-character piece only for an independent vowel (U+17A3–U+17B3). This
+  · recovers 7,250 gold instances the guard was suppressing,
+  · FIXES the ឬ reading wherever the segmenter runs, by splitting it into its own token, and
+  · preserves the guard's entire purpose — `បូកដក` → `បូក|ដក`, never `បូក|ដ|ក`, because ដ and ក are consonants.
+
+Metrics after the change, unchanged within sampling (2,000-pair samples against the earlier 3,000):
+corpus end-to-end perceptron 78.8% / BiLSTM 83.2%; referee 79.4% / 80.7%, gap closed 93.1% / 95.8%.
+
+`review.ts --lang km` still reports **checklist clean**. 3,029 tests pass.
+
+**Method note, and it is the same one for the third time.** Both errors here came from trusting a count instead of
+reading the hits behind it: "attested ×4" for a compound that never occurs, and "0.46% of gold" for a class that is
+7,250 real words. The tooling reported both numbers correctly. What was wrong was the inference from them.
