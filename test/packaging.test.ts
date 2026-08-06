@@ -43,4 +43,22 @@ describe("npm packaging", () => {
                 `.gitignore excludes ${path}, but package.json "files" would publish it — add "!${path}"`,
             ).toBe(true);
     });
+
+    // The subtler half: .gitignore's UNANCHORED globs (*.scratch.*, *.log, __pycache__/) match anywhere,
+    // including under src/ — and an allowlist ignores them too. `*.scratch.*` is the one that matters:
+    // .gitignore calls those "session handoffs and working files, never committed", so publishing one to
+    // the registry is precisely the leak that rule exists to prevent. Verified empirically: before these
+    // negations, src/probe.scratch.md and src/probe.log both appeared in `npm pack --dry-run`.
+    it("negates gitignored globs under src/ too, not just anchored paths", () => {
+        const globs = readFileSync(join(ROOT, ".gitignore"), "utf8")
+            .split("\n")
+            .map((l) => l.trim())
+            .filter((l) => l && !l.startsWith("#") && !l.includes("/") && l.includes("*"));
+        const negated = new Set((pkg.files ?? []).filter((f) => f.startsWith("!")));
+        for (const g of globs)
+            expect(
+                negated.has(`!src/**/${g}`),
+                `.gitignore has the unanchored glob "${g}"; a files allowlist bypasses it — add "!src/**/${g}"`,
+            ).toBe(true);
+    });
 });
