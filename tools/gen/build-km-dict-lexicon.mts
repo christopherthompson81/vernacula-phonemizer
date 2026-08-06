@@ -35,6 +35,23 @@
  * At +15pp on 8.7% of tokens the expected gain is ~1.3pp overall. Real, and an order of magnitude smaller than the
  * naive framing.
  *
+ * ⚠ AND THESE SHARES WERE FIRST MEASURED ON THE WRONG UNIT. They were computed over WRITER-DELIMITED tokens — the
+ * ZWSP/space-separated strings a Khmer writer produced — which is not what the engine looks up. Khmer writers
+ * delimit inconsistently, so those "tokens" average 19.7 characters against 4.2 for a covered one: a 19.7-character
+ * token is not a word, it is an unsegmented multi-word run. The engine looks up what the SEGMENTER hands it, and
+ * on that unit the picture is very different:
+ *
+ *     22.5%  in our exceptions lexicon (wikipron-verified)
+ *     61.3%  a referee word not in it (wikipron says the rules are right)
+ *      8.7%  NO wikipron, but the dictionary has it            ← unchanged, and the reachable population
+ *      7.4%  nothing anywhere                                  ← NOT 38.9%
+ *
+ * The "38.9% with nothing anywhere" was almost entirely unsegmented runs whose PARTS are covered: segment them and
+ * 90.0% of the resulting pieces are in a source, with 62.0% of those tokens splitting entirely into known pieces.
+ * Lexicon coverage of running text is therefore 22.5% → 31.3%, not 14.7% → 23.4%. The DELTA this file contributes
+ * is the same either way (+8.7pp); what was wrong was the absolute picture, and it made the language look far less
+ * covered than it is.
+ *
  * ## The phone mapping, and why it stops at 78%
  *
  * The dictionary's 54-phone inventory is not ours. The mapping below was derived by iterating against wikipron
@@ -115,8 +132,12 @@ writeFileSync(out, `# Khmer SECOND-TIER lexicon — word → IPA, for words no h
 #   of the time on those — so including them would be a measured 12pp regression. See the generator's header.
 #
 # Measured: on the 5,734 referee words this dictionary does cover, it agrees with wikipron 78.3% against the
-# rules' 63.3%. It is the better evidence where no human transcription exists — which is 8.7% of running-text
-# tokens, the whole reachable population for this file.
+# rules' 63.3%. It is the better evidence where no human transcription exists — 8.7% of the units the engine looks
+# up, which is the whole reachable population for this file.
+#
+# Coverage of running text, measured on the SEGMENTED unit (what the engine looks up, not the writer-delimited
+# token — those average 19.7 characters and are multi-word runs): the exceptions lexicon alone reaches 22.5%, and
+# with this file 31.3%. Only 7.4% of lookups then have no human or curated evidence behind them.
 #
 # Regenerate: npx tsx tools/gen/build-km-dict-lexicon.mts <km/data/lexicon.tsv>
 # ENTRIES: ${rows.length}

@@ -13,8 +13,12 @@
 #   of the time on those — so including them would be a measured 12pp regression. See the generator's header.
 #
 # Measured: on the 5,734 referee words this dictionary does cover, it agrees with wikipron 78.3% against the
-# rules' 63.3%. It is the better evidence where no human transcription exists — which is 8.7% of running-text
-# tokens, the whole reachable population for this file.
+# rules' 63.3%. It is the better evidence where no human transcription exists — 8.7% of the units the engine looks
+# up, which is the whole reachable population for this file.
+#
+# Coverage of running text, measured on the SEGMENTED unit (what the engine looks up, not the writer-delimited
+# token — those average 19.7 characters and are multi-word runs): the exceptions lexicon alone reaches 22.5%, and
+# with this file 31.3%. Only 7.4% of lookups then have no human or curated evidence behind them.
 #
 # Regenerate: npx tsx tools/gen/build-km-dict-lexicon.mts <km/data/lexicon.tsv>
 # ENTRIES: 56356

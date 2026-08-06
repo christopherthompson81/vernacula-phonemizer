@@ -99,9 +99,15 @@ const LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon
  * This dictionary agrees with wikipron only 88.1% of the time on those, so including them would be a measured 12pp
  * regression on exactly the words that can be checked. The generator excludes them; see its header.
  *
- * What is left is the population with no human transcription at all — 8.7% of running-text tokens — and there this
- * is the better evidence: on the 5,734 referee words it does cover it agrees with wikipron 78.3% against the rules'
- * 63.3%. Built by tools/gen/build-km-dict-lexicon.mts.
+ * What is left is the population with no human transcription at all — 8.7% of the units the engine looks up — and
+ * there this is the better evidence: on the 5,734 referee words it does cover it agrees with wikipron 78.3% against
+ * the rules' 63.3%.
+ *
+ * ⚠ "THE UNITS THE ENGINE LOOKS UP" MEANS AFTER SEGMENTATION, and measuring it on writer-delimited tokens instead
+ * gave a badly wrong picture: those average 19.7 characters against 4.2 for a covered token, because Khmer writers
+ * delimit inconsistently and an unsegmented run is several words. On the segmented unit lexicon coverage is
+ * 22.5% → 31.3% with only 7.4% of lookups having no evidence anywhere — not the 38.9% a token-level count suggests.
+ * Built by tools/gen/build-km-dict-lexicon.mts.
  */
 const DICT: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon-dict.tsv", undefined,
     { optional: true });

@@ -82,3 +82,42 @@ intervention working.
 
 **Left open:** the 38.9% of tokens with no evidence anywhere remain rule-read and unverified. Nothing here touches
 them, and no available source would.
+
+## Run 4 — 2026-08-05 21:30 · the coverage figures were measured on the wrong unit
+
+Asked what "no evidence anywhere" meant — whether those tokens really have nothing resembling them. Checking
+rather than answering from the earlier table found that the whole decomposition was computed on the wrong unit.
+
+**It was computed over WRITER-DELIMITED tokens** — the ZWSP/space-separated strings a Khmer writer produced. That
+is not what the engine looks up. Khmer writers delimit inconsistently, and the tell was in the lengths:
+
+    "nothing anywhere" tokens:  mean 19.7 characters
+    covered tokens:             mean  4.2 characters
+
+A 19.7-character Khmer "token" is not a word — Khmer words run 4-5 characters — it is an **unsegmented multi-word
+run**. So "no evidence anywhere" did not mean "nothing resembling it exists"; it meant the whole run is not a
+dictionary headword, which is unsurprising because it is not a word.
+
+Segmenting those runs with the shipped perceptron:
+
+    pieces that ARE in a source:                              90.0%
+    orphan tokens splitting ENTIRELY into known pieces:       62.0%
+
+Re-decomposed on the unit the engine actually looks up — a maximal Khmer run after the segmenter has split it:
+
+| evidence | writer-delimited tokens (as first reported) | SEGMENTED units (correct) |
+|---|---|---|
+| exceptions lexicon (wikipron-verified) | 14.7% | **22.5%** |
+| referee word not in it (rules already right) | 37.6% | **61.3%** |
+| no wikipron, dictionary has it | 8.7% | **8.7%** |
+| nothing anywhere | 38.9% | **7.4%** |
+
+So **92.6% of production lookups have some human or curated evidence behind them**, and lexicon coverage is
+22.5% → 31.3% rather than 14.7% → 23.4%.
+
+⚠ The DELTA this work contributes is unchanged at +8.7pp — the reachable population was right. What was wrong was
+the absolute picture, and it made the language look far less covered than it is. This is the same lesson as the
+`eval_km_segmenter.mts` baseline that silently became perceptron-segmented: **measure the unit the engine uses, not
+the one the corpus file happens to offer.** Third instance this session.
+
+Corrected in the generator header, `khmer.ts`, and this document.
