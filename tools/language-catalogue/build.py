@@ -19,8 +19,13 @@ def main():
     if os.path.exists(DB):
         os.remove(DB)
     con = sqlite3.connect(DB)
+    # ⚠ FOREIGN KEYS ON. SQLite ignores REFERENCES by default, so `served_by` accepted anything — which is how
+    # `served_by='native'`, not a language code, survived in the source of truth. With this the build FAILS on a
+    # served_by that names no row, which is the only way a convention documented in a comment stays true.
+    con.execute("PRAGMA foreign_keys = ON")
     con.executescript(schema)
 
+    con.execute("BEGIN")            # one transaction, so the DEFERRED served_by check runs at COMMIT
     with open(os.path.join(HERE,"catalogue.tsv")) as f:
         reader = csv.DictReader(f, delimiter="\t")
         cols = reader.fieldnames
