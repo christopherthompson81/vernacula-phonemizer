@@ -153,6 +153,7 @@ export function normalizeYoruba(text: string): string {
     s = s.replace(DECIMAL, (_m, whole: string, frac: string) =>
         `${whole} ${SYM.decimalWord} ${[...frac].join(" ")}`);
 
-    // A sentence-final period survives: DECIMAL requires a digit on BOTH sides.
-    return s;
+    // Removing a redundant `(60%)` leaves the space on both sides of it, so a doubled space would survive into
+    // the token stream where the gloss used to be.
+    return s.replace(/[ \t]{2,}/gu, " ");
 }

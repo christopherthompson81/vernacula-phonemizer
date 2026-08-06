@@ -72,17 +72,38 @@ function scaled(magnitude: string, multiplier: number): string {
     return `${magnitude} ${N.times} ${below1000(multiplier)}`;
 }
 
-/** Reads each digit separately, in Yoruba units — the floor, so nothing ever escapes to English. */
-function digitByDigit(s: string): string {
-    return [...s].map((ch) => {
+/**
+ * Reads each digit separately, in Yoruba units — the floor, so nothing ever escapes to English.
+ *
+ * ⚠ IT TAKES THE DIGIT STRING, NEVER A NUMBER, and that is a correctness fix rather than a style choice. The
+ * first version was reached as `digitByDigit(String(n))`, and above 1e21 JavaScript stringifies to EXPONENTIAL
+ * notation: `1e+21` was read as *ọ̀kan e + méjì ọ̀kan* — the letters `e` and `+` voiced as words, with an `e˧`
+ * phoneme landing mid-number. Worse, `Number` had already lost the digits: a 24-digit run became
+ * 1.2345678901234568e+23, so the digits actually spoken were not the digits given. Reading the string keeps every
+ * digit and cannot produce a character that is not one.
+ */
+function digitByDigit(digits: string): string {
+    return [...digits].map((ch) => {
         const d = Number(ch);
-        return Number.isNaN(d) ? ch : d === 0 ? N.zero : unit(d);
+        return Number.isNaN(d) ? "" : d === 0 ? N.zero : unit(d);
     }).filter((x) => x !== "").join(" ");
+}
+
+/**
+ * A run of DIGITS → its Yoruba cardinal reading. The string form is what the engine calls: it preserves every
+ * digit of a run too long for a `number`, where `Number` would both lose precision and stringify to exponential
+ * notation. See `digitByDigit`.
+ */
+export function yorubaNumber(digits: string): string {
+    const n = Number(digits);
+    // Not a safe integer → read the given digits, not a rounded reconstruction of them.
+    return Number.isSafeInteger(n) ? yorubaCardinal(n) : digitByDigit(digits);
 }
 
 /** A non-negative integer → its Yoruba cardinal reading. */
 export function yorubaCardinal(n: number): string {
-    if (!Number.isFinite(n) || n < 0 || !Number.isInteger(n)) return digitByDigit(String(n));
+    if (!Number.isFinite(n) || n < 0 || !Number.isInteger(n) || !Number.isSafeInteger(n))
+        return digitByDigit(Number.isFinite(n) ? String(Math.abs(Math.trunc(n))) : "");
     if (n === 0) return N.zero;
     if (n < 1000) return below1000(n);
     for (const [limit, word] of [[1e6, N.thousand], [1e9, N.million], [1e12, N.billion]] as const) {
@@ -98,5 +119,5 @@ export function yorubaCardinal(n: number): string {
 
 /** Every run of digits in `text` → its Yoruba cardinal reading. */
 export function readYorubaNumbers(text: string): string {
-    return text.replace(/\p{Nd}+/gu, (m) => yorubaCardinal(Number(m)));
+    return text.replace(/\p{Nd}+/gu, (m) => yorubaNumber(m));
 }

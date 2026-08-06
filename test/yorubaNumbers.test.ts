@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { yorubaCardinal } from "../src/languages/yoruba/numbers.ts";
+import { yorubaCardinal, yorubaNumber } from "../src/languages/yoruba/numbers.ts";
 
 /**
  * The gold set is the CORPUS'S OWN GLOSSES: yo.wikipedia writes a numeral out and repeats it in figures, so
@@ -106,6 +106,38 @@ describe("yoruba cardinals — the corpus's own numeral↔digit glosses", () => 
         expect(y.split(" ").length).toBeGreaterThan(3);        // and emitted as separate words, not one blob
         expect(yorubaCardinal(1e15)).not.toMatch(/[a-z]illion/u);
         expect(yorubaCardinal(1e15).split(" ").length).toBeGreaterThan(10);
+    });
+
+    test("⚠ a digit run too long for a `number` keeps its digits and grows no letters", () => {
+        // Reached as `digitByDigit(String(n))`, this read `1e+21` as *ọ̀kan e + méjì ọ̀kan* — `e` and `+` voiced
+        // as words, with an e˧ phoneme mid-number. And `Number` had already lost the digits: a 24-digit run
+        // became 1.2345678901234568e+23, so what was spoken was not what was given. The string is read instead.
+        const run = "123456789012345678901234";
+        const out = yorubaNumber(run);
+        expect(out.split(" ")).toHaveLength(24);              // one word per digit, none lost
+        // ⚠ TESTED AS STANDALONE TOKENS. A first version asserted the whole string matched no /[e+.]/, which
+        // Yoruba numerals fail on their own letters — méjì, mẹ́ta. What must not appear is `e` or `+` AS A WORD.
+        expect(out.split(" ")).not.toContain("e");
+        expect(out.split(" ")).not.toContain("+");
+        expect(out.split(" ").every((w) => /^[\p{L}\p{M}-]+$/u.test(w))).toBe(true);
+        expect(yorubaNumber("1000000000000000000000").split(" ")).toHaveLength(22);
+        // ⚠ Through the engine the guarantee is a COUNT, not an alphabet test. "No Latin letter in the output"
+        // is meaningless for IPA, which is written with Latin letters (me˥d͡ʒi˩) — that assertion was mine and it
+        // was nonsense. What the exponent bug produced was an EXTRA token (`e˧`) and too few digits, so: one
+        // phoneme group per digit, 24 in, 24 out.
+        // Counted against the SPLIT form, not the digit count: `márùn-ún` and `mẹ́sàn-án` each contribute two
+        // tokens at their hyphen (this run has a 5 and a 9 twice, hence 28), which is the same boundary a writer
+        // typing the word gets. The invariant is that the engine emits exactly what the compositor composed.
+        expect(String(phonemize(run, "yo")).split(" ")).toHaveLength(out.split(/[\s-]+/u).length);
+    });
+
+    test("⚠ a numeral word reads the same whether it came from a digit or from text", () => {
+        // `phonemizeWord` ignores a hyphen, but TOKEN splits typed text at one — so emitting a composed numeral
+        // split only on SPACES gave `100` the reading ɔ˧ɡɔ˥ɾũ˩ũ˥ while a typed `ọgọ́rùn-ún` read ɔ˧ɡɔ˥ɾũ˩ ũ˥,
+        // losing a boundary the text path keeps. The hyphen is a syllable boundary in this orthography.
+        expect(String(phonemize("100", "yo"))).toBe(String(phonemize("ọgọ́rùn-ún", "yo")));
+        expect(String(phonemize("5", "yo"))).toBe(String(phonemize("márùn-ún", "yo")));
+        expect(String(phonemize("9", "yo"))).toBe(String(phonemize("mẹ́sàn-án", "yo")));
     });
 
     test("zero is `òdo`, and the corpus glosses it", () => {

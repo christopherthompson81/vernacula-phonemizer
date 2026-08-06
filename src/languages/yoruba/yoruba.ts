@@ -11,7 +11,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { MANIFEST as DEF } from "./manifest.ts";
 import { normalizeYoruba } from "./normalize.ts";
-import { yorubaCardinal } from "./numbers.ts";
+import { yorubaNumber } from "./numbers.ts";
 const CLAUSE_MARK = DEF.clausePunctuation;
 const DOT_BELOW = "̣", ACUTE = "́", GRAVE = "̀", MACRON = "̄";
 const TONE_MARK = new Set([ACUTE, GRAVE, MACRON]);
@@ -150,7 +150,12 @@ class YorubaPhonemizer implements Phonemizer {
             // ⚠ ONE emit PER WORD. A composed numeral is several words, and handing the whole string to
             // `phonemizeWord` ran them together — `1945` came out as one 40-phone blob with no boundary, so the
             // syllabifier re-parsed across every junction.
-            else if (m[2]) for (const w of yorubaCardinal(Number(m[2])).split(" ")) sink.emit(phonemizeWord(w));
+            // ⚠ SPLIT ON HYPHENS TOO, not only spaces, because TOKEN splits typed text there — `ọgọ́rùn-ún` is
+            // two tokens when a writer types it. Splitting only on spaces gave the SAME WORD two readings
+            // depending on where it came from: `100` read ɔ˧ɡɔ˥ɾũ˩ũ˥ as one unit while typed `ọgọ́rùn-ún` read
+            // ɔ˧ɡɔ˥ɾũ˩ ũ˥ with the boundary. The hyphen is a syllable boundary in this orthography, and
+            // `phonemizeWord` simply ignores it, so the joined form lost a boundary the text path keeps.
+            else if (m[2]) for (const w of yorubaNumber(m[2]).split(/[\s-]+/u)) { if (w) sink.emit(phonemizeWord(w)); }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

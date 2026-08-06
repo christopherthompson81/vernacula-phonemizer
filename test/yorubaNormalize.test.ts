@@ -47,7 +47,9 @@ describe("yoruba text normalization", () => {
         expect(normalizeYoruba("4.14")).toBe("4 àti dásímà 1 4");
         // ⚠ And leaving the period alone is NOT neutral: yoruba.ts treats `.` as clause punctuation, so `3.5`
         // read *mɛ˥ta˧ . ma˥ɾũ˩ũ˥* — a sentence break inside a number.
-        expect(String(phonemize("3.5", "yo"))).toBe("mɛ˥ta˧ a˩ti˧ da˥si˥ma˩ ma˥ɾũ˩ũ˥");
+        // márùn-ún carries its internal boundary here, the same as when a writer types the word — see the
+        // digit-vs-text agreement test in yorubaNumbers.test.ts.
+        expect(String(phonemize("3.5", "yo"))).toBe("mɛ˥ta˧ a˩ti˧ da˥si˥ma˩ ma˥ɾũ˩ ũ˥");
     });
 
     test("⚠ rule ORDER: the percent circumfix must see a decimal number whole", () => {
@@ -64,6 +66,11 @@ describe("yoruba text normalization", () => {
 
     test("the ampersand is `àti`, the ordinary connective", () => {
         expect(normalizeYoruba("A & B")).toBe("A àti B");
+    });
+
+    test("dropping a redundant gloss leaves no doubled space", () => {
+        // The `(60%)` sits between two spaces, so removing it used to leave `ọgọ́rùn-ún  jẹ́` in the token stream.
+        expect(normalizeYoruba("ìdá 60 nínú ọgọ́rùn-ún (60%) jẹ́ púpọ̀")).toBe("ìdá 60 nínú ọgọ́rùn-ún jẹ́ púpọ̀");
     });
 
     test("a sentence-final period survives", () => {

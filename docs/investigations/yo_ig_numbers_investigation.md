@@ -384,3 +384,31 @@ Layolle` shape, where a dash separates a year from a title and silence is correc
 is inert for a Latin-script language by construction, so those cannot be auto-excluded.
 
 3,086 tests pass.
+
+### Review pass on the PR — three defects in my own layer
+
+Testing edge cases rather than re-reading the prose, which found things reading did not:
+
+1. ⚠ **Exponential notation leaked into the phoneme stream, and the digits spoken were not the digits given.**
+   `digitByDigit` was reached as `digitByDigit(String(n))`, and above 1e21 JavaScript stringifies to exponential
+   form: `1e+21` read as *ọ̀kan **e + ** méjì ọ̀kan*, with an `e˧` phoneme landing mid-number. Worse, `Number` had
+   already destroyed the value — a 24-digit run became 1.2345678901234568e+23, so the reading was of a rounded
+   reconstruction rather than the input. Fixed by reading the digit STRING: `yorubaNumber(digits)` composes only
+   when the value is a safe integer, and otherwise reads the characters given. It now cannot emit a character
+   that is not a digit's word.
+2. ⚠ **The same word read two ways depending on where it came from.** `100` gave ɔ˧ɡɔ˥ɾũ˩ũ˥ as one unit while a
+   typed `ọgọ́rùn-ún` gave ɔ˧ɡɔ˥ɾũ˩ ũ˥ — because the numeral path split composed output on SPACES only, and
+   `phonemizeWord` ignores a hyphen, while TOKEN splits typed text at one. The hyphen is a syllable boundary in
+   this orthography, so the digit path was losing a boundary the text path keeps. Split on `[\s-]+`.
+3. **A doubled space** survived where a redundant `(60%)` gloss was removed.
+
+And three of my own TEST assertions were wrong, all the same way — asserting on an alphabet where the alphabet is
+not the property:
+  · `expect(out).not.toMatch(/[e+.]/)` fails on Yoruba's own letters (méjì, mẹ́ta). The property is that `e` and
+    `+` do not appear AS TOKENS.
+  · `expect(phonemes).not.toMatch(/[a-z]/i)` is meaningless for IPA, which is written with Latin letters
+    (me˥d͡ʒi˩). The exponent bug produced an extra TOKEN and too few digits, so the property is a count.
+  · that count is against the hyphen-SPLIT form, not the digit count: `márùn-ún` and `mẹ́sàn-án` each contribute
+    two tokens, so a 24-digit run with a 5 and a 9 twice emits 28.
+
+`review.ts --lang yo`: 9 of 10 checks pass. 3,089 tests.
