@@ -64,8 +64,9 @@ describe("Khmer — shipped phonemizeWord (exceptions lexicon dict-first)", () =
     });
 });
 
-// Cardinal numbers — Khmer is the fleet's BI-QUINARY case: 6–9 are overtly 5+n (ប្រាំមួយ = ប្រាំ 5 + មួយ 1), and
-// the bi-quinary unit is reused whole inside the teens (16 = ដប់ + ប្រាំមួយ). Above that the system is decimal, with
+// Cardinal numbers — BI-QUINARY: 6–9 are overtly 5+n (ប្រាំមួយ = ប្រាំ 5 + មួយ 1), and ⚠ the 5+n unit is reused
+// WHOLE inside the teens (16 = ដប់ + ប្រាំមួយ), which is what separates Khmer from the other quinary systems
+// here — wolof, fula and umbundu all build 6–9 the same way but compose their tens as multiplier×10. Above that the system is decimal, with
 // native ដប់ 10 / ម្ភៃ 20 and a Thai-derived 30–90 overlay. Numerals from Wikipedia "Khmer numerals" (see numbers.ts).
 describe("Khmer (km) cardinal numbers — bi-quinary 6–9", () => {
     for (const [n, ipa] of [
