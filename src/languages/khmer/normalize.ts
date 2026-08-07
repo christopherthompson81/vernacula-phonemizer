@@ -24,9 +24,9 @@ import { lastKhmerWord } from "./segment.ts";
 import { havePerceptron, segmentRun } from "./khmerPerceptron.ts";
 
 /**
- * THE SHARED SYMBOL TIER, not local regexes — playbook trap 16: before declaring a class out of scope, check
- * whether the seam already exists. It did, for five of the classes this file first solved by hand, and it
- * carries two Khmer needs that hand-written rules had missed entirely.
+ * THE SHARED SYMBOL TIER, not local regexes. ⚠ Before declaring a class out of scope, check whether the seam
+ * already exists — it covers five of the classes this file would otherwise solve by hand, plus two Khmer needs
+ * hand-written rules miss entirely.
  *
  * `unspacedScript` is the load-bearing flag, and the tier's own header documents Khmer's exact symptoms against
  * Chinese: the boundary guards assume spaces between words, so in an unspaced script the ORDINARY case is the one
@@ -37,10 +37,10 @@ import { havePerceptron, segmentRun } from "./khmerPerceptron.ts";
  *   percent      ភាគរយ    445, of which 230 directly after a digit
  *   currency     ដុល្លារ  712
  *   °C / °       អង្សាសេ 25 after a digit · អង្សា 74 — declared as UNITS, which is how the tier reads a scale
- *   exponent     ការេ     ⚠ THIS WAS WRONGLY REFUSED FIRST TIME. It is 0/0 DIGIT-adjacent, and I concluded from
- *                         that it was unsourceable — but `²` attaches to a UNIT, not a digit, and ការេ is
- *                         exactly the square-metre word: ម៉ែត្រការេ ×17, គីឡូម៉ែត្រការេ ×10, ម៉ែតការេ ×20.
- *                         `position: "compound"` because it FUSES, like Swedish kvadratkilometer.
+ *   exponent     ការេ     ⚠ PROBE THE UNIT, NOT THE DIGIT. This word is 0/0 digit-adjacent, which looks
+ *                         unsourceable — but `²` attaches to a UNIT, and ការេ is exactly the square-metre word
+ *                         (ម៉ែត្រការេ, គីឡូម៉ែត្រការេ). `position: "compound"` because it FUSES, like Swedish
+ *                         kvadratkilometer.
  *   multiply     គុណ      3,338, written out between numerals: `៣គុណ៥`, `១៤០០ គុណ ២០០០`
  *   ampersand    និង      40,204 — the commonest word in the language
  */
@@ -200,7 +200,7 @@ export function normalizeKhmer(text: string): string {
     //       109  digit = digit    arithmetic — this rule
     //         9  URL query strings
     // Widening to the probe's shape would fire on the code and the query strings, getting it wrong nearly as
-    // often as right, which is trap 9 (a guard alternative with no attested…)'s misfire generator seen from the other side. The arithmetic reading is
+    // often as right. The arithmetic reading is
     // the only one the evidence supports.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}=${SEP}(?=[${D}])`, "gu"), " ស្មើ ");
     /**
@@ -300,7 +300,7 @@ export function normalizeKhmer(text: string): string {
     // restated: the signs are absent while the readings are ordinary prose.
     //
     // They are added anyway because the words are SOURCED and the rules are digit-flanked, so on this corpus
-    // they cannot misfire — the risk trap 9 (a guard alternative with no attested…) warns about is a guard
+    // they cannot misfire — the risk is a guard
     // that fires on something else, and with zero instances there is nothing here to fire on. This is the
     // "pure robustness rather than a repair" #654 argues for, and it closes the same class for arbitrary input.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}÷${SEP}(?=[${D}])`, "gu"), " ចែក ");

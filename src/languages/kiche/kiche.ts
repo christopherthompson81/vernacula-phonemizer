@@ -4,7 +4,7 @@
  * longest-match grapheme scan. The Mayan hallmark is the EJECTIVE/glottalized series ⟨b'⟩→[ɓ] (implosive), ⟨t'⟩→[tʼ],
  * ⟨k'⟩→[kʼ], ⟨q'⟩→[qʼ], ⟨tz'⟩→[t͡sʼ], ⟨ch'⟩→[t͡ʃʼ]; the plain voiceless stops are ASPIRATED ⟨p t k q tz ch⟩→[pʰ tʰ kʰ qʰ
  * t͡sʰ t͡ʃʰ]. Uvular ⟨q q'⟩; ⟨x⟩→[ʃ], ⟨j⟩→[x], ⟨w⟩→[ʋ], ⟨r⟩→[ɻ], ⟨'⟩→[ʔ]; the sixth vowel ⟨ä⟩→[ə]. Vowel LENGTH is phonemic but
- * UNWRITTEN (folded); FINAL stress. 🔷 single-source (English Wiktionary, 127).
+ * UNWRITTEN (folded); FINAL stress. ⚠ SINGLE-SOURCE: English Wiktionary, 127 pairs, and no second referee.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -60,10 +60,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’ʼ`-")})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zäöëïüáéíóúÄÖËÏÜÁÉÍÓÚA-Z'’ʼ`-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

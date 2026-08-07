@@ -4,13 +4,13 @@
  * official script is a LATIN alphabet, and it is highly phonemic → a left-to-right greedy scan over a digraph + letter
  * table with word-final (oxytone) stress.
  *
- * ★ The 2016 Latin alphabet with its acute-marked front/uvular letters: ⟨á⟩→[æ], ⟨ó⟩→[ø], ⟨ú⟩→[y] (front vowels vs
+ * ⚠ The 2016 Latin alphabet with its acute-marked front/uvular letters: ⟨á⟩→[æ], ⟨ó⟩→[ø], ⟨ú⟩→[y] (front vowels vs
  *   plain ⟨a o u⟩→[ɑ o u]); the DOTLESS ⟨ı⟩→[ɯ] vs dotted ⟨i⟩→[i]; ⟨q⟩→[q] (uvular, back-harmony) vs ⟨k⟩→[k], ⟨x⟩→[χ]
  *   (uvular) vs ⟨h⟩→[h], ⟨ǵ⟩→[ʁ] (uvular voiced fricative, back) vs ⟨g⟩→[ɡ]; ⟨ń⟩→[ŋ]; ⟨j⟩→[ʒ], ⟨w⟩→[w], ⟨y⟩→[j];
  *   digraphs ⟨sh⟩→[ʃ], ⟨ch⟩→[t͡ʃ]. (Unlike Kazakh, the uvular/velar choice is WRITTEN — q/k, x/h, ǵ/g — so no
  *   harmony inference is needed.) Word-final stress backs up over one onset consonant (basqa→[bɑsˈqɑ]).
  *
- * 🔷 thin single-source (English Wiktionary "Karakalpak terms with IPA pronunciation", ~11 usable Latin pairs — no
+ * ⚠ THIN SINGLE-SOURCE: English Wiktionary "Karakalpak terms with IPA pronunciation", ~11 usable Latin pairs — no
  * wikipron/kaikki/epitran kaa).
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -70,10 +70,10 @@ function number(digits: string): string {
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-záóúíńǵıA-ZÁÓÚÍŃǴIİ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

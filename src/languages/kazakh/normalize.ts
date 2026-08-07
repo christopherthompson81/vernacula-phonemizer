@@ -1,34 +1,19 @@
 /**
- * Kazakh (kk) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Kazakh (kk) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Kazakh's DEFINING rule (measured over the kk_hr FLEURS corpus — * CASE SUFFIX after a digit, exactly as trap 14 (agreement cannot be applied to digits) predicted:
- *   `N-ші`/`N-шы` ordinals ×16 (190-шы, 60-шы, 19-шы, 1-ші)
- *   bare numbers with a CASE suffix ×36 (200-ге, 8-ден, 80-нен, 60-тан, 1000-нан, 11:00-ден, 9:30-да,
- *     160 км/сағ-қа)
- * The suffix must AGREE with the word (vowel harmony), so gluing the written suffix verbatim to the
- * digits is wrong: `200-ге` is *екі жүзге* (the -ге on жүз), `11:00-ден` is *он бірден*. The written
- * suffix tells the CASE; the WORD supplies the harmonised ending.
+ * ⚠ KAZAKH'S DEFINING RULE IS THE CASE SUFFIX WRITTEN AFTER A DIGIT — `N-ші`/`N-шы` ordinals (190-шы, 1-ші)
+ * and bare numbers carrying a case ending (200-ге, 8-ден, 1000-нан, 11:00-ден, 160 км/сағ-қа).
  *
- * The rest of the corpus:
- *   space-grouped thousands ×6 (17 000, 5 000 000) — the TOKEN `\d+` splits these on the space
- *   comma-decimals ×5 (2,3, 3,7) — the comma is a pause
- *   clocks ×8 (11:00-ден, 08:46, 10: 00, 13:15, 9:30-да, 0230 UTC)
- *   `б.д.д.` (before the birth of Jesus = BC) ×2, `т.б.` (etc), `т.с.с.` — dotted abbreviations
- *   `км/сағ` (km/h), `миля/сағат` (mph) — the /сағ not composed
- *   degrees (`+ 30 °C-тан`, 35°W)
- *   percent `80%` (the tier's пайыз) · `АҚШ` (USA) · `XVI ғасырда` (roman ordinal — works)
+ * ⚠ THE SUFFIX MUST AGREE WITH THE WORD BY VOWEL HARMONY, so gluing the WRITTEN suffix verbatim to the digits
+ * is wrong: `200-ге` is *екі жүзге* — the -ге attaches to жүз, not to the numeral as written — and `11:00-ден`
+ * is *он бірден*. The written suffix tells you the CASE; the WORD supplies the harmonised ending.
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `190-шы`    → `ʒˈʏz toqsˈɑn ʃˈə`      the ordinal suffix read as the bare word "шы"
- *   `200-ге`    → `jˈekɪʒˈʏz ɡˈe`          the case suffix read as the bare word "ге"
- *   `11:00-ден` → `ˈonbˈɪr , nˈøɫ dˈen`    the clock + the ablative suffix
- *   `17 000`    → `ˈonʒˈetɪ nˈøɫ`           the space-thousands became two numbers
- *   `2,3 миллиард` → `jˈekɪ , ˈʏʃ …`         the comma-decimal became a pause
- *   `б.д.д.`    → `bˈə . dˈə . dˈə .`       the era marker letter-spelled
- *   `83 км/сағ` → `… kəjlomˈetr sˈɑʁ`       the rate denominator raw
+ * ⚠ THE TOKEN'S `\d+` SPLITS A SPACE-GROUPED THOUSAND (17 000, 5 000 000) into two numbers, and the comma of a
+ * decimal reads as a pause. Both are claimed here.
  *
- * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
+ * ⚠ Every boundary in this file is an explicit lookaround, never `\b`, which is ASCII-defined and finds none
+ * against Cyrillic.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToIpa } from "./numbers.ts";
@@ -89,7 +74,7 @@ function ordinalWord(n: number): string | undefined {
 }
 
 // ---------------------------------------------------------------------------------------------------
-// CASE SUFFIXES (trap 14 (agreement cannot be applied to digits) — the defining rule)
+// CASE SUFFIXES — the defining rule; see the header on harmony.
 // ---------------------------------------------------------------------------------------------------
 
 /** The Kazakh case suffixes the corpus writes after digits, keyed by the CASE they mark. The suffix the
@@ -248,7 +233,7 @@ export function normalizeKazakh(input: string): string {
 
     // 4) THE CASE SUFFIX — `200-ге`, `8-ден`, `80-нен`, `60-тан`, `1000-нан`, `11:00-ден`, `9:30-да`,
     //    `160 км/сағ-қа`. The suffix tells the CASE; the number becomes words; the ending attaches to
-    //    the last word with harmony. This is trap 14's shape: agreement cannot be applied to digits, so
+    //    the last word with harmony. ⚠ AGREEMENT CANNOT BE APPLIED TO DIGITS, so
     //    the operand is wordified FIRST. Runs AFTER the clock rule so a clock + suffix reads the time
     //    then the suffix (11:00-ден → он бірден).
     s = s.replace(/(?<![\d.,])(\d+)(?:-)?(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан|ның|нің|да|де|та|те|мен|бен|пен)(?![\p{L}\p{M}])/giu,

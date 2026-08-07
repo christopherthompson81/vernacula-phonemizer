@@ -1,62 +1,38 @@
 /**
- * Korean (ko) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * readable by the Hangul engine into Hangul the existing pipeline speaks. Pure text→text; no IPA.
+ * Korean (ko) text normalization — the pre-tokenizer pass that rewrites everything which is not already
+ * readable by the Hangul engine into Hangul the pipeline speaks. Pure text→text; no IPA.
  *
- * Measured over the ko_kr FLEURS corpus, 1,746 deduplicated utterances, column 3 (the cased one):
- * embedded Latin ×601 instances in 293 utterances (115 all-caps runs / 77 distinct, 57 single letters,
- * the rest mixed-case proper nouns), a digit directly followed by a Hangul counter ×~430, 년 ×149,
- * 월 ×62, 일 ×33, 명 ×42, 세기 ×24, 개 ×28, comma-grouped thousands ×33, 개월 ×8, 시 (clock) ×12,
- * 분 ×12, 시간 ×6, 번째 ×4, ranges ×19 (12 of them ~ / –), decimals ×10, %  ×11, $ ×2, ° ×2,
- * unit abbreviations after a digit ×~50 (km ×20, mm ×10, m ×6, cm ×4, mph ×3, mi ×2, km/h ×2, m/s ×1).
+ * FOUR THINGS CARRY THIS FILE.
  *
- * FOUR DEFECTS DOMINATE, in this order.
+ * ⚠ 1. THE NUMBER–COUNTER BOUNDARY IS WHERE KOREAN SANDHI LIVES. korean.ts tokenizes
+ *    `([가-힣]+)|(\d+)|…`, so `17일` becomes TWO tokens phonemized alone — and the liaison is lost: 17일 is
+ *    [ɕip̚t͡ɕʰiɾiɭ] (십치릴), where the ㄹ of 칠 resyllabifies into 일, but split it reads `sˈip̚t͡ɕʰiɭ ˈiɭ`.
+ *    Same for 100년 [pɛŋnjʌn] (ㄱ→ŋ before ㄴ) and 6개월 [juk̚k͈ɛwʌl] (tensification). Rule 8 spells the digits
+ *    as Hangul and JOINS them to the counter, putting the boundary back inside one token where g2p.ts's
+ *    cross-syllable sandhi can see it.
  *
- * 1. THE NUMBER–COUNTER BOUNDARY. korean.ts tokenizes `([가-힣]+)|(\d+)|…`, so `17일` becomes two
- *    tokens and each is phonemized ALONE. Korean's sandhi is what carries the boundary: 17일 is
- *    [ɕip̚t͡ɕʰiɾiɭ] (십치릴) — the ㄹ of 칠 resyllabifies into 일 — and the split output was
- *    `sˈip̚t͡ɕʰiɭ ˈiɭ`, two words with no liaison at all. Same for 100년 [pɛŋnjʌn] (백년, ㄱ→ŋ before
- *    ㄴ) which came out `p͈ˈɛk̚ nˈjɘn`, and 6개월 [juk̚k͈ɛwʌl] (육깨월, tensification) which came out
- *    `ˈjuk̚ kɛˈwɘɭ`. Rule 8 spells the digits as Hangul and JOINS them to the counter, which puts the
- *    boundary back inside one token where g2p.ts's cross-syllable sandhi can see it. This is why the
- *    corpus diff moves ~430 utterances: it is one rule, and it is the whole reason Korean needed this
- *    layer more than a language whose numbers are already spaced words.
+ * ⚠ 2. NATIVE vs SINO-KOREAN NUMERALS, and WHICH SERIES A NUMERAL TAKES IS A PROPERTY OF THE COUNTER.
+ *    numbers.ts is Sino-only (일 이 삼 …), which is right for dates, money, minutes and measures and FLATLY
+ *    WRONG for the counters taking the native series: 3명 is 세 명, not 삼 명; 11시 is 열한 시, not 십일 시.
+ *    So rule 7 lists only the counters actually attested. ⚠ 개 is guarded against 개월 and 개국, which are
+ *    Sino (육 개월, 칠 개국) and would otherwise be corrupted into 여섯 개월 / 일곱 개국. ⚠ And ≥100 is Sino
+ *    for EVERY counter.
  *
- * 2. NATIVE vs SINO-KOREAN NUMERALS. numbers.ts is Sino-only (일 이 삼 …), which is right for dates,
- *    money, minutes and measures and FLATLY WRONG for the counters that take the native series: 3명 is
- *    세 명, not 삼 명; 11시 is 열한 시, not 십일 시. Which series a numeral takes is a property of the
- *    COUNTER, so rule 7 carries the counters the corpus actually attests and nothing else. The corpus is
- *    also what excluded 대: all seven instances are Sino (20대 "the twenties", 21 대 20 a score, 4대 왕,
- *    300대의 객차 — and ≥100 is Sino for every counter anyway), so the vehicle counter 두 대 that a
- *    grammar would list is simply not what this corpus contains, and guessing it in would have been the
- *    one change with no evidence behind it. 개 is likewise guarded against 개월 ×8 and 개국 ×4, which
- *    are Sino (육 개월, 칠 개국) and would have been corrupted into 여섯 개월 / 일곱 개국.
+ * ⚠ 3. EMBEDDED LATIN ROUTES TO THE ENGLISH PHONEMIZER, which is a sound default for an engine that would
+ *    otherwise DROP the run and wrong here: FBI → [ˈɛfbˈiːʲˈaᶦ], CCTV → [sˈiːsiːtʰˈiːvˌiː] — æ, ɹ, v, f and
+ *    the English diphthongs inside an utterance whose inventory has none of them. A Korean reader says an
+ *    initialism as its HANGUL LETTER NAMES (FBI is 에프비아이), so rule 9 emits those.
+ *    Letter-spelling is a safe DEFAULT because it is always available; the word-read acronyms (UN 유엔,
+ *    NATO 나토) are LEXICAL and live in a short list. Same split as core/initialisms.ts, polarity flipped.
+ *    ⚠ MIXED-CASE Latin is deliberately NOT converted — proper nouns and loanwords whose Hangul is lexical
+ *    and unguessable from spelling. Lowercase single letters keep the fallback too.
  *
- * 3. EMBEDDED LATIN → THE ENGLISH PHONEMIZER. core/foreign.ts is a sound default for an engine that
- *    would otherwise DROP the run, but in a Korean IPA stream it injects phonemes Korean has no
- *    inventory for: FBI → [ˈɛfbˈiːʲˈaᶦ], CCTV → [sˈiːsiːtʰˈiːvˌiː], MRI → [ˌɛmɑːɹˈaᶦ]. That is æ, ɹ, v,
- *    f and the English diphthongs inside an utterance whose inventory has none of them. A Korean reader
- *    says an initialism as its HANGUL LETTER NAMES — FBI is 에프비아이 — so rule 9 emits those and the
- *    ordinary engine speaks them natively. Letter-spelling is always an available Korean reading, so it
- *    is a safe default for an unknown all-caps run; the acronyms read as WORDS (UN 유엔, NATO 나토) are
- *    LEXICAL facts and live in a short list of established ones, not invented for the corpus's long
- *    tail. Same lexical-vs-OOV split as core/initialisms.ts, with the polarity flipped.
+ * ⚠ 4. GROUPED THOUSANDS. The comma is in korean.jsonc's clausePunctuation, so `1,000명` is a PHRASE BREAK
+ *    plus a second number: `ˈiɭ , ˈjɘŋ mˈjɘŋ`, "one, zero people". Rule 1, first, for that reason.
  *
- *    MIXED-CASE Latin (413 instances / 345 distinct — Atlanta, ZMapp, TogiNet, Hesperonychus…) is
- *    deliberately NOT converted. Those are proper nouns and loanwords whose Hangul is lexical and
- *    unguessable from spelling, and they keep the English fallback until there is a sourced loanword
- *    lexicon. Lowercase single letters (c, g, r, e — the corpus discusses their spelling) keep it too.
- *
- * 4. GROUPED THOUSANDS ×33. The comma is in korean.jsonc's clausePunctuation, so 1,000명 was a PHRASE
- *    BREAK plus a second number: `ˈiɭ , ˈjɘŋ mˈjɘŋ` — "one, zero people". Rule 1, first, for that reason.
- *
- * WHAT IS DELIBERATELY LEFT. The ASCII hyphen: five of its digit-flanked instances are 1995-1996년,
- * 35-40 mph, 56-64 km/h, 10 - 11시 — and 5-3으로 이긴, a sports score, which Korean reads 오 대 삼, not
- * 오에서 삼. The same character is also the internal hyphen of COVID-19 / XDR-TB / 슈퍼-G. Four range
- * instances are not enough to claim a mark that overloaded, so `-` keeps its current behaviour (dropped)
- * and only the unambiguous ~ – — are read. The slash likewise: 11 of its 14 instances are 및/또는
- * ("and/or") or a compound like 왕복/연결, not a fraction — the corpus's fractions are already written
- * out as 분의 — so no fraction rule exists here. °W (×1) keeps its bare 도 rather than gaining 서경,
- * and mph/km/h gain 시속 but no per-hour word, because inventing a reading is worse than a plain one.
+ * ⚠ WHAT IS DELIBERATELY LEFT: the ASCII hyphen. It is a range (1995-1996년, 56-64 km/h), a sports SCORE
+ * (5-3으로 이긴, which Korean reads 오 대 삼 and not 오에서 삼), and the internal hyphen of COVID-19 / XDR-TB /
+ * 슈퍼-G. Too overloaded to claim, so it keeps its current dropped behaviour.
  */
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";

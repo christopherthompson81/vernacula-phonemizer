@@ -3,7 +3,7 @@
  * DANISH LOAN NUMERALS (in Danish orthography) from 13 up.** This is the native-vs-borrowed decision for kl, and
  * it is the one in this batch with genuinely hard empirical backing rather than a judgement call.
  *
- * ★★ WHY NOT THE TRADITIONAL VIGESIMAL SYSTEM. Greenlandic's inherited system is base-20 and beautifully
+ * ⚠ WHY NOT THE TRADITIONAL VIGESIMAL SYSTEM. Greenlandic's inherited system is base-20 and beautifully
  *   transparent — `arfineq` 'other hand' builds 6–10, `aqqaneq` 'going down' (to the feet) builds 11–15,
  *   `arfersaneq`/`isikkaneq` 'other foot' builds 16–20, and 20 is `inuk naallugu` 'a whole person'. But:
  *     - **it stops at 20.** In Oqaasileriffik's own reference analyser (the normative Greenlandic FST) there is NO
@@ -16,7 +16,7 @@
  *   So generating native forms above 12 would mean **inventing** them. We do not. We stop the native series at 12,
  *   which is exactly where the modern descriptive sources stop it.
  *
- * ★★ WHY DANISH, AND WHY IN DANISH SPELLING — the empirical test. Greenlandic selects its suffix allomorph by
+ * ⚠ WHY DANISH, AND WHY IN DANISH SPELLING — the empirical test. Greenlandic selects its suffix allomorph by
  *   whether the host word ends in a vowel or a consonant (absolutive plural `-t` after V, `-it` after C). So the
  *   suffix attached to a *digit* in real text reveals how that digit is being READ ALOUD. Over the 833 980-word
  *   GiellaLT/Oqaasileriffik speller corpus (news, literature, official prose):
@@ -34,7 +34,7 @@
  *   corpus they are almost all DERIVATIONAL (`untritillit` 'hundreds', `tuusintilippassuit` 'many thousands'),
  *   not bare cardinals — so they are the wrong thing to generate for a bare digit.
  *
- * ★ SOURCES
+ * ⚠ SOURCES
  *   - **Oqaasileriffik / GiellaLT `lang-kal`** — `src/fst/morphology/stems/nouns.lexc`, the "### Talmaskine ###"
  *     block (the native 0–20 series with its `+Orth/Alt`, `+Orth/Arch` and `+OLang/DAN+Err/Sub` tags), plus the
  *     repo's 46 462-line speller corpus used for the allomorph tests above.
@@ -48,13 +48,13 @@
  *     template** (its CARDINAL lexicon reads peyak/nîso/nisto…, with stray Sámi leftovers, and its Root lexicon is
  *     commented out). It must not be used, despite being the obvious-looking file.
  *
- * ★ ZERO. There is no native Greenlandic zero; the corpus has bare Danish `nul` (3× in 834k words — every
+ * ⚠ ZERO. There is no native Greenlandic zero; the corpus has bare Danish `nul` (3× in 834k words — every
  *   `nule-` hit is the unrelated verb *nuleer-* 'to take a wife'), and the FST routes the digit 0 to the
  *   CONSONANT-final host class, which is correct for `nul` and wrong for any vowel-final alternative. So 0 = `nul`.
  *   NOTE FOR THE PROBE: `nul` is correct Greenlandic-text data, not a failed table lookup — a sentinel check
  *   matching /null/ would false-positive on it.
  *
- * ★ COMPOSITION (Danish, from 13 up)
+ * ⚠ COMPOSITION (Danish, from 13 up)
  *   - 21–99: unit + `og` + ten, written **SOLID**: femogtyve 25, otteoghalvfems 98, syvogtredive 37 (attested).
  *   - hundreds/thousands also solid, and they nest: 713 = `syvhundredetretten`, 12 345 =
  *     `tolvtusindtrehundredefemogfyrre` (both attested shapes).

@@ -10,7 +10,7 @@
  * (2004). The 400+ template is from ALMG's *Numeración Maya* (2004), whose author writes TZ'UTUJIL — used
  * for STRUCTURE only, never for spelling.
  *
- * ★ THE SCORE SERIES IS NOT UNIFORM. The multiples of 20 use three different bases:
+ * ⚠ THE SCORE SERIES IS NOT UNIFORM. The multiples of 20 use three different bases:
  *     20 juwinaq, 40 kawinaq            (⟨winaq⟩ 'person' = 20)
  *     60 oxk'al                          (⟨k'al⟩ = 20)
  *     80 jumuch'                         (⟨much'⟩ = 80 — NOT 400; a common error)
@@ -18,7 +18,7 @@
  *     400 juq'o                          (⟨q'o⟩ = 400)
  *   100 is the NATIVE 5×20 ⟨jok'al⟩, not a Spanish loan.
  *
- * ★★ ADDITIVE ONLY — a deliberate, sourced simplification. Classical K'iche' also had the Mayan
+ * ⚠ ADDITIVE ONLY — a deliberate, sourced simplification. Classical K'iche' also had the Mayan
  * OVERCOUNTING construction ("n toward the next score"), which applied FROM 41 UP (21–39 were already
  * additive; Dékány 2025:132, Yasugi 1995:104–105). This file does not generate it, following ALMG, which
  * norms the additive form because its consulted elders did not recognise the subtractive one — §1.7.4,
