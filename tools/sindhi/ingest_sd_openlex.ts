@@ -8,7 +8,7 @@
  * grammatical final -u the abjad drops (اڪڻ ↔ अकणु əkəɳʊ).
  *
  * That makes this a strictly better signal than the same dataset's `word_with_airab_or_variant` harakat
- * field, which is only PARTIALLY marked (Phase 8) — there, "unmarked" conflates "no vowel" with
+ * field, which is only PARTIALLY marked — there, "unmarked" conflates "no vowel" with
  * "unwritten vowel". Devanagari has no such ambiguity.
  *
  * Reuses the reader + gate already calibrated on kaikki (`crossscript_sd.ts`, 84.6% vs attested IPA):

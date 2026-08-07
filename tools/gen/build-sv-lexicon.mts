@@ -1,5 +1,5 @@
 /**
- * Build the vernacula Swedish Phase-2 lexicon from the CC0 NST Pronunciation Lexicon (swe030224NST.pron).
+ * Build the Swedish accent lexicon from the CC0 NST Pronunciation Lexicon (swe030224NST.pron).
  * We take only CONVENTION-INDEPENDENT abstract features (NOT the NST/espeak segments):
  *   - pitch accent (1|2): NST field 12 SAMPA primary-stress marker — `""` = accent 2, `"` = accent 1.
  *   - primary-stress ORDINAL (0-based syllable index): the `$`-delimited syllable that carries the `"` marker.

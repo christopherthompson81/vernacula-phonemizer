@@ -1,7 +1,7 @@
 /**
  * Build the Hebrew PHASE-2 restorer training corpus from a VOCALIZED Hebrew text corpus (the Nakdimon
  * `hebrew_diacritized` collection). ARCHITECTURE (see he-tagger.PROVENANCE.md): a SENTENCE-LEVEL per-consonant
- * BiLSTM that restores the NIQQUD of unvocalized Hebrew (the ar/nakdan approach), which the deterministic Phase-1
+ * BiLSTM that restores the NIQQUD of unvocalized Hebrew (the ar/nakdan approach), which the deterministic rule
  * g2p (hebrew.ts) then converts to IPA — the neural net learns ONLY the context-dependent diacritization, not the
  * (already-validated) g2p. SENTENCE-LEVEL (the fa faTagger pattern): each example is a CLAUSE (words joined by
  * single spaces) so the bidirectional pass sees CROSS-WORD context and can resolve homographs (ספר =

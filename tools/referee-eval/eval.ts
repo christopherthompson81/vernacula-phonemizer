@@ -224,7 +224,7 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     tg, // Tajik — Persian variety in Cyrillic (near-phonemic); wikipron tgk broad+narrow + epitran tgk-Cyrl
     arz: (w: string) => ar(w, "egyptian", { lexicon: false }), // Egyptian Arabic variety — shares phonemizeArabic
     apc: (w: string) => ar(w, "levantine"), // North Levantine Arabic variety
-    apd: (w: string) => ar(w, "sudanese"), // Sudanese Arabic variety (no referee — gold-anchored 🔷)
+    apd: (w: string) => ar(w, "sudanese"), // Sudanese Arabic variety (no referee — gold-anchored)
     acm: (w: string) => ar(w, "iraqi"), // Iraqi Arabic variety (Baghdadi gilit)
     afb: (w: string) => ar(w, "gulf"), // Gulf Arabic variety (Khaleeji)
     ary: (w: string) => ar(w, "moroccan"), // Moroccan Arabic variety (Darija)

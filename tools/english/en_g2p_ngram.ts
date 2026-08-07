@@ -1,5 +1,5 @@
 /**
- * English L2S divestment (cleanroom G2P) — Phase 2: JOINT-SEQUENCE N-GRAM model (Sequitur-style), the
+ * English cleanroom G2P — a JOINT-SEQUENCE N-GRAM model (Sequitur-style), the
  * high-ceiling method vs the per-letter backoff. Trains on CMUdict (public domain, no espeak):
  *   1. EM-align letters→ARPABET (1 letter → 0..2 phones).
  *   2. Turn each word into a sequence of JOINT tokens  g:p  (grapheme-chunk : phone-chunk).

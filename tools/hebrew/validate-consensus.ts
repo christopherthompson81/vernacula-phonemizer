@@ -1,6 +1,6 @@
 /**
- * Validate the Hebrew Phase-1 g2p against the UNANIMOUS 3-referee consensus gold (tools/hebrew/consensus-gold.tsv,
- * where Wiktionary + Phonikud + ReNikud agree). This is the OBJECTIVE gate for a Phase-1 rule change: run it before
+ * Validate the Hebrew rule g2p against the UNANIMOUS 3-referee consensus gold (tools/hebrew/consensus-gold.tsv,
+ * where Wiktionary + Phonikud + ReNikud agree). This is the OBJECTIVE gate for a phase-1 rule change: run it before
  * and after, and accept the change iff the agreement % goes UP. Where the three referees disagreed, the word was
  * excluded from the gold, so this never penalises a genuine convention/ambiguity.
  *
@@ -29,5 +29,5 @@ for (const [voc, gold] of rows) {
     if (ours === gold) ok++;
     else miss.push(`${gold}\t${ours}\t(${voc})`);
 }
-console.log(`Phase-1 g2p vs unanimous 3-referee consensus: ${ok}/${rows.length} = ${(100 * ok / rows.length).toFixed(1)}%`);
+console.log(`rule g2p vs unanimous 3-referee consensus: ${ok}/${rows.length} = ${(100 * ok / rows.length).toFixed(1)}%`);
 if (process.argv.includes("--miss")) for (const m of miss) console.log("  " + m);

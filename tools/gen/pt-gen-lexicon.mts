@@ -6,7 +6,7 @@
  *   - a word-initial e is e/ɛ (overriding the default i-raising).
  * Open/init detection is aligned to the stressed / initial nucleus by vowel index (NOT a blind substring
  * search — a pretonic ɛ/ɔ must not open the stressed vowel). Robust to the referee's betacism / affricate via
- * folding. Usage: npx tsx tools/pt-gen-lexicon.mts
+ * folding. Usage: npx tsx tools/gen/pt-gen-lexicon.mts
  */
 import { readFileSync, writeFileSync } from "node:fs";
 
@@ -72,6 +72,6 @@ for (const [word, gold] of ref) {
 rows.sort();
 const header = `# European Portuguese lexical correction table — word<TAB>code. ɛ|ɔ = stressed mid vowel opens;\n`
   + `# x:s|x:z|x:ks = grapheme x; e:e|e:ɛ = word-initial e (vs the default i). Engine handles everything else.\n`
-  + `# Derived from wikipron EP (por_latn_po) — tools/pt-gen-lexicon.mts.\n`;
+  + `# Derived from wikipron EP (por_latn_po) — tools/gen/pt-gen-lexicon.mts.\n`;
 writeFileSync(OUT, header + rows.join("\n") + "\n");
 console.log(`wrote ${rows.length} rows (${counts.open} open, ${counts.x} x, ${counts.initE} initial-e) from ${ref.size} entries → ${OUT}`);

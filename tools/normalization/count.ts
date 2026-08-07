@@ -16,7 +16,7 @@
  * for a question that is always the same shape: how many times does X occur in this corpus, optionally flanked?
  * A function cannot be got wrong the same way twice.
  *
- * ⚠ AND A COUNT IS STILL A LEAD, NEVER A FINDING. The playbook says so (`A count is a lead, never a finding — read
+ * ⚠ AND A COUNT IS STILL A LEAD, NEVER A FINDING. (`A count is a lead, never a finding — read
  * the instances`) and this module cannot enforce it, so every function here returns the MATCHES, not a number, and
  * the count is `.length`. Getting a count out requires having the instances in hand.
  */
