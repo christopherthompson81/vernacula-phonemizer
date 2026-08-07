@@ -243,7 +243,7 @@ export function normalizeMacedonian(input: string): string {
 
     // 9) CENTURY — `N век` → ordinal + век (10 век → десетти век), including the compound list
     //    `10 и 11 век`. Also the one Germanic remnant `8. век` (with a dot). The suffix forms (17-ти век,
-    //    18-тиот век) were already claimed by step 6.
+    //    18-тиот век) were already claimed by step 8.
     s = s.replace(/(\d+)\s+и\s+(\d+)\s*век(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) => {
         const oa = mkOrdinal(Number(a)), ob = mkOrdinal(Number(b));
         return oa !== undefined && ob !== undefined ? `${oa} и ${ob} век` : _m;

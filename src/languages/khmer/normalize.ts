@@ -127,9 +127,9 @@ export function normalizeKhmer(text: string): string {
     // the mined artifacts of 94 of 154 languages — 2,653 occurrences. Solving that here would mean solving it 94
     // times. It now happens once, during extraction, in `tools/normalization/wikidump-to-text.py`.
     //
-    // What remains local is one guard, because a caller can pass anything: step 10 turns `&` into និង, and the
-    // `&` of an undecoded `&nbsp;` would become "and nbsp" — confident nonsense, read aloud. So that rule
-    // declines an `&` that opens an entity rather than re-implementing a decoder.
+    // What remains local is one guard, because a caller can pass anything: the shared tier at step 8 turns `&`
+    // into និង, and the `&` of an undecoded `&nbsp;` would become "and nbsp" — confident nonsense, read aloud.
+    // So that rule declines an `&` that opens an entity rather than re-implementing a decoder.
 
     // ── 1. ៗ (លេខទោ) = repeat the preceding WORD ──────────────────────────────────────────────────────
     // FIRST, because it is the only rule that reads a Khmer run as a unit; every later rule works on digits

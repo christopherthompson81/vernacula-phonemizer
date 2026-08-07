@@ -206,7 +206,8 @@ export function normalizeDutch(input: string): string {
 
     // 8) DEGREES. `0°C` came out as the bare consonant *s*; `35°W` dropped the sign and left a lone `W`.
     //    The compass letters are expanded only DIRECTLY after a degree sign, where they cannot be anything
-    //    else. AFTER step 7 so `m/s` is already gone, and after the clock so no `°` rule sees a time.
+    //    else. AFTER the 6-7 tier composition so `m/s` is already gone, and after the clock (step 5) so no
+    //    `°` rule sees a time.
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 graden Celsius");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 graden Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NOZW])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
