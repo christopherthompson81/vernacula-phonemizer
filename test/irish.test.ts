@@ -158,7 +158,7 @@ describe("Irish text normalization", () => {
         expect(ph("400,000")).toBe("cˈɛhɾʲə çˈeːd̪ˠ mʲˈiːlʲə");
         expect(ph("1.5 million")).toBe("ˈa hˈeːn̪ˠ pˠˈɔnʲtʲə ˈa kˈuːɟ mʲˈɪlʲən̪ˠ");
         expect(ph("12.8 km")).toBe("ˈa d̪ˠˈoː jˈeːɡ pˠˈɔnʲtʲə ˈa hˈɔxt̪ˠ cˈɪlʲəmʲeːd̪ˠəɾˠ");
-        // trap pins: the haon-ending compound ordinals (21ú, 31ú) and the decimal-percent (3.5%)
+        // trap pins: the haon-ending compound ordinal (21ú) and the decimal-percent (3.5%)
         expect(ph("21ú")).toBe("ˈeːn̪ˠuː ˈɪʃ fʲˈɪçə"); // aonú is fiche — the unit first, the tens last
         expect(ph("3.5%")).toBe("ˈa tʲɾʲˈiː pˠˈɔnʲtʲə ˈa kˈuːɟ fˠˈiːnʲ ɟˈeːd̪ˠ"); // faoin gcéad after the decimal
     });

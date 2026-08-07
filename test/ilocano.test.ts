@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { createIlocano, phonemizeWord, phonemizeWordRules } from "../src/languages/ilocano/ilocano.ts";
 
 // Canonical-IPA goldens for Ilocano / Iloko (ilo) — Austronesian (Northern Luzon, NOT Bisayan), Latin. TWO paths:
-// phonemizeWordRules = the non-circular RULE g2p (what the referee eval measures, ~83%); phonemizeWord = the shipped
+// phonemizeWordRules = the non-circular RULE g2p (what the referee eval measures); phonemizeWord = the shipped
 // path (a stress-marked-referee lexicon first, then the rule). The rule's Ilocano-distinctive HIATUS: a HIGH vowel
 // ⟨i u⟩ before a vowel GLIDES (dua→dwa, radio→ɾadjo). Whether a high vowel glides vs stays syllabic is LEXICAL
 // (garcia stays but radio glides — identical C-i-V, differ only in lexical stress); the lexicon carries that.

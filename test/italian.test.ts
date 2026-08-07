@@ -119,7 +119,7 @@ describe("italian Roman-numeral ordinal policy", () => {
 // with the count and the pre-change output recorded in normalize.ts's header. Assertions are on substrings
 // of the phonemized output, because what these rules fix is a wrong or missing WORD, not a whole utterance.
 describe("italian text normalization", () => {
-    test("dot-grouped thousands are one number, not a sentence break (×52 — the largest defect)", () => {
+    test("dot-grouped thousands are one number, not a sentence break (×52)", () => {
         // Before: "19.500" → [dit͡ʃannˈove . t͡ʃinkwet͡ʃˈento] — a full clause pause inside one number.
         expect(phonemize("una superficie di 19.500 km²", "it")).toContain("dit͡ʃannovemilat͡ʃinkwet͡ʃˈento");
         expect(phonemize("una superficie di 19.500 km²", "it")).not.toContain(" . ");
@@ -240,9 +240,9 @@ describe("italian text normalization", () => {
     });
 
     test("the plus as a WORD-JOINER, and the exponent across a magnitude", () => {
-        // `volo+hotel` is the only `+` in the corpus and it is not arithmetic — no digit on either side, so
-        // every digit-keyed rule from the signed-number sweep was blind to it. MMS-1b-all (`ita`) on the
-        // it_it speaker: "pacchetti combinati vol o piu hotel".
+        // ⚠ A LETTER-FLANKED `+` IS INVISIBLE TO EVERY DIGIT-KEYED SIGN RULE. `volo+hotel` is the corpus's
+        // only `+` and it is not arithmetic — no digit on either side. MMS-1b-all (`ita`) on the it_it
+        // speaker confirms the reading: "pacchetti combinati vol o piu hotel".
         expect(phonemize("pacchetti combinati volo+hotel", "it")).toContain("vˈolo pjˈu ˈotel");
         // The numeric pluses must be untouched by that rule — it is letter-keyed on BOTH sides.
         expect(phonemize("ora locale (UTC+1)", "it")).toContain("pjˈu ˈuno");

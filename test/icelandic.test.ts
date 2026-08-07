@@ -7,8 +7,8 @@ import { normalizeIcelandic } from "../src/languages/icelandic/normalize.ts";
 // Icelandic (is) — íslenska, North Germanic (Insular), Latin + ⟨þ ð æ ö⟩ (~330k). One of the deepest orthographies
 // in the fleet: NO voicing contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k];
 // famous epenthetic-stop clusters ⟨ll⟩→[tl] ⟨rn⟩→[rtn]; preaspiration; devoiced-sonorant onsets. A greedy scan +
-// code rules, validated against wikipron isl_latn_broad (10,093 human headwords) — 79.8% FOLDED / 96.7% symbol, with
-// vowel LENGTH + ASPIRATION folded. single-source but LARGE.
+// code rules. Referee: wikipron isl_latn_broad (human), with vowel LENGTH + ASPIRATION folded. ⚠ It is the
+// only referee for is — single-source, though a large one.
 describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization + the epenthetic clusters", () => {
     const is = createIcelandic();
 
@@ -97,7 +97,7 @@ describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization
 
 });
 
-// the normalization layer. Counts measured over the FLEURS is_is corpus (column 3).
+// TEXT NORMALIZATION. Counts measured over the FLEURS is_is corpus (column 3).
 describe("icelandic normalization", () => {
     // Icelandic ordinals AGREE IN GENDER AND CASE, which is what separates this from the Norwegian and
     // Danish single-form tables. Weak declension: -i is masculine NOMINATIVE only; -a covers masculine

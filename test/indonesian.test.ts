@@ -48,8 +48,9 @@ describe("indonesian canonical IPA", () => {
     });
 });
 
-// the eleventh language. Three defects were outside the normalization layer (padded punctuation, a
-// bare \d+ number token, no decimal word) and are fixed in the manifest and the engine.
+// TEXT NORMALIZATION. ⚠ Three of the defects this covers are NOT in the normalization layer at all —
+// padded punctuation, a bare `\d+` number token, and a missing decimal word — and are fixed in the manifest
+// and the engine. Reading the normalizer alone would have found none of them.
 describe("indonesian normalization", () => {
     test("both number separators, which were clause pauses", () => {
         // The number token was a bare \d+, so "9.000" tokenized as 9 | . | 000 and the separator became a
