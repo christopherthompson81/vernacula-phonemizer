@@ -18,8 +18,8 @@ interface CrimeanTatarDef {
 // Letter → IPA (crimeantatar.jsonc). The ⟨v⟩→[w] coda rule and dotless-I casing are handled in the scan.
 const DEF = loadManifest<CrimeanTatarDef>(import.meta.url, "crimeantatar.jsonc");
 const LETTER = DEF.letters;
-// The Latin vowel letters (crimeantatar.jsonc) — the ⟨v⟩→[w] coda context. Named CYR_ for the Cyrillic
-// sister orthography this engine grew out of; Crimean Tatar's standard script is Latin.
+// The Latin vowel letters (crimeantatar.jsonc) — the ⟨v⟩→[w] coda context. The CYR_ prefix is inherited
+// from the sibling Turkic engines; Crimean Tatar is written in Latin and this engine always has been.
 const CYR_VOWEL = new Set(DEF.vowelLetters);
 const IPA_VOWEL = new Set([..."ɑaeɯioøuy"]);
 

@@ -25,7 +25,6 @@
         "ໜ": ["n", "high"], "ໝ": ["m", "high"], // precomposed ຫນ/ຫມ
     },
 
-    // Final (coda) consonant → IPA. Lao has the 8-way final set (stops unreleased; sonorants + glides).
     // ⚠ THE LEADING VOWEL SIGNS ⟨ເ ແ ໂ ໃ ໄ⟩ — written BEFORE the consonant they follow in speech. lao.ts
     // reorders them to after their consonant (cluster) first, so the rest of the scan can read strictly
     // left to right. This is the abugida's one visual/phonetic inversion.
@@ -41,6 +40,7 @@
     // length × mark), which is the table further down and the resolver in lao.ts.
     "toneMarks": ["່", "້", "໊", "໋"],
 
+    // Final (coda) consonant → IPA. Lao has the 8-way final set (stops unreleased; sonorants + glides).
     "codas": {
         "ກ": "k̚", "ດ": "t̚", "ບ": "p̚", "ງ": "ŋ", "ນ": "n", "ມ": "m", "ຍ": "j", "ວ": "w",
     },

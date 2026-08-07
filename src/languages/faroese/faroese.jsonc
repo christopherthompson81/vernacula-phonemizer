@@ -30,8 +30,6 @@
         "m": "m", "n": "n", "r": "r", "v": "v", "ð": "ð", "þ": "θ", "c": "k", "w": "v", "x": "ks", "z": "s", "q": "k",
     },
 
-    // SKERPING vowel remap before ⟨gv⟩ (the "sharpening"): ó→[ɛ], ú→[ɪ], í ý→[ʊi]. Before ⟨ggj⟩ the í/ý
-    // offglide DROPS to a plain [ʊ] (nýggjur→nʊt͡ʃːʊɹ, kríggj→kɹʊt͡ʃ).
     // Front vowel GRAPHEMES that affricate a preceding ⟨g k⟩ → [t͡ʃ] (argi→aɹt͡ʃɪ).
     // ⚠ NOT ⟨ø⟩: gøta is [køːta], not *[t͡ʃøːta] — the front-ROUNDED vowel does not palatalize the velar.
     "affricatingVowels": ["e", "i", "y", "í", "ý", "æ"],
@@ -46,6 +44,8 @@
     "frontGlideVowels": ["i", "y", "í", "ý", "æ", "ei", "ey", "oy"],
     "roundGlideVowels": ["o", "u", "ó", "ú", "ø", "á"],
 
+    // SKERPING vowel remap before ⟨gv⟩ (the "sharpening"): ó→[ɛ], ú→[ɪ], í ý→[ʊi]. Before ⟨ggj⟩ the í/ý
+    // offglide DROPS to a plain [ʊ] (nýggjur→nʊt͡ʃːʊɹ, kríggj→kɹʊt͡ʃ).
     "skerping": { "ó": "ɛ", "ú": "ɪ", "í": "ʊi", "ý": "ʊi" },
     "skerpingGgj": { "ó": "ɛ", "ú": "ɪ", "í": "ʊ", "ý": "ʊ" },
 

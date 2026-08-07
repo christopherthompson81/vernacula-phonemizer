@@ -27,12 +27,12 @@
         ["dh", "ð"], ["th", "θ"], ["gh", "ɡ"], ["ch", "k"],
     ],
 
-    // Single letters. ⟨y⟩ = the Greek-gamma letter → [ɣ] (anyedz→anɣed͡z), NOT the glide [j].
     // The VOWEL LETTERS — the environment for the two code rules in aromanian.ts: the SILENT softener ⟨i⟩ in
     // ⟨ci gi⟩ + vowel, and the on/offglide test that turns a non-high vowel letter into part of a diphthong.
     // ⟨â î⟩ are absent deliberately: they are the same [ɨ] and never take part in either rule.
     "vowelLetters": ["a", "e", "i", "o", "u", "ã"],
 
+    // Single letters. ⟨y⟩ = the Greek-gamma letter → [ɣ] (anyedz→anɣed͡z), NOT the glide [j].
     "letters": {
         "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ã": "ə", "â": "ɨ", "î": "ɨ",
         "b": "b", "d": "d", "f": "f", "h": "h", "j": "ʒ", "k": "k", "l": "l", "m": "m", "n": "n",

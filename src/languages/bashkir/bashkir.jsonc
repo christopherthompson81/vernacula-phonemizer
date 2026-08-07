@@ -43,11 +43,11 @@
     // "bashkirLetters" are the letters Russian does not have. They are always harmonic, so ONE of them
     // vetoes the whole test — this is the guard that keeps a native word out of the Russian g2p.
     "bashkirLetters": ["ҡ", "ғ", "ҙ", "ҫ", "ң", "ә", "ө", "ү", "һ"],
-    // The two harmony classes the violation is measured over. "loanBackVowels" is the same list as
-    // "backVowels" above, but it answers a different question and is kept separate for that reason.
-    // ⚠ THE FRONT LIST IS DELIBERATELY SHORT. ⟨и⟩ is harmonically NEUTRAL and frequent in back-vowel
-    // Arabic/Persian loans, so counting it would flag native words. ⟨ә ө ү⟩ are front but are also
-    // Bashkir-specific letters, so the guard above has already returned by the time they would matter.
-    "loanBackVowels": ["а", "о", "у", "ы"],
+    // The BACK side of the violation is "backVowels" above — the same letters, read a second time, since
+    // there is only one set of Bashkir back vowels and two copies could only ever drift apart.
+    // ⚠ THE FRONT SIDE IS DELIBERATELY SHORT — it is NOT the mirror of "backVowels". ⟨и⟩ is harmonically
+    // NEUTRAL and frequent in back-vowel Arabic/Persian loans, so counting it would flag native words as
+    // Russian. ⟨ә ө ү⟩ are front but are also Bashkir-specific letters, so the guard above has already
+    // returned by the time they could matter. That asymmetry is why only this list gets its own key.
     "loanFrontVowels": ["е", "э"],
 }

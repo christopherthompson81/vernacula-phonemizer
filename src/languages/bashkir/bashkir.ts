@@ -17,7 +17,6 @@ interface BashkirDef {
     vowelLetters: readonly string[];
     backVowels: readonly string[];
     bashkirLetters: readonly string[];
-    loanBackVowels: readonly string[];
     loanFrontVowels: readonly string[];
 }
 const DEF = loadManifest<BashkirDef>(import.meta.url, "bashkir.jsonc");
@@ -35,7 +34,7 @@ const IPA_VOWEL = new Set([..."ɑæʊøɯɪyiuo"]); // every vowel the scan emit
 // with a front one — and lacking any Bashkir-specific letter (which are always harmonic) — is a Russian loan.
 // The three lists, and WHY the front one is shorter than it looks, are in bashkir.jsonc.
 const BASHKIR_LETTER = new Set(DEF.bashkirLetters);
-const BACK_V = new Set(DEF.loanBackVowels);
+const BACK_V = BACK; // the same back vowels as the ⟨л⟩ rule — one set of them exists, so one list
 const FRONT_V = new Set(DEF.loanFrontVowels);
 export function isRussianLoan(word: string): boolean {
     const w = word.normalize("NFC").toLowerCase();

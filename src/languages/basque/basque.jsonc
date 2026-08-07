@@ -26,13 +26,13 @@
         ["tx", "t͡ʃ"], ["tz", "t͡s̻"], ["ts", "t͡s̺"], ["dd", "ɟ"], ["tt", "c"], ["ll", "ʎ"], ["rr", "r"],
     ],
 
-    // Single letters. ⟨z⟩→[s̻] laminal, ⟨s⟩→[s̺] apical, ⟨x⟩→[ʃ]; ⟨j⟩→[x]; ⟨g⟩→[ɡ] always. Loan letters
-    // ⟨c q v w y ç⟩ map to their nearest Basque value. ⟨h⟩ and ⟨r⟩ are handled in the scan (basque.ts).
     // The five VOWEL LETTERS — Basque has no accented or extra vowels. This is the environment for the one
     // context rule in basque.ts: a single ⟨r⟩ is the TAP [ɾ] only BETWEEN two of these, and the trill [r]
     // word-initially, word-finally or next to a consonant.
     "vowelLetters": ["a", "e", "i", "o", "u"],
 
+    // Single letters. ⟨z⟩→[s̻] laminal, ⟨s⟩→[s̺] apical, ⟨x⟩→[ʃ]; ⟨j⟩→[x]; ⟨g⟩→[ɡ] always. Loan letters
+    // ⟨c q v w y ç⟩ map to their nearest Basque value. ⟨h⟩ and ⟨r⟩ are handled in the scan (basque.ts).
     "letters": {
         "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
         "b": "b", "d": "d", "f": "f", "g": "ɡ", "j": "x", "k": "k", "l": "l", "m": "m", "n": "n",

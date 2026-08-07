@@ -7,7 +7,6 @@
     "name": "Khmer",
     "script": ["Khmer"],
 
-    // Base consonant → [onset IPA, series ("a" | "o")]. The series sets the inherent vowel and the vowel-sign reading.
     // Combining DIACRITICS consumed after a unit's vowel. The two register shifters (musikatoan ⟨៉⟩,
     // triisap ⟨៊⟩) and the bantoc ⟨់⟩ carry meaning and are handled by name in khmer.ts; the rest are
     // consumed and ignored, and they are listed together here because the scan's job is to know where the
@@ -22,6 +21,7 @@
     // The NASAL subset of those — a nasal-initial cluster is a prefix syllable, not a true onset cluster.
     "nasalConsonants": ["ង", "ញ", "ណ", "ន", "ម"],
 
+    // Base consonant → [onset IPA, series ("a" | "o")]. The series sets the inherent vowel and the vowel-sign reading.
     "consonants": {
         "ក": ["k", "a"], "ខ": ["kʰ", "a"], "គ": ["k", "o"], "ឃ": ["kʰ", "o"], "ង": ["ŋ", "o"],
         "ច": ["c", "a"], "ឆ": ["cʰ", "a"], "ជ": ["c", "o"], "ឈ": ["cʰ", "o"], "ញ": ["ɲ", "o"],

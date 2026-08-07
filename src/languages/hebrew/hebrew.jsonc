@@ -18,8 +18,6 @@
         "stress": "phonemic but UNWRITTEN → not emitted; the referee marks it (ˈ) → folded"
     },
 
-    // Base (SOFT / default) consonant → IPA. Finals ⟨ךםןףץ⟩ = their base soft value. The dagesh-hard overrides
-    // (בכפ → b k p) and the shin/sin split live in code (hebrew.ts).
     // The GUTTURALS that take a furtive patach. A patach written under one of these WORD-FINALLY is read
     // BEFORE the consonant, not after it (רוּחַ → ˈʁuaχ, not *ˈʁuχa) — the one place Hebrew's vowel points
     // do not read left-to-right. ⟨ה⟩ is in the list but is itself silent word-final, so it contributes the
@@ -34,6 +32,8 @@
     // nach in general needs morphology; the proclitics are the subset that can be decided from the letter.
     "proclitics": ["ו", "ל", "ב", "כ", "מ"],
 
+    // Base (SOFT / default) consonant → IPA. Finals ⟨ךםןףץ⟩ = their base soft value. The dagesh-hard overrides
+    // (בכפ → b k p) and the shin/sin split live in code (hebrew.ts).
     "consonants": {
         "א": "ʔ", "ב": "v", "ג": "ɡ", "ד": "d", "ה": "h", "ו": "v", "ז": "z", "ח": "χ", "ט": "t",
         "י": "j", "כ": "χ", "ך": "χ", "ל": "l", "מ": "m", "ם": "m", "נ": "n", "ן": "n", "ס": "s",

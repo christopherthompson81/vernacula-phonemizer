@@ -24,8 +24,6 @@
     // alia→alia, creātūra→kreaːtuːra); the diaeresis vowels tense on the same rule (applied in latin.ts).
     "tense": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "y": "y", "ë": "e", "ï": "i", "ö": "o", "ü": "u", "ÿ": "y" },
 
-    // Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ is
-    // dark/clear by context (latin.ts).
     // Every letter that writes a vowel, across all three spelling conventions the tables above cover: the
     // plain ⟨a e i o u y⟩, the MACRONED long vowels, and the diaeresis vowels that mark a broken diphthong.
     // The scan in latin.ts tests this to find syllable boundaries — so a macron missing here would make a
@@ -36,6 +34,8 @@
         "ë", "ï", "ö", "ü", "ÿ"
     ],
 
+    // Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ is
+    // dark/clear by context (latin.ts).
     "consonants": {
         "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "k": "k", "m": "m", "n": "n",
         "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "w", "z": "z", "j": "j",

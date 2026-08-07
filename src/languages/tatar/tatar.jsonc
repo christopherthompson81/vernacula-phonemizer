@@ -20,7 +20,6 @@
     // Simple vowels → IPA. ⟨а⟩'s [a]/[ɑ] split by word harmony is applied in tatar.ts.
     "vowels": { "а": "ɑ", "ә": "æ", "о": "o", "ө": "ø", "у": "u", "ү": "y", "ы": "ɨ", "и": "i", "е": "e", "э": "e" },
 
-    // Iotated vowels → glide + vowel.
     // Every letter that writes a vowel — the environment for the ⟨е⟩ iotation in tatar.ts (word-initial or
     // post-vocalic ⟨е⟩ → [je]).
     "vowelLetters": ["а", "ә", "о", "ө", "у", "ү", "ы", "и", "е", "э", "я", "ю", "ё"],
@@ -34,5 +33,6 @@
     "backVowels": ["а", "о", "у", "ы", "я", "ю", "ё"],
     "frontVowels": ["ә", "ө", "ү", "е", "э", "и"],
 
+    // Iotated vowels → glide + vowel.
     "iotated": { "я": "jɑ", "ю": "ju", "ё": "jo" },
 }

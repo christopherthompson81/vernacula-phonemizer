@@ -9,7 +9,6 @@
     "name": "Guaraní (Avañe'ẽ)",
     "script": ["Latin"],
 
-    // Scanned LONGEST-FIRST. Prenasalized stops ⟨mb nd nt⟩; ⟨ng⟩→plain [ŋ]; ⟨ch⟩→ʃ; ⟨gu⟩→w (labiovelar); ⟨rr⟩ trill.
     // The ACUTE vowels — Guaraní marks stress with an acute, and an unmarked word is oxytone, so this list
     // is the whole stress rule's input.
     "acuteVowels": ["á", "é", "í", "ó", "ú", "ý"],
@@ -20,6 +19,7 @@
     // and [w] before a back vowel, so ⟨y⟩ ([ɨ], written ⟨y⟩ in the orthography) belongs here with ⟨e i⟩.
     "frontLetters": ["e", "i", "é", "í", "ẽ", "ĩ", "y", "ý", "ỹ"],
 
+    // Scanned LONGEST-FIRST. Prenasalized stops ⟨mb nd nt⟩; ⟨ng⟩→plain [ŋ]; ⟨ch⟩→ʃ; ⟨gu⟩→w (labiovelar); ⟨rr⟩ trill.
     "digraphs": {
         "mb": "ᵐb", "nd": "ⁿd", "ng": "ŋ", "nt": "ⁿt",
         "ch": "ʃ", "rr": "r"
