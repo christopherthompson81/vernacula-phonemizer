@@ -15,6 +15,7 @@ import { numberToWords } from "./numbers.ts";
 
 interface HaitianDef {
     digraphs: Record<string, string>;
+    hiatusVowels: readonly string[];
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
 }
@@ -25,7 +26,7 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 // TRUE vowels (not the glides ⟨y w⟩) — an ⟨n⟩ stays an oral onset only before one of these; before a glide the vowel
 // still nasalizes (anyen→ãjɛ̃, anwo→ãwo).
-const HIATUS_VOWEL = new Set([..."aeiouèòéà"]);
+const HIATUS_VOWEL = new Set(DEF.hiatusVowels);
 // Plain ⟨a e o⟩ + a syllable-final ⟨n⟩ → the nasal vowel.
 const NASAL: Record<string, string> = { a: "ã", e: "ɛ̃", o: "ɔ̃" };
 

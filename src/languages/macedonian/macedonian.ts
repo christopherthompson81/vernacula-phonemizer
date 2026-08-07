@@ -27,6 +27,7 @@ interface NumbersDef {
 }
 interface MacedonianDef {
     letters: Record<string, string>;
+    frontLetters: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
 }
@@ -79,7 +80,7 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 const VOWELS = new Set([..."aɛiɔu"]);
-const FRONT_L = new Set(["е", "и", "ј"]); // ⟨л⟩ is light [l] before these, dark [ɫ] elsewhere
+const FRONT_L = new Set(DEF.frontLetters); // ⟨л⟩ is light [l] before these, dark [ɫ] elsewhere
 // Voiced obstruent → voiceless (final devoicing + regressive assimilation before a voiceless obstruent).
 const DEVOICE: Record<string, string> = { b: "p", v: "f", ɡ: "k", d: "t", ʒ: "ʃ", z: "s", "d͡ʒ": "t͡ʃ", "d͡z": "t͡s", ɟ: "c" };
 const VOICE: Record<string, string> = Object.fromEntries(Object.entries(DEVOICE).map(([k, v]) => [v, k]));

@@ -14,6 +14,7 @@ import { latinPhone } from "../../core/latinPhones.ts";
 
 interface LatgalianDef {
     digraphs: [string, string][];
+    frontVowels: readonly string[];
     vowels: Record<string, string>;
     consonants: Record<string, string>;
     voice: Record<string, string>;
@@ -26,7 +27,7 @@ const VOWEL = DEF.vowels;
 const CONS = DEF.consonants;
 const VOICE = DEF.voice;
 const DEVOICE = DEF.devoice;
-const FRONT = new Set([..."iīeē"]); // the vowel LETTERS that palatalize a preceding consonant (NOT ⟨y⟩)
+const FRONT = new Set(DEF.frontVowels); // the vowel LETTERS that palatalize a preceding consonant
 
 interface Seg { ph: string; vowel: boolean; frontTrigger: boolean; }
 

@@ -26,6 +26,24 @@
         "þ": "θ", "ð": "ð", "x": "ks", "c": "k", "q": "k", "w": "v", "z": "s"
     },
 
+    // ⚠ FOUR LETTER CLASSES, one per context rule in icelandic.ts. They overlap but none is derivable from
+    // another, which is why each is written out.
+    //
+    // "frontVowels" — ⟨g k⟩ become the affricates [c ch] before one of these (kex→cɛxs). ⟨j⟩ is in the list
+    // because the glide conditions the change exactly as a front vowel does.
+    "frontVowels": ["e", "é", "i", "í", "y", "ý", "æ", "j"],
+    // "highFrontVowels" — these ALSO insert a glide [j] before a following vowel (Biblía→pɪplija). A subset
+    // of the front vowels: ⟨e é æ⟩ are front but not high enough to break the hiatus.
+    "highFrontVowels": ["i", "í", "y", "ý"],
+    // "longNuclei" — the accented vowels, which are long by spelling. A doubled ⟨nn⟩ is the PREASPIRATED
+    // [tn] only after one of these (or after the diphthongs ⟨au ei ey⟩, which the engine tests separately);
+    // after a short vowel it is the plain geminate [nː]. This is the ⟨nn⟩ of the definite article.
+    "longNuclei": ["á", "é", "í", "ó", "ú", "ý", "æ"],
+    // "collapsingDoubles" — the NON-STOP consonants whose doubling is purely orthographic and collapses to
+    // one phone (Sviss→svɪs). The stops ⟨p t k⟩ are excluded deliberately: their doubling is preaspiration,
+    // a real sound change, handled separately.
+    "collapsingDoubles": ["s", "f", "m", "r", "v", "þ", "ð"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },

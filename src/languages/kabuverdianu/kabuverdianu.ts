@@ -14,6 +14,8 @@ import { numberToWords } from "./numbers.ts";
 
 interface KabuverdianuDef {
     digraphs: Record<string, string>;
+    accentedVowels: readonly string[];
+    vowelLetters: readonly string[];
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
 }
@@ -22,7 +24,7 @@ const DI = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const VOWEL_PH = new Set([..."ɐeɛioɔu"]);
-const ACCENTED = new Set([..."áàâéèêíìîóòôúùû"]); // a written accent carries the stress
+const ACCENTED = new Set(DEF.accentedVowels); // a written accent carries the stress
 
 interface Seg {
     ph: string;
@@ -30,7 +32,7 @@ interface Seg {
     accented: boolean;
     offglide: boolean; // a falling-diphthong ⟨i/u⟩ after another vowel — a vowel but NOT a stress-bearing nucleus
 }
-const VOWEL_LETTERS = new Set([..."aeiouáàâéèêíìîóòôúùûy"]);
+const VOWEL_LETTERS = new Set(DEF.vowelLetters);
 
 /** Scan a lowercased Kabuverdianu word into IPA segments (digraphs first, then single graphemes). */
 function scan(word: string): Seg[] {

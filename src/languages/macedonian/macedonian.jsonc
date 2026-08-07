@@ -17,6 +17,11 @@
         "ѐ": "ɛ", "ѝ": "i", // the disambiguating grave-accented spellings (сѐ "all", ѝ "her")
     },
 
+    // ⟨л⟩ is the LIGHT [l] before one of these and the DARK [ɫ] everywhere else — the Macedonian hallmark
+    // that distinguishes it from Serbian. ⟨ј⟩ is in the list with ⟨е и⟩: it is a consonant letter, but it is
+    // the palatal glide, so it conditions the light variant exactly as a front vowel does.
+    "frontLetters": ["е", "и", "ј"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",", "—": ",",
     },

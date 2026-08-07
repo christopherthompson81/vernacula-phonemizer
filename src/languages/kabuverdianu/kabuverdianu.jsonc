@@ -14,6 +14,17 @@
 
     // Single grapheme → canonical IPA. The acute marks the OPEN mid quality (é→ɛ, ó→ɔ) + stress; ⟨h⟩ is silent ("");
     // ⟨s⟩ is always [s] (ALUPEC writes ⟨z⟩ for [z]); ⟨r⟩ is the tap [ɾ]. Non-ALUPEC loan letters (c q w y) nativized.
+    // The ACCENTED vowel letters. A written accent CARRIES THE STRESS in Kabuverdianu, so these do two jobs
+    // in kabuverdianu.ts: they pin the stressed syllable, and an accented ⟨i u⟩ is therefore a full nucleus
+    // rather than a diphthong offglide.
+    "accentedVowels": ["á", "à", "â", "é", "è", "ê", "í", "ì", "î", "ó", "ò", "ô", "ú", "ù", "û"],
+    // Every vowel LETTER (plain + accented + loan ⟨y⟩) — the default-stress test reads the last letter of
+    // the word: ending in a vowel or the plural ⟨-s⟩ → penultimate stress, otherwise oxytone.
+    "vowelLetters": [
+        "a", "e", "i", "o", "u",
+        "á", "à", "â", "é", "è", "ê", "í", "ì", "î", "ó", "ò", "ô", "ú", "ù", "û", "y"
+    ],
+
     "graphemes": {
         "a": "ɐ", "á": "ɐ", "à": "ɐ", "â": "ɐ",
         "e": "e", "é": "ɛ", "è": "ɛ", "ê": "e",
