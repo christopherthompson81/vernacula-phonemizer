@@ -50,8 +50,8 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
     // `1995 -96`), designations (`चंद्रयान -1`) and apposition dashes, against a bare handful of true
     // negatives across the whole fleet.
     // ⚠ THE WINDOW IS DELIBERATELY TIGHT — a digit, then at most an ordinal suffix or an abbreviating dot,
-    // then at most one space — rather than "a digit somewhere behind". A window wide enough to reach past two
-    // abbreviations swallows the era-range shape's neighbour, `०.३७२७१९ ख॰इ॰), -२.८८ परिमाण`, which is a real
+    // then at most one space — rather than "a digit somewhere behind". Widen it far enough to reach past two
+    // abbreviations and it swallows `०.३७२७१९ ख॰इ॰), -२.८८ परिमाण`, an astronomical magnitude and a genuine
     // negative. Under-excluding a range is a stray report; over-excluding deletes a true positive.
     //
     // ⚠ A DESIGNATION AFTER A SPACE IS NOT DECIDABLE HERE and is deliberately still reported. `चंद्रयान -1`
