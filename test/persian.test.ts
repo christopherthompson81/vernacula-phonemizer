@@ -45,11 +45,13 @@ describe("persian canonical IPA", () => {
 });
 
 // ── TEXT NORMALIZATION ───────────────────────────────────────────────────────────────────────────────
-// src/languages/persian/normalize.ts + the DECIMAL IRANIAN number compositor (persian/numbers.ts). Counts and
-// the before-behaviour these pin are in the normalize.ts header, measured over the fa_ir corpus (1,856 utts).
+// src/languages/persian/normalize.ts + the DECIMAL IRANIAN number compositor (persian/numbers.ts). The counts,
+// and the wrong readings these assertions pin against, are in the normalize.ts header — measured over the fa_ir
+// corpus (1,856 utterances).
 describe("persian text normalization", () => {
-    // The compositor. Persian was previously read by the Indic lakh/crore composer, which had the tens and units
-    // in Indic order, no ⟨و⟩, and no fused hundreds: 21 "یک بیست", 200 "دو صد", 1,000,000 "ده صد هزار".
+    // ⚠ THE INDIC lakh/crore COMPOSER IS THE WRONG SHAPE FOR PERSIAN, and fails in three separate ways at
+    // once: tens and units in Indic order (21 → "یک بیست"), no ⟨و⟩ connective, and no fused hundreds
+    // (200 → "دو صد", 1,000,000 → "ده صد هزار").
     test("cardinals: connective ⟨و⟩ /o/, bare صد/هزار, fused hundreds, million", () => {
         const cases: [string, string][] = [
             ["21", "bˈiːsto ˈiːk"], // bist-O-yek — the enclitic connective, and the Iranian tens-first order
@@ -158,11 +160,10 @@ describe("persian text normalization", () => {
         expect(code).not.toMatch(/\\b/u);
     });
 
-    // the header records that this corpus writes NO unit abbreviation, which is still true; but
-    // `5 km` reached the g2p as the cluster [ˈʊkm] and a phonemizer is handed arbitrary text (the argument
-    // step 7b already makes for the currency signs fa_ir also lacks). Every word is the corpus's own:
-    // کیلومتر ×65, متر ×45, and the richest measure-word attestation in the sweep — کیلومتر مربع ×16,
-    // متر مکعب ×3, both POSTPOSED.
+    // ⚠ THIS CORPUS WRITES NO UNIT ABBREVIATION — still true — but a phonemizer is handed ARBITRARY text, and
+    // untreated `5 km` reaches the g2p as the cluster [ˈʊkm]. Same argument step 7b already makes for the
+    // currency signs fa_ir also lacks. Every word emitted here is the corpus's own, and ⚠ both measure words
+    // are POSTPOSED (کیلومتر مربع, متر مکعب).
     test("unit abbreviations and their powers", () => {
         expect(phonemize("19,500 km²", "fa")).toContain("kiːlˈuːmtɾ maɾebˈeʔ");
         expect(phonemize("120 m³", "fa")).toContain("mˈetɾ mˈakʔb");
