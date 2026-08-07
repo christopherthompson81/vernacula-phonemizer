@@ -19,7 +19,7 @@
  *        count 1 + remainder, hundreds only  → suppletive stem నూట (నూట యాభై = 150)
  *
  * EVIDENCE for the four forms — corpus text and, where the text alone could not settle it, the FLEURS
- * audio read back through Parakeet (playbook step 5b; te_in/test):
+ * audio read back through Parakeet (read back from audio):
  *   · "దాదాపు మూడు వేల"  (corpus)  — oblique plural వేల before a remainder/noun
  *   · 2011 → "రెండు వేల పదకొండు"   (audio, 14062468540202204867) — NOT *రెండు వెయ్యి పదకొండు
  *   · 150  → "నూట యాభై"            (audio, 15009446377620036374) — the suppletive నూట

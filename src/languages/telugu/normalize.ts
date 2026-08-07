@@ -75,7 +75,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "మరియు",
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -293,9 +293,8 @@ export function normalizeTelugu(input: string): string {
     //      read *ముప్పై డిగ్రీల సెల్సియస్* — thirty degrees, with nothing where the sign was.
     //
     //      No text tier could supply the word: `concept.ts` returns the BARE CHARACTER `+` as Telugu's own
-    //      label for "plus sign", and prose writes the glyph, so there is nothing to probe for. te's audio was
-    //      not in this corpus until #586's FLEURS fetch; with it, decoded by
-    //      facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer — 392 tokens, no `+` and no digits in
+    //      label for "plus sign", and prose writes the glyph, so there is nothing to probe for. the reading was
+    //      taken from AUDIO instead, decoded by a PHONEME recognizer (no `+` and no digits in
     //      its vocabulary, so it cannot echo the orthography back):
     //        UTC+1   →  `… j u t i s i  p l a s  o n i …`      1 of 2 speakers; the other skips the
     //                                                          parenthetical, as in ta, en, am and zu

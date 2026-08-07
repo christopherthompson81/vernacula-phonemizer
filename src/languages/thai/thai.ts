@@ -49,7 +49,7 @@ function numberToThaiWords(n: number): string[] {
     return out;
 }
 
-// #562 symbol normalization — Thai: เปอร์เซ็นต์ (kaikki-attested /pɤː˧.sen˧/), read by the Thai g2p.
+// symbol normalization — Thai: เปอร์เซ็นต์ (kaikki-attested /pɤː˧.sen˧/), read by the Thai g2p.
 //
 // CURRENCY. `$5` read as bare *hˈaː˥˩*. th_th contains ZERO `$` against 39 `%`, so the corpus-driven
 // gate that caught the percent could not see this — yet all four words are in that same corpus, spelled out
@@ -70,10 +70,10 @@ const SYMBOLS = makeSymbolNormalizer({
     // `&` was DROPPED outright, losing the sign from `ที่พักประเภท B&B`. `และ` is the ordinary
     // conjunction and the corpus's own word, ×1711 — the most frequent candidate by a wide margin (`กับ`
     // ×674 is "with", and `แอนด์`, the transliterated English "and", is ×0 here).
-    // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
+    // ⚠ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
     // word — `ที่พักประเภท B&B แข่งขันกันในสองสิ่งเป็นหลัก คือ ที่นอนและอาหารเช้า` ("bed AND breakfast").
     // The text states what the sign expands to, in the same breath, with the conjunction chosen here.
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
@@ -88,7 +88,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1.
     // ⚠ Bare ตาราง substring-matches ×11 and its first instance is `ตารางธาตุ` — the periodic TABLE, which
     // is what ตาราง means on its own. In an unspaced script the bare count cannot be a token count at all
-    // (trap 19 (a word-boundary test is meaningless in a…)), so only the full compound is evidence.
+    // (⚠ a word-boundary test is meaningless in an unspaced script), so only the full compound is evidence.
     // `before` RATHER THAN `compound`, against the orthography, because the fused form is MIS-SYLLABIFIED by
     // this G2P and the spaced one is not:
     //   5 ตารางกิโลเมตร  → …mˌeː˧to˧n      5 ตาราง กิโลเมตร  → …mˌeː˦˥t   (= bare กิโลเมตร)

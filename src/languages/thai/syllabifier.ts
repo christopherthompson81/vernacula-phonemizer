@@ -7,8 +7,6 @@ import {
     thaiEffectiveClass,
 } from "./thaiTone.ts";
 
-// Thai / Burmese / Hangul script segmentation (arch-review latent extraction; C#-UNPORTED, no Normalize.* counterpart).
-
 /** Thai leading (pre-posed) vowels: เ แ โ ใ ไ (U+0E40-U+0E44). */
 const THAI_LEADING_VOWEL_RE = /[เ-ไ]/;
 
@@ -16,8 +14,8 @@ const THAI_LEADING_VOWEL_RE = /[เ-ไ]/;
 const isThaiConsonant = (c: string): boolean => c >= "ก" && c <= "ฮ";
 
 /**
- * Irregular Thai words whose ORTHOGRAPHY doesn't yield the right pronunciation through
- * the regular L2S — rewritten to an orthographic form that DOES (the rewrite is captured
+ * Irregular Thai words whose ORTHOGRAPHY does not yield the right pronunciation through the regular
+ * grapheme rules — rewritten to an orthographic form that DOES (the rewrite is captured
  * for tone BEFORE stripThaiMarks). ก็ = /kɔ̂ː/ ("also / then", extremely common): its
  * mai-taikhu ็ is lexicalised, not the usual vowel-shortener, and stripThaiMarks would
  * drop it leaving a bare ก. ก่อ gives the right result — mid-class + mai-ek → low tone,
@@ -92,7 +90,7 @@ const THAI_MARK_RE = /[ฺ็-ํ]/u;
  *     this DELIBERATELY matches epitran even where Thai silences a fuller cluster).
  *  3. mai-taikhu ◌็ (U+0E47, vowel-shortener), nikhahit ◌ํ (U+0E4D), phinthu ◌ฺ
  *     (U+0E3A) — segmentally inert here (tone/length are a later phase); deleting
- *     them lets the L2S see adjacent consonants (`ด้วย`'s ◌้ no longer breaks the
+ *     them lets the scan see adjacent consonants (`ด้วย`'s ◌้ no longer breaks the
  *     inherent-vowel lookahead).
  */
 export function stripThaiMarks(text: string): string {
@@ -103,37 +101,15 @@ export function stripThaiMarks(text: string): string {
         .replace(/[็ํฺ]/gu, ""); // (3) mai-taikhu, nikhahit, phinthu
 }
 
-/**
- * Inherent-vowel markers inserted by syllabifyThai into the grapheme stream.
- * Private-Use chars so they can't collide with Thai script; the authored th_rules
- * map them to the short vowels o / a (with word-final ʔ-epenthesis). A consonant
- * FOLLOWED by one is unambiguously an onset; one not followed by a vowel/marker is
- * a coda — which is what lets the L2S drop all onset/coda guessing.
- */
-
-/** อ acting as the VOWEL ɔː (vs the glottal-stop consonant ʔ). The syllabifier
- *  decides which by the FOLLOWING grapheme; emitting a distinct marker keeps the L2S
- *  unambiguous — the bare อ grapheme then always maps to ʔ, this marker to ɔː, so
- *  อำนาจ → ɔːamnaːt even though ำ is a following vowel (ำ ∈ L05). */
-
-/** ว acting as the medial VOWEL /ua/ in a CวC syllable (ส่วน → sŭan, not sawon). Thai
- *  writes /ua/-before-a-coda as a bare ว (the ◌ั is dropped); a distinct marker keeps
- *  the L2S unambiguous so the bare ว grapheme still maps to the consonant /w/. */
+/** ว acting as the medial VOWEL /ua/ in a CวC syllable (ส่วน → sŭan, not sawon). ⚠ Thai
+ *  writes /ua/-before-a-coda as a BARE ว (the ◌ั is dropped), so without a distinct marker the
+ *  grapheme is indistinguishable from the consonant /w/. */
 export const THAI_UA_VOWEL = "";
 
 /**
- * Per-tone IR markers (PUA U+F710-F714) that syllabifyThaiWithTones appends at each
- * syllable's END. th_rules maps each to a ph_shan tone phoneme (rising=1 … falling=5)
- * whose contour IPA is pinned in the th job phonemeIpaOverrides
- */
-
-/**
- * Thai consonant grapheme → its onset phoneme class (for the epitran simulation:
- * cluster-former detection in rule 5 and neutralization in rule 4). This is a
- * SECOND encoding of the consonant table in `tools/thai-gold/gen_th_rules.py`
- * (`CONS`/`CLUSTER`) — keep them in sync: this side drives marker PLACEMENT, that
- * side the L2S phonemes; a divergence (e.g. changing a cluster former) silently
- * desyncs them. (The Phase-2 Module:th-pron port collapses both to one source.)
+ * Thai consonant grapheme → its onset phoneme class, used for cluster-former detection and for
+ * coda neutralization. These are ONSET classes only — the coda inventory is smaller, and the
+ * neutralization rule is what maps one onto the other.
  */
 const THAI_CONS_PH: Readonly<Record<string, string>> = {
     ก: "k",
@@ -279,7 +255,7 @@ function thaiVowelSpan(
     if (c === "โ") return at(1) === "ะ" ? { gs: ["โ", "ะ"] } : { gs: ["โ"] };
     // ◌ือ (sara uee + อ) is ONE long vowel /ɯː/ — the อ is a silent orthographic tail,
     // not the ɔː vowel. Consume both so อ never surfaces as a separate vowel (คือ → kʰɯː,
-    // was kʰɯɔ); the silent tail is dropped by a left-context rule in th_rules.
+    // was kʰɯɔ).
     if (c === "ื" && at(1) === "อ") return { gs: ["ื", "อ"] };
     if (THAI_VSIGN.has(c)) return { gs: [c] };
     // อ as the vowel ɔː: when it is NOT acting as the glottal-stop consonant (i.e. the
@@ -371,10 +347,9 @@ const THAI_LEADER_SONORANT = new Set([..."งญณนมฬ"]);
 /**
  * Is unit `i` a SILENT leading consonant — a ห before a raisable sonorant (หม/หน/หว/
  * หญ/หร/หล/หง) or the อ of the อย words (อย่า/อยาก/อยู่/อย่าง)? In correct Thai such a
- * leader is NOT pronounced; it only raises the syllable's tone class. The epitran-
- * faithful syllabifier would give it an inherent vowel (a spurious syllable, จังหวัด →
- * …ha.wat); both the segmentation (syllabifyThai) and the tone analysis
- * (thaiSyllableTones) skip it via this shared predicate so their syllable counts agree.
+ * leader is NOT pronounced; it only raises the syllable's tone class. ⚠ A naive syllabifier gives it
+ * an inherent vowel and so a SPURIOUS SYLLABLE (จังหวัด → …ha.wat). The segmentation and the tone
+ * analysis both skip it through this one shared predicate, so their syllable counts cannot disagree.
  */
 function thaiIsSilentLeader(units: readonly ThaiUnit[], i: number): boolean {
     const u = units[i];
@@ -564,7 +539,7 @@ export function thaiPrep(
     // mai-taikhu ◌็ (U+0E47) shortens its syllable's vowel (เป็น /pen/, เล็ก /lék/). Like the tone
     // marks it is dropped by stripThaiMarks, so capture its position here (against the char it sits
     // on) before the strip, then project onto the surviving unit — used for BOTH the tone's
-    // long/short input and the segmental short-vowel emission. #958.
+    // long/short input and the segmental short-vowel emission.
     const shortAt: boolean[] = [];
     const cleaned: string[] = [];
     for (const c of [...reordered]) {
@@ -624,10 +599,9 @@ export function thaiPrep(
 }
 
 /**
- * Scan a prepared Thai word into syllables, computing each one's lexical tone via the
- * Phase-2a tone brain (consonant class × live/dead × length × mark). Drives BOTH the
- * tone list (thaiSyllableTones) and the tone-glyph injection (syllabifyThaiWithTones),
- * so segmental and tonal syllabification can never disagree.
+ * Scan a prepared Thai word into syllables, computing each one's lexical tone from the tone rule
+ * (consonant class × live/dead × length × mark; see thaiTone.ts). ⚠ SEGMENTATION AND TONE COME OUT
+ * OF THE SAME SCAN, which is what makes it impossible for them to disagree on syllable count.
  */
 export function thaiScanSyllables(
     units: readonly ThaiUnit[],
@@ -635,8 +609,8 @@ export function thaiScanSyllables(
     unitMark: (ThaiToneMark | undefined)[],
     shortMark: readonly boolean[] = [],
 ): ThaiSyllableScan[] {
-    // A silent ห/อ leader (หม/หน/หว…, อย) is NOT a nucleus — skip it (shared predicate
-    // with emitThaiUnit, which drops the same leaders from the segment stream).
+    // A silent ห/อ leader (หม/หน/หว…, อย) is NOT a nucleus — skip it, using the same
+    // `thaiIsSilentLeader` predicate that drops these leaders from the segment stream.
     const isNucleus = (i: number) =>
         !thaiIsSilentLeader(units, i) &&
         (units[i]!.kind === "V" || (units[i]!.kind === "C" && fates.has(i)));

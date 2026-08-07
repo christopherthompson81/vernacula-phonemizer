@@ -8,7 +8,7 @@
  * form and a COMBINING form, and 11–19 are suppletive. All of it is authored DATA in tamil.jsonc; this
  * file is only the compositor.
  *
- * #562 evidence: before this, every one of the 660 numerals in the ta_in corpus went through the naive
+ * evidence: before this, every one of the 660 numerals in the ta_in corpus went through the naive
  * concatenating path — 1995 read *ஒன்று ஆயிரம் ஒன்பது நூறு தொண்ணூறு ஐந்து instead of ஆயிரத்து
  * தொள்ளாயிரத்து தொண்ணூற்றி ஐந்து.
  */

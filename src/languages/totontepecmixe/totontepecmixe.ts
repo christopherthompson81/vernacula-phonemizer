@@ -5,10 +5,10 @@
  * mold). The consonants + allophony are Crawford-grounded and confident; the modern-orthography VOWEL mapping is
  * reconstructed from Crawford's example words (kääm 'pig'=/kæːm/, këp 'tree'=/kɨp/, üts 'I'=/ʌts/, ök 'dog'=/ʊk/)
  * with the central-vowel series + the UNDERLINE diacritic as the disclosed residual.
- *   ★ 9 VOWELS (Crawford §1.112): a→[a], e→[e], i→[i], o→[o], u→[u]; ä→[æ], ë→[ɨ], ü→[ʌ], ö→[ʊ]; a DOUBLED vowel
+ *   · 9 VOWELS (Crawford §1.112): a→[a], e→[e], i→[i], o→[o], u→[u]; ä→[æ], ë→[ɨ], ü→[ʌ], ö→[ʊ]; a DOUBLED vowel
  *     → LENGTH (kääm→kæːm). ⟨ts⟩→[t͡s], ⟨tx cy⟩→[t͡ʃ] (palatalized), ⟨x⟩→[ʃ], ⟨j⟩→[h], ⟨c⟩→[k], ⟨ꞌ ' ⟩→[ʔ].
- *   ★ POST-NASAL VOICING (§1.121d): /p t ts k/ → [b d d͡z ɡ] after a nasal (mp→mb, nt→nd, nts→nd͡z, nk→ŋɡ).
- *   ★ /d g/ → the fricatives [ð ɣ] intervocalically; ⟨n⟩→[ŋ] before a velar; ⟨ny⟩→[ɲ].
+ *   ⚠ POST-NASAL VOICING (§1.121d): /p t ts k/ → [b d d͡z ɡ] after a nasal (mp→mb, nt→nd, nts→nd͡z, nk→ŋɡ).
+ *   · /d g/ → the fricatives [ð ɣ] intervocalically; ⟨n⟩→[ŋ] before a velar; ⟨ny⟩→[ɲ].
  * Stress (accentual, not lexical-tonal) is not emitted. Referee: the ASJP North-Highland-Mixe Swadesh list
  * (coarse, independent) — inventory-only.
  */
@@ -104,10 +104,10 @@ function consonantPasses(segs: Seg[]): void {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "ʼ'’`-")})|(\\d+)|([.?!,;:…])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zäëöüáéíóúÄËÖǛ-ͯʼꞌ'’`-]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
