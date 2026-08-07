@@ -11,13 +11,13 @@
  * Nahuatl g2p is authored from Andrews §2, but Andrews's orthography section does not tabulate the numerals,
  * so the numeral DATA is cited to Wiktionary rather than to Andrews).
  *
- * ★ THE POWERS OF TWENTY, each with its own noun:
+ * THE POWERS OF TWENTY, each with its own noun:
  *     20⁰ —                20¹ pōhualli 'a count'      20² tzontli 'hair/tuft'   20³ xiquipilli 'bag'
  *     20⁴ pōhualxiquipilli   20⁵ tzonxiquipilli          20⁶ pōhualtzonxiquipilli
  *   Attested anchors this file reproduces EXACTLY: cempōhualli 20, centzontli 400, cenxiquipilli 8000,
  *   cempōhualxiquipilli 160 000, centzonxiquipilli 3 200 000, cempōhualtzonxiquipilli 64 000 000.
  *
- * ★★ TWO DIFFERENT JOINERS, and this is the crux:
+ * ⚠ TWO DIFFERENT JOINERS, and this is the crux:
  *   • Inside the sub-400 part the next word is prefixed with the linker ⟨on-⟩, which assimilates to ⟨om-⟩
  *     before a vowel or ⟨m⟩: cempōhualli oncē 21, cempōhualli omōme 22, cempōhualli ommahtlāctli 30,
  *     cempōhualli oncaxtōlli 35, caxtōlli onnāhui 19.
@@ -28,7 +28,7 @@
  *   "caxtōlli onnāuhxiquipilli īpan caxtōlli onnāuhtzontli īpan caxtōlli onnāppōhualli oncaxtōlli onnāhui",
  *   1 000 000 "chicuacempōhualxiquipilli īpan mācuīlxiquipilli".
  *
- * ★ 11–14 / 16–19 AND THEIR MULTIPLIER USE. There is no *11 word: 11 is mahtlāctli oncē (10+1) and 19 is
+ * · 11–14 / 16–19 AND THEIR MULTIPLIER USE. There is no *11 word: 11 is mahtlāctli oncē (10+1) and 19 is
  *   caxtōlli onnāhui (15+4). The same additive shape is used when 11–19 MULTIPLIES a power: 220 is
  *   "mahtlāctli oncempōhualli" (10 scores + 1 score), 4400 "mahtlāctli oncentzontli", 104 000 "mahtlāctli
  *   omēxiquipilli". So a multiplier of 11–14 / 16–19 is emitted as ⟨mahtlāctli⟩/⟨caxtōlli⟩ + the residual

@@ -184,8 +184,7 @@ export function normalizeMalayalam(input: string): string {
     //    ഫാരൻഹീറ്റ്) appears anywhere here and neither °C nor °F occurs, so none is invented.
     // THE PLUS is പ്ലസ്, and Malayalam voices it in BOTH positions (`UTC+1`, `+30°C`). ⚠ This is the
     //    MEASUREMENT plus — the reading a language uses for a signed quantity — which not every language
-    //    shares; some read a word meaning "above" instead. MUST PRECEDE the degree rule, or `+30°C` has
-    //    lost its sign by the time the plus rule looks.
+    //    shares; some read a word meaning "above" instead.
     //
     // THE MINUS AND ±. ⚠ WHETHER A MINUS RULE IS SAFE IS A FACT ABOUT THE TEXT, NOT ABOUT THE GUARD. The
     //    shape no guard can reject is `word · space · hyphen · digit`, which is indistinguishable from a

@@ -63,7 +63,7 @@ const IRREGULAR: Readonly<Record<number, string>> = {
 /**
  * Devanagari unit abbreviations → the full Nepali word, matched only after a digit. The shared symbol
  * tier is keyed on the LATIN abbreviations, which is not what this corpus writes. Longest key first.
- * ONLY the four attested keys are here: the over-counting trap (playbook #2) is live in this corpus —
+ * ⚠ ONLY THE ATTESTED KEYS ARE HERE, because the over-counting trap is live for this script —
  * `ग्रा` occurs 42 times, every one of them inside an ordinary word (ग्राम, ग्राहक, कार्यक्रम …), and
  * `मी` occurs inside मिटर/मिनेट, so neither is declared even though Hindi's table has ग्रा.
  * The spellings follow the corpus's own transliteration convention (किलोमिटर ×18, मिटर ×12,
@@ -243,8 +243,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //        followed by मिनेट). These are NOT clocks. Hindi's inherited clock rule claimed them
         //        (its `(?![\d:])` permits a following dot) and produced "चार बजकर एकचालीस मिनट . तीस" —
         //        a bogus clock, two Hindi words, and a spurious phrase break. Dropping the colon leaves
-        //        two plain numbers, the honest reading, which nothing downstream can re-claim. The same
-        //        failure the playbook records for ru, id and mr.
+        //        two plain numbers, the honest reading, which nothing downstream can re-claim.
         s = s.replace(/(?<![\d.,:])(\d{1,2}):(\d{2}\.\d{1,2})(?![\d:])/gu, "$1 $2");
         //    7b) A time RANGE h:mm-h:mm, before the clock proper so both endpoints survive as times and
         //        before the numeric range rule in step 11, whose `(?<![\d.,:])` guard would in any case
@@ -258,8 +257,8 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //        is CONSUMED when the minutes are spoken, because बजेर already carries its sense — 9 of
         //        the 15 clocks in this corpus are written "9:30 बजे" and the alternative is a duplicate.
         //        At :00 बजे is exactly right and is supplied when absent — but NOT when the next word is
-        //        another बज- form, or "11:00 बजेपछि" would become "एघार बजे बजेपछि" (the duplicate-word
-        //        trap the playbook records for Arabic's الساعة and Marathi's वाजता).
+        //        another बज- form, or "11:00 बजेपछि" would become "एघार बजे बजेपछि" — ⚠ the duplicate-word
+        //        trap that bites any language whose clock noun can also begin the following word.
         s = s.replace(
             /(?<![\d:.])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.])(\s*बजे(?![\p{L}\p{M}]))?/gu,
             (m, h: string, min: string, baje: string | undefined, offset: number, whole: string) => {
@@ -280,42 +279,34 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    THE TRAILING SPACE in each replacement is load-bearing for the same reason: "+30°Cभन्दा"
         //    has a Devanagari postposition welded to the C, and without it सेल्सियस and भन्दा became one
         //    token [selsijʌsbʱˈʌnd̪a]. The double-space collapse at step 13 cleans up the rest.
-        // THE PLUS → प्लस, from the corpus's own AUDIO (facebook/wav2vec2-xlsr-53-espeak-cv-ft, a PHONEME
-        // recognizer — no `+` and no digits in its 392-token vocabulary). Over ne_np/train:
-        //   UTC+1  →  `… j u t i s i p l o s e k …` / `… j u d i s i p l a s e k …`   2 of 3 (third skips it)
-        //   +30°C  →  `… t i s d i ɡ r i b o n d a …`  तीस डिग्री, NO plus phones, 2 of 2
-        // प्लस reads plˈʌs, matching the decode. BEFORE the degree rule (the ordering zu's `[+]?` taught).
-        // THE MINUS AND ±. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
-        //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
-        //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
-        //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
-        //    (ACCEPTED_SIGN_SILENCE); this corpus does not, so a guarded rule is safe HERE — a fact about the
-        //    corpus, not about the guard.
+        // THE SIGNS. प्लस is the reading for a signed quantity (`UTC+1`, `+30°C`). The degree rule below
+        //    re-emits the digit it captures, so the two are order-independent.
         //
-        //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately before
-        //    (rejects closed designations), and a digit ANYWHERE to the left (rejects a SPACED range or score, which
-        //    the fleet's usual guard misses — the gap that cost a real defect in th).
+        //    ⚠ WHETHER A MINUS RULE IS SAFE IS A FACT ABOUT THE TEXT, NOT ABOUT THE GUARD. The shape no guard
+        //    can reject is `word · space · hyphen · digit`, indistinguishable from a spaced range or a dashed
+        //    designation; a language whose text contains that shape must decline the rule outright. Nepali
+        //    text of this kind does not contain it, so a guarded rule is safe HERE and nowhere by default.
         //
-        //    SOURCED: ne.wikipedia NAMES THE SIGN — "घटाउ (जुन माइनस चिन्ह ⟨−⟩द्वारा सङ्केत गरिन्छ)", subtraction, which
-        //    is denoted by the MINUS SIGN ⟨−⟩. x10 / 8 articles, and the same article pairs it with प्लस.
+        //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately
+        //    before (rejects closed designations), and a digit ANYWHERE to the left — that last one rejects a
+        //    SPACED range or score, which the usual guard misses.
         //
-        //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
+        //    SOURCED: ne.wikipedia NAMES THE SIGN — "घटाउ (जुन माइनस चिन्ह ⟨−⟩द्वारा सङ्केत गरिन्छ)": subtraction,
+        //    denoted by the MINUS SIGN ⟨−⟩. The same article pairs it with प्लस, so ± is those two juxtaposed.
         s = s.replace(/±/gu, " प्लस माइनस ");
         s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
             /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "माइनस ");
         s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 प्लस ");
         s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1प्लस ");
 
-        // THE RELATIONAL AND DIVISION SIGNS, sourced ENTIRELY from ne_np — one of the few languages in
-        // this issue where tier 2 settles all four, with no Wikipedia needed:
+        // THE RELATIONAL AND DIVISION SIGNS, all four attested in running Nepali text:
+        //   `बराबर`    "यस आकार अनुपातको बराबर" — EQUAL TO this aspect ratio
+        //   `भन्दा कम` · `भन्दा बढी`             — both postposed, both with real operands
+        //   `विभाजन`   "बाह्रलाई विभाजन गरेर"    — a division performed aloud
         //
-        //   `बराबर`      ×5 token    "यस आकार अनुपातको बराबर" — EQUAL TO this aspect ratio
-        //   `भन्दा कम`    ×20 phrase  ·  `भन्दा बढी` ×75 phrase   — both postposed, both with real operands
-        //   `विभाजन`     ×11 token   and "बाह्रलाई विभाजन गरेर" — FLEURS's parallel division sentence
-        //
-        // ⚠ THE COMPARATIVES ARE POSTPOSITIONAL and भन्दा FUSES to the standard (सामान्यभन्दा धेरै), so they use
-        // core/postposedSign.ts; an infix rule would read the comparison backwards. The equality and division
-        // read infix, as the cognates in hi/ur/pa do, each sourced from its own corpus.
+        // ⚠ THE COMPARATIVES ARE POSTPOSITIONAL and भन्दा FUSES to the standard (सामान्यभन्दा धेरै), so they
+        // use core/postposedSign.ts — an infix rule would read the comparison BACKWARDS. The equality and
+        // division read infix.
         s = postposedSign(s, "<", "भन्दा कम");
         s = postposedSign(s, ">", "भन्दा बढी");
         s = s.replace(/\s?=\s?/gu, " बराबर ");
@@ -397,8 +388,8 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         );
 
         // 12) FRACTIONS. One instance, "5 मिलिमिटर (1/5 इन्च)". बटा is INHERITED FROM HINDI and is not
-        //     attested in either ne referee or this corpus — but neither is any alternative, so per the
-        //     playbook's standing rule it is carried forward verbatim rather than replaced by a guess.
+        //     attested for Nepali — but neither is any alternative, so ⚠ it is carried forward VERBATIM
+        //     rather than replaced by a guess: an unsourced substitute is worse than an inherited word.
         //     It has to be restated here because supplying this normalizer stops Hindi's from running,
         //     and without the rule "1/5" would read as two unrelated numbers.
         s = s.replace(/(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
@@ -406,14 +397,8 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
             return nw === "" || dw === "" ? m0 : `${nw} बटा ${dw}`;
         });
 
-        // 13) THE APPROXIMATION TILDE only. लगभग is the corpus's own word for it (×40; करिब ×18 is the
-        //     other). ×1 instance, "~500 कंगोको फ्रान".
-        //     NEITHER PLUS NOR MINUS IS CLAIMED, and that is a measured decision, not an omission.
-        //     The corpus's two '+' are "युटिसी+1" — a UTC offset, where "धन" (Hindi's word, which the
-        //     inherited rule emitted) is simply wrong — and "+30°C", where the plus is optional in
-        //     speech. So the rule had one false positive, one indifferent case and zero true positives.
-        //     Minus is worse: Devanagari compounds are hyphenated (जाने-आउने) and this corpus's only
-        //     hyphen-before-digit outside a range is inside a name.
+        // 13) THE APPROXIMATION TILDE. लगभग is Nepali's own word for it. (Plus and minus are claimed in
+        //     step 8, not here.)
         s = s.replace(/~\s?(?=\d)/gu, "लगभग ");
         s = s.replace(/ {2,}/gu, " ");
 

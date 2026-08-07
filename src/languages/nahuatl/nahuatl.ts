@@ -1,15 +1,17 @@
 /**
  * Classical Nahuatl / nāhuatlahtōlli (nci) phonemizer — Uto-Aztecan, the language of the Aztec Empire (16th-c.
- * Central Mexico), the traditional Spanish-based Latin orthography, canonical IPA. The
- * fleet's FIRST UTO-AZTECAN language. The g2p is AUTHORED FROM Andrews, *Introduction to Classical Nahuatl* (§2).
- *   ★ 8 VOWELS /a e i o/ × length (macron ā ē ī ō → [Vː]); LENGTH is UNWRITTEN in traditional texts → we emit
- *     SHORT vowels (the referee's ː is backbone-stripped). No diphthongs. ⟨u⟩ is NEVER a vowel natively (only
- *     part of cu/uc/hu/uh); a bare ⟨u⟩ is a loan vowel.
- *   ★★ THE SPANISH-ORTHOGRAPHY CONTEXT RULES (§2.4): ⟨c⟩→[s] before e/i, else [k]; ⟨qu⟩→[k]; ⟨z⟩→[s]; ⟨cu⟩+V /
- *     V⟨uc⟩→[kʷ]; ⟨hu⟩+V / V⟨uh⟩→[w]; saltillo ⟨h⟩→[ʔ]; ⟨x⟩→ʃ, ⟨tz⟩→t͡s, ⟨tl⟩→t͡ɬ, ⟨ch⟩→t͡ʃ. ★ THE ⟨chu⟩ TRAP:
- *     ⟨ch⟩ before ⟨u⟩+V is [k]-coda + ⟨hu⟩[w] (cachuah=/kakwa/), NOT the affricate.
- * Stress is regular penultimate (unmarked in the broad referee → not emitted). Syllable-final /l/→[ɬ], /n/→[ŋ]
- * before /k/, and coda /w/→[w̥ ɸ] are allophonic (disclosed/folded).
+ * Central Mexico), the traditional Spanish-based Latin orthography, canonical IPA. Authored from Andrews,
+ * *Introduction to Classical Nahuatl* (§2).
+ *
+ *   · 8 VOWELS /a e i o/ × length (macron ā ē ī ō → [Vː]). ⚠ LENGTH IS UNWRITTEN in traditional texts, so
+ *     SHORT vowels are emitted. No diphthongs. ⟨u⟩ is NEVER a vowel natively — only part of cu/uc/hu/uh —
+ *     so a bare ⟨u⟩ is a loan vowel.
+ *   ⚠ THE SPANISH-ORTHOGRAPHY CONTEXT RULES (§2.4): ⟨c⟩→[s] before e/i, else [k]; ⟨qu⟩→[k]; ⟨z⟩→[s];
+ *     ⟨cu⟩+V / V⟨uc⟩→[kʷ]; ⟨hu⟩+V / V⟨uh⟩→[w]; saltillo ⟨h⟩→[ʔ]; ⟨x⟩→ʃ, ⟨tz⟩→t͡s, ⟨tl⟩→t͡ɬ, ⟨ch⟩→t͡ʃ.
+ *   ⚠ THE ⟨chu⟩ TRAP: ⟨ch⟩ before ⟨u⟩+V is a [k] coda plus ⟨hu⟩ [w] (cachuah = /kakwa/), NOT the affricate.
+ *
+ * Stress is regular penultimate and unmarked, so it is not emitted. Syllable-final /l/→[ɬ], /n/→[ŋ] before
+ * /k/, and coda /w/→[w̥ ɸ] are allophonic and folded.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -69,10 +71,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zāēīōūáéíóúç]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

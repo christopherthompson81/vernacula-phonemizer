@@ -13,9 +13,9 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makeNepaliNormalizer } from "./normalize.ts";
 
 /**
- * #562 normalization. Nepali shares Hindi's ENGINE but not Hindi's orthographic conventions, so it
+ * normalization. Nepali shares Hindi's ENGINE but not Hindi's orthographic conventions, so it
  * supplies its OWN normalizer and its OWN symbol words through `makeNativeHindi`'s `overrides` rather
- * than inheriting Hindi's (issue #583; `src/languages/marathi/marathi.ts` is the other worked example).
+ * than inheriting Hindi's (`src/languages/marathi/marathi.ts` is the other worked example).
  *
  * What is overridden and what is NOT is recorded in normalize.ts's header. For this tier specifically:
  *   percent  प्रतिशत — IDENTICAL to Hindi's, and that is a measured result: it is the ne_np corpus's own
@@ -40,32 +40,27 @@ const NE_SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "र",
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
     multiply: { times: "गुणा" },
     percent: ["प्रतिशत"],
-    // Hindi's four keys exactly, with only `cm` respelled (see above). A one-letter `m` is deliberately
-    // NOT declared — the playbook's `rateDenominators` note records a one-letter unit key matching an
-    // alphanumeric designation, and this corpus's digit-adjacent single Latin letters are all something
-    // else (compass points, "5 A", "6 b").
-    // `m` — मिटर ×12, which is the corpus's spelling (मीटर, the long-vowel form, is ×0 here); digit-adjacent
-    // bare `m` is ×0, so the one-letter-key hazard is checked rather than assumed. Without it the cube word
-    // below has no head noun and is dead data.
-    // THE DEVANAGARI ABBREVIATION, both spellings the corpus uses — किमि ×5 and किमी ×6. Only the Latin keys
-    // were declared, so `19,500 किमि²` matched nothing: the unit AND its exponent were lost together while the
-    // Latin `19,500 km²` read correctly. Same shape as ru/uk/kk declaring Cyrillic keys beside their Latin ones.
+    // Hindi's four keys, with `cm` respelled (see above), plus the one-letter `m`.
+    // ⚠ A ONE-LETTER UNIT KEY IS A HAZARD — it also matches alphanumeric designations ("5 A", "6 b",
+    // compass points) — so `m` is declared only after checking that digit-adjacent bare `m` does not occur
+    // in this sense here. It is needed: without a head noun the cube word below would be dead data.
+    // ⚠ THE DEVANAGARI ABBREVIATIONS MUST BE DECLARED BESIDE THE LATIN ONES. With only the Latin keys,
+    // `19,500 किमि²` matches nothing and the unit AND its exponent are lost together, while the Latin
+    // `19,500 km²` reads correctly. Both spellings occur — किमि and किमी.
     units: { km: ["किलोमीटर"], "किमि": ["किलोमीटर"], "किमी": ["किलोमीटर"],
         cm: ["सेन्टिमिटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मिटर"] },
     unitPer: "प्रति",
     rateDenominators: { h: "घण्टा", s: "सेकेण्ड" },
-    // `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"), word-first. घन ×0 — and this
-    // is the same घन/धन cluster that produced five confidently wrong plus words in Phase 1, so the cube
-    // reading stays on the fallback until a corpus says otherwise.
-    // `120–160 घनमिटर इन्धन` — and this is why a token probe said ×0 for घन: the corpus writes it FUSED to
-    // the unit noun. `before` still spells it correctly as two words, which the same corpus does for
-    // `वर्ग किलोमिटर`; only the cube instance happens to be written closed.
+    // `वर्ग किलोमिटर` is word-first ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ").
+    // ⚠ A TOKEN PROBE REPORTS घन AS ABSENT, AND IS WRONG: the cube word is written FUSED to its unit noun
+    // (`120–160 घनमिटर इन्धन`), so it never appears as a token of its own. `before` still spells it as two
+    // words, which is what the same text does for `वर्ग किलोमिटर`; only the cube happens to be written closed.
     exponentWords: { squared: ["वर्ग"], cubed: ["घन"], position: "before" },
 });
 

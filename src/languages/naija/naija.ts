@@ -1,16 +1,18 @@
 /**
- * Native Nigerian Pidgin / Naija (pcm) text phonemizer — canonical IPA. The FIRST
- * English-lexified creole in the project. Targets the English-etymological MEDIA orthography (BBC Pidgin /
- * social media — the norm people actually read and write), NOT the academic phonemic NLA orthography. Two layers:
- *   (1) a LEXICON (naija.jsonc) of high-frequency words whose media spelling is irregular (English-etymological:
- *       dey→dɛ, e→i, make→mek, say→se) or whose mid-vowel quality needs adjudication (comot→kɔmɔt, go→ɡo);
- *   (2) a Naija-phonology RULE g2p for everything else — 7 vowels /i e ɛ a ɔ o u/, TH-stopping (th→t), NO schwa
- *       reduction (full vowels), labial-velars ⟨gb⟩→ɡ͡b ⟨kp⟩→k͡p, ⟨ch⟩→t͡ʃ ⟨sh⟩→ʃ ⟨ny⟩→ɲ ⟨ng⟩→ŋ, ⟨r⟩→ɾ.
- * Because Naija NATIVISES English loans (reads them with Naija values), the rule g2p is applied to English-spelled
- * tokens rather than routing them to the English phonemizer (which is wired as `foreign` but not auto-used —
- * nativising is more correct for the creole). Tone (H/L) is UNMARKED in the media orthography → out of scope
- * (segmental output, no stress/tone marks). No independent referee exists; the anchor is the adjudicated gold in
- * test/naija.test.ts (Faraclas 1996 + NLA).
+ * Nigerian Pidgin / Naija (pcm) phonemizer — an English-lexified creole, canonical IPA.
+ *
+ * ⚠ TARGETS THE ENGLISH-ETYMOLOGICAL MEDIA ORTHOGRAPHY (BBC Pidgin, social media — what people actually read
+ * and write), NOT the academic phonemic NLA orthography. Two layers:
+ *   (1) a LEXICON (naija.jsonc) of high-frequency words whose media spelling is irregular
+ *       (dey→dɛ, e→i, make→mek, say→se) or whose mid-vowel quality needs adjudication (comot→kɔmɔt, go→ɡo);
+ *   (2) a Naija-phonology RULE g2p for everything else — 7 vowels /i e ɛ a ɔ o u/, TH-stopping (th→t), NO
+ *       schwa reduction (full vowels), labial-velars ⟨gb⟩→ɡ͡b ⟨kp⟩→k͡p, ⟨ch⟩→t͡ʃ ⟨sh⟩→ʃ ⟨ny⟩→ɲ ⟨ng⟩→ŋ, ⟨r⟩→ɾ.
+ *
+ * ⚠ ENGLISH-SPELLED TOKENS GO THROUGH THE RULE G2P, NOT THE ENGLISH PHONEMIZER. Naija NATIVISES its English
+ * loans — reads them with Naija values — so routing them out would be wrong for the creole. An English
+ * reader is wired as `foreign` but deliberately not used automatically.
+ *
+ * Tone (H/L) is UNMARKED in the media orthography and out of scope; the output is segmental.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
