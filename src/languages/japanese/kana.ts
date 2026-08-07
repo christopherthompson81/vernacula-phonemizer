@@ -119,7 +119,7 @@ export function kanaToMorae(word: string): string[] | null {
 
 /**
  * Sokuon っ geminates the FOLLOWING mora's initial consonant. Like the ん pass below, this is split out so it
- * can run again over CONCATENATED segments: per-morpheme conversion (segmentsToMorae, #552) leaves a
+ * can run again over CONCATENATED segments: per-morpheme conversion (segmentsToMorae) leaves a
  * segment-final っ unable to see the next segment's onset, so it fell back to the glottal ʔ — 吹っ切れ came
  * out ɸɯᵝʔkiɾe̞ instead of ɸɯᵝkkiɾe̞. Idempotent: an already-geminated mora is no longer "ʔ".
  */
@@ -139,7 +139,7 @@ export function geminateSokuon(morae: string[]): string[] {
  * else ɴ (before vowels/glides/fricatives or word-finally): こんにちは→ko̞nni…, にほんご→niho̞ŋɡo̞, さんぽ→sampo̞.
  *
  * Split out so it can run a second time over CONCATENATED segments: when a word is moraised per morpheme
- * (segmentsToMorae, #552), a ん ending one segment cannot see the next segment's onset, and 健康 けん|こう
+ * (segmentsToMorae), a ん ending one segment cannot see the next segment's onset, and 健康 けん|こう
  * came out ke̞ɴko̞ː instead of ke̞ŋko̞ː. Re-running over the joined morae fixes that, and is idempotent —
  * an already-assimilated mora is no longer "ɴ", so the loop skips it.
  */
@@ -168,7 +168,7 @@ export function kanaToIpa(word: string): string | null {
  *
  * Long-vowel coalescence is confined to a segment, so the first vowel of one morpheme can never be absorbed
  * into the previous morpheme's length: 経営 けい|えい → ke̞ːe̞ː (not ke̞ːːː), 聖域 せい|いき → se̞ːiki (not
- * se̞ːːki), 子牛 こ|うし → ko̞ɯᵝɕi (not ko̞ːɕi). Issue #552.
+ * se̞ːːki), 子牛 こ|うし → ko̞ɯᵝɕi (not ko̞ːɕi).
  *
  * The mora COUNT is unchanged by this — a coalesced ː was already one mora — so accent-nucleus indices from
  * the pitch dictionary keep pointing at the same mora. Only the vowel QUALITY is corrected.
