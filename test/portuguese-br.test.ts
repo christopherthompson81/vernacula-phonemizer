@@ -1,7 +1,8 @@
 /**
- * pt-BR ("neutral"/paulistano BP) accent DIAGNOSTIC GOLD — the hand-adjudicated quality anchor. Unlike English,
- * the referee number is NOT noise-limited (the `pt` rule engine has real coverage): pt-BR scores 83% vs wikipron
- * por_latn_bz (57k). This gold hand-checks the EP→BP delta on core vocabulary + every signature feature (RP from
+ * pt-BR ("neutral"/paulistano BP) accent DIAGNOSTIC GOLD — the hand-adjudicated quality anchor. ⚠ Unlike
+ * English's, this referee is NOT noise-limited: the `pt` rule engine has real coverage, so wikipron
+ * por_latn_bz says something. This gold hand-checks the EP→BP delta on core vocabulary + every signature
+ * feature (RP from
  * Cristófaro Silva / Wikipédia BP conventions, corroborated against the wikipron BZ referee).
  *
  * NOT included (documented lexical tail): open/close stressed-mid words where the shared EP lexicon differs from
@@ -122,7 +123,7 @@ describe("pt-BR Roman-numeral policy — centuries cardinal, prenominal events o
 // locale of the FLEURS audio these were measured against; the layer is shared with European pt apart from
 // the date rule below.
 describe("portuguese normalization", () => {
-    test("ordinal indicators no longer leak, and ° is not one of them", () => {
+    test("ordinal indicators are read, not leaked — and ° is not one of them", () => {
         // º and ª were reaching the phoneme string RAW — a non-IPA character in the output, on 13 corpus
         // utterances.
         expect(phonemize("o 1º dia", "pt-BR")).toBe("o pɾimˈejɾu d͡ʒˈiɐ");

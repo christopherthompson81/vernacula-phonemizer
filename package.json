@@ -21,7 +21,9 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:package": "node tools/check-package-fence.mjs",
+    "ci": "npm run typecheck && npm test && npm run check:package"
   },
   "optionalDependencies": {
     "onnxruntime-node": "^1.27.0"
