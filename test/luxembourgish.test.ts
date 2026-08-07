@@ -176,7 +176,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
         expect(N("55 000 Barrellen")).toBe("55000 Barrellen"); // plain space
         expect(N("9 000 Leit")).toBe("9000 Leit"); // NBSP
         expect(N("4 830 Kilometer")).toBe("4830 Kilometer"); // NARROW NBSP
-        expect(lb.text("9 000").trim()).toBe("neːŋdæu̯zənt"); // was *néng null*
+        expect(lb.text("9 000").trim()).toBe("neːŋdæu̯zənt"); // NBSP again, end-to-end; was *néng null*
     });
 
     test("decimals: the comma is the decimal point, the fraction is read digit by digit", () => {
@@ -188,6 +188,8 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
 
     // TRAP 14: `bis` starts with ⟨b⟩, so a left operand ending in unstressed ⟨-en⟩ loses it — the corpus
     // writes `siwe bis aacht`. Emitting `$1 bis $2` on digits could never do that.
+    // ⚠ THE DASHES BELOW ARE NBSP-FLANKED (U+00A0), not plain spaces, because that is how the corpus
+    //   writes them — indistinguishable on screen. The parenthetical-dash case is NBSP then a PLAIN space.
     test("ranges: the joiner is `bis`, and it triggers n-deletion on the left operand", () => {
         expect(N("(1894 – 1895)")).toBe("(1894 bis 1895)");
         expect(N("vun 2 – 3 km Äis")).toBe("vun 2 bis 3 km Äis"); // right operand stays DIGITS for the tier
@@ -208,9 +210,9 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
     });
 
     test("era, abbreviations and the ones deliberately left alone", () => {
-        expect(N("am 10. Joerhonnert v. Chr. ass")).toBe("am zéngte Joerhonnert vir Christus ass");
+        expect(N("am 10. Joerhonnert v. Chr. ass")).toBe("am zéngte Joerhonnert vir Christus ass"); // ⚠ NBSP inside `v. Chr.`
         expect(N("(1000 – 1300 n. Chr.)")).toBe("(1000 bis 1300 no Christus)");
-        expect(N("z. B. de Pennsylvania Wilds")).toBe("zum Beispill de Pennsylvania Wilds");
+        expect(N("z. B. de Pennsylvania Wilds")).toBe("zum Beispill de Pennsylvania Wilds"); // ⚠ NBSP inside `z. B.`
         expect(N("Kéis, Thon asw.")).toBe("Kéis, Thon an sou weider."); // the sentence break survives
         expect(N("Nëss, Iessen asw., déi")).toBe("Nëss, Iessen an sou weider, déi"); // no DOUBLED pause
         expect(N("den Dr. Damadian")).toBe("den Dokter Damadian");
@@ -218,7 +220,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
     });
 
     test("degrees and signs — and the compound hyphens that must not become a minus", () => {
-        expect(N("bei 32 °C Hëtzt")).toBe("bei 32 Grad Celsius Hëtzt");
+        expect(N("bei 32 °C Hëtzt")).toBe("bei 32 Grad Celsius Hëtzt"); // ⚠ NBSP before the degree sign
         expect(N("12 °F")).toBe("12 Grad Fahrenheit"); // zero corpus instances — absence is not evidence of correctness
         expect(N("iwwer +30 Grad Celsius")).toBe("iwwer plus 30 Grad Celsius");
         expect(N("(UTC+1)")).toBe("(UTC plus 1)");
@@ -255,8 +257,8 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
 
     // The shared symbol tier, reached through the engine so the words are proved to pass the g2p (a word your layer emits must come from the…)).
     test("the symbol tier: percent, currency, units and the two rate idioms", () => {
-        expect(lb.text("88 %").trim()).toBe(lb.text("88 Prozent").trim());
-        expect(lb.text("30 $").trim()).toBe(lb.text("30 Dollar").trim());
+        expect(lb.text("88 %").trim()).toBe(lb.text("88 Prozent").trim()); // ⚠ NARROW NBSP U+202F, not the U+00A0 used above
+        expect(lb.text("30 $").trim()).toBe(lb.text("30 Dollar").trim()); // ⚠ NARROW NBSP U+202F
         expect(lb.text("165 km/h").trim()).toBe(lb.text("165 Kilometer an der Stonn").trim()); // corpus idiom
         expect(lb.text("133 m/s").trim()).toBe(lb.text("133 Meter pro Sekonn").trim()); // corpus idiom
         expect(lb.text("7 cm").trim()).toBe(lb.text("7 Zentimeter").trim()); // was *km*

@@ -141,8 +141,8 @@ describe("marathi text normalization", () => {
 
     test("ZWJ inside a word, and the अ‍ॅ digraph", () => {
         // core/unicode.ts DEVANAGARI_WORD excludes U+200D, so the tokenizer split the word in two.
-        expect(mr("आपल्‍या")).toBe(mr("आपल्या"));
-        expect(mr("अ‍ॅनिमेशन")).toBe(mr("ऍनिमेशन"));
+        expect(mr("आपल्‍या")).toBe(mr("आपल्या")); // ⚠ ZWJ U+200D inside the conjunct
+        expect(mr("अ‍ॅनिमेशन")).toBe(mr("ऍनिमेशन")); // ⚠ अ+ZWJ+ॅ vs the precomposed ऍ
     });
 
     test("ASCII ':' written for the visarga, and the visarga written for a colon", () => {
