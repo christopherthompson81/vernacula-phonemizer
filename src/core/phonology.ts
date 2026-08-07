@@ -1,7 +1,7 @@
 /**
- * Loader for the shared native-abugida phonology tables (data/native/_shared/phonology.jsonc).
+ * Loader for the shared native-abugida phonology tables (`phonology.jsonc`, beside this module).
  * Universal, output-affecting DATA (place-of-articulation + homorganic nasal) — see that file's header
- * and src/Phonemize/native/unicode.ts for the data-vs-code split. Memoized: the file is read once.
+ * for the data-vs-code split. Memoized: the file is read once.
  */
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";

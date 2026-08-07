@@ -40,7 +40,7 @@ export function makeAbugidaG2P(
         IV = def.independentVowels,
         VS = def.vowelSigns;
     // Longest-prefix place lookup: sort keys so t͡ʃ / t̪ win over any shorter prefix. `""` (no match) →
-    // homorganicNasal[""] is undefined, so no nasal is inserted (same as the old `place() === ""` path).
+    // homorganicNasal[""] is undefined, so no nasal is inserted.
     const placeKeys = Object.keys(phon.placeOfArticulation).sort(
         (a, b) => b.length - a.length,
     );

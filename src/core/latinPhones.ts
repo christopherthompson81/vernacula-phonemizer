@@ -9,7 +9,7 @@
  *     mi   Cañitas → anitas       (`C` and `s` are not Maori letters)
  *     sr   kayo    → kao          (Serbian Latin has no q w x y)
  *
- * Measured across the fleet: **45 engines cannot read at least one ASCII letter** — `x` in 30 of them, `q` in 29,
+ * ⚠ Measured across the fleet, **45 engines cannot read at least one ASCII letter** — `x` in 30 of them, `q` in 29,
  * `c` in 17; Maori is missing thirteen of twenty-six. An explicitly typed character is content, and deleting it is
  * neither nativising nor routing.
  *
@@ -19,11 +19,11 @@
  *
  * ## ⚠ WHY NOT A LETTER→LETTER SUBSTITUTION BEFORE THE G2P
  *
- * The first attempt at #663 was orthographic: a central table rewriting `q`→`k`, `x`→`ks`, `c`→`k` before the
- * engine ran, driven by removing the unreadable letters from each engine's inventory. It broke ten tests across
- * five files, and the reason generalises.
+ * The orthographic alternative — a central table rewriting `q`→`k`, `x`→`ks`, `c`→`k` before the engine runs,
+ * driven by removing the unreadable letters from each engine's inventory — breaks on multigraphs, and the reason
+ * generalises.
  *
- * Uzbek cannot read a bare `c`, so `c` left its inventory — and **Uzbek writes /t͡ʃ/ as the DIGRAPH `ch`**:
+ * Uzbek cannot read a bare `c`, so `c` leaves its inventory — and **Uzbek writes /t͡ʃ/ as the DIGRAPH `ch`**:
  *
  *     ikkinchi → ikkinkhi        uch → ukh        kichik → kikhik
  *
@@ -51,11 +51,11 @@
  * `c`, and its rule wins before this table is reached. What is left is the languages with no opinion at all, and
  * for those every value in the range is better than silence.
  *
- * ## Interaction with the #657 accent fold
+ * ## Interaction with the accent fold
  *
  * For an engine with a `makeNativiser`, an out-of-inventory ACCENT is already folded to its base before the g2p
- * runs (`ö`→`o`), so what reaches this table is mostly plain ASCII — which is exactly the #663 measurement. The
- * accented rows below matter for the engines that have no nativiser, where the letter arrives intact.
+ * runs (`ö`→`o`), so what reaches this table is mostly plain ASCII. The accented rows below matter for the
+ * engines that have no nativiser, where the letter arrives intact.
  */
 
 /**
@@ -65,7 +65,7 @@
  * the table language-neutral and override-free.
  */
 export const LATIN_PHONE: Readonly<Record<string, string>> = {
-    // ── ASCII. These are the #663 measurement: the letters an engine's scan actually falls through on.
+    // ── ASCII: the letters an engine's scan actually falls through on.
     b: "b",
     c: "k", // ⚠ AMBIGUOUS: /k/ (Latin, Slavic ⟨c⟩=/ts/, Italian /t͡ʃ/ before front vowels, French /s/). /k/ is the
     //          alphabet's older value and the one a language with no ⟨c⟩ rule most likely intends in a name.
@@ -121,22 +121,9 @@ export const LATIN_PHONE: Readonly<Record<string, string>> = {
 };
 
 /**
- * The phone for `ch`, or `undefined` if this table has nothing to say — which is the correct answer for anything
- * that is not a letter.
- *
- * ⚠ NOT FOR COMBINING MARKS, and that is why the guard is here rather than left to each caller. The scan branch
- * this is consulted from also swallows stray combining marks, and a mark is not a segment: giving one a phone
- * would invent a sound where the orthography has a diacritic the engine has already handled or declined.
- *
- * ⚠ AND NOT FOR `h` BY DEFAULT. `h` is written and read as NOTHING in Italian, Galician, Aragonese and Asturian,
- * and those engines fall through on it for that reason — correctly. A caller in one of those languages must not
- * consult this table for `h`, so `h` is opt-in via `includeH`. Measuring "the g2p says nothing" cannot distinguish
- * deliberate silence from a missing rule, so the distinction has to be declared by the caller.
- */
-/**
  * ⚠ WORD-INITIAL ⟨x⟩ IS /z/, NOT /ks/. The cluster is the letter's value between or after vowels (`Xerox` →
  * *…oks*, `taxi`), but no language that borrows ⟨x⟩ begins a word with the cluster — `Xerox`, `xylophone`,
- * `Xanthe` all start /z/. Emitting /ks/ there manufactured an initial cluster that the source language does not
+ * `Xanthe` all start /z/. Emitting /ks/ there manufactures an initial cluster that the source language does not
  * have either, which is the worst of both: illegal in the host AND wrong about the loan.
  */
 const X_INITIAL = "z";

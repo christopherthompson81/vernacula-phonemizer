@@ -18,8 +18,8 @@ import {
     TIE_BAR,
 } from "./unicode.ts";
 
-// Regexes built from the notation-primitive lists (src/Phonemize/native/unicode.ts) — the list is the
-// single source, the pattern is derived. VOWEL = syllable nuclei; MOD = trailing modifiers that attach
+// Regexes built from the notation-primitive lists in `./unicode.ts` — the list is the single source, the
+// pattern is derived. VOWEL = syllable nuclei; MOD = trailing modifiers that attach
 // to the preceding unit (spacing modifiers ː ˑ ʲ ʰ ʱ ʼ + any combining diacritic, so t̪/d̪/n̪ stay ONE token).
 const VOWEL = new RegExp(`[${IPA_VOWELS}]`);
 const MOD = new RegExp(`[${ATTACHING_MODIFIERS}${COMBINING_DIACRITICS}]`);

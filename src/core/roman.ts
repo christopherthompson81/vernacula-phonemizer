@@ -126,23 +126,21 @@ const PREV_WORD = /(\p{L}+)[^\p{L}]*$/u;
 const NEXT_WORD = /^[^\p{L}]*(\p{L}+)/u;
 
 export function normalizeRomans(text: string, policy: RomanPolicy = {}): string {
-    // Fast path: ONE Roman letter is the floor, not two. Requiring two CONSECUTIVE letters looked like a
-    // cheaper filter but was wrong for a single-letter numeral in non-Latin context — "L годовщина" (the
-    // 50th anniversary) returned early unconverted, while "L rocznica" happened to pass only because
-    // "rocznica" contains "ci". This still short-circuits every text with no Latin at all, which is the
-    // bulk of the engines this pass exists for.
+    // ⚠ Fast path: ONE Roman letter is the floor, not two. Requiring two CONSECUTIVE letters misses a
+    // single-letter numeral in non-Latin context — "L годовщина" (the 50th anniversary) returns early
+    // unconverted, while "L rocznica" passes only because "rocznica" happens to contain "ci". This still
+    // short-circuits every text with no Latin at all, which is the bulk of the engines this pass exists for.
     if (!/[ivxlcdmIVXLCDM]/u.test(text)) return text;
     const hasLower = /\p{Ll}/u.test(text);
     return text.replace(TOKEN, (tok, offset: number) => {
         const lower = tok.toLowerCase();
         if (policy.exclude?.has(lower)) return tok; // this language's own homograph — never a numeral
         // GLUED TO DIGITS ⇒ not a numeral but part of an alphanumeric code: the C of `39C`, the B of
-        // `2B`, the X of `X5`. core/initialisms.ts already encodes the same fact from the other side,
-        // claiming `\p{Lu}+(?=\d)` as a code rather than an acronym. This is checked BEFORE everything
-        // else because the numeral-context licence below deliberately bypasses the single-letter guard,
-        // so without it an ordinal context turns the `C` of `JAS 39C Gripen` into "hundredth". Found by
-        // the Hungarian run, which measured a regnal-ordinal rule gaining 3 instances and losing that one
-        // — and reverted the rule rather than ship a confidently wrong reading.
+        // `2B`, the X of `X5`. core/initialisms.ts encodes the same fact from the other side, claiming
+        // `\p{Lu}+(?=\d)` as a code rather than an acronym.
+        // ⚠ CHECKED BEFORE EVERYTHING ELSE, because the numeral-context licence below deliberately
+        // bypasses the single-letter guard — without this, an ordinal context turns the `C` of
+        // `JAS 39C Gripen` into "hundredth".
         if (/\d/u.test(text[offset - 1] ?? "") || /\d/u.test(text[offset + tok.length] ?? "")) return tok;
         const n = romanToInt(tok);
         if (n === null) return tok;
@@ -163,8 +161,8 @@ export function normalizeRomans(text: string, policy: RomanPolicy = {}): string 
         // capitals are unambiguous, because no numeral is written that way; a LONE capital stays
         // ambiguous and is left to the rules below.
         //
-        // This is what let `D K Arya főfelügyelő-helyettes` read as *ötszázadik K Arya* once a regnal
-        // rule licensed a following capitalised word — D is Roman 500.
+        // Without it, `D K Arya főfelügyelő-helyettes` reads as *ötszázadik K Arya* as soon as a regnal
+        // rule licenses a following capitalised word — D is Roman 500.
         const isSingleCap = (w: string | undefined): boolean =>
             w !== undefined && w.length === 1 && w === w.toUpperCase() && /\p{Lu}/u.test(w);
         if (isSingleCap(tok) && (isSingleCap(prevW) || isSingleCap(nextW))) return tok;

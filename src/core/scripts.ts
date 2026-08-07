@@ -1,10 +1,8 @@
 /**
  * SCRIPT ROUTING — which language reads a run of text in a script the host engine does not own.
  *
- * WHY THIS EXISTS. `core/foreign.ts` gave every engine a fallback for embedded foreign text, but only for
- * LATIN, and `emitUnclaimed` said so explicitly: "Everything else in a gap — stray punctuation,
- * whitespace, a third script — stays dropped exactly as before." That scoping was right at the time and
- * this is the generalisation it anticipated. Measured before the change:
+ * ⚠ WHY THIS EXISTS. `core/foreign.ts` alone gives every engine a fallback for embedded foreign text, but only
+ * for LATIN — every other script in an unclaimed gap is dropped outright:
  *
  *   Cyrillic inside Greek      Ο Πούτιν και ο Владимир   →  "o putin ce o"        (Владимир GONE)
  *   Greek inside English       The word λόγος means word →  "ðə wˈɝd mˈiːnz wˈɝd" (λόγος GONE)
@@ -12,8 +10,7 @@
  *   Greek inside Thai          คำว่า Ελλάδα คือ           →  Ελλάδα GONE
  *   Latin inside Russian       Слово hello значит        →  works, because Latin is the special case
  *
- * A dropped run is invisible to every leak-based check — nothing survives into the IPA to be flagged —
- * which is the same blindness that hid the currency drops in #584.
+ * ⚠ A DROPPED RUN IS INVISIBLE TO EVERY LEAK-BASED CHECK — nothing survives into the IPA to be flagged.
  *
  * THE MODEL: a DEFAULT READER PER SCRIPT, overridable per language. A script is a much better predictor
  * of language than nothing at all, and for several scripts it is nearly deterministic — Greek script is
@@ -32,16 +29,11 @@
 export type ScriptName =
     | "Latin" | "Cyrillic" | "Greek" | "Han" | "Kana" | "Hangul" | "Arabic" | "Hebrew"
     | "Devanagari" | "Bengali" | "Tamil" | "Thai" | "Ethiopic" | "Armenian" | "Georgian" | "Myanmar"
-    // The table below was first written from the "obvious" scripts and silently dropped every run in
-    // one it did not list — Telugu, Kannada, Malayalam, Gujarati, Gurmukhi, Odia, Sinhala, Khmer, Lao,
-    // Tibetan, Tifinagh, Cherokee and Ol Chiki all vanished from a host language's output, and the fleet
-    // has an ENGINE for every one of them. The set is now derived from what the registry can actually
-    // read rather than hand-picked; anything with an engine belongs here.
+    // ⚠ THIS SET MUST BE DERIVED FROM WHAT THE FLEET CAN READ — the registry, the language catalogue, the
+    // README examples — never from recall. A script with an engine that is missing here does not fall back:
+    // every run in it vanishes from the host language's output, silently.
     | "Telugu" | "Kannada" | "Malayalam" | "Gujarati" | "Gurmukhi" | "Oriya" | "Sinhala"
     | "Khmer" | "Lao" | "Tibetan" | "Tifinagh" | "Cherokee" | "Ol_Chiki"
-    // …and these five come from the README's OWN example list, which exercises scripts the first two
-    // passes still missed. The lesson is the same each time: the set must be derived from what the fleet
-    // can read (the registry, the language catalogue, the README examples), never from recall.
     | "Adlam" | "Nko" | "Syloti_Nagri" | "Javanese" | "Sundanese";
 
 const SCRIPT_TESTS: [ScriptName, RegExp][] = [

@@ -19,17 +19,13 @@
  *     H gone, `MP` → [mp], `NYC` → [niːk], `WTO` → [uːt], `DSLR` → [ʌdslɚ]; French `SNCF` → [snkf] and
  *     `TGV`/`PDG` DROPPED from the output entirely. Every one of those has no vowel or an illegal cluster.
  *
- * An earlier version of this file also carried a word-acronym list and a length-based "lexicalization
- * threshold" (4+ letters and pronounceable ⇒ read as a word). Both were removed: they were logic trying to
- * re-derive lexical facts, and the threshold duplicated what the OOV g2p already does — measured against
- * the wikipron referee, the g2p was ALREADY right on the pronounceable acronyms it records as words
- * (BAMF, SNES, CUPE, TESDA, CAGR, USAR, VUSA), so the correct move is to leave them to it.
- *
- * The cost of that simplification is honest and small: an acronym that IS spelled out in speech but is
- * pronounceable and unrecorded (ROV, NYC, SUV) now needs a data entry, where the threshold would have
- * guessed at it — and guessed wrong about as often (it read USAF as a word). On the wikipron referee the
- * threshold scored 1650/4558 folded against 1648 here, i.e. two words, for a rule that could not be
- * justified. Both are above the 1644 the engine started at.
+ * ⚠ THERE IS DELIBERATELY NO LENGTH-BASED "LEXICALIZATION THRESHOLD" (4+ letters and pronounceable ⇒ read
+ * as a word). That is logic trying to re-derive a lexical fact, and it duplicates what the OOV g2p already
+ * does: measured against the wikipron referee, the g2p is ALREADY right on the pronounceable acronyms it
+ * records as words (BAMF, SNES, CUPE, TESDA, CAGR, USAR, VUSA).
+ * The cost is honest and small: an acronym that IS spelled out in speech but is pronounceable and unrecorded
+ * (ROV, NYC, SUV) needs a data entry, where a threshold would guess — and guess wrong about as often (it
+ * reads USAF as a word), for a two-word difference on the referee.
  */
 
 export interface InitialismData {
@@ -54,39 +50,33 @@ export interface InitialismData {
 }
 
 /**
- * Build the text→text initialism pass.
+ * PERSONAL INITIALS — `J. S. Bach`, `George W. Bush`. A single capital plus a period, which the all-caps run
+ * below cannot claim because it requires two letters, so the bare letter reaches the g2p as an unpronounceable
+ * consonant plus a spurious phrase break (es `w .`, pt `v .`, ru `u .`, de `f .`).
  *
- * ORDERING CONSTRAINT FOR THE CALLER, and it bites: Roman numerals are all-caps letter runs too, so this
- * pass MUST run after the language's Roman-numeral rules. Run earlier, it spells `Louis XIV` as
- * EX-EYE-VEE. `II` occurs 8 times in the English cased column, so the collision is real, not a
- * hypothetical. Likewise it must run after abbreviation expansion, or French `MM.` becomes EM-EM.
- */
-/**
- * PERSONAL INITIALS — `J. S. Bach`, `George W. Bush`. A single capital plus a period, which the run above
- * cannot claim because it requires two letters, so the bare letter reached the g2p as an unpronounceable
- * consonant plus a spurious phrase break: es `w .`, pt `v .`, ru `u .`, de `f .`. English got the letter
- * name but kept the break. Reported by the Dutch run, which could only work around it locally.
- *
- * The disambiguation is CONTIGUITY, which is what makes this safe. A run of two or more is unambiguous —
- * no abbreviation appears twice in a row — so it is claimed outright. A LONE initial is genuinely
- * ambiguous with a real abbreviation (German `S.` is *Seite*, and `S. 42` must stay that), so it is
- * claimed only when it sits BETWEEN two capitalised words. That excludes the dangerous case, a sentence
- * ending in a single capital before a new one ("…ist A. Der Rest…"), because there the preceding word is
- * lowercase.
+ * ⚠ THE DISAMBIGUATION IS CONTIGUITY, and that is what makes this safe. A run of two or more is unambiguous —
+ * no abbreviation appears twice in a row — so it is claimed outright. A LONE initial is genuinely ambiguous
+ * with a real abbreviation (German `S.` is *Seite*, and `S. 42` must stay that), so it is claimed only when it
+ * sits BETWEEN two capitalised words. That excludes the dangerous case, a sentence ending in a single capital
+ * before a new one ("…ist A. Der Rest…"), because there the preceding word is lowercase.
  *
  * The periods are consumed, since they are abbreviation dots rather than sentence ends.
  *
- * KNOWN FALSE POSITIVE, measured rather than assumed. A sentence that ENDS in a lone capital and is
- * followed by a new capitalised sentence has the same shape — "Vitamin C. It helps" loses its sentence
- * boundary. Counting the shape across the en_us corpus: 4 matches, and all 4 are genuine personal
- * initials (John F. Kennedy, Lyndon B. Johnson, George W. Bush ×2) with no sentence-end among them. The
- * fix would be a list of sentence-opening function words, which is language-specific lexical knowledge and
- * does not belong in shared code — so the limit is recorded here instead. A language that finds this
- * costly can pre-empt it in its own normalize.ts.
+ * ⚠ KNOWN FALSE POSITIVE: a sentence that ENDS in a lone capital followed by a new capitalised sentence has
+ * the same shape, so "Vitamin C. It helps" loses its sentence boundary. The fix would be a list of
+ * sentence-opening function words, which is language-specific lexical knowledge and does not belong in shared
+ * code — a language that finds this costly can pre-empt it in its own normalize.ts.
  */
 const INITIAL_RUN = /(?<![\p{L}\p{M}])(?:\p{Lu}\.[  ]*){2,}/gu;
 const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})/gu;
 
+/**
+ * Build the text→text initialism pass.
+ *
+ * ⚠ ORDERING CONSTRAINT FOR THE CALLER, and it bites: Roman numerals are all-caps letter runs too, so this
+ * pass MUST run AFTER the language's Roman-numeral rules, or it spells `Louis XIV` as EX-EYE-VEE. Likewise it
+ * must run after abbreviation expansion, or French `MM.` becomes EM-EM.
+ */
 export function makeInitialismNormalizer(d: InitialismData): (text: string) => string {
     const spellInitials = (run: string): string =>
         [...run.matchAll(/\p{Lu}/gu)]
@@ -155,15 +145,15 @@ export interface PhonotacticsData {
  *   3. An illegal word-INITIAL cluster (French TVA has no /tv/ onset; English WTO no /wt/).
  *   4. An illegal word-FINAL cluster (French RATP /tp/, EDF /df/; English UTC /tc/).
  *
- * DIGRAPH ORTHOGRAPHIES MUST FOLD FIRST. This test counts raw LETTERS, so a language whose orthography
- * writes one sound with two letters looks like it has an illegal consonant run: Hungarian `ENSZ` is
- * e-n-sz, three sounds, but reads here as a 3-consonant cluster and would be spelled out where it is
- * actually said as the word *ensz*. Wrap the call in a fold from digraphs to single placeholder letters
- * before passing the token in; the Hungarian run does exactly that locally. Reported by that run.
+ * ⚠ DIGRAPH ORTHOGRAPHIES MUST FOLD FIRST. This test counts raw LETTERS, so a language whose orthography
+ * writes one sound with two letters looks like it has an illegal consonant run: Hungarian `ENSZ` is e-n-sz,
+ * three sounds, but reads here as a 3-consonant cluster and would be spelled out where it is actually said as
+ * the word *ensz*. Wrap the call in a fold from digraphs to single placeholder letters before passing the
+ * token in, as the Hungarian engine does.
  *
- * KNOWN LIMIT: readability is not convention. `ONG`, `PIB`, `RER`, `US`, `UK` are all readable yet
- * spelled out in speech, which is exactly why `forceLetters` exists — no phonotactic test can derive a
- * lexical convention.
+ * ⚠ KNOWN LIMIT: READABILITY IS NOT CONVENTION. `ONG`, `PIB`, `RER`, `US`, `UK` are all readable yet spelled
+ * out in speech, which is exactly why `acronymLetters` exists — no phonotactic test can derive a lexical
+ * convention.
  */
 export function makeUnreadableTest(d: PhonotacticsData): (word: string) => boolean {
     const consonantRun = new RegExp(`[^${d.vowels.source.replace(/^\[|\]$/g, "")}]{3,}`, "u");

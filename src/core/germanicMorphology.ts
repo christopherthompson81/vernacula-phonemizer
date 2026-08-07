@@ -8,8 +8,8 @@
  * The ALGORITHM lives here; every language-specific fact is CONFIG: the affix lists, the linking elements
  * (Fugen-s), the stem lexicon (isWord/isConstituent/takesLink), the vowel set + valid onsets, and a few optional
  * per-language quirks (a negation prefix, real-word-only stressed prefixes, a suffix digraph guard, the
- * element-initial seam pattern, and a keep-whole verb suffix). German supplies all of them (→ byte-identical to its
- * former private module); Dutch/Afrikaans supply the subset they need.
+ * element-initial seam pattern, and a keep-whole verb suffix). German supplies all of them; Dutch and Afrikaans
+ * supply the subset they need.
  */
 
 export const BOUNDARY = "·"; // inserted between morphemes; the g2p treats the next letter as element-initial
