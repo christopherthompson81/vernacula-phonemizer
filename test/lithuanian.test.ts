@@ -4,8 +4,8 @@ import { phonemizeWord, createLithuanian } from "../src/languages/lithuanian/lit
 
 // Canonical-IPA goldens for Lithuanian / lietuvių (lt) — Baltic (Indo-European), Latin script, ~3M. A RULE-based g2p
 // (g2p.ts): a left-to-right scan + the hard/soft PALATALIZATION contrast (Cʲ before front vowels / the softening ⟨i⟩,
-// spreading leftward through clusters) + regressive VOICING assimilation + n→ŋ before velars. Scored 85.7% folded /
-// 98.5% symbol against the wikipron lit_latn_narrow referee (HUMAN, 15,513 words) — the folds strip the lexical PITCH
+// spreading leftward through clusters) + regressive VOICING assimilation + n→ŋ before velars. Referee: wikipron
+// lit_latn_narrow (HUMAN, 15,513 words) — the folds strip the lexical PITCH
 // accents (¹/²), stress-conditioned length (ː) + vowel quality (ɑ→ɐ, æ→ɛ), and narrow allophony (dark ɫ, v~ʋ, the
 // glide j~ɪ̯). Several golds are referee-verified (exact after folds). Stress is lexical → not marked.
 describe("Lithuanian canonical IPA — rule g2p (palatalization + voicing)", () => {

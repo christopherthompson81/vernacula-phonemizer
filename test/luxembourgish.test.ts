@@ -9,8 +9,8 @@ import { normalizeLuxembourgish, ordinalStem } from "../src/languages/luxembourg
 // Luxembourgish (lb) — Lëtzebuergesch, West Germanic (Moselle Franconian), Latin script (~390k). A German-derived
 // orthography (⟨w⟩→v, ⟨ch⟩→χ, initial st/sp→ʃt/ʃp) + a distinctive diphthong system + French loans. The engine is a
 // greedy longest-match grapheme scan + German-style rules (stressed ⟨e⟩→æ, geminate collapse, devoicing). Validated
-// against wikipron ltz_latn_broad (3893 human headwords) — 69.3% FOLDED / 92.2% symbol, with vowel LENGTH folded.
-// single-source-family.
+// against wikipron ltz_latn_broad (human), with vowel LENGTH folded. ⚠ Its two referees are the same
+// Wiktionary tradition, so they are not independent of each other.
 describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + German-style rules", () => {
     const lb = createLuxembourgish();
 
@@ -94,7 +94,7 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
 
 // TEXT NORMALIZATION. Counts are FLEURS lb_lu, column 3, 1,896 utterances. The assertions are on the
 // text→text layer (plus a couple through phonemize, to prove the words reach the g2p rather than a sink),
-// and they pin the rule's BRANCHES rather than the corpus's instances .
+// and they pin the rule's BRANCHES rather than the corpus's instances.
 describe("Luxembourgish normalization — the period's four jobs + the Eifeler Regel", () => {
     const lb = createLuxembourgish();
     const N = normalizeLuxembourgish;
