@@ -168,9 +168,10 @@ export function phonemizeWordSegmental(word: string): string {
 // survives and nothing VANISHES, so it is a WRONG-WORD defect the leak and DROP classes cannot reach.
 // `\p{M}` so a DECOMPOSED accent stays with its base instead of ending the token one character later.
 const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}ʼ’']*)|(\d+)|([.?!,;:])/gu;
-/** Oromo's OWN inventory — this is the token class as it stood before the widening above, lifted verbatim, so
- *  nothing about the language is invented here. A token outside it carries a letter Oromo orthography does not
- *  use, i.e. a FOREIGN NAME, and goes to the injected reader rather than to a g2p with no rule for it. */
+/** Oromo's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
+ *  SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ *  token OUTSIDE this class carries a letter Oromo orthography does not use — i.e. a FOREIGN NAME — and goes
+ *  to the injected reader rather than to a g2p with no rule for it. */
 const NATIVE_WORD = /^[A-Za-zʼ’']+$/u;
 
 /**
@@ -182,7 +183,7 @@ const NATIVE_WORD = /^[A-Za-zʼ’']+$/u;
  * inflect for the numeral that counts it (`kiiloo meetira 1600`, `paawundii 1,000`).
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -203,7 +204,7 @@ class OromoPhonemizer implements Phonemizer {
     text(input: string): string {
         // normalize.ts, then the shared tier, then normalize.ts's number pass. The tier matches DIGITS
         // beside a sign, so every rule that turns digits into WORDS — the glued Oromo enclitic and the
-        // decimal — has to run after it (trap 14 (agreement cannot be applied to digits) from the other end). That ordering is what keeps the
+        // decimal — has to run after it, from the other end. That ordering is what keeps the
         // currency and percent words in ONE place, the declaration above.
         // The INITIALISM pass runs LAST of the three text passes: after normalizeOromo has expanded the
         // dotted abbreviations and the era marker (or `D.K.D` would be spelled DAA-KAA-DAA), and after the

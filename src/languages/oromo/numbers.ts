@@ -1,9 +1,8 @@
 /**
- * Oromo number → words — replaces the English-digit STOPGAP wired in #560 (digits used to be
- * dropped entirely, then read in English; now they are read in Oromo).
+ * Oromo number → words.
  *
- * ATTESTATION per class — this corpus-first split matters because Oromo compounding was the open
- * question that kept this deferred:
+ * ⚠ ATTESTATION VARIES BY CLASS, and the weakest pieces are marked, because Oromo compounding is the
+ * part a reader should not assume is settled:
  *   [c] ones 1–10 and the TEENS LINKER "kudha", the tens digdama/soddoma, dhibba (100), kuma (1000)
  *       and miliyoona: attested in the FLEURS om_et source text itself and/or the kaikki human set.
  *   [t] jaatama/torbaatama: the Kamisee thesis attests the stems (jáatàm, torbáatàm).
@@ -48,7 +47,7 @@ export function numberToWords(n: number): string {
         const th = Math.floor(n / 1000), r = n % 1000;
         // below1000, NOT below100: a thousands count of 100 or more (783,562 → kuma dhibba torba
         // saddeettamii sadii …) reached `TENS[78]`, which is undefined, and CRASHED. It was unreachable
-        // before #562 only because the tokenizer split a grouped number at the comma; de-grouping in
+        // only because the tokenizer split a grouped number at the comma; de-grouping in
         // normalize.ts exposed it on the corpus's own `783,562` and `291,773`.
         const head = th === 1 ? "kuma" : `kuma ${below1000(th)}`; // kuma shan = 5,000 (corpus: kuma + count)
         return r === 0 ? head : `${head} ${below1000(r)}`;
