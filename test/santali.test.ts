@@ -4,7 +4,7 @@ import { phonemizeWord } from "../src/languages/santali/santali.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Santali (sat) — ᱥᱟᱱᱛᱟᱲᱤ, Munda (Austroasiatic), the OL CHIKI alphabet (U+1C50–1C7F), the
-// fleet's first Munda language + first Ol Chiki. A grapheme scan + sign rules: ⟨ᱷ⟩ aspirates the preceding stop
+// A grapheme scan + sign rules: ⟨ᱷ⟩ aspirates the preceding stop
 // (ᱵᱷ→bʱ), ⟨ᱹ⟩ modifies the vowel (ᱟᱹ→ə), ⟨ᱸ⟩ nasalizes it (ᱟᱸ→ã), and the HALLMARK — a word-final voiced stop is
 // CHECKED/glottalized (ᱫᱟᱜ→dakʼ, ᱢᱮᱫ→metʼ). Referee: kaikki Santali (490 human).
 describe("Santali (ᱥᱟᱱᱛᱟᱲᱤ) canonical IPA", () => {

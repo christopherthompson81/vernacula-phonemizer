@@ -5,7 +5,7 @@ import { phonemizeWord } from "../src/languages/nahuatl/nahuatl.ts";
 import { numberToWords } from "../src/languages/nahuatl/numbers.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
-// Canonical-IPA goldens for Classical Nahuatl / nāhuatlahtōlli (nci) — Uto-Aztecan (the fleet's FIRST), the
+// Canonical-IPA goldens for Classical Nahuatl / nāhuatlahtōlli (nci) — Uto-Aztecan, the
 // traditional Spanish-based orthography. AUTHORED from Andrews, *Introduction to Classical Nahuatl* (§2). Vowel
 // length is unwritten in traditional texts → short vowels (the referee's ː is backbone-folded). Two corroborating
 // human referees (wikipron 886 / kaikki 2329) at ~93% folded / ~98.8% symbol.

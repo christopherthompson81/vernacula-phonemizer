@@ -4,7 +4,7 @@ import { phonemizeWord, createMossi } from "../src/languages/mossi/mossi.ts";
 import { numberToWords } from "../src/languages/mossi/numbers.ts";
 
 // Canonical-IPA goldens for Mossi / Mooré (mos) — Niger-Congo GUR (Oti-Volta), Latin (Burkinabé) orthography,
-// the FIRST Gur language in the fleet. Hand-adjudicated against en.wiktionary Moore (Wiktionary). The greedy g2p
+// Hand-adjudicated against en.wiktionary Moore (Wiktionary). The greedy g2p
 // + gemination scores 94.9% folded vs the referee (tools/referee-eval, 39 words) — the two residuals are referee
 // artifacts (a gemination-notation inconsistency + a y/j typo), so the segmental backbone is ~100%. Signatures:
 // dedicated ATR letters ⟨ɛ ɩ ʋ⟩, ⟨o⟩=o always (no ⟨ɔ⟩), DOUBLING = length, TILDE = nasal, ⟨r⟩=ɾ, ⟨y⟩=j. TONE

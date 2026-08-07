@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createTurkmen } from "../src/languages/turkmen/turkmen.ts";
 
-// Canonical-IPA goldens for Standard Turkmen (tk) — Türkmençe, Oghuz Turkic, Latin, the fleet's first Turkmen.
+// Canonical-IPA goldens for Standard Turkmen (tk) — Türkmençe, Oghuz Turkic, Latin.
 // THE HALLMARK: the INTERDENTAL fricatives ⟨s⟩→[θ] and ⟨z⟩→[ð] (shared with Bashkir — söz→θøð). 9 vowels with
 // ⟨a⟩→[ɑ] (back), ⟨ä⟩→[æ], ⟨ö⟩→[ø], ⟨ü⟩→[y] (front rounded), ⟨y⟩→[ɯ] (close back unrounded); ⟨ç⟩→t͡ʃ, ⟨j⟩→d͡ʒ,
 // ⟨ž⟩→ʒ, ⟨ş⟩→ʃ, ⟨ň⟩→ŋ, ⟨ý⟩→j (glide, vs the vowel ⟨y⟩), ⟨h⟩→x. Word-final (oxytone) stress; unwritten phonemic

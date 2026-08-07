@@ -69,7 +69,7 @@ describe("es-419 Roman-numeral policy — centuries cardinal, prenominal events 
     });
 });
 
-// text normalization (spanish/normalize.ts) — the third language to get the treatment, after English
+// TEXT NORMALIZATION (spanish/normalize.ts). Modelled on English
 // and French. Asserted on es-419 because that is the locale of the FLEURS audio these were measured
 // against; the layer itself is shared with Castilian `es` apart from the date rule below.
 describe("spanish normalization", () => {

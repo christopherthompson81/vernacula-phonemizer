@@ -5,7 +5,7 @@ import { phonemizeWord } from "../src/languages/totontepecmixe/totontepecmixe.ts
 import { numberToWords } from "../src/languages/totontepecmixe/numbers.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
-// Canonical-IPA goldens for Totontepec Mixe / ayöök (mto) — Mixe-Zoquean (the fleet's FIRST), the modern SIL
+// Canonical-IPA goldens for Totontepec Mixe / ayöök (mto) — Mixe-Zoquean, the modern SIL
 // orthography. AUTHORED from Crawford, *Totontepec Mixe Phonotagmemics* (SIL 1963). The consonants + allophony are
 // Crawford-grounded (the allophony goldens below reproduce his exact transcriptions, e.g. mpahk→[mbahk],
 // cingavus→[tsingavus]); the vowel-orthography mapping is reconstructed from his example words.

@@ -1,6 +1,6 @@
 /**
  * Mooré (mos) phonemizer — Niger-Congo GUR (Oti-Volta), the Latin (Burkinabé) orthography, canonical IPA,
- * The largest language of Burkina Faso (~8M) and the FIRST Gur language in the fleet. A greedy
+ * The largest language of Burkina Faso (~8M); Niger-Congo Gur (Oti-Volta). A greedy
  * longest-match scan over the grapheme table (manifest.ts) with two code rules: CONSONANT GEMINATION — a doubled
  * consonant is a geminate [Cː] (yelle→jélːé) — and NASAL place assimilation — ⟨n⟩→[ŋ] before g/k (tenga→teŋɡa).
  * Grounded on TWO independent authorities: the en.wiktionary Moore referee (modern orthography) + the FSI Moré

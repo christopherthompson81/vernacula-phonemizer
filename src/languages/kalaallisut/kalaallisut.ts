@@ -1,6 +1,6 @@
 /**
  * Kalaallisut / West Greenlandic (kl) phonemizer — Eskimo-Aleut (Inuit branch), ~56k (Greenland), the 1973
- * PHONEMIC Latin orthography. Canonical IPA. The fleet's FIRST Eskimo-Aleut language. Because
+ * PHONEMIC Latin orthography. Canonical IPA. Because
  * the orthography is highly phonemic, this is a near-1:1 scan:
  *   ⚠ THREE-VOWEL system /a i u/ (the Inuit hallmark). ⟨e o⟩ are NOT phonemes — they are the LOWERED allophones of
  *     /i u/ the orthography writes before a uvular ⟨q r⟩, so ⟨e⟩→[i], ⟨o⟩→[u] (aaneq→aːniq). Doubled vowel → LENGTH.

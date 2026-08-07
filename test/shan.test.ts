@@ -4,7 +4,7 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/shan/shan.ts";
 
 // Canonical-IPA goldens for Shan / Tai Long (shn) — လိၵ်ႈတႆး, Southwestern Tai (Tai-Kadai), the SHAN ABUGIDA (a
-// Myanmar-script variant), TONAL, the fleet's first Shan. A per-syllable scan: onset → medials → rime (vowel signs ×
+// Myanmar-script variant), TONAL. A per-syllable scan: onset → medials → rime (vowel signs ×
 // coda) → EXPLICIT tone (unmarked→˨˦, ႇ→˩, ႈ→˧˧˨, visarga း→˥, ႉ→˦˨). Signatures: aspirated ⟨သ⟩→[sʰ], glottal-onset
 // ⟨ဢ⟩→[ʔ]; ⟨ူ⟩→[o] closed / [uː] open; medial ⟨ွ⟩ ROUNDS the inherent rime to [ɔ]; ⟨ိူ⟩→[ɤ], ⟨ို⟩→[ɯ]; the ⟨ႂ⟩ coda
 // →[ɰ]; palatalisation ⟨ၵျ⟩→[d͡ʑ]. Referee: wikipron shn_mymr_broad (2607 human).
