@@ -1,0 +1,31 @@
+// Native canonical-IPA data manifest for Kalaallisut / West Greenlandic (kl) — Eskimo-Aleut (Inuit
+// branch), ~56k (Greenland), the 1973 PHONEMIC Latin orthography. Because the orthography is highly
+// phonemic, the engine (kalaallisut.ts) is a near-1:1 scan:
+//   ⚠ THREE-VOWEL system /a i u/ (the Inuit hallmark). ⟨e o⟩ are NOT phonemes — they are the LOWERED
+//     allophones of /i u/ the orthography writes before a uvular ⟨q r⟩, so ⟨e⟩→[i], ⟨o⟩→[u] (aaneq→aːniq).
+//     Doubled vowel → LENGTH.
+//   ⚠ the UVULAR stop ⟨q⟩→[q] and the uvular fricative ⟨r⟩→[ʁ]; ⟨ng⟩→[ŋ], ⟨nng⟩→[ŋː]; a doubled consonant
+//     → LENGTH. The gemination/digraph logic is code, in kalaallisut.ts.
+// The PHONETIC regressive consonant ASSIMILATION (rp→pp) + uvular vowel-lowering ([ɜ ɔ ɑ], ll→ɬ) are the
+// NARROW layer — deferred (the engine targets the broad/phonemic level). No stress (weight-based,
+// unmarked). Referee: wikipron kal_latn_broad (human, 1581).
+{
+    "language": "kl",
+    "name": "Kalaallisut (kalaallisut)",
+    "script": ["Latin"],
+
+    // Single vowel graphemes → IPA. ⟨e o⟩ are the orthographic lowered-before-uvular allophones of /i u/ →
+    // [i]/[u]. ⟨y⟩ joins æ ø å as a Danish-loan vowel letter: it is unavoidable once Danish numerals are
+    // read (tyve, fyrre, sytten — see numbers.ts), and without it the scan silently deleted it
+    // (tyve → *[tvi]).
+    "vowels": { "a": "a", "i": "i", "u": "u", "e": "i", "o": "u", "æ": "ɛ", "ø": "ø", "å": "ɔ", "y": "y" },
+
+    // Single consonant graphemes → IPA. ⟨r⟩ is the uvular fricative [ʁ]. ⟨b d⟩ are loan letters —
+    // Greenlandic has no voiced stops, so they DEVOICE to [p t] (Biina→piːna, Bolatta→pulatːa). ⟨g⟩ is the
+    // voiced velar FRICATIVE [ɣ] (isigak→isiɣak) — the continuant parallel to the stop ⟨k⟩, exactly as
+    // ⟨r⟩→[ʁ] is to ⟨q⟩ (the series v s g r = [v s ɣ ʁ]); the broad referee coarsens it to [ɡ] (fold).
+    "consonants": {
+        "p": "p", "t": "t", "k": "k", "q": "q", "b": "p", "d": "t", "g": "ɣ", "f": "f", "h": "h", "j": "j",
+        "l": "l", "m": "m", "n": "n", "s": "s", "v": "v", "r": "ʁ", "w": "v",
+    },
+}

@@ -1,0 +1,26 @@
+// Native canonical-IPA data manifest for Crimean Tatar (crh) — qırımtatar tili, KIPCHAK Turkic with strong
+// OGHUZ influence, ~540k speakers (Crimea + diaspora). The standard Latin alphabet (Turkish-based) is
+// highly phonemic, so the engine (crimeantatar.ts) is a left-to-right grapheme scan (no digraphs — ⟨ç ş ñ
+// ğ⟩ are single letters) with gemination and word-final (oxytone) stress.
+// ⚠ The alphabet: back ⟨a o u ı⟩→[ɑ o u ɯ] vs front ⟨e ö ü i⟩→[e ø y i] (harmony is SPELLED); ⟨q⟩→[q]
+//   (uvular) vs ⟨k⟩→[k], ⟨ğ⟩→[ɣ] (voiced dorsal) vs ⟨g⟩→[ɡ]; ⟨c⟩→[d͡ʒ], ⟨ç⟩→[t͡ʃ], ⟨ş⟩→[ʃ], ⟨j⟩→[ʒ],
+//   ⟨ñ⟩→[ŋ], ⟨y⟩→[j], ⟨v⟩→[v], ⟨h⟩→[h]; ⟨â⟩ is the palatalisation vowel → [a]. Doubled letters geminate
+//   (yollamaq→[jolːɑmɑq]). The ⟨v⟩→[w] coda rule and the dotless-I casing are code, in crimeantatar.ts.
+// ⚠ THIN SINGLE-SOURCE: English Wiktionary "Crimean Tatar terms with IPA pronunciation", ~18 Latin pairs —
+// no wikipron/kaikki/epitran crh.
+{
+    "language": "crh",
+    "name": "Crimean Tatar (qırımtatar tili)",
+    "script": ["Latin"],
+
+    // Single letters (no digraphs in the Crimean Tatar Latin alphabet). ⟨â⟩→[a] (the palatalisation vowel;
+    // the palatalisation of the preceding consonant, kâr→[cɑr], is a low-frequency loanword feature —
+    // deferred). ⟨v⟩ is context-dependent ([w] in a post-vocalic coda) and handled in the scan. ⟨x⟩/⟨w⟩
+    // are NOT Crimean Tatar letters.
+    "letters": {
+        "a": "ɑ", "â": "a", "e": "e", "ı": "ɯ", "i": "i", "o": "o", "ö": "ø", "u": "u", "ü": "y",
+        "b": "b", "c": "d͡ʒ", "ç": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "ğ": "ɣ", "h": "h", "j": "ʒ", "k": "k",
+        "l": "l", "m": "m", "n": "n", "ñ": "ŋ", "p": "p", "q": "q", "r": "r", "s": "s", "ş": "ʃ", "t": "t",
+        "v": "v", "y": "j", "z": "z",
+    },
+}

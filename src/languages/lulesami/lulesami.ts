@@ -19,26 +19,17 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 
-// Multi-letter graphemes, LONGEST-FIRST (trigraphs → digraphs → geminate doubles). ⟨dtj dts⟩ = the voiced
-// affricates (geminate-only); ⟨ssj ttj tts nnj llj⟩ = the palatal/sibilant geminates; ⟨ie uo oa⟩ = diphthongs.
-const MULTI: [string, string][] = [
-    ["ddj", "ɟː"], ["dtj", "d͡ʒ"], ["dts", "d͡z"],
-    ["ssj", "ʃː"], ["ttj", "t͡ʃː"], ["tts", "t͡sː"], ["nnj", "ɲː"], ["llj", "ʎː"],
-    ["sj", "ʃ"], ["tj", "t͡ʃ"], ["ts", "t͡s"], ["nj", "ɲ"], ["lj", "ʎ"], ["dj", "ɟ"],
-    ["ie", "ie"], ["uo", "uo"], ["oa", "oɑ"],
-    ["bb", "pː"], ["dd", "tː"], ["gg", "kː"], ["pp", "pː"], ["tt", "tː"], ["kk", "kː"],
-    ["mm", "mː"], ["nn", "nː"], ["ll", "lː"], ["rr", "rː"], ["vv", "vː"], ["ss", "sː"], ["ff", "fː"],
-];
-// Single graphemes → IPA. ⟨b d g⟩ = VOICELESS UNASPIRATED [p t k]; ⟨p t k⟩ are PLAIN here (word-initial
-// aspiration is applied below). c/q/w/x/z are loan letters (Scandinavian) adapted to the nearest phoneme.
-const SINGLE: Record<string, string> = {
-    a: "ɑ", á: "ɑː", å: "o", e: "e", i: "i", o: "o", u: "u", æ: "æ", ä: "æ", ø: "ø", ö: "ø", y: "y",
-    b: "p", d: "t", g: "k", p: "p", t: "t", k: "k",
-    m: "m", n: "n", ŋ: "ŋ", r: "r", l: "l", v: "v", j: "j", f: "f", h: "h", s: "s",
-    c: "k", q: "k", w: "v", x: "ks", z: "s",
-};
+interface LuleSamiDef {
+    multigraphs: [string, string][];
+    letters: Record<string, string>;
+}
+const DEF = loadManifest<LuleSamiDef>(import.meta.url, "lulesami.jsonc");
+// Grapheme tables (lulesami.jsonc). The word-initial ⟨p t k⟩ aspiration rule is in the scan below.
+const MULTI = DEF.multigraphs;
+const SINGLE = DEF.letters;
 
 /** One Lule Sami word → canonical IPA (transparent segmental scan; morphophonology is the deferred residual). */
 export function phonemizeWord(word: string): string {

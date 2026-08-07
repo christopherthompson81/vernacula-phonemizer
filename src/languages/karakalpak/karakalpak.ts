@@ -16,19 +16,18 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-const DIGRAPHS: [string, string][] = [["sh", "ʃ"], ["ch", "t͡ʃ"]];
-// Single letters. Vowels: the acute letters ⟨á ó ú⟩ are the front counterparts of ⟨a o u⟩; ⟨ı⟩ (dotless) is [ɯ].
-const LETTER: Record<string, string> = {
-    "a": "ɑ", "á": "æ", "e": "e", "ı": "ɯ", "i": "i", "o": "o", "ó": "ø", "u": "u", "ú": "y",
-    "b": "b", "d": "d", "f": "f", "g": "ɡ", "ǵ": "ʁ", "h": "h", "x": "χ", "j": "ʒ", "k": "k", "q": "q",
-    "l": "l", "m": "m", "n": "n", "ń": "ŋ", "p": "p", "r": "r", "s": "s", "t": "t", "w": "w", "y": "j", "z": "z",
-    "v": "v", // the loan letter ⟨v⟩ (Russian в). ⟨c⟩ is NOT in the Karakalpak alphabet — it occurs only in the ⟨ch⟩
-    // digraph (handled above), so there is no standalone ⟨c⟩ mapping.
-    "í": "ɯ", // the dotless-⟨ı⟩ letter as Wiktionary titles it (I-acute); not a real Karakalpak grapheme otherwise
-};
+interface KarakalpakDef {
+    digraphs: [string, string][];
+    letters: Record<string, string>;
+}
+const DEF = loadManifest<KarakalpakDef>(import.meta.url, "karakalpak.jsonc");
+// Letter → IPA tables (karakalpak.jsonc). The dotless-I casing is handled in the scan below.
+const DIGRAPHS = DEF.digraphs;
+const LETTER = DEF.letters;
 const IPA_VOWEL = new Set([..."ɑæeɯioøuy"]);
 
 /** One Karakalpak word → canonical IPA. */

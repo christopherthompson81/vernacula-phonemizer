@@ -10,21 +10,17 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Multi-char units (longest-match first): the glottalized series (C + ʼ), then the plain aspirated affricates.
-const UNIT: Record<string, string> = {
-    "chʼ": "t͡ʃʼ", "tzʼ": "t͡sʼ", "bʼ": "ɓ", "tʼ": "tʼ", "kʼ": "kʼ", "qʼ": "qʼ", "pʼ": "pʼ",
-    "ch": "t͡ʃʰ", "tz": "t͡sʰ",
-};
-// Single letters. Plain voiceless stops are ASPIRATED; ⟨b⟩ is the implosive [ɓ]; ⟨r⟩→[ɻ], ⟨w⟩→[ʋ], ⟨j⟩→[x], ⟨x⟩→[ʃ].
-const G: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ä": "ə",
-    "ü": "u", "ö": "o", "ë": "e", "ï": "i", "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", // accent/diaeresis → base vowel
-    "p": "pʰ", "t": "tʰ", "k": "kʰ", "q": "qʰ", "b": "ɓ", "s": "s", "l": "l", "m": "m", "n": "n",
-    "r": "ɻ", "w": "ʋ", "x": "ʃ", "j": "x", "y": "j", "ʼ": "ʔ",
-    "d": "d", "g": "ɡ", "f": "f", "v": "b", "z": "s", "c": "k", // Spanish-loan consonants (kept, not silently dropped; ⟨h⟩ is silent per Spanish)
-};
+interface KicheDef {
+    units: Record<string, string>;
+    letters: Record<string, string>;
+}
+const DEF = loadManifest<KicheDef>(import.meta.url, "kiche.jsonc");
+// Grapheme tables (kiche.jsonc): the glottalized/aspirated units (longest-match) and the single letters.
+const UNIT = DEF.units;
+const G = DEF.letters;
 const ORDER = Object.keys(UNIT).sort((a, b) => b.length - a.length);
 const VOWEL = new Set(["a", "e", "i", "o", "u", "ə"]);
 

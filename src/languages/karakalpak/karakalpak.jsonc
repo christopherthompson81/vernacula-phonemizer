@@ -1,0 +1,30 @@
+// Native canonical-IPA data manifest for Karakalpak (kaa) — qaraqalpaq tili, KIPCHAK Turkic (closely
+// related to Kazakh), ~600k speakers (Karakalpakstan, NW Uzbekistan). Since the 2016 reform the official
+// script is a LATIN alphabet, and it is highly phonemic — the engine (karakalpak.ts) is a left-to-right
+// greedy scan over a digraph + letter table with word-final (oxytone) stress.
+// ⚠ The 2016 Latin alphabet with its acute-marked front/uvular letters: ⟨á⟩→[æ], ⟨ó⟩→[ø], ⟨ú⟩→[y] (front
+//   vowels vs plain ⟨a o u⟩→[ɑ o u]); the DOTLESS ⟨ı⟩→[ɯ] vs dotted ⟨i⟩→[i]; ⟨q⟩→[q] (uvular, back-harmony)
+//   vs ⟨k⟩→[k], ⟨x⟩→[χ] (uvular) vs ⟨h⟩→[h], ⟨ǵ⟩→[ʁ] (uvular voiced fricative, back) vs ⟨g⟩→[ɡ]; ⟨ń⟩→[ŋ];
+//   ⟨j⟩→[ʒ], ⟨w⟩→[w], ⟨y⟩→[j]; digraphs ⟨sh⟩→[ʃ], ⟨ch⟩→[t͡ʃ]. (Unlike Kazakh, the uvular/velar choice is
+//   WRITTEN — q/k, x/h, ǵ/g — so no harmony inference is needed.) The dotless-I casing rule is code, in
+//   karakalpak.ts.
+// ⚠ THIN SINGLE-SOURCE: English Wiktionary "Karakalpak terms with IPA pronunciation", ~11 usable Latin
+// pairs — no wikipron/kaikki/epitran kaa.
+{
+    "language": "kaa",
+    "name": "Karakalpak (qaraqalpaq tili)",
+    "script": ["Latin"],
+
+    "digraphs": [["sh", "ʃ"], ["ch", "t͡ʃ"]],
+
+    // Single letters. Vowels: the acute letters ⟨á ó ú⟩ are the front counterparts of ⟨a o u⟩; ⟨ı⟩
+    // (dotless) is [ɯ]. ⟨v⟩ is the loan letter (Russian в). ⟨c⟩ is NOT in the Karakalpak alphabet — it
+    // occurs only in the ⟨ch⟩ digraph, so there is no standalone ⟨c⟩ mapping. ⟨í⟩ is the dotless-⟨ı⟩
+    // letter as Wiktionary titles it (I-acute); not a real Karakalpak grapheme otherwise.
+    "letters": {
+        "a": "ɑ", "á": "æ", "e": "e", "ı": "ɯ", "i": "i", "o": "o", "ó": "ø", "u": "u", "ú": "y",
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "ǵ": "ʁ", "h": "h", "x": "χ", "j": "ʒ", "k": "k", "q": "q",
+        "l": "l", "m": "m", "n": "n", "ń": "ŋ", "p": "p", "r": "r", "s": "s", "t": "t", "w": "w", "y": "j", "z": "z",
+        "v": "v", "í": "ɯ",
+    },
+}

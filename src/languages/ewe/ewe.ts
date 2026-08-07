@@ -10,17 +10,17 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Multi-letter units (longest-match first): labial-velars, affricates, ⟨ny⟩→ɲ.
-const DIGRAPH: Record<string, string> = { "gb": "ɡ͡b", "kp": "k͡p", "dz": "d͡z", "ts": "t͡s", "ny": "ɲ" };
-// Single letters. ⟨ƒ⟩/⟨ʋ⟩ are the BILABIAL series (vs labiodental ⟨f⟩/⟨v⟩); ⟨ɣ⟩→ɰ, ⟨x⟩→x, ⟨y⟩→j, ⟨r⟩→l (Ewe [l~ɾ]).
-const G: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ɛ": "ɛ", "ɔ": "ɔ",
-    "b": "b", "d": "d", "ɖ": "ɖ", "f": "f", "ƒ": "ɸ", "g": "ɡ", "h": "h", "k": "k", "l": "l", "m": "m",
-    "n": "n", "ŋ": "ŋ", "p": "p", "r": "r", "s": "s", "t": "t", "v": "v", "ʋ": "β", "x": "x",
-    "y": "j", "z": "z", "ɣ": "ɰ", "c": "t͡s", "j": "d͡z", "q": "k", "'": "ʔ",
-};
+interface EweDef {
+    digraphs: Record<string, string>;
+    letters: Record<string, string>;
+}
+const DEF = loadManifest<EweDef>(import.meta.url, "ewe.jsonc");
+// Letter → IPA tables (ewe.jsonc). The ⟨r⟩ and ⟨w⟩ allophony rules are handled in the scan below.
+const DIGRAPH = DEF.digraphs;
+const G = DEF.letters;
 const ORDER = Object.keys(DIGRAPH); // all length-2
 
 // NFD so a PRECOMPOSED nasal vowel (ã ẽ ĩ õ ũ) decomposes to base+◌̃ and its base is still recognised as a vowel.

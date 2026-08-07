@@ -16,20 +16,19 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-const VOWEL: Record<string, string> = {
-    a: "a", e: "e", i: "i", o: "o", u: "u",
-    ā: "aː", ē: "eː", ī: "iː", ō: "oː", ū: "uː",
-    á: "a", é: "e", í: "i", ó: "o", ú: "u", // acute (some texts) → the plain vowel
-};
+interface NahuatlDef {
+    vowels: Record<string, string>;
+    consonants: Record<string, string>;
+}
+const DEF = loadManifest<NahuatlDef>(import.meta.url, "nahuatl.jsonc");
+// Context-free tables (nahuatl.jsonc). ⟨c z x h q u⟩ are handled positionally in the scan below.
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
 const isVowel = (c: string | undefined): boolean => c !== undefined && VOWEL[c] !== undefined;
 const isFront = (c: string | undefined): boolean => c === "e" || c === "i" || c === "ē" || c === "ī" || c === "é" || c === "í";
-// Non-contextual single consonants (⟨c z x h q u⟩ are handled positionally; loan letters map to the nearest sound).
-const CONS: Record<string, string> = {
-    p: "p", t: "t", m: "m", n: "n", l: "l", y: "j", w: "w",
-    s: "s", r: "ɾ", f: "f", b: "b", d: "d", g: "ɡ", v: "v", j: "x", k: "k", q: "k",
-};
 
 /** One Classical Nahuatl word → canonical IPA (Andrews §2 orthography rules; morphophonology deferred). */
 export function phonemizeWord(word: string): string {

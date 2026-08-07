@@ -14,18 +14,15 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Single letters (no digraphs in the Crimean Tatar Latin alphabet). ⟨â⟩→[a] (the palatalisation vowel; the
-// palatalisation of the preceding consonant, kâr→[cɑr], is a low-frequency loanword feature — deferred). ⟨v⟩ is
-// context-dependent ([w] in a post-vocalic coda) and handled in the scan. ⟨x⟩/⟨w⟩ are NOT Crimean Tatar letters.
-const LETTER: Record<string, string> = {
-    "a": "ɑ", "â": "a", "e": "e", "ı": "ɯ", "i": "i", "o": "o", "ö": "ø", "u": "u", "ü": "y",
-    "b": "b", "c": "d͡ʒ", "ç": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "ğ": "ɣ", "h": "h", "j": "ʒ", "k": "k",
-    "l": "l", "m": "m", "n": "n", "ñ": "ŋ", "p": "p", "q": "q", "r": "r", "s": "s", "ş": "ʃ", "t": "t",
-    "v": "v", "y": "j", "z": "z",
-};
+interface CrimeanTatarDef {
+    letters: Record<string, string>;
+}
+// Letter → IPA (crimeantatar.jsonc). The ⟨v⟩→[w] coda rule and dotless-I casing are handled in the scan.
+const LETTER = loadManifest<CrimeanTatarDef>(import.meta.url, "crimeantatar.jsonc").letters;
 const CYR_VOWEL = new Set([..."aâeıioöuü"]); // Latin vowels (for the ⟨v⟩→[w] coda context)
 const IPA_VOWEL = new Set([..."ɑaeɯioøuy"]);
 

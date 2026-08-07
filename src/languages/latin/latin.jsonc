@@ -1,0 +1,33 @@
+// Native canonical-IPA data manifest for Latin (la) — CLASSICAL Latin, the restored/reconstructed
+// pronunciation per Allen, *Vox Latina*. Italic (Indo-European), Latin script with MACRONS marking vowel
+// length. Classical Latin g2p is near-fully deterministic from macronized spelling — the engine (latin.ts)
+// is a context-sensitive grapheme scan: short vowels are LAX (⟨e i o u⟩→[ɛ ɪ ɔ ʊ]) while macrons give
+// length ([aː eː …]); ⟨c⟩ is ALWAYS [k] (no palatalization), ⟨v⟩→[w], ⟨qu⟩→[kʷ], ⟨x⟩→[ks], ⟨gn⟩→[ŋn],
+// aspirates ⟨ph th ch⟩→[pʰ tʰ kʰ]; word-initial/intervocalic ⟨i j⟩→glide [j] (intervocalic GEMINATE [j j],
+// eius→ɛjjʊs); DARK ⟨l⟩→[ɫ] (clear when geminate/before front); ⟨n⟩→[ŋ] before a velar; and the signature
+// WORD-FINAL ⟨-Vm⟩→ nasalized LONG vowel [Ṽː] (bellum→bɛllũː). Penult/antepenult weight stress is emitted.
+// The digraph/diphthong/glide/assimilation/stress rules are code, in latin.ts; the vowel-quality and
+// consonant tables live here. Ecclesiastical Latin is deferred.
+{
+    "language": "la",
+    "name": "Latin (lingua Latīna)",
+    "script": ["Latin"],
+
+    // Short vowels LAX to open-mid/near-close (Allen); ⟨a⟩ stays open. The diaeresis vowels ⟨ë ï ö ü ÿ⟩
+    // mark hiatus (coëunda, poëta).
+    "short": { "a": "a", "e": "ɛ", "i": "ɪ", "o": "ɔ", "u": "ʊ", "y": "y", "ë": "ɛ", "ï": "ɪ", "ö": "ɔ", "ü": "ʊ", "ÿ": "y" },
+
+    // Long vowels (macron) are tense + [ː].
+    "long": { "ā": "aː", "ē": "eː", "ī": "iː", "ō": "oː", "ū": "uː", "ȳ": "yː" },
+
+    // A short vowel in HIATUS (immediately before another vowel) is TENSE/close, not lax (Allen:
+    // alia→alia, creātūra→kreaːtuːra); the diaeresis vowels tense on the same rule (applied in latin.ts).
+    "tense": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "y": "y", "ë": "e", "ï": "i", "ö": "o", "ü": "u", "ÿ": "y" },
+
+    // Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ is
+    // dark/clear by context (latin.ts).
+    "consonants": {
+        "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "k": "k", "m": "m", "n": "n",
+        "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "w", "z": "z", "j": "j",
+    },
+}

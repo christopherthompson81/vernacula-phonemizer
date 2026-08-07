@@ -15,25 +15,25 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Multi-letter graphemes (longest-first). ⟨tx cy ch⟩ = the palatalized affricate /cy/ [t͡ʃ]; ⟨ts⟩ = /c/ [t͡s];
-// ⟨qu⟩ = [k]. (Nasal clusters ⟨ny⟩ + post-nasal voicing are handled in the passes below.)
-const DIGRAPHS: [string, string][] = [["tx", "t͡ʃ"], ["cy", "t͡ʃ"], ["ch", "t͡ʃ"], ["ts", "t͡s"], ["qu", "k"]];
-// Single vowel graphemes → IPA. The central/back special vowels (ä ë ü ö) are the reconstructed values.
-const VOWEL: Record<string, string> = {
-    a: "a", e: "e", i: "i", o: "o", u: "u", ä: "æ", ë: "ɨ", ü: "ʌ", ö: "ʊ",
-};
-// Single consonant graphemes → IPA. ⟨c⟩=[k], ⟨x⟩=[ʃ] (Crawford's retroflex /š/), ⟨j⟩=[h], ⟨v w⟩=[v]/[w], ⟨y⟩=[j].
-const CONS: Record<string, string> = {
-    p: "p", t: "t", k: "k", c: "k", b: "b", d: "d", g: "ɡ", m: "m", n: "n", s: "s", x: "ʃ", j: "h",
-    h: "h", v: "v", w: "w", y: "j", l: "l", r: "ɾ", f: "f", z: "ʒ", "ʼ": "ʔ", "'": "ʔ", "’": "ʔ", "ꞌ": "ʔ", "`": "ʔ",
-};
+interface TotontepecMixeDef {
+    digraphs: [string, string][];
+    vowels: Record<string, string>;
+    consonants: Record<string, string>;
+    postNasalVoice: Record<string, string>;
+}
+const DEF = loadManifest<TotontepecMixeDef>(import.meta.url, "totontepecmixe.jsonc");
+// Grapheme tables (totontepecmixe.jsonc). The allophony passes (post-nasal voicing, ð/ɣ, ŋ) are below.
+const DIGRAPHS = DEF.digraphs;
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
+const POSTNASAL_VOICE = DEF.postNasalVoice;
 const isVowel = (ph: string): boolean => [..."aeiouæɨʌʊ"].includes(ph[0] ?? "");
 const NASAL = new Set(["m", "n"]);
 const VELAR = new Set(["k", "ɡ", "ɣ"]);
-const POSTNASAL_VOICE: Record<string, string> = { p: "b", t: "d", k: "ɡ", "t͡s": "d͡z" };
 
 interface Seg { ph: string; vowel: boolean }
 

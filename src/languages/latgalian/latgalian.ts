@@ -17,23 +17,25 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Multi-char graphemes (longest-first): the affricate digraphs.
-const DIGRAPHS: [string, string][] = [["dz", "d͡z"], ["dž", "d͡ʒ"], ["tz", "d͡z"], ["ch", "x"]];
-const VOWEL: Record<string, string> = {
-    "a": "a", "ā": "aː", "e": "æ", "ē": "æː", "i": "i", "ī": "iː", "o": "ɔ", "ō": "ɔː",
-    "u": "u", "ū": "uː", "y": "ɨ", "ȳ": "ɨː",
-};
+interface LatgalianDef {
+    digraphs: [string, string][];
+    vowels: Record<string, string>;
+    consonants: Record<string, string>;
+    voice: Record<string, string>;
+    devoice: Record<string, string>;
+}
+const DEF = loadManifest<LatgalianDef>(import.meta.url, "latgalian.jsonc");
+// Grapheme tables + voicing pairs (latgalian.jsonc). Palatalization and assimilation are the passes below.
+const DIGRAPHS = DEF.digraphs;
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
+const VOICE = DEF.voice;
+const DEVOICE = DEF.devoice;
 const FRONT = new Set([..."iīeē"]); // the vowel LETTERS that palatalize a preceding consonant (NOT ⟨y⟩)
-const CONS: Record<string, string> = {
-    "b": "b", "c": "t͡s", "č": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "ģ": "ɡʲ", "h": "x", "j": "j", "k": "k",
-    "ķ": "kʲ", "l": "l", "ļ": "lʲ", "m": "m", "n": "n", "ņ": "nʲ", "p": "p", "r": "r", "ř": "rʲ", "s": "s",
-    "š": "ʃ", "t": "t", "v": "v", "z": "z", "ž": "ʒ",
-};
-const VOICE: Record<string, string> = { "p": "b", "t": "d", "k": "ɡ", "s": "z", "ʃ": "ʒ", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ", "f": "v", "x": "ɣ" };
-const DEVOICE: Record<string, string> = { "b": "p", "d": "t", "ɡ": "k", "z": "s", "ʒ": "ʃ", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ", "v": "f" };
 
 interface Seg { ph: string; vowel: boolean; frontTrigger: boolean; }
 

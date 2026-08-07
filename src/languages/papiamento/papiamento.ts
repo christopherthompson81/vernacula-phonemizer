@@ -18,20 +18,21 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-const DIGRAPHS: [string, string][] = [["ch", "t͡ʃ"], ["sh", "ʃ"], ["dj", "d͡ʒ"], ["zj", "ʒ"]];
-// Single letters. Open-vowel letters ⟨è ò ù⟩; acute ⟨á é í ó ú⟩ = stressed base vowel (stress found separately).
-const LETTER: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "è": "ɛ", "ò": "ɔ", "ù": "ø",
-    "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "à": "a", "ì": "i",
-    "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j", "k": "k", "l": "l",
-    "m": "m", "n": "n", "ñ": "ɲ", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t", "v": "v",
-    "w": "w", "x": "ks", "y": "j", "z": "z",
-};
+interface PapiamentoDef {
+    digraphs: [string, string][];
+    letters: Record<string, string>;
+    nasalized: Record<string, string>;
+}
+const DEF = loadManifest<PapiamentoDef>(import.meta.url, "papiamento.jsonc");
+// Grapheme tables (papiamento.jsonc). The coda-⟨n⟩, degemination and stress rules are the scan below.
+const DIGRAPHS = DEF.digraphs;
+const LETTER = DEF.letters;
+const NASALIZE = DEF.nasalized;
 const VOWEL_G = new Set([..."aeiouèòùáéíóúàìeo"]); // Latin vowels (for the coda-⟨n⟩ nasalization context)
 const IPA_VOWEL = new Set([..."aeiouɛɔø"]);
-const NASALIZE: Record<string, string> = { a: "ã", e: "ẽ", i: "ĩ", o: "õ", u: "ũ", ɛ: "ɛ̃", ɔ: "ɔ̃", ø: "ø̃" };
 const ACUTE: Record<string, string> = { "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u" };
 
 /** One Papiamentu word → canonical IPA. */

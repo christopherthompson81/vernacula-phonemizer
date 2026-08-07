@@ -17,22 +17,19 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Digraphs, longest-first (2 letters). ⟨ch gh⟩ are the HARD/fricative dorsals; ⟨ll⟩ = ⟨lj⟩ = [ʎ].
-const DIGRAPHS: [string, string][] = [
-    ["ts", "t͡s"], ["sh", "ʃ"], ["nj", "ɲ"], ["lj", "ʎ"], ["ll", "ʎ"],
-    ["dh", "ð"], ["th", "θ"], ["gh", "ɡ"], ["ch", "k"], // ⟨gh⟩→[ɡ] (matches 2/3 referee vs [ɣ] 1/3; the ɣ~ɡ fold covers it)
-    // ⟨dz⟩ is handled specially (the ⟨ndz⟩+front-vowel soft-g reflex → [ndʒ], else [d͡z]).
-];
+interface AromanianDef {
+    digraphs: [string, string][];
+    letters: Record<string, string>;
+}
+const DEF = loadManifest<AromanianDef>(import.meta.url, "aromanian.jsonc");
+// Grapheme tables (aromanian.jsonc). ⟨dz⟩, the c/g softening and the vowel rules are the scan below.
+const DIGRAPHS = DEF.digraphs;
+const LETTER = DEF.letters;
 const VOWEL_L = new Set([..."aeiouã"]);
 const VOWEL_PH = "aeiouəɨ";
-const LETTER: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ã": "ə", "â": "ɨ", "î": "ɨ",
-    "b": "b", "d": "d", "f": "f", "h": "h", "j": "ʒ", "k": "k", "l": "l", "m": "m", "n": "n",
-    "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "v", "w": "w", "x": "ks", "y": "ɣ", "z": "z",
-    "ñ": "ɲ", "ç": "t͡s", // ⟨y⟩ = the Greek-gamma letter → [ɣ] (anyedz→anɣed͡z), NOT the glide [j]
-};
 const isFront = (x: string | undefined): boolean => x === "e" || x === "i";
 const isHigh = (x: string | undefined): boolean => x === "i" || x === "u";
 

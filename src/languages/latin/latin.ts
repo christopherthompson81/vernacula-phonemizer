@@ -12,20 +12,22 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Short vowels LAX to open-mid/near-close (Allen); ⟨a⟩ stays open. Long vowels (macron) are tense + [ː].
-const SHORT: Record<string, string> = { a: "a", e: "ɛ", i: "ɪ", o: "ɔ", u: "ʊ", y: "y", ë: "ɛ", ï: "ɪ", ö: "ɔ", ü: "ʊ", ÿ: "y" };
-const LONG: Record<string, string> = { "ā": "aː", "ē": "eː", "ī": "iː", "ō": "oː", "ū": "uː", "ȳ": "yː" };
-// A short vowel in HIATUS (immediately before another vowel) is TENSE/close, not lax (Allen: alia→alia, creātūra→kreaːtuːra).
-// The diaeresis vowels ⟨ë ï ö ü ÿ⟩ EXIST to mark hiatus (coëunda, poëta), so they tense on the same rule.
-const TENSE: Record<string, string> = { a: "a", e: "e", i: "i", o: "o", u: "u", y: "y", "ë": "e", "ï": "i", "ö": "o", "ü": "u", "ÿ": "y" };
-// Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ handled below (dark/clear).
-const CONS: Record<string, string> = {
-    b: "b", c: "k", d: "d", f: "f", g: "ɡ", h: "h", k: "k", m: "m", n: "n",
-    p: "p", q: "k", r: "r", s: "s", t: "t", v: "w", z: "z", j: "j",
-};
+interface LatinDef {
+    short: Record<string, string>;
+    long: Record<string, string>;
+    tense: Record<string, string>;
+    consonants: Record<string, string>;
+}
+const DEF = loadManifest<LatinDef>(import.meta.url, "latin.jsonc");
+// Vowel-quality and consonant tables (latin.jsonc). The hiatus/glide/digraph/stress rules are the scan below.
+const SHORT = DEF.short;
+const LONG = DEF.long;
+const TENSE = DEF.tense;
+const CONS = DEF.consonants;
 // Every vowel LETTER (short, macron, diaeresis) — for glide (i→j) and diphthong context tests.
 const VOWEL_LETTER = new Set([..."aeiouy", ..."āēīōūȳ", ..."ëïöüÿ"]);
 // IPA vowel BASE chars — for segment-level tests (nasalization, stress nuclei). Excludes offglide/length marks.

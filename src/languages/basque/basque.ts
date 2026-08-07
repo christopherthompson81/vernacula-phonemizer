@@ -19,21 +19,26 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
-// Digraphs, longest-first. The three affricates carry the sibilant place; ⟨tt dd ll rr⟩ are the palatal/geminate pairs.
-const DIGRAPHS: [string, string][] = [
-    ["tx", "t͡ʃ"], ["tz", "t͡s̻"], ["ts", "t͡s̺"], ["dd", "ɟ"], ["tt", "c"], ["ll", "ʎ"], ["rr", "r"],
-];
+interface BasqueNumbers {
+    ones: string[];
+    scores: string[];
+    hundreds: string[];
+    thousand: string;
+    million: string;
+    and: string;
+}
+interface BasqueDef {
+    digraphs: [string, string][];
+    letters: Record<string, string>;
+    numbers: BasqueNumbers;
+}
+const DEF = loadManifest<BasqueDef>(import.meta.url, "basque.jsonc");
+// Letter tables (basque.jsonc). ⟨h⟩ and the tap/trill ⟨r⟩ are context-dependent — handled in the scan below.
+const DIGRAPHS = DEF.digraphs;
+const LETTER = DEF.letters;
 const VOWELS = new Set([..."aeiou"]);
-// Single letters. ⟨z⟩→[s̻] laminal, ⟨s⟩→[s̺] apical, ⟨x⟩→[ʃ]; ⟨j⟩→[x]; ⟨g⟩→[ɡ] always; ⟨h⟩ dropped ("" below). Loan
-// letters ⟨c q v w y ç⟩ map to their nearest Basque value.
-const LETTER: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
-    "b": "b", "d": "d", "f": "f", "g": "ɡ", "j": "x", "k": "k", "l": "l", "m": "m", "n": "n",
-    "ñ": "ɲ", "p": "p", "s": "s̺", "t": "t", "x": "ʃ", "z": "s̻",
-    "c": "k", "q": "k", "v": "b", "w": "w", "y": "j", "ç": "s̻",
-    // ⟨h⟩ is handled explicitly (dropped); ⟨r⟩ is context-dependent (tap/trill) — both below.
-};
 
 /** One Basque word → canonical IPA. */
 export function phonemizeWord(word: string): string {
@@ -60,16 +65,11 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
-// ── NUMBERS (the Basque VIGESIMAL / base-20 system) ────────────────────────────────────────────────────────────────
-// 0-19 are listed; the tens are built on scores of 20 — 20 hogei, 40 berrogei (2×20), 60 hirurogei (3×20), 80 laurogei
-// (4×20) — with the connective ⟨-ta⟩ suffixed for a remainder (hogeita hamar = 20+10 = 30). Hundreds prefix the score
-// system (ehun, berrehun…) and take the free connective ⟨eta⟩; likewise ⟨mila⟩ (thousand), ⟨milioi⟩ (million). ⟨eta⟩
-// is placed once, before the final sub-100 group (the common Euskaltzaindia convention). Not referee-validated (the
-// wikipron dump has no composed numbers) — the component words ARE (bat→bat, hiru→hiɾu, hogei→hoɡei̯…).
-const ONES = ["zero", "bat", "bi", "hiru", "lau", "bost", "sei", "zazpi", "zortzi", "bederatzi",
-    "hamar", "hamaika", "hamabi", "hamahiru", "hamalau", "hamabost", "hamasei", "hamazazpi", "hemezortzi", "hemeretzi"];
-const SCORES = ["", "hogei", "berrogei", "hirurogei", "laurogei"]; // multiples of 20
-const HUNDREDS = ["", "ehun", "berrehun", "hirurehun", "laurehun", "bostehun", "seiehun", "zazpiehun", "zortziehun", "bederatziehun"];
+// ── NUMBERS (the Basque VIGESIMAL / base-20 system; data + provenance in basque.jsonc) ─────────────────────────────
+const NUM = DEF.numbers;
+const ONES = NUM.ones;
+const SCORES = NUM.scores;
+const HUNDREDS = NUM.hundreds;
 
 /** Basque cardinal 0 ≤ n < 10¹² → the spelled-out words (space-separated). */
 function cardinalWords(n: number): string {
@@ -80,24 +80,24 @@ function cardinalWords(n: number): string {
     }
     if (n < 1000) {
         const h = Math.floor(n / 100), rem = n % 100;
-        return rem === 0 ? HUNDREDS[h]! : `${HUNDREDS[h]} eta ${cardinalWords(rem)}`; // ehun eta bat
+        return rem === 0 ? HUNDREDS[h]! : `${HUNDREDS[h]} ${NUM.and} ${cardinalWords(rem)}`; // ehun eta bat
     }
     if (n < 1_000_000) {
         const th = Math.floor(n / 1000), rem = n % 1000;
-        const thWord = th === 1 ? "mila" : `${cardinalWords(th)} mila`;
-        return rem === 0 ? thWord : `${thWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
+        const thWord = th === 1 ? NUM.thousand : `${cardinalWords(th)} ${NUM.thousand}`;
+        return rem === 0 ? thWord : `${thWord}${rem < 100 ? ` ${NUM.and} ` : " "}${cardinalWords(rem)}`;
     }
     if (n < 1_000_000_000) {
         const mil = Math.floor(n / 1_000_000), rem = n % 1_000_000;
-        const milWord = mil === 1 ? "milioi bat" : `${cardinalWords(mil)} milioi`;
-        return rem === 0 ? milWord : `${milWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
+        const milWord = mil === 1 ? `${NUM.million} bat` : `${cardinalWords(mil)} ${NUM.million}`;
+        return rem === 0 ? milWord : `${milWord}${rem < 100 ? ` ${NUM.and} ` : " "}${cardinalWords(rem)}`;
     }
     // 10⁹ is NOT ⟨bilioi⟩ in Basque — the long scale puts bilioi at 10¹², and 10⁹ is said ⟨mila milioi⟩ "a thousand
     // million" (Berria Estilo Liburua, the Euskaltzaindia-aligned style manual: "45.000 milioi [45 mila milioi]";
     // it also states bilioi = 10¹²). Before this, ≥ 10⁹ fell out of range and leaked the raw digits.
     const bil = Math.floor(n / 1_000_000_000), rem = n % 1_000_000_000;
-    const bilWord = bil === 1 ? "mila milioi" : `${cardinalWords(bil)} mila milioi`;
-    return rem === 0 ? bilWord : `${bilWord}${rem < 100 ? " eta " : " "}${cardinalWords(rem)}`;
+    const bilWord = bil === 1 ? `${NUM.thousand} ${NUM.million}` : `${cardinalWords(bil)} ${NUM.thousand} ${NUM.million}`;
+    return rem === 0 ? bilWord : `${bilWord}${rem < 100 ? ` ${NUM.and} ` : " "}${cardinalWords(rem)}`;
 }
 
 /** A digit string → canonical IPA of its Basque cardinal (each word phonemized, space-joined). Out-of-range → raw. */
