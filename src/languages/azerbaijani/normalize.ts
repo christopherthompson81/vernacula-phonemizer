@@ -1,47 +1,20 @@
 /**
- * Azerbaijani (az) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Azerbaijani (az) text normalization — the pre-tokenizer pass that rewrites everything which is not already
+ * a pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the 1,919 unique cased az_az FLEURS utterances (column 3):
- *   `N-ci` ordinal suffix ×~250   (1767-ci ildə, 1978-ci ilin, 190-cı yerdə, 24-cü pillədə, 7-ci ən böyük)
- *   space-grouped thousands ×…    (400 000, 30 000, 330 000, 800 000, 40 000)
- *   comma decimals ×20            (6,5 / 1,2 / 3,50 / 2,8 / 2,3 — the comma is ALSO clause punctuation)
- *   percent ×11                   (30%-i, 100%, 3%-ni, 88%-ni — the -i/-ni are possessive suffixes)
- *   clocks ×21                    (12:00 GMT, 21:20, 23:35-ə)
- *   version dots ×…               (2.4Ghz, 5.0 Ghz, 802.11n/a/b/g)
- *   era markers ×2                (e.ə. / E.ə. = eramızdan əvvəl, BC)
- *   degrees ×2                    (+30°C, 35° longitude)
- *   units ×34 · rates ×7          (km, mm, km², mil, yard; km/s, km/saat, m/s, Mbit/s)
- *   currency ×2 · fractions ×3    (1000$, $14,7; 24½, 29¾, 1/5, 1/3)
- *   roman ×9                      (II Dünya Müharibəsi — World War II reads İkinci)
- *   initialisms ×135 · abbrev ×54 (ABŞ, BMT, GPS, MS, KNP, CEP; Dr., Corc V. Buş)
+ * ⚠ THE `N-ci` ORDINAL IS THE DEFINING FORM. Azerbaijani writes the ordinal as a numeral plus a HARMONISED
+ * suffix — `7-ci`, `190-cı`, `24-cü`, `2010-cu` — which agrees with the stem's last vowel in FOUR-WAY harmony.
+ * The spoken form is the cardinal with `-ıncı/-inci/-uncu/-üncü` on its LAST word (birinci, ikinci, üçüncü,
+ * onuncu, iyirminci), and ⚠ A VOWEL-FINAL STEM DROPS THE LINKING VOWEL (iki→ikinci, altı→altıncı).
+ * romanOrdinals.ts owns the harmony logic; this pass applies it to ARABIC numerals with the written suffix.
  *
- * THE `N-ci` ORDINAL — the corpus's defining form. Azerbaijani writes the ordinal as a numeral plus a
- * HARMONISED suffix: `7-ci`, `190-cı`, `24-cü`, `2010-cu`. The suffix agrees with the stem's last vowel in
- * four-way harmony, and the spoken form is the cardinal with `-ıncı/-inci/-uncu/-üncü` on its LAST word
- * (birinci, ikinci, üçüncü, dördüncü, onuncu, iyirminci …) — a vowel-final stem drops the linking vowel
- * (iki→ikinci, altı→altıncı). romanOrdinals.ts owns the harmony logic; this pass applies it to ARABIC
- * numerals with the written suffix.
+ * ⚠ A PERCENT SIGN CAN CARRY A POSSESSIVE SUFFIX (`30%-i`, `3%-ni`, `88%-ni`), and so can a clock (`23:35-ə`).
+ * A rule that stops at the sign leaves the suffix to be read as a bare vowel.
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `1767-ci ildə`   → `mˈin jedːˈi jˈyz ɑɫtmˈɯʃ jedːˈi d͡ʒˈi ildˈæ`   cardinal + bare "ci" syllable
- *   `400 000`        → `dˈœɾd jˈyz sɯfˈɯɾ`       space-grouped thousands read as "dörd yüz sıfır"
- *   `12:00 GMT`      → `ˈon icˈi , sɯfˈɯɾ ɟmt`    the colon became a pause, GMT read as [ɟmt]
- *   `30%-i`          → `otˈuz ˈi`                  percent dropped, the possessive -i read as [i]
- *   `+30°C`          → `otˈuz d͡ʒ`                  plus dropped, °C read as [dʒ]
- *   `e.ə. 323-cü`    → `ˈe . ˈæ .`                 era marker letter-spelled
- *   `2.4Ghz`         → `icˈi . dˈœɾd ɟhz`          version dot → a phrase break
- *   `19500 km²`      → `… km dˈiɾ`                 squared unit raw
- *   `80 km (50 mil)` → `sæcsˈæn km ællˈi mˈil`     units raw
- *   `1000$`          → `mˈin`                      currency dropped
- *   `II Dünya Müharibəsi` → `icˈi …`               regnal Roman read as the cardinal
- *   `Corc V. Buş`    → `… v . bˈuʃ`                the initial dot left a break
- *   `Dr. Moll`       → `dɾ . mˈoɫɫ`                the abbreviation left a break
- *
- * WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
+ * ⚠ WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
  * the word path stresses them; the de-grouped thousands, the comma decimal and the version dot stay DIGITS so
- * the shared symbol tier can still see the number adjacent to its unit/sign — the tier is composed AFTER this
- * pass in azerbaijani.ts, and the TOKEN swallows the separators (see azerbaijani.ts).
+ * the shared symbol tier can still see the number adjacent to its unit or sign. The tier is composed AFTER
+ * this pass in azerbaijani.ts, and the TOKEN swallows the separators.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
