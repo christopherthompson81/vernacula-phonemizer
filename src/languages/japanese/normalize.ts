@@ -1,43 +1,33 @@
 /**
- * Japanese (ja) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * readable by the kana engine into kana/kanji the existing pipeline speaks. Pure text→text; no IPA.
+ * Japanese (ja) text normalization — the pre-tokenizer pass that rewrites everything which is not already
+ * readable by the kana engine into kana/kanji the pipeline speaks. Pure text→text; no IPA.
  *
- * Thirteenth language, and the one where the layer's job is DIFFERENT from the previous twelve. Japanese
- * already had the strongest number path of any engine here — counters (1本→いっぽん), dates (1999年3月14日),
- * ordinals (第3回), 世紀, percent — all correct before this file existed. What it did NOT have was a way to
- * keep foreign and symbolic text INSIDE the Japanese phoneme inventory.
+ * ⚠ THIS LAYER'S JOB IS DIFFERENT FROM ITS COUNTERPARTS IN OTHER LANGUAGES. Japanese already has a strong
+ * number path — counters (1本→いっぽん), dates, ordinals (第3回), 世紀, percent. What it lacks is a way to keep
+ * foreign and symbolic text INSIDE the Japanese phoneme inventory.
  *
- * THE DEFECT THAT DOMINATES: embedded Latin routes to the ENGLISH phonemizer (core/foreign.ts — a good
- * default for a Cyrillic or Devanagari engine, which would otherwise DROP it). In a Japanese IPA stream it
- * is worse than a drop, because it injects phonemes Japanese does not have: `NASA` → [nˈæsə], `WHO` →
- * [dˈʌbəɫjuː ˈeᶦt͡ʃ ˈoᶷ], `SNS` → [ˈɛs ˈɛn ˈɛs]. That is æ, ʌ, ɫ, t͡ʃ, oᶷ inside an utterance whose whole
- * inventory is the gojūon. A Japanese speaker reads an initialism as its KATAKANA LETTER NAMES — FBI is
- * エフビーアイ — so that is what this file emits, and the ordinary kana engine then speaks it natively.
+ * ⚠ EMBEDDED LATIN ROUTES TO THE ENGLISH PHONEMIZER, WHICH IS WORSE THAN A DROP HERE. A good default for a
+ * Cyrillic or Devanagari engine that would otherwise lose the run, it injects phonemes Japanese does not
+ * have: `NASA` → [nˈæsə], `WHO` → [dˈʌbəɫjuː ˈeᶦt͡ʃ ˈoᶷ]. That is æ, ʌ, ɫ, t͡ʃ, oᶷ inside an utterance whose
+ * whole inventory is the gojūon. A Japanese speaker reads an initialism as its KATAKANA LETTER NAMES — FBI is
+ * エフビーアイ — so that is what this file emits, and the kana engine then speaks it natively.
  *
- * LETTER-SPELLING IS THE DEFAULT, NOT A GUESS. It is always an available Japanese reading for an
- * initialism, so an unknown all-caps run is safe to spell. The acronyms read as WORDS (NATO ナトー, UNESCO
- * ユネスコ) are lexical facts, and live in a short list of ones that are actually established — not
- * invented for the corpus's long tail. This is the same lexical-vs-OOV split core/initialisms.ts settled on
- * for the Latin-script languages, with the polarity flipped: there the default is to leave the token alone,
- * which here is not an option.
+ * ⚠ LETTER-SPELLING IS THE DEFAULT, NOT A GUESS: it is always an available Japanese reading, so an unknown
+ * all-caps run is safe to spell. The acronyms read as WORDS (NATO ナトー, UNESCO ユネスコ) are LEXICAL facts and
+ * live in a short list of established ones. Same lexical-vs-OOV split core/initialisms.ts uses for the
+ * Latin-script languages, with the polarity flipped — there the default is to leave the token alone, which
+ * here is not an option.
  *
- * MIXED-CASE Latin (Apple ×9, Skype ×3, iPhone ×3, ZMapp ×4) is deliberately NOT converted. Those are
- * loanwords whose katakana is lexical and unguessable from spelling (Apple→アップル, not アプレ), so they
- * keep the English fallback until there is a sourced loanword lexicon. `pH` ×9 is listed because it is an
- * initialism that merely happens to carry a lowercase letter.
+ * ⚠ MIXED-CASE LATIN IS DELIBERATELY NOT CONVERTED (Apple, Skype, iPhone, ZMapp). Those are loanwords whose
+ * katakana is lexical and unguessable from spelling — Apple is アップル, not アプレ — so they keep the English
+ * fallback until there is a sourced loanword lexicon. `pH` is listed only because it is an initialism that
+ * happens to carry a lowercase letter.
  *
- * Measured over the ja_jp corpus (3,208 utterances): ・ ×302 (already correct — a bunsetsu space), 年 ×242,
- * all-caps Latin ×208 instances / 83 distinct, counters ×169, 月 ×84, 単位 after a digit ×64, 分の ×28 (see
- * below), comma-grouped thousands ×56, 約 ×51, 日 ×49, 時 ×40, ranges 〜/～ ×37, percent ×30, 第N ×17,
- * decimals ×16, single-letter Latin ×66, clock ×3, ℃ ×2, km² ×1.
- *
- * THE 分の BUG, found while probing this layer and fixed here. `3分の1` read as [sämpɯᵝnno̞ it͡ɕi] —
- * さん*ぷん*の, "three MINUTES of". The counter fusion in japanese.ts sees `3` + 分 and applies the 分 =
- * minutes reading, which is right for 3分 and wrong for 3分の1, where 分 is ぶん. Rewriting to katakana
- * ブンノ takes the kanji out of the fusion rule's reach, which is the smallest fix that cannot regress the
- * genuine minutes counter — but ONLY between two digits. Tabulating the 26 分の in the corpus is what made
- * that condition non-negotiable: just 5 are fractions, 12 are 自分の ("one's own"), and one is 7時30分の,
- * where ふん is correct. A blanket rewrite corrupted all thirteen.
+ * ⚠ THE 分の TRAP. `3分の1` reads [sämpɯᵝnno̞ it͡ɕi] — さん*ぷん*の, "three MINUTES of" — because the counter
+ * fusion in japanese.ts sees `3` + 分 and applies the minutes reading, which is right for 3分 and wrong here,
+ * where 分 is ぶん. Rewriting to katakana ブンノ takes the kanji out of the fusion rule's reach.
+ * ⚠ BUT ONLY BETWEEN TWO DIGITS. Most 分の in running text is 自分の ("one's own"), and 7時30分の is a genuine
+ * ふん — a blanket rewrite corrupts every one of them.
  */
 import { MANIFEST } from "./manifest.ts";
 

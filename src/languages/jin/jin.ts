@@ -9,7 +9,7 @@
  * (segmental IPA + a superscript pitch-number tone), so the front-end is the shared Han-dict engine
  * (hanDictIpa.ts): greedy longest-match segmentation, superscript-tone → Chao contour letters (taking the
  * SURFACE tone after a sandhi arrow ⁻), Han numerals. SINGLE authoritative source (Wiktionary/kaikki Taiyuan
- * Sinological-IPA), no independent referee → 🔷.
+ * Sinological-IPA). ⚠ SINGLE-SOURCE: no independent referee, so nothing here is cross-checked.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

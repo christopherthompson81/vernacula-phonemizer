@@ -79,7 +79,7 @@ function longestKeyMatch(
  *
  *  The segmentation matters downstream: long-vowel coalescence (kanaToMorae) must not run ACROSS a reading
  *  boundary, or the next morpheme's initial vowel is absorbed into the previous one's length — 経営 けい|えい
- *  became ke̞ːːː instead of ke̞ːe̞ː, 聖域 せい|いき became se̞ːːki (issue #552). Flattening to one string here
+ *  became ke̞ːːː instead of ke̞ːe̞ː, 聖域 せい|いき became se̞ːːki. Flattening to one string here
  *  destroyed the only evidence of where a morpheme ended. A literal-kana RUN stays one segment so genuine
  *  within-run coalescence still fires (おおさか → o̞ːsäkä). */
 /**
@@ -90,7 +90,7 @@ function longestKeyMatch(
  * the split けい|えい is recoverable and provable — the concatenation reproduces the stored reading exactly.
  * Returns null when NO alignment exists, which is the conservative and correct outcome for a compound whose
  * reading is not the sum of its parts (大人 おとな, 今日 きょう) and for one that genuinely coalesces across the
- * boundary (小売 こうり — 売 has no reading うり, so it stays fused and keeps giving koːri). Issue #552.
+ * boundary (小売 こうり — 売 has no reading うり, so it stays fused and keeps giving koːri).
  */
 function alignCompoundReading(
     unit: string,
@@ -296,7 +296,7 @@ export function segmentText(text: string): string {
         // とうきょう え). を is already handled in kana.ts; が/を/に pass through unchanged (unambiguous kana). は/へ
         // that START a dictionary word (はな, へや) are matched as a ≥2-mora unit above, so single-char は/へ after
         // content is the particle. が/を/に keep the stricter isKanji(prev) gate the segmenter already relied on.
-        // の/と/も/や/で joined the single-particle set for #552's residual: they are the O/E/A-vowel carriers
+        // の/と/も/や/で joined the single-particle set for the residual: they are the O/E/A-vowel carriers
         // whose kana can trigger long-vowel coalescence across the bunsetsu boundary when left fused — 東京のうち
         // read のう as [noː] instead of の うち. Safe under the isKanji(prev) gate: no verb okurigana begins with
         // の/と/も/や, and the て-form で (飲んで) is preceded by ん (kana), which the gate excludes.
@@ -314,7 +314,7 @@ export function segmentText(text: string): string {
                     ((unit === "は" || unit === "へ") &&
                         // ⚠ A DIGIT COUNTS AS A CONTENT WORD HERE. `7は` is the topic particle just as `私は`
                         // is, but the gate tested only kanji and kana, so the は stayed /ha/ — 「7は3より小さい」
-                        // read *nana ha* instead of *nana wa*. Found by #654's relational rule, which builds
+                        // read *nana ha* instead of *nana wa*. Found by the relational rule, which builds
                         // exactly that clause, and pre-existing for any text that topic-marks a bare numeral.
                         // Safe to widen: a counter written with hiragana は immediately after a digit would be
                         // a ≥2-mora unit and is matched before this branch, so single は after a digit is the

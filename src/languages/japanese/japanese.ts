@@ -29,46 +29,42 @@ const TOKEN =
     /([㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])/gu;
 const KANA_ONLY = /[^ぁ-ゖァ-ヺー]/gu; // strip anything the reading pass left un-converted (unresolved kanji)
 
-// #562 symbol normalization — Japanese: katakana loans, read by the ordinary kana engine.
+// Katakana loans, read by the ordinary kana engine.
 // UNITS moved to normalize.ts, which must resolve them before its decimal and exponent rules break the
 // number-adjacency this tier matches on; see UNIT_KANA there. Percent stays, because nothing reorders it.
-// Currency closes the CUR-DROP that tools/normalization/audit.ts flags for ja: the sign was dropped
-// outright, so "$5" and "5" read identically. No sign occurs in this corpus (it writes 円 and ドル as
-// words), but the reading is not in doubt, and a dropped sign is silent content loss wherever one does.
+// ⚠ Without a currency declaration the sign is DROPPED outright, so "$5" and "5" read identically. Japanese
+// prose normally writes 円 and ドル as words rather than using a sign, but the reading is not in doubt and a
+// dropped sign is silent content loss wherever one appears.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
-    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
-    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
+    // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it.
     multiply: { times: "かける" },
     percent: ["パーセント"],
-    // `&` was DROPPED: the corpus's `高級B&Bが…` read *ko̞ːkʲɯː biː biː ɡa*, two initialisms run together
-    // with nothing between them. SOURCED FROM THE CORPUS'S OWN AUDIO, because the word is absent from the text
-    // by construction — `&` is written as a GLYPH, so no amount of Japanese prose contains its reading.
+    // ⚠ Unread, `&` is DROPPED — `高級B&Bが…` reads *ko̞ːkʲɯː biː biː ɡa*, two initialisms run together with
+    // nothing between them. The reading cannot come from text: `&` is written as a GLYPH, so no amount of
+    // Japanese prose contains it.
     ampersand: "アンド",
-    // MIGRATION TEST: units + exponent from the shared tier instead of normalize.ts's local table.
+    // Units and exponent come from the shared tier rather than a local table.
     units: {
         km: ["キロメートル"], cm: ["センチメートル"], mm: ["ミリメートル"], nm: ["ナノメートル"], m: ["メートル"],
         kg: ["キログラム"], mg: ["ミリグラム"], g: ["グラム"], t: ["トン"], ha: ["ヘクタール"],
         ml: ["ミリリットル"], l: ["リットル"],
     },
     exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
     // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
     // they are different words (平方キロメートル but 二十の二乗).
-    // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
-    // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
-    // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns
-    // about — th `กำลัง` matched the progressive-aspect marker, fa `توان` and ar `أس` matched inside unrelated
-    // words. FLEURS is news and encyclopedia prose and simply does not contain spoken arithmetic.
-    // The cardinal is used for the generic power, never the ordinal — see core for that argument.
+    // ⚠ PROVENANCE, stated because it is weaker than most data here: these are STANDARD MATHEMATICAL REGISTER,
+    // not attestations. Power words do not occur in ordinary prose — news and encyclopedia text contains no
+    // spoken arithmetic — and the apparent hits in other languages are substring traps (th `กำลัง` is the
+    // progressive-aspect marker; fa `توان` and ar `أس` match inside unrelated words).
+    // The cardinal is used for the generic power, never the ordinal.
     bareExponent: { squared: "{n}の二乗", cubed: "{n}の三乗", power: "{n}の{e}乗" , negative: "マイナス" },
     currency: { $: ["ドル"], "€": ["ユーロ"], "£": ["ポンド"], "¥": ["円"], "₩": ["ウォン"] },
-    // Japanese has no spaces either, so the tier's letter-boundary guards were rejecting its ordinary case
-    // the same way they were Chinese's: `20℃は暑い` dropped the ℃ and `50 km²の` lost the exponent, while their
-    // punctuation-adjacent twins worked. Found by extending the cmn measurement to the other unspaced
-    // scripts. yue and th show the same readings but declare only `percent` through this tier, so theirs is a
-    // missing DECLARATION rather than a guard problem — recorded for the sweep, not fixed here.
+    // ⚠ THE TIER'S LETTER-BOUNDARY GUARDS REJECT AN UNSPACED SCRIPT'S ORDINARY CASE: `20℃は暑い` drops the ℃
+    // and `50 km²の` loses the exponent, while their punctuation-adjacent twins work. `unspacedScript` is what
+    // turns those guards off.
     unspacedScript: true,
 });
 
@@ -98,7 +94,7 @@ class JapanesePhonemizer implements Phonemizer {
         // segmentText inserts bunsetsu spaces first, then assembleClauses runs the standard clause skeleton.
         return assembleClauses(segmentText(input), TOKEN, (m, sink) => {
             if (m[1]) {
-                const segments = readingSegments(m[1]); // kanji → kana per morpheme (boundaries kept, #552)
+                const segments = readingSegments(m[1]); // kanji → kana per morpheme (boundaries kept)
                 const reading = segments.join("");
                 const morae = segmentsToMorae(segments);
                 if (morae)
