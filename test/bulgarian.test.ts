@@ -4,8 +4,8 @@ import { phonemizeWord, createBulgarian } from "../src/languages/bulgarian/bulga
 import { normalizeBulgarian } from "../src/languages/bulgarian/normalize.ts";
 
 // Canonical-IPA goldens for Bulgarian / български (bg) — South Slavic, Cyrillic, "clean" (highly phonemic). A
-// left-to-right g2p + phonotactic post-rules, validated against TWO independent human referees (wikipron
-// bul_cyrl_narrow 99.6% + kaikki bg 99.5%). Stress is unwritten (lexical) and Bulgarian vowel reduction is
+// left-to-right g2p + phonotactic post-rules, refereed by TWO independent human sources (wikipron
+// bul_cyrl_narrow + kaikki bg). Stress is unwritten (lexical) and Bulgarian vowel reduction is
 // stress-conditioned, so the full phonemic vowels are emitted (а→a, о→ɔ, у→u, ъ→ɤ) and reduction is folded in the
 // eval.
 describe("Bulgarian canonical IPA — phonemic g2p + phonotactics", () => {
@@ -52,13 +52,12 @@ describe("Bulgarian canonical IPA — phonemic g2p + phonotactics", () => {
     });
 });
 
-
-// the normalization layer. Every count is measured over the FLEURS bg_bg corpus (column 3); the
-// engine is rule-based, so every emitted word was probed through the g2p rather than looked up.
+// TEXT NORMALIZATION. Counts are measured over the FLEURS bg_bg corpus (column 3); the engine is
+// rule-based, so every emitted word was probed through the g2p rather than looked up.
 describe("bulgarian normalization", () => {
-    // The largest defect in the language, and nothing like it in the four previous ones: `1767 г.` is
-    // how Bulgarian writes a year. It read as the numeral, then the LETTER г as [k], then a SENTENCE
-    // BREAK from the abbreviation dot. 265 instances.
+    // ⚠ `1767 г.` is how Bulgarian writes a YEAR, and it is the largest defect class in the language (265
+    // instances). Untreated it reads as the numeral, then the LETTER г as [k], then a SENTENCE BREAK from
+    // the abbreviation dot.
     test("the year abbreviation N г.", () => {
         expect(normalizeBulgarian("1767 г.")).toBe("1767 година");
     });
@@ -106,10 +105,10 @@ describe("bulgarian normalization", () => {
         expect(normalizeBulgarian("Българският е език.")).toBe("Българският е език.");
     });
 
-    // this layer already read `км/ч` as `в час`; two shapes it did not cover.
-    // ⚠ THE AUDIT THAT FOUND THESE FIRST OVER-REPORTED THEM, by probing with LATIN abbreviations against a
-    // Cyrillic-writing language. Bulgarian's own forms were already right — `5 км`, `5 м`, `5 км2`, `5 м3`,
-    // `120 км/ч` all read correctly before this — so what follows is narrow on purpose.
+    // Two rate denominators beyond the `км/ч` → `в час` this layer already covered.
+    // ⚠ AN AUDIT THAT PROBES WITH LATIN ABBREVIATIONS OVER-REPORTS against a Cyrillic-writing language.
+    // Bulgarian's own forms — `5 км`, `5 м`, `5 км2`, `5 м3`, `120 км/ч` — all read correctly on their own,
+    // so the additions below are narrow on purpose.
     test("the rate denominators this layer had missed", () => {
         // The corpus's own `133 м/сек` read the denominator as the bare syllable [sɛk]. `в секунда` ×2.
         expect(createBulgarian().text("133 м/сек").trim()).toContain("mɛtra f sɛkunda");
@@ -122,8 +121,9 @@ describe("bulgarian normalization", () => {
 
     // THE NUMERO SIGN was dropped outright: "космонавт № 11" read as *космонавт единадесет*, the sign
     // silently gone. `номер` ×5 in this corpus, and ru/uk already read it this way, preposed.
-    // ⚠ This is the character DELIBERATELY EXCLUDED from the ℃ fold (a compatibility character is a fold)): NFKC maps № to the Latin "No",
-    // which a Bulgarian g2p reads as an English word. A compatibility character can need a WORD, not a fold.
+    // ⚠ № IS DELIBERATELY EXCLUDED FROM THE NFKC COMPATIBILITY FOLD that handles ℃ and friends: NFKC maps
+    // № to the Latin "No", which a Bulgarian g2p then reads as an English word. A compatibility character
+    // can need a WORD, not a fold.
     test("the numero sign reads номер", () => {
         expect(createBulgarian().text("космонавт № 11").trim()).toContain("nɔmɛr ɛdinajsɛt");
         expect(createBulgarian().text("реактори № 1").trim()).toContain("nɔmɛr");

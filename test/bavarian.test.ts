@@ -5,10 +5,10 @@ import { numberToWords } from "../src/languages/bavarian/numbers.ts";
 
 // Bavarian (bar) — Boarisch, Upper German (Austro-Bavarian, ~14M), Latin script over the de-facto Bavarian-Wikipedia
 // orthography (⟨å⟩ for the dark [ɔ], ⟨ä ö ü⟩, ⟨ß⟩). A greedy scan + the falling diphthongs + German-style rules.
-// Validated against wikipron bar_latn_broad (1380 human headwords, variants merged) — 60.4% FOLDED / 89.9% symbol.
-// The referee is a NARROW transcription of a dialect CONTINUUM (~1.29 variants/headword), so the folded number is
-// dragged by inherent dialect vowel-quality variation; the 89.9% symbol accuracy shows the segments are essentially
-// right. single source.
+// Referee: wikipron bar_latn_broad (human, variants merged). ⚠ It is a NARROW transcription of a dialect
+// CONTINUUM (~1.29 variants/headword), so its folded score is dragged down by inherent dialect vowel-quality
+// variation rather than by the engine — symbol accuracy is the meaningful reading here. It is also the ONLY
+// referee for bar, so there is no independent second opinion.
 describe("Bavarian canonical IPA — greedy g2p + falling diphthongs + fortis/lenis neutralization", () => {
     const bar = createBavarian();
 

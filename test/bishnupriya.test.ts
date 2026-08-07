@@ -7,7 +7,8 @@ import { getPhonemizer } from "../src/registry.ts";
 // Eastern-Nagari script (~120k, Assam/Tripura + Sylhet). Reuses the Bengali engine (abugida scan + inherent-vowel
 // deletion) with BENGALI phoneme values — the referee is Bengali-like, NOT Assamese-like: the ʃ sibilants, the
 // retroflex/dental split, and the affricates are all kept. The one divergence is heightHarmony:false (no ɔ→o
-// raising). Validated 84.2% folded / 95.1% symbol vs the English-Wiktionary bpy category (human, 38 pairs).
+// raising). ⚠ Referee: the English-Wiktionary bpy category — 38 pairs, thin enough that its score carries
+// very little weight either way.
 describe("Bishnupriya Manipuri canonical IPA", () => {
     test("Bengali-like sibilants শ/ষ/স → [ʃ] (NOT the Assamese [x])", () => {
         expect(phonemizeWord("সাত")).toBe("ʃat̪"); // স → ʃ, ত → dental t̪ (seven)

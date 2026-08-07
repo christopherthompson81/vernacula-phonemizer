@@ -2,15 +2,16 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord } from "../src/languages/bhojpuri/bhojpuri.ts";
 
-// Canonical-IPA goldens for Bhojpuri (bho) — Indo-Aryan, Devanagari. REVISED against "A Grammar of Bhojpuri"
-// (dissertation, Shukla-tradition), whose word→IPA examples were g2p-mined (1623 pairs) as a falsifiable anchor.
-// The grammar CORRECTED the earlier module: Bhojpuri has an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic
-// length (0/1623 mined length marks), and ⟨ऐ ऐ⟩→[ɛ]/⟨औ⟩→[ɔ] are MONOPHTHONGS (NOT the diphthongs previously
-// claimed). Only /s ɦ/ fricatives (श/ष→s), ⟨व⟩→[w] (not Hindi ʋ), ⟨ण ञ⟩→[n].
-describe("Bhojpuri canonical IPA — revised from the reference grammar", () => {
-    test("the CORRECTIONS: ⟨ऐ⟩→ɛ, ⟨औ⟩→ɔ (MONOPHTHONGS, not diphthongs); no vowel length", () => {
-        expect(phonemizeWord("बैल")).toBe("bˈɛl"); // 'ox' — ऐ → ɛ monophthong (was wrongly [ai])
-        expect(phonemizeWord("कौन")).toBe("kˈɔn"); // 'who' — औ → ɔ monophthong (was wrongly [au])
+// Canonical-IPA goldens for Bhojpuri (bho) — Indo-Aryan, Devanagari. Anchored on "A Grammar of Bhojpuri"
+// (dissertation, Shukla-tradition), whose word→IPA examples were g2p-mined as a falsifiable reference.
+// ⚠ BHOJPURI IS NOT A HINDI CLONE, and the three places it differs are the ones a Hindi-shaped engine gets
+// wrong: an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic length (0 length marks in 1623 mined pairs);
+// ⟨ऐ⟩→[ɛ] and ⟨औ⟩→[ɔ] are MONOPHTHONGS, not diphthongs; and only /s ɦ/ fricatives (श/ष→s), with ⟨व⟩→[w]
+// (not Hindi ʋ) and ⟨ण ञ⟩→[n].
+describe("Bhojpuri canonical IPA — from the reference grammar", () => {
+    test("⟨ऐ⟩→ɛ, ⟨औ⟩→ɔ (MONOPHTHONGS, not diphthongs); no vowel length", () => {
+        expect(phonemizeWord("बैल")).toBe("bˈɛl"); // 'ox' — ऐ → ɛ monophthong, NOT [ai]
+        expect(phonemizeWord("कौन")).toBe("kˈɔn"); // 'who' — औ → ɔ monophthong, NOT [au]
         expect(phonemizeWord("किताब")).toBe("kˈit̪ɑb"); // 'book' — no length (ई→i, ा→ɑ)
         expect(phonemizeWord("पानी")).toBe("pɑnˈi"); // 'water' — no length
     });
