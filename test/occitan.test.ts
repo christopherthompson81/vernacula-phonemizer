@@ -5,9 +5,10 @@ import { numberToWords } from "../src/languages/occitan/numbers.ts";
 
 // Occitan (oc) — occitan / lenga d'òc, Occitano-Romance (Gallo-Romance) of southern France (~200k). The classical
 // orthography is PAN-DIALECTAL (one spelling, dialect-specific readings), so this g2p targets LANGUEDOCIEN (the
-// central reference standard + the most-likely FLEURS reader dialect). A greedy scan + code rules, validated against
-// wikipron oci_latn_broad (675 human headwords — SMALL + dialect-mixed) — 68.7% FOLDED / 93.0% symbol, with the
-// dialect vowel/rhotic spread + spirantization + stress folded. thin single source. Dialect overrides
+// central reference standard + the most-likely FLEURS reader dialect). A greedy scan + code rules.
+// ⚠ Referee: wikipron oci_latn_broad — 675 headwords, SMALL and DIALECT-MIXED, which is the ceiling on what it
+// can say about a pan-dialectal orthography at all. Folds: dialect vowel/rhotic spread, spirantization,
+// stress. Single-source. Dialect overrides
 // (Gascon/Provençal/Niçard) are DEFERRED (no clean per-dialect data).
 describe("Occitan (Languedocien) canonical IPA — Gallo-Romance g2p", () => {
     const oc = createOccitan();

@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Odia / ଓଡ଼ିଆ (or) — Eastern Indo-Aryan, Odia Brahmic abugida read by the generic
 // engine like the Dravidian trio: NO inherent-vowel deletion, inherent vowel /ɔ/ (ଘର→ɡʱɔɾɔ), like Bengali. Odia
 // has NO phonemic vowel length. Distinctive: SIBILANT MERGER ଶ/ଷ/ସ→[s] (ଭାଷା→bʱasa), the retroflex flap ଡ଼→ɽ,
-// ଳ→ɭ, dental t̪ d̪ n̪. Validated at 98.3% vs kaikki ori (folded).
+// ଳ→ɭ, dental t̪ d̪ n̪. Referee: kaikki ori.
 describe("Odia canonical IPA", () => {
     test("inherent vowel /ɔ/ retained (no schwa deletion) + retroflex flap ଡ଼→ɽ", () => {
         expect(phonemizeWord("ଓଡ଼ିଆ")).toBe("ˈoɽia"); // 'Odia' — ଡ଼ → ɽ (flap)

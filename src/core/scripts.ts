@@ -143,6 +143,46 @@ export const OVERRIDES: Readonly<Record<string, Partial<Record<ScriptName, strin
 
 /** The script of a run, or `undefined` if it carries no letters this router knows. */
 /**
+ * Script declarations for the codes that have NO `.jsonc` manifest of their own — the complement of the
+ * manifests, so that (manifests ∪ this) covers every registered code exactly once. Three reasons a code lands
+ * here, and none of them is an oversight:
+ *
+ *   · a VARIETY of another language (the nine Arabic dialects) — the engine and its manifest belong to `ar`;
+ *   · an ACCENT VARIANT (en-GB, en-IN, fr-CA, pt-BR, es-419) or an ALIAS (ms/zsm, bgc, pnb, skr) — the
+ *     manifest it reuses names its PARENT, not this code;
+ *   · a single-`.ts` engine with no data to externalise (ab, chr, la, lo, sat, …) — there is no manifest to
+ *     put a field in.
+ *
+ * ⚠ THIS TABLE IS INTERIM FOR THE THIRD CASE, not the intended end state. A manifest is a language's
+ * encyclopedic entry — its phonology, orthography and the concerns a reader needs before touching the engine —
+ * and the 26 single-.ts engines are missing that record, not merely this field; their documentation currently
+ * sits in a .ts header with the tables inline beside the code. As each gains a manifest its row moves there and
+ * this table should end up holding only the varieties, accent variants and aliases, which legitimately have no
+ * manifest of their own. See issue #741.
+ *
+ * test/manifest-script.test.ts asserts the union is exact in BOTH directions, so a new engine cannot be added
+ * without landing in one place or the other, and a stale row here cannot outlive its code.
+ */
+export const MANIFESTLESS_SCRIPTS: Readonly<Record<string, readonly string[]>> = {
+    // Arabic varieties — the shared `ar` engine plus a VarietyDef delta.
+    acm: ["Arabic"], acw: ["Arabic"], afb: ["Arabic"], ajp: ["Arabic"], apc: ["Arabic"],
+    apd: ["Arabic"], ary: ["Arabic"], arz: ["Arabic"], ayl: ["Arabic"],
+    // Accent variants — a post-process on the parent engine's output.
+    "en-GB": ["Latin"], "en-IN": ["Latin"], "es-419": ["Latin"], "fr-CA": ["Latin"], "pt-BR": ["Latin"],
+    // Aliases and close siblings riding another language's engine.
+    ms: ["Latin"], zsm: ["Latin"],          // Malay / Standard Malay
+    bgc: ["Devanagari"],                    // Haryanvi, on the Hindi engine
+    pnb: ["Arabic"], skr: ["Arabic"],       // Western Punjabi + Saraiki, both Shahmukhi
+    // Single-.ts engines with no manifest.
+    ab: ["Cyrillic"], ba: ["Cyrillic"], chv: ["Cyrillic"], nog: ["Cyrillic"], tt: ["Cyrillic"],
+    bo: ["Tibetan"], chr: ["Cherokee"], grc: ["Greek"], lo: ["Lao"], sat: ["Ol Chiki"],
+    shn: ["Myanmar"],                       // the Shan abugida is a Myanmar-script variant (U+1075–U+108F)
+    crh: ["Latin"], ee: ["Latin"], eu: ["Latin"], fo: ["Latin"], kaa: ["Latin"], kl: ["Latin"],
+    la: ["Latin"], ltg: ["Latin"], mto: ["Latin"], naq: ["Latin"], nci: ["Latin"], pap: ["Latin"],
+    quc: ["Latin"], rup: ["Latin"], smj: ["Latin"],
+};
+
+/**
  * Languages whose PRIMARY script is Cyrillic — the tie-break for `foldCyrillicConfusables`, which needs to know
  * whether the HOST language is Cyrillic when a word's own letters split evenly (`рaсa`, 2 and 2).
  *
