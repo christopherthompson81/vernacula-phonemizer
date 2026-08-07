@@ -1,5 +1,5 @@
 /**
- * Irish number → words. A real compositor for 0–999,999,999 (the Run-1 stub read every multi-digit number
+ * Irish number → words. A real compositor for 0–999,999,999 (a digit-by-digit stub reads every multi-digit number
  * digit-by-digit: 25 → "dó cúig", 1998 → "aon naoi naoi ocht").
  *
  * Irish is not a plain units/tens/hundreds language, so this cannot use `westernNumberWords`:

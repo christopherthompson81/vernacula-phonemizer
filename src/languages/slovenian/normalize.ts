@@ -839,7 +839,7 @@ export function normalizeSlovenian(input: string): string {
         },
     );
 
-    // 6c) GENERAL ORDINAL — the discriminator from the Run 2 tabulation, and the whole reason this file
+    // 6c) GENERAL ORDINAL — the discriminator from the corpus tabulation, and the whole reason this file
     //     does not carry Croatian's year rule: a `N.` followed by a LOWERCASE word or a COMMA is an
     //     ordinal; one followed by an UPPERCASE word, a closing quote, or the END OF THE UTTERANCE is a
     //     SENTENCE PERIOD and must not be claimed. That leaves all 26 utterance-final periods and both

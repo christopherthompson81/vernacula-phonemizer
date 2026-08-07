@@ -1,5 +1,5 @@
 /**
- * Run 6 fix-lever probe: for register-suspect covered-misses (Perso-Arabic words where our Hindi-sourced reading
+ * Fix-lever probe: for register-suspect covered-misses (Perso-Arabic words where our Hindi-sourced reading
  * misses wikipron), would preferring the OLD harakat lexicon's Urdu-native reading (g2p-converted) match wikipron?
  * Measures the headroom of a register-aware precedence flip (harakat wins over Hindi for Perso-Arabic skeletons).
  *   npx tsx tools/perso-arabic/ur_register_fix_probe.ts

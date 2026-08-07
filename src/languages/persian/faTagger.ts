@@ -27,7 +27,7 @@ import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 const SHORT_V = new Set(["a", "e", "o"]);
 /**
  * Post-tagger FIRST-VOWEL correction — targets the tagger's /a/-prior default on the lexically-fixed first syllable
- * (Run 32: the correct vowel is in the clean training data, but the lightweight BiLSTM can't memorise every lexical
+ * (the correct vowel is in the clean training data, but the lightweight BiLSTM can't memorise every lexical
  * exception, so it falls back to the majority /a/). Two parts: (1) a DETERMINISTIC rule — word-initial آ (alef madda)
  * is always ʔ + long aː, so after the leading ʔ we force a long aː: promote a short vowel (آزاد ʔazaːd→ʔaːzaːd) OR
  * INSERT aː when the tagger dropped the vowel entirely (آنان ʔnaːn→ʔaːnaːn); (2) a PIN transplant — replace the first

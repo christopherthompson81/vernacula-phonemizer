@@ -1,7 +1,7 @@
 /**
  * Irish Gaelic (ga) phonemizer — Standard/Connacht-leaning, canonical IPA. Rule-based g2p
  * (g2p.ts, the broad/slender axis) + first-syllable stress (the native default) + i-offglide and svarabhakti
- * passes, with a Connacht pronunciation lexicon (lexicon.tsv, Run 3) pinning the semi-lexical vowel detail the
+ * passes, with a Connacht pronunciation lexicon (lexicon.tsv) pinning the semi-lexical vowel detail the
  * rules defer (io/oi/eo splits). Lexicon first, g2p for OOV.
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -14,7 +14,7 @@ import { numberToWords } from "./numbers.ts";
 import { normalizeIrish } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
-// Connacht pronunciation lexicon (Run 3): oracle-distilled, consonant+glide-skeleton-verified overrides that pin
+// Connacht pronunciation lexicon: oracle-distilled, consonant+glide-skeleton-verified overrides that pin
 // the semi-lexical vowel-QUALITY detail the rules defer (io/oi/eo splits). Consulted before the g2p; OOV words
 // fall through to the rules. Lazily loaded (like french/swedish) so merely importing this module — e.g. from the
 // referee eval to score another language — does not parse the whole TSV. See lexicon.tsv.

@@ -37,7 +37,7 @@ def clean_ipa(s):
 
 # Per-source IPA HARMONIZER: normalize the source's narrow transcription to OUR g2p's (broad) convention BEFORE
 # inversion, so more of it inverts consistently and its labels don't teach off-convention patterns to the shared
-# model. Without this, a second source's conventions REGRESS the wikipron eval (Run 17). Per language, since e.g.
+# model. Without this, a second source's conventions REGRESS the wikipron eval. Per language, since e.g.
 # aspiration is phonemic in Urdu but not Persian.
 def harmonize(ipa, code):
     if code == "fas":

@@ -56,4 +56,4 @@ npx tsx eval_endtoend.ts /tmp/pred.tsv
 Warm-started `bilstm_pausal.pt` (26 lstm/fc tensors + 39 embedding rows copied; 5 lang tokens appended), 15.3 M
 params, best at epoch 1. Held-out harakat DER: ur 2.4% / fa 2.6% / ps 4.0% / pa 7.2%. **End-to-end IPA (model vs
 bare-skeleton baseline): 68.7% → 86.5%, +17.8** (fa +25.2, ps +9.3, ur +4.5, pa +2.7). Checkpoint in `$ARDIAC`
-(gitignored); `multilingual_diacritizer.meta.json` committed. See docs Run 9.
+(gitignored); `multilingual_diacritizer.meta.json` committed.

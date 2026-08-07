@@ -21,7 +21,7 @@ whole-word context. On the seed-0 20% held-out (OOV) split the three architectur
 The n-gram is left-to-right and cannot see whole-word structure, so it drops non-locally-determined inherent vowels
 (−27pp). The tagger *beats* the seq2seq because the monotone one-tag-per-grapheme constraint is a correct inductive
 bias — it spends all capacity on the vowel decision instead of re-learning that output tracks input length. For the
-rule engine the same OOV ɔ/o is 62.6%. Run 17-18.
+rule engine the same OOV ɔ/o is 62.6%.
 
 **Architecture:** grapheme embedding (128) → 2-layer **bidirectional** LSTM (hidden 256) → linear → 158 tag logits.
 Input: grapheme char-ids `[1, L]`. Output: tag logits `[1, L, 158]`. The per-grapheme **consonant-consistency mask**,

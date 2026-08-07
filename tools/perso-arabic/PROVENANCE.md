@@ -21,7 +21,7 @@ Uyghur (a fully vocalized alphabet — nothing to restore) and single-letter hea
 Extra `(skeleton, lang, ipa)` pairs from **kaikki** (Wiktionary, CC-BY-SA) — a larger extraction than wikipron —
 for words NOT already in `silver.tsv`. `build_kaikki.py` fetches a kaikki dump and **harmonizes** its narrow IPA to
 our g2p's convention BEFORE inversion (per language: Persian strips aspiration/dental, ɒ→ɑ, æ→a, w→v; Urdu keeps
-aspiration/dental). Without harmonization a second source's conventions regress the eval (docs Run 17); with it,
+aspiration/dental). Without harmonization a second source's conventions regress the eval; with it,
 Persian gains (+0.7 held-out). `invert_harakat.ts` labels it alongside wikipron; the eval_set stays wikipron-only.
 Inherits CC-BY-SA. The raw dumps (~30–85 MB) are not committed; regenerate with the URLs in `build_kaikki.py`.
 
@@ -38,11 +38,11 @@ OUT of the neural training manifest. Inherits CC-BY-SA; the raw Hindi dump (~160
 vocalization per skeleton → `skeleton⇥lang⇥vocalized`. The Arabic `restore.ts`/`diacritization.tsv` analogue for the
 riders: at inference, look up a word; if present, use its exact vocalization → g2p → IPA; else fall to the neural
 model. Urdu: 8,120 words = **66.4% of production tokens** (measured by `coverage_eval.py` on OpenSubtitles frequency
-lists). Inherits the CC-BY-SA of its sources. This is the axis the held-out neural eval can't see (docs Run 20–21).
+lists). Inherits the CC-BY-SA of its sources. This is the axis the held-out neural eval can't see.
 
 ## Role: EVALUATION reference (not the training target)
 The shared model's TARGET is **harakat** (short-vowel diacritics) → each language's existing deterministic g2p turns
-the vocalized text into IPA (Run 4). These wikipron IPA pairs
+the vocalized text into IPA. These wikipron IPA pairs
 are the **end-to-end eval reference**: run skeleton →[model] harakat →[deterministic g2p] IPA and score against the
 IPA here. Training data (skeleton→harakat) is built separately from diacritized corpora.
 

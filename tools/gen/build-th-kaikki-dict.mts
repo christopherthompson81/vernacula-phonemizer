@@ -92,7 +92,7 @@ if (process.argv.includes("--validate")) {
 } else {
     // Self-maintaining rebuild: the dict must hold ONLY entries the rules can't derive. Read everything (above),
     // then EMPTY the dict file so phonemizeWord runs RULES-ONLY, then keep/prune existing + add kaikki against the
-    // rule output. (Our port's rule gaps differ from espeak's — e.g. the Run-5 cluster fix — so imported espeak
+    // rule output. (Our port's rule gaps differ from espeak's — the cluster handling, for one — so imported espeak
     // entries the rules now reproduce are dead weight and get pruned.)
     const header = readFileSync(DICT, "utf8")
         .split("\n")

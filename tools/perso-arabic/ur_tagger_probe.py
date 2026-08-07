@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run 1 probe for the Urdu tagger: (a) size the aligned training pool from the Hindi-derived
+"""Probe for the Urdu tagger: (a) size the aligned training pool from the Hindi-derived
 IPA silver, (b) size the OPPORTUNITY — on wikipron gold, how often a short-vowel slot is
 actually ɪ/ʊ (not the default ə) and a majhūl long vowel is uː/eː (not the default oː/iː).
 That headroom is what the blanket-[ə] baseline forfeits and the tagger could win.

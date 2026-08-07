@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run 7: extract an independent Urdu short-vowel source from the kaikki Urdu (Wiktionary) dump and measure what it
+"""Probe: extract an independent Urdu short-vowel source from the kaikki Urdu (Wiktionary) dump and measure what it
 could fix. kaikki-urd gives human Urdu IPA with the correct Arabic-template ɪ/ʊ (امام ɪmɑːm, اسلام ɪslɑːm) — the exact
 short-vowel-layer errors our Hindi-derived readings make. It is INDEPENDENT of wikipron → validates non-circularly.
 Measures: coverage of wikipron, standalone accuracy, and how many of our current covered-misses it fixes."""

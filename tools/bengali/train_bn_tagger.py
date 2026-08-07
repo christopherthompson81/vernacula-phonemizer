@@ -8,7 +8,7 @@ from a MONOTONE 1-grapheme→0..2-unit EM alignment; a consonant-consistency mas
 the tags it produced in training, so the model only ever decides the vowel.
 
 On the seed-0 20% held-out (OOV) split this reads ɔ/o 90.5% | full 86.4% — vs the seq2seq's 86.1/79.4 and the
-rule engine's 62.6% ɔ/o. Run 17-18.
+rule engine's 62.6% ɔ/o.
 
   npx tsx tools/bengali/build_tagger_data.ts /tmp/bn_tagger_train.tsv
   python train_bn_tagger.py /tmp/bn_tagger_train.tsv src/languages/bengali   # writes bn_tagger.pt (+ reports held-out)

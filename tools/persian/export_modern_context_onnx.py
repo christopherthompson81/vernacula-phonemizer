@@ -4,7 +4,7 @@ build_homorich_ipa.py for how homorich_ipa.tsv is produced (Grapheme<TAB>canonic
 ZWNJ-concatenated, gheyn-conditioned). Sentence-level char seq2seq (BiLSTM enc + attention dec) — arch IDENTICAL to
 export_context_onnx.py so contextRestorer.ts runs it unchanged.
 
-Run 19 upgrades: (1) HOMOGRAPH LOSS-WEIGHTING — HomoRich marks which word is the tricky homograph (3rd column); its
+Two upgrades over the plain encoder: (1) HOMOGRAPH LOSS-WEIGHTING — HomoRich marks which word is the tricky homograph (3rd column); its
 target chars get weight W so its gradient isn't diluted ~10× among the other words. (2) PATIENCE early-stopping on a
 val split (loss was still dropping at a fixed 7 epochs). (3) UNCAPPED data. Reports overall held-out per-word AND a
 HOMOGRAPH-SPECIFIC accuracy (on the annotated word) so that lever is visible. Exports enc/dec ONNX (fp32) + int8.

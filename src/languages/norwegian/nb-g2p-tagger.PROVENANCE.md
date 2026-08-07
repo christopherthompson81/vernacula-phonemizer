@@ -71,5 +71,3 @@ its epoch-10 bottom, held-out 75.1% on the last-epoch weights); annealing made t
 to 89.7%. `onnxruntime-node` is an optional dependency
 imported lazily — absent it, `createNorwegianTagger()` resolves to `undefined` and the sync engine (lexicon → rules)
 serves everything, so the tagger is a pure quality add-on with no hard dependency.
-
- Run 4.

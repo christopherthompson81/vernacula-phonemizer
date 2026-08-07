@@ -245,7 +245,7 @@ export type ForeignPhonemizer = (latin: string) => string;
 // NFC does NOT unify them (distinct base letters, not canonical-equivalent), so the harakat lexicon and the neural
 // tagger — both keyed on Farsi orthography — treat Arabic yeh as unknown and GARBLE the word (کسي→kˈasv vs Farsi
 // کسی→kasˈiː). Fold them to Farsi at every fa text entry. Surfaced by the independent GE2PE referee (1207 Arabic
-// yehs in its test set); Run 27.
+// yehs in its test set).
 const FA_ORTHO: Record<string, string> = { "ي": "ی", "ك": "ک", "ى": "ی", "ة": "ه" };
 export function normalizePersianOrthography(text: string): string {
     // NFC first so decomposed input (e.g. NFD آ = bare alef + combining madda U+0653) composes to the single

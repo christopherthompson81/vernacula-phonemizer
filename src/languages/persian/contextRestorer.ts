@@ -1,7 +1,7 @@
 /**
  * Persian CONTEXT restorer — a SENTENCE-level char seq2seq (BiLSTM encoder + attention decoder) that maps a whole
  * Persian abjad hemistich to IPA, resolving the homograph / ezafe / connector ambiguities that only sentence
- * context fixes (Run 5). Unlike the word-level vowelRestorer, this reads the whole sentence.
+ * context fixes. Unlike the word-level vowelRestorer, this reads the whole sentence.
  *
  * ⚠ CLASSICAL-Persian scoped. Trained on the aligned-Shahnameh corpus — it is EXCELLENT in-domain (+18.8pp over
  * word-level, nails ezafe) but can HALLUCINATE on short/modern out-of-domain text. It is therefore an OPTIONAL

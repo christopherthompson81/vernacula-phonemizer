@@ -143,7 +143,7 @@ function label(lang: string): void {
 
     // Two outputs from the SAME inverter:
     //  • NEURAL training (default) — wikipron + convention-harmonized kaikki only. NOT Hindi→Urdu: it's a different
-    //    vocabulary distribution, so it can't improve wikipron-distribution GENERALIZATION (measured flat, Run 20).
+    //    vocabulary distribution, so it can't improve wikipron-distribution GENERALIZATION (measured flat).
     //  • LEXICON (--lexicon) — ALL sources incl. Hindi→Urdu (real Urdu spellings + gold IPA). This is the COVERAGE
     //    layer (exact-match at inference); Hindi adds +12 pts of production token-coverage for Urdu (coverage_eval).
     const sources = LEXICON

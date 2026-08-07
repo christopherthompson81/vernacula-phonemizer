@@ -124,7 +124,7 @@ describe("mined-corpus health", () => {
     });
 
     test("a thin sample is reported as unjudgeable rather than as a bad wiki", () => {
-        // The Run 4 trap: a partially-written fetch measures as a small wiki and every proportion below is
+        // ⚠ THE TRAP: a partially-written fetch measures as a small wiki and every proportion below is
         // noise. This must be a note about the SAMPLE, not a verdict about the text.
         const v = verdict(health(PROSE.slice(0, 5)));
         expect(v.ok).toBe(false);

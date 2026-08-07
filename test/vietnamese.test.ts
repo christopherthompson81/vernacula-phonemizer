@@ -50,7 +50,7 @@ describe("Vietnamese g2p (Northern)", () => {
 });
 
 // Foreign proper nouns are code-switched constantly in Vietnamese text; a token that is not a valid
-// Vietnamese syllable used to phonemize to "" and vanish (paris sofia → nothing, Run 28). Now routed
+// Vietnamese syllable used to phonemize to "" and vanish (paris sofia → nothing). Now routed
 // through the English phonemizer — a missing word is worse than an English-phoneme one.
 describe("Vietnamese: foreign tokens are not dropped", () => {
     test("invalid syllables route through foreign", () => {

@@ -2,7 +2,7 @@
  * Build an INDEPENDENT Urdu pronunciation referee from CLE Lahore's "Phonetically Rich Urdu Speech Corpus" — human
  * read-speech transcribed in CISAMPA, fully independent of Wiktionary (fills the gap ur.jsonc flagged: "no independent
  * diacritized-Urdu referee wired"). Word-aligns the Arabic text (space-separated) with the CISAMPA (## word bounds),
- * converts CISAMPA→IPA, and writes the ~5.6k-word referee. Corroborates wikipron at 87% (Run 8).
+ * converts CISAMPA→IPA, and writes the ~5.6k-word referee. Corroborates wikipron at 87%.
  *
  *   # fetch + extract the corpus (CC-licensed, ~480MB with audio — we keep only the transcription-derived lexicon):
  *   curl -sL https://www.cle.org.pk/Downloads/ling_resources/UrduPhoneticSpeechCorpus.rar -o /tmp/c.rar
