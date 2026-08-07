@@ -55,7 +55,7 @@ describe("Romanian cardinal numbers — gender agreement on the magnitude nouns"
     test("the feminine sută, and the miliard tier", () => {
         expect(ro("100")).toBe("ˈo ˈsutə"); // o sută
         expect(ro("200")).toBe("ˈdowə ˈsute"); // două sute — FEM two (not *doi sute)
-        // un miliard — the 10⁹ tier (the billions multiplier used to index past the tables and leak "undefined").
+        // un miliard — the 10⁹ tier (⚠ without it the billions multiplier indexes past the tables and leaks "undefined").
         // ⟨lia⟩ glides exactly as in milion → miˈljon, so the reading is consistent with the neighbouring tier.
         expect(ro("1000000000")).toBe("ˈun miˈljard");
     });

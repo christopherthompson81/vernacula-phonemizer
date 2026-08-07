@@ -5,8 +5,8 @@ import { phonemizeWord, createSerbian } from "../src/languages/serbian/serbian.t
 // Canonical-IPA goldens for Serbian / српски (sr) — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully
 // phonemic. Both scripts map to the same IPA. Signature: ⟨в/v⟩→ʋ (labiodental approximant), ⟨ђ⟩→d͡ʑ / ⟨ћ⟩→t͡ɕ
 // (alveolo-palatal affricates), ⟨џ/dž⟩→d͡ʒ, ⟨љ/lj⟩→ʎ / ⟨њ/nj⟩→ɲ, ⟨х/h⟩→x, syllabic ⟨r⟩; NO vowel reduction. The
-// lexical pitch accent + length are unwritten → deferred (no accent mark). Validated at 98.4% vs wikipron hbs
-// latin + 99.2% vs epitran.
+// lexical pitch accent + length are unwritten → deferred (no accent mark). Referees: wikipron hbs_latn +
+// epitran.
 describe("Serbian canonical IPA", () => {
     test("Latin: v→ʋ, the alveolo-palatal + palatal series, syllabic r", () => {
         expect(phonemizeWord("voda")).toBe("ʋoda"); // v → ʋ
@@ -133,10 +133,9 @@ describe("Serbian normalization", () => {
     test("degrees consume the degree noun the text already wrote", () => {
         expect(say("32 °C степена")).toBe("trideset dʋa stepena t͡selzijusa");
         expect(say("90 °F")).toBe("deʋedeset stepeni farenxajta");
-        // The bare degree now reads the DEGREE NOUN, with numeral agreement and no scale word. This
-        // line used to assert "trideset pet" — the ° declined outright so a LONGITUDE lost the word that
-        // makes it one. Declining protected the scale word (Celsius/Fahrenheit), which the C/F arm supplies,
-        // and threw away the degree noun with it.
+        // ⚠ A BARE ° MUST STILL READ THE DEGREE NOUN, with numeral agreement and no scale word. Declining it
+        // outright protects the scale word (Celsius/Fahrenheit, which the C/F arm supplies) but throws the
+        // degree noun away with it — and a LONGITUDE then loses the word that makes it one.
         // ⚠ The compass `W` is still unread, and deliberately: `јужне` is ×0 in this corpus, so a four-way
         // table would have to invent its missing quarter. Only the recoverable half is fixed.
         expect(say("35°W")).toBe("trideset pet stepeni");

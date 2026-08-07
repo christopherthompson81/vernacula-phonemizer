@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Scottish Gaelic / Gàidhlig (gd) — Goidelic Celtic (sibling of Irish). The core is the
 // BROAD/SLENDER axis (velarized/dental next to a/o/u, palatalized next to e/i) + the Scottish hallmarks:
-// PRE-ASPIRATION (medial ⟨p t c⟩→[hp ht̪ xk]) and lenis ⟨b d g⟩→[p t̪ k]. Validated 67.0% symbol vs the
+// PRE-ASPIRATION (medial ⟨p t c⟩→[hp ht̪ xk]) and lenis ⟨b d g⟩→[p t̪ k]. Referee: symbol vs the
 // MULTI-DIALECT wikipron gla_latn_broad (human, 6000; the folded % is a multi-dialect artifact).
 describe("Scottish Gaelic (Gàidhlig) canonical IPA", () => {
     test("PRE-ASPIRATION: medial/final ⟨p t c⟩ → [hp ht̪ xk]", () => {

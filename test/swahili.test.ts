@@ -4,7 +4,7 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/swahili/swahili.ts";
 
 // Canonical-IPA goldens for Swahili / Kiswahili (sw) — Bantu, highly phonemic Latin orthography, no tone, regular
-// penultimate stress. Validated against wikipron swa (93.5%) + kaikki swa (97.8%), both human. The distinctive
+// penultimate stress. Referees: wikipron swa + kaikki swa, both human. The distinctive
 // segments: IMPLOSIVE voiced stops (ɓ ɗ ʄ ɠ), PRENASALIZED stops (ᵐb ⁿd ⁿd͡ʒ ᵑɡ), ⟨ng'⟩→ŋ vs ⟨ng⟩→ᵑɡ, syllabic
 // nasals (m̩ n̩), long vowels from ⟨aa⟩ etc., Cʷ labialization.
 describe("swahili canonical IPA", () => {
@@ -81,10 +81,10 @@ describe("swahili text normalization", () => {
         expect(phonemize("ushindi wa 5-3", "sw")).not.toContain("hˈɑɗi");
     });
 
-    test("degrees: ºC leaked the raw character and read C as the letter", () => {
-        // "+30ºC" → *thelathini º k*, with U+00BA emitted RAW into the phoneme stream.
-        // The plus is now read (plas). The degree rule below used to capture `([+-]?)` and DISCARD it,
-        // so the sign vanished — the same shape zu's `[+]?` had. ⚠ sw's two temperature speakers say the DEGREE
+    test("degrees: the MASCULINE ORDINAL INDICATOR º is not the degree sign, and C is not a letter", () => {
+        // ⚠ `+30ºC` reads *thelathini º k* untreated — U+00BA emitted RAW into the phoneme stream.
+        // ⚠ AND A DEGREE RULE THAT CAPTURES `([+-]?)` WITHOUT EMITTING IT SWALLOWS THE SIGN — the same shape
+        // zu's `[+]?` had. ⚠ sw's two temperature speakers say the DEGREE
         // word in that slot (`z aɪ i d i a  ɲ u z i  t a l a t i n i`), not a plus; the offset speaker says
         // `p l a s w a n`. Voiced here per the standing choice on explicitly typed characters.
         expect(phonemize("+30ºC", "sw")).toBe("plˈɑs ɲˈuzi ʄˈɔtɔ θɛlɑθˈini sɛlsiˈɑsi");

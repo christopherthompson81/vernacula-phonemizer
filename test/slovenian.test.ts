@@ -11,8 +11,8 @@ import { inflect, normalizeSlovenian, ordinalBase, ordinalWords } from "../src/l
 // syllabic-liquid → voicing pipeline. Slovene orthography is shallow at the consonant level but UNDERSPECIFIES the
 // vowels (quality/length/pitch/schwa are all unwritten) → the vowel axis is folded in the referee eval; these golds
 // lock the CONSONANT skeleton + the Slovene rules: ⟨lj/nj⟩ coda-j-drop, syllabic-r→ər, voicing/devoicing, ⟨v⟩→ʋ. NO
-// stress mark is emitted (Slovene stress is free/lexical + unwritten → deferred). 94.1% folded / 98.7% symbol accuracy
-// vs wikipron slv_latn_broad (5,177 headwords).
+// stress mark is emitted (Slovene stress is free/lexical + unwritten → deferred).
+// Referee: wikipron slv_latn_broad (5,177 headwords).
 describe("Slovenian canonical IPA — Slovak-shaped South Slavic engine + Slovene rules", () => {
     const sl = createSlovenian();
 

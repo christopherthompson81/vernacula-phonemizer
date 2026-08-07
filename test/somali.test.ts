@@ -5,7 +5,7 @@ import { phonemizeWord, createSomali } from "../src/languages/somali/somali.ts";
 // Canonical-IPA goldens for Somali / Af-Soomaali (so) — Cushitic, 1972 Latin orthography. A shallow near-phonemic
 // rule g2p; the signature Cushitic consonants ⟨c⟩→ʕ, ⟨x⟩→ħ (pharyngeals), ⟨dh⟩→ɖ (retroflex), ⟨q⟩→q (uvular),
 // ⟨'⟩→ʔ; doubled letters geminate (→ Cː), doubled vowels are long (→ Vː). Tone (grammatical, unwritten) is
-// deferred. Validated at 98.7% vs epitran som-Latn + 81.0% vs kaikki so.
+// deferred. Referees: epitran som-Latn + kaikki so.
 describe("Somali canonical IPA", () => {
     test("the pharyngeals ⟨c⟩→ʕ, ⟨x⟩→ħ", () => {
         expect(phonemizeWord("magac")).toBe("maɡaʕ"); // c → ʕ (voiced pharyngeal)

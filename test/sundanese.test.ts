@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Sundanese / Basa Sunda (su) — Austronesian (West Java), modern Latin orthography.
 // Shallow, near-phonemic (the id/jv pattern), so a flat scan. Signature: the SEVEN-vowel system with the central
 // vowel ⟨eu⟩→[ɨ] alongside ⟨e⟩→[ə] (schwa) and ⟨é⟩→[e]; c→[t͡ʃ], j→[d͡ʒ], ng→[ŋ], ny→[ɲ]; glottal at a
-// word-initial vowel and same-vowel hiatus. Validated at 91.2% vs kaikki su (465, the only referee).
+// word-initial vowel and same-vowel hiatus. Referee: kaikki su (465) — the only one.
 describe("Sundanese canonical IPA", () => {
     test("the seven-vowel system: ⟨eu⟩→ɨ, ⟨e⟩→ə, ⟨é⟩→e", () => {
         expect(phonemizeWord("ieu")).toBe("ʔˈiɨ"); // ⟨eu⟩ → ɨ (+ word-initial glottal)
