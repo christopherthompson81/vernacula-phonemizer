@@ -97,9 +97,9 @@ function adjectiveStress(w: string): number | undefined {
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([а-яёА-ЯЁ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
 
-// #562 symbol normalization — Russian: CYRILLIC unit abbreviations (км, not km) and three-way agreement.
+// symbol normalization — Russian: CYRILLIC unit abbreviations (км, not km) and three-way agreement.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -124,7 +124,7 @@ const SYMBOLS = makeSymbolNormalizer({
         "м": ["метр", "метра", "метров"], "m": ["метр", "метра", "метров"] },
     unitPer: "в",
     exponentWords: { squared: ["квадратный", "квадратных"], cubed: ["кубический", "кубических"], position: "before" },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
     // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
     // they are different words (квадратных километров but двадцать в квадрате).
@@ -144,7 +144,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class RussianPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: Russian rewrites (abbreviations, ordinal notation, clock, units) → INITIALISMS →
+        // order: Russian rewrites (abbreviations, ordinal notation, clock, units) → INITIALISMS →
         // the shared symbol tier last. Roman numerals arrive already converted from the registry seam,
         // with romanOrdinals.ts supplying the ordinal a century wants, so no ordering hazard here.
         const normalized = SYMBOLS(normalizeRussianInitialisms(normalizeRussian(input)));

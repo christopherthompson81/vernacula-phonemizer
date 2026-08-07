@@ -12,7 +12,7 @@
  * the g2p rather than checked against a word list: `la sută` → [ˈla ˈsutə], `virgulă` → [ˈvirɡulə],
  * `kilometri pătrați` → [kilomeˈtri pəˈtrat͡sʲ], `până` → [ˈpɨnə].
  *
- * ★ THE ORDINAL-DOT RULE IS DELIBERATELY ABSENT, and this is the finding of the run. It is the LARGEST
+ * ⚠ THE ORDINAL-DOT RULE IS DELIBERATELY ABSENT. It is the LARGEST
  * rule in both Norwegian (134 instances) and Danish (112), and the shape `N.` occurs 169 times here — so
  * porting it looks obviously right. Measured, Romanian has **zero** ordinal dots: of those 169, none is
  * followed by a lowercase word and 3 are followed by a capital. They are sentence ends and the
@@ -133,7 +133,7 @@ export function normalizeRomanian(input: string): string {
     //    dropped, so the denominator vanished entirely. `pe oră` is attested 8 times in the corpus.
     //    ⚠ The trailing boundary is `(?!\p{L})`, NOT `\b`. `\b` is defined on ASCII word characters, so
     //    after the `ă` of `oră` — which is not one — it finds no boundary and the rule silently did not
-    //    fire. This is the playbook's top-ranked trap, and Romanian's alphabet (ă â î ș ț) walks into it.
+    //    fire. Romanian's own alphabet (ă â î ș ț) walks straight into it.
     t = t.replace(/km\s*\/\s*(?:h|or[ăa])(?!\p{L})/giu, "kilometri pe oră");
     t = t.replace(/(?<!\p{L})m\s*\/\s*s(?!\p{L})/giu, "metri pe secundă");
 

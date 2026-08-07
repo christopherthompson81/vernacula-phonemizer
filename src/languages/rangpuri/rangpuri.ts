@@ -1,14 +1,13 @@
 /**
- * Native Rangpuri (rkt) text phonemizer — canonical IPA. Rangpuri is the Eastern-Indo-Aryan KRNB
- * lect of Rangpur (Bangladesh) + adjacent India, written here in Devanagari (the Kamtapuri/activist script). It shares
- * Hindi's Devanagari abugida machinery, so it REUSES the generic Hindi engine (makeNativeHindi) with a Rangpuri data
- * file (rangpuri.jsonc). The KRNB-specific facts live entirely in the manifest:
- *   - DEAFFRICATION: च/छ → [s], ज/झ → [d͡z] (the Assamese-area feature);
- *   - VOICED aspirates RETAINED (घ झ ढ ध भ → ɡʱ d͡zʱ ɖʱ d̪ʱ bʱ); VOICELESS aspirates positional — ख ठ थ फ keep [ʰ]
- *     word-initially (ठीक→ʈʰik) but deaspirate elsewhere (आठ→aʈ), via a postRule;
- *   - inherent vowel [ɔ] (Eastern-Indic), NO phonemic vowel length, ◌ॉ → [æ], व → [w], ण → [n].
- * Inherent-schwa deletion is the same shared algorithm as Hindi. Validated against the Toulmin (2006) Appendix-A
- * Rangpur referee (tools/krnb/referees/RP.tsv).
+ * Rangpuri (rkt) phonemizer — canonical IPA. An Eastern Indo-Aryan KRNB lect of Rangpur (Bangladesh) and
+ * adjacent India, written here in Devanagari (the Kamtapuri/activist script). It shares Hindi's Devanagari
+ * abugida machinery, so it REUSES the generic Hindi engine (makeNativeHindi) with a Rangpuri data file.
+ * The KRNB-specific facts live entirely in the manifest:
+ *   · DEAFFRICATION: च/छ → [s], ज/झ → [d͡z] (the Assamese-area feature);
+ *   · VOICED aspirates RETAINED (घ झ ढ ध भ → ɡʱ d͡zʱ ɖʱ d̪ʱ bʱ); ⚠ VOICELESS aspirates are POSITIONAL —
+ *     ख ठ थ फ keep the [ʰ] word-initially (ठीक→ʈʰik) but deaspirate elsewhere (आठ→aʈ), via a postRule;
+ *   · inherent vowel [ɔ] (Eastern-Indic), NO phonemic vowel length, ◌ॉ → [æ], व → [w], ण → [n].
+ * Inherent-schwa deletion is the same shared algorithm as Hindi.
  */
 /**
  * NORMALIZER WORDS: NO SOURCE EXISTS, and Rangpuri is the language most likely to diverge.
