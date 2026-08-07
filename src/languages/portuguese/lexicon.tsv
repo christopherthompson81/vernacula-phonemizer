@@ -1,6 +1,6 @@
 # European Portuguese lexical correction table — word<TAB>code. ɛ|ɔ = stressed mid vowel opens;
 # x:s|x:z|x:ks = grapheme x; e:e|e:ɛ = word-initial e (vs the default i). Engine handles everything else.
-# Derived from wikipron EP (por_latn_po) — tools/pt-gen-lexicon.mts.
+# Derived from wikipron EP (por_latn_po) — tools/gen/pt-gen-lexicon.mts.
 abandona	ɔ
 abandonam	ɔ
 abandonas	ɔ

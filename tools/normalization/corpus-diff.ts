@@ -15,7 +15,7 @@
  * That is fine for one person working alone and actively dangerous the moment two agents share a checkout:
  * `git stash` is global, so one agent's baseline run silently pockets every other agent's uncommitted work.
  * Emitting to a file from a read-only worktree has the same effect with no shared mutable state — see
- * docs/normalization_playbook.md, which sets the worktree up once for the whole fan-out.
+ * the fan-out procedure, which sets the worktree up once for the whole batch.
  *
  * THE DEFECT CLASSES are the ones the thirteen languages kept producing. A rule that looks right on a
  * handful of probes still lands these at corpus scale:

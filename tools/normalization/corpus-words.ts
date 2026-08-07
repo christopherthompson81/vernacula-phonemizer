@@ -98,7 +98,7 @@ function utterances(code: string): string[] {
 }
 
 /**
- * `--sentence <regex>` — THE PARALLEL-CORPUS MODE, and the strongest sourcing route this issue found.
+ * `--sentence <regex>` — THE PARALLEL-CORPUS MODE, and the strongest sourcing route available.
  *
  * FLEURS is a PARALLEL corpus: the same source sentences, translated and recorded per language. So a sentence
  * that PERFORMS the operation you need to read gives you that reading in every language at once, spoken, in the
@@ -170,7 +170,7 @@ const spaceless = dominant !== undefined && SPACELESS_SCRIPTS.has(dominant);
  *     除以 ×2   "長 寬 比 除 以 12"          小於 ×1   "不 會 小 於 50 公 頃"
  *     大於 ×1   "遠 大 於 定 焦 鏡 頭"
  *
- * Fourth manufactured negative this issue has found in its own tooling, and the same shape as the other
+ * ⚠ THE FOURTH MANUFACTURED NEGATIVE THIS TOOLING PRODUCED IN ITSELF, and the same shape as the other
  * three: a confident absence with nothing behind it. For an unspaced script the whitespace is not linguistic
  * information at all, so it is removed from BOTH sides before the substring test.
  */
@@ -218,7 +218,7 @@ for (const w0 of words) {
      * `substring-only` — inverted, because in a spaceless script every real word is a substring of running text,
      * so the test discriminates less, not more. The asterisk carried the entire warning and an asterisk is easy to
      * skip: `យ័ន` scored `attested* ×521` (every hit inside បាយ័ន/អារ្យ័ន) and `បូកដក` `attested* ×4` (every hit
-     * a space-spanning list), and both were written into shipped code as attestations. The playbook's own index
+     * a space-spanning list), and both were written into shipped code as attestations. The index
      * says "a count is a lead, never a finding — read the instances"; the label was arguing the opposite.
      */
     // ⚠ TOKEN HITS COUNT EVEN IN A SPACELESS SCRIPT, and the first version of this fix forgot that — it labelled

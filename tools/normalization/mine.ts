@@ -21,7 +21,7 @@
  * Vietnamese `ây` gap was worth fixing because it was 22.1% OF THE CORPUS), and a hard-cases-only corpus
  * proves the rules fire without proving ordinary text still survives.
  *
- * ★ FILLING HOLES IS A TARGETED FETCH, NOT MORE RANDOM TEXT. The first Burmese run left six cells empty and
+ * ⚠ FILLING HOLES IS A TARGETED FETCH, NOT MORE RANDOM TEXT. The first Burmese run left six cells empty and
  * the natural reading — "Burmese does not write those" — was WRONG. A CirrusSearch `insource:` regex query
  * found 944 articles containing a native-digit percentage, 326 with a clock and 22 with a temperature; none
  * had surfaced because random sampling reads INTROS, and intros are biographical while percentages live in
@@ -45,7 +45,7 @@ import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
 // NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo, `bara 1945 tti`).
 // Every per-sentence regex for it — `\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`,
 // every measure phrase in every language, so the cell reports COVERED everywhere and says nothing. The
-// finding is real and general (playbook trap 15 (the same bound suffix is also written with…)); the evidence for it is a corpus-level statistic — the
+// finding is real and general — ⚠ the same bound suffix is also written with a space; the evidence for it is a corpus-level statistic — the
 // same morpheme appearing both glued and detached — which is not the shape a cell can hold.
 
 const asciiVariant = (re: RegExp): RegExp => new RegExp(re.source.replace(/\\p\{Nd\}/gu, "\\d"), re.flags);

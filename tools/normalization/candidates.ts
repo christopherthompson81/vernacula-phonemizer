@@ -266,7 +266,7 @@ async function main(): Promise<void> {
                 // A stub farm passes the volume floor and still cannot fill a cell inventory: a 40-word article
                 // is a lead sentence and an infobox, and the infobox does not survive plain-text extraction.
                 perArt > 0 && perArt < 80 ? `⚠ ${perArt} words/article — stubs` : "",
-                r.referees === 0 ? "no referee (irrelevant to mining — recorded because the issue counts by it)" : "",
+                r.referees === 0 ? "no referee (irrelevant to mining — recorded because the census counts by it)" : "",
             ].filter(Boolean).join("; ");
             console.log(`  ${r.code.padEnd(8)}${(r.wiki ?? "—").padEnd(8)}${(r.vol?.articles ?? 0).toLocaleString("en").padStart(9)}`
                 + `${(r.vol?.words ?? 0).toLocaleString("en").padStart(14)}${String(perArt).padStart(7)}  ${String(r.referees).padStart(3)}  ${note}`);

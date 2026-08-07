@@ -15,7 +15,7 @@
  * Every one of those was hand-investigated, per language, by whoever wrote the layer — and the cost of doing
  * it by hand is not the time, it is that **it was got wrong**: Slovak deferred 119 initialisms with
  * "it is a separate seam", when the seam existed, 30 languages already wired it, and espeak carried Slovak's
- * full letter-name table. That is trap 16, and this file is trap 16 (before declaring a class out of scope) mechanised: the check becomes a lookup.
+ * full letter-name table. ⚠ That is the before-declaring-a-class-out-of scope) mechanised: the check becomes a lookup.
  *
  * The counterpart matters just as much. Luxembourgish and Zulu/Xhosa deferred the same
  * class CORRECTLY — lb_list has 2 of 26 letter names and espeak ships no Zulu or Xhosa at all — and the
@@ -307,7 +307,7 @@ function tierWords(c: Ctx): Row[] {
  *
  * ⚠ THIS FILE DID NOT KNOW ABOUT THESE CLASSES, AND THAT IS A REAL GAP RATHER THAN AN OMISSION. 654 spent a
  * whole issue establishing the sign vocabulary for the fleet, and taught `defects.ts` (SIGN_CASES), `review.ts`
- * and `coverage.ts` about it — but not this file. So the tool the playbook mandates running BEFORE writing a
+ * and `coverage.ts` about it — but not this file. So the tool that must run BEFORE writing a
  * layer was blind to eight of the classes `review.ts` then FAILS the layer on.
  *
  * The consequence is not hypothetical. Writing the Khmer layer, this report listed percent, currency, degrees,

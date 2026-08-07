@@ -5,7 +5,7 @@
  * the intermediate oracle TSV (word<TAB>IPA) from inside that repo with:
  *
  *   // gen_ga.mts, run with `npx tsx` inside the reference-engine checkout ($ESPEAK_PORTABLE)
- *   import { phonemize } from "./src/index.ts"; import { loadLanguage } from "./src/loadData.ts";
+ *   import { phonemize } from "./src/index.ts"; import { loadLanguage } from "./src/loadData.ts";  // ← that repo's paths, not this one's
  *   const l = await loadLanguage("ga");
  *   for (const w of corpusWords) if (/^[a-záéíóú]+$/.test(w)) print(w + "\t" + phonemize(w, l));
  *

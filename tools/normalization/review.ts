@@ -300,7 +300,7 @@ for (const name of accepted) console.log(`  ⓘ ${name} is INTENTIONALLY silent 
  *   21 leak a RAW `km` into the IPA   am ar as bg bn ckb cy de fa ff ga gu kk mi ne pa sw th tr ur yue
  *    7 lose the unit word entirely    da fr hu id ja nb sv
  *
- * German reads `5 km²` as *fʏnf km* — the unit abbreviation reaching the phoneme sink verbatim, trap 6 (a word your layer emits must come from the…)'s
+ * German reads `5 km²` as *fʏnf km* — the unit abbreviation reaching the phoneme sink verbatim — ⚠ a word your layer emits must come from the language, and this one is
  * defect arriving through the exponent. French differs from `5 km` by ONE VOWEL (kilomˈɛtʁ vs kilɔmˈɛtʁ),
  * an incidental g2p artefact of the changed token, so even a careful reader has to compare two nearly
  * identical strings to see that the `²` was dropped. That is 28 of 66 languages.
@@ -396,7 +396,7 @@ note("spelling → g2p", spellings.length === 0,
 // currency names, the decimal word — is core vocabulary, where absence is real evidence.
 //
 // So: read the list. For each word, if you cannot say WHERE it came from, source it or leave the symbol
-// unread — a wrong word is worse than a dropped sign (playbook, "Two standing rules on data").
+// unread — a wrong word is worse than a dropped sign.
 const ESPEAK_DICT = process.env["ESPEAK_NG"] === undefined ? "" : join(process.env["ESPEAK_NG"], "dictsource");
 function attestationHaystack(): { tokens: ReadonlySet<string>; text: string } {
     let hay = "";
