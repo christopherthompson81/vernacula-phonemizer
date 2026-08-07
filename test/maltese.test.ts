@@ -6,9 +6,8 @@ import { getPhonemizer } from "../src/registry.ts";
 // Maltese (mt) — Malti, the ONLY Semitic language written in the Latin alphabet (a Siculo-Arabic core + Sicilian/
 // Italian/English superstrate), Malta (~520k). Maltese orthography is fairly phonemic, so the engine is a greedy
 // grapheme scan (the ⟨ie għ⟩ digraphs + the silent-letter rules) + final devoicing + regressive voicing assimilation
-// + affricate gemination + n→m before a labial. Validated against the wikipron mlt_latn_broad referee (15,837 human
-// headwords) — 91.9% FOLDED / 98.0% symbol, with vowel LENGTH (stress-conditioned, ~50% of lines) + għ
-// pharyngealization folded. ⚠ Single-source: there is no second referee for mt.
+// + affricate gemination + n→m before a labial. Referee: wikipron mlt_latn_broad (15,837 human headwords),
+// with vowel LENGTH (stress-conditioned, ~50% of lines) + għ pharyngealization folded. ⚠ Single-source: there is no second referee for mt.
 describe("Maltese canonical IPA — grapheme g2p + silent-letter rules + devoicing", () => {
     const mt = createMaltese();
 
