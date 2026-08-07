@@ -136,7 +136,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(/(?<![\d.,])([01]?\d|2[0-3])\.([0-5]\d)(?=\s*UTC(?![A-Za-z]))/gu,
             (m: string, h: string, min: string) => clock(m, h, min));
 
-        // 3b) UNIT ABBREVIATIONS AND THEIR POWERS. Persian spells its units out, but a phonemizer is handed
+        // 5b) UNIT ABBREVIATIONS AND THEIR POWERS. Persian spells its units out, but a phonemizer is handed
         //     arbitrary text, and `5 km` reached the g2p as the cluster [ˈʊkm] while `5 km²` lost the quantity
         //     outright. No word is invented — every one is Persian's own spelled-out form.
         //     ⚠ LATIN KEYS ONLY, never the Perso-Arabic ones, and Persian is the reason that distinction exists:
@@ -197,7 +197,7 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         s = s.replace(new RegExp(`([$€£¥])\\s?(\\d[\\d.,]*)`, "gu"),
             (_m, sign: string, num: string) => `${num} ${CURRENCY[sign]!}`);
 
-        // 7b) THE PLUS → به اضافه. Its noun اضافه is specifically ADDITION, where the near-synonym علاوه doubles
+        // 7c) THE PLUS → به اضافه. Its noun اضافه is specifically ADDITION, where the near-synonym علاوه doubles
         //     as the discourse connective "moreover"; both are ordinary Persian and both read correctly here.
         //     ⚠ TWO ARMS, BECAUSE THE OFFSET IS STORED AS `1+` IN LOGICAL ORDER — the sign AFTER the digit, which
         //     is what the bidi reordering of a displayed `+1` leaves behind. A single arm replacing the sign in

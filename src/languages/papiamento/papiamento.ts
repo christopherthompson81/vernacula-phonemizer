@@ -1,20 +1,19 @@
 /**
- * Native Papiamentu / Papiamento (pap) text phonemizer — canonical IPA. Papiamentu is an IBERIAN-
- * (Portuguese/Spanish-) lexified CREOLE of the ABC islands (Aruba, Bonaire, Curaçao), ~340k speakers — the fleet's 4th
- * creole (after Haitian, Cape Verdean, Nigerian Pidgin). This targets the CURAÇAO/BONAIRE phonemic orthography, a
- * greedy longest-match scan with two creole hallmarks:
+ * Papiamentu / Papiamento (pap) phonemizer — canonical IPA. An IBERIAN- (Portuguese/Spanish-) lexified
+ * CREOLE of the ABC islands (Aruba, Bonaire, Curaçao), ~340k speakers. Targets the CURAÇAO/BONAIRE
+ * phonemic orthography; a greedy longest-match scan with two creole hallmarks:
  *
- *   ★ CODA-⟨n⟩ RETENTION (Maurer; Kouwenberg & Murray) — Papiamentu KEEPS a coda ⟨n⟩ (it does NOT delete it):
+ *   ⚠ CODA-⟨n⟩ RETENTION (Maurer; Kouwenberg & Murray) — Papiamentu KEEPS a coda ⟨n⟩ (it does NOT delete it):
  *     WORD-FINAL ⟨n⟩ → the velar nasal [ŋ], also nasalizing the vowel (bon→[bõŋ], federashon→[fedeɾaˈʃõŋ]); a ⟨n⟩
  *     before a consonant or a vowel stays [n] (kontra→[ˈkontɾa], Papiamentu→[papiaˈmentu]). (The Wiktionary referee's
  *     Portuguese-style "nasalize + drop the ⟨n⟩" — ʃõ — is a transcription artifact; the dropped ⟨n⟩ is folded.)
- *   ★ The digraphs ⟨ch⟩→[t͡ʃ], ⟨sh⟩→[ʃ], ⟨dj⟩→[d͡ʒ], ⟨zj⟩→[ʒ]; the OPEN-vowel letters ⟨è⟩→[ɛ], ⟨ò⟩→[ɔ], ⟨ù⟩→[ø]
+ *   · The digraphs ⟨ch⟩→[t͡ʃ], ⟨sh⟩→[ʃ], ⟨dj⟩→[d͡ʒ], ⟨zj⟩→[ʒ]; the OPEN-vowel letters ⟨è⟩→[ɛ], ⟨ò⟩→[ɔ], ⟨ù⟩→[ø]
  *     and the ⟨ou⟩ diphthong → [ɔu]; ⟨ñ⟩→[ɲ], ⟨y⟩→[j], ⟨r⟩→[ɾ]. Acute-accented vowels ⟨á é í ó ú⟩ mark irregular
  *     STRESS (abolí→aboˈli); default penult (a diphthong counts as one nucleus), ULTIMATE for a consonant-final word.
  *     Papiamentu's lexical PITCH-ACCENT (H/L on each syllable) is not written and not emitted (it folds).
  *
- * 🔷 thin single-source (kaikki + English Wiktionary "Papiamentu terms with IPA pronunciation", ~20 pairs — no
- * wikipron/epitran pap).
+ * ⚠ THINLY ATTESTED — roughly twenty IPA pairs from a single source family. Treat the less common
+ * graphemes here as less settled than the two hallmarks above.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -94,10 +93,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zàáèéìíòóùúñA-ZÀÁÈÉÌÍÒÓÙÚÑ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

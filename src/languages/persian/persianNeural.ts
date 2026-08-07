@@ -39,7 +39,7 @@ let modernCtxP: Promise<FaContextRestorer | undefined> | undefined;
  */
 export async function phonemizeFaNeural(text: string): Promise<string> {
     text = normalizePersianOrthography(text); // fold Arabic yeh/kaf → Farsi so the tagger doesn't garble (Run 27)
-    // …then the #562 text-normalization pass, so the tagger sees the SAME rewritten text as the sync path (a
+    // …then the text-normalization pass, so the tagger sees the SAME rewritten text as the sync path (a
     // clock/percentage/ordinal becomes ordinary Persian words, which is exactly what the model was trained on).
     // Everything it emits is bare orthography: the tagger's source alphabet carries no harakat (fa-tagger.meta).
     text = normalizePersianText(text);

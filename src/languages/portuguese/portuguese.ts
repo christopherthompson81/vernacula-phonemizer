@@ -14,8 +14,9 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Lexical CORRECTION table (Approach A): the engine gets reduction/stress/glides right on its own; the lexicon
 // only patches the two genuinely-lexical axes it cannot predict — the STRESSED mid-vowel quality (open ɛ/ɔ vs
-// the close e/o default) and grapheme x (s/z/ks vs the ʃ default). Derived from wikipron EP (tools/pt-gen-
-// lexicon.mts). Row: word<TAB>code, code ∈ { "ɛ", "ɔ", "x:s", "x:z", "x:ks" }, "|"-joined if both apply.
+// the close e/o default) and grapheme x (s/z/ks vs the ʃ default). Derived from wikipron EP by
+// tools/gen/pt-gen-lexicon.mts. Row: word<TAB>code, code ∈ { "ɛ", "ɔ", "x:s", "x:z", "x:ks" }, "|"-joined
+// if both apply.
 export interface Corr {
     open?: "ɛ" | "ɔ";
     x?: string;
@@ -254,12 +255,12 @@ function wordIpa(
     return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
 }
 
-// #562 symbol normalization — Portuguese (quilômetro: the BR spelling; pt-BR is the corpus variety).
+// symbol normalization — Portuguese (quilômetro: the BR spelling; pt-BR is the corpus variety).
 const SYMBOLS = makeSymbolNormalizer({
     // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `e` ×1118 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
@@ -283,7 +284,7 @@ const SYMBOLS = makeSymbolNormalizer({
         l: ["litro", "litros"], ml: ["mililitro", "mililitros"], g: ["grama", "gramas"],
         t: ["tonelada", "toneladas"], ha: ["hectare", "hectares"], kw: ["quilowatt", "quilowatts"] },
     exponentWords: { squared: ["quadrado", "quadrados"], cubed: ["cúbico", "cúbicos"] },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
     // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
     // they are different words (quilómetros quadrados but vinte ao quadrado).
@@ -306,7 +307,7 @@ class PortuguesePhonemizer implements Phonemizer {
     text(input: string): string {
         const d = this.dialect,
             pw = this.postWord;
-        // #562 order: Portuguese rewrites (abbreviations, era markers, ordinal indicators, clock, R$) →
+        // order: Portuguese rewrites (abbreviations, era markers, ordinal indicators, clock, R$) →
         // INITIALISMS → the shared symbol tier last, since the clock rule has already claimed the hour.
         // Roman numerals arrive already converted from the registry seam (pt is not in ROMAN_NATIVE).
         const normalized = SYMBOLS(normalizePortugueseInitialisms(normalizePortuguese(input, this.dialect === "bp")));

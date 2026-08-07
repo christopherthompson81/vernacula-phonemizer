@@ -43,7 +43,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `i` ×846 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
@@ -94,7 +94,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:,\\d+)?)|([.?!,;:])`, "gu");
 
 class PolishPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: Polish rewrites (grouping, abbreviations, ordinals, clock, ranges, signs) →
+        // order: Polish rewrites (grouping, abbreviations, ordinals, clock, ranges, signs) →
         // INITIALISMS (after abbreviations, so `m.in.` is not spelled EM-EN) → the shared symbol tier last
         // (it needs the number still adjacent to its unit/sign). Roman numerals arrive already converted
         // at the registry seam, so the roman-vs-initialism hazard cannot arise here.

@@ -122,7 +122,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     // 4) ORDINAL INDICATORS. º and ª were reaching the phoneme string RAW — a non-IPA character in the
     //    output. ° (U+00B0 DEGREE SIGN) is deliberately NOT one of them: "35°" and "32 °" occur in this
     //    corpus and are temperatures, and treating ° as ordinal would read them as ordinals.
-    //    ⚠ THE DIGIT RUN MUST SPAN THE GROUPING DOTS, and until #586 it did not — `\d+` cannot cross the `.`
+    //    ⚠ THE DIGIT RUN MUST SPAN THE GROUPING DOTS — a bare `\d+` cannot cross the `.`
     //    in `1.000º`, and the consequences were two different failures on the same shape:
     //      `1.000º`  the pattern matched the TAIL, `000º`, so n was 0, portugueseOrdinal(0) is undefined, the
     //                match was returned unchanged and the º REACHED THE IPA RAW — the leak this rule exists to
