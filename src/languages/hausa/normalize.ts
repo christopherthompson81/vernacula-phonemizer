@@ -1,36 +1,13 @@
 /**
- * Hausa (ha) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Hausa (ha) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the 1,495 unique cased ha_ng FLEURS utterances (column 3 — a Hausa translation of the
- * English FLEURS set):
- *   `kashi N%` ×4 — the corpus's percent register is "kashi 80%" (kashi = portion, BEFORE the number)
- *   comma-thousands ×26 (783,562, 5,000,000, 6,387, 3,850) + dot-decimals (1.1, 1.5, 2.8, 12.8)
- *   clocks ×16 (8:46 na safe, 8:30 na yamma, 12.00 GMT, 15.00 UTC — na safe/yamma are a.m./p.m.)
- *   era markers ×2 (1000 B.C., 10,000 BCE)
- *   rates ×7 (160km / h, 480 km/h, 133 m/s, 300 mph, 600Mbit/s, 100-200 mil/awa, 64 kph)
- *   currency ×7 (US $ 30, $11,000, US$14.7, ¥2,500, £27) · units ×14 (90kg, 35 mm, 6,387 km)
- *   degrees ×2 (+30°C, 35°W longitude) · fractions ×2 (4/4, inci 1/5)
- *   ranges ×11 (2-3 km, 4.2-3.9 miliyan) · initialisms ×96 (AOL, AU, OPEC, OHA, UN, PSTN, A1GP)
- *   abbrev (George W. Bush, Roe v. Wade) · &amp; (the corpus's B&amp;Bs)
+ * ⚠ THE PERCENT WORD PRECEDES THE NUMBER: Hausa's register is "kashi 80%" (kashi = portion), so this is a
+ * PREPOSED reading, not the postposed one most of the fleet uses.
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `kashi 80%`    → `kˈaʃi ta˩mˈa˩ni˥n`         the % dropped (no percent word)
- *   `8:46 na safe` → `tˈa˥kʷa˩s , … na safe`    the colon pause
- *   `1000 B.C.`    → `dˈu˥bu˥ b . tʃ .`          the era marker letter-spelled
- *   `160km / h`    → `… km h`                    the rate raw
- *   `$11,000`      → `ɡˈo˥ma˩ ʃˈa˥ ɗˈa˥ja˥ , siɸˈili`  the $ dropped, comma pause
- *   `6,387 km`     → `ʃˈi˥da˩ , … km`            the comma-thousands became a pause
- *   `35 mm`        → `… mm`                      the unit raw (no tier units)
- *   `30°C`         → `ta˩lˈa˩ti˥n t͡ʃ`            the degree dropped to [tʃ]
- *   `Hoto na 1.1`  → `ɗˈa˥ja˥ . ɗˈa˥ja˥`          the dot-decimal became a pause
- *   `A1GP`         → `ˈa ɗˈa˥ja˥ ɡp`             letters+digits, GP cluster
- *   `B&amp;Bs`      → `b bs`                      the HTML entity dropped
- *   `Roe v. Wade`  → `… v . wˈade`               the v. dot survived
- *
- * WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The comma-thousands and dot-decimal stay
- * DIGITS so the shared symbol tier can still see the number adjacent to its unit/sign — the tier is
- * composed AFTER this pass in hausa.ts, and the TOKEN swallows the separators (see hausa.ts).
+ * ⚠ THE CLOCK MARKERS ARE HAUSA WORDS, not a.m./p.m.: `na safe` (morning) and `na yamma` (evening) attach to
+ * a colon clock, and 24-hour forms arrive with a timezone instead (`12.00 GMT`). A rule that assumes one of
+ * the three silently mishandles the others.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords as hausaNumber } from "./numbers.ts";

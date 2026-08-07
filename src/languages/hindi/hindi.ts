@@ -177,8 +177,8 @@ export function makeNativeHindi(
         return renderNumber(n, def.numbers, word);
     }
 
-    // #562 normalization: Hindi-specific rewrites (ordinal suffixes, Devanagari unit abbreviations,
-    // abbreviations, clock, signs, fractions) BEFORE the shared symbol tier, whose unit keys are Latin.
+    // ⚠ THE HINDI-SPECIFIC REWRITES RUN BEFORE THE SHARED SYMBOL TIER, whose unit keys are LATIN — ordinal
+    // suffixes, Devanagari unit abbreviations, abbreviations, clock, signs, fractions.
     // Roman numerals need no ordering care: `hi` is not in the registry's ROMAN_NATIVE set, so the shared
     // pass has already run at the registry seam.
     const normalize = overrides.normalize ?? makeHindiNormalizer(def.numbers);
@@ -203,24 +203,19 @@ export function makeNativeHindi(
 }
 
 /** Load hindi.jsonc (beside this file) and build the Hindi phonemizer. `foreign` handles embedded Latin. */
-// #562 symbol normalization — Hindi (प्रतिशत is invariant; units after the number).
+// प्रतिशत is invariant, and the units follow the number.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
-    // omitted and defaults to it — this language does not split dimension from product.
+    // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
+    // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it — Hindi does not
+    // split dimension from product.
     multiply: { times: "गुणा" },
     percent: ["प्रतिशत"],
-    // `¢` added for #586, and it is ROBUSTNESS with an unusually honest caveat. The sign occurs in ZERO of the
-    // 67 FLEURS corpora and NO language in the fleet declares it, so this is a fleet-wide gap that happens to
-    // surface through hi — the only hit anywhere is hi's wiki artifact, `२०¢ या १०¢ तक`.
-    // ⚠ AND THAT SENTENCE IS ALMOST CERTAINLY CORRUPT. It is about a VERNIER SCALE ("बर्नियर से … तक पढ़ने की
-    // सुविधा"), which reads arc-seconds, not money — and the same artifact carries the same sentence with `²`
-    // where this one has `¢` (`२०² या १०²`). Two different characters in one slot across two copies is the
-    // signature of an OCR or encoding corruption of `″`, and neither `¢` nor `²` is what the author wrote.
-    // Declared anyway, because the engine's job is to read the character it is given and #584's rule stands: a
-    // dropped sign is INAUDIBLE, the one outcome that cannot be right. `सेंट` is the ordinary Hindi form of the
-    // currency name — plain lexis, not an attestation, and marked so no later pass credits the corpus with it.
+    // ⚠ `¢` IS ROBUSTNESS, NOT ATTESTATION, and the one place it surfaces is almost certainly CORRUPT: a
+    // sentence about a VERNIER SCALE (`२०¢ या १०¢ तक`), which reads arc-seconds rather than money — and a second
+    // copy of the same sentence carries `²` in that slot. Two different characters in one position across two
+    // copies is the signature of an OCR corruption of `″`. Declared anyway, because the engine's job is to read
+    // the character it is given and a dropped sign is INAUDIBLE. `सेंट` is the ordinary Hindi form of the
+    // currency name — plain lexis, so no later pass should credit a corpus with it.
     currency: { "$": ["डॉलर"], "€": ["यूरो"], "£": ["पाउंड"], "₹": ["रुपये"], "¥": ["येन"], "¢": ["सेंट"] },
     // `m` — मीटर ×8, and digit-adjacent bare `m` is ×0 in this corpus, so the one-letter-key hazard is
     // checked rather than assumed. `घन` was declared below but unreachable without it: the exponent branch
