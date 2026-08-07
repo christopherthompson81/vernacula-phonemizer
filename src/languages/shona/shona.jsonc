@@ -8,7 +8,7 @@
 //   • PRENASALIZED ⟨mb nd ng nz nj⟩ → ᵐb ⁿd ᵑɡ ⁿz ⁿd͡ʒ (a superscript nasal marks the unit); ⟨ng'⟩ (apostrophe) → ŋ.
 //   • BREATHY ⟨mh nh vh zh⟩ → m̤ n̤ v̤ ʒ; ⟨v⟩→ʋ (approximant).
 // Tone (H/L) is unwritten and DEFERRED; there is no vowel-length/stress marking. Referee: epitran sna-Latn
-// (programmatic, INDEPENDENT — the only substantial Shona source; kaikki has <25 IPA entries) → 🔷 single-source.
+// (programmatic, INDEPENDENT — the only substantial Shona source; kaikki has <25 IPA entries) → single-source.
 {
     "language": "sn",
     "name": "Shona (chiShona)",

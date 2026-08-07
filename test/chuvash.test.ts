@@ -9,7 +9,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // STRESS — the reduced vowels ⟨ӑ⟩→[ə], ⟨ӗ⟩→[ɘ] cannot bear stress; it falls on the last full vowel, else the first.
 // Referee: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 human pairs).
 describe("Chuvash (Чӑвашла) canonical IPA", () => {
-    test("★ HALLMARK 1 — allophonic intervocalic / post-nasal VOICING", () => {
+    test("HALLMARK 1 — allophonic intervocalic / post-nasal VOICING", () => {
         expect(phonemizeWord("апат")).toBe("aˈbat"); // ⟨п⟩→[b] between vowels; final ⟨т⟩ stays [t]
         expect(phonemizeWord("ача")).toBe("aˈd͡ʑa"); // ⟨ч⟩→[d͡ʑ] intervocalic
         expect(phonemizeWord("вӑкӑр")).toBe("ˈʋəɡər"); // ⟨к⟩→[ɡ] intervocalic
@@ -20,12 +20,12 @@ describe("Chuvash (Чӑвашла) canonical IPA", () => {
         expect(phonemizeWord("чӗрпӗк")).toBe("ˈt͡ɕɘrpɘk"); // ⟨п⟩ stays [p] after a liquid before a REDUCED vowel (no voicing)
     });
 
-    test("★ gemination BLOCKS voicing → single long voiceless [Cː]", () => {
+    test("gemination BLOCKS voicing → single long voiceless [Cː]", () => {
         expect(phonemizeWord("иккӗ")).toBe("ˈikːɘ"); // ⟨кк⟩→[kː] (NOT voiced [ɡ])
         expect(phonemizeWord("саккӑр")).toBe("ˈsakːər"); // ⟨кк⟩→[kː]
     });
 
-    test("★ HALLMARK 2 — reduced ⟨ӑ⟩→ə, ⟨ӗ⟩→ɘ never bear stress", () => {
+    test("HALLMARK 2 — reduced ⟨ӑ⟩→ə, ⟨ӗ⟩→ɘ never bear stress", () => {
         expect(phonemizeWord("чӑваш")).toBe("t͡ɕəˈʋaʂ"); // 'Chuvash' — stress the FULL ⟨а⟩, not the reduced ⟨ӑ⟩
         expect(phonemizeWord("сӑмах")).toBe("səˈmaχ"); // stress the last full ⟨а⟩ (⟨ӑ⟩ reduced)
         expect(phonemizeWord("вӑтӑр")).toBe("ˈʋədər"); // 'thirty' — ALL vowels reduced → stress the FIRST
@@ -33,7 +33,7 @@ describe("Chuvash (Чӑвашла) canonical IPA", () => {
         expect(phonemizeWord("кӗҫнерникун")).toBe("kɘɕnerniˈɡun"); // stress the last full vowel ⟨у⟩; ⟨ӗ⟩ reduced
     });
 
-    test("★ NUMBERS — the OGHUR system: two series per unit + unit-times-ten 80/90", () => {
+    test("NUMBERS — the OGHUR system: two series per unit + unit-times-ten 80/90", () => {
         const chv = getPhonemizer("chv");
         // Data + provenance: src/languages/chuvash/numbers.ts (Chuvash Wikipedia "Хисеп ячĕ" for the roots AND the
         // composition rule — вун ҫиччĕ 17, ҫирĕм тăваттă 24, ҫĕр вăтăр саккăр 138 — plus Omniglot / Wiktionary cv).
@@ -42,8 +42,8 @@ describe("Chuvash (Чӑвашла) canonical IPA", () => {
         expect(chv.text("25").trim()).toBe("ˈɕirɘm ˈpilːɘk"); // ҫирӗм пиллӗк — the cited ҫирĕм+unit shape
         expect(chv.text("100").trim()).toBe("ˈɕɘr"); // ҫӗр — no multiplier for 1
         expect(chv.text("138").trim()).toBe("ˈɕɘr ˈʋədər ˈsakːər"); // ҫӗр вӑтӑр саккӑр — verbatim the source's own example
-        expect(chv.text("555").trim()).toBe("ˈpilɘk ˈɕɘr ˈalːə ˈpilːɘk"); // пилӗк ҫӗр аллӑ пиллӗк — ★ SHORT пилӗк before ҫӗр, FULL пиллӗк at the end
-        expect(chv.text("1984").trim()).toBe("ˈpin ˈtəɣər ˈɕɘr saɡərˈʋunːə təˈʋatːə"); // пин тӑхӑр ҫӗр сакӑрвуннӑ тӑваттӑ — ★ 80 = 8×10
+        expect(chv.text("555").trim()).toBe("ˈpilɘk ˈɕɘr ˈalːə ˈpilːɘk"); // пилӗк ҫӗр аллӑ пиллӗк — SHORT пилӗк before ҫӗр, FULL пиллӗк at the end
+        expect(chv.text("1984").trim()).toBe("ˈpin ˈtəɣər ˈɕɘr saɡərˈʋunːə təˈʋatːə"); // пин тӑхӑр ҫӗр сакӑрвуннӑ тӑваттӑ — 80 = 8×10
         expect(chv.text("12345").trim()).toBe("ˈʋun ˈik ˈpin ˈʋiɕ ˈɕɘr ˈχɘrɘχ ˈpilːɘk"); // вун ик пин виҫ ҫӗр хӗрӗх пиллӗк — short ик/виҫ in the multiplier slots
         expect(chv.text("1000000").trim()).toBe("ˈpɘr milːiˈon"); // пӗр миллион
     });

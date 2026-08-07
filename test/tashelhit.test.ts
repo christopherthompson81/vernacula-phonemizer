@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Tashelhit / Shilha (shi) — Taclḥit, a Berber (Amazigh) language of SW Morocco (~7–9M). A near-1:1 phonemic
 // Berber-Latin → IPA converter: emphatics (dot-below) ḍ→dˤ etc., pharyngeals ḥ→ħ / ɛ→ʕ, uvulars ɣ/x→χ/q, c→ʃ;
 // labialisation C+ʷ→Cʷ; gemination (doubling)→Cː. Validated against wikipron shi_latn (97.4% folded / 99.4% symbol)
-// + kaikki Tashelhit (97.8%/99.5%) — both Wiktionary → 🔷 single-source-family.
+// + kaikki Tashelhit (97.8%/99.5%) — both Wiktionary → single-source-family.
 describe("Tashelhit (Shilha) canonical IPA — Berber Latin → IPA converter", () => {
     const shi = createTashelhit();
 
@@ -53,7 +53,7 @@ describe("Tashelhit (Shilha) canonical IPA — Berber Latin → IPA converter", 
     // native decade 1–10 and a native vigesimal 11–99 (Kossmann 2013:307–308), but it is recessive and even it
     // borrows at 100/1000; the Peace Corps Tashlheet Textbook (2011:37) states the rule outright: "In TashlHeet we
     // usually use Arabic numbers except for the numbers: one, two and three." Sources in numbers.ts.
-    test("★ cardinals: native Berber 1–3, Moroccan Arabic from 4 up", () => {
+    test("cardinals: native Berber 1–3, Moroccan Arabic from 4 up", () => {
         const shi = getPhonemizer("shi");
         expect(shi.text("1").trim()).toBe("jan"); // yan — NATIVE Berber (never `waḥd` standalone)
         expect(shi.text("3").trim()).toBe("kradˤ"); // kraḍ — NATIVE; the cut-off

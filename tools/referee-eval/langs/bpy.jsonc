@@ -1,7 +1,7 @@
 // Bishnupriya Manipuri (bpy) — Eastern Indo-Aryan, Bengali / Eastern-Nagari script; the Bengali engine + Bengali
 // phoneme values, minus the ɔ→o height harmony. Referee: English Wiktionary "Bishnupriya Manipuri terms with IPA
 // pronunciation" (the ONLY source — no wikipron/kaikki/epitran bpy), 38 pairs, ~29 real words + ~9 single-letter
-// vowel definitions. 🔷 single-source, THIN — the % is a real signal on a small human sample, not a breadth claim.
+// vowel definitions. single-source, THIN — the % is a real signal on a small human sample, not a breadth claim.
 // Folds are notational: the referee's retroflex-tinged affricate ⟨ʈʃ⟩ for চ (we write t͡ʃ), diphthong offglide
 // marks, the dental bridge, ɪ~i / ʊ~u, and the ɔ~o mid-back inconsistency the thin referee shows.
 {

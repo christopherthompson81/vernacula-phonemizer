@@ -4,7 +4,7 @@
 // where WE are correct and epitran naively emits [g] (Setswana has no /g/ phoneme), and (c) the MID-VOWEL HEIGHT
 // that the standard orthography leaves underdetermined — orthographic ⟨e⟩ spans [e]~[ɛ]~[ɪ] and ⟨o⟩ spans
 // [o]~[ɔ]~[ʊ] (7→9-vowel raising); we emit the close-mid default, epitran applies its own raising, so the height
-// is folded to one class each (a bounded, characterised class — cf. the maturity legend's 🟢).
+// is folded to one class each (a bounded, characterised class — cf. the maturity legend's ).
 {
     "language": "tn", "name": "Setswana (Tswana)", "script": "Latin",
     "provenance": "Authored greedy g2p from Setswana orthography + Mistry (Cole 1955). Referee: epitran tsn-Latn.",

@@ -10,7 +10,7 @@ import { numberToWords } from "../src/languages/aromanian/numbers.ts";
 describe("Aromanian (armãneashti) canonical IPA", () => {
     const rup = createAromanian();
 
-    test("★ the Aromanian digraphs ⟨ts dz sh nj lj dh th⟩", () => {
+    test("the Aromanian digraphs ⟨ts dz sh nj lj dh th⟩", () => {
         expect(phonemizeWord("tsintsi")).toBe("t͡sint͡si"); // 'five' — ⟨ts⟩→[t͡s]
         expect(phonemizeWord("dzatsi")).toBe("d͡zat͡si"); // 'ten' — ⟨dz⟩→[d͡z]
         expect(phonemizeWord("njic")).toBe("ɲik"); // 'small' — ⟨nj⟩→[ɲ]
@@ -19,7 +19,7 @@ describe("Aromanian (armãneashti) canonical IPA", () => {
         expect(phonemizeWord("dhoarã")).toBe("ðo̯arə"); // ⟨dh⟩→[ð]; ⟨oa⟩→[o̯a]; ⟨ã⟩→[ə]
     });
 
-    test("★ ⟨ã⟩→[ə], the rising diphthongs ⟨ea oa⟩, and the endonym", () => {
+    test("⟨ã⟩→[ə], the rising diphthongs ⟨ea oa⟩, and the endonym", () => {
         expect(phonemizeWord("armãneashti")).toBe("arməne̯aʃti"); // 'Aromanian' — ⟨ã⟩→[ə], ⟨ea⟩→[e̯a], ⟨sh⟩→[ʃ]
         expect(phonemizeWord("noaptea")).toBe("no̯apte̯a"); // 'the night' — ⟨oa⟩→[o̯a], ⟨ea⟩→[e̯a]
         expect(phonemizeWord("limba")).toBe("limba"); // 'the tongue/language'
@@ -45,10 +45,10 @@ describe("Aromanian (armãneashti) canonical IPA", () => {
     test("numbers: units, the fused twenties, the ⟨shi⟩ connector, hundreds, thousands, millions", () => {
         expect(numberToWords(7)).toBe("shapti");
         expect(numberToWords(16)).toBe("shasprãdzatsi"); // the ⟨-sprã-dzatsi⟩ over-ten series
-        expect(numberToWords(20)).toBe("yinghits"); // ★ the opaque Latin *vīgintī* reflex
-        expect(numberToWords(21)).toBe("unsprãyinghits"); // ★ one-over-TWENTY, fused (no connector)
+        expect(numberToWords(20)).toBe("yinghits"); // the opaque Latin *vīgintī* reflex
+        expect(numberToWords(21)).toBe("unsprãyinghits"); // one-over-TWENTY, fused (no connector)
         expect(numberToWords(31)).toBe("treidzãts shi unu"); // 30+ take ⟨shi⟩
-        expect(numberToWords(100)).toBe("unã sutã"); // ★ the Slavic ⟨sutã⟩
+        expect(numberToWords(100)).toBe("unã sutã"); // the Slavic ⟨sutã⟩
         expect(numberToWords(555)).toBe("tsintsi suti tsindzãts shi tsintsi");
         expect(numberToWords(12345)).toBe("dosprãdzatsi njilj trei suti patrudzãts shi tsintsi");
         expect(numberToWords(1000000)).toBe("unã miliunã");

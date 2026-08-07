@@ -8,7 +8,7 @@
     "referees": [
         { "file": "kl.wikipron-broad.tsv", "source": "wikipron kal_latn_broad (human)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source family (wikipron; kaikki Greenlandic same Wiktionary source). The narrow referee's phonetic detail (regressive assimilation rp→pp, uvular vowel-lowering [ɜ ɔ ɑ], ll→ɬ) is deferred — we target the broad/phonemic level.",
+    "secondaryGap": "single-source family (wikipron; kaikki Greenlandic same Wiktionary source). The narrow referee's phonetic detail (regressive assimilation rp→pp, uvular vowel-lowering [ɜ ɔ ɑ], ll→ɬ) is deferred — we target the broad/phonemic level.",
     "folds": [
         { "pattern": "([aiu])\\1", "replace": "$1", "note": "LENGTH: the referee writes a long vowel as a DOUBLED segment (a a → aa); we emit [Vː], but the eval BACKBONE strips ː first → collapse the referee's doubling to a single to match" },
         { "pattern": "([ptkqbdɡɣfjlmnsvʁŋr])\\1", "replace": "$1", "note": "GEMINATE: the referee writes a long consonant as a doubled segment (l l → ll); our [Cː] is backbone-stripped → collapse the referee's doubling to a single. Includes ⟨r⟩ — a long uvular is written doubled as [rr] (nirrivik), which our ʁː → r must meet as a single [r]" },

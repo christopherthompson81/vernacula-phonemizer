@@ -6,21 +6,21 @@ import { phonemizeWord, createBasque } from "../src/languages/basque/basque.ts";
 // SIBILANT / affricate system: laminal ⟨z⟩→[s̻] / ⟨tz⟩→[t͡s̻], apical ⟨s⟩→[s̺] / ⟨ts⟩→[t͡s̺], postalveolar ⟨x⟩→[ʃ] /
 // ⟨tx⟩→[t͡ʃ]. Plus the ⟨r⟩ tap/trill split and the palatal digraphs. Referee: wikipron eus_latn broad + narrow.
 describe("Basque (euskara) canonical IPA", () => {
-    test("★ THE HALLMARK — the three-way sibilant contrast (laminal / apical / postalveolar)", () => {
+    test("THE HALLMARK — the three-way sibilant contrast (laminal / apical / postalveolar)", () => {
         expect(phonemizeWord("zu")).toBe("s̻u"); // 'you' — ⟨z⟩→[s̻] laminal
         expect(phonemizeWord("su")).toBe("s̺u"); // 'fire' — ⟨s⟩→[s̺] apical (a MINIMAL PAIR with zu)
         expect(phonemizeWord("xede")).toBe("ʃede"); // ⟨x⟩→[ʃ] postalveolar
         expect(phonemizeWord("gizon")).toBe("ɡis̻on"); // 'man' — ⟨z⟩→[s̻]
     });
 
-    test("★ the three-way AFFRICATE contrast (⟨tz ts tx⟩)", () => {
+    test("the three-way AFFRICATE contrast (⟨tz ts tx⟩)", () => {
         expect(phonemizeWord("atzo")).toBe("at͡s̻o"); // 'yesterday' — ⟨tz⟩→[t͡s̻] laminal
         expect(phonemizeWord("hots")).toBe("hot͡s̺"); // 'sound' — ⟨ts⟩→[t͡s̺] apical
         expect(phonemizeWord("etxe")).toBe("et͡ʃe"); // 'house' — ⟨tx⟩→[t͡ʃ] postalveolar
         expect(phonemizeWord("hotz")).toBe("hot͡s̻"); // 'cold' — ⟨tz⟩→[t͡s̻] (vs hots's ⟨ts⟩)
     });
 
-    test("★ ⟨r⟩ — tap [ɾ] between vowels, trill [r] finally / before a consonant / doubled", () => {
+    test("⟨r⟩ — tap [ɾ] between vowels, trill [r] finally / before a consonant / doubled", () => {
         expect(phonemizeWord("udare")).toBe("udaɾe"); // intervocalic single ⟨r⟩ → [ɾ] tap
         expect(phonemizeWord("hartu")).toBe("hartu"); // ⟨r⟩ before a consonant → [r] trill
         expect(phonemizeWord("herri")).toBe("heri"); // ⟨rr⟩ → [r] trill
@@ -34,7 +34,7 @@ describe("Basque (euskara) canonical IPA", () => {
         expect(phonemizeWord("euskara")).toBe("eus̺kaɾa"); // the endonym — ⟨s⟩→[s̺], intervocalic ⟨r⟩→[ɾ]
     });
 
-    test("★ the VIGESIMAL (base-20) number system", () => {
+    test("the VIGESIMAL (base-20) number system", () => {
         const eu = createBasque();
         expect(eu.text("20")).toBe("hoɡei"); // one score
         expect(eu.text("30")).toBe("hoɡeita hamar"); // 20 + connective -ta + 10

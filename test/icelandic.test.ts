@@ -8,7 +8,7 @@ import { normalizeIcelandic } from "../src/languages/icelandic/normalize.ts";
 // in the fleet: NO voicing contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k];
 // famous epenthetic-stop clusters ⟨ll⟩→[tl] ⟨rn⟩→[rtn]; preaspiration; devoiced-sonorant onsets. A greedy scan +
 // code rules, validated against wikipron isl_latn_broad (10,093 human headwords) — 79.8% FOLDED / 96.7% symbol, with
-// vowel LENGTH + ASPIRATION folded. 🔷 single-source but LARGE.
+// vowel LENGTH + ASPIRATION folded. single-source but LARGE.
 describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization + the epenthetic clusters", () => {
     const is = createIcelandic();
 
@@ -99,7 +99,7 @@ describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization
 
 // the normalization layer. Counts measured over the FLEURS is_is corpus (column 3).
 describe("icelandic normalization", () => {
-    // ★ Icelandic ordinals AGREE IN GENDER AND CASE, which is what separates this from the Norwegian and
+    // Icelandic ordinals AGREE IN GENDER AND CASE, which is what separates this from the Norwegian and
     // Danish single-form tables. Weak declension: -i is masculine NOMINATIVE only; -a covers masculine
     // oblique, feminine nominative and all neuter; -u is feminine oblique. So -a is the DEFAULT, and
     // porting a single-form table would give the masculine nominative everywhere.
@@ -139,7 +139,7 @@ describe("icelandic normalization", () => {
     // Icelandic fuses the measure word on as a prefix, like `fer-` in the squared rule above it.
     // ⚠ Bare `m` is deliberately NOT in the unit table: adding it made `802.11m` read as "…ellefu METRAR",
     // because this file spends the version dot before the shared tier's NOT_VERSION guard can use it
-    // (trap 39 (a local rule that depends on a character…)). Nothing is lost — these rules are local and do not consult that table.
+    // (a local rule depending on a character an earlier rule rewrote will not fire). Nothing is lost — these rules are local and do not consult that table.
     test("the cubed unit, and why bare m stays out", () => {
         expect(createIcelandic().text("5 m³").trim()).toContain("rumɛtrar");
         expect(createIcelandic().text("5 km³").trim()).toContain("rumciloumɛtrar");

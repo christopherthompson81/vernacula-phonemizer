@@ -3,7 +3,7 @@
 // reference variety), written in the Balochi ARABIC alphabet (the default script the Baloch use). Authored from
 // Jahani & Korn, "Balochi", in *The Iranian Languages* (2009) — Table 11.1 (the Pakistan alphabet), Table 11.6
 // (SWBal. consonants), Table 11.2 (ComBal. vowels). NO machine referee exists (no wikipron/kaikki/epitran for
-// bal/bcc/bgn/bgp) → a hand-gold on the sourced inventory (test/balochi.test.ts), verdict ⛔.
+// bal/bcc/bgn/bgp) → a hand-gold on the sourced inventory (test/balochi.test.ts), verdict .
 //
 // SIGNATURE (what makes Balochi distinct among the Iranian fleet fa/ps/ckb): the RETROFLEX series ٹ→ʈ, ڈ→ɖ, ڑ→ɽ
 // (from Indic contact) contrasting with the DENTAL stops ت→t̪, د→d̪; no native /q/ (ق→k); Southern Balochi is
@@ -12,12 +12,12 @@
 // THE SCRIPT IS DEFECTIVE (a "variant without sufficient vowel-encoding"): the short vowels /a i u/ are UNWRITTEN
 // (abjad), AND ⟨و⟩ conflates long /uː oː/ while ⟨ی⟩ conflates long /iː eː/. So the g2p recovers the consonant
 // backbone + long-vowel POSITIONS but not the short vowels or the o/u–e/i quality — those are folded/defaulted
-// (و→uː, ی→iː). This is the honest ⛔ ceiling of an Arabic-script Balochi g2p.
+// (و→uː, ی→iː). This is the honest ceiling of an Arabic-script Balochi g2p.
 {
     "language": "bal",
     "name": "Balochi (Southern)",
     "script": "Arabic (Balochi)",
-    "provenance": "Authored from Jahani & Korn (2009), 'Balochi', The Iranian Languages, Tables 11.1/11.2/11.6 (Southern Balochi, Pakistan alphabet). No machine referee — hand-gold on the sourced inventory. ⛔ cannot-verify (defective vowel encoding).",
+    "provenance": "Authored from Jahani & Korn (2009), 'Balochi', The Iranian Languages, Tables 11.1/11.2/11.6 (Southern Balochi, Pakistan alphabet). No machine referee — hand-gold on the sourced inventory. cannot-verify (defective vowel encoding).",
 
     "consonants": {
         "ب": "b", "پ": "p", "ت": "t̪", "ٹ": "ʈ", "ث": "s", "ج": "d͡ʒ", "چ": "t͡ʃ", "ح": "h", "خ": "x",

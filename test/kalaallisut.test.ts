@@ -32,7 +32,7 @@ describe("Kalaallisut (Greenlandic) canonical IPA", () => {
     // from 13 up. Not a guess: Oqaasileriffik's reference analyser has NO native numeral above 20, tags 16–20
     // archaic, and the suffix-allomorph distribution over an 834k-word corpus matches Danish and only Danish
     // (20/30/40 vowel-final → -t; 50–90 consonant-final → -it). Full evidence in numbers.ts.
-    test("★ cardinals: the NATIVE hand/foot series, 0–12 only", () => {
+    test("cardinals: the NATIVE hand/foot series, 0–12 only", () => {
         const kl = getPhonemizer("kl");
         expect(kl.text("1").trim()).toBe("ataːsiq"); // ataaseq
         expect(kl.text("7").trim()).toBe("aʁfiniq maʁluk"); // arfineq marluk — 'other hand' + two
@@ -42,7 +42,7 @@ describe("Kalaallisut (Greenlandic) canonical IPA", () => {
         expect(kl.text("0").trim()).toBe("nul");
     });
 
-    test("★ cardinals: DANISH from 13 up — unit-og-ten, written SOLID", () => {
+    test("cardinals: DANISH from 13 up — unit-og-ten, written SOLID", () => {
         const kl = getPhonemizer("kl");
         expect(kl.text("13").trim()).toBe("tʁitːin"); // tretten — the native series STOPS at 12
         expect(kl.text("25").trim()).toBe("fimuɣtyvi"); // femogtyve — units-first with `og`, solid

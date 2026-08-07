@@ -9,7 +9,7 @@
     "referees": [
         { "file": "la.wikipron-lat-clas-narrow.tsv", "source": "wikipron lat_latn_clas_narrow (Wiktionary, HUMAN, 44,907)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 human single-source-FAMILY — wikipron Classical Latin (44,907) is LARGE and robust but its only corroboration is the SAME Wiktionary source (kaikki) or an authored implementation of the same Allen reconstruction; no independent human attestation and no epitran lat mapping.",
+    "secondaryGap": "human single-source-FAMILY — wikipron Classical Latin (44,907) is LARGE and robust but its only corroboration is the SAME Wiktionary source (kaikki) or an authored implementation of the same Allen reconstruction; no independent human attestation and no epitran lat mapping.",
     "folds": [
         { "pattern": "ɦ", "replace": "h", "note": "⟨h⟩: [h] (ours) ~ intervocalic voiced [ɦ] (referee, nihila→niɦɪɫa) — allophonic voicing; the referee also has [h]-dropped variants (residual)" },
         { "pattern": "̯", "replace": "", "note": "non-syllabic offglide U+032F on the diphthong second element (⟨ae au oe⟩ → a e̯ …) — a diacritic, not a segment" }

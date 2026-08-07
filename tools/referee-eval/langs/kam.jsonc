@@ -4,7 +4,7 @@
 // contextual, unwritten → we emit none), SYLLABLE dots, the prenasal notation (referee plain m/n/ŋ+stop ~ our
 // superscript ᵐ/ⁿ/ᵑ), and doubled-vowel length. Vowel quality (⟨ĩ⟩=e/⟨ũ⟩=o) and the ⟨v⟩=β / ⟨ny⟩=ɲ / prenasalized
 // consonants ARE compared directly. Phonology corroborated by the Omniglot Kikamba chart + Wikipedia (Roberts-Kohno
-// 2000), not a second numeric referee → honest status 🔷.
+// 2000), not a second numeric referee → honest status .
 {
     "language": "kam", "name": "Kamba (Kikamba)", "script": "Latin",
     "provenance": "Authored greedy g2p from the Kikamba orthography; vowels anchored on the 5-word en.wiktionary Kamba IPA referee (mũtĩ→mòté ⇒ ⟨ĩ⟩=e/⟨ũ⟩=o), consonants from the Omniglot Kikamba alphabet chart + Wikipedia Kamba table.",

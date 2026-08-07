@@ -9,7 +9,7 @@
     "language": "bho",
     "name": "Bhojpuri",
     "script": "Devanagari",
-    "provenance": "REVISED from 'A Grammar of Bhojpuri' (dissertation, Shukla-tradition), whose glossed examples were g2p-mined (1622 Devanagari→IPA pairs) as a falsifiable anchor. Reuses the Hindi Devanagari engine with the Bhojpuri divergences: an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic length (0/1622 mined length marks), ऐ→ɛ/औ→ɔ MONOPHTHONGS (the earlier 'diphthong' claim was WRONG), श/ष→s (only /s ɦ/ fricatives), व→w (not Hindi ʋ), ण/ञ→n. Single published source → 🔷.",
+    "provenance": "REVISED from 'A Grammar of Bhojpuri' (dissertation, Shukla-tradition), whose glossed examples were g2p-mined (1622 Devanagari→IPA pairs) as a falsifiable anchor. Reuses the Hindi Devanagari engine with the Bhojpuri divergences: an 8-vowel /i e ɛ a ʌ ɔ o u/ system with NO phonemic length (0/1622 mined length marks), ऐ→ɛ/औ→ɔ MONOPHTHONGS (the earlier 'diphthong' claim was WRONG), श/ष→s (only /s ɦ/ fricatives), व→w (not Hindi ʋ), ण/ञ→n. Single published source → .",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.

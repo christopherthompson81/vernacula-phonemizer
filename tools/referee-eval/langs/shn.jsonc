@@ -8,6 +8,6 @@
     "referees": [
         { "file": "shn.wikipron-shn-mymr-broad.tsv", "source": "wikipron shn_mymr_broad (Wiktionary, HUMAN, 2607)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 human single-source — wikipron Shan (2607) is the only machine referee (no epitran shn-Mymr mapping, no kaikki Shan dump pulled; no independent human attestation).",
+    "secondaryGap": "human single-source — wikipron Shan (2607) is the only machine referee (no epitran shn-Mymr mapping, no kaikki Shan dump pulled; no independent human attestation).",
     "folds": []
 }

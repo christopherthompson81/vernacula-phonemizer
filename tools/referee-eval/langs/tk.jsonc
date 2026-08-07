@@ -12,7 +12,7 @@
         { "file": "tk.wikipron-tuk-broad.tsv", "source": "wikipron tuk_latn_broad (Wiktionary-scraped, HUMAN, 424)", "role": "secondary" },
         { "file": "tk.epitran-tuk.tsv", "source": "epitran tuk-Latn OUTPUT (independent rule-based G2P, 530)", "role": "secondary" }
     ],
-    "secondaryGap": "🔷 — kaikki human primary + wikipron (correlated, same Wiktionary) + epitran (INDEPENDENT rule-based, but NAIVE on the interdentals s/z and w→β). We CORRECT epitran on s→θ/z→ð (the Shona pattern). Phonemic vowel LENGTH is unwritten/unrecoverable → folded.",
+    "secondaryGap": "— kaikki human primary + wikipron (correlated, same Wiktionary) + epitran (INDEPENDENT rule-based, but NAIVE on the interdentals s/z and w→β). We CORRECT epitran on s→θ/z→ð (the Shona pattern). Phonemic vowel LENGTH is unwritten/unrecoverable → folded.",
     "folds": [
         { "pattern": "a", "replace": "ɑ", "note": "⟨a⟩ is the BACK low vowel [ɑ] (ours + Wiktionary); epitran writes [a] — fold" },
         { "pattern": "[ɢʁɣ]", "replace": "ɡ", "note": "⟨g⟩: the /ɡ/ phoneme spirantizes/backs to [ɣ ʁ ɢ] (intervocalic/back-harmony) — allophonic, not contrastive; fold to [ɡ]" },

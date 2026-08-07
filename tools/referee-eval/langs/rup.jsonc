@@ -9,7 +9,7 @@
         { "file": "rup.wikipron-rup-narrow.tsv", "source": "wikipron rup_latn_narrow (Wiktionary, HUMAN, 196)", "role": "primary" },
         { "file": "rup.kaikki-rup.tsv", "source": "kaikki Aromanian (Wiktionary, HUMAN, 201)", "role": "secondary" }
     ],
-    "secondaryGap": "🔷 single-source-FAMILY — wikipron + kaikki both Wiktionary (correlated). No epitran rup. The ⟨ã⟩ central vowel is transcribed BOTH [ə] and [ɨ] (the orthography doesn't distinguish them) → folded.",
+    "secondaryGap": "single-source-FAMILY — wikipron + kaikki both Wiktionary (correlated). No epitran rup. The ⟨ã⟩ central vowel is transcribed BOTH [ə] and [ɨ] (the orthography doesn't distinguish them) → folded.",
     "folds": [
         { "pattern": "\\.", "replace": "", "note": "the kaikki referee's syllable-boundary dots (ˈu.ne, ka.le)" },
         { "pattern": "ɨ", "replace": "ə", "note": "⟨ã⟩ central vowel — the referee writes it BOTH [ə] and [ɨ] (alumtã→alumtə AND alumtɨ); the Cunia orthography has ONE ⟨ã⟩ letter for both, so neutralise" },

@@ -4,12 +4,12 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeWord, createHebrew } from "../src/languages/hebrew/hebrew.ts";
 
 // Canonical-IPA goldens for Hebrew (he) — Afro-Asiatic (Semitic), the Hebrew abjad, MODERN ISRAELI pronunciation.
-// PHASE 1: a niqqud→IPA segmental g2p over VOCALIZED (pointed) input (unvocalized restoration — a neural nakdan —
-// is Phase 2, deferred, the Arabic-diacritizer analogue). Hand-adjudicated against en.wiktionary vocalized→a=IL
+// A niqqud→IPA segmental g2p over VOCALIZED (pointed) input (unvocalized restoration — a neural nakdan —
+// is deferred — the Arabic-diacritizer analogue). Hand-adjudicated against en.wiktionary vocalized→a=IL
 // IPA (2561 words): 87.1% folded, the folds stripping stress (unwritten), the variable glottal ⟨א⟩/⟨ע⟩=ʔ, the
 // velar-nasal allophone, and resh notation. Signatures: bgdkpt dagesh (בּ→b/ב→v, כּ→k/כ→χ, פּ→p/פ→f); ⟨ש⟩ shin/sin;
 // ⟨ו⟩ shuruk וּ→u / holam male וֹ→o; patach genuvah (final guttural's patach surfaces before it, מָשִׁיחַ→maʃiaχ).
-describe("Hebrew canonical IPA — Phase-1 niqqud→IPA (Modern Israeli)", () => {
+describe("Hebrew canonical IPA — niqqud→IPA (Modern Israeli)", () => {
     test("bgdkpt dagesh split + ⟨ש⟩ shin/sin + ⟨ו⟩ specials", () => {
         expect(phonemizeWord("בַּיִת")).toBe("bajit"); // dagesh בּ→b; ⟨יִ⟩…⟨ת⟩; yod glide
         expect(phonemizeWord("אָב")).toBe("ʔav"); // soft ⟨ב⟩→v
@@ -30,7 +30,7 @@ describe("Hebrew canonical IPA — Phase-1 niqqud→IPA (Modern Israeli)", () =>
 
     // Cardinal numbers (numbers.ts): feminine citation forms; מֵאָה fem vs אֶלֶף/מִילְיוֹן masc multipliers; duals
     // מָאתַיִם/אַלְפַּיִם; the internal וְ connector (→[v], sheva-na elided) before the last small cardinal, never a
-    // magnitude word (מֵאָה אֶלֶף vs עֶשְׂרִים וְאֶחָד אֶלֶף). Digit tokens route through the Phase-1 g2p.
+    // magnitude word (מֵאָה אֶלֶף vs עֶשְׂרִים וְאֶחָד אֶלֶף). Digit tokens route through the rule g2p.
     test("numbers → IPA (feminine citation, gender/dual magnitudes, decimals)", () => {
         expect(phonemize("7","he")).toBe("ʃeva"); // שֶׁבַע — final-ayin glottal dropped (consensus)
         expect(phonemize("15","he")).toBe("χameʃ ʔesʁe");

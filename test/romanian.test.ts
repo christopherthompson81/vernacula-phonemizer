@@ -143,7 +143,7 @@ describe("romanian normalization", () => {
         expect(normalizeRomanian("160 km/oră")).toBe("160 kilometri pe oră");
     });
 
-    // ★ Romanian has NO ordinal dot. It is the largest rule in Norwegian (134) and Danish (112), and the
+    // Romanian has NO ordinal dot. It is the largest rule in Norwegian (134) and Danish (112), and the
     // shape occurs 169 times here — but zero are followed by a lowercase word. They are sentence ends and
     // grouping periods; Romanian writes ordinals as words (primul, al doilea) and dates without a dot.
     test("a dotted number is NOT an ordinal — sentence ends survive", () => {

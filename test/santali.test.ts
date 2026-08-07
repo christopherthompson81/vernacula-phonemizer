@@ -36,7 +36,7 @@ describe("Santali (ᱥᱟᱱᱛᱟᱲᱤ) canonical IPA", () => {
 
     // ═══ CARDINAL NUMBERS — the NATIVE MUNDA decimal series (ᱜᱮᱞ 'ten' as the base) for 1–99, with the
     // Indo-Aryan loan magnitudes above it, in Indian 2-2-3 grouping. Sources in src/languages/santali/numbers.ts.
-    test("★ cardinals: native ᱜᱮᱞ decimal, SPACED, purely additive", () => {
+    test("cardinals: native ᱜᱮᱞ decimal, SPACED, purely additive", () => {
         const sat = getPhonemizer("sat");
         expect(sat.text("0").trim()).toBe("sun"); // ᱥᱩᱱ — an IA loan; no native Munda zero exists
         expect(sat.text("5").trim()).toBe("mɔɳe"); // ᱢᱚᱬᱮ

@@ -2,7 +2,7 @@
 // South Africa, official in both). Latin orthography. Sibling of the done Setswana (tn) but a DISTINCT language:
 // authored from standard Sesotho orthography + phonology (Doke & Mofokeng), NOT aliasable to Setswana (systematic
 // vowel + ejective differences). NO usable machine referee (kaikki "Sotho" = 3 IPA entries; no wikipron/epitran) →
-// hand-gold anchored, verdict 🔷 single-source. The g2p is the greedy longest-match scan shared with Setswana.
+// hand-gold anchored, verdict single-source. The g2p is the greedy longest-match scan shared with Setswana.
 //
 // SIGNATURE (confirmed by the 3 kaikki attestations motswalle→mʊt͡sʼʷɑl̩lɛ, phuputso→pʰupʼut͡sʼɔ, peo→pe(w)):
 // the plain voiceless stops are EJECTIVE ⟨p t k⟩→[pʼ tʼ kʼ] (vs aspirated ⟨ph th kh⟩→[pʰ tʰ kʰ]), ⟨ts⟩→[t͡sʼ]
@@ -13,7 +13,7 @@
     "language": "st",
     "name": "Sesotho (Southern Sotho)",
     "script": "Latin",
-    "provenance": "Authored from standard Sesotho orthography + phonology (Doke & Mofokeng 1957). No machine referee (kaikki Sotho = 3 IPA entries); hand-gold anchored. 🔷 single-source.",
+    "provenance": "Authored from standard Sesotho orthography + phonology (Doke & Mofokeng 1957). No machine referee (kaikki Sotho = 3 IPA entries); hand-gold anchored. single-source.",
 
     "graphemes": {
         "tšh": "t͡ʃʰ", "tsh": "t͡sʰ", "tlh": "t͡ɬʰ",

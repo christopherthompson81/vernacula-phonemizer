@@ -6,7 +6,7 @@ import { isSawndip, sawndipToReadings } from "../src/languages/zhuang/sawndip.ts
 import { loadTsvMap } from "../src/core/loadTsv.ts";
 
 // Sawndip (古壮字) — the Han-derived LOGOGRAPHIC second script for Zhuang (za), read via a glyph→Standard-Zhuang-reading
-// dictionary routed through the za Latin g2p (the Adlam/Tifinagh second-script pattern). 🔷 reference-parity,
+// dictionary routed through the za Latin g2p (the Adlam/Tifinagh second-script pattern). reference-parity,
 // covered-subset, default-reading (polyphonic glyphs → most-common).
 describe("Zhuang Sawndip (second-script front-end)", () => {
     const za = getPhonemizer("za");

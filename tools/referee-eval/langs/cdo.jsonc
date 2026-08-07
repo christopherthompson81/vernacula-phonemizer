@@ -1,6 +1,6 @@
 // Min Dong / Eastern Min (cdo) — Fuzhou dialect, Sinitic, tonal. Input orthography = Bàng-uâ-cê (BUC). Referee:
 // BUC↔IPA pairs extracted from the kaikki Chinese dump (Wiktionary Module:cdo-pron OUTPUT, single-syllable
-// citation). ⚠ The referee is RULE-GENERATED, not human transcription → this is 🔷 REFERENCE-IMPLEMENTATION
+// citation). ⚠ The referee is RULE-GENERATED, not human transcription → this is REFERENCE-IMPLEMENTATION
 // PARITY (does our spec-derived BUC→IPA converter match Wiktionary's converter?), NOT independent attestation.
 // Segmental + citation tone, with the 韻變 (rime alternation) now MODELLED in the engine (so its a~ɑ/o~ɔ/e~ɛ folds
 // are GONE — only the tone strip + the narrow initial notation remain). The eval strips tones (both sides) and
@@ -11,7 +11,7 @@
     "referees": [
         { "file": "cdo.buc-ipa.tsv", "source": "kaikki Chinese dump, Min-Dong Min Dong-Romanized↔Sinological-IPA (Wiktionary Module:cdo-pron, single-syllable citation, ~1500)", "role": "primary" }
     ],
-    "secondaryGap": "Single source, and it is RULE-GENERATED (Wiktionary Module:cdo-pron), not human — so the % is reference-implementation PARITY, not independent verification. No independent human Fuzhou referee is machine-available (wikipron cdo is the same Wiktionary source; the only Han→reading dict is circular). 🔷 (near the ⛔ boundary).",
+    "secondaryGap": "Single source, and it is RULE-GENERATED (Wiktionary Module:cdo-pron), not human — so the % is reference-implementation PARITY, not independent verification. No independent human Fuzhou referee is machine-available (wikipron cdo is the same Wiktionary source; the only Han→reading dict is circular). (near the boundary).",
     "folds": [
         { "pattern": "[⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁽⁾]", "replace": "", "note": "referee tone = superscript Chao digits (³³ ⁵⁵ ²¹³ + sandhi arrows ⁻); ours = Chao letters (backbone-stripped). Strip the digit tones → segmental comparison (tone/sandhi is Phase-2)" },
         { "pattern": "ˡ", "replace": "", "note": "the referee writes the l/n initial with a superscript-l release (nˡ); we emit plain [n] → strip the modifier (the l̃ tilde variant is already backbone-stripped)" }

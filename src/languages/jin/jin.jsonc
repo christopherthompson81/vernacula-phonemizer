@@ -3,7 +3,7 @@
 // coda ʔ — and its rich tone sandhi). The dict (dict.tsv) already carries the Sinological IPA per syllable
 // (segmental IPA + a superscript pitch-number tone, e.g. ma⁵³, yəʔ²); the runtime only converts the pitch
 // digits → Chao contour letters (1→˩ … 5→˥) and resolves the sandhi arrow ⁻ (underlying⁻surface → surface).
-// SINGLE authoritative source (Wiktionary/kaikki Taiyuan Sinological-IPA) — no independent referee (🔷).
+// SINGLE authoritative source (Wiktionary/kaikki Taiyuan Sinological-IPA) — no independent referee ().
 {
     "language": "cjy",
     "name": "Jin Chinese (Taiyuan)",

@@ -42,7 +42,7 @@ describe("russian canonical IPA", () => {
         expect(phonemizeWord("большой")).toBe("bɐlʲʂˈoj");
     });
 
-    test("Phase 2: genitive г→v + loanword hard е/и", () => {
+    test("genitive г→v + loanword hard е/и", () => {
         expect(phonemizeWord("красного")).toBe("krˈasnəvə"); // genitive -ого → v
         expect(phonemizeWord("большого")).toBe("bɐlʲʂˈovə");
         expect(phonemizeWord("много")).toBe("mnˈoɡə"); // adverb exception → keeps ɡ

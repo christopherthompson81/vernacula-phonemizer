@@ -12,7 +12,7 @@
     "referees": [
         { "file": "kea.kaikki-anchors.tsv", "source": "kaikki.org Kabuverdianu (Wiktionary-derived, human) — the 7 IPA-carrying words (the ONLY machine pronunciations for kea)", "role": "primary" }
     ],
-    "secondaryGap": "NO independent referee beyond these 7 kaikki words — wikipron has no Kabuverdianu, and the kaikki dump (1,062 words) carries IPA on only 7. The g2p is AUTHORED from the standardized ALUPEC phonemic orthography + standard Cape Verdean phonology (Lang 2002 / Quint 2000 / Wikipedia); this 7-word set is a LOOSE tripwire, and the exact-match gold in test/kabuverdianu.test.ts is the falsifiable anchor. 🔷 thin single-source (the fleet's thinnest, 7 words vs Luo 17 / Madurese 35).",
+    "secondaryGap": "NO independent referee beyond these 7 kaikki words — wikipron has no Kabuverdianu, and the kaikki dump (1,062 words) carries IPA on only 7. The g2p is AUTHORED from the standardized ALUPEC phonemic orthography + standard Cape Verdean phonology (Lang 2002 / Quint 2000 / Wikipedia); this 7-word set is a LOOSE tripwire, and the exact-match gold in test/kabuverdianu.test.ts is the falsifiable anchor. thin single-source (the fleet's thinnest, 7 words vs Luo 17 / Madurese 35).",
     "folds": [
         { "pattern": "ˈ", "replace": "", "note": "STRESS position: the kaikki puts ˈ at the syllable ONSET (ˈko.brɐ), we put it at the NUCLEUS (kˈobɾɐ, fleet convention) — strip it and compare segments (the stressed SYLLABLE matches on all 7)" },
         { "pattern": "\\.", "replace": "", "note": "the kaikki's syllable-boundary dots (ˈko.brɐ)" },

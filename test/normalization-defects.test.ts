@@ -101,7 +101,7 @@ describe("a citation is sourcing, but only if a reader could go and check it", (
         const cite = CITED_WORDS["ig"]?.["ntụkpọ"];
         expect(cite).toBeDefined();
         expect(cite).toMatch(/Nkọwa okwu/u);
-        // The zero is part of the claim, not an omission from it — see the playbook's corpus-silence trap.
+        // The zero is part of the claim, not an omission from it — see the corpus-silence trap.
         expect(cite).toMatch(/ZERO/u);
     });
 });

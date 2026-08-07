@@ -7,7 +7,7 @@
     "referees": [
         { "file": "quc.wiktionary-kiche.tsv", "source": "English Wiktionary quc IPA (HUMAN, 127)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source — English Wiktionary (127 K'iche' IPA entries, via the MediaWiki API) is the ONLY machine referee (no wikipron/kaikki/epitran quc); no independent human attestation.",
+    "secondaryGap": "single-source — English Wiktionary (127 K'iche' IPA entries, via the MediaWiki API) is the ONLY machine referee (no wikipron/kaikki/epitran quc); no independent human attestation.",
     "folds": [
         { "pattern": "ː", "replace": "", "note": "VOWEL LENGTH — phonemic in K'iche' but UNWRITTEN in the ALMG orthography (unrecoverable from spelling); the referee marks it, we don't emit it" },
         { "pattern": "ʰ", "replace": "", "note": "ASPIRATION of the plain voiceless stops [pʰ tʰ kʰ qʰ t͡ʃʰ t͡sʰ] — allophonic and INCONSISTENT in the referee (chaj→t͡ʃ but achaq→t͡ʃʰ); fold it (the ejective ʼ contrast is untouched)" },

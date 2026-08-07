@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 
-// Canonical-IPA goldens for Mandarin (cmn) — Phase 1, the pinyin input path. Segmental values come from the
+// Canonical-IPA goldens for Mandarin (cmn) — the pinyin input path. Segmental values come from the
 // project's converged cmn engine (validated vs wikipron + epitran); tones are Chao contour letters at the
 // syllable end, with third-tone sandhi. Anchor values (zhong1 guo2, ni3 hao3) carry tone placement
 // regularized to syllable-final.

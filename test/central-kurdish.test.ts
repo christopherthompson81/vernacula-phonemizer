@@ -31,7 +31,7 @@ describe("Central Kurdish (Sorani) canonical IPA — Perso-Arabic alphabet", () 
 
 // the normalization layer. Counts are measured over the FLEURS ckb_iq corpus (column 3).
 describe("central kurdish normalization", () => {
-    // ★ THE HEADLINE. The tokenizer's letter class is [ؠ-ۿ] = U+0620–U+06FF, which CONTAINS the
+    // THE HEADLINE. The tokenizer's letter class is [ؠ-ۿ] = U+0620–U+06FF, which CONTAINS the
     // Arabic-Indic digits U+0660–U+0669 — so a native digit run was claimed by the LETTER branch and
     // phonemized to an EMPTY STRING. That is the majority digit system here: 2036 against 1705 ASCII.
     test("native Arabic-Indic digits are read, not swallowed", () => {
@@ -88,7 +88,7 @@ describe("central kurdish normalization", () => {
     // slash — "480 کم لە کاتژمێر (133 مەتر/چرکە)" — and the slash was silently dropped, so four utterances lost
     // the "per" entirely. `لە` is the per, `کاتژمێر` the hour, `چرکە` the second, all from that sentence.
     // ⚠ The Perso-Arabic arm must accept the ABBREVIATION (`کم`), not just the spelled word: this block runs
-    // above the decimal rule to keep the version dot (trap 39 (a local rule that depends on a character…)), and `کم` → `کیلۆمەتر` happens further down.
+    // above the decimal rule to keep the version dot (a local rule depending on a character an earlier rule rewrote will not fire), and `کم` → `کیلۆمەتر` happens further down.
     test("the rate, in both scripts", () => {
         expect(phonemize("120 کم/کاتژمێر", "ckb")).toContain("kiːloːmatɾ la kaːtʒmeːɾ");
         expect(phonemize("120 مەتر/چرکە", "ckb")).toContain("matɾ la t͡ʃɾka");

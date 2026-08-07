@@ -2,7 +2,7 @@
 // and narrow are 404; the scraped Arabic varieties are acm/afb/ajp/apc/ary/arz/ayl), and there is no free Sudanese
 // pronunciation corpus. So `referees: []` + `secondaryGap`; the correctness anchor is the adjudicated gold in
 // test/arabic.test.ts, validated against published Sudanese phonology (Dickins, Sudanese Arabic Phonematics). This
-// makes apd 🔷 single-source verified (the Wu/Igbo pattern) — the distinctive fingerprint (ق→ɡ, ج→ɟ, interdentals
+// makes apd single-source verified (the Wu/Igbo pattern) — the distinctive fingerprint (ق→ɡ, ج→ɟ, interdentals
 // kept) is gold-checked, not measured. The shared MSA vowels are the same data-limited tail as arz/apc.
 {
     "referees": [],

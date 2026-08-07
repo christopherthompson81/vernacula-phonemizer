@@ -55,7 +55,7 @@ describe("Lithuanian canonical IPA — rule g2p (palatalization + voicing)", () 
         expect(lt.text("1000").trim()).toBe("tuːkstɐnʲtʲɪs"); // tūkstantis — the numeral"vienas" is dropped
         expect(lt.text("2000").trim()).toBe("dʊ tuːkstɐnʲt͡ʃʲɛɪ"); // du tūkstančiai → NOM PL
         expect(lt.text("10000").trim()).toBe("dʲɛʃʲɪmt tuːkstɐnʲt͡ʃʲuː"); // dešimt tūkstančių → …0 ⇒ GEN PL
-        expect(lt.text("21000").trim()).toBe("dʲʋʲɪdʲɛʃʲɪmt ʋʲiɛnɐs tuːkstɐnʲtʲɪs"); // ★ …1 ⇒ NOM SG tūkstantis
+        expect(lt.text("21000").trim()).toBe("dʲʋʲɪdʲɛʃʲɪmt ʋʲiɛnɐs tuːkstɐnʲtʲɪs"); // …1 ⇒ NOM SG tūkstantis
         expect(lt.text("100000").trim()).toBe("ʃʲɪmtɐs tuːkstɐnʲt͡ʃʲuː"); // šimtas tūkstančių
         expect(lt.text("12345").trim()).toBe(
             "dʲʋʲiːlʲɪkɐ tuːkstɐnʲt͡ʃʲuː tʲrʲiːs ʃʲɪmtɐɪ kʲɛtʊrʲɛzʲdʲɛʃʲɪmt pʲɛŋʲkʲɪ",

@@ -8,7 +8,7 @@
     "referees": [
         { "file": "kaa.wiktionary-kaa.tsv", "source": "English Wiktionary 'Karakalpak terms with IPA pronunciation' (literal human {{IPA|kaa|…}}, ~11 Latin)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 THIN single-source (~11 usable Latin pairs) — no wikipron kaa, no kaikki Karakalpak, no epitran kaa. The % is on a small sample; the g2p is well-defined by the phonemic 2016 Latin orthography and verified on goldens.",
+    "secondaryGap": "THIN single-source (~11 usable Latin pairs) — no wikipron kaa, no kaikki Karakalpak, no epitran kaa. The % is on a small sample; the g2p is well-defined by the phonemic 2016 Latin orthography and verified on goldens.",
     "folds": [
         { "pattern": "\\.", "replace": "", "note": "the referee's syllable-boundary dots (øz.bek, tu.wuw)" }
     ]

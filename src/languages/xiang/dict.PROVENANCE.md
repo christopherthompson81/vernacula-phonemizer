@@ -26,6 +26,6 @@ citation readings + 2,548 multi-character word readings, with the Changsha tone 
 - **License:** Wiktionary content is CC-BY-SA 3.0; the kaikki extract is a mechanical redistribution of it.
   OpenCC `TSCharacters` is Apache-2.0.
 
-**Single-source (🔷):** no independent second referee for Changsha Xiang (no wikipron hsn; epitran ships no Xiang),
+**Single-source ():** no independent second referee for Changsha Xiang (no wikipron hsn; epitran ships no Xiang),
 so this dict is verified only *within* the Wiktionary tradition — a systematic error shared with that source would
 go undetected.

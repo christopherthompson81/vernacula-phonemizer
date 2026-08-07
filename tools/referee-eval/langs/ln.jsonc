@@ -1,6 +1,6 @@
 // Lingala / Lingála (ln) — Bantu (C30B) of the Congo. NO wikipron/epitran; the referee is the SMALL kaikki human
 // set (~55 entries, tone-marked, with prenasalisation + syllable dots). Its own module (Meeuwis 2020). TONE is
-// WRITTEN (acute=H) → we render it, so it is MEASURED here (not folded). 🔷 single-source. Correctness anchor:
+// WRITTEN (acute=H) → we render it, so it is MEASURED here (not folded). single-source. Correctness anchor:
 // test/lingala.test.ts.
 {
     "language": "ln",

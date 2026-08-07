@@ -9,7 +9,7 @@
     "script": "Han",
     "provenance": "Wiktionary Chinese Changsha Sinological-IPA via the kaikki.org extract; simplified aliases via OpenCC TSCharacters.",
     "referees": [],
-    "secondaryGap": "No independent referee exists for Changsha Xiang: no wikipron hsn and epitran ships no Xiang. The only machine-readable Changsha IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (🔷), the Jin/Hakka/Wu pattern; the correctness anchor is the adjudicated gold in test/xiang.test.ts.",
+    "secondaryGap": "No independent referee exists for Changsha Xiang: no wikipron hsn and epitran ships no Xiang. The only machine-readable Changsha IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (), the Jin/Hakka/Wu pattern; the correctness anchor is the adjudicated gold in test/xiang.test.ts.",
     "segmentJoin": true,
     "folds": []
 }

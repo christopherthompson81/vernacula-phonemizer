@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/minnan/minnan.ts";
 // Canonical-IPA goldens for Min Nan / Taiwanese Hokkien (nan) — Sinitic, tonal. Two front-ends, one converter:
 // Han → Tâi-lô via dict.tsv (MOE 臺灣閩南語辭典) → IPA, and direct Tâi-lô/POJ → IPA. The converter (from the
 // epitran nan-Latn-tl spec): strip the tone diacritic → [initial] + final → IPA + Chao tone. Sibilants palatalise
-// before i (ts/tsh/s/j → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ), checked -p̚/-t̚/-k̚ + -h→ʔ, nasalised -nn vowels, syllabic m̩/ŋ̍. Phase 1:
+// before i (ts/tsh/s/j → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ), checked -p̚/-t̚/-k̚ + -h→ʔ, nasalised -nn vowels, syllabic m̩/ŋ̍.
 // segmental + citation tone (sandhi deferred).
 describe("min nan (Taiwanese Hokkien) canonical IPA", () => {
     test("direct Tâi-lô: initials, finals, palatalisation, checked codas, tones", () => {

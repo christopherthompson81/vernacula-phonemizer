@@ -1,6 +1,6 @@
 // Native canonical-IPA definition for Persian / Farsi (fa) — the Perso-Arabic ABJAD. Like Urdu, LONG vowels are
 // written (ا/آ→aː, و→uː, ی→iː) but SHORT vowels (a e o) are usually OMITTED and must be restored — the deferred
-// subsystem (🟠). Persian phonology (NOT Hindi): no retroflexes, no aspirates; â=[aː], and the four Persian
+// subsystem (). Persian phonology (NOT Hindi): no retroflexes, no aspirates; â=[aː], and the four Persian
 // letters پ چ ژ گ. persian.ts (g2p) reads this file. Stored in logical order = phonetic order (RTL is a non-issue).
 {
     "language": "fa",

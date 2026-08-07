@@ -48,7 +48,7 @@ describe("Latin (Classical) canonical IPA", () => {
 });
 
 // CARDINAL NUMBERS (src/languages/latin/numbers.ts). Source: Allen & Greenough, *New Latin Grammar* §§132–138.
-// The two non-table features: the ★ SUBTRACTIVE forms for the last two of every decade (18 duodēvīgintī,
+// The two non-table features: the SUBTRACTIVE forms for the last two of every decade (18 duodēvīgintī,
 // 19 ūndēvīgintī, 28 duodētrīgintā, 98 duodēcentum, 99 ūndēcentum) and the mīlle/mīlia split (bare indeclinable
 // mīlle for exactly 1000; the neuter plural noun mīlia counted by a neuter numeral above it — tria mīlia).
 // Citation form for the inflecting numerals is the MASCULINE NOMINATIVE (ūnus, trēs, ducentī).
@@ -59,14 +59,14 @@ describe("Latin numbers", () => {
         [3, "trēs"],
         [10, "decem"],
         [17, "septendecim"],                             // additive, as expected below 18
-        [18, "duodēvīgintī"],                            // ★ SUBTRACTIVE "two from twenty"
-        [19, "ūndēvīgintī"],                             // ★ SUBTRACTIVE "one from twenty"
+        [18, "duodēvīgintī"],                            // SUBTRACTIVE "two from twenty"
+        [19, "ūndēvīgintī"],                             // SUBTRACTIVE "one from twenty"
         [20, "vīgintī"],
         [21, "vīgintī ūnus"],                            // tens-first additive compound (A&G §133)
-        [28, "duodētrīgintā"],                           // ★ the subtractive pattern repeats each decade
+        [28, "duodētrīgintā"],                           // the subtractive pattern repeats each decade
         [29, "ūndētrīgintā"],
         [88, "duodēnōnāgintā"],
-        [98, "duodēcentum"],                             // ★ the "next ten" after 90 is centum
+        [98, "duodēcentum"],                             // the "next ten" after 90 is centum
         [99, "ūndēcentum"],
         [100, "centum"],
         [101, "centum ūnus"],

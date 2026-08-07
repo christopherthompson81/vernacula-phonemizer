@@ -9,7 +9,7 @@
 //   • ⟨r⟩→ɾ (tap), double vowels → long (aa→aː). ⟨Cw⟩/⟨Cy⟩-not-listed fall out as C+w / C+j.
 // Tone (H/L) is unwritten → DEFERRED; the written double-vowel length IS emitted. Referee: epitran kin-Latn
 // (programmatic, INDEPENDENT) — corroborates the BULK (vowels, plain C, prenasals, labialisation, length); the
-// palatal signatures rest on the grammar (epitran is wrong there) → 🔷 single-source.
+// palatal signatures rest on the grammar (epitran is wrong there) → single-source.
 {
     "language": "rw",
     "name": "Kinyarwanda (Ikinyarwanda)",

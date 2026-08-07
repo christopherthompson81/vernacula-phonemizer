@@ -4,7 +4,7 @@
 // merged them to -ʔ and Mandarin lost them. The dict (dict.tsv) already carries the Sinological IPA per syllable
 // (segmental IPA + a superscript pitch-number tone); the shared Han-dict engine (hanDictIpa.ts) converts the pitch
 // digits → Chao contour letters and resolves the sandhi arrow ⁻. SINGLE authoritative source (Wiktionary/kaikki
-// Meixian Sinological-IPA) — no independent referee (🔷).
+// Meixian Sinological-IPA) — no independent referee ().
 {
     "language": "hak",
     "name": "Hakka Chinese (Meixian)",

@@ -11,7 +11,7 @@
     "referees": [
         { "file": "mto.asjp-swadesh.tsv", "source": "ASJP North_Highland_Mixe (Lexibank, CC0, coarse — INDEPENDENT), the ~3 Wiktionary-orthography overlaps", "role": "primary" }
     ],
-    "secondaryGap": "🔷 authored from a published grammar (Crawford 1963), SEVERELY referee-limited. No wikipron/kaikki/Wiktionary-IPA mto. The ASJP corroboration is 3 coarse words (dog/I/tree) — inventory-only. The g2p rests on Crawford's phonology; the central-vowel orthography + the underline are the disclosed residual.",
+    "secondaryGap": "authored from a published grammar (Crawford 1963), SEVERELY referee-limited. No wikipron/kaikki/Wiktionary-IPA mto. The ASJP corroboration is 3 coarse words (dog/I/tree) — inventory-only. The g2p rests on Crawford's phonology; the central-vowel orthography + the underline are the disclosed residual.",
     "folds": [
         { "pattern": "͡", "replace": "", "note": "affricate tie-bar (ASJP has none)" },
         { "pattern": "ʊ", "replace": "u", "note": "ASJP COARSENESS: the central/back special vowel ⟨ö⟩ [ʊ] is rendered [u] (ök→uk); our [ʊ] is Crawford's value, folded for the coarse referee" },

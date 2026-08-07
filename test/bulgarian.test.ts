@@ -56,7 +56,7 @@ describe("Bulgarian canonical IPA — phonemic g2p + phonotactics", () => {
 // the normalization layer. Every count is measured over the FLEURS bg_bg corpus (column 3); the
 // engine is rule-based, so every emitted word was probed through the g2p rather than looked up.
 describe("bulgarian normalization", () => {
-    // ★ The largest defect in the language, and nothing like it in the four previous ones: `1767 г.` is
+    // The largest defect in the language, and nothing like it in the four previous ones: `1767 г.` is
     // how Bulgarian writes a year. It read as the numeral, then the LETTER г as [k], then a SENTENCE
     // BREAK from the abbreviation dot. 265 instances.
     test("the year abbreviation N г.", () => {
@@ -89,7 +89,7 @@ describe("bulgarian normalization", () => {
         expect(normalizeBulgarian("50 км/ч")).toBe("50 километра в час");
     });
 
-    // ★ Bulgarian has NO ordinal dot — 0 of 54 `N.` shapes are followed by a lowercase word. The rule
+    // Bulgarian has NO ordinal dot — 0 of 54 `N.` shapes are followed by a lowercase word. The rule
     // that is largest in Norwegian (134) and Danish (112) must not exist here, as in Romanian.
     test("a dotted number is NOT an ordinal — sentence ends survive", () => {
         expect(normalizeBulgarian("Това е 1990. Той дойде")).toBe("Това е 1990. Той дойде");
@@ -122,7 +122,7 @@ describe("bulgarian normalization", () => {
 
     // THE NUMERO SIGN was dropped outright: "космонавт № 11" read as *космонавт единадесет*, the sign
     // silently gone. `номер` ×5 in this corpus, and ru/uk already read it this way, preposed.
-    // ⚠ This is the character DELIBERATELY EXCLUDED from the ℃ fold (trap 36 (a compatibility character is a fold)): NFKC maps № to the Latin "No",
+    // ⚠ This is the character DELIBERATELY EXCLUDED from the ℃ fold (a compatibility character is a fold)): NFKC maps № to the Latin "No",
     // which a Bulgarian g2p reads as an English word. A compatibility character can need a WORD, not a fold.
     test("the numero sign reads номер", () => {
         expect(createBulgarian().text("космонавт № 11").trim()).toContain("nɔmɛr ɛdinajsɛt");

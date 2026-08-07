@@ -1,5 +1,5 @@
 /**
- * Build the Burmese pronunciation lexicon (src/languages/burmese/dictionary.tsv) — the 🟡→✅ layer. The rule g2p is
+ * Build the Burmese pronunciation lexicon (src/languages/burmese/dictionary.tsv) — the →layer. The rule g2p is
  * correct for the derivable bulk; the residual is a per-word LEXICAL tail (rime variation ည→i~ɛ / ေ→e~i, colloquial
  * forms, Pali gemination, loanword ⟨ရ⟩→ɹ). This mines the kaikki gold for the words our g2p gets wrong and stores
  * the CORRECT pronunciation IN OUR CONVENTION as a per-word override (the Thai dictionary.tsv pattern).
@@ -47,7 +47,7 @@ for (const [w, ipa] of first) {
 
 rows.sort();
 const header =
-    "# Burmese pronunciation lexicon (the 🟡→✅ lexical layer) — undiacritized word ⇥ canonical IPA, for words the\n" +
+    "# Burmese pronunciation lexicon (the lexical layer that closes the remaining gap) — undiacritized word ⇥ canonical IPA, for words the\n" +
     "# rule g2p gets wrong (lexical rime, colloquial, Pali gemination, loanword ⟨ရ⟩→ɹ). Mined from kaikki.org (an\n" +
     "# extraction of https://en.wiktionary.org Burmese pronunciations; CC-BY-SA 4.0 — this derived TSV inherits it)\n" +
     "# by tools/gen/build-my-dict.ts; tone diacritics converted to our Chao letters. Applied in burmese.ts (an exact-word\n" +

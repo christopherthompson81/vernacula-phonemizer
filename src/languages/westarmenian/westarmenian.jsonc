@@ -2,13 +2,13 @@
 // Armenian alphabet. The Istanbul/diaspora standard (the wikipron hye_armn_w referee). Reuses the shared Armenian
 // engine (armenian.ts makeArmenianEngine); the ONLY differences from Eastern (hy) are in the consonant table:
 //
-//   ★★ THE WESTERN CONSONANT SHIFT — the classical three-way stop/affricate system collapses to a TWO-way one:
+//   THE WESTERN CONSONANT SHIFT — the classical three-way stop/affricate system collapses to a TWO-way one:
 //      · classical VOICED     ⟨բ դ գ ձ ջ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]  (DEVOICED + aspirated)
 //      · classical ASPIRATED  ⟨փ թ ք ց չ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]  (unchanged) — MERGES with the voiced column
 //      · classical VOICELESS  ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]        (VOICED)
 //      (պատ→bɑd, բարի→pʰɑɾi, փակ→pʰɑɡ, գործ→kʰoɾd͡z, կով→ɡov.)
-//   ★ RHOTIC NEUTRALISATION — Eastern's tap ⟨ր⟩→[ɾ] vs trill ⟨ռ⟩→[r] both become a single tap [ɾ] in Western.
-//   ★ FRONT-ROUNDED vowels from the palatal sequences ⟨յու⟩/⟨իւ⟩→[ʏ] and ⟨յո⟩→[œ] (loan-heavy: Turkish/French names,
+//   RHOTIC NEUTRALISATION — Eastern's tap ⟨ր⟩→[ɾ] vs trill ⟨ռ⟩→[r] both become a single tap [ɾ] in Western.
+//   FRONT-ROUNDED vowels from the palatal sequences ⟨յու⟩/⟨իւ⟩→[ʏ] and ⟨յո⟩→[œ] (loan-heavy: Turkish/French names,
 //      and the classical ⟨իւ⟩ spelling kept in Western orthography) — handled as digraphs.
 //
 // Validated vs wikipron hye_armn_w broad (17211) + narrow (17584).

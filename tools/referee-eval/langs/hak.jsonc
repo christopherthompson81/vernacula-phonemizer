@@ -9,7 +9,7 @@
     "script": "Han",
     "provenance": "Wiktionary Chinese Meixian Sinological-IPA via the kaikki.org extract; simplified aliases via OpenCC TSCharacters.",
     "referees": [],
-    "secondaryGap": "No independent referee exists for Meixian Hakka: no wikipron hak and epitran ships no Hakka. The only machine-readable Meixian IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (🔷), the Wu/Igbo/Naija pattern; the correctness anchor is the adjudicated gold in test/hakka.test.ts.",
+    "secondaryGap": "No independent referee exists for Meixian Hakka: no wikipron hak and epitran ships no Hakka. The only machine-readable Meixian IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (), the Wu/Igbo/Naija pattern; the correctness anchor is the adjudicated gold in test/hakka.test.ts.",
     "segmentJoin": true,
     "folds": []
 }

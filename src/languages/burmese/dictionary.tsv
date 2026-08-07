@@ -1,4 +1,4 @@
-# Burmese pronunciation lexicon (the 🟡→✅ lexical layer) — undiacritized word ⇥ canonical IPA, for words the
+# Burmese pronunciation lexicon (the lexical layer that closes the remaining gap) — undiacritized word ⇥ canonical IPA, for words the
 # rule g2p gets wrong (lexical rime, colloquial, Pali gemination, loanword ⟨ရ⟩→ɹ). Mined from kaikki.org (an
 # extraction of https://en.wiktionary.org Burmese pronunciations; CC-BY-SA 4.0 — this derived TSV inherits it)
 # by tools/gen/build-my-dict.ts; tone diacritics converted to our Chao letters. Applied in burmese.ts (an exact-word

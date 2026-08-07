@@ -30,6 +30,6 @@ in simplified Han) resolves too.
 - **License:** Wiktionary content is CC-BY-SA 3.0; the kaikki extract is a mechanical redistribution of it.
   OpenCC `TSCharacters` is Apache-2.0 (the same basis already used for the Wu simplified↔traditional folds).
 
-**Single-source (🔷):** there is no independent second referee for Taiyuan Jin (no wikipron cjy — the scrape
+**Single-source ():** there is no independent second referee for Taiyuan Jin (no wikipron cjy — the scrape
 404s — and epitran ships no Jin), so this dict is verified only *within* the Wiktionary tradition. A systematic
 error shared with that source would go undetected.

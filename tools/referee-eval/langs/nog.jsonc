@@ -12,7 +12,7 @@
     "referees": [
         { "file": "nog.asjp-swadesh.tsv", "source": "ASJP Nogai (Lexibank, CC0, coarse Swadesh — INDEPENDENT transcriber)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 authored, REFEREE-LIMITED (the st/umb/bal mold). No wikipron nog, no epitran nog; kaikki Nogai has ONE IPA entry (туькен, in the golden). The ASJP Swadesh list (~24 usable pairs) is COARSE and orthography-free — it corroborates the inventory only. The g2p rests on documented Nogai phonology + the transparent explicit-uvular orthography.",
+    "secondaryGap": "authored, REFEREE-LIMITED (the st/umb/bal mold). No wikipron nog, no epitran nog; kaikki Nogai has ONE IPA entry (туькен, in the golden). The ASJP Swadesh list (~24 usable pairs) is COARSE and orthography-free — it corroborates the inventory only. The g2p rests on documented Nogai phonology + the transparent explicit-uvular orthography.",
     "folds": [
         { "pattern": "y", "replace": "i", "note": "ASJP COARSENESS: ASJPcode has no front-rounded high vowel — ⟨уь⟩ [y] is transcribed as [i] (муьйиз→miyiz). Our [y] is correct (kaikki туькен→tyken keeps it, asserted in the golden); folded ONLY to compare against the coarse referee." },
         { "pattern": "ø", "replace": "e", "note": "ASJP COARSENESS: no front-rounded mid vowel — ⟨оь⟩ [ø] is transcribed [e] (коьз→kez). Our [ø] is correct; folded only for the coarse referee." },

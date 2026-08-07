@@ -62,5 +62,5 @@ for a canonical TTS front-end — accuracy on canonical gold, degeneration-safet
 **Limitations:** the ~6.4% residual on the canonical held-out is the abjad **short-vowel / ezafe wall** — a genuine
 information-floor error (the vowels are unwritten and not always recoverable from context), NOT degeneration. These
 misses are **graceful** (a wrong short vowel; consonants and skeleton intact), never a runaway string. The eval is
-in-distribution HomoRich gold, not an independent human referee, so fa remains **🟡** in `language-maturity.md`; the
+in-distribution HomoRich gold, not an independent human referee, so fa remains **** in `language-maturity.md`; the
 tagger raises the floor and removes the degeneration risk but does not substitute for external validation.

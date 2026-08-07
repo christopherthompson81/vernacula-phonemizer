@@ -12,6 +12,6 @@
     "referees": [
         { "file": "grc.wikipron-attic.tsv", "source": "wikipron grc_grek (human, {{grc-IPA}} 5th-BCE Attic)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source family (wikipron; kaikki grc same {{grc-IPA}} module). The referee is MODULE-GENERATED (the Wiktionary grc-IPA converter from the standard reconstruction) → reference-parity-adjacent, but the reconstruction is the scholarly Allen standard.",
+    "secondaryGap": "single-source family (wikipron; kaikki grc same {{grc-IPA}} module). The referee is MODULE-GENERATED (the Wiktionary grc-IPA converter from the standard reconstruction) → reference-parity-adjacent, but the reconstruction is the scholarly Allen standard.",
     "folds": []
 }

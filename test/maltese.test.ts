@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // grapheme scan (the ⟨ie għ⟩ digraphs + the silent-letter rules) + final devoicing + regressive voicing assimilation
 // + affricate gemination + n→m before a labial. Validated against the wikipron mlt_latn_broad referee (15,837 human
 // headwords) — 91.9% FOLDED / 98.0% symbol, with vowel LENGTH (stress-conditioned, ~50% of lines) + għ
-// pharyngealization folded. 🔷 single-source.
+// pharyngealization folded. single-source.
 describe("Maltese canonical IPA — grapheme g2p + silent-letter rules + devoicing", () => {
     const mt = createMaltese();
 
@@ -74,7 +74,7 @@ describe("Maltese canonical IPA — grapheme g2p + silent-letter rules + devoici
     // ═══ CARDINAL NUMBERS — the NATIVE Semitic series (Maltese has no rival borrowed one). Composition + sources
     // live in src/languages/maltese/numbers.ts (GF-RGL NumeralMlt.gf + Wiktionary). The judgment call: a bare
     // digit reads with the ABSOLUTE/COUNTING form (tnejn 2), not the pre-nominal attributive (żewġ).
-    test("★ cardinals: the ABSOLUTE counting series + units-first ⟨u⟩ + the DUAL magnitudes", () => {
+    test("cardinals: the ABSOLUTE counting series + units-first ⟨u⟩ + the DUAL magnitudes", () => {
         const mt = getPhonemizer("mt");
         expect(mt.text("0").trim()).toBe("zɛrɔ"); // żero
         expect(mt.text("2").trim()).toBe("tnɛjn"); // tnejn — the COUNTING form, not attributive żewġ

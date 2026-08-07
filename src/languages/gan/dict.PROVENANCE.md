@@ -29,7 +29,7 @@ readings + multi-character word readings, with the Nanchang tone sandhi baked in
 - **License:** Wiktionary content is CC-BY-SA 3.0; the kaikki extract is a mechanical redistribution of it.
   OpenCC `TSCharacters` is Apache-2.0.
 
-**Single-source (🔷):** no independent second referee for Nanchang Gan (no wikipron gan; epitran ships no Gan), so
+**Single-source ():** no independent second referee for Nanchang Gan (no wikipron gan; epitran ships no Gan), so
 this dict is verified only *within* the Wiktionary tradition — a systematic error shared with that source would go
 undetected. The correctness anchor is the adjudicated gold in `test/gan.test.ts`. See
 .

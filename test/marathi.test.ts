@@ -90,7 +90,7 @@ describe("marathi text normalization", () => {
 
     test("a SPORTS time is not a clock", () => {
         // 4:41.30 is minutes:seconds.hundredths. The inherited Hindi clock rule claimed it and produced a
-        // bogus "चार बजकर एकेचाळीस मिनट . तीस" — the same failure the playbook records for ru and id.
+        // bogus "चार बजकर एकेचाळीस मिनट . तीस" — the same failure a clock rule makes when it permits a following dot
         expect(mr("4:41.30")).toBe(mr("4 41.30"));
         expect(mr("4:41.30")).not.toContain(phonemizeWord("मिनिटे"));
     });

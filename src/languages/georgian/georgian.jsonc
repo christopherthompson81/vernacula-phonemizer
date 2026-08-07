@@ -43,7 +43,7 @@
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",", "჻": "."
     },
 
-    // ★ VIGESIMAL cardinal numbers (composition logic in numbers.ts). Georgian counts 20–99 in SCORES:
+    // VIGESIMAL cardinal numbers (composition logic in numbers.ts). Georgian counts 20–99 in SCORES:
     //   20 ოცი · 40 ორმოცი (ორ-"2" × ოც-"20") · 60 სამოცი (3×20) · 80 ოთხმოცი (4×20); any other 21–99 takes the
     //   score's stem + -და- ("and") + the plain 1–19 word, as ONE word:
     //     30 ოცდაათი (20+10) · 45 ორმოცდახუთი (2×20+5) · 67 სამოცდაშვიდი (3×20+7) · 89 ოთხმოცდაცხრა (4×20+9)

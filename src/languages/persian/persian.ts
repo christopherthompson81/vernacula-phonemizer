@@ -3,7 +3,7 @@
  * so RTL is a non-issue (as for Arabic/Urdu). Handles: consonant letters, long vowels written with ا/آ/و/ی,
  * a WORD-INITIAL glottal stop ʔ before a vowel (آب→ʔaːb), the خوا→[xʷaː] labialization, word-final ه → [e]
  * (خانه→xaːne), shadda gemination, short vowels from harakat WHEN present — and, for the usual undiacritized
- * text, a DEFAULT short vowel [a] (the crude stand-in for the deferred short-vowel-restoration subsystem, 🟠).
+ * text, a DEFAULT short vowel [a] (the crude stand-in for the deferred short-vowel-restoration subsystem).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

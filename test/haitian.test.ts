@@ -7,7 +7,7 @@ import { numberToWords } from "../src/languages/haitian/numbers.ts";
 // Kabuverdianu). The IPN orthography is phonemic, so a greedy scan + the nasal-vowel rule nails it. Validated against
 // wikipron hat_latn_broad (1691 human headwords) — 97.7% FOLDED / 99.4% symbol (96.9% first pass). Note: the eval
 // backbone strips the nasal tilde, so the nasal comparison is on the base vowel; the engine DOES emit ã ɛ̃ ɔ̃.
-// 🔷 single source.
+// single source.
 describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel rule", () => {
     const ht = createHaitian();
 
@@ -42,7 +42,7 @@ describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel ru
         expect(ht.text("Mwen pale kreyòl.").trim()).toBe("mwɛ̃ pale kɣejɔl .");
     });
 
-    // NUMBERS — ★ the FRENCH VIGESIMAL RESIDUE is kept: 70 swasanndis (60+10), 80 katreven (4×20), 90 katrevendis
+    // NUMBERS — the FRENCH VIGESIMAL RESIDUE is kept: 70 swasanndis (60+10), 80 katreven (4×20), 90 katrevendis
     // (4×20+10). The Belgian/Swiss decimal ⟨septante/octante/nonante⟩ forms are NOT Haitian. Source: LDC2017S03
     // "Haitian Creole LSP" §8.1–8.2 (citing Valdman et al. 2007). See haitian.jsonc.
     test("numbers: units, the decade stem alternation, hundreds, thousands, millions", () => {
@@ -58,7 +58,7 @@ describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel ru
         expect(numberToWords(1000000000)).toBe("en milya");
     });
 
-    test("★ numbers: the vigesimal 70/80/90 band (NOT septante/octante/nonante)", () => {
+    test("numbers: the vigesimal 70/80/90 band (NOT septante/octante/nonante)", () => {
         expect(numberToWords(70)).toBe("swasanndis"); // 60 + 10
         expect(numberToWords(71)).toBe("swasannonz"); // 60 + 11
         expect(numberToWords(79)).toBe("swasanndiznèf"); // 60 + 19

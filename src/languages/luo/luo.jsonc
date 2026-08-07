@@ -13,7 +13,7 @@
 //   • 9-vowel ±ATR system, but the orthography writes only 5 letters a e i o u and marks NO ATR trigger → ATR is
 //     UNWRITTEN / harmonic → unrecoverable from spelling. We emit the +ATR (tense) default i e o u and FOLD [±ATR]
 //     (ɪ~i ɛ~e ɔ~o ʊ~u) in the eval — the principled cap, like tone.
-//   • ⟨r⟩ → ɾ (tap, folded r~ɾ). Register TONE (H/L) is UNWRITTEN → DEFERRED (folded). Single-source (🔷): the only
+//   • ⟨r⟩ → ɾ (tap, folded r~ɾ). Register TONE (H/L) is UNWRITTEN → DEFERRED (folded). Single-source (): the only
 //     numeric referee is the 17-word Wiktionary set; consonants corroborated by Tucker.
 {
     "language": "luo",

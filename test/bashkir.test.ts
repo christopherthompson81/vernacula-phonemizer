@@ -6,7 +6,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Bashkir (ba) — Башҡорт теле, Kipchak Turkic (sibling of Tatar), CYRILLIC. Signatures:
 // the INTERDENTAL fricatives ⟨ҫ⟩→[θ], ⟨ҙ⟩→[ð] (Bashkir's hallmark); the WRITTEN uvulars ⟨ҡ⟩→[q], ⟨ғ⟩→[ʁ] (no harmony
 // inference — unlike Tatar); the Bashkir VOWEL SHIFT ⟨о⟩→[ʊ], ⟨ө⟩→[ø], ⟨ы⟩→[ɯ], ⟨е⟩→[ɪ]; dark ⟨л⟩→[ɫ] (back harmony);
-// ⟨у ү⟩→[w] after a vowel. ★ Real Bashkir text is loan-heavy → a detected RUSSIAN LOAN (vowel-harmony violation) is
+// ⟨у ү⟩→[w] after a vowel. Real Bashkir text is loan-heavy → a detected RUSSIAN LOAN (vowel-harmony violation) is
 // routed to the Russian g2p. Referee: kaikki Bashkir (REFEREE-LIMITED by Russian loans).
 describe("Bashkir (Башҡорт теле) canonical IPA", () => {
     test("the INTERDENTAL hallmark ⟨ҫ⟩→θ, ⟨ҙ⟩→ð + written uvulars ⟨ҡ ғ⟩", () => {

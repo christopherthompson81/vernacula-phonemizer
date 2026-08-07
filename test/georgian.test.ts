@@ -45,10 +45,10 @@ describe("Georgian canonical IPA — greedy g2p (Mkhedruli, three-way stop contr
         expect(createGeorgian().text("სახლი჻ ბაღი").trim()).toBe("saχli . baʁi"); // ჻ → sentence pause
     });
 
-    // ★ VIGESIMAL cardinal numbers (numbers.ts + the georgian.jsonc table). 20–99 is score·20 + a 1–19 remainder
+    // VIGESIMAL cardinal numbers (numbers.ts + the georgian.jsonc table). 20–99 is score·20 + a 1–19 remainder
     // joined by -და- as ONE word; from 100 up the groups are separate words and a numeral followed by a smaller
     // number drops its final ⟨ი⟩ (ასი→ას, ათასი→ათას).
-    test("★ cardinal numbers are VIGESIMAL: score·20 + remainder joined by -და-", () => {
+    test("cardinal numbers are VIGESIMAL: score·20 + remainder joined by -და-", () => {
         const ka = createGeorgian();
         expect(ka.text("20").trim()).toBe("ɔt͡sʰi"); // ოცი — the bare score
         expect(ka.text("21").trim()).toBe("ɔt͡sʰdaɛɾtʰi"); // ოცდაერთი = 20 + 1
@@ -67,11 +67,11 @@ describe("Georgian canonical IPA — greedy g2p (Mkhedruli, three-way stop contr
         expect(ka.text("7").trim()).toBe("ʃvidi"); // შვიდი
         expect(ka.text("8").trim()).toBe("ɾva"); // რვა (no final ⟨ი⟩)
         expect(ka.text("100").trim()).toBe("asi"); // ასი — group-final, keeps ⟨ი⟩
-        expect(ka.text("101").trim()).toBe("as ɛɾtʰi"); // ★ ას ერთი — the hundred TRUNCATES before a remainder
+        expect(ka.text("101").trim()).toBe("as ɛɾtʰi"); // ას ერთი — the hundred TRUNCATES before a remainder
         expect(ka.text("555").trim()).toBe("χutʰas ɔɾmɔt͡sʰdatʰχutʰmɛtʼi"); // ხუთას ორმოცდათხუთმეტი (2×20+15)
         expect(ka.text("999").trim()).toBe("t͡sʰχɾaas ɔtʰχmɔt͡sʰdat͡sʰχɾamɛtʼi"); // ცხრაას ოთხმოცდაცხრამეტი
         expect(ka.text("1000").trim()).toBe("atʰasi"); // ათასი — no *ერთი ათასი
-        expect(ka.text("1001").trim()).toBe("atʰas ɛɾtʰi"); // ★ ათას ერთი — the thousand truncates
+        expect(ka.text("1001").trim()).toBe("atʰas ɛɾtʰi"); // ათას ერთი — the thousand truncates
         expect(ka.text("12345").trim()).toBe("tʰɔɾmɛtʼi atʰas samas ɔɾmɔt͡sʰdaχutʰi"); // თორმეტი ათას სამას ორმოცდახუთი
         expect(ka.text("1000000").trim()).toBe("ɛɾtʰi miliɔni"); // ერთი მილიონი (borrowed noun — keeps ერთი)
         expect(ka.text("1000000000").trim()).toBe("ɛɾtʰi miliaɾdi"); // ერთი მილიარდი

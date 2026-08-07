@@ -119,7 +119,7 @@ describe("Nepali normalization", () => {
     });
 
     // `वर्ग किलोमिटर` ×4 ("सुन्दरवनले 3,850 वर्ग किलोमिटर क्षेत्रफल ओगटेको छ"). No cube word: घन is ×0, and
-    // this is the same घन/धन cluster that produced five confidently wrong plus words in Phase 1.
+    // this is the same घन/धन cluster that offers confidently wrong plus words to a token count.
     test("the squared/cubed measure word", () => {
         expect(t("3,850 km²")).toContain("wˈʌɾɡʌ kˈilomiʈʌɾ");
     });
