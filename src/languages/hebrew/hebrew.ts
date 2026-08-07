@@ -73,7 +73,7 @@ export function phonemizeAligned(word: string): HebrewChunk[] {
             emit("j", ""); continue;
         }
         // ⟨א⟩ with no vowel: a silent mater MID-WORD (רֹאשׁ→ʁoʃ), but a glottal ONSET [ʔ] word-initially (אוֹר→ʔoʁ)
-        // — the 3-referee consensus keeps the initial glottal we used to drop. Word-initial → fall through to [ʔ].
+        // — the 3-referee consensus KEEPS the initial glottal. Word-initial → fall through to [ʔ].
         if (c === "א" && !vowel && !sheva && chunks.length > 0) { chunks.push({ cons: c, ipa: "" }); k = j; continue; }
         if (c === "ה" && atEnd && !vowel) { chunks.push({ cons: c, ipa: "" }); k = j; continue; }  // silent final he
         // word-FINAL ⟨ע⟩ with no vowel is dropped (Modern Hebrew; אֶצְבַּע→ʔetsba not ʔetsbaʔ) — consensus drops it

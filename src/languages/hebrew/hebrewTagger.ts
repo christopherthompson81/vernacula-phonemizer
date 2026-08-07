@@ -9,7 +9,7 @@
  * One forward pass over the clause; each char gets a niqqud TAG (a space char → the space tag, a word boundary). A
  * per-consonant consonant-consistency MASK constrains each letter to only the niqqud it took in training. Output
  * length == input length → cannot degenerate. Shares core/onnx.ts + core/structuralTagger.ts (maskedArgmax) with
- * the fa/bn taggers. See src/hebrewNeural.ts + he-tagger.PROVENANCE.md.
+ * the fa/bn taggers. See `hebrewNeural.ts` beside this module, and he-tagger.PROVENANCE.md.
  *
  * `onnxruntime-node` is OPTIONAL (lazy); if it — or the model — is absent, createHebrewTagger() resolves to
  * `undefined` and the caller falls back to the sync (vocalized-only) engine.

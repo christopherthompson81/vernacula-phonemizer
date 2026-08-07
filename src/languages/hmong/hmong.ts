@@ -7,7 +7,7 @@
  * before /i/; a vowel-initial syllable gets a glottal onset [ʔ]. The rich onset system — prenasalised (np→ᵐb,
  * nts→ᶯd͡ʐ), voiceless sonorants (hm→m̥, hl→l̥), retroflex (r→ʈ, ts→t͡ʂ), uvular (q) — lives in hmong.jsonc.
  * Nasal vowels ⟨ee oo⟩→[ẽ ɒ̃]. Maps derived from the wikipron mww_latn_broad referee (~470 pairs) + the documented
- * RPA tables → 🔷 single-source (thin).
+ * RPA tables. ⚠ SINGLE-SOURCE AND THIN: one reference, few forms, so agreement with it proves little.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
@@ -82,10 +82,9 @@ export function phonemizeWord(word: string): string {
 }
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
- * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
- * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
+ * SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A token
+ * this class REJECTS carries a letter the language does not use — i.e. a foreign name. See core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zA-Z]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

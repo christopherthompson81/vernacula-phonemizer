@@ -1,22 +1,19 @@
 /**
- * Hindi (hi) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Hindi (hi) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Fourth language to get this treatment, and the first outside the Latin script. Most of the tiers were
- * ALREADY right and are deliberately untouched, which is worth stating because it shrinks what this file
- * has to do: the Indic number compositor already reads लाख/करोड़ (100000 → एक लाख), the number tokenizer
- * already accepts BOTH the Western and the Indian comma grouping (9,000 / 1,00,000 both correct),
- * decimals read as दशमलव, %/currency work through the shared symbol tier, the danda । is already a clause
- * mark, and embedded Latin runs are already delegated to English by the shared foreign-run pass — which is
- * the right reading for the acronyms that occur (AOL, PBS, DNA are said with English letter names).
+ * ⚠ MOST OF THE TIERS ARE ALREADY RIGHT AND ARE DELIBERATELY UNTOUCHED, which is worth stating because it
+ * bounds what this file does: the Indic number compositor already reads लाख/करोड़ (100000 → एक लाख), the
+ * number tokenizer already accepts BOTH the Western and the Indian comma grouping (9,000 and 1,00,000), the
+ * decimal already reads as दशमलव, % and currency work through the shared symbol tier, the danda । is already
+ * a clause mark, and embedded Latin runs are already delegated to English — which is the right reading for the
+ * acronyms that occur, since AOL, PBS and DNA are said with English letter names.
  *
- * So what is left is genuinely Hindi-specific: its ordinal suffixes, its Devanagari unit abbreviations,
- * its abbreviations, and its clock.
+ * What is left is genuinely Hindi-specific: the ordinal suffixes, the Devanagari unit abbreviations, the
+ * abbreviations, and the clock.
  *
- * Measured over the hi_in FLEURS corpus (2,120 utterances): Devanagari unit abbreviations ×54
- * (किमी, मिमी, मीटर, किग्रा), ordinal suffixes ×35, डॉ ×27 (the most frequent abbreviation, and ×22 of
- * those are written WITHOUT the dot), बजे ×22, times h:mm ×18, ई.पू. ×3. Zero Devanagari DIGITS — the
- * corpus writes numbers with ASCII digits throughout — so no digit transliteration is needed here.
+ * ⚠ HINDI TEXT WRITES NUMBERS WITH ASCII DIGITS, not Devanagari ones, so no digit transliteration is needed
+ * here — unlike the Perso-Arabic and Bengali engines, where the fold is load-bearing.
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";

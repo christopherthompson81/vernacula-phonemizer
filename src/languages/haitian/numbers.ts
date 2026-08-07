@@ -6,7 +6,7 @@
  * Document", LDC2017S03 §8.1–8.2 (a complete 0–99 table + the magnitudes, citing Valdman et al. 2007), with 0–79
  * cross-checked against en.wikibooks.org/wiki/Haitian_Creole/Numbers.
  *
- * ★ THE FRENCH VIGESIMAL RESIDUE — the reason this is Pattern B and not a data table. Haitian inherited
+ * ⚠ THE FRENCH VIGESIMAL RESIDUE — the reason this is Pattern B and not a data table. Haitian inherited
  *   Metropolitan French's base-20 seam at 70/80/90 and did NOT regularise it to the Belgian/Swiss ⟨septante /
  *   octante / nonante⟩:
  *     70–79  ⟨swasann⟩ + the TEEN  — swasanndis (60+10), swasannonz (60+11) … swasanndiznèf (60+19)
@@ -17,7 +17,7 @@
  *   So 70 and 90 are not decades at all: they are a decade/score plus a TEEN, and the tens digit of 7 and 9 never
  *   surfaces. No `tens` table keyed by the round value can express that, which rules out `westernNumberWords`.
  *
- * ★ THE DECADE STEM ALTERNATION (20–60) is the second reason. Each decade has three shapes, and which one appears
+ * ⚠ THE DECADE STEM ALTERNATION (20–60) is the second reason. Each decade has three shapes, and which one appears
  *   is selected by the FOLLOWING unit:
  *     bare (no unit)   ven, trant, karant, senkant, swasant
  *     + unit 1         the ⟨t⟩ stem + ⟨eyen⟩          — venteyen, tranteyen, swasanteyen
