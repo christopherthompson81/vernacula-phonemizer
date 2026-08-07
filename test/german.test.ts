@@ -275,8 +275,8 @@ describe("german canonical IPA", () => {
 
     // OOV compounds (absent from the whole-word kaikki dicts) fall back to MORPHEME-KEYED corrections that compose
     // per stem — each morpheme keeps its own loanword length/quality/consonant correction + prefix reduction, which
-    // the old no-correction fallback lost. Holdout-measured 81.3% vs 68.5% raw on OOV compounds. Known words are
-    // unaffected (they take the exact whole-word path — covered by the goldens above + the 78.2% referee).
+    // a no-correction fallback loses. Measured held-out at 81.3% against 68.5% raw on OOV compounds — that
+    // A/B is why the extra machinery exists. Known words are unaffected: they take the exact whole-word path.
     test("OOV compound fallback: morpheme-keyed corrections compose", () => {
         expect(phonemizeWord("Musikverein")).toBe("muzˈiːkfɛʁaɪ̯n"); // musik: s→z, short u, iː; verein: ver-→fɛʁ
         expect(phonemizeWord("Musikschule")).toBe("muzˈiːkʃuːlə"); // musik loan-corrected + schule

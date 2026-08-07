@@ -20,7 +20,7 @@ describe("Kamba canonical IPA — greedy g2p (Bantu, Kikamba orthography)", () =
     });
 
     test("7-vowel ATR: the TILDE is vowel QUALITY not nasal — ⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ; doubling = length", () => {
-        expect(phonemizeWord("mũndũ")).toBe("moⁿdo"); //"person" — ⟨ũ⟩→o, ⟨nd⟩→ⁿd
+        expect(phonemizeWord("mũndũ")).toBe("moⁿdo"); // "person" — ⟨ũ⟩→o, ⟨nd⟩→ⁿd
         expect(phonemizeWord("kĩlũngũ")).toBe("keloᵑɡo"); // ⟨ĩ⟩→e, ⟨ũ⟩→o, ⟨ng⟩→ᵑɡ
         expect(phonemizeWord("kaa")).toBe("kaː"); // ⟨aa⟩→aː (length by doubling)
         expect(phonemizeWord("muundu")).toBe("muːⁿdu"); // ⟨uu⟩→uː
@@ -29,15 +29,15 @@ describe("Kamba canonical IPA — greedy g2p (Bantu, Kikamba orthography)", () =
     test("KAMBA-SPECIFIC consonants: ⟨v⟩=β, ⟨sy⟩=ʃ, ⟨ky⟩=tʃ, ⟨th⟩=ð, ⟨nth⟩=ⁿð (differ from Kikuyu)", () => {
         expect(phonemizeWord("ngavu")).toBe("ᵑɡaβu"); // ⟨v⟩→β (Kamba's [β]); ⟨ng⟩→ᵑɡ
         expect(phonemizeWord("mavindu")).toBe("maβiⁿdu"); // ⟨v⟩→β intervocalic
-        expect(phonemizeWord("syana")).toBe("ʃana"); //"children" — ⟨sy⟩→ʃ (Kikuyu has no ⟨sy⟩)
+        expect(phonemizeWord("syana")).toBe("ʃana"); // "children" — ⟨sy⟩→ʃ (Kikuyu has no ⟨sy⟩)
         expect(phonemizeWord("kyama")).toBe("tʃama"); // ⟨ky⟩→tʃ affricate
-        expect(phonemizeWord("thandatu")).toBe("ðaⁿdatu"); //"six" — ⟨th⟩→ð, ⟨nd⟩→ⁿd
-        expect(phonemizeWord("nthakame")).toBe("ⁿðakamɛ"); //"blood" — ⟨nth⟩→ⁿð (prenasal dental)
+        expect(phonemizeWord("thandatu")).toBe("ðaⁿdatu"); // "six" — ⟨th⟩→ð, ⟨nd⟩→ⁿd
+        expect(phonemizeWord("nthakame")).toBe("ⁿðakamɛ"); // "blood" — ⟨nth⟩→ⁿð (prenasal dental)
     });
 
     test("prenasalized units + velar nasal: ⟨mb⟩=ᵐb, ⟨nz⟩=ⁿz, ⟨ny⟩=ɲ, ⟨ng'⟩=ŋ (distinct from ⟨ng⟩)", () => {
-        expect(phonemizeWord("ng'ombe")).toBe("ŋɔᵐbɛ"); //"cow" — ⟨ng'⟩→ŋ, ⟨mb⟩→ᵐb
-        expect(phonemizeWord("nyama")).toBe("ɲama"); //"meat" — ⟨ny⟩→ɲ
+        expect(phonemizeWord("ng'ombe")).toBe("ŋɔᵐbɛ"); // "cow" — ⟨ng'⟩→ŋ, ⟨mb⟩→ᵐb
+        expect(phonemizeWord("nyama")).toBe("ɲama"); // "meat" — ⟨ny⟩→ɲ
         expect(phonemizeWord("nzoka")).toBe("ⁿzɔka"); // ⟨nz⟩→ⁿz (post-nasal voicing of s)
         expect(phonemizeWord("itong'o")).toBe("itɔŋɔ"); // ⟨ng'⟩→ŋ (distinct from ⟨ng⟩→ᵑɡ)
         expect(phonemizeWord("king'abwe")).toBe("kiŋaβwɛ"); // ⟨ng'⟩→ŋ, standalone ⟨b⟩→β (mission spelling)
@@ -48,8 +48,8 @@ describe("Kamba canonical IPA — greedy g2p (Bantu, Kikamba orthography)", () =
     });
 
     test("loan/name consonants are kept, not silently dropped (⟨d⟩=d, ⟨c⟩=tʃ)", () => {
-        expect(phonemizeWord("Daudi")).toBe("daudi"); //"David" — a common Kenyan name; ⟨d⟩ must not vanish
-        expect(phonemizeWord("daktari")).toBe("daktaɾi"); //"doctor" (loan) — onset ⟨d⟩ kept
+        expect(phonemizeWord("Daudi")).toBe("daudi"); // "David" — a common Kenyan name; ⟨d⟩ must not vanish
+        expect(phonemizeWord("daktari")).toBe("daktaɾi"); // "doctor" (loan) — onset ⟨d⟩ kept
     });
 
     test("the ⟨ng'⟩ apostrophe: all three variants normalise; a bare quote injects no glottal", () => {

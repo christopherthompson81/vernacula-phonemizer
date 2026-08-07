@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "../src/languages/gan/gan.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
-// Canonical-IPA goldens for Gan Chinese / 贛語 (gan), Nanchang 南昌 dialect — a distinct Sinitic branch (Jiangxi),
-// the eighth in the fleet. Its signature within the Sinitic set: it retains the Middle Chinese 入声 (entering)
+// Canonical-IPA goldens for Gan Chinese / 贛語 (gan), Nanchang 南昌 dialect — a distinct Sinitic branch
+// (Jiangxi). Its signature within the Sinitic set: it retains the Middle Chinese 入声 (entering)
 // tones with TWO CHECKED STOP CODAS — -t̚ (from MC -p/-t) and -ʔ (from MC -k) — where Hakka keeps all three
 // -p̚/-t̚/-k̚, Jin keeps only -ʔ, and Xiang lost the coda entirely. Nasal codas are -n/-ŋ (MC -m merged to -n), and
 // Nanchang shows the n→l initial merger (南→lan). Readings from Wiktionary/kaikki Nanchang Sinological-IPA (narrow
