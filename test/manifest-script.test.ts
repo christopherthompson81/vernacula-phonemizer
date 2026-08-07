@@ -19,12 +19,14 @@ import { readFileSync, readdirSync } from "node:fs";
 
 import { describe, expect, test } from "vitest";
 
+import { MANIFESTLESS_SCRIPTS } from "../src/core/scripts.ts";
+
 /** Unicode script names. A value outside this set is a typo or a new script that needs a deliberate entry. */
 const SCRIPTS = new Set([
-    "Adlam", "Arabic", "Armenian", "Bengali", "Cyrillic", "Devanagari", "Ethiopic", "Georgian",
-    "Greek", "Gujarati", "Gurmukhi", "Han", "Hangul", "Hebrew", "Javanese", "Kana", "Kannada",
-    "Khmer", "Latin", "Malayalam", "Myanmar", "Nko", "Odia", "Sinhala", "Sundanese",
-    "Syloti Nagri", "Tamil", "Telugu", "Thai",
+    "Adlam", "Arabic", "Armenian", "Bengali-Assamese", "Cherokee", "Cyrillic", "Devanagari", "Ethiopic",
+    "Georgian", "Greek", "Gujarati", "Gurmukhi", "Han", "Hangul", "Hebrew", "Javanese", "Kana", "Kannada",
+    "Khmer", "Lao", "Latin", "Malayalam", "Myanmar", "Nko", "Odia", "Ol Chiki", "Sinhala", "Sundanese",
+    "Syloti Nagri", "Tamil", "Telugu", "Thai", "Tibetan",
 ]);
 
 const DIR = new URL("../src/languages/", import.meta.url);
@@ -65,5 +67,39 @@ describe("manifest `script` field", () => {
             .filter(([, src]) => /"script"\s*:\s*\[[^\]]*[(/+][^\]]*\]/u.test(src))
             .map(([n]) => n);
         expect(qualified, `qualifier inside script: ${qualified.join(", ")}`).toEqual([]);
+    });
+
+    test("the manifest-less table draws from the same vocabulary", () => {
+        const bad: string[] = [];
+        for (const [lang, scripts] of Object.entries(MANIFESTLESS_SCRIPTS)) {
+            if (scripts.length === 0) bad.push(`${lang}: empty`);
+            for (const s of scripts) if (!SCRIPTS.has(s)) bad.push(`${lang}: unknown script ${s}`);
+        }
+        expect(bad).toEqual([]);
+    });
+
+    // ⚠ THE UNION MUST BE EXACT IN BOTH DIRECTIONS. A gap means a registered language silently declares no
+    // script; an orphan means a row outlived the engine it described. Neither is visible without this check —
+    // the field has no runtime consumer that would fail on a missing entry.
+    test("⚠ every registered code is covered exactly once, with no orphan rows", () => {
+        const registry = readFileSync(new URL("../src/registry.ts", import.meta.url), "utf8");
+        const codes = new Set([...registry.matchAll(/^\s+case "([A-Za-z0-9-]+)":/gmu)].map((m) => m[1]!));
+        expect(codes.size).toBeGreaterThan(180);
+
+        const fromManifest = new Set<string>();
+        for (const [, src] of langManifests) {
+            const m = /"language"\s*:\s*"([^"]+)"/u.exec(src);
+            if (m) fromManifest.add(m[1]!);
+        }
+        const fromTable = new Set(Object.keys(MANIFESTLESS_SCRIPTS));
+
+        const uncovered = [...codes].filter((c) => !fromManifest.has(c) && !fromTable.has(c)).sort();
+        expect(uncovered, `no script declaration: ${uncovered.join(", ")}`).toEqual([]);
+
+        const orphans = [...fromTable].filter((c) => !codes.has(c)).sort();
+        expect(orphans, `table row for an unregistered code: ${orphans.join(", ")}`).toEqual([]);
+
+        const both = [...fromTable].filter((c) => fromManifest.has(c)).sort();
+        expect(both, `declared twice — drop the table row: ${both.join(", ")}`).toEqual([]);
     });
 });

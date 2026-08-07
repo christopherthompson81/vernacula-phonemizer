@@ -6,8 +6,8 @@ import { normalizeNorwegian } from "../src/languages/norwegian/normalize.ts";
 // Norwegian Bokmål (nb) — North Germanic, Latin, Urban East Norwegian. TWO tiers: an NST pronunciation lexicon
 // (nb-lexicon.tsv, National-Library CC0, ~38k common forms → 98% of real-text tokens, with correct LEXICAL stress)
 // → a rule g2p fallback (phonemizeWordRules: complementary vowel length picks quality, front-vowel softening,
-// retroflexes, silent-d, unstressed ⟨e⟩→ə). Shipped path (lexicon→rules) = 90.4% frequency-weighted vs kaikki
-// (non-circular, NST≠Wiktionary); rules-only floor 63.4%.
+// retroflexes, silent-d, unstressed ⟨e⟩→ə). The shipped path (lexicon→rules) is scored FREQUENCY-WEIGHTED
+// against kaikki — ⚠ non-circular, since NST is not Wiktionary — with the rule engine floored separately.
 describe("Norwegian Bokmål canonical IPA", () => {
     test("rule engine — vowel quality via complementary length: ⟨o⟩→uː, ⟨u⟩→ʉː, ⟨å⟩→oː", () => {
         expect(phonemizeWordRules("bok")).toBe("ˈbuːk"); // o → uː (long, open)
@@ -137,10 +137,10 @@ describe("norwegian normalization", () => {
         expect(normalizeNorwegian("Norsk er et språk.")).toBe("Norsk er et språk.");
     });
 
-    // ADOPTED THE SHARED TIER for units and rates, for the reason Danish did: the lexicon handles a
-    // TOKEN and cannot compose across a slash, so a rate's denominator read as an English letter name.
-    // `mm` is declared to FIX A DEFECT — the lexicon read the bare abbreviation as the GEMINATE [mː], and the
-    // corpus writes `mm` ×10. Words from the corpus: kilometer ×15, meter ×9, `i timen` ×9, `i sekundet` ×2.
+    // ⚠ UNITS AND RATES MUST USE THE SHARED TIER, not the lexicon — same reason as Danish: a lexicon handles a
+    // TOKEN and cannot compose across a slash, so a rate's denominator reads as an English letter name.
+    // ⚠ `mm` must be DECLARED, or the lexicon reads the bare abbreviation as the GEMINATE [mː]; the corpus
+    // writes it ×10. Every word emitted below is the corpus's own.
     test("units and rates through the shared tier", () => {
         expect(createNorwegian().text("160 km/t").trim()).toContain("ˈçiːlʊˌmeːtəɾ ˈiː ˈtiːmən"); // was the letter T
         expect(createNorwegian().text("133 m/s").trim()).toContain("ˈmeːtəɾ ˈiː səˈkʊnə");        // was ˈɛm ˈɛs

@@ -10,7 +10,7 @@
 {
     "language": "bpy",
     "name": "Bishnupriya Manipuri",
-    "script": ["Bengali"],
+    "script": ["Bengali-Assamese"],
     "provenance": "Authored from the Unicode Bengali chart + the English-Wiktionary bpy IPA attestations. Reuses the Bengali G2P engine (shared Eastern-Indic inherent-vowel deletion) with Bengali phoneme values; the one divergence is no ɔ→o height harmony. Referee: English Wiktionary 'Bishnupriya Manipuri terms with IPA pronunciation' (human).",
 
     // Inherent vowel /ɔ/ (as Bengali). Bishnupriya does NOT share Bengali's ɔ→o height harmony (the referee
