@@ -1,48 +1,20 @@
 /**
- * Assamese (as) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Assamese (as) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * ARCHITECTURE — THIS IS A PRE-PASS. The Assamese engine reuses the Bengali engine
- * (`makeNativeBengali`), which internally runs `makeBengaliNormalizer` + a Bengali-word symbol tier on the
- * Assamese manifest. That shared layer already handles the classes Assamese shares with Bengali: digit
- * folding, `°C` → ডিগ্ৰি সেলছিয়াছ, `%` → শতাংশ, `$`/`£` → ডলাৰ/পাউণ্ড, clocks (টা … মিনিট), dot decimals
- * (দশমিক), comma-grouping (tokenizer), and the Bengali-style ordinals `7ম`→সপ্তম, `13তম`→তেরতম (the
- * Bengali normalize composes with the Assamese numbers def). This pass therefore handles ONLY the
- * Assamese-specific gaps, and is composed BEFORE `makeNativeBengali(...).text()` in createAssamese.
+ * ⚠ THIS IS A PRE-PASS, NOT THE WHOLE LAYER. The Assamese engine reuses the Bengali engine
+ * (`makeNativeBengali`), which internally runs `makeBengaliNormalizer` plus a Bengali-word symbol tier on the
+ * Assamese manifest — so digit folding, `°C`, `%`, currency, clocks, dot decimals, comma-grouping and the
+ * Bengali-style ordinals `7ম`/`13তম` are ALREADY HANDLED there. This pass owns only the Assamese-specific
+ * gaps, and is composed BEFORE `makeNativeBengali(...).text()` in createAssamese.
  *
- * MEASURED over the 1,961 unique cased as_in FLEURS utterances (column 3):
- *   `Nশ` classical ordinals ×~12   (11শ, 12শ, 14শ, 15শ, 17শ, 18শ — centuries; but 1শ = একশ, "100")
- *   `নং` number marker ×2          (190 নং, 60নং — reads *number 190*, not the syllable [nɔŋ])
- *   comma-grouped ordinals ×…      (1,000তম — the grouping comma detaches the ordinal suffix)
- *   dotted Latin ×3                (U.S., George W. Bush — the interior/suffix dots survive as breaks)
- *   dotted Bengali ×2              (ইউ.এছ.অ.চি — USOC, the dots break the letters)
- *   version dots ×…                (802.11এন, 802.11a/b/g — the tokenizer reads them as DECIMALS)
- *   currency codes ×…              (AUD$, US$ — the code reads as an English word, the $ dropped)
- *   `&` ×1                         (B&B — the ampersand is dropped)
- *   regnal II ×1                   (II বিশ্ব যুদ্ধ — World War II reads as a cardinal digit)
+ * ⚠ THE `শ` ORDINAL IS THIS FILE'S REASON TO EXIST. Assamese writes the CLASSICAL 11–20 series as a numeral
+ * plus `শ` — 11শ → একাদশ, 12শ → দ্বাদশ, 18শ → অষ্টাদশ — the same Sanskrit table as Bengali's শে date form but
+ * written without the ে. Unhandled it reads as the cardinal plus a bare শ syllable.
+ * ⚠ `1শ` IS NOT AN ORDINAL. It is একশ, "one hundred", so the rule must require a tens digit.
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `11শ`         → `eɡʱaɹ xɔ`           the শ century read as cardinal + a bare শ syllable
- *   `1,000তম`     → `ek ɦazaɹ tɔm`       the ordinal suffix detached from the grouped number
- *   `190 নং`      → `ek ex nɔbːɔi nɔŋ`    নং read as the syllable [nɔŋ] instead of number
- *   `U.S.`        → `jˈuː . ˈɛs .`        interior dot survived as a phrase break
- *   `ইউ.এছ.অ.চি`  → `iu . es . ɔ . si`    the dots broke the letters
- *   `George W. Bush` → `dˈʌbəɫjuː . bˈʊʃ` the W. suffix dot left a break
- *   `802.11এন`    → `atʰ ex dui dɔxɔmik ek ek en`  version read as a decimal
- *   `AUD$৪৫`      → `ˈɔːd pãs sɔlːix`      the AUD code read as English, $ dropped
- *   `US$30`       → `jˈuː ˈɛs tɹix`        the US code read as English, $ dropped
- *   `B&B য়ে`      → `bˈiː bˈiː je`         the ampersand dropped
- *   `II বিশ্ব যুদ্ধ` → `dui bixːo zudʱːo`    World War II read as the cardinal two
- *
- * THE ORDINAL SUFFIXES. Assamese writes the ordinal as a numeral plus a suffix, like Bengali: `ম` for 1–10
- * (7ম → সপ্তম, classical suppletive), `তম` from 11 up (13তম → তেরতম, cardinal+তম), and `শ` for the
- * 11–20 CLASSICAL series (11শ → একাদশ, 12শ → দ্বাদশ, 18শ → অষ্টাদশ) — the same Sanskrit table as Bengali's
- * শে date form, but written without the ে. The Bengali normalize already owns ম/তম; this pass owns শ, and
- * re-de-groups a comma-grouped ordinal so the suffix stays attached. `1শ` (no tens digit) is NOT an
- * ordinal — it is একশ, "one hundred".
- *
- * DIGIT FOLDING is NOT done here: the Bengali normalize folds Bengali digits to ASCII (its step 0), and this
- * pass runs BEFORE it, so it must accept both scripts. The shared digit class is used throughout.
+ * ⚠ DIGIT FOLDING IS NOT DONE HERE. The Bengali normalize folds Bengali digits to ASCII in its own step 0,
+ * and this pass runs BEFORE it — so every rule here must accept BOTH scripts, via the shared digit class.
  */
 import { BENGALI_DIGITS } from "../../core/unicode.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";

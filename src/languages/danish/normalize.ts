@@ -1,39 +1,25 @@
 /**
- * Danish (da) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the Danish g2p
- * cannot already read into Danish words the existing pipeline speaks. Pure text→text, no IPA. Runs inside
- * danish.ts's `text()`, before the tokenizer.
+ * Danish (da) text normalization — the pre-tokenizer pass that rewrites everything the Danish g2p cannot
+ * already read into Danish words the pipeline speaks. Pure text→text, no IPA. Runs inside danish.ts's
+ * `text()`, before the tokenizer.
  *
- * MEASURED OVER THE FLEURS da_dk CORPUS, column 3 (the ORIGINAL cased text):
- *   ordinal dot     N.      112 before a lowercase word (8 before a capital)   ← the largest defect
- *   period-grouped  N.NNN    99      decimal comma  N,N   35      colon clock  HH:MM  33
- *   ranges          N–N      16      percent        N %   27 (as the word)
- *   abbreviations           84      km²                    3      degrees             3
+ * ⚠ DANISH IS NOT NORWEGIAN, and the differences are why this file cannot be adapted from nb/normalize.ts:
  *
- * EVERY WORD EMITTED BELOW IS IN THE da-lexicon at reference quality — procent, komma, grader, celsius,
- * kvadratkilometer, klokken, minus, plus, lig, med, og, til — and the four ordinals it lacks (sekstende,
- * syttende, attende, nittende) were PROBED through the rule g2p rather than assumed: [sˈekstenə],
- * [sˈytenə], [ˈatenə], [nˈitenə].
+ *   1. THE PERIOD IS A THOUSANDS SEPARATOR (330.000, 7.000) — the German convention. In Norwegian the same
+ *      shape is a DATE (24.08.2021) and gets a date rule; here a date rule would corrupt every large
+ *      number, because Danish writes no `D.M.YYYY` dates at all.
+ *   2. THERE IS NO SPACE GROUPING. Norwegian's largest numeric defect is `5 000 000` read as three
+ *      numerals; Danish has none, so that rule is absent here rather than copied.
+ *   3. THE COMMA IS PURELY DECIMAL. Norwegian carries English-style thousands groupings that survived
+ *      translation and needed a guard; Danish has none, so no guard is needed.
  *
- * ⚠ DANISH IS NOT NORWEGIAN, and the differences are the whole reason this file was measured separately
- * rather than adapted from nb/normalize.ts written hours earlier:
+ *   What DOES transfer is the ordinal-dot guard, and for the same reason: Danish month names are lowercase,
+ *   so requiring a lowercase word after the dot catches every date while sparing a sentence ending in a year.
  *
- *   1. THE PERIOD IS A THOUSANDS SEPARATOR (99 instances: 330.000 · 7.000 · 24.000) — the German
- *      convention. In Norwegian the same shape was a DATE (24.08.2021) and got a date rule; here a date
- *      rule would corrupt every large number. Danish writes NO `D.M.YYYY` dates at all in this corpus.
- *   2. THERE IS NO SPACE GROUPING. Norwegian's largest numeric defect was `5 000 000` read as three
- *      numerals (42 instances); Danish has ZERO, so that rule is absent here rather than copied.
- *   3. THE COMMA IS PURELY DECIMAL. Norwegian carried 5 English-style thousands groupings that survived
- *      translation and needed a guard; Danish has 35 decimals and none of those, so no guard is needed.
- *
- *   What DOES transfer is the ordinal-dot guard: 112 before a lowercase word against 8 before a capital,
- *   the same ratio and the same reason (Danish month names are lowercase, so every date is caught while
- *   a sentence ending in a year is not).
- *
- * ⚠ NO PERIOD-CLOCK RULE. `HH.MM` is the Danish written clock and 17 instances of the shape occur — but
- * they are `802.11a`, `802.11b`, `802.11g`, `802.11n`, i.e. one technical identifier repeated, plus a
- * single genuine `15.00 UTC`. Claiming the shape would rewrite the standard's name four times to fix one
- * clock. The colon form (33) carries the real clocks and is claimed instead. Same conclusion as Norwegian
- * for a completely different reason — there the shape was dates, here it is a Wi-Fi standard.
+ * ⚠ NO PERIOD-CLOCK RULE, although `HH.MM` is the Danish written clock. The shape in running text is
+ * overwhelmingly `802.11a/b/g/n` — one technical identifier repeated — so claiming it would rewrite the
+ * standard's name several times over to fix a single clock. The colon form carries the real clocks and is
+ * claimed instead.
  */
 
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

@@ -1,38 +1,19 @@
 /**
- * Fula (ff) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Fula (ff) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the 1,500 unique cased ff_sn FLEURS utterances (column 3 — a Fula translation of the
- * English FLEURS set, heavily English-influenced: miliyon, biliyon, kilometre, miles, hour):
- *   `Nst`/`Nth`/`Nrd` Latin ordinals ×17 (1st, 3rd, 4th, 16th, 190th — English ordinal digits, the
- *     corpus's dates/centuries) — the Fula ordinal is the cardinal + -aɓal (gootal suppletive)
- *   comma-thousands ×23 (2,243, 100,000, 5,000,000) + dot-decimals (1.5, 3.50, 2.3, 12.8)
- *   clocks ×15 (1:15 a.m., 9:30 fajiri, 0230 UTC, 8:30 p.m., 15.00 UTC — the corpus mixes a.m./p.m.
- *     with 24h UTC and the Fula time-of-day word fajiri)
- *   era markers ×4 (1000B.C.) · rates ×6 (160km/h, 133m/s, 300mph, 64kph)
- *   units ×18 (5mm, 35mm, 3136mm2, 12.8km) · currency ×8 (US$11,000, AUD$45, ¥2,500, £27, uS$14.7)
- *   percent ×4 (88%) · ranges/scores ×11 (7-2, 1995-96, 2-3km) · signs (4×4, &amp;)
- *   initialisms ×102 (MRI, OHA, REM, ACMA, U.S., H5N1, A1GP) · degrees ×1 (30°C) · fractions ×1 (1/5)
+ * ⚠ FULA TEXT CARRIES ENGLISH ORDINAL DIGITS — `1st`, `3rd`, `16th`, `190th` — in its own dates and
+ * centuries, because the written register is heavily English-influenced (miliyon, biliyon, kilometre, hour).
+ * The Fula ordinal is the cardinal plus `-aɓal`, with `gootal` suppletive for 1. Unhandled, the English
+ * suffix reads as a bare word ("st", "th").
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `1st`            → `ɡˈoː st`           the English ordinal suffix read as the bare word "st"
- *   `16th`           → `sˈapːo ˈe d͡ʒˈeːɡom th`   the suffix read as "th"
- *   `2,243`          → `ɗˈiɗi , …`         the comma-thousands became a pause
- *   `1:15 a.m.`      → `ɡˈoː , … ˈa . m .` the colon pause + [a.m.] letter-spelled
- *   `1000B.C.`       → `… b . tʃ .`        the era marker letter-spelled
- *   `160km/h`        → `… km h`            the rate raw
- *   `US$11,000`      → `ˈus … , mˈeːɾe`    the currency prefix swallowed, comma pause
- *   `30°C`           → `t͡ʃapːˈanɗe tˈati t͡ʃ`  the degree dropped
- *   `1/5 inch`       → `ɡˈoː d͡ʒˈoji ˈint͡ʃh`  the fraction read as two numbers
- *   `4×4`            → `nˈaji nˈaji`        the × dropped
- *   `&amp;`          → ``                 the HTML entity dropped
- *   `MRI`            → [mɾˈi]  `OHA` → [ˈoha]  `U.S.` → [ˈu . s .]  initialisms as words/clusters
- *   `H5N1`           → `h d͡ʒˈoji n ɡˈoː`   the digits inside the code read as words
+ * ⚠ THE CLOCK MIXES THREE SYSTEMS in one corpus: `1:15 a.m.`, 24-hour `0230 UTC`, and the Fula time-of-day
+ * word (`9:30 fajiri`). A rule that assumes one of them silently mishandles the others.
  *
- * WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text
- * so the word path stresses them; the comma-thousands and dot-decimal stay DIGITS so the shared symbol
- * tier can still see the number adjacent to its unit/sign — the tier is composed AFTER this pass in
- * fula.ts, and the TOKEN swallows the separators (see fula.ts).
+ * ⚠ WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
+ * the word path stresses them; the comma-thousands and dot-decimal stay DIGITS so the shared symbol tier can
+ * still see the number adjacent to its unit or sign. The tier is composed AFTER this pass in fula.ts, and the
+ * TOKEN swallows the separators.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
@@ -41,8 +22,8 @@ import { numberToWords } from "./numbers.ts";
 // DATA
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Fula letter names — the standard Boko alphabet, per the UNESCO Bamako alphabet (a, ba, be, ci, da, …
- *  The letter names are the letter + -a (ba, ca, da, fa…), the conventional way Fula spells initials. */
+/** Fula letter names — the standard Boko alphabet, per the UNESCO Bamako alphabet. A letter's name is the
+ *  letter plus -a (ba, ca, da, fa …), which is the conventional way Fula spells an initial. */
 const LETTER_NAME: Readonly<Record<string, string>> = {
     a: "a", b: "ba", c: "ca", d: "da", e: "e", f: "fa", g: "ga", h: "ha", i: "i", j: "ja",
     k: "ka", l: "la", m: "ma", n: "na", o: "o", p: "pa", q: "ka", r: "ra", s: "sa", t: "ta",

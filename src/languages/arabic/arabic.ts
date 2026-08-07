@@ -1,7 +1,11 @@
 /**
- * Arabic (ar) phonemizer — canonical IPA (Modern Standard Arabic, broad phonemic).
- * Diacritized g2p (g2p.ts) + quantity-sensitive stress. Phase 1 assumes vowelled input; a neural diacritizer
- * pre-pass (permissively-sourced) will restore short vowels for bare text in Phase 2.
+ * Arabic (ar) phonemizer — canonical IPA (Modern Standard Arabic, broad phonemic). Diacritized g2p (g2p.ts)
+ * plus quantity-sensitive stress.
+ *
+ * ⚠ TWO ENTRY POINTS, AND THEY EXPECT DIFFERENT INPUT. The SYNCHRONOUS path assumes VOWELLED text: bare
+ * Arabic reaching it is read off its consonant skeleton. `phonemizeArabic` is the async path, which runs the
+ * neural diacritizer (ONNX, optional dependency) to restore the short vowels first — that is the one to use
+ * for real-world text.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

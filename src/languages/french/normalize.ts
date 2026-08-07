@@ -2,11 +2,11 @@
  * French (fr) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * This mirrors the shape of english/normalize.ts: one ordered pipeline of numbered steps, where the
- * order is itself load-bearing. The contract, as everywhere in the fleet: emit plain French words and
- * bare digits, and let the tokenizer / lexicon / g2p / number compositor do the pronouncing.
+ * One ordered pipeline of numbered steps, where ⚠ THE ORDER IS ITSELF LOAD-BEARING. The contract, as
+ * everywhere in the fleet: emit plain French words and bare digits, and let the tokenizer / lexicon / g2p /
+ * number compositor do the pronouncing.
  *
- * WHY THE ORDER IS WHAT IT IS — the couplings that bite:
+ * The couplings that bite:
  *   · Abbreviations run before initialisms, or `MM.` (Messieurs) is letter-spelled as EM-EM.
  *   · Roman numerals run before initialisms, or `Louis XIV` is letter-spelled as IXE-I-VÉ. Both are
  *     all-caps letter runs; only the numeral rule can tell them apart, so it gets first refusal.
@@ -15,13 +15,13 @@
  *     era marker, not a street.
  *   · Thousands-degrouping runs first so every later step sees one unbroken digit run.
  *
- * Dates and years need less than one might expect: French reads a year as a plain cardinal
- * (1988 = mille neuf cent quatre-vingt-huit), so there is no pair-wise year rule of the English
- * "nineteen eighty-eight" kind, and a day is a plain cardinal too (17 septembre). The only irregular
- * day is the 1st, which is an ordinal (1er janvier = premier janvier).
+ * Dates and years need less than one might expect: French reads a year as a plain CARDINAL (1988 = mille
+ * neuf cent quatre-vingt-huit), so there is no pair-wise year rule of the English "nineteen eighty-eight"
+ * kind, and a day is a plain cardinal too. ⚠ The only irregular day is the 1st, an ordinal (1er janvier =
+ * premier janvier).
  *
- * FEMININE AGREEMENT is the trap in times: heure and minute are feminine, so 1 and any number ending in
- * 1 take *une*, not *un* — `1 h 15` is "une heure quinze" and `4:41` is "quatre heures quarante et une".
+ * ⚠ FEMININE AGREEMENT IS THE TRAP IN TIMES: heure and minute are feminine, so 1 and any number ending in 1
+ * take *une*, not *un* — `1 h 15` is "une heure quinze" and `4:41` is "quatre heures quarante et une".
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST as FR_MANIFEST } from "./manifest.ts";
