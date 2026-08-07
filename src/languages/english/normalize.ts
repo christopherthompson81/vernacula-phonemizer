@@ -272,8 +272,9 @@ export function normalizeEnglish(input: string): string {
     //     operator's word on the sign's job and be ambiguous with subtraction exactly where a phonemizer
     //     cannot afford it. `negative` on a measurement is unremarkable English ("negative forty Celsius").
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1negative $2");
-    //     ⚠ `±` requires the digit IMMEDIATELY after the sign, as 0e does. Allowing `\s?` there turns a
-    //     spaced range — `(1418 – 1450)` — into a subtraction.
+    //     ⚠ THE SIGN ARM ABOVE REQUIRES THE DIGIT IMMEDIATELY, with no `\s?`, and that is what keeps a
+    //     spaced range out: `(1418 – 1450)` reads as a subtraction the moment a space is allowed after the
+    //     dash. `±` can afford the `\s?` because no range is written with one.
     s = s.replace(/(^|[\s(])±\s?(\d)/gu, "$1plus or minus $2");
 
     // 0f0) NUMERIC DATES, before the fraction rule (which would otherwise have to guard against them) and

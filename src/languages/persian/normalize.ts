@@ -16,9 +16,9 @@
  * every "not a letter" guard also excludes ZWNJ. The ordinal rule is the one place a ZWNJ is consumed, and only
  * between a digit run and the ordinal suffix (⟨1000‌ام⟩), which is not a word-internal position.
  *
- * ⚠ THE SIGN PRECEDES THE NUMERAL IN LOGICAL ORDER but the word follows it, so the currency, plus and ordinal
- * rules MOVE their word across the numeral rather than substituting in place. A rule that substitutes in place
- * emits the operand and operator inverted.
+ * ⚠ A SIGN PRECEDES THE NUMERAL IN LOGICAL ORDER but its word follows it, so the currency and plus rules MOVE
+ * their word across the numeral rather than substituting in place. A rule that substitutes in place emits the
+ * operand and operator inverted.
  *
  * Deliberately absent:
  *   · RANGES on the hyphen. Genuinely ambiguous rather than merely unhandled: some are ranges, some are SPORTS

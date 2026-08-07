@@ -284,8 +284,8 @@ export function normalizeSerbian(input: string): string {
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*(?:[.!?”"»)\\]]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED[lat(ab)]!}.`);
 
-    // 3b) SIGNS, before the degree rules — the ordering matters because `±` is a single character the `+`
-    //     rule cannot see, and the `+` arms must not claim the `°` shapes' spacing.
+    // 3b) SIGNS. ⚠ `±` MUST PRECEDE THE `+` ARMS: it is a single character they cannot see, so a `+` arm
+    //     running first would leave the `±` untouched and a later one would never reach it.
     // ⚠ THE MINUS GUARDS EACH REJECT A REAL SHAPE, and none of them is redundant:
     //      · a digit IMMEDIATELY AFTER the sign — rejects the spaced `- 2` form
     //      · a letter or digit IMMEDIATELY BEFORE — rejects `il-76` and closed ranges
