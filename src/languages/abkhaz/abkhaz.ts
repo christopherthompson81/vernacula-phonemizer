@@ -6,15 +6,17 @@
  * ⟨ы⟩→[ə]).
  *
  * The Cyrillic alphabet writes the consonants with base letters + MODIFIER letters:
- *   ★ ⟨ь⟩ PALATALIZES to a dorsal+[ʲ] (гь→[ɡʲ], хь→[χʲ]), ⟨ә⟩ LABIALIZES (гә→[ɡʷ], шә→[ʃʷ]), ⟨'⟩ PHARYNGEALIZES (х'→[χˤ]).
- *   ★ THREE-WAY stops/affricates — voiced / aspirated / ejective: ⟨г қ к⟩→[ɡ kʰ kʼ], ⟨д ҭ т⟩→[d tʰ tʼ],
+ *   ⚠ ⟨ь⟩ PALATALIZES to a dorsal+[ʲ] (гь→[ɡʲ], хь→[χʲ]), ⟨ә⟩ LABIALIZES (гә→[ɡʷ], шә→[ʃʷ]), ⟨'⟩ PHARYNGEALIZES (х'→[χˤ]).
+ *   ⚠ THREE-WAY stops/affricates — voiced / aspirated / ejective: ⟨г қ к⟩→[ɡ kʰ kʼ], ⟨д ҭ т⟩→[d tʰ tʼ],
  *     ⟨б ҧ п⟩→[b pʰ pʼ], ⟨ӡ ц ҵ⟩→[d͡z t͡sʰ t͡sʼ], ⟨џ ч ҷ⟩→[d͡ʐ t͡ʃʰ t͡ʃʼ]; the uvular ⟨ҟ⟩→[qʼ], the pharyngeal ⟨ҳ⟩→[ħ].
  *
  * Numbers are VIGESIMAL (base-20) and composed by numbers.ts — 30 = ҩажәи жәаба (20+10), 40 = ҩынҩажәа (2×20),
  * 99 = ԥшьынҩажәи зеижә (4×20+19); the NON-HUMAN/abstract class series is used as the bare-numeral citation form.
  *
- * 🔷 well-referenced (wikipron abk_cyrl broad + kaikki Abkhaz) BUT the referee is partly the letter/digraph DEFINITIONS
- * (near reference-parity), and its narrow transcriptions are internally inconsistent.
+ * ⚠ THE REFEREE IS PARTLY CIRCULAR. wikipron abk_cyrl and kaikki Abkhaz both cover this language well, but much of
+ * what they carry is the letter and digraph DEFINITIONS this engine is built from — so agreement with them is close
+ * to reference-parity rather than independent confirmation. Their narrow transcriptions are also internally
+ * inconsistent, which is why the tables below follow the corpus where the two disagree.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -25,8 +27,9 @@ import { numberToWords } from "./numbers.ts";
 // base+[ʲ]/[ʷ] (handled in code).
 const CLUSTER: Record<string, string> = {
     "х'ә": "χˤʷ",
-    // Palatalized DORSALS = dorsal + [ʲ] (NOT the devoiced palatal-place symbols of the wikipron letter-defs — the
-    // 979-word corpus uses ɡʲ/kʼʲ/kʰʲ/χʲ, matching the already-correct ҟь→qʼʲ, ӷь→ʁʲ; ⟨г⟩ is voiced so гь can't be [c]).
+    // ⚠ Palatalized DORSALS are dorsal + [ʲ], NOT the devoiced palatal-place symbols the wikipron letter-definitions
+    // give: the corpus uses ɡʲ/kʼʲ/kʰʲ/χʲ, matching the already-correct ҟь→qʼʲ and ӷь→ʁʲ. ⟨г⟩ is voiced, so гь
+    // cannot be [c].
     "гь": "ɡʲ", "гә": "ɡʷ", "дә": "dʷ", "жь": "ʒ", "жә": "ʒʷ", "кь": "kʼʲ", "кә": "kʼʷ", "тә": "tʷʼ",
     "хь": "χʲ", "хә": "χʷ", "ць": "t͡ɕʰ", "цә": "t͡ɕʷʰ", "шь": "ʃ", "шә": "ʃʷ", "ҙә": "ʑʷ",
     "қь": "kʰʲ", "қә": "kʷʰ", "ҟь": "qʼʲ", "ҟә": "qʼʷ", "ҭә": "tʷʰ", "ҳә": "ħʷ", "ҵь": "t͡ɕʼ", "ҵә": "t͡ɕʼʷ",

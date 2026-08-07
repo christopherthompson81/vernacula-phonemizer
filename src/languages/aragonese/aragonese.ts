@@ -3,11 +3,11 @@
  *
  * A Spanish-shaped shallow greedy scan (the Asturian/Galician pattern) with the Aragonese
  * hallmarks:
- *   ★ ⟨ch⟩→[t͡ʃ] (Aragonese writes ⟨ch⟩ where Spanish has [x]: Chesús→t͡ʃesus), ⟨ny⟩→[ɲ] (the Catalan-style digraph:
+ *   ⚠ ⟨ch⟩→[t͡ʃ] (Aragonese writes ⟨ch⟩ where Spanish has [x]: Chesús→t͡ʃesus), ⟨ny⟩→[ɲ] (the Catalan-style digraph:
  *     Espanya→espaɲa), ⟨x⟩→[ʃ] (baxo→baʃo), ⟨v⟩→[b] (betacism);
- *   ★ DISTINCIÓN (standard Aragonese, per the Academia): ⟨z⟩ / ⟨c⟩ before e/i → [θ] (seseo [s] is the marked
+ *   ⚠ DISTINCIÓN (standard Aragonese, per the Academia): ⟨z⟩ / ⟨c⟩ before e/i → [θ] (seseo [s] is the marked
  *     Benasquese/Ribagorçan minority → we emit [θ] and fold the axis); ⟨j⟩ / ⟨g⟩ before e/i → [x];
- *   ★ WORD-FINAL ⟨-r⟩ after a vowel is DROPPED (the Aragonese apocope: abanzar→abansa, cantar→canta).
+ *   ⚠ WORD-FINAL ⟨-r⟩ after a vowel is DROPPED (the Aragonese apocope: abanzar→abansa, cantar→canta).
  * Single ⟨r⟩→[ɾ] tap vs ⟨rr⟩/word-initial → [r] trill; the rising glides ⟨i⟩→[j]/⟨u⟩→[w] before a vowel; ⟨qu gu⟩→
  * [k ɡ] before a front vowel (⟨u⟩ silent) / [kw ɡw] before a back vowel. Stress (written accents + the Ibero rule)
  * and SPIRANTIZATION (intervocalic b/d/g→β/ð/ɣ) are folded/deferred. Referee: wikipron arg_latn_broad (human,

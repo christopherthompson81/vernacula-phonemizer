@@ -5,30 +5,23 @@
  * Awadhi (1937): the SIBILANT MERGER श/ष→[s] (data file) and the INTERVOCALIC FLAP ड/ढ→[ɽ]/[ɽʱ] except after a
  * nasal (this module — Saksena: intervocalically ḍ/ḍh become ṛ/ṛh; they stay only after a nasal).
  *
- * 🔷 SINGLE-SOURCE: the divergences are drawn from ONE documented source, Baburam Saksena's Evolution of Awadhi
- * (1937) — a real Awadhi-specific grammar with IPA, not a circular Hindi clone. That single source is what 🔷
- * requires; there is no *independent* second referee (wikipron/kaikki/epitran ship no Awadhi, and a machine
- * Hindi-clone check would be circular), so awa is single-source, not multiply-verified — but it is NOT ⛔, because
- * grading against Saksena measures something real. Per Saksena (quoting Bloch) the Eastern-Indo-Aryan phonologies
- * are "perceptibly identical", distinguished chiefly by GRAMMAR, so the Hindi-shared rules hold BY ATTESTATION.
- * MEASURED: 93.9% folded against a Saksena referee (tools/referee-eval/referees/awa.saksena.tsv, 33 of his own
- * transcribed forms; Devanagari confirmed against the Awadhi Shabd-Kosh corpus). Coverage: 99.99% of 48.6k
- * awawiki types + 100% of 6.6k dictionary headwords phonemize (real Awadhi, not Hindi cognates).
+ * ⚠ SINGLE-SOURCE. The divergences come from ONE documented source, Baburam Saksena's Evolution of Awadhi
+ * (1937) — a real Awadhi-specific grammar with IPA, not a circular Hindi clone. There is no INDEPENDENT second
+ * referee: wikipron, kaikki and epitran ship no Awadhi, and a machine Hindi-clone check would be circular. So
+ * this engine is graded against Saksena and nothing else. Per Saksena (quoting Bloch) the Eastern-Indo-Aryan
+ * phonologies are "perceptibly identical", distinguished chiefly by GRAMMAR, which is what licenses the
+ * Hindi-shared rules. Measured at 93.9% folded against a Saksena referee of 33 of his own transcribed forms.
  */
 /**
- * NORMALIZER WORDS: the Hindi defaults are RETAINED, and three of them are now confirmed for Awadhi
- * rather than merely inherited. Evidence from awa.wikipedia via `tools/normalization/attest.ts`
- * (`tools/corpus/attest/awa.jsonc`), with each sentence's language judged from its MORPHOLOGY, because a
- * Devanagari token hit on a small wiki is routinely a quoted Hindi passage:
+ * NORMALIZER WORDS: the Hindi defaults are RETAINED, and three of them are confirmed for Awadhi rather than
+ * merely inherited — प्रतिशत, मिनट and ईसा पूर्व each occur in sentences whose MORPHOLOGY is Awadhi (कय, होय,
+ * मा, कइन्हिन). ⚠ The morphology test is the point: a Devanagari token hit on a small wiki is routinely a
+ * quoted HINDI passage, so a bare count proves nothing.
+ * ⚠ बजकर / बजे ARE NOT ATTESTED. The clock connective is rare in encyclopedic prose, so that is absence of
+ * evidence rather than evidence of absence; Hindi's default stands, unconfirmed.
  *
- *   प्रतिशत  ✓ "प्रायद्वीप कय 40 प्रतिशत हिस्सा होय"        — कय / होय are Awadhi
- *   मिनट     ✓ "16 घंटा 20 मिनट मा तय कइन्हिन"              — मा / कइन्हिन are Awadhi
- *   ईसा पूर्व ✓ "५५० ईसा पूर्व मा इ क्षेत्र कय जीत लिहिन"    — Awadhi
- *   बजकर, बजे  NOT ATTESTED (0 hits) — the clock connective is rare in encyclopedic prose, so this is
- *              absence of evidence, not evidence of absence. Hindi's default stands, unconfirmed.
- *
- * A TRAP RECORDED: `सैकड़ा` ×2 is real Awadhi and means CRICKET CENTURIES — "वन १६ सैकड़ा लगाय चुका हैं" —
- * not "per hundred". It is not a percent word here. Same shape as the Malay `paun` weight-vs-currency trap.
+ * ⚠ A TRAP: `सैकड़ा` is real Awadhi and means CRICKET CENTURIES ("वन १६ सैकड़ा लगाय चुका हैं"), not "per hundred".
+ * It is NOT a percent word here. Same shape as the Malay `paun` weight-vs-currency trap.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

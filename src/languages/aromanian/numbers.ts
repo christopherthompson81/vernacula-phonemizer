@@ -12,7 +12,7 @@
  *     unsprãyinghits 21, doisprãyinghits 22, treisprãyinghits 23, patrusprãyinghits 24, shasprãyinghits 26,
  *     shaptisprãyinghits 27, optusprãyinghits 28, noauãsprãyinghits 29).
  *
- * ★ THE BALKAN CONTACT VOCABULARY is what makes this table not just "Romanian with different spelling":
+ * ⚠ THE BALKAN CONTACT VOCABULARY is what makes this table not just "Romanian with different spelling":
  *   - 20 ⟨yinghits⟩ — inherited Latin *vīgintī* but through the contracted *vintī → *yintsi with syllable
  *     reduplication/metathesis, so it is opaque where Romanian rebuilt a transparent decade (douăzeci "two tens");
  *   - 100 ⟨sutã⟩ — the SLAVIC loan (cf. сто / Albanian *qind* alongside), not a Latin *centum* reflex; the Latin

@@ -8,7 +8,7 @@
 import { MANIFEST } from "./manifest.ts";
 
 // Number words are authored DATA — MSA in arabic.jsonc, with optional per-VARIETY overrides (egyptian.jsonc:
-// issue #561 — arz read 80 as MSA θamaːnuːn, with a θ the dialect does not have; Egyptian is tamaniːn).
+// arz otherwise reads 80 as MSA θamaːnuːn, with a θ the dialect does not have; Egyptian is tamaniːn).
 // A variety table may carry `hundredsFused`, the dialects' fused hundreds (mijːa, miteːn, tultumijːa …),
 // which replaces MSA's construct + dual composition below.
 export interface ArabicNumberData {

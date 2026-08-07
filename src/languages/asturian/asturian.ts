@@ -90,7 +90,7 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'·")})|(\\d+)|([.!?…,;:]
  * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
  * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
  * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
- * `test/native-inventory.test.ts` now measures it rather than trusting it.
+ * `test/native-inventory.test.ts` measures it rather than trusting it.
  */
 const NATIVE_CLASS = "[a-zñáéíóúüïḥA-ZÑÁÉÍÓÚÜÏḤ'·]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

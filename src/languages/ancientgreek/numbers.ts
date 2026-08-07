@@ -8,7 +8,7 @@
  * pitch accents off the diacritics (see ancientgreek.ts): a bare ⟨εις⟩ would lose the [h] of `εἷς`.
  *
  * ── The three things that make Greek not a plain units/tens/hundreds table ────────────────────────────────
- *  1. **★ καί-LINKED COMPOUNDS.** Every part of a composed numeral is joined by καὶ. Smyth §347 lists BOTH
+ *  1. **καί-LINKED COMPOUNDS.** Every part of a composed numeral is joined by καὶ. Smyth §347 lists BOTH
  *     orders for the 21–99 range — units-first `εἷς καὶ εἴκοσι` and tens-first `εἴκοσι καὶ εἷς`. The
  *     TENS-FIRST (descending) order is chosen here and used uniformly at every magnitude, so that one rule
  *     covers 25, 555 and 12,345 alike (πεντακόσιοι καὶ πεντήκοντα καὶ πέντε) and the spoken order tracks the
@@ -16,7 +16,7 @@
  *     invert only the last two elements and read against the digits.
  *     EXCEPTION: 13 and 14 keep Smyth's own units-first phrases `τρεῖς καὶ δέκα` / `τέτταρες καὶ δέκα`, which
  *     are the attested forms for those two (15–19 are fused: πεντεκαίδεκα, ἑκκαίδεκα, …).
- *  2. **★ MYRIAD (10⁴) GROUPING, not thousands.** Greek's top simple magnitude is μύριοι "10,000"; large
+ *  2. **MYRIAD (10⁴) GROUPING, not thousands.** Greek's top simple magnitude is μύριοι "10,000"; large
  *     numbers are counted in myriads, and the nesting is genitive — Archimedes' μυριὰς μυριάδων = 10⁸. So this
  *     decomposes in BASE 10,000: each group of four digits is composed with the <10,000 machinery and tagged
  *     `μυριάδες` (+ one `μυριάδων` per extra level). 1,000,000 = ἑκατόν μυριάδες ("a hundred myriads");

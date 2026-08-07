@@ -1,60 +1,54 @@
 /**
- * ★ Abkhaz (ab) VIGESIMAL cardinal number compositor. Returns composed Abkhaz TEXT (space-separated) that
+ * Abkhaz (ab) VIGESIMAL cardinal number compositor. Returns composed Abkhaz TEXT (space-separated) that
  * abkhaz.ts runs through the g2p, so the IPA stays consistent with the word engine. Abkhaz has no data manifest
- * (the whole engine is a single .ts), so the numeral table is authored HERE rather than in a .jsonc.
+ * — the whole engine is a single .ts — so the numeral table is authored HERE rather than in a .jsonc.
  *
- * SOURCE: ab.wikipedia «Иԥсабаратәу ахыԥхьаӡара» (Natural number), whose 0–99 table, hundreds list and
- * thousands list are cited there to Хәарцкиа Ҳ. И. & Џьонуа Б. Гь., «АУРЫС-АԤСУА, АԤСУА-АУРЫС акомпиутертә
- * терминқәа ржәар», Аҟәа 2012. Cross-checked word-for-word against ab.wikipedia's own per-number articles
- * («21 (ахыԥхьаӡара)» → ҩажәи акы … «99 (ахыԥхьаӡара)» → ԥшьынҩажәи зеижә) and its year articles for the
- * compounds above 100 — 101 шәи акы · 105 шәи хәба · 111 шәи жәеиза · 120 шәи ҩажәа · 135 шәи ҩажәи жәохә ·
- * 155 шәи ҩынҩажәи жәохә · 199 шәи ԥшьынҩажәи зеижә · 201 ҩышәи акы · 555 хәшәи ҩынҩажәи жәохә ·
- * 999 жәшәи ԥшьынҩажәи зеижә · 1001 зқьы акы · 1100 зқьы шәкы · 1101 зқьы шәи акы · 1234 зқьы ҩышәи ҩажәи
- * жәиԥшь · 1500 зқьы хәшә · 1900 зқьы жәшәы · 1989 зқьы жәшәи ԥшьынҩажәи жәба · 2001 ҩнызқь акы ·
- * 2020 ҩнызқь ҩажәа. Zero is from ab.wikipedia «Аноль»: «0 (аноль; алаҭ. nullus — акгьы)».
+ * SOURCE: ab.wikipedia «Иԥсабаратәу ахыԥхьаӡара» (Natural number), whose 0–99 table, hundreds list and thousands
+ * list are cited there to Хәарцкиа Ҳ. И. & Џьонуа Б. Гь., «АУРЫС-АԤСУА, АԤСУА-АУРЫС акомпиутертә терминқәа
+ * ржәар», Аҟәа 2012. Cross-checked word-for-word against ab.wikipedia's own per-number and year articles across
+ * the 21–99, 101–199, 201–999 and 1001–2020 ranges. Zero is from «Аноль».
  *
- *   ★ THE SCORE CONSTRUCTION (20–99), the traditional NW-Caucasian base-20 system. The four score words are
- *     20 ҩажәа, 40 ҩынҩажәа (2×20), 60 хынҩажәа (3×20), 80 ԥшьынҩажәа (4×20). An exact multiple of 20 is just
- *     that word; anything else is the score's CONNECTIVE form (final -а → -и, "and") + a SPACE + the plain 1–19
- *     word — so, exactly as in Georgian, the whole 1–19 series (teens included) attaches into one slot:
- *         30 = 20+10 ҩажәи жәаба      45 = 2×20+5  ҩынҩажәи хәба     67 = 3×20+7  хынҩажәи быжьба
- *         89 = 4×20+9 ԥшьынҩажәи жәба 99 = 4×20+19 ԥшьынҩажәи зеижә
- *     There is no "ten" digit: 50 is ҩынҩажәи жәаба (2×20+10), 70 хынҩажәи жәаба, 90 ԥшьынҩажәи жәаба.
- *   ★ THE SAME -и CONNECTIVE marks a non-final HUNDRED: 100 шәкы but 101 шәи акы; 200 ҩышә but 201 ҩышәи акы.
- *     Stored as bare/comb pairs below. The thousand word does NOT take it (1001 зқьы акы, 2001 ҩнызқь акы).
- *   ★ THOUSANDS are FUSED for a multiplier of 1–10 (зқьы, ҩнызқь, хнызқь … жәанызқь) and for exactly 100
- *     (шәнызқь); any other multiplier is spelled out + the separate word нызқь (20 000 ҩажәа нызқь,
- *     30 000 ҩажәи жәаба нызқь).
+ * ⚠ THE SCORE CONSTRUCTION (20–99) — the traditional NW-Caucasian base-20 system. The four score words are
+ * 20 ҩажәа, 40 ҩынҩажәа (2×20), 60 хынҩажәа (3×20), 80 ԥшьынҩажәа (4×20). An exact multiple of 20 is just that
+ * word; anything else is the score's CONNECTIVE form (final -а → -и, "and") plus a SPACE plus the plain 1–19
+ * word — so, exactly as in Georgian, the whole 1–19 series INCLUDING THE TEENS attaches into one slot:
+ *     30 = 20+10 ҩажәи жәаба      45 = 2×20+5  ҩынҩажәи хәба     67 = 3×20+7  хынҩажәи быжьба
+ *     89 = 4×20+9 ԥшьынҩажәи жәба 99 = 4×20+19 ԥшьынҩажәи зеижә
+ * ⚠ THERE IS NO "TEN" DIGIT: 50 is ҩынҩажәи жәаба (2×20+10), 70 хынҩажәи жәаба, 90 ԥшьынҩажәи жәаба.
  *
- * ★ CITATION FORM / CLASS AGREEMENT — the one real judgment call. Abkhaz numerals agree with the HUMAN vs
- *   NON-HUMAN class of what they count: the human series is built with -ҩык/-џьара (аӡәы "one person",
- *   ҩыџьа "two people", хҩык "three people"), the non-human/abstract series is акы, ҩба, хԥа … A bare numeral
- *   in a TTS input string has NO counted noun, hence no class to agree with, so this compositor emits the
- *   NON-HUMAN / abstract counting series throughout — which is also the series ab.wikipedia's own number
- *   articles use to name the numbers themselves, i.e. the citation form a speaker reads a bare digit string
- *   with. Human-class concord would need the noun and is therefore out of scope here.
+ * ⚠ THE SAME -и CONNECTIVE MARKS A NON-FINAL HUNDRED: 100 шәкы but 101 шәи акы; 200 ҩышә but 201 ҩышәи акы.
+ * Stored as bare/comb pairs below. The THOUSAND word does NOT take it (1001 зқьы акы, 2001 ҩнызқь акы).
  *
- * Other judgment calls: 7 is authored быжьба (the year articles + Omniglot); the dictionary-cited table writes
- * the syncopated бжьба, which also shows up in the derived 7000 бжьнызқь — both are current, the fuller stem is
- * used for the standalone numeral and the source's own form for each derived word. 500 is authored хәышә per
- * the dictionary-cited hundreds list, though the 555/1500 year articles write the syncopated хәшә(и).
- * 10^6 / 10^9 use the Russian loans миллион / миллиард (attested in running ab.wikipedia text — "140 миллион",
- * "750 миллион шықәса"); a count of 1 is read as the bare noun, parallel to зқьы for 1000.
+ * ⚠ THOUSANDS ARE FUSED for a multiplier of 1–10 (зқьы, ҩнызқь, хнызқь … жәанызқь) and for exactly 100
+ * (шәнызқь); any other multiplier is spelled out plus the separate word нызқь (20 000 ҩажәа нызқь).
+ *
+ * ⚠ CITATION FORM / CLASS AGREEMENT — the one real judgment call. Abkhaz numerals agree with the HUMAN vs
+ * NON-HUMAN class of what they count: the human series is built with -ҩык/-џьара (аӡәы "one person", ҩыџьа "two
+ * people"), the non-human/abstract series is акы, ҩба, хԥа … A bare numeral in a TTS input string has NO counted
+ * noun and therefore no class to agree with, so this compositor emits the NON-HUMAN series throughout — which is
+ * also the series ab.wikipedia's own number articles use to name the numbers themselves, i.e. the citation form a
+ * speaker reads a bare digit string with. Human-class concord would need the noun and is out of scope here.
+ *
+ * Other judgment calls: 7 is authored быжьба (the year articles and Omniglot) where the dictionary table writes
+ * the syncopated бжьба, which also surfaces in the derived 7000 бжьнызқь — both are current, so the fuller stem
+ * is used for the standalone numeral and the source's own form for each derived word. 500 is authored хәышә per
+ * the hundreds list, though the 555/1500 year articles write the syncopated хәшә(и). 10^6 / 10^9 use the Russian
+ * loans миллион / миллиард, attested in running ab.wikipedia text; a count of 1 is read as the bare noun,
+ * parallel to зқьы for 1000.
  */
-
 /** 0–19, the plain series that attaches after a score's -и connective. */
 const SUB20 = [
     "аноль", "акы", "ҩба", "хԥа", "ԥшьба", "хәба", "фба", "быжьба", "ааба", "жәба",
     "жәаба", "жәеиза", "жәаҩа", "жәаха", "жәиԥшь", "жәохә", "жәаф", "жәибжь", "жәаа", "зеижә",
 ];
-/** ★ Score words indexed by the score count 1–4 (= 20, 40, 60, 80); index 0 is unused padding.
+/** Score words indexed by the score count 1–4 (= 20, 40, 60, 80); index 0 is unused padding.
  *  `COMB` is the connective form (final -а → -и) used when a 1–19 remainder follows. */
 const SCORE_BARE = ["", "ҩажәа", "ҩынҩажәа", "хынҩажәа", "ԥшьынҩажәа"];
 const SCORE_COMB = ["", "ҩажәи", "ҩынҩажәи", "хынҩажәи", "ԥшьынҩажәи"];
 /** Round hundreds indexed by the hundreds digit 1–9; `COMB` again takes the -и connective (шәкы → шәи акы). */
 const HUND_BARE = ["", "шәкы", "ҩышә", "хышә", "ԥшьышә", "хәышә", "фышә", "быжьшәы", "аашәы", "жәшәы"];
 const HUND_COMB = ["", "шәи", "ҩышәи", "хышәи", "ԥшьышәи", "хәышәи", "фышәи", "быжьшәи", "аашәи", "жәшәи"];
-/** ★ FUSED thousands for a multiplier of 1–10 (index = the multiplier). */
+/** FUSED thousands for a multiplier of 1–10 (index = the multiplier). */
 const THOUSAND_FUSED = [
     "", "зқьы", "ҩнызқь", "хнызқь", "ԥшьнызқь", "хәнызқь",
     "фнызқь", "бжьнызқь", "аанызқь", "жәнызқь", "жәанызқь",
@@ -64,7 +58,7 @@ const THOUSAND_WORD = "нызқь"; // the separate word used with any other mul
 const MILLION = "миллион";
 const MILLIARD = "миллиард";
 
-/** ★ 0–99 → Abkhaz text. 20–99 is score·20 + remainder, the score in its -и connective form. */
+/** 0–99 → Abkhaz text. 20–99 is score·20 + remainder, the score in its -и connective form. */
 function sub100(n: number): string {
     if (n < 20) return SUB20[n]!;
     const s = Math.floor(n / 20), // 1–4 → ҩажә / ҩынҩажә / хынҩажә / ԥшьынҩажә
@@ -80,7 +74,7 @@ function sub1000(n: number): string {
     return r === 0 ? HUND_BARE[h]! : `${HUND_COMB[h]} ${sub100(r)}`;
 }
 
-/** ★ A thousands group: fused for a multiplier of 1–10 and for 100, otherwise multiplier + нызқь. */
+/** A thousands group: fused for a multiplier of 1–10 and for 100, otherwise multiplier + нызқь. */
 function thousands(count: number): string {
     if (count <= 10) return THOUSAND_FUSED[count]!;
     if (count === 100) return THOUSAND_HUNDRED;
