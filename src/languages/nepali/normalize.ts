@@ -279,8 +279,8 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    THE TRAILING SPACE in each replacement is load-bearing for the same reason: "+30°Cभन्दा"
         //    has a Devanagari postposition welded to the C, and without it सेल्सियस and भन्दा became one
         //    token [selsijʌsbʱˈʌnd̪a]. The double-space collapse at step 13 cleans up the rest.
-        // THE SIGNS. प्लस is the reading for a signed quantity (`UTC+1`, `+30°C`), and ⚠ MUST PRECEDE the
-        //    degree rule below, or `+30°C` has lost its sign by the time the plus rule looks.
+        // THE SIGNS. प्लस is the reading for a signed quantity (`UTC+1`, `+30°C`). The degree rule below
+        //    re-emits the digit it captures, so the two are order-independent.
         //
         //    ⚠ WHETHER A MINUS RULE IS SAFE IS A FACT ABOUT THE TEXT, NOT ABOUT THE GUARD. The shape no guard
         //    can reject is `word · space · hyphen · digit`, indistinguishable from a spaced range or a dashed
