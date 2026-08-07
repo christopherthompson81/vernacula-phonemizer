@@ -2,10 +2,10 @@ import { describe, expect, test } from "vitest";
 
 import { createMaori, phonemizeWord } from "../src/languages/maori/maori.ts";
 
-// Māori (mi) — te reo Māori, Eastern Polynesian, New Zealand (~185k). One of the simplest orthographies in the fleet:
+// Māori (mi) — te reo Māori, Eastern Polynesian, New Zealand (~185k). One of the simplest orthographies anywhere:
 // a near-1:1 phonemic map + the macron = length + two digraphs (⟨wh⟩→ɸ, ⟨ng⟩→ŋ). Strict CV syllables, no glide
-// formation. Validated against wikipron mri_latn_broad (1005 human headwords) — 99.8% FOLDED / 100.0% symbol on the
-// first pass (the only misses are a non-Māori letter glyph). single-source-family.
+// formation. Referee: wikipron mri_latn_broad (human) — the only misses are a non-Māori letter glyph. ⚠ Its two
+// referees are the same Wiktionary tradition, so they are not independent of each other.
 describe("Māori canonical IPA — direct phonemic g2p + macron length + the ⟨wh ng⟩ digraphs", () => {
     const mi = createMaori();
 
@@ -65,10 +65,9 @@ describe("Māori cardinal numbers", () => {
         expect(say(1000000000)).toBe("kotahi piɾiona"); // kotahi piriona
     });
 
-    // Māori had NO normalization of any kind: `text()` ran the tokenizer straight over raw input, and
-    // its classes are letters, digits and clause marks, so `%`, `$` and every unit abbreviation were DELETED.
-    // Every word here is from mi_nz over its 1,994 unique utterances — ōrau ×8, tāra ×6, pauna ×5,
-    // kiromita ×34, mita ×28, pūrua ×18, pūtoru ×3, the rate connective `ia` ×6, me ×726.
+    // ⚠ WITHOUT A NORMALIZATION LAYER, `text()` runs the tokenizer straight over raw input — and its classes
+    // are letters, digits and clause marks, so `%`, `$` and every unit abbreviation are DELETED outright.
+    // Every word emitted below is attested in mi_nz (1,994 unique utterances).
     test("the symbol tier: percent, currency, units and the powers", () => {
         const mi = createMaori();
         expect(mi.text("88%").trim()).toBe("waɾu tekau maː waɾu oːɾau");      // the % was dropped outright

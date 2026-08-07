@@ -5,7 +5,7 @@ import { createMinDong, phonemizeWord } from "../src/languages/mindong/mindong.t
 // Min Dong / Eastern Min (cdo) — Fuzhou dialect, Sinitic, tonal (~9M). A Bàng-uâ-cê (BUC / Foochow Romanized) → IPA
 // converter (the only major Sinitic branch otherwise absent). BUC missionary convention: plain ⟨p t k⟩ = [pʰ tʰ kʰ],
 // ⟨b d g⟩ = [p t k], ⟨c⟩=[t͡s], ⟨ch⟩=[t͡sʰ], ⟨ng⟩=[ŋ]. Validated against BUC↔IPA pairs from the kaikki Chinese dump
-// (Wiktionary Module:cdo-pron output) — 99.9% FOLDED / 100.0% symbol, reference-implementation parity (the referee
+// (Wiktionary Module:cdo-pron output) — ⚠ REFERENCE-IMPLEMENTATION PARITY, not independent agreement (the referee
 // is rule-generated, not human). Segmental + citation tone, with the 韻變 (rime alternation) MODELLED (tight/loose
 // by tone register); tone sandhi, initial assimilation, and the Han front-end deferred.
 describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", () => {

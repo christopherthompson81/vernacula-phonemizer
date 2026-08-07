@@ -25,9 +25,13 @@ await phonemizeAsync("भारत", "hi"); // Devanagari → bʱˈaːɾət̪
 await phonemizeAsync("العربية", "ar"); // Arabic → alʕarabˈijːa
 await phonemizeAsync("Україна", "uk"); // Cyrillic → ukrajina
 await phonemizeAsync("বাংলাদেশ", "bn"); // Bengali → baŋlad̪eʃ
+// Japanese Scripts
 await phonemizeAsync("ひらがな", "ja"); // Hiragana → çiɾäɡäꜜnä
 await phonemizeAsync("カタカナ", "ja"); // Katakana → kätäkänä
 await phonemizeAsync("日本語", "ja"); // Kanji → niho̞ŋɡo̞
+await phonemizeAsync("ਪੰਜਾਬੀ", "pa"); // Gurmukhi → pˈə̃ɲd͡ʒaːbiː
+await phonemizeAsync("فارسی", "fa"); // Perso-Arabic → faːɾsˈiː
+
 
 await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi"); // Tifinagh → taʃlħit
 await phonemizeAsync("𞤆𞤵𞤤𞤢𞥄𞤪", "ff"); // Adlam → pˈulaːɾ
@@ -38,7 +42,7 @@ await phonemizeAsync("Հայերեն", "hy"); // Armenian → hɑjeɾen
 await phonemizeAsync("ქართული", "ka"); // Georgian → kʰaɾtʰuli
 await phonemizeAsync("עברית", "he"); // Hebrew → ʔivʁit
 
-await phonemizeAsync("ਪੰਜਾਬੀ", "pa"); // Gurmukhi → pˈə̃ɲd͡ʒaːbiː
+
 await phonemizeAsync("ગુજરાતી", "gu"); // Gujarati → ɡˈud͡ʒɾat̪i
 
 await phonemizeAsync("ꠍꠤꠟꠐꠤ", "syl"); // Syloti Nagri → silʈi
@@ -50,7 +54,7 @@ await phonemizeAsync("മലയാളം", "ml"); // Malayalam → mˈalajaːɭa
 await phonemizeAsync("සිංහල", "si"); // Sinhala → sˈiŋhələ
 await phonemizeAsync("ᱥᱟᱱᱛᱟᱲᱤ", "sat"); // Ol Chiki → santaɽi
 
-await phonemizeAsync("فارسی", "fa"); // Perso-Arabic → faːɾsˈiː
+
 await phonemizeAsync("አማርኛ", "am"); // Geʽez → amaɾɲa
 await phonemizeAsync("မြန်မာ", "my"); // Myanmar → mja˨ɴma˨
 await phonemizeAsync("လိၵ်ႈတႆး", "shn"); // Shan → lik̚˧˧˨taj˥

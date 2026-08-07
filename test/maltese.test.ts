@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // grapheme scan (the ⟨ie għ⟩ digraphs + the silent-letter rules) + final devoicing + regressive voicing assimilation
 // + affricate gemination + n→m before a labial. Validated against the wikipron mlt_latn_broad referee (15,837 human
 // headwords) — 91.9% FOLDED / 98.0% symbol, with vowel LENGTH (stress-conditioned, ~50% of lines) + għ
-// pharyngealization folded. single-source.
+// pharyngealization folded. ⚠ Single-source: there is no second referee for mt.
 describe("Maltese canonical IPA — grapheme g2p + silent-letter rules + devoicing", () => {
     const mt = createMaltese();
 

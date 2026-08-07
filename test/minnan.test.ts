@@ -64,9 +64,8 @@ describe("min nan (Taiwanese Hokkien) canonical IPA", () => {
 
     test("running Han text: word segmentation + within-word sandhi", () => {
         // 食飯 is a DICT WORD in the ChhoeTaigi rebuild (tsia̍h-pn̄g), so 食 takes its within-word
-        // sandhi tone (8→˨˩), which is how the phrase is actually said. The old expectation
-        // (citation ʔ˥ on 食) was an artifact of the MOE dict lacking the word — 食 and 飯 fell to
-        // separate single-char lookups with citation tones.
+        // sandhi tone (8→˨˩), which is how the phrase is actually said. ⚠ A citation ʔ˥ here would mean the
+        // dict LACKS the word: 食 and 飯 fall to separate single-char lookups, each with its citation tone.
         expect(phonemize("我食飯", "nan")).toBe("ɡu̯a˥˩ t͡ɕi̯aʔ˨˩ pŋ̍˧"); // guá tsia̍h-pn̄g (飯 → syllabic ŋ̍)
     });
 });
