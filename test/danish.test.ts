@@ -36,7 +36,9 @@ describe("Danish canonical IPA", () => {
         expect(phonemizeWordRules("rolig")).toBe("ʁˈoli"); // final ⟨g⟩ after vowel → silent
     });
 
-    // CARDINAL NUMBERS — Danish is the fleet's VIGESIMAL (base-20) outlier above 40 AND units-first with "og".
+    // CARDINAL NUMBERS — ⚠ Danish is VIGESIMAL (base-20) above 40 AND units-first with "og", so a decimal
+    // Germanic composer gets 50–90 wrong in a way no amount of unit-table fixing reaches. (Faroese carries
+    // the same borrowed tens as a secondary layer but composes DECIMALLY — see test/faroese.test.ts.)
     // The 50–90 tens are the lexicalised contractions of the base-20 multiplicatives: halvtreds = halvtredje-sinds-
     // tyve "half-third × 20", tres = "three × 20", halvfjerds "half-fourth × 20", firs "four × 20", halvfems
     // "half-fifth × 20". Source: Wiktionary Appendix:Danish numerals + Dansk Sprognævn for the "og" between
@@ -71,10 +73,9 @@ describe("Danish canonical IPA", () => {
         expect(phonemize("90", "da").trim()).toBe("halˈfɛmˀs"); // halvfems
         expect(phonemize("1000", "da").trim()).toBe("ˈɛd ˈtuːˀsen"); // et tusind
     });
-
 });
 
-// the normalization layer. Every count is measured over the FLEURS da_dk corpus (column 3), and
+// TEXT NORMALIZATION. Every count is measured over the FLEURS da_dk corpus (column 3), and
 // every emitted word is in da-lexicon.tsv at reference quality.
 describe("danish normalization", () => {
     // ⚠ The period is a THOUSANDS SEPARATOR in Danish (99 instances) — the German convention. In Norwegian
@@ -97,7 +98,7 @@ describe("danish normalization", () => {
         expect(normalizeDanish("23 km²")).toBe("23 kvadratkilometer");
     });
 
-    test("ordinal dot — the largest defect, 112 instances", () => {
+    test("a dotted numeral is an ORDINAL (112 instances), except at a sentence end", () => {
         expect(normalizeDanish("3. maj")).toBe("tredje maj");
         expect(normalizeDanish("18. århundrede")).toBe("attende århundrede");
         expect(normalizeDanish("I 1990. Han kom")).toBe("I 1990. Han kom"); // a sentence end survives
@@ -134,9 +135,9 @@ describe("danish normalization", () => {
         expect(normalizeDanish("Dansk er et sprog.")).toBe("Dansk er et sprog.");
     });
 
-    // ADOPTED THE SHARED TIER for units and rates. Danish predates it and reads unit abbreviations
-    // from the LEXICON (`km` → kiloˈmeːˀdɐ), which handles a TOKEN and can never compose across a slash: the
-    // denominator reached the IPA as a LETTER NAME. Note `km/t` — Danish `t` is *time* (hour), ×8 in the
+    // ⚠ UNITS AND RATES MUST USE THE SHARED TIER, not the lexicon. Reading a unit abbreviation from the
+    // LEXICON (`km` → kiloˈmeːˀdɐ) handles a TOKEN and can never compose across a slash, so the denominator
+    // reaches the IPA as a LETTER NAME. Note `km/t` — Danish `t` is *time* (hour), ×8 in the
     // corpus against `km/h` ×0 — and that `km`/`kilometer` phonemize identically, so the plain reading is
     // untouched. Words from the corpus: kilometer ×8, meter ×4, `i timen` ×7, `i sekundet` ×3.
     test("units and rates through the shared tier", () => {

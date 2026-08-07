@@ -4,8 +4,8 @@ import { phonemizeWord, createDutch } from "../src/languages/dutch/dutch.ts";
 
 // Canonical-IPA goldens for Dutch / Nederlands (nl) — Northern Standard Dutch, West Germanic, Latin. Cleanroom
 // rule-based g2p: open/closed-syllable vowel length, the Dutch diphthongs, g→ɣ (onset) / x (coda), w→ʋ, h→ɦ,
-// final devoicing, unstressed ⟨e⟩→schwa. Validated at ~61% vs kaikki nl + wikipron nld broad (both Wiktionary-
-// derived, name/loanword-heavy).
+// final devoicing, unstressed ⟨e⟩→schwa. ⚠ Referees: kaikki nl + wikipron nld broad — BOTH Wiktionary-derived,
+// so they are not independent of each other, and both are name/loanword-heavy.
 describe("Dutch canonical IPA", () => {
     test("open/closed syllable vowel length (tense vs lax)", () => {
         expect(phonemizeWord("water")).toBe("ʋˈaːtər"); // open a → aː
