@@ -56,17 +56,6 @@ function reorder(w: string): string {
     return out.join("");
 }
 
-interface Syl {
-    onset: string; // IPA
-    cls: Cls;
-    quality: string; // vowel IPA (no length)
-    long: boolean;
-    glide: string; // diphthong offglide or vowel-derived coda (j/w/m)
-    coda: string; // IPA coda
-    mark: string; // tone mark char
-    live: boolean;
-}
-
 // After reorder, resolve the vowel PATTERN around a consonant. Returns [quality, long, glide, consumedTail].
 // `pre` = a leading vowel now sitting AFTER the consonant (ເ ແ ໂ ໄ ໃ), `signs` = the following sign string.
 // This is the crux of Lao g2p.
