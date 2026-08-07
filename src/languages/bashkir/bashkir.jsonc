@@ -1,0 +1,31 @@
+// Native canonical-IPA data manifest for Bashkir (ba) — Башҡорт теле, Kipchak Turkic (Tatar's closest
+// sibling, ~1.2M), CYRILLIC (the Bashkir alphabet). The engine (bashkir.ts) is a Cyrillic grapheme scan.
+// Bashkir's HALLMARK is the INTERDENTAL fricatives ⟨ҫ⟩→[θ] and ⟨ҙ⟩→[ð] (shared with Turkmen). Unlike Tatar,
+// Bashkir WRITES the uvulars ⟨ҡ⟩→[q] / ⟨ғ⟩→[ʁ] (so ⟨к⟩→[k], ⟨г⟩→[ɡ] always — no harmony inference). The
+// BASHKIR VOWEL SHIFT: ⟨и⟩→[i], ⟨о⟩→[ʊ], ⟨у⟩→[u], ⟨е⟩→[ɪ] (bare; [jɪ] word-initial), ⟨ы⟩→[ɯ], ⟨ө⟩→[ø],
+// ⟨ү⟩→[y], ⟨ә⟩→[æ]. Word-final (oxytone) stress — the Turkic default. Context rules (dark/clear ⟨л⟩, the
+// ⟨у ү е⟩ position splits, RUSSIAN-LOAN routing via vowel-harmony violation) are code, in bashkir.ts.
+// ⚠ SINGLE-SOURCE: kaikki is the only referee, and it is noisy — its Bashkir entries include Russian loans
+// transcribed inconsistently, so a disagreement with it is as likely to be the referee's.
+{
+    "language": "ba",
+    "name": "Bashkir (Башҡорт теле)",
+    "script": ["Cyrillic"],
+
+    // Context-free consonants. ⟨ҡ⟩/⟨ғ⟩ are the written uvulars; ⟨ҫ⟩/⟨ҙ⟩ the interdentals; ⟨р⟩→[ɾ] tap.
+    // ⟨л⟩ (dark/clear by harmony) is handled in bashkir.ts, not here.
+    "consonants": {
+        "б": "b", "в": "w", "г": "ɡ", "ғ": "ʁ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "ҡ": "q",
+        "м": "m", "н": "n", "ң": "ŋ", "п": "p", "р": "ɾ", "с": "s", "ҫ": "θ", "т": "t", "ф": "f",
+        "х": "χ", "һ": "h", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ɕː", "ҙ": "ð",
+    },
+
+    // Vowels (the Bashkir shift). ⟨у ү⟩ are vowels in onset but the glide [w] after a vowel (diphthong ау→ɑw)
+    // and ⟨е⟩ is [ɪ] except word-initial/post-vowel → [jɪ] — those position rules are code, in bashkir.ts.
+    "vowels": {
+        "а": "ɑ", "ә": "æ", "о": "ʊ", "ө": "ø", "у": "u", "ү": "y", "ы": "ɯ", "и": "i", "э": "ɪ",
+    },
+
+    // Iotated vowels → glide + vowel.
+    "iotated": { "я": "jɑ", "ю": "ju", "ё": "jo" },
+}

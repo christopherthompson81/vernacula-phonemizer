@@ -20,36 +20,19 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Base letter + MODIFIER (⟨ь⟩ palatal / ⟨ә⟩ labial / ⟨'⟩ pharyngeal) → the specific IPA cluster (from the Wiktionary
-// letter-definitions). Longest-match: trigraphs (х'ә) before 2-char before base. Any base+ь/ә not here falls back to
-// base+[ʲ]/[ʷ] (handled in code).
-const CLUSTER: Record<string, string> = {
-    "х'ә": "χˤʷ",
-    // ⚠ Palatalized DORSALS are dorsal + [ʲ], NOT the devoiced palatal-place symbols the wikipron letter-definitions
-    // give: the corpus uses ɡʲ/kʼʲ/kʰʲ/χʲ, matching the already-correct ҟь→qʼʲ and ӷь→ʁʲ. ⟨г⟩ is voiced, so гь
-    // cannot be [c].
-    "гь": "ɡʲ", "гә": "ɡʷ", "дә": "dʷ", "жь": "ʒ", "жә": "ʒʷ", "кь": "kʼʲ", "кә": "kʼʷ", "тә": "tʷʼ",
-    "хь": "χʲ", "хә": "χʷ", "ць": "t͡ɕʰ", "цә": "t͡ɕʷʰ", "шь": "ʃ", "шә": "ʃʷ", "ҙә": "ʑʷ",
-    "қь": "kʰʲ", "қә": "kʷʰ", "ҟь": "qʼʲ", "ҟә": "qʼʷ", "ҭә": "tʷʰ", "ҳә": "ħʷ", "ҵь": "t͡ɕʼ", "ҵә": "t͡ɕʼʷ",
-    "ӡь": "d͡ʑ", "ӡә": "d͡ʑʷ", "ӷь": "ʁʲ", "ӷә": "ʁʷ", "ҕь": "ʁʲ", "ҕә": "ʁʷ", "ҫә": "ɕʷ", "џь": "d͡ʒ",
-    "чь": "t͡ɕʰ", "ҷь": "t͡ɕʼ", "х'": "χˤ",
-};
-// Base letters (single Cyrillic). The three-way stop/affricate series + the NW-Caucasian extras.
-const BASE: Record<string, string> = {
-    "а": "a", "б": "b", "в": "v", "г": "ɡ", "д": "d", "е": "e", "ж": "ʐ", "з": "z", "и": "i", "й": "j",
-    "к": "kʼ", "л": "l", "м": "m", "н": "n", "о": "o", "п": "pʼ", "р": "r", "с": "s", "т": "tʼ", "у": "w",
-    "ф": "f", "х": "χ", "ц": "t͡sʰ", "ч": "t͡ʃʰ", "ш": "ʂ", "ы": "ə", "э": "e", "ю": "ju", "я": "ja",
-    "ҕ": "ʁ", "ӷ": "ʁ", "ҙ": "ʑ", "ӡ": "d͡z", "қ": "kʰ", "ӄ": "kʰ", "ҟ": "qʼ", "ҧ": "pʰ", "ԥ": "pʰ",
-    "ҩ": "ɥ", "ҫ": "ɕ", "ҭ": "tʰ", "ҳ": "ħ", "ҵ": "t͡sʼ", "ҷ": "t͡ʃʼ", "ҽ": "t͡ʂʰ", "ҿ": "t͡ʂʼ", "џ": "d͡ʐ",
-    // Extended / historical Abkhaz Cyrillic letters (older orthographies):
-    "ԡ": "lʰ", "ԣ": "nʰ", "ԫ": "d͡ʒ", "ԭ": "d͡ʑ",
-    "ꚁ": "dʷ", "ꚃ": "d͡ʑʷ", "ꚅ": "ʒʷ", "ꚇ": "t͡ʂʰ", "ꚉ": "d͡z", "ꚋ": "tʰ", "ꚍ": "tʷʰ", "ꚏ": "t͡ɕʷʰ",
-    "ꚑ": "t͡sʼ", "ꚓ": "t͡ʃʼ", "ꚕ": "ħʷ", "ꚗ": "ʃʷ",
-    // ⟨ъ⟩ hard sign dropped; ⟨ь⟩/⟨ә⟩ handled as modifiers below.
-};
-const MODIFIER: Record<string, string> = { "ь": "ʲ", "ә": "ʷ", "'": "ˤ" };
+interface AbkhazDef {
+    clusters: Record<string, string>;
+    base: Record<string, string>;
+    modifiers: Record<string, string>;
+}
+const DEF = loadManifest<AbkhazDef>(import.meta.url, "abkhaz.jsonc");
+// Letter tables (abkhaz.jsonc): base+modifier clusters, base letters, and the generic modifier fallbacks.
+const CLUSTER = DEF.clusters;
+const BASE = DEF.base;
+const MODIFIER = DEF.modifiers;
 // The vowel letters (used for the ⟨у⟩/⟨и⟩ glide-vs-syllabic rule).
 const VOWEL_LETTER = new Set([..."аыеоуи"]);
 

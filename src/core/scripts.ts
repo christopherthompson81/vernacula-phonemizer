@@ -174,7 +174,6 @@ export const MANIFESTLESS_SCRIPTS: Readonly<Record<string, readonly string[]>> =
     bgc: ["Devanagari"],                    // Haryanvi, on the Hindi engine
     pnb: ["Arabic"], skr: ["Arabic"],       // Western Punjabi + Saraiki, both Shahmukhi
     // Single-.ts engines with no manifest.
-    ab: ["Cyrillic"], ba: ["Cyrillic"], chv: ["Cyrillic"], nog: ["Cyrillic"], tt: ["Cyrillic"],
     bo: ["Tibetan"], chr: ["Cherokee"], grc: ["Greek"], lo: ["Lao"], sat: ["Ol Chiki"],
     shn: ["Myanmar"],                       // the Shan abugida is a Myanmar-script variant (U+1075–U+108F)
     crh: ["Latin"], ee: ["Latin"], eu: ["Latin"], fo: ["Latin"], kaa: ["Latin"], kl: ["Latin"],
@@ -186,21 +185,16 @@ export const MANIFESTLESS_SCRIPTS: Readonly<Record<string, readonly string[]>> =
  * Languages whose PRIMARY script is Cyrillic — the tie-break for `foldCyrillicConfusables`, which needs to know
  * whether the HOST language is Cyrillic when a word's own letters split evenly (`рaсa`, 2 and 2).
  *
- * ⚠ THIS CANNOT BE DERIVED FROM THE MANIFESTS ALONE, and the gap is why it is written out here. Only 136 of the
- * engines ship a `.jsonc` at all — ab, ba, chv, nog and tt are pure `.ts` engines with no manifest to declare
- * anything — so a manifest scan finds 10 of the 15 and silently misses five real Cyrillic languages. The
- * manifests stay authoritative WHERE THEY EXIST: test/cyrillic-confusables.test.ts asserts every manifest
- * declaring a Cyrillic-primary script appears here, so a new one cannot be forgotten, and names the
- * manifest-less five explicitly so the extra entries are accounted for rather than unexplained.
+ * The manifests are authoritative — every Cyrillic-led entry here has a manifest whose `script` array leads
+ * with "Cyrillic" — but the set is written out rather than derived at import time so that the fold does not
+ * pay a 190-file directory scan on startup. test/cyrillic-confusables.test.ts asserts the two agree in both
+ * directions, so a new Cyrillic-primary manifest cannot be forgotten and a stale entry cannot linger.
  *
  * `sr` and `kk` declare "Cyrillic/Latin" and are included — Cyrillic leads, so it is the primary. `bs` declares
  * "Latin + Cyrillic" and `uz` "Latin/Cyrillic", both Latin-led, and are NOT included.
  */
 export const CYRILLIC_HOSTS: ReadonlySet<string> = new Set([
-    // declared Cyrillic-primary in a manifest
-    "be", "bg", "kk", "ky", "mk", "mn", "ru", "sr", "tg", "uk",
-    // no manifest exists — engine is a single .ts
-    "ab", "ba", "chv", "nog", "tt",
+    "ab", "ba", "be", "bg", "chv", "kk", "ky", "mk", "mn", "nog", "ru", "sr", "tg", "tt", "uk",
 ]);
 
 export function scriptOf(run: string): ScriptName | undefined {

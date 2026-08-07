@@ -9,22 +9,20 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { phonemizeWord as russianWord } from "../russian/russian.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Context-free consonants. ⟨ҡ⟩/⟨ғ⟩ are the written uvulars; ⟨ҫ⟩/⟨ҙ⟩ the interdentals; ⟨р⟩→[ɾ] tap; ⟨л⟩ dark/clear below.
-const CONS: Record<string, string> = {
-    "б": "b", "в": "w", "г": "ɡ", "ғ": "ʁ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "ҡ": "q",
-    "м": "m", "н": "n", "ң": "ŋ", "п": "p", "р": "ɾ", "с": "s", "ҫ": "θ", "т": "t", "ф": "f",
-    "х": "χ", "һ": "h", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ɕː", "ҙ": "ð",
-};
-// Vowels (the Bashkir shift). ⟨у ү⟩ are vowels in onset but the glide [w] after a vowel (diphthong ау→ɑw); ⟨е⟩ is
-// [ɪ] except word-initial/post-vowel → [jɪ].
-const VOWEL: Record<string, string> = {
-    "а": "ɑ", "ә": "æ", "о": "ʊ", "ө": "ø", "у": "u", "ү": "y", "ы": "ɯ", "и": "i", "э": "ɪ",
-};
-// Iotated vowels → glide + vowel.
-const IOTATED: Record<string, string> = { "я": "jɑ", "ю": "ju", "ё": "jo" };
+interface BashkirDef {
+    consonants: Record<string, string>;
+    vowels: Record<string, string>;
+    iotated: Record<string, string>;
+}
+const DEF = loadManifest<BashkirDef>(import.meta.url, "bashkir.jsonc");
+// Letter → IPA tables (bashkir.jsonc). The position-dependent letters (⟨л у ү е⟩) are handled in the scan below.
+const CONS = DEF.consonants;
+const VOWEL = DEF.vowels;
+const IOTATED = DEF.iotated;
 const CYR_VOWEL = new Set([..."аәоөуүыиэеяюё"]);
 const BACK = new Set([..."аоуы"]); // back-harmony vowels — govern the dark ⟨л⟩→[ɫ]
 const IPA_VOWEL = new Set([..."ɑæʊøɯɪyiuo"]); // every vowel the scan emits (а→ɑ ә→æ о→ʊ ө→ø ы→ɯ э/е→ɪ ү→y и→i у/ю→u ё→o)

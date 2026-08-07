@@ -1,0 +1,41 @@
+// Native canonical-IPA data manifest for Chuvash (chv) — Чӑвашла / Чӑваш чӗлхи, the SOLE surviving Oghur
+// (Bulgaric) Turkic language (the deepest split in Turkic — sister to every Common-Turkic language,
+// tr/az/tk/tt/ba/kk), ~1M (Chuvashia, Russia), CYRILLIC (the Chuvash alphabet + ⟨ӑ ӗ ҫ ӳ⟩). The engine
+// (chuvash.ts) is a Cyrillic grapheme scan with two Chuvash signatures:
+//   ⚠ ALLOPHONIC VOICING — Chuvash has NO phonemic voicing contrast: the voiceless letters ⟨п т к ч с ҫ ш х⟩
+//     voice to [b d ɡ d͡ʑ z ʑ ʐ ɣ] between vowels, after a NASAL/glide, or after a LIQUID before a FULL vowel
+//     (апат→aˈbat, ача→aˈd͡ʑa, манпа→manˈba, вӑлсем→ʋəlˈzem). A GEMINATE (doubled letter) is the underlying
+//     "strong" consonant and BLOCKS voicing → single long [Cː] (иккӗ→ˈikːɘ).
+//   ⚠ REDUCED-VOWEL STRESS — the two reduced vowels ⟨ӑ⟩→[ə], ⟨ӗ⟩→[ɘ] cannot bear stress; stress falls on the
+//     last FULL vowel, else (all-reduced) on the first syllable (вӑлсем→ʋəlˈzem, сӑмах→səˈmax, vs вӑкӑр→ˈvəɡər).
+// Both rules, the ⟨е⟩ [je]/[e] split and gemination are code, in chuvash.ts; the letter tables live here.
+// ⚠ SINGLE-SOURCE: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}}
+// pairs; no wikipron/epitran chv).
+{
+    "language": "chv",
+    "name": "Chuvash (Чӑвашла)",
+    "script": ["Cyrillic"],
+
+    // Onset (default, pre-voicing) consonants. ⟨в⟩→[ʋ] (labial approximant; ~[w] in a coda), ⟨х⟩→[χ]
+    // (uvular), ⟨ҫ⟩→[ɕ].
+    "onset": {
+        "б": "b", "в": "ʋ", "г": "ɡ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "л": "l",
+        "м": "m", "н": "n", "ҥ": "ŋ", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "χ",
+        "ц": "t͡s", "ч": "t͡ɕ", "ш": "ʂ", "щ": "ɕ", "ҫ": "ɕ", "һ": "h",
+    },
+
+    // The intervocalic / post-sonorant VOICED allophone of each of the eight native voiceless obstruents
+    // (the Chuvash voicing rule), keyed by the ONSET IPA. ⟨ф⟩ and ⟨ц⟩ are Russian-loan-only letters —
+    // excluded: loans don't undergo Chuvash allophonic voicing.
+    "voiced": {
+        "p": "b", "t": "d", "k": "ɡ", "t͡ɕ": "d͡ʑ", "s": "z", "ɕ": "ʑ", "ʂ": "ʐ", "χ": "ɣ",
+    },
+
+    // Vowels. ⟨ӑ⟩→[ə] and ⟨ӗ⟩→[ɘ] are the two REDUCED vowels (cannot bear stress); ⟨е⟩ is [je]
+    // initial/post-vowel (position rule in chuvash.ts).
+    "vowels": {
+        "а": "a", "е": "e", "и": "i", "о": "o", "у": "u", "ы": "ɯ", "э": "e", "ӑ": "ə", "ӗ": "ɘ", "ӳ": "y",
+    },
+
+    "iotated": { "я": "ja", "ю": "ju", "ё": "jo" },
+}

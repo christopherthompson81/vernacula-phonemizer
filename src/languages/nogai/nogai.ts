@@ -19,24 +19,21 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Plain (context-free) single-letter consonants. ⟨в⟩ (coda-w) and the digraphs are handled in the scan.
-const CONS: Record<string, string> = {
-    б: "b", г: "ɡ", д: "d", ж: "ʒ", з: "z", й: "j", к: "k", л: "l", м: "m", н: "n",
-    п: "p", р: "r", с: "s", т: "t", ф: "f", х: "x", ц: "t͡s", ч: "t͡ʃ", ш: "ʃ", щ: "ʃː",
-};
-// Simple vowels → IPA. ⟨ы⟩ is the back unrounded [ɯ] (Kipchak); ⟨э⟩ merges with ⟨е⟩ → [e].
-const VOWEL: Record<string, string> = { а: "a", о: "o", у: "u", ы: "ɯ", и: "i", е: "e", э: "e" };
-// Iotated vowels → glide + vowel.
-const IOTATED: Record<string, string> = { я: "ja", ю: "ju", ё: "jo" };
-// Two-character digraphs (checked before the single-letter maps). Front vowels use the soft sign ь; the back
-// consonants + velar nasal use the hard sign ъ; ⟨дж⟩ is two full letters.
-// ⟨дж⟩ is NOT one of the 39 standard Nogai letters (Nogai keeps [j], written ⟨й⟩, where Kazakh/Karakalpak have ж) —
-// it is a defensive mapping for the occasional loan д+ж adjacency, not a distinctive Nogai grapheme.
-const DIGRAPH: Record<string, string> = {
-    аь: "æ", оь: "ø", уь: "y", гъ: "ʁ", къ: "q", нъ: "ŋ", дж: "d͡ʒ",
-};
+interface NogaiDef {
+    consonants: Record<string, string>;
+    vowels: Record<string, string>;
+    iotated: Record<string, string>;
+    digraphs: Record<string, string>;
+}
+const DEF = loadManifest<NogaiDef>(import.meta.url, "nogai.jsonc");
+// Letter → IPA tables (nogai.jsonc). The position-dependent ⟨в е ъ⟩ are handled in the scan below.
+const CONS = DEF.consonants;
+const VOWEL = DEF.vowels;
+const IOTATED = DEF.iotated;
+const DIGRAPH = DEF.digraphs;
 const CYR_VOWEL = new Set(["а", "о", "у", "ы", "и", "е", "э", "я", "ю", "ё", "аь", "оь", "уь"]);
 const IPA_VOWEL = new Set(["a", "æ", "o", "ø", "u", "y", "ɯ", "i", "e"]);
 const STRESS_NASAL = new Set(["m", "n", "ŋ"]);

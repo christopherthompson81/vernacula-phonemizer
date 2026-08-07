@@ -1,0 +1,52 @@
+// Native canonical-IPA data manifest for Abkhaz (ab) — аҧсуа бызшәа, NORTHWEST CAUCASIAN (~190k, Abkhazia).
+// One of the LARGEST CONSONANT INVENTORIES in the world (~58, with LABIALIZED, PALATALIZED, PHARYNGEALIZED
+// and EJECTIVE series) and only TWO phonemic vowels (⟨а⟩→[a], ⟨ы⟩→[ə]). The Cyrillic alphabet writes the
+// consonants with base letters + MODIFIER letters:
+//   ⚠ ⟨ь⟩ PALATALIZES to a dorsal+[ʲ] (гь→[ɡʲ], хь→[χʲ]), ⟨ә⟩ LABIALIZES (гә→[ɡʷ], шә→[ʃʷ]), ⟨'⟩
+//     PHARYNGEALIZES (х'→[χˤ]).
+//   ⚠ THREE-WAY stops/affricates — voiced / aspirated / ejective: ⟨г қ к⟩→[ɡ kʰ kʼ], ⟨д ҭ т⟩→[d tʰ tʼ],
+//     ⟨б ҧ п⟩→[b pʰ pʼ], ⟨ӡ ц ҵ⟩→[d͡z t͡sʰ t͡sʼ], ⟨џ ч ҷ⟩→[d͡ʐ t͡ʃʰ t͡ʃʼ]; the uvular ⟨ҟ⟩→[qʼ], the
+//     pharyngeal ⟨ҳ⟩→[ħ].
+// The scan (abkhaz.ts) is longest-match over these tables — trigraph, then base+modifier, then base — with
+// the ⟨у⟩/⟨и⟩ glide-vs-syllabic split in code. Numbers are VIGESIMAL (base-20), composed by numbers.ts.
+// ⚠ THE REFEREE IS PARTLY CIRCULAR. wikipron abk_cyrl and kaikki Abkhaz both cover this language well, but
+// much of what they carry is the letter and digraph DEFINITIONS this engine is built from — so agreement
+// with them is close to reference-parity rather than independent confirmation. Their narrow transcriptions
+// are also internally inconsistent, which is why the tables here follow the corpus where the two disagree.
+{
+    "language": "ab",
+    "name": "Abkhaz (аҧсуа бызшәа)",
+    "script": ["Cyrillic"],
+
+    // Base letter + MODIFIER (⟨ь⟩ palatal / ⟨ә⟩ labial / ⟨'⟩ pharyngeal) → the specific IPA cluster (from
+    // the Wiktionary letter-definitions). Longest-match: trigraphs (х'ә) before 2-char before base. Any
+    // base+ь/ә not here falls back to base+[ʲ]/[ʷ] (handled in abkhaz.ts).
+    "clusters": {
+        "х'ә": "χˤʷ",
+        // ⚠ Palatalized DORSALS are dorsal + [ʲ], NOT the devoiced palatal-place symbols the wikipron
+        // letter-definitions give: the corpus uses ɡʲ/kʼʲ/kʰʲ/χʲ, matching the already-correct ҟь→qʼʲ and
+        // ӷь→ʁʲ. ⟨г⟩ is voiced, so гь cannot be [c].
+        "гь": "ɡʲ", "гә": "ɡʷ", "дә": "dʷ", "жь": "ʒ", "жә": "ʒʷ", "кь": "kʼʲ", "кә": "kʼʷ", "тә": "tʷʼ",
+        "хь": "χʲ", "хә": "χʷ", "ць": "t͡ɕʰ", "цә": "t͡ɕʷʰ", "шь": "ʃ", "шә": "ʃʷ", "ҙә": "ʑʷ",
+        "қь": "kʰʲ", "қә": "kʷʰ", "ҟь": "qʼʲ", "ҟә": "qʼʷ", "ҭә": "tʷʰ", "ҳә": "ħʷ", "ҵь": "t͡ɕʼ", "ҵә": "t͡ɕʼʷ",
+        "ӡь": "d͡ʑ", "ӡә": "d͡ʑʷ", "ӷь": "ʁʲ", "ӷә": "ʁʷ", "ҕь": "ʁʲ", "ҕә": "ʁʷ", "ҫә": "ɕʷ", "џь": "d͡ʒ",
+        "чь": "t͡ɕʰ", "ҷь": "t͡ɕʼ", "х'": "χˤ",
+    },
+
+    // Base letters (single Cyrillic). The three-way stop/affricate series + the NW-Caucasian extras.
+    "base": {
+        "а": "a", "б": "b", "в": "v", "г": "ɡ", "д": "d", "е": "e", "ж": "ʐ", "з": "z", "и": "i", "й": "j",
+        "к": "kʼ", "л": "l", "м": "m", "н": "n", "о": "o", "п": "pʼ", "р": "r", "с": "s", "т": "tʼ", "у": "w",
+        "ф": "f", "х": "χ", "ц": "t͡sʰ", "ч": "t͡ʃʰ", "ш": "ʂ", "ы": "ə", "э": "e", "ю": "ju", "я": "ja",
+        "ҕ": "ʁ", "ӷ": "ʁ", "ҙ": "ʑ", "ӡ": "d͡z", "қ": "kʰ", "ӄ": "kʰ", "ҟ": "qʼ", "ҧ": "pʰ", "ԥ": "pʰ",
+        "ҩ": "ɥ", "ҫ": "ɕ", "ҭ": "tʰ", "ҳ": "ħ", "ҵ": "t͡sʼ", "ҷ": "t͡ʃʼ", "ҽ": "t͡ʂʰ", "ҿ": "t͡ʂʼ", "џ": "d͡ʐ",
+        // Extended / historical Abkhaz Cyrillic letters (older orthographies):
+        "ԡ": "lʰ", "ԣ": "nʰ", "ԫ": "d͡ʒ", "ԭ": "d͡ʑ",
+        "ꚁ": "dʷ", "ꚃ": "d͡ʑʷ", "ꚅ": "ʒʷ", "ꚇ": "t͡ʂʰ", "ꚉ": "d͡z", "ꚋ": "tʰ", "ꚍ": "tʷʰ", "ꚏ": "t͡ɕʷʰ",
+        "ꚑ": "t͡sʼ", "ꚓ": "t͡ʃʼ", "ꚕ": "ħʷ", "ꚗ": "ʃʷ",
+        // ⟨ъ⟩ hard sign dropped; ⟨ь⟩/⟨ә⟩ handled as modifiers in abkhaz.ts.
+    },
+
+    // A modifier standing after a base with no CLUSTER entry → the generic modifier IPA is appended.
+    "modifiers": { "ь": "ʲ", "ә": "ʷ", "'": "ˤ" },
+}

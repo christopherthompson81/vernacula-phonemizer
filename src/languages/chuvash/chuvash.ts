@@ -15,24 +15,21 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Onset (default, pre-voicing) consonants. ⟨в⟩→[ʋ] (labial approximant; ~[w] in a coda), ⟨х⟩→[χ] (uvular), ⟨ҫ⟩→[ɕ].
-const ONSET: Record<string, string> = {
-    "б": "b", "в": "ʋ", "г": "ɡ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "л": "l",
-    "м": "m", "н": "n", "ҥ": "ŋ", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "χ",
-    "ц": "t͡s", "ч": "t͡ɕ", "ш": "ʂ", "щ": "ɕ", "ҫ": "ɕ", "һ": "h",
-};
-// The intervocalic / post-sonorant VOICED allophone of each of the eight native voiceless obstruents (the Chuvash
-// voicing rule). ⟨ф⟩ and ⟨ц⟩ are Russian-loan-only letters — excluded: loans don't undergo Chuvash allophonic voicing.
-const VOICE: Record<string, string> = {
-    "p": "b", "t": "d", "k": "ɡ", "t͡ɕ": "d͡ʑ", "s": "z", "ɕ": "ʑ", "ʂ": "ʐ", "χ": "ɣ",
-};
-// Vowels. ⟨ӑ⟩→[ə] and ⟨ӗ⟩→[ɘ] are the two REDUCED vowels (cannot bear stress); ⟨е⟩ is [je] initial/post-vowel below.
-const VOWEL: Record<string, string> = {
-    "а": "a", "е": "e", "и": "i", "о": "o", "у": "u", "ы": "ɯ", "э": "e", "ӑ": "ə", "ӗ": "ɘ", "ӳ": "y",
-};
-const IOTATED: Record<string, string> = { "я": "ja", "ю": "ju", "ё": "jo" };
+interface ChuvashDef {
+    onset: Record<string, string>;
+    voiced: Record<string, string>;
+    vowels: Record<string, string>;
+    iotated: Record<string, string>;
+}
+const DEF = loadManifest<ChuvashDef>(import.meta.url, "chuvash.jsonc");
+// Letter → IPA tables (chuvash.jsonc). The voicing/stress/⟨е⟩/gemination rules are the scan below.
+const ONSET = DEF.onset;
+const VOICE = DEF.voiced;
+const VOWEL = DEF.vowels;
+const IOTATED = DEF.iotated;
 const CYR_VOWEL = new Set([..."аеиоуыэёюяӑӗӳ"]);
 // Voicing triggers (before a vowel). The nasals ⟨н м ҥ⟩ and the glide ⟨й⟩ trigger voicing UNCONDITIONALLY, like an
 // intervocalic vowel (манпа→manˈba, мӗншӗн→ˈmŏnʐɘn before a REDUCED vowel, айта→ajˈda). The liquids ⟨р л⟩ trigger it
