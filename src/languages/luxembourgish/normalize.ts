@@ -33,16 +33,16 @@ import { applyEifelerRegel, numberToWords } from "./numbers.ts";
 
 /** All twelve. ⚠ `Mee` is capitalised on purpose — lowercase *mee* is the conjunction "but". */
 const MONTHS = "Januar|Februar|Mäerz|Abrëll|Mee|Juni|Juli|August|September|Oktober|November|Dezember";
-/** The nouns that follow a digit ordinal: Joerhonnert and the months. */
+/** The nouns that follow a digit ordinal: the months, plus Joerhonnert and its relatives. */
 const ORDINAL_NOUN = `${MONTHS}|Joerhonnert|Joerhonnerts|Joerdausend`;
 /**
  * Determiners, possessives and preposition+article contractions that license an ordinal reading. The
  * common ones are each attested BEFORE a digit ordinal; the rest of the paradigm is included because it
  * is the same closed class.
- * ⚠ DELIBERATELY EXCLUDED: the copula. `ass 15. beim Männer-Super-G` IS a real ordinal (the same phrase is
- * spelled out elsewhere — *ass néngte beim Männer-Super-G*), but licensing off a verb turns every
- * sentence-final numeral into an ordinal. So does `Joer`, which precedes two sentence-final years. One
- * instance is not worth a guard that fires on shapes nobody counted.
+ * ⚠ DELIBERATELY EXCLUDED: the copula. `ass 15. beim Männer-Super-G` IS a real ordinal — the same frame
+ * appears spelled out, *ass néngte beim Männer-Super-G* — but licensing off a verb turns every
+ * sentence-final numeral into an ordinal. `Joer` is excluded for the same reason: it precedes
+ * sentence-final years, which must stay cardinal. One instance is not worth a guard that broad.
  */
 const LICENSER = new Set([
     "de", "den", "dem", "der", "dat", "déi", "d'", "d’", "am", "um", "vum", "zum", "nom", "beim",
@@ -162,8 +162,9 @@ export function normalizeLuxembourgish(input: string): string {
     let s = input;
 
     // 1) DE-GROUP THOUSANDS — first, before anything reads a period or a space as a boundary. Both the
-    //    period form (`1.000 $`) and the SPACE form (`9 000`) group here; left alone, each separator
-    //    becomes a phrase break plus a spurious "null". ⚠ MUST PRECEDE the clock rule, because
+    //    period form (`1.000 $`) and the SPACE form (`9 000`) group here. Left alone the period becomes a
+    //    phrase break AND a spurious "null" (*eent . null*), the space just the spurious "null"
+    //    (*néng null*). ⚠ MUST PRECEDE the clock rule, because
     //    `1.000`/`2.500`/`130.000`/`7.000` each contain a `\d{1,2}\.\d{2}` prefix that would otherwise be
     //    claimed as a time — which is exactly this language's period ambiguity, resolved by requiring
     //    EXACTLY THREE digits after the dot for grouping and TWO for a clock.
