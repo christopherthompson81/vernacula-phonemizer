@@ -1,51 +1,29 @@
 /**
- * Cantonese / Yue (yue) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites what is not yet a
- * pronounceable word into Han text the existing Han→Jyutping→IPA pipeline already speaks. Pure text→text,
- * no IPA. Numbers are left as ASCII digits wherever the engine's own cardinal composition is the right
- * reading, and written out as Han ONLY where it is not (years, decimal fractions, the colloquial 兩).
+ * Cantonese / Yue (yue) text normalization — the pre-tokenizer pass that rewrites what is not yet a
+ * pronounceable word into Han text the Han→Jyutping→IPA pipeline already speaks. Pure text→text, no IPA.
  *
- * EVIDENCE — FLEURS yue_hant_hk, 1,726 unique utterances, column 3 (the cased one). Counts are instances:
- *   4-digit year + 年      119   ← the big one; read as the CARDINAL 二千零九年 instead of 二零零九年
- *   月 / 日 after a digit  38 / 27   (already correct — cardinal is the right reading for these)
- *   comma-grouped numbers   27   ← "1,000" → 一 [pause] 零: the comma was clause punctuation AND
- *                                  integerToHan(000) is 零, so the value was destroyed outright
- *   decimals                15   ← "6.34" → 六點… no: the "." was a phrase break and "34" a cardinal
- *   clock H:MM              12   ← "11:29" → 十一 [pause] 二十九; no 點/分 at all
- *   percent                 12   ← the sign was DROPPED; 80% read as 八十
- *   numeric ranges           7   (4 of them YYYY-YYYY year ranges; 2 are tennis SCORES — see step 3)
- *   世紀 after a digit      16   (already correct — cardinal)
- *   第 N                    12   (already correct)
- *   2 + classifier           4   ← 二個 instead of 兩個
- *   a/b fraction             1
- *   a.m. / p.m.              2
- *   embedded Latin runs    267   (see "What is deliberately left", below)
+ * ⚠ NUMBERS STAY AS ASCII DIGITS wherever the engine's own cardinal composition is the right reading, and are
+ * written out as Han ONLY where it is not — years, decimal fractions, and the colloquial 兩.
  *
- * WHAT IS DELIBERATELY LEFT, with the measurement that decided it:
+ * ⚠ `\b` IS NEVER USED: it is ASCII-defined and finds no boundary against Han, so every boundary here is an
+ * explicit lookaround.
  *
- *   · EMBEDDED LATIN stays on the English phonemizer, as Mandarin decided. Japanese and Thai both convert
- *     all-caps initialisms to native letter names instead, and that was tried here first: of the 45 distinct
- *     all-caps runs in the corpus only FOUR (KNP, TMZ, TT, XDR) can be spelled entirely from letter names
- *     that the shipped rime-cantonese dict actually contains — it has D J K L M N P Q R T X Y Z and not
- *     A B C E F G H I O S U V W. Back-deriving the missing ones from the dict's whole-acronym entries
- *     immediately conflicts: S is si1 inside PC/ABC and si4 inside GPS. That is invented data, and the
- *     playbook's rule is that a wrong word beats a dropped sign only in the other direction.
- *   · 3-DIGIT YEARS (991年, 323年, 356年 — 3 instances) keep the cardinal. The 15 non-4-digit "N 年" hits are
- *     mostly DURATIONS (10 年後, 250 年後, 48 年歷史, 100 年的物品), which take the cardinal correctly, and
- *     nothing in the surface form separates them from the 3 real short years. Same call Mandarin made.
- *   · NON-YEAR numeric ranges (2-3 公里, 100-200 英里, 10-60 分鐘) get no connective. The other two dashes in
- *     the corpus are tennis scores — 比分達到 6-6, 交手紀錄為 7–2 — which are read 六比六 / 七比二, and no
- *     surface feature separates them (6-6 is even followed by a Han character, 時, just as 2-3 is followed
- *     by 公里). Reading a score as 至 would be confidently wrong, so only YYYY-YYYY ranges are claimed.
- *   · `．` U+FF0E ×16 is NOT a sentence period in this corpus — it is the interpunct inside transliterated
- *     foreign names (瑪麗．安東尼, 卡米爾．聖桑, 巴布．狄倫). Mapping it to a clause mark would have inserted
- *     16 pauses in the middle of names. It stays unmapped, exactly like `·` ×64 and `‧` ×48.
- *   · CURRENCY: zero currency signs in the corpus. UNITS: the corpus writes its units in Han (公里, 英里,
- *     分鐘, 英寸, 級); the only ASCII unit is Ghz ×2, for which no sourced Cantonese reading was available.
- *     No units/currency tier is declared rather than guess at one.
+ * Deliberately left alone:
+ *   · EMBEDDED LATIN stays on the English phonemizer, as Mandarin decided. Converting all-caps initialisms to
+ *     native letter names needs a letter-name table the shipped rime-cantonese dict does not have — it carries
+ *     D J K L M N P Q R T X Y Z and not A B C E F G H I O S U V W, and back-deriving the rest from whole-acronym
+ *     entries conflicts immediately (S is si1 inside PC/ABC and si4 inside GPS).
+ *   · 3-DIGIT YEARS (991年) keep the cardinal. Most short "N 年" forms are DURATIONS (10 年後, 48 年歷史), which
+ *     take the cardinal correctly, and nothing in the surface form separates them from a real short year.
+ *   · NON-YEAR numeric ranges (2-3 公里) get no connective, because a dash between short numbers is as likely a
+ *     SPORTS SCORE (6-6, 7–2), read 六比六, and no surface feature separates them. Reading a score as 至 would be
+ *     confidently wrong, so only YYYY-YYYY is claimed.
+ *   · `．` U+FF0E is NOT a sentence period here — it is the interpunct inside transliterated foreign names
+ *     (瑪麗．安東尼). Mapping it to a clause mark would insert a pause in the middle of a name. It stays
+ *     unmapped, like `·` and `‧`.
  *
- * CORE LIMITATION (reported, not patched): core/normalizeSymbols.ts matches `[%٪]` but not the
- * FULL-WIDTH ％ U+FF05, which is ordinary CJK typography and appears once here (20％). Step 0 folds it
- * locally; the next CJK language will need the same fold until the shared tier accepts it.
+ * ⚠ CORE LIMITATION: core/normalizeSymbols.ts matches `[%٪]` but not FULL-WIDTH ％ U+FF05, which is ordinary CJK
+ * typography. Step 1 folds it locally; the next CJK language needs the same fold until the shared tier accepts it.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -60,130 +38,84 @@ function spellDigits(s: string): string {
     return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
 }
 
-// The percent word 百分之 PRECEDES its number, as in Mandarin — and the corpus corroborates it directly,
-// writing 百分之三十 in running text ×3. Declared through the shared tier rather than reimplemented.
+// The percent word 百分之 PRECEDES its number, as in Mandarin, and Cantonese prose writes 百分之三十 out.
 //
-// CURRENCY. `$5` read as bare *ŋ̩˩˧*. yue_hant_hk contains ZERO `$` against 54 `%`, so the
-// corpus-driven gate could not see it — but the words are in that same corpus:
+// ⚠ `unspacedScript` because a sign in Chinese is normally flanked by Han, which the tier's letter-boundary guard
+// rejects: `$500。` reads 美元 while `為$500，` drops it.
 //
-//   美元 ×8  "每次可被處以 1,000 美元的罰款"
-//   英鎊 ×3  "福克蘭群島鎊 (FKP)，價值與英鎊 (GBP) 相等"
-//   歐元 ×2  "每年營業額超過 100 億歐元（約 147 億美元）"
-//
-// Counted by substring, which is the only test an unspaced script admits; the examples are the evidence.
-// `¥` is DELIBERATELY ABSENT — neither 日圓 nor 日元 occurs, and an unsourced word is left unread.
-//
-// `unspacedScript` because a sign in Chinese is normally flanked by Han, which the tier's letter-boundary
-// guard rejected: `$500。` read 美元 while `為$500，` dropped it.
+// `¥` is DELIBERATELY ABSENT — neither 日圓 nor 日元 is attested here, and an unsourced word is left unread.
 const SYMBOLS = makeSymbolNormalizer({
-    // `&` was DROPPED outright, losing the sign from `提供豪華的 B&B 服務`. 和 is the standard written
-    // conjunction and the corpus's most frequent candidate (和 ×603, 與 ×320, 同 ×185). For an UNSPACED script
-    // the substring match IS the hit test, which is what attest.ts's header establishes for cmn.
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
+    // ⚠ `multiply` is STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
+    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it; Cantonese
+    // does not split dimension from product.
     multiply: { times: "乘" },
     ampersand: "和",
     percent: ["百分之"],
     percentPrefix: true,
-    // `5 km` read as *ŋ̩˩˧ ˈʊkm*: no unit was declared. Verified in yue_hant_hk:
-    // 公里 ×50 "公園占地一萬九千平方公里", 公斤 ×2 "（ 90 公斤）的人".
-    //
-    // WIKIDATA'S OWN yue LABELS ARE THE WRONG VARIETY, and the corpus is what caught it: it offers 千米 and
-    // 千克, the mainland standard, which occur ×0 here, against the HK 公里 ×50 and 公斤 ×2. A concept label
-    // gives the language's term for a concept, not the register this corpus is in.
-    //
-    // `m` IS DELIBERATELY ABSENT. 米 substring-matches ×36 and the first example is 米勒 — "Miller". In an
-    // unspaced script a one-character unit is unseparable from any name that contains it, so a declaration
-    // would read every such name as a measurement. Trap 19's caveat, arriving as a real hazard.
+    // ⚠ THE HK REGISTER, NOT THE MAINLAND ONE: 公里/公斤, not the 千米/千克 a concept label offers. A label gives
+    // the language's term for a concept, not the register the text is in.
+    // ⚠ `m` IS DELIBERATELY ABSENT. 米 is a one-character unit, and in an UNSPACED script that is inseparable
+    // from any name containing it — 米勒 is "Miller". Declaring it would read every such name as a measurement.
     units: { km: ["公里"], kg: ["公斤"] },
     currency: { $: ["美元"], "€": ["歐元"], "£": ["英鎊"] },
-    // `平方公里` ×4 ("公園占地一萬九千平方公里"), fused and word-first. 立方 is ×0 here, and `m³` could not be
-    // read anyway while 米 stays undeclared for the 米勒 reason above — the two gaps are the same gap.
+    // 平方公里 is fused and word-first. Cubed is undeclared, and could not be read anyway while 米 stays
+    // undeclared for the 米勒 reason above — the two gaps are the same gap.
     exponentWords: { squared: ["平方"], position: "compound" },
     unspacedScript: true,
 });
 
 /**
- * Normalize one Cantonese string. `measureWords` is the manifest's classifier inventory (step 7).
+ * Normalize one Cantonese string. `measureWords` is the manifest's classifier inventory (step 9).
  *
- * The steps are ORDER-DEPENDENT and the coupling is stated at each one; a future reader cannot recover it
- * from the code. `\b` is never used: it is ASCII-defined and finds no boundary against Han script, so every
- * boundary here is an explicit lookaround.
+ * The steps are ORDER-DEPENDENT and the coupling is stated at each one; a future reader cannot recover it from
+ * the code.
  */
 export function normalizeCantonese(input: string, measureWords: string): string {
     let s = input;
 
     // ── 1. full-width symbol fold ────────────────────────────────────────────────────────────────
-    // FIRST, so that exactly one representation reaches every rule below and the shared symbol tier.
-    // ％ U+FF05 ×1 (20％) and ／ U+FF0F ×1; the shared tier knows only ASCII % and Arabic ٪.
+    // FIRST, so exactly one representation reaches every rule below and the shared symbol tier: the tier knows
+    // only ASCII % and Arabic ٪, not the full-width ％ U+FF05 that is ordinary CJK typography.
     s = s.replace(/％/gu, "%").replace(/／/gu, "/");
 
-    // ── 1b. degrees ──────────────────────────────────────────────────────────────────────────────
-    // `20℃` read as "二十 C" — the sign DROPPED and the scale letter spelled out by the Latin fallback,
-    // which is the whole unit lost rather than merely its sign. The shared tier cannot express this
-    // one: the scale name PRECEDES the number and 度 FOLLOWS it, so the reading wraps around the numeral
-    // and a `units` entry can only append.
-    //
-    // Both words and the ORDER are the corpus's own, ×2 each:
-    //   攝氏  "氣溫經常超過攝氏 30 度"        華氏  "在華氏 90 度的高溫中"
-    // Wikidata's `degree Celsius` label for yue is 攝氏 too, independently. The SIGN itself occurs ×0 here,
-    // so this is robustness for plausible input — but the words are not a guess.
-    //
-    // Before the thousands de-grouping is fine (no digits move), and it must be before the Latin-run pass
-    // that reads a bare C as a letter name. ℃/℉ arrive already folded to `°C`/`°F` by the registry.
-    // THE PLUS → 加, from the corpus's own AUDIO (a PHONEME recognizer, no `+` in its vocabulary):
-    //   `… j u5 tɕ i5 s  k ɑ5 j a5  t ei5 t i5 m …` — 「UTC 加一」, 1 of 2 speakers; the other skips it.
-    // 加 reads kaː˥, which is the decoded syllable. Spaced on both sides for the same reason the ampersand
-    // cell is: 「UTC」 is an initialism and joining it to 加 would make one token.
-    // BEFORE the degree rules — the ordering coupling zu's `[+]?` taught.
+    // ── 1b. the plus sign ───────────────────────────────────────────────────────────────────────
+    // 加 reads kaː˥. Spaced on both sides for the same reason the ampersand cell is: an adjacent initialism
+    // (「UTC 加一」) would otherwise fuse into one token.
+    // ⚠ BEFORE THE DEGREE RULES, or the degree pattern consumes the sign's operand and this can no longer match.
     s = s.replace(/\s*\+\s*(?=\d)/gu, " 加 ");
 
-    // THE RELATIONAL AND DIVISION SIGNS. ⚠ THE SOURCE SAYS "IS READ AS" AND THEN READS BOTH SIGNS —
-    // yue.wikipedia's division article writes, of the notation itself:
-    //
-    //   「A ÷ B = Q...R  讀做  A 除以 B 等於 Q 餘 R」        讀做 = "is read as"
-    //
-    // — an explicit pronunciation instruction covering ÷ and = together, operands in place. This is the same
-    // shape as ru's gloss and fa's 「می‌خوانیم」, and the strongest kind of evidence in the issue.
-    //
-    // The comparisons come from yue_hant_hk itself, with numeric operands: 「不會小於50公頃」 (not smaller than
-    // 50 hectares), 「遠大於定焦鏡頭」 (far greater than a prime lens), plus 除以 ×2 from FLEURS's parallel
-    // division sentence 「長寬比除以12」.
-    //
-    // ⚠ AND THOSE CORPUS HITS WERE FIRST REPORTED ABSENT — a defect in the probe, not a fact about Cantonese.
-    // FLEURS writes Han with a space between EVERY character (「此 格 式 的 長 寬 比 除 以 12」), so a
-    // two-character word never matches as written. Fixed in corpus-words.ts; the fourth manufactured negative
-    // this issue has found in its own tooling.
-    //
-    // Spaced on both sides for the reason the 加 rule above gives: an adjacent initialism would otherwise fuse.
+    // ── 1c. relational and division signs ───────────────────────────────────────────────────────
+    // Spaced on both sides for the reason the 加 rule gives: an adjacent initialism would otherwise fuse.
     s = s.replace(/\s*=\s*/gu, " 等於 ");
     s = s.replace(/\s*<\s*/gu, " 小於 ");
     s = s.replace(/\s*>\s*/gu, " 大於 ");
     s = s.replace(/\s*÷\s*/gu, " 除以 ");
 
+    // ── 1d. degrees ─────────────────────────────────────────────────────────────────────────────
+    // `20℃` read as "二十 C" — the sign DROPPED and the scale letter spelled out by the Latin fallback, which
+    // loses the whole unit rather than merely its sign.
+    // ⚠ THE SHARED TIER CANNOT EXPRESS THIS ONE: the scale name PRECEDES the number and 度 FOLLOWS it, so the
+    // reading wraps around the numeral and a `units` entry can only append.
+    // Must run before the Latin-run pass that would read a bare C as a letter name. ℃/℉ arrive already folded
+    // to `°C`/`°F` by the registry.
     s = s.replace(/(\d+)\s?°\s?C(?![\p{sc=Latn}])/gu, "攝氏$1度");
     s = s.replace(/(\d+)\s?°\s?F(?![\p{sc=Latn}])/gu, "華氏$1度");
     s = s.replace(/(\d+)\s?°/gu, "$1度");
 
     // ── 2. de-group thousands separators ─────────────────────────────────────────────────────────
-    // BEFORE EVERYTHING ELSE. A grouping comma is otherwise read as clause punctuation, and worse: the
-    // engine tokenizes `\d+`, so "1,000" became 一 + [pause] + integerToHan(0) = 零 — the value was gone,
-    // not merely mispaused. Every later rule's "a digit is adjacent" test also needs the number to be one
-    // run. 27 instances.
+    // ⚠ BEFORE EVERYTHING ELSE. A grouping comma is otherwise read as clause punctuation, and worse: the
+    // engine tokenizes `\d+`, so "1,000" becomes 一 + [pause] + integerToHan(0) = 零 — the value gone, not
+    // merely mispaused. Every later rule's "a digit is adjacent" test also needs the number to be one run.
     s = s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
     // ── 3. YYYY-YYYY year ranges ─────────────────────────────────────────────────────────────────
-    // BEFORE the single-year rule (step 4), because only the RIGHT endpoint of "1644-1912 年" is followed
-    // by 年 — left alone, the range would have read 一千六百四十四 至 一九一二, mixing cardinal and digit
-    // readings inside one span. Restricted to two 4-DIGIT numbers: that claims all four year ranges in the
-    // corpus (1644-1912, 1894-1895, 1418-1450, 1469–1539) and none of the five short numeric ranges, two of
-    // which are tennis scores that would be confidently wrong as 至.
-    // A range already written with the Han connective 至/到 is claimed too, but ONLY when 年 follows
-    // ("1977 至 1981 年間"), since a 至-joined pair of 4-digit numbers can otherwise be a quantity range; the
-    // written connective is kept rather than replaced. Without this the left endpoint stayed a cardinal
-    // while step 4 gave the right one the digit reading — the same split, one form later.
+    // ⚠ BEFORE THE SINGLE-YEAR RULE (step 4), because only the RIGHT endpoint of "1644-1912 年" is followed
+    // by 年 — left alone, the range reads 一千六百四十四 至 一九一二, mixing cardinal and digit readings inside
+    // one span. Restricted to two 4-DIGIT numbers, which excludes the short ranges and the tennis scores.
+    // A range already written with the Han connective 至/到 is claimed too, but ONLY when 年 follows, since a
+    // 至-joined pair of 4-digit numbers is otherwise a quantity range; the written connective is kept rather
+    // than replaced. Without this arm the left endpoint stays a cardinal while step 4 gives the right one the
+    // digit reading — the same split, one form later.
     s = s.replace(
         /(?<![\d.,])(\d{4})\s*([-–—])\s*(\d{4})(?![\d.,])|(?<![\d.,])(\d{4})\s*([至到])\s*(\d{4})(?![\d.,])(?=\s*年)/gu,
         (_m, a1: string, _d: string, b1: string, a2: string, conn: string, b2: string) =>
@@ -194,18 +126,17 @@ export function normalizeCantonese(input: string, measureWords: string): string 
 
     // ── 4. 4-digit year before 年 ────────────────────────────────────────────────────────────────
     // AFTER de-grouping (so no grouping comma can sit inside the four digits) and AFTER step 3. A year is
-    // read DIGIT BY DIGIT — 2009 年 is 二零零九年, not the cardinal 二千零九年 the engine produced for all
-    // 119 of them. The 年 must be found ACROSS WHITESPACE: this corpus writes "2009 年" with a space, and
-    // that exact detail is what silently defeated the same rule in Mandarin.
+    // read DIGIT BY DIGIT — 2009 年 is 二零零九年, not the cardinal 二千零九年.
+    // ⚠ THE 年 MUST BE FOUND ACROSS WHITESPACE: Han corpora routinely write "2009 年" with a space, and that
+    // exact detail silently defeated the same rule in Mandarin.
     s = s.replace(/(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spellDigits(y));
 
     // ── 5. clock times ───────────────────────────────────────────────────────────────────────────
-    // BEFORE the decimal rule and before the shared symbol tier: a bare-number rule must not claim either
-    // half of 11:29, and the colon is otherwise clause punctuation (the engine read it as a pause). Cantonese
-    // says H點M分 (點 dim2 / 分 fan1); a zero minute takes no 分 (10:00 → 十點). Digits are LEFT as digits so
-    // the engine's own cardinal composition reads them — that is also what strips the written leading zero
-    // (06:30 → 6點30分 → 六點三十分). All 12 corpus colons are genuine clock times. a.m./p.m. ×2 become the
-    // 上午/下午 PREFIX and are consumed here, which also keeps their stray letters off the English path.
+    // BEFORE the decimal rule and before the shared symbol tier: a bare-number rule must not claim either half
+    // of 11:29, and the colon is otherwise clause punctuation. Cantonese says H點M分; a zero minute takes no 分
+    // (10:00 → 十點). Digits are LEFT as digits so the engine's own cardinal composition reads them — which is
+    // also what strips a written leading zero (06:30 → 6點30分 → 六點三十分). a.m./p.m. become the 上午/下午
+    // PREFIX and are consumed here, which also keeps their stray letters off the English path.
     s = s.replace(
         /(?<![\d:])(\d{1,2}):([0-5]\d)(?![\d:])(?:\s*([ap])\s*\.?\s*m\s*\.?(?![\p{L}\p{M}]))?/giu,
         (_m, h: string, mm: string, ap: string | undefined) => {
@@ -218,26 +149,24 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     );
 
     // ── 6. western fraction → the Chinese order ──────────────────────────────────────────────────
-    // a/b is 分之 in the opposite order: 1/5 is 五分之一, "of five parts, one". Digits are required on BOTH
-    // sides and nothing numeric may be adjacent, which is what keeps the corpus's Han-unit slashes
-    // (英里/小時, 碼/米, 國家/地區 — 10 of the 11 slashes) untouched. Reordered as DIGITS so step 5 has
-    // already passed and the engine's cardinal reading still applies to both halves.
+    // ⚠ a/b IS 分之 IN THE OPPOSITE ORDER: 1/5 is 五分之一, "of five parts, one". Digits are required on BOTH
+    // sides and nothing numeric may be adjacent, which keeps Han-unit slashes (英里/小時, 國家/地區) untouched.
+    // Reordered as DIGITS so the engine's cardinal reading still applies to both halves.
     s = s.replace(
         /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
         (_m, num: string, den: string) => `${den}分之${num}`,
     );
 
     // ── 7. percent, via the shared symbol tier ───────────────────────────────────────────────────
-    // AFTER de-grouping (the tier needs the number contiguous) and BEFORE the decimal rule (step 8), because
-    // the tier matches ASCII digits next to the sign and step 8 replaces the "." with the Han 點, which would
-    // break that adjacency for any decimal percentage. 12 instances, every one of which lost the sign.
+    // AFTER de-grouping (the tier needs the number contiguous) and BEFORE the decimal rule (step 8): the tier
+    // matches ASCII digits next to the sign, and step 8 replaces the "." with the Han 點, which would break
+    // that adjacency for any decimal percentage.
     s = SYMBOLS(s);
 
     // ── 8. decimals ──────────────────────────────────────────────────────────────────────────────
-    // AFTER the clock (step 5) and the year (step 4) rules, so no period they own is still in play, and after
-    // step 7. The separator is 點 and the FRACTIONAL part is read digit by digit — 6.34 is 六點三四, never
-    // 六點三十四 — so it is written out as Han here while the integer part stays a digit for the cardinal
-    // path. Before this the "." was a clause pause and "34" a cardinal. 15 instances.
+    // AFTER the clock (step 5) and year (step 4) rules, so no period they own is still in play, and after
+    // step 7. ⚠ The separator is 點 and the FRACTIONAL part is read DIGIT BY DIGIT — 6.34 is 六點三四, never
+    // 六點三十四 — so it is written out as Han here while the integer part stays a digit for the cardinal path.
     s = s.replace(
         /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu,
         (_m, int: string, frac: string) => `${int}點${spellDigits(frac)}`,
@@ -245,9 +174,8 @@ export function normalizeCantonese(input: string, measureWords: string): string 
 
     // ── 9. 2 + classifier → 兩 ───────────────────────────────────────────────────────────────────
     // LAST of the number rules, and after de-grouping so the "no digit to the left" guard means what it says
-    // (1200 間 must not become 120兩間). Cantonese counts with 兩 loeng5 before a classifier, not 二: 兩個,
-    // 兩座, 兩種. 月 and 日 are deliberately NOT in the manifest's inventory — "2 月" ×2 in this corpus is
-    // February, which is 二月. 4 instances.
+    // (1200 間 must not become 120兩間). Cantonese counts with 兩 loeng5 before a classifier, not 二.
+    // ⚠ 月 and 日 are deliberately NOT in the manifest's inventory — "2 月" is February, which is 二月.
     if (measureWords !== "")
         s = s.replace(
             new RegExp(`(?<![\\d.,])2(?=\\s*[${measureWords}])`, "gu"),

@@ -58,15 +58,15 @@ function toAscii(s: string): string {
     return [...s].map((c) => BENGALI_DIGITS[c] ?? c).join("");
 }
 
-/**
- * The CLASSICAL ordinal series 11–20, which is suppletive and not the cardinal plus a suffix: 11শ is একাদশ,
- * not *এঘাৰশ. (1–10 are the Bengali normalize's table — প্রথম…দশম; 21 up are cardinal+তম, also Bengali's.)
- */
-/** Magnitude nouns that sit BETWEEN a number and its currency ("$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ" — the
- *  corpus's own word order). মিলিয়ন and বিলিয়ন are the attested pair; the Indic scale words are listed
- *  with them because the same rule has to survive them. */
+/** Magnitude nouns that sit BETWEEN a number and its currency ("$১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ" — Assamese's own
+ *  word order). মিলিয়ন and বিলিয়ন are the attested pair; the Indic scale words are listed with them because the
+ *  same rule has to survive them. */
 const MAGNITUDE = "(?:মিলিয়ন|বিলিয়ন|ট্ৰিলিয়ন|হাজাৰ|লাখ|কোটি)";
 
+/**
+ * ⚠ THE CLASSICAL ORDINAL SERIES 11–20 IS SUPPLETIVE, not the cardinal plus a suffix: 11শ is একাদশ, not
+ * *এঘাৰশ. (1–10 are the Bengali normalize's table — প্রথম…দশম; 21 up are cardinal+তম, also Bengali's.)
+ */
 const ORDINAL_11_20: Readonly<Record<number, string>> = {
     11: "একাদশ", 12: "দ্বাদশ", 13: "ত্রয়োদশ", 14: "চতুর্দশ", 15: "পঞ্চদশ",
     16: "ষোড়শ", 17: "সপ্তদশ", 18: "অষ্টাদশ", 19: "ঊনবিংশ", 20: "বিংশ",
