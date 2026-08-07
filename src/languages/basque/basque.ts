@@ -3,14 +3,14 @@
  * living relatives), Latin script, and its orthography is highly phonemic → a left-to-right greedy scan over a digraph
  * + letter table with two context rules (the ⟨r⟩ tap/trill split and the sibilant places).
  *
- * ★★ THE HALLMARK — the THREE-WAY SIBILANT / affricate system, a laminal vs apical vs postalveolar contrast:
+ * ⚠⚠ THE HALLMARK — the THREE-WAY SIBILANT / affricate system, a laminal vs apical vs postalveolar contrast:
  *     fricatives  ⟨z⟩→[s̻] (laminal)  ⟨s⟩→[s̺] (apical)   ⟨x⟩→[ʃ] (postalveolar)
  *     affricates  ⟨tz⟩→[t͡s̻]          ⟨ts⟩→[t͡s̺]          ⟨tx⟩→[t͡ʃ]
  *   (zu 'you'→[s̻u] vs su 'fire'→[s̺u]; atzo 'yesterday'→[at͡s̻o] vs hots 'sound'→[ot͡s̺]). The laminal/apical
  *   distinction is neutralised in the western dialects and the wikipron referee records it INCONSISTENTLY (both s̺/s̻
  *   for ⟨z⟩), and the eval backbone strips the apical/laminal diacritics anyway — but we EMIT the standard three-way.
- * ★ ⟨r⟩ is a TAP [ɾ] between vowels, a TRILL [r] word-finally / before a consonant / doubled ⟨rr⟩ (hartu→[artu],
- *   udare→[udaɾe], agirre→[aɡire]). ★ ⟨j⟩→[x] (the southern/Gipuzkoan standard; [j]~[ɟ]~[d͡ʒ] dialectally). ⟨h⟩ is
+ * ⚠ ⟨r⟩ is a TAP [ɾ] between vowels, a TRILL [r] word-finally / before a consonant / doubled ⟨rr⟩ (hartu→[artu],
+ *   udare→[udaɾe], agirre→[aɡire]). ⚠ ⟨j⟩→[x] (the southern/Gipuzkoan standard; [j]~[ɟ]~[d͡ʒ] dialectally). ⟨h⟩ is
  *   silent (southern majority; [h] in the north). Palatal digraphs ⟨tt⟩→[c], ⟨dd⟩→[ɟ], ⟨ll⟩→[ʎ], ⟨ñ⟩→[ɲ]. ⟨g⟩→[ɡ]
  *   always (no soft g). Diphthong offglides ⟨i u⟩→[i̯ u̯] are written as plain vowels (the non-syllabic mark folds).
  *
@@ -111,10 +111,10 @@ function number(digits: string): string {
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zñçA-ZÑÇ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

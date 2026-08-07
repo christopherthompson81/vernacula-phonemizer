@@ -1,23 +1,20 @@
 /**
- * Bengali (bn) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Bengali (bn) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Sixth language, and the first with MIXED DIGIT SYSTEMS: the corpus writes ASCII digits ×1299 AND Bengali
- * digits ×483, including inside times (১১:২০), decimals (২.৩) and fractions (১/৫). Step 0 folds Bengali
- * digits to ASCII so there is ONE representation downstream — which also repairs the shared symbol tier,
- * whose number pattern is ASCII-only and was therefore dropping the percent sign of "৮%".
+ * ⚠ BENGALI TEXT MIXES DIGIT SYSTEMS — ASCII and Bengali ০-৯ both occur, including inside times (১১:২০),
+ * decimals (২.৩) and fractions (১/৫). Step 0 folds Bengali digits to ASCII so there is ONE representation
+ * downstream, which also repairs the shared symbol tier: its number pattern is ASCII-only, so without the fold
+ * it drops the percent sign of "৮%".
  *
- * Boundaries are explicit lookarounds throughout, never `\b` — `\b` is defined on ASCII word characters
- * and finds no boundary at all against Bengali script, so a rule written with it matches nothing and
- * leaves output that is wrong but plausible. That trap has now cost a debugging round in three languages
- * (French matching INSIDE an accented word, Hindi matching nothing before Devanagari, and Mandarin's
- * whitespace lookahead) — hence the standing rule: probe the corpus's surface form, not the canonical one.
+ * ⚠ EVERY BOUNDARY IS AN EXPLICIT LOOKAROUND, NEVER `\b`. `\b` is defined on ASCII word characters and finds no
+ * boundary at all against Bengali script, so a rule written with it matches NOTHING and leaves output that is
+ * wrong but plausible.
  *
- * Measured over the bn_in corpus (3,006 utterances): the dominant defects were NOT in this layer — the
- * numbers data was missing its fused 21–99 forms (161 numbers) and `clausePunctuation` mapped every mark
- * to ITSELF padded with spaces, so 3,327 dandas and every comma reached the output as a raw non-IPA
- * character. Both are fixed in bengali.jsonc. What is left here: ordinal suffixes ×~31, the clock ×25,
- * Bengali unit abbreviations, signs ×7, fractions ×2.
+ * ⚠ THE LARGEST BENGALI DEFECTS ARE NOT IN THIS LAYER, and looking for them here wastes a pass: the numbers data
+ * needs its fused 21–99 forms, and `clausePunctuation` must not map a mark to ITSELF padded with spaces, or every
+ * danda and comma reaches the output as a raw non-IPA character. Both live in bengali.jsonc. What belongs here is
+ * ordinal suffixes, the clock, Bengali unit abbreviations, signs and fractions.
  */
 import { BENGALI_DIGITS } from "../../core/unicode.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";

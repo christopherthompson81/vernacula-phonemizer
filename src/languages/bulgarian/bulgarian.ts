@@ -138,9 +138,9 @@ function numberToText(n: number): string {
         if (!r) return thWord;
         return `${thWord} ${r < 100 || r % 100 === 0 ? NUM.and + " " : ""}${numberToText(r)}`;
     }
-    // милион / милиард (10⁶ / 10⁹) — MASCULINE, so unlike the feminine хиляда they take a masculine multiplier and
-    // the COUNT plural -а above one (един милион, два милиона, пет милиарда). Nothing above 999 999 was composed
-    // before, so 10⁶+ fell through to the digit string and the Cyrillic g2p emitted EMPTY IPA.
+    // ⚠ милион / милиард (10⁶ / 10⁹) ARE MASCULINE, so unlike the feminine хиляда they take a masculine
+    // multiplier and the COUNT plural -а above one (един милион, два милиона, пет милиарда).
+    // ⚠ Without a composer for them, 10⁶+ falls through to the digit string and the Cyrillic g2p emits EMPTY IPA.
     for (const [value, sg, pl] of [
         [1_000_000_000, NUM.billion, NUM.billions], [1_000_000, NUM.million, NUM.millions],
     ] as const) {

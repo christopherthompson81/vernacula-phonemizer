@@ -4,7 +4,8 @@
  * INTERDENTAL fricatives ⟨ҫ⟩→[θ] and ⟨ҙ⟩→[ð] (shared with Turkmen). Unlike Tatar, Bashkir WRITES the uvulars ⟨ҡ⟩→[q]
  * / ⟨ғ⟩→[ʁ] (so ⟨к⟩→[k], ⟨г⟩→[ɡ] always — no harmony inference). The BASHKIR VOWEL SHIFT: ⟨и⟩→[i], ⟨о⟩→[ʊ],
  * ⟨у⟩→[u], ⟨е⟩→[ɪ] (bare; [je] word-initial), ⟨ы⟩→[ɯ], ⟨ө⟩→[ø], ⟨ү⟩→[y], ⟨ә⟩→[æ]. Word-final (oxytone) stress
- * (Turkic). 🔷 single-source-family (kaikki, referee-noisy with Russian loans).
+ * (Turkic). ⚠ SINGLE-SOURCE: kaikki is the only referee, and it is noisy — its Bashkir entries include Russian
+ * loans transcribed inconsistently, so a disagreement with it is as likely to be the referee's.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -28,7 +29,7 @@ const CYR_VOWEL = new Set([..."аәоөуүыиэеяюё"]);
 const BACK = new Set([..."аоуы"]); // back-harmony vowels — govern the dark ⟨л⟩→[ɫ]
 const IPA_VOWEL = new Set([..."ɑæʊøɯɪyiuo"]); // every vowel the scan emits (а→ɑ ә→æ о→ʊ ө→ø ы→ɯ э/е→ɪ ү→y и→i у/ю→u ё→o)
 
-// ★ RUSSIAN-LOAN DETECTION. Real Bashkir text is saturated with Russian loanwords, and Bashkir speakers pronounce them
+// ⚠ RUSSIAN-LOAN DETECTION. Real Bashkir text is saturated with Russian loanwords, and Bashkir speakers pronounce them
 // RUSSIAN-STYLE (palatalization, akanye, Russian stress) — so a realistic phonemizer routes them to the Russian g2p.
 // The signal is VOWEL HARMONY: native Bashkir is strictly all-back or all-front, so a word MIXING a back vowel (а о у ы)
 // with a front one (е и э) — and lacking any Bashkir-specific letter (which are always harmonic) — is a Russian loan.
