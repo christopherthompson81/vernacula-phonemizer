@@ -1,10 +1,8 @@
 /**
- * K'iche' (quc) phonemizer — Qatzijob'al, the largest MAYAN language (~1.1M, Guatemala), Latin script (ALMG
- * orthography), canonical IPA. ALMG is near-1:1 phonemic, so a
- * longest-match grapheme scan. The Mayan hallmark is the EJECTIVE/glottalized series ⟨b'⟩→[ɓ] (implosive), ⟨t'⟩→[tʼ],
- * ⟨k'⟩→[kʼ], ⟨q'⟩→[qʼ], ⟨tz'⟩→[t͡sʼ], ⟨ch'⟩→[t͡ʃʼ]; the plain voiceless stops are ASPIRATED ⟨p t k q tz ch⟩→[pʰ tʰ kʰ qʰ
- * t͡sʰ t͡ʃʰ]. Uvular ⟨q q'⟩; ⟨x⟩→[ʃ], ⟨j⟩→[x], ⟨w⟩→[ʋ], ⟨r⟩→[ɻ], ⟨'⟩→[ʔ]; the sixth vowel ⟨ä⟩→[ə]. Vowel LENGTH is phonemic but
- * UNWRITTEN (folded); FINAL stress. ⚠ SINGLE-SOURCE: English Wiktionary, 127 pairs, and no second referee.
+ * K'iche' (quc) phonemizer — a longest-match grapheme scan over the ALMG orthography, canonical IPA.
+ * This file owns the apostrophe-glyph normalisation (so the glottalized units match), multi-word
+ * splitting, and FINAL (oxytone) stress placement. The unit/letter tables (the ejective/aspirated
+ * series) and the encyclopedic record live in kiche.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

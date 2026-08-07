@@ -1,20 +1,8 @@
 /**
- * Lule Sami / julevsámegiella (smj) phonemizer — Uralic (Saami branch), ~700–2000 speakers (Norway/Sweden),
- * the 1983 Latin orthography, canonical IPA. Authored from Ylikoski, "Lule Saami" (a published reference
- * chapter). A TRANSPARENT SEGMENTAL grapheme scan.
- *
- *   · VOWELS /i u e o ɑ/ + diphthongs ⟨ie uo oa⟩: ⟨a⟩→ɑ, ⟨á⟩→ɑː (the one written length contrast), ⟨å⟩→o,
- *     ⟨æ/ä⟩→æ, loan ⟨y⟩→y ⟨ø/ö⟩→ø. Most vowel LENGTH is UNWRITTEN, so it is not emitted.
- *   ⚠ THE ORTHOGRAPHY TRAP (North-Saami-style): word-initial ⟨b d g⟩ are VOICELESS UNASPIRATED [p t k], NOT
- *     voiced — bena=[peːnə], giella=[kiellɑ]. ⟨p t k⟩ are the marginal ASPIRATED series [pʰ tʰ kʰ], found only
- *     WORD-INITIALLY in loans (§9.2.2); medially and in clusters they are PLAIN [p t k] (Table 9.5:
- *     bargo=[parkuo]).
- *   · CONSONANTS: ⟨sj⟩→ʃ, ⟨tj⟩→t͡ʃ, ⟨ts⟩→t͡s, ⟨dtj⟩→d͡ʒ, ⟨dts⟩→d͡z, ⟨nj⟩→ɲ, ⟨ŋ⟩→ŋ, ⟨ddj⟩→ɟː; ⟨lj⟩→ʎ renders the
- *     grammar's /lj/ SEQUENCE (Ylikoski has no phonemic /ʎ/). Doubled → geminate [Cː]; pre-stop ⟨h⟩
- *     (⟨hk hp ht⟩) is the gradation/pre-aspiration marker. Primary stress = the FIRST syllable.
- *
- * DEFERRED, because none of it is recoverable from a segmental scan (§9.2.5): the 3-grade consonant gradation,
- * epenthetic vowels, labial harmony, 2nd-syllable lengthening, and unwritten length.
+ * Lule Sami (smj) phonemizer — a transparent segmental grapheme scan (Ylikoski), canonical IPA. This
+ * file owns the longest-match order (trigraphs → digraphs → geminate doubles) and the word-initial
+ * ⟨p t k⟩ aspiration rule, plus fixed first-syllable stress. The grapheme tables and the encyclopedic
+ * record (the b/d/g voicelessness trap, the deferred morphophonology) live in lulesami.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,22 +1,8 @@
 /**
- * Native Abkhaz / аҧсуа бызшәа (ab) text phonemizer — canonical IPA
- *
- * Abkhaz is a NORTHWEST CAUCASIAN language (~190k, Abkhazia). It has ONE OF THE LARGEST CONSONANT INVENTORIES in the
- * world (~58, with LABIALIZED, PALATALIZED, PHARYNGEALIZED and EJECTIVE series) and only TWO phonemic vowels (⟨а⟩→[a],
- * ⟨ы⟩→[ə]).
- *
- * The Cyrillic alphabet writes the consonants with base letters + MODIFIER letters:
- *   ⚠ ⟨ь⟩ PALATALIZES to a dorsal+[ʲ] (гь→[ɡʲ], хь→[χʲ]), ⟨ә⟩ LABIALIZES (гә→[ɡʷ], шә→[ʃʷ]), ⟨'⟩ PHARYNGEALIZES (х'→[χˤ]).
- *   ⚠ THREE-WAY stops/affricates — voiced / aspirated / ejective: ⟨г қ к⟩→[ɡ kʰ kʼ], ⟨д ҭ т⟩→[d tʰ tʼ],
- *     ⟨б ҧ п⟩→[b pʰ pʼ], ⟨ӡ ц ҵ⟩→[d͡z t͡sʰ t͡sʼ], ⟨џ ч ҷ⟩→[d͡ʐ t͡ʃʰ t͡ʃʼ]; the uvular ⟨ҟ⟩→[qʼ], the pharyngeal ⟨ҳ⟩→[ħ].
- *
- * Numbers are VIGESIMAL (base-20) and composed by numbers.ts — 30 = ҩажәи жәаба (20+10), 40 = ҩынҩажәа (2×20),
- * 99 = ԥшьынҩажәи зеижә (4×20+19); the NON-HUMAN/abstract class series is used as the bare-numeral citation form.
- *
- * ⚠ THE REFEREE IS PARTLY CIRCULAR. wikipron abk_cyrl and kaikki Abkhaz both cover this language well, but much of
- * what they carry is the letter and digraph DEFINITIONS this engine is built from — so agreement with them is close
- * to reference-parity rather than independent confirmation. Their narrow transcriptions are also internally
- * inconsistent, which is why the tables below follow the corpus where the two disagree.
+ * Abkhaz (ab) phonemizer — canonical IPA. A longest-match scan over base+modifier Cyrillic: trigraph, then
+ * base+modifier cluster, then base, with the ⟨у⟩/⟨и⟩ glide-vs-syllabic split handled here. Numbers are
+ * VIGESIMAL and composed by numbers.ts. The letter tables and the encyclopedic record (the NW-Caucasian
+ * consonant system, the modifier letters, the referee-circularity caveat) live in abkhaz.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

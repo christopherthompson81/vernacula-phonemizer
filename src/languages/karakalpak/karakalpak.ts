@@ -1,17 +1,8 @@
 /**
- * Native Karakalpak / qaraqalpaq tili (kaa) text phonemizer — canonical IPA. Karakalpak is KIPCHAK
- * Turkic (closely related to Kazakh), ~600k speakers (Karakalpakstan, NW Uzbekistan). Since the 2016 reform the
- * official script is a LATIN alphabet, and it is highly phonemic → a left-to-right greedy scan over a digraph + letter
- * table with word-final (oxytone) stress.
- *
- * ⚠ The 2016 Latin alphabet with its acute-marked front/uvular letters: ⟨á⟩→[æ], ⟨ó⟩→[ø], ⟨ú⟩→[y] (front vowels vs
- *   plain ⟨a o u⟩→[ɑ o u]); the DOTLESS ⟨ı⟩→[ɯ] vs dotted ⟨i⟩→[i]; ⟨q⟩→[q] (uvular, back-harmony) vs ⟨k⟩→[k], ⟨x⟩→[χ]
- *   (uvular) vs ⟨h⟩→[h], ⟨ǵ⟩→[ʁ] (uvular voiced fricative, back) vs ⟨g⟩→[ɡ]; ⟨ń⟩→[ŋ]; ⟨j⟩→[ʒ], ⟨w⟩→[w], ⟨y⟩→[j];
- *   digraphs ⟨sh⟩→[ʃ], ⟨ch⟩→[t͡ʃ]. (Unlike Kazakh, the uvular/velar choice is WRITTEN — q/k, x/h, ǵ/g — so no
- *   harmony inference is needed.) Word-final stress backs up over one onset consonant (basqa→[bɑsˈqɑ]).
- *
- * ⚠ THIN SINGLE-SOURCE: English Wiktionary "Karakalpak terms with IPA pronunciation", ~11 usable Latin pairs — no
- * wikipron/kaikki/epitran kaa).
+ * Karakalpak (kaa) phonemizer — a left-to-right greedy scan over a digraph + letter table + word-final
+ * (oxytone) stress, canonical IPA. This file owns the Turkish-style dotless-I casing and the stress
+ * placement (backs up over one onset consonant: basqa→[bɑsˈqɑ]). The letter tables and the encyclopedic
+ * record live in karakalpak.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,13 +1,9 @@
 /**
- * Latin (la) phonemizer — CLASSICAL Latin, the restored/reconstructed pronunciation per Allen, *Vox Latina*.
- * Italic (Indo-European), Latin script with MACRONS marking vowel length, canonical IPA.
- *
- * Classical Latin g2p is near-fully deterministic from macronized spelling: short vowels are LAX
- * (⟨e i o u⟩→[ɛ ɪ ɔ ʊ]) while macrons give length ([aː eː …]); ⟨c⟩ is ALWAYS [k] (no palatalization), ⟨v⟩→[w],
- * ⟨qu⟩→[kʷ], ⟨x⟩→[ks], ⟨gn⟩→[ŋn], aspirates ⟨ph th ch⟩→[pʰ tʰ kʰ]; word-initial/intervocalic ⟨i j⟩→glide [j]
- * (intervocalic GEMINATE [j j], eius→ɛjjʊs); DARK ⟨l⟩→[ɫ] (clear when geminate/before front); ⟨n⟩→[ŋ] before a
- * velar; and the signature WORD-FINAL ⟨-Vm⟩→ nasalized LONG vowel [Ṽː] (bellum→bɛllũː). Penult/antepenult
- * weight stress is emitted. Ecclesiastical Latin is deferred.
+ * Latin (la) phonemizer — CLASSICAL Latin (Allen, *Vox Latina*), a context-sensitive grapheme scan over
+ * macronized spelling, canonical IPA. This file owns the context rules: digraphs and diphthongs, the
+ * ⟨i j⟩ glide/geminate-glide logic, hiatus tensing, dark/clear ⟨l⟩, ⟨n⟩→[ŋ], the word-final ⟨-Vm⟩
+ * nasalization, and penult/antepenult weight stress. The vowel-quality and consonant tables and the
+ * encyclopedic record live in latin.jsonc. Ecclesiastical Latin is deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

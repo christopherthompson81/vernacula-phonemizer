@@ -1,15 +1,8 @@
 /**
- * Native Crimean Tatar / qırımtatar tili (crh) text phonemizer — canonical IPA. Crimean Tatar is
- * KIPCHAK Turkic with strong OGHUZ influence, ~540k speakers (Crimea + diaspora). The standard Latin alphabet (Turkish-
- * based) is highly phonemic → a left-to-right grapheme scan (no digraphs — ⟨ç ş ñ ğ⟩ are single letters) with
- * gemination and word-final (oxytone) stress.
- *
- * ⚠ The alphabet: back ⟨a o u ı⟩→[ɑ o u ɯ] vs front ⟨e ö ü i⟩→[e ø y i] (harmony is SPELLED); ⟨q⟩→[q] (uvular) vs
- *   ⟨k⟩→[k], ⟨ğ⟩→[ɣ] (voiced dorsal) vs ⟨g⟩→[ɡ]; ⟨c⟩→[d͡ʒ], ⟨ç⟩→[t͡ʃ], ⟨ş⟩→[ʃ], ⟨j⟩→[ʒ], ⟨ñ⟩→[ŋ], ⟨y⟩→[j],
- *   ⟨v⟩→[v], ⟨h⟩→[h]; ⟨â⟩ is the palatalisation vowel → [a]. Doubled letters geminate (yollamaq→[jolːɑmɑq]).
- *
- * ⚠ THIN SINGLE-SOURCE: English Wiktionary "Crimean Tatar terms with IPA pronunciation", ~18 Latin pairs — no
- * wikipron/kaikki/epitran crh).
+ * Crimean Tatar (crh) phonemizer — a left-to-right Latin grapheme scan (no digraphs) + gemination +
+ * word-final (oxytone) stress, canonical IPA. This file owns the position rules: the ⟨v⟩→[w] post-vocalic
+ * coda, the Turkish-style dotless-I casing, and the stress placement. The letter table and the
+ * encyclopedic record live in crimeantatar.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

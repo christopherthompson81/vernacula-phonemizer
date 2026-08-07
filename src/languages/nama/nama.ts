@@ -1,20 +1,9 @@
 /**
- * Nama / Khoekhoe (naq) phonemizer — Khoekhoegowab, a KHOE-KWADI language of Namibia/South Africa/Botswana
- * (~250k), canonical IPA. The Khoekhoegowab Latin orthography writes the four click TYPES with the Unicode
- * click letters and their ACCOMPANIMENT (efflux) with a following letter; a greedy scan handles them.
- *
- *   ⚠ THE CLICKS — four places × five accompaniments, and the efflux is written AFTER the click letter:
- *     place:  ⟨ǀ⟩ dental · ⟨ǁ⟩ lateral · ⟨ǂ⟩ palatal · ⟨ǃ⟩ alveolar
- *     efflux: BARE ⟨ǀ⟩→[ᵑ̊ǀˀ] (glottalised nasal) · ⟨ǀg⟩→[ᵏǀ] (tenuis) · ⟨ǀkh⟩→[ᵏǀʰ] (aspirated) ·
- *             ⟨ǀh⟩→[ᵑ̊ǀʰ] (aspirated nasal) · ⟨ǀn⟩→[ᵑǀ] (voiced nasal) — uniform across all four places.
- *   · Non-click: ⟨kh⟩→[kʰ], ⟨g⟩ (not after a click)→[x], ⟨w⟩→[w]; the WORD-FINAL gender suffix ⟨-b⟩ devoices
- *     to [p] (ǀgomab→[ǀómàp]), ⟨-s⟩ stays. Vowels a e i o u, with the CIRCUMFLEX = NASALIZED (⟨â⟩→[ã],
- *     phonemic in Nama) and a MACRON or DOUBLED vowel = LONG (⟨ā⟩/⟨aa⟩→[aː]).
- *   · Nama's lexical TONE (H/L) is NOT written in the orthography and is not emitted.
- *
- * ⚠ THINLY VERIFIED, and largely against the SPEC rather than against usage: the available IPA attestation is
- * dominated by the click-letter definitions this file implements, with only a few real words as an
- * independent check.
+ * Nama / Khoekhoe (naq) phonemizer — a greedy scan over the Khoekhoegowab click orthography, canonical
+ * IPA. This file owns the click composition (place × efflux is a rule, not a 20-row table — clickIPA
+ * below), the ⟨kh⟩ digraph, doubled-vowel length, and the word-final gender-⟨-b⟩ devoicing. The non-click
+ * letter table and the encyclopedic record (the click system, the spec-verification caveat) live in
+ * nama.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

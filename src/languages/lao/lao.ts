@@ -1,10 +1,8 @@
 /**
- * Lao (lo) phonemizer — canonical IPA (authored). Lao is a Brahmic ABUGIDA, a sibling of Thai
- * but with a MORE PHONEMIC orthography (the Lao-PDR reforms stripped most Indic etymological spelling), so a leaner
- * rule g2p suffices — no Sanskrit-reading dictionary. Like Thai: leading vowels (ເ ແ ໂ ໃ ໄ) are written BEFORE the
- * consonant and reordered; the vowel is a (often discontinuous) pattern of signs around the onset; tone is computed
- * from consonant CLASS × live/dead × length × tone mark. Tones are Chao contour letters (stripped by the eval
- * backbone).
+ * Lao (lo) phonemizer — canonical IPA (authored). This file owns the abugida machinery: the leading-vowel
+ * reorder pass, the vowel-PATTERN resolver (the crux of Lao g2p — positional logic over discontinuous
+ * signs), the ຫ-led cluster handling, and the tone table (class × live/dead × length × mark). The
+ * onset/coda values, number words and the encyclopedic record live in lao.jsonc.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";

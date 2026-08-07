@@ -1,12 +1,8 @@
 /**
- * Ewe (ee) phonemizer — Eʋegbe, a Gbe language (Niger-Congo, Kwa), ~7M (Ghana/Togo), the Latin-based African alphabet
- * with ⟨ɖ ƒ ʋ ɣ ŋ ɔ ɛ⟩ + the labial-velars ⟨gb kp⟩, canonical IPA. A near-phonemic longest-match
- * scan: digraphs ⟨gb kp dz ts ny⟩→[ɡ͡b k͡p d͡z t͡s ɲ] before single letters; the bilabial/labiodental CONTRAST ⟨ƒ⟩→[ɸ]
- * vs ⟨f⟩→[f] and ⟨ʋ⟩→[β] vs ⟨v⟩→[v]; ⟨w⟩→[ɰ] and ⟨ɣ⟩→[ɰ] (velar approximant — Standard/Southern Ewe, per Jalloh);
- * ⟨x⟩→[x], ⟨y⟩→[j]. Nasalization is WRITTEN (a tilde: ã ẽ … → kept).
- * TONE (H/M/L) is UNMARKED in the orthography → not emitted (the Akan/Shona unwritten-tone situation; a tone lexicon
- * is deferred). ⚠ SINGLE-SOURCE-FAMILY: kaikki and wikipron are the only referees and both derive from
- * Wiktionary, so their agreement is not two independent confirmations.
+ * Ewe (ee) phonemizer — a near-phonemic longest-match scan, canonical IPA. This file owns the allophony:
+ * the ⟨r⟩ [l]~[r] split (post-consonant [l]), the ⟨w⟩ [w]/[ɰ] rounding rule, and the nasalization-tilde
+ * handling on both combining and precomposed vowels. The digraph/letter tables and the encyclopedic
+ * record live in ewe.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

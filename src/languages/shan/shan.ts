@@ -1,10 +1,9 @@
 /**
- * Shan / Tai Long (shn) phonemizer — လိၵ်ႈတႆး, Southwestern Tai (Tai-Kadai), the SHAN ABUGIDA (a Myanmar-script variant,
- * Unicode U+1000–U+109F incl. the Shan letters U+1075–U+108F), TONAL, canonical IPA.
- * A per-syllable scan (the Burmese template) — onset consonant → medials (ွ/ႂ→w, ျ palatalises) → the RIME
- * (vowel signs × coda) → the TONE. Unlike Burmese, Shan tone is LEXICAL and marked with EXPLICIT diacritics
- * (unmarked→˨˦, ႇ→˩, ႈ→˧˧˨, visarga း→˥, ႉ→˦˨), so the tone is a direct lookup. Words are space-separated (no DAG
- * segmentation needed). THIN human single-source (wikipron, 2607).
+ * Shan (shn) phonemizer — a per-syllable abugida scan (the Burmese template), canonical IPA. This file
+ * owns the syllable machinery: onset → medials (ွ/ႂ/ျ) → the RIME resolver (vowel-sign combos × medial-w
+ * × coda — positional logic) → the explicit lexical tone, plus the ႉ-tone glottalisation and the ໆ-style
+ * repetition mark. The letter values, tone marks, number words and the encyclopedic record live in
+ * shan.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

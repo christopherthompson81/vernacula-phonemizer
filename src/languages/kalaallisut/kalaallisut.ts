@@ -1,13 +1,8 @@
 /**
- * Kalaallisut / West Greenlandic (kl) phonemizer — Eskimo-Aleut (Inuit branch), ~56k (Greenland), the 1973
- * PHONEMIC Latin orthography. Canonical IPA. Because
- * the orthography is highly phonemic, this is a near-1:1 scan:
- *   ⚠ THREE-VOWEL system /a i u/ (the Inuit hallmark). ⟨e o⟩ are NOT phonemes — they are the LOWERED allophones of
- *     /i u/ the orthography writes before a uvular ⟨q r⟩, so ⟨e⟩→[i], ⟨o⟩→[u] (aaneq→aːniq). Doubled vowel → LENGTH.
- *   ⚠ the UVULAR stop ⟨q⟩→[q] and the uvular fricative ⟨r⟩→[ʁ]; ⟨ng⟩→[ŋ], ⟨nng⟩→[ŋː]; a doubled consonant → LENGTH.
- * The PHONETIC regressive consonant ASSIMILATION (rp→pp) + uvular vowel-lowering ([ɜ ɔ ɑ], ll→ɬ) are the NARROW
- * layer — deferred (we target the broad/phonemic level). No stress (weight-based, unmarked). Referee: wikipron
- * kal_latn_broad (human, 1581).
+ * Kalaallisut (kl) phonemizer — a near-1:1 scan over the 1973 phonemic orthography, canonical IPA. This
+ * file owns the longest-match mechanics: ⟨nng⟩/⟨ng⟩ before singles, doubled vowel/consonant → length
+ * (keyed on the same grapheme, so ⟨ei⟩/⟨ou⟩ never wrongly merge). The letter tables and the encyclopedic
+ * record (the three-vowel system, the deferred narrow layer) live in kalaallisut.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

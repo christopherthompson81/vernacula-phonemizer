@@ -1,17 +1,9 @@
 /**
- * Chuvash (chv) phonemizer — Чӑвашла / Чӑваш чӗлхи, the SOLE surviving Oghur (Bulgaric) Turkic language (the deepest
- * split in Turkic — sister to every Common-Turkic language, tr/az/tk/tt/ba/kk), ~1M (Chuvashia, Russia), CYRILLIC (the
- * Chuvash alphabet + ⟨ӑ ӗ ҫ ӳ⟩). Canonical IPA. A Cyrillic grapheme scan with two Chuvash signatures:
- *
- *   ⚠ ALLOPHONIC VOICING — Chuvash has NO phonemic voicing contrast: the voiceless letters ⟨п т к ч с ҫ ш х⟩ voice to
- *      [b d ɡ d͡ʑ z ʑ ʐ ɣ] between vowels, after a NASAL/glide, or after a LIQUID before a FULL vowel (апат→aˈbat,
- *      ача→aˈd͡ʑa, манпа→manˈba, вӑлсем→ʋəlˈzem). A GEMINATE (doubled letter) is the underlying "strong" consonant and
- *      BLOCKS voicing → single long [Cː] (иккӗ→ˈikːɘ).
- *   ⚠ REDUCED-VOWEL STRESS — the two reduced vowels ⟨ӑ⟩→[ə], ⟨ӗ⟩→[ɘ] cannot bear stress; stress falls on the last
- *      FULL vowel, else (all-reduced) on the first syllable (вӑлсем→ʋəlˈzem, сӑмах→səˈmax, vs вӑкӑр→ˈvəɡər).
- *
- * ⚠ SINGLE-SOURCE: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}} pairs;
- * no wikipron/epitran chv).
+ * Chuvash (chv) phonemizer — a Cyrillic grapheme scan, canonical IPA. This file owns the two signature
+ * rules as passes: ALLOPHONIC VOICING (voiceless obstruents voice between vowels / after a nasal/glide /
+ * after a liquid before a FULL vowel, with geminates blocking) and REDUCED-VOWEL STRESS (stress on the
+ * last FULL vowel; ⟨ӑ ӗ⟩ never stressed), plus the ⟨е⟩ [je]/[e] split and gemination. The letter tables
+ * and the encyclopedic record live in chuvash.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

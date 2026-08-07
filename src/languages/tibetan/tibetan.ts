@@ -1,15 +1,9 @@
 /**
- * Tibetan (bo) phonemizer — Standard / Lhasa Tibetan (Tournadre's "Standard Spoken Tibetan"), Tibetan script
- * (U+0F00–0FFF), canonical IPA. Bodish/Tibetic (Sino-Tibetan). One of the DEEPEST
- * orthographies in the world: Classical spelling encodes Old Tibetan; the Lhasa reading diverges massively, so this
- * is a RULE ENGINE, not a scan — parse the syllable STACK (prefix · superscript · root · subscript · vowel · suffix ·
- * post-suffix) from the Unicode full (U+0F40–0F6C) vs subjoined (U+0F90–0FBC) distinction, then apply the reading
- * rules: tone from tonogenesis (voiceless root→HIGH; voiced-obstruent→LOW+aspiration-by-head; sonorant→HIGH iff a
- * prefix/superscript raises it), onset-cluster realization (ya-btags→palatal, ra-btags→retroflex affricate), and
- * suffix-driven vowel umlaut / length / nasalization / glottalization. Tone emitted as ˥ (H) / ˩ (L).
- *
- * Referees: hand-curated JIPA "Central Tibetan (Lhasa)" illustration (independent, CC-BY) + TIBMD@MUC (independent)
- * + kaikki/Module:bo-pron (reference-parity, disclosed).
+ * Tibetan (bo) phonemizer — a Lhasa syllable-stack RULE ENGINE, not a scan, canonical IPA. This file owns
+ * the stack grammar: parse each syllable into prefix · superscript · root · subscript · vowel · suffix ·
+ * post-suffix from the Unicode full vs subjoined distinction, then read it — tone from tonogenesis,
+ * onset-cluster realization (ya-/ra-/la-btags), suffix-driven umlaut/length/nasalization/glottalization.
+ * The letter values, onset realizations, number words and the encyclopedic record live in tibetan.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

@@ -1,11 +1,8 @@
 /**
- * Bashkir (ba) phonemizer — Башҡорт теле, Kipchak Turkic (sibling of Tatar), CYRILLIC (the Bashkir alphabet),
- * canonical IPA. A Cyrillic grapheme scan. Bashkir's HALLMARK is the
- * INTERDENTAL fricatives ⟨ҫ⟩→[θ] and ⟨ҙ⟩→[ð] (shared with Turkmen). Unlike Tatar, Bashkir WRITES the uvulars ⟨ҡ⟩→[q]
- * / ⟨ғ⟩→[ʁ] (so ⟨к⟩→[k], ⟨г⟩→[ɡ] always — no harmony inference). The BASHKIR VOWEL SHIFT: ⟨и⟩→[i], ⟨о⟩→[ʊ],
- * ⟨у⟩→[u], ⟨е⟩→[ɪ] (bare; [je] word-initial), ⟨ы⟩→[ɯ], ⟨ө⟩→[ø], ⟨ү⟩→[y], ⟨ә⟩→[æ]. Word-final (oxytone) stress
- * (Turkic). ⚠ SINGLE-SOURCE: kaikki is the only referee, and it is noisy — its Bashkir entries include Russian
- * loans transcribed inconsistently, so a disagreement with it is as likely to be the referee's.
+ * Bashkir (ba) phonemizer — a Cyrillic grapheme scan + word-final (oxytone) stress, canonical IPA.
+ * This file owns the position rules: dark/clear ⟨л⟩ by harmony, the ⟨у ү⟩ glide-vs-vowel split, ⟨е⟩
+ * iotation, and RUSSIAN-LOAN routing via vowel-harmony violation. The letter tables and the encyclopedic
+ * record (phonology, alphabet, referee caveats) live in bashkir.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

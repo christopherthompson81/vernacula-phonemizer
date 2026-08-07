@@ -1,10 +1,9 @@
 /**
- * Santali (sat) phonemizer — ᱥᱟᱱᱛᱟᱲᱤ, Munda (Austroasiatic), the OL CHIKI script (ᱚᱞ ᱪᱮᱢᱮᱫ, U+1C50–1C7F — a distinct
- * ALPHABET, 1925, now Santali's official script), canonical IPA. Munda (Austroasiatic)
- * and first Ol Chiki. Ol Chiki is near-phonemic, so a grapheme scan + a few sign rules: ⟨ᱷ OH⟩ aspirates the preceding
- * stop (ᱵᱷ→bʱ) / is [h]; ⟨ᱹ GAAHLAA⟩ modifies the preceding vowel (ᱟᱹ→ə); ⟨ᱸ MU⟩ nasalizes it (ᱟᱸ→ã); ⟨ᱼ PHAARKAA⟩ /
- * ⟨ᱽ AHAD⟩ mark a CHECKED (glottalized) consonant (ᱜᱼ→kʼ); and the Santali HALLMARK — a WORD-FINAL voiced stop is
- * CHECKED/glottalized (ᱫᱟᱜ→dakʼ 'water', ᱢᱮᱫ→metʼ 'eye'). ⚠ Thinly attested — a single source family.
+ * Santali (sat) phonemizer — a grapheme scan over Ol Chiki + the sign rules, canonical IPA. This file
+ * owns the sign machinery: ⟨ᱷ OH⟩ aspirating the preceding stop, ⟨ᱹ GAAHLAA⟩ vowel modification, ⟨ᱸ MU⟩ /
+ * ⟨ᱺ MU-GAHLA⟩ nasalization, ⟨ᱼ PHAARKAA⟩ / ⟨ᱽ AHAD⟩ checking, and the hallmark WORD-FINAL voiced-stop
+ * checking rule with its AHAD block. The letter values, substitution tables and the encyclopedic record
+ * live in santali.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

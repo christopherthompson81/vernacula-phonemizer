@@ -1,18 +1,9 @@
 /**
- * Native Aromanian / armãneashti (rup) text phonemizer — canonical IPA. Aromanian is an EASTERN
- * ROMANCE (Balkan Romance) language, a close sibling of Romanian, spoken across the Balkans (Greece, Albania, North
- * Macedonia, Romania, Bulgaria; ~250k). A near-phonemic Latin orthography (the Cunia/DIARO system) → a greedy
- * left-to-right scan with the shared Romance contextual phonology plus Aromanian's own digraphs.
- *
- *   ⚠ AROMANIAN DIGRAPHS (not in Romanian, which uses diacritic letters): ⟨ts⟩→[t͡s], ⟨dz⟩→[d͡z] (but [d͡ʒ] in the
- *     ⟨ndz⟩+front-vowel soft-g reflex: sãndze→[sənd͡ʒe]), ⟨sh⟩→[ʃ], ⟨nj⟩→[ɲ], ⟨lj⟩/⟨ll⟩→[ʎ] (palatals), ⟨dh⟩→[ð],
- *     ⟨th⟩→[θ] (the Greek-contact interdentals), ⟨gh⟩→[ɡ], ⟨ch⟩→[k]; ⟨y⟩ (Greek gamma)→[ɣ], NOT the glide [j].
- *   ⚠ ⟨ã⟩ is the single central-vowel letter → [ə] (also realised [ɨ]; the two are not distinguished in the
- *     orthography — folded). The shared Romance rules: ⟨c/g⟩ SOFTEN before ⟨e i⟩ (⟨ce ci⟩→t͡ʃ, ⟨ge gi⟩→d͡ʒ, silent
- *     softener i); RISING DIPHTHONGS ⟨ea⟩→[e̯a], ⟨oa⟩→[o̯a]; the ⟨i u⟩ GLIDES ([j w] next to another vowel). ⟨r⟩→[r].
- *
- * Stress is unwritten (deferred, not emitted); the word-final desyllabified ⟨-u⟩ ([ʷ]/[ŭ]) is emitted as [u].
- * Referee: wikipron rup_latn narrow (196) + kaikki Aromanian (201).
+ * Aromanian (rup) phonemizer — a greedy left-to-right scan over the Cunia/DIARO orthography with the
+ * shared Romance contextual phonology, canonical IPA. This file owns the context rules: the ⟨dz⟩/⟨ndz⟩
+ * soft-g reflex, ⟨c/g⟩ softening with the silent softener i, the rising diphthongs ⟨ea oa⟩, the ⟨i u⟩
+ * glides, and the word-final ⟨-u⟩ desyllabification. The digraph/letter tables and the encyclopedic
+ * record live in aromanian.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
