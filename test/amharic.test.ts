@@ -49,9 +49,9 @@ describe("Amharic tens", () => {
     });
 });
 
-// ⚠ A MISSING SCALE ABOVE ሺ (thousand) FAILS SILENTLY: with nothing to compose, 10⁶+ falls through to the raw
-// digit string, and the fidel g2p has no rule for ASCII digits, so the output is EMPTY IPA rather than an
-// error. ሚሊዮን / ቢሊዮን are the European loans Amharic uses
+// ⚠ A MISSING SCALE ABOVE ሺ (thousand) FAILS SILENTLY: with nothing to compose, 10⁶+ never enters the
+// numeral path at all and no error is raised — the number simply does not get read. ሚሊዮን / ቢሊዮን are the
+// European loans Amharic uses
 // (Omniglot "Numbers in Amharic" cites 10⁶ as አንድ ሚሊዮን; Abyssinica dictionary for ቢሊዮን) — see amharic.jsonc.
 describe("Amharic magnitudes above thousand", () => {
     test("ሚሊዮን / ቢሊዮን keep their multiplier at 1 (unlike the bare መቶ / ሺ)", () => {

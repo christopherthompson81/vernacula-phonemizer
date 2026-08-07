@@ -1,7 +1,7 @@
 # Bhojpuri referee — g2p-mined Devanagari↔IPA pairs (1,622 after cleaning) from the glossed forms in
 # Lohar, Gopal Thakur (2020). *A Grammar of Bhojpuri*. PhD dissertation, Tribhuvan University,
 # Kathmandu, Nepal (July 2020; supervisor Dan Raj Regmi). Mined mechanically by regex over the
-# pdftotext extraction .
+# pdftotext extraction.
 खा	kʰɑ
 देख	dekʰ
 रह	rʌɦ

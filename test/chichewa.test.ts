@@ -11,9 +11,10 @@ import { numberToWords } from "../src/languages/chichewa/numbers.ts";
 //
 // ⚠ THE TENS MULTIPLIER AND A TRAILING UNIT TAKE DIFFERENT CONCORDS, and collapsing them to one series is
 // SILENT: the multiplier needs the CLASS-6 concord of makumi (limodzi, awiri, atatu, anayi) while a trailing
-// unit keeps its class-8/10 citation form (chimodzi, ziwiri, …). Use one series for both and 60 composes to
-// *makumi zisanu ndi chimodzi — byte-identical to 51, with 70=52, 80=53 and 90=54 likewise. Nothing is
-// dropped or malformed; two different numbers simply read the same. See src/languages/chichewa/numbers.ts.
+// unit keeps its class-8/10 citation form (chimodzi, ziwiri, …). Use one series for BOTH slots and each of
+// 60/70/80/90 composes to exactly the same string as 51/52/53/54 — nothing is dropped or malformed, two
+// different numbers simply read the same. The loop below pins those four pairs apart.
+// See src/languages/chichewa/numbers.ts.
 describe("Chichewa numbers", () => {
     test("units — 6–9 are '5 and N' (class-8/10 citation form)", () => {
         expect(numberToWords(1)).toBe("chimodzi");

@@ -121,8 +121,9 @@ describe("Afrikaans text normalization", () => {
         expect(normalizeAfrikaans("‘nuwe’ idee")).toBe("‘nuwe’ idee"); // an opening quote on an n-word is not the article
     });
 
-    // ⚠ The era marker MUST require its dots. A bare `v` + `C` pattern also matches the ⟨'n C…⟩ of an
-    // indefinite article before a capitalised word, which is the commonest shape in the language.
+    // ⚠ It is the `n.C.` (na Christus) marker that MUST require its dots — unanchored, `n` + `C` matches the
+    // ⟨'n C…⟩ of the indefinite article before any c-word, destroying the commonest word in the language.
+    // And na Christus has ZERO corpus instances of its own. See normalize.ts.
     test("the era marker is dot-bound, so it cannot eat the indefinite article", () => {
         expect(normalizeAfrikaans("'n Chinese skip")).toBe("'n Chinese skip"); // was *'na Christushinese*
         expect(normalizeAfrikaans("323 v.C.")).toBe("323 voor Christus.");

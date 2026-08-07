@@ -3,8 +3,8 @@
  * fa.ge2pe-ezafe-homograph.tsv — modern Iranian, MIT, non-circular vs HomoRich). Reports word-level FULL and
  * BACKBONE (consonants + long vowels) agreement, overall and per test set (Kasre = ezafe-stress, Homograph =
  * homograph-stress). These are ADVERSARIAL hard-case sets, so the numbers are a lower bound, not a representative
- * accuracy — the value is INDEPENDENT corroboration of the backbone and confirmation of the ezafe/homograph residual
- * . Run: npx tsx tools/persian/ge2pe-eval.ts
+ * accuracy — the value is INDEPENDENT corroboration of the backbone and confirmation of the ezafe/homograph
+ * residual. Run: npx tsx tools/persian/ge2pe-eval.ts
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
