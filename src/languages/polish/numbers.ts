@@ -8,7 +8,7 @@
  * in polish.jsonc. Magnitude agreement forms are the standard paradigm (tysiąc/tysiące/tysięcy,
  * milion/miliony/milionów, miliard/miliardy/miliardów).
  *
- * ★ WHY THIS IS NOT `westernNumberWords`: the shared Western composer stores ONE string per magnitude, but a
+ * ⚠ WHY THIS IS NOT `westernNumberWords`: the shared Western composer stores ONE string per magnitude, but a
  *   Slavic magnitude noun agrees with its count (2 tysiące vs 5 tysięcy). Polish also DIVERGES from the shared
  *   `slavicCountForm` used by ru/cs for symbol agreement: in Polish a compound numeral ending in "jeden" takes
  *   the GENITIVE PLURAL, not the singular — "dwadzieścia jeden tysięcy" (3 hits on pl.wikipedia) vs

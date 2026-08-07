@@ -129,7 +129,7 @@ export const isUnreadablePolish = makeUnreadableTest({
 });
 
 /** LEXICAL: acronyms Polish spells out although the letters could be read as a word. Authored in
- *  polish.jsonc beside the language's other hand-authored facts, per the playbook's data rule. */
+ *  polish.jsonc beside the language's other hand-authored facts. */
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
 /**
@@ -147,7 +147,7 @@ export function normalizePolishInitialisms(text: string): string {
     })(text);
 }
 
-/** Multi-dot abbreviations. Claimed FIRST (playbook coupling) or their interior dots survive as breaks. */
+/** Multi-dot abbreviations. ⚠ Claimed FIRST, or their interior dots survive as phrase breaks. */
 const MULTI_DOT: ReadonlyArray<readonly [RegExp, string]> = [
     [/(?<![\p{L}\p{M}])p\.\s?n\.\s?e\./giu, "przed naszą erą"],
     [/(?<![\p{L}\p{M}])n\.\s?e\./giu, "naszej ery"],
@@ -220,7 +220,7 @@ function keepFinal(expansion: string, matched: string, rest: readonly unknown[])
 export function normalizePolish(input: string): string {
     let s = input;
 
-    // 0) DIGIT DE-GROUPING, first (playbook coupling: a grouping separator is otherwise read as clause
+    // 0) DIGIT DE-GROUPING, first (⚠ a grouping separator is otherwise read as clause
     //    punctuation, and the number token cannot span a space). Polish groups thousands with a SPACE and
     //    marks the decimal with a COMMA — verified against the corpus: 16 space-grouped numbers, 19
     //    comma-decimals, ZERO period-grouped and zero comma-grouped. Two passes, because the groups
@@ -231,7 +231,7 @@ export function normalizePolish(input: string): string {
         s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
-    // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule (playbook coupling) — otherwise the interior
+    // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule — otherwise the interior
     //    dot of p.n.e. / m.in. survives as a phrase break. p.n.e. is also an ERA marker and so has to
     //    precede the generic rules for the same reason.
     //    Each expansion CONSUMES the abbreviation's final dot, so where that dot was also the sentence
@@ -309,7 +309,7 @@ export function normalizePolish(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}\d.,])(\d+)\.(?=\s*[,\p{Ll}])/gu,
         (m0, digits: string) => ordinal(Number(digits)) ?? m0);
 
-    // 8) CLOCK. Before any rule that looks for a bare number (playbook coupling): `11:30` must not be
+    // 8) CLOCK. ⚠ Before any rule that looks for a bare number: `11:30` must not be
     //    claimed by the range or unit rules. The colon is clause punctuation in polish.jsonc, so every
     //    time in the corpus was previously split by a phrase break. Polish reads the hour as a FEMININE
     //    ORDINAL agreeing with godzina (8:46 = ósma czterdzieści sześć), inflected by the governing
@@ -343,7 +343,7 @@ export function normalizePolish(input: string): string {
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
     // THE MINUS. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE
     //    (1000–1300), a SCORE (1977-1981), a DESIGNATION (ił-76) or a clock range. The rule is written anyway on
-    //    the #584 argument: the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
+    //    the corpus is not the only input, and a dropped minus INVERTS a quantity rather than
     //    merely omitting it. What matters is that it fires on NONE of those instances, and the corpus diff is
     //    what verifies that rather than the guard looking plausible.
     //

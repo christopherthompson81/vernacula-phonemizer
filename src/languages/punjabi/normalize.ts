@@ -45,7 +45,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "ਅਤੇ",
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -61,7 +61,7 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["ਵਰਗ"], cubed: ["ਘਣ"], position: "before" },
     // ⚠ `¥` → ਯੇਨ, AND IT WAS RECORDED AS UNSOURCEABLE UNTIL THE AUDIO ARRIVED. The corpus writes
     // `ਟਿਕਟਾਂ ਦੀ ਕੀਮਤ ¥2,500 ਅਤੇ ¥130,000` and the sign was DROPPED, so the price lost its currency entirely.
-    // "yen" is ×0 in this corpus's TEXT and in the wiki, which is why #586 filed it as unsourceable — a correct
+    // "yen" is ×0 in this corpus's TEXT and in the wiki, i.e. unsourceable — a correct
     // report about the text tiers and the wrong conclusion about the language. The reader says it: decoded with
     // facebook/wav2vec2-xlsr-53-espeak-cv-ft (a PHONEME recognizer, so it cannot echo a glyph back),
     //   `… t i k t a n d i k iː m a t … ʌ l a k a t iː h i a r r  j e n  d e v i tʃ k a r h o v e ɡ iː …`
@@ -83,7 +83,7 @@ const ORDINAL_SUFFIXES = ["ਵੀਂ", "ਵੀ", "ਵਾਂ", "ਵਾ", "ਵੇ�
 
 /**
  * Gurmukhi unit abbreviations → the full word, matched only AFTER a number. Longest first so ਕਿ.ਮੀ. beats
- * ਮੀ. and ਸੈ.ਮੀ beats ਮੀ — this is the playbook's "multi-dot abbreviations before single-dot" coupling,
+ * ਮੀ. and ਸੈ.ਮੀ beats ਮੀ — ⚠ multi-dot abbreviations must precede single-dot ones,
  * expressed as alternation order (an interior dot that survives becomes a phrase break).
  * Attested: ਕਿਮੀ ×4, ਕਿ.ਮੀ ×2, ਮਿਮੀ ×4, ਮੀ. ×2, ਸੈ.ਮੀ ×1.
  */
@@ -121,7 +121,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         // 1) THE SHARED SYMBOL TIER FIRST. It matches a sign only when a NUMBER is ADJACENT, and its own
         //    numeral pattern reads "2,500" / "2.3" as ONE token. Steps 2 and 3 below split exactly those
         //    into two tokens, so running them first would strand every sign on half a numeral. (This is
-        //    the playbook's "units before decimals" coupling, one layer up: the sign tier before both.)
+        //    units are resolved BEFORE decimals; here the sign tier precedes both.)
         let s = SYMBOLS(input);
 
         // 2) DIGIT DE-GROUPING, before anything else that reads punctuation. A grouping comma is otherwise
@@ -155,7 +155,7 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    THE TRAILING BOUNDARY IS LOAD-BEARING — without it the suffix matches the START of an
         //    ordinary word and glues it to the numeral. `\b` cannot express it: `\b` is ASCII-defined and
         //    finds nothing at all against Gurmukhi, so every boundary in this file is an explicit
-        //    lookaround (playbook trap #1).
+        //    lookaround — `\b` is ASCII-defined and matches nothing against this script.
         s = s.replace(
             new RegExp(`(?<![\\d.,])(\\d+)\\s?(${ORDINAL_SUFFIXES.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) => ordinal(Number(digits), suffix) ?? whole);

@@ -8,7 +8,7 @@
  *   - palabricks.nl/blog/tel-tot-honderd and /van-100-tot-1000 (Papiaments language school) for the two
  *     composition rules, plus omniglot.com/language/numbers/papiamento.htm as a cross-check.
  *
- * ★ TWO RULES SHAPE THIS COMPOSITOR, and both mean sub-1000 is ONE orthographic word:
+ * ⚠ TWO RULES SHAPE THIS COMPOSITOR, and both mean sub-1000 is ONE orthographic word:
  *   1. the tens ending in ⟨-a⟩ change that ⟨a⟩ to ⟨i⟩ before a unit — "trinta eindigt op de letter a. Maar bij de
  *      getallen die volgen, verandert de a in een i" — trinta → trintiun (31), kuarenta → kuarentidos (42);
  *      ⟨binti⟩ (20) already ends in -i, hence bintiun (21). The -i- IS the additive conjunction ⟨i⟩ "and", fused.
