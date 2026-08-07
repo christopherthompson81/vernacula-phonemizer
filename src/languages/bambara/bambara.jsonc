@@ -33,6 +33,11 @@
         "i": "i", "e": "e", "ɛ": "ɛ", "a": "a", "ɔ": "ɔ", "o": "o", "u": "u"
     },
 
+    // The seven ORAL VOWEL LETTERS (the orthography writes ⟨ɛ ɔ⟩ as letters in their own right). This is the
+    // environment for the nasalisation rule in bambara.ts: an ⟨n⟩ FOLLOWED by one of these is an onset and
+    // stays [n]; anywhere else it is syllable-final, nasalises the preceding vowel and drops.
+    "vowelLetters": ["i", "e", "ɛ", "a", "ɔ", "o", "u"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     }

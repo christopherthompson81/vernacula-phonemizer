@@ -30,6 +30,20 @@
         "m": "m", "n": "n", "r": "r", "v": "v", "ð": "ð", "þ": "θ", "c": "k", "w": "v", "x": "ks", "z": "s", "q": "k",
     },
 
+    // Front vowel GRAPHEMES that affricate a preceding ⟨g k⟩ → [t͡ʃ] (argi→aɹt͡ʃɪ).
+    // ⚠ NOT ⟨ø⟩: gøta is [køːta], not *[t͡ʃøːta] — the front-ROUNDED vowel does not palatalize the velar.
+    "affricatingVowels": ["e", "i", "y", "í", "ý", "æ"],
+
+    // ⚠ THE INTERVOCALIC ⟨g ð⟩ GLIDE, decided by the vowels on BOTH sides (the resolver is in faroese.ts).
+    // A FRONT neighbour makes it [j], a ROUND one [v], and neither makes it silent (agað→ɛaːa). Front WINS
+    // over round when the two disagree — Eyður→ɛiːjʊɹ is ey (front) + u (round) → [j].
+    // ⚠ ⟨e⟩ AND ⟨a⟩ ARE IN NEITHER LIST, deliberately: they are NEUTRAL and defer to the other neighbour, so
+    // vegur is e + u → the round ⟨u⟩ decides → [v], while Bogi is o + i → the front ⟨i⟩ decides → [j].
+    // The vowel DIGRAPHS ⟨ei ey oy⟩ are front for this rule, which is why the keys here are graphemes and
+    // not single letters. ⟨á⟩ counts as round here even though it is not round in the affrication rule above.
+    "frontGlideVowels": ["i", "y", "í", "ý", "æ", "ei", "ey", "oy"],
+    "roundGlideVowels": ["o", "u", "ó", "ú", "ø", "á"],
+
     // SKERPING vowel remap before ⟨gv⟩ (the "sharpening"): ó→[ɛ], ú→[ɪ], í ý→[ʊi]. Before ⟨ggj⟩ the í/ý
     // offglide DROPS to a plain [ʊ] (nýggjur→nʊt͡ʃːʊɹ, kríggj→kɹʊt͡ʃ).
     "skerping": { "ó": "ɛ", "ú": "ɪ", "í": "ʊi", "ý": "ʊi" },

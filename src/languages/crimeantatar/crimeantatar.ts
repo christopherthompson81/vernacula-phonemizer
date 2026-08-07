@@ -13,10 +13,14 @@ import { latinPhone } from "../../core/latinPhones.ts";
 
 interface CrimeanTatarDef {
     letters: Record<string, string>;
+    vowelLetters: readonly string[];
 }
 // Letter → IPA (crimeantatar.jsonc). The ⟨v⟩→[w] coda rule and dotless-I casing are handled in the scan.
-const LETTER = loadManifest<CrimeanTatarDef>(import.meta.url, "crimeantatar.jsonc").letters;
-const CYR_VOWEL = new Set([..."aâeıioöuü"]); // Latin vowels (for the ⟨v⟩→[w] coda context)
+const DEF = loadManifest<CrimeanTatarDef>(import.meta.url, "crimeantatar.jsonc");
+const LETTER = DEF.letters;
+// The Latin vowel letters (crimeantatar.jsonc) — the ⟨v⟩→[w] coda context. The CYR_ prefix is inherited
+// from the sibling Turkic engines; Crimean Tatar is written in Latin and this engine always has been.
+const CYR_VOWEL = new Set(DEF.vowelLetters);
 const IPA_VOWEL = new Set([..."ɑaeɯioøuy"]);
 
 /** One Crimean Tatar word → canonical IPA. */

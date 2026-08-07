@@ -13,12 +13,15 @@ interface TatarDef {
     consonants: Record<string, string>;
     vowels: Record<string, string>;
     iotated: Record<string, string>;
+    vowelLetters: readonly string[];
+    backVowels: readonly string[];
+    frontVowels: readonly string[];
 }
 const DEF = loadManifest<TatarDef>(import.meta.url, "tatar.jsonc");
 // Letter → IPA tables (tatar.jsonc). The harmony-conditioned ⟨к г а⟩ and iotating ⟨е⟩ are handled in the scan.
 const CONS = DEF.consonants;
 // Cyrillic vowel letters — for the word-initial/post-vocalic ⟨е⟩→[je] iotation.
-const CYR_VOWEL = new Set(["а", "ә", "о", "ө", "у", "ү", "ы", "и", "е", "э", "я", "ю", "ё"]);
+const CYR_VOWEL = new Set(DEF.vowelLetters);
 const STRESS_NASAL = new Set(["m", "n", "ŋ"]);
 /** Sonority for maximal-onset stress: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */
 function sonority(seg: string): number {
@@ -33,8 +36,8 @@ function sonority(seg: string): number {
 const VOWEL = DEF.vowels;
 const IOTATED = DEF.iotated;
 // Backness for the к/г harmony: a nearby BACK vowel → [q]/[ʁ]; a FRONT vowel → [k]/[ɡ].
-const BACK = new Set(["а", "о", "у", "ы", "я", "ю", "ё"]);
-const FRONT = new Set(["ә", "ө", "ү", "е", "э", "и"]);
+const BACK = new Set(DEF.backVowels);
+const FRONT = new Set(DEF.frontVowels);
 const IPA_VOWEL = new Set(["ɑ", "a", "æ", "o", "ø", "u", "y", "ɨ", "i", "e"]);
 
 /** Is the nearest vowel to position `i` (scanning outward) a BACK vowel? Defaults to back (Turkic default). */

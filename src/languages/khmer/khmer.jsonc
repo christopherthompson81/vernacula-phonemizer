@@ -7,6 +7,20 @@
     "name": "Khmer",
     "script": ["Khmer"],
 
+    // Combining DIACRITICS consumed after a unit's vowel. The two register shifters (musikatoan ⟨៉⟩,
+    // triisap ⟨៊⟩) and the bantoc ⟨់⟩ carry meaning and are handled by name in khmer.ts; the rest are
+    // consumed and ignored, and they are listed together here because the scan's job is to know where the
+    // unit ENDS, not what each mark does.
+    "diacritics": ["់", "៉", "៊", "៌", "៍", "៎", "៏", "័", "៑", "៓", "ៈ"],
+
+    // ⚠ PASSIVE consonants — the continuants (nasals, semivowels, liquids). In a two-consonant onset the
+    // SERIES (register) is set by the DOMINANT consonant, and a passive one yields to it: khmer.ts scans
+    // the onset and takes its register from the first letter that is NOT in this list. Everything absent
+    // here is a dominant stop or spirant, so the list is the whole rule.
+    "passiveConsonants": ["ង", "ញ", "ណ", "ន", "ម", "យ", "រ", "ល", "វ", "ឡ"],
+    // The NASAL subset of those — a nasal-initial cluster is a prefix syllable, not a true onset cluster.
+    "nasalConsonants": ["ង", "ញ", "ណ", "ន", "ម"],
+
     // Base consonant → [onset IPA, series ("a" | "o")]. The series sets the inherent vowel and the vowel-sign reading.
     "consonants": {
         "ក": ["k", "a"], "ខ": ["kʰ", "a"], "គ": ["k", "o"], "ឃ": ["kʰ", "o"], "ង": ["ŋ", "o"],

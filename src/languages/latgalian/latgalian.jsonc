@@ -20,6 +20,12 @@
     // Multi-char graphemes (longest-first): the affricate digraphs.
     "digraphs": [["dz", "d͡z"], ["dž", "d͡ʒ"], ["tz", "d͡z"], ["ch", "x"]],
 
+    // The vowel LETTERS that PALATALIZE a preceding consonant — the front ⟨i ī e ē⟩ and their long partners.
+    // The rule in latgalian.ts looks ahead past the whole consonant cluster to the next vowel, so this list
+    // is what the lookahead is testing for.
+    // ⚠ NOT ⟨y⟩: Latgalian ⟨y⟩ is the CENTRAL [ɨ], not a front vowel, and does not palatalize.
+    "frontVowels": ["i", "ī", "e", "ē"],
+
     "vowels": {
         "a": "a", "ā": "aː", "e": "æ", "ē": "æː", "i": "i", "ī": "iː", "o": "ɔ", "ō": "ɔː",
         "u": "u", "ū": "uː", "y": "ɨ", "ȳ": "ɨː",

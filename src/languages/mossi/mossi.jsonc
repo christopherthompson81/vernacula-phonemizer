@@ -38,6 +38,11 @@
         "y": "j", "z": "z", "ʼ": "ʔ", "'": "ʔ"
     },
 
+    // The VOWEL LETTERS: the plain five, the dedicated -ATR letters ⟨ɛ ɩ ʋ⟩, and the tilde (nasal) vowels.
+    // This is what splits the DOUBLING rule in mossi.ts — a doubled vowel is length, a doubled consonant is
+    // a geminate — so an -ATR or nasal vowel missing here would be geminated instead of lengthened.
+    "vowelLetters": ["a", "e", "ɛ", "i", "ɩ", "o", "u", "ʋ", "ã", "ẽ", "ĩ", "õ", "ũ"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     }

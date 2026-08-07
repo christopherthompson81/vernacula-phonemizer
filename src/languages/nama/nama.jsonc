@@ -19,6 +19,14 @@
     "name": "Nama / Khoekhoe (Khoekhoegowab)",
     "script": ["Latin"],
 
+    // The four CLICK letters — dental ⟨ǀ⟩, lateral ⟨ǁ⟩, palatal ⟨ǂ⟩, alveolar ⟨ǃ⟩. A click is not a letter
+    // that maps to a phone on its own: it takes an ACCOMPANIMENT from the following letter, which is why
+    // nama.ts branches on this set rather than looking the character up in the table below.
+    "clicks": ["ǀ", "ǁ", "ǂ", "ǃ"],
+    // The five plain vowel letters — a doubled one is a LONG vowel [Vː]. The nasal ⟨â ê î ô û⟩ are excluded:
+    // they do not double.
+    "plainVowels": ["a", "e", "i", "o", "u"],
+
     // Non-click letters. ⟨kh⟩→[kʰ] is handled as a digraph in the scan; ⟨g⟩ only occurs as a click
     // accompaniment or as the fricative [x]. ⟨l j⟩ occur only in NATURALISED LOANS, but they do occur: the
     // Khoekhoegowab section of Namibia's New Era writes "N$47 miljunsa" / "N$1 biljunmaris" (10⁶/10⁹ — see

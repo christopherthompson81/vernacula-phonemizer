@@ -20,6 +20,9 @@ interface LaoNumbers {
 }
 interface LaoDef {
     onsets: Record<string, [string, Cls]>;
+    leadingVowels: readonly string[];
+    hLedSonorants: readonly string[];
+    toneMarks: readonly string[];
     codas: Record<string, string>;
     numbers: LaoNumbers;
 }
@@ -30,9 +33,9 @@ const CONS = DEF.onsets;
 const CODA = DEF.codas;
 
 // Vowel signs (combining/spacing) used by the scanner.
-const LEAD = new Set(["ເ", "ແ", "ໂ", "ໃ", "ໄ"]); // written before the consonant
-const HSON = new Set(["ງ", "ຍ", "ນ", "ມ", "ລ", "ວ"]); // the sonorants ຫ leads → HIGH class (ຫ + others is NOT a lead)
-const TONEMARK = new Set(["່", "້", "໊", "໋"]);
+const LEAD = new Set(DEF.leadingVowels); // written before the consonant
+const HSON = new Set(DEF.hLedSonorants); // the sonorants ຫ leads → HIGH class (ຫ + others is NOT a lead)
+const TONEMARK = new Set(DEF.toneMarks);
 const isCons = (c: string): boolean => c in CONS;
 
 /** Reorder a leading vowel (ເ ແ ໂ ໃ ໄ) to AFTER its consonant (cluster): ເມ → ມເ, so the scanner reads L→R. */

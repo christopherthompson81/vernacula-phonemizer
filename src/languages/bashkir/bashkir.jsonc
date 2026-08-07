@@ -28,4 +28,26 @@
 
     // Iotated vowels → glide + vowel.
     "iotated": { "я": "jɑ", "ю": "ju", "ё": "jo" },
+
+    // Every Cyrillic letter that writes a vowel — the environment for the ⟨у⟩/⟨ү⟩ glide test in bashkir.ts.
+    "vowelLetters": ["а", "ә", "о", "ө", "у", "ү", "ы", "и", "э", "е", "я", "ю", "ё"],
+    // The BACK-harmony vowels. Bashkir vowel harmony is a whole-word property, so ONE of these anywhere in
+    // the word makes it a back word — which is what decides the dark ⟨л⟩→[ɫ] against the clear [l].
+    "backVowels": ["а", "о", "у", "ы"],
+
+    // ⚠ RUSSIAN-LOAN DETECTION (the rule is in bashkir.ts). Real Bashkir text is saturated with Russian
+    // loanwords, and Bashkir speakers read them RUSSIAN-style — palatalization, akanye, Russian stress — so
+    // the engine routes a detected loan to the Russian g2p entirely. The signal is a HARMONY VIOLATION:
+    // native Bashkir is strictly all-back or all-front, so a word mixing the two is not native.
+    //
+    // "bashkirLetters" are the letters Russian does not have. They are always harmonic, so ONE of them
+    // vetoes the whole test — this is the guard that keeps a native word out of the Russian g2p.
+    "bashkirLetters": ["ҡ", "ғ", "ҙ", "ҫ", "ң", "ә", "ө", "ү", "һ"],
+    // The BACK side of the violation is "backVowels" above — the same letters, read a second time, since
+    // there is only one set of Bashkir back vowels and two copies could only ever drift apart.
+    // ⚠ THE FRONT SIDE IS DELIBERATELY SHORT — it is NOT the mirror of "backVowels". ⟨и⟩ is harmonically
+    // NEUTRAL and frequent in back-vowel Arabic/Persian loans, so counting it would flag native words as
+    // Russian. ⟨ә ө ү⟩ are front but are also Bashkir-specific letters, so the guard above has already
+    // returned by the time they could matter. That asymmetry is why only this list gets its own key.
+    "loanFrontVowels": ["е", "э"],
 }

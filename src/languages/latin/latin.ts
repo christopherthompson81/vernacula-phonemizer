@@ -16,6 +16,7 @@ interface LatinDef {
     short: Record<string, string>;
     long: Record<string, string>;
     tense: Record<string, string>;
+    vowelLetters: readonly string[];
     consonants: Record<string, string>;
 }
 const DEF = loadManifest<LatinDef>(import.meta.url, "latin.jsonc");
@@ -25,7 +26,7 @@ const LONG = DEF.long;
 const TENSE = DEF.tense;
 const CONS = DEF.consonants;
 // Every vowel LETTER (short, macron, diaeresis) — for glide (i→j) and diphthong context tests.
-const VOWEL_LETTER = new Set([..."aeiouy", ..."āēīōūȳ", ..."ëïöüÿ"]);
+const VOWEL_LETTER = new Set(DEF.vowelLetters);
 // IPA vowel BASE chars — for segment-level tests (nasalization, stress nuclei). Excludes offglide/length marks.
 const IPA_VOWEL = new Set([..."aɛeiɪoɔuʊy"]);
 

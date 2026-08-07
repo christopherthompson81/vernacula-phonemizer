@@ -33,6 +33,11 @@
         "x": "x", "y": "j"
     },
 
+    // The VOWEL LETTERS, including the +ATR ⟨é ó⟩, the schwa ⟨ë⟩ and the long ⟨à⟩. This is what splits the
+    // DOUBLING rule in wolof.ts — a doubled vowel is length, a doubled consonant is a geminate [Cː] — so an
+    // accented vowel missing here would be geminated instead of lengthened.
+    "vowelLetters": ["a", "à", "e", "é", "ë", "i", "o", "ó", "u"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     }

@@ -10,6 +10,12 @@ export interface GreekManifest {
     name: string;
     script: readonly string[];
     vowels: Record<string, string>;
+    /** Voiceless consonant letters — they take the voiceless glide [ç] under palatalisation. */
+    voiceless: readonly string[];
+    /** Letters AND digraphs that make ⟨αυ ευ⟩ voiced ([av ev] rather than [af ef]). */
+    auVoiced: readonly string[];
+    /** The shorter class that voices a preceding ⟨σ⟩ to [z]. */
+    sigmaVoiced: readonly string[];
     vowelDigraphs: Record<string, string>;
     consonants: Record<string, string>;
     consonantDigraphs: Record<string, string>;

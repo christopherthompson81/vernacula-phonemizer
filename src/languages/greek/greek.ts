@@ -27,13 +27,13 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TONOS: Record<string, string> = { ά: "α", έ: "ε", ή: "η", ί: "ι", ό: "ο", ύ: "υ", ώ: "ω", ΐ: "ϊ", ΰ: "ϋ" };
 const STRESSED = new Set("άέήίόύώΐΰ");
 const isCons = (ch: string): boolean => C[ch] !== undefined && ch !== "ς";
-const VOICELESS = new Set(["π", "τ", "κ", "θ", "φ", "χ", "σ", "ς", "ξ", "ψ"]);
+const VOICELESS = new Set(MANIFEST.voiceless);
 // Palatal replacement of a consonant that swallows a following synizesis [i].
 const SYN_PAL: Record<string, string> = { λ: "ʎ", ν: "ɲ", κ: "c", γ: "ʝ", χ: "ç" };
-// Voiced sounds that turn ⟨αυ ευ⟩ → [av ev] (else [af ef]).
-const AU_VOICED = new Set(["β", "γ", "δ", "ζ", "λ", "μ", "ν", "ρ", "μπ", "ντ", "γκ", "γγ"]);
-// Consonants that voice a preceding ⟨σ⟩ → [z] (before a voiced obstruent/nasal).
-const SIGMA_VOICED = new Set(["β", "γ", "δ", "μ", "ν", "μπ", "ντ", "γκ", "γγ"]);
+// Voiced sounds that turn ⟨αυ ευ⟩ → [av ev] (else [af ef]), and the shorter class that voices ⟨σ⟩ → [z]
+// (before a voiced obstruent/nasal). Both include the voiced-stop DIGRAPHS — see greek.jsonc.
+const AU_VOICED = new Set(MANIFEST.auVoiced);
+const SIGMA_VOICED = new Set(MANIFEST.sigmaVoiced);
 
 /** Match a vowel grapheme (digraph first) at position i → [orthLen, sound] or null. */
 function matchVowel(w: string, i: number): [number, string] | null {

@@ -18,6 +18,12 @@
         "c": "k", "q": "k", "w": "v", "x": "ks", "y": "i", // non-native letters (loans/names): nativized
     },
 
+    // The VOWEL LETTERS: the nine native ones, plus the accented loan vowels and the loan ⟨y⟩ (→[i]) that
+    // turn up in names. This is what splits the DOUBLING rule in estonian.ts — a doubled vowel is always
+    // long (aa→ɑː), a doubled consonant is a geminate only in the right context — so a loan vowel missing
+    // here would be geminated instead of lengthened.
+    "vowelLetters": ["a", "e", "i", "o", "u", "õ", "ä", "ö", "ü", "á", "é", "í", "ó", "ú", "y"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },

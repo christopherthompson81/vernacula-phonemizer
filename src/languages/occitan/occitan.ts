@@ -20,14 +20,17 @@ interface OccitanDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    vowelLetters: readonly string[];
+    frontLetters: readonly string[];
 }
 const DEF = loadManifest<OccitanDef>(import.meta.url, "occitan.jsonc");
 const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL_LETTER = new Set([..."aeiouáéíóúàèòïü"]);
-const FRONT_LETTER = new Set([..."eiéèíï"]); // ⟨c g qu gu⟩ soften before these
+// Letter environments (occitan.jsonc): ⟨c g qu gu⟩ soften before a FRONT letter.
+const VOWEL_LETTER = new Set(DEF.vowelLetters);
+const FRONT_LETTER = new Set(DEF.frontLetters);
 const VOWEL_PH = new Set([..."aeiɔouyɛ"]); // IPA vowel heads (intervocalic + final-consonant tests)
 
 /** One scan token: the IPA phones for a grapheme + a flag marking a single ⟨s⟩ that may voice to [z] intervocalically. */

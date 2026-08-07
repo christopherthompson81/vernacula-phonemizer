@@ -26,12 +26,10 @@ const SHEVA = "ְ";
 const HOLAM = "ֹ";
 const PATACH = "ַ";
 const POINT = /[֑-ׇ]/u; // any Hebrew cantillation/point/mark
-const FINAL_GUTTURAL = new Set(["ח", "ע", "ה"]);
-// Word-initial sheva under a one-letter PROCLITIC prefix (וְ/לְ/בְּ/כְּ/מְ) is sheva-na → realised [e] in spoken
-// Modern Hebrew (veʁaʔa, leʔeveʁ, bejisʁaʔel) — two independent audio-grounded referees (Phonikud, ReNikud) agree.
-// Restricted to these prefixes so word-initial STEM clusters stay elided (שְׁלוֹשִׁים→ʃloʃim, תְּשַׁע→tʃaʔ). Other
-// sheva → ∅ (Modern Hebrew elides sheva-na pervasively; a full na/nach rule needs morphology).
-const PROCLITIC = new Set(["ו", "ל", "ב", "כ", "מ"]);
+// The furtive-patach gutturals, and the proclitic prefixes under which a word-initial sheva is realised [e]
+// rather than elided. Both lists — and why the second one is only five letters — are in hebrew.jsonc.
+const FINAL_GUTTURAL = new Set(MANIFEST.furtivePatachGutturals);
+const PROCLITIC = new Set(MANIFEST.proclitics);
 
 /** One consonant of the (unvocalized) skeleton and the IPA chunk its points resolved to (chunk "" = silent mater). */
 export interface HebrewChunk { cons: string; ipa: string }

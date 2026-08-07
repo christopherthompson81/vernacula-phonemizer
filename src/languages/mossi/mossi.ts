@@ -20,7 +20,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Base vowel letters — used only to keep the consonant-gemination rule from firing on a doubled vowel (vowel
 // length is the digraph table's job). The nasal tilde vowels start with one of these, so a doubled consonant is
 // unambiguously a consonant letter followed by itself.
-const VOWEL_LETTERS = new Set(["a", "e", "ɛ", "i", "ɩ", "o", "u", "ʋ", "ã", "ẽ", "ĩ", "õ", "ũ"]);
+const VOWEL_LETTERS = new Set(MANIFEST.vowelLetters);
 
 /** Phonemize a single Mooré word to canonical IPA (segmental; gemination; non-tonal — tone not in the orthography). */
 export function phonemizeWord(word: string): string {

@@ -58,6 +58,12 @@
         "millionStem": "miljoonaa"
     },
 
+    // The VOWEL LETTERS (including the loan-only ⟨å⟩ of Swedish names). This is what splits the DOUBLING
+    // rule in finnish.ts: a doubled letter is long either way, but a doubled VOWEL is a long vowel from the
+    // grapheme table while a doubled CONSONANT is a geminate [Cː] built in code — so a vowel missing here
+    // would be geminated as if it were a consonant.
+    "vowelLetters": ["a", "e", "i", "o", "u", "y", "ä", "ö", "å"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     }

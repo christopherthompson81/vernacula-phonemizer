@@ -14,6 +14,9 @@ import { numberToWords } from "./numbers.ts";
 interface FaroeseDef {
     vowels: Record<string, [string, string]>;
     consonants: Record<string, string>;
+    affricatingVowels: readonly string[];
+    frontGlideVowels: readonly string[];
+    roundGlideVowels: readonly string[];
     skerping: Record<string, string>;
     skerpingGgj: Record<string, string>;
     prenasal: Record<string, string>;
@@ -21,15 +24,10 @@ interface FaroeseDef {
 const DEF = loadManifest<FaroeseDef>(import.meta.url, "faroese.jsonc");
 // Vowel graphemes → [long, short] IPA quality (faroese.jsonc). Digraphs ⟨ei ey oy⟩ scan first (longest-match).
 const VOWEL = DEF.vowels;
-// Round vs front vowel GRAPHEMES — decide the glide that an intervocalic ⟨g ð⟩ becomes ([v] near round, [j] near
-// front, deleted near ⟨a á⟩).
-const ROUND_V = new Set([..."ouóúø"]);
-const GLIDE_FRONT_V = new Set([..."eiyíýæ"]);
 const VOWEL_KEYS = Object.keys(VOWEL).sort((a, b) => b.length - a.length); // digraphs first
 const CONS = DEF.consonants;
-// Front vowel GRAPHEMES that affricate a preceding ⟨g k⟩ → [t͡ʃ] (argi→aɹt͡ʃɪ). NOT ⟨ø⟩ — gøta→[køːta], not
-// [t͡ʃøːta] (the front-rounded ⟨ø⟩ does not palatalize the velar).
-const FRONT_V = new Set([..."eiyíýæ"]);
+// Front vowel graphemes that affricate a preceding ⟨g k⟩ (faroese.jsonc, which records why ⟨ø⟩ is absent).
+const FRONT_V = new Set(DEF.affricatingVowels);
 // SKERPING vowel remap before ⟨gv⟩ / ⟨ggj⟩, and the pre-nasal shift before ⟨ng nk⟩ (faroese.jsonc).
 const SKERP = DEF.skerping;
 const SKERP_GGJ = DEF.skerpingGgj;
@@ -96,12 +94,10 @@ export function phonemizeWord(word: string): string {
 
 const isV = (s: Seg | undefined): boolean => s !== undefined && s.vowel;
 
-// Vowel graphemes (incl. digraphs) that make a neighbouring intervocalic ⟨g ð⟩ a FRONT glide [j] vs a ROUND glide
-// [v]. A front (i-type) neighbour WINS over a round one (Eyður→ɛiːjʊɹ: ey[front]+u[round]→j). ⟨e⟩ and ⟨a⟩ are
-// NEUTRAL — they defer to the OTHER neighbour (vegur: e + u → the round u wins → [v], but Bogi: o + i → the front
-// i wins → [j]).
-const FRONT_GLIDE = new Set(["i", "y", "í", "ý", "æ", "ei", "ey", "oy"]);
-const ROUND_GLIDE = new Set(["o", "u", "ó", "ú", "ø", "á"]);
+// The two neighbour classes that decide that glide (faroese.jsonc, with the front-wins-over-round order and
+// the deliberately absent ⟨e a⟩).
+const FRONT_GLIDE = new Set(DEF.frontGlideVowels);
+const ROUND_GLIDE = new Set(DEF.roundGlideVowels);
 /** The glide an intervocalic ⟨g ð⟩ becomes, decided by the surrounding vowels: [j] if EITHER neighbour is front
  *  (Bogi→poːjɪ, Eyður→ɛiːjʊɹ), else [v] if either is round (dagur→tɛaːvʊɹ, bága→pɔːwa), else deleted (agað→ɛaːa). */
 function gdGlide(prev: Seg | undefined, next: Seg | undefined): string {

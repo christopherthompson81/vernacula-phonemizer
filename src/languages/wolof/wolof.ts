@@ -16,7 +16,7 @@ import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const VOWEL_LETTERS = new Set(["a", "à", "e", "é", "ë", "i", "o", "ó", "u"]);
+const VOWEL_LETTERS = new Set(MANIFEST.vowelLetters);
 
 /** Phonemize a single Wolof word to canonical IPA (segmental; gemination + nasal assimilation; non-tonal). */
 export function phonemizeWord(word: string): string {

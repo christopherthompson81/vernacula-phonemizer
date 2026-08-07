@@ -13,6 +13,11 @@
     "name": "Crimean Tatar (qırımtatar tili)",
     "script": ["Latin"],
 
+    // The VOWEL LETTERS of the Latin orthography, including the front/round pairs ⟨ı i⟩, ⟨o ö⟩, ⟨u ü⟩ and
+    // the soft ⟨â⟩. This is the environment for the one context rule in crimeantatar.ts: ⟨v⟩ is the glide
+    // [w] in a POST-VOCALIC CODA — after one of these and not before another — and [v] elsewhere.
+    "vowelLetters": ["a", "â", "e", "ı", "i", "o", "ö", "u", "ü"],
+
     // Single letters (no digraphs in the Crimean Tatar Latin alphabet). ⟨â⟩→[a] (the palatalisation vowel;
     // the palatalisation of the preceding consonant, kâr→[cɑr], is a low-frequency loanword feature —
     // deferred). ⟨v⟩ is context-dependent ([w] in a post-vocalic coda) and handled in the scan. ⟨x⟩/⟨w⟩

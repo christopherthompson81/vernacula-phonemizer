@@ -28,6 +28,9 @@ import { numberToKhmerWords } from "./numbers.ts";
 
 interface KhmerDef {
     consonants: Record<string, [string, string]>;
+    diacritics: readonly string[];
+    passiveConsonants: readonly string[];
+    nasalConsonants: readonly string[];
     vowels: Record<string, [string, string]>;
     vowelCombos: Record<string, [string, string]>;
     codas: Record<string, string>;
@@ -46,14 +49,14 @@ const BANTOC = "់"; // U+17CB — shortens the vowel; sits on a coda consonant
 const REAHMUK = "ះ"; // U+17C7 — adds an -h coda (combines with a preceding base vowel)
 const NIKAHIT = "ំ"; // U+17C6 — adds an -m coda (combines with a preceding base vowel)
 // Combining diacritics consumed after a unit's vowel (register shifters + bantoc handled separately, rest ignored).
-const DIACRITICS = new Set(["់", "៉", "៊", "៌", "៍", "៎", "៏", "័", "៑", "៓", "ៈ"]);
+const DIACRITICS = new Set(DEF.diacritics);
 // A long vowel shortened by the /bantaq/ (់): កាត់ kaːt → kat, ចាប់ caːp → cap.
 const SHORTEN: Record<string, string> = {
     "aː": "a", "ɛː": "ɛ", "eː": "e", "oː": "o", "uː": "u", "iː": "i", "ɨː": "ɨ", "əː": "ə", "ɔː": "ɔ", "ɑː": "ɑ",
 };
 // Passive consonants = continuants (nasals, semivowels, liquids); everything else is a dominant stop/spirant.
-const PASSIVE = new Set(["ង", "ញ", "ណ", "ន", "ម", "យ", "រ", "ល", "វ", "ឡ"]);
-const NASAL = new Set(["ង", "ញ", "ណ", "ន", "ម"]);
+const PASSIVE = new Set(DEF.passiveConsonants);
+const NASAL = new Set(DEF.nasalConsonants);
 
 interface Unit {
     ons: string[]; // onset consonant letters (base + coeng subscripts)

@@ -11,6 +11,8 @@ export interface FinnishManifest {
     name: string;
     script: readonly string[];
     graphemes: Record<string, string>;
+    /** The vowel letters — a doubled one is a long vowel, not the geminate a doubled consonant makes. */
+    vowelLetters: readonly string[];
     numbers: {
         zero: string;
         units: string[];

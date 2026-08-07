@@ -17,6 +17,7 @@ import { iranianNumberWords, type CkbNumbersDef } from "./numbers.ts";
 interface CkbDef {
     consonants: Record<string, string>;
     vowels: Record<string, string>;
+    vowelLetters: readonly string[];
     numbers: CkbNumbersDef;
     clausePunctuation: Record<string, string>;
 }
@@ -25,7 +26,7 @@ const CONS = DEF.consonants;
 const VOW = DEF.vowels;
 const CLAUSE_MARK = DEF.clausePunctuation;
 // Letters that carry a vowel (so an adjacent و/ی is a glide, not a syllabic vowel).
-const VOWEL_LETTERS = new Set([..."اەێۆ"]);
+const VOWEL_LETTERS = new Set(DEF.vowelLetters);
 
 /** Phonemize a single Sorani word to canonical IPA (full written vowels; the unwritten short /ɪ/ is not emitted). */
 export function phonemizeWord(word: string): string {

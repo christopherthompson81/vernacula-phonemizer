@@ -10,6 +10,8 @@ export interface BambaraManifest {
     name: string;
     script: readonly string[];
     graphemes: Record<string, string>;
+    /** The oral vowel LETTERS — the environment for the syllable-final ⟨n⟩ nasalisation rule. */
+    vowelLetters: readonly string[];
     clausePunctuation: Record<string, string>;
 }
 

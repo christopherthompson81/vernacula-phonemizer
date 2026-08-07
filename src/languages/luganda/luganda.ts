@@ -16,11 +16,11 @@ import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const VOWEL_LETTERS = new Set(["a", "e", "i", "o", "u"]);
+const VOWEL_LETTERS = new Set(MANIFEST.vowelLetters);
 // ⟨ng'⟩/⟨ny⟩ + the syllabic-nasal prefix ⟨n'⟩ — must be matched BEFORE the general prenasalisation rule.
 const SPECIAL = ["nng'", "ng'", "nny", "ny", "n'"];
 // A nasal prenasalises a following obstruent (epitran's set): b p f v t d c j k g — NOT s z (left as n + C).
-const PRENASAL = new Set(["b", "p", "f", "v", "t", "d", "c", "j", "k", "ɡ", "g"]);
+const PRENASAL = new Set(MANIFEST.prenasalisable);
 // Multi-letter grapheme keys handled by the greedy step: labialisation ⟨Cw⟩ (2nd char w) + the vowel-length
 // digraphs (two vowels). The prenasal digraphs (mb, nd…) are EXCLUDED — the prenasalisation rule handles them.
 const OTHER_DIGRAPHS = GRAPHEME_KEYS.filter(

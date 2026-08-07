@@ -12,6 +12,9 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 
 interface GuaraniDef {
+    acuteVowels: readonly string[];
+    nasalVowels: readonly string[];
+    frontLetters: readonly string[];
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
@@ -21,11 +24,12 @@ const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const ACUTE = new Set(["á", "é", "í", "ó", "ú", "ý"]);
-const NASAL = new Set(["ã", "ẽ", "ĩ", "õ", "ũ", "ỹ"]);
+// Marked vowel letters (guarani.jsonc): the acute marks STRESS, the tilde marks NASALITY.
+const ACUTE = new Set(DEF.acuteVowels);
+const NASAL = new Set(DEF.nasalVowels);
 const VOWEL = new Set(["a", "e", "i", "o", "u", "ɨ", "ã", "ẽ", "ĩ", "õ", "ũ", "ɨ̃"]);
 
-const FRONT = new Set(["e", "i", "é", "í", "ẽ", "ĩ", "y", "ý", "ỹ"]); // ⟨gu⟩ is u-silent [ɰ] before a front OR central vowel
+const FRONT = new Set(DEF.frontLetters); // ⟨gu⟩ is u-silent [ɰ] before a front OR central vowel
 const GLIDE: Record<string, string> = { i: "j", u: "w", ɨ: "j" };
 const GLIDE_OUT = new Set(["j", "w"]);
 

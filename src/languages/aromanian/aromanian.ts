@@ -14,12 +14,14 @@ import { numberToWords } from "./numbers.ts";
 interface AromanianDef {
     digraphs: [string, string][];
     letters: Record<string, string>;
+    vowelLetters: readonly string[];
 }
 const DEF = loadManifest<AromanianDef>(import.meta.url, "aromanian.jsonc");
 // Grapheme tables (aromanian.jsonc). ⟨dz⟩, the c/g softening and the vowel rules are the scan below.
 const DIGRAPHS = DEF.digraphs;
 const LETTER = DEF.letters;
-const VOWEL_L = new Set([..."aeiouã"]);
+// The vowel letters (aromanian.jsonc) — the environment for the silent ⟨i⟩ softener and the glide tests.
+const VOWEL_L = new Set(DEF.vowelLetters);
 const VOWEL_PH = "aeiouəɨ";
 const isFront = (x: string | undefined): boolean => x === "e" || x === "i";
 const isHigh = (x: string | undefined): boolean => x === "i" || x === "u";

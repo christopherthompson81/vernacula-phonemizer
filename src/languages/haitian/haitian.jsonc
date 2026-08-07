@@ -11,6 +11,11 @@
     // (context-dependent — nasal only syllable-finally).
     "digraphs": { "ou": "u", "ui": "ɥi", "ch": "ʃ" },
 
+    // The vowel letters that BLOCK nasalization. ⟨an en on⟩ are nasal vowels in Haitian orthography — but
+    // only when the ⟨n⟩ is syllable-final. Followed by a TRUE vowel the ⟨n⟩ is an onset instead, and the
+    // vowel stays oral, so this list is what tells ⟨sant⟩ (nasal) from ⟨sanite⟩ (oral + [n]).
+    "hiatusVowels": ["a", "e", "i", "o", "u", "è", "ò", "é", "à"],
+
     // Single grapheme → canonical IPA. ⟨è⟩→ɛ, ⟨ò⟩→ɔ; the Haitian ⟨r⟩→[ɣ] (velar fricative), ⟨j⟩→ʒ, ⟨y⟩→j, ⟨w⟩→w.
     // Plain ⟨a e o⟩ nasalize before a syllable-final ⟨n⟩ (in code); ⟨u⟩ alone is rare (loans) → [u].
     "graphemes": {

@@ -20,6 +20,19 @@
     // Simple vowels → IPA. ⟨а⟩'s [a]/[ɑ] split by word harmony is applied in tatar.ts.
     "vowels": { "а": "ɑ", "ә": "æ", "о": "o", "ө": "ø", "у": "u", "ү": "y", "ы": "ɨ", "и": "i", "е": "e", "э": "e" },
 
+    // Every letter that writes a vowel — the environment for the ⟨е⟩ iotation in tatar.ts (word-initial or
+    // post-vocalic ⟨е⟩ → [je]).
+    "vowelLetters": ["а", "ә", "о", "ө", "у", "ү", "ы", "и", "е", "э", "я", "ю", "ё"],
+
+    // ⚠ THE HARMONY CLASSES, which drive two different rules in tatar.ts:
+    //   · ⟨к г⟩ back to the uvulars [q ʁ] beside a BACK vowel and stay velar [k ɡ] beside a FRONT one — a
+    //     NEAREST-vowel scan outward from the consonant, so both lists must be complete;
+    //   · a word containing ANY front vowel fronts its ⟨а⟩ to [a] (else the back [ɑ]).
+    // The iotated ⟨я ю ё⟩ are back and ⟨и⟩ is front — Tatar ⟨и⟩ is a genuine front vowel, unlike the
+    // harmonically neutral ⟨и⟩ of Bashkir.
+    "backVowels": ["а", "о", "у", "ы", "я", "ю", "ё"],
+    "frontVowels": ["ә", "ө", "ү", "е", "э", "и"],
+
     // Iotated vowels → glide + vowel.
     "iotated": { "я": "jɑ", "ю": "ju", "ё": "jo" },
 }

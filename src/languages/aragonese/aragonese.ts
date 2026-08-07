@@ -24,14 +24,17 @@ interface AragoneseDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    vowelLetters: readonly string[];
+    frontLetters: readonly string[];
 }
 const DEF = loadManifest<AragoneseDef>(import.meta.url, "aragonese.jsonc");
 const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL_LETTER = new Set([..."aeiouáéíóúü"]);
-const FRONT_LETTER = new Set([..."eiéí"]); // ⟨c⟩/⟨g⟩ soften and ⟨qu gu⟩ drop the [w] before these
+// Letter environments (aragonese.jsonc): ⟨c⟩/⟨g⟩ soften and ⟨qu gu⟩ drop the [w] before a FRONT letter.
+const VOWEL_LETTER = new Set(DEF.vowelLetters);
+const FRONT_LETTER = new Set(DEF.frontLetters);
 const IPA_VOWEL = new Set([..."aeiou"]);
 
 /** Scan a lowercased Aragonese word into IPA phone tokens. */

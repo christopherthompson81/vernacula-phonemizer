@@ -18,7 +18,7 @@ import { numberToWords, readDigits } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const VOWEL_LETTERS = new Set(["a", "e", "i", "o", "u", "y", "ä", "ö", "å"]);
+const VOWEL_LETTERS = new Set(MANIFEST.vowelLetters);
 
 /** Phonemize a single Finnish word to canonical IPA (segmental; gemination + velar-nasal rules; length + diphthong
  *  offglides emitted). */

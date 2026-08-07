@@ -20,6 +20,10 @@ import { numberToWords } from "./numbers.ts";
 interface IcelandicDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
+    frontVowels: readonly string[];
+    highFrontVowels: readonly string[];
+    longNuclei: readonly string[];
+    collapsingDoubles: readonly string[];
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<IcelandicDef>(import.meta.url, "icelandic.jsonc");
@@ -31,12 +35,14 @@ const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for inte
 // Grapheme-level front vowels that PALATALIZE a preceding ⟨k g⟩ → [c] (kýr→ciːr, gelda→cɛlta, Bylgja→pɪlca) — incl.
 // ⟨e é⟩ and the ⟨ei ey⟩ diphthong (the referee majority palatalizes: geipa→ceipa; the un-palatalized Geir→keir is
 // the minority we over-palatalize to ceir).
-const FRONT_V = new Set([..."eéiíyýæj"]);
+// The four letter classes (icelandic.jsonc): what affricates ⟨g k⟩, what inserts a hiatus glide, what
+// licenses the preaspirated ⟨nn⟩, and which doubled consonants are merely orthographic.
+const FRONT_V = new Set(DEF.frontVowels);
 const FRONT_PH = new Set([..."ɛɪijy"]); // IPA front-vowel heads — an intervocalic ⟨g⟩ → [j] (not [ɣ]) before these
-const HIGH_FRONT = new Set([..."iíyý"]); // trigger a glide [j] before a following vowel (Biblía→pɪplija)
-const LONG_NUCLEUS = new Set([..."áéíóúýæ"]); // a doubled ⟨nn⟩ → [tn] only after one of these (or ⟨au ei ey⟩)
+const HIGH_FRONT = new Set(DEF.highFrontVowels); // trigger a glide [j] before a following vowel (Biblía→pɪplija)
+const LONG_NUCLEUS = new Set(DEF.longNuclei); // a doubled ⟨nn⟩ → [tn] only after one of these (or ⟨au ei ey⟩)
 const STOPS = new Set(["p", "t", "k"]);
-const OTHER_DOUBLE = new Set([..."sfmrvþð"]); // non-stop doubled consonants collapse to a single phone (Sviss→svɪs)
+const OTHER_DOUBLE = new Set(DEF.collapsingDoubles); // non-stop doubles collapse to one phone (Sviss→svɪs)
 
 /** One scan token: the IPA phones for a grapheme + flags (⟨g⟩-origin → intervocalic spirantization; a high-front
  *  vowel → the glide rule; FORTIS ⟨p t k⟩ → preaspiration). */

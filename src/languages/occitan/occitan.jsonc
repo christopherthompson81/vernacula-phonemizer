@@ -23,6 +23,13 @@
         "v": "b", "w": "w", "x": "ks", "y": "i", "z": "z"
     },
 
+    // The VOWEL LETTERS (plain + the grave/acute accents + the diaeresis ⟨ï ü⟩) — the environment the code
+    // rules test for (the ⟨qu gu⟩ sequences, the ⟨u⟩→[w] offglide, the final-consonant deletion).
+    "vowelLetters": ["a", "e", "i", "o", "u", "á", "é", "í", "ó", "ú", "à", "è", "ò", "ï", "ü"],
+    // The FRONT vowel letters — the softening environment: ⟨c⟩ → [s] and ⟨g⟩ → [d͡ʒ] before one of these,
+    // and ⟨qu gu⟩ drop the [w] before one.
+    "frontLetters": ["e", "i", "é", "è", "í", "ï"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },

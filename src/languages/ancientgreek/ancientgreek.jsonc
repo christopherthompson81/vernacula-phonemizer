@@ -26,6 +26,11 @@
         "υ": ["y", "yː"], "ω": ["ɔː", "ɔː"],
     },
 
+    // The VOICED consonants that assimilate a preceding ⟨σ⟩ to [z] — Λέσβια → lézbia, Σμύρνα → zmýrna, the
+    // standard sibilant assimilation. Both shapes of sigma trigger it, so ancientgreek.ts tests ⟨σ⟩ and the
+    // final ⟨ς⟩ against this one list.
+    "voicedAfterSigma": ["β", "γ", "δ", "μ", "ν", "λ", "ρ"],
+
     // Base consonant letter → IPA (γ is context-sensitive; handled in the scan).
     "consonants": {
         "β": "b", "δ": "d", "ζ": "zd", "θ": "tʰ", "κ": "k", "λ": "l", "μ": "m", "ν": "n", "ξ": "ks", "π": "p",
