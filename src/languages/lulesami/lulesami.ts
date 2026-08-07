@@ -1,19 +1,20 @@
 /**
- * Lule Sami / julevsámegiella (smj) phonemizer — Uralic (Saami branch), ~700–2000 speakers (Norway/Sweden), the
- * 1983 Latin orthography, canonical IPA. The g2p is AUTHORED FROM Ylikoski, "Lule Saami"
- * (a published reference chapter — the bho/Crawford grammar-mined mold). A TRANSPARENT SEGMENTAL grapheme scan.
- *   ★ VOWELS /i u e o ɑ/ + diphthongs ⟨ie uo oa⟩: ⟨a⟩→ɑ, ⟨á⟩→ɑː (the one written length contrast), ⟨å⟩→o,
- *     ⟨æ/ä⟩→æ, loan ⟨y⟩→y ⟨ø/ö⟩→ø. Most vowel LENGTH is UNWRITTEN (not emitted — the deferred residual).
- *   ★★ THE ORTHOGRAPHY TRAP (North-Saami-style): word-initial ⟨b d g⟩ = VOICELESS UNASPIRATED [p t k] (NOT
- *     voiced — bena=[peːnə], giella=[kiellɑ]); ⟨p t k⟩ = the marginal ASPIRATED [pʰ tʰ kʰ] found only WORD-
- *     INITIALLY in loans (§9.2.2) — medially/in clusters they are PLAIN [p t k] (Table 9.5: bargo=[parkuo]).
- *     ASJP confirms the voiceless reading (pena, kuoktɐ, tolo).
- *   ★ CONSONANTS: ⟨sj⟩→ʃ, ⟨tj⟩→t͡ʃ, ⟨ts⟩→t͡s, ⟨dtj⟩→d͡ʒ, ⟨dts⟩→d͡z, ⟨nj⟩→ɲ, ⟨ŋ⟩→ŋ, ⟨ddj⟩→ɟː; ⟨lj⟩→ʎ is the
- *     ASJP realization of the grammar's /lj/ sequence (Ylikoski has no phonemic /ʎ/). Doubled → geminate [Cː];
- *     pre-stop ⟨h⟩ (⟨hk hp ht⟩) = the gradation/pre-aspiration marker. Primary stress = the FIRST syllable.
- * The COMPLEX MORPHOPHONOLOGY (3-grade consonant gradation, epenthetic vowels, labial harmony, 2nd-syllable
- * lengthening, unwritten length) is the DEFERRED residual — not recoverable from a segmental scan (§9.2.5).
- * Referee: the curated ASJP×kaikki join (independent, COARSE — an inventory-level check).
+ * Lule Sami / julevsámegiella (smj) phonemizer — Uralic (Saami branch), ~700–2000 speakers (Norway/Sweden),
+ * the 1983 Latin orthography, canonical IPA. Authored from Ylikoski, "Lule Saami" (a published reference
+ * chapter). A TRANSPARENT SEGMENTAL grapheme scan.
+ *
+ *   · VOWELS /i u e o ɑ/ + diphthongs ⟨ie uo oa⟩: ⟨a⟩→ɑ, ⟨á⟩→ɑː (the one written length contrast), ⟨å⟩→o,
+ *     ⟨æ/ä⟩→æ, loan ⟨y⟩→y ⟨ø/ö⟩→ø. Most vowel LENGTH is UNWRITTEN, so it is not emitted.
+ *   ⚠ THE ORTHOGRAPHY TRAP (North-Saami-style): word-initial ⟨b d g⟩ are VOICELESS UNASPIRATED [p t k], NOT
+ *     voiced — bena=[peːnə], giella=[kiellɑ]. ⟨p t k⟩ are the marginal ASPIRATED series [pʰ tʰ kʰ], found only
+ *     WORD-INITIALLY in loans (§9.2.2); medially and in clusters they are PLAIN [p t k] (Table 9.5:
+ *     bargo=[parkuo]).
+ *   · CONSONANTS: ⟨sj⟩→ʃ, ⟨tj⟩→t͡ʃ, ⟨ts⟩→t͡s, ⟨dtj⟩→d͡ʒ, ⟨dts⟩→d͡z, ⟨nj⟩→ɲ, ⟨ŋ⟩→ŋ, ⟨ddj⟩→ɟː; ⟨lj⟩→ʎ renders the
+ *     grammar's /lj/ SEQUENCE (Ylikoski has no phonemic /ʎ/). Doubled → geminate [Cː]; pre-stop ⟨h⟩
+ *     (⟨hk hp ht⟩) is the gradation/pre-aspiration marker. Primary stress = the FIRST syllable.
+ *
+ * DEFERRED, because none of it is recoverable from a segmental scan (§9.2.5): the 3-grade consonant gradation,
+ * epenthetic vowels, labial harmony, 2nd-syllable lengthening, and unwritten length.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -62,10 +63,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zŋáåæäøö]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

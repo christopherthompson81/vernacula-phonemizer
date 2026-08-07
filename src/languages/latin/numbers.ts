@@ -1,6 +1,5 @@
 /**
- * Classical Latin number → words. A compositor for 0–999,999,999,999 (before this the la engine passed digit
- * strings straight through, so `phonemize("18", "la")` leaked "18" into the IPA).
+ * Classical Latin number → words. A compositor for 0–999,999,999,999.
  *
  * SOURCE: Allen & Greenough, *New Latin Grammar* §§132–138 (the cardinal-numeral table, the subtractive
  * duodē-/ūndē- forms, and the mīlle / mīlia rule); cross-checked against Gildersleeve & Lodge §§94–97 and
@@ -8,7 +7,7 @@
  * macron (see latin.ts) — an unmacronized ⟨unus⟩ would surface as [ˈʊnʊs] instead of [ˈuːnʊs].
  *
  * ── The three things that make Latin not a plain units/tens/hundreds table ────────────────────────────────
- *  1. **★ SUBTRACTIVE 18/19 and x8/x9.** The standard Classical forms for the last two of every decade are
+ *  1. **⚠ SUBTRACTIVE 18/19 and x8/x9.** The standard Classical forms for the last two of every decade are
  *     built DOWN from the next ten: 18 duodēvīgintī ("two from twenty"), 19 ūndēvīgintī, 28 duodētrīgintā,
  *     29 ūndētrīgintā, … 88 duodēnōnāgintā, 98 duodēcentum, 99 ūndēcentum (A&G §133). This is not a stylistic
  *     variant — it is the expected reading, so it is what this emits; the additive alternatives
@@ -75,7 +74,7 @@ function underHundred(n: number): string {
     if (n < 10) return UNITS[n]!;
     if (n < 20) return TEENS[n - 10]!;
     const t = Math.floor(n / 10) * 10, u = n % 10;
-    // ★ SUBTRACTIVE: the last two of each decade count DOWN from the next ten (28 duodētrīgintā, 99 ūndēcentum).
+    // ⚠ SUBTRACTIVE: the last two of each decade count DOWN from the next ten (28 duodētrīgintā, 99 ūndēcentum).
     if (u === 8) return "duodē" + TENS[String(t + 10)]!;
     if (u === 9) return "ūndē" + TENS[String(t + 10)]!;
     return TENS[String(t)]! + (u ? ` ${UNITS[u]!}` : "");

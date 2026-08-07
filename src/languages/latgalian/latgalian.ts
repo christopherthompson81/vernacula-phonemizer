@@ -1,19 +1,18 @@
 /**
- * Native Latgalian / latgaļu volūda (ltg) text phonemizer — canonical IPA. Latgalian is an EASTERN
- * BALTIC language (~150k, Latgale in eastern Latvia), a close sibling of Latvian — the fleet's 3rd Baltic language
- * (after Latvian, Lithuanian). A near-phonemic Latin orthography with macron length + háček sibilants; a greedy scan
- * with the Latgalian PALATALIZATION system.
+ * Latgalian / latgaļu volūda (ltg) phonemizer — EASTERN BALTIC (~150k, Latgale in eastern Latvia), a close
+ * sibling of Latvian. Latin script, canonical IPA. A near-phonemic orthography with macron length + háček
+ * sibilants; a greedy scan plus the Latgalian PALATALIZATION system.
  *
- *   ★ THE ⟨i⟩/⟨y⟩ SOFT/HARD SPLIT — the signature: ⟨i ī e ē⟩ are FRONT and PALATALIZE the preceding consonant(s)
- *     (ci→[t͡sʲi], bet→[bʲæt], nest→[nʲæst]), but ⟨y⟩→[ɨ] is a HARD central vowel that does NOT (cylvāks→[t͡sɨlvaːks]).
- *   ★ Vowels: ⟨a e i o u y⟩→[a æ i ɔ u ɨ]; macron = LONG (⟨ā ē ī ū ō ȳ⟩→[aː æː iː uː ɔː ɨː]). Consonants: ⟨c⟩→[t͡s],
- *     ⟨č⟩→[t͡ʃ], ⟨š⟩→[ʃ], ⟨ž⟩→[ʒ], ⟨dz⟩→[d͡z], ⟨dž⟩→[d͡ʒ], the written palatals ⟨ļ ņ ģ ķ ř⟩→[lʲ nʲ ɡʲ kʲ rʲ], ⟨v⟩→[w]
- *     in a coda. Baltic VOICING assimilation in obstruent clusters (Latgola→[ladɡɔla]).
+ *   ⚠ THE ⟨i⟩/⟨y⟩ SOFT/HARD SPLIT is the signature: ⟨i ī e ē⟩ are FRONT and PALATALIZE the preceding
+ *     consonant(s) (ci→[t͡sʲi], bet→[bʲæt], nest→[nʲæst]), but ⟨y⟩→[ɨ] is a HARD central vowel that does NOT
+ *     (cylvāks→[t͡sɨlvaːks]).
+ *   · Vowels: ⟨a e i o u y⟩→[a æ i ɔ u ɨ]; macron = LONG (⟨ā ē ī ū ō ȳ⟩→[aː æː iː uː ɔː ɨː]). Consonants:
+ *     ⟨c⟩→[t͡s], ⟨č⟩→[t͡ʃ], ⟨š⟩→[ʃ], ⟨ž⟩→[ʒ], ⟨dz⟩→[d͡z], ⟨dž⟩→[d͡ʒ], the written palatals ⟨ļ ņ ģ ķ ř⟩→
+ *     [lʲ nʲ ɡʲ kʲ rʲ], ⟨v⟩→[w] in a coda. Baltic VOICING assimilation in obstruent clusters (Latgola→[ladɡɔla]).
  *
  * Numbers are composed by numbers.ts (the East-Baltic counted-noun concord + the FEMININE "tyukstūša").
  *
- * Latgalian's pitch ACCENT (level/falling/broken, marked in the narrow referee) is not written → not emitted (folds).
- * Referee: wikipron ltg_latn narrow (488) + kaikki Latgalian (516).
+ * Latgalian's pitch ACCENT (level/falling/broken) is not written, so it is not emitted.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -61,8 +60,8 @@ export function phonemizeWord(word: string): string {
         { const p = latinPhone(c, { initial: i === 0, includeH: true });
           if (p !== undefined) segs.push({ ph: p, vowel: false, frontTrigger: false }); }
     }
-    // ★ PALATALIZATION: a consonant is palatalized if its NEXT vowel (skipping the consonant cluster) is a FRONT
-    // vowel ⟨i ī e ē⟩ — the whole ONSET before a front vowel softens (bazneica→bazʲnʲɛit͡sa). ★ /r/ is OPAQUE: an
+    // PALATALIZATION: a consonant is palatalized if its NEXT vowel (skipping the consonant cluster) is a FRONT
+    // vowel ⟨i ī e ē⟩ — the whole ONSET before a front vowel softens (bazneica→bazʲnʲɛit͡sa). ⚠ /r/ IS OPAQUE: an
     // obstruent+⟨r⟩ cluster stays HARD (treis→trɛis, not tʲrʲæis) — a consonant before ⟨r⟩ doesn't soften, and ⟨r⟩ in
     // a cluster (preceded by a consonant) doesn't soften; a SIMPLE ⟨r⟩ onset still does (svareigs→sʋarʲɛiks).
     for (let k = 0; k < segs.length; k++) {
@@ -76,7 +75,7 @@ export function phonemizeWord(word: string): string {
             if (t.vowel) { if (t.frontTrigger) seg.ph += "ʲ"; break; }
         }
     }
-    // ★ t-EPENTHESIS: a word-final ⟨s⟩/⟨š⟩ after a nasal /n ņ/ surfaces with an epenthetic [t] → the affricate
+    // t-EPENTHESIS: a word-final ⟨s⟩/⟨š⟩ after a nasal /n ņ/ surfaces with an epenthetic [t] → the affricate
     // [t͡s]/[t͡ʃ] (sens→sʲænt͡s, kaimiņš→kaimʲinʲt͡ʃ; the -ons nominatives + -eņš/-iņš diminutives).
     if (segs.length >= 2) {
         const last = segs[segs.length - 1]!, prev = segs[segs.length - 2]!;
@@ -84,7 +83,7 @@ export function phonemizeWord(word: string): string {
         if (prevNasal && last.ph === "s") last.ph = prev.ph === "nʲ" ? "t͡sʲ" : "t͡s";
         else if (prevNasal && last.ph === "ʃ") last.ph = "t͡ʃ";
     }
-    // ★ VOICING assimilation (regressive) within obstruent clusters: a voiced/voiceless obstruent assimilates to the
+    // VOICING assimilation (regressive) within obstruent clusters: a voiced/voiceless obstruent assimilates to the
     // LAST obstruent of the cluster; a word-final obstruent devoices (Latgola→ladɡɔla; absurds→apsurt͡s).
     for (let k = segs.length - 1; k >= 0; k--) {
         const base = segs[k]!.ph.replace(/ʲ$/u, "");
@@ -106,10 +105,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d+)|([.?!,;:…])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zāēīōūȳčšžģķļņř'’]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

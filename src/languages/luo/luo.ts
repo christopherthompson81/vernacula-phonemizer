@@ -1,11 +1,14 @@
 /**
- * Luo / Dholuo (luo) phonemizer — Western Nilotic (Luo group), the Latin orthography, canonical IPA,
- * Spoken around Lake Victoria in Kenya + Tanzania (~4–5M). The FIRST Nilotic language in the repo.
- * A greedy longest-match scan over the grapheme table (manifest.ts) with ONE code rule: a high vowel ⟨i u⟩ before
- * another vowel becomes the glide ⟨j w⟩ (dhiang'→ðjaŋ, chieng'→t͡ʃjeŋ). Signatures: the DENTAL vs ALVEOLAR contrast
- * (⟨th dh⟩→θ ð vs ⟨t d⟩→t d); PRENASALISED voiced stops as single units (mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ); ⟨ng'⟩→ŋ vs
- * ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; the palatals ⟨ch⟩→t͡ʃ, ⟨j⟩→d͡ʒ; ⟨r⟩→ɾ. The 9-vowel ±ATR distinction and register TONE (H/L) are
- * UNWRITTEN in the orthography → emitted at a +ATR/toneless default (folded in the eval).
+ * Luo / Dholuo (luo) phonemizer — Western Nilotic (Luo group), the Latin orthography, canonical IPA. Spoken
+ * around Lake Victoria in Kenya + Tanzania (~4–5M).
+ *
+ * A greedy longest-match scan over the grapheme table (manifest.ts) with ONE code rule: a high vowel ⟨i u⟩
+ * before another vowel becomes the glide ⟨j w⟩ (dhiang'→ðjaŋ, chieng'→t͡ʃjeŋ). Signatures: the DENTAL vs
+ * ALVEOLAR contrast (⟨th dh⟩→θ ð vs ⟨t d⟩→t d); PRENASALISED voiced stops as single units (mb→ᵐb, nd→ⁿd,
+ * nj→ⁿd͡ʒ, ng→ᵑɡ); ⟨ng'⟩→ŋ vs ⟨ng⟩→ᵑɡ; ⟨ny⟩→ɲ; the palatals ⟨ch⟩→t͡ʃ, ⟨j⟩→d͡ʒ; ⟨r⟩→ɾ.
+ *
+ * ⚠ The 9-vowel ±ATR distinction and register TONE (H/L) are UNWRITTEN in this orthography, so both are
+ * emitted at a +ATR/toneless default. Neither is recoverable from the spelling.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -20,7 +23,7 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
  *  tone-marked citation spelling (chíeng', à) is normalised to its base letters first — the orthography proper is
  *  unaccented, and we emit no tone. */
 export function phonemizeWord(word: string): string {
-    // normalise the \u27e8ng'\u27e9 apostrophe (\u2019 U+2019 / \u02bc U+02BC \u2192 ASCII ') and strip tone-marked citation accents
+    // Normalise the ⟨ng'⟩ apostrophe (’ U+2019 / ʼ U+02BC → ASCII ') and strip tone-marked citation accents.
     const w = word.toLowerCase().replace(/[\u2019\u02bc]/gu, "'").normalize("NFD").replace(/[\u0300-\u036f]/gu, "");
     let out = "";
     let i = 0;
@@ -50,10 +53,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’ʼ")})|(\\d+)|([.!?…,;:])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zàáâãäèéêëìíîïòóôõöùúûü'’ʼ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
