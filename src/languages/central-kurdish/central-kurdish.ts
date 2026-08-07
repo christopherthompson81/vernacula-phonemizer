@@ -67,10 +67,10 @@ export type ForeignPhonemizer = (latin: string) => string;
 class CentralKurdishPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        // everything the g2p cannot read is rewritten FIRST — see normalize.ts. Most importantly
-        // the ARABIC-INDIC DIGITS are folded to ASCII there: the letter class above is U+0620–U+06FF,
-        // which contains U+0660–U+0669, so a native digit run was claimed by the LETTER branch and read
-        // as an empty string. That is the majority digit system in this corpus.
+        // Everything the g2p cannot read is rewritten FIRST — see normalize.ts.
+        // ⚠ MOST IMPORTANTLY THE ARABIC-INDIC DIGITS ARE FOLDED TO ASCII THERE. The letter class above is
+        // U+0620–U+06FF, which CONTAINS U+0660–U+0669, so without the fold a native digit run is claimed by
+        // the LETTER branch and read as an empty string — and those are the majority digit system in Kurdish.
         return assembleClauses(normalizeCentralKurdish(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));

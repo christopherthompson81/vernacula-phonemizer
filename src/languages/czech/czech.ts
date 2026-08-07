@@ -55,14 +55,13 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// The number token carries its DECIMAL COMMA (Czech's decimal mark) so the comma is not read as clause
-// punctuation — `2,3` was coming out as a phrase break between "dva" and "tři". A 3-digit block after the
-// comma is GROUPING, not a fraction (the corpus's "19,500 km²" is nineteen thousand five hundred), so it
-// is read as one number.
+// ⚠ THE NUMBER TOKEN CARRIES ITS DECIMAL COMMA (Czech's decimal mark), or the comma is read as clause
+// punctuation and `2,3` becomes a phrase break between "dva" and "tři". A 3-digit block after the comma is
+// GROUPING rather than a fraction ("19,500 km²" is nineteen thousand five hundred), so it reads as one number.
 /**
- * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so
- * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
- * use, i.e. a foreign name.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class below decides where the
+ * SCRIPT boundary falls, while this one decides whether the g2p has rules for these letters. A token this class
+ * REJECTS carries a letter Czech does not use — i.e. a foreign name.
  */
 const NATIVE_CLASS = "[A-Za-zÁáČčĎďÉéĚěÍíŇňÓóŘřŠšŤťÚúŮůÝýŽž]";
 /**
@@ -78,16 +77,15 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 // every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:,\\d+)?)|([.!?…,;:])`, "gu");
 
-// #562 symbol normalization — Czech, with the Slavic three-way agreement (1 procento / 2 procenta /
-// 5 procent). `countForm` is Czech's own, not `slavicCountForm`: a compound ending in 1 is the genitive
-// plural (dvacet jedna procent), where the Russian selector keeps the singular. km²/mm² are composed here
-// (čtvereční kilometr, before the noun, agreeing), and km/h / m/s read as "kilometrů za hodinu" /
-// "metrů za sekundu" via the rate machinery — both were local defects before the migration.
+// The shared symbol tier, with Czech's three-way agreement (1 procento / 2 procenta / 5 procent).
+// ⚠ `countForm` IS CZECH'S OWN, not `slavicCountForm`: a compound ending in 1 takes the genitive plural
+// (dvacet jedna procent) where the Russian selector keeps the singular.
+// km²/mm² are composed here (čtvereční kilometr, BEFORE the noun and agreeing), and km/h / m/s read as
+// "kilometrů za hodinu" / "metrů za sekundu" through the rate machinery.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
-    // omitted and defaults to it — this language does not split dimension from product.
+    // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
+    // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it — Czech does not
+    // split dimension from product.
     multiply: { times: "krát" },
     percent: ["procento", "procenta", "procent"],
     currency: { "€": ["euro", "eura", "eur"], "$": ["dolar", "dolary", "dolarů"], "£": ["libra", "libry", "liber"] },

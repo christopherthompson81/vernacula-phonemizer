@@ -91,14 +91,13 @@ function hanRun(run: string): string {
 /**
  * A SYNTHESIZED numeral string → IPA, read one character at a time.
  *
- * it must NOT go through hanRun(). Greedy longest-match segmentation looks up whole words, and the
- * rime-cantonese dict carries a colloquial lexical entry 十九 = "sap1 gau1" — so every composed number
- * containing 十九 was mis-toned: 29 → 二十九 segmented as 二 + 十九 and came out ji6 sap1 gau1 instead of
- * ji6 sap6 gau2. 18 of the 208 distinct integers in the corpus were hit, all from that one entry, including
- * every cardinal year ending in 9 with a non-zero tens digit (1469, 1759, 1889, 1989 …). A number the engine
- * itself composed has no lexical word boundaries to discover — its characters are digits — so per-character
- * lookup is both the fix and the honest model. Text the AUTHOR wrote in Han numerals still goes through
- * hanRun and keeps whatever lexical reading the dict has for it.
+ * ⚠ A COMPOSED NUMERAL MUST NOT GO THROUGH `hanRun()`. Greedy longest-match segmentation looks up whole WORDS,
+ * and the rime-cantonese dict carries a colloquial lexical entry 十九 = "sap1 gau1" — so a composed number
+ * containing 十九 is mis-toned: 29 → 二十九 segments as 二 + 十九 and comes out ji6 sap1 gau1 instead of
+ * ji6 sap6 gau2, which hits every cardinal year ending in 9 with a non-zero tens digit (1469, 1759, 1989 …).
+ * A number the ENGINE composed has no lexical word boundaries to discover — its characters are digits — so
+ * per-character lookup is both the fix and the honest model. Text the AUTHOR wrote in Han numerals still goes
+ * through `hanRun` and keeps whatever lexical reading the dict has for it.
  */
 function numeralRun(han: string): string {
     return [...han]
@@ -108,8 +107,8 @@ function numeralRun(han: string): string {
 }
 
 // Han numeral composition (shared Chinese system): 零一二三四五六七八九 + 十百千萬億. The Han string is then
-// phonemized through the same dict→jyutping→IPA path, so no separate number IPA is authored. DIGITS is owned
-// by normalize.ts so the digit-string reading (years, decimals) and this cardinal reading cannot drift apart.
+// phonemized through the same dict→jyutping→IPA path, so no separate number IPA is authored. ⚠ DIGITS is owned
+// by normalize.ts, so the digit-string reading (years, decimals) and this cardinal reading cannot drift apart.
 const SMALL = ["", "十", "百", "千"];
 function under10000(n: number): string {
     if (n === 0) return "";
@@ -150,17 +149,16 @@ class CantonesePhonemizer implements Phonemizer {
     text(input: string): string {
         // Whole-string Jyutping input (tone digits present) → direct path.
         if (JYUTPING.test(input.trim())) return jyutpingToIpa(input);
-        // the Cantonese normalization pass runs first, so what reaches the tokenizer is either a word
-        // the dict speaks or a number whose CARDINAL reading is the correct one.
+        // The normalization pass runs FIRST, so what reaches the tokenizer is either a word the dict speaks or
+        // a number whose CARDINAL reading is the correct one.
         input = normalizeCantonese(input, DEF.measureWords);
-        // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape
-        // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
-        // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
-        // itself; the gap pass covers everything else via the script router (core/scripts.ts).
-                // The clause-mark alternation is the manifest's keys, so adding a mark to the data is enough (…, ─,
-        // the ﹑ variant comma). The Latin run is \p{Script=Latin} + combining marks, not [A-Za-z]: the ASCII
-        // class split every accented name into fragments — Müslüm Gürses reached the English phonemizer as
-        // M / sl / m / G / rses ("ˈɛm sɫ ˈɛm …") instead of two words. 9 tokens in the corpus.
+        // ⚠ `assembleClauses`, NOT a private exec loop. A hand-rolled clauseSink + token loop is the same shape
+        // but gets no GAP PASS, so a run in a script the engine does not own is dropped. This engine claims
+        // Latin itself; the gap pass covers everything else via the script router (core/scripts.ts).
+        // The clause-mark alternation is built from the manifest's keys, so adding a mark to the data is enough.
+        // ⚠ The Latin run is `\p{Script=Latin}` + combining marks, NOT `[A-Za-z]`: the ASCII class splits every
+        // accented name into fragments — Müslüm Gürses reaches the English phonemizer as M / sl / m / G / rses
+        // ("ˈɛm sɫ ˈɛm …") instead of two words.
         const marks = Object.keys(CLAUSE_MARK)
             .map((k) => k.replace(/[.*+?^${}()|[\]\\-]/gu, "\\$&"))
             .join("");

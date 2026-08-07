@@ -4,11 +4,11 @@
  * based) is highly phonemic → a left-to-right grapheme scan (no digraphs — ⟨ç ş ñ ğ⟩ are single letters) with
  * gemination and word-final (oxytone) stress.
  *
- * ★ The alphabet: back ⟨a o u ı⟩→[ɑ o u ɯ] vs front ⟨e ö ü i⟩→[e ø y i] (harmony is SPELLED); ⟨q⟩→[q] (uvular) vs
+ * ⚠ The alphabet: back ⟨a o u ı⟩→[ɑ o u ɯ] vs front ⟨e ö ü i⟩→[e ø y i] (harmony is SPELLED); ⟨q⟩→[q] (uvular) vs
  *   ⟨k⟩→[k], ⟨ğ⟩→[ɣ] (voiced dorsal) vs ⟨g⟩→[ɡ]; ⟨c⟩→[d͡ʒ], ⟨ç⟩→[t͡ʃ], ⟨ş⟩→[ʃ], ⟨j⟩→[ʒ], ⟨ñ⟩→[ŋ], ⟨y⟩→[j],
  *   ⟨v⟩→[v], ⟨h⟩→[h]; ⟨â⟩ is the palatalisation vowel → [a]. Doubled letters geminate (yollamaq→[jolːɑmɑq]).
  *
- * 🔷 thin single-source (English Wiktionary "Crimean Tatar terms with IPA pronunciation", ~18 Latin pairs — no
+ * ⚠ THIN SINGLE-SOURCE: English Wiktionary "Crimean Tatar terms with IPA pronunciation", ~18 Latin pairs — no
  * wikipron/kaikki/epitran crh).
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -72,10 +72,10 @@ function number(digits: string): string {
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zâçğıiñöşüA-ZÂÇĞIİÑÖŞÜ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

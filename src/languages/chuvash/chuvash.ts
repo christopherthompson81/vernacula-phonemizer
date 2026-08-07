@@ -3,14 +3,14 @@
  * split in Turkic — sister to every Common-Turkic language, tr/az/tk/tt/ba/kk), ~1M (Chuvashia, Russia), CYRILLIC (the
  * Chuvash alphabet + ⟨ӑ ӗ ҫ ӳ⟩). Canonical IPA. A Cyrillic grapheme scan with two Chuvash signatures:
  *
- *   ★★ ALLOPHONIC VOICING — Chuvash has NO phonemic voicing contrast: the voiceless letters ⟨п т к ч с ҫ ш х⟩ voice to
+ *   ⚠ ALLOPHONIC VOICING — Chuvash has NO phonemic voicing contrast: the voiceless letters ⟨п т к ч с ҫ ш х⟩ voice to
  *      [b d ɡ d͡ʑ z ʑ ʐ ɣ] between vowels, after a NASAL/glide, or after a LIQUID before a FULL vowel (апат→aˈbat,
  *      ача→aˈd͡ʑa, манпа→manˈba, вӑлсем→ʋəlˈzem). A GEMINATE (doubled letter) is the underlying "strong" consonant and
  *      BLOCKS voicing → single long [Cː] (иккӗ→ˈikːɘ).
- *   ★★ REDUCED-VOWEL STRESS — the two reduced vowels ⟨ӑ⟩→[ə], ⟨ӗ⟩→[ɘ] cannot bear stress; stress falls on the last
+ *   ⚠ REDUCED-VOWEL STRESS — the two reduced vowels ⟨ӑ⟩→[ə], ⟨ӗ⟩→[ɘ] cannot bear stress; stress falls on the last
  *      FULL vowel, else (all-reduced) on the first syllable (вӑлсем→ʋəlˈzem, сӑмах→səˈmax, vs вӑкӑр→ˈvəɡər).
  *
- * 🔷 single-source: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}} pairs;
+ * ⚠ SINGLE-SOURCE: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}} pairs;
  * no wikipron/epitran chv).
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -75,7 +75,7 @@ export function phonemizeWord(word: string): string {
         // ъ ь and stray marks: dropped
     }
 
-    // ★ VOICING pass: a voiceless obstruent voices when the previous seg is a vowel or a nasal AND the next seg is a
+    // ⚠ VOICING pass: a voiceless obstruent voices when the previous seg is a vowel or a nasal AND the next seg is a
     // vowel (intervocalic V_V, or nasal_V). Geminates already carry the length mark and are not in VOICE → untouched.
     for (let k = 0; k < segs.length; k++) {
         const s = segs[k]!;
@@ -88,7 +88,7 @@ export function phonemizeWord(word: string): string {
         if (trigger) s.ipa = voiced;
     }
 
-    // ★ STRESS: the last FULL (non-reduced) vowel; if the word has only reduced vowels, the first vowel. ˈ before the
+    // ⚠ STRESS: the last FULL (non-reduced) vowel; if the word has only reduced vowels, the first vowel. ˈ before the
     // nucleus's onset consonant.
     const vIdx = segs.map((s, idx) => (s.vowel ? idx : -1)).filter((x) => x >= 0);
     if (vIdx.length) {

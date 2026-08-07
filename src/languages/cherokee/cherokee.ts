@@ -3,11 +3,11 @@
  * CHEROKEE SYLLABARY (Sequoyah, 85 characters, U+13A0–U+13F4 + Supplement U+AB70–U+ABBF), canonical IPA.
  * The g2p is AUTHORED FROM Montgomery-Anderson, *Cherokee, A Reference Grammar of Oklahoma* (the falsifiable
  * published phonology — the bho/Crawford mold).
- *   ★ Deterministic per-CHARACTER lookup over the 85-char syllabary (Table 13). Each char → its CV IPA. 6 vowels
+ *   ⚠ Deterministic per-CHARACTER lookup over the 85-char syllabary (Table 13). Each char → its CV IPA. 6 vowels
  *     a e i o u + ⟨v⟩→[ə̃] (nasal mid-central). Obstruents are PHONEMICALLY VOICELESS (Cherokee contrasts
  *     aspiration, NOT voicing): the g/d/ts/tl/qu series → unaspirated [k t t͡s t͡ɬ kʷ]; the aspirated split-cell
  *     chars (Ꭷ→kʰ, Ꮤ/Ꮦ/Ꮨ→tʰ, Ꮭ→t͡ɬ) emit the richer aspirated form. Bare Ꮝ = /s/.
- *   ★★ THE SYLLABARY IS A SHALLOW PHONEMIC SKELETON (grammar §4, p.95): it does NOT differentiate aspiration
+ *   ⚠ THE SYLLABARY IS A SHALLOW PHONEMIC SKELETON (grammar §4, p.95): it does NOT differentiate aspiration
  *     (EXCEPT in the split cells ga/ka, da/ta, de/te, di/ti, dla/tla — handled above), and never marks tone,
  *     vowel length, the glottal stop, or the intrusive /h/. So this recovers the SEGMENTAL melody only — the 6
  *     tones, length, most aspiration, glottalisation and intrusive-h are the disclosed folded residual (SYMBOL
