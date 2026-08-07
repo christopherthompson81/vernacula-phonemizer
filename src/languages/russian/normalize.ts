@@ -2,22 +2,18 @@
  * Russian (ru) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
  * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * Ninth language. Already correct and untouched: dates take a plain cardinal day, decimals read with
- * *целых* (1,5 → одна целых пять), % carries proper Slavic count agreement through the shared symbol tier
- * (процент / процента / процентов), and Roman numerals arrive already converted at the registry seam — with
- * `russian/romanOrdinals.ts` supplying the ORDINAL reading a century wants, so `XV век` was already
- * *пятнадцатый век*. That also means the roman-vs-initialism ordering hazard cannot arise here.
- *
- * THE HARD PART IS ORDINAL NOTATION. Russian writes `5-е`, `1-й`, `1970-х`, `3-м`, and the suffix is not an
- * ordinal marker — it is the CASE ending. `5-е` is пятое (neuter nominative), `5-го` пятого (genitive),
- * `1970-х` семидесятых (genitive plural). So the rule reads the ending off the text and inflects the
- * ordinal to match, rather than concatenating: the suffix is the last letters of the full form, not a
- * suffix that can be appended. Previously each of these spoke the bare letter as a word — `5-е` came out
+ * ⚠ THE HARD PART IS ORDINAL NOTATION. Russian writes `5-е`, `1-й`, `1970-х`, `3-м`, and the suffix is NOT
+ * an ordinal marker — it is the CASE ENDING. `5-е` is пятое (neuter nominative), `5-го` пятого (genitive),
+ * `1970-х` семидесятых (genitive plural). So the rule reads the ending off the text and INFLECTS the
+ * ordinal to match, rather than concatenating: what is written is the last letters of the full form, not a
+ * suffix that can be appended. Unclaimed, each of these speaks the bare letter as a word — `5-е` comes out
  * [pʲætʲ je], "five ye".
  *
- * Measured over the ru_ru corpus (2,562 utterances): dates ×55, units ×40, space-thousands ×38, ordinal
- * notation ×32, comma-decimals ×29, percent ×26, times ×26, час/минут ×19, Cyrillic all-caps ×118
- * (США ×47, СМИ ×10, ООН ×6, ВМС ×5, ДНК ×5, ТВ ×5), Latin all-caps ×88, Roman ×25, № ×7.
+ * Already correct and untouched: dates take a plain cardinal day, decimals read with *целых*
+ * (1,5 → одна целых пять), % carries proper Slavic count agreement through the shared symbol tier
+ * (процент / процента / процентов), and Roman numerals arrive already converted at the registry seam —
+ * with `russian/romanOrdinals.ts` supplying the ORDINAL reading a century wants, so `XV век` is already
+ * *пятнадцатый век*. That also means the roman-vs-initialism ordering hazard cannot arise here.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { slavicCountForm } from "../../core/normalizeSymbols.ts";
@@ -50,10 +46,10 @@ const CASE_ENDING: Readonly<Record<string, readonly [string, string]>> = {
 const CASE_ALT = Object.keys(CASE_ENDING).sort((a, b) => b.length - a.length).join("|");
 
 /**
- * Integer → the masculine-nominative ordinal, extended past the former's 1–100 range. Only the LAST element
- * inflects in Russian, so a larger number is its cardinal head plus the ordinal of its final ≤100 part:
- * 1970 → "тысяча девятьсот" + семидесятый. That is what `1970-х` needs, and the bare former returns
- * undefined there.
+ * Integer → the masculine-nominative ordinal, extended past `russianOrdinal`'s own 1–100 range. ⚠ ONLY THE
+ * LAST ELEMENT INFLECTS in Russian, so a larger number is its cardinal head plus the ordinal of its final
+ * ≤100 part: 1970 → "тысяча девятьсот" + семидесятый. That is what `1970-х` needs, and `russianOrdinal`
+ * alone returns undefined there.
  */
 function ordinalBase(n: number): string | undefined {
     const direct = russianOrdinal(n);
@@ -223,9 +219,9 @@ export function normalizeRussian(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 плюс $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1плюс $2");
 
-    // 7b) RELATIONAL AND DIVISION SIGNS. ⚠ RUSSIAN'S REGISTER SOURCE IS A PRONUNCIATION GLOSS, and it is
-    //     the strongest tier-4 evidence in the issue: ru.wikipedia's arithmetic articles do not merely use these
-    //     words, they QUOTE THE SPOKEN READING of the notation beside the notation itself —
+    // 7b) RELATIONAL AND DIVISION SIGNS. ⚠ THE SOURCE HERE IS A PRONUNCIATION GLOSS, which is the strongest
+    //     shape this kind of evidence takes: the arithmetic articles do not merely use these words, they
+    //     QUOTE THE SPOKEN READING of the notation beside the notation itself —
     //
     //       6 : 3 = 2    («шесть разделить на три равно два»)
     //       65 : 5 = 13  («шестьдесят пять разделить на пять равно тринадцать»)
@@ -234,8 +230,8 @@ export function normalizeRussian(input: string): string {
     //     — so the division word and the equals word are sourced together, in the slot, as speech.
     //
     //     ⚠ AND THE CORPUS EVIDENCE FOR `равно` IS THE WRONG SENSE. It is ×4 TOKEN in ru_ru and every hit is the
-    //     conjunction `равно как и` ("as well as"), which has no arithmetic reading at all — the same shape as
-    //     it's `sorella minore di`. A count-only pass would have called the equals word corpus-sourced.
+    //     conjunction `равно как и` ("as well as"), which has no arithmetic reading at all. ⚠ A COUNT-ONLY
+    //     PASS WOULD HAVE CALLED THE EQUALS WORD CORPUS-SOURCED — the count is right and the sense is wrong.
     //
     //     ⚠ THE COMPARATIVES TAKE `чем` RATHER THAN THE BARE GENITIVE, and that is a grammatical requirement,
     //     not a stylistic choice. Russian `меньше` governs the GENITIVE — the register quotes are `меньше нуля`,

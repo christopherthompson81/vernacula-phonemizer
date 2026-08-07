@@ -1,10 +1,12 @@
 /**
- * Quechua (qu) phonemizer — Southern Quechua / Runasimi (Qhichwa; Cusco-Collao + Ayacucho), Latin script, canonical
- * IPA. The fleet's first Quechuan language. Near-phonemic: a 3-vowel system ⟨a i u⟩ and a
- * THREE-WAY stop series written overtly — plain ⟨p t k q ch⟩, aspirated with ⟨h⟩ (⟨ph th kh qh chh⟩), ejective with
- * an apostrophe (⟨p' t' k' q' ch'⟩); uvular ⟨q⟩→[q]. A longest-match scan (tri/digraphs before single graphemes)
- * suffices, then regular PENULTIMATE stress (the onset of the penult syllable). Apostrophes (ʼ ' ') are normalised
- * to U+0027 before the scan.
+ * Quechua (qu) phonemizer — Southern Quechua / Runasimi (Qhichwa; Cusco-Collao + Ayacucho), Latin script,
+ * canonical IPA. Near-phonemic: a 3-vowel system ⟨a i u⟩ and a THREE-WAY stop series written overtly —
+ * plain ⟨p t k q ch⟩, aspirated with ⟨h⟩ (⟨ph th kh qh chh⟩), ejective with an apostrophe (⟨p' t' k' q'
+ * ch'⟩); uvular ⟨q⟩→[q]. A longest-match scan (tri/digraphs before single graphemes) suffices, then
+ * regular PENULTIMATE stress on the onset of the penult syllable.
+ *
+ * ⚠ THE APOSTROPHE IS A LETTER HERE, not punctuation — it marks ejection, and the three shapes (ʼ ’ ')
+ * are normalised to U+0027 before the scan so all of them reach the same rule.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -56,10 +58,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’ʼ‘-")})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zñşA-ZÑŞ'’ʼ‘-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
