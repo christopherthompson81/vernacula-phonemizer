@@ -56,17 +56,6 @@ function reorder(w: string): string {
     return out.join("");
 }
 
-interface Syl {
-    onset: string; // IPA
-    cls: Cls;
-    quality: string; // vowel IPA (no length)
-    long: boolean;
-    glide: string; // diphthong offglide or vowel-derived coda (j/w/m)
-    coda: string; // IPA coda
-    mark: string; // tone mark char
-    live: boolean;
-}
-
 // After reorder, resolve the vowel PATTERN around a consonant. Returns [quality, long, glide, consumedTail].
 // `pre` = a leading vowel now sitting AFTER the consonant (ເ ແ ໂ ໄ ໃ), `signs` = the following sign string.
 // This is the crux of Lao g2p.
@@ -157,7 +146,17 @@ function extractTones(chars: string[]): { clean: string[]; toneAt: Map<number, s
 }
 
 /** One syllable's features — enough to RENDER it and to derive its tone. */
-interface SylF { onset: string; quality: string; long: boolean; codaOut: string; cls: Cls; live: boolean; mark: string; heavy: boolean; }
+interface SylF {
+    onset: string; // IPA, including any cluster member
+    cls: Cls; // the onset's TONAL class, which is what tone() keys on
+    quality: string; // vowel IPA, without the length mark
+    long: boolean; // append ː when rendering
+    codaOut: string; // IPA coda: the coda consonant, or the vowel-derived glide
+    mark: string; // the tone-mark character, extracted up front by extractTones
+    live: boolean; // open-heavy or sonorant coda — the live/dead split tone() needs
+    heavy: boolean; // ⚠ NOT `long`: a centring diphthong carries its ː inside `quality` and sets
+    // long:false so scan() does not append a second one, but still counts as heavy for tone.
+}
 
 /** Scan a reordered Lao word into per-syllable feature records (for rendering AND tone derivation). */
 function scanFeatures(word: string): SylF[] {
