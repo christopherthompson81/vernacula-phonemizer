@@ -11,15 +11,14 @@
  * Only the FINAL element of a compound inflects (cent trente-sept → cent trente-septième), and 1 is
  * suppletive: premier / première standalone, but unième inside a compound (vingt-et-unième).
  *
- * Why a function and not a table: the previous implementation was a hardcoded map of 2–20 reachable only
- * from the Roman rule, so `le 37e` and `le 190e` — both attested in the FLEURS corpus — fell through and
- * the bare suffix was spoken as a stray word ([tʁɑ̃t sɛt ø], "thirty-seven uh"). Ordinal contexts are not
- * bounded by the century range.
+ * ⚠ A FUNCTION AND NOT A TABLE, because ordinal contexts are not bounded by the century range. A hardcoded
+ * 2–20 map reachable only from the Roman rule lets `le 37e` and `le 190e` fall through, and the bare suffix is
+ * then spoken as a stray word ([tʁɑ̃t sɛt ø], "thirty-seven uh").
  *
- * HOMOGRAPHS are the hard part of the Roman form, not decoding. Measured over the fr FLEURS corpus, the
- * naive pattern "Roman letters + ordinal suffix" matches `de` 8,411 times, `les` 3,512, `le` 3,497,
- * `des` 3,234, `ce` 411, plus `vie`, `dire`, `lire`, `mer`, `ville`, `livre` — all real words that decode
- * as a numeral (DE = 500+…, LE = 50+…, DI = 501, LI = 51). The filter used here is the Lexique
+ * ⚠ HOMOGRAPHS ARE THE HARD PART OF THE ROMAN FORM, not decoding. The naive pattern "Roman letters + ordinal
+ * suffix" matches `de`, `les`, `le`, `des`, `ce`, `vie`, `dire`, `lire`, `mer`, `ville`, `livre` — thousands of
+ * instances of real words that decode as a numeral (DE = 500+…, LE = 50+…, DI = 501, LI = 51). The filter is
+ * the Lexique
  * pronunciation lexicon itself: if the whole token is an attested French word, it is not a numeral. That
  * blocks every case above while leaving `XVIIe`, `XIe`, `Ve`, `LVIIIe` free, and it stays correct as the
  * lexicon grows. Three abbreviations/rare verbs are absent from Lexique and stoplisted explicitly.
