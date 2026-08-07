@@ -149,6 +149,27 @@
     "forceLong": ["เอ", "เิ"], // เ–อ / เ–ิ are ɤː (long); the short exceptions (เงิน) are in the dict
     "raisable": "งญณนมยรลฬว", // sonorants a silent ห leader raises (drops the ห onset)
 
+    // ⚠ THE SYLLABIFIER'S GRAPHEME CLASSES. These four decide where syllables BREAK and whether one is
+    // live or dead — the inputs to the tone table below, not part of it.
+    //
+    // "vowelSigns" — standalone vowel signs, always a one-grapheme vowel.
+    // ⚠ ⟨ำ⟩ IS DELIBERATELY ABSENT: it is a glide-bearing span (am), handled explicitly by the vowel-span
+    // scanner rather than as a plain sign.
+    "vowelSigns": ["ะ", "า", "ิ", "ี", "ึ", "ื", "ุ", "ู", "ั", "ๅ"],
+    // "oGlottalNext" — ⟨อ⟩ is the glottal-stop CONSONANT [ʔ] before one of these, and the vowel [ɔː]
+    // otherwise (epitran's vowel-diacritic list for อ→ʔ).
+    // ⚠ ⟨ำ⟩ AND ⟨ๅ⟩ ARE DELIBERATELY ABSENT: epitran keeps ⟨อ⟩ as [ɔː] before them — อำนาจ → ɔːamnaːt.
+    "oGlottalNext": ["า", "ี", "ู", "เ", "แ", "ื", "โ", "อ", "ะ", "ิ", "ุ", "ึ", "ไ", "ใ", "ั"],
+    // "shortVowelSigns" — the short signs. Vowel LENGTH feeds the dead-short vs dead-long tone split, so
+    // this list is upstream of the tone table.
+    "shortVowelSigns": ["ะ", "ิ", "ึ", "ุ", "ั"],
+    // "liveCodas" — the sonorant codas that make a syllable LIVE: the nasals and liquids ⟨มญณนรลฬง⟩ plus
+    // the GLIDE codas ⟨ย ว⟩. A glide-final syllable is always live regardless of vowel length. (th-pron
+    // reaches the same answer differently — it folds ย/ว into the nucleus, าย→aːj, าว→aːw, so the syllable
+    // is open+long and therefore live. Our tokenizer treats the glide as a coda unit, so it is listed
+    // here instead. This is what makes โดย mid and สาว rising.)
+    "liveCodas": ["ม", "ญ", "ณ", "น", "ร", "ล", "ฬ", "ง", "ย", "ว"],
+
     // Tone system — a deterministic function of initial-consonant CLASS × syllable LIFE × vowel LENGTH × mark.
     "tone": {
         // Thai consonant → tonal class (อักษร กลาง/สูง/ต่ำ): 9 mid, 11 high, 24 low.

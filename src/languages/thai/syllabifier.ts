@@ -1,3 +1,4 @@
+import { MANIFEST } from "./manifest.ts";
 import {
     type ThaiConsonantClass,
     type ThaiTone,
@@ -156,14 +157,13 @@ const THAI_CONS_PH: Readonly<Record<string, string>> = {
 /** Consonant graphemes (incl. อ, which can be the glottal-stop consonant ʔ). */
 const THAI_CONS = new Set([...Object.keys(THAI_CONS_PH), "อ"]);
 
-/** Standalone vowel signs (always one-grapheme vowels). ำ is NOT here — it is a
- *  glide-bearing span (am), handled explicitly in thaiVowelSpan. */
-const THAI_VSIGN = new Set([..."ะาิีึืุูัๅ"]);
+/** Standalone vowel signs (thai.jsonc). ำ is NOT here — it is a glide-bearing span
+ *  (am), handled explicitly in thaiVowelSpan. */
+const THAI_VSIGN = new Set(MANIFEST.vowelSigns);
 
-/** อ is the glottal-stop CONSONANT ʔ when followed by one of these (epitran's
- *  vowel-diacritic list for `อ→ʔ`); otherwise อ is the vowel ɔː. ำ and ๅ are
- *  deliberately ABSENT (epitran keeps อ as ɔː before them: อำนาจ → ɔːamnaːt). */
-const THAI_O_GLOTTAL_NEXT = new Set([..."าีูเแืโอะิุึไใั"]);
+/** อ is the glottal-stop CONSONANT ʔ before one of these, else the vowel ɔː
+ *  (thai.jsonc, which records why ำ and ๅ are absent). */
+const THAI_O_GLOTTAL_NEXT = new Set(MANIFEST.oGlottalNext);
 
 /** Longest-first เ-combinations (post-reorder: เ sits after its consonant). */
 const THAI_E_COMBOS = [
@@ -332,12 +332,14 @@ function thaiTokenize(word: string): ThaiUnit[] {
     return units;
 }
 
-/** Low sonorants a silent ห raises to HIGH class (and ย after a silent อ): หม/หน/หว…, อย. */
-const THAI_H_RAISABLE = new Set([..."งญณนมยรลฬว"]);
+/** Low sonorants a silent ห raises to HIGH class (and ย after a silent อ): หม/หน/หว…, อย.
+ *  From thai.jsonc — the SAME list g2p.ts reads, which is why it is not spelled out twice. */
+const THAI_H_RAISABLE = new Set(MANIFEST.raisable);
 
-/** Non-cluster low sonorants (THAI_H_RAISABLE minus the cluster glides ย/ร/ล/ว) — a leader's
- *  second consonant in the เ-frame อักษรนำ rotate, where C1+C2 can never be an onset cluster. */
-const THAI_LEADER_SONORANT = new Set([..."งญณนมฬ"]);
+/** Non-cluster low sonorants — THAI_H_RAISABLE minus the cluster glides ย/ร/ล/ว, and DERIVED
+ *  that way so the two cannot drift. Used for a leader's second consonant in the เ-frame
+ *  อักษรนำ rotate, where C1+C2 can never be an onset cluster. */
+const THAI_LEADER_SONORANT = new Set([...THAI_H_RAISABLE].filter((c) => !"ยรลว".includes(c)));
 
 /**
  * Is unit `i` a SILENT leading consonant — a ห before a raisable sonorant (หม/หน/หว/
@@ -492,15 +494,12 @@ function rewriteThai<T>(
     return out;
 }
 
-/** Short vowel signs (length feeds the dead-short/dead-long tone split). */
-const THAI_SHORT_VSIGN = new Set([..."ะิึุั"]);
+/** Short vowel signs (thai.jsonc) — length feeds the dead-short/dead-long tone split. */
+const THAI_SHORT_VSIGN = new Set(MANIFEST.shortVowelSigns);
 
-/** Sonorant codas that make a syllable LIVE. Nasals/liquids [มญณนรลฬง] plus the glide
- * codas ย/ว: a glide-final syllable is always live (sonorant coda), regardless of vowel
- * length — th-pron reaches the same result by folding ย/ว into the vowel nucleus (าย→aːj,
- * าว→aːw, open+long → live) and via THAI_LIVE_EXC for the short glide-vowels; our tokenizer
- * treats the glide as a coda unit, so it lives here instead. Fixes โดย→mid, สาว→rising, etc. */
-const THAI_LIVE_CODA = new Set([..."มญณนรลฬงยว"]);
+/** Sonorant (and glide) codas that make a syllable LIVE — thai.jsonc, which records why the
+ *  glides are here rather than folded into the nucleus as th-pron does it. */
+const THAI_LIVE_CODA = new Set(MANIFEST.liveCodas);
 
 /** One scanned syllable: `nucleus` is its vowel unit index (where the tone glyph is
  *  injected — BEFORE the vowel, so the engine repositions it after the syllabic vowel,

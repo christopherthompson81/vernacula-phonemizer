@@ -26,6 +26,21 @@
     },
 
     // Final (coda) consonant → IPA. Lao has the 8-way final set (stops unreleased; sonorants + glides).
+    // ⚠ THE LEADING VOWEL SIGNS ⟨ເ ແ ໂ ໃ ໄ⟩ — written BEFORE the consonant they follow in speech. lao.ts
+    // reorders them to after their consonant (cluster) first, so the rest of the scan can read strictly
+    // left to right. This is the abugida's one visual/phonetic inversion.
+    "leadingVowels": ["ເ", "ແ", "ໂ", "ໃ", "ໄ"],
+
+    // The SONORANTS that ⟨ຫ⟩ leads. Lao tone is determined by the onset's CLASS, and the sonorants are
+    // low-class on their own; a preceding silent ⟨ຫ⟩ raises the pair to HIGH class (ຫນ = ໜ, ຫມ = ໝ).
+    // ⚠ ⟨ຫ⟩ + anything NOT in this list is a real ⟨ຫ⟩ onset, not a class-raising lead — which is exactly
+    // what this list exists to decide.
+    "hLedSonorants": ["ງ", "ຍ", "ນ", "ມ", "ລ", "ວ"],
+
+    // The four TONE MARKS. They are not tones themselves: the tone is a lookup on (class × live/dead ×
+    // length × mark), which is the table further down and the resolver in lao.ts.
+    "toneMarks": ["່", "້", "໊", "໋"],
+
     "codas": {
         "ກ": "k̚", "ດ": "t̚", "ບ": "p̚", "ງ": "ŋ", "ນ": "n", "ມ": "m", "ຍ": "j", "ວ": "w",
     },

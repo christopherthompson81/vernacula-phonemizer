@@ -17,6 +17,14 @@ export interface ThaiManifest {
     noLength: string[];
     forceLong: string[];
     raisable: string;
+    /** Standalone one-grapheme vowel signs (⟨ำ⟩ excluded — it is a glide-bearing span). */
+    vowelSigns: readonly string[];
+    /** Signs before which ⟨อ⟩ is the glottal-stop consonant rather than the vowel [ɔː]. */
+    oGlottalNext: readonly string[];
+    /** The short vowel signs — length feeds the dead-short/dead-long tone split. */
+    shortVowelSigns: readonly string[];
+    /** Sonorant (and glide) codas that make a syllable LIVE. */
+    liveCodas: readonly string[];
     tone: {
         class: Record<string, ThaiConsonantClass>;
         fromMark: Record<ThaiToneMark, Record<ThaiConsonantClass, ThaiTone>>;

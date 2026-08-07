@@ -13,6 +13,7 @@ import { numberToWords } from "./numbers.ts";
 interface AncientGreekDef {
     vowels: Record<string, [string, string]>;
     consonants: Record<string, string>;
+    voicedAfterSigma: readonly string[];
     diphthongs: Record<string, string>;
 }
 const DEF = loadManifest<AncientGreekDef>(import.meta.url, "ancientgreek.jsonc");
@@ -29,8 +30,8 @@ const VOWEL = DEF.vowels;
 const CONS = DEF.consonants;
 const DIPHTHONG = DEF.diphthongs;
 const VELAR = new Set(["ɡ", "k", "kʰ", "ks"]); // γ → [ŋ] before one of these (the ⟨γγ γκ γχ γξ⟩ nasal)
-// ⟨σ⟩ → [z] before a VOICED consonant (β γ δ μ ν λ ρ): Λέσβια→lézbia, Σμύρνα→zmýrna (the standard assimilation).
-const VOICED_AFTER_S = new Set(["β", "γ", "δ", "μ", "ν", "λ", "ρ"]);
+// ⟨σ⟩ → [z] before a VOICED consonant (ancientgreek.jsonc): Λέσβια→lézbia, Σμύρνα→zmýrna.
+const VOICED_AFTER_S = new Set(DEF.voicedAfterSigma);
 
 interface Seg { ph: string; accent: string }
 
