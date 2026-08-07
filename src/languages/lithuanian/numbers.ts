@@ -7,7 +7,7 @@
  * dvidešimt, "60 (skaičius)" → šešiasdešimt, "80 (skaičius)" → aštuoniasdešimt, "90 (skaičius)" →
  * devyniasdešimt; the table itself lives in lithuanian.jsonc.
  *
- * ★ WHY THIS IS NOT `westernNumberWords`: (a) Lithuanian has NO irregular round-hundred words — the hundreds are
+ * ⚠ WHY THIS IS NOT `westernNumberWords`: (a) Lithuanian has NO irregular round-hundred words — the hundreds are
  *   a COUNTED NOUN (šimtas / du šimtai), so there is nothing to put in the shared `hundreds` array; and (b) every
  *   magnitude noun agrees with its count, which the shared composer's one-string-per-magnitude schema cannot
  *   express. The concord is the Lithuanian THREE-WAY split (= the CLDR lt one/few/other categories):

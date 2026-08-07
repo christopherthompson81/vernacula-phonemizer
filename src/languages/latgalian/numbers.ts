@@ -10,7 +10,7 @@
  *     četri, pīci, seši, septeni, ostoni, deveni, desmit), the teens (vīnpadsmit … deveņpadsmit), the round tens
  *     (divdesmit, treisdesmit, četrudesmit, pīcdesmit, sešdesmit, septeņdesmit, ostoņdesmit, deveņdesmit),
  *     symts / tyukstūša / miļjons / miļjards, AND the separate FEMININE series (vīna, divi, treis, četrys,
- *     pīcys, sešys, septenis, ostonis, devenis) — which this compositor needs, see ★ below.
+ *     pīcys, sešys, septenis, ostonis, devenis) — which this compositor needs — see GENDER below.
  *   • Omniglot "Numbers in Latgalian" (omniglot.com/language/numbers/latgalian.htm) — independent confirmation,
  *     incl. the compounds "divdesmit vīns" (21), "div(i) symti" (200) and "pīci symti pīcdesmit pīci" (555).
  *
@@ -20,7 +20,7 @@
  *     across both the ten and the teen, and it is the prescriptive source of the two.
  *   • 0: neither source lists it. "nulle" is used, the form Latvian (the closest relative, and the source of
  *     Latgalian's modern technical vocabulary) has. Flagged as UNATTESTED for Latgalian specifically.
- *   • ★ GENDER: unlike Latvian, whose tūkstotis is MASCULINE, Latgalian "tyukstūša" is FEMININE (grammar: a 4th-
+ *   • ⚠ GENDER: unlike Latvian, whose tūkstotis is MASCULINE, Latgalian "tyukstūša" is FEMININE (grammar: a 4th-
  *     declension noun, with the example "sešys tyukstūšys"). A numeral agrees with its counted noun, so the
  *     thousands multiplier must use the FEMININE unit forms (sešys tyukstūšys, not *seši tyukstūšys) while
  *     symts / miļjons / miļjards, being masculine, take the masculine ones. That is modelled. CASE concord
@@ -29,7 +29,7 @@
 
 /** Masculine unit series (index 0 = zero). Used everywhere except a thousands multiplier. */
 const UNITS = ["nulle", "vīns", "divi", "treis", "četri", "pīci", "seši", "septeni", "ostoni", "deveni"];
-/** ★ FEMININE unit series — the multiplier of the feminine noun "tyukstūša" (grammar: sešys tyukstūšys). */
+/** ⚠ FEMININE unit series — the multiplier of the feminine noun "tyukstūša" (grammar: sešys tyukstūšys). */
 const UNITS_F = ["nulle", "vīna", "divi", "treis", "četrys", "pīcys", "sešys", "septenis", "ostonis", "devenis"];
 /** 10–19: the -padsmit teens (one word), gender-invariant. */
 const TEENS = [
@@ -48,7 +48,7 @@ interface Forms {
     many: string;
 }
 const HUNDRED: Forms = { one: "symts", many: "symti" }; // masculine, 1st declension
-const THOUSAND: Forms = { one: "tyukstūša", many: "tyukstūšys" }; // ★ FEMININE, 4th declension
+const THOUSAND: Forms = { one: "tyukstūša", many: "tyukstūšys" }; // ⚠ FEMININE, 4th declension
 const MILLION: Forms = { one: "miļjons", many: "miļjoni" }; // masculine
 const MILLIARD: Forms = { one: "miļjards", many: "miļjardi" }; // masculine
 
@@ -109,7 +109,7 @@ export function numberToWords(n: number): string {
     if (mil) parts.push(magnitude(mil, MILLION, false, true));
     const th = Math.floor(n / 1000);
     n %= 1000;
-    if (th) parts.push(magnitude(th, THOUSAND, true, false)); // ★ feminine multiplier; 1000 → bare tyukstūša
+    if (th) parts.push(magnitude(th, THOUSAND, true, false)); // ⚠ feminine multiplier; 1000 → bare tyukstūša
     if (n) parts.push(sub1000(n, false));
     return parts.join(" ");
 }

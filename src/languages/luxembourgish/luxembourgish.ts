@@ -167,29 +167,26 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:–])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  *
- * ⚠ NOT QUITE VERBATIM: à á â ô û ü ö and their capitals were REMOVED, because the g2p has no rule for them and DROPPED them outright.
- * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was
- * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
- * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
- * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
- * `test/native-inventory.test.ts` now measures it rather than trusting it.
+ * ⚠ à á â ô û ü ö and their capitals ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright — listing them here
+ * would promise a reading that does not exist. NATIVE_CLASS is a claim ABOUT THE G2P, and
+ * `test/native-inventory.test.ts` measures it character by character rather than trusting it.
  */
 const NATIVE_CLASS = "[a-zéëäA-ZÉËÄ'-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 /**
- * #562 symbol normalization. Every noun here is invariant in the plural (Kilometer, Meter, Prozent,
+ * Symbol normalization. Every noun here is invariant in the plural (Kilometer, Meter, Prozent,
  * Dollar), so no `countForm` override is needed.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // is sourced. ⚠ Declaring it HERE is what makes ASCII `x` read like `×`; without it `6x6 cm` reads the
+    // `x` as a LETTER NAME, and the `NxN` spelling is by far the commoner of the two. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
     multiply: { times: "mol" },
     percent: ["Prozent"],
@@ -198,16 +195,15 @@ const SYMBOLS = makeSymbolNormalizer({
     magnitudes: ["Milliounen", "Millioune", "Millioun", "Milliarden", "Milliard"],
     unitPer: { h: "an der", s: "pro" },
     rateDenominators: { h: "Stonn", s: "Sekonn" },
-    // `km²` ×3 (`19 500 km²`, `3 850 km²`, `2,2 Millioune km²`) used to leave the unit entirely raw,
-    // because the tier declines an undeclared exponent. Luxembourgish fuses the measure word German-style,
-    // and the corpus writes both compounds itself: `783 562 Quadratkilometer (300 948 Quadratmeilen)` and
-    // `120 – 160 Kubikmeter`.
+    // ⚠ An UNDECLARED exponent leaves the unit entirely raw — the tier declines it rather than guessing —
+    // so `km²` needs these. Luxembourgish fuses the measure word German-style, and the language writes both
+    // compounds itself: `Quadratkilometer`, `Kubikmeter`.
     exponentWords: { squared: ["Quadrat"], cubed: ["Kubik"], position: "compound" },
 });
 
 class LuxembourgishPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: the Luxembourgish rewrites (de-grouping, era, abbreviations, ORDINALS, sports
+        // ORDER: the Luxembourgish rewrites (de-grouping, era, abbreviations, ORDINALS, sports
         // times, clock, decimals, ranges, degrees, signs, fractions) → the shared symbol tier. The
         // ordinals and the clock must precede the number tokenizer; the tier runs last because it needs
         // a NUMBER adjacent to its unit, and both decimal rules above leave their operands as digits so
@@ -217,23 +213,22 @@ class LuxembourgishPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
             //
-            // THE EIFELER REGEL APPLIES ACROSS THE NUMBER'S RIGHT EDGE TOO. `7 Kilometer` was read
-            // *siwen kilomètre* where the language says *siwe Kilometer* — and the corpus proves the rule
-            // on numerals itself, writing `siwe bis aacht`. normalize.ts already applies it wherever IT
-            // emits a numeral word (the range operand, the ordinal ending, the fraction numerator); the
-            // plain number path did not, so the sandhi was right in the rewritten cases and wrong in the
-            // ordinary one. Measured: 9 utterances in lb_lu, every one on *siwen*, which is effectively
-            // the only lb numeral ending in an unstressed ⟨-en⟩.
+            // ⚠ THE EIFELER REGEL APPLIES ACROSS THE NUMBER'S RIGHT EDGE TOO: the language says
+            // *siwe Kilometer*, not *siwen Kilometer*, and writes the rule on numerals itself in
+            // `siwe bis aacht`. normalize.ts applies it wherever IT emits a numeral word (the range
+            // operand, the ordinal ending, the fraction numerator); this is the plain-number path, and
+            // omitting it here makes the sandhi right in the rewritten cases and wrong in the ordinary
+            // one. In practice *siwen* is effectively the only lb numeral ending in unstressed ⟨-en⟩.
             //
-            // The `/en$/` guard is load-bearing and is the same one the range rule carries: a bare final
-            // ⟨n⟩ test strips the STEM of *Millioun* (1 000 000 → *eng Milliou*). It cannot move inside
-            // applyEifelerRegel, because the numeral CONNECTOR *an* → *a* is a two-letter function word
-            // that the rule also governs and that no `-en` test matches.
+            // ⚠ The `/en$/` guard is load-bearing, and is the same one the range rule carries: a bare
+            // final-⟨n⟩ test strips the STEM of *Millioun* (1 000 000 → *eng Milliou*). It cannot move
+            // inside applyEifelerRegel, because the numeral CONNECTOR *an* → *a* is a two-letter function
+            // word that the rule also governs and that no `-en` test matches.
             else if (m[2]) {
                 const words = numberToWords(Number(m[2])).split(" ");
-                // The follower must be a LETTER. Before a pause the ⟨n⟩ is RETAINED, and `Et sinn 7.`
-                // proved the point: trimming whitespace alone handed the rule a `.`, which is outside the
-                // keeper set, so the sandhi fired across a sentence boundary and said *siwe*.
+                // ⚠ The follower must be a LETTER — before a pause the ⟨n⟩ is RETAINED. Trimming
+                // whitespace alone hands the rule a `.`, which is outside the keeper set, so the sandhi
+                // fires across a sentence boundary (`Et sinn 7.` → *siwe*).
                 const after = /^\s*([\p{L}\p{M}])/u.exec((m.input ?? "").slice((m.index ?? 0) + m[0].length));
                 const last = words.length - 1;
                 if (after !== null && /en$/u.test(words[last]!))

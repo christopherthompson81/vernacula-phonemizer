@@ -25,16 +25,12 @@ export function phonemizeWord(word: string): string {
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 /**
- * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so
- * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
- * use, i.e. a foreign name.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class below decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name, which `nat`
+ * then folds to a base the g2p does have a rule for. See core/hostWord.ts.
  */
 const NATIVE_CLASS = "[A-Za-zĀāČčĒēĢģĪīĶķĻļŅņŌōŠšŪūŽž]";
-/**
- * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
- * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
- */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an

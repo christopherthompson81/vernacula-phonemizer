@@ -1,19 +1,18 @@
 /**
- * Lingala / Lingála (ln) text phonemizer — Bantu (C30B), Latin orthography, canonical IPA.
- * A major lingua franca of the Congo basin (~20M native + ~20-25M L2). Authored from Meeuwis (2020) "A Grammatical
- * Overview of Lingála" (Revised & Extended Edition), which describes the prestige KINSHASA variety.
+ * Lingala / Lingála (ln) phonemizer — Bantu (C30B), Latin orthography, canonical IPA. A major lingua franca of
+ * the Congo basin (~20M native + ~20–25M L2). Authored from Meeuwis (2020), "A Grammatical Overview of
+ * Lingála" (Revised & Extended Edition), which describes the prestige KINSHASA variety.
  *
- * A greedy longest-match g2p (the Chichewa pattern) + accent-based tone (the Yoruba pattern):
- *   • prenasalised obstruents are SINGLE onset units — ⟨mb nd ng nz⟩ → ᵐb ⁿd ᵑɡ ⁿz (homorganic ᵐ/ⁿ/ᵑ; Meeuwis §2.2);
+ * A greedy longest-match g2p plus accent-based tone:
+ *   · prenasalised obstruents are SINGLE onset units — ⟨mb nd ng nz⟩ → ᵐb ⁿd ᵑɡ ⁿz (homorganic ᵐ/ⁿ/ᵑ; §2.2);
  *     ⟨ny⟩ → ɲ, semi-vowels ⟨w y⟩ → w j. Only 13 consonant phonemes; no native /r/ or /h/ (loan graphemes).
- *   • 7 vowel graphemes a e ɛ i o ɔ u rendered as written — Kinshasa is phonemically 5-vowel (ɛ/ɔ merged into e/o;
- *     §2.1.1), so the ⟨e⟩=/e/~/ɛ/ collapse of casual spelling is an unrecoverable gap, but ɛ/ɔ are rendered when
- *     the (careful/northwestern) orthography writes them. NO diphthongs — vowel sequences are HIATUS, each vowel a
- *     separate tone-bearing nucleus (mái = ma.i; §2.1.5). No vowel harmony, length, or phonemic nasalisation.
- *   • TONE (H/L, meaning-distinctive; §2.4) is marked only in careful writing: acute → H (˥), háček → rising (˩˥),
- *     circumflex → falling (˥˩), unmarked → L (˩). Applied per nucleus. Casual (toneless) input → default L.
- *
- * Referee: kaikki Lingala (small human set, tone-marked) → 🔷 single-source.
+ *   · 7 vowel graphemes a e ɛ i o ɔ u rendered as written. ⚠ Kinshasa is phonemically 5-vowel (ɛ/ɔ merged into
+ *     e/o; §2.1.1), so the ⟨e⟩=/e/~/ɛ/ collapse of casual spelling is an unrecoverable gap — ɛ/ɔ are rendered
+ *     only where the (careful/northwestern) orthography writes them. NO diphthongs: vowel sequences are
+ *     HIATUS, each vowel its own tone-bearing nucleus (mái = ma.i; §2.1.5). No vowel harmony, length, or
+ *     phonemic nasalisation.
+ *   · TONE (H/L, meaning-distinctive; §2.4) is marked only in careful writing: acute → H (˥), háček → rising
+ *     (˩˥), circumflex → falling (˥˩), unmarked → L (˩). Applied per nucleus; casual toneless input → all L.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -73,7 +72,7 @@ export function phonemizeWord(word: string): string {
 const NUM = DEF.numbers;
 function cardinalWords(n: number): string {
     if (n < 0) return "";
-    if (n === 0) return NUM.zero; // libungutúlu — "0" used to leak the raw digit (there was no zero word at all)
+    if (n === 0) return NUM.zero; // libungutúlu
     if (n <= 10) return NUM.ordinals[n - 1]!;
     if (n < 20) return `${NUM.ten} ${NUM.and} ${NUM.ordinals[(n % 10) - 1]}`;
     if (n < 100) {
@@ -86,11 +85,10 @@ function cardinalWords(n: number): string {
         const hun = `${NUM.hundred} ${NUM.ordinals[h - 1]}`;
         return r === 0 ? hun : `${hun} ${NUM.and} ${cardinalWords(r)}`;
     }
-    // The scale ladder above kámá. kóto is INVARIANT and always carries an explicit multiplier (kóto mǒkó = 1 000);
-    // the higher scales are class-alternating nouns whose SINGULAR stands alone for a multiplier of 1 and whose
-    // PLURAL takes the multiplier (efúku = 10⁶, bifúku míbalé = 2×10⁶). Previously everything ≥ 1 000 went through
-    // `ordinals[Math.min(th, 10) - 1]`, which clamped the thousand-multiplier at 10 — so 100 000, 10⁶ and 10⁹ all
-    // produced the identical "kóto zómi".
+    // The scale ladder above kámá. ⚠ THE SCALES DO NOT SHARE ONE SHAPE: kóto is INVARIANT and always carries an
+    // explicit multiplier (kóto mǒkó = 1 000), while the higher scales are class-alternating nouns whose
+    // SINGULAR stands alone for a multiplier of 1 and whose PLURAL takes the multiplier (efúku = 10⁶,
+    // bifúku míbalé = 2×10⁶). Driving them all off one multiplier list collapses 100 000, 10⁶ and 10⁹ together.
     const SCALES: [number, string, string | null][] = [
         [1_000_000_000, NUM.billion, NUM.billions],
         [1_000_000, NUM.million, NUM.millions],

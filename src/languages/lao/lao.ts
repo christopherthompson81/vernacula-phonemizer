@@ -69,7 +69,7 @@ interface Syl {
 
 // After reorder, resolve the vowel PATTERN around a consonant. Returns [quality, long, glide, consumedTail].
 // `pre` = a leading vowel now sitting AFTER the consonant (ເ ແ ໂ ໄ ໃ), `signs` = the following sign string.
-// This is the crux of Lao g2p; extended iteratively against the kaikki referee.
+// This is the crux of Lao g2p.
 function resolveVowel(
     pre: string,
     after: string[],
@@ -156,7 +156,7 @@ function extractTones(chars: string[]): { clean: string[]; toneAt: Map<number, s
     return { clean, toneAt };
 }
 
-/** Scan one reordered Lao word into rendered IPA syllables. */
+/** One syllable's features — enough to RENDER it and to derive its tone. */
 interface SylF { onset: string; quality: string; long: boolean; codaOut: string; cls: Cls; live: boolean; mark: string; heavy: boolean; }
 
 /** Scan a reordered Lao word into per-syllable feature records (for rendering AND tone derivation). */
@@ -200,16 +200,13 @@ function scanFeatures(word: string): SylF[] {
         let coda = "";
         const nx = s[i] ?? "";
         if (!glide && nx in CODA) {
-            // nx is the onset of a NEW syllable (not a coda of this one) when it's directly followed by a vowel.
-            // ອ/ວ are BOTH vowel signs and onset consonants (ʔ/ʋ), needing a 2-char lookahead: an ອ/ວ after nx
-            // is a new onset (→ nx is THIS syllable's coda) only when it carries its OWN vowel (after2 is a vowel
-            // sign/lead) AND this syllable already has a vowel — ຄົນອັງກິດ → kʰon.ʔaŋ.kit. Otherwise the ອ/ວ is
-            // nx's own vowel (ກອນ → kɔːn, ຂະບວນ → kʰa.buːən) and nx stays the onset.
+            // nx is the onset of a NEW syllable (not a coda of this one) when it is directly followed by a vowel.
+            // ⚠ ອ/ວ ARE BOTH VOWEL SIGNS AND ONSET CONSONANTS (ʔ/ʋ), so this needs a 2-char lookahead. An ອ/ວ
+            // after nx is nx's OWN vowel — leaving nx the onset — only when nothing vowel-like follows it
+            // (ກອນ=kɔːn, ຂະບວນ=kʰa.buːən). If a vowel sign or lead vowel DOES follow, that ອ/ວ is its own onset
+            // and nx is THIS syllable's coda (ຄົນອັງກິດ=kʰon.ʔaŋ.kit, ກັງວານ=kaŋ.ʋaːn).
             const after = s[i + 1] ?? "", after2 = s[i + 2] ?? "";
             const vsigns = ["ະ", "າ", "ິ", "ີ", "ຸ", "ູ", "ຶ", "ື", "ັ", "ົ", "ຳ", "ໍ", "ຽ"];
-            // an ອ/ວ after nx is nx's OWN vowel (→ nx is an onset) only when that ອ/ວ has no vowel of its own
-            // after it (after2 not a vowel/lead → ກອນ=kɔːn, ຂະບວນ=kʰa.buːən); if it does, the ອ/ວ is a separate
-            // onset and nx is THIS syllable's coda (ຄົນອັງກິດ=kʰon.ʔaŋ.kit, ກັງວານ=kaŋ.ʋaːn).
             const oIsOwnVowel = (after === "ອ" || after === "ວ")
                 && !(vsigns.includes(after2) || LEAD.has(after2) || after2 === "ອ" || after2 === "ວ");
             const followsVowel = vsigns.includes(after) || LEAD.has(after) || oIsOwnVowel;
@@ -241,8 +238,8 @@ function scan(word: string): string {
 const TOKEN = /([຀-໿]+)|(\d+)|([.!?…,;:])/gu;
 
 // ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
-// The tokenizer matched (\d+) but NO branch consumed it — every digit run was silently dropped. The
-// compositor emits LAO-SCRIPT words and reads them through the ordinary g2p, so no IPA is authored here.
+// The compositor emits LAO-SCRIPT words and reads them back through the ordinary g2p, so no IPA is
+// authored here.
 // Lao is Tai, structurally the Thai system (see thai.ts) with the cognate irregulars: 20 is ຊາວ — and it
 // REPLACES the whole "twenty" (ຊາວສອງ = 22, no ສິບ), unlike Thai ຢີ່ສິບ; a FINAL 1 in any compound ≥11 is
 // ເອັດ (ສິບເອັດ, ຊາວເອັດ); 10⁴ ໝື່ນ and 10⁵ ແສນ are their own magnitude words.
@@ -291,15 +288,15 @@ export function phonemizeWord(word: string): string {
 
 class LaoPhonemizer implements Phonemizer {
     text(input: string): string {
-        // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
-        // defines as ASCII-only, so a numeral written in native digits matched NO token and was
-        // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
+        // ⚠ FOLD THIS SCRIPT'S OWN DIGITS TO ASCII FIRST: the number token is `\d+`, and JavaScript
+        // defines `\d` as ASCII-only, so a numeral written in Lao digits matches NO token at all and
+        // is dropped (core/unicode.ts).
         return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
-            // Canonical, UNPADDED pause marks — a padded value reaches the output as a double space, and
-            // collapsing ? and ! into "." threw away the sentence type. Lao is the one engine that
-            // hardcodes this rather than reading clausePunctuation from its manifest.
+            // Canonical, UNPADDED pause marks: a padded value reaches the output as a double space, and
+            // ? and ! must stay distinct from "." or the sentence type is lost. Lao is the one engine
+            // that hardcodes this rather than reading clausePunctuation from its manifest.
             else if (m[3] === "?") sink.pause("?");
             else if (m[3] === "!") sink.pause("!");
             else if (m[3] && ".…".includes(m[3])) sink.pause(".");

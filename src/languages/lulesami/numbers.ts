@@ -3,22 +3,22 @@
  * involved below 10⁶ (the magnitude words `tuvsán` 10³ / `millijåvnnå` 10⁶ / `millijárdda` 10⁹ are old
  * Scandinavian loans, but they are the only forms the language has and every source agrees on them).
  *
- * ★ SOURCE (primary): the Divvun/Giellatekno **Lule Sami digit→text transducer**,
+ *   · SOURCE (primary): the Divvun/Giellatekno **Lule Sami digit→text transducer**,
  *   `giellalt/lang-smj:src/fst/transcriptions/transcriptor-numbers-digit2text.lexc` (GPL, University of Tromsø /
  *   Norwegian Sámi Parliament). That file is *itself* authored for this exact job — its own comments mark the
  *   preferred branch "for tekst-til-tale og andre normative verkty" (for text-to-speech and other normative
  *   tools) vs the `+Use/NG` (non-generating) variants. This composer reproduces the normative branch.
- * ★ Corroborated by the same repo's `devtools/testdata/numeraler.txt` (real composed forms: `lågenanvihtta` 15,
+ *   · Corroborated by the same repo's `devtools/testdata/numeraler.txt` (real composed forms: `lågenanvihtta` 15,
  *   `nielljalåkvihtta` 45, `tjuohteguhttalåkniellja` 164, `guoktatuvsánvihttatjuohteaktse` 2509) and
  *   `src/fst/test/gt-norm-yamls/numerals_gt-norm.yaml` (`tjuohtegålmmå` 103, `tuvsánlågenanaktse` 1019,
  *   `tuvsántjuohtenielljalåkgålmmå` 1143, `guhttatuvsán` 6000).
- * ★ 0 = `nålla` — NOT in the transducer (an FST that reads digit strings never needs a zero word); taken from
+ *   · 0 = `nålla` — NOT in the transducer (an FST that reads digit strings never needs a zero word); taken from
  *   Omniglot "Numbers in Lule Sámi" (https://www.omniglot.com/language/numbers/lulesami.htm). Units 1–9 and the
  *   `lågev`/`låhke`/`tjuohte` shape are independently confirmed there and by
  *   languagesandnumbers.com/how-to-count-in-lule-sami ("Tens are formed starting with the multiplier digit,
  *   directly followed by a form of the word for ten (låhke)"; that site's data stops at 100).
  *
- * ★★ ORTHOGRAPHIC SHAPE — Lule Sami writes a cardinal SOLID, as ONE word, Finnish-style
+ * ⚠ ORTHOGRAPHIC SHAPE — Lule Sami writes a cardinal SOLID, as ONE word, Finnish-style
  * (kaksikymmentäyksi ≈ guoktalåkakta), all the way through the thousands: 12 345 is the single word
  * `guoktalågenantuvsángålmmåtjuotnielljalåkvihtta`. Only 10⁶/10⁹ are separate words. Hence this composer
  * returns a string whose SPACES are real word boundaries (the caller phonemizes each space-separated word),
@@ -35,8 +35,8 @@
  *     in both the free and the pre-remainder slot**, because the repo's own corpus testdata does exactly that in
  *     every instance — `gålmmåtjuohtegålmmålåkgålmmå` 333, `guoktatuvsánvihttatjuohteaktse` 2509,
  *     `vihttatuvsánnielljatjuohtegáktsalåkgáktsa` 5488, `tjuohteguhttalåkniellja` 164 — and the transducer's own
- *     Root uses `tjuohte` for 101–199. `tjuot` and `tjuode` are recorded here as the attested variants we do not
- *     generate. (`tjuode` IS used in the magnitude-multiplier slot, where it is the only generating branch.)
+ *     Root uses `tjuohte` for 101–199. `tjuot` is therefore an attested variant this composer does not generate.
+ *     (`tjuode` IS used, in the magnitude-multiplier slot, where it is the only generating branch.)
  *   - 7 is `gietjav` in the transducer everywhere; the corpus testdata uses the combining stem `giehtja-`
  *     inside compounds (`giehtjalåkguhtta` 76). We use `gietjav` uniformly (the transducer's normative form).
  *
