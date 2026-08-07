@@ -7,12 +7,12 @@
  * Santiago"), cross-checked against omniglot.com/language/numbers/kriol.htm and
  * languagesandnumbers.com/how-to-count-in-cape-verdean-creole.
  *
- * ★ Kabuverdianu is the SIMPLEST of the Iberian-lexified creoles here: fully decimal, and the tens JUXTAPOSE with
+ * ⚠ Kabuverdianu is the SIMPLEST of the Iberian-lexified creoles here: fully decimal, and the tens JUXTAPOSE with
  *   their unit — Omniglot and languagesandnumbers both print the link as a hyphen (⟨vinti-un⟩ 21, ⟨vinti-dós⟩ 22,
  *   ⟨sunkuénti-sax⟩ 56), so there is no ⟨i⟩ connector word of the Portuguese ⟨trinta e um⟩ type. The hyphen is
  *   written as a SPACE so each element reads through the g2p as its own word (and gets its own stress, which is
  *   what the hyphenated spelling implies).
- * ★ 16–19 are the ANALYTIC ⟨diza-⟩ series (dizasais, dizaseti, dizaoitu, dizanovi) — Portuguese ⟨dezasseis⟩
+ * ⚠ 16–19 are the ANALYTIC ⟨diza-⟩ series (dizasais, dizaseti, dizaoitu, dizanovi) — Portuguese ⟨dezasseis⟩
  *   rather than Spanish ⟨dieciséis⟩ — so the 16–19 irregularity lives entirely in the `teens` data.
  *
  * Pattern B (bespoke): `westernNumberWords` needs its `hundreds` slot to be a bare round-hundred word AND keeps
