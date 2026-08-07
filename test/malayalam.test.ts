@@ -10,7 +10,7 @@ const ml = (t: string): string => getPhonemizer("ml").text(t).trim();
 // a Malayalam data file, NO inherent-vowel deletion). The two Malayalam-specific features: SAMVRITOKARAM (a
 // word-final chandrakkala → half-close [ɨ], നാല്→naːlɨ) and CHILLU pure-consonants (ൻ ർ ൺ ൽ ൾ ൿ → bare codas),
 // plus the Dravidian INTERVOCALIC VOICING (single plosives voice between vowels: അടി→aɖi; geminates and
-// word-final stops stay voiceless). Validated at 87.0% vs wikipron mal + 80.0% vs kaikki mal (folded).
+// word-final stops stay voiceless). Referees: wikipron mal + kaikki mal.
 describe("Malayalam canonical IPA", () => {
     test("retroflex/dental series, ള→ɭ, gemination→length", () => {
         expect(phonemizeWord("മലയാളം")).toBe("mˈalajaːɭam"); // ള→ɭ, final ം→m
@@ -51,9 +51,8 @@ describe("Malayalam canonical IPA", () => {
 
 /**
  * NUMBER COMPOSITION. Malayalam moved off `indicNumberWords` onto the SHARED Dravidian composer
- * (core/numbers.ts), which Telugu and Kannada also read — Malayalam is the fourth Dravidian language
- * and the consumer that made consolidating the three private composers testable. Each assertion below
- * names what the old composer produced.
+ * (core/numbers.ts), which Telugu and Kannada also read. ⚠ Each assertion below names the reading a
+ * PRIVATE per-language composer produced, which is what the shared one has to reproduce.
  */
 describe("Malayalam numbers — the Dravidian composer", () => {
     test("21-99 is ONE fused word, not the ten and the unit apart", () => {
