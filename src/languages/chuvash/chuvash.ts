@@ -15,6 +15,7 @@ interface ChuvashDef {
     voiced: Record<string, string>;
     vowels: Record<string, string>;
     iotated: Record<string, string>;
+    vowelLetters: readonly string[];
 }
 const DEF = loadManifest<ChuvashDef>(import.meta.url, "chuvash.jsonc");
 // Letter → IPA tables (chuvash.jsonc). The voicing/stress/⟨е⟩/gemination rules are the scan below.
@@ -22,7 +23,7 @@ const ONSET = DEF.onset;
 const VOICE = DEF.voiced;
 const VOWEL = DEF.vowels;
 const IOTATED = DEF.iotated;
-const CYR_VOWEL = new Set([..."аеиоуыэёюяӑӗӳ"]);
+const CYR_VOWEL = new Set(DEF.vowelLetters);
 // Voicing triggers (before a vowel). The nasals ⟨н м ҥ⟩ and the glide ⟨й⟩ trigger voicing UNCONDITIONALLY, like an
 // intervocalic vowel (манпа→manˈba, мӗншӗн→ˈmŏnʐɘn before a REDUCED vowel, айта→ajˈda). The liquids ⟨р л⟩ trigger it
 // only before a FULL vowel — the generalization that fits all three referee cases: вӑлсем→ʋəlˈzem (л·с·е FULL → z) vs

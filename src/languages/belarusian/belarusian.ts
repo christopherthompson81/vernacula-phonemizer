@@ -19,6 +19,8 @@ import { loadManifest } from "../../core/loadManifest.ts";
 interface BelarusianDef {
     vowels: Record<string, string>;
     iotated: Record<string, string>;
+    palatalizers: readonly string[];
+    vowelLetters: readonly string[];
     consonants: Record<string, string>;
     voicing: { toVoiceless: Record<string, string>; toVoiced: Record<string, string> };
     numbers: EastSlavicNumbers; // Western/Slavic base table + the magnitude count forms and feminine 1/2
@@ -30,8 +32,8 @@ const TO_VOICELESS = DEF.voicing.toVoiceless;
 const TO_VOICED = DEF.voicing.toVoiced;
 
 const SOFT = "ь";
-const PALATALIZERS = new Set(["ь", "і", "я", "е", "ё", "ю"]);
-const VOWEL_LETTERS = new Set(["а", "о", "у", "ы", "э", "я", "е", "ё", "ю", "і"]);
+const PALATALIZERS = new Set(DEF.palatalizers);
+const VOWEL_LETTERS = new Set(DEF.vowelLetters);
 const isCons = (c: string): boolean => c in DEF.consonants;
 
 /** Palatalise a hard-consonant IPA: dark ɫ → lʲ (loses velarisation), everything else appends ʲ. */

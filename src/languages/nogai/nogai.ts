@@ -14,6 +14,7 @@ interface NogaiDef {
     vowels: Record<string, string>;
     iotated: Record<string, string>;
     digraphs: Record<string, string>;
+    vowelLetters: readonly string[];
 }
 const DEF = loadManifest<NogaiDef>(import.meta.url, "nogai.jsonc");
 // Letter → IPA tables (nogai.jsonc). The position-dependent ⟨в е ъ⟩ are handled in the scan below.
@@ -21,7 +22,7 @@ const CONS = DEF.consonants;
 const VOWEL = DEF.vowels;
 const IOTATED = DEF.iotated;
 const DIGRAPH = DEF.digraphs;
-const CYR_VOWEL = new Set(["а", "о", "у", "ы", "и", "е", "э", "я", "ю", "ё", "аь", "оь", "уь"]);
+const CYR_VOWEL = new Set(DEF.vowelLetters);
 const IPA_VOWEL = new Set(["a", "æ", "o", "ø", "u", "y", "ɯ", "i", "e"]);
 const STRESS_NASAL = new Set(["m", "n", "ŋ"]);
 

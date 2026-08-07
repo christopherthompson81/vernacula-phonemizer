@@ -38,4 +38,9 @@
     },
 
     "iotated": { "я": "ja", "ю": "ju", "ё": "jo" },
+
+    // Every letter that writes a vowel, including the three Chuvash-specific ones ⟨ӑ ӗ ӳ⟩. This is the
+    // environment for the ⟨е⟩ iotation in chuvash.ts: ⟨е⟩ is [je] word-initially or after one of these, and
+    // plain [e] after a consonant.
+    "vowelLetters": ["а", "е", "и", "о", "у", "ы", "э", "ё", "ю", "я", "ӑ", "ӗ", "ӳ"],
 }

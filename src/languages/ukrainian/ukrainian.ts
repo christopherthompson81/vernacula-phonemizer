@@ -18,6 +18,9 @@ import { normalizeUkrainian, normalizeUkrainianInitialisms } from "./normalize.t
 interface UkrainianDef {
     vowels: Record<string, string>;
     iotated: Record<string, string>;
+    palatalizers: readonly string[];
+    vowelLetters: readonly string[];
+    plainVowels: readonly string[];
     consonants: Record<string, string>;
     /** Western/Slavic base table + the magnitude count forms, feminine 1/2, and the decimal-comma name. */
     numbers: EastSlavicNumbers & { decimalConnector: string };
@@ -27,9 +30,11 @@ const DEF = loadManifest<UkrainianDef>(import.meta.url, "ukrainian.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 
 const SOFT = "ь";
-const PALATALIZERS = new Set(["ь", "і", "я", "ю", "є", "ї"]);
-const VOWEL_LETTERS = new Set(["а", "е", "и", "і", "о", "у", "я", "ю", "є", "ї"]);
-const PLAIN_VOWELS = new Set(["а", "е", "и", "і", "о", "у"]); // non-iotated vowels (for the й onset test)
+// Letter environments (ukrainian.jsonc): the palatalizing letters, every vowel letter, and the NON-iotated
+// subset that decides whether ⟨й⟩ is an onset [j] or a coda [i̯].
+const PALATALIZERS = new Set(DEF.palatalizers);
+const VOWEL_LETTERS = new Set(DEF.vowelLetters);
+const PLAIN_VOWELS = new Set(DEF.plainVowels);
 const isCons = (c: string): boolean => c in DEF.consonants;
 
 /** Palatalise a hard-consonant IPA: dark ɫ → lʲ (loses velarisation), everything else appends ʲ. */

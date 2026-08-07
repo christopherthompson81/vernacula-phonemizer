@@ -19,6 +19,16 @@
 
     // Consonants → their HARD IPA. Palatalisation appends ʲ (ɫ→lʲ is special: the dark l loses velarisation).
     // г→ɦ, ґ→ɡ; в→ʋ (vocalises to w in the coda, in ukrainian.ts); dark л→ɫ.
+    // The PALATALIZERS — a consonant before one of these is soft: the soft sign ⟨ь⟩ and ⟨і⟩ outright, the
+    // iotated ⟨я ю є ї⟩ by absorbing their own glide into the preceding consonant.
+    "palatalizers": ["ь", "і", "я", "ю", "є", "ї"],
+    // Every letter that writes a vowel — the environment for ⟨в⟩, which is the non-syllabic [u̯] after a
+    // vowel and [w] otherwise.
+    "vowelLetters": ["а", "е", "и", "і", "о", "у", "я", "ю", "є", "ї"],
+    // The NON-iotated subset. ⟨й⟩ is the onset [j] before one of these and the coda offglide [i̯] otherwise,
+    // so an iotated vowel must NOT be here: it already carries a glide, and ⟨Майя⟩ needs the coda reading.
+    "plainVowels": ["а", "е", "и", "і", "о", "у"],
+
     "consonants": {
         "б": "b", "в": "ʋ", "г": "ɦ", "ґ": "ɡ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k",
         "л": "ɫ", "м": "m", "н": "n", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "x",

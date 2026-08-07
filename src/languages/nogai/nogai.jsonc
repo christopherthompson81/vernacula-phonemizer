@@ -24,6 +24,13 @@
     "vowels": { "а": "a", "о": "o", "у": "u", "ы": "ɯ", "и": "i", "е": "e", "э": "e" },
 
     // Iotated vowels → glide + vowel.
+    // Every letter that writes a vowel — the lookahead for the ⟨в⟩→[w] coda test in nogai.ts (⟨в⟩ is [w]
+    // when NOT followed by a vowel). Only single characters: the test reads one character ahead, and the
+    // front-vowel DIGRAPHS ⟨аь оь уь⟩ need no entry of their own because each begins with a letter that is
+    // already here. (The BACKWARD half of that test reads the last emitted segment instead, which is how a
+    // preceding digraph still counts as a vowel.)
+    "vowelLetters": ["а", "о", "у", "ы", "и", "е", "э", "я", "ю", "ё"],
+
     "iotated": { "я": "ja", "ю": "ju", "ё": "jo" },
 
     // Two-character digraphs (checked before the single-letter maps). Front vowels use the soft sign ь; the

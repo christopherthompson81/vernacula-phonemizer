@@ -30,6 +30,8 @@ interface NumbersDef {
 }
 interface BulgarianDef {
     letters: Record<string, string>;
+    palatalizingLetters: readonly string[];
+    frontVowelLetters: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
 }
@@ -39,8 +41,9 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
 const VOWELS = new Set([..."aɛiɔuɤ"]);
-const FRONT = new Set(["и", "е"]);
-const PAL = new Set(["ь", "я", "ю"]);
+// The ⟨л⟩ environments (bulgarian.jsonc): [lʲ] before a palatalizer, [l] before a front vowel, else [ɫ].
+const FRONT = new Set(DEF.frontVowelLetters);
+const PAL = new Set(DEF.palatalizingLetters);
 // Voiced obstruent → voiceless (final devoicing + regressive assimilation before a voiceless obstruent).
 const DEVOICE: Record<string, string> = { b: "p", v: "f", ɡ: "k", d: "t", ʒ: "ʃ", z: "s", "d͡ʒ": "t͡ʃ", "d͡z": "t͡s" };
 const VOICE: Record<string, string> = Object.fromEntries(Object.entries(DEVOICE).map(([k, v]) => [v, k]));

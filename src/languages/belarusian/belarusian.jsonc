@@ -21,6 +21,14 @@
 
     // Consonants → their HARD IPA. Palatalisation appends ʲ (ɫ→lʲ is special: dark l loses velarisation). г→ɣ (velar
     // fricative), retroflex hushers ж→ʐ ш→ʂ ч→t͡ʂ, в→v, dark л→ɫ. ⟨ў⟩ and the ⟨дз/дж⟩ digraphs are handled in code.
+    // The PALATALIZERS — a consonant before one of these is soft. The soft sign ⟨ь⟩ and ⟨і⟩ palatalize
+    // outright; the iotated vowels ⟨я е ё ю⟩ palatalize the consonant and lose their own glide. This also
+    // gates the ⟨дз⟩ affricate: only ⟨дз⟩ softens before these, never ⟨дж⟩, which is always hard.
+    "palatalizers": ["ь", "і", "я", "е", "ё", "ю"],
+    // Every letter that writes a vowel — the environment for the Belarusian ⟨ў⟩ (short u): the non-syllabic
+    // [u̯] after a vowel, [w] otherwise.
+    "vowelLetters": ["а", "о", "у", "ы", "э", "я", "е", "ё", "ю", "і"],
+
     "consonants": {
         "б": "b", "в": "v", "г": "ɣ", "ґ": "ɡ", "д": "d", "ж": "ʐ", "з": "z", "й": "j", "к": "k",
         "л": "ɫ", "м": "m", "н": "n", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "x",

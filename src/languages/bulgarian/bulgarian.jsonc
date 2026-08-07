@@ -18,6 +18,12 @@
         "х": "x", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃt", "ъ": "ɤ"
     },
 
+    // The ⟨л⟩ THREE-WAY SPLIT (the rule is in bulgarian.ts). Bulgarian ⟨л⟩ is not one sound: it is palatal
+    // [lʲ] before a PALATALIZING letter, clear [l] before a FRONT vowel, and the dark/velarized [ɫ]
+    // everywhere else — which is the default, so these two short lists are the whole rule.
+    "palatalizingLetters": ["ь", "я", "ю"],
+    "frontVowelLetters": ["и", "е"],
+
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "—": ","
     },
