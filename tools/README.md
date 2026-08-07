@@ -48,6 +48,8 @@ itself; they matter only when regenerating a committed artifact.
 | `ESPEAK_NG` | an `espeak-ng` checkout, for its `dictsource/` tier | `normalization/sources.ts` |
 | `ESPEAK_PORTABLE` | the reference-engine checkout some one-off distillations were built against | `gen/build-{ca,ga,sv,cs,cy,th}-*` |
 | `AUDIO_CACHE` | the FLEURS audio cache | `corpus/fetch-fleurs-audio.py` |
+| `CMUDICT` | a CMUdict `cmudict.dict` file (public domain) | `english/en_g2p_ngram.ts` |
+| `EN_FREQ` | an English frequency wordlist, one word per line | `english/en_g2p_ngram.ts` |
 | `ARDIAC` / `ARDIAC_PY` | the Arabic-diacritizer staging dir and its torch+CUDA interpreter | `perso-arabic/`, `persian/` |
 | `ARZDIAC` | the Egyptian-diacritizer staging dir | the `arz` pipeline |
 

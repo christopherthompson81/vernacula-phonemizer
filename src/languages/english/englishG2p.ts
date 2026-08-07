@@ -7,16 +7,15 @@
  *   compound-split (dict pieces + compound stress) → suffix morphology → joint n-gram beam decode
  *
  * All paths emit stress-bearing ARPABET; {@link arpabetToIpa} renders the SAME canonical convention as the
- * dict, so a sentence mixing dict + G2P words has no seam. Trained cleanroom on CMUdict (public domain); the
- * shipped artifact is `g2p-model.json`, and its offline builder is not part of this package —
- * `tools/english/en_baseline.mts` and `en_per_compare.mts` CONSUME the model but do not produce it.
+ * dict, so a sentence mixing dict + G2P words has no seam. Trained cleanroom on CMUdict (public domain) by
+ * `tools/english/en_g2p_ngram.ts --emit`; the shipped artifact is `g2p-model.json`.
  * ⚠ NOT THE SAME MODEL AS THE NEURAL PATH: `en-g2p-tagger.onnx` is a separate BiLSTM built by
  * `tools/english/en_g2p_bilstm.py` and used by englishTagger.ts. This file is the SYNC n-gram fallback.
  * ⚠ A PURE FUNCTION of its injected {model, dict, common, arpabetToIpa} — no filesystem, no globals — which is
  * what makes it portable.
  */
 
-/** Serialized model: a joint n-gram over grapheme:phone tokens, emitted by the offline builder. */
+/** Serialized model: a joint n-gram over grapheme:phone tokens (`en_g2p_ngram.ts --emit`). */
 export interface EnglishG2pModel {
     order: number;
     alpha: number;
