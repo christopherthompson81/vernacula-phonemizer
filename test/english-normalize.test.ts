@@ -160,7 +160,7 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
         expect(phonemize("2/5", "en")).toBe("tʰˈuː fˈɪfθs"); // ordinal denominator, pluralized
         // A dropped sign INVERTS the meaning — the worst class of silent error for a temperature.
         // ⚠ "NEGATIVE", NOT "MINUS": `minus` is the arithmetic OPERATOR and English reserves it for that,
-        // using `negative` for a sign on an amount. See step 0e — this rule only ever matches the sign position.
+        // using `negative` for a sign on an amount. See step 0f — this rule only ever matches the sign position.
         expect(phonemize("-5 degrees", "en")).toBe("nˈɛɡət̬ɪv fˈaᶦv dᵻɡɹˈiːz");
     });
 

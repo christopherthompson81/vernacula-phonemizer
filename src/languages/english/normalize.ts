@@ -238,7 +238,7 @@ export function normalizeEnglish(input: string): string {
     s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
     s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
 
-    // 0d) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
+    // 0e) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
     //     ORDERING IS THE WHOLE REASON THIS IS SEPARATE FROM 6b rather than the same rule.
     //     A superscript sits BETWEEN the number and its unit (`9.11 × 10⁻³¹ kg`), which breaks the adjacency
     //     the unit rule matches on: the unit then fails and `kg` reaches the phoneme stream RAW as *kɡ* — a
@@ -264,7 +264,7 @@ export function normalizeEnglish(input: string): string {
             return `${ten} to the power of ${neg ? `negative ${digits.slice(1)}` : digits}`;
         });
 
-    // 0e) NEGATIVES. A dropped minus sign INVERTS the meaning, which for a temperature is the worst class of
+    // 0f) NEGATIVES. A dropped minus sign INVERTS the meaning, which for a temperature is the worst class of
     //     silent error: "-5 degrees" read as "five degrees".
     //     ⚠ "NEGATIVE", NOT "MINUS", and the distinction is the point. `minus` is the ARITHMETIC OPERATOR —
     //     "ten minus four" — while `negative` is the SIGN on an amount. This rule only ever matches the SIGN
@@ -299,7 +299,7 @@ export function normalizeEnglish(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 plus $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1plus $2");
 
-    // 0f) FRACTIONS. Guarded against dates (3/14/2011) and unit ratios (km/h) by requiring digits both sides
+    // 0g) FRACTIONS. Guarded against dates (3/14/2011) and unit ratios (km/h) by requiring digits both sides
     //     and nothing numeric or alphabetic after.
     s = s.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
@@ -382,7 +382,7 @@ export function normalizeEnglish(input: string): string {
         (_m, base: string, sup: string) => {
             const digits = [...sup].map((c) => SUPERSCRIPT_DIGIT[c]!).join("");
             //     ⚠ THE SIGN WORD IS EMITTED HERE, not left as an ASCII `-` for the sign rule to pick up:
-            //     that rule is step 0e and this is step 6b, so anything written now is downstream of it and
+            //     that rule is step 0f and this is step 6b, so anything written now is downstream of it and
             //     a `-` would simply be dropped — reading `2\u207b\u2075` as "two to the power of five",
             //     with the sign silently inverted.
             const neg = digits.startsWith("-");
@@ -411,7 +411,7 @@ export function normalizeEnglish(input: string): string {
         });
     }
 
-    // 7) ROMAN NUMERALS, the closed 2–20 set: cardinal after a context word, else the regnal ordinal.
+    // 7b) ROMAN NUMERALS, the closed 2–20 set: cardinal after a context word, else the regnal ordinal.
     s = s.replace(/\b([a-z']+)\s+(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\b/gi,
         (_m, prev: string, rom: string) => {
             const n = ROMAN[rom.toLowerCase()]!;
