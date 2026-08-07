@@ -27,9 +27,9 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makeBengaliNormalizer } from "./normalize.ts";
 
-// Whole-word pronunciation lexicon for the PROVEN-lexical vowel tail (closed-syllable ɔ→o, final-[o] retention)
-// that no rule can derive — see bengali-lexicon.tsv for the cross-source-consensus provenance. Loaded once; the
-// override is applied only on the SHIPPED path (phonemizeWord / text), never in the rule engine.
+// Whole-word pronunciation lexicon for the lexical vowel tail (closed-syllable ɔ→o, final-[o] retention) that no
+// rule can derive; provenance in bengali-lexicon.tsv. ⚠ The override applies only on the SHIPPED path
+// (phonemizeWord / text), never in the rule engine — which is what keeps the referee signal non-circular.
 let LEXICON: Map<string, string> | undefined;
 const lexicon = (): Map<string, string> => {
     if (!LEXICON) {
@@ -94,32 +94,22 @@ export function makeNativeBengali(
     def.vowelSigns[AE] = { ipa: "æ" };
     def.independentVowels[AE] = { ipa: "æ" };
     const g2p = makeAbugidaG2P(def, phon);
-    // #562 Bengali had NO symbol tier at all, so % and every currency sign were DROPPED outright ("3%"
-    // read as just "তিন") and the Latin unit abbreviations were unexpanded. শতাংশ follows the number.
+    // Without a symbol tier, % and every currency sign are DROPPED outright ("3%" reads as just "তিন") and the
+    // Latin unit abbreviations go unexpanded. শতাংশ FOLLOWS the number.
     const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // এবং is ×1987 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
-    // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
-    // see the tier, where the spacing exists because `B&B` is two initialisms.
+    // ⚠ THE AMPERSAND IS A LATIN-SCRIPT PRINTING LIGATURE, so what it takes is a READING and not a translation.
+    // In a non-Latin script it only ever arrives inside a Latin run, and the tier substitutes the language's own
+    // conjunction either way — SPACED, because `B&B` is two initialisms.
     ampersand: "এবং",
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
-    // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
-    // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
-    // defaults to it — this language does not split dimension from product.
+    // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
+    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — Bengali does
+    // not split dimension from product.
     multiply: { times: "গুণ" },
         percent: ["শতাংশ"],
-        // `¥` ADDED, and the audio's answer here is about the SILENCE, not the word. The corpus's
-        // `টিকিটের দাম ¥2,500 থেকে ¥130,000` dropped all three signs; both bn_in speakers of the sentence read
-        // the amounts and no currency at all (wav2vec2: `… d a m d u a z ɛ r p a ʃ o t e k …` — "dām dui hazār
-        // pā̃cśata", straight on to the next number). or_in does the same.
-        //
-        // WE VOICE IT ANYWAY, and that is a deliberate policy call rather than an oversight: for TTS an
-        // explicitly typed character is CONTENT, and a speaker's omission is evidence about reading habit, not
-        // licence to delete. The same rule that kept hi's `+30 °C` audible.
+        // ⚠ `¥` IS VOICED EVEN THOUGH READERS OMIT IT. Recordings of a Bengali price list read the amounts and
+        // no currency at all, straight on to the next number. That is a deliberate policy call, not an
+        // oversight: for TTS an explicitly typed character is CONTENT, and a speaker's omission is evidence
+        // about reading habit rather than licence to delete.
         //
         // So the audio bounds what it can: it proves no *other* word is there to compete with this one. `ইয়েন`
         // is the standard Bengali form of the currency name — ordinary lexis, not an audio finding, and marked

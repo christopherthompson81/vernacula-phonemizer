@@ -18,16 +18,15 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A Bosnian word — both scripts (Cyrillic + Gaj's Latin incl. diacritics č ć š ž đ) / number / punctuation token.
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "а-шђјљњћџ")})|(\\d+)|([.!?…,;:])`, "giu");
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
- * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
- * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
+ * SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A token
+ * this class REJECTS carries a letter the language does not use — i.e. a foreign name. See core/hostWord.ts.
  *
  * ⚠ `й` IS EXCLUDED, and it is the one part of this that is not a straight lift. The old class used the coarse
  * range `а-ш`, which sweeps up `й` — a RUSSIAN letter that Serbian/Bosnian Cyrillic does not have (this
  * orthography writes `ј`, U+0458, which sits outside the range entirely and is listed separately). The g2p has no
  * rule for `й` and dropped it. Excluding it from the inventory hands it to the fold instead, and `й` DOES
- * decompose — и + combining breve — so `Толстой` now reads with a final /i/ rather than losing the letter.
+ * decompose — и + combining breve — so `Толстой` reads with a final /i/ rather than losing the letter.
  * The TOKEN above deliberately stays wide: claiming the whole Cyrillic run is the SCRIPT question, and getting
  * that right is what puts the letter in front of the fold at all.
  */

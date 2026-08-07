@@ -18,14 +18,12 @@
  * rules); Omniglot "Numbers in Burmese" (the 0–10 and tens lists, cross-checked). Every numeral word was
  * verified to phonemize through this engine standalone before being used here.
  *
- * VOICING — corrected note. An earlier version of this header called the voiceless place word an engine
- * gap, on the strength of Omniglot romanizing 90 ကိုးဆယ် as "koe-zeh". The gold contradicts that: wikipron
- * and kaikki both give 30 သုံးဆယ် as [θóʊɴsʰɛ̀], VOICELESS, after an open syllable where any systematic
- * rule would voice it — while 10 တစ်ဆယ် is [təzɛ̀], voiced. Burmese compound voicing is genuinely lexical,
- * not derivable, and the common numeral compounds are already covered by dictionary.tsv (တစ်ဆယ်, တစ်ရာ,
- * နှစ်ရာ …), so composed numerals match the gold as they stand. A systematic rule was implemented and
- * measured against the referee: every variant LOST ground (95.7% → 91.7% minor-syllable-only, → 81.2%
- * intervocalic-only, → 79.0% both), so it was reverted.
+ * ⚠ COMPOUND VOICING IS LEXICAL, NOT DERIVABLE, and there is deliberately no rule for it. A romanization like
+ * Omniglot's "koe-zeh" for 90 ကိုးဆယ် suggests one, but the gold contradicts it: wikipron and kaikki both give
+ * 30 သုံးဆယ် as [θóʊɴsʰɛ̀], VOICELESS, after an open syllable where any systematic rule would voice it — while
+ * 10 တစ်ဆယ် is [təzɛ̀], voiced. The common numeral compounds are covered by dictionary.tsv, so composed
+ * numerals match the gold as they stand. A systematic rule was implemented and measured: every variant LOST
+ * ground against the referee (95.7% → 91.7% / 81.2% / 79.0%).
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 
