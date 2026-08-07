@@ -7,9 +7,9 @@ import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Afrikaans (af) — Indo-European (West Germanic, daughter of Dutch), Latin script,
 // Standard Afrikaans. A greedy digraph-first g2p + the Germanic OPEN/CLOSED-SYLLABLE vowel-length
-// rule + word-final obstruent devoicing. Referee: en.wiktionary Afrikaans IPA (2220 words) — 71.2% folded overall
-// (86% on short native words, 91% monosyllabic); the full-set residual is stress-conditioned vowel reduction on
-// POLYSYLLABLES (no stress model yet) + proper-noun/loan pronunciations (Afrika, Botha, Coetzee — lexical). Folds:
+// rule + word-final obstruent devoicing. Referee: en.wiktionary Afrikaans IPA. The residual is
+// stress-conditioned vowel reduction on POLYSYLLABLES (no stress model yet) + proper-noun/loan
+// pronunciations (Afrika, Botha, Coetzee — lexical). Folds:
 // stress (unwritten) + syllable dots not emitted, r~ɾ one symbol, ʊ~u / ɪ~i / œy~œi centering-diphthong-onset
 // notation. Signatures below. DEFERRED: a stress/syllable model, a proper-noun lexicon, nasalization.
 describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Standard Afrikaans)", () => {

@@ -7,8 +7,8 @@ import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Ancient Greek / Ἑλληνική (grc) — the reconstructed 5th-c. BCE CLASSICAL ATTIC
 // pronunciation (Allen, Vox Graeca), polytonic Greek script. The aspirates θ φ χ→[tʰ pʰ kʰ], ζ→[zd], η/ω long
-// mid, υ→[y], diphthongs, γ-nasal, rough breathing→[h], pitch accent. Validated 99.4% folded / 99.7% symbol vs
-// wikipron grc (human, {{grc-IPA}} Attic row, 33709).
+// mid, υ→[y], diphthongs, γ-nasal, rough breathing→[h], pitch accent.
+// Referee: wikipron grc (human, the {{grc-IPA}} Attic row).
 describe("Ancient Greek (Attic) canonical IPA", () => {
     test("aspirates θ/φ/χ + long η/ω + the γ-nasal", () => {
         expect(phonemizeWord("λόγος")).toBe("lóɡos"); // γ→[ɡ]

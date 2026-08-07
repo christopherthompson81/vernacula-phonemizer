@@ -6,8 +6,7 @@ import { numberToWords, phonemizeWord } from "../src/languages/albanian/albanian
 // Canonical-IPA goldens for Standard Albanian (sq) — Shqip (Tosk-based), Latin script, its own Indo-European
 // branch. Signature: a rich DIGRAPH system — ⟨dh th sh zh xh⟩→[ð θ ʃ ʒ d͡ʒ], the PALATALS ⟨gj⟩→[ɟ]
 // / ⟨q⟩→[c], ⟨nj⟩→[ɲ], ⟨ll⟩→[ɫ] (dark l), ⟨rr⟩→[r] (trill) vs ⟨r⟩→[ɾ] (tap); ⟨c⟩→[t͡s], ⟨ç⟩→[t͡ʃ], ⟨x⟩→[d͡z];
-// the 7-vowel system ⟨e⟩→[ɛ], ⟨y⟩→[y], ⟨ë⟩→[ə]. Penultimate stress. Validated at 97.3% symbol (87.8% folded) vs
-// kaikki + 98.5% / 90.2% vs epitran sqi-Latn.
+// the 7-vowel system ⟨e⟩→[ɛ], ⟨y⟩→[y], ⟨ë⟩→[ə]. Penultimate stress. Referees: kaikki + epitran sqi-Latn.
 describe("Albanian (Shqip) canonical IPA", () => {
     test("the digraph fricatives ⟨dh th sh zh xh⟩", () => {
         expect(phonemizeWord("dhe")).toBe("ˈðɛ"); // 'and/earth' — ⟨dh⟩→ð, ⟨e⟩→ɛ

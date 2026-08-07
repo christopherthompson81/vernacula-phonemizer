@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/amharic/amharic.ts";
 // codepoint is a whole CV syllable (vowel baked into the glyph), so the g2p is a flat fidel→CV lookup (not a
 // Brahmic matra/virama engine). Guttural 1st-order → [a] (ሀ→ha), ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. Two features are
 // UNWRITTEN: GEMINATION (folded vs the referee) and the 6th-order [ɨ] (epenthetic — kept only as the word's first
-// vowel, else deleted: ሁለት→hulət). Validated against wikipron amh (80.1%) + kaikki amh (78.3%), both human.
+// vowel, else deleted: ሁለት→hulət). Referees: wikipron amh + kaikki amh, both human.
 describe("amharic canonical IPA", () => {
     test("fidel syllabary, gutturals, ejectives, 6th-order ɨ deletion", () => {
         const cases: [string, string][] = [

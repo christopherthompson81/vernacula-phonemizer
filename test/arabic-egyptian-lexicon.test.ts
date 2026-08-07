@@ -2,9 +2,10 @@
  * arz (Egyptian Arabic) short-vowel LEXICON — regression guard for the shipped Egyptian vowel data. The MSA
  * neural diacritizer restores MSA short vowels, which are wrong for Egyptian (مصر MSA miṣr → Egyptian maṣr,
  * أنا anā → ana); the lexicon (egyptian-lexicon.tsv, mined from kaikki/Wiktionary Egyptian-Arabic, CC BY-SA)
- * supplies the correct Egyptian vocalization. The referee eval scores the RULE path (lexicon:false) so its 37.3%
- * stays non-circular (kaikki shares Wiktionary with the wikipron-arz referee); this lexicon is a SHIPPED
- * refinement, validated ~88–92% against wikipron-arz at build time.
+ * supplies the correct Egyptian vocalization. ⚠ The referee eval must score the RULE path (lexicon:false) to
+ * stay NON-CIRCULAR: kaikki shares Wiktionary with the wikipron-arz referee, so scoring the lexicon path would
+ * grade the mined data against its own source. This lexicon is a SHIPPED refinement, validated against
+ * wikipron-arz at build time.
  *
  * `createArabic("egyptian", true).text(word)` resolves a lexicon hit synchronously (no ONNX diacritizer needed),
  * so these assertions are deterministic.
