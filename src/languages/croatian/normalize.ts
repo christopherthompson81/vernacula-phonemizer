@@ -2,21 +2,18 @@
  * Croatian (hr) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * Croatian and Serbian are the pluricentric standards of ONE phonological system (Serbo-Croatian), so this
- * file is the Serbian normalize.ts (src/languages/serbian/normalize.ts) adapted to the CROATIAN corpus's
- * forms — the period-thousands/ordinal disambiguation, the hyphen+case-suffix decades, the three-way count
- * agreement, the dot-clock — with the differences that the hr_hr corpus actually shows:
- *   · DECIMAL COMMA, not period — `2,4 Ghz`, `5,0 Ghz`, `802,11 n` (the Serbian corpus writes the comma
- *     too, but Croatian's dot-thousands make the comma the unambiguous decimal).
+ * Croatian and Serbian are the pluricentric standards of ONE phonological system, so this file shares
+ * `serbian/normalize.ts`'s shape — the period-thousands/ordinal disambiguation, the hyphen+case-suffix
+ * decades, the three-way count agreement, the dot-clock. ⚠ WHAT DIFFERS IS DATA, NOT STRUCTURE:
+ *   · DECIMAL COMMA, not period — Croatian's dot-thousands make the comma the unambiguous decimal.
  *   · the CROATIAN `h` CLOCK SUFFIX — `23:35 h`, `22:00 i 23:00 h` (h = sat).
  *   · the `n. e.` (nove ere) / `p.n.e.` (prije nove ere) era markers.
  *   · the CROATIAN licensors for the `N.` ordinal — month GENITIVES (kolovoza, rujna, listopada, srpnja),
- *     stoljeća, marka, najvećim (locative), godine.
- *   · prenominal ROMAN ordinals — `I. i II. svjetski rat` (the roman-vs-ordinal seam).
+ *     stoljeća, godine.
+ *   · prenominal ROMAN ordinals — `I. i II. svjetski rat`, the roman-vs-ordinal seam.
  *
- * MEASURED over the hr_hr FLEURS corpus.
- *
- * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
+ * ⚠ Every boundary here is an explicit lookaround, never `\b`, which is ASCII-defined and finds none against
+ * the Croatian diacritics.
  */
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";

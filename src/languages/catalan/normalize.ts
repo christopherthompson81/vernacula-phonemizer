@@ -1,36 +1,18 @@
 /**
- * Catalan (ca) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Catalan (ca) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the 1,841 unique cased ca_es FLEURS utterances (column 3, a Catalan translation of the
- * English FLEURS set):
- *   `Nè`/`Na`/`Nr`/`Nn` ordinals ×~10 (7è de rugbi, la 7a illa, la 190a posició, el 37è país, el 1r dia)
- *   dot-thousands ×37 (1.400, 400.000, 19.500 — the TOKEN already handles these) + comma decimals
- *   clocks ×17 (11:35 PM, 06:30, 10:00h-11:00 PM MDT) + version dots ×… (2.4 Ghz, 802.11n)
- *   percent ×6 (per cent — the tier owns it) · currency ×2 (¥ dropped) · units/rates ×37
- *   era markers ×2 (dC / aC — després/abans de Crist) · roman ×24 (segle XVIII is correctly CARDINAL)
- *   initialisms ×135 (EUA, ONU, NHK, FIC, AP, NSW, IRM, RMN, B&B) · abbrev (Dr., etc., George W. Bush)
- *   fractions ×2 (29¾, 24½, 1/5) · degrees ×1 (30 °C)
+ * ⚠ THE ORDINAL IS A NUMERAL PLUS A LETTER SUFFIX that agrees in gender and number — `7è`, `7a`, `1r`, `2n`,
+ * `190a`. Left unhandled the suffix reads as a bare word ("sˈɛt ˈɛ"), so the rule has to consume it and pick
+ * the agreeing form rather than merely strip it.
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `7è de rugbi`      → `sˈɛt ˈɛ də rˈuɣβi`    the ordinal suffix read as the bare word "è"
- *   `la 7a illa`       → `ɫə sˈɛt ə ˈiʎə`       the feminine ordinal suffix read as "a"
- *   `11:35 PM`         → `ˈonzə , tɾˈɛntə sˈiŋ pm`  the colon became a pause, PM read as [pm]
- *   `30 °C`            → `tɾˈɛntə k`             °C → the bare consonant [k]
- *   `2.4 Ghz`          → `bˈin i kwˈatɾə ɡs`     version dot → a pause, Ghz → [ɡs]
- *   `29¾ polzades`     → `bˈin i nˈɔw …`         the vulgar fraction dropped, 29 misread
- *   `1.300 dC`         → `… tk`                  the era marker read as the cluster [tk]
- *   `segle III aC`     → `sˈeɡːɫə tɾˈɛs ˈak`     the BC marker read as [ak]
- *   `2.500 ¥`          → `dˈos mˈiɫ …`           the currency sign dropped
- *   `Dr. Moll`         → `dɾ . mˈɔʎ`             the abbreviation dot left a break
- *   `George W. Bush`   → `… w . bˈus`            the W. initial dot left a break
- *   `B&B`              → `p p`                   the ampersand dropped
- *   `els EUA`          → `əɫs ˈɛwə`              the USA read as the word "eua"
+ * ⚠ A ROMAN NUMERAL IN A CENTURY IS A CARDINAL IN CATALAN — `segle XVIII` is *divuit*, not an ordinal. That
+ * is the opposite of Russian, Polish and Italian, and it is why ca is excluded from the shared ordinal path.
  *
- * WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
+ * ⚠ WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
  * the word path stresses them; the dot-thousands, the comma decimal and the version dot stay DIGITS so the
- * shared symbol tier can still see the number adjacent to its unit/sign — the tier is composed AFTER this
- * pass in catalan.ts, and the TOKEN swallows the separators (see catalan.ts).
+ * shared symbol tier can still see the number adjacent to its unit or sign. The tier is composed AFTER this
+ * pass in catalan.ts, and the TOKEN swallows the separators.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";

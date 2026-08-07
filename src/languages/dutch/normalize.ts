@@ -1,29 +1,17 @@
 /**
- * Dutch (nl) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Dutch (nl) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the 1,829 unique cased FLEURS nl_nl utterances (column 3):
- *   dot-grouped thousands ×33 · comma decimals ×16 · clock `H.MM` ×15 · clock `H:MM` ×5 (+3 that are NOT
- *   clocks, see below) · ordinals `Ne/Nde/Nste` ×33 · units (km/mm/cm/kg/mi/m) ×37 · `km/u`+`m/s` ×5 ·
- *   squared units (km² km2 mi2 mm2) ×8 · percent ×6 · currency ×3 ($ ×2, £ ×1) · degrees ×2 · `&` ×4 ·
- *   `+` ×2 · dotted abbreviations ×14 (etc. ×5, bijv. ×2, ca. ×1, dd. ×1, nr. ×1, jr. ×1, St. ×2, dr. ×1) ·
- *   multi-dot ×5 (v.Chr. ×2, n.Chr. ×1, e.d. ×1) · dotted capital runs ×4 (V.S., V.N., U.S., D. K.) ·
- *   all-caps runs ×146 (VS ×13, VN ×4, ADD ×4, MS/FBI/GMT/DNA/MRI/UTC ×3 each) · fractions ×1.
+ * ⚠ THE BARE `N.` NON-RULE — a deliberate negative result. German writes its ordinal as a numeral plus a bare
+ * PERIOD (`16. Jahrhundert`) and needs a detector for it. Dutch does NOT: every `\d{1,4}\.` in Dutch prose is
+ * a SENTENCE-FINAL period ("…in 1979.", "…de jaren 20."). Dutch writes the ordinal with a LETTER suffix
+ * instead — `18e`, `15de`, `60ste` — which is unambiguous and needs no context. Porting German's rule here
+ * would convert sentence-final pauses into ordinals.
  *
- * THE BARE `N.` NON-RULE — the deliberate negative result. German writes its ordinal as a numeral plus a
- * bare PERIOD (`16. Jahrhundert`) and needed a detector for it. Dutch does NOT: tabulating every
- * `(?<![\d.])\d{1,4}\.(?!\d)` across nl_nl returns 26 hits and ALL TWENTY-SIX are sentence-final periods
- * ("…in 1979.", "…de jaren 20.", "…Fort Greely-pompstation 9."). Dutch writes the ordinal with a LETTER
- * suffix instead — `18e`, `15de`, `60ste` — which is unambiguous and needs no context at all. So German's
- * rule is deliberately NOT ported; porting it would have converted 26 sentence-final pauses into ordinals.
- * The check that matters, stated as the playbook asks: zero sentence-final pauses are lost, because no rule
- * here touches a digit followed by a bare period.
- *
- * THE SEPARATORS. Dutch, like German, groups thousands with a PERIOD and takes a COMMA decimal. The Dutch
- * engine had the same latent bug German did, one layer down: `dutch.ts`'s TOKEN was a bare `(\d+)`, so BOTH
- * separators fell through to `clausePunctuation` and `400.000` read as *vierhonderd . nul* — a phrase break
- * and a lost magnitude — while `6,5` read as *zes , vijf*. That defect is in the tokenizer, not in this
- * layer, so it is fixed where it lives (dutch.ts), not papered over here.
+ * ⚠ THE SEPARATORS ARE GERMAN-STYLE: thousands grouped with a PERIOD, decimal with a COMMA. Both fall through
+ * to `clausePunctuation` if the tokenizer's number group is a bare `(\d+)`, so `400.000` reads as
+ * *vierhonderd . nul* — a phrase break and a lost magnitude — and `6,5` as *zes , vijf*. That defect belongs
+ * to the tokenizer and is fixed in dutch.ts, not papered over here.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
