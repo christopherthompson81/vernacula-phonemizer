@@ -5,7 +5,7 @@
 {
     "language": "id",
     "name": "Indonesian",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Indonesian (Bahasa Indonesia) orthography + phonology. This file IS the language data — the g2p reads it directly.",
 
     // Multi-letter graphemes (longest-first) → IPA.

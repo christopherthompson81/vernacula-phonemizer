@@ -5,7 +5,7 @@
 {
     "language": "oc",
     "name": "Occitan (occitan)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Multi-letter graphemes, scanned LONGEST-FIRST. Digraphs ⟨lh nh ch⟩; ⟨qu gu⟩ before a front vowel = [k ɡ];
     // diphthong offglides ⟨u⟩→[w] and ⟨i⟩→[j] are handled in code (context-dependent).

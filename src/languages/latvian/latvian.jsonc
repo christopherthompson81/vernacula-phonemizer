@@ -9,7 +9,7 @@
 {
     "language": "lv",
     "name": "Latvian (latviešu)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored rule-based g2p (grapheme→IPA scan + written palatals/length + diphthongs + voicing) from Latvian phonology; the rules derived empirically from the wikipron lav_latn_narrow referee (1,657 headwords). No lexicon.",
 
     "convention": {

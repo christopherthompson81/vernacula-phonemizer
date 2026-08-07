@@ -8,7 +8,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface AfrikaansManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     fixed: Record<string, string>;
     vowelsLong: Record<string, string>;
     vowelsShort: Record<string, string>;

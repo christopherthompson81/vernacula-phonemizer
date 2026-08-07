@@ -4,7 +4,7 @@
     // sinhala.ts. Anusvara ං is pre-rewritten to ඞ් (coda ŋ).
     "language": "si",
     "name": "Sinhala",
-    "script": "Sinhala",
+    "script": ["Sinhala"],
     "inherentVowel": "a",
     "consonants": {
         "ක": { "ipa": "k" },

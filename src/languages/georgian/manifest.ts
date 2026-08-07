@@ -16,7 +16,7 @@ export interface GeorgianNumeralPair {
 export interface GeorgianManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: {

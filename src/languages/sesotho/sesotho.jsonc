@@ -12,7 +12,7 @@
 {
     "language": "st",
     "name": "Sesotho (Southern Sotho)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Sesotho orthography + phonology (Doke & Mofokeng 1957). No machine referee (kaikki Sotho = 3 IPA entries); hand-gold anchored. single-source.",
 
     "graphemes": {

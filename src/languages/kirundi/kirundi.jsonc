@@ -11,7 +11,7 @@
 {
     "language": "rn",
     "name": "Kirundi (Ikirundi)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "NEAR-CLONE of Kinyarwanda (rw): reuses the rw greedy g2p + Cox comparative-grammar palatals, with the one confident Kirundi delta ⟨j⟩→d͡ʒ (affricate, vs Kinyarwanda ʒ). Referee: epitran run-Latn (crude, partly circular).",
 
     "convention": {

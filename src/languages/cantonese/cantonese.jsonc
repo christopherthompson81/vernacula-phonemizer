@@ -5,7 +5,7 @@
 {
     "language": "yue",
     "name": "Cantonese",
-    "script": "Han",
+    "script": ["Han"],
 
     // Syllable INITIALS (onsets). Parsed longest-first (ng/gw/kw before single letters).
     "initials": {

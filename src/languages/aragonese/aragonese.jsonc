@@ -11,7 +11,7 @@
 {
     "language": "an",
     "name": "Aragonese (aragonés)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Digraphs, scanned LONGEST-FIRST: ⟨ny⟩→[ɲ], ⟨ll⟩→[ʎ], ⟨ch⟩→[t͡ʃ], ⟨tz⟩→[t͡s], ⟨rr⟩→[r] (trill). ⟨qu gu gü⟩,
     // the ⟨c⟩/⟨g⟩ softening, and the ⟨i u⟩ rising glides are handled in code.

@@ -10,7 +10,7 @@
 {
     "language": "nso",
     "name": "Sepedi (Northern Sotho)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Sepedi/Northern Sotho orthography + phonology (Ziervogel & Mokgokong). NO machine referee (no wikipron/kaikki/epitran) → cannot-verify; a couple of hand examples only.",
 
     "graphemes": {

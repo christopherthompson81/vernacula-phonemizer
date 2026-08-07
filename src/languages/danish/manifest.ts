@@ -7,7 +7,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface DanishManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     vowels: Record<string, string>;
     consonants: Record<string, string>;
     clausePunctuation: Record<string, string>;

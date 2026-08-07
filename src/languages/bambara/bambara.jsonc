@@ -11,7 +11,7 @@
 {
     "language": "bm",
     "name": "Bambara (Bamanankan)",
-    "script": "Latin",
+    "script": ["Latin", "Nko"],
     "provenance": "Authored greedy g2p from the Bambara Latin orthography; inventory confirmed by Vydrin (2020, IJL 32.1). Referee: kaikki Bambara (Wiktionary).",
 
     "convention": {

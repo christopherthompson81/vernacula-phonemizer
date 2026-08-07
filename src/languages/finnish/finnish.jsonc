@@ -13,7 +13,7 @@
 {
     "language": "fi",
     "name": "Finnish",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p + gemination from the Finnish Latin orthography (near-perfectly phonemic). Referee: en.wiktionary Finnish (HUMAN).",
 
     "convention": {

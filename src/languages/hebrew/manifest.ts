@@ -30,7 +30,7 @@ export interface HebrewNumbers {
 export interface HebrewManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     consonants: Record<string, string>;
     dageshHard: Record<string, string>;
     vowels: Record<string, string>;

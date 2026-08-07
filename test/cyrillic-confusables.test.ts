@@ -62,8 +62,9 @@ describe("foldCyrillicConfusables", () => {
             for (const f of readdirSync(new URL(`${d}/`, dir)).filter((n) => n.endsWith(".jsonc"))) {
                 const src = readFileSync(new URL(`${d}/${f}`, dir), "utf8");
                 const lang = /"language"\s*:\s*"([^"]+)"/u.exec(src);
-                const script = /"script"\s*:\s*"([^"]*)"/u.exec(src);
-                if (lang && script?.[1]?.startsWith("Cyrillic")) declared.add(lang[1]!);
+                // `script` is an ORDERED list, primary first — so a Cyrillic-primary language leads with it.
+                const script = /"script"\s*:\s*\[\s*"([^"]*)"/u.exec(src);
+                if (lang && script?.[1] === "Cyrillic") declared.add(lang[1]!);
             }
         }
         expect(declared.size).toBeGreaterThan(5); // the scan actually found manifests

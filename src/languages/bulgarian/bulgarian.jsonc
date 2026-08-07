@@ -8,7 +8,7 @@
 {
     "language": "bg",
     "name": "Bulgarian",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
     "provenance": "Authored from standard Bulgarian orthography→phonology; rules calibrated to wikipron bul_cyrl_narrow + kaikki bg (both human). Numbers authored from standard Bulgarian.",
 
     // Base grapheme → phoneme (the context-sensitive letters л, я, ю, ь are handled in code).

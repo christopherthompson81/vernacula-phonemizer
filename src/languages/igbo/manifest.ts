@@ -8,7 +8,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface IgboManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     clausePunctuation: Record<string, string>;
     /** Cardinal numbers — the MODERN DECIMAL system. See igbo.jsonc for sourcing and why not the vigesimal one. */
     numbers: {

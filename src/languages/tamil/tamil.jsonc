@@ -4,7 +4,7 @@
     // as a post-pass in tamil.ts (they are context-sensitive, not declarative).
     "language": "ta",
     "name": "Tamil",
-    "script": "Tamil",
+    "script": ["Tamil"],
     "inherentVowel": "ɐ",
     "consonants": {
         "க": { "ipa": "k" },

@@ -10,7 +10,7 @@
 {
     "language": "bar",
     "name": "Bavarian (Boarisch)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Multi-letter graphemes — scanned LONGEST-FIRST (see ORDER in bavarian.ts). The DIPHTHONGS map to two vowel
     // SEGMENTS (the offglide ◌̯ folds in the backbone). Bavarian's distinctive FALLING diphthongs ⟨ia ua oa⟩→[iɐ̯ uɐ̯ oɐ̯]

@@ -7,7 +7,7 @@
 {
     "language": "kea",
     "name": "Kabuverdianu (kriolu)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Digraphs (matched before single letters): ⟨dj tx nh lh⟩ + ⟨rr⟩ trill + ⟨ch⟩ (Portuguese-spelling loans).
     "digraphs": { "dj": "d͡ʒ", "tx": "t͡ʃ", "nh": "ɲ", "lh": "ʎ", "rr": "r", "ch": "t͡ʃ" },

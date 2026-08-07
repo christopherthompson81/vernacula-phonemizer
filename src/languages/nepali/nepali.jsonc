@@ -8,7 +8,7 @@
 {
     "language": "ne",
     "name": "Nepali",
-    "script": "Devanagari",
+    "script": ["Devanagari"],
     "provenance": "Authored from the Devanagari chart + standard Nepali phonology; cross-checked vs wikipron nep_deva narrow + kaikki. Reuses the Hindi Devanagari engine (makeNativeHindi) with the Nepali divergences: inherent vowel अ→[ʌ] (not Hindi ə), DENTAL affricates च/छ/ज/झ→[t͡s t͡sʰ d͡z d͡zʱ] (not palatal), sibilant merger श/ष→[s], NO phonemic vowel length (ई→i, ऊ→u), diphthongs ऐ→[ʌi]/औ→[ʌu], व→[w].",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida

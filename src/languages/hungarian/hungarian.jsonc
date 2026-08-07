@@ -7,7 +7,7 @@
 {
     "language": "hu",
     "name": "Hungarian (magyar)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Hungarian orthography + phonology (regular, near-phonemic). This file IS the language data — the g2p reads it directly. Referees: wikipron hun_latn narrow + epitran hun-Latn.",
 
     "convention": {

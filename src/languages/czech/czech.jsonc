@@ -10,7 +10,7 @@
 {
     "language": "cs",
     "name": "Czech",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // The canonical-IPA conventions the values below are written in (documentation; the engine bakes them in).
     "convention": {

@@ -9,6 +9,7 @@
 // OOV G2P). The "convention", "provenance", "models" blocks are self-describing documentation.
 {
     "language": "en",
+    "script": ["Latin"],
     "name": "English (General American)",
     "provenance": "CMUdict (public-domain lexicon) + a cleanroom joint-n-gram OOV G2P + a UD-EWT-trained averaged-perceptron POS tagger. Single canonical-IPA output mode, no fallback. WHICH words are heteronyms / function words, and the number words, are small closed language facts (no attribution needed).",
 

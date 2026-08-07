@@ -10,7 +10,7 @@
 {
     "language": "mn",
     "name": "Mongolian",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
     "provenance": "Authored from Khalkha Mongolian Cyrillic orthography + Svantesson et al. (2005) 'The Phonology of Mongolian'. Referee: en.wiktionary Mongolian IPA (1460 words, narrow/phonetic).",
 
     "convention": {

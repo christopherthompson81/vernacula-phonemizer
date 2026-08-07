@@ -10,7 +10,7 @@
 {
     "language": "cdo",
     "name": "Min Dong (Fuzhou / Eastern Min)",
-    "script": "Latin (Bàng-uâ-cê) + Han",
+    "script": ["Latin", "Han"],
     "initials": {
         "b": "p",
         "p": "pʰ",

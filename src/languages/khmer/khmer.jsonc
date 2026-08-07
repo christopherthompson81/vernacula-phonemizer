@@ -5,7 +5,7 @@
 {
     "language": "km",
     "name": "Khmer",
-    "script": "Khmer",
+    "script": ["Khmer"],
 
     // Base consonant → [onset IPA, series ("a" | "o")]. The series sets the inherent vowel and the vowel-sign reading.
     "consonants": {

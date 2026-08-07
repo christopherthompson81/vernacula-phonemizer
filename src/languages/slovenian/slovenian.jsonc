@@ -11,7 +11,7 @@
 {
     "language": "sl",
     "name": "Slovenian (slovenščina)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored rule-based g2p (Slovak-shaped scan + Slovene l-vocalization / lj-nj / syllabic-r + voicing) from Slovene phonology; the rules derived empirically from the wikipron slv_latn_broad referee (5,177 headwords). No lexicon.",
 
     "convention": {

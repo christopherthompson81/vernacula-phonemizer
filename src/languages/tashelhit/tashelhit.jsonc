@@ -9,7 +9,7 @@
 {
     "language": "shi",
     "name": "Tashelhit (Shilha / Taclḥit)",
-    "script": "Latin (Berber Latin alphabet)",
+    "script": ["Latin"],
     "graphemes": {
         "a": "a",
         "i": "i",

@@ -8,7 +8,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface GreekManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     vowels: Record<string, string>;
     vowelDigraphs: Record<string, string>;
     consonants: Record<string, string>;

@@ -11,7 +11,7 @@
 {
     "language": "umb",
     "name": "Umbundu",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Schadeberg (1982) 'Nasalization in UMbundu' (J. African Langs & Linguistics) — the primary R11 phonology, Table 1 systematic-phonetic inventory — + the Umbundu orthography; ASJP Umbundu-3 corroborated. Referee-scarce (no wikipron/kaikki/epitran/Wiktionary-IPA) → single-source, grammar-grounded gold-anchored.",
 
     "convention": {

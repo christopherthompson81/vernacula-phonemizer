@@ -6,7 +6,7 @@
 {
     "language": "qu",
     "name": "Quechua (Runasimi)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Scanned LONGEST-FIRST. Trigraphs: aspirated/ejective affricate ⟨chh ch'⟩. Digraphs: the plain affricate
     // ⟨ch⟩, the aspirated stops ⟨ph th kh qh⟩, the ejective stops ⟨p' t' k' q'⟩, the palatals ⟨ll⟩→ʎ and the

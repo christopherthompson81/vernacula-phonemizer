@@ -7,7 +7,7 @@
 {
     "language": "hil",
     "name": "Hiligaynon (Ilonggo)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Hiligaynon orthography + phonology (the Bisayan/Tagalog near-phonemic pattern; Cebuano core + Spanish-loan deltas ⟨j⟩→h, ⟨f⟩→p). Calibrated to wikipron hil_latn + kaikki hil (both human).",
 
     "digraphs": { "ng": "ŋ", "ch": "t͡ʃ", "ny": "ɲ", "ts": "t͡s", "ll": "lj", "rr": "ɾ", "gui": "ɡi", "gue": "ɡe", "qui": "ki", "que": "ke" },

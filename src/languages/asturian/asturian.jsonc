@@ -6,7 +6,7 @@
 {
     "language": "ast",
     "name": "Asturian (asturianu)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Digraphs, scanned LONGEST-FIRST: ⟨ll⟩→[ʎ], ⟨ch⟩→[t͡ʃ], ⟨rr⟩→[r] (trill). ⟨qu gu gü⟩ are handled in code
     // (context-dependent), as are the ⟨c⟩→[θ] softening and the ⟨i u⟩ rising glides.

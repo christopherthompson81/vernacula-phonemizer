@@ -7,7 +7,7 @@
 {
     "language": "za",
     "name": "Zhuang (Vahcuengh)",
-    "script": "Latin",
+    "script": ["Latin", "Han"],
     "provenance": "Authored from the Standard Zhuang (Wuming) 1982 Latin orthography + phonology. Referees: wikipron zha_latn broad + kaikki Zhuang.",
 
     "convention": {

@@ -9,7 +9,7 @@ import type { E5xNumberTable } from "../kikuyu/e5xNumbers.ts";
 export interface KambaManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
     /** The cardinal number words (the citation/counting series) — the composer is the shared E5x algorithm. */

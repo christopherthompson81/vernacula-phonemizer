@@ -29,7 +29,7 @@ export interface RwandaRundiNumbers {
 export interface KinyarwandaManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: RwandaRundiNumbers;

@@ -9,7 +9,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface MongolianManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     vowels: Record<string, string>;
     longVowels: Record<string, string>;
     diphthongs: Record<string, string>;

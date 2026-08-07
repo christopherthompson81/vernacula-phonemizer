@@ -6,7 +6,7 @@
 {
     "language": "mt",
     "name": "Maltese (Malti)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Single grapheme → canonical IPA. ⟨h⟩ (silent medial / [ħ] final), ⟨għ⟩ (silent), ⟨ie⟩ (long ɪ) are handled in
     // maltese.ts. The distinctive Maltese letters: ⟨ċ⟩→t͡ʃ, ⟨ġ⟩→d͡ʒ, ⟨ħ⟩→ħ, ⟨q⟩→ʔ, ⟨x⟩→ʃ, ⟨z⟩→t͡s vs ⟨ż⟩→z.

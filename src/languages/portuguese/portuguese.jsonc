@@ -22,7 +22,7 @@
 
     "language": "pt",
     "name": "Portuguese (European, pt-PT)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from European Portuguese orthography + phonology (largely rule-governed). This file IS the language data — the native rule engine reads it directly. The two genuinely-lexical axes (stressed mid-vowel quality, grapheme x) are patched from a wikipron-derived correction lexicon (lexicon.tsv).",
 
     "convention": {

@@ -7,7 +7,7 @@
 {
     "language": "gu",
     "name": "Gujarati",
-    "script": "Gujarati",
+    "script": ["Gujarati"],
     "provenance": "Authored from the Unicode Gujarati chart + standard Gujarati phonology. Reuses the generic abugida engine + the Hindi orchestration with Gujarati Unicode.",
 
     "inherentVowel": "ə",

@@ -6,7 +6,7 @@
 {
     "language": "sd",
     "name": "Sindhi",
-    "script": "Arabic",
+    "script": ["Arabic"],
     "provenance": "Authored from standard Sindhi (Perso-Arabic) orthography + phonology; cross-checked vs kaikki + wikipron snd.",
 
     "consonants": {

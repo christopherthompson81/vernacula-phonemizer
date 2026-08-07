@@ -9,7 +9,7 @@
 {
     "language": "as",
     "name": "Assamese",
-    "script": "Bengali",
+    "script": ["Bengali"],
     "provenance": "Authored from the Unicode Bengali-Assamese chart + standard Assamese phonology. Reuses the Bengali G2P engine (shared Eastern-Indic harmony + deletion) with Assamese phoneme values — the signature x-fricative, deaffrication, and alveolar merger.",
 
     // Assamese inherent vowel is /ɔ/ (as Bengali). Assamese does NOT share Bengali's ɔ→o height harmony (the

@@ -12,7 +12,7 @@
 {
     "language": "sn",
     "name": "Shona (chiShona)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the Standard Shona (Zezuru) orthography + phonology (Wikipedia Shona phonology; Doke). Referee: epitran sna-Latn.",
 
     "convention": {

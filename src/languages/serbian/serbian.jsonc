@@ -7,7 +7,7 @@
 {
     "language": "sr",
     "name": "Serbian (српски)",
-    "script": "Cyrillic/Latin",
+    "script": ["Cyrillic", "Latin"],
     "provenance": "Authored from Serbian phonemic orthography (both scripts) + standard phonology. Fully phonemic (one grapheme = one phoneme). Referees: wikipron hbs (Serbo-Croatian) latin + cyrillic + epitran srp-Latn.",
 
     "convention": {

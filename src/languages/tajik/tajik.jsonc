@@ -12,7 +12,7 @@
 {
     "language": "tg",
     "name": "Tajik",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
     "provenance": "Authored from the Tajik Cyrillic orthography + standard Tajik (Persian) phonology — a shallow, near-phonemic alphabet, so the native Cyrillic G2P reads this manifest directly. Validated against wikipron tgk_cyrl (broad + narrow, human) and epitran tgk-Cyrl. No short-vowel restoration is needed (Cyrillic writes the vowels), unlike the fa abjad.",
 
     "convention": {

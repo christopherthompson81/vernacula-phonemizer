@@ -6,7 +6,7 @@
 {
     "language": "su",
     "name": "Sundanese",
-    "script": "Latin",
+    "script": ["Latin", "Sundanese"],
     "provenance": "Authored from the modern Sundanese Latin orthography + standard Sundanese phonology; cross-checked vs kaikki su (the only referee).",
 
     // Digraphs (tried longest-first): the central vowel ⟨eu⟩→[ɨ], ng→[ŋ], ny→[ɲ]. (kh/sy for loans.)

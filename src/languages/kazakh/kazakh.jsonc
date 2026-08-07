@@ -10,7 +10,7 @@
 {
     "language": "kk",
     "name": "Kazakh",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
 
     "convention": {
         "eInitial": "word-initial е → je (ел→jel); elsewhere e",

@@ -5,7 +5,7 @@
 {
     "language": "mi",
     "name": "Māori (te reo Māori)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // The two digraphs, scanned LONGEST-FIRST: ⟨wh⟩→[ɸ] (a bilabial fricative), ⟨ng⟩→[ŋ] (a velar nasal).
     "digraphs": { "wh": "ɸ", "ng": "ŋ" },

@@ -9,7 +9,7 @@
 {
     "language": "ilo",
     "name": "Ilocano (Iloko)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Ilocano orthography + phonology (Philippine near-phonemic pattern; high-vowel gliding hiatus + geminates). Calibrated to wikipron ilo_latn + kaikki ilo + epitran ilo-Latn.",
 
     "digraphs": { "ng": "ŋ", "ts": "t͡s", "gui": "ɡi", "gue": "ɡe", "qui": "ki", "que": "ke" },

@@ -9,7 +9,7 @@ import type { NumbersDef } from "../../core/numbers.ts";
 export interface UyghurManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     graphemes: Record<string, string>;
     /** Turkic cardinal number spellings (Uyghur Arabic); composed by uyghur.ts, phonemized by the same g2p. */
     numbers: NumbersDef;

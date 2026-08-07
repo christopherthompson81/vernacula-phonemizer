@@ -7,7 +7,7 @@
 {
     "language": "nan",
     "name": "Min Nan (Taiwanese Hokkien)",
-    "script": "Latin (Tâi-lô/POJ) + Han",
+    "script": ["Latin", "Han"],
 
     // Onset consonants → IPA. The four sibilants have PALATALISED allophones before i (handled in minnan.ts):
     // ts→t͡ɕ, tsh→t͡ɕʰ, s→ɕ, j→d͡ʑ.

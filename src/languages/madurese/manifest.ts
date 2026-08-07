@@ -9,7 +9,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface MadureseManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     raiseCons: Record<string, string>;
     lowCons: Record<string, string>;
     transpCons: Record<string, string>;

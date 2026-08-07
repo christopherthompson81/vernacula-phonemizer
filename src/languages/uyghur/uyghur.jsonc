@@ -11,7 +11,7 @@
 {
     "language": "ug",
     "name": "Uyghur (Uyghurche)",
-    "script": "Arabic",
+    "script": ["Arabic"],
     "provenance": "Authored greedy letter→IPA g2p from the Uyghur Arabic alphabet. Referees: wikipron uig_arab_broad (human) + epitran uig-Arab.",
 
     "convention": {

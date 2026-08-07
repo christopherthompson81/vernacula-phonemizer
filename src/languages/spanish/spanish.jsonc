@@ -20,7 +20,7 @@
 
     "language": "es",
     "name": "Spanish (broad Castilian)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Spanish orthography + phonology (shallow, near-deterministic). This file IS the language data — the native rule engine reads it directly. No lexicon.",
 
     "convention": {

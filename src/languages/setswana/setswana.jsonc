@@ -18,7 +18,7 @@
 {
     "language": "tn",
     "name": "Setswana (Tswana)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the Setswana orthography + Mistry (Cole 1955) phonology. Referee: epitran tsn-Latn.",
 
     "convention": {

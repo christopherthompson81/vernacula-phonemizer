@@ -13,7 +13,7 @@
 {
     "language": "ki",
     "name": "Kikuyu (Gĩkũyũ)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p from the Kikuyu Latin orthography; mapping derived directly from the 1062-word en.wiktionary Kikuyu IPA referee. Phonology per Wikipedia + the Englebretson Gĩkũyũ sketch grammar.",
 
     "convention": {

@@ -14,7 +14,7 @@
 {
     "language": "ca",
     "name": "Catalan (General Eastern / Central)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Catalan orthography + Central-Catalan phonology (Wheeler, The Phonology of Catalan). Rule engine, no lexicon; the wikipron cat referee is a fallible cross-check. Stressed open/close mids default and are folded in the eval (lexical ceiling).",
 
     "convention": {

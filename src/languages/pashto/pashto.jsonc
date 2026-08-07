@@ -7,7 +7,7 @@
 {
     "language": "ps",
     "name": "Pashto",
-    "script": "Arabic (Perso-Arabic, extended)",
+    "script": ["Arabic"],
     "provenance": "Authored from the Unicode Arabic/Pashto chart + standard (Kandahari/literary) Pashto phonology. Validated against wikipron pus + kaikki pus (human).",
 
     // Consonant letters → canonical IPA. Dental t̪/d̪ (ت/ط, د), retroflex ʈ ɖ ɳ ɻ (ټ ډ ڼ ړ), retroflex sibilants

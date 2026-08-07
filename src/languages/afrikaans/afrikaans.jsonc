@@ -8,7 +8,7 @@
 {
     "language": "af",
     "name": "Afrikaans",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p for Standard Afrikaans. Referee: en.wiktionary Afrikaans IPA (2220 words).",
 
     "convention": {

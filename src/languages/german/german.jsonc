@@ -17,6 +17,7 @@
     ],
 
     "language": "de",
+    "script": ["Latin"],
     "name": "German (standard / Hochdeutsch)",
     "provenance": "Cleanroom, rule-based g2p + a pronunciation lexicon (lexicon.tsv) + morphological compound/affix analysis + a vigesimal-free number compositor. The affix IPA, the exception word-lists, and the number words are language facts.",
 

@@ -11,7 +11,7 @@
 {
     "language": "el",
     "name": "Greek (Ελληνικά)",
-    "script": "Greek",
+    "script": ["Greek"],
     "provenance": "Authored from Modern Greek orthography↔phonology. Referees: wikipron ell_grek + kaikki Greek.",
 
     // Single vowel letters → sound (a/e/i/o/u). Front sounds e/i trigger velar palatalisation.

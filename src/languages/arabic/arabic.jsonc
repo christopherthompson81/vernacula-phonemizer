@@ -9,6 +9,7 @@
 // "clausePunctuation", "numbers", "diacritizer". "convention" / "provenance" are self-describing documentation.
 {
     "language": "ar",
+    "script": ["Arabic"],
     "name": "Arabic (Modern Standard)",
     "provenance": "Cleanroom, rule-based g2p + number compositor (no lexicon). WHICH consonants/letters map where and the number words are language facts. The neural diacritizer MODEL is separately + permissively sourced (CATT teacher Apache-2.0 → Arabic Wikipedia CC-BY-SA silver, no NC/GPL) — see diacritizer.PROVENANCE.md.",
 

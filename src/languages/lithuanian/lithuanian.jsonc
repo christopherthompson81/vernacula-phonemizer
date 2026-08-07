@@ -12,7 +12,7 @@
 {
     "language": "lt",
     "name": "Lithuanian (lietuvių)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored rule-based g2p from Lithuanian orthography (Wikipedia Lithuanian phonology / Help:IPA/Lithuanian + Cambridge JIPA Standard Lithuanian); vowel values + the palatalization/voicing rules validated against the wikipron lit_latn_narrow referee (HUMAN, 15,513 words).",
 
     // Vowels → phonemic IPA (short quality; the stressed-long ɑː/æː realisations are folded in the eval).

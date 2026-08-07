@@ -7,7 +7,7 @@
 {
     "language": "hr",
     "name": "Croatian",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Croatian cardinal number words. units/teens/tens are identical to Serbian; the deltas are: hundreds
     // dvjesto/tristo (vs dvesta/trista), thousand tisuća (vs hiljada), million milijun (vs milion).

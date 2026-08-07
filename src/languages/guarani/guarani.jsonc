@@ -7,7 +7,7 @@
 {
     "language": "gn",
     "name": "Guaraní (Avañe'ẽ)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Scanned LONGEST-FIRST. Prenasalized stops ⟨mb nd nt⟩; ⟨ng⟩→plain [ŋ]; ⟨ch⟩→ʃ; ⟨gu⟩→w (labiovelar); ⟨rr⟩ trill.
     "digraphs": {

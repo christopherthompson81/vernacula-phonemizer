@@ -6,6 +6,7 @@
 // sandhi rules, and numbers.
 {
     "language": "cmn",
+    "script": ["Han"],
     "name": "Mandarin Chinese (Standard, Hanyu Pinyin)",
 
     "convention": {

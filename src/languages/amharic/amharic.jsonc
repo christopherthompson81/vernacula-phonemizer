@@ -8,7 +8,7 @@
 {
     "language": "am",
     "name": "Amharic",
-    "script": "Ethiopic (Ge'ez / Fidäl)",
+    "script": ["Ethiopic"],
     "provenance": "Fidel→CV syllabary from the epitran amh-Ethi map (Apache-2.0) + guttural 1st-order fix; numbers/phonology authored from standard Amharic.",
 
     "clausePunctuation": {

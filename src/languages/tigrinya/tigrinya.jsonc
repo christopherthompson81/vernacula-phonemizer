@@ -14,7 +14,7 @@
 {
     "language": "ti",
     "name": "Tigrinya",
-    "script": "Ethiopic (Ge'ez / Fidäl)",
+    "script": ["Ethiopic"],
     "provenance": "Fidel→CV syllabary adapted from the Amharic table with the Tigrinya guttural restoration (ħ/ʕ/ʔ/x) and central guttural-1st vowel, calibrated to kaikki tir (human) + epitran tir-Ethi; numbers authored from standard Tigrinya.",
 
     "clausePunctuation": {

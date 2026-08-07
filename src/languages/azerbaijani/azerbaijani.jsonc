@@ -6,7 +6,7 @@
 {
     "language": "az",
     "name": "Azerbaijani (North, Latin)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Azerbaijani orthography + phonology (shallow, near-1:1; vowel harmony is already spelled). This file IS the language data — the native rule engine reads it directly. The Oghuz sibling of Turkish, sharing the scan shape.",
 
     "convention": {

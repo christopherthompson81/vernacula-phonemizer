@@ -12,7 +12,7 @@
 {
     "language": "nya",
     "name": "Chichewa (Chinyanja)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the Chichewa orthography + phonology. Referees: wikipron nya_latn + kaikki + epitran nya-Latn.",
 
     "convention": {

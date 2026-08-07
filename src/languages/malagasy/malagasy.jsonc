@@ -6,7 +6,7 @@
 {
     "language": "mg",
     "name": "Malagasy (Standard, Merina)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Malagasy orthography + published phonology (Merina/Official Malagasy). Shallow near-phonemic g2p; the referees (wikipron + kaikki, both Wiktionary-derived, ~200 words, narrow) are a folded regression anchor, not independent triangulation → single-source ().",
 
     "convention": {

@@ -6,7 +6,7 @@
 {
     "language": "ur",
     "name": "Urdu",
-    "script": "Arabic (Nastaʿlīq)",
+    "script": ["Arabic"],
     "provenance": "Authored from the Unicode Arabic/Urdu chart + standard Urdu (= Hindi) phonology. This file IS the language data — the g2p reads it directly.",
 
     // Unambiguous consonant letters → canonical IPA.

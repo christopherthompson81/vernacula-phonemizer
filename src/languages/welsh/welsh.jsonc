@@ -7,7 +7,7 @@
 {
     "language": "cy",
     "name": "Welsh (Cymraeg)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Welsh orthography + phonology (the standard penultimate-stress + vowel-length system), bootstrapped over a 50k frequency corpus with the ə/ɨ y-vowel values (not ʌ/ø). wikipron cym (NW, dialect-matched) is the independent cross-check.",
 
     // Digraphs (resolved before single letters). ⟨si⟩+V → ʃ is handled in code (needs a following vowel).

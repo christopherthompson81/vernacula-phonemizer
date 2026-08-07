@@ -6,7 +6,7 @@
 {
     "language": "uz",
     "name": "Uzbek",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the modern Uzbek Latin orthography + standard Uzbek phonology; cross-checked vs wikipron uzb_latn + kaikki + epitran uzb-Latn.",
 
     // Single vowels. ⟨o⟩ is the open back [ɒ] (Eron→erɒn); ⟨oʻ⟩ (a digraph below) is the close-mid [o].

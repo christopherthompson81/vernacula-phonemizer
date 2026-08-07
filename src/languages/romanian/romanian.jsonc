@@ -5,7 +5,7 @@
 {
     "language": "ro",
     "name": "Romanian",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Romanian orthography + phonology. Validated against wikipron ron_latn broad (human). This file IS the language data — the g2p reads it directly.",
 
     // Simple (context-free) consonant letters → IPA. c/g are handled contextually in the g2p and are NOT here.

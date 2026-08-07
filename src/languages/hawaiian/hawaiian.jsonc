@@ -6,7 +6,7 @@
 {
     "language": "haw",
     "name": "Hawaiian (ʻŌlelo Hawaiʻi)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Single grapheme → canonical IPA. The 5 vowels + their MACRON (long) forms; the 8 native consonants; the
     // ʻOKINA ⟨ʻ⟩ (and its ASCII/Unicode variants ' ʼ ‘ `) → the glottal stop [ʔ]; and the LOAN-LETTER adaptations

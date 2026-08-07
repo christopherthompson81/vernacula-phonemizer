@@ -8,7 +8,7 @@
 {
     "language": "ml",
     "name": "Malayalam",
-    "script": "Malayalam",
+    "script": ["Malayalam"],
     "provenance": "Authored from the Unicode Malayalam chart + standard Malayalam phonology. This file IS the language data — the generic abugida engine reads it directly.",
 
     "inherentVowel": "a",

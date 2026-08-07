@@ -7,7 +7,7 @@
 {
     "language": "ln",
     "name": "Lingala",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Meeuwis (2020) 'A Grammatical Overview of Lingála' (Revised & Extended Edition); validated against the kaikki Lingala human readings (tone + prenasalisation).",
 
     // Consonant graphemes (the greedy scan tries digraphs before singles). Prenasalised voiced clusters →

@@ -7,7 +7,7 @@
 {
     "language": "hy",
     "name": "Armenian",
-    "script": "Armenian",
+    "script": ["Armenian"],
     "provenance": "Authored from the Eastern Armenian alphabet + standard phonology; cross-checked vs wikipron hye_armn_e broad (18090).",
 
     // Vowels. ⟨ե⟩→e and ⟨ո⟩→o here are the BARE (non-initial) values; the word-initial [j]/[v] onset is added in code.

@@ -6,7 +6,7 @@
 {
     "language": "et",
     "name": "Estonian (eesti keel)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Grapheme → canonical IPA. ⟨b d g⟩ are the VOICELESS-LENIS stops (Estonian has no true voiced stops); the referee
     // writes the devoicing ring b̥/d̥/ɡ̊ which the BACKBONE strips, so we emit plain b/d/ɡ. The 9 vowels incl. õ→ɤ.

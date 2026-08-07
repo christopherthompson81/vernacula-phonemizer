@@ -9,7 +9,7 @@
 {
     "language": "bs",
     "name": "Bosnian",
-    "script": "Latin + Cyrillic",
+    "script": ["Latin", "Cyrillic"],
 
     // Bosnian cardinal number words. units/teens/tens are identical to Serbian/Croatian; the deltas from Serbian are
     // just the ijekavian hundreds dvjesta (vs ekavian dvesta) — Bosnian keeps the Serbian hiljada/milion (vs Croatian

@@ -16,7 +16,7 @@
 {
     "language": "bal",
     "name": "Balochi (Southern)",
-    "script": "Arabic (Balochi)",
+    "script": ["Arabic", "Latin"],
     "provenance": "Authored from Jahani & Korn (2009), 'Balochi', The Iranian Languages, Tables 11.1/11.2/11.6 (Southern Balochi, Pakistan alphabet). No machine referee — hand-gold on the sourced inventory. cannot-verify (defective vowel encoding).",
 
     "consonants": {

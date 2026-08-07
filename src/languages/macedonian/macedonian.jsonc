@@ -7,7 +7,7 @@
 {
     "language": "mk",
     "name": "Macedonian (македонски)",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
 
     // Cyrillic letter → canonical IPA. ⟨л⟩ (dark-l rule) and syllabic ⟨р⟩ are handled in macedonian.ts, not here.
     "letters": {

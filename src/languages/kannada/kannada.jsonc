@@ -6,7 +6,7 @@
 {
     "language": "kn",
     "name": "Kannada",
-    "script": "Kannada",
+    "script": ["Kannada"],
     "provenance": "Authored from the Unicode Kannada chart + standard Kannada phonology. This file IS the language data — the generic abugida engine reads it directly.",
 
     "inherentVowel": "a",
