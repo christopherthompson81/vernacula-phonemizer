@@ -4,7 +4,7 @@ import { phonemizeWord } from "../src/languages/uyghur/uyghur.ts";
 
 // Canonical-IPA goldens for Uyghur / ئۇيغۇرچە (ug) — Turkic (Karluk), the Uyghur Arabic alphabet (a FULL phonemic
 // alphabet — all 8 vowels written, so no short-vowel restoration). Hand-adjudicated against wikipron uig_arab_broad
-// (human, 2673). The greedy letter→IPA g2p + final-stop devoicing scores 98.2% folded vs the referee. Signatures:
+// (human, 2673) refereeing the greedy letter→IPA g2p + final-stop devoicing. Signatures:
 // ا→ɑ (back a), ە→ɛ, the hamza ئ→ʔ (glottal onset), ⟨چ ج⟩→t͡ʃ d͡ʒ, ⟨غ⟩→ʁ, ⟨خ⟩→χ, ⟨ق⟩→q, ⟨ف⟩→p (nativised).
 describe("Uyghur canonical IPA — greedy letter g2p", () => {
     test("vowels ا→ɑ / ە→ɛ, the hamza ئ→ʔ glottal onset, ⟨غ⟩→ʁ", () => {

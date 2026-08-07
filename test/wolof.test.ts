@@ -4,8 +4,7 @@ import { createWolof, phonemizeWord } from "../src/languages/wolof/wolof.ts";
 import { numberToWords } from "../src/languages/wolof/numbers.ts";
 
 // Canonical-IPA goldens for Wolof / Wolof (wo) — Atlantic-Congo (Senegambian), Latin orthography, NON-tonal.
-// Hand-adjudicated against kaikki Wolof (Wiktionary). The greedy g2p + gemination scores 97.1% folded vs the
-// referee (tools/referee-eval, 69 words) — the folds strip stress, syllable dots, and the variable word-initial
+// Hand-adjudicated against kaikki Wolof (Wiktionary). ⚠ The referee is 69 words (tools/referee-eval) — the folds strip stress, syllable dots, and the variable word-initial
 // glottal onset. Signatures: ATR vowels (⟨e⟩=ɛ / ⟨é⟩=e, ⟨o⟩=ɔ / ⟨ó⟩=o, ⟨ë⟩=ə, ⟨à⟩=aː), DOUBLING = length /
 // gemination, the palatal STOPS ⟨c⟩=c / ⟨j⟩=ɟ. Numbers are QUINARY (see below); the Arabic (Wolofal) /
 // Garay scripts are deferred.

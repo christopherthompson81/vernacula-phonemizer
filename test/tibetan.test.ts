@@ -7,8 +7,8 @@ import { getPhonemizer } from "../src/registry.ts";
 // and ONE OF THE DEEPEST orthographies in the world. Classical spelling encodes Old Tibetan; the Lhasa reading is a
 // syllable-stack rule engine: TONE from tonogenesis (˥ high / ˩ low), SILENT prefixes/superscripts, onset-cluster
 // realization (ya-btags→palatal, ra-btags→retroflex affricate, subjoined-ha→ɬ), and suffix-driven vowel UMLAUT
-// (a→ɛ o→ø u→y) / LENGTH / NASALIZATION / GLOTTALIZATION. Validated at 97.5% vs the INDEPENDENT hand-curated JIPA
-// 'Central Tibetan (Lhasa)' illustration; 100% coverage on 300k independent TIBMD Lhasa tokens.
+// (a→ɛ o→ø u→y) / LENGTH / NASALIZATION / GLOTTALIZATION. Referee: the INDEPENDENT hand-curated JIPA
+// 'Central Tibetan (Lhasa)' illustration, with full coverage over 300k independent TIBMD Lhasa tokens.
 describe("Tibetan (Standard/Lhasa) canonical IPA", () => {
     test("tonogenesis: voiceless→HIGH ˥, voiced-obstruent→LOW ˩ + aspiration, sonorant tone", () => {
         expect(phonemizeWord("ཁ")).toBe("kʰa˥"); // kha — voiceless aspirate, HIGH
@@ -74,7 +74,7 @@ describe("Tibetan (Standard/Lhasa) canonical IPA", () => {
     });
 });
 
-// ASCII digit runs are now composed too (previously only the Tibetan digits ༠–༩ were tokenized, so "21" was
+// ASCII digit runs are composed too (⚠ tokenizing only the Tibetan digits ༠–༩ means "21" was
 // dropped), and the magnitude ladder runs to 10⁹: བརྒྱ 10² · སྟོང 10³ · ཁྲི 10⁴ · འབུམ 10⁵ · ས་ཡ 10⁶ · བྱེ་བ 10⁷ ·
 // དུང་ཕྱུར 10⁸ · ཐེར་འབུམ 10⁹ (Wikipedia "Tibetan numerals"). Every numeral below is phonemized by the ordinary
 // syllable-stack engine — these goldens are what that engine actually reads out of the spellings.
@@ -89,7 +89,7 @@ describe("Tibetan (bo) cardinal numbers — ASCII digits + the full magnitude la
         [100, "kʲa˩"], // བརྒྱ — multiplier 1 unspoken
         [1000, "toŋ˥"], // སྟོང
         [12345, "ʈ͡ʂʰi˥taŋ˥ɲiː˥toŋ˥taŋ˥sum˥kʲa˥taŋ˥ɕe˥ŋa˥"], // ཁྲི 10⁴, remainders joined with དང dang
-        [1000000, "sa˥ja˥"], // ས་ཡ sa ya 10⁶ — previously fell back to leaking the digits
+        [1000000, "sa˥ja˥"], // ས་ཡ sa ya 10⁶ — without it the tier falls back to leaking the digits
     ] as const) {
         test(`${n} → ${ipa}`, () => {
             expect(num(n)).toBe(ipa);

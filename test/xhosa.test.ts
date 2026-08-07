@@ -7,8 +7,8 @@ import { phonemize } from "../src/index.ts";
 // Canonical-IPA goldens for Xhosa / isiXhosa (xh) — Nguni Bantu, AUTHORED. The sibling of Zulu:
 // it REUSES the shared Zulu g2p scan (the 15-way click series, depressor consonants, implosive b→ɓ, ejective
 // stops) with the Xhosa rule table — the one addition being ⟨rh⟩→[x] (voiceless velar fricative, Zulu lacks it).
-// Nguni penultimate stress with vowel lengthening (ˈ + ː); tone is lexical/unwritten → deferred. Validated at
-// 90.0% vs wikipron xho narrow + 80.2% vs epitran.
+// Nguni penultimate stress with vowel lengthening (ˈ + ː); tone is lexical/unwritten → deferred.
+// Referees: wikipron xho narrow + epitran.
 describe("Xhosa canonical IPA", () => {
     test("clicks (c/q/x → kǀ/kǃ/kǁ, xh→kǁʰ) + penult stress/length", () => {
         expect(phonemizeWord("xhosa")).toBe("kǁʰˈɔːsa"); // xh → kǁʰ (aspirated lateral click)
@@ -53,7 +53,7 @@ describe("Xhosa canonical IPA", () => {
 // TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances :
 // every rule with a table plus a fallback gets one case from each side, and the cases the corpus does NOT
 // contain (a capitalised ordinal suffix, `°F`, `00:30`, an out-of-range hour, a comma decimal) are pinned
-// deliberately, because zero corpus instances is not evidence of correctness .
+// deliberately, because zero corpus instances is not evidence of correctness.
 describe("Xhosa text normalization", () => {
     test("thousands de-grouping — comma, space, and the two shapes that must NOT de-group", () => {
         expect(normalizeXhosa("eziyi-3,850")).toBe("eziyi-3850");
@@ -153,7 +153,7 @@ describe("Xhosa text normalization", () => {
         expect(normalizeXhosa("amaqondo angaphezulu kwe +30°C aqhelekile."))
             .toBe("amaqondo angaphezulu kwe plas 30 aqhelekile.");
         // A leading MINUS on a temperature is a real negative and is read — 0 corpus instances, pinned as
-        // the adversarial neighbour .
+        // the adversarial neighbour.
         expect(normalizeXhosa("(-30°C)")).toBe("(thabatha amaqondo 30)");
         // …but the sign capture is letter-guarded, because Xhosa's CONCORD hyphen looks exactly like a
         // minus. Unguarded, this ordinary spelling read *kwi thabatha amaqondo 30* — "in minus thirty".

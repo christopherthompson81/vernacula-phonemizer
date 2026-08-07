@@ -8,8 +8,8 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Ukrainian / українська (uk) — East Slavic, Cyrillic. Ukrainian has NO vowel
 // reduction, so the g2p is a flat scan (no stress dictionary). Signatures: г→[ɦ] (vs Russian ɡ), dark л→[ɫ], в
 // as /w/ with allophony ([w] before о/у + coda, [ʋ] before а/е/и, [ʋʲ] before і), PALATALISATION (Cʲ before ь/і/
-// iotated) + REGRESSIVE palatalisation (a coronal before a palatalised consonant). Validated at 95.1% vs
-// wikipron ukr_cyrl narrow (50k, human).
+// iotated) + REGRESSIVE palatalisation (a coronal before a palatalised consonant).
+// Referee: wikipron ukr_cyrl narrow (50k, human).
 describe("Ukrainian canonical IPA", () => {
     test("г→ɦ (the Ukrainian hallmark), dark л→ɫ, palatalisation", () => {
         expect(phonemizeWord("голова")).toBe("ɦɔɫɔʋa"); // г→ɦ, dark ɫ, medial в→ʋ

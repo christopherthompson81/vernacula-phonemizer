@@ -166,8 +166,8 @@ describe("Zulu text normalization", () => {
 
     it("square miles, degrees, and the compass — the click letters the ° left behind", () => {
         expect(normalizeZulu("(300,948 sq mi)")).toBe("(300948 amamayela skwele)"); // `sq` read as [skǃ]
-        // The plus is now VOICED: the degree pattern used to open with `[+]?`, matching the sign and
-        // never re-emitting it, so `+30°C` lost it silently. `plas` is sourced (step 14b) and the sign is
+        // ⚠ A DEGREE PATTERN THAT OPENS WITH `[+]?` MATCHES THE SIGN AND NEVER RE-EMITS IT, so `+30°C` loses
+        // it silently — the same shape sw's `([+-]?)` had. `plas` is sourced (step 14b) and the sign is
         // claimed at step 8c, BEFORE degrees — after the degree rewrite the text reads `+amazinga…` and the
         // sign step needs a digit after the sign, so ordering is what makes it reachable.
         expect(normalizeZulu("kuka-+30°C")).toBe("kuka- plas amazinga angu-30"); // C alone read as the click [kǀ]

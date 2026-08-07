@@ -4,7 +4,7 @@ import { phonemizeWord } from "../src/languages/tajik/tajik.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Tajik / тоҷикӣ (tg) — Iranian (SW), a Persian variety in the CYRILLIC alphabet. Verified against wikipron
-// tgk_cyrl broad (human, PRIMARY, 98.1% folded) + narrow (human) + epitran. Cyrillic writes all vowels → no
+// tgk_cyrl broad (human, PRIMARY) + narrow (human) + epitran. Cyrillic writes all vowels → no
 // short-vowel restoration (unlike the fa abjad).
 describe("Tajik canonical IPA (Cyrillic Persian, near-phonemic)", () => {
     test("six-vowel system: о→ɔ (Persian ā), ӯ→ɵ, а→a", () => {

@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Uzbek / oʻzbekcha (uz) — Turkic, modern LATIN orthography. Uzbek is the Turkic
 // outlier that LOST vowel harmony (Persian/Tajik contact), so the g2p is a flat scan with fixed letter values.
 // Signature: the vowel split ⟨o⟩→[ɒ] vs ⟨oʻ⟩→[o]; digraphs sh/ch/ng + the comma-letters oʻ/gʻ; the separate
-// tutuq belgisi (ʼ) → glottal [ʔ]. Validated at 91.3% vs wikipron uzb_latn + 87.1% vs kaikki (folded).
+// tutuq belgisi (ʼ) → glottal [ʔ]. Referees: wikipron uzb_latn + kaikki.
 describe("Uzbek canonical IPA", () => {
     test("the vowel split ⟨o⟩→[ɒ] vs ⟨oʻ⟩→[o] (the signature)", () => {
         expect(phonemizeWord("Oʻzbekiston")).toBe("ozbekistˈɒn"); // oʻ→o, o→ɒ in one word
