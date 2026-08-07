@@ -368,7 +368,6 @@ export function normalizePolish(input: string): string {
     s = s.replace(/(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
 
     // 10b) THE RELATIONAL AND DIVISION SIGNS.
-    s = s.replace(/±/gu, " plus minus ");
 
     //      ⚠ POLISH IS WHERE THE REGISTER RESTRICTION MADE THE ANSWER WORSE, and that is the finding worth
     //      keeping. `attest.ts --context "matematyka arytmetyka dzielenie"` returned `równa się` ABSENT — because
