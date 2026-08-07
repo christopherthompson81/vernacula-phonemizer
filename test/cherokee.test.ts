@@ -5,11 +5,11 @@ import { phonemizeWord } from "../src/languages/cherokee/cherokee.ts";
 import { numberToWords } from "../src/languages/cherokee/numbers.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
-// Canonical-IPA goldens for Cherokee / ᏣᎳᎩ (chr) — Iroquoian (the fleet's FIRST), the Cherokee syllabary.
-// AUTHORED from Montgomery-Anderson, *A Reference Grammar of Oklahoma*. The syllabary is a SHALLOW PHONEMIC
+// Canonical-IPA goldens for Cherokee / ᏣᎳᎩ (chr) — Iroquoian, the Cherokee syllabary. AUTHORED from
+// Montgomery-Anderson, *A Reference Grammar of Oklahoma Cherokee*. ⚠ The syllabary is a SHALLOW PHONEMIC
 // SKELETON — it marks no tone, length, aspiration, glottal stop or intrusive-h — so these goldens are the
-// SEGMENTAL melody (obstruents phonemically VOICELESS: aspiration-not-voicing). Both referees (wikipron
-// chr_cher_broad + kaikki) corroborate at ~91% folded / ~97% symbol.
+// SEGMENTAL melody only (obstruents phonemically VOICELESS: aspiration-not-voicing).
+// Referees: wikipron chr_cher_broad + kaikki.
 describe("Cherokee (ᏣᎳᎩ) canonical IPA", () => {
     test("core words", () => {
         expect(phonemizeWord("ᏣᎳᎩ")).toBe("t͡salaki"); // 'Cherokee' — Ꮳtsa Ꮃla Ꭹgi; ⟨ts⟩=[t͡s], g-series=[k]

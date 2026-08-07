@@ -32,7 +32,7 @@ describe("cantonese canonical IPA", () => {
     });
 });
 
-// text normalization. Counts in the comments are instances in FLEURS yue_hant_hk (1,726 utterances);
+// TEXT NORMALIZATION. Counts in the comments are instances in FLEURS yue_hant_hk (1,726 utterances);
 // the rules and the ordering they depend on are documented in src/languages/cantonese/normalize.ts.
 describe("cantonese text normalization", () => {
     const yue = (s: string): string => phonemize(s, "yue");

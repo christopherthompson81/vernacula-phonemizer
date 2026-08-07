@@ -9,10 +9,11 @@ import { numberToWords } from "../src/languages/chichewa/numbers.ts";
 // Sources: Omniglot "Numbers in Chichewa" for the tens (60 = makumi asanu ndi limodzi); Wiktionary for the
 // magnitude nouns and their classes (zana cl.5 / mazana cl.6 = hundred; chikwi cl.7 / zikwi cl.8 = thousand).
 //
-// THE REGRESSION THIS LOCKS DOWN: the tens multiplier must take the CLASS-6 concord of makumi (limodzi, awiri,
-// atatu, anayi) while a trailing unit keeps its class-8/10 citation form (chimodzi, ziwiri, …). The old compositor
-// used one series for both, so 60 came out as *makumi zisanu ndi chimodzi — byte-identical to 51 — and likewise
-// 70=52, 80=53, 90=54. See src/languages/chichewa/numbers.ts.
+// ⚠ THE TENS MULTIPLIER AND A TRAILING UNIT TAKE DIFFERENT CONCORDS, and collapsing them to one series is
+// SILENT: the multiplier needs the CLASS-6 concord of makumi (limodzi, awiri, atatu, anayi) while a trailing
+// unit keeps its class-8/10 citation form (chimodzi, ziwiri, …). Use one series for both and 60 composes to
+// *makumi zisanu ndi chimodzi — byte-identical to 51, with 70=52, 80=53 and 90=54 likewise. Nothing is
+// dropped or malformed; two different numbers simply read the same. See src/languages/chichewa/numbers.ts.
 describe("Chichewa numbers", () => {
     test("units — 6–9 are '5 and N' (class-8/10 citation form)", () => {
         expect(numberToWords(1)).toBe("chimodzi");
@@ -36,7 +37,7 @@ describe("Chichewa numbers", () => {
         expect(numberToWords(70)).toBe("makumi asanu ndi awiri");
         expect(numberToWords(80)).toBe("makumi asanu ndi atatu");
         expect(numberToWords(90)).toBe("makumi asanu ndi anayi");
-        // the class-8/10 unit series keeps 51–54 distinct from 60–90 (the old bug made these pairs identical)
+        // the class-8/10 unit series is what keeps 51–54 distinct from 60–90
         expect(numberToWords(51)).toBe("makumi asanu ndi chimodzi");
         expect(numberToWords(52)).toBe("makumi asanu ndi ziwiri");
         expect(numberToWords(61)).toBe("makumi asanu ndi limodzi ndi chimodzi");

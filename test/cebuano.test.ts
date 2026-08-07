@@ -5,8 +5,8 @@ import { phonemizeWord, createCebuano } from "../src/languages/cebuano/cebuano.t
 // Canonical-IPA goldens for Cebuano / Sinugboanon (ceb) — Philippine (Central Bisayan), the Tagalog near-phonemic
 // pattern: the digraph ⟨ng⟩→ŋ, a WORD-INITIAL glottal [ʔ] before a vowel, a HIATUS glottal between two vowels
 // (kaon→kaʔon), a hyphen→[ʔ], ⟨y⟩→j, penultimate stress (phonemic but unwritten → folded by the eval). The
-// unwritten word-final glottal (bata child [bataʔ] vs robe [bata]) is deferred. Validated at 87.3% vs wikipron
-// ceb broad (native core ~100%; residual is Spanish-surname proper nouns) + 70.0% vs epitran.
+// unwritten word-final glottal (bata child [bataʔ] vs robe [bata]) is deferred. Referees: wikipron ceb broad
+// + epitran. ⚠ The residual is almost entirely Spanish-surname proper nouns, not the native core.
 describe("Cebuano canonical IPA", () => {
     test("word-initial + hiatus glottal stop; ng→ŋ; penult stress", () => {
         expect(phonemizeWord("adlaw")).toBe("ʔˈadlaw"); // word-initial ʔ

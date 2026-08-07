@@ -47,12 +47,12 @@ describe("Czech g2p", () => {
     });
 });
 
-// the normalization layer. Counts measured over the FLEURS cs_cz corpus (column 3).
+// TEXT NORMALIZATION. Counts measured over the FLEURS cs_cz corpus (column 3).
 describe("Czech normalization", () => {
-    // Czech ordinals inflect for CASE, which is what separates this from every earlier language in the
-    // sweep — Norwegian and Danish took one form per number, Icelandic three by gender. The rules key on
-    // the FOLLOWING word, so these pin the recoverable-case heuristics: a later edit to the month list or
-    // the v/ve check would otherwise change readings silently.
+    // ⚠ Czech ordinals inflect for CASE — more than Norwegian/Danish (one form per number) or Icelandic
+    // (three, by gender) need. The rules key on the FOLLOWING word, so these pin the recoverable-case
+    // heuristics: a later edit to the month list or the v/ve check would otherwise change readings
+    // silently.
     it("ordinal case is selected by the following word", () => {
         expect(normalizeCzech("21. století")).toBe("dvacátého prvního století"); // genitive
         expect(normalizeCzech("ve 21. století")).toBe("ve dvacátém prvním století"); // locative after v/ve
