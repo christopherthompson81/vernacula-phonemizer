@@ -5,6 +5,7 @@
  * repetition mark. The letter values, tone marks, number words and the encyclopedic record live in
  * shan.jsonc.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -23,7 +24,6 @@ interface ShanDef {
     unmarkedTone: string;
     palatal: Record<string, string>;
     vowelSigns: Record<string, string>;
-    digits: Record<string, string>;
     numbers: ShanNumbers;
 }
 const DEF = loadManifest<ShanDef>(import.meta.url, "shan.jsonc");
@@ -160,8 +160,6 @@ function numberToShanWords(n: number): string[] {
     return out;
 }
 
-// Shan digits U+1090–1099 → ASCII, so a Shan-digit run composes like an ASCII one.
-const SHN_DIGIT = DEF.digits;
 
 
 // A Shan word (Myanmar-block letters/signs, EXCLUDING the dandas U+104A/104B and the Shan digits U+1090–99) / number
@@ -170,12 +168,12 @@ const TOKEN = /([က-၉၌-ႏႚ-႟ꩠ-ꩿ]+)|(\d+|[႐-႙]+)|([၊။.!?…
 
 class ShanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // Shan digits (U+1090–1099) fold to ASCII up front (core/unicode.ts), so a Shan-digit run composes
+        // exactly like a Western one. The token class still admits ႐-႙ so an unfolded digit could never
+        // fall between the WORD ranges and vanish.
+        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) {
-                const ascii = [...m[2]].map((d) => SHN_DIGIT[d] ?? d).join("");
-                for (const wd of numberToShanWords(Number(ascii))) sink.emit(phonemizeWord(wd));
-            }
+            else if (m[2]) for (const wd of numberToShanWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "။" || m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });
     }

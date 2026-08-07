@@ -1,7 +1,8 @@
 /**
  * Papiamentu cardinal number → words. Covers 0 … <10¹²; larger / unsafe values read digit-by-digit.
  *
- * SOURCES (papiamento.ts holds its data inline — this language has no .jsonc manifest — so the table lives here):
+ * SOURCES (the numeral tables stay here, beside the compositor that is their only reader; papiamento.jsonc
+ * carries the grapheme tables):
  *   - en.wiktionary.org Category:Papiamentu_numerals — the attested lemmas, which is where the haplologies come
  *     from: ⟨diesinku⟩ 15 and ⟨dieseis⟩ 16 (not *diessinku / *diesseis), and the fused hundreds ⟨doshen⟩ 200,
  *     ⟨treshen⟩ 300, ⟨kuatershen⟩ 400, ⟨sinkushen⟩, ⟨seishen⟩, ⟨sheteshen⟩, ⟨ochoshen⟩, ⟨nuebeshen⟩;

@@ -17,9 +17,11 @@
     "script": ["Tibetan"],
 
     // Full consonant letters (U+0F40–0F6C) → Wylie token. The subjoined forms (U+0F90–0FBC) map to the same
-    // token at codepoint − 0x50, computed in tibetan.ts.
+    // token at codepoint − 0x50, computed in tibetan.ts. GHA (U+0F43) is written as an escape for the same
+    // reason as the composed vowel signs below: it is an NFC composition exclusion, and a literal key would
+    // silently decompose into ག + subjoined ha and shadow the plain-⟨ག⟩ entry.
     "letters": {
-        "ཀ": "k", "ཁ": "kh", "ག": "g", "གྷ": "g", "ང": "ng", "ཅ": "c", "ཆ": "ch", "ཇ": "j",
+        "ཀ": "k", "ཁ": "kh", "ག": "g", "\u0F43": "g", "ང": "ng", "ཅ": "c", "ཆ": "ch", "ཇ": "j",
         "ཉ": "ny", "ཊ": "T", "ཋ": "Th", "ཌ": "D", "ཎ": "N", "ཏ": "t", "ཐ": "th", "ད": "d",
         "ན": "n", "པ": "p", "ཕ": "ph", "བ": "b", "མ": "m", "ཙ": "ts", "ཚ": "tsh", "ཛ": "dz",
         "ཝ": "w", "ཞ": "zh", "ཟ": "z", "འ": "'", "ཡ": "y", "ར": "r", "ལ": "l", "ཤ": "sh",
@@ -48,9 +50,6 @@
     },
     "fricatives": { "sh": "ɕ", "s": "s", "zh": "ɕ", "z": "s", "h": "h" },
     "sonorants": { "ng": "ŋ", "ny": "ɲ", "n": "n", "m": "m", "w": "w", "y": "j", "r": "ɻ", "l": "l", "N": "n" },
-
-    // Tibetan digits (U+0F20–0F29) → Arabic.
-    "digits": { "༠": "0", "༡": "1", "༢": "2", "༣": "3", "༤": "4", "༥": "5", "༦": "6", "༧": "7", "༨": "8", "༩": "9" },
 
     // Cardinal number words (Tibetan spelling — the reader runs them through the engine). Tibetan
     // tens+units use a DECADE-specific connective (ཉེར/སོ/ཞེ/ང/རེ/དོན/གྱ/གོ), and magnitudes join the remainder

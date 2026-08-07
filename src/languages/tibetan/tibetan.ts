@@ -5,6 +5,7 @@
  * onset-cluster realization (ya-/ra-/la-btags), suffix-driven umlaut/length/nasalization/glottalization.
  * The letter values, onset realizations, number words and the encyclopedic record live in tibetan.jsonc.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
@@ -25,7 +26,6 @@ interface TibetanDef {
     aspirated: Record<string, string>;
     fricatives: Record<string, string>;
     sonorants: Record<string, string>;
-    digits: Record<string, string>;
     numbers: TibetanNumbers;
 }
 const DEF = loadManifest<TibetanDef>(import.meta.url, "tibetan.jsonc");
@@ -233,9 +233,6 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
-// Tibetan digits (U+0F20–0F29) → Arabic.
-const TNUM = DEF.digits;
-
 // Cardinal number data (tibetan.jsonc): units, decades and their connectives, the magnitude ladder, and དང.
 const NUM = DEF.numbers;
 const UNITS = NUM.units;
@@ -281,8 +278,11 @@ const TOKEN = /([༠-༩\d]+)|([ༀ-࿿]+)|([.!?])|([།༎ ,;:])/gu;
 
 class TibetanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(number([...m[1]].map((d) => TNUM[d] ?? d).join(""))); // Tibetan numerals → number words
+        // Tibetan digits (U+0F20–0F29) fold to ASCII up front (core/unicode.ts), so a Tibetan-numeral run
+        // composes exactly like a Western one. The token class still admits ༠-༩ so an unfolded digit could
+        // never fall into the WORD alternative and vanish inside parseSyllable.
+        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(number(m[1]));
             else if (m[2]) sink.emit(phonemizeWord(m[2]));
             else if (m[3]) sink.pause(m[3]!);
             else if (m[4]) sink.pause(",");

@@ -37,9 +37,6 @@
         "ဵ": "e_short", "ႅ": "ee_short", "ၢ": "aa", "ႆ": "FINAL_Y",
     },
 
-    // Shan digits U+1090–1099 → ASCII, so a Shan-digit run composes like an ASCII one.
-    "digits": { "႐": "0", "႑": "1", "႒": "2", "႓": "3", "႔": "4", "႕": "5", "႖": "6", "႗": "7", "႘": "8", "႙": "9" },
-
     // Cardinal number words (SHAN-SCRIPT spellings only; the abugida scan reads them). Shan is Southwestern
     // Tai, so the system is structurally Thai's (see thai.ts) with the cognate irregulars: 20 is သၢဝ်း (sao)
     // and REPLACES the whole "twenty" (no သိပ်း), and a FINAL 1 in any compound ≥11 is ဢဵတ်း (et) rather than

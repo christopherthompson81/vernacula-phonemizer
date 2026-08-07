@@ -17,6 +17,7 @@ import { describe, expect, test } from "vitest";
 import { CYRILLIC_HOSTS } from "../src/core/scripts.ts";
 import { foldCyrillicConfusables, foldLatinConfusables } from "../src/core/unicode.ts";
 import { phonemize } from "../src/index.ts";
+import { stripJsonc } from "../src/core/jsonc.ts";
 
 describe("foldCyrillicConfusables", () => {
     test("a Latin look-alike wedged inside a Cyrillic word is folded", () => {
@@ -61,7 +62,10 @@ describe("foldCyrillicConfusables", () => {
         const declared = new Set<string>();
         for (const d of readdirSync(dir)) {
             for (const f of readdirSync(new URL(`${d}/`, dir)).filter((n) => n.endsWith(".jsonc"))) {
-                const src = readFileSync(new URL(`${d}/${f}`, dir), "utf8");
+                // Strip comments BEFORE matching: a comment (or newline) between `[` and the first element
+                // would otherwise silently drop the manifest from `declared` and fire the assertion at the
+                // wrong side.
+                const src = stripJsonc(readFileSync(new URL(`${d}/${f}`, dir), "utf8"));
                 const lang = /"language"\s*:\s*"([^"]+)"/u.exec(src);
                 // `script` is an ORDERED list, primary first — so a Cyrillic-primary language leads with it.
                 const script = /"script"\s*:\s*\[\s*"([^"]*)"/u.exec(src);
