@@ -109,7 +109,7 @@ describe("mandarin canonical IPA — pinyin path", () => {
     });
 });
 
-// text normalization — the fifth language. Mandarin already had more of this tier than any other
+// TEXT NORMALIZATION. Mandarin already had more of this tier than any other
 // audited (digit-by-digit years, full dates, 世纪, 点/分, 第N, the 百分之 prefix, full-width punctuation,
 // Latin-run delegation), so the defects were in the ENGINE's number handling rather than in a new pass.
 describe("mandarin normalization", () => {

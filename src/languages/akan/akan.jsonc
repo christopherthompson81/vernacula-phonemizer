@@ -1,4 +1,4 @@
-// Akan / Akan kasa (ak) — a Kwa (Niger-Congo) language of Ghana (~20M incl. L2), the fleet's FIRST Kwa language.
+// Akan / Akan kasa (ak) — a Kwa (Niger-Congo) language of Ghana (~20M incl. L2).
 // akan.ts reads this file. Akan has a shallow, well-standardised Latin orthography (Bureau of Ghana Languages;
 // Asante/Akuapem Twi + Fante share it), so a near one-to-one rule g2p. The interesting part is the CONSONANT
 // DIGRAPHS — a palatal series ⟨ky gy hy ny⟩ → t͡ɕ d͡ʑ ɕ ɲ and a LABIALISED series ⟨tw dw kw gw hw nw⟩ → t͡ɕʷ d͡ʑʷ kʷ

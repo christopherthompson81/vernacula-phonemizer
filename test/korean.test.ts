@@ -41,8 +41,8 @@ describe("Korean Hangul g2p + sandhi", () => {
     });
 });
 
-// text normalization. Corpus counts in src/languages/korean/normalize.ts's header; the assertions
-// below are the DEFECTS that layer removes, one per rule, phrased as what the engine used to produce.
+// TEXT NORMALIZATION. Corpus counts live in src/languages/korean/normalize.ts's header. Each assertion
+// below is one rule's defect, stated as the wrong reading the layer exists to prevent.
 describe("Korean text normalization", () => {
     it("a number fused to its counter, so the sandhi crosses the boundary", () => {
         // Each of these was two separately phonemized tokens, with no sandhi between them at all.

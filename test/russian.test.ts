@@ -145,8 +145,8 @@ describe("Russian roman-numeral ordinals", () => {
     });
 });
 
-// the ninth language, and the first Cyrillic one to reach the shared initialism pass, which
-// exposed an ASCII-only boundary inside core/initialisms.ts itself.
+// ⚠ THE SHARED INITIALISM PASS CARRIED AN ASCII-ONLY BOUNDARY, which only a Cyrillic caller can expose —
+// core/initialisms.ts matched \b, which finds no boundary next to a Cyrillic letter.
 describe("russian normalization", () => {
     test("ordinal notation: the suffix is the CASE ending, not an appendable marker", () => {
         // 5-е is пятое (neuter nom), 5-го пятого (gen), 1970-х семидесятых (gen pl). Each previously spoke

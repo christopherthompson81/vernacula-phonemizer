@@ -4,11 +4,12 @@ import { createKabuverdianu, phonemizeWord } from "../src/languages/kabuverdianu
 import { numberToWords } from "../src/languages/kabuverdianu/numbers.ts";
 
 // Kabuverdianu / kriolu (kea) — Cape Verdean Creole (Portuguese-lexified, ~870k), the ALUPEC/AK phonemic orthography,
-// Santiago variety. The FIRST creole with a bespoke engine in the fleet. No machine referee exists (wikipron has no
+// Santiago variety. No machine referee exists (wikipron has no
 // kea; the kaikki dump carries IPA on only 7 words), so this is an AUTHORED bring-up (the Madurese/Luo pattern): a
 // greedy ALUPEC scan (digraphs dj/tx/nh/lh/rr) + Portuguese-creole nasalization + accent/penult stress, ANCHORED on
 // the 7 independent kaikki IPA words (this file is the falsifiable gold). Segments match all 7 (the kaikki's onset-ˈ
-// notation and its loose ⟨r⟩~ɾ differ from our nucleus-ˈ + tap [ɾ] conventions). thin single-source.
+// notation and its loose ⟨r⟩~ɾ differ from our nucleus-ˈ + tap [ɾ] conventions). ⚠ Seven words is the whole
+// of the independent evidence — thin, and single-source.
 describe("Kabuverdianu canonical IPA — ALUPEC g2p + nasalization (anchored on the 7 kaikki words)", () => {
     const kea = createKabuverdianu();
 

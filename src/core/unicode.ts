@@ -219,6 +219,57 @@ export function foldLatinConfusables(s: string): string {
 }
 
 /**
+ * The MIRROR of the table above: a LATIN look-alike standing in for a Cyrillic letter. Only the rows where the
+ * Latin glyph is genuinely confusable with a Cyrillic one, so this is not simply the inverse map — Latin `j`
+ * for Cyrillic ⟨ј⟩ (U+0458) and `i` for ⟨і⟩ (U+0456) are the two that bite, because those Cyrillic letters
+ * exist only in some of the alphabets (Macedonian, Serbian, Ukrainian, Belarusian) and a keyboard set for
+ * Russian cannot type them.
+ */
+const CYRILLIC_CONFUSABLE: Readonly<Record<string, string>> = {
+    a: "а", c: "с", e: "е", i: "і", j: "ј", o: "о", p: "р", s: "ѕ", x: "х", y: "у",
+    A: "А", B: "В", C: "С", E: "Е", H: "Н", I: "І", J: "Ј", K: "К", M: "М",
+    O: "О", P: "Р", S: "Ѕ", T: "Т", X: "Х", Y: "У",
+};
+const CYR_KEYS = new RegExp(`[${Object.keys(CYRILLIC_CONFUSABLE).join("")}]`, "gu");
+const WORDISH = /[\p{L}\p{M}\p{Nd}]+/gu;
+
+/**
+ * Fold a Latin look-alike sitting INSIDE a Cyrillic word to its Cyrillic equivalent.
+ *
+ * ⚠ THE FAILURE THIS PREVENTS IS NOT A DROPPED CHARACTER. A Latin letter inside a Cyrillic word falls outside
+ * the engine's token class, so the word SPLITS and the stray letter is handed to the foreign reader as an
+ * ENGLISH LETTER NAME: Macedonian `Фаренхаjт` with a Latin j read *fˈarɛnxa d͡ʒˈeᶦ t*. Nothing is dropped and
+ * no raw character survives, so no leak gate can see it.
+ *
+ * ⚠ THE DISCRIMINATOR IS WHICH SCRIPT DOMINATES THE WORD, not the immediate neighbours — and that is the one
+ * thing a flank test cannot express. `foldLatinConfusables` uses a Latin flank because it only ever pulls
+ * TOWARDS Latin; run both with flank guards and they fight: in `сeрiя` the Latin `e` gives the Cyrillic `р` a
+ * Latin left-flank, so the Latin fold rewrites it to `p` and makes the word MORE Latin, after which no
+ * trailing-lookahead guard can pull it back. Scoping to the word and requiring a Cyrillic majority settles the
+ * direction once, before any character is rewritten.
+ *
+ * ⚠ AN EXACT TIE IS BROKEN BY THE HOST LANGUAGE, not guessed from the word. `рaсa` is 2 Cyrillic and 2 Latin,
+ * and nothing in the word itself settles it — favouring Cyrillic would rewrite the two-letter Latin `оk`, and
+ * first-letter script fails the same way. The host language is the evidence the WORD does not carry: inside a
+ * Cyrillic-primary language (CYRILLIC_HOSTS) the tie folds to Cyrillic; anywhere else it declines and the
+ * established Latin default stands.
+ */
+export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): string {
+    if (!/\p{Script=Cyrillic}/u.test(s)) return s;
+    return s.replace(WORDISH, (w) => {
+        let cyr = 0, lat = 0;
+        for (const ch of w) {
+            if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
+            else if (/\p{Script=Latin}/u.test(ch)) lat++;
+        }
+        if (cyr === 0 || lat === 0 || lat > cyr) return w; // Latin-majority word — leave it to the Latin fold
+        if (lat === cyr && !hostIsCyrillic) return w; // an even split, and no host evidence to tip it
+        CYR_KEYS.lastIndex = 0;
+        return w.replace(CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!);
+    });
+}
+
+/**
  * REPAIR DOUBLE-ENCODED UTF-8 — text whose bytes were UTF-8 but got decoded as Latin-1 and re-encoded, so
  * `\u00b2` arrives as `\u00c2\u00b2` and `\u00f1` as `\u00c3\u00b1`. Mojibake is one of the commonest real-world corruptions in
  * scraped text, and a phonemizer is handed arbitrary text.

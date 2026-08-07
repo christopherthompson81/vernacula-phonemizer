@@ -199,9 +199,9 @@ import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
 import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 
 import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
-import { readerFor } from "./core/scripts.ts";
+import { CYRILLIC_HOSTS, readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldCaretExponents, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
+import { foldCaretExponents, foldCyrillicConfusables, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -326,7 +326,7 @@ export function getPhonemizer(lang: string): Phonemizer {
                     // (31 occurrences, all in id_id, none elsewhere); see `repairDoubleEncoded`.
                     // `foldLatinConfusables` sits with the other repairs, and AFTER the mojibake decode: a double-encoded
                     // sequence can produce Latin-1 letters, so the confusable check wants the decoded string.
-                    const folded = foldCaretExponents(foldLatinConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input))))));
+                    const folded = foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)))), CYRILLIC_HOSTS.has(lang))));
                     const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
                     return original(FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre));
                 } finally {
@@ -660,7 +660,7 @@ function build(lang: string): Phonemizer {
         // Santali (ᱥᱟᱱᱛᱟᱲᱤ) — Munda (Austroasiatic), the Ol Chiki alphabet; ᱷ aspiration, ᱹ→ə, ᱸ nasal, word-final CHECKED stops.
         case "sat":
             return createSantali();
-        // K'iche' (Qatzijob'al) — the fleet's first MAYAN language; ejective series b'→ɓ k'/q'/tz'/ch', aspirated plain stops, x→ʃ j→x.
+        // K'iche' (Qatzijob'al) — Mayan; ejective series b'→ɓ k'/q'/tz'/ch', aspirated plain stops, x→ʃ j→x.
         case "quc":
             return createKichee();
         // Bashkir (Башҡорт теле) — Kipchak Turkic; interdentals ҫ→θ ҙ→ð, written uvulars ҡ→q ғ→ʁ, vowel shift; Russian loans routed to ru.

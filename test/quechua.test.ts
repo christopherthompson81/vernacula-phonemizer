@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/quechua/quechua.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Quechua / Runasimi (qu) — Southern Quechua (Cusco-Collao + Ayacucho), the standardised
-// trilingual Latin orthography. The fleet's first Quechuan language. Signature: a 3-vowel system ⟨a i u⟩ (NO uvular
+// trilingual Latin orthography. Signature: a 3-vowel system ⟨a i u⟩ (NO uvular
 // lowering emitted — the phonemic norm, matching the kaikki referee) and a THREE-WAY stop series written overtly —
 // plain ⟨p t k q ch⟩, aspirated with ⟨h⟩ (⟨ph th kh qh chh⟩), ejective with an apostrophe (⟨p' t' k' q' ch'⟩);
 // uvular ⟨q⟩→[q]; ⟨ll⟩→ʎ, ⟨ñ⟩→ɲ, ⟨r⟩→ɾ (tap). Regular PENULTIMATE stress. Validated at 93.0% (97.6% symbol) vs the

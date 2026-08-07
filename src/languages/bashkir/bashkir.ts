@@ -1,6 +1,6 @@
 /**
  * Bashkir (ba) phonemizer — Башҡорт теле, Kipchak Turkic (sibling of Tatar), CYRILLIC (the Bashkir alphabet),
- * canonical IPA. The fleet's first Bashkir. A Cyrillic grapheme scan. Bashkir's HALLMARK is the
+ * canonical IPA. A Cyrillic grapheme scan. Bashkir's HALLMARK is the
  * INTERDENTAL fricatives ⟨ҫ⟩→[θ] and ⟨ҙ⟩→[ð] (shared with Turkmen). Unlike Tatar, Bashkir WRITES the uvulars ⟨ҡ⟩→[q]
  * / ⟨ғ⟩→[ʁ] (so ⟨к⟩→[k], ⟨г⟩→[ɡ] always — no harmony inference). The BASHKIR VOWEL SHIFT: ⟨и⟩→[i], ⟨о⟩→[ʊ],
  * ⟨у⟩→[u], ⟨е⟩→[ɪ] (bare; [je] word-initial), ⟨ы⟩→[ɯ], ⟨ө⟩→[ø], ⟨ү⟩→[y], ⟨ә⟩→[æ]. Word-final (oxytone) stress

@@ -5,7 +5,7 @@ import { phonemizeWord } from "../src/languages/latin/latin.ts";
 import { numberToWords } from "../src/languages/latin/numbers.ts";
 
 // Canonical-IPA goldens for CLASSICAL Latin (la) — the reconstructed pronunciation (Allen, Vox Latina), Italic, the
-// fleet's first Italic language. Signature features: short-vowel LAXING (⟨e i o u⟩→ɛ ɪ ɔ ʊ) vs macron length (ā→aː);
+// Signature features: short-vowel LAXING (⟨e i o u⟩→ɛ ɪ ɔ ʊ) vs macron length (ā→aː);
 // ⟨c⟩ ALWAYS [k], ⟨v⟩→[w], ⟨qu⟩→[kʷ], ⟨x⟩→[ks], ⟨gn⟩→[ŋn]; aspirates ⟨ph th ch⟩; word-initial/intervocalic ⟨i⟩→glide
 // [j]; DARK ⟨l⟩→[ɫ]; ⟨n⟩→[ŋ] before a velar; the WORD-FINAL ⟨-Vm⟩→ nasalized long [Ṽː]; penult/antepenult weight
 // stress. Referee: wikipron lat_latn_clas_narrow (44,907 human).

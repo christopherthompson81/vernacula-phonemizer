@@ -1,6 +1,6 @@
 /**
  * Totontepec Mixe / ayöök (mto) phonemizer — Mixe-Zoquean (Mixean, Oaxaca, North Highland), ~6k, the modern SIL
- * practical orthography, canonical IPA. The fleet's FIRST Mixe-Zoquean language. The g2p is
+ * practical orthography, canonical IPA. The g2p is
  * AUTHORED FROM Crawford, *Totontepec Mixe Phonotagmemics* (SIL, 1963) — a published phonology (the bho/Balochi
  * mold). The consonants + allophony are Crawford-grounded and confident; the modern-orthography VOWEL mapping is
  * reconstructed from Crawford's example words (kääm 'pig'=/kæːm/, këp 'tree'=/kɨp/, üts 'I'=/ʌts/, ök 'dog'=/ʊk/)

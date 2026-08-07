@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "../src/languages/tibetan/tibetan.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
-// Canonical-IPA goldens for Standard / Lhasa Tibetan (bo) — the fleet's first Bodish/Tibetic (Sino-Tibetan) language
+// Canonical-IPA goldens for Standard / Lhasa Tibetan (bo) — Bodish/Tibetic (Sino-Tibetan)
 // and ONE OF THE DEEPEST orthographies in the world. Classical spelling encodes Old Tibetan; the Lhasa reading is a
 // syllable-stack rule engine: TONE from tonogenesis (˥ high / ˩ low), SILENT prefixes/superscripts, onset-cluster
 // realization (ya-btags→palatal, ra-btags→retroflex affricate, subjoined-ha→ɬ), and suffix-driven vowel UMLAUT

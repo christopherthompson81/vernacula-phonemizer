@@ -46,7 +46,7 @@ describe("urdu canonical IPA", () => {
     });
 });
 
-// the tenth language. As with Bengali, the biggest defects were NOT in the normalization layer:
+// TEXT NORMALIZATION. ⚠ As with Bengali, the biggest defects are NOT in the normalization layer:
 // the numbers data had no fused 21-99 forms, clausePunctuation mapped every mark to a PADDED copy of
 // itself, and the number function leaked ASCII digits for any decimal.
 describe("urdu normalization", () => {
