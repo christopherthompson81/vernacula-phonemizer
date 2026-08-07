@@ -1,55 +1,32 @@
 /**
- * Modern Greek (el) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
- * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Modern Greek (el) text normalization — the pre-tokenizer pass that rewrites everything which is not already
+ * a pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Twenty-second language. MEASURED over the el_gr FLEURS corpus (1,969 unique utterances, column 3 —
- * the cased one):
+ * ⚠ GREEK CARRIES THE HIGHEST RATE OF EMBEDDED LATIN OF ANY LANGUAGE MEASURED — roughly one utterance in
+ * seven. Most of it is brand and place names left alone deliberately (see below), but the all-caps
+ * initialisms have to be claimed, or `το FBI` reads with ENGLISH phonemes in a Greek stream
+ * (to ˈɛfbˈiːʲˈaᶦ) and `η UNESCO` comes out carrying ɪ ʊ ɹ ʃ d͡ʒ æ ɫ.
  *
- *   embedded Latin        291 utterances (14.8%) — the HIGHEST rate of any language measured
- *                         · all-caps initialisms  78 instances / 58 distinct in 68 utterances
- *                         · single Latin letters   9 after the unit/rate rules take theirs
- *                         · Latin↔Greek HOMOGLYPHS 12 (see step 1) — a corpus defect, not a loanword
- *                         · mixed-case names      the rest (Apple, Xinhua, Northern Rock) — LEFT ALONE
- *   ordinal notation       55  (15ο, 1η, 18ου, 9ης — the ending is the CASE, see step 7)
- *   grouped numbers        50  (1.000, 783.562 — Greek groups with a PERIOD)
- *   times                  21  (8:30, 07:19, 11:00) + 3 SPORTS times that must NOT be claimed
- *   ranges                 23  (3-5, 35-40) — deliberately NOT touched, see the footnote
- *   percent                12
- *   decimal comma          12  (2,3 — Greek's decimal mark is the COMMA)
- *   dotted abbreviations   27  (π.Χ. ×7, π.μ. ×7, π.χ. ×4, κ.λπ. ×4, μ.Χ. ×3, μ.μ. ×2, βλ. ×1)
- *   χλμ                     8  (3 of them dotted, 2 of them as a rate `χλμ / ώρα`)
- *   units after a number   ~20 (mm ×6, km ×3, km/h ×3, mi² ×2, km² ×1, m/s ×1, m, cm, g, °C ×1)
- *   Greek ALPHABETIC numerals 6 (Α΄ Β΄ ΙΣΤ΄ — with U+0384, not the keraia; see step 2)
- *   currency $              2  · vulgar fractions ½ ¾ 2 · `+` sign 1
+ * ⚠ LATIN↔GREEK HOMOGLYPHS ARE A REAL CLASS HERE, not a curiosity: a Latin `o` typed for the article ο makes
+ * the word vanish into the foreign path (`και o αγριόκουρκος` → ce ˈoᶷ aɣɾʝokuɾkos). See step 1.
  *
- * WHAT THE ENGINE PRODUCED BEFORE (each probed through `phonemize(form, "el")`):
- *   "το FBI και το GPS"  → to ˈɛfbˈiːʲˈaᶦ ce to d͡ʒˈiː pʰˈiː ˈɛs   ENGLISH phonemes (core/foreign.ts)
- *   "η UNESCO"           → i juːnˈɛskoᶷ                            in a Greek stream: ɪ ʊ ɹ ʃ d͡ʒ æ ɫ
- *   "τον 15ο αιώνα"      → ton ðeka pende o eona                   cardinal + a stray vowel
- *   "1.000 άτομα"        → ena . miðen atoma                       the grouping dot became a PAUSE
- *   "στις 8:30 μ.μ."     → stis oxto , tɾʝanda m . m .             the colon became a pause; μ.μ. spelled
- *   "300 π.Χ."           → tɾiakosia p . x .                       three phrase breaks out of one word
- *   "Β΄ Παγκόσμιο"       → v paŋɡozmio                             the numeral read as the LETTER beta
- *   "Το 3-5% των"        → to tɾia pende ton                       % dropped outright
- *   "783.562 km²"        → eftakosia oɣðonda tɾia . pendakosça …ˈʊkm   grouping dot + the [ˈʊkm] cluster
- *   "30 °C"              → tɾʝanda sˈiː                            the English letter C
- *   "35-40 km/h"         → … saɾanda ˈʊkm ˈeᶦt͡ʃ                    and the English letter H
- *   "το 2,3 τοις"        → to ðio , tɾia tis                       the decimal comma became a pause
- *   "και o αγριόκουρκος" → ce ˈoᶷ aɣɾʝokuɾkos                      a LATIN o typed for the article ο
+ * ⚠ GREEK GROUPS THOUSANDS WITH A PERIOD AND TAKES A COMMA DECIMAL, so both separators reach
+ * `clausePunctuation` as pauses unless claimed: `1.000 άτομα` → *ena . miðen atoma*.
  *
- * NEVER `\b` in this file: it is ASCII-defined and finds no boundary against Greek script, so a rule
- * written with it silently matches nothing (the trap that made core/initialisms.ts a no-op for Cyrillic).
- * Every boundary here is an explicit `(?<![\p{L}\p{M}])` / `(?![\p{L}\p{M}])` lookaround.
+ * ⚠ THE ORDINAL ENDING IS THE CASE (15ο, 1η, 18ου, 9ης), not a fixed suffix — see step 7.
+ *
+ * ⚠ NEVER `\b` IN THIS FILE. It is ASCII-defined and finds no boundary against Greek script, so a rule
+ * written with it silently matches NOTHING. Every boundary here is an explicit `(?<![\p{L}\p{M}])` /
+ * `(?![\p{L}\p{M}])` lookaround.
  *
  * NOT DONE, deliberately:
- *   • NUMERIC RANGES (23) — `3-5%`, `35-40 μίλια`. A Greek reader supplies a connective (έως / με), but
- *     which one is a register choice the transcript cannot settle, and the dash also occurs in `COVID-19`,
- *     `Super-G`, `1984-1985` and `Il-76`. Left alone rather than guessed at.
- *   • MIXED-CASE Latin (the bulk of the 291) — brand and place names. Same call Japanese and Thai made:
- *     letter-spelling is not an available reading for `Xinhua`, and transliterating a name is invention.
- *   • `53χρονης` (1) — an age compound whose reading is one fused word (πενηντατριάχρονης). One instance;
- *     a wrong compound is worse than the space it currently gets.
- *   • `m;esa` (1) — a Greek word typed entirely in Latin, with a stray `;`. A corpus typo, not a class.
+ *   · NUMERIC RANGES — `3-5%`, `35-40 μίλια`. A Greek reader supplies a connective (έως / με), but which one
+ *     is a register choice the text cannot settle, and the dash also occurs in `COVID-19`, `Super-G`,
+ *     `1984-1985` and `Il-76`.
+ *   · MIXED-CASE LATIN, the bulk of the embedded runs — brand and place names. Same call Japanese and Thai
+ *     made: letter-spelling is not an available reading for `Xinhua`, and transliterating a name is invention.
+ *   · AGE COMPOUNDS like `53χρονης`, whose reading is one fused word (πενηντατριάχρονης). A wrong compound is
+ *     worse than the space it currently gets.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 

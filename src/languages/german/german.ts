@@ -388,43 +388,37 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d{1,3}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zäöüßA-ZÄÖÜ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
-// #562 symbol normalization — German words (Prozent/Euro/Kilometer are invariant plurals).
+// German measure and currency words are INVARIANT plurals (Prozent, Euro, Kilometer).
 const SYMBOLS = makeSymbolNormalizer({
-    // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
-    // `und` ×1135 in this corpus. The tier spaces it on both sides, because `B&B` is two
-    // initialisms and joining them would make one token.
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
+    // ⚠ The tier spaces `und` on both sides, because `B&B` is two initialisms and joining them would make one
+    // token.
+    // ⚠ `multiply` is STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the
+    // operator returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it —
+    // German does not split dimension from product.
     multiply: { times: "mal" },
     ampersand: "und",
     percent: ["Prozent"],
     currency: { "€": ["Euro"], "$": ["Dollar"], "£": ["Pfund"], "¥": ["Yen"] },
-    // `m` — Meter ×6, and every digit-adjacent bare `m` in this corpus is a metre: `4892 m Höhe`,
-    // `100 m und 200 m Freistil`, `133 m/s`. Without it `Kubik`/`Quadrat` below could not reach a bare
-    // metre, so `5 m³` read as the raw letter while `5 km³` read correctly.
+    // `m` is declared because a digit-adjacent bare `m` in German is a metre (`4892 m Höhe`, `133 m/s`).
+    // ⚠ Without it `Kubik`/`Quadrat` below cannot reach a bare metre, so `5 m³` reads as the raw letter while
+    // `5 km³` reads correctly.
     units: { km: ["Kilometer"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"], mg: ["Milligramm"],
         m: ["Meter"] },
-    // #586. `5 km²` read as *fʏnf km* — the abbreviation reaching the phoneme sink verbatim, the QUANTITY lost
-    // and not merely its power, because an undeclared measure word made the tier abandon the whole match. The
-    // core now emits the unit and hands the exponent back, so this became a VISIBLE `DROP:exponent` (de went
-    // 3 → 6 drops while three sentences' units were repaired); this declaration is what closes it.
-    // German FUSES the measure word onto the front, which is `compound`: corpus ×2
-    // "2,2 Millionen Quadratkilometer Ozeanfläche", and Kubik ×2 for the cube.
+    // ⚠ AN UNDECLARED MEASURE WORD MAKES THE TIER ABANDON THE WHOLE MATCH, so `5 km²` reads as *fʏnf km* —
+    // the abbreviation reaching the phoneme sink verbatim and the QUANTITY lost, not merely its power.
+    // German FUSES the measure word onto the front, which is `compound`: *Quadratkilometer*, *Kubikmeter*.
     exponentWords: { squared: ["Quadrat"], cubed: ["Kubik"], position: "compound" },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
-    // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
-    // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
-    // they are different words (Quadratkilometer but zwanzig zum Quadrat).
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`).
+    // ⚠ THIS CANNOT REUSE `exponentWords` ABOVE: that is the unit MODIFIER and this is the PREDICATE, and in
+    // most languages they are different words — Quadratkilometer, but zwanzig zum Quadrat.
     // ⚠ PROVENANCE, stated because it is weaker than most data in this repo: these are STANDARD MATHEMATICAL
     // REGISTER, not corpus attestations. The power words are ×0 in this language's artifact, and the apparent
     // hits for other languages were substring traps of exactly the kind tools/normalization/attest.ts warns

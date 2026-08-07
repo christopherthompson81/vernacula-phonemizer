@@ -1,52 +1,28 @@
 /**
- * Gujarati (gu) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Gujarati (gu) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Gujarati reuses HINDI'S ENGINE (`makeNativeHindi`) and, until this file existed, also inherited HINDI'S
- * NORMALIZER and HINDI'S SYMBOL WORDS. Those words are written in DEVANAGARI, which is not in
- * `core/unicode.ts` GUJARATI_WORD, so the tokenizer never emitted them at all: the inherited tier was not
- * merely saying the wrong word, it was **silently deleting the symbol**. Measured before the change —
- *     "45%"          → [pˈistalis]                  (the percent word vanished entirely)
- *     "$45 મિલિયન"    → [pˈistalis mˈilijən]         (so did the currency word)
- *     "11:00 વાગતાજ"  → [ˈəɡijaɾ ʋˈaɡt̪ad͡ʒ]           (Hindi's बजे vanished; :00 was simply dropped)
- *     "9:30 ના"       → [nˈəʋ t̪ɾˈis nˈa]            (बजकर/मिनट vanished — two bare numbers)
- * Every symbol tier in this file therefore replaces an inherited Hindi one, and each replacement word is
- * sourced from the corpus itself wherever the corpus contains it.
+ * ⚠ GUJARATI REUSES HINDI'S ENGINE (`makeNativeHindi`), AND THAT MAKES INHERITING HINDI'S SYMBOL WORDS A
+ * SILENT DELETION rather than a wrong reading. Hindi's words are written in DEVANAGARI, which is not in
+ * `core/unicode.ts`'s GUJARATI_WORD, so the tokenizer never emits them at all:
+ *     "45%"          → [pˈistalis]          the percent word vanishes entirely
+ *     "$45 મિલિયન"    → [pˈistalis mˈilijən]  so does the currency word
+ *     "11:00 વાગતાજ"  → [ˈəɡijaɾ ʋˈaɡt̪ad͡ʒ]    Hindi's बजे vanishes, and :00 is dropped
+ * Every symbol tier in this file therefore REPLACES an inherited Hindi one. Adding a Devanagari word here
+ * does not degrade the reading — it produces no reading at all.
  *
- * Measured over the gu_in FLEURS corpus (1,996 unique utterances, column 3):
- *   digits+ATTACHED Gujarati suffix .. 120  (માં 44, ના 24, મી 20, થી 11, ની 11, નાં 2, મો 2, મા 1,
- *                                            નું 1, માંથી 1, લી 1, જી 1 — the largest defect class)
- *   spaced ordinal `N મી` ............   6  ("15 મી સદી")
- *   four-digit years ................. 171
- *   two-digit numbers ................ 227
- *   three-digit numbers ..............  81
- *   grouped numbers (1,234 / 1,04,500)  48  (already correct — the Indic compositor reads both groupings)
- *   decimals .........................  30  (read as RAW DIGITS — the manifest had no `decimalWord`)
- *   ranges N-M .......................  17  (13 ascending = real ranges, 4 sports scores — see step 11)
- *   Gujarati dotted initialisms ......  18  (યુ.એસ. ×7, ઈ.સ. ×3, દા.ત. ×2, કિ.મી./કી.મી. ×2, યુ.એન.,
- *                                            એફ.ટી.એ., એ.એફ.સી.એફ.ટી.એ. — every interior dot a pause)
- *   clock times h:mm .................  15  (3 of which are SPORTS times 4:41.30 — not clocks)
- *   ASCII ':' written for visarga ....   9  (પુન: ×5, સંભવત: ×2, ક્રમશ: ×1, અંત: ×1)
- *   currency signs ...................  11  ($ ×5 incl. US$/AUD$, ¥ ×3, and the rest)
- *   percent ..........................   4
- *   Gujarati unit abbreviations ......  21  (કિમી ×15, મીમી/મિમી ×3, એમએમ ×1, કિમી/ક ×1, માઇલ/કલાક ×1)
- *   fractions ........................   3  (only ONE is a real fraction — see step 12)
- *   degrees ° ........................   1
- *   ડો./ડૉ. ..........................   6
- *   Gujarati digits ૦-૯ ..............  11  (NEGATIVE RESULT — see step 1)
- *   danda ।/॥ ........................   0  (NEGATIVE RESULT: this corpus punctuates with ASCII `.`)
- *   ZWJ/ZWNJ .........................   0  (NEGATIVE RESULT: the Marathi ZWJ defect does not occur here)
+ * ⚠ THE LARGEST DEFECT CLASS IS A DIGIT WITH AN ATTACHED GUJARATI SUFFIX (માં, ના, મી, થી, ની …), which is
+ * ordinary Gujarati morphology and not an ordinal marker. Step 7 owns it.
  *
- * WORDS AND THEIR SOURCES. Everything this file emits is attested in the gu_in corpus in the same
- * function, except where noted: ટકા ×40, ડોલર ×4 / ડૉલર ×2, યુરો ×37, પાઉન્ડ ×8, યેન ×3, કિલોમીટર ×15,
- * મીલીમીટર ×3, પ્રતિ ×6 (as the rate connective, "8 માઇલ પ્રતિ સેકંડ"), કલાક ×30, વાગ્યે ×9, ડિગ્રી ×2
- * (in the degree sense, "35 ડિગ્રી પશ્ચિમ"), ઈસવીસન ×2, ડૉક્ટર ×2, આશરે ×5, થી ×737 (as the range
- * connective, "2 થી 3 મિલિયન"), અડધો ×2, and the ordinal paradigm પહેલ-/બીજ-/ત્રીજ-/ચોથ-/છઠ્ઠ- plus the
- * regular cardinal+મ- (પાંચમો, સાતમો, નવમા, દસમા, અગિયારમાં, સોળમુ). NOT corpus-attested and taken as
- * transparent international/arithmetic vocabulary: સેલ્સિયસ, ફેરનહીટ, સેન્ટીમીટર, કિલોગ્રામ, રૂપિયા,
- * ભાગ્યા, and દશાંશ (the manifest's new `decimalWord`, the exact cognate of the दशांश this repo already
- * ships for Marathi). DELIBERATELY OMITTED for want of a source. A wrong word is worse than a
- * dropped sign.
+ * ⚠ ASCII `:` IS WRITTEN FOR THE VISARGA (પુન:, સંભવત:, ક્રમશ:), so a colon here is not always a clock.
+ *
+ * NEGATIVE RESULTS, recorded so they are not re-investigated: Gujarati text punctuates with the ASCII period
+ * rather than the danda ।/॥, and the ZWJ/ZWNJ defect that bites Marathi does not occur.
+ *
+ * ⚠ SOURCING. Everything this file emits is attested in Gujarati text in the same function, EXCEPT a short
+ * list taken as transparent international or arithmetic vocabulary: સેલ્સિયસ, ફેરનહીટ, સેન્ટીમીટર,
+ * કિલોગ્રામ, રૂપિયા, ભાગ્યા, and દશાંશ (the exact cognate of the दशांश already shipped for Marathi).
+ * A wrong word is worse than a dropped sign, so anything not in one of those two categories is omitted.
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
@@ -231,7 +207,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //   UTC+1  →  `… a r j uː t i s iː  p l a s v o n  k a l l a k …`   2 of 3 speakers
         //   +30°C  →  `… m a h i n ɔ o m a  p l a s  t r iː s d i ɡ r i …`  and
         //             `… m a h i n aʊ m a  p l a s  t r e s aʊ s s ɛ l ts i a s …`   BOTH speakers
-        // ★ gu VOICES THE MEASUREMENT PLUS, 2 of 2 — unlike en, hi, vi, te, xh and am, which all omit it there,
+        // ⚠ gu VOICES THE MEASUREMENT PLUS, 2 of 2 — unlike en, hi, vi, te, xh and am, which all omit it there,
         // and like ta and mi. So the reading habit genuinely splits across the fleet; it is not a universal.
         // પ્લસ reads plˈəs, matching the decode, so no new lexical data was needed.
         // BEFORE the degree rule — the ordering coupling zu's `[+]?` taught.

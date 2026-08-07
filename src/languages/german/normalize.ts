@@ -1,30 +1,23 @@
 /**
- * German (de) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * German (de) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Twelfth language, and the one the ORDINAL work has been building towards. German writes the ordinal as a
- * numeral plus a bare PERIOD — `16. Jahrhundert`, `am 17. September` — which is the class Run 1 flagged as
- * needing a detector, because a regex cannot tell it from a sentence-final digit. It is the largest single
- * defect here (×100), and previously every one read as a cardinal followed by a PAUSE: "im 16. Jahrhundert"
- * came out as *sechzehn . Jahrhundert*.
+ * ⚠ GERMAN WRITES THE ORDINAL AS A NUMERAL PLUS A BARE PERIOD — `16. Jahrhundert`, `am 17. September` — which
+ * a regex cannot tell from a sentence-final digit. It is the largest single defect class here, and unhandled
+ * every one reads as a cardinal followed by a PAUSE: "im 16. Jahrhundert" → *sechzehn . Jahrhundert*.
  *
- * THE DETECTOR IS BUILT FROM THE CORPUS, not from intuition. Tabulating what surrounds `N.` over the 2,987
- * de_de utterances:
- *   AFTER   Jahrhundert(s) ×34, month names ×66, a few regiment names — and 79 instances with NOTHING
- *           after, which are the sentence-final periods that must NOT be claimed.
- *   BEFORE  am ×54, im ×14, des ×9, dem ×8, das ×7, zum ×5, vom ×2, bis ×2, ins ×1, den ×1.
- * So the rule fires on the FOLLOWING word (a month or Jahrhundert) — which alone covers ~100 of the 109 —
- * or on a preceding date/ordinal-licensing article plus a capitalised noun, which picks up the regiments.
- * A sentence-final `N.` matches neither, because nothing follows it and the word before is a content word.
+ * ⚠ THE DETECTOR IS BUILT FROM WHAT SURROUNDS `N.`, NOT FROM INTUITION:
+ *   AFTER   Jahrhundert(s), month names, a few regiment names — and, critically, the sentence-final periods
+ *           with NOTHING after them, which must NOT be claimed.
+ *   BEFORE  am, im, des, dem, das, zum, vom, bis, ins, den.
+ * So the rule fires on the FOLLOWING word (a month or Jahrhundert), or on a preceding date/ordinal-licensing
+ * article plus a capitalised noun, which picks up the regiments. A sentence-final `N.` matches neither,
+ * because nothing follows it and the word before is a content word.
  *
- * DECLENSION comes from the same evidence. The governing preposition or article decides the ending:
- * `am/im/vom/zum/dem/des/den/ins/seit/bis` take the weak **-en** (*am siebzehnten September*, *des
- * sechzehnten Jahrhunderts*), while `das/der/die` and a bare ordinal take **-e** (*das sechzehnte
- * Jahrhundert*). That is not full case agreement — it is the two forms the corpus actually needs.
- *
- * Measured over de_de (2,987 utterances): ordinals ×109, dates ×66, units ×60, dotted abbreviations ×58,
- * dot-thousands ×55, percent ×30, `Uhr` ×30, comma-decimals ×29, times ×23, `v. Chr.` ×11, all-caps ×222
- * (US ×30, USA ×14, AOL ×8), signs ×5.
+ * ⚠ DECLENSION COMES FROM THE SAME EVIDENCE, and it is TWO forms rather than full case agreement. The
+ * governing preposition or article decides the ending: `am/im/vom/zum/dem/des/den/ins/seit/bis` take the weak
+ * **-en** (*am siebzehnten September*, *des sechzehnten Jahrhunderts*), while `das/der/die` and a bare ordinal
+ * take **-e** (*das sechzehnte Jahrhundert*).
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
