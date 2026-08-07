@@ -6,7 +6,7 @@ import { numberToWords } from "../src/languages/luganda/numbers.ts";
 
 // Canonical-IPA goldens for Luganda / Oluganda (lg) — Bantu (Great Lakes, JE15), Latin orthography.
 // Phonology grounded in Wikipedia (Luganda) + the epitran lug-Latn map. The greedy g2p + gemination + prenasal
-// lengthening scores 99.1% folded vs epitran lug-Latn (tools/referee-eval, 1500 words) — but epitran is itself
+// lengthening is refereed by epitran lug-Latn (tools/referee-eval, 1500 words) — ⚠ but epitran is itself
 // rule-based, so that comparison is partly CIRCULAR (single-source). These goldens pin the segmental backbone.
 // Tone (3-way H/L/falling) is lexical + unwritten → deferred.
 describe("Luganda canonical IPA — greedy g2p + gemination + prenasal lengthening", () => {

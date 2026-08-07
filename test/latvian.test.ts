@@ -6,8 +6,8 @@ import { createLatvian, phonemizeWord } from "../src/languages/latvian/latvian.t
 // leaves implicit: palatalization (ģ ķ ļ ņ → ɟ c ʎ ɲ), vowel length (macrons ā ē ī ū → ː), and stress is FIXED on
 // the first syllable (emitted). So the g2p is a mostly-direct grapheme→IPA scan + the native ⟨o⟩→[uɔ̯] diphthong +
 // falling-diphthong offglides + regressive devoicing. The narrow referee (1,657 headwords) carries syllable tone +
-// the lexical ⟨e⟩ quality (folded in the eval); these golds lock the segment skeleton. 84.0% folded / 96.6% symbol
-// accuracy vs wikipron lav_latn_narrow.
+// the lexical ⟨e⟩ quality (folded in the eval); these golds lock the segment skeleton.
+// Referee: wikipron lav_latn_narrow.
 describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + first-syllable stress)", () => {
     const lv = createLatvian();
 

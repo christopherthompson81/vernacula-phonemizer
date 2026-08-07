@@ -6,10 +6,10 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Lingala / Lingála (ln) — Bantu (C30B), a major lingua franca of the Congo (~20M native
 // + ~20-25M L2). Authored from Meeuwis (2020) "A Grammatical Overview of Lingála" (Revised & Extended Edition,
 // describing the prestige Kinshasa variety). Signatures: PRENASALISED obstruents as single onset units
-// (⟨mb nd ng nz⟩ → ᵐb ⁿd ᵑɡ ⁿz, homorganic), ⟨ny⟩ → ɲ, and — unlike the fleet's other Bantu languages — TONE is
+// (⟨mb nd ng nz⟩ → ᵐb ⁿd ᵑɡ ⁿz, homorganic), ⟨ny⟩ → ɲ, and — unusually for a Bantu orthography — TONE is
 // WRITTEN (acute=H, háček=rising, circumflex=falling, unmarked=L) so it is rendered per nucleus (Chao letters).
-// No diphthongs (vowel sequences are hiatus, each a tone-bearing nucleus). Anchored on kaikki Lingala (97% folded,
-// tone MEASURED not folded).
+// No diphthongs (vowel sequences are hiatus, each a tone-bearing nucleus). Anchored on kaikki Lingala — ⚠ with tone MEASURED,
+// not folded, which is what makes the referee meaningful here at all.
 describe("Lingala canonical IPA", () => {
     test("prenasalised obstruents as single onset units (homorganic)", () => {
         expect(phonemizeWord("mbɔ́tɛ")).toBe("ᵐbɔ˥tɛ˩"); // mb → ᵐb ("hello")

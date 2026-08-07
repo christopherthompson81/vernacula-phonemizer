@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/lao/lao.ts";
 // (leading-vowel reorder, discontinuous vowels, ຫ-led high sonorant, Cວ→uːə, ຳ→am, tone-mark extraction).
 // Tone is the Vientiane 5-tone system (Chao letters), DERIVED from and VERIFIED against the kaikki Lao referee:
 // 100% of single-syllable segmentally-correct words match, and per-syllable tone is ~100% where syllable counts
-// agree (the segmental g2p is 97.7% vs kaikki Lao).
+// agree (the segmental g2p is refereed by kaikki Lao).
 describe("Lao (lo) g2p — diagnostic gold", () => {
     for (const [word, ipa] of [
         ["ລາວ", "laː˧˥w"], // "Lao/he" — ລ low + live sonorant coda → rising

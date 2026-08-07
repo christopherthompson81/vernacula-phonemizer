@@ -4,9 +4,10 @@ import { phonemizeWord, createLuo } from "../src/languages/luo/luo.ts";
 import { numberToWords } from "../src/languages/luo/numbers.ts";
 
 // Canonical-IPA goldens for Luo / Dholuo (luo) — Western Nilotic (Luo group), Latin orthography, spoken around Lake
-// Victoria in Kenya + Tanzania (~4–5M). The FIRST Nilotic language in the repo. Hand-adjudicated against the 17-word
-// en.wiktionary Luo IPA referee (the only source; single-source ) + Tucker (1994) 'A Grammar of Kenya Luo'. The
-// greedy g2p scores 100% folded (17/17) vs the referee (tools/referee-eval) — the folds strip tone + ±ATR (both
+// Victoria in Kenya + Tanzania (~4–5M). Hand-adjudicated against the 17-word
+// en.wiktionary Luo IPA referee (the only source; single-source) + Tucker (1994) 'A Grammar of Kenya Luo'. The
+// greedy g2p agrees with all 17 — ⚠ a perfect score on a 17-word referee is a statement about the referee's
+// size, not the engine's margin. The folds strip tone + ±ATR (both
 // UNWRITTEN), the one-palatal notation, aspiration, and the tap/glide notation. Signatures: the DENTAL vs ALVEOLAR
 // contrast (⟨th dh⟩=θ ð vs ⟨t d⟩=t d); PRENASALIZED voiced stops (⟨mb⟩=ᵐb, ⟨nd⟩=ⁿd, ⟨nj⟩=ⁿd͡ʒ, ⟨ng⟩=ᵑɡ); ⟨ng'⟩=ŋ,
 // ⟨ny⟩=ɲ; the palatals ⟨ch⟩=t͡ʃ, ⟨j⟩=d͡ʒ; the high-vowel glide (⟨i u⟩+V → j/w). The 9-vowel ±ATR distinction and
