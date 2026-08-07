@@ -5,8 +5,8 @@ import { getPhonemizer } from "../src/registry.ts";
 
 // Tashelhit / Shilha (shi) — Taclḥit, a Berber (Amazigh) language of SW Morocco (~7–9M). A near-1:1 phonemic
 // Berber-Latin → IPA converter: emphatics (dot-below) ḍ→dˤ etc., pharyngeals ḥ→ħ / ɛ→ʕ, uvulars ɣ/x→χ/q, c→ʃ;
-// labialisation C+ʷ→Cʷ; gemination (doubling)→Cː. Validated against wikipron shi_latn (97.4% folded / 99.4% symbol)
-// + kaikki Tashelhit (97.8%/99.5%) — both Wiktionary → single-source-family.
+// labialisation C+ʷ→Cʷ; gemination (doubling)→Cː. Referees: wikipron shi_latn + kaikki Tashelhit — ⚠ both
+// Wiktionary, so they are not independent of each other.
 describe("Tashelhit (Shilha) canonical IPA — Berber Latin → IPA converter", () => {
     const shi = createTashelhit();
 
@@ -80,7 +80,7 @@ describe("Tashelhit (Shilha) canonical IPA — Berber Latin → IPA converter", 
         expect(shi.text("1000000").trim()).toBe("mljun"); // mlyun
     });
 
-    test("cardinals: numbers used to be DROPPED (the tokenizer had no digit group)", () => {
+    test("cardinals: a tokenizer with no digit group DROPS every number", () => {
         // Arabic-Indic digits ٠-٩ are accepted too, since Moroccan text mixes them with 0-9.
         expect(getPhonemizer("shi").text("٤٥").trim()).toBe("χmsa u rbʕin");
     });

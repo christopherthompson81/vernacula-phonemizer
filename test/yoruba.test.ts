@@ -4,7 +4,7 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/yoruba/yoruba.ts";
 
 // Canonical-IPA goldens for Yoruba / Èdè Yorùbá (yo) — Volta-Niger (Niger-Congo), a highly phonemic three-tone
-// Latin orthography. Validated against wikipron yor (89.6%) + kaikki yor (88.8%), both human. Signature features:
+// Latin orthography. Referees: wikipron yor + kaikki yor, both human. Signature features:
 // the labial-velars ⟨gb⟩→ɡ͡b / ⟨p⟩→k͡p, ⟨j⟩→d͡ʒ, ⟨ṣ⟩→ʃ, ⟨r⟩→ɾ; dotted vowels ẹ→ɛ ọ→ɔ; coda-⟨n⟩ nasalisation
 // (ọdún→ɔdũ) vs onset n (ẹni→ɛni); and three LEVEL tones as Chao letters — High ˥ / Mid ˧ / Low ˩.
 describe("yoruba canonical IPA", () => {

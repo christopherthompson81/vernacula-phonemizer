@@ -6,7 +6,7 @@ import { phonemizeWord, createTurkmen } from "../src/languages/turkmen/turkmen.t
 // THE HALLMARK: the INTERDENTAL fricatives ⟨s⟩→[θ] and ⟨z⟩→[ð] (shared with Bashkir — söz→θøð). 9 vowels with
 // ⟨a⟩→[ɑ] (back), ⟨ä⟩→[æ], ⟨ö⟩→[ø], ⟨ü⟩→[y] (front rounded), ⟨y⟩→[ɯ] (close back unrounded); ⟨ç⟩→t͡ʃ, ⟨j⟩→d͡ʒ,
 // ⟨ž⟩→ʒ, ⟨ş⟩→ʃ, ⟨ň⟩→ŋ, ⟨ý⟩→j (glide, vs the vowel ⟨y⟩), ⟨h⟩→x. Word-final (oxytone) stress; unwritten phonemic
-// length not emitted. Validated at 97.9% symbol (91.5% folded) vs wikipron / 94.9% (80.4%) vs kaikki.
+// length not emitted. Referees: wikipron + kaikki.
 describe("Turkmen (Türkmençe) canonical IPA", () => {
     test("the INTERDENTAL hallmark ⟨s⟩→θ, ⟨z⟩→ð", () => {
         expect(phonemizeWord("söz")).toBe("ˈθøð"); // 'word' — ⟨s⟩→θ, ⟨ö⟩→ø, ⟨z⟩→ð
