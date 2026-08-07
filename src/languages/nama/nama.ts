@@ -13,10 +13,12 @@ import { numberToWords, readDigits } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
 interface NamaDef {
+    clicks: readonly string[];
+    plainVowels: readonly string[];
     letters: Record<string, string>;
 }
-
-const CLICK = new Set(["ǀ", "ǁ", "ǂ", "ǃ"]); // dental, lateral, palatal, alveolar
+const DEF = loadManifest<NamaDef>(import.meta.url, "nama.jsonc");
+const CLICK = new Set(DEF.clicks); // dental, lateral, palatal, alveolar
 /** A click letter + its accompaniment (the following g/kh/h/n, longest-first) → the IPA click cluster. */
 function clickIPA(click: string, accomp: string): string {
     switch (accomp) {
@@ -28,8 +30,8 @@ function clickIPA(click: string, accomp: string): string {
     }
 }
 // Non-click letters (nama.jsonc). ⟨kh⟩→[kʰ] handled as a digraph; ⟨g⟩ NOT after a click → [x].
-const LETTER = loadManifest<NamaDef>(import.meta.url, "nama.jsonc").letters;
-const PLAIN_VOWEL = new Set([..."aeiou"]);
+const LETTER = DEF.letters;
+const PLAIN_VOWEL = new Set(DEF.plainVowels);
 
 /** One Nama word → canonical IPA. */
 export function phonemizeWord(word: string): string {

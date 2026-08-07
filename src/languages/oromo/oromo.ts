@@ -13,6 +13,7 @@ import { numberToWords } from "./numbers.ts";
 import { normalizeOromo, normalizeOromoInitialisms, normalizeOromoNumerals } from "./normalize.ts";
 
 interface OromoDef {
+    glottalStopLetters: readonly string[];
     digraphs: Record<string, string>;
     consonants: Record<string, string>;
     vowels: Record<string, string>;
@@ -23,7 +24,7 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
-const APOSTROPHE = new Set(["'", "ʼ", "’"]); // ' ʼ ’ → glottal stop
+const APOSTROPHE = new Set(DEF.glottalStopLetters); // ' ʼ ’ → glottal stop
 
 /** Scan a lowercased Oromo word → IPA units (digraphs, gemination, length, glottal stop). */
 function scan(w: string): string[] {

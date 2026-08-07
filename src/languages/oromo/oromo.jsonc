@@ -10,6 +10,12 @@
     "provenance": "Authored from the standard Qubee orthography + Oromo phonology; cross-checked against epitran orm-Latn.",
 
     // Multi-letter graphemes (longest-first).
+    // The three characters that write the GLOTTAL STOP: ASCII ⟨'⟩, the modifier letter ⟨ʼ⟩ (the
+    // typographically correct one), and the right single quote ⟨’⟩ that word processors substitute for it.
+    // All three occur in real Oromo text, so the engine treats them as one letter — which also means an
+    // apostrophe in Oromo is never punctuation to be stripped.
+    "glottalStopLetters": ["'", "ʼ", "’"],
+
     "digraphs": {
         "ch": "t͡ʃ", "dh": "ᶑ", "ny": "ɲ", "ph": "pʼ", "sh": "ʃ"
     },

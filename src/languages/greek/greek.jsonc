@@ -16,6 +16,19 @@
 
     // Single vowel letters → sound (a/e/i/o/u). Front sounds e/i trigger velar palatalisation.
     "vowels": { "α": "a", "ε": "e", "η": "i", "ι": "i", "ο": "o", "υ": "i", "ω": "o", "ϊ": "i", "ϋ": "i" },
+    // ⚠ THREE CONSONANT-LETTER CLASSES, each the environment of one Modern Greek sandhi rule.
+    //
+    // "voiceless" — after ⟨ι⟩-type palatalisation, a voiceless consonant takes the voiceless glide [ç] and
+    // anything else takes [ʝ]. ⟨σ⟩ and its word-final form ⟨ς⟩ both appear: the same letter, two shapes.
+    "voiceless": ["π", "τ", "κ", "θ", "φ", "χ", "σ", "ς", "ξ", "ψ"],
+    // "auVoiced" — ⟨αυ ευ ηυ⟩ are [av ev iv] before a VOICED sound and [af ef if] before a voiceless one.
+    // The list holds DIGRAPHS as well as letters (⟨μπ ντ γκ γγ⟩ are the voiced-stop spellings), so the test
+    // has to try two characters before one.
+    "auVoiced": ["β", "γ", "δ", "ζ", "λ", "μ", "ν", "ρ", "μπ", "ντ", "γκ", "γγ"],
+    // "sigmaVoiced" — ⟨σ⟩ voices to [z] before a voiced OBSTRUENT or nasal. Shorter than "auVoiced" on
+    // purpose: ⟨ζ λ ρ⟩ are absent because a following ⟨σ⟩+ζ/λ/ρ does not trigger the assimilation.
+    "sigmaVoiced": ["β", "γ", "δ", "μ", "ν", "μπ", "ντ", "γκ", "γγ"],
+
     "vowelDigraphs": { "αι": "e", "ει": "i", "οι": "i", "υι": "i", "ου": "u" },
 
     // Single consonant letters → default IPA (context rules in greek.ts refine κ/γ/χ/σ/λ/ν).

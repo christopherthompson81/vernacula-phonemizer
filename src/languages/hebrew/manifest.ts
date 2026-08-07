@@ -32,6 +32,10 @@ export interface HebrewManifest {
     name: string;
     script: readonly string[];
     consonants: Record<string, string>;
+    /** Gutturals whose word-final patach is FURTIVE — read before the consonant, not after it. */
+    furtivePatachGutturals: readonly string[];
+    /** The one-letter prefixes under which a word-initial sheva is realised [e]. */
+    proclitics: readonly string[];
     dageshHard: Record<string, string>;
     vowels: Record<string, string>;
     clausePunctuation: Record<string, string>;

@@ -23,6 +23,12 @@
 
     // Single letters. Open-vowel letters ⟨è ò ù⟩; acute ⟨á é í ó ú⟩ = stressed base vowel (stress found
     // separately, in papiamento.ts).
+    // Every letter that writes a vowel, plain and accented. This is used for COUNTING, not for scanning: to
+    // place the stress of an acute-marked word, papiamento.ts counts the vowel letters BEFORE the acute and
+    // uses that count to find the matching vowel segment. A vowel letter missing here would shift the count
+    // and pin the stress on the wrong syllable.
+    "vowelLetters": ["a", "e", "i", "o", "u", "è", "ò", "ù", "á", "é", "í", "ó", "ú", "à", "ì"],
+
     "letters": {
         "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "è": "ɛ", "ò": "ɔ", "ù": "ø",
         "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "à": "a", "ì": "i",
