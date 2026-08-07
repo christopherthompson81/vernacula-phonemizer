@@ -10,6 +10,10 @@ export interface LugandaManifest {
     name: string;
     script: readonly string[];
     graphemes: Record<string, string>;
+    /** The five vowel letters — a doubled one is length, not the geminate a doubled consonant makes. */
+    vowelLetters: readonly string[];
+    /** The obstruent letters a preceding ⟨n m⟩ prenasalises into one onset unit. */
+    prenasalisable: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: LugandaNumbers;
 }

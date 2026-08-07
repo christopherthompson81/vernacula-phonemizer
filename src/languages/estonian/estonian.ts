@@ -23,6 +23,7 @@ interface NumbersDef {
 }
 interface EstonianDef {
     graphemes: Record<string, string>;
+    vowelLetters: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
 }
@@ -30,7 +31,7 @@ const DEF = loadManifest<EstonianDef>(import.meta.url, "estonian.jsonc");
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const N = DEF.numbers;
-const VOWEL_LETTERS = new Set([..."aeiouõäöüáéíóúy"]); // + accented loan vowels and loan ⟨y⟩ (→[i])
+const VOWEL_LETTERS = new Set(DEF.vowelLetters); // + accented loan vowels and loan ⟨y⟩ (→[i])
 
 /** Phonemize a single Estonian word to canonical IPA (segmental + gemination + fixed first-syllable stress). */
 export function phonemizeWord(word: string): string {

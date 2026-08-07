@@ -41,6 +41,14 @@
         "v": "v", "w": "w", "x": "ks", "y": "j", "z": "z"
     },
 
+    // The five VOWEL LETTERS. Two rules in luganda.ts read them: the DOUBLING split (a doubled vowel is
+    // length, a doubled consonant is a geminate [Cː]), and the two-letter grapheme test that admits a
+    // vowel-vowel key.
+    "vowelLetters": ["a", "e", "i", "o", "u"],
+    // The obstruent letters that a preceding ⟨n m⟩ PRENASALISES (⟨mb nd ŋk⟩ → ᵐb ⁿd ᵑk, one onset unit).
+    // ⟨ɡ⟩ (U+0261) is listed beside ASCII ⟨g⟩ as a defensive alias — Luganda text is written with ⟨g⟩.
+    "prenasalisable": ["b", "p", "f", "v", "t", "d", "c", "j", "k", "ɡ", "g"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },

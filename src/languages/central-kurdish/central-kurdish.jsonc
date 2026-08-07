@@ -49,6 +49,13 @@
         "connective": "و"
     },
 
+    // Every letter that unambiguously WRITES a vowel — ⟨ا ە ێ ۆ⟩. This is the environment for the glide
+    // test in central-kurdish.ts: ⟨و⟩ and ⟨ی⟩ are the two ambivalent letters, read as the glides [w]/[j]
+    // word-initially or beside one of these, and as the vowels [uː]/[iː] between consonants. They are
+    // deliberately NOT in the list themselves — that is what keeps ⟨وو⟩ and ⟨یی⟩ from making each other
+    // glides, unlike the Balochi rule of the same shape.
+    "vowelLetters": ["ا", "ە", "ێ", "ۆ"],
+
     "clausePunctuation": {
         "،": ",", "؛": ",", "؟": "?", ".": ".", "?": "?", "!": "!", ",": ",", ":": ",", "…": "."
     }

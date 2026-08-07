@@ -10,6 +10,8 @@ export interface WolofManifest {
     name: string;
     script: readonly string[];
     graphemes: Record<string, string>;
+    /** The vowel letters (plain + ATR ⟨é ó⟩ + ⟨ë à⟩) — a doubled one is length, not a geminate. */
+    vowelLetters: readonly string[];
     clausePunctuation: Record<string, string>;
 }
 
