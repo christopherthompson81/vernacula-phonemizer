@@ -64,7 +64,7 @@ function expandDotted(s: string, body: string, word: string): string {
 
 /** Era markers. `Baada ya Kristo` is attested in the corpus itself ("1000-1300 Baada ya Kristo"); its
  *  counterpart `Kabla ya Kristo` is the standard Swahili for BC/BCE. The DOTTED spellings are expanded
- *  first (playbook ordering: a multi-dot abbreviation must be consumed before anything reads its interior
+ *  first (⚠ a multi-dot abbreviation must be consumed before anything reads its interior
  *  dot as a phrase break), and bare `BC` is required to follow a NUMBER — unlike `BCE`, two bare capitals
  *  are otherwise a perfectly ordinary initialism, and the corpus's one instance is "Takribani 1000 BC". */
 const BCE_WORD = "Kabla ya Kristo";
@@ -111,15 +111,14 @@ export function normalizeSwahili(input: string): string {
     //    and was EMITTED RAW into the phoneme stream ("thelathini º k"). Must precede step 5.
     s = s.replace(/º/gu, "°");
 
-    // 3) THOUSANDS DE-GROUPING, before anything else numeric (playbook ordering rule #1): the grouping
+    // 3) THOUSANDS DE-GROUPING, before anything else numeric: ⚠ the grouping
     //    comma is otherwise read as clause punctuation and the tail as a separate number — `1,000` came
     //    out *moja , sifuri* and `755,688` as two numbers with a pause between them. ×44.
     //    Exactly three digits per block, so a decimal comma (none occur here, but Swahili permits it)
     //    could never be swallowed.
-    //    THE TRAILING GUARD EXCLUDES A DECIMAL, NOT A CLAUSE MARK. `(?![\d.,])` refuses to de-group a number
-    //    followed by its own sentence comma or period, so `24,000, na wengine` read *ishirini na nne , SIFURI ,*
-    //    — the group split off and `000` spoken as zero. Found independently by the zu and xh runs (#606/#607),
-    //    both of which had copied this guard from here, and verified in main before fixing. The mark is only a
+    //    ⚠ THE TRAILING GUARD MUST EXCLUDE A DECIMAL, NOT A CLAUSE MARK. A plain `(?![\d.,])` refuses to
+    //    de-group a number followed by its own sentence comma or period, so `24,000, na wengine` reads
+    //    *ishirini na nne , SIFURI ,* — the group splits off and `000` is spoken as zero. The mark is only a
     //    separator when a DIGIT follows it: `(?![\d]|,\d)`.
     s = s.replace(/(?<![\d.,])(\d{1,3})(,\d{3})+(?![\d]|,\d)/gu, (whole) => whole.replace(/,/gu, ""));
 
@@ -185,7 +184,7 @@ export function normalizeSwahili(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d\p{L}])/gu, (_m, int: string, frac: string) =>
         `${int} nukta ${[...frac].join(" ")}`);
 
-    // 8) DOTTED abbreviations before BARE ones (playbook ordering: multi-dot before single-dot, era
+    // 8) DOTTED abbreviations before BARE ones (⚠ multi-dot before single-dot, era
     //    markers before generic abbreviations) — `B.C.E.` must be claimed before `BC` can bite into it.
     for (const [body, word] of DOTTED) s = expandDotted(s, body, word);
     for (const [re, word] of BARE_ERA) s = s.replace(re, word);

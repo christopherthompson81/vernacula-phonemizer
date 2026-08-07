@@ -126,17 +126,17 @@ const nfc = (s: string): string => s.normalize("NFC");
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zåäöéA-ZÅÄÖÉ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
-// #562 symbol normalization — Swedish (procent/kilometer/dollar are invariant plurals).
+// symbol normalization — Swedish (procent/kilometer/dollar are invariant plurals).
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
     // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
     // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
     multiply: { times: "gånger" },
@@ -173,7 +173,7 @@ const SYMBOLS = makeSymbolNormalizer({
 class SwedishPhonemizer implements Phonemizer {
     text(input: string): string {
         // NFC first so decomposed å/ä/ö/é tokenize as single letters (the TOKEN class matches only precomposed).
-        // #562 order: normalize.ts, then the INITIALISM pass (which must see abbreviations already expanded
+        // order: normalize.ts, then the INITIALISM pass (which must see abbreviations already expanded
         // and the inflectional colon already resolved), then the shared symbol tier — which still needs to
         // see number–unit adjacency, so normalize.ts leaves digits as digits.
         const normalized = SYMBOLS(normalizeSwedishInitialisms(normalizeSwedish(input)));

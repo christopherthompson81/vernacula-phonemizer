@@ -56,7 +56,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class SerbianPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: normalize.ts owns the whole sequence, INCLUDING the shared symbol tier — its step 9
+        // order: normalize.ts owns the whole sequence, INCLUDING the shared symbol tier — its step 9
         // has to sit between the clock (which needs the colon) and the decimal fold (which destroys the
         // number the tier's count agreement reads), so the tier cannot be applied around this call the
         // way most engines do it. See the ordering comments there.

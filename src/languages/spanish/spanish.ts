@@ -65,10 +65,10 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation; // ¿¡ openers are silent → a
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-záéíóúüñ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
@@ -93,12 +93,12 @@ function wordIpa(word: string): string {
     return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
 }
 
-// #562 symbol normalization — Spanish (shared by es and es-419; the words are variety-neutral).
+// symbol normalization — Spanish (shared by es and es-419; the words are variety-neutral).
 const SYMBOLS = makeSymbolNormalizer({
     // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `y` ×1141 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
@@ -117,7 +117,7 @@ const SYMBOLS = makeSymbolNormalizer({
         km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
         kg: ["kilogramo", "kilogramos"], mg: ["miligramo", "miligramos"] },
     exponentWords: { squared: ["cuadrado", "cuadrados"], cubed: ["cúbico", "cúbicos"] },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
     // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
     // they are different words (kilómetros cuadrados but veinte al cuadrado).
@@ -136,7 +136,7 @@ class SpanishPhonemizer implements Phonemizer {
     constructor(private readonly americas = false) {}
 
     text(input: string): string {
-        // #562 normalization order: general text normalization (abbreviations, era markers, ordinal
+        // normalization order: general text normalization (abbreviations, era markers, ordinal
         // indicators, times, dates) → INITIALISMS → SYMBOLS (%, currency, units) last, since the time rule
         // upstream has already claimed the hour. Roman numerals need no ordering care here: `es` is not in
         // the registry's ROMAN_NATIVE set, so the shared pass has already converted them before text().

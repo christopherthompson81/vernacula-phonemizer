@@ -30,7 +30,7 @@
  *                                                      `… norr om 1770. De kan …`, `… 2021. Vissa …`)
  *
  * So the largest rule in every sibling is DELIBERATELY ABSENT here; Swedish writes the ordinal with the
- * COLON suffix instead (`1:a`, `3:e`, `37:e`). **The invariant the playbook asks for, stated and measured:
+ * COLON suffix instead (`1:a`, `3:e`, `37:e`). **The invariant, stated and measured:
  * ZERO utterance-final sentence pauses are lost, because no rule in this file matches a digit followed by a
  * bare period.** The clock rule requires two digits after the dot AND a legal minute value; the century
  * rule requires a hyphen; the year rule rewrites the digits and leaves the period untouched.
@@ -51,7 +51,7 @@
  * gates its pair-wise year on `in|of|since|…`; measured here, a Swedish marker list (`år|sedan|från|under|
  * mellan|` + month names) catches only 41 of the ~110 four-digit numbers in range, which would leave
  * `år 1945` reading *nittonhundrafyrtiofem* and `1945 och` reading *ettusenniohundrafyrtiofem* in the same
- * corpus — trap 17 (a "too big to do here" item is a count)'s "the inconsistency is the tell". Going unconditional is safe here for a reason
+ * corpus — ⚠ the INCONSISTENCY is the tell. Going unconditional is safe here for a reason
  * specific to Swedish: the hundreds reading is idiomatic for a four-digit QUANTITY too (*sextonhundra
  * kilometer*, *tolvhundra skalbolag*), so the two shapes the gate would have protected — `1600 km` and
  * `1200 skalbolag`, the only non-year uses in range — are not errors under it. 2000+ is left alone: both
@@ -79,7 +79,7 @@ const THOUSAND = MANIFEST.numbers.thousand; // "tusen"
  * ORDINALS 1–19, the irregular table. Every one is in the NST lexicon (`accent-stress.tsv`) except
  * `sextonde`, `sjuttonde` and `nittonde`, which are COMPOSED the way the attested `trettonde` /
  * `fjortonde` / `femtonde` are — cardinal + `-de` — rather than asserted. 20 and up is compositional
- * (see `ordinal`), which is what trap 13 (pin the rule's BRANCHES) asks for: a table whose branches the corpus does not exercise
+ * (see `ordinal`), which pins the rule's BRANCHES: a table whose branches the corpus does not exercise
  * is a table that is wrong where nobody looked.
  */
 const ORD_1_19: readonly string[] = [
@@ -133,7 +133,7 @@ export function hundredsYear(n: number): string | undefined {
  * over sv_se: **5 utterance-final pauses** were lost by the first draft, at `… tar tag i ens arm, etc.`,
  * `… storytelling, etc.)`, `… ost, tonfisk, etc.`, `… omkring 10 000 f.v.t.`, `… templet 323 f.Kr.` and
  * `… fram till ungefär år 1100 e.Kr.` — the same collision as the Slovak `N.` problem, approached from the
- * abbreviation side rather than the ordinal side, and the mechanism the playbook records as Polish's
+ * abbreviation side rather than the ordinal side, and the mechanism also seen in Polish's
  * `keepFinal`.
  *
  * ONLY SOME ABBREVIATIONS CAN END A SENTENCE, and which ones is a measurement, not a guess:
@@ -232,7 +232,7 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(["usa", "os", "ai", "usoc"]
  * accent/stress table over ordinary words — so, as in German and Dutch, `isRecorded` is always false and
  * the lexical facts live entirely in ACRONYM_LETTERS above.
  *
- * ORDERING, verified end-to-end rather than asserted (trap 16 (before declaring a class out of scope)): this pass must run after the Roman-numeral
+ * ORDERING, verified end-to-end rather than asserted : this pass must run after the Roman-numeral
  * pass, or `XVI` is spelled EKS-VE-I. Swedish is NOT in `registry.ts`'s `ROMAN_NATIVE`, so `normalizeRomans`
  * wraps `engine.text()` and the numerals are already digits by the time this file sees them. A test pins
  * that through the real phonemizer with `XV`, whose letters would be unreadable if the order were wrong.
@@ -287,7 +287,7 @@ export function normalizeSwedish(input: string): string {
     //    the number path as two numerals and read *ett fyrahundra*, `5 000 000` as *fem noll noll*, and
     //    `24 000` as *tjugofyra noll*. Includes NBSP and the narrow NBSP, which is what a typesetter
     //    emits. It must precede the century and year rules (steps 9–10) so `1 400 människor` and
-    //    `1400-talet` get the SAME hundreds reading — the inconsistency trap 17 (a "too big to do here" item is a count) warns about.
+    //    `1400-talet` get the SAME hundreds reading — the inconsistency to avoid.
     do {
         prev = t;
         t = t.replace(/(\d)[   ](\d{3})(?!\d)/gu, "$1$2");
@@ -394,7 +394,7 @@ export function normalizeSwedish(input: string): string {
     // 10) RANGES (11). A dash between numerals is spoken `till`, and it was dropped outright, so
     //     `2-3 km tjock` read *två tre kilometer*. The RIGHT-EDGE guard is what excludes the five SCORES
     //     (see the header): a real range is followed by `)` or by a lowercase word. The operand class ends
-    //     in a digit (trap 14 (agreement cannot be applied to digits)) so a trailing clause comma cannot be eaten, and admits an interior comma so
+    //     in a digit so a trailing clause comma cannot be eaten, and admits an interior comma so
     //     the decimal range `4,2-3,9 miljoner` is one match rather than two.
     //
     //     THE GUARD IS A BLACKLIST, NOT A WHITELIST, and that is the second version. The first accepted a
@@ -432,7 +432,7 @@ export function normalizeSwedish(input: string): string {
     //
     //     ⚠ BUT IT DOES DECLINE A NUMBER THE SYMBOL TIER STILL HAS TO SEE, and this was the one regression
     //     the corpus diff would have caught if the probe had not: converting an operand to words destroys
-    //     the number–unit ADJACENCY `makeSymbolNormalizer` matches on (trap 14 (agreement cannot be applied to digits), and step 4's "units before
+    //     the number–unit ADJACENCY `makeSymbolNormalizer` matches on (and step 4's "units before
     //     decimals" coupling). `1 300 km av Trans-Alaska…` and `en 1600 km lång väg` came out as
     //     *trettonhundra* / *sextonhundra* followed by a BARE [km] — the unit silently lost, which is worse
     //     than the un-idiomatic *ettusen trehundra kilometer* it replaced. Two utterances, both measured, and
@@ -474,7 +474,7 @@ export function normalizeSwedish(input: string): string {
 
     // 16) AMPERSAND (2) — `bed & breakfasts`, `College of Arts & Sciences`. Dropped outright today, so the
     //     two sides ran together with no separation at all. Both instances sit inside an English phrase;
-    //     `och` is still strictly better than silence, which is the #584 argument and the one nb and da
+    //     `och` is still strictly better than silence, the same argument nb and da
     //     made for the same shape.
     t = t.replace(/\s*[&＆]\s*/gu, " och ");
 

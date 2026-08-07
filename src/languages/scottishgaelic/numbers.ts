@@ -14,7 +14,7 @@
  *  2. **The particle ⟨a⟩** introduces a bare counting numeral: a h-aon, fichead agus a còig, ceud agus a h-ochd.
  *  3. **h- before a vowel-initial counting form** after ⟨a⟩: aon → `a h-aon`, ochd → `a h-ochd`. Gaelic writes
  *     the hyphen (Irish writes `a haon`); phonemizeWord strips it, so both reach the g2p as h + vowel.
- *  4. **★ LENITION ONLY — no eclipsis.** This is the headline divergence from Irish. Irish eclipses a magnitude
+ *  4. **⚠ LENITION ONLY — no eclipsis.** This is the headline divergence from Irish. Irish eclipses a magnitude
  *     after 7–10 (seacht gcéad); Gaelic has no eclipsis at all. Only ⟨dà⟩ lenites the magnitude it counts
  *     (dà cheud "200", dà mhìle "2000"); 3–10 leave it bare (trì ceud, seachd ceud, naoi mìle).
  *  5. **⟨deug⟩ lenites after dhà** only: a h-aon deug "11", `a dhà dheug` "12", a trì deug "13".

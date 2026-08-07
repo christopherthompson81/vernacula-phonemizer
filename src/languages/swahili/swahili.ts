@@ -194,7 +194,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "na",
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
@@ -222,7 +222,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class SwahiliPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 ORDER: the shared symbol tier runs FIRST, then normalize.ts. The tier matches on a raw
+        // ORDER: the shared symbol tier runs FIRST, then normalize.ts. The tier matches on a raw
         // `<number> %` adjacency, and normalize.ts's decimal rewrite (`1.5` → `1 nukta 5`) destroys
         // exactly that adjacency — the reverse order would have left a percent sign stranded on any
         // decimal. Nothing normalize.ts emits can create a new percent sign, so the order is safe.
@@ -254,7 +254,7 @@ class SwahiliPhonemizer implements Phonemizer {
  * The correct reading is Swahili letter names, which `core/initialisms.ts` would supply given an
  * `acronymLetters` table — but the Swahili run found no source for them, so none is authored. Until one
  * exists an unreadable acronym stays a cluster (GPS → [ɠps]). That is a MISSING reading rather than a
- * confidently wrong one, which is the trade the playbook's standing rule on data asks for.
+ * confidently wrong one, which is the trade an unsourced substitute always loses.
  */
 export function createSwahili(): Phonemizer {
     return new SwahiliPhonemizer();

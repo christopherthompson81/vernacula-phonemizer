@@ -51,7 +51,7 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * #562 Slovak count-form selector: 1 → 0 (sg), exactly 2/3/4 → 1 (nominative plural), everything else → 2
+ * Slovak count-form selector: 1 → 0 (sg), exactly 2/3/4 → 1 (nominative plural), everything else → 2
  * (genitive plural).
  *
  * NOT the shared `slavicCountForm`, and NOT Czech's final-digit selector either — this is the one place
@@ -75,7 +75,7 @@ export const skCountForm = (n: number): number => (n === 1 ? 0 : n === 2 || n ==
  * sourcing check can read the declaration.
  */
 export const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.

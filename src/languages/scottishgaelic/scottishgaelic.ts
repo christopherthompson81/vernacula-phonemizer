@@ -3,10 +3,10 @@
  * A rule-based grapheme scan on the BROAD/SLENDER axis ("caol le caol": a consonant is velarized
  * [Cˠ]/dental next to a/o/u, palatalized [Cʲ] next to e/i), self-contained (Irish's engine is lexicon-bound and
  * diverges on the values below, so this isolates it). The Scottish hallmarks:
- *   ★★ PRE-ASPIRATION: a medial/final fortis ⟨p t c⟩ → [hp ht̪ xk] (mac→maxk, cat→kʰaht̪); word-initial → the
+ *   ⚠ PRE-ASPIRATION: a medial/final fortis ⟨p t c⟩ → [hp ht̪ xk] (mac→maxk, cat→kʰaht̪); word-initial → the
  *      aspirated [pʰ t̪ʰ kʰ].
- *   ★ ⟨b d g⟩ → the UNASPIRATED lenis [p t̪ k] (NOT Irish's voiced [bˠ d̪ˠ ɡ]).
- *   ★ ⟨ao⟩ → [ɯː] (the signature vowel).
+ *   ⚠ ⟨b d g⟩ → the UNASPIRATED lenis [p t̪ k] (NOT Irish's voiced [bˠ d̪ˠ ɡ]).
+ *   · ⟨ao⟩ → [ɯː] (the signature vowel).
  * First-syllable stress (native default); unstressed short vowels reduce to [ə]. The data (broad/slender maps,
  * lenition digraphs, vowel clusters) lives in scottishgaelic.jsonc. Referee: wikipron gla_latn_broad (human,
  * MULTI-DIALECT).
@@ -142,10 +142,10 @@ export const numberToWords = makeNumberToWords(M.numbers);
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zàèìòùáéíóúA-ZÀÈÌÒÙÁÉÍÓÚ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
