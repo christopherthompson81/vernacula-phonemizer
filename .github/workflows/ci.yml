@@ -26,12 +26,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - name: pack and assert the fence holds
-        run: |
-          npm pack --dry-run --json > /tmp/pack.json
-          node -e '
-            const files = require("/tmp/pack.json")[0].files.map(f => f.path);
-            const leaked = files.filter(p => /^(docs|tools|test)\//.test(p) || /\.test\.ts$/.test(p));
-            if (leaked.length) { console.error("would publish:\n  " + leaked.join("\n  ")); process.exit(1); }
-            console.log(`ok — ${files.length} files, no docs/ tools/ test/`);
-          '
+      # Same script `npm run ci` runs locally — inline here it could only be exercised by pushing.
+      - run: npm run check:package
