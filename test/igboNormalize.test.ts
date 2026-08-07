@@ -51,13 +51,9 @@ describe("igbo normalization", () => {
     });
 
     test("⚠ the separator is `ntụkpọ`, which the corpus does not contain — a dictionary settles it", () => {
-        // ⚠ THIS ASSERTION USED TO PIN THE OPPOSITE: `2.5` → "2 5", separator silent, on the grounds that no word
-        // exists. Every corpus probe was empty (zero digit-point-digit; `ntụkpọ` and every variant 0; the 89
-        // whole-word `point` hits all English text inside the Igbo wiki; `ntụpọ` 552 but meaning a SPOT/blemish;
-        // `akara` 16,476 but a mark or score, and the corpus writes `akara 2.3 na 2.7` with a bare period). The
-        // dictionary reading is `ǹtụ̀kpọ`, n. "decimal point; decimal number" — Nkọwa okwu, whose own example is
-        // definitional: "E ji ntụkpọ ekewapụ nọmba nnuzuroke na nọmba ọgwa". A written corpus is weak evidence
-        // about a SPOKEN symbol: writers type `2.5`, they never spell out how they say it.
+        // ⚠ A WRITTEN CORPUS IS WEAK EVIDENCE ABOUT A SPOKEN SYMBOL: writers type `2.5`, they never spell out
+        // how they say it, so zero corpus hits for a decimal word does NOT mean the language lacks one. Sourced
+        // instead from Nkọwa okwu: `ǹtụ̀kpọ`, n. "decimal point; decimal number".
         expect(normalizeIgbo("2.5")).toBe("2 ntụkpọ 5");
         // Untoned, like every other word this layer emits — igbo.ts reads tone only when marked, and the toned
         // headword would voice ˩ tones (n̩˩tʊ˩k͡pɔ) that Igbo standard orthography does not write.
