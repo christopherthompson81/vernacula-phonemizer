@@ -404,7 +404,7 @@ export function normalizeGreek(input: string): string {
     s = s.replace(/(\d)\s?¼/gu, "$1 και ένα τέταρτο");
     s = s.replace(/(\d)\s?¾/gu, "$1 και τρία τέταρτα");
 
-    // 11c) RELATIONAL AND DIVISION SIGNS. ⚠ SOURCED ENTIRELY AT TIER 4 — the corpus has nothing to give
+    // 11b) RELATIONAL AND DIVISION SIGNS. ⚠ SOURCED ENTIRELY AT TIER 4 — the corpus has nothing to give
     //      here, and says so in the two ways this issue has learned to distinguish:
     //
     //        `ίσον`  ×0 token / ×0 substring — ABSENT
@@ -427,7 +427,7 @@ export function normalizeGreek(input: string): string {
     s = s.replace(/\s?>\s?/gu, " μεγαλύτερο από ");
     s = s.replace(/\s?÷\s?/gu, " διά ");
 
-    // 11b) THE PARENTHETICAL DASH → A PAUSE. This was reported for a whole sweep as a `signed-number` DROP,
+    // 11c) THE PARENTHETICAL DASH → A PAUSE. This was reported for a whole sweep as a `signed-number` DROP,
     //      and the classification was wrong: it is not a minus, not a designation, and not ambiguous. Greek
     //      writes an APPOSITION between dashes where English would use commas or brackets —
     //      `Ο ναός Πνομ Κρομ –12 χιλιόμετρα νοτιοδυτικά του Σιέμ Ριπ– που βρίσκεται …` — and both dashes were
@@ -452,7 +452,7 @@ export function normalizeGreek(input: string): string {
     //      The `(?<=\S)` guard keeps a sentence-initial dash from producing a leading comma (a SLOT-GAP).
     s = s.replace(/(?<=\S)(?:\s+[–—]\s*|[–—]\s+)/gu, ", ");
 
-    // 11c) THE MINUS → μείον, and this one is ROBUSTNESS, not a measured repair — said plainly because the
+    // 11d) THE MINUS → μείον, and this one is ROBUSTNESS, not a measured repair — said plainly because the
     //      file's other sign rules are corpus-attested and this one cannot be. el_gr contains ZERO true
     //      negatives (all 30 dash-before-digit instances are ranges, designations or the apposition above),
     //      so no gate can see this and the corpus diff for it is empty BY CONSTRUCTION.
@@ -464,7 +464,7 @@ export function normalizeGreek(input: string): string {
     //      designations `COVID-19` and `Chandrayaan-1`), and not a RANGE — the second lookbehind spans a
     //      digit plus at most an ordinal suffix, an abbreviating dot and one space, which is what rejects
     //      `35-40`, `(1469-1539)`, `7:00-8:00` and the spaced `26 - 00`.
-    //      The en/em dashes are gone by step 11b, so this only ever sees ASCII `-` and U+2212.
+    //      The en/em dashes are gone by step 11c, so this only ever sees ASCII `-` and U+2212.
     s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(?<!\p{Nd}[\p{L}\p{M}]{0,2}[.,]?[ \t]?)[-−](?=\p{Nd})/gu, "μείον ");
 
     // 12) SHARED SYMBOL TIER: %, currency, plain units, squared/cubed. AFTER the rate and degree rules,
