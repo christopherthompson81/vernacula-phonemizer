@@ -13,31 +13,31 @@ import { numberToWords } from "../src/languages/luo/numbers.ts";
 // register TONE (H/L) are UNWRITTEN → emitted at a +ATR/toneless default.
 describe("Luo (Dholuo) canonical IPA — greedy g2p (Nilotic: dental contrast + prenasalization)", () => {
     test("DENTAL vs ALVEOLAR: ⟨th dh⟩=θ ð (dental) vs ⟨t d⟩=t d (alveolar)", () => {
-        expect(phonemizeWord("dhano")).toBe("ðano"); //"person" — ⟨dh⟩→ð (dental fricative)
-        expect(phonemizeWord("thum")).toBe("θum"); //"music/instrument" — ⟨th⟩→θ (dental fricative)
-        expect(phonemizeWord("adek")).toBe("adek"); //"three" — ⟨d⟩→d, ⟨k⟩→k (plain alveolar/velar)
-        expect(phonemizeWord("kidi")).toBe("kidi"); //"stone" — ⟨d⟩→d alveolar (not dental)
+        expect(phonemizeWord("dhano")).toBe("ðano"); // "person" — ⟨dh⟩→ð (dental fricative)
+        expect(phonemizeWord("thum")).toBe("θum"); // "music/instrument" — ⟨th⟩→θ (dental fricative)
+        expect(phonemizeWord("adek")).toBe("adek"); // "three" — ⟨d⟩→d, ⟨k⟩→k (plain alveolar/velar)
+        expect(phonemizeWord("kidi")).toBe("kidi"); // "stone" — ⟨d⟩→d alveolar (not dental)
     });
 
     test("PALATALS + velar nasal: ⟨ch⟩=t͡ʃ, ⟨ny⟩=ɲ, ⟨ng'⟩=ŋ, ⟨y⟩=j", () => {
-        expect(phonemizeWord("rech")).toBe("ɾet͡ʃ"); //"fish" — ⟨ch⟩→t͡ʃ, ⟨r⟩→ɾ
-        expect(phonemizeWord("wich")).toBe("wit͡ʃ"); //"head"
-        expect(phonemizeWord("nyang'")).toBe("ɲaŋ"); //"crocodile" — ⟨ny⟩→ɲ, ⟨ng'⟩→ŋ
-        expect(phonemizeWord("ng'ato")).toBe("ŋato"); //"someone" — word-initial ⟨ng'⟩→ŋ
+        expect(phonemizeWord("rech")).toBe("ɾet͡ʃ"); // "fish" — ⟨ch⟩→t͡ʃ, ⟨r⟩→ɾ
+        expect(phonemizeWord("wich")).toBe("wit͡ʃ"); // "head"
+        expect(phonemizeWord("nyang'")).toBe("ɲaŋ"); // "crocodile" — ⟨ny⟩→ɲ, ⟨ng'⟩→ŋ
+        expect(phonemizeWord("ng'ato")).toBe("ŋato"); // "someone" — word-initial ⟨ng'⟩→ŋ
         expect(phonemizeWord("nyaroya")).toBe("ɲaɾoja"); // ⟨y⟩→j
     });
 
     test("PRENASALIZED voiced stops as single units: ⟨mb nd nj ng⟩", () => {
-        expect(phonemizeWord("ndalo")).toBe("ⁿdalo"); //"time/days" — ⟨nd⟩→ⁿd
+        expect(phonemizeWord("ndalo")).toBe("ⁿdalo"); // "time/days" — ⟨nd⟩→ⁿd
         expect(phonemizeWord("mbaka")).toBe("ᵐbaka"); // ⟨mb⟩→ᵐb
-        expect(phonemizeWord("ngano")).toBe("ᵑɡano"); //"story" — ⟨ng⟩→ᵑɡ (prenasalized, vs ⟨ng'⟩→ŋ)
+        expect(phonemizeWord("ngano")).toBe("ᵑɡano"); // "story" — ⟨ng⟩→ᵑɡ (prenasalized, vs ⟨ng'⟩→ŋ)
     });
 
     test("⟨i⟩+{a,e} GLIDE only (conservative — ⟨u⟩+V + ⟨i⟩+high left as hiatus)", () => {
-        expect(phonemizeWord("dhiang'")).toBe("ðjaŋ"); //"cow" — ⟨i⟩+a → j glide, after dental ð
-        expect(phonemizeWord("chíeng'")).toBe("t͡ʃjeŋ"); //"sun/day" — ⟨i⟩+e → j (tone-marked citation → base)
+        expect(phonemizeWord("dhiang'")).toBe("ðjaŋ"); // "cow" — ⟨i⟩+a → j glide, after dental ð
+        expect(phonemizeWord("chíeng'")).toBe("t͡ʃjeŋ"); // "sun/day" — ⟨i⟩+e → j (tone-marked citation → base)
         expect(phonemizeWord("dholuo")).toBe("ðoluo"); // the endonym — ⟨u⟩+o is HIATUS (/ðoluo/), NOT glided to ðolwo
-        expect(phonemizeWord("guok")).toBe("ɡuok"); //"dog" — ⟨u⟩+o kept as a vowel sequence (no ⟨u⟩→w glide)
+        expect(phonemizeWord("guok")).toBe("ɡuok"); // "dog" — ⟨u⟩+o kept as a vowel sequence (no ⟨u⟩→w glide)
     });
 
     test("+ATR/toneless default (ATR + tone unwritten); ⟨ng'⟩ apostrophe robust to ' / ’ / ʼ", () => {

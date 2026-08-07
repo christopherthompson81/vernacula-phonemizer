@@ -24,8 +24,8 @@ describe("Lingala canonical IPA", () => {
     });
 
     test("TONE is written and rendered per nucleus (H=˥, L=˩) — the tonal minimal pair", () => {
-        expect(phonemizeWord("moto")).toBe("mo˩to˩"); // L L"person"
-        expect(phonemizeWord("motó")).toBe("mo˩to˥"); // L H"head"
+        expect(phonemizeWord("moto")).toBe("mo˩to˩"); // L L "person"
+        expect(phonemizeWord("motó")).toBe("mo˩to˥"); // L H "head"
     });
 
     test("no diphthongs — final V+i is hiatus, each vowel its own tone-bearing nucleus", () => {

@@ -86,7 +86,7 @@ describe("greek normalization — numbers written in Greek convention", () => {
         expect(phonemize("το 2,3 τοις", "el")).toBe("to ðio koma tɾia tis");
     });
 
-    test("numberToWords reaches past 10⁶ (5.000.000 fell off the old ceiling)", () => {
+    test("numberToWords reaches past 10⁶ — a ceiling below it silently truncates", () => {
         expect(numberToWords(5_000_000)).toBe("πέντε εκατομμύρια");
         expect(numberToWords(1_500_000)).toBe("ένα εκατομμύριο πεντακόσιες χιλιάδες");
         expect(numberToWords(999)).toBe("εννιακόσια ενενήντα εννέα"); // unchanged below the ceiling
@@ -183,9 +183,9 @@ describe("greek clause marks", () => {
     });
 
     test("the APPOSITION dash is a pause, and the range hyphen is not", () => {
-        // Reported for a whole sweep as a `signed-number` DROP, and misclassified: not a minus, not a
-        // designation, not ambiguous. Greek brackets an aside between dashes and BOTH were silently dropped,
-        // so the aside ran into its host clause with no break.
+        // ⚠ MISCLASSIFIED BY SHAPE as a `signed-number` DROP — it is not a minus, not a designation and not
+        // ambiguous. Greek brackets an ASIDE between dashes; drop both and the aside runs into its host
+        // clause with no break at all.
         const g = phonemize("Ο ναός Πνομ Κρομ –12 χιλιόμετρα νοτιοδυτικά του Σιέμ Ριπ– που βρίσκεται στην κορυφή.", "el");
         expect(g).toContain("kɾom , ðeka ðio");
         expect(g).toContain("ɾip , pu");

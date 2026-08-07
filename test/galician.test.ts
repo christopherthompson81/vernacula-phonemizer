@@ -4,8 +4,8 @@ import { createGalician, phonemizeWord } from "../src/languages/galician/galicia
 
 // Galician (gl, galego) — Ibero-Romance (~2.4M), sister of Portuguese. A shallow near-phonemic orthography, so the
 // engine reuses the Spanish shape (left-to-right scan + vowel-run glide classifier + spirantization + rule-based
-// stress). The Galician-specific deltas — all derived empirically from the wikipron glg_latn_broad referee (10,237
-// human words, 90.9% folded / 98.4% symbol accuracy): ⟨x⟩/⟨j⟩→ʃ, ⟨g⟩→ɡ (no Castilian jota), ⟨nh⟩→ŋ, coda/pre-velar
+// stress). The Galician-specific deltas — all derived empirically from the wikipron glg_latn_broad referee
+// (human): ⟨x⟩/⟨j⟩→ʃ, ⟨g⟩→ɡ (no Castilian jota), ⟨nh⟩→ŋ, coda/pre-velar
 // ⟨n⟩→ŋ, and the standard RAG distinción (⟨z⟩/⟨c+e,i⟩→θ). The 7-vowel open-mids ɛ/ɔ are lexical + unmarked in
 // spelling → we emit close-mid e/o.
 describe("Galician canonical IPA — Spanish-shaped Ibero-Romance engine + Galician deltas", () => {

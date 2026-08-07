@@ -15,11 +15,11 @@ describe("Kikuyu canonical IPA — greedy g2p (Bantu fricativization + prenasali
     test("7-vowel ATR: the TILDE is vowel QUALITY not nasal — ⟨ĩ⟩=e, ⟨ũ⟩=o; ⟨e⟩=ɛ, ⟨o⟩=ɔ", () => {
         expect(phonemizeWord("Gĩkũyũ")).toBe("ɣekojo"); // ⟨ĩ⟩→e, ⟨ũ⟩→o (the endonym)
         expect(phonemizeWord("gatego")).toBe("ɣatɛɣɔ"); // ⟨e⟩→ɛ, ⟨o⟩→ɔ
-        expect(phonemizeWord("mũndũ")).toBe("moⁿdo"); //"person" — ⟨ũ⟩→o, ⟨nd⟩→ⁿd
+        expect(phonemizeWord("mũndũ")).toBe("moⁿdo"); // "person" — ⟨ũ⟩→o, ⟨nd⟩→ⁿd
     });
 
     test("Bantu FRICATIVIZATION: ⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ, ⟨c⟩=ɕ; ⟨r⟩=ɾ", () => {
-        expect(phonemizeWord("thaatũ")).toBe("ðaːto"); //"three" — ⟨th⟩→ð, ⟨aa⟩→aː, ⟨ũ⟩→o
+        expect(phonemizeWord("thaatũ")).toBe("ðaːto"); // "three" — ⟨th⟩→ð, ⟨aa⟩→aː, ⟨ũ⟩→o
         expect(phonemizeWord("biacara")).toBe("βiaɕaɾa"); // ⟨b⟩→β, ⟨c⟩→ɕ, ⟨r⟩→ɾ
         expect(phonemizeWord("gatarũ")).toBe("ɣataɾo"); // ⟨g⟩→ɣ (Dahl's Law is orthographic)
     });
@@ -56,7 +56,7 @@ describe("Kikuyu cardinal numbers — the E5x citation series", () => {
     test("hundreds take the cl.6 magana series", () => {
         expect(numberToWords(100)).toBe("igana rĩmwe");
         expect(numberToWords(200)).toBe("magana meerĩ");
-        expect(numberToWords(555)).toBe("magana matano mĩrongo ithano na ithano"); //"na" only before the last part
+        expect(numberToWords(555)).toBe("magana matano mĩrongo ithano na ithano"); // "na" only before the last part
     });
     test("thousands + millions; 10⁹ is a THOUSAND MILLION (no borrowed 'billion')", () => {
         expect(numberToWords(1000)).toBe("ngiri ĩmwe");

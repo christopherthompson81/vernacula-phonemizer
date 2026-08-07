@@ -3,11 +3,12 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "../src/languages/guarani/guarani.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
-// Canonical-IPA goldens for Paraguayan Guaraní (gn) — Avañe'ẽ, Tupian (the fleet's first), co-official in Paraguay.
+// Canonical-IPA goldens for Paraguayan Guaraní (gn) — Avañe'ẽ, Tupian, co-official in Paraguay.
 // Signature: the 12-vowel system (⟨y⟩→[ɨ] + six NASAL vowels ⟨ã ẽ ĩ õ ũ ỹ⟩), the PRENASALIZED voiced stops
 // ⟨mb nd⟩→[ᵐb ⁿd] (⟨ng⟩ is always [ŋ]), the glottal ⟨'⟩ (puso)→[ʔ], ⟨ch⟩→[ʃ], ⟨j⟩→[d͡ʒ], ⟨g⟩→[ɰ] / ⟨gu⟩→[w],
-// ⟨ñ⟩→[ɲ]; glide formation (prevocalic i→j, u→w); default final-syllable (oxytone) stress. Validated at 95.2%
-// symbol (75.6% folded, dragged by partly-lexical nasal harmony) vs wikipron gug_latn_broad.
+// ⟨ñ⟩→[ɲ]; glide formation (prevocalic i→j, u→w); default final-syllable (oxytone) stress.
+// ⚠ Referee: wikipron gug_latn_broad — its folded score is dragged down by NASAL HARMONY, which is partly
+// lexical and so not derivable here; symbol accuracy is the meaningful reading.
 describe("Guaraní (Avañe'ẽ) canonical IPA", () => {
     test("12 vowels: ⟨y⟩→ɨ + nasal vowels; the glottal ⟨'⟩ (puso)", () => {
         expect(phonemizeWord("y")).toBe("ˈɨ"); // 'water' — ⟨y⟩ is the high central vowel [ɨ]

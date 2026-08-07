@@ -8,7 +8,7 @@ import {
 
 // Canonical-IPA goldens for Gujarati (gu) — Indo-Aryan, the Gujarati abugida. Reuses the generic abugida engine +
 // the Hindi orchestration (schwa deletion, weight stress, numbers) with a Gujarati-Unicode data file. Validated
-// against wikipron guj (80.4%) + kaikki guj (82.2%), both human. Gujarati has NO phonemic length (ઇ/ઈ→i), ⟨આ⟩=a,
+// against wikipron guj + kaikki guj, both human. Gujarati has NO phonemic length (ઇ/ઈ→i), ⟨આ⟩=a,
 // the ⟨ે⟩/⟨ો⟩ mids are [e]~[ɛ]/[o]~[ɔ], dental t̪/d̪ vs retroflex ʈ/ɖ, ળ→ɭ, ષ→ʂ.
 const gu = (t: string): string => phonemize(t, "gu");
 
@@ -63,12 +63,13 @@ describe("gujarati canonical IPA", () => {
     });
 
     // ————————————————————————————————————————————————————————————————————————————————————————————
-    // TEXT NORMALIZATION. Gujarati reuses HINDI'S ENGINE and used to inherit Hindi's normalizer
-    // and Hindi's symbol words, which are written in DEVANAGARI — excluded by core/unicode.ts
-    // GUJARATI_WORD, so the tokenizer DELETED them. Counts below are from the gu_in FLEURS corpus
-    // (1,996 unique utterances); see src/languages/gujarati/normalize.ts for the full tabulation.
+    // TEXT NORMALIZATION. ⚠ REUSING ANOTHER LANGUAGE'S ENGINE MEANS INHERITING ITS NORMALIZER, and a
+    // normalizer emits WORDS — Hindi's are in DEVANAGARI, which core/unicode.ts GUJARATI_WORD excludes, so
+    // the tokenizer DELETES every one of them. The engine is shared; the emitted vocabulary cannot be.
+    // Counts below are from the gu_in FLEURS corpus (1,996 unique utterances); see
+    // src/languages/gujarati/normalize.ts for the full tabulation.
 
-    test("percent and currency were SILENTLY DROPPED by the inherited Devanagari tier", () => {
+    test("percent and currency use GUJARATI words, not the inherited Devanagari ones", () => {
         // Before: "45%" → [pˈist̪alis] — the percent word was emitted as प्रतिशत and then vanished.
         expect(gu("45%")).toBe(gu("45 ટકા"));
         expect(gu("45%")).toContain(phonemizeWord("ટકા"));

@@ -12,7 +12,7 @@ import { numberToWords } from "../src/languages/mossi/numbers.ts";
 describe("Mooré canonical IPA — greedy g2p + gemination", () => {
     test("dedicated ATR letters ⟨ɛ⟩=ɛ, ⟨ɩ⟩=ɪ, ⟨ʋ⟩=ʊ; ⟨o⟩=o always (no ɔ)", () => {
         expect(phonemizeWord("lakrɛ")).toBe("lakɾɛ"); // ⟨ɛ⟩ → ɛ
-        expect(phonemizeWord("malɛka")).toBe("malɛka"); //"angel" — ⟨ɛ⟩ → ɛ
+        expect(phonemizeWord("malɛka")).toBe("malɛka"); // "angel" — ⟨ɛ⟩ → ɛ
         expect(phonemizeWord("fɩnetre")).toBe("fɪnetɾe"); // ⟨ɩ⟩ → ɪ
         expect(phonemizeWord("boko")).toBe("boko"); // ⟨o⟩ → o (not ɔ)
         expect(phonemizeWord("laloa")).toBe("laloa"); // /ɔ/ is written as the hiatus ⟨oa⟩, not a letter
@@ -39,7 +39,7 @@ describe("Mooré canonical IPA — greedy g2p + gemination", () => {
     });
 
     test("NASAL place assimilation: ⟨n⟩ → ŋ before a velar g/k (FSI /n/=[n,ŋ])", () => {
-        expect(phonemizeWord("tenga")).toBe("teŋɡa"); //"village" — ⟨ng⟩ → ŋɡ (FSI tengá→teŋɡa)
+        expect(phonemizeWord("tenga")).toBe("teŋɡa"); // "village" — ⟨ng⟩ → ŋɡ (FSI tengá→teŋɡa)
         expect(phonemizeWord("sh")).toBe("ʃ"); // ⟨sh⟩ → ʃ (FSI /s/ allophone spelling)
     });
 
