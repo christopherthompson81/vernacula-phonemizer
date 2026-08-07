@@ -13,6 +13,10 @@ export interface AfrikaansManifest {
     vowelsLong: Record<string, string>;
     vowelsShort: Record<string, string>;
     diacriticVowels: Record<string, string>;
+    /** The five bare vowels routed through the open/closed length rule. */
+    bareVowels: readonly string[];
+    /** Every letter that heads a nucleus — bounds the consonant run in that same lookahead. */
+    vowelLetters: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: {
         units: string[];

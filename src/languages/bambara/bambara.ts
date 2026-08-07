@@ -20,7 +20,7 @@ import { latinPhone } from "../../core/latinPhones.ts";
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const NASAL_TILDE = "̃"; // combining tilde — a nasalised vowel (matches the referee's ã õ ũ …)
-const VOWELS = new Set(["i", "e", "ɛ", "a", "ɔ", "o", "u"]); // orthographic oral vowels
+const VOWELS = new Set(MANIFEST.vowelLetters); // orthographic oral vowels (bambara.jsonc)
 const IPA_VOWELS = new Set(["i", "e", "ɛ", "a", "ɔ", "o", "u"]); // their IPA (identical here)
 
 /** Phonemize a single Bambara word to canonical IPA (segmental + nasalisation; tone + length deferred). Accepts

@@ -41,6 +41,17 @@
         "ë": "ə", "ï": "i", "é": "eː", "è": "ɛ", "á": "ɑː", "à": "a", "ó": "oː", "ú": "y", "ü": "y", "ö": "ø"
     },
 
+    // The BARE single vowels — the five letters routed through the open/closed length rule above (the
+    // digraphs and the diacritic vowels carry their own length, so only these need the lookahead).
+    "bareVowels": ["a", "e", "i", "o", "u"],
+    // Every letter that heads a vowel/nucleus, bare or diacritic. This BOUNDS THE CONSONANT RUN in that same
+    // lookahead: the syllable is open iff at most one consonant separates a vowel from the next one, so a
+    // letter missing here would be counted as a consonant and close the syllable that should be open.
+    "vowelLetters": [
+        "a", "e", "i", "o", "u", "y", "ê", "ô", "û", "î", "ë", "ï",
+        "é", "è", "á", "à", "ó", "ú", "ü", "ö"
+    ],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },

@@ -22,6 +22,14 @@
         "v": "b", "w": "w", "x": "ʃ", "y": "ʝ", "z": "θ", "ḥ": "h"
     },
 
+    // The VOWEL LETTERS (plain + written-accent + the diaeresis ⟨ü⟩) — the environment the code rules test
+    // for: a ⟨qu gu⟩ sequence only loses its ⟨u⟩ before one of these, and ⟨i u⟩ only become the rising
+    // glides [j w] before one.
+    "vowelLetters": ["a", "e", "i", "o", "u", "á", "é", "í", "ó", "ú", "ü"],
+    // The FRONT vowel letters — the softening environment: ⟨c⟩ → [θ] (distinción) before one of these, and
+    // ⟨qu gu⟩ drop the [w] before one (⟨gü⟩ is the spelling that keeps it).
+    "frontLetters": ["e", "i", "é", "í"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },

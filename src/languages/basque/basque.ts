@@ -20,13 +20,14 @@ interface BasqueNumbers {
 interface BasqueDef {
     digraphs: [string, string][];
     letters: Record<string, string>;
+    vowelLetters: readonly string[];
     numbers: BasqueNumbers;
 }
 const DEF = loadManifest<BasqueDef>(import.meta.url, "basque.jsonc");
 // Letter tables (basque.jsonc). ⟨h⟩ and the tap/trill ⟨r⟩ are context-dependent — handled in the scan below.
 const DIGRAPHS = DEF.digraphs;
 const LETTER = DEF.letters;
-const VOWELS = new Set([..."aeiou"]);
+const VOWELS = new Set(DEF.vowelLetters);
 
 /** One Basque word → canonical IPA. */
 export function phonemizeWord(word: string): string {

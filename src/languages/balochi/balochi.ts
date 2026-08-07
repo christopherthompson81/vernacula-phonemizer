@@ -20,6 +20,7 @@ import { balochiNumberWords, encliticWord, type BalNumbersDef } from "./numbers.
 interface BalochiDef {
     consonants: Record<string, string>;
     vowels: Record<string, string>;
+    vowelLetters: readonly string[];
     numbers: BalNumbersDef;
     clausePunctuation: Record<string, string>;
 }
@@ -27,7 +28,7 @@ const DEF = loadManifest<BalochiDef>(import.meta.url, "balochi.jsonc");
 const CONS = DEF.consonants;
 const VOW = DEF.vowels;
 const CLAUSE_MARK = DEF.clausePunctuation;
-const VOWEL_LETTERS = new Set([..."اآوىیے"]);
+const VOWEL_LETTERS = new Set(DEF.vowelLetters);
 
 // Cross-script lexicon (arabic <TAB> roman <TAB> ipa). Loaded once; keyed by BOTH spellings → full-voweled IPA.
 let LEX_AR: Map<string, string> | undefined;

@@ -19,14 +19,17 @@ interface AsturianDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    vowelLetters: readonly string[];
+    frontLetters: readonly string[];
 }
 const DEF = loadManifest<AsturianDef>(import.meta.url, "asturian.jsonc");
 const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL_LETTER = new Set([..."aeiouáéíóúü"]);
-const FRONT_LETTER = new Set([..."eiéí"]); // ⟨c⟩ softens to [θ], ⟨qu gu⟩ drop the [w] before these
+// Letter environments (asturian.jsonc): ⟨c⟩ softens to [θ] and ⟨qu gu⟩ drop the [w] before a FRONT letter.
+const VOWEL_LETTER = new Set(DEF.vowelLetters);
+const FRONT_LETTER = new Set(DEF.frontLetters);
 
 /** Scan a lowercased Asturian word into IPA phone tokens. */
 function scan(word: string): string[] {

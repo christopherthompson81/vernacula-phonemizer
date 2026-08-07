@@ -21,10 +21,11 @@ const SHORT = MANIFEST.vowelsShort;
 const DIA = MANIFEST.diacriticVowels;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
-const BARE_VOWELS = new Set(["a", "e", "i", "o", "u"]); // vowels routed through the length rule
 const DEVOICE: Record<string, string> = { b: "p", d: "t", z: "s" }; // word-final devoicing (g→χ, v→f already fixed)
-// every letter that heads a vowel/nucleus — bounds the consonant run in the open/closed lookahead
-const VOWEL_LETTER = new Set(["a", "e", "i", "o", "u", "y", "ê", "ô", "û", "î", "ë", "ï", "é", "è", "á", "à", "ó", "ú", "ü", "ö"]);
+// Letter environments (afrikaans.jsonc): the vowels routed through the length rule, and every letter that
+// heads a nucleus — the latter bounds the consonant run in the open/closed lookahead below.
+const BARE_VOWELS = new Set(MANIFEST.bareVowels);
+const VOWEL_LETTER = new Set(MANIFEST.vowelLetters);
 
 /** Is the bare vowel at index `i` in an OPEN syllable (→ long/tense)? V ends a syllable when ≤1 consonant separates
  *  it from the next vowel: V# / V.V / V.CV are open; VC# and VCC are closed. */

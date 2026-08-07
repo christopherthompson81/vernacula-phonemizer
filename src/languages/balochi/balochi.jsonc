@@ -31,6 +31,13 @@
         "ا": "aː", "آ": "aː", "ے": "eː"
     },
 
+    // Every letter that can WRITE a vowel — the three above plus the two ambivalent matres ⟨و⟩ and ⟨ی/ى⟩,
+    // which are themselves in the set. This is the environment for the glide test in balochi.ts: ⟨و⟩/⟨ی⟩ are
+    // the glides [w]/[j] word-initially or ADJACENT TO another vowel letter, and the long vowels [uː]/[iː]
+    // between consonants. Two matres in a row therefore make each other a glide, which is what the defective
+    // abjad intends.
+    "vowelLetters": ["ا", "آ", "و", "ى", "ی", "ے"],
+
     // NUMBERS — Balochi Arabic spellings; the canonical IPA is resolved through the cross-script lexicon
     // (balochi-lexicon.tsv now carries these headwords with their full vowels — the defective abjad cannot recover
     // them: ⟨هپت⟩ alone scans to *hpt̪). Composed by balochi/numbers.ts.
