@@ -2,48 +2,21 @@
  * Odia (or) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
  * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the or_in FLEURS corpus (1,327 unique utterances, column 3 — the cased, punctuated text):
+ * ⚠ ODIA DIGITS ୦-୯ ARE LIVE in real text (୨୦୦୮, ୧୪୦୦, ୬.୫, ୩:୨, ୩୫ମିମି), unlike several sibling Indic
+ * languages where the lead fails and the inventory is ASCII throughout. `foldNativeDigits` runs in `text()`
+ * BEFORE this pass, because every pattern below is written against ASCII digits; `number()` already folded
+ * them for the bare-numeral path, so the fold changes no reading — it only lets these rules see them.
  *
- *   defect                                       count   what the engine produced BEFORE
- *   ------------------------------------------   -----   ---------------------------------------------
- *   fused 21–99 cardinals (see odia.jsonc)         113    21 → [ˈekɔ kˈoɽie] "one twenty";
- *     (96 of the 113 covered by the authored map)          56 → "ଛଅ ପଚାଶ", six fifty;
- *                                                         1947 → "…ସାତ ଚାଳିଶ", seven forty
- *   Latin `I` used as a DANDA                       23    "…ହୋଇଛି I" → [ˈaᶦ] — the ENGLISH LETTER, and the
- *                                                         sentence break lost. Confidently wrong ×23.
- *   grouped numerals 1,234                          22    7,000 → [sˈat̪ɔ , sˈun̪jɔ] "seven, zero"
- *   decimals N.M                                    20    1.2 → [ˈekɔ . d̪ˈui] — a SENTENCE BREAK mid-number
- *   ordinal suffixes ଶ / ତମ / ମ                     19    18ଶ → [ˈɔʈʰɔɾɔ sˈɔ] — suffix as its own word
- *   times h:mm                                      11    10:00 → [d̪ˈɔsɔ , sˈun̪jɔ] — colon as a comma pause
- *   Latin units km / mm / mi / mph / kph            13    "2-3 km" → [ˈʊkm]; "3136 mm2" left the 2 stranded
- *   Odia unit abbreviations କିମି / ମିମି / କି.ମି.      7    1600 କି.ମି. → [kˈi . mˈi .] — two phrase breaks
- *   rate slash ଏକକ/ଘଣ୍ଟା                             5    480 କିଲୋମିଟର/ଘଣ୍ଟା — the slash silently dropped
- *   percent %                                        4    93% → [t̪ˈin̪i n̪ˈɔbe] — the sign DROPPED
- *   currency $ / US$                               3/1    $5 → [pˈaɲt͡ʃɔ] — the sign DROPPED
- *   dotted Latin initialisms a.m. / U.S. / A.D.      7    "07:19 a.m. ରେ" → two spurious sentence breaks
- *   ଡଃ. / ଡାଃ. / ନଂ.                                 3    a spurious sentence break each
- *   degree °                                         1    35°W → the sign DROPPED
+ * ⚠ A LATIN `I` IS USED AS A DANDA in this orthography's running text. Unclaimed it reads as the ENGLISH
+ * LETTER [ˈaᶦ] and the sentence break is lost — confidently wrong, not merely dropped.
  *
- * ODIA DIGITS ୦-୯ ARE LIVE HERE — 52 of them across 23 runs (୨୦୦୮, ୧୪୦୦, ୬.୫, ୩:୨, ୩୫ମିମି). The same lead
- * failed for fa/ta/te and held for mr (×597); for Odia it holds. `foldNativeDigits` runs in `text()` BEFORE
- * this pass, because every pattern below is written against ASCII digits — and `number()` already folded
- * them for the bare-numeral path, so the fold changes no reading, it only lets these rules see them.
+ * ⚠ NO `\b` ANYWHERE IN THIS FILE. It is ASCII-defined and matches nothing against Odia script, so every
+ * boundary is an explicit `(?<![\p{L}\p{M}])` / `(?![\p{L}\p{M}])` lookaround.
  *
- * `\b` IS NOT USED ANYWHERE IN THIS FILE. It is ASCII-defined and matches nothing against Odia script
- * (playbook trap #1), so every boundary is an explicit `(?<![\p{L}\p{M}])` / `(?![\p{L}\p{M}])` lookaround.
- *
- * SOURCES. Every Odia word emitted below is attested, and where it is, it is attested TWICE:
- *   ପ୍ରତିଶତ    corpus ×9, always POSTPOSED ("20 ପ୍ରତିଶତ", "ଅଶୀ ପ୍ରତିଶତ") — hence no `percentPrefix`.
- *              Confirmed independently on or.wiktionary: "ଶତକଡ଼ା; ପ୍ରତିଶହ — Per cent."
- *   ଡଲାର       corpus ×3 ("କିଛି ବିଲିୟନ୍ US ଡଲାର", "10 ଆମେରିକୀୟ ଡଲାର୍"), postposed. THE ONLY WORD HERE
- *              WITH NO SECOND WITNESS: neither Wiktionary carries it (the Odia wiki is a Purnachandra
- *              import that predates the loan; the complete ଡଲ- prefix is ଡଲା and ଡଲ୍ଲକ). Kept anyway,
- *              because three independent modern utterances of the spelling is itself attestation and one
- *              of them writes the sign's own semantics beside it — but flagged so nobody assumes parity
- *              with the rest of this list.
- *   କିଲୋମିଟର   corpus ×13 + kaikki-ori referee      ଡାକ୍ତର corpus ×7 + referee
- *   ମିଟର ×23, ମାଇଲ ×21, ଘଣ୍ଟା ×16 (+referee), ବର୍ଗ ×14 (+referee), ପ୍ରତି ×100 (+referee),
- *   ନମ୍ବର ×6 (+referee), ମିଲିମିଟର ×1, ସେକେଣ୍ଡ ×1, ଡିଗ୍ରୀ ×3, ଖ୍ରୀଷ୍ଟପୂର୍ବ ×2 — all corpus spellings.
+ * SOURCING. Every Odia word emitted below is attested, and most are attested twice — corpus plus a
+ * dictionary or referee. ⚠ ONE EXCEPTION IS FLAGGED AS SUCH: `ଡଲାର` (dollar) has no second witness, because
+ * the available Odia dictionary predates the loan. It is kept on the strength of independent modern
+ * usage, but it does not have the standing of the rest of this list.
  */
 import { postposedSign } from "../../core/postposedSign.ts";
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
@@ -79,7 +52,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "ଏବଂ",
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -110,7 +83,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 /**
  * Odia unit abbreviations → the full word, matched only AFTER a number. Longest first so କି.ମି. beats
- * ମି — the playbook's "multi-dot abbreviations before single-dot" coupling, expressed as alternation
+ * ମି — ⚠ multi-dot abbreviations BEFORE single-dot ones, expressed as alternation
  * order (an interior dot that survives becomes a phrase break).
  *
  * Attested: କିମି ×2 (both in `160କିମି/ଘଣ୍ଟା`), ମିମି ×2, କି.ମି. ×1, କି.ଗ୍ରା. ×2. କି.ଗ୍ରା. maps to the
@@ -157,7 +130,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         // 1) THE SHARED SYMBOL TIER FIRST. It matches a sign only when a NUMBER is ADJACENT, and its own
         //    numeral pattern reads "19,500" / "14.7" as ONE token. Steps 5 and 7 below split exactly those
         //    into two tokens, so running them first would strand every sign on half a numeral. (This is
-        //    the playbook's "units before decimals" coupling, one layer up: the sign tier before both.)
+        //    units are resolved BEFORE decimals; here the sign tier precedes both.)
         let s = SYMBOLS(input);
 
         // 2) ODIA UNIT ABBREVIATIONS, only after a number — which is what keeps ordinary words out, and
@@ -216,7 +189,7 @@ export function makeOdiaNormalizer(numbers: NumbersDef): (text: string) => strin
         //    THE TWO-DIGIT MINUTE GUARD IS LOAD-BEARING: the corpus also writes the ratio ୩:୨ (folded to
         //    3:2), which is not a time and does not match. The `(?<![\d:])` guard keeps the sports splits
         //    "4: 41.30" and "2: 11.60" out too — those write a SPACE after the colon, which `:([0-5]\d)`
-        //    already rejects, and the playbook records a Russian clock that claimed exactly that shape.
+        //    already rejects — ⚠ a clock rule that permits a following dot will claim a sports time.
         s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
             (_m, h: string, min: string) => (Number(min) === 0 ? h : `${h} ${min}`));
 
