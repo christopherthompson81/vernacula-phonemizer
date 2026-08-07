@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Classical Nahuatl / nāhuatlahtōlli (nci) — Uto-Aztecan, the
 // traditional Spanish-based orthography. AUTHORED from Andrews, *Introduction to Classical Nahuatl* (§2). Vowel
 // length is unwritten in traditional texts → short vowels (the referee's ː is backbone-folded). Two corroborating
-// human referees (wikipron 886 / kaikki 2329) at ~93% folded / ~98.8% symbol.
+// human referees (wikipron 886 / kaikki 2329).
 describe("Classical Nahuatl (nāhuatlahtōlli) canonical IPA", () => {
     test("the affricates + digraphs + saltillo", () => {
         expect(phonemizeWord("nahuatl")).toBe("nawat͡ɬ"); // ⟨hu⟩→[w], ⟨tl⟩→[t͡ɬ]

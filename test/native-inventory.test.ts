@@ -5,10 +5,10 @@
  * a base the g2p can read, and leaves everything inside alone — so a class that lists a letter the g2p CANNOT
  * read produces silence: the fold declines to touch it, and the g2p then drops it.
  *
- * ⚠ THE WORD-LEVEL FOLD USED TO MASK THIS, which is why it went unnoticed. Folding the whole word when any one
- * letter was foreign meant an over-claimed letter got folded too, by accident, whenever it happened to share a
- * word with something genuinely foreign. Judging each character separately — which is the correct semantics, and
- * the fix for Turkish `İsveç` coming out *ɯsvˈed͡ʒ* — removes the accident and exposes the mismatch. Eight
+ * ⚠ A WORD-LEVEL FOLD MASKS THIS ENTIRELY. Folding the whole word when any ONE letter is foreign means an
+ * over-claimed letter gets folded too, by accident, whenever it happens to share a word with something
+ * genuinely foreign. Judging each character separately — the correct semantics, and the fix for Turkish
+ * `İsveç` coming out *ɯsvˈed͡ʒ* — removes the accident and exposes the mismatch. Eight
  * engines were over-claiming: da, ro, kea, mt, lb, rup, ast, lg.
  *
  * ⚠ LETTERS ONLY. An apostrophe (`'`, `’`, `ʼ`), a word-joiner (`·`, `‑`) or a bare combining mark carries no

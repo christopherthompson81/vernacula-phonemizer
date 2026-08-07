@@ -5,9 +5,9 @@
  * and its own header explains the stake: "the cost of doing it by hand is not the time, it is that it was got
  * wrong". But its class list was hand-written and had fallen behind twice over.
  *
- * established the sign vocabulary for the fleet and taught `defects.ts`, `review.ts` and `coverage.ts`
- * about it — not this file. And `ampersand` and `iteration` had never been represented at all. So an author
- * running the mandated check was told, by silence, that eight classes did not apply. Writing the Khmer layer
+ * ⚠ THE SIGN CLASSES LIVE IN `defects.ts`, `review.ts` AND `coverage.ts` — not here. `sources.ts` carried its
+ * own hand-written copy, which drifted; `ampersand` and `iteration` were never represented at all. So an author
+ * running the mandated check was told, BY SILENCE, that eight classes did not apply. Writing the Khmer layer,
  * that is exactly what happened: the report listed percent, currency, degrees, decimal and fractions, said
  * nothing about signs, and the author asserted "× ÷ and = have no corpus-attested Khmer reading" into a code
  * comment without checking. Every one was attested — ដក ×3,808, គុណ ×3,338, ចែក ×3,285, ស្មើ ×2,077 — with
