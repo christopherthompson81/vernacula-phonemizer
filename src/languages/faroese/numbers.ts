@@ -30,8 +30,8 @@
  */
 import { unitsFirstNumberToWords, type UnitsFirstDef } from "../danish/unitsFirstNumbers.ts";
 
-// Faroese has no data manifest (all faroese.ts tables are inline in code), so the number words live here, inline,
-// matching the language's own convention.
+// The number words stay here, beside the units-first compositor that is their only reader (faroese.jsonc
+// carries the grapheme tables).
 const DEF: UnitsFirstDef = {
     // 0–19 in the NEUTER counting series (eitt, tvey, trý; fýra upward is invariant).
     ones: [

@@ -1,7 +1,7 @@
 /**
  * Abkhaz (ab) VIGESIMAL cardinal number compositor. Returns composed Abkhaz TEXT (space-separated) that
- * abkhaz.ts runs through the g2p, so the IPA stays consistent with the word engine. Abkhaz has no data manifest
- * — the whole engine is a single .ts — so the numeral table is authored HERE rather than in a .jsonc.
+ * abkhaz.ts runs through the g2p, so the IPA stays consistent with the word engine. The numeral tables stay
+ * HERE, beside the vigesimal compositor that is their only reader (abkhaz.jsonc carries the letter tables).
  *
  * SOURCE: ab.wikipedia «Иԥсабаратәу ахыԥхьаӡара» (Natural number), whose 0–99 table, hundreds list and thousands
  * list are cited there to Хәарцкиа Ҳ. И. & Џьонуа Б. Гь., «АУРЫС-АԤСУА, АԤСУА-АУРЫС акомпиутертә терминқәа

@@ -141,24 +141,17 @@ export const OVERRIDES: Readonly<Record<string, Partial<Record<ScriptName, strin
     ne: { Devanagari: "ne" },
 };
 
-/** The script of a run, or `undefined` if it carries no letters this router knows. */
 /**
  * Script declarations for the codes that have NO `.jsonc` manifest of their own — the complement of the
- * manifests, so that (manifests ∪ this) covers every registered code exactly once. Three reasons a code lands
- * here, and none of them is an oversight:
+ * manifests, so that (manifests ∪ this) covers every registered code exactly once. Two reasons a code lands
+ * here, and both are deliberate:
  *
  *   · a VARIETY of another language (the nine Arabic dialects) — the engine and its manifest belong to `ar`;
  *   · an ACCENT VARIANT (en-GB, en-IN, fr-CA, pt-BR, es-419) or an ALIAS (ms/zsm, bgc, pnb, skr) — the
- *     manifest it reuses names its PARENT, not this code;
- *   · a single-`.ts` engine with no data to externalise (ab, chr, la, lo, sat, …) — there is no manifest to
- *     put a field in.
+ *     manifest it reuses names its PARENT, not this code.
  *
- * ⚠ THIS TABLE IS INTERIM FOR THE THIRD CASE, not the intended end state. A manifest is a language's
- * encyclopedic entry — its phonology, orthography and the concerns a reader needs before touching the engine —
- * and the 26 single-.ts engines are missing that record, not merely this field; their documentation currently
- * sits in a .ts header with the tables inline beside the code. As each gains a manifest its row moves there and
- * this table should end up holding only the varieties, accent variants and aliases, which legitimately have no
- * manifest of their own. See issue #741.
+ * Every LANGUAGE engine declares its script in its own manifest (#741 gave the last 26 theirs), so a new row
+ * here should only ever be a variety or an alias.
  *
  * test/manifest-script.test.ts asserts the union is exact in BOTH directions, so a new engine cannot be added
  * without landing in one place or the other, and a stale row here cannot outlive its code.
@@ -173,10 +166,6 @@ export const MANIFESTLESS_SCRIPTS: Readonly<Record<string, readonly string[]>> =
     ms: ["Latin"], zsm: ["Latin"],          // Malay / Standard Malay
     bgc: ["Devanagari"],                    // Haryanvi, on the Hindi engine
     pnb: ["Arabic"], skr: ["Arabic"],       // Western Punjabi + Saraiki, both Shahmukhi
-    // Single-.ts engines with no manifest.
-    crh: ["Latin"], ee: ["Latin"], eu: ["Latin"], fo: ["Latin"], kaa: ["Latin"], kl: ["Latin"],
-    la: ["Latin"], ltg: ["Latin"], mto: ["Latin"], naq: ["Latin"], nci: ["Latin"], pap: ["Latin"],
-    quc: ["Latin"], rup: ["Latin"], smj: ["Latin"],
 };
 
 /**
@@ -195,6 +184,7 @@ export const CYRILLIC_HOSTS: ReadonlySet<string> = new Set([
     "ab", "ba", "be", "bg", "chv", "kk", "ky", "mk", "mn", "nog", "ru", "sr", "tg", "tt", "uk",
 ]);
 
+/** The script of a run, or `undefined` if it carries no letters this router knows. */
 export function scriptOf(run: string): ScriptName | undefined {
     for (const [name, re] of SCRIPT_TESTS) if (re.test(run)) return name;
     return undefined;
