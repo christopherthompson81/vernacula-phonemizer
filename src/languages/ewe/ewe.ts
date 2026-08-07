@@ -5,7 +5,8 @@
  * vs ⟨f⟩→[f] and ⟨ʋ⟩→[β] vs ⟨v⟩→[v]; ⟨w⟩→[ɰ] and ⟨ɣ⟩→[ɰ] (velar approximant — Standard/Southern Ewe, per Jalloh);
  * ⟨x⟩→[x], ⟨y⟩→[j]. Nasalization is WRITTEN (a tilde: ã ẽ … → kept).
  * TONE (H/M/L) is UNMARKED in the orthography → not emitted (the Akan/Shona unwritten-tone situation; a tone lexicon
- * is deferred). 🔷 single-source-family (kaikki + wikipron, both Wiktionary).
+ * is deferred). ⚠ SINGLE-SOURCE-FAMILY: kaikki and wikipron are the only referees and both derive from
+ * Wiktionary, so their agreement is not two independent confirmations.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

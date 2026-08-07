@@ -4,11 +4,13 @@
  * Drives English homograph disambiguation — the `$verb`/`$noun`/`$past`
  * dictionary conditionals — with a real part-of-speech tagger.
  *
- * Zero runtime dependencies. The model artifact is trained offline by
- * `tools/pos-tagger/train.ts` on UD English-EWT XPOS (Penn Treebank tags) and
- * shipped as a data file. This module is the SINGLE SOURCE OF TRUTH for the
- * feature extraction — the trainer imports {@link extractFeatures} from here so
- * train-time and run-time features can never drift. The C# port mirrors it.
+ * Zero runtime dependencies. The model artifact is trained OFFLINE on UD English-EWT
+ * XPOS (Penn Treebank tags) and shipped as the data file `pos-model.json`; the
+ * trainer itself is not part of this package, and `pos-model.PROVENANCE.md` is the
+ * record of where the weights came from.
+ * ⚠ THIS MODULE IS THE SINGLE SOURCE OF TRUTH FOR FEATURE EXTRACTION — the trainer
+ * imports {@link extractFeatures} from here, so train-time and run-time features
+ * cannot drift. Changing it invalidates the shipped weights.
  *
  * Tags are the Penn Treebank tagset (VB/VBP/VBZ/VBG/VBN/VBD verbal forms,
  * NN/NNS/NNP nominal forms, JJ adjectives, …). We need the full PTB set rather
@@ -38,8 +40,8 @@ export function normalizeToken(word: string): string {
  * "carries a token" iff it contains "word", and the token is its last
  * space-delimited field. Every word-bearing feature below therefore ends in the
  * token. If you add a feature whose key contains "word" but whose last field is
- * NOT a corpus token, update `lexicalToken` in tools/pos-tagger/train.ts or the
- * PII scrub will mis-classify it.
+ * NOT a corpus token, the offline trainer's `lexicalToken` predicate must be updated
+ * to match, or its PII scrub will mis-classify the feature.
  */
 export function extractFeatures(
     i: number,
@@ -129,7 +131,7 @@ export function isVerbalUpos(tag: string): boolean {
     return tag === "VERB" || tag === "AUX";
 }
 
-/** Serialized model artifact format (see `tools/pos-tagger/train.ts`). */
+/** Serialized model artifact format, as emitted by the offline trainer. */
 export interface PosModel {
     scale: number;
     classes: string[];
