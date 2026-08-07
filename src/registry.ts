@@ -544,7 +544,7 @@ function build(lang: string): Phonemizer {
             // ⚠ A FOREIGN READER IS NEEDED AFTER ALL, and the old comment's reasoning was the trap: being
             // Latin-script is exactly what made this necessary, not what made it unnecessary. Oromo's word group
             // claims Latin text, so an accented foreign NAME was claimed and then mangled by a g2p with no rule
-            // for the letter — `São Paulo` read *s ˈə ˈo paˈulo*. See #657.
+            // for the letter — `São Paulo` read *s ˈə ˈo paˈulo*.
             return createOromo((latin) => getPhonemizer("en").text(latin));
         case "pl":
             return createPolish();
@@ -707,7 +707,7 @@ function build(lang: string): Phonemizer {
         // Bavarian (Boarisch) — Upper German (Austro-Bavarian), Latin; greedy scan + falling diphthongs + r-vocalization.
         case "bar":
             return createBavarian();
-        // Min Dong / Eastern Min (Fuzhou) — Sinitic, tonal; Bàng-uâ-cê (BUC) → IPA converter (Phase 1: segmental + citation tone).
+        // Min Dong / Eastern Min (Fuzhou) — Sinitic, tonal; Bàng-uâ-cê (BUC) → IPA converter; segmental + citation tone.
         case "cdo":
             return createMinDong();
         // Hmong (White Hmong / Hmoob Dawb) — Hmong-Mien, tonal; RPA → IPA (final consonant letter = tone).
@@ -718,8 +718,9 @@ function build(lang: string): Phonemizer {
             return createTashelhit();
         case "ckb":
             return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
-        // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn); ⛔ (defective vowel
-        // encoding: short vowels unwritten + و/ی conflate uː/oː, iː/eː). Fills the retroflex-Iranian census gap.
+        // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn). ⚠ THE ORTHOGRAPHY IS
+        // DEFECTIVE for this purpose: short vowels are unwritten and و/ی each conflate two long vowels
+        // (uː/oː, iː/eː), so those distinctions are not recoverable from the spelling. Fills the retroflex-Iranian census gap.
         case "bal":
             return createBalochi((latin) => getPhonemizer("en").text(latin));
         case "bho":
@@ -741,12 +742,12 @@ function build(lang: string): Phonemizer {
         // nobody re-investigates a settled refusal; a KRNB-style divergence check would need a Haryanvi source.
         case "bgc":
             return createHindi((latin) => getPhonemizer("en").text(latin));
-        // Chhattisgarhi (Eastern Hindi) — ⛔ cannot-verify stub on the shared Hindi engine.
+        // Chhattisgarhi (Eastern Hindi) — ⚠ an unverified stub on the shared Hindi engine.
         case "hne":
             return createChhattisgarhi((latin) => getPhonemizer("en").text(latin));
         case "za":
             return createZhuang();
-        // Awadhi (Eastern Hindi) — Saksena-sourced ⛔ stub on the shared Hindi engine.
+        // Awadhi (Eastern Hindi) — a Saksena-sourced ⚠ unverified stub on the shared Hindi engine.
         case "awa":
             return createAwadhi((latin) => getPhonemizer("en").text(latin));
         case "mai":

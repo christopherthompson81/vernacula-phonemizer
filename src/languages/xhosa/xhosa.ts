@@ -51,9 +51,9 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * #562 symbol normalization — Xhosa: class-10 loan plurals (iipesenti, iidola, iikhilomitha).
+ * symbol normalization — Xhosa: class-10 loan plurals (iipesenti, iidola, iikhilomitha).
  *
- * `US$` IS DECLARED AS ITS OWN KEY, and that is the fix for the drop the playbook names: the tier's
+ * `US$` IS DECLARED AS ITS OWN KEY, and that is what fixes the drop: the tier's
  * pattern is letter-bounded on the left, so a bare `$` can never match inside `US$30`. `normalize.ts`
  * step 5 additionally prises the sign off the Xhosa CONCORD PREFIX that is glued to it (`leUS$30`,
  * `i$10`) — a compound key cannot do that job, because `i` is a noun prefix and not a currency code.
@@ -65,7 +65,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
  * normalize.ts, because Xhosa's rate denominator is a single attested word (*ngeyure*), not "A per B".
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
     // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
     // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
     multiply: { times: "phindaphinda" },
@@ -88,7 +88,7 @@ class XhosaPhonemizer implements Phonemizer {
     text(input: string): string {
         // normalize.ts runs BEFORE the shared tier, and leaves every operand as DIGITS precisely so the
         // tier can still see number–unit adjacency (the one exception is the clock, which must produce
-        // words for the `na-` connective and therefore claims its own marker and timezone — trap 14 (agreement cannot be applied to digits)).
+        // words for the `na-` connective and therefore claims its own marker and timezone).
         return assembleClauses(SYMBOLS(normalizeXhosa(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])

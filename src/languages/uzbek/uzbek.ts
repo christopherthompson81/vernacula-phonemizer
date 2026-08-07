@@ -81,12 +81,12 @@ function number(digits: string): string {
 /** The decimal-comma word (manifest `numbers.decimalWord`) as IPA — read between integer and fraction. */
 const DECIMAL_IPA = phonemizeWord(DEF.numbers.decimalWord!);
 
-// #562 symbol normalization — Uzbek. The corpus's own prose fixes the conventions: percent is POSTPOSED
+// symbol normalization — Uzbek. The corpus's own prose fixes the conventions: percent is POSTPOSED
 // ("8 foizga" — foiz = percent), rates are PREFIXED ("soatiga 240 kilometr"), and squared units are a
 // PREFIX adjective ("kvadrat kilometr"). km/mm/cm are claimed here so the tier's "only after a number"
 // guard applies; the m/s and km/s compounds are consumed earlier, in normalize.ts step 10.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
@@ -103,10 +103,10 @@ const SYMBOLS = makeSymbolNormalizer({
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "ʻ'’‘`ʼ′")})|(\\d+(?:,\\d+)?)|([.!?…,;:])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zʻ'’‘`ʼ′]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");

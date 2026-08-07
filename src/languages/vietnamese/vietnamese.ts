@@ -22,10 +22,10 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A Vietnamese syllable (letters incl. precomposed diacritics + combining marks), a number, or clause punctuation.
 const TOKEN = /([a-zà-ỹăâđêôơưÀ-Ỹ̀-̣]+)|(\d+)|([.!?…,;:])/giu;
 
-// #562 symbol normalization — Vietnamese: unit words emitted as SEPARATE SYLLABLES (ki lô mét), because
+// symbol normalization — Vietnamese: unit words emitted as SEPARATE SYLLABLES (ki lô mét), because
 // the engine phonemizes per syllable and "kilômét" is not one valid syllable.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
@@ -46,7 +46,7 @@ const SYMBOLS = makeSymbolNormalizer({
 class VietnamesePhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        // #562 ORDER: normalize.ts FIRST, then the shared symbol tier. Every rewrite in normalize.ts is
+        // ORDER: normalize.ts FIRST, then the shared symbol tier. Every rewrite in normalize.ts is
         // written to preserve the digits↔unit adjacency the symbol tier matches on (783.562 km² becomes
         // 783.562 km vuông, not 783.562 vuông km), so the tier still sees "<number> km" afterwards.
         return assembleClauses(SYMBOLS(normalizeVietnamese(input)), TOKEN, (m, sink) => {

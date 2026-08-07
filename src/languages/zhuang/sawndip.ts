@@ -5,7 +5,7 @@
  * (so Sawndip inherits za's validated phonology + tones). Self-consistency: za(reading) reproduces the glyph's kaikki
  * Standard-Zhuang IPA at 100% (2411/2411, segmental).
  *
- * HONEST SCOPE (🔷 reference-parity, covered-subset, DEFAULT-reading):
+ * ⚠ HONEST SCOPE — reference-parity over a covered subset, default readings only:
  *  - Coverage is the ~2412 Wiktionary-documented single-codepoint glyphs; real manuscripts use idiosyncratic/unencoded
  *    (PUA / Ideographic-Description) forms → OOV, which are dropped (unreadable).
  *  - Sawndip is POLYPHONIC (~8% of covered glyphs have >1 reading — mostly tonal variants of one root). We ship a
