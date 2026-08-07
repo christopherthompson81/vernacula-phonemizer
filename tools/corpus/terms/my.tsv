@@ -5,7 +5,7 @@
 # measured against. Two of those cells are LEXICAL (`calendar`, `ordinal-native`): they are found by matching
 # the language's own WORDS, not by a shape, so they cannot be filled without a term list. The list used
 # originally was a scratch file and was never committed, which meant the tree's richest artifact could not be
-# regenerated from the repository at all — the #586 re-mine hit exactly that wall (calendar alone holds 81,301
+# regenerated from the repository at all — a re-mine hit exactly that wall (calendar alone holds 81,301
 # occurrences and would simply have vanished).
 #
 # `cell<TAB>term` scopes a term to one cell; a bare line applies to every lexical cell. The two cells need
