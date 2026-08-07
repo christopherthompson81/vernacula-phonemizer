@@ -5,9 +5,9 @@
  * dictionary conditionals — with a real part-of-speech tagger.
  *
  * Zero runtime dependencies. The model artifact is trained OFFLINE on UD English-EWT
- * XPOS (Penn Treebank tags) and shipped as the data file `pos-model.json`; the
- * trainer itself is not part of this package, and `pos-model.PROVENANCE.md` is the
- * record of where the weights came from.
+ * XPOS (Penn Treebank tags) by `tools/english/en_pos_train.ts` and shipped as the
+ * data file `pos-model.json`; `pos-model.PROVENANCE.md` records where the weights
+ * came from.
  * ⚠ THIS MODULE IS THE SINGLE SOURCE OF TRUTH FOR FEATURE EXTRACTION — the trainer
  * imports {@link extractFeatures} from here, so train-time and run-time features
  * cannot drift. Changing it invalidates the shipped weights.
@@ -40,8 +40,8 @@ export function normalizeToken(word: string): string {
  * "carries a token" iff it contains "word", and the token is its last
  * space-delimited field. Every word-bearing feature below therefore ends in the
  * token. If you add a feature whose key contains "word" but whose last field is
- * NOT a corpus token, the offline trainer's `lexicalToken` predicate must be updated
- * to match, or its PII scrub will mis-classify the feature.
+ * NOT a corpus token, update `lexicalToken` in `tools/english/en_pos_train.ts` to
+ * match, or its PII scrub will mis-classify the feature.
  */
 export function extractFeatures(
     i: number,
@@ -131,7 +131,7 @@ export function isVerbalUpos(tag: string): boolean {
     return tag === "VERB" || tag === "AUX";
 }
 
-/** Serialized model artifact format, as emitted by the offline trainer. */
+/** Serialized model artifact format (emitted by `tools/english/en_pos_train.ts`). */
 export interface PosModel {
     scale: number;
     classes: string[];
