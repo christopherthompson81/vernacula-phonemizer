@@ -102,7 +102,7 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         //    word: `10 वापस` became one glued token (*dasvāpas*) with a stress lost, and the same for वायु,
         //    वाहन and — in the eight languages that inherit this normalizer — वाजता, वादळे, वाईल्ड. The
         //    Marathi run measured 13 live corruptions of that shape in its own corpus. This is trap #1 in
-        //    the playbook: never a bare match where a letter may follow.
+        //    ⚠ never a bare match where a letter may follow.
         s = s.replace(new RegExp(`(?<![\\d.,])(\\d+)\\s?(${Object.keys(SUFFIX_FORM).join("|")})(?![\\p{L}\\p{M}])`, "gu"),
             (whole, digits: string, suffix: string) =>
                 ordinal(Number(digits), SUFFIX_FORM[suffix]!, suffix) ?? whole);

@@ -282,7 +282,7 @@ function dravidianGroup(
  *      the wrong hundred and no linkage.
  *
  * WHY IT IS HERE AND NOT A FOURTH PRIVATE COPY. Tamil, Telugu and Kannada each wrote their own composer
- * for overlapping subsets of the above; the playbook recorded that duplication as evidence and named
+ * for overlapping subsets of the above; that duplication was the evidence, and named
  * Malayalam as the trigger to consolidate. It is, so this is that consolidation — te, kn and ml all read
  * it, and each of their corpus diffs is byte-identical across the migration.
  *

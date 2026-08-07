@@ -509,8 +509,8 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             s = s.replace(
                 unitRe,
                 (whole, num: string, mag: string | undefined, u: string, denom?: string, exp?: string) => {
-                    // The magnitude travels with the NUMBER and is re-emitted verbatim (trap 10 (a rule that CONSUMES a word must put it back) — a rule that
-                    // consumes a word must put it back). It also governs the count form the way a LARGE COUNT
+                    // The magnitude travels with the NUMBER and is re-emitted verbatim — ⚠ a rule that
+                    // CONSUMES a word must put it back. It also governs the count form the way a LARGE COUNT
                     // does, resolved through the language's own `countForm` via MANY — the same reasoning, and
                     // the same constant, that `withMagnitude` uses for the currency side, and for the same
                     // reason: passing a literal 2 means the PAUCAL to a Slavic selector, and taking the last

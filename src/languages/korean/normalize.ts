@@ -142,7 +142,7 @@ export function normalizeKorean(input: string): string {
     //    The trailing guard is `[A-Za-z\d]`, NOT Japanese's `\p{L}` — Korean writes its particle
     //    directly onto the abbreviation (83km/h의), and a letter-class guard rejects exactly those.
     //    An ALREADY PRESENT 시속 / 초속 is CONSUMED by the match rather than blocked by a lookbehind.
-    //    That is the Arabic الساعة lesson from the playbook, and the first draft got it wrong in the
+    //    ⚠ The same duplicate-word trap Arabic's الساعة poses, and the first draft got it wrong in the
     //    instructive way: a `(?<!시속\s)` guard on 시속 160km/h merely pushed the match one digit to the
     //    right, so it matched `60km/h` and produced 시속 1시속 60킬로미터 — a duplicated adverb AND a
     //    severed number. Consuming it cannot do that. The leading `(?<![\d.])` is the other half: it

@@ -141,7 +141,7 @@ export function normalizeCatalan(input: string): string {
     // 4) ORDINALS — the `Nè`/`Na`/`Nr`/`Nn`/`Nt`/`Nns` form. The suffix records the gender and the written
     //    ending: a feminine, r/n/t the irregular series (primer/segon/tercer/quart), è the -è series. The
     //    suffix must MATCH the spoken ordinal's final word, which rules out misfires on forms the language
-    //    does not write (11r, 5t) — see trap 9: a guard alternative with no attested instance is a misfire
+    //    does not write (11r, 5t) — ⚠ a guard alternative with no attested instance is a misfire
     //    generator. Was *set è* / *set a* / *cent noranta a* / *quatre t*. BEFORE the clock rule so a digit
     //    run is not first claimed as a time.
     s = s.replace(/(?<![\d.,])(\d+)(è|a|r|n|ns|t)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
@@ -160,7 +160,7 @@ export function normalizeCatalan(input: string): string {
     });
 
     // 4b) DECADES — `1920s`, `90s`. Without this the shared tier's `s` unit reads "1920 s" as *mil nou-cents
-    //     vint segons* (nineteen-twenty SECONDS) — the playbook's Il-76s trap. The corpus writes `els anys
+    //     vint segons* (nineteen-twenty SECONDS) — ⚠ an alphanumeric designation looks exactly like a range. The corpus writes `els anys
     //     1920s`. Drop the plural marker; the number itself is the decade.
     //     Narrowed to the DECADE shapes — a four-digit year or a bare tens (`1920s`, `90s`). Stripping the
     //     `s` from ANY number took the unit off a genuine `45s` (forty-five SECONDS), which the tier reads
@@ -171,7 +171,6 @@ export function normalizeCatalan(input: string): string {
     //    is clause punctuation and must be claimed here. `11:35 PM` → onze trenta-cinc PM; `06:30` → sis
     //    trenta. The 24h form with `h` (`10:00h`) and the AM/PM marker are consumed. NOT a sports time:
     //    a THIRD `\d.\d\d` field after the minutes (4:41.30) means the number is a pace, not a clock — the
-    //    playbook's sports-time cell.
     s = s.replace(/(?<![\d:,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])\s*(h)?\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?)?/giu,
         (m0, h: string, min: string, hh: string, ap: string) => {
             const hv = Number(h), mv = Number(min);

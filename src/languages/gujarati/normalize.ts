@@ -81,7 +81,7 @@ const DOTTED_ALT = Object.keys(DOTTED)
  * પુન: ×5 (પુન:સ્થાપિત, પુન:સ્થાપન, પુન:સર્જન, પુન: પ્રતિકૃતિ, પુન: પ્રાપ્ત), સંભવત: ×2, ક્રમશ: ×1,
  * અંત: ×1. A CLOSED LIST, not the pattern `ત:` — the corpus's "લાંચ: રુશવત" is the compound લાંચ-રુશવત
  * and its 40-odd genuine list colons ("કહ્યું: …", "છે: …") must stay the phrase break the manifest
- * maps them to. Same over-counting trap the playbook records for Bengali's ম.
+ * maps them to. ⚠ The same over-counting trap any short unit key has in an abugida.
  */
 const VISARGA_WORD = ["પુન", "સંભવત", "ક્રમશ", "અંત", "વિશેષત", "મુખ્યત", "સામાન્યત", "અંશત"].join("|");
 
@@ -315,7 +315,7 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //
         //          THE TRAILING BOUNDARY IS THE WHOLE RULE. Without `(?![\p{L}\p{M}])` the મ- alternative
         //          matches the first character of મીટર, મીલીમીટર, મીમી, મિનિટ, મહિના and મુકામ — the same
-        //          over-counting trap the playbook records for Bengali's ম, and live in this corpus at
+        //          over-counting trap any short unit key has in an abugida, and live in this corpus at
         //          "35 મીલીમીટર", "83 મીટરની", "45 મિનિટમાં", "3 મહિનામાં".
         //
         //          THE CURRENCY LOOKBEHIND IS ALSO LOAD-BEARING, and it is an ORDERING coupling with the
