@@ -46,10 +46,10 @@ export function phonemizeWord(word: string): string {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'ʻ-")})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zāēīōūA-ZĀĒĪŌŪ'ʻ-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
@@ -58,8 +58,8 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
  *
  * ⚠ `NATIVE_CLASS` IS THE TOKEN CLASS, NOT THE ALPHABET — it spans `a-zA-Z`, because that is what the tokenizer
  * needs in order to claim a word at all. Using it to decide routing routes NOTHING: `Safari` is entirely ASCII, so
- * it tests as native and never reaches the reader. The two have been distinct all along and the names hid it; for
- * the #657 fold the difference was invisible, because that fold only ever fires on a NON-ASCII letter.
+ * it tests as native and never reaches the reader. The two questions are distinct and the shared name hides it;
+ * a fold that only ever fires on a NON-ASCII letter cannot expose the difference.
  *
  * ⚠ IT WALKS THE WORD THE WAY THE G2P DOES — longest digraph first, then a single grapheme — rather than testing
  * membership in a flat letter set. A flat set has to admit `g` for the sake of ⟨ng⟩, and then a standalone `g`
@@ -95,8 +95,8 @@ class MaoriPhonemizer implements Phonemizer {
             //
             // Until that exists, an English reading is the honest answer for a word Māori cannot spell: the wrong
             // voice, but legal phones and a recognisable name. THIRTEEN of twenty-six letters are outside this
-            // alphabet, which makes Māori the fleet's most extreme case rather than a typical one — most of the 45
-            // engines measured in #663 are missing one or two letters and need no routing.
+            // alphabet, which makes Māori an extreme case rather than a typical one — most Latin-script
+            // engines are missing one or two letters and need no routing at all.
             //
             // The floor stays underneath: `nat` still applies on the native branch, and `latinPhone` still backs
             // the g2p, for the case where no reader is injected (direct engine use, or a test).

@@ -1,8 +1,10 @@
 /**
- * Mandarin Chinese (cmn) phonemizer — canonical IPA. Phase 1: the pinyin input path (tokenized pinyin with
- * tone digits → IPA with Chao tones + third-tone sandhi). Phase 2 adds the Hanzi front-end (pypinyin char +
- * phrase dicts → polyphone-aware pinyin), Phase 3 numbers + normalization. The data (syllable→IPA table,
- * tone system, sandhi) lives beside this file; this module wires it into the Phonemizer interface.
+ * Mandarin Chinese (cmn) phonemizer — canonical IPA. Two input paths, one converter:
+ *   · HANZI → pinyin via the pypinyin char + phrase dicts (polyphone-aware), then pinyin → IPA;
+ *   · direct tokenized pinyin with tone digits → IPA.
+ * The converter emits Chao tone letters and applies third-tone sandhi within a Han run, plus 一/不 sandhi.
+ * Numbers and text normalization run ahead of it. The data (syllable→IPA table, tone system, sandhi) lives
+ * beside this file; this module wires it into the Phonemizer interface.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -42,9 +44,9 @@ const PINYIN_INPUT = /^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$/i;
 /** Embedded Latin → foreign (en) phonemizer, injected by the registry (lazy, like Hindi). */
 export type ForeignPhonemizer = (latin: string) => string;
 
-// #562 symbol normalization — Mandarin: 百分之 PRECEDES the number (百分之九十三); units follow.
+// symbol normalization — Mandarin: 百分之 PRECEDES the number (百分之九十三); units follow.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
     // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
     // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
     multiply: { times: "乘以" },
@@ -67,7 +69,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // Attested in the artifact itself: 公园占地 19500 平方公里 · 783,562 平方公里（300,948 平方英里）.
     // One form each, because a Chinese measure word does not agree with its count.
     exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
     // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
     // they are different words (平方公里 but 二十的平方).

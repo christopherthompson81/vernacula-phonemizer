@@ -2,40 +2,24 @@
  * Malayalam (ml) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
  * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * Measured over the ml_in FLEURS corpus (1,955 unique utterances, column 3 — the cased one):
- *   560 ZWNJ + 264 ZWJ · 722 bare numerals (227 one-digit · 83 teens · 51 round tens · 81 two-digit
- *   non-round · 75 three-digit · 189 in the 1000-9999 band · 10 in 10k-99k · 6 larger)
- *   133 hyphenated clitics on a numeral (ൽ ×46 · ന് ×23 · ലെ ×17 · ആം/ാം ×16 · നും ×6 · കളിൽ ×6 ·
- *   മത്തെ/ാമത്തെ ×5 · ന്റെ ×3 · ത്തിലെ ×2 · rest ×9) + 40 more written with a SPACE instead
- *   36 comma-grouped numbers · 25 decimals · 21 numeric ranges · 15 digit-colon-digit (13 of them
- *   clock times) · 5 currency signs · 4 percent · 3 Latin unit abbreviations (km2 ×2, m ×3, mm ×3)
- *   1 degree · ~43 Latin runs · ZERO Malayalam digits ൦-൯
+ * ⚠ MALAYALAM DIGITS ൦-൯ DO NOT OCCUR in practice; the digit inventory used is ASCII. Step 2 folds them
+ * anyway, because it costs nothing and malayalam.ts's own fold happens too late for any rule here.
  *
- * MALAYALAM DIGITS ൦-൯ DO NOT OCCUR — not once in 1,955 utterances. The lead that held for Marathi
- * (×597) fails here as it did for Persian, Tamil and Telugu; the digit inventory is ASCII. Step 2 folds
- * them anyway, because it costs nothing and malayalam.ts's own fold happens too late for any rule here.
+ * ⚠ THE TWO ZERO-WIDTH CHARACTERS ARE NOT THE SAME DEFECT, and treating them alike — a blanket deletion —
+ * is wrong for this script:
+ *   · ZWNJ splits the word. The engine's word class is the Malayalam block, which excludes U+200C, so
+ *     ഓസ്‌ട്രേലിയ tokenizes as TWO words and comes out [ˈoːsɨ ʈɾˈeːlija] — two primary stresses AND a
+ *     spurious samvritokaram [ɨ] on a word-internal virama. Deleting it is correct.
+ *   · ZWJ is Malayalam's LEGACY CHILLU ENCODING: ല് + ZWJ IS ൽ. Deleting it leaves a bare word-final
+ *     virama, which malayalam.ts then reads as samvritokaram — വിസ്താരത്തില്‍ becomes [ʋˈist̪aːɾat̪ːilɨ]
+ *     where the chillu spelling gives [ʋˈist̪aːɾat̪ːil]. It must be MAPPED to the atomic chillu, not
+ *     dropped. Almost all of them sit immediately after a virama; the few strays are deleted.
  *
- * THE TWO LARGEST DEFECTS WERE ZERO-WIDTH CHARACTERS, and they are NOT the same defect — which is why
- * Kannada's blanket deletion would have been wrong here:
- *   · ZWNJ ×560 splits the word. The engine's word class is the Malayalam block, which excludes
- *     U+200C, so ഓസ്‌ട്രേലിയ tokenized as TWO words and came out [ˈoːsɨ ʈɾˈeːlija] — two primary
- *     stresses AND a spurious samvritokaram [ɨ] on a word-internal virama. Deleting it is correct.
- *   · ZWJ ×264 is Malayalam's LEGACY CHILLU ENCODING: ല് + ZWJ IS ൽ. Deleting it leaves a bare
- *     word-final virama, which malayalam.ts then reads as samvritokaram — വിസ്താരത്തില്‍ came out
- *     [ʋˈist̪aːɾat̪ːilɨ] where the chillu spelling gives [ʋˈist̪aːɾat̪ːil]. It must be MAPPED to the
- *     atomic chillu, not dropped. 257 of the 264 sit immediately after a virama (checked by printing
- *     the neighbours); the other 7 are stray and are deleted.
- *
- * THE NUMBER PATH WAS THE LARGEST DEFECT INSIDE THIS LAYER, and it was fixed where it lives — see
- * numbers.ts and the `numbers` block in malayalam.jsonc. `bareMagnitude` was confirmed to read
- * correctly at lakh and crore (100000 → ലക്ഷം, 10000000 → കോടി, no leading "one"), so that earlier
- * fix holds; everything else about the composition was wrong.
- *
- * NO `\b` ANYWHERE. `\b` is defined on ASCII word characters and finds no boundary at all against
+ * ⚠ NO `\b` ANYWHERE. `\b` is defined on ASCII word characters and finds no boundary at all against
  * Malayalam script. Every boundary here is an explicit `(?<![\p{L}\p{M}])` / `(?![\p{L}\p{M}])`.
  *
- * LATIN RUNS ARE LEFT TO THE EMBEDDED FOREIGN PHONEMIZER (~43 tokens: US, NSA, FBI, MRI, GMT, UTC,
- * DNA, GPS, COVID…). A Latin→Malayalam letter-name table would be invented data.
+ * LATIN RUNS ARE LEFT TO THE EMBEDDED FOREIGN PHONEMIZER (US, NSA, FBI, MRI, GMT, DNA, GPS, COVID…). A
+ * Latin→Malayalam letter-name table would be invented data.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
@@ -67,21 +51,18 @@ const ZWJ_CHILLU: Readonly<Record<string, string>> = {
  * malayalam.ts because its position in the ordering matters and the ordering is this file's job.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
     multiply: { times: "ഗുണം" },
-    // `&` was DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
-    // TRANSLITERATED English "and", and it is attested in exactly this construction rather than merely as a
-    // word: every wiki hit is an English institution name rendered in Malayalam — `ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ്
-    // ഗൈനക്കോളജി`, `അമേരിക്കൻ ബോർഡ് ഓഫ് ഒബ്സ്റ്റട്രിക്സ് ആൻഡ് ഗൈനക്കോളജി`, `റോയൽ കോളേജ് ഓഫ് ഒബ്സ്റ്റട്രീഷ്യൻസ്
-    // ആൻഡ് ഗൈനക്കോളജിസ്റ്റ്സ്` — and one of those sentences writes the sign itself, `ഒ& ജി`. 18 wiki tokens,
-    // 8 in the corpus. Chosen over the native options because they do not fit the slot: `ഉം` is a BOUND
-    // suffix (it attaches to both coordinands, so it cannot stand between two initialisms), and `ഒപ്പം` /
-    // `കൂടാതെ` mean "along with" / "besides" — 1 and 2 tokens, and the wrong register for a proper name.
-    // Trap 8, checked: EVERY `&` in all five corpora treated in this batch is the universal `B&B` /
-    // `Arts & Sciences` pair — no `AT&T`, no URL query — so "and" is right in every attested context.
+    // `&` is otherwise DROPPED outright, losing the sign from `കോളേജ് ഓഫ് ആർട്സ് & സയൻസസ്`. `ആൻഡ്` is the
+    // TRANSLITERATED English "and", attested in exactly this construction rather than merely as a word:
+    // the hits are English institution names rendered in Malayalam (`ഒബ്സ്റ്റട്രിക്ക്സ് ആൻഡ് ഗൈനക്കോളജി`), and
+    // one such sentence writes the sign itself, `ഒ& ജി`.
+    // ⚠ THE NATIVE OPTIONS DO NOT FIT THE SLOT: `ഉം` is a BOUND suffix — it attaches to BOTH coordinands, so
+    // it cannot stand between two initialisms — and `ഒപ്പം` / `കൂടാതെ` mean "along with" / "besides", the
+    // wrong register for a proper name.
     ampersand: "ആൻഡ്",
     percent: ["ശതമാനം"],
     currency: { "US$": ["ഡോളർ"], "$": ["ഡോളർ"] },
@@ -92,9 +73,9 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 /**
- * The clitics this corpus actually welds onto a numeral, each with the stem it selects. A CLOSED list,
- * closed to what is ATTESTED — an open "digits + any Malayalam run" rule would swallow ordinary nouns
- * that merely follow a number ("100 അടി", "56 വ്യത്യസ്ത"), which is trap #2.
+ * The clitics Malayalam welds onto a numeral, each with the stem it selects. ⚠ A CLOSED list, closed to
+ * what is ATTESTED — an open "digits + any Malayalam run" rule swallows ordinary nouns that merely follow
+ * a number ("100 അടി", "56 വ്യത്യസ്ത").
  *
  * Longest first, so ത്തിലെ is not shadowed by ലെ. ത്തിൽ/ത്തിലെ carry their own -ത്തി- linker, which is
  * precisely the oblique stem of a ം-final magnitude, so they are folded to ൽ/ലെ and take the same path
@@ -112,8 +93,8 @@ const FOLD_CLITIC: Readonly<Record<string, string>> = {
 };
 
 /**
- * The Malayalam normalizer. A numbered, ORDER-DEPENDENT sequence; the coupling is stated at each step
- * because a future reader cannot recover it from the code.
+ * The Malayalam normalizer. ⚠ A numbered, ORDER-DEPENDENT sequence — the coupling is stated at each step,
+ * because it is not recoverable from the code.
  */
 export function normalizeMalayalam(input: string): string {
     // 1) ZERO-WIDTH characters — FIRST, because every later rule asserts letter/digit adjacency and an
@@ -178,19 +159,18 @@ export function normalizeMalayalam(input: string): string {
     s = SYMBOLS(s);
 
     // 6) TIMES BEFORE the decimal step: a bare-number rule must not claim 06:30, and this corpus writes
-    //    the sports times 2:11.60, 1:09.02 and 4:41.30 where a restart inside the number would be
-    //    exactly the Indonesian defect the playbook records.
-    //    (a) :00 minutes are DROPPED, not read — "11:00 (യുടിസി" was giving പതിനൊന്ന് പൂജ്യം.
-    //    (b) every remaining digit-colon-digit becomes a SPACE: `:` is clause punctuation in this
-    //        engine (malayalam.jsonc maps it to ","), so it inserted a pause inside 8:30 and 9:30.
-    //    NO മണി is added. The noun is already in the text where it belongs ("11:00 ന് കഴിഞ്ഞപ്പോൾ",
-    //    "8:30 ന് ആരംഭിക്കും") — the same call Tamil, Telugu and Kannada made on the same evidence.
+    //    the sports times 2:11.60, 1:09.02 and 4:41.30, where a bare-number rule restarting INSIDE the
+    //    number is the classic failure.
+    //    (a) :00 minutes are DROPPED, not read, or "11:00" gives പതിനൊന്ന് പൂജ്യം.
+    //    (b) every remaining digit-colon-digit becomes a SPACE: ⚠ `:` is clause punctuation in this engine
+    //        (malayalam.jsonc maps it to ","), so left alone it inserts a pause INSIDE 8:30.
+    //    NO മണി is added — the noun is already in the text where it belongs ("11:00 ന് കഴിഞ്ഞപ്പോൾ").
     s = s.replace(/(?<![\d:])([01]?\d|2[0-3]):\s?00(?![\d:.])/gu, "$1");
     s = s.replace(/(?<=\d):\s?(?=\d)/gu, " ");
 
-    // 7) PERCENT ALREADY SPELLED OUT. "93% ശതമാനം" (×1) — the tier's duplicate guard is currency-only,
-    //    so step 5 turned this into "93 ശതമാനം ശതമാനം". Collapsed here rather than in core, because the
-    //    guard's generalisation to percent is a shared-code change and #562 reports those instead.
+    // 7) PERCENT ALREADY SPELLED OUT ("93% ശതമാനം"). ⚠ The shared tier's duplicate guard is CURRENCY-ONLY,
+    //    so step 5 turns this into "93 ശതമാനം ശതമാനം". Collapsed here rather than in core, because
+    //    generalising that guard to percent is a shared-code change.
     s = s.replace(/ശതമാനം(\s+ശതമാനം)+/gu, "ശതമാനം");
 
     // 8) DECIMALS (×25), after units and times have taken their share.
@@ -202,92 +182,73 @@ export function normalizeMalayalam(input: string): string {
     // 9) DEGREES (×1), last, so a decimal temperature would keep its point. Only the bare sign is
     //    handled: ഡിഗ്രി is written out three times in this corpus, but no scale word (സെൽഷ്യസ്,
     //    ഫാരൻഹീറ്റ്) appears anywhere here and neither °C nor °F occurs, so none is invented.
-    // THE PLUS → പ്ലസ്, from the corpus's own AUDIO (a PHONEME recognizer, no `+` in its vocabulary). Over
-    // ml_in/train, and ml voices it in BOTH positions:
-    //   UTC+1  →  `… n j uː l t i s iː p l a s o n n ə …` and `… y j uː l t i s i p l a s o n n …`  2 of 2
-    //   +30°C  →  `… m a s a ŋ l i l p l a s v u p o d e d i ɡ …`  plus + മുപ്പതു, 1 of 1
-    // ★ Like ta, gu and mi, and unlike en/hi/vi/te/xh/am/ne, ml says the MEASUREMENT plus. പ്ലസ് reads
-    // plˈasɨ, matching the decode. BEFORE the degree rule — the ordering zu's `[+]?` taught.
-    // THE MINUS AND ±. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE and no unguardable shape either — measured:
-    //    every `-<digit>` here is a range, a score or a closed designation, and there are ZERO instances of the
-    //    one shape no guard can reject, `word · space · hyphen · digit`. That test is what decides this class:
-    //    mr, nl, ta, gu, kn and yue all have such an instance and all decline the rule
-    //    (ACCEPTED_SIGN_SILENCE); this corpus does not, so a guarded rule is safe HERE — a fact about the
-    //    corpus, not about the guard.
+    // THE PLUS is പ്ലസ്, and Malayalam voices it in BOTH positions (`UTC+1`, `+30°C`). ⚠ This is the
+    //    MEASUREMENT plus — the reading a language uses for a signed quantity — which not every language
+    //    shares; some read a word meaning "above" instead. MUST PRECEDE the degree rule, or `+30°C` has
+    //    lost its sign by the time the plus rule looks.
     //
-    //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately before
-    //    (rejects closed designations), and a digit ANYWHERE to the left (rejects a SPACED range or score, which
-    //    the fleet's usual guard misses — the gap that cost a real defect in th).
+    // THE MINUS AND ±. ⚠ WHETHER A MINUS RULE IS SAFE IS A FACT ABOUT THE TEXT, NOT ABOUT THE GUARD. The
+    //    shape no guard can reject is `word · space · hyphen · digit`, which is indistinguishable from a
+    //    spaced range or a dashed designation; a language whose text contains that shape must decline the
+    //    rule outright. This one does not contain it, so a guarded rule is safe HERE and nowhere by default.
     //
-    //    SOURCED, AND THE SAME SENTENCE GIVES ± DIRECTLY: ml.wikipedia writes "പ്ലസ്-മൈനസ് ചിഹ്നം, ±,
-    //    ഒന്നിലധികം അർത്ഥങ്ങളുള്ള ഒരു ഗണിത…" — the PLUS-MINUS SIGN, ±, a mathematical symbol with several
-    //    meanings. So both the minus word (x16 / 8 articles) and the ± pairing come from one quote naming the
-    //    glyph, which is the strongest shape tier 4 takes.
+    //    THREE GUARDS: a digit immediately after the sign (rejects `- 2`), a letter or digit immediately
+    //    before (rejects closed designations), and a digit ANYWHERE to the left — that last one rejects a
+    //    SPACED range or score, which the usual guard misses.
     //
-    //    ± is then this language's own two words juxtaposed, both lifted from rules in this file.
+    //    ± IS SOURCED BY THE SAME SENTENCE AS THE MINUS: ml.wikipedia names the glyph directly —
+    //    "പ്ലസ്-മൈനസ് ചിഹ്നം, ±, ഒന്നിലധികം അർത്ഥങ്ങളുള്ള ഒരു ഗണിത…" (the plus-minus sign, ±, a mathematical
+    //    symbol with several meanings). A citation that names the WORD against the GLYPH is the strongest
+    //    form this kind of sourcing takes. ± is then the two words juxtaposed, both already in this file.
     s = s.replace(/±/gu, " പ്ലസ് മൈനസ് ");
     s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "മൈനസ് ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 പ്ലസ് ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1പ്ലസ് ");
 
-    // THE DIVISION AND COMPARISON SIGNS. The EQUALITY IS DELIBERATELY LEFT DROPPED — see the end.
+    // THE DIVISION AND COMPARISON SIGNS.
     //
-    // ⚠ THE PARALLEL-CORPUS FORM IS A SUBORDINATE CLAUSE, NOT A READING, and Malayalam is the clearest case of
-    // why a hit in FLEURS's aspect-ratio sentence is a lead rather than an answer. That sentence gives
-    // "പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ", and both halves are inflected FOR THAT SENTENCE:
+    // ⚠ A VERB FORM FOUND IN RUNNING TEXT IS USUALLY INFLECTED FOR THAT SENTENCE, not for the slot between
+    // two operands. Malayalam is the clearest case: the obvious source phrase is
+    // "പന്ത്രണ്ട് ഉപയോഗിച്ച് ഹരിക്കുമ്പോൾ", and BOTH halves are sentence-bound —
     //
-    //   ഹരിക്കുമ്പോൾ = ഹരിക്ക്- (divide) + -ുമ്പോൾ, and -ുമ്പോൾ IS the word "when" (historically -ഉം + പോൾ
-    //   "time"). So the form means "when dividing" — a temporal SUBORDINATOR, subordinated here to the main
-    //   predicate ആണെന്ന് പറയാം ("can be said to be"). Between two operands there is no main clause for it to
-    //   attach to, so `6 ÷ 3` would read "six when-divided three", a fragment awaiting a predicate.
+    //   ഹരിക്കുമ്പോൾ = ഹരിക്ക്- (divide) + -ുമ്പോൾ, and -ുമ്പോൾ IS "when" (historically -ഉം + പോൾ "time"),
+    //   so the form means "when dividing" — a temporal SUBORDINATOR needing a main predicate. Between two
+    //   operands there is none, so `6 ÷ 3` would read "six when-divided three", a fragment.
     //
-    //   ഉപയോഗിച്ച് ("using") is a converb, not the instrumental case -കൊണ്ട് that Malayalam puts on a divisor.
-    //   The translator wrote a two-clause paraphrase of the operation, not a reading of the notation.
+    //   ഉപയോഗിച്ച് ("using") is a converb, not the instrumental -കൊണ്ട് that Malayalam puts on a divisor.
     //
-    // What the sentence DOES establish, with certainty, is the ROOT: ഹരി-. The form comes from ml.wikipedia's
-    // arithmetic article, which names the sign against the glyph in a section heading —
+    // What such a phrase DOES establish is the ROOT, ഹരി-. The form shipped is the sign's own NAME, taken
+    // from an arithmetic article that names it against the glyph — `=== ഹരണം (÷ or /) ===`. ⚠ The naming
+    // citation is the EVIDENCE; placing that name INFIX is an INFERENCE, and is marked as one.
     //
-    //     === ഹരണം (÷ or /) ===        then  "ഗുണനത്തിന്റെ വിപരീത ക്രിയയാണ് ഹരണം"
+    // ⚠ AND ഹരണം'S CORPUS HITS ARE ALL INSIDE അപഹരണം, "ABDUCTION" — a substring trap. Counting tokens for a
+    // short root without checking what encloses them measures the wrong word.
     //
-    // — so ഹരണം (×12 token / 2 articles) is the sign's own NAME, and a sign name reads infix: `el` does exactly
-    // this with ίσον, `ja` with イコール, and `ta`'s wiki writes the parallel Dravidian nominal out in the slot
-    // ("a வகுத்தல் b"). ⚠ That last step is a fleet PATTERN rather than an attested "a ഹരണം b" string, and is
-    // marked as such: the naming citation is the evidence, the infix placement is the inference.
+    // ⚠ A BOUND MORPHEME CANNOT BE TOKEN-COUNTED AT ALL. -എക്കാൾ ("than") appears only fused
+    // (കൾച്ചർ ഷോക്കിനെക്കാൾ, പരമ്പരാഗത ഭാഷകളെക്കാൾ), so its token count is ×0 BY CONSTRUCTION, not by
+    // absence. What IS countable is the head it governs: കൂടുതൽ, കുറവ്. Postposed, so a comparison here
+    // cannot read backwards.
     //
-    // ⚠ AND ഹരണം'S SIX CORPUS HITS ARE ALL INSIDE അപഹരണം, "ABDUCTION" — the substring trap, and the funniest
-    // instance of it so far. The corpus contributes the root and nothing else.
-    //
-    // ⚠ THE COMPARATIVE MORPHEME CANNOT BE TOKEN-COUNTED AT ALL. -എക്കാൾ ("than") is BOUND: it appears only
-    // fused (കൾച്ചർ ഷോക്കിനെക്കാൾ, പരമ്പരാഗത ഭാഷകളെക്കാൾ), so its token count is ×0 by construction, not by
-    // absence — the agglutinative counterpart of the ZWNJ false negative Persian produced. What IS countable is
-    // the head it governs: കൂടുതൽ ×182 token, കുറവ് ×12. Postposed, so the comparison cannot read backwards.
-    //
-    // Emitted UNFUSED, as ta's accusative is, and for the same reason: fusing needs the numeral spelled here
-    // plus its sandhi. The phones are unchanged; the tokenizer sees a boundary Malayalam would not write.
+    // Emitted UNFUSED: fusing would need the numeral spelled out here plus its sandhi. The phones are
+    // unchanged; the tokenizer merely sees a boundary Malayalam would not write.
     s = postposedSign(s, "<", "എക്കാൾ കുറവ്");
     s = postposedSign(s, ">", "എക്കാൾ കൂടുതൽ");
     s = s.replace(/\s?÷\s?/gu, " ഹരണം ");
 
-    // THE EQUALITY, and ⚠ IT WAS THE REGISTER RESTRICTION THAT HID IT — the Polish lesson, repeated exactly.
-    // This rule was first left DROPPED on the finding that സമം, തുല്യം and ഹരിച്ചാൽ were ×0 in both corpus and
-    // wiki. That was measured with `attest.ts --context "ഗണിതം അങ്കഗണിതം ഹരണം"`, i.e. inside maths articles, and
-    // those articles write the notation instead of reading it. Dropping the restriction found the word at once:
+    // THE EQUALITY. ⚠ SEARCHING ONLY INSIDE MATHS ARTICLES HIDES THE EQUALITY WORD, because those articles
+    // WRITE the notation rather than read it aloud. The word turns up immediately in ordinary prose:
+    // തുല്യം in "കിലോഗ്രാമിന്റെ പിണ്ഡത്തിന് തുല്യം" (equal TO the mass of the kilogram), and the predicative
+    // സമമാണ് ("is equal").
     //
-    //   `തുല്യം`  ×11 token / 11 ARTICLES   "കിലോഗ്രാമിന്റെ പിണ്ഡത്തിന് തുല്യം" — EQUAL TO the mass of the
-    //                                       kilogram; "രാജസൂയത്തിനു തുല്യം ഫലം" — a result EQUAL TO the Rajasuya
-    //   `സമമാണ്`  ×19                       the predicative form, "is equal"
-    //
-    // ⚠ AND `സമം` IS THE WRONG WORD FOR THIS SLOT, which is why probing it first was misleading. It is ×22 but
-    // means "in equal MEASURE" adverbially ("ഇവ സമം കഷായം" — these in equal parts, "10 ഗ്രാം സമം നെയ്യും") and is
-    // separately the name of a rhetorical figure ("സമം എന്ന അലങ്കാരം"). Its Tamil, Kannada and Telugu cognates
-    // (சமம், ಸಮ, సమానం) ARE the equality word in those languages — all four are the same Sanskrit loan *sama* —
-    // so a sister-language inference would have picked exactly the wrong member of the set. The cognate tells
-    // you where to look; it does not tell you which sense the borrowing settled into.
+    // ⚠ AND `സമം` IS THE WRONG WORD FOR THIS SLOT, though it is the commonest candidate. It means "in equal
+    // MEASURE" adverbially ("ഇവ സമം കഷായം" — these in equal parts) and is separately the name of a rhetorical
+    // figure. Its Tamil, Kannada and Telugu cognates (சமம், ಸಮ, సమానం) ARE the equality word there — all four
+    // are the same Sanskrit loan *sama* — so a sister-language inference picks exactly the wrong member of
+    // the set. A cognate tells you where to look, not which sense the borrowing settled into.
     //
     // ⚠ POSTPOSED, because the attested construction is DATIVE + തുല്യം: the standard comes first
-    // (`പിണ്ഡത്തിന് തുല്യം`), so `A = B` is "A B-ന് തുല്യം". The dative is emitted unfused for the same reason
-    // the comparative's -എക്കാൾ is, and with the same known limitation.
+    // (`പിണ്ഡത്തിന് തുല്യം`), so `A = B` is "A B-ന് തുല്യം". The dative is emitted unfused, as above.
     s = postposedSign(s, "=", "ന് തുല്യം");
 
     s = s.replace(/(\d)\s?°\s?/gu, "$1 ഡിഗ്രി ");

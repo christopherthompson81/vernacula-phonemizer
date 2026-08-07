@@ -1,12 +1,11 @@
 /**
  * Malayalam cardinal number → words, plus the ordinal and oblique morphology normalize.ts needs.
  *
- * THE COMPOSITION IS THE SHARED `dravidianNumberWords` (core/numbers.ts). Malayalam is the fourth
- * Dravidian language in this repo and the one the playbook named as the trigger to consolidate the
- * three private composers rather than write a fourth: it needs every capability Tamil, Telugu and
- * Kannada each needed separately — a fused 21-99, suppletive round hundreds, suppletive round
- * thousands, and a combining magnitude form before a remainder. All of it is DATA in malayalam.jsonc,
- * with its provenance; this file is only the Malayalam-facing wrapper plus the two morphologies.
+ * THE COMPOSITION IS THE SHARED `dravidianNumberWords` (core/numbers.ts). Malayalam exercises every
+ * capability that composer has — a fused 21–99, suppletive round hundreds, suppletive round thousands,
+ * and a combining magnitude form before a remainder — which is why it is worth reading as the reference
+ * case for the shared path. All of it is DATA in malayalam.jsonc, with its provenance; this file is only
+ * the Malayalam-facing wrapper plus the two morphologies.
  *
  * What `indicNumberWords` produced before, measured on this corpus's own numerals:
  *     21   ഇരുപത് ഒന്ന്                          → ഇരുപത്തിയൊന്ന്

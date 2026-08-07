@@ -8,7 +8,7 @@
  * which are not Malay's. This file runs as a PRE-PASS in front of it (see malay.ts) and claims only the
  * shapes where the ms_my corpus measurably disagrees with Indonesian. Everything else is deliberately left
  * to the inherited layer: a Malay file that re-states Indonesian for no measured reason is worse than the
- * alias. What was NOT duplicated, and why, is in.
+ * alias. Each rule below states what it claims and why the inherited layer could not.
  *
  * THE INVERSION THAT SHAPES THIS FILE. Indonesian groups thousands with a PERIOD and writes the decimal
  * COMMA (9.000 / 1,5). The ms_my corpus — translated from the English FLEURS set — uses the ENGLISH
@@ -23,8 +23,7 @@
  * ORDERING is load-bearing throughout; each step states its coupling. The two that matter most: every rule
  * that consumes a GLUED unit (`2.4Ghz`, `160km/j`, `19,500km²`) runs BEFORE the decimal rule, because the
  * version-dot guard is "a letter follows the fraction digits" and a glued unit looks exactly like that; and
- * the clock runs before the range, because a range endpoint may be a clock (playbook trap 14 (agreement cannot be applied to digits)'s ordering
- * hazard).
+ * the clock runs before the range, because a range endpoint may be a clock (a range endpoint may itself be a clock).
  */
 
 /** Dotted abbreviations where MALAY differs from Indonesian's table. `dsb.`/`dll.` are identical in both and
@@ -60,7 +59,7 @@ const FREQ_WORD: Readonly<Record<string, string>> = {
 /** Compass letters after a degree sign: `35°W` was read as the glued `dərˈad͡ʒatw`. */
 const COMPASS: Readonly<Record<string, string>> = { n: "utara", s: "selatan", e: "timur", w: "barat" };
 
-const L = "(?<![\\p{L}\\p{M}])"; // never `\b` — playbook trap 1 (`\b` is ASCII-defined)
+const L = "(?<![\\p{L}\\p{M}])"; // ⚠ never `\b`: it is ASCII-defined and finds no boundary against non-Latin script
 const R = "(?![\\p{L}\\p{M}])";
 
 /** A clock is only a clock when something says so, and in this corpus something always does: `pukul`/`jam`
@@ -83,16 +82,17 @@ function meridiemWord(hour: number, mark: string): string {
 
 /** Nouns that mark a hyphenated pair as a RANGE rather than a score. Every corpus range is followed by one
  *  (or is a year pair); every corpus SCORE — 5-3, 6-6, 7-2, 26 - 00 — is followed by none, which is what
- *  keeps `hingga` out of them. Widened only for shapes that were counted (playbook trap 9 (a guard alternative with no attested…)). */
+ *  keeps `hingga` out of them. ⚠ Widened only for shapes that were actually counted — a guard alternative with no attested
+ *  instance behind it is a guess wearing the costume of evidence. */
 const RANGE_NOUN = [
     "minit", "jam", "saat", "hari", "malam", "petang", "pagi", "bulan", "minggu", "tahun", "abad",
     "km", "kilometer", "meter", "sentimeter", "milimeter", "batu", "ela", "inci", "kaki", "kg", "kilogram",
     "juta", "bilion", "ribu", "peratus", "darjah", "kali", "orang", "ekor", "pm", "GMT", "UTC", "MDT",
 ].join("|");
 
-/** Malay is not a mutating or case-marking language, so trap 14 (agreement cannot be applied to digits) does not bite here: `hingga` and the
+/** Malay is not a mutating or case-marking language, so no agreement is lost by rewriting DIGITS: `hingga` and the
  *  clock rewrites can be applied to DIGITS without any agreement being lost, and every operand is
- *  re-emitted verbatim (trap 10 (a rule that CONSUMES a word must put it back)). Every rule below emits DIGITS where a number is involved and lets the
+ *  re-emitted verbatim (a rule that CONSUMES a word must put it back). Every rule below emits DIGITS where a number is involved and lets the
  *  engine's own number path speak them, which keeps this layer free of the number words entirely. */
 export function normalizeMalay(input: string): string {
     let s = input;
@@ -110,7 +110,7 @@ export function normalizeMalay(input: string): string {
 
     // 3) `US$30` — the shared symbol tier is keyed on a sign at a token boundary, so a `$` glued behind
     //    letters was swallowed and the amount lost its currency word entirely (`uɛs tiga puluh`). One space
-    //    is the whole fix; `US` is written, so it stays written (trap 12 (a REDUNDANT symbol is a permissible drop): say each thing once).
+    //    is the whole fix; `US` is written, so it stays written (a REDUNDANT symbol is a permissible drop: say each thing once).
     s = s.replace(new RegExp(`(${L}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)`, "gu"), "$1 $");
     //    …and A MAGNITUDE WORD AFTER THE AMOUNT has to be got out from between the number and its currency.
     //    The tier keys the currency word on the sign's ADJACENCY TO THE DIGITS, so it lands inside the
@@ -150,7 +150,7 @@ export function normalizeMalay(input: string): string {
     s = s.replace(/(\d)\s?%(?=\s*peratus)/gu, "$1");
     s = s.replace(/(\d)\s?%/gu, "$1 peratus");
 
-    // 5) ERA MARKER, before the generic abbreviation step (playbook's ordering rule). `323 SM`, `5000 SM`:
+    // 5) ERA MARKER, before the generic abbreviation step. `323 SM`, `5000 SM`:
     //    the letters were spelled `ɛsɛm`. The corpus spells the expansion itself ×3 (`abad ke-10 sebelum
     //    Masihi`), which is where the wording comes from. A preceding number is required, so an `SM` that
     //    is some other initialism cannot be claimed.
@@ -180,8 +180,8 @@ export function normalizeMalay(input: string): string {
 
     // 8) EXPONENT. `3,850 km²` and `19,500km²` read as `ʔm` — the unit was not claimed (no adjacent digit
     //    after de-grouping in `juta km2`) and the `²` was dropped. Both the superscript and the ASCII form,
-    //    because a rule that matches only `²` reads the ASCII 2 as a number (the Japanese bug, playbook
-    //    "Migrating a local rule"). The bare `m²` arm requires a preceding digit so `M2` cannot match.
+    //    because a rule matching only `²` leaves the ASCII form to be read as a NUMBER. The bare `m²` arm
+    //    requires a preceding digit so `M2` cannot match.
     s = s.replace(new RegExp(`(?<=\\d)km[²2]${R}`, "gu"), " kilometer persegi"); // glued: `19,500km²`
     s = s.replace(new RegExp(`${L}km[²2]${R}`, "gu"), "kilometer persegi");
     s = s.replace(/(\d\s?)m²/gu, "$1meter persegi");
@@ -259,7 +259,8 @@ export function normalizeMalay(input: string): string {
     }
 
     // 12) A BARE hour with a meridiem (`8 p.m.`) — zero corpus instances, but it is the adversarial
-    //     neighbour of the clock above and read `p . m .` before (trap 8 (zero corpus instances is not evidence of…)).
+    //     neighbour of the clock above and read `p . m .` before. ⚠ Zero corpus instances is not evidence of correctness — it is
+    //     absence of evidence, and the adversarial neighbour of a rule that DOES fire needs covering.
     s = s.replace(new RegExp(`(?<![\\d.:])(\\d{1,2})\\s?(${MERIDIEM})(?![\\p{L}\\p{M}])(?!\\s*(?:pagi|petang|malam|tengah))`, "gu"),
         (_m, h: string, mark: string) => `${h} ${meridiemWord(Number(h), mark)}`);
     //     …and `pg`, the corpus's abbreviation for `pagi`, which read as the bare letters `pɡ`. Only after a
@@ -282,8 +283,8 @@ export function normalizeMalay(input: string): string {
     s = s.replace(/(?<![\d.:])([01]?\d|2[0-3]):00(?![\d.:])/gu, "$1");
     s = s.replace(/(?<![\d.:])(\d{1,4}):(\d{1,4})(?!\d)/gu, "$1 $2");
 
-    // 13b) ARITHMETIC AND COMPARISON SIGNS, dropped silently by the shared tier (in Indonesian too). Zero
-    //      instances in this corpus, which is not evidence of correctness (trap 8 (zero corpus instances is not evidence of…)) — and the corpus does
+    // 13b) ARITHMETIC AND COMPARISON SIGNS, dropped silently by the shared tier (in Indonesian too). ⚠ Zero
+    //      instances in this corpus, which is not evidence of correctness — and the corpus does
     //      supply every word: it spells the multiplication infix itself in `format 6 kali 6 sm` and
     //      `negatif 56 kali 56 mm`, and writes `sama dengan` ×11, `kurang daripada` ×3, `lebih daripada`
     //      ×11. `<`/`>`/`×` are claimed ONLY between digits, because this corpus's text still carries HTML
@@ -297,7 +298,7 @@ export function normalizeMalay(input: string): string {
     //     silently dropped, so `10-60 minit` read *sepuluh enam puluh minit*. Fires ONLY for a pair that a
     //     measure/period noun follows, or a pair of four-digit years — which is what keeps it out of the
     //     four sports scores (5-3, 6-6, 7-2, 26 - 00), none of which has either. Operands are re-emitted
-    //     verbatim and the class ends in a digit, so a following clause comma cannot be eaten (trap 14 (agreement cannot be applied to digits)).
+    //     verbatim and the class ends in a digit, so a following clause comma cannot be eaten.
     const num = "\\d+(?:\\.\\d+)?";
     s = s.replace(new RegExp(`(?<![\\d.])(${num})\\s?[-–]\\s?(${num})(?=\\s*(?:${RANGE_NOUN})${R})`, "gu"), "$1 hingga $2");
     //     The year arm's trailing guard is `(?!\d)` and NOT `(?![\d.,])`: `sejak 1995-1996, apabila` ends on
@@ -305,9 +306,9 @@ export function normalizeMalay(input: string): string {
     s = s.replace(/(?<!\d)([12]\d{3})\s?[-–]\s?([12]\d{3})(?!\d)/gu, "$1 hingga $2");
 
     // 15) DECIMALS, LAST — every rule that consumes a glued unit has run, so a letter still stuck to the
-    //     fraction now means a VERSION (`802.11a/b/g/n`, ×5), not a unit. Malay reads the point as
-    //     `perpuluhan`; round-tripped through this repo's g2p), and the fraction digit
-    //     by digit — hence the space between them, so the tokenizer says *lima kosong* and not *lima puluh*.
+    //     fraction now means a VERSION (`802.11a/b/g/n`), not a unit. Malay reads the point as
+    //     `perpuluhan` and the fraction DIGIT BY DIGIT — hence the space between the digits, so `.50`
+    //     reads *lima nol* and not *lima puluh* (fifty).
     //     `\d{1,3}.000` is EXCLUDED: the corpus's one `9.000 orang` is Indonesian-convention thousands
     //     grouping in a translated sentence, and the inherited tokenizer already reads it as *sembilan
     //     ribu*. The exclusion is narrowed to an ALL-ZERO group rather than any three digits, because the

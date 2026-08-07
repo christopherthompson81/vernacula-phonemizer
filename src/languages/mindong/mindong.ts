@@ -1,19 +1,20 @@
 /**
- * Min Dong / Eastern Min (cdo) — Fuzhou dialect (Fuzhounese), Sinitic, tonal (~9M speakers), the only major Sinitic
- * branch otherwise absent from the fleet. This phonemizer consumes **Bàng-uâ-cê (BUC / Foochow Romanized)** — the
- * phonemic missionary Latin orthography (used by the cdo Wikipedia + historical Bible/press) — and converts it to
- * canonical IPA, mirroring the Min Nan (nan) direct-Tâi-lô path. The converter (mindong.jsonc): strip the tone
- * diacritic (identifies the tone) → [initial] + rime → IPA + Chao tone letters. BUC follows the missionary
- * convention where the plain stop letters are ASPIRATED: ⟨p t k⟩ = [pʰ tʰ kʰ], ⟨b d g⟩ = [p t k]; ⟨c⟩ = [t͡s],
- * ⟨ch⟩ = [t͡sʰ]; ⟨ng⟩ = [ŋ].
+ * Min Dong / Eastern Min (cdo) — Fuzhou dialect (Fuzhounese), Sinitic, tonal (~9M speakers). This phonemizer
+ * consumes **Bàng-uâ-cê (BUC / Foochow Romanized)** — the phonemic missionary Latin orthography used by the cdo
+ * Wikipedia and historical Bible/press — and converts it to canonical IPA, mirroring the Min Nan direct-Tâi-lô
+ * path. The converter (mindong.jsonc): strip the tone diacritic (which identifies the tone) → [initial] + rime
+ * → IPA + Chao tone letters.
  *
- * SEGMENTAL + CITATION tone, with the 韻變 (rime alternation) MODELLED: each rime has a TIGHT form and, where it
- * alternates, a LOOSE form, selected by the tone register (LOOSE under the acute/circumflex tones 陰去/陰入/陽去,
- * tight otherwise); the ⟨io⟩-family additionally picks its medial [y]/[u] by the initial place. Still DEFERRED: the
- * Han front-end (no independent Han→reading dict exists — the only source is Wiktionary, the referee's source →
- * circular), tone sandhi (連讀變調), and initial assimilation (聲母類化). The eval folds tones (Chao letters stripped
- * both sides) and validates the segmental backbone. Referee: BUC↔IPA pairs from the kaikki Chinese dump (Wiktionary
- * Module:cdo-pron output) → 🔷 reference-implementation parity, not independent human attestation.
+ * ⚠ BUC FOLLOWS THE MISSIONARY CONVENTION, so the plain stop letters are ASPIRATED: ⟨p t k⟩ = [pʰ tʰ kʰ] and
+ * ⟨b d g⟩ = [p t k]. ⟨c⟩ = [t͡s], ⟨ch⟩ = [t͡sʰ], ⟨ng⟩ = [ŋ].
+ *
+ * SEGMENTAL + CITATION tone, with the 韻變 (rime alternation) MODELLED: each rime has a TIGHT form and, where
+ * it alternates, a LOOSE form, selected by the tone register (LOOSE under the acute/circumflex tones 陰去/陰入/
+ * 陽去, tight otherwise); the ⟨io⟩-family additionally picks its medial [y]/[u] by the initial place.
+ *
+ * DEFERRED: the Han front-end (no independent Han→reading dictionary exists — the only source is Wiktionary,
+ * which is also the referee's source, so it would be circular), tone sandhi (連讀變調), and initial
+ * assimilation (聲母類化).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";

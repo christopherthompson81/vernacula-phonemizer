@@ -4,7 +4,7 @@
  * only loans are the magnitude words `miljun`/`biljun` (Italian milione/bilione), which are the ordinary Maltese
  * words for those magnitudes — there is no rival Semitic form in use.
  *
- * ★ THE ONE REAL JUDGMENT CALL — **counting form, not attributive form.** Maltese has two numeral series and the
+ * ⚠ THE ONE REAL JUDGMENT CALL — **counting form, not attributive form.** Maltese has two numeral series and the
  *   split is the classic Maltese textbook point: the ABSOLUTE/COUNTING form (`tnejn` 2, `tlieta` 3, `erbgħa` 4 …)
  *   used when counting aloud, doing arithmetic, or citing a bare figure, versus the ATTRIBUTIVE/construct form
  *   (`żewġ` 2, `tliet` 3, `erba'` 4 …) used immediately before a counted noun. A digit in running text is a bare
@@ -15,7 +15,7 @@
  *   follows. Reading the counting form there is the standard TTS compromise (and is how a Maltese speaker reads a
  *   figure aloud out of context).
  *
- * ★ SOURCES
+ * SOURCES
  *   - **GF Resource Grammar Library, `NumeralMlt.gf`** (John J. Camilleri, 2011–2013, LGPL) —
  *     https://raw.githubusercontent.com/GrammaticalFramework/gf-rgl/master/src/maltese/NumeralMlt.gf. A complete
  *     published generator for Maltese 1–999 999; every composition rule below is read off it: the unit/attributive/
@@ -27,7 +27,7 @@
  *   - Attested composed forms used as goldens: `tliet mija u ħdax-il elf` (311 000, Maltese broadcast text) and
  *     Camilleri's own `elf, erba' mija u għoxrin` (1420) — both reproduced exactly by this composer.
  *
- * ★ STRUCTURE — three things make Maltese not a Western decimal:
+ * STRUCTURE — three things make Maltese not a Western decimal:
  *   1. **Units-first inside 21–99** with the connector `u`: 21 = `wieħed u għoxrin` ("one and twenty"), 45 =
  *      `ħamsa u erbgħin`. (Semitic order, same as Arabic waːħid wa ʕiʃruːn and German einundzwanzig.)
  *   2. **DUAL forms** for exactly 2× a magnitude: 200 `mitejn`, 2000 `elfejn` — not *żewġ mija, not *żewġt elef.

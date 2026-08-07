@@ -44,12 +44,12 @@ const mkCountForm = (n: number): number => {
     return m % 10 === 1 && m !== 11 ? 0 : 1;
 };
 
-// #562 symbol normalization — Macedonian. Percent/currency/units/rates carry the count form above
+// symbol normalization — Macedonian. Percent/currency/units/rates carry the count form above
 // (1 процент, 2 проценти; 1 километар, 2 километри). Units are written BOTH ways — Cyrillic кm and Latin
 // km are equally common in the corpus — so both scripts are declared. The rate denominator is "на час"
 // (per hour) but "во секунда" (per second), which the keyed unitPer expresses.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
@@ -173,7 +173,7 @@ const TOKEN = /([а-шА-ШѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\d+(?:,\d+)?
 
 class MacedonianPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: Macedonian rewrites (grouping, ordinals, century/date, clock, ranges, signs) →
+        // order: Macedonian rewrites (grouping, ordinals, century/date, clock, ranges, signs) →
         // INITIALISMS (after abbreviations, so `Д-р` is not spelled DE-ER) → the shared symbol tier last
         // (it needs the number still adjacent to its unit/sign). Roman numerals arrive already converted
         // at the registry seam, so regnal "Лиалофи III" is "3" by the time normalize runs.

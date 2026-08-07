@@ -6,7 +6,9 @@
  * The Tâi-lô→IPA converter (minnan.jsonc, initial/final/tone maps from the epitran nan-Latn-tl spec): strip the
  * tone diacritic (identifies the tone) → [initial] + final → IPA + Chao tone letter. Sibilants PALATALISE before
  * i (ts/tsh/s/j+i → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ); checked finals -p̚/-t̚/-k̚, -h→ʔ; nasalised -nn vowels; syllabic m̩/ŋ̍.
- * Phase 1: segmental + CITATION tone (the tone-sandhi circle is deferred).
+ *
+ * Segmental + CITATION tone. The tone-sandhi circle is DEFERRED — it is phrase-level and not recoverable
+ * from a syllable-at-a-time conversion.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
@@ -239,16 +241,15 @@ export function phonemizeWord(word: string): string {
 }
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted verbatim, so
- * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
- * use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it is no longer also
- * deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  *
- * ⚠ ONE ADDITION BEYOND THE VERBATIM LIFT: the capitals `ÀÁÂĀǍ`. the Tâi-lô tone vowels were listed in lower case only, so `TÂI` lost the tone `tâi` kept — so a
- * CAPITALISED native word failed the inventory test and the fold stripped its diacritic. Harmless while the
- * class was only deciding tokenization (the letter fell out of the token and fragmented, which is the defect this
- * issue is about); it becomes a silent DELETION the moment the class also drives the fold. Found by checking every
- * class against the upper case of its own letters, not by a corpus.
+ * ⚠ THE CAPITALS `ÀÁÂĀǍ` MUST BE LISTED ALONGSIDE THE LOWER CASE. Listing only the lower-case Tâi-lô tone
+ * vowels means `TÂI` fails the inventory test where `tâi` passes, so a CAPITALISED native word is treated as
+ * foreign and the fold strips its tone diacritic — a silent DELETION, since this class drives the fold and
+ * not merely the tokenization. Any class that omits the upper case of its own letters has the same bug.
  */
 const NATIVE_CLASS = "[A-Za-zàáâāǎÀÁÂĀǍ̀-̍]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

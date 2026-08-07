@@ -2,38 +2,21 @@
  * Marathi (mr) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
  * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
  *
- * Marathi shares Hindi's script and Hindi's abugida engine (`makeNativeHindi`), but NOT Hindi's
- * orthographic conventions, and the two diverge in every tier this file touches: Marathi writes the
- * percent as टक्के (not प्रतिशत), the clock as वाजून/वाजता (not बजकर/बजे), the ordinal suffix as
- * -व्या/-वा/-वी/-वे with its own suppletive 1-4, and — the one that mattered most — it writes a large
- * fraction of its numbers in DEVANAGARI DIGITS, which every ASCII-defined rule in the fleet misses.
+ * ⚠ MARATHI SHARES HINDI'S SCRIPT AND HINDI'S ABUGIDA ENGINE (`makeNativeHindi`) BUT NOT HINDI'S
+ * ORTHOGRAPHIC CONVENTIONS, and the two diverge in every tier this file touches: Marathi writes the
+ * percent as टक्के (not प्रतिशत), the clock as वाजून/वाजता (not बजकर/बजे), and the ordinal suffix as
+ * -व्या/-वा/-वी/-वे with its own suppletive 1–4. It also writes a large fraction of its numbers in
+ * DEVANAGARI DIGITS, which every ASCII-defined rule misses — see step 2, and note that the same lead
+ * FAILS for several sibling Indic languages, so it must be measured per language rather than assumed.
  *
- * Measured over the mr_in FLEURS corpus (1,992 unique utterances, column 3):
- *   Devanagari digits ०-९ .......... 597   (the "native digits" lead HOLDS here, unlike hi/bn/ur)
- *   two-digit numbers .............. 233   (every one of them mis-read — see marathi.jsonc `compound`)
- *   four-digit years ............... 171
- *   three-digit numbers ............  76
- *   ordinal suffixes (व्या/वा/वे) ...  45
- *   grouped numbers (1,234) ........  46
- *   ZWJ inside a word .............. 66   (्‍य ×45, अ‍ॅ ×21 — split the word in the tokenizer)
- *   ASCII ':' written for visarga ..  ~42  (विशेषत: ×12, स्वत:* ×17, सामान्यत: ×9 …)
- *   decimals .......................  29
- *   Devanagari unit abbreviations ..  32   (किमी, मिमी, मी, किमी/तास, किमी²)
- *   clock times h:mm ...............  17   (3 of which are SPORTS times 4:41.30 — not clocks)
- *   ranges N-M .....................  17   (4 of which are SPORTS SCORES — see step 12)
- *   currency signs .................  11   ($ ×7, ¥ ×3, € ×1 — 7 of them on Devanagari digits)
- *   percent ........................   5
- *   fractions ......................   3
- *   era markers इ.स.पू. ............   4
- *   डॉ. ............................   6
- *   degrees ° ......................   2
- *   danda ।/॥ ......................   0   (NEGATIVE RESULT: the Marathi corpus uses the ASCII period)
+ * ⚠ THE DANDA ।/॥ DOES NOT APPEAR — Marathi text of this kind uses the ASCII period. A negative result
+ * worth recording, because it is the opposite of what the script suggests.
  *
- * A NOTE ON THE SHARED ENGINE, which shapes several rules below. `makeNativeHindi` applies HINDI's
- * normalizer and HINDI's symbol tier unconditionally to all seven languages that reuse it, and there is
- * no seam to pass a different one. So this pass runs FIRST and must leave nothing behind that Hindi's
- * pass can claim — every rule here is written to consume its input completely. Where that forced a rule
- * into a shape it would not otherwise take, it is called out at the step (5, 7, 12).
+ * ⚠ A NOTE ON THE SHARED ENGINE, which shapes several rules below. `makeNativeHindi` applies HINDI's
+ * normalizer and HINDI's symbol tier to every language that reuses it, and there is no seam to pass a
+ * different one. So this pass runs FIRST and must leave nothing behind that Hindi's pass can claim —
+ * every rule here is written to consume its input completely. Where that forced a rule into a shape it
+ * would not otherwise take, it is called out at the step (5, 7, 12).
  */
 import { indicNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { postposedSign } from "../../core/postposedSign.ts";
@@ -89,8 +72,8 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
     // Marathi's as well, but the bare-hundred rewrite in step 14 turns `100 km` into `शंभर km`, which
     // that tier can no longer match (its NUM is a digit run) — the Latin would have been stranded and
     // read out as letter names. Owning them here settles the ordering. Single-letter `m` is deliberately
-    // NOT here: the playbook's `rateDenominators` note records a one-letter unit matching an
-    // alphanumeric designation, and this corpus's only `100m`/`200m` are swim events, 2 instances.
+    // NOT here: ⚠ a one-letter unit key matches alphanumeric designations, and the `100m`/`200m`
+    // that occur are swim events, not measurements.
     "km": "किलोमीटर", "cm": "सेंटीमीटर", "mm": "मिलीमीटर", "kg": "किलोग्रॅम",
 };
 const UNIT_ALT = Object.keys(UNIT_WORD)
@@ -253,7 +236,7 @@ export function makeMarathiNormalizer(
         //        Hindi clock rule claims them (its `(?![\d:])` permits a following dot) and produced
         //        "चार बजकर एकेचाळीस मिनट . तीस" — a bogus clock, a Hindi word, and a spurious phrase
         //        break. Dropping the colon leaves two plain numbers, which is the honest reading and
-        //        which nothing downstream can re-claim. (Same failure the playbook records for ru/id.)
+        //        which nothing downstream can re-claim.
         //        (the trailing guard is `(?![\d:])`, NOT `(?![\d.,:])` — the corpus writes these in a
         //        comma-separated list, "4:41.30, 2:11.60", and excluding a following comma made the rule
         //        miss the first of the two.)
@@ -316,7 +299,7 @@ export function makeMarathiNormalizer(
         //     step 13, whose solidus would otherwise have to compete with किमी/तास. The shared tier
         //     matches a unit only when a NUMBER is adjacent and these keys are Devanagari, so this stays
         //     local. `(?![\p{L}\p{M}])` after the key is what keeps मी (metre) out of मीटर, मिनिटे and
-        //     the pronoun मी — the same over-counting trap that bit Bengali's ম.
+        //     the pronoun मी — the same over-counting trap any short unit key has in an abugida.
         s = s.replace(
             new RegExp(`(\\d)\\s?(${UNIT_ALT})(?![\\p{L}\\p{M}])`, "gu"),
             (_m, d: string, u: string) => `${d} ${UNIT_WORD[u]!}`,
@@ -355,40 +338,38 @@ export function makeMarathiNormalizer(
         //     `शंभरm` from the swim event "100m आणि 200m" — the guard leaves any digits+Latin pair alone.
         s = s.replace(/(?<![\d,.\-–—])100(?![\d,.\-–—])(?!\s*[A-Za-z])/gu, "शंभर");
 
-        // 15) SIGNS. Plus and the approximation tilde only. The MINUS rule used elsewhere in the fleet
-        //     is deliberately NOT applied, on the same evidence Hindi recorded: Devanagari compounds are
-        //     written with a hyphen (आस-पास), the corpus's one hyphen-before-digit outside a range is
-        //     "चंद्रयान -1" — a spacecraft name — and reading it as "उणे एक" is worse than silence.
+        // 15) SIGNS. Plus and the approximation tilde only. ⚠ THE MINUS RULE IS DELIBERATELY NOT APPLIED:
+        //     Devanagari compounds are written with a hyphen (आस-पास), and the hyphen-before-digit that
+        //     occurs outside a range is a designation — "चंद्रयान -1", a spacecraft name — where reading
+        //     "उणे एक" ("minus one") is worse than silence.
         s = s.replace(/\+\s?(?=\d)/gu, " अधिक ");
         s = s.replace(/~\s?(?=\d)/gu, " सुमारे ");
 
-        // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. All sourced from mr_in, because mr.wikipedia is
-        //      thin here — `बरोबर`, `भागिले` and `पेक्षा कमी` are all ×0 in its arithmetic articles, so tier 2 is
-        //      the whole of the evidence and tier 4 contributed nothing.
+        // 15b) THE RELATIONAL AND DIVISION SIGNS, and ±. ⚠ All sourced from running text rather than from
+        //      Marathi's own arithmetic articles, which write the notation instead of reading it — `बरोबर`,
+        //      `भागिले` and `पेक्षा कमी` are all ×0 there.
         //
         //      ⚠ THE COMPARATIVES ARE POSTPOSITIONAL, so they use core/postposedSign.ts rather than a
         //      substitution: Marathi states the standard first and the comparative after it, and the corpus
         //      writes पेक्षा FUSED to the standard — "एका मैलापेक्षा कमी" (less than one mile) ×8,
         //      "१०० फुटांपेक्षा जास्त" (more than 100 feet) ×23. An infix rule would read the comparison
-        //      backwards, which is the ja/ko/fa lesson in a postpositional rather than verb-final language.
+        //      BACKWARDS — the same hazard any postpositional or verb-final language poses.
         //
-        //      ⚠ THE DIVISION IS POSTPOSITIONAL TOO, and this is where FLEURS being a PARALLEL corpus paid: its
-        //      aspect-ratio sentence performs a division aloud in 57 of the 67 languages, and the Marathi
-        //      translator wrote "बाराने भागणे" — instrumental -ने on the operand, then भागणे. So `A ÷ B` is
-        //      "A, by B, dividing". `भागिले`, the infix school form, is ×0 in both corpus and wiki, so the
-        //      attested shape is the one shipped.
+        //      ⚠ THE DIVISION IS POSTPOSITIONAL TOO. A PARALLEL corpus is what settles this: the same
+        //      sentence performs a division aloud across many languages, and the Marathi rendering is
+        //      "बाराने भागणे" — instrumental -ने on the operand, THEN भागणे. So `A ÷ B` is "A, by B,
+        //      dividing". `भागिले`, the infix school form, is ×0 everywhere measured.
         //
-        //      ⚠ AND `बरोबर` IS A HOMOGRAPH MAJORITY, like vi's `bằng`. Of its ×21 corpus tokens most are the
-        //      postposition "with" — "तुमच्या बरोबर" (with you), "त्याच बरोबर" (along with that) — but the
-        //      equality sense is present and is the arithmetic reading: "तो बरोबर आहे" (it is correct),
-        //      "अनुक्रमे बरोबर" (respectively equal). Counted alone the word looks wrong; read, it is right.
+        //      ⚠ AND `बरोबर` IS A HOMOGRAPH MAJORITY. Most of its tokens are the postposition "with" —
+        //      "तुमच्या बरोबर" (with you), "त्याच बरोबर" (along with that) — but the equality sense is present
+        //      and is the arithmetic reading: "तो बरोबर आहे" (it is correct), "अनुक्रमे बरोबर" (respectively
+        //      equal). COUNTED alone the word looks wrong; READ, it is right.
         //
-        //      ± pairs this file's own अधिक with उणे — the word the minus note above names as the reading it
-        //      declined ("reading it as उणे एक is worse than silence"), so the vocabulary was already cited here.
-        // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the preceding word:
-        //    `तापमान±5` read *t̪ˈaːpmaːnəəd̪ʱɪk*, one token, with the stress of neither. The shared symbol tier's
-        //    `ampersand` note records the same hazard for the same reason. Every other language that reads ± in this
-        //    fleet uses the spaced form; these three did not, and gu/mr got it by copying hi.
+        //      ± pairs this file's own अधिक with उणे — the word the minus note in step 15 names as the
+        //      reading it declined, so both halves are already cited in this file.
+        // ⚠ SPACED ON BOTH SIDES. `/±\s?/` with an unspaced replacement FUSES the reading onto the
+        //    preceding word: `तापमान±5` reads *t̪ˈaːpmaːnəəd̪ʱɪk*, one token, with the stress of neither.
+        //    The shared symbol tier's `ampersand` note records the same hazard for the same reason.
         s = s.replace(/±/gu, " अधिक उणे ");
         s = postposedSign(s, "<", "पेक्षा कमी");
         s = postposedSign(s, ">", "पेक्षा जास्त");
