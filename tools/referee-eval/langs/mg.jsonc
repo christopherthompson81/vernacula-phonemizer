@@ -4,7 +4,7 @@
 // the big one — they DELETE the weak final vowels (Malagasy's famous unstressed final a/o/y), realising them as
 // labialisation ʷ / palatalisation ʲ / devoicing on the preceding consonant. Our BROAD canonical transcription
 // KEEPS those vowels (correct for a synthesis target), so the folds below neutralise the narrow allophony but the
-// keep-vs-delete final-vowel difference is a documented ceiling, not an error. → single-source (🔷).
+// keep-vs-delete final-vowel difference is a documented ceiling, not an error. → single-source ().
 {
     "referees": [
         {
@@ -18,7 +18,7 @@
             "role": "secondary"
         }
     ],
-    "secondaryGap": "Both Malagasy referees are Wiktionary-derived (wikipron + kaikki = the same human source parsed twice), small (~200 words), and very narrow (weak-final-vowel deletion, glottal-h). No independent non-Wiktionary Malagasy pronunciation corpus is free; epitran has no Malagasy. → single-source (🔷).",
+    "secondaryGap": "Both Malagasy referees are Wiktionary-derived (wikipron + kaikki = the same human source parsed twice), small (~200 words), and very narrow (weak-final-vowel deletion, glottal-h). No independent non-Wiktionary Malagasy pronunciation corpus is free; epitran has no Malagasy. → single-source ().",
     "folds": [
         { "pattern": "ʔ", "replace": "h", "note": "intervocalic ⟨h⟩ realised as a glottal stop in the narrow referee → our canonical h" },
         { "pattern": "ʷ", "replace": "", "note": "labialisation from a weak final ⟨o⟩ (the referee deletes the vowel, we keep it) — notational" },

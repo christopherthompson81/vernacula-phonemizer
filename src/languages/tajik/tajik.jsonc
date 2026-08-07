@@ -1,7 +1,7 @@
 // Native canonical-IPA data manifest for Tajik / тоҷикӣ (tg) — Cyrillic.
 // Tajik is a variety of Persian (Iranian, SW) written in a CYRILLIC alphabet that — unlike the Perso-Arabic
 // abjad our `fa` uses — WRITES ALL ITS VOWELS. So this is a near-phonemic left-to-right Cyrillic scan with NO
-// short-vowel restoration (the wall that keeps fa 🟡) — the Kurmanji-vs-Persian advantage.
+// short-vowel restoration (the wall that keeps fa ) — the Kurmanji-vs-Persian advantage.
 //
 // The ALGORITHMS that read this stay in tajik.ts: the greedy grapheme scan (word-initial / post-vowel е→je,
 // iotated ё/ю/я, the special letters), Persian FINAL stress, the tokenizer, and the cardinal-number compositor.

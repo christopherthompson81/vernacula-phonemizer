@@ -8,7 +8,7 @@ import { numberToWords } from "../src/languages/umbundu/numbers.ts";
 // Schadeberg (1982) "Nasalization in UMbundu" (the primary R11 phonology, Table 1 inventory) + the orthography —
 // REFEREE-SCARCE (no wikipron/kaikki/epitran/Wiktionary-IPA), ASJP Umbundu-3 corroborated. This gold is a MEANINGFUL
 // correctness anchor (Umbundu is a distinct, documented language, not a clone — the Igbo/Naija no-referee pattern),
-// 🔷 single-source. Signatures: VOICED obstruents ONLY prenasalised (⟨mb nd nj ng⟩→ᵐb ⁿd ᶮd͡ʒ ᵑɡ), ⟨c⟩→t͡ʃ (palatal
+// single-source. Signatures: VOICED obstruents ONLY prenasalised (⟨mb nd nj ng⟩→ᵐb ⁿd ᶮd͡ʒ ᵑɡ), ⟨c⟩→t͡ʃ (palatal
 // obstruent, not [ʃ]), ⟨v⟩→v, ⟨ñ⟩/⟨ny⟩→ɲ, ⟨ng'⟩→ŋ, ⟨l⟩→l (no native /r/). Tone (H/L+downstep) unwritten → stripped,
 // deferred.
 describe("Umbundu canonical IPA", () => {

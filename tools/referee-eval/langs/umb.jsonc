@@ -4,7 +4,7 @@
 // CORROBORATES the phoneme inventory + rough sound values (⟨c⟩=t͡ʃ, prenasalised voiced stops, ⟨v⟩=v, ⟨l⟩=l) but
 // cannot serve as an orthography→IPA referee. Unlike Bhojpuri this is NOT circular (Umbundu is a distinct, well-
 // documented language, not a clone), so the hand-adjudicated gold in test/umbundu.test.ts is a MEANINGFUL correctness
-// anchor — the Igbo/Naija no-referee pattern. 🔷 single-source.
+// anchor — the Igbo/Naija no-referee pattern. single-source.
 {
     "language": "umb",
     "name": "Umbundu",

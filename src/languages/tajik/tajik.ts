@@ -1,7 +1,7 @@
 /**
  * Tajik / тоҷикӣ (tg) phonemizer — canonical IPA. A variety of Persian (Iranian, SW) in the
  * CYRILLIC alphabet, which writes all its vowels → a near-phonemic left-to-right scan with NO short-vowel
- * restoration (the wall that keeps our Perso-Arabic `fa` at 🟡). The letter→IPA tables are DATA (tajik.jsonc);
+ * restoration (the wall that keeps Perso-Arabic `fa` short of full coverage). The letter→IPA tables are DATA (tajik.jsonc);
  * the code here is the scan (word-initial / post-vowel е→je, iotated ё/ю/я, the six-vowel system, the special
  * Cyrillic letters ғ қ ҳ ҷ ӣ ӯ ъ), Persian FINAL stress, a cardinal-number compositor, and the tokenizer.
  * Validated against wikipron tgk_cyrl (broad + narrow, human) + epitran tgk-Cyrl.

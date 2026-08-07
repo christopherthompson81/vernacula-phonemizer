@@ -9,7 +9,7 @@
     "language": "mag",
     "name": "Magahi",
     "script": "Devanagari",
-    "provenance": "Magahi (mag) — Indo-Aryan, Devanagari. Bespoke: the Bhojpuri engine + phonology (shared Bihari features: no vowel length, single sibilant श/ष→s, ण/ञ→n) plus the DOCUMENTED Magahi-specific GLIDE HARDENING from the comparative phonology (Vinod Kumar 2026): word-initial व→[b] (वंश→bans) and य→[d͡ʒ] (यन्त्र→jantar), where Bhojpuri preserves the glides. Single comparative-source delta on a grammar-anchored base → 🔷.",
+    "provenance": "Magahi (mag) — Indo-Aryan, Devanagari. Bespoke: the Bhojpuri engine + phonology (shared Bihari features: no vowel length, single sibilant श/ष→s, ण/ञ→n) plus the DOCUMENTED Magahi-specific GLIDE HARDENING from the comparative phonology (Vinod Kumar 2026): word-initial व→[b] (वंश→bans) and य→[d͡ʒ] (यन्त्र→jantar), where Bhojpuri preserves the glides. Single comparative-source delta on a grammar-anchored base → .",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida
     // 'inherent vowel'). Hindi's is the schwa /ə/. Its deletion (below) is the one non-trivial rule.

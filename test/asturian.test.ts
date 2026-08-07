@@ -5,7 +5,7 @@ import { numberToWords } from "../src/languages/asturian/numbers.ts";
 
 // Asturian (ast) — asturianu, Astur-Leonese (Ibero-Romance), Asturias/NW Spain (~110k). Close to Spanish/Galician (distinción c/z→[θ]); the Asturian hallmark is ⟨x⟩→[ʃ]. A greedy Ibero-Romance
 // scan, validated against wikipron ast_latn_broad (4170 human headwords) — 97.8% FOLDED / 99.6% symbol, with stress +
-// spirantization folded. 🔷 single source.
+// spirantization folded. single source.
 describe("Asturian canonical IPA — Ibero-Romance g2p (x→ʃ, distinción)", () => {
     const ast = createAsturian();
 

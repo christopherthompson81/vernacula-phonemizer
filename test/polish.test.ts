@@ -60,7 +60,7 @@ describe("Polish canonical IPA", () => {
         expect(phonemize("1000", "pl").trim()).toBe("tˈɨɕɔnt͡s"); // tysiąc — the numeral "jeden" is dropped
         expect(phonemize("2000", "pl").trim()).toBe("dvˈa tɨɕˈɔnt͡sɛ"); // 2–4 → PAUCAL tysiące
         expect(phonemize("5000", "pl").trim()).toBe("pjˈɛɲt͡ɕ tɨɕˈɛnt͡sɨ"); // 5+ → GEN-PL tysięcy
-        expect(phonemize("21000", "pl").trim()).toBe("dvad͡ʑˈɛɕt͡ɕa jˈɛdɛn tɨɕˈɛnt͡sɨ"); // ★ …jeden → GEN-PL, not sg
+        expect(phonemize("21000", "pl").trim()).toBe("dvad͡ʑˈɛɕt͡ɕa jˈɛdɛn tɨɕˈɛnt͡sɨ"); // …jeden → GEN-PL, not sg
         expect(phonemize("100000", "pl").trim()).toBe("stˈɔ tɨɕˈɛnt͡sɨ"); // sto tysięcy
         expect(phonemize("12345", "pl").trim()).toBe("dvanˈaɕt͡ɕɛ tɨɕˈɛnt͡sɨ tʂˈɨsta t͡ʂtɛrd͡ʑˈɛɕt͡ɕi pjˈɛɲt͡ɕ");
         expect(phonemize("1000000", "pl").trim()).toBe("mˈiljɔn"); // milion
@@ -209,7 +209,7 @@ describe("Polish text normalization", () => {
         expect(phonemize("1%", "pl").trim()).toBe("jˈɛdɛn prˈɔt͡sɛnt");
         expect(phonemize("3%", "pl").trim()).toBe("tʂˈɨ prɔt͡sˈɛntɨ"); // paucal — trzy procenty
         expect(phonemize("88%", "pl").trim()).toBe("ɔɕɛmd͡ʑˈɛɕɔnt ˈɔɕɛm prˈɔt͡sɛnt"); // gen-pl
-        expect(phonemize("21%", "pl").trim()).toBe("dvad͡ʑˈɛɕt͡ɕa jˈɛdɛn prˈɔt͡sɛnt"); // ★ gen-pl, not sg
+        expect(phonemize("21%", "pl").trim()).toBe("dvad͡ʑˈɛɕt͡ɕa jˈɛdɛn prˈɔt͡sɛnt"); // gen-pl, not sg
         expect(phonemize("12%", "pl").trim()).toBe("dvanˈaɕt͡ɕɛ prˈɔt͡sɛnt"); // 11–14 always gen-pl
         expect(n("100 m i 200 m stylem")).toBe("100 m i 200 m stylem"); // units are the tier's, not ours
         expect(phonemize("2 km", "pl").trim()).toBe("dvˈa kilɔmˈɛtrɨ");

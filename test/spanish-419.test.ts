@@ -1,7 +1,7 @@
 /**
  * es-419 (Latin-American / "neutral" Spanish) accent DIAGNOSTIC GOLD — the quality anchor. es-419 = the
  * Castilian `es` engine + two categorical, pan-American mergers (seseo θ→s, yeísmo ʎ→ʝ). The referee number
- * (92.6% vs wikipron spa_latn_la, matching the ✅ es parent's 92.5%) is NOT the story — the residual is entirely
+ * (92.6% vs wikipron spa_latn_la, matching the es parent's 92.5%) is NOT the story — the residual is entirely
  * inherited coda-obstruent-voicing allophony (shared with es). This gold verifies the two mergers are exact on
  * the vocabulary that distinguishes Latin-American from Castilian.
  *

@@ -11,7 +11,7 @@
     "referees": [
         { "file": "smj.asjp-swadesh.tsv", "source": "ASJP LULE_SAAMI + LULE_SAAMI_2 (Lexibank, CC0, coarse — INDEPENDENT) × kaikki gloss→orthography, 43 curated pairs", "role": "primary" }
     ],
-    "secondaryGap": "🔷 authored from a published grammar (Ylikoski), REFEREE-LIMITED. No wikipron/kaikki-IPA/Wiktionary-IPA smj. The ASJP corroboration is 43 coarse Swadesh words (inventory-level: ASJP folds length/quality/gemination). The g2p rests on the grammar phonology; the morphophonology (gradation/epenthesis/harmony/length) is the disclosed deferred residual.",
+    "secondaryGap": "authored from a published grammar (Ylikoski), REFEREE-LIMITED. No wikipron/kaikki-IPA/Wiktionary-IPA smj. The ASJP corroboration is 43 coarse Swadesh words (inventory-level: ASJP folds length/quality/gemination). The g2p rests on the grammar phonology; the morphophonology (gradation/epenthesis/harmony/length) is the disclosed deferred residual.",
     "folds": [
         { "pattern": "ʰ", "replace": "", "note": "ASPIRATION: the marginal ⟨p t k⟩→[pʰ tʰ kʰ] and pre-stop pre-aspiration — ASJP transcribes plain stops" },
         { "pattern": "ʲ", "replace": "", "note": "ASJP palatalisation mark (tʃʲ, dʲ) — we emit plain t͡ʃ / ɟ" },

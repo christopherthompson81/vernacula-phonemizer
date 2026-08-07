@@ -9,7 +9,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // PRE-ASPIRATION (medial ⟨p t c⟩→[hp ht̪ xk]) and lenis ⟨b d g⟩→[p t̪ k]. Validated 67.0% symbol vs the
 // MULTI-DIALECT wikipron gla_latn_broad (human, 6000; the folded % is a multi-dialect artifact).
 describe("Scottish Gaelic (Gàidhlig) canonical IPA", () => {
-    test("★ PRE-ASPIRATION: medial/final ⟨p t c⟩ → [hp ht̪ xk]", () => {
+    test("PRE-ASPIRATION: medial/final ⟨p t c⟩ → [hp ht̪ xk]", () => {
         expect(phonemizeWord("mac")).toBe("mˈaxk"); // medial ⟨c⟩ pre-aspirates to [xk] (the SG signature)
         expect(phonemizeWord("cat")).toBe("kʰˈaht̪"); // initial ⟨c⟩→[kʰ] aspirated; final ⟨t⟩→[ht̪] pre-aspirated
         expect(phonemizeWord("cù")).toBe("kʰˈuː"); // initial fortis ⟨c⟩→[kʰ]; ù→[uː]
@@ -57,9 +57,9 @@ describe("Scottish Gaelic numbers", () => {
         [99, "naochad agus a naoi"],
         [100, "ceud"],                           // bare magnitude — no ⟨aon⟩
         [101, "ceud agus a h-aon"],
-        [200, "dà cheud"],                       // ★ ⟨dà⟩ LENITES: ceud → cheud
+        [200, "dà cheud"],                       // ⟨dà⟩ LENITES: ceud → cheud
         [300, "trì ceud"],                       // 3–10 leave the magnitude BARE
-        [900, "naoi ceud"],                      // ★ NO ECLIPSIS (Irish: naoi gcéad) — the gd/ga divergence
+        [900, "naoi ceud"],                      // NO ECLIPSIS (Irish: naoi gcéad) — the gd/ga divergence
         [1000, "mìle"],
         [2000, "dà mhìle"],                      // mìle → mhìle after dà
         [1009, "mìle agus a naoi"],              // connector before a bare counting remainder

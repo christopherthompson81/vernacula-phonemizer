@@ -9,7 +9,7 @@
     "referees": [
         { "file": "haw.wikipron-broad.tsv", "source": "wikipron haw_latn_broad (human)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source family (wikipron; kaikki Hawaiian same Wiktionary source) — but a trivially-phonemic orthography means low referee-error risk.",
+    "secondaryGap": "single-source family (wikipron; kaikki Hawaiian same Wiktionary source) — but a trivially-phonemic orthography means low referee-error risk.",
     "folds": [
         { "pattern": "\\u032F", "replace": "", "note": "non-syllabic OFFGLIDE mark (the 2nd vowel of a falling diphthong: alawai→alawai̯) — a narrow detail; we emit the plain vowel" }
     ]

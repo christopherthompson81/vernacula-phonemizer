@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // ACCOMPANIMENTS: bare→[ᵑ̊_ˀ] (glottalised nasal), ⟨g⟩→[ᵏ_] (tenuis), ⟨kh⟩→[ᵏ_ʰ] (aspirated), ⟨h⟩→[ᵑ̊_ʰ], ⟨n⟩→[ᵑ_]
 // (voiced nasal). Referee: English Wiktionary "Khoekhoe terms with IPA pronunciation".
 describe("Nama (Khoekhoe) canonical IPA", () => {
-    test("★ THE CLICK SYSTEM — the dental ⟨ǀ⟩ series × 5 accompaniments", () => {
+    test("THE CLICK SYSTEM — the dental ⟨ǀ⟩ series × 5 accompaniments", () => {
         expect(phonemizeWord("ǀ")).toBe("ᵑ̊ǀˀ"); // BARE click → the glottalised nasal click
         expect(phonemizeWord("ǀg")).toBe("ᵏǀ"); // ⟨g⟩ → tenuis [ᵏǀ]
         expect(phonemizeWord("ǀkh")).toBe("ᵏǀʰ"); // ⟨kh⟩ → aspirated [ᵏǀʰ]
@@ -16,7 +16,7 @@ describe("Nama (Khoekhoe) canonical IPA", () => {
         expect(phonemizeWord("ǀn")).toBe("ᵑǀ"); // ⟨n⟩ → voiced nasal [ᵑǀ]
     });
 
-    test("★ the four click PLACES (bare = glottalised nasal at each place)", () => {
+    test("the four click PLACES (bare = glottalised nasal at each place)", () => {
         expect(phonemizeWord("ǀ")).toBe("ᵑ̊ǀˀ"); // dental
         expect(phonemizeWord("ǁ")).toBe("ᵑ̊ǁˀ"); // lateral
         expect(phonemizeWord("ǂ")).toBe("ᵑ̊ǂˀ"); // palatal
@@ -39,7 +39,7 @@ describe("Nama (Khoekhoe) canonical IPA", () => {
 
     // ═══ CARDINAL NUMBERS — NATIVE Khoe decimal to 999 999, with the two naturalised loan magnitudes miljun/
     // biljun that published Khoekhoegowab actually uses. Sources in src/languages/nama/numbers.ts.
-    test("★ cardinals: solid disi compounds; the tens multiplier starts at TWO", () => {
+    test("cardinals: solid disi compounds; the tens multiplier starts at TWO", () => {
         const naq = getPhonemizer("naq");
         expect(naq.text("1").trim()).toBe("ᵏǀui"); // ǀgui — ⟨ǀg⟩ is the TENUIS click [ᵏǀ]
         expect(naq.text("7").trim()).toBe("hũ"); // hû — the circumflex is NASALITY, not tone

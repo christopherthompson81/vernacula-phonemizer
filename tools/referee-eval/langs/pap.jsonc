@@ -8,7 +8,7 @@
     "referees": [
         { "file": "pap.kaikki-wiktionary.tsv", "source": "kaikki Papiamentu + Wiktionary 'Papiamentu terms with IPA' (HUMAN, ~20)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 THIN single-source-family (~20 pairs, kaikki + Wiktionary both Wiktionary-derived) — no wikipron/epitran pap. The % is on a small sample; the g2p is well-defined by the Curaçao phonemic orthography and verified on goldens. Papiamentu's lexical PITCH-ACCENT (H/L) is transcribed by the referee (párà) but folds via the backbone.",
+    "secondaryGap": "THIN single-source-family (~20 pairs, kaikki + Wiktionary both Wiktionary-derived) — no wikipron/epitran pap. The % is on a small sample; the g2p is well-defined by the Curaçao phonemic orthography and verified on goldens. Papiamentu's lexical PITCH-ACCENT (H/L) is transcribed by the referee (párà) but folds via the backbone.",
     "folds": [
         { "pattern": "\\.", "replace": "", "note": "the referee's syllable-boundary dots" },
         { "pattern": "ɾ", "replace": "r", "note": "⟨r⟩ tap [ɾ] (ours) ~ [r] (referee) — the rhotic; the referee also debuccalizes a CODA ⟨r⟩ to [h] (deporte→depohte, a Curaçao feature), left as a residual" },

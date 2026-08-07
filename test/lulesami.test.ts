@@ -9,7 +9,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // hallmark is the North-Saami-style VOICELESS ⟨b d g⟩→[p t k] (aspiration-not-voicing), ASJP-confirmed.
 // First-syllable stress.
 describe("Lule Sami (julevsámegiella) canonical IPA", () => {
-    test("★ the voiceless ⟨b d g⟩ → [p t k] trap + medial ⟨p t k⟩ stay PLAIN", () => {
+    test("the voiceless ⟨b d g⟩ → [p t k] trap + medial ⟨p t k⟩ stay PLAIN", () => {
         expect(phonemizeWord("bena")).toBe("ˈpenɑ"); // 'dog' — ⟨b⟩→[p] (grammar /peːnə/), NOT [b]; ⟨a⟩→[ɑ]
         expect(phonemizeWord("giella")).toBe("ˈkielːɑ"); // 'language' — ⟨g⟩→[k], ⟨ie⟩ diphthong, ⟨ll⟩→geminate
         expect(phonemizeWord("guokta")).toBe("ˈkuoktɑ"); // 'two' — ⟨g⟩→[k]; medial ⟨k t⟩ are PLAIN (not [kʰ tʰ])
@@ -37,7 +37,7 @@ describe("Lule Sami (julevsámegiella) canonical IPA", () => {
     // ═══ CARDINAL NUMBERS — native Uralic decimal, written SOLID (Finnish-style) below a million. Authored from
     // the Divvun/Giellatekno digit→text transducer for smj, whose own comments mark the branch we follow as the
     // one "for tekst-til-tale" (for text-to-speech). Sources + stem alternations in numbers.ts.
-    test("★ cardinals: the lågev / -låhke / -låk and lågenan- stem alternations", () => {
+    test("cardinals: the lågev / -låhke / -låk and lågenan- stem alternations", () => {
         const smj = getPhonemizer("smj");
         expect(smj.text("0").trim()).toBe("ˈnolːɑ"); // nålla
         expect(smj.text("7").trim()).toBe("ˈkiet͡ʃɑv"); // gietjav — ⟨g⟩→[k], the voiceless-⟨b d g⟩ trap

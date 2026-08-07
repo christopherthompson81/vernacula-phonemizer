@@ -1,9 +1,9 @@
-// Awadhi (awa) — Eastern Hindi (Indo-Aryan), Devanagari. 🔷 SINGLE-SOURCE, now MEASURED. The referee is a set of
+// Awadhi (awa) — Eastern Hindi (Indo-Aryan), Devanagari. SINGLE-SOURCE, now MEASURED. The referee is a set of
 // Saksena's own transcribed forms (Evolution of Awadhi, 1937, §41-52/§90-136), hand-read from the PDF because the
 // PaddleOCR IPA is corrupt; the Devanagari is supplied from Saksena's English glosses (standard orthography,
-// independent of his IPA — so the pairing is non-circular). One documented source = 🔷. There is no *independent*
+// independent of his IPA — so the pairing is non-circular). One documented source = . There is no *independent*
 // second referee (wikipron awa 0 lines, no kaikki Awadhi, epitran ships none; a machine Hindi-clone would be
-// circular), so this stays single-source, not multiply-verified. NOT ⛔: Saksena is a real Awadhi-specific source.
+// circular), so this stays single-source, not multiply-verified. NOT : Saksena is a real Awadhi-specific source.
 // 93.9% folded (notation folds only). Coverage (LOCAL, permissive corpus): 99.99% of 48.6k awawiki types
 // (frequency-ranked via tools/corpus/build.ts --wiki awa) and 100% of 6.6k Awadhi Shabd-Kosh
 // headwords — real Awadhi vocabulary, not Hindi cognates. The Awadhi Shabd-Kosh (rights-restricted) is used
@@ -12,11 +12,11 @@
     "language": "awa",
     "name": "Awadhi",
     "script": "Devanagari",
-    "provenance": "Hindi-derived Devanagari engine + Awadhi divergences from Saksena (1937). 🔷 single-source, now MEASURED against a Saksena referee.",
+    "provenance": "Hindi-derived Devanagari engine + Awadhi divergences from Saksena (1937). single-source, now MEASURED against a Saksena referee.",
     "referees": [
         { "file": "awa.saksena.tsv", "source": "Saksena, Evolution of Awadhi (1937), §41-52/§90-136 origin-of-sounds forms (hand-read; the PaddleOCR IPA is corrupt)", "role": "primary" }
     ],
-    "secondaryGap": "SINGLE-SOURCE (🔷). The referee is Saksena's own transcribed example forms — Devanagari supplied from his English glosses (standard orthography, independent of his IPA). No *independent* second referee exists (wikipron awa empty, no kaikki extract, epitran ships none; and because Awadhi is segmentally ~Hindi per Saksena/Bloch, a machine Hindi-clone would be circular), so this stays single-source, not multiply-verified — but that is what 🔷 is. Coverage corroboration (LOCAL, not committed here): the engine phonemizes 99.99% of 48.6k awawiki types and 100% of the top-1000 most-frequent, and 100% of 6.6k Awadhi Shabd-Kosh headwords — real Awadhi vocabulary, not Hindi cognates.",
+    "secondaryGap": "SINGLE-SOURCE (). The referee is Saksena's own transcribed example forms — Devanagari supplied from his English glosses (standard orthography, independent of his IPA). No *independent* second referee exists (wikipron awa empty, no kaikki extract, epitran ships none; and because Awadhi is segmentally ~Hindi per Saksena/Bloch, a machine Hindi-clone would be circular), so this stays single-source, not multiply-verified — but that is what is. Coverage corroboration (LOCAL, not committed here): the engine phonemizes 99.99% of 48.6k awawiki types and 100% of the top-1000 most-frequent, and 100% of 6.6k Awadhi Shabd-Kosh headwords — real Awadhi vocabulary, not Hindi cognates.",
     "folds": [
         { "pattern": "[ˈˌ]", "replace": "", "note": "stress — Saksena's segmental forms carry no stress mark" },
         { "pattern": "ʌ", "replace": "ə", "note": "Saksena writes [ʌ] for OIA-a (§95/§103); our engine keeps the fleet schwa ə (schwa-deletion keys on it). Residual: Saksena also writes short [a] variably (पसार, अपन) — not folded, stays as signal." },

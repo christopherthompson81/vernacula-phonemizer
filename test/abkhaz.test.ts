@@ -7,7 +7,7 @@ import { phonemizeWord, createAbkhaz } from "../src/languages/abkhaz/abkhaz.ts";
 // base letters + MODIFIER letters: ⟨ь⟩ palatalizes, ⟨ә⟩ labializes, ⟨'⟩ pharyngealizes. Three-way voiced/aspirated/
 // ejective stops. Referee: wikipron abk_cyrl broad + kaikki.
 describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
-    test("★ the THREE-WAY stop/affricate series (voiced / aspirated / ejective)", () => {
+    test("the THREE-WAY stop/affricate series (voiced / aspirated / ejective)", () => {
         expect(phonemizeWord("акы")).toBe("akʼə"); // ⟨к⟩→[kʼ] EJECTIVE; ⟨ы⟩→[ə]
         expect(phonemizeWord("аӡын")).toBe("ad͡zən"); // ⟨ӡ⟩→[d͡z] voiced affricate
         expect(phonemizeWord("аҵла")).toBe("at͡sʼla"); // ⟨ҵ⟩→[t͡sʼ] ejective affricate
@@ -15,7 +15,7 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(phonemizeWord("аҳ")).toBe("aħ"); // ⟨ҳ⟩→[ħ] pharyngeal
     });
 
-    test("★ the MODIFIERS — ⟨ь⟩ palatal, ⟨ә⟩ labial, ⟨'⟩ pharyngeal", () => {
+    test("the MODIFIERS — ⟨ь⟩ palatal, ⟨ә⟩ labial, ⟨'⟩ pharyngeal", () => {
         expect(phonemizeWord("аҟәа")).toBe("aqʼʷa"); // 'Sukhum' — ⟨ҟә⟩→[qʼʷ] labialized uvular ejective
         expect(phonemizeWord("ажәабжь")).toBe("aʒʷabʒ"); // ⟨жә⟩→[ʒʷ], ⟨жь⟩→[ʒ]
         expect(phonemizeWord("ахәыҷ")).toBe("aχʷət͡ʃʼ"); // ⟨хә⟩→[χʷ]
@@ -34,10 +34,10 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(phonemizeWord("х’а")).toBe("χˤa"); // the CURLY apostrophe ’ still pharyngealizes ⟨х⟩→[χˤ]
     });
 
-    // ★ VIGESIMAL cardinal numbers (numbers.ts). 20–99 is score·20 + a 1–19 remainder, the score in its -и
+    // VIGESIMAL cardinal numbers (numbers.ts). 20–99 is score·20 + a 1–19 remainder, the score in its -и
     // connective form (ҩажәа → ҩажәи); the same -и marks a non-final hundred (шәкы → шәи акы). Thousands are FUSED
     // for a multiplier of 1–10. The NON-HUMAN / abstract class series is the bare-numeral citation form.
-    test("★ cardinal numbers are VIGESIMAL: score·20 + remainder with the -и connective", () => {
+    test("cardinal numbers are VIGESIMAL: score·20 + remainder with the -и connective", () => {
         const ab = createAbkhaz();
         expect(ab.text("7").trim()).toBe("bəʒba"); // быжьба
         expect(ab.text("20").trim()).toBe("ɥaʒʷa"); // ҩажәа — the bare score
@@ -53,12 +53,12 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
     test("cardinal numbers: hundreds with the -и connective, FUSED thousands, millions", () => {
         const ab = createAbkhaz();
         expect(ab.text("100").trim()).toBe("ʃʷkʼə"); // шәкы
-        expect(ab.text("101").trim()).toBe("ʃʷi akʼə"); // ★ шәи акы — the hundred takes -и before a remainder
+        expect(ab.text("101").trim()).toBe("ʃʷi akʼə"); // шәи акы — the hundred takes -и before a remainder
         expect(ab.text("999").trim()).toBe("ʒʷʃʷi pʰʃənɥaʒʷi zejʒʷ"); // жәшәи ԥшьынҩажәи зеижә
         expect(ab.text("1000").trim()).toBe("zkʰʲə"); // зқьы
         expect(ab.text("1001").trim()).toBe("zkʰʲə akʼə"); // зқьы акы — the thousand does NOT take -и
-        expect(ab.text("2000").trim()).toBe("ɥnəzkʰʲ"); // ★ ҩнызқь — FUSED multiplier+нызқь
-        expect(ab.text("100000").trim()).toBe("ʃʷnəzkʰʲ"); // ★ шәнызқь — likewise fused
+        expect(ab.text("2000").trim()).toBe("ɥnəzkʰʲ"); // ҩнызқь — FUSED multiplier+нызқь
+        expect(ab.text("100000").trim()).toBe("ʃʷnəzkʰʲ"); // шәнызқь — likewise fused
         expect(ab.text("12345").trim()).toBe("ʒʷaɥa nəzkʰʲ χəʃʷi ɥənɥaʒʷi χʷba"); // жәаҩа нызқь хышәи ҩынҩажәи хәба
         expect(ab.text("1000000").trim()).toBe("milljon"); // миллион (Russian loan)
         expect(ab.text("1000000000").trim()).toBe("milljard"); // миллиард

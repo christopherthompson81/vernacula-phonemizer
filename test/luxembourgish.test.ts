@@ -10,7 +10,7 @@ import { normalizeLuxembourgish, ordinalStem } from "../src/languages/luxembourg
 // orthography (⟨w⟩→v, ⟨ch⟩→χ, initial st/sp→ʃt/ʃp) + a distinctive diphthong system + French loans. The engine is a
 // greedy longest-match grapheme scan + German-style rules (stressed ⟨e⟩→æ, geminate collapse, devoicing). Validated
 // against wikipron ltz_latn_broad (3893 human headwords) — 69.3% FOLDED / 92.2% symbol, with vowel LENGTH folded.
-// 🔷 single-source-family.
+// single-source-family.
 describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + German-style rules", () => {
     const lb = createLuxembourgish();
 
@@ -94,7 +94,7 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
 
 // TEXT NORMALIZATION. Counts are FLEURS lb_lu, column 3, 1,896 utterances. The assertions are on the
 // text→text layer (plus a couple through phonemize, to prove the words reach the g2p rather than a sink),
-// and they pin the rule's BRANCHES rather than the corpus's instances — trap 13 (pin the rule's BRANCHES).
+// and they pin the rule's BRANCHES rather than the corpus's instances .
 describe("Luxembourgish normalization — the period's four jobs + the Eifeler Regel", () => {
     const lb = createLuxembourgish();
     const N = normalizeLuxembourgish;
@@ -102,7 +102,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
     // The ordinal STEM has five branches and the corpus exercises only some of them: the suppletive table,
     // the `+t` path, the doubled-`t` collapse at 8, the `+st` path from 20, and the multi-word carrier
     // where the ending must land on the last word only. 8, 100 and 1922 are NOT in the corpus.
-    test("ordinal stem: every branch, not just the attested values (trap 13 (pin the rule's BRANCHES))", () => {
+    test("ordinal stem: every branch, not just the attested values", () => {
         expect(ordinalStem(1)).toBe("éischt"); // suppletive
         expect(ordinalStem(3)).toBe("drëtt"); // suppletive
         expect(ordinalStem(7)).toBe("siwent"); // +t
@@ -163,7 +163,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
     test("clock: `Auer` is re-emitted, a zone label is put back, and hour 1 is feminine", () => {
         expect(N("um 20.30 Auer Lokalzäit (15.00 UTC)")).toBe("um 20 Auer 30 Lokalzäit (15 Auer UTC)");
         expect(N("Tëschent 22.00 an 23.00 Auer MDT")).toBe("Tëschent 22 Auer an 23 Auer MDT");
-        expect(N("E Samschdeg um 1.15 Auer")).toBe("E Samschdeg um eng Auer 15"); // trap 14 (agreement cannot be applied to digits): Auer is FEMININE
+        expect(N("E Samschdeg um 1.15 Auer")).toBe("E Samschdeg um eng Auer 15"); // the numeral must AGREE, so it is words-ified here
         expect(N("tëschent 6.30 a 7.30 Auer")).toBe("tëschent 6 Auer 30 a 7 Auer 30"); // licensed both ways
         // An UNLICENSED period-pair is left alone: the decimal rule takes a one-digit fraction only,
         // because in this language a two-digit fraction after a dot is the clock shape.
@@ -219,7 +219,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
 
     test("degrees and signs — and the compound hyphens that must not become a minus", () => {
         expect(N("bei 32 °C Hëtzt")).toBe("bei 32 Grad Celsius Hëtzt");
-        expect(N("12 °F")).toBe("12 Grad Fahrenheit"); // zero corpus instances — trap 8 (zero corpus instances is not evidence of…) probe
+        expect(N("12 °F")).toBe("12 Grad Fahrenheit"); // zero corpus instances — absence is not evidence of correctness
         expect(N("iwwer +30 Grad Celsius")).toBe("iwwer plus 30 Grad Celsius");
         expect(N("(UTC+1)")).toBe("(UTC plus 1)");
         expect(N("Typ-1-Diabetes an COVID-19")).toBe("Typ-1-Diabetes an COVID-19"); // no minus
@@ -253,7 +253,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
         expect(N("4x4")).toBe("4x4"); // the ASCII x is a LETTER here and stays one
     });
 
-    // The shared symbol tier, reached through the engine so the words are proved to pass the g2p (trap 6 (a word your layer emits must come from the…)).
+    // The shared symbol tier, reached through the engine so the words are proved to pass the g2p (a word your layer emits must come from the…)).
     test("the symbol tier: percent, currency, units and the two rate idioms", () => {
         expect(lb.text("88 %").trim()).toBe(lb.text("88 Prozent").trim());
         expect(lb.text("30 $").trim()).toBe(lb.text("30 Dollar").trim());

@@ -60,7 +60,7 @@ describe("Slovenian canonical IPA — Slovak-shaped South Slavic engine + Sloven
     });
 });
 
-// TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (trap 13 (pin the rule's BRANCHES)): the ordinal
+// TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances : the ordinal
 // table, the tens+units composition and the boundary between them; both count-form paths; the licensor list
 // AND the ending fallback; and the discriminator that decides an ordinal period from a sentence period.
 // Corpus counts are in src/languages/slovenian/normalize.ts and.
@@ -226,7 +226,7 @@ describe("Slovenian — grouping, decimals, clocks, ranges, units", () => {
         expect(normalizeSlovenian("je torej 3:2.")).toBe("je torej 3 proti 2."); // a colon is never a range
         // …but a DESCENDING pair with a decimal is a real range ("4.2 to 3.9 million years AGO")
         expect(normalizeSlovenian("izpred 4,2–3,9 milijona")).toBe("izpred 4 vejica 2 do 3 vejica 9 milijona");
-        // and the joiner is dropped, not doubled, when the sentence already writes it (trap 12 (a REDUNDANT symbol is a permissible drop))
+        // and the joiner is dropped, not doubled, when the sentence already writes it (redundant)
         expect(normalizeSlovenian("zmagala 26:00 proti peti")).toBe("zmagala 26 00 proti peti");
         // NOT a score: a spaced 3-digit field is a PAGE CITATION, and a 4+2-digit pair is a SEASON — both
         // misfired in the first version of this rule and were caught only by the corpus diff

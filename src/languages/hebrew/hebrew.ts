@@ -1,6 +1,6 @@
 /**
  * Hebrew (he) phonemizer — Afro-Asiatic (Semitic), the Hebrew abjad, MODERN ISRAELI pronunciation,
- * PHASE 1: a niqqud→IPA segmental g2p over VOCALIZED (pointed) Hebrew — the deterministic
+ * A niqqud→IPA segmental g2p over VOCALIZED (pointed) Hebrew — the deterministic
  * core. A stateful scan: each consonant carries the trailing points (dagesh, shin/sin dot, a vowel), which it
  * resolves — the bgdkpt dagesh split (ⁿⁿב→b/v, כ→k/χ, פ→p/f), ⟨ש⟩ shin/sin, the ⟨ו⟩ specials (shuruk וּ→u, holam
  * male וֹ→o, else consonant v), quiescent alef / silent final he / mater yod, and patach genuvah (a final guttural's

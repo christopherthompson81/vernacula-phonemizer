@@ -3,7 +3,7 @@
 // merged. `segmentJoin` strips the referee's per-phone spaces. Tones are Chao LETTERS on both sides → the backbone
 // strips them (segmental comparison); the offglide (◌̯), nasal (◌̃), creaky (◌̰) and breathy (◌̤) marks are combining
 // diacritics the backbone also strips. So the eval validates the SEGMENTAL backbone; tone + nasalisation are folded.
-// 🔷 single-source (wikipron mww, ~470 pairs; thin). RPA is deterministic so the converter generalises past it.
+// single-source (wikipron mww, ~470 pairs; thin). RPA is deterministic so the converter generalises past it.
 {
     "language": "hmn", "name": "Hmong (White Hmong / Hmoob Dawb)", "script": "Latin (RPA)",
     "provenance": "Authored RPA→IPA converter (onset/rime/tone-letter maps derived from the wikipron mww correspondence + the documented Romanized Popular Alphabet tables); validated against wikipron mww_latn_broad.",

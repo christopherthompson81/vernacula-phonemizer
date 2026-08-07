@@ -8,7 +8,7 @@
 //   • ⟨c⟩=c, ⟨j⟩=ɟ (voiceless/voiced palatal STOPS, Wikipedia — [tʃ]/[dʒ] are allophones before front vowels;
 //     folded c~tʃ, ɟ~dʒ vs the epitran referee). ⟨l⟩=l, ⟨r⟩=ɾ (allophones the orthography already writes).
 // TONE (3-way H/L/falling) is LEXICAL + UNWRITTEN → DEFERRED (not emitted). REFEREE = epitran lug-Latn only, which
-// is itself RULE-based, so the comparison is partly circular (single-source, 🔷).
+// is itself RULE-based, so the comparison is partly circular (single-source).
 {
     "language": "lg",
     "name": "Luganda (Oluganda)",

@@ -36,8 +36,8 @@ describe("Ancient Greek (Attic) canonical IPA", () => {
 });
 
 // CARDINAL NUMBERS (src/languages/ancientgreek/numbers.ts). Source: Smyth, *Greek Grammar* §§347–354.
-// Two structural features: ★ καί-LINKED compounds — Smyth gives both orders for 21–99 and this engine picks the
-// TENS-FIRST (descending) one uniformly (εἴκοσι καὶ εἷς), so the spoken order tracks the digits; and ★ MYRIAD
+// Two structural features: καί-LINKED compounds — Smyth gives both orders for 21–99 and this engine picks the
+// TENS-FIRST (descending) one uniformly (εἴκοσι καὶ εἷς), so the spoken order tracks the digits; and MYRIAD
 // (10⁴) grouping rather than a thousands ladder — μυριάς/μυριάδες with a genitive μυριάδων per extra level
 // (Archimedes' μυριὰς μυριάδων = 10⁸), so 10⁶ is ἑκατόν μυριάδες. Citation form: masculine nominative.
 describe("Ancient Greek numbers", () => {
@@ -52,7 +52,7 @@ describe("Ancient Greek numbers", () => {
         [15, "πεντεκαίδεκα"],                            // 15–19 are FUSED
         [16, "ἑκκαίδεκα"],
         [20, "εἴκοσι"],
-        [21, "εἴκοσι καὶ εἷς"],                          // ★ tens-first καί-linked compound (the chosen order)
+        [21, "εἴκοσι καὶ εἷς"],                          // tens-first καί-linked compound (the chosen order)
         [25, "εἴκοσι καὶ πέντε"],
         [99, "ἐνενήκοντα καὶ ἐννέα"],
         [100, "ἑκατόν"],
@@ -61,11 +61,11 @@ describe("Ancient Greek numbers", () => {
         [1000, "χίλιοι"],
         [2000, "δισχίλιοι"],                             // the multiplicative χίλιοι series
         [4000, "τετρακισχίλιοι"],
-        [10000, "μυριάς"],                               // ★ the myriad is a magnitude, not "ten thousand"
+        [10000, "μυριάς"],                               // the myriad is a magnitude, not "ten thousand"
         [12345, "μυριάς καὶ δισχίλιοι καὶ τριακόσιοι καὶ τετταράκοντα καὶ πέντε"],
         [20000, "δύο μυριάδες"],
-        [1000000, "ἑκατόν μυριάδες"],                    // ★ 10⁶ = a hundred myriads
-        [1000000000, "δέκα μυριάδες μυριάδων"],          // ★ the genitive nesting (10⁸ = μυριὰς μυριάδων)
+        [1000000, "ἑκατόν μυριάδες"],                    // 10⁶ = a hundred myriads
+        [1000000000, "δέκα μυριάδες μυριάδων"],          // the genitive nesting (10⁸ = μυριὰς μυριάδων)
     ] as const) {
         test(`${n} → ${expected}`, () => expect(numberToWords(n)).toBe(expected));
     }

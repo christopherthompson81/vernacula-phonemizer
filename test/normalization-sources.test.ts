@@ -1,7 +1,7 @@
 /**
  * The pre-flight source report must know about every class the gates will fail a layer on.
  *
- * ⚠ WHY THIS TEST EXISTS. `sources.ts` is the check the playbook mandates BEFORE writing a normalization layer,
+ * ⚠ WHY THIS TEST EXISTS. `sources.ts` is the check that must run BEFORE writing a normalization layer,
  * and its own header explains the stake: "the cost of doing it by hand is not the time, it is that it was got
  * wrong". But its class list was hand-written and had fallen behind twice over.
  *

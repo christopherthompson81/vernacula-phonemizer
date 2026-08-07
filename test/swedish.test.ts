@@ -6,7 +6,7 @@ import {
     hundredsYear, normalizeSwedish, normalizeSwedishInitialisms, ordinal,
 } from "../src/languages/swedish/normalize.ts";
 
-// Canonical-IPA goldens for Central Standard Swedish (rikssvenska). Phase 2 adds the NST
+// Canonical-IPA goldens for Central Standard Swedish (rikssvenska). The NST lexicon adds
 // pitch-accent + stress lexicon (accent-stress.tsv, CC0): word → accent 1|2 + the primary-stress nucleus. The
 // accent-2 grave (combining U+0300) marks the primary-stressed vowel; accent 1 is unmarked. Stress can be
 // non-initial (loanwords). OOV words fall to the rules (first-syllable stress; accent by shape). Segmental
@@ -56,14 +56,14 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("flicka")).toBe("flˈɪ̀kːa"); // ck → kː (geminate, like tt/kk/gg); accent 2
     });
 
-    test("Phase 2 — pitch accent (NST lexicon): accent-2 grave vs unmarked accent 1", () => {
+    test("pitch accent (NST lexicon): accent-2 grave vs unmarked accent 1", () => {
         expect(phonemizeWord("tala")).toBe("tˈɑ̀ːla"); // accent 2 (grave on the stressed vowel)
         expect(phonemizeWord("flicka")).toBe("flˈɪ̀kːa"); // accent 2
         expect(phonemizeWord("bil")).toBe("biːl"); // monosyllable → accent 1, no mark
         expect(phonemizeWord("boken")).toBe("bˈuːkɛn"); // accent 1 polysyllable → no grave
     });
 
-    test("Phase 3 — compound prosody (NST secondary stress): ˌ + boundary-safe length/quality + 2nd-onset softening", () => {
+    test("compound prosody (NST secondary stress): ˌ + boundary-safe length/quality + 2nd-onset softening", () => {
         // The element boundary (stor|stad) makes the first ⟨o⟩ an open syllable → long [uː], not the coda-rule's
         // short [ɔ]; the second element takes secondary stress ˌ and its own length. NST supplies both.
         expect(phonemizeWord("storstad")).toBe("stˈùːʂtˌɑːd"); // stor→uː (not ɔ), stad ˌɑː; rs→ʂ across boundary
@@ -77,7 +77,7 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("barnkör")).toBe("bˈɑ̀ːɳɕˌœːr"); // consonant-initial 2nd element → onset k→ɕ still fires
     });
 
-    test("Phase 2 — stress lexicon fixes non-initial (loanword) stress + its vowel quality", () => {
+    test("stress lexicon fixes non-initial (loanword) stress + its vowel quality", () => {
         expect(phonemizeWord("polis")).toBe("pɔlˈiːs"); // stress 2nd → o unstressed short ɔ, i long
         expect(phonemizeWord("station")).toBe("staɧˈuːn"); // -tion stressed
         expect(phonemizeWord("student")).toBe("stɵdˈɛnt");
@@ -85,7 +85,7 @@ describe("swedish canonical IPA", () => {
         expect(phonemizeWord("europa")).toBe("ɛɵrˈuːpa"); // diphthong ⟨eu⟩ counts 2 nuclei → stress lands past it
     });
 
-    test("Phase 3 — lexical o-quality (NST): stressed ⟨o⟩ is [oː] or [uː]", () => {
+    test("lexical o-quality (NST): stressed ⟨o⟩ is [oː] or [uː]", () => {
         expect(phonemizeWord("telefon")).toBe("tɛlɛfˈoːn"); // lexical [oː] override
         expect(phonemizeWord("kol")).toBe("koːl");
         expect(phonemizeWord("biolog")).toBe("bɪɔlˈoːɡ"); // stressed o → oː; unstressed o stays ɔ
@@ -140,7 +140,7 @@ describe("swedish canonical IPA", () => {
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // TEXT NORMALIZATION (src/languages/swedish/normalize.ts)
 //
-// These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13 (pin the rule's BRANCHES)). The ordinal and the
+// These pin the RULE'S BRANCHES, not the corpus's instances . The ordinal and the
 // hundreds-year composers each have a table branch, a compositional branch and a boundary between them,
 // and the corpus exercises only the first — every case below marked ⟨unattested⟩ is there precisely
 // because the corpus never writes it.

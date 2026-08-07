@@ -1,5 +1,5 @@
 // Luo / Dholuo (luo) — Western Nilotic (Luo group), Latin orthography. Referee: en.wiktionary Luo (Wiktionary, HUMAN,
-// 17 words — the ONLY source; no kaikki dump, no epitran luo-Latn, no wikipron). Single-source (🔷); consonants
+// 17 words — the ONLY source; no kaikki dump, no epitran luo-Latn, no wikipron). Single-source (); consonants
 // corroborated by Tucker (1994) 'A Grammar of Kenya Luo (Dholuo)'. The backbone (config.ts) already strips the
 // referee's combining TONE + ATR diacritics (à̀ e̙ o̘) and the affricate tie bar; these folds neutralise the rest of
 // what the orthography does NOT determine: the PRECOMPOSED tone-marked citation vowels (à ó ê í), syllable dots, the

@@ -10,7 +10,7 @@
     "referees": [
         { "file": "gd.wikipron-broad.tsv", "source": "wikipron gla_latn_broad (human, multi-dialect)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source family (wikipron; kaikki gd same Wiktionary source). The referee is MULTI-DIALECT (4+ transcriptions per word) → the folded % has a low ceiling (like Irish's ~34%); symbol accuracy is the honest signal.",
+    "secondaryGap": "single-source family (wikipron; kaikki gd same Wiktionary source). The referee is MULTI-DIALECT (4+ transcriptions per word) → the folded % has a low ceiling (like Irish's ~34%); symbol accuracy is the honest signal.",
     "folds": [
         { "pattern": "ˠ", "replace": "", "note": "VELARIZATION of the broad coronals (l̪ˠ n̪ˠ rˠ): the multi-dialect referee marks it very variably — strip it; the broad/slender CONTRAST survives via the dental/ʲ/segment identity (s̪ vs ʃ, kʲ vs k, ɲ vs n̪, ɾʲ vs r)" },
         { "pattern": "\\u0325", "replace": "", "note": "voiceless RING (b̥ d̪̊ ɡ̊): the referee writes the lenis stops with a devoicing ring — strip it before the voiced→voiceless fold below" },

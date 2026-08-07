@@ -8,7 +8,7 @@ import { phonemizeWord as eastern } from "../src/languages/armenian/armenian.ts"
 // ⟨բ դ գ ձ ջ⟩ and classical ASPIRATE ⟨փ թ ք ց չ⟩ both → voiceless-aspirated [pʰ tʰ kʰ t͡sʰ t͡ʃʰ], while classical
 // VOICELESS ⟨պ տ կ ծ ճ⟩ → VOICED [b d ɡ d͡z d͡ʒ]. Referee: wikipron hye_armn_w broad + narrow.
 describe("Western Armenian (արեւմտահայերէն) canonical IPA", () => {
-    test("★ THE CONSONANT SHIFT — classical voiceless ⟨պ տ կ⟩ → VOICED [b d ɡ]", () => {
+    test("THE CONSONANT SHIFT — classical voiceless ⟨պ տ կ⟩ → VOICED [b d ɡ]", () => {
         expect(phonemizeWord("պատ")).toBe("bɑd"); // 'wall' — ⟨պ⟩→[b], final ⟨տ⟩→[d]
         expect(phonemizeWord("տուն")).toBe("dun"); // 'house' — ⟨տ⟩→[d]
         expect(phonemizeWord("կով")).toBe("ɡov"); // 'cow' — ⟨կ⟩→[ɡ]
@@ -16,7 +16,7 @@ describe("Western Armenian (արեւմտահայերէն) canonical IPA", () => 
         expect(phonemizeWord("ճամբա")).toBe("d͡ʒɑmpʰɑ"); // 'road' — ⟨ճ⟩→[d͡ʒ], and ⟨բ⟩→[pʰ]
     });
 
-    test("★ THE CONSONANT SHIFT — classical voiced ⟨բ դ գ⟩ → voiceless-ASPIRATED [pʰ tʰ kʰ]", () => {
+    test("THE CONSONANT SHIFT — classical voiced ⟨բ դ գ⟩ → voiceless-ASPIRATED [pʰ tʰ kʰ]", () => {
         expect(phonemizeWord("բարի")).toBe("pʰɑɾi"); // 'kind' — ⟨բ⟩→[pʰ]
         expect(phonemizeWord("դուռ")).toBe("tʰuɾ"); // 'door' — ⟨դ⟩→[tʰ], and ⟨ռ⟩→[ɾ] (neutralised)
         expect(phonemizeWord("գործ")).toBe("kʰoɾd͡z"); // 'work' — ⟨գ⟩→[kʰ], ⟨ծ⟩→[d͡z]
@@ -24,7 +24,7 @@ describe("Western Armenian (արեւմտահայերէն) canonical IPA", () => 
         expect(phonemizeWord("ջուր")).toBe("t͡ʃʰuɾ"); // 'water' — ⟨ջ⟩→[t͡ʃʰ]
     });
 
-    test("★ classical aspirate ⟨փ թ ք⟩ stay [pʰ tʰ kʰ] — MERGING with the shifted voiced column", () => {
+    test("classical aspirate ⟨փ թ ք⟩ stay [pʰ tʰ kʰ] — MERGING with the shifted voiced column", () => {
         expect(phonemizeWord("փակ")).toBe("pʰɑɡ"); // ⟨փ⟩→[pʰ] (= ⟨բ⟩), ⟨կ⟩→[ɡ]
         expect(phonemizeWord("թութ")).toBe("tʰutʰ"); // ⟨թ⟩→[tʰ] (= ⟨դ⟩)
         expect(phonemizeWord("քար")).toBe("kʰɑɾ"); // ⟨ք⟩→[kʰ] (= ⟨գ⟩)

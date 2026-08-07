@@ -112,7 +112,7 @@ describe("punjabi text normalization", () => {
         expect(phonemize("35°", "pa")).toBe("pˈɛ̃t̪iː ɖˈɪɡɾiː"); // the sign was dropped
         expect(phonemize("ਡਾ. ਸਿੰਘ", "pa")).toContain("ɖˈaːkʈəɾ");
         // ਸੈਮੀ and ਗ੍ਰਾ are NOT unit keys — every corpus occurrence is ਸੈਮੀਫਾਈਨਲ / ਫ਼ੋਟੋਗ੍ਰਾਫ਼ੀ, and
-        // requiring a preceding digit is what keeps them out (playbook trap #2, live in this corpus).
+        // requiring a preceding digit is what keeps them out (the over-counting trap, live in this corpus).
         expect(phonemize("ਸੈਮੀਫਾਈਨਲ", "pa")).not.toContain("ʈiːmˈiːʈəɾ");
     });
 

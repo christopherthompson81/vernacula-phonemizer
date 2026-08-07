@@ -1,6 +1,6 @@
 // Rangpuri (rkt) — Eastern Indo-Aryan (KRNB), Devanagari. Referee: Toulmin (2006) Appendix A, Rangpur (RP) survey
 // point — a comparative-reconstruction wordlist (Devanagari→IPA), ~370 pairs. NO wikipron/kaikki/epitran exists.
-// 🔷 single-source-but-medium. The extraction carries ~15% alignment noise (two-column PDF) → a real residual floor.
+// single-source-but-medium. The extraction carries ~15% alignment noise (two-column PDF) → a real residual floor.
 {
     "language": "rkt", "name": "Rangpuri (KRNB)", "script": "Devanagari",
     "provenance": "Toulmin (2006) Appendix A comparative KRNB wordlist, Rangpur point (Devanagari + IPA reflexes), ANU open-access — independent + non-circular.",

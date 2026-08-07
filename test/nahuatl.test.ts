@@ -17,14 +17,14 @@ describe("Classical Nahuatl (nāhuatlahtōlli) canonical IPA", () => {
         expect(phonemizeWord("tlahtolli")).toBe("t͡ɬaʔtolli"); // 'word' — the SALTILLO ⟨h⟩→[ʔ] (after a vowel)
     });
 
-    test("★ the c/qu/cu/uc context rules (§2.4)", () => {
+    test("the c/qu/cu/uc context rules (§2.4)", () => {
         expect(phonemizeWord("cihuatl")).toBe("siwat͡ɬ"); // 'woman' — ⟨c⟩ before i → [s]; ⟨hu⟩→[w]
         expect(phonemizeWord("quimichin")).toBe("kimit͡ʃin"); // ⟨qu⟩ before i → [k]
         expect(phonemizeWord("cuauhtli")).toBe("kʷawt͡ɬi"); // 'eagle' — ⟨cu⟩+V→[kʷ], ⟨uh⟩ coda→[w]
         expect(phonemizeWord("teuctli")).toBe("tekʷt͡ɬi"); // 'lord' — ⟨uc⟩ coda → [kʷ]
     });
 
-    test("★ the ⟨chu⟩ trap + word-initial ⟨h⟩ is not a saltillo", () => {
+    test("the ⟨chu⟩ trap + word-initial ⟨h⟩ is not a saltillo", () => {
         expect(phonemizeWord("cachuah")).toBe("kakwaʔ"); // ⟨chu⟩ = [k]-coda + ⟨hu⟩[w] (=/kakwa/), NOT [t͡ʃ]
         expect(phonemizeWord("yehhuatl")).toBe("jeʔwat͡ɬ"); // ⟨h⟩→[ʔ] then ⟨hu⟩→[w]; ⟨y⟩→[j]
         expect(phonemizeWord("he")).toBe("e"); // word-initial ⟨h⟩ is silent (saltillo only occurs AFTER a vowel)

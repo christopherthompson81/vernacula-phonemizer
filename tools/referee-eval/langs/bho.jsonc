@@ -1,6 +1,6 @@
 // Bhojpuri (bho) — Indo-Aryan, Devanagari. The referee is a g2p-MINE of "A Grammar of Bhojpuri" (dissertation,
 // Shukla-tradition): 1622 Devanagari→IPA example pairs auto-extracted from the grammar's glossed forms. Single
-// published source (🔷). The module was REVISED to match it: 8-vowel /i e ɛ a ʌ ɔ o u/ NO length, ऐ→ɛ/औ→ɔ
+// published source (). The module was REVISED to match it: 8-vowel /i e ɛ a ʌ ɔ o u/ NO length, ऐ→ɛ/औ→ɔ
 // MONOPHTHONGS, श/ष→s, व→w, ण/ञ→n. Folds are NOTATION only (the grammar writes j for ज, c for च, y for य, r for
 // the tap, ʌ for schwa, drops the breathy diacritic). Residual = the grammar's schwa-deletion granularity +
 // tatsama vowel epenthesis (istiri, iskul) + mining fragments/misalignments — a bounded, documented tail.

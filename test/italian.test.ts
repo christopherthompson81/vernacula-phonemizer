@@ -135,7 +135,7 @@ describe("italian text normalization", () => {
     });
 
     test("the decimal rewrite runs AFTER the unit tier, so number-unit adjacency survives", () => {
-        // The ordering coupling the playbook names: rewriting "1,5 km/s" first would leave the symbol tier
+        // The ordering coupling: rewriting "1,5 km/s" first would leave the symbol tier
         // looking at "5 km/s", with no number attached to the unit at all.
         expect(phonemize("una velocità di 1,5 km/s", "it"))
             .toContain("virɡˈola t͡ʃˈinkwe kilomˈetri ˈal sekˈondo");

@@ -5,7 +5,7 @@ import { createMaori, phonemizeWord } from "../src/languages/maori/maori.ts";
 // Māori (mi) — te reo Māori, Eastern Polynesian, New Zealand (~185k). One of the simplest orthographies in the fleet:
 // a near-1:1 phonemic map + the macron = length + two digraphs (⟨wh⟩→ɸ, ⟨ng⟩→ŋ). Strict CV syllables, no glide
 // formation. Validated against wikipron mri_latn_broad (1005 human headwords) — 99.8% FOLDED / 100.0% symbol on the
-// first pass (the only misses are a non-Māori letter glyph). 🔷 single-source-family.
+// first pass (the only misses are a non-Māori letter glyph). single-source-family.
 describe("Māori canonical IPA — direct phonemic g2p + macron length + the ⟨wh ng⟩ digraphs", () => {
     const mi = createMaori();
 

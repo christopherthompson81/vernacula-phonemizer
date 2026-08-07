@@ -9,7 +9,7 @@
     "referees": [
         { "file": "naq.wiktionary-khoekhoe.tsv", "source": "English Wiktionary 'Khoekhoe terms with IPA pronunciation' (literal human {{IPA|naq|…}}, 46 — mostly click-letter definitions)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 THIN + largely REFERENCE-PARITY — the 46-entry referee is DOMINATED by the click-letter DEFINITIONS (ǀ, ǀG, ǀh, ǀKh, ǀN… = the orthography→IPA spec we implement), so those matches are near-circular; the ~7 real words (ǀgama, ǀhao, ǁaub, ǂkhoab, ǃkhās, kharob, taras) are the independent check. No wikipron/kaikki/epitran naq. Nama's TONE is unwritten → folded.",
+    "secondaryGap": "THIN + largely REFERENCE-PARITY — the 46-entry referee is DOMINATED by the click-letter DEFINITIONS (ǀ, ǀG, ǀh, ǀKh, ǀN… = the orthography→IPA spec we implement), so those matches are near-circular; the ~7 real words (ǀgama, ǀhao, ǁaub, ǂkhoab, ǃkhās, kharob, taras) are the independent check. No wikipron/kaikki/epitran naq. Nama's TONE is unwritten → folded.",
     "folds": [
         { "pattern": "-", "replace": "", "note": "the referee's morpheme/syllable hyphen (tàra̋-s)" }
     ]

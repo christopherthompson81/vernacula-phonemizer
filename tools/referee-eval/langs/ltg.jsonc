@@ -7,7 +7,7 @@
         { "file": "ltg.wikipron-ltg-narrow.tsv", "source": "wikipron ltg_latn_narrow (Wiktionary, HUMAN, 488)", "role": "primary" },
         { "file": "ltg.kaikki-ltg.tsv", "source": "kaikki Latgalian (Wiktionary, HUMAN, 516)", "role": "secondary" }
     ],
-    "secondaryGap": "🔷 single-source-family (wikipron + kaikki both Wiktionary). The NARROW referees mark PITCH ACCENT (level/falling/broken) — unwritten → folded (combining marks stripped by the backbone).",
+    "secondaryGap": "single-source-family (wikipron + kaikki both Wiktionary). The NARROW referees mark PITCH ACCENT (level/falling/broken) — unwritten → folded (combining marks stripped by the backbone).",
     "folds": [
         { "pattern": "ɛ", "replace": "æ", "note": "⟨e⟩ [ɛ]~[æ] — the referee writes both for the same ⟨e⟩ letter" },
         { "pattern": "ː", "replace": "", "note": "vowel LENGTH — the narrow referee is inconsistent on it (and the pitch-accent marks interact); strip to compare the segment skeleton" }

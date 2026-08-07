@@ -61,7 +61,7 @@ describe("wordAndSubstring", () => {
 
 describe("matches returns instances, not a number", () => {
     test("⚠ the count is .length, so the caller has the instances in hand", () => {
-        // "A count is a lead, never a finding — read the instances" (playbook). The API cannot enforce reading
+        // "A count is a lead, never a finding — read the instances" . The API cannot enforce reading
         // them, but it can refuse to hand over a bare number.
         const ms = matches("៥+៣ និង ៨+២", "\\+");
         expect(ms.length).toBe(2);

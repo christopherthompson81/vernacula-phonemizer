@@ -3,7 +3,7 @@
  * language. Logical order = phonetic order, so RTL is a non-issue. Pashto is a SHALLOWER abjad than Urdu/Arabic:
  * it writes the long/mid vowels distinctly — ا/آ→ɑ (ā), ې→e, و→o (or the glide w), ی→i (or the glide j), ۍ/ئ→əi —
  * but the SHORT vowels a/ə/i/u are usually UNWRITTEN, so a default [ə] (the zwarakay) + medial-schwa deletion
- * stand in for the deferred short-vowel-restoration subsystem (🟠, as for Urdu/Persian). Word-final ه→[ə]
+ * stand in for the deferred short-vowel-restoration subsystem (, as for Urdu/Persian). Word-final ه→[ə]
  * (ښه→ʂə); ع→ʔ. Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ.
  */
 import type { Phonemizer } from "../../registry.ts";

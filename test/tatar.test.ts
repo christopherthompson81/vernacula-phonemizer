@@ -33,7 +33,7 @@ describe("Tatar (Татар теле) canonical IPA", () => {
         const tt = getPhonemizer("tt");
         // Data + provenance: src/languages/tatar/numbers.ts (Wiktionary Module:number list/data/tt + Omniglot).
         expect(tt.text("7").trim()).toBe("ʑiˈde"); // җиде — a bare unit
-        expect(tt.text("11").trim()).toBe("unˈber"); // унбер — ★ ONE word (one stress domain), Tatar's deviation
+        expect(tt.text("11").trim()).toBe("unˈber"); // унбер — ONE word (one stress domain), Tatar's deviation
         expect(tt.text("25").trim()).toBe("jeɡerˈme ˈbiʃ"); // егерме биш — 21-99 stay TWO words
         expect(tt.text("100").trim()).toBe("ˈjøz"); // йөз — the multiplier "бер" is dropped
         expect(tt.text("555").trim()).toBe("ˈbiʃ ˈjøz ilˈle ˈbiʃ"); // биш йөз илле биш

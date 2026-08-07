@@ -6,7 +6,7 @@
     "referees": [
         { "file": "sat.kaikki-santali.tsv", "source": "kaikki Santali (Wiktionary, HUMAN, 490 Ol Chiki)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source — kaikki Santali (490 Ol Chiki IPA headwords) is the ONLY machine referee (no wikipron/epitran sat). Phrase- and loan-heavy (Bengali/Hindi/English).",
+    "secondaryGap": "single-source — kaikki Santali (490 Ol Chiki IPA headwords) is the ONLY machine referee (no wikipron/epitran sat). Phrase- and loan-heavy (Bengali/Hindi/English).",
     "folds": [
         { "pattern": "‿", "replace": "", "note": "word-LINKING undertie (U+203F) the referee puts between the words of a multi-word phrase — prosodic, not segmental" },
         { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the referee transcription (san.ta.ɽi)" },

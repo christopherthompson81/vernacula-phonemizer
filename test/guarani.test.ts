@@ -39,12 +39,12 @@ describe("Guaraní (Avañe'ẽ) canonical IPA", () => {
     });
 
     // ═══ CARDINAL NUMBERS — the 20th-century NEOLOGISM system (Decoud Larrosa; Estigarribia 2020 §3.4.3).
-    // ★ PROMINENT CAVEAT: Estigarribia calls this system "purely of academic use" — colloquial Paraguayan
+    // PROMINENT CAVEAT: Estigarribia calls this system "purely of academic use" — colloquial Paraguayan
     // Guaraní uses SPANISH numerals beyond irundy '4'. We still implement the neologisms because they are the
     // only numerals attested IN GUARANÍ ORTHOGRAPHY (written Guaraní otherwise just prints Arabic digits), so a
     // Spanish-loan path would mean inventing respellings. See src/languages/guarani/numbers.ts for the full
     // argument and sources. This reads as the written/academic register, by design.
-    test("★ cardinals: native 1–4, then the po/pa neologisms (apheresis + fusion)", () => {
+    test("cardinals: native 1–4, then the po/pa neologisms (apheresis + fusion)", () => {
         const gn = getPhonemizer("gn");
         expect(gn.text("0").trim()).toBe("ᵐbaʔeˈʋe"); // mba'eve 'nothing'
         expect(gn.text("4").trim()).toBe("iɾuˈⁿdɨ"); // irundy — the last PRE-CONTACT numeral

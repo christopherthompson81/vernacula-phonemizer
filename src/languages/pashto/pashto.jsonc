@@ -2,7 +2,7 @@
 // (extended: retroflex letters ټ ډ ړ ڼ ښ ږ, affricates څ ts / ځ dz, the velar ګ). pashto.ts reads this file.
 // Pashto is a SHALLOWER abjad than Urdu/Arabic — it writes ā (ا), e (ې), o/u (و), i (ی) distinctly — but the SHORT
 // vowels a/ə/i/u are still usually UNWRITTEN, so a default short vowel [ə] (the zwarakay) + medial-schwa deletion
-// stand in for the deferred short-vowel restoration (🟠, like Urdu/Persian). Dialect note: ښ/ږ are rendered as the
+// stand in for the deferred short-vowel restoration (, like Urdu/Persian). Dialect note: ښ/ږ are rendered as the
 // SW/Kandahari retroflex ʂ/ʐ (NE dialects x/ɡ, Central ç/ʝ).
 {
     "language": "ps",

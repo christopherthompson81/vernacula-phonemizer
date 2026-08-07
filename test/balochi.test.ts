@@ -28,7 +28,7 @@ describe("Balochi (Southern) — cross-script canonical IPA", () => {
         expect(phonemizeArabic("کتاب")).toBe("kt̪aːb"); // the raw Arabic SKELETON (OOV path): dental t̪, short i unwritten
     });
 
-    test("Arabic OOV falls back to the defective skeleton (honest ⛔ tail)", () => {
+    test("Arabic OOV falls back to the defective skeleton (an honest unverifiable tail)", () => {
         expect(phonemizeArabic("بلوچستان")).toBe("bluːt͡ʃst̪aːn"); // not in lexicon → skeleton (short vowels gone)
     });
 });

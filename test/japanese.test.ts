@@ -7,7 +7,7 @@ import {
     phonemizeWordSegmental,
 } from "../src/languages/japanese/japanese.ts";
 
-describe("Japanese kana → IPA (Phase 1)", () => {
+describe("Japanese kana → IPA", () => {
     it("core kana, youon, sokuon, long vowels, moraic ん", () => {
         const cases: [string, string][] = [
             ["です", "de̞sɯᵝ"],
@@ -46,7 +46,7 @@ describe("Japanese kana → IPA (Phase 1)", () => {
         expect(phonemize("これはペンです。", "ja")).toBe("ko̞ɾe̞wä pe̞nde̞sɯᵝ .");
     });
 
-    it("kanji → kana readings (Phase 2)", () => {
+    it("kanji → kana readings", () => {
         expect(phonemizeWordSegmental("日本語")).toBe("niho̞ŋɡo̞");
         expect(phonemizeWordSegmental("東京")).toBe("to̞ːkʲo̞ː");
         expect(phonemizeWordSegmental("食べる")).toBe("täbe̞ɾɯᵝ");
@@ -96,7 +96,7 @@ describe("Japanese counters (助数詞)", () => {
     });
 });
 
-describe("Japanese pitch accent (Phase 3)", () => {
+describe("Japanese pitch accent", () => {
     it("contrastive minimal pair via downstep ꜜ", () => {
         expect(phonemizeWord("箸")).toBe("häꜜɕi"); // chopsticks, accent 1
         expect(phonemizeWord("端")).toBe("häɕi"); // edge, heiban (no mark)

@@ -30,7 +30,7 @@
     // 10,000 / 100,000 / 1,000,000 / 1 billion, in the standard IPN orthography and referencing Valdman et al.
     // 2007 "Haitian Creole–English Bilingual Dictionary". Cross-checked 0–79 against
     // en.wikibooks.org/wiki/Haitian_Creole/Numbers.
-    // ★ THE FRENCH VIGESIMAL RESIDUE IS KEPT (see numbers.ts): 70 swasanndis (60+10), 80 katreven (4×20),
+    // THE FRENCH VIGESIMAL RESIDUE IS KEPT (see numbers.ts): 70 swasanndis (60+10), 80 katreven (4×20),
     //   90 katrevendis (4×20+10). The Belgian/Swiss-French decimal ⟨septante / octante / nonante⟩ forms are NOT
     //   Haitian and are deliberately absent.
     "numbers": {

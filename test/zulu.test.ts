@@ -61,7 +61,7 @@ describe("Zulu (isiZulu) g2p — authored", () => {
 });
 
 /**
- * TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (trap 13 (pin the rule's BRANCHES)): every
+ * TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances : every
  * table gets both a case the corpus contains and a case it does not, and every guard gets the neighbour it
  * is supposed to refuse. `normalizeZulu` is asserted as text→text because that is what the layer is; the
  * `phonemize` cases at the end pin the ORDERING against the shared symbol tier, which normalize.ts runs
@@ -242,7 +242,7 @@ describe("Zulu text normalization", () => {
         expect(normalizeZulu("amazinga. Kufinyelela ku-30°C")).toBe("amazinga. Kufinyelela ku-amazinga angu-30");
         // The corpus's second instance is a LONGITUDE with no degree word of its own: still emitted.
         expect(normalizeZulu("empumalanga kwe-35°W.")).toBe("empumalanga kwe-amazinga angu-35 entshonalanga.");
-        // Fahrenheit survives the suppression path (0 corpus instances, pinned per trap 8 (zero corpus instances is not evidence of…)).
+        // Fahrenheit survives the suppression path (0 corpus instances, pinned per absence is not evidence of correctness
         expect(normalizeZulu("izinga elingu-35°F")).toBe("izinga elingu-amazinga angu-35 Fahrenheit");
     });
 });

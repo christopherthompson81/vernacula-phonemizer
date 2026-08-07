@@ -8,7 +8,7 @@ import { numberToWords } from "../src/languages/papiamento/numbers.ts";
 // [n] (kontra→[kontɾa]); the digraphs ⟨ch sh dj zj⟩→[t͡ʃ ʃ d͡ʒ ʒ]; the open-vowel letters ⟨è ò ù⟩→[ɛ ɔ ø] + the ⟨ou⟩
 // diphthong [ɔu]; degemination; acute/penult stress. Referee: kaikki + Wiktionary (thin, ~20).
 describe("Papiamentu (Papiamento) canonical IPA", () => {
-    test("★ coda-⟨n⟩ RETENTION — word-final [ŋ] (+ nasal vowel), medial [n]", () => {
+    test("coda-⟨n⟩ RETENTION — word-final [ŋ] (+ nasal vowel), medial [n]", () => {
         expect(phonemizeWord("bon")).toBe("ˈbõŋ"); // 'good' — word-final ⟨n⟩ → [ŋ], vowel nasalized
         expect(phonemizeWord("federashon")).toBe("fedeɾaˈʃõŋ"); // ⟨sh⟩→[ʃ]; final -on → [õŋ]; final stress
         expect(phonemizeWord("mashin")).toBe("maˈʃĩŋ"); // final ⟨n⟩ → [ŋ]
@@ -16,7 +16,7 @@ describe("Papiamentu (Papiamento) canonical IPA", () => {
         expect(phonemizeWord("Papiamentu")).toBe("papiaˈmentu"); // the endonym — medial ⟨n⟩ kept
     });
 
-    test("★ digraphs ⟨ch sh dj⟩ + open vowels ⟨ò⟩ + the ⟨ou⟩ diphthong + degemination", () => {
+    test("digraphs ⟨ch sh dj⟩ + open vowels ⟨ò⟩ + the ⟨ou⟩ diphthong + degemination", () => {
         expect(phonemizeWord("dushi")).toBe("ˈduʃi"); // 'sweet/nice' — ⟨sh⟩→[ʃ]
         expect(phonemizeWord("Kòrsou")).toBe("ˈkɔɾsɔu"); // 'Curaçao' — ⟨ò⟩→[ɔ]; ⟨ou⟩→[ɔu] diphthong (one nucleus, stress first)
         expect(phonemizeWord("futbòl")).toBe("futˈbɔl"); // ⟨ò⟩→[ɔ]; consonant-final → ultimate stress
@@ -37,9 +37,9 @@ describe("Papiamentu (Papiamento) canonical IPA", () => {
         expect(numberToWords(7)).toBe("shete");
         expect(numberToWords(16)).toBe("dieseis"); // haplology: one ⟨s⟩ (not *diesseis)
         expect(numberToWords(21)).toBe("bintiun"); // binti already ends in -i
-        expect(numberToWords(31)).toBe("trintiun"); // ★ trinta → trinti + un, one word
+        expect(numberToWords(31)).toBe("trintiun"); // trinta → trinti + un, one word
         expect(numberToWords(42)).toBe("kuarentidos");
-        expect(numberToWords(101)).toBe("shentiun"); // ★ the fused ⟨-ti-⟩ hundred link
+        expect(numberToWords(101)).toBe("shentiun"); // the fused ⟨-ti-⟩ hundred link
         expect(numberToWords(555)).toBe("sinkushentisinkuentisinku");
         expect(numberToWords(12345)).toBe("diesdos mil i treshentikuarentisinku");
         expect(numberToWords(1000000)).toBe("un mion");

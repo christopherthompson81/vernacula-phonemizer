@@ -7,7 +7,7 @@
         { "file": "ab.wikipron-abk-broad.tsv", "source": "wikipron abk_cyrl_broad (Wiktionary, HUMAN, 205)", "role": "primary" },
         { "file": "ab.kaikki-ab.tsv", "source": "kaikki Abkhaz (Wiktionary, HUMAN)", "role": "secondary" }
     ],
-    "secondaryGap": "🔷 single-source-family (wikipron + kaikki both Wiktionary). The primary is ~90 letter/digraph DEFINITIONS (near reference-parity on the alphabet spec) + ~115 real words; the narrow transcriptions are internally inconsistent (х~χ, ə~ɨ, tie-bar notation).",
+    "secondaryGap": "single-source-family (wikipron + kaikki both Wiktionary). The primary is ~90 letter/digraph DEFINITIONS (near reference-parity on the alphabet spec) + ~115 real words; the narrow transcriptions are internally inconsistent (х~χ, ə~ɨ, tie-bar notation).",
     "folds": [
         { "pattern": "ɨ", "replace": "ə", "note": "⟨ы⟩ [ə]~[ɨ] — the referee writes both" },
         { "pattern": "ɑ", "replace": "a", "note": "⟨а⟩ [a]~[ɑ] backness" },

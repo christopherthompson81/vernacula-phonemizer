@@ -8,7 +8,7 @@
     "referees": [
         { "file": "tt.kaikki-tatar.tsv", "source": "kaikki Tatar (Wiktionary, HUMAN, 69 Cyrillic)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 THIN single-source — kaikki Tatar (69 Cyrillic IPA headwords) is the ONLY machine referee (no wikipron tt/tat, no epitran tat-Cyrl mapping). Some entries are Russian-loan pronunciations (адрес→ˈädrʲɪs — palatalized, front ä). The map is the standard Tatar phonology.",
+    "secondaryGap": "THIN single-source — kaikki Tatar (69 Cyrillic IPA headwords) is the ONLY machine referee (no wikipron tt/tat, no epitran tat-Cyrl mapping). Some entries are Russian-loan pronunciations (адрес→ˈädrʲɪs — palatalized, front ä). The map is the standard Tatar phonology.",
     "folds": [
         { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the kaikki transcription — not segmental" },
         { "pattern": "ɵ", "replace": "ø", "note": "⟨ө⟩: [ø] (ours) ~ [ɵ] (referee) — mid front/central rounded notation" },

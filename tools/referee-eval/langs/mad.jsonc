@@ -2,13 +2,13 @@
 // referee (no wikipron/epitran/kaikki). The referee here is an INDEPENDENT, FALSIFIABLE literary gold: the
 // transcribed 'North Wind and the Sun' passage + wordlist from the JIPA Illustration (Misnadin & Kirby 2020,
 // J. Int. Phon. Assoc. 50(1)), a peer-reviewed phonetic description. 35 orthography→IPA pairs. The engine was
-// authored from Davies (2010) A Grammar of Madurese and verified against this gold → 🔷 single-source (one
+// authored from Davies (2010) A Grammar of Madurese and verified against this gold → single-source (one
 // independent human phonetic source; small but real). r/ɾ normalised to ɾ (the passage's convention; the JIPA
 // wordlist inconsistently uses r). The backbone strips gemination length ː on both sides.
 {
     "referees": [
         { "file": "mad.jipa-misnadin-kirby-2020.tsv", "source": "JIPA Illustration (Misnadin & Kirby 2020), human", "role": "primary" }
     ],
-    "secondaryGap": "No machine referee exists for Madurese (no wikipron/epitran/kaikki). The engine is authored from Davies (2010) and verified against ONE independent human source — the JIPA Illustration (Misnadin & Kirby 2020) transcribed passage (35 pairs). Small but genuinely independent + falsifiable. → 🔷 single-source. The 2 residuals are orthographic under-specification: a lexical word-final glottal (mokka→[mɔkːaʔ], /ʔ/ unwritten) and the ⟨e⟩=/ə/-vs-/ɛ/ ambiguity (aherra→[ahɛɾa], we default /ə/) — neither recoverable from spelling without a lexicon.",
+    "secondaryGap": "No machine referee exists for Madurese (no wikipron/epitran/kaikki). The engine is authored from Davies (2010) and verified against ONE independent human source — the JIPA Illustration (Misnadin & Kirby 2020) transcribed passage (35 pairs). Small but genuinely independent + falsifiable. → single-source. The 2 residuals are orthographic under-specification: a lexical word-final glottal (mokka→[mɔkːaʔ], /ʔ/ unwritten) and the ⟨e⟩=/ə/-vs-/ɛ/ ambiguity (aherra→[ahɛɾa], we default /ə/) — neither recoverable from spelling without a lexicon.",
     "folds": []
 }

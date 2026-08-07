@@ -8,7 +8,7 @@
     "referees": [
         { "file": "crh.wiktionary-crh.tsv", "source": "English Wiktionary 'Crimean Tatar terms with IPA pronunciation' (literal human {{IPA|crh|…}}, ~18 Latin)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 THIN single-source (~18 Latin pairs) — no wikipron crh, no kaikki, no epitran crh. The % is on a small sample; the g2p is well-defined by the phonemic Latin orthography and verified on goldens.",
+    "secondaryGap": "THIN single-source (~18 Latin pairs) — no wikipron crh, no kaikki, no epitran crh. The % is on a small sample; the g2p is well-defined by the phonemic Latin orthography and verified on goldens.",
     "folds": [
         { "pattern": "\\.", "replace": "", "note": "the referee's syllable-boundary dots (qu.vɛtˈsɪz, sɑ.lɯn…)" },
         { "pattern": "ɑ", "replace": "a", "note": "⟨a⟩ [ɑ] (back, ours) ~ [a] — the referee writes the low vowel BOTH ways inconsistently (qara→qɑrɑ but añlamaq→aŋlamaq); neutralise the backness" },

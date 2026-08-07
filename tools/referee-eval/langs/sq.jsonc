@@ -10,7 +10,7 @@
         { "file": "sq.kaikki-albanian.tsv", "source": "kaikki Albanian (Wiktionary, HUMAN, 6002)", "role": "primary" },
         { "file": "sq.epitran-sqi.tsv", "source": "epitran sqi-Latn OUTPUT (independent rule-based G2P, 6002)", "role": "secondary" }
     ],
-    "secondaryGap": "🔷 — the PRIMARY is the human kaikki (6002, large); the SECONDARY, epitran sqi-Latn, is an INDEPENDENT rule-based G2P (an independent implementation, not a second human attestation) that corroborates strongly at 90.2%/98.5% but drops some contrasts (⟨ll⟩→[l] not [ɫ], no stress). Same footing as qu/bo (human primary + epitran 2nd = 🔷).",
+    "secondaryGap": "— the PRIMARY is the human kaikki (6002, large); the SECONDARY, epitran sqi-Latn, is an INDEPENDENT rule-based G2P (an independent implementation, not a second human attestation) that corroborates strongly at 90.2%/98.5% but drops some contrasts (⟨ll⟩→[l] not [ɫ], no stress). Same footing as qu/bo (human primary + epitran 2nd = ).",
     "folds": [
         { "pattern": "c͡?ç", "replace": "c", "note": "⟨q⟩: palatal stop [c] (ours + epitran) ~ palatal affricate [c͡ç] (kaikki) — the standard notation variant" },
         { "pattern": "ɟ͡?ʝ", "replace": "ɟ", "note": "⟨gj⟩: palatal stop [ɟ] (ours + epitran) ~ palatal affricate [ɟ͡ʝ] (kaikki)" },

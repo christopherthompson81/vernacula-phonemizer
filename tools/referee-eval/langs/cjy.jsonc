@@ -10,7 +10,7 @@
     "script": "Han",
     "provenance": "Wiktionary Chinese Taiyuan Sinological-IPA via the kaikki.org extract; simplified aliases via OpenCC TSCharacters.",
     "referees": [],
-    "secondaryGap": "No independent referee exists for Taiyuan Jin: wikipron cjy 404s and epitran ships no Jin. The only machine-readable Taiyuan IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (🔷), the Wu/Igbo/Naija pattern; the correctness anchor is the adjudicated gold in test/jin.test.ts.",
+    "secondaryGap": "No independent referee exists for Taiyuan Jin: wikipron cjy 404s and epitran ships no Jin. The only machine-readable Taiyuan IPA is the Wiktionary Chinese dialectal data, which IS our source (kaikki.org extract) — so an automated referee would be circular. Single-source verified (), the Wu/Igbo/Naija pattern; the correctness anchor is the adjudicated gold in test/jin.test.ts.",
     "segmentJoin": true,
     "folds": []
 }

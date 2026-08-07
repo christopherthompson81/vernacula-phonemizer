@@ -1,6 +1,6 @@
 // Kinyarwanda (rw) — Bantu (JD61, Rwanda-Rundi), Latin orthography, AUTHORED. Referees: epitran
 // kin-Latn (programmatic) for the BULK + the Cox "Kirundi & Kinyarwanda Comparative Grammar" (Table 25) for the
-// PALATAL series. Wordlist: CC0 Common Voice sentence corpus. → 🔷 single-source.
+// PALATAL series. Wordlist: CC0 Common Voice sentence corpus. → single-source.
 //
 // The palatal analysis was REVISED (from Wikipedia's palatal-segment c/ɟ/ç/bɟ to the grammar's PALATALIZATION
 // analysis ⟨Cy⟩→Cʲ: cy=kʲ, jy=ɡʲ, shy=ʃʲ, by=bʲ, ry=ɾʲ, my=mʲ). This is better-sourced (the Cox grammar AND
@@ -13,7 +13,7 @@
     "referees": [
         { "file": "rw.epitran-kin.tsv", "source": "epitran kin-Latn (programmatic)", "role": "primary" }
     ],
-    "secondaryGap": "No second machine referee (no wikipron/kaikki for Kinyarwanda). epitran corroborates the bulk + the palatalized ⟨Cy⟩ series (cy/jy/by/ry/my, folded ʲ~j); it is wrong on ⟨sh c j⟩ where the Cox grammar (Table 25) + the coronal-harmony phonetics paper independently confirm ours ([ʃ t͡ʃ ʒ]). The palatal VALUES rest on the Cox grammar (an independent human source), not Wikipedia alone. Wordlist: CC0 Common Voice. → 🔷 single-source.",
+    "secondaryGap": "No second machine referee (no wikipron/kaikki for Kinyarwanda). epitran corroborates the bulk + the palatalized ⟨Cy⟩ series (cy/jy/by/ry/my, folded ʲ~j); it is wrong on ⟨sh c j⟩ where the Cox grammar (Table 25) + the coronal-harmony phonetics paper independently confirm ours ([ʃ t͡ʃ ʒ]). The palatal VALUES rest on the Cox grammar (an independent human source), not Wikipedia alone. Wordlist: CC0 Common Voice. → single-source.",
     "folds": [
         { "pattern": "ʲ", "replace": "j", "note": "PALATALISATION ⟨Cy⟩→[Cʲ] (Cox grammar Table 25) vs epitran's full glide [Cj] — the same palatalised consonant in two notations; fold ours ʲ→j to compare (we keep ʲ, the secondary articulation, in output). Reconciles cy=kʲ~kj, jy=ɡʲ~ɡj, by=bʲ~bj, ry=ɾʲ~ɾj, my=mʲ~mj." }
     ]

@@ -219,7 +219,7 @@ describe("sindhi normalization", () => {
     // `ڪيوبڪ ميٽر` is the corpus's own ("لونو ۾ 120–160 ڪيوبڪ ميٽر تيل هو"), the loan preceding the
     // noun exactly as مربع does in the squared rule above.
     // ⚠ Bare `m` is deliberately NOT in the unit table: adding it made `802.11m` read as a metre, because
-    // this file rewrites the version dot to a word before the shared tier's guard can see it (trap 39 (a local rule that depends on a character…)).
+    // this file rewrites the version dot to a word before the shared tier's guard can see it (a local rule depending on a character an earlier rule rewrote will not fire).
     test("the cubed unit, and why bare m stays out", () => {
         expect(phonemize("5 m³", "sd")).toContain("kˈiːʋbəkə mˈiːʈəɾə");
         expect(phonemize("5 km³", "sd")).toContain("kˈiːʋbəkə kəloːmˈiːʈəɾə");

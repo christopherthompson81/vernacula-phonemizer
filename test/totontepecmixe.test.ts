@@ -24,7 +24,7 @@ describe("Totontepec Mixe (ayöök) canonical IPA", () => {
         expect(phonemizeWord("joꞌc")).toBe("hoʔk"); // 'owl' — ⟨j⟩=[h], saltillo ⟨ꞌ⟩=[ʔ], ⟨c⟩=[k]
     });
 
-    test("★ the Crawford ALLOPHONY: post-nasal voicing + intervocalic ⟨d g⟩→[ð ɣ] + ⟨ny⟩→[ɲ]", () => {
+    test("the Crawford ALLOPHONY: post-nasal voicing + intervocalic ⟨d g⟩→[ð ɣ] + ⟨ny⟩→[ɲ]", () => {
         expect(phonemizeWord("cumantoc")).toBe("kumandok"); // 'nahualism' — POST-NASAL: ⟨nt⟩→[nd]
         expect(phonemizeWord("tocu̱nágu̱c")).toBe("tokunaɣuk"); // 'toad' — intervocalic ⟨g⟩→[ɣ]; the UNDERLINE + the ACUTE stress-mark are stripped (not emitted), so the vowel is read not dropped
         expect(phonemizeWord("mpahk")).toBe("mbahk"); // Crawford's own example: ⟨mp⟩→[mb] ('your bone')

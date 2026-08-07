@@ -11,7 +11,7 @@ import { phonemizeWord, phonemizeWordRules as phonemize } from "../src/languages
 // reduction, coda assignment, and the nasal-superscript medial-cluster split. These goldens pin the two-series
 // core PLUS one word per structural rule that matches the wikipron referee. Deferred long tail: Pali
 // doubled-consonant loanwords, special digraphs (ហ្វ→f), bantaq vowel-shortening, independent vowels.
-describe("Khmer canonical IPA — two-series sesquisyllabic core (Phase 2)", () => {
+describe("Khmer canonical IPA — two-series sesquisyllabic core", () => {
     test("THE two-series contrast: the same vowel sign ⟨ា⟩ reads by the governing series", () => {
         expect(phonemize("កា")).toBe("kaː"); // ក a-series → aː (matches wikipron)
         expect(phonemize("គា")).toBe("kiə"); // គ o-series → iə (same sign ា, different reading)
@@ -177,7 +177,7 @@ describe("Khmer signs, units and currencies", () => {
 // NOTE: in this file `phonemize` is the RULE-ONLY path (imported as `phonemizeWordRules as phonemize`) and
 // `phonemizeWord` is the lexicon-first one. That distinction is load-bearing for the standalone test below.
 describe("independent vowels", () => {
-    // ⚠ THE SYLLABIFIER USED TO SKIP THESE ENTIRELY, marked "Phase 1" — so all 17 letters U+17A3–U+17B3 were
+    // ⚠ THE SYLLABIFIER USED TO SKIP THESE ENTIRELY, left unhandled — so all 17 letters U+17A3–U+17B3 were
     // silently DELETED from every reading in which they were not the whole word. 176,282 occurrences in the mined
     // corpus, 6.0% of all Khmer-letter tokens, and agreement with wikipron on the 254 referee words containing one
     // was 0/254. Not 0% accuracy on a hard class — literally every one wrong, because a character vanished.

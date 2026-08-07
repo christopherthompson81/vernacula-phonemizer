@@ -6,7 +6,7 @@
     "referees": [
         { "file": "chv.wiktionary-chuvash.tsv", "source": "English Wiktionary 'Chuvash terms with IPA pronunciation' (literal human {{IPA|cv|…}}, 84)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source — one Wiktionary category (84 HUMAN pairs, literal IPA not module-generated). No wikipron chv, no epitran chv-Cyrl, no independent kaikki (kaikki chv is the same-source 73-pair subset). Thin but human and phonologically consistent → the % is a real quality signal on a small sample.",
+    "secondaryGap": "single-source — one Wiktionary category (84 HUMAN pairs, literal IPA not module-generated). No wikipron chv, no epitran chv-Cyrl, no independent kaikki (kaikki chv is the same-source 73-pair subset). Thin but human and phonologically consistent → the % is a real quality signal on a small sample.",
     "preFolds": [
         { "pattern": "[oɔɤ]̆", "replace": "ə", "note": "the REDUCED back vowel ⟨ӑ⟩ — the referee writes it [ŏ]/[ɔ̆]/[ɤ̆] (a back vowel + BREVE U+0306, the reduction mark); we emit [ə]. Must run in preFolds, BEFORE the backbone strips the breve (NFD-decomposition turns the precomposed ŏ into o+◌̆)" },
         { "pattern": "[øĕeə]̆", "replace": "ɘ", "note": "the REDUCED front vowel ⟨ӗ⟩ — referee [ø̆]/[ĕ]/[ə̆] (front/central vowel + breve) ~ our [ɘ]" },

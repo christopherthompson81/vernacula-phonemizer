@@ -2,7 +2,7 @@
 // A greedy longest-match scan (the Chichewa/Shona pattern): Umbundu is open CV with prenasalised
 // clusters as single onset units, so a pure left-to-right longest match suffices. Referee-SCARCE (no wikipron /
 // kaikki / epitran / Wiktionary-IPA); authored from the documented phonology (Wikipedia/Schadeberg) + an ASJP-
-// corroborated curated gold — 🔷 single-source. Signatures:
+// corroborated curated gold — single-source. Signatures:
 //   • VOICED obstruents occur ONLY PRENASALISED: ⟨mb nd nj ng⟩ → ᵐb ⁿd ᶮd͡ʒ ᵑɡ (there is no plain /b d d͡ʒ ɡ/).
 //   • ⟨c⟩ → [t͡ʃ] (the affricate), ⟨v⟩ → [v], ⟨ñ⟩/⟨ny⟩ → [ɲ], ⟨ng'⟩ → [ŋ] (plain velar nasal, ≠ ⟨ng⟩=ᵑɡ), ⟨l⟩ → [l].
 //   • plain stops p t k; fricatives f s h (voiceless) + v (voiced); nasals m n ɲ ŋ; approximants w l j.
@@ -12,7 +12,7 @@
     "language": "umb",
     "name": "Umbundu",
     "script": "Latin",
-    "provenance": "Authored from Schadeberg (1982) 'Nasalization in UMbundu' (J. African Langs & Linguistics) — the primary R11 phonology, Table 1 systematic-phonetic inventory — + the Umbundu orthography; ASJP Umbundu-3 corroborated. Referee-scarce (no wikipron/kaikki/epitran/Wiktionary-IPA) → 🔷 single-source, grammar-grounded gold-anchored.",
+    "provenance": "Authored from Schadeberg (1982) 'Nasalization in UMbundu' (J. African Langs & Linguistics) — the primary R11 phonology, Table 1 systematic-phonetic inventory — + the Umbundu orthography; ASJP Umbundu-3 corroborated. Referee-scarce (no wikipron/kaikki/epitran/Wiktionary-IPA) → single-source, grammar-grounded gold-anchored.",
 
     "convention": {
         "prenasalised": "the voiced stops b/d/j/g occur ONLY after a homorganic nasal (Schadeberg 1982 rule (1): b/d/j/g /N_ ~ v/l/y/∅ elsewhere), written ⟨mb nd nj ng⟩ → ᵐb ⁿd ᶮd͡ʒ ᵑɡ (also ⟨mp nt nc nk ns⟩ → ᵐp ⁿt ᶮt͡ʃ ᵑk ⁿs); ⟨ng'⟩ → ŋ",

@@ -10,7 +10,7 @@
         { "file": "hyw.wikipron-hyw-broad.tsv", "source": "wikipron hye_armn_w_broad (Wiktionary, HUMAN, 17211)", "role": "primary" },
         { "file": "hyw.wikipron-hyw-narrow.tsv", "source": "wikipron hye_armn_w_narrow (Wiktionary, HUMAN, 17584 — marks aspiration + stress)", "role": "secondary" }
     ],
-    "secondaryGap": "🔷 single-source-FAMILY — broad + narrow are both wikipron (Wiktionary), correlated not independent. No epitran hye. But the two transcription DEPTHS corroborate the shift: broad drops aspiration (պատ→bɑd, բարի→pɑɾi), narrow marks it (բարի→pʰɑɾí) — so the aspirated-voiceless vs voiced TWO-way contrast is attested at both depths.",
+    "secondaryGap": "single-source-FAMILY — broad + narrow are both wikipron (Wiktionary), correlated not independent. No epitran hye. But the two transcription DEPTHS corroborate the shift: broad drops aspiration (պատ→bɑd, բարի→pɑɾi), narrow marks it (բարի→pʰɑɾí) — so the aspirated-voiceless vs voiced TWO-way contrast is attested at both depths.",
     "folds": [
         { "pattern": "ʰ", "replace": "", "note": "ASPIRATION — the BROAD primary referee does not transcribe it (բարի→pɑɾi, not pʰɑɾi), while our canonical output and the NARROW referee mark it (pʰɑɾí). Fold it away for the broad comparison; the voiced/voiceless TWO-way contrast (⟨պ⟩→b vs ⟨բ⟩→pʰ→p) survives the fold" },
         { "pattern": "ʏ̆", "replace": "ʏ", "note": "the referee's non-syllabic diacritic on the front-rounded ⟨յու⟩→[ʏ] in a diphthong-like context — we emit the plain vowel" },

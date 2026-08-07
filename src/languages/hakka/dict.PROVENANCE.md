@@ -27,6 +27,6 @@ simplified Han) resolves too.
 - **License:** Wiktionary content is CC-BY-SA 3.0; the kaikki extract is a mechanical redistribution of it.
   OpenCC `TSCharacters` is Apache-2.0.
 
-**Single-source (🔷):** no independent second referee for Meixian Hakka (no wikipron hak; epitran ships no Hakka),
+**Single-source ():** no independent second referee for Meixian Hakka (no wikipron hak; epitran ships no Hakka),
 so this dict is verified only *within* the Wiktionary tradition — a systematic error shared with that source
 would go undetected.

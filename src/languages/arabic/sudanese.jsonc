@@ -1,5 +1,5 @@
 // Sudanese Arabic (apd — Khartoum/Sudanese) variety data. AUTHORED from the published phonology (Dickins, Sudanese
-// Arabic Phonematics) — there is NO wikipron/kaikki apd referee, so this is gold-anchored (🔷 single-source), not
+// Arabic Phonematics) — there is NO wikipron/kaikki apd referee, so this is gold-anchored (single-source), not
 // referee-measured. The Sudanese fingerprint is the OPPOSITE of Egyptian/Levantine on two axes:
 //   ق → [ɡ] (voiced velar — the Bedouin reflex, NOT urban [ʔ])   ج → [ɟ] (voiced PALATAL plosive — the signature)
 // and it is CONSERVATIVE on the interdentals: ث ذ ظ are KEPT as [θ ð ðˤ] (Egyptian/Levantine merge them to stops),

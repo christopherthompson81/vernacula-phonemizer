@@ -6,15 +6,15 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeHebrewNeural } from "../src/languages/hebrew/hebrewNeural.ts";
 
-// The Phase-2 neural VOWEL RESTORER for UNVOCALIZED Hebrew is gated on the (optional) ONNX model + onnxruntime-node.
-// When absent the path falls back to the sync Phase-1 engine (vocalized-only), so the fallback contract is testable
+// The neural VOWEL RESTORER for UNVOCALIZED Hebrew is gated on the (optional) ONNX model + onnxruntime-node.
+// When absent the path falls back to the sync rule engine (vocalized-only), so the fallback contract is testable
 // everywhere; the restoration assertions run only with the model present. See he-tagger.PROVENANCE.md.
 const haveModel = existsSync(join(import.meta.dirname, "../src/languages/hebrew/he-tagger.int8.onnx"));
 
-describe("hebrew neural vowel restoration (Phase 2)", () => {
-    // A VOCALIZED word is always routed to the deterministic Phase-1 g2p (the tagger declines on niqqud chars), so
+describe("hebrew neural vowel restoration", () => {
+    // A VOCALIZED word is always routed to the deterministic rule g2p (the tagger declines on niqqud chars), so
     // vocalized text is identical to the sync path whether or not the model is present.
-    test("vocalized text: neural path equals the sync Phase-1 path", async () => {
+    test("vocalized text: neural path equals the sync rule path", async () => {
         for (const s of ["שָׁלוֹם", "מָשִׁיחַ", "אֶבֶן"]) {
             expect(await phonemizeHebrewNeural(s)).toBe(phonemize(s, "he"));
         }

@@ -7,7 +7,7 @@
     "referees": [
         { "file": "ee.kaikki-ewe.tsv", "source": "kaikki Ewe (Wiktionary, HUMAN, 249 phonemic)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source-FAMILY — kaikki Ewe (249) + wikipron ewe_latn (small, proper-noun-heavy) are BOTH Wiktionary-derived (correlated). No epitran ewe. Tone unmarked in the orthography (folded).",
+    "secondaryGap": "single-source-FAMILY — kaikki Ewe (249) + wikipron ewe_latn (small, proper-noun-heavy) are BOTH Wiktionary-derived (correlated). No epitran ewe. Tone unmarked in the orthography (folded).",
     "folds": [
         { "pattern": "[.]", "replace": "", "note": "syllable-boundary dots in the kaikki transcription" },
         { "pattern": "w", "replace": "ɰ", "note": "⟨w⟩ ALLOPHONY: we emit Jalloh's rounding-conditioned [w]/[ɰ] (rounded/unrounded vowel) for canonical output; the Wiktionary referee GENERALIZES [ɰ] — fold the w~ɰ allophone to compare" }

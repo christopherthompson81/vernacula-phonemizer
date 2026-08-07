@@ -18,7 +18,7 @@
     "language": "kam",
     "name": "Kamba (Kikamba)",
     "script": "Latin",
-    "provenance": "Authored greedy g2p from the Kamba Latin orthography; vowel system anchored on the 5-word en.wiktionary Kamba IPA referee (mũtĩ→mòté confirms ⟨ĩ⟩=e/⟨ũ⟩=o), consonants from the Omniglot Kikamba alphabet chart + Wikipedia Kamba consonant table (cites Roberts-Kohno 2000); a THIN single-source referee → 🔷.",
+    "provenance": "Authored greedy g2p from the Kamba Latin orthography; vowel system anchored on the 5-word en.wiktionary Kamba IPA referee (mũtĩ→mòté confirms ⟨ĩ⟩=e/⟨ũ⟩=o), consonants from the Omniglot Kikamba alphabet chart + Wikipedia Kamba consonant table (cites Roberts-Kohno 2000); a THIN single-source referee → .",
 
     "convention": {
         "vowels": "7-vowel ATR; TILDE = QUALITY not nasal — ⟨i⟩=i, ⟨ĩ⟩=e, ⟨e⟩=ɛ, ⟨a⟩=a, ⟨o⟩=ɔ, ⟨u⟩=u, ⟨ũ⟩=o",

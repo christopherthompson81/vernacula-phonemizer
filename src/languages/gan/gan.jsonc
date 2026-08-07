@@ -4,7 +4,7 @@
 // diacritics kept verbatim); the shared Han-dict engine (hanDictIpa.ts) converts the pitch digits → Chao contour
 // letters and resolves the sandhi arrow ⁻. Its place in the Sinitic set: Nanchang Gan RETAINS the Middle Chinese
 // 入声 (entering) tones with CHECKED STOP CODAS -t̚/-ʔ (cf. Hakka's full -p̚/-t̚/-k̚, Jin's -ʔ only, Xiang's none).
-// SINGLE authoritative source (Wiktionary/kaikki Nanchang Sinological-IPA) — no independent referee (🔷).
+// SINGLE authoritative source (Wiktionary/kaikki Nanchang Sinological-IPA) — no independent referee ().
 {
     "language": "gan",
     "name": "Gan Chinese (Nanchang)",

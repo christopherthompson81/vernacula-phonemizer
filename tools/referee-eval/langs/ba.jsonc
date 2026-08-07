@@ -6,7 +6,7 @@
     "referees": [
         { "file": "ba.kaikki-bashkir.tsv", "source": "kaikki Bashkir (Wiktionary, HUMAN, 2395)", "role": "primary" }
     ],
-    "secondaryGap": "🔷 single-source-FAMILY — kaikki Bashkir + wikipron bak_cyrl both Wiktionary (correlated). No epitran bak. Russian-LOAN-heavy (palatalization ʲ, akanye, vowel ä) → referee-noisy.",
+    "secondaryGap": "single-source-FAMILY — kaikki Bashkir + wikipron bak_cyrl both Wiktionary (correlated). No epitran bak. Russian-LOAN-heavy (palatalization ʲ, akanye, vowel ä) → referee-noisy.",
     "folds": [
         { "pattern": "̞", "replace": "", "note": "the referee's vowel-LOWERING diacritic (U+031E) — it marks the near-close ⟨о ы е и ө⟩ as [ʊ̞ ɯ̞ ɪ̞], we emit the base [ʊ ɯ ɪ] (allophonic detail)" },
         { "pattern": "β", "replace": "b", "note": "intervocalic ⟨б⟩ LENITION [b]→[β] (arba→arβa) — allophonic; we emit [b]" },
