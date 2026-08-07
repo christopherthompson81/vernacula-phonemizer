@@ -41,7 +41,7 @@
  * ORDERING COUPLINGS, each a bug that happened:
  *   · de-grouping FIRST — a period/space is otherwise a token boundary or clause mark.
  *   · multi-dot era markers BEFORE the single-dot year rule, and before the `N г.` expansion.
- *   · the ordinal-suffix rule BEFORE the century/date rules and the range rule.
+ *   · the ordinal-suffix rule BEFORE the century/date rules, which would otherwise claim the digits.
  *   · the range rule BEFORE the clock rule, so `22:00-23:00` becomes "22:00 до 23:00" first.
  *   · personal-initial single capitals BEFORE the initialism pass (which would otherwise see the dot).
  */

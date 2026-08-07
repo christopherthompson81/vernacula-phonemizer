@@ -307,8 +307,8 @@ export function normalizeMalay(input: string): string {
 
     // 15) DECIMALS, LAST — every rule that consumes a glued unit has run, so a letter still stuck to the
     //     fraction now means a VERSION (`802.11a/b/g/n`), not a unit. Malay reads the point as
-    //     `perpuluhan` and the fraction DIGIT BY DIGIT — hence the space between the digits, so the
-    //     tokenizer says *lima kosong* and not *lima puluh*.
+    //     `perpuluhan` and the fraction DIGIT BY DIGIT — hence the space between the digits, so `.50`
+    //     reads *lima nol* and not *lima puluh* (fifty).
     //     `\d{1,3}.000` is EXCLUDED: the corpus's one `9.000 orang` is Indonesian-convention thousands
     //     grouping in a translated sentence, and the inherited tokenizer already reads it as *sembilan
     //     ribu*. The exclusion is narrowed to an ALL-ZERO group rather than any three digits, because the
