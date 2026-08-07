@@ -13,7 +13,7 @@
 {
     "language": "pa",
     "name": "Punjabi (Shahmukhi)",
-    "script": "Arabic (Shahmukhi)",
+    "script": ["Arabic"],
     "provenance": "Authored from the Unicode Arabic/Shahmukhi chart + standard (Majhi) Punjabi phonology, matching the Gurmukhi phoneme values in punjabi.jsonc. Validated against wikipron pan_arab broad (human).",
 
     // Unambiguous consonant letters → canonical Punjabi IPA (same inventory as the Gurmukhi punjabi.jsonc).

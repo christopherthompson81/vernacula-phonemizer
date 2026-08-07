@@ -6,7 +6,7 @@
 {
     "language": "xh",
     "name": "Xhosa (isiXhosa)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored; the Nguni sibling of Zulu. IPA + inventory from the Zulu authored rules (epitran xho-Latn + wikipron xho + kaikki referees) + the Xhosa ⟨rh⟩→[x]. This file IS the language data — the shared Nguni rule engine reads it directly.",
 
     "convention": {

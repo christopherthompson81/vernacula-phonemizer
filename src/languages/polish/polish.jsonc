@@ -13,7 +13,7 @@
 {
     "language": "pl",
     "name": "Polish",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Polish orthography + phonology; cross-checked vs wikipron pol + epitran pol-Latn.",
 
     "vowels": { "a": "a", "e": "ɛ", "i": "i", "o": "ɔ", "u": "u", "ó": "u", "y": "ɨ" },

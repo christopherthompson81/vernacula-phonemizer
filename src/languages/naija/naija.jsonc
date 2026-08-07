@@ -9,7 +9,7 @@
 {
     "language": "pcm",
     "name": "Nigerian Pidgin",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Faraclas (1996) + NLA orthography. Media (English-etymological) orthography; segmental only (tone unmarked in spelling).",
 
     // Multi-letter graphemes (longest-first), Naija values.

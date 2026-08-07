@@ -8,7 +8,7 @@
 {
     "language": "hne",
     "name": "Chhattisgarhi (छत्तीसगढ़ी)",
-    "script": "Devanagari",
+    "script": ["Devanagari"],
     "provenance": "Authored from standard Chhattisgarhi phonology (Grierson LSI VI-ii; Chhattisgarhi is Eastern-Hindi, segmentally near-identical to Awadhi/Bhojpuri). Reuses the Hindi Devanagari engine. CORROBORATED against Hira Lal Kavyopadhyaya's 'A Grammar of the Chhattisgarhi Dialect of Eastern Hindi' (1921, rev. Grierson LSI) — its phoneme inventory + the attested UDHR Article-1 sample. This CONFIRMED श/ष→[s] (the inventory has no /ʃ/) but CORRECTED an initial error: ऐ/औ are MONOPHTHONGS [ɛː]/[ɔː] like Hindi (गौरव→[ɡɔrəʋ] in the sample), NOT the Bhojpuri-style diphthongs [ai]/[au] — so Chhattisgarhi's SOLE confident segmental divergence from Hindi is श/ष→[s]. A further documented feature (reduced schwa deletion — लोगन→[loɡən], बरोबरी→[bərobəri]) is noted but not modelled (needs more data). CANNOT-VERIFY: no phonetic corpus / independent referee exists — the anchor is the distinctive-feature gold, corroborated by the 1921 grammar.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida

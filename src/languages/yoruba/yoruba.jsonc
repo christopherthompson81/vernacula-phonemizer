@@ -7,7 +7,7 @@
 {
     "language": "yo",
     "name": "Yoruba",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Yoruba phonology + the highly phonemic orthography. Validated against wikipron yor + kaikki yor (human) + epitran yor-Latn.",
 
     // Consonant letters → IPA. ⟨gb⟩/⟨p⟩ are the labial-velars ɡ͡b/k͡p; ⟨j⟩ is the affricate d͡ʒ, ⟨y⟩ the glide j;

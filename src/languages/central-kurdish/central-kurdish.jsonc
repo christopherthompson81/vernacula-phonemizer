@@ -12,7 +12,7 @@
 {
     "language": "ckb",
     "name": "Central Kurdish (Sorani)",
-    "script": "Sorani (Perso-Arabic)",
+    "script": ["Arabic"],
     "provenance": "Authored from the Sorani alphabet→phonology; calibrated to wikipron ckb_arab_broad + kaikki ckb (both human). The unwritten short /ɪ/ is folded (bizroke).",
 
     "consonants": {

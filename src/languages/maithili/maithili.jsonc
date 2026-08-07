@@ -8,7 +8,7 @@
 {
     "language": "mai",
     "name": "Maithili",
-    "script": "Devanagari",
+    "script": ["Devanagari"],
     "provenance": "Authored from standard Maithili phonology; cross-checked vs wikipron mai_deva narrow (167, the ONLY referee — small, so single-source). Reuses the Hindi Devanagari engine with the Maithili divergences: SHORT e/o (ए→e, ओ→o), diphthongs ऐ→əɪ / औ→əʊ, inherent /ə/. The signature ULTRASHORT schwa ᵊ (a cluster schwa Hindi deletes → Maithili reduces: इसपात→ɪsᵊpaːt) is a narrow phonetic detail folded (ᵊ~∅) in the eval. single-source (small referee).",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida

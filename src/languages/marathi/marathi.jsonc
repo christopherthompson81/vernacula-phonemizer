@@ -8,7 +8,7 @@
 {
     "language": "mr",
     "name": "Marathi",
-    "script": "Devanagari",
+    "script": ["Devanagari"],
     "provenance": "Authored from the Unicode Devanagari chart + standard Hindi phonology. This file IS the language data — the native G2P engine reads it directly.",
 
     // The vowel inserted after a consonant that has no explicit vowel sign and no virama (the abugida

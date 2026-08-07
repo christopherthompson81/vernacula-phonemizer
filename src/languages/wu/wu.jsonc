@@ -7,7 +7,7 @@
 {
     "language": "wuu",
     "name": "Wu Chinese (Shanghainese)",
-    "script": "Han",
+    "script": ["Han"],
 
     // Consonant onsets → IPA (tried longest-first, so digraphs win: tsh/ts, ph/th/kh, ch/sh/zh/gh, ng/gn/ngh,
     // mh/nh/lh). The aspirated and VOICED (yang-register) series are the Wu signature.

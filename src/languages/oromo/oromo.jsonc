@@ -6,7 +6,7 @@
 {
     "language": "om",
     "name": "Oromo",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the standard Qubee orthography + Oromo phonology; cross-checked against epitran orm-Latn.",
 
     // Multi-letter graphemes (longest-first).

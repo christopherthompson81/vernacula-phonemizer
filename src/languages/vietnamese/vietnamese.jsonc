@@ -12,7 +12,7 @@
 {
     "language": "vi",
     "name": "Vietnamese (Northern / Hanoi)",
-    "script": "Latin (with diacritics)",
+    "script": ["Latin"],
     "provenance": "Authored from Vietnamese orthography + Hanoi phonology. This file IS the language data — the native syllable engine reads it directly. The closed rhyme set is derived data (rhymes.tsv).",
 
     "convention": {

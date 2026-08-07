@@ -12,7 +12,7 @@
 {
     "language": "mos",
     "name": "Mooré",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p + gemination + nasal assimilation from the Mooré Latin (Burkinabé) orthography, grounded on TWO independent authorities: the en.wiktionary Moore referee (modern orthography, human) + the FSI Moré Basic Course (Lehr, Redden & Balima 1966) phonology — which corroborates ⟨r⟩=flap-allophone-of-/d/, ⟨o⟩=/o/ (no ⟨ɔ⟩), ⟨ny⟩=ɲ, /n/=[n,ŋ], and the H/L tone (unwritten in the modern orthography).",
 
     "convention": {

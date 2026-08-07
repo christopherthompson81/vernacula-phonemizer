@@ -5,7 +5,7 @@
 {
     "language": "da",
     "name": "Danish",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p for Standard Danish (rigsdansk) with context rules, canonical IPA. Referee: en.wiktionary Danish IPA (7699 words, narrow). Length/stød/aspiration folded (deferred).",
 
     "convention": {

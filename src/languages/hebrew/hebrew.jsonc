@@ -7,7 +7,7 @@
 {
     "language": "he",
     "name": "Hebrew",
-    "script": "Hebrew",
+    "script": ["Hebrew"],
     "provenance": "Authored niqqud→IPA g2p for MODERN ISRAELI Hebrew from the pointed orthography. Referee: en.wiktionary vocalized-form → a=IL Modern-Israeli IPA.",
 
     "convention": {

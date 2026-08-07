@@ -5,7 +5,7 @@
 {
     "language": "it",
     "name": "Italian",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Italian orthography + phonology (7-vowel, gemination, c/g softening). This file IS the language data — the g2p reads it directly.",
 
     // Simple (context-free) consonant letters → IPA. c/g/s/z/q and the digraphs gl/gn/sc/ch/gh are handled

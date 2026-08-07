@@ -7,7 +7,7 @@
 {
     "language": "uk",
     "name": "Ukrainian",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
     "provenance": "Authored from Ukrainian Cyrillic orthography + standard Ukrainian phonology; cross-checked vs wikipron ukr_cyrl narrow (53021) + kaikki + epitran ukr-Cyrl.",
 
     // Plain vowels (no stress-conditioned reduction). а→a, е→ɛ, и→ɪ, і→i, о→ɔ, у→u.

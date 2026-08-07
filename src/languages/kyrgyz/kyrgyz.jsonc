@@ -8,7 +8,7 @@
 {
     "language": "ky",
     "name": "Kyrgyz",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
     "provenance": "Authored from the Kyrgyz Cyrillic orthography + standard phonology (a shallow near-1:1 script; harmony is spelled). Cross-checked vs wikipron kir_cyrl broad (888).",
 
     // Plain vowel letters → IPA. BACK: а о у ы. FRONT: е э ө ү и. (A doubled vowel → [Vː], handled in code.)

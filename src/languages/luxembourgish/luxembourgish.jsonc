@@ -7,7 +7,7 @@
 {
     "language": "lb",
     "name": "Luxembourgish (Lëtzebuergesch)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Multi-letter graphemes — scanned LONGEST-FIRST (see ORDER in luxembourgish.ts). Diphthongs map to the two vowel
     // SEGMENTS (the offglide diacritic folds in the backbone). ⟨ei ai⟩→ai̯, ⟨au⟩→æu̯, ⟨ou⟩→əu̯, ⟨éi⟩→ei̯ (the front

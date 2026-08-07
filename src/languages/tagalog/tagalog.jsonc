@@ -5,7 +5,7 @@
 {
     "language": "tl",
     "name": "Tagalog",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Filipino/Tagalog orthography + phonology. This file IS the language data — the g2p reads it directly.",
 
     // Multi-letter graphemes (longest-first).

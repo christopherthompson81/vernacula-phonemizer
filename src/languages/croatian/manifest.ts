@@ -9,7 +9,7 @@ import type { MANIFEST as SR } from "../serbian/manifest.ts";
 export interface CroatianManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     numbers: (typeof SR)["numbers"]; // same shape as the Serbian number table (Croatian word forms)
     clausePunctuation: Record<string, string>;
 }

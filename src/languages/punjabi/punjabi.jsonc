@@ -6,7 +6,7 @@
 {
     "language": "pa",
     "name": "Punjabi",
-    "script": "Gurmukhi",
+    "script": ["Gurmukhi"],
     "provenance": "Authored from the Unicode Gurmukhi chart + standard (Majhi) Punjabi phonology. This file IS the language data — the native G2P engine reads it directly.",
 
     "inherentVowel": "ə",

@@ -17,7 +17,7 @@
 {
     "language": "ka",
     "name": "Georgian (ქართული)",
-    "script": "Mkhedruli",
+    "script": ["Georgian"],
     "provenance": "Authored greedy g2p from the Mkhedruli alphabet; the 33-letter table was derived empirically from the wikipron kat_geor_narrow referee (HUMAN, 18,350 1:1-aligned words), cross-checked against standard Georgian phonology.",
 
     "convention": {

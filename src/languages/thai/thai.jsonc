@@ -12,7 +12,7 @@
 {
     "language": "th",
     "name": "Thai",
-    "script": "Thai",
+    "script": ["Thai"],
     "provenance": "Authored from Thai orthography + phonology; the tone system is ported from Wiktionary Module:th-pron (CC-BY-SA, tone facts as provenance). This file IS the language data — the native syllabifier/renderer reads it directly. Irregulars are patched from a dictionary (dictionary.tsv).",
 
     "convention": {

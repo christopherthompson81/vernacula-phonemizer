@@ -6,7 +6,7 @@
 {
     "language": "so",
     "name": "Somali (Af-Soomaali)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the Somali Latin orthography (1972) + standard phonology. Shallow near-phonemic g2p; the signature pharyngeals/retroflex/uvular are language facts. Referees: epitran som-Latn + kaikki so.",
 
     "convention": {

@@ -7,7 +7,7 @@
 {
     "language": "cjy",
     "name": "Jin Chinese (Taiyuan)",
-    "script": "Han",
+    "script": ["Han"],
 
     // Pitch digit → Chao contour letter (the fleet tone convention, tone letters trailing the syllable).
     "chao": { "1": "˩", "2": "˨", "3": "˧", "4": "˦", "5": "˥" },

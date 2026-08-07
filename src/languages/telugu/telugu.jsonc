@@ -5,7 +5,7 @@
 {
     "language": "te",
     "name": "Telugu",
-    "script": "Telugu",
+    "script": ["Telugu"],
     "provenance": "Authored from the Unicode Telugu chart + standard Telugu phonology. This file IS the language data — the native G2P engine reads it directly.",
 
     "inherentVowel": "a",

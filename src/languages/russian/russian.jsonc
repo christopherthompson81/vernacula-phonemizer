@@ -25,7 +25,7 @@
 
     "language": "ru",
     "name": "Russian (Standard, Moscow)",
-    "script": "Cyrillic",
+    "script": ["Cyrillic"],
     "provenance": "Authored from Russian orthography + standard Moscow phonology. This file IS the language data — the native Cyrillic G2P engine reads it directly. Stress (lexical, not spelling-derivable) comes from a stress dictionary (stress.tsv); loanword hard-е from hard-e.tsv.",
 
     "convention": {

@@ -9,7 +9,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface FinnishManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     graphemes: Record<string, string>;
     numbers: {
         zero: string;

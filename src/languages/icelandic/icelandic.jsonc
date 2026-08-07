@@ -6,7 +6,7 @@
 {
     "language": "is",
     "name": "Icelandic (íslenska)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Multi-letter graphemes, scanned LONGEST-FIRST. Vowel digraphs ⟨au⟩→øy, ⟨ei ey⟩→ei; ⟨hv⟩→kv; the epenthetic-stop
     // sonorant clusters ⟨ll⟩→tl, ⟨rl⟩→rtl, ⟨rn⟩→rtn (⟨nn⟩ is context-dependent → handled in code).

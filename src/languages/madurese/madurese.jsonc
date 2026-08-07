@@ -15,7 +15,7 @@
 {
     "language": "mad",
     "name": "Madurese (Bhâsa Madhurâ)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Davies (2010) A Grammar of Madurese + Misnadin & Kirby (2020) JIPA Illustration. No machine referee; gold = the JIPA transcribed passage.",
 
     // Consonants by REGISTER CLASS (longest orthographic keys first in the scan). raise = voiced+aspirated stops

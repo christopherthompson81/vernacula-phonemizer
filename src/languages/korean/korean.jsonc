@@ -13,7 +13,7 @@
 {
     "language": "ko",
     "name": "Korean (Seoul standard)",
-    "script": "Hangul",
+    "script": ["Hangul"],
     "provenance": "Authored from the Hangul jamo chart + standard Seoul phonology; the lexical-tensification exceptions are derived from wikipron (tensification.tsv). This file IS the language data — the native decomposition/sandhi engine reads it directly.",
 
     "convention": {

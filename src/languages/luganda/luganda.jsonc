@@ -12,7 +12,7 @@
 {
     "language": "lg",
     "name": "Luganda (Oluganda)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p from the Luganda orthography; phonology per Wikipedia + epitran lug-Latn (the referee, rule-based → partly circular).",
 
     "convention": {

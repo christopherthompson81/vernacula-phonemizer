@@ -8,7 +8,7 @@
 {
     "language": "gd",
     "name": "Scottish Gaelic (Gàidhlig)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Scottish Gaelic orthography + the broad/slender system + the SG pre-aspiration/lenis-stop phonology (read off wikipron gla_latn_broad). Rule engine; the multi-dialect wikipron gla referee is a cross-check, not a tight guard (the Irish situation).",
 
     // Slender-marking vowel LETTERS (e, i + accents) vs broad-marking (a, o, u + accents).

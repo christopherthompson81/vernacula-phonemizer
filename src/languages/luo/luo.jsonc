@@ -18,7 +18,7 @@
 {
     "language": "luo",
     "name": "Luo (Dholuo)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p from the Dholuo orthography; mapping from the 17-word en.wiktionary Luo IPA referee + Tucker (1994) / Okoth-Okombo (1982).",
 
     "convention": {

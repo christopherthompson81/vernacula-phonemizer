@@ -7,7 +7,7 @@
 {
     "language": "ig",
     "name": "Igbo",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Igbo phonology (Emenanjo 1978; Green & Igwe 1963). No independent referee — anchored on an adjudicated gold.",
 
     // Multi-letter graphemes (longest-first): affricates, labial-velars, labialised, palatal nasal.

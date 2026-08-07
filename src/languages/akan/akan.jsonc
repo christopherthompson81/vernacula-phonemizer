@@ -8,7 +8,7 @@
 {
     "language": "ak",
     "name": "Akan (Twi)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the standard Akan (Twi-Fante) orthography + Dolphyne (1988) 'The Akan (Twi-Fante) Language: Its Sound Systems and Tonal Structure'. Validated against the kaikki Akan human readings.",
 
     // Consonant DIGRAPHS (longest-match first) → IPA. Palatal series + labialised series + ⟨ng⟩.

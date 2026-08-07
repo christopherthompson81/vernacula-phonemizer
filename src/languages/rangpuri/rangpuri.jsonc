@@ -7,7 +7,7 @@
 {
     "language": "rkt",
     "name": "Rangpuri (KRNB)",
-    "script": "Devanagari",
+    "script": ["Devanagari"],
     "provenance": "Authored from Toulmin (2006) Appendix A comparative KRNB reflexes (Rangpur/RP point) + standard Eastern-NIA phonology; reuses the shared Devanagari abugida engine. KRNB deltas: deaffrication, voiced-aspirate retention + positional voiceless deaspiration, inherent [ɔ], no vowel length.",
 
     // Inherent vowel kept as ⟨ə⟩ so the shared schwa-DELETION algorithm fires, then a finalRule maps the survivors to

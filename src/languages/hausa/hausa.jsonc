@@ -8,6 +8,7 @@
 // "convention" / "provenance" are self-describing documentation.
 {
     "language": "ha",
+    "script": ["Latin"],
     "name": "Hausa (Kano standard)",
     "provenance": "Cleanroom, rule-based g2p — Boko orthography is shallow and near-1:1; validated vs epitran hau-Latn + kaikki. Fills census gaps: implosives ɓ ɗ, ejectives kʼ t͡sʼ, labialization kʷ ɡʷ, glottalized ʔʲ, palatals c ɟ, ɸ. Tone is a Wiktionary-derived lexical FACT (tone.tsv).",
 

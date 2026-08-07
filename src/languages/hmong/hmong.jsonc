@@ -8,7 +8,7 @@
 {
     "language": "hmn",
     "name": "Hmong (White Hmong / Hmoob Dawb)",
-    "script": "Latin (RPA)",
+    "script": ["Latin"],
     "initials": {
         "nplh": "ᵐpˡʰ",
         "ntsh": "ᶯt͡ʂʰ",

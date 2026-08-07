@@ -9,7 +9,7 @@
 {
     "language": "wo",
     "name": "Wolof",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored greedy g2p + gemination from the Wolof Latin orthography (CLAD). Referee: kaikki Wolof (Wiktionary).",
 
     "convention": {

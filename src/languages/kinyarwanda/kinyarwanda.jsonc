@@ -13,7 +13,7 @@
 {
     "language": "rw",
     "name": "Kinyarwanda (Ikinyarwanda)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the Kinyarwanda orthography + phonology (Wikipedia Kinyarwanda phonology). Referee: epitran kin-Latn (corroborates the bulk; the palatal series is grammar-authored). CC0 Common Voice wordlist.",
 
     "convention": {

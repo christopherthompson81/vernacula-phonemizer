@@ -5,7 +5,7 @@
 {
     "language": "fa",
     "name": "Persian",
-    "script": "Arabic (Perso-Arabic)",
+    "script": ["Arabic"],
     "provenance": "Authored from the Unicode Arabic/Persian chart + standard Iranian Persian phonology. This file IS the language data — the g2p reads it directly.",
 
     // Unambiguous consonant letters → canonical IPA.

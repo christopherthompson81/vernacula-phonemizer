@@ -7,7 +7,7 @@
 {
     "language": "kmr",
     "name": "Kurmanji (Northern Kurdish)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from the Kurmanji Hawar orthography + phonology (near-phonemic). This file IS the language data — the g2p reads it directly. Referees: wikipron kmr_latn broad + epitran kmr-Latn.",
 
     "convention": {

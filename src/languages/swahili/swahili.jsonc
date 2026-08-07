@@ -7,7 +7,7 @@
 {
     "language": "sw",
     "name": "Swahili",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Swahili phonology (implosives, prenasalization, penultimate stress). Validated against wikipron swa + kaikki swa (human) + epitran swa-Latn.",
 
     // ⟨ng'⟩ (with apostrophe) → the velar nasal ŋ — scanned before ⟨ng⟩ (the prenasalized ᵑɡ).

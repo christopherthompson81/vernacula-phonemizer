@@ -11,6 +11,7 @@
 // "clausePunctuation", "numbers". "convention" / "provenance" are documentation.
 {
     "language": "sv",
+    "script": ["Latin"],
     "name": "Swedish (Central Standard / rikssvenska)",
     "provenance": "Cleanroom, rule-based g2p authored from Central Standard Swedish phonology (Elert; Engstrand). The vowel/consonant tables and number words are language facts; the referee (wikipron swe) is a fallible cross-check, not an oracle.",
 

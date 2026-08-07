@@ -9,6 +9,7 @@
 // "clausePunctuation", "numbers". "convention" / "provenance" are self-describing documentation.
 {
     "language": "sk",
+    "script": ["Latin"],
     "name": "Slovak",
     "provenance": "Cleanroom rule-based g2p + number compositor (no lexicon). Consonant/vowel maps + number words are language facts; scored against the wikipron slk_latn_broad HUMAN referee.",
 

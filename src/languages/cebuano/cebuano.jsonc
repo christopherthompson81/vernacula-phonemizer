@@ -6,7 +6,7 @@
 {
     "language": "ceb",
     "name": "Cebuano",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from standard Cebuano/Bisaya orthography + phonology (the Tagalog near-phonemic pattern). This file IS the language data — the g2p reads it directly.",
 
     // Multi-letter graphemes (longest-first). Native Cebuano has only ⟨ng⟩; the rest are nativized loan digraphs.

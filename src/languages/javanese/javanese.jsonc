@@ -7,7 +7,7 @@
 {
     "language": "jv",
     "name": "Javanese",
-    "script": "Latin",
+    "script": ["Latin", "Javanese"],
     "provenance": "Authored from the Wikipedia Javanese-phonology article + standard references. Validated against kaikki jav (human) + epitran jav-Latn.",
 
     // Multi-letter graphemes (longest-first): retroflex th/dh, palatal/velar nasals ny/ng.

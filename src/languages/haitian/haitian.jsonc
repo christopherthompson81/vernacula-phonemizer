@@ -5,7 +5,7 @@
 {
     "language": "ht",
     "name": "Haitian Creole (kreyòl ayisyen)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Digraphs, scanned LONGEST-FIRST: ⟨ou⟩→[u], ⟨ui⟩→[ɥi], ⟨ch⟩→[ʃ]. The nasal ⟨an en on⟩ are handled in code
     // (context-dependent — nasal only syllable-finally).

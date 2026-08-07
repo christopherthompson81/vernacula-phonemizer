@@ -14,7 +14,7 @@
 {
     "language": "ja",
     "name": "Japanese (Standard/Tokyo)",
-    "script": "Han + Hiragana + Katakana",
+    "script": ["Kana", "Han"],
     "provenance": "Authored from the gojūon kana chart + standard Tokyo phonology; readings/pitch lexica are derived data files (see dataFiles). This file IS the language data — the native kana/number/pitch engine reads it directly.",
 
     "convention": {

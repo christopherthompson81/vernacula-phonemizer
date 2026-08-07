@@ -16,7 +16,7 @@ export interface LithuanianAgreement {
 export interface LithuanianManifest {
     language: string;
     name: string;
-    script: string;
+    script: readonly string[];
     vowels: Record<string, string>;
     vowelDigraphs: Record<string, string>;
     consonants: Record<string, string>;

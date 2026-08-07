@@ -10,6 +10,7 @@
 // "convention" / "provenance" are self-describing documentation.
 {
     "language": "fr",
+    "script": ["Latin"],
     "name": "French (standard / Parisian)",
     "provenance": "Cleanroom, rule-based g2p (French orthography is deep but rule-governed in the reading direction) + an exception lexicon (lexicon.tsv) + a vigesimal number compositor. WHICH words are h-aspiré / take liaison, and the number words, are language facts.",
 

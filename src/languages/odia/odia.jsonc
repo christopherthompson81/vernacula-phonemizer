@@ -7,7 +7,7 @@
 {
     "language": "or",
     "name": "Odia",
-    "script": "Odia",
+    "script": ["Odia"],
     "provenance": "Authored from the Unicode Odia chart + standard Odia phonology. This file IS the language data — the generic abugida engine reads it directly.",
 
     "inherentVowel": "ɔ",

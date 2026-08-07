@@ -11,7 +11,7 @@
 {
     "language": "zu",
     "name": "Zulu (isiZulu)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored; IPA + inventory anchored on the epitran zul-Latn + kaikki referees. A near-clone of Xhosa. This file IS the language data — the native rule engine reads it directly.",
 
     "convention": {

@@ -13,7 +13,7 @@
 {
     "language": "bn",
     "name": "Bengali",
-    "script": "Bengali",
+    "script": ["Bengali"],
     "provenance": "Authored from the Unicode Bengali chart + standard Bengali phonology (Kolkata/standard-colloquial). This file IS the language data — the native G2P engine reads it directly.",
 
     // The abugida inherent vowel: Bengali's is /ɔ/. Vowel harmony (ɔ→o) + deletion live in bengali.ts.

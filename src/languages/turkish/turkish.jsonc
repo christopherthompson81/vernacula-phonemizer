@@ -11,7 +11,7 @@
 {
     "language": "tr",
     "name": "Turkish",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Turkish orthography + phonology (shallow, near-1:1; vowel harmony is already in the spelling). This file IS the language data — the native rule engine reads it directly. Stress exceptions come from a small lexicon (stress.tsv).",
 
     "convention": {

@@ -14,7 +14,7 @@
 {
     "language": "syl",
     "name": "Sylheti (Syloti Nagri)",
-    "script": "Syloti Nagri",
+    "script": ["Syloti Nagri"],
     "provenance": "Authored from the Syloti Nagri Unicode chart; consonant values DERIVED from wikipron syl_sylo_broad (spirantisation). Referees: wikipron syl_sylo + kaikki Sylheti.",
 
     "inherentVowel": "ɔ",

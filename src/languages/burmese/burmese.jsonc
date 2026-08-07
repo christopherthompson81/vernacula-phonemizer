@@ -7,7 +7,7 @@
 {
     "language": "my",
     "name": "Burmese",
-    "script": "Myanmar (Mon-Burmese)",
+    "script": ["Myanmar"],
     "provenance": "Authored from standard Burmese phonology (MLC transcription) + the epitran mya-Mymr inventory. Validated against wikipron mya + kaikki mya (human).",
 
     // Base consonants (inherent vowel added by the g2p). ⟨ရ⟩→j, ⟨သ⟩→θ, ⟨အ⟩→ʔ (glottal / vowel carrier).

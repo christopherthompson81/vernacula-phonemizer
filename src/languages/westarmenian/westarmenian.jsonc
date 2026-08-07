@@ -15,7 +15,7 @@
 {
     "language": "hyw",
     "name": "Western Armenian",
-    "script": "Armenian",
+    "script": ["Armenian"],
     "provenance": "Authored Western Armenian rule g2p — the CONSONANT SHIFT (classical voiced+aspirate ⟨բ դ գ ձ ջ / փ թ ք ց չ⟩ → [pʰ tʰ kʰ t͡sʰ t͡ʃʰ]; classical voiceless ⟨պ տ կ ծ ճ⟩ → [b d ɡ d͡z d͡ʒ]), rhotic neutralisation ⟨ր ռ⟩→[ɾ], the ⟨յու/իւ⟩→[ʏ] ⟨յո⟩→[œ] digraphs — reusing the shared Armenian engine. Cross-checked vs wikipron hye_armn_w broad + narrow.",
 
     // Vowels — identical to Eastern (the shift is consonantal). ⟨ե⟩→e / ⟨ո⟩→o are the BARE values; the initial [j]/[v]

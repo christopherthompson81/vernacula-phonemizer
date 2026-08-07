@@ -6,7 +6,7 @@
 {
     "language": "ga",
     "name": "Irish Gaelic (Standard/Connacht)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Irish orthography + the broad/slender system (Ó Siadhail), Connacht-leaning. Rule engine; the wikipron gle referee is a 3-dialect, vowel-noisy cross-check (~34% ceiling), not a tight guard.",
 
     // Slender-marking vowel LETTERS (e, i + fadas) vs broad-marking (a, o, u + fadas). A consonant is slender

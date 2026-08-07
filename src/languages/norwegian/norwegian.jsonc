@@ -6,6 +6,7 @@
 // the referee's ² / circumflex) is lexical + unwritten → DEFERRED (folded in the eval, like Swedish).
 {
     "language": "nb",
+    "script": ["Latin"],
     "name": "Norwegian Bokmål (Urban East Norwegian)",
     "provenance": "Cleanroom rule-based g2p authored from Urban East Norwegian phonology (Kristoffersen, The Phonology of Norwegian); the referee (wikipron nob) is a fallible cross-check.",
 

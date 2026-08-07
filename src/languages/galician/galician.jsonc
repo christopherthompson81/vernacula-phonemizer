@@ -10,7 +10,7 @@
 {
     "language": "gl",
     "name": "Galician (galego)",
-    "script": "Latin",
+    "script": ["Latin"],
     "provenance": "Authored from Galician orthography + phonology (shallow, near-deterministic); the Galician-specific graphemes (x/j→ʃ, g→ɡ, nh→ŋ, nasal velarization) derived empirically from the wikipron glg_latn_broad referee (10,237 human words). No lexicon.",
 
     "convention": {

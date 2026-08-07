@@ -7,7 +7,7 @@
 {
     "language": "sq",
     "name": "Albanian (Shqip)",
-    "script": "Latin",
+    "script": ["Latin"],
 
     // Scanned LONGEST-FIRST (all two-letter). The fricative/affricate/palatal/liquid digraphs.
     "digraphs": {
