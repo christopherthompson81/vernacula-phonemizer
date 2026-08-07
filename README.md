@@ -25,47 +25,36 @@ await phonemizeAsync("भारत", "hi"); // Devanagari → bʱˈaːɾət̪
 await phonemizeAsync("العربية", "ar"); // Arabic → alʕarabˈijːa
 await phonemizeAsync("Україна", "uk"); // Cyrillic → ukrajina
 await phonemizeAsync("বাংলাদেশ", "bn"); // Bengali → baŋlad̪eʃ
-// Japanese Scripts
 await phonemizeAsync("ひらがな", "ja"); // Hiragana → çiɾäɡäꜜnä
 await phonemizeAsync("カタカナ", "ja"); // Katakana → kätäkänä
 await phonemizeAsync("日本語", "ja"); // Kanji → niho̞ŋɡo̞
 await phonemizeAsync("ਪੰਜਾਬੀ", "pa"); // Gurmukhi → pˈə̃ɲd͡ʒaːbiː
 await phonemizeAsync("فارسی", "fa"); // Perso-Arabic → faːɾsˈiː
-
-
-await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi"); // Tifinagh → taʃlħit
+await phonemizeAsync("ภาษาไทย", "th"); // Thai → pʰˈaː˧saː˩˩˦tʰˌa˧j
+await phonemizeAsync("తెలుగు", "te"); // Telugu → t̪ˈeluɡu
+await phonemizeAsync("தமிழ்", "ta"); // Tamil → t̪ˈɐmɪɻ
+await phonemizeAsync("한국어", "ko"); // Hangul → hˈɐnɡuɡɘ
+await phonemizeAsync("አማርኛ", "am"); // Geʽez → amaɾɲa
+await phonemizeAsync("ꦗꦮ", "jv"); // Javanese → d͡ʒˈɔwɔ
+await phonemizeAsync("ಕನ್ನಡ", "kn"); // Kannada → kˈanːaɖa
+await phonemizeAsync("ગુજરાતી", "gu"); // Gujarati → ɡˈud͡ʒɾat̪i
+await phonemizeAsync("မြန်မာ", "my"); // Myanmar → mja˨ɴma˨
+await phonemizeAsync("മലയാളം", "ml"); // Malayalam → mˈalajaːɭam
+await phonemizeAsync("ଓଡ଼ିଆ", "or"); // Odia → ˈoɽia
+await phonemizeAsync("ᮞᮥᮔ᮪ᮓ", "su"); // Aksara Sunda → sˈunda
 await phonemizeAsync("𞤆𞤵𞤤𞤢𞥄𞤪", "ff"); // Adlam → pˈulaːɾ
+await phonemizeAsync("සිංහල", "si"); // Sinhala → sˈiŋhələ
+await phonemizeAsync("ខ្មែរ", "km"); // Khmer → kʰmae
 await phonemizeAsync("ߓߊߡߊߣߊ߲", "bm"); // N'Ko → bamanã
 await phonemizeAsync("Ελληνικά", "el"); // Greek → elinika
-
+await phonemizeAsync("ꠍꠤꠟꠐꠤ", "syl"); // Syloti Nagri → silʈi
+await phonemizeAsync("עברית", "he"); // Hebrew → ʔivʁit
+await phonemizeAsync("ⵜⴰⵛⵍⵃⵉⵜ", "shi"); // Tifinagh → taʃlħit
+await phonemizeAsync("ᱥᱟᱱᱛᱟᱲᱤ", "sat"); // Ol Chiki → santaɽi
+await phonemizeAsync("བོད་སྐད", "bo"); // Tibetan → pʰøʔ˩kɛʔ˥
 await phonemizeAsync("Հայերեն", "hy"); // Armenian → hɑjeɾen
 await phonemizeAsync("ქართული", "ka"); // Georgian → kʰaɾtʰuli
-await phonemizeAsync("עברית", "he"); // Hebrew → ʔivʁit
-
-
-await phonemizeAsync("ગુજરાતી", "gu"); // Gujarati → ɡˈud͡ʒɾat̪i
-
-await phonemizeAsync("ꠍꠤꠟꠐꠤ", "syl"); // Syloti Nagri → silʈi
-await phonemizeAsync("ଓଡ଼ିଆ", "or"); // Odia → ˈoɽia
-await phonemizeAsync("தமிழ்", "ta"); // Tamil → t̪ˈɐmɪɻ
-await phonemizeAsync("తెలుగు", "te"); // Telugu → t̪ˈeluɡu
-await phonemizeAsync("ಕನ್ನಡ", "kn"); // Kannada → kˈanːaɖa
-await phonemizeAsync("മലയാളം", "ml"); // Malayalam → mˈalajaːɭam
-await phonemizeAsync("සිංහල", "si"); // Sinhala → sˈiŋhələ
-await phonemizeAsync("ᱥᱟᱱᱛᱟᱲᱤ", "sat"); // Ol Chiki → santaɽi
-
-
-await phonemizeAsync("አማርኛ", "am"); // Geʽez → amaɾɲa
-await phonemizeAsync("မြန်မာ", "my"); // Myanmar → mja˨ɴma˨
 await phonemizeAsync("လိၵ်ႈတႆး", "shn"); // Shan → lik̚˧˧˨taj˥
-await phonemizeAsync("ខ្មែរ", "km"); // Khmer → kʰmae
-await phonemizeAsync("ภาษาไทย", "th"); // Thai → pʰˈaː˧saː˩˩˦tʰˌa˧j
-
-
-await phonemizeAsync("한국어", "ko"); // Hangul → hˈɐnɡuɡɘ
-await phonemizeAsync("ꦗꦮ", "jv"); // Javanese → d͡ʒˈɔwɔ
-await phonemizeAsync("ᮞᮥᮔ᮪ᮓ", "su"); // Aksara Sunda → sˈunda
-await phonemizeAsync("བོད་སྐད", "bo"); // Tibetan → pʰøʔ˩kɛʔ˥
 ```
 
 ## Languages
