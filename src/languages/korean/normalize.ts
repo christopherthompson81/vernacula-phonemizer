@@ -195,8 +195,8 @@ export function normalizeKorean(input: string): string {
     //     ⚠ THE TWO REGISTERS ARE NOT INTERCHANGEABLE, and Korean keeps them apart: 더하기 / 빼기 are the
     //     OPERATORS (three plus four), 플러스 / 마이너스 the SIGNS (minus five degrees). So the additive rule
     //     below uses 더하기 while the negative rule uses 마이너스, and ± — which is a sign and not an operation —
-    //     juxtaposes the loan pair, the same pair `ja` uses (プラスマイナス). Runs BEFORE the + rule, since ± is
-    //     a single character the + rule cannot see.
+    //     juxtaposes the loan pair. ⚠ ± NEEDS ITS OWN RULE: it is a single character (U+00B1), not a `+`,
+    //     so no `+` rule can match inside it and the sign would otherwise be dropped in silence.
     s = s.replace(/±/gu, " 플러스 마이너스 ");
     s = s.replace(/(\d)\s?\+\s?(?=\d)/gu, "$1 더하기 ");
     //     The LEADING plus is the sign, not the operation, so it takes 플러스 (`+5` → 플러스 5) — the same

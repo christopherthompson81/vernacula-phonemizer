@@ -200,11 +200,10 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 8) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
     s = s.replace(/(^|[\s(])[-−–](\d)/gu, "$1menos $2");
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
-    //    the plus and minus rules already in this file, so nothing is invented. The FORM is the one every
-    //    language that already read ± uses (bg/da/is/nb/ro/sv all juxtapose with no conjunction; English is the
-    //    outlier that needs "or", and it already has its own rule). Runs BEFORE the + rule: ± is a single
-    //    character, so the + rule cannot see it, and putting it first keeps the sign audible either way.
+    // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
+    //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
+    //    reading is this language's own two words juxtaposed, both taken from the plus and minus rules
+    //    already in this file.
     s = s.replace(/±/gu, " mais menos ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 mais $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1mais $2");

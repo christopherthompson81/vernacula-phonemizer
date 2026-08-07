@@ -327,12 +327,10 @@ export function numberWords(n: number, opts: { stem?: boolean } = {}): string {
  * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
  * use, i.e. a foreign name.
  *
- * ⚠ NOT QUITE VERBATIM: á é í ó ú à were REMOVED, because the g2p has no rule for them and DROPPED them outright.
- * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was
- * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
- * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
- * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
- * `test/native-inventory.test.ts` now measures it rather than trusting it.
+ * ⚠ á é í ó ú à ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright —
+ * listing them here would promise a reading that does not exist. NATIVE_CLASS is a claim ABOUT
+ * THE G2P, and `test/native-inventory.test.ts` measures it character by character rather than
+ * trusting it.
  */
 const NATIVE_CLASS = "[a-zA-ZăâîșțA-ZĂÂÎȘȚ]";
 /**

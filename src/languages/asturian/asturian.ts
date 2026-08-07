@@ -85,12 +85,10 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'·")})|(\\d+)|([.!?…,;:]
  * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
  * is no longer also deciding where the script boundary falls.
  *
- * ⚠ NOT QUITE VERBATIM: ḷ Ḷ were REMOVED, because the g2p has no rule for them and DROPPED them outright.
- * The old token class listed them anyway, and the word-level fold hid the mismatch — a word containing one was
- * rejected whole, so everything in it got folded and the letter came out readable by accident. Judging each
- * character on its own exposes the over-claim instead of masking it: `Thérèse` in Romanian read *ˈthrese*, the é
- * gone, because the class promised a rule that did not exist. NATIVE_CLASS is a claim about the G2P, and
- * `test/native-inventory.test.ts` measures it rather than trusting it.
+ * ⚠ ḷ Ḷ ARE DELIBERATELY ABSENT: the g2p has no rule for them, and drops them outright —
+ * listing them here would promise a reading that does not exist. NATIVE_CLASS is a claim ABOUT
+ * THE G2P, and `test/native-inventory.test.ts` measures it character by character rather than
+ * trusting it.
  */
 const NATIVE_CLASS = "[a-zñáéíóúüïḥA-ZÑÁÉÍÓÚÜÏḤ'·]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

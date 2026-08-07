@@ -202,9 +202,10 @@ export function normalizeTurkish(input: string): string {
     // 6) SIGNS. `UTC+1` ×1 — the sign vanished entirely.
     // ⚠ ± AND THE MINUS ARE HERE ON THE STRENGTH OF THE SAME SOURCE AS THE RELATIONAL RULES BELOW:
     //    tr.wikipedia's arithmetic article names the subtraction sign outright — «Çıkarma sembolü "eksi" (-) ile
-    //    ifade edilir» — and `eksi` is ×64 token / 9 articles. With `artı` already in this file, ± is then the
-    //    juxtaposed pair every language that reads it uses (bg/da/is/nb/ro/sv), at no further sourcing cost.
-    //    ± first, since it is a single character the + rule cannot see.
+    //    ifade edilir» — naming the word against the SIGN. With `artı` already in this file, ± is then the
+    //    two juxtaposed, at no further sourcing cost.
+    //    ⚠ ± NEEDS ITS OWN RULE: it is a single character (U+00B1), not a `+`, so no `+` rule can match
+    //    inside it and the sign would otherwise be dropped in silence.
     s = s.replace(/±/gu, " artı eksi ");
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 artı $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1artı $2");

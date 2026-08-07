@@ -377,11 +377,10 @@ export function normalizeKazakh(input: string): string {
     s = s.replace(/(\d+)\s?÷\s?(\d+)/gu, (_m, a: string, b: string) =>
         `${orthographic(Number(a))} ${withCase(orthographic(Number(b)), "dat")} бөлінеді`);
 
-    // ⚠ ± IS THIS LANGUAGE'S OWN TWO WORDS, juxtaposed — zero new sourcing. Both halves are lifted from
-    //    the plus and minus rules in this file, so nothing is invented, and both are SIGN names rather than
-    //    operation names, which is what ± needs: it marks a tolerance, not an addition. The FORM is the one every
-    //    language that already read ± uses (bg/da/is/nb/ro/sv juxtapose with no conjunction). Runs BEFORE the +
-    //    rule, since ± is a single character the + rule cannot see.
+    // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
+    //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
+    //    reading is this language's own two words juxtaposed, and ⚠ both are SIGN names rather than
+    //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
     s = s.replace(/±/gu, " плюс минус ");
     s = s.replace(/(?<=[A-Z])\s?\+\s?(\d)/gu, " плюс $1");
     s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "минус $1");

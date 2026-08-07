@@ -222,9 +222,9 @@ export function normalizeDutch(input: string): string {
 
     // 9b) ± AND THE RELATIONAL AND DIVISION SIGNS. ± is this language's own two words juxtaposed, and
     //     the `plus` half is lifted from the rule directly above; `min` is not otherwise in this file precisely
-    //     because nl_nl has no true minus sign (see the note above), so `min` is the one word here that comes
-    //     from the register rather than from the tree. It is the standard Dutch reading of the sign and matches
-    //     the juxtaposed form every language that already read ± uses (bg/da/is/nb/ro/sv).
+    //     because this language has no true minus sign (see the note above), so ⚠ `min` is the one word here
+    //     that comes from the REGISTER rather than from another rule in this file. It is the standard Dutch
+    //     reading of the sign.
     s = s.replace(/±/gu, " plus min ");
 
     //     ⚠ THE ONLY LANGUAGE IN THIS BATCH WHERE TIER 2 SETTLED THE READING ON ITS OWN. Counted in nl_nl:
