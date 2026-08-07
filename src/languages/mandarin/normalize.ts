@@ -21,10 +21,9 @@
  *
  * ── THE SIGN CLASSES ────────────────────────────────────────────────────────────────────────────
  *
- * The #562 pass left every math sign DROPPED, which the review gate reported as
- * `DROPPED: minus plus equals less-than times` and the artifact scan as `DROP math-sign ×1`. The minus was
- * the one that mattered: `-5 度` read as 五度, **positive** five degrees, so a below-freezing temperature
- * was silently reported as above it.
+ * ⚠ AN UNCLAIMED MATH SIGN IS DROPPED, NOT MISREAD, which is what makes it dangerous: `-5 度` reads as
+ * 五度, **positive** five degrees, so a below-freezing temperature is silently reported as above it. A
+ * dropped sign is invisible to every check that looks for a wrong reading.
  *
  * EVERY WORD BELOW IS ATTESTED IN ITS OWN NOTATION SLOT, from zh.wikipedia via
  * `tools/normalization/attest.ts` (cached in `tools/corpus/attest/cmn.jsonc`) and, for 乘以 and 平方, from
@@ -94,7 +93,7 @@ const SIGNS: readonly (readonly [RegExp, string])[] = [
 ];
 
 /**
- * THE AMPERSAND, which is the one drop left after the signs above and the class #586 opens with.
+ * THE AMPERSAND, the one drop left after the signs above.
  *
  * The artifact's only `&` is `一众 B&B 公司` — "a number of B&B companies" — and it read as *bˈiː bˈiː*,
  * "B B". Between LATIN letters the ampersand stays inside the Latin run and is spelled ` and `, because the

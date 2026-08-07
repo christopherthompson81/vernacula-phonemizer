@@ -188,7 +188,8 @@ export function normalizeMacedonian(input: string): string {
         return `${a} до ${b}`;
     });
 
-    // 7) CLOCK. The colon was clause punctuation, so `06:30` read as "шест , триесет". Macedonian reads
+    // 6) CLOCK. The colon is otherwise clause punctuation, so `06:30` reads as "шест , триесет".
+    //    Macedonian reads
     //    the time CARDINALLY with "и": 6:30 = "шест и триесет"; :00 drops the minutes (10:00 = "десет").
     //    The trailing "часот"/"ч" (the hour) is kept/expanded — "ч" is the abbreviation for "часот". A
     //    comma after the minutes marks a sports time, not a clock. The range rule ran first, so
@@ -204,12 +205,12 @@ export function normalizeMacedonian(input: string): string {
             return typeof ч === "string" ? `${body} часот` : body;
         },
     );
-    // 7b) `am`/`pm` after a time → претпладне/попладне. Standalone words (the clock already consumed the
+    // 6b) `am`/`pm` after a time → претпладне/попладне. Standalone words (the clock already consumed the
     //     digits), matched on word boundaries so "Сами" is untouched.
     s = s.replace(/\bam\b/giu, "претпладне");
     s = s.replace(/\bpm\b/giu, "попладне");
 
-    // 8) THE ORDINAL SUFFIX — the big one. `(\d+)[- ]?` + the written suffix (the last letters of the
+    // 7) THE ORDINAL SUFFIX, the largest class in this file. `(\d+)[- ]?` + the written suffix (the last letters of the
     //    spoken ordinal). The `-те` suffix is ambiguous between a count ("the N") and a decade: a 4-digit
     //    number followed by "години" is a decade, otherwise it is "the N".
     s = s.replace(
@@ -241,9 +242,9 @@ export function normalizeMacedonian(input: string): string {
         },
     );
 
-    // 9) CENTURY — `N век` → ordinal + век (10 век → десетти век), including the compound list
+    // 8) CENTURY — `N век` → ordinal + век (10 век → десетти век), including the compound list
     //    `10 и 11 век`. Also the one Germanic remnant `8. век` (with a dot). The suffix forms (17-ти век,
-    //    18-тиот век) were already claimed by step 8.
+    //    18-тиот век) are already claimed by step 7.
     s = s.replace(/(\d+)\s+и\s+(\d+)\s*век(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) => {
         const oa = mkOrdinal(Number(a)), ob = mkOrdinal(Number(b));
         return oa !== undefined && ob !== undefined ? `${oa} и ${ob} век` : _m;
@@ -257,7 +258,7 @@ export function normalizeMacedonian(input: string): string {
         return o === undefined ? m0 : `${o} век`;
     });
 
-    // 10) DATES — `N месяц` → ordinal + месяц (на 6 октомври → на шести октомври), including a date range
+    // 9) DATES — `N <month>` → ordinal + month (на 6 октомври → на шести октомври), including a date range
     //    `24 август - 5 септември` and the Germanic-dot form `4. јули 1776`. The day must be 1–31.
     const monthAlt = [...MONTHS].join("|");
     s = s.replace(
@@ -277,9 +278,7 @@ export function normalizeMacedonian(input: string): string {
         },
     );
 
-    // 11) (the range rule lives at step 5, before the clock.)
-
-    // 11) REGNAL ORDINALS. All three corpus Romans (Лиалофи III, Елизабета II, Луј XVI) are regnal proper
+    // 10) REGNAL ORDINALS. All three corpus Romans (Лиалофи III, Елизабета II, Луј XVI) are regnal proper
     //     names, and the shared Roman pass has already rewritten them to CARDINAL digits before this engine
     //     runs (Macedonian has no ROMAN_POLICIES entry). The digit after a capitalized NAME is read as an
     //     ordinal: Лиалофи 3 → Лиалофи трети, Луј 16 → Луј шеснаесетти. Guarded by the same ≤39 monarch
@@ -297,7 +296,7 @@ export function normalizeMacedonian(input: string): string {
         return `${name} ${name.endsWith("а") ? femIndef(o) : o}`;
     });
 
-    // 12) RATE UNITS the shared tier cannot compose. `милји/час` (miles/hour — милји is a full word, not an
+    // 11) RATE UNITS the shared tier cannot compose. `милји/час` (miles/hour — милји is a full word, not an
     //     abbreviation), the Latin `mph`/`kph`, `Mbit/s` (megabits per second). The Cyrillic squared units
     //     `мм2`/`км2` are also local: the tier's exponent lookbehind `(?<=[a-zA-Z])` is ASCII-only and the
     //     corpus writes `3136 мм2`.
@@ -308,7 +307,7 @@ export function normalizeMacedonian(input: string): string {
     s = s.replace(/(\d+)\s*мм\s*[²2](?!\d)/gu, "$1 квадратни милиметри");
     s = s.replace(/(\d+)\s*км\s*[²2](?!\d)/gu, "$1 квадратни километри");
 
-    // 13) DEGREES — `90°F`, `35° W`, and a bare `N°`. The corpus's own spelled-out form is
+    // 12) DEGREES — `90°F`, `35° W`, and a bare `N°`. The corpus's own spelled-out form is
     //     "30 степени целзиусови", so °C/°F use the "по" construction; `° W`/`° E` are coordinates.
     s = s.replace(/(\d+)\s*°\s*C(?![\p{L}\p{M}])/gu, "$1 степени по Целзиус");
     s = s.replace(/(\d+)\s*°\s*F(?![\p{L}\p{M}])/gu, "$1 степени по Фаренхаjт");
@@ -316,7 +315,7 @@ export function normalizeMacedonian(input: string): string {
     s = s.replace(/(\d+)\s*°\s*E(?![\p{L}\p{M}])/gu, "$1 степени исток");
     s = s.replace(/(\d+)\s*°/gu, "$1 степени");
 
-    // 14) SIGNS. `+30` (the corpus's "над +30 степени") reads "плус". Minus, ×, ÷, =, <, > and the
+    // 13) SIGNS. `+30` (the corpus's "над +30 степени") reads "плус". Minus, ×, ÷, =, <, > and the
     //     ampersand are the handoff's sign classes — none occurs in the corpus but a dropped sign is
     //     inaudible, so each is read.
     s = s.replace(/(^|[\s(])[-−]\s?(?=\d)/gu, "$1минус ");
@@ -334,12 +333,12 @@ export function normalizeMacedonian(input: string): string {
     s = s.replace(/\s*>\s*/gu, " поголемо од ");
     s = s.replace(/\s*[&＆]\s*/gu, " и ");
 
-    // 15) pH → "пе ха" (letter names) and `Ghz` → "гигахерци" — the corpus's lowercase-tech tokens that
+    // 14) pH → "пе ха" (letter names) and `Ghz` → "гигахерци" — the corpus's lowercase-tech tokens that
     //     would otherwise read as consonant clusters or Latin foreign.
     s = s.replace(/(?<![\p{L}\p{M}])pH(?![\p{L}\p{M}])/gu, "пе ха");
     s = s.replace(/(?<![\p{L}\p{M}])Ghz(?![\p{L}\p{M}])/giu, "гигахерци");
 
-    // 15b) FRACTIONS — the corpus's "29¾ инчи на 24½ инчи" and "5 мм (1/5 инчи)". ¾/½ after a whole read
+    // 14b) FRACTIONS — the corpus's "29¾ инчи на 24½ инчи" and "5 мм (1/5 инчи)". ¾/½ after a whole read
     //     "и три четвртини" / "и половина"; a unit fraction reads "една петтина"-shaped (numeral-ordinand
     //     stem + -тина). The vulgar-fraction glyphs are not in any clause-punctuation map, so they were
     //     being dropped outright.
@@ -354,7 +353,7 @@ export function normalizeMacedonian(input: string): string {
         return `една ${suffix}`;
     });
 
-    // 16) PERSONAL-INITIAL single capitals — `Н. Вејн` (the shared LONE_INITIAL handles `В. Буш`, which
+    // 15) PERSONAL-INITIAL single capitals — `Н. Вејн` (the shared LONE_INITIAL handles `В. Буш`, which
     //     sits between capitalized words; this one follows a comma in "НАСА, Н. Вејн"). And a lone Latin
     //     capital standing as a LETTER between words — `буквата V` (the letter vee) reads "ве" not the
     //     English [viː]; `H во pH` (after pH → "пе ха") reads "ха".

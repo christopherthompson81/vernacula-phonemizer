@@ -1,26 +1,25 @@
 /**
- * Native Maithili / मैथिली (mai) text phonemizer — canonical IPA. Eastern Indo-Aryan (Bihari
- * group), Devanagari. Reuses the Hindi Devanagari engine (makeNativeHindi — schwa deletion, weight stress,
- * numbers) with a Maithili data file whose divergences from Hindi are: SHORT e/o (ए→e, ओ→o), the diphthongs
- * ऐ→[əɪ] / औ→[əu], and inherent /ə/. Maithili's signature — a cluster schwa that Hindi DELETES instead reduces to
- * an ULTRASHORT [ᵊ] (इसपात→ɪsᵊpaːt) — is a narrow phonetic detail folded (ᵊ~∅) against the referee.
+ * Native Maithili / मैथिली (mai) text phonemizer — canonical IPA. Eastern Indo-Aryan (Bihari group),
+ * Devanagari. Reuses the Hindi Devanagari engine (makeNativeHindi — schwa deletion, weight stress, numbers)
+ * with a Maithili data file. The divergences from Hindi: SHORT e/o (ए→e, ओ→o), the diphthongs ऐ→[əɪ] /
+ * औ→[əu], and inherent /ə/.
  *
- * 🔷 SINGLE-SOURCE: the only referee is wikipron mai_deva narrow (167 human pairs) — small, so this is a
- * single-source-verified bring-up, not a confident convergence. Distinct from the ⛔ Bhojpuri/Awadhi stubs, which
- * have NO referee at all.
+ * Maithili's signature — a cluster schwa that Hindi DELETES is instead reduced to an ULTRASHORT [ᵊ]
+ * (इसपात→ɪsᵊpaːt) — is a narrow phonetic detail, folded (ᵊ~∅) rather than contrasted.
+ *
+ * ⚠ SINGLE-SOURCE bring-up: the only referee is a small human set (167 pairs), so this is verified rather
+ * than convergent.
  */
 /**
- * NORMALIZER WORDS: Hindi's CLOCK words are confirmed for Maithili; its percent word is NOT, and is
- * retained unconfirmed. Evidence from mai.wikipedia via `tools/normalization/attest.ts`
- * (`tools/corpus/attest/mai.jsonc`). This language is why the reading has to be done per sentence:
+ * NORMALIZER WORDS. This engine inherits Hindi's. The CLOCK words (बजकर, मिनट) are confirmed for Maithili;
+ * the percent word प्रतिशत is NOT, and is retained unconfirmed — an unsourced substitute is worse than an
+ * inherited word.
  *
- *   बजकर + मिनट ✓ "प्राण प्रतिष्ठाक मुहूर्त १२ बजकर २९ मिनट ८ सेकेण्ड सँ … रहल जे"
- *                  — प्रतिष्ठाक / सेकेण्ड सँ / रहल जे are Maithili. TWO of the four बजकर hits are Maithili;
- *                    the other two are the same passage in HINDI (का मुहूर्त, रहा, मिलाकर), quoted verbatim.
- *   मिनट     ✓ "5 घंटा 30 मिनट जोड़ला सं प्राप्त होइत अछि"           — होइत अछि is Maithili
- *   प्रतिशत   ✗ its single hit is a NEPALI passage ("९७.९ प्रतिशत भन्दा अधिक … लागेकाछन्"), so it says
- *              nothing about Maithili. Hindi's default stands, unconfirmed — not replaced, because an
- *              unsourced substitute is worse than an inherited word (this issue's own standing rule).
+ * ⚠ ATTESTATION MUST BE JUDGED PER SENTENCE, NOT PER HIT, and this language is why. Devanagari wikis quote
+ * each other verbatim, so a search for a Maithili word returns Hindi and Nepali passages under a Maithili
+ * title: half the बजकर hits here are one Hindi passage quoted whole (का मुहूर्त, रहा, मिलाकर), and the
+ * only प्रतिशत hit is Nepali (भन्दा अधिक, लागेकाछन्). A hit counts only when the surrounding sentence
+ * carries Maithili morphology — होइत अछि, रहल जे, सेकेण्ड सँ.
  */
 import { makeNativeHindi, type HindiDef, type ForeignPhonemizer } from "../hindi/hindi.ts";
 import { loadManifest } from "../../core/loadManifest.ts";

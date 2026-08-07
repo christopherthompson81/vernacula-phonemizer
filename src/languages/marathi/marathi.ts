@@ -23,14 +23,11 @@ function engine(foreign?: ForeignPhonemizer) {
     );
 }
 
-/** #562 normalization. Marathi shares Hindi's ENGINE but not Hindi's orthographic conventions, so it
- *  supplies its OWN normalizer and its OWN symbol words through `makeNativeHindi`'s overrides rather than
- *  inheriting Hindi's. Before that parameter existed the Marathi pass had to run AHEAD of `text()` and be
- *  written to consume its input completely, so the Hindi pass inside would find nothing left to claim —
- *  a coupling that was load-bearing in three separate steps. Verified byte-identical over the whole
- *  mr_in corpus when moved onto the seam. */
+/** Normalization. Marathi shares Hindi's ENGINE but not Hindi's orthographic conventions, so it supplies
+ *  its OWN normalizer and its OWN symbol words through `makeNativeHindi`'s overrides rather than
+ *  inheriting Hindi's. */
 const MR_SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
