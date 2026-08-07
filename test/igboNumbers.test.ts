@@ -1,9 +1,9 @@
 /**
  * Igbo cardinal numbers — the compositor that stopped digits being read in English.
  *
- * ⚠ WHAT THIS REPLACES. Igbo had no `numbers.ts`, so `igbo.ts` handed every digit run to its `foreign` fallback,
- * which the registry wires to the ENGLISH phonemizer. `1945` read *wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd fˈɔːɹt̬i fˈaᶦv* —
- * fluent English inside Igbo speech. A dropped symbol loses information; this asserted the wrong language.
+ * ⚠ A LANGUAGE WITH NO `numbers.ts` HANDS EVERY DIGIT RUN TO ITS `foreign` FALLBACK, which the registry wires
+ * to the ENGLISH phonemizer — so `1945` reads *wˈʌn θˈaᶷzənd nˈaᶦn hˈʌndɹəd fˈɔːɹt̬i fˈaᶦv*, fluent English
+ * inside Igbo speech. A dropped symbol loses information; this asserts the WRONG LANGUAGE, confidently.
  *
  * The expectations below are corpus-attested phrases, not invented ones: `iri na otu` has 2,056 hits in a
  * 558,991-line ig.wikipedia dump, `iri abụọ` 7,814. Igbo has NO independent referee (wikipron, epitran and kaikki
