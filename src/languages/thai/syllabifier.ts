@@ -101,11 +101,6 @@ export function stripThaiMarks(text: string): string {
         .replace(/[็ํฺ]/gu, ""); // (3) mai-taikhu, nikhahit, phinthu
 }
 
-/** ว acting as the medial VOWEL /ua/ in a CวC syllable (ส่วน → sŭan, not sawon). ⚠ Thai
- *  writes /ua/-before-a-coda as a BARE ว (the ◌ั is dropped), so without a distinct marker the
- *  grapheme is indistinguishable from the consonant /w/. */
-export const THAI_UA_VOWEL = "";
-
 /**
  * Thai consonant grapheme → its onset phoneme class, used for cluster-former detection and for
  * coda neutralization. These are ONSET classes only — the coda inventory is smaller, and the
