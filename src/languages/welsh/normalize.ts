@@ -107,13 +107,13 @@ ORD_COMPOUND[1] = "unfed";
 
 /** The round vigesimal tens the Wikipedia table documents — and nothing else. The non-round 40s–90s
  *  have inconsistent connectors (50 = degfed ar ddeugain but 51 = unfed ar ddeg a deugain) and the
- *  corpus writes no such digit, so they return undefined (trap 9 (a guard alternative with no attested…): no unattested guard branches). */
+ *  corpus writes no such digit, so they return undefined (⚠ no unattested guard branches — a guard alternative with no attested instance is a misfire generator). */
 const ROUND_TENS: Readonly<Record<number, string>> = {
     20: "ugeinfed", 30: "degfed ar hugain", 40: "deugainfed", 50: "degfed ar ddeugain",
     60: "trigainfed", 70: "degfed ar trigain", 80: "pedwar ugeinfed", 90: "degfed a phedwar ugain",
 };
 
-/** Integer → the vigesimal ordinal. Attested forms only (trap 13 (pin the rule's BRANCHES) + trap 9 (a guard alternative with no attested…)): the 1–19 table, the 20s and
+/** Integer → the vigesimal ordinal. ⚠ ATTESTED FORMS ONLY, and every branch pinned: the 1–19 table, the 20s and
  *  30s composition (the corpus writes 37fed = ail ar bymtheg ar hugain), the round tens the Wikipedia
  *  table documents, the corpus's 190fed (10 a naw ugain → degfed a naw ugain) and the simple -fed on
  *  cant/mil. Anything else → undefined, so the caller leaves the digit untouched rather than emitting a
@@ -122,7 +122,7 @@ export function ordinalWords(n: number): string | undefined {
     if (!Number.isSafeInteger(n) || n < 0) return undefined;
     if (n <= 19) return n === 0 ? "dimfed" : ORD_1_19[n]!;
     if (n === 20) return ROUND_TENS[20]; // the branch BOUNDARY: `low` is 0 here, so the 21-39 arm below
-                                        //  returned undefined and ugeinfed was unreachable (trap 13 (pin the rule's BRANCHES)).
+                                        //  returned undefined and ugeinfed was unreachable.
     if (n < 40) {
         // 21–39: the compound 1–19 base + "ar hugain". 31 = unfed ar ddeg ar hugain (11 on 20),
         // 37 = ail ar bymtheg ar hugain (17 on 20).
@@ -157,7 +157,7 @@ export function soften(text: string): string {
 }
 
 /** The tier's unit words, needed when a rule converts a number to WORDS and so breaks the number-unit
- *  adjacency the shared tier matches on (playbook step 4, "units before decimals"). */
+ *  adjacency the shared tier matches on — ⚠ units are resolved BEFORE decimals. */
 const UNIT_WORD: Readonly<Record<string, string>> = {
     km: "cilometr", kg: "cilogram", mm: "milimetr", cm: "centimetr", m: "metr",
 };
@@ -217,7 +217,7 @@ export function normalizeWelsh(input: string): string {
 
     // 5) DECADES — `1970au`, `1920au`, `90au`. The Welsh plural -au after the year. Read as the decade
     //    number (the -au is a plural of the year, not a separate word). NOT `\b` — the -au is attached to
-    //    the digits with no boundary for the ASCII word class to find (trap 1 (`\b` is ASCII-defined)).
+    //    the digits with no boundary for the ASCII word class to find (`` is ASCII-defined).
     s = s.replace(/(?<![\p{L}\p{M}\d])(\d[\d,]*)(au)(?![\p{L}\p{M}])/giu, "$1");
 
     // 5b) RANGES and SCORES — `6-6`, `5-3`, `26-00`, `1894-1895`, `10:00-11:00`, `10-60 munud`. Welsh
@@ -297,7 +297,7 @@ export function normalizeWelsh(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
         (m0, i: string, f: string) =>
             `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")} `);
-    // A DECIMAL with a UNIT — `12.8 km`. The playbook's "units before decimals" coupling: converting the
+    // A DECIMAL with a UNIT — `12.8 km`. ⚠ UNITS ARE RESOLVED BEFORE DECIMALS: converting the
     // number to words breaks the tier's number-unit adjacency, so the unit's WORD must be claimed here.
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm)(?![\p{L}\p{M}])/giu,
         (m0, i: string, f: string, u: string) =>
@@ -305,7 +305,7 @@ export function normalizeWelsh(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")}`);
 
-    // 7c) COMMA-DECIMALS — `12,5`, `4,2`. Welsh follows English notation (comma = thousands, dot =
+    // 7b) COMMA-DECIMALS — `12,5`, `4,2`. Welsh follows English notation (comma = thousands, dot =
     //     decimal), so the corpus writes no comma-decimal (verified: zero `\d,\d{1,2}` not part of a
     //     3-digit group). But a European-style comma-decimal must not LEAK the comma as a clause pause:
     //     it reads "pwynt" like the dot. A comma followed by a THREE-digit group is thousands (1,400)
@@ -316,7 +316,7 @@ export function normalizeWelsh(input: string): string {
     // 8) FRACTIONS. `1/5 modfedd` → *un pumed*. The denominator's word is the FRACTION NOUN, which is the
     //    ordinal for 5+ (pumed, chweched, wythfed) but a separate noun for 3 and 4 (traean = a third,
     //    chwarter = a quarter — both referee-attested, distinct from the ordinals trydydd/pedwerydd). The
-    //    corpus's only fraction is 1/5; the 3/4 noun branch is pinned here from the referee (trap 13 (pin the rule's BRANCHES)).
+    //    corpus's only fraction is 1/5; the 3/4 noun branch is pinned here from an independent source.
     //    ¾/½ after a whole read "a thri chwarter"/"a hanner".
     s = s.replace(/(\d+)¾/gu, "$1 a thri chwarter");
     s = s.replace(/(\d+)½/gu, "$1 a hanner");
@@ -339,7 +339,7 @@ export function normalizeWelsh(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}])cilomedr\/awr(?![\p{L}\p{M}])/giu, "cilomedr yr awr");
     s = s.replace(/(?<![\p{L}\p{M}])llath\/metr(?![\p{L}\p{M}])/giu, "llath neu fetr");
 
-    // 12) SIGNS. `+30°C` — the plus was dropped. `&` → *a* (and). A TRUE minus (`-5`) reads "minws"; the
+    // 11) SIGNS. `+30°C` — the plus was dropped. `&` → *a* (and). A TRUE minus (`-5`) reads "minws"; the
     //     corpus's `-\d` are all ranges/scores (6-6, 7-2, 10-60, 35-40) and stay as two bare numbers.
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
@@ -362,7 +362,7 @@ export function normalizeWelsh(input: string): string {
     s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 yn fwy na $2");
     s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 gwaith $2");
 
-    // 13) INITIALISMS, LAST of the letter rules: it must run after the era markers (else C.C. → *ec.
+    // 12) INITIALISMS, LAST of the letter rules: it must run after the era markers (else C.C. → *ec.
     //     ec.*) and after the dotted-capital rule.
     s = normalizeInitialisms(s);
 

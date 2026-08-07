@@ -87,7 +87,7 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 // every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
-// #562 symbol normalization — Zulu: loan plurals (amaphesenti, amadola, amakhilomitha).
+// symbol normalization — Zulu: loan plurals (amaphesenti, amadola, amakhilomitha).
 //
 // EVERY NOUN HERE IS POSTPOSED, which is the tier's default and is right for Zulu for a non-obvious
 // reason: the corpus writes a measure noun BEFORE its numeral (`amakhilomitha angu-1,600`), but the
@@ -108,7 +108,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 // NO `rateDenominators`/`unitPer`: Zulu's rate is ONE agglutinated word (nga- + ihora → `ngehora`, ×6)
 // and this tier emits a rate as four tokens, so the rate is handled in normalize.ts. See the note there.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
     // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
     // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
     multiply: { times: "kuphindwe ngo-" },

@@ -110,7 +110,7 @@ function number(digits: string): string {
 }
 
 /**
- * #562 symbol normalization — Ukrainian: CYRILLIC unit abbreviations (км, not km) and the three-way Slavic
+ * symbol normalization — Ukrainian: CYRILLIC unit abbreviations (км, not km) and the three-way Slavic
  * agreement, which for uk IS Russian's selector (see normalize.ts's header for the evidence).
  *
  * `м` is NOT declared here on purpose: the shared tier's trailing guard is `(?![\p{L}\p{M}])`, and the
@@ -122,7 +122,7 @@ function number(digits: string): string {
  * standard dictionary paradigms, not invented.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -138,7 +138,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // ampersand always joins. ⚠ Both were checked at TOKEN level rather than by substring — a substring
     // count is meaningless for these two, since `і` and `та` occur inside hundreds of ordinary words
     // (3853 and 2290 raw substring hits against 51 and 14 real tokens).
-    // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
+    // ⚠ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
     // word — `готелі типу B&B … змагаються у двох основних речах: ліжко та сніданок` ("bed AND breakfast").
     // That settles the `і` vs `та` question on the corpus's own usage rather than on a preference.
     ampersand: "та",
@@ -199,7 +199,7 @@ export type ForeignPhonemizer = (latin: string) => string;
 
 class UkrainianPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: Ukrainian rewrites (de-grouping, abbreviations, ordinal notation, clock, ranges,
+        // order: Ukrainian rewrites (de-grouping, abbreviations, ordinal notation, clock, ranges,
         // signs) → INITIALISMS (after the abbreviations, so a dotted abbreviation is never spelled out)
         // → the shared symbol tier LAST, because it needs the number still adjacent to its unit or sign.
         // Roman numerals arrive already converted at the registry seam (uk is not in ROMAN_NATIVE), with

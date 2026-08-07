@@ -98,10 +98,10 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  *
  * ⚠ ONE ADDITION BEYOND THE VERBATIM LIFT: the capitals `ÀÈÌÒÙÏËÖÄÜ`. the lowercase half listed ten accented vowels the uppercase half did not — so a
  * CAPITALISED native word failed the inventory test and the fold stripped its diacritic. Harmless while the
@@ -112,12 +112,12 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d{1,3}(?:,
 const NATIVE_CLASS = "[a-zâêîôûŵŷàèìòùïëöäüA-ZÂÊÎÔÛŴŶÀÈÌÒÙÏËÖÄÜ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
-// #562 symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
+// symbol normalization — Welsh: "y cant" after the number (40 y cant, the BBC Cymru convention);
 // nouns stay SINGULAR after numerals in Welsh, so one form suffices (deg doler, not *doleri*).
 // cant/doler/punt/cilogram are referee-attested; milimetr/centimetr are the standard borrowings, read by
 // rule. `m` (metre) added for the corpus's 100m/230m running events and 4892 m.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
@@ -125,7 +125,7 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["y cant"],
     currency: { "$": ["doler"], "£": ["punt"], "¥": ["yen"] },
     units: { km: ["cilomedr"], kg: ["cilogram"], mm: ["milimetr"], cm: ["centimetr"], m: ["metr"] },
-    // #586. `5 km²` read as *pˈɨmp km*, the abbreviation raw in the IPA — see the German note for the shared
+    // `5 km²` reads as *pˈɨmp km*, the abbreviation raw in the IPA — see the German note for the shared
     // cause. Welsh puts the measure word AFTER the unit with a space, which the corpus shows ×10:
     // "2.2 miliwn cilomedr sgwâr o gefnfor"; ciwbig ×3 for the cube. One form each — both are adjectives and
     // do not agree here.
