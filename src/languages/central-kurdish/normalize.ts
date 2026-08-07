@@ -1,42 +1,32 @@
 /**
- * Central Kurdish / Sorani (ckb) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites
- * everything the Kurdish g2p cannot already read into Kurdish words the existing pipeline speaks. Pure
- * text→text, no IPA. Runs inside central-kurdish.ts's `text()`, before the tokenizer.
+ * Central Kurdish / Sorani (ckb) text normalization — the pre-tokenizer pass that rewrites everything the
+ * Kurdish g2p cannot already read into Kurdish words the pipeline speaks. Pure text→text, no IPA. Runs
+ * inside central-kurdish.ts's `text()`, before the tokenizer.
  *
- * MEASURED OVER THE FLEURS ckb_iq CORPUS, column 3 (the ORIGINAL cased text):
- *   ARABIC-INDIC DIGITS ٠-٩  2036   ← the majority digit system, and it read as NOTHING
- *   ASCII digits             1705      decimal point N.N   47      ranges N–N   34
- *   comma-grouped N,NNN        31      colon clock HH:MM   25      percent N %   5
+ * ⚠ THE LANGUAGE'S OWN DIGITS PRODUCE AN EMPTY STRING WITHOUT THE FOLD. `٢٠٢٤` phonemizes to `""`, and so
+ * does `١٠٠٠٠`. The cause is the tokenizer's letter class, `[ؠ-ۿ]` = U+0620–U+06FF, which CONTAINS the
+ * Arabic-Indic digits U+0660–U+0669 — so a digit run is claimed by the LETTER branch and the word
+ * phonemizer has nothing to say about it, while the `(\d+)` branch can never see it. The Arabic-Indic digits
+ * are the MAJORITY system in Kurdish text, so this is most of the numerals in a document.
+ * The fix is `foldNativeDigits` (core/unicode.ts) rather than a local table; its block-base arithmetic covers
+ * the Extended Arabic-Indic range ۰-۹ too.
  *
- * ★ THE HEADLINE: THE LANGUAGE'S OWN DIGITS PRODUCED AN EMPTY STRING. `٢٠٢٤` phonemized to `""`, and so
- * did `١٠٠٠٠`. The cause is the tokenizer's letter class, `[ؠ-ۿ]` = U+0620–U+06FF, which CONTAINS the
- * Arabic-Indic digits U+0660–U+0669 — so a digit run was claimed by the LETTER branch and the word
- * phonemizer had nothing to say about it. The `(\d+)` branch could never see them. This is the same shape
- * as the Burmese defect where a raw block range swallowed that script's own sentence terminators, and it
- * is worse here because the swallowed characters are the MAJORITY digit system: 2036 against 1705 ASCII.
+ * ⚠ KURDISH USES THE ENGLISH NUMERIC CONVENTIONS, unlike its European neighbours in this tree: the comma is
+ * the THOUSANDS separator (`30,000`) and the period is the DECIMAL point (`2.4`). Danish, Romanian, Bulgarian
+ * and Norwegian are all the other way round, and reading `30,000` as a decimal turns thirty thousand into
+ * "thirty point zero zero zero".
  *
- * Folding to ASCII first is the fix, using the shared `foldNativeDigits` (core/unicode.ts) rather than a
- * local table — twelve languages already do this, and the block-base arithmetic there covers the
- * Extended Arabic-Indic range ۰-۹ too, which this corpus does not use but neighbouring orthographies do.
- *
- * ⚠ KURDISH USES THE ENGLISH NUMERIC CONVENTIONS, which is the opposite of the three European languages
- * treated immediately before it. The comma is the THOUSANDS separator (31 instances: `30,000`) and the
- * period is the DECIMAL point (47: `2.4`, `5.0`). Danish, Romanian and Bulgarian are all the other way
- * round, and Norwegian is too. Reading `30,000` as a decimal — which the previous four languages' rule
- * would do — turns thirty thousand into "thirty point zero zero zero".
- *
- * ⚠ `802.11` is here as well, in its fourth consecutive language. The decimal rule is written to accept
- * one or two fractional digits, so the Wi-Fi standard's `.11` is claimed as a decimal — which is
- * harmless, since it is spoken as a number either way — while the three-digit `,000` grouping is not.
+ * ⚠ `802.11` IS A DESIGNATION, NOT A QUANTITY. The decimal rule accepts one or two fractional digits, so the
+ * Wi-Fi standard's `.11` is claimed as a decimal — harmless, since it is spoken as a number either way —
+ * while the three-digit `,000` grouping is not.
  *
  * ORDERING:
- *   · THE DIGIT FOLD IS FIRST. Every rule below counts digits, and none of them would match a native one.
+ *   · THE DIGIT FOLD IS FIRST. Every rule below counts digits, and none would match a native one.
  *   · DE-GROUPING before the decimal rule, or `30,000` is read as a fraction.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
 
-/** Relational and operator signs, read in every position — a dropped sign is inaudible. All probed
- *  through the g2p; `خاڵ` (point) is attested 56 times, `پلە` (degree) 90. */
+/** Relational and operator signs, read in every position — a dropped sign is inaudible. */
 const RELATIONAL: [RegExp, string][] = [
     [/±/gu, " کۆ و لێدەرکراو "],
     [/=/gu, " یەکسانە بە "],
@@ -48,38 +38,35 @@ const RELATIONAL: [RegExp, string][] = [
     [/÷/gu, " دابەش بە "],
 ];
 
-/** Currency sign → the Kurdish word. `دۆلار` is attested 27 times, `یۆرۆ` once. */
+/** Currency sign → the Kurdish word. */
 const CURRENCY: Readonly<Record<string, string>> = {
     "$": "دۆلار", "€": "یۆرۆ", "£": "پاوەند", "¥": "یەن",
 };
 
 export function normalizeCentralKurdish(input: string): string {
-    // 1) FOLD THE NATIVE DIGITS FIRST — see the header. Without this every rule below is blind to 2036 of
-    //    the corpus's 3741 digits, and the engine reads them as an empty string.
+    // 1) FOLD THE NATIVE DIGITS FIRST — see the header. Without this every rule below is blind to the
+    //    majority of the text's digits, and the engine reads them as an empty string.
     let t = foldNativeDigits(input);
 
-    // 2) COMMA-GROUPED THOUSANDS (31), before the decimal rule. Kurdish follows the ENGLISH convention,
-    //    so the comma is a GROUPING mark here and reading it as a decimal would turn `30,000` into
-    //    "thirty point zero zero zero".
+    // 2) COMMA-GROUPED THOUSANDS, before the decimal rule. Kurdish follows the ENGLISH convention, so the
+    //    comma is a GROUPING mark and reading it as a decimal turns `30,000` into "thirty point zero zero
+    //    zero".
     let prev: string;
     do {
         prev = t;
         t = t.replace(/(\d)[,،](\d{3})(?!\d)/gu, "$1$2");
     } while (t !== prev);
 
-    // 2b) LATIN UNIT ALIASES AND THEIR POWERS. and this needs NO NEW VOCABULARY — only a second key onto a word the corpus already
-    //     attests, which is the same move ru, uk and kk made. `5 km` was reaching the g2p as the cluster
-    //     [ˈʊkm] while `5 کم` read correctly: same unit, one spelling handled and the other not. The Latin
-    //     run is rare here (`4Ghz`, `1a`, `1b` — no bare `m`), so unlike the Arabic-script `م` a Latin `m`
-    //     key is safe, and `مەتر` ×21 / `میلیمەتر` ×4 are the corpus's own words for it.
-    //     THIS RUNS BEFORE THE DECIMAL RULE (3), and that ordering is FORCED rather than tidy: step 3
-    //     replaces the dot with the WORD خاڵ, so by 6b a version designation is already `802 خاڵ 1 1 m`
-    //     and the `NOT_VERSION` guard below has nothing left to recognise — `802.11m` read as metres.
-    //     After DE-GROUPING (2) though, or `19،500 km` matches only its last three digits.
-    //     THE EXPONENT ARM MUST COME FIRST, or the plain rule below consumes the unit and strands the `²`.
-    //     Both measure words are the corpus's own and both FOLLOW the noun:
-    //       دووجا ×4  "پارکەکە 19500 کم دووجا دایپۆشیوە"       (squared)
-    //       سێجا  ×3  "لونۆ 120-160 مەتر سێجا سوتەمەنی بار کرد" (cubed)
+    // 2b) LATIN UNIT ALIASES AND THEIR POWERS. No new vocabulary — a second KEY onto the words step 6b
+    //     already declares, because `5 km` reaches the g2p as the cluster [ˈʊkm] while `5 کم` reads correctly.
+    //     A Latin `m` key is safe here, unlike the Arabic-script `م`, because the Latin runs in Kurdish text
+    //     are designations (`4Ghz`, `1a`, `1b`) and never a bare `m`.
+    //     ⚠ THIS RUNS BEFORE THE DECIMAL RULE (3), and the ordering is FORCED rather than tidy: step 3
+    //     replaces the dot with the WORD خاڵ, so a rule placed after it sees `802 خاڵ 1 1 m` and the
+    //     `NOT_VERSION` guard below has no dot left to recognise — `802.11m` reads as metres.
+    //     ⚠ BUT AFTER DE-GROUPING (2), or `19،500 km` matches only its last three digits.
+    //     ⚠ THE EXPONENT ARM MUST COME FIRST, or the plain rule below consumes the unit and strands the `²`.
+    //     Both measure words FOLLOW the noun: دووجا (squared), سێجا (cubed).
     const CKB_UNIT: Readonly<Record<string, string>> = {
         km: "کیلۆمەتر", cm: "سانتیمەتر", mm: "میلیمەتر", m: "مەتر",
     };
@@ -90,12 +77,10 @@ export function normalizeCentralKurdish(input: string): string {
     t = t.replace(new RegExp(`${CKB_NUM}\\s*(${ckbUnits})(?:\\s?([²³])|([23])(?![\\d\\p{L}]))`, "giu"),
         (_m, n: string, u: string, sup: string | undefined, ascii: string | undefined) =>
             `${n} ${CKB_UNIT[u.toLowerCase()]!} ${(sup ?? ascii) === "³" || (sup ?? ascii) === "3" ? "سێجا" : "دووجا"}`);
-    //     RATES BEFORE the plain arm, or that arm consumes the numerator and strands the slash — which left
-    //     `120 km/h` reading the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and `133 m/s` as [ˈɛs]. The
-    //     construction is this corpus's own: "480 کم لە کاتژمێر (133 مەتر/چرکە؛ 300میل/کاتژمێر)" — `لە` is the
-    //     "per", `کاتژمێر` the hour, `چرکە` the second. The corpus also writes the PERSO-ARABIC denominator
-    //     against a slash (`مەتر/چرکە`), which read with the slash silently dropped, so that shape is claimed
-    //     too.
+    //     ⚠ RATES BEFORE THE PLAIN ARM, or that arm consumes the numerator and strands the slash, leaving
+    //     `120 km/h` to read the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ] and `133 m/s` as [ˈɛs].
+    //     `لە` is the "per", `کاتژمێر` the hour, `چرکە` the second. A PERSO-ARABIC denominator against a slash
+    //     (`مەتر/چرکە`) is claimed too — otherwise the slash is silently dropped.
     const CKB_PER: Readonly<Record<string, string>> = {
         h: "کاتژمێر", s: "چرکە", "کاتژمێر": "کاتژمێر", "چرکە": "چرکە",
     };
@@ -104,10 +89,10 @@ export function normalizeCentralKurdish(input: string): string {
         (_m, n: string, u: string, d: string) =>
             `${n} ${CKB_UNIT[u.toLowerCase()]!} لە ${CKB_PER[d.toLowerCase()]!}`);
     //     …and the PERSO-ARABIC numerator, which the corpus writes as `کم/کاتژمێر` and `مەتر/چرکە`.
-    //     ⚠ THE ABBREVIATION MUST BE ACCEPTED HERE, NOT JUST THE WORD. This block runs at step 2b — lifted
-    //     above the decimal rule so the version guard keeps its dot (trap 39 (a local rule that depends on a character…)) — while the Perso-Arabic unit
-    //     expansion is step 6b, further DOWN the file. So at this point `کم` has not become `کیلۆمەتر` yet, and
-    //     an arm matching only the spelled forms silently missed the corpus's own `کم/کاتژمێر`.
+    //     ⚠ THE ABBREVIATION MUST BE ACCEPTED HERE, NOT JUST THE SPELLED WORD. This block sits at step 2b,
+    //     above the decimal rule, while the Perso-Arabic unit expansion is step 6b further DOWN — so at this
+    //     point `کم` has not become `کیلۆمەتر` yet, and an arm matching only the spelled forms silently misses
+    //     `کم/کاتژمێر`.
     const CKB_NUMER: Readonly<Record<string, string>> = {
         "کم": "کیلۆمەتر", "کیلۆمەتر": "کیلۆمەتر", "مەتر": "مەتر", "سم": "سانتیمەتر",
     };

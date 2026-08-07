@@ -3,36 +3,23 @@
  * Bulgarian g2p cannot already read into Bulgarian words the existing pipeline speaks. Pure text→text, no
  * IPA. Runs inside bulgarian.ts's `text()`, before the tokenizer.
  *
- * MEASURED OVER THE FLEURS bg_bg CORPUS, column 3 (the ORIGINAL cased text):
- *   `N г.` year          265   ← by far the largest defect, and specific to this language
- *   space-grouped N NNN   53      Cyrillic units `N км`  50      colon clock HH:MM  41
- *   decimal comma N,N     39      percent  N %           18      decade `N-те`      20
- *   ranges N–N             9      km²                     4      degrees  N °        2
+ * ⚠ `N г.` IS THE DOMINANT PATTERN, and it is specific to this language. `1767 г.` is the ordinary way
+ * Bulgarian writes a year, and unhandled it reads as the numeral, then the LETTER `г` as [k], then a SENTENCE
+ * BREAK from the abbreviation dot. It expands to `година`.
  *
- * Bulgarian's engine is rule-based, so every word below was probed through the g2p rather than looked up:
- * `година` → [ɡɔdina], `процента` → [prɔt͡sɛnta], `квадратни километра` → [kvadratni kiɫɔmɛtra].
+ * ⚠ NO ORDINAL-DOT RULE. Bulgarian does not write the Germanic ordinal dot at all — no `N.` is followed by a
+ * lowercase word — so the rule that is largest in Norwegian and Danish must not exist here. Porting a
+ * neighbour's biggest rule would fire on sentence boundaries.
  *
- * ★ `N г.` IS THE HEADLINE, and nothing in the previous four languages resembles it. `1767 г.` is the
- * ordinary way Bulgarian writes a year, and it was reading as the numeral, then the LETTER `г` as [k],
- * then a SENTENCE BREAK from the abbreviation dot. 265 instances — more than every other numeric pattern
- * in the corpus combined. It expands to `година`.
+ * ⚠ UNITS ARE WRITTEN IN BOTH SCRIPTS, mostly Cyrillic — `км`, `кг`, `см`, `м` — where Norwegian, Danish and
+ * Romanian all use Latin `km`. A Latin-only unit table therefore misses the bulk of them, and `км2` reaches the
+ * output as the Latin letters "km" plus the numeral "две". Both key sets are declared; see `UNIT`.
  *
- * ★ NO ORDINAL-DOT RULE, for the same measured reason as Romanian: of the 54 `N.` shapes, ZERO are
- * followed by a lowercase word and 2 by a capital. Bulgarian does not write the Germanic ordinal dot, so
- * the rule that is largest in Norwegian and Danish must not exist here either. That is now two of five
- * languages in this sequence where porting the previous one's biggest rule would have fired on sentence
- * boundaries.
+ * ⚠ THE COUNT FORM IS THE COUNTING PLURAL. Bulgarian says `18 процента`, `50 километра`, `20 градуса` — the
+ * form after a numeral, not the citation singular (`процент`, `километър`, `градус`).
  *
- * ⚠ UNITS ARE WRITTEN IN CYRILLIC — `км` (50), `кг`, `см`, `м` — not the Latin `km` that Norwegian,
- * Danish and Romanian all use. A Latin unit table matches nothing here. `км2` was reaching the output as
- * the Latin letters "km" plus the numeral "две".
- *
- * ⚠ THE COUNT FORM IS THE COUNTING PLURAL. Bulgarian says `18 процента`, `50 километра`, `20 градуса` —
- * the form after a numeral, not the citation singular (`процент`, `километър`, `градус`). Measured in the
- * corpus: every `N %` written out uses `процента` (8/8).
- *
- * ⚠ NO PERIOD RULES AT ALL. There is no period-grouped thousands form (0 instances, unlike Danish's 99
- * and Romanian's 56), and the 15 `HH.MM` shapes are `802.11a/b/g/n` plus sports times (`4:41.30`).
+ * ⚠ NO PERIOD RULES AT ALL. Bulgarian has no period-grouped thousands form, unlike Danish and Romanian, and
+ * the `HH.MM` shapes that do occur are `802.11a/b/g/n` plus sports times (`4:41.30`).
  *
  * ORDERING, each constraint a bug that happened:
  *   · THE YEAR ABBREVIATION consumes its dot BEFORE the dot can become a sentence end.
@@ -44,19 +31,13 @@
 /**
  * Unit abbreviations → the COUNTING form of the word. Longest first.
  *
- * BOTH SCRIPTS, and the header's claim that "a Latin unit table matches nothing here" is half right.
- * Cyrillic is what the corpus mostly writes — км ×50, см ×5, кг ×4, мм ×3, all after a numeral — but it also
- * writes LATIN abbreviations 14 times, every one of them after a numeral:
+ * ⚠ BOTH SCRIPTS. Cyrillic is the bulk of it, but Bulgarian also writes LATIN abbreviations after a numeral
+ * ("Стандартният 35 mm филм (негатив 36 на 24 mm)"), and those reach the output as the raw letters. The Latin
+ * keys map to the identical words, so this is an alias list rather than new data.
  *
- *   "Стандартният 35 mm филм (негатив 36 на 24 mm)"     mm ×12 · cm ×2
- *
- * Those were reaching the output as the raw letters, the same `ˈʊkm` shape found fleet-wide. The Latin keys map
- * to the identical words, so this is an alias list rather than new data — exactly the gap Kazakh had, where the
- * words were right and only the Cyrillic spelling of the KEY was declared.
- *
- * `м` and `г` get NO Latin alias on purpose. A one-letter key is the documented `Il-76s` hazard, and in Latin
- * it would also collide with `m`/`g` inside ordinary Bulgarian-transliterated text; the Cyrillic one-letter
- * keys are safe because a Latin `m` cannot appear inside a Cyrillic word.
+ * ⚠ `м` AND `г` GET NO LATIN ALIAS, on purpose. A one-letter Latin key would collide with `m`/`g` inside
+ * ordinary Bulgarian-transliterated text; the Cyrillic one-letter keys are safe because a Latin `m` cannot
+ * appear inside a Cyrillic word.
  */
 const UNITS: [string, string][] = [
     ["км", "километра"],
@@ -76,12 +57,10 @@ const UNITS: [string, string][] = [
 const SQUARED: [RegExp, string][] = [
     // ⚠ BOTH boundaries are `\p{L}` lookarounds, never `\b`. `\b` is defined on ASCII word characters, so
     // it finds no boundary next to a CYRILLIC letter and the rule silently never fires — `км2` stayed
-    // `км2`. This is the third instance of the same trap in two languages (the Romanian rate rule ended
-    // `or[ăa]\b`, and the trailing guard in step 8 below is written correctly for exactly this reason).
-    // In a non-ASCII orthography `\b` is never the right boundary.
-    // The Latin `km` is accepted here for the same reason it is in `UNITS`: once the plain unit gained
-    // a Latin alias, `50 km2` read "километра ДВЕ" — the unit substituted and the exponent left to be spoken
-    // as a bare numeral, which is worse than the raw `km` it replaced. The pair must move together.
+    // `км2`. ⚠ IN A NON-ASCII ORTHOGRAPHY `\b` IS NEVER THE RIGHT BOUNDARY.
+    // ⚠ THE LATIN KEY AND ITS EXPONENT MUST MOVE TOGETHER. Give the plain unit a Latin alias without this
+    // one and `50 km2` reads "километра ДВЕ" — the unit substituted and the exponent left to be spoken as a
+    // bare numeral, which is worse than the raw `km` it replaced.
     // Bulgarian's own one-letter `м` keeps no Latin alias, so `m2` is deliberately not matched.
     [/(?<!\p{L})(?:км|km)\s*[²2](?!\d)/giu, "квадратни километра"],
     [/(?<!\p{L})м\s*[²2](?!\d)/giu, "квадратни метра"],
@@ -89,13 +68,12 @@ const SQUARED: [RegExp, string][] = [
     [/(?<!\p{L})м\s*[³3](?!\d)/giu, "кубични метра"],
 ];
 
-/** Currency sign → the counting form. долара 12, евро 39, лева 6 in the corpus. */
+/** Currency sign → the counting form. */
 const CURRENCY: Readonly<Record<string, string>> = {
     "$": "долара", "€": "евро", "£": "паунда", "¥": "йени",
 };
 
-/** Relational and operator signs, read in every position — a dropped sign is inaudible. `минус` is
- *  attested 4 times; the rest were probed through the g2p. */
+/** Relational and operator signs, read in every position — a dropped sign is inaudible. */
 const RELATIONAL: [RegExp, string][] = [
     [/±/gu, " плюс минус "],
     [/≈/gu, " приблизително равно на "],
@@ -113,78 +91,73 @@ const RELATIONAL: [RegExp, string][] = [
 export function normalizeBulgarian(input: string): string {
     let t = input;
 
-    // 1) THE YEAR ABBREVIATION `N г.` (265) — FIRST, so the abbreviation dot never reaches
-    //    clausePunctuation as a sentence end. The bare `г` was also being read as a LETTER, [k].
-    //    Requires a preceding number, because `г.` elsewhere is `господин` and not a year.
+    // 1) THE YEAR ABBREVIATION `N г.` — FIRST, so the abbreviation dot never reaches clausePunctuation as a
+    //    sentence end. The bare `г` is otherwise read as a LETTER, [k].
+    //    ⚠ REQUIRES A PRECEDING NUMBER, because `г.` elsewhere is `господин` and not a year.
     t = t.replace(/(\d)\s*г\./gu, "$1 година");
 
-    // 2) ERA MARKER `пр.н.е.` (17) — "преди новата ера", before the common era. Must run with the year
-    //    rule and before anything else claims a dot: it carries THREE abbreviation dots, each of which
-    //    was becoming a sentence break, so `323 г. пр.н.е.` fragmented into four clauses.
+    // 2) ERA MARKER `пр.н.е.` — "преди новата ера", before the common era. Must run with the year rule and
+    //    before anything else claims a dot: it carries THREE abbreviation dots, each becoming a sentence
+    //    break, so `323 г. пр.н.е.` fragments into four clauses.
     t = t.replace(/пр\.\s*н\.\s*е\./giu, "преди новата ера");
     t = t.replace(/сл\.\s*н\.\s*е\./giu, "след новата ера");
 
-    // 3) RATES — `мили/час` (2) and the abbreviated `/ч` (24). Spoken with `в` ("per"), attested 15
-    //    times as `в час`. Before the unit rule, or the numerator is consumed and the slash left bare.
+    // 3) RATES — `мили/час` and the abbreviated `/ч`, spoken with `в` ("per"). Before the unit rule, or the
+    //    numerator is consumed and the slash left bare.
     t = t.replace(/(?<!\p{L})км\s*\/\s*ч(?!\p{L})/giu, "километра в час");
     t = t.replace(/(\p{L}+)\s*\/\s*час(?!\p{L})/giu, "$1 в час");
-    //    THE SECOND, which this rule did not cover: the corpus's `133 м/сек` read the denominator as the bare
-    //    syllable [sɛk] and `м/с` as [s]. `в секунда` ×2 ("1,5 километра в секунда"), the same construction.
+    //    The SECOND-based rate is the same construction with `в секунда`; without it `133 м/сек` reads the
+    //    denominator as the bare syllable [sɛk] and `м/с` as [s].
     t = t.replace(/(?<!\p{L})м\s*\/\s*(?:сек|с)(?!\p{L})/giu, "метра в секунда");
-    //    AND THE LATIN ABBREVIATIONS. Cyrillic is what this corpus writes and the header is right about that,
-    //    but a foreign-sourced `120 km/h` reached the g2p with the denominator as the ENGLISH LETTER NAME
-    //    [ˈeᶦt͡ʃ] — the same reason ru, uk and kk each declare Latin aliases beside their Cyrillic keys. The
-    //    plain Latin `km` already read correctly here; only the rate did not.
+    //    AND THE LATIN ABBREVIATIONS, for the reason `UNIT` gives: a foreign-sourced `120 km/h` reaches the
+    //    g2p with the denominator as the ENGLISH LETTER NAME [ˈeᶦt͡ʃ]. The plain Latin `km` already read
+    //    correctly; only the rate did not.
     t = t.replace(/(?<!\p{L})km\s*\/\s*h(?!\p{L})/giu, "километра в час");
     t = t.replace(/(?<!\p{L})m\s*\/\s*s(?!\p{L})/giu, "метра в секунда");
 
-    // 4) SPACE-GROUPED THOUSANDS (53). A space is a token boundary, so `5 000` read as "пет нула" —
-    //    "five zero". Includes NBSP and the narrow NBSP.
+    // 4) SPACE-GROUPED THOUSANDS. ⚠ A space is a token boundary, so `5 000` reads as "пет нула" — "five
+    //    zero". Includes NBSP and the narrow NBSP.
     let prev: string;
     do {
         prev = t;
         t = t.replace(/(\d)[   ](\d{3})(?!\d)/gu, "$1$2");
     } while (t !== prev);
 
-    // 5) DECIMAL COMMA (39). The comma is clause punctuation, so `12,5` read as "дванайсет , пет" — a
-    //    PAUSE inside a number. Bulgarian reads the separator as `цяло и` ("whole and"), not a bare
-    //    "comma"; the fractional part follows digit by digit.
+    // 5) DECIMAL COMMA. The comma is clause punctuation, so `12,5` reads as "дванайсет , пет" — a PAUSE
+    //    inside a number. ⚠ Bulgarian reads the separator as `цяло и` ("whole and"), not as a bare "comma";
+    //    the fractional part follows digit by digit.
     t = t.replace(/(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} цяло и ${[...frac].join(" ")}`);
 
-    // 6) CLOCK, COLON FORM ONLY (41). The colon was reaching clausePunctuation as a COMMA PAUSE, so
-    //    `22:00` read as "двайсет и две , нула". There is no period-clock form — see the header.
+    // 6) CLOCK, COLON FORM ONLY. The colon reaches clausePunctuation as a COMMA PAUSE, so `22:00` reads as
+    //    "двайсет и две , нула". There is no period-clock form — see the header.
     t = t.replace(/(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
 
-    // 6b) НОМЕР. The NUMERO SIGN was dropped outright — "космонавт № 11" read as *космонавт единадесет*, the
-    //     sign silently gone. `номер` ×5 in this corpus (plus `номера` ×1), and ru and uk already read the sign
-    //     exactly this way, preposed before the figure. THIS IS THE CHARACTER DELIBERATELY EXCLUDED FROM THE
-    //     ℃ FOLD: NFKC maps № to the Latin "No", which a Bulgarian g2p would read as an English word — a
-    //     compatibility character can need a WORD rather than a fold, which is why it was left for here.
+    // 6b) НОМЕР. The NUMERO SIGN is dropped outright — "космонавт № 11" reads as *космонавт единадесет*.
+    //     ⚠ THIS CHARACTER IS DELIBERATELY EXCLUDED FROM THE ℃ FOLD: NFKC maps № to the Latin "No", which a
+    //     Bulgarian g2p reads as an English word. A compatibility character can need a WORD rather than a fold.
     t = t.replace(/№\s?(?=\d)/gu, "номер ");
 
-    // 7) PERCENT (18) → the counting plural `процента`, which is what the corpus writes out (8/8).
+    // 7) PERCENT → the counting plural `процента`; see the header on count forms.
     t = t.replace(/(\d+)\s*%/gu, "$1 процента");
 
-    // 8) DEGREES (2), BEFORE the unit rules — the C of `20 °C` was read as the English letter name.
+    // 8) DEGREES, BEFORE the unit rules — the C of `20 °C` is otherwise read as the English letter name.
     t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
     t = t.replace(/(\d)\s*°\s*C(?!\p{L})/giu, "$1 градуса по Целзий");
     t = t.replace(/(\d)\s*°\s*F(?!\p{L})/giu, "$1 градуса по Фаренхайт");
     t = t.replace(/(\d)\s*°/gu, "$1 градуса");
 
-    // 9) SQUARED / CUBED UNITS (4), BEFORE the plain unit rule — otherwise `км` is consumed first and the
-    //    exponent is left stranded. Accepts both the superscript and the ASCII digit, since the corpus
-    //    writes `км2`.
+    // 9) SQUARED / CUBED UNITS, ⚠ BEFORE the plain unit rule — otherwise `км` is consumed first and the
+    //    exponent is left stranded. Accepts both the superscript and the ASCII digit (`км2`).
     for (const [re, word] of SQUARED) t = t.replace(re, word);
 
-    // 10) CYRILLIC UNIT ABBREVIATIONS after a number (50 for `км` alone). The trailing guard is
-    //    `(?!\p{L})` and not `\b`: `\b` is defined on ASCII word characters and finds no boundary after a
-    //    Cyrillic letter, so the rule would silently never fire — the trap that bit the Romanian rate
-    //    rule one language earlier.
+    // 10) CYRILLIC UNIT ABBREVIATIONS after a number. ⚠ The trailing guard is `(?!\p{L})` and NOT `\b`:
+    //    `\b` is defined on ASCII word characters and finds no boundary after a Cyrillic letter, so the rule
+    //    would silently never fire.
     for (const [abbr, word] of UNITS)
         t = t.replace(new RegExp(`(\\d)\\s*${abbr}(?!\\p{L})`, "gu"), `$1 ${word}`);
 
-    // 11) RANGES (9). Spoken `до`.
+    // 11) RANGES, spoken `до`.
     t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 до $2");
 
     // 12) CURRENCY, both placements.

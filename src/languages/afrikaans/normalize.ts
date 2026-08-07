@@ -1,49 +1,21 @@
 /**
- * Afrikaans (af) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Afrikaans (af) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the 1,236 unique cased af_za FLEURS utterances (column 3):
- *   ordinals `Ne/Nde/Nste` ×31   (11de Hussars, 15de eeu, 9e Augustus, 190ste, 60ste van die seisoen)
- *   comma-grouped thousands ×21  (1,000 · 17,500 · 9,000 · 100,000 · 2,220 · 104,500)
- *   DOT decimals ×17             (12.8 km, 2.3 miljoen, 6.34 duim, $2.3 biljoen, 3.50-meter)
- *   space-grouped thousands ×…   (3 000 myl, 55 000 vate, 3 850 km²)
- *   clocks ×12                   (11:20, 10:00vm, 8:30 n.m., 15.00 GUT, 0230 UTC, + racing times)
- *   rates ×6                     (480 km/h, 133 m/s, 300 mph, 40 m.p.u, 600Mbit/s)
- *   currency ×6 ($ £ ¥, incl. U$/VS$ prefix forms) · percent ×4 · degrees ×2 · &amp; ×2
- *   era markers ×7 (v.C./vC/V.C. = voor Christus, d.i. = dit is) · dotted ×13 (V.S., n.m., m.p.u, Dr.)
- *   initialisms ×94 · letter names ×26 (A(H5N1), U-bote)
+ * ⚠ AFRIKAANS USES THE ENGLISH SEPARATOR CONVENTION, which is the OPPOSITE of its sister Dutch: the PERIOD is
+ * the decimal point (`12.8 km`, `$2.3 biljoen`) and the COMMA groups thousands (`17,500 myl`). Dutch is
+ * dot-thousands / comma-decimal. Each language has to be measured on its own text, not inherited from the
+ * neighbour it most resembles.
  *
- * THE SEPARATORS — AFRIKAANS IN THIS CORPUS USES THE ENGLISH CONVENTION. FLEURS af_za is a translation of
- * the English FLEURS set, so it inherits English numerals: the PERIOD is the decimal point (12.8 km, $2.3
- * biljoen) and the COMMA groups thousands (17,500 myl, 100,000 mense). This is the OPPOSITE of Afrikaans's
- * sister Dutch (dot-thousands / comma-decimal) — each language measured on its own corpus. The mined
- * hard-set is explicit: "Sewe punte agter, is Johnson tweede met 2,243" is a score, and "wat teen 1.5
- * kilometer per sekonde" is a decimal.
+ * ⚠ THE ORDINAL IS A NUMERAL PLUS A LETTER SUFFIX, exactly as in Dutch: `11de`, `15de`, `9e`, `60ste`,
+ * `190ste`. That makes it UNAMBIGUOUS, so no bare-`N.` detector is needed. The words are the cardinal with the
+ * Dutch-style ending: below 20 a small table (eerste, tweede, derde, agtste, neënde …), from 20 up `-ste`,
+ * ⚠ with a sub-20 TAIL keeping its own ordinal — 190's remainder is 90, which is not sub-20, but 125's is.
  *
- * THE ORDINAL. Afrikaans writes the ordinal as a numeral plus a LETTER suffix, exactly as Dutch does:
- * `11de`, `15de`, `9e`, `60ste`, `190ste`. Unambiguous — no bare-`N.` detector needed (see the Dutch
- * file's rationale). The words are the cardinal with the Dutch-style ending: below 20 a small table
- * (eerste, tweede, derde, agtste, neënde, elfde, vyftiende …), from 20 up `-ste` (twintigste,
- * honderd en negentigste) with a sub-20 tail keeping its own ordinal (190's remainder 90 is not sub-20).
- *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `11de Hussars`  → `ɛlf də ɦœsars`        ordinal read as the cardinal plus the bare suffix as a word
- *   `17,500 myl`    → `siəvəntin , fəif ɦɔndərt məil`   comma grouping → a COMMA PAUSE
- *   `12.8 km`       → `tvɑːlf . aχt km`      the decimal point → a PHRASE BREAK
- *   `3 000 myl`     → `dri nœl məil`          space grouping → "drie nul"
- *   `10:00vm`       → `tin , nœl fm`          the colon → a pause, and `vm` read as a word
- *   `8:30 n.m.`     → `aχt , dɛrtəχ n . m .`  the PM marker letter-spelled
- *   `40 m.p.u`      → `fiərtəχ m . p . yː`    mph written the Afrikaans way — dotted, letter-spelled
- *   `93%`           → `dri ɛn niəχəntəχ`      percent dropped
- *   `$2.3 biljoen`  → `tviə . dri bəljun`     currency sign dropped, decimal broken
- *   `1000 V.C.`     → `dœysənt f . s .`       era marker letter-spelled
- *   `B&amp;B`       → `p p`                   the HTML entity is not even `&`
- *   `Wêreld Oorlog II` → `… uərlɔχ tviə`      regnal Roman read as a cardinal digit
- *
- * WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
- * the word path stresses them; the de-grouped thousands, the comma-grouping and the dot decimal stay DIGITS
- * so the shared symbol tier can still see the number adjacent to its unit/sign — the tier is composed AFTER
- * this pass in afrikaans.ts, and the TOKEN swallows the separators (see afrikaans.ts).
+ * ⚠ WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
+ * the word path stresses them; the de-grouped thousands and the dot decimal stay DIGITS so the shared symbol
+ * tier can still see the number adjacent to its unit or sign. The tier is composed AFTER this pass in
+ * afrikaans.ts, and the TOKEN swallows the separators.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";

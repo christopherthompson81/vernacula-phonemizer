@@ -1,49 +1,21 @@
 /**
- * Czech (cs) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Czech (cs) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the cs_cz FLEURS corpus (1,947 unique cased utterances, column 3). Every count below was
- * taken from that column, and every rule here exists because the engine produced something wrong on it:
+ * ⚠ THE `N.` ORDINAL NOTATION IS THE DOMINANT PATTERN, and it collides with the sentence break: `v 16. století`
+ * reads as a CARDINAL plus a spurious phrase break, [v ʃɛstnaːt͡st . stolɛt͡siː]. See step 8.
  *
- *   ordinal `N.` notation ×72 mid-sentence (see step 8) — read as a cardinal PLUS a spurious phrase break:
- *       `v 16. století` → [v ʃɛstnaːt͡st . stolɛt͡siː], `70. let` → [sɛdm̩dɛsaːt . lɛt].
- *   clock times ×19 — the colon is clause punctuation here, so `8:46` read as [osm , t͡ʃtɪr̝ɪt͡sɛtʃɛst]
- *       (a phrase break inside the time) and `12:00` as "dvanáct , nula".
- *   comma decimals ×16 (2,3 miliardy, 7,7 kg, 14,7 miliardy …) — the comma was a phrase break.
- *       (Handled in czech.ts's TOKEN, not here — see the note at step 0.)
- *   space-grouped thousands ×5 (6 387 km, 3 850 km², 10 000 př. n. l. …) — the number token cannot span
- *       a space, so `6 387` read as "šest tři sta osmdesát sedm".
- *   era markers ×10 (`př. n. l.` ×5, `př.n.l` ×2, `n.l.` ×3) — every interior dot a phrase break, and the
- *       letters read as a bogus word: `př. n. l.` → [pr̝̊ . n . l .].
- *   dotted abbreviations ×~24 (tzv. ×4, např. ×4, atd. ×4, apod. ×2, aj./tzn./tj. ×1, Dr. ×3, Jr. ×3,
- *       Sv./St. ×2 each, Inc./Co. ×1, mil. ×1) — every one read the letters as a bogus word AND left the
- *       dot as a phrase break: `tzv.` → [tsf .], `Dr.` → [dr̩ .].
- *   all-caps initialisms ×~150 (USA ×13, OSN ×6, UNESCO/FBI/DNA/CEP/AOL ×3 …) — USA → [ˈusa], OSN → [osən],
- *       FBI → [vbɪ], DVD → [tft], GMT → [ɡmt], UTC → [ˈutt͡s].
- *   version dots ×5 (`802.11n` ×3, `2.4Ghz`/`5.0Ghz`, `1.1` figure) — the interior dot was a phrase break.
- *   date `N. N.` ×2 (`24. 8. do 5. 9. 2021`) — read as two bare ordinals with a break inside.
- *   numeric ranges ×~6 (1418–1450, 35–40, 1000–1300, 1995-96 …) — the dash was DROPPED, fusing the
- *       endpoints into one run of words.
- *   rate units km/h ×8 and mil/h ×2 — the `/h` read as the letter [x]; km² ×2 — the ² was dropped and km
- *       read as letters. (km² and km/h are now composed by the SHARED tier — see czech.ts.)
- *   degrees ×3 (35°, 30 °C, 30°) — the sign was dropped outright.
- *   `×` ×2 (6 × 6 cm, 56 × 56 mm), `+` ×1 (UTC +1), `1/5` ×1 — signs dropped outright.
- *   `pH` ×3 — read as the cluster [px]; `Ghz` ×2 — read as [ks] + [x].
- *   Roman numerals ×3 — ALL regnal proper names (Lealofi III, Alžběty II., Ludvík XVI.), which the shared
- *       pass converts to CARDINAL digits ([tr̝̊ɪ], [dva]) — see the regnal rule at step 12.
+ * ⚠ COUNT AGREEMENT IS THREE-WAY (1 hodina / 2–4 hodiny / 5+ hodin), keyed on the numeral's final digits like
+ * the other Slavic engines — but NOT on Russian's `slavicCountForm`. A compound ending in 1 is *dvacet jedna
+ * hodin* (genitive plural), never the singular *dvacet jedna hodina*, so `csCountForm` below is the
+ * Polish-style selector. That ending-in-1 case is the selectors' only divergence.
  *
- * COUNT AGREEMENT. Czech is three-way (1 hodina / 2–4 hodiny / 5+ hodin), keyed on the numeral's final
- * digits like the other Slavic engines — but NOT Russian's `slavicCountForm`: a compound ending in 1 is
- * *dvacet jedna hodin* (genitive plural), never the singular *dvacet jedna hodina*. `csCountForm` below is
- * the Polish-style selector; the shared symbol tier in czech.ts was already using `slavicCountForm`, whose
- * only divergence is exactly that ending-in-1 case, so the wiring now agrees everywhere.
- *
- * CASE, the standing limitation. Czech ordinals inflect for case, and the surrounding case is not
- * recoverable from a number alone. Where the FOLLOWING WORD is unambiguous (století → genitive, and
- * locative after the adjacent preposition v/ve; let/letech → genitive/locative plural; místě → locative;
- * měsíc names → genitive; červenci → dative; hodině → locative; místo → neuter) the rule reads it and
- * inflects; elsewhere it emits the masculine nominative. That is the same trade romanOrdinals.ts
- * documents: the right lexeme with the wrong ending beats the wrong word entirely.
+ * ⚠ CASE IS THE STANDING LIMITATION. Czech ordinals inflect for case, and the surrounding case is not
+ * recoverable from a number alone. Where the FOLLOWING WORD is unambiguous (století → genitive, and locative
+ * after an adjacent v/ve; let/letech → genitive/locative plural; místě → locative; month names → genitive;
+ * červenci → dative; hodině → locative) the rule reads it and inflects; elsewhere it emits the masculine
+ * nominative. Same trade romanOrdinals.ts documents: the right lexeme with the wrong ending beats the wrong
+ * word entirely.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -53,10 +25,9 @@ import { numberToWords } from "./numbers.ts";
 const GROUP_SPACE = "  ";
 
 /**
- * Czech count-form selector for the LOCAL rules below (and czech.ts's shared symbol tier). Same final-digit
- * shape as Polish's: 1 → 0 (sg), 2–4 → 1 (paucal, but never 12–14), else 2 (genitive plural). The
- * divergence from `slavicCountForm` is only the ending-in-1 compound (21 → *dvacet jedna hodin*, not the
- * Russian singular).
+ * Czech count-form selector for the LOCAL rules below and for czech.ts's shared symbol tier. Same final-digit
+ * shape as Polish's: 1 → 0 (sg), 2–4 → 1 (paucal, but never 12–14), else 2 (genitive plural). ⚠ The divergence
+ * from `slavicCountForm` is only the ending-in-1 compound — see the header.
  */
 export const csCountForm = (n: number): number => {
     if (n === 1) return 0;
@@ -72,11 +43,10 @@ function counted(n: number, forms: readonly string[]): string {
 }
 
 /**
- * Adjectival case forms of a masculine-nominative ordinal (první, druhý, třetí, dvacátý …). Regular
- * adjectival declension: hard stems in -ý take -ého/-ém/-ým/-ých/-é/-á/-ému, the two soft stems in the
- * 1–3 range (první, třetí) take the -i- forms. Used by the century/decade/date/month/place rules and the
- * regnal rule below. Every ELEMENT of a compound inflects, not just the tail: Czech compounds agree
- * throughout (sto dvacátý pátý → ve stu dvacátém pátém).
+ * Adjectival case forms of a masculine-nominative ordinal (první, druhý, třetí, dvacátý …). Regular adjectival
+ * declension: hard stems in -ý take -ého/-ém/-ým/-ých/-é/-á/-ému, and the two soft stems in the 1–3 range
+ * (první, třetí) take the -i- forms.
+ * ⚠ EVERY ELEMENT OF A COMPOUND INFLECTS, not just the tail: sto dvacátý pátý → ve stu dvacátém pátém.
  */
 type OrdCase = "gen" | "loc" | "instr" | "plGen" | "neutNom" | "fem" | "dat";
 function inflectOrdinal(masc: string, c: OrdCase): string {
@@ -90,7 +60,7 @@ function inflectOrdinal(masc: string, c: OrdCase): string {
     }).join(" ");
 }
 
-/** Czech letter names, for the initialism pass. USA is [ú es á], OSN [ó es en], DVD [dé vé dé]. */
+/** Czech letter names, for the initialism pass — USA is [ú es á], DVD [dé vé dé]. */
 const LETTER_NAME: Readonly<Record<string, string>> = {
     a: "á", b: "bé", c: "cé", č: "čé", d: "dé", e: "é", f: "ef", g: "gé", h: "há", i: "í",
     j: "jé", k: "ká", l: "el", m: "em", n: "en", o: "ó", p: "pé", q: "kvé", r: "er", ř: "eř",
@@ -98,9 +68,9 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
     z: "zet", ž: "žet",
 };
 
-/** Czech phonotactics, for the OOV rule in core/initialisms.ts. Czech tolerates heavy clusters (like
- *  Polish), so the onset/coda sets are generous on purpose — the work here is done by the no-vowel test
- *  (GPS, DVD, USD, GMT, TV, MP) and the run/onset tests (DSLR, QVC, PTWC, USGS), not by cluster policing. */
+/** Czech phonotactics, for the OOV rule in core/initialisms.ts. ⚠ Czech tolerates heavy clusters, so the
+ *  onset/coda sets are generous ON PURPOSE — the work is done by the no-vowel test (GPS, DVD, GMT, TV) and the
+ *  run/onset tests (DSLR, QVC, USGS), not by cluster policing. */
 export const isUnreadableCzech = makeUnreadableTest({
     vowels: /[aeiouyáéíóúůýě]/u,
     legalOnsets: new Set([
@@ -115,10 +85,9 @@ export const isUnreadableCzech = makeUnreadableTest({
     ]),
 });
 
-/** LEXICAL: acronyms Czech spells out although the letters could be read as a word. Authored in
- *  czech.jsonc beside the language's other hand-authored facts, per the playbook's data rule. Tokens with
- *  no vowel letter (DVD, USD, GPS, PC, TV, MP, GMT, GBP, TB, XDR, NHK …) need no entry: the OOV rule
- *  letter-spells them automatically. */
+/** LEXICAL: acronyms Czech spells out although the letters could be read as a word. Authored in czech.jsonc
+ *  beside the language's other hand-authored facts. ⚠ A token with NO vowel letter (DVD, GPS, TV, GMT) needs
+ *  no entry — the OOV rule letter-spells it automatically. */
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
 
 /**
