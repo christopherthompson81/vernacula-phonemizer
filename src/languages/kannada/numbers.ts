@@ -22,7 +22,7 @@
  *      Kannada says three, with the wrong hundred and no linkage at all.
  *
  * The migration to the shared composer is BYTE-IDENTICAL over the kn_in corpus (0/1811 utterances
- * changed), which is the gate the playbook sets for lifting a local rule to a shared seam.
+ * changed), which is the gate for lifting a local rule to a shared seam.
  *
  *
  * YEARS NEED NO SPECIAL RULE. Unlike Telugu (which reads 1976 as "nineteen hundred seventy-six" and had

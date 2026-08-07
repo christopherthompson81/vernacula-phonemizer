@@ -156,7 +156,7 @@ export function normalizeKhmer(text: string): string {
     );
 
     // ── 2. de-group thousands ─────────────────────────────────────────────────────────────────────────
-    // FIRST among the numeric rules, and the playbook's standing coupling: the grouping comma is otherwise
+    // FIRST among the numeric rules, and ⚠ the grouping comma is otherwise
     // clause punctuation, so `១,០០០,០០០` reads as three sentences — "one", "zero", "zero" — instead of one
     // million. Exactly-three-digit blocks only, so a genuine list `៣,៤,៥` is untouched. 2,788 in the corpus.
     // Applied repeatedly because the lookbehind cannot span a group it has already consumed.
@@ -261,7 +261,7 @@ export function normalizeKhmer(text: string): string {
      * it is the weaker tier and is marked as such. `វិជ្ជមាន` is attested 419 times as a WORD, but the SIGN never
      * appears in a sign-value role in this corpus: of 62 sites with no operand before a `+`, 61 are the algebra
      * above and one is a timezone offset (`16:46:36 +0000`). So the reading rests on the word's attestation plus
-     * the sign's meaning, which is a LEAD rather than a finding in the playbook's terms.
+     * the sign's meaning, which is a LEAD rather than a finding.
      *
      * It is preferred to silence because silence is not neutral here: `review.ts`'s `+5` probe read *pram*, the
      * bare number, with the sign gone — a reader told "five" where the text says "positive five".

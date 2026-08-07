@@ -121,12 +121,12 @@ export function makeNativeBengali(
         // two corpora disagree about the space — bn fuses it onto কিলোমিটার but writes `বর্গ মাইল` spaced in
         // the very same sentence, and as writes `বৰ্গ কিলোমিটাৰ` (×7) spaced throughout. `before` is
         // therefore attested in both, where `compound` would have been wrong for one of them.
-        // No cubed word: ঘন ×19 in this corpus is the REDUPLICATED ADVERB `ঘন ঘন` ("frequently"), and
-        // `ঘন মিটার`/`ঘনমিটার` are both zero — a count that says nothing about the unit sense (trap 12 (a REDUNDANT symbol is a permissible drop)).
-        // `120-160 কিউবিক মিটার জ্বালানি তেল` — the loan, word-first. This is the word an earlier pass could
-        // not find: it probed ঘন (×19, the reduplicated adverb "frequently") and `ঘনমিটার` (×0), and the
-        // corpus uses neither. ⚠ Assamese SHARES this tier and its own corpus attests no cube word at all —
-        // the as translation of that sentence writes `বর্গমিটাৰ`, the SQUARE word, for cubic metres.
+        // The cube word is the LOAN `কিউবিক`, word-first: `120-160 কিউবিক মিটার জ্বালানি তেল`.
+        // ⚠ PROBING THE NATIVE WORD REPORTS IT ABSENT AND IS MISLEADING: ঘন occurs, but as the REDUPLICATED
+        // ADVERB `ঘন ঘন` ("frequently") — a count that says nothing about the unit sense — while
+        // `ঘন মিটার` and `ঘনমিটার` are both zero. The corpus uses none of them.
+        // ⚠ ASSAMESE SHARES THIS TIER and attests no cube word at all: its translation of that same sentence
+        // writes `বর্গমিটাৰ`, the SQUARE word, for cubic metres.
         exponentWords: { squared: ["বর্গ"], cubed: ["কিউবিক"], position: "before" },
     });
     const normalize = makeBengaliNormalizer(def.numbers);

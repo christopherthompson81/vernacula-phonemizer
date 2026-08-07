@@ -43,7 +43,7 @@ const lexicon = (): Map<string, string> => {
  * `US$` and `AUD$` are declared because the corpus writes both ("US$30", "US$11,000થી", "AUD$45 મિલિયન")
  * and the tier's currency lookbehind `(?<![\p{L}\p{M}])` would otherwise refuse the bare `$` after a
  * letter and drop the sign silently. `ક` (for કલાક, in "165 કિમી/ક") is a rateDenominator rather than a
- * unit precisely for the reason the playbook records for Dutch `s`: a one-letter key matchable standalone
+ * unit precisely because ⚠ a one-letter key matchable standalone
  * is confidently wrong far more often than it is right.
  */
 const GU_SYMBOLS = makeSymbolNormalizer({

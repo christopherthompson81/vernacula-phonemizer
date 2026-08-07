@@ -307,7 +307,7 @@ export const CURRENCY: Readonly<Record<string, readonly [string, string]>> = {
 };
 
 /**
- * The DECIMAL COMMA, split out because of an ordering coupling the playbook names explicitly: the shared
+ * The DECIMAL COMMA, split out because of an ordering coupling: the shared
  * unit/percent/currency tier matches a unit only when a NUMBER is adjacent, and rewriting `1,5 km/s` to
  * "1 virgola 5 km/s" first would leave the tier looking at `5 km/s` — the number-unit association is
  * destroyed by the very rewrite. So italian.ts calls this AFTER the symbol tier has run.

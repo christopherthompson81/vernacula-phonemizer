@@ -104,7 +104,7 @@ export function normalizeCzechInitialisms(text: string): string {
     })(text);
 }
 
-/** Multi-dot abbreviations — the ERA markers. Claimed FIRST (playbook coupling) or their interior dots
+/** Multi-dot abbreviations — the ERA markers. ⚠ Claimed FIRST, or their interior dots
  *  survive as breaks. The final dot is optional in the corpus (př.n.l appears bare before `!`), and is
  *  re-attached by keepFinal when it was doing duty as the sentence period. */
 const MULTI_DOT: ReadonlyArray<readonly [RegExp, string]> = [
@@ -189,7 +189,7 @@ const MONTH_ALT = Object.keys(MONTH_RULE).sort((a, b) => b.length - a.length).jo
 export function normalizeCzech(input: string): string {
     let s = input;
 
-    // 0) DIGIT DE-GROUPING, first (playbook coupling: a grouping separator is otherwise read as clause
+    // 0) DIGIT DE-GROUPING, first (⚠ a grouping separator is otherwise read as clause
     //    punctuation, and the number token cannot span a space). Czech groups thousands with a SPACE and
     //    marks the decimal with a COMMA — verified against the corpus: 5 space-grouped numbers, 16
     //    comma-decimals. Two passes, because the groups overlap on the shared digit (3 850 000). The
@@ -200,7 +200,7 @@ export function normalizeCzech(input: string): string {
         s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
-    // 1) MULTI-DOT ABBREVIATIONS (the era markers), before the single-dot rule (playbook coupling) —
+    // 1) MULTI-DOT ABBREVIATIONS (the era markers), before the single-dot rule —
     //    otherwise the interior dots survive as breaks and the letters read as a bogus word.
     //    Each expansion CONSUMES the abbreviation's final dot, so where that dot was also the sentence
     //    period it has to be put back — "…do roku 1000 př. n. l." ends the utterance, and eating the dot
@@ -217,7 +217,7 @@ export function normalizeCzech(input: string): string {
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
         (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`);
 
-    // 3) CLOCK. Before any rule that looks for a bare number (playbook coupling): `11:30` must not be
+    // 3) CLOCK. ⚠ Before any rule that looks for a bare number: `11:30` must not be
     //    claimed by the range or ordinal rules. The colon is clause punctuation in czech.jsonc, so every
     //    time in the corpus was previously split by a phrase break. Czech reads the time CARDINALLY with
     //    an explicit counted unit (8:46 = osm hodin čtyřicet šest minut), the corpus's own spelling of
