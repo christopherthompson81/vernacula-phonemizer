@@ -8,7 +8,7 @@ import { normalizeKannada } from "../src/languages/kannada/normalize.ts";
 // Canonical-IPA goldens for Kannada (kn) — a Dravidian Brahmic abugida read by the generic engine, mirroring
 // Telugu: NO inherent-vowel deletion (every akshara pronounced, inherent /a/). Dravidian short/long e·o, dental
 // t̪/d̪ vs retroflex ʈ/ɖ, ಳ→ɭ, ಷ→ʂ, geminate→length, final anusvara ಂ→[m], first-syllable stress. Validated
-// against wikipron kan (97.4%) + kaikki kan (96.8%), both human.
+// against wikipron kan + kaikki kan, both human.
 describe("kannada canonical IPA", () => {
     test("consonants, vowels, gemination, retroflex, anusvara", () => {
         const cases: [string, string][] = [
@@ -71,9 +71,9 @@ describe("kannada canonical IPA", () => {
  */
 describe("kannada text normalization", () => {
     test("zero-width joiners are stripped, rejoining a word the tokenizer had split", () => {
-        // ZWNJ ×922 + ZWJ ×139 + ZWSP ×6 — the largest raw count in the corpus. All sit after a virama,
-        // so removing them leaves the identical akshara sequence. Before this, ಪಾಯಿಂಟ್‌ಗಳಿಂದ tokenized
-        // as TWO words and carried TWO primary stresses.
+        // ⚠ ZWNJ, ZWJ and ZWSP all occur, and all sit AFTER A VIRAMA — so stripping them leaves the identical
+        // akshara sequence and is safe. Left in, ಪಾಯಿಂಟ್‌ಗಳಿಂದ tokenizes as TWO words and carries TWO primary
+        // stresses.
         expect(phonemize("ಪಾಯಿಂಟ್‌ಗಳಿಂದ", "kn")).toBe("pˈaːjĩɳʈɡaɭĩn̪d̪a"); // ⚠ ZWNJ U+200C after ್
         expect(normalizeKannada("ಡಾಲರ್‍‌ಗಳ")).toBe("ಡಾಲರ್ಗಳ"); // ⚠ ZWJ U+200D *then* ZWNJ U+200C — both invisible
     });

@@ -5,9 +5,9 @@ import { phonemize } from "../src/index.ts";
 import { numberToWords } from "../src/languages/kikuyu/numbers.ts";
 
 // Canonical-IPA goldens for Kikuyu / Gĩkũyũ (ki) — Niger-Congo BANTU (E51), Latin orthography, the largest language
-// of Kenya (~8M). Hand-adjudicated against en.wiktionary Kikuyu (1062 IPA words). The pure greedy g2p scores 99.4%
-// folded vs the referee (tools/referee-eval) — the folds strip tone (unwritten), downstep, length, and the glide/
-// sibilant/tap notation. Signatures: a 7-vowel ATR system where the TILDE is vowel QUALITY not nasalization
+// of Kenya (~8M). Hand-adjudicated against en.wiktionary Kikuyu (1062 IPA words), which is also the referee
+// (tools/referee-eval) — its folds strip tone (unwritten), downstep, length, and the glide/sibilant/tap
+// notation. Signatures: a 7-vowel ATR system where the TILDE is vowel QUALITY not nasalization
 // (⟨ĩ⟩=e, ⟨ũ⟩=o, ⟨e⟩=ɛ, ⟨o⟩=ɔ); Bantu FRICATIVIZATION (⟨b⟩=β, ⟨th⟩=ð, ⟨g⟩=ɣ, ⟨c⟩=ɕ); PRENASALIZED digraphs
 // (⟨mb⟩=ᵐb, ⟨nd⟩=ⁿd, ⟨nj⟩=ᶮdʑ, ⟨ng⟩=ᵑɡ); ⟨ng'⟩=ŋ, ⟨ny⟩=ɲ, ⟨r⟩=ɾ. TONE (2-tone H/L + downstep) is not written →
 // not emitted; cardinal numbers are covered in their own describe block below.

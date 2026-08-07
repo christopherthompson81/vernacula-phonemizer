@@ -12,8 +12,8 @@ import { segmentKhmer, lastKhmerWord } from "../src/languages/khmer/segment.ts";
 
 describe("Khmer segmentation", () => {
     test("a single high-frequency word is never split", () => {
-        // These are the four commonest ៗ antecedents in the corpus: ផ្សេង ×840, ធំ ×214, ថ្មី ×193, តូច ×130.
-        // Splitting any of them would make the reduplication rule repeat a fragment instead of a word.
+        // The commonest ៗ antecedents in the corpus. Splitting any of them makes the reduplication rule
+        // repeat a FRAGMENT instead of a word.
         for (const w of ["ផ្សេង", "ធំ", "ថ្មី", "តូច", "នីមួយ"])
             expect(segmentKhmer(w), w).toEqual([w]);
     });

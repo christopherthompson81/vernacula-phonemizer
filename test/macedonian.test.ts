@@ -118,7 +118,11 @@ describe("Macedonian text normalization", () => {
     });
 
     test("signs: degrees, plus, ampersand — the handoff's sign classes", () => {
-        expect(ph("90°F")).toBe("dɛvˈɛdɛsɛt stˈɛpɛni pˈɔ fˈarɛnxa d͡ʒˈeᶦ t");
+        // ⚠ Фаренхајт MUST use Cyrillic ⟨ј⟩ U+0458, not Latin ⟨j⟩ U+006A. They are indistinguishable on
+        // screen, but a Latin j is outside the Cyrillic token class, so the word splits in three and the j
+        // is handed to the foreign reader as the ENGLISH LETTER NAME: *fˈarɛnxa d͡ʒˈeᶦ t*. Nothing is dropped
+        // and nothing raw survives, so no leak gate can see it.
+        expect(ph("90°F")).toBe("dɛvˈɛdɛsɛt stˈɛpɛni pˈɔ fˈarɛnxajt");
         expect(ph("35° W")).toBe("trˈiɛsɛt ˈi pˈɛt stˈɛpɛni zˈapat");
         expect(ph("над +30 степени целзиусови")).toBe("nˈat pɫˈus trˈiɛsɛt stˈɛpɛni t͡sɛɫziˈusɔvi");
         expect(ph("Б&Б")).toBe("p ˈi p"); // ampersand → и (was dropped before)

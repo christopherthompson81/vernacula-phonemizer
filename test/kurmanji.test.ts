@@ -6,7 +6,7 @@ import { phonemizeWord, createKurmanji } from "../src/languages/kurmanji/kurmanj
 // (vowels written, so no restoration — unlike Persian/Pashto abjads). Near-phonemic: ⟨c⟩→d͡ʒ / ⟨ç⟩→t͡ʃ (reverse of
 // Romance), ⟨j⟩→ʒ, ⟨ş⟩→ʃ, ⟨q⟩→q, ⟨x⟩→x, ⟨xw⟩→xʷ; long a/ê/î/o/û → ɑː eː iː oː uː vs short e/i/u → ɛ ɪ ʊ;
 // final-syllable stress; n→ŋ before k/ɡ. Aspiration/pharyngealisation are allophonic/unwritten → not emitted.
-// Validated at 97.4% vs wikipron kmr + 96.3% vs epitran.
+// Referees: wikipron kmr + epitran.
 describe("Kurmanji canonical IPA", () => {
     test("the reversed affricates ⟨c⟩→d͡ʒ / ⟨ç⟩→t͡ʃ, ⟨j⟩→ʒ, ⟨ş⟩→ʃ", () => {
         expect(phonemizeWord("çav")).toBe("t͡ʃˈɑːv"); // ç → t͡ʃ, a → ɑː

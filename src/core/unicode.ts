@@ -219,6 +219,41 @@ export function foldLatinConfusables(s: string): string {
 }
 
 /**
+ * The MIRROR of the table above: a LATIN look-alike standing in for a Cyrillic letter. Only the rows where the
+ * Latin glyph is genuinely confusable with a Cyrillic one, so this is not simply the inverse map — Latin `j`
+ * for Cyrillic ⟨ј⟩ (U+0458) and `i` for ⟨і⟩ (U+0456) are the two that bite, because those Cyrillic letters
+ * exist only in some of the alphabets (Macedonian, Serbian, Ukrainian, Belarusian) and a keyboard set for
+ * Russian cannot type them.
+ */
+const CYRILLIC_CONFUSABLE: Readonly<Record<string, string>> = {
+    a: "а", c: "с", e: "е", i: "і", j: "ј", o: "о", p: "р", s: "ѕ", x: "х", y: "у",
+    A: "А", B: "В", C: "С", E: "Е", H: "Н", I: "І", J: "Ј", K: "К", M: "М",
+    O: "О", P: "Р", S: "Ѕ", T: "Т", X: "Х", Y: "У",
+};
+/**
+ * Preceded by a Cyrillic letter, and NOT followed by more Latin — the exact mirror of CONFUSABLE_RE, and the
+ * trailing lookahead does the same job: a genuine Latin word embedded in Cyrillic text either is not preceded
+ * by a Cyrillic letter (`Ова е hello` — the h follows a space) or continues in Latin (`Оваhello` — the h is
+ * followed by `e`), and both are declined.
+ *
+ * ⚠ THE FAILURE THIS PREVENTS IS NOT A DROPPED CHARACTER. A Latin letter inside a Cyrillic word falls outside
+ * the engine's token class, so the word SPLITS and the stray letter is handed to the foreign reader as an
+ * ENGLISH LETTER NAME: Macedonian `Фаренхаjт` with a Latin j read *fˈarɛnxa d͡ʒˈeᶦ t*. Nothing is dropped and
+ * no raw character survives, so no leak gate can see it.
+ */
+const CYR_CONFUSABLE_RE = new RegExp(
+    `(?<=\\p{Script=Cyrillic})([${Object.keys(CYRILLIC_CONFUSABLE).join("")}])`
+    + `(?![\\p{Script=Latin}])`, "gu");
+
+/** Fold a Latin look-alike sitting INSIDE a Cyrillic word to its Cyrillic equivalent. */
+export function foldCyrillicConfusables(s: string): string {
+    CYR_CONFUSABLE_RE.lastIndex = 0;
+    if (!CYR_CONFUSABLE_RE.test(s)) return s;
+    CYR_CONFUSABLE_RE.lastIndex = 0;
+    return s.replace(CYR_CONFUSABLE_RE, (c) => CYRILLIC_CONFUSABLE[c]!);
+}
+
+/**
  * REPAIR DOUBLE-ENCODED UTF-8 — text whose bytes were UTF-8 but got decoded as Latin-1 and re-encoded, so
  * `\u00b2` arrives as `\u00c2\u00b2` and `\u00f1` as `\u00c3\u00b1`. Mojibake is one of the commonest real-world corruptions in
  * scraped text, and a phonemizer is handed arbitrary text.

@@ -11,9 +11,9 @@ import { numberToWords } from "../src/languages/kinyarwanda/numbers.ts";
 // Harvard ELIAS "Grammar: Cardinal and ordinal numbers" for the concord statement (1–7 take class agreement,
 // 8/9/10 invariable).
 //
-// WHAT THIS LOCKS DOWN: each magnitude selects its OWN multiplier series — mirongo takes i- (mirongo itatu),
-// magana takes a- (magana abiri), ibihumbi takes bi- (ibihumbi bibiri) — and 20 is the fused makumyabiri.
-// The old table had a single bare "makumi" + the citation units, producing *makumi kabiri for 20.
+// ⚠ EACH MAGNITUDE SELECTS ITS OWN MULTIPLIER SERIES — mirongo takes i- (mirongo itatu), magana takes a-
+// (magana abiri), ibihumbi takes bi- (ibihumbi bibiri) — and 20 is the fused makumyabiri. A single bare
+// "makumi" plus the citation units composes *makumi kabiri for 20, which is not a Kinyarwanda word.
 describe("Kinyarwanda numbers", () => {
     test("units + ten (bare-numeral citation form)", () => {
         expect(numberToWords(0)).toBe("zeru");

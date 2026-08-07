@@ -177,10 +177,10 @@ describe("Khmer signs, units and currencies", () => {
 // NOTE: in this file `phonemize` is the RULE-ONLY path (imported as `phonemizeWordRules as phonemize`) and
 // `phonemizeWord` is the lexicon-first one. That distinction is load-bearing for the standalone test below.
 describe("independent vowels", () => {
-    // ⚠ THE SYLLABIFIER USED TO SKIP THESE ENTIRELY, left unhandled — so all 17 letters U+17A3–U+17B3 were
-    // silently DELETED from every reading in which they were not the whole word. 176,282 occurrences in the mined
-    // corpus, 6.0% of all Khmer-letter tokens, and agreement with wikipron on the 254 referee words containing one
-    // was 0/254. Not 0% accuracy on a hard class — literally every one wrong, because a character vanished.
+    // ⚠ AN UNHANDLED INDEPENDENT VOWEL IS SILENTLY DELETED, not mis-read: all 17 letters U+17A3–U+17B3 vanish
+    // from any reading in which they are not the whole word. They are 6.0% of all Khmer-letter tokens, and the
+    // failure is TOTAL rather than partial — agreement with wikipron on the 254 referee words containing one
+    // was 0/254. Not a low score on a hard class; every single one wrong, because a character disappeared.
     test("an independent vowel before a consonant is READ, not dropped", () => {
         expect(phonemize("ឬដក")).toContain("rɨː");     // was ɗɑːk — the ឬ gone
         expect(phonemize("ឯណា")).toContain("ʔae");     // was naː
@@ -226,7 +226,7 @@ describe("independent vowels", () => {
     });
 });
 
-describe("khmer signs the layer used to leave silent", () => {
+describe("khmer signs that are easily left silent", () => {
     test("⚠ a SPACED plus reads បូក even when the left operand is not a digit", () => {
         // 274 sites this layer left silent, refused as "undecidable" on a measurement that pooled the unspaced
         // `x+3\!` LaTeX shape with the spaced one. Measured apart, the spaced shape has 312 sites and ZERO carry
