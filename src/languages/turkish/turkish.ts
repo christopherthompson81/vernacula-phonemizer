@@ -94,10 +94,10 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:\\.\\d{3})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  *
  * ⚠ `İ` IS ADDED, and it is the one letter here that is not a straight lift. Capital İ (U+0130) has no Unicode
  * simple case-fold to `i` — it folds to `i` + COMBINING DOT ABOVE — so the /i/ flag does not make the old class
@@ -121,7 +121,7 @@ function numberTokenToWords(tok: string): string {
     return words;
 }
 
-// #562 symbol normalization — Turkish: the percent word PRECEDES the number (yüzde kırk, written %40); both
+// symbol normalization — Turkish: the percent word PRECEDES the number (yüzde kırk, written %40); both
 // %40 and 40% occur in the wild and both rewrite to prefix order. `m` → metre is claimed here rather than in
 // normalize.ts so the shared tier's "only after a number" guard applies (4892 m, 100m); the `m/s` compound is
 // consumed earlier, in normalize.ts step 4, before this tier can break the adjacency.
@@ -130,7 +130,7 @@ function numberTokenToWords(tok: string): string {
 const UNITS = { km: ["kilometre"], cm: ["santimetre"], mm: ["milimetre"], kg: ["kilogram"], m: ["metre"] };
 
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
@@ -148,7 +148,8 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 /**
- * THE APOSTROPHE SUFFIX DEFEATED THE UNIT TIER ENTIRELY, and #586's audit only saw the smallest part of it.
+ * ⚠ THE APOSTROPHE SUFFIX DEFEATS THE UNIT TIER ENTIRELY, and an audit that counts only visible damage sees
+ * the smallest part of it.
  * Turkish attaches case/possessive suffixes to an abbreviation with an apostrophe, and the tier's trailing
  * guard — which exists so a key cannot bite into a word — rejects the letter that follows. Measured over
  * tr_tr, fourteen instances, and every one of them was misread:
@@ -166,8 +167,8 @@ const SYMBOLS = makeSymbolNormalizer({
  *
  * ⚠ ONLY THE EXPONENT CASE WAS VISIBLE TO THE GATE. A raw `km` in the IPA is not a digit and not a symbol, so
  * the LEAK check cannot see it and the differential DROP check cannot either — the reading changes when the
- * letters are deleted, so nothing "vanished". Twelve of the fourteen were invisible, which is the #584 blind
- * spot in a new shape: a defect is only found by the gate that was built to look for it.
+ * letters are deleted, so nothing "vanished". Most of the damage was invisible for that reason.
+ * ⚠ A DEFECT IS ONLY FOUND BY A CHECK THAT WAS BUILT TO LOOK FOR IT.
  *
  * PROTECT AND RESTORE, rather than a local unit table. The suffix is moved out of the way behind a sentinel so
  * the tier sees an ordinary boundary, then glued back onto whatever word the tier produced. That way the unit

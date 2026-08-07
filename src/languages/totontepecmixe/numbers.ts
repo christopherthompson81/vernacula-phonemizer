@@ -1,7 +1,7 @@
 /**
  * Totontepec Mixe (mto / ayöök) cardinal number → words. VIGESIMAL (base 20) — hence Pattern B.
  *
- * ★ CRAWFORD DOES NOT COVER NUMERALS. This engine's g2p is authored from Crawford, *Totontepec Mixe
+ * ⚠ THE GRAMMAR DOES NOT COVER NUMERALS. This engine's g2p is authored from Crawford, *Totontepec Mixe
  * Phonotagmemics* (SIL, 1963), but that is a PHONOLOGY — it has no numeral list, and
  * accordingly lists "numbers" among the deferred
  * items. So the numeral DATA here cannot be cited to Crawford and is not.
@@ -17,12 +17,12 @@
  * NOTE that it deliberately STRIPS the underline (its value is the engine's disclosed residual — it is not in
  * Crawford), so the central/back quality those vowels mark is not recovered here either.
  *
- * ★ THE SCORES ALTERNATE 20 / 20+10 (verbatim from the source): majc 10 · ii'px 20 · ii'pxmajc 30 ·
+ * ⚠ THE SCORES ALTERNATE 20 / 20+10 (verbatim from the source): majc 10 · ii'px 20 · ii'pxmajc 30 ·
  *   vu̱jxtcupx 40 · vu̱jxtcupxu̱cmajc 50 · toogupx 60 · toogupxu̱cmajc 70 · majctupx 80 · majctupxu̱cmajc 90.
  *   So the real bases are the four TWENTIES (ii'px, vu̱jxtcupx, toogupx, majctupx) and the "+10" forms are
  *   those plus the ten-word.
  *
- * ★★ THE COMPOSITION RULES, quoted: "Compound numbers are formed starting with the ten directly followed
+ * ⚠ THE COMPOSITION RULES, quoted: "Compound numbers are formed starting with the ten directly followed
  *   with the unit when the ten is a multiple of twenty (e.g.: ii'pxto'c [21], toogupxme̱jtsc [62]), and
  *   starting with the ten where the word for ten (majc) is replaced by the number from eleven to nineteen
  *   when the ten is not a multiple of [twenty] (e.g.: ii'pxmacmó̱cx [35], majctupxu̱cmactojt [96])."
@@ -31,7 +31,7 @@
  *   35 is ii'pxmacmó̱cx) and NOT before a bare unit (62 is toogupxme̱jtsc) — that distribution is exactly what
  *   `link()` below encodes, and every one of the five cited examples is reproduced.
  *
- * ★ HUNDREDS, quoted: "Hundreds are formed starting with the multiplier digit, followed by the word for
+ * HUNDREDS, quoted: "Hundreds are formed starting with the multiplier digit, followed by the word for
  *   hundred (mó̱cupx) separated with a space, except for one hundred: mó̱cupx [100], me̱jtsc mó̱cupx [200] …".
  *
  * ATTESTED RANGE: 1 … 999. The source states outright that "due to lack of data, it is only possible to count

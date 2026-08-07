@@ -9,7 +9,7 @@
  *   - GEMINATION: a doubled consonant letter → a LONG consonant [Cː] (phonemic in Berber: kk→kː, ll→lː, ṭṭ→tˤː).
  * Emphatics are pharyngealised (dot-below): ḍ→dˤ, ṭ→tˤ, ṣ→sˤ, ẓ→zˤ, ṛ→rˤ; pharyngeals ḥ→ħ, ɛ→ʕ; uvulars ɣ→ʁ~ɣ,
  * x→χ, q; ⟨c⟩→ʃ, ⟨j⟩→ʒ, ⟨y⟩→j, ⟨e⟩→ə. Validated against wikipron shi_latn + kaikki Tashelhit (both Wiktionary →
- * 🔷 single-source-family, correlated). Vowel-lessness / syllabic consonants are left as-is (Berber allows them).
+ * ⚠ thinly attested, and from a single source family). Vowel-lessness / syllabic consonants are left as-is (Berber allows them).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";

@@ -2,7 +2,7 @@
  * Tashelhit / Shilha (shi) cardinal number → words, in the Berber Latin alphabet. **SYSTEM: MOROCCAN ARABIC LOAN
  * numerals, with NATIVE Berber kept for 1–3.** This is a deliberate, contested choice and the reasoning is below.
  *
- * ★★ FIRST, A CORRECTION WORTH RECORDING. The usual claim — "Berber has native 1–10 but Arabic loans take over
+ * ⚠ FIRST, A CORRECTION WORTH RECORDING. The usual claim — "Berber has native 1–10 but Arabic loans take over
  *   above 3" — is the CENTRAL MOROCCAN / TARIFIYT / KABYLE picture, and it is **wrong for Tashelhit**. Tashelhit is
  *   one of the few Northern Berber languages that preserves the full native decade 1–10 *and* a native VIGESIMAL
  *   system for 11–99 (Kossmann 2013:307–308, citing Aspinion 1953:254ff. and Galand 1988:230; independently
@@ -16,7 +16,7 @@
  *   above 10; the old literary `timiḍi` 100 / `ifḍ` 1000 are genuine 18th-century Tashelhit (van den Boogert
  *   1997:286–287) but obsolete, and `agim` 1000 is Tuareg/Kabyle, not Tashelhit at all.
  *
- * ★★ WHY THE ARABIC SYSTEM IS THE DEFAULT ANYWAY. The sole practical teaching resource for the language states it
+ * ⚠ WHY THE ARABIC SYSTEM IS THE DEFAULT ANYWAY. The sole practical teaching resource for the language states it
  *   flatly — Peace Corps/Morocco, *Tashlheet Textbook* (2011), p. 37, verbatim:
  *       "In TashlHeet we usually use Arabic numbers except for the numbers: one, two and three."
  *   Its main numerals chapter teaches native 1–3 and then Arabic from 4 up; the native decade and the vigesimal
@@ -28,7 +28,7 @@
  *   A "purist" mode (native decade + vigesimal) would be a legitimate flag-gated addition, but it must not be the
  *   default: it is recessive, regionally variable, and cannot reach 100.
  *
- * ★ SOURCES
+ * SOURCES
  *   - **Peace Corps/Morocco, *Tashlheet Textbook* (2011), pp. 37–44 and 210–212** — the loan table, the "except
  *     one, two and three" rule, and the supplementary native/vigesimal lesson. (Its OCR renders ɛ as an Arabic
  *     ʿayn and ḥ as a Cyrillic н; those are normalised here.)
@@ -43,12 +43,12 @@
  *     `numbers[100] = {"mya", "smmus idaw ɛcrin", "timiḍi"}` is an editor's extrapolation, not an attestation.
  *     Kossmann's `id-ɛcrin` is preferred, and none of that module's composed forms are used here.
  *
- * ★ ORTHOGRAPHY. The forms below are in the **Berber Latin alphabet**, which is what tashelhit.ts's Latin
+ * ORTHOGRAPHY. The forms below are in the **Berber Latin alphabet**, which is what tashelhit.ts's Latin
  *   grapheme map consumes (ɛ→ʕ, ḍ→dˤ, ṣ→sˤ, ḥ→ħ, c→ʃ). The engine also accepts Neo-Tifinagh and — by design —
  *   yields IDENTICAL IPA from either script, so emitting Latin is not a script choice with phonetic consequences;
  *   it is simply the script the loan numerals are conventionally written in in the sources.
  *
- * ★ COMPOSITION (Moroccan Arabic)
+ * COMPOSITION (Moroccan Arabic)
  *   - **units-first inside the final tens+units pair**, joined by `u`: 45 = `xmsa u rbɛin`, 21 = `waḥd u ɛcrin`.
  *   - everything else runs largest → smallest, also joined by `u`: 345 = `tlt mya u xmsa u rbɛin`.
  *   - hundreds: 100 `mya`, 200 the DUAL `myatayn`, 300–900 the SHORT stem + `mya` (`tlt mya`).

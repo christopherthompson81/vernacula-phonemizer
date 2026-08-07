@@ -46,7 +46,7 @@
  *   • RANGES `2-3`, `1644-1912` (15). The dash is currently dropped, which merely juxtaposes the two
  *     numbers — not a corruption. Thai says ถึง for a span but ต่อ for a SCORE, and the corpus is 6 spans,
  *     3 scores (5-3, 6-6, 7-2), 2 times, 4 years: no majority large enough to justify a confidently wrong
- *     word in the other third. Left, per the playbook's "a wrong word is worse than a dropped sign".
+ *     word in the other third. Left, because a wrong word is worse than a dropped sign.
  *   • ส.ส. (1) and พรบ. (1). ส.ส. is read as Thai LETTER names, which needs the Thai consonant-name
  *     table (กอ ไก่ …) — a data set this file does not have and will not invent for one hit.
  *   • `และ/หรือ` (and/or, ×5) and other Thai-word slashes: the slash is already dropped without a pause.
@@ -76,7 +76,7 @@ const THAI_LETTER_NAME: Readonly<Record<string, string>> = {
 /**
  * Thai abbreviation → its spoken expansion. ORDER IS LOAD-BEARING: longest key first, so the two-dot
  * forms (ตร.กม.) and the unit-per-unit forms (กม./ชม.) are consumed before the single-dot suffix they
- * end with (กม.) can claim half of them. This is the playbook's "multi-dot abbreviations before
+ * end with (กม.) can claim half of them. ⚠ Multi-dot abbreviations before
  * single-dot" coupling; here it also covers the `/` composites.
  *
  * `unitOnly` entries are rewritten ONLY when a number is adjacent on the left — the shared symbol tier's
@@ -235,7 +235,7 @@ export function normalizeThai(input: string): string {
     // BEFORE the degree rule, which is the ordering coupling zu's `[+]?` taught: a rule that consumes the
     // sign's operand must not get there first. Thai's degree rule does not match the sign today, so this is
     // insurance rather than a fix. `+30°C` has ZERO corpus instances here (unlike most of the fleet — th_th
-    // does not carry the Montevideo sentence), so that arm is the arbitrary-text case #584 argues for: a
+    // does not carry the Montevideo sentence), so that arm covers arbitrary text rather than this corpus: a
     // dropped sign is inaudible, which is the one outcome that cannot be right.
     s = s.replace(/\s*\+\s*(?=\d)/gu, " บวก ");
 
@@ -290,13 +290,12 @@ export function normalizeThai(input: string): string {
     // ── 8c. the dimension × → คูณ, SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────────
     // The corpus's one instance is the manuscript sentence, `วัดขนาดได้ 29¾ นิ้ว × 24½ นิ้ว`, and the sign was
     // DROPPED — so a measurement read as two bare numbers.
-    // ⚠ `คูณ` HAD ZERO HITS IN THE WIKI HAYSTACK when attest.ts probed it, which is why #586 recorded this as
-    // unsourced and invented no rule. It is audible. The utterance sits in th_th's TEST split, which this
-    // corpus did not carry until the split was fetched; decoded with facebook/wav2vec2-xlsr-53-espeak-cv-ft
-    // (a PHONEME recognizer — no `×` and no digits in its 392-token vocabulary):
+    // ⚠ `คูณ` HAS ZERO HITS IN THE WIKI HAYSTACK, so a text-only probe reports it
+    // unsourceable. ⚠ IT IS NEVERTHELESS AUDIBLE: the reading below comes from AUDIO, decoded by a
+    // PHONEME recognizer (no `×` and no digits in its vocabulary):
     //     `… k ʌ n a d aɪ  j iː s ɪ p k aʊ  s e s a m s ʊ n s iː  k uː n  j iː z p s iː  s e n ʊ ŋ s ʊ n s ɔ ŋ  n iː …`
     //   ยี่สิบเก้า (29) · เศษสามส่วนสี่ (¾) · **คูณ** · ยี่สิบสี่ (24) · เศษหนึ่งส่วนสอง (½) · นิ้ว
-    // ★ Note the reader also SPELLS OUT THE VULGAR FRACTIONS (เศษสามส่วนสี่ for ¾), which this layer does not
+    // ⚠ Note the reader also SPELLS OUT THE VULGAR FRACTIONS (เศษสามส่วนสี่ for ¾), which this layer does not
     //   yet do — a separate gap, recorded here because the same recording is the evidence for it.
     //
     // ⚠ KEYED ON THE FOLLOWING DIGIT ALONE, not digit-flanked, and Arabic's rule records the same reason: in

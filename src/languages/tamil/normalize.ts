@@ -35,7 +35,7 @@ const NA = "(?![\\p{L}\\p{M}])";
  *
  * percent: சதவீதம், which the corpus also writes as சதவிகிதம்; both are current, சதவீதம் is the form
  * already used by the engine. currency: only the dollar sign occurs (×8), in the bare `$` and `US$`
- * spellings. Bhutan's `Nu` (×2) is left alone — no sourced Tamil form, and per the playbook a wrong
+ * spellings. Bhutan's `Nu` (×2) is left alone — no sourced Tamil form, and a wrong
  * currency word is worse than a dropped sign.
  *
  * EXPONENT uses position "before" with a SPACE: Tamil says சதுர கிலோமீட்டர், two words — and the corpus
@@ -47,7 +47,7 @@ const NA = "(?![\\p{L}\\p{M}])";
  * forms are handled locally in step 5.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -59,7 +59,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // corpus: ×1 there against மற்றும்'s 997. It is common in the wiki (121 tokens) because that haystack is
     // full of transliterated company names, which is a fact about the haystack and not about how this
     // language reads an ampersand.
-    // ★ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
+    // ⚠ THE STRONGEST EVIDENCE IS IN THE SENTENCE ITSELF: the corpus GLOSSES the abbreviation using this very
     // word — `B&Bs இரண்டு முக்கிய விஷயங்களில் போட்டியிடுகின்றன: படுக்கை மற்றும் காலை உணவு` ("bed AND
     // breakfast"). The text states what the sign expands to, in the same breath, with the conjunction chosen
     // here. Frequency counts are the weaker argument; this is the slot, glossed.
@@ -274,7 +274,7 @@ export function normalizeTamil(input: string): string {
     s = s.replace(/(\S)\+\s?(\d)/gu, "$1 பிளஸ் $2");
     s = s.replace(/(^|\s)\+\s?(\d)/gu, "$1பிளஸ் $2");
 
-    // 8b) THE RELATIONAL AND DIVISION SIGNS
+    // 8c) THE RELATIONAL AND DIVISION SIGNS
     s = postposedSign(s, "<", "ஐ விட குறைவாக");
     s = postposedSign(s, ">", "ஐ விட அதிகமாக");
     s = s.replace(/\s?=\s?/gu, " சமம் ");
