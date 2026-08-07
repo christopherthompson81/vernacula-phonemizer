@@ -5,8 +5,8 @@
  * TOKENIZATION: the sub-100 group is emitted as ONE hyphenated orthographic word (dix-sept,
  * vingt-et-un, quatre-vingt-dix-sept) and the magnitude groups are space-separated
  * ("mille neuf cent quatre-vingt-huit"). The hyphens are not cosmetic — they are what makes the
- * numeral resolve against the Lexique compounds, and the space-separated form was phonemically WRONG
- * at the joins because each piece was phonemized in isolation:
+ * numeral resolve against the Lexique compounds. ⚠ THE SPACE-SEPARATED FORM IS PHONEMICALLY WRONG AT THE
+ * JOINS, because each piece is then phonemized in isolation:
  *     17  dix sept      → [dis sɛt]   but dix-sept      is [disɛt]    (one [s], not two)
  *     18  dix huit      → [dis ɥit]   but dix-huit      is [dizɥit]   (voiced — huit blocks liaison
  *                                     as a separate word, but not compound-internally)

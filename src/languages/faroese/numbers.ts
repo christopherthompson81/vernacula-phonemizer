@@ -1,9 +1,8 @@
 /**
  * Faroese cardinal number → words. Like Danish, Faroese is UNITS-FIRST with "og" fused into a single word
  * (einogtjúgu = 21, fimmogsjeyti = 75); magnitude groups above 100 are written open and chained with "og". The
- * composition itself is the shared units-first Germanic algorithm — see ../danish/unitsFirstNumbers.ts (housed in
- * the Danish dir only because src/core/ was locked during the number fan-out; it is language-neutral). Covers
- * 0 … <10¹².
+ * composition itself is the shared units-first Germanic algorithm — see ../danish/unitsFirstNumbers.ts, which is
+ * language-neutral despite living in the Danish directory. Covers 0 … <10¹².
  *
  * SOURCES for the number words:
  *   • omniglot.com/language/numbers/faroese.htm — the 0–20 / tens / hundrað / túsund / millión table and the

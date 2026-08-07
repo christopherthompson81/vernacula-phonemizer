@@ -37,29 +37,24 @@ const TOKEN = new RegExp(
 const NATIVE_CLASS = "[a-zɓɗŋɲƴñA-ZƁƊŊƝƳÑ\\u{1E900}-\\u{1E94A}]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
-// #562 symbol normalization — Fula. Percent reads "e teemedere" (in a hundred) — COMPOSED from two
-// attested pieces (`e` ×92 in the corpus, `teemedere` = 100 in this engine's own number data) rather than
-// asserted as a single word: the form this shipped with, "tere", appears in neither the corpus nor the
-// epitran referee's 1,777-word list, and a wrong percent word is worse than a dropped sign (playbook).
-// Nouns stay SINGULAR after numerals, so one form suffices.
-// The unit words are the corpus's own borrowings (kilometre, metre); "e wakkati gootel" = per hour.
+// ⚠ PERCENT IS COMPOSED, NOT ASSERTED: "e teemedere" ("in a hundred") is built from two attested pieces —
+// the preposition `e` and `teemedere` = 100 from this engine's own number data. A single-word form was tried
+// and appears in neither Fula text nor the epitran referee, and a wrong percent word is worse than a dropped
+// sign.
+// Nouns stay SINGULAR after numerals, so one form suffices. "e wakkati gootel" = per hour.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
-    // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
-    // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
+    // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
+    // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it.
     multiply: { times: "je" },
     percent: ["e teemedere"],
     currency: { "$": ["dollar"], "€": ["euro"], "¥": ["yen"], "£": ["pound"] },
     units: { km: ["kilometre"], m: ["metre"], kg: ["kilogram"], mm: ["milimeta"], cm: ["santimeta"] },
     unitPer: "e wakkati gootel", // 160 km/h -> teemedere e cappanɗe jeegom kilometre e wakkati gootel
     rateDenominators: { h: "wakkati", s: "sahaawa" },
-    // Both sourced from ff.wikipedia, because the FLEURS corpus attests no measure word at all. Postposed:
-    //   kiloomeeteer kaaree  "468 kiloomeeteer kaaree (181 mi kaaree)"        ← squared
-    //   meeteer kubik        "60 miliyoŋ meeteer kubik (2.1×10⁹ cu ft)"       ← cubed
-    // `kaaree` is attested across at least six independent articles (Farayse, Roosiya, Belaruusiya, Abuko,
-    // Akinyele, Aouk Aoukale) — every one a COUNTRY or a place, which is the article class that cannot state
-    // its subject without an area figure. That is where a unit's measure word lives; the maths articles this
-    // wiki does not have would have been the harder route.
+    // ⚠ POSTPOSED — kiloomeeteer kaaree (squared), meeteer kubik (cubed). Both come from ff.wikipedia rather
+    // than from spoken-corpus text, which attests no measure word at all: `kaaree` recurs across country and
+    // place articles, the class that cannot state its subject without an area figure. That is where a unit's
+    // measure word lives when the language has no maths articles.
     //
     // ⚠ `kaare` AND `kaaree` ARE DIFFERENT WORDS, one letter apart, and the shorter one is the SHAPE:
     // "Suudu juulirde nduu ko kaare, ceŋol mum ko dome mawɗo" (the prayer hall is square, with a dome).

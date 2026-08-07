@@ -2,10 +2,10 @@
  * Faroese (fo) phonemizer — føroyskt, North Germanic (Insular Scandinavian, sibling of Icelandic), Latin + ⟨á í ó
  * ú ý æ ø ð⟩, canonical IPA. One of the DEEPEST orthographies in the fleet. A greedy grapheme
  * scan where the CORE rule is that vowel LENGTH conditions vowel QUALITY:
- *   ★ a stressed vowel is LONG (often diphthongal) in an OPEN syllable / before ≤1 consonant, SHORT (monophthong)
+ *   ⚠ a stressed vowel is LONG (often diphthongal) in an OPEN syllable / before ≤1 consonant, SHORT (monophthong)
  *     before a cluster — a→[ɛaː]/[a], á→[ɔaː]/[ɔ], ó→[ɔuː]/[œ], ú→[ʉuː]/[ʏ], í ý→[ʊiː]/[ʊi], etc.
- *   ★ NO voicing contrast: ⟨b d g⟩→[p t k] (pre-aspiration of ⟨p t k⟩ + length are FOLDED for the referee).
- *   ★ ⟨ð⟩ is largely SILENT (etymological) — intervocalic ⟨ð⟩ and ⟨g⟩ delete (aðal→ɛaːal, agað→ɛaːa); ⟨g k⟩ →
+ *   ⚠ NO voicing contrast: ⟨b d g⟩→[p t k] (pre-aspiration of ⟨p t k⟩ + length are FOLDED for the referee).
+ *   ⚠ ⟨ð⟩ is largely SILENT (etymological) — intervocalic ⟨ð⟩ and ⟨g⟩ delete (aðal→ɛaːal, agað→ɛaːa); ⟨g k⟩ →
  *     the affricate [t͡ʃ] before a front vowel (argi→aɹt͡ʃɪ); retroflex r-clusters ⟨rn rt rd rs rl⟩→[ɻɳ ʈ ɖ ʂ ɭ];
  *     ⟨ll⟩→[tl]; ⟨v⟩→[u] before a consonant (diphthong) / [v] intervocalic; ⟨hv⟩→[kv], ⟨hj⟩→[j].
  * Referee: wikipron fao_latn_broad (human, 3024).
@@ -87,7 +87,7 @@ export function phonemizeWord(word: string): string {
         const pair = VOWEL[s.g]!;
         s.ph = s.stressed && s.long ? pair[0] : pair[1];
     }
-    // ★ SKERPING (skerping/"sharpening"): a vowel before ⟨gv⟩ raises/shortens — ó→[ɛ], ú→[ɪ], í ý→[ʊi] (dúgva→tɪkva,
+    // ⚠ SKERPING (skerping/"sharpening"): a vowel before ⟨gv⟩ raises/shortens — ó→[ɛ], ú→[ɪ], í ý→[ʊi] (dúgva→tɪkva,
     // ógv→ɛkv); the ⟨g⟩ stays [k]. A hallmark of the deep orthography.
     for (let k = 0; k < segs.length - 2; k++) {
         const v = segs[k]!;
@@ -190,10 +190,10 @@ function nasalPass(segs: Seg[]): void {
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
+ * core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-záíóúýæøðþA-ZÁÍÓÚÝÆØÐÞ'-]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
