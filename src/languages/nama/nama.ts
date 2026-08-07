@@ -1,20 +1,19 @@
 /**
- * Native Nama / Khoekhoe (naq) text phonemizer — Khoekhoegowab, canonical IPA. Nama (Khoekhoe/
- * Damara) is a KHOE-KWADI language of Namibia/South Africa/Botswana (~250k) — the fleet's FIRST CLICK language. The
- * Khoekhoegowab Latin orthography writes the four click TYPES with the Unicode click letters and their ACCOMPANIMENT
- * (efflux) with a following letter; a greedy scan handles them.
+ * Nama / Khoekhoe (naq) phonemizer — Khoekhoegowab, a KHOE-KWADI language of Namibia/South Africa/Botswana
+ * (~250k), canonical IPA. The Khoekhoegowab Latin orthography writes the four click TYPES with the Unicode
+ * click letters and their ACCOMPANIMENT (efflux) with a following letter; a greedy scan handles them.
  *
- *   ★★ THE CLICKS — four places × five accompaniments:
+ *   ⚠ THE CLICKS — four places × five accompaniments, and the efflux is written AFTER the click letter:
  *     place:  ⟨ǀ⟩ dental · ⟨ǁ⟩ lateral · ⟨ǂ⟩ palatal · ⟨ǃ⟩ alveolar
  *     efflux: BARE ⟨ǀ⟩→[ᵑ̊ǀˀ] (glottalised nasal) · ⟨ǀg⟩→[ᵏǀ] (tenuis) · ⟨ǀkh⟩→[ᵏǀʰ] (aspirated) ·
  *             ⟨ǀh⟩→[ᵑ̊ǀʰ] (aspirated nasal) · ⟨ǀn⟩→[ᵑǀ] (voiced nasal) — uniform across all four places.
- *   ★ Non-click: ⟨kh⟩→[kʰ], ⟨g⟩ (not after a click)→[x], ⟨w⟩→[w]; the WORD-FINAL gender suffix ⟨-b⟩ devoices to [p]
- *     (ǀgomab→[ǀómàp]), ⟨-s⟩ stays. Vowels a e i o u, with the CIRCUMFLEX = NASALIZED (⟨â⟩→[ã], phonemic in Nama) and
- *     a MACRON or DOUBLED vowel = LONG (⟨ā⟩/⟨aa⟩→[aː]). Nama's lexical TONE (H/L, marked with an acute/grave in the
- *     narrow referee) is NOT written in the orthography and not emitted (it folds).
+ *   · Non-click: ⟨kh⟩→[kʰ], ⟨g⟩ (not after a click)→[x], ⟨w⟩→[w]; the WORD-FINAL gender suffix ⟨-b⟩ devoices
+ *     to [p] (ǀgomab→[ǀómàp]), ⟨-s⟩ stays. Vowels a e i o u, with the CIRCUMFLEX = NASALIZED (⟨â⟩→[ã],
+ *     phonemic in Nama) and a MACRON or DOUBLED vowel = LONG (⟨ā⟩/⟨aa⟩→[aː]).
+ *   · Nama's lexical TONE (H/L) is NOT written in the orthography and is not emitted.
  *
- * 🔷 thin, largely REFERENCE-PARITY: the referee (English Wiktionary "Khoekhoe terms with IPA pronunciation", 46) is
- * dominated by the click-letter DEFINITIONS (the orthography→IPA spec we implement), with a few real words as an
+ * ⚠ THINLY VERIFIED, and largely against the SPEC rather than against usage: the available IPA attestation is
+ * dominated by the click-letter definitions this file implements, with only a few real words as an
  * independent check.
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -83,16 +82,12 @@ export function phonemizeWord(word: string): string {
 
 // Nama Latin + the click letters ǀ ǁ ǂ ǃ. Word / number / punctuation.
 /**
- * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so
- * nothing about the orthography is invented here. A token this REJECTS carries a letter the language does not
- * use, i.e. a foreign name.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class below decides where
+ * the SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A
+ * token this class REJECTS carries a letter the language does not use — i.e. a foreign name, which `nat`
+ * then folds to a base the g2p does have a rule for. See core/hostWord.ts.
  */
 const NATIVE_CLASS = "[a-zA-Zǀǁǂǃ]";
-/**
- * NATIVISE a foreign name: fold an out-of-inventory accent to a base this g2p has a rule for. `NATIVE_CLASS`
- * above is the inventory — a word it rejects carries a letter this language does not use. See
- * `core/hostWord.ts` for why the inventory and the script boundary are two different questions.
- */
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 // ⚠ ALL OF LATIN, not just this language's own letters — the narrow class ended the token at an

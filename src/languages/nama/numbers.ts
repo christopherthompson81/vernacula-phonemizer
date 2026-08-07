@@ -6,7 +6,7 @@
  * language's own newspapers write the Afrikaans/Dutch-shaped loans with native Khoekhoegowab suffixes. So: native
  * where native exists, loan only where it does not, and nothing invented in between.
  *
- * ★ SOURCES
+ * SOURCES
  *   - **1–10, 11–19, 20–90, 21–99**: Wiktionary `Category:Khoekhoe numerals` (which contains exactly the ten unit
  *     stems below and nothing else — https://en.wiktionary.org/wiki/Category:Khoekhoe_numerals), Omniglot "Numbers
  *     in Khoekhoe" (https://www.omniglot.com/language/numbers/khoekhoe.htm), the Peace Corps *Khoekhoegowab Made
@@ -27,7 +27,7 @@
  *     (Incidental but useful finding from the same corpus: Khoekhoegowab news writes the FIGURE as digits and
  *     spells only the magnitude word — exactly the input this compositor has to handle.)
  *
- * ★★ ORTHOGRAPHY — the engine's own conventions, and they matter here:
+ * ⚠ ORTHOGRAPHY — the engine's own conventions, and they matter here:
  *   - **TONE IS NOT WRITTEN** in standard Khoekhoegowab, so no tone diacritics appear below (nama.ts drops them
  *     anyway). The diacritics that DO appear are segmental: a CIRCUMFLEX is nasalisation, so 7 `hû` keeps it. A
  *     MACRON is length; the sources vary between `disi` and `dīsi` for 10, and we use the unmarked **`disi`**
@@ -39,7 +39,7 @@
  *   - 9 is **`khoese`**, not `khoesa`. The Peace Corps manual is internally inconsistent (khoesa in its 1–10 list
  *     but khoese-disi for 90); Wiktionary, Omniglot and UD all support khoese, so khoese it is.
  *
- * ★ COMPOSITION
+ * · COMPOSITION
  *   - 11–19: `disi` + UNIT + `ǀa`, written SOLID as one word (Disiǀguiǀa). No published analysis of the `-ǀa`
  *     connector was found — "and" is the obvious guess but is NOT asserted here.
  *   - round tens: UNIT + `disi`, and the multiplier **starts at TWO** — 20 is `ǀgamdisi`, never *ǀguidisi.
@@ -53,7 +53,7 @@
  *   - The seam between a MAGNITUDE and its remainder is rendered as a WORD BREAK (101 → `kaidisi ǀgui`), whereas
  *     the attested 1–99 patterns are solid. Spacing at that seam is the conservative choice: it commits to no
  *     morphology the sources do not show, and the corpus does write magnitude words as free words.
- *   - ★★ **ZERO = `nul`, AN UNATTESTED AFRIKAANS CONTACT-LOAN STOPGAP — NOT a Khoekhoegowab numeral.** Label it
+ *   - ⚠ **ZERO = `nul`, AN UNATTESTED AFRIKAANS CONTACT-LOAN STOPGAP — NOT a Khoekhoegowab numeral.** Label it
  *     as such wherever it surfaces. **No native zero could be sourced.** Searched, all clean negatives:
  *     Wiktionary `Category:Khoekhoe numerals` (contains exactly the ten unit stems, no zero), Omniglot, the UD
  *     Khoekhoe treebank corpus + lexicon, a full-text extraction of the Peace Corps manual grepped for

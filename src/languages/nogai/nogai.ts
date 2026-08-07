@@ -1,20 +1,21 @@
 /**
- * Nogai (nog) phonemizer — ногай тили, Kipchak Turkic (Kipchak-Nogai / South-Kipchak, close to Kazakh/Karakalpak),
- * CYRILLIC script, ~90k (North Caucasus + Turkey). Canonical IPA. A near-deterministic Cyrillic
- * grapheme scan — Nogai's orthography WRITES the uvulars (⟨къ⟩→[q], ⟨гъ⟩→[ʁ]) and the velar nasal (⟨нъ⟩→[ŋ]) as
- * DIGRAPHS, so — unlike Kazakh/Tatar, which infer ⟨к⟩→[q] from vowel harmony — ⟨к⟩ is always [k] and ⟨г⟩ always [ɡ]
- * (the Bashkir pattern, no harmony inference needed).
+ * Nogai (nog) phonemizer — ногай тили, Kipchak Turkic (Kipchak-Nogai / South-Kipchak, close to Kazakh and
+ * Karakalpak), CYRILLIC script, ~90k speakers (North Caucasus + Turkey). Canonical IPA.
  *
- *   ★ DIGRAPHS (longest-match, two Cyrillic characters): the FRONT vowels ⟨аь⟩→[æ], ⟨оь⟩→[ø], ⟨уь⟩→[y] (soft-sign
- *     ь), and the back consonants ⟨гъ⟩→[ʁ], ⟨къ⟩→[q], ⟨нъ⟩→[ŋ] (hard-sign ъ), plus ⟨дж⟩→[d͡ʒ].
- *   ★ Simple vowels ⟨а е и о у ы э⟩→[a e i o u ɯ e]; ⟨ы⟩ is the back unrounded [ɯ]. Iotated ⟨я ю ё⟩→[ja ju jo] and
- *     word-initial / post-vocalic ⟨е⟩→[je]. ⟨ж⟩→[ʒ], ⟨ш⟩→[ʃ], ⟨ч⟩→[t͡ʃ], ⟨х⟩→[x], ⟨й⟩→[j].
- *   ★ ⟨в⟩ → [w] post-vocalically in a coda (сув→suw, тав→taw — the native Turkic /w/) but [v] as an onset (loans).
- *   ★ Word-final (oxytone) stress — the Turkic default.
+ * A near-deterministic Cyrillic grapheme scan. ⚠ NOGAI WRITES THE UVULARS AS DIGRAPHS — ⟨къ⟩→[q], ⟨гъ⟩→[ʁ] —
+ * and the velar nasal too (⟨нъ⟩→[ŋ]), so unlike Kazakh and Tatar, which INFER ⟨к⟩→[q] from vowel harmony,
+ * here ⟨к⟩ is always [k] and ⟨г⟩ always [ɡ]. No harmony inference is needed anywhere in this file.
  *
- * REFEREE-LIMITED (the st/umb/bal mold): Nogai has essentially no orthographic-IPA attestation (1 kaikki word,
- * туькен→tyken; no wikipron/epitran). The g2p is authored from documented Kipchak-Nogai phonology and corroborated
- * (coarsely, inventory-only) by the ASJP Nogai Swadesh list.
+ *   · DIGRAPHS (longest-match, two Cyrillic characters): the FRONT vowels ⟨аь⟩→[æ], ⟨оь⟩→[ø], ⟨уь⟩→[y]
+ *     (soft-sign ь), the back consonants ⟨гъ⟩→[ʁ], ⟨къ⟩→[q], ⟨нъ⟩→[ŋ] (hard-sign ъ), plus ⟨дж⟩→[d͡ʒ].
+ *   · Simple vowels ⟨а е и о у ы э⟩→[a e i o u ɯ e]; ⟨ы⟩ is the back unrounded [ɯ]. Iotated ⟨я ю ё⟩→[ja ju
+ *     jo], and word-initial / post-vocalic ⟨е⟩→[je]. ⟨ж⟩→[ʒ], ⟨ш⟩→[ʃ], ⟨ч⟩→[t͡ʃ], ⟨х⟩→[x], ⟨й⟩→[j].
+ *   · ⟨в⟩ → [w] post-vocalically in a coda (сув→suw, тав→taw — the native Turkic /w/) but [v] as an onset,
+ *     which is where the loans put it.
+ *   · Word-final (oxytone) stress — the Turkic default.
+ *
+ * ⚠ THINLY ATTESTED: Nogai has essentially no orthographic-IPA data to check against. The g2p is authored
+ * from documented Kipchak-Nogai phonology and corroborated only coarsely, at the inventory level.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

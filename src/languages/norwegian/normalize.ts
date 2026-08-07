@@ -63,7 +63,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * `t` and `h` are declared, for the same reason Danish declares both.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
+    // `multiply` — this language's OWN word, harvested from its existing `×` rule, so nothing new is
     // sourced. Declaring it here is what makes ASCII `x` read like `×`: `6x6 cm` read the `x` as a LETTER NAME,
     // and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` defaults to it.
     multiply: { times: "ganger" },
@@ -213,7 +213,7 @@ export function normalizeNorwegian(input: string): string {
     //     English. All five words are in the NST lexicon (kroner, dollar, euro, pund, yen); the corpus
     //     carries ¥ only (3 instances, all `¥N`), and the sign was dropped outright so the amount read as
     //     a bare number. The others are included because a phonemizer is handed arbitrary text, not only
-    //     this corpus — which is the #584 lesson about a corpus-shaped blind spot.
+    //     this corpus — a phonemizer is handed arbitrary text, not only a corpus.
     for (const [sign, word] of Object.entries(CURRENCY))
         t = t.replace(new RegExp(`${sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\s*(\\d[\\d ]*)`, "gu"), `$1 ${word}`);
 
@@ -221,10 +221,9 @@ export function normalizeNorwegian(input: string): string {
     //     `+30°C` read as plain "tretti grader" and `UTC +1` lost the offset entirely. Measured, the plus
     //     is the MORE common half of this category (5 in nb_no against 1 minus), which is why the miner's
     //     cell now covers both signs rather than the minus alone. Both words are in the NST lexicon.
-    //     Runs AFTER ranges so a range's dash is already gone, and requires a boundary before the sign so
-    //     a hyphenated compound is untouched. Unlike Burmese, Norwegian does write a bare negative temperature, and `minus` is in the
-    //     lexicon. Requires a boundary before the sign so a hyphenated compound is untouched, and runs
-    //     AFTER ranges so a range's dash is already gone.
+    //     ⚠ Runs AFTER ranges, so a range's dash is already gone, and requires a boundary before the sign
+    //     so a hyphenated compound is untouched. Norwegian does write a bare negative temperature, and
+    //     `minus` is in the lexicon.
     t = t.replace(/(?<![\p{L}\d])([-−+])(\d+)/gu, (_m, sign: string, n: string) =>
         `${sign === "+" ? "pluss" : "minus"} ${n}`);
 
