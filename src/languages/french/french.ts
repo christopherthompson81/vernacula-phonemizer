@@ -30,17 +30,16 @@ function lexicon(): Map<string, string> {
  * every key here is absent from Lexique, so the two can never disagree and Lexique stays authoritative
  * for everything it covers.
  *
- * The entries exist because normalize.ts now EMITS words the corpus never contained, so words that were
- * previously unreachable are suddenly on the hot path: `20 °C` → "degrés celsius", where the g2p drops
- * the final ⟨s⟩ that French sounds in this Latin loan ([sɛlsjys], not [sɛlsjy]).
+ * ⚠ THE ENTRIES EXIST BECAUSE normalize.ts EMITS WORDS ORDINARY TEXT NEVER CONTAINS, so a word that was
+ * previously unreachable is suddenly on the hot path: `20 °C` → "degrés celsius", where the g2p drops the
+ * final ⟨s⟩ that French sounds in this Latin loan ([sɛlsjys], not [sɛlsjy]).
  *
- * Audited rather than guessed: all 118 words the normalizer can emit were checked against Lexique, 22
- * were absent, and each of those 22 was compared to its expected IPA. Only three were actually wrong,
- * which is why this file is three lines and not twenty-two.
+ * Audited rather than guessed: every word the normalizer can emit was checked against Lexique, and only the
+ * ones actually wrong are listed — which is why this is three lines and not twenty-two.
  *
- * DELIBERATE NON-ENTRY: `Jésus-Christ`. The g2p gives [ʒezykʁist] and the traditional dictionary form is
- * [ʒezykʁi], but both are current in speech, so the existing reading is a legitimate variant rather than
- * a defect and is left alone.
+ * ⚠ DELIBERATE NON-ENTRY: `Jésus-Christ`. The g2p gives [ʒezykʁist] and the traditional dictionary form is
+ * [ʒezykʁi], but both are current in speech, so the existing reading is a legitimate variant rather than a
+ * defect and is left alone.
  */
 let SUPPLEMENT: Map<string, string> | undefined;
 function supplement(): Map<string, string> {
@@ -128,11 +127,11 @@ function accentFinal(tokens: string[]): void {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// The word class admits an internal HYPHEN as well as an apostrophe, so a hyphenated compound arrives as
-// one token and can resolve against Lexique's ~4.2k attested compounds (dix-septième → [disɛtjɛm],
-// peut-être → [pøtɛtʁ]). Splitting at the hyphen phonemized each half in isolation, which lost exactly
-// the compound-internal liaison the hyphen marks. The hyphen must sit BETWEEN letters, so a dash between
-// words ("Paris — Lyon") and a digit range ("1918-1939") are unaffected.
+// ⚠ THE WORD CLASS ADMITS AN INTERNAL HYPHEN as well as an apostrophe, so a hyphenated compound arrives as
+// ONE token and resolves against Lexique's attested compounds (dix-septième → [disɛtjɛm], peut-être →
+// [pøtɛtʁ]). Splitting at the hyphen phonemizes each half in isolation and loses exactly the
+// compound-internal liaison the hyphen marks. The hyphen must sit BETWEEN letters, so a dash between words
+// ("Paris — Lyon") and a digit range ("1918-1939") are unaffected.
 const TOKEN =
     /([a-zà-ÿœæ]+(?:[-'’][a-zà-ÿœæ]+)*)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/giu;
 
@@ -158,14 +157,10 @@ function stripLatent(ipa: string, c: string): string {
     return LATENT[c]?.test(ipa) ? ipa.slice(0, -1) : ipa;
 }
 
-// #562 symbol normalization — French words for %, currency signs, and unit abbreviations.
+// French words for %, currency signs, and unit abbreviations.
 const SYMBOLS = makeSymbolNormalizer({
-    // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
-    // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.
-    // et is ×2234 TOKEN in this language's own corpus, i.e. among its commonest words; there was nothing to source.
-    //
-    // A Latin-script printing LIGATURE rather than anything native, so what it takes is a reading and not a
-    // translation: for a language written in Latin script that is its own conjunction, and for one that is not,
+    // ⚠ THE AMPERSAND IS A LATIN-SCRIPT PRINTING LIGATURE, so what it takes is a READING and not a
+    // translation. For a language written in Latin script that is its own conjunction; for one that is not,
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "et",
