@@ -41,9 +41,9 @@ describe("french canonical IPA", () => {
     });
 
     test("numbers (vigesimal 70/80/90)", () => {
-        // The sub-100 group is ONE hyphenated word, so it resolves against the Lexique compounds and
-        // the compound-internal liaison survives. These two expectations previously pinned the
-        // space-separated readings, which phonemized each piece in isolation and lost it.
+        // ⚠ The sub-100 group must stay ONE hyphenated word, so it resolves against the Lexique compounds
+        // and the compound-internal liaison survives. Split on the hyphen, each piece phonemizes in
+        // isolation and the liaison is lost.
         expect(phonemize("21", "fr")).toBe("vɛ̃teˈœ̃"); // vingt-et-un — the t liaison, per Lexique vɛ̃teœ̃
         expect(phonemize("342", "fr")).toBe("tʁwa sɑ̃ kaʁɑ̃tdˈø"); // trois cent quarante-deux
     });
@@ -91,7 +91,7 @@ describe("french canonical IPA", () => {
         expect(phonemize("le siècle", "fr")).toBe("lə sjˈɛkl");
     });
 
-    // text normalization (normalize.ts): the ordered pipeline that rewrites everything which is not
+    // TEXT NORMALIZATION (normalize.ts) — the ordered pipeline that rewrites everything which is not
     // already a pronounceable word. Grouped by the class of thing being normalized.
     test("times: the hour marker is spoken, with feminine agreement", () => {
         // "11 h 20" previously read as "onze vingt" — the h vanished entirely — and the colon form turned
@@ -134,7 +134,7 @@ describe("french canonical IPA", () => {
         expect(phonemize("la SNCF", "fr")).toBe("la ɛs ɛn se ˈɛf"); // was the cluster [snkf]
         expect(phonemize("le TGV", "fr")).toBe("lə te ʒe vˈe"); // was DROPPED from the output entirely
         expect(phonemize("les USA", "fr")).toBe("le zy ɛs ˈa"); // readable, but conventionally spelled out
-        // Lexicalized acronyms stay words — these regressed to letters when the rule first went in.
+        // ⚠ Lexicalized acronyms stay WORDS — an initialism rule with no exception list spells these out.
         expect(phonemize("l'ONU", "fr")).toBe("lɔnˈy");
         expect(phonemize("l'UNESCO", "fr")).toBe("lynɛskˈo");
         // An all-caps ordinary word is not an initialism, and a Roman numeral gets first refusal.

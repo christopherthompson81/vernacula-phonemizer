@@ -7,8 +7,7 @@ import { numberToWords } from "../src/languages/faroese/numbers.ts";
 // Canonical-IPA goldens for Faroese / føroyskt (fo) — North Germanic (Insular Scandinavian, sibling of Icelandic),
 // one of the deepest orthographies in the fleet. The core rule is that vowel LENGTH conditions vowel QUALITY
 // (open syllable → long/diphthongal, closed → short/monophthong); plus b/d/g→p/t/k, intervocalic ð/g→glide,
-// g/k→t͡ʃ before front vowels, skerping, ng-palatalization. Validated 57.1% folded / 88.6% symbol vs wikipron
-// fao_latn_broad (human, 3024).
+// g/k→t͡ʃ before front vowels, skerping, ng-palatalization. Referee: wikipron fao_latn_broad (human).
 describe("Faroese (føroyskt) canonical IPA", () => {
     test("length-conditioned vowel quality (open→long, closed→short) + b/d/g→p/t/k", () => {
         expect(phonemizeWord("maður")).toBe("mɛaːvʊɹ"); // open: a→[ɛaː] long; ð→[v] (round u); m man
@@ -58,5 +57,4 @@ describe("Faroese (føroyskt) canonical IPA", () => {
         expect(getPhonemizer("fo").text("21").trim()).toBe("aiːnɔkt͡ʃʏvʊ"); // einogtjúgu
         expect(getPhonemizer("fo").text("1000").trim()).toBe("ait tʉuːsʊnt"); // eitt túsund
     });
-
 });

@@ -5,10 +5,11 @@ import { scriptOf } from "../src/core/scripts.ts";
 
 import { phonemize } from "../src/index.ts";
 
-// An engine's tokenizer only matches its own script, and assembleClauses skips whatever the tokenizer
-// does not claim — so 47 engines DROPPED embedded Latin outright (a brand name, acronym, loanword or
-// code-switched phrase). Measured in FLEURS that was 3-15% of utterances per language. The shared
-// unclaimed-run pass (core/clauses.ts + core/foreign.ts) now reads those runs as English.
+// ⚠ AN ENGINE'S TOKENIZER ONLY MATCHES ITS OWN SCRIPT, and assembleClauses SKIPS whatever the tokenizer does
+// not claim — so without a fallback every engine drops embedded Latin outright (a brand name, acronym,
+// loanword or code-switched phrase), which in FLEURS is 3-15% of utterances per language. The dropped run
+// leaves grammatical output, so no leak or length gate can see it. The shared unclaimed-run pass
+// (core/clauses.ts + core/foreign.ts) reads those runs with a reader chosen by script.
 describe("embedded foreign (Latin) runs", () => {
     // One per script family that was affected, spanning both the assembleClauses path and the two
     // engines with custom scan loops (Burmese) or an over-broad token class (Georgian).
@@ -57,10 +58,9 @@ describe("embedded foreign (Latin) runs", () => {
         expect(after.indexOf("vʲek")).toBeLessThan(after.indexOf("həl"));
     });
 
-    // SUPERSEDED. This test used to assert that a third script stays dropped — the deliberate scope of
-    // the original Latin-only fallback. core/scripts.ts generalises it: a run is now routed to a reader
-    // chosen by its SCRIPT, so the Han is read as Mandarin instead of vanishing. The old behaviour was a
-    // silent DROP, invisible to every leak-based check, which is the same blindness a dropped sign always has.
+    // ⚠ The fallback is NOT Latin-only: core/scripts.ts routes a run to a reader chosen by its SCRIPT, so
+    // Han inside Russian is read as Mandarin rather than vanishing. A dropped run is a silent DROP,
+    // invisible to every leak-based check — the same blindness a dropped sign always has.
     test("a third script is routed to a reader for that script, not dropped", () => {
         const out = phonemize("век 世界", "ru");
         expect(out.startsWith("vʲek")).toBe(true);
@@ -158,19 +158,18 @@ describe("hmong and tashelhit read embedded foreign runs", () => {
     });
 });
 
-// The whole point of the sweep: no engine silently discards a run in a script it does not own.
+// THE INVARIANT: no engine silently discards a run in a script it does not own.
 test("no registered engine drops a foreign run outright", () => {
     for (const lang of ["en", "en-GB", "en-IN", "fr", "fr-CA", "yue", "wuu", "nan", "cdo", "gan", "hak", "hsn", "cjy", "hmn", "shi"]) {
         expect(phonemize("7 Москва 7", lang), lang).not.toBe(phonemize("7  7", lang));
     }
 });
 
-// The router's script table was first written from the "obvious" scripts, and silently dropped every run
-// in one it did not list. It took THREE passes to find them all — thirteen scripts with engines in this
-// fleet, then five more that the README's own example list exercises (Adlam, N'Ko, Syloti Nagri,
-// Javanese, Sundanese). The lesson is that the set must be DERIVED from what the fleet can read, never
-// recalled — so this test reads the README rather than carrying a hand-kept list, and a new engine whose
-// script nobody routed fails here instead of vanishing from someone's output.
+// ⚠ THE ROUTED-SCRIPT SET MUST BE DERIVED, NEVER RECALLED. A table written from the "obvious" scripts
+// silently drops every run in one it does not list, and the misses are exactly the scripts nobody thinks
+// of (Adlam, N'Ko, Syloti Nagri, Javanese, Sundanese all had engines before anything routed them). So this
+// test reads the README's own examples rather than carrying a hand-kept list: a new engine whose script
+// nobody routed fails HERE instead of vanishing from someone's output.
 describe("script routing covers every script the README exercises", () => {
     const README = readFileSync(new URL("../README.md", import.meta.url), "utf8");
     const EXAMPLE = /phonemize(?:Async)?\(\s*"([^"]+)"\s*,\s*"([a-zA-Z-]+)"/gu;
