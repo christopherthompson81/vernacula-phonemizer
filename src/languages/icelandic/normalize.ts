@@ -8,7 +8,7 @@
  *   Latin units N km     57      period-grouped N.NNN  22      ranges N–N  12
  *   colon clock HH:MM    10      decimal comma N,N      8      percent N %  2      km²  2
  *
- * ★ ICELANDIC ORDINALS AGREE IN GENDER AND CASE, which is what makes this file different from the
+ * ⚠ ICELANDIC ORDINALS AGREE IN GENDER AND CASE, which is what makes this file different from the
  * Norwegian and Danish ones where a single ordinal form served. The weak adjective declension is:
  *
  *     -i   masculine NOMINATIVE only

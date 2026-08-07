@@ -1,37 +1,21 @@
 /**
- * Irish (ga) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already
- * a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Irish (ga) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * MEASURED over the 1,944 unique cased ga_ie FLEURS utterances (column 3):
- *   `Nú` ordinals ×~40 (7ú, 11ú, 12ú, 13ú, 15ú, 18ú, 20ú, 60ú, 25ú — the corpus's own ordinal digits;
- *     the prose spells "an chéad"/"an dara"/"an tríú")
- *   comma-thousands ×32 (1,400, 400,000, 19,500, 5,000,000) + dot-decimals (1.5, 4.2-3.9)
- *   clocks ×19 (11:35 i.n., 8:30 p.m., 1:15 r.n. — i.n./r.n. = iarnóin/réamhnóin p.m./a.m.)
- *   era markers ×8 (400 A.D., 1000 R.C. — A.D. = tar éis Chríost, R.C. = roimh Chríost)
- *   rates ×8 (70km/h, 160km/u, 35-40 msu — msu = míle san uair mph, km/u = km/h)
- *   currency ×7 (US$14.7, ¥2,500, £27) · percent ×3 (faoin gcéad — the tier owns it)
- *   degrees ×2 (30°C, 35°W longitude) · fractions ×2 (29¾, 24½, 1/5)
- *   abbrev (N.A. = Náisiúin Aontaithe UN, S.A. = Stáit Aontaithe USA, Dr., etc.)
- *   initialisms ×128 (NHK, APS, KNP, PA, FIC, MS, XDR-TB, PSTN) · ranges ×14 · &amp; ×3
- *   zero-width ×18 (U+200B characters in the corpus)
+ * ⚠ THE ORDINAL IS A NUMERAL PLUS `ú` (7ú, 11ú, 190ú), which unhandled reads as the bare vowel — `1ú` comes
+ * out *ˈa hˈeːn̪ˠ ˈuː*. The prose spells the low ordinals out instead ("an chéad", "an dara", "an tríú").
  *
- * WHAT WAS BROKEN, verbatim from the pre-change engine:
- *   `1ú`           → `ˈa hˈeːn̪ˠ ˈuː`       the ordinal suffix read as the bare vowel "ú"
- *   `190ú`         → `cˈeːd̪ˠ n̪ˠˈoːxə ˈuː`   the ordinal suffix read as "ú"
- *   `1,400`        → `ˈa hˈeːn̪ˠ , cˈɛhɾʲə çˈeːd̪ˠ`  the comma-thousands became a pause
- *   `11:35 i.n.`   → `… pˠ . mˠ .`          the colon pause + [i.n.] letter-spelled
- *   `400 A.D.`     → `… ˈad̪ˠ`               the era marker read as "ad"
- *   `1000 R.C.`    → `… bˠk`                the era marker read as the cluster [bk]
- *   `1.5 million`  → `ˈa hˈeːn̪ˠ . ˈa kˈuːɟ`  the dot-decimal became a pause
- *   `160km/h`      → `… cˈɪlʲəmʲeːd̪ˠəɾˠ h`   the rate read the /h as a letter
- *   `30°C`         → `tʲɾʲˈiːxə k`          the degree dropped to [k]
- *   `B&Banna`      → the & dropped
- *   `BBC`          → [bˠk]  `IRL` → [ˈɪɾʲl̪ˠ]  `GAA` → [ɡˈaə]  initialisms as clusters
+ * ⚠ THE CLOCK AND ERA MARKERS ARE IRISH ABBREVIATIONS, not English ones: `i.n.` / `r.n.` are iarnóin and
+ * réamhnóin (p.m. / a.m.), `A.D.` is tar éis Chríost and `R.C.` roimh Chríost. Left alone they letter-spell
+ * or collapse to a cluster — `1000 R.C.` reads [bk].
  *
- * WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text
- * so the word path stresses them; the comma-thousands and dot-decimal stay DIGITS so the shared symbol
- * tier can still see the number adjacent to its unit/sign — the tier is composed AFTER this pass in
- * irish.ts, and the TOKEN swallows the separators (see irish.ts).
+ * ⚠ THE RATE DENOMINATORS ARE IRISH TOO: `km/u` is the Irish spelling of km/h (uair = hour), and `msu` is
+ * míle san uair, i.e. mph. A rule keyed on the English abbreviations alone misses both.
+ *
+ * ⚠ WHY THE NUMBER RULES RUN HERE AND NOT IN THE TOKENIZER. The ordinal's spoken words must be plain text so
+ * the word path stresses them; the comma-thousands and dot-decimal stay DIGITS so the shared symbol tier can
+ * still see the number adjacent to its unit or sign. The tier is composed AFTER this pass in irish.ts, and
+ * the TOKEN swallows the separators.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords as irishNumber } from "./numbers.ts";
