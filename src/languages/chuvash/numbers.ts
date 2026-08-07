@@ -2,7 +2,7 @@
  * CHUVASH (chv) cardinal number composition — the SOLE surviving OGHUR (Bulgaric) Turkic language, Cyrillic.
  * Authored DATA + the compositor; words in Chuvash's own orthography, phonemized by chuvash.ts.
  *
- * ★ Chuvash is researched SEPARATELY from the Common-Turkic seven, and it needed to be — its numerals are not the
+ * ⚠ Chuvash is researched SEPARATELY from the Common-Turkic seven, and it needed to be — its numerals are not the
  *   Kipchak/Oghuz set with a sound-shift applied, and its composition has two features none of tr/tk/tt/ba/kaa/crh/
  *   nog has:
  *

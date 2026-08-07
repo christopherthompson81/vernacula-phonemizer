@@ -6,7 +6,7 @@
  * suffixing the TENS word, not the unit word.
  *
  * SOURCES (two, layered):
- *  ★ 0–100 — Cherokee Nation Language Department, "Numbers 1 – 100 written in the Cherokee syllabary"
+ *  ⚠ 0–100 — Cherokee Nation Language Department, "Numbers 1 – 100 written in the Cherokee syllabary"
  *    (language.cherokee.org/posters/syllabary-and-numbers/, media/nvafexqb/numbers.pdf). Every one of the
  *    101 forms below 101 is copied from that poster, including the clipped compounds it spells out in full:
  *    "21- ᏔᎵᏍᎪ ᏌᏊ … 99- ᏐᏁᎳᏍᎪ ᏐᏁᎳ", "100- ᏍᎪᎯᏥᏆ".
@@ -17,7 +17,7 @@
  *    outright: "The number words above twenty consist of the base ten numeral followed by the single number."
  *    Note the grammar's example 54 writes 21 UNCLIPPED (thalskohi saakwuu); the Nation's syllabary poster
  *    clips it (ᏔᎵᏍᎪ ᏌᏊ). The poster wins here — it is the syllabary-native source and spells all 79 compounds.
- *  ★ 0, and 200–1000 — English Wiktionary Cherokee numerals (ᏃᏘ 'nought/zero', a borrowing from English;
+ *  ⚠ 0, and 200–1000 — English Wiktionary Cherokee numerals (ᏃᏘ 'nought/zero', a borrowing from English;
  *    ᏍᎪᎯᏥᏆ 'hundred'; ᎢᏯᎦᏴᎵ 'thousand') + Omniglot "Numbers in Cherokee" for the 200–900 series
  *    (omniglot.com/language/numbers/cherokee.htm: ᏔᎵᏍᎪᎯᏥᏆ 200, ᏦᏍᎪᎯᏥᏆ 300, … ). Neither the poster nor
  *    the grammar goes above 100.
