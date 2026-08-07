@@ -58,7 +58,7 @@ describe("Sindhi canonical IPA", () => {
 });
 
 // Quantity-sensitive weight stress (the shared hi/ur/pa Indo-Aryan rule): rightmost superheavy,
-// else rightmost NON-FINAL heavy, else initial. Sindhi previously emitted no stress at all.
+// else rightmost NON-FINAL heavy, else initial.
 describe("Sindhi weight stress", () => {
     test("every word carries exactly one primary stress", () => {
         for (const w of ["ٻارو", "ڪتاب", "سنڌ", "پنج", "ٻه", "زبان"]) {

@@ -6,9 +6,8 @@ import { createRangpuri, phonemizeWord } from "../src/languages/rangpuri/rangpur
 // the shared Hindi abugida engine + a KRNB manifest. KRNB deltas: DEAFFRICATION (च/छ→s, ज→d͡z, झ→d͡zʱ); VOICED
 // aspirates RETAINED (घ झ ढ ध भ → ɡʱ d͡zʱ ɖʱ d̪ʱ bʱ), VOICELESS aspirates positional (ख ठ थ फ keep ʰ word-initially,
 // deaspirate elsewhere); inherent [ɔ], no vowel length, व→w, ण→n.
-// Validated against the Toulmin (2006) Appendix-A Rangpur referee (~370 Deva→IPA pairs) — 63.8% FOLDED / 86.8%
-// symbol (the folded number is a mix of ~two-column-PDF referee noise + residual fine-grained gaps; symbol acc higher).
-// single-source.
+// Referee: the Toulmin (2006) Appendix-A Rangpur list (~370 Deva→IPA pairs), the only one — ⚠ and it was
+// extracted from a TWO-COLUMN PDF, so part of the disagreement is extraction noise rather than engine error.
 describe("Rangpuri (KRNB) canonical IPA — Devanagari abugida + KRNB deltas", () => {
     const rkt = createRangpuri();
 

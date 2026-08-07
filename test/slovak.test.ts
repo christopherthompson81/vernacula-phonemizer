@@ -7,7 +7,7 @@ import { normalizeSlovak, ordinalWords } from "../src/languages/slovak/normalize
 // Slovak (sk) — West Slavic, Latin, sibling of Czech. Rule g2p (g2p.ts): palatalisation d/t/n/l→ɟ/c/ɲ/ʎ before soft
 // vowels i/í/e (y/ý are HARD), the rising diphthongs ⟨ia ie iu⟩→ɪ̯a/ɪ̯e/ɪ̯u and ⟨ô⟩→u̯ɔ, ⟨ä⟩→æ, syllabic l̩/r̩
 // (long ĺ/ŕ), ⟨v⟩ (onset→f before voiceless, coda stays v), ⟨h⟩=ɦ, ⟨ch⟩=x, gemination, voicing + final devoicing.
-// Scored 89.0% folded on wikipron slk_latn_broad (HUMAN, 15950).
+// Referee: wikipron slk_latn_broad (human, 15950).
 describe("Slovak canonical IPA — rule g2p (Standard Slovak)", () => {
     test("palatalisation d/t/n/l → ɟ/c/ɲ/ʎ before soft vowels; y/ý stay HARD", () => {
         expect(phonemizeWord("deň")).toBe("ɟˈeɲ"); // d→ɟ before e, ň→ɲ
