@@ -28,9 +28,8 @@ describe("english neural OOV tagger", () => {
             expect(await phonemizeEnNeural(s)).not.toBe(phonemize(s, "en"));
         });
 
-        // REGRESSION GUARD: the tagger emits ARPABET internally (K S for ⟨x⟩) and renders it to IPA. A raw uppercase
-        // ARPABET token leaking into the output (e.g. "…plɛKS") means a chunk-boundary bug — the output must be
-        // all-lowercase IPA.
+        // ⚠ The tagger emits ARPABET internally (K S for ⟨x⟩) and renders it to IPA. A raw uppercase ARPABET
+        // token in the output (e.g. "…plɛKS") means a chunk-boundary bug: the output must be all-lowercase IPA.
         test("no raw ARPABET leaks into OOV output (all-lowercase IPA)", async () => {
             for (const w of ["Zorplex", "Xylophraxy", "Quixotical", "Blexworth"]) {
                 const out = await phonemizeEnNeural(w);

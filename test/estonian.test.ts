@@ -5,8 +5,8 @@ import { createEstonian, phonemizeWord } from "../src/languages/estonian/estonia
 // Estonian (et, eesti keel) — Uralic (Finnic, ~1.1M), sibling of Finnish. A greedy phonemic grapheme scan +
 // gemination (double letter → [Cː]/[Vː]) + FIXED first-syllable stress. Estonian specifics: ⟨b d g⟩ are the
 // voiceless-lenis stops → plain b/d/ɡ, the 9 vowels incl. ⟨õ⟩→ɤ ⟨ä ö ü⟩→æ ø y, NO n→ŋ. Palatalization + the
-// three-way QUANTITY (half-long) are only partially orthographic → folded in the referee eval (94.0% folded /
-// 98.5% symbol vs wikipron est_latn_broad, 2,773 headwords).
+// three-way QUANTITY (half-long) are only partially orthographic → folded in the referee eval.
+// Referee: wikipron est_latn_broad.
 describe("Estonian canonical IPA — Finnic greedy g2p + gemination + first-syllable stress", () => {
     const et = createEstonian();
 
