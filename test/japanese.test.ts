@@ -111,13 +111,13 @@ describe("Japanese pitch accent", () => {
     });
 });
 
-// long-vowel coalescence used to run across MORPHEME boundaries, absorbing the next morpheme's initial
-// vowel into the previous one's length (経営 けい|えい → ke̞ːːː instead of ke̞ːe̞ː). Readings now carry their
+// ⚠ LONG-VOWEL COALESCENCE MUST NOT CROSS A MORPHEME BOUNDARY, or the next morpheme's initial vowel is
+// absorbed into the previous one's length (経営 けい|えい → ke̞ːːː instead of ke̞ːe̞ː). Readings carry their
 // boundaries (applyReadingSegments) and coalescence is confined to a segment. A compound whose stored reading
 // is NOT the sum of its characters' readings finds no alignment and stays fused — which is exactly the set
 // that legitimately DOES coalesce, so no exception list is needed.
 describe("Japanese morpheme-boundary coalescence", () => {
-    test("a boundary vowel is no longer absorbed into the preceding length", () => {
+    test("a boundary vowel is not absorbed into the preceding length", () => {
         expect(phonemizeWord("経営")).toBe("ke̞ːe̞ː"); // けい|えい — was ke̞ːːː
         expect(phonemizeWord("聖域")).toBe("se̞ːiki"); // せい|いき — was se̞ːːki
         expect(phonemizeWord("東欧")).toBe("to̞ːo̞ː"); // とう|おう — was to̞ːːː
@@ -156,13 +156,13 @@ describe("Japanese morpheme-boundary coalescence", () => {
     });
 });
 
-// residual — particle-boundary segmentation. Particles left fused to a following word let long-vowel
-// coalescence fire across the bunsetsu boundary (東京のうち read のう as [noː]); stranded particles split the
-// other way picked up pitch accents from the dictionary (85 で → de̞ꜜ). Three mechanisms: the extended
+// ⚠ PARTICLE SEGMENTATION IS WRONG IN BOTH DIRECTIONS. A particle left FUSED to a following word lets
+// long-vowel coalescence fire across the bunsetsu boundary (東京のうち reads のう as [noː]); a particle
+// STRANDED on its own picks up a pitch accent from the dictionary (85 で → de̞ꜜ). Three mechanisms: the extended
 // single/multi particle sets in segmentText, particle CHAINING (では/での stay attached to their content
 // word), and a pitch-layer guard (a bare particle token is always heiban).
 describe("Japanese particle segmentation", () => {
-    test("coalescence no longer crosses a particle boundary", () => {
+    test("coalescence does not cross a particle boundary", () => {
         expect(phonemizeText("そのうち")).toBe("so̞no̞ ɯᵝt͡ɕi"); // was so̞no̞ːt͡ɕi
         expect(phonemizeText("東京のうち")).toBe("to̞ːkʲo̞ːno̞ ɯᵝt͡ɕi"); // was …no̞ːt͡ɕi
         expect(phonemizeText("彼とうちに行く")).toContain("ɯᵝt͡ɕini"); // とう not folded
