@@ -248,13 +248,13 @@ const WORDISH = /[\p{L}\p{M}\p{Nd}]+/gu;
  * trailing-lookahead guard can pull it back. Scoping to the word and requiring a Cyrillic majority settles the
  * direction once, before any character is rewritten.
  *
- * ⚠ AN EXACT TIE DECLINES rather than guessing, so a half-and-half word is left to the Latin fold: `рaсa`
- * (2 Cyrillic, 2 Latin) is not repaired. Neither tie-break is safe — favouring Cyrillic would rewrite a
- * two-letter Latin word like `оk`, and favouring first-letter script fails the same way — so with no majority
- * there is no evidence, and the established Latin default stands. Same choice core/scripts.ts makes for a lone
- * Greek letter.
+ * ⚠ AN EXACT TIE IS BROKEN BY THE HOST LANGUAGE, not guessed from the word. `рaсa` is 2 Cyrillic and 2 Latin,
+ * and nothing in the word itself settles it — favouring Cyrillic would rewrite the two-letter Latin `оk`, and
+ * first-letter script fails the same way. The host language is the evidence the WORD does not carry: inside a
+ * Cyrillic-primary language (CYRILLIC_HOSTS) the tie folds to Cyrillic; anywhere else it declines and the
+ * established Latin default stands.
  */
-export function foldCyrillicConfusables(s: string): string {
+export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): string {
     if (!/\p{Script=Cyrillic}/u.test(s)) return s;
     return s.replace(WORDISH, (w) => {
         let cyr = 0, lat = 0;
@@ -262,7 +262,8 @@ export function foldCyrillicConfusables(s: string): string {
             if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
             else if (/\p{Script=Latin}/u.test(ch)) lat++;
         }
-        if (cyr === 0 || lat === 0 || lat >= cyr) return w; // not a Cyrillic word with strays
+        if (cyr === 0 || lat === 0 || lat > cyr) return w; // Latin-majority word — leave it to the Latin fold
+        if (lat === cyr && !hostIsCyrillic) return w; // an even split, and no host evidence to tip it
         CYR_KEYS.lastIndex = 0;
         return w.replace(CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!);
     });

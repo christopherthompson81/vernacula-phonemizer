@@ -11,7 +11,10 @@
  * Serbian, Ukrainian, Belarusian), so a keyboard set for Russian cannot type them and the Latin key is right
  * beside the intended letter.
  */
+import { readFileSync, readdirSync } from "node:fs";
+
 import { describe, expect, test } from "vitest";
+import { CYRILLIC_HOSTS } from "../src/core/scripts.ts";
 import { foldCyrillicConfusables, foldLatinConfusables } from "../src/core/unicode.ts";
 import { phonemize } from "../src/index.ts";
 
@@ -41,10 +44,33 @@ describe("foldCyrillicConfusables", () => {
         expect(foldLatinConfusables(foldCyrillicConfusables("Straβe"))).toBe("Straße");
     });
 
-    test("an exact tie DECLINES rather than guessing", () => {
-        // `рaсa` is 2 Cyrillic and 2 Latin. No tie-break is safe — favouring Cyrillic would rewrite the
-        // two-letter Latin `оk` — so with no majority the word is left to the established Latin default.
+    test("an exact tie is broken by the HOST LANGUAGE, not by the word", () => {
+        // `рaсa` is 2 Cyrillic and 2 Latin and nothing in the word settles it — favouring Cyrillic outright
+        // would rewrite the two-letter Latin `оk`. The host is the evidence the word does not carry.
         expect(foldCyrillicConfusables("рaсa")).toBe("рaсa");
+        expect(foldCyrillicConfusables("рaсa", true)).toBe("раса");
+        expect(phonemize("рaсa", "ru").trim()).toBe(phonemize("раса", "ru").trim());
+    });
+
+    // ⚠ CYRILLIC_HOSTS CANNOT BE DERIVED FROM THE MANIFESTS, because five Cyrillic engines have no manifest at
+    // all. This keeps the manifests authoritative where they DO exist: a new Cyrillic-primary manifest that
+    // nobody adds to the set fails here rather than silently losing its tie-break.
+    test("every Cyrillic-primary manifest is in CYRILLIC_HOSTS", () => {
+        const dir = new URL("../src/languages/", import.meta.url);
+        const declared = new Set<string>();
+        for (const d of readdirSync(dir)) {
+            for (const f of readdirSync(new URL(`${d}/`, dir)).filter((n) => n.endsWith(".jsonc"))) {
+                const src = readFileSync(new URL(`${d}/${f}`, dir), "utf8");
+                const lang = /"language"\s*:\s*"([^"]+)"/u.exec(src);
+                const script = /"script"\s*:\s*"([^"]*)"/u.exec(src);
+                if (lang && script?.[1]?.startsWith("Cyrillic")) declared.add(lang[1]!);
+            }
+        }
+        expect(declared.size).toBeGreaterThan(5); // the scan actually found manifests
+        for (const l of declared) expect(CYRILLIC_HOSTS.has(l), `${l} declares Cyrillic but is not in CYRILLIC_HOSTS`).toBe(true);
+        // …and the entries with no manifest are named, so the surplus is accounted for rather than unexplained.
+        const manifestless = [...CYRILLIC_HOSTS].filter((l) => !declared.has(l)).sort();
+        expect(manifestless).toEqual(["ab", "ba", "chv", "nog", "tt"]);
     });
 
     test("the embedded-Latin-run routing still works — the fold must not eat a foreign word", () => {

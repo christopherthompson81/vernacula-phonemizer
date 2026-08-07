@@ -199,7 +199,7 @@ import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
 import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 
 import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
-import { readerFor } from "./core/scripts.ts";
+import { CYRILLIC_HOSTS, readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
 import { foldCaretExponents, foldCyrillicConfusables, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
 
@@ -326,7 +326,7 @@ export function getPhonemizer(lang: string): Phonemizer {
                     // (31 occurrences, all in id_id, none elsewhere); see `repairDoubleEncoded`.
                     // `foldLatinConfusables` sits with the other repairs, and AFTER the mojibake decode: a double-encoded
                     // sequence can produce Latin-1 letters, so the confusable check wants the decoded string.
-                    const folded = foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)))))));
+                    const folded = foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)))), CYRILLIC_HOSTS.has(lang))));
                     const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
                     return original(FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre));
                 } finally {

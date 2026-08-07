@@ -142,6 +142,27 @@ export const OVERRIDES: Readonly<Record<string, Partial<Record<ScriptName, strin
 };
 
 /** The script of a run, or `undefined` if it carries no letters this router knows. */
+/**
+ * Languages whose PRIMARY script is Cyrillic — the tie-break for `foldCyrillicConfusables`, which needs to know
+ * whether the HOST language is Cyrillic when a word's own letters split evenly (`рaсa`, 2 and 2).
+ *
+ * ⚠ THIS CANNOT BE DERIVED FROM THE MANIFESTS ALONE, and the gap is why it is written out here. Only 136 of the
+ * engines ship a `.jsonc` at all — ab, ba, chv, nog and tt are pure `.ts` engines with no manifest to declare
+ * anything — so a manifest scan finds 10 of the 15 and silently misses five real Cyrillic languages. The
+ * manifests stay authoritative WHERE THEY EXIST: test/cyrillic-confusables.test.ts asserts every manifest
+ * declaring a Cyrillic-primary script appears here, so a new one cannot be forgotten, and names the
+ * manifest-less five explicitly so the extra entries are accounted for rather than unexplained.
+ *
+ * `sr` and `kk` declare "Cyrillic/Latin" and are included — Cyrillic leads, so it is the primary. `bs` declares
+ * "Latin + Cyrillic" and `uz` "Latin/Cyrillic", both Latin-led, and are NOT included.
+ */
+export const CYRILLIC_HOSTS: ReadonlySet<string> = new Set([
+    // declared Cyrillic-primary in a manifest
+    "be", "bg", "kk", "ky", "mk", "mn", "ru", "sr", "tg", "uk",
+    // no manifest exists — engine is a single .ts
+    "ab", "ba", "chv", "nog", "tt",
+]);
+
 export function scriptOf(run: string): ScriptName | undefined {
     for (const [name, re] of SCRIPT_TESTS) if (re.test(run)) return name;
     return undefined;
