@@ -41,7 +41,7 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
- * #562 Slovene count-form selector — index into a five-slot `CountForms` array:
+ * Slovene count-form selector — index into a five-slot `CountForms` array:
  *
  *     0 sg (1)   1 DUAL (2)   2 paucal (3–4)   3 gen.pl (5+)   4 gen.sg (a decimal)
  *
@@ -79,7 +79,7 @@ const C = (g: "m" | "f", ...forms: readonly string[]): Counted =>
     ({ g, forms: forms as unknown as Counted["forms"] });
 
 /**
- * #562 The counted nouns this layer can emit. Kept in the ENGINE file (not normalize.ts) so the review
+ * The counted nouns this layer can emit. Kept in the ENGINE file (not normalize.ts) so the review
  * tool's sourcing check can read the declaration, and shared with normalize.ts's gender repair so the two
  * cannot disagree about a form.
  *
@@ -120,7 +120,7 @@ export const COUNTED: Readonly<Record<string, Counted>> = {
 const F = (k: string): string[] => [...COUNTED[k]!.forms];
 
 /**
- * #562 SYMBOL NORMALIZATION — Slovenian. There was NO tier here before, so every sign class in this
+ * SYMBOL NORMALIZATION — Slovenian. There was NO tier here before, so every sign class in this
  * language was unread: `km` reached the sink as the raw letters [km], `km²` dropped its exponent, `/h` read
  * as [x], `mm2` read the ASCII 2 as the number *dva*, and `%` was dropped outright.
  *
@@ -144,7 +144,7 @@ export const SYMBOLS = makeSymbolNormalizer({
     // declaration — it greps the tier's source for `percent: [...]` and `currency: { ... }`, and a helper
     // call makes the whole check inert. The `tierMatchesCounted` test pins them against COUNTED so the two
     // copies cannot drift.
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.
@@ -177,7 +177,7 @@ export const SYMBOLS = makeSymbolNormalizer({
 
 class SlovenianPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 normalize.ts owns the whole pre-tokenizer pass and calls the shared symbol tier itself, at
+        // normalize.ts owns the whole pre-tokenizer pass and calls the shared symbol tier itself, at
         // the one point in its numbered sequence where the number is still adjacent to its unit and still
         // carries its decimal comma (step 14).
         return assembleClauses(normalizeSlovenian(input), TOKEN, (m, sink) => {

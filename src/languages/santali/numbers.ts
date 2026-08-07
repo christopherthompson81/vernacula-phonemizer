@@ -3,7 +3,7 @@
  * 1–99, with the INDO-ARYAN LOAN magnitudes above it** — because Santali itself has no native word for 100 and
  * above, and because the Ol Chiki literary standard is native-decimal below 100.
  *
- * ★★ THE NATIVE-vs-BORROWED DECISION, stated plainly. Three systems compete in real Santali:
+ * ⚠ THE NATIVE-vs-BORROWED DECISION, stated plainly. Three systems compete in real Santali:
  *   1. **native decimal** — `ᱜᱮᱞ` (gel) 'ten' as the base: 20 = ᱵᱟᱨ ᱜᱮᱞ ('two ten'), 47 = ᱯᱩᱱ ᱜᱮᱞ ᱮᱭᱟᱭ. **This is
  *      what we generate.** It is the modern WRITTEN standard: it is what Wiktionary lemmatises, what sat.wikipedia
  *      running prose uses, and what Ghosh's grammar describes as the productive system ("all numerals are derived
@@ -22,7 +22,7 @@
  *   We deliberately do NOT emit the de-Aryanising revivalist coinages (ᱢᱤᱫ ᱜᱮᱥᱟᱭ 1000, ᱢᱤᱫ ᱥᱟᱥᱟᱭ 10 000): they
  *   appear in one unsourced sat.wikipedia table and are absent from Wiktionary, from Ghosh, and from running text.
  *
- * ★ SOURCES
+ * SOURCES
  *   - **Ghosh, "Santali", in Anderson (ed.), *The Munda Languages*, §3.1.8** — the composition rule and the
  *     native/borrowed split, verbatim on both counts (quoted above).
  *   - **Wiktionary `Category:Santali numerals`** (52 entries) and the individual Ol Chiki lemmas — every form in
@@ -34,7 +34,7 @@
  *   - NOT consulted (print-only, so nothing here is quoted from them): Neukom 2001; Bodding 1922/1929.
  *   - **languagesandnumbers.com has NO Santali page** — it 302-redirects to the German one. Not cited.
  *
- * ★ ORTHOGRAPHIC DECISIONS (each one is a real fork in the sources)
+ * ORTHOGRAPHIC DECISIONS (each one is a real fork in the sources)
  *   - **Everything is SPACED, including 11–19 and 21–99.** Ghosh writes them solid in Latin transcription, but Ol
  *     Chiki practice is spaced: all nine teens are separate Wiktionary lemmas and running text writes ᱜᱮᱞ ᱢᱤᱫ.
  *   - 4 = **ᱯᱩᱱ**. Wiktionary lemmatises ᱯᱳᱱ (with U+1C73), but sat.wikipedia uses ᱯᱩᱱ throughout.
@@ -46,7 +46,7 @@
  *   - Accepted on input but never generated: the ᱤᱥᱤ chains, ᱯᱳᱱ, ᱢᱚᱬᱮᱸ, ᱥᱳ, ᱞᱟᱠ, ᱠᱳᱴᱤ, and the contracted
  *     colloquial register (ᱜᱮᱢᱤᱫ 11, ᱵᱟᱜᱮᱢᱤᱫ 21, ᱢᱤᱫᱥᱟᱭ 100).
  *
- * ★ GROUPING IS INDIAN 2-2-3, decisively (᱖,᱐᱐,᱐᱐᱐): thousand → **lakh** (10⁵) → **crore** (10⁷).
+ * ⚠ GROUPING IS INDIAN 2-2-3, decisively (᱖,᱐᱐,᱐᱐᱐): thousand → **lakh** (10⁵) → **crore** (10⁷).
  *   **There is no Santali word for "million" or "billion"** — so 10⁶ reads as ᱜᱮᱞ ᱞᱟᱠᱷ (ten lakh) and 10⁹ as
  *   ᱢᱤᱫ ᱥᱟᱭ ᱠᱚᱨᱚᱲ (a hundred crore). That is the correct Santali reading of those figures, not a workaround.
  *

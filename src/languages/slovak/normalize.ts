@@ -30,7 +30,7 @@
  * corpus: 65 lowercase word, 1 comma, 31 END OF UTTERANCE, 2 uppercase word, 1
  * closing quote, 6 immediately-following digit. Fourteen of the 31 utterance-final ones sit right after a
  * YEAR (`v roku 1835.`, `sezóny 2009.`, `za rok 2010.`) — and they are SENTENCE PERIODS, because Slovak
- * reads a year as a CARDINAL and writes it with no ordinal period at all. Croatian #599's year-ordinal
+ * reads a year as a CARDINAL and writes it with no ordinal period at all. Croatian's year-ordinal
  * rule (`1683. dinastija`, feminine genitive with *godine* elided) has no Slovak counterpart; applied
  * here it would destroy fourteen sentence-final pauses. So the discriminator is the plain German/Czech
  * one — lowercase word or comma → ordinal, uppercase / quote / end → sentence period — and the check that
@@ -40,13 +40,13 @@
  * WRITTEN (storočia/storočí/storočím, the month genitives, rokoch/rokov, mieste, kategórie, gólom,
  * najväčším/najväčšou, svetovej, typu), so step 7 reads it and inflects. Step 8 emits the masculine
  * nominative for anything the licensor list does not know; it claims 0 corpus instances and exists because
- * trap 8 (zero corpus instances is not evidence of…) says a closed list is correct exactly where you looked (Croatian's defect).
+ * ⚠ A CLOSED LIST IS CORRECT EXACTLY WHERE YOU LOOKED, and silent everywhere else.
  *
  * COUNT AGREEMENT is three-way and is NOT `slavicCountForm`: a Slovak compound ending in 1 takes the
  * genitive plural (*dvadsaťjeden hodín*, *dvadsaťjeden percent*), never the Russian singular. `skCountForm`
  * below is that selector, and slovak.ts passes it to the shared symbol tier so the two agree everywhere.
  *
- * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (trap 1 (`\b` is ASCII-defined)).
+ * NOTE on boundaries: every one here is an explicit lookaround, never `\b` (`\b` is ASCII-defined and matches nothing here).
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -227,7 +227,7 @@ export function ordinalWords(n: number, slot: Slot): string | undefined {
 /**
  * The licensing word after a bare `N.`, and the case it governs. EVERY key follows a `N.` somewhere in the
  * corpus except where marked: the paradigm's other slots are filled in from the same
- * lexemes so the rule is not correct only where I happened to look (trap 8 (zero corpus instances is not evidence of…)).
+ * lexemes so the rule is not correct only where the corpus happened to look.
  *
  *   storočie is NEUTER — 18. storočia = *osemnásteho storočia* (gen), v 16. storočí = *v šestnástom
  *   storočí* (loc), 11. storočím = *jedenástym storočím* (instr).
@@ -276,7 +276,7 @@ function keepFinal(expansion: string, matched: string, rest: readonly unknown[])
     return /^\s+\p{Lu}/u.test(after) ? `${expansion}.` : expansion;
 }
 
-/** MULTI-DOT abbreviations — the ERA markers and `n. m.`. Claimed FIRST (playbook coupling) or their
+/** MULTI-DOT abbreviations — the ERA markers and `n. m.`. ⚠ Claimed FIRST, or their
  *  interior dots survive as breaks. `pred n. l.` is matched before the bare `n. l.` so the preposition is
  *  read into the instrumental *naším letopočtom*; the corpus itself spells that phrase out ("Egypťania v
  *  treťom storočí pred naším letopočtom"), which is where the wording comes from. The final dot is
@@ -355,7 +355,7 @@ const CLOCK_TAIL = "(?![\\d:])(?!\\.\\d)(?!,\\d)";
 export function normalizeSlovak(input: string): string {
     let s = input;
 
-    // 0) DIGIT DE-GROUPING, FIRST (playbook coupling: a grouping separator is otherwise read as clause
+    // 0) DIGIT DE-GROUPING, FIRST (⚠ a grouping separator is otherwise read as clause
     //    punctuation, and the number token cannot span a space). Slovak groups thousands with a SPACE
     //    (42 corpus instances) and marks the decimal with a COMMA (17); there are ZERO period-grouped
     //    thousands, which is the opposite of Croatian and is why no period/ordinal thousands
@@ -366,7 +366,7 @@ export function normalizeSlovak(input: string): string {
         s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(new RegExp(`[${GROUP_SPACE}]`, "gu"), " ");
 
-    // 1) MULTI-DOT ABBREVIATIONS (era markers, `n. m.`, `t. j.`), before the single-dot rule (playbook
+    // 1) MULTI-DOT ABBREVIATIONS (era markers, `n. m.`, `t. j.`), before the single-dot rule (⚠
     //    coupling) — otherwise the interior dots survive as breaks and the letters read as a bogus word
     //    ([n . ˈl̩ .]). Each expansion CONSUMES the final dot, so keepFinal puts back the sentence period
     //    where that dot was doing double duty (`356 pred n.l. Išlo …`).
@@ -390,11 +390,11 @@ export function normalizeSlovak(input: string): string {
     //    single `Saint` is the composer SAINT-SAËNS, a French surname, not this abbreviation's reading,
     //    and Czech's `St. = svatý` is the hagionym sense, wrong for an American city. But the dot is a
     //    separate defect from the word — it put a full phrase break in the middle of `do Six Flags v St.
-    //    Louis v štáte Missouri` — and removing it needs no vocabulary at all. Claimed BY NAME (trap 4 (ambiguity is resolved by evidence)),
+    //    Louis v štáte Missouri` — and removing it needs no vocabulary at all. Claimed BY NAME,
     //    and only before a capitalised word, so a sentence-final `st.` cannot lose its pause.
     s = s.replace(/(?<![\p{L}\p{M}.])(St)\.(?=\s+\p{Lu})/gu, "$1");
 
-    // 3) CLOCK RANGE, before the single clock (trap 14 (agreement cannot be applied to digits)'s ordering lesson — order by who needs WORDS
+    // 3) CLOCK RANGE, before the single clock (⚠ order by who needs WORDS
     //    first). `medzi 22:00 - 23:00` governs the INSTRUMENTAL on BOTH clocks, and the second one's form
     //    does not exist until it has been read, so the pair is claimed here and the dash becomes the `a`
     //    the corpus's other instance writes ("medzi 06:30 a 07:30"). Without this step the dash would
@@ -403,12 +403,12 @@ export function normalizeSlovak(input: string): string {
         (m0, pre: string, h1: string, m1: string, h2: string, m2: string) =>
             `${pre}${clock(Number(h1), Number(m1), "f.instr")} a ${clock(Number(h2), Number(m2), "f.instr")}`);
 
-    // 4) CLOCK. Before any rule that looks for a bare number (playbook coupling) and before the version-dot
+    // 4) CLOCK. ⚠ Before any rule that looks for a bare number, and before the version-dot
     //    rule, which would otherwise eat the interior dot of the period form `o 12.00 GMT`. The colon is
     //    clause punctuation in slovak.jsonc, so every time in the corpus was split by a phrase break.
     //    The GOVERNING PREPOSITION picks the case (Run 6): o/do/po/od/pred/okolo → -ej, medzi → -ou (the
     //    step above), nothing → the neutral cardinal + counted *hodín*. A trailing `hod`/`h` is CONSUMED
-    //    (`do 23:35 hod`): the hour noun is already in the reading and saying it twice is trap 12 (a REDUNDANT symbol is a permissible drop).
+    //    (`do 23:35 hod`): the hour noun is already in the reading and saying it twice is redundant.
     s = s.replace(new RegExp(`(?<![\\d:.,])${CLOCK_BODY}${CLOCK_TAIL}(?:\\s+(?:hod|h)(?![\\p{L}\\p{M}]))?`, "gu"),
         (m0: string, h: string, min: string, offset: number, whole: string) => {
             const before = whole.slice(0, offset);
@@ -449,7 +449,7 @@ export function normalizeSlovak(input: string): string {
             const tail = ordinalWords(Number(digits), slot);
             if (tail === undefined) return m0;
             //    The item's own COMMA is re-emitted: `v 11., 12. a 13. storočí` is spoken with that pause,
-            //    and swallowing it with the ordinal period lost it (trap 14 (agreement cannot be applied to digits)'s second hazard — once you
+            //    and swallowing it with the ordinal period lost it (⚠ once you
             //    stop writing an operand back verbatim, its character class starts eating punctuation).
             const pre = list.replace(/(\d{1,4})\.(,?)/gu,
                 (w, n: string, comma: string) => `${ordinalWords(Number(n), slot) ?? w}${comma}`);
@@ -522,7 +522,7 @@ export function normalizeSlovak(input: string): string {
     s = s.replace(/(?<=\d),(?=\d)/gu, " čiarka ");
 
     // 13) FRACTIONS. Zero corpus instances — the only slash it writes is the SEASON `1995/96`, which the
-    //     ≤3-digit numerator guard excludes — so this is the constructive half of trap 8 (zero corpus instances is not evidence of…): the rule
+    //     ≤3-digit numerator guard excludes — so the rule
     //     COMPOSES from the denominator noun and a feminine numerator (1/5 = jedna pätina, 3/4 = tri
     //     štvrtiny, 2/3 = dve tretiny) instead of tabulating the numerator that happens to be attested,
     //     which is exactly the defect Uzbek shipped. Denominators above 10 are left untouched.

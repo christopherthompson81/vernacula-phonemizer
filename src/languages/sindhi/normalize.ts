@@ -8,7 +8,7 @@
  *   colon clock HH:MM               43      comma-grouped N,NNN 35      percent N %  11
  *   degrees N °                      5
  *
- * ★ THIS LAYER WAS POINTLESS UNTIL #587. Sindhi had no number composer at all — `sindhi.ts` handed every
+ * ⚠ THIS LAYER DEPENDS ON THE NUMBER COMPOSER. Without one, `sindhi.ts` hands every
  * digit run to the foreign phonemizer, so `5` was spoken as English "five". Every rule below produces
  * digits for that composer to read, so none of them would have helped. The composer landed first,
  * deliberately.
@@ -55,7 +55,7 @@ const UNITS: [RegExp, string][] = [
     [/mm/giu, "ملي ميٽر"],
     // ⚠ NO BARE `m`, though ميٽر ×32 is spelled out and digit-adjacent bare `m` is ×0 here. Added and
     // withdrawn on measurement: `802.11m` read as "…hiku hiku MĪṬARU". The tier's `NOT_VERSION` guard covers
-    // that class, but it works by seeing the DOT and this file has already rewritten it to a word (trap 39 (a local rule that depends on a character…)).
+    // that class, but it works by seeing the DOT and this file has already rewritten it to a word — ⚠ a local rule that depends on a character this file has already rewritten will not fire.
     // Nothing is lost: the squared and cubed rules below are LOCAL and do not consult this table.
 ];
 

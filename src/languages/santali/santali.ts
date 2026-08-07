@@ -4,7 +4,7 @@
  * and first Ol Chiki. Ol Chiki is near-phonemic, so a grapheme scan + a few sign rules: ⟨ᱷ OH⟩ aspirates the preceding
  * stop (ᱵᱷ→bʱ) / is [h]; ⟨ᱹ GAAHLAA⟩ modifies the preceding vowel (ᱟᱹ→ə); ⟨ᱸ MU⟩ nasalizes it (ᱟᱸ→ã); ⟨ᱼ PHAARKAA⟩ /
  * ⟨ᱽ AHAD⟩ mark a CHECKED (glottalized) consonant (ᱜᱼ→kʼ); and the Santali HALLMARK — a WORD-FINAL voiced stop is
- * CHECKED/glottalized (ᱫᱟᱜ→dakʼ 'water', ᱢᱮᱫ→metʼ 'eye'). 🔷 single-source (kaikki).
+ * CHECKED/glottalized (ᱫᱟᱜ→dakʼ 'water', ᱢᱮᱫ→metʼ 'eye'). ⚠ Thinly attested — a single source family.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -65,7 +65,7 @@ export function phonemizeWord(word: string): string {
         // consonant it's a bare separator (ᱫᱽᱨ→dr, ɡidrə); word-finally it BLOCKS the checking rule (ᱨᱳᱜᱽ→roɡ, not rokʼ).
         // digits / punctuation / unmapped signs: handled by text() or dropped
     }
-    // ★ Santali hallmark: a WORD-FINAL voiced stop is CHECKED/glottalized (dak→dakʼ, met→metʼ) — but NOT when marked
+    // ⚠ Santali hallmark: a WORD-FINAL voiced stop is CHECKED/glottalized (dak→dakʼ, met→metʼ) — but NOT when marked
     // plain by a trailing ⟨ᱽ AHAD⟩, and only in a real syllable (a lone-consonant citation like ⟨ᱵ⟩ stays [b]).
     const l = last();
     if (l !== undefined && VOICED_STOP.has(l) && ahadAt !== segs.length - 1 && segs.some(isVowelSeg)) segs[segs.length - 1] = CHECKED[l]!;

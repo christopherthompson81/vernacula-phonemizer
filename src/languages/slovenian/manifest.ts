@@ -15,7 +15,7 @@ export interface SlovenianManifest {
         toVoiced: Record<string, string>;
     };
     clausePunctuation: Record<string, string>;
-    /** #562 Acronyms read letter-by-letter although their lowercase form is phonotactically readable, so
+    /** Acronyms read letter-by-letter although their lowercase form is phonotactically readable, so
      *  `core/initialisms.ts`'s OOV test cannot derive it (ZDA, USA, MRI, EU, IT). */
     acronymLetters: string[];
     numbers: {
@@ -25,7 +25,7 @@ export interface SlovenianManifest {
         hundreds: string[];
         and: string;
         thousand: string;
-        /** #562 The word for the decimal comma (`2,4` → *dva vejica štiri*). */
+        /** The word for the decimal comma (`2,4` → *dva vejica štiri*). */
         decimalWord: string;
         countForms: Record<"m" | "f", Record<string, string>>;
         magnitudes: {
