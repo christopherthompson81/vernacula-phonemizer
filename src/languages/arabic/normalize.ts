@@ -78,9 +78,9 @@ export function normalizeArabic(input: string): string {
     // 5) SIGNS. A dropped sign is silent content loss, so these are read whether or not a given corpus has
     //    an instance.
     s = s.replace(new RegExp(`(^|[\\s(])[-−–]([${DIGIT}])`, "gu"), "$1نَاقِص $2");
-    // ⚠ ± IS THE TWO SIGN WORDS JUXTAPOSED, with no conjunction — the form bg/da/is/nb/ro/sv all use, where
-    //    English is the outlier that needs "or". ⚠ RUNS BEFORE THE `+` RULE: ± is a single character the `+`
-    //    rule cannot see, so putting it second would leave it unread.
+    // ⚠ ± IS THE TWO SIGN WORDS JUXTAPOSED, with no conjunction. It needs its OWN rule: ± is a single
+    //    character (U+00B1), not a `+`, so no `+` rule can match inside it and the sign would otherwise
+    //    be dropped in silence.
     s = s.replace(/±/gu, " زَائِد نَاقِص ");
     s = s.replace(new RegExp(`(\\S)\\+\\s?([${DIGIT}])`, "gu"), "$1 زَائِد $2");
     s = s.replace(new RegExp(`(^|\\s)\\+\\s?([${DIGIT}])`, "gu"), "$1زَائِد $2");

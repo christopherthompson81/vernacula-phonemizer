@@ -464,10 +464,10 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "mínusz ",
     );
-    // ⚠ ± IS NOW FREE, and it was not before this commit: it needs two SIGN names and this file had only the
-    //    plus until the minus rule above was added. Both halves are lifted from rules in this file, so nothing is
-    //    invented, and the FORM is the juxtaposition every language that already reads ± uses. Runs BEFORE the
-    //    + rule, since ± is a single character the + rule cannot see.
+    // ⚠ ± TAKES TWO SIGN NAMES, so it is only expressible once BOTH the plus and the minus rules exist —
+    //    both halves are taken from the rules in this file. ⚠ It needs its OWN rule: ± is a single character
+    //    (U+00B1), not a `+`, so no `+` rule can match inside it and the sign would otherwise be dropped in
+    //    silence.
     //    ⚠ AND hu.wikipedia NAMES BOTH SIGNS TOGETHER, which is as direct as this gets: "A két előjel a
     //    pluszjel (+) és a mínuszjel (−), melyek a matematikában a pozitív és a negatív fogalmát" — the two
     //    SIGNS are the plus sign and the minus sign, expressing positive and negative. Exactly the sense ±
