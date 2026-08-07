@@ -11,7 +11,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // (86% on short native words, 91% monosyllabic); the full-set residual is stress-conditioned vowel reduction on
 // POLYSYLLABLES (no stress model yet) + proper-noun/loan pronunciations (Afrika, Botha, Coetzee — lexical). Folds:
 // stress (unwritten) + syllable dots not emitted, r~ɾ one symbol, ʊ~u / ɪ~i / œy~œi centering-diphthong-onset
-// notation. Signatures below. DEFERRED: a stress/syllable model, a proper-noun lexicon, numbers, nasalization.
+// notation. Signatures below. DEFERRED: a stress/syllable model, a proper-noun lexicon, nasalization.
 describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Standard Afrikaans)", () => {
     test("⟨g⟩ = [χ] fricative + word-final obstruent DEVOICING", () => {
         expect(phonemizeWord("dag")).toBe("daχ"); // ⟨g⟩ = velar/uvular fricative [χ], not [ɡ]
@@ -41,7 +41,7 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("môre")).toBe("mɔːrə"); // ⟨ô⟩ → long [ɔː]
     });
 
-    test("text: words + clause punctuation (stress + numbers deferred)", () => {
+    test("text: words + clause punctuation (stress deferred)", () => {
         expect(createAfrikaans().text("Die man loop huis toe.")).toBe("di man luəp ɦœys tu .");
     });
 });
@@ -121,7 +121,8 @@ describe("Afrikaans text normalization", () => {
         expect(normalizeAfrikaans("‘nuwe’ idee")).toBe("‘nuwe’ idee"); // an opening quote on an n-word is not the article
     });
 
-    // Each of these was a live misreading;
+    // ⚠ The era marker MUST require its dots. A bare `v` + `C` pattern also matches the ⟨'n C…⟩ of an
+    // indefinite article before a capitalised word, which is the commonest shape in the language.
     test("the era marker is dot-bound, so it cannot eat the indefinite article", () => {
         expect(normalizeAfrikaans("'n Chinese skip")).toBe("'n Chinese skip"); // was *'na Christushinese*
         expect(normalizeAfrikaans("323 v.C.")).toBe("323 voor Christus.");

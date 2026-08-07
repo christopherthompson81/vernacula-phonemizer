@@ -3,9 +3,10 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "../src/languages/awadhi/awadhi.ts";
 
 // Hand-adjudicated canonical-IPA gold for Awadhi / अवधी (awa) — Eastern Hindi (Indo-Aryan), Devanagari.
-// SINGLE-SOURCE: the divergences + this gold both come from ONE documented source (Saksena) — that is what 
-// requires; there is no *independent* second referee (no wikipron/kaikki/epitran Awadhi), and a machine
-// Hindi-clone would be circular, but Saksena is a real Awadhi grammar so grading against it is not vacuous. Per Baburam Saksena,
+// ⚠ SINGLE-SOURCE, AND NOT INDEPENDENT: the divergences this engine implements and the gold that grades it
+// both come from Saksena. There is no second referee for Awadhi (no wikipron/kaikki/epitran), and a machine
+// Hindi clone would be circular. Saksena is a real Awadhi grammar, so grading against it is not vacuous — but
+// it cannot catch an error Saksena himself makes. Per Baburam Saksena,
 // Evolution of Awadhi (1937, Lakhimpuri dialect), quoting Bloch, the Eastern-Indo-Aryan phonologies are
 // "perceptibly identical" and distinguished chiefly by GRAMMAR — so this gold targets the DOCUMENTED points of
 // segmental divergence, the axis where a blind Hindi clone would be wrong: the SIBILANT MERGER श/ष→[s] (Saksena

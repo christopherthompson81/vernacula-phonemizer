@@ -126,8 +126,8 @@ export const indicNumberWords: NumberComposer = (n, d) => {
  * WESTERN / Slavic decimal composition (units + teens + tens + hundreds + thousand/million/billion, space-separated).
  * Shared by the East-Slavic (uk, be) and Armenian (hy) engines — they differ only in their DATA (`d.units` etc.),
  * routed through each language's own G2P by `renderNumber`. Needs the irregular round-hundred spellings in
- * `d.hundreds` (сто, двісті, …; Armenian հարюр, երկուհարюр, …). The leading "one" is OMITTED for a bare thousand
- * (тисяча / հазар, matching the bare hundred сто), but KEPT for million/billion (один мільйон — grammatical).
+ * `d.hundreds` (сто, двісті, …; Armenian հարյուր, երկուհարյուր, …). The leading "one" is OMITTED for a bare thousand
+ * (тисяча / հազար, matching the bare hundred сто), but KEPT for million/billion (один мільйон — grammatical).
  *
  * ITS SCOPE, measured rather than assumed, because "why isn't this used more widely" is a recurring question.
  * Three engines read it (hy, nb, and uk/be below 1000); 115 languages compose privately, and 22 of those

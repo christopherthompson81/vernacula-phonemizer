@@ -51,11 +51,11 @@ describe("arabic canonical IPA — diacritized path", () => {
         expect(phonemize("٢٠٢٤", "ar")).toBe("ʔalfaːn wa ʔarbaʕa wa ʕiʃruːn"); // 2000 and 24
         expect(phonemize("100", "ar")).toBe("miʔa");
         expect(phonemize("21", "ar")).toBe("waːħid wa ʕiʃruːn"); // ones precede tens
-        expect(phonemize("2000000", "ar")).toBe("miljuːnaːn"); // millions dual (review fix)
+        expect(phonemize("2000000", "ar")).toBe("miljuːnaːn"); // millions DUAL, not plural
         expect(phonemize("3000000", "ar")).toBe("θalaːθa malaːjiːn"); // millions plural
     });
 
-    test("dagger-alif after a geminated article-lam keeps its long vowel (review fix)", () => {
+    test("dagger-alif after a geminated article-lam keeps its long vowel", () => {
         expect(phonemizeWord("لِلّٰه")).toBe("lilːˈaːh"); // was dropping the aː
     });
 
@@ -215,9 +215,9 @@ describe("arabic canonical IPA — diacritized path", () => {
     });
 });
 
-// the seventh language. Arabic arrived with its punctuation already right (، ؛ ؟ are clause marks)
-// and Arabic-Indic digits already folding, so the work was narrower: the Arabic-specific SYMBOL
-// characters, grouped/decimal number tokenization, and the clock.
+// TEXT NORMALIZATION. Arabic punctuation (، ؛ ؟ as clause marks) and Arabic-Indic digit folding are handled
+// upstream, so what is left here is Arabic-specific: the SYMBOL characters that have their own codepoints,
+// grouped/decimal number tokenization, and the clock.
 describe("arabic normalization", () => {
     test("the Arabic percent sign is no longer dropped", () => {
         // ٪ is U+066A, a different character from ASCII %, and every shared rule is written against the

@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createAbkhaz } from "../src/languages/abkhaz/abkhaz.ts";
 
-// Canonical-IPA goldens for Abkhaz (ab) — аҧсуа бызшәа, a Northwest Caucasian language (the fleet's first) with one of
+// Canonical-IPA goldens for Abkhaz (ab) — аҧсуа бызшәа, a Northwest Caucasian language with one of
 // the world's largest consonant inventories and just 2 vowels (⟨а⟩→[a], ⟨ы⟩→[ə]). The Cyrillic writes consonants with
 // base letters + MODIFIER letters: ⟨ь⟩ palatalizes, ⟨ә⟩ labializes, ⟨'⟩ pharyngealizes. Three-way voiced/aspirated/
 // ejective stops. Referee: wikipron abk_cyrl broad + kaikki.
@@ -36,7 +36,8 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
 
     // VIGESIMAL cardinal numbers (numbers.ts). 20–99 is score·20 + a 1–19 remainder, the score in its -и
     // connective form (ҩажәа → ҩажәи); the same -и marks a non-final hundred (шәкы → шәи акы). Thousands are FUSED
-    // for a multiplier of 1–10. The NON-HUMAN / abstract class series is the bare-numeral citation form.
+    // for a multiplier of 1–10 and for exactly 100; any other multiplier takes the separate word нызқь. The
+    // NON-HUMAN / abstract class series is the bare-numeral citation form.
     test("cardinal numbers are VIGESIMAL: score·20 + remainder with the -и connective", () => {
         const ab = createAbkhaz();
         expect(ab.text("7").trim()).toBe("bəʒba"); // быжьба
