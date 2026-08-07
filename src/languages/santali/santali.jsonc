@@ -1,0 +1,36 @@
+// Native canonical-IPA data manifest for Santali (sat) — ᱥᱟᱱᱛᱟᱲᱤ, Munda (Austroasiatic), ~7.6M (India /
+// Bangladesh / Nepal), the OL CHIKI script (ᱚᱞ ᱪᱮᱢᱮᱫ, U+1C50–1C7F — a distinct ALPHABET, 1925, now
+// Santali's official script). Ol Chiki is near-phonemic, so the engine (santali.ts) is a grapheme scan +
+// a few sign rules: ⟨ᱷ OH⟩ aspirates the preceding stop (ᱵᱷ→bʱ) / is [h]; ⟨ᱹ GAAHLAA⟩ modifies the
+// preceding vowel (ᱟᱹ→ə); ⟨ᱸ MU⟩ nasalizes it (ᱟᱸ→ã); ⟨ᱼ PHAARKAA⟩ / ⟨ᱽ AHAD⟩ mark a CHECKED (glottalized)
+// consonant (ᱜᱼ→kʼ); and the Santali HALLMARK — a WORD-FINAL voiced stop is CHECKED/glottalized
+// (ᱫᱟᱜ→dakʼ 'water', ᱢᱮᱫ→metʼ 'eye'). The sign rules are code, in santali.ts; the letter values and the
+// sign-driven substitution tables live here.
+// ⚠ Thinly attested — a single source family.
+{
+    "language": "sat",
+    "name": "Santali (ᱥᱟᱱᱛᱟᱲᱤ)",
+    "script": ["Ol Chiki"],
+
+    // Ol Chiki letter → IPA. Vowels + consonants (palatal stops ⟨ᱪ ᱡ⟩ → c/ɟ; retroflex ⟨ᱴ ᱰ ᱬ ᱲ⟩ → ʈ ɖ ɳ ɽ).
+    // ⟨ᱶ OV⟩ is the NASAL labial glide /w̃/ (vs ⟨ᱣ AAW⟩ /w/).
+    "letters": {
+        "ᱚ": "ɔ", "ᱟ": "a", "ᱤ": "i", "ᱩ": "u", "ᱮ": "e", "ᱳ": "o", // vowels
+        "ᱜ": "ɡ", "ᱠ": "k", "ᱛ": "t", "ᱫ": "d", "ᱴ": "ʈ", "ᱰ": "ɖ", "ᱯ": "p", "ᱵ": "b", "ᱪ": "c", "ᱡ": "ɟ",
+        "ᱢ": "m", "ᱱ": "n", "ᱝ": "ŋ", "ᱧ": "ɲ", "ᱬ": "ɳ", "ᱞ": "l", "ᱨ": "r", "ᱲ": "ɽ", "ᱥ": "s", "ᱦ": "h",
+        "ᱭ": "j", "ᱣ": "w", "ᱶ": "w̃", "ᱷ": "h",
+    },
+
+    // A checked (glottalized) stop: devoice + a glottal release ⟨ʼ⟩ (ɡ→kʼ, d→tʼ …).
+    "checked": {
+        "ɡ": "kʼ", "k": "kʼ", "d": "tʼ", "t": "tʼ", "ɖ": "ʈʼ", "ʈ": "ʈʼ", "b": "pʼ", "p": "pʼ", "ɟ": "cʼ", "c": "cʼ",
+    },
+
+    // Aspiration by ⟨ᱷ OH⟩: voiceless → ʰ, voiced → breathy ʱ.
+    "aspirated": {
+        "p": "pʰ", "t": "tʰ", "ʈ": "ʈʰ", "c": "cʰ", "k": "kʰ", "b": "bʱ", "d": "dʱ", "ɖ": "ɖʱ", "ɟ": "ɟʱ", "ɡ": "ɡʱ",
+    },
+
+    // ⟨ᱹ GAAHLAA⟩ vowel modification — the "extra" Santali vowels (chiefly ᱟ a→ə).
+    "gahla": { "a": "ə", "ɔ": "ɔ", "o": "ɔ", "e": "ɛ", "i": "i", "u": "u" },
+}

@@ -9,25 +9,27 @@
 import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
 type Cls = "high" | "mid" | "low";
 
-// Onset consonant → [IPA, tonal class]. ຫ/ຮ = h; ອ = glottal ʔ; ວ onset = w. The ຫ-led sonorants (ໜ ໝ, ຫຼ ຫງ …)
-// become HIGH class — handled in the scanner.
-const CONS: Record<string, [string, Cls]> = {
-    ກ: ["k", "mid"], ຂ: ["kʰ", "high"], ຄ: ["kʰ", "low"], ງ: ["ŋ", "low"],
-    ຈ: ["t͡ɕ", "mid"], ສ: ["s", "high"], ຊ: ["s", "low"], ຍ: ["ɲ", "low"],
-    ດ: ["d", "mid"], ຕ: ["t", "mid"], ຖ: ["tʰ", "high"], ທ: ["tʰ", "low"],
-    ນ: ["n", "low"], ບ: ["b", "mid"], ປ: ["p", "mid"], ຜ: ["pʰ", "high"],
-    ຝ: ["f", "high"], ພ: ["pʰ", "low"], ຟ: ["f", "low"], ມ: ["m", "low"],
-    ຢ: ["j", "mid"], ຣ: ["l", "low"], ລ: ["l", "low"], ວ: ["ʋ", "low"],
-    ຫ: ["h", "high"], ອ: ["ʔ", "mid"], ຮ: ["h", "low"],
-    ໜ: ["n", "high"], ໝ: ["m", "high"], // precomposed ຫນ/ຫມ
-};
-// Final (coda) consonant → IPA. Lao has the 8-way final set (stops unreleased; sonorants + glides).
-const CODA: Record<string, string> = {
-    ກ: "k̚", ດ: "t̚", ບ: "p̚", ງ: "ŋ", ນ: "n", ມ: "m", ຍ: "j", ວ: "w",
-};
+interface LaoNumbers {
+    units: string[];
+    ten: string;
+    twenty: string;
+    finalOne: string;
+    magnitudes: [number, string][];
+}
+interface LaoDef {
+    onsets: Record<string, [string, Cls]>;
+    codas: Record<string, string>;
+    numbers: LaoNumbers;
+}
+const DEF = loadManifest<LaoDef>(import.meta.url, "lao.jsonc");
+// Onset consonant → [IPA, tonal class] and the 8-way final set (lao.jsonc). The ຫ-led sonorants (ໜ ໝ,
+// ຫຼ ຫງ …) become HIGH class — handled in the scanner below.
+const CONS = DEF.onsets;
+const CODA = DEF.codas;
 
 // Vowel signs (combining/spacing) used by the scanner.
 const LEAD = new Set(["ເ", "ແ", "ໂ", "ໃ", "ໄ"]); // written before the consonant
@@ -237,15 +239,10 @@ function scan(word: string): string {
 const TOKEN = /([຀-໿]+)|(\d+)|([.!?…,;:])/gu;
 
 // ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
-// The compositor emits LAO-SCRIPT words and reads them back through the ordinary g2p, so no IPA is
-// authored here.
-// Lao is Tai, structurally the Thai system (see thai.ts) with the cognate irregulars: 20 is ຊາວ — and it
-// REPLACES the whole "twenty" (ຊາວສອງ = 22, no ສິບ), unlike Thai ຢີ່ສິບ; a FINAL 1 in any compound ≥11 is
-// ເອັດ (ສິບເອັດ, ຊາວເອັດ); 10⁴ ໝື່ນ and 10⁵ ແສນ are their own magnitude words.
-// Source: Wiktionary "Category:Lao numerals" (the full 0–99 + ຮ້ອຍ / ພັນ / ໝື່ນ / ແສນ / ລ້ານ inventory,
-// incl. ຊາວ, ຊາວເອັດ, ສິບເອັດ) — https://en.wiktionary.org/wiki/Category:Lao_numerals.
-const LO_UNITS = ["ສູນ", "ໜຶ່ງ", "ສອງ", "ສາມ", "ສີ່", "ຫ້າ", "ຫົກ", "ເຈັດ", "ແປດ", "ເກົ້າ"];
-const LO_MAG: [number, string][] = [[1e6, "ລ້ານ"], [1e5, "ແສນ"], [1e4, "ໝື່ນ"], [1e3, "ພັນ"], [100, "ຮ້ອຍ"]];
+// The compositor emits LAO-SCRIPT words (data + provenance in lao.jsonc) and reads them back through the
+// ordinary g2p, so no IPA is authored here.
+const NUM = DEF.numbers;
+const LO_UNITS = NUM.units;
 
 function numberToLaoWords(n: number): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
@@ -254,7 +251,7 @@ function numberToLaoWords(n: number): string[] {
     if (n === 0) return [LO_UNITS[0]!];
     const out: string[] = [];
     let r = n;
-    for (const [v, w] of LO_MAG) {
+    for (const [v, w] of NUM.magnitudes) {
         if (r >= v) {
             const q = Math.floor(r / v);
             out.push(...numberToLaoWords(q), w);
@@ -263,13 +260,13 @@ function numberToLaoWords(n: number): string[] {
     }
     if (r >= 10) {
         const t = Math.floor(r / 10);
-        if (t === 2) out.push("ຊາວ"); // 20 is ຊາວ alone — no ສິບ (ຊາວສອງ = 22)
-        else if (t === 1) out.push("ສິບ");
-        else out.push(LO_UNITS[t]!, "ສິບ");
+        if (t === 2) out.push(NUM.twenty); // 20 is ຊາວ alone — no ສິບ (ຊາວສອງ = 22)
+        else if (t === 1) out.push(NUM.ten);
+        else out.push(LO_UNITS[t]!, NUM.ten);
         r %= 10;
     }
     // A FINAL 1 in ANY compound ≥11 is ເອັດ, not ໜຶ່ງ: ສິບເອັດ 11, ຊາວເອັດ 21, ຮ້ອຍເອັດ 101, ພັນເອັດ 1001.
-    if (r === 1 && n >= 11) out.push("ເອັດ");
+    if (r === 1 && n >= 11) out.push(NUM.finalOne);
     else if (r > 0) out.push(LO_UNITS[r]!);
     return out;
 }
@@ -294,8 +291,8 @@ class LaoPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             // Canonical, UNPADDED pause marks: a padded value reaches the output as a double space, and
-            // ? and ! must stay distinct from "." or the sentence type is lost. Lao is the one engine
-            // that hardcodes this rather than reading clausePunctuation from its manifest.
+            // ? and ! must stay distinct from "." or the sentence type is lost. Hardcoded rather than a
+            // manifest clausePunctuation table, deliberately: , ; : produce NO pause here.
             else if (m[3] === "?") sink.pause("?");
             else if (m[3] === "!") sink.pause("!");
             else if (m[3] && ".…".includes(m[3])) sink.pause(".");

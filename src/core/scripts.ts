@@ -174,8 +174,6 @@ export const MANIFESTLESS_SCRIPTS: Readonly<Record<string, readonly string[]>> =
     bgc: ["Devanagari"],                    // Haryanvi, on the Hindi engine
     pnb: ["Arabic"], skr: ["Arabic"],       // Western Punjabi + Saraiki, both Shahmukhi
     // Single-.ts engines with no manifest.
-    bo: ["Tibetan"], chr: ["Cherokee"], grc: ["Greek"], lo: ["Lao"], sat: ["Ol Chiki"],
-    shn: ["Myanmar"],                       // the Shan abugida is a Myanmar-script variant (U+1075–U+108F)
     crh: ["Latin"], ee: ["Latin"], eu: ["Latin"], fo: ["Latin"], kaa: ["Latin"], kl: ["Latin"],
     la: ["Latin"], ltg: ["Latin"], mto: ["Latin"], naq: ["Latin"], nci: ["Latin"], pap: ["Latin"],
     quc: ["Latin"], rup: ["Latin"], smj: ["Latin"],

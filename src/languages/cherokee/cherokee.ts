@@ -15,32 +15,19 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// The 85 syllabary values in U+13A0 order (the standard chart). Bare "s" (U+13CD) and the obsolete "nah"
-// (U+13C0) are the only non-CV entries. The Cherokee Supplement lowercase block folds here via toUpperCase().
-const SYLLABLES = (
-    "a e i o u v " + // U+13A0..
-    "ga ka ge gi go gu gv " + // k-series (Ꭶ=ka unasp, Ꭷ=kha asp)
-    "ha he hi ho hu hv " +
-    "la le li lo lu lv " +
-    "ma me mi mo mu " + // no mv
-    "na hna nah ne ni no nu nv " +
-    "qua que qui quo quu quv " + // labialised velar
-    "sa s se si so su sv " + // bare Ꮝ = /s/
-    "da ta de te di ti do du dv " + // t-series (Ꮣ=ta unasp, Ꮤ/Ꮦ/Ꮨ=tha asp)
-    "dla tla tle tli tlo tlu tlv " + // lateral affricate
-    "tsa tse tsi tso tsu tsv " + // affricate (⟨j/ch/ts⟩ all collapse here)
-    "wa we wi wo wu wv " +
-    "ya ye yi yo yu yv"
-).split(" ");
-
-// Syllable ONSET → IPA. Voiceless-unaspirated baseline; the aspirated split-cell onsets (k, t) emit [kʰ tʰ].
-const ONSET: Record<string, string> = {
-    "": "", g: "k", k: "kʰ", h: "h", hn: "hn", l: "l", m: "m", n: "n", qu: "kʷ",
-    s: "s", d: "t", t: "tʰ", dl: "t͡ɬ", tl: "t͡ɬ", ts: "t͡s", w: "w", y: "j",
-};
-const VOWEL: Record<string, string> = { a: "a", e: "e", i: "i", o: "o", u: "u", v: "ə̃" };
+interface CherokeeDef {
+    syllables: string[];
+    onsets: Record<string, string>;
+    vowels: Record<string, string>;
+}
+// The 85 syllabary values in U+13A0 order, the onset → IPA map, and the vowels (cherokee.jsonc).
+const DEF = loadManifest<CherokeeDef>(import.meta.url, "cherokee.jsonc");
+const SYLLABLES = DEF.syllables;
+const ONSET = DEF.onsets;
+const VOWEL = DEF.vowels;
 
 // Build the char → IPA table from the ordered values (U+13A0 + index).
 const CHAR_IPA: Record<string, string> = {};
