@@ -1,14 +1,10 @@
 /**
  * Native number rendering — GENERAL, not abugida-specific (declarative, portable).
  *
- * Number COMPOSITION is bespoke per numbering system (there is no universal magnitude structure — see the
- * rejected Layer-A number-builder consolidation), so each system contributes its own `<system>NumberWords`
- * that decomposes an integer into an ordered list of number-WORD spellings. `renderNumber` is the reusable
- * seam: it takes a composer + a word→IPA renderer and stitches the result. The composer defaults to
- * `indicNumberWords` (the only system so far); a non-Indic native language passes its own (e.g. a Western
- * thousand/million/billion composer) to the same `renderNumber`. The magnitude-field DATA schema on
- * `NumbersDef` (currently Indic lakh/crore) generalises when that 2nd system lands (ADR-0002 defers the
- * data-schema lift to the 2nd consumer; the composer SEAM exists from day one).
+ * ⚠ NUMBER COMPOSITION IS BESPOKE PER NUMBERING SYSTEM — there is no universal magnitude structure — so each
+ * system contributes its own `<system>NumberWords` that decomposes an integer into an ordered list of
+ * number-WORD spellings. `renderNumber` is the reusable seam: it takes a composer plus a word→IPA renderer and
+ * stitches the result. The composer defaults to `indicNumberWords`; a non-Indic language passes its own.
  */
 
 export interface NumbersDef {
@@ -16,8 +12,7 @@ export interface NumbersDef {
     teens?: string[]; // 10..19 spellings (Indic irregular teens; omitted by systems that compose them, e.g. Turkic oʻn+unit)
     tens: Record<string, string>; // "20".."90" (round) spellings (Turkic includes "10")
     hundreds?: string[]; // 0..9 → the irregular round-hundred spellings (Western/Slavic: сто, двісті, триста…), read by westernNumberWords
-    // Magnitude words. hundred/thousand are universal; Indic adds lakh/crore, Western/Turkic adds million/billion.
-    // (ADR-0002: the data-schema lift lands with the 2nd numbering system — Uzbek's Turkic composer.)
+    // Magnitude words. hundred/thousand are universal; Indic adds lakh/crore, Western/Turkic million/billion.
     magnitudes: {
         hundred: string;
         thousand: string;
@@ -30,19 +25,16 @@ export interface NumbersDef {
     compound?: Record<string, string>;
     /**
      * Order of the 21..99 FALLBACK when no `compound` spelling is authored. The default is UNIT then TENS
-     * (the Hindi-belt *ekchālīs* shape). DRAVIDIAN languages are the other way round — Kannada
-     * ಇಪ್ಪತ್ತೊಂದು, Malayalam ഇരുപത്തിയൊന്ന് — and were reading "one twenty". Found by the Telugu run,
-     * which fixed its own with a private composer and then measured the same defect in its relatives.
+     * (the Hindi-belt *ekchālīs* shape). ⚠ DRAVIDIAN LANGUAGES ARE THE OTHER WAY ROUND — Kannada
+     * ಇಪ್ಪತ್ತೊಂದು, Malayalam ഇരുപത്തിയൊന്ന് — and read "one twenty" under the default.
      */
     compoundOrder?: "unit-tens" | "tens-unit";
     /**
      * Read a bare 100/1000/lakh/crore as the magnitude word ALONE — Kannada ನೂರು, not *ondu nūru. Opt-in,
      * because the Hindi-belt languages genuinely do say *ek sau* and *ek hazār*.
      *
-     * It applied to hundred and thousand ONLY when first added, so a language declaring it still read
-     * "one lakh" and "one crore" while correctly saying a bare hundred — Malayalam did, and Kannada would
-     * have but for writing its own composer. Reported independently by the Punjabi and Kannada runs, both
-     * of which read the code rather than probing.
+     * ⚠ It applies to EVERY magnitude, not only hundred and thousand: a version that stopped at thousand
+     * still read "one lakh" and "one crore" while correctly saying a bare hundred.
      */
     bareMagnitude?: boolean;
     /**
@@ -91,10 +83,9 @@ export const indicNumberWords: NumberComposer = (n, d) => {
     if (n < 1000) {
         const h = Math.floor(n / 100),
             r = n % 100;
-        // A SUPPLETIVE round hundred wins outright where the language declares one — Odia ଶହେ for 100,
-        // which `bareMagnitude` cannot express because that only OMITS the leading "one" and would leave
-        // the wrong word (ଶହ). `NumbersDef.hundreds` already existed for this but only westernNumberWords
-        // and the Dravidian composer read it. Reported by the Odia run, and by Kannada before it.
+        // ⚠ A SUPPLETIVE ROUND HUNDRED WINS OUTRIGHT where the language declares one — Odia ଶହେ for 100,
+        // which `bareMagnitude` cannot express: that only OMITS the leading "one" and would leave the wrong
+        // word (ଶହ).
         const sup = d.hundreds?.[h];
         if (sup !== undefined && sup !== "") return [sup, ...(r ? indicNumberWords(r, d) : [])];
         return [

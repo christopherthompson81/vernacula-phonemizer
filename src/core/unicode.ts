@@ -2,7 +2,7 @@
  * Notation-parsing PRIMITIVES for the native abugida path — pure Unicode/IPA facts about HOW to read
  * the string (which codepoints are vowels, modifiers, tie bars, digits; which block is a script). These
  * are code constants, NOT declarative data: they don't decide which phoneme is produced (that lives in
- * data/native/_shared/phonology.jsonc + the per-language JSONC) — they only classify characters while
+ * `phonology.jsonc` beside this module, plus the per-language JSONC) — they only classify characters while
  * tokenizing. Regexes that match a SET are built from the string lists here at the use site, so the list
  * is the single source and the pattern is derived from it. One obvious mirror target for the C# port.
  */
@@ -157,29 +157,20 @@ export function foldNativeDigits(s: string): string {
 /**
  * GREEK / CYRILLIC LETTERS USED AS LATIN LOOK-ALIKES, folded ONLY when flanked by Latin letters.
  *
- * FOUND BY A FIX THAT REGRESSED. Afrikaans' tokenizer claimed any `\p{L}` as a word, which silently deleted
- * embedded Greek, Cyrillic and Thai (they were CLAIMED, so they never became a gap for the script router).
- * Bounding the token to Latin script fixed that and broke two words — because af_za writes `proteϊen` and
- * `ruϊnes` with U+03CA GREEK SMALL LETTER IOTA WITH DIALYTIKA in place of Latin `ï`. The over-claiming token had
- * been quietly absorbing a homoglyph, so the "correct" narrowing exposed a defect it had been masking.
- *
- * ⚠ WHICH IS THE SAME SHAPE AS THE MOJIBAKE PHANTOMS: a character from the wrong script masquerading as one
+ * ⚠ A HOMOGLYPH IS THE SAME SHAPE AS A MOJIBAKE PHANTOM: a character from the wrong script masquerading as one
  * from the right one, invisible until something downstream depends on the distinction. It is the third variety
- * of it in this file, after the double-encoding repair and the squared-degree fold.
+ * of it in this file, after the double-encoding repair and the squared-degree fold. Real text carries them —
+ * `proteϊen` and `ruϊnes` are written with U+03CA GREEK SMALL LETTER IOTA WITH DIALYTIKA in place of Latin `ï`.
  *
- * THE LATIN FLANK IS THE WHOLE GUARD, and it is what makes a fleet-wide fold safe here where
- * `foldNativeDigits` had to stay per-engine. A genuinely Greek or Cyrillic word has no Latin neighbours, so
+ * ⚠ THE LATIN FLANK IS THE WHOLE GUARD, and it is what makes a fleet-wide fold safe here where
+ * `foldNativeDigits` has to stay per-engine. A genuinely Greek or Cyrillic word has no Latin neighbours, so
  * `Ελλάδα` and `Владимир` cannot match however they are hosted; only a letter WEDGED INSIDE a Latin word can.
- * Measured across all 67 FLEURS corpora: `\p{Latin}[\p{Greek}\p{Cyrillic}]\p{Latin}` occurs **twice, both in
- * af_za, both this ϊ**. The table is wider than those two hits deliberately — the confusable set is a known,
- * closed list, and admitting only the letters that happen to occur would leave the same trap for the next
- * corpus. Every entry is a visual look-alike, not a transliteration.
- */
-/**
- * ⚠ PRECAUTIONARY, NOT CORPUS-ATTESTED, and the distinction matters for how much weight the rows carry. Counted
- * across all 67 corpora, exactly ONE member of this table occurs between two Latin letters: `ϊ`, twice, in
- * `af proteϊene`. Every other row is here on the Unicode TR39 confusables basis — a phonemizer is handed arbitrary
- * text, and homoglyphs arrive from OCR and from keyboard-layout slips rather than from curated corpora.
+ *
+ * ⚠ MOSTLY PRECAUTIONARY, NOT CORPUS-ATTESTED, and the distinction matters for how much weight the rows carry.
+ * Across the fleet's corpora exactly ONE member of this table occurs between two Latin letters. Every other row
+ * is here on the Unicode TR39 confusables basis — a phonemizer is handed arbitrary text, and homoglyphs arrive
+ * from OCR and from keyboard-layout slips rather than from curated corpora. Admitting only the letters that
+ * happen to occur would leave the same trap for the next corpus.
  *
  * ⚠ THE LOWERCASE MAPPING IS NOT THE LOWERCASE OF THE UPPERCASE ONE. Greek capital `Β` looks like Latin `B`, so it
  * folds to `B`. Greek small `β` does NOT look like `b` — it looks like German `ß`, which is why a mistyped or
@@ -188,8 +179,7 @@ export function foldNativeDigits(s: string): string {
  *
  * Without the row the letter is not merely mis-read, it FRAGMENTS the word: `β` is Greek script, so a Latin-script
  * tokenizer declines it, and a lone Greek letter is below the script router's two-letter threshold — so
- * `Straβe` came out *stɹˈæ ˈiː* in English, the β gone and the word in two pieces (#657's defect class arriving by
- * a different route).
+ * `Straβe` comes out *stɹˈæ ˈiː* in English — the β gone and the word in two pieces.
  */
 const LATIN_CONFUSABLE: Readonly<Record<string, string>> = {
     // Greek → Latin

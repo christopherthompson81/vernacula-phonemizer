@@ -54,26 +54,22 @@ export function clauseSink(): { sink: ClauseSink; finish: () => string } {
 
 /** A run of Latin-script text (with its combining marks, apostrophes and internal hyphens). */
 const LATIN_RUN = /\p{Script=Latin}[\p{Script=Latin}\p{M}'’-]*/gu;
-/** A run of letters in ANY script, kept together with its combining marks and internal apostrophes. */
 /**
  * A run of letters in ANY script, kept together with its combining marks and internal apostrophes.
  *
  * EXPORTED because two engines cannot use `assembleClauses` and hand-roll their own gap pass —
- * english.ts (a two-phase tagger pipeline) and french.ts (liaison looks one word ahead). Both had a
- * COPY of this pattern, which meant three places to fix whenever the definition of a foreign run
- * changed. One definition, three call sites.
+ * english.ts (a two-phase tagger pipeline) and french.ts (liaison looks one word ahead). One definition,
+ * three call sites.
  *
- * Deliberately LETTERS only, not `\p{Nd}`. A digit is script-marked but language-NEUTRAL in value, so
- * `٢٠٢٤` in English text is 2024 and wants an English reading, not an Arabic one — the registry folds
- * native digits to ASCII for every language before any engine sees them, which is a better answer than
- * routing them by script.
- */
-/**
+ * ⚠ DELIBERATELY LETTERS ONLY, not `\p{Nd}`. A digit is script-marked but language-NEUTRAL in value, so
+ * `٢٠٢٤` in English text is 2024 and wants an English reading, not an Arabic one. The registry folds native
+ * digits to ASCII for every language before any engine sees them, which is a better answer than routing them
+ * by script.
+ *
  * ⚠ A TRAILING SUPERSCRIPT TRAVELS WITH THE RUN, because it belongs to the foreign expression and not to the
- * host. Burmese quotes `E = mc²`; the `²` is `No`, not `\p{L}`, so the run ended at `mc` and the exponent was
- * left in the gap and DROPPED — the formula read *ˈiː ɲi˨m̥ja mˈɪk*, equals correctly voiced and the square
- * gone. English can read `mc²` perfectly well once it is handed the whole thing, so the fix is to stop cutting
- * the expression in half rather than to invent a Burmese reading for an English formula.
+ * host. In `E = mc²` the `²` is `No`, not `\p{L}`, so a letters-only run ends at `mc` and the exponent is left
+ * in the gap and DROPPED. English reads `mc²` perfectly well once handed the whole thing, so the fix is to
+ * stop cutting the expression in half rather than to invent a host-language reading for it.
  * Only TRAILING, and only the superscript digits: a superscript cannot begin a word, so this cannot start a
  * run that would not otherwise exist, and it cannot swallow a following host-language character.
  */
@@ -82,13 +78,11 @@ export const FOREIGN_RUN = /[\p{L}\p{M}][\p{L}\p{M}'’-]*[\u2070\u00b9\u00b2\u0
 /**
  * Emit the FOREIGN runs inside text the engine's own tokenizer did not claim.
  *
- * Only Latin-script runs are surfaced. Everything else in a gap — stray punctuation, whitespace, a
- * third script — stays dropped exactly as before, keeping this change tightly scoped to the defect it
- * fixes (see core/foreign.ts for why 47 engines lost embedded Latin entirely).
+ * A run in ANY script is a candidate: the script router is asked first, and only if it declines does the
+ * Latin-to-English fallback apply. Everything else in a gap — stray punctuation, whitespace — stays dropped
+ * (see core/foreign.ts for why an unclaimed gap loses embedded text entirely).
  */
 export function emitUnclaimed(gap: string, sink: ClauseSink): void {
-    // Any run of LETTERS is a candidate now, not only Latin. `\p{L}+` with combining marks, so an
-    // abugida or a decomposed accent survives as one run.
     for (const m of gap.matchAll(FOREIGN_RUN)) {
         const run = m[0];
         // The script router first — it knows which language should read this run. It declines for an
@@ -98,8 +92,7 @@ export function emitUnclaimed(gap: string, sink: ClauseSink): void {
             if (routed !== "") sink.emit(routed);
             continue;
         }
-        // Fallback: the pre-existing Latin-to-English path, kept so behaviour is unchanged wherever the
-        // router has nothing to say.
+        // Fallback: the Latin-to-English path, for wherever the router has nothing to say.
         if (!/\p{Script=Latin}/u.test(run)) continue;
         const foreign = getDefaultForeign();
         if (foreign !== undefined) sink.emit(foreign(run));

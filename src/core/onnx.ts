@@ -2,9 +2,9 @@
  * Shared onnxruntime-node plumbing for every neural path (fa tagger/seq2seq/context restorers, the rider + Arabic
  * diacritizers, the Bengali OOV tagger). `onnxruntime-node` is an OPTIONAL dependency: it is imported lazily here
  * exactly once per process, and consumers wrap `loadOrt()` in their own try/catch to fall back to the sync path
- * (or, for bare Arabic, to surface the install hint). Previously each of the ~6 consumers hand-copied these Ort*
- * interfaces and the `import("onnxruntime-node").then(m => m.default ?? m)` loader; they had already drifted
- * (different OrtTensor.data unions, `create(path)` vs `create(bytes, options)`), so this is the single source.
+ * (or, for bare Arabic, to surface the install hint). ⚠ ONE SOURCE FOR THE Ort* INTERFACES AND THE LOADER: hand-
+ * copied per consumer they drift, and they had — different `OrtTensor.data` unions, `create(path)` vs
+ * `create(bytes, options)`.
  */
 
 /** An ORT output/input tensor. `data` is the widest union any consumer needs (int64 ids, float32 logits/states,

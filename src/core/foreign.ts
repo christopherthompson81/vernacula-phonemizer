@@ -5,14 +5,12 @@
  * Registered by the registry rather than imported from it, so `core/` keeps its no-dependency
  * position and there is no import cycle. Set once at registry module load; read lazily.
  *
- * Why this exists: an engine's tokenizer only matches its own script, and `assembleClauses` skips
- * whatever the tokenizer does not claim — so before this, 47 engines DROPPED embedded Latin outright.
- * `phonemize("hello век", "ru")` returned just the Cyrillic. Measured in the FLEURS corpora that is
- * 3–15% of utterances per language (Greek 15.3%, Thai 15.4%, Korean 14.1%), losing real content:
- * "new mexico", "covid", "gps", "ebay craigslist", "aol im".
+ * ⚠ WHY THIS EXISTS: an engine's tokenizer only matches its own script, and `assembleClauses` skips
+ * whatever the tokenizer does not claim — so without a fallback, `phonemize("hello век", "ru")` returns just
+ * the Cyrillic. That is 3–15% of utterances per language, losing real content ("new mexico", "covid", "gps").
  *
- * The 144 engines that already handle Latin do so with their own tokenizer group plus an injected
- * `ForeignPhonemizer`; they claim the text, leave no gap, and are unaffected by this fallback.
+ * An engine that handles Latin itself — its own tokenizer group plus an injected `ForeignPhonemizer` — claims
+ * the text, leaves no gap, and is unaffected by this fallback.
  */
 
 /** Reads a run of foreign (non-native-script) text to canonical IPA. */
@@ -31,10 +29,9 @@ export function getDefaultForeign(): ForeignPhonemizer | undefined {
 }
 
 /**
- * SCRIPT-AWARE reading (see core/scripts.ts). `defaultForeign` above always read a run as ENGLISH, which
- * is right for Latin and wrong for everything else — and in practice every non-Latin run was dropped
- * before it ever got here. The reader below is given the run AND the host language so it can route by
- * script, with the host's own overrides applied.
+ * SCRIPT-AWARE reading (see core/scripts.ts). ⚠ `defaultForeign` above reads every run as ENGLISH, which is
+ * right for Latin and wrong for everything else. This reader is given the run AND the host language, so it can
+ * route by script with the host's own overrides applied.
  */
 export type ScriptReader = (run: string, host: string) => string | undefined;
 
