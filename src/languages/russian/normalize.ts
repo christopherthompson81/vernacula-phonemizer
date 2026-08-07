@@ -9,8 +9,8 @@
  * suffix that can be appended. Unclaimed, each of these speaks the bare letter as a word — `5-е` comes out
  * [pʲætʲ je], "five ye".
  *
- * Already correct and untouched: dates take a plain cardinal day, decimals read with *целых*
- * (1,5 → одна целых пять), % carries proper Slavic count agreement through the shared symbol tier
+ * Already correct and untouched: dates take a plain cardinal day, the decimal comma reads as *целых*
+ * (1,5 → один целых пять), % carries proper Slavic count agreement through the shared symbol tier
  * (процент / процента / процентов), and Roman numerals arrive already converted at the registry seam —
  * with `russian/romanOrdinals.ts` supplying the ORDINAL reading a century wants, so `XV век` is already
  * *пятнадцатый век*. That also means the roman-vs-initialism ordering hazard cannot arise here.
