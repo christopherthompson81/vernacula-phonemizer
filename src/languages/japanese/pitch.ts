@@ -1,5 +1,5 @@
 /**
- * Japanese (Tokyo) lexical pitch accent — Phase 3. Accent is lexical and
+ * Japanese (Tokyo) lexical pitch accent. Accent is lexical and
  * contrastive (箸 haꜜɕi "chopsticks" vs 端 haɕi "edge"); the accent NUCLEUS is marked with the IPA downstep
  * ꜜ (U+A71C) placed AFTER the nucleus mora. Heiban (accentless, nucleus 0) words carry no mark.
  *

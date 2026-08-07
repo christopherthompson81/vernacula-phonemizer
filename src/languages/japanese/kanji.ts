@@ -1,5 +1,5 @@
 /**
- * Kanji → kana reading conversion + bunsetsu segmentation (Phase 2). Two passes drive it:
+ * Kanji → kana reading conversion + bunsetsu segmentation. Two passes drive it:
  *   - segmentText: insert spaces at bunsetsu (phrase) boundaries so a spaceless run is phonemized
  *     phrase-by-phrase (kana→kanji transition = new phrase; case particles が/を/に end a phrase; て-form +
  *     auxiliary splits; adverbs are their own bunsetsu).

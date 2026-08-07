@@ -1,6 +1,6 @@
 /**
  * Hebrew (he) cardinal-number → IPA compositor. Semitic gendered structure (like Arabic's numbers.ts), but the
- * number WORDS are authored with niqqud in hebrew.jsonc and rendered by the deterministic Phase-1 g2p
+ * number WORDS are authored with niqqud in hebrew.jsonc and rendered by the deterministic rule g2p
  * (phonemizeWord) — the Persian pattern — so numbers stay consistent with the rest of Hebrew's canonical IPA.
  *
  * Register: the FEMININE citation forms (how a bare number is read aloud abstractly). Gender/construct handled where
@@ -82,7 +82,7 @@ function integerWords(n: number): string[] {
     return compose(n).flat();
 }
 
-/** Phonemize a digit token (integer or decimal) to Modern Israeli IPA via the Phase-1 g2p. */
+/** Phonemize a digit token (integer or decimal) to Modern Israeli IPA via the rule g2p. */
 export function numberToIpa(digits: string): string {
     const dot = digits.indexOf(".");
     if (dot < 0) return integerWords(Number(digits)).map(phonemizeWord).join(" ");

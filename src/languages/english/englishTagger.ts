@@ -1,5 +1,5 @@
 /**
- * English OOV G2P — the neural OOV reader (English divestment, Phase 4). A per-grapheme BiLSTM (ONNX) that labels each
+ * English OOV G2P — the neural OOV reader. A per-grapheme BiLSTM (ONNX) that labels each
  * letter with an ARPABET-chunk TAG in a SINGLE forward pass, replacing the joint n-gram (and the net-harmful
  * compound-splitter) on the non-lexicon tail. On a clean CMUdict held-out it roughly HALVES the phone-error-rate vs
  * the n-gram pipeline (9.3% vs 18.2%; word-exact 59% vs 37%). It emits stress-bearing ARPABET, then finishes it the
