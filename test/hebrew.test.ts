@@ -4,9 +4,10 @@ import { phonemize } from "../src/index.ts";
 import { phonemizeWord, createHebrew } from "../src/languages/hebrew/hebrew.ts";
 
 // Canonical-IPA goldens for Hebrew (he) — Afro-Asiatic (Semitic), the Hebrew abjad, MODERN ISRAELI pronunciation.
-// A niqqud→IPA segmental g2p over VOCALIZED (pointed) input (unvocalized restoration — a neural nakdan —
-// is deferred — the Arabic-diacritizer analogue). Hand-adjudicated against en.wiktionary vocalized→a=IL
-// IPA (2561 words): 87.1% folded, the folds stripping stress (unwritten), the variable glottal ⟨א⟩/⟨ע⟩=ʔ, the
+// A niqqud→IPA segmental g2p over VOCALIZED (pointed) input; UNVOCALIZED text is restored first by the neural
+// nakdan (hebrewNeural.ts — the Arabic-diacritizer analogue), covered in test/hebrewNeural.test.ts.
+// Hand-adjudicated against en.wiktionary vocalized→a=IL
+// IPA, the folds stripping stress (unwritten), the variable glottal ⟨א⟩/⟨ע⟩=ʔ, the
 // velar-nasal allophone, and resh notation. Signatures: bgdkpt dagesh (בּ→b/ב→v, כּ→k/כ→χ, פּ→p/פ→f); ⟨ש⟩ shin/sin;
 // ⟨ו⟩ shuruk וּ→u / holam male וֹ→o; patach genuvah (final guttural's patach surfaces before it, מָשִׁיחַ→maʃiaχ).
 describe("Hebrew canonical IPA — niqqud→IPA (Modern Israeli)", () => {

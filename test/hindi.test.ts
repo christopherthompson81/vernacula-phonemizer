@@ -38,9 +38,9 @@ describe("hindi canonical IPA", () => {
     });
 });
 
-// text normalization (hindi/normalize.ts) — the fourth language, and the first outside the Latin
-// script. Most tiers were already right and are untouched: lakh/crore, both comma-grouping conventions,
-// decimals, %, currency, the danda, and Latin-run delegation to English.
+// TEXT NORMALIZATION (hindi/normalize.ts). Most tiers need no Hindi-specific work and are untouched:
+// lakh/crore, both comma-grouping conventions, decimals, %, currency, the danda, and Latin-run delegation
+// to English.
 describe("hindi normalization", () => {
     test("ordinal suffixes join the numeral instead of becoming a stray word", () => {
         // The suffix is written attached (16वीं) but was tokenized apart, so it was spoken on its own:

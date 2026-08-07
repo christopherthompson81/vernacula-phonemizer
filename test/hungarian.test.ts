@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // their geminate forms (ssz→sː, ggy→ɟː) before single letters, then doubled-consonant → Cː, then FIXED
 // first-syllable stress. Signature: ⟨s⟩→ʃ / ⟨sz⟩→s (reversed), ⟨gy⟩→ɟ / ⟨ty⟩→c (palatal stops), ⟨a⟩→ɒ, the full
 // long/short vowel system; plus REGRESSIVE voicing assimilation (biztat→ˈbistɒt), j-palatalization (feddj→ˈfɛɟː),
-// and n→ŋ before k/ɡ. Validated at 92.6% vs wikipron hun narrow + 87.6% vs epitran.
+// and n→ŋ before k/ɡ. Referees: wikipron hun narrow + epitran.
 describe("Hungarian canonical IPA", () => {
     test("the reversed sibilants + palatal stops + ⟨a⟩→ɒ, first-syllable stress", () => {
         expect(phonemizeWord("magyar")).toBe("ˈmɒɟɒr"); // gy → ɟ, a → ɒ, stress on σ1
@@ -56,10 +56,9 @@ describe("Hungarian roman-numeral ordinals", () => {
         expect(ord(50)).toBe("ötvenedik");
         expect(ord(63)).toBe("hatvanharmadik"); // past 50 — anniversary / congress range
         expect(ord(100)).toBe("századik");
-        // NO RANGE CAP any more. This used to assert `undefined` above 100, pinning a 1–100 table;
-        // ordinal formation now lives in numbers.ts and is the cardinal with its final morph replaced,
-        // so it reaches every value the cardinal compositor does. The old assertion was preserving a
-        // limitation, not a behaviour.
+        // ⚠ NO RANGE CAP: ordinal formation lives in numbers.ts and is the cardinal with its final morph
+        // replaced, so it reaches every value the cardinal compositor does. Asserting `undefined` above some
+        // bound would pin a TABLE SIZE — preserving a limitation rather than a behaviour.
         expect(ord(101)).toBe("százegyedik");
         expect(ord(247)).toBe("kétszáznegyvenhetedik");
         expect(ord(1000)).toBe("ezredik");
@@ -94,7 +93,7 @@ describe("Hungarian text normalization", () => {
         // ×59 lowercase-follows. Was: cardinal + a spurious phrase break (ˈtizɛŋkilɛnt͡s . ˈsaːzɒdbɒn).
         expect(say("a 19. században")).toBe("ˈɒ ˈtizɛŋkilɛnt͡sɛdik ˈsaːzɒdbɒn");
         expect(say("a 7. legnagyobb")).toBe("ˈɒ ˈhɛtɛdik ˈlɛɡnɒɟobː");
-        expect(say("Az 1000. bélyege")).toBe("ˈɒz ˈɛzrɛdik ˈbeːjɛɡɛ"); // ezer → ezredik, past the old 100 cap
+        expect(say("Az 1000. bélyege")).toBe("ˈɒz ˈɛzrɛdik ˈbeːjɛɡɛ"); // ezer → ezredik, well past any table
         expect(say("alkotmány 247. cikkelye")).toBe("ˈɒlkotmaːɲ ˈkeːtsaːznɛɟvɛnhɛtɛdik ˈt͡sikːɛjɛ");
         expect(say("a 11., 12. és 13. századokban")) // a comma also licenses it
             .toBe("ˈɒ ˈtizɛnɛɟɛdik , ˈtizɛŋkɛtːɛdik ˈeːʃ ˈtizɛnhɒrmɒdik ˈsaːzɒdoɡbɒn");

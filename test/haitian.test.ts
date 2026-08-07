@@ -3,11 +3,11 @@ import { describe, expect, test } from "vitest";
 import { createHaitian, phonemizeWord } from "../src/languages/haitian/haitian.ts";
 import { numberToWords } from "../src/languages/haitian/numbers.ts";
 
-// Haitian Creole (ht) — kreyòl ayisyen, a French-lexified creole of Haiti (~12M). The 3rd creole in the fleet (after
-// Kabuverdianu). The IPN orthography is phonemic, so a greedy scan + the nasal-vowel rule nails it. Validated against
-// wikipron hat_latn_broad (1691 human headwords) — 97.7% FOLDED / 99.4% symbol (96.9% first pass). Note: the eval
-// backbone strips the nasal tilde, so the nasal comparison is on the base vowel; the engine DOES emit ã ɛ̃ ɔ̃.
-// single source.
+// Haitian Creole (ht) — kreyòl ayisyen, a French-lexified creole of Haiti (~12M). The IPN orthography is
+// phonemic, so a greedy scan + the nasal-vowel rule covers it. Referee: wikipron hat_latn_broad (human).
+// ⚠ The eval backbone STRIPS the nasal tilde, so the nasal comparison is on the base vowel only — the engine
+// does emit ã ɛ̃ ɔ̃, and the referee score says nothing about whether they are right. It is also the only
+// referee for ht, so there is no independent second opinion.
 describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel rule", () => {
     const ht = createHaitian();
 

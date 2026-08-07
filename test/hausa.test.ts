@@ -73,7 +73,7 @@ describe("Hausa text normalization", () => {
         expect(ph("480 km/h")).toBe("ɗˈa˩ri˥ hˈu˥ɗu˥ dˈa ta˩mˈa˩ni˥n kilomˈita ˈa ˈa˥wa˩");
         expect(ph("133 m/s")).toBe("ɗˈa˩ri˥ dˈa ta˩lˈa˩ti˥n dˈa ˈu˥ku˩ mˈita ˈa da˩kʼˈi˥kʼa˩");
         expect(ph("12.8 km/h")).toBe("ɡˈo˥ma˩ ʃˈa˥ bˈi˥ju˥ mˈaki tˈa˥kʷa˩s kilomˈita ˈa ˈa˥wa˩");
-        // trap pins: the decimal-percent (3.5%) and the B.C.kafin dedupe
+        // ⚠ `kashi` must not be DOUBLED: the percent rule prepends it, and the sentence may already carry it.
         expect(ph("3.5%")).toBe("kˈaʃi ˈu˥ku˩ mˈaki bˈi˩ja˥r");
         expect(ph("kashi 3.5%")).toBe("kˈaʃi ˈu˥ku˩ mˈaki bˈi˩ja˥r"); // no double kashi
     });
