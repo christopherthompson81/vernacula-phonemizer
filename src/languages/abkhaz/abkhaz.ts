@@ -1,26 +1,21 @@
 /**
  * Abkhaz (ab) phonemizer — canonical IPA. A longest-match scan over base+modifier Cyrillic: trigraph, then
  * base+modifier cluster, then base, with the ⟨у⟩/⟨и⟩ glide-vs-syllabic split handled here. Numbers are
- * VIGESIMAL and composed by numbers.ts. The letter tables and the encyclopedic record (the NW-Caucasian
- * consonant system, the modifier letters, the referee-circularity caveat) live in abkhaz.jsonc.
+ * VIGESIMAL and composed by numbers.ts. The letter tables, the vowel-letter set and the encyclopedic record
+ * (the NW-Caucasian consonant system, the modifier letters, the referee-circularity caveat) live in
+ * abkhaz.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-interface AbkhazDef {
-    clusters: Record<string, string>;
-    base: Record<string, string>;
-    modifiers: Record<string, string>;
-}
-const DEF = loadManifest<AbkhazDef>(import.meta.url, "abkhaz.jsonc");
 // Letter tables (abkhaz.jsonc): base+modifier clusters, base letters, and the generic modifier fallbacks.
-const CLUSTER = DEF.clusters;
-const BASE = DEF.base;
-const MODIFIER = DEF.modifiers;
-// The vowel letters (used for the ⟨у⟩/⟨и⟩ glide-vs-syllabic rule).
-const VOWEL_LETTER = new Set([..."аыеоуи"]);
+const CLUSTER = MANIFEST.clusters;
+const BASE = MANIFEST.base;
+const MODIFIER = MANIFEST.modifiers;
+// The vowel letters (abkhaz.jsonc) — the environment for the ⟨у⟩/⟨и⟩ glide-vs-syllabic rule below.
+const VOWEL_LETTER = new Set(MANIFEST.vowelLetters);
 
 /** One Abkhaz word → canonical IPA. */
 export function phonemizeWord(word: string): string {
