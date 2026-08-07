@@ -156,12 +156,12 @@ describe("Japanese morpheme-boundary coalescence", () => {
     });
 });
 
-// #552 residual — particle-boundary segmentation. Particles left fused to a following word let long-vowel
+// residual — particle-boundary segmentation. Particles left fused to a following word let long-vowel
 // coalescence fire across the bunsetsu boundary (東京のうち read のう as [noː]); stranded particles split the
 // other way picked up pitch accents from the dictionary (85 で → de̞ꜜ). Three mechanisms: the extended
 // single/multi particle sets in segmentText, particle CHAINING (では/での stay attached to their content
 // word), and a pitch-layer guard (a bare particle token is always heiban).
-describe("Japanese particle segmentation (#552 residual)", () => {
+describe("Japanese particle segmentation", () => {
     test("coalescence no longer crosses a particle boundary", () => {
         expect(phonemizeText("そのうち")).toBe("so̞no̞ ɯᵝt͡ɕi"); // was so̞no̞ːt͡ɕi
         expect(phonemizeText("東京のうち")).toBe("to̞ːkʲo̞ːno̞ ɯᵝt͡ɕi"); // was …no̞ːt͡ɕi
@@ -192,7 +192,7 @@ describe("Japanese particle segmentation (#552 residual)", () => {
 });
 
 /**
- * #562 TEXT NORMALIZATION. Each expectation below is a defect the ja_jp corpus (3,208 utterances) proved
+ * TEXT NORMALIZATION. Each expectation below is a defect the ja_jp corpus (3,208 utterances) proved
  * was there, with its count; the "was" comment is what the engine actually produced before normalize.ts.
  */
 describe("Japanese text normalization", () => {
@@ -203,7 +203,7 @@ describe("Japanese text normalization", () => {
         expect(phonemizeText("1,2")).toContain(" , "); // …and a non-grouping comma stays a pause
     });
 
-    // #586. Japanese has no spaces, so a unit is normally followed by kana — and the shared tier's
+    // Japanese has no spaces, so a unit is normally followed by kana — and the shared tier's
     // letter-boundary guard was rejecting exactly that, letting the abbreviation reach the phoneme sink
     // verbatim. Measured over ja_jp: 14 utterances, all of this shape.
     test("a unit survives a kana neighbour instead of leaking", () => {
@@ -254,7 +254,7 @@ describe("Japanese text normalization", () => {
         expect(phonemizeText("3:2")).toBe("säɴ ni");
     });
 
-    test("#586 the ampersand is アンド, and the epenthetic vowel is the proof", () => {
+    test("the ampersand is アンド, and the epenthetic vowel is the proof", () => {
         // wav2vec2: `x oː k ɪ l  b iː a n d ə b iː  ɡ ʊ m o t o …`. Japanese cannot end a syllable in /d/, so
         // a borrowed "and" must surface as /a.n.do/ — the `ə` is the language's phonotactics stamped onto the
         // English word, which is exactly what アンド spells.

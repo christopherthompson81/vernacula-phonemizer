@@ -63,7 +63,7 @@ describe("gujarati canonical IPA", () => {
     });
 
     // ————————————————————————————————————————————————————————————————————————————————————————————
-    // #562 TEXT NORMALIZATION. Gujarati reuses HINDI'S ENGINE and used to inherit Hindi's normalizer
+    // TEXT NORMALIZATION. Gujarati reuses HINDI'S ENGINE and used to inherit Hindi's normalizer
     // and Hindi's symbol words, which are written in DEVANAGARI — excluded by core/unicode.ts
     // GUJARATI_WORD, so the tokenizer DELETED them. Counts below are from the gu_in FLEURS corpus
     // (1,996 unique utterances); see src/languages/gujarati/normalize.ts for the full tabulation.

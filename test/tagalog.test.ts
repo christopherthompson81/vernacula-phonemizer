@@ -106,7 +106,7 @@ describe("tagalog canonical IPA", () => {
         expect(phonemize("200", "tl")).toBe("dalawˈaŋ daʔˈan"); // dalawáng daán — ligature keeps final stress
     });
 
-    test("#657 out-of-inventory accents fold; ñ is NATIVE and must not", () => {
+    test("out-of-inventory accents fold; ñ is NATIVE and must not", () => {
         // `[A-Za-zÑñ]+` ended the token at an out-of-class diacritic, so that letter became an unclaimed gap read
         // as an English LETTER NAME: `São Paulo` → *s ˈə ʔˈo paʔˈulo*, `Klöcker` → *kl ˈoᶷ kkˈeɾ*.
         // ⚠ THE FOLD IS CONDITIONAL, and that is the whole subtlety here. Tagalog inherited `ñ` from Spanish and

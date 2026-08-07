@@ -296,13 +296,13 @@ export function normalizeKhmer(text: string): string {
 
     // ── 6b. divide, less-than, greater-than — ROBUSTNESS, not repair ─────────────────────────────────
     // ⚠ THESE SIGNS DO NOT OCCUR DIGIT-FLANKED IN THIS CORPUS: `÷` 0, `<` 0, `>` 2. Khmer writes the WORD
-    // instead — ចែក 3,285, and the same is true of `×` (0 signs, គុណ 3,338), which is #654's central finding
+    // instead — ចែក 3,285, and the same is true of `×` (0 signs, គុណ 3,338), which is the central findral finding
     // restated: the signs are absent while the readings are ordinary prose.
     //
     // They are added anyway because the words are SOURCED and the rules are digit-flanked, so on this corpus
     // they cannot misfire — the risk is a guard
     // that fires on something else, and with zero instances there is nothing here to fire on. This is the
-    // "pure robustness rather than a repair" #654 argues for, and it closes the same class for arbitrary input.
+    // "pure robustness rather than a repair" case, and it closes the same class for arbitrary input.
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}÷${SEP}(?=[${D}])`, "gu"), " ចែក ");
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}<${SEP}(?=[${D}])`, "gu"), " តិចជាង ");
     s = s.replace(new RegExp(`(?<=[${D}])${SEP}>${SEP}(?=[${D}])`, "gu"), " ច្រើនជាង ");

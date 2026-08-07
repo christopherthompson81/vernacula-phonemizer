@@ -2,7 +2,7 @@
  * VOCABULARY-SOURCE REPORT — per language, which classes of normalizer vocabulary have a source, and
  * which are blocked. Run this BEFORE writing a layer, and again when planning a re-sweep.
  *
- * WHY THIS EXISTS. Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25
+ * WHY THIS EXISTS. Reading back through all 25 merged normalization PRs, the "deliberately not done" lists are not 25
  * different problems. They are the SAME HANDFUL OF VOCABULARY CLASSES recurring, and in almost every case the
  * deferral turns on one question — *is there a source for this class in this language?*
  *
@@ -17,7 +17,7 @@
  * "it is a separate seam", when the seam existed, 30 languages already wired it, and espeak carried Slovak's
  * full letter-name table. That is trap 16, and this file is trap 16 (before declaring a class out of scope) mechanised: the check becomes a lookup.
  *
- * The counterpart matters just as much. Luxembourgish and Zulu/Xhosa (#606/#607) deferred the same
+ * The counterpart matters just as much. Luxembourgish and Zulu/Xhosa deferred the same
  * class CORRECTLY — lb_list has 2 of 26 letter names and espeak ships no Zulu or Xhosa at all — and the
  * report says so, so nobody re-investigates a settled refusal.
  *
@@ -145,7 +145,7 @@ interface Row { klass: string; verdict: Verdict; detail: string }
  * The question this class answers is narrow: when a reader meets an initialism, what does each character get
  * called? `\p{L}` matches 亿 as readily as `b`, and cmn_list is 3,899 lines of Han headwords — so the count
  * came back **3,836 letters** and this tool reported `letter-names espeak 3836 — WIREABLE` for a language
- * whose Latin letter block is entirely COMMENTED OUT. Found by the #586 loop-back on cmn.
+ * whose Latin letter block is entirely COMMENTED OUT. Found by a loop-back on cmn.
  *
  * Excluded by script rather than by count, because a large count can be legitimate: Ethiopic really does have
  * ~350 fidel and Amharic's seam is keyed on them, so a "no alphabet has more than N letters" threshold would
@@ -203,7 +203,7 @@ function letterNames(c: Ctx): Row {
 }
 
 /** THE DECIMAL POINT — espeak's `_dpt` is the separator's name; `_.` is the punctuation mark's, and they are
- *  NOT interchangeable (ms: `_dpt perpuluhan` for a decimal, `_. titik` for a version dot — #601 needed both
+ *  NOT interchangeable (ms: `_dpt perpuluhan` for a decimal, `_. titik` for a version dot — needed both
  *  and the distinction was the citation). Also accept a manifest `decimalWord`. */
 function decimalWord(c: Ctx): Row {
     const dpt = /^_dpt\s+\S/mu.test(c.espeak);
@@ -260,7 +260,7 @@ function tierWords(c: Ctx): Row[] {
     // backreference marker (`"$1 percent"`) and the JS template-literal sigil (`${h} ${min}`) — and `$` is in
     // `\p{Sc}`. So testing the whole call text found a "currency sign" in every layer that uses a template
     // literal anywhere, which is all of them. Measured: fa, hu, sr, th and yue all reported
-    // `currency-word: declared or emitted` while every one of them DROPS `$5` — the five languages of #584,
+    // `currency-word: declared or emitted` while every one of them DROPS `$5` — the five languages in that class,
     // reported clean by the tool meant to find them.
     //
     // So: match the regex LITERAL only, and for `$` require it to be ESCAPED (`\$`, how a pattern matches a
@@ -305,7 +305,7 @@ function tierWords(c: Ctx): Row[] {
 /**
  * SIGN VOCABULARY — minus, ±, =, <, >, ×, ÷ and the exponent.
  *
- * ⚠ THIS FILE DID NOT KNOW ABOUT THESE CLASSES, AND THAT IS A REAL GAP RATHER THAN AN OMISSION. #654 spent a
+ * ⚠ THIS FILE DID NOT KNOW ABOUT THESE CLASSES, AND THAT IS A REAL GAP RATHER THAN AN OMISSION. 654 spent a
  * whole issue establishing the sign vocabulary for the fleet, and taught `defects.ts` (SIGN_CASES), `review.ts`
  * and `coverage.ts` about it — but not this file. So the tool the playbook mandates running BEFORE writing a
  * layer was blind to eight of the classes `review.ts` then FAILS the layer on.
@@ -318,7 +318,7 @@ function tierWords(c: Ctx): Row[] {
  * failure this file's header was written to end.
  *
  * WHAT IS CHECKED. Whether the SIGN occurs in the evidence at all, and whether the layer already emits a reading.
- * It deliberately does NOT try to name the word: #654's finding was that the readings are ordinary prose —
+ * It deliberately does NOT try to name the word: the finding was that the readings are ordinary prose —
  * `kleiner als`, `ਤੋਂ ਵੱਧ`, `zaidi ya` — attested in quantity and specific to each language, so the candidate has
  * to come from `corpus-words.ts` with its SENSE checked. Availability here means "go and look", never "use this".
  *
@@ -331,7 +331,7 @@ function tierWords(c: Ctx): Row[] {
  *
  *     ampersand · currency · degree · exponent · iteration · math-sign · minus · percent
  *
- * This file reported on currency, percent, degree (as scale-names) and — only after #654's gap was noticed —
+ * This file reported on currency, percent, degree (as scale-names) and — only after the gap was noticed —
  * minus and exponent. It said nothing about AMPERSAND or the ITERATION mark, so an author running the mandated
  * pre-flight check was told those classes did not exist. Khmer needed both: `&` 1,331 occurrences and ៗ 24,413,
  * the latter being the single largest defect in the language.

@@ -28,7 +28,7 @@ describe("telugu canonical IPA", () => {
     });
 });
 
-// #562 text normalization. The number tests are the important ones: before this, all 627 numerals in the
+// text normalization. The number tests are the important ones: before this, all 627 numerals in the
 // te_in corpus were composed by the shared `indicNumberWords`, which orders 21-99 unit-first and does not
 // inflect the magnitude nouns — see src/languages/telugu/numbers.ts for the corpus/audio evidence.
 describe("telugu numbers (magnitude agreement)", () => {

@@ -130,7 +130,7 @@ describe("Irish numbers", () => {
     });
 });
 
-// TEXT NORMALIZATION (src/languages/irish/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// TEXT NORMALIZATION (src/languages/irish/normalize.ts) — the pre-tokenizer pass. The defining
 // rules are the `Nú` ordinal digits (chéad, tríú, cúigiú … déag — the article is the text's own), the comma-thousands, the dot-decimal
 // "pointe", the i.n./r.n./A.D./R.C. era markers, the msu/km-u rates, and the letter-spelled initialisms.
 describe("Irish text normalization", () => {

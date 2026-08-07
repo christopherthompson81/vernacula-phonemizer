@@ -29,7 +29,7 @@ const lexicon = (): Map<string, string> => {
 };
 
 /**
- * #562 normalization. Gujarati shares Hindi's ENGINE but not Hindi's orthographic conventions or its
+ * normalization. Gujarati shares Hindi's ENGINE but not Hindi's orthographic conventions or its
  * SCRIPT, so it supplies its own normalizer and its own symbol words through `makeNativeHindi`'s
  * overrides rather than inheriting Hindi's. The inheritance was not merely saying the wrong word: Hindi's
  * tier emits DEVANAGARI, which `core/unicode.ts` GUJARATI_WORD excludes, so the tokenizer dropped it —
@@ -47,7 +47,7 @@ const lexicon = (): Map<string, string> => {
  * is confidently wrong far more often than it is right.
  */
 const GU_SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.

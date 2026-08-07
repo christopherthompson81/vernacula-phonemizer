@@ -31,11 +31,11 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?|\\d+,
 const NATIVE_CLASS = "[a-zčćšžđ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
-// #562 symbol normalization — Croatian: % is "posto" (indecilnable), the units/rates/exponents follow the
+// symbol normalization — Croatian: % is "posto" (indecilnable), the units/rates/exponents follow the
 // Serbian tier, and the currency signs the corpus writes (¥, $, €, £) are declared. Kept in the ENGINE
 // file so the review tool's sourcing check can see the words.
 export const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.

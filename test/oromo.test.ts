@@ -286,7 +286,7 @@ describe("Oromo text normalization", () => {
         expect(phonemize("km 2-3", "om")).toBe("kiːloːmˈeːtira lˈama hˈanɡa sadˈiː"); // guard still holds
     });
 
-    test("#586 the multiplication sign runs BEFORE the unit block — unitPrefix moves the noun", () => {
+    test("the multiplication sign runs BEFORE the unit block — unitPrefix moves the noun", () => {
         // ⚠ Oromo's unit rules honour `unitPrefix` and MOVE the noun ahead of its number, so `6 × 6 cm` became
         // `6 × seentiimeetira 6` — the sign's `(\d+)…(\d+)` no longer had a digit after it and *si’a* was
         // DROPPED. `6x6 cm` failed the mirror way: the `x` broke the unit rule's adjacency, so the sign read but
@@ -303,7 +303,7 @@ describe("Oromo text normalization", () => {
         expect(phonemize("3,850 km²", "om")).toContain("iskuwˈeːr");
     });
 
-    test("#657 accented Latin stays ONE word and goes to the foreign reader", () => {
+    test("accented Latin stays ONE word and goes to the foreign reader", () => {
         // `[A-Za-zʼ’']+` ended the token at a diacritic, so the letter carrying it became an unclaimed gap read
         // as an English LETTER NAME and the rest of the word started over: `São Paulo` → *s ˈə ˈo paˈulo*.
         // Invisible to every gate — no digit or raw mark survives and nothing VANISHES.

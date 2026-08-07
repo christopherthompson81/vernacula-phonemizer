@@ -70,7 +70,7 @@ describe("Uzbek roman-numeral ordinals", () => {
     });
 });
 
-// TEXT NORMALIZATION (src/languages/uzbek/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// TEXT NORMALIZATION (src/languages/uzbek/normalize.ts) — the pre-tokenizer pass. The defining
 // rule is the corpus-verified ORDINAL: an Arabic numeral + hyphen + word IS the ordinal writing (the
 // orthographic rule sourced in romanOrdinals.ts: "1991-yilning 1-sentabri"). So years, centuries, dates and
 // ranks all read ordinal. Also space-grouped thousands, comma decimals, clocks, era markers, rates, units,

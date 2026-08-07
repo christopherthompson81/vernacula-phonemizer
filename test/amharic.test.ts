@@ -38,7 +38,7 @@ describe("amharic canonical IPA", () => {
     });
 });
 
-// Tens (found by the #562 impact audit): NUM.tens is keyed "20".."90" but the lookup used String(t) —
+// Tens (found by an impact audit): NUM.tens is keyed "20".."90" but the lookup used String(t) —
 // "2".."9" — so EVERY ten was silently dropped: 25 → "amɨst", 1998 → thousand-nine-hundred-EIGHT.
 // 21.7% of FLEURS am_et utterances contain digits.
 describe("Amharic tens", () => {
@@ -64,10 +64,10 @@ describe("Amharic magnitudes above thousand", () => {
     });
 });
 
-// ── #562 text normalization ───────────────────────────────────────────────────────────────────────────
+// ── text normalization ───────────────────────────────────────────────────────────────────────────
 // Counts are over the 1,922 unique FLEURS am_et transcripts (column 3). See src/languages/amharic/normalize.ts
 // for the full tabulation, the ordering couplings, and the negative results.
-describe("Amharic #562 normalization", () => {
+describe("Amharic normalization", () => {
     // The Ethiopic sentence terminator written as TWO U+1361 WORDSPACE — the typewriter/keyboard substitute
     // for ። . 74 instances, 60 utterances use it as their ONLY terminator, and it reached no TOKEN branch at
     // all, so every one of those sentence boundaries produced NO PAUSE.
@@ -140,7 +140,7 @@ describe("Amharic #562 normalization", () => {
         expect(phonemize("19,500 ኪ.ሜ²", "am")).toBe("asɾa zətʼəɲ ʃi amɨst məto kaɾe kilo metɨɾ");
     });
 
-    // Currency: the shared tier already carried $/¥/£. The #562 run added `magnitudes` and two LOCAL
+    // Currency: the shared tier already carried $/¥/£. A later run added `magnitudes` and two LOCAL
     // workarounds for core limitations — see normalize.ts §8b.
     test("currency: magnitudes hop, letter-code prefixes reach the tier, the noun is not doubled", () => {
         expect(phonemize("US$14.7 ቢሊዮን", "am")).toContain("bilijon dolaɾ"); // was: sign dropped entirely

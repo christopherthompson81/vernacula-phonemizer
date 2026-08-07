@@ -42,7 +42,7 @@ const KHMER_RUN = /[ក-៓ៜ-៝]{2,}/gu;
 /** Shortest permissible word piece. See the guard's note in the decode loop below. */
 const MIN_PIECE = 2;
 /** …except an independent vowel, which IS a standalone Khmer word. Same exception as khmerPerceptron.ts,
- *  and see its note: this no longer props up a g2p defect, #670 having fixed that at source. */
+ *  and see its note: this no longer props up a g2p defect, which was fixed at source. */
 const STANDALONE_1CHAR = /[\u17A3-\u17B3]/u;
 
 interface Meta {

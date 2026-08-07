@@ -5,7 +5,7 @@ import { numberToWords as cyNum } from "../src/languages/welsh/numbers.ts";
 import { numberToWords as omNum } from "../src/languages/oromo/numbers.ts";
 import { phonemize } from "../src/index.ts";
 
-// #562 beyond English: the shared symbol layer (%, currency, units — per-language DATA over one engine,
+// beyond English: the shared symbol layer (%, currency, units — per-language DATA over one engine,
 // with real count agreement), the French roman-numeral rules, and the Welsh + Oromo number compositors.
 describe("shared symbol normalizer (core)", () => {
     test("slavicCountForm implements the 1 / 2–4 / 5+ split with the 11–14 exception", () => {
@@ -47,7 +47,7 @@ describe("shared symbol normalizer (core)", () => {
     // magnitude and `m³` reached the IPA as the English letter name (*ˈɛm*) — the same failure the spaced
     // case had. The magnitude is re-emitted verbatim, so it keeps its space when it has one and none when it
     // does not. Measured over all 66 FLEURS corpora: no corpus reading changes, so this is robustness.
-    // #586, found by the zh.wikipedia fill. The boundary guards assume spaces between words, so in Chinese and
+    // Found by the zh.wikipedia fill. The boundary guards assume spaces between words, so in Chinese and
     // Japanese — where a unit or sign is normally flanked by Han/kana — they rejected the ORDINARY case and
     // only punctuation-adjacent instances worked.
     test("unspacedScript: a Han neighbour is a boundary, not token-continuation", () => {
@@ -160,7 +160,7 @@ describe("Oromo number compositor", () => {
         test(`${n} → ${w}`, () => expect(omNum(n)).toBe(w));
     }
 
-    test("digits are read in Oromo, not English (the #560 stopgap is gone)", () => {
+    test("digits are read in Oromo, not English", () => {
         expect(phonemize("dhibbentaa 25 ta'a", "om")).toBe("ᶑibːentˈaː diɡdamˈiː ʃˈan tˈaʔa");
     });
 });
@@ -448,7 +448,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
 });
 
 /**
- * five languages that had been through the #562 pass read `%` correctly and dropped CURRENCY signs
+ * five languages that had been through the symbol pass read `%` correctly and dropped CURRENCY signs
  * SILENTLY: the sign contributed nothing and `$5` was byte-identical to `5`, so nothing downstream marked the
  * loss. The cause was the gate, not an oversight: each language got the symbol coverage its own corpus
  * exercised, and all five corpora contain ZERO `$` against 18–54 `%`.

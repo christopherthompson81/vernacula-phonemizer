@@ -91,7 +91,7 @@ describe("french canonical IPA", () => {
         expect(phonemize("le siècle", "fr")).toBe("lə sjˈɛkl");
     });
 
-    // #562 text normalization (normalize.ts): the ordered pipeline that rewrites everything which is not
+    // text normalization (normalize.ts): the ordered pipeline that rewrites everything which is not
     // already a pronounceable word. Grouped by the class of thing being normalized.
     test("times: the hour marker is spoken, with feminine agreement", () => {
         // "11 h 20" previously read as "onze vingt" — the h vanished entirely — and the colon form turned

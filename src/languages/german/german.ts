@@ -431,7 +431,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class GermanPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: German rewrites (era, abbreviations, ORDINALS, clock, units) → INITIALISMS →
+        // ORDER: German rewrites (era, abbreviations, ORDINALS, clock, units) → INITIALISMS →
         // the shared symbol tier. The clock and the ordinals must precede the number tokenizer.
         const normalized = SYMBOLS(normalizeGermanInitialisms(normalizeGerman(input)));
         return assembleClauses(normalized, TOKEN, (m, sink) => {

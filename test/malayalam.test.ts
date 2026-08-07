@@ -50,7 +50,7 @@ describe("Malayalam canonical IPA", () => {
 });
 
 /**
- * #562 NUMBER COMPOSITION. Malayalam moved off `indicNumberWords` onto the SHARED Dravidian composer
+ * NUMBER COMPOSITION. Malayalam moved off `indicNumberWords` onto the SHARED Dravidian composer
  * (core/numbers.ts), which Telugu and Kannada also read — Malayalam is the fourth Dravidian language
  * and the consumer that made consolidating the three private composers testable. Each assertion below
  * names what the old composer produced.
@@ -81,7 +81,7 @@ describe("Malayalam numbers — the Dravidian composer", () => {
 });
 
 /**
- * #562 TEXT NORMALIZATION. Asserted through `phonemize`, not through normalizeMalayalam directly — the
+ * TEXT NORMALIZATION. Asserted through `phonemize`, not through normalizeMalayalam directly — the
  * layer's contract is what the engine finally says.
  */
 describe("Malayalam text normalization", () => {

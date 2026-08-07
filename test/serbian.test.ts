@@ -48,7 +48,7 @@ describe("Serbian canonical IPA", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION. Every case here is a form ATTESTED in the sr_rs FLEURS corpus (1,923 unique
+// TEXT NORMALIZATION. Every case here is a form ATTESTED in the sr_rs FLEURS corpus (1,923 unique
 // utterances) with the reading the corpus itself licenses; see src/languages/serbian/normalize.ts for the
 // tabulation and the counts. Asserted through the engine's `text()`, not against the normalizer, so the
 // wiring and the ordering are covered too.
@@ -133,7 +133,7 @@ describe("Serbian normalization", () => {
     test("degrees consume the degree noun the text already wrote", () => {
         expect(say("32 °C степена")).toBe("trideset dʋa stepena t͡selzijusa");
         expect(say("90 °F")).toBe("deʋedeset stepeni farenxajta");
-        // #586. The bare degree now reads the DEGREE NOUN, with numeral agreement and no scale word. This
+        // The bare degree now reads the DEGREE NOUN, with numeral agreement and no scale word. This
         // line used to assert "trideset pet" — the ° declined outright so a LONGITUDE lost the word that
         // makes it one. Declining protected the scale word (Celsius/Fahrenheit), which the C/F arm supplies,
         // and threw away the degree noun with it.

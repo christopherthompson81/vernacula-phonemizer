@@ -239,7 +239,7 @@ describe("italian text normalization", () => {
         expect(phonemize("vittoria contro lo Zambia (26 - 00)", "it")).not.toContain("mˈeno");
     });
 
-    test("#586 the plus as a WORD-JOINER, and the exponent across a magnitude", () => {
+    test("the plus as a WORD-JOINER, and the exponent across a magnitude", () => {
         // `volo+hotel` is the only `+` in the corpus and it is not arithmetic — no digit on either side, so
         // every digit-keyed rule from the signed-number sweep was blind to it. MMS-1b-all (`ita`) on the
         // it_it speaker: "pacchetti combinati vol o piu hotel".

@@ -104,7 +104,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class CzechPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: Czech rewrites (grouping, abbreviations, ordinals, clock, dates, ranges, signs) →
+        // ORDER: Czech rewrites (grouping, abbreviations, ordinals, clock, dates, ranges, signs) →
         // INITIALISMS (after abbreviations, so `Co.` is not spelled CEE-OH) → the shared symbol tier last
         // (it needs the number still adjacent to its unit/sign). Roman numerals arrive already converted
         // at the registry seam, so the regnal rule (normalize.ts step 12) sees digits after proper names.

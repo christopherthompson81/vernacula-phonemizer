@@ -171,7 +171,7 @@ function numberWords(n: number): string {
 // The number class accepts Indonesian's DOT thousands grouping and COMMA decimal. Without them "9.000"
 // tokenized as 9 | . | 000 and the separator became a clause PAUSE ("sembilan . nol"), and "1,5" likewise.
 // Times (11.00) are claimed earlier by normalize.ts, so only real numbers reach this.
-// #562 Indonesian had no symbol tier at all: "3%" read as just "tiga", losing the percent.
+// Indonesian had no symbol tier at all: "3%" read as just "tiga", losing the percent.
 const SYMBOLS = makeSymbolNormalizer({
     // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
     // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — this

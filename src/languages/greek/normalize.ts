@@ -167,7 +167,7 @@ const DOTTED_ALT = Object.keys(DOTTED)
 // ── the shared symbol tier ──────────────────────────────────────────────────────────────────────────
 
 /**
- * #562 symbol normalization — Greek.
+ * symbol normalization — Greek.
  *
  * NO `unitPer`. Greek does not say "A per B" for a rate; it takes the DEFINITE ARTICLE agreeing with the
  * denominator — «χιλιόμετρα ΤΗΝ ώρα» (fem), «μέτρα ΤΟ δευτερόλεπτο» (neut). The corpus itself writes the
@@ -188,7 +188,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "και",
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
@@ -458,7 +458,7 @@ export function normalizeGreek(input: string): string {
     //      so no gate can see this and the corpus diff for it is empty BY CONSTRUCTION.
     //      It is worth having anyway because the asymmetry is indefensible on its own terms: step 11 already
     //      voices `+` as συν from a single `(UTC +1)`, and a `-5` that reads exactly like `5` is silent
-    //      content loss of the kind #586 exists to remove.
+    //      content loss of exactly the kind this tier exists to remove.
     //      THE GUARD IS THE ONE `tools/normalization/defects.ts` arrived at after resolving all 66 artifacts
     //      by hand, reused rather than reinvented: no letter, mark or digit before (which excludes the
     //      designations `COVID-19` and `Chandrayaan-1`), and not a RANGE — the second lookbehind spans a

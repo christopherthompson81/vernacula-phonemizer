@@ -37,7 +37,7 @@ describe("Tamil abugida g2p", () => {
 });
 
 /**
- * #562 text normalization. Asserted on the TEXT layer where the rule is a rewrite (readable, and the IPA
+ * text normalization. Asserted on the TEXT layer where the rule is a rewrite (readable, and the IPA
  * for a whole utterance is unreviewable), and through phonemize() where the point is that the pipeline
  * consumes it — no stray pause, no bare consonant, no leaked digit.
  */

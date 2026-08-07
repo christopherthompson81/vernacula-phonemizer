@@ -1,10 +1,10 @@
 /**
- * WORD ATTESTATION PROBE (#562/#586) — answer "is this word actually used in this language?" for the words
+ * WORD ATTESTATION PROBE — answer "is this word actually used in this language?" for the words
  * `review.ts --lang X` reports as *in NO source*.
  *
  * WHY THIS EXISTS. The sourcing gate's haystack is the FLEURS corpus + the mined artifact + the referee word
  * lists + the language's own data files + espeak `dictsource` + any sister standard. That is a strong haystack
- * for a well-resourced language and a thin one otherwise, and the #562 batches kept ending on the same
+ * for a well-resourced language and a thin one otherwise, and the batches kept ending on the same
  * unresolvable prompt — one currency word, attested nowhere, shipped as a stated assumption because dropping
  * the sign would delete the currency from the only sentences that have one:
  *
@@ -41,7 +41,7 @@
  * false for every real Chinese word and the verdict is `substring-only` no matter what. Measured on cmn:
  *
  *   等于 小于 乘以 除以 平方 立方 摄氏度 …  →  0 token / 1 substring — every one, including 摄氏度,
- *                                            which this repo has SHIPPED as the Celsius word since #562
+ *                                            which this repo has SHIPPED as the Celsius word since the start62
  *
  * Worse, the one `attested` verdict in that run — 大于 — hit only because a LaTeX dump had put spaces round
  * it. The boundary test was not measuring the language; it was measuring the markup.
@@ -224,7 +224,7 @@ async function probe(word: string): Promise<Finding> {
     // WARNING rather than an error — `"exlimit" was too large for a whole article extracts request, lowered
     // to 1` — and returns the first page only. So the probe searched twenty articles, read ONE, and reported
     // the other nineteen as containing nothing. Every `absent` and every low `articles` count produced before
-    // this fix understates by up to 20×, including the #654 pilot's three German `absent` verdicts.
+    // this fix understates by up to 20×, including a pilot's three German `absent` verdicts.
     //
     // The alternative the API offers is `exintro=1`, which does allow 20 pages — but only their LEAD
     // paragraph, and a relational word or a unit modifier is body prose, not summary prose. Reading whole
@@ -264,7 +264,7 @@ async function probe(word: string): Promise<Finding> {
             //
             // Examples are re-found in the ORIGINAL text with the ORIGINAL word. If the wiki writes it with
             // different marks the fold still COUNTS the hit and no example is quoted — a missing quote is a
-            // prompt to look; a misaligned one is a wrong finding, and #610 made these quotes the whole of the
+            // prompt to look; a misaligned one is a wrong finding, and these quotes are the whole of the
             // evidence for unspaced scripts.
             tokenHits += [...fold(text).matchAll(hitRe)].length;
             const qBody = phrase ? word.trim().split(/\s+/u).map(reEsc).join("\\s+") : reEsc(word);

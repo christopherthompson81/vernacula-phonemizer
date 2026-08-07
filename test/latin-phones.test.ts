@@ -3,7 +3,7 @@
  *
  * Three separate mechanisms, pinned together because they are easy to confuse and they run in this order:
  *   1. input repair (registry) — mojibake, homoglyphs, fullwidth forms: make the character the one that was meant
- *   2. the #657 fold (makeNativiser) — an out-of-inventory ACCENT to a base the g2p has a rule for
+ *   2. the fold (makeNativiser) — an out-of-inventory ACCENT to a base the g2p has a rule for
  *   3. this floor (latinPhone) — a letter the g2p still cannot read, at the g2p's own fall-through
  */
 import { describe, expect, test } from "vitest";

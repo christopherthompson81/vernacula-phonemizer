@@ -5,12 +5,12 @@
  *
  * `attest.ts` asks Wikipedia whether a word EXISTS. This asks the audio-aligned corpus whether the word is
  * SPOKEN — a stronger source, and the one `review.ts` already treats as the top haystack tier. The two answer
- * different questions and the #654 pilot showed the order matters: German Wikipedia's only hit for `größer als`
+ * different questions, and a pilot showed the order matters: German Wikipedia's only hit for `größer als`
  * was a film title, while the corpus had `kleiner als` seven times in ordinary prose.
  *
  * ## ⚠ THE MISTAKE THIS TOOL EXISTS TO PREVENT: SEARCHING FOR THE SIGN
  *
- * The first pass at #654 grepped the corpora for `=`, `<`, `>`, `÷` and concluded the corpus could not source
+ * A first pass grepped the corpora for `=`, `<`, `>`, `÷` and concluded the corpus could not source
  * them. That is true and useless. Every `<` in the fleet is an HTML tag, `=` is LaTeX residue — but the READINGS
  * are ordinary comparative prose (`less than`, `divided by`), and those words are in the corpus in quantity.
  * *Search for the words, never for the notation.*
@@ -55,7 +55,7 @@ const SPACELESS_SCRIPTS = new Set(["Han", "Hiragana", "Katakana", "Thai", "Lao",
 /** Every utterance in this language's corpus — the normalized transcript column, one per line. */
 /**
  * ⚠ "ABSENT" MUST MEAN "LOOKED AND DID NOT FIND", NOT "HAD NOWHERE TO LOOK. This tool is the tier-2 gate — the
- * one #654 treats as the strongest text source and uses to decide whether a language's vocabulary is real — and
+ * the one treated as the strongest text source and uses to decide whether a language's vocabulary is real — and
  * for a language with no FLEURS corpus it reported, verbatim:
  *
  *     km: 0 utterances, 0 distinct tokens

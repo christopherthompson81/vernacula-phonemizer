@@ -69,18 +69,18 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// Kazakh Cyrillic words / numbers / punctuation. #562: the corpus groups thousands with SPACES (17 000,
+// Kazakh Cyrillic words / numbers / punctuation. ⚠ The corpus groups thousands with SPACES (17 000,
 // 5 000 000) and writes decimals with COMMAS (2,3); the TOKEN swallows both so the tier can see the number.
 const TOKEN = /([Ѐ-ӿ]+)|(\d{1,3}(?: \d{3})+(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:])/gu;
 
-// #562 symbol normalization — Kazakh: пайыз (percent), CYRILLIC unit abbreviations (the corpus writes
+// symbol normalization — Kazakh: пайыз (percent), CYRILLIC unit abbreviations (the corpus writes
 // км/кг, not km/kg — the same trap as Russian). Kept in the ENGINE file so the review tool's sourcing
 // check can see the words.
 export const SYMBOLS = makeSymbolNormalizer({
     // `&` was DROPPED outright: the corpus's `B&B` and `Arts & Sciences` lost the sign.
     // `және` ×561 in this corpus. The tier spaces it on both sides, because `B&B` is two
     // initialisms and joining them would make one token.
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
+    // `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
     // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
     // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
     // omitted and defaults to it — this language does not split dimension from product.

@@ -49,8 +49,8 @@ const flag = (name: string): string | undefined => {
 /**
  * THE TEXT UNDER TEST, from either evidence source.
  *
- * ⚠ THIS GATE COULD NOT READ THE CORPORA #585 EXISTS TO PROVIDE, which made that issue's deliverable
- * unusable for its own stated purpose. #585 opens by observing that "the #562 normalization work is gated on a
+ * ⚠ THIS GATE COULD NOT READ THE CORPORA IT EXISTS TO CHECK, which made it deliverable
+ * unusable for its own stated purpose. The observation was that "the normalization work is gated on a
  * per-language corpus diff, which is the check that has found more real defects than any other. That confines
  * the plan to the ~66 languages with a FLEURS corpus" — and then supplies mined artifacts for 87 more. But this
  * file read `CORPUS_ROOT` and nothing else, so `--corpus km_kh` simply threw: the corpora arrived and the gate
@@ -117,7 +117,7 @@ const DEFECTS: [string, RegExp][] = [
     // that knows one and not the others gives false assurance.
     ["RAWMARK", /[…。、，％℃°ºª〜～・！？²³$€£¥०-९٠-٩۰-۹।॥۔؟،؛]/u],
     // A SYMBOL THAT VANISHED. Every class above detects a character that SURVIVES into the IPA; none of
-    // them can see one that is silently DISCARDED, and that blind spot is why the currency drop in #584
+    // them can see one that is silently DISCARDED, and that blind spot is why a currency drop
     // went unnoticed through thirty-seven languages of corpus-driven work. `emit` appends this marker
     // after phonemizing the utterance a second time with the symbol deleted and finding the two readings
     // identical — proof the symbol contributed nothing.

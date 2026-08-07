@@ -323,7 +323,7 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 
 /**
- * #562 symbol normalization — Italian. Percent is *per cento*, invariable, so a one-element form list.
+ * symbol normalization — Italian. Percent is *per cento*, invariable, so a one-element form list.
  * Currency and unit names are the standard Italian ones; the corpus writes the currency sign AFTER the
  * amount ("banconote da 5 $"), which the shared tier already handles.
  *
@@ -373,7 +373,7 @@ const SYMBOLS = makeSymbolNormalizer({
     },
     // MIGRATION TEST: the composite km²/m² keys are gone, composed by the shared tier instead.
     exponentWords: { squared: ["quadrato", "quadrati"], cubed: ["cubo", "cubi"] },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
     // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
     // they are different words (chilometri quadrati but venti al quadrato).
@@ -388,7 +388,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class ItalianPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 normalization order: general text normalization (de-grouping, era markers, abbreviations,
+        // NORMALIZATION ORDER: general text normalization (de-grouping, era markers, abbreviations,
         // degrees, ordinals, clock, signs, fractions) → INITIALISMS (after abbreviation expansion, so
         // `a.C.` is already words) → SYMBOLS (%, currency, units) → the DECIMAL COMMA last of all, because
         // the symbol tier matches a unit only against an ADJACENT number and "1,5 km/s" must reach it

@@ -60,7 +60,7 @@ describe("embedded foreign (Latin) runs", () => {
     // SUPERSEDED. This test used to assert that a third script stays dropped — the deliberate scope of
     // the original Latin-only fallback. core/scripts.ts generalises it: a run is now routed to a reader
     // chosen by its SCRIPT, so the Han is read as Mandarin instead of vanishing. The old behaviour was a
-    // silent DROP, invisible to every leak-based check, which is the same blindness as #584.
+    // silent DROP, invisible to every leak-based check, which is the same blindness a dropped sign always has.
     test("a third script is routed to a reader for that script, not dropped", () => {
         const out = phonemize("век 世界", "ru");
         expect(out.startsWith("vʲek")).toBe(true);

@@ -61,7 +61,7 @@ describe("Zulu (isiZulu) g2p — authored", () => {
 });
 
 /**
- * #562 TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (trap 13 (pin the rule's BRANCHES)): every
+ * TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (trap 13 (pin the rule's BRANCHES)): every
  * table gets both a case the corpus contains and a case it does not, and every guard gets the neighbour it
  * is supposed to refuse. `normalizeZulu` is asserted as text→text because that is what the layer is; the
  * `phonemize` cases at the end pin the ORDERING against the shared symbol tier, which normalize.ts runs
@@ -89,7 +89,7 @@ describe("Zulu text normalization", () => {
         expect(normalizeZulu("x = y")).toBe("x kulingana no-y");
         expect(normalizeZulu("5 < 6")).toBe("5 ngaphansi kuka-6");
         expect(normalizeZulu("6 > 5")).toBe("6 ngaphezu kuka-5"); // the adversarial neighbour — 0 instances
-        // #586. `plas`, not ` no-`. ` no-` was inferred from the SENSE of `(UTC+1)` while the rule's own
+        // `plas`, not ` no-`. ` no-` was inferred from the SENSE of `(UTC+1)` while the rule's own
         // comment said a bare positive sign was left under-specified rather than guessing a borrowing — but the
         // borrowing is audible: a PHONEME recognizer (no `+`, no digits in its vocabulary) gives
         // `j u t i s i p l a s w a n`. One speaker of three; the other two skip the parenthetical entirely, so
@@ -166,7 +166,7 @@ describe("Zulu text normalization", () => {
 
     it("square miles, degrees, and the compass — the click letters the ° left behind", () => {
         expect(normalizeZulu("(300,948 sq mi)")).toBe("(300948 amamayela skwele)"); // `sq` read as [skǃ]
-        // #586. The plus is now VOICED: the degree pattern used to open with `[+]?`, matching the sign and
+        // The plus is now VOICED: the degree pattern used to open with `[+]?`, matching the sign and
         // never re-emitting it, so `+30°C` lost it silently. `plas` is sourced (step 14b) and the sign is
         // claimed at step 8c, BEFORE degrees — after the degree rewrite the text reads `+amazinga…` and the
         // sign step needs a digit after the sign, so ordering is what makes it reachable.

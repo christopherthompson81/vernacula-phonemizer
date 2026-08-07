@@ -49,7 +49,7 @@ describe("Macedonian canonical IPA — phonemic Cyrillic g2p + antepenultimate s
     });
 });
 
-// #562 TEXT NORMALIZATION. Asserted on the normalize.ts text→text output where the point is the WORDS
+// TEXT NORMALIZATION. Asserted on the normalize.ts text→text output where the point is the WORDS
 // (a wrong word is the failure mode this layer has), and through `phonemize` where the point is that the
 // pipeline downstream actually speaks them. Counts are from the mk_mk FLEURS corpus (1,857 utterances).
 describe("Macedonian text normalization", () => {

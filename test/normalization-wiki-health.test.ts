@@ -1,7 +1,7 @@
 /**
  * The mined-corpus health check — that it still fails a template-built corpus and passes prose.
  *
- * WHY THIS IS PINNED. The first set of thresholds PASSED `ceb`, the one wiki #585 names as the reason the
+ * WHY THIS IS PINNED. The first set of thresholds PASSED `ceb`, the one wiki that is the reason the
  * check exists: they were written from the shape of the argument before anything was measured. The
  * calibration that replaced them lives in, and a
  * future edit that loosens a threshold, changes the shingle width, or swaps the tokenizer can silently

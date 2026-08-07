@@ -90,7 +90,7 @@ describe("Ukrainian roman-numeral ordinals", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION. Asserted on the normalize.ts text→text output where the point is the WORDS
+// TEXT NORMALIZATION. Asserted on the normalize.ts text→text output where the point is the WORDS
 // (a wrong word is the failure mode this layer has), and through `phonemize` where the point is that the
 // pipeline downstream actually speaks them. Counts in the comments are from the uk_ua FLEURS corpus
 // (1,925 unique utterances, column 3).

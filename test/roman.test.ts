@@ -112,7 +112,7 @@ describe("Roman numerals (core/roman.ts)", () => {
     });
 });
 
-/** #562 — a Roman-looking letter glued to a digit is part of an alphanumeric code, not a numeral. */
+/** a Roman-looking letter glued to a digit is part of an alphanumeric code, not a numeral. */
 describe("digit-glued candidates are never numerals", () => {
     test("a letter touching a digit is left alone", () => {
         // The numeral-context licence deliberately bypasses the single-letter guard, so without this an
@@ -129,7 +129,7 @@ describe("digit-glued candidates are never numerals", () => {
     });
 });
 
-/** #562 — a contiguous run of single capitals is INITIALS, not numerals. */
+/** a contiguous run of single capitals is INITIALS, not numerals. */
 describe("initial runs are not numerals", () => {
     test("two adjacent single capitals are left alone", () => {
         // `D` is Roman 500; a regnal rule licensing a following capitalised word turned

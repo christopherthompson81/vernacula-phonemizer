@@ -32,7 +32,7 @@ function below1000(n: number): string {
 /**
  * The multiplier of χιλιάδες agrees with it, and χιλιάδα is FEMININE: «πεντακόσιες χιλιάδες», «τρεις
  * χιλιάδες» — not the neuter πεντακόσια / τρία the tables hold. Only 1, 3, 4 and the hundreds inflect;
- * everything else is invariant. Exposed by #562, whose digit de-grouping made the corpus's 50
+ * everything else is invariant. Exposed by the digit de-grouping, which made the corpus's 50
  * period-grouped numbers (1.000, 783.562) reach this path as whole integers for the first time.
  */
 const FEMININE: Readonly<Record<string, string>> = { "ένα": "μία", "τρία": "τρεις", "τέσσερα": "τέσσερις" };

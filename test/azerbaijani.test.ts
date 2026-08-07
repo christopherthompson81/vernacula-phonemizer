@@ -90,7 +90,7 @@ describe("Azerbaijani roman-numeral ordinals", () => {
     });
 });
 
-// TEXT NORMALIZATION (src/languages/azerbaijani/normalize.ts) — the pre-tokenizer pass behind #562. The
+// TEXT NORMALIZATION (src/languages/azerbaijani/normalize.ts) — the pre-tokenizer pass. The
 // defining rule is the `N-ci` ordinal (written suffix cı/ci/cu/cü, spoken -ıncı/-inci/-uncu/-üncü on the
 // last cardinal word). Also space-grouped thousands, comma decimals, clocks, era markers, percent with a
 // possessive suffix, degrees, rates, version dots, units, currency, signs and initialisms.

@@ -15,12 +15,12 @@ export { phonemizeWord };
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([가-힣]+)|(\d+)|([.!?…,;:])/gu;
 
-// #562 symbol normalization — Korean: hangul loans through the ordinary engine. The UNITS moved to
+// symbol normalization — Korean: hangul loans through the ordinary engine. The UNITS moved to
 // normalize.ts, which needs them before its range/decimal rules and needs them JOINED to the number
 // (this tier always inserts a space); % and the currency sign stay here, where the shared machinery
 // already places the word after the number, which is also Korean's order.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.

@@ -8,7 +8,7 @@
  *
  * ⚠ WHY A SOURCE PARSE AND NOT A HAND-KEPT LIST. Because a hand-kept list goes stale silently and then
  * understates the scope of every sweep that trusts it — the audit ran for months against a hardcoded 37 of 67
- * languages, and #657's work list was derived from a grep that found 21 of 108 affected engines. A derived list
+ * languages, and one work list was derived from a grep that found only 21 of 108 affected engines. A derived list
  * cannot drift from what the registry serves.
  *
  * ⚠ FALL-THROUGH LABELS ACCUMULATE. Several codes share one factory:

@@ -186,7 +186,7 @@ describe("persian text normalization", () => {
         expect(phonemize("اصطکاک کم است", "fa")).toContain("kˈam ʔˈast"); // the adjective still untouched
     });
 
-    test("#586 the ampersand is the ENGLISH word, and both speakers say it", () => {
+    test("the ampersand is the ENGLISH word, and both speakers say it", () => {
         const s = phonemize("بدیهی است که B&B ها به عمدتا.", "fa");
         expect(s).toContain("ʔˈand");
         expect(s).not.toBe(phonemize("بدیهی است که BB ها به عمدتا.", "fa"));

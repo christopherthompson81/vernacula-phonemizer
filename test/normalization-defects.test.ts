@@ -5,7 +5,7 @@
  * currency sign inside the ENGLISH half of a bilingual cell (`SGD$8.5 million to build`, with 0 Khmer letters
  * either side), and an `=` whose silence is a refusal argued at length in the language's own file. The first is a
  * fact about English; the second was already recorded in `ACCEPTED_SIGN_SILENCE`, which this scan did not consult —
- * the same inconsistency #586 fixed between `coverage.ts` and `review.ts`, one level up.
+ * the same inconsistency once present between `coverage.ts` and `review.ts`, one level up.
  *
  * Both are easy to get wrong in the direction of HIDING real defects, so what is pinned here is mostly the
  * negative cases: a sign in the native half of a bilingual line, a line mixing an accepted sign with a read one,

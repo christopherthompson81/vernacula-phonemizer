@@ -257,7 +257,7 @@ export function normalizeItalian(input: string): string {
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 9b) THE PLUS AS A WORD-JOINER — a shape the whole signed-number sweep never met. Every other `+` resolved
-    //     in #586 sat against a DIGIT (a UTC offset, a temperature, an arithmetic operand), and the guards were
+    //     sat against a DIGIT (a UTC offset, a temperature, an arithmetic operand), and the guards were
     //     written accordingly. Italian's only `+` joins two NOUNS: `pacchetti combinati volo+hotel`, a package
     //     deal. Nothing numeric anywhere near it, so a digit-keyed rule could never have found it, and the sign
     //     was DROPPED — `volo hotel`, two nouns collided into an asyndeton.

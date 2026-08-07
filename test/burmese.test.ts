@@ -98,7 +98,7 @@ describe("burmese canonical IPA", () => {
     });
 });
 
-// #562/#585 — the normalization layer, verified against a MINED corpus (tools/corpus/mined/my.jsonc)
+// The normalization layer, verified against a MINED corpus (tools/corpus/mined/my.jsonc)
 // rather than FLEURS, which has no Burmese. Every emitted word is attested in that corpus.
 describe("burmese normalization", () => {
     const say = (s: string): string => phonemize(s, "my").trim();

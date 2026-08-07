@@ -38,7 +38,7 @@ what this document is; the rules themselves are bespoke every time.
 npx tsx tools/normalization/mine.ts mine --in fleurs:hu_hu --out tools/corpus/mined/hu.jsonc \
     --lang hu --source "FLEURS hu_hu" --per-cell 4 --sample 30
 
-# a language WITHOUT one — mine a Wikipedia dump (see #585; my.jsonc is the worked example)
+# a language WITHOUT one — mine a Wikipedia dump (my.jsonc is the worked example)
 python3 tools/normalization/wikidump-to-text.py xxwiki.xml.bz2 xx_paras.txt
 npx tsx tools/normalization/mine.ts mine --in xx_paras.txt --out tools/corpus/mined/xx.jsonc \
     --lang xx --segment paragraph --terms xx_terms.txt --per-cell 6 --sample 40
@@ -263,7 +263,7 @@ short enough to read, and each one a real question.
 
 **When the residue is the answer, probe Wikipedia — `tools/normalization/attest.ts`.** For a well-resourced
 language the haystack above is strong; for a language espeak does not ship at all it is nearly just the corpus
-and the artifact, and zu/xh both ended #562 on an unresolvable currency prompt for that reason. The probe asks
+and the artifact, and zu/xh both ended on an unresolvable currency prompt for that reason. The probe asks
 CirrusSearch for one specific WORD and reports it three ways:
 
 ```
@@ -455,8 +455,7 @@ words. Two consequences:
   → `REDUNDANT`, a note. Absent → `DROP`, a defect. A symbol the engine never reads adds no tokens and can
   never be downgraded, and a symbol swallowed only in context still reports (Xhosa reads a bare `$5` but not
   the `$` in `leUS$30`).
-- **A currency is also named by its ISO CODE**, which that second question cannot see: `$45 juta AUD` (ms,
-  #601) states one currency twice, but the code reads as spelled letters, so `dolar` is nowhere in the IPA
+- **A currency is also named by its ISO CODE**, which that second question cannot see: `$45 juta AUD` (ms) states one currency twice, but the code reads as spelled letters, so `dolar` is nowhere in the IPA
   and the correct drop reported as a defect. Both gates now also accept a sign-keyed ISO code that is itself
   spoken in the reading — sign-keyed rather than a bare three-capitals shape, which is every other
   initialism in the corpus; and the code must be spoken, or a dropped code would license a dropped sign.
@@ -612,7 +611,7 @@ languages** while cmn's `一众 B&B 公司` read as "B B".
 hits from SUBSTRING-ONLY hits, and only the first attests — the discipline that caught `Yen` inside `Libyen`.
 For Chinese, Japanese, Thai, Khmer and the rest, splitting prose on non-letters yields **one token per
 sentence**, so every real word scores `substring-only` by construction. Measured on cmn: 等于 小于 乘以 除以
-平方 立方 and 摄氏度 — the last of which this repo has *shipped* as the Celsius word since #562 — all reported
+平方 立方 and 摄氏度 — the last of which this repo has *shipped* as the Celsius word from the start — all reported
 as negatives. The one `attested` verdict hit only because a LaTeX dump had put spaces around it.
 
 - **A gate that returns the same answer for every input is not a strict gate, it is a broken one.** The tell
@@ -674,10 +673,8 @@ hi and ta.
   translated into. Same pattern as the seven-utterance magnitude case in trap 17.
 
 **24. CHECK WHETHER THE RULE SHAPE IS THE ONLY ONE AVAILABLE BEFORE ACCEPTING A REFUSAL — INCLUDING YOUR OWN.**
-Trap 16 is about seams that exist; this is its complement. Hindi's layer DECLINED the minus rule under #562 and
-was right: measured over hi_in, the fleet's `(^|[\s(])[-−–](\d)` shape has one false positive (`चंद्रयान -1`)
-and **no true ones** — the corpus contains no negative number. Re-measuring for #586 reproduced those counts
-exactly. The gate said FAIL, the corpus said the gate was wrong, and the deferral was documented well enough to
+Trap 16 is about seams that exist; this is its complement. Hindi's layer DECLINED the minus rule and was right: measured over hi_in, the fleet's `(^|[\s(])[-−–](\d)` shape has one false positive (`चंद्रयान -1`)
+and **no true ones** — the corpus contains no negative number. Re-measuring later reproduced those counts exactly. The gate said FAIL, the corpus said the gate was wrong, and the deferral was documented well enough to
 re-check in one command.
 
 - **What broke the refusal was not better evidence, it was a narrower rule.** Every counter-example is a
@@ -717,8 +714,7 @@ also changes how its NEIGHBOURS tokenize, and the test then credits the symbol f
 artifact writes `32℃에`, which reads as two tokens (*sˈɐmsibi ˈe*); delete the ℃ and `32에` **agglutinates**
 into one (*sˈɐmsibie*), so the readings differ and `scan` reported ko as having NO DEFECTS while `20℃` read as
 bare *isˈip̚*. Replacing the symbol with a SPACE holds the boundary still. Measured over all 66 artifacts:
-**16 new drops found, 0 lost** — ten of them the B&B ampersand across nine languages, the defect #586 opens
-with. Fleet count 56 defective cells across 30/37 → 68 across 34/37.
+**16 new drops found, 0 lost** — ten of them the B&B ampersand across nine languages, the defect that opens this class. Fleet count 56 defective cells across 30/37 → 68 across 34/37.
 
 - **This is trap 18 at the corpus level.** There it was a probe (`A&B` → `AB`); here it is real text. Same
   cause, and it is worst in agglutinative languages — Korean, Japanese, Turkish, Finnish, Hungarian.
@@ -803,8 +799,7 @@ article to plaintext. The requests are independent.
 - **Pooling also let each request fail alone.** Serially, one bad article threw to the cell's catch and silently
   abandoned the remaining titles.
 
-**31. RE-MINING IS NOT MONOTONE — DIFF THE SCAN, NOT JUST THE COVERAGE.** The #586 re-mine of 63 artifacts
-raised fleet coverage from 1511 to 1709 populated cells, and along the way it QUIETLY DROPPED a defect example:
+**31. RE-MINING IS NOT MONOTONE — DIFF THE SCAN, NOT JUST THE COVERAGE.** A re-mine of 63 artifacts raised fleet coverage from 1511 to 1709 populated cells, and along the way it QUIETLY DROPPED a defect example:
 zu's `endawe$ni` (a corpus typo with a stray `$`) still occurs twice in zu_za but no longer appears in the
 artifact, so `DROP currency ×1` vanished from its scan. Selection prefers unpicked segments in order to spread
 coverage, so changing the cell set changes which examples survive `--per-cell`.
@@ -838,7 +833,7 @@ occurrences) and `ordinal-native`.
 Folding changes string length in every script that writes combining marks, so the window landed off by however
 many marks preceded the hit and the quoted sentence did not contain the word at all. Latin without diacritics
 folds to itself, which is why it survived until a Maithili run showed `प्रतिशत`'s example as a passage with no
-प्रतिशत in it. #610 had just made those quotes **the whole of the evidence** for unspaced scripts.
+प्रतिशत in it. That run had just made those quotes **the whole of the evidence** for unspaced scripts.
 
 - **Count in one representation and quote from the other, never mix the indices.** Examples are now re-found in
   the original text with the original word; if the wiki spells it with different marks the fold still counts the
@@ -861,8 +856,7 @@ Maithili's four `बजकर` hits: two are Hindi (*का मुहूर्�
 
 **35. WHEN YOU HAVE NO CANDIDATE WORD, ASK WHAT THE LANGUAGE CALLS THE THING.** Every sourcing avenue in this
 tree reads TEXT and asks *does this word occur?* — the corpus, the referees, espeak, `attest.ts`. All of them
-need a candidate first, and when you have none they fail worse than silently. The #586 Phase 1 findings left five
-Indic languages dropping the `+` in `UTC+1`, and a substring search for plausible words offered:
+need a candidate first, and when you have none they fail worse than silently. The first-pass findings left five Indic languages dropping the `+` in `UTC+1`, and a substring search for plausible words offered:
 
 ```
 gu ધન ×167   ml ധന ×119   ne धन ×84   ta மேலும் ×161
@@ -1034,7 +1028,7 @@ negative from a gate is a claim about the gate until you have done that once.
 registered as `zsm` (ISO 639-3) and worked throughout; `ms` (ISO 639-1) threw, and `ms` is what nearly every
 caller writes — including this repo's own `tools/corpus/mined/ms.jsonc`, whose `source` field reads
 "FLEURS ms_my". So a fleet sweep that iterated the ARTIFACTS reported Malay as unreachable and its cells as
-unmeasurable, for the whole of #586, while nothing was wrong with the language at all. Accept both codes, and
+unmeasurable, for a whole sweep, while nothing was wrong with the language at all. Accept both codes, and
 when a sweep reports a language as missing, check the code before the engine.
 
 - **The same sweep hid a real gap behind the fake one.** Once `ms` resolved, Malay turned out to drop `m³`
@@ -1211,7 +1205,7 @@ principle as trap 48. What would move these is a source neither the corpus nor t
 
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
-Reading back through all 25 merged #562 PRs, the "deliberately not done" lists are not 25 different problems.
+Reading back through all 25 merged normalization PRs, the "deliberately not done" lists are not 25 different problems.
 They are the same handful of VOCABULARY CLASSES recurring, and each deferral turns on one question: *is there
 a source for this class in this language?*
 
@@ -1264,7 +1258,7 @@ source — that is `attest.ts`'s example column, and it is the half no tool can 
 ## Naming: what a normalizer export is called
 
 Three shapes, and the fleet already agrees on all three — this writes the convention down so it stops being
-folklore, after the #586 loop-back found the one outlier by watching `review.ts` print a blank where a name
+folklore, after a loop-back found the one outlier by watching `review.ts` print a blank where a name
 should have been.
 
 | shape | when | count |
@@ -1444,7 +1438,7 @@ is testing the wrong layer. Re-assert through `phonemize`, and note in the test 
 
 ## The corpus's own AUDIO is a sourcing tier, and it outranks every text tier for a SIGN
 
-Established on #586's plus/minus work, after the text tiers were exhausted twice
+Established on the plus/minus work, after the text tiers were exhausted twice
 .
 
 **The failure that motivates it.** A written sign — `+`, `−`, `×` — is written as a GLYPH in running prose in
@@ -1521,7 +1515,7 @@ word from the wrong register is harder to catch than a word with two senses, bec
 
 ## A corrupt input MANUFACTURES symbols — repair before you measure
 
-Three separate #586 defects turned out to be the same non-defect, so this is a class and not an anecdote.
+Three separate defects turned out to be the same non-defect, so this is a class and not an anecdote.
 Double-encoded (mojibake) text uses Latin-1 punctuation as a UTF-8 continuation byte, and **some of those bytes
 are exactly the signs the DROP classes hunt for**:
 

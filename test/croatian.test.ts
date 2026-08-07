@@ -41,7 +41,7 @@ describe("Croatian (hr) canonical IPA", () => {
     });
 });
 
-// TEXT NORMALIZATION (src/languages/croatian/normalize.ts) — the pre-tokenizer pass behind #562, modeled on
+// TEXT NORMALIZATION (src/languages/croatian/normalize.ts) — the pre-tokenizer pass, modeled on
 // the Serbian normalize. The defining rules are the N. ordinal with its Croatian licensors (month genitives,
 // stoljeća, najvećim), the period-thousands vs ordinal disambiguation, the comma-decimal "zarez", the h-clock
 // suffix, the n.e./p.n.e. era markers, and the prenominal roman ordinals (I./II. svjetski rat).

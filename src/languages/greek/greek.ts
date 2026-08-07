@@ -221,7 +221,7 @@ const TOKEN = /([Ͱ-Ͽἀ-῿]+)|(\d+)|([.!;?…,:·])/gu;
 
 class GreekPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: normalizeGreek owns the whole ordered sequence, including the shared symbol tier at
+        // ORDER: normalizeGreek owns the whole ordered sequence, including the shared symbol tier at
         // its step 12 — the rate and degree rules have to run before it and the decimal comma after it, so
         // the tier cannot simply be wrapped around the outside. See normalize.ts for the couplings.
         return assembleClauses(normalizeGreek(input), TOKEN, (m, sink) => {

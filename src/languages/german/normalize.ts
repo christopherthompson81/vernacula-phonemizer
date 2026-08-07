@@ -158,7 +158,7 @@ export function normalizeGerman(input: string): string {
 
     // 6b) RELATIONAL AND DIVISION SIGNS. ⚠ THE SIGNS ARE UNATTESTED AND THE WORDS ARE NOT, and that
     //     distinction is the whole sourcing story. Searching de_de for `=`/`<`/`>`/`÷` finds nothing usable — every
-    //     `<` in the fleet is an HTML tag — so the first pass at #654 concluded the corpus could not source these
+    //     `<` in the fleet is an HTML tag — so a first pass concluded the corpus could not source these
     //     and only Wikipedia could. Wrong question: these readings are ordinary comparative PROSE, and the words
     //     are in the corpus in quantity.
     //

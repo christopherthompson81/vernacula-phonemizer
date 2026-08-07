@@ -99,7 +99,7 @@ describe("English text normalization", () => {
     });
 });
 
-// #562 parity sweep against the French normalization layer: the classes English was missing or getting
+// parity sweep against the French normalization layer: the classes English was missing or getting
 // wrong. Measured over the CASED column of the FLEURS transcripts (228 all-caps tokens), which is what
 // real input looks like — the lowercased column the rest of the suite uses cannot exercise these.
 describe("english normalization: initialisms", () => {
@@ -266,9 +266,9 @@ describe("Latin abbreviations and phrases", () => {
         expect(p("a priori reasoning")).toContain("pɹaᶦˈɔːɹaᶦ");
     });
 
-    // #586's headline case, and en was the FIRST language treated: the exponent and the ampersand were
-    // dropped for the whole of #562 because no gate could see them until defects.ts unified the tables.
-    test("the exponent and the ampersand, #586's opening examples", () => {
+    // The headline case, and en was the first language treated: the exponent and the ampersand were
+    // dropped everywhere because no gate could see them until defects.ts unified the tables.
+    test("the exponent and the ampersand", () => {
         // `km²` matched the unit and stranded the `²`, so an AREA read as a length.
         expect(normalizeEnglish("The park covers 19,500 km² and")).toBe("The park covers 19,500 square kilometers and");
         expect(normalizeEnglish("3 m³ of water")).toBe("3 cubic meters of water");

@@ -92,10 +92,10 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
 
 });
 
-// #562 TEXT NORMALIZATION. Counts are FLEURS lb_lu, column 3, 1,896 utterances. The assertions are on the
+// TEXT NORMALIZATION. Counts are FLEURS lb_lu, column 3, 1,896 utterances. The assertions are on the
 // text→text layer (plus a couple through phonemize, to prove the words reach the g2p rather than a sink),
 // and they pin the rule's BRANCHES rather than the corpus's instances — trap 13 (pin the rule's BRANCHES).
-describe("Luxembourgish #562 normalization — the period's four jobs + the Eifeler Regel", () => {
+describe("Luxembourgish normalization — the period's four jobs + the Eifeler Regel", () => {
     const lb = createLuxembourgish();
     const N = normalizeLuxembourgish;
 
@@ -241,7 +241,7 @@ describe("Luxembourgish #562 normalization — the period's four jobs + the Eife
         expect(lb.text("7 m³").trim()).toBe(lb.text("7 Kubikmeter").trim()); // cf. the corpus's Kubikmeter
     });
 
-    // `&` has 2 corpus instances; the relational signs have zero and are read anyway (#584 — a dropped
+    // `&` has 2 corpus instances; the relational signs have zero and are read anyway (a dropped
     // sign is inaudible, which is the one outcome that cannot be right).
     test("no sign class is silently dropped", () => {
         expect(N("College of Arts & Sciences")).toBe("College of Arts an Sciences");

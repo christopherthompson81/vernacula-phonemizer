@@ -84,7 +84,7 @@ describe("Dutch canonical IPA", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION. Counts are over the 1,829 unique cased FLEURS nl_nl utterances; each assertion
+// TEXT NORMALIZATION. Counts are over the 1,829 unique cased FLEURS nl_nl utterances; each assertion
 // records what the engine produced BEFORE the layer existed. See src/languages/dutch/normalize.ts.
 describe("Dutch text normalization", () => {
     const d = createDutch();
