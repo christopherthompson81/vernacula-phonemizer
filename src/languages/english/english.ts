@@ -194,17 +194,17 @@ export class EnglishPhonemizer {
         wordTransform?: (ipa: string, word: string) => string,
         oovOverride?: (g2pKey: string) => string | undefined,
     ): string {
-        // #562 text normalization: %, $, units, dates, times, years, romans. INITIALISMS run after, so
-        // the Roman-numeral rules get first refusal on all-caps letter runs (II occurs 8× in the cased
-        // corpus column; run earlier this would spell "Louis XIV" as EX-EYE-VEE).
+        // Text normalization: %, $, units, dates, times, years, romans. ⚠ INITIALISMS run after, so
+        // the Roman-numeral rules get first refusal on all-caps letter runs — run earlier, this spells
+        // "Louis XIV" as EX-EYE-VEE.
         input = normalizeEnglishInitialisms(normalizeEnglish(input), (w) => this.lexicon.has(w));
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;
-        // GAPS between tokens carry embedded foreign text. English's tokenizer matches Latin script only,
-        // so before this a Greek or Cyrillic run was dropped outright: "The word λόγος means word" read as
-        // "the word means word". English cannot use `assembleClauses` — that is a streaming sink and this
-        // is a two-phase pipeline (tokens → POS tagger → resolver) — but the GAP PASS is separable from
-        // the clause model, which is the same split burmese.ts makes with its own exec loop.
+        // GAPS between tokens carry embedded foreign text. English's tokenizer matches Latin script only, so
+        // without this a Greek or Cyrillic run is dropped outright and "The word λόγος means word" reads as
+        // "the word means word".
+        // ⚠ ENGLISH CANNOT USE `assembleClauses` — that is a streaming sink and this is a two-phase pipeline
+        // (tokens → POS tagger → resolver) — but the GAP PASS is separable from the clause model.
         let gapCursor = 0;
         const claimGap = (upto: number): void => {
             if (upto > gapCursor) {
