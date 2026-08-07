@@ -21,7 +21,7 @@ import { describe, expect, test } from "vitest";
 
 /** Unicode script names. A value outside this set is a typo or a new script that needs a deliberate entry. */
 const SCRIPTS = new Set([
-    "Adlam", "Arabic", "Armenian", "Bengali", "Cyrillic", "Devanagari", "Ethiopic", "Georgian",
+    "Adlam", "Arabic", "Armenian", "Bengali-Assamese", "Cyrillic", "Devanagari", "Ethiopic", "Georgian",
     "Greek", "Gujarati", "Gurmukhi", "Han", "Hangul", "Hebrew", "Javanese", "Kana", "Kannada",
     "Khmer", "Latin", "Malayalam", "Myanmar", "Nko", "Odia", "Sinhala", "Sundanese",
     "Syloti Nagri", "Tamil", "Telugu", "Thai",
