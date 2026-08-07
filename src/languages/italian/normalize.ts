@@ -1,40 +1,24 @@
 /**
- * Italian (it) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not already a
- * pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Italian (it) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Fourteenth language. Structurally a close relative of `es` and `pt` — same ordinal indicators, same
- * dot-thousands / comma-decimal conventions, same era markers — but every rule below was re-derived from the
- * it_it FLEURS corpus (1,978 unique cased utterances) rather than ported, and two of them came out different:
- * Italian writes its masculine ordinal with the DEGREE SIGN (`1° gennaio`, `60° gol`), which es/pt explicitly
- * exclude as a temperature; and `ha` is NOT admissible as the hectare abbreviation here, because after a
- * number it is the verb *avere* (`Chandrayaan-1 ha sganciato`) in every corpus occurrence.
+ * Structurally a close relative of `es` and `pt` — same ordinal indicators, same dot-thousands /
+ * comma-decimal conventions, same era markers — but ⚠ TWO RULES COME OUT DIFFERENT and must not be ported:
+ *   · Italian writes its masculine ordinal with the DEGREE SIGN (`1° gennaio`, `60° gol`), which es and pt
+ *     explicitly exclude as a temperature.
+ *   · `ha` is NOT admissible as the hectare abbreviation, because after a number it is the verb *avere*
+ *     (`Chandrayaan-1 ha sganciato`).
  *
- * WHAT THE CORPUS CONTAINS, and what the engine did with it before this file existed:
- *   · dot-grouped thousands ×52 — `19.500` → [dit͡ʃannˈove . t͡ʃinkwet͡ʃˈento]: a full SENTENCE PAUSE inside
- *     one number. The single worst defect in the language.
- *   · decimal comma ×16 — `14,7` → [kwattordˈit͡ʃi , sˈette]: a clause pause where *virgola* belongs.
- *   · clock `h:mm` ×19 — `11:20` → [undˈit͡ʃi , vˈenti]: the colon became a pause.
- *   · percent ×18 — the sign was DROPPED (`il 29%` → "il ventinove").
- *   · units ×~35 (km ×10, km/h ×9, km² ×6, mm ×5, ha, kg, cm, m, m/s, km/s, mph) — read as raw letter
- *     clusters: `km` → [km], `kg` → [kɡ].
- *   · all-caps initialisms ×127 (90 distinct: FBI, DNA, TV, GPS, NSA, USB, UTC …) — no initialism layer
- *     existed at all, so `FBI` → [fbˈi], `DNA` → [dnˈa], `USB` → [ˈuzb].
- *   · ordinal `°` ×8 — `1° gennaio` → "uno gennaio", `60° gol` → "sessanta gol" (sign dropped).
- *   · ordinal indicators `º`/`ª` ×2 — these LEAKED RAW into the phoneme string ([undˈit͡ʃi º]), because
- *     U+00BA/U+00AA are Script=Latin and so reach core/clauses.ts's foreign fallback verbatim.
- *   · era markers `a.C.` ×7 / `d.C.` ×3 — [ˈa . k .]: two spurious pauses and a letter-spelled Cristo.
- *   · currency ×5 (`¥` ×3, `$` ×2, both POSTPOSED: "banconote da 5 $") — signs dropped.
- *   · temperature ×2 (`30°C`, `90 °F`), longitude ×1 (`35°W`), fraction ×1 (`1/5`), `+` ×1 (`UTC+1`),
- *     dotted abbreviations ×9 (`ecc.` ×4, `n.` ×2 both before a digit, `es.` ×2, `dott.` ×1).
+ * ⚠ `º`/`ª` (U+00BA/U+00AA) LEAK RAW into the phoneme string if unclaimed, because they are Script=Latin and
+ * so reach core/clauses.ts's foreign fallback verbatim — `11º` comes out [undˈit͡ʃi º].
  *
- * NOT DONE, deliberately: numeric RANGES (`1894-1895` ×~25) keep the bare juxtaposition the tokenizer
- * already produces — the hyphen is silent either way and the two numbers are audible; and space-grouped
- * thousands (`5 000`) are not attested in this corpus at all, so no rule was written for a form it does not
- * write.
+ * NOT DONE, deliberately: numeric RANGES (`1894-1895`) keep the bare juxtaposition the tokenizer already
+ * produces — the hyphen is silent either way and both numbers are audible; and space-grouped thousands are
+ * not an Italian convention, so no rule exists for a form the language does not write.
  *
- * ORDERING — the couplings, each stated at its step below. The two that bite:
- *   · digit de-grouping runs FIRST, or the grouping period is clause punctuation.
- *   · the decimal comma is rewritten LAST, after the shared unit/percent tier — see
+ * ORDERING — the two couplings that bite:
+ *   · digit de-grouping runs FIRST, or the grouping period is read as clause punctuation.
+ *   · ⚠ the decimal comma is rewritten LAST, AFTER the shared unit/percent tier — see
  *     `normalizeItalianDecimals`, which italian.ts calls after SYMBOLS for exactly that reason.
  * Roman numerals need no ordering care: `it` is not in the registry's ROMAN_NATIVE set, so the shared
  * core/roman.ts pass (with this language's ordinal policy, romanOrdinals.ts) has already turned `XIX secolo`

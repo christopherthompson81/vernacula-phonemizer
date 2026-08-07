@@ -1,25 +1,15 @@
 /**
- * Indonesian (id) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything which is not
- * already a pronounceable word into words the existing pipeline speaks. Pure text→text; no IPA.
+ * Indonesian (id) text normalization — the pre-tokenizer pass that rewrites everything which is not already a
+ * pronounceable word into words the pipeline speaks. Pure text→text; no IPA.
  *
- * Eleventh language. Three defects were outside this layer and are fixed in the manifest and the engine:
- * `clausePunctuation` mapped every mark to a PADDED copy of itself, the number token was a bare `\d+` so
- * both Indonesian separators became clause pauses ("9.000" → "sembilan . nol"), and there was no decimal
- * word at all.
+ * ⚠ INDONESIAN WRITES BOTH THE THOUSANDS GROUPING AND THE CLOCK WITH A PERIOD — `9.000` and `11.00` — and the
+ * DIGIT COUNT is what separates them: three digits after the dot is grouping, two is a time. Nothing else in
+ * the surface form distinguishes the two, so a rule keyed on the dot alone gets one of them wrong.
  *
- * ALREADY CORRECT and untouched, worth stating because it is unusual: Indonesian ordinals need nothing.
- * `ke-16` is genuinely "ke" plus the cardinal, which is what the engine already produced, and the manifest
- * carries a `letterNames` map so initialisms already spell out (PBB → pe-be-be, GPS → ge-pe-es). Roman
- * numerals arrive already converted from the registry seam.
- *
- * THE AMBIGUITY THAT SHAPES THIS FILE: Indonesian writes BOTH the thousands separator and the clock with a
- * period — `9.000` (×67 in the corpus) and `11.00` (×29). The digit count separates them cleanly: grouping
- * always takes exactly three digits after the dot, a clock exactly two. So the clock is claimed HERE,
- * before the number tokenizer, and everything the tokenizer then sees with a dot is real grouping.
- *
- * Measured over the id_id corpus (2,579 utterances): dot-thousands ×67, units ×55, dates ×51, ordinals
- * ×49, centuries ×36, the dot clock ×29, comma-decimals ×28, percent ×26, `pukul` ×25, all-caps ×242
- * (AS ×30, II ×10 Roman, TV ×8, GPS ×8, PBB ×7), dotted abbreviations ×10.
+ * ⚠ THREE DEFECTS FOR THIS LANGUAGE LIVE OUTSIDE THIS LAYER, in the manifest and the engine:
+ * `clausePunctuation` must not map a mark to a PADDED copy of itself, the number token must not be a bare
+ * `\d+` (or both separators become clause pauses — "9.000" → "sembilan . nol"), and the decimal word has to
+ * exist at all. Looking for them here wastes a pass.
  */
 
 /** Dotted abbreviations → the spoken words. Only three shapes occur (Dr. ×5, dll. ×4, No. ×1). */
