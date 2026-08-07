@@ -230,27 +230,42 @@ const CYRILLIC_CONFUSABLE: Readonly<Record<string, string>> = {
     A: "А", B: "В", C: "С", E: "Е", H: "Н", I: "І", J: "Ј", K: "К", M: "М",
     O: "О", P: "Р", S: "Ѕ", T: "Т", X: "Х", Y: "У",
 };
+const CYR_KEYS = new RegExp(`[${Object.keys(CYRILLIC_CONFUSABLE).join("")}]`, "gu");
+const WORDISH = /[\p{L}\p{M}\p{Nd}]+/gu;
+
 /**
- * Preceded by a Cyrillic letter, and NOT followed by more Latin — the exact mirror of CONFUSABLE_RE, and the
- * trailing lookahead does the same job: a genuine Latin word embedded in Cyrillic text either is not preceded
- * by a Cyrillic letter (`Ова е hello` — the h follows a space) or continues in Latin (`Оваhello` — the h is
- * followed by `e`), and both are declined.
+ * Fold a Latin look-alike sitting INSIDE a Cyrillic word to its Cyrillic equivalent.
  *
  * ⚠ THE FAILURE THIS PREVENTS IS NOT A DROPPED CHARACTER. A Latin letter inside a Cyrillic word falls outside
  * the engine's token class, so the word SPLITS and the stray letter is handed to the foreign reader as an
  * ENGLISH LETTER NAME: Macedonian `Фаренхаjт` with a Latin j read *fˈarɛnxa d͡ʒˈeᶦ t*. Nothing is dropped and
  * no raw character survives, so no leak gate can see it.
+ *
+ * ⚠ THE DISCRIMINATOR IS WHICH SCRIPT DOMINATES THE WORD, not the immediate neighbours — and that is the one
+ * thing a flank test cannot express. `foldLatinConfusables` uses a Latin flank because it only ever pulls
+ * TOWARDS Latin; run both with flank guards and they fight: in `сeрiя` the Latin `e` gives the Cyrillic `р` a
+ * Latin left-flank, so the Latin fold rewrites it to `p` and makes the word MORE Latin, after which no
+ * trailing-lookahead guard can pull it back. Scoping to the word and requiring a Cyrillic majority settles the
+ * direction once, before any character is rewritten.
+ *
+ * ⚠ AN EXACT TIE DECLINES rather than guessing, so a half-and-half word is left to the Latin fold: `рaсa`
+ * (2 Cyrillic, 2 Latin) is not repaired. Neither tie-break is safe — favouring Cyrillic would rewrite a
+ * two-letter Latin word like `оk`, and favouring first-letter script fails the same way — so with no majority
+ * there is no evidence, and the established Latin default stands. Same choice core/scripts.ts makes for a lone
+ * Greek letter.
  */
-const CYR_CONFUSABLE_RE = new RegExp(
-    `(?<=\\p{Script=Cyrillic})([${Object.keys(CYRILLIC_CONFUSABLE).join("")}])`
-    + `(?![\\p{Script=Latin}])`, "gu");
-
-/** Fold a Latin look-alike sitting INSIDE a Cyrillic word to its Cyrillic equivalent. */
 export function foldCyrillicConfusables(s: string): string {
-    CYR_CONFUSABLE_RE.lastIndex = 0;
-    if (!CYR_CONFUSABLE_RE.test(s)) return s;
-    CYR_CONFUSABLE_RE.lastIndex = 0;
-    return s.replace(CYR_CONFUSABLE_RE, (c) => CYRILLIC_CONFUSABLE[c]!);
+    if (!/\p{Script=Cyrillic}/u.test(s)) return s;
+    return s.replace(WORDISH, (w) => {
+        let cyr = 0, lat = 0;
+        for (const ch of w) {
+            if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
+            else if (/\p{Script=Latin}/u.test(ch)) lat++;
+        }
+        if (cyr === 0 || lat === 0 || lat >= cyr) return w; // not a Cyrillic word with strays
+        CYR_KEYS.lastIndex = 0;
+        return w.replace(CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!);
+    });
 }
 
 /**

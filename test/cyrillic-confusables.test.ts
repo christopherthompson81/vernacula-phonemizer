@@ -12,7 +12,7 @@
  * beside the intended letter.
  */
 import { describe, expect, test } from "vitest";
-import { foldCyrillicConfusables } from "../src/core/unicode.ts";
+import { foldCyrillicConfusables, foldLatinConfusables } from "../src/core/unicode.ts";
 import { phonemize } from "../src/index.ts";
 
 describe("foldCyrillicConfusables", () => {
@@ -22,13 +22,29 @@ describe("foldCyrillicConfusables", () => {
         expect(foldCyrillicConfusables("слoво")).toBe("слово"); // Latin o → Cyrillic о
     });
 
-    test("⚠ A GENUINE LATIN WORD IS NEVER TOUCHED — the Cyrillic flank is the whole guard", () => {
-        // A real Latin word embedded in Cyrillic text either is not preceded by a Cyrillic letter (it follows a
-        // space) or continues in Latin, and both are declined. This is what lets the fold be fleet-wide.
+    test("⚠ A GENUINE LATIN WORD IS NEVER TOUCHED — a Cyrillic MAJORITY is the whole guard", () => {
+        // The gate is per-word and counts scripts, so an embedded Latin word never qualifies however it is
+        // hosted. This is what lets the fold be fleet-wide rather than per-engine.
         expect(foldCyrillicConfusables("Ова е hello")).toBe("Ова е hello");
-        expect(foldCyrillicConfusables("Оваhello")).toBe("Оваhello"); // Latin run continues
+        expect(foldCyrillicConfusables("Оваhello")).toBe("Оваhello");
         for (const s of ["plain ascii", "Владимир", "日本語", ""])
             expect(foldCyrillicConfusables(s)).toBe(s);
+    });
+
+    test("⚠ the two folds must not fight — the direction is settled before any character is rewritten", () => {
+        // With flank guards on both sides they do fight: in `сeрiя` the Latin `e` gives the Cyrillic `р` a Latin
+        // left-flank, so a Latin-first pass rewrites it to `p`, making the word MORE Latin and unrepairable.
+        expect(foldLatinConfusables(foldCyrillicConfusables("сeрiя"))).toBe("серія");
+        // …and the Latin direction still wins for a Latin-majority word, including at a word edge.
+        expect(foldLatinConfusables(foldCyrillicConfusables("Rуssian"))).toBe("Ryssian");
+        expect(foldLatinConfusables(foldCyrillicConfusables("prоp"))).toBe("prop");
+        expect(foldLatinConfusables(foldCyrillicConfusables("Straβe"))).toBe("Straße");
+    });
+
+    test("an exact tie DECLINES rather than guessing", () => {
+        // `рaсa` is 2 Cyrillic and 2 Latin. No tie-break is safe — favouring Cyrillic would rewrite the
+        // two-letter Latin `оk` — so with no majority the word is left to the established Latin default.
+        expect(foldCyrillicConfusables("рaсa")).toBe("рaсa");
     });
 
     test("the embedded-Latin-run routing still works — the fold must not eat a foreign word", () => {
