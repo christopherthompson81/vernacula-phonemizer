@@ -2,7 +2,8 @@
  * Aromanian / armãneashti cardinal number → words. Emits SPACE-separated words so each element reads through the
  * aromanian.ts g2p (Cunia orthography). Covers 0 … <10¹²; larger / unsafe values read digit-by-digit.
  *
- * SOURCES (aromanian.ts holds its data inline — this language has no .jsonc manifest — so the table lives here):
+ * SOURCES (the numeral tables stay here, beside the compositor that is their only reader; aromanian.jsonc
+ * carries the grapheme tables):
  *   - Tiberius Cunia, "Dictsiunar a Limbãljei Armãneascã" (2008), consulted via dixionline.net, for the magnitude
  *     and zero lexemes: ⟨nulã⟩ "numirlu 0" (zero), ⟨sutã⟩ "hundred", ⟨njilji⟩ "thousand", and ⟨miliunã⟩ (pl.
  *     ⟨miliunj⟩) glossed "numir multu mari tsi easti isea cu-unã njilji di njilj" — a thousand thousands;

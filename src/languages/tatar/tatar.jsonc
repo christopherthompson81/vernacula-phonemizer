@@ -1,0 +1,25 @@
+// Native canonical-IPA data manifest for Tatar (tt) — Татар теле, Kipchak Turkic, ~5M (Tatarstan),
+// CYRILLIC (official). The engine (tatar.ts) is a Cyrillic grapheme scan with VOWEL-HARMONY backing:
+// ⟨к⟩→[q] / ⟨г⟩→[ʁ] next to a BACK vowel (ак→ɑq, җомга→d͡ʒomʁɑ), but [k]/[ɡ] next to a FRONT vowel
+// (көз→køz) — unlike Bashkir, which WRITES its uvulars ⟨ҡ ғ⟩. 9 vowels with the special letters ⟨ә⟩→[æ],
+// ⟨ө⟩→[ø], ⟨ү⟩→[y], ⟨ы⟩→[ɨ]; the iotated ⟨я ю е ё⟩; the Kazan-standard fricatives ⟨җ⟩→[ʑ] / ⟨ч⟩→[ɕ],
+// ⟨ң⟩→[ŋ], ⟨һ⟩→[h]. Word-final (oxytone) stress, the Turkic default. The harmony scan, the ⟨а⟩ [a]/[ɑ]
+// fronting, and the ⟨е⟩ iotation are code, in tatar.ts; the letter tables live here.
+// ⚠ THIN single-source referee (kaikki).
+{
+    "language": "tt",
+    "name": "Tatar (Татар теле)",
+    "script": ["Cyrillic"],
+
+    // Plain (context-free) consonants. ⟨к г⟩ are harmony-conditioned (handled in tatar.ts); ⟨я ю е ё⟩ iotated.
+    "consonants": {
+        "б": "b", "в": "v", "д": "d", "ж": "ʒ", "җ": "ʑ", "з": "z", "й": "j", "л": "l", "м": "m", "н": "n", "ң": "ŋ",
+        "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "x", "һ": "h", "ц": "t͡s", "ч": "ɕ", "ш": "ʃ", "щ": "ɕ",
+    },
+
+    // Simple vowels → IPA. ⟨а⟩'s [a]/[ɑ] split by word harmony is applied in tatar.ts.
+    "vowels": { "а": "ɑ", "ә": "æ", "о": "o", "ө": "ø", "у": "u", "ү": "y", "ы": "ɨ", "и": "i", "е": "e", "э": "e" },
+
+    // Iotated vowels → glide + vowel.
+    "iotated": { "я": "jɑ", "ю": "ju", "ё": "jo" },
+}

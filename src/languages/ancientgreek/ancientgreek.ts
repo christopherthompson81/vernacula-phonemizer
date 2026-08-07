@@ -1,19 +1,21 @@
 /**
- * Ancient Greek (grc) phonemizer — Ἑλληνική, the POLYTONIC Greek script, targeting the reconstructed 5th-century
- * BCE CLASSICAL ATTIC pronunciation (Allen, *Vox Graeca*), canonical IPA. The classical
- * Hellenic counterpart to the Classical-Latin bring-up. A grapheme scan over the NFD-decomposed polytonic text:
- *   ⚠ Vowels α ε η ι ο υ ω → [a e ɛː i o y ɔː] (η/ω are LONG mid; υ is the front-rounded [y]); the MACRON marks
- *     length on α ι υ (ᾱ→aː). DIPHTHONGS: αι→[ai̯], ει→[eː], οι→[oi̯], υι→[yi̯], αυ→[au̯], ευ→[eu̯], ου→[uː],
- *     ηυ→[ɛːu̯], ωυ→[ɔːu̯]; the IOTA SUBSCRIPT (ᾳ ῃ ῳ) → long vowel + [i̯]; a DIAERESIS breaks a diphthong.
- *   ⚠ Consonants: the ASPIRATES θ φ χ → [tʰ pʰ kʰ], β γ δ → [b ɡ d], ζ→[zd], ξ→[ks], ψ→[ps]; γ before a velar
- *     (γ κ χ ξ) → [ŋ] (ἄγγελος→áŋɡelos); ρ/σ/etc. direct.
- *   ⚠ ROUGH BREATHING (dasia ῾) on a word-initial vowel → a prefixed [h] (ἵππος→híppos); SMOOTH breathing → ∅.
- *   ⚠ PITCH ACCENT (acute/grave/circumflex) is emitted on the vowel and folded by the eval (the Latin treatment).
- * Referee: wikipron grc_grek (human, {{grc-IPA}} 5th-BCE Attic row).
+ * Ancient Greek (grc) phonemizer — a grapheme scan over NFD-decomposed polytonic text targeting 5th-BCE
+ * Classical Attic, canonical IPA. This file owns the combining-mark grammar (breathings, accents, iota
+ * subscript, diaeresis, macron/breve), the context rules (γ-agma, σ-voicing, voiceless ρ, aspirate
+ * assimilation) and the rough-breathing [h] prefix. The letter values (vowel short/long pairs,
+ * consonants, diphthongs) and the encyclopedic record live in ancientgreek.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+
+interface AncientGreekDef {
+    vowels: Record<string, [string, string]>;
+    consonants: Record<string, string>;
+    diphthongs: Record<string, string>;
+}
+const DEF = loadManifest<AncientGreekDef>(import.meta.url, "ancientgreek.jsonc");
 
 // Combining marks (NFD): breathings, accents, iota subscript, diaeresis, length.
 const ROUGH = "̔", SMOOTH = "̓";
@@ -22,20 +24,11 @@ const SUBSCRIPT = "ͅ", DIAERESIS = "̈", MACRON = "̄", BREVE = "̆";
 const ACCENTS = new Set([ACUTE, GRAVE, CIRCUM]);
 const MARKS = new Set([ROUGH, SMOOTH, ACUTE, GRAVE, CIRCUM, SUBSCRIPT, DIAERESIS, MACRON, BREVE]);
 
-// Base vowel letter → [short, long] IPA. η ω are inherently long; α ι υ take length from the macron/subscript.
-const VOWEL: Record<string, [string, string]> = {
-    α: ["a", "aː"], ε: ["e", "e"], η: ["ɛː", "ɛː"], ι: ["i", "iː"], ο: ["o", "o"], υ: ["y", "yː"], ω: ["ɔː", "ɔː"],
-};
-// Base consonant letter → IPA (γ is context-sensitive; handled in the scan).
-const CONS: Record<string, string> = {
-    β: "b", δ: "d", ζ: "zd", θ: "tʰ", κ: "k", λ: "l", μ: "m", ν: "n", ξ: "ks", π: "p",
-    ρ: "r", σ: "s", ς: "s", τ: "t", φ: "pʰ", χ: "kʰ", ψ: "ps", ϝ: "w",
-};
+// Letter → IPA tables (ancientgreek.jsonc): vowels as [short, long] pairs, consonants, diphthongs.
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
+const DIPHTHONG = DEF.diphthongs;
 const VELAR = new Set(["ɡ", "k", "kʰ", "ks"]); // γ → [ŋ] before one of these (the ⟨γγ γκ γχ γξ⟩ nasal)
-// Diphthong: a base vowel + an offglide ⟨ι⟩/⟨υ⟩ → the diphthong IPA (unless the offglide has a diaeresis).
-const DIPHTHONG: Record<string, string> = {
-    αι: "ai̯", αυ: "au̯", ει: "eː", ευ: "eu̯", οι: "oi̯", ου: "uː", υι: "yː", ηυ: "ɛːu̯", ωυ: "ɔːu̯", ηι: "ɛːi̯", ωι: "ɔːi̯",
-};
 // ⟨σ⟩ → [z] before a VOICED consonant (β γ δ μ ν λ ρ): Λέσβια→lézbia, Σμύρνα→zmýrna (the standard assimilation).
 const VOICED_AFTER_S = new Set(["β", "γ", "δ", "μ", "ν", "λ", "ρ"]);
 

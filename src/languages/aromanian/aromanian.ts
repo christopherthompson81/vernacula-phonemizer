@@ -1,38 +1,26 @@
 /**
- * Native Aromanian / armãneashti (rup) text phonemizer — canonical IPA. Aromanian is an EASTERN
- * ROMANCE (Balkan Romance) language, a close sibling of Romanian, spoken across the Balkans (Greece, Albania, North
- * Macedonia, Romania, Bulgaria; ~250k). A near-phonemic Latin orthography (the Cunia/DIARO system) → a greedy
- * left-to-right scan with the shared Romance contextual phonology plus Aromanian's own digraphs.
- *
- *   ⚠ AROMANIAN DIGRAPHS (not in Romanian, which uses diacritic letters): ⟨ts⟩→[t͡s], ⟨dz⟩→[d͡z] (but [d͡ʒ] in the
- *     ⟨ndz⟩+front-vowel soft-g reflex: sãndze→[sənd͡ʒe]), ⟨sh⟩→[ʃ], ⟨nj⟩→[ɲ], ⟨lj⟩/⟨ll⟩→[ʎ] (palatals), ⟨dh⟩→[ð],
- *     ⟨th⟩→[θ] (the Greek-contact interdentals), ⟨gh⟩→[ɡ], ⟨ch⟩→[k]; ⟨y⟩ (Greek gamma)→[ɣ], NOT the glide [j].
- *   ⚠ ⟨ã⟩ is the single central-vowel letter → [ə] (also realised [ɨ]; the two are not distinguished in the
- *     orthography — folded). The shared Romance rules: ⟨c/g⟩ SOFTEN before ⟨e i⟩ (⟨ce ci⟩→t͡ʃ, ⟨ge gi⟩→d͡ʒ, silent
- *     softener i); RISING DIPHTHONGS ⟨ea⟩→[e̯a], ⟨oa⟩→[o̯a]; the ⟨i u⟩ GLIDES ([j w] next to another vowel). ⟨r⟩→[r].
- *
- * Stress is unwritten (deferred, not emitted); the word-final desyllabified ⟨-u⟩ ([ʷ]/[ŭ]) is emitted as [u].
- * Referee: wikipron rup_latn narrow (196) + kaikki Aromanian (201).
+ * Aromanian (rup) phonemizer — a greedy left-to-right scan over the Cunia/DIARO orthography with the
+ * shared Romance contextual phonology, canonical IPA. This file owns the context rules: the ⟨dz⟩/⟨ndz⟩
+ * soft-g reflex, ⟨c/g⟩ softening with the silent softener i, the rising diphthongs ⟨ea oa⟩, the ⟨i u⟩
+ * glides, and the word-final ⟨-u⟩ desyllabification. The digraph/letter tables and the encyclopedic
+ * record live in aromanian.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Digraphs, longest-first (2 letters). ⟨ch gh⟩ are the HARD/fricative dorsals; ⟨ll⟩ = ⟨lj⟩ = [ʎ].
-const DIGRAPHS: [string, string][] = [
-    ["ts", "t͡s"], ["sh", "ʃ"], ["nj", "ɲ"], ["lj", "ʎ"], ["ll", "ʎ"],
-    ["dh", "ð"], ["th", "θ"], ["gh", "ɡ"], ["ch", "k"], // ⟨gh⟩→[ɡ] (matches 2/3 referee vs [ɣ] 1/3; the ɣ~ɡ fold covers it)
-    // ⟨dz⟩ is handled specially (the ⟨ndz⟩+front-vowel soft-g reflex → [ndʒ], else [d͡z]).
-];
+interface AromanianDef {
+    digraphs: [string, string][];
+    letters: Record<string, string>;
+}
+const DEF = loadManifest<AromanianDef>(import.meta.url, "aromanian.jsonc");
+// Grapheme tables (aromanian.jsonc). ⟨dz⟩, the c/g softening and the vowel rules are the scan below.
+const DIGRAPHS = DEF.digraphs;
+const LETTER = DEF.letters;
 const VOWEL_L = new Set([..."aeiouã"]);
 const VOWEL_PH = "aeiouəɨ";
-const LETTER: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ã": "ə", "â": "ɨ", "î": "ɨ",
-    "b": "b", "d": "d", "f": "f", "h": "h", "j": "ʒ", "k": "k", "l": "l", "m": "m", "n": "n",
-    "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "v", "w": "w", "x": "ks", "y": "ɣ", "z": "z",
-    "ñ": "ɲ", "ç": "t͡s", // ⟨y⟩ = the Greek-gamma letter → [ɣ] (anyedz→anɣed͡z), NOT the glide [j]
-};
 const isFront = (x: string | undefined): boolean => x === "e" || x === "i";
 const isHigh = (x: string | undefined): boolean => x === "i" || x === "u";
 

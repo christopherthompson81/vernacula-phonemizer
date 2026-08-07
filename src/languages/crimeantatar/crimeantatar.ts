@@ -1,31 +1,21 @@
 /**
- * Native Crimean Tatar / qırımtatar tili (crh) text phonemizer — canonical IPA. Crimean Tatar is
- * KIPCHAK Turkic with strong OGHUZ influence, ~540k speakers (Crimea + diaspora). The standard Latin alphabet (Turkish-
- * based) is highly phonemic → a left-to-right grapheme scan (no digraphs — ⟨ç ş ñ ğ⟩ are single letters) with
- * gemination and word-final (oxytone) stress.
- *
- * ⚠ The alphabet: back ⟨a o u ı⟩→[ɑ o u ɯ] vs front ⟨e ö ü i⟩→[e ø y i] (harmony is SPELLED); ⟨q⟩→[q] (uvular) vs
- *   ⟨k⟩→[k], ⟨ğ⟩→[ɣ] (voiced dorsal) vs ⟨g⟩→[ɡ]; ⟨c⟩→[d͡ʒ], ⟨ç⟩→[t͡ʃ], ⟨ş⟩→[ʃ], ⟨j⟩→[ʒ], ⟨ñ⟩→[ŋ], ⟨y⟩→[j],
- *   ⟨v⟩→[v], ⟨h⟩→[h]; ⟨â⟩ is the palatalisation vowel → [a]. Doubled letters geminate (yollamaq→[jolːɑmɑq]).
- *
- * ⚠ THIN SINGLE-SOURCE: English Wiktionary "Crimean Tatar terms with IPA pronunciation", ~18 Latin pairs — no
- * wikipron/kaikki/epitran crh).
+ * Crimean Tatar (crh) phonemizer — a left-to-right Latin grapheme scan (no digraphs) + gemination +
+ * word-final (oxytone) stress, canonical IPA. This file owns the position rules: the ⟨v⟩→[w] post-vocalic
+ * coda, the Turkish-style dotless-I casing, and the stress placement. The letter table and the
+ * encyclopedic record live in crimeantatar.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Single letters (no digraphs in the Crimean Tatar Latin alphabet). ⟨â⟩→[a] (the palatalisation vowel; the
-// palatalisation of the preceding consonant, kâr→[cɑr], is a low-frequency loanword feature — deferred). ⟨v⟩ is
-// context-dependent ([w] in a post-vocalic coda) and handled in the scan. ⟨x⟩/⟨w⟩ are NOT Crimean Tatar letters.
-const LETTER: Record<string, string> = {
-    "a": "ɑ", "â": "a", "e": "e", "ı": "ɯ", "i": "i", "o": "o", "ö": "ø", "u": "u", "ü": "y",
-    "b": "b", "c": "d͡ʒ", "ç": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "ğ": "ɣ", "h": "h", "j": "ʒ", "k": "k",
-    "l": "l", "m": "m", "n": "n", "ñ": "ŋ", "p": "p", "q": "q", "r": "r", "s": "s", "ş": "ʃ", "t": "t",
-    "v": "v", "y": "j", "z": "z",
-};
+interface CrimeanTatarDef {
+    letters: Record<string, string>;
+}
+// Letter → IPA (crimeantatar.jsonc). The ⟨v⟩→[w] coda rule and dotless-I casing are handled in the scan.
+const LETTER = loadManifest<CrimeanTatarDef>(import.meta.url, "crimeantatar.jsonc").letters;
 const CYR_VOWEL = new Set([..."aâeıioöuü"]); // Latin vowels (for the ⟨v⟩→[w] coda context)
 const IPA_VOWEL = new Set([..."ɑaeɯioøuy"]);
 

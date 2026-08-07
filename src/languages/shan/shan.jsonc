@@ -1,0 +1,57 @@
+// Native canonical-IPA data manifest for Shan / Tai Long (shn) — လိၵ်ႈတႆး, Southwestern Tai (Tai-Kadai),
+// ~3.3M (Shan State, Myanmar), the SHAN ABUGIDA (a Myanmar-script variant, Unicode U+1000–U+109F incl. the
+// Shan letters U+1075–U+108F), TONAL. The engine (shan.ts) is a per-syllable scan (the Burmese template) —
+// onset consonant → medials (ွ/ႂ→w, ျ palatalises) → the RIME (vowel signs × coda) → the TONE. Unlike
+// Burmese, Shan tone is LEXICAL and marked with EXPLICIT diacritics (unmarked→˨˦, ႇ→˩, ႈ→˧˧˨, visarga
+// း→˥, ႉ→˦˨), so the tone is a direct lookup. Words are space-separated (no DAG segmentation needed).
+// The rime resolver (vowel-sign combos × medial-w × coda) is code, in shan.ts; the letter values, tone
+// marks and number words live here. THIN human single-source (wikipron, 2607).
+{
+    "language": "shn",
+    "name": "Shan (လိၵ်ႈတႆး)",
+    "script": ["Myanmar"],
+
+    // Onset consonants (Shan letters + shared Myanmar letters) → IPA.
+    "onsets": {
+        "ၵ": "k", "ၶ": "kʰ", "ၸ": "t͡ɕ", "သ": "sʰ", "ထ": "tʰ", "ပ": "p", "ၽ": "pʰ", "ၾ": "f", "တ": "t", "ၼ": "n",
+        "မ": "m", "လ": "l", "ဝ": "w", "ယ": "j", "ရ": "r", "ႁ": "h", "ႀ": "θ", "ဢ": "ʔ", "င": "ŋ", "ၺ": "ɲ",
+    },
+
+    // Coda consonants (a killed consonant, C + asat ်) → IPA. Nasals + checked stops (unreleased).
+    "codas": {
+        "င": "ŋ", "ၼ": "n", "မ": "m", "ၵ": "k̚", "တ": "t̚", "ပ": "p̚", "ၺ": "j", "ဝ": "w",
+    },
+
+    // Tone marks → Chao tone. Unmarked = ˨˦ (rising).
+    "tones": { "း": "˥", "ႇ": "˩", "ႈ": "˧˧˨", "ႉ": "˦˨", "ႊ": "˧" },
+    "unmarkedTone": "˨˦",
+
+    // Palatalisation of an onset by ျ: ⟨ၵျ⟩→d͡ʑ (voiced), ⟨ၶျ⟩→t͡ɕʰ, ⟨သျ⟩→ʃ.
+    "palatal": { "k": "d͡ʑ", "kʰ": "t͡ɕʰ", "sʰ": "ʃ" },
+
+    // Vowel signs (above/below/after the onset) → an abstract vowel key; the combos are resolved by the
+    // rime logic in shan.ts. ⟨ၢ⟩ (U+1062) and ⟨ႃ⟩ (U+1083) are BOTH long [aː] — ⟨ၢ⟩ writes closed-syllable
+    // /aː/, ⟨ႃ⟩ the open one; short /a/ is the inherent (sign-less) vowel.
+    "vowelSigns": {
+        "ႃ": "aa", "ိ": "i", "ီ": "ii", "ု": "u", "ူ": "uu", "ေ": "ee", "ႄ": "ee_open",
+        "ဵ": "e_short", "ႅ": "ee_short", "ၢ": "aa", "ႆ": "FINAL_Y",
+    },
+
+    // Cardinal number words (SHAN-SCRIPT spellings only; the abugida scan reads them). Shan is Southwestern
+    // Tai, so the system is structurally Thai's (see thai.ts) with the cognate irregulars: 20 is သၢဝ်း (sao)
+    // and REPLACES the whole "twenty" (no သိပ်း), and a FINAL 1 in any compound ≥11 is ဢဵတ်း (et) rather than
+    // ၼိုင်ႈ (nueng) — သိပ်းဢဵတ်း 11, သၢဝ်းဢဵတ်း 21. Tens 30–90 are unit-first (သၢမ်သိပ်း = 3×10).
+    // Sources: Wiktionary "Category:Shan numerals" (ၼိုင်ႈ … ၵဝ်ႈ, သိပ်း, သၢဝ်း, ဢဵတ်း, the 30–90 unit+သိပ်း
+    // forms, ပၢၵ်ႇ 100, ႁဵင် 1000, မိုၼ်ႇ 10⁴, သႅၼ် 10⁵), cross-checked against Omniglot "Numbers in Shan",
+    // which agrees on all of 0–100 + ပၢၵ်ႇ/ႁဵင်/မိုၼ်ႇ/သႅၼ်.
+    // JUDGMENT CALL: neither source attests a word for 10⁶. Rather than invent one (the expected Tai cognate
+    // လၢၼ်ႉ is unattested in both), the magnitude ladder STOPS at သႅၼ် (10⁵) and larger values are composed
+    // as multiples of it (10⁶ = သိပ်းသႅၼ် "ten hundred-thousand") — compositional from cited words only.
+    "numbers": {
+        "units": ["သုၼ်", "ၼိုင်ႈ", "သွင်", "သၢမ်", "သီႇ", "ႁႃႈ", "ႁူၵ်း", "ၸဵတ်း", "ပႅတ်ႇ", "ၵဝ်ႈ"],
+        "ten": "သိပ်း",
+        "twenty": "သၢဝ်း",
+        "finalOne": "ဢဵတ်း",
+        "magnitudes": [[100000, "သႅၼ်"], [10000, "မိုၼ်ႇ"], [1000, "ႁဵင်"], [100, "ပၢၵ်ႇ"]],
+    },
+}

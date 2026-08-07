@@ -1,34 +1,24 @@
 /**
- * Native Karakalpak / qaraqalpaq tili (kaa) text phonemizer — canonical IPA. Karakalpak is KIPCHAK
- * Turkic (closely related to Kazakh), ~600k speakers (Karakalpakstan, NW Uzbekistan). Since the 2016 reform the
- * official script is a LATIN alphabet, and it is highly phonemic → a left-to-right greedy scan over a digraph + letter
- * table with word-final (oxytone) stress.
- *
- * ⚠ The 2016 Latin alphabet with its acute-marked front/uvular letters: ⟨á⟩→[æ], ⟨ó⟩→[ø], ⟨ú⟩→[y] (front vowels vs
- *   plain ⟨a o u⟩→[ɑ o u]); the DOTLESS ⟨ı⟩→[ɯ] vs dotted ⟨i⟩→[i]; ⟨q⟩→[q] (uvular, back-harmony) vs ⟨k⟩→[k], ⟨x⟩→[χ]
- *   (uvular) vs ⟨h⟩→[h], ⟨ǵ⟩→[ʁ] (uvular voiced fricative, back) vs ⟨g⟩→[ɡ]; ⟨ń⟩→[ŋ]; ⟨j⟩→[ʒ], ⟨w⟩→[w], ⟨y⟩→[j];
- *   digraphs ⟨sh⟩→[ʃ], ⟨ch⟩→[t͡ʃ]. (Unlike Kazakh, the uvular/velar choice is WRITTEN — q/k, x/h, ǵ/g — so no
- *   harmony inference is needed.) Word-final stress backs up over one onset consonant (basqa→[bɑsˈqɑ]).
- *
- * ⚠ THIN SINGLE-SOURCE: English Wiktionary "Karakalpak terms with IPA pronunciation", ~11 usable Latin pairs — no
- * wikipron/kaikki/epitran kaa).
+ * Karakalpak (kaa) phonemizer — a left-to-right greedy scan over a digraph + letter table + word-final
+ * (oxytone) stress, canonical IPA. This file owns the Turkish-style dotless-I casing and the stress
+ * placement (backs up over one onset consonant: basqa→[bɑsˈqɑ]). The letter tables and the encyclopedic
+ * record live in karakalpak.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-const DIGRAPHS: [string, string][] = [["sh", "ʃ"], ["ch", "t͡ʃ"]];
-// Single letters. Vowels: the acute letters ⟨á ó ú⟩ are the front counterparts of ⟨a o u⟩; ⟨ı⟩ (dotless) is [ɯ].
-const LETTER: Record<string, string> = {
-    "a": "ɑ", "á": "æ", "e": "e", "ı": "ɯ", "i": "i", "o": "o", "ó": "ø", "u": "u", "ú": "y",
-    "b": "b", "d": "d", "f": "f", "g": "ɡ", "ǵ": "ʁ", "h": "h", "x": "χ", "j": "ʒ", "k": "k", "q": "q",
-    "l": "l", "m": "m", "n": "n", "ń": "ŋ", "p": "p", "r": "r", "s": "s", "t": "t", "w": "w", "y": "j", "z": "z",
-    "v": "v", // the loan letter ⟨v⟩ (Russian в). ⟨c⟩ is NOT in the Karakalpak alphabet — it occurs only in the ⟨ch⟩
-    // digraph (handled above), so there is no standalone ⟨c⟩ mapping.
-    "í": "ɯ", // the dotless-⟨ı⟩ letter as Wiktionary titles it (I-acute); not a real Karakalpak grapheme otherwise
-};
+interface KarakalpakDef {
+    digraphs: [string, string][];
+    letters: Record<string, string>;
+}
+const DEF = loadManifest<KarakalpakDef>(import.meta.url, "karakalpak.jsonc");
+// Letter → IPA tables (karakalpak.jsonc). The dotless-I casing is handled in the scan below.
+const DIGRAPHS = DEF.digraphs;
+const LETTER = DEF.letters;
 const IPA_VOWEL = new Set([..."ɑæeɯioøuy"]);
 
 /** One Karakalpak word → canonical IPA. */

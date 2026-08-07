@@ -1,40 +1,43 @@
 /**
- * Shan / Tai Long (shn) phonemizer — လိၵ်ႈတႆး, Southwestern Tai (Tai-Kadai), the SHAN ABUGIDA (a Myanmar-script variant,
- * Unicode U+1000–U+109F incl. the Shan letters U+1075–U+108F), TONAL, canonical IPA. The fleet's
- * first Shan. A per-syllable scan (the Burmese template) — onset consonant → medials (ွ/ႂ→w, ျ palatalises) → the RIME
- * (vowel signs × coda) → the TONE. Unlike Burmese, Shan tone is LEXICAL and marked with EXPLICIT diacritics
- * (unmarked→˨˦, ႇ→˩, ႈ→˧˧˨, visarga း→˥, ႉ→˦˨), so the tone is a direct lookup. Words are space-separated (no DAG
- * segmentation needed). THIN human single-source (wikipron, 2607).
+ * Shan (shn) phonemizer — a per-syllable abugida scan (the Burmese template), canonical IPA. This file
+ * owns the syllable machinery: onset → medials (ွ/ႂ/ျ) → the RIME resolver (vowel-sign combos × medial-w
+ * × coda — positional logic) → the explicit lexical tone, plus the ႉ-tone glottalisation and the ໆ-style
+ * repetition mark. The letter values, tone marks, number words and the encyclopedic record live in
+ * shan.jsonc.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
-// Onset consonants (Shan letters + shared Myanmar letters) → IPA.
-const ONSET: Record<string, string> = {
-    "ၵ": "k", "ၶ": "kʰ", "ၸ": "t͡ɕ", "သ": "sʰ", "ထ": "tʰ", "ပ": "p", "ၽ": "pʰ", "ၾ": "f", "တ": "t", "ၼ": "n",
-    "မ": "m", "လ": "l", "ဝ": "w", "ယ": "j", "ရ": "r", "ႁ": "h", "ႀ": "θ", "ဢ": "ʔ", "င": "ŋ", "ၺ": "ɲ",
-};
-// Coda consonants (a killed consonant, C + asat ်) → IPA. Nasals + checked stops (unreleased).
-const CODA: Record<string, string> = {
-    "င": "ŋ", "ၼ": "n", "မ": "m", "ၵ": "k̚", "တ": "t̚", "ပ": "p̚", "ၺ": "j", "ဝ": "w",
-};
-// Tone marks → Chao tone. Unmarked = ˨˦ (rising).
-const TONE: Record<string, string> = { "း": "˥", "ႇ": "˩", "ႈ": "˧˧˨", "ႉ": "˦˨", "ႊ": "˧" };
-const UNMARKED_TONE = "˨˦";
+interface ShanNumbers {
+    units: string[];
+    ten: string;
+    twenty: string;
+    finalOne: string;
+    magnitudes: [number, string][];
+}
+interface ShanDef {
+    onsets: Record<string, string>;
+    codas: Record<string, string>;
+    tones: Record<string, string>;
+    unmarkedTone: string;
+    palatal: Record<string, string>;
+    vowelSigns: Record<string, string>;
+    numbers: ShanNumbers;
+}
+const DEF = loadManifest<ShanDef>(import.meta.url, "shan.jsonc");
+// Letter tables (shan.jsonc): onsets, the 8-way coda set, tone marks, palatalisation, vowel-sign keys.
+const ONSET = DEF.onsets;
+const CODA = DEF.codas;
+const TONE = DEF.tones;
+const UNMARKED_TONE = DEF.unmarkedTone;
+const PALATAL = DEF.palatal;
+const VSIGN = DEF.vowelSigns;
 
 const ASAT = "်"; // U+103A — kills a consonant → coda
 const MED_Y = "ျ", MED_R = "ြ", MED_W1 = "ွ", MED_W2 = "ႂ";
 const MEDIALS = new Set([MED_Y, MED_R, MED_W1, MED_W2]);
-// Palatalisation of an onset by ျ: ⟨ၵျ⟩→d͡ʑ (voiced), ⟨ၶျ⟩→t͡ɕʰ, ⟨သျ⟩→ʃ.
-const PALATAL: Record<string, string> = { "k": "d͡ʑ", "kʰ": "t͡ɕʰ", "sʰ": "ʃ" };
-
-// Vowel signs (above/below/after the onset) → an abstract vowel key. Combos resolved in rime().
-const VSIGN: Record<string, string> = {
-    // ⟨ၢ⟩ (U+1062) and ⟨ႃ⟩ (U+1083) are BOTH long [aː] — ⟨ၢ⟩ writes closed-syllable /aː/, ⟨ႃ⟩ the open one; short /a/
-    // is the inherent (sign-less) vowel.
-    "ႃ": "aa", "ိ": "i", "ီ": "ii", "ု": "u", "ူ": "uu", "ေ": "ee", "ႄ": "ee_open",
-    "ဵ": "e_short", "ႅ": "ee_short", "ၢ": "aa", "ႆ": "FINAL_Y",
-};
 const isVSign = (c: string | undefined): boolean => c !== undefined && VSIGN[c] !== undefined;
 const isOnset = (c: string | undefined): boolean => c !== undefined && ONSET[c] !== undefined;
 
@@ -126,19 +129,10 @@ export function phonemizeWord(word: string): string {
 }
 
 // ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
-// Digit runs were previously emitted RAW (a digit leak into the IPA). Shan is Southwestern Tai, so the system is
-// structurally Thai's (see thai.ts) with the cognate irregulars: 20 is သၢဝ်း (sao) and REPLACES the whole "twenty"
-// (no သိပ်း), and a FINAL 1 in any compound ≥11 is ဢဵတ်း (et) rather than ၼိုင်ႈ (nueng) — သိပ်းဢဵတ်း 11,
-// သၢဝ်းဢဵတ်း 21. Tens 30–90 are unit-first (သၢမ်သိပ်း = 3×10). SHAN-SCRIPT words only; the abugida scan reads them.
-// Sources: Wiktionary "Category:Shan numerals" (ၼိုင်ႈ … ၵဝ်ႈ, သိပ်း, သၢဝ်း, ဢဵတ်း, the 30–90 unit+သိပ်း forms,
-// ပၢၵ်ႇ 100, ႁဵင် 1000, မိုၼ်ႇ 10⁴, သႅၼ် 10⁵) — https://en.wiktionary.org/wiki/Category:Shan_numerals — cross-checked
-// against Omniglot "Numbers in Shan" (https://www.omniglot.com/language/numbers/shan.htm), which agrees on all of
-// 0–100 + ပၢၵ်ႇ/ႁဵင်/မိုၼ်ႇ/သႅၼ်.
-// JUDGMENT CALL: neither source attests a word for 10⁶. Rather than invent one (the expected Tai cognate လၢၼ်ႉ is
-// unattested in both), the magnitude ladder STOPS at သႅၼ် (10⁵) and larger values are composed as multiples of it
-// (10⁶ = သိပ်းသႅၼ် "ten hundred-thousand", 10⁹ = ၼိုင်ႈမိုၼ်ႇသႅၼ်) — compositional from cited words only.
-const SHN_UNITS = ["သုၼ်", "ၼိုင်ႈ", "သွင်", "သၢမ်", "သီႇ", "ႁႃႈ", "ႁူၵ်း", "ၸဵတ်း", "ပႅတ်ႇ", "ၵဝ်ႈ"];
-const SHN_MAG: [number, string][] = [[1e5, "သႅၼ်"], [1e4, "မိုၼ်ႇ"], [1e3, "ႁဵင်"], [100, "ပၢၵ်ႇ"]];
+// Digit runs were previously emitted RAW (a digit leak into the IPA). SHAN-SCRIPT words only (data +
+// provenance in shan.jsonc); the abugida scan reads them.
+const NUM = DEF.numbers;
+const SHN_UNITS = NUM.units;
 
 function numberToShanWords(n: number): string[] {
     if (!Number.isSafeInteger(n) || n < 0) {
@@ -147,7 +141,7 @@ function numberToShanWords(n: number): string[] {
     if (n === 0) return [SHN_UNITS[0]!];
     const out: string[] = [];
     let r = n;
-    for (const [v, w] of SHN_MAG) {
+    for (const [v, w] of NUM.magnitudes) {
         if (r >= v) {
             const q = Math.floor(r / v);
             out.push(...numberToShanWords(q), w);
@@ -156,20 +150,16 @@ function numberToShanWords(n: number): string[] {
     }
     if (r >= 10) {
         const t = Math.floor(r / 10);
-        if (t === 2) out.push("သၢဝ်း"); // 20 = သၢဝ်း alone (သၢဝ်းသွင် = 22)
-        else if (t === 1) out.push("သိပ်း");
-        else out.push(SHN_UNITS[t]!, "သိပ်း");
+        if (t === 2) out.push(NUM.twenty); // 20 = သၢဝ်း alone (သၢဝ်းသွင် = 22)
+        else if (t === 1) out.push(NUM.ten);
+        else out.push(SHN_UNITS[t]!, NUM.ten);
         r %= 10;
     }
-    if (r === 1 && n >= 11) out.push("ဢဵတ်း"); // final 1 in a compound → ဢဵတ်း
+    if (r === 1 && n >= 11) out.push(NUM.finalOne); // final 1 in a compound → ဢဵတ်း
     else if (r > 0) out.push(SHN_UNITS[r]!);
     return out;
 }
 
-// Shan digits U+1090–1099 → ASCII, so a Shan-digit run composes like an ASCII one.
-const SHN_DIGIT: Record<string, string> = {
-    "႐": "0", "႑": "1", "႒": "2", "႓": "3", "႔": "4", "႕": "5", "႖": "6", "႗": "7", "႘": "8", "႙": "9",
-};
 
 
 // A Shan word (Myanmar-block letters/signs, EXCLUDING the dandas U+104A/104B and the Shan digits U+1090–99) / number
@@ -178,12 +168,12 @@ const TOKEN = /([က-၉၌-ႏႚ-႟ꩠ-ꩿ]+)|(\d+|[႐-႙]+)|([၊။.!?…
 
 class ShanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // Shan digits (U+1090–1099) fold to ASCII up front (core/unicode.ts), so a Shan-digit run composes
+        // exactly like a Western one. The token class still admits ႐-႙ so an unfolded digit could never
+        // fall between the WORD ranges and vanish.
+        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) {
-                const ascii = [...m[2]].map((d) => SHN_DIGIT[d] ?? d).join("");
-                for (const wd of numberToShanWords(Number(ascii))) sink.emit(phonemizeWord(wd));
-            }
+            else if (m[2]) for (const wd of numberToShanWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "။" || m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });
     }

@@ -1,19 +1,22 @@
 /**
- * Tatar (tt) phonemizer — Татар теле, Kipchak Turkic, CYRILLIC script (official), canonical IPA.
- * Cyrillic grapheme scan with VOWEL-HARMONY backing: ⟨к⟩→[q]/[г]→[ʁ] next to a BACK vowel
- * (ак→ɑq, җомга→d͡ʒomʁɑ), but [k]/[ɡ] next to a FRONT vowel (көз→køz). 9 vowels with the special letters ⟨ә⟩→[æ],
- * ⟨ө⟩→[ø], ⟨ү⟩→[y], ⟨ы⟩→[ɨ]; the iotated ⟨я ю е ё⟩; the Kazan-standard fricatives ⟨җ⟩→[ʑ] / ⟨ч⟩→[ɕ], ⟨ң⟩→[ŋ], ⟨һ⟩→[h]. Word-final
- * (oxytone) stress, the Turkic default. THIN single-source (kaikki).
+ * Tatar (tt) phonemizer — a Cyrillic grapheme scan + word-final (oxytone) stress, canonical IPA. This
+ * file owns the harmony logic: ⟨к г⟩ back to [q ʁ] next to a BACK vowel (nearest-vowel scan), ⟨а⟩
+ * fronts to [a] in a front-vowel word, ⟨е⟩ iotates word-initially/post-vocalically, and the
+ * maximal-onset stress placement. The letter tables and the encyclopedic record live in tatar.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Plain (context-free) consonants. ⟨к г⟩ are harmony-conditioned (handled below); ⟨я ю е ё⟩ are iotated.
-const CONS: Record<string, string> = {
-    б: "b", в: "v", д: "d", ж: "ʒ", җ: "ʑ", з: "z", й: "j", л: "l", м: "m", н: "n", ң: "ŋ",
-    п: "p", р: "r", с: "s", т: "t", ф: "f", х: "x", һ: "h", ц: "t͡s", ч: "ɕ", ш: "ʃ", щ: "ɕ",
-};
+interface TatarDef {
+    consonants: Record<string, string>;
+    vowels: Record<string, string>;
+    iotated: Record<string, string>;
+}
+const DEF = loadManifest<TatarDef>(import.meta.url, "tatar.jsonc");
+// Letter → IPA tables (tatar.jsonc). The harmony-conditioned ⟨к г а⟩ and iotating ⟨е⟩ are handled in the scan.
+const CONS = DEF.consonants;
 // Cyrillic vowel letters — for the word-initial/post-vocalic ⟨е⟩→[je] iotation.
 const CYR_VOWEL = new Set(["а", "ә", "о", "ө", "у", "ү", "ы", "и", "е", "э", "я", "ю", "ё"]);
 const STRESS_NASAL = new Set(["m", "n", "ŋ"]);
@@ -27,10 +30,8 @@ function sonority(seg: string): number {
     if (["f", "v", "s", "z", "ʃ", "ʒ", "ɕ", "ʑ", "x", "χ", "h", "ʁ", "ɣ"].includes(seg)) return 2;
     return 0;
 }
-// Simple vowels → IPA.
-const VOWEL: Record<string, string> = { а: "ɑ", ә: "æ", о: "o", ө: "ø", у: "u", ү: "y", ы: "ɨ", и: "i", е: "e", э: "e" };
-// Iotated vowels → glide + vowel.
-const IOTATED: Record<string, string> = { я: "jɑ", ю: "ju", ё: "jo" };
+const VOWEL = DEF.vowels;
+const IOTATED = DEF.iotated;
 // Backness for the к/г harmony: a nearby BACK vowel → [q]/[ʁ]; a FRONT vowel → [k]/[ɡ].
 const BACK = new Set(["а", "о", "у", "ы", "я", "ю", "ё"]);
 const FRONT = new Set(["ә", "ө", "ү", "е", "э", "и"]);

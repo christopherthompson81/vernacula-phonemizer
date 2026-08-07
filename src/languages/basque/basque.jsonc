@@ -1,0 +1,57 @@
+// Native canonical-IPA data manifest for Basque (eu) — euskara, a LANGUAGE ISOLATE (no living relatives),
+// ~750k speakers, Latin script. The orthography is highly phonemic, so the engine (basque.ts) is a
+// left-to-right greedy scan over a digraph + letter table with two context rules (the ⟨r⟩ tap/trill split
+// and the sibilant places).
+// ⚠⚠ THE HALLMARK — the THREE-WAY SIBILANT / affricate system, a laminal vs apical vs postalveolar contrast:
+//     fricatives  ⟨z⟩→[s̻] (laminal)  ⟨s⟩→[s̺] (apical)   ⟨x⟩→[ʃ] (postalveolar)
+//     affricates  ⟨tz⟩→[t͡s̻]          ⟨ts⟩→[t͡s̺]          ⟨tx⟩→[t͡ʃ]
+//   (zu 'you'→[s̻u] vs su 'fire'→[s̺u]; atzo 'yesterday'→[at͡s̻o] vs hots 'sound'→[ot͡s̺]). The laminal/apical
+//   distinction is neutralised in the western dialects and the wikipron referee records it INCONSISTENTLY
+//   (both s̺/s̻ for ⟨z⟩), and the eval backbone strips the apical/laminal diacritics anyway — but we EMIT
+//   the standard three-way.
+// ⚠ ⟨r⟩ is a TAP [ɾ] between vowels, a TRILL [r] word-finally / before a consonant / doubled ⟨rr⟩
+//   (hartu→[artu], udare→[udaɾe], agirre→[aɡire]) — code, in basque.ts. ⚠ ⟨j⟩→[x] (the southern/Gipuzkoan
+//   standard; [j]~[ɟ]~[d͡ʒ] dialectally). ⟨h⟩→[h] (northern/careful standard; the southern majority drops
+//   it — the referee lists both, and the h-form scores higher). Palatal digraphs ⟨tt⟩→[c], ⟨dd⟩→[ɟ],
+//   ⟨ll⟩→[ʎ], ⟨ñ⟩→[ɲ]. ⟨g⟩→[ɡ] always (no soft g).
+// Validated vs wikipron eus_latn broad (20114) + narrow (20079).
+{
+    "language": "eu",
+    "name": "Basque (euskara)",
+    "script": ["Latin"],
+
+    // Digraphs, longest-first (ordered pairs). The three affricates carry the sibilant place; ⟨tt dd ll rr⟩
+    // are the palatal/geminate pairs.
+    "digraphs": [
+        ["tx", "t͡ʃ"], ["tz", "t͡s̻"], ["ts", "t͡s̺"], ["dd", "ɟ"], ["tt", "c"], ["ll", "ʎ"], ["rr", "r"],
+    ],
+
+    // Single letters. ⟨z⟩→[s̻] laminal, ⟨s⟩→[s̺] apical, ⟨x⟩→[ʃ]; ⟨j⟩→[x]; ⟨g⟩→[ɡ] always. Loan letters
+    // ⟨c q v w y ç⟩ map to their nearest Basque value. ⟨h⟩ and ⟨r⟩ are handled in the scan (basque.ts).
+    "letters": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "b": "b", "d": "d", "f": "f", "g": "ɡ", "j": "x", "k": "k", "l": "l", "m": "m", "n": "n",
+        "ñ": "ɲ", "p": "p", "s": "s̺", "t": "t", "x": "ʃ", "z": "s̻",
+        "c": "k", "q": "k", "v": "b", "w": "w", "y": "j", "ç": "s̻",
+    },
+
+    // The Basque VIGESIMAL (base-20) number words. 0-19 are listed; the tens are built on scores of 20 —
+    // 20 hogei, 40 berrogei (2×20), 60 hirurogei (3×20), 80 laurogei (4×20) — with the connective ⟨-ta⟩
+    // suffixed for a remainder (hogeita hamar = 20+10 = 30). Hundreds prefix the score system (ehun,
+    // berrehun…) and take the free connective ⟨eta⟩; likewise ⟨mila⟩ (thousand), ⟨milioi⟩ (million). ⟨eta⟩
+    // is placed once, before the final sub-100 group (the common Euskaltzaindia convention) — composition
+    // in basque.ts. Not referee-validated (the wikipron dump has no composed numbers) — the component
+    // words ARE (bat→bat, hiru→hiɾu, hogei→hoɡei̯…).
+    "numbers": {
+        "ones": [
+            "zero", "bat", "bi", "hiru", "lau", "bost", "sei", "zazpi", "zortzi", "bederatzi",
+            "hamar", "hamaika", "hamabi", "hamahiru", "hamalau", "hamabost", "hamasei", "hamazazpi",
+            "hemezortzi", "hemeretzi",
+        ],
+        "scores": ["", "hogei", "berrogei", "hirurogei", "laurogei"], // multiples of 20
+        "hundreds": ["", "ehun", "berrehun", "hirurehun", "laurehun", "bostehun", "seiehun", "zazpiehun", "zortziehun", "bederatziehun"],
+        "thousand": "mila",
+        "million": "milioi",
+        "and": "eta",
+    },
+}

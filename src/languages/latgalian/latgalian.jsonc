@@ -1,0 +1,37 @@
+// Native canonical-IPA data manifest for Latgalian (ltg) — latgaļu volūda, EASTERN BALTIC (~150k, Latgale
+// in eastern Latvia), a close sibling of Latvian. Latin script, near-phonemic orthography with macron
+// length + háček sibilants; the engine (latgalian.ts) is a greedy scan plus the Latgalian PALATALIZATION
+// system.
+//   ⚠ THE ⟨i⟩/⟨y⟩ SOFT/HARD SPLIT is the signature: ⟨i ī e ē⟩ are FRONT and PALATALIZE the preceding
+//     consonant(s) (ci→[t͡sʲi], bet→[bʲæt], nest→[nʲæst]), but ⟨y⟩→[ɨ] is a HARD central vowel that does
+//     NOT (cylvāks→[t͡sɨlvaːks]).
+//   · Vowels: ⟨a e i o u y⟩→[a æ i ɔ u ɨ]; macron = LONG (⟨ā ē ī ū ō ȳ⟩→[aː æː iː uː ɔː ɨː]). Consonants:
+//     ⟨c⟩→[t͡s], ⟨č⟩→[t͡ʃ], ⟨š⟩→[ʃ], ⟨ž⟩→[ʒ], ⟨dz⟩→[d͡z], ⟨dž⟩→[d͡ʒ], the written palatals ⟨ļ ņ ģ ķ ř⟩→
+//     [lʲ nʲ ɡʲ kʲ rʲ], ⟨v⟩→[w] in a coda. Baltic VOICING assimilation in obstruent clusters
+//     (Latgola→[ladɡɔla]).
+// The palatalization pass (with its /r/-opacity), the ⟨v⟩ coda rule and the voicing assimilation are code,
+// in latgalian.ts; the grapheme values and the voice/devoice pairs live here.
+// Latgalian's pitch ACCENT (level/falling/broken) is not written, so it is not emitted.
+{
+    "language": "ltg",
+    "name": "Latgalian (latgaļu volūda)",
+    "script": ["Latin"],
+
+    // Multi-char graphemes (longest-first): the affricate digraphs.
+    "digraphs": [["dz", "d͡z"], ["dž", "d͡ʒ"], ["tz", "d͡z"], ["ch", "x"]],
+
+    "vowels": {
+        "a": "a", "ā": "aː", "e": "æ", "ē": "æː", "i": "i", "ī": "iː", "o": "ɔ", "ō": "ɔː",
+        "u": "u", "ū": "uː", "y": "ɨ", "ȳ": "ɨː",
+    },
+
+    "consonants": {
+        "b": "b", "c": "t͡s", "č": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "ģ": "ɡʲ", "h": "x", "j": "j", "k": "k",
+        "ķ": "kʲ", "l": "l", "ļ": "lʲ", "m": "m", "n": "n", "ņ": "nʲ", "p": "p", "r": "r", "ř": "rʲ", "s": "s",
+        "š": "ʃ", "t": "t", "v": "v", "z": "z", "ž": "ʒ",
+    },
+
+    // Baltic voicing assimilation pairs (applied right-to-left over obstruent clusters in latgalian.ts).
+    "voice": { "p": "b", "t": "d", "k": "ɡ", "s": "z", "ʃ": "ʒ", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ", "f": "v", "x": "ɣ" },
+    "devoice": { "b": "p", "d": "t", "ɡ": "k", "z": "s", "ʒ": "ʃ", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ", "v": "f" },
+}

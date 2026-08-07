@@ -1,39 +1,32 @@
 /**
- * Totontepec Mixe / ayöök (mto) phonemizer — Mixe-Zoquean (Mixean, Oaxaca, North Highland), ~6k, the modern SIL
- * practical orthography, canonical IPA. The g2p is
- * AUTHORED FROM Crawford, *Totontepec Mixe Phonotagmemics* (SIL, 1963) — a published phonology (the bho/Balochi
- * mold). The consonants + allophony are Crawford-grounded and confident; the modern-orthography VOWEL mapping is
- * reconstructed from Crawford's example words (kääm 'pig'=/kæːm/, këp 'tree'=/kɨp/, üts 'I'=/ʌts/, ök 'dog'=/ʊk/)
- * with the central-vowel series + the UNDERLINE diacritic as the disclosed residual.
- *   · 9 VOWELS (Crawford §1.112): a→[a], e→[e], i→[i], o→[o], u→[u]; ä→[æ], ë→[ɨ], ü→[ʌ], ö→[ʊ]; a DOUBLED vowel
- *     → LENGTH (kääm→kæːm). ⟨ts⟩→[t͡s], ⟨tx cy⟩→[t͡ʃ] (palatalized), ⟨x⟩→[ʃ], ⟨j⟩→[h], ⟨c⟩→[k], ⟨ꞌ ' ⟩→[ʔ].
- *   ⚠ POST-NASAL VOICING (§1.121d): /p t ts k/ → [b d d͡z ɡ] after a nasal (mp→mb, nt→nd, nts→nd͡z, nk→ŋɡ).
- *   · /d g/ → the fricatives [ð ɣ] intervocalically; ⟨n⟩→[ŋ] before a velar; ⟨ny⟩→[ɲ].
- * Stress (accentual, not lexical-tonal) is not emitted. Referee: the ASJP North-Highland-Mixe Swadesh list
- * (coarse, independent) — inventory-only.
+ * Totontepec Mixe (mto) phonemizer — a greedy scan over the modern SIL practical orthography + Crawford's
+ * allophony as passes, canonical IPA. This file owns the passes: POST-NASAL VOICING, intervocalic
+ * /d g/→[ð ɣ], ⟨n⟩→[ŋ] before a velar, ⟨ny⟩→[ɲ], plus the underline/stress-mark stripping. The grapheme
+ * tables and the encyclopedic record (Crawford provenance, the vowel reconstruction) live in
+ * totontepecmixe.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Multi-letter graphemes (longest-first). ⟨tx cy ch⟩ = the palatalized affricate /cy/ [t͡ʃ]; ⟨ts⟩ = /c/ [t͡s];
-// ⟨qu⟩ = [k]. (Nasal clusters ⟨ny⟩ + post-nasal voicing are handled in the passes below.)
-const DIGRAPHS: [string, string][] = [["tx", "t͡ʃ"], ["cy", "t͡ʃ"], ["ch", "t͡ʃ"], ["ts", "t͡s"], ["qu", "k"]];
-// Single vowel graphemes → IPA. The central/back special vowels (ä ë ü ö) are the reconstructed values.
-const VOWEL: Record<string, string> = {
-    a: "a", e: "e", i: "i", o: "o", u: "u", ä: "æ", ë: "ɨ", ü: "ʌ", ö: "ʊ",
-};
-// Single consonant graphemes → IPA. ⟨c⟩=[k], ⟨x⟩=[ʃ] (Crawford's retroflex /š/), ⟨j⟩=[h], ⟨v w⟩=[v]/[w], ⟨y⟩=[j].
-const CONS: Record<string, string> = {
-    p: "p", t: "t", k: "k", c: "k", b: "b", d: "d", g: "ɡ", m: "m", n: "n", s: "s", x: "ʃ", j: "h",
-    h: "h", v: "v", w: "w", y: "j", l: "l", r: "ɾ", f: "f", z: "ʒ", "ʼ": "ʔ", "'": "ʔ", "’": "ʔ", "ꞌ": "ʔ", "`": "ʔ",
-};
+interface TotontepecMixeDef {
+    digraphs: [string, string][];
+    vowels: Record<string, string>;
+    consonants: Record<string, string>;
+    postNasalVoice: Record<string, string>;
+}
+const DEF = loadManifest<TotontepecMixeDef>(import.meta.url, "totontepecmixe.jsonc");
+// Grapheme tables (totontepecmixe.jsonc). The allophony passes (post-nasal voicing, ð/ɣ, ŋ) are below.
+const DIGRAPHS = DEF.digraphs;
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
+const POSTNASAL_VOICE = DEF.postNasalVoice;
 const isVowel = (ph: string): boolean => [..."aeiouæɨʌʊ"].includes(ph[0] ?? "");
 const NASAL = new Set(["m", "n"]);
 const VELAR = new Set(["k", "ɡ", "ɣ"]);
-const POSTNASAL_VOICE: Record<string, string> = { p: "b", t: "d", k: "ɡ", "t͡s": "d͡z" };
 
 interface Seg { ph: string; vowel: boolean }
 

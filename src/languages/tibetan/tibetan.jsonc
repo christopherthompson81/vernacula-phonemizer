@@ -1,0 +1,73 @@
+// Native canonical-IPA data manifest for Tibetan (bo) — Standard / Lhasa Tibetan (Tournadre's "Standard
+// Spoken Tibetan"), Tibetan script (U+0F00–0FFF), Bodish/Tibetic (Sino-Tibetan), ~1.2M L1 (Lhasa dialect).
+// One of the DEEPEST orthographies in the world: Classical spelling encodes Old Tibetan; the Lhasa reading
+// diverges massively, so the engine (tibetan.ts) is a RULE ENGINE, not a scan — it parses the syllable STACK
+// (prefix · superscript · root · subscript · vowel · suffix · post-suffix) from the Unicode full
+// (U+0F40–0F6C) vs subjoined (U+0F90–0FBC) distinction, then applies the reading rules: tone from
+// tonogenesis (voiceless root→HIGH; voiced-obstruent→LOW+aspiration-by-head; sonorant→HIGH iff a
+// prefix/superscript raises it), onset-cluster realization (ya-btags→palatal, ra-btags→retroflex
+// affricate), and suffix-driven vowel umlaut / length / nasalization / glottalization. Tone is emitted as
+// ˥ (H) / ˩ (L). The stack grammar (letter classes, prefix-legality, suffix effects) lives with the parser
+// in tibetan.ts; the letter values, onset realizations and number words live here.
+// Referees: hand-curated JIPA "Central Tibetan (Lhasa)" illustration (independent, CC-BY) + TIBMD@MUC
+// (independent) + kaikki/Module:bo-pron (reference-parity, disclosed).
+{
+    "language": "bo",
+    "name": "Tibetan (བོད་སྐད་)",
+    "script": ["Tibetan"],
+
+    // Full consonant letters (U+0F40–0F6C) → Wylie token. The subjoined forms (U+0F90–0FBC) map to the same
+    // token at codepoint − 0x50, computed in tibetan.ts. GHA (U+0F43) is written as an escape for the same
+    // reason as the composed vowel signs below: it is an NFC composition exclusion, and a literal key would
+    // silently decompose into ག + subjoined ha and shadow the plain-⟨ག⟩ entry.
+    "letters": {
+        "ཀ": "k", "ཁ": "kh", "ག": "g", "\u0F43": "g", "ང": "ng", "ཅ": "c", "ཆ": "ch", "ཇ": "j",
+        "ཉ": "ny", "ཊ": "T", "ཋ": "Th", "ཌ": "D", "ཎ": "N", "ཏ": "t", "ཐ": "th", "ད": "d",
+        "ན": "n", "པ": "p", "ཕ": "ph", "བ": "b", "མ": "m", "ཙ": "ts", "ཚ": "tsh", "ཛ": "dz",
+        "ཝ": "w", "ཞ": "zh", "ཟ": "z", "འ": "'", "ཡ": "y", "ར": "r", "ལ": "l", "ཤ": "sh",
+        "ས": "s", "ཧ": "h", "ཨ": "a",
+    },
+
+    // Vowel signs → base vowel (length folded; length comes from codas). The three COMPOSED signs
+    // (U+0F73/0F75/0F81) are written as escapes: they are NFC composition exclusions, so a literal key
+    // would silently decompose into two codepoints and stop matching the single-codepoint scan.
+    "vowelSigns": {
+        "ཱ": "a", "ི": "i", "\u0F73": "i", "ུ": "u", "\u0F75": "u", "ེ": "e", "ཻ": "e", "ོ": "o",
+        "ཽ": "o", "ྀ": "i", "\u0F81": "i",
+    },
+
+    // Onset realization by root class (keyed by Wylie): the voiceless unaspirated / aspirated pair by
+    // place, the fricatives, and the sonorants. Which of these applies — and the tone that goes with it —
+    // is the tonogenesis logic in tibetan.ts.
+    "unaspirated": {
+        "k": "k", "kh": "k", "g": "k", "c": "t͡ɕ", "ch": "t͡ɕ", "j": "t͡ɕ", "t": "t", "th": "t", "d": "t",
+        "p": "p", "ph": "p", "b": "p", "ts": "t͡s", "tsh": "t͡s", "dz": "t͡s", "T": "ʈ", "Th": "ʈ", "D": "ʈ",
+    },
+    "aspirated": {
+        "k": "kʰ", "kh": "kʰ", "g": "kʰ", "c": "t͡ɕʰ", "ch": "t͡ɕʰ", "j": "t͡ɕʰ", "t": "tʰ", "th": "tʰ",
+        "d": "tʰ", "p": "pʰ", "ph": "pʰ", "b": "pʰ", "ts": "t͡sʰ", "tsh": "t͡sʰ", "dz": "t͡sʰ",
+        "T": "ʈʰ", "Th": "ʈʰ", "D": "ʈʰ",
+    },
+    "fricatives": { "sh": "ɕ", "s": "s", "zh": "ɕ", "z": "s", "h": "h" },
+    "sonorants": { "ng": "ŋ", "ny": "ɲ", "n": "n", "m": "m", "w": "w", "y": "j", "r": "ɻ", "l": "l", "N": "n" },
+
+    // Cardinal number words (Tibetan spelling — the reader runs them through the engine). Tibetan
+    // tens+units use a DECADE-specific connective (ཉེར/སོ/ཞེ/ང/རེ/དོན/གྱ/གོ), and magnitudes join the remainder
+    // with དང dang. Authored from the standard cardinals; self-verified via the engine (no independent
+    // spoken-number referee exists).
+    "numbers": {
+        "zero": "ཀླད་ཀོར", // klad kor
+        "units": ["", "གཅིག", "གཉིས", "གསུམ", "བཞི", "ལྔ", "དྲུག", "བདུན", "བརྒྱད", "དགུ"],
+        "ten": "བཅུ", // 11–19 = bcu + unit
+        "decades": ["", "", "ཉི་ཤུ", "སུམ་ཅུ", "བཞི་བཅུ", "ལྔ་བཅུ", "དྲུག་ཅུ", "བདུན་ཅུ", "བརྒྱད་ཅུ", "དགུ་བཅུ"], // 20…90
+        "connectives": ["", "", "ཉེར", "སོ", "ཞེ", "ང", "རེ", "དོན", "གྱ", "གོ"], // decade connective before a unit (21…)
+        "and": "དང",
+        // Magnitudes, largest first. Tibetan names every decimal power up to 10⁹: བརྒྱ 10², སྟོང 10³, ཁྲི 10⁴,
+        // འབུམ 10⁵, ས་ཡ 10⁶, བྱེ་བ 10⁷, དུང་ཕྱུར 10⁸, ཐེར་འབུམ 10⁹ (Wikipedia "Tibetan numerals": gya, tong,
+        // thri, bum, sa ya, che wa, dung chur, ther pum).
+        "magnitudes": [
+            [1000000000, "ཐེར་འབུམ"], [100000000, "དུང་ཕྱུར"], [10000000, "བྱེ་བ"], [1000000, "ས་ཡ"],
+            [100000, "འབུམ"], [10000, "ཁྲི"], [1000, "སྟོང"], [100, "བརྒྱ"],
+        ],
+    },
+}

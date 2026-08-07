@@ -1,39 +1,32 @@
 /**
- * Latgalian / latgaļu volūda (ltg) phonemizer — EASTERN BALTIC (~150k, Latgale in eastern Latvia), a close
- * sibling of Latvian. Latin script, canonical IPA. A near-phonemic orthography with macron length + háček
- * sibilants; a greedy scan plus the Latgalian PALATALIZATION system.
- *
- *   ⚠ THE ⟨i⟩/⟨y⟩ SOFT/HARD SPLIT is the signature: ⟨i ī e ē⟩ are FRONT and PALATALIZE the preceding
- *     consonant(s) (ci→[t͡sʲi], bet→[bʲæt], nest→[nʲæst]), but ⟨y⟩→[ɨ] is a HARD central vowel that does NOT
- *     (cylvāks→[t͡sɨlvaːks]).
- *   · Vowels: ⟨a e i o u y⟩→[a æ i ɔ u ɨ]; macron = LONG (⟨ā ē ī ū ō ȳ⟩→[aː æː iː uː ɔː ɨː]). Consonants:
- *     ⟨c⟩→[t͡s], ⟨č⟩→[t͡ʃ], ⟨š⟩→[ʃ], ⟨ž⟩→[ʒ], ⟨dz⟩→[d͡z], ⟨dž⟩→[d͡ʒ], the written palatals ⟨ļ ņ ģ ķ ř⟩→
- *     [lʲ nʲ ɡʲ kʲ rʲ], ⟨v⟩→[w] in a coda. Baltic VOICING assimilation in obstruent clusters (Latgola→[ladɡɔla]).
- *
- * Numbers are composed by numbers.ts (the East-Baltic counted-noun concord + the FEMININE "tyukstūša").
- *
- * Latgalian's pitch ACCENT (level/falling/broken) is not written, so it is not emitted.
+ * Latgalian (ltg) phonemizer — a greedy scan + the Latgalian PALATALIZATION system, canonical IPA. This
+ * file owns the passes: whole-onset palatalization before a front vowel with its /r/-opacity, the ⟨v⟩
+ * coda rule, and the Baltic voicing assimilation. Numbers are composed by numbers.ts (the East-Baltic
+ * counted-noun concord + the FEMININE "tyukstūša"). The grapheme tables, voicing pairs and the
+ * encyclopedic record live in latgalian.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Multi-char graphemes (longest-first): the affricate digraphs.
-const DIGRAPHS: [string, string][] = [["dz", "d͡z"], ["dž", "d͡ʒ"], ["tz", "d͡z"], ["ch", "x"]];
-const VOWEL: Record<string, string> = {
-    "a": "a", "ā": "aː", "e": "æ", "ē": "æː", "i": "i", "ī": "iː", "o": "ɔ", "ō": "ɔː",
-    "u": "u", "ū": "uː", "y": "ɨ", "ȳ": "ɨː",
-};
+interface LatgalianDef {
+    digraphs: [string, string][];
+    vowels: Record<string, string>;
+    consonants: Record<string, string>;
+    voice: Record<string, string>;
+    devoice: Record<string, string>;
+}
+const DEF = loadManifest<LatgalianDef>(import.meta.url, "latgalian.jsonc");
+// Grapheme tables + voicing pairs (latgalian.jsonc). Palatalization and assimilation are the passes below.
+const DIGRAPHS = DEF.digraphs;
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
+const VOICE = DEF.voice;
+const DEVOICE = DEF.devoice;
 const FRONT = new Set([..."iīeē"]); // the vowel LETTERS that palatalize a preceding consonant (NOT ⟨y⟩)
-const CONS: Record<string, string> = {
-    "b": "b", "c": "t͡s", "č": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "ģ": "ɡʲ", "h": "x", "j": "j", "k": "k",
-    "ķ": "kʲ", "l": "l", "ļ": "lʲ", "m": "m", "n": "n", "ņ": "nʲ", "p": "p", "r": "r", "ř": "rʲ", "s": "s",
-    "š": "ʃ", "t": "t", "v": "v", "z": "z", "ž": "ʒ",
-};
-const VOICE: Record<string, string> = { "p": "b", "t": "d", "k": "ɡ", "s": "z", "ʃ": "ʒ", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ", "f": "v", "x": "ɣ" };
-const DEVOICE: Record<string, string> = { "b": "p", "d": "t", "ɡ": "k", "z": "s", "ʒ": "ʃ", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ", "v": "f" };
 
 interface Seg { ph: string; vowel: boolean; frontTrigger: boolean; }
 

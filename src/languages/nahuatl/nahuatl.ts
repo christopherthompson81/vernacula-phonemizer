@@ -1,35 +1,26 @@
 /**
- * Classical Nahuatl / nāhuatlahtōlli (nci) phonemizer — Uto-Aztecan, the language of the Aztec Empire (16th-c.
- * Central Mexico), the traditional Spanish-based Latin orthography, canonical IPA. Authored from Andrews,
- * *Introduction to Classical Nahuatl* (§2).
- *
- *   · 8 VOWELS /a e i o/ × length (macron ā ē ī ō → [Vː]). ⚠ LENGTH IS UNWRITTEN in traditional texts, so
- *     SHORT vowels are emitted. No diphthongs. ⟨u⟩ is NEVER a vowel natively — only part of cu/uc/hu/uh —
- *     so a bare ⟨u⟩ is a loan vowel.
- *   ⚠ THE SPANISH-ORTHOGRAPHY CONTEXT RULES (§2.4): ⟨c⟩→[s] before e/i, else [k]; ⟨qu⟩→[k]; ⟨z⟩→[s];
- *     ⟨cu⟩+V / V⟨uc⟩→[kʷ]; ⟨hu⟩+V / V⟨uh⟩→[w]; saltillo ⟨h⟩→[ʔ]; ⟨x⟩→ʃ, ⟨tz⟩→t͡s, ⟨tl⟩→t͡ɬ, ⟨ch⟩→t͡ʃ.
- *   ⚠ THE ⟨chu⟩ TRAP: ⟨ch⟩ before ⟨u⟩+V is a [k] coda plus ⟨hu⟩ [w] (cachuah = /kakwa/), NOT the affricate.
- *
- * Stress is regular penultimate and unmarked, so it is not emitted. Syllable-final /l/→[ɬ], /n/→[ŋ] before
- * /k/, and coda /w/→[w̥ ɸ] are allophonic and folded.
+ * Classical Nahuatl (nci) phonemizer — a position-aware scan of the traditional Spanish-based orthography
+ * (Andrews §2), canonical IPA. This file owns the context rules: ⟨cu/uc⟩→[kʷ] and ⟨hu/uh⟩→[w] by
+ * position, the ⟨chu⟩ trap ([k] coda + [w], not the affricate), ⟨c⟩ softening before e/i, ⟨qu⟩, and the
+ * post-vocalic saltillo ⟨h⟩→[ʔ]. The context-free tables and the encyclopedic record live in
+ * nahuatl.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-const VOWEL: Record<string, string> = {
-    a: "a", e: "e", i: "i", o: "o", u: "u",
-    ā: "aː", ē: "eː", ī: "iː", ō: "oː", ū: "uː",
-    á: "a", é: "e", í: "i", ó: "o", ú: "u", // acute (some texts) → the plain vowel
-};
+interface NahuatlDef {
+    vowels: Record<string, string>;
+    consonants: Record<string, string>;
+}
+const DEF = loadManifest<NahuatlDef>(import.meta.url, "nahuatl.jsonc");
+// Context-free tables (nahuatl.jsonc). ⟨c z x h q u⟩ are handled positionally in the scan below.
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
 const isVowel = (c: string | undefined): boolean => c !== undefined && VOWEL[c] !== undefined;
 const isFront = (c: string | undefined): boolean => c === "e" || c === "i" || c === "ē" || c === "ī" || c === "é" || c === "í";
-// Non-contextual single consonants (⟨c z x h q u⟩ are handled positionally; loan letters map to the nearest sound).
-const CONS: Record<string, string> = {
-    p: "p", t: "t", m: "m", n: "n", l: "l", y: "j", w: "w",
-    s: "s", r: "ɾ", f: "f", b: "b", d: "d", g: "ɡ", v: "v", j: "x", k: "k", q: "k",
-};
 
 /** One Classical Nahuatl word → canonical IPA (Andrews §2 orthography rules; morphophonology deferred). */
 export function phonemizeWord(word: string): string {

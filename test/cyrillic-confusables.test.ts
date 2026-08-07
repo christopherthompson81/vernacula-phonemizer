@@ -17,6 +17,7 @@ import { describe, expect, test } from "vitest";
 import { CYRILLIC_HOSTS } from "../src/core/scripts.ts";
 import { foldCyrillicConfusables, foldLatinConfusables } from "../src/core/unicode.ts";
 import { phonemize } from "../src/index.ts";
+import { stripJsonc } from "../src/core/jsonc.ts";
 
 describe("foldCyrillicConfusables", () => {
     test("a Latin look-alike wedged inside a Cyrillic word is folded", () => {
@@ -52,15 +53,19 @@ describe("foldCyrillicConfusables", () => {
         expect(phonemize("рaсa", "ru").trim()).toBe(phonemize("раса", "ru").trim());
     });
 
-    // ⚠ CYRILLIC_HOSTS CANNOT BE DERIVED FROM THE MANIFESTS, because five Cyrillic engines have no manifest at
-    // all. This keeps the manifests authoritative where they DO exist: a new Cyrillic-primary manifest that
-    // nobody adds to the set fails here rather than silently losing its tie-break.
-    test("every Cyrillic-primary manifest is in CYRILLIC_HOSTS", () => {
+    // ⚠ CYRILLIC_HOSTS is a hand-written copy of what the manifests declare (so the fold does not pay a
+    // directory scan on startup), and a copy drifts. Exact in both directions: a new Cyrillic-primary
+    // manifest that nobody adds to the set fails here rather than silently losing its tie-break, and an
+    // entry whose manifest stops leading with Cyrillic fails rather than lingering.
+    test("CYRILLIC_HOSTS is exactly the Cyrillic-primary manifests", () => {
         const dir = new URL("../src/languages/", import.meta.url);
         const declared = new Set<string>();
         for (const d of readdirSync(dir)) {
             for (const f of readdirSync(new URL(`${d}/`, dir)).filter((n) => n.endsWith(".jsonc"))) {
-                const src = readFileSync(new URL(`${d}/${f}`, dir), "utf8");
+                // Strip comments BEFORE matching: a comment (or newline) between `[` and the first element
+                // would otherwise silently drop the manifest from `declared` and fire the assertion at the
+                // wrong side.
+                const src = stripJsonc(readFileSync(new URL(`${d}/${f}`, dir), "utf8"));
                 const lang = /"language"\s*:\s*"([^"]+)"/u.exec(src);
                 // `script` is an ORDERED list, primary first — so a Cyrillic-primary language leads with it.
                 const script = /"script"\s*:\s*\[\s*"([^"]*)"/u.exec(src);
@@ -68,10 +73,7 @@ describe("foldCyrillicConfusables", () => {
             }
         }
         expect(declared.size).toBeGreaterThan(5); // the scan actually found manifests
-        for (const l of declared) expect(CYRILLIC_HOSTS.has(l), `${l} declares Cyrillic but is not in CYRILLIC_HOSTS`).toBe(true);
-        // …and the entries with no manifest are named, so the surplus is accounted for rather than unexplained.
-        const manifestless = [...CYRILLIC_HOSTS].filter((l) => !declared.has(l)).sort();
-        expect(manifestless).toEqual(["ab", "ba", "chv", "nog", "tt"]);
+        expect([...declared].sort()).toEqual([...CYRILLIC_HOSTS].sort());
     });
 
     test("the embedded-Latin-run routing still works — the fold must not eat a foreign word", () => {

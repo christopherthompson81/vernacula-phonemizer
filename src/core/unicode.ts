@@ -113,6 +113,7 @@ export function foldLatinDiacritics(s: string): string {
 const NATIVE_DIGIT_BASES: readonly number[] = [
     0x0660, // Arabic-Indic
     0x06f0, // Extended Arabic-Indic (Persian, Urdu)
+    0x07c0, // Nko
     0x0966, // Devanagari
     0x09e6, // Bengali
     0x0a66, // Gurmukhi
@@ -127,7 +128,12 @@ const NATIVE_DIGIT_BASES: readonly number[] = [
     0x0ed0, // Lao
     0x0f20, // Tibetan
     0x1040, // Myanmar
+    0x1090, // Myanmar Shan
     0x17e0, // Khmer
+    0x1bb0, // Sundanese
+    0x1c50, // Ol Chiki
+    0xa9d0, // Javanese
+    0x1e950, // Adlam
     0xff10, // Fullwidth
 ];
 

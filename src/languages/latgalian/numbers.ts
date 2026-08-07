@@ -1,8 +1,8 @@
 /**
  * Latgalian (ltg) cardinal number compositor. Returns composed Latgalian TEXT (space-separated) that
- * latgalian.ts runs through the g2p, so the IPA stays consistent with the word engine. Latgalian has no
- * data manifest (the whole engine is a single .ts), so the numeral table is authored HERE rather than in a
- * .jsonc — the Somali/Irish shape.
+ * latgalian.ts runs through the g2p, so the IPA stays consistent with the word engine. The numeral tables
+ * stay HERE, beside the counted-noun compositor that is their only reader (latgalian.jsonc carries the
+ * grapheme tables) — the Somali/Irish shape.
  *
  * SOURCES
  *   • "SKAITĻA VĀRDS", Latgalīšu daslēdzis škola (lynuojs.wordpress.com/gramatika/skaitla-vards/) — the

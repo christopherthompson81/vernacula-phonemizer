@@ -20,6 +20,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 
 import { MANIFESTLESS_SCRIPTS } from "../src/core/scripts.ts";
+import { stripJsonc } from "../src/core/jsonc.ts";
 
 /** Unicode script names. A value outside this set is a typo or a new script that needs a deliberate entry. */
 const SCRIPTS = new Set([
@@ -32,8 +33,10 @@ const SCRIPTS = new Set([
 const DIR = new URL("../src/languages/", import.meta.url);
 const manifests: Array<[string, string]> = [];
 for (const d of readdirSync(DIR)) {
+    // Comments are stripped BEFORE any regex sees the source, so a comment inside a matched span can
+    // never make a manifest silently drop out of a scan.
     for (const f of readdirSync(new URL(`${d}/`, DIR)).filter((n) => n.endsWith(".jsonc")))
-        manifests.push([`${d}/${f}`, readFileSync(new URL(`${d}/${f}`, DIR), "utf8")]);
+        manifests.push([`${d}/${f}`, stripJsonc(readFileSync(new URL(`${d}/${f}`, DIR), "utf8"))]);
 }
 /** A LANGUAGE manifest declares `language`. A variety delta (`variety`) or a data file does not, and is out of scope. */
 const langManifests = manifests.filter(([, src]) => /"language"\s*:/u.test(src));

@@ -1,0 +1,40 @@
+// Native canonical-IPA data manifest for Faroese (fo) — føroyskt, North Germanic (Insular Scandinavian,
+// sibling of Icelandic), ~70k (Faroe Islands), Latin + ⟨á í ó ú ý æ ø ð⟩. One of the DEEPEST Latin
+// orthographies among these engines. The engine (faroese.ts) is a greedy grapheme scan where the CORE rule
+// is that vowel LENGTH conditions vowel QUALITY:
+//   ⚠ a stressed vowel is LONG (often diphthongal) in an OPEN syllable / before ≤1 consonant, SHORT
+//     (monophthong) before a cluster — a→[ɛaː]/[a], á→[ɔaː]/[ɔ], ó→[ɔuː]/[œ], ú→[ʉuː]/[ʏ], í ý→[ʊiː]/[ʊi].
+//   ⚠ NO voicing contrast: ⟨b d g⟩→[p t k] (pre-aspiration of ⟨p t k⟩ + length are FOLDED for the referee).
+//   ⚠ ⟨ð⟩ is largely SILENT (etymological) — intervocalic ⟨ð⟩ and ⟨g⟩ delete (aðal→ɛaːal); ⟨g k⟩ → the
+//     affricate [t͡ʃ] before a front vowel (argi→aɹt͡ʃɪ); retroflex r-clusters ⟨rn rt rd rs rl⟩→[ɻɳ ʈ ɖ ʂ ɭ];
+//     ⟨ll⟩→[tl]; ⟨v⟩→[u] before a consonant / [v] intervocalic; ⟨hv⟩→[kv], ⟨hj⟩→[j].
+// The length computation, the deletion/affrication/retroflex passes and the glide choices are code, in
+// faroese.ts; the grapheme values and the skerping remaps live here.
+// Referee: wikipron fao_latn_broad (human, 3024).
+{
+    "language": "fo",
+    "name": "Faroese (føroyskt)",
+    "script": ["Latin"],
+
+    // Vowel graphemes → [long, short] IPA quality. The digraphs ⟨ei ey oy⟩ are scanned first (longest-match).
+    "vowels": {
+        "a": ["ɛaː", "a"], "á": ["ɔɑː", "ɔ"], "e": ["eː", "ɛ"], "i": ["iː", "ɪ"], "o": ["oː", "ɔ"], "u": ["uː", "ʊ"],
+        "y": ["iː", "ɪ"], "í": ["ʊiː", "ʊi"], "ó": ["ɔuː", "œ"], "ú": ["ʉuː", "ʏ"], "ý": ["ʊiː", "ʊi"], "æ": ["ɛaː", "a"],
+        "ø": ["øː", "œ"], "ei": ["aiː", "ai"], "ey": ["ɛiː", "ɛi"], "oy": ["ɔiː", "ɔi"],
+    },
+
+    // Base consonant graphemes → IPA (voicing neutralized: ⟨b d g⟩→[p t k]). The context rules
+    // (affrication, deletion, retroflex clusters, v-vocalization) are applied in passes in faroese.ts.
+    "consonants": {
+        "b": "p", "d": "t", "g": "k", "p": "p", "t": "t", "k": "k", "f": "f", "s": "s", "h": "h", "j": "j", "l": "l",
+        "m": "m", "n": "n", "r": "r", "v": "v", "ð": "ð", "þ": "θ", "c": "k", "w": "v", "x": "ks", "z": "s", "q": "k",
+    },
+
+    // SKERPING vowel remap before ⟨gv⟩ (the "sharpening"): ó→[ɛ], ú→[ɪ], í ý→[ʊi]. Before ⟨ggj⟩ the í/ý
+    // offglide DROPS to a plain [ʊ] (nýggjur→nʊt͡ʃːʊɹ, kríggj→kɹʊt͡ʃ).
+    "skerping": { "ó": "ɛ", "ú": "ɪ", "í": "ʊi", "ý": "ʊi" },
+    "skerpingGgj": { "ó": "ɛ", "ú": "ɪ", "í": "ʊ", "ý": "ʊ" },
+
+    // A short vowel before ⟨ng nk⟩ raises/changes (the pre-nasal shift): a→[ɛ] (gangi→kɛɲt͡ʃɪ).
+    "prenasal": { "a": "ɛ" },
+}

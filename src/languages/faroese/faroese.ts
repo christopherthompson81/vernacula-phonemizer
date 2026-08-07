@@ -1,46 +1,39 @@
 /**
- * Faroese (fo) phonemizer — føroyskt, North Germanic (Insular Scandinavian, sibling of Icelandic), Latin + ⟨á í ó
- * ú ý æ ø ð⟩, canonical IPA. One of the DEEPEST orthographies in the fleet. A greedy grapheme
- * scan where the CORE rule is that vowel LENGTH conditions vowel QUALITY:
- *   ⚠ a stressed vowel is LONG (often diphthongal) in an OPEN syllable / before ≤1 consonant, SHORT (monophthong)
- *     before a cluster — a→[ɛaː]/[a], á→[ɔaː]/[ɔ], ó→[ɔuː]/[œ], ú→[ʉuː]/[ʏ], í ý→[ʊiː]/[ʊi], etc.
- *   ⚠ NO voicing contrast: ⟨b d g⟩→[p t k] (pre-aspiration of ⟨p t k⟩ + length are FOLDED for the referee).
- *   ⚠ ⟨ð⟩ is largely SILENT (etymological) — intervocalic ⟨ð⟩ and ⟨g⟩ delete (aðal→ɛaːal, agað→ɛaːa); ⟨g k⟩ →
- *     the affricate [t͡ʃ] before a front vowel (argi→aɹt͡ʃɪ); retroflex r-clusters ⟨rn rt rd rs rl⟩→[ɻɳ ʈ ɖ ʂ ɭ];
- *     ⟨ll⟩→[tl]; ⟨v⟩→[u] before a consonant (diphthong) / [v] intervocalic; ⟨hv⟩→[kv], ⟨hj⟩→[j].
- * Referee: wikipron fao_latn_broad (human, 3024).
+ * Faroese (fo) phonemizer — a greedy grapheme scan whose CORE rule is that vowel LENGTH conditions vowel
+ * QUALITY, canonical IPA. This file owns the machinery: the open/closed length computation on the
+ * stressed vowel, the SKERPING application sites, and the consonant passes (ð/g deletion with glide
+ * choice, g/k affrication, retroflex r-clusters, ll→tl, v-vocalization, hv/hj). The grapheme values,
+ * skerping remaps and the encyclopedic record live in faroese.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Vowel graphemes → [long, short] IPA quality. The digraphs ⟨ei ey oy⟩ are scanned first (longest-match).
-const VOWEL: Record<string, [string, string]> = {
-    a: ["ɛaː", "a"], á: ["ɔɑː", "ɔ"], e: ["eː", "ɛ"], i: ["iː", "ɪ"], o: ["oː", "ɔ"], u: ["uː", "ʊ"],
-    y: ["iː", "ɪ"], í: ["ʊiː", "ʊi"], ó: ["ɔuː", "œ"], ú: ["ʉuː", "ʏ"], ý: ["ʊiː", "ʊi"], æ: ["ɛaː", "a"],
-    ø: ["øː", "œ"], ei: ["aiː", "ai"], ey: ["ɛiː", "ɛi"], oy: ["ɔiː", "ɔi"],
-};
+interface FaroeseDef {
+    vowels: Record<string, [string, string]>;
+    consonants: Record<string, string>;
+    skerping: Record<string, string>;
+    skerpingGgj: Record<string, string>;
+    prenasal: Record<string, string>;
+}
+const DEF = loadManifest<FaroeseDef>(import.meta.url, "faroese.jsonc");
+// Vowel graphemes → [long, short] IPA quality (faroese.jsonc). Digraphs ⟨ei ey oy⟩ scan first (longest-match).
+const VOWEL = DEF.vowels;
 // Round vs front vowel GRAPHEMES — decide the glide that an intervocalic ⟨g ð⟩ becomes ([v] near round, [j] near
 // front, deleted near ⟨a á⟩).
 const ROUND_V = new Set([..."ouóúø"]);
 const GLIDE_FRONT_V = new Set([..."eiyíýæ"]);
 const VOWEL_KEYS = Object.keys(VOWEL).sort((a, b) => b.length - a.length); // digraphs first
-// Base consonant graphemes → IPA (voicing neutralized: ⟨b d g⟩→[p t k]). Context rules (affrication, deletion,
-// retroflex clusters, v-vocalization) are applied in passes below.
-const CONS: Record<string, string> = {
-    b: "p", d: "t", g: "k", p: "p", t: "t", k: "k", f: "f", s: "s", h: "h", j: "j", l: "l",
-    m: "m", n: "n", r: "r", v: "v", ð: "ð", þ: "θ", c: "k", w: "v", x: "ks", z: "s", q: "k",
-};
+const CONS = DEF.consonants;
 // Front vowel GRAPHEMES that affricate a preceding ⟨g k⟩ → [t͡ʃ] (argi→aɹt͡ʃɪ). NOT ⟨ø⟩ — gøta→[køːta], not
 // [t͡ʃøːta] (the front-rounded ⟨ø⟩ does not palatalize the velar).
 const FRONT_V = new Set([..."eiyíýæ"]);
-// SKERPING vowel remap before ⟨gv⟩ (the "sharpening"): ó→[ɛ], ú→[ɪ], í ý→[ʊi]. Before ⟨ggj⟩ the í/ý offglide
-// DROPS to a plain [ʊ] (nýggjur→nʊt͡ʃːʊɹ, kríggj→kɹʊt͡ʃ).
-const SKERP: Record<string, string> = { ó: "ɛ", ú: "ɪ", í: "ʊi", ý: "ʊi" };
-const SKERP_GGJ: Record<string, string> = { ó: "ɛ", ú: "ɪ", í: "ʊ", ý: "ʊ" };
-// A short vowel before ⟨ng nk⟩ raises/changes (the pre-nasal shift): a→[ɛ] (gangi→kɛɲt͡ʃɪ).
-const PRENASAL: Record<string, string> = { a: "ɛ" };
+// SKERPING vowel remap before ⟨gv⟩ / ⟨ggj⟩, and the pre-nasal shift before ⟨ng nk⟩ (faroese.jsonc).
+const SKERP = DEF.skerping;
+const SKERP_GGJ = DEF.skerpingGgj;
+const PRENASAL = DEF.prenasal;
 
 interface Seg { g: string; ph: string; vowel: boolean; stressed: boolean; long: boolean }
 

@@ -1,32 +1,24 @@
 /**
- * Kalaallisut / West Greenlandic (kl) phonemizer — Eskimo-Aleut (Inuit branch), ~56k (Greenland), the 1973
- * PHONEMIC Latin orthography. Canonical IPA. Because
- * the orthography is highly phonemic, this is a near-1:1 scan:
- *   ⚠ THREE-VOWEL system /a i u/ (the Inuit hallmark). ⟨e o⟩ are NOT phonemes — they are the LOWERED allophones of
- *     /i u/ the orthography writes before a uvular ⟨q r⟩, so ⟨e⟩→[i], ⟨o⟩→[u] (aaneq→aːniq). Doubled vowel → LENGTH.
- *   ⚠ the UVULAR stop ⟨q⟩→[q] and the uvular fricative ⟨r⟩→[ʁ]; ⟨ng⟩→[ŋ], ⟨nng⟩→[ŋː]; a doubled consonant → LENGTH.
- * The PHONETIC regressive consonant ASSIMILATION (rp→pp) + uvular vowel-lowering ([ɜ ɔ ɑ], ll→ɬ) are the NARROW
- * layer — deferred (we target the broad/phonemic level). No stress (weight-based, unmarked). Referee: wikipron
- * kal_latn_broad (human, 1581).
+ * Kalaallisut (kl) phonemizer — a near-1:1 scan over the 1973 phonemic orthography, canonical IPA. This
+ * file owns the longest-match mechanics: ⟨nng⟩/⟨ng⟩ before singles, doubled vowel/consonant → length
+ * (keyed on the same grapheme, so ⟨ei⟩/⟨ou⟩ never wrongly merge). The letter tables and the encyclopedic
+ * record (the three-vowel system, the deferred narrow layer) live in kalaallisut.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
-// Single vowel graphemes → IPA. ⟨e o⟩ are the orthographic lowered-before-uvular allophones of /i u/ → [i]/[u].
-// ⟨y⟩ joins æ ø å as a Danish-loan vowel letter: it is unavoidable once Danish numerals are read (tyve, fyrre,
-// sytten — see numbers.ts), and without it the scan silently deleted it (tyve → *[tvi]).
-const VOWEL: Record<string, string> = { a: "a", i: "i", u: "u", e: "i", o: "u", æ: "ɛ", ø: "ø", å: "ɔ", y: "y" };
-// Single consonant graphemes → IPA. ⟨r⟩ is the uvular fricative [ʁ]; ⟨g⟩→[ɡ].
-// ⟨b d⟩ are loan letters — Greenlandic has no voiced stops, so they DEVOICE to [p t] (Biina→piːna, Bolatta→
-// pulatːa). ⟨g⟩ is the voiced velar FRICATIVE [ɣ] (isigak→isiɣak) — the continuant parallel to the stop ⟨k⟩,
-// exactly as ⟨r⟩→[ʁ] is to ⟨q⟩ (the series v s g r = [v s ɣ ʁ]); the broad referee coarsens it to [ɡ] (fold).
-const CONS: Record<string, string> = {
-    p: "p", t: "t", k: "k", q: "q", b: "p", d: "t", g: "ɣ", f: "f", h: "h", j: "j",
-    l: "l", m: "m", n: "n", s: "s", v: "v", r: "ʁ", w: "v",
-};
+interface KalaallisutDef {
+    vowels: Record<string, string>;
+    consonants: Record<string, string>;
+}
+const DEF = loadManifest<KalaallisutDef>(import.meta.url, "kalaallisut.jsonc");
+// Letter → IPA tables (kalaallisut.jsonc). Gemination and ng/nng are handled in the scan below.
+const VOWEL = DEF.vowels;
+const CONS = DEF.consonants;
 const isVowelChar = (c: string): boolean => VOWEL[c] !== undefined;
 
 /** Phonemize one Kalaallisut word → canonical IPA (near-1:1 scan; doubled letter → length; ng/nng → ŋ/ŋː). */

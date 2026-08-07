@@ -1,0 +1,31 @@
+// Native canonical-IPA data manifest for Classical Nahuatl (nci) — nāhuatlahtōlli, Uto-Aztecan, the
+// language of the Aztec Empire (16th-c. Central Mexico), the traditional Spanish-based Latin orthography.
+// The engine (nahuatl.ts) is AUTHORED FROM Andrews, *Introduction to Classical Nahuatl* (§2).
+//   · 8 VOWELS /a e i o/ × length (macron ā ē ī ō → [Vː]). ⚠ LENGTH IS UNWRITTEN in traditional texts, so
+//     SHORT vowels are emitted. No diphthongs. ⟨u⟩ is NEVER a vowel natively — only part of cu/uc/hu/uh —
+//     so a bare ⟨u⟩ is a loan vowel.
+//   ⚠ THE SPANISH-ORTHOGRAPHY CONTEXT RULES (§2.4): ⟨c⟩→[s] before e/i, else [k]; ⟨qu⟩→[k]; ⟨z⟩→[s];
+//     ⟨cu⟩+V / V⟨uc⟩→[kʷ]; ⟨hu⟩+V / V⟨uh⟩→[w]; saltillo ⟨h⟩→[ʔ]; ⟨x⟩→ʃ, ⟨tz⟩→t͡s, ⟨tl⟩→t͡ɬ, ⟨ch⟩→t͡ʃ.
+//   ⚠ THE ⟨chu⟩ TRAP: ⟨ch⟩ before ⟨u⟩+V is a [k] coda plus ⟨hu⟩ [w] (cachuah = /kakwa/), NOT the affricate.
+// Those context rules are code, in nahuatl.ts; the context-free tables live here. Stress is regular
+// penultimate and unmarked, so it is not emitted. Syllable-final /l/→[ɬ], /n/→[ŋ] before /k/, and coda
+// /w/→[w̥ ɸ] are allophonic and folded.
+{
+    "language": "nci",
+    "name": "Classical Nahuatl (nāhuatlahtōlli)",
+    "script": ["Latin"],
+
+    // Vowels; the acute spellings (some texts) → the plain vowel.
+    "vowels": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
+        "ā": "aː", "ē": "eː", "ī": "iː", "ō": "oː", "ū": "uː",
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+    },
+
+    // Non-contextual single consonants (⟨c z x h q u⟩ are handled positionally in nahuatl.ts; loan letters
+    // map to the nearest sound).
+    "consonants": {
+        "p": "p", "t": "t", "m": "m", "n": "n", "l": "l", "y": "j", "w": "w",
+        "s": "s", "r": "ɾ", "f": "f", "b": "b", "d": "d", "g": "ɡ", "v": "v", "j": "x", "k": "k", "q": "k",
+    },
+}

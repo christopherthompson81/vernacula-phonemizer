@@ -1,39 +1,39 @@
 /**
- * Santali (sat) phonemizer — ᱥᱟᱱᱛᱟᱲᱤ, Munda (Austroasiatic), the OL CHIKI script (ᱚᱞ ᱪᱮᱢᱮᱫ, U+1C50–1C7F — a distinct
- * ALPHABET, 1925, now Santali's official script), canonical IPA. Munda (Austroasiatic)
- * and first Ol Chiki. Ol Chiki is near-phonemic, so a grapheme scan + a few sign rules: ⟨ᱷ OH⟩ aspirates the preceding
- * stop (ᱵᱷ→bʱ) / is [h]; ⟨ᱹ GAAHLAA⟩ modifies the preceding vowel (ᱟᱹ→ə); ⟨ᱸ MU⟩ nasalizes it (ᱟᱸ→ã); ⟨ᱼ PHAARKAA⟩ /
- * ⟨ᱽ AHAD⟩ mark a CHECKED (glottalized) consonant (ᱜᱼ→kʼ); and the Santali HALLMARK — a WORD-FINAL voiced stop is
- * CHECKED/glottalized (ᱫᱟᱜ→dakʼ 'water', ᱢᱮᱫ→metʼ 'eye'). ⚠ Thinly attested — a single source family.
+ * Santali (sat) phonemizer — a grapheme scan over Ol Chiki + the sign rules, canonical IPA. This file
+ * owns the sign machinery: ⟨ᱷ OH⟩ aspirating the preceding stop, ⟨ᱹ GAAHLAA⟩ vowel modification, ⟨ᱸ MU⟩ /
+ * ⟨ᱺ MU-GAHLA⟩ nasalization, ⟨ᱼ PHAARKAA⟩ / ⟨ᱽ AHAD⟩ checking, and the hallmark WORD-FINAL voiced-stop
+ * checking rule with its AHAD block. The letter values, substitution tables and the encyclopedic record
+ * live in santali.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+
+interface SantaliDef {
+    letters: Record<string, string>;
+    checked: Record<string, string>;
+    aspirated: Record<string, string>;
+    gahla: Record<string, string>;
+}
+const DEF = loadManifest<SantaliDef>(import.meta.url, "santali.jsonc");
 
 // Ol Chiki digits ᱐-᱙ (U+1C50–1C59) → ASCII, so an Ol-Chiki-numeral token composes exactly like a Western one.
 const OL_CHIKI_DIGITS = "᱐᱑᱒᱓᱔᱕᱖᱗᱘᱙";
 const toAsciiDigits = (s: string): string =>
     [...s].map((c) => (OL_CHIKI_DIGITS.includes(c) ? String(OL_CHIKI_DIGITS.indexOf(c)) : c)).join("");
 
-// Ol Chiki letter → IPA. Vowels + consonants (palatal stops ⟨ᱪ ᱡ⟩ → c/ɟ; retroflex ⟨ᱴ ᱰ ᱬ ᱲ⟩ → ʈ ɖ ɳ ɽ).
-const BASE: Record<string, string> = {
-    "ᱚ": "ɔ", "ᱟ": "a", "ᱤ": "i", "ᱩ": "u", "ᱮ": "e", "ᱳ": "o", // vowels
-    "ᱜ": "ɡ", "ᱠ": "k", "ᱛ": "t", "ᱫ": "d", "ᱴ": "ʈ", "ᱰ": "ɖ", "ᱯ": "p", "ᱵ": "b", "ᱪ": "c", "ᱡ": "ɟ",
-    "ᱢ": "m", "ᱱ": "n", "ᱝ": "ŋ", "ᱧ": "ɲ", "ᱬ": "ɳ", "ᱞ": "l", "ᱨ": "r", "ᱲ": "ɽ", "ᱥ": "s", "ᱦ": "h",
-    "ᱭ": "j", "ᱣ": "w", "ᱶ": "w̃", "ᱷ": "h", // ⟨ᱶ OV⟩ is the NASAL labial glide /w̃/ (vs ⟨ᱣ AAW⟩ /w/)
-};
+// Ol Chiki letter → IPA and the sign-driven substitution tables (santali.jsonc).
+const BASE = DEF.letters;
 const VOWEL = new Set(["ɔ", "a", "i", "u", "e", "ɛ", "o", "ə"]);
 // A vowel NUCLEUS test that survives nasalization/length (NFD so ã→a+◌̃, ɛ̃→ɛ+◌̃ still count as vowels).
 const VOWEL_BASE = new Set([..."ɔaiueɛoə"]);
 const isVowelSeg = (s: string): boolean => [...s.normalize("NFD")].some((c) => VOWEL_BASE.has(c));
 const STOP = new Set(["ɡ", "k", "t", "d", "ʈ", "ɖ", "p", "b", "c", "ɟ"]);
 const VOICED_STOP = new Set(["ɡ", "d", "ɖ", "b", "ɟ"]);
-// A checked (glottalized) stop: devoice + a glottal release ⟨ʼ⟩ (ɡ→kʼ, d→tʼ …).
-const CHECKED: Record<string, string> = { "ɡ": "kʼ", "k": "kʼ", "d": "tʼ", "t": "tʼ", "ɖ": "ʈʼ", "ʈ": "ʈʼ", "b": "pʼ", "p": "pʼ", "ɟ": "cʼ", "c": "cʼ" };
-// Aspiration by ⟨ᱷ OH⟩: voiceless → ʰ, voiced → breathy ʱ.
-const ASPIRATE: Record<string, string> = { "p": "pʰ", "t": "tʰ", "ʈ": "ʈʰ", "c": "cʰ", "k": "kʰ", "b": "bʱ", "d": "dʱ", "ɖ": "ɖʱ", "ɟ": "ɟʱ", "ɡ": "ɡʱ" };
-// ⟨ᱹ GAAHLAA⟩ vowel modification — the "extra" Santali vowels (chiefly ᱟ a→ə).
-const GAHLA: Record<string, string> = { "a": "ə", "ɔ": "ɔ", "o": "ɔ", "e": "ɛ", "i": "i", "u": "u" };
+const CHECKED = DEF.checked;
+const ASPIRATE = DEF.aspirated;
+const GAHLA = DEF.gahla;
 
 const OH = "ᱷ", GAHLA_SIGN = "ᱹ", MU = "ᱸ", MU_GAHLA = "ᱺ", PHAARKAA = "ᱼ", AHAD = "ᱽ";
 

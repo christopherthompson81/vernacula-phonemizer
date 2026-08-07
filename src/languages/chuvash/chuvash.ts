@@ -1,38 +1,27 @@
 /**
- * Chuvash (chv) phonemizer — Чӑвашла / Чӑваш чӗлхи, the SOLE surviving Oghur (Bulgaric) Turkic language (the deepest
- * split in Turkic — sister to every Common-Turkic language, tr/az/tk/tt/ba/kk), ~1M (Chuvashia, Russia), CYRILLIC (the
- * Chuvash alphabet + ⟨ӑ ӗ ҫ ӳ⟩). Canonical IPA. A Cyrillic grapheme scan with two Chuvash signatures:
- *
- *   ⚠ ALLOPHONIC VOICING — Chuvash has NO phonemic voicing contrast: the voiceless letters ⟨п т к ч с ҫ ш х⟩ voice to
- *      [b d ɡ d͡ʑ z ʑ ʐ ɣ] between vowels, after a NASAL/glide, or after a LIQUID before a FULL vowel (апат→aˈbat,
- *      ача→aˈd͡ʑa, манпа→manˈba, вӑлсем→ʋəlˈzem). A GEMINATE (doubled letter) is the underlying "strong" consonant and
- *      BLOCKS voicing → single long [Cː] (иккӗ→ˈikːɘ).
- *   ⚠ REDUCED-VOWEL STRESS — the two reduced vowels ⟨ӑ⟩→[ə], ⟨ӗ⟩→[ɘ] cannot bear stress; stress falls on the last
- *      FULL vowel, else (all-reduced) on the first syllable (вӑлсем→ʋəlˈzem, сӑмах→səˈmax, vs вӑкӑр→ˈvəɡər).
- *
- * ⚠ SINGLE-SOURCE: English Wiktionary 'Chuvash terms with IPA pronunciation' (84 literal human {{IPA|cv|…}} pairs;
- * no wikipron/epitran chv).
+ * Chuvash (chv) phonemizer — a Cyrillic grapheme scan, canonical IPA. This file owns the two signature
+ * rules as passes: ALLOPHONIC VOICING (voiceless obstruents voice between vowels / after a nasal/glide /
+ * after a liquid before a FULL vowel, with geminates blocking) and REDUCED-VOWEL STRESS (stress on the
+ * last FULL vowel; ⟨ӑ ӗ⟩ never stressed), plus the ⟨е⟩ [je]/[e] split and gemination. The letter tables
+ * and the encyclopedic record live in chuvash.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Onset (default, pre-voicing) consonants. ⟨в⟩→[ʋ] (labial approximant; ~[w] in a coda), ⟨х⟩→[χ] (uvular), ⟨ҫ⟩→[ɕ].
-const ONSET: Record<string, string> = {
-    "б": "b", "в": "ʋ", "г": "ɡ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "л": "l",
-    "м": "m", "н": "n", "ҥ": "ŋ", "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "χ",
-    "ц": "t͡s", "ч": "t͡ɕ", "ш": "ʂ", "щ": "ɕ", "ҫ": "ɕ", "һ": "h",
-};
-// The intervocalic / post-sonorant VOICED allophone of each of the eight native voiceless obstruents (the Chuvash
-// voicing rule). ⟨ф⟩ and ⟨ц⟩ are Russian-loan-only letters — excluded: loans don't undergo Chuvash allophonic voicing.
-const VOICE: Record<string, string> = {
-    "p": "b", "t": "d", "k": "ɡ", "t͡ɕ": "d͡ʑ", "s": "z", "ɕ": "ʑ", "ʂ": "ʐ", "χ": "ɣ",
-};
-// Vowels. ⟨ӑ⟩→[ə] and ⟨ӗ⟩→[ɘ] are the two REDUCED vowels (cannot bear stress); ⟨е⟩ is [je] initial/post-vowel below.
-const VOWEL: Record<string, string> = {
-    "а": "a", "е": "e", "и": "i", "о": "o", "у": "u", "ы": "ɯ", "э": "e", "ӑ": "ə", "ӗ": "ɘ", "ӳ": "y",
-};
-const IOTATED: Record<string, string> = { "я": "ja", "ю": "ju", "ё": "jo" };
+interface ChuvashDef {
+    onset: Record<string, string>;
+    voiced: Record<string, string>;
+    vowels: Record<string, string>;
+    iotated: Record<string, string>;
+}
+const DEF = loadManifest<ChuvashDef>(import.meta.url, "chuvash.jsonc");
+// Letter → IPA tables (chuvash.jsonc). The voicing/stress/⟨е⟩/gemination rules are the scan below.
+const ONSET = DEF.onset;
+const VOICE = DEF.voiced;
+const VOWEL = DEF.vowels;
+const IOTATED = DEF.iotated;
 const CYR_VOWEL = new Set([..."аеиоуыэёюяӑӗӳ"]);
 // Voicing triggers (before a vowel). The nasals ⟨н м ҥ⟩ and the glide ⟨й⟩ trigger voicing UNCONDITIONALLY, like an
 // intervocalic vowel (манпа→manˈba, мӗншӗн→ˈmŏnʐɘn before a REDUCED vowel, айта→ajˈda). The liquids ⟨р л⟩ trigger it

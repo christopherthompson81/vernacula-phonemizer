@@ -1,0 +1,30 @@
+// Native canonical-IPA data manifest for K'iche' (quc) — Qatzijob'al, the largest MAYAN language (~1.1M,
+// Guatemala), Latin script (ALMG orthography). ALMG is near-1:1 phonemic, so the engine (kiche.ts) is a
+// longest-match grapheme scan. The Mayan hallmark is the EJECTIVE/glottalized series ⟨b'⟩→[ɓ] (implosive),
+// ⟨t'⟩→[tʼ], ⟨k'⟩→[kʼ], ⟨q'⟩→[qʼ], ⟨tz'⟩→[t͡sʼ], ⟨ch'⟩→[t͡ʃʼ]; the plain voiceless stops are ASPIRATED
+// ⟨p t k q tz ch⟩→[pʰ tʰ kʰ qʰ t͡sʰ t͡ʃʰ]. Uvular ⟨q q'⟩; ⟨x⟩→[ʃ], ⟨j⟩→[x], ⟨w⟩→[ʋ], ⟨r⟩→[ɻ], ⟨'⟩→[ʔ]; the
+// sixth vowel ⟨ä⟩→[ə]. Vowel LENGTH is phonemic but UNWRITTEN (folded); FINAL stress (emitted in kiche.ts).
+// ⚠ SINGLE-SOURCE: English Wiktionary, 127 pairs, and no second referee.
+{
+    "language": "quc",
+    "name": "K'iche' (Qatzijob'al)",
+    "script": ["Latin"],
+
+    // Multi-char units (longest-match first): the glottalized series (C + ʼ), then the plain aspirated
+    // affricates. The apostrophe glyphs (' ’ `) are normalised to ʼ before matching (kiche.ts).
+    "units": {
+        "chʼ": "t͡ʃʼ", "tzʼ": "t͡sʼ", "bʼ": "ɓ", "tʼ": "tʼ", "kʼ": "kʼ", "qʼ": "qʼ", "pʼ": "pʼ",
+        "ch": "t͡ʃʰ", "tz": "t͡sʰ",
+    },
+
+    // Single letters. Plain voiceless stops are ASPIRATED; ⟨b⟩ is the implosive [ɓ]; ⟨r⟩→[ɻ], ⟨w⟩→[ʋ],
+    // ⟨j⟩→[x], ⟨x⟩→[ʃ]. The accent/diaeresis vowels fold to the base vowel; the Spanish-loan consonants
+    // are kept, not silently dropped (⟨h⟩ is silent per Spanish).
+    "letters": {
+        "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ä": "ə",
+        "ü": "u", "ö": "o", "ë": "e", "ï": "i", "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+        "p": "pʰ", "t": "tʰ", "k": "kʰ", "q": "qʰ", "b": "ɓ", "s": "s", "l": "l", "m": "m", "n": "n",
+        "r": "ɻ", "w": "ʋ", "x": "ʃ", "j": "x", "y": "j", "ʼ": "ʔ",
+        "d": "d", "g": "ɡ", "f": "f", "v": "b", "z": "s", "c": "k",
+    },
+}

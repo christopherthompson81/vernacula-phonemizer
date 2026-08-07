@@ -1,0 +1,36 @@
+// Native canonical-IPA data manifest for Nogai (nog) — ногай тили, Kipchak Turkic (Kipchak-Nogai /
+// South-Kipchak, close to Kazakh and Karakalpak), CYRILLIC, ~90k speakers (North Caucasus + Turkey). The
+// engine (nogai.ts) is a near-deterministic digraph-aware Cyrillic grapheme scan with word-final (oxytone)
+// stress — the Turkic default.
+// ⚠ NOGAI WRITES THE UVULARS AS DIGRAPHS — ⟨къ⟩→[q], ⟨гъ⟩→[ʁ] — and the velar nasal too (⟨нъ⟩→[ŋ]), so
+// unlike Kazakh and Tatar, which INFER ⟨к⟩→[q] from vowel harmony, here ⟨к⟩ is always [k] and ⟨г⟩ always
+// [ɡ]. No harmony inference is needed anywhere in the engine.
+// The position rules — ⟨в⟩→[w] in a post-vocalic coda but [v] as an onset, word-initial / post-vocalic
+// ⟨е⟩→[je], stray ⟨ъ⟩→[ʔ] — are code, in nogai.ts; the letter tables live here.
+// ⚠ THINLY ATTESTED: Nogai has essentially no orthographic-IPA data to check against. The g2p is authored
+// from documented Kipchak-Nogai phonology and corroborated only coarsely, at the inventory level.
+{
+    "language": "nog",
+    "name": "Nogai (ногай тили)",
+    "script": ["Cyrillic"],
+
+    // Plain (context-free) single-letter consonants. ⟨в⟩ (coda-w) and the digraphs are handled in the scan.
+    "consonants": {
+        "б": "b", "г": "ɡ", "д": "d", "ж": "ʒ", "з": "z", "й": "j", "к": "k", "л": "l", "м": "m", "н": "n",
+        "п": "p", "р": "r", "с": "s", "т": "t", "ф": "f", "х": "x", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃː",
+    },
+
+    // Simple vowels → IPA. ⟨ы⟩ is the back unrounded [ɯ] (Kipchak); ⟨э⟩ merges with ⟨е⟩ → [e].
+    "vowels": { "а": "a", "о": "o", "у": "u", "ы": "ɯ", "и": "i", "е": "e", "э": "e" },
+
+    // Iotated vowels → glide + vowel.
+    "iotated": { "я": "ja", "ю": "ju", "ё": "jo" },
+
+    // Two-character digraphs (checked before the single-letter maps). Front vowels use the soft sign ь; the
+    // back consonants + velar nasal use the hard sign ъ; ⟨дж⟩ is two full letters.
+    // ⟨дж⟩ is NOT one of the 39 standard Nogai letters (Nogai keeps [j], written ⟨й⟩, where Kazakh/Karakalpak
+    // have ж) — it is a defensive mapping for the occasional loan д+ж adjacency, not a distinctive grapheme.
+    "digraphs": {
+        "аь": "æ", "оь": "ø", "уь": "y", "гъ": "ʁ", "къ": "q", "нъ": "ŋ", "дж": "d͡ʒ",
+    },
+}

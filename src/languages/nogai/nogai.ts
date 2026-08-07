@@ -1,42 +1,26 @@
 /**
- * Nogai (nog) phonemizer — ногай тили, Kipchak Turkic (Kipchak-Nogai / South-Kipchak, close to Kazakh and
- * Karakalpak), CYRILLIC script, ~90k speakers (North Caucasus + Turkey). Canonical IPA.
- *
- * A near-deterministic Cyrillic grapheme scan. ⚠ NOGAI WRITES THE UVULARS AS DIGRAPHS — ⟨къ⟩→[q], ⟨гъ⟩→[ʁ] —
- * and the velar nasal too (⟨нъ⟩→[ŋ]), so unlike Kazakh and Tatar, which INFER ⟨к⟩→[q] from vowel harmony,
- * here ⟨к⟩ is always [k] and ⟨г⟩ always [ɡ]. No harmony inference is needed anywhere in this file.
- *
- *   · DIGRAPHS (longest-match, two Cyrillic characters): the FRONT vowels ⟨аь⟩→[æ], ⟨оь⟩→[ø], ⟨уь⟩→[y]
- *     (soft-sign ь), the back consonants ⟨гъ⟩→[ʁ], ⟨къ⟩→[q], ⟨нъ⟩→[ŋ] (hard-sign ъ), plus ⟨дж⟩→[d͡ʒ].
- *   · Simple vowels ⟨а е и о у ы э⟩→[a e i o u ɯ e]; ⟨ы⟩ is the back unrounded [ɯ]. Iotated ⟨я ю ё⟩→[ja ju
- *     jo], and word-initial / post-vocalic ⟨е⟩→[je]. ⟨ж⟩→[ʒ], ⟨ш⟩→[ʃ], ⟨ч⟩→[t͡ʃ], ⟨х⟩→[x], ⟨й⟩→[j].
- *   · ⟨в⟩ → [w] post-vocalically in a coda (сув→suw, тав→taw — the native Turkic /w/) but [v] as an onset,
- *     which is where the loans put it.
- *   · Word-final (oxytone) stress — the Turkic default.
- *
- * ⚠ THINLY ATTESTED: Nogai has essentially no orthographic-IPA data to check against. The g2p is authored
- * from documented Kipchak-Nogai phonology and corroborated only coarsely, at the inventory level.
+ * Nogai (nog) phonemizer — a near-deterministic digraph-aware Cyrillic grapheme scan + word-final
+ * (oxytone) stress, canonical IPA. This file owns the position rules: coda ⟨в⟩→[w] vs onset [v], ⟨е⟩
+ * iotation, stray ⟨ъ⟩→[ʔ], and the maximal-onset stress placement. The letter/digraph tables and the
+ * encyclopedic record (written uvulars, attestation caveat) live in nogai.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-// Plain (context-free) single-letter consonants. ⟨в⟩ (coda-w) and the digraphs are handled in the scan.
-const CONS: Record<string, string> = {
-    б: "b", г: "ɡ", д: "d", ж: "ʒ", з: "z", й: "j", к: "k", л: "l", м: "m", н: "n",
-    п: "p", р: "r", с: "s", т: "t", ф: "f", х: "x", ц: "t͡s", ч: "t͡ʃ", ш: "ʃ", щ: "ʃː",
-};
-// Simple vowels → IPA. ⟨ы⟩ is the back unrounded [ɯ] (Kipchak); ⟨э⟩ merges with ⟨е⟩ → [e].
-const VOWEL: Record<string, string> = { а: "a", о: "o", у: "u", ы: "ɯ", и: "i", е: "e", э: "e" };
-// Iotated vowels → glide + vowel.
-const IOTATED: Record<string, string> = { я: "ja", ю: "ju", ё: "jo" };
-// Two-character digraphs (checked before the single-letter maps). Front vowels use the soft sign ь; the back
-// consonants + velar nasal use the hard sign ъ; ⟨дж⟩ is two full letters.
-// ⟨дж⟩ is NOT one of the 39 standard Nogai letters (Nogai keeps [j], written ⟨й⟩, where Kazakh/Karakalpak have ж) —
-// it is a defensive mapping for the occasional loan д+ж adjacency, not a distinctive Nogai grapheme.
-const DIGRAPH: Record<string, string> = {
-    аь: "æ", оь: "ø", уь: "y", гъ: "ʁ", къ: "q", нъ: "ŋ", дж: "d͡ʒ",
-};
+interface NogaiDef {
+    consonants: Record<string, string>;
+    vowels: Record<string, string>;
+    iotated: Record<string, string>;
+    digraphs: Record<string, string>;
+}
+const DEF = loadManifest<NogaiDef>(import.meta.url, "nogai.jsonc");
+// Letter → IPA tables (nogai.jsonc). The position-dependent ⟨в е ъ⟩ are handled in the scan below.
+const CONS = DEF.consonants;
+const VOWEL = DEF.vowels;
+const IOTATED = DEF.iotated;
+const DIGRAPH = DEF.digraphs;
 const CYR_VOWEL = new Set(["а", "о", "у", "ы", "и", "е", "э", "я", "ю", "ё", "аь", "оь", "уь"]);
 const IPA_VOWEL = new Set(["a", "æ", "o", "ø", "u", "y", "ɯ", "i", "e"]);
 const STRESS_NASAL = new Set(["m", "n", "ŋ"]);

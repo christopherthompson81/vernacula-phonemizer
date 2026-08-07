@@ -1,32 +1,43 @@
 /**
- * Tibetan (bo) phonemizer — Standard / Lhasa Tibetan (Tournadre's "Standard Spoken Tibetan"), Tibetan script
- * (U+0F00–0FFF), canonical IPA. Bodish/Tibetic (Sino-Tibetan). One of the DEEPEST
- * orthographies in the world: Classical spelling encodes Old Tibetan; the Lhasa reading diverges massively, so this
- * is a RULE ENGINE, not a scan — parse the syllable STACK (prefix · superscript · root · subscript · vowel · suffix ·
- * post-suffix) from the Unicode full (U+0F40–0F6C) vs subjoined (U+0F90–0FBC) distinction, then apply the reading
- * rules: tone from tonogenesis (voiceless root→HIGH; voiced-obstruent→LOW+aspiration-by-head; sonorant→HIGH iff a
- * prefix/superscript raises it), onset-cluster realization (ya-btags→palatal, ra-btags→retroflex affricate), and
- * suffix-driven vowel umlaut / length / nasalization / glottalization. Tone emitted as ˥ (H) / ˩ (L).
- *
- * Referees: hand-curated JIPA "Central Tibetan (Lhasa)" illustration (independent, CC-BY) + TIBMD@MUC (independent)
- * + kaikki/Module:bo-pron (reference-parity, disclosed).
+ * Tibetan (bo) phonemizer — a Lhasa syllable-stack RULE ENGINE, not a scan, canonical IPA. This file owns
+ * the stack grammar: parse each syllable into prefix · superscript · root · subscript · vowel · suffix ·
+ * post-suffix from the Unicode full vs subjoined distinction, then read it — tone from tonogenesis,
+ * onset-cluster realization (ya-/ra-/la-btags), suffix-driven umlaut/length/nasalization/glottalization.
+ * The letter values, onset realizations, number words and the encyclopedic record live in tibetan.jsonc.
  */
+import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 
+interface TibetanNumbers {
+    zero: string;
+    units: string[];
+    ten: string;
+    decades: string[];
+    connectives: string[];
+    and: string;
+    magnitudes: [number, string][];
+}
+interface TibetanDef {
+    letters: Record<string, string>;
+    vowelSigns: Record<string, string>;
+    unaspirated: Record<string, string>;
+    aspirated: Record<string, string>;
+    fricatives: Record<string, string>;
+    sonorants: Record<string, string>;
+    numbers: TibetanNumbers;
+}
+const DEF = loadManifest<TibetanDef>(import.meta.url, "tibetan.jsonc");
+
+/** The manifest keys letter tables by the character; the parser scans codepoints. */
+function byCodepoint(table: Record<string, string>): Record<number, string> {
+    return Object.fromEntries(Object.entries(table).map(([ch, v]) => [ch.codePointAt(0)!, v]));
+}
 // Full consonants U+0F40–0F6C → Wylie token. Subjoined (U+0F90–0FBC) map to the same token at codepoint − 0x50.
-const FULL: Record<number, string> = {
-    0x0f40: "k", 0x0f41: "kh", 0x0f42: "g", 0x0f43: "g", 0x0f44: "ng", 0x0f45: "c", 0x0f46: "ch", 0x0f47: "j",
-    0x0f49: "ny", 0x0f4a: "T", 0x0f4b: "Th", 0x0f4c: "D", 0x0f4e: "N", 0x0f4f: "t", 0x0f50: "th", 0x0f51: "d",
-    0x0f53: "n", 0x0f54: "p", 0x0f55: "ph", 0x0f56: "b", 0x0f58: "m", 0x0f59: "ts", 0x0f5a: "tsh", 0x0f5b: "dz",
-    0x0f5d: "w", 0x0f5e: "zh", 0x0f5f: "z", 0x0f60: "'", 0x0f61: "y", 0x0f62: "r", 0x0f63: "l", 0x0f64: "sh",
-    0x0f66: "s", 0x0f67: "h", 0x0f68: "a",
-};
-// Vowel signs → base vowel (length folded; length comes from codas). Anusvara/candrabindu → nasal marker "M".
-const VSIGN: Record<number, string> = {
-    0x0f71: "a", 0x0f72: "i", 0x0f73: "i", 0x0f74: "u", 0x0f75: "u", 0x0f7a: "e", 0x0f7b: "e", 0x0f7c: "o",
-    0x0f7d: "o", 0x0f80: "i", 0x0f81: "i",
-};
+const FULL: Record<number, string> = byCodepoint(DEF.letters);
+// Vowel signs → base vowel (length folded; length comes from codas). Anusvara/candrabindu → nasal marker in the parser.
+const VSIGN: Record<number, string> = byCodepoint(DEF.vowelSigns);
 const VOICELESS = new Set(["k", "kh", "c", "ch", "t", "th", "p", "ph", "ts", "tsh", "sh", "s", "h", "T", "Th"]);
 const VOICED = new Set(["g", "j", "d", "b", "dz", "zh", "z", "D"]);
 const SONORANT = new Set(["ng", "ny", "n", "m", "w", "y", "r", "l", "N"]);
@@ -59,17 +70,11 @@ function findRootIdx(units: { full: string; subs: string[] }[]): number {
     return PREFIX.has(f(0)) && PREFIX_ROOT[f(0)]!.has(f(1)) ? 1 : 0;
 }
 
-// Base voiceless onset per root (unaspirated / aspirated pair), by place.
-const UNASP: Record<string, string> = {
-    k: "k", kh: "k", g: "k", c: "t͡ɕ", ch: "t͡ɕ", j: "t͡ɕ", t: "t", th: "t", d: "t", p: "p", ph: "p", b: "p",
-    ts: "t͡s", tsh: "t͡s", dz: "t͡s", T: "ʈ", Th: "ʈ", D: "ʈ",
-};
-const ASP: Record<string, string> = {
-    k: "kʰ", kh: "kʰ", g: "kʰ", c: "t͡ɕʰ", ch: "t͡ɕʰ", j: "t͡ɕʰ", t: "tʰ", th: "tʰ", d: "tʰ", p: "pʰ", ph: "pʰ",
-    b: "pʰ", ts: "t͡sʰ", tsh: "t͡sʰ", dz: "t͡sʰ", T: "ʈʰ", Th: "ʈʰ", D: "ʈʰ",
-};
-const FRIC: Record<string, string> = { sh: "ɕ", s: "s", zh: "ɕ", z: "s", h: "h" };
-const SON: Record<string, string> = { ng: "ŋ", ny: "ɲ", n: "n", m: "m", w: "w", y: "j", r: "ɻ", l: "l", N: "n" };
+// Onset realization tables (tibetan.jsonc): voiceless unaspirated/aspirated by place, fricatives, sonorants.
+const UNASP = DEF.unaspirated;
+const ASP = DEF.aspirated;
+const FRIC = DEF.fricatives;
+const SON = DEF.sonorants;
 
 interface Stack {
     prefix?: string;
@@ -228,44 +233,32 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
-// Tibetan digits (U+0F20–0F29) → Arabic.
-const TNUM: Record<string, string> = { "༠": "0", "༡": "1", "༢": "2", "༣": "3", "༤": "4", "༥": "5", "༦": "6", "༧": "7", "༨": "8", "༩": "9" };
+// Cardinal number data (tibetan.jsonc): units, decades and their connectives, the magnitude ladder, and དང.
+const NUM = DEF.numbers;
+const UNITS = NUM.units;
 
-// Cardinal number words (Tibetan spelling — the reader runs them through the engine). Tibetan tens+units use a
-// DECADE-specific connective (ཉེར/སོ/ཞེ/ང/རེ/དོན/གྱ/གོ), and magnitudes join the remainder with དང dang. Authored
-// from the standard cardinals; self-verified via the engine (no independent spoken-number referee exists).
-const UNITS = ["", "གཅིག", "གཉིས", "གསུམ", "བཞི", "ལྔ", "དྲུག", "བདུན", "བརྒྱད", "དགུ"];
-const DECADE = ["", "", "ཉི་ཤུ", "སུམ་ཅུ", "བཞི་བཅུ", "ལྔ་བཅུ", "དྲུག་ཅུ", "བདུན་ཅུ", "བརྒྱད་ཅུ", "དགུ་བཅུ"]; // 20…90
-const CONNECT = ["", "", "ཉེར", "སོ", "ཞེ", "ང", "རེ", "དོན", "གྱ", "གོ"]; // decade connective before a unit (21…)
-
-/** Compose an integer 0–99999 into Tibetan number words (tsheg-joined), or null to fall back to digits. */
+/** Compose an integer into Tibetan number words (tsheg-joined), or null to fall back to digits. */
 function numToTibetan(n: number): string | null {
-    if (n === 0) return "ཀླད་ཀོར"; // klad kor
+    if (n === 0) return NUM.zero; // klad kor
     if (n < 10) return UNITS[n]!;
-    if (n < 20) return n === 10 ? "བཅུ" : "བཅུ་" + UNITS[n - 10]!; // 11–19 = bcu + unit
+    if (n < 20) return n === 10 ? NUM.ten : NUM.ten + "་" + UNITS[n - 10]!; // 11–19 = bcu + unit
     if (n < 100) {
         const t = Math.floor(n / 10),
             u = n % 10;
-        return u === 0 ? DECADE[t]! : CONNECT[t]! + "་" + UNITS[u]!;
+        return u === 0 ? NUM.decades[t]! : NUM.connectives[t]! + "་" + UNITS[u]!;
     }
-    // Magnitudes, largest first. Tibetan names every decimal power up to 10⁹: བརྒྱ 10², སྟོང 10³, ཁྲི 10⁴,
-    // འབུམ 10⁵, ས་ཡ 10⁶, བྱེ་བ 10⁷, དུང་ཕྱུར 10⁸, ཐེར་འབུམ 10⁹ (Wikipedia "Tibetan numerals": gya, tong, thri,
-    // bum, sa ya, che wa, dung chur, ther pum). A multiplier of 1 is left unspoken (བརྒྱ = "a hundred") and the
-    // remainder is joined with དང dang.
-    for (const [v, w] of MAGNITUDE) {
+    // Magnitudes, largest first (the named 10²…10⁹ ladder). A multiplier of 1 is left unspoken (བརྒྱ = "a
+    // hundred") and the remainder is joined with དང dang.
+    for (const [v, w] of NUM.magnitudes) {
         if (n >= v) {
             const q = Math.floor(n / v);
             const head = (q === 1 ? "" : numToTibetan(q) + "་") + w;
             const r = n % v;
-            return r === 0 ? head : head + "་དང་" + numToTibetan(r);
+            return r === 0 ? head : head + "་" + NUM.and + "་" + numToTibetan(r);
         }
     }
     return null;
 }
-const MAGNITUDE: [number, string][] = [
-    [1e9, "ཐེར་འབུམ"], [1e8, "དུང་ཕྱུར"], [1e7, "བྱེ་བ"], [1e6, "ས་ཡ"],
-    [1e5, "འབུམ"], [1e4, "ཁྲི"], [1e3, "སྟོང"], [100, "བརྒྱ"],
-];
 
 /** A numeral run → Tibetan number words → IPA. Beyond the named 10⁹ ladder (or a non-safe integer) the digits are
  *  read one by one as number words rather than leaked as digits. */
@@ -275,7 +268,7 @@ function number(digits: string): string {
     if (words !== null) return phonemizeWord(words);
     return [...digits]
         .filter((c) => c >= "0" && c <= "9")
-        .map((d) => phonemizeWord(d === "0" ? "ཀླད་ཀོར" : UNITS[Number(d)]!))
+        .map((d) => phonemizeWord(d === "0" ? NUM.zero : UNITS[Number(d)]!))
         .join(" ");
 }
 
@@ -285,8 +278,11 @@ const TOKEN = /([༠-༩\d]+)|([ༀ-࿿]+)|([.!?])|([།༎ ,;:])/gu;
 
 class TibetanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(number([...m[1]].map((d) => TNUM[d] ?? d).join(""))); // Tibetan numerals → number words
+        // Tibetan digits (U+0F20–0F29) fold to ASCII up front (core/unicode.ts), so a Tibetan-numeral run
+        // composes exactly like a Western one. The token class still admits ༠-༩ so an unfolded digit could
+        // never fall into the WORD alternative and vanish inside parseSyllable.
+        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
+            if (m[1]) sink.emit(number(m[1]));
             else if (m[2]) sink.emit(phonemizeWord(m[2]));
             else if (m[3]) sink.pause(m[3]!);
             else if (m[4]) sink.pause(",");

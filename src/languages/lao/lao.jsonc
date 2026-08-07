@@ -1,0 +1,46 @@
+// Native canonical-IPA data manifest for Lao (lo) — ພາສາລາວ, Tai (Tai-Kadai), ~30M incl. Isan speakers,
+// the LAO ABUGIDA (U+0E80–0EFF). Lao is a sibling of Thai but with a MORE PHONEMIC orthography (the
+// Lao-PDR reforms stripped most Indic etymological spelling), so a leaner rule g2p suffices — no
+// Sanskrit-reading dictionary. Like Thai: leading vowels (ເ ແ ໂ ໃ ໄ) are written BEFORE the consonant and
+// reordered; the vowel is a (often discontinuous) pattern of signs around the onset; tone is computed from
+// consonant CLASS × live/dead × length × tone mark (Vientiane values, derived empirically from the kaikki
+// Chao contours). Tones are Chao contour letters (stripped by the eval backbone).
+// The vowel-pattern resolver, the reorder pass, the ຫ-led clusters and the tone table are code, in lao.ts —
+// the patterns are positional logic, not lookups. The onset/coda letter values and the number words live here.
+{
+    "language": "lo",
+    "name": "Lao (ພາສາລາວ)",
+    "script": ["Lao"],
+
+    // Onset consonant → [IPA, tonal class]. ຫ/ຮ = h; ອ = glottal ʔ; ວ onset = w. The ຫ-led sonorants
+    // (ໜ ໝ, ຫຼ ຫງ …) become HIGH class — handled in the scanner (lao.ts).
+    "onsets": {
+        "ກ": ["k", "mid"], "ຂ": ["kʰ", "high"], "ຄ": ["kʰ", "low"], "ງ": ["ŋ", "low"],
+        "ຈ": ["t͡ɕ", "mid"], "ສ": ["s", "high"], "ຊ": ["s", "low"], "ຍ": ["ɲ", "low"],
+        "ດ": ["d", "mid"], "ຕ": ["t", "mid"], "ຖ": ["tʰ", "high"], "ທ": ["tʰ", "low"],
+        "ນ": ["n", "low"], "ບ": ["b", "mid"], "ປ": ["p", "mid"], "ຜ": ["pʰ", "high"],
+        "ຝ": ["f", "high"], "ພ": ["pʰ", "low"], "ຟ": ["f", "low"], "ມ": ["m", "low"],
+        "ຢ": ["j", "mid"], "ຣ": ["l", "low"], "ລ": ["l", "low"], "ວ": ["ʋ", "low"],
+        "ຫ": ["h", "high"], "ອ": ["ʔ", "mid"], "ຮ": ["h", "low"],
+        "ໜ": ["n", "high"], "ໝ": ["m", "high"], // precomposed ຫນ/ຫມ
+    },
+
+    // Final (coda) consonant → IPA. Lao has the 8-way final set (stops unreleased; sonorants + glides).
+    "codas": {
+        "ກ": "k̚", "ດ": "t̚", "ບ": "p̚", "ງ": "ŋ", "ນ": "n", "ມ": "m", "ຍ": "j", "ວ": "w",
+    },
+
+    // Cardinal number words (LAO-SCRIPT spellings — the compositor reads them back through the ordinary
+    // g2p, so no IPA is authored here). Lao is Tai, structurally the Thai system (see thai.ts) with the
+    // cognate irregulars: 20 is ຊາວ — and it REPLACES the whole "twenty" (ຊາວສອງ = 22, no ສິບ), unlike Thai
+    // ຢີ່ສິບ; a FINAL 1 in any compound ≥11 is ເອັດ (ສິບເອັດ, ຊາວເອັດ); 10⁴ ໝື່ນ and 10⁵ ແສນ are their own
+    // magnitude words. Source: Wiktionary "Category:Lao numerals" (the full 0–99 + ຮ້ອຍ / ພັນ / ໝື່ນ / ແສນ /
+    // ລ້ານ inventory, incl. ຊາວ, ຊາວເອັດ, ສິບເອັດ).
+    "numbers": {
+        "units": ["ສູນ", "ໜຶ່ງ", "ສອງ", "ສາມ", "ສີ່", "ຫ້າ", "ຫົກ", "ເຈັດ", "ແປດ", "ເກົ້າ"],
+        "ten": "ສິບ",
+        "twenty": "ຊາວ",
+        "finalOne": "ເອັດ",
+        "magnitudes": [[1000000, "ລ້ານ"], [100000, "ແສນ"], [10000, "ໝື່ນ"], [1000, "ພັນ"], [100, "ຮ້ອຍ"]],
+    },
+}

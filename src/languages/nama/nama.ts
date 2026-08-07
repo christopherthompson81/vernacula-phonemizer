@@ -1,26 +1,20 @@
 /**
- * Nama / Khoekhoe (naq) phonemizer — Khoekhoegowab, a KHOE-KWADI language of Namibia/South Africa/Botswana
- * (~250k), canonical IPA. The Khoekhoegowab Latin orthography writes the four click TYPES with the Unicode
- * click letters and their ACCOMPANIMENT (efflux) with a following letter; a greedy scan handles them.
- *
- *   ⚠ THE CLICKS — four places × five accompaniments, and the efflux is written AFTER the click letter:
- *     place:  ⟨ǀ⟩ dental · ⟨ǁ⟩ lateral · ⟨ǂ⟩ palatal · ⟨ǃ⟩ alveolar
- *     efflux: BARE ⟨ǀ⟩→[ᵑ̊ǀˀ] (glottalised nasal) · ⟨ǀg⟩→[ᵏǀ] (tenuis) · ⟨ǀkh⟩→[ᵏǀʰ] (aspirated) ·
- *             ⟨ǀh⟩→[ᵑ̊ǀʰ] (aspirated nasal) · ⟨ǀn⟩→[ᵑǀ] (voiced nasal) — uniform across all four places.
- *   · Non-click: ⟨kh⟩→[kʰ], ⟨g⟩ (not after a click)→[x], ⟨w⟩→[w]; the WORD-FINAL gender suffix ⟨-b⟩ devoices
- *     to [p] (ǀgomab→[ǀómàp]), ⟨-s⟩ stays. Vowels a e i o u, with the CIRCUMFLEX = NASALIZED (⟨â⟩→[ã],
- *     phonemic in Nama) and a MACRON or DOUBLED vowel = LONG (⟨ā⟩/⟨aa⟩→[aː]).
- *   · Nama's lexical TONE (H/L) is NOT written in the orthography and is not emitted.
- *
- * ⚠ THINLY VERIFIED, and largely against the SPEC rather than against usage: the available IPA attestation is
- * dominated by the click-letter definitions this file implements, with only a few real words as an
- * independent check.
+ * Nama / Khoekhoe (naq) phonemizer — a greedy scan over the Khoekhoegowab click orthography, canonical
+ * IPA. This file owns the click composition (place × efflux is a rule, not a 20-row table — clickIPA
+ * below), the ⟨kh⟩ digraph, doubled-vowel length, and the word-final gender-⟨-b⟩ devoicing. The non-click
+ * letter table and the encyclopedic record (the click system, the spec-verification caveat) live in
+ * nama.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+
+interface NamaDef {
+    letters: Record<string, string>;
+}
 
 const CLICK = new Set(["ǀ", "ǁ", "ǂ", "ǃ"]); // dental, lateral, palatal, alveolar
 /** A click letter + its accompaniment (the following g/kh/h/n, longest-first) → the IPA click cluster. */
@@ -33,18 +27,8 @@ function clickIPA(click: string, accomp: string): string {
         default: return "ᵑ̊" + click + "ˀ"; // BARE click → the glottalised nasal click
     }
 }
-// Non-click letters. ⟨kh⟩→[kʰ] handled as a digraph; ⟨g⟩ only occurs as a click accompaniment.
-const LETTER: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
-    "ā": "aː", "ē": "eː", "ī": "iː", "ō": "oː", "ū": "uː", // macron = long vowel (ǃkhās→kǃʰaːs)
-    "â": "ã", "ê": "ẽ", "î": "ĩ", "ô": "õ", "û": "ũ", // circumflex = NASALIZED vowel (phonemic in Nama: ǂgâ, ǀî)
-    "b": "b", "d": "d", "g": "x", "h": "h", "k": "k", "m": "m", "n": "n", "p": "p", "r": "r", "s": "s",
-    "t": "t", "w": "w", "x": "x", // ⟨g⟩ NOT after a click → the velar fricative [x] (Khoekhoegowab→…xo…); ⟨w⟩→[w]
-    // ⟨l j⟩ occur only in NATURALISED LOANS, but they do occur: the Khoekhoegowab section of Namibia's New Era
-    // writes "N$47 miljunsa" / "N$1 biljunmaris" (10⁶/10⁹ — see numbers.ts). Without these two entries the scan
-    // silently deleted them (miljun→*miun), so they are mapped to their ordinary values.
-    "l": "l", "j": "j",
-};
+// Non-click letters (nama.jsonc). ⟨kh⟩→[kʰ] handled as a digraph; ⟨g⟩ NOT after a click → [x].
+const LETTER = loadManifest<NamaDef>(import.meta.url, "nama.jsonc").letters;
 const PLAIN_VOWEL = new Set([..."aeiou"]);
 
 /** One Nama word → canonical IPA. */

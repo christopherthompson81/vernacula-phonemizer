@@ -1,37 +1,28 @@
 /**
- * Papiamentu / Papiamento (pap) phonemizer — canonical IPA. An IBERIAN- (Portuguese/Spanish-) lexified
- * CREOLE of the ABC islands (Aruba, Bonaire, Curaçao), ~340k speakers. Targets the CURAÇAO/BONAIRE
- * phonemic orthography; a greedy longest-match scan with two creole hallmarks:
- *
- *   ⚠ CODA-⟨n⟩ RETENTION (Maurer; Kouwenberg & Murray) — Papiamentu KEEPS a coda ⟨n⟩ (it does NOT delete it):
- *     WORD-FINAL ⟨n⟩ → the velar nasal [ŋ], also nasalizing the vowel (bon→[bõŋ], federashon→[fedeɾaˈʃõŋ]); a ⟨n⟩
- *     before a consonant or a vowel stays [n] (kontra→[ˈkontɾa], Papiamentu→[papiaˈmentu]). (The Wiktionary referee's
- *     Portuguese-style "nasalize + drop the ⟨n⟩" — ʃõ — is a transcription artifact; the dropped ⟨n⟩ is folded.)
- *   · The digraphs ⟨ch⟩→[t͡ʃ], ⟨sh⟩→[ʃ], ⟨dj⟩→[d͡ʒ], ⟨zj⟩→[ʒ]; the OPEN-vowel letters ⟨è⟩→[ɛ], ⟨ò⟩→[ɔ], ⟨ù⟩→[ø]
- *     and the ⟨ou⟩ diphthong → [ɔu]; ⟨ñ⟩→[ɲ], ⟨y⟩→[j], ⟨r⟩→[ɾ]. Acute-accented vowels ⟨á é í ó ú⟩ mark irregular
- *     STRESS (abolí→aboˈli); default penult (a diphthong counts as one nucleus), ULTIMATE for a consonant-final word.
- *     Papiamentu's lexical PITCH-ACCENT (H/L on each syllable) is not written and not emitted (it folds).
- *
- * ⚠ THINLY ATTESTED — roughly twenty IPA pairs from a single source family. Treat the less common
- * graphemes here as less settled than the two hallmarks above.
+ * Papiamentu (pap) phonemizer — a greedy longest-match scan over the Curaçao/Bonaire phonemic
+ * orthography, canonical IPA. This file owns the rules: word-final coda-⟨n⟩ → [ŋ] with vowel
+ * nasalization, degemination, the ⟨ou⟩ diphthong, and stress placement (acute pin / penult default /
+ * ultimate for consonant-final). The grapheme tables and the encyclopedic record (the coda-⟨n⟩ hallmark,
+ * attestation caveat) live in papiamento.jsonc.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
-const DIGRAPHS: [string, string][] = [["ch", "t͡ʃ"], ["sh", "ʃ"], ["dj", "d͡ʒ"], ["zj", "ʒ"]];
-// Single letters. Open-vowel letters ⟨è ò ù⟩; acute ⟨á é í ó ú⟩ = stressed base vowel (stress found separately).
-const LETTER: Record<string, string> = {
-    "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "è": "ɛ", "ò": "ɔ", "ù": "ø",
-    "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "à": "a", "ì": "i",
-    "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j", "k": "k", "l": "l",
-    "m": "m", "n": "n", "ñ": "ɲ", "p": "p", "q": "k", "r": "ɾ", "s": "s", "t": "t", "v": "v",
-    "w": "w", "x": "ks", "y": "j", "z": "z",
-};
+interface PapiamentoDef {
+    digraphs: [string, string][];
+    letters: Record<string, string>;
+    nasalized: Record<string, string>;
+}
+const DEF = loadManifest<PapiamentoDef>(import.meta.url, "papiamento.jsonc");
+// Grapheme tables (papiamento.jsonc). The coda-⟨n⟩, degemination and stress rules are the scan below.
+const DIGRAPHS = DEF.digraphs;
+const LETTER = DEF.letters;
+const NASALIZE = DEF.nasalized;
 const VOWEL_G = new Set([..."aeiouèòùáéíóúàìeo"]); // Latin vowels (for the coda-⟨n⟩ nasalization context)
 const IPA_VOWEL = new Set([..."aeiouɛɔø"]);
-const NASALIZE: Record<string, string> = { a: "ã", e: "ẽ", i: "ĩ", o: "õ", u: "ũ", ɛ: "ɛ̃", ɔ: "ɔ̃", ø: "ø̃" };
 const ACUTE: Record<string, string> = { "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u" };
 
 /** One Papiamentu word → canonical IPA. */
