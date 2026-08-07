@@ -30,6 +30,7 @@
  * ふん — a blanket rewrite corrupts every one of them.
  */
 import { MANIFEST } from "./manifest.ts";
+import { applyReadings } from "./kanji.ts";
 
 /** Hiragana → katakana. Counter and digit readings are injected as KATAKANA throughout this engine so
  *  segmentText's hiragana-specific は→わ particle heuristic cannot corrupt an internal は — はち would
@@ -69,6 +70,30 @@ const WORD_ACRONYM: Readonly<Record<string, string>> = {
 /** Full-width Latin Ａ-Ｚ / ａ-ｚ → ASCII, so one representation reaches the rules below. */
 const FULLWIDTH_LATIN = /[Ａ-Ｚａ-ｚ]/gu;
 
+const RUBY = "[\\p{Script=Hiragana}\\p{Script=Katakana}ー]+";
+
+/**
+ * RUBY (furigana) arrives in two kinds, and they get OPPOSITE treatment.
+ *
+ * ⚠ TRUE RUBY POSITIONING IS NOT PLAIN TEXT — it is markup, so what reaches a phonemizer is one of these
+ * flattenings. `DECLARED` covers the forms that SAY they are ruby: Unicode interlinear annotation
+ * (U+FFF9 base U+FFFA ruby U+FFFB, defined for exactly this and discouraged for interchange, so rare) and the
+ * aozora convention `｜base《ruby》`. There the author has stated the reading, so the RUBY WINS and the base is
+ * dropped — that is the whole point of writing it.
+ *
+ * `PARENTHESISED` covers `base（ruby）` / `base(ruby)`, which is a CONVENTION and not a declaration: the same
+ * shape is an ordinary parenthetical. Those are handled by equality against the computed reading — see step 0b.
+ */
+const DECLARED_RUBY = new RegExp(
+    `\\uFFF9(\\p{Script=Han}+)\\uFFFA(${RUBY})\\uFFFB|｜(\\p{Script=Han}+)《(${RUBY})》`,
+    "gu",
+);
+const PARENTHESISED_RUBY = new RegExp(
+    `(\\p{Script=Han}+)(?:（(${RUBY})）|\\((${RUBY})\\))`,
+    "gu",
+);
+
+
 /**
  * Unit abbreviation → its katakana word. These live HERE rather than in the shared symbol tier because
  * that tier matches a unit only when a NUMBER is directly adjacent to it, and two rules below break that
@@ -102,6 +127,30 @@ export function normalizeJapanese(input: string): string {
     let s = input
         .replace(/[０-９]/gu, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0))
         .replace(FULLWIDTH_LATIN, (d) => String.fromCodePoint(d.codePointAt(0)! - 0xfee0));
+
+    // 0a) DECLARED RUBY — an annotation that says it is one. The author has stated the reading, so it WINS
+    //     and the base is dropped: `｜日本《にっぽん》` reads にっぽん, overriding the default にほん. That is
+    //     the entire reason for writing it, and it is the one case where the annotation is authoritative.
+    s = s.replace(DECLARED_RUBY, (_m, b1?: string, r1?: string, _b2?: string, r2?: string) =>
+        (r1 ?? r2 ?? b1) as string);
+
+    // 0b) PARENTHESISED RUBY — a CONVENTION, not a declaration, so it needs a guard. Unclaimed, the
+    //     annotation is phonemized as ordinary text AFTER the kanji and the reading is emitted TWICE:
+    //     `漢字（かんじ）` reads *känd͡ʑi känd͡ʑi*, where a reader says it once.
+    //     ⚠ THE GUARD IS EQUALITY WITH THE COMPUTED READING. A parenthesised kana run is NOT always furigana:
+    //       日本（にほんじん）   a genuine gloss, not a reading of 日本
+    //       日本（にっぽん）     an ALTERNATE reading — written precisely because it differs from the default,
+    //                            so suppressing it would delete the author's point
+    //       会議（ミーティング） a katakana gloss of a loanword
+    //     None equals the computed reading, so all three survive. Only an annotation saying exactly what the
+    //     engine would already say is dropped, which is lossless by construction.
+    //     ⚠ AND THAT IS WHY THIS CANNOT USE 0a's RULE: here the ruby is not authoritative, so a mismatch means
+    //     "keep both", not "the author is overriding".
+    s = s.replace(PARENTHESISED_RUBY, (whole, base: string, r1?: string, r2?: string) => {
+        const ruby = r1 ?? r2 ?? "";
+        return toHiragana(ruby) === applyReadings(base) ? base : whole;
+    });
+
 
     // 1) COMMA-GROUPED THOUSANDS (×56, the largest numeric defect). The comma is in this engine's clause
     //    punctuation, so "3,850" became a PHRASE BREAK plus a second number: さん , はっぴゃくごじゅう.
