@@ -99,8 +99,8 @@ function phonemizeMorpheme(word: string): string {
     return out;
 }
 
-// Reduced IPA for the UNSTRESSED (inseparable) prefixes — phonemised standalone they'd wrongly stress their vowel
-// (ver→fɛr), but as a prefix the vowel reduces (ver·staan → fər·stɑːn). Separable prefixes (aan/af…) carry stress and
+// Reduced IPA for the UNSTRESSED (inseparable) prefixes. ⚠ Phonemised standalone they wrongly stress their vowel
+// (ver→fɛr); as a prefix the vowel reduces (ver·staan → fər·stɑːn). Separable prefixes (aan/af…) carry stress and
 // take the normal morpheme path.
 const PREFIX_IPA: Record<string, string> = { be: "bə", ge: "χə", ver: "fər", ont: "ɔnt", her: "ɦər", er: "ər" };
 
@@ -117,11 +117,10 @@ export function phonemizeWord(word: string): string {
         .join("");
 }
 
-// Afrikaans in this corpus (FLEURS af_za, an English translation) uses the ENGLISH separators:
-// a PERIOD is the decimal point and a COMMA groups thousands. The old class was a bare `(\d+)`, so BOTH
-// separators fell through to clausePunctuation: "12.8" read *twaalf . agt* and "17,500" *sewentien , vyf
-// honderd*. Clocks and the version-dot are claimed by normalize.ts first; a period reaching here is a
-// decimal (the TOKEN's `\d+\.\d+`) and a comma a thousands grouping (`\d{1,3}(?:,\d{3})+`).
+// ⚠ AFRIKAANS USES THE ENGLISH SEPARATORS — a PERIOD decimal point, a COMMA thousands grouping. With a bare
+// `(\d+)` number group BOTH fall through to clausePunctuation: "12.8" reads *twaalf . agt* and "17,500"
+// *sewentien , vyf honderd*. Clocks and the version-dot are claimed by normalize.ts first, so a period reaching
+// here is a decimal and a comma a thousands grouping.
 // ⚠ THE WORD GROUP IS BOUNDED TO LATIN SCRIPT, and `[\p{L}\p{M}]` here was silent content loss. `\p{L}` matches
 // EVERY script, so this token claimed embedded Greek, Cyrillic, Thai and Devanagari as though they were words of
 // this language — and because they were CLAIMED they never became a gap, so `emitUnclaimed` never ran and the
@@ -137,32 +136,25 @@ export function phonemizeWord(word: string): string {
 // mark can only ever be claimed as part of a Latin word, which is the only thing it should attach to here.
 const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*)|(\d+\.\d+|\d{1,3}(?:,\d{3})+|\d+)|([.!?…,;:])/gu;
 
-// #562 symbol normalization — Afrikaans measure and currency nouns are INVARIANT after a numeral
-// ("drie persent", "480 kilometer per uur"). `m` is deliberately NOT a standalone unit: the corpus's
-// "m.p.u" (myl per uur) and "600Mbit/s" are claimed in normalize.ts first.
+// Afrikaans measure and currency nouns are INVARIANT after a numeral ("drie persent", "480 kilometer per uur").
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
-    // omitted and defaults to it — this language does not split dimension from product.
+    // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
+    // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it — Afrikaans does not
+    // split dimension from product.
     multiply: { times: "keer" },
     percent: ["persent"],
     currency: { "€": ["euro"], "$": ["dollar"], "£": ["pond"], "¥": ["jen"], "U$": ["VS-dollar"], "VS$": ["VS-dollar"] },
     units: {
         km: ["kilometer"], cm: ["sentimeter"], mm: ["millimeter"], kg: ["kilogram"],
         mi: ["myl"], mph: ["myl per uur"],
-        // `m` — meter ×9, and `kubieke`/`vierkante` below could not reach a bare metre without it.
-        // The one hazard in this corpus is `40 m.p.u` (myl per uur, the Afrikaans way), which a
-        // letter-guard would NOT reject because a dot is not a letter — but normalize.ts rewrites the dotted
-        // abbreviation to words BEFORE the tier runs, so no bare `m` survives to be misread. `133 m/s` is
-        // the other instance and is a genuine metre.
-        // ⚠ RESIDUAL EXPOSURE, stated rather than left to be discovered: normalize.ts step 7 rewrites a
-        // version dot to the WORD "punt" before the tier runs, so the tier's `NOT_VERSION` guard — which
-        // exists because `802.11g` once read as "802.11 GRAMS" in ten languages — has no dot left to see, and
-        // `802.11m` reads as "…elf METER". Trap 39. It is bounded and unattested: that rule fires only on
-        // THREE-or-more integer digits plus one trailing letter, so `6.5m` is untouched (it reads the letter),
-        // and no corpus contains a dotted version ending in `m` — 802.11 comes as a/b/g/n. Measured the same
-        // way in ca, and in uz/as where it predates this change.
+        // `m` is declared because `kubieke`/`vierkante` below cannot reach a bare metre without it.
+        // ⚠ THE HAZARD IS `40 m.p.u` (myl per uur, the Afrikaans spelling), which a letter-guard does NOT reject
+        // because a dot is not a letter — but normalize.ts rewrites the dotted abbreviation to words BEFORE the
+        // tier runs, so no bare `m` survives to be misread.
+        // ⚠ RESIDUAL EXPOSURE, stated rather than left to be discovered: normalize.ts step 7 rewrites a version
+        // dot to the WORD "punt" before the tier runs, so the tier's `NOT_VERSION` guard has no dot left to see
+        // and `802.11m` reads as "…elf METER". Bounded and unattested: that rule fires only on THREE-or-more
+        // integer digits plus one trailing letter, so `6.5m` is untouched, and 802.11 comes as a/b/g/n.
         m: ["meter"],
     },
     rateDenominators: { h: "uur", u: "uur", s: "sekonde" },

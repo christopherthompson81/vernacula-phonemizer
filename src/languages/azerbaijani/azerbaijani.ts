@@ -26,12 +26,11 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// Azerbaijani groups thousands with a SPACE (400 000) or a PERIOD (1.234 — the old class's "."
-// thousands sep, still the idiomatic reading) and takes a COMMA decimal (6,5). The old class was a bare
-// `(\d+)`, so BOTH the space-group and the comma fell through: "400 000" read *dörd yüz sıfır* and "6,5"
-// *altı , beş*. normalize.ts claims clocks and the version dot first; a comma reaching here is a decimal
-// (the TOKEN's `\d+,\d+`), a period-thousands is a group (the TOKEN's `\d+\.\d{3}`), and a plain digit run
-// is a bare number.
+// ⚠ AZERBAIJANI GROUPS THOUSANDS WITH A SPACE (400 000) OR A PERIOD (1.234) and takes a COMMA decimal (6,5).
+// With a bare `(\d+)` number group both the space-group and the comma fall through to clausePunctuation:
+// "400 000" reads *dörd yüz sıfır* and "6,5" *altı , beş*. normalize.ts claims clocks and the version dot
+// first, so a comma reaching here is a decimal, a period-thousands is a group, and a plain digit run is a
+// bare number.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+\\.\\d{3}(?:\\.\\d{3})*|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
 
 /**
@@ -43,13 +42,12 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+\\.\\d{3}(?:\\.\\d{3})*|\\d+,\\d+|
 const NATIVE_CLASS = "[a-zçğəıiöşüx]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
-// #562 symbol normalization — Azerbaijani measure and currency nouns are INVARIANT after a numeral
+// Azerbaijani measure and currency nouns are INVARIANT after a numeral
 // ("üç faiz", "80 kilometr"). `m` is a standalone metre unit (4892 m, 3,50 m).
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — the word is this language's OWN, harvested from its existing `×` rule, so nothing new
-    // is sourced. Declaring it HERE is what makes ASCII `x` read like `×`: `6x6 cm` was reading the `x` as a
-    // LETTER NAME, and `NxN` forms outnumber `×` roughly 85 to 20 across the corpora. One word, so `by` is
-    // omitted and defaults to it — this language does not split dimension from product.
+    // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
+    // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it — Azerbaijani does
+    // not split dimension from product.
     multiply: { times: "vur" },
     percent: ["faiz"],
     currency: { "€": ["avro"], "$": ["dollar"], "£": ["funt sterlinq"], "¥": ["yen"] },

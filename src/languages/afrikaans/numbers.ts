@@ -25,11 +25,9 @@ function below1000(n: number): string {
 }
 
 /**
- * A magnitude group. A lone THOUSAND is bare — *duisend*, not "een duisend" — but MILLION and up KEEP the
- * numeral: 1 000 000 is *een miljoen*, and reading it as a bare *miljoen* drops the count entirely. This is
- * the same split `core/numbers.ts` documents on `bareMagnitude` (bare hundred/thousand, "one" retained from
- * million up), which this private composer did not follow. No corpus instance is written in digits, so no
- * gate caught it.
+ * A magnitude group. ⚠ A LONE THOUSAND IS BARE — *duisend*, not "een duisend" — but MILLION AND UP KEEP THE
+ * NUMERAL: 1 000 000 is *een miljoen*, and reading it as a bare *miljoen* drops the count entirely. Same split
+ * `core/numbers.ts` documents on `bareMagnitude`.
  */
 function magnitude(mult: number, word: string, bareAtOne: boolean): string {
     return mult === 1 && bareAtOne ? word : `${below1000(mult)} ${word}`;

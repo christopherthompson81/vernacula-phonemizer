@@ -2,13 +2,13 @@
  * Ancient Greek (grc) phonemizer — Ἑλληνική, the POLYTONIC Greek script, targeting the reconstructed 5th-century
  * BCE CLASSICAL ATTIC pronunciation (Allen, *Vox Graeca*), canonical IPA. The classical
  * Hellenic counterpart to the Classical-Latin bring-up. A grapheme scan over the NFD-decomposed polytonic text:
- *   ★ Vowels α ε η ι ο υ ω → [a e ɛː i o y ɔː] (η/ω are LONG mid; υ is the front-rounded [y]); the MACRON marks
+ *   ⚠ Vowels α ε η ι ο υ ω → [a e ɛː i o y ɔː] (η/ω are LONG mid; υ is the front-rounded [y]); the MACRON marks
  *     length on α ι υ (ᾱ→aː). DIPHTHONGS: αι→[ai̯], ει→[eː], οι→[oi̯], υι→[yi̯], αυ→[au̯], ευ→[eu̯], ου→[uː],
  *     ηυ→[ɛːu̯], ωυ→[ɔːu̯]; the IOTA SUBSCRIPT (ᾳ ῃ ῳ) → long vowel + [i̯]; a DIAERESIS breaks a diphthong.
- *   ★ Consonants: the ASPIRATES θ φ χ → [tʰ pʰ kʰ], β γ δ → [b ɡ d], ζ→[zd], ξ→[ks], ψ→[ps]; γ before a velar
+ *   ⚠ Consonants: the ASPIRATES θ φ χ → [tʰ pʰ kʰ], β γ δ → [b ɡ d], ζ→[zd], ξ→[ks], ψ→[ps]; γ before a velar
  *     (γ κ χ ξ) → [ŋ] (ἄγγελος→áŋɡelos); ρ/σ/etc. direct.
- *   ★ ROUGH BREATHING (dasia ῾) on a word-initial vowel → a prefixed [h] (ἵππος→híppos); SMOOTH breathing → ∅.
- *   ★ PITCH ACCENT (acute/grave/circumflex) is emitted on the vowel and folded by the eval (the Latin treatment).
+ *   ⚠ ROUGH BREATHING (dasia ῾) on a word-initial vowel → a prefixed [h] (ἵππος→híppos); SMOOTH breathing → ∅.
+ *   ⚠ PITCH ACCENT (acute/grave/circumflex) is emitted on the vowel and folded by the eval (the Latin treatment).
  * Referee: wikipron grc_grek (human, {{grc-IPA}} 5th-BCE Attic row).
  */
 import type { Phonemizer } from "../../registry.ts";

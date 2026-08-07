@@ -1,13 +1,13 @@
 /**
- * Standard Albanian (Tosk) number → words. A compositor for 0–999,999,999,999 (before this the sq engine
- * passed digit strings straight through, so `phonemize("21", "sq")` leaked "21" into the IPA).
+ * Standard Albanian (Tosk) number → words, for 0–999,999,999,999. Without it a digit string passes straight
+ * through and leaks into the IPA.
  *
  * SOURCE: Newmark, Hubbard & Prifti, *Standard Albanian: A Reference Grammar for Students* (Stanford, 1982),
  * the cardinal-numeral section; cross-checked against Wiktionary's Albanian numeral entries. The word list
  * lives in albanian.jsonc (`numbers`).
  *
- * Albanian is decimal and regular, so the only reason this is not a `westernNumberWords` data block is the
- * **obligatory ⟨e⟩ "and" connector** between the groups of a composed numeral — njëzet **e** një "21",
+ * ⚠ ALBANIAN IS DECIMAL AND REGULAR, so the only reason this is not a `westernNumberWords` data block is the
+ * OBLIGATORY ⟨e⟩ "and" CONNECTOR between the groups of a composed numeral — njëzet **e** një "21",
  * njëqind **e** një "101", një mijë **e** dyqind **e** tridhjetë **e** katër "1234". The connector is a
  * separate word (it must reach the g2p as its own token, [ˈɛ], not fused into the neighbouring numeral), which
  * the shared Western composer has no slot for. Everything else is plain: fused round hundreds (njëqind,

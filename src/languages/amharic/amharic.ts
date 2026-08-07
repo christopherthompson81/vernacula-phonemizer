@@ -42,9 +42,8 @@ function numberToText(n: number): string {
     if (n < 20) return `${NUM.teenPrefix} ${NUM.units[n - 10]}`;
     if (n < 100) {
         const t = Math.floor(n / 10), u = n % 10;
-        // tens are keyed "20".."90" — String(t) looked up "2".."9", got undefined, and every ten in the
-        // corpus was silently dropped (25 → "amɨst", 1998 → thousand-nine-hundred-EIGHT). 21.7% of FLEURS
-        // am_et utterances contain digits, so this was the single largest Amharic corpus defect.
+        // ⚠ THE TENS ARE KEYED "20".."90", not "2".."9". Looking up the digit alone returns undefined and the
+        // ten is silently DROPPED — 25 reads "amɨst", 1998 reads thousand-nine-hundred-EIGHT.
         return NUM.tens[String(t * 10)]! + (u ? ` ${NUM.units[u]}` : "");
     }
     if (n < 1000) {
@@ -55,9 +54,9 @@ function numberToText(n: number): string {
         const th = Math.floor(n / 1000), r = n % 1000;
         return `${th > 1 ? numberToText(th) + " " : ""}${NUM.thousand}${r ? " " + numberToText(r) : ""}`;
     }
-    // Scales above ሺ are European loans (ሚሊዮን / ቢሊዮን) and, unlike the bare ሺ / መቶ, KEEP their multiplier at 1 —
-    // Omniglot cites 10⁶ as አንድ ሚሊዮን. Nothing above 999 999 was composed before, so 10⁶+ emitted the digit string
-    // and the fidel g2p then rendered it as EMPTY IPA.
+    // ⚠ Scales above ሺ are European loans (ሚሊዮን / ቢሊዮን) and, unlike the bare ሺ / መቶ, KEEP their multiplier at
+    // 1 — 10⁶ is አንድ ሚሊዮን. Without a composer for them the digit string is emitted raw, and the fidel g2p then
+    // renders it as EMPTY IPA.
     for (const [value, scale] of [[1_000_000_000, NUM.billion], [1_000_000, NUM.million]] as const) {
         if (n >= value) {
             const q = Math.floor(n / value), r = n % value;
@@ -74,23 +73,20 @@ function number(digits: string): string {
 
 // Ethiopic letters (U+1200–U+135A, incl. combining marks) · Arabic digits · Ethiopic + ASCII punctuation.
 //
-// #562 AUDIT, recorded because it is the known hazard for a script whose punctuation lives inside its own
-// Unicode block (Burmese and Khmer were dropping EVERY sentence boundary this way): the letter class here
-// ends at ፚ = U+135A, and ። ፣ ፤ ፥ ፦ ፧ ፨ are U+1362–U+1368. They are ABOVE the range, so the letter branch
-// cannot swallow them and all 3,391 corpus instances already reach the punctuation branch. Verified, not
-// assumed. Do not widen this class to the full block without moving the punctuation branch ahead of it.
+// ⚠ THE LETTER CLASS MUST NOT REACH THE PUNCTUATION SUB-BLOCK. This is the known hazard for a script whose
+// punctuation lives inside its own Unicode block — Burmese and Khmer each dropped EVERY sentence boundary that
+// way. Here the class ends at ፚ = U+135A while ። ፣ ፤ ፥ ፦ ፧ ፨ are U+1362–U+1368, above the range, so the letter
+// branch cannot swallow them. DO NOT widen this to the full block without moving the punctuation branch ahead
+// of it.
 const TOKEN = /([ሀ-ፚ]+)|(\d+)|([።፣፤፥፦፧፨.?!,;:])/gu;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
-// #562 symbol normalization — Amharic: በመቶ "in a hundred" is THE standard percent construction
-// (Amharic media universal, after the number); currency/unit words are the standard loans, emitted in
-// Ge'ez script and read by the ordinary fidel g2p.
-// MAGNITUDES added by the #562 run: the corpus writes "US$14.7 ቢሊዮን" and "$2.3 ቢልየን", which without the
-// magnitude list came out as "…ዶላር ቢሊዮን" (the noun inserted before the written magnitude). ቢልየን is a
-// corpus-attested spelling variant of ቢሊዮን and is listed so it is matched, not so it is emitted. No
-// `magnitudeConnective`: Amharic takes none (አንድ ሚሊዮን ዶላር). The tier's own `already` guard covers the
-// three corpus cases that write ዶላር/ዶላሮች after the sign, so the noun is not doubled.
+// በመቶ "in a hundred" is the standard percent construction, postposed; the currency and unit words are the
+// standard loans, emitted in Ge'ez script and read by the ordinary fidel g2p.
+// ⚠ THE MAGNITUDE LIST IS LOAD-BEARING: text writes "US$14.7 ቢሊዮን", and without it the currency noun is
+// inserted BEFORE the written magnitude ("…ዶላር ቢሊዮን"). ቢልየን is a spelling variant listed so it is MATCHED,
+// not so it is emitted. No `magnitudeConnective` — Amharic takes none (አንድ ሚሊዮን ዶላር).
 const SYMBOLS = makeSymbolNormalizer({
     // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
     // and this language is one of the fourteen that still had no word declared, so `&` was DROPPED outright.

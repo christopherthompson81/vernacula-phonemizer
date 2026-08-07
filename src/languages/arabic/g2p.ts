@@ -2,8 +2,8 @@
  * Arabic diacritized grapheme→phoneme engine (Modern Standard Arabic, broad phonemic). Takes FULLY-VOWELLED
  * Arabic (harakat present) and produces canonical IPA — cleanroom, rule-based, no lexicon. Short-vowel
  * restoration for bare text is a separate pre-pass (the neural diacritizer); this engine assumes the vowels
- * are already there. Arabic is stored in logical order = phonetic order, so RTL is a non-issue.
- * for the convention.
+ * are already there. ⚠ Arabic is stored in LOGICAL order, which is also phonetic order, so RTL is a non-issue
+ * for this scan.
  */
 
 import { MANIFEST } from "./manifest.ts";
