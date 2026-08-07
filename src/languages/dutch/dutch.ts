@@ -114,20 +114,19 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // A word (Latin letters incl. Dutch diacritics) / number / punctuation token. An optional LEADING apostrophe
 // captures the reduced clitics 't 'n 'k 'm 's (informal Dutch); medial apostrophes handle zo'n, auto's.
 //
-// Dutch groups thousands with a PERIOD and takes a COMMA decimal. The old class was a bare `(\d+)`, so
-// BOTH separators fell through to clausePunctuation: "400.000" read as *vierhonderd . nul* (a phrase break
-// plus a lost magnitude) and "6,5" as *zes , vijf*. Clocks are claimed by normalize.ts first, so a period
-// reaching here is grouping and a comma is the decimal point.
+// ⚠ DUTCH GROUPS THOUSANDS WITH A PERIOD AND TAKES A COMMA DECIMAL, so a bare `(\d+)` number group lets BOTH
+// separators fall through to clausePunctuation: "400.000" reads *vierhonderd . nul* — a phrase break plus a
+// lost magnitude — and "6,5" reads *zes , vijf*. Clocks are claimed by normalize.ts first, so a period reaching
+// here is grouping and a comma is the decimal point.
 const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|(\d{1,3}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!?…,;:])/giu;
 
-// #562 symbol normalization — Dutch measure and currency nouns are INVARIANT after a numeral ("vijf euro",
-// "83 kilometer", "27 miljoen pond"), so each entry is a single form and no count agreement is needed. `g` is
-// deliberately NOT a unit: the corpus writes the Wi-Fi standards "802.11a/b/g", and "11g" is not 11 grams.
+// Dutch measure and currency nouns are INVARIANT after a numeral ("vijf euro", "83 kilometer", "27 miljoen
+// pond"), so each entry is a single form and no count agreement is needed.
+// ⚠ `g` IS DELIBERATELY NOT A UNIT: the Wi-Fi standards are written "802.11a/b/g", and "11g" is not 11 grams.
 const SYMBOLS = makeSymbolNormalizer({
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
-    // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
-    // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
-    // One word, so `by` defaults to it; this language does not split dimension from product.
+    // ⚠ `multiply` IS STANDARD MATHEMATICAL REGISTER, not a corpus attestation: a corpus sweep for the operator
+    // returns homographs of PREPOSITIONS in every language tried. One word, so `by` defaults to it — Dutch does
+    // not split dimension from product.
     multiply: { times: "keer" },
     percent: ["procent"],
     currency: { "€": ["euro"], $: ["dollar"], "£": ["pond"], "¥": ["yen"] },
@@ -136,7 +135,7 @@ const SYMBOLS = makeSymbolNormalizer({
         kg: ["kilogram"], mg: ["milligram"], ha: ["hectare"], mi: ["mijl"],
         mph: ["mijl per uur"],
     },
-    // Denominators only — `s` as a standalone unit made the corpus's `Il-76s` read *zesenzeventig seconde*.
+    // ⚠ Denominators ONLY. `s` as a standalone unit makes `Il-76s` read *zesenzeventig seconde*.
     rateDenominators: { u: "uur", h: "uur", s: "seconde" },
     unitPer: "per",
     // Dutch puts the measure word BEFORE the unit, spaced, and measure nouns stay singular after a numeral.
@@ -146,10 +145,10 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class DutchPhonemizer implements Phonemizer {
     text(input: string): string {
-        // #562 order: the Dutch rewrites (era/abbreviations, dotted capital runs, ORDINALS, clock, units,
-        // signs) → INITIALISMS → the shared symbol tier. The initialism pass must follow the abbreviation
-        // rewrites (else `V.S.` never becomes the caps run it spells out), and the symbol tier must follow
-        // the local unit rules (which own the ratio and squared forms it cannot express).
+        // ⚠ THE ORDER IS FORCED: Dutch rewrites (era/abbreviations, dotted capital runs, ORDINALS, clock,
+        // units, signs) → INITIALISMS → the shared symbol tier. The initialism pass must follow the
+        // abbreviation rewrites, or `V.S.` never becomes the caps run it spells out; and the symbol tier must
+        // follow the local unit rules, which own the ratio and squared forms it cannot express.
         const normalized = SYMBOLS(normalizeDutchInitialisms(normalizeDutch(input)));
         return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
