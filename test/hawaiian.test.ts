@@ -5,8 +5,8 @@ import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Hawaiian / ʻŌlelo Hawaiʻi (haw) — Austronesian (Eastern Polynesian, sibling of Māori).
 // One of the SIMPLEST phonologies in the world: 5 vowels + the macron (kahakō) = length, 8 consonants + the ʻokina
-// ⟨ʻ⟩→[ʔ], loan-letter adaptation (t→k, s→k, r→l, …). Validated 98.9% folded / 99.8% symbol vs wikipron
-// haw_latn_broad (human, 2152; the only residual is alphabet letter-name rows).
+// ⟨ʻ⟩→[ʔ], loan-letter adaptation (t→k, s→k, r→l, …). Referee: wikipron haw_latn_broad (human) — the only
+// residual is alphabet letter-name rows.
 describe("Hawaiian (ʻŌlelo Hawaiʻi) canonical IPA", () => {
     test("the ʻokina ⟨ʻ⟩→[ʔ] + the macron (kahakō) = length", () => {
         expect(phonemizeWord("Hawaiʻi")).toBe("hawaiʔi"); // the ʻokina → glottal stop [ʔ]

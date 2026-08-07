@@ -3,8 +3,7 @@ import { describe, expect, test } from "vitest";
 import { createHiligaynon, phonemizeWord } from "../src/languages/hiligaynon/hiligaynon.ts";
 
 // Canonical-IPA goldens for Hiligaynon / Ilonggo (hil) — Austronesian (Western Bisayan), Latin, near-phonemic.
-// A shallow rule g2p (the Cebuano/Tagalog pattern) validated against wikipron hil_latn (94.4%) + kaikki hil (94.1%),
-// both human. Shares the Bisayan core with Cebuano; the deltas are the Spanish-loan letters ⟨j⟩→[h] and ⟨f⟩→[p].
+// A shallow rule g2p (the Cebuano/Tagalog pattern), refereed by wikipron hil_latn + kaikki hil, both human. Shares the Bisayan core with Cebuano; the deltas are the Spanish-loan letters ⟨j⟩→[h] and ⟨f⟩→[p].
 // Stress (penultimate default) is phonemic-but-unwritten (folded by the eval); the word-final glottal and the
 // Spanish rising diphthongs are deferred residuals.
 describe("Hiligaynon canonical IPA — Bisayan rule g2p", () => {

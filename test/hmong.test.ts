@@ -3,9 +3,10 @@ import { describe, expect, test } from "vitest";
 import { createHmong, phonemizeWord } from "../src/languages/hmong/hmong.ts";
 
 // Hmong (hmn) — White Hmong / Hmoob Dawb (Hmong Daw, mww), Hmong-Mien, tonal (~8M). An RPA (Romanized Popular
-// Alphabet) → IPA converter. RPA has NO codas → a final ⟨b j v s g m d⟩ is always a TONE marker. Validated against
-// wikipron mww_latn_broad (single-syllable, ~455): 100% on-referee (maps fit to it; RPA is deterministic) / 94.1%
-// held-out 5-fold CV (the honest generalization). single-source (thin).
+// Alphabet) → IPA converter. RPA has NO codas → a final ⟨b j v s g m d⟩ is always a TONE marker.
+// ⚠ Referee: wikipron mww_latn_broad (single-syllable, ~455) — and the on-referee score is MEANINGLESS,
+// because the maps were fit to it and RPA is deterministic. The held-out 5-fold CV is the only honest
+// generalisation figure. Single-source and thin either way.
 describe("Hmong (White Hmong) canonical IPA — RPA → IPA converter", () => {
     const hmn = createHmong();
 
