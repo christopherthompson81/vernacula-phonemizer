@@ -1,10 +1,10 @@
 /**
- * ★ Georgian (ka) VIGESIMAL cardinal number compositor. Returns composed Georgian TEXT that georgian.ts runs
+ * ⚠ Georgian (ka) VIGESIMAL cardinal number compositor. Returns composed Georgian TEXT that georgian.ts runs
  * through the g2p, so the IPA stays consistent with the word engine. Pattern B is mandatory here: Georgian is
  * NOT decimal-Western below 100, so the shared `westernNumberWords` (units + teens + round TENS) has no round
  * tens to read — there are none. Georgian counts 20–99 in SCORES of twenty.
  *
- *   ★ THE SCORE CONSTRUCTION (20–99). The four score words are 20 ოცი, 40 ორმოცი (ორ- "2" × ოც- "20"),
+ *   ⚠ THE SCORE CONSTRUCTION (20–99). The four score words are 20 ოცი, 40 ორმოცი (ორ- "2" × ოც- "20"),
  *     60 სამოცი (3×20), 80 ოთხმოცი (4×20). An exact multiple of 20 is just that word. Anything else is the
  *     score's stem + -და- ("and") + the PLAIN 1–19 numeral, written as ONE word — so the whole 1–19 series
  *     (including the teens) attaches into the same slot:
@@ -14,7 +14,7 @@
  *     90 is ოთხმოცდაათი (4×20 + 10). The score index is floor(n/20) and the attached remainder is n − 20·index,
  *     which lands in 0–19 by construction.
  *
- *   ★ TRUNCATION (≥ 100). From 100 up, groups are written as SEPARATE words and a numeral that is followed by a
+ *   ⚠ TRUNCATION (≥ 100). From 100 up, groups are written as SEPARATE words and a numeral that is followed by a
  *     smaller number drops its final ⟨ი⟩ (ასი→ას, ორასი→ორას, ათასი→ათას, მილიონი→მილიონ). This is LOCAL: the
  *     hundred truncates iff its own sub-hundred remainder is non-zero, and a magnitude noun truncates iff any
  *     remainder follows it. So 1300 = ათას სამასი (the thousand truncates, the hundred does not — it is final),
@@ -41,7 +41,7 @@ function sub20(n: number): string {
     return n < 10 ? UNITS[n]! : TEENS[n - 10]!;
 }
 
-/** ★ 0–99 → ONE Georgian word. 20–99 is score·20 + remainder, joined by the score stem's -და-. */
+/** 0–99 → ONE Georgian word. 20–99 is score·20 + remainder, joined by the score stem's -და-. */
 function sub100(n: number): string {
     if (n < 20) return sub20(n);
     const s = Math.floor(n / 20), // 1–4 → ოც / ორმოც / სამოც / ოთხმოც
