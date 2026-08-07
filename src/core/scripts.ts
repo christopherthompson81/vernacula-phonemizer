@@ -153,8 +153,13 @@ export const OVERRIDES: Readonly<Record<string, Partial<Record<ScriptName, strin
  *   · a single-`.ts` engine with no data to externalise (ab, chr, la, lo, sat, …) — there is no manifest to
  *     put a field in.
  *
- * ⚠ Kept here rather than by minting one-field manifests: a manifest exists to hold DATA, and a file whose
- * only content is its own script name is a worse record than a line in a table that can be read end to end.
+ * ⚠ THIS TABLE IS INTERIM FOR THE THIRD CASE, not the intended end state. A manifest is a language's
+ * encyclopedic entry — its phonology, orthography and the concerns a reader needs before touching the engine —
+ * and the 26 single-.ts engines are missing that record, not merely this field; their documentation currently
+ * sits in a .ts header with the tables inline beside the code. As each gains a manifest its row moves there and
+ * this table should end up holding only the varieties, accent variants and aliases, which legitimately have no
+ * manifest of their own. See issue #741.
+ *
  * test/manifest-script.test.ts asserts the union is exact in BOTH directions, so a new engine cannot be added
  * without landing in one place or the other, and a stale row here cannot outlive its code.
  */
