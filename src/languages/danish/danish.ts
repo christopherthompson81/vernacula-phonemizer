@@ -115,33 +115,30 @@ export function phonemizeWordRules(word: string): string {
  *  (daNeural.ts), which keys by the raw match so it can share the fleet `wordLevelNeuralPrepass` (nb/bn pattern). */
 export type OovResolver = (word: string) => string | undefined;
 
-/** One Danish word → canonical IPA. THREE tiers for the deep orthography: (1) the LEXICON (NST ∩ top-50k freq, ~37k
- *  known words at reference quality — the narrow convention: r-vocalisation, lenition, soft-d, length, stød), (2) the
- *  neural TAGGER via `oovOverride` (the BiLSTM, async path only — trained on the full 199k NST, ~96% symbol held-out), (3) the
- *  RULE engine (fallback when the tagger is absent OR declines). The old averaged-perceptron tier was dropped — it was
- *  trained on the small broad-convention lexicon and is superseded by the NST lexicon + BiLSTM. */
+/** One Danish word → canonical IPA. ⚠ THREE TIERS, because the orthography is deep: (1) the LEXICON (~37k known
+ *  words at reference quality, in the narrow convention — r-vocalisation, lenition, soft-d, length, stød), (2) the
+ *  neural TAGGER via `oovOverride` (async path only), (3) the RULE engine, which is the fallback when the tagger
+ *  is absent OR declines. */
 export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     const w = word.toLowerCase();
     return lexicon().get(w) ?? oovOverride?.(word) ?? phonemizeWordRules(word);
 }
 
-// A Danish word (Latin incl. æ ø å + loanword accents é ö ä ü ó è ã à) / number / punctuation token. The accent set
-// must cover every letter that appears in a da-lexicon.tsv key, else that entry is unreachable and the word is split
-// at the missing char (voilà → "voil"); it also feeds the neural WORD regex in daNeural.ts (keep the two in sync).
+// A Danish word (Latin incl. æ ø å + loanword accents é ö ä ü ó è ã à) / number / punctuation token.
+// ⚠ THE ACCENT SET MUST COVER EVERY LETTER APPEARING IN A da-lexicon.tsv KEY, or that entry is unreachable and
+// the word splits at the missing character (voilà → "voil"). It also feeds the neural WORD regex in
+// danishNeural.ts — keep the two in sync.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
 
 /**
- * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
- * verbatim, so nothing about the orthography is invented here. A token this REJECTS carries a letter the
- * language does not use, i.e. a foreign name. See core/hostWord.ts: this is the INVENTORY question, and it
- * is no longer also deciding where the script boundary falls.
+ * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
+ * SCRIPT boundary falls, while this one decides whether the g2p has rules for these letters.
  *
- * ⚠ NOT QUITE VERBATIM: ó è ã à were REMOVED, because the g2p has no rule for them and
- * DROPPED them outright. The old token class listed them anyway, and the word-level fold hid the mismatch — a
- * word containing one was rejected whole, so everything in it got folded and the letter came out readable by
- * accident. Judging each character on its own exposes the over-claim instead of masking it: `Thérèse` in
- * Romanian read *ˈthrese*, the é gone, because the class promised a rule that did not exist. NATIVE_CLASS is a
- * claim about the G2P, and `test/native-inventory.test.ts` now measures it rather than trusting it.
+ * ⚠ IT IS NARROWER THAN THE TOKEN CLASS ON PURPOSE. ó è ã à are absent, because the g2p has no rule for them
+ * and DROPS them outright — listing them here would promise a rule that does not exist. A word-level fold hides
+ * that mismatch (a word containing one is rejected whole, so everything gets folded and the letter comes out
+ * readable by accident); judging each character on its own exposes it instead. `NATIVE_CLASS` is a claim about
+ * the G2P, and `test/native-inventory.test.ts` measures it rather than trusting it.
  */
 const NATIVE_CLASS = "[a-zæøåéöäü]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
@@ -150,9 +147,9 @@ class DanishPhonemizer implements Phonemizer {
     // `oovOverride` (neural path only, daNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
     // path omits it, so behaviour is byte-identical to phonemize(text, "da").
     text(rawInput: string, oovOverride?: OovResolver): string {
-        // everything the g2p cannot read is rewritten to Danish words FIRST — see normalize.ts for
-        // the ordered steps and, in particular, why Danish is NOT Norwegian (the period is a thousands
-        // separator here, and there is no space grouping at all).
+        // Everything the g2p cannot read is rewritten to Danish words FIRST — see normalize.ts for the ordered
+        // steps and, in particular, ⚠ why Danish is NOT Norwegian: the period is a thousands separator here, and
+        // there is no space grouping at all.
         return assembleClauses(normalizeDanish(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]), oovOverride));
             // Numbers: the vigesimal/units-first compositor (numbers.ts) → each word through the same 3-tier g2p.

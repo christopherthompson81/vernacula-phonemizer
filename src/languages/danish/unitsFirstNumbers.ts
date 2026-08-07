@@ -9,9 +9,8 @@
  * chained with "og" (North Germanic) or bare juxtaposition (West Germanic). All three are parameters below; the
  * NUMBER WORDS themselves stay in each language's own data manifest.
  *
- * ⚠ HOUSING: this belongs in `src/core/numbers.ts` beside `westernNumberWords`/`indicNumberWords`. It lives here
- * only because src/core/ was off-limits while four number fan-out branches were in flight in parallel. Lift it to
- * core (and re-point the fo/lb/bar imports) when the fan-out lands. Nothing Danish-specific is in this file.
+ * ⚠ HOUSING: NOTHING IN THIS FILE IS DANISH-SPECIFIC. It belongs in `src/core/numbers.ts` beside
+ * `westernNumberWords`/`indicNumberWords`; lifting it there means re-pointing the fo/lb/bar imports too.
  */
 
 export interface UnitsFirstDef {
