@@ -6,9 +6,9 @@ import {
     phonemizeWordRules,
 } from "../src/languages/javanese/javanese.ts";
 
-// Canonical-IPA goldens for Javanese / Basa Jawa (jv) — Austronesian, Latin script, rule-based g2p
-// validated against kaikki jav (human, 85.9% folded). The signature
-// processes: the ⟨a⟩→[ɔ] rule (open final + penult harmony), the DENTAL vs RETROFLEX contrast (t̪ d̪ vs ʈ ɖ),
+// Canonical-IPA goldens for Javanese / Basa Jawa (jv) — Austronesian, Latin script, rule-based g2p refereed
+// by kaikki jav (human). The signature processes: the ⟨a⟩→[ɔ] rule (open final + penult harmony),
+// the DENTAL vs RETROFLEX contrast (t̪ d̪ vs ʈ ɖ),
 // closed-syllable laxing (i→ɪ u→ʊ) + final ⟨k⟩→ʔ, pepet/taling ⟨e⟩.
 describe("javanese canonical IPA", () => {
     test("the a→ɔ rule (open final + penult harmony; closed final blocks it)", () => {
