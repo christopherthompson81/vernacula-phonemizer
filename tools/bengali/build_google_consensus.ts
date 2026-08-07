@@ -1,6 +1,6 @@
 /**
  * Expand the Bengali ɔ/o + medial-deletion lexicon (bengali-lexicon.tsv) using a THIRD independent source:
- * Google `language-resources/bn` (CC-BY-4.0, ~65k words, non-Wiktionary, retroflex-correct). Run 12 established
+ * Google `language-resources/bn` (CC-BY-4.0, ~65k words, non-Wiktionary, retroflex-correct). Measurement established
  * that Bengali's ɔ→o raising + medial-vowel deletion is NOT cleanly rule-derivable (two rule re-derivations crashed
  * the gold), so Google's reliability is applied PER-WORD via cross-source consensus: pin a word ONLY where Google
  * AND wikipron ben AGREE on the reading, it differs from our rule engine, only the vowels differ (consonant

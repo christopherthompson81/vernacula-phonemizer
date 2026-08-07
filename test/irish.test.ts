@@ -56,7 +56,7 @@ describe("irish canonical IPA", () => {
         expect(phonemizeWord("scoil")).toBe("sˠkˈɔlʲ"); // oi → ɔ (not ɛ)
     });
 
-    test("Run 2 — i-offglide (long back V + slender coda) + svarabhakti epenthesis", () => {
+    test("i-offglide (long back V + slender coda) + svarabhakti epenthesis", () => {
         expect(phonemizeWord("áit")).toBe("ˈɑːⁱtʲ"); // ɑː + slender coda t → i-offglide
         expect(phonemizeWord("cóir")).toBe("kˈoːⁱɾʲ");
         expect(phonemizeWord("súil")).toBe("sˠˈuːlʲ"); // uː gets NO offglide
@@ -67,7 +67,7 @@ describe("irish canonical IPA", () => {
         expect(phonemizeWord("ainm")).toBe("ˈanʲmˠ"); // n does NOT trigger epenthesis
     });
 
-    test("Run 3 — ia/ua diphthongs, onset offglide, eo no-glide, lexicon overrides", () => {
+    test("ia/ua diphthongs, onset offglide, eo no-glide, lexicon overrides", () => {
         expect(phonemizeWord("iad")).toBe("ˈiəd̪ˠ"); // ia → iə (short first element; referee-confirmed)
         expect(phonemizeWord("ciall")).toBe("cˈiəl̪ˠ");
         expect(phonemizeWord("nuair")).toBe("n̪ˠˈuəɾʲ"); // ua → uə
@@ -85,7 +85,7 @@ describe("irish canonical IPA", () => {
     });
 });
 
-// Irish numeral composition. The Run-1 stub read every multi-digit number digit-by-digit
+// Irish numeral composition. A digit-by-digit stub reads every multi-digit number one digit at a time
 // (25 → "dó cúig"). Irish needs a bespoke compositor: two numeral series (counting ceathair vs
 // attributive ceithre), the `a` particle, h-prefix on vowel-initial counting forms, and initial
 // mutation of the magnitude word (2–6 lenite, 7–10 eclipse). Every word below is attested in

@@ -2,29 +2,25 @@ node_modules
 *.log
 .DS_Store
 
-# (Arabic diacritizer model is now COMMITTED — the permissive silver-only build, 15 MB, CPU-fine: it ships in
-#  every distribution so it's part of the tested product, not an optional dev stand-in. Provenance in the module.)
-tools/fa-restoration/__pycache__/
-
 # Python training env (BiLSTM taggers) — not shipped
 .venv/
 __pycache__/
 
-# fp32 intermediate from the English G2P trainer (EN_PRODUCTION); only the int8-quantised model is shipped
+# fp32 intermediate from the G2P trainers; only the int8-quantised model is shipped
 src/languages/english/en-g2p-tagger.onnx
-
-# fp32 intermediate from the French G2P trainer (FR_PRODUCTION); only the int8-quantised model is shipped
 src/languages/french/fr-g2p-tagger.onnx
 src/languages/danish/da-g2p-tagger.onnx
+
+# Khmer boundary tagger: the torch checkpoint is a regeneratable intermediate — only the int8 graph and its
+# meta ship. Rebuild with tools/khmer/build_km_segmenter_data.py + train_km_segmenter.py from a kmwiki dump.
+src/languages/khmer/km_segmenter.pt
+
+tools/fa-restoration/__pycache__/
 
 # Sindhi tagger: checkpoints + fp32 intermediate (only the int8 model ships), and the regeneratable
 # training artifacts. The MINED gold (sd.crossscript.tsv, sd.openlex*.tsv) IS committed — it is the
 # input the lexicon and model derive from. sd_deva_pairs.json / sd_airab.json are rebuilt from the
 # upstream dataset by extract_sd_openlex.py.
-# Khmer boundary tagger: the torch checkpoint is a regeneratable intermediate — only the int8 graph and its
-# meta ship. Rebuild with tools/khmer/build_km_segmenter_data.py + train_km_segmenter.py from a kmwiki dump.
-src/languages/khmer/km_segmenter.pt
-
 tools/sindhi/*.pt
 tools/sindhi/sd-g2p-tagger.onnx
 tools/sindhi/sd-g2p-tagger.int8.onnx

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """fa short-vowel restoration — char-level SEQ2SEQ over the ABJAD (encoder-decoder + attention).
 
-The Run-7 scaling finding pointed at INPUT REPRESENTATION as the real lever: the per-position frame-tagger
+A scaling probe pointed at INPUT REPRESENTATION as the real lever: the per-position frame-tagger
 (train_ipa_bilstm.py) reads fa's COLLAPSED g2p output (consonants + long vowels + default-[a] slots), which has
 already thrown away the و/ی/ه and word structure. This model reads the ABJAD LETTERS directly and generates IPA —
 a BiLSTM encoder + LSTM decoder with dot-product attention. It is no longer constrained to the g2p frame's slots,

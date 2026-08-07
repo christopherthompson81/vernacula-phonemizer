@@ -8,8 +8,7 @@ import { normalizeBurmese } from "../src/languages/burmese/normalize.ts";
 // core challenge is the RIME chart (vowel × coda: ောင်→aʊɴ, ိုင်→aɪɴ, ိန်→eɪɴ, ုန်→oʊɴ, bare င်→ɪɴ), the ⟨ွ⟩
 // labialisation, minor-syllable reduction (bare open non-final → ə), medial palatalisation (ကျ→t͡ɕ, ငြ→ɲ) and the
 // voiceless ⟨ှ⟩ sonorants (မှ→m̥). The FOUR tones (low ˨ / high ˥˩ / creaky ˥ˀ / checked ʔ) are ORTHOGRAPHIC and
-// rule-derived — see the tone test below. Validated vs wikipron mya (54.2% segmental, 99.6% mono tone) + kaikki
-// mya (55.9%).
+// rule-derived — see the tone test below. Referees: wikipron mya + kaikki mya.
 describe("burmese canonical IPA", () => {
     test("consonants, medials, rimes, minor-syllable reduction (+ tone)", () => {
         const cases: [string, string][] = [

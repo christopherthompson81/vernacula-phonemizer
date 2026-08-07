@@ -57,7 +57,7 @@ print(f"PIN lexicon: {len(pin)} words (freq≥{FREQ}, consistency≥{CONS}, agre
 import os
 _OUT=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src/languages/persian/fa-pin-vowels.tsv")
 _HDR=["# fa first-syllable-vowel PIN — skeleton <TAB> correct first SHORT vowel (a/e/o). Corrects the tagger's",
-      "# /a/-prior default on lexically-fixed first vowels (Run 32): the vowel is in the clean training data but",
+      "# /a/-prior default on lexically-fixed first vowels: the vowel is in the clean training data but",
       "# the lightweight BiLSTM can't memorise every lexical exception. FREQUENT (HomoRich freq≥30) + CONSISTENT",
       "# (≥90% one vowel, non-homograph) + agreement-validated. آ-initial words excluded (the deterministic",
       "# word-initial آ→long aː rule in faTagger.ts owns them). Applied as a first-vowel transplant. Build: tools/persian/build_pin.py"]

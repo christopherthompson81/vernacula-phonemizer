@@ -18,7 +18,7 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("dona")).toBe("dˈɔnə"); // stressed open ɔ (correct here)
     });
 
-    test("Run 2 — lexical stressed mid-vowel height (open ɛ/ɔ default, close e/o)", () => {
+    test("lexical stressed mid-vowel height (open ɛ/ɔ default, close e/o)", () => {
         expect(phonemizeWord("pedra")).toBe("pˈeðɾə"); // close e (lexicon)
         expect(phonemizeWord("menja")).toBe("mˈeɲʒə"); // close e
         expect(phonemizeWord("por")).toBe("pˈoɾ"); // close o
@@ -67,7 +67,7 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("molt")).toBe("mˈoɫ"); // final -lt → l
     });
 
-    test("review fixes: velar-nasal cluster, -ig affricate, spirant-after-lateral, diphthong-final stress", () => {
+    test("velar-nasal cluster, -ig affricate, spirant-after-lateral, diphthong-final stress", () => {
         expect(phonemizeWord("banc")).toBe("bˈaŋ"); // n→ŋ then final k drops
         expect(phonemizeWord("sang")).toBe("sˈaŋ"); // -ng → ŋ
         expect(phonemizeWord("maig")).toBe("mˈat͡ʃ"); // vowel-preceded -ig → t͡ʃ (i silent)
@@ -78,7 +78,7 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("pausa")).toBe("pˈawzə"); // s → z after a glide too
     });
 
-    test("Run 3 — ⟨x⟩ realization, -Cs cluster, bl/gl gemination", () => {
+    test("⟨x⟩ realization, -Cs cluster, bl/gl gemination", () => {
         expect(phonemizeWord("taxi")).toBe("tˈaksi"); // ⟨x⟩ after a vowel → ks
         expect(phonemizeWord("box")).toBe("bˈɔks"); // coda ⟨x⟩ → ks
         expect(phonemizeWord("panxa")).toBe("pˈaɲʃə"); // ⟨x⟩ after a consonant → ʃ
@@ -91,7 +91,7 @@ describe("catalan canonical IPA", () => {
         expect(phonemizeWord("obligar")).toBe("uβɫiɣˈa");
     });
 
-    test("review fixes: diphthong+coda oxytone stress, gua/guo glide", () => {
+    test("diphthong+coda oxytone stress, gua/guo glide", () => {
         expect(phonemizeWord("correus")).toBe("kurˈɛws"); // falling diphthong + plural -s → still OXYTONE (not penult)
         expect(phonemizeWord("dijous")).toBe("diʒˈɔws");
         expect(phonemizeWord("remeis")).toBe("rəmˈɛjs");
@@ -109,13 +109,13 @@ describe("catalan canonical IPA", () => {
     });
 
     test("text: reduction + function-word destressing + punctuation", () => {
-        expect(phonemize("El gat menja peix.", "ca")).toBe("əɫ ɡˈat mˈeɲʒə pˈeʃ ."); // el reduces: proclitic [ə] (was ɛɫ before the Run-27 fix)
+        expect(phonemize("El gat menja peix.", "ca")).toBe("əɫ ɡˈat mˈeɲʒə pˈeʃ ."); // el reduces: proclitic [ə], not the citation ɛɫ
     });
 });
 
-// Proclitic vowel reduction (found by the FLEURS engine diff, Run 27). De-stressing a function word used to be
-// a post-hoc ˈ strip, applied AFTER reduce() had run with the word's only nucleus at the stress index — the
-// mark vanished but the vowel kept its stressed quality (el → ɛɫ).
+// ⚠ DE-STRESSING A FUNCTION WORD CANNOT BE A POST-HOC ˈ STRIP. Applied AFTER reduce() has run with the
+// word's only nucleus at the stress index, the mark vanishes but the vowel KEEPS its stressed quality
+// (el → ɛɫ, where running text needs əɫ). The reduction has to know the word is a clitic before it reduces.
 describe("Catalan proclitic reduction", () => {
     test("clitics reduce in running text", () => {
         expect(phonemize("el gat", "ca")).toBe("əɫ ɡˈat");
@@ -142,8 +142,9 @@ describe("Catalan proclitic reduction", () => {
 });
 
 // ── Roman-numeral policy (src/languages/catalan/romanOrdinals.ts) ──
-// A CENTURY IS A CARDINAL in Catalan (Optimot, «Ús i lectura de les xifres romanes»: after its noun a Roman numeral reads as a cardinal, el segle III = tres) — the shared Roman→digits pass is already right and the policy
-// must not change that. What the policy adds is the PRENOMINAL ordinal of event names, which is ordinal at ANY
+// A CENTURY IS A CARDINAL in Catalan (Optimot, «Ús i lectura de les xifres romanes»: after its noun a Roman
+// numeral reads as a cardinal, el segle III = tres) — the shared Roman→digits pass is already right and the
+// policy must not change that. What the policy adds is the PRENOMINAL ordinal of event names, ordinal at ANY
 // value (XL/L aniversari·o → the -ésimo / -è series), where the cardinal would be the wrong register.
 describe("Catalan Roman-numeral policy — centuries cardinal, prenominal events ordinal", () => {
     const ord = (n: number): string | undefined => ROMAN_POLICY.ordinal(n);

@@ -13,7 +13,7 @@
 # Pronunciations are linguistic facts, in our convention, on the same CC-BY-SA footing as the committed wikipron
 # referee. Overrides SHIPPED whole-word output only; the rule engine (phonemizeWordRules) — and the referee
 # eval — bypass it and stay the honest, non-circular signal.
-# (c) GOOGLE-CONSENSUS EXPANSION (+134, Run 12): pinned where Google language-resources/bn (CC-BY-4.0, a
+# (c) GOOGLE-CONSENSUS EXPANSION (+134): pinned where Google language-resources/bn (CC-BY-4.0, a
 #     THIRD independent source — non-Wiktionary, retroflex-correct) AND wikipron ben AGREE on the ɔ/o +
 #     medial deletion, differ from the rule engine (vowel-only, consonant-skeleton-matched), and are NOT
 #     gold words (the hand-adjudicated gold wins). Breaks the prior wikipron∩BengaliAI ~168 ceiling.

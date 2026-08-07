@@ -44,7 +44,7 @@
 
     // A stressed monophthong lengthens when open (0 coda consonants) or before a SINGLE coda from this set
     // (voiced stops + fricatives). Voiceless stops p t k, m, ŋ, ɬ, and any cluster keep it short. n/r/l are
-    // lexically variable (the circumflex disambiguates: tân/taːn vs tan/tan) — Run 1 treats them as non-length.
+    // lexically variable (the circumflex disambiguates: tân/taːn vs tan/tan) — treated here as non-length.
     "lengthenBefore": "bdɡvðfχθsz",
 
     // Function-word clitics where ⟨y⟩ stays OBSCURE (ə) despite being a final/only syllable.

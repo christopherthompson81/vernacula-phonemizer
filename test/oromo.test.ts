@@ -89,8 +89,8 @@ describe("Oromo stress (Dejene 2010 §5.3.1)", () => {
 // ── TEXT NORMALIZATION ────────────────────────────────────────────────────────────────────────
 // The pins are on the rule's BRANCHES, not on the corpus's instances : the ordinal and the
 // enclitic are COMPOSED from the cardinal, so the branch the corpus never writes (10ffaa, 8ffaa, a
-// consonant-final stem before -tti) is pinned beside the branch it does. The evidence for every word is
-// in, Run 4.
+// consonant-final stem before -tti) is pinned beside the branch it does. The corpus evidence for each
+// word is recorded with its rule in src/languages/oromo/normalize.ts.
 import { normalizeOromo, normalizeOromoNumerals } from "../src/languages/oromo/normalize.ts";
 import { numberToWords } from "../src/languages/oromo/numbers.ts";
 

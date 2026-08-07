@@ -6,8 +6,8 @@ import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Aragonese / aragonés (an) — Ibero-Romance (Pyrenean), a Spanish-shaped shallow g2p.
 // The hallmarks: ⟨ch⟩→[t͡ʃ] (where Spanish has [x]), ⟨ny⟩→[ɲ] (Catalan-style digraph), ⟨x⟩→[ʃ], ⟨v⟩→[b], distinción
-// (z/c+e,i→[s]), and word-final ⟨-r⟩ apocope. Validated 76.2% folded / 96.2% symbol vs wikipron arg_latn_broad
-// (human, 1320; the folded % is dragged by the referee's dual final-r forms).
+// (z/c+e,i→[θ], NOT the seseo merger to [s]), and word-final ⟨-r⟩ apocope. Referee: wikipron arg_latn_broad
+// (human). ⚠ Its folded score is dragged down by the referee's DUAL final-r forms, not by the engine.
 describe("Aragonese (aragonés) canonical IPA", () => {
     test("the hallmark ⟨ch⟩→[t͡ʃ], ⟨ny⟩→[ɲ], ⟨x⟩→[ʃ]", () => {
         expect(phonemizeWord("Chesús")).toBe("t͡ʃesus"); // ⟨ch⟩→[t͡ʃ] (where Spanish has [x])

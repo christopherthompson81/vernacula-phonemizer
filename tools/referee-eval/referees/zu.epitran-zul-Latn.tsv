@@ -1,7 +1,7 @@
 # zu_gold.tsv — Zulu epitran zul-Latn REFEREE set (NOT oracle/gold). epitran is an
 # independent programmatic G2P that corroborates our L2S but is FALLIBLE: it drops ejectives, writes bare
 # clicks (ǀ vs our kǀ), ng→ŋ (not ŋɡ), and ⟨kl⟩ as k+l (not the kx affricate). NB epitran DOES palatalise
-# the homorganic nasal (nj→ɲd͡ʒ) — epitran was RIGHT and ours had the gap (now fixed; convergence Run 2).
+# the homorganic nasal (nj→ɲd͡ʒ) — epitran was RIGHT and ours had the gap (now fixed).
 # The word set is the CURATED zu_tone.tsv lexicon (real Zulu words — no corpus/English contamination).
 # nguni-gold-eval.ts folds the documented epitran limitations; our committed GOLD is the integration test.
 abantu	aɓantu

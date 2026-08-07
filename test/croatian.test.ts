@@ -55,7 +55,7 @@ describe("Croatian text normalization", () => {
         expect(normalizeCroatian("1683. dinastija Qing")).toBe("tisuću šeststo osamdeset treće dinastija Qing");
         expect(normalizeCroatian("(1644. - 1912.) prisilno")).toBe("(tisuću šeststo četrdeset četvrte - tisuću devetsto dvanaeste) prisilno");
         expect(normalizeCroatian("rezultata 6:6.")).toBe("rezultata 6:6."); // a sentence-final score is not an ordinal
-        // followers added from the tabulation of what the closed list was leaving behind
+        // further licensors, taken from a tabulation of what the closed list was leaving behind
         expect(normalizeCroatian("zauzeo 190. mjesto")).toBe("zauzeo sto devedeseto mjesto");
         expect(normalizeCroatian("oluja 4. kategorije")).toBe("oluja četvrte kategorije");
         expect(ph("7. najvećim")).toBe("sedmom najʋet͡ɕim");

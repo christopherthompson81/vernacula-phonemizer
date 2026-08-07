@@ -4,8 +4,8 @@ import { phonemizeWord, createArmenian } from "../src/languages/armenian/armenia
 
 // Armenian (hy) — Indo-European (own branch), own alphabet. EASTERN Armenian (Yerevan). Left-to-right greedy scan +
 // the ⟨ու⟩=u digraph, word-initial glides (ե→je, ո→vo, և→jev), and schwa epenthesis (word-initial/final clusters).
-// Signatures: the three-way stop/affricate system (b/p/pʰ …), uvulars խ→χ/ղ→ʁ, tap ր→ɾ vs trill ռ→r. Scored 81.1%
-// folded on wikipron hye_armn_e broad (HUMAN, 18090).
+// Signatures: the three-way stop/affricate system (b/p/pʰ …), uvulars խ→χ/ղ→ʁ, tap ր→ɾ vs trill ռ→r.
+// Referee: wikipron hye_armn_e broad (human).
 describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
     test("three-way stops/affricates + uvulars", () => {
         expect(phonemizeWord("բարև")).toBe("bɑɾev"); // բ=b, ր=ɾ (tap), և=ev
@@ -26,7 +26,7 @@ describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
     test("schwa epenthesis (initial/final clusters; s+stop kept)", () => {
         expect(phonemizeWord("գնալ")).toBe("ɡənɑl"); // #գն → ɡən
         expect(phonemizeWord("խնդիր")).toBe("χəndiɾ"); // #խն → χən
-        expect(phonemizeWord("եզր")).toBe("jezəɾ"); // final զр (rising) → zəɾ
+        expect(phonemizeWord("եզր")).toBe("jezəɾ"); // final զր (rising) → zəɾ
         expect(phonemizeWord("սպանել")).toBe("spɑnel"); // #սպ = s+stop kept as onset
         expect(phonemizeWord("ընկեր")).toBe("ənkeɾ"); // written ը = ə
         expect(phonemizeWord("կոմունիզմ")).toBe("komunizm"); // final -զմ stays bare (no ə before /m/)
@@ -38,7 +38,7 @@ describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
         expect(hy.text("2").trim()).toBe("jeɾku"); // երկու
         expect(hy.text("15").trim()).toBe("tɑsnhinɡ"); // տասնհինգ
         expect(hy.text("21").trim()).toBe("kʰəsɑn mek"); // քսան մեկ
-        expect(hy.text("1000").trim()).toBe("hɑzɑɾ"); // հազар — bare (no leading"մեկ"), via westernNumberWords
+        expect(hy.text("1000").trim()).toBe("hɑzɑɾ"); // հազար — bare (no leading "մեկ"), via westernNumberWords
     });
 
     test("text: words + Armenian clause punctuation (։)", () => {

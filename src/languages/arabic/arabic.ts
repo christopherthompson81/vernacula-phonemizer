@@ -282,7 +282,7 @@ function restoreLex(): ReadonlyMap<string, string> {
  * non-circular (the lexicon is mined from the same Wiktionary tradition as the wikipron-arz referee).
  */
 
-// ── Foreign-cluster repair (Run 28: سنترال → sntrˈaːl) ──────────────────────────────────────────────────────
+// ── Foreign-cluster repair (سنترال → sntrˈaːl) ───────────────────────────────────────────────────────────────
 // The neural diacritizer vocalizes native words and FREQUENT loans (كمبيوتر → kumbijuːtar), but rare
 // transliterations come back with few or no diacritics, and the g2p then emits consonant runs no Arabic
 // syllable allows — (C)V(C)(C) permits at most CC, so a 3+-consonant run is always a vocalization failure

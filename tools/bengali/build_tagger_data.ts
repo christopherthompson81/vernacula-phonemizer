@@ -1,7 +1,7 @@
 /**
  * Build the Bengali neural-tagger TRAINING corpus from Google `language-resources/bn` (CC-BY-4.0, ~65k words,
  * non-Wiktionary, retroflex-correct). Emits `word<TAB>ipa` for train_bn_tagger.py. This is the OOV generalisation
- * source: the tagger learns Bengali's ɔ/o raising + inherent-vowel deletion from Google's readings (which Run 12
+ * source: the tagger learns Bengali's ɔ/o raising + inherent-vowel deletion from Google's readings (which the
  * established are NOT cleanly rule-derivable). The authoritative Kolkata gold + cross-source consensus lexicon
  * (bengali-lexicon.tsv) take PRECEDENCE at runtime, so Google's Dhaka-leaning convention only affects the OOV tail
  * — where the tagger's 90.5% ɔ/o beats the rule engine's 62.6%.

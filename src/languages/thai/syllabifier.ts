@@ -292,7 +292,7 @@ function thaiVowelSpan(
     // lŭaŋ, หมวด → mŭat, หนวด → nŭat. The silent ห makes s[i-1] the real onset, so ว here is the nucleus
     // exactly like the CวC case above; ว just sits at i≥2 (after the leader). Fires word-initial AND
     // mid-word (เมืองหลวง → …lŭaŋ). Needs a following coda consonant (not a vowel/อ). Without this, ว fell
-    // through to a bare /w/ consonant and the leader logic mangled the onset (หลวง → nwoŋ). Run 23.
+    // through to a bare /w/ consonant and the leader logic mangled the onset (หลวง → nwoŋ).
     if (
         c === "ว" &&
         i >= 2 &&

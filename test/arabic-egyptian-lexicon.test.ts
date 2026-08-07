@@ -2,9 +2,10 @@
  * arz (Egyptian Arabic) short-vowel LEXICON — regression guard for the shipped Egyptian vowel data. The MSA
  * neural diacritizer restores MSA short vowels, which are wrong for Egyptian (مصر MSA miṣr → Egyptian maṣr,
  * أنا anā → ana); the lexicon (egyptian-lexicon.tsv, mined from kaikki/Wiktionary Egyptian-Arabic, CC BY-SA)
- * supplies the correct Egyptian vocalization. The referee eval scores the RULE path (lexicon:false) so its 37.3%
- * stays non-circular (kaikki shares Wiktionary with the wikipron-arz referee); this lexicon is a SHIPPED
- * refinement, validated ~88–92% against wikipron-arz at build time.
+ * supplies the correct Egyptian vocalization. ⚠ The referee eval must score the RULE path (lexicon:false) to
+ * stay NON-CIRCULAR: kaikki shares Wiktionary with the wikipron-arz referee, so scoring the lexicon path would
+ * grade the mined data against its own source. This lexicon is a SHIPPED refinement, validated against
+ * wikipron-arz at build time.
  *
  * `createArabic("egyptian", true).text(word)` resolves a lexicon hit synchronously (no ONNX diacritizer needed),
  * so these assertions are deterministic.
@@ -51,8 +52,9 @@ describe("arz Egyptian g2p rules (diacritized input)", () => {
     }
 });
 
-// the mined lexicon once glued a Wiktionary entry's phonemic and phonetic transcriptions together
-// (كتب → "katab/[kˈatab"), and the raw "/[" reached the IPA output as if it were a phoneme. Two layers now:
+// ⚠ A WIKTIONARY ENTRY CAN CARRY TWO TRANSCRIPTIONS — phonemic and phonetic — and a miner that takes the
+// whole field glues them (كتب → "katab/[kˈatab"), so the raw "/[" reaches the IPA output as if it were a
+// phoneme. Two layers guard it:
 // the DATA is repaired, and the loader DROPS any row carrying a structural delimiter, so a re-mine cannot
 // reintroduce it — such a word falls through to the rule g2p instead (unrefined, but never punctuation).
 describe("Egyptian lexicon — no annotation artifacts", () => {
@@ -90,7 +92,7 @@ describe("Egyptian lexicon — no annotation artifacts", () => {
     });
 });
 
-// Foreign-cluster repair (Run 28: سنترال → sntrˈaːl). The diacritizer vocalizes native words and frequent
+// Foreign-cluster repair (سنترال → sntrˈaːl). The diacritizer vocalizes native words and frequent
 // loans but returns rare transliterations bare; the g2p then emits consonant runs no Arabic syllable
 // permits — (C)V(C)(C) allows at most CC, so a 3+ run is always a vocalization failure. Tier 1 re-reads
 // و/ي inside an illegal run as the vowels they carry in loan spellings; tier 2 breaks residual runs with
@@ -126,7 +128,7 @@ describe("Arabic foreign-cluster repair", () => {
 // shared algorithm. Sync path — numberToIpa needs no diacritizer.
 describe("Egyptian numerals", () => {
     it("dialect forms, not MSA", () => {
-        expect(arz.text("80")).toBe("tamaniːn"); // the issue's headline — was θamaːnuːn
+        expect(arz.text("80")).toBe("tamaniːn"); // was θamaːnuːn, with a /θ/ Egyptian does not have
         expect(arz.text("25")).toBe("xamsa wi ʕiʃriːn"); // wi, not wa
         expect(arz.text("90")).toBe("tisʔiːn"); // attested ʕ→ʔ
         expect(arz.text("200")).toBe("miteːn");

@@ -38,7 +38,7 @@ let modernCtxP: Promise<FaContextRestorer | undefined> | undefined;
  * Async because the ONNX pass is.
  */
 export async function phonemizeFaNeural(text: string): Promise<string> {
-    text = normalizePersianOrthography(text); // fold Arabic yeh/kaf → Farsi so the tagger doesn't garble (Run 27)
+    text = normalizePersianOrthography(text); // fold Arabic yeh/kaf → Farsi so the tagger doesn't garble
     // …then the text-normalization pass, so the tagger sees the SAME rewritten text as the sync path (a
     // clock/percentage/ordinal becomes ordinary Persian words, which is exactly what the model was trained on).
     // Everything it emits is bare orthography: the tagger's source alphabet carries no harakat (fa-tagger.meta).
@@ -127,7 +127,7 @@ async function phonemizeFaWordLevel(text: string, restorer: FaVowelRestorer | un
 let contextP: Promise<FaContextRestorer | undefined> | undefined;
 /**
  * OPTIONAL: phonemize a CLASSICAL Persian hemistich/sentence via the sentence-level CONTEXT model — it resolves
- * ezafe / homographs / connectors from context (Run 15, +18.8pp in-domain). ⚠ Classical-scoped: excellent on
+ * ezafe / homographs / connectors from context (+18.8pp in-domain). ⚠ Classical-scoped: excellent on
  * Shahnameh-style verse, but it can hallucinate on short/modern out-of-domain text, so this is NOT the default —
  * use `phonemizeFaNeural` for general/modern text. Falls back to the sync path when the model is unavailable.
  */

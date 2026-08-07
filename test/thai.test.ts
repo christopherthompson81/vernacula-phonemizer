@@ -34,8 +34,8 @@ describe("Thai g2p (ported syllabifier + native IPA render)", () => {
         expect(phonemizeWord("ไม่ว่า")).toBe("mˈa˥˩j wˈaː˥˩"); // ไม่ + ว่า
     });
 
-    it("word-internal kr/pr/tr cluster (ר), not stranded as a coda ר→น", () => {
-        // Rule 3's schwa-deletion must not steal ר's cluster schwa: กรมการ → krom·kaːn, not kon·ma·kaːn.
+    it("word-internal kr/pr/tr cluster (ร), not stranded as a coda ร→น", () => {
+        // Rule 3's schwa-deletion must not steal ร's cluster schwa: กรมการ → krom·kaːn, not kon·ma·kaːn.
         expect(phonemizeWord("กรม")).toBe("krˈo˧m"); // krom (standalone, already worked)
         expect(phonemizeWord("ตรงนั้น")).toBe("trˈo˧ŋna˦˥n"); // troŋ·nan (was ton·ŋa·nan)
         expect(phonemizeWord("ผลกระทบ")).toBe("pʰˈo˩˩˦nkra˨˩tʰˌo˦˥p"); // ผล→pʰon (ל coda) but กร→kra cluster

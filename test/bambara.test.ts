@@ -7,10 +7,10 @@ import { numberToWords } from "../src/languages/bambara/numbers.ts";
 const phonemizeWord = (w: string) => raw(w).normalize("NFC");
 
 // Canonical-IPA goldens for Bambara / Bamanankan (bm) — Mande (Manding), Latin orthography. Hand-adjudicated
-// against kaikki Bambara (Wiktionary, narrow). The greedy g2p + nasalisation scores 86.5% folded vs the referee
-// (tools/referee-eval, 74 words) — the folds strip TONE (2-level H/L + downstep) and vowel LENGTH, both lexical
-// and absent from the standard orthography. These goldens pin the segmental + nasalisation backbone. Tone,
-// length are deferred (numbers are composed in numbers.ts); N'Ko is a second script, folded to Latin.
+// against kaikki Bambara (Wiktionary, narrow) — ⚠ only 74 words, a thin referee. Its folds strip TONE
+// (2-level H/L + downstep) and vowel LENGTH, both lexical and absent from the standard orthography, so these
+// goldens are what pin the segmental + nasalisation backbone. Tone and length are deferred; numbers are
+// composed in numbers.ts; N'Ko is a second script, folded to Latin.
 describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
     test("affricates and sibilant: ⟨c⟩→t͡ʃ, ⟨j⟩→d͡ʒ, ⟨sh⟩→ʃ", () => {
         expect(phonemizeWord("cɔnkɔ")).toBe("t͡ʃɔ̃kɔ".normalize("NFC")); // ⟨c⟩ → t͡ʃ (+ nasal ɔ̃)

@@ -128,7 +128,7 @@ describe("Sindhi tagger mask — glide-deletion guard", () => {
     });
 });
 
-describe("Sindhi: no silent content loss (Run 28)", () => {
+describe("Sindhi: no silent content loss", () => {
     test("the particles ۾ and ۽ are pronounced", () => {
         expect(phonemizeWordShipped("۾").replace(/[ˈˌ]/gu, "")).toBe("mẽ");
         expect(phonemizeWordShipped("۽").replace(/[ˈˌ]/gu, "")).toBe("aẽ");

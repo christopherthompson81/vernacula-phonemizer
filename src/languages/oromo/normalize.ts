@@ -104,7 +104,7 @@ function ordinalStem(word: string): string {
 }
 
 /**
- * Attach a case enclitic to a numeral word. Two classes, both read off the corpus (Run 5):
+ * Attach a case enclitic to a numeral word. Two classes, both read off the corpus:
  *   -n and -f take a LONG link — *tokkoon* ×7, *lamaan* ×9, *sadiin* ×2, *shaniin*, *saddeetiin*,
  *     *tokkoof* ×6, *jahaaf*, *sadiif* ×3, *saddeetiif* — i.e. a short final vowel is lengthened and a
  *     consonant-final stem takes `ii`.

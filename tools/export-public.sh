@@ -19,7 +19,10 @@ echo "verifying the export:"
 # corpus/mined carries Wikipedia text that legitimately contains these shapes; this script and
 # packaging.test.ts name docs/investigations on purpose, so both are excluded from their own check.
 SKIP='corpus/mined|export-public.sh|packaging.test.ts'
-for pat in '/home/[a-z]|/mnt/data|~/Programming' 'espeak-ng-portable' 'docs/investigations'; do
+# `Run N` cites docs/investigations, which the line above deletes — so every such reference is a
+# pointer to something the published tree does not contain. Checked here because nothing else can:
+# they accumulated to 107 across src/, tools/ and test/ (37 of them inside test NAMES) unnoticed.
+for pat in '/home/[a-z]|/mnt/data|~/Programming' 'espeak-ng-portable' 'docs/investigations' '\bRun[ -][0-9]+'; do
     n=$( { grep -rInE "$pat" "$DEST" 2>/dev/null || true; } | { grep -vE "$SKIP" || true; } | wc -l)
     if [ "$n" -eq 0 ]; then echo "  ok    no $pat"; else
         echo "  FAIL  $n hits for $pat"

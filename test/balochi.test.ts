@@ -4,7 +4,7 @@ import { phonemizeWord, phonemizeArabic, phonemizeRoman } from "../src/languages
 
 // Canonical-IPA goldens for Balochi / بلوچی (bal) — Southern Balochi, CROSS-SCRIPT (Arabic + Roman). Authored from
 // Jahani & Korn (2009) + Korn (2005a); the cross-script lexicon is corroborated by ASJP Southern-Balochi (an
-// INDEPENDENT transcriber) at ~97% on the overlapping core vocabulary. The Balochi Arabic abjad under-encodes vowels
+// INDEPENDENT transcriber) on the overlapping core vocabulary. The Balochi Arabic abjad under-encodes vowels
 // (short /a i u/ unwritten + ⟨و⟩/⟨ی⟩ conflate uː/oː, iː/eː); the cross-script lexicon recovers the full vowels the
 // abjad loses, and the Roman orthography is phonemic.
 describe("Balochi (Southern) — cross-script canonical IPA", () => {

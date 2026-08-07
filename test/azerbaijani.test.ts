@@ -8,7 +8,7 @@ import { getPhonemizer } from "../src/registry.ts";
 // Canonical-IPA goldens for Azerbaijani / Azərbaycan dili (az) — North Azerbaijani, Turkic (Oghuz), Latin. A
 // cleanroom rule g2p sharing the Turkish engine shape (vowel harmony already spelled; k/g palatalize before front
 // vowels; dark/clear l; geminate stops; final-syllable stress). Azerbaijani-specific: the extra vowel ə→[æ],
-// a→[ɑ], ö→[œ]; q→[ɡ] (final→x); x→[x], ğ→[ɣ]. Validated ~81.6% vs wikipron aze narrow + 66.4% vs epitran.
+// a→[ɑ], ö→[œ]; q→[ɡ] (final→x); x→[x], ğ→[ɣ]. Referees: wikipron aze narrow + epitran.
 describe("Azerbaijani canonical IPA", () => {
     test("vowels a→ɑ, ə→æ, ö→œ, ü→y", () => {
         expect(phonemizeWord("salam")).toBe("sɑɫˈɑm"); // a → ɑ, dark-l

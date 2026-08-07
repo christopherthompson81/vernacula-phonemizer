@@ -84,8 +84,7 @@ const IV_VS = "\u0000";
 // internal-doubling, Pali/Sanskrit loanword vowels. These are LEXICAL (not derivable from the spelling, per
 // Huffman 1970), so — the Romanian-stress / akan-tone pattern — a mined lexicon carries them and the shipped
 // phonemizeWord consults it dict-first. phonemizeWordRules NEVER reads it, keeping the referee eval non-circular
-// (the lexicon is derived FROM the wikipron referee). Mined by tools/gen/build-km-lexicon.mts. See
-// Run 5.
+// (the lexicon is derived FROM the wikipron referee). Mined by tools/gen/build-km-lexicon.mts.
 const LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon.tsv", undefined, { optional: true });
 
 /**

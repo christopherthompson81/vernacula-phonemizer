@@ -798,7 +798,7 @@ if (mode === "__module__") {
     const empty = CELLS.filter((c) => (result.counts[c.key] ?? 0) === 0).map((c) => c.key);
     console.log(`\ncovered ${CELLS.length - empty.length}/${CELLS.length} cells`);
     if (empty.length > 0) {
-        // An empty cell is a QUERY TO RUN OR A TOOL BUG — never evidence on its own. Run 1 read six empty
+        // An empty cell is a QUERY TO RUN OR A TOOL BUG — never evidence on its own. One sweep read six empty
         // cells as "Burmese does not write those" and a targeted search found 1013 articles with a
         // percentage; later, three dot-bearing cells read empty because the SPLITTER was eating the dots.
         // Print what to do next rather than a conclusion.

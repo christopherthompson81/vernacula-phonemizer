@@ -49,13 +49,12 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
     });
 
     test("the table covers the sweep's whole residual, per class", () => {
-        // ⚠ `mi` WAS REMOVED FROM THIS LIST, and the removal is the point of the gate rather than an
-        // exception to it. Its entry accepted `+30 tākiri` as correctly silent because Māori's inventory could
-        // not say the attested English loan — but that engine now has an English READER for words it cannot
-        // spell, so the plus now reads [plˈʌs], the drop no longer happens, and the accept had nothing left to
-        // cover. A baseline entry that can never fire is worse than none: it would mask exactly the regression
-        // this table exists to make visible. Removed there, and here, together.
-        // ⚠ `km` WAS ADDED LATER, and it is the first entry here that is not a designation.
+        // ⚠ AN ENTRY THAT CAN NO LONGER FIRE MUST BE DELETED, not left as harmless ballast: it would mask
+        // exactly the regression this table exists to make visible. `mi` used to sit here, accepting
+        // `+30 tākiri` as correctly silent because Māori's inventory could not say the attested English loan.
+        // Once that engine gained an English READER for words it cannot spell, the plus read [plˈʌs], the drop
+        // stopped happening, and the accept covered nothing. Deleted from both lists together.
+        // ⚠ `km` is the one entry here that is NOT a designation.
         // The km wiki carries a programming tutorial whose code reaches the corpus, and the percent cell selects
         // it because `%` beside letters is exactly what that cell looks for. The `%` in `scanf("%lf %lf", …)` is
         // a C conversion flag, so silence is the CORRECT reading and a rule that voiced it would be the defect.
@@ -73,12 +72,12 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
     test("classes are independent — an accept for one class never covers another", () => {
         // my accepts a compound-joiner `+` (math-sign) and an apposition `-` (minus) SEPARATELY. Neither may
         // stand in for the other, and no class may borrow a sibling's list.
-        expect(isAcceptedSilent("my", "math-sign", "\u1021\u1001\u103B\u102D\u1014\u103A+\u101B\u1015\u103A\u101D\u1014\u103A\u1038\u1011\u102F", MATH)).toBe(true);
-        expect(isAcceptedSilent("my", "minus", "\u1021\u1001\u103B\u102D\u1014\u103A+\u101B\u1015\u103A\u101D\u1014\u103A\u1038\u1011\u102F", MINUS)).toBe(false);
+        expect(isAcceptedSilent("my", "math-sign", "အချိန်+ရပ်ဝန်းထု", MATH)).toBe(true);
+        expect(isAcceptedSilent("my", "minus", "အချိန်+ရပ်ဝန်းထု", MINUS)).toBe(false);
         // An UNLISTED word-joining plus in my still reports — the accept names the two spacetime compounds,
         // not the shape.
-        expect(isAcceptedSilent("my", "math-sign", "\u1000+\u1001", MATH)).toBe(false);
+        expect(isAcceptedSilent("my", "math-sign", "က+ခ", MATH)).toBe(false);
         // xh's accepted stray hyphen is minus-only; its `+` is now VOICED and must not be accepted at all.
-        expect(isAcceptedSilent("xh", "math-sign", "kwe +30\u00B0C", MATH)).toBe(false);
+        expect(isAcceptedSilent("xh", "math-sign", "kwe +30°C", MATH)).toBe(false);
     });
 });

@@ -78,8 +78,8 @@ describe("bengali canonical IPA", () => {
         expect(phonemizeWord("ঘোষণা")).toBe("ɡʱoʃona"); // medial-ɔ retention (consensus insert/delete class)
         expect(phonemizeWord("বলে")).toBe("bole"); // verb ô→o before -e (hand supplement)
         expect(phonemizeWord("কম")).toBe("kɔm"); // minimal-pair partner of মন — genuinely stays ɔ
-        // জীবন: Run 16 corrected — the gold+rule had mis-defaulted it to d͡ʒibɔn (a shared blind spot), but
-        // Google AND wikipron independently corroborate [o]; the lexicon now pins the correct d͡ʒibon.
+        // জীবন: the gold and the rule engine BOTH mis-defaulted it to d͡ʒibɔn — a shared blind spot, so the
+        // gold could not catch it. Google and wikipron independently corroborate [o]; the lexicon pins d͡ʒibon.
         expect(phonemizeWord("জীবন")).toBe("d͡ʒibon");
         // the rule engine is the honest, lexicon-free signal:
         expect(phonemizeWordRules("মন")).toBe("mɔn");
@@ -91,9 +91,10 @@ describe("bengali canonical IPA", () => {
     });
 });
 
-// the sixth language. Two of the three defects were NOT in the normalization layer: the numbers
-// data was missing its fused 21-99 forms, and clausePunctuation mapped every mark to ITSELF padded with
-// spaces, so raw dandas reached the output on 2,949 of 3,006 corpus utterances.
+// TEXT NORMALIZATION. ⚠ Two of the three defects this covers are NOT in the normalization layer at all —
+// the numbers data was missing its fused 21-99 forms, and clausePunctuation mapped every mark to ITSELF
+// padded with spaces, so raw dandas reached the output on 2,949 of 3,006 corpus utterances. Reading the
+// normalizer alone would have found neither.
 describe("bengali normalization", () => {
     test("21-99 are fused words, not unit+tens", () => {
         // Bengali, unlike a decimal-compositional language, has its own word for every number to 100. The
@@ -128,9 +129,9 @@ describe("bengali normalization", () => {
         expect(phonemize("১লা জানুয়ারি", "bn")).toBe("pɔɦela d͡ʒanujaɾi"); // পহেলা
     });
 
-    test("symbols: Bengali had no symbol tier at all", () => {
-        // % and every currency sign were DROPPED outright, and the digit fold is what lets the shared
-        // ASCII-keyed tier see a Bengali-digit amount.
+    test("symbols: the shared tier reads Bengali digits and signs", () => {
+        // Without a symbol tier, % and every currency sign are DROPPED outright; the digit fold is what lets
+        // the shared ASCII-keyed tier see a Bengali-digit amount at all.
         expect(phonemize("3%", "bn")).toBe("t̪in ʃɔt̪aŋʃo");
         expect(phonemize("৮%", "bn")).toBe("aʈ ʃɔt̪aŋʃo"); // Bengali digits — the sign was dropped
         expect(phonemize("৳৫০০", "bn")).toBe("pãt͡ʃ ʃɔt̪ ʈaka");
@@ -157,9 +158,9 @@ describe("bengali normalization", () => {
         expect(phonemize("19,500 km²", "bn")).toContain("bɔɾɡo kilomiʈaɾ");
     });
 
-    // `120-160 কিউবিক মিটার জ্বালানি তেল`, the loan, word-first. This is the word an earlier pass could
-    // not find: it probed ঘন (×19 — the reduplicated adverb "frequently") and `ঘনমিটার` (×0), and the corpus
-    // uses neither.
+    // `120-160 কিউবিক মিটার জ্বালানি তেল` — the loan, word-first. ⚠ Do NOT reach for the native-looking
+    // candidates: ঘন scores ×19 but every hit is the reduplicated adverb "frequently", and `ঘনমিটার` is ×0.
+    // The corpus uses neither.
     test("the cubed measure word", () => {
         expect(phonemize("120 m³", "bn")).toContain("kiubik miʈaɾ");
     });

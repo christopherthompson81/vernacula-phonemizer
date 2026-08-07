@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run 6 probe: is Hindi/Urdu REGISTER divergence a true factor in the covered-word misses? A Perso-Arabic-origin
+"""Probe: is Hindi/Urdu REGISTER divergence a true factor in the covered-word misses? A Perso-Arabic-origin
 word (diagnostic letters ع ح ذ ض ظ ط ص ث, or ق) borrowed via Persian/Arabic often takes an Arabic vowel pattern
 (short ɪ/ʊ, ع→ʔ) that the HINDI cognate we stored reads differently (Hindi ə/eː, ع dropped). Quantify:
   (1) of covered words that MISS wikipron, how many are register-suspect (Perso-Arabic letter) vs not;

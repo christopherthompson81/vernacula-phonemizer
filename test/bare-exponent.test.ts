@@ -1,10 +1,10 @@
 /**
  * ARBITRARY EXPONENT READING — squared, cubed, and "to the power of N" on a BARE base.
  *
- * Before this, EVERY language in the fleet dropped an exponent that had no unit to modify. Measured on the
- * same probe across eight: `20²` read as the bare number in all of them — en *twˈɛnti*, de *t͡svˈant͡sɪç*,
- * fr *vˈɛ̃*, es *bˈeᶦnte*, it *vˈenti*, hi *bˈiːs*, pt *vˈĩtɨ*, ru *dvˈat͡sətʲ*. The whole exponent machinery
- * was unit-only, so a power with nothing to modify vanished silently.
+ * ⚠ EXPONENT MACHINERY BUILT AROUND UNITS DROPS A BARE POWER SILENTLY. Measured on one probe across eight
+ * languages, `20²` read as the plain number in every one — en *twˈɛnti*, de *t͡svˈant͡sɪç*, fr *vˈɛ̃*,
+ * es *bˈeᶦnte*, it *vˈenti*, hi *bˈiːs*, pt *vˈĩtɨ*, ru *dvˈat͡sətʲ* — because a power with nothing to
+ * modify never reached a rule.
  *
  * ⚠ THE PREDICATE IS A DIFFERENT WORD FROM THE UNIT MODIFIER, which is why this needed new data rather than a
  * reuse: English reads *square kilometres* but *twenty SQUARED*; Italian *chilometri quadrati* but
@@ -93,9 +93,9 @@ describe("bare exponent", () => {
         expect(phonemize("Smith¹ said", "en")).not.toContain("pʰˈaᶷɚ");
         expect(phonemize("the theory² holds", "en")).not.toContain("skwˈɛɹd");
         expect(phonemize("evidence³ shows", "en")).not.toContain("kjˈuːbd");
-        // ⚠ THE CAP ALONE DID NOTHING. `{1,3}` matches the LAST three letters of a long word, so `Smith¹`
-        // matched `ith` and still read *smˈɪθ tʰuː ðə pʰˈaᶷɚ ʌv wˈʌn*. The `(?<![A-Za-z])` boundary is what
-        // makes a length limit limit anything, and this test exists because the first version shipped without it.
+        // ⚠ THE CAP ALONE DOES NOTHING. `{1,3}` matches the LAST three letters of a long word, so `Smith¹`
+        // matches `ith` and still reads *smˈɪθ tʰuː ðə pʰˈaᶷɚ ʌv wˈʌn*. The `(?<![A-Za-z])` boundary is what
+        // makes a length limit limit anything.
         expect(phonemize("Smith¹ said", "en")).toBe(phonemize("Smith said", "en"));
         // Short bases — real mathematical variables — are unaffected.
         expect(phonemize("mc²", "en")).toContain("skwˈɛɹd");
@@ -103,8 +103,8 @@ describe("bare exponent", () => {
     });
 
     test("NEGATIVE exponents", () => {
-        // "Negative exponents in scientific notation — has a cell now, no rule." U+207B was missing from the
-        // superscript run, so `10⁻³¹` read as bare *tʰˈɛn*: sign and power both gone.
+        // ⚠ U+207B SUPERSCRIPT MINUS must be in the superscript run. Without it `10⁻³¹` reads as bare
+        // *tʰˈɛn* — sign and power both gone.
         expect(phonemize("10⁻³¹", "en")).toContain("pʰˈaᶷɚ ʌv nˈɛɡət̬ɪv");
         expect(phonemize("2⁻⁵", "en")).toContain("nˈɛɡət̬ɪv fˈaᶦv");
         // Every declared language reads it, each with its OWN sign word taken from its existing minus rule.
@@ -137,7 +137,7 @@ describe("bare exponent", () => {
         expect(phonemize("from 10 - 31", "en")).not.toContain("pʰˈaᶷɚ");
     });
 
-    test("⚠ THREE ENCODINGS, ONE READING — and the markup one was OUR data loss", () => {
+    test("⚠ THREE ENCODINGS, ONE READING — including the markup form that flattening destroys", () => {
         // A caller hands a phonemizer whichever encoding is at hand. All three must land on the same reading.
         const want = phonemize("19,500 km²", "en");
         expect(phonemize("19,500 km<sup>2</sup>", "en")).toBe(want);   // HTML markup
@@ -149,13 +149,14 @@ describe("bare exponent", () => {
         expect(phonemize("9.11 × 10<sup>-31</sup> kg", "en")).toBe(neg);
         expect(phonemize("9.11 × 10^-31 kg", "en")).toBe(neg);
 
-        // ⚠ THE MARKUP CASE WAS A LOSS WE CAUSED, not the source's. Stripping `<sup>` left the digits INLINE,
-        // so `2.802×10<sup>10</sup>` became `2.802×1010` — the exponent merged into the mantissa. The arithmetic
-        // proves it: hi's `2,603 वर्ग किलोमीटर (2.802×1010 वर्ग फुट)` only reconciles as 2.802×10¹⁰ sq ft.
+        // ⚠ THE MARKUP CASE IS A LOSS THE PIPELINE CAUSES, not one the source arrived with. Stripping `<sup>`
+        // leaves the digits INLINE, so `2.802×10<sup>10</sup>` becomes `2.802×1010` — the exponent merges into
+        // the mantissa. The arithmetic proves which reading was meant: hi's
+        // `2,603 वर्ग किलोमीटर (2.802×1010 वर्ग फुट)` only reconciles as 2.802×10¹⁰ sq ft.
         expect(phonemize("2.802×10<sup>10</sup>", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn");
-        // ⚠ AND MY FIRST CLAIM ABOUT WHY IT HID WAS WRONG, which this assertion caught. I wrote that the unit
-        // case "survives flattening because the tier accepts an ASCII exponent" — true for 7 of the 9 tier
-        // languages that carry `km2` (el es ml bg ne hu cmn), but NOT for en, sw or nb. In those three the `2`
+        // ⚠ AND THE OBVIOUS EXPLANATION IS WRONG — this assertion is what catches it. "The unit case survives
+        // flattening because the tier accepts an ASCII exponent" holds for 7 of the 9 tier languages that carry
+        // `km2` (el es ml bg ne hu cmn), but NOT for en, sw or nb. In those three the `2`
         // fell out of the unit match and read as a SEPARATE NUMBER: "nineteen thousand five hundred kilometres
         // TWO". Audibly wrong, and invisible to both gates — no superscript survives to leak, nothing vanishes.
         // en now accepts the ASCII exponent (bounded by the unit list, so `H2O` cannot match). sw and nb differ
@@ -187,7 +188,7 @@ describe("bare exponent", () => {
         expect(phonemize("&notareal; thing", "en")).toBeTruthy();
     });
 
-    test("⚠ ENGLISH LEAKED ITS UNIT ACROSS A MAGNITUDE WORD — found by chasing the flattened exponent", () => {
+    test("⚠ ENGLISH LEAKS ITS UNIT ACROSS A MAGNITUDE WORD", () => {
         // `2.2 million km2 of ocean` — the archipelago sentence, in en_us — read as *… mˈɪɫjən ˈʊkm tʰˈuː …*:
         // the abbreviation reached the phoneme stream AS RAW LETTERS and the area was lost entirely. Invisible
         // to every gate, because bare Latin letters are in no leak class and nothing vanished for DROP to catch.

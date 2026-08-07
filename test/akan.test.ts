@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest";
 import { phonemizeWord, phonemizeWordRules } from "../src/languages/akan/akan.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
-// Canonical-IPA goldens for Akan / Akan kasa (ak) — a Kwa (Niger-Congo) language of Ghana, the fleet's FIRST Kwa
-// language. Shallow, well-standardised Latin orthography (Asante/Akuapem Twi + Fante). Segmental signature: the
+// Canonical-IPA goldens for Akan / Akan kasa (ak) — a Kwa (Niger-Congo) language of Ghana.
+// Shallow, well-standardised Latin orthography (Asante/Akuapem Twi + Fante). Segmental signature: the
 // consonant DIGRAPH system (palatal ⟨ky gy hy ny⟩ → t͡ɕ d͡ʑ ɕ ɲ + labialised ⟨tw dw kw gw hw nw⟩ → t͡ɕʷ d͡ʑʷ kʷ ɡʷ ɕʷ
 // ŋʷ), Glide Formation (boa→bwa), coda-nasal + Labial Nasalization (Paster 2010), and ATR harmony. TONE (H/L) and
 // vowel nasality are lexical (unwritten) → carried by a mined lexicon on the SHIPPED phonemizeWord (Chao letters
@@ -63,8 +63,8 @@ describe("Akan (Twi) canonical IPA", () => {
         expect(ak.text("555").trim()).toBe("ahanum adwonum nnum"); // ahanum aduonum nnum
         expect(ak.text("1000").trim()).toBe("apem");
         expect(ak.text("2000").trim()).toBe("mpem mmienu");
-        // REGRESSION: numberWords had no 10⁶/10⁹ branch, so the multiplier hit hundreds[9] and 1000000 came out
-        // as the stringified sentinel "mpem undefined".
+        // ⚠ 10⁶/10⁹ need their OWN branch. Without one the multiplier indexes past the end of the hundreds
+        // table and the undefined slot stringifies straight into the output ("mpem undefined").
         expect(ak.text("1000000").trim()).toBe("ɔpɪpɪm"); // ɔpepem (⟨e⟩ → ɪ by −ATR harmony)
         expect(ak.text("1000000000").trim()).toBe("ɔpɪpɪpɪm"); // ɔpepepem
     });

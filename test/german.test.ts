@@ -62,169 +62,169 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("endlich")).toBe("ˈɛndlɪç"); // NOT end·lich (end isn't a word)
     });
 
-    test("Run 40 — the ⟨hör⟩ root keeps its h after a prefix (gehör, behörde)", () => {
+    test("the ⟨hör⟩ root keeps its h after a prefix (gehör, behörde)", () => {
         expect(phonemizeWord("gehör")).toBe("ɡəhˈøːɐ̯"); // ge+hör: h is a real onset (was dropped)
         expect(phonemizeWord("Behörde")).toBe("bəhˈøːɐ̯də");
         expect(phonemizeWord("gehen")).toBe("ɡˈeːən"); // control: silent lengthening h stays silent
         expect(phonemizeWord("fröhlich")).toBe("fʁˈøːlɪç"); // control: öh (not hö) stays silent
     });
 
-    test("Run 39 — \"mit\" prefix needs a real-word stem (mittel not mit·tel)", () => {
+    test("\"mit\" prefix needs a real-word stem (mittel not mit·tel)", () => {
         expect(phonemizeWord("mittelmäßig")).toBe("mˈɪtəlmɛsɪç"); // mittel·mäßig: tt collapses (was mit·telmäßig → ɪttəl)
         expect(phonemizeWord("mitteilen")).toBe("mˈɪttaɪ̯lən"); // control: real mit·teilen (teilen is a word)
     });
 
-    test("Run 38 — negation un- before a prefix blocks the ng→ŋ merge (ungefähr)", () => {
+    test("negation un- before a prefix blocks the ng→ŋ merge (ungefähr)", () => {
         expect(phonemizeWord("ungefähr")).toBe("ˈʊnɡəfɛːɐ̯"); // un·ge → nɡ (not ŋ), un → ʊn
         expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // control: un+ion NOT split (ion after un isn't a prefix)
         expect(phonemizeWord("Universität")).toBe("ʊnifɛʁzitˈɛːt"); // control: not un-prefixed
     });
 
-    test("Run 37 — monomorphemic ge-/er-+st keeps alveolar st (gestern, erst)", () => {
+    test("monomorphemic ge-/er-+st keeps alveolar st (gestern, erst)", () => {
         expect(phonemizeWord("gestern")).toBe("ɡˈɛstɐn"); // NOT ge·stern → ʃt
         expect(phonemizeWord("erst")).toBe("eːɐ̯st");
         expect(phonemizeWord("Gestein")).toBe("ɡəʃtˈaɪ̯n"); // control: real ge- prefix → ʃt
         expect(phonemizeWord("erstaunen")).toBe("ɛɐ̯ʃtˈaʊ̯nən"); // control: real er- prefix → ʃt
     });
 
-    test("Run 36 — particle-verb seam splits (fest·stellen → st → ʃt)", () => {
+    test("particle-verb seam splits (fest·stellen → st → ʃt)", () => {
         expect(phonemizeWord("feststellen")).toBe("fˈɛstʃtɛlən"); // fest·stellen: seam st → ʃt
         expect(phonemizeWord("klarstellen")).toBe("klˈaːɐ̯ʃtɛlən");
         expect(phonemizeWord("schreiben")).toBe("ʃʁˈaɪ̯bən"); // control: simplex verb stays whole (no seam)
         expect(phonemizeWord("Klarinette")).toBe("klaʁinˈɛtə"); // control: klar+inette NOT split (inette not a constituent)
     });
 
-    test("Run 34 — doubled voiced obstruent collapses before devoicing (Krabbe → kʁabə)", () => {
+    test("doubled voiced obstruent collapses before devoicing (Krabbe → kʁabə)", () => {
         expect(phonemizeWord("Krabbe")).toBe("kʁˈabə"); // bb → b (was wrongly kʁapbə)
         expect(phonemizeWord("Widder")).toBe("vˈɪdɐ"); // dd → d
         expect(phonemizeWord("Smaragd")).toBe("smaʁˈakt"); // control: real coda cluster gd → kt still devoices
     });
 
-    test("Run 33 — loanword full unstressed vowel (ə → ɛ/e), native schwa protected", () => {
+    test("loanword full unstressed vowel (ə → ɛ/e), native schwa protected", () => {
         expect(phonemizeWord("Talent")).toBe("talˈɛnt"); // loanword -ent → ɛ (was ə)
         expect(phonemizeWord("Dokument")).toBe("dɔkumˈɛnt");
         expect(phonemizeWord("machen")).toBe("mˈaxən"); // control: native weak-schwa stays ə
         expect(phonemizeWord("gemacht")).toBe("ɡəmˈaxt"); // control: native ge- prefix stays ə
     });
 
-    test("Run 32 — word-final French -eur → øːɐ̯ (not the ɔʏ̯ diphthong)", () => {
+    test("word-final French -eur → øːɐ̯ (not the ɔʏ̯ diphthong)", () => {
         expect(phonemizeWord("Friseur")).toBe("fʁizˈøːɐ̯"); // -eur loan suffix → øːɐ̯
         expect(phonemizeWord("Amateur")).toBe("amatˈøːɐ̯");
         expect(phonemizeWord("Steuer")).toBe("ʃtˈɔʏ̯ɐ"); // control: -euer is eu+er → diphthong stays
     });
 
-    test("Run 31 — unstressed uː/oː lax to ʊ/ɔ (Latinate -ium/-um)", () => {
+    test("unstressed uː/oː lax to ʊ/ɔ (Latinate -ium/-um)", () => {
         expect(phonemizeWord("Aluminium")).toBe("aːluːmˈiːni̯ʊm"); // -ium → ʊm (was uːm)
         expect(phonemizeWord("Zentrum")).toBe("t͡sˈɛntʁʊm"); // -um → ʊm
         expect(phonemizeWord("Buch")).toBe("buːx"); // control: STRESSED uː stays long (build skips stressed)
     });
 
-    test("Run 30 — -nis suffix devoices a bound stem's final obstruent", () => {
+    test("-nis suffix devoices a bound stem's final obstruent", () => {
         expect(phonemizeWord("Bündnis")).toBe("bˈʏntnɪs"); // bünd·nis: d → t at the boundary
         expect(phonemizeWord("Ergebnis")).toBe("ɛɐ̯ɡˈeːpnɪs"); // ergeb·nis: b → p
         expect(phonemizeWord("Tennis")).toBe("tˈɛnɪs"); // control: monomorphemic (sonorant stem) → NOT split
     });
 
-    test("Run 29 — -er restore before consonant lexicon unblocks loanword v→v", () => {
+    test("-er restore before consonant lexicon unblocks loanword v→v", () => {
         expect(phonemizeWord("universal")).toBe("univɛʁzˈaːl"); // v now lands (was f) — ʁ inserted before applyConsonant
         expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: native ⟨v⟩ → f unchanged
     });
 
-    test("Run 28 — loanword -er restoration lexicon (unstressed ɐ → ɛʁ)", () => {
+    test("loanword -er restoration lexicon (unstressed ɐ → ɛʁ)", () => {
         expect(phonemizeWord("Adverb")).toBe("ˈatfɛʁp"); // loanword unstressed -er → ɛʁ (was ɐ)
         expect(phonemizeWord("Expertise")).toBe("ɛkspɛʁtˈiːzə");
         expect(phonemizeWord("Wasser")).toBe("vˈasɐ"); // control: native -er stays reduced ɐ
         expect(phonemizeWord("Wanderer")).toBe("vˈandəʁɐ"); // control: native medial -er (ə/ɐ), not restored
     });
 
-    test("Run 27 — unstressed i in medial hiatus → glide i̯ (Latinate -iVC-)", () => {
+    test("unstressed i in medial hiatus → glide i̯ (Latinate -iVC-)", () => {
         expect(phonemizeWord("Union")).toBe("uːni̯ˈoːn"); // -ion → i̯oːn
         expect(phonemizeWord("genial")).toBe("ɡeni̯ˈaːl"); // -ial → i̯aːl
         expect(phonemizeWord("Material")).toBe("maːteːʁi̯ˈaːl");
         expect(phonemizeWord("Liberia")).toBe("libˈeːʁia"); // control: word-final -iV# stays syllabic
     });
 
-    test("Run 26 — recurse into a prefixed compound constituent (wahn·vor·stellung)", () => {
+    test("recurse into a prefixed compound constituent (wahn·vor·stellung)", () => {
         expect(phonemizeWord("Wahnvorstellung")).toBe("vˈaːnfoːɐ̯ʃtɛlʊŋ"); // inner vor·stellung → st → ʃt
         expect(phonemizeWord("Vorstellung")).toBe("fˈoːɐ̯ʃtɛlʊŋ"); // control: standalone still correct
         expect(phonemizeWord("Donaudampfschiff")).toBe("dˈoːnaʊ̯dampfʃɪf"); // control: unaffected compound
     });
 
-    test("Run 25 — a STRESSED bare ɐ is a wrongly-reduced -er → ɛʁ", () => {
+    test("a STRESSED bare ɐ is a wrongly-reduced -er → ɛʁ", () => {
         expect(phonemizeWord("Laterne")).toBe("latˈɛʁnə"); // stressed -er → ɛʁ (was ɐ)
         expect(phonemizeWord("Inferno")).toBe("ɪnfˈɛʁno");
         expect(phonemizeWord("Wasser")).toBe("vˈasɐ"); // control: UNSTRESSED -er stays reduced ɐ
     });
 
-    test("Run 24 — vocalized coda-r ɐ̯ holds a consonant slot (unblocks the lexicon)", () => {
+    test("vocalized coda-r ɐ̯ holds a consonant slot (unblocks the lexicon)", () => {
         expect(phonemizeWord("Marge")).toBe("mˈaɐ̯ʒə"); // ʒ correction now lands (was skew-blocked by the r)
         expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: native word, corrections unchanged
     });
 
-    test("Run 23 — French -age/-ge loans: g → ʒ", () => {
+    test("French -age/-ge loans: g → ʒ", () => {
         expect(phonemizeWord("Garage")).toBe("ɡaʁˈaːʒə"); // -age loan → ʒ
         expect(phonemizeWord("Etage")).toBe("etˈaːʒə");
         expect(phonemizeWord("Regen")).toBe("ʁˈeːɡən"); // control: native ⟨g⟩ stays ɡ
     });
 
-    test("Run 22 — unstressed Latinate -ie/-ien suffix → i̯ə/i̯ən", () => {
+    test("unstressed Latinate -ie/-ien suffix → i̯ə/i̯ən", () => {
         expect(phonemizeWord("Familie")).toBe("famˈiːli̯ə"); // unstressed -ie → i̯ə
         expect(phonemizeWord("Ferien")).toBe("fˈeːʁi̯ən"); // -ien → i̯ən
         expect(phonemizeWord("Melodie")).toBe("melodˈiː"); // final-STRESSED loan → iː (restore post-pass)
         expect(phonemizeWord("Knie")).toBe("kniː"); // control: monosyllable (no preceding vowel) → iː
     });
 
-    test("Run 21 — voiced obstruent devoices before ç/x/ʃ", () => {
+    test("voiced obstruent devoices before ç/x/ʃ", () => {
         expect(phonemizeWord("Mädchen")).toBe("mˈɛːtçən"); // d before ç (ch) → t
         expect(phonemizeWord("Bildchen")).toBe("bˈɪltçən"); // control: cross-boundary case still devoices
     });
 
-    test("Run 20 — long ä is always ɛː (never eː)", () => {
+    test("long ä is always ɛː (never eː)", () => {
         expect(phonemizeWord("Ärzte")).toBe("ˈɛːɐ̯t͡stə"); // cluster-preceded long ä → ɛː (not eː)
         expect(phonemizeWord("Gespräch")).toBe("ɡəʃpʁˈɛːç");
         expect(phonemizeWord("Hätte")).toBe("hˈɛtə"); // control: genuinely-short ä → ɛ (marker normalised)
         expect(phonemizeWord("Käse")).toBe("kˈɛːzə"); // control: open-syllable long ä unaffected
     });
 
-    test("Run 19 — recurse into a known constituent (triple compound seam)", () => {
+    test("recurse into a known constituent (triple compound seam)", () => {
         expect(phonemizeWord("Waffenstillstand")).toBe("vˈafənʃtɪlʃtant"); // waffen·still·stand: inner st → ʃt
         expect(phonemizeWord("Landstraße")).toBe("lˈantʃtʁaːsə"); // control: 2-part still splits
     });
 
-    test("Run 18 — -igkeit: ⟨g⟩ between i and k → ç", () => {
+    test("-igkeit: ⟨g⟩ between i and k → ç", () => {
         expect(phonemizeWord("Geschwindigkeit")).toBe("ɡəʃvˈɪndɪçkaɪ̯t"); // -igk- → ɪçk
         expect(phonemizeWord("Iglu")).toBe("ˈiːɡlu"); // control: igl (not igk) → ɡl
     });
 
-    test("Run 17 — unstressed -igen i → ɪ (stressed iː protected)", () => {
+    test("unstressed -igen i → ɪ (stressed iː protected)", () => {
         expect(phonemizeWord("würdigen")).toBe("vˈʏɐ̯dɪɡən"); // -ig- unstressed → ɪ (was long iːɡ)
         expect(phonemizeWord("Liga")).toBe("lˈiːɡa"); // control: STRESSED iː stays long (build skips stressed)
     });
 
-    test("Run 16 — mid-compound reduction recovered (kaikki syllabic n̩ expanded)", () => {
+    test("mid-compound reduction recovered (kaikki syllabic n̩ expanded)", () => {
         expect(phonemizeWord("Christentum")).toBe("kʁˈɪstəntuːm"); // christen·tum: -en → ə (was ɛ)
         expect(phonemizeWord("Heidelbeere")).toBe("hˈaɪ̯dəlbeːʁə"); // heidel- -el → ə
     });
 
-    test("Run 15 — split ordering: prefer the whole-word lexeme (schreib·en not schrei·ben)", () => {
+    test("split ordering: prefer the whole-word lexeme (schreib·en not schrei·ben)", () => {
         expect(phonemizeWord("schreiben")).toBe("ʃʁˈaɪ̯bən"); // known verb → schreib·en, not the schrei·ben compound
         expect(phonemizeWord("Waldsterben")).toBe("vˈaltʃtɛɐ̯bən"); // control: a non-lexeme compound still splits
     });
 
-    test("Run 13 — loanword consonants (v→v, s→s), native unchanged", () => {
+    test("loanword consonants (v→v, s→s), native unchanged", () => {
         expect(phonemizeWord("Vase")).toBe("vˈaːzə"); // LOANWORD ⟨v⟩ → v
         expect(phonemizeWord("Pseudonym")).toBe("psɔʏ̯donˈyːm"); // loanword initial ⟨s⟩ → s (not z)
         expect(phonemizeWord("Vater")).toBe("fˈaːtɐ"); // control: NATIVE ⟨v⟩ → f
         expect(phonemizeWord("Sonne")).toBe("zˈɔnə"); // control: native initial ⟨s⟩ → z
     });
 
-    test("Run 12 — split ranking: don't shatter ⟨sch⟩ (…schen verb, not raus·chen)", () => {
+    test("split ranking: don't shatter ⟨sch⟩ (…schen verb, not raus·chen)", () => {
         expect(phonemizeWord("rauschen")).toBe("ʁˈaʊ̯ʃən"); // rausch·en (sch = ʃ), NOT raus·chen (s+ç)
         expect(phonemizeWord("waschen")).toBe("vˈaʃən");
         expect(phonemizeWord("Tuch")).toBe("tuːx"); // control: ⟨ch⟩ unaffected
     });
 
-    test("Run 11 — word-initial ch (ç/k) + coda-cluster final devoicing", () => {
+    test("word-initial ch (ç/k) + coda-cluster final devoicing", () => {
         expect(phonemizeWord("China")).toBe("çˈiːna"); // initial ch + front vowel → ç
         expect(phonemizeWord("Christ")).toBe("kʁɪst"); // initial ch + consonant → k
         expect(phonemizeWord("Chaos")).toBe("kˈaːɔs"); // initial ch + back vowel → k
@@ -233,36 +233,36 @@ describe("german canonical IPA", () => {
         expect(phonemizeWord("Adler")).toBe("ˈaːdlɐ"); // control: d before a sonorant stays voiced
     });
 
-    test("Run 10 — compound-split retry after a suffix strip (fires the seam st→ʃt)", () => {
+    test("compound-split retry after a suffix strip (fires the seam st→ʃt)", () => {
         expect(phonemizeWord("Waldsterben")).toBe("vˈaltʃtɛɐ̯bən"); // wald·sterben: seam st→ʃt (was waldsterb·en)
         expect(phonemizeWord("leben")).toBe("lˈeːbən"); // control: a simple -en word is NOT wrongly compound-split
     });
 
-    test("Run 9 — unstressed loanword vowel tensing (lax → tense, kaikki-derived quality lexicon)", () => {
+    test("unstressed loanword vowel tensing (lax → tense, kaikki-derived quality lexicon)", () => {
         expect(phonemizeWord("November")).toBe("nofˈɛmbɐ"); // ɔ → o
         expect(phonemizeWord("digital")).toBe("diɡitˈaːl"); // ɪ → i (×2)
         expect(phonemizeWord("Dezember")).toBe("det͡sˈɛmbɐ"); // ɛ → e
         expect(phonemizeWord("Plural")).toBe("pluʁˈaːl"); // ʊ → u
     });
 
-    test("Run 8 — no stressed schwa (weak-schwa mis-fire on a stressed root → ɛ, lengthened where flagged)", () => {
+    test("no stressed schwa (weak-schwa mis-fire on a stressed root → ɛ, lengthened where flagged)", () => {
         expect(phonemizeWord("gesetz")).toBe("ɡəzˈɛt͡s"); // setz is the stressed root, not a schwa ending
         expect(phonemizeWord("generell")).toBe("ɡenəʁˈɛl");
         expect(phonemizeWord("Problem")).toBe("pʁoblˈeːm"); // ɛ→eː (length 1L) + unstressed ɔ→o (quality lexicon)
         expect(phonemizeWord("machen")).toBe("mˈaxən"); // control: genuine unstressed -en schwa unaffected
     });
 
-    test("Run 7 — unstressed e→ə reduction (lexical: native ə, loanword ɛ)", () => {
+    test("unstressed e→ə reduction (lexical: native ə, loanword ɛ)", () => {
         expect(phonemizeWord("wesentlich")).toBe("vˈeːzəntlɪç"); // native: -ent- e → ə
         expect(phonemizeWord("anderen")).toBe("ˈandəʁən"); // native: -er- e → ə
         expect(phonemizeWord("helikopter")).toBe("helikˈɔptɐ"); // LOANWORD: unstressed e/i TENSE (quality lexicon), not reduced to ə
     });
 
-    test("Run 6 — Latin -tion/-tial suffix (ti + o/a → t͡si̯), native -tie unaffected", () => {
+    test("Latin -tion/-tial suffix (ti + o/a → t͡si̯), native -tie unaffected", () => {
         expect(phonemizeWord("Aktion")).toBe("akt͡si̯ˈoːn"); // ti + o → t͡si̯
         expect(phonemizeWord("Nation")).toBe("naːt͡si̯ˈoːn");
         expect(phonemizeWord("Garantie")).toBe("ɡaʁantˈiː"); // word-final -tie (ie digraph) → tiː, NOT t͡si̯
-        expect(phonemizeWord("Studie")).toBe("ʃtˈuːdi̯ə"); // unstressed -ie suffix → i̯ə (Run 22); ⟨di⟩ not ⟨ti⟩ — unaffected
+        expect(phonemizeWord("Studie")).toBe("ʃtˈuːdi̯ə"); // unstressed -ie suffix → i̯ə; ⟨di⟩ not ⟨ti⟩ — unaffected
     });
 
     test("numbers + text", () => {
@@ -284,8 +284,7 @@ describe("german canonical IPA", () => {
     });
 });
 
-// Prefix destressing for words the 68k stress dict has never seen (found by close-reading the FLEURS corpus,
-// Run 28). The dict stores LEMMAS, so inflected forms (bedeutet, genutzten) missed the be-/ge- reduction and
+// Prefix destressing for words the 68k stress dict has never seen. ⚠ The dict stores LEMMAS, so inflected forms (bedeutet, genutzten) missed the be-/ge- reduction and
 // came out with a stressed long prefix (bˈeːdɔʏ̯tət). Two extensions: inflection-aware lookup (suffix
 // strip/swap to the lemma entry — which also PROTECTS roots: beiden → beide ord 0), and a guarded fallback
 // for dict-missing prefix words (ablaut participles like gegangen, which no suffix trick can reach).
@@ -309,8 +308,8 @@ describe("German unstressed prefixes on dict-missing forms", () => {
     });
 });
 
-// the twelfth language, and the one the ordinal work was building towards: German writes the
-// ordinal as a numeral plus a bare PERIOD, the class Run 1 flagged as needing a detector.
+// TEXT NORMALIZATION. ⚠ German writes an ORDINAL as a numeral plus a bare PERIOD, which is
+// indistinguishable by shape from a numeral ending a sentence — the detector below is what separates them.
 describe("german normalization", () => {
     test("ordinal N. is detected and DECLINED, without eating a sentence period", () => {
         // Every one of these previously read as a cardinal plus a PAUSE ("sechzehn . Jahrhundert"). The

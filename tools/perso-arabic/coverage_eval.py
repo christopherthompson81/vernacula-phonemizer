@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Production COVERAGE eval — the axis the held-out generalization eval can't see (docs Run 20).
+"""Production COVERAGE eval — the axis the held-out generalization eval can't see.
 
 The held-out eval measures neural GENERALIZATION to novel words (at its g2p-coverage ceiling). But production
 accuracy is COVERAGE-dominated: most TOKENS in real text are common/seen words the LEXICON handles exactly. This

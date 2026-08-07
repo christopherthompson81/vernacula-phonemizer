@@ -3,9 +3,10 @@ import { describe, expect, test } from "vitest";
 import { createAsturian, phonemizeWord } from "../src/languages/asturian/asturian.ts";
 import { numberToWords } from "../src/languages/asturian/numbers.ts";
 
-// Asturian (ast) — asturianu, Astur-Leonese (Ibero-Romance), Asturias/NW Spain (~110k). Close to Spanish/Galician (distinción c/z→[θ]); the Asturian hallmark is ⟨x⟩→[ʃ]. A greedy Ibero-Romance
-// scan, validated against wikipron ast_latn_broad (4170 human headwords) — 97.8% FOLDED / 99.6% symbol, with stress +
-// spirantization folded. single source.
+// Asturian (ast) — asturianu, Astur-Leonese (Ibero-Romance), Asturias/NW Spain (~110k speakers). Close to
+// Spanish/Galician (distinción c/z→[θ]); the Asturian hallmark is ⟨x⟩→[ʃ]. A greedy Ibero-Romance scan.
+// Referee: wikipron ast_latn_broad (human), with stress and spirantization folded. ⚠ It is the ONLY referee
+// available for ast, so the engine has no independent second opinion behind it.
 describe("Asturian canonical IPA — Ibero-Romance g2p (x→ʃ, distinción)", () => {
     const ast = createAsturian();
 

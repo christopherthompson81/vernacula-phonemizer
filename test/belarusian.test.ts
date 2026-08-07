@@ -4,8 +4,8 @@ import { phonemizeWord, createBelarusian } from "../src/languages/belarusian/bel
 
 // Belarusian (be) — East Slavic, Cyrillic. Rule g2p mirroring Ukrainian's iotated/palatalisation machinery, plus
 // Belarusian signatures: г→ɣ, retroflex ж/ш/ч→ʐ/ʂ/t͡ʂ, ⟨і⟩ iotated (Іван→jivan), ⟨ў⟩→u̯/w, дз/дж affricates, dark
-// л→ɫ, and — unlike Ukrainian — regressive voicing + final devoicing (akanne is spelled → no stress dict). Scored
-// 97.2% folded on wikipron bel_cyrl narrow (HUMAN, 7259).
+// л→ɫ, and — unlike Ukrainian — regressive voicing + final devoicing (akanne is spelled → no stress dict).
+// Referee: wikipron bel_cyrl narrow (human).
 describe("Belarusian canonical IPA — rule g2p (Standard Belarusian)", () => {
     test("core segments: г→ɣ, dark л→ɫ, ы→ɨ, retroflex ч→t͡ʂ", () => {
         expect(phonemizeWord("вада")).toBe("vada"); // akanne spelled → no reduction
@@ -42,7 +42,7 @@ describe("Belarusian canonical IPA — rule g2p (Standard Belarusian)", () => {
         expect(be.text("5").trim()).toBe("pʲat͡sʲ"); // пяць
         expect(be.text("21").trim()).toBe("dvat͡sːat͡sʲ ad͡zʲin"); // дваццаць адзін (geminate цц)
         expect(be.text("100").trim()).toBe("sto");
-        expect(be.text("1000").trim()).toBe("tɨsʲat͡ʂa"); // тысяча — bare (no leading"адзін")
+        expect(be.text("1000").trim()).toBe("tɨsʲat͡ʂa"); // тысяча — bare (no leading "адзін")
     });
 
     // MAGNITUDE-NOUN AGREEMENT (the shared East-Slavic compositor in ukrainian/numbers.ts). тысяча is FEMININE

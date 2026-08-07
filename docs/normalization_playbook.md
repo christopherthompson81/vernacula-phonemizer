@@ -163,8 +163,8 @@ so no rendering matched the audio and the choice was free.
 That run also surfaced something that is NOT this repo's problem but is worth knowing while working here:
 **a FLEURS transcript is the script the reader was given, not a record of what they said.** Every gate in
 this playbook compares the engine against the transcript, so a perfectly correct rule can still pair IPA
-with audio that never contained those phonemes. The measurement, and the divergence-audit follow-up, live
-with the training scripts — `docs/omnivoice_ipa_corpus_investigation.md`, Run 31, in the `vernacula` repo.
+with audio that never contained those phonemes. Treat a transcript-vs-engine mismatch as evidence about
+the rule, never as evidence about the recording.
 
 ### 5c. Sourcing language data from espeak, without making noise
 

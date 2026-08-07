@@ -4,7 +4,7 @@
  *
  * MEASURED over the sk_sk FLEURS corpus (1,719 unique cased utterances, column 3). Every count below was
  * taken from that column and every rule exists because the engine produced something wrong on it — the
- * verbatim before-readings are in, Run 4.
+ * wrong reading is named with each rule below.
  *
  *   `N.` ordinals ×66 (see steps 7–8) — read as a CARDINAL plus a spurious phrase break:
  *       `V 16. storočí` → [v ʃˈestnaːsc . stˈɔrɔt͡ʃiː], `na 190. mieste` → [nˈa stˈɔ ɟˈevæɟɟˌesɪ̯at . mˈɪ̯esce].
@@ -406,7 +406,7 @@ export function normalizeSlovak(input: string): string {
     // 4) CLOCK. ⚠ Before any rule that looks for a bare number, and before the version-dot
     //    rule, which would otherwise eat the interior dot of the period form `o 12.00 GMT`. The colon is
     //    clause punctuation in slovak.jsonc, so every time in the corpus was split by a phrase break.
-    //    The GOVERNING PREPOSITION picks the case (Run 6): o/do/po/od/pred/okolo → -ej, medzi → -ou (the
+    //    The GOVERNING PREPOSITION picks the case: o/do/po/od/pred/okolo → -ej, medzi → -ou (the
     //    step above), nothing → the neutral cardinal + counted *hodín*. A trailing `hod`/`h` is CONSUMED
     //    (`do 23:35 hod`): the hour noun is already in the reading and saying it twice is redundant.
     s = s.replace(new RegExp(`(?<![\\d:.,])${CLOCK_BODY}${CLOCK_TAIL}(?:\\s+(?:hod|h)(?![\\p{L}\\p{M}]))?`, "gu"),
@@ -457,7 +457,7 @@ export function normalizeSlovak(input: string): string {
         },
     );
 
-    // 8) GENERAL ORDINAL — the discriminator from the corpus tabulation (Run 3): a `N.` followed by a
+    // 8) GENERAL ORDINAL — the discriminator from the corpus tabulation: a `N.` followed by a
     //    LOWERCASE word or a COMMA is an ordinal; one followed by an UPPERCASE word, a closing quote or
     //    the end of the utterance is a SENTENCE PERIOD and must not be claimed. Emits the masculine
     //    nominative, because a word outside the licensor list does not disclose the case.

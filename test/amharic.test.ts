@@ -7,7 +7,7 @@ import { phonemizeWord } from "../src/languages/amharic/amharic.ts";
 // codepoint is a whole CV syllable (vowel baked into the glyph), so the g2p is a flat fidel→CV lookup (not a
 // Brahmic matra/virama engine). Guttural 1st-order → [a] (ሀ→ha), ejectives kʼ tʼ t͡ʃʼ pʼ t͡sʼ. Two features are
 // UNWRITTEN: GEMINATION (folded vs the referee) and the 6th-order [ɨ] (epenthetic — kept only as the word's first
-// vowel, else deleted: ሁለት→hulət). Validated against wikipron amh (80.1%) + kaikki amh (78.3%), both human.
+// vowel, else deleted: ሁለት→hulət). Referees: wikipron amh + kaikki amh, both human.
 describe("amharic canonical IPA", () => {
     test("fidel syllabary, gutturals, ejectives, 6th-order ɨ deletion", () => {
         const cases: [string, string][] = [
@@ -38,9 +38,9 @@ describe("amharic canonical IPA", () => {
     });
 });
 
-// Tens (found by an impact audit): NUM.tens is keyed "20".."90" but the lookup used String(t) —
-// "2".."9" — so EVERY ten was silently dropped: 25 → "amɨst", 1998 → thousand-nine-hundred-EIGHT.
-// 21.7% of FLEURS am_et utterances contain digits.
+// ⚠ NUM.tens is keyed by the ROUND VALUE ("20".."90"), not by the tens DIGIT. Looking it up with String(t)
+// misses every key, and a missing ten is silent rather than fatal: 25 reads "amɨst", 1998 reads
+// thousand-nine-hundred-EIGHT.
 describe("Amharic tens", () => {
     test("tens are read", () => {
         expect(phonemize("25", "am")).toBe("haja amɨst"); // ሃያ አምስት
@@ -49,8 +49,9 @@ describe("Amharic tens", () => {
     });
 });
 
-// Scales above ሺ (thousand) were missing entirely — nothing above 999 999 was composed, so 10⁶+ fell through to
-// the digit string and the fidel g2p rendered it as EMPTY IPA. ሚሊዮን / ቢሊዮን are the European loans Amharic uses
+// ⚠ A MISSING SCALE ABOVE ሺ (thousand) FAILS SILENTLY: with nothing to compose, 10⁶+ never enters the
+// numeral path at all and no error is raised — the number simply does not get read. ሚሊዮን / ቢሊዮን are the
+// European loans Amharic uses
 // (Omniglot "Numbers in Amharic" cites 10⁶ as አንድ ሚሊዮን; Abyssinica dictionary for ቢሊዮን) — see amharic.jsonc.
 describe("Amharic magnitudes above thousand", () => {
     test("ሚሊዮን / ቢሊዮን keep their multiplier at 1 (unlike the bare መቶ / ሺ)", () => {
@@ -101,7 +102,8 @@ describe("Amharic normalization", () => {
         expect(phonemize("1,400", "am")).toBe("ʃi aɾat məto"); // was "and , aɾat məto"
     });
 
-    // 26 instances; the dot was a full STOP. The fractional tail is read ONE DIGIT AT A TIME. ነጥብ
+    // The decimal separator is ነጥብ, and the fractional tail is read ONE DIGIT AT A TIME — an unhandled dot
+    // between digits falls through to the sentence-period branch instead.
     test("decimals take ነጥብ and digit-by-digit fractions", () => {
         expect(phonemize("6.34", "am")).toBe("sɨdɨst nətʼb sost aɾat"); // was "sɨdɨst . səlasa aɾat"
     });
@@ -140,8 +142,8 @@ describe("Amharic normalization", () => {
         expect(phonemize("19,500 ኪ.ሜ²", "am")).toBe("asɾa zətʼəɲ ʃi amɨst məto kaɾe kilo metɨɾ");
     });
 
-    // Currency: the shared tier already carried $/¥/£. A later run added `magnitudes` and two LOCAL
-    // workarounds for core limitations — see normalize.ts §8b.
+    // Currency rides the shared tier ($/¥/£) plus `magnitudes` and two LOCAL workarounds for core
+    // limitations — see normalize.ts §8b.
     test("currency: magnitudes hop, letter-code prefixes reach the tier, the noun is not doubled", () => {
         expect(phonemize("US$14.7 ቢሊዮን", "am")).toContain("bilijon dolaɾ"); // was: sign dropped entirely
         expect(phonemize("$100 ዶላሮች", "am")).toBe("məto dolaɾot͡ʃ"); // was "məto dolaɾ dolaɾot͡ʃ"
@@ -157,8 +159,8 @@ describe("Amharic normalization", () => {
             .toBe("haɡəɾ , kətəma , səw . wɨha , bəɾədo , t͡ʃʼəw");
     });
 
-    // the two powers sit on OPPOSITE SIDES in this language, which is why the tier's `position`
-    // takes a per-power record. The corpus writes `783,562 ስኩዌር ኪ.ሜ.` (word before) and `120-160 ሜትር ኪዩብ`
+    // ⚠ The squared and cubed words sit on OPPOSITE SIDES of the unit in this language, which is why the
+    // tier's `position` takes a per-power record. The corpus writes `783,562 ስኩዌር ኪ.ሜ.` (word before) and `120-160 ሜትር ኪዩብ`
     // (word after); a single value would have had to be wrong about one of them.
     test("the squared/cubed measure word", () => {
         expect(phonemize("783,562 km²", "am")).toContain("sɨkuweɾ kilo metɨɾ");

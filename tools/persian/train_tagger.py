@@ -30,7 +30,7 @@ ANCH={c:[p] for c,p in CONS.items()}
 ANCH["ا"]=["aː","ʔ","ɑː",""]; ANCH["آ"]=["aː","ʔ","ɑː"]; ANCH["ٰ"]=["aː"]
 # HIATUS: ی/و before a vowel are realized as vowel+GLIDE (نیاز niːjaːz, زیاد ziːjaːd, بسیار besiːjaːɾ) — one written
 # char producing TWO IPA units (iːj/uːv). Without these candidates every hiatus word fails to align and is masked
-# out of training (7185 words, 1.8%), so the tagger never learns the class and drops the glide (Run 28). Multi-token
+# out of training (7185 words, 1.8%), so the tagger never learns the class and drops the glide. Multi-token
 # candidates are listed LONGEST-FIRST so the aligner prefers iːj over iː (greedy longest match).
 ANCH["و"]=["uːv","oːv","uː","oː","v","w",""]; ANCH["ی"]=["iːj","eːj","iː","eː","j",""]; ANCH["ي"]=ANCH["ی"]
 ANCH["ه"]=["h","e",""]; ANCH["ء"]=["ʔ",""]; ANCH["ئ"]=["ʔ","j",""]; ANCH["ۀ"]=["e","h"]

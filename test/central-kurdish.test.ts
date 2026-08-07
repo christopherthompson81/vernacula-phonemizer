@@ -6,7 +6,7 @@ import { phonemizeWord } from "../src/languages/central-kurdish/central-kurdish.
 
 // Canonical-IPA goldens for Central Kurdish / Sorani / کوردیی ناوەندی (ckb) — Iranian, the Sorani Perso-Arabic
 // alphabet (a near-FULL alphabet: writes all long vowels + short /a/, only the short /ɪ/ bizroke unwritten).
-// Hand-adjudicated against wikipron ckb_arab_broad (94.9%) + kaikki ckb (94.2%), both human. Signatures: the
+// Hand-adjudicated against wikipron ckb_arab_broad + kaikki ckb, both human. Signatures: the
 // pharyngeals ح→ħ, ع→ʕ; the velarised ڵ→ɫ; the trill ڕ→r vs tap ر→ɾ; ئ→ʔ (glottal onset). Complements Kurmanji
 // (kmr).
 describe("Central Kurdish (Sorani) canonical IPA — Perso-Arabic alphabet", () => {
@@ -29,10 +29,10 @@ describe("Central Kurdish (Sorani) canonical IPA — Perso-Arabic alphabet", () 
     });
 });
 
-// the normalization layer. Counts are measured over the FLEURS ckb_iq corpus (column 3).
+// TEXT NORMALIZATION. Counts are measured over the FLEURS ckb_iq corpus (column 3).
 describe("central kurdish normalization", () => {
-    // THE HEADLINE. The tokenizer's letter class is [ؠ-ۿ] = U+0620–U+06FF, which CONTAINS the
-    // Arabic-Indic digits U+0660–U+0669 — so a native digit run was claimed by the LETTER branch and
+    // ⚠ THE TOKENIZER'S LETTER CLASS MUST EXCLUDE THE DIGITS. [ؠ-ۿ] = U+0620–U+06FF CONTAINS the
+    // Arabic-Indic digits U+0660–U+0669, so a native digit run is claimed by the LETTER branch and
     // phonemized to an EMPTY STRING. That is the majority digit system here: 2036 against 1705 ASCII.
     test("native Arabic-Indic digits are read, not swallowed", () => {
         expect(phonemize("٢٠٢٤", "ckb")).not.toBe("");
@@ -40,9 +40,10 @@ describe("central kurdish normalization", () => {
         expect(phonemize("١٠٠٠٠", "ckb")).toBe(phonemize("10000", "ckb"));
     });
 
-    // ⚠ Kurdish uses the ENGLISH numeric conventions — comma groups, period decimates — the opposite of
-    // Danish, Romanian and Bulgarian. Reading `30,000` as a decimal makes it "thirty point zero zero zero".
-    test("comma groups and period decimates, unlike the European languages before it", () => {
+    // ⚠ Kurdish uses the ENGLISH numeric conventions — the comma GROUPS and the period is the DECIMAL —
+    // the opposite of Danish, Romanian and Bulgarian. Reading `30,000` as a decimal makes it
+    // "thirty point zero zero zero".
+    test("the comma groups and the period is the decimal, unlike the European convention", () => {
         expect(normalizeCentralKurdish("30,000")).toBe("30000");
         expect(normalizeCentralKurdish("2.4")).toBe("2 خاڵ 4");
     });
@@ -87,8 +88,9 @@ describe("central kurdish normalization", () => {
     // RATES, in BOTH scripts. The corpus writes the rate with a Perso-Arabic denominator against a
     // slash — "480 کم لە کاتژمێر (133 مەتر/چرکە)" — and the slash was silently dropped, so four utterances lost
     // the "per" entirely. `لە` is the per, `کاتژمێر` the hour, `چرکە` the second, all from that sentence.
-    // ⚠ The Perso-Arabic arm must accept the ABBREVIATION (`کم`), not just the spelled word: this block runs
-    // above the decimal rule to keep the version dot (a local rule depending on a character an earlier rule rewrote will not fire), and `کم` → `کیلۆمەتر` happens further down.
+    // ⚠ The Perso-Arabic arm must accept the ABBREVIATION (`کم`), not just the spelled word. This block runs
+    // ABOVE the decimal rule so the version dot survives — a rule that depends on a character an earlier rule
+    // has already rewritten will never fire — and `کم` → `کیلۆمەتر` happens further down.
     test("the rate, in both scripts", () => {
         expect(phonemize("120 کم/کاتژمێر", "ckb")).toContain("kiːloːmatɾ la kaːtʒmeːɾ");
         expect(phonemize("120 مەتر/چرکە", "ckb")).toContain("matɾ la t͡ʃɾka");

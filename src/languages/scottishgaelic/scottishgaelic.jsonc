@@ -32,7 +32,7 @@
     },
 
     // Vowel-cluster → IPA, matched LONGEST-first (the pronounced nucleus; consonant quality is set separately).
-    // Semi-lexical / dialect-variable — the Run-2+ residual.
+    // Semi-lexical / dialect-variable — the known residual.
     "vowels": {
         "aoi": "ɯː", "ao": "ɯː", "eu": "iaː", "èa": "iaː", "eòi": "jɔː", "eò": "jɔː", "eói": "joː",
         "ia": "iə", "ua": "uə", "iu": "u", "io": "i", "eo": "jɔ", "iai": "iə",

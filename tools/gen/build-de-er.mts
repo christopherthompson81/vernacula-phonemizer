@@ -8,7 +8,7 @@
  * it INSERTS a consonant (ɐ → ɛ + ʁ), not a substitution. So this distils it per word, per NUCLEUS, from kaikki:
  * for each UNSTRESSED nucleus where our reduced ɐ corresponds to kaikki's ɛ immediately followed by ʁ/r, record the
  * ordinal. applyErRestore (german.ts) turns that ɐ back into ɛʁ (as a post-pass, after applyConsonant). The STRESSED
- * case is already handled by the restoreStressedEr rule (Run 25), so the build never sees a stressed bare ɐ.
+ * case is already handled by the restoreStressedEr rule, so the build never sees a stressed bare ɐ.
  *
  * SOURCE: the kaikki German extract (word<TAB>IPA). Regenerate with:
  *   curl -s https://kaikki.org/dictionary/German/kaikki.org-dictionary-German.jsonl \

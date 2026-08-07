@@ -21,7 +21,7 @@ the fa `q`/`ɣ` split, ZWNJ→concatenate so word-counts align). A **monotonic c
 the per-char training tags (each abjad char ↦ its consonant + trailing short vowel/ezafe); it round-trips ~91% of
 words. The ی/و candidates include the **vowel+glide hiatus realization** (`iːj`/`uːv`, e.g. نیاز→niːjaːz, زیاد→
 ziːjaːd) — one written char producing two IPA units (a boundary guard refuses over-consuming a glide the next grapheme owns, e.g. یئن); without these, every hiatus word failed to align and was masked
-out of training (7185 words, 1.8%; the tagger then dropped the glide — Run 28). Non-alignable words (colloquial
+out of training (7185 words, 1.8%; the tagger then dropped the glide). Non-alignable words (colloquial
 fusions/elisions, rare anomalies) are **masked out of the loss, not dropped** — the whole sentence is kept for
 context and only the alignable words carry a gold tag, so training uses ~all of the corpus while the aligner's
 canonical convention defines the target.

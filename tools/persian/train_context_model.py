@@ -2,7 +2,7 @@
 """Persian CONTEXT model demonstration — does a SENTENCE-level seq2seq beat a word-level one?
 
 The word-level restorer (shipped) hits a ceiling on homographs (مرد mard~mord) and ezafe, which only SENTENCE
-CONTEXT resolves (Run 5). This trains BOTH a word-level and a sentence-level char seq2seq (BiLSTM enc + attention
+CONTEXT resolves. This trains BOTH a word-level and a sentence-level char seq2seq (BiLSTM enc + attention
 dec) on the SAME aligned-Shahnameh corpus (tools/persian/parallel/), so the gap IS the context benefit:
 the sentence model reads the whole hemistich; the word model sees one word. Both target the (Tajik-derived silver)
 IPA; evaluated per-word on held-out sentences.

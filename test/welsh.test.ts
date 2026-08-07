@@ -55,12 +55,12 @@ describe("welsh canonical IPA", () => {
         expect(phonemizeWord("papur")).toBe("pˈapɨr"); // lax a before p (voiceless)
     });
 
-    test("Run 2 — word-initial nasal mutation, irregular function words, apostrophe enclitics", () => {
+    test("word-initial nasal mutation, irregular function words, apostrophe enclitics", () => {
         expect(phonemizeWord("nhw")).toBe("n̥ˈuː"); // word-initial nh → n̥ (nasal mutation)
         expect(phonemizeWord("nghymru")).toBe("ŋ̥ˈəmrɨ"); // ngh → ŋ̥
         expect(phonemizeWord("enghraifft")).toBe("ˈɛŋ̊raᶦfd"); // MEDIAL ngh is ŋ+h, not the mutation
         expect(phonemizeWord("dechrau")).toBe("dˈɛχra"); // NW final unstressed -au → [a] (referee: dɛχra)
-        expect(phonemizeWord("i")).toBe("ˈiː"); // the word ⟨i⟩ → front iː (referee-backed; the Run-2 oracle ɨ was an artifact)
+        expect(phonemizeWord("i")).toBe("ˈiː"); // the word ⟨i⟩ → front iː (referee-backed; an oracle ɨ here is an artifact)
         expect(phonemizeWord("bod")).toBe("bˈɔd"); // irregular: short ɔ, not the regular oː
         expect(phonemizeWord("heb")).toBe("hˈɛb"); // irregular: lax ɛ
         expect(phonemizeWord("un")).toBe("ˈɨːn"); // irregular: long ɨː before n
