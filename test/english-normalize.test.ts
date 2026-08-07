@@ -99,9 +99,8 @@ describe("English text normalization", () => {
     });
 });
 
-// parity sweep against the French normalization layer: the classes English was missing or getting
-// wrong. Measured over the CASED column of the FLEURS transcripts (228 all-caps tokens), which is what
-// real input looks like — the lowercased column the rest of the suite uses cannot exercise these.
+// INITIALISMS. ⚠ Measured over the CASED column of the FLEURS transcripts (228 all-caps tokens), which is
+// what real input looks like — the lowercased column the rest of the suite uses cannot exercise these at all.
 describe("english normalization: initialisms", () => {
     test("unpronounceable or dictionary-absent acronyms are spelled out", () => {
         // These were relying on CMUdict happening to contain each acronym. Where it did not, the OOV g2p
@@ -166,9 +165,9 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
 
     test("units that were dropped or read as letter names", () => {
         expect(phonemize("20 °C", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs"); // was "twenty see"
-        // ℃ / ℉ are SINGLE code points (U+2103, U+2109), so the `°c`/`°f` keys could not reach them and
-        // `20℃` read as bare "twenty" — the whole unit gone, not merely the sign. Found while reviewing the
-        // cmn/hi loop-back; 53 of 65 languages still drop ℃, and ja and ko have it in their corpora.
+        // ⚠ ℃ / ℉ ARE SINGLE CODE POINTS (U+2103, U+2109), so `°c`/`°f` keys cannot reach them and `20℃`
+        // reads as bare "twenty" — the whole unit gone, not merely the sign. Most of the fleet still drops
+        // them; ja and ko carry them in their corpora.
         expect(phonemize("20℃", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs");
         expect(phonemize("20℉", "en")).toBe("twˈɛnti dᵻɡɹˈiːz fˈɛɹənhˌaᶦt");
         expect(phonemize("160 km/h", "en")).toBe("wˈʌn hˈʌndɹəd sˈɪksti kəlˈɑːmʌt̬ɚz pʰɝ ˈaᶷɚ"); // /h was "aitch"
@@ -266,8 +265,8 @@ describe("Latin abbreviations and phrases", () => {
         expect(p("a priori reasoning")).toContain("pɹaᶦˈɔːɹaᶦ");
     });
 
-    // The headline case, and en was the first language treated: the exponent and the ampersand were
-    // dropped everywhere because no gate could see them until defects.ts unified the tables.
+    // ⚠ THE EXPONENT AND THE AMPERSAND WERE DROPPED FLEET-WIDE, because no gate could see either until
+    // defects.ts unified the tables — a dropped `²` and a dropped `&` both leave grammatical output.
     test("the exponent and the ampersand", () => {
         // `km²` matched the unit and stranded the `²`, so an AREA read as a length.
         expect(normalizeEnglish("The park covers 19,500 km² and")).toBe("The park covers 19,500 square kilometers and");
@@ -305,10 +304,10 @@ describe("Latin abbreviations and phrases", () => {
         expect(normalizeEnglish("<i>italic</i> text")).toBe("<i>italic</i> text");
     });
 
-    // A RANGE IS NOT A SUBTRACTION, and this is a regression pin. Adding a leading-minus arm that allowed a
-    // SPACE after the dash (`[−–]\s?`) read the corpus's `(1418 – 1450)` as "fourteen eighteen MINUS one
-    // thousand four hundred fifty". Step 0e requires the digit immediately after the dash, which is what
-    // keeps a spaced range out; `\s?` is the whole difference between the two behaviours.
+    // A RANGE IS NOT A SUBTRACTION, and this is a regression pin. A leading-sign arm that allows a SPACE
+    // after the dash (`[−–]\s?`) reads the corpus's `(1418 – 1450)` as "fourteen eighteen MINUS one thousand
+    // four hundred fifty". ⚠ Step 0f requires the digit IMMEDIATELY after the dash, which is what keeps a
+    // spaced range out; `\s?` is the whole difference between the two behaviours.
     test("a spaced dash between years is never a minus", () => {
         expect(normalizeEnglish("Sejong (1418 – 1450)")).toBe("Sejong (1418 – 1450)");
         // ⚠ ASSERTED ON "negative", NOT "minus" — the word the sign rule now emits. Left as `minus` these

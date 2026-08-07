@@ -1,12 +1,12 @@
 /**
- * en-GB (SSBE / "BBC") accent-transform DIAGNOSTIC GOLD — the non-circular quality anchor. The referee-eval
- * headline (~39% vs wikipron UK, rule-only) is REFEREE-NOISE-LIMITED exactly like `en`'s own ~36%: the 76k
- * wikipron list is dominated by rare/proper/foreign words where the shared OOV G2P model mangles the spelling,
- * a weakness of the parent `en` engine, not of the accent delta. This hand-adjudicated gold (RP from Wells's
+ * en-GB (SSBE / "BBC") accent-transform DIAGNOSTIC GOLD — the non-circular quality anchor. ⚠ The referee-eval
+ * headline is REFEREE-NOISE-LIMITED exactly like `en`'s own: the 76k wikipron UK list is dominated by
+ * rare/proper/foreign words where the shared OOV G2P model mangles the spelling — a weakness of the parent
+ * `en` engine, not of the accent delta, so the score says little about the transform. This gold (RP from Wells's
  * lexical sets + Jones/Cambridge EPD conventions, NOT mined from the referee) measures what actually matters:
  * whether the GenAm→SSBE transform is right on the core vocabulary + every Wells lexical set.
  *
- * DEFERRED (documented in), so excluded here:
+ * DEFERRED, and so excluded from this gold:
  *   • yod-COALESCENCE after /t d/ (tube→t͡ʃuːb, duke→d͡ʒuːk) — a further modern-SSBE step beyond yod-retention.
  *   • idiosyncratic US/UK lexical vowel swaps (tomato→təˈmɑːtəʊ, pasta→ˈpæstə) — not a systematic set.
  */
