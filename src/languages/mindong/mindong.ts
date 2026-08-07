@@ -81,7 +81,7 @@ function syllableParts(syl: string): { seg: string; tone: string } | null {
     return { seg, tone };
 }
 
-/** A BUC word (hyphen/space-joined syllables) → IPA. Phase 1: each syllable keeps its CITATION tone (sandhi
+/** A BUC word (hyphen/space-joined syllables) → IPA. each syllable keeps its CITATION tone (sandhi
  *  deferred), so syllables convert independently and join with a space. */
 function bucToIpa(word: string): string {
     return word

@@ -1,6 +1,6 @@
 /**
  * Hebrew (he) pronunciation lexicon — a LOOKUP layer for the unvocalized (neural) path. A known skeleton maps to a
- * stored niqqud (vocalized) reading, which we render through the Phase-1 g2p (`phonemizeWord`) — so the lexicon
+ * stored niqqud (vocalized) reading, which we render through the rule g2p (`phonemizeWord`) — so the lexicon
  * output is always in OUR canonical convention and auto-tracks g2p rule changes (the glottal rule etc.), never
  * importing an external IPA convention. Homographs and OOV words are NOT in the lexicon and fall through to the
  * context-aware tagger. See he-lexicon.tsv + tools/hebrew/build-lexicon.py.

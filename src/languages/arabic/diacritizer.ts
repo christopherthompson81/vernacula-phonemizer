@@ -1,5 +1,5 @@
 /**
- * Neural Arabic diacritizer (Phase 2): a sentence-level BiLSTM that restores short vowels on bare Arabic
+ * Neural Arabic diacritizer: a sentence-level BiLSTM that restores short vowels on bare Arabic
  * text, run via ONNX Runtime as an ASYNC PRE-PASS. Its vocalized output feeds the (synchronous) g2p in
  * arabic.ts — so phonemize() stays sync and dependency-free; only this pre-pass touches ONNX. `onnxruntime-
  * node` is an OPTIONAL dependency, imported lazily.

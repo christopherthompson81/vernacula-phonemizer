@@ -1,10 +1,10 @@
 /**
  * Hebrew PHASE-2 restorer — the neural NAKDAN for UNVOCALIZED Hebrew. A SENTENCE-LEVEL per-consonant BiLSTM (ONNX)
- * that RESTORES THE NIQQUD of a bare consonantal clause; the deterministic Phase-1 g2p (hebrew.ts) then converts
+ * that RESTORES THE NIQQUD of a bare consonantal clause; the deterministic rule g2p (hebrew.ts) then converts
  * the reconstructed vocalized words to IPA. This is the ar/nakdan architecture (predict diacritics, then a fixed
  * g2p) with the fa `faTagger` sentence-context (the bidirectional pass over the WHOLE clause resolves homographs —
  * ספר = sefer/safar/siper — that a word-at-a-time model cannot). The net learns ONLY the context-dependent
- * diacritization; the g2p rules (bgdkpt, patach genuvah, mater lectionis) stay in the already-validated Phase-1.
+ * diacritization; the g2p rules (bgdkpt, patach genuvah, mater lectionis) stay in the already-validated rule g2p.
  *
  * One forward pass over the clause; each char gets a niqqud TAG (a space char → the space tag, a word boundary). A
  * per-consonant consonant-consistency MASK constrains each letter to only the niqqud it took in training. Output

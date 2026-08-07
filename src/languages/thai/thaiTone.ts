@@ -36,7 +36,7 @@ export function thaiConsonantClass(
  * raise — the single most error-prone step when computing Thai tone:
  *  - a silent leading ห raises a following sonorant (low class) to HIGH (หมา → rising);
  *  - a silent leading อ in the four อย words (อย่า อยาก อยู่ อย่าง) makes ย behave MID.
- * Pass the base initial plus the silent leader (if any — the Phase-2b syllable parser
+ * Pass the base initial plus the silent leader (if any — the syllable parser
  * identifies it). Centralising this here means `computeThaiTone` callers can't forget
  * the raise: they ask THIS for the class. Returns undefined if `initial` isn't a consonant.
  */

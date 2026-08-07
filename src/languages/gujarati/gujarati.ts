@@ -80,8 +80,8 @@ const GU_SYMBOLS = makeSymbolNormalizer({
     // word-first. ⚠ NEITHER bare word is the evidence, and both bare counts are traps:
     //   વર્ગ ×55   is the CLASSROOM ("વિદ્યાર્થીઓ તેમના વર્ગમાં બેસીને")
     //   ઘન  ×6    is SOLID, the state of matter ("ઘન, પ્રવાહી, વાયુ અને પ્લાઝમા") — and it is the same
-    //             ધન/ઘન cluster that offered five confidently wrong plus words in Phase 1
-    // The cube word here is the English loan ક્યુબિક, not ઘન, which the corpus decides and a label could not.
+    //             ધન/ઘન cluster that offers confidently wrong plus words to a token count.
+    // The cube word here is the English loan ક્યુબિક, not ઘન. Only the collocation decides it.
     exponentWords: { squared: ["વર્ગ"], cubed: ["ક્યુબિક"], position: "before" },
 });
 

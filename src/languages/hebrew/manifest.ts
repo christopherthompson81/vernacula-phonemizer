@@ -5,7 +5,7 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 
-/** Cardinal number words (niqqud-authored) — composed by numbers.ts, rendered by the Phase-1 g2p. */
+/** Cardinal number words (niqqud-authored) — composed by numbers.ts, rendered by the rule g2p. */
 export interface HebrewNumbers {
     point: string;
     and: string;

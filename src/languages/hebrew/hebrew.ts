@@ -39,7 +39,7 @@ export interface HebrewChunk { cons: string; ipa: string }
 /**
  * Scan a VOCALIZED (pointed) Hebrew word into per-consonant chunks: each skeleton consonant (the letter that
  * SURVIVES niqqud-stripping) paired with the IPA its points resolved to. `phonemizeWord` joins the ipa parts; the
- * Phase-2 tagger data-gen (tools/hebrew/build_tagger_data.ts) uses the (cons → ipa) alignment as its training tags.
+ * Tagger data-gen (tools/hebrew/build_tagger_data.ts) uses the (cons → ipa) alignment as its training tags.
  */
 export function phonemizeAligned(word: string): HebrewChunk[] {
     const cps = [...word.normalize("NFC")];
@@ -104,8 +104,8 @@ export function phonemizeWord(word: string): string {
 // token. The number group precedes punctuation so "3.14" is one token while a trailing "." stays a clause mark.
 const TOKEN = /([א-ת][֑-ׇ־־]*(?:[א-ת][֑-ׇ]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
 
-/** Per-call OOV resolver: word → IPA, or undefined to fall back to the Phase-1 g2p. Used by the async neural path
- *  (hebrewNeural.ts) to inject the Phase-2 tagger's reading for UNVOCALIZED words. */
+/** Per-call OOV resolver: word → IPA, or undefined to fall back to the rule g2p. Used by the async neural path
+ *  (hebrewNeural.ts) to inject the neural tagger's reading for UNVOCALIZED words. */
 export type HebrewOovResolver = (w: string) => string | undefined;
 
 class HebrewPhonemizer implements Phonemizer {
@@ -121,8 +121,8 @@ class HebrewPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Hebrew phonemizer (Phase-1 niqqud→IPA g2p; the returned `text` takes an optional per-call
- *  `oovOverride` for the Phase-2 neural restoration of unvocalized words). */
+/** Build the Hebrew phonemizer (the niqqud→IPA rule g2p; the returned `text` takes an optional per-call
+ *  `oovOverride` for the neural restoration of unvocalized words). */
 export function createHebrew(): { text(input: string, oovOverride?: HebrewOovResolver): string } {
     return new HebrewPhonemizer();
 }

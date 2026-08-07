@@ -3,7 +3,7 @@
  *   text → segmentText (bunsetsu spaces) → per run: applyReadings (kanji→kana) → kanaToIpa.
  * PHASE 1: native kana/katakana → IPA (kana.ts) + Sino-Japanese numbers. PHASE 2: kanji → kana via a 60k
  * whole-word reading map + per-kanji on/kun/rendaku fallback (kanji.ts), and orthographic bunsetsu
- * segmentation of spaceless text. Pitch accent (ꜜ) is Phase 3.
+ * segmentation of spaceless text. Pitch accent (ꜜ) is applied by pitch.ts.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";

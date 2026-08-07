@@ -1,5 +1,5 @@
 /**
- * Hanzi → pinyin segmentation (Phase 2). Greedy longest-match against the phrase dictionary gives
+ * Hanzi → pinyin segmentation. Greedy longest-match against the phrase dictionary gives
  * polyphone disambiguation (银行 → yín háng, not yín xíng); characters not covered by a phrase fall back to
  * their most-common single-char reading. Non-Han characters pass through untouched (numbers / punctuation /
  * Latin are handled downstream). Output is a list of `base+tone` pinyin tokens (+ raw pass-through tokens)

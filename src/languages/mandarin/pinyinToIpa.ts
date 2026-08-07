@@ -1,5 +1,5 @@
 /**
- * Pinyin → canonical IPA (Phase 1: the pinyin input path).
+ * Pinyin → canonical IPA.
  *
  * A tokenized pinyin string (`ni3 hao3`, `zhong1 guo2`) becomes canonical IPA: each syllable is looked up
  * in the toneless syllable→IPA table, third-tone sandhi is applied over the tone-number sequence, and the

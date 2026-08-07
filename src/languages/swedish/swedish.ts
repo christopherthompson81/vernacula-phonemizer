@@ -28,7 +28,7 @@ interface LexEntry {
     secVowelInitial?: boolean; // secondary element vowel-initial → don't soften the (coda) C before it
 }
 
-// Phase-2 lexicon (accent-stress.tsv, from the CC0 NST leksikon): word → pitch accent 1|2 + the primary-stress
+// The accent lexicon (accent-stress.tsv, from the CC0 NST leksikon): word → pitch accent 1|2 + the primary-stress
 // nucleus ordinal where it deviates from the first syllable. OOV words fall to the rule (first-syllable stress;
 // accent by the swedishAccentRule). See tools/gen/build-sv-lexicon.mts +.
 let LEXICON: Map<string, LexEntry> | undefined;
