@@ -1,7 +1,7 @@
 /**
  * WHICH OF THE UNMINED LANGUAGES CAN BE MINED AT ALL? — the triage that has to come before the sweep.
  *
- * #585 proposes extending the normalization diff gate past the 67 FLEURS languages to the rest of the
+ * proposes extending the normalization diff gate past the 67 FLEURS languages to the rest of the
  * registry, by mining wiki text. Measured when this file was written: **188 registry codes, 67 mined
  * artifacts, 121 to go**, and the 67 are exactly the FLEURS set — not one corpus-less code has been mined,
  * though the tooling to do it (`mine.ts`, `cells.ts`, the `review.ts` staleness gate) has existed since the

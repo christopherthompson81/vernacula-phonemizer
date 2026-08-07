@@ -164,7 +164,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "et",
-    // #586 `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
+    // `multiply` — this language DROPPED the sign outright. ⚠ STANDARD MATHEMATICAL REGISTER, not a corpus
     // attestation: the sweep failed exactly as the exponent sweep did, because the plausible hits are homographs
     // of PREPOSITIONS — es `por` ×23, it `per` ×25, ru `на` ×31 are all the preposition, never the operator.
     // One word, so `by` defaults to it; this language does not split dimension from product.
@@ -187,7 +187,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ Bare `carré` ×2 is the SHAPE ("un carré dont le côté inférieur est manquant") — the collocation
     // with the unit noun is the attestation, never the bare word.
     exponentWords: { squared: ["carré", "carrés"], cubed: ["cube", "cubes"], position: "after" },
-    // #586 BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
+    // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language
     // in the fleet was dropping silently. See `bareExponent` in core/normalizeSymbols.ts for why this cannot
     // reuse `exponentWords` above: that is the unit MODIFIER and this is the PREDICATE, and in most languages
     // they are different words (kilomètres carrés but vingt au carré).
@@ -227,7 +227,7 @@ class FrenchPhonemizer implements Phonemizer {
     // path omits it, so tokenizer / numbers / liaison / accentuation are byte-identical to phonemize(text, "fr").
     text(input: string, oovOverride?: OovResolver): string {
         const isWord = (w: string): boolean => lexicon().has(w);
-        // #562 normalization order: general text normalization (abbreviations, era markers, numéro,
+        // NORMALIZATION ORDER: general text normalization (abbreviations, era markers, numéro,
         // digit degrouping) → NUMERALS (roman ordinals, digit ordinals, bare romans) → INITIALISMS, which
         // must see the all-caps runs the numeral pass declined → SYMBOLS (%, currency, units) last, since
         // the time rule upstream has already claimed the hour marker.

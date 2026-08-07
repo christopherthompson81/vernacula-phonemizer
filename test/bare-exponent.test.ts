@@ -102,7 +102,7 @@ describe("bare exponent", () => {
         expect(phonemize("x⁷", "en")).toContain("pʰˈaᶷɚ");
     });
 
-    test("#586 NEGATIVE exponents — the issue's last named open item", () => {
+    test("NEGATIVE exponents", () => {
         // "Negative exponents in scientific notation — has a cell now, no rule." U+207B was missing from the
         // superscript run, so `10⁻³¹` read as bare *tʰˈɛn*: sign and power both gone.
         expect(phonemize("10⁻³¹", "en")).toContain("pʰˈaᶷɚ ʌv nˈɛɡət̬ɪv");
@@ -116,7 +116,7 @@ describe("bare exponent", () => {
         expect(phonemize("10⁻²", "en")).toContain("pʰˈaᶷɚ ʌv nˈɛɡət̬ɪv tʰˈuː");
     });
 
-    test("#586 SCIENTIFIC NOTATION keeps its unit — the superscript broke their adjacency", () => {
+    test("SCIENTIFIC NOTATION keeps its unit — the superscript broke their adjacency", () => {
         // ⚠ THE UNIT LEAKED. A superscript sits BETWEEN the number and the unit, so the unit rule's adjacency
         // failed and `9.11 × 10⁻³¹ kg` reached the phoneme stream with a RAW `kɡ` — worse than the dropped
         // exponent beside it. Resolving the exponent BEFORE the unit rule leaves its digits next to the unit.

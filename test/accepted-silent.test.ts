@@ -49,13 +49,13 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
     });
 
     test("the table covers the sweep's whole residual, per class", () => {
-        // ⚠ `mi` WAS REMOVED FROM THIS LIST IN #654, and the removal is the point of the gate rather than an
+        // ⚠ `mi` WAS REMOVED FROM THIS LIST, and the removal is the point of the gate rather than an
         // exception to it. Its entry accepted `+30 tākiri` as correctly silent because Māori's inventory could
-        // not say the attested English loan — but #663 gave that engine an English READER for words it cannot
+        // not say the attested English loan — but that engine now has an English READER for words it cannot
         // spell, so the plus now reads [plˈʌs], the drop no longer happens, and the accept had nothing left to
         // cover. A baseline entry that can never fire is worse than none: it would mask exactly the regression
         // this table exists to make visible. Removed there, and here, together.
-        // ⚠ `km` WAS ADDED IN THE #585 REVIEW PASS, and it is the first entry here that is not a designation.
+        // ⚠ `km` WAS ADDED LATER, and it is the first entry here that is not a designation.
         // The km wiki carries a programming tutorial whose code reaches the corpus, and the percent cell selects
         // it because `%` beside letters is exactly what that cell looks for. The `%` in `scanf("%lf %lf", …)` is
         // a C conversion flag, so silence is the CORRECT reading and a rule that voiced it would be the defect.

@@ -69,7 +69,7 @@ describe("es-419 Roman-numeral policy — centuries cardinal, prenominal events 
     });
 });
 
-// #562 text normalization (spanish/normalize.ts) — the third language to get the treatment, after English
+// text normalization (spanish/normalize.ts) — the third language to get the treatment, after English
 // and French. Asserted on es-419 because that is the locale of the FLEURS audio these were measured
 // against; the layer itself is shared with Castilian `es` apart from the date rule below.
 describe("spanish normalization", () => {

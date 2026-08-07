@@ -49,7 +49,7 @@
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
 
-    // #562 Acronyms that Slovene SPELLS OUT even though their letters are phonotactically readable, so
+    // Acronyms that Slovene SPELLS OUT even though their letters are phonotactically readable, so
     // core/initialisms.ts's OOV test cannot derive it — a lexical convention, not a spelling fact. Chosen by
     // running that test over every all-caps run in the sl_si corpus (132 instances, 85 distinct) and keeping
     // the readable ones convention spells: ZDA ×11 is the most frequent acronym in the corpus and would

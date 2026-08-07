@@ -97,7 +97,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // the symbol only ever arrives inside a Latin run. Either way the tier substitutes the conjunction, SPACED —
     // see the tier, where the spacing exists because `B&B` is two initialisms.
     ampersand: "እና",
-    // #586 `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
+    // `multiply` — this language had NO word for the sign at all. ⚠ STANDARD MATHEMATICAL REGISTER, not a
     // corpus attestation: the sweep's plausible hits were homographs of PREPOSITIONS (es `por` ×23, it `per` ×25,
     // ru `на` ×31 are all the preposition), the same trap that defeated the exponent sourcing. One word, so `by`
     // defaults to it — this language does not split dimension from product.
@@ -121,7 +121,7 @@ const SYMBOLS = makeSymbolNormalizer({
     magnitudes: ["ሚሊዮን", "ቢሊዮን", "ቢልየን", "ትሪሊዮን"],
 });
 
-/** #562 text normalization. SYMBOLS is threaded through it — the ordering is load-bearing (normalize.ts §9). */
+/** Text normalization. SYMBOLS is threaded through it — the ordering is load-bearing (normalize.ts §9). */
 const NORMALIZE = makeAmharicNormalizer(numberToText, SYMBOLS);
 
 class AmharicPhonemizer implements Phonemizer {

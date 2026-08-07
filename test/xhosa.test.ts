@@ -50,7 +50,7 @@ describe("Xhosa canonical IPA", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13 (pin the rule's BRANCHES)):
+// TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (playbook trap 13 (pin the rule's BRANCHES)):
 // every rule with a table plus a fallback gets one case from each side, and the cases the corpus does NOT
 // contain (a capitalised ordinal suffix, `°F`, `00:30`, an out-of-range hour, a comma decimal) are pinned
 // deliberately, because zero corpus instances is not evidence of correctness (trap 8 (zero corpus instances is not evidence of…)).
@@ -209,7 +209,7 @@ describe("Xhosa text normalization", () => {
         expect(normalizeXhosa("23 > 19")).toBe("23 ngaphezulu kuna 19");
         expect(normalizeXhosa("7 × 2")).toBe("7 phindaphinda 2");
         expect(normalizeXhosa("8 ÷ 2")).toBe("8 yahlula 2");
-        // #586. `plas`, not the HSRC dictionary's addition operator `dibanisa`: all THREE xh_za speakers of
+        // `plas`, not the HSRC dictionary's addition operator `dibanisa`: all THREE xh_za speakers of
         // the `UTC+1` sentence say the English loan, decoded with a PHONEME recognizer whose vocabulary holds
         // no `+` and no digits (`j u t i s i p l a s w a n`). `dibanisa` glosses the SYMBOL correctly and is
         // not what a reader says. Spelled `plas` because the attested vowel is [a] and the orthography is

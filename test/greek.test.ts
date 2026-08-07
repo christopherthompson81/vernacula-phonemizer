@@ -6,7 +6,7 @@ import { normalizeGreek } from "../src/languages/greek/normalize.ts";
 import { numberToWords } from "../src/languages/greek/numbers.ts";
 
 // Canonical-IPA goldens for Modern Greek (el). The g2p itself is a context-sensitive scan (greek.ts);
-// these pin the #562 TEXT-NORMALIZATION layer (normalize.ts), which rewrites everything that is not
+// these pin the TEXT-NORMALIZATION layer (normalize.ts), which rewrites everything that is not
 // already a pronounceable word before the tokenizer sees it. Every expectation below is a form the
 // el_gr FLEURS corpus actually writes.
 
@@ -182,7 +182,7 @@ describe("greek clause marks", () => {
         expect(phonemize("γιατί;", "el")).toBe("ʝati ?"); // γι- synizes: the [i] is absorbed into [ʝ]
     });
 
-    test("#586 the APPOSITION dash is a pause, and the range hyphen is not", () => {
+    test("the APPOSITION dash is a pause, and the range hyphen is not", () => {
         // Reported for a whole sweep as a `signed-number` DROP, and misclassified: not a minus, not a
         // designation, not ambiguous. Greek brackets an aside between dashes and BOTH were silently dropped,
         // so the aside ran into its host clause with no break.

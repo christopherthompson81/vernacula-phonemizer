@@ -96,7 +96,7 @@ describe("Egyptian lexicon — no annotation artifacts", () => {
 // و/ي inside an illegal run as the vowels they carry in loan spellings; tier 2 breaks residual runs with
 // the epenthetic vowel, after the run's FIRST consonant (selected against 57 attested loanword
 // transcriptions: booking → bukinɡ, not bukniɡ). Pure function — no ONNX needed to test it.
-describe("Arabic foreign-cluster repair (#560 follow-up)", () => {
+describe("Arabic foreign-cluster repair", () => {
     it("tier 1: mater lectionis — و/ي in an illegal run become u/i", () => {
         expect(repairForeignClusters("bwknɡ")).toBe("bukinɡ"); // بوكنج Booking (tier 2 finishes knɡ)
         expect(repairForeignClusters("kˈaːrwljn")).toBe("kˈaːrulin"); // Carolyn

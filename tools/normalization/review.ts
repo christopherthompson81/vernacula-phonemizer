@@ -104,7 +104,7 @@ if (!hasNorm) { report(); process.exit(1); }
 // several languages off one normalizer with different number data: `makeHindiNormalizer` (hi, ur, mr, as, gu,
 // ne, or, fa, bn, pa) and `makeAmharicNormalizer` (am). Matching `normalize\w+` alone found nothing in any
 // of them, so `exportNames` was EMPTY and two checks reported a false FAIL — "no call to  found" and "no test
-// file references " — with a blank where the name should be. Found by the #586 loop-back on hi, and the blank
+// file references " — with a blank where the name should be. Found by a loop-back on hi, and the blank
 // is what gave it away: a report that cannot name what it is looking for is not reporting a real absence.
 const exportNames = [...readFileSync(normPath, "utf8")
     .matchAll(/export function ((?:normalize|make|create)\w+)/gu)]
@@ -160,7 +160,7 @@ note("tests", testing.length > 0,
 // ── 3. the artifact is committed (Czech's was left untracked) ─────────────────────────────────────
 // The artifact is usually `<lang>.jsonc`, but a language served through an ALIAS files it under the code
 // its corpus is named for: Standard Malay runs as `zsm` while its corpus is `ms_my` and its artifact is
-// `ms.jsonc`. Reporting that as "missing" then skips the scan entirely, which is how #601 lost a gate to a
+// `ms.jsonc`. Reporting that as "missing" then skips the scan entirely, which is how one run lost a gate to a
 // naming detail.
 //
 // A sister candidate is only usable if that code is NOT ITSELF A REGISTERED LANGUAGE: a registered sibling
@@ -186,7 +186,7 @@ note("artifact tracked", tracked, tracked ? artifact : `${artifact} ${existsSync
  * Measured across the tree when this check was added: **64 of 67 artifacts stale**, with `sports-time`,
  * `version-dot`, `quote-letter`, `scaled-currency` and `ordinal-caps` never evaluated for any of those 64, and
  * 35 still carrying a count under the dead key `negative`. That is a fleet-sized blind spot that no gate
- * mentioned, and it is exactly the kind #586 exists to close — so it is a FAIL, not a note.
+ * mentioned, and it is exactly the kind this gate exists to close — so it is a FAIL, not a note.
  */
 if (existsSync(artifact)) {
     const st = staleness(readFileSync(artifact, "utf8"));
@@ -303,7 +303,7 @@ for (const name of accepted) console.log(`  ⓘ ${name} is INTENTIONALLY silent 
  * German reads `5 km²` as *fʏnf km* — the unit abbreviation reaching the phoneme sink verbatim, trap 6 (a word your layer emits must come from the…)'s
  * defect arriving through the exponent. French differs from `5 km` by ONE VOWEL (kilomˈɛtʁ vs kilɔmˈɛtʁ),
  * an incidental g2p artefact of the changed token, so even a careful reader has to compare two nearly
- * identical strings to see that the `²` was dropped. That is 28 of 66 languages, for #586 to sweep.
+ * identical strings to see that the `²` was dropped. That is 28 of 66 languages.
  *
  * TWO MECHANICAL CHECKS WERE TRIED AND BOTH REJECTED, which is why this is a comment and not a `note()`:
  *

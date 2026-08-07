@@ -75,7 +75,7 @@ describe("welsh canonical IPA", () => {
     });
 });
 
-// TEXT NORMALIZATION (src/languages/welsh/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// TEXT NORMALIZATION (src/languages/welsh/normalize.ts) — the pre-tokenizer pass. The defining
 // rules are the VIGESIMAL ordinal (settled by audio: 60fed reads trigainfed, not chwe degfed), the
 // comma-thousands (Welsh groups with commas; the dot is a decimal "pwynt"), the era markers O.C./C.C.,
 // the p.m./a.m. clocks, the -au decades, and the letter-spelled initialisms.

@@ -179,7 +179,7 @@ describe("Catalan Roman-numeral policy — centuries cardinal, prenominal events
     });
 });
 
-// TEXT NORMALIZATION (src/languages/catalan/normalize.ts) — the pre-tokenizer pass behind #562. The
+// TEXT NORMALIZATION (src/languages/catalan/normalize.ts) — the pre-tokenizer pass. The
 // defining rules are the `Nè`/`Na`/`Nr` ordinal (the Catalan written form), the era markers dC/aC, the
 // dot-thousands vs dot-decimal/version disambiguation, clocks with AM/PM, fractions, and the initialism
 // pass (EUA letter-spells, ONU stays a word).
@@ -213,7 +213,7 @@ describe("Catalan text normalization", () => {
 
     test("dot-thousands stay grouped; 1-2 digit fractions are decimals/versions (punt)", () => {
         expect(ph("1.400 persones")).toBe("mˈiɫ kwˈatɾə sˈens pəɾsˈonəs"); // 1400
-        // The bare `m` was the RAW LETTER here until #586 declared `metre`/`metres` — this corpus's only
+        // The bare `m` was the RAW LETTER here until `metre`/`metres` were declared — this corpus's only
         // digit-adjacent bare `m`, and a genuine metre ("un màxim de 4.892 m del Mont Vinson").
         expect(ph("4.892 m")).toBe("kwˈatɾə mˈiɫ bˈujt sˈens nuɾˈantə dˈos mˈɛtɾəs"); // 4892 m
         expect(ph("1.5 milions")).toBe("un pˈun sˈiŋ miɫiˈons"); // 1.5 → punt

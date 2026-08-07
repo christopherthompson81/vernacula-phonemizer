@@ -46,7 +46,7 @@ describe("Hausa g2p (authored, Boko orthography)", () => {
     });
 });
 
-// TEXT NORMALIZATION (src/languages/hausa/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// TEXT NORMALIZATION (src/languages/hausa/normalize.ts) — the pre-tokenizer pass. The defining
 // rules are the kashi-prefix percent (kashi 80%), the comma-thousands, the dot-decimal "maki", the na
 // safe/na yamma clocks, the B.C./BCE era markers, the rates "a awa", and the letter-spelled initialisms.
 describe("Hausa text normalization", () => {

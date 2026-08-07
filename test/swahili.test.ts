@@ -47,7 +47,7 @@ describe("swahili canonical IPA", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION (src/languages/swahili/normalize.ts). Every case below is a form attested in the
+// TEXT NORMALIZATION (src/languages/swahili/normalize.ts). Every case below is a form attested in the
 // sw_ke FLEURS corpus; the "before" in each comment is what the engine actually produced prior to the pass.
 describe("swahili text normalization", () => {
     test("grouped thousands: the comma was a clause pause and the tail a second number", () => {
@@ -83,7 +83,7 @@ describe("swahili text normalization", () => {
 
     test("degrees: ºC leaked the raw character and read C as the letter", () => {
         // "+30ºC" → *thelathini º k*, with U+00BA emitted RAW into the phoneme stream.
-        // #586. The plus is now read (plas). The degree rule below used to capture `([+-]?)` and DISCARD it,
+        // The plus is now read (plas). The degree rule below used to capture `([+-]?)` and DISCARD it,
         // so the sign vanished — the same shape zu's `[+]?` had. ⚠ sw's two temperature speakers say the DEGREE
         // word in that slot (`z aɪ i d i a  ɲ u z i  t a l a t i n i`), not a plus; the offset speaker says
         // `p l a s w a n`. Voiced here per the standing choice on explicitly typed characters.

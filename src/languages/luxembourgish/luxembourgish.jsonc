@@ -31,7 +31,7 @@
         "v": "f", "w": "v", "x": "ks", "z": "t͡s"
     },
 
-    // The PARENTHETICAL EN DASH is a pause, and it was being dropped outright in 31 utterances (#562/#604):
+    // The PARENTHETICAL EN DASH is a pause, and it was being dropped outright in 31 utterances:
     // `Kloteren a Sprangen – erfuerdert awer …` ran the two clauses together with nothing between them.
     // It reads as the same short break `;` and `:` already map to. The corpus's 54 en dashes are 11 numeric
     // ranges — claimed as `bis` by normalize.ts step 10, long before the tokenizer sees them — and this.

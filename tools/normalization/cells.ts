@@ -108,7 +108,7 @@ export const CELLS: Cell[] = [
     // both cheaper and more accurate than a regex. Same principle as acronymLetters in core/initialisms.ts:
     // a lexical fact belongs in data, not in logic.
     { key: "calendar", langs: 6, re: /$^/u, lexical: true },
-    // ─── CELLS ADDED FROM THE REVIEW PASSES (#590 uz, #591 af, #592 as). Each exists because a shipped
+    // ─── CELLS ADDED FROM THE REVIEW PASSES (uz, af, as). Each exists because a shipped
     // layer read one of these wrong and NO existing cell would have surfaced it. Round two is the
     // reason to add them here rather than fix one language and move on.
     //

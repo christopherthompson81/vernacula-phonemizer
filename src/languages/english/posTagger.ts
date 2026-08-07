@@ -35,7 +35,7 @@ export function normalizeToken(word: string): string {
  * two START tokens at the front and two END tokens at the back, so the token at
  * sentence position `i` lives at `context[i + 2]`.
  *
- * NOTE (PII-scrub coupling, #687): the trainer's PII filter identifies which
+ * ⚠ PII-SCRUB COUPLING: the trainer's PII filter identifies which
  * weights carry a raw corpus token by string-matching the feature key — a key
  * "carries a token" iff it contains "word", and the token is its last
  * space-delimited field. Every word-bearing feature below therefore ends in the

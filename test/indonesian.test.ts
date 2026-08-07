@@ -103,7 +103,7 @@ describe("indonesian normalization", () => {
         expect(phonemize("783.562 km²", "id")).toContain("kilomətˈər pərsəɡˈi");
     });
 
-    test("#586 the US$ code, its magnitude slot, and the coordinate degree", () => {
+    test("the US$ code, its magnitude slot, and the coordinate degree", () => {
         // Third language with this defect after pt and nl, by a third route: id has no initialism pass, so the
         // `$` simply arrived preceded by `S` and the tier's word-guard refused it.
         const g = phonemize("10 miliar euro (US$ 14,7 miliar) per tahun", "id");

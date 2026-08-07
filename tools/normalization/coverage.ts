@@ -2,7 +2,7 @@
  * RETROACTIVE COVERAGE AUDIT — check every ALREADY-TREATED language against the FULL pattern
  * inventory, not the partial one that existed when it was treated.
  *
- * WHY THIS HAS TO EXIST. The 37 languages under #562 were done one at a time over many batches, and each
+ * WHY THIS HAS TO EXIST. The 37 treated languages were done one at a time over many batches, and each
  * was judged against whatever the playbook knew at that point. The inventory in mine.ts was
  * then derived FROM those 37 — so it is strictly newer than every language in it, and no early language
  * was ever checked against the later cells. That is not hypothetical: `exponent` is declared in 24
@@ -20,7 +20,7 @@
  *          Listed per instance in `defects.ts` ACCEPTED_SILENT, printed in its own section below, and NOT
  *          counted as a defect. A designation not on that list still reports as a DROP.
  *   DROP   it occurs and a symbol in it VANISHES (differential test: the reading is byte-identical with
- *          the symbol deleted). This is the class the corpus diff was blind to — see #584.
+ *          the symbol deleted). This is the class the corpus diff was blind to.
  *   LEAK   it occurs and a digit or raw mark SURVIVES into the IPA.
  *
  * A DROP or LEAK is a defect in a language that is already marked done.
@@ -203,7 +203,7 @@ function corpusLines(corpus: string): string[] {
             //   `SÃ£o Paulo`  → `Ã` + `£`  — a POUND SIGN, reported as a currency DROP in a place name
             //   `Ä°zmir`      → `Ä` + `°`  — a DEGREE SIGN, reported as a degree DROP in a population figure
             //   `19.500 kmÂ²` → `Â` + `²`  — the one case where the phantom coincides with a real symbol
-            // Both of the first two were chased as defects during #586 before the cause was spotted, and each
+            // Both of the first two were chased as per-language defects before the shared cause was spotted, and each
             // would have cost a per-language rule for a sign no reader will ever see.
             //
             // Repairing here is not leniency, it is MATCHING THE ENGINE: the registry applies
@@ -283,7 +283,7 @@ for (const [lang, corpus] of TREATED) {
             // into two tokens, and deleting the ℃ agglutinates `32에` into one, so the readings differed and
             // ko scanned CLEAN while `20℃` read as bare *isˈip̚*. Measured over all 66 artifacts, the
             // substitution finds 16 drops this missed and loses none — ten of them the B&B ampersand, in
-            // nine languages, which is the defect #586 opens with.
+            // nine languages, which is the defect this gate exists to catch.
             const without = say(withoutSymbol(l, re));
             if (without === undefined || without !== ipa) continue;
             const symbols = [...new Set(l.match(re) ?? [])];
@@ -354,7 +354,7 @@ if (acceptedRows.length) {
  * languages that HAVE a normalization layer, and already prints "N/67" for defective cells.
  *
  * ⚠ AND IT CATCHES A REGRESSION THAT NOTHING ELSE CAN. These signs are ABSENT from the FLEURS corpora — that is
- * the whole reason #654 needed Wikipedia and register sources — so `corpus-diff.ts` reports 0 changed whether a
+ * the whole reason Wikipedia and register sources are needed — so `corpus-diff.ts` reports 0 changed whether a
  * rule works or has just been deleted. A scripted edit to croatian/normalize.ts REPLACED its `>` rule instead of
  * appending after it, and only the per-language sign check saw it. Sweeping every language every run turns that
  * from a lucky catch into a gate.

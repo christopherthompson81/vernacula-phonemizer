@@ -61,7 +61,7 @@ describe("Slovak canonical IPA — rule g2p (Standard Slovak)", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION — asserted on normalizeSlovak (text→text) so the pins read as Slovak rather than
+// TEXT NORMALIZATION — asserted on normalizeSlovak (text→text) so the pins read as Slovak rather than
 // as IPA, plus phonemize() end-to-end where the point is that the pipeline speaks the result.
 // Evidence and counts:.
 describe("Slovak text normalization", () => {

@@ -74,7 +74,7 @@ interface VarietyDef {
     consonantShifts: [string, string][];
     diphthongShifts: Record<string, string>;
     articleVowel?: string; // raise the definite-article nucleus (arz "i" → il-); omitted = keep MSA [a]
-    numbers?: ArabicNumberData; // per-variety numeral tables (#561: arz 80 is tamaniːn, not MSA θamaːnuːn)
+    numbers?: ArabicNumberData; // per-variety numeral tables (arz 80 is tamaniːn, not MSA θamaːnuːn)
 }
 interface VarietyRules {
     consonantShifts: [string, string][]; // literal string rewrites (consonants are unambiguous)
@@ -158,7 +158,7 @@ const HARAKAT = /[ً-ْٰـ]/gu; // short-vowel diacritics + dagger-alif + tatwe
 
 // The lexicon is MINED from kaikki, and the extraction once emitted a Wiktionary entry's phonemic and
 // phonetic transcriptions glued together — كتب → "katab/[kˈatab" — which reached the output verbatim as a
-// "phoneme" (issue #550). The data is repaired; this guard keeps a re-mine from reintroducing it.
+// "phoneme". The data is repaired; this guard keeps a re-mine from reintroducing it.
 //
 // It REPAIRS rather than drops. Dropping would be wrong here specifically: this lexicon exists to supply
 // EGYPTIAN short vowels, and without a hit the word falls back to the abjad rule path or the MSA neural
@@ -180,7 +180,7 @@ export const ipaOnly = (value: string): string | undefined => {
     return pick !== undefined && !NOT_IPA.test(pick) ? pick : undefined;
 };
 
-// #562 symbol normalization — % is the only symbol in the Arabic FLEURS text. في المئة (the standard
+// symbol normalization — % is the only symbol in the Arabic FLEURS text. في المئة (the standard
 // written form, matching FLEURS' MSA-leaning register) reads cleanly through the diacritizer as
 // fi ilmiʔa; the Egyptian colloquial المية spelling vocalized worse. Shared path — only arz has corpus %.
 const SYMBOLS = makeSymbolNormalizer({

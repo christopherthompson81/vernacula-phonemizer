@@ -88,7 +88,7 @@ describe("Khmer (km) cardinal numbers — bi-quinary 6–9", () => {
     }
 });
 
-describe("Khmer signs, units and currencies (#585 review pass)", () => {
+describe("Khmer signs, units and currencies", () => {
     // Every reading below is corpus-sourced; the counts are digit-flanked occurrences in the mined kmwiki dump.
     test("arithmetic signs read as words", () => {
         expect(phonemizeText("៥+៣", "km")).toContain("ɓouk");        // + 74 instances, បូក

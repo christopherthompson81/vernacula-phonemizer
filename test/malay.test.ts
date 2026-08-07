@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { normalizeMalay } from "../src/languages/malay/normalize.ts";
 
-// #562 Standard Malay (zsm) TEXT NORMALIZATION. The phonology is still Indonesian's (zsm is served by the
+// Standard Malay (zsm) TEXT NORMALIZATION. The phonology is still Indonesian's (zsm is served by the
 // Indonesian engine as a labelled approximation), so these goldens pin the TEXT→TEXT layer that runs in
 // front of it — the shapes where the two standards' orthographic conventions genuinely differ.
 //

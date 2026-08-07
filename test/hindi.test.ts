@@ -28,7 +28,7 @@ describe("hindi canonical IPA", () => {
         // the strip is unreachable. Before the registry folded native digits, `₹500` already read
         // "रुपये" while `₹५००` did not, because the currency regex is ASCII-anchored — the two digit
         // systems disagreed and this test asserted the accidental half. Dropping a currency sign is the
-        // #584 defect, so the reading is the correct resolution.
+        // defect, so the reading is the correct resolution.
         expect(phonemize("₹५००", "hi")).toBe("pˈaː̃t͡ʃ sˈɔː ɾˈʊpjeː");
         expect(phonemize("₹500", "hi")).toBe(phonemize("₹५००", "hi")); // both digit systems agree
     });
@@ -38,7 +38,7 @@ describe("hindi canonical IPA", () => {
     });
 });
 
-// #562 text normalization (hindi/normalize.ts) — the fourth language, and the first outside the Latin
+// text normalization (hindi/normalize.ts) — the fourth language, and the first outside the Latin
 // script. Most tiers were already right and are untouched: lakh/crore, both comma-grouping conventions,
 // decimals, %, currency, the danda, and Latin-run delegation to English.
 describe("hindi normalization", () => {
@@ -80,7 +80,7 @@ describe("hindi normalization", () => {
         expect(phonemize("1/2", "hi")).toBe("ˈaːd̪ʱaː");
         expect(phonemize("1/3", "hi")).toBe("ˈeːk t̪ɪɦˈaːiː");
         expect(phonemize("1/5", "hi")).toBe("ˈeːk bˈəʈaː pˈaː̃t͡ʃ"); // the ordinary spoken "n बटा m"
-        // #586. The plus was `धन` here until the corpus's own AUDIO was consulted: both hi_in speakers of the
+        // The plus was `धन` here until the corpus's own AUDIO was consulted: both hi_in speakers of the
         // `यूटीसी + 1` sentence say प्लस. धन is what the sign is CALLED in a maths article, not what is read
         // in the slot — a correctly-sourced word from the wrong register.
         // Both hi speakers of `+ 30° C` omit the sign, but for a TTS target that is a REFEREE signal and not
@@ -92,7 +92,7 @@ describe("hindi normalization", () => {
         expect(phonemize("यूटीसी + 1", "hi")).toBe("juːʈˈiːsiː plˈəs ˈeːk"); // the word, per two speakers
     });
 
-    // #586. The minus WAS deliberately not claimed, and the refusal was right about the rule it refused:
+    // The minus WAS deliberately not claimed, and the refusal was right about the rule it refused:
     // measured over hi_in, the fleet's `(^|[\s(])[-−–](\d)` shape has one false positive and no true ones.
     // A narrower rule escapes the objection — the sign is unambiguous when it opens the string or a bracket,
     // or when a degree/percent word follows — and the corpus's own `+ 30° C` proves the signed temperature is
@@ -153,7 +153,7 @@ describe("hindi normalization", () => {
     });
 });
 
-/** #562 — the ordinal suffix must not match the START of an ordinary word. */
+/** the ordinal suffix must not match the START of an ordinary word. */
 describe("Hindi ordinal suffix boundary", () => {
     test("a number before a वा- word stays two words", () => {
         // Was one glued token with a stress lost — dasvāpas. The Marathi run measured 13 live corruptions

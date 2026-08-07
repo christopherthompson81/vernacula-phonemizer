@@ -9,7 +9,7 @@
 // real proportions, and to check that ORDINARY text still survives a change — a hard-set proves the rules
 // fire, not that nothing else broke.
 //
-// ⚠ ERRATA — 1 LOSSY MOJIBAKE residue was CORRECTED IN PLACE (2026-08-04, #654):
+// ⚠ ERRATA — 1 LOSSY MOJIBAKE residue was CORRECTED IN PLACE (2026-08-04):
 //   `उदाहरणार्थ, â€इलर्निंगâ€� आणि â€समाजीकरणâ€� …`  →  `उदाहरणार्थ, “इलर्निंग” आणि “समाजीकरण” …`
 // ⚠ THIS ONE IS AN INFERENCE, NOT AN EXACT DECODE, and the distinction matters — id.jsonc's errata is the exact
 // kind and this is not. `â€` is `E2 80`, the first two bytes of a General Punctuation character, and the third
@@ -23,7 +23,7 @@
 //     siblings write U+201C/U+201D, which is what settles the OPENING quote rather than a dash.
 // ⚠ AND THE DAMAGE IS BOUNDED EVEN IF WRONG: every candidate for the missing character is a quote, a dash or a
 // space — all of them either clause marks or silent in this engine — so a wrong choice cannot produce a wrong
-// WORD. Left as mojibake it left a `€` that `\p{Sc}` read as a PHANTOM CURRENCY, which is what #586 chased.
+// WORD. Left as mojibake it left a `€` that `\p{Sc}` read as a PHANTOM CURRENCY, which is what an earlier audit chased.
 // The mining tool now repairs this at source (`repair_double_encoded` in wikidump-to-text.py).
 // ⚠ AN EMPTY CELL IS NOT EVIDENCE. It is a query to run or a tool bug. Both have happened here: random
 // sampling read intros and missed 1013 articles with a percentage, and a sentence splitter ate the

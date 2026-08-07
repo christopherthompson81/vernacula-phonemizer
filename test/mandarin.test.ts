@@ -109,7 +109,7 @@ describe("mandarin canonical IPA — pinyin path", () => {
     });
 });
 
-// #562 text normalization — the fifth language. Mandarin already had more of this tier than any other
+// text normalization — the fifth language. Mandarin already had more of this tier than any other
 // audited (digit-by-digit years, full dates, 世纪, 点/分, 第N, the 百分之 prefix, full-width punctuation,
 // Latin-run delegation), so the defects were in the ENGINE's number handling rather than in a new pass.
 describe("mandarin normalization", () => {
@@ -136,12 +136,12 @@ describe("mandarin normalization", () => {
         expect(phonemize("35°", "cmn")).toBe("san˥˥ ʂʐ̩˧˥ wu˨˩˦ tu˥˩"); // 度
         expect(phonemize("120 km/h", "cmn")).toBe("ji˥˩ paⁱ˨˩˦ ər˥˩ ʂʐ̩˧˥ koŋ˥˥ li˧˥ meⁱ˧˥ ɕjɑᵘ˨˩˦ ʂʐ̩˧˥");
         // ℃ / ℉ are SINGLE code points (U+2103, U+2109), so the `°c`/`°f` keys could not reach them and
-        // `20℃` read as bare 二十 — the whole unit gone. Found while reviewing #586; hi and en had it too.
+        // `20℃` read as bare 二十 — the whole unit gone. hi and en had it too.
         expect(phonemize("20℃", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 摄氏度
         expect(phonemize("20℉", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ xwɑ˧˥ ʂʐ̩˥˩ tu˥˩"); // 华氏度
     });
 
-    // #586, from the zh.wikipedia fill: Chinese has no spaces, so a unit or sign is normally flanked by Han —
+    // From the zh.wikipedia fill: Chinese has no spaces, so a unit or sign is normally flanked by Han —
     // and the shared tier's letter-boundary guards were rejecting exactly that. Only punctuation-adjacent
     // instances worked, which is why the FLEURS corpus (units written as words) could never show it.
     test("a unit or sign survives a Han neighbour", () => {
@@ -205,7 +205,7 @@ describe("mandarin normalization", () => {
         expect(phonemize("20世纪", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂʐ̩˥˩ t͡ɕi˥˩"); // a century is a CARDINAL
     });
 
-    test("#586 embedded foreign SCRIPT routes, and accented Latin stays one word", () => {
+    test("embedded foreign SCRIPT routes, and accented Latin stays one word", () => {
         // cmn drives clauseSink() directly instead of going through assembleClauses, and assembleClauses is
         // where emitUnclaimed calls the script router — so taking the fast path meant silently opting out of a
         // fleet-wide fix. Every non-Latin foreign script was DELETED: Greek, Cyrillic, Thai, all of it.

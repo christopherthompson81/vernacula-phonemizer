@@ -52,7 +52,7 @@ describe("Turkish g2p (segmental)", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION. Counts in the comments are over the 1,876 unique tr_tr FLEURS utterances
+// TEXT NORMALIZATION. Counts in the comments are over the 1,876 unique tr_tr FLEURS utterances
 // (column 3, the cased one); see src/languages/turkish/normalize.ts for the full tabulation.
 describe("Turkish text normalization", () => {
     it("ordinal builder: the -(I)ncI suffix under four-way harmony, dört the sole irregular stem", () => {

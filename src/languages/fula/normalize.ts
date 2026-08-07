@@ -151,11 +151,11 @@ export function normalizeFula(input: string): string {
     // 6) CLOCK, in the COLON form. `1:15 a.m.` → goo e sappo e joyi a.m.; `9:30 fajiri` → … fajiri.
     //    The 24h `0230 UTC` is handled here too (a leading 0 makes it a 4-digit time). The a.m./p.m.
     //    marker expands to the Fula time-of-day: `fajiri` (dawn) is corpus-attested ×4, and `kikiiɗe`
-    //    (afternoon/evening) — carried here as a STATED ASSUMPTION in #596, because it appears in neither
+    //    (afternoon/evening) — carried here as a STATED ASSUMPTION, because it appears in neither
     //    the corpus nor the epitran referee's word list — is now ATTESTED on ff.wikipedia, in exactly this
     //    slot: "yiite ngee yani ko hedde waktu 23ɓo kikiiɗe" ("the fire fell at about hour 23 kikiiɗe"),
     //    a clock time with the marker attached. Three corpus clocks depended on the assumption; the wiki
-    //    tier did not exist when #596 shipped, and it settles it. NOT a sports
+    //    tier did not exist when this rule was written, and it settles the question. NOT a sports
     //    time: a THIRD `\d.\d\d` field (4:41.30) means a pace. The trailing marker is captured WITHOUT
     //    eating the space before a following word (trap: a bare `\s*` glued "tati fajiri" → "tatifajiri").
     s = s.replace(/(?<![\d:,])(\d{1,2}):(\d{2})(?![:.\d])(?:\s*([Aa]\.?[Mm]\.?|[Pp]\.?[Mm]\.?))?/giu,

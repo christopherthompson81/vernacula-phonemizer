@@ -164,7 +164,7 @@ describe("bengali normalization", () => {
         expect(phonemize("120 m³", "bn")).toContain("kiubik miʈaɾ");
     });
 
-    test("#586 the yen sign is VOICED although both speakers omit it", () => {
+    test("the yen sign is VOICED although both speakers omit it", () => {
         // Both bn_in speakers read the amounts and no currency word at all (wav2vec2:
         // "d a m d u a z er p a sh o t e k"). We voice it anyway: for TTS an explicitly typed character is
         // content, and a speaker's omission is evidence about reading habit, not licence to delete.

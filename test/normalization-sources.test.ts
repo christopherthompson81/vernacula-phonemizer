@@ -5,7 +5,7 @@
  * and its own header explains the stake: "the cost of doing it by hand is not the time, it is that it was got
  * wrong". But its class list was hand-written and had fallen behind twice over.
  *
- * #654 established the sign vocabulary for the fleet and taught `defects.ts`, `review.ts` and `coverage.ts`
+ * established the sign vocabulary for the fleet and taught `defects.ts`, `review.ts` and `coverage.ts`
  * about it — not this file. And `ampersand` and `iteration` had never been represented at all. So an author
  * running the mandated check was told, by silence, that eight classes did not apply. Writing the Khmer layer
  * that is exactly what happened: the report listed percent, currency, degrees, decimal and fractions, said
@@ -50,7 +50,7 @@ describe("sources.ts covers what the gates check", () => {
         }
     });
 
-    test("the sign classes #654 established are all represented", () => {
+    test("the sign classes are all represented", () => {
         // Named explicitly rather than derived, because these are the ones that went missing for a whole issue's
         // worth of work and the failure was invisible — the report simply did not mention them.
         for (const sign of ["minus", "plus", "plus-minus", "equals", "less-than", "greater-than", "times", "divide"])

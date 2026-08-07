@@ -32,7 +32,7 @@ describe("cantonese canonical IPA", () => {
     });
 });
 
-// #562 text normalization. Counts in the comments are instances in FLEURS yue_hant_hk (1,726 utterances);
+// text normalization. Counts in the comments are instances in FLEURS yue_hant_hk (1,726 utterances);
 // the rules and the ordering they depend on are documented in src/languages/cantonese/normalize.ts.
 describe("cantonese text normalization", () => {
     const yue = (s: string): string => phonemize(s, "yue");
@@ -52,7 +52,7 @@ describe("cantonese text normalization", () => {
         expect(yue("1469–1539")).toBe(phonemizeWord("一四六九至一五三九"));
         expect(yue("1977 至 1981 年")).toBe(phonemizeWord("一九七七至一九八一年"));
         // A short numeric range is NOT claimed: 6-6 and 7–2 in this corpus are tennis scores (六比六),
-        // and no surface feature separates them from 2-3 公里. Unchanged from the pre-#562 behaviour.
+        // and no surface feature separates them from 2-3 公里. Unchanged from the pre-normalization behaviour.
         expect(yue("6-6")).toBe(phonemizeWord("六六"));
     });
 

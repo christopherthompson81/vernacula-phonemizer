@@ -198,7 +198,7 @@ export function makeHindiNormalizer(numbers: NumbersDef): (text: string) => stri
         // 7b) MINUS — WHERE IT IS UNAMBIGUOUS, AND ONLY THERE.
         //
         //     This step used to be a documented REFUSAL, and the refusal was right about the rule it was
-        //     refusing. Re-measured over the whole hi_in corpus for #586, its numbers hold exactly:
+        //     refusing. Re-measured over the whole hi_in corpus, its numbers hold exactly:
         //
         //       hyphen preceded by a DIGIT (a range: 25-30, 1000-1300, 100-200)   22   — never a negative
         //       hyphen preceded by a SPACE                                         1   — `चंद्रयान -1`

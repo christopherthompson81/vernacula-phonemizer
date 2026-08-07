@@ -60,11 +60,11 @@ describe("Slovenian canonical IPA — Slovak-shaped South Slavic engine + Sloven
     });
 });
 
-// #562 TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (trap 13 (pin the rule's BRANCHES)): the ordinal
+// TEXT NORMALIZATION. These pin the RULE'S BRANCHES, not the corpus's instances (trap 13 (pin the rule's BRANCHES)): the ordinal
 // table, the tens+units composition and the boundary between them; both count-form paths; the licensor list
 // AND the ending fallback; and the discriminator that decides an ordinal period from a sentence period.
 // Corpus counts are in src/languages/slovenian/normalize.ts and.
-describe("Slovenian #562 — ordinals: the table, the composition, and the boundary between them", () => {
+describe("Slovenian — ordinals: the table, the composition, and the boundary between them", () => {
     test("the TABLE branch, 1–19, and its two irregular stems", () => {
         expect(ordinalBase(1)).toBe("prvi");
         expect(ordinalBase(3)).toBe("tretji"); // the only PALATAL stem in 1–999
@@ -106,7 +106,7 @@ describe("Slovenian #562 — ordinals: the table, the composition, and the bound
     });
 });
 
-describe("Slovenian #562 — the ordinal period vs the sentence period", () => {
+describe("Slovenian — the ordinal period vs the sentence period", () => {
     test("a LOWERCASE follower is an ordinal; the licensor gives the case", () => {
         expect(normalizeSlovenian("V 16. stoletju")).toBe("V šestnajstem stoletju");
         expect(normalizeSlovenian("19. stoletja")).toBe("devetnajstega stoletja");
@@ -157,7 +157,7 @@ describe("Slovenian #562 — the ordinal period vs the sentence period", () => {
     });
 });
 
-describe("Slovenian #562 — the four-way DUAL count agreement", () => {
+describe("Slovenian — the four-way DUAL count agreement", () => {
     test("the tier's literal arrays match COUNTED — the two copies must not drift", () => {
         // The tier declares its percent/currency words as LITERALS so review.ts's sourcing check can read
         // them; COUNTED is what the gender repair and the local degree rule read. Same words, or a bug.
@@ -191,7 +191,7 @@ describe("Slovenian #562 — the four-way DUAL count agreement", () => {
     });
 });
 
-describe("Slovenian #562 — grouping, decimals, clocks, ranges, units", () => {
+describe("Slovenian — grouping, decimals, clocks, ranges, units", () => {
     test("PERIOD-grouped thousands are de-grouped FIRST; the COMMA decimal becomes a word", () => {
         expect(normalizeSlovenian("Park pokriva 19.500 km²")).toBe("Park pokriva 19500 kvadratnih kilometrov");
         expect(normalizeSlovenian("5.000.000 posameznikov")).toBe("5000000 posameznikov"); // two passes
@@ -246,7 +246,7 @@ describe("Slovenian #562 — grouping, decimals, clocks, ranges, units", () => {
     });
 });
 
-describe("Slovenian #562 — abbreviations, signs, fractions, initialisms", () => {
+describe("Slovenian — abbreviations, signs, fractions, initialisms", () => {
     test("era markers, whose interior dots were three phrase breaks", () => {
         expect(normalizeSlovenian("leta 323 pr. n. š. obnovili.")).toBe("leta 323 pred našim štetjem obnovili.");
         expect(normalizeSlovenian("do 1100 n. š.")).toBe("do 1100 našega štetja."); // sentence period restored
@@ -294,7 +294,7 @@ describe("Slovenian #562 — abbreviations, signs, fractions, initialisms", () =
     });
 });
 
-describe("Slovenian #562 — end-to-end through the real phonemizer", () => {
+describe("Slovenian — end-to-end through the real phonemizer", () => {
     const sl = getPhonemizer("sl")!;
 
     test("ROMAN numerals reach normalize.ts as DIGITS — the registry ordering, pinned on a vowel-less one", () => {

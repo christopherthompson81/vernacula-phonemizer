@@ -38,7 +38,7 @@ describe("Nepali canonical IPA", () => {
     });
 });
 
-// ── #562 text normalization ───────────────────────────────────────────────────────────────────────
+// ── text normalization ───────────────────────────────────────────────────────────────────────
 // Nepali reuses Hindi's ENGINE but supplies its own normalizer and symbol words through the engine's
 // `overrides` parameter. These assert through `text()`, which is the layer that owns the rules.
 const t = (s: string): string => getPhonemizer("ne").text(s).trim();
@@ -106,7 +106,7 @@ describe("Nepali normalization", () => {
     });
 
     test("degrees keep their scale letter, even welded to a Devanagari postposition", () => {
-        // #586. The plus is now read (प्लस), sourced from the corpus's own audio: 2 of 3 ne_np speakers of the
+        // The plus is now read (प्लस), sourced from the corpus's own audio: 2 of 3 ne_np speakers of the
         // offset sentence say `p l a s`/`p l o s`. ⚠ Both TEMPERATURE speakers omit it (`t i s d i ɡ r i`), so
         // this arm is the standing choice to voice an explicitly typed character, not a copied reading habit.
         expect(t("+30°Cभन्दा")).toBe("plˈʌs t̪ˈis ɖˈiɡɾi sˈelsijʌs bʱˈʌnd̪a"); // C was read as the letter name

@@ -72,7 +72,7 @@ describe("Fula g2p (authored)", () => {
     });
 });
 
-// TEXT NORMALIZATION (src/languages/fula/normalize.ts) — the pre-tokenizer pass behind #562. The defining
+// TEXT NORMALIZATION (src/languages/fula/normalize.ts) — the pre-tokenizer pass. The defining
 // rules are the English ordinal digits read as Fula ordinals (1st → gootal), the comma-thousands (the
 // corpus groups with commas), the dot-decimal "tere", the a.m./p.m. clocks with Fula time-of-day words,
 // the rates "e wakkati gootel", and the letter-spelled initialisms.

@@ -46,7 +46,7 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     });
 });
 
-// TEXT NORMALIZATION (src/languages/afrikaans/normalize.ts) — the pre-tokenizer pass behind #562. The
+// TEXT NORMALIZATION (src/languages/afrikaans/normalize.ts) — the pre-tokenizer pass. The
 // defining rules are the ORDINAL (numeral + letter suffix: 11de, 15de, 9e, 60ste — Dutch-style) and the
 // ENGLISH separators this corpus actually uses (dot decimal, comma thousands). Also era markers, clocks
 // with vm/n.m., rates, currency, percent, degrees, signs and initialisms.

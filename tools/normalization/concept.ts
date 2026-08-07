@@ -3,7 +3,7 @@
  *
  * WHY THIS EXISTS. Every sourcing avenue the sweep had reads TEXT and asks "does this word occur?" — the FLEURS
  * corpus, the referees, espeak's dictsource, `attest.ts` against Wikipedia. That works when you already have a
- * candidate. It fails completely when you do not, and it fails WORSE than silently: the #586 Phase 1 findings
+ * candidate. It fails completely when you do not, and it fails WORSE than silently: the first pass findings
  * left five Indic languages dropping the `+` in `UTC+1`, and a substring search for plausible words returned
  *
  *   gu ધન ×167 · ml ധന ×119 · ne धन ×84 · ta மேலும் ×161
@@ -28,7 +28,7 @@
  *   yue    加           減             乘                除
  *
  * THREE INDEPENDENT ROUTES AGREED, which is why this is worth a tool. `hi`'s row is exactly what was read by
- * hand out of the अंकगणित article for #610; `ta`'s is exactly the title behind en:Plus_and_minus_signs's
+ * hand out of the अंकगणित article; `ta`'s is exactly the title behind en:Plus_and_minus_signs's
  * interlanguage link; `yue`'s 加 and 乘 are exactly the words chosen for Mandarin from zh.wikipedia prose. None
  * of those three routes knew about the others.
  *

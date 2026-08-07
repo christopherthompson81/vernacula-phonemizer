@@ -9,13 +9,13 @@
 // real proportions, and to check that ORDINARY text still survives a change — a hard-set proves the rules
 // fire, not that nothing else broke.
 //
-// ⚠ ERRATA — 12 sequences of DOUBLE-ENCODED UTF-8 was CORRECTED IN PLACE (2026-08-04, #654). The wiki text was UTF-8
+// ⚠ ERRATA — 12 sequences of DOUBLE-ENCODED UTF-8 was CORRECTED IN PLACE (2026-08-04). The wiki text was UTF-8
 // decoded as Latin-1 and re-encoded, so it arrived mis-decoded:
 //   Las CaÃ±itas → Las Cañitas · SÃ£o Paulo → São Paulo · Ä°zmir → İzmir · 19.500 kmÂ² → 19.500 km²
 // ⚠ WHY THIS ARTIFACT WAS EDITED RATHER THAN LEFT AS MINED. The mojibake did not merely fail to read — it
 // MANUFACTURED SYMBOLS for every measurement over this file, because the mis-decode of a letter contains a
-// sign: `Ã±` contains `±`, `Ä°` contains `°`, `Ã£` contains `£`, `Â²` contains `²`. #654 cited `Las CaÃ±itas`
-// as the fleet's ONLY `±`, and #586 chased both the `°` and the `£` as per-language defects before the cause
+// sign: `Ã±` contains `±`, `Ä°` contains `°`, `Ã£` contains `£`, `Â²` contains `²`. One audit cited `Las CaÃ±itas`
+// as the fleet's ONLY `±`, and both the `°` and the `£` as per-language defects before the cause
 // was found. An artifact that invents symbols is worse than one that is merely incomplete.
 // ⚠ AND THE DECODE IS EXACT, which is what licenses editing stored evidence here. UTF-8 `C2..C5 XX` encodes a
 // known code point, so this is a DECODE, not an inference — nothing is guessed. Contrast the `<sup>` flattening

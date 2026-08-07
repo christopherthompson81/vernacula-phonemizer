@@ -43,7 +43,7 @@ describe("Thai g2p (ported syllabifier + native IPA render)", () => {
     });
 });
 
-// Numbers (found by the #562 impact audit): the tokenizer matched (\d+) but NO branch consumed it — every
+// Numbers (found by an impact audit): the tokenizer matched (\d+) but NO branch consumed it — every
 // digit run in Thai text was silently dropped, and 23.4% of FLEURS th_th utterances contain digits. The
 // compositor emits Thai-script words (each kaikki-attested with IPA) through the ordinary g2p.
 describe("Thai numbers", () => {
@@ -56,7 +56,7 @@ describe("Thai numbers", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION (src/languages/thai/normalize.ts). The count in each `test` name is instances in
+// TEXT NORMALIZATION (src/languages/thai/normalize.ts). The count in each `test` name is instances in
 // the FLEURS th_th corpus (1,906 unique utterances, column 3); the comment on a line is what the engine
 // produced BEFORE the layer existed.
 describe("Thai text normalization", () => {

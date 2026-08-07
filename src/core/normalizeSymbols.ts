@@ -211,7 +211,7 @@ export interface SymbolData {
     /**
      * The word for `&`, which is DROPPED outright without one — and a dropped sign is inaudible.
      *
-     * 16 languages still lost it after the #562 sweep, always in the same two corpus sentences: `B&B` and
+     * 16 languages still lost it after the first symbol sweep, always in the same two corpus sentences: `B&B` and
      * `Arts & Sciences` (also `bed & breakfast`, `Qatar Airways & Turkish Airlines`). Every one of them has a
      * high-frequency conjunction to spend — und ×1135, dan ×1053, og ×1135, и ×1129, және ×561 — so this was a
      * missing CELL, not a sourcing problem.

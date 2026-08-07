@@ -93,7 +93,7 @@ describe("Czech normalization", () => {
         expect(phonemize("100 km/h", "cs")).toContain("zˈa ɦˈoɟɪnu"); // za hodinu
     });
 
-    // These three were SILENTLY DROPPED and are the #584 class: `-5 stupňů` read as "pět stupňů", five
+    // These three were SILENTLY DROPPED and are the DROPPED-SIGN class: `-5 stupňů` read as "pět stupňů", five
     // degrees rather than minus five. `plus` and `×` were already handled; the minus was not.
     it("signs that were dropped are read", () => {
         expect(normalizeCzech("-5")).toBe("mínus 5");

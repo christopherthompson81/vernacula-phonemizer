@@ -5,7 +5,7 @@
  * WHY SELECTION AND NOT A DUMP. An exhaustive dump is the wrong target: most sentences exercise nothing the
  * normalizer does, and size is not the property we want. The property we want is COVERAGE of the pattern
  * inventory below, which is not invented here — it is the empirical shape of the 338 numbered rules across
- * the 37 languages already treated under #562. Each cell of that inventory exists because a real corpus
+ * the 37 languages already treated. Each cell of that inventory exists because a real corpus
  * instance broke an engine. So the corpus is complete when every cell holds a few real examples, which
  * gives a stopping criterion that does not depend on how much text was fetched.
  *
@@ -42,7 +42,7 @@ import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allO
 import { CELLS, type Cell } from "./cells.ts";
 import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
 
-// NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo #602, `bara 1945 tti`).
+// NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo, `bara 1945 tti`).
 // Every per-sentence regex for it — `\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`,
 // every measure phrase in every language, so the cell reports COVERED everywhere and says nothing. The
 // finding is real and general (playbook trap 15 (the same bound suffix is also written with…)); the evidence for it is a corpus-level statistic — the
@@ -612,7 +612,7 @@ if (mode === "fetch") {
  *   DROP — a symbol was SILENTLY DISCARDED. Detected differentially: phonemize the sentence, then
  *   phonemize it again with the symbol deleted, and if the two are identical the symbol contributed
  *   nothing. THE LEAK CLASSES ARE STRUCTURALLY BLIND TO THIS — they can only see a character that
- *   survives, never one that vanishes — which is why the currency drop in #584 went unnoticed through
+ *   survives, never one that vanishes — which is why a currency drop can go unnoticed through
  *   thirty-seven languages of corpus-driven work. Measured here on a real mined Burmese sentence: `၉၈%`
  *   phonemizes byte-identically with and without the percent sign.
  */
@@ -661,7 +661,7 @@ if (mode === "scan") {
         // itself says what the symbol means, the correct reading is byte-identical with and without it.
         for (const d of dropsIn(sentence, ipa, say, contribution)) {
             // ⚠ AN ACCEPTED SILENCE IS NOT A DEFECT HERE EITHER, and this scan was the one place that did not
-            // know it. `coverage.ts` has consulted `ACCEPTED_SILENT` since #586, so the SAME sentence was
+            // know it. `coverage.ts` consults `ACCEPTED_SILENT`, so the SAME sentence was
             // accepted by the audit and failed by `review.ts`, which runs this scan — mr's `चंद्रयान -1` is
             // accepted as a designation in one tool and reported as a `DROP minus` in the other. The baseline
             // is per-LINE and the artifact's line is the same designation the corpus's is, so the check
@@ -753,7 +753,7 @@ if (mode === "__module__") {
 
     // MULTIPLE SOURCES, MERGED. `--in a,b` reads each and concatenates the segments, which is what a
     // language with a FLEURS corpus but incomplete coverage needs: FLEURS is read-aloud news prose and so
-    // is symbol-POOR (#584 — hu_hu contains no `$` at all, and nine treated languages sit below 20/29
+    // is symbol-POOR (hu_hu contains no `$` at all, and nine treated languages sit below 20/29
     // cells from FLEURS alone), while Wikipedia carries dates, units, eras and month names at far higher
     // rates. Neither source alone covers the inventory; together they do, and merging beats replacing
     // because the FLEURS half is the text the engine was actually built and evaluated against.

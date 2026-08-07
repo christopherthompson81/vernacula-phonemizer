@@ -7,7 +7,7 @@
  * does not merely fail to read, it INVENTS a symbol for a later pass to reason about:
  *   `Ä°zmir`  = `Ä` + `°`  → a DEGREE sign in a sentence about a city's population
  *   `SÃ£o`    = `Ã` + `£`  → a POUND sign in a Brazilian place name
- * Both were chased as per-language defects during #586 before the cause was found.
+ * Both were chased as per-language defects before the shared cause was found.
  */
 import { describe, expect, test } from "vitest";
 import { repairDoubleEncoded } from "../src/core/unicode.ts";

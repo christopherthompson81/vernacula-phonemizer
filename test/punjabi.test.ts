@@ -55,7 +55,7 @@ describe("punjabi Shahmukhi front-end", () => {
     });
 });
 
-// #562 TEXT NORMALIZATION. Counts in the comments are measured over the pa_in FLEURS corpus (1,589 unique
+// TEXT NORMALIZATION. Counts in the comments are measured over the pa_in FLEURS corpus (1,589 unique
 // utterances); "before" is what the engine produced at 6621b5a. See src/languages/punjabi/normalize.ts.
 describe("punjabi text normalization", () => {
     test("fused 21-59 cardinals (compound map) — the corpus's largest defect, ×143", () => {

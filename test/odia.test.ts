@@ -90,7 +90,7 @@ describe("Odia text normalization", () => {
         expect(or("ଏବଂ/କିମ୍ବା")).toBe("ˈebɔ̃ kˈimba");
     });
 
-    test("#586 yen, pound, and the UTC offset's plus", () => {
+    test("yen, pound, and the UTC offset's plus", () => {
         // Same sentence and same finding as bn — the or_in speaker voices no currency either.
         expect(or("ମୂଲ୍ୟ ପ୍ରାୟ ¥7,000 ହେବା ସହିତ।")).toContain("jˈen̪ɔ");
         // `£` stayed hidden behind `¥`: the audit reports the FIRST defective instance per cell, so closing
