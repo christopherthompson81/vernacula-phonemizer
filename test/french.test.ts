@@ -105,8 +105,8 @@ describe("french canonical IPA", () => {
     test("digit grouping: a space-grouped thousand is one number", () => {
         // The tokenizer's number class does not span a space, so these read as two numbers with the
         // thousand lost — "5 000 ans" was "cinq zéro ans". Both forms occur in the corpus.
-        expect(phonemize("5 000 ans", "fr")).toBe("sɛ̃k mil ˈɑ̃");
-        expect(phonemize("5 000 ans", "fr")).toBe("sɛ̃k mil ˈɑ̃"); // NBSP, which is what FLEURS uses
+        expect(phonemize("5 000 ans", "fr")).toBe("sɛ̃k mil ˈɑ̃"); // ASCII space U+0020
+        expect(phonemize("5 000 ans", "fr")).toBe("sɛ̃k mil ˈɑ̃"); // ⚠ NBSP U+00A0 — looks identical above; FLEURS writes this one
         expect(phonemize("1 040 km", "fr")).toBe("mil kaʁɑ̃t kilɔmˈɛtʁ");
     });
 

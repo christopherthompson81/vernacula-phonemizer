@@ -169,7 +169,7 @@ describe("Tamil normalization", () => {
         // ல் alone is a single consonant and reached the IPA as a bare [l].
         expect(normalizeTamil("1444-ல்")).toBe("1444 இல்");
         expect(normalizeTamil("1920ல்")).toBe("1920 இல்");
-        expect(normalizeTamil("ஸ்டைல் ​​ஸ்கை")).toBe("ஸ்டைல் ஸ்கை");
+        expect(normalizeTamil("ஸ்டைல் ​​ஸ்கை")).toBe("ஸ்டைல் ஸ்கை"); // ⚠ TWO ZWSP U+200B after the space
     });
 
     it("Tamil DIGITS ௦–௯ do not occur in the corpus, but are folded anyway", () => {

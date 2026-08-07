@@ -74,8 +74,8 @@ describe("kannada text normalization", () => {
         // ZWNJ ×922 + ZWJ ×139 + ZWSP ×6 — the largest raw count in the corpus. All sit after a virama,
         // so removing them leaves the identical akshara sequence. Before this, ಪಾಯಿಂಟ್‌ಗಳಿಂದ tokenized
         // as TWO words and carried TWO primary stresses.
-        expect(phonemize("ಪಾಯಿಂಟ್‌ಗಳಿಂದ", "kn")).toBe("pˈaːjĩɳʈɡaɭĩn̪d̪a");
-        expect(normalizeKannada("ಡಾಲರ್‍‌ಗಳ")).toBe("ಡಾಲರ್ಗಳ");
+        expect(phonemize("ಪಾಯಿಂಟ್‌ಗಳಿಂದ", "kn")).toBe("pˈaːjĩɳʈɡaɭĩn̪d̪a"); // ⚠ ZWNJ U+200C after ್
+        expect(normalizeKannada("ಡಾಲರ್‍‌ಗಳ")).toBe("ಡಾಲರ್ಗಳ"); // ⚠ ZWJ U+200D *then* ZWNJ U+200C — both invisible
     });
 
     test("digit de-grouping runs before punctuation is read", () => {
@@ -128,7 +128,7 @@ describe("kannada text normalization", () => {
         expect(normalizeKannada("35°W")).toBe("35 ಡಿಗ್ರಿ W");
     });
 
-    // `120-160 ಘನ ಮೀಟರ್‍‌ನಷ್ಟು ಇಂಧನ`, word-first beside ಚದರ. `m` had to be declared for it to have a
+    // `120-160 ಘನ ಮೀಟರ್‍‌ನಷ್ಟು ಇಂಧನ` (⚠ ZWJ+ZWNJ after ್), word-first beside ಚದರ. `m` had to be declared for it to have a
     // head noun (ಮೀಟರ್ ×10; digit-adjacent bare `m` is ×0, so the one-letter-key hazard is checked).
     test("the bare metre and the cubed measure word", () => {
         expect(phonemize("5 m", "kn")).toContain("mˈiːʈaɾ");

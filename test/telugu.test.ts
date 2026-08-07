@@ -84,7 +84,7 @@ describe("telugu text normalization", () => {
     });
 
     test("zero-width joiners are removed, so a split word keeps ONE stress", () => {
-        expect(phonemize("వైట్‌హాల్", "te")).toBe("ʋˈaiʈhaːl"); // was ʋˈaiʈ hˈaːl
+        expect(phonemize("వైట్‌హాల్", "te")).toBe("ʋˈaiʈhaːl"); // ⚠ ZWNJ U+200C after ్ // was ʋˈaiʈ hˈaːl
     });
 
     test("grouped numerals de-group instead of taking a clause pause", () => {

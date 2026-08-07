@@ -86,13 +86,13 @@ describe("Malayalam numbers — the Dravidian composer", () => {
  */
 describe("Malayalam text normalization", () => {
     test("ZWNJ was splitting the word in two and adding a spurious samvritokaram", () => {
-        expect(ml("ഓസ്‌ട്രേലിയ")).toBe("ˈoːsʈɾeːlija"); // was ˈoːsɨ ʈɾˈeːlija — two words, two stresses
-        expect(ml("സ്‌പീക്കർ")).toBe("spˈiːkːaɾ"); // was sˈɨ pˈiːkːaɾ — a stray [sɨ]
+        expect(ml("ഓസ്‌ട്രേലിയ")).toBe("ˈoːsʈɾeːlija"); // ⚠ ZWNJ U+200C // was ˈoːsɨ ʈɾˈeːlija — two words, two stresses
+        expect(ml("സ്‌പീക്കർ")).toBe("spˈiːkːaɾ"); // ⚠ ZWNJ U+200C // was sˈɨ pˈiːkːaɾ — a stray [sɨ]
     });
 
     test("ZWJ is the LEGACY CHILLU spelling and must be mapped, not deleted", () => {
         // ല് + ZWJ IS ൽ. Deleting the joiner leaves a bare virama, which reads as samvritokaram [ɨ].
-        expect(ml("വിസ്താരത്തില്‍")).toBe(ml("വിസ്താരത്തിൽ"));
+        expect(ml("വിസ്താരത്തില്‍")).toBe(ml("വിസ്താരത്തിൽ")); // ⚠ chillu written ല്+ZWJ U+200D vs the atomic ൽ
         expect(ml("വിസ്താരത്തില്‍")).toBe("ʋˈist̪aːɾat̪ːil"); // was ʋˈist̪aːɾat̪ːilɨ
     });
 
