@@ -27,6 +27,16 @@ export interface RefLang {
     secondaryGap?: string;
     /** Referee IPA is space-separated phoneme segments (wikipron style) → join before comparing. */
     segmentJoin?: boolean;
+    /**
+     * This referee writes an OPTIONAL SEGMENT in parentheses (af: ˈɑr(ə)m, ˈan(d)ər) → expand each row to
+     * both variants and credit either, exactly like a multi-pronunciation row.
+     *
+     * ⚠ OPT-IN PER LANGUAGE, because a parenthesis does not mean the same thing in every file: 160 referee
+     * files contain one, and in some it is DATA (Amharic's `(ʔ)itjopʼja`) while elsewhere it is a gloss or
+     * a variant label. Expanding fleet-wide would move `raw`, `folded` and `symbolAcc` for languages nobody
+     * re-measured, silently staling their floor comments and catalogue rows.
+     */
+    parenOptional?: boolean;
     /** [pattern, replacement, justification] applied BEFORE the backbone strip, to both sides — for folds that
      *  need combining diacritics the backbone would remove (e.g. German syllabic n̩→ən before ̩ is stripped). */
     preFolds?: [RegExp, string, string][];
@@ -62,6 +72,7 @@ interface RawLang {
     referees: Referee[];
     secondaryGap?: string;
     segmentJoin?: boolean;
+    parenOptional?: boolean;
     preFolds?: RawFold[];
     folds?: RawFold[];
 }
@@ -85,6 +96,7 @@ function loadLang(code: string): RefLang {
         }),
         ...(raw.secondaryGap ? { secondaryGap: raw.secondaryGap } : {}),
         ...(raw.segmentJoin ? { segmentJoin: true } : {}),
+        ...(raw.parenOptional ? { parenOptional: true } : {}),
         ...(raw.preFolds ? { preFolds: compile(raw.preFolds) } : {}),
         folds: compile(raw.folds),
     };

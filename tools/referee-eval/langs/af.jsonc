@@ -1,20 +1,33 @@
 // Afrikaans (af) — Indo-European (West Germanic), Latin orthography. Referee: en.wiktionary Afrikaans IPA
-// (Wiktionary, HUMAN, 2220 words).. The backbone strips the marks the orthography does
-// not determine: STRESS (ˈ ˌ — Afrikaans stress is largely first-syllable but unwritten → we emit none), LENGTH ː
-// (the open/closed length is realised by our vowel choice; the referee's ː is redundant), NASALIZATION (ɛ̃ before
-// nasal+C — allophonic, deferred), and the diphthong OFFGLIDE tie ( ̯ ). The language folds below neutralise the
-// referee's syllable dots, the r~ɾ tap/trill, and the optional-schwa parens. NOT folded: the ə~ɛ/ɪ schwa-reduction of
-// UNSTRESSED vowels — that is a real stress-conditioned residual we do not yet model (kept visible, like the Hebrew
-// sheva).
+// (Wiktionary, HUMAN, 2220 words). The backbone strips the marks the orthography does not determine: STRESS
+// (ˈ ˌ — Afrikaans stress is largely first-syllable but unwritten → we emit none), LENGTH ː (the open/closed
+// length is realised by our vowel choice), NASALIZATION (ɛ̃ before nasal+C — allophonic, deferred), and the
+// diphthong OFFGLIDE tie ( ̯ ).
+// The folds below neutralise: syllable dots, r~ɾ, x~χ, the centering-diphthong onsets ɪ~i / ʊ~u, short o~ɔ,
+// ui œy~œi, ⟨ei⟩~⟨y⟩ (ONE phoneme, two spellings), and the -heid [ɦ] the referee writes inconsistently. The
+// short-⟨a⟩ backness fold is a PREFOLD so it cannot also collapse long ɑː onto short a — see its note.
+// Optional parenthesised segments are expanded to both readings (`parenOptional`), not stripped.
+// NOT folded: the ə~ɛ/ɪ schwa-reduction of UNSTRESSED vowels — a real stress-conditioned residual we do not
+// yet model (kept visible, like the Hebrew sheva).
+// ⚠ THE EVAL SCORES phonemizeWordRules, NOT the shipped phonemizeWord: af-lexicon.tsv is built from this
+// same referee (single-source language), so the shipped path would be scoring the answer key.
 {
     "language": "af", "name": "Afrikaans", "script": "Latin",
+    // This referee parenthesises an OPTIONAL segment (ˈɑr(ə)m, ˈan(d)ər) — score either reading.
+    "parenOptional": true,
     "provenance": "Authored greedy g2p + open/closed vowel-length rule + final devoicing, from the 2220-word en.wiktionary Afrikaans IPA referee.",
     "referees": [
         { "file": "af.wiktionary-af.tsv", "source": "en.wiktionary Afrikaans (Wiktionary, human, 2220)", "role": "primary" }
     ],
     "secondaryGap": "No independent second numeric source wired yet: wikipron afr exists (a candidate 2nd referee) but is not yet imported; kaikki has no convenient per-language Afrikaans IPA dump and epitran lacks af. The primary is the en.wiktionary Afrikaans IPA category (human, 2220). Standard-Afrikaans phonology (open/closed vowel length, centering diphthongs ee=iə/oo=uə, g=[χ], final devoicing) is corroborated by published descriptions (Donaldson, Afrikaans reference grammar). Anchor: the adjudicated common-word gold in test/afrikaans.test.ts.",
+    // ⚠ THE SHORT-⟨a⟩ FOLD IS A PREFOLD, AND THAT IS LOAD-BEARING. The referee free-varies short ⟨a⟩
+    // between [a] and [ɑ] (adres→adrɛs but arm→ɑrm), which is non-contrastive and worth folding — but
+    // folding it AFTER the backbone strips ː would also collapse our LONG [ɑː] onto the referee's SHORT
+    // [a], hiding genuine open/closed-length errors. Measured: of the 63 words an unconditional fold
+    // gained, 39 were exactly that (anys ɑːnəis vs aˈnəis, apart, fantasie, ekstase). The `(?!ː)` guard
+    // runs here, while the length mark is still present, so only the SHORT vowels fold together.
     "preFolds": [
-        { "pattern": "\\([^)]*\\)", "replace": "", "note": "OPTIONAL schwa: the referee parenthesises an optional epenthetic schwa (arm→ˈɑr(ə)m, alles→ˈal(ə)s) — strip the optional group before comparison" }
+        { "pattern": "ɑ(?![ː̃])", "replace": "a", "note": "short ⟨a⟩ backness [a]~[ɑ], referee-inconsistent and non-contrastive. ⚠ SHORT ONLY — long ɑː and nasal ɑ̃ are left alone so a length or nasality disagreement stays visible" }
     ],
     "folds": [
         { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
@@ -23,6 +36,8 @@
         { "pattern": "ɪ", "replace": "i", "note": "the centering-diphthong onset ⟨ee⟩/open-e is written [ɪə]~[iə]; non-contrastive height → fold [ɪ]→[i] (we emit iə)" },
         { "pattern": "ʊ", "replace": "u", "note": "the centering-diphthong onset ⟨oo⟩/open-o is written [ʊə]~[uə]; non-contrastive height → fold [ʊ]→[u] (we emit uə)" },
         { "pattern": "o(?![ː])", "replace": "ɔ", "note": "short ⟨o⟩ height: the referee writes it [o]~[ɔ] freely; non-contrastive → fold plain [o]→[ɔ] (we emit ɔ; long/diphthong oː untouched)" },
-        { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" }
+        { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" },
+        { "pattern": "ɛi", "replace": "əi", "note": "⟨ei⟩/⟨y⟩ are HOMOPHONOUS in Afrikaans (one phoneme, two spellings — Donaldson §1); the referee writes ⟨ei⟩ rows [ɛi] and ⟨y⟩ rows [əi]. We emit [əi] for both → fold the notation together (+4 words, measured)" },
+        { "pattern": "ɦ(?=əit)", "replace": "", "note": "the referee writes the ⟨-heid⟩ suffix's [ɦ] inconsistently — aamborstigheid keeps it, afwesigheid drops it — so fold it out IN THAT SUFFIX ONLY (+2, measured). ⚠ SCOPED DELIBERATELY: an unconditional ɦ-fold buys the same 2 words while blinding the eval to ⟨h⟩=[ɦ], one of this language's signature segments — an engine that dropped /h/ entirely would then score identically" }
     ]
 }

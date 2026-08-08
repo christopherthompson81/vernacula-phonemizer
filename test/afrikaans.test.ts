@@ -105,6 +105,21 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("cent")).toBe("sɛnt"); // …and ⟨c⟩ BEFORE a front vowel is still soft
     });
 
+    test("proper nouns come from the LEXICON, not the spelling rules", () => {
+        // af-lexicon.tsv (~50 referee-sourced entries; circularity documented in
+        // af-lexicon.PROVENANCE.md): name orthography no Afrikaans rule can derive.
+        expect(phonemizeWord("Botha")).toBe("buəta"); // the rules said bɔtɦa
+        // ⚠ NORMALIZED TO THE ENGINE'S INVENTORY, not copied raw: the referee row is ˈblɨxnœut, and this
+        // engine has no [ɨ] and writes the ⟨g⟩ fricative [χ]. Shipping referee-narrow symbols would put
+        // segments in users' output that the eval's own folds hide (ɪə/ʊə, ˑ, ◌̯, ɲ, c were all present).
+        expect(phonemizeWord("Blignault")).toBe("bləχnœut");
+        // ⚠ The nasal set rides in the lexicon too — the generative nasal rule stays deferred with
+        // evidence (visible n-deletion class is ×2 in 2220), but the flagship word carries its ɑ̃.
+        expect(phonemizeWord("Afrikaans")).toBe("afrikɑ̃ːs");
+        // Lookup is case-insensitive (the engine lowercases), so a sentence-medial mention hits too.
+        expect(phonemizeWord("botha")).toBe("buəta");
+    });
+
 });
 
 // TEXT NORMALIZATION (src/languages/afrikaans/normalize.ts) — the pre-tokenizer pass. The

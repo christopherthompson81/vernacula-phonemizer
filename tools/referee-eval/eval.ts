@@ -109,7 +109,9 @@ import { phonemizeWord as kam } from "../../src/languages/kamba/kamba.ts";
 import { phonemizeWord as ka } from "../../src/languages/georgian/georgian.ts";
 import { phonemizeWord as lt } from "../../src/languages/lithuanian/lithuanian.ts";
 import { phonemizeWord as luo } from "../../src/languages/luo/luo.ts";
-import { phonemizeWord as af } from "../../src/languages/afrikaans/afrikaans.ts";
+// RULE-ONLY: the shipped phonemizeWord consults af-lexicon.tsv, which is built FROM this referee (af is
+// single-source), so scoring it would be circular. phonemizeWordRules is the honest generative signal.
+import { phonemizeWordRules as af } from "../../src/languages/afrikaans/afrikaans.ts";
 import { phonemizeWord as fi } from "../../src/languages/finnish/finnish.ts";
 import { phonemizeWord as sk } from "../../src/languages/slovak/slovak.ts";
 import { phonemizeWord as be } from "../../src/languages/belarusian/belarusian.ts";
@@ -401,6 +403,26 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes, plus any
  *  per-referee folds (`extra`) for folds valid only against one referee (e.g. a dual-script language's abjad). */
+/**
+ * Every reading of a reference row carrying OPTIONAL parenthesized segments — 2ⁿ for n groups, deduped.
+ * `ˈɑr(ə)m` → [ˈɑrm, ˈɑrəm]; `(ʔ)a(ə)b` → all four. Only called when the language sets `parenOptional`.
+ * ⚠ 2ⁿ IS BOUNDED IN THE DATA (the maximum in any shipped referee is 3 groups → 8 readings), but the cap
+ * below keeps a pathological row from exploding the comparison set rather than trusting that forever.
+ */
+export function expandOptional(ipa: string, maxGroups = 6): string[] {
+    const groups = [...ipa.matchAll(/\(([^)]*)\)/gu)];
+    if (groups.length === 0 || groups.length > maxGroups) return [ipa.replace(/[()]/gu, "")];
+    let out = [""];
+    let cursor = 0;
+    for (const g of groups) {
+        const lead = ipa.slice(cursor, g.index);
+        out = out.flatMap((p) => [`${p}${lead}`, `${p}${lead}${g[1]!}`]);
+        cursor = g.index + g[0].length;
+    }
+    const tail = ipa.slice(cursor);
+    return [...new Set(out.map((p) => `${p}${tail}`))];
+}
+
 export function makeFold(
     cfg: RefLang,
     extra: readonly [RegExp, string, string][] = [],
@@ -505,7 +527,15 @@ export async function evaluate(
             // are the length-1 case, unchanged.
             const refIpas = row
                 .slice(1)
-                .map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri));
+                .map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri))
+                // A PARENTHESIZED GROUP IS AN OPTIONAL SEGMENT where the referee says so (`parenOptional`,
+                // opt-in per language — see config.ts for why this is not fleet-wide). Expand to BOTH
+                // variants and credit either, exactly like the multi-pronunciation tab fields above.
+                // Stripping the group instead (the old af preFold) deleted REAL segments: "an(d)ər" lost
+                // its d, and an engine emitting the epenthetic schwa could never match a reference that
+                // wrote it. ⚠ EVERY COMBINATION, not just all-in/all-out: a row with two optional groups
+                // has four readings, and the referee licenses each one.
+                .flatMap((ri) => (cfg.parenOptional && /[()]/u.test(ri) ? expandOptional(ri) : [ri]));
             const rawOurs = await phon(w);
             // Under segmentJoin the reference is space-stripped; strip OUR word-separator spaces too (a segmented
             // phonemizer, e.g. Burmese/Thai, joins subwords with a space) so the raw metric compares like with like.
