@@ -31,7 +31,6 @@ const CYR_VOWEL = new Set(DEF.vowelLetters);
 const NASAL_GLIDE = new Set(["n", "m", "ŋ", "j"]);
 const LIQUID = new Set(["l", "r"]);
 const REDUCED = new Set(["ə", "ɘ"]); // reduced vowels — never stressed
-const IPA_VOWEL = new Set([..."aeiouɯəɘyo"]);
 
 type Seg = { ipa: string; vowel: boolean; reduced: boolean };
 

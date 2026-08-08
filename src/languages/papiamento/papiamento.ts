@@ -9,6 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface PapiamentoDef {
@@ -23,7 +24,6 @@ const DIGRAPHS = DEF.digraphs;
 const LETTER = DEF.letters;
 const NASALIZE = DEF.nasalized;
 const VOWEL_G = new Set(DEF.vowelLetters); // the vowel letters counted to place an acute-marked stress
-const IPA_VOWEL = new Set([..."aeiouɛɔø"]);
 const ACUTE: Record<string, string> = { "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u" };
 
 /** One Papiamentu word → canonical IPA. */

@@ -20,6 +20,7 @@ import { lexiconPrimary } from "./restore.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { normalizeArabic } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const isLongNucleus = (ph: string): boolean =>
@@ -300,7 +301,7 @@ function restoreLex(): ReadonlyMap<string, string> {
 // Today that is moot — every variety runs the MSA diacritizer first, so ary output arrives vocalized and
 // the repair never fires on it (كتبت → kutˈibat). If ary ever gains true schwa-deletion, gate this repair
 // per variety (or raise its run threshold for ary) BEFORE shipping that change.
-const REPAIR_VOWELS = new Set([..."aeiouɑɐæəɛɔʊɪ"]);
+const REPAIR_VOWELS = IPA_VOWEL;
 const REPAIR_SKIP = new Set([..."ˈˌːˤ\u0651\u0640"]);
 
 interface RUnit { text: string; vowel: boolean }

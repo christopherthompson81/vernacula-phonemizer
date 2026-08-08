@@ -10,6 +10,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 
 interface KarakalpakDef {
     digraphs: [string, string][];
@@ -19,7 +20,6 @@ const DEF = loadManifest<KarakalpakDef>(import.meta.url, "karakalpak.jsonc");
 // Letter → IPA tables (karakalpak.jsonc). The dotless-I casing is handled in the scan below.
 const DIGRAPHS = DEF.digraphs;
 const LETTER = DEF.letters;
-const IPA_VOWEL = new Set([..."ɑæeɯioøuy"]);
 
 /** One Karakalpak word → canonical IPA. */
 export function phonemizeWord(word: string): string {

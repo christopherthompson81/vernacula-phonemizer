@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface KicheDef {
@@ -20,7 +21,7 @@ const DEF = loadManifest<KicheDef>(import.meta.url, "kiche.jsonc");
 const UNIT = DEF.units;
 const G = DEF.letters;
 const ORDER = Object.keys(UNIT).sort((a, b) => b.length - a.length);
-const VOWEL = new Set(["a", "e", "i", "o", "u", "ə"]);
+const VOWEL = IPA_VOWEL;
 
 /** Phonemize a K'iche' word → canonical IPA: longest-match scan + glottal onset + final stress (length not emitted).
  *  A multi-word phrase (some referee headwords) is split so each word gets its own glottal onset + stress. */

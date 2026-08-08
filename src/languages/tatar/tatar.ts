@@ -7,6 +7,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface TatarDef {
@@ -38,7 +39,6 @@ const IOTATED = DEF.iotated;
 // Backness for the к/г harmony: a nearby BACK vowel → [q]/[ʁ]; a FRONT vowel → [k]/[ɡ].
 const BACK = new Set(DEF.backVowels);
 const FRONT = new Set(DEF.frontVowels);
-const IPA_VOWEL = new Set(["ɑ", "a", "æ", "o", "ø", "u", "y", "ɨ", "i", "e"]);
 
 /** Is the nearest vowel to position `i` (scanning outward) a BACK vowel? Defaults to back (Turkic default). */
 function nearBack(chars: string[], i: number): boolean {

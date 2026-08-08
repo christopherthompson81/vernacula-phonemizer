@@ -11,6 +11,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 
 interface TurkmenDef {
     digraphs: Record<string, string>;
@@ -21,7 +22,7 @@ interface TurkmenDef {
 const DEF = loadManifest<TurkmenDef>(import.meta.url, "turkmen.jsonc");
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
-const VOWEL = new Set(["ɑ", "e", "æ", "i", "o", "ø", "u", "y", "ɯ"]);
+const VOWEL = IPA_VOWEL;
 const NASAL = new Set(["m", "n", "ŋ"]);
 
 /** Sonority class (higher = more sonorous): vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */

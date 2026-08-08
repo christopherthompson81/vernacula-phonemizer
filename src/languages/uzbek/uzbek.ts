@@ -12,6 +12,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { turkicNumberWords, type UzbekNumberWords } from "./numbers.ts";
 import { normalizeUzbek } from "./normalize.ts";
 
@@ -30,7 +31,7 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 // straight ' , curly ' ' , backtick ` , the modifier turned-comma ʻ , the modifier apostrophe ʼ .
 const APOS = /['’‘`ʻʼ′]/gu;
 const APOS_C = "ʻ";
-const VOWEL_IPA = new Set(["a", "e", "i", "o", "u", "ɒ"]);
+const VOWEL_IPA = IPA_VOWEL;
 
 /** One Uzbek (Latin) word → canonical IPA. */
 export function phonemizeWord(word: string): string {

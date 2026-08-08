@@ -12,6 +12,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { type MalteseNumbers, numberToWords, readDigits } from "./numbers.ts";
 
 interface MalteseDef {
@@ -26,7 +27,7 @@ const DEVOICE = DEF.voicing.devoice;
 const VOICE = DEF.voicing.voice;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
-const VOWELS = new Set([..."aɛɪɔu"]);
+const VOWELS = IPA_VOWEL;
 const VOICELESS = new Set([...Object.values(DEVOICE), "t͡s", "ʃ", "ħ", "ʔ", "f", "k", "p", "t", "s"]);
 
 /** Scan a lowercased Maltese word into IPA phoneme tokens (digraphs ⟨ie għ⟩ + the ⟨h⟩ silent/[ħ] rule). */

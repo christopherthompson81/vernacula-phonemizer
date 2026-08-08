@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 
 interface SantaliDef {
@@ -25,9 +26,9 @@ const toAsciiDigits = (s: string): string =>
 
 // Ol Chiki letter → IPA and the sign-driven substitution tables (santali.jsonc).
 const BASE = DEF.letters;
-const VOWEL = new Set(["ɔ", "a", "i", "u", "e", "ɛ", "o", "ə"]);
+const VOWEL = IPA_VOWEL;
 // A vowel NUCLEUS test that survives nasalization/length (NFD so ã→a+◌̃, ɛ̃→ɛ+◌̃ still count as vowels).
-const VOWEL_BASE = new Set([..."ɔaiueɛoə"]);
+const VOWEL_BASE = IPA_VOWEL;
 const isVowelSeg = (s: string): boolean => [...s.normalize("NFD")].some((c) => VOWEL_BASE.has(c));
 const STOP = new Set(["ɡ", "k", "t", "d", "ʈ", "ɖ", "p", "b", "c", "ɟ"]);
 const VOICED_STOP = new Set(["ɡ", "d", "ɖ", "b", "ɟ"]);

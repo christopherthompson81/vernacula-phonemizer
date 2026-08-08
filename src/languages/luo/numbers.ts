@@ -31,6 +31,8 @@ const HUNDRED = "mia";
 const THOUSAND = "elfu";
 const MILLION = "milion";
 const BILLION = "bilion";
+// ⚠ ORTHOGRAPHIC, NOT IPA — the gi-/g- elision reads the SPELLING of the next number word, so this
+// stays a Luo-letter list (see the Quechua note; core/ipa.ts is for emitted phones).
 const VOWELS = new Set([..."aeiou"]);
 
 /** The coordinator gi 'and': elides to a solid g- before a vowel-initial word, stays free before a consonant. */

@@ -7,6 +7,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { phonemizeWord as russianWord } from "../russian/russian.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -26,7 +27,6 @@ const VOWEL = DEF.vowels;
 const IOTATED = DEF.iotated;
 const CYR_VOWEL = new Set(DEF.vowelLetters);
 const BACK = new Set(DEF.backVowels); // back-harmony vowels — govern the dark ⟨л⟩→[ɫ]
-const IPA_VOWEL = new Set([..."ɑæʊøɯɪyiuo"]); // every vowel the scan emits (а→ɑ ә→æ о→ʊ ө→ø ы→ɯ э/е→ɪ ү→y и→i у/ю→u ё→o)
 
 // ⚠ RUSSIAN-LOAN DETECTION. Real Bashkir text is saturated with Russian loanwords, and Bashkir speakers pronounce them
 // RUSSIAN-STYLE (palatalization, akanye, Russian stress) — so a realistic phonemizer routes them to the Russian g2p.

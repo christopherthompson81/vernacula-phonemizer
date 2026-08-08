@@ -10,6 +10,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 
 interface CrimeanTatarDef {
     letters: Record<string, string>;
@@ -21,7 +22,6 @@ const LETTER = DEF.letters;
 // The Latin vowel letters (crimeantatar.jsonc) — the ⟨v⟩→[w] coda context. The CYR_ prefix is inherited
 // from the sibling Turkic engines; Crimean Tatar is written in Latin and this engine always has been.
 const CYR_VOWEL = new Set(DEF.vowelLetters);
-const IPA_VOWEL = new Set([..."ɑaeɯioøuy"]);
 
 /** One Crimean Tatar word → canonical IPA. */
 export function phonemizeWord(word: string): string {

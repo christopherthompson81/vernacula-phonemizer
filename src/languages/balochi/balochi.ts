@@ -69,6 +69,7 @@ export function phonemizeArabic(word: string): string {
 }
 
 // ── Roman-script g2p (phonemic orthography → full IPA) ────────────────────────────────────────────────────────
+// ⚠ ORTHOGRAPHIC, NOT IPA — phonemizeRoman scans the ROMAN Balochi spelling, not phones.
 const R_VOWEL = new Set([..."aeiou"]);
 const R_LONG: Record<string, string> = { a: "aː", e: "eː", i: "iː", o: "oː", u: "uː" };
 const R_SHORT: Record<string, string> = { a: "a", e: "eː", i: "i", o: "oː", u: "u" }; // e,o have no short counterpart

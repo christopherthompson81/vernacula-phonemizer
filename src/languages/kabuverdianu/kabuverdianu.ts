@@ -10,6 +10,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface KabuverdianuDef {
@@ -23,7 +24,7 @@ const DEF = loadManifest<KabuverdianuDef>(import.meta.url, "kabuverdianu.jsonc")
 const DI = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
-const VOWEL_PH = new Set([..."ɐeɛioɔu"]);
+const VOWEL_PH = IPA_VOWEL;
 const ACCENTED = new Set(DEF.accentedVowels); // a written accent carries the stress
 
 interface Seg {

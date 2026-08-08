@@ -29,6 +29,9 @@
 // 0..9. Index 0 is the Cusco-Collao ejective spelling of 'zero/empty'.
 const UNITS = ["ch'usaq", "huk", "iskay", "kimsa", "tawa", "pichqa", "suqta", "qanchis", "pusaq", "isqun"];
 const TEN = "chunka", HUNDRED = "pachak", THOUSAND = "waranqa", MILLION = "hunu", BILLION = "lluna";
+// ⚠ ORTHOGRAPHIC, NOT IPA — these are Quechua SPELLING vowels, so this must NOT be pointed at
+// core/ipa.ts: ⟨y⟩ is a consonant letter in Quechua (iskay) but the IPA vowel [y], and the shared
+// set would turn iskay-niyuq into *iskay-yuq.
 const VOWELS = new Set(["a", "i", "u", "e", "o"]);
 
 /** The -yuq linker with its allomorphy: -niyuq after a consonant (huk → hukniyuq), -yuq after a vowel

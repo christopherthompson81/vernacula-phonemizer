@@ -30,13 +30,14 @@ import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 
 // Tone + vowel-nasality lexicon (word → comma-joined per-nucleus tokens: H/L, +~ if nasal). Akan tone is lexical
 // (unpredictable from the toneless orthography), so — the Romanian-stress pattern — a lexicon carries it and the
 // tonal rules apply on top; mined from the tone-marked kaikki readings + Paster (2010). Small coverage (OOV = no
 // tone); consumed by the SHIPPED phonemizeWord only (phonemizeWordRules stays tone-free / non-circular).
 const TONE_LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "akan-tone.tsv", undefined, { optional: true });
-const NUCLEI = new Set(["a", "e", "i", "o", "u", "ɛ", "ɔ", "ɪ", "ʊ"]);
+const NUCLEI = IPA_VOWEL;
 
 interface AkanDef {
     digraphs: Record<string, string>;

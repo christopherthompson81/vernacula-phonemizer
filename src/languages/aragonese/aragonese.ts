@@ -18,6 +18,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface AragoneseDef {
@@ -35,7 +36,6 @@ const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 // Letter environments (aragonese.jsonc): ⟨c⟩/⟨g⟩ soften and ⟨qu gu⟩ drop the [w] before a FRONT letter.
 const VOWEL_LETTER = new Set(DEF.vowelLetters);
 const FRONT_LETTER = new Set(DEF.frontLetters);
-const IPA_VOWEL = new Set([..."aeiou"]);
 
 /** Scan a lowercased Aragonese word into IPA phone tokens. */
 function scan(word: string): string[] {

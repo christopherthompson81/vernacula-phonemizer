@@ -31,12 +31,20 @@ const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
+// ⚠ DELIBERATELY NOT core/ipa.ts's shared class — the ONE engine in #748 that keeps its own list.
+// It omits plain ⟨e⟩, which this engine DOES emit (the digraphs ⟨ei ey⟩ map to the two-character value
+// "ei"), so startsWithVowel("ei") is false and the hiatus-glide rule below never fires before a
+// diphthong. That looks like an omission and is not: the referee ATTESTS the glideless reading —
+// tools/referee-eval/referees/is.wikipron-isl-broad.tsv:2311 has erkiengill = ɛ r̥ c ɪ e i ɲ c ɪ t l,
+// no [j]. Widening this set to the shared class emits ɛrcɪjeiŋcɪtl and drops the folded backbone
+// 8086 → 8085/10093. The narrow list is accidentally CONTAINING an over-eager rule, not breaking it.
+// ⚠ The rule over-applies already on the cases the referee covers (hýena→hijɛna vs h iː ɛ n a,
+// bavían→pavijan vs p aː v iː a n). Fixing THAT is the real repair; widening this set is the opposite
+// of it. See docs/ipa_classes_investigation.md Run 7.
 const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for intervocalic + glide tests)
 // Grapheme-level front vowels that PALATALIZE a preceding ⟨k g⟩ → [c] (kýr→ciːr, gelda→cɛlta, Bylgja→pɪlca) — incl.
 // ⟨e é⟩ and the ⟨ei ey⟩ diphthong (the referee majority palatalizes: geipa→ceipa; the un-palatalized Geir→keir is
-// the minority we over-palatalize to ceir).
-// The four letter classes (icelandic.jsonc): what affricates ⟨g k⟩, what inserts a hiatus glide, what
-// licenses the preaspirated ⟨nn⟩, and which doubled consonants are merely orthographic.
+// the minority we over-palatalize to ceir). The four letter classes are in icelandic.jsonc.
 const FRONT_V = new Set(DEF.frontVowels);
 const FRONT_PH = new Set([..."ɛɪijy"]); // IPA front-vowel heads — an intervocalic ⟨g⟩ → [j] (not [ɣ]) before these
 const HIGH_FRONT = new Set(DEF.highFrontVowels); // trigger a glide [j] before a following vowel (Biblía→pɪplija)

@@ -11,6 +11,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { makeNumberToWords, type AlbanianNumbers } from "./numbers.ts";
 
 interface AlbanianDef {
@@ -26,7 +27,7 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 /** Integer → Standard Albanian numeral words (decimal + the obligatory ⟨e⟩ connector; see numbers.ts). */
 export const numberToWords = makeNumberToWords(DEF.numbers);
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL = new Set(["a", "ɛ", "i", "o", "u", "y", "ə"]);
+const VOWEL = IPA_VOWEL;
 const SIBILANT = new Set(["s", "z", "ʃ", "ʒ"]);
 const NASAL = new Set(["m", "n", "ɲ", "ŋ"]);
 
