@@ -31,11 +31,11 @@
     // final ⟨ς⟩ against this one list.
     "voicedAfterSigma": ["β", "γ", "δ", "μ", "ν", "λ", "ρ"],
 
-    // Base consonant letter → IPA (γ is context-sensitive; handled in the scan).
     // The VELAR phones before which ⟨γ⟩ is the nasal [ŋ] — the ⟨γγ γκ γχ γξ⟩ spelling of a velar nasal.
     // ⟨ks⟩ is here because ⟨ξ⟩ scans to a two-phone value whose head is the velar.
     "velars": ["ɡ", "k", "kʰ", "ks"],
 
+    // Base consonant letter → IPA (γ is context-sensitive; handled in the scan).
     "consonants": {
         "β": "b", "δ": "d", "ζ": "zd", "θ": "tʰ", "κ": "k", "λ": "l", "μ": "m", "ν": "n", "ξ": "ks", "π": "p",
         "ρ": "r", "σ": "s", "ς": "s", "τ": "t", "φ": "pʰ", "χ": "kʰ", "ψ": "ps", "ϝ": "w",

@@ -31,8 +31,6 @@
         "p": "b", "t": "d", "k": "ɡ", "t͡ɕ": "d͡ʑ", "s": "z", "ɕ": "ʑ", "ʂ": "ʐ", "χ": "ɣ",
     },
 
-    // Vowels. ⟨ӑ⟩→[ə] and ⟨ӗ⟩→[ɘ] are the two REDUCED vowels (cannot bear stress); ⟨е⟩ is [je]
-    // initial/post-vowel (position rule in chuvash.ts).
     // ⚠ THE INTERVOCALIC VOICING TRIGGERS (chuvash.ts). A single consonant voices between two vowels, and
     // ALSO after a nasal or glide, and after a liquid when the following vowel is not reduced. The two
     // lists are what "sonorant enough to voice" means here — narrower than the sonorants in general, and
@@ -40,6 +38,8 @@
     "voicingSonorants": ["n", "m", "ŋ", "j"],
     "liquids": ["l", "r"],
 
+    // Vowels. ⟨ӑ⟩→[ə] and ⟨ӗ⟩→[ɘ] are the two REDUCED vowels (cannot bear stress); ⟨е⟩ is [je]
+    // initial/post-vowel (position rule in chuvash.ts).
     "vowels": {
         "а": "a", "е": "e", "и": "i", "о": "o", "у": "u", "ы": "ɯ", "э": "e", "ӑ": "ə", "ӗ": "ɘ", "ӳ": "y",
     },

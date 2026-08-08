@@ -37,8 +37,9 @@
 
     // Nasal phonemes (a following nasal blocks spirantization) and the stop→fricative spirantization pairs.
     "nasals": ["m", "n", "ɲ", "ŋ"],
-    // The VELAR STOPS before which a word-final ⟨n⟩ stays velar rather than assimilating — the second half
-    // of the nasal-velarization rule whose first half is "nasals" above.
+    // The VELAR STOPS that velarize a PRECEDING ⟨n⟩ — the test reads the phone AFTER the nasal, which is
+    // what turns a medial ⟨n⟩ velar (cinco→siŋko). Word-final ⟨n⟩ velarizes too, but through a separate
+    // branch (no following phone at all), so this list is only about the medial case.
     "velars": ["k", "ɡ"],
     "spirantize": { "b": "β", "d": "ð", "ɡ": "ɣ" },
 

@@ -15,12 +15,13 @@
     "slenderVowels": "eièéìí",
     "broadVowels": "aouàòóùáú",
 
-    // Consonant → IPA, by quality. ⟨b d g⟩ = unaspirated lenis [p t̪ k]; ⟨p t c⟩ = fortis (aspirated ʰ →
-    // pre-aspirated medially, done in code). Labials do NOT palatalize (slender b/m/f/p same as broad).
-    // The SONORANTS that can host the preceding rule's site — like Irish's liquids, these carry the
-    // broad ⟨ˠ⟩ / slender ⟨ʲ⟩ marks, so the class is language-specific by construction.
+    // The SONORANTS that license PREASPIRATION: a stop preaspirates after a vowel OR after one of these,
+    // and deaspirates otherwise. Like Irish's liquids these carry the broad ⟨ˠ⟩ / slender ⟨ʲ⟩ marks, so
+    // the class is language-specific by construction — no shared "sonorants" could stand in for it.
     "sonorants": ["l̪ˠ", "lʲ", "rˠ", "ɾʲ"],
 
+    // Consonant → IPA, by quality. ⟨b d g⟩ = unaspirated lenis [p t̪ k]; ⟨p t c⟩ = fortis (aspirated ʰ →
+    // pre-aspirated medially, done in code). Labials do NOT palatalize (slender b/m/f/p same as broad).
     "broad": {
         "b": "p", "c": "kʰ", "d": "t̪", "f": "f", "g": "k", "h": "h", "l": "l̪ˠ", "m": "m",
         "n": "n̪ˠ", "p": "pʰ", "r": "rˠ", "s": "s̪", "t": "t̪ʰ"

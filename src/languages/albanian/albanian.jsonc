@@ -15,14 +15,15 @@
         "gj": "ɟ", "nj": "ɲ", "ll": "ɫ", "rr": "r"
     },
 
-    // Single graphemes. The 7 vowels (⟨e⟩→ɛ, ⟨y⟩→y, ⟨ë⟩→ə) + the consonants (⟨q⟩→c palatal, ⟨c⟩→t͡s, ⟨ç⟩→t͡ʃ,
-    // ⟨x⟩→d͡z, ⟨r⟩→ɾ tap, ⟨l⟩→l).
-    // The SONORITY classes the stress rule reads (albanian.ts). Albanian stress is maximal-onset, so the
-    // scan needs to know which emitted phone is a nasal (sonority 3) and which is a sibilant — the latter
-    // licenses an s+stop onset cluster (shtëpi), the one place a rising-sonority onset is not required.
+    // The SONORITY classes the stress rule reads (albanian.ts). Albanian stress is maximal-onset, and an
+    // onset normally has to RISE in sonority; these two lists are the exceptions that do not:
+    //   · a sibilant + stop/affricate/fricative (shtëpi) — "sibilants";
+    //   · a nasal + stop/affricate (mp, nd, mpr) — "nasals", which the sonority scale also reads (3).
     "nasals": ["m", "n", "ɲ", "ŋ"],
     "sibilants": ["s", "z", "ʃ", "ʒ"],
 
+    // Single graphemes. The 7 vowels (⟨e⟩→ɛ, ⟨y⟩→y, ⟨ë⟩→ə) + the consonants (⟨q⟩→c palatal, ⟨c⟩→t͡s, ⟨ç⟩→t͡ʃ,
+    // ⟨x⟩→d͡z, ⟨r⟩→ɾ tap, ⟨l⟩→l).
     "graphemes": {
         "a": "a", "e": "ɛ", "i": "i", "o": "o", "u": "u", "y": "y", "ë": "ə",
         "b": "b", "c": "t͡s", "ç": "t͡ʃ", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j",

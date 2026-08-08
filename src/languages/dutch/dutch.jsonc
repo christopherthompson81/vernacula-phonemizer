@@ -23,17 +23,20 @@
     // IPA vowel inventory (nucleus detection).
     "vowelChars": "ɑaɛeɪioɔuyʏøœəɐ",
 
-    // Orthographic vowel letter → IPA, chosen by the g2p's open/closed length rule. `long` = tense (open
-    // syllable / doubled); `short` = lax (closed syllable). Trema letters (ë ï ö ü) base-map to their plain
-    // vowel; they never join a preceding vowel into a digraph (tweeën → tʋeːə, the ë breaks the ⟨ee⟩).
-    // Dutch's CONSONANT phone inventory — the engine tests it to collapse a doubled coda+onset across a
-    // syllable seam, so it must list exactly the phones the tables above can emit (⟨ʋ⟩ for ⟨w⟩, ⟨ɦ⟩ for
-    // ⟨h⟩, ⟨ɣ⟩ for the voiced velar fricative).
+    // The CONSONANT phones that DEGEMINATE across a syllable seam: when a syllable's coda and the next
+    // syllable's onset are the same phone and it is one of these, one copy is dropped. The Dutch-specific
+    // values are here — ⟨ʋ⟩ for ⟨w⟩, ⟨ɦ⟩ for ⟨h⟩, ⟨ɣ⟩ for the voiced velar fricative.
+    // ⚠ IT IS NOT THE FULL EMITTED INVENTORY, and should not be "corrected" into one: ⟨ʒ⟩ is emitted (the
+    // voicedFinal table maps ʒ→ʃ) and is deliberately absent, since adding it would start collapsing
+    // seams that are not collapsed today.
     "consonantPhones": [
         "p", "t", "k", "b", "d", "f", "s", "x", "ʃ", "ɣ", "v",
         "z", "ŋ", "n", "m", "l", "r", "ɦ", "j", "ʋ", "ɡ"
     ],
 
+    // Orthographic vowel letter → IPA, chosen by the g2p's open/closed length rule. `long` = tense (open
+    // syllable / doubled); `short` = lax (closed syllable). Trema letters (ë ï ö ü) base-map to their plain
+    // vowel; they never join a preceding vowel into a digraph (tweeën → tʋeːə, the ë breaks the ⟨ee⟩).
     "vowels": {
         "long": {
             "a": "aː",
