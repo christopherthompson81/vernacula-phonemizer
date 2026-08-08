@@ -21,7 +21,14 @@ interface BalochiDef {
     consonants: Record<string, string>;
     vowels: Record<string, string>;
     vowelLetters: readonly string[];
-    romanVowels: readonly string[];
+    roman: {
+        vowelLetters: readonly string[];
+        long: Record<string, string>;
+        short: Record<string, string>;
+        consonants: Record<string, string>;
+        retroflex: Record<string, string>;
+        postalveolar: Record<string, string>;
+    };
     numbers: BalNumbersDef;
     clausePunctuation: Record<string, string>;
 }
@@ -70,15 +77,14 @@ export function phonemizeArabic(word: string): string {
 }
 
 // ── Roman-script g2p (phonemic orthography → full IPA) ────────────────────────────────────────────────────────
-const R_VOWEL = new Set(DEF.romanVowels); // the ROMAN-script vowel letters (balochi.jsonc)
-const R_LONG: Record<string, string> = { a: "aː", e: "eː", i: "iː", o: "oː", u: "uː" };
-const R_SHORT: Record<string, string> = { a: "a", e: "eː", i: "i", o: "oː", u: "u" }; // e,o have no short counterpart
-const R_CONS: Record<string, string> = {
-    b: "b", p: "p", t: "t̪", d: "d̪", k: "k", g: "ɡ", q: "k", f: "f", v: "v", s: "s", z: "z",
-    š: "ʃ", ž: "ʒ", c: "t͡ʃ", j: "d͡ʒ", x: "x", ġ: "ɣ", h: "h", m: "m", n: "n", r: "r", l: "l", w: "w", y: "j",
-};
-const RETRO: Record<string, string> = { "t̪": "ʈ", "d̪": "ɖ", r: "ɽ", n: "ɳ", s: "ʂ", l: "ɭ" };
-const POSTALV: Record<string, string> = { c: "t͡ʃ", s: "ʃ", z: "ʒ", j: "d͡ʒ" };
+// The Roman half's tables (balochi.jsonc `roman`). The diacritic LOGIC — which mark reaches for which
+// table, and that a macron may be combining or precomposed — is the scan below.
+const R_VOWEL = new Set(DEF.roman.vowelLetters);
+const R_LONG = DEF.roman.long;
+const R_SHORT = DEF.roman.short;
+const R_CONS = DEF.roman.consonants;
+const RETRO = DEF.roman.retroflex;
+const POSTALV = DEF.roman.postalveolar;
 const MACRON = "̄", HACEK = "̌", DOTBELOW = "̣";
 
 /** One Balochi word in the Roman orthography → full IPA. Combining/precomposed macron→long vowel, háček→postalveolar,

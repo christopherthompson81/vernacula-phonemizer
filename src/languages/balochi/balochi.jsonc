@@ -38,10 +38,29 @@
     // abjad intends.
     "vowelLetters": ["ا", "آ", "و", "ى", "ی", "ے"],
 
-    // ⚠ ORTHOGRAPHIC, NOT IPA, AND NOT THE ARABIC-SCRIPT LIST ABOVE. Balochi is written in both scripts;
-    // phonemizeRoman scans the ROMAN spelling, and these are its vowel letters. "vowelLetters" above is
-    // the Arabic-script set, for a different scan in the same engine.
-    "romanVowels": ["a", "e", "i", "o", "u"],
+    // ⚠ THE ROMAN ORTHOGRAPHY, a SECOND full g2p in the same engine — Balochi is written in both scripts and
+    // this half is PHONEMIC where the Arabic half is defective, so it resolves to full IPA on its own rather
+    // than leaning on the lexicon. The two halves share nothing but the language.
+    "roman": {
+        // ⚠ ORTHOGRAPHIC, NOT IPA, AND NOT THE ARABIC-SCRIPT "vowelLetters" ABOVE — that one is the abjad's
+        // set, for the other scan in this same engine. These are the Roman letters, then long vs short by
+        // diacritic; a MACRON writes length.
+        // ⚠ ⟨e o⟩ ARE LONG IN BOTH COLUMNS: Balochi has no short /e o/, so an unmarked ⟨e⟩ is still [eː].
+        "vowelLetters": ["a", "e", "i", "o", "u"],
+        "long": { "a": "aː", "e": "eː", "i": "iː", "o": "oː", "u": "uː" },
+        "short": { "a": "a", "e": "eː", "i": "i", "o": "oː", "u": "u" },
+        // Base consonants. ⟨t d⟩ are DENTAL [t̪ d̪] — the retroflex series below is derived from them.
+        "consonants": {
+            "b": "b", "p": "p", "t": "t̪", "d": "d̪", "k": "k", "g": "ɡ", "q": "k", "f": "f", "v": "v",
+            "s": "s", "z": "z", "š": "ʃ", "ž": "ʒ", "c": "t͡ʃ", "j": "d͡ʒ", "x": "x", "ġ": "ɣ", "h": "h",
+            "m": "m", "n": "n", "r": "r", "l": "l", "w": "w", "y": "j"
+        },
+        // A DOT BELOW makes the consonant retroflex; a HÁČEK makes it postalveolar. Keyed by the phone the
+        // base letter already produced (hence "t̪"/"d̪" here, not ⟨t⟩/⟨d⟩) except where the letter is the
+        // only handle — balochi.ts tries the phone first, then the letter.
+        "retroflex": { "t̪": "ʈ", "d̪": "ɖ", "r": "ɽ", "n": "ɳ", "s": "ʂ", "l": "ɭ" },
+        "postalveolar": { "c": "t͡ʃ", "s": "ʃ", "z": "ʒ", "j": "d͡ʒ" }
+    },
 
     // NUMBERS — Balochi Arabic spellings; the canonical IPA is resolved through the cross-script lexicon
     // (balochi-lexicon.tsv now carries these headwords with their full vowels — the defective abjad cannot recover

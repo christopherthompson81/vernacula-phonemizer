@@ -11,6 +11,33 @@
     // vowel LENGTHENER doubles the vowel letter it just wrote. These are those letters.
     "latinVowels": ["a", "e", "i", "o", "u"],
 
+    // ⚠ THE ADLAM FRONT-END (𞤀𞤁𞤂𞤃, U+1E900–1E95F) — the second script Fula is registered for, transliterated
+    // to the Boko/Latin orthography so the ONE g2p serves both. Adlam is the modern (1989, the Barry
+    // brothers) phonemic alphabet for Fulfulde/Pular, in wide diaspora and West-African use.
+    // Keys are the SMALL letters (U+1E922–1E943); the uppercase range folds onto them by a −0x22 offset in
+    // fulaAdlam.ts, since Adlam case is not phonemic. The last four (va x gb z kp sh) are the loan letters,
+    // mapped to the same Boko equivalents the Latin engine already uses so the two scripts stay consistent.
+    "adlam": {
+        "letters": {
+            "𞤢": "a", "𞤣": "d", "𞤤": "l", "𞤥": "m", "𞤦": "b", "𞤧": "s", "𞤨": "p", "𞤩": "ɓ", "𞤪": "r", "𞤫": "e",
+            "𞤬": "f", "𞤭": "i", "𞤮": "o", "𞤯": "ɗ", "𞤰": "ƴ", "𞤱": "w", "𞤲": "n", "𞤳": "k", "𞤴": "y", "𞤵": "u",
+            "𞤶": "j", "𞤷": "c", "𞤸": "h", "𞤹": "q", "𞤺": "g", "𞤻": "ny", "𞤼": "t", "𞤽": "ŋ", "𞤾": "v", "𞤿": "x",
+            "𞥀": "gb", "𞥁": "z", "𞥂": "kp", "𞥃": "sh"
+        },
+        // ⚠ ADLAM MARKS LENGTH AND GEMINATION WITH COMBINING MARKS, NOT BY DOUBLING — which is why the
+        // transliteration has to DOUBLE the letter it just wrote rather than map these to anything:
+        //   lengtheners (ALIF U+1E944 / VOWEL LENGTHENER U+1E945) double the preceding VOWEL (𞤢𞥅 → "aa" → aː)
+        //   gemination  (U+1E946)                                double the preceding CONSONANT (𞤦𞥆 → "bb")
+        // ⚠ WRITTEN AS SURROGATE PAIRS: these are ASTRAL codepoints and JSON has no \u{…} form. They are
+        // also INVISIBLE combining marks, so a literal would be an unreadable blank in this file.
+        // U+1E944 ALIF LENGTHENER, U+1E945 VOWEL LENGTHENER.
+        "lengtheners": ["\uD83A\uDD44", "\uD83A\uDD45"],
+        "gemination": "\uD83A\uDD46", // U+1E946 GEMINATION MARK
+        "hamza": "\uD83A\uDD47", // → the glottal ⟨q⟩, which the Latin g2p already reads as [ʔ]
+        // CONSONANT MODIFIER / GEMINATE CONSONANT MODIFIER / NUKTA — rare foreign-sound marks, dropped.
+        "drop": ["\uD83A\uDD48", "\uD83A\uDD49", "\uD83A\uDD4A"] // U+1E948–1E94A
+    },
+
     "script": ["Latin", "Adlam"],
     "name": "Fula (Fulfulde)",
     "provenance": "Cleanroom, rule-based g2p — Fulfulde Boko/Latin orthography is shallow and near-1:1; validated vs the r12a/Wikipedia references + languagesandnumbers. Sole census provider of the implosives ʄ (ƴ) / ɠ.",
