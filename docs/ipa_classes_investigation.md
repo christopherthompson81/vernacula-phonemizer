@@ -281,3 +281,18 @@ corpus's silence as the whole evidence base.
 
 `IPA_VOWELS` and `IPA_VOWEL` are now one list again — the split #748 introduced was a workaround for a
 question that had an answer.
+
+### Run 9a — the residual the fix exposed: the avagraha ⟨ऽ⟩
+
+Review of #752 measured the +125 as **135 words fixed, 10 broken**, and identified the 10:
+
+    बाड़ऽ   was bɑɽˈə (matches the referee's bɑɽʌ)   now bˈɑɽ
+
+⟨ऽ⟩ (U+0973) appears NOWHERE in `src/languages/bhojpuri/` or `src/languages/hindi/`, so it is dropped as
+an unknown character — and the invisible ⟨ɑ⟩ had been accidentally suppressing final-schwa deletion for
+these forms. Removing the accident exposed the real gap. Avagraha matches fall 15/31 → 5/31.
+
+Not folded into #752: the avagraha is a phonological rule (it writes a final vowel that would otherwise
+delete), and `schwaDeletion` in the manifest is already the configurable hook for exactly this. Scope is
+31 bho words + 2 mai; nothing else in any referee carries the character. Logged as its own change with a
+measurable target, like the Icelandic over-application in Run 7 which became #749.
