@@ -3,9 +3,12 @@
 // (ˈ ˌ — Afrikaans stress is largely first-syllable but unwritten → we emit none), LENGTH ː (the open/closed
 // length is realised by our vowel choice), NASALIZATION (ɛ̃ before nasal+C — allophonic, deferred), and the
 // diphthong OFFGLIDE tie ( ̯ ).
-// The folds below neutralise: syllable dots, r~ɾ, x~χ, the centering-diphthong onsets ɪ~i / ʊ~u, short o~ɔ,
-// ui œy~œi, ⟨ei⟩~⟨y⟩ (ONE phoneme, two spellings), and the -heid [ɦ] the referee writes inconsistently. The
-// short-⟨a⟩ backness fold is a PREFOLD so it cannot also collapse long ɑː onto short a — see its note.
+// The folds below neutralise, in order: syllable dots, r~ɾ, x~χ, the centering-diphthong onsets ɪ~i / ʊ~u,
+// short o~ɔ, ui œy~œi, ⟨ei⟩~⟨y⟩ (ONE phoneme, two spellings), the ⟨sw/dw⟩ onset (the referee writes swaar
+// [sw] but sweep [sv] — six each way), the ⟨h⟩ symbol ɦ~h (a RENAME, so /h/ presence stays measurable),
+// æ~ɛ, ɐ~a, ʋ~v, and finally the ⟨-heid⟩ /h/ the referee writes inconsistently. ⚠ THE ORDER IS PART OF THE
+// SPEC — folds run in sequence, so -heid must be keyed on [h] because the rename above already ran.
+// The short-⟨a⟩ backness fold is a PREFOLD so it cannot also collapse long ɑː onto short a — see its note.
 // Optional parenthesised segments are expanded to both readings (`parenOptional`), not stripped.
 // NOT folded: the ə~ɛ/ɪ schwa-reduction of UNSTRESSED vowels — a real stress-conditioned residual we do not
 // yet model (kept visible, like the Hebrew sheva).
@@ -38,6 +41,11 @@
         { "pattern": "o(?![ː])", "replace": "ɔ", "note": "short ⟨o⟩ height: the referee writes it [o]~[ɔ] freely; non-contrastive → fold plain [o]→[ɔ] (we emit ɔ; long/diphthong oː untouched)" },
         { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" },
         { "pattern": "ɛi", "replace": "əi", "note": "⟨ei⟩/⟨y⟩ are HOMOPHONOUS in Afrikaans (one phoneme, two spellings — Donaldson §1); the referee writes ⟨ei⟩ rows [ɛi] and ⟨y⟩ rows [əi]. We emit [əi] for both → fold the notation together (+4 words, measured)" },
-        { "pattern": "ɦ(?=əit)", "replace": "", "note": "the referee writes the ⟨-heid⟩ suffix's [ɦ] inconsistently — aamborstigheid keeps it, afwesigheid drops it — so fold it out IN THAT SUFFIX ONLY (+2, measured). ⚠ SCOPED DELIBERATELY: an unconditional ɦ-fold buys the same 2 words while blinding the eval to ⟨h⟩=[ɦ], one of this language's signature segments — an engine that dropped /h/ entirely would then score identically" }
+        { "pattern": "(?<=^|[^\\p{L}])([sd])v", "replace": "$1w", "note": "the ⟨sw⟩/⟨dw⟩ ONSET: the referee writes it BOTH ways and splits almost evenly — [sw] in swaar/swart/swyn/Swede/dwaal, [sv] in swaan/sweep/sweet/swembad/swaartekrag/dwarsoor. Six each way in the same environment is inconsistency, not a contrast, so fold both sides to [w] — +5 MEASURED (12 is the size of the environment; six of those words still miss for unrelated reasons). ⚠ An ENGINE rule was tried first (morpheme-initial sw/dw → [w], the Donaldson description) and measured EXACTLY net zero — it fixed the six [sw] rows and broke the six [sv] rows, which is how the inconsistency was found. ⚠ THE LOOKBEHIND IS WORD-INITIAL, not morpheme-initial: the backbone has already stripped ˈ and the syllable dots, so there is no seam left to anchor on, and a prefixed stem (verdwyn) keeps its miss" },
+        { "pattern": "ɦ", "replace": "h", "note": "⟨h⟩ SYMBOL identity: the referee writes the same segment [ɦ]~[h] (hom→hɔm beside ɦart) — non-contrastive notation. ⚠ THIS IS A RENAME, NOT A DELETION: the earlier unconditional ɦ→\"\" fold blinded the eval to whether /h/ was emitted at all; mapping the symbols together keeps presence measurable (+10)" },
+        { "pattern": "æ", "replace": "ɛ", "note": "⟨e⟩ before /r/ and /l/: the referee narrow-transcribes the lowered allophone [æ] (perd, lekker, pêrel) — allophonic, fold to the [ɛ] we emit (+6)" },
+        { "pattern": "ɐ", "replace": "a", "note": "short ⟨a⟩ centralised: the referee writes [ɐ] for the same vowel it elsewhere writes [a]/[ɑ] (antwoord, blad, rand) — allophonic notation (+5)" },
+        { "pattern": "ʋ", "replace": "v", "note": "⟨w⟩ as the labiodental approximant [ʋ]~[v]: the referee uses both for the same phoneme (kwarantyn, verwysing, werk) — non-contrastive (+5)" },
+        { "pattern": "h(?=əit)", "replace": "", "note": "the ⟨-heid⟩ suffix's /h/ is written inconsistently by the referee — aamborstigheid and middelmatigheid keep it, afwesigheid drops it — so fold it out IN THAT SUFFIX ONLY. ⚠ SCOPED DELIBERATELY: an unconditional drop would blind the eval to ⟨h⟩ everywhere, one of this language's signature segments. ⚠ SPELLED [h], NOT [ɦ], AND THAT IS ORDER-DEPENDENT: folds apply in sequence, so the ɦ→h rename above has already run and a ⟨ɦ⟩-keyed pattern here matches nothing — it was dead for exactly that reason until review caught it" }
     ]
 }

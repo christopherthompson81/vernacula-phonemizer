@@ -117,3 +117,81 @@ than only all-in/all-out.
 **Honest result: 76.9% folded / 93.9% symbol** (rules only), up from the 75.7% baseline
 — +1.2pp, not the +5.5pp first reported. Floor 0.73 → 0.74. The lexicon's value is real
 but lives in shipped output, not in the score.
+
+## Run 4 — 2026-08-08 (the stress/reduction model — and what it is actually worth)
+
+Command: A/B each candidate against the eval, one at a time; then bound the whole project
+with a perfect-stress ORACLE (stressedNucleus replaced by the referee's own ˈ position).
+
+**THE HEADLINE FINDING — the deferred item was mis-scoped.** The oracle scores
+**1783/2220 against the rule engine's 1738**. So every stress rule that could ever be
+written, taken together and executed perfectly, is worth **~45 words (2pp)**. The
+"stress/syllable model" was recorded as *the* path to higher; it is not. The residual is
+segmental and lexical, and the reduction errors that look prosodic are mostly a handful
+of loan words.
+
+Measured, in order tried:
+
+| candidate | result | kept |
+|---|---|---|
+| `dontSplitKnownWords: true` (Dutch's guard) | 1708 → **1691** | no — the stem list is a frequency wordlist full of real compounds |
+| extended loan-stress suffixes, greedy set of 8 | 1708 → 1707 | no |
+| per-suffix sweep: ⟨uur⟩ +3, ⟨oen⟩ +2, ⟨eel⟩ +1; ⟨sie⟩ −12, ⟨aar⟩ −6, ⟨el⟩ −42 | — | the three that pay |
+| unstressed ⟨e⟩ in a closed final syllable → [ɛ] | 1738 → **1556** | no — that vowel is the schwa of -es/-en/-er |
+| morpheme-initial ⟨sw/dw⟩ → [w] (Donaldson) | net **exactly 0** | no — see below |
+| referee-notation folds (ɦ~h, æ~ɛ, ɐ~a, ʋ~v) | +25 | yes |
+| ⟨sw⟩/⟨dw⟩ onset fold | +5 | yes |
+
+⚠ **Leave-one-out, re-measured in review** (each fold removed from the final 1745 config —
+the honest per-fold contribution, since folds interact):
+
+| fold | without it | contributes |
+|---|---|---|
+| ɦ~h (rename) | 1734 | **+11** |
+| ⟨sw/dw⟩ onset | 1740 | **+5** |
+| æ~ɛ | 1739 | **+6** |
+| ɐ~a | 1740 | **+5** |
+| ʋ~v | 1740 | **+5** |
+| ⟨-heid⟩ h | 1744 | **+1** |
+
+These sum to more than the total because they overlap; the config-level truth is the
+1708 → 1745 delta. The first draft of this PR reported +25/+30 from single-fold
+measurements taken against different baselines — corrected here.
+
+**The sw/dw case is the instructive one.** The engine rule is linguistically correct
+(Donaldson: /v/ is [w] after an obstruent) and it measured net zero — it fixed six words
+and broke six. Reading them explains why: the referee writes `swaar, swart, swyn, Swede,
+dwaal` with [sw] and `swaan, sweep, sweet, swembad, swaartekrag, dwarsoor` with [sv], in
+the same environment. That is referee inconsistency, so the answer is a FOLD, not an
+engine rule — the engine keeps its simpler [v] and the eval stops scoring a coin flip.
+
+**Result: 76.9% → 78.6% folded, 93.9% → 94.3% symbol.** Of that, +30 is folds (the eval
+learning what this referee cannot adjudicate) and +6 is engine (three loan suffixes).
+
+**What the remaining 476 misses are** (single-symbol repair tally, after the new folds):
+ə↔ɛ 36+18, ɑ↔a 28+13, ə↔i 9+7 — i.e. reduction and length, bounded at +45 by the oracle;
+then f→v 13 and d↔t 14, which are morpheme-seam voicing (aan·dete, ad·vies), the one
+class with real headroom left and no prosody involved. Anyone continuing here should
+start with the seam, not with stress.
+
+## Run 5 — 2026-08-08 (review of PR #771)
+
+Six findings, all fixed. The one that cost a word:
+
+- **The ⟨-heid⟩ fold was DEAD.** Folds apply in sequence, and the new `ɦ→h` rename runs
+  first, so a `ɦ(?=əit)`-keyed pattern could never match — the rewrite to `h(?=əit)` that
+  was supposed to accompany the rename silently failed to apply (an exact-string replace
+  that missed). Revived: **1744 → 1745**, and the ordering dependency is now written into
+  both the rule's own note and the file header.
+- The ⟨sw/dw⟩ note claimed "+12 measured" — 12 is the size of the *environment*; the fold
+  contributes **+5**. Corrected, and every fold note now carries a leave-one-out number.
+- The header's fold inventory listed only the pre-existing folds and still advertised the
+  -heid rule as live. Rewritten to list all of them in application order.
+- `stressFinalSuffixes` was no longer longest-first, contradicting its own comment three
+  lines above (inert today — `byLen` sorts at build time and both patterns are anchored —
+  but the comment asserts an invariant a later append would trust). Reordered.
+- The ⟨sw/dw⟩ lookbehind is word-initial, not morpheme-initial as its note said: the
+  backbone strips ˈ and the syllable dots before folds run, so there is no seam to anchor
+  on and `verdwyn` keeps its miss. Wording corrected rather than the pattern widened.
+
+Final: **1745/2220 (78.6%), symbol 94.3%.**
