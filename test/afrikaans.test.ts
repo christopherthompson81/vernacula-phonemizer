@@ -77,6 +77,10 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("X")).toBe("ɛks"); // referee ɛks — exact
         expect(createAfrikaans().text("Vitamien C").trim()).toBe("fitamin siə");
         expect(phonemizeWord("'n")).toBe("ə"); // …and the one-letter-looking WORD is untouched
+        // In running text the two that move are both improvements: ⟨x⟩ as a symbol reads "eks", and
+        // ⟨e-pos⟩ (email) is said "ee-pos" — the letter name — not with a schwa.
+        expect(createAfrikaans().text("x = 5").trim()).toBe("ɛks χələik ɑːn fəif");
+        expect(createAfrikaans().text("e-pos").trim()).toBe("iə pɔs");
     });
 
     test("a word-final ⟨c⟩ is [k], not the soft [s]", () => {
