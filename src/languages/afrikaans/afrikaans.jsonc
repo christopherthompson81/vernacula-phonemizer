@@ -20,12 +20,17 @@
 
     // Fixed multi-letter graphemes + ⟨y⟩ + consonants (the greedy length-desc table; bare a/e/i/o/u go through the
     // open/closed length code instead). Long vowels here are the doubled/di-graph spellings (always long).
+    // ⚠ ⟨sch⟩ AND ⟨chr⟩ MUST OUT-RANK ⟨ch⟩, and longest-match is what makes that work — the same argument
+    // as every other multi-letter entry here. Without ⟨sch⟩ the surnames come out [sʃ], which is not a
+    // possible Afrikaans onset (Schalk → *sʃalk); the referee's majority is [sk] — Schalk, Schoeman,
+    // Schutte, Labuschagne — against Schuster/Laubscher [ʃ] and Hauptfleisch [s]. ⟨schr⟩ falls out of
+    // ⟨sch⟩ + ⟨r⟩ with no entry of its own.
     "fixed": {
         "aai": "ɑːi", "ooi": "oːi", "oei": "ui", "eeu": "iːu", "aau": "ɑːu",
         "aa": "ɑː", "ee": "iə", "oo": "uə", "uu": "yː", "ie": "i", "oe": "u", "eu": "øː",
         "ei": "əi", "ui": "œy", "ou": "œu", "au": "œu", "y": "əi",
         "tjie": "ki", "djie": "ki", "jie": "ki", "tz": "ts", "sj": "ʃ", "tj": "c", "dj": "dʒ", "ch": "ʃ",
-        "ng": "ŋ", "nk": "ŋk",
+        "sch": "sk", "chr": "kr", "ng": "ŋ", "nk": "ŋk",
         "b": "b", "d": "d", "f": "f", "g": "χ", "h": "ɦ", "j": "j", "k": "k",
         "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "r", "s": "s", "t": "t",
         "v": "f", "w": "v", "x": "ks", "z": "z"

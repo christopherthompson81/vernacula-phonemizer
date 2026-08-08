@@ -90,9 +90,15 @@ function phonemizeMorpheme(word: string): string {
             // accident inverted the rule rather than extending it.
             // ⚠ NOT REFEREE-DECIDED: the corpus's only word-final ⟨c⟩ is the letter name C→sɪə, which this
             // branch does reach and misses BOTH ways, so the score is unmoved either way (#761).
-            out += C_SOFT.has(w[i + 1] ?? "") ? "s" : "k";
-            i += 1;
-            continue;
+            // ⚠ …EXCEPT ⟨ch⟩, WHICH IS A DIGRAPH IN THE FIXED TABLE. This code rule runs BEFORE that table
+            // so it can beat the single-letter entries, and that made it shadow ⟨ch⟩ entirely: chemie came
+            // out kɦiəmi, an onset Afrikaans does not have (#758). Yielding on a following ⟨h⟩ lets the
+            // table's ⟨chr⟩/⟨ch⟩ entries match.
+            if (w[i + 1] !== "h") {
+                out += C_SOFT.has(w[i + 1] ?? "") ? "s" : "k";
+                i += 1;
+                continue;
+            }
         }
         let matched = false;
         for (const key of FIXED_KEYS) {
@@ -127,6 +133,7 @@ function phonemizeMorpheme(word: string): string {
 // Reduced IPA per unstressed prefix (afrikaans.jsonc). Separable prefixes (aan/af…) carry stress and take
 // the normal morpheme path.
 const PREFIX_IPA = MANIFEST.prefixIpa;
+const LETTER_NAME = MANIFEST.letterNames; // a bare single letter is SPELLED (see phonemizeWord)
 // ⚠ THE TWO LISTS MUST AGREE — the same six prefixes, read by two consumers (this file's stress + IPA,
 // and the shared compound engine's decomposition). Asserted in test/afrikaans.test.ts rather than here:
 // registry.ts imports this module STATICALLY, so a throw at module init would make one typo in the
@@ -138,6 +145,16 @@ const PREFIX_IPA = MANIFEST.prefixIpa;
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC").toLowerCase();
     if (w === "'n" || w === "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
+    // ⚠ A BARE SINGLE LETTER IS SPELLED, NOT SOUNDED — ⟨C⟩ is "see" [siə], not [k] (#761). The initialism
+    // normalizer already does this for runs of TWO or more (VSA → vee-es-aa) but never fires on one letter,
+    // so a lone letter fell through to the ordinary word path and came out as its phone. It has to live
+    // HERE rather than in normalize.ts because the referee scores `af` through phonemizeWord directly, and
+    // because a letter reached this way (Vitamien C) is a word of the sentence, not an initialism.
+    // ⚠ Afrikaans has no one-letter words — ⟨'n⟩ is two characters and is handled above — so there is no
+    // real word for this to swallow. Letters with no name (⟨ê⟩, and anything outside the alphabet) fall
+    // through unchanged.
+    const spelled = [...w].length === 1 ? LETTER_NAME[w] : undefined;
+    if (spelled !== undefined) return phonemizeMorpheme(spelled);
     const d = decompose(w);
     if (d.parts.length <= 1) return phonemizeMorpheme(w);
     return d.parts
@@ -184,6 +201,14 @@ const SYMBOLS = makeSymbolNormalizer({
         // and `802.11m` reads as "…elf METER". Bounded and unattested: that rule fires only on THREE-or-more
         // integer digits plus one trailing letter, so `6.5m` is untouched, and 802.11 comes as a/b/g/n.
         m: ["meter"],
+        // ⚠ THE ONE-LETTER UNITS, declared because #762 made their absence AUDIBLE: a bare letter is now
+        // spelled as its name, so an undeclared `3 g suiker` read "drie GEE suiker" — a confident wrong
+        // WORD where it used to be a wrong phone. Only these three, all of which follow a numeral in
+        // ordinary text; anything rarer stays undeclared rather than guessed at.
+        // ⚠ NO UPPERCASE KEYS (volt V, watt W) — core/normalizeSymbols.ts looks the match up as
+        // `units[u.toLowerCase()]!`, so an uppercase key is unreachable AND the non-null assertion turns
+        // the miss into a THROW: `220 V` crashed the phonemizer outright. Filed as #763.
+        g: ["gram"], l: ["liter"], t: ["ton"],
     },
     rateDenominators: { h: "uur", u: "uur", s: "sekonde" },
     unitPer: "per",
