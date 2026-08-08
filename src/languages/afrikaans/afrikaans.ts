@@ -87,8 +87,9 @@ function phonemizeMorpheme(word: string): string {
             // ⟨c⟩ with nothing after it fell into the soft branch. franc→frans, arc→ars. #756 preserved
             // that verbatim (a data move must not change output) and #757 decided it: the rule's own
             // statement is "before a front vowel", and word-final has no following vowel at all, so the
-            // accident inverted the rule rather than extending it. The af referee has no word-final ⟨c⟩,
-            // so this rests on the rule being self-consistent, not on a measurement.
+            // accident inverted the rule rather than extending it.
+            // ⚠ NOT REFEREE-DECIDED: the corpus's only word-final ⟨c⟩ is the letter name C→sɪə, which this
+            // branch does reach and misses BOTH ways, so the score is unmoved either way (#761).
             out += C_SOFT.has(w[i + 1] ?? "") ? "s" : "k";
             i += 1;
             continue;
