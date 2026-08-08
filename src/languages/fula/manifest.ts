@@ -8,6 +8,8 @@ import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface FulaManifest {
     rules: [string, string, boolean][];
+    /** The LATIN spelling vowels the Adlam lengthener doubles; not IPA. */
+    latinVowels: readonly string[];
     clausePunctuation: Record<string, string>;
 }
 

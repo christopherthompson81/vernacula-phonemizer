@@ -7,6 +7,10 @@
 // self-describing documentation. The Adlam script (𞤀𞤁𞤂𞤃) is handled by fulaAdlam.ts, which transliterates Adlam→Boko before this g2p (identical IPA).
 {
     "language": "ff",
+    // ⚠ ORTHOGRAPHIC, NOT IPA. adlamToLatin emits the LATIN spelling of an Adlam word, and the Adlam
+    // vowel LENGTHENER doubles the vowel letter it just wrote. These are those letters.
+    "latinVowels": ["a", "e", "i", "o", "u"],
+
     "script": ["Latin", "Adlam"],
     "name": "Fula (Fulfulde)",
     "provenance": "Cleanroom, rule-based g2p — Fulfulde Boko/Latin orthography is shallow and near-1:1; validated vs the r12a/Wikipedia references + languagesandnumbers. Sole census provider of the implosives ʄ (ƴ) / ɠ.",

@@ -12,16 +12,11 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
-interface QuechuaDef {
-    digraphs: Record<string, string>;
-    graphemes: Record<string, string>;
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<QuechuaDef>(import.meta.url, "quechua.jsonc");
+const DEF = MANIFEST;
 const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;

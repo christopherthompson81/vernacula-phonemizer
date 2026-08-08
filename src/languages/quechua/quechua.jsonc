@@ -8,6 +8,13 @@
     "name": "Quechua (Runasimi)",
     "script": ["Latin"],
 
+    // ⚠ ORTHOGRAPHIC, NOT IPA. The possessive/comitative suffix is -yuq after a vowel-final word and
+    // -niyuq after a consonant-final one (iskay → iskay-niyuq), and numbers.ts decides that by looking at
+    // the last LETTER of the Quechua spelling.
+    // ⚠ ⟨y⟩ IS ABSENT ON PURPOSE: it is a consonant letter in Quechua but the IPA vowel [y], so pointing
+    // this at the shared vowel class in core/ipa.ts produced *iskayyuq (caught by a golden in #748).
+    "spellingVowels": ["a", "i", "u", "e", "o"],
+
     // Scanned LONGEST-FIRST. Trigraphs: aspirated/ejective affricate ⟨chh ch'⟩. Digraphs: the plain affricate
     // ⟨ch⟩, the aspirated stops ⟨ph th kh qh⟩, the ejective stops ⟨p' t' k' q'⟩, the palatals ⟨ll⟩→ʎ and the
     // fricative ⟨sh⟩→ʃ. (Apostrophes are normalised to U+0027 before the scan.)

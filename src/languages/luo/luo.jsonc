@@ -21,6 +21,11 @@
     "script": ["Latin"],
     "provenance": "Authored greedy g2p from the Dholuo orthography; mapping from the 17-word en.wiktionary Luo IPA referee + Tucker (1994) / Okoth-Okombo (1982).",
 
+    // ⚠ ORTHOGRAPHIC, NOT IPA. The coordinator gi 'and' elides to a solid g- before a VOWEL-INITIAL
+    // number word and stays free before a consonant (numbers.ts), and the test reads the first LETTER of
+    // the Dholuo spelling. Not the shared vowel class in core/ipa.ts — see the Quechua note for the trap.
+    "spellingVowels": ["a", "e", "i", "o", "u"],
+
     "convention": {
         "dental": "⟨th dh⟩ → θ ð (dental) vs ⟨t d⟩ → t d (alveolar) — the Dholuo dental/alveolar contrast",
         "prenasal": "⟨mb nd nj ng⟩ → ᵐb ⁿd ⁿd͡ʒ ᵑɡ (single prenasalised onset units)",
