@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeAbkhaz } from "./normalize.ts";
 import { numberToWords } from "./numbers.ts";
 
 // Letter tables (abkhaz.jsonc): base+modifier clusters, base letters, and the generic modifier fallbacks.
@@ -54,7 +55,9 @@ const TOKEN = /([Ѐ-ӿԀ-ԯꚀ-ꚟꙀ-ꙟ'’]+)|(\d+)|([.?!,;:…])/gu;
 
 class AbkhazPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        // ⚠ NORMALIZE BEFORE TOKENIZING — the layer's whole job is to turn what is not a word into words
+        // the scan below can read, so it must run while the digits, dashes and dots are still there.
+        return assembleClauses(normalizeAbkhaz(input.normalize("NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))

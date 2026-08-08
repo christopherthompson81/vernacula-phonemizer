@@ -90,6 +90,19 @@
     // 500 is authored хәышә per the hundreds list, though the 555/1500 year articles write the syncopated
     // хәшә(и). 10⁶ / 10⁹ use the Russian loans миллион / миллиард, attested in running ab.wikipedia text; a
     // count of 1 is read as the bare noun, parallel to зқьы for 1000.
+    // ⚠ TEXT-NORMALIZATION DATA (normalize.ts). Every string here is spelled out somewhere in
+    // tools/corpus/mined/ab.jsonc — nothing is invented, and the counts are in the rule comments.
+    // ⟨ш.⟩ is the year abbreviation and ⟨ашә.⟩ the century one; ⟨шш.⟩ is the plural year form. LONGEST
+    // FIRST, because the scan applies them in order and ⟨ш⟩ would otherwise eat the stem of ⟨шш⟩/⟨ашә⟩.
+    // ⚠ ⟨ш.ш.⟩ IS A SPELLING OF ⟨шш.⟩ (×3 against ×12) and needs its own row: the abbreviation dot is not
+    // a letter, so a rule keyed on ⟨ш⟩ alone matches BOTH halves and yields *шықәсашықәса.
+    "abbreviations": [
+        ["ашә", "ашәышықәса"],
+        ["ш.ш", "шықәсақәа"],
+        ["шш", "шықәсақәа"],
+        ["ш", "шықәса"]
+    ],
+
     "numbers": {
         "units": ["аноль", "акы", "ҩба", "хԥа", "ԥшьба", "хәба", "фба", "быжьба", "ааба", "жәба"],
         "teens": [
@@ -119,5 +132,18 @@
         },
         "million": "миллион",
         "milliard": "миллиард",
+
+        // ⚠ THE ORDINAL IS а + CARDINAL + тәи — proved by the corpus's own spelled forms аҩбатәи (2),
+        // ахԥатәи (3), аԥшьбатәи (4), афбатәи (6), ажәабатәи (10), against the written numeral form
+        // 6-тәи / 19-тәи.
+        // ⚠ 1 IS SUPPLETIVE: актәи, never *акытәи, which the cardinal акы would otherwise give. Five
+        // corpus instances.
+        "ordinalSuffix": "тәи",
+        "ordinalOne": "актәи",
+
+        // The range connectives, both written out in the corpus in this exact frame — "16-тәи ашәышықәса
+        // ИНАРКНЫ 19-тәи ашәышықәса алагамҭа АҞЫНӠА". инаркны ×25, рҟынӡа ×25.
+        "rangeFrom": "инаркны",
+        "rangeTo": "рҟынӡа",
     },
 }

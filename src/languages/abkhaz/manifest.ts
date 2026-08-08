@@ -23,6 +23,8 @@ export interface AbkhazManifest {
     modifiers: Record<string, string>;
     /** Letters that write a vowel — the environment for the ⟨у⟩/⟨и⟩ glide-vs-syllabic rule in abkhaz.ts. */
     vowelLetters: readonly string[];
+    /** [abbreviation, expansion] — LONGEST FIRST; the scan applies them in order. */
+    abbreviations: readonly (readonly [string, string])[];
     numbers: {
         units: string[];
         teens: string[];
@@ -34,6 +36,12 @@ export interface AbkhazManifest {
         thousands: { fused: string[]; hundred: string; word: string };
         million: string;
         milliard: string;
+        /** ⟨тәи⟩ — the ordinal suffix; the numeral takes а- in front and this behind. */
+        ordinalSuffix: string;
+        /** ⟨актәи⟩ — suppletive, because the cardinal акы would give *акытәи. */
+        ordinalOne: string;
+        rangeFrom: string;
+        rangeTo: string;
     };
 }
 
