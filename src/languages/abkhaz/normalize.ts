@@ -28,8 +28,12 @@
  *   minus    ×13   минус ×0 on the full wiki (плюс too — its one hit is a Russian publisher's name);
  *                  Glosbe's "translation" is the "-" glyph itself. So −173 °C still reads without its sign.
  *   math     ×12   +, =, <, >, ×, ÷ — none of their words attested anywhere searched.
- *   cubic    —     куб ×0, so м³/см³/км³ keep their symbol (only км² has a spelled form). °F likewise: no
- *                  Fahrenheit attestation, so ⟨°F⟩ is deliberately left untouched by the degree rule.
+ *   cubic    —     куб ×0, so м³/см³/км³ keep their symbol (only ² has a spelled measure word). °F
+ *                  likewise: no Fahrenheit attestation, so ⟨°F⟩ is left untouched by the degree rule.
+ *   per      —     no word for the rate slash is sourceable, so ⟨0,6км/км²⟩ stays symbols end to end —
+ *                  the shared tier's policy: no rate noun+connective, no half-reading. (The first
+ *                  version half-rewrote the denominator, which LOOKED better on the DROP count and read
+ *                  worse.)
  *   ampersand ×1   one instance, inside a Russian-language bibliographic citation.
  *
  * ⚠ ESPEAK CANNOT HELP HERE: it does not ship Abkhaz at all, so the fleet's usual fallback for numerals
@@ -55,6 +59,12 @@ const symbolize = makeSymbolNormalizer({
     percent: [MANIFEST.symbols.percent],
     currency: Object.fromEntries(MANIFEST.symbols.currencies.map(([sym, word]) => [sym, [word]])),
     magnitudes: [MANIFEST.numbers.milliard, MANIFEST.numbers.million],
+    // km/m — the corpus's own digit-adjacent spellings ("900 метра", "15-20 километра"; км ×58, м ×21).
+    // The tier also composes км² → "километра квадрат" (the attested order) and, with no cubed word
+    // sourceable (куб ×0), re-emits a ³ where the leak gate can see it. мм/кг/г/т stay undeclared — no
+    // spelled singular is attested — and an undeclared unit is left untouched.
+    units: Object.fromEntries(MANIFEST.symbols.units.map(([sym, word]) => [sym, [word]])),
+    exponentWords: { squared: [MANIFEST.symbols.squared], position: "after" },
 });
 
 /**
@@ -170,6 +180,13 @@ export function normalizeAbkhaz(text: string): string {
             if (t === undefined) return m0;
             return `${saidHour(whole, off) ? "" : `${MANIFEST.symbols.hour} `}${t}`;
         });
+    //    ⚠ THE DOT-SEPARATED CLOCK EXISTS TOO — "асааҭ 10.00 инаркны 16.00" is the corpus's own frame —
+    //    but a bare "10.00" is indistinguishable from a decimal, so the dot form is a clock ONLY where
+    //    the frame words prove it: right after асааҭ, or after инаркны continuing a time range. The
+    //    decimal rule (5) reads every other NN.NN.
+    s = s.replace(new RegExp(
+        `(?<=(?:(?<![\\p{L}])${ESC(MANIFEST.symbols.hour)}|${ESC(MANIFEST.numbers.rangeFrom)})\\s{1,2})(\\d{1,2})\\.(\\d{2})(?![\\d.,])`, "gu"),
+        (m0: string, h: string, mm: string) => clockParts(h, mm, undefined) ?? m0);
 
     //    3b) DEGREES (×19: "+23,2 °C", "3,4°", "(+462°C)"). ⟨°C⟩ takes the attested unit NAME
     //    ⟨Цельси иградус⟩ verbatim — Цельси is never attested bare after a number, so no other order can
@@ -195,17 +212,12 @@ export function normalizeAbkhaz(text: string): string {
         s = s.replace(new RegExp(`(?<![\\p{L}])${ESC(abbr)}(?:\\.(\\s+\\p{Lu})?|(?![\\p{L}]))`, "gu"),
             (_m, tail?: string) => (tail === undefined ? MANIFEST.numbers[slot] : `${MANIFEST.numbers[slot]}.${tail}`));
 
-    //    3d) PERCENT (×31) and CURRENCY (×6) go through the SHARED symbol tier (see `symbolize` above),
-    //    which owns the guards: already-said suppression, letter-bounded longest-first keys, and the
-    //    number→magnitude→currency order that is exactly the attested Abkhaz frame.
+    //    3d) PERCENT (×31), CURRENCY (×6), UNITS (км ×58, м ×21) and КМ² all go through the SHARED
+    //    symbol tier (see `symbolize` above), which owns the guards: already-said suppression,
+    //    letter-bounded longest-first keys, the number→magnitude→currency order that is exactly the
+    //    attested Abkhaz frame, and the unit+exponent composition ("422000 км²" → "422000 километра
+    //    квадрат"). ⚠ AFTER the scale expansion (3c) — the tier's magnitudes are the SPELLED words.
     s = symbolize(s);
-
-    //    3e) КМ² (the bulk of the ×16 exponent class): "143,600 километра квадрат" is the wiki's own
-    //    spelling of a км² area — unit and power together, postposed after the number. ⚠ ONLY the square
-    //    kilometre: no cubic word exists to source (куб ×0), so м³ and г/см³ keep their symbols. (Bare
-    //    ⟨км⟩ → километр is also full-wiki attested — "18 километр", "20 километр" — but plain length
-    //    units are a separate class, left for its own change.)
-    s = s.replace(/км²/gu, MANIFEST.symbols.squareKm);
 
     // 4) RANGES (×71: 1908-1915, 10-11, 13-15). ⚠ BOTH CONNECTIVES ARE CORPUS-ATTESTED and neither is
     //    invented: инаркны ("from", ×25) and рҟынӡа/аҟынӡа ("to", ×25/×17) — the corpus writes them out in
@@ -232,8 +244,21 @@ export function normalizeAbkhaz(text: string): string {
     //    a numeral and each fractional digit as its own numeral, with NO connective invented between them.
     //    That is deliberately not a claim about how a speaker says it; it is the reading that adds no
     //    vocabulary this language has not been shown to have.
-    s = s.replace(/(\d+),(\d+)/gu, (_m, int: string, frac: string) =>
-        `${int} ${[...frac].map((d) => numberToWords(Number(d))).join(" ")}`);
+    //    ⚠ THE DOT DECIMAL IS REAL TOO — Latin-source passages write it ("28.28 гр.", "0.02°",
+    //    "38.61мм", "1.98847") — and it was reaching the sink as a full-stop PAUSE mid-number. Digits on
+    //    BOTH sides keep a sentence's "1877. Ашәышықәса" out; the dot-CLOCK frames were consumed in 3a.
+    //    ⚠ A DOT CHAIN IS A DATE, NOT A DECIMAL: "17.11.1946" (the biography frame, all over the corpus)
+    //    must keep its dots as pauses — the first version read it "seventeen one one". THREE guards are
+    //    needed: the ⟨\.\d⟩ lookahead stops the match at ⟨17.11⟩.1946, the lookbehind stops the retry
+    //    from starting inside the chain at ⟨11.1946⟩ — and the ⟨(?!\d)⟩ stops the fraction BACKTRACKING
+    //    past the first guard (without it, frac gave back a digit and ⟨17.11⟩ matched as ⟨17.1⟩).
+    //    ⚠ A LETTER MAY BE GLUED TO THE FRACTION ("0,6км", "38.61мм" — the corpus writes both), and the
+    //    emitted words fused with it: 0,6км read *фбакм, one nonword. A trailing space is added exactly
+    //    when the next character is a letter.
+    s = s.replace(/(?<![\d.])(\d+)[.,](\d+)(?!\d|\.\d)/gu, (m0, int: string, frac: string, off: number, whole: string) => {
+        const sep = /\p{L}/u.test(whole[off + m0.length] ?? "") ? " " : "";
+        return `${int} ${[...frac].map((d) => numberToWords(Number(d))).join(" ")}${sep}`;
+    });
 
     // 6) ORDINALS (×36 across 12 distinct values). ⚠ AFTER ranges: `13-15` is a range, but `16-тәи` is an
     //    ordinal, and both begin `\d+-`. Ranges run first and consume only digit–digit, so what reaches

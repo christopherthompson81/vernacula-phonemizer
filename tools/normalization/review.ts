@@ -472,9 +472,30 @@ function highTrafficWords(hay: { tokens: ReadonlySet<string>; text: string }): s
     const used = (block: string): string => block.split(/,(?=\s*"[^"]*"\s*:)/u)
         .filter((entry) => { const sign = /"([^"]+)"\s*:/u.exec(entry)?.[1]; return sign !== undefined && hay.text.includes(sign); })
         .join(" ");
+    // A TIER MAY BE MANIFEST-DRIVEN — `percent: [MANIFEST.symbols.percent]`, currencies built with
+    // Object.fromEntries over MANIFEST.symbols.currencies — which is the house direction (data lives in
+    // the .jsonc, not in code). The literal extractors see no strings there, and without this arm the
+    // check reported "could not read it" for a language whose declarations were all present and typed
+    // (the Abkhaz run). The convention this reads is the `symbols` manifest block: `percent` as a string,
+    // `currencies` as [sign, word] pairs — the same sign-in-corpus filter as the inline form.
+    const manifestSymbols = (): string => {
+        if (!/MANIFEST\.symbols/u.test(tier)) return "";
+        const out: string[] = [];
+        for (const f of readdirSync(join("src/languages", dir)).filter((n) => n.endsWith(".jsonc"))) {
+            const src = readFileSync(join("src/languages", dir, f), "utf8");
+            const block = /"symbols"\s*:\s*\{[\s\S]*?\n\s*\}/u.exec(src)?.[0];
+            if (block === undefined) continue;
+            const pct = /"percent"\s*:\s*"([^"]+)"/u.exec(block)?.[1];
+            if (pct !== undefined) out.push(`["${pct}"]`);
+            for (const m of block.matchAll(/\[\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\]/gu))
+                if (hay.text.includes(m[1]!)) out.push(`["${m[2]!}"]`);
+        }
+        return out.join(" ");
+    };
     const decl = [
-        ...[...tier.matchAll(/percent:\s*(\[[^\]]*\])/gu)].map((m) => m[1]!),
+        ...[...tier.matchAll(/percent:\s*(\[[^\]]*\])/gu)].map((m) => m[1]!).filter((a) => /"/u.test(a)),
         ...[...tier.matchAll(/currency:\s*\{([^}]*)\}/gu)].map((m) => used(m[1]!)),
+        manifestSymbols(),
         ...readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc"))
             .flatMap((f) => [...readFileSync(join("src/languages", dir, f), "utf8")
                 .matchAll(/"decimal(?:Word|Connector)"\s*:\s*"([^"]+)"/gu)].map((m) => `["${m[1]!}"]`)),

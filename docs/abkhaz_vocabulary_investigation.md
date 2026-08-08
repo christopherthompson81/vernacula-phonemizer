@@ -112,3 +112,30 @@ improvement read by hand; DROP 34 → 33; referee unchanged (170/206, 641/979).
 Also learned en route: bare ⟨км⟩ → километр is full-wiki attested ("18 километр",
 "20 километр", "25 километр" — the bare form after numerals, where the area frame uses
 "километра квадрат") — sourced and available for a plain-length-units follow-up.
+
+## Run 5 — 2026-08-08 (the normalization follow-ups)
+
+Command: local artifact scan for digit-adjacent unit symbols; `attest.ts --lang ab` for
+all 11 sourced words; implemented units + dot decimals + the review.ts sourcing-gate arm.
+
+- Units: the artifact itself spells the frames digit-adjacent — "900 метра",
+  "15-20 километра" — so the declared words are the corpus's own forms (метра,
+  километра), not the wiki's citation forms (километр). км ×58 and м ×21 are the two
+  big classes; мм/кг/г/т have NO attested spelled singular (грамм only as граммақәа) and
+  stay undeclared. Declared through the shared tier (`units` + `exponentWords`), which
+  replaced the literal км² rule — and exposed that the old rule half-rewrote the rate
+  "0,6км/км²"; the tier refuses (no "per" word), so DROP goes 33 → 34, honestly.
+- attest.ts (live wiki, token-level): процент 14 · градус 11 · асааҭ 26 · амааҭ 5 ·
+  доллар 30 · евро 7 · фунт 4 · квадрат 4 · километра 27 · метра 35 · миллиард 100 —
+  all `attested`, artifact committed at tools/corpus/attest/ab.jsonc. Bonus: the probe
+  surfaced "600 инаркны 1600 метра рҟынӡа" — the unit word inside our exact range frame.
+- Dot decimals: "28.28 гр.", "0.02°", "1.98847" now read digit-by-digit like the comma
+  form. Two traps found by the corpus gate, both fixed and pinned: a DOT CHAIN is a date
+  ("17.11.1946" — and the fraction BACKTRACKED past the first guard, matching 17.1), and
+  the fraction words GLUED to a following letter ("0,6км" → *фбакм). The corpus's
+  dot-separated clock ("асааҭ 10.00 инаркны 16.00") is consumed as a clock only where
+  the frame words prove it.
+- review.ts sourcing gate: new arm follows `MANIFEST.symbols` references into the .jsonc
+  (percent string + [sign, word] pairs, same sign-in-corpus filter), so a manifest-driven
+  tier declaration no longer reads as "could not read it". Result: `[ ok ] all 7
+  high-traffic words attested`.

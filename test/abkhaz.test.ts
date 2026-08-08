@@ -97,7 +97,7 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // a sentence break INSIDE a number: 11,3 → "ʒʷejza , χpʰa".
         // ⚠ NO DECIMAL-POINT WORD IS SOURCEABLE for ab (sources.ts: no espeak — it does not ship Abkhaz —
         // and no manifest word), so the fraction is read DIGIT BY DIGIT with no invented connective.
-        expect(ab.text("11,3 км").trim()).toBe("ʒʷejza χpʰa kʼm");
+        expect(ab.text("11,3 км").trim()).toBe("ʒʷejza χpʰa kʼilometʼra"); // …and км is a WORD now too
         expect(ab.text("0,723").trim()).toBe("anolʲ bəʒba ɥˤba χpʰa");
     });
 
@@ -225,10 +225,29 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
             expect(typeof MANIFEST.numbers[slot]).toBe("string");
     });
 
-    test("normalization: ⟨км²⟩ reads as the wiki's own ⟨километра квадрат⟩ — and cubes stay symbols", () => {
+    test("normalization: ⟨км⟩/⟨м⟩ read as the corpus's own километра/метра — squared composes, cubes stay", () => {
+        // The corpus's own digit-adjacent spellings ("900 метра", "15-20 километра"; attest.ts: метра
+        // ×35, километра ×27 on the live wiki, incl. "600 инаркны 1600 метра рҟынӡа" — our range frame).
+        expect(normalizeAbkhaz("11,3 км")).toBe("11 хԥа километра");
+        expect(normalizeAbkhaz("150 м здиаметр")).toBe("150 метра здиаметр");
         expect(normalizeAbkhaz("422 000 км². Иара")).toBe("422000 километра квадрат. Иара");
+        // ⚠ мм/кг/г/т are NOT declared (no spelled singular attested — грамм exists only as граммақәа),
+        // and an undeclared unit must stay untouched, not half-read.
+        expect(normalizeAbkhaz("3 кг")).toBe("3 кг");
         // No cubic word is attested anywhere (куб ×0), so ⟨см³⟩ is deliberately untouched.
         expect(normalizeAbkhaz("5,24 г/см³")).toContain("см³");
+    });
+
+    test("normalization: the DOT decimal reads like the comma one — except in the clock frame", () => {
+        // Latin-source passages write dot decimals ("28.28 гр.", "0.02°", "1.98847") and the dot was a
+        // full-stop pause mid-number. Digits on both sides keep sentence periods out.
+        expect(normalizeAbkhaz("28.28 гр.")).toBe("28 ҩба ааба гр.");
+        expect(normalizeAbkhaz("1877. Ашәышықәса")).toBe("1877. Ашәышықәса");
+        // ⚠ GLUE: "0,6км" fused the last fraction word with the unit into one nonword (*фбакм).
+        expect(normalizeAbkhaz("38.61мм")).toBe("38 фба акы мм");
+        // ⚠ "асааҭ 10.00 инаркны 16.00" is the corpus's own DOT-SEPARATED CLOCK — a clock exactly where
+        // the frame words prove it (after асааҭ, or after инаркны continuing the range), decimal elsewhere.
+        expect(normalizeAbkhaz("асааҭ 10.00 инаркны 16.00 рҟынӡа")).toBe("асааҭ 10 инаркны 16 рҟынӡа");
     });
 
     test("normalization: the clock word goes BEFORE the number and is not doubled", () => {
@@ -246,8 +265,9 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // асааҭ must not suppress the frame word.
         expect(normalizeAbkhaz("иасааҭ 22:30 рзы")).toBe("иасааҭ асааҭ 22 30 рзы");
         // ⚠ A RACE TIME IS NOT A CLOCK: "(1:51.4)" is in the corpus, and fractional "minutes" mark a
-        // duration — excluded by the trailing guard. And no wall clock shows 25:99 (h<24, mm<60).
-        expect(normalizeAbkhaz("(1:51.4)")).toBe("(1:51.4)");
+        // duration — no асааҭ. (Its ⟨51.4⟩ half now reads as the decimal it is; the colon stays a pause.)
+        expect(normalizeAbkhaz("(1:51.4)")).toBe("(1:51 ԥшьба)");
+        // And no wall clock shows 25:99 (h<24, mm<60).
         expect(normalizeAbkhaz("25:99")).toBe("25:99");
     });
 

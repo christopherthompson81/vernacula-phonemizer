@@ -175,7 +175,16 @@
         "degree": "градус",
         "celsius": "Цельси иградус",
         "hour": "асааҭ",
-        "squareKm": "километра квадрат",
+        // [symbol, word] — matched only AFTER a number by the shared tier. ⚠ THE WORDS ARE THE CORPUS'S
+        // OWN DIGIT-ADJACENT SPELLINGS, not the wiki's citation forms: "900 метра аҵаулараҿы",
+        // "15-20 километра аҳаракыраҿы" (артефакт; км ×58 and м ×21 are the two big symbol classes).
+        // ⚠ мм/кг/г/т STAY UNDECLARED: no spelled singular is attested anywhere searched (грамм occurs
+        // only as the plural граммақәа), and the tier leaves an undeclared unit untouched.
+        "units": [["км", "километра"], ["м", "метра"]],
+        // ⟨квадрат⟩ — postposed after the unit, the attested "километра квадрат" order (Башкирия). The
+        // tier composes it with any declared unit, so м² reads "метра квадрат" by the same construction.
+        // No CUBED word exists to source (куб ×0), so ³ is re-emitted where the leak gate can see it.
+        "squared": "квадрат",
         // [symbol, word] — the symbol PRECEDES the number in text ($1,86) but the word FOLLOWS it in speech.
         // ⚠ THE LETTER-PREFIXED KEYS ARE LOAD-BEARING: the shared symbol tier letter-bounds a bare sign so
         // it cannot split a code prefix, which means ⟨US$30⟩ and the corpus's own ⟨B£20⟩ (the Brixton
