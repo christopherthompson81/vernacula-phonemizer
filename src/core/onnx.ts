@@ -30,6 +30,22 @@ export interface OrtLike {
     ) => OrtTensor;
 }
 
+/**
+ * ⚠ THE SPECIFIER IS A CONST, NOT A LITERAL IN THE `import()` BELOW — DO NOT INLINE IT.
+ *
+ * A literal makes `tsc` RESOLVE the package, and resolution fails when the optional dependency is absent:
+ * TS2307, breaking the typecheck of anyone who never asked for ONNX. npm reports a failed optional install as
+ * SUCCESS (the native binary is simply missing), so this lands as an intermittent CI failure in changes that
+ * touch nothing near ONNX — PR #746 saw the same commit fail once and pass on re-run, unmodified. The
+ * indirection keeps the import DYNAMIC in every sense: no static resolution, no type dependency, and no ambient
+ * `declare module` that would shadow a real onnxruntime-node in a consumer's project (this package exports TS
+ * SOURCE, so a declaration shipped here would land in their compilation too).
+ *
+ * Nothing is lost: `OrtLike` above is the checked contract, and the cast below is what enforces it either way.
+ * test/onnx-optional.test.ts pins both this indirection and the sole-importer rule that makes it sufficient.
+ */
+const ORT_SPECIFIER = "onnxruntime-node";
+
 let ortPromise: Promise<OrtLike> | undefined;
 
 /**
@@ -39,7 +55,7 @@ let ortPromise: Promise<OrtLike> | undefined;
  */
 export function loadOrt(context = "Neural inference"): Promise<OrtLike> {
     if (ortPromise) return ortPromise;
-    return (ortPromise = import("onnxruntime-node")
+    return (ortPromise = import(ORT_SPECIFIER)
         .then((m) => ((m as { default?: unknown }).default ?? m) as unknown as OrtLike)
         .catch(() => {
             ortPromise = undefined;
