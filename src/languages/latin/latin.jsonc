@@ -34,8 +34,6 @@
         "ë", "ï", "ö", "ü", "ÿ"
     ],
 
-    // Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ is
-    // dark/clear by context (latin.ts).
     // ⚠ THREE PHONE CLASSES, each the environment of one Latin rule. Latin-specific by construction: the
     // labiovelars ⟨kʷ ɡʷ⟩ (⟨qu gu⟩) and the Greek-loan aspirates ⟨pʰ tʰ kʰ⟩ are members, so no shared
     // "velars"/"stops" class could stand in for them.
@@ -49,6 +47,8 @@
     "mutae": ["p", "t", "k", "b", "d", "ɡ", "kʷ", "ɡʷ", "pʰ", "tʰ", "kʰ", "f"],
     "liquids": ["l", "ɫ", "r"],
 
+    // Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ is
+    // dark/clear by context (latin.ts).
     "consonants": {
         "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "k": "k", "m": "m", "n": "n",
         "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "w", "z": "z", "j": "j",
