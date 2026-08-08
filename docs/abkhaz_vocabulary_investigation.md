@@ -139,3 +139,37 @@ all 11 sourced words; implemented units + dot decimals + the review.ts sourcing-
   (percent string + [sign, word] pairs, same sign-in-corpus filter), so a manifest-driven
   tier declaration no longer reads as "could not read it". Result: `[ ok ] all 7
   high-traffic words attested`.
+
+## Run 6 — 2026-08-08 (review of PR #769)
+
+Eight review angles; the consolidated confirmed set, all fixed:
+
+- The dot-clock's `инаркны` anchor licensed a clock reading for ordinary decimals ("1
+  инаркны 2.50 метра" read "2 50"), wasn't letter-bounded (аинаркны), refused a trailing
+  comma (real clock fell to the decimal rule as "10 аноль аноль"), and had no hyphen
+  form ("асааҭ 10.00-16.00" stranded ".00"). Rewritten: every dot form is anchored on
+  the letter-bounded hour word itself (single / hyphen / инаркны-joined), punctuation
+  is not a refusal, and MM.YYYY joins the date guard.
+- Range endpoints admitted only the comma decimal, so the corpus's own "7.9-8.2" matched
+  its inner digits and stranded ".2" after the "to" word — endpoints now admit [.,],
+  with a left guard against starting past a separator and a right guard that refuses a
+  digit continuation but not a sentence dot. (Side effect: "1002 - 1027," now takes its
+  connectives — the old guard choked on the trailing comma.)
+- "8 км2" (attested): the tier's ASCII-exponent arm is Latin-only by design, so the
+  Cyrillic form is folded to ² before the tier (the Bulgarian precedent).
+- The header's "no half-reading" rate claim was too strong: only a DECLARED denominator
+  refuses whole; "км/с" words the numerator and leaves /с visible. Comment corrected,
+  both behaviors pinned.
+- review.ts: the symbols arm now PARSES the manifest (parseJsonc — the block regex
+  truncated at the first line-initial `}` and over-captured on the hindi-family shape),
+  gates on the whole layer source (yoruba's `const SYM = MANIFEST.symbols` alias was
+  invisible — its percent word was silently unchecked, and the fixed gate immediately
+  flagged its unattested `onígun`), folds the sign before the in-corpus test (US$/B£
+  never matched a folded haystack), walks ALL symbol strings (degree/hour/squared are
+  needles now), and shares one .jsonc read with the decimalWord arm.
+- Цельси/иградус: attest.ts reports both absent — a retrieval blind spot, verified
+  against the СИ article's raw wikitext (action=parse), where "Цельси иградус ||
+  degree Celsius" sits in the unit table the search index does not carry. Cited in the
+  manifest comment.
+- Fraction digits now go through numbers.ts's readDigits instead of re-deriving through
+  the full numeral pipeline.

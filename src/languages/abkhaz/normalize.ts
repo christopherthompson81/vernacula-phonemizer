@@ -30,10 +30,14 @@
  *   math     ×12   +, =, <, >, ×, ÷ — none of their words attested anywhere searched.
  *   cubic    —     куб ×0, so м³/см³/км³ keep their symbol (only ² has a spelled measure word). °F
  *                  likewise: no Fahrenheit attestation, so ⟨°F⟩ is left untouched by the degree rule.
- *   per      —     no word for the rate slash is sourceable, so ⟨0,6км/км²⟩ stays symbols end to end —
- *                  the shared tier's policy: no rate noun+connective, no half-reading. (The first
- *                  version half-rewrote the denominator, which LOOKED better on the DROP count and read
- *                  worse.)
+ *   per      —     no word for the rate slash is sourceable. A rate whose denominator is a DECLARED
+ *                  unit (⟨0,6км/км²⟩) is refused whole by the shared tier — no noun+connective, no half
+ *                  reading (a first version half-rewrote the denominator, which LOOKED better on the
+ *                  DROP count and read worse). ⚠ An UNKNOWN denominator (⟨19,2 км/с⟩, ⟨км/сааҭ⟩) is not
+ *                  a rate the tier can see, so the numerator reads as a word and ⟨/с⟩ stays visible —
+ *                  a quantity heard, a rate marker left where the leak gate can see it. Closing that
+ *                  needs the per-word (unsourced) or a tier-level refusal, which is fleet policy, not
+ *                  this file's.
  *   ampersand ×1   one instance, inside a Russian-language bibliographic citation.
  *
  * ⚠ ESPEAK CANNOT HELP HERE: it does not ship Abkhaz at all, so the fleet's usual fallback for numerals
@@ -41,7 +45,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { numberToWords } from "./numbers.ts";
+import { numberToWords, readDigits } from "./numbers.ts";
 
 const ESC = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
@@ -181,12 +185,30 @@ export function normalizeAbkhaz(text: string): string {
             return `${saidHour(whole, off) ? "" : `${MANIFEST.symbols.hour} `}${t}`;
         });
     //    ⚠ THE DOT-SEPARATED CLOCK EXISTS TOO — "асааҭ 10.00 инаркны 16.00" is the corpus's own frame —
-    //    but a bare "10.00" is indistinguishable from a decimal, so the dot form is a clock ONLY where
-    //    the frame words prove it: right after асааҭ, or after инаркны continuing a time range. The
-    //    decimal rule (5) reads every other NN.NN.
+    //    but a bare "10.00" is indistinguishable from a decimal, so EVERY dot form is anchored on the
+    //    (letter-bounded) hour word itself; the decimal rule (5) reads every other NN.NN.
+    //    ⚠ A FIRST VERSION also accepted a bare инаркны as the anchor, which licensed a clock reading
+    //    for ORDINARY decimals in the range frame — "1 инаркны 2.50 метра" read "2 50". The инаркны
+    //    continuation is only a clock when the асааҭ endpoint opened it, so the whole attested frame is
+    //    one anchored rule (hyphen or инаркны between the endpoints), and the single form another.
+    //    ⚠ THE TRAILING GUARD ADMITS PUNCTUATION: "асааҭ 10.00, нас" and a sentence-final clock are
+    //    still clocks — only a digit continuation ([.,]\d — a chain or a fraction) refuses.
+    const DTIME = "(\\d{1,2})\\.(\\d{2})";
+    const HOUR_ANCHOR = `(?<![\\p{L}])${ESC(MANIFEST.symbols.hour)}\\s{1,2}`;
     s = s.replace(new RegExp(
-        `(?<=(?:(?<![\\p{L}])${ESC(MANIFEST.symbols.hour)}|${ESC(MANIFEST.numbers.rangeFrom)})\\s{1,2})(\\d{1,2})\\.(\\d{2})(?![\\d.,])`, "gu"),
-        (m0: string, h: string, mm: string) => clockParts(h, mm, undefined) ?? m0);
+        `${HOUR_ANCHOR}${DTIME}(?:\\s?[-–—]\\s?|\\s+${ESC(MANIFEST.numbers.rangeFrom)}\\s+)${DTIME}(?!\\d|[.,]\\d)`, "gu"),
+        (m0: string, h1: string, m1: string, h2: string, m2: string, off: number, whole: string) => {
+            const a = clockParts(h1, m1, undefined), b = clockParts(h2, m2, undefined);
+            if (a === undefined || b === undefined) return m0;
+            const after = whole.slice(off + m0.length, off + m0.length + 40);
+            const to = /[ар]ҟынӡа/u.test(after) ? "" : ` ${MANIFEST.numbers.rangeTo}`;
+            return `${MANIFEST.symbols.hour} ${a} ${MANIFEST.numbers.rangeFrom} ${b}${to}`;
+        });
+    s = s.replace(new RegExp(`${HOUR_ANCHOR}${DTIME}(?!\\d|[.,]\\d)`, "gu"),
+        (m0: string, h: string, mm: string) => {
+            const t = clockParts(h, mm, undefined);
+            return t === undefined ? m0 : `${MANIFEST.symbols.hour} ${t}`;
+        });
 
     //    3b) DEGREES (×19: "+23,2 °C", "3,4°", "(+462°C)"). ⟨°C⟩ takes the attested unit NAME
     //    ⟨Цельси иградус⟩ verbatim — Цельси is never attested bare after a number, so no other order can
@@ -212,7 +234,13 @@ export function normalizeAbkhaz(text: string): string {
         s = s.replace(new RegExp(`(?<![\\p{L}])${ESC(abbr)}(?:\\.(\\s+\\p{Lu})?|(?![\\p{L}]))`, "gu"),
             (_m, tail?: string) => (tail === undefined ? MANIFEST.numbers[slot] : `${MANIFEST.numbers[slot]}.${tail}`));
 
-    //    3d) PERCENT (×31), CURRENCY (×6), UNITS (км ×58, м ×21) and КМ² all go through the SHARED
+    //    3d) THE ASCII EXPONENT — the corpus writes "8 км2" beside "422 000 км²", and the tier's
+    //    ASCII-digit arm is Latin-only by design (its lookbehind is [a-zA-Z], so a Cyrillic unit never
+    //    reaches it — the Bulgarian lesson, bg/normalize.ts). Folded to the superscript here, BEFORE the
+    //    tier, so both spellings take the same path.
+    s = s.replace(/(?<=\d\s?(?:км|см|м))([23])(?![\d\p{L}])/gu, (d: string) => (d === "2" ? "²" : "³"));
+
+    //    3e) PERCENT (×31), CURRENCY (×6), UNITS (км ×58, м ×21) and КМ² all go through the SHARED
     //    symbol tier (see `symbolize` above), which owns the guards: already-said suppression,
     //    letter-bounded longest-first keys, the number→magnitude→currency order that is exactly the
     //    attested Abkhaz frame, and the unit+exponent composition ("422000 км²" → "422000 километра
@@ -222,11 +250,14 @@ export function normalizeAbkhaz(text: string): string {
     // 4) RANGES (×71: 1908-1915, 10-11, 13-15). ⚠ BOTH CONNECTIVES ARE CORPUS-ATTESTED and neither is
     //    invented: инаркны ("from", ×25) and рҟынӡа/аҟынӡа ("to", ×25/×17) — the corpus writes them out in
     //    exactly this frame ("16-тәи ашәышықәса инаркны 19-тәи ашәышықәса алагамҭа аҟынӡа").
-    //    ⚠ BEFORE the decimal rule, and the endpoints admit a comma — because the decimal rewrite replaces
-    //    that comma with a SPACE, which destroys the digit-dash-digit shape this needs. Ordered the other
-    //    way, the attested "6,4-7,6" lost its dash entirely and read as four bare numerals.
-    //    ⚠ The guard rejects a dash that follows a letter, so a hyphenated word is never a range.
-    s = s.replace(/(?<![\p{L}\d-])(\d+(?:,\d+)?)\s?[-–—]\s?(\d+(?:,\d+)?)(?![\d,-])/gu,
+    //    ⚠ BEFORE the decimal rule, and the endpoints admit a DECIMAL — comma or dot — because the
+    //    decimal rewrite replaces the separator with a SPACE, which destroys the digit-dash-digit shape
+    //    this needs. Ordered the other way, the attested "6,4-7,6" lost its dash entirely; and with only
+    //    the comma admitted, the corpus's own "7.9-8.2" matched its INNER digits and stranded ".2" after
+    //    the "to" word. The left guard also refuses a start just past a decimal separator (the ⟨14-15⟩
+    //    inside ⟨3.14-15⟩), and the right guard refuses a separator-digit continuation but NOT a
+    //    sentence dot.
+    s = s.replace(/(?<![\p{L}\d.,-])(\d+(?:[.,]\d+)?)\s?[-–—]\s?(\d+(?:[.,]\d+)?)(?!\d|[.,]\d|-)/gu,
         (m0: string, a: string, b: string, off: number, whole: string) => {
             // ⚠ DO NOT DOUBLE A "TO" THE TEXT ALREADY WROTE. "1800-2000 м рҟынӡа" is attested, and adding
             // the connective unconditionally read рҟынӡа twice. Same guard the shared symbol tier uses for
@@ -252,12 +283,16 @@ export function normalizeAbkhaz(text: string): string {
     //    needed: the ⟨\.\d⟩ lookahead stops the match at ⟨17.11⟩.1946, the lookbehind stops the retry
     //    from starting inside the chain at ⟨11.1946⟩ — and the ⟨(?!\d)⟩ stops the fraction BACKTRACKING
     //    past the first guard (without it, frac gave back a digit and ⟨17.11⟩ matched as ⟨17.1⟩).
+    //    ⚠ AND SO IS THE TWO-PART DOT DATE: "11.1946" is a month beside a year, not eleven-point-…, so a
+    //    1–12 integer with an exactly-4-digit fraction keeps its dot as a pause.
     //    ⚠ A LETTER MAY BE GLUED TO THE FRACTION ("0,6км", "38.61мм" — the corpus writes both), and the
     //    emitted words fused with it: 0,6км read *фбакм, one nonword. A trailing space is added exactly
     //    when the next character is a letter.
     s = s.replace(/(?<![\d.])(\d+)[.,](\d+)(?!\d|\.\d)/gu, (m0, int: string, frac: string, off: number, whole: string) => {
+        if (m0.includes(".") && frac.length === 4 && int.length <= 2 && Number(int) >= 1 && Number(int) <= 12)
+            return m0; // MM.YYYY
         const sep = /\p{L}/u.test(whole[off + m0.length] ?? "") ? " " : "";
-        return `${int} ${[...frac].map((d) => numberToWords(Number(d))).join(" ")}${sep}`;
+        return `${int} ${readDigits(frac)}${sep}`;
     });
 
     // 6) ORDINALS (×36 across 12 distinct values). ⚠ AFTER ranges: `13-15` is a range, but `16-тәи` is an

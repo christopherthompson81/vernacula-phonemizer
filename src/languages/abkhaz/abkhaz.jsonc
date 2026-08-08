@@ -162,6 +162,10 @@
     //   градус ×9 — postposed bare: "180 градус", "2,5 градус". ⟨Цельси иградус⟩ is the СИ article's own
     //     name for degree Celsius (possessive и-, "Celsius's degree") — the scale word is NEVER attested
     //     bare after a number, so the unit name is used verbatim.
+    //     ⚠ attest.ts REPORTS BOTH WORDS ABSENT, and that is a retrieval blind spot, not a missing
+    //     source: the words sit inside the СИ article's unit TABLE ("Цельси иградус || degree Celsius"),
+    //     verified against the page's raw wikitext (action=parse) 2026-08-08 — the search-index path
+    //     attest.ts reads does not carry that table row.
     //   асааҭ ×19 — the clock word goes BEFORE the number: "асааҭ 6 рзы", "асааҭ 18:21:56 рзы".
     //   "8 миллиард доллар" (Формула Аку) — number, scale, currency word, in that order. доллар ×41,
     //     евро ×37, фунт ×10; ⟨фунт стерлинг⟩ is spelled out for the £ sums ("29,721,250 фунт стерлинг" —
