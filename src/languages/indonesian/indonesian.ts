@@ -194,7 +194,10 @@ const SYMBOLS = makeSymbolNormalizer({
     // Catalan's *de* or Italian's *di*. Attested in this corpus as `juta` ×8, `miliar` and `ribu`.
     magnitudes: ["triliun", "miliar", "juta", "ribu"],
     units: { km: ["kilometer"], cm: ["sentimeter"], mm: ["milimeter"], kg: ["kilogram"], m: ["meter"],
-        g: ["gram"], l: ["liter"], ha: ["hektar"] },
+        g: ["gram"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+        l: ["liter"], L: ["liter"], ha: ["hektar"] },
     // `kilometer persegi` ×3 — the modifier follows. Bare `persegi` ×9 includes the SHAPE ("persegi yang
     // tidak memiliki sisi bawahnya"), so the collocation is what attests the unit sense. `kubik` ×0, so
     // `m³` keeps the fallback.

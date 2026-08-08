@@ -110,9 +110,15 @@ const SYMBOLS = makeSymbolNormalizer({
     units: { "km/h": ["kilómetro por hora", "kilómetros por hora"], "m/s": ["metro por segundo", "metros por segundo"],
         "°c": ["grado Celsius", "grados Celsius"], "°f": ["grado Fahrenheit", "grados Fahrenheit"],
         "°": ["grado", "grados"],
-        m: ["metro", "metros"], l: ["litro", "litros"], ml: ["mililitro", "mililitros"],
+        m: ["metro", "metros"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+        l: ["litro", "litros"], L: ["litro", "litros"], ml: ["mililitro", "mililitros"],
         g: ["gramo", "gramos"], t: ["tonelada", "toneladas"], ha: ["hectárea", "hectáreas"],
-        kw: ["kilovatio", "kilovatios"], w: ["vatio", "vatios"], hz: ["hercio", "hercios"],
+        // ⚠ SI CASE: ⟨kW⟩ ⟨W⟩ ⟨Hz⟩ are capitalised because watt and hertz are named after people. Declared
+        // exactly so, since #763 resolves a one-letter symbol case-SENSITIVELY — a lower-case ⟨w⟩ is not a
+        // unit. The multi-letter ones still fold, so ⟨kw⟩/⟨KW⟩/⟨hz⟩ in shouty or sloppy text still read.
+        kW: ["kilovatio", "kilovatios"], W: ["vatio", "vatios"], Hz: ["hercio", "hercios"],
         gb: ["gigabyte", "gigabytes"], mb: ["megabyte", "megabytes"],
         km: ["kilómetro", "kilómetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
         kg: ["kilogramo", "kilogramos"], mg: ["miligramo", "miligramos"] },

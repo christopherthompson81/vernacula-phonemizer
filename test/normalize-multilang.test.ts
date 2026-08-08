@@ -18,20 +18,29 @@ describe("shared symbol normalizer (core)", () => {
     test("a unit is resolved case-sensitively, and an unresolvable one is left alone", () => {
         const n = makeSymbolNormalizer({
             percent: ["persent"],
-            units: { V: ["volt"], km: ["kilometer"], m: ["meter"], s: ["sekonde"], MB: ["MB"], Mb: ["Mb"] },
+            units: { V: ["volt"], km: ["kilometer"], m: ["meter"], s: ["sekonde"], l: ["liter"], L: ["liter"],
+                     MB: ["megagreep"], Mb: ["megabis"] },
             rateDenominators: { h: "uur" },
             unitPer: "per",
         });
         expect(n("220 V")).toBe("220 volt"); // an UPPERCASE key resolves — this used to throw
-        expect(n("5 MB")).toBe("5 MB");
-        expect(n("5 Mb")).toBe("5 Mb"); // …and stays distinct from MB
+        // ⚠ SPELLED-OUT FORMS, NOT THE SYMBOL ITSELF. Asserting MB → "5 MB" would pass identically when
+        // resolution FAILED and the callback returned the match untouched — a test that cannot fail.
+        expect(n("5 MB")).toBe("5 megagreep");
+        expect(n("5 Mb")).toBe("5 megabis"); // …and stays distinct from MB
         expect(n("5 KM")).toBe("5 kilometer"); // multi-letter: shouty text still folds
         expect(n("100 km/h")).toBe("100 kilometer per uur");
+        // ⚠ A RATE DENOMINATOR FOLDS EVEN AT ONE LETTER — they nearly all are one letter, so refusing left
+        // `100 KM/H` resolving NEITHER half and dropping the head unit too. The slash position is what
+        // makes it safe: nobody writes kilometres per henry.
+        expect(n("100 KM/H")).toBe("100 kilometer per uur");
+        // ⚠ ⟨L⟩ and ⟨l⟩ are BOTH the litre — the one-letter rule is about cases that are DIFFERENT units.
+        expect(n("2 L")).toBe("2 liter");
+        expect(n("2 l")).toBe("2 liter");
         // ⚠ NOT FOLDED, because for a one-letter symbol the other case is a DIFFERENT unit or none:
         expect(n("220 v")).toBe("220 v"); // ⟨v⟩ is not volt
         expect(n("5 M")).toBe("5 M"); // molar / millions / Roman 1000 — never metres
         expect(n("5 S")).toBe("5 S"); // siemens, not seconds
-        expect(n("100 km/H")).toBe("100 km/H"); // henry, not hours
     });
 
     test("slavicCountForm implements the 1 / 2–4 / 5+ split with the 11–14 exception", () => {

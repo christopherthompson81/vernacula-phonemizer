@@ -48,7 +48,10 @@ const SYMBOLS = makeSymbolNormalizer({
     units: {
         km: ["キロメートル"], cm: ["センチメートル"], mm: ["ミリメートル"], nm: ["ナノメートル"], m: ["メートル"],
         kg: ["キログラム"], mg: ["ミリグラム"], g: ["グラム"], t: ["トン"], ha: ["ヘクタール"],
-        ml: ["ミリリットル"], l: ["リットル"],
+        ml: ["ミリリットル"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+        l: ["リットル"], L: ["リットル"],
     },
     exponentWords: { squared: ["平方"], cubed: ["立方"], position: "compound" },
     // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language

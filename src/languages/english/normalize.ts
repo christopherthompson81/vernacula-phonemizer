@@ -13,6 +13,7 @@
  */
 
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
 import { romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -49,12 +50,22 @@ const UNITS: Record<string, [string, string]> = {
     // reads as bare "twenty" — the whole unit gone, not merely the sign.
     "℃": ["degree Celsius", "degrees Celsius"], "℉": ["degree Fahrenheit", "degrees Fahrenheit"],
     "°": ["degree", "degrees"],
-    m: ["meter", "meters"], l: ["liter", "liters"], ml: ["milliliter", "milliliters"],
-    g: ["gram", "grams"], t: ["ton", "tons"], w: ["watt", "watts"],
+    m: ["meter", "meters"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+    // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+    // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+    l: ["liter", "liters"], L: ["liter", "liters"], ml: ["milliliter", "milliliters"],
+    // ⚠ ⟨W⟩ IS CAPITAL — watt is named after Watt, and #763 resolves a one-letter symbol case-SENSITIVELY,
+    // so a lower-case ⟨w⟩ is not a unit. The multi-letter kw/hz/gb below still fold, so sloppy case reads.
+    g: ["gram", "grams"], t: ["ton", "tons"], W: ["watt", "watts"],
     hz: ["hertz", "hertz"], khz: ["kilohertz", "kilohertz"], mhz: ["megahertz", "megahertz"],
     ghz: ["gigahertz", "gigahertz"], kb: ["kilobyte", "kilobytes"], mb: ["megabyte", "megabytes"],
     gb: ["gigabyte", "gigabytes"], tb: ["terabyte", "terabytes"], kw: ["kilowatt", "kilowatts"],
 };
+/** The case-folded index for step 1 (see resolveUnitSymbol) — built once, beside the table it indexes. */
+const UNITS_FOLDED: Record<string, [string, string]> = Object.fromEntries(
+    Object.entries(UNITS).map(([k, v]) => [k.toLowerCase(), v] as const).reverse(),
+);
+
 const CURRENCY: Record<string, [string, string]> = {
     $: ["dollar", "dollars"], "£": ["pound", "pounds"], "€": ["euro", "euros"], "¥": ["yen", "yen"],
 };
@@ -351,8 +362,14 @@ export function normalizeEnglish(input: string): string {
 
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
     s = s.replace(UNIT_RE,
-        (_m, num: string, mag: string | undefined, u: string, exp: string | undefined) => {
-            const [sg, pl] = UNITS[u.toLowerCase()]!;
+        (_m: string, num: string, mag: string | undefined, u: string, exp: string | undefined) => {
+            // ⚠ SAME TWO STEPS, SAME HELPER as the shared symbol layer — English keeps its own UNITS table
+            // (this normalizer predates that layer), and it carried the same `UNITS[u.toLowerCase()]!`
+            // that #763 fixed there: an uppercase key was unreachable and the assertion made the miss a
+            // THROW. Declaring ⟨W⟩ correctly is what exposed it here.
+            const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, u);
+            if (forms === undefined) return _m; // unresolvable → leave the text alone
+            const [sg, pl] = forms;
             // English puts the measure word BEFORE the unit — "square kilometers" — and the COUNT still
             // governs the noun: "one cubic meter", not "one cubic meters".
             const measure = exp === "²" || exp === "2" ? "square " : exp === "³" || exp === "3" ? "cubic " : "";

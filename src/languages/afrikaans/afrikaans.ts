@@ -208,7 +208,10 @@ const SYMBOLS = makeSymbolNormalizer({
         // ⚠ ⟨V⟩ AND ⟨W⟩ ARE CAPITAL BECAUSE THEY ARE NAMED AFTER PEOPLE (Volta, Watt), and the resolver
         // is case-sensitive for one-letter symbols (#763), so a lower-case ⟨v⟩/⟨w⟩ is correctly NOT read
         // as a unit. ⟨t⟩ is the tonne; ⟨T⟩ would be the tesla and is deliberately not declared.
-        g: ["gram"], l: ["liter"], t: ["ton"], V: ["volt"], W: ["watt"],
+        g: ["gram"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+        l: ["liter"], L: ["liter"], t: ["ton"], V: ["volt"], W: ["watt"],
     },
     rateDenominators: { h: "uur", u: "uur", s: "sekonde" },
     unitPer: "per",
