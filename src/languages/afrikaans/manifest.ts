@@ -24,6 +24,12 @@ export interface AfrikaansManifest {
     stressPenultSuffixes: readonly string[];
     /** Reduced IPA per unstressed prefix; the keys must equal `morphology.prefixUnstressed`. */
     prefixIpa: Record<string, string>;
+    /** Sign and math words, one per symbol — see the manifest note on ± and ⟨&⟩. */
+    signWords: Record<string, string>;
+    /** Clock half-day words, keyed by the written abbreviation. */
+    clockPeriods: Record<string, string>;
+    /** Only the halves need words; every other fraction is built on the ordinal. */
+    fractionWords: { oneHalf: string; halves: string };
     /** Ordinals 1–19; index 0 unused. Above 20 the ending is regular — see normalize.ts. */
     ordinalsBelow20: readonly string[];
     /** [regex SOURCE, replacement] — every pattern is dot-bound on purpose; see the manifest note. */

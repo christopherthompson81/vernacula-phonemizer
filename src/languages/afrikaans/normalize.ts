@@ -74,6 +74,8 @@ const BARE_ALT = Object.keys(DOTTED_ABBREV)
     .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
     .join("|");
 
+const SIGN = MANIFEST.signWords; // afrikaans.jsonc — one word per math/sign symbol
+const FRAC = MANIFEST.fractionWords; // …and the two suppletive halves
 const LETTER_NAME = MANIFEST.letterNames; // afrikaans.jsonc — the g2p spells these through itself
 
 /** Afrikaans phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?). */
@@ -163,7 +165,7 @@ export function normalizeAfrikaans(input: string): string {
     const clock = (h: string, min: string, period?: string): string =>
         `${numberToWords(Number(h))}${Number(min) === 0 ? "" : ` ${numberToWords(Number(min))}`}${period ?? ""}`;
     const period = (p?: string): string =>
-        p === undefined ? "" : ` ${p.trim().toLowerCase() === "vm" ? "voormiddag" : "namiddag"}`;
+        p === undefined ? "" : ` ${MANIFEST.clockPeriods[p.trim().toLowerCase()] ?? ""}`;
     // The trailing guard rejects a further `:` or `.` FOLLOWED BY A DIGIT — a SPORTS TIME, of which the
     // corpus has three (`4:41.30`, `2:11:60`, `1:09:02`). Guarding on `:` alone let `4:41.30` through: the
     // clock claimed `4:41` and stranded `.30` as a phrase break plus a bare number. A plain `.` may NOT be
@@ -247,24 +249,24 @@ export function normalizeAfrikaans(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, and ⚠ both are SIGN names rather than
     //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
-    s = s.replace(/±/gu, " plus of minus ");
-    s = s.replace(/\+\s?(?=\d)/gu, " plus ");
-    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "minus $1");
+    s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
+    s = s.replace(/\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
+    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, `${SIGN.minus} $1`);
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
-        `${LETTER_NAME[a.toLowerCase()] ?? a} en ${LETTER_NAME[b.toLowerCase()] ?? b}`);
-    s = s.replace(/\s&\s/gu, " en ");
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 gelyk aan $2");
-    s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 kleiner as $2");
-    s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 groter as $2");
-    s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 keer $2");
-    s = s.replace(/(\d)\s*÷\s*(\d)/gu, "$1 gedeel deur $2");
+        `${LETTER_NAME[a.toLowerCase()] ?? a} ${SIGN.ampersand} ${LETTER_NAME[b.toLowerCase()] ?? b}`);
+    s = s.replace(/\s&\s/gu, ` ${SIGN.ampersand} `);
+    s = s.replace(/(\S)\s*=\s*(\S)/gu, `$1 ${SIGN.equals} $2`);
+    s = s.replace(/(\d)\s*<\s*(\d)/gu, `$1 ${SIGN.lessThan} $2`);
+    s = s.replace(/(\d)\s*>\s*(\d)/gu, `$1 ${SIGN.greaterThan} $2`);
+    s = s.replace(/(\d)\s*×\s*(\d)/gu, `$1 ${SIGN.times} $2`);
+    s = s.replace(/(\d)\s*÷\s*(\d)/gu, `$1 ${SIGN.dividedBy} $2`);
 
     // 12) FRACTIONS (×1: `1/5 duim`). Afrikaans builds these on the ordinal, as Dutch does: 1/5 → *een vyfde*,
     //     3/4 → *drie vierde*, and 1/2 is the suppletive *een half*. The trailing guard keeps a date or a
     //     ratio chain (`1/5/2020`) out. LAST, so no earlier rule has to work around a slash.
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
-        if (den === 2) return num === 1 ? "een half" : `${numberToWords(num)} halwe`;
+        if (den === 2) return num === 1 ? FRAC.oneHalf : `${numberToWords(num)} ${FRAC.halves}`;
         const ord = ordinalWord(den);
         return ord === undefined ? m0 : `${numberToWords(num)} ${ord}`;
     });

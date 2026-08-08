@@ -84,6 +84,32 @@
     "prefixIpa": { "be": "bə", "ge": "χə", "ver": "fər", "ont": "ɔnt", "her": "ɦər", "er": "ər" },
 
     // ── TEXT NORMALIZATION DATA (normalize.ts) ─────────────────────────────────────────────────────────
+    // ⚠ THE SIGN AND MATH WORDS. Read by normalize.ts, one per symbol.
+    // ⚠ ± IS A SINGLE CODE POINT (U+00B1), not a ⟨+⟩, so no ⟨+⟩ rule can ever reach inside it — it needs
+    // its own entry or the sign vanishes silently. Its reading is two SIGN names juxtaposed rather than an
+    // OPERATION name, which is what ± wants: it marks a TOLERANCE, not an addition.
+    // ⚠ ⟨&⟩ IS "en", the ordinary word for and — the same string the number compositor uses as its
+    // connective, and deliberately not shared with it: they are different jobs that happen to coincide.
+    // ⟨=⟩ ⟨<⟩ ⟨>⟩ ⟨×⟩ ⟨÷⟩ do not occur in the af_za corpus and are declared for completeness.
+    "signWords": {
+        "plusMinus": "plus of minus",
+        "plus": "plus",
+        "minus": "minus",
+        "ampersand": "en",
+        "equals": "gelyk aan",
+        "lessThan": "kleiner as",
+        "greaterThan": "groter as",
+        "times": "keer",
+        "dividedBy": "gedeel deur"
+    },
+
+    // Clock half-day words, keyed by the ABBREVIATION as written (matched case-insensitively).
+    "clockPeriods": { "vm": "voormiddag", "nm": "namiddag" },
+
+    // ⚠ FRACTIONS ARE BUILT ON THE ORDINAL (1/5 → een vyfde, 3/4 → drie vierde), as in Dutch — so only the
+    // HALVES need words of their own, and they are suppletive: ⟨een half⟩ for 1/2, ⟨halwe⟩ for the rest.
+    "fractionWords": { "oneHalf": "een half", "halves": "halwe" },
+
     // Ordinals 1–19. The regular ending is the cardinal plus -de; ⟨eerste⟩, ⟨derde⟩ and ⟨agtste⟩ are the
     // suppletive/assimilated forms. From 20 up the ending is -ste (twintigste), except that a sub-20
     // remainder carries its own small-ordinal form onto the compound — 101e honderdeerste, 112e

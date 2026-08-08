@@ -271,4 +271,21 @@ describe("Afrikaans text normalization", () => {
     });
 
 
+    // ⚠ THE SIGN AND MATH WORDS ARE MANIFEST DATA (afrikaans.jsonc `signWords`), not literals in the
+    // replace calls. Afrikaans is the first engine to declare them — every other language still inlines
+    // its own, so this is the start of that migration rather than a fleet convention yet.
+    // ± is pinned because it is a SINGLE code point (U+00B1): no ⟨+⟩ rule can reach inside it, so without
+    // its own entry the sign disappears in silence rather than reading wrong.
+    test("the sign and math words come from the manifest", () => {
+        expect(ph("±5")).toContain("plœs ɔf minœs"); // ⚠ U+00B1, not "+"
+        expect(ph("3 = 3")).toContain("χələik ɑːn");
+        expect(ph("3 × 4")).toContain("kiər");
+        expect(ph("8 ÷ 2")).toContain("χədiəl døːr");
+        expect(ph("4 < 5")).toContain("kləinɛr as");
+        expect(ph("Jan & Piet")).toContain("ɛn");
+        // …and the two suppletive halves, the only fractions with words of their own.
+        expect(ph("1/2 duim")).toContain("iən ɦalf");
+        expect(ph("3/2 koppies")).toContain("ɦalvə");
+    });
+
 });
