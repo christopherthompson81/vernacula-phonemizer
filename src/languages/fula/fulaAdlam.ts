@@ -23,6 +23,7 @@ const LENGTHENER = new Set(MANIFEST.adlam.lengtheners);
 const GEMINATION = MANIFEST.adlam.gemination;
 const HAMZA = MANIFEST.adlam.hamza;
 const DROP = new Set(MANIFEST.adlam.drop);
+const ADLAM_DIGIT = /[\u{1E950}-\u{1E959}]/u; // 𞥐–𞥙, the only digits this scan may fold
 const VOWELS = new Set(MANIFEST.latinVowels); // the LATIN spelling vowels (fula.jsonc)
 
 /** Is any character of `s` in the Adlam block (U+1E900–1E95F)? */
@@ -47,7 +48,11 @@ export function adlamToLatin(word: string): string {
         if (ch === GEMINATION) { out += lastBase; continue; }
         if (ch === HAMZA) { out += "q"; lastBase = "q"; continue; }
         if (DROP.has(ch)) continue;
-        const lat = ADLAM[ch] ?? foldNativeDigits(ch);
+        // ⚠ THE DIGIT TEST MUST STAY NARROW. foldNativeDigits folds EVERY script's digits and returns a
+        // non-digit unchanged, so calling it unguarded would (a) make `lat` never undefined, killing the
+        // pass-through below, and (b) set lastBase — the gemination target — from a character that is not
+        // an Adlam letter at all. Guarding on the Adlam digit range keeps the undefined signal intact.
+        const lat = ADLAM[ch] ?? (ADLAM_DIGIT.test(ch) ? foldNativeDigits(ch) : undefined);
         if (lat !== undefined) { out += lat; lastBase = lat; } else out += raw; // pass unknown through
     }
     return out;

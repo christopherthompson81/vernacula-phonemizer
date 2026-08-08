@@ -38,14 +38,13 @@
     // abjad intends.
     "vowelLetters": ["ا", "آ", "و", "ى", "ی", "ے"],
 
-    // ⚠ ORTHOGRAPHIC, NOT IPA, AND NOT THE ARABIC-SCRIPT LIST ABOVE. Balochi is written in both scripts;
-    // phonemizeRoman scans the ROMAN spelling, and these are its vowel letters. "vowelLetters" above is
-    // the Arabic-script set, for a different scan in the same engine.
     // ⚠ THE ROMAN ORTHOGRAPHY, a SECOND full g2p in the same engine — Balochi is written in both scripts and
     // this half is PHONEMIC where the Arabic half is defective, so it resolves to full IPA on its own rather
     // than leaning on the lexicon. The two halves share nothing but the language.
     "roman": {
-        // The vowel letters (the scan's own class), then long vs short by diacritic. A MACRON writes length.
+        // ⚠ ORTHOGRAPHIC, NOT IPA, AND NOT THE ARABIC-SCRIPT "vowelLetters" ABOVE — that one is the abjad's
+        // set, for the other scan in this same engine. These are the Roman letters, then long vs short by
+        // diacritic; a MACRON writes length.
         // ⚠ ⟨e o⟩ ARE LONG IN BOTH COLUMNS: Balochi has no short /e o/, so an unmarked ⟨e⟩ is still [eː].
         "vowelLetters": ["a", "e", "i", "o", "u"],
         "long": { "a": "aː", "e": "eː", "i": "iː", "o": "oː", "u": "uː" },
