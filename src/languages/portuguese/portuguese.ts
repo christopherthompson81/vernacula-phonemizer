@@ -281,7 +281,10 @@ const SYMBOLS = makeSymbolNormalizer({
     units: { "km/h": ["quilômetro por hora", "quilômetros por hora"], "m/s": ["metro por segundo", "metros por segundo"],
         km: ["quilômetro", "quilômetros"], cm: ["centímetro", "centímetros"], mm: ["milímetro", "milímetros"],
         kg: ["quilograma", "quilogramas"], mg: ["miligrama", "miligramas"], m: ["metro", "metros"],
-        l: ["litro", "litros"], ml: ["mililitro", "mililitros"], g: ["grama", "gramas"],
+        // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+        l: ["litro", "litros"], L: ["litro", "litros"], ml: ["mililitro", "mililitros"], g: ["grama", "gramas"],
         t: ["tonelada", "toneladas"], ha: ["hectare", "hectares"], kw: ["quilowatt", "quilowatts"] },
     exponentWords: { squared: ["quadrado", "quadrados"], cubed: ["cúbico", "cúbicos"] },
     // BARE EXPONENT — the reading for a power with NO unit to modify (`20²`, `mc²`), which every language

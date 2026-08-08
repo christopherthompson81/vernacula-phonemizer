@@ -174,11 +174,16 @@ const SYMBOLS = makeSymbolNormalizer({
     // Longest keys match first (the builder sorts by length), so km/h beats km and °c beats c.
     units: { km: ["kilomètre", "kilomètres"], cm: ["centimètre", "centimètres"], mm: ["millimètre", "millimètres"],
         kg: ["kilogramme", "kilogrammes"], mg: ["milligramme", "milligrammes"], g: ["gramme", "grammes"],
-        t: ["tonne", "tonnes"], m: ["mètre", "mètres"], l: ["litre", "litres"], ml: ["millilitre", "millilitres"],
+        t: ["tonne", "tonnes"], m: ["mètre", "mètres"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+        l: ["litre", "litres"], L: ["litre", "litres"], ml: ["millilitre", "millilitres"],
         cl: ["centilitre", "centilitres"], dl: ["décilitre", "décilitres"], ha: ["hectare", "hectares"],
         "km/h": ["kilomètre par heure", "kilomètres par heure"], "m/s": ["mètre par seconde", "mètres par seconde"],
         "°c": ["degré Celsius", "degrés Celsius"], "°f": ["degré Fahrenheit", "degrés Fahrenheit"],
-        kw: ["kilowatt", "kilowatts"], w: ["watt", "watts"], hz: ["hertz"], khz: ["kilohertz"], mhz: ["mégahertz"],
+        // ⚠ ⟨W⟩ capital (named after Watt) — a one-letter symbol resolves case-SENSITIVELY since #763. The
+        // multi-letter kw/hz/khz/mhz still fold, so their sloppy spellings keep reading.
+        kw: ["kilowatt", "kilowatts"], W: ["watt", "watts"], hz: ["hertz"], khz: ["kilohertz"], mhz: ["mégahertz"],
         go: ["gigaoctet", "gigaoctets"], mo: ["mégaoctet", "mégaoctets"], ko: ["kilooctet", "kilooctets"],
         min: ["minute", "minutes"] },
     // `kilomètres carrés` ×9 and `mètres cubes` ×2. The adjective agrees, so both numbers are listed; only

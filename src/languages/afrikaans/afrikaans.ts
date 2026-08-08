@@ -205,10 +205,13 @@ const SYMBOLS = makeSymbolNormalizer({
         // spelled as its name, so an undeclared `3 g suiker` read "drie GEE suiker" — a confident wrong
         // WORD where it used to be a wrong phone. Only these three, all of which follow a numeral in
         // ordinary text; anything rarer stays undeclared rather than guessed at.
-        // ⚠ NO UPPERCASE KEYS (volt V, watt W) — core/normalizeSymbols.ts looks the match up as
-        // `units[u.toLowerCase()]!`, so an uppercase key is unreachable AND the non-null assertion turns
-        // the miss into a THROW: `220 V` crashed the phonemizer outright. Filed as #763.
-        g: ["gram"], l: ["liter"], t: ["ton"],
+        // ⚠ ⟨V⟩ AND ⟨W⟩ ARE CAPITAL BECAUSE THEY ARE NAMED AFTER PEOPLE (Volta, Watt), and the resolver
+        // is case-sensitive for one-letter symbols (#763), so a lower-case ⟨v⟩/⟨w⟩ is correctly NOT read
+        // as a unit. ⟨t⟩ is the tonne; ⟨T⟩ would be the tesla and is deliberately not declared.
+        g: ["gram"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
+        // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
+        // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
+        l: ["liter"], L: ["liter"], t: ["ton"], V: ["volt"], W: ["watt"],
     },
     rateDenominators: { h: "uur", u: "uur", s: "sekonde" },
     unitPer: "per",

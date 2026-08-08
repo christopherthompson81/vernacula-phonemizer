@@ -295,8 +295,62 @@ function numValue(num: string): number {
 const NUM = "\\d+(?:[  ]\\d{3}(?!\\d)|[.,]\\d+)*";
 
 /** Build the text→text symbol normalizer for one language's data. */
+/**
+ * A case-folded INDEX of a unit map. Folding the lookup STRING instead is asymmetric: it rescues
+ * upper-case text against a lower-case key (`KM` → `km`) but not lower-case text against a correctly
+ * capitalised one (`kw` → `kW`), so declaring SI case properly would have broken the sloppy spellings.
+ * First declaration wins; the EXACT lookup runs first, so a real pair like ⟨Mb⟩/⟨MB⟩ never reaches this.
+ */
+function foldedIndex<V>(map: Record<string, V> | undefined): Record<string, V> {
+    const out: Record<string, V> = {};
+    for (const [k, v] of Object.entries(map ?? {})) {
+        const lk = k.toLowerCase();
+        if (!(lk in out)) out[lk] = v;
+    }
+    return out;
+}
+
+/**
+ * Resolve a WRITTEN unit symbol to its declared forms — the reading is a multi-step one, and these are the
+ * first two steps: `kw` (sloppy shorthand) → `kW` (the unit) → "kilowatt" (the spoken word, which is the
+ * caller's job).
+ *
+ * ⚠ STEP 1 IS A SPELLING CORRECTION AND STEP 2 IS AN IDENTIFICATION, and keeping them apart is the whole
+ * point. Units are CASE-SENSITIVE, so identification is exact. Correction then rescues a miscased symbol
+ * only where no other unit could be meant — which is why it is restricted to MULTI-CHARACTER symbols:
+ *   · one letter is where the case contrast lives, and both members are real, different units —
+ *     ⟨s⟩ second vs ⟨S⟩ siemens, ⟨t⟩ tonne vs ⟨T⟩ tesla, ⟨a⟩ are vs ⟨A⟩ ampere;
+ *   · ⟨V⟩ ⟨W⟩ ⟨J⟩ ⟨N⟩ are capital because they are named after people — the lower-case forms are no unit;
+ *   · and an upper-case letter need not be a unit at all: a bare ⟨M⟩ is molar, or millions, or Roman
+ *     1000, or an honorific — never metres, so folding it to ⟨m⟩ would assert a reading the text does not
+ *     support. Declining leaves the symbol as text, which the g2p then reads as a letter.
+ *
+ * ⚠ `foldSingle` LIFTS THE ONE-LETTER RESTRICTION, and only the RATE DENOMINATOR passes it. Denominators
+ * are almost always one letter (h, s, u, ч), so without this `100 KM/H` resolved neither half and the
+ * callback abandoned the whole match, leaking two raw abbreviations. The position is what makes it safe:
+ * after the `/` of a rate, ⟨H⟩ is not plausibly henry — nobody writes kilometres per henry.
+ *
+ * ⚠ THE ONE-LETTER RULE ALSO HAS A REAL EXCEPTION IN THE DATA, not handled here: ⟨L⟩ and ⟨l⟩ are BOTH
+ * official for the litre, so the languages that declare it declare both spellings and the exact branch
+ * resolves either. The rule is about symbols whose two cases are DIFFERENT units, not about case as such.
+ *
+ * Returns `undefined` when neither step resolves; every caller must then leave the text ALONE rather than
+ * emit half a reading — the policy this module already states for a rate with a missing noun.
+ */
+export function resolveUnitSymbol<V>(
+    declared: Record<string, V> | undefined,
+    folded: Record<string, V>,
+    written: string,
+    foldSingle = false,
+): V | undefined {
+    if (declared?.[written] !== undefined) return declared[written];
+    return written.length > 1 || foldSingle ? folded[written.toLowerCase()] : undefined;
+}
+
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const cf = d.countForm ?? defaultCountForm;
+    const unitsFolded = foldedIndex(d.units);
+    const denomFolded = foldedIndex(d.rateDenominators);
     /**
      * ⚠ A SEPARATOR IS NOT ALWAYS `\s`. Khmer separates words with U+200B ZERO WIDTH SPACE — 33,285 occurrences
      * in its corpus, the language's most frequent pattern cell — and `\s` does not match it in JavaScript. So
@@ -518,13 +572,24 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     const hasMag = mag !== undefined && mag !== "";
                     const q = hasMag ? `${num}${mag}` : num;
                     const n = hasMag ? MANY : numValue(num);
-                    const head = pick(d.units![u.toLowerCase()]!, n, cf);
+                    // Correct-then-identify; see resolveUnitSymbol. A miss leaves the text alone — before
+                    // #763 this was `units[u.toLowerCase()]!`, and the assertion turned an unreachable
+                    // uppercase key into a THROW from inside pick().
+                    const forms = resolveUnitSymbol(d.units, unitsFolded, u);
+                    if (forms === undefined) return whole;
+                    const head = pick(forms, n, cf);
                     if (denom !== undefined) {
                         // A rate needs both nouns and the connective; without any of them leave the text
                         // alone rather than emit half a reading.
+                        // Same exact-then-folded resolution as the head unit, and for the same reason:
+                        // ⟨h⟩ hour and ⟨H⟩ henry are different units.
+                        // Same two steps as the head, but folding is allowed for a ONE-letter denominator
+                        // too (see resolveUnitSymbol): the slash position rules out the other reading, and
+                        // without it `100 KM/H` resolved neither half and dropped the head unit as well.
                         const dl = denom.toLowerCase();
-                        const dWord = d.units?.[dl]?.[0] ?? d.rateDenominators?.[dl];
-                        const per = typeof d.unitPer === "string" ? d.unitPer : d.unitPer?.[dl];
+                        const dWord = resolveUnitSymbol(d.units, unitsFolded, denom, true)?.[0]
+                            ?? resolveUnitSymbol(d.rateDenominators, denomFolded, denom, true);
+                        const per = typeof d.unitPer === "string" ? d.unitPer : (d.unitPer?.[denom] ?? d.unitPer?.[dl]);
                         if (per === undefined || dWord === undefined) return whole;
                         // `unitPrefix` applies here too, and forgetting it left Swahili reading
                         // "160 kilomita kwa saa" where the language writes the measure noun first. The rate is
