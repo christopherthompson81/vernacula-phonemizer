@@ -25,6 +25,7 @@
  * Usage:  npx tsx tools/normalization/review.ts --lang cs [--dir czech]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { parseJsonc } from "../../src/core/jsonc.ts";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import { CELLS, staleness } from "./cells.ts";
@@ -472,12 +473,52 @@ function highTrafficWords(hay: { tokens: ReadonlySet<string>; text: string }): s
     const used = (block: string): string => block.split(/,(?=\s*"[^"]*"\s*:)/u)
         .filter((entry) => { const sign = /"([^"]+)"\s*:/u.exec(entry)?.[1]; return sign !== undefined && hay.text.includes(sign); })
         .join(" ");
+    // The language's .jsonc files, read ONCE — both the manifest-symbols arm and the decimalWord arm
+    // below consume this list, so the file-selection rule cannot drift between them.
+    const jsoncSrcs = readdirSync(join("src/languages", dir)).filter((n) => n.endsWith(".jsonc"))
+        .map((f) => readFileSync(join("src/languages", dir, f), "utf8"));
+    // A TIER MAY BE MANIFEST-DRIVEN — `percent: [MANIFEST.symbols.percent]`, currencies built with
+    // Object.fromEntries over MANIFEST.symbols.currencies — which is the house direction (data lives in
+    // the .jsonc, not in code). The literal extractors see no strings there, and without this arm the
+    // check reported "could not read it" for a language whose declarations were all present and typed
+    // (the Abkhaz run).
+    // ⚠ PARSED, NOT SCRAPED: the first version regex-matched the `symbols` block and stopped at the
+    // first line-initial `}` — one nested object formatted across lines and the block silently
+    // truncated, dropping needles (the "check went blind" mode this arm exists to close). parseJsonc is
+    // the repo's own conformant parser, written for exactly this failure; four sibling tools already
+    // use it.
+    // ⚠ GATED ON THE WHOLE LAYER SOURCE, not the matched tier block: yoruba aliases
+    // (`const SYM = MANIFEST.symbols`) and the tier block then never contains the literal string.
+    // Every STRING under `symbols` is a candidate word (percent, degree, hour, squared…); a
+    // [sign, word] pair contributes its word only when the FOLDED sign is in the corpus — the same
+    // sign-in-corpus rule as the inline `used()` arm, folded because `hay.text` is folded (an
+    // unfolded "US$" can never match a lowercased haystack).
+    const manifestSymbols = (): string[] => {
+        if (!/MANIFEST\.symbols/u.test(`${engineSrc}\n${tierSrc}\n${readFileSync(normPath, "utf8")}`)) return [];
+        const out: string[] = [];
+        const walk = (v: unknown): void => {
+            if (typeof v === "string") { out.push(v); return; }
+            if (Array.isArray(v)) {
+                if (v.length === 2 && typeof v[0] === "string" && typeof v[1] === "string") {
+                    if (hay.text.includes(fold(v[0]))) out.push(v[1]);
+                    return;
+                }
+                for (const x of v) walk(x);
+            }
+            // nested Records (e.g. a scales→numbers-key map) hold REFERENCES, not words — skipped.
+        };
+        for (const src of jsoncSrcs) {
+            const doc = parseJsonc(src) as { symbols?: Record<string, unknown> };
+            for (const v of Object.values(doc.symbols ?? {})) walk(v);
+        }
+        return out;
+    };
     const decl = [
         ...[...tier.matchAll(/percent:\s*(\[[^\]]*\])/gu)].map((m) => m[1]!),
         ...[...tier.matchAll(/currency:\s*\{([^}]*)\}/gu)].map((m) => used(m[1]!)),
-        ...readdirSync(join("src/languages", dir)).filter((f) => f.endsWith(".jsonc"))
-            .flatMap((f) => [...readFileSync(join("src/languages", dir, f), "utf8")
-                .matchAll(/"decimal(?:Word|Connector)"\s*:\s*"([^"]+)"/gu)].map((m) => `["${m[1]!}"]`)),
+        ...manifestSymbols().map((w) => `["${w.replace(/"/gu, "")}"]`),
+        ...jsoncSrcs.flatMap((src) =>
+            [...src.matchAll(/"decimal(?:Word|Connector)"\s*:\s*"([^"]+)"/gu)].map((m) => `["${m[1]!}"]`)),
     ].join(" ");
     // Extract the WORD ARRAYS first, then the literals inside them. Scanning `"…"` over the raw block
     // pairs quotes in the wrong phase: in `"$": ["dollar"]` the closing quote of the KEY pairs with the

@@ -55,12 +55,18 @@ for (const f of files) {
     if (!existsSync(f)) continue; // deleted
     let before;
     try { before = headers(execSync(`git show ${base}:${f}`, { encoding: "utf8" })); } catch { continue; } // new file
-    const after = headers(readFileSync(f, "utf8"));
+    const src = readFileSync(f, "utf8");
+    const after = headers(src);
+    // The defect is a header SEPARATED from its key — the old comment survives in the file, now heading
+    // someone else's data. A header EDITED in place (old text gone from the file entirely) is a
+    // deliberate change, not an orphaning, and must not trip the gate — flagging it would train people
+    // to never improve a stale comment.
+    const normalized = src.split("\n").map((l) => l.trim()).join("\n");
     for (const [key, comment] of before) {
         if (comment === "") continue; // had no header to lose
         const now = after.get(key);
         if (now === undefined) continue; // key removed — a different question
-        if (now !== comment) {
+        if (now !== comment && normalized.includes(comment)) {
             bad++;
             console.error(`✗ ${f}: "${key}" no longer carries its own header`);
             console.error(`   was: ${comment.split("\n")[0]}`);

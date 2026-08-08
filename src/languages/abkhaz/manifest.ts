@@ -52,7 +52,10 @@ export interface AbkhazManifest {
         celsius: string;
         /** ⟨асааҭ⟩ — goes BEFORE the number ("асааҭ 6 рзы"). */
         hour: string;
-        squareKm: string;
+        /** [symbol, word] — km/m, in the corpus's own digit-adjacent spellings (километра, метра). */
+        units: readonly (readonly [string, string])[];
+        /** ⟨квадрат⟩ — postposed measure word for ²; no cubed word is sourceable. */
+        squared: string;
         /** [symbol, word] — the symbol precedes the number in text, the word follows it in speech.
          *  Compound keys (US$, B£) included, because the shared tier letter-bounds a bare sign. */
         currencies: readonly (readonly [string, string])[];

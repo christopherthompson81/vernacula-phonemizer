@@ -162,6 +162,10 @@
     //   градус ×9 — postposed bare: "180 градус", "2,5 градус". ⟨Цельси иградус⟩ is the СИ article's own
     //     name for degree Celsius (possessive и-, "Celsius's degree") — the scale word is NEVER attested
     //     bare after a number, so the unit name is used verbatim.
+    //     ⚠ attest.ts REPORTS BOTH WORDS ABSENT, and that is a retrieval blind spot, not a missing
+    //     source: the words sit inside the СИ article's unit TABLE ("Цельси иградус || degree Celsius"),
+    //     verified against the page's raw wikitext (action=parse) 2026-08-08 — the search-index path
+    //     attest.ts reads does not carry that table row.
     //   асааҭ ×19 — the clock word goes BEFORE the number: "асааҭ 6 рзы", "асааҭ 18:21:56 рзы".
     //   "8 миллиард доллар" (Формула Аку) — number, scale, currency word, in that order. доллар ×41,
     //     евро ×37, фунт ×10; ⟨фунт стерлинг⟩ is spelled out for the £ sums ("29,721,250 фунт стерлинг" —
@@ -175,7 +179,16 @@
         "degree": "градус",
         "celsius": "Цельси иградус",
         "hour": "асааҭ",
-        "squareKm": "километра квадрат",
+        // [symbol, word] — matched only AFTER a number by the shared tier. ⚠ THE WORDS ARE THE CORPUS'S
+        // OWN DIGIT-ADJACENT SPELLINGS, not the wiki's citation forms: "900 метра аҵаулараҿы",
+        // "15-20 километра аҳаракыраҿы" (артефакт; км ×58 and м ×21 are the two big symbol classes).
+        // ⚠ мм/кг/г/т STAY UNDECLARED: no spelled singular is attested anywhere searched (грамм occurs
+        // only as the plural граммақәа), and the tier leaves an undeclared unit untouched.
+        "units": [["км", "километра"], ["м", "метра"]],
+        // ⟨квадрат⟩ — postposed after the unit, the attested "километра квадрат" order (Башкирия). The
+        // tier composes it with any declared unit, so м² reads "метра квадрат" by the same construction.
+        // No CUBED word exists to source (куб ×0), so ³ is re-emitted where the leak gate can see it.
+        "squared": "квадрат",
         // [symbol, word] — the symbol PRECEDES the number in text ($1,86) but the word FOLLOWS it in speech.
         // ⚠ THE LETTER-PREFIXED KEYS ARE LOAD-BEARING: the shared symbol tier letter-bounds a bare sign so
         // it cannot split a code prefix, which means ⟨US$30⟩ and the corpus's own ⟨B£20⟩ (the Brixton
