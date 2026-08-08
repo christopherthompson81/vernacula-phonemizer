@@ -94,7 +94,7 @@ export function createGujarati(foreign?: ForeignPhonemizer): {
         def,
         loadSharedPhonology(),
         foreign,
-        { word: GUJARATI_WORD, digits: GUJARATI_DIGITS },
+        { word: GUJARATI_WORD, digits: GUJARATI_DIGITS, avagraha: "\u0ABD" },
         lexicon(),
         { normalize: makeGujaratiNormalizer(def.numbers), symbols: GU_SYMBOLS },
     );
@@ -105,7 +105,7 @@ function build() {
         loadManifest<HindiDef>(import.meta.url, "gujarati.jsonc"),
         loadSharedPhonology(),
         undefined,
-        { word: GUJARATI_WORD, digits: GUJARATI_DIGITS },
+        { word: GUJARATI_WORD, digits: GUJARATI_DIGITS, avagraha: "\u0ABD" },
         lexicon(),
     ));
 }

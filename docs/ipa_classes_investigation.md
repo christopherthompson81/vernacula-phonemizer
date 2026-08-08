@@ -296,3 +296,34 @@ Not folded into #752: the avagraha is a phonological rule (it writes a final vow
 delete), and `schwaDeletion` in the manifest is already the configurable hook for exactly this. Scope is
 31 bho words + 2 mai; nothing else in any referee carries the character. Logged as its own change with a
 measurable target, like the Icelandic over-application in Run 7 which became #749.
+
+## Run 10 — 2026-08-07 ~23:30 — the avagraha, closed
+
+The residual from Run 9a. ⚠ FIRST CORRECTION: the character is **U+093D** DEVANAGARI SIGN AVAGRAHA, not
+U+0973 as the review reported — checked by dumping the codepoints of a referee headword rather than
+trusting the number.
+
+    grep 'ऽ' tools/referee-eval/referees/bho.grammar-mined.tsv
+
+    करऽ  kʌrʌ     दऽ  dʌ      देखऽ  dekʰʌ    खइलऽ  kʰʌilʌ    बाड़ऽ  bɑɽʌ
+
+**Raw finding:** all 31 forms keep the final vowel; none delete it. In Bhojpuri the avagraha is a LIVE
+orthographic mark on the imperative/participial forms — not Sanskrit's elision sign — and it writes
+exactly the inherent vowel the schwa rule would otherwise remove. The minimal pair कर/करऽ is the rule.
+
+**Implementation.** A `retainOnAvagraha` flag on the manifest's `schwaDeletion` block, tested against the
+SPELLING: g2p drops the character, so by the time the phones exist there is nothing left to condition on.
+That makes it the one retain-condition that cannot be decided from the IPA string, which is worth the
+comment it now carries in hindi.ts.
+
+| | before | after |
+|---|---|---|
+| **bho** | 1133/1623 (69.8%) | **1153/1623 (71.0%)** |
+| **mai** | 141/167 (84.4%) | **142/167 (85.0%)** |
+
+The other 15 engines that compose `makeNativeHindi` are unaffected — the flag is opt-in and off by
+default; hi/mr/ne/awa re-measured identical to main.
+
+**Residual, deliberate.** Maithili's referee transcribes the retained vowel LONG (अऽ → əː, अहाँलऽ →
+… l əː) and the engine emits short ⟨ə⟩. Retention is right in both languages; the length is a Maithili
+detail on two words, and inventing a per-language avagraha vowel for that sample would be fitting noise.
