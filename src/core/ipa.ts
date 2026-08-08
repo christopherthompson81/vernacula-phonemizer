@@ -24,23 +24,20 @@
  * they attach to a vowel, they are not one. A composed nasal vowel like ⟨ɨ̃⟩ is likewise absent: it is two
  * codepoints, so it can never match a single-character test (see the Guaraní note in guarani.ts).
  *
- * ⚠ THIS IS THE STRESS-NUCLEUS CLASS, AND IT IS DELIBERATELY NARROWER THAN `IPA_VOWEL` BELOW. Its readers
- * are `core/weightStress.ts` and the Indic engines, where it decides which syllables are WEIGHT-BEARING.
- * Adding a letter here therefore moves stress. Measured, not assumed: adding ⟨ɑ⟩ moves 11 urdu/bhojpuri
- * goldens (انبار ˈəmbɑːɾ → əmbˈɑːɾ). That may well be a FIX — a weight rule should stress the long
- * syllable — but it needs the ur/bho referee corpora to settle, and those are not in-repo. See
- * docs/ipa_classes_investigation.md Run 5. Do not widen this to "all vowels" without those numbers.
+ * ⚠ THIS IS ALSO THE STRESS-NUCLEUS CLASS — `core/weightStress.ts` builds its VOWEL regex from it, so a
+ * letter missing here is a syllable the weight rule cannot see. That is not a subtle bias: a word whose
+ * every vowel is invisible gets NO STRESS AT ALL. Until #752 ⟨ɑ⟩ was missing and everyday Urdu came out
+ * bare — آپ→ɑːp, کام→kɑːm, بازار→bɑːzɑːɾ — while the minimal pair kaːm→kˈaːm was stressed normally.
+ * Anything added here must be a genuine vowel LETTER, and anything genuinely a vowel belongs here.
  */
-export const IPA_VOWELS = "əaeiouɪʊɛɔɐæyøɘɤʌɯɵœɜɞʉɨɶ";
+export const IPA_VOWELS = "əaeiouɪʊɛɔɐæyøɘɤʌɯɵœɜɞʉɨɶɑɒʏ";
 
 /**
- * The MEMBERSHIP class: every IPA vowel letter, for the per-segment "is this a vowel?" tests the engines
- * do. Derived from the string above plus the three letters that class omits, so there is one list to edit
- * and the difference between the two is explicit rather than a second hand-written copy.
+ * The same class as a set, for the per-segment "is this a vowel?" tests the engines do.
  *
- * ⚠ ⟨ɑ ɒ ʏ⟩ are load-bearing here and were missing from every shared constant before #748: ɑ in the Turkic
- * engines (bashkir, tatar, turkmen, karakalpak, crimeantatar), ɒ in uzbek and bavarian. ⟨ʏ⟩ is here for
- * completeness of the notation rather than for a current reader — icelandic emits it but keeps its own
- * list (see above). They are added ONLY on this side, which no stress rule reads.
+ * ⚠ THE TWO WERE BRIEFLY DIFFERENT and are not any more. #748 added ⟨ɑ ɒ ʏ⟩ here only, keeping them out
+ * of the nucleus string above because widening it moved 11 urdu/bhojpuri goldens and no referee could
+ * adjudicate the placement. #752 found the rest of the story — the same omission was deleting stress
+ * outright on words whose only vowel is ⟨ɑ⟩ — and unified them. One list, one meaning of "vowel".
  */
-export const IPA_VOWEL: ReadonlySet<string> = new Set([...IPA_VOWELS, ..."ɑɒʏ"]);
+export const IPA_VOWEL: ReadonlySet<string> = new Set(IPA_VOWELS);

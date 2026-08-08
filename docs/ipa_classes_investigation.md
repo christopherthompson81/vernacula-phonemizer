@@ -243,3 +243,41 @@ language's own inventory belongs, and which lets each carry the rule it serves a
 Excluded from the sweep: tibetan's Wylie classes (#741 kept the stack grammar with the parser); the
 `VOICELESS` sets in bulgarian/maltese/macedonian, which are DERIVED from each manifest's `DEVOICE` map and
 so are already single-sourced; and icelandic, whose files are in flight in #749.
+
+## Run 9 — 2026-08-08 ~00:30 — ⟨ɑ⟩ was not a preference question; stress was VANISHING
+
+Run 5 deferred the ⟨ɑ⟩-as-nucleus question because widening `IPA_VOWELS` moved 11 ur/bho goldens and the
+referees carry no stress marks, so placement could not be adjudicated. Run 7 corrected the reason for the
+deferral but kept the deferral. Both times I asked only "which placement is right?".
+
+**The other question, never asked: what happens to a word with NO visible nucleus?**
+
+    applyWeightStress("kaːm")  → kˈaːm        applyWeightStress("kɑːm")  → kɑːm
+    applyWeightStress("aːp")   → ˈaːp         applyWeightStress("ɑːp")   → ɑːp
+    applyWeightStress("saːlaːɾ") → saːlˈaːɾ   applyWeightStress("sɑːlɑːɾ") → sɑːlɑːɾ
+
+The weight rule's fallback chain (rightmost superheavy → rightmost non-final heavy → first syllable) ends
+at "first syllable" — but with no nucleus visible there are no syllables at all, so it emits NOTHING. In
+the live engine: آپ 'you' → `ɑːp`, کام 'work' → `kɑːm`, بازار → `bɑːzɑːɾ`, all bare. Everyday words.
+
+No referee is needed to call that wrong, which is what I had missed twice.
+
+**And then the referee did adjudicate — via the other language.** Widening `IPA_VOWELS` and re-running:
+
+| referee | main | with ⟨ɑ ɒ ʏ⟩ |
+|---|---|---|
+| ur.wikipron-urd-broad | 4382/7709 (56.8%) | 4382/7709 — identical |
+| ur.cle-speech | 3364/5667 (59.4%) | 3364/5667 — identical |
+| **bho.grammar-mined** | **1008/1623 (62.1%)** | **1133/1623 (69.8%)** |
+
+**+125 words for Bhojpuri.** Urdu is genuinely stress-folded and cannot see the change; Bhojpuri improves
+because `IPA_VOWELS` is not only the stress nucleus — the Indic engines build SEGMENTAL regexes from it
+too (schwa handling, vowel counting), so an invisible ⟨ɑ⟩ was corrupting more than stress.
+
+**Implication.** "The referee can't settle it" was wrong twice over: it can't settle Urdu PLACEMENT, but
+it settles the change decisively on Bhojpuri, and the missing-stress half needed no referee at all. The
+generalisable error is scoping the question to the first thing I noticed (placement) and treating one
+corpus's silence as the whole evidence base.
+
+`IPA_VOWELS` and `IPA_VOWEL` are now one list again — the split #748 introduced was a workaround for a
+question that had an answer.

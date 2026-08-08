@@ -10,12 +10,12 @@ import { phonemizeWord } from "../src/languages/urdu/urdu.ts";
 describe("urdu canonical IPA", () => {
     test("consonant + long-vowel skeleton (aspiration, retroflex, long vowels)", () => {
         const cases: [string, string][] = [
-            ["آباد", "ɑːbɑːd̪"], // abad: ا→ɑː, د dental
-            ["پانی", "pɑːnˈiː"], // pani: long ɑː + iː
-            ["ہاتھ", "ɦɑːt̪ʰ"], // hath: aspirated t̪ʰ via ھ
-            ["بھائی", "bʱɑːˈiː"], // bhai: breathy bʱ, hamza-seat ئ→iː
-            ["آواز", "ɑːʋɑːz"], // awaz: و as glide ʋ after ɑː
-            ["نام", "nɑːm"], // nam
+            ["آباد", "ɑːbˈɑːd̪"], // abad: ا→ɑː, د dental
+            ["پانی", "pˈɑːniː"], // pani: long ɑː + iː
+            ["ہاتھ", "ɦˈɑːt̪ʰ"], // hath: aspirated t̪ʰ via ھ
+            ["بھائی", "bʱˈɑːiː"], // bhai: breathy bʱ, hamza-seat ئ→iː
+            ["آواز", "ɑːʋˈɑːz"], // awaz: و as glide ʋ after ɑː
+            ["نام", "nˈɑːm"], // nam
             ["آئینہ", "ɑːˈiːnɑ"], // aina: final ہ → [ɑ] vowel
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
@@ -23,18 +23,28 @@ describe("urdu canonical IPA", () => {
 
     test("nasal place assimilation (n→ŋ before velar, n→m before labial)", () => {
         expect(phonemizeWord("انگور")).toBe("əŋɡˈuːɾ"); // angūr: n→ŋ before ɡ; و→uː from the coverage lexicon (انگُور)
-        expect(phonemizeWord("انبار")).toBe("ˈəmbɑːɾ"); // ambar: n→m before b
+        expect(phonemizeWord("انبار")).toBe("əmbˈɑːɾ"); // ambar: n→m before b
+    });
+
+    // ⚠ A WORD WHOSE ONLY VOWEL IS ⟨ɑ⟩ MUST STILL BE STRESSED. core/weightStress.ts builds its nucleus
+    // regex from IPA_VOWELS, and ⟨ɑ⟩ was missing from it — so these words had NO syllable the weight rule
+    // could see and came out with no stress mark at all (آپ→ɑːp, کام→kɑːm). The minimal pair is the proof
+    // it was the letter and not a monosyllable policy: kaːm→kˈaːm was stressed all along. #752.
+    test("⚠ words whose every vowel is ⟨ɑː⟩ are stressed, not silently bare", () => {
+        expect(phonemizeWord("آپ")).toBe("ˈɑːp"); // 'you' — was ɑːp
+        expect(phonemizeWord("کام")).toBe("kˈɑːm"); // 'work' — was kɑːm
+        expect(phonemizeWord("بازار")).toBe("bɑːzˈɑːɾ"); // 'bazaar' — was bɑːzɑːɾ
     });
 
     test("text: words + Urdu full-stop (۔) pause", () => {
-        expect(phonemize("میرا نام", "ur")).toContain("nɑːm");
+        expect(phonemize("میرا نام", "ur")).toContain("nˈɑːm");
     });
 
     // COVERAGE layer (lexicon-ipa.tsv): an undiacritized skeleton we've mined is returned as canonical IPA directly,
     // short-circuiting the g2p's default schwa. Miss → default-ə core; caller-supplied harakat → respected.
     test("IPA coverage lexicon restores mined short/long vowels", () => {
-        expect(phonemizeWord("آبرو")).toBe("ɑːbɾˈuː"); // ābrū: و→uː from the lexicon, not default oː
-        expect(phonemizeWord("آبرُو")).toBe("ɑːbɾˈuː"); // caller-supplied damma is respected (not clobbered)
+        expect(phonemizeWord("آبرو")).toBe("ˈɑːbɾuː"); // ābrū: و→uː from the lexicon, not default oː
+        expect(phonemizeWord("آبرُو")).toBe("ˈɑːbɾuː"); // caller-supplied damma is respected (not clobbered)
     });
 
     // MAJHŪL long-vowel quality — the distinction harakat CANNOT encode (no diacritic for ی=iː~eː or و=oː~uː);
@@ -56,13 +66,13 @@ describe("urdu normalization", () => {
         // sequence exactly for those it prices (اکیس → ɪkkˈiːs vs ɪ k k iː s).
         expect(phonemize("21", "ur")).toBe("əkˈiːs"); // was "ایک بیس", one-twenty
         expect(phonemize("35", "ur")).toBe("piːnt̪ˈiːs");
-        expect(phonemize("1959", "ur")).toBe("ˈeːk ɦzɑːɾ nˈəoː sˈəoː ˈənsəʈʰ"); // was "نو پچاس"
+        expect(phonemize("1959", "ur")).toBe("ˈeːk ɦzˈɑːɾ nˈəoː sˈəoː ˈənsəʈʰ"); // was "نو پچاس"
     });
 
     test("decimals no longer leak ASCII digits", () => {
         // number() returned the raw string for anything that was not a safe INTEGER, so "1.5" reached the
         // IPA verbatim — 19 corpus utterances. The manifest also had no decimal word at all.
-        expect(phonemize("1.5 میٹر", "ur")).toBe("ˈeːk əʔʃɑːɾˈiːɦ pɑːnˈət͡ʃ mˈiːʈəɾ"); // اعشاریہ
+        expect(phonemize("1.5 میٹر", "ur")).toBe("ˈeːk əʔʃɑːɾˈiːɦ pˈɑːnət͡ʃ mˈiːʈəɾ"); // اعشاریہ
     });
 
     test("punctuation is a canonical pause, not a padded copy", () => {
@@ -75,33 +85,33 @@ describe("urdu normalization", () => {
         // واں / ویں are written attached OR spaced — both occur — and carry the agreement, so it is read
         // off the text. Previously the suffix was spoken as its own syllable.
         expect(phonemize("15 ویں صدی", "ur")).toBe("pənd̪əɾɦˈoːj sˈəd̪iː"); // spaced, as the corpus writes it
-        expect(phonemize("60واں گول", "ur")).toBe("sɑːʈʰʋɑː̃ ɡˈoːl"); // attached
+        expect(phonemize("60واں گول", "ur")).toBe("sˈɑːʈʰʋɑː̃ ɡˈoːl"); // attached
     });
 
     test("clock, grouping, symbols and units", () => {
-        expect(phonemize("11:00", "ur")).toBe("ɡˈiːɑːɾɑ bˈəd͡ʒeː"); // the colon reached the output RAW
+        expect(phonemize("11:00", "ur")).toBe("ɡiːˈɑːɾɑ bˈəd͡ʒeː"); // the colon reached the output RAW
         expect(phonemize("1:15", "ur")).toBe("ˈeːk bˈəd͡ʒ kˈəɾ pənˈəd̪ɾɑ mˈɪnəʈ");
         // The ARABIC COMMA doubles as a thousands separator (×20). Between digits it is grouping, not
         // punctuation; left alone it was a clause break and "11،000" read as "eleven … zero".
-        expect(phonemize("11،000", "ur")).toBe("ɡˈiːɑːɾɑ ɦzɑːɾ");
+        expect(phonemize("11،000", "ur")).toBe("ɡiːˈɑːɾɑ ɦzˈɑːɾ");
         expect(phonemize("یہ، وہ", "ur")).toBe("jˈəɦ , ʋˈəɦ"); // ...while real punctuation is untouched
         // Urdu had no symbol tier at all, so % and every currency sign were dropped.
         expect(phonemize("3%", "ur")).toBe("t̪ˈiːn fˈiːsəd̪");
         expect(phonemize("$ 1", "ur")).toBe("ˈeːk ɖˈɔːləɾ");
-        expect(phonemize("5 کلو میٹر", "ur")).toBe("pɑːnˈət͡ʃ kɪloːmˈiːʈəɾ"); // the SPACED spelling
+        expect(phonemize("5 کلو میٹر", "ur")).toBe("pˈɑːnət͡ʃ kɪloːmˈiːʈəɾ"); // the SPACED spelling
         expect(phonemize("20 °C", "ur")).toBe("bˈiːs ɖˈɪɡɾiː sˈiːnʈiː ɡəɾˈiːɖ");
-        expect(phonemize("1/5", "ur")).toBe("ˈeːk bˈəʈɑː pɑ̃ːt͡ʃ");
-        expect(phonemize("-5 ڈگری", "ur")).toBe("mˈənfiː pɑːnˈət͡ʃ ɖˈɪɡɾiː");
+        expect(phonemize("1/5", "ur")).toBe("ˈeːk bˈəʈɑː pˈɑ̃ːt͡ʃ");
+        expect(phonemize("-5 ڈگری", "ur")).toBe("mˈənfiː pˈɑːnət͡ʃ ɖˈɪɡɾiː");
     });
 
     test("a word that merely STARTS with an abbreviation-shaped prefix is untouched", () => {
         // A naive scan reports قم ×5, which looks like the BC marker. It is the start of قمری "lunar".
-        expect(phonemize("قمری مواد", "ur")).toBe("qˈəmɾiː mʋɑːd̪");
+        expect(phonemize("قمری مواد", "ur")).toBe("qˈəmɾiː mʋˈɑːd̪");
     });
 
     // `مربع کلومیٹر` ×9 and `کیوبک میٹر` ×1, both word-FIRST, where Arabic postposes its cognate مربع.
     test("the squared/cubed measure word", () => {
-        expect(phonemize("783562 km²", "ur")).toContain("mʊɾˈəbbɑːʔ kɪloːmˈiːʈəɾ");
+        expect(phonemize("783562 km²", "ur")).toContain("mʊɾəbbˈɑːʔ kɪloːmˈiːʈəɾ");
         expect(phonemize("120 m³", "ur")).toContain("kjˈoːbək mˈiːʈəɾ");
     });
 });
