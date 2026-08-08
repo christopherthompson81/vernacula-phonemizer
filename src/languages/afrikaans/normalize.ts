@@ -17,6 +17,7 @@
  * tier can still see the number adjacent to its unit or sign. The tier is composed AFTER this pass in
  * afrikaans.ts, and the TOKEN swallows the separators.
  */
+import { MANIFEST } from "./manifest.ts";
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -24,13 +25,7 @@ import { numberToWords } from "./numbers.ts";
 // DATA
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Afrikaans ordinals 1–19. The regular ending is the cardinal plus -de; `eerste`, `derde` and `agtste`
- *  are the suppletive/assimilated forms. From 20 up the ending is -ste (twintigste, vyftigste). */
-const ORD_BELOW_20: readonly string[] = [
-    "", "eerste", "tweede", "derde", "vierde", "vyfde", "sesde", "sewende", "agtste", "neënde", "tiende",
-    "elfde", "twaalfde", "dertiende", "veertiende", "vyftiende", "sestiende", "sewentiende", "agtiende",
-    "negentiende",
-];
+const ORD_BELOW_20 = MANIFEST.ordinalsBelow20; // afrikaans.jsonc
 
 /**
  * Integer → the Afrikaans ordinal word. Below 20 it is a table lookup. At or above 20 the ending is -ste,
@@ -55,31 +50,13 @@ export function ordinalWord(n: number): string | undefined {
     return `${card}ste`;
 }
 
-/** Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
- *  as a phrase break. `v.C.` = voor Christus (BC); `d.i.` = dit is (i.e.); `n.C.` = na Christus (AD).
- *
- *  EVERY LETTER PAIR HERE IS DOT-BOUND, and that is load-bearing. The corpus's four BC instances are
- *  `v. C.`, `v.C.`, `V.C.` and the undotted `vC`/`VC` — a dotted form, or the two letters ADJACENT, never
- *  "letter space letter". Allowing the unpunctuated spaced form (`v\.?\s?C\.?`) made `n\.?\s?C\.?` match
- *  the indefinite article before any c-word: `'n Chinese skip` → *'na Christushinese skip*. Afrikaans's
- *  commonest word, destroyed by a rule with ZERO corpus instances of its own (na Christus never occurs). */
-const MULTI_DOT: readonly (readonly [string, string])[] = [
-    ["v\\.\\s?C\\.?", "voor Christus"],
-    ["vC(?![\\p{L}\\p{M}])", "voor Christus"],
-    ["n\\.\\s?C\\.?", "na Christus"],
-    ["d\\.\\s?i\\.", "dit is"],
-];
+/** Multi-dot abbreviations and era markers (afrikaans.jsonc `multiDotAbbreviations`). Handled BEFORE the
+ *  single-dot rule so no interior dot survives as a phrase break. The manifest records why every pattern is
+ *  DOT-BOUND — the unpunctuated spaced form once made `n. C.` swallow the indefinite article before any
+ *  c-word, destroying Afrikaans's commonest word for a rule with no corpus instances of its own. */
+const MULTI_DOT = MANIFEST.multiDotAbbreviations;
 
-/** Single-dot abbreviations → the spoken words. The dot is a phrase break otherwise, and the stem is usually
- *  unpronounceable. `m.p.u` = myl per uur (mph, the Afrikaans way); `n.m.` = namiddag (PM). The undotted
- *  `vm`/`nm` AM/PM suffixes are handled by the clock rule instead — they attach to a clock. */
-const DOTTED_ABBREV: Readonly<Record<string, string>> = {
-    "dr": "Dokter",
-    "m.p.u": "myl per uur",
-    "m.p.u.": "myl per uur",
-    "n.m": "namiddag",
-    "n.m.": "namiddag",
-};
+const DOTTED_ABBREV = MANIFEST.dottedAbbreviations; // afrikaans.jsonc
 // The keys contain DOTS (m.p.u), so each must be regex-escaped before joining the alternation.
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV)
     .sort((a, b) => b.length - a.length)
@@ -93,36 +70,20 @@ const BARE_ALT = Object.keys(DOTTED_ABBREV)
     .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
     .join("|");
 
-/** Afrikaans letter names — aa, bee, see … (the corpus's own alphabet article: "die gewone alfabet as die
- *  ABC (uitgespreek aa-bee-see)"). The g2p spells them through itself. */
-const LETTER_NAME: Readonly<Record<string, string>> = {
-    a: "aa", b: "bee", c: "see", d: "dee", e: "ee", f: "ef", g: "gee", h: "haa", i: "ie", j: "jee",
-    k: "kaa", l: "el", m: "em", n: "en", o: "oo", p: "pee", q: "kuu", r: "er", s: "es", t: "tee",
-    u: "uu", v: "vee", w: "wee", x: "eks", y: "ei", z: "zet",
-};
+const LETTER_NAME = MANIFEST.letterNames; // afrikaans.jsonc — the g2p spells these through itself
 
 /** Afrikaans phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?). */
 export const isUnreadableAfrikaans = makeUnreadableTest({
     vowels: /[aeiouy]/u,
-    legalOnsets: new Set([
-        "bl", "br", "ch", "dr", "dw", "fl", "fr", "gl", "gn", "gr", "kl", "kn", "kr", "kw", "pl", "pr",
-        "ps", "sc", "sch", "sf", "sj", "sk", "sl", "sm", "sn", "sp", "st", "sw", "th", "tj", "tr", "tw",
-        "vl", "vr", "wr", "zw",
-    ]),
-    legalCodas: new Set([
-        "ch", "ck", "ft", "ht", "kt", "ld", "lf", "lg", "lk", "lm", "lp", "ls", "lt", "mp", "ms", "mt",
-        "nd", "ng", "nk", "ns", "nt", "pt", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp", "rs", "rt",
-        "sp", "st", "ts", "ks", "ps", "sk",
-    ]),
+    legalOnsets: new Set(MANIFEST.phonotactics.legalOnsets),
+    legalCodas: new Set(MANIFEST.phonotactics.legalCodas),
 });
 
-/** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. REM (REM-slaap), COVID,
- *  FIFA, NATO, OPEC, UNESCO, AIDS are all said as words in Afrikaans ("die GPS" would be read as letters). */
-const WORD_ACRONYMS: ReadonlySet<string> = new Set(["rem", "covid", "fifa", "nato", "opec", "unesco", "aids"]);
+const WORD_ACRONYMS: ReadonlySet<string> = new Set(MANIFEST.wordAcronyms); // afrikaans.jsonc
 
 const normalizeInitialisms = makeInitialismNormalizer({
     letterName: (l) => LETTER_NAME[l.toLowerCase()],
-    acronymLetters: new Set(["uk", "vk", "vn", "vsa", "vs", "aol"]),
+    acronymLetters: new Set(MANIFEST.acronymLetters),
     isRecorded: (w) => WORD_ACRONYMS.has(w),
     isUnreadable: isUnreadableAfrikaans,
 });

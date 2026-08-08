@@ -17,6 +17,22 @@ export interface AfrikaansManifest {
     bareVowels: readonly string[];
     /** Every letter that heads a nucleus — bounds the consonant run in that same lookahead. */
     vowelLetters: readonly string[];
+    voicedFinal: Record<string, string>;
+    unstressedReduction: Record<string, string>;
+    cSoftBefore: readonly string[];
+    stressFinalSuffixes: readonly string[];
+    stressPenultSuffixes: readonly string[];
+    /** Reduced IPA per unstressed prefix; the keys must equal `morphology.prefixUnstressed`. */
+    prefixIpa: Record<string, string>;
+    /** Ordinals 1–19; index 0 unused. Above 20 the ending is regular — see normalize.ts. */
+    ordinalsBelow20: readonly string[];
+    /** [regex SOURCE, replacement] — every pattern is dot-bound on purpose; see the manifest note. */
+    multiDotAbbreviations: readonly (readonly [string, string])[];
+    dottedAbbreviations: Record<string, string>;
+    letterNames: Record<string, string>;
+    wordAcronyms: readonly string[];
+    acronymLetters: readonly string[];
+    phonotactics: { legalOnsets: readonly string[]; legalCodas: readonly string[] };
     clausePunctuation: Record<string, string>;
     numbers: {
         units: string[];
