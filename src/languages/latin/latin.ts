@@ -18,6 +18,9 @@ interface LatinDef {
     long: Record<string, string>;
     tense: Record<string, string>;
     vowelLetters: readonly string[];
+    velars: readonly string[];
+    mutae: readonly string[];
+    liquids: readonly string[];
     consonants: Record<string, string>;
 }
 const DEF = loadManifest<LatinDef>(import.meta.url, "latin.jsonc");
@@ -28,6 +31,11 @@ const TENSE = DEF.tense;
 const CONS = DEF.consonants;
 // Every vowel LETTER (short, macron, diaeresis) — for glide (i→j) and diphthong context tests.
 const VOWEL_LETTER = new Set(DEF.vowelLetters);
+// Phone classes (latin.jsonc). These were rebuilt inside the scan on every call; they are per-word
+// constants, and Latin's own — the labiovelars and Greek-loan aspirates are members.
+const VELAR = new Set(DEF.velars);
+const MUTA = new Set(DEF.mutae); // muta cum liquida: obstruent + liquid onsets the ultima
+const LIQUID = new Set(DEF.liquids);
 // IPA vowel BASE chars — for segment-level tests (nasalization, stress nuclei). Excludes offglide/length marks.
 
 const isVowelLetter = (c: string | undefined): boolean => c !== undefined && VOWEL_LETTER.has(c);
@@ -117,7 +125,6 @@ export function phonemizeWord(word: string): string {
     }
 
     // ── Post-processing on the segment array ────────────────────────────────
-    const VELAR = new Set(["k", "ɡ", "kʷ", "ɡʷ", "kʰ"]);
     // (1) nasal ⟨n m⟩ before a fricative ⟨s f⟩ → drop nasal, lengthen+nasalize the preceding vowel (cōnsul→koːsʊɫ).
     for (let k = segs.length - 2; k >= 1; k--) {
         if ((segs[k] === "n" || segs[k] === "m") && (segs[k + 1] === "s" || segs[k + 1] === "f") && isVowelSeg(segs[k - 1])) {
@@ -161,8 +168,6 @@ function placeStress(segs: string[]): void {
         // (volucris→ˈwɔɫʊkrɪs antepenult), so it counts as onset, not coda.
         const cons: string[] = [];
         for (let k = penult.idx + 1; k < ultima.idx; k++) if (!isVowelSeg(segs[k]) && !/̯/u.test(segs[k]!)) cons.push(segs[k]!);
-        const LIQUID = new Set(["l", "ɫ", "r"]);
-        const MUTA = new Set(["p", "t", "k", "b", "d", "ɡ", "kʷ", "ɡʷ", "pʰ", "tʰ", "kʰ", "f"]);
         const m = cons.length;
         let onset = m >= 1 ? 1 : 0;
         if (m >= 2 && MUTA.has(cons[m - 2]!) && LIQUID.has(cons[m - 1]!)) onset = 2; // muta cum liquida → 2-consonant onset

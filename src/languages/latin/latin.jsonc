@@ -36,6 +36,19 @@
 
     // Context-free consonants. ⟨c⟩ is ALWAYS [k] (Classical — no palatalization); ⟨v⟩→[w]; ⟨l⟩ is
     // dark/clear by context (latin.ts).
+    // ⚠ THREE PHONE CLASSES, each the environment of one Latin rule. Latin-specific by construction: the
+    // labiovelars ⟨kʷ ɡʷ⟩ (⟨qu gu⟩) and the Greek-loan aspirates ⟨pʰ tʰ kʰ⟩ are members, so no shared
+    // "velars"/"stops" class could stand in for them.
+    //
+    // "velars" — ⟨n⟩ assimilates to [ŋ] before one of these.
+    "velars": ["k", "ɡ", "kʷ", "ɡʷ", "kʰ"],
+    // ⚠ MUTA CUM LIQUIDA — the stress rule's one subtlety. An obstruent (or ⟨f⟩) plus a liquid onsets the
+    // ULTIMA rather than closing the penult, so volucris is antepenultimate ˈwɔɫʊkrɪs, not *wɔˈɫukrɪs.
+    // "mutae" is deliberately wider than "velars": it is every stop plus ⟨f⟩, because the cluster rule is
+    // about obstruent+liquid, not about place.
+    "mutae": ["p", "t", "k", "b", "d", "ɡ", "kʷ", "ɡʷ", "pʰ", "tʰ", "kʰ", "f"],
+    "liquids": ["l", "ɫ", "r"],
+
     "consonants": {
         "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "k": "k", "m": "m", "n": "n",
         "p": "p", "q": "k", "r": "r", "s": "s", "t": "t", "v": "w", "z": "z", "j": "j",
