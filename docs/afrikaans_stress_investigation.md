@@ -52,6 +52,8 @@ Command: implemented (1)–(3); re-ran eval + the af suite.
   folds + paren-either +73 (measured stepwise in Run 1), lexicon +49. The generative
   number WITHOUT the lexicon is 79.0% — recorded because the lexicon rows are
   reference-parity, not independent confirmation (single-source language).
+  ⚠ **These two numbers did not survive review — see Run 3.** Both the headline and the
+  79.0% were inflated by a fold that was masking real errors.
 - af-lexicon.tsv: 49 entries — the capitalized single-word folded misses, referee IPA
   minus stress/dots/optional-parens, loaded lazily like tagalog's stress lexicon.
   Provenance + circularity: af-lexicon.PROVENANCE.md.
@@ -74,3 +76,44 @@ taxonomy of what's left, for the next session:
   (nm→m), bestanddeel ntd→nd, advies dv→tf.
 - Referee-inconsistent rows that should NOT be chased: final devoicing (ref writes
   bard, antiɛld against standard Afrikaans devoicing), -ig as both iχ and əχ.
+
+## Run 3 — 2026-08-08 (review of PR #770)
+
+Nine findings; all fixed. Three changed the reported NUMBERS, which is the important part.
+
+**1. The headline was circular.** The eval scored the shipped `phonemizeWord`, which now
+consults a lexicon built from the referee itself. Fixed by the house pattern: a new
+`phonemizeWordRules` export (mirrors en-GB/tl/ilo) is what the eval imports; the lexicon
+improves shipped output only and earns zero eval credit.
+
+**2. The short-⟨a⟩ fold was masking the engine's own headline rule.** It gained 63 words,
+but re-measuring with `ː` retained showed **39 of those 63 were genuine open/closed-LENGTH
+errors** (anys ɑːnəis vs aˈnəis; apart; fantasie; ekstase) — the fold ran after the
+backbone strips ː, so our long ɑː landed on the referee's short a. Fixed by moving it to
+a **preFold** guarded `ɑ(?![ː̃])`, where the length mark is still present: short vowels
+fold, long and nasal ones stay visible. Those 39 words are now back in the miss list where
+they belong, and are the largest single remaining class.
+
+**3. Three lexicon rows were unreachable from the pipeline** and earned eval-only credit:
+`suid-afrika`/`kwazulu-natal` (the tokenizer splits on the hyphen), `awb` (normalize.ts
+expands initialisms before phonemizeWord). Two more (`j`, `q`) were single letters that
+**overrode the letter-name rule of #761** — ⟨J⟩ was reading [jɛ] instead of the name
+[jiə]. Dropped all five (44 entries remain), and the lookup now sits after the rule
+path's own special cases so a future stray row is harmless rather than silent.
+
+**4. The lexicon values were not in the engine's inventory** despite the PROVENANCE claim
+— `ɪə`/`ʊə`, mixed `x`/`χ`, plus `ˑ`, `◌̯`, `ɨ`, `ɲ`, `c`. The eval could not see any of
+it (its own folds neutralize exactly those symbols), so it would have reached users
+unmeasured. Normalized; PROVENANCE rewritten to describe what was actually done.
+
+**5. The ɦ fold was fleet-blinding for 2 words** — an engine that dropped /h/ entirely
+would have scored the same. Scoped to the `-heid` suffix, same +2.
+
+**6. Paren expansion was global.** 160 referee files contain a parenthesis and in some it
+is data (Amharic `(ʔ)itjopʼja`), so every language's numbers could move unmeasured. Now
+opt-in per language (`parenOptional`), and it generates **every** combination (2ⁿ) rather
+than only all-in/all-out.
+
+**Honest result: 76.9% folded / 93.9% symbol** (rules only), up from the 75.7% baseline
+— +1.2pp, not the +5.5pp first reported. Floor 0.73 → 0.74. The lexicon's value is real
+but lives in shipped output, not in the score.

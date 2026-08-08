@@ -149,13 +149,29 @@ const LETTER_NAME = MANIFEST.letterNames; // a bare single letter is SPELLED (se
  *  aand·ete → ɑnt·iətə) and devoices at its own boundary; an unstressed prefix reduces. Single morpheme → direct. */
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC").toLowerCase();
-    if (w === "'n" || w === "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
-    // ⚠ PROPER NOUNS AND OPAQUE LOANS FIRST (af-lexicon.tsv — ~50 referee-sourced entries: Botha→buəta,
-    // Blignault→ˈblɨxnœut-class French/anglicised spellings, Afrikaans→afrikɑ̃ːs with its nasal). These are
-    // words where NO spelling rule can win: the orthography is Dutch/French/English-era and the received
-    // pronunciation is lexical. Provenance + the single-source circularity note: af-lexicon.PROVENANCE.md.
+    // ⚠ PROPER NOUNS AND OPAQUE LOANS (af-lexicon.tsv — referee-sourced: Botha→buəta, Blignault-class
+    // French/anglicised spellings, Afrikaans→afrikɑ̃ːs with its nasal): words where NO spelling rule can
+    // win, because the orthography is Dutch/French/English-era and the pronunciation is lexical.
+    // ⚠ AFTER the rule path's own special cases, NOT before — the first version put the lookup first and
+    // the lexicon's stray single-letter rows (j, q) silently overrode the "a bare letter is SPELLED"
+    // rule of #761, so ⟨J⟩ came out [jɛ] instead of the letter name [jiə]. Those rows are gone, and the
+    // ordering now makes their return harmless rather than silent.
+    // ⚠ NOT ON THE EVAL PATH: the entries come from the referee this language is scored against, so
+    // phonemizeWordRules below (what the eval calls) skips them — house pattern, same as en-GB/tl/ilo.
+    // Provenance + the single-source circularity note: af-lexicon.PROVENANCE.md.
     const pinned = lexicon().get(w);
     if (pinned !== undefined) return pinned;
+    return phonemizeWordRules(w);
+}
+
+/**
+ * The RULE ENGINE ALONE — no proper-noun lexicon. This is the non-circular signal the referee eval scores:
+ * af is SINGLE-SOURCE (langs/af.jsonc `secondaryGap`), and af-lexicon.tsv is built from that same referee,
+ * so scoring the shipped path would credit the engine for rows copied out of the answer key.
+ */
+export function phonemizeWordRules(word: string): string {
+    const w = word.normalize("NFC").toLowerCase();
+    if (w === "'n" || w === "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
     // ⚠ A BARE SINGLE LETTER IS SPELLED, NOT SOUNDED — ⟨C⟩ is "see" [siə], not [k] (#761). The initialism
     // normalizer already does this for runs of TWO or more (VSA → vee-es-aa) but never fires on one letter,
     // so a lone letter fell through to the ordinary word path and came out as its phone. It has to live
