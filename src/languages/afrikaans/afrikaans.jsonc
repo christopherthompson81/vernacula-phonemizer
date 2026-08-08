@@ -82,7 +82,7 @@
     // stressedNucleus with a PERFECT ORACLE built from the referee's own stress marks scores 1783/2220
     // against the rule engine's 1738 — so every stress rule that could ever be written, together, is
     // worth about 45 words (2pp). The residual is segmental, not prosodic.
-    "stressFinalSuffixes": ["siteit", "teit", "isme", "eer", "eur", "oor", "oon", "ees", "yn", "uur", "oen", "eel"],
+    "stressFinalSuffixes": ["siteit", "teit", "isme", "eer", "eur", "oor", "oon", "ees", "uur", "oen", "eel", "yn"],
     "stressPenultSuffixes": ["ie"],
 
     // Reduced IPA for the UNSTRESSED (inseparable) prefixes named in `morphology.prefixUnstressed`.

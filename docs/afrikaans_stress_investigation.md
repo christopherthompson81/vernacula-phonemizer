@@ -142,6 +142,22 @@ Measured, in order tried:
 | referee-notation folds (ɦ~h, æ~ɛ, ɐ~a, ʋ~v) | +25 | yes |
 | ⟨sw⟩/⟨dw⟩ onset fold | +5 | yes |
 
+⚠ **Leave-one-out, re-measured in review** (each fold removed from the final 1745 config —
+the honest per-fold contribution, since folds interact):
+
+| fold | without it | contributes |
+|---|---|---|
+| ɦ~h (rename) | 1734 | **+11** |
+| ⟨sw/dw⟩ onset | 1740 | **+5** |
+| æ~ɛ | 1739 | **+6** |
+| ɐ~a | 1740 | **+5** |
+| ʋ~v | 1740 | **+5** |
+| ⟨-heid⟩ h | 1744 | **+1** |
+
+These sum to more than the total because they overlap; the config-level truth is the
+1708 → 1745 delta. The first draft of this PR reported +25/+30 from single-fold
+measurements taken against different baselines — corrected here.
+
 **The sw/dw case is the instructive one.** The engine rule is linguistically correct
 (Donaldson: /v/ is [w] after an obstruent) and it measured net zero — it fixed six words
 and broke six. Reading them explains why: the referee writes `swaar, swart, swyn, Swede,
@@ -157,3 +173,25 @@ learning what this referee cannot adjudicate) and +6 is engine (three loan suffi
 then f→v 13 and d↔t 14, which are morpheme-seam voicing (aan·dete, ad·vies), the one
 class with real headroom left and no prosody involved. Anyone continuing here should
 start with the seam, not with stress.
+
+## Run 5 — 2026-08-08 (review of PR #771)
+
+Six findings, all fixed. The one that cost a word:
+
+- **The ⟨-heid⟩ fold was DEAD.** Folds apply in sequence, and the new `ɦ→h` rename runs
+  first, so a `ɦ(?=əit)`-keyed pattern could never match — the rewrite to `h(?=əit)` that
+  was supposed to accompany the rename silently failed to apply (an exact-string replace
+  that missed). Revived: **1744 → 1745**, and the ordering dependency is now written into
+  both the rule's own note and the file header.
+- The ⟨sw/dw⟩ note claimed "+12 measured" — 12 is the size of the *environment*; the fold
+  contributes **+5**. Corrected, and every fold note now carries a leave-one-out number.
+- The header's fold inventory listed only the pre-existing folds and still advertised the
+  -heid rule as live. Rewritten to list all of them in application order.
+- `stressFinalSuffixes` was no longer longest-first, contradicting its own comment three
+  lines above (inert today — `byLen` sorts at build time and both patterns are anchored —
+  but the comment asserts an invariant a later append would trust). Reordered.
+- The ⟨sw/dw⟩ lookbehind is word-initial, not morpheme-initial as its note said: the
+  backbone strips ˈ and the syllable dots before folds run, so there is no seam to anchor
+  on and `verdwyn` keeps its miss. Wording corrected rather than the pattern widened.
+
+Final: **1745/2220 (78.6%), symbol 94.3%.**
