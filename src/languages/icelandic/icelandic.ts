@@ -14,7 +14,6 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { normalizeIcelandic } from "./normalize.ts";
-import { IPA_VOWEL } from "../../core/ipa.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -32,7 +31,17 @@ const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL_PH = IPA_VOWEL; // IPA vowel heads (for intervocalic + glide tests)
+// ⚠ DELIBERATELY NOT core/ipa.ts's shared class — the ONE engine in #748 that keeps its own list.
+// It omits plain ⟨e⟩, which this engine DOES emit (the digraphs ⟨ei ey⟩ map to the two-character value
+// "ei"), so startsWithVowel("ei") is false and the hiatus-glide rule below never fires before a
+// diphthong. That looks like an omission and is not: the referee ATTESTS the glideless reading —
+// tools/referee-eval/referees/is.wikipron-isl-broad.tsv:2311 has erkiengill = ɛ r̥ c ɪ e i ɲ c ɪ t l,
+// no [j]. Widening this set to the shared class emits ɛrcɪjeiŋcɪtl and drops the folded backbone
+// 8086 → 8085/10093. The narrow list is accidentally CONTAINING an over-eager rule, not breaking it.
+// ⚠ The rule over-applies already on the cases the referee covers (hýena→hijɛna vs h iː ɛ n a,
+// bavían→pavijan vs p aː v iː a n). Fixing THAT is the real repair; widening this set is the opposite
+// of it. See docs/ipa_classes_investigation.md Run 7.
+const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for intervocalic + glide tests)
 // Grapheme-level front vowels that PALATALIZE a preceding ⟨k g⟩ → [c] (kýr→ciːr, gelda→cɛlta, Bylgja→pɪlca) — incl.
 // ⟨e é⟩ and the ⟨ei ey⟩ diphthong (the referee majority palatalizes: geipa→ceipa; the un-palatalized Geir→keir is
 // the minority we over-palatalize to ceir). The four letter classes are in icelandic.jsonc.
@@ -107,11 +116,6 @@ function scan(word: string): Tok[] {
     return toks;
 }
 
-// ⚠ THESE READ THE SHARED VOWEL CLASS, AND THAT FIXED A BUG. The hand-written local class omitted plain
-// ⟨e⟩ — which this engine emits, because the digraphs ⟨ei ey⟩ map to the two-character value "ei". So
-// startsWithVowel("ei") was FALSE, and the hiatus glide below (⟨í ý⟩ + vowel → insert [j], Biblía→pɪplija)
-// silently skipped every ⟨ei⟩: þríeyki was θrieicɪ, now θrijeicɪ. No golden covered it, which is how it
-// survived — test/icelandic.test.ts now has one. See docs/ipa_classes_investigation.md Run 4.
 function startsWithVowel(ph: string): boolean { return VOWEL_PH.has([...ph][0]!); }
 function endsWithVowel(ph: string): boolean { const a = [...ph]; return VOWEL_PH.has(a[a.length - 1]!); }
 

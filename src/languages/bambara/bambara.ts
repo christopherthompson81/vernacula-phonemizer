@@ -22,7 +22,9 @@ const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const NASAL_TILDE = "̃"; // combining tilde — a nasalised vowel (matches the referee's ã õ ũ …)
 const VOWELS = new Set(MANIFEST.vowelLetters); // orthographic oral vowels (bambara.jsonc)
-const IPA_VOWELS = IPA_VOWEL; // their IPA (identical here)
+// Named VOWEL_PH, not IPA_VOWELS: that name is the repo-wide regex STRING (core/ipa.ts), and binding
+// it to a Set here would shadow it for anyone who later imports the real one.
+const VOWEL_PH = IPA_VOWEL;
 
 /** Phonemize a single Bambara word to canonical IPA (segmental + nasalisation; tone + length deferred). Accepts
  *  BOTH scripts: the Latin orthography and N'Ko (ߒߞߏ) — N'Ko is transliterated to Latin first (identical IPA). */
@@ -40,7 +42,7 @@ export function phonemizeWord(word: string): string {
             const next = w[i + 1];
             if (next !== undefined && VOWELS.has(next)) {
                 out.push(c); // onset nasal before a vowel
-            } else if (out.length > 0 && IPA_VOWELS.has(out[out.length - 1]!)) {
+            } else if (out.length > 0 && VOWEL_PH.has(out[out.length - 1]!)) {
                 out[out.length - 1] += NASAL_TILDE; // syllable-final n → nasalise the preceding vowel, drop the n
             } else {
                 // word-initial / post-consonant prenasal: assimilate place to the following consonant

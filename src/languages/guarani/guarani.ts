@@ -30,8 +30,7 @@ const ACUTE = new Set(DEF.acuteVowels);
 const NASAL = new Set(DEF.nasalVowels);
 // The universal vowel letters PLUS Guaraní's nasal vowels. The nasals cannot live in core/ipa.ts: ⟨ã ẽ ĩ
 // õ ũ⟩ are single NFC codepoints but ⟨ɨ̃⟩ is ⟨ɨ⟩ + a combining tilde, so the class is not a set of
-// characters at all — it is only usable because this engine compares whole SEGMENTS, which the shared
-// per-character helpers deliberately do not assume.
+// characters at all — it works only because this engine compares whole SEGMENTS rather than characters.
 const VOWEL = new Set([...IPA_VOWEL, "ã", "ẽ", "ĩ", "õ", "ũ", "ɨ̃"]);
 
 const FRONT = new Set(DEF.frontLetters); // ⟨gu⟩ is u-silent [ɰ] before a front OR central vowel

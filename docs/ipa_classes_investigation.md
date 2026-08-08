@@ -100,11 +100,10 @@ Patched `e` into the set and diffed constructed probes:
 **Raw finding:** the full suite passes BOTH ways — 228 files / 3134 tests. No golden covers the hiatus
 glide at all, which is how the gap survived.
 
-**Implication:** the consolidation is not purely cosmetic here. A hand-written per-language vowel list
-omitted a vowel the engine actually emits, and the shared list repairs it — the [j] SHOULD be inserted
-per the engine's own documented rule. ⚠ NOT REFEREE-CONFIRMED: the wikipron isl_latn_broad corpus is not
-in-repo, so this rests on the engine's stated rule and Icelandic hiatus phonology, not on a measurement.
-Flagged in the PR for a domain call rather than folded in quietly.
+**Implication (WRONG — see Run 7):** read as a repair, on the reasoning that a hand-written list had
+omitted a vowel the engine emits. Recorded here as stated at the time, including the claim that the
+wikipron isl_latn_broad corpus was "not in-repo". It is in-repo, and it settles the question the other
+way.
 
 ## Run 5 — 2026-08-07 ~20:35 — widening the SHARED constant breaks Urdu and Bhojpuri
 
@@ -122,8 +121,11 @@ stress across the Indic engines. Note the direction: `əmbˈɑːɾ` puts the str
 which is what a weight-based rule is supposed to do — so the widening looks like an improvement, not a
 regression, and the goldens may be pinning a bug.
 
-But "looks like" is not a measurement, and these engines have referees (urdu has a mined IPA coverage
-lexicon). The wikipron/kaikki corpora for ur and bho are NOT in-repo, so it cannot be settled here.
+But "looks like" is not a measurement. ⚠ THE REASON RECORDED HERE — "the corpora are not in-repo" — WAS
+FALSE (Run 7). `ur.wikipron-urd-broad.tsv`, `ur.cle-speech.tsv` and `bho.grammar-mined.tsv` are all
+committed. The real blocker is different and worse: `grep -c ˈ` returns 0 in all three, and the eval
+folds stress anyway — so widening `IPA_VOWELS` leaves the ur/bho numbers bit-identical. The referee
+CANNOT settle a stress question, whatever it can settle. Right call, wrong reason.
 
 **Decision.** `core/ipa.ts` defines ONE list and derives both shapes from it:
 
@@ -174,3 +176,36 @@ orthographic; icelandic converted deliberately WITH the behaviour change and a n
    not liquids-in-general — so this needs a per-class judgment, and the ones that ARE language-specific
    belong in manifests, not here.
 3. The four reverted orthographic sets, for the manifest sweep.
+
+## Run 7 — 2026-08-07 ~21:40 — the referee corpora ARE in-repo, and Icelandic was a REGRESSION
+
+Code review of #748 checked the claim I had recorded twice — that the relevant referee corpora were not
+in the repository — and it was false. They are all under `tools/referee-eval/referees/`. I had searched
+`find . -iname '*icel*'`; the file is `is.wikipron-isl-broad.tsv`, keyed by the ISO code. A grep that
+matches nothing is not evidence of absence, and I wrote that non-finding into a code comment, a test
+comment, this log (twice) and the PR description.
+
+    grep -n 'erkiengill' tools/referee-eval/referees/is.wikipron-isl-broad.tsv
+    2311:erkiengill	ɛ r̥ c ɪ e i ɲ c ɪ t l          ← NO hiatus [j]
+
+    npx tsx tools/referee-eval/eval.ts is
+    folded backbone: 8086/10093 (80.1%)   on main
+    folded backbone: 8085/10093           with VOWEL_PH = IPA_VOWEL
+
+**Raw finding:** the referee attests the GLIDELESS reading of exactly the case Run 4 "fixed", and the
+change measurably loses ground. Worse, the referee shows the rule already OVER-applies where it does
+fire: `hýena` → engine `hijɛna` vs referee `h iː ɛ n a`; `bavían` → `pavijan` vs `p aː v iː a n`;
+`beitieski` → `peitɪjɛscɪ` vs `p e iː t ɪ ɛ s c ɪ`.
+
+**Implication.** Run 4's reasoning was backwards. Icelandic's narrow vowel list was not suppressing a
+correct rule; it was accidentally CONTAINING an over-eager one, and widening it extended the
+over-application to diphthongs. Icelandic keeps its own list, with the measurement recorded beside it;
+the new golden now pins the glideless reading the referee attests instead of the glide.
+
+The general lesson, which is why this log exists: a narrower local class is not automatically a bug, and
+"the data isn't available" needs a check that the data isn't available. `tools/referee-eval/eval.ts <code>`
+is the check for anything that touches output — it takes seconds and I should have run it in Run 4.
+
+**Also open, new:** the Icelandic hiatus rule genuinely over-applies (3 referee-attested cases above).
+Tightening it — probably by restricting the glide to a following PLAIN vowel and testing against the
+corpus — is real work with a measurable target.

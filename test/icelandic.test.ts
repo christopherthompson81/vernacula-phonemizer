@@ -95,16 +95,17 @@ describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization
         expect(is.text("1000000").trim()).toBe("ein mɪtljoun"); // ein milljón
     });
 
-    // ⚠ THE HIATUS GLIDE, INCLUDING BEFORE A DIPHTHONG — the rule was half-broken and untested. A high
-    // front ⟨í i ý y⟩ inserts [j] before a following vowel, but the check read a hand-written vowel class
-    // that omitted plain ⟨e⟩ — and ⟨ei ey⟩ scan to the two-character value "ei", so every diphthong-initial
-    // hiatus was skipped (þríeyki→*θrieicɪ). Fixed by reading the shared class in core/ipa.ts (#748).
-    // ⚠ NOT REFEREE-CONFIRMED: wikipron isl_latn_broad is not in-repo, so these pin the engine's own
-    // documented rule (Biblía→pɪplija), applied consistently, rather than a measured transcription.
-    test("a high front vowel inserts the hiatus glide before a DIPHTHONG too", () => {
+    // ⚠ THE HIATUS GLIDE MUST NOT REACH A DIPHTHONG — pinned because #748 nearly widened it there.
+    // VOWEL_PH omits plain ⟨e⟩ while ⟨ei ey⟩ scan to the two-character value "ei", so startsWithVowel("ei")
+    // is false and the glide never fires before a diphthong. That reads like an oversight; it is what the
+    // referee attests. is.wikipron-isl-broad.tsv:2311 erkiengill = ɛ r̥ c ɪ e i ɲ c ɪ t l — no [j] — and
+    // pointing VOWEL_PH at the shared core/ipa.ts class drops the folded backbone 8086 → 8085/10093.
+    // ⚠ The rule ALREADY over-applies where the referee does cover it (hýena→hijɛna vs h iː ɛ n a). Tighten
+    // that if anything; do not loosen this. docs/ipa_classes_investigation.md Run 7.
+    test("the hiatus glide fires before a plain vowel but NOT before a diphthong", () => {
         expect(phonemizeWord("Biblía")).toContain("ja"); // the rule's own example — plain-vowel hiatus
-        expect(phonemizeWord("þríeyki")).toBe("θrijeicɪ"); // 'trio' — ⟨í⟩ + ⟨ey⟩, was θrieicɪ
-        expect(phonemizeWord("nýeyra")).toBe("nijeira"); // ⟨ý⟩ + ⟨ey⟩, was nieira
+        expect(phonemizeWord("erkiengill")).toBe("ɛrcɪeiŋcɪtl"); // referee: …ɪ e i ɲ… — NO glide
+        expect(phonemizeWord("þríeyki")).toBe("θrieicɪ"); // ⟨í⟩ + ⟨ey⟩ — likewise glideless
     });
 
 });
