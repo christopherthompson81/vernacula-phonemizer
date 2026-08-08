@@ -74,7 +74,15 @@
     // default (the Germanic pattern) and these Romance/Latinate endings override it: "final" takes the last
     // nucleus (ingenieur, universiteit), "penultimate" the second-to-last (aborsie → a·BOR·sie). Matched as
     // word-final alternatives, LONGEST FIRST so ⟨siteit⟩ wins over ⟨teit⟩.
-    "stressFinalSuffixes": ["siteit", "teit", "isme", "eer", "eur", "oor", "oon", "ees", "yn"],
+    // ⚠ THE LIST IS MEASURED, NOT COLLECTED. Every plausible Romance ending was swept individually against
+    // the referee; most LOSE, because the same letters also end native words where stress is initial —
+    // ⟨sie⟩ −12, ⟨aar⟩ −6, ⟨el⟩ −42 (kabel, tafel, wortel are all initial-stress). Only ⟨uur⟩ (+3),
+    // ⟨oen⟩ (+2) and ⟨eel⟩ (+1) pay, and they are kept for that reason alone.
+    // ⚠ AND THE WHOLE LEVER IS SMALL, which is worth knowing before anyone extends this list: replacing
+    // stressedNucleus with a PERFECT ORACLE built from the referee's own stress marks scores 1783/2220
+    // against the rule engine's 1738 — so every stress rule that could ever be written, together, is
+    // worth about 45 words (2pp). The residual is segmental, not prosodic.
+    "stressFinalSuffixes": ["siteit", "teit", "isme", "eer", "eur", "oor", "oon", "ees", "yn", "uur", "oen", "eel"],
     "stressPenultSuffixes": ["ie"],
 
     // Reduced IPA for the UNSTRESSED (inseparable) prefixes named in `morphology.prefixUnstressed`.
