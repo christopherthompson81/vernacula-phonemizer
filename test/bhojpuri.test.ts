@@ -13,7 +13,7 @@ describe("Bhojpuri canonical IPA — from the reference grammar", () => {
         expect(phonemizeWord("बैल")).toBe("bˈɛl"); // 'ox' — ऐ → ɛ monophthong, NOT [ai]
         expect(phonemizeWord("कौन")).toBe("kˈɔn"); // 'who' — औ → ɔ monophthong, NOT [au]
         expect(phonemizeWord("किताब")).toBe("kˈit̪ɑb"); // 'book' — no length (ई→i, ा→ɑ)
-        expect(phonemizeWord("पानी")).toBe("pɑnˈi"); // 'water' — no length
+        expect(phonemizeWord("पानी")).toBe("pˈɑni"); // 'water' — no length
     });
     test("reduced inventory: श/ष→s, ⟨व⟩→w, ⟨ण/ञ⟩→n", () => {
         expect(phonemizeWord("देश")).toBe("d̪ˈes"); // श → s (only /s ɦ/ fricatives; Hindi d̪eːʃ)
