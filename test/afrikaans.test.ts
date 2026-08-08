@@ -61,6 +61,17 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // China, chirurg, Charlize and Fouché with [ʃ] against chemie alone with [x]. So chemie is a KNOWN MISS
     // — pinned here as such rather than special-cased, since one instance is not enough to justify a
     // lexical exception list. ⟨chr⟩ is different: it IS orthographic, and is a manifest entry.
+    // ⚠ ⟨sch⟩ IS [sk] AND MUST OUT-RANK ⟨ch⟩ — the review catch on #762. Yielding the ⟨c⟩ rule to ⟨ch⟩
+    // made every ⟨sch⟩ surname come out [sʃ] (Schalk → *sʃalk), which is not a possible Afrikaans onset,
+    // and the aggregate score still ROSE because the letter-spelling gain masked it. The referee's
+    // majority is [sk] — Schalk, Schoeman, Schutte, Labuschagne — against Schuster/Laubscher [ʃ] and
+    // Hauptfleisch [s], so [sk] is the entry and those three are known misses.
+    test("⟨sch⟩ is [sk], out-ranking the ⟨ch⟩ digraph", () => {
+        expect(phonemizeWord("Schalk")).toBe("skalk"); // referee skalk — exact
+        expect(phonemizeWord("Schoeman")).toBe("skuman"); // referee ˈskuman
+        expect(phonemizeWord("skryf")).toBe("skrəif"); // ⟨schr⟩ falls out of ⟨sch⟩+⟨r⟩ with no entry
+    });
+
     test("⟨ch⟩ is the digraph [ʃ], and ⟨chr⟩ is [kr]", () => {
         expect(phonemizeWord("chirurg")).toBe("ʃirœrχ"); // referee ʃiˈrərχ
         expect(phonemizeWord("China")).toBe("ʃina"); // referee ˈʃi.na
@@ -81,6 +92,10 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         // ⟨e-pos⟩ (email) is said "ee-pos" — the letter name — not with a schwa.
         expect(createAfrikaans().text("x = 5").trim()).toBe("ɛks χələik ɑːn fəif");
         expect(createAfrikaans().text("e-pos").trim()).toBe("iə pɔs");
+        // ⚠ …and the one-letter UNITS are declared, because spelling made their absence audible: an
+        // undeclared `3 g` read "drie GEE" — a confident wrong WORD, not just a wrong phone (#762 review).
+        expect(createAfrikaans().text("3 g suiker").trim()).toBe("dri χram sœykər");
+        expect(createAfrikaans().text("5 l water").trim()).toBe("fəif litər vɑːtər");
     });
 
     test("a word-final ⟨c⟩ is [k], not the soft [s]", () => {

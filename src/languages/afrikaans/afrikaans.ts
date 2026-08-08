@@ -201,6 +201,14 @@ const SYMBOLS = makeSymbolNormalizer({
         // and `802.11m` reads as "…elf METER". Bounded and unattested: that rule fires only on THREE-or-more
         // integer digits plus one trailing letter, so `6.5m` is untouched, and 802.11 comes as a/b/g/n.
         m: ["meter"],
+        // ⚠ THE ONE-LETTER UNITS, declared because #762 made their absence AUDIBLE: a bare letter is now
+        // spelled as its name, so an undeclared `3 g suiker` read "drie GEE suiker" — a confident wrong
+        // WORD where it used to be a wrong phone. Only these three, all of which follow a numeral in
+        // ordinary text; anything rarer stays undeclared rather than guessed at.
+        // ⚠ NO UPPERCASE KEYS (volt V, watt W) — core/normalizeSymbols.ts looks the match up as
+        // `units[u.toLowerCase()]!`, so an uppercase key is unreachable AND the non-null assertion turns
+        // the miss into a THROW: `220 V` crashed the phonemizer outright. Filed as #763.
+        g: ["gram"], l: ["liter"], t: ["ton"],
     },
     rateDenominators: { h: "uur", u: "uur", s: "sekonde" },
     unitPer: "per",
