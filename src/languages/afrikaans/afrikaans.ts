@@ -186,7 +186,9 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ Declaring `multiply` HERE is what makes ASCII `x` read like `×`: otherwise `6x6 cm` reads the `x` as a
     // LETTER NAME, and `NxN` is the commoner written form. One word, so `by` defaults to it — Afrikaans does not
     // split dimension from product.
-    multiply: { times: "keer" },
+    // ⚠ ONE SOURCE with signWords.times — `6 × 6` goes through normalize.ts and `6x6 cm` through this
+    // tier, and they must read the same word.
+    multiply: { times: MANIFEST.signWords.times },
     percent: ["persent"],
     currency: { "€": ["euro"], "$": ["dollar"], "£": ["pond"], "¥": ["jen"], "U$": ["VS-dollar"], "VS$": ["VS-dollar"] },
     units: {

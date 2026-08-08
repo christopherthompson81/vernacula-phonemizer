@@ -29,9 +29,17 @@ const ORD_BELOW_20 = MANIFEST.ordinalsBelow20; // afrikaans.jsonc
 
 /**
  * Integer → the Afrikaans ordinal word. Below 20 it is a table lookup. At or above 20 the ending is -ste,
- * EXCEPT that a sub-20 remainder carries its own small-ordinal form onto the end of the compound — 101e is
- * *honderdeerste*, 112e *honderdtwaalfde*. 190e (remainder 190 % 100 = 90, not sub-20) takes plain -ste:
- * honderd en negentigste. 21e (remainder 21 % 100 = 21) is a sub-20 tail: een-en-twintigste.
+ * EXCEPT that a sub-20 REMAINDER carries its own small-ordinal form onto the end of the compound:
+ * 101e → honderd en eerste, 112e → honderd en twaalfde.
+ *
+ * ⚠ THE SPACING FOLLOWS THE NUMBER COMPOSITOR, not the older spelling this docblock used to claim. It said
+ * *honderdeerste* / *honderdtwaalfde* as single words, but numberToWords builds "honderd en twaalf", so the
+ * ordinal is "honderd en twaalfde". The stale text mattered: the fix for the drifted tails cited it as the
+ * authority for what 112 should be, and it was only right about the SUFFIX.
+ *
+ * 190e (remainder 90, not sub-20) takes plain -ste: honderd en negentigste. ⚠ AND SO DOES 21e — the
+ * docblock used to call it a sub-20 tail, but 21 % 100 is 21, which is not < 20, so it never enters that
+ * branch. Its output is right for a different reason than was written here.
  */
 export function ordinalWord(n: number): string | undefined {
     if (!Number.isSafeInteger(n) || n < 1) return undefined;
@@ -40,11 +48,19 @@ export function ordinalWord(n: number): string | undefined {
     if (card === "" || /\d/u.test(card)) return undefined;
     const r = n % 100;
     if (r >= 1 && r < 20) {
-        const tail = r < 10
-            ? ["", "een", "twee", "drie", "vier", "vyf", "ses", "sewe", "agt", "nege"][r]!
-            : ["", "", "tien", "elf", "twaalf", "dertien", "veertien", "vyftien", "sestien", "sewentien",
-                "agtien", "negentien"][r - 10]!;
-        if (card.endsWith(tail))
+        // ⚠ THE TAIL IS THE MANIFEST'S OWN CARDINAL — it used to be two inline arrays that duplicated
+        // `numbers.units` and `numbers.teens`, and the copy had DRIFTED two places: the teens array carried
+        // two leading "" pads, so r=12 asked for "tien" and r=10 asked for the EMPTY string. The empty tail
+        // then matched `card.endsWith("")` — true for every string — and `card.slice(0, -0)` is `""`,
+        // because -0 === 0. So 110 lost its whole "honderd en " and read *tiende*, while 112…119 missed
+        // the match and fell through to the regular -ste, giving *honderd en twaalfste* where this
+        // function's own docblock says honderdtwaalfde.
+        // ⚠ NO `!` HERE — that is the assertion #763 was landed to remove, and it would fail the same way:
+        // a shortened manifest array gives `undefined`, `card.endsWith(undefined)` coerces to the string
+        // "undefined", and the compound silently falls through to plain -ste. One truthiness test covers
+        // both the missing entry AND the empty-string trap that caused this bug.
+        const tail = r < 10 ? MANIFEST.numbers.units[r] : MANIFEST.numbers.teens[r - 10];
+        if (tail && card.endsWith(tail))
             return `${card.slice(0, -tail.length)}${ORD_BELOW_20[r]}`;
     }
     return `${card}ste`;
@@ -70,6 +86,8 @@ const BARE_ALT = Object.keys(DOTTED_ABBREV)
     .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
     .join("|");
 
+const SIGN = MANIFEST.signWords; // afrikaans.jsonc — one word per math/sign symbol
+const FRAC = MANIFEST.fractionWords; // …and the two suppletive halves
 const LETTER_NAME = MANIFEST.letterNames; // afrikaans.jsonc — the g2p spells these through itself
 
 /** Afrikaans phonotactics, for the OOV rule in core/initialisms.ts (can this letter run be a word at all?). */
@@ -159,7 +177,10 @@ export function normalizeAfrikaans(input: string): string {
     const clock = (h: string, min: string, period?: string): string =>
         `${numberToWords(Number(h))}${Number(min) === 0 ? "" : ` ${numberToWords(Number(min))}`}${period ?? ""}`;
     const period = (p?: string): string =>
-        p === undefined ? "" : ` ${p.trim().toLowerCase() === "vm" ? "voormiddag" : "namiddag"}`;
+        // ⚠ AN UNKNOWN ABBREVIATION KEEPS ITS TEXT rather than vanishing. The regex only admits vm|nm
+        // today so the fallback is unreachable, but a silent "" is exactly how the sign words would have
+        // leaked as `undefined` — the same class of miss, and the same policy: leave it alone.
+        p === undefined ? "" : ` ${MANIFEST.clockPeriods[p.trim().toLowerCase()] ?? p.trim()}`;
     // The trailing guard rejects a further `:` or `.` FOLLOWED BY A DIGIT — a SPORTS TIME, of which the
     // corpus has three (`4:41.30`, `2:11:60`, `1:09:02`). Guarding on `:` alone let `4:41.30` through: the
     // clock claimed `4:41` and stranded `.30` as a phrase break plus a bare number. A plain `.` may NOT be
@@ -179,7 +200,7 @@ export function normalizeAfrikaans(input: string): string {
     // separator-less instances are both `vm`, and admitting `nm` here reads the nanometre `10nm` as *tien
     // namiddag*. A spaced or dotted `n.m.`/`nm` still reaches the forms above.
     s = s.replace(/(?<![\d:])([01]?\d|2[0-3])(vm)(?![\p{L}\p{M}])/giu,
-        (_m, h: string) => `${numberToWords(Number(h))} voormiddag`);
+        (_m, h: string) => `${numberToWords(Number(h))} ${MANIFEST.clockPeriods["vm"]}`);
 
     // 6) COMMA-GROUPED THOUSANDS. The comma is the ENGLISH grouping separator here (17,500, 100,000) — NOT
     //    a decimal. It is consumed before the symbol tier so the tier sees a plain digit run, and before the
@@ -243,24 +264,24 @@ export function normalizeAfrikaans(input: string): string {
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The
     //    reading is this language's own two words juxtaposed, and ⚠ both are SIGN names rather than
     //    OPERATION names, which is what ± needs: it marks a TOLERANCE, not an addition.
-    s = s.replace(/±/gu, " plus of minus ");
-    s = s.replace(/\+\s?(?=\d)/gu, " plus ");
-    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, "minus $1");
+    s = s.replace(/±/gu, ` ${SIGN.plusMinus} `);
+    s = s.replace(/\+\s?(?=\d)/gu, ` ${SIGN.plus} `);
+    s = s.replace(/(?<![\p{L}\p{Nd}])-(\d+)(?!\s*[-\d])/gu, `${SIGN.minus} $1`);
     s = s.replace(/(?<![\p{L}\p{M}])(\p{Lu})&(\p{Lu})(?![\p{L}\p{M}])/gu, (_m, a: string, b: string) =>
-        `${LETTER_NAME[a.toLowerCase()] ?? a} en ${LETTER_NAME[b.toLowerCase()] ?? b}`);
-    s = s.replace(/\s&\s/gu, " en ");
-    s = s.replace(/(\S)\s*=\s*(\S)/gu, "$1 gelyk aan $2");
-    s = s.replace(/(\d)\s*<\s*(\d)/gu, "$1 kleiner as $2");
-    s = s.replace(/(\d)\s*>\s*(\d)/gu, "$1 groter as $2");
-    s = s.replace(/(\d)\s*×\s*(\d)/gu, "$1 keer $2");
-    s = s.replace(/(\d)\s*÷\s*(\d)/gu, "$1 gedeel deur $2");
+        `${LETTER_NAME[a.toLowerCase()] ?? a} ${SIGN.ampersand} ${LETTER_NAME[b.toLowerCase()] ?? b}`);
+    s = s.replace(/\s&\s/gu, ` ${SIGN.ampersand} `);
+    s = s.replace(/(\S)\s*=\s*(\S)/gu, `$1 ${SIGN.equals} $2`);
+    s = s.replace(/(\d)\s*<\s*(\d)/gu, `$1 ${SIGN.lessThan} $2`);
+    s = s.replace(/(\d)\s*>\s*(\d)/gu, `$1 ${SIGN.greaterThan} $2`);
+    s = s.replace(/(\d)\s*×\s*(\d)/gu, `$1 ${SIGN.times} $2`);
+    s = s.replace(/(\d)\s*÷\s*(\d)/gu, `$1 ${SIGN.dividedBy} $2`);
 
     // 12) FRACTIONS (×1: `1/5 duim`). Afrikaans builds these on the ordinal, as Dutch does: 1/5 → *een vyfde*,
     //     3/4 → *drie vierde*, and 1/2 is the suppletive *een half*. The trailing guard keeps a date or a
     //     ratio chain (`1/5/2020`) out. LAST, so no earlier rule has to work around a slash.
     s = s.replace(/(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
-        if (den === 2) return num === 1 ? "een half" : `${numberToWords(num)} halwe`;
+        if (den === 2) return num === 1 ? FRAC.oneHalf : `${numberToWords(num)} ${FRAC.halves}`;
         const ord = ordinalWord(den);
         return ord === undefined ? m0 : `${numberToWords(num)} ${ord}`;
     });

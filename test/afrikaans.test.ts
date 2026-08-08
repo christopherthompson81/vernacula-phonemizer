@@ -125,6 +125,20 @@ describe("Afrikaans text normalization", () => {
         expect(ordinalWord(190)).toBe("honderd en negentigste");
     });
 
+    // ⚠ THE SUB-20 TAIL OF A COMPOUND — the case the test above never reached, and it was broken both ways.
+    // The tails were two inline arrays duplicating numbers.units/teens, and the teens copy had drifted two
+    // places: r=10 asked for an EMPTY tail, `card.endsWith("")` is true for everything, and
+    // `card.slice(0, -0)` is "" because -0 === 0 — so 110 lost its whole "honderd en " and read *tiende*.
+    // r=12…19 asked for the wrong word, missed the match, and fell through to plain -ste, giving
+    // *honderd en twaalfste* where ordinalWord's own docblock says honderdtwaalfde. Reads the manifest now.
+    test("a compound ordinal keeps its prefix AND takes the sub-20 form", () => {
+        expect(ordinalWord(110)).toBe("honderd en tiende"); // was *tiende* — prefix destroyed
+        expect(ordinalWord(111)).toBe("honderd en elfde"); // was *elfde*
+        expect(ordinalWord(112)).toBe("honderd en twaalfde"); // was *honderd en twaalfste*
+        expect(ordinalWord(119)).toBe("honderd en negentiende"); // was *honderd en negentienste*
+        expect(ordinalWord(101)).toBe("honderd en eerste"); // …and r<10 was already right
+    });
+
     test("text→text: the N-suffix ordinal becomes the ordinal words", () => {
         expect(normalizeAfrikaans("11de Hussars")).toBe("elfde Hussars");
         expect(normalizeAfrikaans("15de eeu")).toBe("vyftiende eeu");
@@ -256,5 +270,30 @@ describe("Afrikaans text normalization", () => {
         expect(MANIFEST.morphology.prefixUnstressed.length).toBeGreaterThan(0); // and the scan found something
     });
 
+
+    // ⚠ THE SIGN AND MATH WORDS ARE MANIFEST DATA (afrikaans.jsonc `signWords`), not literals in the
+    // replace calls. Afrikaans is the first engine to declare them — every other language still inlines
+    // its own, so this is the start of that migration rather than a fleet convention yet.
+    // ± is pinned because it is a SINGLE code point (U+00B1): no ⟨+⟩ rule can reach inside it, so without
+    // its own entry the sign disappears in silence rather than reading wrong.
+    // ⚠ THE HALF-DAY WORDS EXIST TWICE and JSON cannot reference itself: `clockPeriods` feeds the clock
+    // rule (9:30 vm) while `dottedAbbreviations` feeds the abbreviation pass (n.m. → namiddag), which runs
+    // earlier and by a different mechanism. They must agree, so this asserts it rather than trusting it.
+    test("clockPeriods and the dotted abbreviations tell the same story", () => {
+        expect(MANIFEST.dottedAbbreviations["n.m"]).toBe(MANIFEST.clockPeriods["nm"]);
+        expect(MANIFEST.dottedAbbreviations["n.m."]).toBe(MANIFEST.clockPeriods["nm"]);
+    });
+
+    test("the sign and math words come from the manifest", () => {
+        expect(ph("±5")).toContain("plœs ɔf minœs"); // ⚠ U+00B1, not "+"
+        expect(ph("3 = 3")).toContain("χələik ɑːn");
+        expect(ph("3 × 4")).toContain("kiər");
+        expect(ph("8 ÷ 2")).toContain("χədiəl døːr");
+        expect(ph("4 < 5")).toContain("kləinɛr as");
+        expect(ph("Jan & Piet")).toContain("ɛn");
+        // …and the two suppletive halves, the only fractions with words of their own.
+        expect(ph("1/2 duim")).toContain("iən ɦalf");
+        expect(ph("3/2 koppies")).toContain("ɦalvə");
+    });
 
 });

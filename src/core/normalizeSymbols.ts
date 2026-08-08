@@ -347,6 +347,35 @@ export function resolveUnitSymbol<V>(
     return written.length > 1 || foldSingle ? folded[written.toLowerCase()] : undefined;
 }
 
+/**
+ * The SIGN AND MATH WORDS a language reads for ± + − & = < > × ÷.
+ *
+ * ⚠ AN EXACT SHAPE RATHER THAN `Record<string, string>`, so the .ts side of a language cannot read a key
+ * this does not name. ⚠ BUT IT DOES NOT VALIDATE THE MANIFEST: `loadManifest<T>` parses JSON and casts,
+ * so a .jsonc that omits a key type-checks CLEANLY and the miss reaches the output as the literal string
+ * "undefined" — a leak the phoneme sink cannot tell from a word. Verified, not assumed: renaming a key in
+ * afrikaans.jsonc left `tsc --noEmit` green.
+ * ⚠ THE ACTUAL GUARD IS test/manifest-signwords.test.ts, which asserts every manifest declaring
+ * `signWords` declares the whole shape. That is what makes this safe to roll out across 70 engines.
+ *
+ * ⚠ THE SYMBOL TIER DOES NOT READ THIS YET. Each language's own normalize.ts applies these, because the
+ * surrounding rules (which signs occur, what guards they need) are per-language. This type exists so the
+ * 70 engines converge on ONE shape as they migrate — afrikaans is the first (#765).
+ */
+export interface SignWords {
+    /** ± — ⚠ ONE code point (U+00B1), so no ⟨+⟩ rule can reach inside it; without an entry it vanishes. */
+    plusMinus: string;
+    plus: string;
+    minus: string;
+    /** ⟨&⟩ — the ordinary word for "and". */
+    ampersand: string;
+    equals: string;
+    lessThan: string;
+    greaterThan: string;
+    times: string;
+    dividedBy: string;
+}
+
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const cf = d.countForm ?? defaultCountForm;
     const unitsFolded = foldedIndex(d.units);
