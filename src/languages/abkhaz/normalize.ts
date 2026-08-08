@@ -96,16 +96,22 @@ export function normalizeAbkhaz(text: string): string {
     // 5) ORDINALS (×36 across 12 distinct values). ⚠ AFTER ranges: `13-15` is a range, but `16-тәи` is an
     //    ordinal, and both begin `\d+-`. Ranges run first and consume only digit–digit, so what reaches
     //    here is a numeral followed by the suffix rather than by another numeral.
-    s = s.replace(new RegExp(`(\\d+)-${MANIFEST.numbers.ordinalSuffix}`, "gu"),
+    //    ⚠ THE SEPARATOR MAY BE A SPACE, not only a hyphen — "Совмин 1 тәи ихаҭыԥуаҩ" (×2 against ×20
+    //    hyphenated). Found by reading the corpus diff, not by probing: the hyphenated form is what the
+    //    hard-set carries, and the spaced one only shows up in running text.
+    s = s.replace(new RegExp(`(\\d+)[- ]${MANIFEST.numbers.ordinalSuffix}`, "gu"),
         (m0, d: string) => ordinalWords(Number(d)) ?? m0);
 
     // 6) ABBREVIATIONS (×125). ⚠ THE EXPANSIONS ARE THE CORPUS'S OWN SPELLINGS, counted in it: шықәса
     //    ("year", spelled ×35 in its inflected forms) and ашәышықәса ("century", ×16). The dot is the
     //    abbreviation's, not a sentence's, so it is consumed — otherwise it survives as a phrase break in
     //    the middle of a date ("1452ш." read as a number, a bare letter, then a full stop).
-    //    ⚠ LONGEST FIRST (шш before ш, ашә before ш) or the shorter key eats the longer one's stem.
+    //    ⚠ LONGEST FIRST (ш.ш and шш before ш, ашә before ш) or the shorter key eats the longer one's
+    //    stem — and ⟨ш.ш.⟩ is exactly that case: the dot is not a letter, so the lookbehind does NOT stop
+    //    a ⟨ш⟩-keyed rule from matching the second half, which produced *шықәсашықәса.
+    //    ⚠ THE KEY IS REGEX-ESCAPED because one of them now contains a dot.
     for (const [abbr, full] of MANIFEST.abbreviations)
-        s = s.replace(new RegExp(`(?<![\\p{L}])${abbr}\\.`, "gu"), full);
+        s = s.replace(new RegExp(`(?<![\\p{L}])${abbr.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\.`, "gu"), full);
 
     return s;
 }

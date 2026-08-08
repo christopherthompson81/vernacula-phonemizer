@@ -97,6 +97,9 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(ab.text("6-тәи").trim()).toBe("afbatʷʼi"); // corpus spells афбатәи
         expect(ab.text("19-тәи").trim()).toBe("azejʒʷtʷʼi");
         expect(ab.text("1-тәи").trim()).toBe("akʼtʷʼi"); // ⚠ suppletive актәи, not *акытәи from акы
+        // ⚠ THE SEPARATOR MAY BE A SPACE (×2 vs ×20 hyphenated) — "Совмин 1 тәи ихаҭыԥуаҩ". Also a
+        // corpus-diff find: the hard-set only carries the hyphenated form.
+        expect(ab.text("1 тәи").trim()).toBe("akʼtʷʼi");
     });
 
     test("normalization: the year and century abbreviations expand", () => {
@@ -105,6 +108,10 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // corpus's own spellings (шықәса ×35 inflected, ашәышықәса ×16).
         expect(ab.text("1452ш.").trim()).toBe("zkʰʲə pʰʃəʃʷi ɥənɥaʒʷi ʒʷaɥa ʂəkʷʰsa");
         expect(ab.text("1908-1915 шш.").trim()).toContain("ʂəkʷʰsakʷʰa");
+        // ⚠ ⟨ш.ш.⟩ is a spelling of ⟨шш.⟩ (×3 vs ×12) and needs its own row: the abbreviation dot is not
+        // a LETTER, so the lookbehind does not stop a ⟨ш⟩-keyed rule matching the second half — it read
+        // *шықәсашықәса. Found by reading the corpus diff, not by probing.
+        expect(ab.text("1870-74 ш.ш.").trim()).toContain("ʂəkʷʰsakʷʰa");
     });
 
     test("normalization: what it must NOT touch", () => {

@@ -94,8 +94,11 @@
     // tools/corpus/mined/ab.jsonc — nothing is invented, and the counts are in the rule comments.
     // ⟨ш.⟩ is the year abbreviation and ⟨ашә.⟩ the century one; ⟨шш.⟩ is the plural year form. LONGEST
     // FIRST, because the scan applies them in order and ⟨ш⟩ would otherwise eat the stem of ⟨шш⟩/⟨ашә⟩.
+    // ⚠ ⟨ш.ш.⟩ IS A SPELLING OF ⟨шш.⟩ (×3 against ×12) and needs its own row: the abbreviation dot is not
+    // a letter, so a rule keyed on ⟨ш⟩ alone matches BOTH halves and yields *шықәсашықәса.
     "abbreviations": [
         ["ашә", "ашәышықәса"],
+        ["ш.ш", "шықәсақәа"],
         ["шш", "шықәсақәа"],
         ["ш", "шықәса"]
     ],
