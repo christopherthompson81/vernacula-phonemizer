@@ -35,6 +35,7 @@ function loadStressLex(): ReadonlyMap<string, number> {
 
 interface RomanianDef {
     consonants: Record<string, string>;
+    obstruents: readonly string[];
     vowels: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: Record<string, unknown>;
@@ -46,7 +47,7 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const VOWEL_LETTERS = "aeiouăâî";
 const FRONT = "ei"; // c/g soften before these
 const VOWEL_PH = "aeiouəɨ";
-const OBSTRUENT = new Set(["b", "p", "t", "d", "k", "ɡ", "f", "v", "s", "z", "ʃ", "ʒ", "h", "t͡ʃ", "d͡ʒ", "t͡s"]);
+const OBSTRUENT = new Set(DEF.obstruents);
 const isVowelLetter = (c: string | undefined): boolean => c !== undefined && VOWEL_LETTERS.includes(c);
 const isFront = (c: string | undefined): boolean => c !== undefined && FRONT.includes(c);
 

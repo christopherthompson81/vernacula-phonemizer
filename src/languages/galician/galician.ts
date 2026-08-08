@@ -13,7 +13,7 @@ import { MANIFEST } from "./manifest.ts";
 
 const NASALS = new Set(MANIFEST.nasals);
 const STOP_TO_FRIC = MANIFEST.spirantize;
-const VELARS = new Set(["k", "ɡ"]);
+const VELARS = new Set(MANIFEST.velars);
 
 /** Coda velarization — Galician neutralizes a coda/word-final nasal to the velar [ŋ]:
  *   • ⟨n⟩ → ŋ word-finally (Alén→alɛŋ), before a velar stop (cinco→siŋko), and in the word-final -ns plural

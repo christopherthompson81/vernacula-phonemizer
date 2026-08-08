@@ -26,6 +26,12 @@
 
     // Single consonant graphemes → IPA. ⟨c⟩=[k], ⟨x⟩=[ʃ] (Crawford's retroflex /š/), ⟨j⟩=[h], ⟨v w⟩=[v]/[w],
     // ⟨y⟩=[j]; every apostrophe shape → [ʔ].
+    // ⚠ POST-NASAL VOICING fires after these two ONLY — and the engine does emit [ŋ], which is absent on
+    // purpose: the rule is conditioned on ⟨m n⟩, not on nasality in general.
+    "voicingNasals": ["m", "n"],
+    // The velars, for the intervocalic lenition pass.
+    "velars": ["k", "ɡ", "ɣ"],
+
     "consonants": {
         "p": "p", "t": "t", "k": "k", "c": "k", "b": "b", "d": "d", "g": "ɡ", "m": "m", "n": "n", "s": "s",
         "x": "ʃ", "j": "h", "h": "h", "v": "v", "w": "w", "y": "j", "l": "l", "r": "ɾ", "f": "f", "z": "ʒ",

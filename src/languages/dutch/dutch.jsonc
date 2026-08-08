@@ -26,6 +26,14 @@
     // Orthographic vowel letter → IPA, chosen by the g2p's open/closed length rule. `long` = tense (open
     // syllable / doubled); `short` = lax (closed syllable). Trema letters (ë ï ö ü) base-map to their plain
     // vowel; they never join a preceding vowel into a digraph (tweeën → tʋeːə, the ë breaks the ⟨ee⟩).
+    // Dutch's CONSONANT phone inventory — the engine tests it to collapse a doubled coda+onset across a
+    // syllable seam, so it must list exactly the phones the tables above can emit (⟨ʋ⟩ for ⟨w⟩, ⟨ɦ⟩ for
+    // ⟨h⟩, ⟨ɣ⟩ for the voiced velar fricative).
+    "consonantPhones": [
+        "p", "t", "k", "b", "d", "f", "s", "x", "ʃ", "ɣ", "v",
+        "z", "ŋ", "n", "m", "l", "r", "ɦ", "j", "ʋ", "ɡ"
+    ],
+
     "vowels": {
         "long": {
             "a": "aː",

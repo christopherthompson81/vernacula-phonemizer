@@ -25,6 +25,7 @@ import { normalizeLuxembourgish } from "./normalize.ts";
 interface LuxDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
+    voicelessObstruents: readonly string[];
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<LuxDef>(import.meta.url, "luxembourgish.jsonc");
@@ -35,7 +36,7 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 const VOWEL_PH = IPA_VOWEL; // IPA vowel heads (for the s→z onset test)
 const DEVOICE: Record<string, string> = { b: "p", d: "t", ɡ: "k", z: "s", v: "f" }; // obstruent → its voiceless pair
-const VOICELESS_OBSTR = new Set(["p", "t", "k", "s", "ʃ", "f", "χ", "t͡s", "t͡ʃ"]); // triggers regressive devoicing
+const VOICELESS_OBSTR = new Set(DEF.voicelessObstruents); // triggers regressive devoicing
 
 /** One scan token: the IPA phones for a grapheme + flags marking a single ⟨s⟩ (may voice to [z]) or a single ⟨e⟩
  *  (realized [æ] when stressed, [ə] when not — see realizeE). */

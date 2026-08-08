@@ -93,7 +93,7 @@ export function phonemizeWord(word: string): string {
 }
 
 // IPA consonant symbols a Dutch chunk can end/start with (for seam degemination). Vowels/offglides excluded.
-const CONS_IPA = new Set(["p", "t", "k", "b", "d", "f", "s", "x", "ʃ", "ɣ", "v", "z", "ŋ", "n", "m", "l", "r", "ɦ", "j", "ʋ", "ɡ"]);
+const CONS_IPA = new Set(MANIFEST.consonantPhones);
 
 /** Join compound chunks, DEGEMINATING at each seam: Dutch collapses a doubled consonant across a compound boundary
  *  (voedings+stof → vudɪŋstɔf, knoop+punt → knoːpʏnt, gras+spriet → ɣraspriːt). The next chunk's leading stress mark

@@ -24,6 +24,11 @@
 
     // Single grapheme → canonical IPA. ⟨é⟩→eː (the long mid; only ⟨éi⟩ is the diphthong), ⟨ë⟩→ə, ⟨ä⟩→æ; ⟨w⟩→v, ⟨v⟩→f, ⟨z⟩→t͡s,
     // ⟨s⟩→s (→z as an onset in code), ⟨g⟩→ɡ (→χ word-final in code), ⟨c⟩→k, ⟨x⟩→ks, ⟨y⟩→i.
+    // The VOICELESS OBSTRUENTS that trigger REGRESSIVE DEVOICING — Luxembourgish devoices a preceding
+    // voiced obstruent across the boundary (the Äddi-Wollen sandhi). This is the language's own set: ⟨χ⟩ is
+    // in it (the ⟨ch⟩ fricative) where a Germanic neighbour would write ⟨x⟩.
+    "voicelessObstruents": ["p", "t", "k", "s", "ʃ", "f", "χ", "t͡s", "t͡ʃ"],
+
     "graphemes": {
         "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "é": "eː", "ë": "ə", "ä": "æ", "y": "i",
         "b": "b", "c": "k", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "j", "k": "k",

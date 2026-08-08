@@ -37,6 +37,9 @@
 
     // Nasal phonemes (a following nasal blocks spirantization) and the stop→fricative spirantization pairs.
     "nasals": ["m", "n", "ɲ", "ŋ"],
+    // The VELAR STOPS before which a word-final ⟨n⟩ stays velar rather than assimilating — the second half
+    // of the nasal-velarization rule whose first half is "nasals" above.
+    "velars": ["k", "ɡ"],
     "spirantize": { "b": "β", "d": "ð", "ɡ": "ɣ" },
 
     // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-accented in

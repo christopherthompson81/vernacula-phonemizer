@@ -13,6 +13,7 @@ import { numberToWords } from "./numbers.ts";
 interface AncientGreekDef {
     vowels: Record<string, [string, string]>;
     consonants: Record<string, string>;
+    velars: readonly string[];
     voicedAfterSigma: readonly string[];
     diphthongs: Record<string, string>;
 }
@@ -29,7 +30,7 @@ const MARKS = new Set([ROUGH, SMOOTH, ACUTE, GRAVE, CIRCUM, SUBSCRIPT, DIAERESIS
 const VOWEL = DEF.vowels;
 const CONS = DEF.consonants;
 const DIPHTHONG = DEF.diphthongs;
-const VELAR = new Set(["ɡ", "k", "kʰ", "ks"]); // γ → [ŋ] before one of these (the ⟨γγ γκ γχ γξ⟩ nasal)
+const VELAR = new Set(DEF.velars); // γ → [ŋ] before one of these (the ⟨γγ γκ γχ γξ⟩ nasal)
 // ⟨σ⟩ → [z] before a VOICED consonant (ancientgreek.jsonc): Λέσβια→lézbia, Σμύρνα→zmýrna.
 const VOICED_AFTER_S = new Set(DEF.voicedAfterSigma);
 

@@ -18,6 +18,10 @@
     },
 
     // Vowels: 7-vowel system. ă → ə (mid central), â/î → ɨ (close central; two spellings, one phoneme).
+    // The OBSTRUENTS — both voicings, since the rule that reads them asks "is this an obstruent at all?"
+    // rather than which one. Romanian's set includes the affricates ⟨t͡ʃ d͡ʒ t͡s⟩ as single units.
+    "obstruents": ["b", "p", "t", "d", "k", "ɡ", "f", "v", "s", "z", "ʃ", "ʒ", "h", "t͡ʃ", "d͡ʒ", "t͡s"],
+
     "vowels": {
         "a": "a", "e": "e", "i": "i", "o": "o", "u": "u",
         "ă": "ə", "â": "ɨ", "î": "ɨ"

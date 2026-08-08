@@ -22,6 +22,12 @@
     },
 
     // A checked (glottalized) stop: devoice + a glottal release ⟨ʼ⟩ (ɡ→kʼ, d→tʼ …).
+    // ⚠ THE CHECKED-CONSONANT machinery. Santali's hallmark is the GLOTTALIZED (checked) final stop, so
+    // the engine needs the stops as a class, and the VOICED subset separately: a checked voiced stop
+    // surfaces differently from a checked voiceless one.
+    "stops": ["ɡ", "k", "t", "d", "ʈ", "ɖ", "p", "b", "c", "ɟ"],
+    "voicedStops": ["ɡ", "d", "ɖ", "b", "ɟ"],
+
     "checked": {
         "ɡ": "kʼ", "k": "kʼ", "d": "tʼ", "t": "tʼ", "ɖ": "ʈʼ", "ʈ": "ʈʼ", "b": "pʼ", "p": "pʼ", "ɟ": "cʼ", "c": "cʼ",
     },

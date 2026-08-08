@@ -30,6 +30,11 @@
     // and ⟨qu gu⟩ drop the [w] before one.
     "frontLetters": ["e", "i", "é", "è", "í", "ï"],
 
+    // ⚠ THE VOICELESS PHONES that block intervocalic ⟨s⟩→[z]. ⟨ʃ⟩ is NOT here although the engine emits
+    // it: this list is only ever tested against the phone FOLLOWING a single ⟨s⟩, and the affricates are
+    // caught by their head [t]. Widening it to "the voiceless obstruents" would change the ⟨s⟩ rule.
+    "voicelessPhones": ["p", "t", "k", "f", "s"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },

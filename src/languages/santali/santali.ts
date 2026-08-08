@@ -13,6 +13,8 @@ import { numberToWords, readDigits } from "./numbers.ts";
 
 interface SantaliDef {
     letters: Record<string, string>;
+    stops: readonly string[];
+    voicedStops: readonly string[];
     checked: Record<string, string>;
     aspirated: Record<string, string>;
     gahla: Record<string, string>;
@@ -30,8 +32,8 @@ const VOWEL = IPA_VOWEL;
 // A vowel NUCLEUS test that survives nasalization/length (NFD so ã→a+◌̃, ɛ̃→ɛ+◌̃ still count as vowels).
 const VOWEL_BASE = IPA_VOWEL;
 const isVowelSeg = (s: string): boolean => [...s.normalize("NFD")].some((c) => VOWEL_BASE.has(c));
-const STOP = new Set(["ɡ", "k", "t", "d", "ʈ", "ɖ", "p", "b", "c", "ɟ"]);
-const VOICED_STOP = new Set(["ɡ", "d", "ɖ", "b", "ɟ"]);
+const STOP = new Set(DEF.stops);
+const VOICED_STOP = new Set(DEF.voicedStops);
 const CHECKED = DEF.checked;
 const ASPIRATE = DEF.aspirated;
 const GAHLA = DEF.gahla;

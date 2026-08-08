@@ -9,6 +9,10 @@ import { loadManifest } from "../../core/loadManifest.ts";
 export interface IrishManifest {
     slenderVowels: string;
     broadVowels: string;
+    /** The four broad/slender liquids that svarabhakti breaks. */
+    liquids: readonly string[];
+    /** The consonants after which that break happens. */
+    svarabhaktiNext: readonly string[];
     broad: Record<string, string>;
     slender: Record<string, string>;
     lenition: Record<string, [string, string]>;

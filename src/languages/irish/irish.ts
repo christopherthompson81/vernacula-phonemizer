@@ -33,8 +33,8 @@ const SHORT = new Set(["a", "ɛ", "ɪ", "ɔ", "ʊ"]);
 const isSlenderC = (ph: string): boolean => ph.endsWith("ʲ") || ph === "c" || ph === "ɟ" || ph === "ʃ" || ph === "ç";
 const BACK_V = new Set(["ɑː", "oː"]); // LONG back vowels only (áit, cóir); short a is inconsistent (gairm has none)
 // /r/ or /l/ (broad or slender) triggers svarabhakti before a labial/velar/palatal consonant.
-const LIQUID = new Set(["ɾˠ", "ɾʲ", "l̪ˠ", "lʲ"]);
-const SVARABHAKTI_NEXT = new Set(["mˠ", "mʲ", "bˠ", "bʲ", "vˠ", "vʲ", "w", "ɡ", "ɟ", "x", "ç", "ɣ", "j", "n̪ˠ", "nʲ"]);
+const LIQUID = new Set(MANIFEST.liquids);
+const SVARABHAKTI_NEXT = new Set(MANIFEST.svarabhaktiNext);
 
 /** Long back vowel + a following slender consonant → insert an i-offglide ⁱ, whether that consonant is a coda
  *  (áit → ɑːⁱtʲ, cóir → oːⁱɾʲ) or an onset of the next syllable (óige → oːⁱɟə, áirithe → ɑːⁱɾʲə). A short back

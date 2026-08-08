@@ -16,6 +16,7 @@ import { IPA_VOWEL } from "../../core/ipa.ts";
 interface TurkmenDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
+    nasals: readonly string[];
     numbers: NumbersDef; // units[0..9], tens{"10".."90"} (Turkic: 10 IS a tens entry), magnitudes{}
     clausePunctuation: Record<string, string>;
 }
@@ -23,7 +24,7 @@ const DEF = loadManifest<TurkmenDef>(import.meta.url, "turkmen.jsonc");
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const VOWEL = IPA_VOWEL;
-const NASAL = new Set(["m", "n", "ŋ"]);
+const NASAL = new Set(DEF.nasals);
 
 /** Sonority class (higher = more sonorous): vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */
 function sonority(seg: string): number {

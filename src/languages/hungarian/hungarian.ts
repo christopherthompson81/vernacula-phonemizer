@@ -93,10 +93,10 @@ function mergeGeminates(segs: Seg[]): void {
 // takes the voicing of a following obstruent (biztat→[bistɒt] z→s; lég·szivattyú→[leːk…] ɡ→k; vasgolyó→[vaʒɡ…]).
 const DEVOICE: Record<string, string> = { b: "p", d: "t", ɡ: "k", v: "f", z: "s", ʒ: "ʃ", "d͡z": "t͡s", "d͡ʒ": "t͡ʃ", ɟ: "c" };
 const VOICE: Record<string, string> = { p: "b", t: "d", k: "ɡ", f: "v", s: "z", ʃ: "ʒ", "t͡s": "d͡z", "t͡ʃ": "d͡ʒ", c: "ɟ" };
-const VOICELESS_TRIGGER = new Set(["p", "t", "k", "f", "s", "ʃ", "t͡s", "t͡ʃ", "c", "x"]);
+const VOICELESS_TRIGGER = new Set(MANIFEST.voicelessTriggers);
 // Voiced obstruents that TRIGGER voicing of a preceding one — /v/ and /h/ are excluded (v devoices but does not
 // voice a preceding obstruent; h is not a trigger).
-const VOICED_TRIGGER = new Set(["b", "d", "ɡ", "z", "ʒ", "d͡z", "d͡ʒ", "ɟ"]);
+const VOICED_TRIGGER = new Set(MANIFEST.voicedTriggers);
 const base = (ph: string): string => ph.replace(/ː$/u, "");
 
 /** Regressive obstruent voicing assimilation (right-to-left so a cluster propagates). Preserves length. */

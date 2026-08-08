@@ -20,6 +20,12 @@
 
     // Longest-match orthography → IPA. The boolean = the unit is a vowel nucleus. Geminate digraphs (first letter
     // doubled) come before their base digraph; digraphs before single letters.
+    // ⚠ THE VOICING-ASSIMILATION TRIGGERS. Hungarian assimilates a whole obstruent cluster to the LAST
+    // member's voicing, so the engine needs both directions. These are Hungarian's own inventories — the
+    // palatal stops ⟨c ɟ⟩ are members here in a way most languages' sets have no equivalent for.
+    "voicelessTriggers": ["p", "t", "k", "f", "s", "ʃ", "t͡s", "t͡ʃ", "c", "x"],
+    "voicedTriggers": ["b", "d", "ɡ", "z", "ʒ", "d͡z", "d͡ʒ", "ɟ"],
+
     "rules": [
         ["ddzs", "d͡ʒː", false],
         ["dzs", "d͡ʒ", false],
