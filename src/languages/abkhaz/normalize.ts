@@ -51,11 +51,16 @@ import { numberToWords } from "./numbers.ts";
  */
 function ordinalWords(n: number): string | undefined {
     if (!Number.isSafeInteger(n) || n < 1) return undefined;
-    if (n === 1) return MANIFEST.numbers.ordinalOne;
     const words = numberToWords(n).split(" ");
     const first = words[0]!;
     words[0] = first.startsWith("а") ? first : `а${first}`; // акы already carries the prefix; ҩба does not
-    words[words.length - 1] = `${words[words.length - 1]}${MANIFEST.numbers.ordinalSuffix}`;
+    const last = words.length - 1;
+    // ⚠ THE SUPPLETION IS ABOUT THE LAST CARDINAL WORD, NOT ABOUT n === 1. Keying it on the number made
+    // every COMPOUND ending in one produce the very form the comment above calls impossible: 21-тәи came
+    // out аҩажәи *акытәи, and 21 and 291 are both attested in the corpus.
+    words[last] = words[last] === MANIFEST.numbers.units[1]
+        ? MANIFEST.numbers.ordinalOne
+        : `${words[last]}${MANIFEST.numbers.ordinalSuffix}`;
     return words.join(" ");
 }
 
@@ -72,9 +77,29 @@ export function normalizeAbkhaz(text: string): string {
     //    second numeral, and `125 000` read as "125" followed by the WORD zero.
     //    ⚠ ONLY between digit groups of exactly three, so a genuine "1877 шықәсазы" (year + word) is
     //    untouched — the guard is the following group being 3 digits and not more.
-    s = s.replace(/(\d{1,3})(?:[   ](\d{3}))+(?!\d)/gu, (m) => m.replace(/[   ]/gu, ""));
+    //    ⚠ THE LEFT GUARD IS LOAD-BEARING: without `(?<!\d)` the 1–3 digit group BACKTRACKS into the tail
+    //    of a longer number, so "1877 250 ҩык" (a year beside a count) joined into 1877250 and was read as
+    //    one seven-figure number. The comment used to claim the 3-digit rule covered that; it did not.
+    s = s.replace(/(?<!\d)(\d{1,3})(?:[   ](\d{3}))+(?!\d)/gu, (m) => m.replace(/[   ]/gu, ""));
 
-    // 3) DECIMALS (×120, the commonest numeric form after bare digit runs). The comma is the decimal
+    // 3) RANGES (×71: 1908-1915, 10-11, 13-15). ⚠ BOTH CONNECTIVES ARE CORPUS-ATTESTED and neither is
+    //    invented: инаркны ("from", ×25) and рҟынӡа/аҟынӡа ("to", ×25/×17) — the corpus writes them out in
+    //    exactly this frame ("16-тәи ашәышықәса инаркны 19-тәи ашәышықәса алагамҭа аҟынӡа").
+    //    ⚠ BEFORE the decimal rule, and the endpoints admit a comma — because the decimal rewrite replaces
+    //    that comma with a SPACE, which destroys the digit-dash-digit shape this needs. Ordered the other
+    //    way, the attested "6,4-7,6" lost its dash entirely and read as four bare numerals.
+    //    ⚠ The guard rejects a dash that follows a letter, so a hyphenated word is never a range.
+    s = s.replace(/(?<![\p{L}\d-])(\d+(?:,\d+)?)\s?[-–—]\s?(\d+(?:,\d+)?)(?![\d,-])/gu,
+        (m0: string, a: string, b: string, off: number, whole: string) => {
+            // ⚠ DO NOT DOUBLE A "TO" THE TEXT ALREADY WROTE. "1800-2000 м рҟынӡа" is attested, and adding
+            // the connective unconditionally read рҟынӡа twice. Same guard the shared symbol tier uses for
+            // a percent word that follows its sign.
+            const after = whole.slice(off + m0.length, off + m0.length + 40);
+            const said = /[ар]ҟынӡа/u.test(after);
+            return `${a} ${MANIFEST.numbers.rangeFrom} ${b}${said ? "" : ` ${MANIFEST.numbers.rangeTo}`}`;
+        });
+
+    // 4) DECIMALS (×120, the commonest numeric form after bare digit runs). The comma is the decimal
     //    separator, and it was reaching clause punctuation as a PAUSE — a sentence break inside a number.
     //    ⚠ THE DECIMAL POINT HAS NO SOURCEABLE WORD. tools/normalization/sources.ts reports `decimal-point
     //    NONE` for ab (no espeak entry — espeak does not ship Abkhaz at all — and no manifest word), and
@@ -85,21 +110,15 @@ export function normalizeAbkhaz(text: string): string {
     s = s.replace(/(\d+),(\d+)/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].map((d) => numberToWords(Number(d))).join(" ")}`);
 
-    // 4) RANGES (×71: 1908-1915, 10-11, 13-15). ⚠ BOTH CONNECTIVES ARE CORPUS-ATTESTED and neither is
-    //    invented: инаркны ("from", ×25) and рҟынӡа/аҟынӡа ("to", ×25/×17) — the corpus writes them out in
-    //    exactly this frame ("16-тәи ашәышықәса инаркны 19-тәи ашәышықәса алагамҭа аҟынӡа").
-    //    ⚠ AFTER the decimal rule, so a comma-decimal is already gone and cannot be split across the dash;
-    //    and the guard rejects a dash that follows a letter, so a hyphenated word is never a range.
-    s = s.replace(/(?<![\p{L}\d-])(\d+)\s?[-–—]\s?(\d+)(?![\d-])/gu,
-        (_m, a: string, b: string) => `${a} ${MANIFEST.numbers.rangeFrom} ${b} ${MANIFEST.numbers.rangeTo}`);
-
     // 5) ORDINALS (×36 across 12 distinct values). ⚠ AFTER ranges: `13-15` is a range, but `16-тәи` is an
     //    ordinal, and both begin `\d+-`. Ranges run first and consume only digit–digit, so what reaches
     //    here is a numeral followed by the suffix rather than by another numeral.
     //    ⚠ THE SEPARATOR MAY BE A SPACE, not only a hyphen — "Совмин 1 тәи ихаҭыԥуаҩ" (×2 against ×20
     //    hyphenated). Found by reading the corpus diff, not by probing: the hyphenated form is what the
     //    hard-set carries, and the spaced one only shows up in running text.
-    s = s.replace(new RegExp(`(\\d+)[- ]${MANIFEST.numbers.ordinalSuffix}`, "gu"),
+    //    ⚠ AND A TRAILING BOUNDARY, or the suffix matches the START of a longer word: 5-тәижәа glued into
+    //    ахәбатәижәа.
+    s = s.replace(new RegExp(`(\\d+)[- ]${MANIFEST.numbers.ordinalSuffix}(?![\\p{L}])`, "gu"),
         (m0, d: string) => ordinalWords(Number(d)) ?? m0);
 
     // 6) ABBREVIATIONS (×125). ⚠ THE EXPANSIONS ARE THE CORPUS'S OWN SPELLINGS, counted in it: шықәса
@@ -111,7 +130,11 @@ export function normalizeAbkhaz(text: string): string {
     //    a ⟨ш⟩-keyed rule from matching the second half, which produced *шықәсашықәса.
     //    ⚠ THE KEY IS REGEX-ESCAPED because one of them now contains a dot.
     for (const [abbr, full] of MANIFEST.abbreviations)
-        s = s.replace(new RegExp(`(?<![\\p{L}])${abbr.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\.`, "gu"), full);
+        //    ⚠ THE DOT MAY BE THE SENTENCE'S TOO. Consuming it unconditionally ran two sentences together
+        //    ("Ари 1452ш. Аҩбатәи ауп." lost its pause), so it is re-emitted when what follows looks like a
+        //    new sentence — whitespace then an upper-case letter.
+        s = s.replace(new RegExp(`(?<![\\p{L}])${abbr.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\.(\\s+\\p{Lu})?`, "gu"),
+            (_m, tail?: string) => (tail === undefined ? full : `${full}.${tail}`));
 
     return s;
 }

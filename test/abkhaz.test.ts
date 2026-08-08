@@ -83,12 +83,20 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         const ab = createAbkhaz();
         // ×13. The group split and the second half read as the WORD zero: 125 000 → "…χʷba anolʲ".
         expect(ab.text("125 000 ҩык").trim()).toBe("ʃʷi ɥaʒʷi χʷba nəzkʰʲ ɥəkʼ");
+        // ⚠ WITHOUT THE LEFT GUARD the 1–3 digit group backtracks into a longer number, so a year beside
+        // a count joined into one seven-figure number.
+        expect(ab.text("1877 250 ҩык").trim()).not.toContain("milljon");
     });
 
     test("normalization: a range takes its attested connectives", () => {
         const ab = createAbkhaz();
         // ×71. Both words are the corpus's own, in this exact frame: инаркны ×25 "from", рҟынӡа ×25 "to".
         expect(ab.text("10-11 ашә.").trim()).toBe("ʒʷaba inarkʼnə ʒʷejza rqʼənd͡za aʃʷəʂəkʷʰsa");
+        // ⚠ RANGES RUN BEFORE DECIMALS and admit a comma, because the decimal rewrite replaces that comma
+        // with a SPACE and destroys the digit-dash-digit shape — "6,4-7,6" (attested) lost its dash.
+        expect(ab.text("6,4-7,6").trim()).toContain("inarkʼnə");
+        // ⚠ …and the "to" word is not doubled when the text already wrote one.
+        expect(ab.text("1800-2000 м рҟынӡа").trim().match(/rqʼənd͡za/gu)?.length).toBe(1);
     });
 
     test("normalization: ⟨N-тәи⟩ is the ordinal, а + cardinal + тәи", () => {
@@ -100,6 +108,13 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // ⚠ THE SEPARATOR MAY BE A SPACE (×2 vs ×20 hyphenated) — "Совмин 1 тәи ихаҭыԥуаҩ". Also a
         // corpus-diff find: the hard-set only carries the hyphenated form.
         expect(ab.text("1 тәи").trim()).toBe("akʼtʷʼi");
+        // ⚠ THE SUPPLETION IS ABOUT THE LAST CARDINAL WORD, not about n === 1 — keying it on the number
+        // made every COMPOUND ending in one produce the very form the rule calls impossible: 21-тәи came
+        // out аҩажәи *акытәи. Both 21 and 291 are attested in the corpus.
+        expect(ab.text("21-тәи").trim()).toBe("aɥaʒʷi akʼtʷʼi");
+        expect(ab.text("101-тәи").trim()).toBe("aʃʷi akʼtʷʼi");
+        // …and the suffix needs a trailing boundary, or it matches the START of a longer word.
+        expect(ab.text("5-тәижәа").trim()).not.toContain("aχʷbatʷʼi");
     });
 
     test("normalization: the year and century abbreviations expand", () => {
@@ -112,6 +127,9 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // a LETTER, so the lookbehind does not stop a ⟨ш⟩-keyed rule matching the second half — it read
         // *шықәсашықәса. Found by reading the corpus diff, not by probing.
         expect(ab.text("1870-74 ш.ш.").trim()).toContain("ʂəkʷʰsakʷʰa");
+        // ⚠ THE ABBREVIATION DOT MAY BE THE SENTENCE'S TOO — consuming it unconditionally ran two
+        // sentences together with no pause.
+        expect(ab.text("Ари 1452ш. Аҩбатәи ауп.").trim()).toContain(" . ");
     });
 
     test("normalization: what it must NOT touch", () => {
