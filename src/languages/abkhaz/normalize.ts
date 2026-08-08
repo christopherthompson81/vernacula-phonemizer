@@ -16,29 +16,74 @@
  *
  * ORDER IS LOAD-BEARING; each step states its coupling.
  *
- * ⚠ DELIBERATELY NOT DONE — AND LOOKED UP, NOT ASSUMED. `tools/normalization/review.ts --lang ab` still
- * reports these as DROPPED, and it is right to; they are blocked on VOCABULARY, not on code. The evidence
- * is `tools/normalization/sources.ts --lang ab` plus a `corpus-words.ts` probe of each candidate spelling:
+ * ⚠ THE SYMBOL VOCABULARY (percent, degrees, currency, км², the clock) IS SOURCED FROM THE FULL
+ * ab.wikipedia TEXT, not from the sampled corpus artifact — the artifact's 208 excerpts attest none of it,
+ * which originally deferred all of these classes. The full-text search (2026-08-08) attests every word and
+ * every frame the rules below emit; counts and verbatim snippets are in
+ * docs/abkhaz_vocabulary_investigation.md, and the words live in the manifest's `symbols` block.
  *
- *   percent  ×31   no word. Neither процент nor апроцент/проценти occurs in 7,780 distinct corpus tokens.
- *   degree   ×19   `scale-names NONE` — neither Celsius nor Fahrenheit anywhere; градус occurs ONCE, in a
- *                  lunar-eclipse passage, which is not enough to hang a reading on (the Fula lesson).
- *   exponent ×16   no square/power word sourceable; the ² currently reaches an English reader as "squared".
- *   minus    ×13   no word — минус/аминус absent.
- *   math     ×12   +, =, <, >, ×, ÷ — none of their words attested.
- *   currency ×6    доллар appears only as a SUBSTRING of longer tokens, never as a token.
+ * ⚠ STILL DEFERRED — AND LOOKED UP, NOT ASSUMED. `tools/normalization/review.ts --lang ab` keeps
+ * reporting these as DROPPED, and it is right to; they are blocked on VOCABULARY, not on code:
+ *
+ *   minus    ×13   минус ×0 on the full wiki (плюс too — its one hit is a Russian publisher's name);
+ *                  Glosbe's "translation" is the "-" glyph itself. So −173 °C still reads without its sign.
+ *   math     ×12   +, =, <, >, ×, ÷ — none of their words attested anywhere searched.
+ *   cubic    —     куб ×0, so м³/см³/км³ keep their symbol (only км² has a spelled form). °F likewise: no
+ *                  Fahrenheit attestation, so ⟨°F⟩ is deliberately left untouched by the degree rule.
  *   ampersand ×1   one instance, inside a Russian-language bibliographic citation.
  *
  * ⚠ ESPEAK CANNOT HELP HERE: it does not ship Abkhaz at all, so the fleet's usual fallback for numerals
- * and unit words is unavailable. Closing these needs a source this repo does not yet have — which is a
- * sourcing problem, not a coding one, and worth knowing before anyone plans the work.
- *
- * ⚠ ALSO NOT DONE: the clock (×3 in the corpus). The colon reaches clause punctuation and reads as a
- * pause, which is wrong, but three instances is too thin to choose between the possible readings and no
- * "hour"/"minute" frame is attested digit-adjacent.
+ * and unit words is unavailable.
  */
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+
+const ESC = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+
+/**
+ * The SHARED symbol tier carries percent and currency (with the magnitude hop), and this file uses it
+ * rather than hand-rolling them — the tier's guards are the accumulated defect list of the fleet:
+ * the "already said it" suppression (⟨95% процент⟩ and ⟨$1000 доллар⟩ each read their word TWICE in the
+ * hand-rolled first version — the exact Malayalam/Nepali defects the tier was built for), the left
+ * letter-boundary with longest-first compound keys (⟨US$30⟩ otherwise strands a raw "US"), and
+ * count-form machinery Abkhaz doesn't need but costs nothing (1-element forms).
+ * The magnitudes are the SPELLED words — step 3c expands млрд/млн before this runs, so the tier's
+ * number→magnitude→currency order lands exactly the attested "8 миллиард доллар" frame.
+ */
+const symbolize = makeSymbolNormalizer({
+    percent: [MANIFEST.symbols.percent],
+    currency: Object.fromEntries(MANIFEST.symbols.currencies.map(([sym, word]) => [sym, [word]])),
+    magnitudes: [MANIFEST.numbers.milliard, MANIFEST.numbers.million],
+});
+
+/**
+ * The clock word's "already said" lookback — PRECOMPILED (the first version compiled per match, against
+ * an unbounded prefix slice, with the manifest word unescaped), and ⚠ LEFT-BOUNDED: the и- prefix is
+ * productive in Abkhaz (the manifest's own ⟨Цельси иградус⟩), so a word merely ENDING in асааҭ must not
+ * suppress the frame word — ⟨иасааҭ 22:30⟩ still needs its own асааҭ.
+ */
+const HOUR_SAID = new RegExp(`(?<![\\p{L}])${ESC(MANIFEST.symbols.hour)}\\s*$`, "u");
+const saidHour = (whole: string, off: number): boolean =>
+    HOUR_SAID.test(whole.slice(Math.max(0, off - MANIFEST.symbols.hour.length - 4), off));
+
+/**
+ * One H:MM(:SS) as spoken digits, or undefined for a shape no wall clock shows (25:99 stays text —
+ * bounds per the shared house rule, swedish/normalize.ts's isClock).
+ * ⚠ ONLY TRAILING zero components are dropped. The first version dropped zero components ANYWHERE,
+ * so 10:00:30 collapsed to the same output as the DIFFERENT time 10:30 — the seconds slid into the
+ * minutes slot. The corpus justification ("асааҭ 10.00") covers dead TAIL zeros and nothing more.
+ */
+function clockParts(h: string, mm: string, ss: string | undefined): string | undefined {
+    if (Number(h) >= 24 || Number(mm) >= 60 || (ss !== undefined && Number(ss) >= 60)) return undefined;
+    const parts = [h, String(Number(mm))];
+    if (ss !== undefined) parts.push(String(Number(ss)));
+    while (parts.length > 1 && parts[parts.length - 1] === "0") parts.pop();
+    return parts.join(" ");
+}
+
+/** One clock time — hours 1–2 digits, minutes exactly 2, optional seconds. Shared by both clock rules. */
+const TIME = "(\\d{1,2}):(\\d{2})(?::(\\d{2}))?";
 
 /**
  * ⚠ THE ORDINAL IS а + CARDINAL + тәи, and the corpus spells enough of them to prove it: аҩбатәи (2),
@@ -82,7 +127,87 @@ export function normalizeAbkhaz(text: string): string {
     //    one seven-figure number. The comment used to claim the 3-digit rule covered that; it did not.
     s = s.replace(/(?<!\d)(\d{1,3})(?:[   ](\d{3}))+(?!\d)/gu, (m) => m.replace(/[   ]/gu, ""));
 
-    // 3) RANGES (×71: 1908-1915, 10-11, 13-15). ⚠ BOTH CONNECTIVES ARE CORPUS-ATTESTED and neither is
+    //    ⚠ COMMA-GROUPING TOO. Two-plus groups are unambiguous (£29,721,250 — the wiki spells that very
+    //    sum de-grouped, "29,721,250 фунт стерлинг"). A SINGLE comma group collides with the decimal
+    //    comma, but NOT evenly, and the artifact itself is the tiebreak: its `\d{1,3},\d{3}` instances
+    //    split 7 groupings ("301,340 км²", "143,600", "21,000 К") against 5 decimals — and every one of
+    //    the 5 decimals begins ⟨0,⟩ ("0,723", "0,306"). So the INTEGER PART discriminates: a leading 0
+    //    keeps the decimal reading, anything else de-groups. (The first version kept every single group
+    //    as a decimal and mis-read the majority class its own comment claimed to protect.)
+    s = s.replace(/(?<![\d,])\d{1,3}(?:,\d{3}){2,}(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = s.replace(/(?<![\d,.])([1-9]\d{0,2}),(\d{3})(?![\d,])/gu, "$1$2");
+
+    // 3) SYMBOLS — percent, degrees, currency, км², the clock. The words and their ORDER are the
+    //    full-wiki attestations recorded in the manifest `symbols` block (sourcing:
+    //    docs/abkhaz_vocabulary_investigation.md).
+    //    ⚠ BEFORE ranges and decimals, deliberately: "83°C" must attach its unit while the digits are
+    //    still beside it — the range rewrite inserts words between endpoints, and after it runs the ⟨°C⟩
+    //    would be touching ⟨рҟынӡа⟩, not a digit. Symbol rules only move a WORD in beside the digit span,
+    //    so the later number rules still see the digit shapes they expect.
+
+    //    3a) THE CLOCK (×3: "22:30 рзы", "асааҭ 18:21:56 рзы"). The frame word goes BEFORE the number,
+    //    said ONCE — the corpus wrote it itself in one instance, so the rule must not double it.
+    //    ⚠ THE HYPHENATED RANGE FORM FIRST. Rewriting "10:00-16:00" endpoint-by-endpoint doubled the
+    //    frame word AND stranded the hyphen where the digit-range rule of step 4 could no longer see it
+    //    ("асааҭ 10-асааҭ 16") — breaking this step's own header promise. The corpus frame carries the
+    //    word once for the whole pair ("асааҭ 10.00 инаркны 16.00"), and the connectives are step 4's,
+    //    including its don't-double-рҟынӡа guard.
+    //    ⚠ NOT A CLOCK: "(1:51.4)" — a race time, in the corpus — is excluded by the `[.,]\d` trailing
+    //    guard ("minutes" carrying a fraction are a duration), and 25:99 by the wall-clock bounds in
+    //    clockParts (h<24, mm<60, ss<60 — the shared house rule).
+    s = s.replace(new RegExp(`(?<![\\d:])${TIME}\\s?[-–—]\\s?${TIME}(?![\\d:]|[.,]\\d)`, "gu"),
+        (m0: string, h1: string, m1: string, s1: string | undefined, h2: string, m2: string,
+            s2: string | undefined, off: number, whole: string) => {
+            const a = clockParts(h1, m1, s1), b = clockParts(h2, m2, s2);
+            if (a === undefined || b === undefined) return m0;
+            const after = whole.slice(off + m0.length, off + m0.length + 40);
+            const to = /[ар]ҟынӡа/u.test(after) ? "" : ` ${MANIFEST.numbers.rangeTo}`;
+            return `${saidHour(whole, off) ? "" : `${MANIFEST.symbols.hour} `}${a} ${MANIFEST.numbers.rangeFrom} ${b}${to}`;
+        });
+    s = s.replace(new RegExp(`(?<![\\d:])${TIME}(?![\\d:]|[.,]\\d)`, "gu"),
+        (m0: string, h: string, mm: string, ss: string | undefined, off: number, whole: string) => {
+            const t = clockParts(h, mm, ss);
+            if (t === undefined) return m0;
+            return `${saidHour(whole, off) ? "" : `${MANIFEST.symbols.hour} `}${t}`;
+        });
+
+    //    3b) DEGREES (×19: "+23,2 °C", "3,4°", "(+462°C)"). ⟨°C⟩ takes the attested unit NAME
+    //    ⟨Цельси иградус⟩ verbatim — Цельси is never attested bare after a number, so no other order can
+    //    claim a source. A bare ⟨°⟩ is the postposed ⟨градус⟩ ("180 градус").
+    //    ⚠ ⟨С⟩ MAY BE CYRILLIC — U+0421 is what a Russian keyboard types, so the Celsius class holds both
+    //    letters; without the Cyrillic one, ⟨23 °С⟩ fell through to the bare rule, which consumed the
+    //    space and glued: *градусС.
+    //    ⚠ THE SKIP CLASS WANTS A STANDALONE LETTER, so each letter is bounded — unbounded, any following
+    //    WORD starting with C/F/K suppressed the rule ("60° Кырҭтәыла" kept its raw °). ⟨°F⟩/⟨°Ф⟩ and
+    //    Kelvin still fall through deliberately: no Fahrenheit word is attested, and Kelvin is written
+    //    unsigned ("135 K") — a standalone letter after ° stays untouched, a word does not.
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}])/gu, (_m, d: string) => `${d} ${MANIFEST.symbols.celsius}`);
+    s = s.replace(/(\d)\s?°(?!\s?[CFKКСФ](?![\p{L}]))/gu, (_m, d: string) => `${d} ${MANIFEST.symbols.degree}`);
+
+    //    3c) SCALE ABBREVIATIONS (млрд/млн: "$1,86 млрд", "€ 30 млн") — BEFORE the symbol tier, so the
+    //    currency rule can hop the SPELLED scale word and land the currency name LAST, in the attested
+    //    "8 миллиард доллар" order. The words come from `numbers` via the manifest's scale→key mapping —
+    //    one copy, shared with the number path.
+    //    ⚠ THE DOT FORMS ARE REAL (млн./млрд. — Russian writes them dotted, and sibling corpora attest
+    //    both), so the dot is consumed like step 7's abbreviation dots — and like there, it may be the
+    //    SENTENCE'S too, so it is re-emitted before whitespace + an upper-case letter.
+    for (const [abbr, slot] of Object.entries(MANIFEST.symbols.scales))
+        s = s.replace(new RegExp(`(?<![\\p{L}])${ESC(abbr)}(?:\\.(\\s+\\p{Lu})?|(?![\\p{L}]))`, "gu"),
+            (_m, tail?: string) => (tail === undefined ? MANIFEST.numbers[slot] : `${MANIFEST.numbers[slot]}.${tail}`));
+
+    //    3d) PERCENT (×31) and CURRENCY (×6) go through the SHARED symbol tier (see `symbolize` above),
+    //    which owns the guards: already-said suppression, letter-bounded longest-first keys, and the
+    //    number→magnitude→currency order that is exactly the attested Abkhaz frame.
+    s = symbolize(s);
+
+    //    3e) КМ² (the bulk of the ×16 exponent class): "143,600 километра квадрат" is the wiki's own
+    //    spelling of a км² area — unit and power together, postposed after the number. ⚠ ONLY the square
+    //    kilometre: no cubic word exists to source (куб ×0), so м³ and г/см³ keep their symbols. (Bare
+    //    ⟨км⟩ → километр is also full-wiki attested — "18 километр", "20 километр" — but plain length
+    //    units are a separate class, left for its own change.)
+    s = s.replace(/км²/gu, MANIFEST.symbols.squareKm);
+
+    // 4) RANGES (×71: 1908-1915, 10-11, 13-15). ⚠ BOTH CONNECTIVES ARE CORPUS-ATTESTED and neither is
     //    invented: инаркны ("from", ×25) and рҟынӡа/аҟынӡа ("to", ×25/×17) — the corpus writes them out in
     //    exactly this frame ("16-тәи ашәышықәса инаркны 19-тәи ашәышықәса алагамҭа аҟынӡа").
     //    ⚠ BEFORE the decimal rule, and the endpoints admit a comma — because the decimal rewrite replaces
@@ -99,7 +224,7 @@ export function normalizeAbkhaz(text: string): string {
             return `${a} ${MANIFEST.numbers.rangeFrom} ${b}${said ? "" : ` ${MANIFEST.numbers.rangeTo}`}`;
         });
 
-    // 4) DECIMALS (×120, the commonest numeric form after bare digit runs). The comma is the decimal
+    // 5) DECIMALS (×120, the commonest numeric form after bare digit runs). The comma is the decimal
     //    separator, and it was reaching clause punctuation as a PAUSE — a sentence break inside a number.
     //    ⚠ THE DECIMAL POINT HAS NO SOURCEABLE WORD. tools/normalization/sources.ts reports `decimal-point
     //    NONE` for ab (no espeak entry — espeak does not ship Abkhaz at all — and no manifest word), and
@@ -110,7 +235,7 @@ export function normalizeAbkhaz(text: string): string {
     s = s.replace(/(\d+),(\d+)/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].map((d) => numberToWords(Number(d))).join(" ")}`);
 
-    // 5) ORDINALS (×36 across 12 distinct values). ⚠ AFTER ranges: `13-15` is a range, but `16-тәи` is an
+    // 6) ORDINALS (×36 across 12 distinct values). ⚠ AFTER ranges: `13-15` is a range, but `16-тәи` is an
     //    ordinal, and both begin `\d+-`. Ranges run first and consume only digit–digit, so what reaches
     //    here is a numeral followed by the suffix rather than by another numeral.
     //    ⚠ THE SEPARATOR MAY BE A SPACE, not only a hyphen — "Совмин 1 тәи ихаҭыԥуаҩ" (×2 against ×20
@@ -121,7 +246,7 @@ export function normalizeAbkhaz(text: string): string {
     s = s.replace(new RegExp(`(\\d+)[- ]${MANIFEST.numbers.ordinalSuffix}(?![\\p{L}])`, "gu"),
         (m0, d: string) => ordinalWords(Number(d)) ?? m0);
 
-    // 6) ABBREVIATIONS (×125). ⚠ THE EXPANSIONS ARE THE CORPUS'S OWN SPELLINGS, counted in it: шықәса
+    // 7) ABBREVIATIONS (×125). ⚠ THE EXPANSIONS ARE THE CORPUS'S OWN SPELLINGS, counted in it: шықәса
     //    ("year", spelled ×35 in its inflected forms) and ашәышықәса ("century", ×16). The dot is the
     //    abbreviation's, not a sentence's, so it is consumed — otherwise it survives as a phrase break in
     //    the middle of a date ("1452ш." read as a number, a bare letter, then a full stop).
