@@ -10,6 +10,8 @@ export interface LuoManifest {
     name: string;
     script: readonly string[];
     graphemes: Record<string, string>;
+    /** The SPELLING vowels — the gi-/g- elision reads them; not IPA. */
+    spellingVowels: readonly string[];
     clausePunctuation: Record<string, string>;
 }
 

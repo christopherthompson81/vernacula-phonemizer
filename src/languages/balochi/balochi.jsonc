@@ -38,6 +38,11 @@
     // abjad intends.
     "vowelLetters": ["ا", "آ", "و", "ى", "ی", "ے"],
 
+    // ⚠ ORTHOGRAPHIC, NOT IPA, AND NOT THE ARABIC-SCRIPT LIST ABOVE. Balochi is written in both scripts;
+    // phonemizeRoman scans the ROMAN spelling, and these are its vowel letters. "vowelLetters" above is
+    // the Arabic-script set, for a different scan in the same engine.
+    "romanVowels": ["a", "e", "i", "o", "u"],
+
     // NUMBERS — Balochi Arabic spellings; the canonical IPA is resolved through the cross-script lexicon
     // (balochi-lexicon.tsv now carries these headwords with their full vowels — the defective abjad cannot recover
     // them: ⟨هپت⟩ alone scans to *hpt̪). Composed by balochi/numbers.ts.

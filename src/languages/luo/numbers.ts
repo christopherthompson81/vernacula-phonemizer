@@ -23,6 +23,7 @@
  * speech and teaching material use, and it extends cleanly to 10⁹, which the traditional set does not
  * (Omniglot has to build 10⁹ as tara gi gana '10⁶ and 10³').
  */
+import { MANIFEST } from "./manifest.ts";
 
 const ONES = ["nono", "achiel", "ariyo", "adek", "ang'wen", "abich", "auchiel", "abiriyo", "aboro", "ochiko"];
 const TEN = "apar";
@@ -31,9 +32,7 @@ const HUNDRED = "mia";
 const THOUSAND = "elfu";
 const MILLION = "milion";
 const BILLION = "bilion";
-// ⚠ ORTHOGRAPHIC, NOT IPA — the gi-/g- elision reads the SPELLING of the next number word, so this
-// stays a Luo-letter list (see the Quechua note; core/ipa.ts is for emitted phones).
-const VOWELS = new Set([..."aeiou"]);
+const VOWELS = new Set(MANIFEST.spellingVowels); // ORTHOGRAPHIC (luo.jsonc), never core/ipa.ts
 
 /** The coordinator gi 'and': elides to a solid g- before a vowel-initial word, stays free before a consonant. */
 const and = (w: string): string => (VOWELS.has(w[0]!) ? `g${w}` : `gi ${w}`);
