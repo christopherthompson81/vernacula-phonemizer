@@ -46,8 +46,9 @@ const C_SOFT = new Set(MANIFEST.cSoftBefore); // ⟨c⟩ → [s] before one of t
 // regex merged it either way), but it is one edit away from mattering. Derived, it cannot drift again.
 const V = MANIFEST.vowelLetters.join("");
 const VOWEL_GROUP = new RegExp(`[${V}]+`, "gu");
-// Longest-first so ⟨siteit⟩ wins over ⟨teit⟩ — the manifest lists them that way, and sorting here keeps that
-// true even if the list is later reordered.
+// Longest-first is cosmetic here, NOT load-bearing: both patterns are $-anchored and used only through
+// .test(), so alternation order cannot change the boolean. Sorted anyway so the source reads in the same
+// order as the manifest lists them, and so it stays correct if either is ever used to CAPTURE.
 const byLen = (xs: readonly string[]): string => [...xs].sort((a, b) => b.length - a.length).join("|");
 const STRESS_FINAL = new RegExp(`(${byLen(MANIFEST.stressFinalSuffixes)})$`, "u");
 const STRESS_PENULT = new RegExp(`(${byLen(MANIFEST.stressPenultSuffixes)})$`, "u");
@@ -85,7 +86,7 @@ function phonemizeMorpheme(word: string): string {
             // following letter fell into the soft branch. Moving the list to the manifest turned that into
             // a Set, which would have silently flipped 38 of 1500 probe words to [k]. Kept identical here
             // because a data move must not change output; the af referee covers neither reading, so the
-            // question needs its own evidence rather than a refactor's side effect.
+            // question needs its own evidence rather than a refactor's side effect. Filed as issue #757.
             const nx = w[i + 1];
             out += nx === undefined || C_SOFT.has(nx) ? "s" : "k";
             i += 1;
@@ -124,13 +125,10 @@ function phonemizeMorpheme(word: string): string {
 // Reduced IPA per unstressed prefix (afrikaans.jsonc). Separable prefixes (aan/af…) carry stress and take
 // the normal morpheme path.
 const PREFIX_IPA = MANIFEST.prefixIpa;
-// ⚠ THE TWO LISTS MUST AGREE — they are the same six prefixes read by two different consumers (this file's
-// stress + IPA, and the shared compound engine's decomposition). Cheap, and only reachable by editing one.
-{
-    const a = [...MANIFEST.morphology.prefixUnstressed].sort().join(",");
-    const b = Object.keys(PREFIX_IPA).sort().join(",");
-    if (a !== b) throw new Error(`afrikaans: prefixIpa keys (${b}) ≠ morphology.prefixUnstressed (${a})`);
-}
+// ⚠ THE TWO LISTS MUST AGREE — the same six prefixes, read by two consumers (this file's stress + IPA,
+// and the shared compound engine's decomposition). Asserted in test/afrikaans.test.ts rather than here:
+// registry.ts imports this module STATICALLY, so a throw at module init would make one typo in the
+// Afrikaans manifest break every other language's import too.
 
 /** Phonemize one Afrikaans word to canonical IPA. Compounds/affixed words are DECOMPOSED (shared morphology) and
  *  each morpheme phonemized independently — so each element keeps its OWN stressed vowel (no cross-element reduction:

@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { MANIFEST } from "../src/languages/afrikaans/manifest.ts";
+
 import { phonemizeWord, createAfrikaans } from "../src/languages/afrikaans/afrikaans.ts";
 import { normalizeAfrikaans, ordinalWord } from "../src/languages/afrikaans/normalize.ts";
 import { numberToWords } from "../src/languages/afrikaans/numbers.ts";
@@ -182,4 +184,14 @@ describe("Afrikaans text normalization", () => {
         expect(getPhonemizer("af").text("5 m³").trim()).toContain("kyːbikə miətər");
         expect(getPhonemizer("af").text("40 m.p.u").trim()).toContain("məil pɛr yːr");
     });
+    // ⚠ THE SAME SIX UNSTRESSED PREFIXES ARE READ BY TWO CONSUMERS — afrikaans.ts (stress placement + the
+    // reduced prefix IPA) and the shared Germanic compound engine via morphology.prefixUnstressed. They
+    // were three hand-written copies before #756, and a copy drifts. Asserted here rather than thrown at
+    // module init: registry.ts imports afrikaans.ts statically, so an init-time throw would take every
+    // other language's import down with it over one Afrikaans data typo.
+    test("prefixIpa keys are exactly morphology.prefixUnstressed", () => {
+        expect(Object.keys(MANIFEST.prefixIpa).sort()).toEqual([...MANIFEST.morphology.prefixUnstressed].sort());
+        expect(MANIFEST.morphology.prefixUnstressed.length).toBeGreaterThan(0); // and the scan found something
+    });
+
 });
