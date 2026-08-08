@@ -297,7 +297,7 @@ delete), and `schwaDeletion` in the manifest is already the configurable hook fo
 31 bho words + 2 mai; nothing else in any referee carries the character. Logged as its own change with a
 measurable target, like the Icelandic over-application in Run 7 which became #749.
 
-## Run 10 — 2026-08-08 ~02:00 — the avagraha, closed
+## Run 10 — 2026-08-07 ~23:30 — the avagraha, closed
 
 The residual from Run 9a. ⚠ FIRST CORRECTION: the character is **U+093D** DEVANAGARI SIGN AVAGRAHA, not
 U+0973 as the review reported — checked by dumping the codepoints of a referee headword rather than

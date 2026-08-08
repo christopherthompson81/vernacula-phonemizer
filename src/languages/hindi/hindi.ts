@@ -31,7 +31,8 @@ export interface HindiDef extends AbugidaDef {
         retainInMonosyllable?: boolean;
         retainFinalAfterCluster?: boolean;
         /** ⚠ A word-final AVAGRAHA ⟨ऽ⟩ (U+093D) retains the inherent vowel it writes. See the note in
-         *  wordRules — this is spelling-driven, so it overrides the deletion rule for that word alone. */
+         *  wordRules — this is spelling-driven, so it overrides the deletion rule for that word alone.
+         *  The SIGN itself comes from `AbugidaScript.avagraha`, since it differs per Brahmic block. */
         retainOnAvagraha?: boolean;
     };
     clausePunctuation: Record<string, string>;
@@ -72,13 +73,20 @@ export function heavyFinalCoda(body: string): boolean {
 export interface AbugidaScript {
     word: string;
     digits: Record<string, string>;
+    /**
+     * The script's AVAGRAHA sign, for `schwaDeletion.retainOnAvagraha`. ⚠ IT IS PER-SCRIPT, not a
+     * constant: the Brahmic blocks are aligned so it sits at offset 0x3D in each — Devanagari ऽ U+093D,
+     * Bengali ঽ U+09BD, Gujarati ઽ U+0ABD. Hard-coding the Devanagari one would make the flag silently
+     * INERT for any language passing another block, with the manifest still reading as though it were on.
+     */
+    avagraha?: string;
 }
 
 export function makeNativeHindi(
     def: HindiDef,
     phon: Phonology = loadSharedPhonology(),
     foreign?: ForeignPhonemizer,
-    script: AbugidaScript = { word: DEVANAGARI_WORD, digits: DEVANAGARI_DIGITS },
+    script: AbugidaScript = { word: DEVANAGARI_WORD, digits: DEVANAGARI_DIGITS, avagraha: "\u093D" },
     lexicon?: ReadonlyMap<string, string>,
     /**
      * PER-LANGUAGE OVERRIDES for the two things that are Hindi's LEXICAL choices rather than its engine.
@@ -129,6 +137,14 @@ export function makeNativeHindi(
         "gu",
     );
 
+    // ⚠ FAIL LOUDLY RATHER THAN SILENTLY DO NOTHING. A manifest asking for avagraha retention under a
+    // script that has not declared its avagraha would read as though the rule were on while every final
+    // schwa still deleted — the failure mode this codebase keeps turning up. Cheap, and only reachable
+    // through misconfiguration.
+    const retainOnAvagraha = def.schwaDeletion.retainOnAvagraha === true;
+    if (retainOnAvagraha && script.avagraha === undefined)
+        throw new Error("schwaDeletion.retainOnAvagraha is set but this script declares no `avagraha` sign");
+
     /** Pure RULE-ENGINE word→IPA (no lexicon) — the honest, non-circular signal used by the referee eval. */
     function wordRules(w: string): string {
         let x = g2p(w);
@@ -137,7 +153,7 @@ export function makeNativeHindi(
         // orthographic instruction to retain, so it is the one retain-condition that cannot be decided
         // from `x`: g2p drops the character, leaving nothing downstream to test. Verified against the
         // grammar-mined referee, where every one of its 31 avagraha forms keeps the vowel.
-        const avagraha = def.schwaDeletion.retainOnAvagraha === true && /\u093D$/u.test(w);
+        const avagraha = retainOnAvagraha && w.endsWith(script.avagraha!);
         for (const r of post) x = x.replace(r.re, r.to);
         const syls = (x.match(VOWEL_G) || []).length;
         if (

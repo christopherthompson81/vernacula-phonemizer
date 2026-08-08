@@ -18,6 +18,16 @@ describe("Maithili canonical IPA", () => {
         expect(phonemizeWord("दौड़ब")).toBe("d̪ˈəʊɽəb"); // औ → əʊ
     });
 
+    // ⚠ THE AVAGRAHA ⟨ऽ⟩ RETAINS the final vowel here as in Bhojpuri (schwaDeletion.retainOnAvagraha).
+    // Pinned because nothing else asserted it: the flag was set with two referee forms behind it, and a
+    // later re-tune of this schwa block could switch it back with no test complaining.
+    // ⚠ THE LENGTH IS A KNOWN DIVERGENCE: the referee has अऽ → əː (LONG), the engine emits short ⟨ə⟩.
+    // These goldens pin what the engine does, not what the referee wants — see maithili.jsonc.
+    test("a word-final avagraha ⟨ऽ⟩ retains the vowel (length still short — known divergence)", () => {
+        expect(phonemizeWord("अऽ")).toBe("ˈə"); // referee əː — retained, but short
+        expect(phonemizeWord("अहाँलऽ")).toBe("əɦˈaː̃lə"); // referee ə ɦ ãː l əː
+    });
+
     test("shared Indo-Aryan core (Hindi-identical where Maithili does not diverge)", () => {
         expect(phonemizeWord("मीत")).toBe("mˈiːt̪"); // 'friend'
         expect(phonemizeWord("पुस्तक")).toBe("pˈʊst̪ək"); // 'book'

@@ -145,6 +145,12 @@
     "schwaDeletion": {
         "deleteWordFinal": true,
         "retainInMonosyllable": true,
+        // ⚠ A word-final AVAGRAHA ⟨ऽ⟩ RETAINS the vowel, as in Bhojpuri (bhojpuri.jsonc has the fuller
+        // note). Maithili's evidence is thin — TWO forms in the wikipron referee, अऽ and अहाँलऽ — but they
+        // agree, and retention is the same live orthographic use.
+        // ⚠ KNOWN DIVERGENCE, deliberately not chased: the referee transcribes the retained vowel LONG
+        // (अऽ → əː) and the engine emits short ⟨ə⟩. Retention is the part that is certain; inventing a
+        // per-language avagraha vowel to fit two words would be fitting noise.
         "retainOnAvagraha": true,
         "medialRule": "ohala-VCaCV",
         "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
