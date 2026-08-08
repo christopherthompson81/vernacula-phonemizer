@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+
 import { phonemizeWord, createAbkhaz } from "../src/languages/abkhaz/abkhaz.ts";
 
 // Canonical-IPA goldens for Abkhaz (ab) — аҧсуа бызшәа, a Northwest Caucasian language with one of
@@ -64,4 +66,56 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(ab.text("1000000").trim()).toBe("milljon"); // миллион (Russian loan)
         expect(ab.text("1000000000").trim()).toBe("milljard"); // миллиард
     });
+    // ── TEXT NORMALIZATION ─────────────────────────────────────────────────────────────────────────────
+    // Counts are over tools/corpus/mined/ab.jsonc (an ab.wikipedia dump). Each rule answers a MEASURED
+    // defect, listed in normalize.ts's header — this is the playbook's step 2, pinned.
+    test("normalization: the decimal comma is not a clause pause", () => {
+        const ab = createAbkhaz();
+        // ×120, the commonest numeric form after bare digit runs. It reached clause punctuation and became
+        // a sentence break INSIDE a number: 11,3 → "ʒʷejza , χpʰa".
+        // ⚠ NO DECIMAL-POINT WORD IS SOURCEABLE for ab (sources.ts: no espeak — it does not ship Abkhaz —
+        // and no manifest word), so the fraction is read DIGIT BY DIGIT with no invented connective.
+        expect(ab.text("11,3 км").trim()).toBe("ʒʷejza χpʰa kʼm");
+        expect(ab.text("0,723").trim()).toBe("anolʲ bəʒba ɥba χpʰa");
+    });
+
+    test("normalization: a grouped numeral is ONE number", () => {
+        const ab = createAbkhaz();
+        // ×13. The group split and the second half read as the WORD zero: 125 000 → "…χʷba anolʲ".
+        expect(ab.text("125 000 ҩык").trim()).toBe("ʃʷi ɥaʒʷi χʷba nəzkʰʲ ɥəkʼ");
+    });
+
+    test("normalization: a range takes its attested connectives", () => {
+        const ab = createAbkhaz();
+        // ×71. Both words are the corpus's own, in this exact frame: инаркны ×25 "from", рҟынӡа ×25 "to".
+        expect(ab.text("10-11 ашә.").trim()).toBe("ʒʷaba inarkʼnə ʒʷejza rqʼənd͡za aʃʷəʂəkʷʰsa");
+    });
+
+    test("normalization: ⟨N-тәи⟩ is the ordinal, а + cardinal + тәи", () => {
+        const ab = createAbkhaz();
+        // ×36 over 12 distinct values. The suffix used to become a separate word: 6-тәи → "fba tʷʼi".
+        expect(ab.text("6-тәи").trim()).toBe("afbatʷʼi"); // corpus spells афбатәи
+        expect(ab.text("19-тәи").trim()).toBe("azejʒʷtʷʼi");
+        expect(ab.text("1-тәи").trim()).toBe("akʼtʷʼi"); // ⚠ suppletive актәи, not *акытәи from акы
+    });
+
+    test("normalization: the year and century abbreviations expand", () => {
+        const ab = createAbkhaz();
+        // ×125. ⟨ш.⟩ read as a bare letter and its dot as a full stop mid-date. The expansions are the
+        // corpus's own spellings (шықәса ×35 inflected, ашәышықәса ×16).
+        expect(ab.text("1452ш.").trim()).toBe("zkʰʲə pʰʃəʃʷi ɥənɥaʒʷi ʒʷaɥa ʂəkʷʰsa");
+        expect(ab.text("1908-1915 шш.").trim()).toContain("ʂəkʷʰsakʷʰa");
+    });
+
+    test("normalization: what it must NOT touch", () => {
+        const ab = createAbkhaz();
+        // ⚠ ROMAN NUMERALS ARE A REGISTRY-LEVEL SEAM, not an engine one: registry.ts wraps text() with
+        // normalizeRomans, so this must be probed through phonemize() — createAbkhaz().text() never sees
+        // the conversion and drops the Latin run instead. Pinned because the normalizer must not disturb
+        // the input the wrapper hands it.
+        expect(phonemize("XX ашәышықәса", "ab").trim()).toBe("ɥaʒʷa aʃʷəʂəkʷʰsa");
+        // A hyphenated WORD is not a range: the guard requires digits on both sides.
+        expect(ab.text("аԥсуа-аурыс").trim()).not.toContain("inarkʼnə");
+    });
+
 });
