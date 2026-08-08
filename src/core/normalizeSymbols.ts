@@ -518,13 +518,39 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     const hasMag = mag !== undefined && mag !== "";
                     const q = hasMag ? `${num}${mag}` : num;
                     const n = hasMag ? MANY : numValue(num);
-                    const head = pick(d.units![u.toLowerCase()]!, n, cf);
+                    // ⚠ UNITS ARE CASE-SENSITIVE, so the EXACT spelling is tried first. SI case carries
+                    // meaning — ⟨m⟩ metre vs ⟨M⟩ mega, ⟨s⟩ second vs ⟨S⟩ siemens, ⟨t⟩ tonne vs ⟨T⟩ tesla,
+                    // ⟨mb⟩/⟨Mb⟩/⟨MB⟩ — and ⟨V⟩ is capital because it is named for Volta; a lower-case ⟨v⟩
+                    // is not volt. The match itself stays case-INSENSITIVE so shouty text still reads
+                    // (5 KM), but that leniency is a FALLBACK, never a way to equate two real units.
+                    // ⚠ THE FALLBACK IS FOR MULTI-CHARACTER SYMBOLS ONLY, because case is contrastive
+                    // exactly where the symbol is ONE letter. Both members are real, different units:
+                    // ⟨s⟩ second vs ⟨S⟩ siemens, ⟨t⟩ tonne vs ⟨T⟩ tesla, ⟨a⟩ are vs ⟨A⟩ ampere, ⟨g⟩ gram
+                    // vs ⟨G⟩ gauss; and ⟨V⟩ volt, ⟨W⟩ watt, ⟨J⟩ joule, ⟨N⟩ newton are capital because they
+                    // are named after people — their lower-case forms are not units at all.
+                    // ⚠ AND AN UPPERCASE LETTER NEED NOT BE A UNIT EVEN WHEN THE LOWER-CASE ONE IS. A bare
+                    // ⟨M⟩ after a number is molar, or millions, or Roman 1000, or an honorific — never
+                    // metres. Folding it to ⟨m⟩ would state a reading the text does not support, which is
+                    // worse than declining: an undeclared unit is left alone and reaches the g2p as text.
+                    // Two-or-more-letter symbols that differ only by case do exist (mb/Mb/MB), but the
+                    // EXACT branch above already resolves those, so the fold only ever rescues shouty
+                    // text — `5 KM` → km — where no competing unit can be meant.
+                    // ⚠ AND NO NON-NULL ASSERTION. Before #763 this was `units[u.toLowerCase()]!`, which made
+                    // an unreachable uppercase key a THROW: `220 V` crashed the phonemizer outright, dying
+                    // in pick() three frames from the config that was actually wrong. A miss now leaves the
+                    // text alone — this module's stated policy for a half-resolvable match.
+                    const forms = d.units?.[u] ?? (u.length > 1 ? d.units?.[u.toLowerCase()] : undefined);
+                    if (forms === undefined) return whole;
+                    const head = pick(forms, n, cf);
                     if (denom !== undefined) {
                         // A rate needs both nouns and the connective; without any of them leave the text
                         // alone rather than emit half a reading.
-                        const dl = denom.toLowerCase();
-                        const dWord = d.units?.[dl]?.[0] ?? d.rateDenominators?.[dl];
-                        const per = typeof d.unitPer === "string" ? d.unitPer : d.unitPer?.[dl];
+                        // Same exact-then-folded resolution as the head unit, and for the same reason:
+                        // ⟨h⟩ hour and ⟨H⟩ henry are different units.
+                        const dl = denom.length > 1 ? denom.toLowerCase() : denom; // ⟨h⟩ hour vs ⟨H⟩ henry
+                        const dWord = d.units?.[denom]?.[0] ?? d.rateDenominators?.[denom]
+                            ?? d.units?.[dl]?.[0] ?? d.rateDenominators?.[dl];
+                        const per = typeof d.unitPer === "string" ? d.unitPer : (d.unitPer?.[denom] ?? d.unitPer?.[dl]);
                         if (per === undefined || dWord === undefined) return whole;
                         // `unitPrefix` applies here too, and forgetting it left Swahili reading
                         // "160 kilomita kwa saa" where the language writes the measure noun first. The rate is

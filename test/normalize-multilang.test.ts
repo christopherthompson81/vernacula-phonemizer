@@ -8,6 +8,32 @@ import { phonemize } from "../src/index.ts";
 // beyond English: the shared symbol layer (%, currency, units — per-language DATA over one engine,
 // with real count agreement), the French roman-numeral rules, and the Welsh + Oromo number compositors.
 describe("shared symbol normalizer (core)", () => {
+    // ⚠ UNITS ARE CASE-SENSITIVE, AND AN UPPERCASE KEY USED TO THROW (#763). The unit regex is built
+    // case-INSENSITIVELY and the match was resolved as `units[u.toLowerCase()]!` — so a key like ⟨V⟩ was
+    // unreachable, and the non-null assertion turned that miss into a TypeError from inside pick(), three
+    // frames from the config that was wrong. `220 V` crashed the phonemizer outright.
+    // Resolution is now EXACT first, folded only for multi-character symbols: case is contrastive exactly
+    // where the symbol is one letter (s/S second/siemens, t/T tonne/tesla, a/A are/ampere), and a bare ⟨M⟩
+    // is molar or millions or Roman 1000 — never metres.
+    test("a unit is resolved case-sensitively, and an unresolvable one is left alone", () => {
+        const n = makeSymbolNormalizer({
+            percent: ["persent"],
+            units: { V: ["volt"], km: ["kilometer"], m: ["meter"], s: ["sekonde"], MB: ["MB"], Mb: ["Mb"] },
+            rateDenominators: { h: "uur" },
+            unitPer: "per",
+        });
+        expect(n("220 V")).toBe("220 volt"); // an UPPERCASE key resolves — this used to throw
+        expect(n("5 MB")).toBe("5 MB");
+        expect(n("5 Mb")).toBe("5 Mb"); // …and stays distinct from MB
+        expect(n("5 KM")).toBe("5 kilometer"); // multi-letter: shouty text still folds
+        expect(n("100 km/h")).toBe("100 kilometer per uur");
+        // ⚠ NOT FOLDED, because for a one-letter symbol the other case is a DIFFERENT unit or none:
+        expect(n("220 v")).toBe("220 v"); // ⟨v⟩ is not volt
+        expect(n("5 M")).toBe("5 M"); // molar / millions / Roman 1000 — never metres
+        expect(n("5 S")).toBe("5 S"); // siemens, not seconds
+        expect(n("100 km/H")).toBe("100 km/H"); // henry, not hours
+    });
+
     test("slavicCountForm implements the 1 / 2–4 / 5+ split with the 11–14 exception", () => {
         const f = slavicCountForm;
         expect([f(1), f(2), f(4), f(5), f(11), f(12), f(21), f(22), f(25), f(111)]).toEqual(
