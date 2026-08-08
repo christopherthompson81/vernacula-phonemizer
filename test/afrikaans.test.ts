@@ -276,6 +276,14 @@ describe("Afrikaans text normalization", () => {
     // its own, so this is the start of that migration rather than a fleet convention yet.
     // ± is pinned because it is a SINGLE code point (U+00B1): no ⟨+⟩ rule can reach inside it, so without
     // its own entry the sign disappears in silence rather than reading wrong.
+    // ⚠ THE HALF-DAY WORDS EXIST TWICE and JSON cannot reference itself: `clockPeriods` feeds the clock
+    // rule (9:30 vm) while `dottedAbbreviations` feeds the abbreviation pass (n.m. → namiddag), which runs
+    // earlier and by a different mechanism. They must agree, so this asserts it rather than trusting it.
+    test("clockPeriods and the dotted abbreviations tell the same story", () => {
+        expect(MANIFEST.dottedAbbreviations["n.m"]).toBe(MANIFEST.clockPeriods["nm"]);
+        expect(MANIFEST.dottedAbbreviations["n.m."]).toBe(MANIFEST.clockPeriods["nm"]);
+    });
+
     test("the sign and math words come from the manifest", () => {
         expect(ph("±5")).toContain("plœs ɔf minœs"); // ⚠ U+00B1, not "+"
         expect(ph("3 = 3")).toContain("χələik ɑːn");

@@ -29,9 +29,17 @@ const ORD_BELOW_20 = MANIFEST.ordinalsBelow20; // afrikaans.jsonc
 
 /**
  * Integer → the Afrikaans ordinal word. Below 20 it is a table lookup. At or above 20 the ending is -ste,
- * EXCEPT that a sub-20 remainder carries its own small-ordinal form onto the end of the compound — 101e is
- * *honderdeerste*, 112e *honderdtwaalfde*. 190e (remainder 190 % 100 = 90, not sub-20) takes plain -ste:
- * honderd en negentigste. 21e (remainder 21 % 100 = 21) is a sub-20 tail: een-en-twintigste.
+ * EXCEPT that a sub-20 REMAINDER carries its own small-ordinal form onto the end of the compound:
+ * 101e → honderd en eerste, 112e → honderd en twaalfde.
+ *
+ * ⚠ THE SPACING FOLLOWS THE NUMBER COMPOSITOR, not the older spelling this docblock used to claim. It said
+ * *honderdeerste* / *honderdtwaalfde* as single words, but numberToWords builds "honderd en twaalf", so the
+ * ordinal is "honderd en twaalfde". The stale text mattered: the fix for the drifted tails cited it as the
+ * authority for what 112 should be, and it was only right about the SUFFIX.
+ *
+ * 190e (remainder 90, not sub-20) takes plain -ste: honderd en negentigste. ⚠ AND SO DOES 21e — the
+ * docblock used to call it a sub-20 tail, but 21 % 100 is 21, which is not < 20, so it never enters that
+ * branch. Its output is right for a different reason than was written here.
  */
 export function ordinalWord(n: number): string | undefined {
     if (!Number.isSafeInteger(n) || n < 1) return undefined;
@@ -47,8 +55,12 @@ export function ordinalWord(n: number): string | undefined {
         // because -0 === 0. So 110 lost its whole "honderd en " and read *tiende*, while 112…119 missed
         // the match and fell through to the regular -ste, giving *honderd en twaalfste* where this
         // function's own docblock says honderdtwaalfde.
-        const tail = r < 10 ? MANIFEST.numbers.units[r]! : MANIFEST.numbers.teens[r - 10]!;
-        if (tail !== "" && card.endsWith(tail))
+        // ⚠ NO `!` HERE — that is the assertion #763 was landed to remove, and it would fail the same way:
+        // a shortened manifest array gives `undefined`, `card.endsWith(undefined)` coerces to the string
+        // "undefined", and the compound silently falls through to plain -ste. One truthiness test covers
+        // both the missing entry AND the empty-string trap that caused this bug.
+        const tail = r < 10 ? MANIFEST.numbers.units[r] : MANIFEST.numbers.teens[r - 10];
+        if (tail && card.endsWith(tail))
             return `${card.slice(0, -tail.length)}${ORD_BELOW_20[r]}`;
     }
     return `${card}ste`;
@@ -188,7 +200,7 @@ export function normalizeAfrikaans(input: string): string {
     // separator-less instances are both `vm`, and admitting `nm` here reads the nanometre `10nm` as *tien
     // namiddag*. A spaced or dotted `n.m.`/`nm` still reaches the forms above.
     s = s.replace(/(?<![\d:])([01]?\d|2[0-3])(vm)(?![\p{L}\p{M}])/giu,
-        (_m, h: string) => `${numberToWords(Number(h))} voormiddag`);
+        (_m, h: string) => `${numberToWords(Number(h))} ${MANIFEST.clockPeriods["vm"]}`);
 
     // 6) COMMA-GROUPED THOUSANDS. The comma is the ENGLISH grouping separator here (17,500, 100,000) — NOT
     //    a decimal. It is consumed before the symbol tier so the tier sees a plain digit run, and before the

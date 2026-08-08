@@ -90,7 +90,9 @@
     // OPERATION name, which is what ± wants: it marks a TOLERANCE, not an addition.
     // ⚠ ⟨&⟩ IS "en", the ordinary word for and — the same string the number compositor uses as its
     // connective, and deliberately not shared with it: they are different jobs that happen to coincide.
-    // ⟨=⟩ ⟨<⟩ ⟨>⟩ ⟨×⟩ ⟨÷⟩ do not occur in the af_za corpus and are declared for completeness.
+    // ⚠ ⟨×⟩ DOES OCCUR — as the ASCII ⟨x⟩ of `6x6 cm`, which the symbol tier in afrikaans.ts routes here by
+    // declaring `multiply` (it reads `times` from this very block, so the two paths cannot diverge).
+    // ⟨=⟩ ⟨<⟩ ⟨>⟩ ⟨÷⟩ do not occur in the af_za corpus and are declared for completeness.
     "signWords": {
         "plusMinus": "plus of minus",
         "plus": "plus",
