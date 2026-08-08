@@ -43,6 +43,21 @@ export interface AbkhazManifest {
         rangeFrom: string;
         rangeTo: string;
     };
+    /** Words for symbols (%, °, currency, км², the clock) — attested in FULL ab.wikipedia text, not the
+     *  sampled corpus artifact; sourcing in docs/abkhaz_vocabulary_investigation.md. */
+    symbols: {
+        percent: string;
+        degree: string;
+        /** ⟨Цельси иградус⟩ — the attested unit NAME, used verbatim; Цельси is never attested bare. */
+        celsius: string;
+        /** ⟨асааҭ⟩ — goes BEFORE the number ("асааҭ 6 рзы"). */
+        hour: string;
+        squareKm: string;
+        /** [symbol, word] — the symbol precedes the number in text, the word follows it in speech. */
+        currencies: readonly (readonly [string, string])[];
+        /** [abbreviation, word] — млрд/млн, expanding to the same миллиард/миллион as numbers. */
+        scales: readonly (readonly [string, string])[];
+    };
 }
 
 /** The consolidated hand-authored Abkhaz data tables (see abkhaz.jsonc). */

@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 
 import { phonemizeWord, createAbkhaz } from "../src/languages/abkhaz/abkhaz.ts";
+import { normalizeAbkhaz } from "../src/languages/abkhaz/normalize.ts";
 
 // Canonical-IPA goldens for Abkhaz (ab) — аҧсуа бызшәа, a Northwest Caucasian language with one of
 // the world's largest consonant inventories and just 2 vowels (⟨а⟩→[a], ⟨ы⟩→[ə]). The Cyrillic writes consonants with
@@ -130,6 +131,58 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // ⚠ THE ABBREVIATION DOT MAY BE THE SENTENCE'S TOO — consuming it unconditionally ran two
         // sentences together with no pause.
         expect(ab.text("Ари 1452ш. Аҩбатәи ауп.").trim()).toContain(" . ");
+    });
+
+    // ── SYMBOLS: words sourced from the FULL ab.wikipedia text (docs/abkhaz_vocabulary_investigation.md),
+    // because the sampled corpus artifact attests none of them and espeak does not ship Abkhaz. Asserted
+    // at the TEXT level: what matters here is which word lands where, not its phonemes.
+    test("normalization: percent takes the postposed word", () => {
+        // Full wiki ×10, always straight after the numeral ("18 процент"). The decimal comma inside
+        // "52,8%" must still reach the decimal rule after the word moves in.
+        expect(normalizeAbkhaz("аҟынтәи 95%),")).toBe("аҟынтәи 95 процент),");
+        expect(normalizeAbkhaz("52,8%")).toBe("52 ааба процент");
+    });
+
+    test("normalization: degrees — ⟨°C⟩ is the attested unit name, bare ⟨°⟩ is градус, ⟨°F⟩ untouched", () => {
+        // "180 градус" ×9 postposed; ⟨Цельси иградус⟩ is the СИ article's own name for the unit, and
+        // Цельси is NEVER attested bare after a number — so the name is used verbatim.
+        expect(normalizeAbkhaz("+23,2 °C ыҟоуп")).toBe("+23 ҩба Цельси иградус ыҟоуп");
+        expect(normalizeAbkhaz("анаара 3,4° ауп")).toBe("анаара 3 ԥшьба градус ауп");
+        // ⚠ SYMBOLS RUN BEFORE RANGES, or the unit detaches: in "−73–83°C" the range rewrite would leave
+        // ⟨°C⟩ touching ⟨рҟынӡа⟩ instead of a digit. The corpus's own string, verbatim — its trailing
+        // рҟынӡа also exercises the range rule's no-doubling guard in the same breath.
+        expect(normalizeAbkhaz("90–220 К (−73–83°C) рҟынӡа")).toContain("73 инаркны 83 Цельси иградус");
+        // No Fahrenheit word is attested (куб- and минус-class gap), so ⟨°F⟩ deliberately falls through.
+        expect(normalizeAbkhaz("451 °F")).toBe("451 °F");
+    });
+
+    test("normalization: currency lands LAST, after any scale word", () => {
+        // "8 миллиард доллар" (Формула Аку) fixes the order: number, scale, currency. млрд/млн are the
+        // corpus's own abbreviations and expand to the same миллиард/миллион the numbers table carries.
+        expect(normalizeAbkhaz("$1,86 млрд")).toBe("1 ааба фба миллиард доллар");
+        expect(normalizeAbkhaz("€ 30 млн")).toBe("30 миллион евро");
+        expect(normalizeAbkhaz("£200")).toBe("200 фунт стерлинг");
+        // ⚠ ENGLISH-STYLE COMMA GROUPING de-groups only at TWO-plus groups — one group is
+        // indistinguishable from a decimal. The wiki spells this very sum "29,721,250 фунт стерлинг".
+        expect(normalizeAbkhaz("£29,721,250")).toBe("29721250 фунт стерлинг");
+    });
+
+    test("normalization: ⟨км²⟩ reads as the wiki's own ⟨километра квадрат⟩ — and cubes stay symbols", () => {
+        expect(normalizeAbkhaz("422 000 км². Иара")).toBe("422000 километра квадрат. Иара");
+        // No cubic word is attested anywhere (куб ×0), so ⟨см³⟩ is deliberately untouched.
+        expect(normalizeAbkhaz("5,24 г/см³")).toContain("см³");
+    });
+
+    test("normalization: the clock word goes BEFORE the number and is not doubled", () => {
+        // "асааҭ 6 рзы" / "асааҭ 18:21:56 рзы" — the corpus wrote the frame itself once, so the guard
+        // from the range rule applies here too.
+        expect(normalizeAbkhaz("22:30 рзы")).toBe("асааҭ 22 30 рзы");
+        expect(normalizeAbkhaz("асааҭ 18:21:56 рзы")).toBe("асааҭ 18 21 56 рзы");
+        // Zero minutes are DROPPED, not read: асааҭ 10, never "10 аноль".
+        expect(normalizeAbkhaz("асааҭ 10:00 инаркны 16:00 рҟынӡа")).toBe("асааҭ 10 инаркны асааҭ 16 рҟынӡа");
+        // ⚠ A RACE TIME IS NOT A CLOCK: "(1:51.4)" is in the corpus, and fractional "minutes" mark a
+        // duration — excluded by the trailing guard.
+        expect(normalizeAbkhaz("(1:51.4)")).toBe("(1:51.4)");
     });
 
     test("normalization: what it must NOT touch", () => {
