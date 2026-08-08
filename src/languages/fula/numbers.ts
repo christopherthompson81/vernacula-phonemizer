@@ -102,10 +102,10 @@ export function numberToWords(n: number): string {
     return r === 0 ? head : `${head} ${E} ${numberToWords(r)}`;
 }
 
-/** Adlam digits 𞥐–𞥙 (U+1E950–1E959) → ASCII, so the number branch serves both registered scripts. */
-export function foldAdlamDigits(s: string): string {
-    return [...s].map((ch) => {
-        const c = ch.codePointAt(0)!;
-        return c >= 0x1e950 && c <= 0x1e959 ? String(c - 0x1e950) : ch;
-    }).join("");
-}
+/**
+ * Adlam digits 𞥐–𞥙 (U+1E950–1E959) → ASCII, so the number branch serves both registered scripts.
+ * Re-exported from the shared fold rather than re-implemented: core/unicode.ts carries the Adlam base in
+ * NATIVE_DIGIT_BASES, and this file had a third copy of the same arithmetic (fulaAdlam.ts had a fourth,
+ * as a lookup table).
+ */
+export { foldNativeDigits as foldAdlamDigits } from "../../core/unicode.ts";

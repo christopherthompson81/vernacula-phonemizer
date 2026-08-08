@@ -10,6 +10,14 @@ export interface FulaManifest {
     rules: [string, string, boolean][];
     /** The LATIN spelling vowels the Adlam lengthener doubles; not IPA. */
     latinVowels: readonly string[];
+    /** The Adlam front-end: letter → Boko/Latin, plus the combining marks. */
+    adlam: {
+        letters: Record<string, string>;
+        lengtheners: readonly string[];
+        gemination: string;
+        hamza: string;
+        drop: readonly string[];
+    };
     clausePunctuation: Record<string, string>;
 }
 
