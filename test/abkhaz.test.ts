@@ -36,12 +36,18 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(phonemizeWord("аи")).toBe("aj"); // ⟨и⟩ next to a vowel → the glide [j]
         expect(phonemizeWord("иҭабуп")).toBe("itʰabupʼ"); // ⟨у⟩ between consonants → syllabic [u] (not the glide [w])
         expect(phonemizeWord("х’а")).toBe("χˤa"); // the CURLY apostrophe ’ still pharyngealizes ⟨х⟩→[χˤ]
-        // ⚠ AN IDENTICAL TWIN IS NOT ITS OWN VOWEL CONTEXT. ⟨у⟩/⟨и⟩ count each other as vowels, so ⟨уу⟩
-        // made BOTH glides — асууари read as[ww]ari. First of the pair is syllabic (referee: asuwari…);
-        // the mixed pairs (аиуит → ajwjtʼ) keep their reading.
+        // ⚠ A GLIDE RUN ALTERNATES FROM ITS ANCHOR — the left context is the REALIZED phone, and an
+        // undecided у/и on the right is no context. Keyed on letters instead, every run came out
+        // nucleus-free (⟨уу⟩→[ww], ⟨иу⟩→[jw]).
+        // Referee rows, exactly two: асууари → kaikki "asuwarij" / wikipron "a s u w a r i j" (our
+        // missing final [j] is the referee's phonemic i=əj tail — the documented divergence class),
+        // and адиуан → "adiwan", which the letter-keyed rule got WRONG (adjwan).
         expect(phonemizeWord("асууари")).toBe("asuwari");
-        expect(phonemizeWord("диит")).toBe("dijtʼ"); // ⟨ии⟩ likewise [ij], not [jj]
-        expect(phonemizeWord("аиуит")).toBe("ajwjtʼ"); // mixed run unchanged — only identical twins split
+        expect(phonemizeWord("адиуан")).toBe("adiwan"); // = referee
+        // ⚠ NO REFEREE ROW for the rest — pinned for the alternation invariant, not against a source:
+        expect(phonemizeWord("диит")).toBe("dijtʼ"); // ⟨ии⟩ → [ij]
+        expect(phonemizeWord("ауу")).toBe("awu"); // vowel-anchored twin: glide FIRST, then syllabic
+        expect(phonemizeWord("аиуит")).toBe("ajujtʼ"); // the run gets a nucleus (was the nucleus-free ajwjtʼ)
     });
 
     test("⟨ҩ⟩ is the PHARYNGEALIZED [ɥˤ]", () => {

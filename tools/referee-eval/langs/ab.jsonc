@@ -19,7 +19,6 @@
         { "pattern": "cʰ", "replace": "kʰʲ", "note": "⟨қь⟩ — the wikipron letter-def uses the PALATAL-place [cʰ]; the 979-word corpus (and we) use dorsal+[ʲ] = [kʰʲ]. Notation-only (place)" },
         { "pattern": "cʼ", "replace": "kʼʲ", "note": "⟨кь⟩ palatal [cʼ] ~ dorsal [kʼʲ] — place notation" },
         { "pattern": "ç", "replace": "χʲ", "note": "⟨хь⟩ palatal [ç] ~ dorsal [χʲ] — place notation" },
-        { "pattern": "ʏ", "replace": "ə", "note": "⟨ы⟩ after ⟨ҩ⟩ [ɥˤ] — kaikki writes the ROUNDED allophone (аҩы→aɥˤʏ); same ə" },
-        { "pattern": "e̞", "replace": "e", "note": "mid [e̞] ~ [e] height diacritic — kaikki-only notation" }
+        { "pattern": "(?<=ɥˤ)ʏ", "replace": "ə", "note": "⟨ы⟩ after ⟨ҩ⟩ [ɥˤ] — kaikki writes the ROUNDED allophone (аҩы→aɥˤʏ); same ə. ⚠ CONTEXT-LIMITED to the position that causes the rounding (all 14 kaikki ʏ rows are post-ɥˤ) — an unconditional fold would silently pass a future row where ʏ is a genuine front rounded vowel" }
     ]
 }

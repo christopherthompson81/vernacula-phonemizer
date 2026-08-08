@@ -24,8 +24,10 @@ Classes, with verdicts:
    asuwari(j) — first syllabic, second glide. Fix: an identical twin on the RIGHT does
    not count as vowel context (left twin still does), so уу → uw, ии → ij. The mixed
    pairs (⟨аиуит⟩ → ajwjtʼ) keep their behavior — only the identical-twin case changes.
-3. **kaikki notation folds, not defects:** ʏ for ⟨ы⟩ after ɥˤ (аҩы → aɥˤʏ — rounding
-   allophone of ə, kaikki-only), and e̞ for e. → two new folds in langs/ab.jsonc.
+3. **kaikki notation fold, not a defect:** ʏ for ⟨ы⟩ after ɥˤ (аҩы → aɥˤʏ — rounding
+   allophone of ə, kaikki-only) → one new CONTEXT-LIMITED fold, (?<=ɥˤ)ʏ. (An e̞ fold was
+   drafted too and turned out DEAD: the eval's BACKBONE strips U+031E before language
+   folds run, so e̞ already compares as e — review catch, removed.)
 4. **Referee writes the PHONEMIC two-vowel analysis in scattered rows** — [e]=aj
    (жәеиза→ʒʷajza), [o]=aw, [i]=əj (Никарагуа→nəjkʼaraɡwa, жәибжь→ʒʷəjpʒ), [u]=əw
    (аӷу→aʁəw, аԥсуа→apʰsəwa) — while writing surface e/o/i/u in others (Џибути's final
@@ -43,11 +45,11 @@ Classes, with verdicts:
 
 Expected effect: primary roughly flat (ахҩа fixed, the ҩ definition row now diverges —
 the def row was the minority reading), kaikki up substantially (up to ~50 ɥˤ words plus
-the ʏ/e̞ folds).
+the ʏ fold).
 
 ## Run 2 — 2026-08-08
 
-Command: applied ҩ→ɥˤ (manifest), the twin-glide fix (abkhaz.ts), folds ʏ→ə and e̞→e
+Command: applied ҩ→ɥˤ (manifest), the twin-glide fix (abkhaz.ts), the ʏ→ə fold
 (langs/ab.jsonc); re-ran eval and a corpus emit/compare against the pre-change state.
 
 - Referee: kaikki **641 → 676** (65.5% → 69.1%; raw 389 → 409). Primary 170 → 166 —
@@ -61,3 +63,29 @@ Command: applied ҩ→ɥˤ (manifest), the twin-glide fix (abkhaz.ts), folds ʏ�
 - Tests: goldens updated ɥ→ɥˤ wholesale (⟨ҩ⟩ is the only source of ɥ in this engine);
   new pins for асууари/диит/аиуит and аҩны/ахҩа. Shared IPA classes unaffected (ɥ is
   not in core vowel classes; fr/ht keep their plain ɥ).
+
+## Run 3 — 2026-08-08 (review of PR #768)
+
+Eight findings survived the adversarial verify; all fixed:
+
+1+2. The twin-glide patch was keyed on LETTER IDENTITY, so it fixed only ⟨уу⟩-after-
+  consonant: ауу still read a[ww], and mixed runs stayed nucleus-free (адиуан → adjwan
+  where the kaikki referee has adiwan). Replaced with the general rule — left context is
+  the REALIZED previous phone (a fresh glide is a consonant), right context is a vowel
+  letter that is not itself у/и. A run now alternates from its anchor: асууари→asuwari,
+  адиуан→adiwan (=referee), ауу→awu, иаиууа→jajuwa, аиуит→ajujtʼ (the ajwjtʼ pin had no
+  referee backing and no nucleus). Corpus: 187/404 rows changed, ALL of them wj→uj /
+  jw→iw-ju nucleus repairs (уи "that" was [wj]; Хьиуитт "Hewitt" was χʲjwjtʼtʼ, now
+  χʲiwitʼtʼ). kaikki 676 → 677.
+3. ⟨ҩ'⟩ doubled the pharyngealizer (ɥˤˤ) — the generic modifier path now skips a mod the
+  base already ends with.
+4. The e̞→e fold was DEAD (the eval's BACKBONE strips U+031E before language folds run) —
+  removed, doc claim corrected.
+5. Test comments now quote the referee exactly (asuwarij — the final j is the phonemic
+  i=əj tail) and mark the no-referee pins as invariant pins.
+6. The manifest's vowelLetters comment still described the old "у/и count each other"
+  rule — rewritten.
+7. The referee-floor comment and the catalogue row still carried 82.5%/65.5% — updated
+  to 80.6%/69.1% with the ҩ→ɥˤ cost/gain disclosed.
+8. The ʏ→ə fold was documented as context-limited but written unconditional — now
+  (?<=ɥˤ)ʏ (all 14 kaikki ʏ rows are post-ɥˤ).

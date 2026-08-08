@@ -57,8 +57,10 @@
     // The VOWEL LETTERS — the two phonemic vowels ⟨а ы⟩ plus the letters that write a vowel in loans and in
     // the ⟨е о⟩/⟨и у⟩ series. This is the ENVIRONMENT for the ⟨у⟩/⟨и⟩ glide-vs-syllabic rule in abkhaz.ts:
     // both are underlyingly the glides /w j/, realized [w]/[j] beside a vowel and syllabic [u]/[i] between
-    // consonants or word-finally (аи→aj, аԥсуа→apʰswa; but иҭабуп→itʰabup, амени→ameni). ⟨у⟩ and ⟨и⟩ are
-    // themselves in the set, so a sequence of the two counts each other as the vowel context.
+    // consonants or word-finally (аи→aj, аԥсуа→apʰswa; but иҭабуп→itʰabup, амени→ameni).
+    // ⚠ ⟨у⟩ AND ⟨и⟩ DO NOT COUNT EACH OTHER as vowel context — the rule in abkhaz.ts reads the REALIZED
+    // left neighbour (a glide that just became [w]/[j] is a consonant) and, on the right, only a vowel
+    // letter that is not itself у/и. A run alternates from its anchor: асууари→asuwari, адиуан→adiwan.
     "vowelLetters": ["а", "ы", "е", "о", "у", "и"],
 
     // VIGESIMAL cardinal numbers — the traditional NW-Caucasian base-20 system (composition logic in
