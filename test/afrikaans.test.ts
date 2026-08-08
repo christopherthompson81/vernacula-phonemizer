@@ -54,6 +54,31 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // phonemizeWord directly, so that entry does reach this branch. It simply misses BOTH ways (s, then k,
     // against sɪə), which is why the folded backbone is unmoved at 1658/2220. Single letters are not
     // spelled out by the g2p at all — `B → p` likewise — see issue #761.
+    // ⚠ ⟨ch⟩ IS A DIGRAPH AND THE ⟨c⟩ CODE RULE MUST YIELD TO IT (#758). That rule runs before the fixed
+    // table so it can beat the single-letter entries, and it was shadowing ⟨ch⟩ outright: chemie → kɦiəmi,
+    // an onset Afrikaans does not have.
+    // ⚠ THE [ʃ]/[x] SPLIT IS LEXICAL, NOT ORTHOGRAPHIC, and the manifest takes the MAJORITY: the referee has
+    // China, chirurg, Charlize and Fouché with [ʃ] against chemie alone with [x]. So chemie is a KNOWN MISS
+    // — pinned here as such rather than special-cased, since one instance is not enough to justify a
+    // lexical exception list. ⟨chr⟩ is different: it IS orthographic, and is a manifest entry.
+    test("⟨ch⟩ is the digraph [ʃ], and ⟨chr⟩ is [kr]", () => {
+        expect(phonemizeWord("chirurg")).toBe("ʃirœrχ"); // referee ʃiˈrərχ
+        expect(phonemizeWord("China")).toBe("ʃina"); // referee ˈʃi.na
+        expect(phonemizeWord("Christus")).toBe("krəstœs"); // ⟨chr⟩ → kr, not *ʃrəstœs
+        expect(phonemizeWord("chemie")).toBe("ʃiəmi"); // ⚠ referee ˈxɛmi — the lexical [x], a known miss
+    });
+
+    // ⚠ A BARE SINGLE LETTER IS SPELLED, NOT SOUNDED (#761) — the initialism normalizer only fires on runs
+    // of two or more, so a lone letter used to fall through to the word path and come out as its phone
+    // (C → k, B → p). The referee holds all 26 letters; this moved af 1658 → 1677/2220 on its own.
+    test("a bare single letter is spelled as its name", () => {
+        expect(phonemizeWord("C")).toBe("siə"); // referee sɪə
+        expect(phonemizeWord("B")).toBe("biə"); // referee bɪə
+        expect(phonemizeWord("X")).toBe("ɛks"); // referee ɛks — exact
+        expect(createAfrikaans().text("Vitamien C").trim()).toBe("fitamin siə");
+        expect(phonemizeWord("'n")).toBe("ə"); // …and the one-letter-looking WORD is untouched
+    });
+
     test("a word-final ⟨c⟩ is [k], not the soft [s]", () => {
         expect(phonemizeWord("franc")).toBe("frank");
         expect(phonemizeWord("arc")).toBe("ark");
@@ -102,7 +127,8 @@ describe("Afrikaans text normalization", () => {
     });
 
     test("era markers and dotted abbreviations expand", () => {
-        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn tvəntəχ fuər kɦrəstœs .");
+        // ⟨Christus⟩ is [kr-], not the old *kɦr- — the ⟨c⟩ rule used to shadow the ⟨chr⟩ digraph (#758).
+        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn tvəntəχ fuər krəstœs .");
         expect(ph("d.i. 0 of 1")).toBe("dət əs nœl ɔf iən");
         expect(ph("Dr. Lee")).toBe("dɔktər liə");
         expect(ph("40 m.p.u")).toBe("fiərtəχ məil pɛr yːr");
@@ -177,7 +203,9 @@ describe("Afrikaans text normalization", () => {
 
     test("a version dot is 802.11n and Figuur N.N — a decimal glued to its unit is not", () => {
         expect(ph("12.5km")).toBe("tvɑːlf kɔma fəif kilɔmiətər"); // was *twaalf punt vyf kilometer*
-        expect(ph("802.11n")).toBe("aχt ɦɔndərt ɛn tviə pœnt ɛlf n");
+        // ⚠ The trailing standard-suffix letter is SPELLED (n → "en" [ɛn]), which is what a reader says —
+        // and what #761 fixed. It used to emit a bare [n], not a sayable syllable on its own.
+        expect(ph("802.11n")).toBe("aχt ɦɔndərt ɛn tviə pœnt ɛlf ɛn");
         expect(ph("Figuur 1.1")).toBe("fiχyːr iən pœnt iən");
     });
 
