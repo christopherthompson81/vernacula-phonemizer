@@ -95,6 +95,18 @@ describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization
         expect(is.text("1000000").trim()).toBe("ein mɪtljoun"); // ein milljón
     });
 
+    // ⚠ THE HIATUS GLIDE, INCLUDING BEFORE A DIPHTHONG — the rule was half-broken and untested. A high
+    // front ⟨í i ý y⟩ inserts [j] before a following vowel, but the check read a hand-written vowel class
+    // that omitted plain ⟨e⟩ — and ⟨ei ey⟩ scan to the two-character value "ei", so every diphthong-initial
+    // hiatus was skipped (þríeyki→*θrieicɪ). Fixed by reading the shared class in core/ipa.ts (#748).
+    // ⚠ NOT REFEREE-CONFIRMED: wikipron isl_latn_broad is not in-repo, so these pin the engine's own
+    // documented rule (Biblía→pɪplija), applied consistently, rather than a measured transcription.
+    test("a high front vowel inserts the hiatus glide before a DIPHTHONG too", () => {
+        expect(phonemizeWord("Biblía")).toContain("ja"); // the rule's own example — plain-vowel hiatus
+        expect(phonemizeWord("þríeyki")).toBe("θrijeicɪ"); // 'trio' — ⟨í⟩ + ⟨ey⟩, was θrieicɪ
+        expect(phonemizeWord("nýeyra")).toBe("nijeira"); // ⟨ý⟩ + ⟨ey⟩, was nieira
+    });
+
 });
 
 // TEXT NORMALIZATION. Counts measured over the FLEURS is_is corpus (column 3).

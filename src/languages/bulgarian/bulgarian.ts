@@ -12,6 +12,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { normalizeBulgarian } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 
 interface NumbersDef {
     units: string[];
@@ -40,7 +41,7 @@ const L = DEF.letters;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 
-const VOWELS = new Set([..."aɛiɔuɤ"]);
+const VOWELS = IPA_VOWEL;
 // The ⟨л⟩ environments (bulgarian.jsonc): [lʲ] before a palatalizer, [l] before a front vowel, else [ɫ].
 const FRONT = new Set(DEF.frontVowelLetters);
 const PAL = new Set(DEF.palatalizingLetters);

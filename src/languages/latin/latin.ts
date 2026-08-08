@@ -11,6 +11,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 
 interface LatinDef {
     short: Record<string, string>;
@@ -28,7 +29,6 @@ const CONS = DEF.consonants;
 // Every vowel LETTER (short, macron, diaeresis) — for glide (i→j) and diphthong context tests.
 const VOWEL_LETTER = new Set(DEF.vowelLetters);
 // IPA vowel BASE chars — for segment-level tests (nasalization, stress nuclei). Excludes offglide/length marks.
-const IPA_VOWEL = new Set([..."aɛeiɪoɔuʊy"]);
 
 const isVowelLetter = (c: string | undefined): boolean => c !== undefined && VOWEL_LETTER.has(c);
 // NFD-normalise so a nasalized PRECOMPOSED vowel (ãẽĩõũ from nasalizeLong) decomposes to base+tilde and its base is found.

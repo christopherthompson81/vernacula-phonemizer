@@ -14,6 +14,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { normalizeIcelandic } from "./normalize.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -31,12 +32,10 @@ const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for intervocalic + glide tests)
+const VOWEL_PH = IPA_VOWEL; // IPA vowel heads (for intervocalic + glide tests)
 // Grapheme-level front vowels that PALATALIZE a preceding ⟨k g⟩ → [c] (kýr→ciːr, gelda→cɛlta, Bylgja→pɪlca) — incl.
 // ⟨e é⟩ and the ⟨ei ey⟩ diphthong (the referee majority palatalizes: geipa→ceipa; the un-palatalized Geir→keir is
-// the minority we over-palatalize to ceir).
-// The four letter classes (icelandic.jsonc): what affricates ⟨g k⟩, what inserts a hiatus glide, what
-// licenses the preaspirated ⟨nn⟩, and which doubled consonants are merely orthographic.
+// the minority we over-palatalize to ceir). The four letter classes are in icelandic.jsonc.
 const FRONT_V = new Set(DEF.frontVowels);
 const FRONT_PH = new Set([..."ɛɪijy"]); // IPA front-vowel heads — an intervocalic ⟨g⟩ → [j] (not [ɣ]) before these
 const HIGH_FRONT = new Set(DEF.highFrontVowels); // trigger a glide [j] before a following vowel (Biblía→pɪplija)
@@ -108,6 +107,11 @@ function scan(word: string): Tok[] {
     return toks;
 }
 
+// ⚠ THESE READ THE SHARED VOWEL CLASS, AND THAT FIXED A BUG. The hand-written local class omitted plain
+// ⟨e⟩ — which this engine emits, because the digraphs ⟨ei ey⟩ map to the two-character value "ei". So
+// startsWithVowel("ei") was FALSE, and the hiatus glide below (⟨í ý⟩ + vowel → insert [j], Biblía→pɪplija)
+// silently skipped every ⟨ei⟩: þríeyki was θrieicɪ, now θrijeicɪ. No golden covered it, which is how it
+// survived — test/icelandic.test.ts now has one. See docs/ipa_classes_investigation.md Run 4.
 function startsWithVowel(ph: string): boolean { return VOWEL_PH.has([...ph][0]!); }
 function endsWithVowel(ph: string): boolean { const a = [...ph]; return VOWEL_PH.has(a[a.length - 1]!); }
 

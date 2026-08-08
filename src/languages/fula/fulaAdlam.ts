@@ -25,6 +25,8 @@ const LENGTHENER = new Set(["\u{1E944}", "\u{1E945}"]); // ALIF / VOWEL LENGTHEN
 const GEMINATION = "\u{1E946}"; // GEMINATION MARK → double the preceding consonant
 const HAMZA = "\u{1E947}"; // → the glottal ⟨q⟩ ([ʔ] in the g2p)
 const DROP = new Set(["\u{1E948}", "\u{1E949}", "\u{1E94A}"]); // CONSONANT MODIFIER / GEMINATE MOD / NUKTA (foreign)
+// ⚠ ORTHOGRAPHIC, NOT IPA — adlamToLatin emits the Latin SPELLING, and the lengthener doubles a
+// spelled vowel. Not core/ipa.ts.
 const VOWELS = new Set([..."aeiou"]);
 
 /** Is any character of `s` in the Adlam block (U+1E900–1E95F)? */

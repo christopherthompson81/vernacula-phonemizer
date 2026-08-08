@@ -16,12 +16,13 @@ import { isNko, nkoToLatin } from "./bambaraNko.ts";
 import { foldNkoDigits, numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const NASAL_TILDE = "̃"; // combining tilde — a nasalised vowel (matches the referee's ã õ ũ …)
 const VOWELS = new Set(MANIFEST.vowelLetters); // orthographic oral vowels (bambara.jsonc)
-const IPA_VOWELS = new Set(["i", "e", "ɛ", "a", "ɔ", "o", "u"]); // their IPA (identical here)
+const IPA_VOWELS = IPA_VOWEL; // their IPA (identical here)
 
 /** Phonemize a single Bambara word to canonical IPA (segmental + nasalisation; tone + length deferred). Accepts
  *  BOTH scripts: the Latin orthography and N'Ko (ߒߞߏ) — N'Ko is transliterated to Latin first (identical IPA). */

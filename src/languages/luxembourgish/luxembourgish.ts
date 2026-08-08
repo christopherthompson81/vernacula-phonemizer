@@ -18,6 +18,7 @@ import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { applyEifelerRegel, numberToWords } from "./numbers.ts";
 import { normalizeLuxembourgish } from "./normalize.ts";
 
@@ -32,7 +33,7 @@ const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 // Multi-letter graphemes scanned longest-first so ⟨sch⟩ beats ⟨s⟩+⟨ch⟩ and ⟨tsch⟩ beats ⟨tz⟩ etc.
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL_PH = new Set([..."aeiouəæɛɔ"]); // IPA vowel heads (for the s→z onset test)
+const VOWEL_PH = IPA_VOWEL; // IPA vowel heads (for the s→z onset test)
 const DEVOICE: Record<string, string> = { b: "p", d: "t", ɡ: "k", z: "s", v: "f" }; // obstruent → its voiceless pair
 const VOICELESS_OBSTR = new Set(["p", "t", "k", "s", "ʃ", "f", "χ", "t͡s", "t͡ʃ"]); // triggers regressive devoicing
 

@@ -11,6 +11,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface HaitianDef {
@@ -55,7 +56,7 @@ function scan(word: string): string[] {
     return out;
 }
 
-const VOWEL_PH = new Set([..."aeiouɛɔ"]); // IPA vowel heads (for the geminate test — collapse only CONSONANT doubles)
+const VOWEL_PH = IPA_VOWEL; // IPA vowel heads (for the geminate test — collapse only CONSONANT doubles)
 /** Geminate collapse: a doubled consonant (from a loan spelling) → a single phone (accoma→akoma). */
 function degeminate(toks: string[]): void {
     for (let i = toks.length - 1; i > 0; i--) {

@@ -19,6 +19,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface BarDef {
@@ -32,7 +33,7 @@ const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 // Multi-letter graphemes scanned longest-first so ⟨sch⟩ beats ⟨s⟩+⟨ch⟩, ⟨tsch⟩ beats ⟨t⟩+⟨sch⟩, etc.
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL_PH = new Set([..."aeiouyɑɔɛœøɒəɐ"]); // IPA vowel heads (for r-vocalization + ch front/back tests)
+const VOWEL_PH = IPA_VOWEL; // IPA vowel heads (for r-vocalization + ch front/back tests)
 // A FRONT vowel head triggers the ⟨ch⟩→[ç] realization; anything else (a back vowel) → [x].
 const FRONT_VOWEL = new Set([..."eiyɛœøɐ"]);
 

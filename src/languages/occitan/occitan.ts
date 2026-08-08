@@ -14,6 +14,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface OccitanDef {
@@ -31,7 +32,7 @@ const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 // Letter environments (occitan.jsonc): ⟨c g qu gu⟩ soften before a FRONT letter.
 const VOWEL_LETTER = new Set(DEF.vowelLetters);
 const FRONT_LETTER = new Set(DEF.frontLetters);
-const VOWEL_PH = new Set([..."aeiɔouyɛ"]); // IPA vowel heads (intervocalic + final-consonant tests)
+const VOWEL_PH = IPA_VOWEL; // IPA vowel heads (intervocalic + final-consonant tests)
 
 /** One scan token: the IPA phones for a grapheme + a flag marking a single ⟨s⟩ that may voice to [z] intervocalically. */
 interface Tok { ph: string; sVar?: boolean }

@@ -13,6 +13,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface QuechuaDef {
@@ -25,7 +26,7 @@ const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-const VOWEL = new Set(["a", "e", "i", "o", "u"]);
+const VOWEL = IPA_VOWEL;
 
 /** Phonemize one Quechua word → canonical IPA: longest-match scan + penultimate stress. */
 export function phonemizeWord(word: string): string {

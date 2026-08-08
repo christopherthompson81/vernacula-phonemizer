@@ -18,8 +18,10 @@ export const TIE_BAR = "͡";
 export const ATTACHING_MODIFIERS = "ːˑʲʰʱʼ";
 
 /** IPA vowel letters — the universal alphabet the stress tokenizer treats as syllable nuclei. A vowel is
- *  a vowel regardless of which language declares it, so this is a notation constant, not per-language data. */
-export const IPA_VOWELS = "əaeiouɪʊɛɔɐæyøɘɤʌɯɵœɜɞʉɨɶ";
+ *  a vowel regardless of which language declares it, so this is a notation constant, not per-language data.
+ *  ⚠ RE-EXPORTED, NOT DEFINED HERE: core/ipa.ts owns the phone classes, and 31 engines now read the same
+ *  one. Kept exported from unicode.ts so the existing regex users need not care where it moved. */
+export { IPA_VOWELS } from "./ipa.ts";
 
 /** Primary / secondary stress marks (IPA). */
 export const STRESS_PRIMARY = "ˈ";

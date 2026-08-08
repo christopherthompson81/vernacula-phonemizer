@@ -8,6 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 
@@ -27,7 +28,11 @@ const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 // Marked vowel letters (guarani.jsonc): the acute marks STRESS, the tilde marks NASALITY.
 const ACUTE = new Set(DEF.acuteVowels);
 const NASAL = new Set(DEF.nasalVowels);
-const VOWEL = new Set(["a", "e", "i", "o", "u", "ɨ", "ã", "ẽ", "ĩ", "õ", "ũ", "ɨ̃"]);
+// The universal vowel letters PLUS Guaraní's nasal vowels. The nasals cannot live in core/ipa.ts: ⟨ã ẽ ĩ
+// õ ũ⟩ are single NFC codepoints but ⟨ɨ̃⟩ is ⟨ɨ⟩ + a combining tilde, so the class is not a set of
+// characters at all — it is only usable because this engine compares whole SEGMENTS, which the shared
+// per-character helpers deliberately do not assume.
+const VOWEL = new Set([...IPA_VOWEL, "ã", "ẽ", "ĩ", "õ", "ũ", "ɨ̃"]);
 
 const FRONT = new Set(DEF.frontLetters); // ⟨gu⟩ is u-silent [ɰ] before a front OR central vowel
 const GLIDE: Record<string, string> = { i: "j", u: "w", ɨ: "j" };

@@ -7,6 +7,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface NogaiDef {
@@ -23,7 +24,6 @@ const VOWEL = DEF.vowels;
 const IOTATED = DEF.iotated;
 const DIGRAPH = DEF.digraphs;
 const CYR_VOWEL = new Set(DEF.vowelLetters);
-const IPA_VOWEL = new Set(["a", "æ", "o", "ø", "u", "y", "ɯ", "i", "e"]);
 const STRESS_NASAL = new Set(["m", "n", "ŋ"]);
 
 /** Sonority for maximal-onset stress: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */

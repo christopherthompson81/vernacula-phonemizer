@@ -10,6 +10,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToText } from "./numbers.ts";
 import { normalizeMacedonian, normalizeMacedonianInitialisms } from "./normalize.ts";
 
@@ -79,7 +80,7 @@ const SYMBOLS = makeSymbolNormalizer({
     countForm: mkCountForm,
 });
 
-const VOWELS = new Set([..."aɛiɔu"]);
+const VOWELS = IPA_VOWEL;
 const FRONT_L = new Set(DEF.frontLetters); // ⟨л⟩ is light [l] before these, dark [ɫ] elsewhere
 // Voiced obstruent → voiceless (final devoicing + regressive assimilation before a voiceless obstruent).
 const DEVOICE: Record<string, string> = { b: "p", v: "f", ɡ: "k", d: "t", ʒ: "ʃ", z: "s", "d͡ʒ": "t͡ʃ", "d͡z": "t͡s", ɟ: "c" };
