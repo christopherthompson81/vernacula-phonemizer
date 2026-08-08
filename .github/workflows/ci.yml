@@ -1,9 +1,22 @@
 name: CI
 
+# ⚠ AUTOMATIC RUNS ARE OFF, DELIBERATELY. Solo repo, unpublished, and `npm run ci` (typecheck + test +
+# check:package — the same three commands the jobs below run) is run locally before every merge, so the
+# push/pull_request triggers only added a ~6-minute wait after the work was already verified.
+#
+# TO RUN IT ANYWAY: `gh workflow run ci.yml` (or the Actions tab) — the jobs are live, just not automatic.
+# TO RESTORE BEFORE PUBLISHING: uncomment the two triggers below and delete this note. That is the whole
+# change; nothing else here was touched.
+#
+# ⚠ WHAT LOCAL `npm run ci` DOES NOT COVER, and why this should go back on before the first publish:
+# these jobs run a FRESH `npm ci` on a clean checkout at a pinned Node 22. A warm local node_modules hides
+# lockfile drift, a dependency that no longer installs, and anything that depends on install order — the
+# optional-dependency typecheck break fixed in #747 was only ever visible in that clean-install path.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+  # pull_request:
 
 jobs:
   test:
