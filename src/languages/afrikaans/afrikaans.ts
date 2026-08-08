@@ -21,7 +21,7 @@ const SHORT = MANIFEST.vowelsShort;
 const DIA = MANIFEST.diacriticVowels;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
-const DEVOICE: Record<string, string> = { b: "p", d: "t", z: "s" }; // word-final devoicing (g→χ, v→f already fixed)
+const DEVOICE = MANIFEST.voicedFinal; // word-final devoicing (g→χ, v→f already fixed)
 // Letter environments (afrikaans.jsonc): the vowels routed through the length rule, and every letter that
 // heads a nucleus — the latter bounds the consonant run in the open/closed lookahead below.
 const BARE_VOWELS = new Set(MANIFEST.bareVowels);
@@ -37,22 +37,33 @@ function isOpen(w: string, i: number): boolean {
     return cons === 1 && j < w.length; // exactly one consonant before another vowel → open
 }
 
-// UNSTRESSED bare vowels reduce: the open/closed length rule only lengthens in a STRESSED syllable; elsewhere a
-// vowel stays short and ⟨e⟩/⟨i⟩ centralise to schwa. (Stress ≈ first syllable — the Germanic default; not yet
-// prefix-aware.) Digraph vowels (aa, ee=iə …) are inherently long and unaffected.
-const REDUCE: Record<string, string> = { a: "a", e: "ə", i: "ə", o: "ɔ", u: "œ" };
+const REDUCE = MANIFEST.unstressedReduction; // unstressed bare vowels (afrikaans.jsonc)
+const C_SOFT = new Set(MANIFEST.cSoftBefore); // ⟨c⟩ → [s] before one of these, else [k]
 
-// Unstressed one-syllable prefixes: stress falls on the following syllable (begín, gemáák, verstáán, ontdék, herháál).
-const UNSTRESSED_PREFIX = /^(be|ge|ver|ont|her|er)[^aeiouyêôûîëïéèáàóúü]*[aeiouyêôûîëïéèáàóúü]/u;
-const VOWEL_GROUP = /[aeiouyêôûîëïéèáàóúü]+/gu;
+// ⚠ THESE REGEXES ARE BUILT FROM THE MANIFEST, NOT SPELLED OUT. Both classes were written inline, and the
+// vowel one had already DRIFTED from `vowelLetters` — it was missing ⟨ö⟩, which the diacritic table maps to
+// [ø]. Inert so far (Afrikaans does not emit stress, and ⟨ö⟩ only occurs beside another vowel, so the group
+// regex merged it either way), but it is one edit away from mattering. Derived, it cannot drift again.
+const V = MANIFEST.vowelLetters.join("");
+const VOWEL_GROUP = new RegExp(`[${V}]+`, "gu");
+// Longest-first is cosmetic here, NOT load-bearing: both patterns are $-anchored and used only through
+// .test(), so alternation order cannot change the boolean. Sorted anyway so the source reads in the same
+// order as the manifest lists them, and so it stays correct if either is ever used to CAPTURE.
+const byLen = (xs: readonly string[]): string => [...xs].sort((a, b) => b.length - a.length).join("|");
+const STRESS_FINAL = new RegExp(`(${byLen(MANIFEST.stressFinalSuffixes)})$`, "u");
+const STRESS_PENULT = new RegExp(`(${byLen(MANIFEST.stressPenultSuffixes)})$`, "u");
+// Unstressed one-syllable prefixes: stress falls on the following syllable (begín, gemáák, verstáán).
+// ⚠ THE SAME SIX PREFIXES LIVED IN THREE PLACES — this regex, PREFIX_IPA below, and the manifest's
+// morphology.prefixUnstressed (read by the shared Germanic compound engine). One source now, asserted below.
+const UNSTRESSED_PREFIX = new RegExp(`^(${MANIFEST.morphology.prefixUnstressed.join("|")})[^${V}]*[${V}]`, "u");
 
 /** The (0-based) nucleus that carries primary stress. Native default = the first syllable (past an unstressed
  *  prefix); loan suffixes shift it: -ie/-sie/-asie → penultimate (aborsie→a·BOR·sie), -eer/-eur/-teit → final. */
 function stressedNucleus(w: string): number {
     const n = (w.match(VOWEL_GROUP) ?? []).length;
     if (n <= 1) return 0;
-    if (/(eer|eur|oor|oon|yn|ees|teit|siteit|isme)$/u.test(w)) return n - 1; // stress-final loan suffixes
-    if (/ie$/u.test(w)) return n - 2; // -ie / -sie / -asie / -osie → penultimate
+    if (STRESS_FINAL.test(w)) return n - 1; // stress-final loan suffixes (afrikaans.jsonc)
+    if (STRESS_PENULT.test(w)) return n - 2; // -ie / -sie / -asie / -osie → penultimate
     return UNSTRESSED_PREFIX.test(w) ? 1 : 0;
 }
 
@@ -69,7 +80,18 @@ function phonemizeMorpheme(word: string): string {
         if (DIA[c]) { out += DIA[c]; i += 1; nucleus += 1; continue; } // diacritic vowel (single char)
         // Code rules that must beat the fixed table:
         if (!VOWEL_LETTER.has(c) && w[i + 1] === c && c !== "'") { i += 1; continue; } // doubled consonant = single phoneme (appel→ˈapəl)
-        if (c === "c") { out += "eiyêéè".includes(w[i + 1] ?? "") ? "s" : "k"; i += 1; continue; } // ⟨c⟩ soft [s] before front vowel, else [k]
+        if (c === "c") {
+            // ⚠ WORD-FINAL ⟨c⟩ TAKES THE SOFT [s], AND THAT IS AN ACCIDENT PRESERVED ON PURPOSE. The old
+            // test was `"eiyêéè".includes(w[i + 1] ?? "")`, and `includes("")` is TRUE — so a ⟨c⟩ with no
+            // following letter fell into the soft branch. Moving the list to the manifest turned that into
+            // a Set, which would have silently flipped 38 of 1500 probe words to [k]. Kept identical here
+            // because a data move must not change output; the af referee covers neither reading, so the
+            // question needs its own evidence rather than a refactor's side effect. Filed as issue #757.
+            const nx = w[i + 1];
+            out += nx === undefined || C_SOFT.has(nx) ? "s" : "k";
+            i += 1;
+            continue;
+        } // ⟨c⟩ soft [s] before front vowel, else [k]
         let matched = false;
         for (const key of FIXED_KEYS) {
             if (w.startsWith(key, i)) {
@@ -100,10 +122,13 @@ function phonemizeMorpheme(word: string): string {
     return out;
 }
 
-// Reduced IPA for the UNSTRESSED (inseparable) prefixes. ⚠ Phonemised standalone they wrongly stress their vowel
-// (ver→fɛr); as a prefix the vowel reduces (ver·staan → fər·stɑːn). Separable prefixes (aan/af…) carry stress and
-// take the normal morpheme path.
-const PREFIX_IPA: Record<string, string> = { be: "bə", ge: "χə", ver: "fər", ont: "ɔnt", her: "ɦər", er: "ər" };
+// Reduced IPA per unstressed prefix (afrikaans.jsonc). Separable prefixes (aan/af…) carry stress and take
+// the normal morpheme path.
+const PREFIX_IPA = MANIFEST.prefixIpa;
+// ⚠ THE TWO LISTS MUST AGREE — the same six prefixes, read by two consumers (this file's stress + IPA,
+// and the shared compound engine's decomposition). Asserted in test/afrikaans.test.ts rather than here:
+// registry.ts imports this module STATICALLY, so a throw at module init would make one typo in the
+// Afrikaans manifest break every other language's import too.
 
 /** Phonemize one Afrikaans word to canonical IPA. Compounds/affixed words are DECOMPOSED (shared morphology) and
  *  each morpheme phonemized independently — so each element keeps its OWN stressed vowel (no cross-element reduction:

@@ -52,6 +52,98 @@
         "é", "è", "á", "à", "ó", "ú", "ü", "ö"
     ],
 
+    // FINAL DEVOICING (Auslautverhärtung): a voiced obstruent devoices word- and morpheme-finally
+    // (hond→ɦɔnt). ⟨g⟩→[χ] and ⟨v⟩→[f] need no entry — the grapheme table already emits the voiceless one.
+    "voicedFinal": { "b": "p", "d": "t", "z": "s" },
+
+    // ⚠ UNSTRESSED BARE VOWELS REDUCE. The open/closed length rule only lengthens in a STRESSED syllable;
+    // elsewhere the vowel stays short and ⟨e⟩/⟨i⟩ centralise to schwa. Digraph vowels (aa, ee=iə …) are
+    // inherently long and never reach this table.
+    "unstressedReduction": { "a": "a", "e": "ə", "i": "ə", "o": "ɔ", "u": "œ" },
+
+    // ⟨c⟩ is soft [s] before one of these and [k] elsewhere. A LETTER list, not a phone list — it is read
+    // off the spelling during the scan.
+    "cSoftBefore": ["e", "i", "y", "ê", "é", "è"],
+
+    // ⚠ LOAN SUFFIXES THAT MOVE THE STRESS off the native first syllable. Afrikaans stress is initial by
+    // default (the Germanic pattern) and these Romance/Latinate endings override it: "final" takes the last
+    // nucleus (ingenieur, universiteit), "penultimate" the second-to-last (aborsie → a·BOR·sie). Matched as
+    // word-final alternatives, LONGEST FIRST so ⟨siteit⟩ wins over ⟨teit⟩.
+    "stressFinalSuffixes": ["siteit", "teit", "isme", "eer", "eur", "oor", "oon", "ees", "yn"],
+    "stressPenultSuffixes": ["ie"],
+
+    // Reduced IPA for the UNSTRESSED (inseparable) prefixes named in `morphology.prefixUnstressed`.
+    // ⚠ PHONEMISED STANDALONE THEY WOULD STRESS THEIR OWN VOWEL (ver→fɛr); as a prefix the vowel reduces
+    // (ver·staan → fər·stɑːn). The KEYS must match morphology.prefixUnstressed — afrikaans.ts throws if
+    // they diverge, because this list, that one and the stress regex were three copies of the same six.
+    "prefixIpa": { "be": "bə", "ge": "χə", "ver": "fər", "ont": "ɔnt", "her": "ɦər", "er": "ər" },
+
+    // ── TEXT NORMALIZATION DATA (normalize.ts) ─────────────────────────────────────────────────────────
+    // Ordinals 1–19. The regular ending is the cardinal plus -de; ⟨eerste⟩, ⟨derde⟩ and ⟨agtste⟩ are the
+    // suppletive/assimilated forms. From 20 up the ending is -ste (twintigste), except that a sub-20
+    // remainder carries its own small-ordinal form onto the compound — 101e honderdeerste, 112e
+    // honderdtwaalfde. Index 0 is unused padding.
+    "ordinalsBelow20": [
+        "", "eerste", "tweede", "derde", "vierde", "vyfde", "sesde", "sewende", "agtste", "neënde",
+        "tiende", "elfde", "twaalfde", "dertiende", "veertiende", "vyftiende", "sestiende",
+        "sewentiende", "agtiende", "negentiende"
+    ],
+
+    // ⚠ MULTI-DOT ABBREVIATIONS, and EVERY LETTER PAIR HERE IS DOT-BOUND — that is load-bearing, not
+    // tidiness. The corpus's four BC instances are `v. C.`, `v.C.`, `V.C.` and the undotted `vC`/`VC` — a
+    // dotted form, or the two letters ADJACENT, never "letter space letter". Allowing the unpunctuated
+    // spaced form (`v\.?\s?C\.?`) made `n\.?\s?C\.?` match the indefinite article before any c-word:
+    // `'n Chinese skip` → *'na Christushinese skip*. Afrikaans's commonest word, destroyed by a rule with
+    // ZERO corpus instances of its own (na Christus never occurs).
+    // Values are REGEX SOURCE, so a backslash is doubled for JSON.
+    "multiDotAbbreviations": [
+        ["v\\.\\s?C\\.?", "voor Christus"],
+        ["vC(?![\\p{L}\\p{M}])", "voor Christus"],
+        ["n\\.\\s?C\\.?", "na Christus"],
+        ["d\\.\\s?i\\.", "dit is"]
+    ],
+
+    // Single-dot abbreviations → the spoken words. The dot is a phrase break otherwise, and the stem is
+    // usually unpronounceable. `m.p.u` = myl per uur (mph, the Afrikaans way); `n.m.` = namiddag (PM). The
+    // undotted vm/nm AM/PM suffixes are handled by the clock rule instead — they attach to a clock.
+    // ⚠ Only the DOTTED keys may appear without their trailing dot; a plain word like `dr` is never matched
+    // bare, since it starts "Dromaeosauridae" and would misfire (the split is computed in normalize.ts).
+    "dottedAbbreviations": {
+        "dr": "Dokter", "m.p.u": "myl per uur", "m.p.u.": "myl per uur",
+        "n.m": "namiddag", "n.m.": "namiddag"
+    },
+
+    // Afrikaans letter names — aa, bee, see … (the corpus's own alphabet article: "die gewone alfabet as
+    // die ABC (uitgespreek aa-bee-see)"). The g2p spells them through itself.
+    "letterNames": {
+        "a": "aa", "b": "bee", "c": "see", "d": "dee", "e": "ee", "f": "ef", "g": "gee", "h": "haa",
+        "i": "ie", "j": "jee", "k": "kaa", "l": "el", "m": "em", "n": "en", "o": "oo", "p": "pee",
+        "q": "kuu", "r": "er", "s": "es", "t": "tee", "u": "uu", "v": "vee", "w": "wee", "x": "eks",
+        "y": "ei", "z": "zet"
+    },
+
+    // LEXICAL: acronyms read AS WORDS despite being unreadable by phonotactics (REM-slaap, COVID, FIFA,
+    // NATO, OPEC, UNESCO, AIDS). "die GPS" by contrast is read as letters.
+    "wordAcronyms": ["rem", "covid", "fifa", "nato", "opec", "unesco", "aids"],
+    // …and the readable-looking runs Afrikaans nonetheless SPELLS OUT, which the phonotactic rule would
+    // otherwise hand to the g2p as a word.
+    "acronymLetters": ["uk", "vk", "vn", "vsa", "vs", "aol"],
+
+    // Afrikaans phonotactics for the OOV initialism rule (core/initialisms.ts): can this letter run be a
+    // word at all? Onsets and codas that a native word may actually carry.
+    "phonotactics": {
+        "legalOnsets": [
+            "bl", "br", "ch", "dr", "dw", "fl", "fr", "gl", "gn", "gr", "kl", "kn", "kr", "kw", "pl",
+            "pr", "ps", "sc", "sch", "sf", "sj", "sk", "sl", "sm", "sn", "sp", "st", "sw", "th", "tj",
+            "tr", "tw", "vl", "vr", "wr", "zw"
+        ],
+        "legalCodas": [
+            "ch", "ck", "ft", "ht", "kt", "ld", "lf", "lg", "lk", "lm", "lp", "ls", "lt", "mp", "ms",
+            "mt", "nd", "ng", "nk", "ns", "nt", "pt", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp",
+            "rs", "rt", "sp", "st", "ts", "ks", "ps", "sk"
+        ]
+    },
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
