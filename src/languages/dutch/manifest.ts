@@ -7,6 +7,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface DutchManifest {
     vowelChars: string;
+    consonantPhones: readonly string[];
     vowels: {
         long: Record<string, string>;
         short: Record<string, string>;

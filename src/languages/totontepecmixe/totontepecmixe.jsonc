@@ -24,6 +24,12 @@
     // Single vowel graphemes → IPA. The central/back special vowels (ä ë ü ö) are the reconstructed values.
     "vowels": { "a": "a", "e": "e", "i": "i", "o": "o", "u": "u", "ä": "æ", "ë": "ɨ", "ü": "ʌ", "ö": "ʊ" },
 
+    // ⚠ POST-NASAL VOICING fires after these two ONLY — and the engine does emit [ŋ], which is absent on
+    // purpose: the rule is conditioned on ⟨m n⟩, not on nasality in general.
+    "voicingNasals": ["m", "n"],
+    // The velars, for the intervocalic lenition pass.
+    "velars": ["k", "ɡ", "ɣ"],
+
     // Single consonant graphemes → IPA. ⟨c⟩=[k], ⟨x⟩=[ʃ] (Crawford's retroflex /š/), ⟨j⟩=[h], ⟨v w⟩=[v]/[w],
     // ⟨y⟩=[j]; every apostrophe shape → [ʔ].
     "consonants": {

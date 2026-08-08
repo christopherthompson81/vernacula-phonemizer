@@ -21,6 +21,7 @@ interface OccitanDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    voicelessPhones: readonly string[];
     vowelLetters: readonly string[];
     frontLetters: readonly string[];
 }
@@ -74,7 +75,7 @@ function scan(word: string): Tok[] {
 function startsWithVowel(ph: string): boolean { return VOWEL_PH.has([...ph][0]!); }
 function endsWithVowel(ph: string): boolean { const a = [...ph]; return VOWEL_PH.has(a[a.length - 1]!); }
 
-const VOICELESS_PH = new Set([..."ptkfs"]); // + the affricates t͡ʃ t͡s (tested by their head [t])
+const VOICELESS_PH = new Set(DEF.voicelessPhones); // + the affricates t͡ʃ t͡s (tested by their head [t])
 /** Single ⟨s⟩ → [z] before a voiced sound (intervocalic Lisbona→lizbunɔ, or before a voiced consonant); ⟨ss⟩ (already
  *  [s]) and coda ⟨s⟩ before a voiceless sound stay [s]. */
 function voiceS(toks: Tok[]): void {

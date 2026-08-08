@@ -210,3 +210,36 @@ is the check for anything that touches output — it takes seconds and I should 
 → DONE, see `icelandic_hiatus_investigation.md`: the trigger is the long ⟨í⟩ alone, not the high front
 class, and narrowing it moved the backbone 8086 → 8091/10093. The guessed cause in this line (restrict
 by the FOLLOWING vowel) was wrong — it is the preceding one.
+
+## Run 8 — 2026-08-07 ~23:00 — the CONSONANT classes should NOT go to core/ipa.ts
+
+The follow-up item assumed the consonant classes were the same problem as the vowel one. They are not.
+
+    npx tsx cons.scratch.ts   # every consonant-class set, grouped by class name
+
+| class | engines | the members |
+|---|---|---|
+| voiceless | 6 | hungarian `p t k f s ʃ t͡s t͡ʃ c x` · icelandic `p t k s θ f h c` · luxembourgish `p t k s ʃ f χ t͡s t͡ʃ` · occitan `p t k f s` · romanian (obstruent, both voicings) · tibetan (WYLIE tokens, not IPA) |
+| velar | 5 | ancientgreek `ɡ k kʰ ks` · galician `k ɡ` · latin `k ɡ kʷ ɡʷ kʰ` · totontepecmixe `k ɡ ɣ` · mindong (romanization finals) |
+| sonorant | 5 | chuvash `l r` · irish `ɾˠ ɾʲ l̪ˠ lʲ` · latin `l ɫ r` · scottishgaelic `l̪ˠ lʲ rˠ ɾʲ` · tibetan (Wylie) |
+| nasal | 4 | albanian `m n ɲ ŋ` · chuvash `n m ŋ j` · totontepecmixe `m n` · turkmen `m n ŋ` |
+| voiced / stop / sibilant | 7 | all per-language |
+
+**Raw finding: no two are the same list.** Unlike `IPA_VOWEL`, where 31 engines held near-identical copies
+of one universal alphabet, these share only a class NAME. Each is that language's own inventory, and the
+narrowness is deliberate and load-bearing:
+
+    totontepecmixe NASAL = {m, n}     — but the engine DOES emit ŋ; post-nasal voicing fires after m/n only
+    occitan VOICELESS_PH = {p t k f s} — but the engine DOES emit ʃ; intervocalic ⟨s⟩→[z] depends on that
+
+Substituting a universal class in either case changes output. The vowel consolidation worked because "the
+IPA vowel letters" is a fact about the notation; "the voiceless obstruents OF THIS LANGUAGE" is a fact
+about the language.
+
+**Decision: do not consolidate. Move them to their MANIFESTS instead** — the #746 rule, which is where a
+language's own inventory belongs, and which lets each carry the rule it serves and why it is narrow.
+`core/ipa.ts` stays a vowel-class module.
+
+Excluded from the sweep: tibetan's Wylie classes (#741 kept the stack grammar with the parser); the
+`VOICELESS` sets in bulgarian/maltese/macedonian, which are DERIVED from each manifest's `DEVOICE` map and
+so are already single-sourced; and icelandic, whose files are in flight in #749.

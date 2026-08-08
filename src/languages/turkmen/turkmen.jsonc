@@ -11,6 +11,10 @@
 
     "digraphs": {},
 
+    // The NASALS, for the maximal-onset stress scan (sonority 3) and for the nasal+stop test that keeps a
+    // medial nasal in the coda rather than letting it start an onset cluster — Turkic has no such onsets.
+    "nasals": ["m", "n", "ŋ"],
+
     // Single graphemes. Vowels: ⟨ä⟩→æ, ⟨ö⟩→ø, ⟨ü⟩→y, ⟨y⟩→ɯ. Consonants: the interdentals ⟨s⟩→θ / ⟨z⟩→ð, ⟨ç⟩→t͡ʃ,
     // ⟨j⟩→d͡ʒ, ⟨ž⟩→ʒ, ⟨ş⟩→ʃ, ⟨ň⟩→ŋ, ⟨ý⟩→j (glide), ⟨h⟩→x, ⟨r⟩→ɾ (tap), ⟨w⟩→w.
     "graphemes": {

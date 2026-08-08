@@ -14,6 +14,15 @@
     "slenderVowels": "eiéí",
     "broadVowels": "aouáóú",
 
+    // ⚠ SVARABHAKTI (the epenthetic vowel of gorm→ɡɔɾˠəmˠ). It breaks a LIQUID + one of the following
+    // consonants, and both lists are Irish's own: every member carries the BROAD ⟨ˠ⟩ / SLENDER ⟨ʲ⟩ mark
+    // that is this language's central contrast, so "the liquids" here are four phones, not two.
+    "liquids": ["ɾˠ", "ɾʲ", "l̪ˠ", "lʲ"],
+    "svarabhaktiNext": [
+        "mˠ", "mʲ", "bˠ", "bʲ", "vˠ", "vʲ", "w", "ɡ",
+        "ɟ", "x", "ç", "ɣ", "j", "n̪ˠ", "nʲ"
+    ],
+
     // Consonant → IPA, by quality. Digraphs (lenition) resolved before this.
     "broad": {
         "b": "bˠ", "c": "k", "d": "d̪ˠ", "f": "fˠ", "g": "ɡ", "h": "h", "l": "l̪ˠ", "m": "mˠ",

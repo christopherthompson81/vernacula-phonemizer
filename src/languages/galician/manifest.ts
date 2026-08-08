@@ -17,6 +17,7 @@ export interface GalicianManifest {
     };
     accents: Record<string, string>;
     nasals: string[];
+    velars: readonly string[];
     spirantize: Record<string, string>;
     functionWords: string[];
     clausePunctuation: Record<string, string>;

@@ -15,6 +15,8 @@ interface ChuvashDef {
     voiced: Record<string, string>;
     vowels: Record<string, string>;
     iotated: Record<string, string>;
+    voicingSonorants: readonly string[];
+    liquids: readonly string[];
     vowelLetters: readonly string[];
 }
 const DEF = loadManifest<ChuvashDef>(import.meta.url, "chuvash.jsonc");
@@ -28,8 +30,8 @@ const CYR_VOWEL = new Set(DEF.vowelLetters);
 // intervocalic vowel (манпа→manˈba, мӗншӗн→ˈmŏnʐɘn before a REDUCED vowel, айта→ajˈda). The liquids ⟨р л⟩ trigger it
 // only before a FULL vowel — the generalization that fits all three referee cases: вӑлсем→ʋəlˈzem (л·с·е FULL → z) vs
 // ҫулҫӑ→ɕulɕ… (л·ҫ·ӑ REDUCED → ɕ) and чӗрпӗк→…rʲpʲ… (р·п·ӗ REDUCED → p).
-const NASAL_GLIDE = new Set(["n", "m", "ŋ", "j"]);
-const LIQUID = new Set(["l", "r"]);
+const NASAL_GLIDE = new Set(DEF.voicingSonorants);
+const LIQUID = new Set(DEF.liquids);
 const REDUCED = new Set(["ə", "ɘ"]); // reduced vowels — never stressed
 
 type Seg = { ipa: string; vowel: boolean; reduced: boolean };

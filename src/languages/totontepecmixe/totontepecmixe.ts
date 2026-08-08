@@ -16,6 +16,8 @@ interface TotontepecMixeDef {
     digraphs: [string, string][];
     vowels: Record<string, string>;
     consonants: Record<string, string>;
+    voicingNasals: readonly string[];
+    velars: readonly string[];
     postNasalVoice: Record<string, string>;
 }
 const DEF = loadManifest<TotontepecMixeDef>(import.meta.url, "totontepecmixe.jsonc");
@@ -25,8 +27,8 @@ const VOWEL = DEF.vowels;
 const CONS = DEF.consonants;
 const POSTNASAL_VOICE = DEF.postNasalVoice;
 const isVowel = (ph: string): boolean => [..."aeiouæɨʌʊ"].includes(ph[0] ?? "");
-const NASAL = new Set(["m", "n"]);
-const VELAR = new Set(["k", "ɡ", "ɣ"]);
+const NASAL = new Set(DEF.voicingNasals);
+const VELAR = new Set(DEF.velars);
 
 interface Seg { ph: string; vowel: boolean }
 

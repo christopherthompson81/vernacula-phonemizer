@@ -8,6 +8,8 @@ import { loadManifest } from "../../core/loadManifest.ts";
 
 export interface HungarianManifest {
     rules: [string, string, boolean][];
+    voicelessTriggers: readonly string[];
+    voicedTriggers: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: {
         units: string[];

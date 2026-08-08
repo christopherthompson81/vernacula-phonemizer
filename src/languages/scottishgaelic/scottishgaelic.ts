@@ -20,6 +20,7 @@ import { makeNumberToWords, type GaelicNumbers } from "./numbers.ts";
 interface GaelicManifest {
     slenderVowels: string;
     broadVowels: string;
+    sonorants: readonly string[];
     broad: Record<string, string>;
     slender: Record<string, string>;
     lenition: Record<string, [string, string]>;
@@ -98,7 +99,7 @@ const PREASP: Record<string, string> = { "pʰ": "hp", "t̪ʰ": "ht̪", "tʲʰ": 
 const DEASP: Record<string, string> = { "pʰ": "p", "t̪ʰ": "t̪", "tʲʰ": "tʲ", "kʰ": "k", "kʲʰ": "kʲ" };
 // Sonorant phones after which pre-aspiration is a valid site (plus any vowel nucleus): the LIQUIDS l/r only —
 // NOT the nasals (post-nasal fortis stays plain: annta→an̪t̪ə, cainnt→kaɲtʲ — the fortis de-aspirates there).
-const SONORANT = new Set(["l̪ˠ", "lʲ", "rˠ", "ɾʲ"]);
+const SONORANT = new Set(M.sonorants);
 /** PRE-ASPIRATION: a non-initial fortis stop pre-aspirates after a vowel/liquid, else de-aspirates. */
 function preaspirate(segs: Seg[]): void {
     for (let i = 1; i < segs.length; i++) {

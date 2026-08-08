@@ -15,6 +15,13 @@
         "gj": "ɟ", "nj": "ɲ", "ll": "ɫ", "rr": "r"
     },
 
+    // The SONORITY classes the stress rule reads (albanian.ts). Albanian stress is maximal-onset, and an
+    // onset normally has to RISE in sonority; these two lists are the exceptions that do not:
+    //   · a sibilant + stop/affricate/fricative (shtëpi) — "sibilants";
+    //   · a nasal + stop/affricate (mp, nd, mpr) — "nasals", which the sonority scale also reads (3).
+    "nasals": ["m", "n", "ɲ", "ŋ"],
+    "sibilants": ["s", "z", "ʃ", "ʒ"],
+
     // Single graphemes. The 7 vowels (⟨e⟩→ɛ, ⟨y⟩→y, ⟨ë⟩→ə) + the consonants (⟨q⟩→c palatal, ⟨c⟩→t͡s, ⟨ç⟩→t͡ʃ,
     // ⟨x⟩→d͡z, ⟨r⟩→ɾ tap, ⟨l⟩→l).
     "graphemes": {

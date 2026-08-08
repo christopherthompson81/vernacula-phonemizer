@@ -17,6 +17,8 @@ import { makeNumberToWords, type AlbanianNumbers } from "./numbers.ts";
 interface AlbanianDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
+    nasals: readonly string[];
+    sibilants: readonly string[];
     numbers: AlbanianNumbers;
     clausePunctuation: Record<string, string>;
 }
@@ -28,8 +30,8 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 export const numberToWords = makeNumberToWords(DEF.numbers);
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 const VOWEL = IPA_VOWEL;
-const SIBILANT = new Set(["s", "z", "ʃ", "ʒ"]);
-const NASAL = new Set(["m", "n", "ɲ", "ŋ"]);
+const SIBILANT = new Set(DEF.sibilants);
+const NASAL = new Set(DEF.nasals);
 
 /** Sonority class (higher = more sonorous): vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */
 function sonority(seg: string): number {
