@@ -13,6 +13,11 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { MANIFEST, FIXED_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { decompose } from "./morphology.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
+
+// Proper-noun / opaque-loan lexicon (af-lexicon.tsv), lazily loaded like tagalog's stress lexicon.
+let LEXICON: ReadonlyMap<string, string> | undefined;
+const lexicon = (): ReadonlyMap<string, string> => (LEXICON ??= loadTsvMap(import.meta.url, "af-lexicon.tsv"));
 import { normalizeAfrikaans, normalizeAfrikaansInitialisms } from "./normalize.ts";
 
 const FIXED = MANIFEST.fixed;
@@ -145,6 +150,12 @@ const LETTER_NAME = MANIFEST.letterNames; // a bare single letter is SPELLED (se
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC").toLowerCase();
     if (w === "'n" || w === "’n") return "ə"; // the indefinite article ⟨'n⟩ = [ə]
+    // ⚠ PROPER NOUNS AND OPAQUE LOANS FIRST (af-lexicon.tsv — ~50 referee-sourced entries: Botha→buəta,
+    // Blignault→ˈblɨxnœut-class French/anglicised spellings, Afrikaans→afrikɑ̃ːs with its nasal). These are
+    // words where NO spelling rule can win: the orthography is Dutch/French/English-era and the received
+    // pronunciation is lexical. Provenance + the single-source circularity note: af-lexicon.PROVENANCE.md.
+    const pinned = lexicon().get(w);
+    if (pinned !== undefined) return pinned;
     // ⚠ A BARE SINGLE LETTER IS SPELLED, NOT SOUNDED — ⟨C⟩ is "see" [siə], not [k] (#761). The initialism
     // normalizer already does this for runs of TWO or more (VSA → vee-es-aa) but never fires on one letter,
     // so a lone letter fell through to the ordinary word path and came out as its phone. It has to live

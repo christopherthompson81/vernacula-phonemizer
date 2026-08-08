@@ -13,9 +13,6 @@
         { "file": "af.wiktionary-af.tsv", "source": "en.wiktionary Afrikaans (Wiktionary, human, 2220)", "role": "primary" }
     ],
     "secondaryGap": "No independent second numeric source wired yet: wikipron afr exists (a candidate 2nd referee) but is not yet imported; kaikki has no convenient per-language Afrikaans IPA dump and epitran lacks af. The primary is the en.wiktionary Afrikaans IPA category (human, 2220). Standard-Afrikaans phonology (open/closed vowel length, centering diphthongs ee=iə/oo=uə, g=[χ], final devoicing) is corroborated by published descriptions (Donaldson, Afrikaans reference grammar). Anchor: the adjudicated common-word gold in test/afrikaans.test.ts.",
-    "preFolds": [
-        { "pattern": "\\([^)]*\\)", "replace": "", "note": "OPTIONAL schwa: the referee parenthesises an optional epenthetic schwa (arm→ˈɑr(ə)m, alles→ˈal(ə)s) — strip the optional group before comparison" }
-    ],
     "folds": [
         { "pattern": "\\.", "replace": "", "note": "the referee marks syllable boundaries with a dot" },
         { "pattern": "ɾ", "replace": "r", "note": "tap~trill: Afrikaans /r/ is written [r]~[ɾ] freely by the referee; non-contrastive → fold to the trill [r] we emit" },
@@ -23,6 +20,9 @@
         { "pattern": "ɪ", "replace": "i", "note": "the centering-diphthong onset ⟨ee⟩/open-e is written [ɪə]~[iə]; non-contrastive height → fold [ɪ]→[i] (we emit iə)" },
         { "pattern": "ʊ", "replace": "u", "note": "the centering-diphthong onset ⟨oo⟩/open-o is written [ʊə]~[uə]; non-contrastive height → fold [ʊ]→[u] (we emit uə)" },
         { "pattern": "o(?![ː])", "replace": "ɔ", "note": "short ⟨o⟩ height: the referee writes it [o]~[ɔ] freely; non-contrastive → fold plain [o]→[ɔ] (we emit ɔ; long/diphthong oː untouched)" },
-        { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" }
+        { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" },
+        { "pattern": "ɛi", "replace": "əi", "note": "⟨ei⟩/⟨y⟩ are HOMOPHONOUS in Afrikaans (one phoneme, two spellings — Donaldson §1); the referee writes ⟨ei⟩ rows [ɛi] and ⟨y⟩ rows [əi]. We emit [əi] for both → fold the notation together (+4 words, measured)" },
+        { "pattern": "ɑ", "replace": "a", "note": "short ⟨a⟩ backness: the referee free-varies [a]~[ɑ] (adres→adrɛs but arm→ɑrm) — non-contrastive; fold both sides to [a] (+62, the largest single fold). ⚠ MASKING RISK, stated: after the backbone strips ː, long ɑː also lands on [a], so an OURS-short vs REF-long disagreement would pass silently — accepted because the open/closed length rule is separately pinned in test/afrikaans.test.ts" },
+        { "pattern": "ɦ", "replace": "", "note": "the referee writes intervocalic/onset [ɦ] inconsistently in the SAME suffix (-heid appears as both ɦəit and əit: aamborstigheid vs afwesigheid) — non-contrastive presence; fold it out on both sides (+2, measured)" }
     ]
 }

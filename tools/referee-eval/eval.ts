@@ -505,7 +505,15 @@ export async function evaluate(
             // are the length-1 case, unchanged.
             const refIpas = row
                 .slice(1)
-                .map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri));
+                .map((ri) => (cfg.segmentJoin ? ri.replace(/\s+/g, "") : ri))
+                // A PARENTHESIZED GROUP IS AN OPTIONAL SEGMENT — dictionary convention (af writes
+                // ˈɑr(ə)m, ˈan(d)ər). Expand to BOTH variants and credit either, exactly like the
+                // multi-pronunciation tab fields above. Stripping the group instead (the old af preFold)
+                // deleted REAL segments: "an(d)ər" lost its d, and an engine emitting the epenthetic
+                // schwa could never match a reference that had it in the text.
+                .flatMap((ri) => (/[()]/u.test(ri)
+                    ? [...new Set([ri.replace(/\([^)]*\)/gu, ""), ri.replace(/[()]/gu, "")])]
+                    : [ri]));
             const rawOurs = await phon(w);
             // Under segmentJoin the reference is space-stripped; strip OUR word-separator spaces too (a segmented
             // phonemizer, e.g. Burmese/Thai, joins subwords with a space) so the raw metric compares like with like.
