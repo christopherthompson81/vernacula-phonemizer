@@ -36,6 +36,20 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(phonemizeWord("аи")).toBe("aj"); // ⟨и⟩ next to a vowel → the glide [j]
         expect(phonemizeWord("иҭабуп")).toBe("itʰabupʼ"); // ⟨у⟩ between consonants → syllabic [u] (not the glide [w])
         expect(phonemizeWord("х’а")).toBe("χˤa"); // the CURLY apostrophe ’ still pharyngealizes ⟨х⟩→[χˤ]
+        // ⚠ AN IDENTICAL TWIN IS NOT ITS OWN VOWEL CONTEXT. ⟨у⟩/⟨и⟩ count each other as vowels, so ⟨уу⟩
+        // made BOTH glides — асууари read as[ww]ari. First of the pair is syllabic (referee: asuwari…);
+        // the mixed pairs (аиуит → ajwjtʼ) keep their reading.
+        expect(phonemizeWord("асууари")).toBe("asuwari");
+        expect(phonemizeWord("диит")).toBe("dijtʼ"); // ⟨ии⟩ likewise [ij], not [jj]
+        expect(phonemizeWord("аиуит")).toBe("ajwjtʼ"); // mixed run unchanged — only identical twins split
+    });
+
+    test("⟨ҩ⟩ is the PHARYNGEALIZED [ɥˤ]", () => {
+        // The word corpus writes ɥˤ ~12:1 (kaikki 50× vs 4; wikipron's one non-definition ҩ-word agrees).
+        // The bare-ɥ rows are the letter DEFINITION and the numeral series — the referee's inconsistent
+        // corner (it also devoices б there). Chirikba /ʕʷ/, Hewitt [ɥˤ].
+        expect(phonemizeWord("аҩны")).toBe("aɥˤnə"); // 'house' — kaikki aɥˤnə
+        expect(phonemizeWord("ахҩа")).toBe("aχɥˤa"); // wikipron aχɥˤa
     });
 
     // VIGESIMAL cardinal numbers (numbers.ts). 20–99 is score·20 + a 1–19 remainder, the score in its -и
@@ -45,26 +59,26 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
     test("cardinal numbers are VIGESIMAL: score·20 + remainder with the -и connective", () => {
         const ab = createAbkhaz();
         expect(ab.text("7").trim()).toBe("bəʒba"); // быжьба
-        expect(ab.text("20").trim()).toBe("ɥaʒʷa"); // ҩажәа — the bare score
-        expect(ab.text("21").trim()).toBe("ɥaʒʷi akʼə"); // ҩажәи акы = 20 + 1
-        expect(ab.text("30").trim()).toBe("ɥaʒʷi ʒʷaba"); // ҩажәи жәаба = 20 + 10 (no "thirty" word)
-        expect(ab.text("45").trim()).toBe("ɥənɥaʒʷi χʷba"); // ҩынҩажәи хәба = 2×20 + 5
-        expect(ab.text("50").trim()).toBe("ɥənɥaʒʷi ʒʷaba"); // ҩынҩажәи жәаба = 2×20 + 10
-        expect(ab.text("67").trim()).toBe("χənɥaʒʷi bəʒba"); // хынҩажәи быжьба = 3×20 + 7
-        expect(ab.text("89").trim()).toBe("pʰʃənɥaʒʷi ʒʷba"); // ԥшьынҩажәи жәба = 4×20 + 9
-        expect(ab.text("99").trim()).toBe("pʰʃənɥaʒʷi zejʒʷ"); // ԥшьынҩажәи зеижә = 4×20 + 19 (a TEEN attaches too)
+        expect(ab.text("20").trim()).toBe("ɥˤaʒʷa"); // ҩажәа — the bare score
+        expect(ab.text("21").trim()).toBe("ɥˤaʒʷi akʼə"); // ҩажәи акы = 20 + 1
+        expect(ab.text("30").trim()).toBe("ɥˤaʒʷi ʒʷaba"); // ҩажәи жәаба = 20 + 10 (no "thirty" word)
+        expect(ab.text("45").trim()).toBe("ɥˤənɥˤaʒʷi χʷba"); // ҩынҩажәи хәба = 2×20 + 5
+        expect(ab.text("50").trim()).toBe("ɥˤənɥˤaʒʷi ʒʷaba"); // ҩынҩажәи жәаба = 2×20 + 10
+        expect(ab.text("67").trim()).toBe("χənɥˤaʒʷi bəʒba"); // хынҩажәи быжьба = 3×20 + 7
+        expect(ab.text("89").trim()).toBe("pʰʃənɥˤaʒʷi ʒʷba"); // ԥшьынҩажәи жәба = 4×20 + 9
+        expect(ab.text("99").trim()).toBe("pʰʃənɥˤaʒʷi zejʒʷ"); // ԥшьынҩажәи зеижә = 4×20 + 19 (a TEEN attaches too)
     });
 
     test("cardinal numbers: hundreds with the -и connective, FUSED thousands, millions", () => {
         const ab = createAbkhaz();
         expect(ab.text("100").trim()).toBe("ʃʷkʼə"); // шәкы
         expect(ab.text("101").trim()).toBe("ʃʷi akʼə"); // шәи акы — the hundred takes -и before a remainder
-        expect(ab.text("999").trim()).toBe("ʒʷʃʷi pʰʃənɥaʒʷi zejʒʷ"); // жәшәи ԥшьынҩажәи зеижә
+        expect(ab.text("999").trim()).toBe("ʒʷʃʷi pʰʃənɥˤaʒʷi zejʒʷ"); // жәшәи ԥшьынҩажәи зеижә
         expect(ab.text("1000").trim()).toBe("zkʰʲə"); // зқьы
         expect(ab.text("1001").trim()).toBe("zkʰʲə akʼə"); // зқьы акы — the thousand does NOT take -и
-        expect(ab.text("2000").trim()).toBe("ɥnəzkʰʲ"); // ҩнызқь — FUSED multiplier+нызқь
+        expect(ab.text("2000").trim()).toBe("ɥˤnəzkʰʲ"); // ҩнызқь — FUSED multiplier+нызқь
         expect(ab.text("100000").trim()).toBe("ʃʷnəzkʰʲ"); // шәнызқь — likewise fused
-        expect(ab.text("12345").trim()).toBe("ʒʷaɥa nəzkʰʲ χəʃʷi ɥənɥaʒʷi χʷba"); // жәаҩа нызқь хышәи ҩынҩажәи хәба
+        expect(ab.text("12345").trim()).toBe("ʒʷaɥˤa nəzkʰʲ χəʃʷi ɥˤənɥˤaʒʷi χʷba"); // жәаҩа нызқь хышәи ҩынҩажәи хәба
         expect(ab.text("1000000").trim()).toBe("milljon"); // миллион (Russian loan)
         expect(ab.text("1000000000").trim()).toBe("milljard"); // миллиард
     });
@@ -78,13 +92,13 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // ⚠ NO DECIMAL-POINT WORD IS SOURCEABLE for ab (sources.ts: no espeak — it does not ship Abkhaz —
         // and no manifest word), so the fraction is read DIGIT BY DIGIT with no invented connective.
         expect(ab.text("11,3 км").trim()).toBe("ʒʷejza χpʰa kʼm");
-        expect(ab.text("0,723").trim()).toBe("anolʲ bəʒba ɥba χpʰa");
+        expect(ab.text("0,723").trim()).toBe("anolʲ bəʒba ɥˤba χpʰa");
     });
 
     test("normalization: a grouped numeral is ONE number", () => {
         const ab = createAbkhaz();
         // ×13. The group split and the second half read as the WORD zero: 125 000 → "…χʷba anolʲ".
-        expect(ab.text("125 000 ҩык").trim()).toBe("ʃʷi ɥaʒʷi χʷba nəzkʰʲ ɥəkʼ");
+        expect(ab.text("125 000 ҩык").trim()).toBe("ʃʷi ɥˤaʒʷi χʷba nəzkʰʲ ɥˤəkʼ");
         // ⚠ WITHOUT THE LEFT GUARD the 1–3 digit group backtracks into a longer number, so a year beside
         // a count joined into one seven-figure number.
         expect(ab.text("1877 250 ҩык").trim()).not.toContain("milljon");
@@ -113,7 +127,7 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // ⚠ THE SUPPLETION IS ABOUT THE LAST CARDINAL WORD, not about n === 1 — keying it on the number
         // made every COMPOUND ending in one produce the very form the rule calls impossible: 21-тәи came
         // out аҩажәи *акытәи. Both 21 and 291 are attested in the corpus.
-        expect(ab.text("21-тәи").trim()).toBe("aɥaʒʷi akʼtʷʼi");
+        expect(ab.text("21-тәи").trim()).toBe("aɥˤaʒʷi akʼtʷʼi");
         expect(ab.text("101-тәи").trim()).toBe("aʃʷi akʼtʷʼi");
         // …and the suffix needs a trailing boundary, or it matches the START of a longer word.
         expect(ab.text("5-тәижәа").trim()).not.toContain("aχʷbatʷʼi");
@@ -123,7 +137,7 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         const ab = createAbkhaz();
         // ×125. ⟨ш.⟩ read as a bare letter and its dot as a full stop mid-date. The expansions are the
         // corpus's own spellings (шықәса ×35 inflected, ашәышықәса ×16).
-        expect(ab.text("1452ш.").trim()).toBe("zkʰʲə pʰʃəʃʷi ɥənɥaʒʷi ʒʷaɥa ʂəkʷʰsa");
+        expect(ab.text("1452ш.").trim()).toBe("zkʰʲə pʰʃəʃʷi ɥˤənɥˤaʒʷi ʒʷaɥˤa ʂəkʷʰsa");
         expect(ab.text("1908-1915 шш.").trim()).toContain("ʂəkʷʰsakʷʰa");
         // ⚠ ⟨ш.ш.⟩ is a spelling of ⟨шш.⟩ (×3 vs ×12) and needs its own row: the abbreviation dot is not
         // a LETTER, so the lookbehind does not stop a ⟨ш⟩-keyed rule matching the second half — it read
@@ -245,7 +259,7 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // normalizeRomans, so this must be probed through phonemize() — createAbkhaz().text() never sees
         // the conversion and drops the Latin run instead. Pinned because the normalizer must not disturb
         // the input the wrapper hands it.
-        expect(phonemize("XX ашәышықәса", "ab").trim()).toBe("ɥaʒʷa aʃʷəʂəkʷʰsa");
+        expect(phonemize("XX ашәышықәса", "ab").trim()).toBe("ɥˤaʒʷa aʃʷəʂəkʷʰsa");
         // A hyphenated WORD is not a range: the guard requires digits on both sides.
         expect(ab.text("аԥсуа-аурыс").trim()).not.toContain("inarkʼnə");
     });

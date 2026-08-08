@@ -33,7 +33,11 @@ export function phonemizeWord(word: string): string {
         // ⟨у⟩/⟨и⟩ are underlyingly the GLIDES /w j/: [w]/[j] next to a vowel, syllabic [u]/[i] between consonants /
         // word-finally (аи→aj, аԥсуа→apʰswa; but иҭабуп→itʰabup, амени→ameni).
         if (c === "у" || c === "и") {
-            const adjV = (i > 0 && VOWEL_LETTER.has(s[i - 1]!)) || (i + 1 < s.length && VOWEL_LETTER.has(s[i + 1]!));
+            // ⚠ AN IDENTICAL TWIN ON THE RIGHT IS NOT VOWEL CONTEXT: ⟨у⟩/⟨и⟩ count each other as vowels,
+            // so ⟨уу⟩ made BOTH glides — асууари came out as[ww]ari. The first of a twin pair is the
+            // syllabic one ([uw]/[ij], the referee's own asuwari...), so only the LEFT twin counts.
+            const adjV = (i > 0 && VOWEL_LETTER.has(s[i - 1]!))
+                || (i + 1 < s.length && s[i + 1] !== c && VOWEL_LETTER.has(s[i + 1]!));
             out.push(c === "у" ? (adjV ? "w" : "u") : (adjV ? "j" : "i"));
             continue;
         }

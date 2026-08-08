@@ -18,6 +18,8 @@
         { "pattern": "aː", "replace": "aa", "note": "⟨аа⟩ — the kaikki referee writes the long vowel [aː] where wikipron (and we) write [aa] (two segments); neutralise" },
         { "pattern": "cʰ", "replace": "kʰʲ", "note": "⟨қь⟩ — the wikipron letter-def uses the PALATAL-place [cʰ]; the 979-word corpus (and we) use dorsal+[ʲ] = [kʰʲ]. Notation-only (place)" },
         { "pattern": "cʼ", "replace": "kʼʲ", "note": "⟨кь⟩ palatal [cʼ] ~ dorsal [kʼʲ] — place notation" },
-        { "pattern": "ç", "replace": "χʲ", "note": "⟨хь⟩ palatal [ç] ~ dorsal [χʲ] — place notation" }
+        { "pattern": "ç", "replace": "χʲ", "note": "⟨хь⟩ palatal [ç] ~ dorsal [χʲ] — place notation" },
+        { "pattern": "ʏ", "replace": "ə", "note": "⟨ы⟩ after ⟨ҩ⟩ [ɥˤ] — kaikki writes the ROUNDED allophone (аҩы→aɥˤʏ); same ə" },
+        { "pattern": "e̞", "replace": "e", "note": "mid [e̞] ~ [e] height diacritic — kaikki-only notation" }
     ]
 }

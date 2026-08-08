@@ -39,7 +39,11 @@
         "к": "kʼ", "л": "l", "м": "m", "н": "n", "о": "o", "п": "pʼ", "р": "r", "с": "s", "т": "tʼ", "у": "w",
         "ф": "f", "х": "χ", "ц": "t͡sʰ", "ч": "t͡ʃʰ", "ш": "ʂ", "ы": "ə", "э": "e", "ю": "ju", "я": "ja",
         "ҕ": "ʁ", "ӷ": "ʁ", "ҙ": "ʑ", "ӡ": "d͡z", "қ": "kʰ", "ӄ": "kʰ", "ҟ": "qʼ", "ҧ": "pʰ", "ԥ": "pʰ",
-        "ҩ": "ɥ", "ҫ": "ɕ", "ҭ": "tʰ", "ҳ": "ħ", "ҵ": "t͡sʼ", "ҷ": "t͡ʃʼ", "ҽ": "t͡ʂʰ", "ҿ": "t͡ʂʼ", "џ": "d͡ʐ",
+        // ⚠ ⟨ҩ⟩ IS PHARYNGEALIZED — [ɥˤ], not plain [ɥ]. The word corpus writes ɥˤ ~12:1 (kaikki 50×
+        // against 4, wikipron's one non-definition ҩ-word agrees); the bare-ɥ rows are the letter
+        // DEFINITION and the numeral series, which is the referee's inconsistent corner (it also
+        // devoices б there). Chirikba /ʕʷ/, Hewitt [ɥˤ] — the same segment.
+        "ҩ": "ɥˤ", "ҫ": "ɕ", "ҭ": "tʰ", "ҳ": "ħ", "ҵ": "t͡sʼ", "ҷ": "t͡ʃʼ", "ҽ": "t͡ʂʰ", "ҿ": "t͡ʂʼ", "џ": "d͡ʐ",
         // Extended / historical Abkhaz Cyrillic letters (older orthographies):
         "ԡ": "lʰ", "ԣ": "nʰ", "ԫ": "d͡ʒ", "ԭ": "d͡ʑ",
         "ꚁ": "dʷ", "ꚃ": "d͡ʑʷ", "ꚅ": "ʒʷ", "ꚇ": "t͡ʂʰ", "ꚉ": "d͡z", "ꚋ": "tʰ", "ꚍ": "tʷʰ", "ꚏ": "t͡ɕʷʰ",
