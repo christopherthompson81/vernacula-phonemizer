@@ -46,6 +46,21 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     test("text: words + clause punctuation (stress deferred)", () => {
         expect(createAfrikaans().text("Die man loop huis toe.")).toBe("di man luəp ɦœys tu .");
     });
+    // ⚠ WORD-FINAL ⟨c⟩ IS [k] — issue #757. The rule is "soft [s] BEFORE a front vowel", and word-finally
+    // there is no following vowel, so the soft branch cannot apply. It used to, because the test was
+    // `"eiyêéè".includes(w[i + 1] ?? "")` and `includes("")` is TRUE: franc→frans, arc→ars.
+    // ⚠ THE REFEREE CANNOT ADJUDICATE THIS, though not for the reason first written here. af.wiktionary-af
+    // .tsv DOES hold one word-final ⟨c⟩ — the letter name `C → sɪə` — and eval.ts feeds af through
+    // phonemizeWord directly, so that entry does reach this branch. It simply misses BOTH ways (s, then k,
+    // against sɪə), which is why the folded backbone is unmoved at 1658/2220. Single letters are not
+    // spelled out by the g2p at all — `B → p` likewise — see issue #761.
+    test("a word-final ⟨c⟩ is [k], not the soft [s]", () => {
+        expect(phonemizeWord("franc")).toBe("frank");
+        expect(phonemizeWord("arc")).toBe("ark");
+        expect(phonemizeWord("bloc")).toBe("blɔk");
+        expect(phonemizeWord("cent")).toBe("sɛnt"); // …and ⟨c⟩ BEFORE a front vowel is still soft
+    });
+
 });
 
 // TEXT NORMALIZATION (src/languages/afrikaans/normalize.ts) — the pre-tokenizer pass. The
@@ -193,5 +208,6 @@ describe("Afrikaans text normalization", () => {
         expect(Object.keys(MANIFEST.prefixIpa).sort()).toEqual([...MANIFEST.morphology.prefixUnstressed].sort());
         expect(MANIFEST.morphology.prefixUnstressed.length).toBeGreaterThan(0); // and the scan found something
     });
+
 
 });

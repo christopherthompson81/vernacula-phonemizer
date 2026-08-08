@@ -81,17 +81,19 @@ function phonemizeMorpheme(word: string): string {
         // Code rules that must beat the fixed table:
         if (!VOWEL_LETTER.has(c) && w[i + 1] === c && c !== "'") { i += 1; continue; } // doubled consonant = single phoneme (appel→ˈapəl)
         if (c === "c") {
-            // ⚠ WORD-FINAL ⟨c⟩ TAKES THE SOFT [s], AND THAT IS AN ACCIDENT PRESERVED ON PURPOSE. The old
-            // test was `"eiyêéè".includes(w[i + 1] ?? "")`, and `includes("")` is TRUE — so a ⟨c⟩ with no
-            // following letter fell into the soft branch. Moving the list to the manifest turned that into
-            // a Set, which would have silently flipped 38 of 1500 probe words to [k]. Kept identical here
-            // because a data move must not change output; the af referee covers neither reading, so the
-            // question needs its own evidence rather than a refactor's side effect. Filed as issue #757.
-            const nx = w[i + 1];
-            out += nx === undefined || C_SOFT.has(nx) ? "s" : "k";
+            // ⟨c⟩ is SOFT [s] BEFORE a front vowel and [k] elsewhere — so word-finally it is [k], because
+            // there is no following letter for the soft condition to be met by.
+            // ⚠ IT USED TO BE [s], from `"eiyêéè".includes(w[i + 1] ?? "")` — `includes("")` is TRUE, so a
+            // ⟨c⟩ with nothing after it fell into the soft branch. franc→frans, arc→ars. #756 preserved
+            // that verbatim (a data move must not change output) and #757 decided it: the rule's own
+            // statement is "before a front vowel", and word-final has no following vowel at all, so the
+            // accident inverted the rule rather than extending it.
+            // ⚠ NOT REFEREE-DECIDED: the corpus's only word-final ⟨c⟩ is the letter name C→sɪə, which this
+            // branch does reach and misses BOTH ways, so the score is unmoved either way (#761).
+            out += C_SOFT.has(w[i + 1] ?? "") ? "s" : "k";
             i += 1;
             continue;
-        } // ⟨c⟩ soft [s] before front vowel, else [k]
+        }
         let matched = false;
         for (const key of FIXED_KEYS) {
             if (w.startsWith(key, i)) {
