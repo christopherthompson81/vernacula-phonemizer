@@ -194,4 +194,16 @@ describe("Afrikaans text normalization", () => {
         expect(MANIFEST.morphology.prefixUnstressed.length).toBeGreaterThan(0); // and the scan found something
     });
 
+    // ⚠ WORD-FINAL ⟨c⟩ IS [k] — issue #757. The rule is "soft [s] BEFORE a front vowel", and word-finally
+    // there is no following vowel, so the soft branch cannot apply. It used to, because the test was
+    // `"eiyêéè".includes(w[i + 1] ?? "")` and `includes("")` is TRUE: franc→frans, arc→ars.
+    // ⚠ NOT REFEREE-CONFIRMED — af.wiktionary-af.tsv contains no word-final ⟨c⟩ at all (its only ⟨c⟩
+    // entries are surnames and the letter name C→sɪə). These pin the rule being self-consistent.
+    test("a word-final ⟨c⟩ is [k], not the soft [s]", () => {
+        expect(phonemizeWord("franc")).toBe("frank");
+        expect(phonemizeWord("arc")).toBe("ark");
+        expect(phonemizeWord("bloc")).toBe("blɔk");
+        expect(phonemizeWord("cent")).toBe("sɛnt"); // …and ⟨c⟩ BEFORE a front vowel is still soft
+    });
+
 });
