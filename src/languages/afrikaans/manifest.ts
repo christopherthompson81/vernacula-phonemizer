@@ -4,6 +4,7 @@
  * punctuation). The open/closed vowel-length lookahead + final devoicing ALGORITHM lives in afrikaans.ts.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
+import type { SignWords } from "../../core/normalizeSymbols.ts";
 
 export interface AfrikaansManifest {
     language: string;
@@ -24,8 +25,8 @@ export interface AfrikaansManifest {
     stressPenultSuffixes: readonly string[];
     /** Reduced IPA per unstressed prefix; the keys must equal `morphology.prefixUnstressed`. */
     prefixIpa: Record<string, string>;
-    /** Sign and math words, one per symbol — see the manifest note on ± and ⟨&⟩. */
-    signWords: Record<string, string>;
+    /** Sign and math words — the shared SHAPE, so an omission is a compile error, not "undefined". */
+    signWords: SignWords;
     /** Clock half-day words, keyed by the written abbreviation. */
     clockPeriods: Record<string, string>;
     /** Only the halves need words; every other fraction is built on the ordinal. */

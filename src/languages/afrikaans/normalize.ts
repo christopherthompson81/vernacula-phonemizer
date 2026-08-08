@@ -165,7 +165,10 @@ export function normalizeAfrikaans(input: string): string {
     const clock = (h: string, min: string, period?: string): string =>
         `${numberToWords(Number(h))}${Number(min) === 0 ? "" : ` ${numberToWords(Number(min))}`}${period ?? ""}`;
     const period = (p?: string): string =>
-        p === undefined ? "" : ` ${MANIFEST.clockPeriods[p.trim().toLowerCase()] ?? ""}`;
+        // ⚠ AN UNKNOWN ABBREVIATION KEEPS ITS TEXT rather than vanishing. The regex only admits vm|nm
+        // today so the fallback is unreachable, but a silent "" is exactly how the sign words would have
+        // leaked as `undefined` — the same class of miss, and the same policy: leave it alone.
+        p === undefined ? "" : ` ${MANIFEST.clockPeriods[p.trim().toLowerCase()] ?? p.trim()}`;
     // The trailing guard rejects a further `:` or `.` FOLLOWED BY A DIGIT — a SPORTS TIME, of which the
     // corpus has three (`4:41.30`, `2:11:60`, `1:09:02`). Guarding on `:` alone let `4:41.30` through: the
     // clock claimed `4:41` and stranded `.30` as a phrase break plus a bare number. A plain `.` may NOT be
