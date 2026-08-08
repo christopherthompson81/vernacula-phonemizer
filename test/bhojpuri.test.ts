@@ -21,4 +21,16 @@ describe("Bhojpuri canonical IPA — from the reference grammar", () => {
         expect(phonemizeWord("गणेश")).toBe("ɡˈənes"); // ण → n (allophone of /n/), श → s
         expect(phonemizeWord("शहर")).toBe("sˈəɦəɾ"); // श → s, no əɦə-lowering (Hindi ʃɛɦɛɾ)
     });
+
+    // ⚠ THE AVAGRAHA ⟨ऽ⟩ (U+093D) WRITES A RETAINED FINAL VOWEL — a live orthographic mark in Bhojpuri on
+    // the imperative/participial forms, not Sanskrit's elision sign. Without it the final schwa deletes as
+    // usual, so the pair कर/करऽ is the whole rule. All 31 avagraha forms in the grammar-mined referee keep
+    // the vowel; enabling it moved the folded backbone 1133 → 1153/1623. It is read from the SPELLING
+    // because g2p drops the character, leaving nothing in the phones to test.
+    test("a word-final avagraha ⟨ऽ⟩ retains the vowel the schwa rule would delete", () => {
+        expect(phonemizeWord("करऽ")).toBe("kˈəɾə"); // referee kʌrʌ — imperative
+        expect(phonemizeWord("कर")).toBe("kˈəɾ"); // the same word WITHOUT it — still deleted
+        expect(phonemizeWord("देखऽ")).toBe("d̪ˈekʰə"); // referee dekʰʌ
+        expect(phonemizeWord("खइलऽ")).toBe("kʰˈəilə"); // referee kʰʌilʌ — participial
+    });
 });

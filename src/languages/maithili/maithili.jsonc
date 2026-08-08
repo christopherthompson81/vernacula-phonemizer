@@ -145,6 +145,7 @@
     "schwaDeletion": {
         "deleteWordFinal": true,
         "retainInMonosyllable": true,
+        "retainOnAvagraha": true,
         "medialRule": "ohala-VCaCV",
         "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
     },

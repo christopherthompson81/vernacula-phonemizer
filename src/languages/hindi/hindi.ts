@@ -30,6 +30,9 @@ export interface HindiDef extends AbugidaDef {
         deleteWordFinal?: boolean;
         retainInMonosyllable?: boolean;
         retainFinalAfterCluster?: boolean;
+        /** ⚠ A word-final AVAGRAHA ⟨ऽ⟩ (U+093D) retains the inherent vowel it writes. See the note in
+         *  wordRules — this is spelling-driven, so it overrides the deletion rule for that word alone. */
+        retainOnAvagraha?: boolean;
     };
     clausePunctuation: Record<string, string>;
     symbols?: Record<string, string>;
@@ -129,10 +132,17 @@ export function makeNativeHindi(
     /** Pure RULE-ENGINE word→IPA (no lexicon) — the honest, non-circular signal used by the referee eval. */
     function wordRules(w: string): string {
         let x = g2p(w);
+        // ⚠ THE AVAGRAHA ⟨ऽ⟩ IS READ FROM THE SPELLING, NOT THE PHONES. In Bhojpuri it WRITES the final
+        // inherent vowel that would otherwise delete (करऽ kʌrʌ vs कर kʌr, दऽ dʌ, देखऽ dekʰʌ) — an
+        // orthographic instruction to retain, so it is the one retain-condition that cannot be decided
+        // from `x`: g2p drops the character, leaving nothing downstream to test. Verified against the
+        // grammar-mined referee, where every one of its 31 avagraha forms keeps the vowel.
+        const avagraha = def.schwaDeletion.retainOnAvagraha === true && /\u093D$/u.test(w);
         for (const r of post) x = x.replace(r.re, r.to);
         const syls = (x.match(VOWEL_G) || []).length;
         if (
             def.schwaDeletion.deleteWordFinal &&
+            !avagraha &&
             !(def.schwaDeletion.retainInMonosyllable && syls <= 1) &&
             !(
                 def.schwaDeletion.retainFinalAfterCluster &&

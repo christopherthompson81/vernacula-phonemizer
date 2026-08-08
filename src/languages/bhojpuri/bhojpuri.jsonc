@@ -145,6 +145,10 @@
     "schwaDeletion": {
         "deleteWordFinal": true,
         "retainInMonosyllable": true,
+        // ⚠ A word-final AVAGRAHA ⟨ऽ⟩ RETAINS the vowel. Bhojpuri uses it as a live orthographic mark on the
+        // imperative/participial forms (करऽ kʌrʌ, देखऽ dekʰʌ, दऽ dʌ, खइलऽ kʰʌilʌ) — not as Sanskrit's
+        // elision sign. All 31 avagraha forms in the grammar-mined referee keep the vowel; none delete it.
+        "retainOnAvagraha": true,
         "medialRule": "ohala-VCaCV",
         "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
     },
