@@ -125,6 +125,20 @@ describe("Afrikaans text normalization", () => {
         expect(ordinalWord(190)).toBe("honderd en negentigste");
     });
 
+    // ⚠ THE SUB-20 TAIL OF A COMPOUND — the case the test above never reached, and it was broken both ways.
+    // The tails were two inline arrays duplicating numbers.units/teens, and the teens copy had drifted two
+    // places: r=10 asked for an EMPTY tail, `card.endsWith("")` is true for everything, and
+    // `card.slice(0, -0)` is "" because -0 === 0 — so 110 lost its whole "honderd en " and read *tiende*.
+    // r=12…19 asked for the wrong word, missed the match, and fell through to plain -ste, giving
+    // *honderd en twaalfste* where ordinalWord's own docblock says honderdtwaalfde. Reads the manifest now.
+    test("a compound ordinal keeps its prefix AND takes the sub-20 form", () => {
+        expect(ordinalWord(110)).toBe("honderd en tiende"); // was *tiende* — prefix destroyed
+        expect(ordinalWord(111)).toBe("honderd en elfde"); // was *elfde*
+        expect(ordinalWord(112)).toBe("honderd en twaalfde"); // was *honderd en twaalfste*
+        expect(ordinalWord(119)).toBe("honderd en negentiende"); // was *honderd en negentienste*
+        expect(ordinalWord(101)).toBe("honderd en eerste"); // …and r<10 was already right
+    });
+
     test("text→text: the N-suffix ordinal becomes the ordinal words", () => {
         expect(normalizeAfrikaans("11de Hussars")).toBe("elfde Hussars");
         expect(normalizeAfrikaans("15de eeu")).toBe("vyftiende eeu");

@@ -40,11 +40,15 @@ export function ordinalWord(n: number): string | undefined {
     if (card === "" || /\d/u.test(card)) return undefined;
     const r = n % 100;
     if (r >= 1 && r < 20) {
-        const tail = r < 10
-            ? ["", "een", "twee", "drie", "vier", "vyf", "ses", "sewe", "agt", "nege"][r]!
-            : ["", "", "tien", "elf", "twaalf", "dertien", "veertien", "vyftien", "sestien", "sewentien",
-                "agtien", "negentien"][r - 10]!;
-        if (card.endsWith(tail))
+        // ⚠ THE TAIL IS THE MANIFEST'S OWN CARDINAL — it used to be two inline arrays that duplicated
+        // `numbers.units` and `numbers.teens`, and the copy had DRIFTED two places: the teens array carried
+        // two leading "" pads, so r=12 asked for "tien" and r=10 asked for the EMPTY string. The empty tail
+        // then matched `card.endsWith("")` — true for every string — and `card.slice(0, -0)` is `""`,
+        // because -0 === 0. So 110 lost its whole "honderd en " and read *tiende*, while 112…119 missed
+        // the match and fell through to the regular -ste, giving *honderd en twaalfste* where this
+        // function's own docblock says honderdtwaalfde.
+        const tail = r < 10 ? MANIFEST.numbers.units[r]! : MANIFEST.numbers.teens[r - 10]!;
+        if (tail !== "" && card.endsWith(tail))
             return `${card.slice(0, -tail.length)}${ORD_BELOW_20[r]}`;
     }
     return `${card}ste`;
