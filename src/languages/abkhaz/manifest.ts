@@ -53,10 +53,12 @@ export interface AbkhazManifest {
         /** ⟨асааҭ⟩ — goes BEFORE the number ("асааҭ 6 рзы"). */
         hour: string;
         squareKm: string;
-        /** [symbol, word] — the symbol precedes the number in text, the word follows it in speech. */
+        /** [symbol, word] — the symbol precedes the number in text, the word follows it in speech.
+         *  Compound keys (US$, B£) included, because the shared tier letter-bounds a bare sign. */
         currencies: readonly (readonly [string, string])[];
-        /** [abbreviation, word] — млрд/млн, expanding to the same миллиард/миллион as numbers. */
-        scales: readonly (readonly [string, string])[];
+        /** Scale abbreviation (млрд/млн) → the KEY in `numbers` holding its word — a reference, so the
+         *  word cannot drift from the copy the number path reads. */
+        scales: Readonly<Record<string, "million" | "milliard">>;
     };
 }
 

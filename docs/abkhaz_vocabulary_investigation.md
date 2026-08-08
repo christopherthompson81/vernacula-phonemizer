@@ -79,3 +79,36 @@ Corpus-diff: 63/404 changed, DROP 78 → 34. Referee unchanged (170/206, 641/979
 Still deferred: minus, plus, = < > × ÷, cubic, °F, ampersand — searched, not assumed.
 Gemini corroboration was unnecessary: the engine's own g2p reads the sourced Cyrillic
 words directly, so no external phonemization enters the repo.
+
+## Run 4 — 2026-08-08 (review of PR #767)
+
+Command: /code-review 767 (multi-agent, adversarial verify), then re-ran the gates.
+Question: what did the first implementation get wrong?
+
+Eight findings survived verification (km² was refuted — the alleged bad corpus instance
+does not exist). All eight fixed:
+
+1. Single comma group: "decimal by default" mis-read the MAJORITY class — the artifact
+   splits 7 groupings vs 5 decimals, and every decimal begins ⟨0,⟩. Leading-0 is now the
+   discriminator ("301,340 км²" was reading as ~301 km²; "21,000 К" as "21 0 0 0").
+2. Hand-rolled percent/currency doubled the word when the text already spelled it
+   ("95% процент", "$1000 доллар") and stranded "US" from US$. Replaced with the shared
+   symbol tier (makeSymbolNormalizer) + compound keys US$ and B£ (the corpus's Brixton
+   pound).
+3. млрд/млн had no dotted forms; "30 млн. аԥара" left a stray sentence-break dot. Now
+   consumed/re-emitted like the year abbreviations, and symbols.scales references
+   numbers keys instead of duplicating the words.
+4. The clock said-lookback wasn't letter-bounded (иасааҭ suppressed the frame word),
+   compiled per match, unescaped, unbounded slice.
+5. No wall-clock bounds (25:99 accepted) — now h<24, mm<60, ss<60 (swedish precedent).
+6. Medial-zero drop collapsed 10:00:30 into 10:30's output — now trailing zeros only.
+7. "10:00-16:00" was rewritten endpoint-wise: doubled асааҭ, stranded hyphen. A clock
+   RANGE rule now runs first and emits the corpus frame (асааҭ once, инаркны…рҟынӡа).
+8. Degrees: Cyrillic ⟨°С⟩ (U+0421) glued *градусС; an unbounded skip class let any
+   following К/C/F-word suppress the degree word ("60° Кырҭтәыла").
+
+Gates after fixes: 8/404 corpus rows changed vs the pre-review PR state, every one an
+improvement read by hand; DROP 34 → 33; referee unchanged (170/206, 641/979).
+Also learned en route: bare ⟨км⟩ → километр is full-wiki attested ("18 километр",
+"20 километр", "25 километр" — the bare form after numerals, where the area frame uses
+"километра квадрат") — sourced and available for a plain-length-units follow-up.

@@ -171,8 +171,13 @@
         "hour": "асааҭ",
         "squareKm": "километра квадрат",
         // [symbol, word] — the symbol PRECEDES the number in text ($1,86) but the word FOLLOWS it in speech.
-        "currencies": [["$", "доллар"], ["€", "евро"], ["£", "фунт стерлинг"]],
-        // [abbreviation, word] — LONGEST FIRST (млрд before млн is not length-critical, but keep the habit).
-        "scales": [["млрд", "миллиард"], ["млн", "миллион"]],
+        // ⚠ THE LETTER-PREFIXED KEYS ARE LOAD-BEARING: the shared symbol tier letter-bounds a bare sign so
+        // it cannot split a code prefix, which means ⟨US$30⟩ and the corpus's own ⟨B£20⟩ (the Brixton
+        // pound — "брикстонтәи афунтқәа") match NOTHING unless the compound key is declared. Longest-first
+        // matching is the tier's, not ours.
+        "currencies": [["US$", "доллар"], ["B£", "фунт"], ["$", "доллар"], ["€", "евро"], ["£", "фунт стерлинг"]],
+        // Scale abbreviation → the KEY IN "numbers" ABOVE that holds its word — a reference, not a copy,
+        // so миллиард/миллион cannot drift apart between the number path and the currency path.
+        "scales": { "млрд": "milliard", "млн": "million" },
     },
 }

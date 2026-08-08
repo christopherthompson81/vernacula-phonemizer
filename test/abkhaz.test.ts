@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 
 import { phonemizeWord, createAbkhaz } from "../src/languages/abkhaz/abkhaz.ts";
+import { MANIFEST } from "../src/languages/abkhaz/manifest.ts";
 import { normalizeAbkhaz } from "../src/languages/abkhaz/normalize.ts";
 
 // Canonical-IPA goldens for Abkhaz (ab) — аҧсуа бызшәа, a Northwest Caucasian language with one of
@@ -136,11 +137,23 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
     // ── SYMBOLS: words sourced from the FULL ab.wikipedia text (docs/abkhaz_vocabulary_investigation.md),
     // because the sampled corpus artifact attests none of them and espeak does not ship Abkhaz. Asserted
     // at the TEXT level: what matters here is which word lands where, not its phonemes.
-    test("normalization: percent takes the postposed word", () => {
+    test("normalization: percent takes the postposed word — once", () => {
         // Full wiki ×10, always straight after the numeral ("18 процент"). The decimal comma inside
         // "52,8%" must still reach the decimal rule after the word moves in.
         expect(normalizeAbkhaz("аҟынтәи 95%),")).toBe("аҟынтәи 95 процент),");
         expect(normalizeAbkhaz("52,8%")).toBe("52 ааба процент");
+        // ⚠ NOT TWICE. Percent and currency go through the shared symbol tier for its already-said
+        // suppression — hand-rolled, ⟨95% процент⟩ read *процент процент* (the Malayalam defect).
+        expect(normalizeAbkhaz("95% процент")).toBe("95 процент");
+    });
+
+    test("normalization: a single comma group de-groups unless it leads with 0", () => {
+        // The artifact's own `\d{1,3},\d{3}` instances split 7 thousands-groupings vs 5 decimals, and
+        // every decimal begins ⟨0,⟩ — so the integer part is the discriminator. The first version kept
+        // ALL single groups as decimals and mis-read the majority class.
+        expect(normalizeAbkhaz("301,340 км²")).toBe("301340 километра квадрат");
+        expect(normalizeAbkhaz("21,000 К")).toBe("21000 К");
+        expect(normalizeAbkhaz("0,723")).toContain("быжьба ҩба хԥа"); // 0,723 stays a decimal
     });
 
     test("normalization: degrees — ⟨°C⟩ is the attested unit name, bare ⟨°⟩ is градус, ⟨°F⟩ untouched", () => {
@@ -154,17 +167,42 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(normalizeAbkhaz("90–220 К (−73–83°C) рҟынӡа")).toContain("73 инаркны 83 Цельси иградус");
         // No Fahrenheit word is attested (куб- and минус-class gap), so ⟨°F⟩ deliberately falls through.
         expect(normalizeAbkhaz("451 °F")).toBe("451 °F");
+        // ⚠ ⟨С⟩ MAY BE CYRILLIC (U+0421 — what a Russian keyboard types). Latin-only, this fell through
+        // to the bare rule and GLUED: *градусС.
+        expect(normalizeAbkhaz("23 °С ыҟоуп")).toBe("23 Цельси иградус ыҟоуп");
+        // ⚠ …and the skip class wants a STANDALONE letter: a following WORD starting with C/F/K must not
+        // suppress the degree word ("60° Кырҭтәыла" kept its raw °, silently dropped downstream).
+        expect(normalizeAbkhaz("аԥхарра 60° Кырҭтәыла")).toBe("аԥхарра 60 градус Кырҭтәыла");
     });
 
-    test("normalization: currency lands LAST, after any scale word", () => {
-        // "8 миллиард доллар" (Формула Аку) fixes the order: number, scale, currency. млрд/млн are the
-        // corpus's own abbreviations and expand to the same миллиард/миллион the numbers table carries.
+    test("normalization: currency lands LAST, after any scale word — and never twice", () => {
+        // "8 миллиард доллар" (Формула Аку) fixes the order: number, scale, currency. млрд/млн expand to
+        // the миллиард/миллион the numbers table carries — by REFERENCE (symbols.scales maps to numbers
+        // keys), so the two paths cannot drift.
         expect(normalizeAbkhaz("$1,86 млрд")).toBe("1 ааба фба миллиард доллар");
         expect(normalizeAbkhaz("€ 30 млн")).toBe("30 миллион евро");
         expect(normalizeAbkhaz("£200")).toBe("200 фунт стерлинг");
-        // ⚠ ENGLISH-STYLE COMMA GROUPING de-groups only at TWO-plus groups — one group is
-        // indistinguishable from a decimal. The wiki spells this very sum "29,721,250 фунт стерлинг".
         expect(normalizeAbkhaz("£29,721,250")).toBe("29721250 фунт стерлинг");
+        // ⚠ THE SHARED TIER'S GUARDS, exercised: already-said suppression (the Nepali defect — a written
+        // ⟨доллар⟩ after the sum must silence the sign, not double the word)…
+        expect(normalizeAbkhaz("$1000 доллар")).toBe("1000 доллар");
+        // …and letter-bounded longest-first keys: a bare ⟨$⟩ must not split ⟨US$⟩ and strand a raw "US";
+        // ⟨B£⟩ is the corpus's own Brixton pound ("B£20 абанкнотаҿы").
+        expect(normalizeAbkhaz("US$30 млрд")).toBe("30 миллиард доллар");
+        expect(normalizeAbkhaz("B£20 абанкнотаҿы")).toBe("20 фунт абанкнотаҿы");
+    });
+
+    test("normalization: the scale dot is consumed — unless it is the sentence's", () => {
+        // млн./млрд. are the dotted Russian-convention spellings (attested in sibling corpora); undotted
+        // they left a stray full stop that read as a sentence break mid-noun-phrase.
+        expect(normalizeAbkhaz("30 млн. аԥара")).toBe("30 миллион аԥара");
+        // Same re-emit rule as the year abbreviations: whitespace + upper-case means the dot was doing
+        // double duty as the full stop.
+        expect(normalizeAbkhaz("30 млн. Аҩбатәи")).toBe("30 миллион. Аҩбатәи");
+        // The scales map must reference REAL numbers keys — loadManifest casts without validating, so a
+        // typo there would reach the output as the literal string "undefined".
+        for (const slot of Object.values(MANIFEST.symbols.scales))
+            expect(typeof MANIFEST.numbers[slot]).toBe("string");
     });
 
     test("normalization: ⟨км²⟩ reads as the wiki's own ⟨километра квадрат⟩ — and cubes stay symbols", () => {
@@ -178,11 +216,27 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         // from the range rule applies here too.
         expect(normalizeAbkhaz("22:30 рзы")).toBe("асааҭ 22 30 рзы");
         expect(normalizeAbkhaz("асааҭ 18:21:56 рзы")).toBe("асааҭ 18 21 56 рзы");
-        // Zero minutes are DROPPED, not read: асааҭ 10, never "10 аноль".
+        // TRAILING zero components are dropped, not read: асааҭ 10, never "10 аноль".
         expect(normalizeAbkhaz("асааҭ 10:00 инаркны 16:00 рҟынӡа")).toBe("асааҭ 10 инаркны асааҭ 16 рҟынӡа");
+        // ⚠ …TRAILING ONLY. Dropping a MEDIAL zero collapsed 10:00:30 into the same output as the
+        // different time 10:30 — the seconds slid into the minutes slot.
+        expect(normalizeAbkhaz("асааҭ 10:00:30 рзы")).toBe("асааҭ 10 0 30 рзы");
+        expect(normalizeAbkhaz("10:05:00")).toBe("асааҭ 10 5");
+        // ⚠ THE SAID-LOOKBACK IS LETTER-BOUNDED: the и- prefix is productive, so a word merely ENDING in
+        // асааҭ must not suppress the frame word.
+        expect(normalizeAbkhaz("иасааҭ 22:30 рзы")).toBe("иасааҭ асааҭ 22 30 рзы");
         // ⚠ A RACE TIME IS NOT A CLOCK: "(1:51.4)" is in the corpus, and fractional "minutes" mark a
-        // duration — excluded by the trailing guard.
+        // duration — excluded by the trailing guard. And no wall clock shows 25:99 (h<24, mm<60).
         expect(normalizeAbkhaz("(1:51.4)")).toBe("(1:51.4)");
+        expect(normalizeAbkhaz("25:99")).toBe("25:99");
+    });
+
+    test("normalization: a hyphenated clock RANGE says the frame word once and keeps step 4's connectives", () => {
+        // Rewriting endpoint-by-endpoint doubled асааҭ and stranded the hyphen where the digit-range
+        // rule could no longer see it ("асааҭ 10-асааҭ 16"). The corpus frame carries the word once for
+        // the pair: "асааҭ 10.00 инаркны 16.00".
+        expect(normalizeAbkhaz("асааҭ 10:00-16:00 рзы")).toBe("асааҭ 10 инаркны 16 рҟынӡа рзы");
+        expect(normalizeAbkhaz("10:00-16:00")).toBe("асааҭ 10 инаркны 16 рҟынӡа");
     });
 
     test("normalization: what it must NOT touch", () => {
