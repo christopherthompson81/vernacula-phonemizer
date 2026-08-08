@@ -33,15 +33,28 @@ export function phonemizeWord(word: string): string {
         // ⟨у⟩/⟨и⟩ are underlyingly the GLIDES /w j/: [w]/[j] next to a vowel, syllabic [u]/[i] between consonants /
         // word-finally (аи→aj, аԥсуа→apʰswa; but иҭабуп→itʰabup, амени→ameni).
         if (c === "у" || c === "и") {
-            const adjV = (i > 0 && VOWEL_LETTER.has(s[i - 1]!)) || (i + 1 < s.length && VOWEL_LETTER.has(s[i + 1]!));
+            // ⚠ THE LEFT CONTEXT IS THE REALIZED PHONE, NOT THE LETTER. A first pass keyed both sides on
+            // the LETTER set (у/и count as vowels), so any glide RUN came out nucleus-free: ⟨уу⟩ was
+            // as[ww]ari, and patching only the identical-twin case left ⟨ауу⟩ → a[ww] and ⟨иу⟩ → [jw]
+            // (адиуан read adjwan where the referee has adiwan). The rule that survives all of these:
+            //   · LEFT: does the PREVIOUS EMITTED phone end in a vowel? (a realized glide is a consonant)
+            //   · RIGHT: a vowel LETTER that is not itself ⟨у⟩/⟨и⟩ — an undecided glide is no context.
+            // So a run alternates from its anchor: асууари→asuwari (referee asuwarij — its final j is the
+            // referee's phonemic i=əj tail), адиуан→adiwan (=referee), ауу→awu, иаиууа→jajuwa.
+            const leftV = /[aeiouə]$/u.test(out[out.length - 1] ?? "");
+            const nxt = s[i + 1];
+            const rightV = nxt !== undefined && nxt !== "у" && nxt !== "и" && VOWEL_LETTER.has(nxt);
+            const adjV = leftV || rightV;
             out.push(c === "у" ? (adjV ? "w" : "u") : (adjV ? "j" : "i"));
             continue;
         }
         if (BASE[c] !== undefined) {
             let ph = BASE[c]!;
             // A base not in the CLUSTER table + a modifier → append the generic modifier IPA.
+            // ⚠ NOT TWICE: ⟨ҩ⟩ is [ɥˤ] with the pharyngealizer already in the base value, so ⟨ҩ'⟩ must
+            // consume the apostrophe WITHOUT appending — ɥˤˤ is not IPA.
             const mod = MODIFIER[s[i + 1] ?? ""];
-            if (mod !== undefined) { ph += mod; i++; }
+            if (mod !== undefined) { if (!ph.endsWith(mod)) ph += mod; i++; }
             out.push(ph);
             continue;
         }

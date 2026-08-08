@@ -39,7 +39,11 @@
         "к": "kʼ", "л": "l", "м": "m", "н": "n", "о": "o", "п": "pʼ", "р": "r", "с": "s", "т": "tʼ", "у": "w",
         "ф": "f", "х": "χ", "ц": "t͡sʰ", "ч": "t͡ʃʰ", "ш": "ʂ", "ы": "ə", "э": "e", "ю": "ju", "я": "ja",
         "ҕ": "ʁ", "ӷ": "ʁ", "ҙ": "ʑ", "ӡ": "d͡z", "қ": "kʰ", "ӄ": "kʰ", "ҟ": "qʼ", "ҧ": "pʰ", "ԥ": "pʰ",
-        "ҩ": "ɥ", "ҫ": "ɕ", "ҭ": "tʰ", "ҳ": "ħ", "ҵ": "t͡sʼ", "ҷ": "t͡ʃʼ", "ҽ": "t͡ʂʰ", "ҿ": "t͡ʂʼ", "џ": "d͡ʐ",
+        // ⚠ ⟨ҩ⟩ IS PHARYNGEALIZED — [ɥˤ], not plain [ɥ]. The word corpus writes ɥˤ ~12:1 (kaikki 50×
+        // against 4, wikipron's one non-definition ҩ-word agrees); the bare-ɥ rows are the letter
+        // DEFINITION and the numeral series, which is the referee's inconsistent corner (it also
+        // devoices б there). Chirikba /ʕʷ/, Hewitt [ɥˤ] — the same segment.
+        "ҩ": "ɥˤ", "ҫ": "ɕ", "ҭ": "tʰ", "ҳ": "ħ", "ҵ": "t͡sʼ", "ҷ": "t͡ʃʼ", "ҽ": "t͡ʂʰ", "ҿ": "t͡ʂʼ", "џ": "d͡ʐ",
         // Extended / historical Abkhaz Cyrillic letters (older orthographies):
         "ԡ": "lʰ", "ԣ": "nʰ", "ԫ": "d͡ʒ", "ԭ": "d͡ʑ",
         "ꚁ": "dʷ", "ꚃ": "d͡ʑʷ", "ꚅ": "ʒʷ", "ꚇ": "t͡ʂʰ", "ꚉ": "d͡z", "ꚋ": "tʰ", "ꚍ": "tʷʰ", "ꚏ": "t͡ɕʷʰ",
@@ -53,8 +57,10 @@
     // The VOWEL LETTERS — the two phonemic vowels ⟨а ы⟩ plus the letters that write a vowel in loans and in
     // the ⟨е о⟩/⟨и у⟩ series. This is the ENVIRONMENT for the ⟨у⟩/⟨и⟩ glide-vs-syllabic rule in abkhaz.ts:
     // both are underlyingly the glides /w j/, realized [w]/[j] beside a vowel and syllabic [u]/[i] between
-    // consonants or word-finally (аи→aj, аԥсуа→apʰswa; but иҭабуп→itʰabup, амени→ameni). ⟨у⟩ and ⟨и⟩ are
-    // themselves in the set, so a sequence of the two counts each other as the vowel context.
+    // consonants or word-finally (аи→aj, аԥсуа→apʰswa; but иҭабуп→itʰabup, амени→ameni).
+    // ⚠ ⟨у⟩ AND ⟨и⟩ DO NOT COUNT EACH OTHER as vowel context — the rule in abkhaz.ts reads the REALIZED
+    // left neighbour (a glide that just became [w]/[j] is a consonant) and, on the right, only a vowel
+    // letter that is not itself у/и. A run alternates from its anchor: асууари→asuwari, адиуан→adiwan.
     "vowelLetters": ["а", "ы", "е", "о", "у", "и"],
 
     // VIGESIMAL cardinal numbers — the traditional NW-Caucasian base-20 system (composition logic in
