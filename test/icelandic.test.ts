@@ -108,6 +108,17 @@ describe("Icelandic canonical IPA — grapheme g2p + fortis/lenis neutralization
         expect(phonemizeWord("þríeyki")).toBe("θrieicɪ"); // ⟨í⟩ + ⟨ey⟩ — likewise glideless
     });
 
+    // ⚠ THE GLIDE IS ⟨í⟩'s ALONE — measured, not reasoned. The trigger was "the high front vowels"
+    // ⟨i í y ý⟩, which over-applied: the referee gives the glide to the LONG ⟨í⟩ (90 glide / 13 none) and
+    // withholds it from plain ⟨i⟩ (2/7) and ⟨ý⟩ (0/4). Narrowing to ⟨í⟩ moved the folded backbone
+    // 8086 → 8091/10093. Counts + the eval numbers are in icelandic.jsonc.
+    test("plain ⟨i⟩ and ⟨ý⟩ do NOT take the hiatus glide, ⟨í⟩ does", () => {
+        expect(phonemizeWord("hýena")).toBe("hiɛna"); // referee h iː ɛ n a — was hijɛna
+        expect(phonemizeWord("beitieski")).toBe("peitɪɛscɪ"); // referee p e iː t ɪ ɛ s c ɪ — was peitɪjɛscɪ
+        expect(phonemizeWord("blýantur")).toBe("pliantʏr"); // referee p l iː a n t ʏ r
+        expect(phonemizeWord("Albanía")).toBe("alpanija"); // ⟨í⟩ KEEPS it — referee a l p aː n iː j a
+    });
+
 });
 
 // TEXT NORMALIZATION. Counts measured over the FLEURS is_is corpus (column 3).

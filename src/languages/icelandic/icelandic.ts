@@ -21,7 +21,7 @@ interface IcelandicDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     frontVowels: readonly string[];
-    highFrontVowels: readonly string[];
+    hiatusGlideVowels: readonly string[];
     longNuclei: readonly string[];
     collapsingDoubles: readonly string[];
     clausePunctuation: Record<string, string>;
@@ -47,7 +47,9 @@ const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for inte
 // the minority we over-palatalize to ceir). The four letter classes are in icelandic.jsonc.
 const FRONT_V = new Set(DEF.frontVowels);
 const FRONT_PH = new Set([..."ɛɪijy"]); // IPA front-vowel heads — an intervocalic ⟨g⟩ → [j] (not [ɣ]) before these
-const HIGH_FRONT = new Set(DEF.highFrontVowels); // trigger a glide [j] before a following vowel (Biblía→pɪplija)
+// The ⟨í⟩ that triggers the hiatus glide [j] (Biblía→pɪplija). ONE letter, measured — icelandic.jsonc
+// has the referee counts and why plain ⟨i⟩ and ⟨ý⟩ are not here.
+const HIATUS_GLIDE = new Set(DEF.hiatusGlideVowels);
 const LONG_NUCLEUS = new Set(DEF.longNuclei); // a doubled ⟨nn⟩ → [tn] only after one of these (or ⟨au ei ey⟩)
 const STOPS = new Set(["p", "t", "k"]);
 const OTHER_DOUBLE = new Set(DEF.collapsingDoubles); // non-stop doubles collapse to one phone (Sviss→svɪs)
@@ -110,7 +112,7 @@ function scan(word: string): Tok[] {
             continue;
         }
         const ph = G[c];
-        if (ph !== undefined) toks.push({ ph, gVar: c === "g", highFront: HIGH_FRONT.has(c), fortis: STOPS.has(c) });
+        if (ph !== undefined) toks.push({ ph, gVar: c === "g", highFront: HIATUS_GLIDE.has(c), fortis: STOPS.has(c) });
         i += 1;
     }
     return toks;

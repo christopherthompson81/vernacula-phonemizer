@@ -207,5 +207,6 @@ The general lesson, which is why this log exists: a narrower local class is not 
 is the check for anything that touches output — it takes seconds and I should have run it in Run 4.
 
 **Also open, new:** the Icelandic hiatus rule genuinely over-applies (3 referee-attested cases above).
-Tightening it — probably by restricting the glide to a following PLAIN vowel and testing against the
-corpus — is real work with a measurable target.
+→ DONE, see `icelandic_hiatus_investigation.md`: the trigger is the long ⟨í⟩ alone, not the high front
+class, and narrowing it moved the backbone 8086 → 8091/10093. The guessed cause in this line (restrict
+by the FOLLOWING vowel) was wrong — it is the preceding one.
