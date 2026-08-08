@@ -7,7 +7,7 @@
  *   - the DEVOICED-SONORANT onsets ⟨hr hl hn⟩ → [r l n] (the ring folds; Hrafn→rapn), ⟨hj⟩ → [ç], ⟨hv⟩ → [kv];
  *   - the EPENTHETIC-STOP clusters ⟨ll⟩→[tl], ⟨rl⟩→[rtl], ⟨rn⟩→[rtn]; ⟨nn⟩→[tn] after a long/accented vowel or a
  *     diphthong (Steinn→steitn) but [n] after a short vowel (Anna→ana); geminate stops collapse;
- *   - a glide [j] between a high front ⟨í i ý y⟩ and a following vowel (Biblía→pɪplija); ⟨f⟩→[v]/[p]/[f].
+ *   - a glide [j] between ⟨í⟩ and a following vowel (Biblía→pɪplija) — ⟨í⟩ ALONE, measured; ⟨f⟩→[v]/[p]/[f].
  * Vowel LENGTH, ASPIRATION (pre/post), and DEVOICED SONORANTS are folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -21,7 +21,7 @@ interface IcelandicDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
     frontVowels: readonly string[];
-    highFrontVowels: readonly string[];
+    hiatusGlideVowels: readonly string[];
     longNuclei: readonly string[];
     collapsingDoubles: readonly string[];
     clausePunctuation: Record<string, string>;
@@ -31,30 +31,30 @@ const DIGRAPHS = DEF.digraphs;
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
-// ⚠ DELIBERATELY NOT core/ipa.ts's shared class — the ONE engine in #748 that keeps its own list.
-// It omits plain ⟨e⟩, which this engine DOES emit (the digraphs ⟨ei ey⟩ map to the two-character value
-// "ei"), so startsWithVowel("ei") is false and the hiatus-glide rule below never fires before a
-// diphthong. That looks like an omission and is not: the referee ATTESTS the glideless reading —
-// tools/referee-eval/referees/is.wikipron-isl-broad.tsv:2311 has erkiengill = ɛ r̥ c ɪ e i ɲ c ɪ t l,
-// no [j]. Widening this set to the shared class emits ɛrcɪjeiŋcɪtl and drops the folded backbone
-// 8086 → 8085/10093. The narrow list is accidentally CONTAINING an over-eager rule, not breaking it.
-// ⚠ The rule over-applies already on the cases the referee covers (hýena→hijɛna vs h iː ɛ n a,
-// bavían→pavijan vs p aː v iː a n). Fixing THAT is the real repair; widening this set is the opposite
-// of it. See docs/ipa_classes_investigation.md Run 7.
+// ⚠ DELIBERATELY NOT core/ipa.ts's shared class — the ONE engine that keeps its own vowel list. It omits
+// plain ⟨e⟩, and since the digraphs ⟨ei ey⟩ scan to the two-character value "ei", startsWithVowel("ei")
+// is false and the hiatus glide never fires before a diphthong.
+// ⚠ MEASURED, AND SMALLER THAN IT LOOKS. Adding ⟨e⟩ here now costs 8091 → 8090/10093, and exactly one
+// word moves: þríeyki → θrijeicɪ. It is NOT what keeps erkiengill glideless — that is the ⟨í⟩-only
+// trigger set (hiatusGlideVowels in icelandic.jsonc), which came later and does the heavier lifting.
+// Keep the two straight: the trigger set decides WHICH vowel glides, this decides what counts as a
+// vowel to glide INTO. docs/icelandic_hiatus_investigation.md.
 const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for intervocalic + glide tests)
 // Grapheme-level front vowels that PALATALIZE a preceding ⟨k g⟩ → [c] (kýr→ciːr, gelda→cɛlta, Bylgja→pɪlca) — incl.
 // ⟨e é⟩ and the ⟨ei ey⟩ diphthong (the referee majority palatalizes: geipa→ceipa; the un-palatalized Geir→keir is
 // the minority we over-palatalize to ceir). The four letter classes are in icelandic.jsonc.
 const FRONT_V = new Set(DEF.frontVowels);
 const FRONT_PH = new Set([..."ɛɪijy"]); // IPA front-vowel heads — an intervocalic ⟨g⟩ → [j] (not [ɣ]) before these
-const HIGH_FRONT = new Set(DEF.highFrontVowels); // trigger a glide [j] before a following vowel (Biblía→pɪplija)
+// The ⟨í⟩ that triggers the hiatus glide [j] (Biblía→pɪplija). ONE letter, measured — icelandic.jsonc
+// has the referee counts and why plain ⟨i⟩ and ⟨ý⟩ are not here.
+const HIATUS_GLIDE = new Set(DEF.hiatusGlideVowels);
 const LONG_NUCLEUS = new Set(DEF.longNuclei); // a doubled ⟨nn⟩ → [tn] only after one of these (or ⟨au ei ey⟩)
 const STOPS = new Set(["p", "t", "k"]);
 const OTHER_DOUBLE = new Set(DEF.collapsingDoubles); // non-stop doubles collapse to one phone (Sviss→svɪs)
 
 /** One scan token: the IPA phones for a grapheme + flags (⟨g⟩-origin → intervocalic spirantization; a high-front
  *  vowel → the glide rule; FORTIS ⟨p t k⟩ → preaspiration). */
-interface Tok { ph: string; gVar?: boolean; highFront?: boolean; fortis?: boolean }
+interface Tok { ph: string; gVar?: boolean; hiatusGlide?: boolean; fortis?: boolean }
 
 /** Scan a lowercased Icelandic word into phone tokens: longest-match digraphs (incl. the sonorant clusters), the
  *  geminate stops, and the ⟨k g⟩→[c] palatalization + the context-dependent ⟨nn⟩. */
@@ -110,7 +110,7 @@ function scan(word: string): Tok[] {
             continue;
         }
         const ph = G[c];
-        if (ph !== undefined) toks.push({ ph, gVar: c === "g", highFront: HIGH_FRONT.has(c), fortis: STOPS.has(c) });
+        if (ph !== undefined) toks.push({ ph, gVar: c === "g", hiatusGlide: HIATUS_GLIDE.has(c), fortis: STOPS.has(c) });
         i += 1;
     }
     return toks;
@@ -160,10 +160,10 @@ function preaspirate(toks: Tok[]): void {
     }
 }
 
-/** A glide [j] appears between a high front vowel ⟨í i ý y⟩ and a following vowel (Biblía→pɪplija, María→maːrija). */
+/** A glide [j] appears between a ⟨í⟩ and a following vowel (Biblía→pɪplija, María→maːrija). */
 function glideJ(toks: Tok[]): void {
     for (let i = toks.length - 2; i >= 0; i--) {
-        if (toks[i]!.highFront && startsWithVowel(toks[i + 1]!.ph)) toks.splice(i + 1, 0, { ph: "j" });
+        if (toks[i]!.hiatusGlide && startsWithVowel(toks[i + 1]!.ph)) toks.splice(i + 1, 0, { ph: "j" });
     }
 }
 

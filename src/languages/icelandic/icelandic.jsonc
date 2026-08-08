@@ -32,9 +32,19 @@
     // "frontVowels" — ⟨g k⟩ become the affricates [c ch] before one of these (kex→cɛxs). ⟨j⟩ is in the list
     // because the glide conditions the change exactly as a front vowel does.
     "frontVowels": ["e", "é", "i", "í", "y", "ý", "æ", "j"],
-    // "highFrontVowels" — these ALSO insert a glide [j] before a following vowel (Biblía→pɪplija). A subset
-    // of the front vowels: ⟨e é æ⟩ are front but not high enough to break the hiatus.
-    "highFrontVowels": ["i", "í", "y", "ý"],
+    // ⚠ "hiatusGlideVowels" — ONE LETTER, and that is the measured answer, not an oversight. A vowel here
+    // inserts a glide [j] before a following vowel (Biblía→pɪplija). It was ⟨i í y ý⟩ ("the high front
+    // vowels", by reasoning) and over-applied; the referee says the glide belongs to the LONG ⟨í⟩ alone.
+    // Counting every referee headword with a high-front letter directly before another vowel letter
+    // (tools/referee-eval/referees/is.wikipron-isl-broad.tsv):
+    //     ⟨í⟩  90 glide /  13 none   — í+a 73/7 (Albanía, Asía, Biblía), í+u 10/2, í+ó 4/3, í+e 3/1
+    //     ⟨i⟩   2 glide /   7 none   — i+e 0/4 (Briem, Nielsen, beitieski), i+ö 0/1, i+á 0/1
+    //     ⟨ý⟩   0 glide /   4 none   — ý+y 0/2 (nýyrði), ý+a 0/1 (blýantur), ý+e 0/1 (hýena)
+    //     ⟨y⟩   1 glide /   0 none
+    // Measured end to end with tools/referee-eval/eval.ts: ⟨i í y ý⟩ 8086/10093 → ⟨í ý⟩ 8087 → ⟨í⟩ 8091.
+    // NOT narrowed further: dropping ⟨í⟩ before ⟨ó⟩ (the bíó words, 4 glide / 3 none) would trade 4 losses
+    // for 3 gains, so the residual there is left alone rather than tuned into noise.
+    "hiatusGlideVowels": ["í"],
     // "longNuclei" — the accented vowels, which are long by spelling. A doubled ⟨nn⟩ is the PREASPIRATED
     // [tn] only after one of these (or after the diphthongs ⟨au ei ey⟩, which the engine tests separately);
     // after a short vowel it is the plain geminate [nː]. This is the ⟨nn⟩ of the definite article.
