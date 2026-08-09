@@ -21,6 +21,14 @@
                 { "pattern": "[eɛ]", "replace": "i", "note": "MAJHŪL ی: [iː]~[eː]~[ɛ] are ALL written with the single letter ی/ے in the Shahmukhi ABJAD → the quality is unrecoverable from the skeleton (as for sd/ur). Per-referee: Gurmukhi writes ਈ/ਏ/ਐ distinctly, so this fold is NOT applied to the pan_guru referee." },
                 { "pattern": "[oɔ]", "replace": "u", "note": "MAJHŪL و: [uː]~[oː]~[ɔ] all written و in the abjad — unrecoverable, Shahmukhi-only (Gurmukhi writes ਊ/ਓ/ਔ)." }
             ]
+        },
+        {
+            "file": "pa.epitran-pan-guru.tsv",
+            "source": "epitran pan-Guru (INDEPENDENT rule-based, non-Wiktionary)",
+            "role": "secondary",
+            "folds": [
+                { "pattern": "ɑ", "replace": "a", "note": "epitran writes the long low vowel ɑ where the primary writes aː/ä — notation (the backbone strips length)" }
+            ]
         }
     ],
     "segmentJoin": true,

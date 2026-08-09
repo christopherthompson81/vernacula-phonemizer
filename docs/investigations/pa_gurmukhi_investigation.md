@@ -172,3 +172,34 @@ eval path reads none of it, precedence, and the audio-adjudicated goldens: ਹ�
 CC-BY-SA §3 fence extended. What the audio work bought, in the end: the confidence to close the class as
 LEXICAL (rather than keep hunting a rule), the out-of-band validation of the mined entries, and a standing
 harness for the next convention question. What remains 🟡: the Shahmukhi side, data-blocked as sized in Run 0.
+
+## Run 6 — 2026-08-09 19:30 — a second referee (epitran), and pa's first frequency-weighted numbers
+
+**epitran pan-Guru wired as the INDEPENDENT secondary** (the tk/kmr/qu arrangement): a non-Wiktionary,
+hand-authored rule tradition, its readings generated over the primary's word list (a list is not labels;
+`tools/gen/build-pa-epitran-referee.py`). Probed on the residual classes first: it is orthographically
+CONSERVATIVE — keeps written nasality without restoring the homorganic consonant (ਆਂਡਾ ɑ̃ɖɑ), no
+h-coalescence (ਜ਼ਹਿਰ zəɦɪɾ), its own partial schwa model (agrees with wikipron on ਦਿਲਚਸਪ, keeps ə in
+ਅਰਥ/ਗਰਮ where wikipron deletes) — so it corroborates SEGMENTS, and its known gaps are per-referee folds,
+not scores. espeak pa exists but has NO schwa deletion at all — the weaker candidate, not wired.
+
+    engine vs epitran:  85.8% folded / 96.0% symbol / 94.4% frequency-weighted   (residual: its map quirks)
+
+⚠ A crude-fold health check first said 50.7% — the Run-3 phantom mechanism AGAIN (the crude fold kept the
+citation ə̆ the real pipeline disposes of). Measured only with the eval's own folds thereafter.
+
+**freq/pa.txt** (FLEURS pa_in transcripts + the mined artifact; 66k tokens, 5.5k types ≥2 — no hermitdave
+pa exists) gives pa its first token-weighted numbers, and they invert the km/af pattern:
+
+    primary (wikipron):  73.6% word-exact  →  70.7% FREQUENCY-WEIGHTED
+    epitran secondary:   85.8% word-exact  →  94.4% frequency-weighted
+
+Frequent words do WORSE against wikipron while the two independent engines agree MORE there: the frequent
+band is function words carrying wikipron's phonological conventions (the h-coalescence/tonogenesis class —
+ਇਹ e, ਜ਼ਹਿਰ zɛr — and vowel-quality choices), which epitran does not model either. The 73.6→70.7 gap is a
+CONVENTION concentration, not a segment-quality cliff — the segment story at frequency is the 94.4%.
+The shipped lexicon covers 6.5% of running-text tokens with referee-verified readings on top.
+
+Verdict effect: the Gurmukhi engine is no longer single-tradition — two independent rule systems corroborate at 85.8/96.0/94.4, the human referee adjudicates the residual, and the audio harness stands as the
+third leg for convention questions. The h-coalescence and nasal-restoration classes remain the next honest
+engine work, now with a second referee to check them against.
