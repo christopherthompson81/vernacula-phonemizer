@@ -1,14 +1,12 @@
 # Punjabi SECONDARY referee — epitran pan-Guru (INDEPENDENT rule-based, non-Wiktionary; MIT).
 # Readings are epitran's own over the primary's word list (a list is not labels).
 # ⚠ Known model gaps are FOLDED per-referee in pa.jsonc, not scored: no homorganic-nasal
-#   restoration, no h-coalescence, its own partial schwa model.
+#   restoration, no h-coalescence, its own partial schwa model. Rows whose output leaked
+#   source-script characters (nukta) or whose word is only combining marks are REJECTED.
 # Regenerate: python3 tools/gen/build-pa-epitran-referee.py
-# ENTRIES: 1360
+# ENTRIES: 1328
 'ਤੇ	't̪e
-ਂ	̃
 ਅਕਤੂਬਰ	əkt̪ubəɾ
-ਅਕ਼ਲ	əkə਼l
-ਅਕ਼ਲਮੰਦ	əkə਼ləmə̃d̪
 ਅਗਨ	əɡən
 ਅਗਰਬੱਤੀ	əɡɾəbət̪ːi
 ਅਗਸਤ	əɡsət̪
@@ -34,7 +32,6 @@
 ਅਫ਼ਗ਼ਾਨਿਸਤਾਨ	əfɣɑnɪst̪ɑn
 ਅਮਲ	əməl
 ਅਰਕ	əɾək
-ਅਰਕ਼	əɾkə਼
 ਅਰਜ਼ੀ	əɾzi
 ਅਰਥ	əɾət̪ʰ
 ਅਰਬ	əɾəb
@@ -107,7 +104,6 @@
 ਇਲਿਯਾਸ	ɪlɪjɑs
 ਇਸਤਰੀ	ɪst̪əɾi
 ਇਸਮਾਈਲ	ɪsmɑil
-ਇਸਹਾਕ਼	ɪsɦɑkə਼
 ਇਹ	ɪɦ
 ਇਹਦਾ	ɪɦd̪ɑ
 ਇੱਕ	ɪkː
@@ -198,10 +194,6 @@
 ਕਹਾਣੀ	kəɦɑɳi
 ਕਹਿਣਾ	kəɦɪɳɑ
 ਕਹੀ	kəɦi
-ਕ਼	kə਼
-ਕ਼ਿਸਮ	kə਼ɪsəm
-ਕ਼ਿਸਮਤ	kə਼ɪsmət̪
-ਕ਼ੁਰਬਾਨ	kə਼ʊɾbɑn
 ਕਾਂ	kɑ̃
 ਕਾਂਡੀ	kɑ̃ɖi
 ਕਾਇਰ	kɑɪɾ
@@ -382,7 +374,6 @@
 ਚਣਾਖ	t͡ʃəɳɑkʰ
 ਚਪੇੜ	t͡ʃəpeɽ
 ਚਵਲ	t͡ʃəʋəl
-ਚਾਕ਼ੂ	t͡ʃɑkə਼u
 ਚਾਕੂ	t͡ʃɑku
 ਚਾਰ	t͡ʃɑɾ
 ਚਾਲਬਾਜੀ	t͡ʃɑlbɑd͡ʒi
@@ -565,16 +556,12 @@
 ਤਰਖਾਣ	t̪əɾkʰɑɳ
 ਤਰਤਾਲ਼ੀ	t̪əɾt̪ɑɭi
 ਤਰਵੰਜਾ	t̪əɾʋə̃d͡ʒɑ
-ਤਰੀਕ਼ਾ	t̪əɾikə਼ɑ
 ਤਰੀਕਾ	t̪əɾikɑ
 ਤਰ੍ਹਾਂ	t̪əɾɦɑ̃
 ਤਲ਼ਨਾ	t̪əɭnɑ
 ਤਲਾਕ	t̪əlɑk
 ਤਲਾਕਨਾਮਾ	t̪əlɑknɑmɑ
 ਤਲਾਕਸ਼ੁਦਾ	t̪əlɑkʃʊd̪ɑ
-ਤਲਾਕ਼	t̪əlɑkə਼
-ਤਲਾਕ਼ਨਾਮਾ	t̪əlɑkə਼nɑmɑ
-ਤਲਾਕ਼ਸ਼ੁਦਾ	t̪əlɑkə਼ʃʊd̪ɑ
 ਤਵੀ	t̪əʋi
 ਤਾਂ	t̪ɑ̃
 ਤਾਂਬਾ	t̪ɑ̃bɑ
@@ -828,7 +815,6 @@
 ਫ਼	f
 ਫ਼ਜਰ	fəd͡ʒəɾ
 ਫ਼ਤਿਹ	fət̪ɪɦ
-ਫ਼ਰਕ਼	fəɾkə਼
 ਫ਼ਰਸ਼	fəɾəʃ
 ਫ਼ਰਿਸ਼ਤਾ	fəɾɪʃt̪ɑ
 ਫ਼ਲਸਤੀਨ	fəlsət̪in
@@ -880,7 +866,6 @@
 ਬਾਂਦਰ	bɑ̃d̪əɾ
 ਬਾਂਹ	bɑ̃ɦ
 ਬਾਈ	bɑi
-ਬਾਕ਼ੀ	bɑkə਼i
 ਬਾਕੀ	bɑki
 ਬਾਗ਼	bɑɣ
 ਬਾਘ	bɑk
@@ -1049,15 +1034,12 @@
 ਮੱਮਾ	məmːɑ
 ਯ	j
 ਯਕ	jək
-ਯਕ਼ੀਨ	jəkə਼in
-ਯਕ਼ੀਨਨ	jəkə਼inən
 ਯਕੀਨ	jəkin
 ਯਕੀਨਨ	jəkinən
 ਯਸੂ	jəsu
 ਯਸੂਹ	jəsuɦ
 ਯਹਯਾ	jəɦjɑ
 ਯਹੂਦੀ	jəɦud̪i
-ਯਾਕ਼ੂਬ	jɑkə਼ub
 ਯਿਸੂ	jɪsu
 ਯੁਨਾਨ	jʊnɑn
 ਯੂਕਰੇਨ	jukɾen
@@ -1283,7 +1265,6 @@
 ਸੰਗ	sə̃ɡ
 ਸੰਝ	sə̃t͡ʃ
 ਸੰਤਾਲ਼ੀ	sə̃t̪ɑɭi
-ਸੰਦੂਕ਼ੜੀ	sə̃d̪ukə਼ɽi
 ਸੰਧਿਆ	sə̃t̪ɪɑ
 ਸੰਬੰਧ	sə̃bə̃t̪
 ਸੰਯੁਕਤ	sə̃jʊkət̪
@@ -1323,7 +1304,6 @@
 ਹੁਕਮਨਾਮਾ	ɦʊkmənɑmɑ
 ਹੁਣ	ɦʊɳ
 ਹੁੰਮ੍ਹ	ɦʊ̃mɦ
-ਹੁੱਕ਼ਾ	ɦʊkːə਼ɑ
 ਹੂਦ	ɦud̪
 ਹੇ	ɦe
 ਹੈ	ɦɛ
@@ -1351,15 +1331,5 @@
 ਹੱਤਿਆ	ɦət̪ːɪɑ
 ਹੱਥ	ɦət̪ːʰ
 ਹੱਸ	ɦəsː
-ਾ	ɑ
-ਿ	ɪ
-ੀ	i
-ੁ	ʊ
-ੂ	u
-ੇ	e
-ੈ	ɛ
-ੋ	o
-ੌ	ɔ
 ੜ	ɽ
 ੜਾੜਾ	ɽɑɽɑ
-ੰ	̃

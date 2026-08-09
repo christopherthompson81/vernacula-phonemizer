@@ -183,7 +183,7 @@ h-coalescence (ਜ਼ਹਿਰ zəɦɪɾ), its own partial schwa model (agrees w
 ਅਰਥ/ਗਰਮ where wikipron deletes) — so it corroborates SEGMENTS, and its known gaps are per-referee folds,
 not scores. espeak pa exists but has NO schwa deletion at all — the weaker candidate, not wired.
 
-    engine vs epitran:  84.0% folded / 95.1% symbol / 94.4% frequency-weighted   (residual: its map quirks)
+    engine vs epitran:  85.8% folded / 96.0% symbol / 94.4% frequency-weighted   (residual: its map quirks)
 
 ⚠ A crude-fold health check first said 50.7% — the Run-3 phantom mechanism AGAIN (the crude fold kept the
 citation ə̆ the real pipeline disposes of). Measured only with the eval's own folds thereafter.
@@ -192,7 +192,7 @@ citation ə̆ the real pipeline disposes of). Measured only with the eval's own 
 pa exists) gives pa its first token-weighted numbers, and they invert the km/af pattern:
 
     primary (wikipron):  73.6% word-exact  →  70.7% FREQUENCY-WEIGHTED
-    epitran secondary:   84.0% word-exact  →  94.4% frequency-weighted
+    epitran secondary:   85.8% word-exact  →  94.4% frequency-weighted
 
 Frequent words do WORSE against wikipron while the two independent engines agree MORE there: the frequent
 band is function words carrying wikipron's phonological conventions (the h-coalescence/tonogenesis class —
@@ -200,7 +200,6 @@ band is function words carrying wikipron's phonological conventions (the h-coale
 CONVENTION concentration, not a segment-quality cliff — the segment story at frequency is the 94.4%.
 The shipped lexicon covers 6.5% of running-text tokens with referee-verified readings on top.
 
-Verdict effect: the Gurmukhi engine is no longer single-tradition — two independent rule systems
-corroborate at 84/95/94.4, the human referee adjudicates the residual, and the audio harness stands as the
+Verdict effect: the Gurmukhi engine is no longer single-tradition — two independent rule systems corroborate at 85.8/96.0/94.4, the human referee adjudicates the residual, and the audio harness stands as the
 third leg for convention questions. The h-coalescence and nasal-restoration classes remain the next honest
 engine work, now with a second referee to check them against.
