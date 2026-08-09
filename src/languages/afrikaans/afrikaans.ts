@@ -29,6 +29,11 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
 // Proper-noun / opaque-loan lexicon (af-lexicon.tsv), lazily loaded like tagalog's stress lexicon.
 let LEXICON: ReadonlyMap<string, string> | undefined;
 const lexicon = (): ReadonlyMap<string, string> => (LEXICON ??= loadTsvMap(import.meta.url, "af-lexicon.tsv"));
+// The 27,428-word RCRL pronunciation lexicon — the primary SHIPPED path, as for da/nb/fr/en. Optional: absent
+// → the rules serve every word, which is exactly the pre-lexicon behaviour.
+let RCRL: ReadonlyMap<string, string> | undefined;
+const rcrl = (): ReadonlyMap<string, string> =>
+    (RCRL ??= loadTsvMap(import.meta.url, "af-rcrl-lexicon.tsv", undefined, { optional: true }));
 import { normalizeAfrikaans, normalizeAfrikaansInitialisms } from "./normalize.ts";
 
 const FIXED = MANIFEST.fixed;
@@ -280,6 +285,14 @@ export function phonemizeWord(word: string): string {
     // Provenance + the single-source circularity note: af-lexicon.PROVENANCE.md.
     const pinned = lexicon().get(w);
     if (pinned !== undefined) return pinned;
+    // ⚠ THEN THE 27k RCRL LEXICON, AND ONLY THEN THE RULES. Order matters against the tier above: RCRL writes
+    // `afrikaans` afrikɑːns, while the curated file carries the nasal afrikɑ̃ːs — the hand-adjudicated entry has
+    // to win, so the small curated tier is consulted first and this one fills in behind it.
+    // ⚠ WHY A LEXICON AT ALL, when the rules score 79.5%: that number is DICTIONARY-shaped. On running text the
+    // rules are ~87% exact, but RCRL covers ~86% of running-text TOKENS, so serving those authoritatively fixes
+    // ≈11pp of everything read aloud — the largest single lever left, and the same tiering da/nb/fr/en use.
+    const dict = rcrl().get(w);
+    if (dict !== undefined) return dict;
     return phonemizeWordRules(w);
 }
 

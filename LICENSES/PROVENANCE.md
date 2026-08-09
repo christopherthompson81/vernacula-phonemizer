@@ -103,6 +103,9 @@ CC-BY-SA 4.0 + iTaigi CC0 + kaikki Hokkien chars; sidecar); `thai/dictionary.tsv
 `portuguese-br/pt-br-openclose.tsv`; `portuguese/lexicon.tsv`; `korean/tensification.tsv`;
 `ilocano/ilo-lexicon.tsv`; `turkish/stress.tsv` (kaikki non-final-stress mine + adjudicated
 entries, per header); `afrikaans/af-stems.txt` (afwiki + OpenSubtitles + kaikki union; sidecar);
+`afrikaans/af-rcrl-lexicon.tsv` (26,872 entries — RCRL Afrikaans Pronunciation Dictionary v1.4.1,
+CTexT/NWU via ttslab/za_lex, **CC BY-SA 2.5 ZA**, the one shipped lexicon in the fleet that is NOT
+Wiktionary-derived; sidecar);
 `french/lexicon.tsv` (Lexique 3.83, CC BY-SA 4.0, per header).
 
 **Shipped Japanese data:** `japanese/pitch-accent.tsv` (kanjium CC-BY-SA voter, with BSD OpenJTalk
@@ -119,9 +122,9 @@ data): `languages/perso-arabic/riderDiacritizer.onnx`; `persian/fa-vowel-restore
 dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `english/pos-model.json`
 (UD-EWT CC-BY-SA 4.0; sidecar). Flagged individually in NOTICE with their training-data statements.
 
-**tools-only:** the `af` SECONDARY referee `referee-eval/referees/af.rcrl-apd.tsv` — RCRL Afrikaans
-Pronunciation Dictionary v1.4.1 (CTexT/NWU) via ttslab/za_lex, **CC BY-SA 2.5 ZA**, the one referee in
-the set that is NOT Wiktionary-derived (sidecar: `af.rcrl-apd.PROVENANCE.md`); the 246-referee eval set — 120 wikipron + 53 kaikki + 15 wiktionary-API + the
+**tools-only:** the `af` SECONDARY referee `referee-eval/referees/af.rcrl-apd.tsv` — same RCRL source as
+the shipped lexicon above and under the same CC BY-SA 2.5 ZA terms, the one referee in the set that is NOT
+Wiktionary-derived (sidecar: `af.rcrl-apd.PROVENANCE.md`); the 246-referee eval set — 120 wikipron + 53 kaikki + 15 wiktionary-API + the
 CC-CEDICT check (all CC-BY-SA); 32 epitran outputs (epitran code MIT; wordlists often kaikki);
 hermitdave FrequencyWords lists (CC-BY-SA), used as **filters** for the CC0 NST lexica — the
 shipped intersections keep only NST content; the external ranking is the sole FrequencyWords

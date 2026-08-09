@@ -787,3 +787,65 @@ same three sentences but not the primary's. Now moot in the other direction — 
 back to 94.654% (94.7%) — but all three are set from what the eval actually prints.
 
 **Final: primary 1765/2220 (79.5%) / 94.7% symbol · secondary 17,885/27,428 (65.2%) / 93.9% symbol.**
+
+## Run 16 — 2026-08-08 (the shipped lexicon — and why wholesale import was wrong)
+
+The measurement that motivated this: the rules score 79.5% on the primary and 65.2% on RCRL, but
+**~87% on running text**. A dictionary-shaped referee over-samples rare long Latinate words; ordinary
+text is short and native. The lexicon is still worth having, because of *where* the errors fall:
+
+| | |
+|---|---|
+| RCRL coverage of running-text tokens (mined corpus) | **86.2%** |
+| rules exact on those tokens, frequency-weighted | **87.4%** |
+| with the lexicon | **99.5%** |
+| **net** | **≈10.5pp of ALL running-text tokens** |
+
+Wired as `phonemizeWord` → curated `af-lexicon.tsv` (44 rows) → `af-rcrl-lexicon.tsv` (26,872) → rules.
+The curated tier must stay first: RCRL writes `afrikaans` afrikɑːns while the hand-adjudicated row
+carries the nasal afrikɑ̃ːs. **The eval is byte-identical before and after** (1765 / 17,885) — it scores
+`phonemizeWordRules`, which never consults either lexicon.
+
+### Wholesale import was wrong, and the TEST SUITE is what said so
+
+27,428 → **26,872**. Every exclusion was found by an existing golden failing, not by inspection:
+
+1. **Single letters** (4: `n`→ə, `a`→a, `o`→œu, `'n`). A bare letter is SPELLED, not sounded (#761), and
+   a lexicon hit shadows that rule — `802.11n` read *…elf ə* instead of *…elf ɛn*. ⚠ **THE SECOND TIME:**
+   review of #770 caught exactly this in af-lexicon.tsv, where stray `j`/`q` rows made ⟨J⟩ read [jɛ].
+   Same language, same trap, different source. It is now a filter in the builder rather than a fact
+   about one hand-written file.
+2. **⟨ê⟩ ⟨û⟩ ⟨ô⟩ ⟨uu⟩ words** (552). RCRL has **no ɛː, no œː and no yː at all** — it writes aangelê
+   ɑːnxəlɛ, aangestuur ɑːnxəstyr — so importing them silently deletes a length distinction the engine
+   marks and the primary corroborates (ɛː ×16, yː ×3). An INVENTORY GAP in the source, not a
+   disagreement about the language. ⟨ô⟩ joins on the same evidence: RCRL *has* ɔː (150 rows) yet writes
+   môre short against the primary's ˈmɔː.rə. Caught by the ⟨ô⟩ golden.
+3. **Word-initial ⟨v⟩ written [v]** — normalized to [f], not dropped. Both sources are ~97% [f] (RCRL
+   2363:69, primary 184:13) and Run 6 established this class as transcription noise. A dictionary's
+   per-word value normally beats a majority rule — that is the whole point of a lexicon — but not when
+   the majority is 97% *across independent sources* and the minority has no environment of its own.
+   Caught by `Vitamien C` reading *[v]itamin*.
+
+**The general lesson: a curated dictionary is not automatically better than a rule.** It is better
+per-word where it has real lexical knowledge, and worse wherever its transcription convention is
+*coarser* than the engine's. Diffing the two inventories before importing is the check — and running
+the existing goldens is what actually finds the cases you did not predict.
+
+### What the lexicon fixes that the rules could not
+
+Beyond the bulk: `chemie` → χiəmi, a **documented known miss** the rule engine has carried since #758
+(our [ʃ] against both referees' [x]); `polisie` → pulisi (rules mis-stress it); `nasionalisme` →
+naʃiunaləsmə (⟨si⟩→ʃ, which no rule models); `millimeter` → məlimiətər.
+
+⚠ Several goldens documenting RULE behaviour had to be repointed at `phonemizeWordRules` — once
+`phonemizeWord` is lexicon-first, a golden written to pin a grapheme rule silently starts testing the
+dictionary instead. That is a permanent hazard for every language with a lexicon tier, and worth
+knowing before adding one.
+
+### Where this leaves the OOV model
+
+The tail is now defined, which it was not before: ~14% of running-text tokens, and it is exactly the
+hard part — proper nouns, English loans, inflected forms outside the dictionary, and long Latinate
+words where our stress placement falls to 36%. af has 23k stress-annotated pairs to train on,
+independent of the primary that would judge it. **That is the first time in this sequence that every
+precondition for a neural tier is actually met.**
