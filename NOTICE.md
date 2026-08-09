@@ -67,6 +67,8 @@ Used without obligation beyond the credit given here.
   "Copyright 2018 Google Inc." `khmer/km-lexicon-dict.tsv` (the second lexicon tier) and
   `tools/referee-eval/referees/km.google-lexicon.tsv` (the secondary referee), both converted to this
   project's IPA; the readings are Google's.
+- **Google FLEURS** (<https://huggingface.co/datasets/google/fleurs>) — CC-BY 4.0. Transcript-derived
+  word frequencies in `tools/referee-eval/freq/pa.txt`; audio used measurement-only (never shipped).
 - **Phonikud** and **ReNikud** — thewh1teagle, CC-BY 4.0. Builders behind `hebrew/he-lexicon.tsv`.
 - **ICU `thaidict`** — Unicode, Inc., Unicode-DFS-2016. Part of `thai/seg-words.txt`.
   Text: `LICENSES/Unicode-DFS-2016.txt`.
