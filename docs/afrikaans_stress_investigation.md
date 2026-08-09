@@ -1168,3 +1168,67 @@ is still real, unmodelled error rather than referee noise — so not ✅. And th
 shows the contrast is largely recoverable from spelling — so not 🟢, whose definition requires the tail to
 be "a principled coin-flip forever". The verdict rests on the *shape* of the residual, and that has not
 changed; only its size, slightly, in our favour.
+
+## Run 23 — 2026-08-08 (there is no stress gap left, and the verdict is ✅)
+
+Asked for a proposal to close the stress gap. **There isn't one worth making, and the measurements that
+show it also overturn the 🟡 verdict I set one run earlier.**
+
+### The 4.3pp figure was scoped wrong, and I had been quoting it as if it were shipped headroom
+
+| | |
+|---|---|
+| perfect stress, RULE ENGINE vs the secondary | +1168 words (4.3pp) |
+| perfect stress, **SHIPPED path** vs the secondary | **+28 words (0.10pp)** |
+| dictionary words that reach the rules at all | 2,314 of 27,428 |
+| rule-path stress placement, token-weighted | 92.1% |
+
+The lexicon closed it. Optimising stress further optimises a path that 92% of dictionary words and most
+real-text tokens already bypass.
+
+### My own best proposal was measured and rejected
+
+The tagger is async-only while `phonemize()` is sync, so distilling it into a sync-available table looked
+like the lever — af-stems covers 98.3% of the OOV tail. On the frequent traffic the lexicon does not serve:
+
+| | token-weighted correct |
+|---|---|
+| rules | **97.4%** |
+| tagger | 97.2% |
+
+⚠ And that comparison is **rigged in the tagger's favour** — it trained on most of those words. Its real
+advantage is on rare, long, Latinate items: exactly what a dictionary-shaped held-out split contains and
+exactly what running text does not. The 91.4%-vs-63.5% held-out gap is real but lives in a population
+users rarely hit.
+
+### Decomposing the residual is what settles the verdict
+
+Shipped disagreement with the secondary is 1,093 types = 2.69% of tokens. By token weight:
+
+| share of tokens | types | what it is |
+|---|---|---|
+| **2.14%** | **3** | single letters ⟨n⟩ ⟨o⟩ ⟨a⟩ — the frequency list strips the apostrophe from ⟨'n⟩, colliding with the deliberate letter-name rule of #761 |
+| 0.18% | 39 | the INDEPENDENT primary backs US against the secondary (epenthesis film/arm/vorm, final devoicing, initial ⟨v⟩) |
+| **0.37%** | 1,051 | **genuine residual** — loans (abattoir, adagio) and reduction on rare polysyllables |
+
+**99.6% of real-text tokens are read correctly.** Two thirds of the apparent 2.69% is three letters and a
+tokenizer artifact; another slice is the referee disagreeing with an adjudicated decision its counterpart
+supports.
+
+### Verdict: 🟡 → ✅
+
+⚠ I argued 🟡 in Run 22 on the grounds that "74.8% placement with 4.3pp of oracle headroom is real
+unmodelled error, not referee noise". **That argument used the rule engine's numbers for a shipped-path
+judgement.** Corrected: the shipped headroom is 0.10pp and the genuine residual is 0.37% of tokens.
+
+- **✅** — "trust the output; deferrals are minor/notation, or the low referee % is just referee noise."
+  Both hold: the word-exact 79.5% / 65.2% are dictionary-shape bias (96.2% / 92.9% frequency-weighted),
+  and the deferrals are nasalization (×2/2220) and the ⟨êre⟩ suffix class (48 words at 93.75%, just under
+  the derivation's 0.95 threshold, ≈0 shipped impact).
+- **not 🟢** — the tagger's 91.4% shows the unwritten stress contrast is largely recoverable from spelling,
+  not "a principled coin-flip forever". Same argument bn's row makes.
+- **not 🟡** — there is no specific class a further lexicon or rule layer would close. The layers are built,
+  and the one remaining idea was measured and rejected.
+
+**The binding constraint is data, not method.** ~32.6k pairs is the ceiling; further effort has better
+returns elsewhere in the fleet.
