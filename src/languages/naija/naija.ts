@@ -19,6 +19,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, foldLatinToBase } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeNaija } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -200,25 +201,6 @@ function timeWords(h: number, mm: number): string[] {
     return [...out, ...numberWords(mm).split(" ")];
 }
 
-/**
- * ABBREVIATIONS. `Dr.` nativised as the WORD ⟨dr⟩ → *dɾaiv* ("drive"), the same wrong-word class as the
- * ordinals. Expanded before the tier so the full word goes through the ordinary path. ⟨Doctor⟩ ×3 against
- * ⟨Dr⟩ ×4 in the mined corpus — the expansion is the corpus's own word, not an English import.
- * ⚠ THE TRAILING DOT IS CONSUMED, or it would still be read as a clause pause mid-phrase — and it is
- * OPTIONAL, because the corpus writes both ⟨Dr. Lateef⟩ (×3) and dotless ⟨Dr Zeh⟩ (×1). The `\b` is what
- * keeps the dotless form safe: ⟨Drama⟩ and ⟨Dreamstar⟩ continue past the `r`, so neither can match.
- */
-const ABBREV: Record<string, string> = { Dr: "Doctor", dr: "Doctor" };
-// ⚠ `\.?(?![\p{L}])`, NOT `\.?\b` — after a consumed dot the next char is a space, and `\b` between `.`
-// and ` ` is FALSE, so the dot survived and read as a clause pause (`Dr. Ada` → *dakta . eda*). The
-// negative lookahead both consumes the dot and keeps ⟨Drama⟩/⟨Dreamstar⟩ out.
-// ⚠ NO `i` FLAG. Case-insensitive matching read the COUNTRY abbreviation `DR Congo` as *dakta kaŋɡo*
-// ("Doctor Congo") — routine in the football/news copy this engine targets. The title is written ⟨Dr⟩ or
-// ⟨dr⟩; an all-caps ⟨DR⟩ is a different word, so the alternation is explicit and the flag is dropped.
-const ABBREV_RE = new RegExp(`\\b(${Object.keys(ABBREV).join("|")})\\.?(?![\\p{L}])`, "gu");
-const expandAbbrev = (s: string): string =>
-    s.replace(ABBREV_RE, (_m, w: string) => ABBREV[w]!);
-
 // ⚠ ALL OF LATIN, not just ASCII — `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became
 // an unclaimed gap read as an English LETTER NAME and the rest of the word started over: `São Paulo` read
 // *ɛs ˈə o pɔlo* ("ES ə O") and `Cañitas` *kɔ ˈɛn itas*. One word became three. Invisible to every gate: no digit
@@ -231,12 +213,12 @@ const expandAbbrev = (s: string): string =>
 // its own output — `water` → *wata*, `computer` → *kampjuta*, not English's *wˈɔːt̬ɚ* / *kəmpjˈuːt̬ɚ*. Sending an
 // accented token to the foreign reader would contradict the engine's design, so the token is only made WHOLE and
 // pcm's own g2p reads it, which is what the fragmentation was preventing.
+//
 // ⚠ THE NUMBER CLASS MUST SWALLOW THE SEPARATORS, or the clause branch claims them. `(\d+)` alone made the
 // thousands COMMA and the decimal DOT clause marks, so `₦2,000` read *tu , ziɾo* — "two [pause] zero", the
 // number destroyed — and `3.5` read *tɾi . faiv*. Both shapes are the corpus norm, not edge cases: the mined
 // pcm corpus has 60 comma-grouped numbers and 61 dot-decimals. Same class as Hausa's, and for the same reason.
-// ⚠ THE ORDINAL ALTERNATIVE MUST COME FIRST, before the Latin run — otherwise `1st` splits into the number
-// `1` and the WORD `st`, which is exactly the defect (⟨st⟩ nativises to *stɾit*, "street").
+//
 // ⚠ ORDER IS LOAD-BEARING. Time before the number class (else `5:30` splits and the `:` becomes a pause);
 // the ordinal before the Latin run (else `1st` splits and ⟨st⟩ nativises to *stɾit*, "street"); the dotted
 // initialism before it too (else `A.I.` splits on the dots and ⟨I⟩ hits the pcm PRONOUN lexicon → *a*).
@@ -308,7 +290,7 @@ class NaijaPhonemizer implements Phonemizer {
     // loan) falls through to the rule g2p. Wired in the registry from the English module.
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(SYMBOLS(expandAbbrev(input)), TOKEN, (m, sink) => {
+        return assembleClauses(SYMBOLS(normalizeNaija(input)), TOKEN, (m, sink) => {
             if (m[1] !== undefined && m[2] !== undefined) {
                 for (const wd of timeWords(Number(m[1]), Number(m[2]))) sink.emit(wd);
             } else if (m[3]) {
