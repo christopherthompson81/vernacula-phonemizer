@@ -122,9 +122,11 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
   shipped intersections retain only NST content and the external ranking is FrequencyWords' sole
   contribution there, and as one input tier to `afrikaans/af-stems.txt`, which does inherit CC-BY-SA.
   ⚠ The ranking IS reproduced verbatim in the tools-only frequency lists
-  `tools/referee-eval/freq/nb.txt` and `freq/af.txt` (word+count pairs, attributed in each file header
-  and in `freq/README.md`). This entry previously said it was not reproduced anywhere; that stopped
-  being true when nb.txt landed. Ranking data only — no pronunciation content.
+  `tools/referee-eval/freq/nb.txt`, `freq/af.txt` and `freq/ur.txt` (word+count pairs, attributed in
+  each file header and in `freq/README.md`). This entry previously said it was not reproduced
+  anywhere; that stopped being true when nb.txt landed, and this list must be extended whenever a
+  new `freq/<lang>.txt` lands — af.txt and ur.txt each had to be added after the fact.
+  Ranking data only — no pronunciation content.
 - **Tajik Shahnameh corpus** — CC-BY-SA. Tajik component of `persian/fa-context-restorer.*.onnx`.
 
 Model weights that reproduce licensed pronunciation data are declared CC-BY-SA-inheriting and fenced
