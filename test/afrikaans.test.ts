@@ -118,6 +118,14 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("advies")).toBe("atfis");
         expect(phonemizeWord("goedkoop")).toBe("χutkuəp"); // …and the letters that already worked still do
         expect(phonemizeWord("ontbyt")).toBe("ɔntbəit"); // ⚠ NOT the reverse: no regressive VOICING (referee ɔntbəi̯t)
+        // ⚠ PINNED AS A SET, because "derived, so it cannot drift" is only half true: the trigger is
+        // `fixed` ∩ `voicelessPhones`, and voicelessPhones is still hand-written. Adding a single-letter
+        // grapheme whose phone is missing from that list would drop it out of the trigger silently — the
+        // same failure the "ptksfcgx" literal had, relocated one file over. This is what closes it.
+        const voiceless = new Set(MANIFEST.voicelessPhones);
+        const trigger = Object.keys(MANIFEST.fixed)
+            .filter((k) => k.length === 1 && voiceless.has([...MANIFEST.fixed[k]!][0]!)).sort();
+        expect(trigger).toEqual(["f", "g", "k", "p", "q", "s", "t", "v", "x"]); // + ⟨c⟩, added in code (no `fixed` entry)
     });
 
     test("a vowel-initial SUFFIX resyllabifies, so the stem does not devoice", () => {
@@ -127,7 +135,13 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("skoolvoeding")).toBe("skuəlfudəŋ"); // a compound seam AND a suffix seam in one word
         // ⚠ AND A VOWEL-INITIAL COMPOUND ELEMENT DOES NOT BLOCK IT — that is why the suffix list is closed
         // rather than a "next part starts with a vowel" test. A compound element is its own prosodic word.
-        expect(phonemizeWord("raadgewer")).toBe("rɑːtχəvər"); // raad·gewer: coda ⟨d⟩ still devoices
+        // ⚠ THESE TWO MUST ACTUALLY SPLIT for the assertion to mean anything. An earlier draft pinned
+        // `raadgewer`, which `decompose` returns as ONE part — there was no seam, the [t] came from the
+        // intra-morpheme regressive rule (⟨g⟩=[χ]), and the closed-list decision had no coverage at all.
+        expect(decompose("bloedarm").parts).toEqual(["bloed", "arm"]);
+        expect(phonemizeWord("bloedarm")).toBe("blutarm"); // vowel-initial ELEMENT: the ⟨d⟩ still devoices
+        expect(decompose("handomkeer").parts).toEqual(["hand", "om", "keer"]);
+        expect(phonemizeWord("handomkeer")).toBe("ɦantɔmkiər");
         expect(phonemizeWord("hond")).toBe("ɦɔnt"); // …and word-finally, unchanged
     });
 
@@ -141,22 +155,6 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         // measured first and lost this word: a true underlying /t/ against /t/ is a GEMINATE the referee
         // writes out. Only the ⟨d⟩ that Auslautverhärtung already neutralized has no contrast left to keep.
         expect(phonemizeWord("groottoon")).toBe("χruəttuən"); // referee χrʊət.tʊən — the geminate stays
-    });
-
-    test("a 3-letter compound HEAD is permitted BY NAME, and only by name", () => {
-        // The shared splitter's leading constituent is ≥4 letters. That floor is load-bearing, not caution: the
-        // stem lexicon is a 53k WORDLIST, so at ≥3 every three-letter word in it becomes a head and ordinary
-        // vocabulary shatters — measured +33/−143. `shortHeads` names the real 3-letter stems individually.
-        expect(phonemizeWord("seewater")).toBe("siəvɑːtər"); // see·water — referee ˈsɪə̯ˌvɑː.tər
-        expect(phonemizeWord("naguil")).toBe("naχœyl"); // nag·uil — referee ˈnaχ.œi̯l
-        expect(phonemizeWord("wedloop")).toBe("vɛtluəp"); // wed·loop — and the seam ⟨d⟩ devoices: referee ˈvɛt.lʊə̯p
-        expect(decompose("inenting").parts).toEqual(["in", "ent", "ing"]); // in·ent·ing, an inner 3-letter stem
-        // ⚠ AND THE WORDS THE FLOOR EXISTS TO PROTECT MUST STAY WHOLE. Each of these begins with a real
-        // Afrikaans word that is in the stem list; none of them is a compound.
-        for (const w of ["venster", "suiker", "dogter", "bakkie", "mantel", "kopende"])
-            expect(decompose(w).parts).toEqual([w]);
-        expect(phonemizeWord("venster")).toBe("fɛnstər"); // referee ˈfɛnstər — not *ven·ster
-        expect(phonemizeWord("mantel")).toBe("mantəl"); // referee ˈman.təl — ⟨man⟩ is NOT a listed head
     });
 
     test("proper nouns come from the LEXICON, not the spelling rules", () => {

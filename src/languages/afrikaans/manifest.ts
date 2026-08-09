@@ -63,8 +63,6 @@ export interface AfrikaansManifest {
         stKeep: string[];
         /** Vowel-initial suffixes that resyllabify the stem's final consonant → it does NOT devoice. */
         resyllabifyingSuffixes: string[];
-        /** 3-letter compound heads permitted by name (the shared splitter's leading constituent is ≥4). */
-        shortHeads: string[];
     };
 }
 

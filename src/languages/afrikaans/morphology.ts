@@ -52,9 +52,6 @@ const CONFIG: MorphologyConfig = {
     // frequency wordlist carries fragments), so the guard passes and the word is torn to aan·dete — the stressed-
     // prefix strip runs before splitCompound, which would otherwise have found aand·ete. Measured cost: 1 word.
     realWordStressedPrefixes: new Set(M.prefixStressed),
-    // 3-letter compound HEADS permitted by name — the shared splitter's leading constituent is ≥4 letters
-    // otherwise, because a wordlist at ≥3 shatters ordinary vocabulary (measured: +33/−143). See the manifest.
-    shortHeads: new Set(M.shortHeads),
 };
 
 /** Decompose an Afrikaans word into ordered morphemes with a stress hint. */

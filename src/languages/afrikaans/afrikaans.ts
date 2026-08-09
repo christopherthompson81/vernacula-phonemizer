@@ -12,6 +12,7 @@
  *   1. POSITIONAL — a voiced obstruent devoices at the end of a word or of a compound element (hond→ɦɔnt).
  *   2. REGRESSIVE — and before a voiceless one, wherever it sits (advies→atfis). The trigger is DERIVED from the
  *      grapheme table (VOICELESS_NEXT), because ⟨v⟩ is [f] and ⟨q⟩ is [k] and a hand-written letter list forgot both.
+ *      Derivation is not a full guarantee — `voicelessPhones` is still hand-written — so the set is pinned in the tests.
  *   3. RESYLLABIFICATION BLOCKS #1 — a vowel-initial SUFFIX takes the stem's final consonant as its onset, and a
  *      coda rule cannot apply to a segment that is no longer a coda: send·ing→sɛndəŋ, not *sɛntəŋ. A vowel-initial
  *      compound ELEMENT is a separate prosodic word and does NOT block it, so the list is closed (afrikaans.jsonc).
@@ -42,6 +43,9 @@ const DEVOICE = MANIFEST.voicedFinal; // word-final devoicing (g→χ, v→f alr
 // "voiceless" that had already drifted from the table it was meant to mirror (⟨v⟩ is [f] and ⟨q⟩ is [k], so
 // neither devoiced a preceding ⟨d⟩: advies read [adfis]). ⟨c⟩ is added by hand because it has no `fixed`
 // entry at all — the code rule below picks [s] or [k], and both are voiceless.
+// ⚠ DERIVED IS NOT THE SAME AS SAFE: this reads `fixed` ∩ `voicelessPhones`, and the latter is hand-written, so
+// a new single-letter grapheme whose phone nobody added there drops out of the trigger with no error. The set's
+// CONTENTS are asserted in test/afrikaans.test.ts; that assertion, not the derivation, is the actual guard.
 // Single-letter lookup is enough: every multi-letter grapheme headed by one of these letters is voiceless
 // too (⟨tj⟩ [c], ⟨tz⟩ [ts], ⟨sj⟩ [ʃ], ⟨sch⟩ [sk]), and the caller only has one following letter to test.
 const VOICELESS = new Set(MANIFEST.voicelessPhones);

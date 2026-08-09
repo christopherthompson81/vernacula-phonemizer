@@ -66,7 +66,12 @@
     // "ptksfcgx", which is a spelling-level restatement of "voiceless" and had drifted from the grapheme
     // table: ⟨v⟩ is [f] in Afrikaans and ⟨q⟩ is [k], so neither triggered devoicing and `advies` read
     // [adfis] — a voiced [d] before a voiceless [f], which the language does not have. Derived from
-    // `fixed` instead (afrikaans.ts), the two cannot diverge again.
+    // `fixed` instead (afrikaans.ts), so a grapheme change carries into the trigger automatically.
+    // ⚠ THAT IS ONLY HALF A GUARANTEE, and the half it is not is this list: the trigger is
+    // `fixed` ∩ `voicelessPhones`, and THIS list is still hand-written. Add a single-letter grapheme whose
+    // phone is not named here and it drops out of the trigger silently — the old literal's failure mode,
+    // relocated one file over. The derived set is pinned as a SET in test/afrikaans.test.ts, which is what
+    // actually closes it.
     // ⟨c⟩ is added by the engine rather than listed here: it has no `fixed` entry (a code rule picks [s]
     // or [k] by the following letter) and BOTH of its values are voiceless.
     "voicelessPhones": ["p", "t", "k", "c", "f", "s", "ʃ", "χ"],
@@ -240,26 +245,6 @@
         // kənərs), ⟨eer⟩ ×1 (waardeer vɑrdier). A fourth environment, ⟨ana⟩ in *bandana*, is NOT listed: it is
         // not an Afrikaans suffix, it is a loanword the stem splitter tore in half, and the defect there is the
         // split. Measured contribution: +4 words (the other three carry a second, unrelated error each).
-        "resyllabifyingSuffixes": ["ing", "ers", "eer"],
-
-        // ⚠ THE 3-LETTER COMPOUND HEADS, BY NAME. The shared splitter requires a LEADING constituent of ≥4
-        // letters, and that floor is load-bearing rather than cautious: the stem lexicon is a 53k WORDLIST, so
-        // at ≥3 every three-letter word in it becomes a compound head and ordinary vocabulary shatters —
-        // MEASURED at +33/−143 (bak·kie, dog·ter, ven·ster, sui·ker, don·ker, bot·tel, sus·ter…). But a few
-        // real Afrikaans stems ARE three letters, and the floor loses them with the rest; naming them
-        // individually is what lets the language have both.
-        // ⚠ ATTESTED, NOT COLLECTED, and the difference was measurable. A list chosen on VOCABULARY grounds
-        // (20 common 3-letter stems: see nag dag lug bos man vis oog oor kop sak erd wed sit ent reg een god
-        // hut kat) scored +10/−3 — ⟨man⟩ tore *mantel* to man·tel and ⟨kop⟩ tore *kopende* to kop·ende, each
-        // a real word the wordlist happens to contain. Keeping only the heads with a correct scoring instance
-        // gives the SAME 1764 with **+9/−0**, so that is what ships. ⟨vis⟩ is excluded at net zero (vis·arend
-        // right, vis·ser wrong); ⟨erd⟩ (erd·wolf) is excluded because it is not in af-stems.txt and so could
-        // never be a head anyway — that word needs a LEXICON entry, not a floor change.
-        // ⚠ ⟨hut⟩ REACHES ITS WORD THROUGH THE LINKING ELEMENT: *hutsmerk* is huts·merk, and "huts" is not in
-        // af-stems.txt, so no ≥4 head finds it. It splits as head ⟨hut⟩ + Fugen ⟨s⟩, which the splitter rejoins
-        // into the same "huts" constituent — the right parse arrived at through the link, not around it.
-        // Leave-one-out, each worth +1: bos (boswerker), een (onteenseglik), ent (inenting), hut (hutsmerk),
-        // nag (naguil), reg (regmatig), see (seewater), sit (sitkamer), wed (wedloop).
-        "shortHeads": ["bos", "een", "ent", "hut", "nag", "reg", "see", "sit", "wed"]
+        "resyllabifyingSuffixes": ["ing", "ers", "eer"]
     }
 }
