@@ -46,7 +46,7 @@ describe("afrikaans neural OOV tagger", () => {
         });
 
         // A genuinely-OOV compound: the tagger reads the stress-conditioned vowel quality from spelling, which is
-        // the class the rule engine cannot reach (72.6% stress placement overall, 36% at eight syllables).
+        // the class the rule engine cannot reach (74.8% stress placement overall, 40% at eight syllables).
         // Held-out (dictionary-gold): tagger 91.4% word-exact against the rule engine's 63.5%.
         test("OOV word: the tagger fills the tail, differing from the rule-only reading", async () => {
             const s = "Die rekenaarwetenskaplike werk.";

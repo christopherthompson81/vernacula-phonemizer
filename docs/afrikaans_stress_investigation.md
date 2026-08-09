@@ -1127,3 +1127,44 @@ move was undocumented. Both recorded; ⟨ui⟩ still reads [œy] through two-gra
 in both file headers, so this was a stale claim rather than a missing licence — corrected in both.
 
 **Final: dictionary-gold held-out — rule engine 63.5% / 93.5%, tagger 91.4% / 98.7%.** Suite 3184.
+
+## Run 22 — 2026-08-08 (re-measuring stress, because the quoted figure was stale)
+
+Challenged on the "72.6% stress placement" claim in the maturity row. It **was** stale: measured in Run 14,
+*before* the `stressFromEnd` table landed (#775) and before the `countNuclei` fix (#775 review) changed how
+positions are counted from the end. Both moved it.
+
+Re-measured against RCRL with the current engine, nucleus-aligned (comparing `stressedNucleus` to the
+referee's stressed syllable only where `countNuclei` and the referee agree on the syllable count — 24,709
+comparable polysyllables, up from Run 14's 23,388 because nucleus counting aligns better than vowel-group
+counting did):
+
+| | Run 14 | **now** |
+|---|---|---|
+| overall placement | 72.6% | **74.8%** |
+| 2 syllables | 88% | 88% |
+| 3 | 75% | **77%** |
+| 4 | 59% | **64%** |
+| 5 | 46% | **56%** |
+| 6 | 48% | **56%** |
+| 7 | 42% | **51%** |
+| 8 | 36% | **40%** |
+
+And the oracle, re-run with the current engine: **+1168 words (4.3pp)** on the secondary (17,885 → 19,053),
+against Run 14's +1189. The headroom is essentially unchanged in percentage terms — the engine got better
+at placement *and* the ceiling moved down with it.
+
+⚠ **The long words are where the derived table actually paid.** The overall +2.2pp understates it: 5- and
+6-syllable words gained 10 and 8 points. That is the population the suffix table targets, and it is also
+the population the OOV tagger serves — which is why the tagger's advantage on the held-out split (91.4% vs
+63.5%) is larger than the rule engine's aggregate numbers suggest.
+
+Corrected in seven places that were quoting the Run 14 figures: `afrikaans.jsonc`,
+`af-g2p-tagger.PROVENANCE.md`, `afrikaansTagger.ts`, `afrikaans.test.ts`, `afNeural.test.ts`,
+`language-maturity.md`, `catalogue.tsv`, `referee-eval.test.ts`.
+
+**Does it change the 🟡 verdict? No.** 74.8% placement with +1168 words (4.3pp) of measured oracle headroom
+is still real, unmodelled error rather than referee noise — so not ✅. And the OOV tagger reading 91.4% still
+shows the contrast is largely recoverable from spelling — so not 🟢, whose definition requires the tail to
+be "a principled coin-flip forever". The verdict rests on the *shape* of the residual, and that has not
+changed; only its size, slightly, in our favour.
