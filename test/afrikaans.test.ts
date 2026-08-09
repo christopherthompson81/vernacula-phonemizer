@@ -201,12 +201,22 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // 25,247 stress-and-syllable-annotated words; ⟨o⟩ and ⟨u⟩ shipped, ⟨i⟩ was measured and REJECTED because
     // it cost 9 words on the independent primary (see the manifest note).
     test("an unstressed OPEN syllable keeps the tense vowel quality, short", () => {
+        // ⟨o⟩ ɔ→u — every one of these is RCRL-EXACT, not merely closer.
         expect(phonemizeWord("kilometer")).toBe("kilumiətər"); // RCRL ˈki.lu.miə.tər — was *kilɔmiətər*
         expect(phonemizeWord("kilogram")).toBe("kiluχram"); // RCRL ˈki.lu.xram
-        expect(phonemizeWord("polisie")).toBe("puəlisi"); // ⟨o⟩ open; RCRL pu.ˈli.si (our stress differs, the vowel does not)
-        // ⚠ AND THE CLOSED CELL IS UNTOUCHED — it was confirmed by the same derivation (ɔ 97%, œ 97%).
-        expect(phonemizeWord("kanon")).toBe("kɑːnɔn"); // final ⟨o⟩ is CLOSED → ɔ, RCRL ka.ˈnɔn
-        expect(phonemizeWord("muskiet")).toBe("mœskit"); // ⟨u⟩ CLOSED → œ, RCRL mœ.ˈsik(-)
+        expect(phonemizeWord("advokaat")).toBe("atfukɑːt"); // RCRL at.fu.ˈkɑːt
+        expect(phonemizeWord("ammoniete")).toBe("amunitə"); // RCRL a.mu.ˈni.tə
+        // ⟨u⟩ œ→y — the cell with the only INDEPENDENT word-level evidence (+4 on the primary), and it had no
+        // test at all until review: deleting the manifest entry left all 37 af tests green while silently
+        // changing ~1,100 stems.
+        expect(phonemizeWord("formule")).toBe("fɔrmylə"); // RCRL fɔr.ˈmy.lə
+        expect(phonemizeWord("akkuraat")).toBe("akyrɑːt"); // RCRL a.ky.ˈrɑːt
+        expect(phonemizeWord("afsku")).toBe("afsky"); // RCRL ˈaf.sky
+        // ⚠ AND THE UNSTRESSED-CLOSED CELL IS UNTOUCHED — confirmed by the same derivation (ɔ 97%, œ 97%).
+        expect(phonemizeWord("kanon")).toBe("kɑːnɔn"); // unstressed-open ⟨a⟩ + CLOSED ⟨o⟩ → ɔ; RCRL ka.ˈnɔn
+        // ⚠ NOT a control for that cell, and it was mislabelled as one: `muskiet` takes first-syllable stress
+        // here, so its ⟨u⟩ pins `vowelsShort`, not `unstressedReduction`. Kept as the STRESSED-closed pin it is.
+        expect(phonemizeWord("muskiet")).toBe("mœskit"); // stressed closed ⟨u⟩ → œ
     });
 
     test("proper nouns come from the LEXICON, not the spelling rules", () => {

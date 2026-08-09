@@ -101,6 +101,13 @@
     // written down rather than left as a gap. ⟨a⟩ (ɑː) and ⟨e⟩ (iə) were swept as CONTROLS — RCRL says a 77% and
     // ə 90%, i.e. our existing values — and both duly lost (−23, −54 on the primary), which is the method
     // validating itself.
+    // ⚠ AND THE STEM-LIST DIFF, which the first draft of this change skipped — the gate Run 7 exists to enforce
+    // ("THE REFEREE IS 2220 WORDS AND THE STEM LIST IS 53k"). This rewrites 4,741 of 53,344 stems (8.9%), far
+    // more than the 143 that got `shortHeads` reverted, so the direction of those edits is the evidence that
+    // matters, not the count. Of the touched words a referee covers: **35 toward / 2 away on the INDEPENDENT
+    // primary**, and 809 toward / 56 away on RCRL (circular, listed for completeness). ⟨o⟩ in particular is
+    // 0-gained/0-lost on the primary's 30 word-exact rows — word-exact is simply too coarse there, and the
+    // distance metric is what shows those words moving closer (symbol accuracy 94.4% → 94.7% is the same fact).
     "unstressedOpen": { "o": "u", "u": "y" },
 
     // ⟨c⟩ is soft [s] before one of these and [k] elsewhere. A LETTER list, not a phone list — it is read
