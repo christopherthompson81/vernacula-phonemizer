@@ -67,3 +67,43 @@ wikipron overlap instead of this first guess; (2) scale to the FLEURS train spli
 once its gate is clicked; (3) aggregate votes per word type with a confidence threshold; (4) ship two
 artifacts — a final-schwa FOLD for the pa eval (referee convention, measured) and a medial-schwa LEXICON for
 the words audio settles; (5) re-measure the 73.6%.
+
+## Run 2 — 2026-08-09 17:10 — scale to 2,748 utterances, and the register confound
+
+Recognized all of FLEURS pa_in (dev 251 + train 1,923 + test 574 = 2,748 utterances). Fold calibrated on
+608 rule-correct word occurrences (PER .299; the one systematic pair is ə→a — the recognizer hears Punjabi
+ə as a, so (ə,a) substitutions are FREE in votes). Aggregation: per-word schwa-lattice candidates (base,
+single medial-ə deletions, single CC-cluster insertions, ±final ə, wikipron readings), fitting-aligned,
+margin-weighted votes, confidence = ≥3 occurrences + ≥70% share.
+
+    confident corrections: 426    wikipron-validatable: 46    matching: 65%
+
+⚠ 65% IS NOT SHIPPABLE, AND THE FAILURE HAS ONE SHAPE. Split by correction type (validated modulo the
+final-ə convention Run 1 settled):
+
+| type | n | precision |
+|---|---|---|
+| **position swap** (same ə count) | 6 | **100%** |
+| deletion | 36 | 67% |
+| insertion | 4 | 50% |
+
+— and 411 of the 426 are DELETIONS. The audio is not wrong: FLEURS speakers genuinely reduce (sərir→srir,
+səvere→svere — connected speech). But the referee's convention is CITATION FORM, so a deletion-class lexicon
+would "correct" the engine toward a different register than the one it is scored and shipped in. The
+confound is systematic and will NOT wash out with scale — more fast speech is more reduction.
+
+**What the audio reliably adjudicates, then:**
+1. **The final-ə convention** (Run 1, ~88:0) — wikipron writes a citation final ə speech does not carry.
+   An eval-fold candidate with an audio measurement behind it.
+2. **Medial-schwa POSITION** (100% at n=6) — when the schwa count is right but the slot is wrong, audio
+   recovers wikipron's answer. This is evidence the syncope-position defect is RULE-shaped, not lexical.
+3. NOT presence/absence of medial schwa — that is register, not lexicon.
+
+**Reframed plan (the km playbook, with audio as the adjudicator it just proved to be):**
+· Derive the medial-schwa POSITION rule from the full wikipron set (1,586 words — a derivation pass, no
+  audio needed now that audio has shown the class is rule-shaped).
+· Take the final-ə question to the eval config as a measured fold candidate.
+· Keep the audio pipeline (recognizer + fold + vote harness, all on /mnt/data/pa-audio) for what it is
+  reliable at: adjudicating convention questions and validating rule fixes out-of-band — and revisit
+  deletion-class corrections only if a citation-register corpus (read speech, dictionary audio) appears.
+  Shrutilipi (gate now accepted; 7 shards downloading) adds scale for the swap/final-ə classes.
