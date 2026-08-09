@@ -960,3 +960,49 @@ dictionaries, which the tagger serves but which no measurement here scores direc
 2,473 tokens and normalization-shaped. **A frequency list for af (`tools/referee-eval/freq/af.txt`) is the
 cheapest next thing**: it would switch on the eval's frequency-weighted metric, which is the number that
 actually reflects TTS quality, and would let the OOV tail be measured rather than estimated.
+
+## Run 19 — 2026-08-08 (review of PR #777 — the same trap, a third time)
+
+Four findings. The first is HIGH and is the same defect this language has now produced **three times**,
+each time in whatever tier was newest.
+
+**⟨'n⟩ AND BARE LETTERS ARE RULE-PATH SPECIAL CASES, AND EVERY NEW TIER CLAIMS THEM.**
+
+| | |
+|---|---|
+| #770 | `af-lexicon.tsv` carried stray `j`/`q` rows → ⟨J⟩ read [jɛ] instead of the name [jiə]. Fixed by deleting the rows. |
+| #776 | the RCRL lexicon carried `n`→ə, `a`, `o`, `u` → `802.11n` read *…elf ə*. Fixed by a **build-time filter** in the lexicon builder. |
+| #777 | the neural tier has no builder and no filter, so it claimed both classes again. |
+
+Measured with the shipped model, before the fix:
+
+```
+"Dit is 'n boek."      sync: dət əs ə buk .       neural: dət əs n buk .
+"Vitamien C is goed."  sync: fitamin siə əs χut . neural: fitamin k əs χut .
+```
+
+**⟨'n⟩ is the most frequent word in Afrikaans running text**, so essentially every sentence through
+`phonemizeAsync(text, "af")` misread it — and ⟨C⟩ silently reverted #761.
+
+⚠ The galling part: `afrikaans.ts` already carried a comment, written in #776, saying *"the safety is the
+build-time filter, not this order"* — and then I added a tier with neither. **So the guard is now at the
+SEAM** (`afrikaansRuleReserved`, consulted by `phonemizeWord` before it consults `oovOverride`), where it
+protects any tier that is ever injected, instead of being re-implemented — or forgotten — once per tier.
+The neural path also checks it in `lexHas`, but only to avoid a wasted `tag()` call; the engine enforces it.
+
+**2. The prepass key was missing NFC**, so on decomposed input the reading was computed under the NFD key,
+looked up under the NFC one, and discarded — silently switching the tier off for exactly the
+diacritic-bearing words (ë ô ï ê) it was most needed for. `reënwater` fell back to the rules.
+
+**3. The byte-identity test picked three strings that avoided both broken classes.** It asserted "only OOV
+word readings change" and stayed green while the tier rewrote the commonest word in the language. Both
+strings are now in the loop, plus an NFD/NFC equality test. **A byte-identity test is worth exactly what
+its strings cover** — and choosing them to exercise the *special cases* rather than the ordinary path is
+the whole skill.
+
+**4.** README still said "Nine languages have an optional neural tier"; the catalogue and maturity table
+were updated in the PR and the README was missed.
+
+**Final: suite 3183, tsc clean, fence ok.** The held-out numbers are unchanged (the fix removes two word
+classes from the tier, neither of which is in the training data): tagger **91.8% / 98.8%** against the rule
+engine's **64.0% / 93.6%**.

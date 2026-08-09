@@ -16,9 +16,25 @@ describe("afrikaans neural OOV tagger", () => {
     // Numbers, punctuation, normalization, clause assembly and every lexicon-covered word belong to the SYNC
     // engine — the neural path only swaps OOV word readings. On lexicon-covered text it must be byte-identical.
     test("lexicon/common text: neural path is byte-identical to the sync path", async () => {
-        for (const s of ["Die man loop huis toe.", "Ek het 100 boeke.", "Dit is 12,5 kilometer."]) {
-            expect(await phonemizeAfNeural(s)).toBe(phonemize(s, "af"));
+        for (const s of [
+            "Die man loop huis toe.", "Ek het 100 boeke.", "Dit is 12,5 kilometer.",
+            // ⚠ THESE TWO ARE THE POINT. The first draft of this test picked three strings that happened to
+            // contain no ⟨'n⟩ and no bare letter, so it stayed green while the tier claimed BOTH — reading
+            // ⟨'n⟩, the most frequent word in Afrikaans, as [n] instead of [ə], and ⟨C⟩ as the phone [k]
+            // instead of the letter name [siə] (silently reverting #761). A byte-identity test is only worth
+            // what its strings cover.
+            "Dit is 'n boek.", "Vitamien C is goed.",
+        ]) {
+            expect(await phonemizeAfNeural(s), s).toBe(phonemize(s, "af"));
         }
+    });
+
+    // ⚠ NFC, matching phonemizeWord's own key: on decomposed input the prepass would otherwise store under the
+    // NFD key while the lookup asks for the NFC one, discarding every reading — switching the tier off for
+    // exactly the diacritic-bearing words it is needed for.
+    test("decomposed (NFD) input reaches the tagger too", async () => {
+        const s = "Die reënwater is groot.";
+        expect(await phonemizeAfNeural(s.normalize("NFD"))).toBe(await phonemizeAfNeural(s));
     });
 
     describe.skipIf(!haveModel)("with the ONNX model present", () => {

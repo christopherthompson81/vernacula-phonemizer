@@ -11,7 +11,7 @@
  * `phonemize(text, "af")` — only OOV word readings change. When `onnxruntime-node` or the model is absent the
  * tagger is `undefined` and this returns exactly the sync path (no throw). The sync engine is untouched.
  */
-import { createAfrikaans, afrikaansLexiconHas } from "./afrikaans.ts";
+import { createAfrikaans, afrikaansLexiconHas, afrikaansRuleReserved } from "./afrikaans.ts";
 import { createAfrikaansTagger, type AfrikaansTagger } from "./afrikaansTagger.ts";
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
@@ -31,8 +31,13 @@ export async function phonemizeAfNeural(text: string): Promise<string> {
     if (!tagger) return afEngine().text(text); // no model → sync path
     return wordLevelNeuralPrepass(text, {
         word: WORD,
-        key: (w) => w.toLowerCase(),
-        lexHas: (w) => afrikaansLexiconHas(w), // lexicon-covered words are served by the sync lexicon path
+        // ⚠ NFC, matching phonemizeWord's own key. Without it the prepass stores under the NFD key while the
+        // lookup asks for the NFC one, so on decomposed input every reading is computed and then DISCARDED —
+        // silently switching the tier off for exactly the diacritic-bearing words (ë ô ï ê) it was needed for.
+        key: (w) => w.normalize("NFC").toLowerCase(),
+        // Lexicon-covered words are served by the sync lexicon path; RULE-RESERVED words (⟨'n⟩, bare letters)
+        // by the rule path. The engine enforces the latter at the seam too — this just avoids a wasted tag().
+        lexHas: (w) => afrikaansLexiconHas(w) || afrikaansRuleReserved(w),
         tag: (w) => tagger.tag(w),
         render: (t, oov) => afEngine().text(t, oov),
     });

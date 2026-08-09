@@ -280,6 +280,24 @@ export function afrikaansLexiconHas(word: string): boolean {
  *  What happens AT the seam (blocked devoicing, degemination) is joinSeams's job, not the morpheme's. */
 export type OovResolver = (word: string) => string | undefined;
 
+/**
+ * Words `phonemizeWordRules` handles with a SPECIAL CASE, which no outside tier may claim: the indefinite
+ * article ⟨'n⟩ = [ə], and a bare single letter, which is SPELLED as its NAME rather than sounded (⟨C⟩ is
+ * "see" [siə], #761).
+ *
+ * ⚠ THIS IS THE THIRD TIME THIS TRAP HAS BEEN SPRUNG IN THIS LANGUAGE, and the first two fixes were both
+ * local to whatever tier was being added: #770 caught stray `j`/`q` rows in af-lexicon.tsv making ⟨J⟩ read
+ * [jɛ]; #776 caught RCRL's `n`→ə row and fixed it with a BUILD-TIME filter in the lexicon builder. Then the
+ * neural tier arrived with no builder and no filter, and claimed both classes again — ⟨'n⟩, the most
+ * frequent word in Afrikaans running text, read [n] instead of [ə] in essentially every sentence.
+ * So the guard now lives at the SEAM, where it protects any tier that is ever injected, rather than being
+ * re-implemented (or forgotten) once per tier.
+ */
+export function afrikaansRuleReserved(word: string): boolean {
+    const w = word.normalize("NFC").toLowerCase();
+    return w === "'n" || w === "’n" || [...w].length === 1;
+}
+
 export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     const w = word.normalize("NFC").toLowerCase();
     // ⚠ PROPER NOUNS AND OPAQUE LOANS (af-lexicon.tsv — referee-sourced: Botha→buəta, Blignault-class
@@ -305,7 +323,8 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     if (dict !== undefined) return dict;
     // ⚠ THE NEURAL TIER'S SEAM — after both dictionaries, before the rules. Supplied only by the async path
     // (afrikaansNeural.ts); the sync engine never sets it, so `phonemize(text, "af")` is unchanged.
-    const oov = oovOverride?.(w);
+    // ⚠ AND IT MAY NOT CLAIM THE RULE PATH'S SPECIAL CASES — see afrikaansRuleReserved.
+    const oov = afrikaansRuleReserved(w) ? undefined : oovOverride?.(w);
     if (oov !== undefined && oov !== "") return oov;
     return phonemizeWordRules(w);
 }
