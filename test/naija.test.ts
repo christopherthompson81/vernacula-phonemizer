@@ -118,4 +118,133 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // Native Naija is untouched.
         expect(phonemize("di pikin dem", "pcm")).toBe("di pikin dɛm");
     });
+
+    /**
+     * NORMALIZATION. pcm was flagged PCT-DROP and CUR-DROP by tools/normalization/audit.ts: the sign
+     * contributed nothing, so `50%` was byte-identical to `50` and `$5` to `5` — a silent loss no
+     * downstream gate could see. Separately the number class was a bare `\d+`, so the thousands COMMA and
+     * the decimal DOT were claimed by the clause branch and the number was destroyed outright.
+     * Every word is attested — in the mined pcm corpus, except ⟨percent⟩, which that corpus writes only
+     * once and which is sourced from pcm.wikipedia instead. Counts are in the SYMBOLS block.
+     */
+    test("the symbol tier reads %, currency and & instead of dropping them", () => {
+        expect(phonemize("50%", "pcm")).toBe("fifti pasɛnt");
+        expect(phonemize("$5", "pcm")).toBe("faiv dola");
+        // ⚠ the corpus word is ⟨dolla⟩ ×2, not English ⟨dollar⟩ ×1 — the minority form is the English one.
+        expect(phonemize("₦2,000", "pcm")).toBe("tu tauzin nɛɾa");
+        expect(phonemize("fish & chips", "pcm")).toBe("fiʃ an t͡ʃips");
+        // ⚠ THE SOURCING SENTENCE ITSELF DOUBLED THE WORD: the tier's "already said it" guard was
+        // case-SENSITIVE, and running text capitalises the currency noun after a sign, so
+        // "$12.4 Billion Dolla" read *…biljan dola dola*. Fixed in core/normalizeSymbols.ts (suppression
+        // only — emission is untouched).
+        expect(phonemize("$12.4 Billion Dolla", "pcm")).toBe("twɛlv pɔint fo biljan dola");
+        // the sign must not be a no-op — the exact shape of the defect the audit names
+        for (const [sign, bare] of [["50%", "50"], ["$5", "5"], ["₦5", "5"]] as const)
+            expect(phonemize(sign, "pcm"), sign).not.toBe(phonemize(bare, "pcm"));
+    });
+
+    test("thousands separators and decimals survive the tokenizer", () => {
+        // `(\d+)` alone read ₦2,000 as *tu , ziɾo* ("two [pause] zero") and 3.5 as *tɾi . faiv*.
+        expect(phonemize("3.5 kilo", "pcm")).toBe("tɾi pɔint faiv kilo");
+        expect(phonemize("I get 1,000 naira", "pcm")).toBe("a ɡɛt wan tauzin nɛɾa");
+        // a decimal tail is read DIGIT BY DIGIT, so 1.50 is not "fifty"
+        expect(phonemize("1.50", "pcm")).toBe("wan pɔint faiv ziɾo");
+        expect(phonemize("87.14%", "pcm")).toBe("eti sɛvin pɔint wan fo pasɛnt");
+    });
+
+    test("a magnitude hops the currency word, capitalised or not", () => {
+        // ⚠ THE CAPITALISED FORM IS THE REGRESSION: the tier's magnitude alternation is case-SENSITIVE and
+        // this corpus capitalises 8 of 38, so `₦200 Million` stranded the magnitude after the currency
+        // noun — *tu hɔndɛd nɛɾa miljan*, "two hundred naira million" — while the lowercase was fine.
+        expect(phonemize("₦200 million", "pcm")).toBe("tu hɔndɛd miljan nɛɾa");
+        expect(phonemize("₦200 Million", "pcm")).toBe("tu hɔndɛd miljan nɛɾa");
+        // ⚠ `US$` needs its own key (the tier's match is letter-bounded on the left) but NOT its own word:
+        // this engine nativises ⟨US⟩ as the pronoun *us* → [ɔs], which shipped `US$2` as *tu ɔs dola*.
+        expect(phonemize("US$2 million", "pcm")).toBe("tu miljan dola");
+        expect(phonemize("US$750,000", "pcm")).toBe("sɛvin hɔndɛd an fifti tauzin dola");
+    });
+
+    /**
+     * ORDINALS. `1st` reached the g2p as the WORD ⟨st⟩ and read *stɾit* ("street") — `1st place` was
+     * *wan stɾit ples*. The productive rule is `nɔmba` + the CARDINAL (APiCS survey 17), with suppletive
+     * forms for 1–3; that rule is what made 4th+ expressible at all, since an English-style ordinal table
+     * would have been unsourced above ⟨third⟩.
+     */
+    test("ordinals read as ordinals, and above three use nɔmba + the cardinal", () => {
+        expect(phonemize("1st place", "pcm")).toBe("fɛst ples");
+        expect(phonemize("2nd", "pcm")).toBe("sɛkond");
+        expect(phonemize("3rd", "pcm")).toBe("tɛd");
+        expect(phonemize("4th", "pcm")).toBe("nɔmba fo");
+        expect(phonemize("12th", "pcm")).toBe("nɔmba twɛlv");
+        expect(phonemize("21st", "pcm")).toBe("nɔmba twɛnti wan");
+        expect(phonemize("103rd", "pcm")).toBe("nɔmba wan hɔndɛd an tɾi");
+        // the suffix must never survive as a word
+        expect(phonemize("1st", "pcm")).not.toContain("stɾit");
+        // ⚠ UPPERCASE TOO — headline case is routine in this register, and a case-sensitive suffix left
+        // `1ST` reading *wan stɾit*, the exact defect this rule exists to remove.
+        expect(phonemize("1ST", "pcm")).toBe("fɛst");
+        expect(phonemize("4TH", "pcm")).toBe("nɔmba fo");
+        expect(phonemize("21ST", "pcm")).not.toContain("stɾit");
+    });
+
+    test("units and the Dr. abbreviation", () => {
+        // ⟨kilomita⟩/⟨mita⟩ come from pcm.wikipedia ("85 kilomita fom di main kampos", "di 100 mita race") —
+        // the mined corpus has 29 unit-bearing numbers and zero spelled-out unit words. kg/cm are NOT
+        // declared: zero attestations, and guessing is costly here (English ⟨kilometer⟩ nativises to
+        // *kalamata*).
+        expect(phonemize("10km", "pcm")).toBe("ten kilomita");
+        expect(phonemize("di 100 m race", "pcm")).toBe("di wan hɔndɛd mita ɾes");
+        // ⟨Dr⟩ nativised as a word → *dɾaiv* ("drive"). Dot optional (the corpus writes both), and the dot
+        // must be CONSUMED or it reads as a clause pause.
+        expect(phonemize("Dr. Ada", "pcm")).toBe("dakta eda");
+        expect(phonemize("Dr Zeh", "pcm")).toBe("dakta zɛ");
+        // ⚠ an ALL-CAPS ⟨DR⟩ is the country abbreviation, not the title — case-insensitive matching read
+        // `DR Congo` as "Doctor Congo".
+        expect(phonemize("DR Congo", "pcm")).not.toContain("dakta");
+        // ⚠ the guard: a word merely STARTING with dr- is untouched
+        expect(phonemize("Drama awod", "pcm")).toBe("dɾama awod");
+        expect(phonemize("Dreamstar FC", "pcm")).toContain("dɾeamstaɾ");
+    });
+
+    /**
+     * INITIALISMS ARE LETTER-SPELLINGS UNLESS LEXIFIED. `FC` scanned as a word gave the unpronounceable
+     * *fk*; `A.I.` split on the dots so ⟨I⟩ hit the pcm PRONOUN lexicon and read *a*. The lexified test is
+     * the English dict, which already carries both the word-pronounced ones (FIFA, NEPA) and the ones
+     * conventionally spelled out (APC, BBC, TV) — so only a dict MISS is spelled here.
+     */
+    test("initialisms spell out, lexified acronyms do not", () => {
+        expect(phonemize("A.I. dey", "pcm")).toBe("e ai dɛ");
+        expect(phonemize("U.S. team", "pcm")).toBe("ju ɛs tim");
+        expect(phonemize("FC Barcelona", "pcm")).toBe("ɛf si basilona");
+        expect(phonemize("PSV", "pcm")).toBe("pi ɛs vi");
+        expect(phonemize("YBNL", "pcm")).toBe("wai bi ɛn ɛl");
+        // lexified → read as a word, not spelled
+        expect(phonemize("FIFA", "pcm")).toBe("fifa");
+        expect(phonemize("BBC", "pcm")).toBe("bibisi");
+        // ⚠ A DICT MISS IS NOT ENOUGH — it must also be unpronounceable. Gating on the dict alone spelled
+        // out COVID as *si o vi ai di*, plus ABIA (a state), BOGA (a language), AFCON, APGA, INEC, AIBA,
+        // NADECO — eight word-acronyms the base engine already read correctly. Requiring NO VOWEL keeps
+        // every consonant-only win and rescues all eight.
+        for (const [w, ipa] of [["COVID", "kovid"], ["ABIA", "abia"], ["AFCON", "afkon"],
+                                ["INEC", "inek"], ["NADECO", "nadeko"], ["BOGA", "boɡa"]] as const)
+            expect(phonemize(w, "pcm"), w).toBe(ipa);
+        // ⚠ ⟨a⟩ is why letterNames is declared: the English dict's single-letter entry is the ARTICLE [ə],
+        // not the letter name [e], so the dict alone would mis-spell any initialism containing an A.
+        expect(phonemize("A.B.", "pcm")).toBe("e bi");
+    });
+
+    test("times follow the English pattern with pcm number words", () => {
+        // ⚠ PROVISIONAL — no pcm source for clock-reading was found; recorded as such in naija.ts.
+        expect(phonemize("5:30", "pcm")).toBe("faiv tɔti");
+        expect(phonemize("11:40", "pcm")).toBe("ilɛvin foti");
+        expect(phonemize("5:00", "pcm")).toBe("faiv"); // bare hour
+        expect(phonemize("2:20", "pcm")).toBe("tu twɛnti");
+        // a minute under ten keeps its zero rather than borrowing English's unsourced "oh"
+        expect(phonemize("00:05", "pcm")).toBe("ziɾo ziɾo faiv");
+        // the colon must not survive as a clause pause
+        expect(phonemize("5:30", "pcm")).not.toContain(",");
+        // ⚠ a three-part ratio is NOT a time: without a left guard the scan resumed after the first colon
+        // and read the tail `20:20` as a clock, swallowing a pause. `40:20:20` is in the mined corpus.
+        expect(phonemize("40:20:20", "pcm")).toBe("foti , twɛnti , twɛnti");
+    });
 });
