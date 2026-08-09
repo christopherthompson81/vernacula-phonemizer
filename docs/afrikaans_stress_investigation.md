@@ -1006,3 +1006,72 @@ were updated in the PR and the README was missed.
 **Final: suite 3183, tsc clean, fence ok.** The held-out numbers are unchanged (the fix removes two word
 classes from the tier, neither of which is in the training data): tagger **91.8% / 98.8%** against the rule
 engine's **64.0% / 93.6%**.
+
+## Run 20 — 2026-08-08 (a frequency list — and the defect it found in an hour)
+
+`tools/referee-eval/freq/af.txt` — 17,586 words / 337k tokens from hermitdave FrequencyWords
+(OpenSubtitles 2018, CC BY-SA: the same source `nb.txt` uses and the same one `af-stems.txt` was already
+built from, so licensing and precedent were settled). `eval.ts` already supported the metric; af simply
+had no list.
+
+**THE TYPE/TOKEN GAP, finally measured instead of estimated:**
+
+| | word-exact | **frequency-weighted** |
+|---|---|---|
+| primary (en.wiktionary, 2220) | 79.5% | **96.2%** |
+| secondary (RCRL, 27,428) | 65.2% | **92.9%** |
+
+Both referees are DICTIONARY-shaped and over-sample rare Latinate words; real Afrikaans text is short and
+native. **The word-exact figures understate what users hear by 17–28pp.** Every earlier claim in this
+document about "real-text quality" (the ~87% figures in Runs 15–16) was a hand-rolled probe against a
+2,473-token mined corpus; this replaces them with a standing metric that prints on every eval run.
+
+### And it immediately found a live defect the held-out split could not
+
+Measuring the OOV tail over the frequency list, the 500 most frequent OOV types resolve 218,972 tokens.
+Comparing tagger against rules on those:
+
+```
+sê          tagger= (declined)     rules=sɛː
+natuurlik   tagger=natœœrlək       rules=natyːrlək      ← ships
+nuwe        tagger=nyvə            rules=nyːvə
+```
+
+**My own vetting had blinded the tagger to a grapheme class.** The shipped LEXICON correctly drops words
+whose long vowel neither source can write (ɛː œː yː) — but I applied the same drop to the TRAINING data,
+which removed ⟨ê û î⟩ from the character vocabulary entirely. Two different failures followed:
+
+- ⟨ê û î⟩ — not in vocab, so the tagger **declines** and the rules serve. Safe, but the tier is inert on
+  `sê`, `hê`, `gesê`, all common words.
+- ⟨uu⟩ — ⟨u⟩ **is** in vocab, so the model does *not* decline. It emits `natuurlik` → **natœœrlək**. That
+  was shipping.
+
+Fixed by **substituting the rule output rather than dropping the word**: the rules derive that length
+deterministically from the spelling, so for exactly this class they are the authority and the model should
+be taught it rather than have the grapheme hidden from it. 31,224 → **32,548 pairs**, vocabulary 37 → 40
+characters, and the agreement between tagger and rules on the frequent OOV tail went **96.4% → 98.6%**.
+
+⚠ **The held-out split could not have found this**, because the excluded words were excluded from the
+held-out set too. A random split measures the population you kept; it says nothing about the population
+you dropped. That is the general lesson, and it is the second time in this sequence a derivation was
+measured on a sample selected to exclude the class it was getting wrong (cf. Run 15's hiatus bug).
+
+**Re-measured honestly on the new, harder held-out (4,096 of 32,548):**
+
+| | word-exact |
+|---|---|
+| rule engine | 65.5% |
+| **BiLSTM tagger** | **90.6%** |
+
+A 73% relative reduction. Lower than Run 18's 91.8% because the split now *contains* the ⟨ê û uu⟩ class it
+previously hid.
+
+### What the frequency list does NOT do
+
+It cannot score the OOV tail's accuracy — those words are by definition absent from every dictionary, so
+there is no ground truth. It measures the tail's **size** precisely and lets tagger-vs-rules disagreement
+be weighted by real frequency, which is how the defect above surfaced. Scoring it would need new data,
+and Run 18 established there is none.
+
+⚠ One caveat, shared with `nb.txt`: OpenSubtitles skews conversational, so the weighting reflects dialogue
+rather than prose. Still far closer to real text than uniform type weighting.

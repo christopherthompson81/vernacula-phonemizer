@@ -81,7 +81,14 @@ const MISSING_LONG = LONG.filter((v) =>
  *  lexicon overriding adjudicated words at SERVING time, but those rows are correct and belong in training. */
 function vet(w: string, entry: string): string | undefined {
     const r = phonemizeWordRules(w);
-    for (const long of MISSING_LONG) if (r.includes(long) && !entry.includes(long)) return undefined;
+    // ⚠ SUBSTITUTE THE RULE, DO NOT DROP THE WORD. The shipped LEXICON drops this class (neither source can
+    // write ɛː/œː/yː, so their entries would flatten a length the engine marks). Dropping it from TRAINING too
+    // was a mistake: it removed ⟨ê û î⟩ from the character vocabulary entirely — the tagger declines on them,
+    // which is safe but inert — and, worse, left ⟨uu⟩ half-learned, since ⟨u⟩ IS in vocab so the model does not
+    // decline and instead emits natuurlik → *natœœrlək for natyːrlək. The rules derive this length
+    // DETERMINISTICALLY from the spelling, so for exactly this class they are the authority: teach it to the
+    // model rather than hiding the grapheme from it. Found by the af frequency list — natuurlik is common.
+    for (const long of MISSING_LONG) if (r.includes(long) && !entry.includes(long)) return r;
     let ipa = entry;
     const voiced: Record<string, string> = { b: "p", d: "t", z: "s", v: "f", ɡ: "χ" };
     const last = [...ipa].at(-1)!;

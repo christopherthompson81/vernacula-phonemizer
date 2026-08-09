@@ -24,23 +24,23 @@ only the 27,303-word train split.
 
 | | word-exact | symbol accuracy |
 |---|---|---|
-| rule engine (`phonemizeWordRules`) | 64.0% | 93.6% |
-| **BiLSTM tagger** | **91.8%** | **98.8%** |
+| rule engine (`phonemizeWordRules`) | 65.5% | 93.9% |
+| **BiLSTM tagger** | **90.6%** | — |
 
-A **77% relative reduction in word error**. ⚠ The rule engine's number here is *lower* than its 79.5%
+A **73% relative reduction in word error**. (4,096 held out of 32,548 pairs.) ⚠ The rule engine's number here is *lower* than its 79.5%
 referee score because this split is dictionary-shaped — long, rare, Latinate words — which is exactly the
 population the OOV tier serves.
 
 ## Training data
 
-`tools/afrikaans/af-g2p-data.tsv` — **31,224 vetted pairs**, built by `tools/afrikaans/build_af_g2p_data.ts`
+`tools/afrikaans/af-g2p-data.tsv` — **32,548 vetted pairs**, built by `tools/afrikaans/build_af_g2p_data.ts`
 from the union of both open Afrikaans pronunciation dictionaries:
 
 | source | entries | licence | contribution |
 |---|---|---|---|
-| RCRL Afrikaans Pronunciation Dictionary v1.4.1 (CTexT/NWU via ttslab/za_lex) | 27,428 | CC BY-SA 2.5 ZA | 26,369 |
-| NCHLT-inlang Afrikaans (DAC / CSIR / NWU, via SADiLaR) | 15,094 | CC BY 3.0 | 4,855 |
-| — rejected by vetting | | | 1,671 |
+| RCRL Afrikaans Pronunciation Dictionary v1.4.1 (CTexT/NWU via ttslab/za_lex) | 27,428 | CC BY-SA 2.5 ZA | 27,389 |
+| NCHLT-inlang Afrikaans (DAC / CSIR / NWU, via SADiLaR) | 15,094 | CC BY 3.0 | 5,159 |
+| — rejected by vetting | | | 38 |
 
 ⚠ **~31k is the CEILING for this language.** The third open dictionary, **Lwazi Afrikaans** (4,998,
 CC BY 2.5 ZA), was checked and adds **zero** headwords — every one is already in RCRL. There is no
@@ -54,8 +54,16 @@ fine for TRAINING, where the value is coverage, and disqualifying for REFEREEING
 wired as a referee. See `tools/afrikaans/nchlt_afr.PROVENANCE.md`.
 
 Every pair is **vetted against `phonemizeWordRules`** by the same rules the shipped lexicon uses — the
-dictionary wins on lexical knowledge, the engine wins on systematic phonology (final devoicing, the long
-vowels neither source can write, schwa epenthesis in /rm, lm/, dropped onsets, implausible rows).
+dictionary wins on lexical knowledge, the engine wins on systematic phonology (final devoicing, schwa
+epenthesis in /rm, lm/, dropped onsets, implausible rows).
+
+⚠ **ONE DIVERGENCE FROM THE LEXICON'S VETTING, and it matters.** For the long vowels neither source can
+write (ɛː œː yː …) the shipped lexicon DROPS the entry; the training set **substitutes the rule output**
+instead. Dropping them here was a defect: it removed ⟨ê û î⟩ from the character vocabulary entirely, so
+the tagger declined on them (safe but inert), and left ⟨uu⟩ HALF-learned — ⟨u⟩ is in vocab, so the model
+did not decline and emitted `natuurlik` → *natœœrlək* for natyːrlək. The rules derive that length
+deterministically from the spelling, so for exactly this class they are the authority and the model should
+be taught it. Caught by the af frequency list (Run 20), not by the held-out split.
 
 ## Convention
 
