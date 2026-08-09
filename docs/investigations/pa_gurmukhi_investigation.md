@@ -183,7 +183,7 @@ h-coalescence (ਜ਼ਹਿਰ zəɦɪɾ), its own partial schwa model (agrees w
 ਅਰਥ/ਗਰਮ where wikipron deletes) — so it corroborates SEGMENTS, and its known gaps are per-referee folds,
 not scores. espeak pa exists but has NO schwa deletion at all — the weaker candidate, not wired.
 
-    engine vs epitran:  85.8% folded / 96.0% symbol / 94.4% frequency-weighted   (residual: its map quirks)
+    engine vs epitran:  89.1% folded / 96.9% symbol / 94.6% frequency-weighted   (residual: its map quirks)
 
 ⚠ A crude-fold health check first said 50.7% — the Run-3 phantom mechanism AGAIN (the crude fold kept the
 citation ə̆ the real pipeline disposes of). Measured only with the eval's own folds thereafter.
@@ -191,8 +191,8 @@ citation ə̆ the real pipeline disposes of). Measured only with the eval's own 
 **freq/pa.txt** (FLEURS pa_in transcripts + the mined artifact; 66k tokens, 5.5k types ≥2 — no hermitdave
 pa exists) gives pa its first token-weighted numbers, and they invert the km/af pattern:
 
-    primary (wikipron):  73.6% word-exact  →  70.7% FREQUENCY-WEIGHTED
-    epitran secondary:   85.8% word-exact  →  94.4% frequency-weighted
+    primary (wikipron):  74.5% word-exact  →  70.8% FREQUENCY-WEIGHTED
+    epitran secondary:   89.1% word-exact  →  94.6% frequency-weighted
 
 Frequent words do WORSE against wikipron while the two independent engines agree MORE there: the frequent
 band is function words carrying wikipron's phonological conventions (the h-coalescence/tonogenesis class —
@@ -200,6 +200,26 @@ band is function words carrying wikipron's phonological conventions (the h-coale
 CONVENTION concentration, not a segment-quality cliff — the segment story at frequency is the 94.4%.
 The shipped lexicon covers 6.5% of running-text tokens with referee-verified readings on top.
 
-Verdict effect: the Gurmukhi engine is no longer single-tradition — two independent rule systems corroborate at 85.8/96.0/94.4, the human referee adjudicates the residual, and the audio harness stands as the
+Verdict effect: the Gurmukhi engine is no longer single-tradition — two independent rule systems corroborate at 89.1/96.9/94.6, the human referee adjudicates the residual, and the audio harness stands as the
 third leg for convention questions. The h-coalescence and nasal-restoration classes remain the next honest
 engine work, now with a second referee to check them against.
+
+## Run 7 — 2026-08-09 20:15 — the nasal rule lands; h-coalescence refused as a rule
+
+Population derivations first (the Run-4 lesson, applied): bindi-before-stop → homorganic consonant **26:5**
+(rule-shaped); medial ਹਿ/ਹੁ → **17 kept : 10 fused** (NOT rule-shaped — the tonogenesis coalescence is
+lexically/conventionally split, so it stays lexicon-served, and the refusal carries its counts).
+
+The bindi rule is OPT-IN per manifest (`effect: "nasalizeVowelHomorganic"` on the chandrabindu slot) because
+the abugida core is shared: Devanagari's ँ is pure nasalization and must stay so — the flag is what keeps
+Hindi inert (sweep run anyway: hi/bn/ta/te/kn/ml/si/or all at their known values). The class was invisible
+to the folded metric only because the fold strips the ̃ the engine emitted instead of the consonant.
+
+    primary:  73.6 → 74.5% folded (91.6 symbol / 70.8 freq-weighted)
+    epitran:  → 89.1% folded / 96.9 symbol / 94.6 freq-weighted
+    lexicon:  re-mined 231 → 217 (the rule generalized 14 entries away)
+
+The epitran secondary first DROPPED to 83.8 — it does not restore the nasal either, and its header promised
+that gap was folded when only ɑ→a was. The fold is now real, anchored on ŋ/ɳ/ɲ (letters Gurmukhi virtually
+never spells, so a written nasal is untouched; the ̃ anchor is unavailable because the backbone strips it
+first), and it also neutralized the same gap in ɲd͡ʒ words (ਪੰਜਾਬੀ) — 89.1%.

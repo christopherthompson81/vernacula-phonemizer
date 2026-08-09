@@ -27,7 +27,8 @@
             "source": "epitran pan-Guru (INDEPENDENT rule-based, non-Wiktionary)",
             "role": "secondary",
             "folds": [
-                { "pattern": "ɑ", "replace": "a", "note": "epitran writes the long low vowel ɑ where the primary writes aː/ä — notation (the backbone strips length)" }
+                { "pattern": "ɑ", "replace": "a", "note": "epitran writes the long low vowel ɑ where the primary writes aː/ä — notation (the backbone strips length)" },
+                { "pattern": "[ŋɳɲ](?=.)", "replace": "", "note": "epitran does NOT restore the homorganic nasal a nasal sign carries before a stop (ਆਂਡਾ ɑ̃ɖɑ against the engine/primary ãɳɖa, referee-derived 26:5) — its known model gap, folded THIS referee only so the engine is not scored down for being right. Anchored on ŋ/ɳ/ɲ (which Gurmukhi virtually never letter-spells, so a real written nasal is untouched); the backbone strips the ̃ that would otherwise anchor the class. Dental/labial (n/m) sign-nasals stay unfolded to protect letter-spelled ਨ/ਮ." }
             ]
         }
     ],

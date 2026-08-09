@@ -24,7 +24,9 @@ export interface AbugidaDef {
     signs: {
         virama: { char: string };
         anusvara: { char: string };
-        chandrabindu: { char: string };
+        /** `effect: "nasalizeVowelHomorganic"` opts this sign into the anusvara's homorganic-nasal
+         *  restoration (Gurmukhi bindi, referee-derived 26:5); absent/other → pure nasalization (Devanagari). */
+        chandrabindu: { char: string; effect?: string };
         visarga: { char: string };
         nukta: { char: string };
     };
@@ -65,6 +67,12 @@ export function makeAbugidaG2P(
             if (nasalShort) out = out.replace(/ː$/, "");
             if (!/̃/.test(out.slice(-2))) out += "̃";
         };
+        // ⚠ PER-LANGUAGE: does the chandrabindu-slot sign ALSO restore the homorganic nasal before a stop?
+        // Devanagari's ँ is PURE vowel nasalization and must stay so (Hindi default). Gurmukhi's BINDI ਂ is
+        // not: the pa referee writes the consonant in 26 of 31 bindi-before-stop words (ਆਂਡਾ aːɳɖaː,
+        // ਗੋਂਗਲੂ ɡoːŋɡluː, ਆਂਦਰ aːnd̪ər) — population-derived, and the class was invisible to the folded
+        // metric only because the fold strips the nasality diacritic the engine was emitting instead.
+        const chHomorganic = def.signs.chandrabindu?.effect === "nasalizeVowelHomorganic";
         const signs = () => {
             while (
                 i < s.length &&
@@ -73,7 +81,7 @@ export function makeAbugidaG2P(
                 if (s[i] === VIS) out += "h";
                 else {
                     nasalize();
-                    if (s[i] === AN) {
+                    if (s[i] === AN || (s[i] === CH && chHomorganic)) {
                         // anusvara also emits the homorganic nasal before a stop
                         const nx = s[i + 1];
                         const nc =

@@ -51,3 +51,18 @@ describe("punjabi Gurmukhi exceptions lexicon", () => {
         expect(phonemizeWord("ਅਸਮਾਨ")).toBe("əsə̆maːn"); // sky — the loan keeps its epenthetic vowel
     });
 });
+
+// BINDI HOMORGANIC RESTORATION — the one rule-shaped class of the 161 non-schwa residual (population-derived
+// 26:5; investigation Run 7). Opt-in per manifest: Gurmukhi's ਂ restores the nasal consonant before a stop;
+// Devanagari's chandrabindu stays pure nasalization (the flag is what keeps Hindi inert).
+describe("punjabi bindi → homorganic nasal before a stop", () => {
+    test("the class words read the consonant, in the RULES (no lexicon)", () => {
+        expect(phonemizeWordEval("ਆਂਡਾ")).toBe("ˈãɳɖaː"); // egg — was *ˈãɖaː (retroflex → ɳ)
+        expect(phonemizeWordEval("ਗੋਂਗਲੂ")).toBe("ɡˈõŋɡəluː"); // turnip — velar → ŋ
+        expect(phonemizeWordEval("ਆਂਦਰ")).toBe("ˈãn̪d̪əɾ"); // intestine — dental → n̪
+    });
+    test("⚠ h-coalescence stays LEXICON-served — the population splits 17 kept : 10 fused, not a rule", () => {
+        expect(phonemizeWord("ਜ਼ਹਿਰ")).toBe("zɛː˦ɾə̆"); // referee reading via the lexicon
+        expect(phonemizeWordEval("ਜ਼ਹਿਰ")).toBe("zˈəɦɪɾ"); // the rules keep the transparent form
+    });
+});
