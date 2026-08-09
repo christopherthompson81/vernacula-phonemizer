@@ -267,11 +267,20 @@ const LETTER_NAME = MANIFEST.letterNames; // a bare single letter is SPELLED (se
 // registry.ts imports this module STATICALLY, so a throw at module init would make one typo in the
 // Afrikaans manifest break every other language's import too.
 
+/** Is this word served by either shipped lexicon? Read by the async neural path (afrikaansNeural.ts) so a
+ *  lexicon-covered word is served by the exact dictionary reading rather than by the tagger. */
+export function afrikaansLexiconHas(word: string): boolean {
+    const w = word.normalize("NFC").toLowerCase();
+    return lexicon().has(w) || rcrl().has(w);
+}
+
 /** Phonemize one Afrikaans word to canonical IPA. Compounds/affixed words are DECOMPOSED (shared morphology) and
  *  each morpheme phonemized independently — so each element keeps its OWN stressed vowel (no cross-element reduction:
  *  huis·deur → ɦœys·døːr) and devoices at its own boundary; an unstressed prefix reduces. Single morpheme → direct.
  *  What happens AT the seam (blocked devoicing, degemination) is joinSeams's job, not the morpheme's. */
-export function phonemizeWord(word: string): string {
+export type OovResolver = (word: string) => string | undefined;
+
+export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     const w = word.normalize("NFC").toLowerCase();
     // ⚠ PROPER NOUNS AND OPAQUE LOANS (af-lexicon.tsv — referee-sourced: Botha→buəta, Blignault-class
     // French/anglicised spellings, Afrikaans→afrikɑ̃ːs with its nasal): words where NO spelling rule can
@@ -294,6 +303,10 @@ export function phonemizeWord(word: string): string {
     // ≈10pp of everything read aloud — the largest single lever left, and the same tiering da/nb/fr/en use.
     const dict = rcrl().get(w);
     if (dict !== undefined) return dict;
+    // ⚠ THE NEURAL TIER'S SEAM — after both dictionaries, before the rules. Supplied only by the async path
+    // (afrikaansNeural.ts); the sync engine never sets it, so `phonemize(text, "af")` is unchanged.
+    const oov = oovOverride?.(w);
+    if (oov !== undefined && oov !== "") return oov;
     return phonemizeWordRules(w);
 }
 
@@ -388,12 +401,12 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 class AfrikaansPhonemizer implements Phonemizer {
-    text(input: string): string {
+    text(input: string, oovOverride?: OovResolver): string {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/decimal steps need
         // the number and its separator still adjacent, which the tier would break. The initialism pass is
         // re-applied to the tier's output because its currency nouns carry caps (VS-dollar from U$/VS$).
         return assembleClauses(normalizeAfrikaansInitialisms(SYMBOLS(normalizeAfrikaans(input))), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
             else if (m[2]) {
                 // A PERIOD is the decimal point (12.8) and a COMMA groups thousands (17,500) — see TOKEN.
                 const [intPart, frac] = m[2].replace(/,/gu, "").split(".");
@@ -409,6 +422,6 @@ class AfrikaansPhonemizer implements Phonemizer {
 }
 
 /** Build the Afrikaans phonemizer (greedy g2p + open/closed vowel length + final devoicing). */
-export function createAfrikaans(): Phonemizer {
+export function createAfrikaans(): Phonemizer & { text(input: string, oovOverride?: OovResolver): string } {
     return new AfrikaansPhonemizer();
 }

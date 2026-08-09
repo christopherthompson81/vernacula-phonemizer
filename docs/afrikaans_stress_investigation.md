@@ -892,3 +892,71 @@ rather than inherited.
 
 **Result on the INDEPENDENT primary: rules 79.5% → shipped 86.1%, +147 words, 0 regressions**
 (the reviewed version was 85.0%, +123, with 29 regressions). 25,112 entries.
+
+## Run 18 — 2026-08-08 (the OOV tagger — trained, measured, wired)
+
+Run 16 said the OOV tail was finally *defined* and every precondition for a neural tier met. Both held.
+
+### The data hunt first, because the answer bounds everything else
+
+| source | entries | licence | new headwords vs RCRL |
+|---|---|---|---|
+| RCRL Afrikaans Pronunciation Dictionary | 27,428 | CC BY-SA 2.5 ZA | — |
+| **NCHLT-inlang Afrikaans** | 15,094 | **CC BY 3.0** | **+5,160** |
+| **Lwazi Afrikaans** | 4,998 | CC BY 2.5 ZA | **0** |
+| | | **union** | **32,595** |
+
+⚠ **Lwazi adds literally nothing** — every headword is already in RCRL. And NCHLT is **96.6% identical to
+RCRL** on their 9,871-word overlap, which its own README explains: the dictionaries were "created using
+existing resources, and these then verified by language practitioners". All three are one NWU/CSIR lineage.
+
+So **~32.6k is the ceiling for Afrikaans** and no further searching will move it. That is fine for
+TRAINING (the value is coverage) and disqualifying for REFEREEING — NCHLT is deliberately *not* wired as a
+referee, since 96.6% agreement would manufacture corroboration.
+
+For scale: the repo's measured starvation line is ~10k pairs (da's provenance) and the shipped Sindhi
+tagger trains on 9,274. af sits mid-fleet — above sd, below bn's ~60k, far below nb/da's 199k NST.
+
+### Held-out result
+
+31,224 vetted pairs (vetted against `phonemizeWordRules` exactly as the shipped lexicon is), split 90/10 by
+md5 of the word. The aligner, vocabulary and model saw only the 27,303-word train split.
+
+| | word-exact | symbol |
+|---|---|---|
+| rule engine | 64.0% | 93.6% |
+| **BiLSTM tagger** | **91.8%** | **98.8%** |
+
+**A 77% relative reduction in word error.** ⚠ The rule engine scores *lower* here than its 79.5% referee
+number because this split is dictionary-shaped — long, rare, Latinate words — which is precisely the
+population an OOV tier serves. That is the point: the tail is where the rules are worst.
+
+### Wiring
+
+Precedence: **curated `af-lexicon.tsv` → `af-rcrl-lexicon.tsv` → tagger → rules.** The tagger sits below the
+dictionaries (exact where they apply) and above the rules (far better where they do not). Injected as the
+sync engine's `oovOverride`, so tokenizer, numbers, normalization and clause assembly stay byte-identical
+to `phonemize(text, "af")` — only OOV word readings change, and the sync path is untouched. 2.2 MB int8,
+in line with the fleet's other taggers.
+
+⚠ **No stress marks in the tag alphabet**, unlike Norwegian's tagger, which embeds ˈ deliberately. af emits
+no stress by convention, so the model has to carry the stress information in the VOWEL QUALITY instead —
+which is exactly the thing Run 14 showed the rules cannot get (72.6% placement overall, 36% at eight
+syllables). Pinned by a test: the tagger must never emit ˈ, ˌ or a syllable dot, or its output would be
+inconsistent with every word the other two tiers produce.
+
+### Where af stands after this sequence
+
+| | start | now |
+|---|---|---|
+| primary referee (rules only) | 78.6% | **79.5%** |
+| second referee | *none existed* | **65.2%** on 27,428 words |
+| shipped path vs the independent primary | 79.5% | **86.1%**, 0 regressions |
+| OOV words (held-out) | 64.0% | **91.8%** |
+
+**What is left, honestly:** the tagger's own 8.2% held-out miss, which is now the frontier and is not
+obviously reducible without data that does not exist; and the ~14% of running-text tokens outside both
+dictionaries, which the tagger serves but which no measurement here scores directly — the mined corpus is
+2,473 tokens and normalization-shaped. **A frequency list for af (`tools/referee-eval/freq/af.txt`) is the
+cheapest next thing**: it would switch on the eval's frequency-weighted metric, which is the number that
+actually reflects TTS quality, and would let the OOV tail be measured rather than estimated.

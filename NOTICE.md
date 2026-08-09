@@ -103,9 +103,16 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
   North-West University, South Africa; redistributed via `ttslab/za_lex` `data/afr`, © 2016 The
   Department of Arts and Culture, Government of the Republic of South Africa (Multilingual Speech
   Technologies, NWU). **CC BY-SA 2.5 South Africa** <http://creativecommons.org/licenses/by/2.5/za/>.
+  Also the training input (with NCHLT above) for the shipped model weights
+  `src/languages/afrikaans/af-g2p-tagger.int8.onnx`, which are declared CC-BY-SA-inheriting.
   Two artifacts: the SHIPPED pronunciation lexicon `src/languages/afrikaans/af-rcrl-lexicon.tsv`
   (25,112 entries) and the `af` secondary eval referee
   `tools/referee-eval/referees/af.rcrl-apd.tsv`. Each carries a PROVENANCE sidecar.
+- **NCHLT-inlang Pronunciation Dictionaries** — Department of Arts and Culture (DAC), CSIR and
+  North-West University, South Africa. **CC BY 3.0** <http://creativecommons.org/licenses/by/3.0/>.
+  Afrikaans set cited as W. D. Basson & M. H. Davel, *Category-Based Phoneme-to-Grapheme
+  Transliteration*, Interspeech 2013. Tools-only training data for `af-g2p-tagger.int8.onnx`
+  (`tools/afrikaans/nchlt_afr.dict`).
 - **ChhoeTaigi 台華線頂對照典** — CC-BY-SA 4.0. `minnan/dict.tsv`, `dict-chars.tsv`.
 - **CC-CEDICT** — CC-BY-SA. Cross-check only, tools.
 - **Universal Dependencies English-EWT** — CC-BY-SA 4.0. Training data for

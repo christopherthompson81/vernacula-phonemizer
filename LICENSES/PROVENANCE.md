@@ -115,12 +115,18 @@ CC-BY-SA 4.0 — EDRDG requires **specific named attribution** in NOTICE).
 **Shipped model weights declared CC-BY-SA-inheriting** (they reproduce licensed pronunciation
 data): `languages/perso-arabic/riderDiacritizer.onnx`; `persian/fa-vowel-restorer.*.onnx`;
 `persian/fa-context-restorer.*.onnx` (Tajik component); `french/fr-g2p-tagger.int8.onnx`
-(Lexique). These cannot ship in an MIT-only package; they are fenced like the data.
+(Lexique); `afrikaans/af-g2p-tagger.int8.onnx` (RCRL CC BY-SA 2.5 ZA + NCHLT-inlang
+CC BY 3.0 — the share-alike term governs the combination; sidecar). These cannot ship in an MIT-only
+package; they are fenced like the data.
 
 **Models with share-alike training inputs under the training-as-use posture:**
 `arabic/diacritizer.onnx` (arwiki silver), `arabic/diacritizer-egy.onnx` (arzwiki silver + MIT
 dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `english/pos-model.json`
 (UD-EWT CC-BY-SA 4.0; sidecar). Flagged individually in NOTICE with their training-data statements.
+
+**tools-only (af training data):** `afrikaans/nchlt_afr.dict` — NCHLT-inlang Afrikaans, 15,094 rows,
+**CC BY 3.0** (DAC / CSIR / NWU via SADiLaR); sidecar. Training input for the af tagger only — NOT a
+referee (96.6% identical to RCRL on their overlap, same lineage).
 
 **tools-only:** the `af` SECONDARY referee `referee-eval/referees/af.rcrl-apd.tsv` — same RCRL source as
 the shipped lexicon above and under the same CC BY-SA 2.5 ZA terms, the one referee in the set that is NOT
