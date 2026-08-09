@@ -33,3 +33,37 @@ gemination/nasal notation.
 **Also recorded:** the Shahmukhi BiLSTM becomes viable the moment a large real-parallel Gurmukhi⇄Shahmukhi
 corpus exists (scripture and cross-border news are published in both scripts) — a separate hunt, licensing
 gate first.
+
+## Run 1 — 2026-08-09 16:20 — proof of concept: the audio adjudicates schwa, and it distinguishes convention from error
+
+Setup, all licence-clean: **FLEURS pa_in dev** (251 utterances, CC-BY-4.0, ungated — the proof-scale sample;
+Shrutilipi's gate needs a browser click and stays the scale-up), recognized with
+`facebook/wav2vec2-lv-60-espeak-cv-ft` (multilingual PHONE recognizer) on the local 3090; transcripts
+phonemized per-word with our `phonemizeWord` (7,448 types across the three FLEURS TSVs). First-guess folds to
+a shared alphabet; gross agreement median PER 0.41 (best utterances 0.19 — the fold is crude, the ceiling is
+much lower; worst ≈0.95 are digit-bearing/code-switched lines).
+
+THE VOTE: for every dev occurrence of a word where our rules and wikipron differ ONLY in schwa (23 types,
+131 occurrences), fitting-align both candidates against the utterance's machine phones, vote for the closer.
+
+    occurrence votes: wikipron 12 · ours 88 · tie 31
+
+⚠ THE COUNT IS NOT THE FINDING — THE SPLIT IS. The votes separate two classes the referee eval currently
+mixes:
+
+· **Word-final schwa — the audio sides with OUR rules, overwhelmingly.** ਰਾਤ rat (wik ratə), ਇੱਕ ik (ikə),
+  ਕਾਨੂੰਨ kanun (kanunə), ਤਿੰਨ, ਕੰਮ, ਦਸ, ਸੂਰ, ਭੈਣ, ਅੱਠ… — every one of the 88 "ours" votes. wikipron's
+  citation-form final ə is NOT in the speech. That class is REFEREE CONVENTION, not engine error, and the
+  audio just adjudicated it.
+· **Medial schwa position — the audio sides with WIKIPRON, 5:1.** ਦਿਲਚਸਪ dilcəsəp (ours *diləcsəp),
+  ਹਸਪਤਾਲ ɦəspətal (ours *ɦəsəptal), ਦੋਸਤ dost (ours *dosət), ਅਰਥ ərt (ours *ərət), ਆਸਟ੍ਰੇਲੀਆ astrelia
+  (ours *asəʈɾelia) — the exact syncope class the maturity row calls "proven-lexical". The audio confirms the
+  rules are wrong there AND recovers the gold reading without ever seeing it — which is the whole method: on
+  words wikipron does NOT cover, the same vote can supply the answer. (ਅਸਮਾਨ went the other way — audio
+  əsman, wikipron əsəman — so per-word aggregation over many occurrences is required, not single votes.)
+
+**The idea is proven.** What the build needs next: (1) derive the machine-phone fold properly against the
+wikipron overlap instead of this first guess; (2) scale to the FLEURS train split (~1.8k utts) and Shrutilipi
+once its gate is clicked; (3) aggregate votes per word type with a confidence threshold; (4) ship two
+artifacts — a final-schwa FOLD for the pa eval (referee convention, measured) and a medial-schwa LEXICON for
+the words audio settles; (5) re-measure the 73.6%.
