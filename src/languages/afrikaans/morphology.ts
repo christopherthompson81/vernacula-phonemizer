@@ -47,8 +47,14 @@ const CONFIG: MorphologyConfig = {
     isWord: (w) => stems().has(w),
     isConstituent: (w) => w.length >= 3 && stems().has(w),
     // Afrikaans separable prefixes (aan/af/op/uit…) are letters that also begin many roots (aand, afdeling); with no
-    // constituent flags, require the remainder to be a REAL word so aandete isn't torn to aan·dete.
+    // constituent flags, require the remainder to be a REAL word before peeling one off.
+    // ⚠ THIS GUARD DOES NOT SAVE aandete, which it was once documented as saving: "dete" IS in af-stems.txt (a
+    // frequency wordlist carries fragments), so the guard passes and the word is torn to aan·dete — the stressed-
+    // prefix strip runs before splitCompound, which would otherwise have found aand·ete. Measured cost: 1 word.
     realWordStressedPrefixes: new Set(M.prefixStressed),
+    // 3-letter compound HEADS permitted by name — the shared splitter's leading constituent is ≥4 letters
+    // otherwise, because a wordlist at ≥3 shatters ordinary vocabulary (measured: +33/−143). See the manifest.
+    shortHeads: new Set(M.shortHeads),
 };
 
 /** Decompose an Afrikaans word into ordered morphemes with a stress hint. */

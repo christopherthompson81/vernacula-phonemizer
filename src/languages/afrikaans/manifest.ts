@@ -19,6 +19,8 @@ export interface AfrikaansManifest {
     /** Every letter that heads a nucleus — bounds the consonant run in that same lookahead. */
     vowelLetters: readonly string[];
     voicedFinal: Record<string, string>;
+    /** The voiceless obstruents of the inventory — the regressive-devoicing trigger, derived over `fixed`. */
+    voicelessPhones: readonly string[];
     unstressedReduction: Record<string, string>;
     cSoftBefore: readonly string[];
     stressFinalSuffixes: readonly string[];
@@ -59,6 +61,10 @@ export interface AfrikaansManifest {
         linkingElements: string[];
         validOnsets: string[];
         stKeep: string[];
+        /** Vowel-initial suffixes that resyllabify the stem's final consonant → it does NOT devoice. */
+        resyllabifyingSuffixes: string[];
+        /** 3-letter compound heads permitted by name (the shared splitter's leading constituent is ≥4). */
+        shortHeads: string[];
     };
 }
 

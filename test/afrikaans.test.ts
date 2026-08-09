@@ -3,13 +3,15 @@ import { describe, expect, test } from "vitest";
 import { MANIFEST } from "../src/languages/afrikaans/manifest.ts";
 
 import { phonemizeWord, createAfrikaans } from "../src/languages/afrikaans/afrikaans.ts";
+import { decompose } from "../src/languages/afrikaans/morphology.ts";
 import { normalizeAfrikaans, ordinalWord } from "../src/languages/afrikaans/normalize.ts";
 import { numberToWords } from "../src/languages/afrikaans/numbers.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
 // Canonical-IPA goldens for Afrikaans (af) — Indo-European (West Germanic, daughter of Dutch), Latin script,
 // Standard Afrikaans. A greedy digraph-first g2p + the Germanic OPEN/CLOSED-SYLLABLE vowel-length
-// rule + word-final obstruent devoicing. Referee: en.wiktionary Afrikaans IPA. The residual is
+// rule + obstruent devoicing (word-final, regressive, and at the MORPHEME SEAM — where a vowel-initial
+// suffix blocks it and a ⟨d⟩ degeminates). Referee: en.wiktionary Afrikaans IPA. The residual is
 // stress-conditioned vowel reduction on POLYSYLLABLES (no stress model yet) + proper-noun/loan
 // pronunciations (Afrika, Botha, Coetzee — lexical). Folds:
 // stress (unwritten) + syllable dots not emitted, r~ɾ one symbol, ʊ~u / ɪ~i / œy~œi centering-diphthong-onset
@@ -103,6 +105,58 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("arc")).toBe("ark");
         expect(phonemizeWord("bloc")).toBe("blɔk");
         expect(phonemizeWord("cent")).toBe("sɛnt"); // …and ⟨c⟩ BEFORE a front vowel is still soft
+    });
+
+    // ── MORPHEME-SEAM VOICING (#772) ──────────────────────────────────────────────────────────────────
+    // Devoicing is a CODA rule, and a compound is phonemized element by element, so every seam is a
+    // decision. The three contexts below are each pinned, plus the two that must NOT move.
+    test("REGRESSIVE devoicing fires before ⟨v⟩ and ⟨q⟩ — the trigger is the PHONE, not the letter", () => {
+        // ⚠ The trigger set used to be the literal "ptksfcgx" — a spelling-level restatement of "voiceless"
+        // that had drifted from the grapheme table it mirrors. ⟨v⟩ is [f] and ⟨q⟩ is [k], so neither
+        // devoiced a preceding ⟨d⟩ and `advies` read [adfis]: a voiced stop before a voiceless fricative,
+        // which Afrikaans does not have. Now derived from `fixed` (referee atfis — exact).
+        expect(phonemizeWord("advies")).toBe("atfis");
+        expect(phonemizeWord("goedkoop")).toBe("χutkuəp"); // …and the letters that already worked still do
+        expect(phonemizeWord("ontbyt")).toBe("ɔntbəit"); // ⚠ NOT the reverse: no regressive VOICING (referee ɔntbəi̯t)
+    });
+
+    test("a vowel-initial SUFFIX resyllabifies, so the stem does not devoice", () => {
+        // The /d/ of ⟨send⟩ is the onset of the next syllable in sen·ding, and a coda rule cannot reach it.
+        expect(phonemizeWord("sending")).toBe("sɛndəŋ"); // referee ˈsɛn.dəŋ — was *sɛntəŋ
+        expect(phonemizeWord("verbeelding")).toBe("fərbiəldəŋ"); // referee fərˈbɪə̯l.dəŋ
+        expect(phonemizeWord("skoolvoeding")).toBe("skuəlfudəŋ"); // a compound seam AND a suffix seam in one word
+        // ⚠ AND A VOWEL-INITIAL COMPOUND ELEMENT DOES NOT BLOCK IT — that is why the suffix list is closed
+        // rather than a "next part starts with a vowel" test. A compound element is its own prosodic word.
+        expect(phonemizeWord("raadgewer")).toBe("rɑːtχəvər"); // raad·gewer: coda ⟨d⟩ still devoices
+        expect(phonemizeWord("hond")).toBe("ɦɔnt"); // …and word-finally, unchanged
+    });
+
+    test("a seam ⟨d⟩ DEGEMINATES against a following /t/ or /d/ — but a true /t/+/t/ does not", () => {
+        expect(phonemizeWord("veldtog")).toBe("fɛltɔχ"); // referee ˈfɛl.tɔχ — was *fɛlttɔχ
+        expect(phonemizeWord("wildtuin")).toBe("vəltœyn"); // referee ˈvəltœi̯n
+        // ⚠ THE ONSET SURVIVES, WITH ITS OWN VOICING: land·dros keeps [d], it does not become [t].
+        expect(phonemizeWord("landdros")).toBe("landrɔs"); // referee ˈlan.drɔs
+        expect(phonemizeWord("bestanddeel")).toBe("bəstandiəl"); // referee bəˈstanˌdɪə̯l
+        // ⚠ AND THE ⟨d⟩ CONDITION IS LOAD-BEARING, not tidiness. An unconditional coronal-stop rule was
+        // measured first and lost this word: a true underlying /t/ against /t/ is a GEMINATE the referee
+        // writes out. Only the ⟨d⟩ that Auslautverhärtung already neutralized has no contrast left to keep.
+        expect(phonemizeWord("groottoon")).toBe("χruəttuən"); // referee χrʊət.tʊən — the geminate stays
+    });
+
+    test("a 3-letter compound HEAD is permitted BY NAME, and only by name", () => {
+        // The shared splitter's leading constituent is ≥4 letters. That floor is load-bearing, not caution: the
+        // stem lexicon is a 53k WORDLIST, so at ≥3 every three-letter word in it becomes a head and ordinary
+        // vocabulary shatters — measured +33/−143. `shortHeads` names the real 3-letter stems individually.
+        expect(phonemizeWord("seewater")).toBe("siəvɑːtər"); // see·water — referee ˈsɪə̯ˌvɑː.tər
+        expect(phonemizeWord("naguil")).toBe("naχœyl"); // nag·uil — referee ˈnaχ.œi̯l
+        expect(phonemizeWord("wedloop")).toBe("vɛtluəp"); // wed·loop — and the seam ⟨d⟩ devoices: referee ˈvɛt.lʊə̯p
+        expect(decompose("inenting").parts).toEqual(["in", "ent", "ing"]); // in·ent·ing, an inner 3-letter stem
+        // ⚠ AND THE WORDS THE FLOOR EXISTS TO PROTECT MUST STAY WHOLE. Each of these begins with a real
+        // Afrikaans word that is in the stem list; none of them is a compound.
+        for (const w of ["venster", "suiker", "dogter", "bakkie", "mantel", "kopende"])
+            expect(decompose(w).parts).toEqual([w]);
+        expect(phonemizeWord("venster")).toBe("fɛnstər"); // referee ˈfɛnstər — not *ven·ster
+        expect(phonemizeWord("mantel")).toBe("mantəl"); // referee ˈman.təl — ⟨man⟩ is NOT a listed head
     });
 
     test("proper nouns come from the LEXICON, not the spelling rules", () => {

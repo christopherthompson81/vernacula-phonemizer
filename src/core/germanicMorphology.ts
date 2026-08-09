@@ -41,8 +41,9 @@ export interface MorphologyConfig {
     suffixDigraphGuard?: (suffix: string, stem: string) => boolean; // reject a suffix strip that shatters a digraph
     seamElementInitial?: RegExp; // a non-first constituent starting like this resets element-initial (German st/sp/sch)
     wholeVerbSuffix?: string; // keep a whole known verb lexeme ending in this suffix un-split (German -en)
-    minTrailingConstituent?: number; // min letters for a compound's trailing part (default 3; nl/af use 4 to reject
+    minTrailingConstituent?: number; // min letters for a compound's trailing part (default 3; nl uses 4 to reject
     // 3-letter inflectional-lookalike tails — ten/ken/den/end — that are real words but not compound heads)
+    shortHeads?: ReadonlySet<string>; // 3-letter LEADING constituents to permit by name (see the ≥4 floor below)
     dontSplitKnownWords?: boolean; // never split a word that is itself a lexicon entry (nl/af; German splits known
     // compounds so it stays off — its lexicon flags constituents, not whole compounds)
 }
@@ -73,8 +74,17 @@ export function makeDecompose(cfg: MorphologyConfig): (word: string) => Decomp {
         // compounds. nl/af have no such flags, so a whole dictionary entry is the signal that it's ONE morpheme.
         if (cfg.dontSplitKnownWords && cfg.isWord(w)) return null;
         const minTail = cfg.minTrailingConstituent ?? 3;
-        for (let i = w.length - minTail; i >= 4; i--) {
+        // ⚠ A LEADING CONSTITUENT MUST BE ≥4 LETTERS, WITH A NAMED-EXCEPTION LIST. The floor is not arbitrary
+        // caution: a stem lexicon is a WORDLIST, so at ≥3 every three-letter word in it becomes a compound head
+        // and the splitter shatters ordinary vocabulary — measured on af, dropping the floor to 3 scores
+        // +33/−143 (bak·kie, dog·ter, ven·ster, sui·ker, don·ker…). But a handful of real stems ARE three
+        // letters (af see-, nag-, sit-, wed-, ent-), and they are lost with them. `shortHeads` names those
+        // individually so the language can have both; anything not named still needs four letters.
+        const short = cfg.shortHeads;
+        const MIN_HEAD = 4;
+        for (let i = w.length - minTail; i >= (short?.size ? MIN_HEAD - 1 : MIN_HEAD); i--) {
             const head = w.slice(0, i);
+            if (head.length < MIN_HEAD && !short?.has(head)) continue;
             if (!cfg.isConstituent(head)) continue;
             for (const lk of cfg.linksFor(head)) {
                 if (!w.slice(i).startsWith(lk)) continue;

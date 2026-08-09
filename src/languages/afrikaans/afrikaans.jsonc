@@ -61,6 +61,16 @@
     // (hond→ɦɔnt). ⟨g⟩→[χ] and ⟨v⟩→[f] need no entry — the grapheme table already emits the voiceless one.
     "voicedFinal": { "b": "p", "d": "t", "z": "s" },
 
+    // ⚠ THE VOICELESS OBSTRUENTS OF THE INVENTORY — the REGRESSIVE half of the devoicing rule reads this,
+    // not a hand-written letter list. The engine used to test the following LETTER against the literal
+    // "ptksfcgx", which is a spelling-level restatement of "voiceless" and had drifted from the grapheme
+    // table: ⟨v⟩ is [f] in Afrikaans and ⟨q⟩ is [k], so neither triggered devoicing and `advies` read
+    // [adfis] — a voiced [d] before a voiceless [f], which the language does not have. Derived from
+    // `fixed` instead (afrikaans.ts), the two cannot diverge again.
+    // ⟨c⟩ is added by the engine rather than listed here: it has no `fixed` entry (a code rule picks [s]
+    // or [k] by the following letter) and BOTH of its values are voiceless.
+    "voicelessPhones": ["p", "t", "k", "c", "f", "s", "ʃ", "χ"],
+
     // ⚠ UNSTRESSED BARE VOWELS REDUCE. The open/closed length rule only lengthens in a STRESSED syllable;
     // elsewhere the vowel stays short and ⟨e⟩/⟨i⟩ centralise to schwa. Digraph vowels (aa, ee=iə …) are
     // inherently long and never reach this table.
@@ -200,7 +210,12 @@
 
     // Morphology for the shared West-Germanic compound engine (core/germanicMorphology.ts). Afrikaans is heavily
     // compounding like Dutch/German; splitting a word into its morphemes lets each element be phonemized with its own
-    // stress + coda devoicing (aand·ete → ɑnt·iətə). Affixes longest-first. The stem lexicon is a frequency wordlist.
+    // stress + coda devoicing (huis·deur → ɦœys·døːr). Affixes longest-first. The stem lexicon is a frequency wordlist.
+    // ⚠ THIS COMMENT USED TO CITE aand·ete AS THE WORKED EXAMPLE, and morphology.ts still claims the guard below
+    // keeps it whole. IT DOES NOT: "dete" is in the frequency wordlist (junk), so `realWordStressedPrefixes` is
+    // satisfied and the stressed-prefix strip — which runs BEFORE splitCompound — wins with aan·dete. Trying
+    // splitCompound first is worth exactly +1 word in af (measured) and would reorder the SHARED Germanic engine
+    // for nl/de as well, so it was left alone and written down instead. See docs/afrikaans_stress_investigation.md Run 6.
     "morphology": {
         "prefixUnstressed": ["ver", "ont", "her", "be", "ge", "er"],
         "prefixStressed": ["agter", "binne", "buite", "onder", "terug", "deur", "voor", "saam", "teen", "aan", "af", "by", "in", "om", "oor", "op", "uit", "weg", "mee", "toe", "na"],
@@ -209,6 +224,42 @@
         "vowelInitialSuffixes": ["agtig", "asie", "isie"],
         "linkingElements": ["", "s", "e"],
         "validOnsets": ["st", "sp", "sk", "sl", "sm", "sn", "sw", "skr", "str", "spr", "spl", "tr", "dr", "kr", "kn", "gr", "gl", "br", "bl", "pr", "pl", "fr", "fl", "vr", "vl", "kw", "tw", "dw", "gn", "ts", "kl"],
-        "stKeep": []
+        "stKeep": [],
+
+        // ⚠ THE VOWEL-INITIAL SUFFIXES THAT RESYLLABIFY, and so BLOCK the stem's final devoicing: the /d/ of
+        // ⟨send⟩ is a CODA in *sende* but the ONSET of the next syllable in send·ing, and Auslautverhärtung is
+        // a coda rule — sen·ding [sɛndəŋ], not *[sɛntəŋ]. Read by afrikaans.ts, which phonemizes each morpheme
+        // independently and would otherwise devoice at every seam.
+        // ⚠ THIS IS A CLOSED LIST, NOT A "next part starts with a vowel" TEST, and the difference is the point:
+        // a vowel-initial COMPOUND ELEMENT is its own prosodic word and the stem DOES devoice in front of it —
+        // the referee writes aandete [ɑntiətə], bandopnemer [bantɔpniəmər], bloedoortapping [blutuərtapəŋ].
+        // Only a SUFFIX resyllabifies.
+        // ⚠ ATTESTED, NOT COLLECTED (handoff §11): these are the three tails the splitter actually produces at
+        // a voiced-obstruent seam in the 2220-word referee, and the referee corroborates the voiced reading in
+        // every one — ⟨ing⟩ ×5 (sending, voeding, verbeelding, volharding, skoolvoeding), ⟨ers⟩ ×1 (kinders
+        // kənərs), ⟨eer⟩ ×1 (waardeer vɑrdier). A fourth environment, ⟨ana⟩ in *bandana*, is NOT listed: it is
+        // not an Afrikaans suffix, it is a loanword the stem splitter tore in half, and the defect there is the
+        // split. Measured contribution: +4 words (the other three carry a second, unrelated error each).
+        "resyllabifyingSuffixes": ["ing", "ers", "eer"],
+
+        // ⚠ THE 3-LETTER COMPOUND HEADS, BY NAME. The shared splitter requires a LEADING constituent of ≥4
+        // letters, and that floor is load-bearing rather than cautious: the stem lexicon is a 53k WORDLIST, so
+        // at ≥3 every three-letter word in it becomes a compound head and ordinary vocabulary shatters —
+        // MEASURED at +33/−143 (bak·kie, dog·ter, ven·ster, sui·ker, don·ker, bot·tel, sus·ter…). But a few
+        // real Afrikaans stems ARE three letters, and the floor loses them with the rest; naming them
+        // individually is what lets the language have both.
+        // ⚠ ATTESTED, NOT COLLECTED, and the difference was measurable. A list chosen on VOCABULARY grounds
+        // (20 common 3-letter stems: see nag dag lug bos man vis oog oor kop sak erd wed sit ent reg een god
+        // hut kat) scored +10/−3 — ⟨man⟩ tore *mantel* to man·tel and ⟨kop⟩ tore *kopende* to kop·ende, each
+        // a real word the wordlist happens to contain. Keeping only the heads with a correct scoring instance
+        // gives the SAME 1764 with **+9/−0**, so that is what ships. ⟨vis⟩ is excluded at net zero (vis·arend
+        // right, vis·ser wrong); ⟨erd⟩ (erd·wolf) is excluded because it is not in af-stems.txt and so could
+        // never be a head anyway — that word needs a LEXICON entry, not a floor change.
+        // ⚠ ⟨hut⟩ REACHES ITS WORD THROUGH THE LINKING ELEMENT: *hutsmerk* is huts·merk, and "huts" is not in
+        // af-stems.txt, so no ≥4 head finds it. It splits as head ⟨hut⟩ + Fugen ⟨s⟩, which the splitter rejoins
+        // into the same "huts" constituent — the right parse arrived at through the link, not around it.
+        // Leave-one-out, each worth +1: bos (boswerker), een (onteenseglik), ent (inenting), hut (hutsmerk),
+        // nag (naguil), reg (regmatig), see (seewater), sit (sitkamer), wed (wedloop).
+        "shortHeads": ["bos", "een", "ent", "hut", "nag", "reg", "see", "sit", "wed"]
     }
 }

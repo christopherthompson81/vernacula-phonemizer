@@ -3,9 +3,19 @@
  *
  * A greedy longest-match scan over the fixed graphemes (digraphs/consonants, length-desc) PLUS two
  * code rules the table can't express: the Germanic OPEN/CLOSED-SYLLABLE vowel-length rule (a bare vowel is long/tense
- * in an open syllable V.CV, short/lax in a closed one VC#/VCC — via lookahead) and word-final obstruent DEVOICING
+ * in an open syllable V.CV, short/lax in a closed one VC#/VCC — via lookahead) and obstruent DEVOICING
  * (b→p, d→t; g→χ and v→f are unconditional). The long mid vowels are centering diphthongs (ee/open-e = iə, oo/open-o
  * = uə). Stress + schwa-reduction of unstressed vowels are not modelled (folded).
+ *
+ * DEVOICING HAS THREE PARTS, and the second and third are about the MORPHEME SEAM — a compound is phonemized element
+ * by element, so every seam is a decision the joiner has to make:
+ *   1. POSITIONAL — a voiced obstruent devoices at the end of a word or of a compound element (hond→ɦɔnt).
+ *   2. REGRESSIVE — and before a voiceless one, wherever it sits (advies→atfis). The trigger is DERIVED from the
+ *      grapheme table (VOICELESS_NEXT), because ⟨v⟩ is [f] and ⟨q⟩ is [k] and a hand-written letter list forgot both.
+ *   3. RESYLLABIFICATION BLOCKS #1 — a vowel-initial SUFFIX takes the stem's final consonant as its onset, and a
+ *      coda rule cannot apply to a segment that is no longer a coda: send·ing→sɛndəŋ, not *sɛntəŋ. A vowel-initial
+ *      compound ELEMENT is a separate prosodic word and does NOT block it, so the list is closed (afrikaans.jsonc).
+ * The seam also DEGEMINATES a ⟨d⟩ against a following /t/ or /d/ (veld·tog→fɛltɔχ) — see joinSeams.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -27,6 +37,18 @@ const DIA = MANIFEST.diacriticVowels;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
 const DEVOICE = MANIFEST.voicedFinal; // word-final devoicing (g→χ, v→f already fixed)
+// The REGRESSIVE trigger: the letters whose grapheme begins with a voiceless obstruent. ⚠ DERIVED FROM THE
+// GRAPHEME TABLE, not spelled out — the literal "ptksfcgx" it replaces was a spelling-level restatement of
+// "voiceless" that had already drifted from the table it was meant to mirror (⟨v⟩ is [f] and ⟨q⟩ is [k], so
+// neither devoiced a preceding ⟨d⟩: advies read [adfis]). ⟨c⟩ is added by hand because it has no `fixed`
+// entry at all — the code rule below picks [s] or [k], and both are voiceless.
+// Single-letter lookup is enough: every multi-letter grapheme headed by one of these letters is voiceless
+// too (⟨tj⟩ [c], ⟨tz⟩ [ts], ⟨sj⟩ [ʃ], ⟨sch⟩ [sk]), and the caller only has one following letter to test.
+const VOICELESS = new Set(MANIFEST.voicelessPhones);
+const VOICELESS_NEXT = new Set([
+    "c",
+    ...Object.keys(MANIFEST.fixed).filter((k) => k.length === 1 && VOICELESS.has([...MANIFEST.fixed[k]!][0]!)),
+]);
 // Letter environments (afrikaans.jsonc): the vowels routed through the length rule, and every letter that
 // heads a nucleus — the latter bounds the consonant run in the open/closed lookahead below.
 const BARE_VOWELS = new Set(MANIFEST.bareVowels);
@@ -73,8 +95,12 @@ function stressedNucleus(w: string): number {
 }
 
 /** Phonemize a single MORPHEME (a whole non-compound word, or one element of a compound) — its own first-syllable
- *  stress, open/closed length, and word-/morpheme-final devoicing. */
-function phonemizeMorpheme(word: string): string {
+ *  stress, open/closed length, and word-/morpheme-final devoicing.
+ *
+ *  `finalDevoice = false` suppresses only the FINAL (positional) half of the devoicing rule, for a stem whose last
+ *  consonant is resyllabified as the onset of a following suffix (send·ing → sɛndəŋ). The REGRESSIVE half — a voiced
+ *  obstruent before a voiceless one — is unaffected, since it depends on what follows, not on where the morpheme ends. */
+function phonemizeMorpheme(word: string, finalDevoice = true): string {
     const w = word.normalize("NFC").toLowerCase();
     const stressNucleus = stressedNucleus(w); // primary-stress nucleus (native first-syllable + loan-suffix overrides)
     let out = "";
@@ -111,7 +137,7 @@ function phonemizeMorpheme(word: string): string {
                 const next = w[i + key.length];
                 // devoicing: a voiced obstruent devoices word-finally OR before a VOICELESS consonant (aandklok→ɑnt);
                 // it stays voiced before a vowel or a voiced consonant.
-                const devoiceHere = next === undefined || "ptksfcgx".includes(next);
+                const devoiceHere = next === undefined ? finalDevoice : VOICELESS_NEXT.has(next);
                 out += (devoiceHere && DEVOICE[key]) ? DEVOICE[key]! : FIXED[key]!;
                 if (VOWEL_LETTER.has(key[0]!)) nucleus += 1; // a vowel digraph is a nucleus
                 i += key.length;
@@ -138,6 +164,34 @@ function phonemizeMorpheme(word: string): string {
 // Reduced IPA per unstressed prefix (afrikaans.jsonc). Separable prefixes (aan/af…) carry stress and take
 // the normal morpheme path.
 const PREFIX_IPA = MANIFEST.prefixIpa;
+const RESYLLABIFY = new Set(MANIFEST.morphology.resyllabifyingSuffixes); // vowel-initial suffixes that block final devoicing
+
+// ⚠ SEAM DEGEMINATION of the coronal stops. A compound seam that brings /t/ or /d/ against /t/ or /d/ surfaces as
+// ONE consonant, and it is the ONSET that survives: veld·tog [fɛltɔχ] not *[fɛlttɔχ], wild·tuin [vəltœin],
+// be·stand·deel [bəstandiəl], land·dros [landrɔs]. Deleting the CODA rather than merging the two is what leaves the
+// survivor with the ONSET's voicing — land·dros keeps its [d], it does not become [t].
+// ⚠ THE TWO SIDES ARE TESTED DIFFERENTLY, on purpose:
+//   · the CODA on its SPELLING (⟨d⟩), because the condition is UNDERLYING voicing and the phone no longer shows it —
+//     Auslautverhärtung has already turned it into [t]. Only that neutralized stop is absorbed: a true /t/ against
+//     /t/ is a GEMINATE this referee writes out (groot·toon [χruət.tuən]), and it is the one word an unconditional
+//     coronal-stop rule lost. Measured 5 for / 0 against; unconditional was 5 for / 1 against.
+//   · the ONSET on its PHONE, because the grapheme decides what a ⟨d⟩ actually is — lied·jie opens on [k] (the
+//     ⟨jie⟩ entry), not [d], and must not trigger a rule about coronal stops meeting.
+const CORONAL_STOP = /[td]/u;
+/** Join the phonemized morphemes, resolving what happens AT the seam. `src` is each part's SPELLING — the
+ *  degemination rule keys on the coda's underlying voicing, which only the spelling still shows. */
+function joinSeams(parts: readonly { ipa: string; src: string }[]): string {
+    let out = "";
+    let prevSrc = "";
+    for (const { ipa, src } of parts) {
+        const last = out.at(-1);
+        if (last !== undefined && prevSrc.endsWith("d") && CORONAL_STOP.test(last) && CORONAL_STOP.test(ipa[0] ?? ""))
+            out = out.slice(0, -1);
+        out += ipa;
+        prevSrc = src;
+    }
+    return out;
+}
 const LETTER_NAME = MANIFEST.letterNames; // a bare single letter is SPELLED (see phonemizeWord)
 // ⚠ THE TWO LISTS MUST AGREE — the same six prefixes, read by two consumers (this file's stress + IPA,
 // and the shared compound engine's decomposition). Asserted in test/afrikaans.test.ts rather than here:
@@ -146,7 +200,8 @@ const LETTER_NAME = MANIFEST.letterNames; // a bare single letter is SPELLED (se
 
 /** Phonemize one Afrikaans word to canonical IPA. Compounds/affixed words are DECOMPOSED (shared morphology) and
  *  each morpheme phonemized independently — so each element keeps its OWN stressed vowel (no cross-element reduction:
- *  aand·ete → ɑnt·iətə) and devoices at its own boundary; an unstressed prefix reduces. Single morpheme → direct. */
+ *  huis·deur → ɦœys·døːr) and devoices at its own boundary; an unstressed prefix reduces. Single morpheme → direct.
+ *  What happens AT the seam (blocked devoicing, degemination) is joinSeams's job, not the morpheme's. */
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC").toLowerCase();
     // ⚠ PROPER NOUNS AND OPAQUE LOANS (af-lexicon.tsv — referee-sourced: Botha→buəta, Blignault-class
@@ -184,9 +239,15 @@ export function phonemizeWordRules(word: string): string {
     if (spelled !== undefined) return phonemizeMorpheme(spelled);
     const d = decompose(w);
     if (d.parts.length <= 1) return phonemizeMorpheme(w);
-    return d.parts
-        .map((p, idx) => (d.kinds[idx] === "prefix" && idx < d.stressPart ? (PREFIX_IPA[p] ?? phonemizeMorpheme(p)) : phonemizeMorpheme(p)))
-        .join("");
+    const parts = d.parts.map((p, idx) => ({
+        src: p,
+        ipa:
+            d.kinds[idx] === "prefix" && idx < d.stressPart
+                ? (PREFIX_IPA[p] ?? phonemizeMorpheme(p))
+                // A RESYLLABIFYING SUFFIX blocks this element's final devoicing — its coda is the suffix's onset.
+                : phonemizeMorpheme(p, !RESYLLABIFY.has(d.parts[idx + 1] ?? "")),
+    }));
+    return joinSeams(parts);
 }
 
 // ⚠ AFRIKAANS USES THE ENGLISH SEPARATORS — a PERIOD decimal point, a COMMA thousands grouping. With a bare
