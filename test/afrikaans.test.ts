@@ -33,7 +33,7 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
 
     test("long mids are CENTERING DIPHTHONGS (ee=iə, oo=uə); ie/oe/ui", () => {
         expect(phonemizeWord("een")).toBe("iən"); // ⟨ee⟩ → centering [iə]
-        expect(phonemizeWord("twee")).toBe("tviə"); // ⟨tw⟩→tv; ⟨ee⟩→iə
+        expect(phonemizeWord("twee")).toBe("twiə"); // ⟨tw⟩ is the GLIDE onset (see the ⟨Cw⟩ test); ⟨ee⟩→iə
         expect(phonemizeWord("groot")).toBe("χruət"); // ⟨oo⟩ → centering [uə]
         expect(phonemizeWord("sewe")).toBe("siəvə"); // open ⟨e⟩→iə (stressed); ⟨w⟩→v; final ⟨e⟩→ə
         expect(phonemizeWord("huis")).toBe("ɦœys"); // ⟨ui⟩ → [œy]
@@ -157,6 +157,43 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("groottoon")).toBe("χruəttuən"); // referee χrʊət.tʊən — the geminate stays
     });
 
+    // ── ⟨Cw⟩ ONSET (#773) ─────────────────────────────────────────────────────────────────────────────
+    // The rule Donaldson describes, tried in Run 4, measured EXACTLY net zero, and rejected as "referee
+    // inconsistency" — because af had ONE referee and en.wiktionary splits 10:9 across these four onsets
+    // (swaar/twaalf [w] beside swaan/twee [v]). The RCRL secondary is 260:1 for the glide, which is what
+    // an independent source is for. Every expectation below is RCRL-exact.
+    test("⟨w⟩ is the glide [w] in a morpheme-initial obstruent cluster", () => {
+        expect(phonemizeWord("swaar")).toBe("swɑːr"); // RCRL swɑːr
+        expect(phonemizeWord("twee")).toBe("twiə"); // RCRL twiə
+        expect(phonemizeWord("kwaad")).toBe("kwɑːt"); // RCRL kwɑːt
+        expect(phonemizeWord("dwaal")).toBe("dwɑːl"); // RCRL dwɑːl
+        // ⚠ MORPHEME-initial, so a prefixed stem reaches it — the word Run 5 recorded as a permanent miss
+        // because the eval FOLD could only be word-initial (the backbone strips the seam before folds run).
+        expect(phonemizeWord("verdwyn")).toBe("fərdwəin"); // RCRL fər.ˈdwəin
+        // ⚠ AND THE TWO NEGATIVES, which are why the rule is anchored at index 1 rather than "after any
+        // obstruent": a ⟨Cw⟩ spanning a SYLLABLE boundary or a COMPOUND seam is not an onset cluster.
+        expect(phonemizeWord("antwoord")).toBe("antvuərt"); // ant.woord — RCRL ˈant.vuərt, [v] not [w]
+        expect(phonemizeWord("brandweer")).toBe("brantviər"); // brand·weer — RCRL ˈbrant.viər
+        expect(phonemizeWord("weer")).toBe("viər"); // …and a bare ⟨w⟩ is still [v]
+    });
+
+    // ⚠ THE LINKING ⟨-s-⟩ IS THE TRAP THIS RULE FALLS INTO IF THE SPLITTER MISPLACES IT. voedingswaarde is
+    // voedings + waarde: the ⟨s⟩ is a Fugen coda and the ⟨w⟩ opens the next syllable. Split as
+    // voeding·swaarde it looks like an ⟨sw⟩ ONSET, and the glide rule fired on the mirage — four words
+    // shipping wrong (review of #773). Fixed in the splitter (`linkingElements` longest-first), because the
+    // BOUNDARY was what was wrong; a guard in the glide rule keyed on prefix-vs-stem was measured first and
+    // rejected, since it also denied the genuine onsets of berg·kwaggas / drie·kwart / hoof·sweep (−13).
+    test("the linking ⟨-s-⟩ goes on the HEAD, so it cannot fake a ⟨Cw⟩ onset", () => {
+        expect(decompose("voedingswaarde").parts).toEqual(["voedings", "waarde"]);
+        expect(phonemizeWord("voedingswaarde")).toBe("fudəŋsvɑːrdə"); // RCRL ˈfu.dəŋs.vɑːr.də
+        expect(phonemizeWord("gebruikswaarde")).toBe("χəbrœyksvɑːrdə"); // RCRL xə.ˈbrœyks.vɑːr.də
+        expect(phonemizeWord("kruideniersware")).toBe("krœydənirsvɑːrə"); // RCRL krœy.də.ˈnirs.vɑː.rə
+        // ⚠ AND A HEAD THAT ALREADY ENDS IN ⟨s⟩ MAY NOT TAKE THE LINK — else the head's own final ⟨s⟩ is
+        // read as the Fugen and the next element loses its onset (tuiss·pan, polss·lag). Worth −32.
+        expect(decompose("tuisspan").parts).toEqual(["tuis", "span"]);
+        expect(decompose("polsslag").parts).toEqual(["pols", "slag"]);
+    });
+
     test("proper nouns come from the LEXICON, not the spelling rules", () => {
         // af-lexicon.tsv (~50 referee-sourced entries; circularity documented in
         // af-lexicon.PROVENANCE.md): name orthography no Afrikaans rule can derive.
@@ -216,19 +253,21 @@ describe("Afrikaans text normalization", () => {
     test("comma groups thousands and the DOT is a decimal (English convention in this corpus)", () => {
         expect(ph("17,500 myl")).toBe("siəvəntin dœysənt fəif ɦɔndərt məil");
         expect(ph("100,000 mense")).toBe("ɦɔndərt dœysənt mɛnsə");
-        expect(ph("12.8 km")).toBe("tvɑːlf kɔma aχt kilɔmiətər");
-        expect(ph("2.3 miljoen")).toBe("tviə kɔma dri məljun");
+        // ⚠ THE NUMERALS MOVED tv→tw IN #773 (twee, twaalf, twintig): the ⟨Cw⟩ onset is the glide, RCRL 53:0
+        // for ⟨tw⟩ against the primary's 2:2. Not a normalization change — the same words, read correctly.
+        expect(ph("12.8 km")).toBe("twɑːlf kɔma aχt kilɔmiətər");
+        expect(ph("2.3 miljoen")).toBe("twiə kɔma dri məljun");
     });
 
     test("clocks read hour [minute] with voormiddag/namiddag; the AM/PM suffix expands", () => {
         expect(ph("10:00vm")).toBe("tin fuərmədaχ");
         expect(ph("8:30 n.m.")).toBe("aχt dɛrtəχ nɑːmədaχ .");
-        expect(ph("11:20")).toBe("ɛlf tvəntəχ");
+        expect(ph("11:20")).toBe("ɛlf twəntəχ");
     });
 
     test("era markers and dotted abbreviations expand", () => {
         // ⟨Christus⟩ is [kr-], not the old *kɦr- — the ⟨c⟩ rule used to shadow the ⟨chr⟩ digraph (#758).
-        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn tvəntəχ fuər krəstœs .");
+        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn twəntəχ fuər krəstœs .");
         expect(ph("d.i. 0 of 1")).toBe("dət əs nœl ɔf iən");
         expect(ph("Dr. Lee")).toBe("dɔktər liə");
         expect(ph("40 m.p.u")).toBe("fiərtəχ məil pɛr yːr");
@@ -239,8 +278,8 @@ describe("Afrikaans text normalization", () => {
         expect(ph("35 mm")).toBe("fəif ɛn dɛrtəχ məlimətər");
         expect(ph("3 850 km²")).toBe("dri aχt ɦɔndərt ɛn fəiftəχ firkantə kilɔmiətər");
         expect(ph("93%")).toBe("dri ɛn niəχəntəχ pɛrsɛnt");
-        expect(ph("£27 miljoen")).toBe("siəvə ɛn tvəntəχ məljun pɔnt");
-        expect(ph("$2.3 biljoen")).toBe("tviə kɔma dri bəljun dɔlar");
+        expect(ph("£27 miljoen")).toBe("siəvə ɛn twəntəχ məljun pɔnt");
+        expect(ph("$2.3 biljoen")).toBe("twiə kɔma dri bəljun dɔlar");
     });
 
     test("signs read out; the HTML ampersand becomes en; B&B is letter-named", () => {
@@ -251,8 +290,8 @@ describe("Afrikaans text normalization", () => {
     });
 
     test("regnal ordinals take both spellings of the noun and the un-converted Roman I", () => {
-        expect(ph("Wêreld Oorlog II")).toBe("tviədə vɛːrəltuərlɔχ");
-        expect(ph("Wêreldoorlog II")).toBe("tviədə vɛːrəltuərlɔχ"); // the one-word spelling, 2× in corpus
+        expect(ph("Wêreld Oorlog II")).toBe("twiədə vɛːrəltuərlɔχ");
+        expect(ph("Wêreldoorlog II")).toBe("twiədə vɛːrəltuərlɔχ"); // the one-word spelling, 2× in corpus
         expect(ph("Wêreld Oorlog I")).toBe("iərstə vɛːrəltuərlɔχ"); // a lone I is never romanised upstream
     });
 
@@ -295,17 +334,17 @@ describe("Afrikaans text normalization", () => {
     // English FLEURS set), so BOTH conventions have to read. Three digits after the comma is the grouping,
     // one or two is a decimal — a comma decimal used to read as a clause PAUSE inside the number.
     test("a comma is the grouping at three digits and the decimal at one or two", () => {
-        expect(ph("12,5 kilometer")).toBe("tvɑːlf kɔma fəif kilɔmiətər"); // was *twaalf , vyf*
+        expect(ph("12,5 kilometer")).toBe("twɑːlf kɔma fəif kilɔmiətər"); // was *twaalf , vyf*
         expect(ph("3,5 miljoen")).toBe("dri kɔma fəif məljun");
         expect(ph("17,500 myl")).toBe("siəvəntin dœysənt fəif ɦɔndərt məil"); // still the grouping
         expect(ph("In 1990, 5 mense")).toBe("ən dœysənt niəχə ɦɔndərt ɛn niəχəntəχ , fəif mɛnsə"); // a clause comma
     });
 
     test("a version dot is 802.11n and Figuur N.N — a decimal glued to its unit is not", () => {
-        expect(ph("12.5km")).toBe("tvɑːlf kɔma fəif kilɔmiətər"); // was *twaalf punt vyf kilometer*
+        expect(ph("12.5km")).toBe("twɑːlf kɔma fəif kilɔmiətər"); // was *twaalf punt vyf kilometer*
         // ⚠ The trailing standard-suffix letter is SPELLED (n → "en" [ɛn]), which is what a reader says —
         // and what #761 fixed. It used to emit a bare [n], not a sayable syllable on its own.
-        expect(ph("802.11n")).toBe("aχt ɦɔndərt ɛn tviə pœnt ɛlf ɛn");
+        expect(ph("802.11n")).toBe("aχt ɦɔndərt ɛn twiə pœnt ɛlf ɛn");
         expect(ph("Figuur 1.1")).toBe("fiχyːr iən pœnt iən");
     });
 

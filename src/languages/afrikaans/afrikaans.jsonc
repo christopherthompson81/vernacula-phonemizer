@@ -85,6 +85,26 @@
     // off the spelling during the scan.
     "cSoftBefore": ["e", "i", "y", "ê", "é", "è"],
 
+    // ⚠ ⟨w⟩ IS THE GLIDE [w], NOT [v], IN A MORPHEME-INITIAL OBSTRUENT CLUSTER — swaar [swɑːr], twee [twiə],
+    // kwaad [kwɑːt], dwaal [dwɑːl]. Donaldson describes it; the engine emitted [v] everywhere anyway, because
+    // when the rule was first tried (Run 4) it measured EXACTLY net zero against the only referee af then had:
+    // en.wiktionary writes swaar [sw] beside swaan [sv] in the same environment, six each way, so it fixed six
+    // words and broke six. It was recorded as referee inconsistency and demoted to an eval fold.
+    // ⚠ THE SECOND REFEREE SETTLED IT, and the other way: RCRL (non-Wiktionary, 27417) is **260 of 261** for the
+    // glide — ⟨sw⟩ 88:0, ⟨tw⟩ 53:0, ⟨kw⟩ 84:1, ⟨dw⟩ 34:0 — against en.wiktionary's 10:9 coin flip across the same
+    // four onsets. The rule was always right; the primary just could not adjudicate it. This is the single
+    // clearest thing importing an independent source bought.
+    // ⚠ THE LIST IS THE ATTESTED FOUR, not "obstruents" (handoff §11): those are the only C+⟨w⟩ onsets RCRL
+    // contains. Its one ⟨rw⟩ is a loan taking an epenthetic vowel (rwandese → rəwandiəsə), not a cluster.
+    // ⚠ MEASURED HONESTLY, because the first draft of this PR over-credited it: the ENGINE RULE is worth
+    // +67 on the secondary and +1 on the primary. Widening the eval fold from ⟨sd⟩ to ⟨sdtk⟩ is a further
+    // +92/+1 — but that is a SCORING change (it normalises both sides of a comparison), not an engine one,
+    // and it now applies to the PRIMARY ONLY so the secondary scores the contrast rather than hiding it.
+    // ⚠ AND IT DEPENDS ON THE SPLITTER PUTTING THE FUGEN-S ON THE HEAD (`linkingElements` order): with the
+    // ⟨s⟩ on the following element, voeding·swaarde looks like an ⟨sw⟩ onset and this rule fires on a
+    // mirage — *fudəŋswɑːrdə for RCRL ˈfu.dəŋs.vɑːr.də. Four such words were shipping wrong until review.
+    "wGlideAfter": ["s", "d", "t", "k"],
+
     // ⚠ LOAN SUFFIXES THAT MOVE THE STRESS off the native first syllable. Afrikaans stress is initial by
     // default (the Germanic pattern) and these Romance/Latinate endings override it: "final" takes the last
     // nucleus (ingenieur, universiteit), "penultimate" the second-to-last (aborsie → a·BOR·sie). Matched as
@@ -227,7 +247,13 @@
         "ambiguousPrefixes": ["be", "ge", "er"],
         "suffixes": ["likheid", "heid", "teit", "asie", "isie", "isme", "agtig", "baar", "loos", "saam", "lik"],
         "vowelInitialSuffixes": ["agtig", "asie", "isie"],
-        "linkingElements": ["", "s", "e"],
+        // ⚠ ORDER IS LOAD-BEARING, LONGEST-FIRST. With "" first, a head whose next letter is ⟨s⟩ loses the
+        // Fugen-s to the FOLLOWING element whenever that also happens to be a word: voedingswaarde split as
+        // voeding·swaarde rather than voedings·waarde, which is wrong on its own terms and additionally made
+        // the ⟨sw⟩ look like an onset for the `wGlideAfter` rule (*fudəŋswɑːrdə for RCRL ˈfu.dəŋs.vɑːr.də).
+        // Trying ⟨s⟩ first only wins when the remainder is STILL a valid constituent, so hoof·sweep is
+        // untouched (⟨weep⟩ is not a word) while voedings·waarde is fixed.
+        "linkingElements": ["s", "e", ""],
         "validOnsets": ["st", "sp", "sk", "sl", "sm", "sn", "sw", "skr", "str", "spr", "spl", "tr", "dr", "kr", "kn", "gr", "gl", "br", "bl", "pr", "pl", "fr", "fl", "vr", "vl", "kw", "tw", "dw", "gn", "ts", "kl"],
         "stKeep": [],
 

@@ -41,7 +41,11 @@ const CONFIG: MorphologyConfig = {
     suffixes: M.suffixes,
     vowelInitialSuffixes: new Set(M.vowelInitialSuffixes),
     reliableConsSuffixes: new Set(),
-    linksFor: () => LINKS, // no per-stem Fugen flags in Afrikaans → a static order
+    // No per-stem Fugen flags in Afrikaans, so the order is static — EXCEPT that a head already ending in ⟨s⟩
+    // may not take the linking ⟨s⟩. Without that, trying ⟨s⟩ first (see the manifest note on why it must be
+    // first) re-splits tuis·span as tuiss·pan, pols·slag as polss·lag, tennis·span as tenniss·pan: the head's
+    // own final ⟨s⟩ gets read as the Fugen and the next element loses its onset. Measured: −32 without it.
+    linksFor: (head) => (head.endsWith("s") ? LINKS.filter((l) => l !== "s") : LINKS),
     validOnsets: new Set(M.validOnsets),
     stKeep: new Set(M.stKeep),
     isWord: (w) => stems().has(w),

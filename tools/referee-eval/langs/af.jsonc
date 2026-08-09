@@ -1,28 +1,50 @@
-// Afrikaans (af) — Indo-European (West Germanic), Latin orthography. Referee: en.wiktionary Afrikaans IPA
-// (Wiktionary, HUMAN, 2220 words). The backbone strips the marks the orthography does not determine: STRESS
+// Afrikaans (af) — Indo-European (West Germanic), Latin orthography. TWO REFEREES, independent lineages:
+// PRIMARY en.wiktionary Afrikaans IPA (Wiktionary, HUMAN, 2220) and SECONDARY the RCRL Afrikaans Pronunciation
+// Dictionary (CTexT/NWU via ttslab/za_lex, 27428, CC BY-SA 2.5 ZA — a speech-technology lexicon, no Wiktionary
+// lineage). ⚠ wikipron afr is NOT a third source: it is the same en.wiktionary scrape as the primary. The backbone strips the marks the orthography does not determine: STRESS
 // (ˈ ˌ — Afrikaans stress is largely first-syllable but unwritten → we emit none), LENGTH ː (the open/closed
 // length is realised by our vowel choice), NASALIZATION (ɛ̃ before nasal+C — allophonic, deferred), and the
 // diphthong OFFGLIDE tie ( ̯ ).
-// The folds below neutralise, in order: syllable dots, r~ɾ, x~χ, the centering-diphthong onsets ɪ~i / ʊ~u,
-// short o~ɔ, ui œy~œi, ⟨ei⟩~⟨y⟩ (ONE phoneme, two spellings), the ⟨sw/dw⟩ onset (the referee writes swaar
-// [sw] but sweep [sv] — six each way), the ⟨h⟩ symbol ɦ~h (a RENAME, so /h/ presence stays measurable),
+// The GLOBAL folds below neutralise, in order: syllable dots, r~ɾ, x~χ, the centering-diphthong onsets ɪ~i /
+// ʊ~u, short o~ɔ, ui œy~œi, ⟨ei⟩~⟨y⟩ (ONE phoneme, two spellings), the ⟨h⟩ symbol ɦ~h (a RENAME, so /h/
+// presence stays measurable),
 // æ~ɛ, ɐ~a, ʋ~v, and finally the ⟨-heid⟩ /h/ the referee writes inconsistently. ⚠ THE ORDER IS PART OF THE
 // SPEC — folds run in sequence, so -heid must be keyed on [h] because the rename above already ran.
 // The short-⟨a⟩ backness fold is a PREFOLD so it cannot also collapse long ɑː onto short a — see its note.
 // Optional parenthesised segments are expanded to both readings (`parenOptional`), not stripped.
+// ⚠ TWO FOLDS ARE PER-REFEREE, deliberately, because each neutralises a defect of ONE source and applying it
+// to both would destroy real signal:
+//   · PRIMARY only — the ⟨Cw⟩ onset ([sdtk]v→[sdtk]w). en.wiktionary is a 10:9 coin flip across sw/dw/tw/kw;
+//     RCRL is 260:1 for the glide, so the secondary SCORES this contrast instead of hiding it.
+//   · SECONDARY only — ⟨ou⟩ əu→œu. Pure notation: each source is internally unanimous and they differ.
 // NOT folded: the ə~ɛ/ɪ schwa-reduction of UNSTRESSED vowels — a real stress-conditioned residual we do not
 // yet model (kept visible, like the Hebrew sheva).
-// ⚠ THE EVAL SCORES phonemizeWordRules, NOT the shipped phonemizeWord: af-lexicon.tsv is built from this
-// same referee (single-source language), so the shipped path would be scoring the answer key.
+// ⚠ THE EVAL SCORES phonemizeWordRules, NOT the shipped phonemizeWord: af-lexicon.tsv is built from the
+// PRIMARY referee, so scoring the shipped path would be scoring the answer key.
 {
     "language": "af", "name": "Afrikaans", "script": "Latin",
     // This referee parenthesises an OPTIONAL segment (ˈɑr(ə)m, ˈan(d)ər) — score either reading.
     "parenOptional": true,
     "provenance": "Authored greedy g2p + open/closed vowel-length rule + final devoicing, from the 2220-word en.wiktionary Afrikaans IPA referee.",
     "referees": [
-        { "file": "af.wiktionary-af.tsv", "source": "en.wiktionary Afrikaans (Wiktionary, human, 2220)", "role": "primary" }
+        {
+            "file": "af.wiktionary-af.tsv",
+            "source": "en.wiktionary Afrikaans (Wiktionary, human, 2220)",
+            "role": "primary",
+            "folds": [
+                { "pattern": "(?<=^|[^\\p{L}])([sdtk])v", "replace": "$1w", "note": "the morpheme-initial \u27e8Cw\u27e9 ONSET, which THIS referee cannot adjudicate: it writes swaar/swyn/twaalf/twintig [w] beside swaan/sweep/twee/kwarantyn [v] in the same environment \u2014 10:9 across \u27e8sw dw tw kw\u27e9. \u26a0 THE SECOND REFEREE SETTLED IT 260:1 FOR THE GLIDE (RCRL, non-Wiktionary: sw 88:0, tw 53:0, kw 84:1, dw 34:0), so the ENGINE now emits [w] (see wGlideAfter in afrikaans.jsonc) and this fold exists only to stop the primary's coin flip from scoring it. \u26a0 HISTORY WORTH KEEPING: the engine rule was tried in Run 4, measured EXACTLY net zero against this referee alone, and was rejected as 'referee inconsistency'. It was right all along; one source could not show it. Widened from \u27e8sd\u27e9 to all four onsets when the engine rule landed, or the \u27e8tw\u27e9 / \u27e8kw\u27e9 rows this referee writes [tv]/[kv] would score the coin flip instead" }
+            ]
+        },
+        {
+            "file": "af.rcrl-apd.tsv",
+            "source": "RCRL Afrikaans Pronunciation Dictionary v1.4.1 (CTexT/NWU via ttslab/za_lex, 27417) — NON-Wiktionary, the first independent source for af",
+            "role": "secondary",
+            "folds": [
+                { "pattern": "əu", "replace": "œu", "note": "⟨ou⟩/⟨au⟩ NOTATION, per-referee and NOT a disagreement about the language: each source is internally UNANIMOUS and they differ — en.wiktionary writes [œu] 34:0, RCRL writes [əu] 325:0. Two consistent transcriptions of one diphthong, so it is folded to the primary's (and our) symbol for THIS referee only. ⚠ Being unanimous on both sides is exactly what distinguishes it from the ⟨sw/dw⟩ case below, where the primary is a coin flip and the secondary is not" }
+            ]
+        }
     ],
-    "secondaryGap": "No independent second numeric source wired yet: wikipron afr exists (a candidate 2nd referee) but is not yet imported; kaikki has no convenient per-language Afrikaans IPA dump and epitran lacks af. The primary is the en.wiktionary Afrikaans IPA category (human, 2220). Standard-Afrikaans phonology (open/closed vowel length, centering diphthongs ee=iə/oo=uə, g=[χ], final devoicing) is corroborated by published descriptions (Donaldson, Afrikaans reference grammar). Anchor: the adjudicated common-word gold in test/afrikaans.test.ts.",
+    "secondaryGap": "CLOSED as of the RCRL import — af is no longer single-source. The secondary is the RCRL Afrikaans Pronunciation Dictionary v1.4.1 (CTexT/NWU via ttslab/za_lex, 27417 entries, CC BY-SA 2.5 ZA), with NO Wiktionary lineage. ⚠ The candidate this field named for three PRs — wikipron afr_latn — was NOT one: it is the same en.wiktionary scrape as the primary (~2.1k rows, matching entry for entry), so importing it would have corroborated nothing. kaikki still has no per-language Afrikaans IPA dump and epitran lacks af. RESIDUAL CAVEATS, because two sources is not two independent opinions on everything: the primary is 2220 HUMAN dictionary entries, the secondary a 27k speech-technology lexicon partly built by rule plus verification, so they are strong on different things — the secondary settles systematic phonology (it adjudicated the Cw onset 260:1 where the primary was a 10:9 coin flip), while the primary stays the better witness for proper nouns and loans. Standard-Afrikaans phonology is additionally corroborated by published description (Donaldson). Anchor: the adjudicated common-word gold in test/afrikaans.test.ts.",
     // ⚠ THE SHORT-⟨a⟩ FOLD IS A PREFOLD, AND THAT IS LOAD-BEARING. The referee free-varies short ⟨a⟩
     // between [a] and [ɑ] (adres→adrɛs but arm→ɑrm), which is non-contrastive and worth folding — but
     // folding it AFTER the backbone strips ː would also collapse our LONG [ɑː] onto the referee's SHORT
@@ -41,7 +63,6 @@
         { "pattern": "o(?![ː])", "replace": "ɔ", "note": "short ⟨o⟩ height: the referee writes it [o]~[ɔ] freely; non-contrastive → fold plain [o]→[ɔ] (we emit ɔ; long/diphthong oː untouched)" },
         { "pattern": "œy", "replace": "œi", "note": "⟨ui⟩ diphthong: the referee writes the front-rounded offglide as [œy]~[œi] freely; non-contrastive → fold to [œi]" },
         { "pattern": "ɛi", "replace": "əi", "note": "⟨ei⟩/⟨y⟩ are HOMOPHONOUS in Afrikaans (one phoneme, two spellings — Donaldson §1); the referee writes ⟨ei⟩ rows [ɛi] and ⟨y⟩ rows [əi]. We emit [əi] for both → fold the notation together (+4 words, measured)" },
-        { "pattern": "(?<=^|[^\\p{L}])([sd])v", "replace": "$1w", "note": "the ⟨sw⟩/⟨dw⟩ ONSET: the referee writes it BOTH ways and splits almost evenly — [sw] in swaar/swart/swyn/Swede/dwaal, [sv] in swaan/sweep/sweet/swembad/swaartekrag/dwarsoor. Six each way in the same environment is inconsistency, not a contrast, so fold both sides to [w] — +5 MEASURED (12 is the size of the environment; six of those words still miss for unrelated reasons). ⚠ An ENGINE rule was tried first (morpheme-initial sw/dw → [w], the Donaldson description) and measured EXACTLY net zero — it fixed the six [sw] rows and broke the six [sv] rows, which is how the inconsistency was found. ⚠ THE LOOKBEHIND IS WORD-INITIAL, not morpheme-initial: the backbone has already stripped ˈ and the syllable dots, so there is no seam left to anchor on, and a prefixed stem (verdwyn) keeps its miss" },
         { "pattern": "ɦ", "replace": "h", "note": "⟨h⟩ SYMBOL identity: the referee writes the same segment [ɦ]~[h] (hom→hɔm beside ɦart) — non-contrastive notation. ⚠ THIS IS A RENAME, NOT A DELETION: the earlier unconditional ɦ→\"\" fold blinded the eval to whether /h/ was emitted at all; mapping the symbols together keeps presence measurable (+10)" },
         { "pattern": "æ", "replace": "ɛ", "note": "⟨e⟩ before /r/ and /l/: the referee narrow-transcribes the lowered allophone [æ] (perd, lekker, pêrel) — allophonic, fold to the [ɛ] we emit (+6)" },
         { "pattern": "ɐ", "replace": "a", "note": "short ⟨a⟩ centralised: the referee writes [ɐ] for the same vowel it elsewhere writes [a]/[ɑ] (antwoord, blad, rand) — allophonic notation (+5)" },
