@@ -49,7 +49,7 @@ const BANTOC = "់"; // U+17CB — shortens the vowel; sits on a coda consonant
 const SAMYOK = "័"; // U+17D0 — samyok sannya: a short-vowel sign; ⟨័រ⟩ reads oə (កុងទ័រ koŋtoə)
 const REAHMUK = "ះ"; // U+17C7 — adds an -h coda (combines with a preceding base vowel)
 const NIKAHIT = "ំ"; // U+17C6 — adds an -m coda (combines with a preceding base vowel)
-// Combining diacritics consumed after a unit's vowel (register shifters + bantoc handled separately, rest ignored).
+// Combining diacritics consumed after a unit's vowel (register shifters, bantoc and samyok handled by name; rest ignored).
 const DIACRITICS = new Set(DEF.diacritics);
 // A long vowel shortened by the /bantaq/ (់): កាត់ kaːt → kat, ចាប់ caːp → cap.
 const SHORTEN: Record<string, string> = {
@@ -322,10 +322,6 @@ export function phonemizeWordRules(word: string): string {
         } else if (unit.vs) {
             nucleus = DEF.vowels[unit.vs]![oIdx]!;
             if (unit.shorten) nucleus = SHORTEN[nucleus] ?? nucleus;
-            // ⟨ិ⟩/⟨ី⟩ IN A NON-FINAL SYLLABLE REDUCE TO [i], both series — the table values (ə/ɨ, əj/iː) are
-            // the STRESSED (final-syllable) readings, and the Indic polysyllables this fires in carry the
-            // short i medially: កម្មវិធី kammaʋitʰiː not *kammaʋətʰiː, ការីយ- karij- not *karəj-.
-            // Referee-derived: non-final ⟨ិ⟩ i 87 / ə 29 / e 23 / ɨ 7; non-final ⟨ី⟩ i 61 / əj 14.
             // ⟨ិ⟩/⟨ី⟩ REDUCE outside the stressed final-open position — the table values (ə/ɨ, əj) are the
             // stressed readings, and the Indic polysyllables this fires in carry [e]/[i] instead:
             // កម្មវិធី kammaʋitʰiː not *kammaʋətʰiː, កណិការ kaneka. Referee-derived: non-final ⟨ិ⟩ i/e 110 vs
@@ -346,10 +342,15 @@ export function phonemizeWordRules(word: string): string {
             // កុំព្យូទ័រ kompjutoə; referee-derived 25:1 on ័រ-final words).
             if (unit.samyok && unit.coda === "រ") nucleus = "oə";
         } else {
-            // unstressed presyllable → reduced short inherent. ⚠ The o-series value depends on the syllable
-            // SHAPE (referee-derived over the 640 o-series-inherent presyllables: eə 223 / u 171 / ɔ 160 / ə 66):
-            // CLOSED (the unit owns a coda — គម kum-, ពន pun-) → [u]; OPEN stays [ɔ] (34:20 over eə on the
-            // true open-presyllable shape).
+            // unstressed non-final syllable → reduced short inherent. ⚠ The o-series value depends on the
+            // syllable SHAPE (referee-derived over the 640 o-series-inherent presyllables: eə 223 / u 171 /
+            // ɔ 160 / ə 66), and each branch was measured separately:
+            // · CLOSED (the unit owns a coda) → [u] (គម kum-), except the ង/ល codas → [uə] (គង្គា kuəŋkiə,
+            //   កងពល -puəl — the first per-coda derivation MISSED ង because its regex did not allow a coeng
+            //   after the coda letter);
+            // · OPEN and MEDIAL (u > 0) → [eə] (កុម្ភការ kompeəka — the Pali linking syllable);
+            // · OPEN and INITIAL → [ɔ] (34:20 over eə on the true open-presyllable shape; forcing eə there
+            //   was a measured regression and was reverted).
             nucleus = gov === "a" ? "ɑ" : unit.coda ? (unit.coda === "ល" || unit.coda === "ង" ? "uə" : "u") : u > 0 ? "eə" : "ɔ";
         }
         // ⚠ A NIKAHIT NUCLEUS MERGES WITH A ⟨ង⟩ CODA. ⟨ំ⟩ carries its own [-m], so កម្លាំង rendered the m AND

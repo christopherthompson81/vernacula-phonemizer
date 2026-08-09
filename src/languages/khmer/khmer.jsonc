@@ -8,9 +8,10 @@
     "script": ["Khmer"],
 
     // Combining DIACRITICS consumed after a unit's vowel. The two register shifters (musikatoan ⟨៉⟩,
-    // triisap ⟨៊⟩) and the bantoc ⟨់⟩ carry meaning and are handled by name in khmer.ts; the rest are
-    // consumed and ignored, and they are listed together here because the scan's job is to know where the
-    // unit ENDS, not what each mark does.
+    // triisap ⟨៊⟩), the bantoc ⟨់⟩ and the samyok ⟨័⟩ carry meaning and are handled by name in khmer.ts;
+    // the rest are consumed and ignored, and they are listed together here because the scan's job is to know
+    // where the unit ENDS, not what each mark does. ⟨ៈ⟩ is NOT here — it is a vowel (see below) and listing
+    // it here was the bug that silenced it.
     "diacritics": ["់", "៉", "៊", "៌", "៍", "៎", "៏", "័", "៑", "៓"],
 
     // ⚠ PASSIVE consonants — the continuants (nasals, semivowels, liquids). In a two-consonant onset the

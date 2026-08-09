@@ -1,6 +1,7 @@
-# Khmer word-frequency list — derived from src/languages/khmer/km-wordfreq.tsv (this repo's own
-# harvest: 2,851,516 writer-delimited tokens from the mined km corpus (161,436 unique paragraphs), ZWSP/space boundaries
-# typed by Khmer writers; freq>=25). "word count", desc. Same provenance as the segmenter's table.
+# Khmer word-frequency list — src/languages/khmer/km-wordfreq.tsv re-emitted in the eval's "word count"
+# format (desc). That table is this repo's own harvest — 2,851,516 ZWSP/space-delimited tokens the mined-km
+# corpus's writers themselves delimited, freq>=25 — built by tools/gen/build-km-wordfreq.mts; no external
+# licence attaches. Regenerate by re-emitting that file whenever it is rebuilt.
 និង 40204
 ជា 31737
 បាន 30700
