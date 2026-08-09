@@ -81,7 +81,7 @@
     "signs": {
         "virama": { "char": "੍", "effect": "suppressInherentVowel", "note": "halant" },
         "anusvara": { "char": "ੰ", "effect": "nasalizeVowel", "note": "tippi → nasalization (+ homorganic nasal before a stop)" },
-        "chandrabindu": { "char": "ਂ", "effect": "nasalizeVowel", "note": "bindi → nasalizes the preceding vowel" },
+        "chandrabindu": { "char": "ਂ", "effect": "nasalizeVowelHomorganic", "note": "bindi → nasalizes the preceding vowel AND restores the homorganic nasal before a stop (referee-derived 26:5: ਆਂਡਾ aːɳɖaː, ਗੋਂਗਲੂ ɡoːŋɡluː; Devanagari chandrabindu stays pure nasalization — the effect is opt-in)" },
         "visarga": { "char": "ਃ", "effect": "appendH", "note": "→ [h] (rare)" },
         "nukta": { "char": "਼", "effect": "composeNukta", "note": "combines with the preceding consonant (ਸ਼ ਜ਼ ਖ਼ …)" }
     },

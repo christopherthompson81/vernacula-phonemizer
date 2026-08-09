@@ -106,10 +106,10 @@ describe("punjabi text normalization", () => {
 
     test("Gurmukhi unit abbreviations, era marker, degree and ਡਾ.", () => {
         expect(phonemize("83 ਕਿਮੀ", "pa")).toContain("kɪloːmˈiːʈəɾ"); // was read as the word [kˈɪmiː]
-        expect(phonemize("6 ਸੈ.ਮੀ", "pa")).toContain("sɛ̃ʈiːmˈiːʈəɾ"); // the interior dot was a phrase break
+        expect(phonemize("6 ਸੈ.ਮੀ", "pa")).toContain("sˈɛ̃ɳʈiːmiːʈəɾ"); // interior dot was a phrase break; ɳ = the bindi homorganic rule (26:5, Run 7)
         expect(phonemize("35 ਮਿਮੀ", "pa")).toContain("mɪliːmˈiːʈəɾ");
         expect(phonemize("1000 ਈ.ਪੂ. ਵਿੱਚ", "pa")).toContain("ˈiːsaː pˈuːɾəʋ"); // corpus's own expansion
-        expect(phonemize("35°", "pa")).toBe("pˈɛ̃t̪iː ɖˈɪɡɾiː"); // the sign was dropped
+        expect(phonemize("35°", "pa")).toBe("pˈɛ̃n̪t̪iː ɖˈɪɡɾiː"); // the sign was dropped
         expect(phonemize("ਡਾ. ਸਿੰਘ", "pa")).toContain("ɖˈaːkʈəɾ");
         // ਸੈਮੀ and ਗ੍ਰਾ are NOT unit keys — every corpus occurrence is ਸੈਮੀਫਾਈਨਲ / ਫ਼ੋਟੋਗ੍ਰਾਫ਼ੀ, and
         // requiring a preceding digit is what keeps them out (the over-counting trap, live in this corpus).
