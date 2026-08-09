@@ -876,3 +876,60 @@ like. This is the same wall Run 6 hit from the other side: 84% of misses differ 
 
 **Harness:** `ur_emit_raw.ts` (emits raw g2p + finished core so placement policies can be compared
 offline without editing the engine).
+
+## Run 18 — 2026-08-09 — sizing the lexicon tier on RUNNING TEXT (the type/token gap)
+
+Urdu already ships a lexicon: `lexicon-ipa.tsv`, **11,356 entries** (Run 5/7 — kaikki-urd primary,
+Hindi cross-script fill), consulted before the default-ə core. So the question is not "build a
+lexicon" but "does the new data extend the one we have, and by how much where it matters".
+
+⚠ **Urdu had no frequency list**, which is exactly what turned the Afrikaans lexicon decision
+(af Run 20: a dictionary-shaped referee over-samples rare Latinate words; real text is short and
+native). Fetched hermitdave FrequencyWords 2018 `ur_full` — **9,592 types / 262,138 tokens**.
+⚠ Thin, and OpenSubtitles register (conversational); formal/technical Urdu would have a longer
+tail, so the weighted numbers below are a LOWER bound on the tier's value for formal text.
+
+### Coverage
+
+| | running-text token coverage |
+|---|---|
+| current lexicon (11,356 types) | **76.6%** |
+| + Dakshina tier (**29,649** new types) | **89.5%** (+13.0pp of all tokens) |
+| still falling through to the default-ə core | 10.5% |
+
+### Value on the SERVING path
+
+Config A = ships today (curated → lexicon-ipa → core). Config B = A with a Dakshina tier inserted
+above the core. Scored vs CLE, short-vowel choice:
+
+| | unweighted | **frequency-weighted** |
+|---|---|---|
+| A — ships today | 65.8% | **80.9%** |
+| B — + Dakshina tier | 72.2% | **82.1%** |
+| delta | **+6.5pp** | **+1.3pp** |
+
+It serves 2,431 of the 3,535 CLE words currently falling through to the core.
+
+⚠ **Run 17's blind spot does NOT apply here**, and this is the one comparison in this file where
+that is provable rather than assumed: the Dakshina overwrite preserves the backbone's vowel count
+and position exactly, so A and B have **identical placement** and differ only in quality.
+Insertions cannot differ between them, so the metric cannot be fooled.
+
+### Verdict: real, but marginal — and the two numbers say different things
+
+**+6.5pp on dictionary-shaped words, +1.3pp on running text.** The gap is the type/token effect:
+the frequent words are already in the 11,356-entry lexicon, so the new tier mostly serves the
+rare tail. For scale, the Afrikaans RCRL lexicon was justified by **≈10.5pp of ALL running-text
+tokens** — this is +1.3pp, an order of magnitude less compelling.
+
+Against that it costs: a 36k-entry shipped file, a **§3 share-alike fence** + NOTICE attribution
+(Dakshina is CC BY-SA 4.0), and a third lexicon tier to reason about in precedence. **My reading
+is that +1.3pp does not buy that**, with one exception worth stating: if the target is OOV/rare-word
+quality — proper nouns, unusual text, TTS of formal register — then +6.5pp is the relevant figure
+and the trade looks different. That is a product call, not a measurement.
+
+**Cheap and uncontroversial regardless:** commit the frequency list as
+`tools/referee-eval/freq/ur.txt` (the repo already ships `af.txt` from the same source under the
+same licence) and turn on the frequency-weighted metric for ur. Every accuracy claim in this
+investigation is dictionary-shaped without it, and Run 10's headline numbers would gain a
+real-text counterpart — the 80.9% above is the first such figure Urdu has ever had.
