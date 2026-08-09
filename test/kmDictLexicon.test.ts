@@ -78,3 +78,45 @@ describe("khmer second-tier dictionary lexicon", () => {
         expect(phonemizeWord("អាមេរិក")).toBe("ʔaːmeːrik");
     });
 });
+
+/**
+ * The THIRD tier (kaikki) — same invariants, plus the precedence seam it introduces.
+ *
+ * `km-lexicon-kaikki.tsv` is en.wiktionary readings via kaikki — the SAME lineage as the wikipron referee,
+ * which is why it can be a lexicon and can never be a referee. It sits BETWEEN the exceptions lexicon and the
+ * Google dictionary: wikipron-VERIFIED beats a same-tradition reading, which beats the converted dictionary
+ * (kaikki's conversion validates 97.7% against wikipron on 6,564 shared words; the dictionary's 78.3%).
+ */
+const kaikki = read("km-lexicon-kaikki.tsv");
+
+describe("khmer third-tier kaikki lexicon", () => {
+    test("it is real and its licence is recorded", () => {
+        expect(kaikki.size).toBeGreaterThan(400);
+        const header = readFileSync(join(KM, "km-lexicon-kaikki.tsv"), "utf8").slice(0, 1200);
+        expect(header).toContain("CC BY-SA 4.0");
+        expect(header).toContain("kaikki.org");
+    });
+
+    test("⚠ it contains NO word the referee covers — same-lineage leakage would be circular twice over", () => {
+        const leaked = [...kaikki.keys()].filter((w) => referee.has(w));
+        expect(leaked.length, `referee words leaked into the kaikki tier: ${leaked.slice(0, 5).join(", ")}`).toBe(0);
+    });
+
+    test("⚠ it never shadows a wikipron-verified entry", () => {
+        const clash = [...kaikki.keys()].filter((w) => lex.has(w));
+        expect(clash, `in both files; the exceptions lexicon must win: ${clash.slice(0, 5).join(", ")}`).toEqual([]);
+    });
+
+    test("it OVERRIDES the Google dictionary where both cover a word — the evidence ranking", () => {
+        const shared = [...kaikki.keys()].filter((w) => dict.has(w) && kaikki.get(w) !== dict.get(w));
+        expect(shared.length).toBeGreaterThan(50); // the seam is real, not vacuous
+        for (const w of shared.slice(0, 3)) expect(phonemizeWord(w)).toBe(kaikki.get(w));
+    });
+
+    test("a concrete instance: កណ្តាល — the ⟨ត⟩-spelling of \"central\" — reads ɗ, not t", () => {
+        // The common spelling កណ្ដាល (⟨ដ⟩) is a wikipron word; this ⟨ត⟩ variant (479× in the frequency table)
+        // is not, and the rules read the letter written: kɑntaːl. kaikki carries the lexical reading.
+        expect(phonemizeWordRules("កណ្តាល")).toBe("kɑntaːl");
+        expect(phonemizeWord("កណ្តាល")).toBe("kɑnɗaːl");
+    });
+});

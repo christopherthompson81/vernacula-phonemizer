@@ -42,7 +42,13 @@ CREATE TABLE languages (
                            'variant without sufficient vowel-encoding'  -- an abjad/variant that under-writes vowels
                        )),
 
-    verdict          TEXT,                      -- for implemented rows: maturity ✅ 🟢 🟡 🔷 ⛔ (else NULL)
+    verdict          TEXT,                      -- for implemented rows: maturity ✅ 🟢 🟡 🔷 ⛔ (else NULL).
+    -- ⚠ 🔵 ("in active development", per docs/language-maturity.md) IS PART OF THE VOCABULARY and was missing
+    -- here. That omission had a cost: `km` carried 🔵🔷 in the maturity doc, the column could not express it, and
+    -- so km sat with a NULL verdict — the only real engine without one — which read as an oversight rather than
+    -- as a value the schema refused. NO language carries 🔵 today (km was promoted to 🔷 once its bring-up was
+    -- measured), but the state is real and the next bring-up will need it. A verdict may hold TWO glyphs when
+    -- both apply. A blank verdict is meaningful ONLY for an aliased row; see served_by below.
 
     -- TEXT NORMALIZATION state — whether the symbols a reader says aloud (%, currency, ranges, decimals, signs)
     -- are read for this language, which is a SEPARATE axis from `verdict`: a language can phonemize its words

@@ -63,8 +63,8 @@
  * ⚠ `w` IS POSITIONAL: ʋ as an onset, w as a coda (ʋit, but ʔəw). A flat mapping turned every coda into ʋ.
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 /** Dictionary phone → our IPA. Derived by iteration against wikipron; see the header on why it stops here. */
 const MAP: Record<string, string> = {
@@ -87,11 +87,23 @@ export function convert(ipa: string): string {
         .join("");
 }
 
+/**
+ * ⚠ THE BODY BELOW RUNS ONLY WHEN THIS FILE IS THE ENTRY POINT, and the guard is not cosmetic. `convert` is
+ * imported by `tools/khmer/eval_shipped_heldout.ts`, and an ES import executes the whole module — so importing
+ * it used to REBUILD AND OVERWRITE `km-lexicon-dict.tsv` as a side effect, using whatever `process.argv[2]`
+ * the importing tool happened to take. It went unnoticed because the rebuild was byte-identical; it would not
+ * have been if the caller's argument had pointed at a different dictionary.
+ */
 const src = process.argv[2];
-if (src === undefined) {
+const isEntryPoint = process.argv[1] !== undefined
+    && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+if (isEntryPoint && src === undefined) {
     console.error("usage: build-km-dict-lexicon.mts <km/data/lexicon.tsv from google/language-resources>");
     process.exit(2);
 }
+if (isEntryPoint && src !== undefined) main(src);
+
+function main(src: string): void {
 const here = dirname(fileURLToPath(import.meta.url));
 const KHMER_WORD = /^[ក-៓ៜ-៝]{1,}$/u;
 
@@ -147,3 +159,4 @@ console.log(`  kept ${rows.length.toLocaleString()} entries`);
 console.log(`  skipped ${skippedSettled.toLocaleString()} already settled by wikipron / the exceptions lexicon`);
 console.log(`  skipped ${skippedShape.toLocaleString()} non-Khmer rows (the upstream file is a TTS dictionary)`);
 console.log(`  → ${out}`);
+}

@@ -63,6 +63,10 @@ Used without obligation beyond the credit given here.
 - **rime-cantonese**, via **pycantonese** — CC-BY 4.0. `cantonese/dict.tsv`.
 - **Google `language-resources/bn`** (<https://github.com/google/language-resources>) — CC-BY 4.0.
   `bengali/bengali-lexicon.tsv`, `bn-g2p-tagger.int8.onnx`.
+- **Google `language-resources/km`** (<https://github.com/google/language-resources>) — CC-BY 4.0,
+  "Copyright 2018 Google Inc." `khmer/km-lexicon-dict.tsv` (the second lexicon tier) and
+  `tools/referee-eval/referees/km.google-lexicon.tsv` (the secondary referee), both converted to this
+  project's IPA; the readings are Google's.
 - **Phonikud** and **ReNikud** — thewh1teagle, CC-BY 4.0. Builders behind `hebrew/he-lexicon.tsv`.
 - **ICU `thaidict`** — Unicode, Inc., Unicode-DFS-2016. Part of `thai/seg-words.txt`.
   Text: `LICENSES/Unicode-DFS-2016.txt`.

@@ -277,3 +277,59 @@ describe("khmer signs that are easily left silent", () => {
         expect(String(phonemizeText("ចក្រវាឡរណប=satellite", "km"))).not.toContain("smaə");
     });
 });
+
+// PASS-2 CONSUMPTION GUARDS + the nikahit/⟨ង⟩ merge. Three of these rules DELETE a unit after taking its
+// ons[0] as a coda, and none of them used to ask whether that unit was already carrying a coda of its own —
+// so a whole syllable disappeared. Measured: +3.8pp folded on the 7,108-word wikipron referee, 268 words
+// gained and ZERO lost. See docs/investigations/km_syllabifier_defects_investigation.md.
+describe("Khmer syllabifier — rules that consume a unit must not destroy its coda", () => {
+    test("a trailing bare unit that already owns a coda is NOT sliced away", () => {
+        // [ក][ញ្ច][ក់] — ក់ becomes ញ្ច's coda, then the trailing rule deleted ញ្ច and the ក with it (*kɑɲ).
+        expect(phonemize("កញ្ចក់")).toBe("kɑɲcɑk");
+    });
+
+    test("a medial bare unit that already owns a coda is NOT stolen as the previous syllable's", () => {
+        // [កំ][ណ][ត់] — ណ takes ត, then the medial rule took ណ and dropped ត with it (*kɑmn).
+        expect(phonemize("កំណត់")).toBe("kɑmnɑt");
+        expect(phonemize("សំណង់")).toBe("sɑmnɑŋ");
+    });
+
+    test("a medial bare unit followed by a BARE FINAL one is an onset, not a coda", () => {
+        // [ចំ][ណ][ង] = cɑm.nɑːŋ. Stealing ណ stranded ង as its own syllable with a long inherent vowel (*cɑmnŋɑː).
+        expect(phonemize("ចំណង")).toBe("cɑmnɑːŋ");
+    });
+
+    test("but a medial bare unit before a REAL syllable is still that syllable's coda", () => {
+        // The guard above must not fire here — ឈី has a written vowel, so ម is a coda (the original rule's point).
+        expect(phonemize("គីមឈី")).toBe("kiːmcʰiː");
+        expect(phonemize("តម្រង")).toBe("tɑmrɑːŋ");
+    });
+
+    test("a nikahit nucleus merges with a ⟨ង⟩ CODA — the sign marks nasality, ង supplies the place", () => {
+        expect(phonemize("កម្លាំង")).toBe("kɑmlaŋ"); // was *kɑmlamŋ — the m rendered twice
+        expect(phonemize("កាំង")).toBe("kaŋ");
+    });
+
+    test("⚠ but NOT when ⟨ង⟩ is an ONSET — the condition is the assigned coda, not the spelling", () => {
+        // Both keep the m, and a spelling rule (⟨ំ⟩ before ⟨ង⟩) would wrongly strip it from both.
+        expect(phonemize("ជំងឺ")).toBe("cumŋɨː"); // ង carries its own vowel ឺ
+        expect(phonemize("ទំងន់")).toBe("tumŋuən"); // ង is bare but OPENS the syllable ន់ closes
+    });
+
+    test("and every other consonant after ⟨ំ⟩ keeps the m (ង is the only merge environment)", () => {
+        expect(phonemize("កាំបិត")).toBe("kamɓət");
+    });
+});
+
+// ⟨ហ្វ⟩ — the loan-/f/ digraph. Khmer has no native /f/ and spells it ហ+coeng+វ; letter-by-letter rendering
+// gave *hʋ*. Both referees corroborate f, and the google secondary surfaced the gap (12× in its residual).
+describe("Khmer ⟨ហ្វ⟩ — loan /f/", () => {
+    test("ហ្វ reads f, not hʋ", () => {
+        expect(phonemize("កាហ្វេ")).toBe("kaːfeː"); // "coffee" — wikipron k aː f eː
+        expect(phonemize("ហ្វក")).toBe("fɑːk");
+        expect(phonemize("ទីហ្វុង")).toBe("tiːfoŋ"); // "typhoon"
+    });
+    test("a bare ⟨ហ⟩ onset is untouched", () => {
+        expect(phonemize("ហក")).toBe("hɑːk");
+    });
+});

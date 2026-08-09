@@ -8,10 +8,11 @@
     "script": ["Khmer"],
 
     // Combining DIACRITICS consumed after a unit's vowel. The two register shifters (musikatoan ⟨៉⟩,
-    // triisap ⟨៊⟩) and the bantoc ⟨់⟩ carry meaning and are handled by name in khmer.ts; the rest are
-    // consumed and ignored, and they are listed together here because the scan's job is to know where the
-    // unit ENDS, not what each mark does.
-    "diacritics": ["់", "៉", "៊", "៌", "៍", "៎", "៏", "័", "៑", "៓", "ៈ"],
+    // triisap ⟨៊⟩), the bantoc ⟨់⟩ and the samyok ⟨័⟩ carry meaning and are handled by name in khmer.ts;
+    // the rest are consumed and ignored, and they are listed together here because the scan's job is to know
+    // where the unit ENDS, not what each mark does. ⟨ៈ⟩ is NOT here — it is a vowel (see below) and listing
+    // it here was the bug that silenced it.
+    "diacritics": ["់", "៉", "៊", "៌", "៍", "៎", "៏", "័", "៑", "៓"],
 
     // ⚠ PASSIVE consonants — the continuants (nasals, semivowels, liquids). In a two-consonant onset the
     // SERIES (register) is set by the DOMINANT consonant, and a passive one yields to it: khmer.ts scans
@@ -35,8 +36,11 @@
     "vowels": {
         "ា": ["aː", "iə"], "ិ": ["ə", "ɨ"], "ី": ["əj", "iː"], "ឹ": ["ə", "ɨ"], "ឺ": ["əɨ", "ɨː"],
         "ុ": ["o", "u"], "ូ": ["ou", "uː"], "ួ": ["uə", "uə"], "ើ": ["aə", "əː"], "ឿ": ["ɨə", "ɨə"],
-        "ៀ": ["iə", "iə"], "េ": ["eː", "eː"], "ែ": ["ae", "ɛː"], "ៃ": ["aj", "ɨj"], "ោ": ["ao", "oː"],
-        "ៅ": ["aw", "ɨw"], "ំ": ["ɑm", "um"], "ះ": ["ah", "eəh"]
+        "ៀ": ["iə", "iə"], "េ": ["eː", "ei"], "ែ": ["ae", "ɛː"], "ៃ": ["aj", "ɨj"], "ោ": ["ao", "oː"],
+        "ៅ": ["aw", "ɨw"], "ំ": ["ɑm", "um"], "ះ": ["ah", "eəh"],
+        // ⟨ៈ⟩ yuukaleapintu — a SHORT VOWEL + glottal stop, NOT a silent diacritic (it sat in the diacritics
+        // list and was skipped): ខណៈ kʰaʔnaʔ. Referee-derived: aʔ 69 / bare a 8 on the 105 ៈ-final words.
+        "ៈ": ["aʔ", "eəʔ"]
     },
     // Multi-char vowels: a base vowel sign + ⟨ះ⟩ (reahmuk, adds -h) or ⟨ំ⟩ (nikahit, adds -m). The combination
     // shortens/re-colours the base vowel, so it needs its own [a-series, o-series] readings (derived from wikipron:
