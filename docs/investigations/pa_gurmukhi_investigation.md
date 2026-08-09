@@ -132,3 +132,27 @@ must be derived per-language or measured inert on hi.
 
 List at /tmp/pa_medial_class.tsv; FLEURS phones + vote harness at /mnt/data/pa-audio/; Shrutilipi's 7
 Punjabi shards downloaded (gate accepted) for scale when needed.
+
+## Run 4 — 2026-08-09 18:20 — the two rule hypotheses, tested and reverted
+
+From Run 3's decomposition, two rule-shaped candidates were implemented as per-language parameters on the
+shared `deleteMedialSchwa` (Hindi inert by construction) and measured individually:
+
+| hypothesis | derived from | pa primary | verdict |
+|---|---|---|---|
+| LTR deletion order (the 10 swaps) | error class only | 73.6 → 73.3 | ✘ reverted |
+| final-cluster deletion after sonorants (ərtʰ, ɡərm) | error class only | 73.6 → **71.5**, gold 20→19 | ✘ reverted |
+| both together | | 71.7 | ✘ |
+
+⚠ THE DERIVATION MISTAKE WAS THE OLD ONE: both patterns were derived from the 70-word ERROR class instead
+of the full population — the km sweep's own rule, broken twice in one run. Counted properly, gold's
+final V·son·ə·C# context splits **52 deleted : 40 kept** (and 29 of the "deleted" carry a SUPERSCRIPT ᵊ —
+a third notation layer for the reduced vowel). The context is lexically split; no unconditional rule exists.
+
+**So the maturity row's original verdict — medial schwa "proven-lexical" — is now proven three ways:** by
+the audio (position swaps adjudicated per-word, not by pattern), by the failed rule derivations, and by the
+population split. The remaining lever for the ~70 words is a LEXICON, which for pa requires the house
+pattern first: the eval currently scores the SHIPPED `phonemizeWord`, so a wikipron-mined exceptions lexicon
+would score the answer key. The restructure (eval → a core function; mine the exceptions; ship dict-first —
+exactly af/km) is the next build, and it is also what the Shahmukhi side needs before its BiLSTM ever
+becomes viable.
