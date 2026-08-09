@@ -177,6 +177,23 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("weer")).toBe("viər"); // …and a bare ⟨w⟩ is still [v]
     });
 
+    // ⚠ THE LINKING ⟨-s-⟩ IS THE TRAP THIS RULE FALLS INTO IF THE SPLITTER MISPLACES IT. voedingswaarde is
+    // voedings + waarde: the ⟨s⟩ is a Fugen coda and the ⟨w⟩ opens the next syllable. Split as
+    // voeding·swaarde it looks like an ⟨sw⟩ ONSET, and the glide rule fired on the mirage — four words
+    // shipping wrong (review of #773). Fixed in the splitter (`linkingElements` longest-first), because the
+    // BOUNDARY was what was wrong; a guard in the glide rule keyed on prefix-vs-stem was measured first and
+    // rejected, since it also denied the genuine onsets of berg·kwaggas / drie·kwart / hoof·sweep (−13).
+    test("the linking ⟨-s-⟩ goes on the HEAD, so it cannot fake a ⟨Cw⟩ onset", () => {
+        expect(decompose("voedingswaarde").parts).toEqual(["voedings", "waarde"]);
+        expect(phonemizeWord("voedingswaarde")).toBe("fudəŋsvɑːrdə"); // RCRL ˈfu.dəŋs.vɑːr.də
+        expect(phonemizeWord("gebruikswaarde")).toBe("χəbrœyksvɑːrdə"); // RCRL xə.ˈbrœyks.vɑːr.də
+        expect(phonemizeWord("kruideniersware")).toBe("krœydənirsvɑːrə"); // RCRL krœy.də.ˈnirs.vɑː.rə
+        // ⚠ AND A HEAD THAT ALREADY ENDS IN ⟨s⟩ MAY NOT TAKE THE LINK — else the head's own final ⟨s⟩ is
+        // read as the Fugen and the next element loses its onset (tuiss·pan, polss·lag). Worth −32.
+        expect(decompose("tuisspan").parts).toEqual(["tuis", "span"]);
+        expect(decompose("polsslag").parts).toEqual(["pols", "slag"]);
+    });
+
     test("proper nouns come from the LEXICON, not the spelling rules", () => {
         // af-lexicon.tsv (~50 referee-sourced entries; circularity documented in
         // af-lexicon.PROVENANCE.md): name orthography no Afrikaans rule can derive.

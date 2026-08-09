@@ -96,6 +96,13 @@
     // clearest thing importing an independent source bought.
     // ⚠ THE LIST IS THE ATTESTED FOUR, not "obstruents" (handoff §11): those are the only C+⟨w⟩ onsets RCRL
     // contains. Its one ⟨rw⟩ is a loan taking an epenthetic vowel (rwandese → rəwandiəsə), not a cluster.
+    // ⚠ MEASURED HONESTLY, because the first draft of this PR over-credited it: the ENGINE RULE is worth
+    // +67 on the secondary and +1 on the primary. Widening the eval fold from ⟨sd⟩ to ⟨sdtk⟩ is a further
+    // +92/+1 — but that is a SCORING change (it normalises both sides of a comparison), not an engine one,
+    // and it now applies to the PRIMARY ONLY so the secondary scores the contrast rather than hiding it.
+    // ⚠ AND IT DEPENDS ON THE SPLITTER PUTTING THE FUGEN-S ON THE HEAD (`linkingElements` order): with the
+    // ⟨s⟩ on the following element, voeding·swaarde looks like an ⟨sw⟩ onset and this rule fires on a
+    // mirage — *fudəŋswɑːrdə for RCRL ˈfu.dəŋs.vɑːr.də. Four such words were shipping wrong until review.
     "wGlideAfter": ["s", "d", "t", "k"],
 
     // ⚠ LOAN SUFFIXES THAT MOVE THE STRESS off the native first syllable. Afrikaans stress is initial by
@@ -240,7 +247,13 @@
         "ambiguousPrefixes": ["be", "ge", "er"],
         "suffixes": ["likheid", "heid", "teit", "asie", "isie", "isme", "agtig", "baar", "loos", "saam", "lik"],
         "vowelInitialSuffixes": ["agtig", "asie", "isie"],
-        "linkingElements": ["", "s", "e"],
+        // ⚠ ORDER IS LOAD-BEARING, LONGEST-FIRST. With "" first, a head whose next letter is ⟨s⟩ loses the
+        // Fugen-s to the FOLLOWING element whenever that also happens to be a word: voedingswaarde split as
+        // voeding·swaarde rather than voedings·waarde, which is wrong on its own terms and additionally made
+        // the ⟨sw⟩ look like an onset for the `wGlideAfter` rule (*fudəŋswɑːrdə for RCRL ˈfu.dəŋs.vɑːr.də).
+        // Trying ⟨s⟩ first only wins when the remainder is STILL a valid constituent, so hoof·sweep is
+        // untouched (⟨weep⟩ is not a word) while voedings·waarde is fixed.
+        "linkingElements": ["s", "e", ""],
         "validOnsets": ["st", "sp", "sk", "sl", "sm", "sn", "sw", "skr", "str", "spr", "spl", "tr", "dr", "kr", "kn", "gr", "gl", "br", "bl", "pr", "pl", "fr", "fl", "vr", "vl", "kw", "tw", "dw", "gn", "ts", "kl"],
         "stKeep": [],
 

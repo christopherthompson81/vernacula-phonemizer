@@ -1,6 +1,6 @@
 # af.rcrl-apd.tsv — provenance
 
-**Artifact:** `tools/referee-eval/referees/af.rcrl-apd.tsv` — 27,417 Afrikaans word→IPA pairs, the
+**Artifact:** `tools/referee-eval/referees/af.rcrl-apd.tsv` — 27,428 Afrikaans word→IPA pairs, the
 **secondary** referee for `af`. Tools-only (an eval referee); nothing in `src/` reads it.
 
 ## Why it exists
@@ -41,12 +41,18 @@ aaklige None 100 132 AA k l q x q     ->     aaklige   ˈɑː.klə.xə
 - **Phones** are mapped to IPA by the dictionary's **own** `phonememap.ipa-hts.tsv` — the publisher's
   mapping, not ours. `pronundict.txt` is space-separated, so this is a token lookup with no
   longest-match ambiguity. **0 phones failed to map** across all 27,428 rows.
-- **`ˈ` and syllable dots are reconstructed** from the STRESS field (one digit per syllable, 1 =
-  primary) and the SYLLABLE-LENGTHS field (phone count per syllable). Those two were verified to agree
-  with each other and with the phone count on **all 27,428 rows** before being trusted; the 11 rows
-  dropped are orthography-filter failures, not structure failures.
-- Words are filtered to Afrikaans orthography (letters + ê ô û î ë ï é è á à ó ú ü ç, apostrophe,
-  hyphen). 27,428 → **27,417**.
+- **`ˈ`, `ˌ` and syllable dots are reconstructed** from the STRESS field (one digit per syllable over
+  the alphabet **0/1/2** — 1 primary, 2 secondary) and the SYLLABLE-LENGTHS field (phone count per
+  syllable). Those two were verified to agree with each other and with the phone count on **all 27,428
+  rows** before being trusted, and the builder counts each rejection reason separately so this claim is
+  supported by its own output rather than asserted: **0 orthography, 0 structure, 0 unmapped phone**.
+  ⚠ Secondary stress is preserved rather than flattened to `""` — it is inert for today's eval (the
+  backbone strips ˈ and ˌ alike), but the stress fields are the named next lever.
+- Words are filtered to Afrikaans orthography (letters + ê ô û î ë ï é è á à ó ú ü **ö ä ò** ç,
+  apostrophe, hyphen), and **all 27,428 rows pass**. ⚠ ⟨ö⟩/⟨ä⟩ were missing from the first draft of that
+  class, which silently dropped the entire DIAERESIS class — koördinasie, koördinate, koördineer,
+  koördinering, koöperasies, koöperatief, koöpteer, geöriënteerde, kobraägtig, zebraägtig — i.e.
+  precisely the rows that exercise a letter the engine explicitly models (`diacriticVowels` ⟨ö⟩→[ø]).
 - The dictionary lists **one pronunciation per headword** (verified: 0 headwords carry two distinct
   phone strings), so every row is a single-variant row.
 

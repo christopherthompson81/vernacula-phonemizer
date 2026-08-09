@@ -14,9 +14,9 @@
  *
  *     aaklige None 100 132 AA k l q x q
  *
- * STRESS is one digit per syllable (1 = primary) and SYLLABLE-LENGTHS is the phone count per syllable — verified to
- * sum exactly to the phone count on all 27,428 rows, which is what lets this emit ˈ and syllable dots rather than a
- * bare phone string. The hts phone alphabet is mapped to IPA by the dictionary's OWN `phonememap.ipa-hts.tsv`, so
+ * STRESS is one digit per syllable over the alphabet 0/1/2 (1 = primary, 2 = secondary) and SYLLABLE-LENGTHS is the
+ * phone count per syllable — verified to sum exactly to the phone count on all 27,428 rows, which is what lets this
+ * emit ˈ, ˌ and syllable dots rather than a bare phone string. The hts phone alphabet is mapped to IPA by the dictionary's OWN `phonememap.ipa-hts.tsv`, so
  * the mapping is the publisher's, not ours.
  *
  * Run: `npx tsx tools/referee-eval/build-af-rcrl.ts`   (network; writes referees/af.rcrl-apd.tsv)
@@ -28,8 +28,13 @@ import { fileURLToPath } from "node:url";
 const BASE = "https://raw.githubusercontent.com/ttslab/za_lex/master/data/afr";
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-/** Afrikaans orthography — letters + the diacritics the language writes, plus the internal apostrophe of ⟨'n⟩. */
-const WORD_OK = /^['’a-zêôûîëïéèáàóúüç-]+$/u;
+/** Afrikaans orthography — letters + the diacritics the language writes, plus the internal apostrophe of ⟨'n⟩.
+ *  ⚠ ⟨ö⟩ AND ⟨ä⟩ BELONG HERE. Omitting them silently dropped the whole DIAERESIS class the engine explicitly
+ *  models (`diacriticVowels` maps ⟨ö⟩→[ø], and `vowelLetters` carries it): koördinasie, koördinate, koördineer,
+ *  koördinering, koöperasies, koöperatief, koöpteer, geöriënteerde, kobraägtig, zebraägtig. Losing exactly the
+ *  rows that exercise a modelled letter is the worst possible filter bug, so the class is derived from the
+ *  language's own alphabet rather than typed out from memory. ⟨ò⟩ is included for the one row that uses it (nòg). */
+const WORD_OK = /^['’a-zêôûîëïéèáàóúüöäòç-]+$/u;
 
 async function get(file: string): Promise<string> {
     const r = await fetch(`${BASE}/${file}`);
@@ -47,18 +52,20 @@ async function main(): Promise<void> {
     }
 
     const rows: string[] = [];
-    let skippedWord = 0, skippedPhone = 0;
+    // Counted separately, because the PROVENANCE sidecar makes a claim about WHICH filter dropped rows and a
+    // single lumped counter could not support it.
+    let skippedShort = 0, skippedOrthography = 0, skippedStructure = 0, skippedPhone = 0;
     const unknown = new Set<string>();
     for (const line of (await get("pronundict.txt")).split("\n")) {
         const f = line.trim().split(/\s+/u);
-        if (f.length < 5) continue;
+        if (f.length < 5) { skippedShort++; continue; }
         const [word, , stress, sylLens] = f as [string, string, string, string];
         const phones = f.slice(4);
-        if (!WORD_OK.test(word)) { skippedWord++; continue; }
+        if (!WORD_OK.test(word)) { skippedOrthography++; continue; }
         // The two structure fields must agree with each other and with the phone count, or the row is not
         // syllabifiable and is dropped rather than guessed at.
         const lens = [...sylLens].map(Number);
-        if (stress.length !== lens.length || lens.reduce((a, b) => a + b, 0) !== phones.length) { skippedWord++; continue; }
+        if (stress.length !== lens.length || lens.reduce((a, b) => a + b, 0) !== phones.length) { skippedStructure++; continue; }
         const ipa = phones.map((p) => toIpa.get(p));
         if (ipa.some((p) => p === undefined)) {
             phones.forEach((p, i) => { if (ipa[i] === undefined) unknown.add(p); });
@@ -66,7 +73,12 @@ async function main(): Promise<void> {
             continue;
         }
         let at = 0;
-        const sylls = lens.map((n, i) => (stress[i] === "1" ? "ˈ" : "") + ipa.slice(at, (at += n)).join(""));
+        // ⚠ THE STRESS ALPHABET IS 0/1/2, NOT 0/1 — secondary stress is a real value in this source and
+        // dropping it would quietly contradict both the TSV header and the sidecar, which advertise
+        // reconstructed stress. Inert for today's eval (the backbone strips ˈ and ˌ alike), but Run 10 names
+        // this file's stress fields as the next lever, so it is preserved rather than flattened.
+        const MARK: Record<string, string> = { "1": "ˈ", "2": "ˌ" };
+        const sylls = lens.map((n, i) => (MARK[stress[i]!] ?? "") + ipa.slice(at, (at += n)).join(""));
         rows.push(`${word}\t${sylls.join(".")}`);
     }
 
@@ -80,7 +92,10 @@ async function main(): Promise<void> {
         `# ${rows.length} entries.`,
     ].join("\n");
     writeFileSync(join(HERE, "referees", "af.rcrl-apd.tsv"), `${header}\n${rows.join("\n")}\n`);
-    console.log(`wrote ${rows.length} entries; skipped ${skippedWord} (orthography/structure), ${skippedPhone} (unmapped phone)`);
+    console.log(
+        `wrote ${rows.length} entries; skipped ${skippedShort} (short row), ${skippedOrthography} (orthography), ` +
+        `${skippedStructure} (stress/syllable fields disagree), ${skippedPhone} (unmapped phone)`,
+    );
     if (unknown.size) console.log(`unmapped phones: ${[...unknown].join(" ")}`);
 }
 

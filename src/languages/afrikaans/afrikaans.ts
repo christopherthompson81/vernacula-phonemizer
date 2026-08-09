@@ -142,6 +142,12 @@ function phonemizeMorpheme(word: string, finalDevoice = true): string {
         // prefixed stem reaches this correctly because each morpheme is phonemized on its own (ver·dwyn → dwyn).
         // ⚠ ADJUDICATED BY THE SECOND REFEREE, not the first — see the manifest note. en.wiktionary splits 10:9
         // here and made this rule look worthless; RCRL is 260:1 for the glide.
+        // ⚠ THE MIRAGE THIS RULE MUST NOT FALL FOR is the linking ⟨-s-⟩: if the splitter hands the Fugen-s to the
+        // FOLLOWING element, voeding·swaarde looks like an ⟨sw⟩ onset when it is voedings + waarde — a coda ⟨s⟩ and
+        // a ⟨w⟩ opening the next syllable (RCRL ˈfu.dəŋs.vɑːr.də). That is fixed in the SPLITTER, by trying the
+        // linking elements longest-first (afrikaans.jsonc `linkingElements`), not by a guard here: the boundary is
+        // what was wrong, and a guard keyed on prefix-vs-stem was measured and rejected — it also denied the
+        // GENUINE compound onsets berg·kwaggas, drie·kwart, hoof·sweep (−13).
         if (c === "w" && i === 1 && W_GLIDE_AFTER.has(w[0]!)) { out += "w"; i += 1; continue; }
         let matched = false;
         for (const key of FIXED_KEYS) {

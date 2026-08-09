@@ -454,7 +454,7 @@ Run 9 recommended importing RCRL before training anything. Done.
 
 **`tools/referee-eval/build-af-rcrl.ts`** builds the secondary from `ttslab/za_lex` `data/afr`
 (RCRL Afrikaans Pronunciation Dictionary v1.4.1, CTexT/NWU; CC BY-SA 2.5 ZA — share-alike, not NC, so
-it fences in the §3 stratum beside French's Lexique). **27,417 entries**, ~12× the primary.
+it fences in the §3 stratum beside French's Lexique). **27,428 entries**, ~12× the primary.
 
 The format gave more than expected: `WORD POS STRESS SYLLABLE-LENGTHS PHONE…`, where the two structure
 fields were verified to agree with each other and with the phone count on **all 27,428 rows**, so ˈ and
@@ -466,7 +466,7 @@ analysis the manifest was built on, which is corroboration in itself. Deltas: `x
 global folds), and ⟨ou⟩ written `əu` against our `œu` — a **per-referee** fold, because each source is
 internally UNANIMOUS (wiktionary 34:0 for œu, RCRL 325:0 for əu). Two notations, one diphthong.
 
-**Baseline on import, untuned: 62.7% folded / 93.1% symbol on 27,417 unseen words.**
+**Baseline on import, untuned: 62.7% folded / 93.1% symbol on 27,428 unseen words.**
 
 ### What it settled on day one
 
@@ -492,9 +492,10 @@ vowel, not a cluster), anchored at morpheme index 1 so the cluster must OPEN the
 - `antwoord` → antvuərt and `brandweer` → brantviər — a ⟨Cw⟩ across a syllable boundary or a compound
   seam is not an onset. Both RCRL-exact.
 
-**+154 on RCRL, +2 on the primary** (the fold widened ⟨sd⟩→⟨sdtk⟩ so the primary's coin flip is not
-scored). Three pre-existing goldens moved tv→tw (twee, twaalf, twintig) — the same words, read
-correctly.
+**+67 on the secondary, +1 on the primary** for the ENGINE RULE — ⚠ the first draft of this entry said
++154/+2, which lumped in a SCORING change (the widened eval fold). Corrected in Run 11, where the fold
+also moved to primary-only so the secondary scores this contrast instead of hiding it. Three pre-existing
+goldens moved tv→tw (twee, twaalf, twintig) — the same words, read correctly.
 
 ### And it independently confirmed #772
 
@@ -506,8 +507,8 @@ And the four words the reverted `shortHeads` would have broken — `regter`, `si
 
 ### Final
 
-**Primary 1757/2220 (79.1%) / 94.4% symbol · secondary 17,343/27,417 (63.3%) / 93.1% symbol.**
-`secondaryGap` is CLOSED and the sourcing checklist item is clear (10/10).
+**Primary 1760/2220 (79.3%) / 94.4% symbol · secondary 17,447/27,428 (63.6%) / 93.2% symbol** — final,
+after the Run 11 fixes. `secondaryGap` is CLOSED and the sourcing checklist item is clear (10/10).
 
 **On the neural question that started this.** af now has 27k pairs independent of the primary eval, so
 a tagger is finally coherent where Run 9 showed it was not (da's threshold: ~10k). But the referee is
@@ -516,3 +517,66 @@ i↔ə 1764, ɔ→u 999, a↔ɑ 1747: reduction and length, on 27k words that no
 boundaries**. Run 4's oracle bounded stress PLACEMENT at ~45 words on the primary; it never bounded the
 reduction MAPPING, and that mapping is now directly derivable from data. **Do that before training
 anything.**
+
+## Run 11 — 2026-08-08 (review of PR #773)
+
+Nine findings. One was a shipped-output bug, one changed the reported attribution, and the rest were
+stale claims the PR itself had set out to kill.
+
+**1. The ⟨Cw⟩ rule fired on a MIRAGE made by the splitter.** The compound linking ⟨-s-⟩ can be attached
+to either element, and the splitter was handing it to the FOLLOWING one: `voeding·swaarde`, which looks
+like an ⟨sw⟩ onset. It is `voedings + waarde` — a Fugen coda and a ⟨w⟩ opening the next syllable (RCRL
+`ˈfu.dəŋs.vɑːr.də`). Four words were shipping wrong on `phonemizeWord`, not just the eval path.
+
+Two fixes were measured, and the first was wrong:
+
+| attempt | secondary |
+|---|---|
+| guard the glide after any compound-STEM seam (prefix boundaries still fire) | **−9** — it also denied the GENUINE onsets berg·kwaggas, drie·kwart, half·twaalf, hoof·sweep (+4/−13) |
+| fix the BOUNDARY instead: `linkingElements` longest-first, `["s","e",""]` | **+90** |
+| …plus: a head already ending in ⟨s⟩ may not take the ⟨s⟩ link (else tuis·span → tuiss·pan) | **+104** |
+| …plus a symmetric ⟨e⟩ guard | −10, rejected |
+
+The lesson is the same one as Run 7: when a rule fires on the wrong thing, check whether the INPUT to
+the rule is wrong before guarding the rule. Here the morpheme boundary was wrong, and fixing it paid
++104 while a guard on the rule cost 9.
+
+**2. The attribution was wrong, and the fold was hiding the evidence.** "+154 on RCRL, +2 on the
+primary" credited the engine rule with a gain that was mostly a SCORING change. Measured four states:
+
+| | primary | secondary |
+|---|---|---|
+| rule ON, fold ⟨sdtk⟩ | 1759 | 17447 |
+| rule OFF, fold ⟨sdtk⟩ | 1758 | 17380 |
+| rule OFF, fold ⟨sd⟩ | 1757 | 17288 |
+
+So the **engine rule is +67/+1**; widening the eval fold is a further **+92/+1**, and a fold normalises
+BOTH sides of the comparison — it is not an engine improvement. Worse, the widened fold was GLOBAL, so
+it was neutralising the ⟨Cw⟩ contrast on the secondary too — the one source that can adjudicate it
+260:1. Re-homed as a **primary-only** fold, which is where its justification actually applies; the
+secondary now scores the contrast (primary 1759 → 1760).
+
+**3. The referee dropped the entire DIAERESIS class.** `WORD_OK` omitted ⟨ö⟩ and ⟨ä⟩, so koördinasie,
+koördinate, koördineer, koördinering, koöperasies, koöperatief, koöpteer, geöriënteerde, kobraägtig,
+zebraägtig were silently filtered out — precisely the rows exercising a letter the engine explicitly
+models (`diacriticVowels` ⟨ö⟩→[ø], and `afrikaans.ts` already flags ⟨ö⟩ as a past drift hazard). Fixed;
+**all 27,428 rows now pass, 0 dropped for any reason.**
+
+**4. Secondary stress was being discarded.** The source's STRESS alphabet is 0/1/2, not 0/1, so every
+`2` became unmarked while the header and sidecar advertised reconstructed stress. Inert for today's
+eval (the backbone strips ˈ and ˌ alike) but this file's stress fields are the *named next lever*, so
+they are now preserved — **3,307 ˌ marks**.
+
+**5. The builder could not support its own provenance claim.** One `skippedWord` counter was
+incremented by two different filters, so "the 11 dropped rows are orthography failures, not structure
+failures" was unfalsifiable from the tool's output. Split into four counters.
+
+**Stale claims, all of which this PR had claimed to fix:** the af floor comment still said "the only
+numeric source wired; wikipron afr is a candidate 2nd" *in the same sentence* as "NO LONGER
+SINGLE-SOURCE"; `docs/language-maturity.md` still had the af row at 71.2% and 🔷 single-source; the
+catalogue's verdict column was still 🔷 while its own notes said "TWO-SOURCE"; and the af.jsonc eval
+header still described one referee and the old ⟨sw/dw⟩ fold. All corrected — af moves 🔷 → **🔵**, since
+🔷 is *defined* as "no independent second source to triangulate" and that is now false, while the
+reduction/length core layer is still open.
+
+**Final: primary 1760/2220 (79.3%) / 94.4% symbol · secondary 17,447/27,428 (63.6%) / 93.2% symbol.**
