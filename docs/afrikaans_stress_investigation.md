@@ -1006,3 +1006,124 @@ were updated in the PR and the README was missed.
 **Final: suite 3183, tsc clean, fence ok.** The held-out numbers are unchanged (the fix removes two word
 classes from the tier, neither of which is in the training data): tagger **91.8% / 98.8%** against the rule
 engine's **64.0% / 93.6%**.
+
+## Run 20 — 2026-08-08 (a frequency list — and the defect it found in an hour)
+
+`tools/referee-eval/freq/af.txt` — 17,586 words / 337k tokens from hermitdave FrequencyWords
+(OpenSubtitles 2018, CC BY-SA: the same source `nb.txt` uses and the same one `af-stems.txt` was already
+built from, so licensing and precedent were settled). `eval.ts` already supported the metric; af simply
+had no list.
+
+**THE TYPE/TOKEN GAP, finally measured instead of estimated:**
+
+| | word-exact | **frequency-weighted** |
+|---|---|---|
+| primary (en.wiktionary, 2220) | 79.5% | **96.2%** |
+| secondary (RCRL, 27,428) | 65.2% | **92.9%** |
+
+Both referees are DICTIONARY-shaped and over-sample rare Latinate words; real Afrikaans text is short and
+native. **The word-exact figures understate what users hear by 17–28pp.** Every earlier claim in this
+document about "real-text quality" (the ~87% figures in Runs 15–16) was a hand-rolled probe against a
+2,473-token mined corpus; this replaces them with a standing metric that prints on every eval run.
+
+### And it immediately found a live defect the held-out split could not
+
+Measuring the OOV tail over the frequency list, the 500 most frequent OOV types resolve 218,972 tokens.
+Comparing tagger against rules on those:
+
+```
+sê          tagger= (declined)     rules=sɛː
+natuurlik   tagger=natœœrlək       rules=natyːrlək      ← ships
+nuwe        tagger=nyvə            rules=nyːvə
+```
+
+**My own vetting had blinded the tagger to a grapheme class.** The shipped LEXICON correctly drops words
+whose long vowel neither source can write (ɛː œː yː) — but I applied the same drop to the TRAINING data,
+which removed ⟨ê û î⟩ from the character vocabulary entirely. Two different failures followed:
+
+- ⟨ê û î⟩ — not in vocab, so the tagger **declines** and the rules serve. Safe, but the tier is inert on
+  `sê`, `hê`, `gesê`, all common words.
+- ⟨uu⟩ — ⟨u⟩ **is** in vocab, so the model does *not* decline. It emits `natuurlik` → **natœœrlək**. That
+  was shipping.
+
+Fixed by **substituting the rule output rather than dropping the word**: the rules derive that length
+deterministically from the spelling, so for exactly this class they are the authority and the model should
+be taught it rather than have the grapheme hidden from it. 31,224 → **32,544 pairs**, vocabulary 37 → **41**
+characters (⟨é ê û î⟩ — four, not three), and the agreement between tagger and rules on the frequent OOV
+tail went **96.4% → 98.6%**. The tag alphabet moved 62 → 68, gaining the long vowels and losing ⟨œy⟩ and
+⟨pə⟩ — ⟨ui⟩ words still read [œy] through two-grapheme alignment, spot-checked on nine of them.
+
+⚠ **The held-out split could not have found this**, because the excluded words were excluded from the
+held-out set too. A random split measures the population you kept; it says nothing about the population
+you dropped. That is the general lesson, and it is the second time in this sequence a derivation was
+measured on a sample selected to exclude the class it was getting wrong (cf. Run 15's hiatus bug).
+
+**Re-measured honestly on the new, harder held-out (4,096 of 32,548):**
+
+| | word-exact |
+|---|---|
+| rule engine | 65.5% |
+| **BiLSTM tagger** | **90.6%** |
+
+A 73% relative reduction. Lower than Run 18's 91.8% because the split now *contains* the ⟨ê û uu⟩ class it
+previously hid.
+
+### What the frequency list does NOT do
+
+It cannot score the OOV tail's accuracy — those words are by definition absent from every dictionary, so
+there is no ground truth. It measures the tail's **size** precisely and lets tagger-vs-rules disagreement
+be weighted by real frequency, which is how the defect above surfaced. Scoring it would need new data,
+and Run 18 established there is none.
+
+⚠ One caveat, shared with `nb.txt`: OpenSubtitles skews conversational, so the weighting reflects dialogue
+rather than prose. Still far closer to real text than uniform type weighting.
+
+## Run 21 — 2026-08-08 (review of PR #778 — the baseline was contaminated by my own fix)
+
+Eight findings. The one that matters is that **Run 20's fix silently corrupted its own measurement.**
+
+**1. The rule-engine baseline was self-scored.** Substituting the rule output for the class neither source
+can write means those rows have RULE-DERIVED GOLD — and on them the rule engine scores **100% by
+construction**. 223 of the 4,096 held-out rows are that class, which is exactly why the reported baseline
+moved 64.0% → 65.5% when the fix landed. The "73% relative reduction" was measured against a baseline the
+fix had inflated.
+
+Split by gold provenance, which is the honest way to read it:
+
+| held-out subset | | rule engine | **tagger** |
+|---|---|---|---|
+| **dictionary-gold — the honest comparison** | n=3,873 | 63.5% / 93.5% symbol | **91.4% / 98.7% symbol** |
+| rule-substituted gold | n=223 | 100% *(by construction)* | 74.4% |
+| whole set (what #777/#778 reported) | n=4,096 | 65.5% | 90.5% |
+
+⚠ **The honest number is BETTER for the tagger, not worse** — 91.4% against 63.5%, a **76% relative
+reduction**. The contamination was inflating the RULES (63.5 → 65.5) and deflating the tagger
+(91.4 → 90.5), because the substituted rows are the ones the tagger finds hardest. Reporting the whole-set
+figure understated the tier's value while overstating the baseline's.
+
+`af-g2p-data.tsv` now carries a **`gold` column (`dict` | `rule`)**, so the honest split is reproducible
+rather than reconstructed after the fact. That is the durable part: a derived label needs its provenance
+recorded at the moment it is derived, or the next measurement silently scores the deriver against itself.
+
+**2. The substitution bypassed the plausibility guard.** `return r` skipped the edit-distance check every
+other accept path passes. Four loanwords whose rule output is flatly wrong became training labels —
+`blues` blyːəs, `judo` jyːdu, `duvet` dyːfət, `buys` byːəis. Guard restored on that branch; those four are
+rejected again.
+
+**3–5. Six locations still described the model this PR replaced** — `language-maturity.md`,
+`referee-eval.test.ts`, `afrikaansTagger.ts`, `afrikaansNeural.ts`, `neuralRegistry.ts`, `afNeural.test.ts`
+— plus a PROVENANCE that contradicted itself (3,921 vs 4,096) and had its symbol-accuracy cell blanked while
+five other files still quoted the number it used to hold. All corrected to the dictionary-gold figures.
+
+**6. The frequency metric had no floor.** `freq/README.md` and Run 20 both call it "a standing metric" and
+the code comment calls the token-weighted number "the meaningful regression guard" — and nothing asserted
+it. A regression to 50% would have failed no test. `af: 0.90` added beside nb's 0.55.
+
+**7.** Vocabulary went 37 → **41**, not 40 (⟨é ê û î⟩ — four, not three), and the tag alphabet's 62 → 68
+move was undocumented. Both recorded; ⟨ui⟩ still reads [œy] through two-grapheme alignment.
+
+**8.** `NOTICE.md` and `LICENSES/PROVENANCE.md` both claimed the hermitdave ranking "is not reproduced".
+`nb.txt` already reproduced it and `af.txt` makes that a second, larger instance. Attribution was present
+in both file headers, so this was a stale claim rather than a missing licence — corrected in both.
+
+**Final: dictionary-gold held-out — rule engine 63.5% / 93.5%, tagger 91.4% / 98.7%.** Suite 3184.

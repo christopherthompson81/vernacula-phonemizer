@@ -4,7 +4,7 @@
  *
  * Precedence: curated af-lexicon.tsv → af-rcrl-lexicon.tsv → **tagger** → rules. The tagger sits below the
  * dictionaries because they are exact for the words they cover (86% of running-text tokens) and above the rules
- * because on the words neither covers it is far better: 91.8% vs 64.0% word-exact on a held-out split.
+ * because on the words neither covers it is far better: 91.4% vs 63.5% word-exact on a dictionary-gold held-out split.
  *
  * The shared `wordLevelNeuralPrepass` tags each distinct OOV word once and injects the readings as the sync
  * engine's oovOverride, so tokenizer / numbers / normalization / clause assembly stay byte-identical to

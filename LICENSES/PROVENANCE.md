@@ -133,7 +133,10 @@ the shipped lexicon above and under the same CC BY-SA 2.5 ZA terms, the one refe
 Wiktionary-derived (sidecar: `af.rcrl-apd.PROVENANCE.md`); the 246-referee eval set — 120 wikipron + 53 kaikki + 15 wiktionary-API + the
 CC-CEDICT check (all CC-BY-SA); 32 epitran outputs (epitran code MIT; wordlists often kaikki);
 hermitdave FrequencyWords lists (CC-BY-SA), used as **filters** for the CC0 NST lexica — the
-shipped intersections keep only NST content; the external ranking is the sole FrequencyWords
+shipped intersections keep only NST content. ⚠ BUT THE RANKING ITSELF IS NOW REPRODUCED, in
+`referee-eval/freq/nb.txt` and `freq/af.txt` (word+count pairs, tools-only, attributed in each file
+header and in freq/README.md) — this sentence used to say it was not, which stopped being true when
+nb.txt landed. Ranking data only, no pronunciation content. Elsewhere the external ranking is the
 contribution and is not reproduced (stated in NOTICE). `fa.synth-agreement.tsv` is EVAL-ONLY
 (one voter, FarsDat, has unrecorded terms — noted in `synth_referee.py`; no shipped content
 derives from it and it is not wired into referee-eval).

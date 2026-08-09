@@ -27,8 +27,8 @@ const ARABIC_VARIETY: Record<string, string | undefined> = {
 const NEURAL: Record<string, (text: string) => Promise<string>> = {
     en: phonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
     sd: phonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
-    // per-grapheme BiLSTM reading the words BOTH af lexicons miss: 91.8% vs the rules' 64.0% word-exact
-    // on a held-out split, because af's residual is stress-conditioned vowel quality — contextual, not tabulable
+    // per-grapheme BiLSTM reading the words BOTH af lexicons miss: 91.4% vs the rules' 63.5% word-exact
+    // on a dictionary-gold held-out split, because af's residual is stress-conditioned vowel quality — contextual, not tabulable
     af: phonemizeAfNeural,
     bn: phonemizeBnNeural,
     da: phonemizeDaNeural,

@@ -8,8 +8,8 @@
  * engine places stress correctly only 72.6% of the time overall and 36% at eight syllables, which is why the
  * residual it leaves is contextual rather than tabulable.
  *
- * On a 3,921-word held-out split the tagger reads **91.8% exact / 98.8% symbol**, against the rule engine's
- * **64.0% / 93.6%** on the same words — a 77% relative reduction in word error. Provenance, including why ~31k
+ * On a 3,873-word dictionary-gold held-out split the tagger reads **91.4% exact / 98.7% symbol**, against the rule engine's
+ * **63.5% / 93.5%** on the same dictionary-gold words — a 77% relative reduction in word error. Provenance, including why ~31k
  * training pairs is the ceiling for this language: af-g2p-tagger.PROVENANCE.md.
  *
  * The lazy-load + masked decode loop is the shared `createWordStructuralTagger` (core/structuralTagger.ts); this
