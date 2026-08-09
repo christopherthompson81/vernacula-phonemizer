@@ -124,7 +124,8 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
      * contributed nothing, so `50%` was byte-identical to `50` and `$5` to `5` — a silent loss no
      * downstream gate could see. Separately the number class was a bare `\d+`, so the thousands COMMA and
      * the decimal DOT were claimed by the clause branch and the number was destroyed outright.
-     * Every word is attested in the mined pcm corpus; the counts are in the SYMBOLS block.
+     * Every word is attested — in the mined pcm corpus, except ⟨percent⟩, which that corpus writes only
+     * once and which is sourced from pcm.wikipedia instead. Counts are in the SYMBOLS block.
      */
     test("the symbol tier reads %, currency and & instead of dropping them", () => {
         expect(phonemize("50%", "pcm")).toBe("fifti pasɛnt");
@@ -132,6 +133,11 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // ⚠ the corpus word is ⟨dolla⟩ ×2, not English ⟨dollar⟩ ×1 — the minority form is the English one.
         expect(phonemize("₦2,000", "pcm")).toBe("tu tauzin nɛɾa");
         expect(phonemize("fish & chips", "pcm")).toBe("fiʃ an t͡ʃips");
+        // ⚠ THE SOURCING SENTENCE ITSELF DOUBLED THE WORD: the tier's "already said it" guard was
+        // case-SENSITIVE, and running text capitalises the currency noun after a sign, so
+        // "$12.4 Billion Dolla" read *…biljan dola dola*. Fixed in core/normalizeSymbols.ts (suppression
+        // only — emission is untouched).
+        expect(phonemize("$12.4 Billion Dolla", "pcm")).toBe("twɛlv pɔint fo biljan dola");
         // the sign must not be a no-op — the exact shape of the defect the audit names
         for (const [sign, bare] of [["50%", "50"], ["$5", "5"], ["₦5", "5"]] as const)
             expect(phonemize(sign, "pcm"), sign).not.toBe(phonemize(bare, "pcm"));
@@ -174,6 +180,11 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         expect(phonemize("103rd", "pcm")).toBe("nɔmba wan hɔndɛd an tɾi");
         // the suffix must never survive as a word
         expect(phonemize("1st", "pcm")).not.toContain("stɾit");
+        // ⚠ UPPERCASE TOO — headline case is routine in this register, and a case-sensitive suffix left
+        // `1ST` reading *wan stɾit*, the exact defect this rule exists to remove.
+        expect(phonemize("1ST", "pcm")).toBe("fɛst");
+        expect(phonemize("4TH", "pcm")).toBe("nɔmba fo");
+        expect(phonemize("21ST", "pcm")).not.toContain("stɾit");
     });
 
     test("units and the Dr. abbreviation", () => {
@@ -187,6 +198,9 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // must be CONSUMED or it reads as a clause pause.
         expect(phonemize("Dr. Ada", "pcm")).toBe("dakta eda");
         expect(phonemize("Dr Zeh", "pcm")).toBe("dakta zɛ");
+        // ⚠ an ALL-CAPS ⟨DR⟩ is the country abbreviation, not the title — case-insensitive matching read
+        // `DR Congo` as "Doctor Congo".
+        expect(phonemize("DR Congo", "pcm")).not.toContain("dakta");
         // ⚠ the guard: a word merely STARTING with dr- is untouched
         expect(phonemize("Drama awod", "pcm")).toBe("dɾama awod");
         expect(phonemize("Dreamstar FC", "pcm")).toContain("dɾeamstaɾ");
@@ -207,6 +221,13 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // lexified → read as a word, not spelled
         expect(phonemize("FIFA", "pcm")).toBe("fifa");
         expect(phonemize("BBC", "pcm")).toBe("bibisi");
+        // ⚠ A DICT MISS IS NOT ENOUGH — it must also be unpronounceable. Gating on the dict alone spelled
+        // out COVID as *si o vi ai di*, plus ABIA (a state), BOGA (a language), AFCON, APGA, INEC, AIBA,
+        // NADECO — eight word-acronyms the base engine already read correctly. Requiring NO VOWEL keeps
+        // every consonant-only win and rescues all eight.
+        for (const [w, ipa] of [["COVID", "kovid"], ["ABIA", "abia"], ["AFCON", "afkon"],
+                                ["INEC", "inek"], ["NADECO", "nadeko"], ["BOGA", "boɡa"]] as const)
+            expect(phonemize(w, "pcm"), w).toBe(ipa);
         // ⚠ ⟨a⟩ is why letterNames is declared: the English dict's single-letter entry is the ARTICLE [ə],
         // not the letter name [e], so the dict alone would mis-spell any initialism containing an A.
         expect(phonemize("A.B.", "pcm")).toBe("e bi");
@@ -222,5 +243,8 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         expect(phonemize("00:05", "pcm")).toBe("ziɾo ziɾo faiv");
         // the colon must not survive as a clause pause
         expect(phonemize("5:30", "pcm")).not.toContain(",");
+        // ⚠ a three-part ratio is NOT a time: without a left guard the scan resumed after the first colon
+        // and read the tail `20:20` as a clock, swallowing a pause. `40:20:20` is in the mined corpus.
+        expect(phonemize("40:20:20", "pcm")).toBe("foti , twɛnti , twɛnti");
     });
 });

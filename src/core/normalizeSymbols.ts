@@ -506,10 +506,14 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
      */
     const saidAfter = (forms: CountForms): RegExp => {
         const conn = d.magnitudeConnective === undefined ? "" : `(?:${esc(d.magnitudeConnective)}[  ]+)?`;
-        return new RegExp(`^[  ]*${conn}(?:${forms.map(esc).join("|")})`, "u");
+        // ⚠ CASE-INSENSITIVE. Running text capitalises the currency noun (English style capitalises it after
+        // a sign), and a case-sensitive guard let it through TWICE: pcm's own sourcing sentence,
+        // "$12.4 Billion Dolla", read *…biljan dola dola*. Suppression only — emission is unaffected, so a
+        // language whose word this matches still emits its own declared form.
+        return new RegExp(`^[  ]*${conn}(?:${forms.map(esc).join("|")})`, "iu");
     };
     /** The mirror, for a PREFIX word: Turkish `yüzde 40%` was reading *yüzde yüzde kırk*. */
-    const saidBefore = (forms: CountForms): RegExp => new RegExp(`(?:${forms.map(esc).join("|")})[  ]*$`, "u");
+    const saidBefore = (forms: CountForms): RegExp => new RegExp(`(?:${forms.map(esc).join("|")})[  ]*$`, "iu");
     const PCT_AFTER = saidAfter(d.percent);
     const PCT_BEFORE = saidBefore(d.percent);
 

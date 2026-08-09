@@ -171,6 +171,18 @@ function ordinalWords(n: number): string {
  * and the rule chosen here is "letter-spelling unless lexified", so this is the specified behaviour rather
  * than an oversight; lexifying it is a one-line lexicon entry if a source turns up.
  */
+/**
+ * ⚠ A DICT MISS IS NOT ENOUGH — it must also be UNPRONOUNCEABLE. Gating on the dict alone spelled out 87 of
+ * the corpus's 133 all-caps types, and while most were wins (FC *fk*→*ɛf si*, PDP, PSV, YBNL, RCCG), eight
+ * were word-acronyms the base engine already read correctly: COVID → *si o vi ai di*, plus ABIA (a state),
+ * BOGA (a language), AFCON, APGA, INEC, AIBA, NADECO. Requiring NO VOWEL LETTER keeps every consonant-only
+ * win and rescues all eight, because a run with no vowel cannot be a syllable.
+ * ⚠ THE COST, stated: a vowel-bearing letter-acronym (LGA, PGA, AG) keeps reading as a word — unchanged
+ * from the base engine, so a smaller win rather than a regression. DOTTED forms are unaffected: the dots
+ * are an explicit instruction and are handled on their own branch.
+ */
+const isInitialism = (w: string): boolean => /^\p{Lu}{2,6}$/u.test(w) && !/[AEIOU]/u.test(w);
+
 const spellOut = (w: string): string[] =>
     [...w.toLowerCase()].map((c) => LETTER[c]).filter((x): x is string => x !== undefined);
 
@@ -196,13 +208,16 @@ function timeWords(h: number, mm: number): string[] {
  * OPTIONAL, because the corpus writes both ⟨Dr. Lateef⟩ (×3) and dotless ⟨Dr Zeh⟩ (×1). The `\b` is what
  * keeps the dotless form safe: ⟨Drama⟩ and ⟨Dreamstar⟩ continue past the `r`, so neither can match.
  */
-const ABBREV: Record<string, string> = { dr: "Doctor" };
+const ABBREV: Record<string, string> = { Dr: "Doctor", dr: "Doctor" };
 // ⚠ `\.?(?![\p{L}])`, NOT `\.?\b` — after a consumed dot the next char is a space, and `\b` between `.`
 // and ` ` is FALSE, so the dot survived and read as a clause pause (`Dr. Ada` → *dakta . eda*). The
 // negative lookahead both consumes the dot and keeps ⟨Drama⟩/⟨Dreamstar⟩ out.
-const ABBREV_RE = new RegExp(`\\b(${Object.keys(ABBREV).join("|")})\\.?(?![\\p{L}])`, "giu");
+// ⚠ NO `i` FLAG. Case-insensitive matching read the COUNTRY abbreviation `DR Congo` as *dakta kaŋɡo*
+// ("Doctor Congo") — routine in the football/news copy this engine targets. The title is written ⟨Dr⟩ or
+// ⟨dr⟩; an all-caps ⟨DR⟩ is a different word, so the alternation is explicit and the flag is dropped.
+const ABBREV_RE = new RegExp(`\\b(${Object.keys(ABBREV).join("|")})\\.?(?![\\p{L}])`, "gu");
 const expandAbbrev = (s: string): string =>
-    s.replace(ABBREV_RE, (_m, w: string) => ABBREV[w.toLowerCase()]!);
+    s.replace(ABBREV_RE, (_m, w: string) => ABBREV[w]!);
 
 // ⚠ ALL OF LATIN, not just ASCII — `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became
 // an unclaimed gap read as an English LETTER NAME and the rest of the word started over: `São Paulo` read
@@ -226,8 +241,8 @@ const expandAbbrev = (s: string): string =>
 // the ordinal before the Latin run (else `1st` splits and ⟨st⟩ nativises to *stɾit*, "street"); the dotted
 // initialism before it too (else `A.I.` splits on the dots and ⟨I⟩ hits the pcm PRONOUN lexicon → *a*).
 const TOKEN = new RegExp(
-    `(\\d{1,2}):([0-5]\\d)(?![\\d:])` +
-        `|(\\d+)(?:st|nd|rd|th)(?![\\p{L}])` +
+    `(?<![\\d:])(\\d{1,2}):([0-5]\\d)(?![\\d:])` +
+        `|(\\d+)(?:st|nd|rd|th|ST|ND|RD|TH)(?![\\p{L}])` +
         `|((?:\\p{L}\\.){2,})` +
         `|(${LATIN_RUN})` +
         `|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)` +
@@ -242,8 +257,12 @@ const TOKEN = new RegExp(
  * dump-sourced, so the counts are real rates rather than an artifact of a search.
  */
 const SYMBOLS = makeSymbolNormalizer({
-    // ⟨percent⟩ ×9, against 27 `%` signs. The sign is written AFTER the number in every corpus instance
-    // ("35%", "87.14%", "70%"), which is this tier's default, so no `percentPrefix`.
+    // ⚠ ⟨percent⟩ IS THE ONE WORD HERE NOT CARRIED BY THE MINED CORPUS — it has 27 `%` signs but only ONE
+    // instance of the word. (An earlier count of ×9 was wrong: the grep was matching the corpus's own
+    // "cell": "percent" LABELS, i.e. its metadata, not its text.) Sourced instead from pcm.wikipedia the way
+    // ⟨kilomita⟩/⟨mita⟩ were — "85 percent" (Yuganda), "reduce by about 0.87 percent" (Climate change in
+    // Zambia). The sign follows the number in every corpus instance ("35%", "87.14%", "70%"), this tier's
+    // default, so no `percentPrefix`.
     percent: ["percent"],
     // ⚠ THE CURRENCY WORD IS ⟨dolla⟩, NOT ⟨dollar⟩. The corpus writes ⟨Dolla⟩ ×2 ("$12.4 Billion Dolla")
     // against ⟨dollars⟩ ×1 — the English spelling is the minority form here, and the sourcing rule is the
@@ -303,7 +322,7 @@ class NaijaPhonemizer implements Phonemizer {
             } else if (m[5]) {
                 const w = foldLatinToBase(m[5]);
                 // A bare ALL-CAPS run is an initialism unless the dict lexifies it (see spellOut's note).
-                if (/^\p{Lu}{2,6}$/u.test(w) && DEF.lexicon[w.toLowerCase()] === undefined && this.foreign?.(w.toLowerCase()) === undefined)
+                if (isInitialism(w) && DEF.lexicon[w.toLowerCase()] === undefined && this.foreign?.(w.toLowerCase()) === undefined)
                     for (const ph of spellOut(w)) sink.emit(ph);
                 else sink.emit(phonemizeWord(w, this.foreign));
             } else if (m[6]) {
