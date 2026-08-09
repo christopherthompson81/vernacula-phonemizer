@@ -19,28 +19,35 @@ It also had to wait for data. Earlier analysis (docs/afrikaans_stress_investigat
 
 ## Held-out results
 
-3,921 words held out by md5 of the word (90/10, the house policy). The aligner, vocabulary and model saw
-only the 27,303-word train split.
+**4,096** words held out by md5 of the word (90/10, the house policy). The aligner, vocabulary and model saw
+only the 28,448-word train split.
 
-| | word-exact | symbol accuracy |
-|---|---|---|
-| rule engine (`phonemizeWordRules`) | 65.5% | 93.9% |
-| **BiLSTM tagger** | **90.6%** | — |
+⚠ **THE SPLIT MUST BE TAKEN BY GOLD PROVENANCE.** 223 of the held-out rows carry labels the vetting
+*substituted from the rules* (the long vowels neither source can write). On those the rule engine scores
+**100% by construction**, so a whole-set comparison flatters it — 65.5% instead of 63.5%, which is exactly
+what #778's first draft reported. `af-g2p-data.tsv` now carries a `gold` column (`dict` | `rule`) so the
+honest split is reproducible rather than reconstructed.
 
-A **73% relative reduction in word error**. (4,096 held out of 32,548 pairs.) ⚠ The rule engine's number here is *lower* than its 79.5%
+| held-out subset | | rule engine | **BiLSTM tagger** |
+|---|---|---|---|
+| **dictionary-gold — the honest comparison** | n=3,873 | 63.5% / 93.5% symbol | **91.4% / 98.7% symbol** |
+| rule-substituted gold | n=223 | 100% *(by construction)* | 74.4% |
+| whole set | n=4,096 | 65.5% | 90.5% |
+
+**A 76% relative reduction in word error** on the dictionary-gold rows. ⚠ The rule engine's number here is *lower* than its 79.5%
 referee score because this split is dictionary-shaped — long, rare, Latinate words — which is exactly the
 population the OOV tier serves.
 
 ## Training data
 
-`tools/afrikaans/af-g2p-data.tsv` — **32,548 vetted pairs**, built by `tools/afrikaans/build_af_g2p_data.ts`
+`tools/afrikaans/af-g2p-data.tsv` — **32,544 vetted pairs**, built by `tools/afrikaans/build_af_g2p_data.ts`
 from the union of both open Afrikaans pronunciation dictionaries:
 
 | source | entries | licence | contribution |
 |---|---|---|---|
-| RCRL Afrikaans Pronunciation Dictionary v1.4.1 (CTexT/NWU via ttslab/za_lex) | 27,428 | CC BY-SA 2.5 ZA | 27,389 |
+| RCRL Afrikaans Pronunciation Dictionary v1.4.1 (CTexT/NWU via ttslab/za_lex) | 27,428 | CC BY-SA 2.5 ZA | 27,385 |
 | NCHLT-inlang Afrikaans (DAC / CSIR / NWU, via SADiLaR) | 15,094 | CC BY 3.0 | 5,159 |
-| — rejected by vetting | | | 38 |
+| — rejected by vetting | | | 42 |
 
 ⚠ **~31k is the CEILING for this language.** The third open dictionary, **Lwazi Afrikaans** (4,998,
 CC BY 2.5 ZA), was checked and adds **zero** headwords — every one is already in RCRL. There is no
@@ -64,6 +71,8 @@ the tagger declined on them (safe but inert), and left ⟨uu⟩ HALF-learned —
 did not decline and emitted `natuurlik` → *natœœrlək* for natyːrlək. The rules derive that length
 deterministically from the spelling, so for exactly this class they are the authority and the model should
 be taught it. Caught by the af frequency list (Run 20), not by the held-out split.
+⚠ The substitution is still subject to the plausibility guard: without it, four loanwords whose rule output
+is flatly wrong (`blues` blyːəs, `judo` jyːdu, `duvet`, `buys`) became training labels.
 
 ## Convention
 

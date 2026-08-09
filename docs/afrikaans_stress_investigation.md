@@ -1048,8 +1048,10 @@ which removed ⟨ê û î⟩ from the character vocabulary entirely. Two differe
 
 Fixed by **substituting the rule output rather than dropping the word**: the rules derive that length
 deterministically from the spelling, so for exactly this class they are the authority and the model should
-be taught it rather than have the grapheme hidden from it. 31,224 → **32,548 pairs**, vocabulary 37 → 40
-characters, and the agreement between tagger and rules on the frequent OOV tail went **96.4% → 98.6%**.
+be taught it rather than have the grapheme hidden from it. 31,224 → **32,544 pairs**, vocabulary 37 → **41**
+characters (⟨é ê û î⟩ — four, not three), and the agreement between tagger and rules on the frequent OOV
+tail went **96.4% → 98.6%**. The tag alphabet moved 62 → 68, gaining the long vowels and losing ⟨œy⟩ and
+⟨pə⟩ — ⟨ui⟩ words still read [œy] through two-grapheme alignment, spot-checked on nine of them.
 
 ⚠ **The held-out split could not have found this**, because the excluded words were excluded from the
 held-out set too. A random split measures the population you kept; it says nothing about the population
@@ -1075,3 +1077,53 @@ and Run 18 established there is none.
 
 ⚠ One caveat, shared with `nb.txt`: OpenSubtitles skews conversational, so the weighting reflects dialogue
 rather than prose. Still far closer to real text than uniform type weighting.
+
+## Run 21 — 2026-08-08 (review of PR #778 — the baseline was contaminated by my own fix)
+
+Eight findings. The one that matters is that **Run 20's fix silently corrupted its own measurement.**
+
+**1. The rule-engine baseline was self-scored.** Substituting the rule output for the class neither source
+can write means those rows have RULE-DERIVED GOLD — and on them the rule engine scores **100% by
+construction**. 223 of the 4,096 held-out rows are that class, which is exactly why the reported baseline
+moved 64.0% → 65.5% when the fix landed. The "73% relative reduction" was measured against a baseline the
+fix had inflated.
+
+Split by gold provenance, which is the honest way to read it:
+
+| held-out subset | | rule engine | **tagger** |
+|---|---|---|---|
+| **dictionary-gold — the honest comparison** | n=3,873 | 63.5% / 93.5% symbol | **91.4% / 98.7% symbol** |
+| rule-substituted gold | n=223 | 100% *(by construction)* | 74.4% |
+| whole set (what #777/#778 reported) | n=4,096 | 65.5% | 90.5% |
+
+⚠ **The honest number is BETTER for the tagger, not worse** — 91.4% against 63.5%, a **76% relative
+reduction**. The contamination was inflating the RULES (63.5 → 65.5) and deflating the tagger
+(91.4 → 90.5), because the substituted rows are the ones the tagger finds hardest. Reporting the whole-set
+figure understated the tier's value while overstating the baseline's.
+
+`af-g2p-data.tsv` now carries a **`gold` column (`dict` | `rule`)**, so the honest split is reproducible
+rather than reconstructed after the fact. That is the durable part: a derived label needs its provenance
+recorded at the moment it is derived, or the next measurement silently scores the deriver against itself.
+
+**2. The substitution bypassed the plausibility guard.** `return r` skipped the edit-distance check every
+other accept path passes. Four loanwords whose rule output is flatly wrong became training labels —
+`blues` blyːəs, `judo` jyːdu, `duvet` dyːfət, `buys` byːəis. Guard restored on that branch; those four are
+rejected again.
+
+**3–5. Six locations still described the model this PR replaced** — `language-maturity.md`,
+`referee-eval.test.ts`, `afrikaansTagger.ts`, `afrikaansNeural.ts`, `neuralRegistry.ts`, `afNeural.test.ts`
+— plus a PROVENANCE that contradicted itself (3,921 vs 4,096) and had its symbol-accuracy cell blanked while
+five other files still quoted the number it used to hold. All corrected to the dictionary-gold figures.
+
+**6. The frequency metric had no floor.** `freq/README.md` and Run 20 both call it "a standing metric" and
+the code comment calls the token-weighted number "the meaningful regression guard" — and nothing asserted
+it. A regression to 50% would have failed no test. `af: 0.90` added beside nb's 0.55.
+
+**7.** Vocabulary went 37 → **41**, not 40 (⟨é ê û î⟩ — four, not three), and the tag alphabet's 62 → 68
+move was undocumented. Both recorded; ⟨ui⟩ still reads [œy] through two-grapheme alignment.
+
+**8.** `NOTICE.md` and `LICENSES/PROVENANCE.md` both claimed the hermitdave ranking "is not reproduced".
+`nb.txt` already reproduced it and `af.txt` makes that a second, larger instance. Attribution was present
+in both file headers, so this was a stale claim rather than a missing licence — corrected in both.
+
+**Final: dictionary-gold held-out — rule engine 63.5% / 93.5%, tagger 91.4% / 98.7%.** Suite 3184.

@@ -79,7 +79,7 @@ const MISSING_LONG = LONG.filter((v) =>
 /** Vet an entry against the rule output — dictionary wins on lexical knowledge, rules on systematic
  *  phonology. Mirrors build_af_lexicon.ts, MINUS its primary-referee guard: that guard exists to stop the
  *  lexicon overriding adjudicated words at SERVING time, but those rows are correct and belong in training. */
-function vet(w: string, entry: string): string | undefined {
+function vet(w: string, entry: string): { ipa: string; gold: "dict" | "rule" } | undefined {
     const r = phonemizeWordRules(w);
     // ⚠ SUBSTITUTE THE RULE, DO NOT DROP THE WORD. The shipped LEXICON drops this class (neither source can
     // write ɛː/œː/yː, so their entries would flatten a length the engine marks). Dropping it from TRAINING too
@@ -88,21 +88,29 @@ function vet(w: string, entry: string): string | undefined {
     // decline and instead emits natuurlik → *natœœrlək for natyːrlək. The rules derive this length
     // DETERMINISTICALLY from the spelling, so for exactly this class they are the authority: teach it to the
     // model rather than hiding the grapheme from it. Found by the af frequency list — natuurlik is common.
-    for (const long of MISSING_LONG) if (r.includes(long) && !entry.includes(long)) return r;
+    // ⚠ STILL SUBJECT TO THE PLAUSIBILITY GUARD BELOW. Substituting the rule blindly hands the model a
+    // rule-derived label even where the rule is flatly wrong — `blues` dict=bluz → rules=blyːəs,
+    // `judo` dict=dʒudœu → rules=jyːdu, `duvet`, `buys`: loanwords whose spelling the length rule cannot
+    // read. Those four were correctly rejected before this branch existed, so the branch must not skip the
+    // check that rejected them.
+    for (const long of MISSING_LONG) {
+        if (!r.includes(long)) continue;
+        return editDistance(entry, r) > Math.max(3, Math.ceil(r.length * 0.5)) ? undefined : { ipa: r, gold: "rule" };
+    }
     let ipa = entry;
     const voiced: Record<string, string> = { b: "p", d: "t", z: "s", v: "f", ɡ: "χ" };
     const last = [...ipa].at(-1)!;
     if (voiced[last] && [...r].at(-1) === voiced[last]) ipa = ipa.slice(0, -1) + voiced[last];
     if (ipa !== r && ipa.length === r.length + 1) {
         for (let i = 0; i < ipa.length; i++)
-            if (ipa[i] === "ə" && ipa.slice(0, i) + ipa.slice(i + 1) === r) return r;
+            if (ipa[i] === "ə" && ipa.slice(0, i) + ipa.slice(i + 1) === r) return { ipa: r, gold: "rule" };
     }
-    if (ipa !== r && r.slice(1) === ipa) return r;
+    if (ipa !== r && r.slice(1) === ipa) return { ipa: r, gold: "rule" };
     if (editDistance(ipa, r) > Math.max(3, Math.ceil(r.length * 0.5))) return undefined;
-    return ipa;
+    return { ipa, gold: "dict" };
 }
 
-const pairs = new Map<string, string>();
+const pairs = new Map<string, { ipa: string; gold: string }>();
 const stats = { rcrl: 0, nchlt: 0, rejected: 0 };
 // RCRL first — it is the larger and better-specified source, so it wins any headword collision.
 for (const [word, ipa] of rcrlRows) {
@@ -126,12 +134,17 @@ for (const [word, phones] of nchltRows) {
 
 // ── 90/10 held-out, by md5 of the WORD — the house policy (nb/da/fr), so the split is stable across runs
 // and independent of insertion order. English's frequency-tail policy needs a frequency list, which af lacks.
-const rows = [...pairs].map(([w, ipa]) => {
+// ⚠ THE GOLD-PROVENANCE COLUMN IS LOAD-BEARING, not bookkeeping. Where the vetting SUBSTITUTED the rule
+// output, the rule engine scores 100% on that row BY CONSTRUCTION — so a rule-vs-tagger comparison over the
+// whole held-out set flatters the rules. Review of #778 caught exactly that inflating the reported baseline.
+// Recording it here makes the honest split (dict-gold rows only) reproducible instead of reconstructed.
+const rows = [...pairs].map(([w, v]) => {
     const held = createHash("md5").update(w).digest("hex").charCodeAt(0) % 10 === 0;
-    return `${w}\t${ipa}\t${held ? "test" : "train"}`;
+    return `${w}\t${v.ipa}\t${held ? "test" : "train"}\t${v.gold}`;
 });
-writeFileSync(join(HERE, "af-g2p-data.tsv"), `# word\tIPA\tsplit — built by tools/afrikaans/build_af_g2p_data.ts\n${rows.join("\n")}\n`);
-const test = rows.filter((r) => r.endsWith("test")).length;
+writeFileSync(join(HERE, "af-g2p-data.tsv"), `# word\tIPA\tsplit\tgold(dict|rule) — built by tools/afrikaans/build_af_g2p_data.ts\n${rows.join("\n")}\n`);
+const test = rows.filter((r) => r.split("\t")[2] === "test").length;
 console.log(`long vowels neither source can write: ${MISSING_LONG.join(" ") || "(none)"}`);
 console.log(`wrote ${rows.length} pairs (RCRL ${stats.rcrl} + NCHLT ${stats.nchlt}; ${stats.rejected} rejected by vetting)`);
-console.log(`  train ${rows.length - test}   held-out ${test}`);
+const ruleGold = rows.filter((r) => r.split("\t")[3] === "rule").length;
+console.log(`  train ${rows.length - test}   held-out ${test};  gold: ${rows.length - ruleGold} dict / ${ruleGold} rule-substituted`);
