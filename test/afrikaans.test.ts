@@ -194,6 +194,31 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(decompose("polsslag").parts).toEqual(["pols", "slag"]);
     });
 
+    // ── UNSTRESSED OPEN SYLLABLE (#774) ──────────────────────────────────────────────────────────────
+    // The engine applied `unstressedReduction` to every unstressed vowel regardless of syllable shape, so it
+    // had no table for the unstressed-but-OPEN cell. The Germanic open/closed rule does not switch off
+    // outside the stress — the vowel keeps the TENSE quality, just short. Derived from the RCRL secondary's
+    // 25,247 stress-and-syllable-annotated words; ⟨o⟩ and ⟨u⟩ shipped, ⟨i⟩ was measured and REJECTED because
+    // it cost 9 words on the independent primary (see the manifest note).
+    test("an unstressed OPEN syllable keeps the tense vowel quality, short", () => {
+        // ⟨o⟩ ɔ→u — every one of these is RCRL-EXACT, not merely closer.
+        expect(phonemizeWord("kilometer")).toBe("kilumiətər"); // RCRL ˈki.lu.miə.tər — was *kilɔmiətər*
+        expect(phonemizeWord("kilogram")).toBe("kiluχram"); // RCRL ˈki.lu.xram
+        expect(phonemizeWord("advokaat")).toBe("atfukɑːt"); // RCRL at.fu.ˈkɑːt
+        expect(phonemizeWord("ammoniete")).toBe("amunitə"); // RCRL a.mu.ˈni.tə
+        // ⟨u⟩ œ→y — the cell with the only INDEPENDENT word-level evidence (+4 on the primary), and it had no
+        // test at all until review: deleting the manifest entry left all 37 af tests green while silently
+        // changing ~1,100 stems.
+        expect(phonemizeWord("formule")).toBe("fɔrmylə"); // RCRL fɔr.ˈmy.lə
+        expect(phonemizeWord("akkuraat")).toBe("akyrɑːt"); // RCRL a.ky.ˈrɑːt
+        expect(phonemizeWord("afsku")).toBe("afsky"); // RCRL ˈaf.sky
+        // ⚠ AND THE UNSTRESSED-CLOSED CELL IS UNTOUCHED — confirmed by the same derivation (ɔ 97%, œ 97%).
+        expect(phonemizeWord("kanon")).toBe("kɑːnɔn"); // unstressed-open ⟨a⟩ + CLOSED ⟨o⟩ → ɔ; RCRL ka.ˈnɔn
+        // ⚠ NOT a control for that cell, and it was mislabelled as one: `muskiet` takes first-syllable stress
+        // here, so its ⟨u⟩ pins `vowelsShort`, not `unstressedReduction`. Kept as the STRESSED-closed pin it is.
+        expect(phonemizeWord("muskiet")).toBe("mœskit"); // stressed closed ⟨u⟩ → œ
+    });
+
     test("proper nouns come from the LEXICON, not the spelling rules", () => {
         // af-lexicon.tsv (~50 referee-sourced entries; circularity documented in
         // af-lexicon.PROVENANCE.md): name orthography no Afrikaans rule can derive.
@@ -255,7 +280,9 @@ describe("Afrikaans text normalization", () => {
         expect(ph("100,000 mense")).toBe("ɦɔndərt dœysənt mɛnsə");
         // ⚠ THE NUMERALS MOVED tv→tw IN #773 (twee, twaalf, twintig): the ⟨Cw⟩ onset is the glide, RCRL 53:0
         // for ⟨tw⟩ against the primary's 2:2. Not a normalization change — the same words, read correctly.
-        expect(ph("12.8 km")).toBe("twɑːlf kɔma aχt kilɔmiətər");
+        // ⚠ kilometer MOVED ɔ→u IN #774: the ⟨o⟩ is unstressed and OPEN, a cell the engine had no table for.
+        // RCRL ˈki.lu.miə.tər (and kilogram ˈki.lu.xram) — the old golden was wrong, not the new reading.
+        expect(ph("12.8 km")).toBe("twɑːlf kɔma aχt kilumiətər");
         expect(ph("2.3 miljoen")).toBe("twiə kɔma dri məljun");
     });
 
@@ -274,9 +301,9 @@ describe("Afrikaans text normalization", () => {
     });
 
     test("rates, percent, currency and units use Afrikaans words", () => {
-        expect(ph("480 km/h")).toBe("fir ɦɔndərt ɛn taχtəχ kilɔmiətər pɛr yːr");
+        expect(ph("480 km/h")).toBe("fir ɦɔndərt ɛn taχtəχ kilumiətər pɛr yːr");
         expect(ph("35 mm")).toBe("fəif ɛn dɛrtəχ məlimətər");
-        expect(ph("3 850 km²")).toBe("dri aχt ɦɔndərt ɛn fəiftəχ firkantə kilɔmiətər");
+        expect(ph("3 850 km²")).toBe("dri aχt ɦɔndərt ɛn fəiftəχ firkantə kilumiətər");
         expect(ph("93%")).toBe("dri ɛn niəχəntəχ pɛrsɛnt");
         expect(ph("£27 miljoen")).toBe("siəvə ɛn twəntəχ məljun pɔnt");
         expect(ph("$2.3 biljoen")).toBe("twiə kɔma dri bəljun dɔlar");
@@ -334,14 +361,14 @@ describe("Afrikaans text normalization", () => {
     // English FLEURS set), so BOTH conventions have to read. Three digits after the comma is the grouping,
     // one or two is a decimal — a comma decimal used to read as a clause PAUSE inside the number.
     test("a comma is the grouping at three digits and the decimal at one or two", () => {
-        expect(ph("12,5 kilometer")).toBe("twɑːlf kɔma fəif kilɔmiətər"); // was *twaalf , vyf*
+        expect(ph("12,5 kilometer")).toBe("twɑːlf kɔma fəif kilumiətər"); // was *twaalf , vyf*
         expect(ph("3,5 miljoen")).toBe("dri kɔma fəif məljun");
         expect(ph("17,500 myl")).toBe("siəvəntin dœysənt fəif ɦɔndərt məil"); // still the grouping
         expect(ph("In 1990, 5 mense")).toBe("ən dœysənt niəχə ɦɔndərt ɛn niəχəntəχ , fəif mɛnsə"); // a clause comma
     });
 
     test("a version dot is 802.11n and Figuur N.N — a decimal glued to its unit is not", () => {
-        expect(ph("12.5km")).toBe("twɑːlf kɔma fəif kilɔmiətər"); // was *twaalf punt vyf kilometer*
+        expect(ph("12.5km")).toBe("twɑːlf kɔma fəif kilumiətər"); // was *twaalf punt vyf kilometer*
         // ⚠ The trailing standard-suffix letter is SPELLED (n → "en" [ɛn]), which is what a reader says —
         // and what #761 fixed. It used to emit a bare [n], not a sayable syllable on its own.
         expect(ph("802.11n")).toBe("aχt ɦɔndərt ɛn twiə pœnt ɛlf ɛn");

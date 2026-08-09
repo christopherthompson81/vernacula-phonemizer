@@ -580,3 +580,111 @@ header still described one referee and the old ⟨sw/dw⟩ fold. All corrected �
 reduction/length core layer is still open.
 
 **Final: primary 1760/2220 (79.3%) / 94.4% symbol · secondary 17,447/27,428 (63.6%) / 93.2% symbol.**
+
+## Run 12 — 2026-08-08 (the reduction mapping, DERIVED — the lever Run 9 pointed at)
+
+Run 9/10 said: the residual is reduction and length, the new secondary carries stress AND syllable
+boundaries for 27k words, so derive the mapping instead of training on it. Done.
+
+**The extraction.** RCRL gives, per word, a stress digit and a phone count per syllable. Pair
+**vowel-letter group k of the spelling with syllable k of the transcription**, keep only words where the
+two counts agree — **25,247 of 27,428 usable** — and every one of the engine's vowel cells can be read
+straight off the data: (letter × stressed? × open?) → nucleus.
+
+**The engine had 20 cells and a hole.** `unstressedReduction` was applied to every unstressed vowel
+*regardless of syllable shape*, so the unstressed-**open** cell did not exist. It should: the Germanic
+open/closed rule does not switch off outside the stress — the vowel keeps the TENSE quality, just short.
+
+| cell | ours | RCRL |
+|---|---|---|
+| stressed closed | a ɛ ə ɔ œ | a 98 · ɛ+æ 100 · ə 99 · ɔ 100 · œ 94 — **all confirmed** |
+| stressed open | ɑː iə i uə yː | ɑː 74 · iə 68 · **ə 64** · uə 63 · y 50 |
+| unstressed closed | a ə ə ɔ œ | a 98 · ə 78 · ə 100 · ɔ 97 · œ 97 — **all confirmed** |
+| unstressed OPEN | *(no table — fell through to closed)* | a 77 · ə 90 · **ə 55** · **u 53** · **y 65** |
+
+**17 of 20 cells confirmed the manifest**, which is itself the strongest corroboration the vowel system
+has ever had. Three contradicted it, and only two shipped:
+
+| candidate | RCRL | primary (INDEPENDENT) | secondary | kept |
+|---|---|---|---|---|
+| ⟨o⟩ unstressed-open ɔ→u | u 53 / ɔ 25 / uə 21 (n=1846) | ±0 | **+222** | yes |
+| ⟨u⟩ unstressed-open œ→y | y 65 / œ 30 (n=568) | **+4** | **+96** | yes |
+| ⟨i⟩ unstressed-open →ə | ə 55 / i 45 (n=2771) | **−9** | +174 | **no** |
+| ⟨a⟩ →ɑː *(control)* | a 77 — i.e. ours | −23 | +37 | no |
+| ⟨e⟩ →iə *(control)* | ə 90 — i.e. ours | −54 | −1719 | no |
+
+⚠ **THE CIRCULARITY IS THE WHOLE METHODOLOGICAL POINT.** RCRL is now a REFEREE; deriving tables from it
+and then scoring against it proves nothing — it is the same trap `phonemizeWordRules` exists to avoid
+(#770). So the **en.wiktionary primary is the arbiter**, and it is what rejected ⟨i⟩: RCRL prefers [ə]
+there and the primary's *own* derivation agrees (ə 58%) — but on **12 words**, while the primary's
+2220-word eval says −9. Twelve rows of derivation do not outweigh a direct measurement on the whole set.
+⟨i⟩ keeps its existing tense/lax-by-syllable rule.
+
+The two **controls** are what validate the method: ⟨a⟩ and ⟨e⟩ were swept toward values RCRL itself says
+are wrong, and both duly lost. A derivation that cannot fail is not evidence.
+
+⚠ Note the primary has **no data at all** in the ⟨o⟩/⟨u⟩ unstressed-open cells (n below threshold in its
+1,342 usable rows), which is why ⟨o⟩ reads ±0 rather than confirming. It is a 2220-word dictionary
+sample; the cell is simply not attested there. Kept on RCRL's 1,846 + linguistic coherence, with the
+primary confirming no harm — and ⟨u⟩ independently confirming at +4.
+
+**Result: primary 1764/2220 (79.3% → 79.5%), symbol 94.4% → 94.7%; secondary 17,765/27,428 (63.6% →
+64.8%), symbol 93.2% → 93.8%.** Both metrics up on both sources. Floor 0.78 → 0.79.
+
+Five goldens moved ɔ→u (kilometer, kilogram): RCRL writes `ˈki.lu.miə.tər` and `ˈki.lu.xram`, so the old
+expectations were wrong, not the new reading.
+
+**What is left, and it is now a stress problem after all.** `polisie` → puəlisi where RCRL has pu.ˈli.si:
+the VOWEL rule is right, the STRESS is on the wrong syllable, and a wrongly-stressed syllable then takes
+the stressed-open value (uə) instead of the unstressed-open one (u). Run 4's oracle bounded stress at
+~45 words *on the primary* — but that oracle was measured against a 2220-word sample with the
+unstressed-open hole still in the engine, and the two interact. **Re-running the oracle against RCRL's
+27k real stress marks is the obvious next measurement**, and unlike in Run 4 the data now exists to do it.
+
+## Run 13 — 2026-08-08 (review of PR #774)
+
+Five findings. The substantive one is that **I skipped the repo's own gate.**
+
+**1. The stem-list diff was not run — the gate Run 7 exists to enforce.** Both the catalogue and the
+floor comment carry "⚠ THE REFEREE IS 2220 WORDS AND THE STEM LIST IS 53k: diff the stem list before
+believing a +N/−0", written *by Run 7*, after a 143-word stem diff got `shortHeads` reverted. This
+change rewrites **4,741 of 53,344 stems (8.9%)** — 33× larger — and Run 12 recorded no stem diff at all.
+
+Run now, and the direction is what matters at that scale, not the count:
+
+| | toward the referee | away | n |
+|---|---|---|---|
+| **en.wiktionary primary (INDEPENDENT)** | **35** | **2** | 39 covered |
+| RCRL (derivation source — circular, for completeness) | 809 | 56 | 890 covered |
+
+3,851 of the touched words are in no referee at all. So the change is ~95% correct in direction on the
+independent source where it has any coverage — which is the evidence Run 12 should have shown and
+didn't. ⚠ It also explains the ⟨o⟩ cell's odd-looking **0 gained / 0 lost** on the primary's 30
+word-exact rows: those 30 words are wrong both before and after for *other* reasons, so word-exact
+cannot see the improvement. The distance metric can, and so can symbol accuracy (94.4% → 94.7%).
+
+**2. A known-wrong output was presented as corroboration.** The `polisie` assertion carried the comment
+"(our stress differs, the vowel does not)" — false: we emit [uə] and RCRL has [u], which is the *whole*
+point Run 12 makes in its own closing paragraph. Worse, the assertion is invariant under
+`unstressedOpen: {}`, so it demonstrated nothing about the feature it sat inside. Removed and replaced
+with four RCRL-EXACT words.
+
+**3. The ⟨u⟩ cell had zero test coverage** — deleting it from the manifest left all 37 af tests green,
+while silently changing ~1,100 stems. And it is the cell with the *only* independent word-level evidence
+(+4 on the primary). Now pinned on `formule` fɔrmylə, `akkuraat` akyrɑːt, `afsku` afsky, all RCRL-exact.
+
+**4. `muskiet` was mislabelled** as an unstressed-closed control; `stressedNucleus` puts stress on its
+first syllable, so it pins `vowelsShort.u`, not `unstressedReduction.u`. Relabelled rather than moved —
+it is a fine stressed-closed pin, it just was not testing what the banner above it claimed. Only `kanon`
+actually exercises an unstressed cell there.
+
+**5. The re-opened stress claim was left unqualified in three places.** Run 12's own conclusion re-opens
+Run 4's "stress is worth ~45 words, the residual is segmental" — the oracle was measured with the
+unstressed-open hole still in the engine, and the two interact. But `docs/language-maturity.md` still
+listed the reduction mapping as *outstanding* (this PR implements it) and still asserted the bounded-stress
+finding flatly, as did `catalogue.tsv` and the floor comment (which had gained the `unstressedOpen`
+paragraph but kept the old claim beside it). All three now carry the caveat and name the next measurement.
+
+**No correctness bug was found in the engine change itself.** The reviewer independently checked the
+`isOpen` word-final/medial conflation — RCRL's 116 words spelled `-o#` are ~100% [u]/[uə] and zero [ɔ],
+so the single cell is not over-applying — and reproduced every number in the PR.
