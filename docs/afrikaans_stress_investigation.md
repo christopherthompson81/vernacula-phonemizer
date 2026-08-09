@@ -892,3 +892,117 @@ rather than inherited.
 
 **Result on the INDEPENDENT primary: rules 79.5% → shipped 86.1%, +147 words, 0 regressions**
 (the reviewed version was 85.0%, +123, with 29 regressions). 25,112 entries.
+
+## Run 18 — 2026-08-08 (the OOV tagger — trained, measured, wired)
+
+Run 16 said the OOV tail was finally *defined* and every precondition for a neural tier met. Both held.
+
+### The data hunt first, because the answer bounds everything else
+
+| source | entries | licence | new headwords vs RCRL |
+|---|---|---|---|
+| RCRL Afrikaans Pronunciation Dictionary | 27,428 | CC BY-SA 2.5 ZA | — |
+| **NCHLT-inlang Afrikaans** | 15,094 | **CC BY 3.0** | **+5,160** |
+| **Lwazi Afrikaans** | 4,998 | CC BY 2.5 ZA | **0** |
+| | | **union** | **32,595** |
+
+⚠ **Lwazi adds literally nothing** — every headword is already in RCRL. And NCHLT is **96.6% identical to
+RCRL** on their 9,871-word overlap, which its own README explains: the dictionaries were "created using
+existing resources, and these then verified by language practitioners". All three are one NWU/CSIR lineage.
+
+So **~32.6k is the ceiling for Afrikaans** and no further searching will move it. That is fine for
+TRAINING (the value is coverage) and disqualifying for REFEREEING — NCHLT is deliberately *not* wired as a
+referee, since 96.6% agreement would manufacture corroboration.
+
+For scale: the repo's measured starvation line is ~10k pairs (da's provenance) and the shipped Sindhi
+tagger trains on 9,274. af sits mid-fleet — above sd, below bn's ~60k, far below nb/da's 199k NST.
+
+### Held-out result
+
+31,224 vetted pairs (vetted against `phonemizeWordRules` exactly as the shipped lexicon is), split 90/10 by
+md5 of the word. The aligner, vocabulary and model saw only the 27,303-word train split.
+
+| | word-exact | symbol |
+|---|---|---|
+| rule engine | 64.0% | 93.6% |
+| **BiLSTM tagger** | **91.8%** | **98.8%** |
+
+**A 77% relative reduction in word error.** ⚠ The rule engine scores *lower* here than its 79.5% referee
+number because this split is dictionary-shaped — long, rare, Latinate words — which is precisely the
+population an OOV tier serves. That is the point: the tail is where the rules are worst.
+
+### Wiring
+
+Precedence: **curated `af-lexicon.tsv` → `af-rcrl-lexicon.tsv` → tagger → rules.** The tagger sits below the
+dictionaries (exact where they apply) and above the rules (far better where they do not). Injected as the
+sync engine's `oovOverride`, so tokenizer, numbers, normalization and clause assembly stay byte-identical
+to `phonemize(text, "af")` — only OOV word readings change, and the sync path is untouched. 2.2 MB int8,
+in line with the fleet's other taggers.
+
+⚠ **No stress marks in the tag alphabet**, unlike Norwegian's tagger, which embeds ˈ deliberately. af emits
+no stress by convention, so the model has to carry the stress information in the VOWEL QUALITY instead —
+which is exactly the thing Run 14 showed the rules cannot get (72.6% placement overall, 36% at eight
+syllables). Pinned by a test: the tagger must never emit ˈ, ˌ or a syllable dot, or its output would be
+inconsistent with every word the other two tiers produce.
+
+### Where af stands after this sequence
+
+| | start | now |
+|---|---|---|
+| primary referee (rules only) | 78.6% | **79.5%** |
+| second referee | *none existed* | **65.2%** on 27,428 words |
+| shipped path vs the independent primary | 79.5% | **86.1%**, 0 regressions |
+| OOV words (held-out) | 64.0% | **91.8%** |
+
+**What is left, honestly:** the tagger's own 8.2% held-out miss, which is now the frontier and is not
+obviously reducible without data that does not exist; and the ~14% of running-text tokens outside both
+dictionaries, which the tagger serves but which no measurement here scores directly — the mined corpus is
+2,473 tokens and normalization-shaped. **A frequency list for af (`tools/referee-eval/freq/af.txt`) is the
+cheapest next thing**: it would switch on the eval's frequency-weighted metric, which is the number that
+actually reflects TTS quality, and would let the OOV tail be measured rather than estimated.
+
+## Run 19 — 2026-08-08 (review of PR #777 — the same trap, a third time)
+
+Four findings. The first is HIGH and is the same defect this language has now produced **three times**,
+each time in whatever tier was newest.
+
+**⟨'n⟩ AND BARE LETTERS ARE RULE-PATH SPECIAL CASES, AND EVERY NEW TIER CLAIMS THEM.**
+
+| | |
+|---|---|
+| #770 | `af-lexicon.tsv` carried stray `j`/`q` rows → ⟨J⟩ read [jɛ] instead of the name [jiə]. Fixed by deleting the rows. |
+| #776 | the RCRL lexicon carried `n`→ə, `a`, `o`, `u` → `802.11n` read *…elf ə*. Fixed by a **build-time filter** in the lexicon builder. |
+| #777 | the neural tier has no builder and no filter, so it claimed both classes again. |
+
+Measured with the shipped model, before the fix:
+
+```
+"Dit is 'n boek."      sync: dət əs ə buk .       neural: dət əs n buk .
+"Vitamien C is goed."  sync: fitamin siə əs χut . neural: fitamin k əs χut .
+```
+
+**⟨'n⟩ is the most frequent word in Afrikaans running text**, so essentially every sentence through
+`phonemizeAsync(text, "af")` misread it — and ⟨C⟩ silently reverted #761.
+
+⚠ The galling part: `afrikaans.ts` already carried a comment, written in #776, saying *"the safety is the
+build-time filter, not this order"* — and then I added a tier with neither. **So the guard is now at the
+SEAM** (`afrikaansRuleReserved`, consulted by `phonemizeWord` before it consults `oovOverride`), where it
+protects any tier that is ever injected, instead of being re-implemented — or forgotten — once per tier.
+The neural path also checks it in `lexHas`, but only to avoid a wasted `tag()` call; the engine enforces it.
+
+**2. The prepass key was missing NFC**, so on decomposed input the reading was computed under the NFD key,
+looked up under the NFC one, and discarded — silently switching the tier off for exactly the
+diacritic-bearing words (ë ô ï ê) it was most needed for. `reënwater` fell back to the rules.
+
+**3. The byte-identity test picked three strings that avoided both broken classes.** It asserted "only OOV
+word readings change" and stayed green while the tier rewrote the commonest word in the language. Both
+strings are now in the loop, plus an NFD/NFC equality test. **A byte-identity test is worth exactly what
+its strings cover** — and choosing them to exercise the *special cases* rather than the ordinary path is
+the whole skill.
+
+**4.** README still said "Nine languages have an optional neural tier"; the catalogue and maturity table
+were updated in the PR and the README was missed.
+
+**Final: suite 3183, tsc clean, fence ok.** The held-out numbers are unchanged (the fix removes two word
+classes from the tier, neither of which is in the training data): tagger **91.8% / 98.8%** against the rule
+engine's **64.0% / 93.6%**.

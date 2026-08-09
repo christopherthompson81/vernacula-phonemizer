@@ -153,9 +153,9 @@ Five G2P paradigms, chosen per language by how its orthography relates to its ph
   over a *loi-de-position* rule engine; Nigerian Pidgin (an English-lexified creole) nativises
   known English words and reads the substrate loans phonemically.
 
-Nine languages have an **optional neural tier** on top of their engine (`languages/<lang>/<lang>Neural.ts`,
+Ten languages have an **optional neural tier** on top of their engine (`languages/<lang>/<lang>Neural.ts`,
 dispatched by `neuralRegistry.ts`): a per-grapheme BiLSTM reading the OOV tail (English, Bengali,
-Danish, Norwegian, French, Sindhi), a niqqud restorer for Hebrew, the Persian restorers, and one
+Danish, Norwegian, French, Sindhi, Afrikaans), a niqqud restorer for Hebrew, the Persian restorers, and one
 multilingual harakat model shared by the Perso-Arabic riders (`languages/perso-arabic/`). Each is an
 ONNX model behind an *optional* `onnxruntime-node`; when the runtime or the model is absent the path
 degrades to the sync engine, so `phonemizeAsync` is always safe to call.

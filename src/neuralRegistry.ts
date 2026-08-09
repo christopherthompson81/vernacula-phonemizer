@@ -15,6 +15,7 @@ import { phonemizeHebrewNeural } from "./languages/hebrew/hebrewNeural.ts";
 import { phonemizeKmNeural } from "./languages/khmer/khmerNeural.ts";
 import { phonemizeRiderNeural } from "./languages/perso-arabic/riderNeural.ts";
 import { phonemizeSdNeural } from "./languages/sindhi/sindhiNeural.ts";
+import { phonemizeAfNeural } from "./languages/afrikaans/afrikaansNeural.ts";
 
 // Arabic ISO code → engine variety (mirrors the sync registry); every key routes bare text
 // through the async diacritizer.
@@ -26,6 +27,9 @@ const ARABIC_VARIETY: Record<string, string | undefined> = {
 const NEURAL: Record<string, (text: string) => Promise<string>> = {
     en: phonemizeEnNeural, // BiLSTM OOV reader (else the sync n-gram OOV G2P)
     sd: phonemizeSdNeural, // per-letter BiLSTM restoring the abjad's unwritten short vowels on OOV words
+    // per-grapheme BiLSTM reading the words BOTH af lexicons miss: 91.8% vs the rules' 64.0% word-exact
+    // on a held-out split, because af's residual is stress-conditioned vowel quality — contextual, not tabulable
+    af: phonemizeAfNeural,
     bn: phonemizeBnNeural,
     da: phonemizeDaNeural,
     nb: phonemizeNbNeural,
