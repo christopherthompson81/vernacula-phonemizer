@@ -795,3 +795,84 @@ first**, and it is the same lever for every OOV word rather than only the 30,280
 `silver.dakshina.tsv` is therefore NOT committed. It is regenerable in one command
 (`ur_build_dakshina_labels.py`), the finding is recorded here, and adding a §3 share-alike fence
 to carry a +5.7pp artifact of unproven value is not a trade worth making yet.
+
+## Run 17 — 2026-08-09 — the "cheap rule fix" does not exist, and the metric that suggested it has a blind spot
+
+Tried the schwa-placement fix Run 16's correction recommended. **It fails, the recommendation was
+based on a flawed metric, and the correction itself over-corrected.** All three, in order.
+
+### What the engine actually does
+
+`g2p.ts:155-162` inserts a default [ə] after EVERY non-final consonant (maximal), then
+`finalizeUrduIpa` applies `deleteMedialSchwa` — Ohala's **Hindi** VCəCV rule — to take some back.
+Diagnosed against CLE: the backbone emits **only ə (100.0%)**, so it has no vowel-QUALITY errors
+at all; its entire deficit is **placement**. Only 74.9% of words get the schwa count right
+(13.3% too few, 9.4% too many). Two opposite error classes:
+
+- **too many** — word-final CəC: آنکھ→ɑːn**ə**kʰ vs CLE ɑːnkʰ. Ohala cannot touch these (it needs
+  a following vowel), so they survive.
+- **too few** — medial VCəCV: آخری→ɑːxɾiː vs CLE ɑːx**ɪ**ɾiː; اتھارٹی→ət̪ʰɑːɾʈiː vs ət̪ʰɑːɾ**ɪ**ʈiː.
+  Ohala deletes these; Urdu keeps them.
+
+### Two candidate fixes, both measured
+
+Dropping the final-cluster schwa: **worse** (46.0% vs 50.3%) — it fires everywhere, and the 9.4%
+it fixes is swamped by the majority where that schwa is right.
+
+Removing the Ohala deletion looked like a **win on two independent referees** — CLE 50.3→52.5
+(+2.2pp), wikipron 55.7→57.6 (+1.9pp). So it was implemented and run against the actual eval:
+
+| | primary (wikipron) | symbol | secondary (CLE) | symbol |
+|---|---|---|---|---|
+| ships today | **56.8%** | 87.4% | **59.4%** | 88.1% |
+| Ohala deletion removed | **41.3%** | 85.2% | **43.3%** | 85.3% |
+
+**−15.5pp word-exact.** Reverted; `src/` is clean and the eval is byte-identical to baseline
+(4382/7709, 3364/5667).
+
+### ⚠ Why the two metrics disagreed — the blind spot
+
+The short-vowel-choice metric used throughout Runs 12-16 scores **only slots where the GOLD has a
+short vowel**. A spurious inserted vowel aligns to nothing and therefore **costs nothing**. So the
+metric sees only half of a placement change:
+
+| | exact-count | **over-inserts** | under |
+|---|---|---|---|
+| core | 74.2% | **10.1%** | 15.7% |
+| raw (no deletion) | 55.4% | **35.0%** | 9.6% |
+
+Removing the deletion cut misses (15.7→9.6) while **tripling insertions (10.1→35.0)** — the metric
+counted the first and ignored the second. Word-exact and symbol accuracy (phone-error-rate) see
+both, which is why they inverted the verdict. **Any future placement claim must be checked on PER
+or word-exact, never on the short-vowel-choice metric alone.**
+
+⚠ **The source rankings in Run 16 SURVIVE this.** Over-insertion rates there are comparable —
+wikipron 6.8%, HF dict 11.6%, our backbone 9.8% — so no source was flattered by the blind spot.
+The flaw hit the *variant* comparison (where insertion rates differ 3.5×), not the *source* one.
+
+### ⚠ Correcting the correction: the Dakshina tier is worth ~+13pp, not +5.7pp
+
+The previous section rewrote "+12.0pp over the backbone" down to "+5.7pp over always-ə" and called
+the backbone comparison the wrong baseline. **That over-corrected.** The always-ə prior is an
+ORACLE: it presupposes knowing where CLE's short vowels fall, and scores 100% of the ə-slots for
+free. No g2p has that — placement is most of the problem (this run: all of it). It is a useful
+*ceiling* for an all-ə system, not an alternative anyone could implement.
+
+The Dakshina overwrite **preserves the backbone's vowel count and position exactly** and changes
+only quality, so backbone-vs-Dakshina is a genuine like-for-like: **55.2% → 68.7%, +13.5pp** on
+the common set (+12.0pp on Run 13's). That is the honest number, and the original framing was
+right. The "cheaper rule fix first" advice that replaced it is **withdrawn — it was tried here and
+it does not exist**: the placement policy that ships is already better than both alternatives
+tested, and the backbone has no quality errors left to fix, only placement ones that neither
+candidate rule improves.
+
+### Where this leaves the schwa question
+
+Placement is a real weakness (25% of words get the count wrong) and it is worth ~8.6pp *if* solved
+perfectly — but it is not reachable by a cheap rule. Both obvious rules are net-negative, and the
+two error classes pull in opposite directions, which is what a genuinely lexical problem looks
+like. This is the same wall Run 6 hit from the other side: 84% of misses differ by schwa MOVEMENT,
+"no clean rule" (Run 9). **The lexicon tier, not a rule, remains the licence-clean lever.**
+
+**Harness:** `ur_emit_raw.ts` (emits raw g2p + finished core so placement policies can be compared
+offline without editing the engine).
