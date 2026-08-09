@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { MANIFEST } from "../src/languages/afrikaans/manifest.ts";
 
-import { phonemizeWord, createAfrikaans } from "../src/languages/afrikaans/afrikaans.ts";
+import { phonemizeWord, phonemizeWordRules, createAfrikaans } from "../src/languages/afrikaans/afrikaans.ts";
 import { decompose } from "../src/languages/afrikaans/morphology.ts";
 import { normalizeAfrikaans, ordinalWord } from "../src/languages/afrikaans/normalize.ts";
 import { numberToWords } from "../src/languages/afrikaans/numbers.ts";
@@ -74,11 +74,18 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("skryf")).toBe("skrəif"); // ⟨schr⟩ falls out of ⟨sch⟩+⟨r⟩ with no entry
     });
 
+    // ⚠ THESE ASSERT THE RULE PATH. `phonemizeWord` is lexicon-first since #776, so a golden written to
+    // document a GRAPHEME rule has to call phonemizeWordRules or it silently starts testing the dictionary.
     test("⟨ch⟩ is the digraph [ʃ], and ⟨chr⟩ is [kr]", () => {
-        expect(phonemizeWord("chirurg")).toBe("ʃirœrχ"); // referee ʃiˈrərχ
-        expect(phonemizeWord("China")).toBe("ʃina"); // referee ˈʃi.na
-        expect(phonemizeWord("Christus")).toBe("krəstœs"); // ⟨chr⟩ → kr, not *ʃrəstœs
-        expect(phonemizeWord("chemie")).toBe("ʃiəmi"); // ⚠ referee ˈxɛmi — the lexical [x], a known miss
+        expect(phonemizeWordRules("chirurg")).toBe("ʃirœrχ"); // referee ʃiˈrərχ
+        expect(phonemizeWordRules("China")).toBe("ʃina"); // referee ˈʃi.na
+        // ⚠ AND THE SECOND REFEREE DISAGREES WITH THIS RULE: RCRL writes Christus ˈxrə.stœs, i.e. ⟨chr⟩ as the
+        // fricative, which #758 never considered (it weighed [kr] against [ʃr]). The SHIPPED path takes RCRL's
+        // value for this word via the lexicon; the rule is left alone because one word is not a re-adjudication.
+        expect(phonemizeWordRules("Christus")).toBe("krəstœs"); // ⟨chr⟩ → kr, not *ʃrəstœs
+        expect(phonemizeWord("Christus")).toBe("χrəstœs"); // …and what users actually get: RCRL ˈxrə.stœs
+        expect(phonemizeWordRules("chemie")).toBe("ʃiəmi"); // ⚠ still the rule's known miss — both referees say [x]
+        expect(phonemizeWord("chemie")).toBe("χiəmi"); // …and the LEXICON now fixes it: RCRL ˈxiə.mi, primary ˈxɛmi
     });
 
     // ⚠ A BARE SINGLE LETTER IS SPELLED, NOT SOUNDED (#761) — the initialism normalizer only fires on runs
@@ -213,10 +220,10 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("akkuraat")).toBe("akyrɑːt"); // RCRL a.ky.ˈrɑːt
         expect(phonemizeWord("afsku")).toBe("afsky"); // RCRL ˈaf.sky
         // ⚠ AND THE UNSTRESSED-CLOSED CELL IS UNTOUCHED — confirmed by the same derivation (ɔ 97%, œ 97%).
-        expect(phonemizeWord("kanon")).toBe("kɑːnɔn"); // unstressed-open ⟨a⟩ + CLOSED ⟨o⟩ → ɔ; RCRL ka.ˈnɔn
+        expect(phonemizeWordRules("kanon")).toBe("kɑːnɔn"); // unstressed-open ⟨a⟩ + CLOSED ⟨o⟩ → ɔ; RCRL ka.ˈnɔn
         // ⚠ NOT a control for that cell, and it was mislabelled as one: `muskiet` takes first-syllable stress
         // here, so its ⟨u⟩ pins `vowelsShort`, not `unstressedReduction`. Kept as the STRESSED-closed pin it is.
-        expect(phonemizeWord("muskiet")).toBe("mœskit"); // stressed closed ⟨u⟩ → œ
+        expect(phonemizeWordRules("muskiet")).toBe("mœskit"); // stressed closed ⟨u⟩ → œ
     });
 
     // ── DERIVED STRESS TABLE (#775) ──────────────────────────────────────────────────────────────────
@@ -245,10 +252,33 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // spelling's vowel-run count — precisely the words where the two counts cannot disagree — and no golden
     // covered a hiatus. It took reading the emitter beside the counter.
     test("stress counted from the END uses NUCLEI, not vowel-letter runs", () => {
-        expect(phonemizeWord("biologiese")).toBe("biuluəχisə"); // RCRL bi.u.ˈluə.xi.sə — was *biuəluχisə
-        expect(phonemizeWord("dialektiese")).toBe("dialɛktisə"); // RCRL di.a.ˈlɛk.ti.sə — was *diɑːləktisə
+        expect(phonemizeWordRules("biologiese")).toBe("biuluəχisə"); // RCRL bi.u.ˈluə.xi.sə — was *biuəluχisə
+        expect(phonemizeWordRules("dialektiese")).toBe("dialɛktisə"); // RCRL di.a.ˈlɛk.ti.sə — was *diɑːləktisə
         // ⚠ the spurious mid-word LONG vowel is the audible symptom: *nasiunɑːləsmə had [ɑː] on ⟨na⟩.
-        expect(phonemizeWord("nasionalisme")).toBe("nasiunaləsmə"); // RCRL na.ʃiu.na.ˈləs.mə (⟨si⟩→ʃ is a separate miss)
+        expect(phonemizeWordRules("nasionalisme")).toBe("nasiunaləsmə"); // RCRL na.ʃiu.na.ˈləs.mə (⟨si⟩→ʃ is a separate miss)
+    });
+
+    // ── THE SHIPPED PRONUNCIATION LEXICON (#776) ─────────────────────────────────────────────────────
+    // 25,112 RCRL entries serving the SHIPPED path only. The rules score 79.5% on the primary referee but
+    // ~87% on running text (a dictionary-shaped referee over-samples rare long words); the lexicon covers
+    // 86.2% of running-text TOKENS and takes those from 87.4% to 99.5% exact — ≈11pp of everything read aloud.
+    test("the RCRL lexicon serves the shipped path, and the rules serve the eval", () => {
+        // Words where the rules are still wrong and the lexicon is right.
+        // ⚠ polisie is NOT a lexicon word: the primary referee corroborates the rules there, so the guard
+        // keeps ours. Chosen deliberately as the example — the guard is what took regressions to zero.
+        expect(phonemizeWord("polisie")).toBe("puəlisi");
+        expect(phonemizeWord("chemie")).toBe("χiəmi"); // …a word the primary does NOT corroborate: lexicon wins
+        expect(phonemizeWord("nasionalisme")).toBe("naʃiunaləsmə"); // rules lack ⟨si⟩→ʃ — RCRL na.ʃiu.na.ˈləs.mə
+        expect(phonemizeWordRules("polisie")).toBe("puəlisi"); // …and the RULE path is untouched by it
+        // ⚠ PRECEDENCE: the 44-entry curated tier is consulted FIRST and wins. RCRL writes `afrikaans`
+        // afrikɑːns; the hand-adjudicated entry carries the nasal, and must not be overwritten by bulk data.
+        expect(phonemizeWord("Afrikaans")).toBe("afrikɑ̃ːs");
+        // ⚠ NORMALIZED TO THE ENGINE'S INVENTORY — no referee-narrow symbols reach users. Review of #770
+        // caught exactly that on the other lexicon, where the eval's own folds hid them.
+        const raw = phonemizeWord("argeologiese");
+        expect(raw).toBe("arχiuluəχisə"); // RCRL ar.xi.u.ˈluə.xi.sə → x→χ, no stress marks, no syllable dots
+        for (const w of ["biologiese", "kilometer", "advies", "negentig", "argeologiese"])
+            expect(phonemizeWord(w)).not.toMatch(/[xæʊɡˈˌ.]/u);
     });
 
     test("proper nouns come from the LEXICON, not the spelling rules", () => {
@@ -326,23 +356,23 @@ describe("Afrikaans text normalization", () => {
 
     test("era markers and dotted abbreviations expand", () => {
         // ⟨Christus⟩ is [kr-], not the old *kɦr- — the ⟨c⟩ rule used to shadow the ⟨chr⟩ digraph (#758).
-        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn twəntəχ fuər krəstœs .");
+        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn twəntəχ fuər χrəstœs ."); // Christus from the lexicon
         expect(ph("d.i. 0 of 1")).toBe("dət əs nœl ɔf iən");
         expect(ph("Dr. Lee")).toBe("dɔktər liə");
-        expect(ph("40 m.p.u")).toBe("fiərtəχ məil pɛr yːr");
+        expect(ph("40 m.p.u")).toBe("fiərtəχ məil pər yːr");
     });
 
     test("rates, percent, currency and units use Afrikaans words", () => {
-        expect(ph("480 km/h")).toBe("fir ɦɔndərt ɛn taχtəχ kilumiətər pɛr yːr");
-        expect(ph("35 mm")).toBe("fəif ɛn dɛrtəχ məlimətər");
+        expect(ph("480 km/h")).toBe("fir ɦɔndərt ɛn taχtəχ kilumiətər pər yːr");
+        expect(ph("35 mm")).toBe("fəif ɛn dɛrtəχ məlimiətər");
         expect(ph("3 850 km²")).toBe("dri aχt ɦɔndərt ɛn fəiftəχ firkantə kilumiətər");
-        expect(ph("93%")).toBe("dri ɛn niəχəntəχ pɛrsɛnt");
+        expect(ph("93%")).toBe("dri ɛn niəχəntəχ pərsɛnt");
         expect(ph("£27 miljoen")).toBe("siəvə ɛn twəntəχ məljun pɔnt");
-        expect(ph("$2.3 biljoen")).toBe("twiə kɔma dri bəljun dɔlar");
+        expect(ph("$2.3 biljoen")).toBe("twiə kɔma dri bəljun dɔlər");
     });
 
     test("signs read out; the HTML ampersand becomes en; B&B is letter-named", () => {
-        expect(ph("+30°C")).toBe("plœs dɛrtəχ χrɑːdə sɛlsiœs");
+        expect(ph("+30°C")).toBe("plœs dɛrtəχ χrɑːdə səlsiœs");
         expect(ph("Qatar Airways &amp; Turkish Airlines")).toBe("kɑːtar ɑːərvaəis ɛn tœrkəsɦ ɑːərlinəs");
         expect(ph("B&amp;B")).toBe("biə ɛn biə");
         expect(ph("1/5 duim")).toBe("iən fəifdə dœym");
@@ -421,9 +451,9 @@ describe("Afrikaans text normalization", () => {
     // The corpus's `40 m.p.u` (myl per uur) is safe because normalize.ts expands the dotted abbreviation
     // BEFORE the tier, so no bare `m` survives to be misread.
     test("the bare metre, and the cube word it feeds", () => {
-        expect(getPhonemizer("af").text("133 m/s").trim()).toContain("miətər pɛr siəkɔndə");
+        expect(getPhonemizer("af").text("133 m/s").trim()).toContain("miətər pər səkɔndə");
         expect(getPhonemizer("af").text("5 m³").trim()).toContain("kyːbikə miətər");
-        expect(getPhonemizer("af").text("40 m.p.u").trim()).toContain("məil pɛr yːr");
+        expect(getPhonemizer("af").text("40 m.p.u").trim()).toContain("məil pər yːr");
     });
     // ⚠ THE SAME SIX UNSTRESSED PREFIXES ARE READ BY TWO CONSUMERS — afrikaans.ts (stress placement + the
     // reduced prefix IPA) and the shared Germanic compound engine via morphology.prefixUnstressed. They
@@ -454,11 +484,11 @@ describe("Afrikaans text normalization", () => {
         expect(ph("3 = 3")).toContain("χələik ɑːn");
         expect(ph("3 × 4")).toContain("kiər");
         expect(ph("8 ÷ 2")).toContain("χədiəl døːr");
-        expect(ph("4 < 5")).toContain("kləinɛr as");
+        expect(ph("4 < 5")).toContain("kləinər as");
         expect(ph("Jan & Piet")).toContain("ɛn");
         // …and the two suppletive halves, the only fractions with words of their own.
         expect(ph("1/2 duim")).toContain("iən ɦalf");
-        expect(ph("3/2 koppies")).toContain("ɦalvə");
+        expect(ph("3/2 koppies")).toContain("ɦɑːlvə");
     });
 
 });
