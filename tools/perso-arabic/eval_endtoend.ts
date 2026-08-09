@@ -10,7 +10,10 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
+// ⚠ phonemizeWordEval, NOT the shipped phonemizeWord: the shipped path is now gurmukhi-lexicon-first
+// (wikipron-mined), and this tool feeds/derives eval-side data — through the shipped function a REGENERATION
+// would launder wikipron readings into files the eval consumes against a same-tradition referee.
+import { phonemizeWordEval as pa } from "../../src/languages/punjabi/punjabi.ts";
 import { phonemizeWord as ur } from "../../src/languages/urdu/urdu.ts";
 import { phonemizeWord as ps } from "../../src/languages/pashto/pashto.ts";
 import { phonemizeWord as fa } from "../../src/languages/persian/persian.ts";

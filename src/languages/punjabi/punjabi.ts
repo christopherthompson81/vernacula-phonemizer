@@ -234,12 +234,33 @@ export function crossScriptLexicon(): ReadonlyMap<string, string> {
     return (CROSS ??= loadTsvMap(import.meta.url, "crossscript.tsv", undefined, { optional: true }));
 }
 
-/** Bare word→IPA (tests / referee eval): cross-script gold → coverage-lexicon restore → the lexicon-free core. */
-export function phonemizeWord(w: string): string {
+/**
+ * Bare word→IPA for the REFEREE EVAL: cross-script gold → coverage-lexicon restore → the lexicon-free core.
+ *
+ * ⚠ THIS FUNCTION MUST NEVER CONSULT `guruLexicon` — that lexicon is MINED FROM the pan_guru referee, so an
+ * eval that read it would score the answer key (the af/en-GB/km house pattern: the eval scores a
+ * lexicon-free-ish path, the shipped path adds the mined tier on top). The cross-script layer stays: its
+ * readings come from OUR OWN g2p over the voweled Gurmukhi sister-spelling, not from any referee's labels.
+ */
+export function phonemizeWordEval(w: string): string {
     return (
         crossScriptLexicon().get(w) ??
         phonemizeWordCore(restoreHarakat(w, harakatLexicon()))
     );
+}
+
+// GURMUKHI EXCEPTIONS LEXICON — wikipron pan_guru readings for the words the rules get wrong; mostly the
+// medial-schwa class proven lexical three ways (audio adjudication, two failed rule derivations, the 52:40
+// population split — investigation Runs 1-4). Mined by tools/gen/build-pa-guru-lexicon.mts; CC-BY-SA (§3).
+let GURU: ReadonlyMap<string, string> | undefined;
+export function guruLexicon(): ReadonlyMap<string, string> {
+    return (GURU ??= loadTsvMap(import.meta.url, "gurmukhi-lexicon.tsv", undefined, { optional: true }));
+}
+
+/** Bare word→IPA, SHIPPED: the mined Gurmukhi exceptions lexicon first (keys are Gurmukhi script, so
+ *  Shahmukhi input never matches), then the eval path. */
+export function phonemizeWord(w: string): string {
+    return guruLexicon().get(w) ?? phonemizeWordEval(w);
 }
 let PA: ReturnType<typeof makeNativePunjabi> | undefined;
 
