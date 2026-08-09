@@ -85,6 +85,8 @@ const VOWEL_GROUP = new RegExp(`[${V}]+`, "gu");
 // .test(), so alternation order cannot change the boolean. Sorted anyway so the source reads in the same
 // order as the manifest lists them, and so it stays correct if either is ever used to CAPTURE.
 const byLen = (xs: readonly string[]): string => [...xs].sort((a, b) => b.length - a.length).join("|");
+const STRESS_FROM_END = MANIFEST.stressFromEnd; // derived suffix → syllables-from-end (afrikaans.jsonc)
+const STRESS_FROM_END_KEYS = Object.keys(STRESS_FROM_END).sort((a, b) => b.length - a.length);
 const STRESS_FINAL = new RegExp(`(${byLen(MANIFEST.stressFinalSuffixes)})$`, "u");
 const STRESS_PENULT = new RegExp(`(${byLen(MANIFEST.stressPenultSuffixes)})$`, "u");
 // Unstressed one-syllable prefixes: stress falls on the following syllable (begín, gemáák, verstáán).
@@ -97,6 +99,15 @@ const UNSTRESSED_PREFIX = new RegExp(`^(${MANIFEST.morphology.prefixUnstressed.j
 function stressedNucleus(w: string): number {
     const n = (w.match(VOWEL_GROUP) ?? []).length;
     if (n <= 1) return 0;
+    // The DERIVED suffix table first, longest-first — it subsumes most of the two hand-authored lists below.
+    // A match that would place stress outside the word is ignored rather than clamped: the suffix was derived
+    // from longer words, and clamping would invent a position no evidence supports.
+    for (const s of STRESS_FROM_END_KEYS) {
+        if (!w.endsWith(s)) continue;
+        const fromEnd = STRESS_FROM_END[s]!;
+        if (fromEnd < n) return n - 1 - fromEnd;
+        break; // longest match wins; a shorter one is not a better guess for the same word
+    }
     if (STRESS_FINAL.test(w)) return n - 1; // stress-final loan suffixes (afrikaans.jsonc)
     if (STRESS_PENULT.test(w)) return n - 2; // -ie / -sie / -asie / -osie → penultimate
     return UNSTRESSED_PREFIX.test(w) ? 1 : 0;

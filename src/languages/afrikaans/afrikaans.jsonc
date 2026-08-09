@@ -149,6 +149,44 @@
     "stressFinalSuffixes": ["siteit", "teit", "isme", "eer", "eur", "oor", "oon", "ees", "uur", "oen", "eel", "yn"],
     "stressPenultSuffixes": ["ie"],
 
+    // ⚠ THE STRESS TABLE, DERIVED — suffix → how many syllables from the END carry primary stress
+    // (0 = final, 1 = penult, 2 = antepenult). Consulted LONGEST-FIRST, ahead of the two hand-authored lists
+    // above, which it largely subsumes; they are kept because they are cheap and were measured separately.
+    // ⚠ THIS EXISTS BECAUSE THE OLD MEASUREMENT WAS TAKEN ON A SAMPLE TOO SMALL TO SEE IT. Run 4 swept
+    // candidate stress suffixes against the 2220-word primary, found almost nothing, and concluded from a
+    // perfect-stress ORACLE that every stress rule that could ever be written was worth ~45 words. That oracle
+    // covers only 554 of the primary's rows. Re-run against the RCRL secondary it covers 23,388 and is worth
+    // **+1189 words (4.3pp)** — the lever is ~26x what was recorded, and the old number was an artefact of the
+    // sample. Our placement accuracy is 72.6% overall and falls with length: 88% at 2 syllables, 59% at 4, 36% at 8.
+    // ⚠ DERIVED AND VALIDATED ON A HELD-OUT SPLIT, not fitted to the score: suffixes are read off an 80% train
+    // split and scored on the untouched 20% — placement 72.7% → 74.9% held-out against 75.5% on train, so it
+    // generalises rather than memorises. The shipped table is then refit on all 23,382 usable rows.
+    // ⚠ THREE FILTERS, each of which earned its place:
+    //   · n≥10 occurrences and ≥95% agreement on one position. LOWER PRECISION MEASURES BETTER ON THE SOURCE AND
+    //     WORSE IN REALITY: at 0.85 the secondary gains +166 but the INDEPENDENT primary loses 2, and the words
+    //     it breaks are real — motief, positief, gedig, letterkundig. A 15% error rate admits 15% errors.
+    //   · LENGTH-CONSISTENCY: every syllable-count bucket with ≥5 examples must agree with the overall majority,
+    //     which rejects suffixes that are really a from-START rule in disguise.
+    //   · ⟨tig⟩ is excluded BY NAME. It is genuinely penult for the bulk (gunstig, aandagtig) and the filters
+    //     above pass it, but the -tig NUMERALS are a closed, high-frequency, initially-stressed class that it
+    //     mis-stresses: negentig → *nəχɛntəχ for RCRL's ˈniə.xən.təx. Dropping it is better on EVERY axis
+    //     (secondary 17840 → 17847), which is the tell that the class it was helping was not paying for itself.
+    // ⚠ THE RESULT IS MORPHOLOGY, NOT NOISE, which is the check that it is real: ⟨aliseer⟩/⟨ifiseer⟩ take final
+    // stress, ⟨isering⟩/⟨seerde⟩ penult, ⟨igheid⟩/⟨logiese⟩ antepenult, and the ⟨gemaak⟩/⟨gestaan⟩ entries at 2
+    // are compound-initial stress on a past participle (skoongemaak).
+    // ⚠ WHAT IS LEFT: the oracle says +1189 and this table takes +82 of it. The residue is not suffix-shaped.
+    "stressFromEnd": {
+        "derlike": 3, "digheid": 2, "geslaan": 2, "gestaan": 2, "iseerde": 1, "isering": 1, "tigheid": 2,
+        "waardig": 1, "alisme": 1, "derlik": 2, "gegooi": 2, "geloop": 2, "gemaak": 2, "geneem": 2, "gestel": 2,
+        "getrek": 2, "ggende": 2, "kkende": 2, "aties": 1, "biese": 2, "diges": 2, "eksie": 1, "elike": 3,
+        "eloos": 2, "elose": 3, "fiese": 2, "gegee": 2, "gehou": 2, "gesit": 2, "giese": 2, "glike": 2, "igste": 2,
+        "ineer": 0, "iseer": 0, "kaart": 1, "kbaar": 1, "kbare": 2, "ktief": 0, "ldige": 2, "llend": 1, "llige": 2,
+        "nende": 2, "pende": 2, "rdige": 2, "sbaar": 1, "sbare": 2, "slike": 2, "steer": 0, "telik": 2, "tiese": 2,
+        "tiewe": 1, "uleer": 0, "urige": 2, "wende": 2, "adig": 1, "ator": 1, "deer": 0, "iete": 1, "klik": 1,
+        "nies": 1, "nêre": 1, "psie": 1, "rale": 1, "reer": 0, "self": 0, "slik": 1, "tige": 2, "usie": 1,
+        "wige": 2, "ydig": 1, "dat": 1, "gel": 1, "nig": 1, "ci": 0, "êr": 0
+    },
+
     // Reduced IPA for the UNSTRESSED (inseparable) prefixes named in `morphology.prefixUnstressed`.
     // ⚠ PHONEMISED STANDALONE THEY WOULD STRESS THEIR OWN VOWEL (ver→fɛr); as a prefix the vowel reduces
     // (ver·staan → fər·stɑːn). The KEYS must match morphology.prefixUnstressed — afrikaans.ts throws if
