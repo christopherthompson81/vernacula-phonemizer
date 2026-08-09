@@ -107,3 +107,28 @@ confound is systematic and will NOT wash out with scale — more fast speech is 
   reliable at: adjudicating convention questions and validating rule fixes out-of-band — and revisit
   deletion-class corrections only if a citation-register corpus (read speech, dictionary audio) appears.
   Shrutilipi (gate now accepted; 7 shards downloading) adds scale for the swap/final-ə classes.
+
+## Run 3 — 2026-08-09 17:45 — a phantom class, and the true one
+
+⚠ **THE 106-WORD FINAL-ə CLASS WAS A PHANTOM — an artifact of MY analysis fold, not the eval's.** The referee
+writes the citation schwa EXTRA-SHORT (ə + combining breve, ə̆); my crude analysis fold stripped the breve
+and kept the ə, manufacturing 106 "final-ə failures" — but the eval's own pipeline already disposes of ə̆,
+and those words were MATCHING all along. Discovered the hard way: a "fix" to the (apparently dead) final-ə
+fold moved the eval by exactly nothing, and the eval's own residual list contains no final-ə class. The
+jsonc edit was reverted before commit — its note claimed a 6.7pp defect that does not exist. Two lessons,
+both old ones: derive classes with the EVAL's fold, never a reimplementation (the km A/B harness rule), and
+a fold change that moves nothing is evidence about the analysis, not the fold.
+
+The audio's final-ə verdict (Run 1, 88:0) stands as CONFIRMATION of the existing convention treatment — the
+referee's ə̆ really is inaudible, and the eval was right to treat it as convention — just not as new points.
+
+**The true class, computed with the eval's fold:** 231 of 1,360 unique referee words wrong; **70 are
+schwa-arrangement-only (~5pp)**, and the directions are MIXED — gold deletes where we keep (ਅਰਥ ərtʰ, ours
+ərətʰ), keeps where we delete (ਅਸਮਾਨ əsəman, ours əsman — Perso-Arabic loans favour the epenthetic vowel),
+and swaps position (ਅਗਸਤ əɡəst, ours əɡsət; ਉਸਤਰਾ ʊstəra, ours ʊsətra). So `deleteMedialSchwa`'s CONDITIONS
+are the target, not its direction — a derivation pass over the 70 (+ the audio harness to validate
+out-of-band, where it is 100% on position swaps). ⚠ The function is SHARED WITH HINDI — any condition change
+must be derived per-language or measured inert on hi.
+
+List at /tmp/pa_medial_class.tsv; FLEURS phones + vote harness at /mnt/data/pa-audio/; Shrutilipi's 7
+Punjabi shards downloaded (gate accepted) for scale when needed.
