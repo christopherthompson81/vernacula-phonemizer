@@ -81,6 +81,34 @@
         "units": ["ziɾo", "wan", "tu", "tɾi", "fo", "faiv", "siks", "sɛvin", "et", "nain"],
         "teens": ["ten", "ilɛvin", "twɛlv", "tatin", "fotin", "fiftin", "sikstin", "sɛvintin", "etin", "naintin"],
         "tens": ["", "", "twɛnti", "tɔti", "foti", "fifti", "siksti", "sɛventi", "eti", "nainti"],
-        "hundred": "hɔndɛd", "thousand": "tauzin", "million": "miliɔn", "billion": "biliɔn", "and": "an"
+        "hundred": "hɔndɛd", "thousand": "tauzin", "million": "miliɔn", "billion": "biliɔn", "and": "an",
+        // DECIMAL SEPARATOR. ⟨point⟩ ×3 in the mined pcm corpus, and the corpus writes 61 dot-decimals
+        // (1.5, 12.4, 87.14) against zero comma-decimals, so the dot is the separator and ⟨point⟩ is its
+        // word. Given as IPA like the rest of this block because the number path emits these directly
+        // rather than re-running the g2p; ⟨point⟩ through this engine's own g2p is [pɔint].
+        "point": "pɔint"
+    },
+    // ORDINALS. ⚠ THE PRODUCTIVE RULE IS `nɔmba` + THE CARDINAL, not an English-style suffix — this is what
+    // made 4th+ sourceable at all. APiCS Online survey 17 (Faraclas, apics-online.info/surveys/17) gives
+    // "nomba wo̱n ~ fe̱st, no̱mba tu ~ se̱kond, no̱mba tri ~ te̱d, no̱mba for, no̱mba fayv, no̱mba siks …":
+    // suppletive forms for 1-3, `nɔmba` + cardinal above. Corroborated in this language's OWN mined corpus,
+    // which writes ⟨nomba⟩ ×18 against English ⟨number⟩ ×12, and ⟨fest⟩ ×47 / ⟨sekond⟩ ×21 against English
+    // ⟨first⟩ ×12 / ⟨second⟩ ×5 — the pcm forms are the majority in both pairs.
+    // ⚠ VOWELS FOLLOW APiCS, NOT THE MEDIA SPELLING, where the two disagree: the ⟨e̱⟩/⟨o̱⟩ underdot is /ɛ/
+    // and /ɔ/, which the English-etymological media orthography simply does not write. So ⟨sekond⟩ is
+    // /sɛkond/ and ⟨nomba⟩ is /nɔmba/. For 'third' the corpus writes English ⟨third⟩ ×3, which read literally
+    // through this g2p would give *tɔd; APiCS's te̱d is the phonemic form of the same word and wins.
+    "ordinals": { "marker": "nɔmba", "first": "fɛst", "second": "sɛkond", "third": "tɛd" },
+
+    // LETTER NAMES, for spelling out an initialism. The English letter names read with Naija values — the
+    // same nativisation this engine applies to every other English-lexified word, so nothing new in kind.
+    // ⚠ THE ENGLISH DICT CANNOT SUPPLY THESE, which is why they are declared: its single-letter entries are
+    // the WORDS, not the letter names — ⟨a⟩ resolves to the article [ə], not to [e] "ay". The other 25 happen
+    // to be right there, but relying on a dict that is right 25 times out of 26 by coincidence is not a rule.
+    "letterNames": {
+        "a": "e", "b": "bi", "c": "si", "d": "di", "e": "i", "f": "ɛf", "g": "d͡ʒi",
+        "h": "et͡ʃ", "i": "ai", "j": "d͡ʒe", "k": "ke", "l": "ɛl", "m": "ɛm", "n": "ɛn",
+        "o": "o", "p": "pi", "q": "kju", "r": "a", "s": "ɛs", "t": "ti", "u": "ju",
+        "v": "vi", "w": "dɔbulju", "x": "ɛks", "y": "wai", "z": "zɛd"
     }
 }
