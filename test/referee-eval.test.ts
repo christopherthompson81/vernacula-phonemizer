@@ -214,6 +214,14 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
         // IS THE WHOLE POINT: both af referees are DICTIONARY-shaped and over-sample rare Latinate words, so the
         // word-exact figure understates real-text quality by ~17pp. Floored well under the measurement, like nb.
         af: 0.90,
+        // Urdu — measured 66.3% frequency-weighted on the primary (79.6% on the secondary), against
+        // word-exact 56.8% / 59.4%. ⚠ THIS IS THE LEXICON-FREE CORE, which is what the eval scores for ur
+        // (the shipped lexicon is built from kaikki/wikipron, so scoring it here would be circular). The
+        // +9.5pp / +20.2pp gap is the same type/token effect as af: both ur referees are dictionary-shaped,
+        // and Urdu's real text is dominated by short common words the default-[ə] core happens to get right.
+        // ⚠ It does NOT mean short-vowel restoration is solved — docs/investigations/ur_tagger_investigation.md
+        // Runs 17-18 measure the core's placement errors at 25% of words. Floored well under, like nb/af.
+        ur: 0.60,
     };
     for (const [lang, floor] of Object.entries(freqFloors)) {
         it(`${lang} frequency-weighted ≥ ${(floor * 100).toFixed(0)}% (real-text quality)`, async () => {
