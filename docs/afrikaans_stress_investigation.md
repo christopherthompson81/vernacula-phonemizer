@@ -741,11 +741,49 @@ so it generalises rather than memorises. Refit on all 23,382 rows for shipping: 
 final, ⟨isering⟩/⟨seerde⟩ penult, ⟨igheid⟩/⟨logiese⟩/⟨atiese⟩ antepenult, and the ⟨gemaak⟩/⟨gestaan⟩
 entries at 2 are compound-initial stress on a past participle (skoongemaak).
 
-**Result: secondary 17,765 → 17,847 (64.8% → 65.1%), symbol 93.800% → 93.872%. Primary word-exact
-UNCHANGED at 1764, symbol 94.655% → 94.647%** — eight thousandths of a point, i.e. flat.
+**Result (after the Run 15 fix below): secondary 17,765 → 17,885 (64.8% → 65.2%), symbol 93.800% →
+93.910%; primary 1764 → 1765, symbol 94.655% → 94.654%.**
 
 **What is left: the oracle says +1189 and this table takes +82 of it.** The residue is not suffix-shaped —
 it is the first-syllable default being wrong on long Latinate words in ways a word-final string does not
 predict. That is where a learned model would finally have something to do that rules do not: it is the
 one class in this language that is genuinely contextual rather than tabulable, and af now has 23k
 stress-annotated words to train on, independent of the primary that would judge it.
+
+## Run 15 — 2026-08-08 (review of PR #775)
+
+Two findings. The first is a real bug, and it is one neither gate in this project could have caught.
+
+**A VOWEL-LETTER RUN IS NOT A NUCLEUS.** `stressedNucleus` computed its target as `n - 1 - fromEnd`
+where `n` counted maximal runs of vowel LETTERS, while `phonemizeMorpheme` compared that index against
+its own counter, which increments once per **g2p-segmented** nucleus. The two disagree on every
+hiatus — ⟨io⟩, ⟨ia⟩, ⟨eo⟩ are one run and two nuclei — so every position counted from the end landed a
+syllable early and put the stressed long vowel in the wrong place:
+
+| | was | now | RCRL |
+|---|---|---|---|
+| biologiese | *biuəluχisə | **biuluəχisə** | bi.u.ˈluə.xi.sə |
+| dialektiese | *diɑːləktisə | **dialɛktisə** | di.a.ˈlɛk.ti.sə |
+| nasionalisme | *nasiunɑːləsmə | **nasiunaləsmə** | na.ʃiu.na.ˈləs.mə |
+
+The audible symptom is a spurious mid-word LONG vowel — *nasiunɑːləsmə* has [ɑː] on ⟨na⟩. The flaw
+PRE-DATES this PR (it already affected the `n-1` and `n-2` returns) but Run 14 generalised it from
+depths 0–1 to depths 0–3, which is where it starts landing inside the word rather than at its edge.
+Fixed by counting with `countNuclei`, which walks the word with the same decisions the emitter makes.
+**Secondary 17,847 → 17,885 (+38); primary 1764 → 1765.**
+
+⚠ **Neither gate could see this, and that is the part worth keeping.** The derivation is blind by
+construction: it keeps only rows whose referee syllable count equals the spelling's vowel-run count —
+*precisely the words where the two counters cannot disagree*. And no golden covered a hiatus. The
+eval could not see it either, because the words it breaks were already misses for other reasons. It
+took reading the emitter beside the counter. Every measurement in Runs 12–14 was taken on a sample
+selected to exclude the class the code was getting wrong.
+
+The dead `VOWEL_GROUP` regex is removed rather than left as a trap, with a note at its old site.
+
+**2. The primary's symbol figure was stale in three files.** Run 14 moved it 94.655% → 94.647%, which
+crosses the printed rounding boundary (94.7 → 94.6), and the PR updated the secondary's figure in the
+same three sentences but not the primary's. Now moot in the other direction — the nuclei fix brings it
+back to 94.654% (94.7%) — but all three are set from what the eval actually prints.
+
+**Final: primary 1765/2220 (79.5%) / 94.7% symbol · secondary 17,885/27,428 (65.2%) / 93.9% symbol.**

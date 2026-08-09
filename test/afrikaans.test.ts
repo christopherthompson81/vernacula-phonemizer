@@ -237,6 +237,20 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         expect(phonemizeWord("sewentig")).toBe("siəvəntəχ"); // RCRL ˈsiə.vən.təx
     });
 
+    // ⚠ A VOWEL-LETTER RUN IS NOT A NUCLEUS, and counting stress positions from the END makes that load-bearing.
+    // ⟨io⟩/⟨ia⟩/⟨eo⟩ are ONE run and TWO nuclei, so `stressedNucleus` (which counted runs) landed a syllable
+    // early and put the stressed long vowel in the wrong place. Harmless while the only from-the-end rules were
+    // final and penult; audible the moment `stressFromEnd` reached depth 3.
+    // ⚠ NEITHER GATE COULD SEE IT: the derivation keeps only rows whose referee syllable count equals the
+    // spelling's vowel-run count — precisely the words where the two counts cannot disagree — and no golden
+    // covered a hiatus. It took reading the emitter beside the counter.
+    test("stress counted from the END uses NUCLEI, not vowel-letter runs", () => {
+        expect(phonemizeWord("biologiese")).toBe("biuluəχisə"); // RCRL bi.u.ˈluə.xi.sə — was *biuəluχisə
+        expect(phonemizeWord("dialektiese")).toBe("dialɛktisə"); // RCRL di.a.ˈlɛk.ti.sə — was *diɑːləktisə
+        // ⚠ the spurious mid-word LONG vowel is the audible symptom: *nasiunɑːləsmə had [ɑː] on ⟨na⟩.
+        expect(phonemizeWord("nasionalisme")).toBe("nasiunaləsmə"); // RCRL na.ʃiu.na.ˈləs.mə (⟨si⟩→ʃ is a separate miss)
+    });
+
     test("proper nouns come from the LEXICON, not the spelling rules", () => {
         // af-lexicon.tsv (~50 referee-sourced entries; circularity documented in
         // af-lexicon.PROVENANCE.md): name orthography no Afrikaans rule can derive.

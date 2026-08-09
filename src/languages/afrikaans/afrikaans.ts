@@ -75,12 +75,13 @@ const REDUCE_OPEN = MANIFEST.unstressedOpen;
 const C_SOFT = new Set(MANIFEST.cSoftBefore); // ⟨c⟩ → [s] before one of these, else [k]
 const W_GLIDE_AFTER = new Set(MANIFEST.wGlideAfter); // morpheme-initial ⟨Cw⟩ → the glide [w] (afrikaans.jsonc)
 
-// ⚠ THESE REGEXES ARE BUILT FROM THE MANIFEST, NOT SPELLED OUT. Both classes were written inline, and the
-// vowel one had already DRIFTED from `vowelLetters` — it was missing ⟨ö⟩, which the diacritic table maps to
-// [ø]. Inert so far (Afrikaans does not emit stress, and ⟨ö⟩ only occurs beside another vowel, so the group
-// regex merged it either way), but it is one edit away from mattering. Derived, it cannot drift again.
+// ⚠ BUILT FROM THE MANIFEST, NOT SPELLED OUT. This class was once written inline and had already DRIFTED from
+// `vowelLetters` — it was missing ⟨ö⟩, which the diacritic table maps to [ø]. Derived, it cannot drift again.
+// ⚠ THERE USED TO BE A `VOWEL_GROUP` REGEX HERE TOO, counting maximal runs of vowel letters, and
+// `stressedNucleus` used it as a syllable count. It is gone because that was wrong: a vowel run is not a
+// nucleus (⟨io⟩, ⟨ia⟩ are one run and two nuclei). Counting is `countNuclei`, which walks the word the way
+// the emitter does — see its note.
 const V = MANIFEST.vowelLetters.join("");
-const VOWEL_GROUP = new RegExp(`[${V}]+`, "gu");
 // Longest-first is cosmetic here, NOT load-bearing: both patterns are $-anchored and used only through
 // .test(), so alternation order cannot change the boolean. Sorted anyway so the source reads in the same
 // order as the manifest lists them, and so it stays correct if either is ever used to CAPTURE.
@@ -94,10 +95,38 @@ const STRESS_PENULT = new RegExp(`(${byLen(MANIFEST.stressPenultSuffixes)})$`, "
 // morphology.prefixUnstressed (read by the shared Germanic compound engine). One source now, asserted below.
 const UNSTRESSED_PREFIX = new RegExp(`^(${MANIFEST.morphology.prefixUnstressed.join("|")})[^${V}]*[${V}]`, "u");
 
+/**
+ * How many NUCLEI the grapheme scan will emit for `w` — walked with the SAME decisions phonemizeMorpheme makes.
+ *
+ * ⚠ IT MUST NOT BE A VOWEL-LETTER-GROUP COUNT, which is what `stressedNucleus` used to use. A maximal run of
+ * vowel letters is not a nucleus: ⟨io⟩, ⟨ia⟩, ⟨eo⟩ are ONE group but TWO nuclei, so every position counted from
+ * the END landed a syllable early and put the stressed long vowel in the wrong place —
+ * argeologiese *arχəuəluχisə for RCRL ar.xi.u.ˈluə.xi.sə, biologiese *biuəluχisə, nasionalisme *nasiunɑːləsmə
+ * with a spurious [ɑː]. Harmless while the only counted-from-the-end rules were final and penult; audible once
+ * `stressFromEnd` reaches depth 3.
+ * ⚠ THE DERIVATION IS BLIND TO THIS CLASS BY CONSTRUCTION — it keeps only rows whose referee syllable count
+ * equals the spelling's vowel-group count, i.e. exactly the words where the two counts cannot disagree. It could
+ * never have surfaced the bug, and a golden could not either; it took reading the emitter beside the counter.
+ */
+function countNuclei(w: string): number {
+    let n = 0;
+    for (let i = 0; i < w.length; ) {
+        const c = w[i]!;
+        if (DIA[c]) { n += 1; i += 1; continue; }
+        if (!VOWEL_LETTER.has(c) && w[i + 1] === c && c !== "'") { i += 1; continue; } // doubled consonant
+        if (c === "c" && w[i + 1] !== "h") { i += 1; continue; } // the ⟨c⟩ code rule, never a nucleus
+        const key = FIXED_KEYS.find((k) => w.startsWith(k, i));
+        if (key !== undefined) { if (VOWEL_LETTER.has(key[0]!)) n += 1; i += key.length; continue; }
+        if (BARE_VOWELS.has(c)) { n += 1; i += 1; continue; }
+        i += 1;
+    }
+    return n;
+}
+
 /** The (0-based) nucleus that carries primary stress. Native default = the first syllable (past an unstressed
  *  prefix); loan suffixes shift it: -ie/-sie/-asie → penultimate (aborsie→a·BOR·sie), -eer/-eur/-teit → final. */
 function stressedNucleus(w: string): number {
-    const n = (w.match(VOWEL_GROUP) ?? []).length;
+    const n = countNuclei(w); // ⚠ NOT a vowel-letter-group count — see countNuclei
     if (n <= 1) return 0;
     // The DERIVED suffix table first, longest-first — it subsumes most of the two hand-authored lists below.
     // A match that would place stress outside the word is ignored rather than clamped: the suffix was derived
