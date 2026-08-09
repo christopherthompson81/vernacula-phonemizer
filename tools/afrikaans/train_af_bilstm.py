@@ -4,8 +4,9 @@ per-position head labelling each grapheme with an IPA CHUNK. Model + aligner com
 exports the shared structuralTagger contract (af-g2p-tagger.onnx + .meta.json) for onnxruntime-node serving.
 
 WHY af NEEDS ONE, and why only now. The rule engine is ~87% exact on running text but the residual is the part
-rules cannot reach: stress placement is 72.6% overall and collapses to 36% at eight syllables, and a perfect-stress
-oracle is worth +1189 words (4.3pp) on the 27k secondary. That residual is CONTEXTUAL, not tabulable — the one
+rules cannot reach: stress placement is 74.8% overall and falls to 40% at eight syllables, and a perfect-stress
+oracle is worth +1168 words (4.3pp) on the 27k secondary — measured on the RULE ENGINE, which is what this tier
+replaces; on the SHIPPED path, where the lexicon serves 25k words, the same oracle is worth ~0. That residual is CONTEXTUAL, not tabulable — the one
 class in this language where a model has something to do that a rule does not.
 
 ⚠ NO STRESS MARKS IN THE TAG ALPHABET, unlike Norwegian. af emits no stress by convention; the stress information

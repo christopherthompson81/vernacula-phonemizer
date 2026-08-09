@@ -5,7 +5,7 @@
  *
  * ⚠ NO STRESS POSTPROCESS, unlike Norwegian's. af emits no stress mark by convention — the stress information lives
  * in the VOWEL QUALITY (reduction + open/closed length), and that is precisely what this model learns: the rule
- * engine places stress correctly only 72.6% of the time overall and 36% at eight syllables, which is why the
+ * engine places stress correctly only 74.8% of the time overall and 40% at eight syllables, which is why the
  * residual it leaves is contextual rather than tabulable.
  *
  * On a 3,873-word dictionary-gold held-out split the tagger reads **91.4% exact / 98.7% symbol**, against the rule engine's

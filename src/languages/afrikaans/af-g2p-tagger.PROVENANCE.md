@@ -8,8 +8,8 @@ Trained by `tools/afrikaans/train_af_bilstm.py`.
 ## Why af has one, and why only now
 
 The rule engine reads ~87% of running-text tokens exactly, and the two shipped lexicons cover 86% of them
-outright. The residual is the part rules cannot reach: **stress placement is 72.6% overall and collapses to
-36% at eight syllables**, and a perfect-stress oracle is worth **+1189 words (4.3pp)** on the 27k secondary
+outright. The residual is the part rules cannot reach: **stress placement is 74.8% overall and falls to
+40% at eight syllables**, and a perfect-stress oracle is worth **+1168 words (4.3pp)** on the 27k secondary
 referee. That residual is *contextual*, not tabulable — the one class in this language where a model has
 something to do that a rule does not.
 

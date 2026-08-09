@@ -230,7 +230,7 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // `stressFromEnd`: suffix → syllables-from-the-end carrying primary stress, read off the secondary's
     // 23,382 stress-annotated words and validated on a held-out 20% (placement 72.7% → 74.9%). Run 4 had
     // concluded from an oracle that ALL stress rules together were worth ~45 words — that oracle covered 554
-    // of the primary's 2220 rows; on the secondary's 23,388 it is worth +1189 (4.3pp).
+    // of the primary's 2220 rows; on the secondary's 24,709 it is worth +1168 (4.3pp).
     test("the derived stress table places Latinate suffix stress", () => {
         expect(phonemizeWord("klassifiseer")).toBe("klasifisiər"); // ⟨ifiseer⟩ FINAL — RCRL kla.si.fi.ˈsiər
         expect(phonemizeWord("neutraliseer")).toBe("nøːtralisiər"); // ⟨aliseer⟩ final — RCRL nøː.tra.li.ˈsiər

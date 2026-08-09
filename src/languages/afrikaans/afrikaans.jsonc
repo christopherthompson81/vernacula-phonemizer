@@ -155,9 +155,9 @@
     // ⚠ THIS EXISTS BECAUSE THE OLD MEASUREMENT WAS TAKEN ON A SAMPLE TOO SMALL TO SEE IT. Run 4 swept
     // candidate stress suffixes against the 2220-word primary, found almost nothing, and concluded from a
     // perfect-stress ORACLE that every stress rule that could ever be written was worth ~45 words. That oracle
-    // covers only 554 of the primary's rows. Re-run against the RCRL secondary it covers 23,388 and is worth
-    // **+1189 words (4.3pp)** — the lever is ~26x what was recorded, and the old number was an artefact of the
-    // sample. Our placement accuracy is 72.6% overall and falls with length: 88% at 2 syllables, 59% at 4, 36% at 8.
+    // covers only 529 of the primary's rows. Re-run against the RCRL secondary it covers 24,709 and is worth
+    // **+1168 words (4.3pp)** — the lever is ~26x what was recorded, and the old number was an artefact of the
+    // sample. Our placement accuracy is 74.8% overall and falls with length: 88% at 2 syllables, 64% at 4, 40% at 8.
     // ⚠ DERIVED AND VALIDATED ON A HELD-OUT SPLIT, not fitted to the score: suffixes are read off an 80% train
     // split and scored on the untouched 20% — placement 72.7% → 74.9% held-out against 75.5% on train, so it
     // generalises rather than memorises. The shipped table is then refit on all 23,382 usable rows.
@@ -174,7 +174,7 @@
     // ⚠ THE RESULT IS MORPHOLOGY, NOT NOISE, which is the check that it is real: ⟨aliseer⟩/⟨ifiseer⟩ take final
     // stress, ⟨isering⟩/⟨seerde⟩ penult, ⟨igheid⟩/⟨logiese⟩ antepenult, and the ⟨gemaak⟩/⟨gestaan⟩ entries at 2
     // are compound-initial stress on a past participle (skoongemaak).
-    // ⚠ WHAT IS LEFT: the oracle says +1189 and this table takes +82 of it. The residue is not suffix-shaped.
+    // ⚠ WHAT IS LEFT: the oracle says +1168 and this table takes +82 of it. The residue is not suffix-shaped.
     "stressFromEnd": {
         "derlike": 3, "digheid": 2, "geslaan": 2, "gestaan": 2, "iseerde": 1, "isering": 1, "tigheid": 2,
         "waardig": 1, "alisme": 1, "derlik": 2, "gegooi": 2, "geloop": 2, "gemaak": 2, "geneem": 2, "gestel": 2,

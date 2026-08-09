@@ -1127,3 +1127,156 @@ move was undocumented. Both recorded; ⟨ui⟩ still reads [œy] through two-gra
 in both file headers, so this was a stale claim rather than a missing licence — corrected in both.
 
 **Final: dictionary-gold held-out — rule engine 63.5% / 93.5%, tagger 91.4% / 98.7%.** Suite 3184.
+
+## Run 22 — 2026-08-08 (re-measuring stress, because the quoted figure was stale)
+
+Challenged on the "72.6% stress placement" claim in the maturity row. It **was** stale: measured in Run 14,
+*before* the `stressFromEnd` table landed (#775) and before the `countNuclei` fix (#775 review) changed how
+positions are counted from the end. Both moved it.
+
+Re-measured against RCRL with the current engine, nucleus-aligned (comparing `stressedNucleus` to the
+referee's stressed syllable only where `countNuclei` and the referee agree on the syllable count — 24,709
+comparable polysyllables, up from Run 14's 23,388 because nucleus counting aligns better than vowel-group
+counting did):
+
+| | Run 14 | **now** |
+|---|---|---|
+| overall placement | 72.6% | **74.8%** |
+| 2 syllables | 88% | 88% |
+| 3 | 75% | **77%** |
+| 4 | 59% | **64%** |
+| 5 | 46% | **56%** |
+| 6 | 48% | **56%** |
+| 7 | 42% | **51%** |
+| 8 | 36% | **40%** |
+
+And the oracle, re-run with the current engine: **+1168 words (4.3pp)** on the secondary (17,885 → 19,053),
+against Run 14's +1189. The headroom is essentially unchanged in percentage terms — the engine got better
+at placement *and* the ceiling moved down with it.
+
+⚠ **The long words are where the derived table actually paid.** The overall +2.2pp understates it: 5- and
+6-syllable words gained 10 and 8 points. That is the population the suffix table targets, and it is also
+the population the OOV tagger serves — which is why the tagger's advantage on the held-out split (91.4% vs
+63.5%) is larger than the rule engine's aggregate numbers suggest.
+
+Corrected in **nine** sites that were quoting the Run 14 figures: `afrikaans.jsonc`,
+`af-g2p-tagger.PROVENANCE.md`, `afrikaansTagger.ts`, `afrikaans.test.ts`, `afNeural.test.ts`,
+`language-maturity.md`, `catalogue.tsv`, `referee-eval.test.ts` — and `train_af_bilstm.py`, which the
+first sweep missed entirely, leaving the trainer contradicting the PROVENANCE it is mirrored by.
+⚠ The count in this sentence was itself wrong on the first pass ("seven" over a list of eight); a
+sweep's own tally is the checklist the next sweep trusts.
+
+**Does it change the 🟡 verdict? No.** 74.8% placement with +1168 words (4.3pp) of measured oracle headroom
+is still real, unmodelled error rather than referee noise — so not ✅. And the OOV tagger reading 91.4% still
+shows the contrast is largely recoverable from spelling — so not 🟢, whose definition requires the tail to
+be "a principled coin-flip forever". The verdict rests on the *shape* of the residual, and that has not
+changed; only its size, slightly, in our favour.
+
+## Run 23 — 2026-08-08 (there is no stress gap left, and the verdict is ✅)
+
+Asked for a proposal to close the stress gap. **There isn't one worth making, and the measurements that
+show it also overturn the 🟡 verdict I set one run earlier.**
+
+### The 4.3pp figure was scoped wrong, and I had been quoting it as if it were shipped headroom
+
+| | |
+|---|---|
+| perfect stress, RULE ENGINE vs the secondary | +1168 words (4.3pp) |
+| perfect stress, **SHIPPED path** vs the secondary | **+28 words (0.10pp)** |
+| dictionary words that reach the rules at all | 2,314 of 27,428 |
+| rule-path stress placement, token-weighted | 92.1% |
+
+The lexicon closed it. Optimising stress further optimises a path that 92% of dictionary words and most
+real-text tokens already bypass.
+
+### My own best proposal was measured and rejected
+
+The tagger is async-only while `phonemize()` is sync, so distilling it into a sync-available table looked
+like the lever — af-stems covers 98.3% of the OOV tail. On the frequent traffic the lexicon does not serve:
+
+| | token-weighted correct |
+|---|---|
+| rules | **97.4%** |
+| tagger | 97.2% |
+
+⚠ And that comparison is **rigged in the tagger's favour** — it trained on most of those words. Its real
+advantage is on rare, long, Latinate items: exactly what a dictionary-shaped held-out split contains and
+exactly what running text does not. The 91.4%-vs-63.5% held-out gap is real but lives in a population
+users rarely hit.
+
+### Decomposing the residual is what settles the verdict
+
+Shipped disagreement with the secondary is 1,093 types = 2.69% of tokens. By token weight:
+
+| share of tokens | types | what it is |
+|---|---|---|
+| **2.14%** | **3** | single letters. ⚠ Only ⟨n⟩ (6,771 tokens = 2.01pp) is the apostrophe artifact — the frequency list strips the ⟨'⟩ from ⟨'n⟩. ⟨o⟩ (351) and ⟨a⟩ (83), 0.13pp together, are the letter-name rule of #761 disagreeing with the referee's value for a bare letter — a convention difference, not an artifact |
+| 0.18% | 39 | the INDEPENDENT primary backs US against the secondary (epenthesis film/arm/vorm, final devoicing, initial ⟨v⟩) |
+| **0.37%** | 1,051 | **genuine residual** — loans (abattoir, adagio) and reduction on rare polysyllables |
+
+**99.6% of real-text tokens are read correctly.** Two thirds of the apparent 2.69% is three letters and a
+tokenizer artifact; another slice is the referee disagreeing with an adjudicated decision its counterpart
+supports.
+
+### Verdict: 🟡 → ✅
+
+⚠ I argued 🟡 in Run 22 on the grounds that "74.8% placement with 4.3pp of oracle headroom is real
+unmodelled error, not referee noise". **That argument used the rule engine's numbers for a shipped-path
+judgement.** Corrected: the shipped headroom is 0.10pp and the genuine residual is 0.37% of tokens.
+
+- **✅** — "trust the output; deferrals are minor/notation, or the low referee % is just referee noise."
+  Both hold: the word-exact 79.5% / 65.2% are dictionary-shape bias (96.2% / 92.9% frequency-weighted),
+  and the deferrals are nasalization (×2/2220) and the ⟨êre⟩ suffix class (48 words at 93.75%, just under
+  the derivation's 0.95 threshold, ≈0 shipped impact).
+- **not 🟢** — the tagger's 91.4% shows the unwritten stress contrast is largely recoverable from spelling,
+  not "a principled coin-flip forever". Same argument bn's row makes.
+- **not 🟡** — there is no specific class a further lexicon or rule layer would close. The layers are built,
+  and the one remaining idea was measured and rejected.
+
+**The binding constraint is data, not method.** ~32.6k pairs is the ceiling; further effort has better
+returns elsewhere in the fleet.
+
+## Run 24 — 2026-08-09 (review of PR #779 — the ✅ evidence was circular)
+
+Eight findings. The first invalidates the evidence Run 23 used, though not its conclusion.
+
+**⚠ THE ✅ ARGUMENT SCORED THE ANSWER KEY.** Run 23's "+28 words (0.10pp)" shipped-path oracle and its
+"0.37% genuine residual" were both measured **against RCRL** — and the 25,112-entry shipped lexicon is
+*built from RCRL*, covering 25,112 of its 27,428 headwords. Those words are right by construction. This is
+precisely the circularity `phonemizeWordRules` exists to prevent, and which this project has enforced on
+itself all week (#770, #776, #778); I walked into it anyway, one run after congratulating myself for
+catching a subtler version of it.
+
+Re-measured against the **independent primary**, which no tier is derived from except the 44 curated rows:
+
+| | |
+|---|---|
+| shipped vs primary | 86.1% (**86.0%** excluding the 44 curated rows → the circularity there is 0.1pp, not the ~2pp feared) |
+| perfect-stress oracle, shipped path | **−1 word** (the primary can only cover 529 of its rows) |
+| token-weighted residual | **2.23%**, not 0.37% |
+
+And that 2.23% splits:
+
+| share of tokens | types | |
+|---|---|---|
+| **2.06%** | 126 | **two-source conflict** — we emit the secondary's value and the primary disagrees (ander, baard, baie: the primary's inconsistent final devoicing, recorded as not-to-be-chased back in Run 2) |
+| **0.17%** | 168 | **our own error** — loans, reduction on rare polysyllables |
+
+**✅ survives, on better evidence than it was granted with.** Our genuine error is ~0.2% of real-text
+tokens, measured against a source no lexicon tier is built from. The verdict is unchanged; the argument
+behind it is now independent. ⚠ The lesson is the sharper one: *a favourable measurement deserves the same
+scrutiny as an unfavourable one.* Every circularity caught this week was caught by a reviewer, never by me,
+and each time I had just finished writing about circularity.
+
+**The other seven:**
+- the 86.1% carried 44 answer-key rows with no caveat — now quantified at 0.1pp rather than hand-waved
+- three files paired the new oracle numerator (+1168) with the old denominator (23,388); the re-run covers **24,709**
+- `train_af_bilstm.py` was missed by the Run 22 sweep entirely and still carried 72.6% / +1189 — it is the
+  file a future retrain reads first, and it contradicted the PROVENANCE that mirrors it
+- `afrikaans.jsonc` keeps the derivation's held-out figures (72.7% → 74.9%) beside the new 74.8%; they are
+  on the **superseded vowel-group counting** and are now labelled as such rather than left to invite the
+  same challenge that started Run 22
+- "corrected in seven places" listed eight files and the true count was nine
+- the ⟨n⟩⟨o⟩⟨a⟩ token share was attributed wholly to the apostrophe artifact; only ⟨n⟩ (2.01pp) is that.
+  ⟨o⟩ and ⟨a⟩ (0.13pp) are the letter-name rule differing from the referee — a convention difference
+- "THREE TIERS" enumerated four stages
