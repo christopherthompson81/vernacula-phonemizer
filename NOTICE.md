@@ -104,7 +104,7 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
   Department of Arts and Culture, Government of the Republic of South Africa (Multilingual Speech
   Technologies, NWU). **CC BY-SA 2.5 South Africa** <http://creativecommons.org/licenses/by/2.5/za/>.
   Two artifacts: the SHIPPED pronunciation lexicon `src/languages/afrikaans/af-rcrl-lexicon.tsv`
-  (26,872 entries) and the `af` secondary eval referee
+  (25,112 entries) and the `af` secondary eval referee
   `tools/referee-eval/referees/af.rcrl-apd.tsv`. Each carries a PROVENANCE sidecar.
 - **ChhoeTaigi 台華線頂對照典** — CC-BY-SA 4.0. `minnan/dict.tsv`, `dict-chars.tsv`.
 - **CC-CEDICT** — CC-BY-SA. Cross-check only, tools.

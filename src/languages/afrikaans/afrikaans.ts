@@ -29,7 +29,7 @@ import { loadTsvMap } from "../../core/loadTsv.ts";
 // Proper-noun / opaque-loan lexicon (af-lexicon.tsv), lazily loaded like tagalog's stress lexicon.
 let LEXICON: ReadonlyMap<string, string> | undefined;
 const lexicon = (): ReadonlyMap<string, string> => (LEXICON ??= loadTsvMap(import.meta.url, "af-lexicon.tsv"));
-// The 27,428-word RCRL pronunciation lexicon — the primary SHIPPED path, as for da/nb/fr/en. Optional: absent
+// The 25,112-entry RCRL pronunciation lexicon — the primary SHIPPED path, as for da/nb/fr/en. Optional: absent
 // → the rules serve every word, which is exactly the pre-lexicon behaviour.
 let RCRL: ReadonlyMap<string, string> | undefined;
 const rcrl = (): ReadonlyMap<string, string> =>
@@ -276,10 +276,11 @@ export function phonemizeWord(word: string): string {
     // ⚠ PROPER NOUNS AND OPAQUE LOANS (af-lexicon.tsv — referee-sourced: Botha→buəta, Blignault-class
     // French/anglicised spellings, Afrikaans→afrikɑ̃ːs with its nasal): words where NO spelling rule can
     // win, because the orthography is Dutch/French/English-era and the pronunciation is lexical.
-    // ⚠ AFTER the rule path's own special cases, NOT before — the first version put the lookup first and
-    // the lexicon's stray single-letter rows (j, q) silently overrode the "a bare letter is SPELLED"
-    // rule of #761, so ⟨J⟩ came out [jɛ] instead of the letter name [jiə]. Those rows are gone, and the
-    // ordering now makes their return harmless rather than silent.
+    // ⚠ THE LEXICONS RUN BEFORE phonemizeWordRules, SO THEY CAN STILL SHADOW ITS SPECIAL CASES. An earlier
+    // comment here claimed the ordering made a stray row "harmless rather than silent"; it does not — ⟨'n⟩
+    // and the single-letter NAME rule of #761 both live inside phonemizeWordRules and a lexicon hit reaches
+    // them first. That is why af-lexicon.tsv's stray j/q rows made ⟨J⟩ read [jɛ] (#770), and why the RCRL
+    // builder drops single-letter rows at BUILD time. The safety is the build-time filter, not this order.
     // ⚠ NOT ON THE EVAL PATH: the entries come from the referee this language is scored against, so
     // phonemizeWordRules below (what the eval calls) skips them — house pattern, same as en-GB/tl/ilo.
     // Provenance + the single-source circularity note: af-lexicon.PROVENANCE.md.
@@ -290,7 +291,7 @@ export function phonemizeWord(word: string): string {
     // to win, so the small curated tier is consulted first and this one fills in behind it.
     // ⚠ WHY A LEXICON AT ALL, when the rules score 79.5%: that number is DICTIONARY-shaped. On running text the
     // rules are ~87% exact, but RCRL covers ~86% of running-text TOKENS, so serving those authoritatively fixes
-    // ≈11pp of everything read aloud — the largest single lever left, and the same tiering da/nb/fr/en use.
+    // ≈10pp of everything read aloud — the largest single lever left, and the same tiering da/nb/fr/en use.
     const dict = rcrl().get(w);
     if (dict !== undefined) return dict;
     return phonemizeWordRules(w);

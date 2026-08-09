@@ -259,12 +259,15 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     });
 
     // ── THE SHIPPED PRONUNCIATION LEXICON (#776) ─────────────────────────────────────────────────────
-    // 27,428 RCRL entries serving the SHIPPED path only. The rules score 79.5% on the primary referee but
+    // 25,112 RCRL entries serving the SHIPPED path only. The rules score 79.5% on the primary referee but
     // ~87% on running text (a dictionary-shaped referee over-samples rare long words); the lexicon covers
-    // 86.2% of running-text TOKENS and takes those from 87.4% to 99.8% exact — ≈11pp of everything read aloud.
+    // 86.2% of running-text TOKENS and takes those from 87.4% to 99.5% exact — ≈11pp of everything read aloud.
     test("the RCRL lexicon serves the shipped path, and the rules serve the eval", () => {
         // Words where the rules are still wrong and the lexicon is right.
-        expect(phonemizeWord("polisie")).toBe("pulisi"); // rules: puəlisi (stress) — RCRL pu.ˈli.si
+        // ⚠ polisie is NOT a lexicon word: the primary referee corroborates the rules there, so the guard
+        // keeps ours. Chosen deliberately as the example — the guard is what took regressions to zero.
+        expect(phonemizeWord("polisie")).toBe("puəlisi");
+        expect(phonemizeWord("chemie")).toBe("χiəmi"); // …a word the primary does NOT corroborate: lexicon wins
         expect(phonemizeWord("nasionalisme")).toBe("naʃiunaləsmə"); // rules lack ⟨si⟩→ʃ — RCRL na.ʃiu.na.ˈləs.mə
         expect(phonemizeWordRules("polisie")).toBe("puəlisi"); // …and the RULE path is untouched by it
         // ⚠ PRECEDENCE: the 44-entry curated tier is consulted FIRST and wins. RCRL writes `afrikaans`
@@ -449,7 +452,7 @@ describe("Afrikaans text normalization", () => {
     // BEFORE the tier, so no bare `m` survives to be misread.
     test("the bare metre, and the cube word it feeds", () => {
         expect(getPhonemizer("af").text("133 m/s").trim()).toContain("miətər pər səkɔndə");
-        expect(getPhonemizer("af").text("5 m³").trim()).toContain("kybikə miətər");
+        expect(getPhonemizer("af").text("5 m³").trim()).toContain("kyːbikə miətər");
         expect(getPhonemizer("af").text("40 m.p.u").trim()).toContain("məil pər yːr");
     });
     // ⚠ THE SAME SIX UNSTRESSED PREFIXES ARE READ BY TWO CONSUMERS — afrikaans.ts (stress placement + the

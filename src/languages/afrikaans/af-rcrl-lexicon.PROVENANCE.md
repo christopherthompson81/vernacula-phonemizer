@@ -1,6 +1,6 @@
 # af-rcrl-lexicon.tsv — provenance
 
-**Artifact:** `src/languages/afrikaans/af-rcrl-lexicon.tsv` — 26,872 word→IPA entries, the **shipped**
+**Artifact:** `src/languages/afrikaans/af-rcrl-lexicon.tsv` — 25,112 word→IPA entries, the **shipped**
 Afrikaans pronunciation lexicon. Built by `tools/afrikaans/build_af_lexicon.ts` from the in-repo
 referee (no network); re-runnable.
 
@@ -63,25 +63,46 @@ by diffing the symbol inventories — is:
 | `ɡ` | `χ` | a few rows write ⟨g⟩ as a stop; this engine has no /ɡ/ |
 | `əu` | `œu` | ⟨ou⟩/⟨au⟩ — **notation, not disagreement**: RCRL is 325:0 for [əu] and en.wiktionary 34:0 for [œu], each internally unanimous |
 
-### Three exclusions, every one found by an existing golden failing
+### Vetting: every entry is checked against the RULE output
 
-⚠ **Wholesale import was wrong, and the test suite is what said so.** 27,428 → **26,872**:
+⚠ **Wholesale import was wrong.** The first draft vetted only at the SYMBOL level — "these four symbols map
+to those four" — which structurally cannot see a narrow transcription that differs as a *sequence* or as a
+*rule*. Review of #776 found three shipping defect classes it missed. The dictionary is now vetted against
+`phonemizeWordRules`, which is the right relationship between the two: **the dictionary wins on lexical
+knowledge** (which vowel this loan takes, where its stress falls), **the rules win on systematic phonology**
+(devoicing, length, what the inventory contains). 27,428 → **25,112**:
 
-1. **Single letters** (4: `n`→ə, `a`→a, `o`→œu, `'n`). A bare letter in Afrikaans text is SPELLED, not
-   sounded — ⟨C⟩ is "see" [siə] (#761) — and a lexicon hit shadows that rule. ⚠ **This is the second
-   time:** review of #770 caught exactly this in `af-lexicon.tsv`, where stray `j`/`q` rows made ⟨J⟩
-   read [jɛ]. Same language, same trap, different source.
-2. **⟨ê⟩ ⟨û⟩ ⟨ô⟩ ⟨uu⟩ words** (552). RCRL has **no `ɛː`, no `œː` and no `yː` at all** — it writes
-   `aangelê` ɑːnxəlɛ and `aangestuur` ɑːnxəstyr — so importing them would silently delete a length
-   distinction the engine marks and the primary corroborates (`ɛː` ×16, `yː` ×3). This is an inventory
-   gap in the source, not a disagreement about the language. ⟨ô⟩ joins them on the same evidence: RCRL
-   *has* `ɔː` (150 rows) yet writes `môre` short against the primary's `ˈmɔː.rə`. The rules get all of
-   these right from the spelling, so dropping the entry beats importing a flattened one.
-3. **Word-initial ⟨v⟩ written [v]** — normalized to [f] rather than dropped. Both sources agree
-   overwhelmingly (RCRL 2363:69, en.wiktionary 184:13) and Run 6 established the f→v class is
-   transcription noise. A dictionary's per-word value normally beats a majority rule — that is the point
-   of a lexicon — but not when the majority is 97% **across independent sources** and the minority has no
-   environment of its own. Left in, it would have shipped `vitamien` → [v]itamin on the strength of one row.
+| check | action | n |
+|---|---|---|
+| the INDEPENDENT primary referee already corroborates the rules | drop — see below | 1,294 |
+| the rules emit a long vowel this source **cannot write** | drop | 985 |
+| word-final obstruent **devoicing** | repair to the engine's coda | — |
+| **schwa epenthesis** in /rm, lm/ (arm→arəm, film→fələm) | take the rule's form | — |
+| a **dropped onset** (tsaar → sɑːr, i.e. rules minus the first phone) | take the rule's form | — |
+| edit distance from the rules beyond a threshold (`abe` → əib) | drop as a source error | 33 |
+| **single letters** | drop | 4 |
+
+Three of these deserve their reasoning recorded:
+
+- **The primary referee overrules this dictionary.** Where en.wiktionary has the word and already agrees
+  with the rules, the lexicon may not override: the two sources conflict there, and the tiebreaker should be
+  the one that is *not* the lexicon's own source. It is only 2,220 words, but they are the adjudicated ones —
+  `môre` (primary ˈmɔː.rə vs RCRL ˈmɔ.rə, and the manifest documents ⟨ô⟩ = long), `Afrika`, `polisie`,
+  `subsidie`, `telefoon`. **This guard is what took regressions against the primary from 29 to zero.**
+- **The length check is keyed on the source's INVENTORY, not on spelling.** "The rules have ː and the entry
+  does not" is the wrong test — it also drops every row that correctly says SHORT where our rules over-apply
+  length (`kanon`, RCRL ka.ˈnɔn against our kɑːnɔn, is exactly what a lexicon exists to fix). The source *has*
+  ɑː, øː and ɔː, so a short value there is a real lexical claim; it has **no ɛː, œː or yː at all**, so a short
+  value there is an inventory gap. The missing set is derived by scanning the source, not typed out.
+- **Single letters** (`a`, `n`, `o`, `u`). A bare letter is SPELLED, not sounded — ⟨C⟩ is "see" [siə]
+  (#761) — and a lexicon hit shadows that rule; `802.11n` read *…elf ə*. ⚠ **The second time:** review of
+  #770 caught the identical trap in af-lexicon.tsv, where stray `j`/`q` rows made ⟨J⟩ read [jɛ]. ⚠ ⟨'n⟩ is
+  **kept** — it is two characters, and its value `ə` matches the rule.
+
+Also normalized: **word-initial ⟨v⟩ written [v] → [f]** (both sources ~97% [f]: RCRL 2363:69, primary
+184:13; Run 6 established the class as noise). Left in, it shipped `vitamien` → [v]itamin on one row.
+
+**Measured on the INDEPENDENT primary referee: rules 79.5% → shipped 86.1%, +147 words, 0 regressions.**
 
 **Stress marks and syllable dots are stripped.** The engine emits neither, and a lexicon carrying them
 would make shipped output inconsistent with every word the rules produce. (The referee keeps them —

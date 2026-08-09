@@ -103,7 +103,7 @@ CC-BY-SA 4.0 + iTaigi CC0 + kaikki Hokkien chars; sidecar); `thai/dictionary.tsv
 `portuguese-br/pt-br-openclose.tsv`; `portuguese/lexicon.tsv`; `korean/tensification.tsv`;
 `ilocano/ilo-lexicon.tsv`; `turkish/stress.tsv` (kaikki non-final-stress mine + adjudicated
 entries, per header); `afrikaans/af-stems.txt` (afwiki + OpenSubtitles + kaikki union; sidecar);
-`afrikaans/af-rcrl-lexicon.tsv` (26,872 entries — RCRL Afrikaans Pronunciation Dictionary v1.4.1,
+`afrikaans/af-rcrl-lexicon.tsv` (25,112 entries — RCRL Afrikaans Pronunciation Dictionary v1.4.1,
 CTexT/NWU via ttslab/za_lex, **CC BY-SA 2.5 ZA**, the one shipped lexicon in the fleet that is NOT
 Wiktionary-derived; sidecar);
 `french/lexicon.tsv` (Lexique 3.83, CC BY-SA 4.0, per header).

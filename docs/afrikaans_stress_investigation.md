@@ -849,3 +849,46 @@ hard part — proper nouns, English loans, inflected forms outside the dictionar
 words where our stress placement falls to 36%. af has 23k stress-annotated pairs to train on,
 independent of the primary that would judge it. **That is the first time in this sequence that every
 precondition for a neural tier is actually met.**
+
+## Run 17 — 2026-08-08 (review of PR #776 — vetting a dictionary against the rules)
+
+Seven findings, three of them shipping defects. They share one root cause: **my normalization was
+SYMBOL-level** ("these four symbols map to those four, verified exhaustive"), which structurally cannot
+see a narrow transcription that differs as a **sequence** or as a **rule**.
+
+| class | shipped | evidence it is a defect, not a source disagreement |
+|---|---|---|
+| LENGTH, ~360 rows | kubieke kyːbikə → **kybikə**, eeu iːu → **iu**, deuntjie døːnki → **dyŋki** | the guard was a SPELLING list (ê û ô uu) and even missed ⟨î⟩; the gap is in the source's INVENTORY |
+| FINAL DEVOICING, 22 of 24 | klub → **klœb** for klœp | `rob` is native and the INDEPENDENT primary writes rɔp |
+| SCHWA EPENTHESIS, 219 rows | arm → **arəm**, film → **fələm**, storm → **stɔrəm** | the primary writes fəlm, stɔrm, fɔrm; and a lexicon word epenthesized while an OOV compound of the same shape did not |
+
+Fixed by vetting **every entry against `phonemizeWordRules`**, which is the right relationship between the
+two: the dictionary wins on LEXICAL knowledge (which vowel this loan takes, where its stress falls), the
+rules win on SYSTEMATIC phonology (devoicing, length, inventory). Repair where the rule is authoritative
+and the entry's lexical content survives; drop where it does not.
+
+**Two of the guards are worth keeping as general lessons:**
+
+1. **The independent primary referee overrules the dictionary.** Where en.wiktionary has the word and
+   already agrees with the rules, the lexicon may not override it — the two sources conflict there, and the
+   tiebreaker should be the one that is *not* the lexicon's own source. Only 2,220 words, but they are the
+   adjudicated ones. **This single guard took regressions against the primary from 29 to ZERO.**
+2. **A length check must key on the source's INVENTORY, not on spelling.** My first fix dropped every row
+   where "the rules have ː and the entry does not" — which also drops every row that correctly says SHORT
+   where our rules over-apply length (`kanon`: RCRL ka.ˈnɔn against our kɑːnɔn is *exactly* what a lexicon
+   exists to fix). It measured WORSE (85.0 → 84.6). The source has ɑː, øː, ɔː — a short value there is a
+   lexical claim; it has no ɛː, œː, yː at all — a short value there is a gap. The missing set is now derived
+   by scanning the source rather than typed out.
+
+Also: a **dropped onset** guard (RCRL writes `tsaar` sɑːr — the rule output minus its first phone, which is
+edit-distance 1 and invisible to a distance threshold), a plausibility drop (33 rows: `abe` → əib), and the
+single-letter drop — ⚠ whose sidecar entry was itself **wrong**, naming ⟨'n⟩ (which is correctly KEPT) and
+omitting ⟨u⟩. A reader checking "did the indefinite article survive the import?" got the wrong answer.
+
+⚠ And the ordering comment in `afrikaans.ts` asserted a safety property the code does not have — both
+lexicon tiers run BEFORE `phonemizeWordRules`, so its ⟨'n⟩ and letter-name special cases remain shadowable
+by any lexicon row. The safety is the **build-time** single-letter filter, not the lookup order. Corrected
+rather than inherited.
+
+**Result on the INDEPENDENT primary: rules 79.5% → shipped 86.1%, +147 words, 0 regressions**
+(the reviewed version was 85.0%, +123, with 29 regressions). 25,112 entries.
