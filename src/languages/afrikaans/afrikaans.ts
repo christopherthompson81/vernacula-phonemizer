@@ -69,6 +69,9 @@ function isOpen(w: string, i: number): boolean {
 }
 
 const REDUCE = MANIFEST.unstressedReduction; // unstressed bare vowels (afrikaans.jsonc)
+// An unstressed but OPEN syllable keeps the TENSE quality, short (afrikaans.jsonc `unstressedOpen`). Sparse: only
+// the cells that differ from REDUCE, so a missing key falls through to it.
+const REDUCE_OPEN = MANIFEST.unstressedOpen;
 const C_SOFT = new Set(MANIFEST.cSoftBefore); // ⟨c⟩ → [s] before one of these, else [k]
 const W_GLIDE_AFTER = new Set(MANIFEST.wGlideAfter); // morpheme-initial ⟨Cw⟩ → the glide [w] (afrikaans.jsonc)
 
@@ -167,9 +170,12 @@ function phonemizeMorpheme(word: string, finalDevoice = true): string {
         if (BARE_VOWELS.has(c)) {
             const stressed = nucleus === stressNucleus;
             if (c === "e" && i === w.length - 1) out += "ə"; // final unstressed ⟨e⟩ → schwa
-            else if (c === "i") out += isOpen(w, i) ? "i" : "ə"; // ⟨i⟩ is tense [i]/lax [ə] by syllable, not by stress
+            // ⚠ ⟨i⟩ is tense [i] / lax [ə] BY SYLLABLE, not by stress — kept as its own rule after the data sweep
+            // (Run 12) rejected folding it into the tables: RCRL prefers [ə] unstressed-open, but that costs 9
+            // words on the independent primary. See the `unstressedOpen` note in afrikaans.jsonc.
+            else if (c === "i") out += isOpen(w, i) ? "i" : "ə";
             else if (stressed) out += isOpen(w, i) ? LONG[c]! : SHORT[c]!; // length rule in the stressed syllable
-            else out += REDUCE[c]!; // other unstressed vowels → short / schwa
+            else out += (isOpen(w, i) ? REDUCE_OPEN[c] : undefined) ?? REDUCE[c]!;
             i += 1;
             nucleus += 1;
             continue;

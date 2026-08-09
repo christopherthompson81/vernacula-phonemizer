@@ -580,3 +580,63 @@ header still described one referee and the old ⟨sw/dw⟩ fold. All corrected �
 reduction/length core layer is still open.
 
 **Final: primary 1760/2220 (79.3%) / 94.4% symbol · secondary 17,447/27,428 (63.6%) / 93.2% symbol.**
+
+## Run 12 — 2026-08-08 (the reduction mapping, DERIVED — the lever Run 9 pointed at)
+
+Run 9/10 said: the residual is reduction and length, the new secondary carries stress AND syllable
+boundaries for 27k words, so derive the mapping instead of training on it. Done.
+
+**The extraction.** RCRL gives, per word, a stress digit and a phone count per syllable. Pair
+**vowel-letter group k of the spelling with syllable k of the transcription**, keep only words where the
+two counts agree — **25,247 of 27,428 usable** — and every one of the engine's vowel cells can be read
+straight off the data: (letter × stressed? × open?) → nucleus.
+
+**The engine had 20 cells and a hole.** `unstressedReduction` was applied to every unstressed vowel
+*regardless of syllable shape*, so the unstressed-**open** cell did not exist. It should: the Germanic
+open/closed rule does not switch off outside the stress — the vowel keeps the TENSE quality, just short.
+
+| cell | ours | RCRL |
+|---|---|---|
+| stressed closed | a ɛ ə ɔ œ | a 98 · ɛ+æ 100 · ə 99 · ɔ 100 · œ 94 — **all confirmed** |
+| stressed open | ɑː iə i uə yː | ɑː 74 · iə 68 · **ə 64** · uə 63 · y 50 |
+| unstressed closed | a ə ə ɔ œ | a 98 · ə 78 · ə 100 · ɔ 97 · œ 97 — **all confirmed** |
+| unstressed OPEN | *(no table — fell through to closed)* | a 77 · ə 90 · **ə 55** · **u 53** · **y 65** |
+
+**17 of 20 cells confirmed the manifest**, which is itself the strongest corroboration the vowel system
+has ever had. Three contradicted it, and only two shipped:
+
+| candidate | RCRL | primary (INDEPENDENT) | secondary | kept |
+|---|---|---|---|---|
+| ⟨o⟩ unstressed-open ɔ→u | u 53 / ɔ 25 / uə 21 (n=1846) | ±0 | **+222** | yes |
+| ⟨u⟩ unstressed-open œ→y | y 65 / œ 30 (n=568) | **+4** | **+96** | yes |
+| ⟨i⟩ unstressed-open →ə | ə 55 / i 45 (n=2771) | **−9** | +174 | **no** |
+| ⟨a⟩ →ɑː *(control)* | a 77 — i.e. ours | −23 | +37 | no |
+| ⟨e⟩ →iə *(control)* | ə 90 — i.e. ours | −54 | −1719 | no |
+
+⚠ **THE CIRCULARITY IS THE WHOLE METHODOLOGICAL POINT.** RCRL is now a REFEREE; deriving tables from it
+and then scoring against it proves nothing — it is the same trap `phonemizeWordRules` exists to avoid
+(#770). So the **en.wiktionary primary is the arbiter**, and it is what rejected ⟨i⟩: RCRL prefers [ə]
+there and the primary's *own* derivation agrees (ə 58%) — but on **12 words**, while the primary's
+2220-word eval says −9. Twelve rows of derivation do not outweigh a direct measurement on the whole set.
+⟨i⟩ keeps its existing tense/lax-by-syllable rule.
+
+The two **controls** are what validate the method: ⟨a⟩ and ⟨e⟩ were swept toward values RCRL itself says
+are wrong, and both duly lost. A derivation that cannot fail is not evidence.
+
+⚠ Note the primary has **no data at all** in the ⟨o⟩/⟨u⟩ unstressed-open cells (n below threshold in its
+1,342 usable rows), which is why ⟨o⟩ reads ±0 rather than confirming. It is a 2220-word dictionary
+sample; the cell is simply not attested there. Kept on RCRL's 1,846 + linguistic coherence, with the
+primary confirming no harm — and ⟨u⟩ independently confirming at +4.
+
+**Result: primary 1764/2220 (79.3% → 79.5%), symbol 94.4% → 94.7%; secondary 17,765/27,428 (63.6% →
+64.8%), symbol 93.2% → 93.8%.** Both metrics up on both sources. Floor 0.78 → 0.79.
+
+Five goldens moved ɔ→u (kilometer, kilogram): RCRL writes `ˈki.lu.miə.tər` and `ˈki.lu.xram`, so the old
+expectations were wrong, not the new reading.
+
+**What is left, and it is now a stress problem after all.** `polisie` → puəlisi where RCRL has pu.ˈli.si:
+the VOWEL rule is right, the STRESS is on the wrong syllable, and a wrongly-stressed syllable then takes
+the stressed-open value (uə) instead of the unstressed-open one (u). Run 4's oracle bounded stress at
+~45 words *on the primary* — but that oracle was measured against a 2220-word sample with the
+unstressed-open hole still in the engine, and the two interact. **Re-running the oracle against RCRL's
+27k real stress marks is the obvious next measurement**, and unlike in Run 4 the data now exists to do it.

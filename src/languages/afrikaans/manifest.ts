@@ -22,6 +22,8 @@ export interface AfrikaansManifest {
     /** The voiceless obstruents of the inventory — the regressive-devoicing trigger, derived over `fixed`. */
     voicelessPhones: readonly string[];
     unstressedReduction: Record<string, string>;
+    /** Unstressed but OPEN syllable — the tense quality, taken short. Only the cells that differ from `unstressedReduction`. */
+    unstressedOpen: Record<string, string | undefined>;
     cSoftBefore: readonly string[];
     /** Morpheme-initial obstruents after which ⟨w⟩ is the glide [w] rather than [v] (swaar, twee, kwaad, dwaal). */
     wGlideAfter: readonly string[];

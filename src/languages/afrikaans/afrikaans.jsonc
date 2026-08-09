@@ -81,6 +81,28 @@
     // inherently long and never reach this table.
     "unstressedReduction": { "a": "a", "e": "ə", "i": "ə", "o": "ɔ", "u": "œ" },
 
+    // ⚠ THE UNSTRESSED **OPEN** SYLLABLE IS ITS OWN CELL, and the engine had no table for it — `unstressedReduction`
+    // above was applied to every unstressed vowel regardless of syllable shape. The Germanic open/closed rule does
+    // not switch off outside the stress: an open unstressed syllable still takes the TENSE quality, it just takes
+    // it short.
+    // ⚠ DERIVED FROM DATA, NOT GUESSED. The RCRL secondary carries stress AND syllable boundaries for 27,428 words;
+    // pairing vowel-letter group k of the spelling with syllable k of the transcription gives 25,247 usable words
+    // and a direct reading of all 20 cells (tools/referee-eval/build-af-rcrl.ts's source; the derivation is in
+    // docs/afrikaans_stress_investigation.md Run 12). It confirmed 17 of the 20 cells the manifest already had —
+    // every stressed cell and every unstressed CLOSED cell — and contradicted the three unstressed-open ones.
+    // ⚠ ONLY TWO OF THE THREE SHIP, because RCRL is a REFEREE and deriving tables from it then scoring against it
+    // is circular. The en.wiktionary PRIMARY is the non-circular check, and it is the arbiter here:
+    //     ⟨o⟩ ɔ→u   RCRL u 53% / ɔ 25% / uə 21% (n=1846)   primary ±0, secondary +222   KEPT
+    //     ⟨u⟩ œ→y   RCRL y 65% / œ 30%          (n= 568)   primary +4, secondary  +96   KEPT
+    //     ⟨i⟩ ə     RCRL ə 55% / i 45%          (n=2771)   primary −9, secondary +174   REJECTED
+    // The ⟨i⟩ cell is the one to be careful about: RCRL prefers ə, and the primary's OWN derivation agrees (ə 58%)
+    // — but on only 12 words, while the primary's 2220-word eval says −9. Twelve rows of derivation do not outweigh
+    // a direct measurement on the whole set, so ⟨i⟩ keeps its existing tense/lax-by-syllable rule and this is
+    // written down rather than left as a gap. ⟨a⟩ (ɑː) and ⟨e⟩ (iə) were swept as CONTROLS — RCRL says a 77% and
+    // ə 90%, i.e. our existing values — and both duly lost (−23, −54 on the primary), which is the method
+    // validating itself.
+    "unstressedOpen": { "o": "u", "u": "y" },
+
     // ⟨c⟩ is soft [s] before one of these and [k] elsewhere. A LETTER list, not a phone list — it is read
     // off the spelling during the scan.
     "cSoftBefore": ["e", "i", "y", "ê", "é", "è"],
