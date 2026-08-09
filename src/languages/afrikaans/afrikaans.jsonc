@@ -85,6 +85,19 @@
     // off the spelling during the scan.
     "cSoftBefore": ["e", "i", "y", "ê", "é", "è"],
 
+    // ⚠ ⟨w⟩ IS THE GLIDE [w], NOT [v], IN A MORPHEME-INITIAL OBSTRUENT CLUSTER — swaar [swɑːr], twee [twiə],
+    // kwaad [kwɑːt], dwaal [dwɑːl]. Donaldson describes it; the engine emitted [v] everywhere anyway, because
+    // when the rule was first tried (Run 4) it measured EXACTLY net zero against the only referee af then had:
+    // en.wiktionary writes swaar [sw] beside swaan [sv] in the same environment, six each way, so it fixed six
+    // words and broke six. It was recorded as referee inconsistency and demoted to an eval fold.
+    // ⚠ THE SECOND REFEREE SETTLED IT, and the other way: RCRL (non-Wiktionary, 27417) is **260 of 261** for the
+    // glide — ⟨sw⟩ 88:0, ⟨tw⟩ 53:0, ⟨kw⟩ 84:1, ⟨dw⟩ 34:0 — against en.wiktionary's 10:9 coin flip across the same
+    // four onsets. The rule was always right; the primary just could not adjudicate it. This is the single
+    // clearest thing importing an independent source bought.
+    // ⚠ THE LIST IS THE ATTESTED FOUR, not "obstruents" (handoff §11): those are the only C+⟨w⟩ onsets RCRL
+    // contains. Its one ⟨rw⟩ is a loan taking an epenthetic vowel (rwandese → rəwandiəsə), not a cluster.
+    "wGlideAfter": ["s", "d", "t", "k"],
+
     // ⚠ LOAN SUFFIXES THAT MOVE THE STRESS off the native first syllable. Afrikaans stress is initial by
     // default (the Germanic pattern) and these Romance/Latinate endings override it: "final" takes the last
     // nucleus (ingenieur, universiteit), "penultimate" the second-to-last (aborsie → a·BOR·sie). Matched as

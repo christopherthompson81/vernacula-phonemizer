@@ -70,6 +70,7 @@ function isOpen(w: string, i: number): boolean {
 
 const REDUCE = MANIFEST.unstressedReduction; // unstressed bare vowels (afrikaans.jsonc)
 const C_SOFT = new Set(MANIFEST.cSoftBefore); // ⟨c⟩ → [s] before one of these, else [k]
+const W_GLIDE_AFTER = new Set(MANIFEST.wGlideAfter); // morpheme-initial ⟨Cw⟩ → the glide [w] (afrikaans.jsonc)
 
 // ⚠ THESE REGEXES ARE BUILT FROM THE MANIFEST, NOT SPELLED OUT. Both classes were written inline, and the
 // vowel one had already DRIFTED from `vowelLetters` — it was missing ⟨ö⟩, which the diacritic table maps to
@@ -135,6 +136,13 @@ function phonemizeMorpheme(word: string, finalDevoice = true): string {
                 continue;
             }
         }
+        // ⟨w⟩ IS THE GLIDE [w] IN A MORPHEME-INITIAL OBSTRUENT CLUSTER (swaar, twee, kwaad, dwaal) and [v]
+        // everywhere else. ⚠ ANCHORED AT INDEX 1, i.e. the cluster must OPEN the morpheme, which is what keeps
+        // it an onset: `antwoord` is ant.woord with the ⟨tw⟩ across a syllable boundary and stays [v], while a
+        // prefixed stem reaches this correctly because each morpheme is phonemized on its own (ver·dwyn → dwyn).
+        // ⚠ ADJUDICATED BY THE SECOND REFEREE, not the first — see the manifest note. en.wiktionary splits 10:9
+        // here and made this rule look worthless; RCRL is 260:1 for the glide.
+        if (c === "w" && i === 1 && W_GLIDE_AFTER.has(w[0]!)) { out += "w"; i += 1; continue; }
         let matched = false;
         for (const key of FIXED_KEYS) {
             if (w.startsWith(key, i)) {

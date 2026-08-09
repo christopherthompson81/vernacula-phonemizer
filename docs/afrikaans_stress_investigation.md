@@ -359,3 +359,160 @@ are resolved by the Run 7 revert above. The rest:
 
 **Final: 1755/2220 (79.1% folded), symbol 94.4%, floor 0.78.** The seam work stands; the splitter
 work does not.
+
+## Run 9 — 2026-08-08 (would a BiLSTM help? — and the sourcing answer)
+
+Question raised after #772: is the residual something a neural OOV tier would fix?
+
+**The repo has already measured the answer, in Danish's provenance.** The da OOV tier was an averaged
+perceptron on a **7.5k-word** Wiktionary lexicon, where it *merely tied the rule engine* — recorded
+there as "a documented data-starvation: a hand-featured perceptron is competitive with a BiLSTM below
+**~10k pairs**". Swapping in the 199k CC0 NST lexicon un-starved it: 45.5% → 73.1% word-exact.
+
+**af has 2,220 labelled pairs.** That is a fifth of the starvation threshold, and every shipped tagger
+in the repo trained on far more:
+
+| tagger | training lexicon |
+|---|---|
+| nb | NST, 199k, CC0 |
+| bn | Google language-resources, ~60k, CC-BY-4.0 |
+| da | NST, 199k, CC0 (held-out 19,831) |
+| fr | Lexique 3.83, CC BY-SA (held-out 12,586) |
+| en | CMUdict (held-out 11,748) |
+| sd | Sindhi Open Lexicon, 9,274 |
+| **af** | **2,220 — and it is the eval referee itself** |
+
+And there is a second, worse problem: af's 2220 pairs **are the referee**. Training on them and scoring
+against them is the circularity #770 already had to fix once with `phonemizeWordRules`. A model trained
+there earns zero measurable credit without held-out CV, and held-out CV on 2220 rows of a
+dictionary-shaped sample is a thin number.
+
+**Nor is the residual mostly learnable.** Of the 465 misses: 53 are capitalized proper nouns (Dutch/
+French/English-era orthography — lexical, which is why af-lexicon.tsv exists), 27 are multi-word rows,
+and a large part of the rest sits in environments **the referee itself transcribes both ways** — a
+ceiling for any model, learned or written:
+
+| environment | referee's own split | majority |
+|---|---|---|
+| ⟨sw⟩/⟨dw⟩ onset | v:7 w:6 | **54%** |
+| suffix ⟨-ig⟩ | ə:47 i:6 | 89% |
+| short ⟨a⟩, closed syllable | a:185 ɑ:18 ɐ:2 | 90% |
+| word-initial ⟨v⟩ | f:184 v:13 | 93% |
+| word-final ⟨d⟩ (devoicing) | t:154 d:3 | 98% |
+
+The engine already picks the majority in every one of these, and the eval already folds the ones that
+are pure notation. A model trained on this referee converges to the same majority — it cannot beat a
+majority baseline in a free-varying environment. So the answer to "would a BiLSTM help *on this data*"
+is no, and not because of the architecture.
+
+### The sourcing answer: yes, we are undersourced — and the source exists
+
+⚠ **First, a claim in af.jsonc was false and is now corrected.** `secondaryGap` had named "wikipron afr"
+as a candidate second referee since bring-up. It is **the same en.wiktionary scrape as the primary** —
+`afr_latn_broad.tsv` is ~2.1k rows and matches ours entry for entry (AWB aːviəbiə, Amerika aˈmɪərəka,
+André ˈandrəi, Afrikaander, Barnard, Aarde). Importing it would corroborate nothing. Corrected in the
+manifest, the floor comment and the catalogue.
+
+**The real candidate is not Wiktionary-derived at all:**
+
+- **RCRL Afrikaans Pronunciation Dictionary** (Centre for Text Technology / NWU, 2010) — **24,000+
+  words**, SAMPA. Speech-technology lineage, fully independent of Wiktionary.
+- Redistributed as **`ttslab/za_lex`** `data/afr/` (van Niekerk, PRASA 2016/2017) with the pieces
+  already done: `pronundict.txt` in a flat format, **`phonememap.ipa-xsampa.tsv` / `.ipa-hts.tsv`**
+  (the phone→IPA map — the `tools/bengali/googlePhoneMap.ts` job, pre-solved), a `phonemeset.json`,
+  POS tags, and **syllable + stress fields** per entry.
+- **Licence: CC BY-SA 2.5 South Africa** (Dept. of Arts and Culture, RSA; underlying dictionary
+  © CTexT/NWU). Share-alike, **not** NonCommercial — so unlike the Leipzig list that af-stems.txt had
+  to be rebuilt away from, this is fenceable in the §3 stratum the repo already uses.
+- Related: **NCHLT-inlang Pronunciation Dictionaries** (Meraka/CSIR/NWU, CC BY 3.0) via SADiLaR, all 11
+  SA languages — an even more permissive sibling worth checking alongside.
+
+**The precedent is exact.** French already does this shape end to end: a CC-BY-SA pronunciation lexicon
+(Lexique 3.83) serving as the shipped lexicon *and* the BiLSTM's training data, with
+`fr-g2p-tagger.int8.onnx` declared CC-BY-SA-inheriting and fenced. af would be the same pattern.
+
+**What this unlocks, in order of value — note the model is the LAST of the four:**
+1. **A genuine second referee.** af is single-source today; `secondaryGap` closes, and every fold
+   currently justified as "the referee cannot adjudicate this" becomes checkable against a source that
+   can. The ⟨sw/dw⟩ coin-flip and the ⟨-ig⟩ split are the first two to re-adjudicate.
+2. **Non-circular lexicon growth.** af-lexicon.tsv is referee-derived and earns zero eval credit by
+   construction. Rows from an independent dictionary earn real credit.
+3. **Stress supervision.** The residual is reduction and length; the dictionary carries syllable and
+   stress fields. Run 4's oracle bounds *stress placement* at ~45 words, but it does not bound the
+   reduction MAPPING, which is what those fields would actually inform.
+4. **Then, and only then, a tagger.** 24k pairs clears the ~10k starvation line, and the training data
+   would be independent of the eval — the two conditions af fails today.
+
+**Recommendation: do not train anything yet. Import RCRL/za_lex as the second referee first, re-measure,
+and let that decide whether a model is still the interesting lever.** ⚠ Not verified in this run: the
+exact line count of the shipped `pronundict.txt` (RCRL is documented at 24k+; I read the file's head,
+not its length), and whether its phone set distinguishes the vowels this engine's residual turns on.
+
+## Run 10 — 2026-08-08 (the second source, imported — and what it immediately overturned)
+
+Run 9 recommended importing RCRL before training anything. Done.
+
+**`tools/referee-eval/build-af-rcrl.ts`** builds the secondary from `ttslab/za_lex` `data/afr`
+(RCRL Afrikaans Pronunciation Dictionary v1.4.1, CTexT/NWU; CC BY-SA 2.5 ZA — share-alike, not NC, so
+it fences in the §3 stratum beside French's Lexique). **27,417 entries**, ~12× the primary.
+
+The format gave more than expected: `WORD POS STRESS SYLLABLE-LENGTHS PHONE…`, where the two structure
+fields were verified to agree with each other and with the phone count on **all 27,428 rows**, so ˈ and
+syllable dots are reconstructed rather than guessed. The publisher ships its own `phonememap.ipa-hts.tsv`,
+so the phone→IPA mapping is theirs, not ours — **0 phones failed to map**.
+
+**Its IPA convention is nearly ours already** (iə, uə, əi, œy, ɑː, øː, ɦ) — the same Standard-Afrikaans
+analysis the manifest was built on, which is corroboration in itself. Deltas: `x`~χ and `æ`~ɛ (existing
+global folds), and ⟨ou⟩ written `əu` against our `œu` — a **per-referee** fold, because each source is
+internally UNANIMOUS (wiktionary 34:0 for œu, RCRL 325:0 for əu). Two notations, one diphthong.
+
+**Baseline on import, untuned: 62.7% folded / 93.1% symbol on 27,417 unseen words.**
+
+### What it settled on day one
+
+| question | en.wiktionary | RCRL | outcome |
+|---|---|---|---|
+| morpheme-initial ⟨Cw⟩ | **10:9 coin flip** | **260:1 for [w]** | Run 4's rejected rule was RIGHT |
+| ⟨-ig⟩ vowel | ə 47:6 | ə 474:7 | corroborates əχ |
+| word-initial ⟨v⟩ | f 184:13 | f 2363:69 | corroborates [f] — Run 6's "f→v is noise" confirmed |
+| word-final ⟨d⟩ | t 154:3 | t 1608:7 | corroborates |
+
+**THE HEADLINE — a documented decision reversed.** Run 4 tried the Donaldson rule (⟨w⟩ is the glide
+after an obstruent), measured **exactly net zero**, and demoted it to an eval fold with the note
+"referee inconsistency, so the answer is a FOLD, not an engine rule". That conclusion was an artefact of
+having one referee: en.wiktionary writes swaar/twaalf [w] beside swaan/twee [v], 10:9 across the four
+onsets. RCRL is **sw 88:0, tw 53:0, kw 84:1, dw 34:0**. The rule was correct all along and a single
+source could not show it.
+
+Implemented as `wGlideAfter` (the four attested onsets — RCRL's one ⟨rw⟩ is a loan with an epenthetic
+vowel, not a cluster), anchored at morpheme index 1 so the cluster must OPEN the morpheme:
+
+- `verdwyn` → fərdwəin — the word Run 5 recorded as a permanent miss, because the FOLD could only be
+  word-initial (the backbone strips the seam before folds run). An engine rule sees the morpheme.
+- `antwoord` → antvuərt and `brandweer` → brantviər — a ⟨Cw⟩ across a syllable boundary or a compound
+  seam is not an onset. Both RCRL-exact.
+
+**+154 on RCRL, +2 on the primary** (the fold widened ⟨sd⟩→⟨sdtk⟩ so the primary's coin flip is not
+scored). Three pre-existing goldens moved tv→tw (twee, twaalf, twintig) — the same words, read
+correctly.
+
+### And it independently confirmed #772
+
+Every seam rule, from a source that has never seen this repo: `advies` atfis, `sending` sɛndəŋ,
+`verbeelding` fərbiəldəŋ, `volharding` fɔlɦardəŋ, `veldtog` fæltɔx, `landdros` landrɔs (voiced [d] —
+the onset really does survive), `wildtuin` vəltœyn, `bestanddeel` bəstandiəl, `handdoek` ɦanduk.
+And the four words the reverted `shortHeads` would have broken — `regter`, `sitting`, `bossie`,
+`mantel` — are all UNSPLIT in RCRL. Run 7's revert was right.
+
+### Final
+
+**Primary 1757/2220 (79.1%) / 94.4% symbol · secondary 17,343/27,417 (63.3%) / 93.1% symbol.**
+`secondaryGap` is CLOSED and the sourcing checklist item is clear (10/10).
+
+**On the neural question that started this.** af now has 27k pairs independent of the primary eval, so
+a tagger is finally coherent where Run 9 showed it was not (da's threshold: ~10k). But the referee is
+the cheaper lever and is nowhere near spent — the RCRL residual is 10,779 misses dominated by ə↔ɛ 3535,
+i↔ə 1764, ɔ→u 999, a↔ɑ 1747: reduction and length, on 27k words that now carry **stress and syllable
+boundaries**. Run 4's oracle bounded stress PLACEMENT at ~45 words on the primary; it never bounded the
+reduction MAPPING, and that mapping is now directly derivable from data. **Do that before training
+anything.**

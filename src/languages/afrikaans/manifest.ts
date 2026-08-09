@@ -23,6 +23,8 @@ export interface AfrikaansManifest {
     voicelessPhones: readonly string[];
     unstressedReduction: Record<string, string>;
     cSoftBefore: readonly string[];
+    /** Morpheme-initial obstruents after which ⟨w⟩ is the glide [w] rather than [v] (swaar, twee, kwaad, dwaal). */
+    wGlideAfter: readonly string[];
     stressFinalSuffixes: readonly string[];
     stressPenultSuffixes: readonly string[];
     /** Reduced IPA per unstressed prefix; the keys must equal `morphology.prefixUnstressed`. */

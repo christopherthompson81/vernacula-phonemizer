@@ -99,6 +99,11 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
 - **JMdict / KANJIDIC** — © EDRDG, CC-BY-SA 4.0. See the named attribution above.
 - **Lexique 3.83** — Boris New & Christophe Pallier, CC-BY-SA 4.0, via openlexicon.
   `french/lexicon.tsv` and `french/fr-g2p-tagger.int8.onnx`. <http://www.lexique.org>
+- **RCRL Afrikaans Pronunciation Dictionary v1.4.1** — © 2010 Centre for Text Technology (CTexT),
+  North-West University, South Africa; redistributed via `ttslab/za_lex` `data/afr`, © 2016 The
+  Department of Arts and Culture, Government of the Republic of South Africa (Multilingual Speech
+  Technologies, NWU). **CC BY-SA 2.5 South Africa** <http://creativecommons.org/licenses/by/2.5/za/>.
+  Tools-only: the `af` secondary eval referee `tools/referee-eval/referees/af.rcrl-apd.tsv`.
 - **ChhoeTaigi 台華線頂對照典** — CC-BY-SA 4.0. `minnan/dict.tsv`, `dict-chars.tsv`.
 - **CC-CEDICT** — CC-BY-SA. Cross-check only, tools.
 - **Universal Dependencies English-EWT** — CC-BY-SA 4.0. Training data for
