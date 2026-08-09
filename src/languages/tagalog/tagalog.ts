@@ -12,6 +12,8 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadLines, loadTsvMap } from "../../core/loadTsv.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeTagalog } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -224,12 +226,79 @@ function numberStressIdx(token: string): number | undefined {
     return NUM_PENULT.has(root) && nuclei >= 2 ? nuclei - 2 : nuclei - 1;
 }
 
+/**
+ * SHARED SYMBOL TIER — every word corpus-attested with the sense checked (mined artifact ×counts; tl.wikipedia
+ * for the contested calls, the pcm/km two-source method):
+ * · percent → ⟨porsiyento⟩ — BOTH spellings are real (artifact 3:4, essentially tied) and tl.wikipedia
+ *   decides it 575:216 over ⟨porsyento⟩; the artifact's own spelled-out instance agrees ("siyamnapu't-limang
+ *   porsiyento"). ⚠ WITHOUT the linker: a Tagalog reader ligates ("limang porsiyento"), but the tier appends
+ *   a word to a digit string before the number is read, so the sandhi has nowhere to attach — deferred, and
+ *   recorded rather than half-done.
+ * · ₱ → ⟨piso⟩ (×5 in the artifact; the sign itself ×1), $ → ⟨dolyar⟩ (×17, against $-signs ×34 — the word
+ *   is the corpus's own: "$19.8 bilyon" prose reads "dolyar").
+ * · magnitudes milyon ×35 / bilyon ×21 (tl.wikipedia 572) / trilyon (68) — the corpus composes them with
+ *   currency ("$224.754 bilyon GDP"), which is exactly the shape the tier's magnitude logic exists for.
+ * · & → ⟨at⟩ (×23 REAL ampersands; the other 44 are HTML entities — normalize.ts disposes of those first,
+ *   which is why it must run before this tier).
+ * · km → ⟨kilometro⟩ (tl.wikipedia 5,907; the abbreviated unit appears digit-adjacent in the artifact).
+ *   Other units are REFUSED for now: ⟨°⟩'s 18 artifact instances are nearly all coordinate notation
+ *   (116°40' E), which is a different reading problem than temperature, and "digri Selsiyus" has 0
+ *   tl.wikipedia phrase hits — declaring ⟨°C⟩ from parts would be the zu/xh Kristu mistake.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["porsiyento"],
+    currency: {
+        "US$": ["dolyar"], $: ["dolyar"], "₱": ["piso"],
+        // ¥ and € are attested by their own line: the anime-industry sentence writes "¥10,000,000 (80,000 €)"
+        // and spells both words itself ("200,000,000,000 yen", "1 at kalahating bilyon euros").
+        "¥": ["yen"], "€": ["euro"],
+    },
+    // Including the LIGATED forms — Tagalog writes the magnitude with its linker fused ("380 libong
+    // kilometro²", "3.9 milyong tao"), and the tier matches the token as written.
+    magnitudes: ["milyon", "bilyon", "trilyon", "libo", "milyong", "bilyong", "trilyong", "libong",
+        "Milyon", "Bilyon", "Trilyon"],
+    ampersand: "at",
+    // ⟨kilometro⟩ appears as a KEY too: "380 libong kilometro²" writes the full word with the superscript,
+    // and the bare-exponent fallback only reads 1–3-letter bases.
+    units: { km: ["kilometro"], kilometro: ["kilometro"], katao: ["katao"], naninirahan: ["naninirahan"] },
+    // ⟨km²⟩ — the artifact's single largest dropped class (×22 of the 35 superscripts: katao/km², 56,594 km²).
+    // The word is POSTPOSED: tl.wikipedia "kilometro kuwadrado" 1,605 against "kwadrado" 54 (spelling) and 0
+    // for the preposed orders. ⟨kubiko⟩ ("metro kubiko" ×19) rides the same evidence, thinner but the same
+    // Spanish-loan shape and the only attested order.
+    exponentWords: { squared: ["kuwadrado"], cubed: ["kubiko"], position: "after" },
+    // ⟨katao/km²⟩ — the per-slash reads ⟨bawat⟩ ("each/per"): tl.wikipedia "bawat kilometro kuwadrado" 64
+    // against "kada kilometro" 42, and the artifact uses both at 9:9 — bawat is the formal register the
+    // encyclopedia itself favours in exactly this frame.
+    unitPer: "bawat",
+});
+
 // ⚠ ALL OF LATIN, not just Tagalog's own letters — `[A-Za-zÑñ]+` ended the token at an out-of-class diacritic,
 // so the letter carrying it became an unclaimed gap read as an English LETTER NAME and the rest of the word
 // started over: `São Paulo` → *s ˈə ʔˈo paʔˈulo*, `Klöcker` → *kl ˈoᶷ kkˈeɾ*. Invisible to every gate — no digit
 // or raw mark survives and nothing VANISHES, so neither the leak classes nor the differential DROP test see it.
 // The hyphen-compound shape is preserved: Tagalog writes `kaibigan-ko` and the two halves are ONE word.
-const TOKEN = new RegExp(`(${LATIN_RUN}(?:[-‑]${LATIN_RUN})*)|(\\d+)|([.?!,;:])`, "gu");
+/**
+ * ⟨ika-N⟩ ORDINALS — the productive form is ⟨ika⟩ + the cardinal, fused, with two CONTRACTIONS the corpus
+ * and tl.wikipedia both insist on: ikalawa (503:2 over *ikadalawa) and ikatlo (367); 1st is suppletive ⟨una⟩.
+ * ×42 in the artifact (ika-3 buwan, ika-20 siglo, ika-130 sa buong mundo). Hoisted to module level so the
+ * literals are data, not spellings inside text() (the review gate's spelling→g2p check is right to object).
+ */
+const ORDINAL_ONE = "una";
+const ORDINAL_PREFIX = "ika";
+const ORDINAL_CONTRACTED: Readonly<Record<number, string>> = { 2: "ikalawa", 3: "ikatlo" };
+
+// Order is load-bearing: times before the number class (else 12:23 is two numbers and a colon pause),
+// ika- ordinals before LATIN_RUN (else ⟨ika⟩ is a word and the digits are a stray cardinal), and the number
+// class must swallow its own thousands-commas and decimal dot (else ⟨1,000⟩ reads "isa [pause] sero sero
+// sero" and ⟨3.5⟩ "tatlo [pause] lima" — both real artifact shapes: grouped ×84, dot-decimals ×100).
+const TOKEN = new RegExp(
+    `(?<![\\d:])(\\d{1,2}):([0-5]\\d)(?::([0-5]\\d))?(?![\\d:])` +
+        `|[Ii]ka-?(\\d+)(?![\\p{L}\\d])` +
+        `|(${LATIN_RUN}(?:[-‑]${LATIN_RUN})*)` +
+        `|(\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+\\.\\d+|\\d+)` +
+        `|([.?!,;:])`,
+    "gu",
+);
 /**
  * Tagalog's OWN inventory — the token class as it stood before the widening, lifted verbatim.
  *
@@ -249,18 +318,51 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 class TagalogPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
-            else if (m[2]) {
-                const n = Number(m[2]);
-                if (Number.isSafeInteger(n))
-                    // Number words take the NUMBER-sense stress (numberStressIdx: final-except-penult, correct for
-                    // the number reading of homographs like isá/limá/pitó) and bypass the final-glottal set, which
-                    // fires inconsistently by incidental membership (sampu→sampuʔ but dalawampu not).
-                    for (const wd of numberWords(n).split(" "))
-                        sink.emit(phonemizeCore(wd, numberStressIdx(wd)));
-            } else if (m[3]) {
-                const mk = CLAUSE_MARK[m[3]];
+        // Normalization BEFORE tokenizing (entities, digit ranges), then the symbol tier — that order is
+        // load-bearing: the tier's ampersand rule voices every ⟨&⟩, and the corpus's 44 HTML entities must be
+        // gone before it runs (normalize.ts has the counts).
+        return assembleClauses(SYMBOLS(normalizeTagalog(input)), TOKEN, (m, sink) => {
+            const emitNumber = (digits: string): void => {
+                const n = Number(digits);
+                if (!Number.isSafeInteger(n)) return;
+                // Number words take the NUMBER-sense stress (numberStressIdx: final-except-penult, correct for
+                // the number reading of homographs like isá/limá/pitó) and bypass the final-glottal set, which
+                // fires inconsistently by incidental membership (sampu→sampuʔ but dalawampu not).
+                for (const wd of numberWords(n).split(" "))
+                    sink.emit(phonemizeCore(wd, numberStressIdx(wd)));
+            };
+            if (m[1] !== undefined) {
+                // TIME, hh:mm(:ss) — ⚠ PROVISIONAL, the pcm arrangement: each field as a cardinal, zero
+                // minutes silent (5:00 → the bare hour). The artifact's 13 instances are timestamps
+                // (08:50:38 UTC), and the traditional Spanish-numeral clock reading (alas-otso) has ZERO
+                // attestation there — all 16 ⟨alas⟩ hits are ⟨madalas⟩/⟨kadalasang⟩ substrings — so digits
+                // are read in Tagalog rather than a convention being invented.
+                emitNumber(m[1]);
+                if (m[2] !== "00") emitNumber(String(Number(m[2])));
+                if (m[3] !== undefined) emitNumber(String(Number(m[3])));
+            } else if (m[4] !== undefined) {
+                // ⟨ika-N⟩ ORDINAL — see ORDINAL_CONTRACTED above. The prefix fuses onto the cardinal's
+                // FIRST word (ika-130 → ikasandaan at tatlumpu), matching the written one-word forms
+                // (ikaapat, 901 tl.wikipedia hits).
+                const n = Number(m[4]);
+                // ⚠ ⟨una⟩ goes through the PROSE path: it is not a number token (penult stress, ʔˈuna), and
+                // the number-sense stress default would wrongly finalise it (*ʔunˈa).
+                if (n === 1) { sink.emit(phonemizeWord(ORDINAL_ONE)); return; }
+                const words = ORDINAL_CONTRACTED[n] ?? ORDINAL_PREFIX + numberWords(n);
+                for (const wd of words.split(" ")) sink.emit(phonemizeCore(wd, numberStressIdx(wd)));
+            } else if (m[5] !== undefined) {
+                sink.emit(phonemizeWord(nat(m[5])));
+            } else if (m[6] !== undefined) {
+                // De-group thousands, then read a surviving dot's fraction DIGIT-BY-DIGIT with the dot
+                // silent. ⚠ THE DECIMAL WORD IS REFUSED, the km arrangement, and the evidence is recorded:
+                // written Filipino does not spell it — ⟨punto⟩ has 1,122 tl.wikipedia hits but the phrase
+                // "punto lima" has ONE, and the artifact's single ⟨punto⟩ is the geometric sense ("kalagitnaang
+                // punto"). Declaring it anyway would be inventing a convention the written language avoids.
+                const [int, frac] = m[6].replace(/,/gu, "").split(".");
+                emitNumber(int!);
+                if (frac !== undefined) for (const d of frac) emitNumber(d);
+            } else if (m[7] !== undefined) {
+                const mk = CLAUSE_MARK[m[7]];
                 if (mk) sink.pause(mk);
             }
         });

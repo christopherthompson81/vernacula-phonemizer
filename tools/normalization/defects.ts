@@ -141,6 +141,29 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    tl: {
+        // Every reason is a reading of the mined artifact's actual instances (259 utterances) — the classes
+        // are physics/科 encyclopedia copy, not running Tagalog, and no reading word is attested anywhere.
+        minus: "measured: the digit-flanked leading dashes are PREHISTORIC-YEAR notation (`taong -73 000 "
+            + "hanggang -60 000`, `-4000`) — a BCE convention, not arithmetic, and no negative-value word "
+            + "occurs in the corpus. Digit–digit dashes AND digit-hyphen-digit are RANGES and ARE read "
+            + "(hanggang, normalize.ts — a hyphen between digits cannot be a compound)",
+        plus: "measured: 5 instances — a quark charge (`bayad + 2/3`), Greek etymology glosses (`astron + "
+            + "nomos` ×2), a pulsar designation (PSR B1257+12) and one timezone (UTC+8). No plus word is "
+            + "attested; ⟨dagdag⟩ never occurs digit-adjacent",
+        "plus-minus": "measured: zero digit-flanked ± in the artifact",
+        equals: "measured: 5 instances, all physics/etymology copy (`c = 299,792,458m/s`, `E = mc²`, "
+            + "`αστρονομία = άστρον + νόμος`). ⟨katumbas⟩ is never digit-adjacent",
+        "less-than": "measured: zero digit-flanked < in the artifact",
+        "greater-than": "measured: zero digit-flanked > in the artifact",
+        times: "measured: all 9 × are SCIENTIFIC NOTATION (`6.022 × 10²³`) — and every instance is preceded "
+            + "by a wiki value-template artifact (`7023602200000000000♠`), so the class is template dirt on "
+            + "top of a notation this layer does not read for any language",
+        divide: "measured: zero ÷ in the artifact",
+        degrees: "measured: 16 digit-adjacent ° — nearly all geographic COORDINATES (`116°&nbsp;40′ E`), the "
+            + "yo shape, and the two temperatures write the scale word out themselves (`26.5° sentigrado`), "
+            + "so voicing ° would double it. \"digri Selsiyus\" has 0 tl.wikipedia phrase hits",
+    },
     yo: {
         // Yoruba's referees (wikipron yor, kaikki yor) are word→IPA: they can check how a word is pronounced,
         // never whether it is the right word for a sign. So every reason below is a corpus measurement.
@@ -313,6 +336,30 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
 export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    tl: {
+        // ⟨EU$8.86 bilyon⟩ — a NONSTANDARD currency marker: the sentence is about EU aid, so reading the $
+        // as ⟨dolyar⟩ would assert dollars for what the context says are EU funds, and rewriting it as euro
+        // would be inventing what the writer meant. The bare-$ rule cannot reach it anyway (letter-bounded
+        // key), so the silence is the correct reading of an ambiguous token, not a gap.
+        currency: ["EU$8.86"],
+        // The Japanese ideographic iteration mark inside JAPANESE NAMES quoted in a sentence about katakana
+        // (佐々木, 奈々子). The names are Japanese, read as names; the foreign-span filter cannot always see
+        // it because the surrounding gloss is Latin.
+        iteration: ["々", "ゝ", "ゞ"], // 々 in quoted Japanese names; ゝ/ゞ MENTIONED as signs in the same orthography article
+        // PREHISTORIC-YEAR notation — the leading dash is a BCE convention, not arithmetic (the class refusal
+        // with its measurement is in ACCEPTED_SIGN_SILENCE; these instance spans exist because the scan's
+        // class-acceptance test cannot match a CONTEXTUAL sign regex against single characters).
+        minus: ["-73 000", "-60 000", "-70 000", "-50 000", "-52 000", "-108 000", "-39 000", "-38 000",
+            "-10 000", "-4000", "-8000", "-9000", "-1 BCE",
+            // EasyTimeline MARKUP that survived into the artifact ("bar:1991 at:626 fontsize:XS text: 626
+            // shift:(-8,5)") — code coordinates, not prose; the km %lf shape.
+            "shift:(-8,5)"],
+        // BARE POWERS OF TEN in physics copy — scientific notation (`6.022 × 10²³`, `9.11 × 10⁻³¹`) and an
+        // electron configuration (`5s² 4d¹⁰`), the same encyclopedia-copy register as the accepted ×
+        // refusal; this layer reads UNIT exponents (km² → kuwadrado) and no language reads mantissa
+        // notation. Instance-listed rather than class-silenced so a km² regression stays visible.
+        exponent: ["10⁵", "10²¹", "10²²", "10²³", "10⁵⁰", "10⁻⁴", "10⁻¹⁵", "10⁻²⁷", "10⁻³¹", "5s² 4d¹⁰", "mc²"],
+    },
     km: {
         // A C FORMAT SPECIFIER, not a percentage — the km wiki carries a programming tutorial whose code
         // survives into the corpus (`scanf("%lf %lf",&a, &b); /*Khmer comment*/`), and the cell selector

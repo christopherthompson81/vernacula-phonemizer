@@ -125,3 +125,52 @@ describe("tagalog canonical IPA", () => {
         expect(phonemize("computer", "tl")).toBe("kompˈuteɾ");
     });
 });
+
+// NORMALIZATION — the symbol tier + the shapes TOKEN gained. Every word corpus-attested with the sense
+// checked (mined artifact + tl.wikipedia; the counts live in normalize.ts and the SYMBOLS block).
+describe("tagalog normalization — symbols, numbers, ordinals, times", () => {
+    test("percent — ⟨porsiyento⟩, the tl.wikipedia-majority spelling (575:216)", () => {
+        expect(phonemize("50% ng populasyon", "tl")).toBe("limampˈu poɾsijˈento nˈaŋ populˈaʃon");
+    });
+
+    test("currency — ₱ piso, $ dolyar, postposed; magnitudes compose", () => {
+        expect(phonemize("₱1,000", "tl")).toBe("sanlˈibo pˈiso");
+        expect(phonemize("$19.8 bilyon", "tl")).toBe("labinsijˈam walˈo bˈiljon doljˈaɾ");
+    });
+
+    test("thousands de-group; a surviving dot reads its fraction digit-by-digit, the dot itself silent", () => {
+        // ⚠ THE DECIMAL WORD IS REFUSED (the km arrangement): "punto lima" has ONE tl.wikipedia hit —
+        // written Filipino does not spell the decimal word, so none is invented.
+        expect(phonemize("3.5 kilometro", "tl")).toBe("tatlˈo limˈa kilomˈetɾo");
+    });
+
+    test("ika- ordinals — ika + cardinal fused, with the lexical contractions", () => {
+        expect(phonemize("ika-20 siglo", "tl")).toBe("ʔikadalawampˈu sˈiɡlo");
+        expect(phonemize("ika-2", "tl")).toBe("ʔikalawˈa"); // NOT *ikadalawa (tl.wikipedia 503:2)
+        expect(phonemize("ika-3", "tl")).toBe("ʔikatlˈo");
+    });
+
+    test("⚠ ika-1 is suppletive ⟨una⟩, through the PROSE path — penult stress, not the number default", () => {
+        expect(phonemize("ika-1", "tl")).toBe("ʔˈuna");
+    });
+
+    test("ampersand — ⟨at⟩; HTML entities are disposed of first and never voiced", () => {
+        expect(phonemize("A & B", "tl")).toBe("ʔˈa ʔˈat b");
+        expect(phonemize("14 &ndash; 16", "tl")).toBe("labiŋʔˈapat haŋɡˈaŋ labiŋʔˈanim"); // entity → range, not "at ndash"
+    });
+
+    test("digit ranges — the typographic dashes read ⟨hanggang⟩ (corpus ×32); the hyphen stays a compound", () => {
+        expect(phonemize("1995–2000", "tl"))
+            .toBe("sanlˈibo sijˈam nˈa ɾaʔˈan ʔˈat sijamnapˈut limˈa haŋɡˈaŋ dalawˈaŋ lˈibo");
+    });
+
+    test("units — km ⟨kilometro⟩ (tl.wikipedia 5,907)", () => {
+        expect(phonemize("10 km", "tl")).toBe("sampˈu kilomˈetɾo");
+    });
+
+    test("times — ⚠ PROVISIONAL cardinals (the pcm arrangement): the alas- clock reading has ZERO corpus attestation", () => {
+        expect(phonemize("12:23", "tl")).toBe("labindalawˈa dalawampˈut tatlˈo");
+        expect(phonemize("08:50:38", "tl")).toBe("walˈo limampˈu tatlumpˈut walˈo");
+        expect(phonemize("5:00", "tl")).toBe("limˈa"); // zero minutes silent — the bare hour
+    });
+});

@@ -485,7 +485,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const NOT_VERSION = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
     const unitRe = d.units
         ? new RegExp(
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
               "giu",
           )
         : null;
@@ -595,7 +595,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         if (unitRe)
             s = s.replace(
                 unitRe,
-                (whole, num: string, mag: string | undefined, u: string, denom?: string, exp?: string) => {
+                (whole, num: string, mag: string | undefined, u: string, denom?: string, denomExp?: string, exp?: string) => {
                     // The magnitude travels with the NUMBER and is re-emitted verbatim — ⚠ a rule that
                     // CONSUMES a word must put it back. It also governs the count form the way a LARGE COUNT
                     // does, resolved through the language's own `countForm` via MANY — the same reasoning, and
@@ -624,10 +624,30 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                             ?? resolveUnitSymbol(d.rateDenominators, denomFolded, denom, true);
                         const per = typeof d.unitPer === "string" ? d.unitPer : (d.unitPer?.[denom] ?? d.unitPer?.[dl]);
                         if (per === undefined || dWord === undefined) return whole;
+                        // ⚠ THE DENOMINATOR MAY CARRY AN EXPONENT — ⟨20,164 katao/km²⟩, the population-density
+                        // shape. The rate alternative used to end at the denominator key, so the ² fell outside
+                        // the match and was silently dropped (tl's largest exponent class, 13 of 35). Composed
+                        // only when the language declares `exponentWords`; otherwise the old reading stands and
+                        // the superscript is re-emitted where the leak gate can see it, as the head branch does.
+                        let dPhrase = typeof dWord === "string" ? dWord : dWord[0]!;
+                        if (denomExp !== undefined) {
+                            const dPower = denomExp === "\u00b3" ? "cubed" : "squared";
+                            const dForms = d.exponentWords?.[dPower];
+                            if (dForms === undefined) dPhrase = `${dPhrase}${denomExp}`;
+                            else {
+                                const dw = dForms[0]!;
+                                const dDeclared = d.exponentWords?.position;
+                                const dPos = (typeof dDeclared === "string" ? dDeclared : dDeclared?.[dPower]) ?? "after";
+                                dPhrase = dPos === "compound" ? `${dw}${dPhrase}`
+                                    : dPos === "suffix" ? `${dPhrase}${dw}`
+                                    : dPos === "before" ? `${dw} ${dPhrase}`
+                                    : `${dPhrase} ${dw}`;
+                            }
+                        }
                         // `unitPrefix` applies here too, and forgetting it left Swahili reading
                         // "160 kilomita kwa saa" where the language writes the measure noun first. The rate is
                         // one phrase, so the whole of it hinges on the head noun's position.
-                        return d.unitPrefix ? `${head} ${q} ${per} ${dWord}` : `${q} ${head} ${per} ${dWord}`;
+                        return d.unitPrefix ? `${head} ${q} ${per} ${dPhrase}` : `${q} ${head} ${per} ${dPhrase}`;
                     }
                     if (exp !== undefined) {
                         const power = exp === "\u00b3" || exp === "3" ? "cubed" : "squared";
