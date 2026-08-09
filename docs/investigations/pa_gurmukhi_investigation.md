@@ -223,3 +223,23 @@ The epitran secondary first DROPPED to 83.8 — it does not restore the nasal ei
 that gap was folded when only ɑ→a was. The fold is now real, anchored on ŋ/ɳ/ɲ (letters Gurmukhi virtually
 never spells, so a written nasal is untouched; the ̃ anchor is unavailable because the backbone strips it
 first), and it also neutralized the same gap in ɲd͡ʒ words (ਪੰਜਾਬੀ) — 89.1%.
+
+## Run 8 — 2026-08-09 21:00 — Shahmukhi data found: 56.5 → 61.5%, and the BiLSTM unblocked
+
+The hunt, with verdicts:
+· **SLPG/Punjabi_Transliteration_Corpus (6.3M "parallel" sentences)** — REJECTED at both gates: no licence
+  on the card, no data files visible, and the cited paper is an *unsupervised NMT transliteration* system —
+  the parallel side is machine-generated, the synthetic class that sank before.
+· **Fresh kaikki dump** — the committed crossscript predated Wiktionary growth AND its builder read only
+  ONE pair direction (Gurmukhi headword + Shahmukhi form; 4,327 of the dump's 5,868 pairs). Both directions:
+  2,641 → 3,974 gated entries, pan_arab 56.5 → 61.5% (+5.0pp).
+· **pa↔pnb Wikipedia titles via Wikidata sitelinks** — 18,930 dual-wiki articles, REAL human spellings.
+  ⚠ A title pair names the same TOPIC, not the same words (ਮਹਾਤਮਾ ਗਾਂਧੀ ↔ موہن داس گاندھی — Mahatma vs
+  Mohandas), so titles word-align positionally only at equal token counts and every word pair clears the
+  SAME consonant-skeleton gate as a kaikki pair: 25,407 aligned word pairs → 7,192 kept, 8,089 gated.
+  Referee unchanged (titles are proper nouns the dictionary referee doesn't sample) — this tranche is a
+  REAL-TEXT gain (پاکستان paːkɪst̪aːn, لاہور laːɦɔːɾ) and threshold fuel.
+
+**crossscript.tsv: 2,641 → 11,166 entries — the ~10k BiLSTM threshold from Run 0 is CROSSED.** The
+Shahmukhi short-vowel restorer is no longer data-blocked, just unbuilt: 11k real Shahmukhi-word → gold-IPA
+pairs (supervision exactly in the engine's own convention, the ur Phase-C lesson) are now shipped data.
