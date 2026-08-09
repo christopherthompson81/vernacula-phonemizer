@@ -778,3 +778,20 @@ this much weight — worth fixing before CLE adjudicates anything further.
 - The **route to a shippable tagger** is a licence-clean source at ~74% label quality. The
   concrete candidate is `asadullah797/urdu-phoneme-dataset` — human-labelled ASR audio needing
   forced alignment, i.e. the work `build_cle_referee.ts` already did once for CLE.
+
+### ⚠ Correction to the Dakshina lexicon-tier recommendation (same run, later measurement)
+
+Runs 13 and 16 both pitch the Dakshina tier as "+12.0pp over the default-ə backbone". That is
+true but it is measured against **the wrong baseline**, and Run 16's own common-set table is what
+exposes it: the backbone scores **55.2% against an always-ə prior of 63.0%**. Beating a baseline
+that is itself 7.8pp below "guess ə everywhere" is not the achievement it looks like.
+
+Against the correct baseline the Dakshina tier is **68.7% vs 63.0% — +5.7pp**, not +12.0pp. Still
+positive, still licence-clean, but less than half the headline, and a large part of the apparent
+gain is recoverable by simply fixing the backbone's schwa placement instead — a rule change with
+no new data, no share-alike fence and no lexicon tier at all. **That is the cheaper thing to try
+first**, and it is the same lever for every OOV word rather than only the 30,280 Dakshina covers.
+
+`silver.dakshina.tsv` is therefore NOT committed. It is regenerable in one command
+(`ur_build_dakshina_labels.py`), the finding is recorded here, and adding a §3 share-alike fence
+to carry a +5.7pp artifact of unproven value is not a trade worth making yet.
