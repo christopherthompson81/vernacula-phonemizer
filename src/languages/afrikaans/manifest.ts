@@ -27,6 +27,8 @@ export interface AfrikaansManifest {
     cSoftBefore: readonly string[];
     /** Morpheme-initial obstruents after which ⟨w⟩ is the glide [w] rather than [v] (swaar, twee, kwaad, dwaal). */
     wGlideAfter: readonly string[];
+    /** Derived: word-final suffix → syllables-from-the-END carrying primary stress (0 = final). */
+    stressFromEnd: Record<string, number>;
     stressFinalSuffixes: readonly string[];
     stressPenultSuffixes: readonly string[];
     /** Reduced IPA per unstressed prefix; the keys must equal `morphology.prefixUnstressed`. */
