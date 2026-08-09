@@ -60,7 +60,11 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // a C conversion flag, so silence is the CORRECT reading and a rule that voiced it would be the defect.
         // The line is legitimately in the corpus — its trailing comment really is Khmer — so it survives the
         // native-script filter and has to be accepted by identity instead.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "km", "kn", "mr", "my", "ta", "xh"]);
+        // tl's entries are two shapes: prehistoric-year notation ("taong -73 000" — BCE years, not arithmetic;
+        // the CLASS refusal with its measurement is in ACCEPTED_SIGN_SILENCE, and the instance spans exist
+        // because the class-acceptance test cannot match a contextual sign regex against single characters),
+        // and Japanese iteration marks QUOTED as signs in an article about kana orthography.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "km", "kn", "mr", "my", "ta", "tl", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
