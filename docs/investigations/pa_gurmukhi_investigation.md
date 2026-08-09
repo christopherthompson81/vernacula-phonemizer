@@ -243,3 +243,33 @@ The hunt, with verdicts:
 **crossscript.tsv: 2,641 → 11,166 entries — the ~10k BiLSTM threshold from Run 0 is CROSSED.** The
 Shahmukhi short-vowel restorer is no longer data-blocked, just unbuilt: 11k real Shahmukhi-word → gold-IPA
 pairs (supervision exactly in the engine's own convention, the ur Phase-C lesson) are now shipped data.
+
+## Run 9 — 2026-08-09 21:45 — the restorer, built and measured: a clean negative at this scale
+
+The BiLSTM restorer (the ur/fa tagger ported: per-char IPA-chunk tags, pa inventory + tone tokens, the
+tonogenesis anchors بھ→p+tone, output length == input length) trained on the 11,166-pair crossscript.
+Aligner coverage 92% out of the box (two inventory fixes: ɭ, loan-alef eː). Scoring in tsx with the eval's
+own folds throughout (the Run-3 rule).
+
+| configuration | held-out (in-conv) | referee-OOV (n=243) vs the shipped eval path |
+|---|---|---|
+| full 11k pool | 47.5% | tagger 31.7% vs **49.0%** |
+| kaikki-only (3.4k dictionary words) | 56.1% | tagger 36.6% vs **49.4%** |
+
+The title tranche is 65% foreign proper nouns — a different distribution than the referee vocabulary
+(held-out +8.6pp when excluded), so it is LEXICON material, not training material. And the decomposition
+that settles the verdict:
+
+    harakat-COVERED referee words (n=33):  eval path 97.0%   tagger 36.4%
+    BARE words          (n=210):           eval path 41.9%   tagger 36.7%
+
+**The tagger loses everywhere — even on the bare tail it was built for.** The da provenance threshold holds
+exactly: ~10k pairs is where a BiLSTM TIES a good rules+coverage system, not where it wins (ur's Phase C won
+at CLE scale, ~5x more, in-register). The negative is recorded, the trainer is committed
+(tools/perso-arabic/pa_train_restorer.py — aligner 92%, ready for more data), the model is NOT shipped.
+
+What would change the verdict: dictionary-register pairs at 30-50k (a Shahmukhi dictionary with Gurmukhi
+sisters — the SLPG corpus would qualify IF its licence and human-parallel status ever clear), or an
+audio-supervised route on Shahmukhi speech (the FLEURS-pa method, but Pakistani Punjabi audio). Until then
+the Shahmukhi levers stay: the coverage layer (97% where it reaches — GROW the harakat lexicon), and
+crossscript (the 61.5% referee gain shipped in #788 stands regardless).

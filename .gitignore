@@ -22,6 +22,9 @@ tools/fa-restoration/__pycache__/
 # input the lexicon and model derive from. sd_deva_pairs.json / sd_airab.json are rebuilt from the
 # upstream dataset by extract_sd_openlex.py.
 tools/sindhi/*.pt
+# pa restorer checkpoint — a MEASURED NEGATIVE (investigation Run 9: loses to the shipped path at
+# current data scale); the trainer is committed, the model is not shipped.
+tools/perso-arabic/pa_restorer.pt
 tools/sindhi/sd-g2p-tagger.onnx
 tools/sindhi/sd-g2p-tagger.int8.onnx
 tools/sindhi/sd-g2p-tagger.meta.json
