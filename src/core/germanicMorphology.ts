@@ -41,9 +41,9 @@ export interface MorphologyConfig {
     suffixDigraphGuard?: (suffix: string, stem: string) => boolean; // reject a suffix strip that shatters a digraph
     seamElementInitial?: RegExp; // a non-first constituent starting like this resets element-initial (German st/sp/sch)
     wholeVerbSuffix?: string; // keep a whole known verb lexeme ending in this suffix un-split (German -en)
-    minTrailingConstituent?: number; // min letters for a compound's trailing part (default 3; nl/af use 4 to reject
+    minTrailingConstituent?: number; // min letters for a compound's trailing part (default 3; nl uses 4 to reject
     // 3-letter inflectional-lookalike tails — ten/ken/den/end — that are real words but not compound heads)
-    dontSplitKnownWords?: boolean; // never split a word that is itself a lexicon entry (nl/af; German splits known
+    dontSplitKnownWords?: boolean; // never split a word that is itself a lexicon entry (nl only; German splits known
     // compounds so it stays off — its lexicon flags constituents, not whole compounds)
 }
 
@@ -70,9 +70,17 @@ export function makeDecompose(cfg: MorphologyConfig): (word: string) => Decomp {
         if (depth > 2) return null;
         // A lexicalised word must not be torn into two coincidental sub-words (nl schakelen ✗ scha·kelen, af
         // amandel ✗). German (flag off) keeps splitting known compounds — its lexicon flags constituents, not whole
-        // compounds. nl/af have no such flags, so a whole dictionary entry is the signal that it's ONE morpheme.
+        // compounds. nl has no such flags, so a whole dictionary entry is the signal that it's ONE morpheme.
+        // ⚠ af DOES NOT SET THIS, despite the "(nl/af)" this comment used to carry — only nl does. It was
+        // measured for af and REJECTED at −17 (Run 4): the af stem list is a frequency wordlist full of real
+        // compounds, so "is a dictionary entry" is not the one-morpheme signal there that it is for nl.
         if (cfg.dontSplitKnownWords && cfg.isWord(w)) return null;
         const minTail = cfg.minTrailingConstituent ?? 3;
+        // ⚠ A LEADING CONSTITUENT MUST BE ≥4 LETTERS, and the floor is load-bearing rather than cautious: a stem
+        // lexicon is a WORDLIST, so at ≥3 every three-letter word in it becomes a compound head and the splitter
+        // shatters ordinary vocabulary — measured on af, dropping the floor to 3 scores +33/−143 (bak·kie,
+        // dog·ter, ven·ster, sui·ker, don·ker…). A named-exception list for the real 3-letter stems was built and
+        // REJECTED; see docs/afrikaans_stress_investigation.md Run 7 for why it cannot be made safe here.
         for (let i = w.length - minTail; i >= 4; i--) {
             const head = w.slice(0, i);
             if (!cfg.isConstituent(head)) continue;

@@ -195,3 +195,167 @@ Six findings, all fixed. The one that cost a word:
   on and `verdwyn` keeps its miss. Wording corrected rather than the pattern widened.
 
 Final: **1745/2220 (78.6%), symbol 94.3%.**
+
+## Run 6 — 2026-08-08 (the morpheme seam — Run 4's "one class with real headroom")
+
+Command: reclassify the 475 folded misses by single-symbol repair, split the two seam classes
+by hand, then A/B each candidate against the eval one at a time (`gained`/`lost` word lists,
+not just the total).
+
+**THE HEADLINE FINDING — half the class was misfiled.** Run 4 tallied `f→v 13` and `d↔t 14`
+and called both "morpheme-seam voicing (aan·dete, ad·vies)". Reading the 17 f→v rows (the
+count is 17 at the current fold config, not 13):
+
+| | |
+|---|---|
+| f→v | **not a seam at all.** Every row is word-initial or prefix-initial ⟨v⟩: *vesel, vriend, vulkaan, voorouer, van, verdraagsaam, slavin, universiteit*. Afrikaans ⟨v⟩ is /f/; the referee writes **[f] 184 times and [v] 13** for word-initial ⟨v⟩, and writes *ver-* both ways (fərbiəldəŋ beside vərdrɑχsɑm). Referee noise. |
+| | And it is **not foldable either** — ⟨w⟩ is [v] and ⟨v⟩ is [f], so f~v is a live contrast (*wat* ≠ *vat*). Folding it would blind the eval to one of this language's four signature segments. **Nothing to do here; 17 words are simply lost.** |
+| d↔t | real, and three different mechanisms wearing one label. Split below. |
+
+Taking the d↔t rows apart (13 `d→t` + 10 `t→d`, plus 13 `t→∅` that turned out to belong with
+them):
+
+1. **The regressive trigger was written over LETTERS.** `"ptksfcgx".includes(next)` — a
+   spelling-level restatement of "voiceless" that had drifted from the grapheme table it
+   mirrors. ⟨v⟩ is [f] and ⟨q⟩ is [k], so neither devoiced a preceding ⟨d⟩ and `advies` read
+   **[adfis]**: a voiced stop against a voiceless fricative, which Afrikaans does not have.
+   Derived from `fixed` + a new `voicelessPhones` list instead. **1745 → 1746** (advies), 0 lost.
+2. **A vowel-initial SUFFIX resyllabifies, and a coda rule cannot reach a segment that is no
+   longer a coda.** send·ing is *sen·ding* [sɛndəŋ], not *[sɛntəŋ]. Each morpheme is phonemized
+   independently, so the stem was devoicing at every seam. **1746 → 1750**, 0 lost
+   (sending, skoolvoeding, verbeelding, volharding; *voeding* still misses on its f→v).
+   ⚠ Implemented as a CLOSED LIST (`resyllabifyingSuffixes`), not a "next part starts with a
+   vowel" test, and that distinction is load-bearing: a vowel-initial compound ELEMENT is its own
+   prosodic word and the stem DOES devoice in front of it — the referee writes aandete [ɑntiətə],
+   bandopnemer [bantɔpniəmər], bloedoortapping [blutuərtapəŋ]. The list is the three tails the
+   splitter actually produces at a voiced-obstruent seam in 2220 words (⟨ing⟩ ×5, ⟨ers⟩ ×1,
+   ⟨eer⟩ ×1), all corroborated. A fourth environment, ⟨ana⟩ in *bandana*, was deliberately NOT
+   listed — not a suffix, just a loanword the stem splitter tore in half.
+3. **Seam degemination**, and the guard on it is the interesting part. A ⟨d⟩ against a following
+   /t/ or /d/ surfaces as one consonant and the ONSET is what survives — veld·tog [fɛltɔχ],
+   land·dros [land**r**ɔs] (voiced! it takes the onset's voicing, so this is deletion of the coda,
+   not a merge), be·stand·deel [bəstandiəl], wild·tuin [vəltœin]. Tried UNCONDITIONALLY over
+   coronal stops first: **+5 / −1**, and the −1 is *groottoon* → the referee writes `χrʊət.tʊən`,
+   a true geminate. Restricting the coda to spelled ⟨d⟩ — the stop Auslautverhärtung has already
+   neutralized, so it has no contrast left to protect, unlike an underlying /t/ — makes it
+   **+5 / −0**. **1750 → 1755.** Keyed on the SPELLING because after phonemization both are [t].
+
+**Result: 78.6% → 79.1% folded (1745 → 1755), symbol 94.3% → 94.4%. Floor 0.76 → 0.78.**
+Ten words, zero regressions, all three rules measured separately.
+
+**What is left of d↔t is NOT voicing — it is COMPOUND SPLITTING.** Nine of the original 13 `d→t`
+rows never reach a seam because there is no seam: the rule is correct and has nothing to fire at.
+Causes measured one word at a time:
+
+| word | why it does not split |
+|---|---|
+| erdwolf, wedloop | `splitCompound` requires a head of **≥4 letters** (`i >= 4`), so *erd*/*wed* are never tried |
+| noordwaarts, suidwaarts | *waarts* is not in af-stems.txt |
+| handhaaf | *haaf* is not in af-stems.txt |
+| bandopnemer, bloedoortapping | *opnemer* / *oortapping* are not in af-stems.txt |
+| strydwa | the tail *wa* is 2 letters, below `minTrailingConstituent` 3 |
+| aandete | the stressed-prefix strip runs BEFORE `splitCompound`, and *dete* IS in af-stems.txt (a frequency wordlist carries fragments), so `realWordStressedPrefixes` is satisfied and *aan·dete* wins |
+
+⚠ **and the aandete case had been documented as already fixed** — afrikaans.ts, afrikaans.jsonc
+and morphology.ts all cited *aand·ete → ɑnt·iətə* as the worked example of seam devoicing, and
+morphology.ts claimed its `realWordStressedPrefixes` guard was what saved it. It never did.
+Comments corrected in all three (the example is now huis·deur, which is real).
+
+Measured the fix rather than guessing at it: trying `splitCompound` before the stressed-prefix
+strip is worth **exactly +1 word in af** (aandete), 0 lost — but `germanicMorphology.ts` is
+SHARED with nl/de, so a +1 reordering of the fleet's decomposition is not a trade worth taking
+blind. Left alone and written down. Anyone picking this up should do it as a measured af-only
+config flag, together with the `i >= 4` head floor and the af-stems gaps, and score nl/de too.
+
+**Next lever, in order of measured size:** (1) the ə↔ɛ / ɑ↔a reduction-and-length residual, still
+the largest class and still bounded at ~45 by the Run 4 oracle; (2) compound-splitting coverage,
+~9 words visible from the seam alone; (3) nothing in f→v, ever.
+
+## Run 7 — 2026-08-08 (3-letter compound heads: measured, and REJECTED)
+
+Run 6 named the ≥4-letter leading-constituent floor (`i >= 4` in `splitCompound`) as one cause of
+the unsplit seam words. Question: **what breaks if 3-letter heads are permitted, and can an
+explicit list keep the wins without the breakage?**
+
+**The floor is load-bearing, not caution.** Dropping it to 3 outright: **1755 → 1634, +33/−143.**
+The stem lexicon is a 53k *wordlist*, so every three-letter word in it becomes a compound head and
+ordinary vocabulary shatters — bak·kie, dog·ter, ven·ster, sui·ker, don·ker, bot·tel, sus·ter.
+
+**An explicit list looked like it worked.** A `shortHeads` config, measured two ways:
+
+| list | folded | |
+|---|---|---|
+| chosen from VOCABULARY — 20 common 3-letter stems | 1762 | +10 / **−3** |
+| attested only — every head with a correct scoring instance | **1764** | **+9 / −0** |
+
+The vocabulary list's three losses were instructive on their own: **⟨man⟩ tore *mantel* to man·tel**
+and **⟨kop⟩ tore *kopende* to kop·ende**, real words the wordlist happens to contain. Choosing the
+list on linguistic grounds and measuring second is what exposed them.
+
+**And then the review measured the thing the referee cannot see, and it is why this is reverted.**
+The referee is 2220 words. **af-stems.txt is 53,344.** Diffing `phonemizeWordRules` over the whole
+stem list against `HEAD~1` — the harness this run should have built first — gives **444 changed
+words**: 301 from the seam rules (Run 6; spot-checked and almost uniformly right) and **143 from
+`shortHeads`, most of them regressions the +9/−0 could not see**:
+
+| head | off-referee damage |
+|---|---|
+| ⟨reg⟩ ×22 | reg·ter rɛχtɛr, reg·ina, reg·ion, reg·ard, reg·eer, reg·gekom **rɛχχəkɔm** — the exact ven·ster/dog·ter shatter class the floor exists to prevent |
+| ⟨ent⟩ ×22 | **ent·jie ɛntki** — the split destroys the ⟨jie⟩→[ki] grapheme; also komm·ent·aar, wies·ent·hal, gele·ent·hede |
+| ⟨sit⟩ ×18 | sit·ting **səttəŋ**, sit·ter, voor·sit·ter, baby·sit·ting — a spelled geminate with nothing to collapse it |
+| ⟨bos⟩ ×13 | bos·sie **bɔssi**, bos·ses; the genuine bos·werker/bos·veld are right |
+| ⟨een⟩ ×25, ⟨see⟩ ×19 | mixed — een·kant and see·bodem right, een·der and geko·nden·see·rde wrong |
+| ⟨nag⟩ ×11, ⟨wed⟩ ×11, ⟨hut⟩ ×1 | essentially all right |
+
+**Why it cannot simply be guarded, which is the actual finding.** The geminate class wants
+"collapse identical phones at the seam" — sit+ting [t]+[t] → sətəŋ, bos+sie [s]+[s] → bɔsi,
+reg+gekom [χ]+[χ] → rɛχəkɔm. But **groot·toon is also [t]+[t] and must NOT collapse** (referee
+`χrʊət.tʊən`), and it is the word that already forced the ⟨d⟩-coda restriction in Run 6. The two
+are indistinguishable to the splitter:
+
+```
+sitting     sit·ting     kinds = stem,stem
+groottoon   groot·toon   kinds = stem,stem
+```
+
+Separating them needs a compound-seam / derivational-seam distinction that `kinds` does not carry
+(the af splitter labels every part "stem", because the tails come from the wordlist, not the suffix
+list). That is a real project, not a guard, so **`shortHeads` is reverted in full** — the shared
+`MorphologyConfig` field, the af manifest list, and the test.
+
+**Kept from this run:** the ≥4 floor now carries its measured justification in the core, and the
+comment claiming `dontSplitKnownWords` is "(nl/af)" is corrected — only nl sets it, and it was
+measured for af and rejected at −17 back in Run 4, which is also now written where it is read.
+
+**THE DURABLE LESSON, and the reason this run is worth keeping in full: a `+N/−0` on the referee
+is not a regression test.** The referee is a 2220-word dictionary sample; the language's own stem
+list is 53k. A change that touches decomposition can be clean on the referee and wrong on 143
+words nobody looked at. **Diff the stem list before believing the score.** That harness is three
+lines and belongs in any run that touches the splitter:
+
+```bash
+git worktree add /tmp/af-base HEAD~1     # phonemize af-stems.txt in each, then diff
+```
+
+## Run 8 — 2026-08-08 (review of PR #772)
+
+Seven findings. Three (geminates, ⟨jie⟩, the off-referee shatter class) were all one root cause and
+are resolved by the Run 7 revert above. The rest:
+
+- **`dontSplitKnownWords` is documented "(nl/af)" and af never sets it.** True, and it is why
+  `sitting`/`regter` were tearable at all. Corrected in the core, with Run 4's −17 measurement
+  recorded at the point of use so the next reader does not re-try it blind.
+- **The `raadgewer` test did not test what it claimed.** `decompose("raadgewer")` returns ONE part —
+  there was no seam, the [t] came from the intra-morpheme regressive rule, and the "a vowel-initial
+  compound ELEMENT does not block devoicing" decision had **no coverage at all**. Re-pinned on
+  `bloedarm` (bloed·arm → blutarm) and `handomkeer` (hand·om·keer → ɦantɔmkiər), both of which
+  actually split, with the decomposition asserted alongside the IPA so it cannot silently stop.
+- **"Derived from `fixed`, so the two cannot diverge again" was overstated.** The trigger is
+  `fixed` ∩ `voicelessPhones`, and `voicelessPhones` is hand-written — a new single-letter grapheme
+  whose phone nobody adds there drops out of the trigger silently, which is the old `"ptksfcgx"`
+  failure mode relocated one file over. The derived set's CONTENTS are now asserted as a set in the
+  tests; that assertion, not the derivation, is the guard. Wording corrected in both files.
+- `minHead` hardcoding "shortHeads are exactly 3 letters" — moot, reverted with the feature.
+
+**Final: 1755/2220 (79.1% folded), symbol 94.4%, floor 0.78.** The seam work stands; the splitter
+work does not.
