@@ -55,6 +55,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `mandarin/chars.tsv`, `phrases.tsv` | pypinyin | MIT | attribution |
 | `cantonese/dict.tsv` | rime-cantonese (via pycantonese) | CC-BY 4.0 | attribution |
 | `bengali/bn-g2p-tagger.int8.onnx`, `bengali-lexicon.tsv` | Google language-resources/bn | CC-BY 4.0 | attribution |
+| `khmer/km-lexicon-dict.tsv`, referee `km.google-lexicon.tsv` | Google language-resources/km | CC-BY 4.0 | attribution |
 | `sindhi/` lexicon Devanagari tier, `sd-g2p-tagger.int8.onnx` training data | Sindhi Open Lexicon (SindhiLanguage.org) | bespoke, permissive; **not CC-BY** (§2b) | **named attribution: Amar Fayaz Buriro (امر فياض ٻرڙو) — mandatory** |
 | `hebrew/he-lexicon.tsv` builders | Phonikud + ReNikud (thewh1teagle) | CC-BY 4.0 | attribution |
 | `thai/seg-words.txt` | ICU thaidict + PyThaiNLP | Unicode-DFS-2016 + CC0 | notice |
@@ -92,7 +93,8 @@ The largest stratum. Redistributable only under CC-BY-SA; fenced per file inside
 `russian/stress.tsv` + `hard-e.tsv`; `german/{stress,length,quality,consonant,er,lexicon}.tsv`;
 `gan|hakka|jin|xiang/dict.tsv`; `minnan/dict.tsv` + `dict-chars.tsv` (ChhoeTaigi 台華線頂對照典
 CC-BY-SA 4.0 + iTaigi CC0 + kaikki Hokkien chars; sidecar); `thai/dictionary.tsv`;
-`burmese/{dictionary.tsv,seg-words.txt,voicing-lexicon.tsv}`; `khmer/km-lexicon.tsv`;
+`burmese/{dictionary.tsv,seg-words.txt,voicing-lexicon.tsv}`; `khmer/km-lexicon.tsv` +
+`km-lexicon-kaikki.tsv` (kaikki tier);
 `sindhi/sindhi-lexicon.tsv` (kaikki tier); `arabic/egyptian-lexicon.tsv`;
 `urdu/{lexicon.tsv,lexicon-ipa.tsv}`; `persian/lexicon.tsv`; `pashto/lexicon.tsv`;
 `punjabi/{lexicon.tsv,crossscript.tsv}`; `indonesian/indonesian-e-lexicon.tsv`;

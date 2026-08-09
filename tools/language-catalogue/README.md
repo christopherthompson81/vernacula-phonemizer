@@ -26,7 +26,7 @@ data-availability verdicts** every time we pick the next language.
 | `fleurs` | 1 = in the **FLEURS-102** speech benchmark, 0 = not (NULL = unknown) |
 | `decision` | `implemented` \| `rejected` \| `unimplemented` |
 | `rejection_reason` | one of the fixed set below (NULL for implemented) |
-| `verdict` | for implemented rows: maturity `✅ 🟢 🟡 🔷 ⛔` |
+| `verdict` | for implemented rows: maturity `✅ 🟢 🟡 🔷 ⛔ 🔵`. May carry TWO glyphs when both apply. NULL only for an aliased row. |
 | `normalization` | `done` \| `partial` \| `inherited` \| empty — whether the symbols a reader says aloud are read. **Derived**, see below |
 | `pr`, `notes` | provenance / free text |
 

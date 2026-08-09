@@ -46,6 +46,7 @@ const TOANDAKHIAT = "៍"; // U+17CD — silences the consonant it sits on
 const MUUSIKATOAN = "៉"; // U+17C9 — converts a 2nd-series (o) consonant to 1st-series (a)
 const TRIISAP = "៊"; // U+17CA — converts a 1st-series (a) consonant to 2nd-series (o)
 const BANTOC = "់"; // U+17CB — shortens the vowel; sits on a coda consonant
+const SAMYOK = "័"; // U+17D0 — samyok sannya: a short-vowel sign; ⟨័រ⟩ reads oə (កុងទ័រ koŋtoə)
 const REAHMUK = "ះ"; // U+17C7 — adds an -h coda (combines with a preceding base vowel)
 const NIKAHIT = "ំ"; // U+17C6 — adds an -m coda (combines with a preceding base vowel)
 // Combining diacritics consumed after a unit's vowel (register shifters + bantoc handled separately, rest ignored).
@@ -53,6 +54,10 @@ const DIACRITICS = new Set(DEF.diacritics);
 // A long vowel shortened by the /bantaq/ (់): កាត់ kaːt → kat, ចាប់ caːp → cap.
 const SHORTEN: Record<string, string> = {
     "aː": "a", "ɛː": "ɛ", "eː": "e", "oː": "o", "uː": "u", "iː": "i", "ɨː": "ɨ", "əː": "ə", "ɔː": "ɔ", "ɑː": "ɑ",
+    // ⟨ា⟩ o-series is iə, and the bantaq RE-COLOURS it: ជាប់ coəʔ, not *ciəʔ. Referee-derived 71:1 on the
+    // o-series ⟨ា⟩+់ words. ⚠ BANTAQ ONLY — the silent-subscript codaShort shape KEEPS iə (11:0), and that
+    // split falls out structurally: SHORTEN is consulted only on `unit.shorten`.
+    "iə": "oə",
 };
 // Passive consonants = continuants (nasals, semivowels, liquids); everything else is a dominant stop/spirant.
 const PASSIVE = new Set(DEF.passiveConsonants);
@@ -68,6 +73,7 @@ interface Unit {
     coda: string | null; // coda consonant letter, or null
     shorten: boolean; // a following /bantaq/ coda shortens this syllable's vowel
     codaShort: boolean; // the coda came from a silent-subscript/doubled cluster → short inherent (ចន្ទ can)
+    samyok?: boolean; // carries ⟨័⟩ (samyok sannya) — with a silent-រ coda the nucleus is oə (referee 25:1)
     /** An INDEPENDENT VOWEL's literal IPA — the unit is a whole syllable nucleus with no onset letter. */
     iv?: string;
 }
@@ -114,10 +120,24 @@ const LEX: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon
 const DICT: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon-dict.tsv", undefined,
     { optional: true });
 
-/** One Khmer word → canonical IPA. SHIPPED path: the wikipron-verified exceptions lexicon, then the independent
- *  dictionary, then the rule engine. `phonemizeWordRules` reads NEITHER, so the referee eval stays non-circular. */
+/**
+ * THIRD-TIER lexicon — en.wiktionary readings via kaikki, for words the wikipron SCRAPE lacks (newer entries,
+ * compounds written solid). SAME lineage as the referee, which is why it is a lexicon and can never be a
+ * referee; by construction it holds NO referee word, only words where the rules disagree with its reading.
+ *
+ * ⚠ CONSULTED BETWEEN `LEX` AND `DICT`, and the order is an evidence ranking: wikipron-VERIFIED beats a
+ * same-tradition human reading, which beats the converted Google dictionary (its conversion validates 97.7%
+ * against wikipron on 6,564 shared words, against the dictionary's 78.3%). Built by
+ * tools/gen/build-km-kaikki-lexicon.mts.
+ */
+const KAIKKI: ReadonlyMap<string, string> = loadTsvMap(import.meta.url, "km-lexicon-kaikki.tsv", undefined,
+    { optional: true });
+
+/** One Khmer word → canonical IPA. SHIPPED path: the wikipron-verified exceptions lexicon, then the kaikki
+ *  (same-tradition) tier, then the independent dictionary, then the rule engine. `phonemizeWordRules` reads
+ *  NONE of them, so the referee eval stays non-circular. */
 export function phonemizeWord(word: string): string {
-    return LEX.get(word) ?? DICT.get(word) ?? phonemizeWordRules(word);
+    return LEX.get(word) ?? KAIKKI.get(word) ?? DICT.get(word) ?? phonemizeWordRules(word);
 }
 
 /** One Khmer word → canonical IPA by RULE ONLY (segmental two-series sesquisyllabic abugida; no lexicon). This is
@@ -175,12 +195,14 @@ export function phonemizeWordRules(word: string): string {
         // diacritics after the vowel — ៍ silences the whole unit; ់ (bantaq) is recorded; the rest are ignored
         let silent = false;
         let bantaq = false;
+        let samyok = false;
         while (DIACRITICS.has(s[i] ?? "")) {
             if (s[i] === TOANDAKHIAT) silent = true;
             if (s[i] === BANTOC) bantaq = true;
+            if (s[i] === SAMYOK) samyok = true;
             i += 1;
         }
-        if (!silent) units.push({ ons, vs, post, bantaq, ser, bp, coda: null, shorten: false, codaShort: false });
+        if (!silent) units.push({ ons, vs, post, bantaq, ser, bp, coda: null, shorten: false, codaShort: false, samyok });
     }
     if (units.length === 0) return word;
 
@@ -197,11 +219,24 @@ export function phonemizeWordRules(word: string): string {
     }
     // A medial bare consonant (no vowel of its own) after a syllable that already has a WRITTEN vowel but no
     // coda is that syllable's coda, not a minor syllable of its own (គីមឈី → kiːm.ciː, not kiːm.ɔ.ciː).
+    //
+    // ⚠ TWO GUARDS, BOTH FOR THE SAME REASON: this rule CONSUMES `cur`, so it must not fire when `cur` is
+    // carrying something that would be destroyed with it. Without them a whole syllable vanishes.
+    // · `cur.coda === null` — the bantaq rule above may ALREADY have given `cur` a coda. កំណត់ scans to
+    //   [កំ][ណ][ត់]; ណ takes ត as its coda, and stealing ណ here dropped ត with it (kɑmn, not kɑmnɑt).
+    // · the next unit must not be a BARE FINAL one — if it is, `cur` is the ONSET of the last syllable and the
+    //   next unit is its coda, not a coda for `prev`. ចំណង is [ចំ][ណ][ង] = cɑm.nɑːŋ; stealing ណ stranded ង as
+    //   its own syllable with a long inherent vowel, giving the garbled *cɑmnŋɑː*. Contrast គីមឈី, where the
+    //   next unit ឈី has a written vowel and so is a real syllable — there the rule must still fire.
     for (let u = 1; u < units.length - 1; u++) {
         const cur = units[u]!;
         const prev = units[u - 1]!;
+        const next = units[u + 1]!;
+        const nextIsBareFinal = u + 1 === units.length - 1
+            && next.vs === null && next.post === null && !(next as { drop?: boolean }).drop;
         if (cur.vs === null && cur.post === null && !cur.bantaq && cur.ons.length === 1
-            && !(cur as { drop?: boolean }).drop && prev.coda === null && prev.vs !== null) {
+            && !(cur as { drop?: boolean }).drop && cur.coda === null && !nextIsBareFinal
+            && prev.coda === null && prev.vs !== null) {
             prev.coda = cur.ons[0]!;
             (cur as { drop?: boolean }).drop = true;
         }
@@ -209,8 +244,14 @@ export function phonemizeWordRules(word: string): string {
     let live = units.filter((u) => !(u as { drop?: boolean }).drop);
     // A trailing bare unit (no written vowel) supplies the coda of the previous syllable; any subscript in a
     // final cluster (ចន្ទ → can) is silent, so only ons[0] is taken.
+    //
+    // ⚠ `last.coda === null` IS LOAD-BEARING — this rule SLICES `last` away, so a coda already assigned to it
+    // by the bantaq rule above would be discarded along with it. កញ្ចក់ is [ក][ញ្ច][ក់]: ក់ correctly becomes
+    // ញ្ច's coda, then this rule took ញ្ច's ons[0] as ក's coda and deleted the unit, losing the whole second
+    // syllable — kɑɲ against the referee's kɑɲcɑʔ.
     const last = live[live.length - 1]!;
-    if (live.length >= 2 && last.vs === null && last.post === null && !last.bantaq && live[live.length - 2]!.coda === null) {
+    if (live.length >= 2 && last.vs === null && last.post === null && !last.bantaq && last.coda === null
+        && live[live.length - 2]!.coda === null) {
         const prev = live[live.length - 2]!;
         prev.coda = last.ons[0]!;
         prev.codaShort = last.ons.length > 1; // a silent trailing subscript (doubled/type-3) → short inherent
@@ -243,9 +284,19 @@ export function phonemizeWordRules(word: string): string {
             continue;
         }
         // onset IPA — ⟨ប⟩ is [p] as the first member of a cluster, [ɓ] as a simple onset
+        //
+        // ⚠ ⟨ហ្វ⟩ IS THE LOAN-/f/ DIGRAPH, NOT AN h+ʋ CLUSTER. Khmer has no native /f/ and spells it ហ+coeng+វ
+        // (កាហ្វេ "coffee" kaːfeː, តេឡេហ្វូន "telephone"). Both referees corroborate: wikipron writes f in
+        // កាហ្វេ/ទីហ្វុង/តេឡេហ្វូន, and the google secondary surfaced the gap (ហ្វក faːk read *hʋɑːk*, 12× in
+        // its residual). Letter-by-letter rendering gave hʋ, so the pair is read as one segment here.
         let onset = "";
         for (let k = 0; k < unit.ons.length; k++) {
             const letter = unit.ons[k]!;
+            if (letter === "ហ" && unit.ons[k + 1] === "វ") { onset += "f"; k += 1; continue; }
+            // ⟨ដ្ឋ⟩ — the Indic retroflex cluster reads [tt], not *ɗtʰ: the implosive devoices against the
+            // following stop and the aspiration drops (កម្មដ្ឋាន kammattʰan → kammattan folded; referee-derived
+            // tt 59 / t 38 / other 1 on the 98 ⟨ដ្ឋ⟩ words).
+            if (letter === "ដ" && unit.ons[k + 1] === "ឋ") { onset += "tt"; k += 1; continue; }
             onset += letter === "ប" && (unit.bp || unit.ons.length > 1) && k === 0 ? "p" : DEF.consonants[letter]![0];
         }
         // governing series: register-shifter override, else the LAST dominant among the onset consonants,
@@ -271,15 +322,47 @@ export function phonemizeWordRules(word: string): string {
         } else if (unit.vs) {
             nucleus = DEF.vowels[unit.vs]![oIdx]!;
             if (unit.shorten) nucleus = SHORTEN[nucleus] ?? nucleus;
+            // ⟨ិ⟩/⟨ី⟩ IN A NON-FINAL SYLLABLE REDUCE TO [i], both series — the table values (ə/ɨ, əj/iː) are
+            // the STRESSED (final-syllable) readings, and the Indic polysyllables this fires in carry the
+            // short i medially: កម្មវិធី kammaʋitʰiː not *kammaʋətʰiː, ការីយ- karij- not *karəj-.
+            // Referee-derived: non-final ⟨ិ⟩ i 87 / ə 29 / e 23 / ɨ 7; non-final ⟨ី⟩ i 61 / əj 14.
+            // ⟨ិ⟩/⟨ី⟩ REDUCE outside the stressed final-open position — the table values (ə/ɨ, əj) are the
+            // stressed readings, and the Indic polysyllables this fires in carry [e]/[i] instead:
+            // កម្មវិធី kammaʋitʰiː not *kammaʋətʰiː, កណិការ kaneka. Referee-derived: non-final ⟨ិ⟩ i/e 110 vs
+            // ə 29 ɨ 7; non-final ⟨ី⟩ i(ː) 61 vs əj 14; ⟨ី⟩+coda i(ː) 135 vs əj 6.
+            // ⚠ ⟨ី⟩ EMITS LONG iː — the folded metric strips length either way, but the raw referee writes
+            // ទីហ្វុង t iː f o ŋ and ពីរ p iː (the first derivation read "i" as a substring of "iː" and
+            // shortened the raw output of every ី word; four goldens caught it).
+            if (u < units.length - 1 && (unit.vs === "ិ" || unit.vs === "ី") && !unit.coda)
+                nucleus = unit.vs === "ី" ? "iː" : gov === "a" ? "e" : "i";
+            if (unit.vs === "ី" && unit.coda) nucleus = "iː";
         } else if (u === units.length - 1) {
             // stressed (last) syllable. Open → LONG inherent (ក kɑː). Closed: LONG by default (a PLAIN coda —
             // កង kɑːŋ, គង kɔːŋ), but SHORT when the coda is a silent-subscript/doubled cluster (ចន្ទ can,
             // រដ្ឋ rŏət) or carries the bantaq (ចង់ cɑŋ) — Huffman IX.A.1 (long) vs IX.A.2/3 (short).
             const short = unit.codaShort || unit.shorten;
             nucleus = codaIpa === "" || !short ? DEF.inherent[oIdx]! : (gov === "a" ? "ɑ" : "uə");
+            // ⟨័រ⟩ — samyok sannya with the silent-រ coda reads [oə], both series (កុងទ័រ koŋtoə,
+            // កុំព្យូទ័រ kompjutoə; referee-derived 25:1 on ័រ-final words).
+            if (unit.samyok && unit.coda === "រ") nucleus = "oə";
         } else {
-            nucleus = gov === "a" ? "ɑ" : "ɔ"; // unstressed presyllable → reduced short inherent
+            // unstressed presyllable → reduced short inherent. ⚠ The o-series value depends on the syllable
+            // SHAPE (referee-derived over the 640 o-series-inherent presyllables: eə 223 / u 171 / ɔ 160 / ə 66):
+            // CLOSED (the unit owns a coda — គម kum-, ពន pun-) → [u]; OPEN stays [ɔ] (34:20 over eə on the
+            // true open-presyllable shape).
+            nucleus = gov === "a" ? "ɑ" : unit.coda ? (unit.coda === "ល" || unit.coda === "ង" ? "uə" : "u") : u > 0 ? "eə" : "ɔ";
         }
+        // ⚠ A NIKAHIT NUCLEUS MERGES WITH A ⟨ង⟩ CODA. ⟨ំ⟩ carries its own [-m], so កម្លាំង rendered the m AND
+        // the coda: *kɑmlamŋ* against the referee's kɑmlaŋ. A velar nasal coda absorbs it — the sign marks
+        // nasality and ⟨ង⟩ supplies the place.
+        //
+        // ⚠ THE CONDITION IS THE ASSIGNED CODA, NOT THE SPELLING, and the difference is load-bearing. Bucketing
+        // the 7,108 referee rows by the consonant after ⟨ំ⟩ shows ⟨ង⟩ is the ONLY one that drops the m (68 of
+        // 88; ណ 102/102, ព 64/64 and every other keep it — កាំបិត is k a m ɓ ə t). But reading the exceptions
+        // individually finds two that keep it — ជំងឺ cum.ŋɨː, where ⟨ង⟩ has its own vowel, and ទំងន់ tum.ŋuən,
+        // where ⟨ង⟩ is bare but OPENS the syllable that ន់ closes. In both, ⟨ង⟩ is an onset. A spelling rule
+        // (⟨ំ⟩ before ⟨ង⟩) breaks both; PASS 2 has already decided the question, so ask it instead.
+        if (nucleus.endsWith("m") && unit.coda === "ង") nucleus = nucleus.slice(0, -1);
         out += onset + nucleus + codaIpa;
     }
     return out.normalize("NFC");

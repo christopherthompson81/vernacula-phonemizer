@@ -3,7 +3,21 @@
 {
     "language": "km", "name": "Khmer", "script": "Khmer",
     "provenance": "Authored two-series abugida; series + vowel two-readings derived from wikipron khm.",
-    "referees": [ { "file": "km.wikipron-khm-broad.tsv", "source": "wikipron khm_khmr broad (human)", "role": "primary" } ],
+    "referees": [
+        { "file": "km.wikipron-khm-broad.tsv", "source": "wikipron khm_khmr broad (human)", "role": "primary" },
+        // NON-Wiktionary lineage — the independent second tradition (kaikki would be the same source as the
+        // primary). ⚠ The SHIPPED phonemizeWord must never be scored against it: its dictionary tier IS this
+        // data. The eval scores phonemizeWordRules (no lexicon), which is what keeps this non-circular.
+        {
+            "file": "km.google-lexicon.tsv",
+            "source": "google/language-resources km lexicon (human-curated, CC BY 4.0)",
+            "role": "secondary",
+            "folds": [
+                { "pattern": "ʋ", "replace": "w", "note": "the two referees transcribe the SAME phoneme /ʋ/~[w] with opposite letters: in C+coeng+វ clusters wikipron writes ʋ 120:1 while google writes w 1133:288. Pure notation for one phoneme → fold ʋ→w on both sides, THIS referee only (the engine follows the primary\u2019s ʋ)." },
+                { "pattern": "ou", "replace": "oː", "note": "the ូ vowel: a TOTAL convention split — wikipron writes ou 471:6, google writes oː 9151:0. Same phoneme, two notations; fold ou→oː on both sides, this referee only. ⚠ ə~ɨ was checked the same way and is NOT foldable: both referees use both at ~2.4:1, i.e. lexical variance, and folding it would hide real errors." }
+            ]
+        }
+    ],
     "segmentJoin": true,
     "folds": [
         { "pattern": "[ptkc]$", "replace": "ʔ", "note": "word-final voiceless stops are variably GLOTTALISED in the referee ([k]~[ʔ]); fold the word-final coda stop ~ ʔ (both sides)" },
