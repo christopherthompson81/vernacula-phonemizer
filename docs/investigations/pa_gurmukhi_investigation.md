@@ -156,3 +156,19 @@ pattern first: the eval currently scores the SHIPPED `phonemizeWord`, so a wikip
 would score the answer key. The restructure (eval → a core function; mine the exceptions; ship dict-first —
 exactly af/km) is the next build, and it is also what the Shahmukhi side needs before its BiLSTM ever
 becomes viable.
+
+## Run 5 — 2026-08-09 18:50 — the house pattern, and the class closed for the shipped path
+
+The restructure the lexicon needed: `phonemizeWordEval` (cross-script → harakat → core, byte-identical to
+the old shipped behavior) is now what the referee eval scores; shipped `phonemizeWord` consults the new
+**231-entry `gurmukhi-lexicon.tsv`** first — every pan_guru referee word whose eval reading fails under the
+eval's own folds, carrying the referee's reading verbatim (the km arrangement, notation and all). Mining
+used the eval's fold pipeline — Run 3's phantom made that non-negotiable.
+
+Verification: all three referee numbers BYTE-IDENTICAL across the switch (73.6 / 100 / 56.5) — the eval
+never sees the lexicon; invariants pinned in test/paGuruLexicon.test.ts (every entry a referee word, the
+eval path reads none of it, precedence, and the audio-adjudicated goldens: ਹਸਪਤਾਲ ɦəspət̪äːl,
+ਦਿਲਚਸਪ d̪ɪlt͡ʃəsəp, ਅਸਮਾਨ əsə̆maːn — the words FLEURS recovered at 100% precision now ship correctly).
+CC-BY-SA §3 fence extended. What the audio work bought, in the end: the confidence to close the class as
+LEXICAL (rather than keep hunting a rule), the out-of-band validation of the mined entries, and a standing
+harness for the next convention question. What remains 🟡: the Shahmukhi side, data-blocked as sized in Run 0.

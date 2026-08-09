@@ -97,7 +97,7 @@ CC-BY-SA 4.0 + iTaigi CC0 + kaikki Hokkien chars; sidecar); `thai/dictionary.tsv
 `km-lexicon-kaikki.tsv` (kaikki tier);
 `sindhi/sindhi-lexicon.tsv` (kaikki tier); `arabic/egyptian-lexicon.tsv`;
 `urdu/{lexicon.tsv,lexicon-ipa.tsv}`; `persian/lexicon.tsv`; `pashto/lexicon.tsv`;
-`punjabi/{lexicon.tsv,crossscript.tsv}`; `indonesian/indonesian-e-lexicon.tsv`;
+`punjabi/{lexicon.tsv,crossscript.tsv,gurmukhi-lexicon.tsv}`; `indonesian/indonesian-e-lexicon.tsv`;
 `romanian/romanian-stress.tsv`; `welsh/lexicon.tsv`; `czech/loanwords.tsv`; `hausa/tone.tsv`;
 `zulu/tone.tsv`; `akan/akan-tone.tsv`; `zhuang/sawndip-readings.tsv`;
 `tagalog/stress-lexicon.tsv` + `final-glottal.txt`; `javanese/javanese-lexicon.tsv`;

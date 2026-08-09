@@ -153,7 +153,9 @@ import { phonemizeWordCore as ur } from "../../src/languages/urdu/urdu.ts";
 // so evaluating it against those referees would be circular. phonemizeWordRules bypasses it → the honest engine
 // signal (the eval folds ⟨e⟩ anyway, so the % is identical).
 import { phonemizeWordRules as id } from "../../src/languages/indonesian/indonesian.ts";
-import { phonemizeWord as pa } from "../../src/languages/punjabi/punjabi.ts";
+// ⚠ pa scores the EVAL function, not the shipped one: gurmukhi-lexicon.tsv is mined from the pan_guru
+// referee, so the shipped phonemizeWord would score the answer key (house pattern — af/en-GB/tl/ilo/km).
+import { phonemizeWordEval as pa } from "../../src/languages/punjabi/punjabi.ts";
 import { phonemizeWord as mr } from "../../src/languages/marathi/marathi.ts";
 import { phonemizeWord as te } from "../../src/languages/telugu/telugu.ts";
 import { phonemizeWord as yue } from "../../src/languages/cantonese/cantonese.ts";
