@@ -8,7 +8,7 @@ reading — which lets us score each individual change as improved / degraded / 
 
 Scored against CLE, independent of both Wiktionary and Dakshina.
 
-    python3 tools/perso-arabic/ur_label_diagnostics.py
+    UR_CORE=/tmp/ur_core.tsv python3 tools/perso-arabic/ur_label_diagnostics.py
 """
 import collections
 import os
@@ -18,11 +18,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 
 CLE = os.path.join(REPO, "tools/referee-eval/referees/ur.cle-speech.tsv")
-CORE = "/tmp/ur_core.tsv"
+CORE = os.environ.get("UR_CORE") or "/tmp/ur_core.tsv"
 DAK = os.path.join(HERE, "silver.dakshina.tsv")
 
 VOWELS = re.compile(r"(ɑː|aː|uː|iː|eː|oː|ɔː|ɛː|ə|ɪ|ʊ|ɛ|ɔ|ɑ|a|e|o|u|i)")
-SHORTSET = {"ə", "ɪ", "ʊ", "ɛ", "ɔ"}
 
 
 def load(path, col):

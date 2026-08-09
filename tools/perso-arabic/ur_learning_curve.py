@@ -31,7 +31,6 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 
 os.environ.setdefault("UR_EXTRA", "1")  # the full 9,016-pair pool Run 3 used for its second row
-os.environ["UR_LC_IMPORT"] = "1"
 
 import torch  # noqa: E402
 import torch.nn as nn  # noqa: E402
@@ -168,8 +167,14 @@ def load_extra(dev_skels, gold_skels):
     gold pool — otherwise the curve would measure leakage, or would silently replace a gold
     label with a ~63%-accurate romanization-derived one."""
     path = os.environ.get("UR_EXTRA_LABELS") or os.path.join(HERE, "silver.dakshina.tsv")
-    # aligning ~300k pairs in pure Python is minutes, and the curve is re-run often — cache it.
-    cache = f"/tmp/ur_extra_aligned_{os.path.basename(path)}.pkl"
+    # Aligning ~300k pairs in pure Python is minutes, and the curve is re-run often — cache it.
+    # ⚠ THE KEY MUST INCLUDE mtime+size, NOT JUST THE FILENAME. Both label builders write to the same
+    # default path on every variant rebuild (--min-agree, --with-majhul, short-only), so a
+    # filename-only key silently returns the PREVIOUS variant's alignment and reports its count as if
+    # it came from the current file. That happened: review of #780 found a 30,089-pair cache being
+    # served for a 36,328-row rebuild of silver.dakshina.tsv.
+    st = os.stat(path)
+    cache = f"/tmp/ur_extra_aligned_{os.path.basename(path)}_{int(st.st_mtime)}_{st.st_size}.pkl"
     if os.path.exists(cache):
         import pickle
         with open(cache, "rb") as fh:
@@ -194,7 +199,7 @@ def load_extra(dev_skels, gold_skels):
 
 def run_curve(label, points, dev_set, prior, seeds=(1, 2, 3)):
     print(f"\n=== {label} ===", flush=True)
-    print(f"{'train':>9} {'short-slot (3 seeds)':>26} {'Δ vs prior':>11} {'majhūl':>18} {'word-exact':>11}")
+    print(f"{'train':>9} {'short-slot mean (range)':>26} {'Δ vs prior':>11} {'majhūl':>18} {'word-exact':>11}")
     for name, make in points:
         accs, majs, words = [], [], []
         t0 = time.time()
@@ -210,7 +215,7 @@ def run_curve(label, points, dev_set, prior, seeds=(1, 2, 3)):
                 torch.cuda.empty_cache()
         mean = sum(accs) / len(accs)
         spread = max(accs) - min(accs)
-        print(f"{name:>9} {mean:>18.1f}% (±{spread:.1f}) {mean - prior['short_prior']:>+10.1f} "
+        print(f"{name:>9} {mean:>18.1f}% (r{spread:.1f}) {mean - prior['short_prior']:>+10.1f} "
               f"{sum(majs) / len(majs):>16.1f}% {sum(words) / len(words):>10.1f}%"
               f"  [{(time.time() - t0) / len(seeds):.0f}s/seed]", flush=True)
 
@@ -335,15 +340,9 @@ def main():
         # every candidate source was measured with.
         cle = load_cle()
         extra_all = load_extra(dev_skels, gold_skels)
-        path = os.environ.get("UR_EXTRA_LABELS", "")
-        seen = set()
-        for line in open(path, encoding="utf8"):
-            if line.startswith("#"):
-                continue
-            p = line.rstrip("\n").split("\t")
-            if len(p) >= 3 and p[0] in cle:
-                seen.add(p[0])
-        # rebuild with CLE excluded: re-align only what we keep
+        # CLE is held out below by skeleton membership; load_extra already defaults UR_EXTRA_LABELS to
+        # silver.dakshina.tsv, so nothing here may re-open it (doing so crashed `phase c` with
+        # FileNotFoundError: '' whenever the env var was unset — review of #780).
         kept = []
         for chars, tags in extra_all:
             if "".join(chars) not in cle:
@@ -359,9 +358,9 @@ def main():
         if cap and cap < len(kept):
             kept = random.Random(7).sample(kept, cap)
             print(f"⚠ label pool then CAPPED to {cap} (scale control)", flush=True)
-        for name, data in (("gold 9,016 only", pool),
+        for name, data in ((f"gold {len(pool):,} only", pool),
                            (f"labels {len(kept)} (CLE held out)", kept),
-                           (f"gold + labels", pool + kept)):
+                           ("gold + labels", pool + kept)):
             m, cv, mask, ilv = train_one(data, 1)
             w, t, acc, pr = eval_vs_cle(m, cv, mask, ilv, cle)
             print(f"  {name:36} vs CLE: {acc:5.1f}%  (always-ə {pr:.1f}%)  "

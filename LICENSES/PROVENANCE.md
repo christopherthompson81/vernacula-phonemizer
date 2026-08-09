@@ -134,9 +134,12 @@ Wiktionary-derived (sidecar: `af.rcrl-apd.PROVENANCE.md`); the 246-referee eval 
 CC-CEDICT check (all CC-BY-SA); 32 epitran outputs (epitran code MIT; wordlists often kaikki);
 hermitdave FrequencyWords lists (CC-BY-SA), used as **filters** for the CC0 NST lexica — the
 shipped intersections keep only NST content. ⚠ BUT THE RANKING ITSELF IS NOW REPRODUCED, in
-`referee-eval/freq/nb.txt` and `freq/af.txt` (word+count pairs, tools-only, attributed in each file
-header and in freq/README.md) — this sentence used to say it was not, which stopped being true when
-nb.txt landed. Ranking data only, no pronunciation content. Elsewhere the external ranking is the
+`referee-eval/freq/nb.txt`, `freq/af.txt` and `freq/ur.txt` (word+count pairs, tools-only, attributed
+in each file header and in freq/README.md) — this sentence used to say it was not, which stopped
+being true when nb.txt landed. **This list mirrors the one in NOTICE.md and must be extended
+whenever a new `freq/<lang>.txt` lands**; af.txt and ur.txt were each added to it late, ur.txt only
+after review caught that NOTICE.md had been updated and this file had not.
+Ranking data only, no pronunciation content. Elsewhere the external ranking is the
 contribution and is not reproduced (stated in NOTICE). `fa.synth-agreement.tsv` is EVAL-ONLY
 (one voter, FarsDat, has unrecorded terms — noted in `synth_referee.py`; no shipped content
 derives from it and it is not wired into referee-eval).

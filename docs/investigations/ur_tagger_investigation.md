@@ -933,3 +933,19 @@ and the trade looks different. That is a product call, not a measurement.
 same licence) and turn on the frequency-weighted metric for ur. Every accuracy claim in this
 investigation is dictionary-shaped without it, and Run 10's headline numbers would gain a
 real-text counterpart — the 80.9% above is the first such figure Urdu has ever had.
+
+### ⚠ Run 18 addendum — the committed `freq/ur.txt` is FILTERED; Run 18's figures used the raw list
+
+Run 18 was computed on the raw hermitdave list (**9,592 types / 262,138 tokens**). The list
+committed as `tools/referee-eval/freq/ur.txt` is filtered to letters-only, matching the shape of
+the existing `nb.txt`/`af.txt`: **9,181 types / 246,155 tokens**. Two filters — 403 non-Urdu-script
+types (Latin runs and Latin punctuation) and **8 Arabic-range punctuation types**. The second was
+caught in review of #780: ⟨،⟩ and ⟨۔⟩ are ranks 2 and 4 by count, so a naive script-range filter
+keeps them and they alone are 5.6% of the token mass.
+
+The eval's frequency-weighted numbers are **unchanged** by the filter (66.3% / 79.6% before and
+after) — only referee words receive a weight, and punctuation is never a referee word. But Run 18's
+coverage figures (76.6% → 89.5%) and serving-path figures (80.9% → 82.1%, +1.3pp) were computed on
+the raw list and are **not exactly reproducible from the committed artifact**; recomputed on the
+filtered list they would shift slightly. The +1.3pp conclusion — that the tier is not worth a §3
+fence — does not depend on that precision.

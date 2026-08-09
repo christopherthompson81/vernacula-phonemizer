@@ -22,7 +22,12 @@ attestation counts) + Aksharantar's HUMAN subset (CC-BY/CC0, +7,013 new types). 
 620k IndicCorp bulk is MINED and scores 52.5% against CLE vs a 57.4% always-ə prior — below
 guessing — so it is excluded here.
 
-    python3 tools/perso-arabic/ur_build_dakshina_labels.py [--min-agree 0.0] [--out FILE]
+    python3 tools/perso-arabic/ur_build_dakshina_labels.py [--min-agree 0.0] [--with-majhul] [--out FILE]
+
+INPUTS (not in-repo — none of them may be committed here; see .gitignore):
+  UR_CORE             (default /tmp/ur_core.tsv)     — `npx tsx ur_emit_core.ts <words.txt>`
+  UR_DAKSHINA_DIR     (default /tmp/dakshina/lex)    — ur.{train,dev,test}.tsv from dakshina_dataset_v1.0
+  UR_AKSHARANTAR_DIR  (default /tmp/aksh)            — urd_{train,valid,test}.json from ai4bharat/Aksharantar
 """
 import argparse
 import collections
@@ -34,9 +39,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 
-CORE = "/tmp/ur_core.tsv"
-DAK = ["/tmp/dakshina/lex/ur.train.tsv", "/tmp/dakshina/lex/ur.dev.tsv", "/tmp/dakshina/lex/ur.test.tsv"]
-AKSH = ["/tmp/aksh/urd_train.json", "/tmp/aksh/urd_valid.json", "/tmp/aksh/urd_test.json"]
+CORE = os.environ.get("UR_CORE") or "/tmp/ur_core.tsv"
+DAK_DIR = os.environ.get("UR_DAKSHINA_DIR") or "/tmp/dakshina/lex"
+DAK = [f"{DAK_DIR}/ur.{s}.tsv" for s in ("train", "dev", "test")]
+AKSH_DIR = os.environ.get("UR_AKSHARANTAR_DIR") or "/tmp/aksh"
+AKSH = [f"{AKSH_DIR}/urd_{s}.json" for s in ("train", "valid", "test")]
 
 LONG_DIGRAPH = [("aa", "ɑː"), ("ee", "iː"), ("ii", "iː"), ("oo", "uː"), ("uu", "uː"),
                 ("ai", "ɛː"), ("au", "ɔː"), ("ay", "eː"), ("ou", "oː")]
