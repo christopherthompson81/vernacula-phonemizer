@@ -145,11 +145,13 @@ describe("nan text normalization", () => {
         // ⚠ THE ASSERTION NAMES THE LEAK, it does not test for "any Latin": IPA is WRITTEN in ASCII
         // letters, so a `[A-Za-z]` test here is meaningless (the same trap the Wu tests hit).
         // The old POJ output was *ɡɔ˧ hun˥ **chi˥*** — the literal string `chi`, unmapped.
-        expect(phonemize("1/5", "nan")).toBe("ɡɔ˧ hun˥ t͡ɕi˥ it̚˧˨");
         expect(phonemize("50%", "nan")).toBe("paʔ˥˩ hun˥ t͡ɕi˥ ɡɔ˨˩ t͡sap̚˥");
-        // ⚠ 1/5 reads the LITERARY ⟨it⟩, not the colloquial ⟨tsi̍t⟩ of a bare 一 — and that is exactly what
-        // the corpus writes: `Tē-kiû ê gō͘ hun chi it`.
-        expect(phonemize("1/5", "nan")).not.toBe(phonemize("五分之一", "nan"));
+        // ⚠ NO `a/b` FRACTION RULE — removed in review on the count. The corpus has exactly ONE digit/digit
+        // slash and it is `Fahrenheit 9/11`, a film title, which the rule read as "nine elevenths".
+        expect(normalizeMinNan("Fahrenheit 9/11")).toBe("Fahrenheit 9/11");
+        // …and the construction the corpus DOES write already reads with no rule at all: digits through the
+        // number path, ⟨hun chi⟩ through the POJ path.
+        expect(phonemize("7 hun chi 1", "nan")).not.toMatch(/chi/u);
     });
 
     test("⚠ °C in HAN running text — the shape the POJ corpus could never show", () => {

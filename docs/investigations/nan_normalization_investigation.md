@@ -300,3 +300,56 @@ That is a real gap and a separate one, with an attractive property worth recordi
 signal.** A Latin run that fails POJ conversion is almost certainly not POJ, so "unconvertible → route to the
 foreign reader" is a well-founded rule rather than a guess. It needs its own measurement (how many genuine
 POJ syllables would a strict converter reject?) and is not folded in here.
+
+---
+
+## Run 5 — 2026-08-09 22:40 — PR review (#791): a rule removed, and a justification that expired
+
+Two findings, and both are about the branch invalidating its own earlier reasoning.
+
+### ⚠ The fraction rule had ZERO attested instances and ONE false positive — removed
+
+A `a/b` → `b分之a` rule shipped in Run 1, on the strength of the corpus's attested ⟨hun chi⟩ construction.
+Reviewing it meant counting the slash, which Run 1 never did:
+
+```
+digit/digit instances in the retained corpus:  1
+                                               `Fahrenheit 9/11`   — a FILM TITLE
+```
+
+The rule read it as "nine elevenths". Zero genuine fractions, one misfire — playbook trap 9 demonstrating
+itself on the only instance available.
+
+**And the construction needs no rule at all.** This corpus writes fractions in words mixed with digits —
+`Tē-kiû ê gō͘ hun chi it` (1/5) and `sè-kài jîn-kháu ê 7 hun chi 1` (1/7) — and the second form already
+reads correctly as it stands: the digits go through the number path, ⟨hun chi⟩ through the POJ path. The
+layer had nothing to add. Removed, with the count recorded at the step so the decision is re-checkable.
+
+### ⚠ The Han-emission justification expired when Run 4 fixed the leak
+
+The header argued for emitting Han because *"the POJ spellings do not survive the converter"*. Run 4 fixed
+exactly that, so POJ and Han now read the same — `Liap-sī` = `攝氏`, `kàu` = `到`, `tiám` = `點`. **The leak
+is no longer the argument**, and leaving it stated would have been the third instance of the doc-drift the
+previous two PR reviews caught.
+
+Rewritten to the reasons that survive the fix: users write Han; **13 of the 16 words this layer emits are
+dict words** (攝氏 公里 公尺 公斤 美金 箍 每 秒 到 佮 點 度 平方), so each is one tone group with correct
+word-internal sandhi; and a Han word inside POJ prose still reads, so the choice costs the POJ corpus
+nothing.
+
+⚠ **With the residual cost stated rather than glossed:** 百分之 and 分之 are NOT dict words, so they are read
+character by character and get no word-internal sandhi, where the hyphenated POJ token `pah-hun-chi` would.
+Confined to those two words — and the one place the other choice would read better.
+
+### Probed and clean
+
+`ISBN 957-2053-07-8`, `1985/1986`, `10.1016/j.x`, `tē-2-tōa`, `1.2.3`, `2^7-1=127`, `5-ek` — all untouched.
+`0.5%` → 百分之 0點五 · `Tâi-oân 1,234 lâng` → de-grouped · `Bâng 3.4 chat` → 3點四.
+
+### Gates after the review fixes
+
+```
+corpus diff   DROP 91 → 41 · DIGIT/SLOT-GAP/RAWMARK/THROW 0 · 424/447 changed
+referee       95.3% folded / 97.4% symbol — unchanged
+suite         3,275 tests · tsc clean · review.ts --lang nan clean
+```

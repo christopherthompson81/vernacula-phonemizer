@@ -10,17 +10,28 @@
  * not what users type: real-world Taiwanese is written in HAN, and this engine's Han front end (MOE dict)
  * is built for exactly that. So the words are sourced from POJ prose and EMITTED IN HAN.
  *
- * ⚠ AND THAT IS NOT A STYLE CHOICE — THE POJ SPELLINGS WERE LEAKING ASCII. This layer first emitted the POJ
- * forms it had sourced, and two of the highest-traffic ones do not survive the POJ→IPA converter:
+ * ⚠ THE REASON FOR THAT SPLIT CHANGED UNDER IT, AND THE CORRECTED VERSION IS THE ONE THAT MATTERS. It was
+ * originally forced: the POJ spellings LEAKED ASCII, because the converter was Tâi-lô-only —
+ * `1/5` came out *ɡɔ˧ hun˥ **chi˥*** and `50%` *paʔ˥˩ hun˧ **chi˥***, the 之 syllable unmapped. That defect
+ * is now FIXED at its cause (`pojToTailo` in minnan.ts), so POJ and Han read the same:
+ * `Liap-sī` = `攝氏`, `kàu` = `到`, `tiám` = `點`. **The leak is no longer the argument.**
  *
- *     1/5  → ɡɔ˧ hun˥ **chi˥**        `hun chi` — the 之 syllable falls through unmapped
- *     50%  → paʔ˥˩ hun˧ **chi˥**      `pah-hun-chi`, the same syllable, in the percent word
+ * Han is still what is emitted, for reasons that survive the fix:
+ *   · USERS WRITE HAN. The corpus's POJ is nan.wikipedia's editorial convention; real Taiwanese is Han, and
+ *     the Han front end (MOE dict) is built for it. Emitting Han keeps the output coherent with that input.
+ *   · 13 OF THE 16 WORDS THIS LAYER EMITS ARE DICT WORDS — 攝氏 公里 公尺 公斤 美金 箍 每 秒 到 佮 點 度 平方 —
+ *     so each is one tone group and gets its word-internal sandhi. ⟨攝氏⟩ in particular reads *Liap-sī*, the
+ *     very Celsius term this corpus defines.
+ *   · A Han word inside POJ prose still reads: the tokenizer has its own Han group, so the choice costs the
+ *     POJ corpus nothing.
  *
- * The Han forms read cleanly through the MOE dict — 分之 → hun t͡ɕi, 百分之 → paʔ hun t͡ɕi — and ⟨攝氏⟩ is a
- * DICT WORD whose reading is *Liap-sī*, the very Celsius term this corpus defines. Emitting Han also costs
- * the POJ corpus nothing: the tokenizer has its own Han group, so a Han word inside POJ prose reads through
- * the same front end. Sourced in one orthography, emitted in the other, and the pairing is verified word by
- * word (到 = kàu, 點 = tiám, 箍 = kho͘, 每 = múi, 秒 = biáu/bió, 平方 = pêng-hong).
+ * ⚠ AND THE RESIDUAL COST, STATED RATHER THAN GLOSSED: 百分之 and 分之 are NOT dict words, so they are read
+ * character by character and get no word-internal sandhi, where the hyphenated POJ token `pah-hun-chi`
+ * would. It is confined to those two words, and the digits either side are separate tokens in both spellings
+ * anyway — but it is a real difference and the one place the other choice would read better.
+ *
+ * The POJ↔Han pairing is verified word by word (到 = kàu, 點 = tiám, 箍 = kho͘, 每 = múi, 秒 = biáu/bió,
+ * 平方 = pêng-hong), and the corpus confirms the method outright: `Kong-lí ta̍k tiám-cheng (公里逐點鐘)`.
  *
  * Nothing here is modelled on cmn/yue/wuu — those are Han-corpus languages whose evidence came from Han
  * prose. This one's evidence is romanized and its output is not.
@@ -155,16 +166,17 @@ export function normalizeMinNan(input: string): string {
     s = s.replace(/(\d+)\s*°\s*C(?![\p{sc=Latn}])/gu, "攝氏$1度");
     s = s.replace(/(\d+)\s*°\s*/gu, "$1度 ");
 
-    // ── 4. the fraction, in the Chinese order ────────────────────────────────────────────────────
-    // ⚠ `a/b` IS `b hun chi a` — the corpus writes it out twice: `Tē-kiû ê gō͘ hun chi it` is 1/5 ("of five
-    // parts, one") and `1-pah-bān-hun chi it` is one millionth. Digits are required on BOTH sides and
-    // nothing numeric may be adjacent, which keeps the corpus's DOI-ish and date slashes out.
-    // ⚠ AND `km/biáu` IS NOT A FRACTION: the denominator there is letters, so this cannot reach it — the
-    // rate path in step 5 does.
-    s = s.replace(
-        /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
-        (_m, num: string, den: string) => `${den}分之${num}`,
-    );
+    // ── 4. THE FRACTION RULE WAS REMOVED IN REVIEW, and the count is why ────────────────────────
+    // A `a/b` → `b分之a` rule shipped here first, on the strength of the corpus's attested ⟨hun chi⟩
+    // construction. Then the slash was counted: the retained corpus contains **exactly one** digit/digit
+    // instance and it is **`Fahrenheit 9/11`**, a film title — which the rule read as "nine elevenths".
+    // Zero genuine instances, one false positive.
+    //
+    // ⚠ AND THE CONSTRUCTION NEEDS NO RULE ANYWAY. This corpus writes its fractions in WORDS, mixed with
+    // digits: `Tē-kiû ê gō͘ hun chi it` (1/5) and `sè-kài jîn-kháu ê 7 hun chi 1` (1/7). The second form is
+    // already read correctly as it stands — the digits go through the number path and ⟨hun chi⟩ through the
+    // POJ path — so the layer has nothing to add. Playbook trap 9: a rule with no attested instance is a
+    // misfire generator, and this one demonstrated it on the only instance available.
 
     // ── 5. percent, currency, units, exponents and the ampersand, via the shared tier ────────────
     // AFTER de-grouping (the tier needs the number contiguous), AFTER the range rule (which has already
