@@ -47,14 +47,7 @@
  * pause. Here the argument is thinner than in those languages, because there is no corpus to count against.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-
-/** 0–9 as Han numerals, for the digit-by-digit readings (years, decimal fractions). Every one speaks. */
-const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
-
-/** A digit string read one digit at a time — what Chinese gives a year (一九九六) and a decimal's tail. */
-function spellDigits(s: string): string {
-    return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
-}
+import { degroupThousands, readDecimals, reorderFraction, spellYears } from "../../core/sinitic.ts";
 
 /**
  * ⚠ `unspacedScript`, because a sign in Han prose is flanked by Han and the tier's letter-boundary guard
@@ -85,47 +78,19 @@ export function normalizeJin(input: string): string {
     // *iəʔ˨ , liŋ˩˩*, "one … zero". Exactly-3-digit groups, which cannot touch a decimal.
     s = s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
 
-    // ── 2. a year before 年 ──────────────────────────────────────────────────────────────────────
-    // AFTER de-grouping, so no grouping comma sits inside the four digits. A year is read DIGIT BY DIGIT
-    // across Sinitic — `1996年` is 一九九六年, not the cardinal 一千九百九十六年, which is what the engine
-    // produced. ⚠ INFERENCE, and flagged as one: the incubator writes `到了1996年` and `到2007年` in digits
-    // and never spells a year out, so this is the pan-Chinese convention (corpus-verified in the cmn and wuu
-    // layers) applied to a language whose own corpus cannot confirm it.
-    // ⚠ THE 年 MUST BE FOUND ACROSS WHITESPACE — that exact detail silently defeated the same rule in cmn.
-    // ⚠ AND THE RANGE ARM COMES FIRST, because only the RIGHT endpoint of `1996-2007年` is followed by 年:
-    // left alone it read 一千九百九十六 二零零七年, mixing the cardinal and the digit reading inside one span —
-    // and the range rule in step 6 could never repair it, since by then the right endpoint is Han and no
-    // longer adjacent to the dash. The same shape bit the cmn, yue and wuu layers.
-    s = s.replace(
-        /(?<![\d.,])(\d{4})\s*[-–~〜]\s*(\d{4})(?![\d.,])(?=\s*年)/gu,
-        (_m, a: string, b: string) => `${spellDigits(a)}到${spellDigits(b)}`,
-    );
-    // ⚠ AND THE FORM WITH 年 ON BOTH ENDPOINTS — `1996年-2007年` — which must run BEFORE the single-year
-    // rule, not after: placed after, both endpoints are already Han and a digit pattern can never see them.
-    // Both years take the digit reading either way (each is followed by its own 年), so nothing is misread;
-    // what vanishes is the CONNECTIVE, leaving one date abutting another. wuu needed the same third arm.
-    // ⚠ 3-DIGIT YEARS ARE NOT CLAIMED anywhere here, which is the fleet's position: most short `N年` forms
-    // are DURATIONS (`48年歷史`) and nothing in the surface form separates them from a short year.
-    s = s.replace(
-        /(?<![\d.,])(\d{4})\s*年\s*[-–~〜]\s*(?=\d{4}\s*年)/gu,
-        (_m, a: string) => `${spellDigits(a)}年到`,
-    );
-    s = s.replace(/(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spellDigits(y));
-
+    // ── 2. years ─────────────────────────────────────────────────────────────────────────────────
+    // ⚠ ALL THREE ARMS AND THEIR ORDER LIVE IN `core/sinitic.ts` — range, then both-endpoints, then single.
+    // That order was rediscovered the hard way in yue, wuu and again here (`1996-2007年` read one span with
+    // two different readings), which is why it is shared rather than copied a fourth time.
+    // ⚠ INFERENCE, and flagged as one: the digit-by-digit year is the pan-Chinese convention, corpus-verified
+    // in the cmn and wuu layers, applied to a language whose own corpus (7/35 cells) cannot confirm it. The
+    // incubator writes `到了1996年` and `到2007年` in digits and never spells a year out.
+    s = spellYears(s, { rangeWord: "到" });
 
     // ── 3. the fraction, in the Chinese order ────────────────────────────────────────────────────
-    // ⚠ `a/b` IS `b分之a` — "of b parts, a" — and both 分 and 之 speak. Digits required on BOTH sides with
-    // nothing numeric adjacent, which keeps a date or a path out. BEFORE the percent tier, whose output
-    // contains 分之 itself and would otherwise be re-read by this rule.
-    // ⚠ NOT WHEN BOTH SIDES ARE FOUR DIGITS — `2020/2021` is an academic year or a season, not a fraction,
-    // and the rule read it as "2020 twenty-twenty-firsts". THIS IS THE THIRD TIME THAT SHAPE HAS SURFACED in
-    // this sweep: Javanese guarded it (`taun 1985/1986`) and Min Nan's whole fraction rule was removed when
-    // its only slash turned out to be `Fahrenheit 9/11`. Carried here on their evidence, since cjy has no
-    // corpus of its own to count either shape in.
-    s = s.replace(
-        /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
-        (m, num: string, den: string) => (num.length === 4 && den.length === 4 ? m : `${den}分之${num}`),
-    );
+    // ⚠ `a/b` IS `b分之a`, and the shared rule carries the guard three corpora paid for: FOUR DIGITS ON BOTH
+    // SIDES IS A YEAR PAIR (`2020/2021`), not a fraction. Both 分 and 之 SPEAK in this dict.
+    s = reorderFraction(s, "分之");
 
     // ── 4. percent, units, exponents and the ampersand, via the shared tier ──────────────────────
     // AFTER de-grouping (the tier needs the number contiguous) and BEFORE the decimal rule: the tier matches
@@ -134,15 +99,11 @@ export function normalizeJin(input: string): string {
     s = SYMBOLS(s);
 
     // ── 5. decimals ─────────────────────────────────────────────────────────────────────────────
-    // LAST of the number rules, for the reason above. ⚠ The separator is 點 and the FRACTIONAL part is read
-    // DIGIT BY DIGIT — 6.34 is 六點三四, never 六點三十四 — so it is written out as Han while the integer part
-    // stays a digit for the engine's own cardinal path.
-    // ⚠ `(?!\.\d)` KEEPS A DOTTED DESIGNATION OUT (`1.2.3`), a guard the Javanese and Min Nan layers both
-    // earned; with no corpus here it is carried on their evidence rather than this language's.
-    s = s.replace(
-        /(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)/gu,
-        (_m, int: string, frac: string) => `${int}點${spellDigits(frac)}`,
-    );
+    // LAST of the number rules: the tier matches ASCII digits next to a sign, and replacing the "." with 點
+    // would break that adjacency for a decimal percentage. The separator is a word and the FRACTIONAL PART
+    // IS READ DIGIT BY DIGIT — 六點三四, never 六點三十四 — and the shared rule carries the dotted-designation
+    // guard (`1.2.3`) that the jv layer earned.
+    s = readDecimals(s, "點");
 
     // ── 6. ranges ───────────────────────────────────────────────────────────────────────────────
     // LAST, so every rule that owns a dash has already consumed it. ⟨到⟩ is the incubator's own connective
