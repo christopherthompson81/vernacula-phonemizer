@@ -1,13 +1,14 @@
 // Pashto (ps) — Eastern Iranian, Perso-Arabic ABJAD (extended). wikipron pus (human) PRIMARY + kaikki pus (human)
 // SECONDARY. Like Urdu/Persian, SHORT vowels are usually unwritten → folded (unrecoverable): a~ə~i~u default-vowel
-// quality. Also folds: dental t̪~t / retroflex notation, r~ɻ, dialect ښ/ږ (ʂ~x, ʐ~ɡ), and length.
+// quality. Also folds: dental t̪~t / retroflex notation, r~ɻ, the NARROW→BROAD ښ/ږ notation (ʂ~ʃ, ʐ~ʒ), and length.
 //
 // ⚠ EVERY PASHTO REFEREE WE HAVE IS A MACROLANGUAGE AGGREGATE, AND THIS ENGINE IS ONE VARIETY. ISO 639-3 `pus`
 // is a macrolanguage — pbt (Southern/Kandahari), pbu (Northern/Peshawar), pst (Central/Waziri) — and wikipron,
 // kaikki and espeak-ng's ps_list are all aggregated over it. `pashto.ts` declares a single variety ("ښ/ږ =
 // Kandahari retroflex ʂ/ʐ"), so the umbrella marks a correct Southern reading wrong wherever the aggregate
-// happens to carry only a Northern one. The folds below already merge the part that CAN be merged (ʂ~ç~ʃ,
-// ʐ~ʒ); the Northern x (ښ) and ɡ/ʝ (ږ) cannot be, because that would also merge خ and ګ — real contrasts.
+// happens to carry only a Northern one. ⚠ AND THE FOLDS CANNOT PAPER OVER IT: merging the Northern x (ښ) or
+// ɡ (ږ) into our ʂ/ʐ would also merge خ and ګ, which are real phoneme contrasts. Only the NARROW→BROAD
+// notation folds are legitimate (ʂ→ʃ, ʐ→ʒ), and those are what remain below.
 //
 // So the primary DELIBERATELY STAYS THE AGGREGATE — it is the honest floor and must not be gamed — and the
 // variety slices sit beside it as secondaries, cut by tools/pashto/split_referee_by_dialect.py on the ښ/ږ
@@ -18,11 +19,16 @@
 // wikipron and 666 → 666 on kaikki, so the whole gain is denominator. And the engine scores HIGHEST on its own
 // variety — pbt 63.0% / pst 60.4% / pbu 58.1% — which is the second check that the slices are real.
 //
-// ⚠ AND THE FOLD BELOW LIMITS WHAT THESE SLICES CAN SHOW. It merges [ʂç]→ʃ and ʐ→ʒ, so the grader cannot
-// currently distinguish pbt from pst on the isogloss at all; only pbu (x/ɡ) is separable. Grading a
-// single-variety slice ought to DROP those two fold rules — the slice already guarantees the reference
-// answers in our variety, so ʂ should have to match ʂ. That needs per-referee folds, which the harness does
-// not have; recorded here rather than left to be rediscovered.
+// ⚠ THE AGGREGATE LEANS NORTHERN, WHICH IS THE REAL REASON THE UMBRELLA SCORE IS LOW. Counting the isogloss
+// across the primary: ښ is x(pbu) 138 · ʃ(broad) 99 · ʂ(pbt) 52 · ç(pst) 32, and ږ is ɡ(pbu) 151 · ʒ 84 ·
+// ʐ(pbt) 28 · ʝ(pst) 12. kaikki is the same shape (x 90 / ʂ 21, ɡ 119 / ʐ 17). So a SOUTHERN engine is being
+// graded against a reference that answers Northern roughly 3:1 on the diagnostic letters — the umbrella is
+// not a neutral average, it is mostly another variety.
+//
+// ⚠ AND CENTRAL IS BARELY ATTESTED AT ALL (ç ×32 / ʝ ×12 in wikipron, ×2 / ×0 in kaikki). `ps.*-pst.tsv`
+// therefore is NOT a usable Central referee: almost everything in it is variety-neutral material that every
+// slice carries. It is emitted for completeness and to make the absence visible; do not read a pst score as
+// evidence about Waziri.
 {
     "referees": [
         { "file": "ps.wikipron-pus-broad.tsv", "source": "wikipron pus_arab broad (human) — MACROLANGUAGE aggregate, the honest floor", "role": "primary" },
@@ -43,8 +49,8 @@
         { "pattern": "[əaiu]", "replace": "ə", "note": "SHORT vowel quality a~ə~i~u — UNRECOVERABLE from the undiacritized abjad (the deferred restoration subsystem)" },
         { "pattern": "ɪ", "replace": "ə", "note": "referee short ɪ = our default short vowel" },
         { "pattern": "ʊ", "replace": "ə", "note": "referee short ʊ = default short vowel" },
-        { "pattern": "[ʂç]", "replace": "ʃ", "note": "ښ = Kandahari ʂ ~ NE x ~ Central ç ~ ʃ — DIALECT variation (multi-dialect referee)" },
-        { "pattern": "ʐ", "replace": "ʒ", "note": "ږ = Kandahari ʐ ~ NE ɡ ~ Central ʝ ~ ʒ — dialect variation" },
+        { "pattern": "ʂ", "replace": "ʃ", "note": "ښ: our narrow Kandahari ʂ vs the referee's BROAD ʃ — a transcription-granularity fold, not a dialect one. ⚠ `ç` was REMOVED from this class on 2026-08-10: it is the CENTRAL/Waziri reflex, so folding it in merged pbt with pst — a dialect merge hiding inside a notation rule. MEASURED IMPACT: ZERO, on every referee. Central-only entries are rare (ç ×32 in wikipron, ×2 in kaikki) and the ones that exist also list a ʂ or broad-ʃ variant, which still credits us. Kept because it is right in principle and costs nothing, and stated as zero-impact so nobody re-derives it as a win." },
+        { "pattern": "ʐ", "replace": "ʒ", "note": "ږ: our narrow ʐ vs the referee's broad ʒ — notation only. Unlike the ښ rule above this one never merged dialects: the Northern ɡ and Central ʝ are untouched by it, so it stays as written." },
         { "pattern": "[ɻɽ]", "replace": "r", "note": "retroflex flap ⟨ړ⟩ ɻ ~ r notation" }
     ]
 }

@@ -16,7 +16,18 @@ for L in ur fa ps pa; do
     [ -f "$src" ] || { echo "skip $L: $src missing"; continue; }
     {
         echo "# Harakat restoration lexicon (COVERAGE layer) — undiacritized skeleton ⇥ our vocalization."
-        echo "# Source: g2p-inversion over wikipron + kaikki + (ur) Hindi→Urdu real spellings; CC-BY-SA."
+        if [ "$L" = "ps" ]; then
+            # ⚠ ps IS NOT CC-BY-SA LIKE ITS SIBLINGS. Its silver includes espeak-ng dictsource/ps_list
+            # (GPL-3.0), which supplies 89.6% of the rows, so the file is fenced GPL-3.0 per
+            # LICENSES/PROVENANCE.md §4 item 3. Emitting the sibling header here would mislabel it.
+            echo "# ⚠ LICENCE: GPL-3.0 (per-file fence) — NOT CC-BY-SA like the sibling riders."
+            echo "# Source: g2p-inversion over espeak-ng dictsource/ps_list (GPL-3.0, Hanif Rahman) + wikipron + kaikki."
+            echo "# 9,588 of 10,698 rows are reachable only from the GPL source. Only the SHORT-VOWEL PLACEMENT"
+            echo "# derives from it — espeak's phoneme strings are never copied; the consonants are our g2p's."
+            echo "# See src/languages/pashto/lexicon.PROVENANCE.md and LICENSES/PROVENANCE.md §4."
+        else
+            echo "# Source: g2p-inversion over wikipron + kaikki + (ur) Hindi→Urdu real spellings; CC-BY-SA."
+        fi
         echo "# Regenerate: tools/perso-arabic/invert_harakat.ts --lexicon → tools/perso-arabic/export_lexicons.sh"
         echo "# Non-identity rows only (a bare-skeleton row is a no-op — g2p already yields that IPA). See PROVENANCE.md."
         awk -F'\t' '$1!=$3{print $1"\t"$3}' "$src" | LC_ALL=C sort
