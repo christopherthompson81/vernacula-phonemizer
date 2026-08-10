@@ -257,3 +257,30 @@ describe("Hakka Pha̍k-fa-sṳ front end", () => {
         expect(getPhonemizer("hak").text("20°C").trim()).toBe("ŋiap̚˩ sz̩˥˧ ŋi˥˧ səp̚˥ tʰu˥˧");
     });
 });
+
+// ⚠ THE PFS READER MUST NOT SWALLOW ENGLISH, which is the risk of putting a permissive romanization reader
+// in front of the foreign path. These are the shapes that would show it.
+describe("Hakka Pha̍k-fa-sṳ — what it must NOT claim", () => {
+    test("an English sentence stays overwhelmingly English", () => {
+        const out = getPhonemizer("hak").text("Ramsey, S. Robert 1986. Languages of China. Princeton University Press");
+        // English stress marks are the tell: a Hakka reading has tone letters and no ˈ/ˌ.
+        expect(out).toMatch(/ˈ/u);
+        for (const w of ["Ramsey", "Robert", "Languages", "Princeton", "University", "Press"])
+            expect(phonemizePfs(w), w).toBe("");
+    });
+
+    test("a leading dash is not pulled into a Latin word", () => {
+        // `hostWordRun`'s `medialOnly` is what keeps this true: with the hyphen in the FIRST class, the dash
+        // of a detached year range would start a Latin run and be read as part of a word.
+        // ⚠ THE TWO ARE NOT EQUAL, and that is correct rather than a miss — normalize.ts claims the detached
+        // dash as a year range and reads it 至. What this pins is that NOTHING here goes to the English
+        // reader: no stress mark survives, so no fragment was mistaken for a Latin word.
+        const out = getPhonemizer("hak").text("1947年 -1998年").trim();
+        expect(out).not.toMatch(/[ˈˌ]/u);
+        expect(out).toContain(phonemizeWord("至"));
+    });
+
+    test("the Latin arm still hands Cyrillic and other scripts to the router", () => {
+        expect(getPhonemizer("hak").text("世界 Москва 好")).toContain("mɐskvˈa");
+    });
+});

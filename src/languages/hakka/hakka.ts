@@ -28,7 +28,10 @@ const DEF = loadManifest<HanDictDef & PfsDef>(import.meta.url, "hakka.jsonc");
  * at one — delivered three fragments and the reader could never see the WORD. The word is the unit that
  * carries tone sandhi, exactly as a multi-character key does on the Han side.
  */
-const PFS_RUN = hostWordRun(["Latin"], "-");
+// ⚠ `medialOnly`, NOT `extra` — the parameter exists for exactly this. `extra` puts the character in the
+// run's FIRST class too, so a run could BEGIN with a hyphen and swallow the dash of `1947年 -1998年` into a
+// Latin word. Medial-only keeps `Hak-kâ-ngìn` whole and leaves a leading dash where it was.
+const PFS_RUN = hostWordRun(["Latin"], "", "-");
 
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
