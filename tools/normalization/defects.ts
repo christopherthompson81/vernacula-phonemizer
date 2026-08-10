@@ -179,6 +179,41 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ln: {
+        // ⚠ NO ESPEAK LINGALA AT ALL and a 36-line referee, so every reason below is a corpus measurement
+        // over a fresh ln.wikipedia dump (23,678 paragraphs) and nothing else can check it. The refusals are
+        // argued at length in src/languages/lingala/normalize.ts's header.
+        minus: "measured: the digit-flanked dash in Lingala is a RANGE, not a minus — 1,424 hyphens and 162 "
+            + "en dashes sit between digits, and reading them gives year spans (`1965 - 1997 Mobutu Sese "
+            + "Seko`, a governor list), ISBNs and the ISO code `639-3`. Of 228 LEADING dashes, two are true "
+            + "negatives (`-273,15 °C`, `-1,602 189 × 10⁻¹⁹`); the rest are coordinates (`-4.2667`), a "
+            + "postcode (`B-3840`), a compound (`TB-8,000`) and open-ended spans (`19.. - 1960`). And no "
+            + "negative word exists: `molongola` ×1 is an ADJECTIVE in a physics gloss ('mokúmba ya "
+            + "molongola (negative \"-\")'), i.e. the wrong register. Ranges ARE read (kino, normalize.ts "
+            + "step 7). ⚠ OMITTING A MINUS INVERTS — this is a known-wrong silence, not an acceptable one",
+        plus: "measured: 16 digit-flanked `+`, and not one is arithmetic — TELEPHONE COUNTRY CODES (`+255`, "
+            + "`+872 – unassigned`, a dialling-plan article), two album titles (`Libala 1+1`, `1+1=1 (Remix "
+            + "Total)`) and a French book title (`Devenir Président en 50 + 20 jours`). Of 360 leading `+`, "
+            + "the bulk is that same dialling table plus infobox residue (`bato1= +30 000 000`). `kobakisa` "
+            + "×141 is the verb 'to add/increase' and is never digit-adjacent as an operator",
+        "plus-minus": "measured: zero ± in 23,678 paragraphs",
+        equals: "measured: 6 digit-flanked `=` — an album title (`1+1=1`), a population table (`2004 = "
+            + "13197`) and spectroscopy (`v1 = 3650 cm−1`). The bare total of 870 is dominated by WIKI "
+            + "SECTION HEADINGS (`== Bomoyi ==`), so reading the sign would say the equals word twice on "
+            + "every heading. `ezalí` is the ordinary copula, not an arithmetic reading — the corpus writes "
+            + "its own equalities with it (`Falánga ya Swisi mókó ezalí 100 centimes`)",
+        "less-than": "measured: `<` occurs once in the whole corpus and 0 times between digits",
+        "greater-than": "measured: `>` occurs 27 times and 0 of them between digits — all markup residue",
+        times: "measured: `×` occurs 5 times in total. Three are SCIENTIFIC NOTATION (`9,109 53 × 10⁻³¹ "
+            + "kg`), which this layer reads for no language; one is a band name (Wenge Musica 4×4) and one "
+            + "a French relay leg (`le relais du 4 × 100 m`). Zero arithmetic instances, and no multiply "
+            + "word is attested",
+        divide: "measured: zero ÷ in 23,678 paragraphs",
+        exponent: "measured: the SQUARED UNIT is read (`km²`/`km2` → `kilomɛtrɛ-kare`, the word attested ×11 "
+            + "hyphenated onto its noun), but a BARE exponent has no reading: all 24 superscripts are "
+            + "scientific-notation exponents in two physics articles (`10⁻¹⁹`, `10⁻²⁷`, `10⁻³¹`) plus one "
+            + "edition marker (`Kinsásá, 2007³`), and no power word occurs anywhere in the corpus",
+    },
     tl: {
         // Every reason is a reading of the mined artifact's actual instances (259 utterances) — the classes
         // are physics/科 encyclopedia copy, not running Tagalog, and no reading word is attested anywhere.
@@ -672,6 +707,58 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         minus: ["-2, 0, +4", "+4, +6", "50'-114", "5'-25", "562-ngièn -560", "1906 -1979",
             "303-ngièn -349", "319-ngièn -351", "384-ngièn -407",
             "chṳ́ -yû", "chṳ́ -yu", "sṳ́ -yung", "Chhṳ́ -ngoi"],
+    },
+    ln: {
+        // THE BARE DEGREE SIGN, which is not the temperature one. ln/normalize.ts step 6 reads `25 °C` as
+        // `Celsius 25` — the SCALE NAME, since `Celsius`/`kelvin` are attested and no Lingala word for
+        // *degree* is (`degré` ×1 is French). Every instance below is the sign WITHOUT a scale letter, and
+        // there are exactly three kinds, none of them a temperature:
+        //   · GEOGRAPHIC COORDINATES — `4°16′S`, `15°17′E`, `04°48′S`, `11°51′E`, `77° 02’ 12’’ W`, and the
+        //     decimal-degree pair a geohack template emits (`4.800°S 11.850°E`).
+        //   · GEOMETRY ANGLES in the maths articles — the sum of a triangle's angles (`180°`) and the right
+        //     angle (`90°`, ×3 across the perpendicularity and right-triangle definitions).
+        //   · THE FRENCH NUMERO SIGN, which is a different character's job done by this one: `Mobéko
+        //     n°011/2002` (a statute number) and `n° 33-34` / `n° 68-70` (journal issues, two citations in
+        //     the same reference list).
+        //     Reading it as a degree would be worse than silence.
+        // Listed by instance rather than silencing the class so a `°C` regression stays visible — that IS read.
+        degree: ["4°16", "4°22", "15°17", "77°", "04°48", "11°51", "4.800°S", "11.850°E",
+            "180°", "90°", "n°011", "n° 33", "n° 68"],
+        // SCIENTIFIC NOTATION and BIBLIOGRAPHIC EDITION NUMBERS — neither is a unit exponent, and unit
+        // exponents are what this layer reads (`km²` → kilomɛtrɛ-kare, ln/normalize.ts step 5, sourced from
+        // the corpus's own `kilomɛtrɛ-kare` ×11).
+        //   · `10⁻¹⁹`, `10⁻³¹`, `10⁻²⁷` — the electron charge, the electron mass and the neutron mass, in the
+        //     physics articles. A mantissa power is a different thing from a squared unit and no language in
+        //     the fleet reads it.
+        //   · `2007³` and `2007²` — the CONTINENTAL EDITION CONVENTION in a reference list ("3rd ed., 2007"),
+        //     where the superscript numbers the edition, not a power of the year.
+        //   · `m³/s` — a river's discharge. The shared unit tier offers a numerator exponent OR a rate
+        //     denominator, not both, so `m³` composes and the `/s` is left; the same one-instance tier
+        //     limitation jv records. Widening it wants its own fleet measurement.
+        exponent: ["10⁻¹⁹", "10⁻³¹", "10⁻²⁷", "2007³", "2007²", "m³/s"],
+        // THE SIGN IS NAMED IN ITS OWN SENTENCE in every case — the drop is redundant, not lossy, and the
+        // contribution test cannot see it because the name the corpus writes is not the word this layer says.
+        //   · `Bozitó Sterling (lingɛlɛ́sa: Pound Sterling, £) ezalí mbóngo ya Ingɛlɛ́tɛlɛ` and
+        //     `Euro (€) ezalí mbɔ́ngɔ ya Erópa` — DEFINITIONAL GLOSSES, the sign parenthesised beside the
+        //     currency's spelled-out name. Only `dolare` is declared (×16, sense-checked); the pound and the
+        //     euro have no attested Lingala name, so naming them here would be an invention on top of a
+        //     sentence that already says which currency it means.
+        //   · `badollar 45$ tii na badollar 10$` — the DOLLAR, named immediately before the figure. The
+        //     layer's `NAMED` lookbehind (step 9) is what suppresses this on purpose: emitting the word would
+        //     read the currency twice.
+        //   · `ndako na €1` sits inside a French-language passage about a French city.
+        currency: ["£", "€", "45$", "10$"],
+        // LUA MODULE SOURCE quoted verbatim into the wiki (`local zehner = (zahl - zahl % 10 ) / 10;`), where
+        // `%` is the MODULO OPERATOR. A percent word here would read a line of code as a proportion.
+        percent: ["zahl % 10"],
+        // ⚠ NO `minus` KEY, DELIBERATELY. Six lines still report, and all six are GENUINE negatives: two
+        // negative latitudes (`-4.2667`, `-4.800`), the electron charge (`-1,602 189`), absolute zero
+        // (`-273,15 °C`), and two BCE years (`mobú -753`, `mobú -3300`). Lingala has no attested word for
+        // them — the corpus's only candidate, `molongola`, is an adjective describing a charge, not what a
+        // reader says before a number — so the sign is silent and the silence INVERTS the value. Accepting
+        // it here would turn a known-wrong reading into a green gate; the header of ln/normalize.ts records
+        // the same refusal. The two `%`-flanked hyphens that used to report alongside them were never
+        // negatives at all (`20%-40%`, `7.5%-10%`) and are now read as spans, step 7.
     },
     wuu: {
         // A SUPERSCRIPT IN A WU ARTICLE IS OFTEN A CHAO TONE NUMBER, NOT A POWER — the language's own

@@ -18,6 +18,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { normalizeLingala } from "./normalize.ts";
 
 interface LingalaDef {
     consonants: Record<string, string>;
@@ -113,9 +114,12 @@ const TOKEN = /([a-zɛɔ̀-ͯ]+)|(\d+)|([.?!,;:])/giu;
 export function createLingala(): Phonemizer {
     return {
         text(input: string): string {
+            // NORMALIZATION runs first (normalize.ts), on NFC text — it matches literals like `bôngó` and
+            // `T.B.`, which only exist as such before the NFD below splits their accents off. It is pure
+            // text→text, so everything it emits is then read by the ordinary word and number paths.
             // NFD so precomposed accented vowels (á í ǒ …) become base+combining and are captured by TOKEN's
             // combining-mark range (else the accent splits the word and the vowel is dropped).
-            return assembleClauses(input.normalize("NFD"), TOKEN, (m, sink) => {
+            return assembleClauses(normalizeLingala(input).normalize("NFD"), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) {
                     const num = Number(m[2]);
