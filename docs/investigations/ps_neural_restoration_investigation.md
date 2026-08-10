@@ -296,3 +296,40 @@ reproducing its direction (69.5% there, 60.0% here — the kaikki slice is small
   assignment and only 62 carry ښ/ږ, so the variety split accounts for the largest identified class and not
   the whole of it. The rest (ف→p, ځ→z, diphthong and epenthesis variation) is probably the same phenomenon
   and has not been counted. Recorded as open rather than claimed.
+
+## Run 6 — 2026-08-10 — the catalogue now says what is true: `pus` is not an implementable language
+
+Run 5 established the category error and worked around it with a variety-consistent referee. The owner's
+call went further, and is the right one: **you cannot say "these phonemes are correct for this Pashto
+orthography" without naming a variety**, so a measured implementation of `pus` cannot exist and the catalogue
+must stop claiming one.
+
+```
+ps    Pashto (macrolanguage)          unimplemented   macrolanguage umbrella   (no verdict)
+pbt   Pashto (Southern / Kandahari)   implemented     🟡   normalization done
+pbu   Pashto (Northern / Peshawar)    unimplemented   data scarcity
+pst   Pashto (Central / Waziri)       unimplemented   data scarcity
+```
+
+This is the treatment every other macrolanguage in the tree already gets — Arabic→dialects, Chinese→
+cmn/yue/…, Kanuri→knc — and Pashto was the last one carried as a single code with an umbrella verdict.
+
+- **`pbt` is now a registered code**, resolving to the same engine as `ps` (`registry.ts`, the `ms`/`zsm`
+  fall-through shape). The verdict, the referee counts and the espeak/normalization facts moved to that row.
+- **`ps` keeps resolving at runtime**, because it is what callers type. That is a labelled approximation, not
+  a claim — the umbrella row carries no verdict and no normalization.
+- **`pbu` and `pst` are blocked on a referee, not on rules.** The Northern delta is ~2 lines (ښ→x, ږ→ɡ) and
+  cannot be folded into the Southern engine, because that would merge خ and ګ. What is missing is anything to
+  verify it against: the revisit trigger is a Northern-consistent slice, cut from the same aggregate the way
+  `build_pbt_referee.py` cuts the Southern one by inverting the diagnostic.
+
+⚠ **A GATE CAUGHT THE INCOMPLETE CHANGE, which is worth recording.** Adding `pbt` to the registry failed
+`test/manifest-script.test.ts` — *"no script declaration: pbt"*. Every registered code must declare a script
+either in a manifest or in `MANIFESTLESS_SCRIPTS`, and an alias has no manifest of its own. The check exists
+because the field has no runtime consumer that would fail on a missing entry, so nothing else would have
+noticed. Added to the manifest-less table beside `ms`/`zsm`.
+
+**What is still open**, and is not resolved by relabelling: the 396 wikipron words unreachable by any vowel
+assignment are only 62 accounted for by ښ/ږ. The rest (ف→p, ځ→z, diphthong and epenthesis variation) is
+plausibly the same variety phenomenon and has not been counted. Counting it is what would tell us whether
+`pbt` at 60.0% is near its true ceiling or still has engine work in it.
