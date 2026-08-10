@@ -141,7 +141,7 @@ shared layer is right for each dialect is the same question `served_by` exists t
 tools/normalization/review.ts --lang <code>` is what says whether that layer has outstanding defects, and
 `tools/normalization/coverage.ts` gives the fleet matrix.
 
-Current state: **90 done, 17 inherited, 84 implemented-but-unnormalized** (105 rows carry no layer, but 21 of
+Current state: **91 done, 17 inherited, 83 implemented-but-unnormalized** (105 rows carry no layer, but 21 of
 those are `rejected`/`unimplemented` and are not candidates — the planning query filters on
 `decision='implemented'`, so 84 is the number to plan from).
 
