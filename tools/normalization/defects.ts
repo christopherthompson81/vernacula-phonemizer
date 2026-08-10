@@ -109,6 +109,18 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * gate. Name the work, the headword and the sense.
  */
 export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    cjy: {
+        "百分之": "⚠ THERE IS NO JIN CORPUS TO ATTEST ANYTHING IN — no cjy.wikipedia exists, and the "
+            + "Wikimedia Incubator's Wp/cjy holds 3,060 Han characters whose artifact covers 7 of 35 cells "
+            + "with `percent` among the EMPTY ones. So this rests on two other legs. (1) IT SPEAKS, which is "
+            + "the gate that matters for this engine: 百 分 之 are all in the shipped Wiktionary/kaikki "
+            + "Taiyuan dict, so 百分之 reads pai˥˧ fəŋ˩˩ t͡sz̩˩˩ — where ⟨度⟩ and ⟨摄氏⟩ are SILENT and were "
+            + "refused for exactly that reason. (2) IT IS THE PAN-SINITIC WRITTEN FORM, not a dialect "
+            + "vocabulary choice: 百分之 is corpus-verified in the cmn, yue and wuu layers already shipped, "
+            + "each against its own corpus, and Jin is written in the same Han orthography. The genuinely "
+            + "dialectal choices in this layer — the ampersand and the range word — were NOT inferred this "
+            + "way; they come from the incubator text (和 ×16 coordinating, 到 ×5).",
+    },
     nan: {
         "百分之": "⚠ THE GATE CANNOT SEE THIS WORD BECAUSE THE CORPUS IS IN THE OTHER ORTHOGRAPHY. "
             + "nan.wikipedia is written in POJ, so a HAN spelling scores zero there by construction — and "
@@ -278,6 +290,33 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     nl: {
         minus: "measured: every `-\\d` in nl_nl is a score or a range, so the rule would have turned 14 scores "
             + "into negatives — see dutch/normalize.ts step 9",
+    },
+    cjy: {
+        // ⚠ cjy HAS NO CORPUS — there is no cjy.wikipedia, and the Wikimedia Incubator's Wp/cjy is 3,060 Han
+        // characters whose artifact covers 7 of 35 cells. So these reasons are NOT corpus measurements like
+        // every other entry in this table. They are something rarer and, for once, stronger: a CHECK AGAINST
+        // THE SHIPPED DICT, which decides whether a word can be spoken at all. The shared Han-dict engine
+        // skips an uncovered character SILENTLY, so a rule using one of these would delete the word instead
+        // of mispronouncing it — strictly worse than leaving the sign unread, which at least leaves a
+        // RAWMARK the scan can see.
+        degrees: "checked, not measured: ⟨度⟩ is SILENT in this dict, and so are ⟨摄氏⟩/⟨攝氏⟩. `20°C` would "
+            + "lose the degree WORD as well as the sign. The corpus cannot help — its `degrees` cell is EMPTY",
+        equals: "checked: ⟨等于⟩ emits ONE syllable — 于 is silent — so it would say the first half of the "
+            + "word and drop the second. ⟨等於⟩ likewise",
+        "less-than": "checked: the same half-word problem as ⟨等于⟩, on ⟨小于⟩",
+        "greater-than": "checked: the same half-word problem, on ⟨大于⟩",
+        divide: "checked: ⟨除以⟩ needs 以, and no reading is available for the pair; the artifact's "
+            + "`arithmetic` cell is EMPTY so there is nothing to measure either",
+        times: "checked: ⟨乘⟩ speaks but ⟨乘以⟩ does not, and a bare 乘 in the dimension slot is an inference "
+            + "no Jin text available can support",
+        plus: "checked: ⟨加⟩ speaks, but ⟨减⟩ is SILENT — so the layer could read a plus and not a minus, "
+            + "which is a worse state than reading neither. Deferred as a pair",
+        minus: "checked: ⟨负⟩ speaks and ⟨减⟩ is silent (see plus). And with an EMPTY `signed-number` cell "
+            + "there is no evidence about which shapes a Jin corpus would even contain",
+        "plus-minus": "checked: no reading available, and the cell is EMPTY",
+        currency: "⚠ NOT a dict problem — ⟨元⟩ speaks. It is a SENSE problem: all four incubator instances "
+            + "are 維基元 (Meta-Wiki) and the personal names 元好問 / 柳宗元, never money. No Jin currency word "
+            + "is attested in any source available, so the sign stays unread",
     },
     nan: {
         // ⚠ EVERY REASON HERE IS A CORPUS MEASUREMENT. nan HAS a referee (wikipron Hokkien), but it is
@@ -472,6 +511,15 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
     // English set, so these recur across the fleet; the languages listed here are simply the ones that write
     // a SPACE before the hyphen. Every other language writes it closed and the
     // `(?<![\p{L}\p{M}\p{Nd}])` guard already handles it.
+    cjy: {
+        // ⚠ A SUPERSCRIPT IN A JIN ARTICLE IS A ROMANIZATION TONE NUMBER, NOT A POWER — the incubator writes
+        // Jin romanized with them: `Hai²-di²-lau¹ si³ Zung¹-gueh⁴ dieh⁴ hue²-gue¹-tsi² ing²-seh⁵ gung¹-si¹`.
+        // ⚠ THIS IS THE THIRD SINITIC CORPUS TO PRODUCE THAT HAZARD FROM A DIFFERENT SOURCE: wuu from Chao
+        // tone letters in its own phonology sections, nan from jyutping quoted in a Hong Kong article, and
+        // now cjy from its own romanization. Worth expecting in gan/hak/hsn when they are treated.
+        exponent: ["Hai²", "di²", "lau¹", "si³", "Zung¹", "gueh⁴", "dieh⁴", "hue²", "gue¹", "tsi²",
+            "ing²", "seh⁵", "gung¹", "si¹"],
+    },
     nan: {
         // FOREIGN ITERATION MARKS inside QUOTED JAPANESE AND THAI, which Min Nan does not use: the Japanese
         // 々 in names (`千々岩 助太郎`, `佐々木舜一`, `天々座理世`, `東方妖々夢`), the hiragana ゝ in a book

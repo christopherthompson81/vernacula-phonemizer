@@ -81,7 +81,11 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // an ISBN and two genuine negatives no Min Nan word can read. Its exponent entry records the same
         // hazard Wu's does from a different source — a superscript in a nan article is often a ROMANIZATION
         // TONE NUMBER (jyutping `hoeng¹ gong² dak⁶`), not a power.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "jv", "km", "kn", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
+        // ⚠ cjy's single entry is the THIRD SINITIC CORPUS to produce the same hazard from a different
+        // source: a superscript is a ROMANIZATION TONE NUMBER, not a power. wuu got it from Chao tone
+        // letters in its own phonology sections, nan from jyutping quoted in a Hong Kong article, and cjy
+        // from its own romanization (`Hai²-di²-lau¹ si³ Zung¹-gueh⁴`). Expect it in gan/hak/hsn too.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hi", "jv", "km", "kn", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../src/index.ts";
+import { normalizeJin } from "../src/languages/jin/normalize.ts";
 
 import { phonemizeWord } from "../src/languages/jin/jin.ts";
 import { getPhonemizer } from "../src/registry.ts";
@@ -36,5 +38,64 @@ describe("Jin Chinese (Taiyuan) canonical IPA", () => {
 
     test("clause punctuation becomes a pause", () => {
         expect(getPhonemizer("cjy").text("馬。").trim()).toBe("ma˥˧ .");
+    });
+});
+
+describe("cjy text normalization", () => {
+    // ⚠ THIS LANGUAGE HAS NO CORPUS. There is no cjy.wikipedia and no FLEURS; the only Jin text that exists
+    // is the Wikimedia Incubator's Wp/cjy (3,060 Han characters, artifact covers 7/35 cells). So the rules
+    // rest on the SHIPPED DICT — which decides whether a word can be spoken at all — and on that thin text.
+    // Evidence and every refusal: docs/investigations/cjy_normalization_investigation.md.
+
+    test("⚠ THE DICT IS THE GATE: an uncovered character is SILENT, not mispronounced", () => {
+        // This is why the degree, 两-classifier and relational-sign rules are all refused: the words vanish.
+        for (const w of ["度", "摄氏", "攝氏", "两", "兩"]) expect(phonemize(w, "cjy"), w).toBe("");
+        // ⟨等于⟩ is worse than silent — it emits ONE syllable and drops 于, so it would say half the word.
+        expect(phonemize("等于", "cjy").split(" ")).toHaveLength(1);
+        // …and everything this layer DOES emit speaks.
+        for (const w of ["百分之", "分之", "點", "到", "和", "公里", "公斤", "平方", "立方", "零", "九"])
+            expect(phonemize(w, "cjy"), w).not.toBe("");
+    });
+
+    test("the grouping comma destroys the value; the year is digit-by-digit", () => {
+        // `1,000` read *iəʔ˨ , liŋ˩˩* — "one … zero", the value gone.
+        expect(normalizeJin("1,000")).toBe("1000");
+        expect(normalizeJin("1996年")).toBe("一九九六年");
+        // ⚠ THE RANGE ARM MUST COME FIRST: only the RIGHT endpoint sees 年, so left alone `1996-2007年`
+        // mixed the cardinal and the digit reading, and step 6 could never repair it.
+        expect(normalizeJin("1996-2007年")).toBe("一九九六到二零零七年");
+        // ⚠ …and the form with 年 on BOTH endpoints, which must run BEFORE the single-year rule: placed
+        // after, both endpoints are already Han and a digit pattern can never see them.
+        expect(normalizeJin("1996年-2007年")).toBe("一九九六年到二零零七年");
+        // ⚠ A SLASHED YEAR PAIR IS NOT A FRACTION — the third time this shape has surfaced in the sweep
+        // (jv guarded it; nan's whole fraction rule was removed when its only slash was `Fahrenheit 9/11`).
+        expect(normalizeJin("2020/2021")).toBe("2020/2021");
+        expect(normalizeJin("1/5")).toBe("5分之1");
+        // 3-digit years keep the cardinal — the fleet's position, since `48年歷史` is a DURATION.
+        expect(normalizeJin("公元前221年")).toBe("公元前221年");
+    });
+
+    test("percent, fraction, decimal and the ampersand", () => {
+        expect(phonemize("50%", "cjy")).toBe(phonemize("百分之五十", "cjy"));
+        expect(normalizeJin("1/5")).toBe("5分之1");
+        expect(normalizeJin("3.5")).toBe("3點五");
+        // ⟨和⟩ ×16 in the incubator text and coordinating — `吳語、粵語和閩南語`. ⟨跟⟩ ×5 is the alternative.
+        expect(phonemize("A&B", "cjy")).toContain(phonemize("和", "cjy"));
+    });
+
+    test("⚠ a designation is not a range, and a one-character lookbehind cannot tell", () => {
+        // `ISO 8859-1` puts a SPACE between the identifier and the digits, so the guard saw the space and
+        // read it as "8859 到 1". Checked over the preceding characters instead.
+        expect(normalizeJin("ISO 8859-1")).toBe("ISO 8859-1");
+        expect(normalizeJin("2-3")).toBe("2到3");
+        expect(normalizeJin("第2-3章")).toBe("第2到3章");
+    });
+
+    test("⚠ the refused classes stay refused — because the words are SILENT, not because of taste", () => {
+        // Emitting 度 would delete the word as well as the sign; the raw sign at least survives as a RAWMARK.
+        expect(normalizeJin("20°C")).toBe("20°C");
+        expect(normalizeJin("2个")).toBe("2个"); // no 两 rule — 两/兩 are silent
+        expect(normalizeJin("x = y")).toBe("x = y");
+        expect(normalizeJin("$500")).toBe("$500"); // 元 speaks but is never money in the available text
     });
 });
