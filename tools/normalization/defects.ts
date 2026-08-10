@@ -266,6 +266,30 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         minus: "measured: every `-\\d` in nl_nl is a score or a range, so the rule would have turned 14 scores "
             + "into negatives — see dutch/normalize.ts step 9",
     },
+    jv: {
+        minus: "measured: the corpus's ONE true negative is `at –45 °C` inside an ENGLISH bibliographic "
+            + "citation title, and no Javanese negative-number word is attested in the corpus or on "
+            + "jv.wikipedia. Every other digit-adjacent dash is a RANGE (read as ⟨nganti⟩, normalize.ts "
+            + "step 7), a COORDINATE range (step 4b), a citation PAGE range (`157-167 doi:`), a DOI's own "
+            + "`0301-0104`, or a botanical parenthetical extreme (`10-15(-17) cm`)",
+        // ⚠ jv HAS referees (kaikki jv + Aksara), but they are word→IPA: they can check how a word is
+        // pronounced, never whether it is the right word for a SIGN. So every reason below is a corpus
+        // measurement over the mined artifact (jv.wikipedia dump).
+        equals: "measured: 34 `=`, and NOT ONE is arithmetic. They are DEFINITIONAL GLOSSES — a formula "
+            + "being explained (`Rumus: x + y = z. X = pengalaman, y = renungan, z = hasilipun`), a "
+            + "register equivalence (`dèwèkè=dhékné (ngoko)`, `piambeké=piyambekipun`) and a cross-language "
+            + "gloss (`tembung rika (jw = kowé, ind = kamu)`). No equals word is attested, and reading one "
+            + "would speak it aloud in every dictionary-style line the wiki has",
+        plus: "measured: 7 `+`, and the digit-adjacent ones are not operators — `+/- 327.866` is an "
+            + "APPROXIMATION (claimed as ⟨kurang luwih⟩ in normalize.ts step 5b, so the sign IS read there) "
+            + "and the rest are MUSICAL NOTATION, the slendro/pelog scale degrees `[C-D E+ G A]` and "
+            + "`[C+ D E-F# G# A B]`, where a `+` marks a raised pitch",
+        "less-than": "measured: zero `<` in the artifact",
+        "greater-than": "measured: zero `>` in the artifact",
+        divide: "measured: zero `÷` in the artifact",
+        // ⚠ NOT LISTED, deliberately: `±` and `×` ARE read — ± as ⟨kurang luwih⟩ (step 5b) and × as
+        // ⟨kaping⟩ through the tier — so a drop of either is a real regression and must keep failing.
+    },
     wuu: {
         // ⚠ wuu HAS NO REFEREE (the whole modern Wu ecosystem derives from the one Wugniu tradition, so any
         // automated referee is circular), and no FLEURS corpus. Every count below is over the mined
@@ -408,6 +432,39 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
     // English set, so these recur across the fleet; the languages listed here are simply the ones that write
     // a SPACE before the hyphen. Every other language writes it closed and the
     // `(?<![\p{L}\p{M}\p{Nd}])` guard already handles it.
+    jv: {
+        // BARE POWERS OF TEN in astronomy infoboxes — SCIENTIFIC NOTATION (`108,2 × 10⁶ km`,
+        // `2,875 × 10⁹ km`, the planetary orbital radii), which this layer reads for NO language: it reads
+        // UNIT exponents (km² → kilomèter persegi) and mantissa notation is a different thing. Listed by
+        // instance rather than silencing the class, so a km²/cm³ regression stays visible — both ARE read.
+        // …and `mil³`, cubic MILES in a parenthetical unit gloss (`1,4 triliun kilomèter kubik (330 juta
+        // mil³)`). The metric units are declared and read; the imperial one is not, and one instance inside
+        // a conversion aside does not justify adding a short, collision-prone `mil` key.
+        // `--- jiwa/km²` is INFOBOX DEBRIS — a template whose value never filled in ("Kapadhetan: +/- ---
+        // jiwa/km²"), so the density rule finds no number to key on. `m³/s` is a tier limitation rather than
+        // a data gap: its unit pattern offers a numerator EXPONENT and a rate DENOMINATOR as alternatives,
+        // not together, so `1 m³/s` composes the m³ and leaves the `/s`. One instance, in a unit-conversion
+        // aside; widening the shared tier for it would want its own fleet measurement.
+        exponent: ["10⁶", "10⁹", "sa-km²", "mil³", "ft³", "--- jiwa/km²", "m³/s"],
+        // PARENTHETICAL EXTREMES in a botanical description, not negatives: `Godhong awangun jorong nganti
+        // lansét, 10-15(-17) cm × 3-4,5(-12,5) cm` — the flora convention for "usually 10–15, rarely to 17".
+        // A minus rule would read a leaf measurement as arithmetic.
+        // …plus the corpus's ONE TRUE NEGATIVE, which is inside an ENGLISH bibliographic citation: "a
+        // thermodynamic singularity at –45 °C, The Journal of Chemical Physics". No Javanese negative-number
+        // word is attested anywhere in the corpus or on jv.wikipedia, and the sign here sits in foreign
+        // text; inventing one to read a reference title would be the wrong trade.
+        minus: ["(-17)", "(-12,5)", "(-1", "–45"],
+        // A MIXED FRACTION before the degree sign — `2 garis balik (23 1/2°LU-23 1/2° LS)`, the tropics at
+        // 23½°. Step 4 turns the `1/2` into ⟨setengah⟩, which leaves a WORD rather than a digit before the
+        // sign, and the degree rule requires a digit. One instance, and the alternative — letting the degree
+        // rule fire on a word — would misread every other shape.
+        degree: ["setengah°", "1/2°"],
+        // The ⟨×⟩ of a BOTANICAL DIMENSION whose left operand is a unit word, not a digit — `10-15(-17) cm
+        // × 3-4,5(-12,5) cm`. The tier's multiply composes number×number, and the sign IS read in that
+        // shape; this one instance sits after `cm`. Listed rather than widening the tier, since a
+        // `word × number` rule has exactly one attested instance to justify it (trap 9).
+        "math-sign": ["cm × 3"],
+    },
     wuu: {
         // A SUPERSCRIPT IN A WU ARTICLE IS OFTEN A CHAO TONE NUMBER, NOT A POWER — the language's own
         // phonology is written with them, and wuu.wikipedia does it constantly: `khan³⁵-ban⁵⁵-kae³¹`,

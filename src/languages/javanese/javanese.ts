@@ -207,6 +207,8 @@ function numberToText(n: number): string {
 
 // Latin word · Aksara Jawa word run (letters+signs, U+A980–U+A9C0) · Aksara digits · ASCII digits · Aksara pada
 // punctuation (U+A9C1–U+A9CE, U+A9DE–U+A9DF) · ASCII punctuation.
+import { normalizeJavanese } from "./normalize.ts";
+
 const TOKEN = new RegExp(
     `(${hostWordRun(["Latin"])})|([\\u{A980}-\\u{A9C0}]+)|([\\u{A9D0}-\\u{A9D9}]+)|(\\d+)|([\\u{A9C1}-\\u{A9CE}\\u{A9DE}\\u{A9DF}])|([.?!,;:])`,
     "gu",
@@ -230,6 +232,10 @@ function emitNumber(n: number, sink: { emit: (s: string) => void }): void {
 
 class JavanesePhonemizer implements Phonemizer {
     text(input: string): string {
+        // Everything that is not yet a pronounceable word → words the pipeline already speaks. See
+        // normalize.ts, whose steps are ordered around the fact that a DOT in Javanese is a thousands
+        // separator, a decimal point and a clock separator depending on context.
+        input = normalizeJavanese(input);
         return assembleClauses(input, TOKEN, (m, sink) => {
             // ⚠ Only the LATIN group is nativised. Group 2 is the Aksara Jawa run — this language's own
             // script, where there is no inventory question to ask.

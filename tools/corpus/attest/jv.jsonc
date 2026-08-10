@@ -1,0 +1,306 @@
+// WIKIPEDIA WORD ATTESTATION — jv. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "jv",
+    "wiki": "jv.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "tévé",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "tivi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 71,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…carita, drama, lan sapanunggalane. Bisa pentas ana radhio, tivi, utawa filem, wong lanang kang pentas ing acara utawa prast…",
+                "…Trans7 (sadurungé jenengé TV7) yaiku salah sawijiné stasiun tivi swasta nasional ing Indonésia. Trans7 digawé kanthi jeneng…",
+                "…éni Aburizal Bakrie. Saliyané iki Aburizal Bakrie uga nduwé tivi swasta liyané kaya ta antv). Nalika tanggal 22 Maret 2000 k…",
+                "…Nomor 8687. Trans7 diumumaké dadi PT Duta Visual Nusantara Tivi Tujuh. Nalika tanggal 4 Agustus 2006, Para Group kanthi liw…",
+                "…s Corpora wis resmi tuku 49% saham PT Duta Visual Nusantara Tivi Tujuh. Kanthi anané re-launch nalik tanggal 15 Dhésèmber 20…",
+                "…misi, saéngga Trans7 bisa dideleng punjul 133 juta penonton tivi ingi Indonésia. Jakarta 49 UHF Ambon 23 UHF Bandung 44 UHF…"
+            ]
+        },
+        {
+            "word": "pébébé",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "dévédé",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "èks",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 7,
+            "articles": 7,
+            "substringOnly": 1,
+            "examples": [
+                "…ah, papan ngrembakané peradaban Jawa kuna wangsa Syailendra èks Karésidhènan Kedu, Jawa Tengah Kedu, Temanggung…",
+                "…ngah, papan tuwuhing peradaban Jawa kuna dinasti Syailendra èks Karésidhènan Kedhu, Jawa Tengah Kedhu, Temanggung…",
+                "…tha Surakarta, kababar èdisi Suara Sala, kanthi porsi warta èks-karèsidenan Sala kang luwih akèh. Sauntara iku, ing kutha T…",
+                "…arta. Sawisé Indonésia mardika, parusahan asuransi kerugian èks Waelanda lan Inggris dinasionalisasi dadi PT Asuransi Benda…",
+                "…ak Humor. Adicara punika dipunbintangi kaliyan para bintang èks Srimulat. Misye Arsita punika émah-émah kaping kalih. Émah-…",
+                "…Èks Pabrik Gula Randhugunting (Carakan: ꦠꦶꦭꦱ꧀ꦥꦧꦿꦶꦏ꧀ꦒꦸꦭꦫꦟ꧀ꦝꦸꦒꦸꦤ꧀…"
+            ]
+        },
+        {
+            "word": "zèt",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "èf",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "èl",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 32,
+            "articles": 14,
+            "substringOnly": 6,
+            "examples": [
+                "…Èl Salvador miwiti melu ing Permainan Olimpiade ing Olimpiade…",
+                "…80. Nagara kasebut ora tau melu ing Olimpiade Musim Dingin. Èl Salvador ora entuk medhali ing Permainan Olimpiade. == Refe…",
+                "…0. Dibukak ing 2020-01-27. Cithakan:Olimpiade-stub Cithakan:Èl Salvador-stub…",
+                "…Pratélan kabiskopan ing Èl Salvador yaiku pratelan sing ngalebokake lan njlèntrèhaké p…",
+                "…atulik Roma sing dipimpin dening biskop utawa ordinaris ing Èl Salvador. Konferensi para biskop Èl Salvador gabung ing Kon…",
+                "…kop utawa ordinaris ing Èl Salvador. Konferensi para biskop Èl Salvador gabung ing Konferensi Waligreja Èl Salvador. Ing J…"
+            ]
+        },
+        {
+            "word": "èm",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 1,
+            "examples": []
+        },
+        {
+            "word": "gram",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 89,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Gram (basa Yunani/Latin: grámma) yaiku ékan saka massa. Kanthi s…",
+                "…Yunani/Latin: grámma) yaiku ékan saka massa. Kanthi simbol gram g. 1 miligram = 0.001 gram 1 sentigram = 0.01 gram 1 desigr…",
+                "…u ékan saka massa. Kanthi simbol gram g. 1 miligram = 0.001 gram 1 sentigram = 0.01 gram 1 desigram = 0.1 gram 1 dekagram =…",
+                "…i simbol gram g. 1 miligram = 0.001 gram 1 sentigram = 0.01 gram 1 desigram = 0.1 gram 1 dekagram = 10 gram 1 hektagram = 10…",
+                "…igram = 0.001 gram 1 sentigram = 0.01 gram 1 desigram = 0.1 gram 1 dekagram = 10 gram 1 hektagram = 100 gram 1 kilogram = 10…",
+                "…sentigram = 0.01 gram 1 desigram = 0.1 gram 1 dekagram = 10 gram 1 hektagram = 100 gram 1 kilogram = 1000 gram…"
+            ]
+        },
+        {
+            "word": "sèntimèter",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 33,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…hetik. Mèter asring dicekak nganggo aksara m.. milimèter << sèntimèter << dhèsimèter << mèter << dhékamèter << hèktomèter << kilom…",
+                "…agi punika identik. == Ugi pirsani == mèter SI milimèter << sèntimèter << dhèsimèter << mèter << dhékamèter << hèktomèter << kilom…",
+                "…i dipitaya minangka tapak sikile Batutut. Dawané udakara 15 sèntimèter, lan ambane 10 sèntimèter. Driji lan tungkaké mèmper kaya d…",
+                "…sikile Batutut. Dawané udakara 15 sèntimèter, lan ambane 10 sèntimèter. Driji lan tungkaké mèmper kaya driji lan tungkak sikil man…",
+                "…Banyu === Cara ngolah === Kumbah kangkung banjur dirajang 7 sèntimèter. Rajang lombok, bawang lan brambang. Lebokaké lenga ing waj…",
+                "…inding punika kadamel saking sawilah deling mawi panjang 25 sèntimèter kaliyan kandel 2 milimèter. Ing sawilah punika dipun bolong…"
+            ]
+        },
+        {
+            "word": "sentimeter",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 36,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…sepuluh saka sak dhèsimèter sepuluh milimèter. milimeter << sentimeter << desimeter << mèter << dekameter << hektometer << kilomèt…",
+                "…iter padha karo: 0.001 mèter kubik, 1 desimeter kubik, 1000 sentimeter kubik volume kubus kang sisih-sisine 10 sentimeter. Liter u…",
+                "…ik, 1000 sentimeter kubik volume kubus kang sisih-sisine 10 sentimeter. Liter uga bisa dipara dadi unit kang luwih cilik, yaiku 1…",
+                "…aro: 1.000.000 mikroliter (µL) 1.000 mililiter (mL) = 1.000 sentimeter kubik (cm³ utawa cc), 100 sentiliter (cL), 10 desiliter (dL…",
+                "…i sosis individu kanthi ukuran udakara sepuluh nganti rolas sentimeter lan ketebalan telu nganti patang sentimeter.…",
+                "…uh nganti rolas sentimeter lan ketebalan telu nganti patang sentimeter.…"
+            ]
+        },
+        {
+            "word": "kaping loro",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 20,
+            "articles": 18,
+            "substringOnly": 0,
+            "examples": [
+                "…1:3-12 Pamedaran praka rawuhé Gusti Yesus ing donya kanggo kaping loro 2:1-17 Wejangan prakara kepriyé sajatiné wong Kristen kudu…",
+                "…adi Manchester City F.C.. The City wis tau dadi juwara liga kaping loro, Piyala FA kaping papat, Piyala Liga kaping loro lan Piyala…",
+                "…uwara liga kaping loro, Piyala FA kaping papat, Piyala Liga kaping loro lan Piyala Winners Éropah sapisan. Periode paling suksès sa…",
+                "…ia, Singapura lan sabanjuré Ing donya basa Inggris iku basa kaping loro sing pratama disinaoni. Basa Inggris bisa nyebar amarga dén…",
+                "…Sahara iku ara-ara samun gedhé dhéwé sadonya kang kaping loro (kang kaping pisan iku Antartika). Ambané punjul 9.000.000…",
+                "…ka pertapan Kandhabumi. Kang unik ya iku, Urangrayung nikah kaping loro kang memungsuhan, ya iku: Rahwana, kang banjur peputra Prat…"
+            ]
+        },
+        {
+            "word": "jam siji liwat",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "liwat",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 175,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…utif ===== Argo Wilis, menyang Bandung lan menyang Surabaya liwat Jombang Gajayana (reguler & tambahan), menyang Jakarta lan…",
+                "…jinis luxury ing jadwal reguler) Brawijaya, menyang Jakarta liwat Solo-Semarang lan menyang Malang liwat Blitar Bima, menyang…",
+                "…aya, menyang Jakarta liwat Solo-Semarang lan menyang Malang liwat Blitar Bima, menyang Jakarta lan menyang Surabaya liwat Jom…",
+                "…ang liwat Blitar Bima, menyang Jakarta lan menyang Surabaya liwat Jombang Turangga, menyang Bandung lan menyang Surabaya liwa…",
+                "…iwat Jombang Turangga, menyang Bandung lan menyang Surabaya liwat Jombang ===== Kelas campuran ===== Singasari, menyang Jakar…",
+                "…Surabaya (eksekutif-ekonomi plus) Brantas, menyang Jakarta liwat Solo-Semarang lan menyang Blitar (eksekutif-ekonomi) Rangga…"
+            ]
+        },
+        {
+            "word": "nol koma",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "siji koma",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "loro koma",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "koma",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 38,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Teater Koma ya iku kelompok seni téater kang diadegaké ing tanggal 1 Ma…",
+                "…arta . Minangka kelompok téater kang wis cukup tuwa, Teater Koma duwé reputasi apik ing ajang téater Indonésia . Ana 111 rep…",
+                "…akarta , lan kutha-kutha liyan ing sajabané Jakarta. Téater Koma ya iku perkumpulan seni non-profit. Saiki, kelompok iki did…",
+                "…a mèlu nganggo cara nyocogaké wektu. Tokoh utama ing Teater Koma ya iku N. Riantiarno . Saliyané dadi pimpinan, dhèwèké uga…",
+                "…iku 12 wong pekerja téater kang sapisanan ngadegaké Teater Koma, antarané N. Riantiarno Ratna Madjid Rima Melati Rudjito Ja…",
+                "…ong Lenon Zaenal Bungsu Agung Dauhanadalah == Kiprah Teater Koma == Teater Koma minangka kelompok teater merdika lan nglakok…"
+            ]
+        },
+        {
+            "word": "pesagi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 52,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Pesagi utawa pasagi iku wangun dhatar rong dhimènsi kang diwangun…",
+                "…wané lan duwé papat pojok kang kabèh wujud pojok siku-siku. Pesagi ing basa Indonésia diarani bujur sangkar. utawa persegi ==…",
+                "…asa Indonésia diarani bujur sangkar. utawa persegi == Rumus pesagi == === Kubengan === K = 4 ⋅ a {\\displaystyle K=4\\cdot a} ut…",
+                "…splaystyle d=a\\cdot {\\sqrt {2}}} == Elemen jembar == Wangun pesagi kerep kanggo èlemèn jembar sajeroning ngétung jembar siji w…",
+                "…ing ruang koordinat x lan y èlemèn jembar (dA) kang awangun pesagi dinyatakaké minangka: d A = d x d y {\\displaystyle dA=dxdy\\…",
+                "…\\int dx\\int dy\\ f(x,y)=\\int f(x,y)dA\\!} == Uga delengen == Pesagi bunder…"
+            ]
+        },
+        {
+            "word": "persegi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 32,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…erdiri tegak. Masjid ini duwé luas yasan utama 43.500 mèter persegi. Kanggo luas yasan penunjang yaiku 7.115 mèter persegi lan…",
+                "…èter persegi. Kanggo luas yasan penunjang yaiku 7.115 mèter persegi lan luas lantai basement 10.235 mèter persegi. Déné lantai…",
+                "…u 7.115 mèter persegi lan luas lantai basement 10.235 mèter persegi. Déné lantai dhasar masjid duwé luas 10.270 mèter persegi l…",
+                "…r persegi. Déné lantai dhasar masjid duwé luas 10.270 mèter persegi lan lantai utama luase 8.185 mèter persegi. Déné luas lanta…",
+                "…uas 10.270 mèter persegi lan lantai utama luase 8.185 mèter persegi. Déné luas lantai mezanin (balkon) yaiku 5.290 mèter perseg…",
+                "…ersegi. Déné luas lantai mezanin (balkon) yaiku 5.290 mèter persegi. Lokasi iki sak derenge yaiku lahan bekas areal panggergaji…"
+            ]
+        },
+        {
+            "word": "setengah",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 46,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Asap setengah yaiku \"panganan sosis lokal\" ditemokake ing Washington, DC,…",
+                "…lan kanthi daging sing digiling kanthi kasar, sosis asring setengah daging babi lan setengah daging sapi, asap, lan disajeni ng…",
+                "…igiling kanthi kasar, sosis asring setengah daging babi lan setengah daging sapi, asap, lan disajeni nganggo rempah-rempah, bawa…",
+                "…i nganggo rempah-rempah, bawang, lan saus cabai. Etimologi \"setengah asap\" bisa uga asale saka setengah daging babi asli, kompos…",
+                "…n saus cabai. Etimologi \"setengah asap\" bisa uga asale saka setengah daging babi asli, komposisi setengah daging sapi, bahan lan…",
+                "…p\" bisa uga asale saka setengah daging babi asli, komposisi setengah daging sapi, bahan lan metode persiapan asap. Panjelasan li…"
+            ]
+        }
+    ],
+}
