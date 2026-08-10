@@ -110,10 +110,17 @@ export function spellYears(s: string, d: YearRuleData = {}): string {
  * ⚠ FOUR DIGITS ON BOTH SIDES IS A YEAR PAIR, NOT A FRACTION, and this guard is the whole reason the rule
  * is shared rather than copied. `2020/2021` is an academic year; jv met it as `taun 1985/1986`, nan's rule
  * was REMOVED when its only instance was `Fahrenheit 9/11`, and cjy hit it in review. Three corpora.
+ *
+ * ⚠ AND A LATIN LETTER IMMEDIATELY BEFORE THE NUMERATOR MEANS IT IS A CODE. Found by hak, the first language
+ * built ON this module: hak.wikipedia's rolling-stock articles write train-set numbers as `A/C/B351/352`,
+ * `A/C/B359/360`, `SP1900/1950`, and the digit-only lookbehind let every one of them through — `A/C/B351/352`
+ * read *…352分之351*, "351 over 352". Nothing legitimate is written with a fraction fused to a letter; a real
+ * one has a space or a Han character before it (`Fahrenheit 9/11`, `即1/1000`), so the guard costs nothing.
+ * Verified byte-identical over the cmn, yue, wuu, nan and cjy corpora.
  */
 export function reorderFraction(s: string, fractionWord: string): string {
     return s.replace(
-        /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
+        /(?<![\d.,/\p{sc=Latn}])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
         (m, num: string, den: string) => (num.length === 4 && den.length === 4 ? m : `${den}${fractionWord}${num}`),
     );
 }
@@ -152,11 +159,21 @@ export interface DegreeData {
  * spaces is ordinary typography.
  * ⚠ THE GUARD IS `\p{sc=Latn}`, NOT `\p{L}` — a HAN CHARACTER IS `\p{L}`, so `溫度10°C到2°C` failed the
  * guard in nan and fused the degree word onto the stranded ⟨C⟩. Found only by probing in Han running text.
+ *
+ * ⚠ THE NUMBER INCLUDES ITS DECIMAL PART, AND OMITTING THAT WAS A SHIPPED BUG IN EVERY PREPOSING LANGUAGE.
+ * The pattern used to capture `(\d+)`, which on `13.3 °C` matches only the `3` — so the scale word was
+ * inserted INTO the number: yue and nan both read `13.3°C` as `13.` + 攝氏三度, the integer part orphaned in
+ * front of a raw stop and the temperature off by a factor of four. wuu was accidentally immune because it
+ * POSTposes Celsius (`13.3摄氏度` keeps the digits contiguous), which is exactly why four layers could carry
+ * this and no test see it — the defect is invisible from the one language that happens to put the word on
+ * the other side. Found by hak, whose corpus writes `13.3 °C` and `34.2 °C` and which preposes.
+ * ⚠ The decimal part is OPTIONAL and the integer arm is unchanged, so `20°C` behaves exactly as before.
  */
+const DEG_NUM = "(\\d+(?:\\.\\d+)?)";
 export function readDegrees(s: string, d: DegreeData): string {
     let out = s;
-    if (d.celsius) out = out.replace(/(\d+)\s*°\s*C(?![\p{sc=Latn}])/gu, (_m, n: string) => d.celsius!(n));
-    if (d.fahrenheit) out = out.replace(/(\d+)\s*°\s*F(?![\p{sc=Latn}])/gu, (_m, n: string) => d.fahrenheit!(n));
-    if (d.bare) out = out.replace(/(\d+)\s*°/gu, (_m, n: string) => d.bare!(n));
+    if (d.celsius) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*C(?![\\p{sc=Latn}])`, "gu"), (_m, n: string) => d.celsius!(n));
+    if (d.fahrenheit) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*F(?![\\p{sc=Latn}])`, "gu"), (_m, n: string) => d.fahrenheit!(n));
+    if (d.bare) out = out.replace(new RegExp(`${DEG_NUM}\\s*°`, "gu"), (_m, n: string) => d.bare!(n));
     return out;
 }

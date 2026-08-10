@@ -121,6 +121,19 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
             + "dialectal choices in this layer — the ampersand and the range word — were NOT inferred this "
             + "way; they come from the incubator text (和 ×16 coordinating, 到 ×5).",
     },
+    hak: {
+        "百分之": "⚠ THE GATE CANNOT SEE THIS WORD BECAUSE THE CORPUS IS IN THE OTHER ORTHOGRAPHY — the same "
+            + "shape as nan, and for a stronger reason here: hak.wikipedia is written in Pha̍k-fa-sṳ and "
+            + "**93.5% of its characters are Latin**, so a HAN spelling scores zero there by construction. "
+            + "The romanization attests it directly. (1) THE WHOLE WORD, ONCE: `Sîn Nò-vî-ngî pûn sṳ́-yung "
+            + "yî chhû-kiê sû-siá tha̍t-tó pak-fûn-chṳ̂-sṳ̍p-ńg` — 百分之十五, 15%, the percent word in a "
+            + "percentage. (2) ITS SECOND HALF, ×39, IN EXACTLY THE CONSTRUCTION THE FRACTION RULE NEEDS: "
+            + "`sâm-fûn-chṳ̂-ngi` (三分之二 = 2/3), `si-fûn-chṳ̂-yit` (四分之一), `ńg-fûn-chṳ̂-yit` (五分之一) "
+            + "— denominator first, which is what makes 百分之 'of a hundred parts' rather than a borrowing. "
+            + "(3) IT SPEAKS, which is this engine's hard gate: 百 分 之 are each dict keys, so 百分之 reads "
+            + "pak̚¹ pun⁴⁴ t͡sz̩⁴⁴ — where ⟨度⟩ did NOT speak and had to be sourced as a derived entry before "
+            + "the degree rule could exist at all.",
+    },
     nan: {
         "百分之": "⚠ THE GATE CANNOT SEE THIS WORD BECAUSE THE CORPUS IS IN THE OTHER ORTHOGRAPHY. "
             + "nan.wikipedia is written in POJ, so a HAN spelling scores zero there by construction — and "
@@ -317,6 +330,38 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         currency: "⚠ NOT a dict problem — ⟨元⟩ speaks. It is a SENSE problem: all four incubator instances "
             + "are 維基元 (Meta-Wiki) and the personal names 元好問 / 柳宗元, never money. No Jin currency word "
             + "is attested in any source available, so the sign stays unread",
+    },
+    hak: {
+        // ⚠ THE MEASUREMENT BEHIND EVERY LINE HERE IS UNUSUAL AND IS STATED ONCE: hak.wikipedia is written in
+        // Pha̍k-fa-sṳ, not Han — 93.5% of the sample tier's characters are Latin — so these counts are over a
+        // ROMANIZED corpus, and the words they are about would be emitted in Han. That split is nan's shape
+        // too. What it costs here is nothing, because each refusal below rests on reading the INSTANCES.
+        equals: "measured: the `=` instances are not arithmetic. `Egnatia T=thai-kiê` is a mangled wikitable "
+            + "cell, `UTC+8` a timezone, `Yit Kûng-khín = 10 000 Phìn-fông Kûng-tshak` a unit DEFINITION "
+            + "whose two sides are already words, and the rest are LaTeX bodies (`&=\\lim_{h \\to 0}{9 + 6h "
+            + "+ h^2 - 9\\over{h}}`). And ⟨於⟩/⟨于⟩ are SILENT in this dict, so ⟨等於⟩ could only say half of "
+            + "itself — the same half-word refusal cjy made",
+        plus: "measured: ⟨加⟩ speaks but ⟨減⟩ is SILENT, so the layer could read a plus and not a minus, "
+            + "which is worse than reading neither. The 19 `arithmetic` instances do not argue otherwise: "
+            + "`「3+1」的安排` is a train-scheduling label and `-2, 0, +4, +6` are chemical oxidation states",
+        times: "measured: every digit-adjacent `×` is SCIENTIFIC NOTATION whose superscript the dump "
+            + "stripped — `1.392×106`, `2×1030`, `5×1030` are 10⁶, 10³⁰, 10³⁰. Reading the sign there would "
+            + "say \"times one hundred and six\". ⟨乘⟩ speaks; the sign has no attested operator instance",
+        divide: "measured: the one ÷ is inside a formula gloss (`ńg sien chhòng-thu ÷180÷60`), and ⟨除以⟩ "
+            + "needs ⟨以⟩, which this dict does not carry",
+        "plus-minus": "measured: zero ± in the artifact",
+        minus: "measured, and the refusal is NARROWER than it looks: a negative IS read — but only before a "
+            + "degree sign, because the only negative-number word this corpus supplies is 零下 (`làng-hâ`, "
+            + "'below zero'), which is temperature-specific. All 6 genuine negatives in the corpus ARE "
+            + "temperatures (`-4.5℃`, `-218 °C`, `−224℃`, `-170°C` ×2, `-5 °C`) and all 6 are read. A BARE "
+            + "`-5` is what stays silent, and it has no attested instance and no attested word: the other 28 "
+            + "leading hyphens before digits are 3-digit year-range separators (`303-ngièn -349-ngièn`), "
+            + "coordinate ranges (`112°50'-114°45'`, read as ranges by step 3) and chemical oxidation states "
+            + "(`-2, 0, +4, +6`). ⚠ AND THE HYPHEN IS THE WORST CHARACTER IN THIS ORTHOGRAPHY TO GUESS WITH — "
+            + "Pha̍k-fa-sṳ joins every polysyllable with one (`Hak-kâ-ngìn`, `2005-ngièn`), which is why nan "
+            + "declined the ASCII hyphen outright for the same reason",
+        "less-than": "measured: zero `<` in the artifact; and the ⟨小於⟩ half-word problem would apply",
+        "greater-than": "measured: zero `>` in the artifact; same half-word problem on ⟨大於⟩",
     },
     nan: {
         // ⚠ EVERY REASON HERE IS A CORPUS MEASUREMENT. nan HAS a referee (wikipron Hokkien), but it is
@@ -589,6 +634,44 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // shape; this one instance sits after `cm`. Listed rather than widening the tier, since a
         // `word × number` rule has exactly one attested instance to justify it (trap 9).
         "math-sign": ["cm × 3"],
+    },
+    hak: {
+        // ⚠ THE SAME SINITIC HAZARD wuu RECORDS: A SUPERSCRIPT IN THESE ARTICLES IS OFTEN A TONE NUMBER,
+        // not a power — hak.wikipedia glosses other varieties' phonology inline (`Si-chhôn-fa piang-yîm:
+        // Xu⁴nin²`). Silence is the CORRECT reading there; voicing it would read a pronunciation gloss as
+        // arithmetic. The rest are real exponents this layer cannot reach, each for a stated reason:
+        //   · `m/s²` and `m/s/s` — an acceleration in a quoted CHINESE rolling-stock article. The exponent
+        //     sits on a RATE denominator, which the shared tier composes but cannot then square.
+        //   · `万m³` (`2700万m³`, `11.85万m³`) — cubic metres, and BOTH halves are declined: ⟨立方⟩ is
+        //     undeclared because `li̍p-fông` has ZERO corpus instances against `phiàng-fông`'s 1,850, and
+        //     `m` is undeclared because a one-character unit in an unspaced script is inseparable from any
+        //     name containing it. The two gaps are the same gap, as they were in wuu.
+        //   · `ngìn/km²` (population density) — the exponent IS read; what the reading lacks is the rate,
+        //     and wuu's density rule was local precisely because the per-phrase order is per-language and
+        //     this corpus never writes the fact in words for it to be sourced from.
+        // Instance-listed rather than class-silenced so a km² regression stays visible — km² IS read
+        // (`8,494 km²` → 8494 平方公里).
+        //   · `R² sa to R³` — a MATHEMATICAL space (ℝ²→ℝ³) in the calculus article. Not a unit at all, so
+        //     no `exponentWords` slot can reach it; reading it as "square" would be wrong for a dimension.
+        exponent: ["Xu⁴nin²", "No²san¹", "ȵi²bin¹", "Mi²san¹", "R² sa", "to R³", "m/s²", "1.3m/s²",
+            "1.35m/s²", "2700万m³", "11.85万m³", "ngìn/km²", "ngìn /km²", "sṳ̀-kiên²", "x^2", "y^2", "h^2"],
+        // ⚠ NOT ARITHMETIC, which is why the class refusal in ACCEPTED_SIGN_SILENCE cannot carry them (that
+        // table is consulted per SIGN and the minus pattern is CONTEXTUAL, so it never matches one char):
+        //   · `-2, 0, +4, +6` — CHEMICAL OXIDATION STATES in the sulfur article, a list not a subtraction.
+        //   · `112°50'-114°45'` and `23°5'-25°31'` — COORDINATE RANGES, which normalize.ts step 3 reads as
+        //     ranges (`112度50分至114度45分`); the leading `-` the pattern sees is that connective.
+        //   · THE 3-DIGIT YEAR RANGES — `562-ngièn -560-ngièn`, `303-ngièn -349-ngièn`, `319-ngièn -351`,
+        //     `384-ngièn -407-ngièn`. Step 2 folds the morpheme so both endpoints read as cardinals with 年,
+        //     but `spellYears` claims FOUR digits only, so the dash between them stays unread. That is the
+        //     fleet's standing refusal working as intended, not an oversight: a short `N年` is a DURATION as
+        //     often as a year and nothing in the surface separates them. ⚠ THEIR 4-DIGIT COUSINS ARE READ —
+        //     `1847-ngièn -1899-ngièn` → 一八四七年至一八九九年 — which is what makes this a boundary rather
+        //     than a gap. `(1906 -1979)` has no year word on either side and is declined for that reason.
+        // The GENUINE negatives are read, and their word is the corpus's own: `-4.5℃`, `-218 °C`, `−224℃`,
+        // `-170°C`, `-5 °C` all take 零下 (`làng-hâ`, corpus-attested) — normalize.ts step 4.
+        minus: ["-2, 0, +4", "+4, +6", "50'-114", "5'-25", "562-ngièn -560", "1906 -1979",
+            "303-ngièn -349", "319-ngièn -351", "384-ngièn -407",
+            "chṳ́ -yû", "chṳ́ -yu", "sṳ́ -yung", "Chhṳ́ -ngoi"],
     },
     wuu: {
         // A SUPERSCRIPT IN A WU ARTICLE IS OFTEN A CHAO TONE NUMBER, NOT A POWER — the language's own

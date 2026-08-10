@@ -85,7 +85,13 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // source: a superscript is a ROMANIZATION TONE NUMBER, not a power. wuu got it from Chao tone
         // letters in its own phonology sections, nan from jyutping quoted in a Hong Kong article, and cjy
         // from its own romanization (`Hai²-di²-lau¹ si³ Zung¹-gueh⁴`). Expect it in gan/hak/hsn too.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hi", "jv", "km", "kn", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
+        // ⚠ AND THAT PREDICTION CAME TRUE ON THE NEXT LANGUAGE: hak is the FOURTH, from a fourth source —
+        // hak.wikipedia glosses OTHER varieties' phonology inline (`Si-chhôn-fa piang-yîm: Xu⁴nin²`,
+        // `No²san¹`, `ȵi²bin¹`). Four Sinitic corpora, four different routes to the same false positive,
+        // which is what makes it a property of the writing culture rather than of any one wiki. hak's minus
+        // entry records something else: the 3-DIGIT year ranges its layer deliberately declines
+        // (`303-ngièn -349-ngièn`), where the 4-digit ones ARE read — a boundary, listed so it stays one.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "jv", "km", "kn", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
