@@ -33,18 +33,19 @@
  * because the same statement folds `／`, which the fraction rule in step 6 does still need.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { degroupThousands, readDegrees, reorderFraction } from "../../core/sinitic.ts";
+import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 
-/** 0–9 as Han numerals. Shared with cantonese.ts's cardinal composition (which imports it from here, so the
- *  digit-string reading below and the cardinal reading cannot drift apart). */
-export const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+/** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here.
+ *  ⚠ There were THREE identical copies of this table (yue, wuu, core) until the extraction, which is the
+ *  same drift the °C rule already demonstrated. cantonese.ts imports it FROM HERE so the digit-string
+ *  reading (years, decimals) and the cardinal composition still cannot diverge; the re-export keeps that
+ *  guarantee while there is only one table left. */
+export const DIGITS = HAN_DIGITS;
 
 /** A digit string read one digit at a time — the reading Chinese gives a year (二零零九) and the fractional
  *  part of a decimal (點三四), as opposed to the cardinal a quantity gets. 零 (not 〇): the corpus writes 零
  *  ×4 and 〇 ×0. */
-function spellDigits(s: string): string {
-    return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
-}
+const spellDigits = (s: string): string => spellHanDigits(s);
 
 // The percent word 百分之 PRECEDES its number, as in Mandarin, and Cantonese prose writes 百分之三十 out.
 //

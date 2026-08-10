@@ -99,3 +99,45 @@ worktree during the wuu PR, and untouched here.
 The recommendation made when this was proposed still stands: **build the next Sinitic layer (gan or hak) on
 this module rather than refactoring further**, so it is validated against a language it was not extracted
 from. A refactor that only reproduces its own sources proves nothing.
+
+---
+
+## Run 3 — 2026-08-09 23:26 — PR review (#793)
+
+A refactor's likeliest defects are dead code and comments that outlived their code, so the review looked
+there first. **One finding, and it was the same class of defect the PR exists to remove.**
+
+### ⚠ Three identical digit tables, and the extraction had left all three standing
+
+```
+yue  零一二三四五六七八九      (exported; cantonese.ts imports it for cardinal composition)
+wuu  零一二三四五六七八九      (exported; wu.ts likewise)
+core 零一二三四五六七八九      (new)
+```
+
+The local tables were deliberate — each layer's header explains that the ENGINE imports the table from the
+NORMALIZER "so the digit-string reading and the cardinal reading cannot drift apart". That reasoning was
+right and is now better served by one table: both files re-export `HAN_DIGITS` under the name their engine
+already imports, so the guarantee survives with **one** table in the repo instead of three. Their local
+`spellDigits` now delegates to `spellHanDigits` for the same reason.
+
+Adding a fourth copy while extracting the third would have been a poor advertisement for the argument.
+
+### Checked and clean
+
+- **No orphaned locals.** `minnan`'s `DIGITS` is fully removed; `jin`'s remaining "DIGITS" is prose inside a
+  comment, not a binding; `cantonese`/`wu` still use `spellDigits` because their year rules stayed local by
+  design, and it now delegates.
+- **Step numbering and cross-references survive the removals** — jin renumbers 1–6 with its internal
+  "step 5 replaces the `.` with 點" still correct, and minnan's "step 3 still sees `25°C`" likewise.
+
+### Gates after the review fix
+
+```
+corpus output   cmn · yue · wuu · nan · cjy — ALL byte-identical to the pre-refactor baselines
+suite           3,288 tests · tsc clean
+review.ts       clean for cmn, wuu, nan, cjy
+```
+
+⚠ `review.ts --lang yue` reports `DROPPED: plus-minus`, which is **pre-existing** — verified against a base
+worktree during the wuu PR and untouched by this change.

@@ -55,17 +55,16 @@
  * almost entirely `&nbsp;`, and reading the instances is the only thing that showed it.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { degroupThousands, readDegrees, reorderFraction } from "../../core/sinitic.ts";
+import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 
-/** 0–9 as Han numerals. Shared with wu.ts's cardinal composition (which imports it from here, so the
- *  digit-string reading below and the cardinal reading cannot drift apart). */
-export const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+/** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here. wu.ts imports it FROM HERE
+ *  so its cardinal composition and this file's digit-string reading cannot drift apart; the re-export keeps
+ *  that while leaving exactly one table in the repo. */
+export const DIGITS = HAN_DIGITS;
 
 /** A digit string read one digit at a time — the reading Chinese gives a year (二零零九) and the fractional
  *  part of a decimal (点三四), as opposed to the cardinal a quantity gets. */
-function spellDigits(s: string): string {
-    return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
-}
+const spellDigits = (s: string): string => spellHanDigits(s);
 
 // ⚠ `unspacedScript` because a sign in Wu prose is normally flanked by Han, which the tier's letter-boundary
 // guard rejects. `percentPrefix` because 百分之 PRECEDES its number, as in every Sinitic language:
