@@ -108,7 +108,10 @@ describe("wuu normalization — text→text", () => {
     test("an initialism becomes its letter names, spelled in Han for the dict to read", () => {
         expect(norm("中国GDP总量")).toBe("中国 其 地 披 总量");
         expect(norm("PHP语言")).toBe(" 披 诶尺 披 语言");
-        expect(norm("SNCF个车站")).toBe(" 诶丝 恩 西 诶夫 个车站");
+        // ⚠ FOUR LETTERS IS EXCLUDED — narrowed from 2–4 after the cmn corpus showed 9 of 16 four-letter
+        // tokens are ENGLISH WORDS (FIFA ×7, BANK, SEAL). SNCF is a genuine initialism and the cost of the
+        // guard; left on the English reader it still says the right letter names, in the wrong accent.
+        expect(norm("SNCF个车站")).toBe("SNCF个车站");
         // ⚠ ROMAN NUMERALS BELONG TO ANOTHER SEAM (core/roman.ts, which runs in the registry wrapping
         // text(), so it has already claimed what it will). Spelling `II` as *阿阿* would entrench a wrong
         // reading in a class this rule does not own.

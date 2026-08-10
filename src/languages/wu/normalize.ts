@@ -290,13 +290,16 @@ export function normalizeWu(
     // variety — see the `letterNames` sourcing note in wu.jsonc); the PHONOLOGY is not. Rewriting to Han
     // hands the reading to the dict, so the names come out in Wu with Wu tones.
     //
-    // ⚠ THE LENGTH WINDOW IS 2–4 AND THE CORPUS DREW IT. All-caps runs in the artifact: 110 tokens at 2–4
-    // letters, every one an initialism (GDP PHP SNCF UTC ISBN TVB LG GPU DVD CD NGO…), against 4 tokens at
-    // 5+ of which three are all-caps ENGLISH WORDS or names (PROJECT, LAWSON, LOUBAT) that must stay on the
-    // English reader. The honest cost is at the boundary: NASA, TURE, DASH and COOH get spelled out. That
-    // is `core/initialisms.ts`'s own bargain — spelling out an unrecorded acronym "is always a legitimate
-    // reading and therefore a safe default" — and wuu cannot do better, since dict.tsv has ZERO Latin keys
-    // and so no lexical tier that could say which acronyms are read as words.
+    // ⚠ THE LENGTH WINDOW IS 2–3, NARROWED FROM 2–4 BY THE SIBLING CORPORA. This layer shipped 2–4 first,
+    // on the count that the wuu artifact has 110 all-caps tokens at 2–4 letters and only 4 at 5+ (three of
+    // them English words: PROJECT, LAWSON, LOUBAT). Extending the same rule to cmn showed the real boundary
+    // is at FOUR, not five: **9 of 16 four-letter tokens in the cmn corpus are ENGLISH WORDS** — FIFA ×7,
+    // BANK, SEAL — and wuu's own four-letter band carries COOH, DASH, TURE and NASA on the same shape.
+    // The cost is ASYMMETRIC and that is the whole argument: a genuine 4-letter initialism left on the
+    // English reader (SNCF, ISBN, AODV, LGPL) still says the RIGHT LETTER NAMES in the wrong accent, while
+    // a spelled-out English word is confidently unintelligible. Whether an acronym is a word or letters is
+    // a LEXICAL fact — `core/initialisms.ts` says exactly that — and dict.tsv has ZERO Latin keys, so wuu
+    // has no lexical tier that could decide it. yue does, and its rule is shaped accordingly.
     //
     // ⚠ `[IVX]{2,3}` IS EXCLUDED BECAUSE IT BELONGS TO ANOTHER SEAM. `core/roman.ts` runs in the registry,
     // WRAPPING `engine.text()`, so it has already claimed every Roman numeral it is willing to claim before
@@ -336,7 +339,7 @@ export function normalizeWu(
         );
     if (letterNames !== undefined)
         s = s.replace(
-            /(?<![\p{sc=Latn}\d])[A-Z]{2,4}(?![\p{sc=Latn}\d])/gu,
+            /(?<![\p{sc=Latn}\d])[A-Z]{2,3}(?![\p{sc=Latn}\d])/gu,
             (run) =>
                 /^[IVX]{2,3}$/u.test(run)
                     ? run

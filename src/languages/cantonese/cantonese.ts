@@ -30,7 +30,9 @@ function dict(): Map<string, string> {
 const MAX_WORD = 6; // greedy segmentation window
 
 const HAN = /\p{Script=Han}/u;
-const JYUTPING = /^[a-z]+[1-6](?:\s+[a-z]+[1-6])*$/i;
+// ⚠ CASE-SENSITIVE. Jyutping is written lowercase; with the `i` flag an ALL-CAPS alphanumeric token like
+// `MP3` matched, found no rime, and came back VERBATIM through the "leave the jyutping visible" fallback.
+const JYUTPING = /^[a-z]+[1-6](?:\s+[a-z]+[1-6])*$/u;
 
 /** One Jyutping syllable (e.g. "hoeng1") → IPA. */
 function syllableToIpa(syl: string): string {
@@ -142,6 +144,70 @@ function integerToHan(n: number): string {
     return out;
 }
 
+/**
+ * LATIN LETTER NAMES IN JYUTPING — MINED FROM `dict.tsv`, NOT AUTHORED.
+ *
+ * An initialism embedded in Cantonese prose routed straight to the ENGLISH phonemizer: `中國GDP總量` read
+ * …ɡˈiːdˈiːpʰˈiː…, English [iː], English stress, NO TONE, inside a tonal utterance. The header of
+ * `normalize.ts` used to defer this for want of a letter table — while the shipped dict carried **541 Latin
+ * keys** that this engine never consulted, including 69 whole acronyms with their readings (`DVD di1 wi1 di1`,
+ * `ATM ei1 ti1 em1`, `GPS zi1 pi1 e1 si4`). The data was already here.
+ *
+ * ⚠ EVERY VALUE BELOW IS THE DICTIONARY'S OWN, recovered two ways and cross-checked:
+ *   · the 13 SINGLE-LETTER keys — D di1, J zei1, K kei1, L eu1, M em1, N en1, P pi1, Q kiu1, R aau1,
+ *     T ti1, X ik1 si4, Y waai1, Z ji6 set1;
+ *   · per-letter alignment of the all-caps acronym entries, which supplies the other 11 with vote counts:
+ *     B bi1 ×14, C si1 ×11, O ou1 ×11, A ei1 ×10, I aai1 ×9, V wi1 ×6, E ji1 ×4, G zi1 ×4, U ju1 ×2,
+ *     and the two-syllable F e1 fu4 (`FF`) and S e1 si4 (`GPS`, `USB` — two independent entries).
+ *
+ * ⚠ TWO VOTES ARE REJECTED, and reading the source entry is what rejects them:
+ *   · `CLS ci1 lan2 sin3` is 黐撚線, a PROFANITY spelled with letters — not letter names, so its C/L/S
+ *     readings are not evidence. Left in, it would have shipped `S = sin3`.
+ *   · `WP win1 pei1` and `LM lau4 ming4` are NAMES, not initialisms.
+ * The former is why S is taken from GPS/USB instead, and it is playbook trap 2 in miniature: the count was
+ * there, the sense was not.
+ *
+ * ⚠ H AND W ARE ABSENT FROM EVERY SOURCE — no single-letter key, no acronym, and espeak ships no Cantonese
+ * letter table at all (its `yue_list` has zero Latin entries). Rather than invent them, a run containing an
+ * unsourced letter is left WHOLE on the English reader: a half-Cantonese, half-English token would be worse
+ * than either. Measured cost in the mined artifact: 3 of 13 all-caps tokens (`HK`, `NSW`, `NPWS`).
+ */
+const LETTERS: Readonly<Record<string, string>> = {
+    A: "ei1", B: "bi1", C: "si1", D: "di1", E: "ji1", F: "e1 fu4", G: "zi1", I: "aai1", J: "zei1",
+    K: "kei1", L: "eu1", M: "em1", N: "en1", O: "ou1", P: "pi1", Q: "kiu1", R: "aau1", S: "e1 si4",
+    T: "ti1", U: "ju1", V: "wi1", X: "ik1 si4", Y: "waai1", Z: "ji6 set1",
+};
+
+/**
+ * A Latin run → IPA, preferring what the language records over what English would say.
+ *
+ * ⚠ ONLY ALL-CAPS RUNS ARE CLAIMED. The dict's other Latin keys are lowercase ENGLISH LOANS (`bar baa1`,
+ * `account aa6 kaan1`) whose Cantonese reading is right for a loan and wrong for the quoted English the
+ * corpus also contains, and nothing in the surface form separates the two. Initialisms have no such
+ * ambiguity, so they are the whole of the claim.
+ *
+ * ⚠ `[IVX]{2,3}` is excluded because Roman numerals belong to `core/roman.ts`, which runs in the registry
+ * WRAPPING `text()` — what reaches here is what it declined. Length 2–4, and not flanked by a Latin letter
+ * or digit, for the reasons `wu/normalize.ts` step 14 records at length.
+ */
+function latinRun(run: string, foreign?: ForeignPhonemizer): string {
+    const english = (): string => (foreign ? foreign(run) : "");
+    if (!/^[A-Z]{2,}$/u.test(run) || /^[IVX]{2,3}$/u.test(run)) return english();
+    // A RECORDED acronym outranks spelling it out: the reading is a lexical fact and the dict has it
+    // (`DVD`, `ATM`, `USB`, `ID`, `IT`, `BBQ`…), tones and all. This is `core/initialisms.ts`'s own
+    // architecture — a known acronym resolves through the lexicon; only an OOV one is spelled.
+    const recorded = dict().get(run);
+    if (recorded !== undefined) return jyutpingToIpa(recorded);
+    // ⚠ SPELLING is capped at 3 letters while the DICT LOOKUP above is not, and the asymmetry is the point:
+    // a recorded reading is a LEXICAL fact and needs no guard, whereas spelling an unrecorded 4-letter run
+    // is where English WORDS start being mistaken for acronyms — measured on the cmn corpus, 9 of 16
+    // four-letter tokens are words (FIFA ×7, BANK, SEAL). yue's own corpus is too small to show it (13
+    // all-caps tokens), so this follows the sibling's measurement rather than pretending to its own.
+    if (run.length > 3) return english();
+    if (![...run].every((c) => LETTERS[c] !== undefined)) return english(); // H/W — see above
+    return [...run].map((c) => jyutpingToIpa(LETTERS[c]!)).join(" ");
+}
+
 export type ForeignPhonemizer = (latin: string) => string;
 
 class CantonesePhonemizer implements Phonemizer {
@@ -172,7 +238,7 @@ class CantonesePhonemizer implements Phonemizer {
             else if (m[2]) {
                 const n = Number(m[2]);
                 if (Number.isSafeInteger(n)) sink.emit(numeralRun(integerToHan(n)));
-            } else if (m[3]) sink.emit(this.foreign ? this.foreign(m[3]) : "");
+            } else if (m[3]) sink.emit(latinRun(m[3], this.foreign));
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
                 if (mk) sink.pause(mk);

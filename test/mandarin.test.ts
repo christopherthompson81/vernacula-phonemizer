@@ -186,7 +186,12 @@ describe("mandarin normalization", () => {
         // 加, the arithmetic operator — NOT 加上, whose attestations are the conjunction sense.
         expect(phonemize("+5", "cmn")).toBe("t͡ɕiɑ˥˥ wu˨˩˦");
         // The artifact's one math-sign drop: a UTC offset, where the sign is attached to letters.
-        expect(phonemize("11:00 (UTC+1)", "cmn")).toBe("ʂʐ̩˧˥ ji˥˥ , liŋ˧˥ jˈuː tʰˈiː sˈiː t͡ɕiɑ˥˥ ji˥˥");
+        // ⚠ THIS ASSERTION USED TO PIN A DEFECT — `jˈuː tʰˈiː sˈiː`, the initialism in ENGLISH phonology
+        // inside a Mandarin utterance. UTC now reads as Mandarin letter names (优提西); the `+` reading,
+        // which is what this test is actually about, is unchanged.
+        expect(phonemize("11:00 (UTC+1)", "cmn")).toBe(
+            `ʂʐ̩˧˥ ji˥˥ , liŋ˧˥ ${phonemize("优 提 西", "cmn")} t͡ɕiɑ˥˥ ji˥˥`,
+        );
     });
 
     test("the exponent's measure word PRECEDES the unit", () => {
@@ -225,5 +230,47 @@ describe("mandarin normalization", () => {
         // Han and Latin themselves must be untouched by the new branch.
         expect(phonemize("一個胖子", "cmn")).toBe("ji˧˥ kɤ˥˩ pʰɑŋ˥˩ t͡sɹ̩");
         expect(phonemize("這個詞 hello 意即", "cmn")).toContain(phonemize("hello", "en"));
+    });
+});
+
+describe("cmn initialisms → Mandarin letter names", () => {
+    // ⚠ WHY THIS EXISTS: `中国GDP总量` read …ɡˈiːdˈiːpʰˈiː…, English [iː], English stress, and NO TONE inside
+    // a tonal utterance. The letter NAMES are English-derived in every Sinitic variety (espeak-ng's own
+    // `cmn_list` documents them: a ei51 · b pi51 · w ta35pliou); only the phonology was wrong. Evidence and
+    // derivation: docs/investigations/sinitic_initialisms_investigation.md.
+    test("an initialism is read as letters, in Mandarin", () => {
+        expect(phonemize("中国GDP总量", "cmn")).toBe(phonemize("中国 吉 迪 皮 总量", "cmn"));
+        expect(phonemize("CEO", "cmn")).toBe(phonemize("西 伊 欧", "cmn"));
+        expect(phonemize("IT行业", "cmn")).toBe(phonemize("艾 提 行业", "cmn"));
+    });
+
+    test("⚠ a lone letter only where it TOUCHES HAN — otherwise it is a math variable", () => {
+        expect(phonemize("X光", "cmn")).toBe(phonemize("艾克斯 光", "cmn"));
+        // `f(x)`, `m = 2` and a chemical formula are Latin-flanked and must stay untouched.
+        expect(phonemize("f(x) = 1/x", "cmn")).toContain("ˈɛks");
+    });
+
+    test("⚠ the window is 2–3: at four letters this corpus is mostly ENGLISH WORDS", () => {
+        // FIFA ×7, BANK, SEAL — 9 of 16 four-letter tokens. Spelling those out is loud nonsense, while a
+        // 4-letter initialism left on the English reader still says the right letter NAMES.
+        expect(phonemize("FIFA", "cmn")).toBe("fˈɪfɑː");
+        expect(phonemize("BANK", "cmn")).toBe("bˈæŋk");
+    });
+
+    test("⚠ Roman numerals belong to core/roman.ts, not to this rule", () => {
+        expect(phonemize("第II次", "cmn")).not.toBe(phonemize("第 艾 艾 次", "cmn"));
+    });
+
+    test("⚠ the pass runs AFTER the symbol tier, or a temperature loses its scale letter", () => {
+        // Run first, it rewrote the ⟨C⟩ of `20°C` to 西 and the tier could no longer see the unit:
+        // 摄氏度 became 度西. Caught by the corpus diff, not by any probe.
+        expect(phonemize("20°C", "cmn")).toBe(phonemize("二十摄氏度", "cmn"));
+    });
+
+    test("⚠ an ALL-CAPS alphanumeric token is not pinyin input", () => {
+        // The whole-string pinyin fast path was case-INSENSITIVE, so `MP3` matched it, found no syllable,
+        // and was returned VERBATIM — the string "MP3" straight into the phoneme stream.
+        expect(phonemize("MP3", "cmn")).not.toMatch(/MP3/u);
+        expect(phonemize("zhong1 guo2", "cmn")).toBe(phonemize("中国", "cmn"));
     });
 });

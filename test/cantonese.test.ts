@@ -116,3 +116,40 @@ describe("cantonese text normalization", () => {
         expect(phonemize("19500 km²", "yue")).toContain("pʰɪŋ˨˩ fɔːŋ˥ kʊŋ˥ lei˩˧");
     });
 });
+
+describe("yue initialisms → Cantonese letter names, from the dict's own data", () => {
+    // ⚠ THE READINGS ARE NOT AUTHORED — they are mined from `dict.tsv`, which shipped 541 Latin keys the
+    // engine never consulted, including 69 whole acronyms (`DVD di1 wi1 di1`, `GPS zi1 pi1 e1 si4`).
+    // The layer's own header used to defer this "for want of a letter-name table". Derivation and the two
+    // rejected votes: docs/investigations/sinitic_initialisms_investigation.md.
+    test("a RECORDED acronym uses its recorded reading — a lexical fact outranks spelling it out", () => {
+        expect(phonemize("DVD播放機", "yue")).toBe(`${phonemize("di1 wi1 di1", "yue")} ${phonemize("播放機", "yue")}`);
+        expect(phonemize("ATM", "yue")).toBe(phonemize("ei1 ti1 em1", "yue"));
+        expect(phonemize("USB", "yue")).toBe(phonemize("ju1 e1 si4 bi1", "yue"));
+        expect(phonemize("OK", "yue")).toBe(phonemize("o1 ke1", "yue"));
+    });
+
+    test("an UNRECORDED initialism is spelled from the mined letter table", () => {
+        // G/D/P are dict single-letter or acronym-aligned values: zi1, di1, pi1.
+        expect(phonemize("中國GDP總量", "yue")).toBe(
+            `${phonemize("中國", "yue")} ${phonemize("zi1 di1 pi1", "yue")} ${phonemize("總量", "yue")}`,
+        );
+    });
+
+    test("⚠ H and W are in NO source, so a run containing one is left WHOLE on the English reader", () => {
+        // espeak ships no Cantonese letter table at all (`yue_list` has zero Latin entries) and the dict has
+        // neither letter. Half-Cantonese, half-English inside one token would be worse than either.
+        expect(phonemize("香港HK", "yue")).toBe(`${phonemize("香港", "yue")} ˈeᶦt͡ʃ kʰˈeᶦ`);
+    });
+
+    test("⚠ spelling stops at 3 letters; the DICT lookup does not", () => {
+        // A recorded reading needs no length guard — it is lexical. Spelling a 4-letter run is where
+        // English WORDS start being taken for acronyms (measured on cmn: FIFA ×7, BANK, SEAL).
+        expect(phonemize("FTIR", "yue")).toBe("ˈɛf tʰˈiː aᶦ ˈɑːɹ");
+    });
+
+    test("⚠ an ALL-CAPS alphanumeric token is not Jyutping input", () => {
+        expect(phonemize("MP3", "yue")).not.toMatch(/MP3/u);
+        expect(phonemize("hoeng1 gong2", "yue")).toBe(phonemize("香港", "yue"));
+    });
+});
