@@ -240,3 +240,63 @@ against the wikipron Hokkien referee (which is what exposed the last finals-tabl
 row). Recorded with the counts so it is re-runnable in one command. Two things to decide when it is taken
 up: whether to add the POJ spellings to the finals/initials tables or fold POJ→Tâi-lô before conversion,
 and whether `minnan.ts`'s header claim should be narrowed in the meantime.
+
+---
+
+## Run 4 — 2026-08-09 22:35 — the POJ fold, and what it did
+
+Fixed where it lives: a `pojToTailo` fold in `minnan.ts`, applied inside `syllableParts` **to the toneless
+base**. That placement is the whole trick — the tone diacritics have already been pulled off by then, so the
+fold is a plain string substitution and never has to move a combining mark from one vowel to another, which
+is the classic way an orthography fold corrupts its input.
+
+Six correspondences, longest-first where they overlap:
+
+```
+o͘ / o·  → oo      (U+0358 ×234 AND U+00B7 ×141 — running text writes both)
+chh     → tsh     (before ch, or the digraph is eaten)
+ch      → ts
+oa      → ua
+oe      → ue
+eng     → ing
+ek      → ik
+ⁿ       → nn      (U+207F, syllable-final in POJ exactly as Tâi-lô writes nn)
+```
+
+Every POJ form now converges on its Tâi-lô equivalent exactly — `peng`/`ping` → piə̯ŋ, `gō͘`/`gōo` → ɡɔ,
+`hoaⁿ`/`huann` → hũ̯ã, `chhi`/`tshi` → t͡ɕʰi, `koan`/`kuan` → ku̯an.
+
+### ⚠ Safe on Tâi-lô by construction, and it turned out to IMPROVE the Han path
+
+Every left-hand side is a spelling Tâi-lô does not use, so the fold is a no-op on dict readings. Checked
+against them rather than assumed — and the check found something: **40 of the 70,535 MOE dict entries carry
+stray POJ spellings** (`chı̍t-bóe-hî`, `pêⁿ-chha-sò͘-chōa`, `Lîng-tek`, `tek-kok-siau`) which were leaking
+by the same mechanism. Those are now read too.
+
+### Measurements
+
+```
+ASCII `g` in the emitted corpus     1,485  →  1,482  →  337
+                                  (pre-branch) (normalization) (after the fold)     −77%
+leaking POJ word types                533   →  123      of 3,805 probed
+referee (wikipron Hokkien)          95.3% folded / 97.4% symbol — UNCHANGED
+corpus diff                         416/447 utterances changed; leak classes 0 on both sides
+suite                               3,275 tests · tsc clean · review.ts --lang nan clean
+```
+
+⚠ **The referee not moving is the expected result, not a disappointment.** wikipron Hokkien is keyed on Han
+and Tâi-lô, so it never exercised the POJ path — which is precisely why a 14% leak survived a 95.3% score.
+The score confirms the fold is *safe*; the corpus counts are what confirm it *works*. A referee measures
+what it covers, and this one does not cover the orthography the corpus is written in.
+
+### The residue is not POJ at all
+
+The remaining 123 word types are English and Latin embedded in the wiki: `drainage`, `Washington`,
+`College`, `Language`, `Rowling`, `Granger`, `Paguma`, `Vegetabilia`, `regnum`, `Anglo-Chinese`. They leak
+because **nan has no foreign-run fallback** — its Latin *is* the language, so unlike wuu/cmn/yue/jv the
+registry injects no English reader, and every Latin token is treated as POJ.
+
+That is a real gap and a separate one, with an attractive property worth recording: **the leak is itself the
+signal.** A Latin run that fails POJ conversion is almost certainly not POJ, so "unconvertible → route to the
+foreign reader" is a well-founded rule rather than a guess. It needs its own measurement (how many genuine
+POJ syllables would a strict converter reject?) and is not folded in here.

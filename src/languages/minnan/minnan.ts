@@ -2,7 +2,8 @@
  * Min Nan / Taiwanese Hokkien (nan) phonemizer — canonical IPA. Sinitic, tonal (~50M speakers). Written in Han
  * characters and/or the Latin romanizations Tâi-lô / POJ. Two front-ends, one converter:
  *   • Han → Tâi-lô via dict.tsv (word→reading, greedy longest-match — the MOE 臺灣閩南語辭典) then Tâi-lô → IPA;
- *   • direct Tâi-lô / POJ input → IPA.
+ *   • direct Tâi-lô / POJ input → IPA — POJ via `pojToTailo`, which folds the six correspondences the
+ *     two orthographies differ on before the Tâi-lô tables see the syllable.
  * The Tâi-lô→IPA converter (minnan.jsonc, initial/final/tone maps from the epitran nan-Latn-tl spec): strip the
  * tone diacritic (identifies the tone) → [initial] + final → IPA + Chao tone letter. Sibilants PALATALISE before
  * i (ts/tsh/s/j+i → t͡ɕ/t͡ɕʰ/ɕ/d͡ʑ); checked finals -p̚/-t̚/-k̚, -h→ʔ; nasalised -nn vowels; syllabic m̩/ŋ̍.
@@ -52,6 +53,48 @@ function dict(): Map<string, string> {
 const MAX_WORD = 6;
 const HAN = /\p{Script=Han}/u;
 
+/**
+ * POJ (Pe̍h-ōe-jī) → Tâi-lô, on a TONELESS base syllable.
+ *
+ * ⚠ WHY THIS EXISTS: THE CONVERTER WAS TÂI-LÔ-ONLY WHILE THE HEADER CLAIMED BOTH. `minnan.jsonc`'s finals
+ * table is the epitran nan-Latn-tl spec — it declares `oo`, `ann`, `ing`, `ik`, `ua`, `ue`, which are the
+ * TÂI-LÔ spellings — so POJ input worked exactly where the two orthographies coincide (`hong`, `tang`) and
+ * fell through to the "unknown rime → leave visible" fallback everywhere else. Measured on the nan corpus,
+ * which IS POJ (nan.wikipedia's convention): **533 of 3,805 distinct word types, 1,482 tokens**, emitted raw
+ * romanization instead of IPA — `pêng-hong` → *peng˧ hɔŋ˥*, `gō͘` → *go͘˧*, `chi` → *chi˥*.
+ *
+ * ⚠ AND NO LEAK CLASS COULD SEE IT. `DIGIT`, `SLOT-GAP`, `RAWMARK` and `ZERO-WIDTH` hunt digits, spacing and
+ * punctuation; an unmapped syllable is Latin letters with a tone letter attached and looks exactly like
+ * ordinary IPA — which is largely ASCII by design (38% of this repo's output characters). What exposed it
+ * was probing for ASCII ⟨g⟩, since canonical IPA uses ɡ U+0261 and this repo emits that everywhere else:
+ * wuu/cmn/yue/jv scored 0 and nan scored 1,482.
+ *
+ * ⚠ APPLIED TO THE TONELESS BASE, WHICH IS WHAT MAKES IT A PLAIN SUBSTITUTION. `syllableParts` has already
+ * pulled the tone diacritics off, so nothing here has to move a combining mark from one vowel to another —
+ * the classic way an orthography fold corrupts its input.
+ *
+ * ⚠ SAFE ON TÂI-LÔ INPUT BY CONSTRUCTION: every left-hand side is a spelling Tâi-lô does not use (it writes
+ * `ts`/`tsh`, `oo`, `nn`, `ua`, `ue`, `ing`, `ik`), so the fold is a no-op on the Han path's dict readings.
+ * Verified against those readings — and it turns out to IMPROVE them: 40 of the 70,535 MOE entries carry
+ * stray POJ spellings (`chı̍t-bóe-hî`, `pêⁿ-chha-sò͘-chōa`, `Lîng-tek`) that were leaking too.
+ */
+function pojToTailo(base: string): string {
+    return (
+        base
+            // ⚠ BOTH DOT SPELLINGS. POJ's ⟨o͘⟩ is U+0358 COMBINING DOT ABOVE RIGHT, but running text also
+            // writes it as a MIDDLE DOT — this corpus has 234 of the former and 141 of the latter.
+            .replace(/o[\u0358\u00b7\u2027]/gu, "oo")
+            .replace(/chh/gu, "tsh") // longest-first, or `ch` eats the digraph
+            .replace(/ch/gu, "ts")
+            .replace(/oa/gu, "ua")
+            .replace(/oe/gu, "ue")
+            .replace(/eng/gu, "ing")
+            .replace(/ek/gu, "ik")
+            // The nasalisation mark, U+207F, written syllable-finally in POJ exactly as Tâi-lô writes ⟨nn⟩.
+            .replace(/\u207f/gu, "nn")
+    );
+}
+
 /** A toneless Tâi-lô base syllable → segmental IPA (initial + final, with sibilant palatalisation). */
 function baseToIpa(base: string): string {
     if (base === "m") return "m̩";
@@ -78,7 +121,9 @@ function syllableParts(syl: string): { seg: string; tone: string } | null {
     const nfd = syl.normalize("NFD");
     let tone = "";
     for (const ch of nfd) if (TONE_MARK[ch]) tone = TONE_MARK[ch]!;
-    const base = [...nfd].filter((c) => !(c in TONE_MARK)).join("").normalize("NFC").toLowerCase();
+    const base = pojToTailo(
+        [...nfd].filter((c) => !(c in TONE_MARK)).join("").normalize("NFC").toLowerCase(),
+    );
     if (!base) return null;
     if (!tone) tone = /[ptkh]$/u.test(base) ? "4" : "1";
     return { seg: baseToIpa(base), tone };

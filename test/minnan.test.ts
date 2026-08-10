@@ -95,6 +95,46 @@ describe("min nan (nan) cardinal numbers — composed Han, read through the ship
     }
 });
 
+describe("nan POJ → Tâi-lô fold (the converter was Tâi-lô-only)", () => {
+    // ⚠ WHY: `minnan.jsonc`'s finals table is the epitran nan-Latn-tl spec — the TÂI-LÔ spellings — so POJ
+    // input worked only where the two orthographies coincide and fell through to "leave the romanization
+    // visible" everywhere else. The corpus IS POJ, so 533 of 3,805 word types (1,482 tokens) emitted raw
+    // romanization instead of IPA. See docs/investigations/nan_normalization_investigation.md Run 3–4.
+    test("every correspondence the two orthographies differ on now converges", () => {
+        for (const [poj, tailo] of [
+            ["peng", "ping"],       // eng ↔ ing
+            ["le̍k", "li̍k"],        // ek  ↔ ik
+            ["gō͘", "gōo"],         // o͘   ↔ oo   (U+0358) — ⚠ TONE-MATCHED pairs, or only the tone differs
+            ["hoaⁿ", "huann"],      // ⁿ   ↔ nn
+            ["chi", "tsi"],         // ch  ↔ ts
+            ["chhi", "tshi"],       // chh ↔ tsh
+            ["koan", "kuan"],       // oa  ↔ ua
+            ["hoe", "hue"],         // oe  ↔ ue
+        ] as const)
+            expect(phonemizeWord(poj), `${poj} vs ${tailo}`).toBe(phonemizeWord(tailo));
+    });
+
+    test("⚠ the MIDDLE DOT spelling of ⟨o͘⟩ is folded too — running text writes both", () => {
+        // 234 combining-dot instances against 141 middle-dot ones in the corpus.
+        expect(phonemizeWord("thò·")).toBe(phonemizeWord("thòo"));
+        expect(phonemizeWord("sò͘")).toBe(phonemizeWord("sòo"));
+    });
+
+    test("⚠ the fold is a NO-OP on Tâi-lô, which is what keeps the Han path safe", () => {
+        // Every left-hand side is a spelling Tâi-lô does not use, so a dict reading passes through unchanged.
+        for (const w of ["ping", "li̍k", "goo", "huann", "tsi", "tshi", "kuan", "hue", "hong", "tang"])
+            expect(phonemizeWord(w), w).not.toMatch(/[A-Z]|g(?![̊])/u);
+        expect(phonemizeWord("台灣")).toBe(phonemizeWord("tâi-uân"));
+    });
+
+    test("⚠ canonical IPA uses ɡ U+0261, never ASCII g — which is what exposed the leak", () => {
+        // wuu/cmn/yue/jv emit zero ASCII `g`; nan emitted 1,482 across the corpus, all unmapped syllables.
+        expect(phonemizeWord("gō͘")).toContain("\u0261");
+        expect(phonemizeWord("gō͘")).not.toContain("g");
+        expect(phonemizeWord("pêng-hong")).not.toMatch(/[a-z]*g[a-z]*/u);
+    });
+});
+
 describe("nan text normalization", () => {
     // Evidence, refusals and dead ends: docs/investigations/nan_normalization_investigation.md.
     // ⚠ SOURCED IN POJ, EMITTED IN HAN. nan.wikipedia is romanized (268 Han characters against 38,490 Latin
