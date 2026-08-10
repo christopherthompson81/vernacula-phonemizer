@@ -141,4 +141,11 @@ shared layer is right for each dialect is the same question `served_by` exists t
 tools/normalization/review.ts --lang <code>` is what says whether that layer has outstanding defects, and
 `tools/normalization/coverage.ts` gives the fleet matrix.
 
-Current state: **81 done, 17 inherited, 114 implemented-but-unnormalized.**
+Current state: **90 done, 17 inherited, 84 implemented-but-unnormalized** (105 rows carry no layer, but 21 of
+those are `rejected`/`unimplemented` and are not candidates — the planning query filters on
+`decision='implemented'`, so 84 is the number to plan from).
+
+⚠ **Re-derive before reading this line, not after.** The six most recent normalization layers — `jv`, `wuu`,
+`nan`, `cjy`, `hak`, `ln` — all landed with the column still blank, so the planning query was offering
+languages that had already been treated. `derive-normalization.py` is cheap and the column is only worth
+planning from if it was regenerated more recently than the last merge.

@@ -234,6 +234,10 @@ zu|Niger-Congo (Bantu)|Latin|12|16
 # code | wikipron | kaikki | epitran(0/1) | espeak(0/1)   — only what has actually been probed/measured.
 REF = """
 bg|46034|47616|0|1
+# ln: espeak ships NO Lingala at all (sources.ts --lang ln), so the letter-name, decimal-point and every
+# sign class start with no espeak tier — which is why ln has no initialisms and no decimal-point word.
+# wikipron and epitran left blank: not probed, rather than confirmed absent.
+ln||34||0
 ti|0|26|1|0
 ckb|972|1037|1|1
 syl|397|492|0|0
@@ -319,27 +323,37 @@ def m(x):  # millions string → absolute int (or "")
     x=x.strip()
     return "" if x=="" else str(int(round(float(x)*1_000_000)))
 
+def entries(block):
+    """Data lines of a `|`-separated block, skipping blanks and `#` comments.
+
+    ⚠ THE COMMENT SKIP IS LOAD-BEARING, not tidiness: every block is parsed with a bare `l.split("|")`,
+    so an explanatory line next to a row — the natural way to record WHY a probe returned what it did —
+    raised a ValueError and took the whole seed down. A block that cannot be annotated ends up holding
+    numbers whose provenance lives nowhere.
+    """
+    return [l for l in (x.strip() for x in block.strip().splitlines()) if l and not l.startswith("#")]
+
 def rows_from_blocks():
     meta={}
-    for l in META.strip().splitlines():
+    for l in entries(META):
         c,fam,scr,l1,l2=l.split("|"); meta[c]=(fam,scr,m(l1),m(l2))
     ref={}
-    for l in REF.strip().splitlines():
+    for l in entries(REF):
         c,w,k,e,s=l.split("|"); ref[c]=(w,k,e,s)
     vext={}
-    for l in VERDICTS_EXTRA.strip().splitlines():
+    for l in entries(VERDICTS_EXTRA):
         c,v=l.split("|"); vext[c]=v
     served={}
-    for l in SERVED.strip().splitlines():
+    for l in entries(SERVED):
         c,sb=l.split("|"); served[c]=sb
     rows=[]
     fl=lambda c: "1" if c in FLEURS else "0"
-    for l in IMPL.strip().splitlines():
+    for l in entries(IMPL):
         c,v,name=l.split("|")
         fam,scr,l1,l2=meta.get(c,("","","",""))
         w,k,e,s=ref.get(c,("","","",""))
         rows.append([c,name,fam,scr,l1,l2,w,k,e,s,"implemented","",v,served.get(c,""),"","",fl(c)])
-    for l in EXTRA.strip().splitlines():
+    for l in entries(EXTRA):
         c,name,fam,scr,l1,l2,dec,reason,notes=l.split("|")
         w,k,e,s=ref.get(c,("","","",""))
         rows.append([c,name,fam,scr,m(l1),m(l2),w,k,e,s,dec,reason,vext.get(c,""),served.get(c,""),"",notes,fl(c)])
