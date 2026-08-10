@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { normalizeMinNan } from "../src/languages/minnan/normalize.ts";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/minnan/minnan.ts";
@@ -92,4 +93,70 @@ describe("min nan (nan) cardinal numbers — composed Han, read through the ship
             expect(phonemize(String(n), "nan")).toBe(ipa);
         });
     }
+});
+
+describe("nan text normalization", () => {
+    // Evidence, refusals and dead ends: docs/investigations/nan_normalization_investigation.md.
+    // ⚠ SOURCED IN POJ, EMITTED IN HAN. nan.wikipedia is romanized (268 Han characters against 38,490 Latin
+    // in the retained corpus), which is where every word was sourced — but users write Han, and the POJ
+    // spellings LEAK ASCII through the converter, so the emitted forms are Han. See the file header.
+    test("⚠ a POJ spelling of the fraction word leaks ASCII; the Han one does not", () => {
+        // This is why the layer emits Han: `hun chi` came out *hun chi˥*, the 之 syllable unmapped.
+        // ⚠ THE ASSERTION NAMES THE LEAK, it does not test for "any Latin": IPA is WRITTEN in ASCII
+        // letters, so a `[A-Za-z]` test here is meaningless (the same trap the Wu tests hit).
+        // The old POJ output was *ɡɔ˧ hun˥ **chi˥*** — the literal string `chi`, unmapped.
+        expect(phonemize("1/5", "nan")).toBe("ɡɔ˧ hun˥ t͡ɕi˥ it̚˧˨");
+        expect(phonemize("50%", "nan")).toBe("paʔ˥˩ hun˥ t͡ɕi˥ ɡɔ˨˩ t͡sap̚˥");
+        // ⚠ 1/5 reads the LITERARY ⟨it⟩, not the colloquial ⟨tsi̍t⟩ of a bare 一 — and that is exactly what
+        // the corpus writes: `Tē-kiû ê gō͘ hun chi it`.
+        expect(phonemize("1/5", "nan")).not.toBe(phonemize("五分之一", "nan"));
+    });
+
+    test("⚠ °C in HAN running text — the shape the POJ corpus could never show", () => {
+        // `溫度10°C到2°C` read *un-tō͘ tsa̍p **toc** kàu…*: the guard was `(?!\p{L})`, a Han character IS
+        // `\p{L}`, so the rule declined and the bare-degree rule fused ⟨tō͘⟩ onto the stranded ⟨C⟩.
+        // The defect was a fused Latin token — *…t͡sap̚˥ **toc**˥ kau̯…* — so the assertion names it.
+        expect(phonemize("溫度10°C到2°C", "nan")).not.toContain("toc");
+        expect(normalizeMinNan("溫度10°C到2°C")).toBe("溫度攝氏10度到攝氏2度");
+        // ⟨攝氏⟩ is a dict WORD reading Liap-sī — the term this corpus defines: `Liap-sī 0 tō͘ (0 °C)`.
+        expect(normalizeMinNan("10°C")).toBe("攝氏10度");
+    });
+
+    test("the grouping comma destroys the value, and this corpus is English-format", () => {
+        // comma groups ×45 against 3 dot-groups; dot decimals ×55 against 2 comma-decimals.
+        expect(normalizeMinNan("1,000")).toBe("1000");
+        expect(normalizeMinNan("181,040 km²")).toBe("181040 平方公里");
+        expect(normalizeMinNan("3.5")).toBe("3點五");
+        // ⚠ the fractional part is HAN digits, one at a time — joined, `1.797` read the CARDINAL
+        // *chhit-pah káu-cha̍p chhit*, "seven hundred ninety-seven".
+        expect(normalizeMinNan("1.797")).toBe("1點七九七");
+    });
+
+    test("⚠ EN DASH and TILDE are ranges; the ASCII HYPHEN is not, and POJ is why", () => {
+        // 5/5 and 4/4 genuine against 26 ASCII hyphens that are mostly the `ISO 8859-N` block, an ISBN,
+        // arithmetic — and POJ's own word-internal syllable joiner.
+        expect(normalizeMinNan("15–16 sè-kí")).toBe("15 到 16 sè-kí");
+        expect(normalizeMinNan("32~64 mg/kg")).toBe("32 到 64 mg/kg");
+        expect(normalizeMinNan("ISO 8859-1")).toBe("ISO 8859-1");
+        expect(normalizeMinNan("ko͘-1-ê")).toBe("ko͘-1-ê"); // a POJ compound, not a range
+        // ⚠ THE LEFT ENDPOINT MAY CARRY ITS UNIT — captured and PUT BACK so step 3 still sees `25°C`.
+        // Asserted end-to-end because ℃ is folded to `°C` by the REGISTRY, upstream of this function.
+        expect(phonemize("25℃~30℃", "nan")).toBe(phonemize("攝氏25度到攝氏30度", "nan"));
+    });
+
+    test("units, exponent, rate and currency — all corpus-sourced, several glossed by the corpus", () => {
+        expect(phonemize("36,000 km²", "nan")).toContain(phonemizeWord("平方"));
+        expect(phonemize("3~4 km/biáu", "nan")).toContain(phonemizeWord("每"));
+        // `Bí-kim 1 kho͘ (US$1)` — the corpus supplies both signs and their readings in one parenthesis.
+        expect(phonemize("$500", "nan")).toContain(phonemizeWord("箍"));
+        expect(phonemize("US$3", "nan")).toContain(phonemizeWord("美金"));
+        // ⟨佮⟩ kap ×114 — Min Nan's own conjunction, not the 和 the other Sinitic layers use.
+        expect(phonemize("A&B", "nan")).toContain(phonemizeWord("佮"));
+    });
+
+    test("a coordinate reads its degrees; the arc marks are dropped, not guessed", () => {
+        // ⟨tō͘⟩ is attested (`lâm-hūi 65-tō͘`); no arc-minute or arc-second word is.
+        expect(normalizeMinNan("118°04'04\"")).toBe("118度 04 04");
+        expect(normalizeMinNan("24°26'")).toBe("24度 26");
+    });
 });

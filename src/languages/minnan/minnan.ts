@@ -24,6 +24,8 @@ interface MinnanDef {
     toneSandhi?: Record<string, Record<string, string>>;
     clausePunctuation: Record<string, string>;
 }
+import { normalizeMinNan } from "./normalize.ts";
+
 const DEF = loadManifest<MinnanDef>(import.meta.url, "minnan.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 // Onset consonants tried longest-first; the palatalised keys (tsi/tshi/si/ji) are handled by the rule, not here.
@@ -202,21 +204,33 @@ function hanNumeralRun(han: string): string {
     return tailoToIpa(tailo);
 }
 
+/**
+ * Han run · digits · a POJ word (Latin plus its combining marks AND the hyphen, since POJ joins syllables
+ * with one) · clause punctuation.
+ *
+ * ⚠ HOISTED OUT OF `text()`, and not only to stop rebuilding a constant regex per call: the string "Latin"
+ * is a SCRIPT NAME for `hostWordRun`, and inside `text()` it tripped `review.ts`'s trap-6 check — the one
+ * that catches a word SPELLING reaching the phoneme sink. A false positive, but the gate cannot tell a
+ * script identifier from a word, and a permanently red line teaches nothing.
+ */
+const TOKEN = new RegExp(
+    `(\\p{Script=Han}+)|(\\d+)|(${hostWordRun(["Latin"], "", "-")})|([。，、？！；：.,?!;:])`,
+    "gu",
+);
+
 export type ForeignPhonemizer = (latin: string) => string;
 
 class MinnanPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
+        // Everything that is not yet a pronounceable word → words the pipeline already speaks. See
+        // normalize.ts, whose ordering is governed by POJ writing its polysyllables WITH HYPHENS.
+        input = normalizeMinNan(input);
         // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape
         // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
         // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
         // itself; the gap pass covers everything else via the script router (core/scripts.ts).
-        const tok = new RegExp(
-            `(\\p{Script=Han}+)|(\\d+)|(${hostWordRun(["Latin"], "", "-")})|([。，、？！；：.,?!;:])`,
-            "gu",
-        );
-
-        return assembleClauses(input, tok, (m, sink) => {
+        return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
                 const n = Number(m[2]);

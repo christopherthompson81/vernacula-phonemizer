@@ -76,7 +76,12 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // the flora convention for "usually 10–15, rarely to 17"), a MIXED FRACTION before a degree sign
         // (`23 1/2°LU`, the tropics), and template debris (`--- jiwa/km²`). Its one true negative is
         // `at –45 °C` inside an ENGLISH citation title, listed for the same reason.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "jv", "km", "kn", "mr", "my", "ta", "tl", "wuu", "xh"]);
+        // nan's entries are dominated by ONE ORTHOGRAPHIC FACT: POJ joins syllables with a HYPHEN, so its
+        // minus class is word-internal punctuation (`ko͘-1-ê`, `--1-piàn`) alongside the `ISO 8859-N` block,
+        // an ISBN and two genuine negatives no Min Nan word can read. Its exponent entry records the same
+        // hazard Wu's does from a different source — a superscript in a nan article is often a ROMANIZATION
+        // TONE NUMBER (jyutping `hoeng¹ gong² dak⁶`), not a power.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "jv", "km", "kn", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

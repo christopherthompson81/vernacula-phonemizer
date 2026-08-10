@@ -109,6 +109,19 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * gate. Name the work, the headword and the sense.
  */
 export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    nan: {
+        "百分之": "⚠ THE GATE CANNOT SEE THIS WORD BECAUSE THE CORPUS IS IN THE OTHER ORTHOGRAPHY. "
+            + "nan.wikipedia is written in POJ, so a HAN spelling scores zero there by construction — and "
+            + "this layer sources its words from POJ prose but EMITS them in Han, because the POJ forms leak "
+            + "ASCII through the converter (`hun chi` → *hun chi˥*, the 之 syllable unmapped) while the Han "
+            + "forms read cleanly. Two independent legs hold it up. (1) THE CONSTRUCTION IS CORPUS-ATTESTED: "
+            + "百分之 is 百 + 分之, and the corpus writes `Tē-kiû ê gō͘ hun chi it` (1/5), `7 hun chi 1`, and "
+            + "`1-pah-bān-hun chi it` — the same construction with a magnitude prefix, which is exactly what "
+            + "百分之 is. (2) THE HAN SPELLING IS VALIDATED BY THE SHIPPED MOE DICTIONARY (Taiwan Ministry of "
+            + "Education Taiwanese dictionary, via dict.tsv): 分之 reads hun-t͡ɕi and 百分之 reads paʔ-hun-t͡ɕi, "
+            + "the POJ word's own reading. The same two-step is confirmed outright elsewhere — nan.wikipedia "
+            + "glosses `Kong-lí ta̍k tiám-cheng (公里逐點鐘)`, pairing the POJ and Han spellings in one line.",
+    },
     ig: {
         // Igbo has NO independent referee (wikipron ibo_latn, epitran ibo-Latn, kaikki: all 404), so a
         // non-corpus tier is the only tier it has beyond the corpus itself.
@@ -265,6 +278,33 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     nl: {
         minus: "measured: every `-\\d` in nl_nl is a score or a range, so the rule would have turned 14 scores "
             + "into negatives — see dutch/normalize.ts step 9",
+    },
+    nan: {
+        // ⚠ EVERY REASON HERE IS A CORPUS MEASUREMENT. nan HAS a referee (wikipron Hokkien), but it is
+        // word→IPA: it can check how a word is pronounced, never whether it is the right word for a SIGN.
+        minus: "measured: THE HYPHEN IS A WORD-INTERNAL SYLLABLE JOINER IN POJ, which is what makes this "
+            + "class unlike any other language's. The corpus's digit-adjacent dashes are POJ compounds "
+            + "(`ko͘-1-ê`, `bó͘-1-ê`, `têng poaⁿ--1-piàn`), the `ISO 8859-1 … 8859-16` designation block, an "
+            + "ISBN (`957-2053-07-8`) and citation pages (`313-332`). The two GENUINE negatives are both "
+            + "inside formulas or glosses — `10°C kàu -2°C` and `(2000 kg) × (−10 m/s)` — and no Min Nan "
+            + "negative-number word occurs anywhere in the corpus. The RANGES are read, via the en dash and "
+            + "the tilde, which are 5/5 and 4/4 genuine (normalize.ts step 2)",
+        equals: "measured: the `=` instances are WIKI SECTION HEADINGS (`== Chām-gōa liân-kiat ==`) and "
+            + "EasyTimeline template code (`ScaleMajor = unit:year increment:20 start:01/01/1800`, "
+            + "`ScaleMinor = unit:year`). Not one is arithmetic in running prose",
+        plus: "measured: the digit-adjacent `+` joins RUNNING MATES in an election table — "
+            + "`Chúi-píⁿ(chóng-thóng)+Lū Siù-liân(hù-chóng-thóng)` — which is a list separator, not an "
+            + "operator, and no Min Nan addition word is attested digit-adjacent",
+        "plus-minus": "measured: zero ± in the artifact",
+        "less-than": "measured: zero `<` in the artifact",
+        "greater-than": "measured: zero `>` in the artifact",
+        divide: "measured: zero ÷ in the artifact",
+        times: "measured: the one `×` is a PHYSICS FORMULA in a quoted gloss, `(2000 kg) × (−10 m/s)`, and "
+            + "no multiplication word is attested; the corpus writes dimensions out in words instead",
+        currency: "measured: `$` IS read (⟨箍⟩, which the corpus glosses — `Bí-kim 1 kho͘ (US$1)`). What "
+            + "remains is ¥ ×2, € ×2, £ ×6 and ¢, for which NO Min Nan currency name occurs anywhere in the "
+            + "corpus — ⟨箍⟩ is the unit word, not a currency name — plus `$now`, which is EasyTimeline "
+            + "template code rather than money",
     },
     jv: {
         minus: "measured: the corpus's ONE true negative is `at –45 °C` inside an ENGLISH bibliographic "
@@ -432,6 +472,43 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
     // English set, so these recur across the fleet; the languages listed here are simply the ones that write
     // a SPACE before the hyphen. Every other language writes it closed and the
     // `(?<![\p{L}\p{M}\p{Nd}])` guard already handles it.
+    nan: {
+        // FOREIGN ITERATION MARKS inside QUOTED JAPANESE AND THAI, which Min Nan does not use: the Japanese
+        // 々 in names (`千々岩 助太郎`, `佐々木舜一`, `天々座理世`, `東方妖々夢`), the hiragana ゝ in a book
+        // title (`Kokoro (こゝろ)`), and Thai's ๆ in a passage ABOUT Thai text (`และอื่นๆ`). Reading them
+        // would need the quoted language's rule, not this one's.
+        iteration: ["々", "ゝ", "ๆ"],
+        // EASYTIMELINE TEMPLATE CODE that survived into the corpus — a chart definition, not prose:
+        // `ScaleMajor = unit:year increment:20 start:01/01/1800`, `from: 25/10/1945 till: $now text:"…"`.
+        // The `$` there is a template variable and the `=` a parameter assignment.
+        "math-sign": ["ScaleMajor =", "ScaleMinor =", "increment:20"],
+        // `km²` after a POJ magnitude word joined by a HYPHEN — `5-ek 1000-ban km²`. The shared tier's
+        // magnitude hop is declared and handles the SPACED form (`1.797 ek km²` reads), but its `magAlt` is
+        // whitespace and POJ also hyphenates. Widening that is a fleet change with its own measurement.
+        // ⚠ A SUPERSCRIPT IN A nan ARTICLE IS OFTEN A ROMANIZATION TONE NUMBER, NOT A POWER — the same
+        // hazard the Wu layer records, here with JYUTPING quoted in a Hong Kong article:
+        // `hoeng¹ gong² dak⁶ bit⁶ hang⁴ zing³ keoi¹`. Plus scientific notation (`1.6749 × 10⁻²⁷ kg`) and a
+        // physics unit (`39.573 MeV/c²`), neither of which this layer reads for any language.
+        exponent: ["1000-ban km²", "5-ek", "chhù-goân-", "hoeng¹", "gong²", "dak⁶", "bit⁶", "hang⁴",
+            "zing³", "keoi¹", "10⁻²⁷", "MeV/c²"],
+        // The genuine negatives and the POJ compounds, listed by span because `acceptedSignClass` tests a
+        // sign regex against a SINGLE CHARACTER and the minus pattern is contextual — the same limitation
+        // tl and wuu record. `-2°C` and `(−10 m/s)` are real negatives with no Min Nan word to read them;
+        // the rest are POJ's word-internal hyphen and the ISO/ISBN designation blocks.
+        minus: ["-2°C", "−10 m/s", "Ko·-1-kái", "--1-piàn", "ko͘-1-ê", "bó͘-1-ê", ", -1633", ", -1636",
+            "8859-1", "8859-2", "8859-3", "8859-4", "8859-5", "8859-6", "8859-7", "8859-8", "8859-9",
+            "8859-10", "8859-11", "8859-13", "8859-14", "8859-15", "8859-16", "957-2053-07-8", "313-332",
+            "2^7-1", "1700-1400", "36-45", "1837-1898", "85%–90%",
+            // POJ's `ko·-1-` compounds (the middle-dot spelling of ko͘), and EasyTimeline chart offsets.
+            "ko·-1-", "shift:(-40,0)"],
+        // ¢ and ¥/€/£ — no Min Nan currency NAME occurs in the corpus (⟨箍⟩ is the unit word), so they are
+        // left unread rather than guessed. `$` IS read.
+        // ⚠ THE POUND DENOMINATIONS ARE LISTED INDIVIDUALLY because `isAcceptedSilent` is all-or-nothing per
+        // LINE, and one sentence lists six of them (`£1 kap £2 … £5, £10, £20, kap £50`). No Min Nan name
+        // for the pound occurs in the corpus — ⟨箍⟩ is the unit word, not a currency — so they are left
+        // unread rather than guessed, as ¥/€/¢/₫ are.
+        currency: ["$now", "3¢", "¥147,778", "£1", "£2", "£5", "£10", "£20", "£50", "M$2", "€;", "€9500", "₫44"],
+    },
     jv: {
         // BARE POWERS OF TEN in astronomy infoboxes — SCIENTIFIC NOTATION (`108,2 × 10⁶ km`,
         // `2,875 × 10⁹ km`, the planetary orbital radii), which this layer reads for NO language: it reads
