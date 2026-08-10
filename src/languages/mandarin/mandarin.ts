@@ -13,7 +13,7 @@ import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
 import { integerToChinese, digitsToChinese } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
-import { normalizeMandarin } from "./normalize.ts";
+import { normalizeMandarin, spellInitialisms } from "./normalize.ts";
 import { clauseSink } from "../../core/clauses.ts";
 import { readForeignRun } from "../../core/foreign.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -39,7 +39,10 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const MEASURE_WORDS = MANIFEST.measureWords;
 // A whitespace-separated pinyin string with at least one tone digit takes the direct pinyin path. Requiring
 // a tone digit keeps bare Latin words (hello, iPhone) and number-bearing tokens out of it → routed properly.
-const PINYIN_INPUT = /^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$/i;
+// ⚠ CASE-SENSITIVE. Pinyin is written lowercase; with the `i` flag this used to match an ALL-CAPS
+// alphanumeric token — `MP3` took the direct pinyin path, found no syllable, and was returned VERBATIM,
+// so the engine emitted the STRING "MP3" into the phoneme stream. An all-caps run is a designation.
+const PINYIN_INPUT = /^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$/u;
 
 /** Embedded Latin → foreign (en) phonemizer, injected by the registry (lazy, like Hindi). */
 export type ForeignPhonemizer = (latin: string) => string;
@@ -190,7 +193,9 @@ class MandarinPhonemizer implements Phonemizer {
 
     text(input: string): string {
         // the Mandarin-specific rewrite (fraction order) before the shared symbol tier.
-        input = SYMBOLS(normalizeMandarin(input));
+        // ⚠ `spellInitialisms` LAST: the symbol tier reads a temperature's SCALE LETTER, so spelling the
+        // ⟨C⟩ of `20°C` before it runs destroys the unit. See the note on that function.
+        input = spellInitialisms(SYMBOLS(normalizeMandarin(input)));
         // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
         if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input))
             return this.pinyinToIpa(input);

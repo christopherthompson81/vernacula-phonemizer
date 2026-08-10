@@ -266,6 +266,33 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         minus: "measured: every `-\\d` in nl_nl is a score or a range, so the rule would have turned 14 scores "
             + "into negatives — see dutch/normalize.ts step 9",
     },
+    wuu: {
+        // ⚠ wuu HAS NO REFEREE (the whole modern Wu ecosystem derives from the one Wugniu tradition, so any
+        // automated referee is circular), and no FLEURS corpus. Every count below is over the mined
+        // artifact's retained text; the words are separately checked against `src/languages/wu/dict.tsv`,
+        // which is a hard gate here — a word the dict does not carry is SKIPPED by the front end, silently.
+        minus: "measured: 169 hyphens, 56 digit-flanked, and ZERO of them a negative. They are RANGES with a "
+            + "unit (`2-8°C`, `15-25公里`, `0-14 岁`), YEAR ranges (`1763-1774`), BUS ROUTE LISTS "
+            + "(`公交车8 - 31 - 32 - 46 - 49D - 55`), MODEL NUMBERS (`747-400`, `Qwen2.5-72B`) and a TONE "
+            + "NOTATION (`223-33`). The ranges ARE read (到, wu/normalize.ts step 6, right-context guarded); "
+            + "the other three shapes are correctly silent. The only `−` U+2212 instances are 2, both inside "
+            + "Japanese-language mathematics copy quoted in a wuu article (`m = −1 で调和平均`)",
+        plus: "measured: 22 `+`, exactly ONE digit-flanked — a programming tutorial computing `3+2`. And the "
+            + "word fails independently: all 47 corpus hits of 加 are BOUND (外加, 加勒比, 新加坡, 加工, 增加, "
+            + "加拿大) and wuu.wikipedia adds only 汤加 and 毕加索, so no operator sense is attested anywhere",
+        "plus-minus": "measured: zero ± in the artifact",
+        equals: "measured: 20 `=`, ONE digit-flanked (`195 kg ÷ 3 = 65 kg`). The rest are WIKI SECTION "
+            + "HEADINGS (`== 参考文献 ==`) and LaTeX formula bodies (`(x-x_m)^2 + (y-y_m)^2 = a^2`, "
+            + "`y = y_m + a \\sin \\theta`). 等于 is in the dict AND corpus-attested in sense — the WORD is "
+            + "fine and the SIGN is not what the count implied; reading it would say 等于等于 参考文献 等于等于 "
+            + "aloud on every article",
+        "less-than": "measured: zero `<` in the artifact",
+        "greater-than": "measured: zero `>` in the artifact",
+        times: "measured: one `×`, and it is SCIENTIFIC NOTATION (`地球质量约为5.97×10²⁴千克`), which this "
+            + "layer reads for no language. 乘 is in the dict but both its corpus hits are 乘坐 'to ride'",
+        divide: "measured: one `÷`, in the same `195 kg ÷ 3 = 65 kg` worked example as the `=` above; 除以 "
+            + "occurs zero times in the corpus",
+    },
 };
 
 /**
@@ -381,6 +408,37 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
     // English set, so these recur across the fleet; the languages listed here are simply the ones that write
     // a SPACE before the hyphen. Every other language writes it closed and the
     // `(?<![\p{L}\p{M}\p{Nd}])` guard already handles it.
+    wuu: {
+        // A SUPERSCRIPT IN A WU ARTICLE IS OFTEN A CHAO TONE NUMBER, NOT A POWER — the language's own
+        // phonology is written with them, and wuu.wikipedia does it constantly: `khan³⁵-ban⁵⁵-kae³¹`,
+        // `[ʑin²²ø⁵⁵tɕʰy²¹]`, `di⁶ jieu⁶`. Silence is the CORRECT reading; a rule that voiced these would
+        // read a pronunciation gloss as arithmetic. That is a hazard specific to the Sinitic dirs and not a
+        // gap. The remaining two are real exponents this layer cannot reach: `m³` needs the metre, which is
+        // deliberately undeclared (米 is one character and inseparable from 米勒 "Miller" in an unspaced
+        // script), and `公分³` puts the superscript on a HAN unit, which the shared tier cannot key on.
+        // Instance-listed rather than class-silenced so a km² regression stays visible — km² IS read.
+        exponent: ["khan³⁵", "ban⁵⁵", "kae³¹", "ʑin²²", "ø⁵⁵", "tɕʰy²¹", "di⁶", "jieu⁶", "doŋ²²³", "473m³",
+            "公分³", "khan³⁵-ban⁵⁵-kae³¹"],
+        // ⚠ NEITHER OF THESE IS ARITHMETIC, which is the whole reason the class refusal in
+        // ACCEPTED_SIGN_SILENCE cannot carry them: that table is consulted per SIGN and the minus pattern is
+        // CONTEXTUAL, so it can never match a single character (the tl entry records the same limitation).
+        //   · `m = −1 で调和平均` — Japanese-language mathematics copy quoted in a wuu article.
+        //   · `kg·m·s −2` — an SI derived unit, where the sign opens a NEGATIVE EXPONENT (s⁻²) spelled with
+        //     an ASCII minus. Reading it as "minus two" would turn a unit into a subtraction.
+        //   · `g·mol −1` and `g·cm −3` are the same SI shape twice more (mol⁻¹, cm⁻³) — one CHEMISTRY
+        //     infobox carries both, so the line is only accepted once every span in it is named.
+        minus: ["= −1", "s −2", "mol −1", "cm −3"],
+        // A COLUMN HEADING IN A STATISTICS TABLE (`省内生产总值/GDP％ 人均省内生产总值`), where the sign
+        // follows an INITIALISM and no number is in reach. The shared tier is right to require a number; a
+        // percent word here would attach to nothing.
+        percent: ["GDP％"],
+        // The Japanese ideographic iteration mark inside JAPANESE text quoted in a wuu article
+        // (`物理学や工学で様々な応用をもつ`). ⚠ AND THE DROP TEST IS A FALSE POSITIVE HERE FOR A SECOND
+        // REASON: 様 is not a dict.tsv key, so the character it would repeat is skipped either way and the
+        // reading is byte-identical with the mark deleted. The mark IS read wherever the base character is
+        // in the dict — 佐々木 → 佐佐木, wu/normalize.ts step 13.
+        iteration: ["様々"],
+    },
     gu: { minus: ["એચજેઆર -3"] },
     kn: { minus: ["ಎಚ್‌ಜೆಆರ್ -3"] },
     mr: { minus: ["चंद्रयान -1"] },

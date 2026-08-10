@@ -1,0 +1,148 @@
+// WIKIPEDIA WORD ATTESTATION — wuu. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "wuu",
+    "wiki": "wuu.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "艾克斯",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 6,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…艾克斯莱班（法语：Aix-les-Bains；阿皮坦语：Èx-los-Bens），本地人常简称为艾克斯（Aix），是法国东南部…",
+                "…艾克斯莱班（法语：Aix-les-Bains；阿皮坦语：Èx-los-Bens），本地人常简称为艾克斯（Aix），是法国东南部奥弗涅-罗讷-阿尔卑斯大区萨瓦省个一个市镇。因境内温泉资源丰富，渠也是一个重要个温泉度假村。…",
+                "…普罗旺斯地区艾克斯（法语：Aix-en-Provence），法国东南部城市，普罗旺斯-阿尔卑斯-蓝色海岸大区罗讷河口省个一个市镇，也是该省…",
+                "…ovence），法国东南部城市，普罗旺斯-阿尔卑斯-蓝色海岸大区罗讷河口省个一个市镇，也是该省个一个副省会。普罗旺斯地区艾克斯垃拉罗讷河口省中部，是迭一地区个政治文化中心，市镇面积为186.08平方公里。…",
+                "…X射线（英语：X-ray），又被称为爱克斯射线、艾克斯射线、伦琴射线或X光，是一种波长范围勒0.01纳米到10纳米之间（对应频率范围30 PHz到30EHz）个电磁辐射形式。…",
+                "…滨海夏朗德省（法语：Charente-Maritime）是法国个一个省。整个省包括四所岛屿： 欧雷翁岛，雷岛，艾克斯岛搭夫人岛（法语：l'île d'Oléron, l'île de Ré, l'île-d'Aix et l'île M…"
+            ]
+        },
+        {
+            "word": "卡拉OK",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 8,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…幼年伊就欢喜歌咏搭跳舞，六岁金边一个歌舞团培育伊做童星，十岁出舞台浪表演观众侪欢喜看伊表演。伊呒多个辰光拍电影，欢喜拍卡拉OK专辑，邪气多至数不胜数。 == 作品 == 2007年电影——好男当婚（Stay Single When） 电影二十来部…",
+                "…影——好男当婚（Stay Single When） 电影二十来部，侪是些高棉言话，搭仔侪是弗太显眼个角色，又唱仔插曲。 卡拉OK光碟《性感少妞》（Sexy baby），是渠用英文唱个成名曲，一龙总有五集发行海外。 卡拉OK光碟《Dalama》（1,…",
+                "…显眼个角色，又唱仔插曲。 卡拉OK光碟《性感少妞》（Sexy baby），是渠用英文唱个成名曲，一龙总有五集发行海外。 卡拉OK光碟《Dalama》（1, 2, 3集），是用高棉文唱个比较严肃个作品。 乐曲光碟有交关多，兼有英文搭高棉文个。 ==…",
+                "…个人资料 == 生勒勒 ： 1983年7月13号 身长 ： 1.89米 体重 ： 85公斤 爱好 ： 网络游戏 搭仔 卡拉ok == 辉煌战绩 == 2004年雅典奥运会，刘翔以12秒91个成绩夺得男子110米栏比赛个金牌，破奥运会纪录、平世界纪…",
+                "…Pum Puang in My Heart 3-4 （2004） Then & Now 1-2 （2005） === 卡拉OK === === 歌曲专辑 === == 外部链接 == 正式网站 档案，存勒互联网档案馆当中。（2008年12月6号）…",
+                "…个作品用独唱或独奏表演跟预制个磁带音乐同时进行。 计算机跟或多键盘乐器可以用来编程产生跟播放MIDI音乐。听众也可以通过卡拉OK成为演出者，这种形式拨日本人创造，它采用录像跟无声乐跟音轨，该咾演出者就可以将他家自该个声音加上去。 == 音乐教育 =…"
+            ]
+        },
+        {
+            "word": "爱克斯",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…X射线（英语：X-ray），又被称为爱克斯射线、艾克斯射线、伦琴射线或X光，是一种波长范围勒0.01纳米到10纳米之间（对应频率范围30 PHz到30EHz）个电…",
+                "…《第二亚琛和约》，又叫《爱克斯·拉夏贝尔和约》，由法国、英国、荷兰搭奥地利拉第二次亚琛和会讨论后于1748年10月18号签定，亦是奥地利王位继承战争个…"
+            ]
+        },
+        {
+            "word": "百分之",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 23,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…可正字个挪威语之一，而另一种是书面挪威语（挪威语：bokmål，又称挪威博克莫尔语）。拉挪威，新挪威语被使用拉初阶书写达百分之十到百分之十五。 书面挪威语形成于丹麦统治时期，受丹麦语个影响咾大；而新挪威语完全基于挪威民间口语，搭丹麦语差别较大。…",
+                "…威语之一，而另一种是书面挪威语（挪威语：bokmål，又称挪威博克莫尔语）。拉挪威，新挪威语被使用拉初阶书写达百分之十到百分之十五。 书面挪威语形成于丹麦统治时期，受丹麦语个影响咾大；而新挪威语完全基于挪威民间口语，搭丹麦语差别较大。…",
+                "…，然後乘車子去汽車旅館或者交關偏僻個地方搭客人作性服務。一回弗小心就容易拔有怪癖個客人殺脫。 根據西方國家調查，街妓里向百分之七十八有交關個人問題，如吸毒、欠債、多子女、拔強暴、犯罪記錄（許多合法个妓院弗容許有犯罪記錄个性工作者來尋工作）等。百分…",
+                "…分之七十八有交關個人問題，如吸毒、欠債、多子女、拔強暴、犯罪記錄（許多合法个妓院弗容許有犯罪記錄个性工作者來尋工作）等。百分之八十二希望立即離開該行業。 == 對策 == 僅作熟客生意、 帶足防護用具（如芥子氣噴霧器）、 自備性交易場化，如出租房…",
+                "…：Marine fish），是对海水当中生活鱼类个称呼。乃朝已经发现个海水鱼已经有16000种横里，占著所有鱼类总量个靠百分之六十。…",
+                "…中国海，渠与泰国、柬埔寨、越南、马来西亚侪搭界。方圆是32万多平方公里，湾来海个水邪气浅，平均45米，又交关咸，平均盐度百分之3.5。…"
+            ]
+        },
+        {
+            "word": "加",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 79,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…湯加，全名湯加王國，是大洋洲個國家，西面是斐濟，首都勒努庫阿洛法。…",
+                "…湯加，全名湯加王國，是大洋洲個國家，西面是斐濟，首都勒努庫阿洛法。…",
+                "…巴勃罗·鲁伊斯·毕加索（西班牙语：Pablo Ruiz y Picasso，1881年10月25日—1973年4月8日），通称巴勃罗·毕加索…",
+                "…毕加索（西班牙语：Pablo Ruiz y Picasso，1881年10月25日—1973年4月8日），通称巴勃罗·毕加索，西班牙裔法国籍激进风格左派畫家、雕塑家、版画家、陶艺家、舞台设计师及作家，搭喬治·布拉克同爲立體主義个創始者，是20…",
+                "…同爲立體主義个創始者，是20世紀現代藝術个主要代表人物之一，遗作逾两万件。畢卡索是少數在生前“名利雙收”个畫家之一。 畢加索、馬塞爾·杜象搭亨利·马蒂斯是三位垃二十世紀初期開始造型艺术革命性發展个藝術家，在繪畫、雕塑、版畫及陶瓷上儕有得顯著个…",
+                "…始造型艺术革命性發展个藝術家，在繪畫、雕塑、版畫及陶瓷上儕有得顯著个進展。 第二次世界大戰期間主要居住在巴黎，巴黎解放後加入法國共產黨。 == 参考文献 == == 外部連結 == 参观巴塞罗那畢卡索博物馆…"
+            ]
+        },
+        {
+            "word": "摄氏度",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 13,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…有新安江，頂大个湖泊为千岛湖。新安江全长293公里，淳安境内68公里。 1961年至1980年间，淳安县年平均温度为17摄氏度，1月份平均温度5.0摄氏度，7月平均温度28.9摄氏度。年平均降雨量1430毫米，年平均日照时数为1951小时。 ==…",
+                "…。新安江全长293公里，淳安境内68公里。 1961年至1980年间，淳安县年平均温度为17摄氏度，1月份平均温度5.0摄氏度，7月平均温度28.9摄氏度。年平均降雨量1430毫米，年平均日照时数为1951小时。 == 行政区划 == 下辖11个…",
+                "…境内68公里。 1961年至1980年间，淳安县年平均温度为17摄氏度，1月份平均温度5.0摄氏度，7月平均温度28.9摄氏度。年平均降雨量1430毫米，年平均日照时数为1951小时。 == 行政区划 == 下辖11个镇、12个乡，8个社区、11…",
+                "…Calorie，缩写为cal），简称卡，是一物理学能量单位，渠个定义为奈1克水拉1大气压（101.325kPa）下提升1摄氏度所需要个热量。描述食物所含热量辰光用个“卡路里”指个是千卡（kcal），即大卡。一千卡等于1000卡路里。…",
+                "…centiPoise(cP) centi-英文表示一百份之一。(1 cP = 10-2P = 10-3 Pa·s) 25摄氏度水个黏度有0.0089 poise，20度辰光1 cP。…",
+                "…硫化物。其他存在形式有氯化物、硫酸盐、碳酸盐搭酸盐。 属于金属个物质有金、银、铜、铁、铝、锡、锰、锌等。拉一大气压搭25摄氏度个常温下头，只有汞弗是固体（液态），其他金属侪是固体。大部分个纯金属是灰色，例外金、铯为黄色，锇为蓝色，铜为暗红色。…"
+            ]
+        },
+        {
+            "word": "华氏",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 17,
+            "articles": 13,
+            "substringOnly": 0,
+            "examples": [
+                "…华氏温标（Fahrenheit Scale）是一种温标，伊个符号为℉。华氏温标个定义是：拉标准大气压下，冰个熔点为32℉，水…",
+                "…华氏温标（Fahrenheit Scale）是一种温标，伊个符号为℉。华氏温标个定义是：拉标准大气压下，冰个熔点为32℉，水个沸点为212℉，中间有180等分，每等分为华氏1度。 根据德国科学家…",
+                "…种温标，伊个符号为℉。华氏温标个定义是：拉标准大气压下，冰个熔点为32℉，水个沸点为212℉，中间有180等分，每等分为华氏1度。 根据德国科学家华伦·海特于1724年所写个一篇期刊，渠使用三个参考温度来标示渠个刻度。奈温度计放了由冰、水搭仔氯…",
+                "…化铵所混合而成个盐水中，量个刻度即为零度，因为迭是当时能制造出最低温度个物品。盐水是一种制冷混合物，可以奈温度自动维持拉华氏零度。第二个刻度是32度，是奈温度计放正好有冰形成拉表面个水中所量得个刻度。第三个刻度为96度，是奈温度计照含入口中，或…",
+                "…摄氏温标（Celcius Scale）是世界里向顶顶普遍使用个一种温标，伊个符号为℃。 == 参见 == 华氏温标…",
+                "…== 大事记 == 伍子胥（伍员）托太子建投奔宋国，正逢宋元公搭世卿华氏发生内战，楚国也派兵帮助华氏，伍员搭太子建逃到郑国。太子建因预谋发动政变，被郑定公杀害，伍员带着太子建个儿子熊胜继续出奔…"
+            ]
+        },
+        {
+            "word": "公斤",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 28,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…公斤（英语：Kilogram或Kilogramme，單位符号kg），又称千克，国际单位制裏向質量个基本單位。在国际单位制个七…",
+                "…物个质量。例如1 mol H2O有18.02 g，那么H2O个摩尔质量为18.02 g/mol。 摩尔质量个国际单位制是公斤每摩尔（kg mol−1），但拉化学领域中，基于历史原因，常以克每摩尔（g mol−1）作为单位。…",
+                "…浣熊属哺乳纲食肉目浣熊科个一种动物。源自北美洲，因渠食前要拿食物拉水中洗濯，故名浣熊。 浣熊通常重5.5到9.5公斤，但有记载个最重个可达28公斤。…",
+                "…科个一种动物。源自北美洲，因渠食前要拿食物拉水中洗濯，故名浣熊。 浣熊通常重5.5到9.5公斤，但有记载个最重个可达28公斤。…",
+                "…Hereford cattle）是一种原产英国赫里福德郡个著名肉牛品种。箇是一种古老个小型早熟家牛品种，成年公牛重900公斤以上，母牛600公斤以上。…",
+                "…attle）是一种原产英国赫里福德郡个著名肉牛品种。箇是一种古老个小型早熟家牛品种，成年公牛重900公斤以上，母牛600公斤以上。…"
+            ]
+        }
+    ],
+}

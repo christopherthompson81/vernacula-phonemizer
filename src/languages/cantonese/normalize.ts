@@ -9,10 +9,15 @@
  * explicit lookaround.
  *
  * Deliberately left alone:
- *   · EMBEDDED LATIN stays on the English phonemizer, as Mandarin decided. Converting all-caps initialisms to
- *     native letter names needs a letter-name table the shipped rime-cantonese dict does not have — it carries
- *     D J K L M N P Q R T X Y Z and not A B C E F G H I O S U V W, and back-deriving the rest from whole-acronym
- *     entries conflicts immediately (S is si1 inside PC/ABC and si4 inside GPS).
+ *   · EMBEDDED LATIN THAT IS NOT AN INITIALISM — foreign proper names and quoted English — stays on the
+ *     English phonemizer, which is right: they are not Cantonese words. ALL-CAPS INITIALISMS ARE NO LONGER
+ *     LEFT ALONE; see `latinRun` in cantonese.ts.
+ *     ⚠ THIS BULLET USED TO SAY THE OPPOSITE, and was wrong in a way worth recording: it deferred the class
+ *     because "the shipped rime-cantonese dict does not have" a letter-name table, while that dict carries
+ *     541 Latin keys — 13 single letters AND 69 whole acronyms with their readings. It also called the
+ *     back-derivation impossible because "S is si1 inside PC/ABC and si4 inside GPS", but those are two
+ *     different letters: PC/ABC align C→si1, and GPS/USB align S→`e1 si4`, a TWO-syllable name whose second
+ *     syllable is the si4. The conflict was an artifact of assuming one syllable per letter.
  *   · 3-DIGIT YEARS (991年) keep the cardinal. Most short "N 年" forms are DURATIONS (10 年後, 48 年歷史), which
  *     take the cardinal correctly, and nothing in the surface form separates them from a real short year.
  *   · NON-YEAR numeric ranges (2-3 公里) get no connective, because a dash between short numbers is as likely a
@@ -22,8 +27,10 @@
  *     (瑪麗．安東尼). Mapping it to a clause mark would insert a pause in the middle of a name. It stays
  *     unmapped, like `·` and `‧`.
  *
- * ⚠ CORE LIMITATION: core/normalizeSymbols.ts matches `[%٪]` but not FULL-WIDTH ％ U+FF05, which is ordinary CJK
- * typography. Step 1 folds it locally; the next CJK language needs the same fold until the shared tier accepts it.
+ * ⚠ THE FULL-WIDTH ％ NOTE HERE WAS OUT OF DATE and is corrected rather than deleted, because it was cited by
+ * the next CJK layer: `core/normalizeSymbols.ts` now matches `[%\u066a\uff05]`, so it reads ％ U+FF05 itself and
+ * no language needs a local fold. Step 1's ％ arm is therefore redundant (harmless, idempotent) and is kept only
+ * because the same statement folds `／`, which the fraction rule in step 6 does still need.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -74,8 +81,9 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     let s = input;
 
     // ── 1. full-width symbol fold ────────────────────────────────────────────────────────────────
-    // FIRST, so exactly one representation reaches every rule below and the shared symbol tier: the tier knows
-    // only ASCII % and Arabic ٪, not the full-width ％ U+FF05 that is ordinary CJK typography.
+    // FIRST, so exactly one representation reaches every rule below. ⚠ The ％ arm is now REDUNDANT — the shared
+    // tier reads all three percent signs itself (see the header) — but `／` → `/` is not: step 6's fraction rule
+    // matches an ASCII slash, and CJK text writes the full-width one.
     s = s.replace(/％/gu, "%").replace(/／/gu, "/");
 
     // ── 1b. the plus sign ───────────────────────────────────────────────────────────────────────

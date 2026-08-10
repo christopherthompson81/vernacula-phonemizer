@@ -17,18 +17,26 @@ import { LATIN_RUN } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
+import { DIGITS, normalizeWu } from "./normalize.ts";
+
 interface WuDef {
     initials: Record<string, string>;
     finals: Record<string, string>;
     tones: Record<string, string>;
     clausePunctuation: Record<string, string>;
+    measureWords: string;
+    letterNames: Record<string, string>;
 }
 const DEF = loadManifest<WuDef>(import.meta.url, "wu.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
 // Initials tried longest-first so digraphs win (tsh>ts>t, ngh>ng>n>g, gh>g, sh>s …).
 const INITIALS = Object.keys(DEF.initials).sort((a, b) => b.length - a.length);
 const VOWEL = "aeiouy";
-const SYLLABIC: Record<string, string> = { m: "m̩", n: "n̩", ng: "ŋ̍" };
+// ⚠ THE GLOTTALIZED SYLLABIC NASALS ARE SEPARATE ENTRIES, not the plain ones with an onset. A bare ⟨mh⟩ finds
+// the ⟨mh⟩ initial and then an EMPTY rime, which is no final, so it fell through to the romanization-visible
+// fallback: 姆 (mh4) leaked `mh4` into the phoneme stream, and 姆妈 — [ʔm̩ma], one of the most ordinary words
+// in the language — was half ASCII. 44 of the dict's 328 unmapped syllable tokens.
+const SYLLABIC: Record<string, string> = { m: "m̩", n: "n̩", ng: "ŋ̍", mh: "ʔm̩", nh: "ʔn̩", ngh: "ʔŋ̍" };
 
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
@@ -37,7 +45,11 @@ function dict(): Map<string, string> {
 const MAX_WORD = 8; // greedy segmentation window
 
 const HAN = /\p{Script=Han}/u;
-const WUGNIU = /^[a-z]+[0-9](?:\s+[a-z]+[0-9])*$/i;
+// ⚠ CASE-SENSITIVE, and the `i` flag it used to carry was a leak. Wugniu is written lowercase; with `i`,
+// any ALL-CAPS letters-plus-digit token matched the whole-string fast path and was handed to
+// `wugniuToIpa`, which found no rime and returned it VERBATIM — `MP3` phonemized to the string "MP3",
+// ASCII and all. An all-caps alphanumeric run is a designation or an initialism, never a reading.
+const WUGNIU = /^[a-z]+[0-9](?:\s+[a-z]+[0-9])*$/u;
 
 /** One Wugniu syllable (e.g. "zaon2", "koq7") → IPA (initial + final + Chao tone). */
 function syllableToIpa(syl: string): string {
@@ -94,7 +106,8 @@ function hanRun(run: string): string {
 
 // Han numeral composition (shared Chinese system) — the Han string is then read through the dict, so number
 // words pick up their sandhi and no separate number IPA is authored.
-const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+// ⚠ `DIGITS` is imported from normalize.ts, which also reads a digit STRING one digit at a time for years and
+// decimal fractions. One table, so the two readings cannot drift apart.
 const SMALL = ["", "十", "百", "千"];
 function under10000(n: number): string {
     if (n === 0) return "";
@@ -134,7 +147,12 @@ class WuPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         // Whole-string Wugniu input (tone digits present) → direct path.
+        // ⚠ BEFORE normalization: a Wugniu reading is `[a-z]+[0-9]` runs, so the normalizer's number rules
+        // would happily claim the TONE DIGITS (`zaon2 he4` has no thousands separator, but `he4-he5` would
+        // read as a range). The romanized path is not text in the orthography and gets none of this layer.
         if (WUGNIU.test(input.trim())) return wugniuToIpa(input);
+        // Everything that is not yet a pronounceable word → Han the dict already speaks. See normalize.ts.
+        input = normalizeWu(input, DEF.measureWords, DEF.letterNames);
         // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape
         // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
         // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin
