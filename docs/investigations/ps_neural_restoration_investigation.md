@@ -382,3 +382,73 @@ So `pbt` is NOT at its ceiling. A realistic bound: closing both classes is worth
 1,312-word Southern referee, i.e. roughly **60.0% → 70%**, without touching the multi-dialect residual at
 all. That is ordinary g2p work of the kind Runs 1–3 already did, and it is a better use of effort than
 anything on the neural side — which Run 4 measured as a wash.
+
+## Run 8 — 2026-08-10 — the splitter, and Run 7's biggest class was my own artifact
+
+Run 7 classified the 396 unreachable words on FOLDED strings and reported a 141-word (36%) "Waziri
+back-vowel shift" — we emit o, the reference had ə/e/i. **Reading the RAW referee killed it:**
+
+```
+املوک    a m l u k        (we say əmlok)
+انګور    a ŋ ɡ u r        (we say əŋɡor)
+اهوړ     a h u ɽ          (we say əhor)
+الوبالو  a l u b ɑ l u    (we say əlobɑlo)
+```
+
+The reference says **/u/ and our g2p says /o/** — nothing to do with Waziri. The eval fold collapses
+`[əaiu]→ə` but leaves `o` alone, so an ENGINE/LEXICON question about which vowel ⟨و⟩ spells appeared, after
+folding, as a dialect vowel shift. ⟨و⟩ is /u/ or /o/ lexically and the abjad does not say which — that is
+precisely what `lexicon.tsv` exists for, and it is the class the espeak lexicon would resolve per word.
+
+⚠ **So the variety share is ~39 of 396 (10%), not 180 (45%).** I have now got this number wrong in both
+directions — Run 5 undercounted it at 62 by keying on ښ/ږ alone, Run 7 overcounted it at 180 by keying on a
+folded vowel. The lesson is the same one twice: **classify on the RAW reference, never on the folded string**,
+because the fold is asymmetric by design and its asymmetries look like linguistic findings.
+
+### `tools/pashto/split_referee_by_dialect.py`
+
+Replaces the single-purpose `build_pbt_referee.py`. Splits any `pus` aggregate into pbt / pbu / pst on the
+ښ/ږ isogloss alone (MacKenzie's ṣ̌/ẓ̌) — ښ→ʂ/x/ç, ږ→ʐ/ɡ/ʝ. Three properties it needs and has:
+
+- **A word with no ښ/ږ is variety-NEUTRAL and appears in all three slices** with all its readings. The slices
+  overlap heavily and differ exactly on the isogloss.
+- **A broad `ʃ`/`ʒ` is an UNCOMMITTED transcription, not a variety**, and also stays in every slice. Treating
+  it as "not Southern" cost 24 hits on this tool's first run — the same mistake as Run 5's, caught by the
+  hit-count check rather than by inspection.
+- **It never consults the engine.** Only vowels and consonants of the reference are read, and only the two
+  diagnostic letters at that.
+
+```
+                       wikipron              kaikki
+pus (aggregate)        744/1306  57.0%       666/1055  63.1%
+pbt  (ours)            744/1181  63.0%       666/1010  65.9%
+pst                    692/1146  60.4%
+pbu                    696/1197  58.1%
+```
+
+⚠ **THE VALIDATION IS THE HIT COUNT, NOT THE PERCENTAGE — 744 → 744 and 666 → 666.** A variety filter must
+remove nothing the engine was already scoring; if it does, it is a difficulty filter wearing a linguistic
+label. The second check is the ordering: the engine scores highest on its own variety and worst on Northern
+(x/ɡ, the furthest reflex from ʂ/ʐ), which is what a real split should produce.
+
+⚠ **A LIMIT WORTH KNOWING BEFORE ANYONE TRUSTS THE pst ROW.** The fold merges [ʂç]→ʃ and ʐ→ʒ, so the grader
+cannot currently tell pbt from pst on the isogloss — only pbu (x/ɡ) is separable. Grading a single-variety
+slice ought to DROP those two fold rules, since the slice already guarantees the reference answers in our
+variety and ʂ should have to match ʂ. That needs per-referee folds, which the harness does not support. Until
+then the pbt/pst numbers differ only by which entries were dropped, not by a stricter comparison.
+
+### Revised picture of the 396
+
+With the Waziri class retracted, the residual is overwhelmingly OURS, and concentrated:
+
+| | n | ~% | |
+|---|---:|---:|---|
+| ⟨و⟩ = /u/ where we emit /o/ | ~141 | 36% | lexical, and exactly what the (uncommitted) espeak lexicon encodes |
+| و/ی realized as a GLIDE | 86 | 22% | the Run 1/3 class, initial position still open |
+| final -ی diphthong (`a ɪ`) | ~50–100 | 13–25% | Run 2's rule does not reach ـايی/ـکی |
+| ښ/ږ another variety | 34 | 9% | genuinely pbu/pst — the only real variety class |
+| homorganic n↔ŋ | 11 | 3% | |
+| ف→p | 5 | 1% | variety |
+
+That is a better result than Run 7's: the ceiling is lower than "45% is somebody else's language" implied,
+and the top three classes are all tractable engine or lexicon work.
