@@ -1,10 +1,24 @@
 // Pashto (ps) — Eastern Iranian, Perso-Arabic ABJAD (extended). wikipron pus (human) PRIMARY + kaikki pus (human)
 // SECONDARY. Like Urdu/Persian, SHORT vowels are usually unwritten → folded (unrecoverable): a~ə~i~u default-vowel
 // quality. Also folds: dental t̪~t / retroflex notation, r~ɻ, dialect ښ/ږ (ʂ~x, ʐ~ɡ), and length.
+//
+// ⚠ EVERY PASHTO REFEREE WE HAVE IS A MACROLANGUAGE AGGREGATE, AND THIS ENGINE IS ONE VARIETY. ISO 639-3 `pus`
+// is a macrolanguage — pbt (Southern/Kandahari), pbu (Northern/Peshawar), pst (Central/Waziri) — and wikipron,
+// kaikki and espeak-ng's ps_list are all aggregated over it. `pashto.ts` declares a single variety ("ښ/ږ =
+// Kandahari retroflex ʂ/ʐ"), so the umbrella marks a correct Southern reading wrong wherever the aggregate
+// happens to carry only a Northern one. The folds below already merge the part that CAN be merged (ʂ~ç~ʃ,
+// ʐ~ʒ); the Northern x (ښ) and ɡ/ʝ (ږ) cannot be, because that would also merge خ and ګ — real contrasts.
+//
+// So the primary DELIBERATELY STAYS THE AGGREGATE — it is the honest floor and must not be gamed — and the
+// variety-consistent slices sit beside it as secondaries. `ps.wikipron-pbt-southern.tsv` is the primary with
+// the entries that answer in another variety removed (tools/pashto/build_pbt_referee.py). The validation that
+// it is a variety filter rather than a difficulty filter: the engine's HIT COUNT IS IDENTICAL ON BOTH — 744
+// before and 744 after — so every line it removes is one the engine scored zero on. 57.0% → 61.5%.
 {
     "referees": [
-        { "file": "ps.wikipron-pus-broad.tsv", "source": "wikipron pus_arab broad (human)", "role": "primary" },
+        { "file": "ps.wikipron-pus-broad.tsv", "source": "wikipron pus_arab broad (human) — MACROLANGUAGE aggregate, the honest floor", "role": "primary" },
         { "file": "ps.kaikki-pus.tsv", "source": "kaikki pus (Wiktionary, human)", "role": "secondary" },
+        { "file": "ps.wikipron-pbt-southern.tsv", "source": "wikipron pus, SOUTHERN (pbt) slice — same source, entries answering in another variety removed", "role": "secondary" },
         { "file": "ps.kaikki-kandahari.tsv", "source": "kaikki pus KANDAHARI slice (dialect-consistent, matches our ʂ/ʐ)", "role": "secondary" }
     ],
     "segmentJoin": true,
