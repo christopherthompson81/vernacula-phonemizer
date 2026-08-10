@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord } from "../src/languages/hakka/hakka.ts";
+import { phonemizePfs, phonemizeWord } from "../src/languages/hakka/hakka.ts";
 import { normalizeHakka } from "../src/languages/hakka/normalize.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
@@ -162,5 +162,98 @@ describe("Hakka normalization", () => {
         expect(getPhonemizer("hak").text("20°C").trim()).toBe("ŋiap̚˩ sz̩˥˧ ŋi˥˧ səp̚˥ tʰu˥˧");
         // the year, which was reading as a cardinal with the morpheme in English
         expect(getPhonemizer("hak").text("2005-ngièn").trim()).toBe("ŋi˥˧ laŋ˩˩ laŋ˩˩ n̩˧˩ ŋian˩˩");
+    });
+});
+
+// ── PHA̍K-FA-SṲ, the romanization hak.wikipedia is actually written in ─────────────────────────────────
+// 93.5% of that wiki's characters are Latin, and every one of them used to route to ENGLISH. `pfs.ts` reads
+// them against `pfs.tsv` (derived from kaikki — see pfs.PROVENANCE.md). Tests pin the rule's BRANCHES:
+// word key, syllable key, composition, and the refusal that hands a run back to the foreign reader.
+describe("Hakka Pha̍k-fa-sṳ front end", () => {
+    test("⚠ THE ROMANIZED AND HAN SPELLINGS OF A WORD PRODUCE IDENTICAL IPA — sandhi included", () => {
+        // This is the strongest check the front end has, because the two paths are separate artifacts and
+        // separate code: dict.tsv/hanRun against pfs.tsv/readPfs. 客家人 is 44→35 sandhi on the middle
+        // syllable, and the PFS word key carries it — which is the entire reason word keys exist.
+        expect(phonemizePfs("Hak-kâ-ngìn")).toBe(phonemizeWord("客家人"));
+        expect(phonemizePfs("Hak-kâ-ngìn")).toBe("hak̚˩ ka˧˥ ŋin˩˩");
+        expect(phonemizePfs("chûng-koet")).toBe(phonemizeWord("中國"));
+    });
+
+    test("syllable keys, and the six tones the diacritics encode", () => {
+        expect(phonemizePfs("ngìn")).toBe("ŋin˩˩"); // à  陽平 11
+        expect(phonemizePfs("mâ")).toBe("ma˦˦"); //   â  陰平 44
+        // ⚠ NOT 犬's kʰian˧˩, and that is the table being honest rather than wrong: several Han characters
+        // share the Sixian spelling `khién` and split in Meixian, so the majority vote picks kʰɛn. The
+        // TONE — ˧˩, 上聲, from the acute — is what this line pins.
+        expect(phonemizePfs("khién")).toBe("kʰɛn˧˩");
+        expect(phonemizePfs("thai")).toBe("tʰaɪ˥˧"); // bare, open → 去 53
+        expect(phonemizePfs("yit")).toBe("it̚˩"); //   bare + stop coda → 陰入 1
+        expect(phonemizePfs("ngi̍t")).toBe("ŋit̚˥"); // a̍ + stop coda → 陽入 5
+    });
+
+    test("⚠ THE TABLE IS LOOKED UP IN NFD — the file is NFC and a mismatch fails toward composition", () => {
+        // `ngìn` is the 4th commonest syllable in the language. With the keys left NFC and the lookup NFD it
+        // missed the table and COMPOSED instead — silently, because composition still produces output. Only
+        // a syllable with no diacritic at all (`tshai`) matched, which is what made it look like it worked.
+        for (const s of ["ngìn", "chûng", "kâ", "chhṳ̂n", "ngièn"]) expect(phonemizePfs(s), s).not.toBe("");
+        expect(phonemizePfs("ngìn".normalize("NFD"))).toBe(phonemizePfs("ngìn".normalize("NFC")));
+    });
+
+    test("⚠ COMPOSED TONES ARE SUPERSCRIPT — the same renderer serves both paths", () => {
+        // `pfsTones` was authored with ASCII digits, so every COMPOSED syllable leaked a bare `44` into the
+        // phoneme stream while every table-sourced one was correct. No Chao letters, no tone.
+        for (const s of ["ngim", "chhṳ̂n", "ông"]) expect(phonemizePfs(s), s).toMatch(/[˩˨˧˦˥]/u);
+        for (const s of ["ngim", "chhṳ̂n", "ông"]) expect(phonemizePfs(s), s).not.toMatch(/[0-9]/u);
+    });
+
+    test("⚠ THE ZERO ONSET IS A REAL ONSET — it is not a row in the manifest table", () => {
+        // Treating the missing row as "unreadable" condemned every vowel-initial syllable with no
+        // onset-sharing sibling; `tûng-ông` (東王) ×127 went to the English reader because of it.
+        expect(phonemizePfs("ông")).not.toBe("");
+        expect(phonemizePfs("tûng-ông")).not.toBe("");
+    });
+
+    test("a run that is not Hakka is handed back to the foreign reader", () => {
+        for (const w of ["Nobel", "Québec", "Castilla", "Zaragoza", "iPhone", "Ireland"])
+            expect(phonemizePfs(w), w).toBe("");
+        // ⚠ AND THE UNIT `km` IS THE REASON THE ≤2-LETTER REFUSAL EXISTS: it parses as PFS (k + syllabic m̩).
+        // The class is `me a tu g u na en km` — 46 types the orthography cannot tell from English.
+        expect(phonemizePfs("km")).toBe("");
+        // …but a 2-letter word that IS attested still reads: the refusal only covers what the table lacks.
+        expect(phonemizePfs("he")).not.toBe("");
+        expect(phonemizePfs("ke")).not.toBe("");
+    });
+
+    test("⚠ A HYPHENATED RUN RESOLVES PER SYLLABLE — a foreign name keeps its Hakka suffix", () => {
+        // `Soria-sén`, `Québec-sén`, `Zaragoza-sén`, `Huesca-sén` (省, "province") are 519 corpus tokens, and
+        // all-or-nothing sent the ⟨sén⟩ to the English reader with the name. The discriminator survives
+        // intact: an unhyphenated foreign word is ONE syllable and still fails as a whole.
+        expect(phonemizePfs("Soria-sén")).toBe(phonemizePfs("sén"));
+        expect(getPhonemizer("hak").text("Soria-sén").trim()).toContain(phonemizePfs("sén"));
+        expect(getPhonemizer("hak").text("Soria-sén").trim()).not.toBe(phonemizePfs("sén"));
+    });
+
+    test("⟨ts⟩/⟨tsh⟩ fold to ⟨ch⟩/⟨chh⟩; ⟨j⟩ does not", () => {
+        // The wiki spells the affricates both ways (5,230 syllable tokens the other way); folding gains 1.2
+        // points of coverage. ⚠ THE SAME TEST ON ⟨j⟩ GAINED 0.1, and the instances say why — `jawa`, `john`,
+        // `james`, `azerbaijan`. Folding it would have claimed foreign names. The small number was the signal.
+        expect(phonemizePfs("tshai")).toBe(phonemizePfs("chhai"));
+        expect(phonemizePfs("tsú")).toBe(phonemizePfs("chú"));
+        expect(phonemizePfs("john")).toBe("");
+        expect(phonemizePfs("jawa")).toBe("");
+    });
+
+    test("end to end — a romanized sentence reads as Hakka, and Han in the same sentence agrees", () => {
+        const out = getPhonemizer("hak").text("客家人 lâu Hak-kâ-ngìn he siông-thùng ke.").trim();
+        // the Han and the PFS spelling of the SAME word, in one sentence, byte-identical
+        expect(out.startsWith("hak̚˩ ka˧˥ ŋin˩˩ lau˦˦ hak̚˩ ka˧˥ ŋin˩˩")).toBe(true);
+        // and no English phonology survives anywhere in it
+        expect(out).not.toMatch(/[ˈˌ]/u);
+    });
+
+    test("the normalizer still runs in front of the PFS reader", () => {
+        // The layer rewrites `2005-ngièn` to 二零零五年 BEFORE tokenization, so the digits never reach here.
+        expect(getPhonemizer("hak").text("2005-ngièn").trim()).toBe("ŋi˥˧ laŋ˩˩ laŋ˩˩ n̩˧˩ ŋian˩˩");
+        expect(getPhonemizer("hak").text("20°C").trim()).toBe("ŋiap̚˩ sz̩˥˧ ŋi˥˧ səp̚˥ tʰu˥˧");
     });
 });

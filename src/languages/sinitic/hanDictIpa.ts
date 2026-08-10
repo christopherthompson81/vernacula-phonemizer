@@ -16,6 +16,17 @@ export interface HanDictDef {
     clausePunctuation: Record<string, string>;
 }
 
+/**
+ * A language may widen the LATIN arm of the tokenizer. ⚠ ONE LANGUAGE NEEDS THIS AND THE REASON IS
+ * STRUCTURAL: hak.wikipedia is written in Pha̍k-fa-sṳ, which joins the syllables of a word with HYPHENS
+ * (`Hak-kâ-ngìn`). The default `LATIN_RUN` stops at the hyphen, so a PFS word arrived as three separate runs
+ * and the reader could never see a WORD — which is exactly the unit that carries tone sandhi. Passing the
+ * hyphen as a run character is what lets `pfs.ts` look up `hak-kâ` and get the sandhi baked reading, the
+ * same way the Han path gets it from a multi-character dict key.
+ * Left undefined by cjy, gan and hsn, which want the default.
+ */
+export type LatinRunOverride = string;
+
 export type ForeignPhonemizer = (latin: string) => string;
 
 const HAN = /\p{Script=Han}/u;
@@ -47,8 +58,9 @@ function syllableToIpa(syl: string, chao: Record<string, string>): string {
     return body + contour;
 }
 
-/** A space-separated dict reading → IPA. */
-function readingToIpa(reading: string, chao: Record<string, string>): string {
+/** A space-separated dict reading → IPA. ⚠ EXPORTED so the Pha̍k-fa-sṳ reader renders tones through
+ *  THIS function rather than a second copy — its table is emitted in dict.tsv's format for that reason. */
+export function readingToIpa(reading: string, chao: Record<string, string>): string {
     return reading.trim().split(/\s+/u).map((s) => syllableToIpa(s, chao)).join(" ");
 }
 
@@ -130,6 +142,7 @@ class HanDictPhonemizer implements Phonemizer {
         private dict: () => Map<string, string>,
         private def: HanDictDef,
         private foreign?: ForeignPhonemizer,
+        private latinRun: LatinRunOverride = LATIN_RUN,
     ) {}
     text(input: string): string {
         const d = this.dict();
@@ -142,7 +155,7 @@ class HanDictPhonemizer implements Phonemizer {
         // ⚠ The Latin arm is ALL of Latin plus marks, not `[A-Za-z]+`: the ASCII class ended the token at a
         // diacritic and left that letter read as an English letter name (`Cañitas` → *kʰˈʌ ˈɛn ˈaᶦt̬əz*). The
         // engine routes a Latin run to the injected reader, so widening is the whole fix.
-        const tok = new RegExp(`(\\p{Script=Han}+)|(\\d+)|(${LATIN_RUN})|([。，、？！；：.,?!;:])`, "gu");
+        const tok = new RegExp(`(\\p{Script=Han}+)|(\\d+)|(${this.latinRun})|([。，、？！；：.,?!;:])`, "gu");
         return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1], d, max, this.def.chao));
             else if (m[2]) {
@@ -158,8 +171,13 @@ class HanDictPhonemizer implements Phonemizer {
 }
 
 /** Build a Han-dict phonemizer. `dict` is a lazy getter; `foreign` handles embedded Latin runs. */
-export function createHanDictPhonemizer(dict: () => Map<string, string>, def: HanDictDef, foreign?: ForeignPhonemizer): Phonemizer {
-    return new HanDictPhonemizer(dict, def, foreign);
+export function createHanDictPhonemizer(
+    dict: () => Map<string, string>,
+    def: HanDictDef,
+    foreign?: ForeignPhonemizer,
+    latinRun?: LatinRunOverride,
+): Phonemizer {
+    return new HanDictPhonemizer(dict, def, foreign, latinRun);
 }
 
 /** Bare word→IPA (tests / eval): a Han run → IPA. */

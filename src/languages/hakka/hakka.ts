@@ -15,10 +15,20 @@
 import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
-import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord } from "../sinitic/hanDictIpa.ts";
+import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord, readingToIpa } from "../sinitic/hanDictIpa.ts";
+import { hostWordRun } from "../../core/hostWord.ts";
 import { normalizeHakka } from "./normalize.ts";
+import { type PfsDef, pfsTable, readPfs } from "./pfs.ts";
 
-const DEF = loadManifest<HanDictDef>(import.meta.url, "hakka.jsonc");
+const DEF = loadManifest<HanDictDef & PfsDef>(import.meta.url, "hakka.jsonc");
+
+/**
+ * ⚠ THE HYPHEN IS PART OF A PHA̍K-FA-SṲ WORD, and that is why this language overrides the Latin run.
+ * PFS joins the syllables of a word with hyphens (`Hak-kâ-ngìn`), so the default `LATIN_RUN` — which stops
+ * at one — delivered three fragments and the reader could never see the WORD. The word is the unit that
+ * carries tone sandhi, exactly as a multi-character key does on the Han side.
+ */
+const PFS_RUN = hostWordRun(["Latin"], "-");
 
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
@@ -33,8 +43,29 @@ function dict(): Map<string, string> {
  * either apply Hakka's rules to them or need a per-language branch in shared code.
  */
 export function createHakka(foreign?: ForeignPhonemizer): Phonemizer {
-    const engine = createHanDictPhonemizer(dict, DEF, foreign);
+    // ⚠ THE LATIN ARM IS PHA̍K-FA-SṲ FIRST AND `foreign` SECOND, which is the whole bring-up: 93.5% of
+    // hak.wikipedia is romanized Hakka, and all of it used to route to English. `readPfs` returns undefined
+    // for a run that does not parse as PFS — a foreign name, quoted English — and only then does the
+    // injected reader see it. See pfs.ts for the measurement behind that split (7.5% is genuinely foreign).
+    const latin = (run: string): string => {
+        const segs = readPfs(DEF, pfsTable(import.meta.url), run);
+        if (segs === undefined) return foreign ? foreign(run) : "";
+        return segs
+            .map((s) => ("reading" in s ? readingToIpa(s.reading, DEF.chao) : foreign ? foreign(s.foreign) : ""))
+            .filter(Boolean)
+            .join(" ");
+    };
+    const engine = createHanDictPhonemizer(dict, DEF, latin, PFS_RUN);
     return { text: (input: string): string => engine.text(normalizeHakka(input)) };
+}
+
+/** Bare Pha̍k-fa-sṳ word → IPA (tests / eval), or "" when the run is not PFS at all. */
+export function phonemizePfs(run: string): string {
+    const segs = readPfs(DEF, pfsTable(import.meta.url), run);
+    if (segs === undefined) return "";
+    // ⚠ The bare probe reports ONLY the Hakka part — a mixed run's foreign fragment has no reading without
+    // the injected reader, and silently emitting its spelling would be playbook trap 6.
+    return segs.filter((s) => "reading" in s).map((s) => readingToIpa((s as { reading: string }).reading, DEF.chao)).join(" ");
 }
 
 /** Bare word→IPA (tests / eval): a Han run → IPA. */
