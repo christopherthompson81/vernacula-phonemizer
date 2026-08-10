@@ -130,3 +130,85 @@ Asked whether more data / a literary reference could lift the ~30% multi-dialect
 CONCLUSION: the remaining Pashto gap is METHODOLOGICAL (multi-dialect referee), not engine- or data-bound — the
 true single-dialect quality is ~69%. The primary wikipron floor stays multi-dialect (not gamed); the Kandahari
 secondary reports the fair number. This is the right place to STOP engine work.
+
+## Run 4 — 2026-08-10 — the data hypothesis, tested with 25× the data and REFUTED
+
+The 2026-07-16 conclusion ("do NOT retrain/wire the neural") was correct, and this run establishes that it was
+correct for a *stronger* reason than the one recorded. The doc attributed the failure partly to data
+starvation — ps silver was 770 rows, 78% all-bare, against a repo starvation line of ~10k pairs. That
+hypothesis is now testable, because the doc's other claim turned out to be wrong.
+
+**"There is NO larger machine-readable Pashto IPA corpus" was a tooling artifact.** espeak-ng ships
+`dictsource/ps_list` — **82,583 word→pronunciation entries** (Hanif Rahman, updated April 2025), plus 1,513
+lines of letter-to-sound rules and a 729-line phoneme table that declares an explicit `ipa` string for every
+phoneme. It was missed because `tools/normalization/sources.ts` gates its espeak tier on `$ESPEAK_NG`, which
+was unset, so it printed *"espeak does not ship this language at all."* A false negative about the
+environment, not a fact about espeak. (The same false negative reached the ps NORMALIZATION commit, whose
+initialism refusal cites it — `ps_list` opens with a full letter-name table.)
+
+**Pipeline.** `tools/pashto/build_espeak_silver.py` converts ps_list to the miner's (word, lang, IPA) shape
+using the phoneme table's own `ipa` declarations — exact, not reconstructed from the mnemonics (`Q` is ʁ and
+`S.` is ʂ; neither is recoverable by eye). 81,259 rows mapped; 1,290 had an unmappable segment and were
+dropped rather than guessed. `invert_harakat.ts` then gained a ps tranche and a `--shard=k/N` flag: the
+search is a per-word brute force over up to 60,000 vocalizations, each a full g2p call, and it is
+embarrassingly parallel — 16 shards turned ~50 minutes of projected serial work into a few minutes.
+
+```
+82,287 candidate rows → labeled 19,400 (23.6%) · miss 60,196 · capped 2,691
+silver: 770 → 19,400 rows        (25×, and 55.3% now carry a harakat, against 22% before the 2026-07-16 fix)
+```
+
+**The tagger.** `tools/pashto/train_ps_harakat.py` — a per-grapheme BiLSTM that predicts HARAKAT rather than
+IPA chunks, unlike every other tagger in this tree. That choice is what makes espeak usable: espeak disagrees
+with our dialect on ږ (`موږ` → ʁ where our Kandahari engine reads ʐ), so an IPA tagger would import that
+reading, while a harakat tagger takes only espeak's VOWEL PLACEMENT and leaves the consonants to our g2p —
+which already encodes the glide epenthesis, the -ی diphthong and the sukun-marked medial glide that Runs 1–3
+built. It also cannot mis-align: a combining mark already sits after its consonant, so no aligner is needed.
+Trained on 17,574 words, held-out per-position accuracy 94.3% — which is near the 85.7% majority-class floor
+and measures agreement with espeak, not Pashto.
+
+**⚠ AND THE FIRST EVAL WAS WRONG, IN A WAY WORTH RECORDING.** It reported an "OOV" column that looked
+devastating (tagger 4.8% vs sync 9.1%). But "OOV" as defined there meant *the inverter could not label this
+word* — i.e. NO vowel assignment reproduces the reference under our g2p. That is a biased-hard subset by
+construction, and it measures the wrong thing. The fair test is words that ARE reachable but were held out of
+training, by the same md5 rule the trainer uses:
+
+| bucket (ex letter-names) | n | BARE | SYNC | TAGGER |
+|---|---:|---:|---:|---:|
+| wikipron TRAIN | 809 | 55.4% | 81.7% | 76.9% |
+| **wikipron HELDOUT** | **101** | **46.5%** | **79.2%** | **49.5%** |
+| wikipron UNREACHABLE | 396 | 0.8% | 0.8% | 1.0% |
+| kaikki TRAIN | 628 | 61.5% | 93.3% | 87.6% |
+| **kaikki HELDOUT** | **75** | **58.7%** | **94.7%** | **57.3%** |
+| kaikki UNREACHABLE | 352 | 2.3% | 2.3% | 2.3% |
+
+**Verdict: the data hypothesis is refuted.** On reachable unseen words the tagger is +3.0pp on wikipron and
+−1.4pp on kaikki against doing nothing — a wash. 25× the training data moved nothing, so the 2026-07-16
+failure was never about volume.
+
+**And the ceiling is now quantified rather than inferred.** 396/1,306 (30%) of wikipron and 352/1,055 (33%)
+of kaikki are UNREACHABLE — the inverter searched up to 60,000 vocalizations per word and no vowel assignment
+reproduces the reference. Those words fail on CONSONANTS, the multi-dialect ښ/ږ, which is exactly what Run 3's
+Kandahari-slice finding predicted (69.5% on a dialect-consistent slice against 55.7% aggregated). **No
+deterministic vowel restorer can satisfy this referee**, neural or otherwise, because a third of it is not a
+vowel question at all. The tagger is NOT shipped; the trainer and `eval_ps_tagger.ts` stay as the
+documented negative.
+
+**What DID move: the lexicon** — the same conclusion Run 1 reached ("the value was in the DATA/lexicon layer").
+
+```
+src/languages/pashto/lexicon.tsv   351 → 10,723 non-identity rows
+running-text token coverage       2.80% → 5.78%   (13.4M tokens of ps.wikipedia)
+referee                           UNCHANGED at 55.7% / 83.8%
+```
+
+⚠ **The referee cannot see this win, and that is not a defect in the win.** The old 351 entries were mined
+FROM wikipron, so they already covered the referee's words; the 10,372 new ones are words wikipron does not
+contain. Running text is where they land. ⚠ And 5.78% is the honest number, not the 37.2% that espeak's raw
+word list covers: the export drops IDENTITY rows, because a word our g2p already reads correctly needs no
+lexicon entry. 5.78% is the share of running tokens whose reading the lexicon CHANGES.
+
+⚠ **LICENSING — AN OWNER DECISION, NOT TAKEN HERE.** `ps_list` is GPL-3.0, so the shipped `lexicon.tsv` is
+now derived from a GPL source. The repo has an exact precedent (`wu/dict.tsv`, 101k entries from rime-wugniu,
+shipped under a per-file GPL-3.0 fence per `LICENSES/PROVENANCE.md` §4.3) and currently lists espeak-ng under
+"consulted without shipping anything". Moving it requires a PROVENANCE entry and the owner's call.

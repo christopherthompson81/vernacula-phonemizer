@@ -1,6 +1,6 @@
 # Harakat restoration lexicon (COVERAGE layer) — undiacritized skeleton ⇥ our vocalization.
 # Source: g2p-inversion over wikipron + kaikki + (ur) Hindi→Urdu real spellings; CC-BY-SA.
-# Regenerate: tools/arabic-restorer/invert_harakat.ts --lexicon → tools/arabic-restorer/export_lexicons.sh
+# Regenerate: tools/perso-arabic/invert_harakat.ts --lexicon → tools/perso-arabic/export_lexicons.sh
 # Non-identity rows only (a bare-skeleton row is a no-op — g2p already yields that IPA). See PROVENANCE.md.
 آبادیات	آبادُیات
 آبدست	آبدسْت
