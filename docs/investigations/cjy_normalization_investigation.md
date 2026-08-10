@@ -154,3 +154,44 @@ the emitted words are not dialect vocabulary choices — 百分之, 分之, 點,
 forms, corpus-verified in the cmn, yue and wuu layers, and every one was checked to SPEAK in the Jin dict.
 The two genuinely dialectal choices were NOT inferred: 和 (×16, coordinating) and 到 (×5, "up to") come from
 the incubator text itself.
+
+---
+
+## Run 3 — 2026-08-09 23:07 — PR review (#792)
+
+With no corpus, the adversarial probe IS the review — there is no diff that could catch a misfire here.
+Ran 24 constructed shapes. **Two defects, both shapes this sweep has met before.**
+
+### ⚠ `2020/2021` → `2021分之2020` — a slashed year pair read as a fraction, for the third time
+
+Javanese guarded exactly this (`taun 1985/1986`) and Min Nan's whole fraction rule was **removed** when its
+only digit/digit slash turned out to be `Fahrenheit 9/11`. cjy has no corpus to count either shape in, so
+the guard is carried on those two languages' evidence and says so: four digits on both sides is a year pair,
+not a fraction.
+
+**Three languages, three corpora, one shape.** Worth treating as a known hazard for any future `a/b` rule
+rather than rediscovering a fourth time.
+
+### `1996年-2007年` lost its connective — and the fix had to move
+
+Both endpoints already take the digit reading (each is followed by its own 年), so nothing was misread; the
+DASH vanished, leaving one date abutting another. wuu needed the identical third arm.
+
+⚠ **The first attempt did nothing**, because I placed it after the single-year rule — by then both endpoints
+are Han and a digit pattern can never see them. Moved above it. That ordering trap is the same one the
+year-RANGE arm exists for, one step further on.
+
+### Probed clean
+
+`ISO 8859-1` · `COVID-19` · `10.1016/j.x` · `p.12-15` · `1.2.3` · `x=y` · `20°C` · `第2个` · `1,8638.36`
+(the Chinese four-digit grouping, correctly untouched) — all unchanged. `第2-3章` → 第2到3章 ·
+`5~6` → 5到6 · `1996–2007年` (en dash) → 一九九六到二零零七年 · `公元前221年` keeps its cardinal, which is the
+fleet's position on 3-digit years.
+
+### Gates after the review fixes
+
+```
+review.ts --lang cjy   checklist CLEAN
+suite                  3,280 tests · tsc clean
+corpus diff            6/36 changed, DROP 7 both sides — ⚠ 36 utterances is not a gate and did not move
+```

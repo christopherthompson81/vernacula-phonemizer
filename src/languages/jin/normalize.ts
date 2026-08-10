@@ -100,15 +100,31 @@ export function normalizeJin(input: string): string {
         /(?<![\d.,])(\d{4})\s*[-–~〜]\s*(\d{4})(?![\d.,])(?=\s*年)/gu,
         (_m, a: string, b: string) => `${spellDigits(a)}到${spellDigits(b)}`,
     );
+    // ⚠ AND THE FORM WITH 年 ON BOTH ENDPOINTS — `1996年-2007年` — which must run BEFORE the single-year
+    // rule, not after: placed after, both endpoints are already Han and a digit pattern can never see them.
+    // Both years take the digit reading either way (each is followed by its own 年), so nothing is misread;
+    // what vanishes is the CONNECTIVE, leaving one date abutting another. wuu needed the same third arm.
+    // ⚠ 3-DIGIT YEARS ARE NOT CLAIMED anywhere here, which is the fleet's position: most short `N年` forms
+    // are DURATIONS (`48年歷史`) and nothing in the surface form separates them from a short year.
+    s = s.replace(
+        /(?<![\d.,])(\d{4})\s*年\s*[-–~〜]\s*(?=\d{4}\s*年)/gu,
+        (_m, a: string) => `${spellDigits(a)}年到`,
+    );
     s = s.replace(/(?<![\d.,:])(\d{4})(?![\d.,])(?=\s*年)/gu, (_m, y: string) => spellDigits(y));
+
 
     // ── 3. the fraction, in the Chinese order ────────────────────────────────────────────────────
     // ⚠ `a/b` IS `b分之a` — "of b parts, a" — and both 分 and 之 speak. Digits required on BOTH sides with
     // nothing numeric adjacent, which keeps a date or a path out. BEFORE the percent tier, whose output
     // contains 分之 itself and would otherwise be re-read by this rule.
+    // ⚠ NOT WHEN BOTH SIDES ARE FOUR DIGITS — `2020/2021` is an academic year or a season, not a fraction,
+    // and the rule read it as "2020 twenty-twenty-firsts". THIS IS THE THIRD TIME THAT SHAPE HAS SURFACED in
+    // this sweep: Javanese guarded it (`taun 1985/1986`) and Min Nan's whole fraction rule was removed when
+    // its only slash turned out to be `Fahrenheit 9/11`. Carried here on their evidence, since cjy has no
+    // corpus of its own to count either shape in.
     s = s.replace(
         /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
-        (_m, num: string, den: string) => `${den}分之${num}`,
+        (m, num: string, den: string) => (num.length === 4 && den.length === 4 ? m : `${den}分之${num}`),
     );
 
     // ── 4. percent, units, exponents and the ampersand, via the shared tier ──────────────────────

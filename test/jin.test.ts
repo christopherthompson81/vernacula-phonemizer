@@ -64,6 +64,15 @@ describe("cjy text normalization", () => {
         // ⚠ THE RANGE ARM MUST COME FIRST: only the RIGHT endpoint sees 年, so left alone `1996-2007年`
         // mixed the cardinal and the digit reading, and step 6 could never repair it.
         expect(normalizeJin("1996-2007年")).toBe("一九九六到二零零七年");
+        // ⚠ …and the form with 年 on BOTH endpoints, which must run BEFORE the single-year rule: placed
+        // after, both endpoints are already Han and a digit pattern can never see them.
+        expect(normalizeJin("1996年-2007年")).toBe("一九九六年到二零零七年");
+        // ⚠ A SLASHED YEAR PAIR IS NOT A FRACTION — the third time this shape has surfaced in the sweep
+        // (jv guarded it; nan's whole fraction rule was removed when its only slash was `Fahrenheit 9/11`).
+        expect(normalizeJin("2020/2021")).toBe("2020/2021");
+        expect(normalizeJin("1/5")).toBe("5分之1");
+        // 3-digit years keep the cardinal — the fleet's position, since `48年歷史` is a DURATION.
+        expect(normalizeJin("公元前221年")).toBe("公元前221年");
     });
 
     test("percent, fraction, decimal and the ampersand", () => {
