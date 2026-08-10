@@ -15,6 +15,12 @@
         "tsh": "t͡sʰ", "ts": "t͡s", "ph": "pʰ", "th": "tʰ", "kh": "kʰ",
         "ch": "t͡ɕʰ", "sh": "ɕ", "zh": "ʑ", "gh": "ɦ", "ngh": "ʔŋ",
         "gn": "ɲ", "ng": "ŋ", "mh": "ʔm", "nh": "ʔn", "lh": "ʔl",
+        // ⚠ ⟨kn⟩ COMPLETES THE GLOTTALIZED SERIES — it is to ⟨gn⟩ ɲ what ⟨mh nh lh ngh⟩ are to ⟨m n l ng⟩,
+        // and it was the only member missing. Without it 仰 (knian5, knieu5, kni5 …) matched ⟨k⟩ and left
+        // ⟨nian⟩, which is no rime, so the whole syllable fell through to the "leave the romanization
+        // visible" fallback and ASCII reached the phoneme stream: 仰光 read *knian5 kuaon3*. 253 of the
+        // dict's 328 unmapped syllable tokens, measured over all 224,129.
+        "kn": "ʔɲ",
         "p": "p", "t": "t", "k": "k", "b": "b", "d": "d", "g": "ɡ",
         "c": "t͡ɕ", "j": "d͡ʑ", "f": "f", "v": "v", "s": "s", "z": "z",
         "h": "h", "m": "m", "n": "n", "l": "l"
@@ -41,6 +47,13 @@
         "0": "˧˦", "1": "˥˧", "2": "˨", "3": "˧˩", "4": "˦",
         "5": "˥", "6": "˩˧", "7": "˥", "8": "˩˨", "9": "˧"
     },
+
+    // Classifiers, for normalize.ts step 12 — `2` before one of these is 两 (lian6), not 二. Corpus-attested
+    // in exactly this position: 两个大都市, 两国, 两轮车, 两座, 两只岛. Written in BOTH character sets because
+    // wuu.wikipedia mixes them freely inside one article; every character here is a dict.tsv key, so none of
+    // them can be a reading the front end silently skips.
+    // ⚠ 月 and 日 are DELIBERATELY ABSENT — "2月" is February, which is 二月.
+    "measureWords": "个個位本张張只隻条條件对對群种種次天年岁歲块塊层層排组組步口面首部台辆輛架座间間扇页頁杯碗瓶盒袋斤磅吨噸",
 
     "clausePunctuation": {
         "。": ".", "，": ",", "、": ",", "？": "?", "！": "!",

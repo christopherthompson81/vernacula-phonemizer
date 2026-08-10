@@ -64,7 +64,14 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // the CLASS refusal with its measurement is in ACCEPTED_SIGN_SILENCE, and the instance spans exist
         // because the class-acceptance test cannot match a contextual sign regex against single characters),
         // and Japanese iteration marks QUOTED as signs in an article about kana orthography.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "km", "kn", "mr", "my", "ta", "tl", "xh"]);
+        // wuu's entries are the third non-designation shape, and the exponent one is a hazard specific to
+        // the Sinitic dirs: A SUPERSCRIPT IN A WU ARTICLE IS OFTEN A CHAO TONE NUMBER, NOT A POWER
+        // (`khan³⁵-ban⁵⁵-kae³¹`, `[ʑin²²ø⁵⁵tɕʰy²¹]`, `di⁶ jieu⁶`) — the language writes its own phonology
+        // that way, so voicing them would read a pronunciation gloss as arithmetic. Listed by instance,
+        // never by class, so a `km²` regression stays visible. Its minus spans are NEGATIVE EXPONENTS in SI
+        // units written with a spaced ASCII minus (`kg·m·s −2`, `g·mol −1`, `g·cm −3`) — the same
+        // contextual-regex limitation tl records, one class further on.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "km", "kn", "mr", "my", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
