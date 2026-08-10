@@ -103,6 +103,21 @@ describe("lingala text normalization", () => {
         expect(normalizeLingala("802.11n")).toBe("802.11n");
     });
 
+    test("a measured SPAN takes its unit once, in front", () => {
+        // ⚠ REGRESSION GUARD: the single-operand arm's lookbehind excludes a letter, a digit and a dot but
+        // NOT a dash, so it used to reach the span's second operand alone and emit `75 - sɛntimɛtɛlɛ 90` —
+        // the unit stranded mid-span, the dash silent. ×8 in the corpus: the zoology infoboxes' length and
+        // weight rows, plus a rainfall figure.
+        expect(normalizeLingala("Molaí (molómi): 75 - 90 cm")).toBe("Molaí (molómi): sɛntimɛtɛlɛ 75 kino 90");
+        expect(normalizeLingala("Bolaí ezalí 13-19 cm")).toBe("Bolaí ezalí sɛntimɛtɛlɛ 13 kino 19");
+        expect(normalizeLingala("(1500-1800 mm)")).toBe("(milimɛtrɛ 1500 kino 1800)");
+        expect(normalizeLingala("39 - 45 kg")).toBe("kilogálame 39 kino 45");
+        // A span the arm DECLINES must reach the range rule whole, not with its tail already rewritten.
+        expect(normalizeLingala("90-75 cm")).toBe("90-75 cm");
+        // …and the narrow guard must not cost a genuine negative measurement its unit.
+        expect(normalizeLingala("-5 km")).toBe("-kilomɛtrɛ 5");
+    });
+
     test("ranges: ascending only, and the three shapes that must NOT be claimed", () => {
         expect(normalizeLingala("na mibu 1965-1975")).toBe("na mibu 1965 kino 1975");
         expect(normalizeLingala("1975-1965")).toBe("1975-1965"); // descending — a score or a season
@@ -152,6 +167,12 @@ describe("lingala text normalization", () => {
         expect(normalizeLingala("du 16ème siècle")).toBe("du ya 16 siècle"); // was raw [e˩me˩] in the IPA
         expect(normalizeLingala("le 1er janvier")).toBe("le ya libosó janvier"); // the SUPPLETIVE branch
         expect(normalizeLingala("2e éd.")).toBe("ya 2 éd.");
+        // ⚠ REGRESSION GUARD: the bare `e` arm allowed an optional SPACE, and all three `\d+ e` instances in
+        // the corpus are the Portuguese conjunction in quoted Portuguese text — so the rule was deleting an
+        // "and" (`em ya 1533 com a invasão`). The multi-letter suffixes keep the optional gap; `e` does not.
+        expect(normalizeLingala("Com a morte em 1.533 e com a invasão"))
+            .toBe("Com a morte em 1533 e com a invasão");
+        expect(normalizeLingala("2 ème")).toBe("ya 2"); // the gap IS tolerated where the suffix is unambiguous
         // ⚠ SPACED ON BOTH SIDES: `A&B` deletes to `AB`, one token where there were two (traps 18/26).
         expect(normalizeLingala("A&B")).toBe("A mpé B");
         expect(normalizeLingala("De Moor & JP Jacquemin")).toBe("De Moor mpé JP Jacquemin");

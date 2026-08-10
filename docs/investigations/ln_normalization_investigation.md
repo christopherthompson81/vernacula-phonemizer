@@ -229,3 +229,50 @@ Note that `ACCEPTED_SIGN_SILENCE` (per CLASS, read by `coverage.ts`) and `ACCEPT
 read by `mine.ts scan`) are different tables answering different questions — the `ln` class-level entry
 written in Run 5 clears `math-sign` in the scan output as `ACCEPTED-CLASS ×14` but cannot speak for the
 five classes above, which needed the instance list.
+
+## Run 7 — 2026-08-10 — reviewing the layer against the corpus, not against itself
+
+Question: do the rules' stated assumptions about EACH OTHER hold on real text? Two regexes were re-derived
+from the corpus rather than re-read, and both were wrong.
+
+```
+grep  \d+\s?[-–—]\s?\d+\s?(km²|km2|m²|m2|km|cm|mm|kg)\b      →  8
+grep  \d+\s+e(?![\w])                                        →  3
+```
+
+**A measured SPAN was being cut in half.** The unit rule's lookbehind excludes a letter, a digit and a dot —
+but not a dash. So the single-operand arm reached the SECOND operand of a range on its own:
+
+```
+Molaí (molómi): 75 - 90 cm   →  Molaí (molómi): 75 - sɛntimɛtɛlɛ 90
+Bolaí ezalí 13-19 cm         →  Bolaí ezalí 13-sɛntimɛtɛlɛ 19
+(1500-1800 mm)               →  (milimɛtrɛ 1500 kino 1800)   ← wanted; got `1500-milimɛtrɛ 1800`
+```
+
+The unit ends up stranded inside the span and the dash goes silent. All 8 instances are the zoology
+infoboxes' length/weight rows plus one rainfall figure, and all 8 are ascending. Fixed with a SPAN arm in
+step 5 that emits the unit once, in front — `sɛntimɛtɛlɛ 75 kino 90`, which is the corpus's own shape
+(`kilomɛtɛlɛ 1 kino 4`) — plus a narrow `(?<!\d\s?[-–—]\s?)` on the single-operand arm so a span the arm
+DECLINES reaches RANGE whole instead of half-rewritten. Narrow rather than putting the dash in the main
+lookbehind, which would also have cost a genuine negative measurement its unit (`-5 km`).
+
+**The ordinal rule was deleting a Portuguese conjunction.** The bare-`e` arm allowed an optional space, and
+all three `\d+ e` instances in the corpus are Portuguese text quoted into the wiki:
+
+```
+Com a morte de Atahualpa em 1.533 e com a invasão espanhola  →  … em ya 1533 com a invasão espanhola
+A Guerra Colombo-Peruana de 1.933 e a colonização militar     →  … de ya 1933 a colonização militar
+```
+
+Zero of the three are ordinals. This is trap 9 with the evidence pointing the other way — the permissive
+alternative is not merely unattested, it is attested WRONG. The multi-letter suffixes (`ème`, `nd`, `er`,
+`ère`, `re`) keep the optional gap because they are unambiguous; the lone `e` now requires adjacency. Tight
+`2e`/`16e` (×184, all French ordinals, which is what the rule is for) is unaffected.
+
+⚠ **Neither shape occurs in the mined artifact's 411 sample lines**, so the corpus diff is byte-identical
+before and after the fix (`changed 108/411` either way) and every gate was green while both bugs were live.
+That is trap 8 from the tooling side: the artifact is the committed evidence, not the whole of the evidence,
+and the fresh dump is what found these. Both are now pinned as regression tests.
+
+Gates after the fix: tsc clean · vitest 233 files / 3327 tests · corpus-diff unchanged (DIGIT 2→0,
+DROP 75→34) · scan `DROP minus ×6` · review.ts 9 ok / 1 FAIL, the intended one.

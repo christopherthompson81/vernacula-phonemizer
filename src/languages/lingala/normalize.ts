@@ -239,10 +239,29 @@ export function normalizeLingala(input: string): string {
     //    FRACTIONAL part and splits the number in half. Measured on the corpus's own `0,44 km²`: a bare
     //    `\d+` matched `44 km²` and emitted `0,kilomɛtrɛ-kare 44` — the comma then survived as a clause
     //    PAUSE and the quantity read as forty-four. The decimal is left written here and step 10 speaks it.
+    //    ⚠ A SPAN TAKES ITS UNIT ONCE, IN FRONT, and this arm is why the unit rule has to know about ranges
+    //    at all. `75 - 90 cm` and `13-19 cm` (×8, the zoology infoboxes' length/weight rows and one rainfall
+    //    figure) are ONE measurement with two endpoints. Without the arm the single-operand rule below
+    //    reached the SECOND operand on its own — its lookbehind excludes a letter, a digit and a dot, but
+    //    not a dash — and emitted `75 - sɛntimɛtɛlɛ 90`, stranding the unit inside the span and leaving the
+    //    dash silent. The corpus's own shape for this is unit-once-in-front (`kilomɛtɛlɛ 1 kino 4`), so the
+    //    arm reads it as `sɛntimɛtɛlɛ 75 kino 90`. Ascending-only and chain-guarded, exactly like RANGE —
+    //    and it must run HERE rather than after step 7, because step 7 would already have spent the dash.
     for (const [sym, word] of UNITS) {
         const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
         s = s.replace(
-            new RegExp(`(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d])`, "gu"),
+            new RegExp(`(?<![\\d.,:\\p{L}\\p{M}-])(\\d+)\\s?[-–—]\\s?(\\d+)\\s?${key}(?![\\p{L}\\p{M}\\d])`, "gu"),
+            (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${word} ${a} kino ${b}` : whole),
+        );
+        // ⚠ AND THE SINGLE-OPERAND ARM MUST REFUSE A SPAN'S SECOND HALF, which is the defect above stated as
+        // a guard: a descending or chained span the arm just declined must reach RANGE whole, not with its
+        // tail already rewritten. `(?<!\d\s?[-–—]\s?)` is narrower than putting the dash in the main
+        // lookbehind, which would also have blocked a genuine negative measurement.
+        s = s.replace(
+            new RegExp(
+                `(?<![\\p{L}\\p{M}\\d.,])(?<!\\d\\s?[-–—]\\s?)(\\d+(?:[.,]\\d+)?)\\s?${key}(?![\\p{L}\\p{M}\\d])`,
+                "gu",
+            ),
             `${word} $1`,
         );
     }
@@ -263,8 +282,9 @@ export function normalizeLingala(input: string): string {
     //    between them there is no pair left to match. After de-grouping, so a grouped endpoint is one
     //    token. See RANGE for the guards and for why non-ascending pairs are left alone.
     //    ⚠ A PERCENT-TO-PERCENT SPAN NEEDS ITS OWN ARM, and it is the one place a dash may sit between two
-    //    non-bare operands. `20%-40%` and `7.5%-10%` (×2, one sentence) are not reachable by RANGE: its
-    //    lookbehind refuses a `.`-preceded digit and its lookahead refuses `%`, both deliberately. The
+    //    non-bare operands. `20%-40%` and `7.5%-10%` (×2, one sentence) are not reachable by RANGE at all:
+    //    it wants the dash to follow the DIGITS, and here a `%` stands between them. (`7.5%` is doubly out
+    //    of reach — RANGE's lookbehind refuses a `.`-preceded digit, so it cannot start at the `5`.) The
     //    `%…-…%` shape cannot be arithmetic — a difference of two percentages is not written this way — so
     //    the arm needs no ascending-vs-descending judgement beyond the one it shares with RANGE, and it
     //    costs NO NEW WORD: `kino` is the same connective, and each operand keeps its `%` for step 8.
@@ -348,8 +368,16 @@ export function normalizeLingala(input: string): string {
     //     the rule exists to remove RAW LETTERS, not to read an idiom. The Lingala ordinal is `ya` +
     //     cardinal (attested ×1000+ as above), and `1er`/`1ère` take the suppletive `libosó` the manifest
     //     already declares as `firstCard`.
+    //     ⚠ THE BARE `e` ARM TAKES NO SPACE, and that is measured rather than tidy. The multi-letter
+    //     suffixes are unambiguous, so they tolerate the optional gap the French typography sometimes leaves
+    //     (`2 ème`). A lone `e` after a space is a DIFFERENT THING: all three `\d+ e` instances in the corpus
+    //     are the PORTUGUESE CONJUNCTION in quoted Portuguese text ("em 1.533 e com a invasão espanhola"),
+    //     zero are ordinals, and the spaced arm was deleting that "and" — `em ya 1533 com a invasão`. Trap 9
+    //     with the evidence pointing the other way: the alternative is not merely unattested, it is attested
+    //     WRONG. Tight `2e`/`16e` (×184, all French ordinals) is what the rule is for and is unaffected.
     s = s.replace(/(?<![\d\p{L}\p{M}])1\s?(?:er|ère|re)(?![\p{L}\p{M}])/gu, "ya libosó");
-    s = s.replace(/(?<![\d\p{L}\p{M}])(\d+)\s?(?:ème|nd|e)(?![\p{L}\p{M}])/gu, "ya $1");
+    s = s.replace(/(?<![\d\p{L}\p{M}])(\d+)\s?(?:ème|nd)(?![\p{L}\p{M}])/gu, "ya $1");
+    s = s.replace(/(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}])/gu, "ya $1");
 
     // 13) THE AMPERSAND — ×254, and every instance read is a bibliographic "and" between two names
     //     ("De Moor & JP Jacquemin", "M. Vences & F. Glaw", "Bd 1&2"). `mpé` is the language's ordinary
