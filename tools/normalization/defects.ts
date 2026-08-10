@@ -179,6 +179,32 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ps: {
+        // ⚠ NO ESPEAK PASHTO AT ALL, so every reason below is a corpus measurement over a fresh
+        // ps.wikipedia dump (242,649 lines after markup and category-residue filtering) and nothing else can
+        // check it. Argued at length in src/languages/pashto/normalize.ts's header.
+        equals: "measured: `=` counts 7,734 and essentially NONE of it is arithmetic. The bulk is WIKI "
+            + "SECTION HEADING markup that wikidump-to-text.py leaves in (`==خوي او عادتونه==`, "
+            + "`==په طبيعت کښي د يورانيم موجوديت==`) and the rest is chemistry and physics copy "
+            + "(`P1=750mmHg V1=290cc`). Reading the sign would say an equals word twice on every heading. "
+            + "`مساوي` ×935 is the ordinary copula-adjective, never a digit-adjacent operator",
+        plus: "measured: `+` counts 2,001 and is almost entirely CHEMICAL EQUATIONS — `2KMnO4+10FeSO4+"
+            + "8H2SO4`, `Cl2+2NaOH → NaClO + NaCl + H2O`, `Al2O3.2H2O + 6NaOh`. `جمع` ×1,729 is the ordinary "
+            + "noun 'sum/total' and the corpus never places it between two operands",
+        times: "measured: `×` counts 196 and is FOUR different things in one glyph — a cartridge dimension "
+            + "(`۳۹×۷،۶۲ ماډل ۴۳ گولی`), scientific notation (`1.60218 × 10 −13 J`), an equipment count "
+            + "(`۲ × Lyulka AL-37FU`) and genuine arithmetic in one maths article (`1×8 + 90×8`). `ضرب` "
+            + "×574 is attested but no single reading is right for all four senses",
+        "less-than": "measured: `<` is digit-adjacent 1 time in the artifact, inside a temperature range "
+            + "copied from an English source (`>950 °C; >1,740 °F`) — a comparative, not an operator",
+        "greater-than": "measured: same instance as `less-than`, the same imported English fragment",
+        "plus-minus": "measured: zero ± in 242,649 lines",
+        divide: "measured: zero ÷ in 242,649 lines",
+        ampersand: "measured: all 297 `&` sit inside LATIN text — `AT&T`, `P&T/Telecom Éireann`, "
+            + "`Sight & Sound`, the Bangladeshi highway pair `N4 & N405`, and URL query strings "
+            + "(`…&oldid=421080475`). The Pashto conjunction is `او`, and emitting it here would put a "
+            + "Pashto word inside an English proper name",
+    },
     ln: {
         // ⚠ NO ESPEAK LINGALA AT ALL and a 36-line referee, so every reason below is a corpus measurement
         // over a fresh ln.wikipedia dump (23,678 paragraphs) and nothing else can check it. The refusals are
@@ -707,6 +733,44 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         minus: ["-2, 0, +4", "+4, +6", "50'-114", "5'-25", "562-ngièn -560", "1906 -1979",
             "303-ngièn -349", "319-ngièn -351", "384-ngièn -407",
             "chṳ́ -yû", "chṳ́ -yu", "sṳ́ -yung", "Chhṳ́ -ngoi"],
+    },
+    ps: {
+        // THE BARE DEGREE SIGN, every instance a GEOGRAPHIC COORDINATE. ps/normalize.ts step 6 reads the
+        // temperature one (`۲۴ °C` → `۲۴ سانتيګراد`, the word attested ×100 and ×56 directly after a
+        // numeral); the degree OF ARC has no attested Pashto reading and neither do the prime/double-prime
+        // marks beside it, so `۳۳°۳۹'۱۱"N` would be half-read at best. Listed by instance so a `°C`
+        // regression stays visible.
+        degree: ["5 °", "29 °", "22 °", "37 °", "45 °", "38 °", "48 °", "31°", "64 °", "۳۳°", "۷۳°",
+            "۱۳°", "۵۹°"],
+        // CURRENCIES THIS LAYER DOES NOT DECLARE, and deliberately: only the dollar is (`ډالر` ×2,520,
+        // ×374 directly after a numeral). The rupee, the pound and the won have NO Pashto name anywhere in
+        // 242,649 lines, and all four instances are foreign-context asides — Indian cinema ticket prices
+        // (`۱۲۰ ₹`, `₹ 50`), a British statutory fine (`د £ ۵۰۰۰ جریمې`) and a Korean prize
+        // (`₩۱۰۰ میلیونه`). Naming them would be invention; `؋`, the AFGHANI, occurs ONCE in the whole
+        // corpus, which is why the country's own currency is not declared either.
+        // ⚠ AND THE `$` SPANS ARE THE OPPOSITE CASE — PERMISSIBLE DROPS the probe cannot see (trap 12).
+        // The sentence NAMES the dollar on the other side of the figure, so ps/normalize.ts step 10 drops
+        // the sign on purpose: `$ 250 ډالرو`, `$۱۷۴۰۰ ډالره`, `100 $ میلیارده امریکایي ډالرو`. The word IS
+        // in the reading — but in an OBLIQUE/plural form (ډالرو، ډالره) where the probe looks for the
+        // citation form ډالر, so the redundancy test scores it as a drop. Emitting the word anyway would
+        // say the currency twice, which is the reading this layer exists to avoid.
+        currency: ["₹", "£", "₩", "$ 250", "$١٧٤٠٠", "100 $"],
+        // AN EN DASH INSIDE A SCIENTIFIC-NOTATION RANGE — `نژدې 10¹¹–10¹² د وينې نوي سلولونه`, i.e.
+        // 10¹¹ to 10¹². It is a span, not a negative, and the range rule (step 8) cannot claim it because
+        // its operands end in SUPERSCRIPTS rather than digits. Reading it as a minus would turn a blood-cell
+        // count into arithmetic. The corpus's true negatives ARE read — `منفي`, step 11.
+        minus: ["10¹¹–10¹²"],
+        // SCIENTIFIC NOTATION, which this layer reads for no language: `4.1×10¹⁰ m³`, `3 x 10²⁶`,
+        // `2×10³⁰`, `4×10¹³`, `7.2 x 10¹³ jouls/kg`, `2.4 x 10⁷`. A mantissa power is a different thing
+        // from a squared unit, and the squared unit IS read (`km²` → `کیلو متر مربع`, step 5).
+        // Three that are not scientific notation and are worth naming separately:
+        //   · `هر km²` — a unit with NO NUMERAL in front of it ("per every km²"). The rule keys on
+        //     number+unit adjacency, which is right; a numberless unit is a tier limitation, not a gap in
+        //     the data, and it is one instance.
+        //   · `۱۳۷ ک.م²` — the exponent on the PASHTO abbreviation of kilometre (ک.م) rather than the Latin
+        //     one. Undeclared because ک.م is two letters plus a dot and would collide with ordinary prose.
+        //   · `يادېږي²` — a FOOTNOTE MARKER on a word, not a power at all.
+        exponent: ["10¹⁰", "10²⁶", "10³⁰", "10¹³", "10⁷", "km²", "ک.م²", "يادېږي²", "m³"],
     },
     ln: {
         // THE BARE DEGREE SIGN, which is not the temperature one. ln/normalize.ts step 6 reads `25 °C` as

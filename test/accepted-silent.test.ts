@@ -99,7 +99,15 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // negatives (two latitudes, the electron charge, absolute zero, two BCE years). Omitting a minus
         // INVERTS the value, no Lingala word for it is attested, and a known-wrong reading does not get to
         // be a green gate — so `ln.minus` deliberately does not exist and `review.ts --lang ln` stays red.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "jv", "km", "kn", "ln", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
+        // ps is the FIFTH corpus to produce the scientific-notation false positive (after wuu, nan, cjy and
+        // hak produced the romanization-tone-number one from four different sources) — `4.1×10¹⁰ m³`,
+        // `2×10³⁰`, `7.2 x 10¹³ jouls/kg`. Its `exponent` entry also records two things worth keeping
+        // separate from that: a unit with NO NUMERAL in front of it (`هر km²`, "per every km²"), which is a
+        // tier limitation rather than missing data, and a FOOTNOTE MARKER (`يادېږي²`) that is not a power at
+        // all. Its `minus` entry is a single EN DASH inside a scientific-notation range (`10¹¹–10¹²`) whose
+        // operands end in superscripts, so the range rule cannot reach it — a span, not a negative, and
+        // Pashto's true negatives ARE read (`منفي`, sourced ×52 digit-adjacent).
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

@@ -12,6 +12,7 @@ import { LATIN_RUN } from "../../core/hostWord.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
+import { makePashtoNormalizer } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -197,7 +198,7 @@ const NUM = DEF.numbers;
  * sub-100 patterns, per the sources cited in pashto.jsonc: irregular fused `teens`, the bound-⟨ویشت⟩ `compound`
  * series for 21-29, and UNITS-FIRST composition (یو دېرش) for 31-99.
  */
-function numberToText(nn: number): string {
+export function numberToText(nn: number): string {
     if (nn < 0) return "";
     if (nn < 10) return NUM.units[nn]!;
     if (nn < 20) return NUM.teens[nn - 10]!; // irregular fused forms — NOT unit+لس
@@ -241,10 +242,21 @@ const TOKEN = new RegExp(
 
 export type ForeignPhonemizer = (latin: string) => string;
 
+/** ⚠ THE NORMALIZER IS A FACTORY AND TAKES `numberToText`, WHICH IS NOT DECORATION. Pashto's ordinal is a
+ *  gender/case SUFFIX written after the digits (`۱۹مه`), and a suffix cannot agree with a digit run — so
+ *  that one rule has to turn the operand into WORDS inside itself and weld the suffix onto the last one
+ *  (playbook trap 14). Passing the speller in rather than importing it there keeps the dependency one-way:
+ *  the engine calls the normalizer, never the reverse. */
+const normalizePashto = makePashtoNormalizer({ numeralWords: numberToText });
+
 class PashtoPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NORMALIZATION runs first — pure text→text, so everything it emits is then read by the ordinary
+        // word, number and clause paths below. It must see the text BEFORE tokenization, because most of
+        // what it repairs (a grouping `،`, a decimal `.`, a clock `:`) is a character this engine's TOKEN
+        // would otherwise hand to `clausePunctuation` as a pause.
+        return assembleClauses(normalizePashto(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(this.foreign ? this.foreign(m[2]) : "");
             else if (m[3]) sink.emit(number(m[3]));
