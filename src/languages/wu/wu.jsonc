@@ -56,8 +56,8 @@
     "measureWords": "个個位本张張只隻条條件对對群种種次天年岁歲块塊层層排组組步口面首部台辆輛架座间間扇页頁杯碗瓶盒袋斤磅吨噸",
 
     // ── LATIN LETTER NAMES, as Han the dict can read ────────────────────────────────────────────────────
-    // An initialism embedded in Wu prose (`中国GDP总量`, `PHP语言`, `SNCF个车站` — 110 tokens of 2–4 letters
-    // in the mined artifact, `initialism: 3430` corpus-wide) used to route to the ENGLISH phonemizer and come
+    // An initialism embedded in Wu prose (`中国GDP总量`, `PHP语言`, `GDP` — 92 tokens of 2–3 letters in the
+    // mined artifact, `initialism: 3430` corpus-wide) used to route to the ENGLISH phonemizer and come
     // out in English phonology: GDP → ɡˈiːdˈiːpʰˈiː, English [iː], English stress, NO TONE, dropped into a
     // tonal utterance. No Wu speaker produces that.
     //

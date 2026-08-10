@@ -181,14 +181,20 @@ const LETTERS: Readonly<Record<string, string>> = {
 /**
  * A Latin run → IPA, preferring what the language records over what English would say.
  *
+ * ⚠ NO SINGLE-LETTER ARM, unlike wuu and cmn, which claim a lone uppercase letter that TOUCHES HAN (`X光`,
+ * `地铁B线`). Counted before deciding: the yue artifact has ZERO Han-adjacent single uppercase letters, against
+ * 9 in cmn's and 6 in wuu's. Widening a guard for a shape the corpus does not contain is how misfires get
+ * invented (playbook trap 9), so this stays until yue has an instance to measure.
+ *
  * ⚠ ONLY ALL-CAPS RUNS ARE CLAIMED. The dict's other Latin keys are lowercase ENGLISH LOANS (`bar baa1`,
  * `account aa6 kaan1`) whose Cantonese reading is right for a loan and wrong for the quoted English the
  * corpus also contains, and nothing in the surface form separates the two. Initialisms have no such
  * ambiguity, so they are the whole of the claim.
  *
  * ⚠ `[IVX]{2,3}` is excluded because Roman numerals belong to `core/roman.ts`, which runs in the registry
- * WRAPPING `text()` — what reaches here is what it declined. Length 2–4, and not flanked by a Latin letter
- * or digit, for the reasons `wu/normalize.ts` step 14 records at length.
+ * WRAPPING `text()` — what reaches here is what it declined. Not flanked by a Latin letter or digit, so an
+ * alphanumeric code is not an acronym. The SPELLING length cap is stated at the guard below; the DICT lookup
+ * deliberately has none. `wu/normalize.ts` step 14 records the shared reasoning at length.
  */
 function latinRun(run: string, foreign?: ForeignPhonemizer): string {
     const english = (): string => (foreign ? foreign(run) : "");

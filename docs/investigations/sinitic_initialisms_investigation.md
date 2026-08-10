@@ -157,3 +157,58 @@ English.
 three, which need a lexical tier none of them has; and the lowercase Latin loans in yue's dict (`bar baa1`,
 `account aa6 kaan1`), which are NOT claimed because nothing in the surface form separates a Cantonese loan
 from the quoted English the corpus also carries.
+
+## Run 5 — 2026-08-09 20:57 — PR review (#789), and one live defect it caught
+
+Reviewed the three commits as a diff. **Five findings, four of them documentation drifting from the code
+across three rounds of changes — and one real misfire no gate had reported.**
+
+### The real one: ⟨度⟩ in the coordinate-range class rewrote a negative as a range
+
+`wu/normalize.ts` step 2 turns the dash between two coordinates into 到, keyed on `[度分秒]`. On plausible
+input that is wrong:
+
+```
+温度-5度   →  温度到五度      "the temperature TO five degrees"
+```
+
+A genuine negative, read as a range, on exactly the shape a listener would notice. It survived every gate
+because **the corpus contains no negative** — the whole `ACCEPTED_SIGN_SILENCE.wuu` minus entry says so —
+so the corpus diff, the artifact scan and the review checklist were all silent. Only reading the rule
+against invented adversarial input found it (playbook trap 8: *zero corpus instances is not evidence of
+correctness*).
+
+The fix costs nothing: **both** attested coordinate ranges have 分 before the dash (`121°48´-121°57ˊ`,
+`29°08ˊ-29°13ˊ`) and none has a bare 度, so narrowing the class to `[分秒]` keeps every real case and
+removes the misfire. Pinned in `test/wu-normalize.test.ts`.
+
+### The four documentation findings, one of which is the claim this work refuted
+
+1. **`cantonese/normalize.ts` still asserted the refusal.** Its header said embedded Latin stays on English
+   because "the shipped rime-cantonese dict does not have" a letter-name table — the exact statement this
+   PR disproved by mining 541 Latin keys out of that dict. Worse, it argued the back-derivation was
+   impossible because *"S is si1 inside PC/ABC and si4 inside GPS"* — **those are two different letters**:
+   PC/ABC align C→si1, while GPS/USB align S→`e1 si4`, a two-syllable name whose second syllable is that
+   si4. The conflict was an artifact of assuming one syllable per letter. Rewritten, with the error kept
+   rather than deleted, since it is the reason the class sat deferred.
+2. **The `％` CORE LIMITATION note in the same header was out of date** — `core/normalizeSymbols.ts` now
+   matches `[%٪％]` itself. Corrected rather than removed, because the next CJK layer cited it; the local
+   fold is kept only for `／`, which the fraction rule still needs, and now says so.
+3. **`wu.jsonc` still described a 2–4 window** after the narrowing to 2–3.
+4. **`cantonese.ts`'s `latinRun` doc said "Length 2–4"** while the code caps *spelling* at 3 and leaves the
+   *dict lookup* uncapped — the asymmetry that is the point of that function.
+
+### One asymmetry left in deliberately, with the count
+
+wuu and cmn claim a lone uppercase letter that touches Han (`X光`, `地铁B线`); **yue does not**. Counted
+before deciding: the yue artifact has **zero** Han-adjacent single uppercase letters, against 9 in cmn's and
+6 in wuu's. Widening a guard for a shape the corpus does not contain is how misfires get invented
+(trap 9), so it stays unclaimed and the reason is recorded at the function.
+
+### Gates after the review fixes
+
+```
+wuu   DROP 89→28, DIGIT 23→0        cmn 21/144, yue 7/79, leak classes 0 both sides
+referee  cmn 84.7% / 94.9%   yue 70.9% / 89.2% + gold 18/18   ALL UNCHANGED
+3,251 tests · tsc clean · review.ts clean for wuu and cmn
+```

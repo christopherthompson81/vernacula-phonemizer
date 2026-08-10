@@ -70,6 +70,10 @@ describe("wuu normalization — text→text", () => {
         // ⚠ THE RANGE DASH BETWEEN TWO COORDINATES cannot be seen by any digit-to-digit rule: by then the
         // left endpoint ends in 分. 4 of the corpus's dropped minus signs were this one shape.
         expect(norm("东经121°48´-121°57ˊ")).toBe("东经121度48分到121度57分");
+        // ⚠ AND ⟨度⟩ IS NOT IN THAT CLASS — with it, `温度-5度` read 温度到五度, a genuine negative rewritten
+        // as a range. Every attested coordinate range has 分 before the dash, so the narrow class costs
+        // nothing. Found in review, not by any gate.
+        expect(norm("温度-5度")).toBe("温度-5度");
     });
 
     test("⚠ the two temperature scales take OPPOSITE orders, and both are wiki-attested", () => {

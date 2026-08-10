@@ -49,8 +49,8 @@
  *   · THE RATE SLASH in general (`18元/张`, `1g/mol`). Only the population-density shape is claimed, because
  *     only that one has an attested reading (step 8).
  *
- * ⚠ The full-width ％ needs NO local fold: `core/normalizeSymbols.ts` accepts `[%٪％]`. (The yue header still
- * says otherwise; it predates that fix.) ℃/℉ likewise arrive already folded to `°C`/`°F` by the registry,
+ * ⚠ The full-width ％ needs NO local fold: `core/normalizeSymbols.ts` accepts `[%٪％]`. (The yue header used to
+ * say otherwise; corrected there in the same change that added this file's letter table.) ℃/℉ likewise arrive already folded to `°C`/`°F` by the registry,
  * and HTML entities are decoded there too — which matters here, because the artifact's `ampersand: 277` is
  * almost entirely `&nbsp;`, and reading the instances is the only thing that showed it.
  */
@@ -136,7 +136,12 @@ export function normalizeWu(
     // 分/秒/度 and no digit-to-digit rule can ever see them: `东经121°48´-121°57ˊ` became 一二一度四八分 …
     // 一二一度五七分 with the range silently gone (4 of the corpus's DROP-minus instances, all of them this
     // shape). 到 is the corpus's own connective for coordinates too — 121°09′30〃至121°54′00〃 writes 至.
-    s = s.replace(/([度分秒])\s*[-–—－~～〜]\s*(?=\d)/gu, "$1到");
+    // ⚠ ⟨度⟩ IS DELIBERATELY NOT IN THIS CLASS, and leaving it in was a live defect: `温度-5度` read
+    // 温度**到**五度 — a genuine negative rewritten as a range, on the one shape a reader would notice. Both
+    // of the corpus's coordinate ranges have 分 before the dash (`121°48´-121°57ˊ`, `29°08ˊ-29°13ˊ`) and
+    // none has a bare 度, so the narrower class keeps every attested case and drops the misfire. A range
+    // between two whole-degree coordinates would need its own evidence before being claimed.
+    s = s.replace(/([分秒])\s*[-–—－~～〜]\s*(?=\d)/gu, "$1到");
 
     // ── 3. temperature scales ────────────────────────────────────────────────────────────────────
     // ⚠ AFTER coordinates (step 2) and BEFORE the bare-degree rule below, which would otherwise consume the
