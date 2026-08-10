@@ -16,6 +16,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord } from "../sinitic/hanDictIpa.ts";
+import { normalizeHakka } from "./normalize.ts";
 
 const DEF = loadManifest<HanDictDef>(import.meta.url, "hakka.jsonc");
 
@@ -24,9 +25,16 @@ function dict(): Map<string, string> {
     return (DICT ??= loadTsvMap(import.meta.url, "dict.tsv"));
 }
 
-/** Build the Hakka Chinese phonemizer. `foreign` handles embedded Latin runs. */
+/**
+ * Build the Hakka Chinese phonemizer. `foreign` handles embedded Latin runs.
+ *
+ * ⚠ THE NORMALIZER WRAPS the shared engine rather than being wired inside it, for the reason `jin.ts` gives:
+ * `sinitic/hanDictIpa.ts` also serves gan and hsn, which have no normalization layer, so a hook there would
+ * either apply Hakka's rules to them or need a per-language branch in shared code.
+ */
 export function createHakka(foreign?: ForeignPhonemizer): Phonemizer {
-    return createHanDictPhonemizer(dict, DEF, foreign);
+    const engine = createHanDictPhonemizer(dict, DEF, foreign);
+    return { text: (input: string): string => engine.text(normalizeHakka(input)) };
 }
 
 /** Bare word→IPA (tests / eval): a Han run → IPA. */

@@ -76,7 +76,7 @@
  * something at 0 substring.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { degroupThousands, readDecimals } from "../../core/sinitic.ts";
+import { degroupThousands, readDecimals, readDegrees } from "../../core/sinitic.ts";
 
 
 /**
@@ -160,8 +160,14 @@ export function normalizeMinNan(input: string): string {
     // failed the guard, fell through to the bare-degree rule, and fused the degree word onto the stranded
     // ⟨C⟩ as one Latin token: *un-tō͘ tsa̍p **toc** kàu…*. In POJ prose a space or punctuation always
     // follows the scale letter, so the bug was invisible there.
-    s = s.replace(/(\d+)\s*°\s*C(?![\p{sc=Latn}])/gu, "攝氏$1度");
-    s = s.replace(/(\d+)\s*°\s*/gu, "$1度 ");
+    // ⚠ MIGRATED TO THE SHARED RULE, AND THAT FIXED A SECOND BUG THIS FILE WAS CARRYING. The local pattern
+    // captured `(\d+)`, which on `13.3°C` matches only the `3` — so the preposed scale name landed INSIDE
+    // the number and `13.3°C` read `13.` + 攝氏三度. yue had the identical defect; wuu did not, only because
+    // it POSTposes Celsius. hak found it, being the first layer built ON `core/sinitic.ts`. Both guards this
+    // file earned — `\p{sc=Latn}` and temperature-before-bare — are in the shared rule, which is why the
+    // migration is a straight substitution. Fahrenheit stays UNDECLARED: `°F` has no corpus instance and no
+    // Min Nan word was sourced for it.
+    s = readDegrees(s, { celsius: (n) => `攝氏${n}度`, bare: (n) => `${n}度 ` });
 
     // ── 4. THE FRACTION RULE WAS REMOVED IN REVIEW, and the count is why ────────────────────────
     // A `a/b` → `b分之a` rule shipped here first, on the strength of the corpus's attested ⟨hun chi⟩
