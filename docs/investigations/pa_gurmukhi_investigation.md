@@ -308,3 +308,22 @@ crossscript mining source (dictionary tranche, filtered, justified), the regener
 dictionary-register labels, 5.5x the old — correct fuel for the retrain once the convention alignment is
 done), and this run. The convention-alignment regeneration (ur/ps analogues of FA_FULL_FOLD) is the
 prerequisite work item.
+
+## Run 11 — 2026-08-09 23:20 — convention alignment done; every retrain still loses to v1; the recipe gap
+
+UR_FULL_FOLD written and wired (the loose fold collapsed BOTH encodable axes — [ɪʊ]→ə and the majhūl — the
+fa bug doubled); ur re-mined two-pass: 5,710 labels, quality-pinned. v4 (all four conventions aligned):
+pa recovers to 57.7 but ur DROPS to 83.4 loose-folded.
+
+The metric-trap hypothesis (the loose-folded eval structurally favors loose-mined v1 labels) was tested and
+KILLED: under UR_FULL_FOLD, v1 439/591 = 74.3% vs v4 405/591 = 68.5% — v1 wins on the axes v4's labels were
+supposed to improve. Three retrains (v2 titles, v3 clean-tranche, v4 aligned), three losses to v1 on the
+fixed eval, on progressively better data.
+
+**The blocker is the RECIPE, not the data: v1's exact training configuration (epochs, upsample, seed, the
+data files as they stood) was never recorded** — its provenance documents architecture and data lineage but
+not the hyperparameters of the winning run. Until that is recovered or re-searched, retrains are guesses
+that keep measuring worse, and the improved silvers (pa 2,541 crossscript-mined; ur 5,710 full-convention)
+sit as fuel without an engine setting. Committed: the mining improvements + silvers + this record; shipped
+model unchanged (v1); v2-v4 checkpoints on /mnt/data only. Next: a small hyperparameter search with the
+fixed eval as the gate — mechanical, GPU-bound, a fresh-session task.

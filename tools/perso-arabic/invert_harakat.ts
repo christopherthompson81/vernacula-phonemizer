@@ -41,6 +41,17 @@ const FA_FULL_FOLD = (s: string): string =>
 // accepts a bare default-ə for ANY short vowel → 78% of ps silver was under-diacritized, the Persian bug). Folds
 // only the DIALECT-invariant axes: the multi-dialect ښ (ʂ/ç→ʃ) / ږ (ʐ→ʒ), the retroflex rhotic ɻ→r, the dental
 // t̪/d̪, and length/gemination (marked inconsistently by the referee). The lax ɪ/ʊ fold to tense i/u (kasra→i, damma→u).
+// FULL-DIACRITIZATION fold for Urdu (ur): the loose referee-eval fold collapses BOTH axes the harakat can
+// encode — the three shorts ([ɪʊ]→ə, so zer/pesh were accepted as bare-schwa: the Persian bug doubled) AND
+// the majhūl ([eɛ]→i, [oɔ]→u, so bare-ی passed for eː where YA_OPTS can write یَ). This fold KEEPS ə/ɪ/ʊ and
+// e/o distinct so the inversion must pin them; only the unencodable openings fold (ɛ→e, ɔ→o). Notation-only
+// axes stay folded (degemination, ɾ→r, ʋ→v, stress).
+const UR_FULL_FOLD = (s: string): string =>
+    s.replace(/[ˈˌ]/g, "").replace(/\s/g, "")
+        .replace(/ɛ(?!ː)/g, "e").replace(/ɔ(?!ː)/g, "o")
+        .replace(/ɛː/g, "eː").replace(/ɔː/g, "oː")
+        .replace(/ɾ/g, "r").replace(/ʋ/g, "v")
+        .replace(/(.)\1/g, "$1").normalize("NFC");
 const PS_FULL_FOLD = (s: string): string =>
     s.replace(/[ˈˌ]/g, "").replace(/\s/g, "").replace(/ː/g, "")
         .replace(/t̪/g, "t").replace(/d̪/g, "d")
@@ -139,6 +150,7 @@ function label(lang: string): void {
     const passes =
         lang === "fa" ? [FA_FULL_FOLD, looseFold]
         : lang === "ps" ? [PS_FULL_FOLD, looseFold]
+        : lang === "ur" ? [UR_FULL_FOLD, looseFold]
         : [looseFold];
 
     // Two outputs from the SAME inverter:
