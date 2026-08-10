@@ -333,3 +333,52 @@ noticed. Added to the manifest-less table beside `ms`/`zsm`.
 assignment are only 62 accounted for by ښ/ږ. The rest (ف→p, ځ→z, diphthong and epenthesis variation) is
 plausibly the same variety phenomenon and has not been counted. Counting it is what would tell us whether
 `pbt` at 60.0% is near its true ceiling or still has engine work in it.
+
+## Run 7 — 2026-08-10 — decomposing the 396: whose words are they, and why can't vowels fix them?
+
+Runs 4–6 left this open and it is the question that decides whether `pbt` at 60.0% is near its ceiling.
+The 396 are the wikipron words (ex letter-names) where the inverter searched up to 60,000 harakat
+vocalizations and NONE reproduced the reference. Classified by cause, most specific first, each word once:
+
+| | n | % | cause |
+|---|---:|---:|---|
+| **VARIETY** | **180** | **45%** | **not pbt's words at all** |
+| | 141 | 36% | the WAZIRI back-vowel shift — we read و as o/u, every reference has ə/e/i (`املوک` əmlok vs əmlək, `الوبالو` əlobɑlo vs ələbɑlə) → **pst** |
+| | 34 | 9% | ښ/ږ read Northern x/ɡ or Central c (`خواږه` xojʒə vs xwɑɡə) → **pbu** / **pst** |
+| | 5 | 1% | ف read as p (`فرانسه` fərɑnsə vs prɑnsə) — Pashto has no native /f/ |
+| **ENGINE** | **107** | **27%** | **pbt's own g2p, fixable in principle** |
+| | 86 | 22% | و/ی realized as a GLIDE by the reference where we read a vowel (`اورول` orol vs əərəwəl) — the Run 1/3 class, reopened |
+| | 11 | 3% | homorganic n→ŋ over- or under-applied (`فرانس` fərɑnəs vs frɑŋs) |
+| | 9 | 2% | residual و/ی glide-vs-vowel |
+| | 1 | 0% | initial ا read short by us, long by the reference |
+| **NOTATION** | 6 | 2% | the reference writes an initial ʔ we do not (`اسلام` əslɑm vs ʔəslɑm) — no phonemic initial-ʔ contrast in Pashto, so arguably a missing fold |
+| **unclassified** | 103 | 26% | dominated by the FINAL -ی DIPHTHONG — see below |
+
+**The unclassified bucket is mostly one thing, and it is engine-side.** Decoding the raw referee rows:
+`امريکايی` is `a m r i k ɑ j a ɪ` and `اوسېدونکی` is `o s e d u ŋ k a ɪ` — the word-final `-ay` diphthong,
+TWO segments, where our g2p emits a single ə. Run 2 built exactly this rule (a word-final و/ی after a vowel
+is the offglide ʊ/ɪ) and it is not firing on these spellings (ـايی, ـکی). 52 of the 396 (13%) differ from a
+reference in nothing but the final one or two segments, which is the signature.
+
+⚠ **This corrects Run 5's estimate.** Run 5 said "only 62 of the 396 are accounted for by ښ/ږ" and left the
+rest open. That undercounted the variety share badly: once the Waziri vowel shift is counted, **180 of 396
+(45%) are other varieties' words**, not 62. The ښ/ږ consonant test was the wrong instrument — Waziri differs
+from Kandahari in its VOWELS, so a consonant-keyed probe cannot see it.
+
+### The answer to "do they belong to pbt"
+
+**Roughly half do not.** 45% are pbu/pst words that a Southern engine is correct to read differently, and no
+amount of engine work will win them — they belong on those rows as evidence, not on pbt's ledger. The other
+~53% (engine + notation + the diphthong tail) IS pbt's, and it is concentrated in two classes that are
+already understood:
+
+- the **و/ی glide-vs-vowel** ambiguity, ~95 words across two buckets — Runs 1 and 3 opened this and closed
+  the -ول and medial cases; the reference's `əwrəŋɡzeb` for `اورنګزېب` shows the initial/other positions are
+  still open;
+- the **final -ی diphthong** on ـايی/ـکی, ~50-100 words — Run 2's rule exists and does not reach these
+  spellings.
+
+So `pbt` is NOT at its ceiling. A realistic bound: closing both classes is worth up to ~150 words of the
+1,312-word Southern referee, i.e. roughly **60.0% → 70%**, without touching the multi-dialect residual at
+all. That is ordinary g2p work of the kind Runs 1–3 already did, and it is a better use of effort than
+anything on the neural side — which Run 4 measured as a wash.
