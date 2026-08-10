@@ -320,10 +320,29 @@ KILLED: under UR_FULL_FOLD, v1 439/591 = 74.3% vs v4 405/591 = 68.5% — v1 wins
 supposed to improve. Three retrains (v2 titles, v3 clean-tranche, v4 aligned), three losses to v1 on the
 fixed eval, on progressively better data.
 
-**The blocker is the RECIPE, not the data: v1's exact training configuration (epochs, upsample, seed, the
-data files as they stood) was never recorded** — its provenance documents architecture and data lineage but
+**The blocker looked like the recipe — ⚠ SEE RUN 12: the recipe WAS recorded** (arabic_script_restorer
+Run 9: upsample 4×, best at epoch 1) **and the real gap was not consulting it, plus the moved data state** — its provenance documents architecture and data lineage but
 not the hyperparameters of the winning run. Until that is recovered or re-searched, retrains are guesses
 that keep measuring worse, and the improved silvers (pa 2,541 crossscript-mined; ur 5,710 full-convention)
 sit as fuel without an engine setting. Committed: the mining improvements + silvers + this record; shipped
 model unchanged (v1); v2-v4 checkpoints on /mnt/data only. Next: a small hyperparameter search with the
 fixed eval as the gate — mechanical, GPU-bound, a fresh-session task.
+
+## Run 12 — 2026-08-09 23:50 — CORRECTION: v1's recipe WAS recorded; the gap was me not reading it
+
+Run 11 claimed "v1's training recipe was never recorded — a provenance gap". WRONG: it is in
+`arabic_script_restorer_investigation.md` Run 9 (2026-07-15), where it always was — "riders upsampled 4× +
+Arabic replay … 15.3M params, **best at epoch 1, early-stopped**". Three retrains were run without
+consulting the folder that exists to prevent exactly that.
+
+The record also explains the losses: v1 is a NEAR-UNTOUCHED WARM-START (one epoch), and the trainer's
+early-stop gate watches silver held-out DER — a metric that kept improving through my 19-25-epoch runs
+while the wikipron generalization the fixed eval measures degraded. v5 (the recorded --epochs 2 on TODAY'S
+data) still loses (72.2 overall; ps 46.4) — the recipe alone does not transfer because the DATA STATE also
+moved (fa's full-diac silver post-dates v1; my ur/pa silvers are new). Reproducing v1 exactly = the July-15
+data + epoch-1; beating it with the better silvers = a search over {epochs, upsample, data-mix} gated on
+the WIKIPRON eval, not silver DER. Both are now stated with the pointer to the original record.
+
+Two lessons, recorded where they bite: the trainer's early-stop gate should BE the wikipron end-to-end (the
+silver DER gate optimizes memorization of the mining distribution); and "not recorded" claims must cite a
+search of docs/investigations — the folder held the answer for three full retrains.
