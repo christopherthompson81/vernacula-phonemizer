@@ -46,6 +46,18 @@ describe("core/sinitic — the shared rules", () => {
         expect(reorderFraction("至少2/3贊同票", "分之")).toBe("至少3分之2贊同票");
     });
 
+    test("⚠ A FRACTION FUSED TO A LATIN LETTER IS A CODE — found by the first language built ON this module", () => {
+        // hak.wikipedia's rolling-stock articles write train-set numbers as `A/C/B351/352`, and the
+        // digit-only lookbehind let every one through: *…352分之351*, "351 over 352". Nothing legitimate is
+        // written with a fraction fused to a letter, so the guard costs nothing — verified byte-identical
+        // over the cmn, yue, wuu, nan and cjy corpora.
+        expect(reorderFraction("A/C/B351/352", "分之")).toBe("A/C/B351/352");
+        expect(reorderFraction("SP1900/1950", "分之")).toBe("SP1900/1950");
+        // …and a real fraction still reads: a space or a Han character precedes it.
+        expect(reorderFraction("Fahrenheit 9/11", "分之")).toBe("Fahrenheit 11分之9");
+        expect(reorderFraction("即1/1000", "分之")).toBe("即1000分之1");
+    });
+
     test("decimals: the tail is digit-by-digit, and a dotted designation is not a decimal", () => {
         expect(readDecimals("3.5", "點")).toBe("3點五");
         expect(readDecimals("6.34", "點")).toBe("6點三四"); // never 六點三十四
@@ -65,6 +77,22 @@ describe("core/sinitic — the shared rules", () => {
         expect(readDegrees("溫度10°C到2°C", d)).toBe("溫度攝氏10度到攝氏2度");
         // The positions are per-language, which is why the rule takes FUNCTIONS: wu POSTposes Celsius.
         expect(readDegrees("17°C", { celsius: (n) => `${n}摄氏度` })).toBe("17摄氏度");
+    });
+
+    test("⚠ THE NUMBER INCLUDES ITS DECIMAL PART — a shipped bug in every PREPOSING language", () => {
+        // The pattern captured `(\d+)`, which on `13.3 °C` matches only the `3`, so the scale word landed
+        // INSIDE the number: yue and nan both read it as `13.` + 攝氏三度 — the integer part orphaned in
+        // front of a raw stop and the temperature off by a factor of four.
+        const pre = { celsius: (n: string) => `攝氏${n}度`, fahrenheit: (n: string) => `華氏${n}度` };
+        expect(readDegrees("13.3 °C", pre)).toBe("攝氏13.3度");
+        expect(readDegrees("34.2°C", pre)).toBe("攝氏34.2度");
+        expect(readDegrees("98.6°F", pre)).toBe("華氏98.6度");
+        expect(readDegrees("23.5°", { bare: (n) => `${n}度` })).toBe("23.5度");
+        // ⚠ WHY IT SURVIVED FOUR LAYERS: wu POSTposes, so the split reassembles to the same string and the
+        // defect is invisible from exactly the one language that puts the word on the other side.
+        expect(readDegrees("13.3°C", { celsius: (n) => `${n}摄氏度` })).toBe("13.3摄氏度");
+        // ⚠ THE INTEGER ARM IS UNCHANGED — the decimal part is optional.
+        expect(readDegrees("20°C", pre)).toBe("攝氏20度");
     });
 
     test("spellHanDigits leaves a non-digit alone", () => {

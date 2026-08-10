@@ -172,20 +172,7 @@ export function normalizeHakka(input: string): string {
     // (`温度-5度`) rewritten as a range. Both of this corpus's coordinate ranges have 分 before the dash.
     s = s.replace(/([分秒])\s*[-–—－~～〜]\s*(?=\d)/gu, "$1至");
 
-    // ── 4. a negative temperature ────────────────────────────────────────────────────────────────
-    // ⚠ THE WORD IS THE CORPUS'S OWN, AND THAT IS WHY THIS RULE EXISTS AT ALL. Hakka says 零下 — the corpus
-    // writes `Chhiòn chû-ngièn phìn-kiûn hi-vûn he làng-hâ 25℃`, and 零下 reads laŋ¹¹ ha⁴⁴, which is
-    // `làng-hâ` exactly. ⟨負⟩ also speaks and is NOT used: it has no attested sense here and the language
-    // supplied its own answer.
-    // ⚠ CLAIMED ONLY BEFORE A DEGREE SIGN, which is the entire guard and is why it is safe in a corpus whose
-    // every other word contains a hyphen. All 6 attested negatives are temperatures (`-4.5℃`, `-218 °C`,
-    // `−224℃`, `-170°C` ×2, `-5 °C`); the other 28 leading hyphens before digits are YEAR-RANGE separators
-    // (`1947-ngièn -1998-ngièn`, which step 6 claims) and chemistry oxidation states (`-2, 0, +4, +6`),
-    // and a looser rule would read every one of them as a minus.
-    // BEFORE step 5, which consumes the degree sign this rule looks for.
-    s = s.replace(/(?<![\d\p{L}])[-−](\d+(?:\.\d+)?)(?=\s*(?:°|℃|℉))/gu, "零下$1");
-
-    // ── 5. temperature, then the bare degree ─────────────────────────────────────────────────────
+    // ── 4. temperature, then the bare degree ─────────────────────────────────────────────────────
     // ⚠ SHARED — the trio and its order live in `core/sinitic.ts`: temperature first, or the bare rule eats
     // the ° and leaves a lone ⟨C⟩ to be read as an ENGLISH LETTER NAME. That is what `20°C` did here before
     // this file existed: *ŋi˥˧ səp̚˥ sˈiː*. The two guards that rule carries — `\s*` not `\s?`, and
@@ -205,6 +192,27 @@ export function normalizeHakka(input: string): string {
         fahrenheit: (n) => `華氏${n}度`,
         bare: (n) => `${n}度`,
     });
+
+    // ── 5. a negative temperature ────────────────────────────────────────────────────────────────
+    // ⚠ THE WORD IS THE CORPUS'S OWN, AND THAT IS WHY THIS RULE EXISTS AT ALL. Hakka says 零下 — the corpus
+    // writes `Chhiòn chû-ngièn phìn-kiûn hi-vûn he làng-hâ 25℃`, and 零下 reads laŋ¹¹ ha⁴⁴, which is
+    // `làng-hâ` exactly. ⟨負⟩ also speaks and is NOT used: it has no attested sense here and the language
+    // supplied its own answer.
+    // ⚠ AFTER STEP 4, NOT BEFORE IT, AND THE ORDER IS THE WORD ORDER. Run first, this rule produces
+    // `零下4.5°C`, which step 4 then turns into `零下攝氏4點五度` — every word right and the phrase inside
+    // out, because the scale name preposes too and would land between "below zero" and its number. Running
+    // after lets the sign be replaced where the scale name already is: `攝氏零下4點五度`, which is the order
+    // Chinese and Hakka both write.
+    // ⚠ CLAIMED ONLY WHERE A DEGREE READING WAS ACTUALLY PRODUCED, which is the entire guard and is what
+    // makes it safe in a corpus where every other word contains a hyphen. All 6 attested negatives are
+    // temperatures (`-4.5℃`, `-218 °C`, `−224℃`, `-170°C` ×2, `-5 °C`); the other 28 leading hyphens before
+    // digits are YEAR-RANGE separators (`303-ngièn -349-ngièn`), COORDINATE ranges (`112°50'-114°45'`,
+    // already read as ranges by step 3) and CHEMICAL oxidation states (`-2, 0, +4, +6`). A looser rule would
+    // read every one of them as a minus, and Pha̍k-fa-sṳ is the worst orthography there is to guess a hyphen
+    // in — it joins every polysyllable with one.
+    // ⚠ AND ONLY THE SCALED FORM IS CLAIMED — no bare `-5度` arm. Every attested negative carries the scale
+    // letter, so a bare arm would be a guard alternative with no instance behind it (playbook trap 9).
+    s = s.replace(/(?<![\d\p{L}])[-−](攝氏|華氏)/gu, "$1零下");
 
     // ── 6. years ─────────────────────────────────────────────────────────────────────────────────
     // ⚠ ALL THREE ARMS AND THEIR ORDER LIVE IN `core/sinitic.ts` — range, then both-endpoints, then single —

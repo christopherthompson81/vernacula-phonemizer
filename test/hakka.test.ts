@@ -104,7 +104,7 @@ describe("Hakka normalization", () => {
 
     test("a negative temperature takes the corpus's own word, 零下", () => {
         // `làng-hâ 25℃` in the corpus; 零下 reads laŋ¹¹ ha⁴⁴, which is `làng-hâ` exactly.
-        expect(normalizeHakka("-4.5°C")).toBe("零下攝氏4點五度");
+        expect(normalizeHakka("-4.5°C")).toBe("攝氏零下4點五度");
         // ⚠ NOT claimed without a degree sign — the other 28 leading hyphens before digits are year-range
         // separators and chemistry oxidation states.
         expect(normalizeHakka("-2, 0, +4, +6")).toBe("-2, 0, +4, +6");

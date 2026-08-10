@@ -152,8 +152,17 @@ export function normalizeWu(
     // the ° and leaves a lone ⟨C⟩ read as an ENGLISH LETTER NAME, which is what `20°C` did here.
     // ⚠ THE POSITIONS ARE WU'S OWN, and are why the shared rule takes FUNCTIONS rather than words: Celsius
     // is POSTposed (`17摄氏度`) and Fahrenheit PREposed (`华氏1度`), both from wuu.wikipedia prose.
-    s = readDegrees(s, { celsius: (n) => `${n}摄氏度`, fahrenheit: (n) => `华氏${n}度` });
-    s = s.replace(/(\d+)\s*°/gu, "$1度");
+    // ⚠ THE BARE ARM IS THE SHARED RULE'S TOO, and it used to be a local copy here. That copy captured
+    // `(\d+)`, the same shape that turned out to be a live bug in the PREPOSING layers (`13.3 °C` → `13.` +
+    // 攝氏三度 in yue and nan). It was harmless HERE only because Wu postposes, so `2.5°` → `2.` + `5度`
+    // reassembles to the same string — which is precisely the accident that hid the defect from four
+    // languages. Keeping a private copy of a rule whose shared version has already been corrected is how
+    // that happens again.
+    s = readDegrees(s, {
+        celsius: (n) => `${n}摄氏度`,
+        fahrenheit: (n) => `华氏${n}度`,
+        bare: (n) => `${n}度`,
+    });
 
     // ── 4. YYYY–YYYY year ranges ─────────────────────────────────────────────────────────────────
     // ⚠ BEFORE THE SINGLE-YEAR RULE (step 5): only the RIGHT endpoint of `1966-1976年` is followed by 年, so
