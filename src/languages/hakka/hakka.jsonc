@@ -13,6 +13,41 @@
     // Pitch digit → Chao contour letter (the fleet tone convention, tone letters trailing the syllable).
     "chao": { "1": "˩", "2": "˨", "3": "˧", "4": "˦", "5": "˥" },
 
+    // ── PHA̍K-FA-SṲ, the romanization hak.wikipedia is actually written in ────────────────────────────────
+    // 93.5% of that wiki's characters are Latin, and without a reader every one of them routed to ENGLISH.
+    // `pfs.ts` reads a Latin run against `pfs.tsv` (3,536 keys derived from kaikki — see pfs.PROVENANCE.md)
+    // and falls back to COMPOSITION for a syllable the table lacks. These two blocks are the composition's
+    // only hand-authored data; everything else it needs is derived from pfs.tsv at load time, so there is
+    // one artifact and nothing to drift.
+
+    // The PFS consonant inventory → Meixian IPA, longest-first (so chh beats ch, kh beats k, ng beats n).
+    // ⚠ THE SECOND ALTERNANT IS THE PALATAL, used before a front-high nucleus: Meixian palatalizes the
+    // sibilants (西 sî = ɕi⁴⁴, not si⁴⁴). Which one applies is normally decided by an ATTESTED SIBLING
+    // syllable rather than by this table — the fallback only consults it when no sibling shares the onset.
+    // ⟨y⟩ heads a zero onset (the glide is part of the rime: yit = it̚¹).
+    "pfsOnsets": {
+        "chh": ["t͡sʰ", "t͡ɕʰ"], "ch": ["t͡s", "t͡ɕ"], "s": ["s", "ɕ"],
+        "kh": ["kʰ"], "ng": ["ŋ"], "ny": ["ɲ"], "ph": ["pʰ"], "th": ["tʰ"],
+        "f": ["f"], "h": ["h"], "k": ["k"], "l": ["l"], "m": ["m"], "n": ["n"],
+        "p": ["p"], "t": ["t"], "v": ["ʋ"], "y": [""]
+    },
+
+    // PFS tone diacritic → Meixian pitch digits. DERIVED, not assumed: cross-tabulating the diacritic against
+    // the paired Meixian reading over every aligned syllable reproduces the six-tone system at 93–97% purity
+    // per row (the build tool prints the table with `--report`). The key is the combining mark plus whether
+    // the syllable ends in a stop coda, because PFS distinguishes the two 入聲 tones that way and marks 去聲
+    // by leaving the syllable bare.
+    // ⚠ ⟨ṳ⟩ is U+0324 COMBINING DIAERESIS BELOW — a VOWEL letter, not a tone mark. It co-occurs with all six
+    // and its sub-rows reproduce the same table, which is how that was confirmed rather than assumed.
+    // ⚠ SUPERSCRIPT digits, because this is dict.tsv's format and the SAME `readingToIpa` renders both paths.
+    // Written as ASCII first, and every composed syllable leaked a bare `44` into the phoneme stream while
+    // every table-sourced one was correct — the table carries kaikki's superscripts. Two formats in one
+    // reading is exactly the drift the shared renderer exists to prevent.
+    "pfsTones": {
+        "̂": "\u2074\u2074", "": "\u2075\u00b3", "̀": "\u00b9\u00b9", "́": "\u00b3\u00b9",
+        "checked": "\u00b9", "̍": "\u2075"
+    },
+
     "clausePunctuation": {
         "。": ".", "，": ",", "、": ",", "？": "?", "！": "!",
         "；": ",", "：": ",", ".": ".", ",": ",", "?": "?", "!": "!"

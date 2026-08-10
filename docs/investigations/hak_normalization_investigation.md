@@ -246,3 +246,177 @@ correct. Two consequences worth stating plainly:
 - **gan or hsn next for normalization** — hsn has no corpus at all (cjy's situation), gan does. Either would
   be the second language built on `core/sinitic.ts` rather than extracted from it, which is now a
   demonstrated way to find defects in it.
+
+---
+
+# Part II — the Pha̍k-fa-sṳ front end
+
+Run 5 recorded this as "the single highest-value thing available for this language." Built next.
+
+## Run 6 — 2026-08-10 — the lucky break: a parallel corpus already in the source
+
+The question that decided whether this was tractable at all: **can the PFS→IPA mapping be derived rather than
+hand-authored?** It can, and from the source `dict.tsv` already uses.
+
+```
+headwords with BOTH a Hakka Phak-fa-su spelling and a Meixian Sinological-IPA reading:  6,269
+  …unique (word, pfs, ipa) triples                                                      4,759
+  …aligning syllable-for-syllable                                                       4,754   (99.9%)
+  …rejected by the alignment test                                                           5
+```
+
+The alignment has a free third opinion: a Han headword is **one character per syllable**, so PFS-hyphens,
+IPA-spaces and headword length must all agree. That is what rejects the 5 rows where kaikki's two fields
+describe different senses.
+
+**⚠ IT IS A DIALECT TRANSLATION, AND THAT WAS THE DESIGN DECISION.** Wiktionary tags the PFS spelling
+*Sixian* (Taiwan); this engine is *Meixian*. Pairing them maps the SPELLING onto THIS ENGINE'S dialect —
+西 is `sî`, Sixian /si²⁴/, Meixian /ɕi⁴⁴/, and the table emits the Meixian form. The alternative (PFS →
+Sixian IPA) would have made `hak` emit **two dialects depending on which script a sentence happened to be
+in**, which is the defect rather than the fix.
+
+### The tone system fell out of the data
+
+Cross-tabulating the PFS diacritic (plus whether the syllable ends in a stop) against the paired Meixian
+tone, token-weighted:
+
+| PFS | coda | Meixian | category | purity |
+|---|---|---|---|---|
+| â | open | ⁴⁴ | 陰平 | 96.4% |
+| a (bare) | open | ⁵³ | 去聲 | 95.1% |
+| à | open | ¹¹ | 陽平 | 97.7% |
+| á | open | ³¹ | 上聲 | 95.3% |
+| a (bare) | -p -t -k | ¹ | 陰入 | 96.8% |
+| a̍ | -p -t -k | ⁵ | 陽入 | 96.2% |
+
+Six diacritic signatures, six tones, ~96% each. That is the check that the pairing is sound at all — a
+mis-paired corpus would not reproduce a tone system.
+
+⚠ ⟨ṳ⟩ is U+0324, a VOWEL letter, not a tone mark. It co-occurs with all six and its sub-rows reproduce the
+same table, which is how that was confirmed rather than assumed.
+
+## Run 7 — 2026-08-10 — a measurement bug in my own tokenizer, and the coverage it hid
+
+First coverage run said 79.9%. **The tokenizer was wrong**: the character class was written with the
+combining marks as literals (`[A-Za-zÀ-ÿ̀-ͯ]`), which does not form the range it looks like. Rewritten with
+escapes, the same measurement gives **88.9%**. The uncovered list was the tell — it was full of fragments
+(`'s'` ×14,274, `'ch'` ×6,010, a bare `'̂'` ×3,170) rather than words.
+
+Playbook trap 1's family, in a script it is not usually associated with. Recorded because the wrong number
+looked plausible.
+
+### Then the tail split three ways, cleanly
+
+| class | share of syllable tokens | examples |
+|---|---|---|
+| in the derived table | 88.9% | `ke`, `he`, `ngièn`, `ngìn`, `koet` |
+| genuine PFS the table lacks | 2.4% | `ngim` 任 ×666, `chhṳ̂n` ×575, `vet`, `ngi̍t` |
+| a variant affricate spelling | 1.2% | `tshai`, `tsú`, `tshièn`, `tsṳ̂` |
+| foreign | 7.5% | `nobel`, `soria`, `castilla`, `québec`, `león`, `aragon` |
+
+**⟨ts⟩/⟨tsh⟩ → ⟨ch⟩/⟨chh⟩ folds and gains 1.2 points. ⟨j⟩ was tested the same way and gained 0.1** — and
+reading the instances says why: `jawa`, `john`, `james`, `azerbaijan`, `punjabi`. ⟨j⟩ is not a variant
+spelling here, it is foreign names, so folding it would have claimed them. **The small number was the
+signal**, which is trap 2 from the useful direction.
+
+### A second source was tried and refuted
+
+15,738 headwords carry a PFS spelling but no Meixian IPA. For those, the Han headword might be in
+`dict.tsv` already — join on it and get the reading that way. Measured: **9 new syllables.** The two sources
+overlap almost entirely, both being the Meixian tag of the same extract. Dead end, recorded so it is not
+retried.
+
+## Run 8 — 2026-08-10 — the routing policy, measured at the word level
+
+| policy | word tokens read as Hakka |
+|---|---|
+| every syllable in the attested table | 84.5% |
+| table OR composes | **88.3%** |
+| multi-syllable table-or-composes; single table-only | 87.1% |
+
+The disputed set — single words that only COMPOSE — is **1.22% of word tokens**, and splits:
+
+- **291 types carry a PFS diacritic** (`kâi`, `chhṳ̂n`, `khiûn`): unmistakable. Claim.
+- **132 types are 3+ bare letters** (`ngim`, `kha`, `vet`, `sut`): mostly real Hakka. Claim.
+- **46 types are ≤2 bare letters** (`me`, `a`, `tu`, `g`, `u`, `na`, `en`, and the UNIT **`km`**): mostly not
+  Hakka. **Refuse** — a two-letter fragment is where an orthography with 18 onsets and 72 rimes stops
+  discriminating.
+
+## Run 9 — 2026-08-10 — four bugs the corpus found, in order
+
+1. **Composed tones emitted ASCII digits.** `pfsTones` was authored `"44"`; the table carries kaikki's
+   superscripts. So every table-sourced syllable rendered Chao letters and every COMPOSED one leaked a bare
+   `44` into the phoneme stream. Two formats in one reading, which is exactly what the shared renderer
+   exists to prevent.
+2. **The table was looked up in NFD and stored in NFC.** `ngìn` — the 4th commonest syllable in the language
+   — missed the table and composed instead. **Silently**, because composition still produces output; only
+   `tshai`, which has no diacritic at all, matched. A normalization mismatch fails toward the branch that
+   still emits something, which is why it looked like it was working. (Trap 11, in a Latin script.)
+3. **The zero onset is not a row in the manifest table**, and treating a missing row as "unreadable"
+   condemned every vowel-initial syllable with no onset-sharing sibling. `tûng-ông` (東王) ×127 went to the
+   English reader.
+4. **All-or-nothing routing sent a Hakka suffix to English with its foreign stem.** `Soria-sén`,
+   `Québec-sén`, `Zaragoza-sén`, `Huesca-sén` (省, "province") — **519 tokens**. Now a hyphenated run
+   resolves per syllable and only the non-Hakka fragment goes to `foreign`. ⚠ The discriminator survives
+   intact: an unhyphenated foreign word is ONE syllable, so `Nobel`/`Québec`/`iPhone` still fail as a whole.
+
+## Run 10 — 2026-08-10 — measuring the fallback honestly, which took three tries
+
+| protocol | result | why it is wrong or right |
+|---|---|---|
+| score on the syllables kaikki LACKS | **8.9%** | wrong — those are the rare words where the Han dict most often carries a different sense |
+| ad-hoc held-out probe | **83.9%** | wrong — my probe skipped the reader's own ≤2-letter refusal |
+| held-out through the SHIPPED reader | **76.9%** | right, but includes syllables the reader refuses by design |
+| …excluding that class | **81.7%** | the number |
+
+`build-hak-pfs.mts --validate` runs the last one: each attested syllable is removed from the table, composed
+by the shipped `readPfs` against the remaining 1,278, and compared with its own reading. Making that
+possible required a real fix — **the composition index was cached on the manifest, not on the table**, so
+every held-out run would have been scored against the full index and reported perfection.
+
+**81.7% is not good, and it ships anyway.** The arithmetic is the argument: composition covers 4.8% of Latin
+word tokens, so it leaves ~0.9% imperfect against **100% wrong** without it.
+
+### The majority vote had to become onset-aware
+
+A plain vote left **30 of 1,279 syllable rows with an IPA contradicting their own PFS onset** — `khin → in⁵³`
+with the /kʰ/ simply gone, `hô → keu⁵³`, `liá → t͡se³¹`. Preferring the most-attested reading that AGREES
+with the declared onset fixes 6 of them and lifts held-out composition 80.2% → 81.7%.
+
+⚠ **It falls back rather than drops, because some contradictions are real Hakka**: ⟨n⟩~⟨l⟩ genuinely
+alternate (`nang → laŋ`, `nân → lan`) and ⟨chh⟩ before a front vowel surfaces as /ɕ/ in Meixian. Filtering
+every disagreement would have deleted those. 24 remain, each a single-attestation row.
+
+## Run 11 — 2026-08-10 — the gates, and the validation this language never had
+
+```
+corpus-diff (hak)   changed 367/411 (89.3%)   DROP 28 → 28 (all accepted)
+corpus-diff (cmn, yue, wuu, nan, cjy)         BYTE-IDENTICAL
+artifact scan       no defects
+review.ts           checklist clean
+vitest              233 files, 3314 tests
+tsc --noEmit        clean
+```
+
+**The cross-path check is the real find.** `hak` has no referee — no wikipron, no epitran, and the only
+machine-readable Meixian IPA is the source of its own dict. But the Han path and the PFS path are now
+**separate artifacts and separate code**, so where a word exists in both they can be compared:
+
+```
+Hak-kâ-ngìn  →  hak̚˩ ka˧˥ ŋin˩˩
+客家人        →  hak̚˩ ka˧˥ ŋin˩˩      byte-identical, sandhi included
+```
+
+Over the 17,740 Han↔PFS pairs: **81.9% identical** (restricted to rows where the Han path did not silently
+drop a character — its own 7.9% gap), 71.0% unrestricted. The residual is dominated by homographs where the
+two paths independently pick different senses (車 is `chhâ` "vehicle" and `kî` "chess piece"), so it is not a
+measure of the front end alone and is recorded as such.
+
+## What is still not done
+
+- **The compositional fallback at 81.7%.** The ceiling is real — `chang`/`cháng` are attested with different
+  Meixian rimes (t͡saŋ vs t͡sən) from the same PFS rime, an irregular correspondence PFS does not encode.
+- **No cross-word sandhi**, on either path.
+- **The 7.9% single-character Han dict silence** (1,282 characters, 於 ×414). Shared with gan and hsn.
+- **gan and hsn** are the next Sinitic normalization layers, and gan has the same PFS-shaped question
+  waiting: check what script its wiki is actually in before assuming.
