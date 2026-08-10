@@ -181,3 +181,62 @@ stale and wants its own check.
 **Reading the changed lines**: `18,000 km` read *tsa̍p-pat , liâng km* — the value destroyed AND the unit
 dropped — and now reads *tsi̍t-bān pat-tshian kong-lí*. Also `10,911 kong-chhioh`, `21 km²` →
 *jī-tsa̍p-it pêng-hong kong-lí*, `3~4 km/biáu` → *sã kàu sì kong-lí múi bió*, `Firefox 1.5`/`3.0` → tiám.
+
+---
+
+## Run 3 — 2026-08-09 22:35 — ⚠ the POJ front end is a Tâi-lô front end, and 14% of the corpus leaks
+
+Found while answering a question about which Unicode blocks IPA occupies. The answer is that the
+*distinctively* IPA symbols live in U+0250–02AF (IPA Extensions), U+02B0–02FF (modifiers: ʰ ʲ ː ˈ ˌ and the
+tone letters ˥˦˧˨˩) and U+0300–036F (combining marks) — but roughly twenty **plain ASCII Latin letters ARE
+IPA symbols by design**. Measured over this repo's own output across seven languages:
+
+```
+38.1%  ASCII Latin letter    a b d e f i k l m n o p r s t u w z
+20.1%  Spacing Modifiers     U+02B0–02FF
+16.5%  IPA Extensions        U+0250–02AF
+ 6.2%  Combining Diacritics  U+0300–036F
+```
+
+So `[A-Za-z]` cannot test for "a Latin word leaked into the IPA" — it matches ordinary IPA, which is why
+that assertion had to be replaced twice (wuu, then here). But the question points at a test that DOES work:
+**IPA has no uppercase letters, and this repo emits ɡ U+0261 rather than ASCII `g`.** Both are detectable.
+
+Applying that across the emitted corpora:
+
+```
+wuu · cmn · yue · jv    ascii-g = 0
+nan                     ascii-g = 1,482        ← and 1,485 BEFORE this branch, so pre-existing
+```
+
+### The cause: the converter is Tâi-lô-only, while the corpus is POJ
+
+`minnan.ts`'s header claims "direct **Tâi-lô / POJ** input → IPA". The finals table says otherwise — it
+declares `oo`, `ann`, `ing`, `ik`, `ua`, `ue`, which are the **Tâi-lô** spellings. POJ input therefore works
+exactly where its spelling coincides with Tâi-lô, and falls through to the "leave the romanization visible"
+fallback everywhere it does not:
+
+| correspondence | POJ | → | Tâi-lô | → |
+|---|---|---|---|---|
+| eng / ek ↔ ing / ik | `peng`, `le̍k` | **peng˥, lek˥** | `ping`, `li̍k` | piə̯ŋ˥, liə̯k̚˥ |
+| o͘ ↔ oo | `gō͘` | **go͘˧** | `goo` | ɡɔ˥ |
+| ⁿ ↔ nn | `hoaⁿ` | **hoaⁿ˥** | `huann` | hũ̯ã˥ |
+| ch / chh ↔ ts / tsh | `chi`, `chhi` | **chi˥, chhi˥** | `tsi`, `tshi` | t͡ɕi˥, t͡ɕʰi˥ |
+| oa / oe ↔ ua / ue | `koan`, `hoe` | **koan˥, hoe˥** | `kuan`, `hue` | ku̯an˥, hu̯e˥ |
+| (shared spelling) | `hong`, `tang` | hɔŋ˥, taŋ˥ ✓ | `hong`, `tang` | ✓ |
+
+**Scale: 533 of 3,805 distinct POJ word types in the corpus (14%) produce IPA that still contains raw
+romanization.** A handful of those are genuinely foreign (`drainage`, `winds` — English in the corpus), but
+the great majority are the six correspondences above.
+
+⚠ **This is invisible to every leak class.** `DIGIT`, `SLOT-GAP`, `RAWMARK` and `ZERO-WIDTH` hunt digits,
+spacing and punctuation; an unmapped romanization syllable is Latin letters with a tone letter attached, and
+looks exactly like ordinary IPA to all four. The playbook says this about trap 6 in the abstract ("a
+Latin-letter spelling in a Latin-script language looks exactly like a word"); this is the same blindness on
+the OUTPUT side, and an `ascii-g`/uppercase probe is what makes it visible.
+
+**Not fixed here — it is an engine defect, not a normalization one**, and it wants its own measurement
+against the wikipron Hokkien referee (which is what exposed the last finals-table gap, per the maturity
+row). Recorded with the counts so it is re-runnable in one command. Two things to decide when it is taken
+up: whether to add the POJ spellings to the finals/initials tables or fold POJ→Tâi-lô before conversion,
+and whether `minnan.ts`'s header claim should be narrowed in the meantime.
