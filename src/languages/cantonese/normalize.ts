@@ -33,17 +33,19 @@
  * because the same statement folds `／`, which the fraction rule in step 6 does still need.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 
-/** 0–9 as Han numerals. Shared with cantonese.ts's cardinal composition (which imports it from here, so the
- *  digit-string reading below and the cardinal reading cannot drift apart). */
-export const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+/** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here.
+ *  ⚠ There were THREE identical copies of this table (yue, wuu, core) until the extraction, which is the
+ *  same drift the °C rule already demonstrated. cantonese.ts imports it FROM HERE so the digit-string
+ *  reading (years, decimals) and the cardinal composition still cannot diverge; the re-export keeps that
+ *  guarantee while there is only one table left. */
+export const DIGITS = HAN_DIGITS;
 
 /** A digit string read one digit at a time — the reading Chinese gives a year (二零零九) and the fractional
  *  part of a decimal (點三四), as opposed to the cardinal a quantity gets. 零 (not 〇): the corpus writes 零
  *  ×4 and 〇 ×0. */
-function spellDigits(s: string): string {
-    return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
-}
+const spellDigits = (s: string): string => spellHanDigits(s);
 
 // The percent word 百分之 PRECEDES its number, as in Mandarin, and Cantonese prose writes 百分之三十 out.
 //
@@ -102,19 +104,26 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // ── 1d. degrees ─────────────────────────────────────────────────────────────────────────────
     // `20℃` read as "二十 C" — the sign DROPPED and the scale letter spelled out by the Latin fallback, which
     // loses the whole unit rather than merely its sign.
+    // ⚠ `\s*`, NOT `\s?`, AND THE DIFFERENCE WAS A LIVE BUG. This rule shipped with `\s?` — at most ONE
+    // space — while the wu and nan layers, written later from the same shape, used `\s*`. Two spaces is
+    // ordinary typography (the wuu corpus writes `15.5 °C`), and `20  °C` therefore lost its unit HERE and
+    // nowhere else: it read *jiː˨ sɐp̚˨ sˈiː*, the scale letter as an ENGLISH LETTER NAME. Found by asking
+    // whether the Sinitic layers should share a core, which is exactly the drift a shared core prevents.
     // ⚠ THE SHARED TIER CANNOT EXPRESS THIS ONE: the scale name PRECEDES the number and 度 FOLLOWS it, so the
     // reading wraps around the numeral and a `units` entry can only append.
     // Must run before the Latin-run pass that would read a bare C as a letter name. ℃/℉ arrive already folded
     // to `°C`/`°F` by the registry.
-    s = s.replace(/(\d+)\s?°\s?C(?![\p{sc=Latn}])/gu, "攝氏$1度");
-    s = s.replace(/(\d+)\s?°\s?F(?![\p{sc=Latn}])/gu, "華氏$1度");
-    s = s.replace(/(\d+)\s?°/gu, "$1度");
+    // ⚠ SHARED — and this is the rule whose DRIFT made the case for sharing: it shipped with `\s?` here
+    // and `\s*` in wu/nan, so `20  °C` lost its unit in Cantonese and nowhere else, reading the scale
+    // letter as an English letter name. One character, four near-copies, no test able to see it.
+    s = readDegrees(s, { celsius: (n) => `攝氏${n}度`, fahrenheit: (n) => `華氏${n}度` });
+    s = s.replace(/(\d+)\s*°/gu, "$1度");
 
     // ── 2. de-group thousands separators ─────────────────────────────────────────────────────────
     // ⚠ BEFORE EVERYTHING ELSE. A grouping comma is otherwise read as clause punctuation, and worse: the
     // engine tokenizes `\d+`, so "1,000" becomes 一 + [pause] + integerToHan(0) = 零 — the value gone, not
     // merely mispaused. Every later rule's "a digit is adjacent" test also needs the number to be one run.
-    s = s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = degroupThousands(s);
 
     // ── 3. YYYY-YYYY year ranges ─────────────────────────────────────────────────────────────────
     // ⚠ BEFORE THE SINGLE-YEAR RULE (step 4), because only the RIGHT endpoint of "1644-1912 年" is followed
@@ -160,10 +169,9 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // ⚠ a/b IS 分之 IN THE OPPOSITE ORDER: 1/5 is 五分之一, "of five parts, one". Digits are required on BOTH
     // sides and nothing numeric may be adjacent, which keeps Han-unit slashes (英里/小時, 國家/地區) untouched.
     // Reordered as DIGITS so the engine's cardinal reading still applies to both halves.
-    s = s.replace(
-        /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
-        (_m, num: string, den: string) => `${den}分之${num}`,
-    );
+    // ⚠ SHARED, AND THE MOVE FIXED A LATENT BUG HERE TOO: the local copy had no year-pair guard, so
+    // `2020/2021` read 2021分之2020. Five languages met that shape; see `core/sinitic.ts`.
+    s = reorderFraction(s, "分之");
 
     // ── 7. percent, via the shared symbol tier ───────────────────────────────────────────────────
     // AFTER de-grouping (the tier needs the number contiguous) and BEFORE the decimal rule (step 8): the tier

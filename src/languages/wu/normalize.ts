@@ -55,16 +55,16 @@
  * almost entirely `&nbsp;`, and reading the instances is the only thing that showed it.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 
-/** 0–9 as Han numerals. Shared with wu.ts's cardinal composition (which imports it from here, so the
- *  digit-string reading below and the cardinal reading cannot drift apart). */
-export const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+/** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here. wu.ts imports it FROM HERE
+ *  so its cardinal composition and this file's digit-string reading cannot drift apart; the re-export keeps
+ *  that while leaving exactly one table in the repo. */
+export const DIGITS = HAN_DIGITS;
 
 /** A digit string read one digit at a time — the reading Chinese gives a year (二零零九) and the fractional
  *  part of a decimal (点三四), as opposed to the cardinal a quantity gets. */
-function spellDigits(s: string): string {
-    return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
-}
+const spellDigits = (s: string): string => spellHanDigits(s);
 
 // ⚠ `unspacedScript` because a sign in Wu prose is normally flanked by Han, which the tier's letter-boundary
 // guard rejects. `percentPrefix` because 百分之 PRECEDES its number, as in every Sinitic language:
@@ -118,7 +118,7 @@ export function normalizeWu(
     // Every later rule's "a digit is adjacent" test also needs the number to be one run.
     // ⚠ Exactly-3-digit groups only, which is what leaves the corpus's 万-grouped `1,8638.36亿元` alone
     // rather than mangling it — that is a Chinese four-digit grouping, not a thousands separator.
-    s = s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = degroupThousands(s);
 
     // ── 2. geographic coordinates ────────────────────────────────────────────────────────────────
     // ⚠ BEFORE EVERY OTHER ° RULE AND BEFORE THE RANGE RULE. `degrees: 241` corpus-wide and the instances are
@@ -148,8 +148,11 @@ export function normalizeWu(
     // ° and leave a bare `C` to be read as an ENGLISH LETTER NAME — which is what `20°C` did: *əl səʔ sˈiː*.
     // ⚠ THE TWO SCALES TAKE OPPOSITE ORDERS, and both orders are wiki-attested. See the file header.
     // ℃/℉ arrive already folded to `°C`/`°F` by the registry.
-    s = s.replace(/(\d+)\s*°\s*C(?![\p{sc=Latn}])/gu, "$1摄氏度");
-    s = s.replace(/(\d+)\s*°\s*F(?![\p{sc=Latn}])/gu, "华氏$1度");
+    // ⚠ SHARED — the trio and its order live in `core/sinitic.ts`: temperature first, or the bare rule eats
+    // the ° and leaves a lone ⟨C⟩ read as an ENGLISH LETTER NAME, which is what `20°C` did here.
+    // ⚠ THE POSITIONS ARE WU'S OWN, and are why the shared rule takes FUNCTIONS rather than words: Celsius
+    // is POSTposed (`17摄氏度`) and Fahrenheit PREposed (`华氏1度`), both from wuu.wikipedia prose.
+    s = readDegrees(s, { celsius: (n) => `${n}摄氏度`, fahrenheit: (n) => `华氏${n}度` });
     s = s.replace(/(\d+)\s*°/gu, "$1度");
 
     // ── 4. YYYY–YYYY year ranges ─────────────────────────────────────────────────────────────────
@@ -214,10 +217,11 @@ export function normalizeWu(
     // and the corpus uses it exactly this way ×7 (四分之一, 十分之一, 三分之二), including as a GLOSS of the
     // digit form — “即代表千分之一，或1/1000”. Digits are required on BOTH sides and nothing numeric may be
     // adjacent, which keeps Han-unit slashes and the density shape (step 8) untouched.
-    s = s.replace(
-        /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu,
-        (_m, num: string, den: string) => `${den}分之${num}`,
-    );
+    // ⚠ SHARED, AND THE MOVE FIXED A LATENT BUG HERE: the local copy carried no year-pair guard, so
+    // `2020/2021` read 2021分之2020 — an academic year as a fraction. jv guarded that shape, nan's whole
+    // fraction rule was removed over `Fahrenheit 9/11`, cjy caught it in review, and wuu and yue were both
+    // carrying it unnoticed. Five languages, one shape — which is the argument for sharing it.
+    s = reorderFraction(s, "分之");
 
     // ── 8. population density ────────────────────────────────────────────────────────────────────
     // ⚠ THE ONLY RATE CLAIMED, and only because it is the only one with an attested reading: the corpus

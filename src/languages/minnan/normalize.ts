@@ -76,11 +76,8 @@
  * something at 0 substring.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { degroupThousands, readDecimals } from "../../core/sinitic.ts";
 
-/** 0–9 as Han numerals, for reading a decimal's fractional part ONE DIGIT AT A TIME.
- *  ⚠ Joining the digits and letting the number path read them gives the CARDINAL — `1.797` came out
- *  *it tiám chhit-pah káu-cha̍p chhit*, "one point seven hundred ninety-seven". */
-const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
 
 /**
  * ⚠ EVERY UNIT AND EVERY WORD HERE IS FROM THE CORPUS'S OWN PROSE — sourced in POJ, written in Han (see the
@@ -131,7 +128,7 @@ export function normalizeMinNan(input: string): string {
     // kong-lí`) against 3 dot-groups, and dot decimals ×55 (`50.11%`, `1.8 kong-lí`, `31.26 m²`) against 2
     // comma-decimals. So the comma groups and the dot is the decimal, with no contest to resolve.
     // Left alone, the comma is read as a clause pause and the value is destroyed.
-    s = s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+    s = degroupThousands(s);
 
     // ── 2. the two range marks that ARE ranges ───────────────────────────────────────────────────
     // ⚠ EN DASH AND TILDE ONLY — see the header for the count that draws this line, and for why the ASCII
@@ -191,10 +188,9 @@ export function normalizeMinNan(input: string): string {
     // ⚠ THE FRACTIONAL PART IS READ DIGIT BY DIGIT, the reading every Sinitic variety gives it.
     // ⚠ `(?!\.\d)` KEEPS A DOTTED DESIGNATION OUT — `ISO 8859`-style identifiers and version triples share
     // the decimal's shape, and the same guard earned its place in the Javanese layer.
-    s = s.replace(
-        /(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)/gu,
-        (_m, int: string, frac: string) => `${int}點${[...frac].map((d) => DIGITS[Number(d)] ?? d).join("")}`,
-    );
+    // ⚠ SHARED — same rule, same guards: the fractional part digit by digit, and `(?!\.\d)` keeping a
+    // dotted designation out (the guard the jv layer earned on `nomer 1.2.3`).
+    s = readDecimals(s, "點");
 
     return s;
 }
