@@ -27,12 +27,24 @@ and go to a fourth file rather than being distributed silently into the three �
 evidence about Pashto, not about a member, and pretending otherwise is the mistake this exercise exists to
 stop.
 
-  Regenerate (the 4.2 MB source is not vendored; CC-BY-SA):
-    curl -sL -o kaikki-pashto.jsonl https://kaikki.org/dictionary/Pashto/kaikki.org-dictionary-Pashto.jsonl
-    python3 tools/pashto/build_kaikki_dialect_referees.py kaikki-pashto.jsonl tools/referee-eval/referees/ps.kaikki
+⚠ THE SOURCE IS VENDORED AS AN EXTRACT, NOT AS THE FULL DUMP. `kaikki-pashto-sounds.jsonl` beside this
+script carries ONLY the two fields read here — `word` and `sounds[].{ipa,tags}` — for the 1,200 entries that
+have any IPA at all. 4.1 MB → 92 KB, and the four referees rebuild from it byte-identically. It is committed
+because kaikki.org REGENERATES its dumps: the file at the URL below will not be the same file next month, so
+without a local copy the referees are a snapshot nobody can audit or reproduce — which is exactly how the
+hand-cut `ps.kaikki-kandahari.tsv` became unverifiable and had to be retired. Definitions, etymologies,
+senses, translations and forms are dropped; nothing downstream touches them.
+
+  Rebuild the referees (default, offline):
+    python3 tools/pashto/build_kaikki_dialect_referees.py
+
+  Refresh the extract from upstream (rarely — it changes the referees):
+    curl -sL -o /tmp/kaikki-pashto.jsonl https://kaikki.org/dictionary/Pashto/kaikki.org-dictionary-Pashto.jsonl
+    python3 tools/pashto/build_kaikki_dialect_referees.py --extract /tmp/kaikki-pashto.jsonl
 """
 import collections
 import json
+import os
 import re
 import sys
 
@@ -48,8 +60,39 @@ SKIP = {"letter", "name", "phoneme"}
 STRIP = re.compile(r"[/\[\]ˈˌ.]")
 
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+VENDORED = os.path.join(HERE, "kaikki-pashto-sounds.jsonl")
+DEFAULT_PREFIX = os.path.join(HERE, "..", "referee-eval", "referees", "ps.kaikki")
+
+
+def refresh_extract(full, dst):
+    """Full kaikki dump → the vendored two-field extract. Keeps only what `main` reads."""
+    kept = 0
+    with open(dst, "w", encoding="utf8") as f:
+        for line in open(full, encoding="utf8"):
+            d = json.loads(line)
+            sounds = []
+            for s in d.get("sounds", []) or []:
+                if s.get("ipa"):
+                    o = {"ipa": s["ipa"]}
+                    if s.get("tags"):
+                        o["tags"] = s["tags"]
+                    sounds.append(o)
+            if not sounds:
+                continue
+            f.write(json.dumps({"word": d.get("word", ""), "sounds": sounds}, ensure_ascii=False) + "\n")
+            kept += 1
+    print(f"  refreshed {dst}: {kept} entries with IPA", file=sys.stderr)
+
+
 def main():
-    src, prefix = sys.argv[1], sys.argv[2]
+    argv = sys.argv[1:]
+    if "--extract" in argv:
+        i = argv.index("--extract")
+        refresh_extract(argv[i + 1], VENDORED)
+        argv = argv[:i] + argv[i + 2:]
+    src = argv[0] if len(argv) > 0 else VENDORED
+    prefix = argv[1] if len(argv) > 1 else DEFAULT_PREFIX
     out = collections.defaultdict(lambda: collections.defaultdict(list))
     counts = collections.Counter()
     for line in open(src, encoding="utf8"):

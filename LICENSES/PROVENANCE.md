@@ -132,6 +132,14 @@ dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `englis
 **CC BY 3.0** (DAC / CSIR / NWU via SADiLaR); sidecar. Training input for the af tagger only — NOT a
 referee (96.6% identical to RCRL on their overlap, same lineage).
 
+**tools-only (ps variety referees):** `pashto/kaikki-pashto-sounds.jsonl` — a 92 KB two-field extract
+(`word`, `sounds[].{ipa,tags}`) of kaikki's Pashto dump, from which the four tag-derived variety referees
+(`ps.kaikki-{pbt,pbu,pst}-tagged.tsv`, `ps.kaikki-untagged.tsv`) rebuild byte-identically; sidecar.
+**Vendored deliberately**: kaikki.org regenerates its dumps, so referees built from a live fetch are a
+snapshot nobody can reproduce — which is how the hand-cut `ps.kaikki-kandahari.tsv` became unverifiable and
+was retired (trap 32). Only the fields the builder reads are kept; 4.1 MB of definitions, etymologies and
+senses are dropped.
+
 **tools-only:** the `af` SECONDARY referee `referee-eval/referees/af.rcrl-apd.tsv` — same RCRL source as
 the shipped lexicon above and under the same CC BY-SA 2.5 ZA terms, the one referee in the set that is NOT
 Wiktionary-derived (sidecar: `af.rcrl-apd.PROVENANCE.md`); the 246-referee eval set — 120 wikipron + 53 kaikki + 15 wiktionary-API + the
