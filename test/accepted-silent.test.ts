@@ -71,7 +71,12 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // never by class, so a `km²` regression stays visible. Its minus spans are NEGATIVE EXPONENTS in SI
         // units written with a spaced ASCII minus (`kg·m·s −2`, `g·mol −1`, `g·cm −3`) — the same
         // contextual-regex limitation tl records, one class further on.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "km", "kn", "mr", "my", "ta", "tl", "wuu", "xh"]);
+        // jv's four entries are all "this is not the sign you think it is": SCIENTIFIC NOTATION
+        // (`108,2 × 10⁶ km`, planetary orbital radii), BOTANICAL PARENTHETICAL EXTREMES (`10-15(-17) cm`,
+        // the flora convention for "usually 10–15, rarely to 17"), a MIXED FRACTION before a degree sign
+        // (`23 1/2°LU`, the tropics), and template debris (`--- jiwa/km²`). Its one true negative is
+        // `at –45 °C` inside an ENGLISH citation title, listed for the same reason.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["gu", "hi", "jv", "km", "kn", "mr", "my", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

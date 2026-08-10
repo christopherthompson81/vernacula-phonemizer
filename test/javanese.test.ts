@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { normalizeJavanese } from "../src/languages/javanese/normalize.ts";
 
 import { phonemize } from "../src/index.ts";
 import {
@@ -91,5 +92,141 @@ describe("javanese canonical IPA", () => {
 
     test("Aksara Jawa digits route through the ngoko compositor", () => {
         expect(phonemize("꧑꧒꧓", "jv")).toBe("sˈat̪ʊs t̪əlulˈikʊr"); // 123 = satus telulikur
+    });
+});
+
+describe("jv text normalization", () => {
+    // Evidence, refusals and dead ends: docs/investigations/jv_normalization_investigation.md.
+    // ⚠ THE DOT IS CONTESTED BY THREE RULES in this language — thousands separator, decimal point (in the
+    // imported English format) and clock — which is what the step order in normalize.ts exists to resolve.
+    test("⚠ a grouping separator DESTROYS THE VALUE, in both conventions the corpus uses", () => {
+        // `1.500` read *sˈid͡ʒi . lˈimaŋ ˈat̪ʊs* — "one, five hundred". The native dot groups (×47) and the
+        // imported comma groups (×20); exactly-3-digit groups is what tells either from a decimal.
+        expect(normalizeJavanese("1.500")).toBe("1500");
+        expect(normalizeJavanese("200.000")).toBe("200000");
+        expect(normalizeJavanese("32,548")).toBe("32548");
+        // ⚠ BOTH AT ONCE — `± 1.485,36 km²` is grouped AND decimal. The dot arm's lookahead has to allow a
+        // following comma or the group refuses to match and both separators stay clause pauses.
+        expect(normalizeJavanese("1.485,36")).toBe("1485 koma tiga enam".replace("tiga enam", "3 6"));
+    });
+
+    test("the decimal is read digit by digit after koma, as Indonesian does", () => {
+        expect(normalizeJavanese("1,4")).toBe("1 koma 4");
+        expect(normalizeJavanese("43,34")).toBe("43 koma 3 4");
+        expect(normalizeJavanese("16.46")).toBe("16 koma 4 6"); // the imported dot-decimal
+    });
+
+    test("⚠ a clock's dot is claimed only where the corpus proves it is a clock", () => {
+        // Whole hours only — `menit` scores ZERO in the corpus and `jam siji liwat` zero on jv.wikipedia,
+        // so a clock with real minutes is left alone rather than read with a guessed word.
+        expect(normalizeJavanese("jam 09.00")).toBe("jam 9");
+        expect(normalizeJavanese("saka 00.00-03.00 ésuk")).toBe("saka 0 nganti 3 ésuk");
+        expect(normalizeJavanese("jam 08.45")).toBe("jam 08.45");
+        // ⚠ THE COLON IS DECLINED ENTIRELY: every one in the corpus is a 3-field timestamp, a sports time
+        // or a Qur'an verse reference — the shapes a clock rule must NOT claim.
+        expect(normalizeJavanese("jam 00:02:32 WIB")).toBe("jam 00:02:32 WIB");
+        expect(normalizeJavanese("QS 3:83")).toBe("QS 3:83");
+    });
+
+    test("ranges take nganti — including the two whose endpoints are not bare digits", () => {
+        expect(normalizeJavanese("taun 750 nganti 925")).toContain("nganti");
+        expect(normalizeJavanese("10-15")).toBe("10 nganti 15");
+        expect(normalizeJavanese("73–94 persèn")).toBe("73 nganti 94 persèn");
+        // the sign is consumed and PUT BACK, so the tier still reads both halves
+        expect(phonemize("72%-83%", "jv")).toContain(phonemizeWord("nganti"));
+        // a coordinate: the left endpoint ends in a minute mark, not a digit
+        expect(normalizeJavanese("110°30'-110°45'")).toContain("nganti");
+    });
+
+    test("⚠ the dash shapes that are NOT ranges stay untouched", () => {
+        // This wiki is full of bibliographic debris and none of it is a range to read aloud.
+        expect(normalizeJavanese("157-167 doi:10.1016/0301-0104")).not.toContain("nganti");
+        expect(normalizeJavanese("10-15(-17) cm")).toBe("10 nganti 15(-17) cm"); // botanical extreme
+    });
+
+    test("units, exponents and the rate word, all corpus- or wiki-sourced", () => {
+        expect(phonemize("132.000 km²", "jv")).toContain(phonemizeWord("persegi"));
+        expect(phonemize("1 m³/s", "jv")).toContain(phonemizeWord("kubik"));
+        expect(phonemize("5 km/jam", "jv")).toContain(phonemizeWord("per"));
+        expect(phonemize("3,95 g/cm³", "jv")).toContain(phonemizeWord("gram"));
+        expect(phonemize("475 jiwa/km²", "jv")).toContain(phonemizeWord("per"));
+    });
+
+    test("temperature is POSTPOSED, and °C runs before the bare degree", () => {
+        // Left to the bare rule, `20°C` read *rˈɔŋ pˈulʊh t͡ʃ* — the scale letter as a bare consonant.
+        expect(normalizeJavanese("20°C")).toBe("20 drajat celsius");
+        // ⚠ THE TRAILING SPACE IS LOAD-BEARING: without it `6°LU` fused into `6 drajatLU`.
+        // ⚠ …and the compass letters then reach the INITIALISM pass (step 8) and are spelled, which is
+        // what a coordinate wants: `6°LU` is read "nem drajat èl u", not "nem drajat lu".
+        expect(normalizeJavanese("6°LU")).toBe("6 drajat èl u");
+    });
+
+    test("currency, the approximation marker, and the ampersand", () => {
+        // A bare `$` key cannot match inside `AS$`/`US$` — the sign is preceded by a letter.
+        expect(phonemize("AS$143 milyar", "jv")).toContain(phonemizeWord("dolar"));
+        expect(phonemize("US$100 milyar", "jv")).toContain(phonemizeWord("dolar"));
+        expect(phonemize("Rp. 5.000", "jv")).toContain(phonemizeWord("rupiah"));
+        // ⚠ ± IS "ABOUT" HERE, NOT A TOLERANCE — every corpus instance is a rounded population or area.
+        expect(normalizeJavanese("± 1.485,36")).toBe("kurang luwih 1485 koma 3 6");
+        expect(normalizeJavanese("+/- 327.866")).toBe("kurang luwih 327866");
+        expect(phonemize("A&B", "jv")).toContain(phonemizeWord("lan"));
+    });
+
+    test("⚠ the fractions are SUPPLETIVE literals — the corpus glosses two of them itself", () => {
+        // `1/3 (sapratelon)` and `saprapat saka gunggung` are the corpus's own glosses. A pattern rule
+        // would immediately claim the DOIs and the year pairs, so only these three literals are claimed.
+        expect(normalizeJavanese("1/2")).toBe("setengah");
+        expect(normalizeJavanese("1/3")).toBe("sapratelon");
+        expect(normalizeJavanese("1/4")).toBe("saprapat");
+        expect(normalizeJavanese("taun 1985/1986")).toBe("taun 1985/1986"); // a year pair, not a fraction
+        // ½ arrives already folded to `1/2` by the registry — which is why it read *sˈid͡ʒi lˈoro* before.
+        expect(phonemize("½ kilogram", "jv")).toBe(
+            `${phonemizeWord("setengah")} ${phonemizeWord("kilogram")}`,
+        );
+    });
+
+    test("⚠ an unreadable initialism is SPELLED; a readable one keeps its word reading", () => {
+        // `PBB` read [pbb] — a vowel-less cluster, no possible Javanese utterance. The OOV test in
+        // core/initialisms.ts is what decides: it spells only what cannot be a word.
+        expect(phonemize("PBB", "jv")).toBe(["pé", "bé", "bé"].map(phonemizeWord).join(" "));
+        expect(phonemize("PDB", "jv")).toBe(["pé", "dé", "bé"].map(phonemizeWord).join(" "));
+        expect(phonemize("UGM", "jv")).toBe(["u", "gé", "èm"].map(phonemizeWord).join(" "));
+        // …and an acronym Javanese says as a WORD keeps that reading — the blast radius is small by design.
+        expect(phonemize("UNESCO", "jv")).toBe(phonemizeWord("UNESCO"));
+        expect(phonemize("WIB", "jv")).toBe(phonemizeWord("WIB"));
+    });
+
+    test("⚠ THE PHONOLOGY IS JAVANESE even though the letter-name inventory is inferred", () => {
+        // The names are emitted as ORTHOGRAPHY and read by this language's own g2p, so its signatures
+        // apply: the a→ɔ open-final rule and the dental series. Copying Indonesian's IPA table would have
+        // imported Indonesian phonology along with the inventory.
+        expect(phonemizeWord("a")).toBe("ˈɔ");
+        expect(phonemizeWord("ka")).toBe("kˈɔ");
+        expect(phonemizeWord("té")).toBe("t̪ˈe");
+        expect(phonemizeWord("dé")).toBe("d̪ˈe");
+    });
+
+    test("a case-keyed acronym is letters; personal initials lose their spurious pauses", () => {
+        // `AS` (Amérika Sarékat) is a readable word by phonotactics, so only the lexical list gets it right.
+        expect(phonemize("AS", "jv")).toBe(["a", "ès"].map(phonemizeWord).join(" "));
+        // `R. J. Speedy and C. A. Angell` read *r . d͡ʒ . … t͡ʃ . ˈɔ .* — bare consonants and four
+        // spurious phrase breaks, in a corpus full of citations.
+        expect(phonemize("R. T. Sumantri", "jv")).not.toMatch(/[.,]/u);
+        expect(phonemize("R. T. Sumantri", "jv")).toContain(phonemizeWord("èr"));
+    });
+
+    test("⚠ Roman numerals are NOT spelled — core/roman.ts has already claimed them", () => {
+        // It runs in the registry WRAPPING text(), so by the time the initialism pass sees the string they
+        // are digits. Without that ordering, `Louis XIV` would read EX-EYE-VEE.
+        expect(phonemize("Perang Donya II", "jv")).toContain(phonemizeWord("loro"));
+        expect(phonemize("Louis XIV", "jv")).toContain(phonemizeWord("patbelas"));
+    });
+
+    test("⚠ a YEAR needs no rule — Javanese reads it as a CARDINAL, unlike Chinese", () => {
+        // `year: 77647` is the artifact's largest cell and it was already correct.
+        expect(phonemize("taun 2009", "jv")).toBe(
+            `${phonemizeWord("taun")} ${phonemize("2009", "jv")}`,
+        );
+        expect(normalizeJavanese("taun 2009")).toBe("taun 2009");
     });
 });
