@@ -1,0 +1,99 @@
+// WIKIPEDIA WORD ATTESTATION — nan. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "nan",
+    "wiki": "nan.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "百分之",
+            "verdict": "absent",
+            "bounded": false,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "攝氏",
+            "verdict": "absent",
+            "bounded": false,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "公里",
+            "verdict": "attested*",
+            "bounded": false,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…Kong-lí ta̍k tiám-cheng (公里逐點鐘) sī chi̍t ê sok-tō͘ kap sok-lu̍t ê bu̍t-lí tan-ūi, it-po…",
+                "…成海拔800米以上的中山地貌、海拔500米以上至800米的低山地貌和海拔500米以下的丘陵地貌。周宁东南部县境距海岸74公里。 地貌有中山、低山、丘陵三大类型，中山占全县土地面积的61%，是用材林和单季稻、牧、茶区；低山占26.7%，是水源涵养…"
+            ]
+        },
+        {
+            "word": "分之",
+            "verdict": "absent",
+            "bounded": false,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "pah-hun-chi",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 1,
+            "examples": []
+        },
+        {
+            "word": "Hôa-sī",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 1,
+            "examples": []
+        },
+        {
+            "word": "Liap-sī",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 10,
+            "examples": []
+        },
+        {
+            "word": "kong-kin",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 4,
+            "examples": []
+        }
+    ],
+}

@@ -1,0 +1,200 @@
+/**
+ * Min Nan / Taiwanese Hokkien (nan) text normalization — the pre-tokenizer pass that rewrites what is not
+ * yet a pronounceable word into words the POJ/Han → IPA pipeline already speaks. Pure text→text, no IPA.
+ *
+ * ⚠ TWO ORTHOGRAPHIES, AND THEY SPLIT THE JOB: THE EVIDENCE IS POJ, THE OUTPUT IS HAN.
+ *
+ * nan.wikipedia — the corpus — is written in POJ (Pe̍h-ōe-jī) romanization: the retained text holds **268
+ * Han characters against 38,490 Latin**, so `latin-in-native: 413971` is not embedded foreign text, it is
+ * the language. That is where every word below was SOURCED. But it is an editorial convention of that wiki,
+ * not what users type: real-world Taiwanese is written in HAN, and this engine's Han front end (MOE dict)
+ * is built for exactly that. So the words are sourced from POJ prose and EMITTED IN HAN.
+ *
+ * ⚠ THE REASON FOR THAT SPLIT CHANGED UNDER IT, AND THE CORRECTED VERSION IS THE ONE THAT MATTERS. It was
+ * originally forced: the POJ spellings LEAKED ASCII, because the converter was Tâi-lô-only —
+ * `1/5` came out *ɡɔ˧ hun˥ **chi˥*** and `50%` *paʔ˥˩ hun˧ **chi˥***, the 之 syllable unmapped. That defect
+ * is now FIXED at its cause (`pojToTailo` in minnan.ts), so POJ and Han read the same:
+ * `Liap-sī` = `攝氏`, `kàu` = `到`, `tiám` = `點`. **The leak is no longer the argument.**
+ *
+ * Han is still what is emitted, for reasons that survive the fix:
+ *   · USERS WRITE HAN. The corpus's POJ is nan.wikipedia's editorial convention; real Taiwanese is Han, and
+ *     the Han front end (MOE dict) is built for it. Emitting Han keeps the output coherent with that input.
+ *   · 13 OF THE 16 WORDS THIS LAYER EMITS ARE DICT WORDS — 攝氏 公里 公尺 公斤 美金 箍 每 秒 到 佮 點 度 平方 —
+ *     so each is one tone group and gets its word-internal sandhi. ⟨攝氏⟩ in particular reads *Liap-sī*, the
+ *     very Celsius term this corpus defines.
+ *   · A Han word inside POJ prose still reads: the tokenizer has its own Han group, so the choice costs the
+ *     POJ corpus nothing.
+ *
+ * ⚠ AND THE RESIDUAL COST, STATED RATHER THAN GLOSSED: 百分之 and 分之 are NOT dict words, so they are read
+ * character by character and get no word-internal sandhi, where the hyphenated POJ token `pah-hun-chi`
+ * would. It is confined to those two words, and the digits either side are separate tokens in both spellings
+ * anyway — but it is a real difference and the one place the other choice would read better.
+ *
+ * The POJ↔Han pairing is verified word by word (到 = kàu, 點 = tiám, 箍 = kho͘, 每 = múi, 秒 = biáu/bió,
+ * 平方 = pêng-hong), and the corpus confirms the method outright: `Kong-lí ta̍k tiám-cheng (公里逐點鐘)`.
+ *
+ * Nothing here is modelled on cmn/yue/wuu — those are Han-corpus languages whose evidence came from Han
+ * prose. This one's evidence is romanized and its output is not.
+ *
+ * ⚠ THE HYPHEN IS A WORD-INTERNAL SYLLABLE JOINER, WHICH GOVERNS THE WHOLE LAYER. POJ writes a polysyllable
+ * with hyphens (`hái-chúi`, `pêng-hong kong-lí`, `ko͘-1-ê`), so a dash rule is far more dangerous here than
+ * in any language treated so far. Counted over the retained text:
+ *
+ *   EN DASH  5 instances — 5/5 GENUINE RANGES (384–22 nî · 1707–78 nî · 15–16 sè-kí · 1795–1929)
+ *   TILDE    4 instances — 4/4 GENUINE RANGES (25℃~30℃ · 3~4 km/biáu · 32~64 mg/kg)
+ *   ASCII -  26 instances — MOSTLY NOT RANGES: the `ISO 8859-1 … 8859-16` designation block is ~18 of
+ *            them, plus an ISBN (`957-2053-07-8`), arithmetic (`2^7-1=127`), citation pages (`313-332`)
+ *            — and POJ's own word-internal hyphens (`ko͘-1-ê`, `bó͘-1-ê`, `--1-piàn`)
+ *
+ * So the en dash and the tilde are claimed and THE ASCII HYPHEN IS DECLINED. Javanese made the opposite
+ * call on the same character; each corpus decided its own.
+ *
+ * ⚠ `\b` IS NEVER USED — POJ carries ⟨á à â ā a̍ ⁿ o͘⟩, and an ASCII-defined boundary silently fails against
+ * every one of them. Every boundary here is an explicit lookaround over `[\p{L}\p{M}]`.
+ *
+ * Deliberately left alone, with the measurement:
+ *   · THE ASCII HYPHEN, as above — the single largest refusal in this layer, and the one most specific to
+ *     the orthography.
+ *   · A NEGATIVE NUMBER. The corpus has genuine ones (`10°C kàu -2°C`, `2^7-1`), but no Min Nan
+ *     negative-number word occurs anywhere in it, and the shape is inseparable from the word-internal
+ *     hyphen above. Reading it would need a word this corpus does not supply.
+ *   · THE CLOCK. `clock: 1490` corpus-wide, but the retained text's `\d+:\d+` are EasyTimeline template
+ *     coordinates (`from: 25/10/1945 till: $now`, `ScaleMajor = unit:year increment:20`), not times of day.
+ *
+ * ⚠ TWO WORDS ARE SHIPPED ON INFERENCE, flagged at their declarations, and one is much better founded:
+ *   1. `pah-hun-chi` (percent) is unattested AS A WHOLE but is COMPOSITIONAL FROM PARTS THIS CORPUS ATTESTS
+ *      IN THIS CONSTRUCTION — 百分之 is `pah` + `hun chi`, and the corpus writes `1-pah-bān-hun chi it`
+ *      ("one millionth"), the same construction with a magnitude prefix. Pieces, order and pattern attested.
+ *   2. `tiám` (decimal) is the weak one: ×12 in the corpus and every instance is the NOUN "point" inside a
+ *      compound (`te̍k-tiám`, `khí-tiám`, `koan-tiám`), never a separator. Shipped for the reason jv's
+ *      `koma` and wuu's 点 were — 55 dot-decimals otherwise read their separator as a clause pause.
+ *
+ * ⚠ AND A NOTE ON THE EVIDENCE TOOL: `attest.ts` CANNOT DO TOKEN ATTESTATION FOR POJ. It splits prose on
+ * non-letters, and a POJ word CONTAINS hyphens, so the full form never appears as a token — `Liap-sī`, which
+ * this corpus uses four times to define the Celsius scale, reports `0 token / 10 substring`. Trap 19 in a
+ * new guise. For this language the substring count is the evidence, and an `absent` verdict only means
+ * something at 0 substring.
+ */
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+
+/** 0–9 as Han numerals, for reading a decimal's fractional part ONE DIGIT AT A TIME.
+ *  ⚠ Joining the digits and letting the number path read them gives the CARDINAL — `1.797` came out
+ *  *it tiám chhit-pah káu-cha̍p chhit*, "one point seven hundred ninety-seven". */
+const DIGITS = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+
+/**
+ * ⚠ EVERY UNIT AND EVERY WORD HERE IS FROM THE CORPUS'S OWN PROSE — sourced in POJ, written in Han (see the
+ * header) — and several are glossed by the corpus outright:
+ *   · `kong-lí` ×20 (kilometre) · `kong-chhioh` ×10 (metre, `chhim 8605 kong-chhioh`) · `kong-kin` (kilo)
+ *   · `biáu` (second) as a RATE DENOMINATOR, which is the shape that needs it: `3~4 km/biáu`, `5~6km/biáu`
+ *   · `kho͘` (the currency unit) — `Ji̍t-phiò 91 kho͘ (¥91)` and `Bí-kim 1 kho͘ (US$1)`, the corpus
+ *     supplying both the sign and its reading in the same parenthesis
+ *   · `kap` ×114 for the ampersand — Min Nan's own conjunction, NOT the 和 the other Sinitic layers use
+ *
+ * ⚠ `pêng-hong` IS `before`, NOT `compound`: the corpus writes `pêng-hong kong-lí` WITH A SPACE (×5). The
+ * two are not interchangeable — `compound` would fuse it into one unreadable token.
+ * ⚠ CUBED IS UNDECLARED. No cube word occurs in the corpus, and `km³`/`m³` do not either; inventing one to
+ * fill the slot would be a reading with nothing behind it.
+ * ⚠ `¥ € £` ARE UNDECLARED although all three occur (×2, ×2, ×6): `kho͘` is the unit word, not the currency
+ * name, and no Min Nan name for yen/euro/pound appears anywhere in the corpus. An unsourced currency is left
+ * unread rather than guessed.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    ampersand: "佮",
+    percent: ["百分之"],
+    percentPrefix: true,
+    units: { km: ["公里"], m: ["公尺"], kg: ["公斤"] },
+    rateDenominators: { biáu: "秒", s: "秒", kg: "公斤" },
+    // ⟨múi⟩ is the distributive "every/each", attested ×2 in exactly that sense: `Hoat-kok múi ji̍t ē-po͘
+    // chhut-khan` (published every day) and `múi-chi̍t-hūn chiū-sī Liap-sī 1 tō͘` (each part is one degree).
+    unitPer: "每",
+    exponentWords: { squared: ["平方"], position: "compound" },
+    // ⚠ `US$` NEEDS ITS OWN KEY — a bare `$` cannot match there, the sign being preceded by a letter and the
+    // tier's word-guard correctly refusing it (Indonesian and Javanese hit the identical case). The corpus
+    // supplies the reading in a gloss: `Bí-kim 1 kho͘ (US$1)` — 美金, US currency.
+    currency: { "US$": ["美金"], $: ["箍"] },
+    // ⚠ POJ PUTS THE MAGNITUDE WORD BETWEEN THE NUMBER AND THE UNIT — `1.797 ek km²`, `5-ek 1000-ban km²`,
+    // `7676 bān 2 chheng pêng-hong kong-lí` — so without these the unit was not digit-adjacent and the whole
+    // `km²` dropped. Spellings as the corpus writes them, including the unaccented `ban`/`ek` it also uses.
+    magnitudes: ["ek", "bān", "ban", "chheng", "pah", "億", "萬", "千", "百"],
+});
+
+/**
+ * Normalize one Min Nan string. The steps are ORDER-DEPENDENT; each states what breaks if it moves.
+ */
+export function normalizeMinNan(input: string): string {
+    let s = input;
+
+    // ── 1. de-group thousands ────────────────────────────────────────────────────────────────────
+    // ⚠ FIRST, and this language's number format is unambiguous, unlike Javanese's: the corpus is
+    // ENGLISH-STYLE by a wide margin — comma groups ×45 (`181,040 km²`, `¥147,778`, `331,210 pêng-hong
+    // kong-lí`) against 3 dot-groups, and dot decimals ×55 (`50.11%`, `1.8 kong-lí`, `31.26 m²`) against 2
+    // comma-decimals. So the comma groups and the dot is the decimal, with no contest to resolve.
+    // Left alone, the comma is read as a clause pause and the value is destroyed.
+    s = s.replace(/(?<![\d.,])\d{1,3}(?:,\d{3})+(?![\d,])/gu, (m) => m.replace(/,/gu, ""));
+
+    // ── 2. the two range marks that ARE ranges ───────────────────────────────────────────────────
+    // ⚠ EN DASH AND TILDE ONLY — see the header for the count that draws this line, and for why the ASCII
+    // hyphen is not here. ⟨kàu⟩ is the corpus's own connective (×48) and is used in exactly this slot:
+    // `Chúi-un tī 10°C kàu -2°C`, `lak kàu Liap-sī 0-tō͘`, `US$3 khí kàu óa-kīn $1`.
+    // BEFORE the degree and percent rules, because `25℃~30℃` and `32~64 mg/kg` put the mark between two
+    // NUMBERS and those rules would otherwise consume the endpoints' adjacency first.
+    // ⚠ THE LEFT ENDPOINT MAY CARRY ITS UNIT — `25℃~30℃` puts the mark after the SIGN, not after a digit,
+    // so a `(\d)` pattern never reaches it and the range vanished while both halves still read. Captured and
+    // RE-EMITTED (playbook trap 10) so step 3 still sees `25°C` intact and gives it its Liap-sī reading.
+    s = s.replace(/(\d)((?:\s*°\s*C|℃|\s*°|%)?)\s*[–~〜]\s*(?=\d)/gu, "$1$2 到 ");
+
+    // ── 3. coordinates, then the temperature, then the bare degree ───────────────────────────────
+    // ⚠ COORDINATES FIRST: `tang-keng 118°04'04"`, `pak-hūi 24°26'46"`, `118°24′`, `25°10′` — the minute
+    // and second marks must be consumed before the bare-degree rule takes the ° and strands them.
+    // ⚠ ONLY THE DEGREE IS READ. ⟨tō͘⟩ is corpus-attested (`lâm-hūi 65-tō͘`), but no arc-minute or
+    // arc-second word is — ⟨hun⟩ occurs ×4 and never in this sense, ⟨biáu⟩ only as a time unit in `km/biáu`
+    // — so the marks are dropped rather than read with a guessed word, and the digits still speak.
+    s = s.replace(/(\d+)\s*°\s*(\d+)\s*[′']\s*(\d+)\s*[″"]/gu, "$1度 $2 $3");
+    s = s.replace(/(\d+)\s*°\s*(\d+)\s*[′']/gu, "$1度 $2");
+    // ⚠ CELSIUS IS PREPOSED, and the corpus DEFINES it: `siat-tēng-chòe Liap-sī 0 tō͘ (0 °C)` and
+    // `Liap-sī 100 tō͘ (100 °C)`. So the reading wraps around the numeral — the scale name before it, the
+    // degree word after — which no `units` entry can express, hence the local rule. ⟨攝氏⟩ is a dict WORD
+    // reading as Liap-sī. ℃ arrives already folded to `°C`.
+    // ⚠ BEFORE the bare-degree rule, or that rule eats the ° and leaves a lone ⟨C⟩ read as a bare consonant,
+    // which is what `10°C` did: *t͡sap̚˥ c˥*.
+    // ⚠ THE GUARD IS `\p{sc=Latn}`, NOT `\p{L}`, AND THE POJ CORPUS COULD NEVER HAVE SHOWN WHY. A Han
+    // character IS `\p{L}`, so in Han running text — which is what users actually write — `溫度10°C到2°C`
+    // failed the guard, fell through to the bare-degree rule, and fused the degree word onto the stranded
+    // ⟨C⟩ as one Latin token: *un-tō͘ tsa̍p **toc** kàu…*. In POJ prose a space or punctuation always
+    // follows the scale letter, so the bug was invisible there.
+    s = s.replace(/(\d+)\s*°\s*C(?![\p{sc=Latn}])/gu, "攝氏$1度");
+    s = s.replace(/(\d+)\s*°\s*/gu, "$1度 ");
+
+    // ── 4. THE FRACTION RULE WAS REMOVED IN REVIEW, and the count is why ────────────────────────
+    // A `a/b` → `b分之a` rule shipped here first, on the strength of the corpus's attested ⟨hun chi⟩
+    // construction. Then the slash was counted: the retained corpus contains **exactly one** digit/digit
+    // instance and it is **`Fahrenheit 9/11`**, a film title — which the rule read as "nine elevenths".
+    // Zero genuine instances, one false positive.
+    //
+    // ⚠ AND THE CONSTRUCTION NEEDS NO RULE ANYWAY. This corpus writes its fractions in WORDS, mixed with
+    // digits: `Tē-kiû ê gō͘ hun chi it` (1/5) and `sè-kài jîn-kháu ê 7 hun chi 1` (1/7). The second form is
+    // already read correctly as it stands — the digits go through the number path and ⟨hun chi⟩ through the
+    // POJ path — so the layer has nothing to add. Playbook trap 9: a rule with no attested instance is a
+    // misfire generator, and this one demonstrated it on the only instance available.
+
+    // ── 5. percent, currency, units, exponents and the ampersand, via the shared tier ────────────
+    // AFTER de-grouping (the tier needs the number contiguous), AFTER the range rule (which has already
+    // separated `25℃~30℃`), and AFTER the degree rules (so no ⟨C⟩ is still in play for its unit
+    // alternation to compete with).
+    s = SYMBOLS(s);
+
+    // ── 6. decimals ──────────────────────────────────────────────────────────────────────────────
+    // LAST of the number rules: the tier matches ASCII digits next to a sign, and replacing the "." with
+    // ⟨tiám⟩ would break that adjacency for every decimal percentage — of which this corpus has several
+    // (`50.11%`, `62.96%`, `0.03%`).
+    // ⚠ THE FRACTIONAL PART IS READ DIGIT BY DIGIT, the reading every Sinitic variety gives it.
+    // ⚠ `(?!\.\d)` KEEPS A DOTTED DESIGNATION OUT — `ISO 8859`-style identifiers and version triples share
+    // the decimal's shape, and the same guard earned its place in the Javanese layer.
+    s = s.replace(
+        /(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)/gu,
+        (_m, int: string, frac: string) => `${int}點${[...frac].map((d) => DIGITS[Number(d)] ?? d).join("")}`,
+    );
+
+    return s;
+}
