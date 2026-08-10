@@ -274,3 +274,45 @@ suite         3,265 tests · tsc clean · review.ts --lang jv clean but for the 
 **What remains**: nothing in this class that the evidence can settle. The honest residue is that the letter
 NAMES are an inference — recorded here and at the table, and the one thing a Javanese speaker should check
 first if any of this is ever reviewed by one.
+
+---
+
+## Run 4 — 2026-08-09 21:50 — PR review (#790)
+
+Reviewed the diff as a whole, with adversarial probes rather than corpus shapes. **Four findings: one real
+defect, one stale comment, and two measured non-fixes.**
+
+### The defect: a version triple read as a decimal
+
+```
+nomer 1.2.3   →   siji koma loro . telu
+```
+
+The decimal rule claimed `1.2` and left `.3` as a stray pause. Guarded with `(?!\.\d)` — refusing only when
+another dot-plus-digit follows, which is narrow on purpose: a sentence-final decimal (`Ana 3.5.`) must still
+read, and `version-dot` is 103 corpus-wide against 15,961 decimals. Pinned both ways.
+
+### The stale comment, which is the same drift the previous PR review caught
+
+The header said ⟨koma⟩ was "**THE ONE WORD** shipped without an attested sense" — written before the letter
+table landed in Run 3, which is a second one. Corrected to name both, with the distinction that matters:
+`koma` is a bare inference, while the letter names carry a split (inventory inferred, phonology native).
+
+### Two things probed, measured, and deliberately NOT fixed
+
+- **`pukul 13.30` still reads as a decimal.** ⟨pukul⟩ is the Indonesian formal clock word and scores
+  **zero** in this corpus, where all 10 clock instances use ⟨jam⟩. Guarding it would be a rule with no
+  attested instance (trap 9). Recorded at the step rather than papered over.
+- **`ISBN 979` → [ˈɪsbn] is NOT a defect**, and chasing it was worth the time. `core/initialisms.ts` bails
+  on a string with no lowercase and a space — the all-caps-DOCUMENT guard, "in an all-caps document the
+  capitals carry no signal". My probe was a two-token fragment, not real text. In the corpus it reads
+  correctly (`cithakan ISBN 979…` → *i ès bé èn*, and the diff shows it). **Nearly "fixed" shared code on a
+  bad premise.**
+
+### Gates after the review fixes
+
+```
+corpus diff   DROP 101 → 30 · DIGIT/RAWMARK/THROW 0 · 213/448 changed
+referee       86.2% / 96.5% (Latin) · 84.5% / 96.3% (Aksara)  — UNCHANGED
+suite         3,265 tests · tsc clean · review.ts --lang jv clean but for the pre-existing Aksara SLOT-GAP
+```

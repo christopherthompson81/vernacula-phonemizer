@@ -114,6 +114,10 @@ describe("jv text normalization", () => {
         expect(normalizeJavanese("1,4")).toBe("1 koma 4");
         expect(normalizeJavanese("43,34")).toBe("43 koma 3 4");
         expect(normalizeJavanese("16.46")).toBe("16 koma 4 6"); // the imported dot-decimal
+        // ⚠ A VERSION/SECTION TRIPLE IS NOT A DECIMAL — `nomer 1.2.3` read *siji koma loro . telu*. The
+        // guard refuses only when another dot-plus-digit follows, so a sentence-final decimal still reads.
+        expect(normalizeJavanese("nomer 1.2.3")).toBe("nomer 1.2.3");
+        expect(normalizeJavanese("Ana 3.5.")).toBe("Ana 3 koma 5.");
     });
 
     test("⚠ a clock's dot is claimed only where the corpus proves it is a clock", () => {

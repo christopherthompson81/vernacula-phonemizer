@@ -28,13 +28,21 @@
  *     slash in this corpus is mostly a DOI (`10.1016/0301-0104`) or a YEAR PAIR (`taun 1985/1986`). The
  *     three attested suppletives are claimed by literal and nothing else is.
  *
- * ⚠ THE ONE WORD SHIPPED WITHOUT AN ATTESTED SENSE is the decimal ⟨koma⟩, and it is flagged here rather than
- * buried: it scores 38 token hits on jv.wikipedia and **every recorded one is "Teater Koma"**, a theatre
- * company; `nol koma`/`siji koma`/`loro koma` all return zero. But a written corpus is the weakest evidence
- * there is about how a SYMBOL is spoken (writers type `1,4`; they never spell it out), jv's whole
- * numeric-technical vocabulary is the same Indonesian/Dutch stratum and every other member of it IS attested
- * here (persèn, persegi, kubik, milyar, triliun, juta), and the alternative is 15,961 corpus decimals whose
- * separator is read as a CLAUSE PAUSE — destroying the value rather than merely leaving it unread.
+ * ⚠ TWO THINGS ARE SHIPPED WITHOUT AN ATTESTED SENSE, and both are flagged where they are declared rather
+ * than buried here. They rest on the SAME argument — a written corpus is the weakest evidence there is about
+ * how a SYMBOL is spoken, because writers type `1,4` and `PBB` and never spell out how they say them.
+ *
+ *   1. THE DECIMAL ⟨koma⟩. It scores 38 token hits on jv.wikipedia and **every recorded one is "Teater
+ *      Koma"**, a theatre company; `nol koma`/`siji koma`/`loro koma` all return zero. jv's whole
+ *      numeric-technical vocabulary is the same Indonesian/Dutch stratum and every other member of it IS
+ *      attested here (persèn, persegi, kubik, milyar, triliun, juta), and the alternative is 15,961 corpus
+ *      decimals whose separator is read as a CLAUSE PAUSE — destroying the value, not merely leaving it
+ *      unread.
+ *   2. THE LATIN LETTER NAMES, at `LETTER_NAME` below, where the full refutation trail is recorded. That
+ *      one carries a split this one does not: only the INVENTORY is inferred, because the names are emitted
+ *      as ORTHOGRAPHY and this language's own g2p supplies the phonology.
+ *
+ * Neither is an attestation, and a Javanese speaker reviewing this layer should start with these two.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -183,6 +191,9 @@ export function normalizeJavanese(input: string): string {
     // ⚠ ONLY `.00` IS CLAIMED. A minute word is NOT attested anywhere (`menit` scores zero in the corpus),
     // so a clock with real minutes is left alone rather than read with a guessed word — the same refusal
     // shape as the general fraction below. `jam 09.00` → `jam 9`; the hour is then read by the cardinal path.
+    // ⚠ ⟨pukul⟩ IS NOT GUARDED, DELIBERATELY: it is the Indonesian formal clock word and scores ZERO in this
+    // corpus, where all 10 clock instances use ⟨jam⟩. Adding it would be a guard with no attested instance
+    // (trap 9) — so `pukul 13.30` still reads as a decimal, and that is recorded rather than papered over.
     s = s.replace(
         /(\d{1,2})\.00\s*([-–])\s*(\d{1,2})\.00(?!\d)/gu,
         (_m, a: string, _d: string, b: string) => `${Number(a)} nganti ${Number(b)}`,
@@ -231,8 +242,12 @@ export function normalizeJavanese(input: string): string {
     // identify; what it leaves behind is a clock with REAL MINUTES, and this rule read `jam 08.45` as
     // *jam 08 koma 4 5* — a decimal inside a time. Found by a test, not by the corpus, whose clocks all
     // happen to be whole hours. Left alone, the minutes stay unread, which is the refusal step 1 states.
+    // ⚠ AND `(?!\.\d)` KEEPS A VERSION/SECTION TRIPLE OUT — `nomer 1.2.3` read *siji koma loro . telu*, a
+    // decimal followed by a stray pause. Refusing only when ANOTHER DOT-PLUS-DIGIT follows is what lets a
+    // decimal at the end of a sentence through (`Ana 3.5.` is still a decimal); the `version-dot` cell is
+    // 103 corpus-wide against 15,961 decimals, so the guard has to be this narrow.
     s = s.replace(
-        /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d,])/gu,
+        /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d,])(?!\.\d)/gu,
         (m, i: string, f: string, off: number, full: string) =>
             f === "00" || /(?<![\p{L}\p{M}])jam\s*$/u.test(full.slice(0, off)) ? m : decimal(i, f),
     );
