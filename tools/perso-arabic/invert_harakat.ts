@@ -149,10 +149,31 @@ function label(lang: string): void {
     const sources = LEXICON
         ? ["silver.tsv", "silver.kaikki.tsv", "silver.hindiurdu.tsv"]
         : ["silver.tsv", "silver.kaikki.tsv"];
-    const rows = sources
+    let rows = sources
         .flatMap((f) => existsSync(join(HERE, f)) ? readFileSync(join(HERE, f), "utf8").split("\n") : [])
         .map((l) => l.split("\t"))
         .filter((a) => a.length >= 3 && a[1] === cfg.silverCode);
+    // pa ONLY: the CROSS-SCRIPT pairs (real Shahmukhi spelling → gold IPA from the voweled Gurmukhi sister,
+    // 11,166 rows after #788 — both kaikki directions + the skeleton-gated Wikipedia-title tranche) are
+    // exactly this miner's input shape and 4x the wikipron/kaikki silver. Same inversion, same round-trip
+    // verification — the harakat label exists only where a vocalization REPRODUCES the cross-script gold.
+    if (lang === "pa") {
+        const cs = join(HERE, "../../src/languages/punjabi/crossscript.tsv");
+        // ⚠ DICTIONARY TRANCHE ONLY (the kaikki dual-script pairs), NOT the Wikipedia-title tranche. The
+        // titles are 65% foreign proper nouns, and training on them regressed EVERY rider on the fixed
+        // wikipron eval set (pa 58.5→54.5, ps −4.4, ur −1.8 — the same register confound the pa BiLSTM
+        // restorer measured, investigation Run 9/10: titles are LEXICON material, not training material).
+        const keysFile = join(HERE, "pa_kaikki_keys.txt");
+        if (existsSync(cs) && existsSync(keysFile)) {
+            const kaikkiKeys = new Set(readFileSync(keysFile, "utf8").split("\n"));
+            const extra = readFileSync(cs, "utf8").split("\n")
+                .filter((l) => l.includes("\t") && !l.startsWith("#"))
+                .map((l) => { const [w, ipa] = l.split("\t"); return [w!, cfg.silverCode, ipa!] as string[]; })
+                .filter((r) => kaikkiKeys.has(r[0]!));
+            const seen = new Set(rows.map((r) => r[0]));
+            rows = rows.concat(extra.filter((r) => !seen.has(r[0])));
+        }
+    }
 
     const labeled: string[] = [];
     const seenSkel = new Set<string>(); // lexicon: one vocalization per skeleton (the lookup key)

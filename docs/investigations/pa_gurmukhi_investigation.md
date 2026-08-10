@@ -273,3 +273,38 @@ sisters — the SLPG corpus would qualify IF its licence and human-parallel stat
 audio-supervised route on Shahmukhi speech (the FLEURS-pa method, but Pakistani Punjabi audio). Until then
 the Shahmukhi levers stay: the coverage layer (97% where it reaches — GROW the harakat lexicon), and
 crossscript (the 61.5% referee gain shipped in #788 stands regardless).
+
+## Run 10 — 2026-08-09 22:40 — the rider retrain: the title confound confirmed AGAIN, and a coupling discovered
+
+The running-text question first, answered from the shipped code: the riders (ur/fa/ps/pa-Shahmukhi) DO ship
+a neural vocalization pre-pass over running text (`phonemizeRiderNeural` → riderDiacritizer.onnx) — but it
+is a PER-WORD model applied word-by-word (one language token + the word's chars, no cross-word context),
+trained on g2p-inverted word lists, "the riders have no diacritized corpus" per its own provenance. The
+nakdan shape (sentence context + running-text supervision) exists for none of them; audio remains the only
+visible source of that supervision.
+
+The retrain, with the new crossscript as mining fuel (`invert_harakat.ts` now consumes it — same inversion,
+same round-trip verification; pa silver 460 → 6,385 labeled with titles, 2,541 dictionary-only):
+
+| checkpoint | pa silver | pa (fixed wikipron eval) | ur | ps | fa |
+|---|---|---|---|---|---|
+| v1 (shipped) | old | **58.5%** | **87.3** | **57.1** | 68.8 |
+| v2 (full crossscript) | +titles | 54.5 | 85.5 | 52.7 | 68.0 |
+| v3 (dictionary tranche only) | kaikki-only | 54.5 | 86.0 | 52.7 | **69.4** |
+
+Two findings, neither of which ships a model:
+1. **The title tranche regresses training a SECOND time**, in a second architecture (v2; the Run-9 confound
+   reproduced in the rider). Titles are lexicon material. The mining now filters to the dictionary tranche,
+   with the measurement in the comment.
+2. **The multilingual model couples its languages, and fa's pending retrain was pending FOR A REASON:** fa's
+   silver was regenerated to a FULL-DIACRITIZATION convention on 2026-07-16 with the retrain deferred — any
+   retrain today trains fa-new + (pa/ur/ps)-old conventions into shared parameters, and v3 shows exactly
+   that signature: fa improves (+0.6), everyone else drops (pa −4.0, ps −4.4, ur −1.3). The provenance's
+   "retrain pending" is really "retrain BLOCKED until the other three silvers are regenerated to the same
+   convention" — now written down where the next person will look.
+
+**Shipped state: unchanged** (v1 stays; v2/v3 checkpoints live on /mnt/data only). Committed: the
+crossscript mining source (dictionary tranche, filtered, justified), the regenerated pa silver (2,541
+dictionary-register labels, 5.5x the old — correct fuel for the retrain once the convention alignment is
+done), and this run. The convention-alignment regeneration (ur/ps analogues of FA_FULL_FOLD) is the
+prerequisite work item.
