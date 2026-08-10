@@ -91,7 +91,15 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // which is what makes it a property of the writing culture rather than of any one wiki. hak's minus
         // entry records something else: the 3-DIGIT year ranges its layer deliberately declines
         // (`303-ngièn -349-ngièn`), where the 4-digit ones ARE read — a boundary, listed so it stays one.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "jv", "km", "kn", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
+        // ln is the first entry whose largest class is `degree`, and it is there because ONE CHARACTER DOES
+        // THREE JOBS on a French-influenced wiki: the temperature degree (which IS read — `°C` → the scale
+        // name), the coordinate/angle degree, and the FRENCH NUMERO SIGN (`Mobéko n°011/2002`, `n° 68-70`).
+        // Only the first has a Lingala word behind it, so the other two are listed rather than guessed at.
+        // ⚠ AND ITS ABSENT KEY IS THE POINT OF THE ENTRY: ln has SIX unlisted `minus` drops, all genuine
+        // negatives (two latitudes, the electron charge, absolute zero, two BCE years). Omitting a minus
+        // INVERTS the value, no Lingala word for it is attested, and a known-wrong reading does not get to
+        // be a green gate — so `ln.minus` deliberately does not exist and `review.ts --lang ln` stays red.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "jv", "km", "kn", "ln", "mr", "my", "nan", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

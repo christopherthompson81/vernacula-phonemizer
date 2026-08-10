@@ -1,0 +1,177 @@
+// WIKIPEDIA WORD ATTESTATION — ln. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ln",
+    "wiki": "ln.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "virgule",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…Star Extra Musica na mobu 1993. == Palaki na ba nzémbo == \"Virgule\" (2005) == Mazita o libanda == Blog na yé lisolo ya Extra E…",
+                "…== Mazita o libanda == Blog na yé lisolo ya Extra Ebimi ya \"Virgule\" Album ya Quentin Mayascko Africahit: \"Extra Musica eza nga…"
+            ]
+        },
+        {
+            "word": "likolo ya mokama",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…sanduku ya Ekolo na Mbula Matari zambi ya eteni ntuku minei likolo ya mokama (40%) mpo ya bingumba, mpé eteni ntuku motoba likolo ya mok…",
+                "…olo ya mokama (40%) mpo ya bingumba, mpé eteni ntuku motoba likolo ya mokama (60%) mpo ya Mbula Matari. Soki boyokani bozangi na esaleli…"
+            ]
+        },
+        {
+            "word": "likolo ya nkama",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "kare",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 11,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…aki lisusu etúká. Esanga yango ezali na bonene ya kilomɛtrɛ-kare 79 906. == Géographie == Kwilu ezali etúká ya wɛsti mpe ya…",
+                "…u oyo eleki monene na mokili mobimba, ezali na mai ya mɛtrɛ-kare 17 000 na segɔnde moko, na bokeseni ya mɛtrɛ 60.Kataraktɛ y…",
+                "…a ngámbo ya nɔrdi-ɛsti / sudi-wɛsti, na bonene ya kilomɛtrɛ-kare 4650. Ezali na bozindo ya mɛtrɛ koleka 37. Epesamaka na eba…",
+                "…yango ezali na bato mingi te, ezali na bato 11 na kilomɛtrɛ-kare moko, mpe zingazinga na yango ezali na mabele ya pɔtɔpɔtɔ.…",
+                "…e forêt ya Afrika. Parke yango ezali na bonene ya kilomɛtrɛ-kare 36.000 mpe ezali na bazamba ya mikili ya molunge oyo eleki…",
+                "…' ya kilomɛtrɛ soki 40 mpe oyo ezali na bonene ya kilomɛtrɛ-kare koleka 10 000. Etando yango, oyo ezali na bato mingi ya mbo…"
+            ]
+        },
+        {
+            "word": "kilomɛtrɛ-kare",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 8,
+            "examples": []
+        },
+        {
+            "word": "tuku",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 32,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Henri Matisse (31 sánzá ya tuku na mibalé 1869 - 3 sánzá ya tuku na moko 1954) azalaka Mopa…",
+                "…Henri Matisse (31 sánzá ya tuku na mibalé 1869 - 3 sánzá ya tuku na moko 1954) azalaka Mopakoli mpé Moyémi ya Fransia == May…",
+                "…zala == Abótami na Cateau-Cambrésis o mokolo ya 31 sánzá ya tuku na mibalé 1869. == Mayé Asala == == Bowéyi == Akufaka na mo…",
+                "…Mayé Asala == == Bowéyi == Akufaka na mokolo ya 3 sánzá ya tuku na moko 1954 na Nice. == Makumisi == == O Libanda ya awa ==…",
+                "…sanza ya zomi na mibalé o mibu nkoto moko na nkama libwa na tuku motoba na libwa (25 Décembre 1965) o Bandundu, azalí moyémb…",
+                "…á. == Bomoyi == Yannick Bolasie abótama na Lyon o mokolo ya tuku mibale na minei ya sanza motoba o mibu nkoto moko na tuku m…"
+            ]
+        },
+        {
+            "word": "pursa",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "pourcent",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "posa",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 29,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ye. 2. Mobeko lokola Etambwiseli ya mboka Awa mobeko ezali posa ya ekolo na nzela ya balobeli na ye kokekela etambwiseli ya…",
+                "…== mobeko ebotami na lisanga ya batu mpo moto moko azali na posa ya mibeko te tango aza ye moko... posa wana ekobotama tango…",
+                "…o moto moko azali na posa ya mibeko te tango aza ye moko... posa wana ekobotama tango bato bakosangana pona kokela ekolo. Na…",
+                "…ya kosala mbeba, bato ya mayele bamekaka kopesa ndimbola na posa wana kasi mobeko ekelama mpe pona kobatela bamoko na bizale…",
+                "…ama ya bana na ye. Alingi Mwana Nyoka na Libanda ya Pepo... Posa ya mbongo to posa ya mosuni... Tata oyo akoti na suka na mb…",
+                "…Alingi Mwana Nyoka na Libanda ya Pepo... Posa ya mbongo to posa ya mosuni... Tata oyo akoti na suka na mbonge na kati-kati…"
+            ]
+        },
+        {
+            "word": "mokama",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…trice abotami na kombo ya Patrice Ngoy Musoko na engumba ya Mokama, okati ya etúká wa Bandundu . Azali mokambi mpé moyebi. Aba…",
+                "…Ekolo na Mbula Matari zambi ya eteni ntuku minei likolo ya mokama (40%) mpo ya bingumba, mpé eteni ntuku motoba likolo ya mok…",
+                "…ama (40%) mpo ya bingumba, mpé eteni ntuku motoba likolo ya mokama (60%) mpo ya Mbula Matari. Soki boyokani bozangi na esaleli…"
+            ]
+        },
+        {
+            "word": "nkama",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 94,
+            "articles": 19,
+            "substringOnly": 1,
+            "examples": [
+                "…Augustin Nkama azalí bugumési ya Nsele. Bonaki ye na mokɔlɔ ya 8 ya sańzá…",
+                "…o 2005 na Joseph Kabila. Na mokolo 3 yanwáli 2023, Augustin Nkama azwaki esika ya Norbert Muchiga lokola bugumési ya Lingwala…",
+                "…le na mitano o sanza ya zomi na mibalé o mibu nkoto moko na nkama libwa na tuku motoba na libwa (25 Décembre 1965) o Bandundu…",
+                "…mibale na misato na zomi na mibale ya mbula nkoto libwa na nkama mitano na motoba o Lomé, o etuka ya mai, azalí moto ya poli…",
+                "…to == === Bomwana, formation na ebandeli === Na nkoto libwa nkama nsambo na mwambe, akoti na faculté ya mayele ya nkita mpe y…",
+                "…mpe ya bokambi (nzela makambo ya mombongo ) na nkoto libwa nkama mwambe na mibale. Ezali na ntina te. Na poto, azui diplôme…"
+            ]
+        },
+        {
+            "word": "ndambo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 33,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Mali. Lokótá ya Dongo ezali na loléngé mingi ya ko lobama, ndambo ezali awa: Tombo Toro Toro ya Sanga Samisai Toro ya ségué =…",
+                "…Bavili to Baluangu baza bato, ndambo lisangá lya Bakôngo ba fandaka na Bitúká bya Kongó-Brazzavi…",
+                "…ye ekomáká na nsima Kɔ́ngɔ Belezi), akomáká mosakoli nsango ndambo ya Yésu na mibú mya nkóto mɔ̌kɔ́ na nkámá libwá na ntúkú mí…",
+                "…o yango mawa na sima ya boboti. Bokono yango ezali mawa mwa ndambo. Basi ebele bakozala na mawa mwa ndambo na sima ya boboti.…",
+                "…ango ezali mawa mwa ndambo. Basi ebele bakozala na mawa mwa ndambo na sima ya boboti. Kasi, 10% ya bamama ya sika sika bakozal…",
+                "…ato na yango ya mangomba bazali mingimingi baklisto, na mwa ndambo monene oyo bazali kosalela Lingomba ya Bamizilma, mpe basus…"
+            ]
+        }
+    ],
+}
