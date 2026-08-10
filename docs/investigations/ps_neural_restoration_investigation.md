@@ -452,3 +452,62 @@ With the Waziri class retracted, the residual is overwhelmingly OURS, and concen
 
 That is a better result than Run 7's: the ceiling is lower than "45% is somebody else's language" implied,
 and the top three classes are all tractable engine or lexicon work.
+
+## Run 9 — 2026-08-10 — derived, not inferred: kaikki tags the dialect, and the split is 67% vs 5.9%
+
+Run 8's splitter had a flaw worth naming before the fix. It classifies a READING only when the word contains
+ښ/ږ; for the other ~90% it keeps every reading in all three slices, so the "pbt" referee still accepted
+Northern readings for most of its words. Isogloss-constrained, unconstrained everywhere else — the same
+shape as the mistake that produced Run 7's phantom Waziri class.
+
+**kaikki carries per-pronunciation DIALECT TAGS**, so for that source the assignment can be read rather than
+guessed. The raw dump was not in the repo (the 95-row `ps.kaikki-kandahari.tsv` could not be regenerated —
+trap 32), so it was fetched: `kaikki.org-dictionary-Pashto.jsonl`, 1,646 entries, 1,644 IPA records.
+
+```
+Kandahar 65 · Southern 36 · Southwestern 12          → pbt
+Northern 51 · Peshawar 46 · Eastern 30 · NE 20 · …   → pbu
+Wardak 23 · Wazirwola 14 · Central 14 · SE 12        → pst
+```
+
+### The tags validate the inference
+
+Before using them, they were checked against the ښ/ږ reflex the wikipron splitter relies on:
+
+```
+ښ   pbt → ʂ 57/65 (88%)    pbu → x 65/69 (94%)    pst → ç 24/38 (63%, ʃ 8)
+ږ   pbt → ʐ 33/35 (94%)    pbu → ɡ 30/33 (91%)    pst → ʝ 8 / ʒ 10
+```
+
+So the inference is sound at 88–94% and the wikipron slices stand. ⚠ **And there is no SECOND diagnostic to
+find.** Mining all 318 same-word cross-variety pairs for systematic differences returns the ښ/ږ reflexes and
+then nothing but notation (tie bars, brackets, slashes). Vowels *do* differ in 79 of 318 pairs (25%) —
+پښتو is pbt /pəʂˈt̪o/, pbu /pʊxˈt̪o/, pst /paçˈt̪o/ — but the eval fold already collapses [əaiuɪʊ]→ə as
+unrecoverable from an undiacritized abjad, so that axis is invisible to scoring either way. **That is the
+measurement that licenses keeping a no-ښ/ږ word in every slice**, and it was an assumption until now.
+
+### The result
+
+`tools/pashto/build_kaikki_dialect_referees.py` emits four files from the tags. A SOUTHERN engine:
+
+| referee | | |
+|---|---:|---|
+| **pbt** — Kandahar/Southern | **65/97 = 67.0%** | our variety |
+| **pbu** — Northern/Peshawar | **6/102 = 5.9%** | |
+| pst — Central/Waziri | 8/43 = 18.6% | thin, treat as weak |
+| untagged | 663/1041 = 63.7% | not a variety referee |
+
+**An 11× separation between our variety and Northern.** That is the number to quote when anyone asks why the
+`pus` aggregate reads 55.7%: the umbrella is ~3:1 Northern on the isogloss (ښ x 138 / ʂ 52; ږ ɡ 151 / ʐ 28)
+and this engine scores 5.9% there. The aggregate was never a Pashto score — it was a weighted average of a
+test we pass and a test we were never taking.
+
+⚠ **UNTAGGED IS NOT NEUTRAL.** 1,339 of 1,644 records carry no variety tag and go to their own file rather
+than being distributed into the three, which would rebuild the aggregate this whole exercise exists to undo.
+
+⚠ **AND THE TAGGED REFEREES ARE SMALL** — 97 / 102 / 43 words. They are ground truth and they settle the
+question of whether the split is real; they are not a basis for tracking engine quality over time. The
+wikipron pbt slice (1,181 words, inferred at 88–94% precision) remains the working secondary.
+
+Retired in this run: `ps.kaikki-kandahari.tsv` (hand-cut, 95 rows, unregenerable) and the inferred kaikki
+slices, both superseded by the tag-derived files.
