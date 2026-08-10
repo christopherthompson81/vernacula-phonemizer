@@ -25,6 +25,7 @@ interface WuDef {
     tones: Record<string, string>;
     clausePunctuation: Record<string, string>;
     measureWords: string;
+    letterNames: Record<string, string>;
 }
 const DEF = loadManifest<WuDef>(import.meta.url, "wu.jsonc");
 const CLAUSE_MARK = DEF.clausePunctuation;
@@ -44,7 +45,11 @@ function dict(): Map<string, string> {
 const MAX_WORD = 8; // greedy segmentation window
 
 const HAN = /\p{Script=Han}/u;
-const WUGNIU = /^[a-z]+[0-9](?:\s+[a-z]+[0-9])*$/i;
+// ⚠ CASE-SENSITIVE, and the `i` flag it used to carry was a leak. Wugniu is written lowercase; with `i`,
+// any ALL-CAPS letters-plus-digit token matched the whole-string fast path and was handed to
+// `wugniuToIpa`, which found no rime and returned it VERBATIM — `MP3` phonemized to the string "MP3",
+// ASCII and all. An all-caps alphanumeric run is a designation or an initialism, never a reading.
+const WUGNIU = /^[a-z]+[0-9](?:\s+[a-z]+[0-9])*$/u;
 
 /** One Wugniu syllable (e.g. "zaon2", "koq7") → IPA (initial + final + Chao tone). */
 function syllableToIpa(syl: string): string {
@@ -147,7 +152,7 @@ class WuPhonemizer implements Phonemizer {
         // read as a range). The romanized path is not text in the orthography and gets none of this layer.
         if (WUGNIU.test(input.trim())) return wugniuToIpa(input);
         // Everything that is not yet a pronounceable word → Han the dict already speaks. See normalize.ts.
-        input = normalizeWu(input, DEF.measureWords);
+        input = normalizeWu(input, DEF.measureWords, DEF.letterNames);
         // `assembleClauses` rather than a private exec loop: this loop was already exactly that shape
         // (clauseSink + iterate the token regex), it just predated the shared helper — so it never got the
         // GAP PASS and a run in a script it does not own was dropped. The engine still claims Latin

@@ -12,7 +12,12 @@ import { phonemizeWord } from "../src/languages/wu/wu.ts";
 // Every rule's evidence and every refusal's measurement is in
 // docs/investigations/wuu_normalization_investigation.md.
 const CL = "个個位本张張只隻条條件对對群种種次天年岁歲块塊层層排组組步口面首部台辆輛架座间間扇页頁杯碗瓶盒袋斤磅吨噸";
-const norm = (s: string): string => normalizeWu(s, CL);
+const LN: Record<string, string> = {
+    A: "诶", B: "皮", C: "西", D: "地", E: "衣", F: "诶夫", G: "其", H: "诶尺", I: "阿", J: "杰",
+    K: "开", L: "诶勒", M: "诶姆", N: "恩", O: "欧", P: "披", Q: "区", R: "阿尔", S: "诶丝", T: "梯",
+    U: "优", V: "维", W: "达布留", X: "艾克斯", Y: "娃", Z: "兹",
+};
+const norm = (s: string): string => normalizeWu(s, CL, LN);
 
 describe("wuu normalization — text→text", () => {
     test("⚠ a grouping comma DESTROYS THE VALUE, not just the pause", () => {
@@ -100,6 +105,28 @@ describe("wuu normalization — text→text", () => {
         expect(norm("多々良氏")).toBe("多多良氏");
     });
 
+    test("an initialism becomes its letter names, spelled in Han for the dict to read", () => {
+        expect(norm("中国GDP总量")).toBe("中国 其 地 披 总量");
+        expect(norm("PHP语言")).toBe(" 披 诶尺 披 语言");
+        expect(norm("SNCF个车站")).toBe(" 诶丝 恩 西 诶夫 个车站");
+        // ⚠ ROMAN NUMERALS BELONG TO ANOTHER SEAM (core/roman.ts, which runs in the registry wrapping
+        // text(), so it has already claimed what it will). Spelling `II` as *阿阿* would entrench a wrong
+        // reading in a class this rule does not own.
+        expect(norm("第II次")).toBe("第II次");
+        expect(norm("世界大战III")).toBe("世界大战III");
+        // …but a run that merely LOOKS Roman and is an initialism is still claimed. A blanket
+        // "is it a valid numeral" test would have lost all five of CD/DC/ML/MV/XL to protect two.
+        expect(norm("CD")).toBe(" 西 地 ");
+        expect(norm("XL")).toBe(" 艾克斯 诶勒 ");
+        // The length window, drawn by the corpus: 2–4 is initialisms, 5+ is where all-caps English words
+        // and names live (PROJECT, LAWSON, LOUBAT) and those must stay on the English reader.
+        expect(norm("LAWSON")).toBe("LAWSON");
+        // Alphanumeric CODES are not acronyms — the position core/roman.ts and core/initialisms.ts already
+        // take (`\p{Lu}+(?=\d)` is a code). Following the fleet rather than diverging locally.
+        expect(norm("MP3")).toBe("MP3");
+        expect(norm("Qwen2.5-72B")).toBe("Qwen2点五-72B");
+    });
+
     test("declined classes stay declined — each refusal is measured, see the investigation doc", () => {
         expect(norm("== 参考文献 ==")).toBe("== 参考文献 =="); // `=` is wiki heading markup, not 等于
         expect(norm("5+3")).toBe("5+3"); // 加 has no attested operator sense
@@ -117,6 +144,41 @@ describe("wuu normalization — end to end through the wired pipeline", () => {
         // The two currencies the corpus actually writes, both with a corpus-attested reading.
         expect(phonemize("$500", "wuu")).toContain(phonemizeWord("美元"));
         expect(phonemize("£10,500", "wuu")).toContain(phonemizeWord("英镑"));
+    });
+
+    test("⚠ an initialism comes out in WU phonology, not English — the point of the letter table", () => {
+        // Before: 中国GDP总量 → …ɡˈiːdˈiːpʰˈiː…, English [iː], English stress, and NO TONE inside a tonal
+        // utterance. After: the same letter NAMES (they are English-derived in every Sinitic variety) read
+        // through the dict, so they carry Wu segments and Wu tones.
+        expect(phonemize("GDP", "wuu")).toBe(
+            [phonemizeWord("其"), phonemizeWord("地"), phonemizeWord("披")].join(" "),
+        );
+        // ⚠ AND THE SPACES ARE WHY: run together, the segmenter reads 地区 (DQ) as the WORD "region".
+        expect(phonemize("DQ", "wuu")).toBe([phonemizeWord("地"), phonemizeWord("区")].join(" "));
+        expect(phonemize("DQ", "wuu")).not.toBe(phonemizeWord("地区"));
+        expect(phonemize("中国GDP总量", "wuu")).not.toMatch(/[ːˈ]/u);
+        // ⚠ THE VOICING CONTRAST IS THE WHOLE REASON THE TABLE IS NOT MANDARIN'S. Wu kept the MC voiced
+        // series, so it can hold b/p and d/t apart where a Mandarin letter table has to collapse them.
+        expect(phonemizeWord("皮")).toBe("bi˩˧");   // B
+        expect(phonemizeWord("披")).toBe("pʰi˥˧");  // P
+        expect(phonemizeWord("地")).toBe("di˩˧");   // D
+        expect(phonemizeWord("梯")).toBe("tʰi˥˧");  // T
+        // R is 阿尔, not the conventional 阿儿 — 儿 is [ɲi] in Wu, no rhotic at all.
+        expect(phonemizeWord("尔")).toBe("əl˥˧");
+        expect(phonemizeWord("儿")).toBe("ɲi˩˧");
+        // The one corpus-attested spelling, kept verbatim (wuu.wikipedia: 又被称为爱克斯射线、艾克斯射线).
+        expect(phonemize("X光", "wuu")).toBe(`${phonemizeWord("艾克斯")} ${phonemizeWord("光")}`);
+        // A LONE letter is claimed only touching Han — `地铁B线` yes, a math variable never.
+        expect(norm("地铁B线")).toBe("地铁 皮 线");
+        expect(norm("f(x) = 1/x")).toBe("f(x) = 1/x");
+        expect(norm("C 9 H 8 O 4")).toBe("C 9 H 8 O 4");
+    });
+
+    test("⚠ an ALL-CAPS alphanumeric token is not a Wugniu reading", () => {
+        // The whole-string fast path was case-INSENSITIVE, so `MP3` matched it, found no rime, and was
+        // returned VERBATIM — the string "MP3" straight into the phoneme stream.
+        expect(phonemize("MP3", "wuu")).not.toMatch(/MP3/u);
+        expect(phonemize("zaon2 he4", "wuu")).toBe("zɑ̃˨ hɛ˦"); // the real romanized path still works
     });
 
     test("the defects the layer exists to fix are gone", () => {

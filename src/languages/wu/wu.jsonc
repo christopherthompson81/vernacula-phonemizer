@@ -55,6 +55,41 @@
     // ⚠ 月 and 日 are DELIBERATELY ABSENT — "2月" is February, which is 二月.
     "measureWords": "个個位本张張只隻条條件对對群种種次天年岁歲块塊层層排组組步口面首部台辆輛架座间間扇页頁杯碗瓶盒袋斤磅吨噸",
 
+    // ── LATIN LETTER NAMES, as Han the dict can read ────────────────────────────────────────────────────
+    // An initialism embedded in Wu prose (`中国GDP总量`, `PHP语言`, `SNCF个车站` — 110 tokens of 2–4 letters
+    // in the mined artifact, `initialism: 3430` corpus-wide) used to route to the ENGLISH phonemizer and come
+    // out in English phonology: GDP → ɡˈiːdˈiːpʰˈiː, English [iː], English stress, NO TONE, dropped into a
+    // tonal utterance. No Wu speaker produces that.
+    //
+    // WHAT A WU SPEAKER SAYS is the ENGLISH letter NAME in WU phonology. Sourced: espeak-ng's `cmn_list`
+    // carries a block headed "Latin letters with Chinese accent" — a ei51 · b pi51 · c sei55 · d ti51 ·
+    // w ta35pliou ("double-u") · x ai35ks — i.e. the English names, local phonology, local tones. So the fix
+    // is orthographic, not phonetic: spell the name in Han and let the dict read it, which is the same shape
+    // ja uses (letter → katakana → g2p) and what the playbook prefers over emitting a pronunciation.
+    //
+    // ⚠ THE ONE CORPUS-ATTESTED ENTRY IS ⟨X⟩ = 艾克斯, and it is kept VERBATIM: wuu.wikipedia writes
+    // "X射线（英语：X-ray），又被称为爱克斯射线、艾克斯射线". (Its other 5 hits are the French place name Aix —
+    // 艾克斯莱班, 普罗旺斯地区艾克斯 — so the count was a lead and the one letter-sense instance is the finding.)
+    // espeak's `x ai35ks` decomposes to ai-ke-si and matches it exactly, which is what validates the method.
+    //
+    // ⚠ THE SPELLINGS ARE CHOSEN BY THE **WU** READING, NOT INHERITED FROM MANDARIN — because Wu kept the
+    // MC voiced series and Mandarin did not, so the usual Chinese transliteration misreads here:
+    //   · 皮 is [bi] in Wu, so it is the right character for **B**, not for P as Mandarin uses it;
+    //     **P** takes 披 [pʰi]. Wu can hold the b/p contrast that a Mandarin table has to collapse.
+    //   · likewise **D** 地 [di] vs **T** 梯 [tʰi]; **V** 维 [vi] and **Z** 兹 [zɿ] use consonants Mandarin
+    //     has to approximate.
+    //   · **R** is 阿尔, not the conventional 阿儿: 儿 reads [ɲi] in Wu — no rhotic at all — while 尔 is [əl].
+    //   · **E** is 衣 [i], not 伊 [ji], which would add a glide the letter name does not have.
+    //   · **J** 杰 is [d͡ʑiʔ] and the vowel is WRONG for "jay" — Wu has no d͡ʑ before a low vowel at all
+    //     (zero dict characters read d͡ʑa/d͡ʑɛ/d͡ʑo), so the phonotactics, not the table, force it.
+    // Every character here is a dict.tsv key — verified, and required, since an unlisted one is SKIPPED.
+    "letterNames": {
+        "A": "诶", "B": "皮", "C": "西", "D": "地", "E": "衣", "F": "诶夫", "G": "其",
+        "H": "诶尺", "I": "阿", "J": "杰", "K": "开", "L": "诶勒", "M": "诶姆", "N": "恩",
+        "O": "欧", "P": "披", "Q": "区", "R": "阿尔", "S": "诶丝", "T": "梯", "U": "优",
+        "V": "维", "W": "达布留", "X": "艾克斯", "Y": "娃", "Z": "兹"
+    },
+
     "clausePunctuation": {
         "。": ".", "，": ",", "、": ",", "？": "?", "！": "!",
         "；": ",", "：": ",", ".": ".", ",": ",", "?": "?", "!": "!"

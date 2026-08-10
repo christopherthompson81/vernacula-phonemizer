@@ -29,9 +29,10 @@
  *     with a third field — `13:15.10`, `13:02.80`, `2:08:44`, `2:00:25`, `17:47:23`, `08:08:50`, 6 of 6 — and
  *     Chinese writes the time of day as 19时35分, which the corpus does (`2006年8月21号19时35分`) and the dict
  *     already reads correctly. A colon rule here would claim only the shapes it must not.
- *   · EMBEDDED LATIN stays on the English phonemizer, as cmn and yue both decided. `latin-in-native: 23821`
- *     and `initialism: 3430` make this the largest untreated class by far, and `core/initialisms.ts` needs a
- *     letter-name table this dict does not carry — it has no A/B/C entries to back-derive from.
+ *   · EMBEDDED LATIN THAT IS NOT AN INITIALISM — foreign proper names (Perl, Debian, Grenelle, Rasmus) and
+ *     quoted English (`East China Sea`) — stays on the English phonemizer, which is right: they are not Wu
+ *     words in the first place. That is ~88% of the 883 Latin runs in the artifact. The other ~12%, the
+ *     ALL-CAPS initialisms, are NOT left alone any more; see step 14.
  *   · THE RELATIONAL SIGNS. 等于/小于 are in the dict AND corpus-attested in sense, so this looked like the
  *     easy win — and the count refuted it. Of the 20 `=` in the corpus excerpts, the great majority are
  *     WIKI SECTION HEADINGS (`== 参考文献 ==`) and the rest are LaTeX formula bodies (`(x-x_m)^2 + (y-y_m)^2
@@ -97,12 +98,17 @@ const MINUTE = "[′´ˊ’']";
 const SECOND = "[″〃”\"]";
 
 /**
- * Normalize one Wu string.
+ * Normalize one Wu string. `measureWords` is the manifest's classifier inventory (step 12) and
+ * `letterNames` its Latin letter → Han table (step 14); both are language DATA, authored in wu.jsonc.
  *
  * The steps are ORDER-DEPENDENT and the coupling is stated at each one; a future reader cannot recover it
  * from the code.
  */
-export function normalizeWu(input: string, measureWords: string): string {
+export function normalizeWu(
+    input: string,
+    measureWords: string,
+    letterNames?: Readonly<Record<string, string>>,
+): string {
     let s = input;
 
     // ── 1. de-group thousands separators ─────────────────────────────────────────────────────────
@@ -276,6 +282,66 @@ export function normalizeWu(input: string, measureWords: string): string {
     // LAST, because it is the one rule whose input is a Han character rather than a digit or a sign, so
     // nothing above can consume it and nothing below depends on it.
     s = s.replace(/(\p{Script=Han})々/gu, "$1$1");
+
+    // ── 14. Latin initialisms → their letter names, spelled in Han ───────────────────────────────
+    // ⚠ WHY THIS IS NOT LEFT ON THE ENGLISH PHONEMIZER, which is what cmn and yue do. `中国GDP总量` read
+    // *t͡soŋ˥ koʔ˧˩ ɡˈiːdˈiːpʰˈiː t͡soŋ˥ ljɛ̃˧˩* — English [iː], English stress marks, and NO TONE, in the
+    // middle of a tonal utterance. The letter NAMES are right (they are English-derived in every Sinitic
+    // variety — see the `letterNames` sourcing note in wu.jsonc); the PHONOLOGY is not. Rewriting to Han
+    // hands the reading to the dict, so the names come out in Wu with Wu tones.
+    //
+    // ⚠ THE LENGTH WINDOW IS 2–4 AND THE CORPUS DREW IT. All-caps runs in the artifact: 110 tokens at 2–4
+    // letters, every one an initialism (GDP PHP SNCF UTC ISBN TVB LG GPU DVD CD NGO…), against 4 tokens at
+    // 5+ of which three are all-caps ENGLISH WORDS or names (PROJECT, LAWSON, LOUBAT) that must stay on the
+    // English reader. The honest cost is at the boundary: NASA, TURE, DASH and COOH get spelled out. That
+    // is `core/initialisms.ts`'s own bargain — spelling out an unrecorded acronym "is always a legitimate
+    // reading and therefore a safe default" — and wuu cannot do better, since dict.tsv has ZERO Latin keys
+    // and so no lexical tier that could say which acronyms are read as words.
+    //
+    // ⚠ `[IVX]{2,3}` IS EXCLUDED BECAUSE IT BELONGS TO ANOTHER SEAM. `core/roman.ts` runs in the registry,
+    // WRAPPING `engine.text()`, so it has already claimed every Roman numeral it is willing to claim before
+    // this layer sees anything; what reaches here is what it declined (`第II次`, `世界大战II`). Spelling
+    // those as *阿阿* would entrench a wrong reading in a class that is not this rule's. Measured: of the 65
+    // distinct all-caps runs, 7 parse as Roman numerals — II III CD DC ML MV XL — and only the first two
+    // are numerals; CD/DC/ML/MV/XL are initialisms. `[IVX]{2,3}` protects both real cases and costs none of
+    // the five, where a blanket "is it a valid numeral" test would have lost all five to protect two.
+    //
+    // ⚠ THE LETTERS ARE SPACE-SEPARATED, AND THAT IS LOAD-BEARING RATHER THAN COSMETIC. `hanRun` segments
+    // by GREEDY LONGEST MATCH over dict.tsv, so a letter-name string run together can be swallowed as a
+    // REAL WORD and take that word's sandhi melody: `GDP` → 其地披 fused 地披… and `DQ` → 地区 is simply the
+    // word "region". Measured over all 676 letter pairs, 10 spellings contain a dict word spanning the
+    // letter boundary — 西欧 (CO, "Western Europe"), 地区 (DQ, "region"), 地衣 (DE, "lichen"), 娃娃 (YY,
+    // "doll"), 开恩 (KN), 区区 (QQ), 地皮 (DB), 西区 (CQ), 披衣 (PE), 开开 (KK). A space makes each letter its
+    // own Han token, which also gives it the CITATION tone — right for a spelled letter, since each is its
+    // own prosodic word rather than a syllable inside one.
+    //
+    // ⚠ NOT FLANKED BY A LATIN LETTER OR DIGIT: `MP3`, `AODV-2`, `Qwen2.5-72B` and any CamelCase run are
+    // alphanumeric CODES, and `core/roman.ts` encodes the same fact from its side (a numeral glued to a
+    // digit is not a numeral). LAST in the file, after every rule that emits digits, so nothing this layer
+    // itself wrote can be re-read as a code boundary.
+    // ⚠ AND A LONE UPPERCASE LETTER, BUT ONLY TOUCHING HAN. `X光`, `地铁B线`, `A股`, `T恤` are letter-read in
+    // every Chinese variety, while a bare single letter in a Latin context is a MATH VARIABLE or a chemical
+    // symbol (`m = 2`, `f(x)`, `C 9 H 8 O 4`) and must not be. Han-adjacency separates them cleanly:
+    // measured, the artifact has 6 Han-adjacent single uppercase letters and all 6 are letter-reads
+    // (`P.C.亚历山大`, `里昂地铁B线`, `里昂地铁A线`, `C++原始码`, `ADS-B应答器`, `日本7&I控股公司`), while every
+    // math/chemistry single letter in it is Latin-flanked and untouched. Han on one side, nothing
+    // alphanumeric on the other.
+    if (letterNames !== undefined)
+        s = s.replace(
+            /(?<=\p{Script=Han})([A-Z])(?![\p{sc=Latn}\d])|(?<![\p{sc=Latn}\d])([A-Z])(?=\p{Script=Han})/gu,
+            (m, a: string | undefined, b: string | undefined) => {
+                const L = a ?? b!;
+                return letterNames[L] === undefined ? m : ` ${letterNames[L]} `;
+            },
+        );
+    if (letterNames !== undefined)
+        s = s.replace(
+            /(?<![\p{sc=Latn}\d])[A-Z]{2,4}(?![\p{sc=Latn}\d])/gu,
+            (run) =>
+                /^[IVX]{2,3}$/u.test(run)
+                    ? run
+                    : ` ${[...run].map((c) => letterNames[c] ?? c).join(" ")} `,
+        );
 
     return s;
 }

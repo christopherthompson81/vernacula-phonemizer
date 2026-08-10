@@ -242,3 +242,113 @@ takes four instance classes, and one of them is a hazard specific to the Sinitic
   the standalone traditional 萬 as `ve6`, and `integerToHan` emits the traditional 萬/億, so every large
   cardinal takes the `ve` reading while the dict's own compounds take `moq`. That is a back-end question
   about the dict, not about this layer, and it wants its own measurement.
+
+---
+
+## Run 4 — 2026-08-09 20:30 — the initialism refusal was wrong, and the reason it was wrong is instructive
+
+Run 3 left embedded Latin on the English phonemizer "as cmn and yue both decided", with the reason that
+`core/initialisms.ts` needs a letter-name table `dict.tsv` cannot supply. Challenged on it, and the
+challenge was right. Three things I had got wrong:
+
+1. **The seam already exists and I said it did not.** This is playbook trap 16 verbatim — *before declaring
+   a class out of scope, check whether the seam already exists*. `core/initialisms.ts` takes exactly
+   `letterName: (letter) => orthographic form`, and **ja is the worked example of the shape**: letter →
+   katakana → g2p. Nothing needed building.
+2. **My dict claim was understated rather than wrong.** yue's dict carries 13 Latin letters; wuu's carries
+   **zero**. So wuu is worse off than the language I cited as precedent, not better.
+3. **The defect is PHONOLOGY, not letter identity** — which is what makes it fixable. `中国GDP总量` read
+   *t͡soŋ˥ koʔ˧˩ **ɡˈiːdˈiːpʰˈiː** t͡soŋ˥ ljɛ̃˧˩*: English [iː], English stress marks, and **no tone at
+   all**, inside a tonal utterance.
+
+### What a Wu speaker actually says, and the source for it
+
+espeak-ng's `cmn_list` carries a block headed **"Latin letters with Chinese accent"**: `a ei51 · b pi51 ·
+c sei55 · d ti51 · w ta35pliou · x ai35ks`. Those are the **English letter names in local phonology with
+local tones** — the names are English-derived across Sinitic; only the phonology is native. So the fix is
+ORTHOGRAPHIC: spell the name in Han, let the dict read it. (espeak has that block **commented out**, with
+its reason in the file: *"This will make letter within English sentence translated not correctly. i.e. 'ma
+is a horse'. 'a' will be translated as ei51."* That kills a blanket letter rule, not an all-caps-scoped
+one — and it is why the guards below are what they are.)
+
+**The one corpus-attested spelling anchors the method.** wuu.wikipedia writes
+`X射线（英语：X-ray），又被称为爱克斯射线、艾克斯射线`. espeak's `x ai35ks` decomposes to ai-ke-si —
+艾克斯, exactly. ⚠ And the count was a lead, not the finding: 艾克斯 returns 6 hits and **4 are the French
+place name Aix** (艾克斯莱班, 普罗旺斯地区艾克斯, 艾克斯岛). One instance is the letter, and it is the one
+that matters.
+
+### ⚠ The spellings are chosen by the WU reading, not inherited from Mandarin
+
+This is the part a copied table would have got wrong, and it is the same lesson as 搭-not-和 one level
+deeper. **Wu kept the Middle Chinese voiced series; Mandarin lost it**, so the standard Chinese letter
+transliteration systematically misreads here:
+
+| letter | Mandarin convention | its Wu reading | shipped | why |
+|---|---|---|---|---|
+| B | 比 | [pi] | **皮** [bi] | Wu HAS /b/ — 皮 is Mandarin's *P* and Wu's *B* |
+| P | 皮 | [bi] | **披** [pʰi] | so P needs the aspirate |
+| D / T | 迪 / 提 | [diʔ] / [di] | **地** [di] / **梯** [tʰi] | same contrast; 迪 also adds a checked coda |
+| E | 伊 | [ji] | **衣** [i] | 伊 adds a glide the letter name has not got |
+| R | 阿儿 | [a **ɲi**] | **阿尔** [a **əl**] | 儿 has NO rhotic reading in Wu; 尔 is [əl] |
+| V, Z | 维, 兹 | approximated | **维** [vi], **兹** [zɿ] | Wu says these outright |
+
+**J is the one the language simply cannot say.** "Jay" wants [d͡ʑɛ]; a search of every single-character
+dict entry returns **zero** readings of d͡ʑa/d͡ʑɛ/d͡ʑo — Wu's palatals do not combine with a low vowel. So
+杰 [d͡ʑiʔ] keeps the consonant and the phonotactics take the vowel. That is nativization doing its job,
+not a table defect.
+
+### Three guards, each drawn from a count rather than a feeling
+
+- **Length 2–4.** All-caps runs in the artifact: **110 tokens at 2–4 letters, every one an initialism**
+  (GDP PHP SNCF UTC ISBN TVB LG GPU DVD CD NGO…), against **4 tokens at 5+**, three of which are all-caps
+  ENGLISH WORDS or names (PROJECT, LAWSON, LOUBAT) that must stay on the English reader. The corpus drew
+  the line; I did not pick it. Honest cost at the boundary: NASA, TURE, DASH, COOH get spelled out — which
+  is `core/initialisms.ts`'s own stated bargain.
+- **`[IVX]{2,3}` excluded.** `core/roman.ts` runs in the registry *wrapping* `engine.text()`, so it has
+  already claimed every numeral it will; what reaches this layer is what it declined (`第II次`,
+  `世界大战II`). Of the 65 distinct all-caps runs, **7 parse as Roman numerals — II III CD DC ML MV XL —
+  and only the first two are numerals.** A blanket "is it a valid numeral" test would have lost all five
+  initialisms to protect two; `[IVX]{2,3}` protects both and costs none.
+- **A lone letter only when it touches Han.** `X光`, `地铁B线`, `A股`, `T恤` are letter-read; a bare single
+  letter in Latin context is a math variable or a chemical symbol. Measured: the artifact has **6**
+  Han-adjacent single uppercase letters and **all 6 are letter-reads** (`P.C.亚历山大`, `里昂地铁B线`,
+  `里昂地铁A线`, `C++原始码`, `ADS-B应答器`, `日本7&I控股公司`), while every math/chemistry single letter in
+  it (`f(x)`, `C 9 H 8 O 4`, `m = 2`) is Latin-flanked and untouched.
+
+### ⚠ The letters must be SPACE-SEPARATED, and that is load-bearing
+
+`hanRun` segments by **greedy longest match**, so a letter-name string run together can be swallowed as a
+real word and take that word's sandhi melody. Found by a failing test: `GDP` → 其地披 fused across the
+D–P boundary. Measured over all **676 letter pairs, 10 spellings contain a dict word spanning the letter
+boundary** — 西欧 (CO, "Western Europe"), 地区 (DQ, "region"), 地衣 (DE, "lichen"), 娃娃 (YY, "doll"),
+开恩 (KN), 区区 (QQ), 地皮 (DB), 西区 (CQ), 披衣 (PE), 开开 (KK). A space makes each letter its own Han
+token, which also gives it the **citation** tone — right for a spelled letter, since each is its own
+prosodic word rather than a syllable inside one.
+
+### A pre-existing leak found on the way
+
+`MP3` phonemized to the **string `MP3`**. The whole-string Wugniu fast path was `/^[a-z]+[0-9]…$/i` — the
+`i` flag — so any all-caps letters-plus-digit token matched it, was handed to `wugniuToIpa`, found no rime,
+and was returned verbatim by the "leave the romanization visible" fallback. Wugniu is written lowercase;
+an all-caps alphanumeric run is a designation. Flag dropped, `zaon2 he4` still reads zɑ̃˨ hɛ˦.
+
+`MP3`'s letters still route to English, deliberately: an uppercase run glued to a digit is an alphanumeric
+CODE, which is the position `core/roman.ts` and `core/initialisms.ts` both already take
+(`\p{Lu}+(?=\d)` is a code, not an acronym). Following the fleet beats diverging locally.
+
+### Gates
+
+Corpus diff unchanged on the leak classes — DROP 89→28, DIGIT 23→0, RAWMARK/SLOT-GAP/THROW 0 — with
+**80 more utterances changed** by the letter rule (259 → 294 of 436). Reading them: `地铁B线` bˈiː → bi˩˧ ·
+`IIT` ˈiːʲᵻt → a a tʰi · `GCE` d͡ʒˈiː sˈiː ˈiː → d͡ʑi si i · `ABO` **ˈɑːboᶷ** (read as a WORD) → ɛ bi ɤ ·
+`ISBN` ˌaᶦˌɛsbiːʲˈɛn → a ɛ sɿ bi əɲ · `SNCF` → ɛ sɿ əɲ si ɛ fu · and the corpus's own `X光` →
+ŋɛ˩˧ kʰəʔ˥ sɿ˧˩ kwɛ̃˥˧, the attested spelling landing on the attested instance.
+3,240 tests pass · `tsc` clean · `review.ts --lang wuu` checklist clean.
+
+**Still on the English reader, and correctly**: foreign proper names (Perl, Debian, Grenelle, Rasmus) and
+quoted English (`East China Sea`) — ~88% of the artifact's 883 Latin runs. They are not Wu words in the
+first place.
+
+**Open, and now the only real gap left**: cmn and yue ship the identical defect and have better dicts to
+fix it with (rime-cantonese carries 13 letters). This wants to be the same change in both, which is a
+separate measurement per language and not something to fold into a wuu commit.
