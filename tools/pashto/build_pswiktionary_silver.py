@@ -6,9 +6,16 @@ kaikki — so mining from it and scoring against it is circular, investigation R
 (82k rows, GPL, and ~3:1 Northern before the inversion filters it). ps.wiktionary is neither. Run 13 measured
 it as the FIRST pbt-MAJORITY source found, and it is independent of all three:
 
-    ښ → ṣ̌ (pbt) 51/75 = 68%    ·  x (pbu) 15  ·  š 8
-    ږ → ẓ̌ (pbt) 26/32 = 81%    ·  g (pbu)  4  ·  ž 2
+    ښ → ṣ̌ / x̌ (pbt) 74/75 = 99%   ·  plain s 1  ·  NORTHERN x 0  ·  broad š 0
+    ږ → ẓ̌ / ǧ (pbt) 32/32 = 100%
     605 single-word headwords, 547 of them in NEITHER wikipron, kaikki, NOR our lexicon
+
+⚠ Those two lines were 68% and 81% when this file was written, and the correction matters more than the
+numbers do. The first survey classified by an elif chain that tested for a bare `x` before recognising `x̌`,
+and compared `š` across mismatched normalization forms — so it read MacKenzie's SOUTHERN x̌ and ǧ as Northern
+x and g. The source is not pbt-majority, it is very nearly pbt-only. Third time in this investigation that a
+diagnostic also matched something else (Runs 5, 7, 12); the fix is the same each time — classify on explicit
+base+mark clusters, NFC-normalized, not on substring presence.
 
 ⚠ THE `{{IPA|…}}` TEMPLATE ON ps.wiktionary DOES NOT CONTAIN IPA. It holds an ad-hoc Latin transliteration in
 the Pashto Academy / MacKenzie tradition — `bāĵ-pā́zay`, `astāz-lìk`, `halɘk`. That is not a defect for our
@@ -78,12 +85,17 @@ MAP = {
 # Marks that carry information the map keys already encode (they are recomposed before lookup), vs marks that
 # are pure prosody and are dropped. ⚠ The acute is DROPPED, not translated: stress is real information but
 # PS_FULL_FOLD strips it, so carrying it here would only create spurious mismatches in the search.
-COMBINING_KEEP = {"̄", "̣", "̌", "̇", "̂"}  # macron, dot below, caron, dot above, CIRCUMFLEX — letter-forming
-# ⚠ THE CIRCUMFLEX IS KEPT, AND IT IS A ONE-CHARACTER TRAP. It occurs exactly once in the dump — `ĵ` in
-# باجپازی = `baĵ-pā́zay` — as a variant of ǰ for ⟨ج⟩ d͡ʒ. Dropped as prosody, it left a BARE `j`, which this
-# map reads as ⟨ځ⟩ d͡z: a wrong PHONEME rather than a missing diacritic, silently, on a row that then passed
-# every downstream check. Prosody marks are droppable; letter-forming marks are not.
-COMBINING_DROP = {"́", "̀", "̆", "̪"}  # acute, grave, breve, bridge — prosody/notation only
+COMBINING_KEEP = {"̄", "̣", "̌", "̇", "̂", "̆"}  # macron, dot below, caron, dot above, circumflex, BREVE
+# ⚠ THE CIRCUMFLEX AND THE BREVE ARE KEPT, AND EACH IS A ONE-CHARACTER TRAP OF THE SAME SHAPE. Both occur
+# exactly once in the dump and both are LETTER-FORMING there: `ĵ` (باجپازی = `baĵ-pā́zay`) is a variant of ǰ
+# for ⟨ج⟩ d͡ʒ, and `ğ` (زېږندويي = `zeğǝndoyí`) is a variant of ǧ for ⟨ږ⟩ ʐ. Dropped as prosody, each left a
+# BARE base letter that this map reads as a DIFFERENT PHONEME — `j` as ⟨ځ⟩ d͡z, `g` as ⟨ګ⟩ ɡ — silently, on a
+# row that then passed every downstream check. The breve one also corrupted the dialect survey that motivated
+# this whole tranche: it made a Southern ǧ read as a Northern bare g.
+# ⚠ MAP HAS KEYS FOR BOTH (`ĵ`, `ğ`), WHICH IS EXACTLY WHY THIS IS EASY TO GET WRONG — the key looks handled
+# while the mark that forms it is being stripped two lines earlier. Prosody marks are droppable; letter-forming
+# marks are not, and the two are indistinguishable in a combining-character set.
+COMBINING_DROP = {"́", "̀", "̪"}  # acute, grave, bridge — prosody/notation only
 
 # Arabic letter → the IPA our engine emits, for the skeleton cross-check (guard 1).
 SKEL = {

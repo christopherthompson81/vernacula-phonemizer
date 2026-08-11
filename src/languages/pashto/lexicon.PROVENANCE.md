@@ -30,8 +30,8 @@ Added 2026-08-10 (investigation Run 13/14). `tools/perso-arabic/silver.pswikt-ps
 `tools/pashto/build_pswiktionary_silver.py` from the ps.wiktionary dump; see its PROVENANCE neighbour.
 
 It matters out of proportion to its 548 rows for two reasons. First, **it is the only Pashto source found
-that leans SOUTHERN** — ښ→ṣ̌ 68%, ږ→ẓ̌ 81%, where wikipron leans ~3:1 Northern and espeak is internally
-mixed — and it is independent of all three existing sources (427 of its rows are in none of them). Second,
+that is SOUTHERN** — ښ→ṣ̌/x̌ 74/75 = 99%, ږ→ẓ̌/ǧ 32/32 = 100%, with ZERO Northern readings, where wikipron
+leans ~3:1 Northern and espeak is internally mixed — and it is independent of all three existing sources (427 of its rows are in none of them). Second,
 **its `{{IPA}}` template is not IPA but a Latin transliteration**, which is the point: the diacritics mark
 stress (87% of values) and length (49%), the two axes the abjad does not write.
 

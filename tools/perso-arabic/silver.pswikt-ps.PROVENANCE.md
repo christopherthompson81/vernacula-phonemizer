@@ -42,12 +42,12 @@ to a headword in the dump where the Arabic letter and its Latin counterpart line
 
 ## Why this source and not another
 
-It is the **only pbt-majority Pashto pronunciation source found**, and it is independent of all three
-existing ones (investigation Run 13):
+It is the **only SOUTHERN Pashto pronunciation source found** — on the isogloss it is very nearly pbt-only —
+and it is independent of all three existing ones (investigation Run 13, corrected in Run 15):
 
 ```
-ښ → ṣ̌ (pbt) 51/75 = 68%   ·  x (pbu) 15  ·  š 8
-ږ → ẓ̌ (pbt) 26/32 = 81%   ·  g (pbu)  4  ·  ž 2
+ښ → ṣ̌ / x̌ (pbt) 74/75 = 99%   ·  plain s 1  ·  NORTHERN x 0  ·  broad š 0
+ږ → ẓ̌ / ǧ (pbt) 32/32 = 100%
 ```
 
 wikipron leans ~3:1 **Northern**; espeak's ps_list is internally mixed. 427 of these rows are in none of

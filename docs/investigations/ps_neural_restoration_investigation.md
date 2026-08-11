@@ -851,3 +851,47 @@ header. Adding a second CC-BY-SA pool broke it twice:
 
 A licence sentence has to count the rows this build could actually reach. Both fixed; the header now agrees
 with an independent recount.
+
+## Run 15 — 2026-08-11 — reviewing Run 14: the source is not 68% Southern, it is 99%
+
+PR review of the ps.wiktionary tranche. Two findings, and they are the same finding twice.
+
+### The isogloss survey was wrong, in the conservative direction
+
+Run 13 reported ښ→ṣ̌ 68% / ږ→ẓ̌ 81% with 15 Northern `x` and 4 Northern `g`. Re-measured by classifying on
+explicit base+combining CLUSTERS, each NFC-normalized, instead of by substring presence:
+
+```
+ښ   74/75 = 99%  pbt (ṣ̌ / x̌)     ·  plain s 1  ·  NORTHERN x 0  ·  broad š 0
+ږ   32/32 = 100% pbt (ẓ̌ / ǧ / ğ)
+```
+
+**There are no Northern readings in this source at all.** The old probe used an elif chain that tested for a
+bare `x` before it recognised `x̌`, and compared `š` as a 1-char NFC string against 2-char NFD clusters. So
+MacKenzie's SOUTHERN x̌ and ǧ were counted as Northern x and g, and every š missed.
+
+⚠ **Third time in this investigation** that a diagnostic also matched something else — Run 5 keyed on ښ/ږ
+alone, Run 7 keyed on a folded vowel, Run 12's first pass counted genuine خ/ګ as Northern reflexes. The fix
+has been the same every time and is now written into the builder: classify on explicit clusters, normalized,
+never on substring presence.
+
+### And a `ğ` that was silently becoming a different phoneme
+
+`زېږندويي = zeğǝndoyí` spells ⟨ږ⟩ as **`ğ` (g + BREVE)**, a variant of ǧ. `MAP` has a `ğ` key — but the breve
+was still in `COMBINING_DROP` as prosody, so it was stripped before lookup, leaving a bare `g` → **ɡ**.
+
+That is precisely the `ĵ`/circumflex bug from Run 14, still live one mark over, and the comment warning about
+it was sitting three lines above the set that still contained the breve. It also **corrupted the survey that
+motivated the whole tranche**: the one `ğ` is what the old probe reported as a Northern bare `g`. Breve moved
+to `COMBINING_KEEP`; the shipped silver is byte-identical (that entry is multi-word and dropped anyway), so
+this is a latent-bug fix, not a data change.
+
+⚠ The general rule, now stated in the builder: **a MAP key can look handled while the mark that forms it is
+being stripped two lines earlier.** Any letter-forming mark needs an entry in KEEP, and an unrecognised mark
+is a counted drop rather than a silent pass-through.
+
+### What actually changed
+
+Nothing in the data — 548 silver rows, 14,021 lexicon rows, referee unchanged. What changed is that the claim
+"pbt-majority" was too weak by half, and one future dump's `ğ` would have imported a Northern ⟨ږ⟩ into a
+Southern lexicon.

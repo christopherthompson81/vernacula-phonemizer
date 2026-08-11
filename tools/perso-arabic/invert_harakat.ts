@@ -216,7 +216,7 @@ function label(lang: string): void {
     // only where some vocalization REPRODUCES that IPA under PS_FULL_FOLD, so espeak's errors and its dialect
     // disagreements self-filter rather than being imported. The yield rate IS the accuracy measurement.
     // ps: ps.wiktionary's romanizations (tools/pashto/build_pswiktionary_silver.py). SMALL — ~550 rows against
-    // espeak's 81k — but the only tranche here that is BOTH pbt-majority (ښ→ṣ̌ 68%, ږ→ẓ̌ 81%, where wikipron
+    // espeak's 81k — but the only tranche here that is BOTH pbt-majority (ښ→ṣ̌/x̌ 99%, ږ→ẓ̌/ǧ 100%, where wikipron
     // leans ~3:1 Northern) and independent of every referee, so its rows add coverage without adding
     // circularity. ⚠ ORDERED BEFORE espeak DELIBERATELY: `seenSkel` keeps the FIRST vocalization per skeleton,
     // so for a word both sources cover, the Southern reading wins the tie. See investigation Run 13.
