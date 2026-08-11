@@ -76,7 +76,20 @@ four encodings), `scaled-currency` (`$14.7 billion American dollars`: magnitude 
 sign doubling a spelled-out currency) and `ordinal-caps` (`11De`, `16-Noyabr`).
 
 **All of the normalization tooling lives in `tools/normalization/`**: `mine.ts` (artifact + `scan`),
-`review.ts` (the pre-PR checklist), `corpus-diff.ts` (`emit`/`compare`), `coverage.ts` and `audit.ts`.
+`review.ts` (the pre-PR checklist), `corpus-diff.ts` (`emit`/`compare`), `coverage.ts`, `audit.ts` and
+`filter-by-language.py`.
+
+**⚠ A SMALL WIKI IS NOT ALL IN ITS OWN LANGUAGE, and the contamination is not spread evenly — it lands in
+exactly the cells you are about to write rules from.** su.wikipedia carries whole English articles (12.9% of
+its paragraphs), and because `mine.ts` selects ADVERSARIALLY, those pattern-rich paragraphs dominated the
+hard-set: `ranges` came through 8/8 English, `fractions`/`dotted`/`signed-number`/`ampersand` 7/8, and
+`ordinal-latin` measured 27.2% Sundanese on the dump — `\d+th` is English, Sundanese writes `ka-N`. Most
+cells were fine (`decimals` 95.1%), which is what makes the bad ones easy to miss.
+
+Run `filter-by-language.py --lang <l> --in paras.txt --out paras.<l>.txt` BEFORE mining a dump-sourced
+language, and record the filter in the artifact's `--source`. On su it moved `ordinal-latin` 668 → 182,
+`ampersand` 1,242 → 413 and `ranges` 7,555 → 4,055 — it changed the EVIDENCE, not just the noise. This is
+trap 34 applied to a whole corpus rather than to one probe.
 
 ### 1. Read the corpus before writing any rule
 

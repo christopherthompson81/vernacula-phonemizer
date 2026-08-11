@@ -625,7 +625,7 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // before a digit or a bracketed one. Widening it to letters would match a dash between two variables,
         // the same shape as the reduplication hyphen Sundanese writes constantly (`kira-kira`, `béda-béda`).
         "math-sign": ["(H^+)", "L(+)-asam", "aX + b ~ N(aμ + b, (aσ)²)", "X+b", "σ = (n p (1 - p))",
-            "σ = (p(1 − p)/n)", "1.5log((r+ra)/g)+.45", "((r+ra)/g)^.287"],
+            "σ = (p(1 − p)/n)", "1.5log((r+ra)/g)+.45", "((r+ra)/g)^.287", "A/(A+B)"],
         // THE SOURCE'S OWN TYPO, twice: `$28.ooUS` and `$60.ooUS` are `.00` mistyped with letter o's, so the
         // amount is `28.oo` and no rule can make a number of it. The `$` IS read (*dua puluh dalapan dolar*);
         // what the scan sees is the trailing `US` fragment. Not repairable from this side.

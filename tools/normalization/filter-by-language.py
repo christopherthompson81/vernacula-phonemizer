@@ -27,7 +27,7 @@ mine from be the language you are mining.
 heavily; the su list below leans on words that are diagnostic against Indonesian (nyaéta, téh, jeung, ogé,
 mangrupa) rather than the common core (yang, dan, di), so it does not silently accept Indonesian text.
 
-  python3 filter-by-language.py --lang su --in su_paras.txt --out su_paras.su.txt [--report]
+  python3 filter-by-language.py --lang su --in su_paras.txt --out su_paras.su.txt
 """
 import argparse
 import collections
@@ -44,7 +44,7 @@ MARKERS = {
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
-    "an be or not they their he she we you have had also其".split()
+    "an be or not they their he she we you have had also".split()
 )
 
 
@@ -54,7 +54,6 @@ def main():
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--min-chars", type=int, default=40)
-    ap.add_argument("--report", action="store_true", help="print the kept/dropped breakdown to stderr")
     a = ap.parse_args()
 
     target = set(MARKERS[a.lang].split())
