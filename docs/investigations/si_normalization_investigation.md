@@ -258,3 +258,50 @@ and "`මී`-initial words exist" — not from any tool.
 
 Gates after: 3,365 tests, tsc OK, scan "no defects", review.ts clean, corpus diff 381/447 unchanged with
 DROP 85 → 33, referee 607/648.
+
+---
+
+## Run 7 — 2026-08-11 — the sibilants: the open question was mis-stated, and the sources settle it
+
+The maturity row was left saying *"ශ/ෂ/ස all read `s` where the referee has `ʃ`"*. **Both halves of that are
+wrong**, and a web search plus one measurement shows why.
+
+**What the sources say.** [r12a's Sinhala script notes](https://r12a.github.io/scripts/sinh/si.html) map
+ස (śuddha) → /s/ and **both** miśra letters ශ and ෂ → /ʃ/. [Wikipedia's Sinhala
+phonology](https://en.wikipedia.org/wiki/Sinhala_language) says /ʃ/ "is found in learned borrowings from
+Sanskrit and English, including in the honorific ශ්‍රී (śrī)" and is "commonly … replaced by /s/". Popular
+descriptions add that the three-way distinction is "often lost in modern spoken Sinhala", which is the
+documented reason Sinhala spellers confuse these letters.
+
+So there are exactly two coherent analyses — **literary** (ශ=ʃ, ෂ=ʃ) and **colloquial** (both s) — and they
+agree on the one thing that matters here: **ශ and ෂ are the same sound as each other.** The engine shipped
+`ශ→s` with `ෂ→ʃ`, which is neither.
+
+**What the referee says**, read letter by letter rather than in aggregate:
+
+```
+ෂ  9 referee words, s in 9 of 9   ඖෂධය → a u s ə d ə j ə · පුරුෂ · විෂ්ණු · තෘෂ්ණාව · වේෂ්ටය …
+ශ  9 referee words, s in 6 of 9   ශ්‍රී → s r iː  ← the word Wikipedia cites as THE example of /ʃ/
+                                   ʃ only in බංගලාදේශය, ශිශ්නය, ශුක්‍ර — the learned register
+```
+
+**The four-way control**, since the sources disagree and only the referee can arbitrate:
+
+| ශ | ෂ | analysis | folded backbone |
+|---|---|---|---:|
+| s | ʃ | as shipped — held by no source | 607 |
+| ʃ | ʃ | literary / prescriptive (r12a) | **604** — the worst of the four |
+| s | s | colloquial (Wikipedia, the merger) | **612** — chosen |
+| ʃ | s | the inconsistent opposite | 609 |
+
+**93.5% → 94.4%, symbol accuracy 98.3% → 98.6%**, across the three commits.
+
+**The cost, stated:** si now emits no `ʃ` at all. That is correct for a spoken-Sinhala target and would be
+wrong for a literary one, and it is what the only referee this language has attests — reading the whole
+language in the learned register costs eight words to buy three. The eval's standing `secondary-source gap`
+(epitran `sin`) remains the thing that would close this independently rather than by majority vote.
+
+**The methodological point.** The original note was written from a *glance at the residual list*, where the
+`ʃ` divergences are visible and the `s` ones are not, because the residual list shows the engine's form
+first. Reading the referee *by letter* reversed the finding. A per-class aggregate is a lead; the per-letter
+tabulation is the finding — trap 2, in the phonology rather than the corpus.

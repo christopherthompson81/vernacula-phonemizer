@@ -115,7 +115,7 @@ describe("Sinhala anusvara before a sibilant", () => {
     it("ං + ශ/ෂ/ස → ŋ, not the ම් default", () => {
         expect(phonemizeWord("පංසු")).toBe("pˈaŋsu"); // the referee's own word
         expect(phonemizeWord("අංශක")).toBe("ˈaŋsəkə");
-        expect(phonemizeWord("අක්ෂාංශ")).toBe("ˈakʃaːŋsə");
+        expect(phonemizeWord("අක්ෂාංශ")).toBe("ˈaksaːŋsə"); // ෂ is /s/ too — see the sibilant test below
         expect(phonemizeWord("සිංහල")).toBe("sˈiŋhələ"); // the velar/h class still wins
         expect(phonemizeWord("සංවිධාන")).toBe("sˈamʋid̪ʰˌaːnə"); // and a labial still falls to m
     });
@@ -161,5 +161,26 @@ describe("Sinhala abbreviation keys cannot cross a sentence boundary", () => {
         expect(normalizeSinhala("පැයට කි.මී. 250 ක්")).toBe("පැයට කිලෝමීටර් 250 ක්");
         expect(normalizeSinhala("ඇ.ඩො. මිලියන 7.4")).toBe("ඇමෙරිකානු ඩොලර් මිලියන 7 දශම 4");
         expect(normalizeSinhala("රු. 500")).toBe("රුපියල් 500");
+    });
+});
+
+// The sibilants, settled by a four-way control against the referee after the web sources turned out to
+// disagree with each other AND with the engine. r12a's script notes give ශ and ෂ both as /ʃ/; Wikipedia's
+// phonology says /ʃ/ is a learned-borrowing phoneme "commonly … replaced by /s/". Both agree the two miśra
+// letters are the SAME sound; the engine shipped ශ→s with ෂ→ʃ, which is neither analysis.
+describe("Sinhala sibilants: ශ, ෂ and ස are all /s/", () => {
+    it("ෂ is /s/ — the referee is 9 of 9 on it", () => {
+        expect(phonemizeWord("ඖෂධය")).toBe("ˈaᶷsəd̪ʰˌəjə"); // referee: a u s ə d ə j ə
+        expect(phonemizeWord("පුරුෂ")).toBe("pˈurusə"); // referee: p u ɾ u s ə
+        expect(phonemizeWord("විෂ්ණු")).toBe("ʋˈisnu"); // referee: ʋ i s ɳ u
+    });
+
+    it("ශ is /s/ too — including ශ්‍රී, the word cited as THE example of Sinhala /ʃ/", () => {
+        expect(phonemizeWord("ශ්‍රී")).toBe("srˈiː"); // referee: s r iː
+        expect(phonemizeWord("මිශ්‍ර")).toBe("mˈisrə"); // referee: m i s r ə
+    });
+
+    it("a geminate sibilant still lengthens", () => {
+        expect(phonemizeWord("පස්ස")).toBe("pˈasːə"); // referee: p a sː ə
     });
 });

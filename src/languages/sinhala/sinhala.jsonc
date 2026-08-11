@@ -41,8 +41,29 @@
         "ර": { "ipa": "r" },
         "ල": { "ipa": "l" },
         "ව": { "ipa": "ʋ" },
+        // ⚠ ALL THREE SIBILANTS ARE /s/, AND THE SHIPPED MIXTURE (ශ→s, ෂ→ʃ) WAS AN ANALYSIS NO SOURCE HOLDS.
+        // ශ (miśra śa) and ෂ (miśra ṣa) are the SAME sound as each other under every description — r12a's
+        // script notes give both as /ʃ/, and Wikipedia's phonology says /ʃ/ "is found in learned borrowings
+        // from Sanskrit and English" and is "commonly … replaced by /s/". So there are two coherent
+        // analyses, literary (both ʃ) and colloquial (both s), and the engine had neither.
+        //
+        // The referee decides, four ways, on wikipron sin_sinh_narrow (648 human transcriptions):
+        //     ශ=s ෂ=ʃ  607   as shipped — an analysis no source holds
+        //     ශ=ʃ ෂ=ʃ  604   literary/prescriptive (r12a) — the WORST of the four
+        //     ශ=s ෂ=s  612   colloquial — chosen
+        //     ශ=ʃ ෂ=s  609   the inconsistent opposite
+        //
+        // And the referee's own words say why: ෂ is `s` in 9 of 9 (ඖෂධය → a u s ə d ə j ə, පුරුෂ, විෂ්ණු,
+        // තෘෂ්ණාව …) and ශ is `s` in 6 of 9 — including ශ්‍රී → `s r iː`, the very word Wikipedia cites as
+        // THE example of Sinhala /ʃ/. A written three-way distinction with no spoken basis is exactly why
+        // Sinhala spellers are documented as confusing these letters.
+        //
+        // ⚠ The cost is that si no longer emits ʃ at all. That is the correct reading for a SPOKEN-Sinhala
+        // target and it is what the only referee this language has attests; the three ʃ transcriptions it
+        // does carry (බංගලාදේශය, ශිශ්නය, ශුක්‍ර) are the learned-borrowing register, and reading the whole
+        // language that way costs eight words to buy three.
         "ශ": { "ipa": "s" },
-        "ෂ": { "ipa": "ʃ" },
+        "ෂ": { "ipa": "s" },
         "ස": { "ipa": "s" },
         "හ": { "ipa": "h" },
         "ළ": { "ipa": "l" },
