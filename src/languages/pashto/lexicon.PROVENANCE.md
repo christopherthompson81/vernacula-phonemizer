@@ -106,7 +106,12 @@ espeak's pool at all; for ~103 of them our g2p already agrees, so the export emi
 fact that makes espeak invisible to the referee makes the wikipron/kaikki tranche far too visible — those
 rows are mined *from* the referees and then graded *against* them. On `ps.wikipron-pbt.tsv`: shipped lexicon
 69.6%, espeak-only lexicon 46.7%, no lexicon 46.9%. **The entire 22.7pp gap is the referee's own answers fed
-back.** Compare engine changes on the rules-only number. See `tools/referee-eval/langs/ps.jsonc` and
+back.**
+
+⚠ **FIXED 2026-08-11 (Run 16): `eval.ts` now excludes referee-derived lexicon rows, and the reported ps score
+is the non-circular one** — primary 42.5%, pbt 46.9%. The 63.1% / 69.6% figures survive only as what they
+are, a statement about how much of the referee's vocabulary this lexicon COVERS. They are not engine quality
+and must not be quoted as such. See `tools/referee-eval/langs/ps.jsonc` and
 `docs/investigations/ps_neural_restoration_investigation.md` Run 11 — including why it was documented rather
 than fixed in that run. ⚠ And 5.78% is the honest figure, not the 37.2% of tokens espeak's
 raw word list covers — the export drops identity rows, so 5.78% is the share of running tokens whose reading
