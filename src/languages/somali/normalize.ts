@@ -95,8 +95,22 @@ export function normalizeSomali(input: string): string {
     // (`1999M`, `766M`, ×25), one or two is MILLION (`$2M`, `8M oo higtar`, `1M oo ay beeraty`, ×21). Reading
     // the short form as an era would date a sum of money to the year 2; reading the long form as a magnitude
     // would make the year 1999 into 1,999 million. Counted before either rule was written.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)M(?![\p{L}\p{M}])/gu,
-        (_m, n: string) => (n.length >= 3 ? `${n} Miilaadi` : `${n} milyan`));
+    // ⚠ AND THE LONG FORM ADDITIONALLY NEEDS A YEAR CONTEXT, which the corpus diff's adversarial probe forced
+    // and the corpus then confirmed. `\d{3,4}M` is ×25 here and TWO of them are not years at all:
+    // `Diyaaradda Tu-154M` is a Tupolev airliner, and `badda kasareysa 2,407M` is 2,407 METRES. Requiring a
+    // year word, a Hijri year or an `=` within the preceding 45 characters fires on 23 of 25 and excludes
+    // exactly those two — measured, not guessed. (The tier cannot rescue the metres case: its unit keys are
+    // case-SENSITIVE, so `2407m` reads as mitir but `2407M` does not.)
+    // The SHORT form needs no such gate: one or two digits before `M` is the million idiom (`$2M`, `8M`).
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+)M(?![\p{L}\p{M}])/gu, (whole, n: string, off: number, src: string) => {
+        if (n.length < 3) return `${n} milyan`;
+        // ⚠ `Hijri`, not `\d+H` — the H arm above has ALREADY run and rewritten `150H/766M` to
+        // `150 Hijri/766M`, so a check for the raw form silently fails on exactly the calendar-pair frame
+        // this context test exists to recognise.
+        return /[Ss]anad|[Bb]ish|[Qq]arni|Hijri|=/u.test(src.slice(Math.max(0, off - 45), off))
+            ? `${n} Miilaadi`
+            : whole;
+    });
 
     // ── 3. CLOCK — BEFORE the decimal rule, which would otherwise claim `2:00` and `8:15` ───────────────
     // ×288 (`9:00 Subaxnimo`, `8:15 PM`, `12:25`). The colon is clause punctuation, so the time read as two

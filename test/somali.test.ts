@@ -68,13 +68,23 @@ describe("Somali canonical IPA", () => {
             expect(phonemize("70 C.D. Rooma", "so")).toContain("ʕiːse dabadiːs");
             expect(phonemize("728H", "so")).toContain("hid͡ʒri"); // ×567
             expect(phonemize("sanadkii 18H", "so")).toContain("hid͡ʒri"); // ×305 are two-digit years
-            expect(phonemize("1999M", "so")).toContain("miːlaːdi"); // 3-4 digits = the YEAR
+            expect(phonemize("Sanadkii 1999M", "so")).toContain("miːlaːdi"); // 3-4 digits + a year word
+            // ⚠ AND A BARE `1999M` DOES NOT FIRE, which is the guard working rather than a gap: without a year
+            // context the same shape is a model number or an altitude. This line asserted the opposite before
+            // the corpus showed both false positives.
+            expect(phonemize("1999M", "so")).not.toContain("miːlaːdi");
             // ⚠ …but one or two digits is MILLION, not a year (`$2M`, `8M oo higtar`, ×21). Reading the short
             // form as an era would date a sum of money to the year 2.
             expect(phonemize("8M oo higtar", "so")).toContain("miljan");
             expect(phonemize("$2M", "so")).toBe("laba miljan doːlar"); // and the magnitude must hop the noun
             // ⚠ `CD-yada` is compact discs, in this same corpus — the leading digit is what excludes it.
             expect(phonemize("CD-yada iyo Internetka", "so")).not.toContain("dabadiːs");
+            // ⚠ AND THE ERA `M` NEEDS A YEAR CONTEXT, which the corpus forced: two of its 25 instances are not
+            // years at all — a Tupolev airliner and an altitude in METRES. Both must stay unread rather than
+            // be dated. (The tier cannot rescue the metres case: its unit keys are case-SENSITIVE.)
+            expect(phonemize("Diyaaradda Tu-154M oo", "so")).not.toContain("miːlaːdi");
+            expect(phonemize("badda kasareysa 2,407M", "so")).not.toContain("miːlaːdi");
+            expect(phonemize("150H/766M", "so")).toContain("miːlaːdi"); // the calendar-PAIR frame still fires
         });
 
         test("units, percent, signs and the c=/ʕ/ abbreviations", () => {
