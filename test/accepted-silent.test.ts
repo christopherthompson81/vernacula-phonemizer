@@ -136,7 +136,7 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // article ABOUT Japanese writing (`Misuzu (みすゞ)`) — a mention, not a use, and Sundanese has no
         // iteration mark to read it with. ⚠ Two `$28.ooUS`/`$60.ooUS` spans are the SOURCE'S OWN TYPO (`.00`
         // mistyped with letter o's); the `$` there IS read, and what the scan sees is the `US` fragment.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "so", "su", "ta", "tl", "wuu", "xh"]);
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

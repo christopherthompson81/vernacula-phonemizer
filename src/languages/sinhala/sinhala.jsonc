@@ -103,6 +103,12 @@
             },
             { "triggers": "චඡජඣඤ", "nasal": "ඤ්", "note": "palatal → ɲ" },
             { "triggers": "ටඨඩඪණඬ", "nasal": "ණ්", "note": "retroflex → n" },
+            // ⚠ SIBILANTS WERE FALLING TO THE ම් DEFAULT, and the referee refutes it: wikipron's one
+            // ං+sibilant word is පංසු → `p ə ŋ s u`, where the engine read *pˈamsu*. The corpus writes the
+            // shape constantly — `අක්ෂාංශ` (latitude) and `දේශාංශ` (longitude) in every coordinate
+            // sentence — and si/normalize.ts now EMITS `අංශක` (degrees) for every `°`, so the same gap
+            // would have been introduced into a high-traffic reading rather than merely inherited.
+            { "triggers": "ශෂස", "nasal": "ඞ්", "note": "sibilant → ŋ (referee: පංසු = p ə ŋ s u)" },
         ],
     },
 

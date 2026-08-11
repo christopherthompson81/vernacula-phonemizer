@@ -11,6 +11,7 @@ import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeSinhala } from "./normalize.ts";
 
 const GEMINATE = /(t͡ʃ|d͡ʒ|t̪|d̪|ʂ|ʃ|[pbʈɖkɡmnŋɲlshjʋrf])\1/gu; // aspirates stay doubled (ඛ්ඛ→kʰkʰ)
 const VOWEL_G = /aᶦ|aᶷ|aː|æː|iː|uː|eː|oː|[aæiueoə]/gu; // vowel units, in longest-first order
@@ -86,7 +87,7 @@ class SinhalaPhonemizer implements Phonemizer {
         // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript
         // defines as ASCII-only, so a numeral written in native digits matched NO token and was
         // dropped entirely — the engine returned an empty string for it (core/unicode.ts).
-        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
+        return assembleClauses(foldNativeDigits(normalizeSinhala(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))

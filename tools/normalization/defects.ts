@@ -244,6 +244,46 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         ampersand: "n/a — the ampersand IS read (跟, the corpus's own coordinator ×136 against 和 ×63; "
             + "normalize.ts declares it through the shared tier)",
     },
+    si: {
+        // ⚠ EVERY `=`, `+` AND `×` IN THIS CORPUS IS SOMETHING OTHER THAN ARITHMETIC, which is the whole
+        // reason all three are refused rather than read. Measured over the 448 mined si.jsonc segments —
+        // there is no FLEURS corpus for Sinhala and espeak does not ship the language, so the artifact and
+        // si.wikipedia are the only haystacks there are.
+        //
+        // `=` is a GLOSSARY or table separator, never a relation: `අබ්බඩා=.....................`,
+        // `මාමා = මාමා`, `Detective Comics(ඩිටෙක්ටිව් කොමික්ස්) = රහස් පරික්ෂක චිත්‍ර කථා`,
+        // `ක්‍රියාකාරී අනුපාතිකය = නිශ්චිත වසරක…` (a definition heading), and the wiki markup `|alt=`.
+        // The two that LOOK like equations are a variable assignment in an astronomy worked example
+        // (`Y = 0.25`, `RAMC=36.0437268⁰`), where the operand is a letter and the reading would be a
+        // formula rather than prose.
+        equals: "measured: all 20+ mined `=` are a glossary/table separator, a definition heading or wiki "
+            + "markup (`මාමා = මාමා`, `|alt=`); the only two flanking a number are variable assignments in "
+            + "one astronomy worked example. No Sinhala reading is attested for the relation either",
+        // `+` is an ETYMOLOGY GLOSS every time: `කොළ + අඹ යන්න කොළඹ ලෙස`, `αστρονομία = άστρον + νόμος`,
+        // `astron + nomos`, and — in the article on Sinhala orthography itself — `ක් + ර = ක්‍ර : ග් + ය =
+        // ග්‍ය`, which is a statement about CONJUNCT FORMATION. Reading any of them as "plus" would turn
+        // word-formation into a sum. Digit-adjacent `+` is ×0.
+        plus: "measured: every mined `+` joins two WORDS in an etymology or conjunct-formation gloss "
+            + "(`කොළ + අඹ`, `ක් + ර = ක්‍ර`); digit-adjacent `+` is ×0",
+        // `×` is a DIMENSION CROSS in all six instances, every one after `මිලිමීටර්`: `8.2×6.3×0.6`,
+        // `13.7×15.3×1.5`, `8.7×7.7×1.5`, `10.0×0.6`, `40×26`, `2.5m X 2.5m`. That reading is "by", not
+        // "times", and no Sinhala rendering of the dimension cross is attested in either haystack —
+        // `ගුණිත` is ×0 in the corpus. th reached the same conclusion for the same shape.
+        times: "measured: all 6 mined `×` are a DIMENSION CROSS after මිලිමීටර් (`8.2×6.3×0.6`), which is "
+            + "'by' and not 'times'; no Sinhala reading of either sense is attested (ගුණිත ×0)",
+        // ⚠ THE REMAINING THREE ARE ×0 SIGNS WITH ×0 WORDS, and both halves matter. `±`, `<` and `÷` do
+        // not occur in the artifact at all, and no Sinhala rendering of any of them is attested in the two
+        // haystacks this language has. `අඩු`/`වැඩි` ("less"/"more") exist as ordinary adjectives but the
+        // COMPARATIVE RELATION needs a phrase around them (`…ට වඩා අඩු`), which nothing attests in the
+        // slot; that is the Fula `hakkunde` failure — a real word that does not fit the position.
+        "plus-minus": "measured: ± is ×0 in the artifact, and its reading would compose two words neither "
+            + "of which is attested in the slot",
+        "less-than": "measured: `<` is ×0; අඩු is an adjective and the relation needs a phrase (`…ට වඩා "
+            + "අඩු`) that nothing attests digit-flanked",
+        "greater-than": "measured: `>` is ×0; same as less-than — වැඩි is the adjective, not the relation",
+        divide: "measured: `÷` is ×0; බෙදීම is the noun 'division' (and the corpus's only arithmetic `/` "
+            + "instances are rates and dates), never the operator between two numbers",
+    },
     ps: {
         // ⚠ NO ESPEAK PASHTO AT ALL, so every reason below is a corpus measurement over a fresh
         // ps.wikipedia dump (242,649 lines after markup and category-residue filtering) and nothing else can
@@ -644,6 +684,36 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // ⚠ Listed BY INSTANCE rather than silencing the class, so the moment a ¥ appears beside a Cebuano
         // yen-word — or any other currency regresses — the scan reports it again.
         currency: ["¥2,500", "¥130,000", "¥7,000"],
+    },
+    si: {
+        // RANGES AND DATE/DESIGNATION DASHES, none of them a negative — and si/normalize.ts reads the
+        // negative sign as U+2212 ONLY, on the measurement that U+2212 is ×5 in this corpus and all five are
+        // temperatures, while an ASCII hyphen before a digit is ×9 and none of the nine is. These are six of
+        // that nine: three coordinate/temperature RANGES (the layer declines ranges outright — Sinhala
+        // writes its own connective, `අතර`, and two of these carry it), an ordinal with a leading dash, and
+        // two years. Listed per instance rather than widened into the guard, so a real negative written with
+        // a hyphen would still report.
+        minus: ["20°-30°", "29°-39°", "60°-75°", "සමරසේකර -12", "Nations -1967", "උපත -1918"],
+        // TWO SUPERSCRIPTS WITH NO UNIT TO ATTACH TO. `mg• L⁻¹` is a reciprocal-litre exponent whose unit
+        // (`mg`) this language deliberately does not declare — see si/normalize.ts, where all nine `mg` are
+        // inside a rate with no sourced denominator — and `ටොන් 10¹⁵` is scientific notation, which no
+        // language in this tree reads. `bareExponent` is undeclared for si for that reason; the UNIT
+        // exponent (`km²` → වර්ග කිලෝමීටර්) is read and is what keeps this list honest.
+        exponent: ["mg• L⁻¹", "10¹⁵"],
+        // TWO CURRENCIES WITH NO SINHALA NAME AND ONE LETTER-PREFIXED CODE. `GH¢` (Ghanaian cedi) and `CN¥`
+        // (yuan) sit in one sentence about African stock exchanges; neither `සෙඩි` nor `යුවාන්` is attested
+        // in the corpus or on si.wikipedia, and naming one would be the Fula `tere` failure. `PPP$22,480`
+        // is purchasing-power parity — the `$` there is part of a notation, not a price, and the tier's
+        // letter-bounded key correctly refuses it. The dollar, euro, pound and rupee ARE all declared and
+        // read, which is what makes these three visible rather than hidden.
+        currency: ["GH¢", "CN¥180.4", "PPP$22,480"],
+        // ⚠ A MANUFACTURED PERCENT SIGN — the corpus's own corruption, not a defect this layer can repair.
+        // One article has lost its rakaransaya conjunct `්‍ර` and a `%` has been substituted for it, so
+        // `ප්‍රතිපත්ති` is written `ප%තිපත්ති`, `සංග්‍රහයක` `සංග%හයක`, and `ක්‍රි.පූ` `කs%.පූ`. Every `%` in
+        // the line is inside a WORD with no digit anywhere near it. Reading them would insert *සියයට* into
+        // five Sinhala nouns; the percent rule requires a digit and correctly declines. Same class as the
+        // mojibake that manufactures a degree sign in `Ä°zmir` (playbook: repair before you measure).
+        percent: ["කs%.පූ", "ප%තිපත්ති", "ප%රාතාසා", "ප%කාශයට", "සංග%හයක"],
     },
     so: {
         // A `+` JOINING TWO GREEK ETYMOLOGY GLOSSES, not arithmetic — `"waan gubaa" + ōps "wejiga"`, inside the
