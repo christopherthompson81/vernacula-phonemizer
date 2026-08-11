@@ -172,11 +172,11 @@ consulted-not-shipped for every language but Pashto, where `pashto/lexicon.tsv` 
    engine reading it at runtime is not thereby GPL. Alternatives if a GPL data file becomes
    unwanted: rebuild from kaikki Wu readings (CC-BY-SA, gan/hakka/jin/xiang pattern, coverage
    drops to ~10–20k), or ask Wugniu for a permissive grant of the dictionary data.
-3. **`pashto/lexicon.tsv`** (13,861 rows) — the shipped Pashto short-vowel restoration lexicon,
+3. **`pashto/lexicon.tsv`** (13,828 rows) — the shipped Pashto short-vowel restoration lexicon,
    derived from **espeak-ng `dictsource/ps_list`** (GPL-3.0, credited to Hanif Rahman). Per-file
    **GPL-3.0 fence**, same treatment as `wu/dict.tsv`; the engine reading it at runtime is not
-   thereby GPL. Mixed-source and takes the most restrictive licence: 12,535 of 13,861 rows
-   (90.4%) are reachable only from the GPL source, the rest also from wikipron/kaikki (CC-BY-SA),
+   thereby GPL. Mixed-source and takes the most restrictive licence: 12,535 of 13,828 rows
+   (90.6%) are reachable only from the GPL source, the rest also from wikipron/kaikki (CC-BY-SA),
    so the facts posture is **not** available here — the file substantially re-derives that
    compilation's headword selection. ⚠ Note what was taken: only the SHORT-VOWEL PLACEMENT.
    espeak's phoneme strings are never copied — each is fed to `invert_harakat.ts`, which searches

@@ -159,7 +159,7 @@ function g2p(word: string): string {
                 // (آسُو→ɑsuː) and a MEDIAL ⟨ـُو⟩ fell through to the glide arm: کُور read *kuwər for /kur/ and
                 // مُوک read *muwək for /muk/ — an epenthetic vowel and a spurious /w/ on every such word.
                 // ⚠ THAT WAS ON THE SHIPPED PATH, not a hypothetical: `lexicon.tsv` supplies exactly these
-                // harakat, and **416 of its 10,731 entries carry ⟨ُو⟩**, so the coverage layer was feeding the
+                // harakat, and **416 of its 10,723 rows carried ⟨ُو⟩**, so the coverage layer was feeding the
                 // bug rather than avoiding it. The gate is gone; the glide arm now handles only the genuinely
                 // heterorganic cases it was written for.
                 const pv = out.at(-1);

@@ -1,6 +1,6 @@
 # pashto/lexicon.tsv — provenance
 
-**Artifact:** `src/languages/pashto/lexicon.tsv` — 13,861 `skeleton ⇥ vocalized` rows, the **shipped**
+**Artifact:** `src/languages/pashto/lexicon.tsv` — 13,828 `skeleton ⇥ vocalized` rows, one per key, the **shipped**
 Pashto short-vowel restoration lexicon (the COVERAGE layer of the two-layer rider phonemizer). Built by
 `tools/perso-arabic/invert_harakat.ts --lexicon ps` → `tools/perso-arabic/export_lexicons.sh`; re-runnable
 from the repo plus an espeak-ng checkout, no network.
@@ -19,7 +19,7 @@ It is a **mixed-source** artifact and takes the most restrictive licence in the 
 | in both pools | — | 969 |
 | **espeak-only** (would vanish without it) | — | **12,535** |
 
-12,535 of 13,861 rows (90.4%) exist only because of the GPL source, so the facts posture is not available
+12,535 of 13,828 rows (90.6%) exist only because of the GPL source, so the facts posture is not available
 here the way it is for `arabic/diacritization.tsv`: this is not a thin mechanical table that happens to
 overlap an upstream compilation, it *is* substantially that compilation's headword selection, re-derived.
 
@@ -30,14 +30,28 @@ overlap an upstream compilation, it *is* substantially that compilation's headwo
 *our own g2p* reproduces the reference** under `PS_FULL_FOLD`. What is stored is that vocalization — a
 diacritized spelling of the word — not espeak's phoneme string. Three consequences worth stating:
 
-- **espeak's consonants are not imported.** Its dictionary disagrees with this engine's variety on ږ
-  (`موږ` → ʁ where we read ʐ) and is internally mixed on ښ (across 82,583 entries: ʃ 54.7%, ʂ 29.6%,
-  x 21.7%). None of that reaches the lexicon, because the consonants come from our g2p either way.
+- **espeak's consonants are not imported, and the dialect filter is TOTAL — measured, not assumed.** Its
+  dictionary disagrees with this engine's variety on ږ (`موږ` → ʁ where we read ʐ) and is internally mixed on
+  ښ (across 82,583 entries: ʃ 54.7%, ʂ 29.6%, x 21.7%). None of it reaches the lexicon, because a row exists
+  only where OUR g2p reproduces the reference, and `PS_FULL_FOLD` folds our ʂ→ʃ / ʐ→ʒ while leaving the
+  Northern x / ɡ alone — so a Northern entry can never round-trip. Counted on unambiguous cases (ښ in a word
+  with no خ; ږ in a word with no ګ/گ/ج/ځ):
+
+  | espeak entries | | reached the lexicon |
+  |---|---:|---:|
+  | unambiguously **Northern** (x / ɡ) | 501 | **0 (0.0%)** |
+  | unambiguously **Southern** (ʂ / ʐ) | 1,328 | 290 (21.8%) |
+
+  So **the lexicon is already pbt-only on the isogloss by construction**, and splitting it by dialect would
+  remove rows that do not exist. ⚠ The isogloss speaks only for the ~10% of words containing ښ/ږ, and espeak
+  offers no dialect signal for the rest — but with the isogloss removed the Southern/Northern separation still
+  holds 73.7% vs 23.1% on the tagged referees, so vowel contamination is bounded and small. n = 19 and 26,
+  too small to claim purity. See investigation Run 12.
 - **espeak's errors self-filter.** It under-vocalizes ~26% of the words it shares with the wikipron referee
   (it drops the epenthetic schwa our g2p models: `اتل` → `a:tl` against the referee's `a t ə l`). A row
   exists only where a vocalization *reproduced* the reference, so those simply yield nothing.
-- **The yield is the accuracy measure.** 82,287 candidate rows → 21,743 labelled (**26.1%**) → 13,861 after
-  dropping identity rows (a word our g2p already reads correctly needs no entry). ⚠ The yield ROSE from 23.6%
+- **The yield is the accuracy measure.** 82,287 candidate rows → 21,743 labelled (**26.1%**) → 13,828 after
+  dropping identity rows and deduplicating by key (a word our g2p already reads correctly needs no entry). ⚠ The yield ROSE from 23.6%
   on 2026-08-10 without a single new source row, because the g2p learned to spell things it previously could
   not: while the mater-lectionis rule was gated to word-final position a medial ⟨ـُو⟩ read as u·w·ə, so a
   medial /u/ had **no vocalization at all** and every espeak row wanting one simply failed to invert. The
@@ -53,9 +67,9 @@ used by `tools/pashto/build_espeak_silver.py`, is from the same source. Credited
 
 | | |
 |---|---|
-| entries | 351 → 10,698 → **13,861** |
+| rows | 351 → 10,698 → **13,828** (one per key, after the 2026-08-10 dedup fix) |
 | running-text **token** coverage (13.4 M tokens, ps.wikipedia) | 2.80% → 5.78% → *not re-measured* |
-| referee (wikipron `pus`) | **unchanged**, 55.7% → 63.0% (see the caveat below) |
+| referee (wikipron `pus`) | **unchanged**, 55.7% → 63.1% (see the caveat below) |
 
 ⚠ **The token-coverage row is STALE at 5.78% and is left labelled rather than updated.** It was measured
 against a 13.4 M-token ps.wikipedia dump that is not in the repo and is no longer on this machine; the
@@ -65,8 +79,9 @@ not a number to quote. Re-measuring needs the dump re-fetched.
 ⚠ **The referee cannot see the espeak tranche, and that is not a defect in it.** The 351 original entries
 were mined *from* wikipron, so they already covered the referee's words; the espeak rows are words wikipron
 does not contain. Running text is where they land. **Measured directly on 2026-08-10:** an espeak-only
-lexicon (`invert_harakat.ts --lexicon ps --no-referee-silver`) covers just 154 of the 1,281 pbt-referee
-words (12%) and moves that referee by −0.2pp against no lexicon at all.
+lexicon (`invert_harakat.ts --lexicon ps --no-referee-silver`) supplies an entry for just 51 of the 1,281
+pbt-referee words (4%) and moves that referee by −3 words against no lexicon at all. (154 referee words are in
+espeak's pool at all; for ~103 of them our g2p already agrees, so the export emits no row.)
 
 ⚠⚠ **AND THE CONVERSE IS THE UNCOMFORTABLE HALF: the ps referee score is substantially CIRCULAR.** The same
 fact that makes espeak invisible to the referee makes the wikipron/kaikki tranche far too visible — those
