@@ -1,0 +1,72 @@
+// WIKIPEDIA WORD ATTESTATION — so. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "so",
+    "wiki": "so.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "dhibic",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 21,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…a xadaynta waxyaalo badan oo la tirinayo ama la taxaayo. 2. Dhibic hakad (;) waxaa kale oo loo yaqaanaa (Hakad heeg) waxaana l…",
+                "…loo yaqaanaa (Hakad heeg) waxaana loo adeegsadaa, Astaanta dhibic iyo hakad oo laysku daray oo lays ku daray waxaa la adeegsa…",
+                "…ay 6.241509074×1018 elegteroon qiimihiisu waxa uu dhaafayaa dhibic ilbiriqsi gudaheed. Waxaa loo magacaabay ka dib markii xisa…",
+                "…n oo masaafada go'an (oo loo yaqaan raadiyaha) ka fogaanaya dhibic go'an, taasoo loo yaqaan xarunta. Si fudud, waa shay qaab k…",
+                "…oosaska lock, number eight iyo flanker, wuxuuna afar tries (dhibic) u dhaliyay New Zealand 30 kulan oo uu saftay (15 ka mid ah…",
+                "…ha dhanka hoose waxaa loo qaabeeyaa in uu noqdo baal yar oo dhibic ah, inkastoo qaabab kala duwan oo ku habboon ay jiri karaan…"
+            ]
+        },
+        {
+            "word": "nuqte",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "meeldhibic",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "faaruq",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…ilmasideen waa xubin faaruq ah oo murqaha ka samaysan oo ka tirsan nidaamka taranka dum…",
+                "…iidhan timid, waxaa la kulmay nin tuug ah oo u kaxeeya guri faaruq ah oo ku dhow, halkaas oo uu ku xirto oo uu kufsado. Lilya…",
+                "…markii uu arkay mixraabkii uu Nebigu NNKH istaagi jiray oo faaruq ah wuu hanan waayay nafsaddiisa waana la miir daboolay waan…",
+                "…doontaa nolol ka duwan tii hore, waxay noqon doontaa nolol faaruq ah, madhan oo dhibaysa. \"Khudbaddiisa, waxa uu ku tilmaamay…"
+            ]
+        }
+    ],
+}

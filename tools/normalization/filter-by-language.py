@@ -41,6 +41,10 @@ MARKERS = {
           "kacamatan désa kabupatén nu ka ti geus baé hiji dua tilu opat lima kota wewengkon aya",
     "jv": "lan sing ing saka kanthi yaiku uga déning kang menyang iku dadi taun basa wong kutha",
     "id": "yang dan di dari dengan untuk pada adalah ini itu tidak akan sebagai oleh dalam tahun kota",
+    # so: Cushitic, so no relative in this table to be diagnostic against; these are simply the highest-
+    # frequency function words (iyo "and", ee/oo linkers, waxaa/waxay focus markers, ku/ka/la prepositions).
+    "so": "iyo ee ah ka ku la oo waa in uu ay si ugu kala ayaa waxaa waxay lagu loo soo dhexe "
+          "magaalada dalka sanadkii badan mid oo dhan ka mid",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "

@@ -10,6 +10,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeSomali } from "./normalize.ts";
 
 /** Phonemize a single Somali word to canonical IPA (no tone/stress mark — Somali tone is unwritten). */
 export function phonemizeWord(word: string): string {
@@ -34,7 +35,11 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class SomaliPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NORMALIZATION runs first — pure text→text, so everything it emits is then read by the ordinary word,
+        // number and clause paths below. It must see the text BEFORE tokenization, because most of what it
+        // repairs (a grouping `,`, a decimal `.`, a clock `:`) is a character `TOKEN` would otherwise hand to
+        // `clausePunctuation` as a pause.
+        return assembleClauses(normalizeSomali(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

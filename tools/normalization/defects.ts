@@ -613,6 +613,18 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
 export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    so: {
+        // A `+` JOINING TWO GREEK ETYMOLOGY GLOSSES, not arithmetic — `"waan gubaa" + ōps "wejiga"`, inside the
+        // article on the name Αἰθιοπία. so/normalize.ts reads `+` before a digit or a bracketed one; this one
+        // has quoted words on both sides, and voicing it would read a word-formation gloss as a sum.
+        "math-sign": ['"waan gubaa" + ōps'],
+        // TWO SUPERSCRIPTS WITH NO NUMBER TO ATTACH TO. `cm³` follows the WORD `cubo` — the article writes the
+        // Somali reading and the abbreviation side by side (`11.548 Sentimitir cubo cm³`), so the cube is
+        // already spoken and the symbol is a gloss. `E = mc²` is Einstein's, where the base is a VARIABLE; the
+        // `=` IS read (`u dhiganta`), and `bareExponent` is not declared for this language because its
+        // superscripts are overwhelmingly units (km² ×93, m³ ×37) which the unit path already handles.
+        exponent: ["cubo cm³", "E = mc²"],
+    },
     su: {
         // ⚠ ALGEBRAIC SUBTRACTION WITH A VARIABLE OPERAND. su/normalize.ts reads the minus before a DIGIT
         // (`-1,00`, `antara -100`, `(−3)`); these are `1 - p` and `1 − p` inside a standard-deviation

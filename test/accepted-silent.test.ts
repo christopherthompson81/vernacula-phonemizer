@@ -112,6 +112,13 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // all. Its `minus` entry is a single EN DASH inside a scientific-notation range (`10¹¹–10¹²`) whose
         // operands end in superscripts, so the range rule cannot reach it — a span, not a negative, and
         // Pashto's true negatives ARE read (`منفي`, sourced ×52 digit-adjacent).
+        // so has two, both "there is no number here for the symbol to attach to": a `+` joining two Greek
+        // etymology glosses inside the article on the name Αἰθιοπία, and two superscripts whose base is a word
+        // or a variable — `cubo cm³` (where the article writes the Somali reading BESIDE the abbreviation, so
+        // the cube is already spoken) and `E = mc²` (whose `=` IS read). ⚠ `bareExponent` is deliberately not
+        // declared for so: its superscripts are overwhelmingly units (km² ×93, m³ ×37), which the unit path
+        // already handles, and declaring it would buy 26 digit-base powers at the cost of every isotope and
+        // designation in the corpus.
         // su's four classes are all "this is not the sign you think it is", and two of them are shapes no
         // other language in this table carries. Its CURRENCY entries are LaTeX MATH DELIMITERS — su.wikipedia
         // quotes `($10^{13}$–$10^{14}$ taun)` from an English physics article, and su/normalize.ts strips the
@@ -124,7 +131,7 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // article ABOUT Japanese writing (`Misuzu (みすゞ)`) — a mention, not a use, and Sundanese has no
         // iteration mark to read it with. ⚠ Two `$28.ooUS`/`$60.ooUS` spans are the SOURCE'S OWN TYPO (`.00`
         // mistyped with letter o's); the `$` there IS read, and what the scan sees is the `US` fragment.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "su", "ta", "tl", "wuu", "xh"]);
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "so", "su", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
