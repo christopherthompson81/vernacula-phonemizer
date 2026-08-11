@@ -895,3 +895,64 @@ is a counted drop rather than a silent pass-through.
 Nothing in the data — 548 silver rows, 14,021 lexicon rows, referee unchanged. What changed is that the claim
 "pbt-majority" was too weak by half, and one future dump's `ğ` would have imported a Northern ⟨ږ⟩ into a
 Southern lexicon.
+
+## Run 16 — 2026-08-11 — the circularity is fixed, and ps drops 20 points
+
+Run 11 measured the ps referee score as substantially circular and deliberately did not fix it, on the grounds
+that the repair restates every historical ps number. It is fixed now, and it does.
+
+### The mechanism, and why it is not a rule-only entry point
+
+Five languages already dodge this hazard (en-GB, km, af, ilo, gu) by exporting a `phonemizeWordRules` that
+bypasses the referee-derived lexicon entirely. **That is the wrong instrument for ps**, because it would throw
+away a legitimate layer: 95.4% of `pashto/lexicon.tsv` is espeak-ng's ps_list and 548 rows are ps.wiktionary,
+and no referee has seen either. Only rows whose KEY came from wikipron/kaikki have to go.
+
+`eval.ts:psNonCircular` builds that exclusion set from `silver.tsv` + `silver.kaikki.tsv` (filtered to
+`lang == "pus"` — they are multi-language files and Perso-Arabic spellings collide across ur/fa/pa/ps) and
+scores through the surviving lexicon. Costs the shipped artifact nothing, needs no re-mine, keeps the full
+1,281-word denominator, and is reproducible from committed files.
+
+⚠ **EXCLUDING BY KEY IS PRECISE HERE, NOT MERELY CAUTIOUS**, and that turns on source order. The shipped file
+has no provenance column, so a key in two pools cannot be attributed by inspection — but `invert_harakat.ts`
+reads the CC-BY-SA silver FIRST and `seenSkel` keeps the first vocalization per skeleton, so for any word
+wikipron/kaikki also covers, the referee-derived reading **is** the one that shipped. Excluding those keys
+removes exactly the feedback and nothing else.
+
+```
+lexicon 14,021 → 13,589 scored (432 excluded, 3.1%)
+pbt referee words holding a referee-derived entry:  503 → 0
+```
+
+### The result
+
+```
+                        shipped      NON-CIRCULAR
+wikipron pus (primary)   63.1%   →     42.5%      symbol 87.4% → 80.5%
+kaikki  pus              72.3%   →     47.0%
+wikipron pbt (ours)      69.6%   →     46.9%
+kaikki  pbt (tagged)     77.3%   →     51.5%
+kaikki  pbu (Northern)    5.9%   →      2.0%
+```
+
+⚠ **THE ENGINE DID NOT CHANGE. THE MEASUREMENT DID.** Every number above describes the same code that scored
+63.1% yesterday. The shipped figures are not deleted — they are recorded in `ps.jsonc` as what they are, a
+COVERAGE statistic — but the primary is now a number that can be reasoned about.
+
+⚠ **pbt 46.9% EQUALS the rules-only number exactly, and that is a real result rather than a bug.** The espeak
+and ps.wiktionary tranches together move this referee by ZERO words, because they barely reach its vocabulary
+(espeak supplies a shipped row for 51 of 1,281; ps.wiktionary for almost none — 427 of its 548 rows are words
+no referee contains). Their value is production coverage, which no referee here can measure. The exclusion set
+was checked for the opposite failure: 432 rows removed, not 14,021.
+
+⚠ **AND THE DIALECT SEPARATION GOT STARKER, WHICH IS THE CONTROL.** pbt 51.5% against pbu 2.0% is a **26×**
+separation, up from 13×. Removing the feedback hurt the Northern slice proportionally more than ours — the
+referee-derived rows had been flattering pbu too. An honest measurement that made the split look weaker would
+have been evidence the split was an artifact; this is the reverse.
+
+### What this restates
+
+Every historical ps figure in this repo now means one of two things, and they are labelled: a **shipped**
+number (63.1% / pbt 69.6% — coverage) or a **non-circular** one (42.5% / pbt 46.9% — engine). Run 10's carrier
+rules are correctly quoted as **42.2% → 46.9%**, which is what Run 11 already said they should be. The floor
+test moved 0.60 → 0.40 for the same reason and says so in place, so nobody reads it as a regression.

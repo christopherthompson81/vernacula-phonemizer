@@ -7,7 +7,7 @@
  *
  * Usage:  npx tsx tools/referee-eval/eval.ts <zu|si|kk> [--examples N]
  */
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -191,7 +191,10 @@ import { phonemizeWord as sw } from "../../src/languages/swahili/swahili.ts";
 // RULE-ONLY for gu: the shipped phonemizeWord applies a wikipron/kaikki-informed schwa lexicon, so evaluating it
 // against those referees would be circular. phonemizeWordRules bypasses the lexicon → the honest engine signal.
 import { phonemizeWordRules as gu } from "../../src/languages/gujarati/gujarati.ts";
-import { phonemizeWord as ps } from "../../src/languages/pashto/pashto.ts";
+// NON-CIRCULAR for ps — see `psNonCircular` below. The shipped `phonemizeWord` is NOT used here: Pashto's
+// coverage lexicon is mined from wikipron and kaikki, which are the referees it would be scored against.
+import { harakatLexicon as psLexicon, phonemizeWordCore as psCore } from "../../src/languages/pashto/pashto.ts";
+import { restoreHarakat as psRestore } from "../../src/core/harakatLexicon.ts";
 import { phonemizeWord as kn } from "../../src/languages/kannada/kannada.ts";
 import { phonemizeWord as am } from "../../src/languages/amharic/amharic.ts";
 import { phonemizeWord as ti } from "../../src/languages/tigrinya/tigrinya.ts";
@@ -402,6 +405,66 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     zu,
 };
 const HERE = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * ps: the shipped lexicon MINUS every row whose key came from a REFEREE source.
+ *
+ * ⚠ WITHOUT THIS, THE ps NUMBER MEASURES THE REFEREE AGAINST ITSELF. Pashto's coverage layer
+ * (`pashto/lexicon.tsv`) is mined by tools/perso-arabic/invert_harakat.ts from `silver.tsv` and
+ * `silver.kaikki.tsv` — which ARE wikipron and kaikki. Measured on ps.wikipron-pbt.tsv (investigation Run 11):
+ * shipped 892/1281 = 69.6%, no lexicon at all 601/1281 = 46.9%. **The 22.7pp gap is feedback**, not engine
+ * quality: 503 of the referee's words carry a lexicon row and score 90.1% against 56.3% for the rest.
+ *
+ * ⚠ THE FIX IS NOT A RULE-ONLY ENTRY POINT, WHICH IS WHAT en-GB / km / af / ilo / gu DO. That would throw
+ * away a legitimate layer: 95.4% of this lexicon is espeak-ng's ps_list and 548 rows are ps.wiktionary, and
+ * NO referee has seen either. Only rows whose KEY came from wikipron/kaikki have to go, and that set is
+ * derivable from files already committed — so this costs the shipped artifact nothing, needs no re-mine, and
+ * keeps the full 1,281-word denominator (a held-out split would have left ~85 words).
+ *
+ * ⚠ EXCLUDING BY KEY IS PRECISE HERE, NOT MERELY SAFE, and that turns on the miner's source ORDER. The shipped
+ * file has no provenance column, so a key present in two pools cannot be attributed by inspection — but
+ * invert_harakat.ts reads the CC-BY-SA silver FIRST and `seenSkel` keeps the first vocalization per skeleton,
+ * so for any word wikipron/kaikki also covers, the referee-derived reading IS the one that shipped. Excluding
+ * every such key removes exactly the feedback and nothing else. Effect: 432 of 14,021 rows (3.1%) set aside,
+ * and referee words still holding a referee-derived entry go 503 → 0.
+ *
+ * ⚠ IT STILL READS LOWER THAN WHAT A USER GETS, because those 432 words really are covered in the shipped
+ * artifact. That is the right direction to err — the alternative is a number nobody can interpret. The shipped
+ * figure is recorded in tools/referee-eval/langs/ps.jsonc; it is a COVERAGE statistic, not an engine one.
+ *
+ * A FUNCTION DECLARATION, not a const, because `PHONEMIZERS` above is built before `HERE` exists and refers to
+ * `ps` by shorthand. Hoisting resolves the reference; the body is lazy, so `HERE` is initialized by call time.
+ */
+let PS_HONEST: ((w: string) => string) | undefined;
+function ps(word: string): string {
+    if (!PS_HONEST) {
+        // ⚠ FILTERED TO lang=="pus". `silver.tsv` is MULTI-LANGUAGE and Perso-Arabic spellings collide across
+        // ur/fa/pa/ps, so an unfiltered read would exclude rows the ps miner never saw — inflating the penalty
+        // and making this look worse than it is. Same trap that skewed the licence count in export_lexicons.sh.
+        const refDerived = new Set<string>();
+        for (const f of ["silver.tsv", "silver.kaikki.tsv"]) {
+            const p = join(HERE, "..", "perso-arabic", f);
+            if (!existsSync(p)) continue;
+            for (const line of readFileSync(p, "utf8").split("\n")) {
+                const a = line.split("\t");
+                if (a.length >= 3 && a[1] === "pus") refDerived.add(a[0]!.normalize("NFC"));
+            }
+        }
+        // ⚠ FAIL LOUD ON AN EMPTY EXCLUSION SET. Silently excluding nothing restores the circular number, and
+        // it would present as a ~20-point improvement — the most dangerous possible failure mode here.
+        if (refDerived.size === 0)
+            throw new Error(
+                "ps non-circular eval: no lang=pus rows found in perso-arabic/silver.tsv or silver.kaikki.tsv. " +
+                    "The exclusion set would be EMPTY and the score would silently revert to the circular one.",
+            );
+        // ⚠ ps.wiktionary (silver.pswikt-ps.tsv) is deliberately NOT excluded — it is independent of every
+        // referee, so its rows are honest coverage. Only add a file here if it IS a referee source.
+        const filtered = new Map<string, string>();
+        for (const [k, v] of psLexicon()) if (!refDerived.has(k.normalize("NFC"))) filtered.set(k, v);
+        PS_HONEST = (w: string): string => psCore(psRestore(w, filtered));
+    }
+    return PS_HONEST(word);
+}
 
 /** Fold to the comparable segmental backbone: shared strip + the language's justified fold classes, plus any
  *  per-referee folds (`extra`) for folds valid only against one referee (e.g. a dual-script language's abjad). */
