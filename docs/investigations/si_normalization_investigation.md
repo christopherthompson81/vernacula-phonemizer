@@ -223,3 +223,38 @@ silent.
 
 Gates after: 3,363 tests, tsc OK, scan "no defects", review.ts clean, corpus diff 381/447 with DROP 85 → 33,
 referee 607/648.
+
+---
+
+## Run 6 — 2026-08-11 — the review's real find: an abbreviation key that eats a sentence boundary
+
+Question asked while re-reading the diff rather than the probes: **the corpus's commonest dot is a full stop
+with no space after it, and every one of my abbreviation keys ends in an ordinary Sinhala syllable. What
+happens when they meet?**
+
+```
+ලංකාවේ නගරයකි.මීගමුව කොපන්   →  ලංකාවේ නගරයකිලෝමීටර් ගමුව කොපන්
+මෙය හැකි.මීටර් 400            →  මෙය හැකිලෝමීටර් ටර් 400
+තරු. 500 ක්                   →  තරුපියල් 500 ක්
+ශක්‍රි.වචන                    →  ශක්රිස්තු වර්ෂ චන
+```
+
+**මීගමුව is a city and it is in this corpus** — it opens one of the mined segments. Two clause breaks
+destroyed and four words corrupted, and **none of it appears in the 448 mined segments**: the artifact
+samples 0.23% of the dump, so a shape that needs one particular collocation will not be in it. The corpus
+diff was clean, the scan said "no defects", `review.ts` said checklist clean, and the bug was there.
+
+Fixed by bounding every key on both sides (`(?<![඀-෿])` … `(?![඀-෿])`). One detail that had to be got right:
+**the trailing space is emitted by the REPLACEMENT, not absorbed by the pattern** — a pattern ending in
+`\s?` consumes the space and then the right guard looks at the letter beyond it, which rejects the perfectly
+good `සෙ.මී. ඝන වානේ` on its ඝ.
+
+**The lesson to carry, and it is not "add guards".** Every gate in this tree measures against the artifact,
+and the artifact is a SAMPLE. Trap 8 says zero corpus instances is not evidence of correctness; this is the
+same statement about a *sampled* corpus, and it bites hardest on rules keyed to a language's own script,
+where the adversarial neighbour is an ordinary word rather than an exotic symbol. The probe that found it
+was constructed from two facts already written down in this file — "the commonest dot is a missing space"
+and "`මී`-initial words exist" — not from any tool.
+
+Gates after: 3,365 tests, tsc OK, scan "no defects", review.ts clean, corpus diff 381/447 unchanged with
+DROP 85 → 33, referee 607/648.

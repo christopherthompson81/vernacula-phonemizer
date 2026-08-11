@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/sinhala/sinhala.ts";
+import { normalizeSinhala } from "../src/languages/sinhala/normalize.ts";
 
 describe("Sinhala abugida g2p", () => {
     it("schwa alternation (inherent a ↔ ə)", () => {
@@ -140,5 +141,25 @@ describe("Sinhala normalization: the review pass", () => {
     it("an abbreviation glued to its year still separates", () => {
         // ×1 in the corpus: `ක්‍රි.ව.1940 දී පමණ`.
         expect(phonemize("ක්‍රි.ව.1940", "si")).toBe(phonemize("ක්‍රි.ව. 1940", "si"));
+    });
+});
+
+// ⚠ THE REVIEW'S REAL FIND. Every abbreviation key is bounded on both sides, because the corpus's commonest
+// dot is a sentence period with NO SPACE after it and Sinhala has ordinary words starting with each of these
+// second syllables. Unguarded, `නගරයකි.මීගමුව` (මීගමුව is a city, and it is in this corpus) read as
+// *නගරයකිලෝමීටර් ගමුව* — a clause break destroyed and two words corrupted. Invisible in the 448 mined
+// segments; a fact about the 191,335-paragraph dump they sample.
+describe("Sinhala abbreviation keys cannot cross a sentence boundary", () => {
+    it("a missing space after a full stop is still a pause, not an abbreviation", () => {
+        for (const s of ["ලංකාවේ නගරයකි.මීගමුව", "මෙය හැකි.මීටර් 400", "තරු. 500 ක්", "ශක්‍රි.වචන"])
+            expect(phonemize(s, "si")).toContain(" . ");
+    });
+
+    it("…and the genuine abbreviations still expand", () => {
+        expect(normalizeSinhala("ක්‍රි.පූ. 29")).toBe("ක්රිස්තු පූර්ව 29");
+        expect(normalizeSinhala("2.8 සෙ.මී. ඝන වානේ")).toBe("2 දශම 8 සෙන්ටිමීටර් ඝන වානේ");
+        expect(normalizeSinhala("පැයට කි.මී. 250 ක්")).toBe("පැයට කිලෝමීටර් 250 ක්");
+        expect(normalizeSinhala("ඇ.ඩො. මිලියන 7.4")).toBe("ඇමෙරිකානු ඩොලර් මිලියන 7 දශම 4");
+        expect(normalizeSinhala("රු. 500")).toBe("රුපියල් 500");
     });
 });

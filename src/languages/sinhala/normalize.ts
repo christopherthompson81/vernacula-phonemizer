@@ -122,22 +122,42 @@ const stripJoiners = (s: string): string =>
  * (`ක්‍රි.ව. 1660 දී`, `ක්‍රි.පූ. 500දී`, wiki `ක්‍රිස්තු පූර්ව 1000 සිට`). ×11 in the mined segments, 162
  * in the dump. `ක්‍රි.පු.` is a real corpus spelling with a short u.
  */
+/**
+ * ⚠⚠ EVERY KEY IS BOUNDED ON BOTH SIDES, and that is not defensive tidiness — an unbounded key eats a
+ * SENTENCE BOUNDARY in this corpus, because the missing space after a full stop is the corpus's commonest
+ * dot (see above) and Sinhala has ordinary words starting with each of these second syllables. Measured on
+ * the unguarded version:
+ *
+ *     ලංකාවේ නගරයකි.මීගමුව   →  ලංකාවේ නගරයකිලෝමීටර් ගමුව     ← `මීගමුව` is a CITY, and it is in this corpus
+ *     මෙය හැකි.මීටර් 400     →  මෙය හැකිලෝමීටර් ටර් 400
+ *     තරු. 500 ක්            →  තරුපියල් 500 ක්                ← `තරු` = stars
+ *     ශක්‍රි.වචන             →  ශක්රිස්තු වර්ෂ චන
+ *
+ * Two clause breaks destroyed and four words corrupted, none of it visible in the 448 mined segments — the
+ * hazard is a fact about the 191,335-paragraph dump the artifact samples. `(?<![඀-෿])` … `(?![඀-෿])` is the
+ * fix, and the trailing space is emitted by the REPLACEMENT rather than absorbed by the pattern, because a
+ * pattern that swallows the space cannot then look past it (`සෙ.මී. ඝන වානේ` would reject on the ඝ).
+ */
+const B = String.raw`(?<![඀-෿])`, E = String.raw`(?![඀-෿])`;
+const abbrev = (body: string, word: string): readonly [RegExp, string] =>
+    [new RegExp(B + body + E, "gu"), word + " "] as const;
+
 const DOTTED_ABBREV: readonly (readonly [RegExp, string])[] = [
     // Era markers first (playbook step 4: era before generic abbreviations), longest key first.
-    [/ක්රි\.\s?පූ\.?\s?/gu, "ක්‍රිස්තු පූර්ව "],
-    [/ක්රි\.\s?පු\.?\s?/gu, "ක්‍රිස්තු පූර්ව "],
-    [/ක්රි\.\s?ව\.?\s?/gu, "ක්‍රිස්තු වර්ෂ "],
+    abbrev(String.raw`ක්රි\.\s?පූ\.?`, "ක්‍රිස්තු පූර්ව"),
+    abbrev(String.raw`ක්රි\.\s?පු\.?`, "ක්‍රිස්තු පූර්ව"),
+    abbrev(String.raw`ක්රි\.\s?ව\.?`, "ක්‍රිස්තු වර්ෂ"),
     // Measure and currency abbreviations. `කි.මී` ×2 (`වර්ග කි.මී 65,610`, wiki `පැයට කි.මී. 250`),
     // `සෙ.මී.` ×2, `ඇ.ඩො.` from the wiki's own `(ඇ.ඩො. මිලියන 7.4)`. The trailing dot is optional
     // because the corpus writes it both ways.
-    [/ඇ\.\s?ඩො\.\s?මි\.?\s?/gu, "ඇමෙරිකානු ඩොලර් මිලියන "],
-    [/ඇ\.\s?ඩො\.?\s?/gu, "ඇමෙරිකානු ඩොලර් "],
-    [/කි\.\s?මී\.?\s?/gu, "කිලෝමීටර් "],
-    [/සෙ\.\s?මී\.?\s?/gu, "සෙන්ටිමීටර් "],
-    [/මි\.\s?මී\.?\s?/gu, "මිලිමීටර් "],
+    abbrev(String.raw`ඇ\.\s?ඩො\.\s?මි\.?`, "ඇමෙරිකානු ඩොලර් මිලියන"),
+    abbrev(String.raw`ඇ\.\s?ඩො\.?`, "ඇමෙරිකානු ඩොලර්"),
+    abbrev(String.raw`කි\.\s?මී\.?`, "කිලෝමීටර්"),
+    abbrev(String.raw`සෙ\.\s?මී\.?`, "සෙන්ටිමීටර්"),
+    abbrev(String.raw`මි\.\s?මී\.?`, "මිලිමීටර්"),
     // `රු.` only before a number — the bare word රු is not an abbreviation. `රු. (Rs)` is glossed in the
     // corpus; unhandled, `රු. 500` read *rˈu . pˈahə sˈijəjə*, a syllable and a full stop.
-    [/රු\.\s*(?=\p{Nd})/gu, "රුපියල් "],
+    [/(?<![඀-෿])රු\.\s*(?=\p{Nd})/gu, "රුපියල් "],
 ];
 
 /** Sinhala numerals are not used in running text, but the engine folds native digits anyway; every rule
@@ -156,7 +176,6 @@ export function normalizeSinhala(input: string): string {
     //    would still split letters from digits, but the text is what the next rules match on and a rule
     //    that leaves its output unspaced is one edit away from a real bug (trap 10's neighbourhood).
     for (const [rx, word] of DOTTED_ABBREV) s = s.replace(rx, word);
-    s = s.replace(/  +/gu, " ");
 
     // 3) SINHALA-LETTER INITIALS — `එෆ්.ආර්.ප්‍රනාන්දු`, `ජේ.ආර්.ජයවර්ධන`, `ටී.ආර්.එන්.සී`, `බී.එම්.ඩබ්ලිව්`.
     //    Each initial is already a pronounceable Sinhala syllable; the only defect is the dot becoming a
@@ -168,6 +187,9 @@ export function normalizeSinhala(input: string): string {
     //    markers (already spent at step 2), `සෙ.මී.`, and eight genuine initial runs. Requiring TWO dots is
     //    what excludes the missing-space sentence period, which never has a second dot before the space.
     s = s.replace(/(?<![඀-෿.])(?:[඀-෿]{1,7}\.){2,}/gu, (m) => m.replaceAll(".", " ").trimEnd() + " ");
+    //    Steps 2 and 3 both emit a trailing space so an expansion cannot glue itself to what follows; where
+    //    the source already had one, collapse the pair.
+    s = s.replace(/  +/gu, " ");
 
     // 4) THOUSANDS SEPARATOR — before anything that reads a dot or a digit run, or the comma is clause
     //    punctuation: `1,001,450` read *ˈekə , ˈekə , hˈat̪ərə sˈijəjə pˈanəhə*. `grouped` ×6,913 in the dump.
