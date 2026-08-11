@@ -185,7 +185,15 @@ consulted-not-shipped for every language but Pashto, where `pashto/lexicon.tsv` 
    measured yield and the fallbacks: `src/languages/pashto/lexicon.PROVENANCE.md`.
    ⚠ **This moves espeak-ng out of §5 for Pashto only.** It remains "consulted, not shipped" for
    every other language; `ps` is the one place bytes derive from it.
-4. **calima-egy (GPL-2.0)** — offline teacher for diacritizer-egy only; **not shipped**. Stated
+4. **tools-only, same espeak lineage as item 3** — `perso-arabic/harakat.ps.silver.tsv` (19,400
+   rows) and `perso-arabic/lexicon.ps.tsv` (19,400), the miner's outputs and the audit trail for the
+   shipped lexicon. Same **GPL-3.0 fence**; they are the intermediate form of the same derivation, so
+   they cannot sit outside it. ⚠ The 2.5 MB `silver.espeak-ps.tsv` between them is **deliberately not
+   committed** (gitignored): it is a pure intermediate, rebuilt in one command by
+   `tools/pashto/build_espeak_silver.py` from a *versioned* upstream — unlike kaikki's rolling dumps,
+   an espeak-ng release is reproducible, so vendoring buys nothing. `invert_harakat.ts` WARNS when it
+   is absent rather than silently mining a 30×-smaller lexicon.
+5. **calima-egy (GPL-2.0)** — offline teacher for diacritizer-egy only; **not shipped**. Stated
    in NOTICE; nothing distributed derives from it.
 
 ## 5. Referee and verification sources — consulted, not shipped

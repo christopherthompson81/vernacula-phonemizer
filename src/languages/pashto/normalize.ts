@@ -38,9 +38,13 @@
  * ⚠ NO `&`. All 297 instances sit inside LATIN text — `AT&T`, `P&T`, `Sight & Sound`, `N4 & N405`, and URL
  *   query strings. Reading it as `او` would put a Pashto word inside an English name.
  *
- * ⚠ NO INITIALISMS. `core/initialisms.ts` is a NO-OP without a `letterName` table and espeak ships no
- *   Pashto at all — the fleet-wide 94-language sourcing block, not a coding one (trap 16 checked: the seam
- *   exists, the DATA does not).
+ * ⚠ NO INITIALISMS — AND THE REASON PRINTED HERE BEFORE WAS FALSE. It said espeak ships no Pashto, which
+ *   came from `sources.ts` reporting `[NONE]` with `$ESPEAK_NG` unset. espeak-ng ships
+ *   `dictsource/ps_list` (82,583 entries) and it OPENS with a complete letter-name table — ا alif, ب be:,
+ *   پ pe:, … — which is exactly the data `core/initialisms.ts` needs to stop being a no-op. So this is
+ *   DEFERRED WORK, not a sourcing block: the seam exists and so does the data (trap 16, failed the first
+ *   time and re-checked). Wiring it wants its own corpus diff — `RDC`-shaped runs are ×10,087 here — and
+ *   the letter names would carry the same GPL-3.0 fence as `lexicon.tsv`.
  *
  * ⚠ NO EXPONENT WORD. `sources.ts` reports the sign occurring with no reading anywhere, and the corpus
  *   writes area as the WORDS `متر مربع` ×446 rather than `m²`, so the symbol form is a Latin-text residue
@@ -405,8 +409,10 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         s = s.replace(new RegExp(`(^|[\\s(（\\[])[-−–]([${D}])`, "gu"), "$1منفي $2");
 
         // 12) DECIMALS, after every rule that needs the number intact. ⚠ THE POINT WORD IS `اعشاريه`, AND
-        //     THIS IS THE TIER `sources.ts` REPORTED AS `[NONE]` — espeak ships no Pashto, so it had nothing
-        //     to offer, while the language's own prose carries the word ×184 and GLOSSES ITSELF with it:
+        //     THIS IS THE TIER `sources.ts` REPORTED AS `[NONE]`. ⚠ That report was wrong for the reason
+        //     given in the header — an unset $ESPEAK_NG — but the CONCLUSION survives it: espeak is
+        //     phonetic and cannot hand you an orthography, so it could not have supplied this word. The
+        //     language's own prose carries it ×184 and GLOSSES ITSELF with it:
         //
         //         ۵.۰ (صفر اعشاريه پنځه)          "zero point five", the digit form and the word form together
         //         دوه اعشاريه درې ميليونه          2.3 million

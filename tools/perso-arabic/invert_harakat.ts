@@ -198,6 +198,19 @@ function label(lang: string): void {
     // disagreements self-filter rather than being imported. The yield rate IS the accuracy measurement.
     if (lang === "ps") {
         const esp = join(HERE, "silver.espeak-ps.tsv");
+        // ⚠ SAY SO WHEN THE TRANCHE IS ABSENT. It is deliberately NOT committed — 2.5 MB of GPL-derived
+        // intermediate, one command to rebuild — so the common case is that a fresh checkout does not have
+        // it. Silently skipping would take the shipped lexicon from 10,723 rows to ~351 with a clean exit
+        // and no diff to explain it, which is the worst kind of regression: a re-mine that looks like it
+        // worked. Loud, and with the exact command.
+        if (!existsSync(esp)) {
+            console.warn(
+                `⚠ ps: ${esp} is MISSING — the espeak tranche (81,259 rows) will be SKIPPED and the mined\n` +
+                "  lexicon will collapse from ~10,723 rows to ~351. Rebuild it first:\n" +
+                "    ESPEAK_NG=<espeak-ng checkout> python3 tools/pashto/build_espeak_silver.py \\\n" +
+                "        --out tools/perso-arabic/silver.espeak-ps.tsv",
+            );
+        }
         if (existsSync(esp)) {
             const seen = new Set(rows.map((r) => r[0]));
             const extra = readFileSync(esp, "utf8").split("\n")
