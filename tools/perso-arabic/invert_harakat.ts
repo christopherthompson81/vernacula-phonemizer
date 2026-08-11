@@ -82,6 +82,11 @@ const WAW_OPTS = [BARE, DAMMA]; // bare و → oː · damma+waw وُ → uː (th
 // ps ONLY (validated for Pashto; a follow-up for the others): the و GLIDE reading — a short vowel on the preceding
 // consonant makes و a glide [w] (fatḥa → a·w, kasra → i·w), the verbal infinitive -ول = /awəl/ (کَول→kawəl). The
 // referee fold-match disambiguates verb (glide) vs noun (long vowel) per word.
+// ⚠ THE OPTION SET IS UNCHANGED BUT DAMMA NOW MEANS SOMETHING ELSE, AND THAT IS WHY ps MUST BE RE-MINED. While
+// the g2p gated its mater-lectionis rule to word-final position, a medial ⟨ـُو⟩ emitted u·w·ə, so DAMMA was a
+// second way to spell the GLIDE and the search used it that way — بندول was mined as بندُول for /bandawəl/.
+// DAMMA now means the long /uː/ that WAW_OPTS above always claimed it did, and FATHA is the only glide spelling.
+// The search re-derives both from the same options; the stale rows are what would break.
 const WAW_GLIDE_OPTS = [BARE, DAMMA, FATHA, KASRA];
 const YA_OPTS = [BARE, FATHA]; // bare ی → iː · یَ (ya+fatḥa) → eː (the adapted-word encoding of the iː/eː split)
 const MAX_COMBOS = 60000; // product of per-slot option counts; longer words are reported as capped
@@ -114,8 +119,14 @@ function slots(chars: string[], cfg: LangCfg): Slot[] {
         const glideNext = (next === YA || next === WAW) && chars[i + 2] !== undefined &&
             cfg.vowelLetters.includes(chars[i + 2]!);
         if (glideNext) out.push({ pos: i, options: SHORT_OPTS });
+        // ⚠ word-final ی — RE-KEYED when the g2p learned that ⟨ی⟩ and ⟨ي⟩ differ word-finally. It used to read
+        // "bare → iː (long) vs fatḥa → the -ay diphthong", but ⟨ی⟩ finally is the diphthong in 108/125 (86%) of
+        // the pbt reference, so BARE is now the diphthong and the long /iː/ needed somewhere else to live.
+        // KASRA is that place, and only because the mater-lectionis rule stopped being gated to word-final:
+        // ⟨ـِی⟩ is homorganic → /iː/ (ناڅاپِی→nɑt͡sɑpiː). Without the kasra option the 8 genuinely-/i/ words in
+        // the reference would have become UNREACHABLE for the miner — a silent loss of expressiveness.
         else if (cfg.silverCode === "pus" && next === YA && i + 2 === chars.length)
-            out.push({ pos: i, options: [BARE, FATHA] }); // word-final ی: bare → iː (long) vs fatḥa → the -ay diphthong (aɪ)
+            out.push({ pos: i, options: [BARE, FATHA, KASRA] }); // bare → əi · fatḥa → aɪ · kasra → the long iː
         else if (next === WAW) // و long vowel oː/uː; ps also searches the glide reading (‑ول → /awəl/)
             out.push({ pos: i, options: cfg.silverCode === "pus" ? WAW_GLIDE_OPTS : WAW_OPTS });
         else if (next === undefined || !cfg.vowelLetters.includes(next))
@@ -158,7 +169,15 @@ function label(lang: string): void {
     //    vocabulary distribution, so it can't improve wikipron-distribution GENERALIZATION (measured flat).
     //  • LEXICON (--lexicon) — ALL sources incl. Hindi→Urdu (real Urdu spellings + gold IPA). This is the COVERAGE
     //    layer (exact-match at inference); Hindi adds +12 pts of production token-coverage for Urdu (coverage_eval).
-    const sources = LEXICON
+    // ⚠ `--no-referee-silver` EXISTS TO MAKE THE ps REFEREE NUMBER HONEST, and it is a measurement flag, not a
+    // build flag — never use it to produce a shipped lexicon. `silver.tsv` and `silver.kaikki.tsv` ARE wikipron
+    // and kaikki, which are also ps's referees, so a lexicon row mined from them and then scored against them is
+    // circular. Dropping them leaves the espeak tranche, which no referee has ever seen, and the resulting score
+    // is the one to quote. See docs/investigations/ps_neural_restoration_investigation.md Run 11.
+    const NO_REF_SILVER = process.argv.includes("--no-referee-silver");
+    const sources = NO_REF_SILVER
+        ? []
+        : LEXICON
         ? ["silver.tsv", "silver.kaikki.tsv", "silver.hindiurdu.tsv"]
         : ["silver.tsv", "silver.kaikki.tsv"];
     let rows = sources
@@ -267,7 +286,10 @@ function label(lang: string): void {
         else miss++;
     }
 
-    const base = LEXICON ? `lexicon.${lang}.tsv` : `harakat.${lang}.silver.tsv`;
+    // ⚠ The measurement build gets its OWN filename so it can never be mistaken for, or overwrite, the shipped one.
+    const base = LEXICON
+        ? `lexicon.${lang}${NO_REF_SILVER ? ".noref" : ""}.tsv`
+        : `harakat.${lang}.silver.tsv`;
     const fname = shardN > 1 ? `${base}.part${shardK}` : base;
     writeFileSync(join(HERE, fname), labeled.join("\n") + (labeled.length ? "\n" : ""));
     const tot = (shardN > 1 ? ok + miss + capped : rows.length) || 1;

@@ -511,3 +511,200 @@ wikipron pbt slice (1,181 words, inferred at 88–94% precision) remains the wor
 
 Retired in this run: `ps.kaikki-kandahari.tsv` (hand-cut, 95 rows, unregenerable) and the inferred kaikki
 slices, both superseded by the tag-derived files.
+
+## Run 10 — 2026-08-10 — the pbt engine pass: three carrier rules, and one of them was a letter reading as [j]
+
+Run 7/8 left two named classes and an estimate: the و/ی glide (~95 words) and the final -ی diphthong
+(~50–100), together worth "roughly 60.0% → 70%". This run does them. Every rule below was chosen by counting
+the RAW reference (Run 8's lesson), and the two classes that counted out as coin flips were left alone.
+
+### 1. Word-final ⟨ی⟩ is the -ay diphthong; ⟨ي⟩ is /i/
+
+Pashto's orthography separates the two yehs word-finally where Persian and Urdu do not. The g2p read both as
+/i/. On the raw pbt reference:
+
+```
+word-final ی   108/125 (86%)   aɪ 53 · ai 52 · ɪ 2 · əi 1      ← the -ay suffix
+                 8      (6%)   i                                (ناڅاپی, loans)
+                 5            j                                 (after a vowel — the offglide branch)
+word-final ي    42/43  (98%)   i                                ← unchanged
+```
+
+Emitted as `əi` to match ⟨ۍ⟩/⟨ئ⟩, the same morpheme in feminine/verbal spelling. **Alone: +4 words.**
+
+⚠ **That +4 is the interesting part, not the rule.** The rule fires correctly on ~108 words and symbol
+accuracy rose 0.6pp across every referee — but only four words FLIPPED, because the rest carry a second
+blocker in the same word. Run 7's "50–100 words" was a count of words containing the class, not of words the
+class was blocking. A per-class estimate that doesn't check co-occurrence overstates every class it names.
+
+### 2. A carrier immediately before ⟨ا⟩ is the glide — and ⟨ا⟩ was emitting [j]
+
+```
+⟨وا⟩ 31/31 = 100% glide      ⟨يا⟩ 25/25 = 100% glide
+⟨وی⟩  5/10 =  50%   ⟨يو⟩ 4/9 = 44%   ⟨وي⟩ 5/7 — COIN FLIPS, left lexical
+```
+
+The rule existed but was restricted to word-final ـيا, and the restriction was hiding a bug. After a
+CONSONANT the و took the long-vowel branch → [o], which made `endsInVowel` true at the following ا, so the
+**ا fell into the glide branch and was emitted as [j]** — a sound ⟨ا⟩ has in no position. خواږه read
+*xojʐə for xwɑʐə; باغوان *bɑɣojən for bɑɣwɑn. **+19 words**, and it also fixed two number goldens (13
+دیارلس *d̪ijərləs → d̪jɑrləs, 10⁹ میلیارد *milijrəd̪ → miljɑrəd̪) that had encoded the bug as expected output.
+
+### 3. Homorganic carrier = mater lectionis, in ANY position
+
+⟨ـُو⟩ = /uː/ and ⟨ـِی⟩ = /iː/ is ordinary Perso-Arabic, and the g2p had the test — gated on `i === n - 1`, so
+it only ever fired word-finally. A MEDIAL ⟨ـُو⟩ fell through to the glide arm: کُور → *kuwər for /kur/.
+
+⚠ **This was on the shipped path, not hypothetical: 416 of the lexicon's 10,723 rows carried ⟨ُو⟩.** And
+ungating it REGRESSED the referee 810 → 799 before it helped, twice over:
+
+- the glide's epenthetic ə fired after a length mark (مُوک → *muːək) — the epenthesis models a CODA
+  CONSONANT needing a nucleus, and a length mark is not one. Now gated on actually having emitted a glide.
+- **the lexicon had been mined against the bug.** While ⟨ـُو⟩ medially meant u·w·ə, DAMMA was a second way to
+  spell the GLIDE, and the search used it that way — بندول was stored as بندُول for /bandawəl/. Fixing the
+  g2p turned 11 verbs in -ول wrong. The lexicon is calibrated to the g2p and a carrier-semantics change
+  invalidates it.
+
+**So the real unlock is not the rule, it is what the rule makes SPELLABLE.** Before it, a medial /u/ had no
+vocalization at all — which is precisely Run 8's largest residual class (⟨و⟩ = /u/ where we emit /o/, ~141
+words, 36%). Re-mined (14 shards, minutes not hours): yield 23.6% → **26.1%**, lexicon 10,698 → **13,828 rows**.
+
+⚠ **TWO COUNTING DEFECTS SURFACED HERE, BOTH FIXED IN `export_lexicons.sh` RATHER THAN DOCUMENTED.**
+
+- **The row count was a different metric from the documented one.** `lexicon.PROVENANCE.md` had said "10,698
+  rows" since the espeak tranche landed; the file at that moment held 10,723 rows and 10,698 UNIQUE KEYS, so
+  the documented figure was the unique count, unlabelled — and the natural way to re-measure it (`wc -l` minus
+  the header) returns the row count instead. The exporter also printed `wc -l - 4` for every language, which
+  over-reported ps by exactly the four extra licence lines its header carries.
+- **Sharding was duplicating keys.** The miner's `seenSkel` dedup is PER-PROCESS, and `--shard=k/N` runs N of
+  them, so a skeleton occurring twice in the input could land in two shards and survive concatenation twice.
+  24 duplicate keys, and **6 of them carried two DIFFERENT vocalizations** — so which reading shipped depended
+  on the loader's last-wins behaviour over an arbitrary sort order. (`sort -u` would not have caught those six.)
+
+The export now drops identity rows, sorts, keeps the first row per key, and counts the licence sentence from
+the body it is about to write. Result: **13,828 rows = 13,828 unique keys = the runtime map size**, and a
+re-run is byte-identical. The three numbers agreeing is the check; before this they were 13,861 / 13,828 /
+13,828 and nothing compared them.
+The `--no-referee-silver` measurement lexicon of Run 11 is NOT committed — it is a second 600 KB
+GPL-derived near-duplicate that regenerates from one documented flag, so committing it would add licence
+surface for nothing. The command is in the miner's comment and above.
+
+```
+                        before    after
+wikipron pus (primary)   55.7%    63.1%
+kaikki  pus              63.1%    72.3%
+wikipron pbt (ours)      61.4%    69.6%     ← Run 7's target was "roughly 70%"
+kaikki  pbt (tagged)     67.0%    77.3%
+kaikki  pbu (Northern)    5.9%     5.9%     ← UNCHANGED, which is the control
+```
+
+⚠ **pbu holding at 5.9% is the check that matters.** A Southern engine that got genuinely better at Southern
+must NOT get better at Northern; if both had risen, the gain would have been the fold loosening or some
+generic drift rather than Pashto. It didn't move a single word.
+
+### Two definitive negatives, so nobody re-derives them
+
+- **Medial ⟨و⟩ is /u/ 103 vs /o/ 100** — a coin flip. There is no rule; it is lexical, exactly as Run 8 said.
+- **The word-initial cluster is lexical too.** Our default (insert ə) is right 70/30, and the 30% is NOT
+  sonority-conditioned — no cell is lopsided (obstruent+liquid 35%, obstruent+obstruent 35%, the best being
+  liquid+nasal at 43% on n=14). This was the second-biggest residual class (∅→ə 62 + ə→∅ 39 = 101 words) and
+  it is not addressable by a rule. Left to the lexicon, which now carries some of it (خپلواک → xpəlwɑk).
+
+## Run 11 — 2026-08-10 — the ps referee number is substantially CIRCULAR, and nothing said so
+
+Run 10's 69.6% wanted a sanity check before being quoted, because the lexicon is mined from `silver.tsv` and
+`silver.kaikki.tsv` — **which ARE wikipron and kaikki, which are ps's referees.** The repo already has a
+convention for this (en-GB, km, af and ilo are all evaluated on a `phonemizeWordRules` entry point that
+bypasses a referee-derived lexicon, each with a comment saying why). ps evaluates on the lexicon-aware
+`phonemizeWord`, and **no file in the repo mentioned the problem** — not the engine, not the referee config,
+not `lexicon.PROVENANCE.md`.
+
+Measured three ways on `ps.wikipron-pbt.tsv` (1,281 words), and added `--no-referee-silver` to the miner so
+the middle row is reproducible rather than an argument:
+
+```
+shipped lexicon (espeak + wikipron/kaikki)     892/1281 = 69.6%
+espeak-only lexicon (--no-referee-silver)      598/1281 = 46.7%     ← the honest number
+rules only, no lexicon at all                  601/1281 = 46.9%
+  · referee words WITH a shipped-lexicon entry     453/503 = 90.1%
+  · referee words with NO entry                    438/778 = 56.3%
+```
+
+**The entire 22.7pp gap is circular.** 503 of the 1,281 referee words have a lexicon entry and score 90.1%;
+drop the referee-derived rows and only **51** of them still have one. The espeak tranche is 97.4% of the file
+and moves the referee by −3 words — not because it is bad, but because **it barely reaches the referee's
+vocabulary**: 154 referee words are in espeak's pool at all, and for ~103 of those our g2p already agrees, so
+the export emits no row and only 51 (4%) get one. Its value is production token coverage, which this referee
+cannot measure at all. Both statements need making together; either alone is misleading.
+
+⚠ **The like-for-like engine delta is therefore the RULES-ONLY one, and it is the number Run 10 should be
+quoted by:**
+
+```
+                        rules-only before    rules-only after
+wikipron pbt                 42.2%                46.9%      (+4.7pp)
+kaikki  pbt (tagged)         47.4%                51.5%      (+4.1pp)
+```
+
+The shipped 61.4% → 69.6% is a real improvement in what the engine EMITS — the lexicon is shipped and does
+its job on real text — but both endpoints are inflated by the same circularity, so the honest claim for the
+three carrier rules is +4.7pp, not +8.2pp.
+
+⚠ **NOT FIXED IN THIS RUN, AND DELIBERATELY.** The right repair is either a `phonemizeWordRules` export for
+ps (matching the four languages that already do this) or a held-out split of the referee that the miner never
+sees. Both change what every historical ps number in this repo means, which is a decision, not a cleanup —
+and the circularity is pre-existing, so it is not blocking this run's engine work. What this run owes is that
+it be WRITTEN DOWN, in the referee config and the provenance file as well as here, which it now is.
+
+## Run 12 — 2026-08-10 — is the espeak lexicon dialect-mixed? Consonants: already perfectly filtered
+
+Prompted by a direct question during review: espeak's `ps_list` is internally mixed on ښ (ʃ 54.7% / ʂ 29.6% /
+x 21.7% across 82,583 entries), so should the lexicon be split so only pbt words feed the pbt engine?
+`lexicon.PROVENANCE.md` has always ASSERTED that espeak's dialect disagreements "self-filter" because the
+inverter requires our own g2p to reproduce the reference. That was never measured. It is now.
+
+### Consonants — the filter is not partial, it is total
+
+Restricting to entries where the reflex is UNAMBIGUOUS (a word with ښ and no خ, so any x must be the ښ; a word
+with ږ and no ګ/گ/ج/ځ, so any ɡ must be the ږ):
+
+```
+UNAMBIGUOUS Northern espeak entries   501  →    0 reached our lexicon   (0.0%)
+UNAMBIGUOUS Southern espeak entries  1328  →  290 reached our lexicon  (21.8%)
+```
+
+**Zero.** Not "suppressed" — zero. The mechanism is that `PS_FULL_FOLD` maps our ʂ→ʃ and ʐ→ʒ but leaves the
+Northern x and ɡ alone, so a Northern entry can never round-trip through a g2p that only emits ʂ/ʐ. The
+lexicon is already pbt-only on the isogloss, **by construction rather than by curation**, and there is no
+split to perform: the rows a split would remove do not exist.
+
+(A looser probe that searched for x/ɡ anywhere in the word suggested 6.1% leakage. That was counting genuine
+خ and ګ. The same shape of error as Runs 5 and 7 — a diagnostic that also matches something else.)
+
+### Vowels — no label exists, and the separation survives anyway
+
+The isogloss only speaks for the ~10% of words containing ښ/ږ. For the rest espeak offers NO dialect signal,
+so nothing can be split on: `ps_list` carries no tags, and the only tagged Pashto data in existence is
+kaikki's 305 records against espeak's 82k. The question is therefore not "should we split" but "how much
+Northern vowel content got in". Restricting both tagged referees to words WITHOUT ښ/ږ removes the consonant
+evidence and leaves vowels to decide:
+
+```
+                          with ښ/ږ        without ښ/ږ     (rules-only)   (where the lexicon speaks)
+pbt (Southern, ours)   61/78 = 78.2%    14/19 = 73.7%      52.6%            5/6  = 83.3%
+pbu (Northern)          0/76 =  0.0%     6/26 = 23.1%       7.7%            4/11 = 36.4%
+```
+
+**A 3.2× separation survives with the isogloss removed**, so the lexicon is substantially Southern in its
+vowels too, not merely in its consonants. ⚠ **But n = 19 and 26, which is too small to call it pure.** The
+lexicon does lift pbu on that subset (7.7% → 23.1%), and that is equally consistent with harmless agreement —
+Run 9 measured that vowels differ in only 25% of cross-variety pairs, so most words simply sound alike — as
+with genuine Northern content. Both readings fit; the data cannot separate them at this n.
+
+### Verdict
+
+**No split, and the reason is not "it wouldn't help" but "it is already done where it can be done".** For
+consonants the inversion round-trip is a perfect filter. For vowels there is no label to split on and the
+measured contamination, if any, is small enough that a Southern engine still beats Northern 3.2:1 on exactly
+the subset where only vowels can decide. ⚠ What would actually change this is a dialect-tagged Pashto
+dictionary at espeak's scale, which does not exist — the same wall Run 4 hit.
