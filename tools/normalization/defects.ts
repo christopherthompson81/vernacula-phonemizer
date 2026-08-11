@@ -244,6 +244,36 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         ampersand: "n/a — the ampersand IS read (跟, the corpus's own coordinator ×136 against 和 ×63; "
             + "normalize.ts declares it through the shared tier)",
     },
+    kmr: {
+        // ⚠ NOT ONE OF THE 15 MINED `=` `+` `×` IS ARITHMETIC, and they are not even mostly prose. Three
+        // classes, none of which wants an operator reading:
+        //   · a GLOSS or an etymology — `çiya = lêr`, `Deutsches Wörterbuch = Ferhenga Kurdî-Alman`,
+        //     `Mesîn = me/mekan + sî/av + in/tê`, `"GNU/Linux" (GNU + Linux)`, `C++`
+        //   · EasyTimeline / wiki MARKUP that survived into the artifact — `ImageSize = width:800`,
+        //     `PlotArea = top:10`, `ScaleMajor = unit:year`, and URL-encoded catalogue parameters (`$003d`)
+        //   · a FORMULA and scientific notation — `E=mc²`, `7.2×109 m3`, `UTC+7`
+        // No Kurmanji reading of any of the three signs is attested in either haystack (the corpus and
+        // ku.wikipedia — espeak does not ship this language), so all three stay unread.
+        equals: "measured: all mined `=` are a gloss (`çiya = lêr`), EasyTimeline markup (`ImageSize = "
+            + "width:800`) or a formula (`E=mc²`); none is a relation between two numbers, and no Kurmanji "
+            + "reading is attested",
+        plus: "measured: every mined `+` joins WORDS in an etymology (`me/mekan + sî/av`), a software name "
+            + "(`GNU + Linux`, `C++`) or a UTC offset; digit-flanked arithmetic `+` is ×0",
+        times: "measured: the only mined `×` is scientific notation (`7.2×109 m3`), which this layer reads "
+            + "for no language; no Kurmanji word for the operator or the dimension cross is attested",
+        // ⚠ THREE SIGNS THAT DO NOT OCCUR AT ALL, and one that arrives BROKEN. `±` and `÷` are ×0 in the
+        // artifact and `>` is ×0; `<` is ×0 as a character but the corpus shows it was there upstream and
+        // was mangled into a pseudo-entity — `heya &kêm; 16&nbsp;diguhere` is `&lt;` with its name
+        // translated, so the one instance this language has of a less-than is unreachable by any rule and
+        // is a corpus-repair question, not a reading one. None of the four has an attested Kurmanji
+        // reading either: `kêm` ("less") takes a whole clause (`273.15 pileyan ji sifira Selsiyusî kêm`),
+        // which is the Fula `hakkunde` shape — a real word that does not fit the slot.
+        "plus-minus": "measured: ± is ×0 in the artifact and no Kurmanji reading is attested",
+        "less-than": "measured: `<` is ×0 as a character — its one upstream instance arrives as the mangled "
+            + "pseudo-entity `&kêm;` — and `kêm` is a clause-taking comparative, not the relation",
+        "greater-than": "measured: `>` is ×0 and no comparative phrase is attested digit-flanked",
+        divide: "measured: `÷` is ×0; the corpus's `/` instances are rates, dates and URLs",
+    },
     si: {
         // ⚠ EVERY `=`, `+` AND `×` IN THIS CORPUS IS SOMETHING OTHER THAN ARITHMETIC, which is the whole
         // reason all three are refused rather than read. Measured over the 448 mined si.jsonc segments —
@@ -684,6 +714,29 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // ⚠ Listed BY INSTANCE rather than silencing the class, so the moment a ¥ appears beside a Cebuano
         // yen-word — or any other currency regresses — the scan reports it again.
         currency: ["¥2,500", "¥130,000", "¥7,000"],
+    },
+    kmr: {
+        // ⚠ kmr DOES read the minus — inside its DEGREE rule, which is where the sign is unambiguous.
+        // Measured over the mined segments, a dash before a digit not itself preceded by a digit occurs ~22
+        // times and **all ten genuine negatives are temperatures** (`-24,2 °C`, `-52,6℃`, `-24 û -30
+        // pileyan`). These are the residue, and not one of them is a number's sign: a book TITLE
+        // (`Komkujiya Ermenîyan -1915`), a COORDINATE span whose first operand the degree rule has already
+        // spent (`42°-20´`), and EasyTimeline chart MARKUP — `start:-1500`/`start:-1250` are axis origins
+        // and `shift:(-10,5)`/`shift:(-5,5)` are label offsets in pixels, i.e. code rather than prose.
+        minus: ["Ermenîyan -1915", "42°-20´", "start:-1500", "start:-1250", "shift:(-10,5)", "shift:(-5,5)"],
+        // THE TWO CURRENCIES WITH NO KURMANJI NAME, plus one sign the tier cannot reach. `¥` and `£` occur
+        // in Chinese- and UK-education figures; neither has a Kurmanji word in the corpus or on
+        // ku.wikipedia, and naming one would be the Fula `tere` failure. The dollar, by contrast, IS
+        // declared and read (`dolar`, corpus-attested as `50 bilyon dolaran`). `1,5 mîlyar $` is the third:
+        // a sign POSTPOSED after a magnitude word, where no digit is adjacent for the tier to match on —
+        // and the same sentence's `Sequoia $ 50 mîlyon dolar` already says `dolar` in full.
+        currency: ["20,023 ¥", "3.204 ¥", "230.000 £", "3.121 £", "mîlyar $", "Sequoia $ 50"],
+        // TWO SUPERSCRIPTS WITH NOTHING TO ATTACH TO. `E=mc²` is Einstein's, where the base is a VARIABLE
+        // and `bareExponent` is undeclared for this language (no Kurmanji power phrase is attested).
+        // `qebareya kupê (m³)` is the corpus writing the CUBE WORD and the symbol side by side — the
+        // reading already says *kupê*, so the symbol is a gloss and dropping it is trap 12's permissible
+        // drop; the differential test cannot see that, because the correct reading is byte-identical.
+        exponent: ["E=mc²", "kupê (m³)"],
     },
     si: {
         // RANGES AND DATE/DESIGNATION DASHES, none of them a negative — and si/normalize.ts reads the

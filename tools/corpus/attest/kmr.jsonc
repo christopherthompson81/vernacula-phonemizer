@@ -1,0 +1,623 @@
+// WIKIPEDIA WORD ATTESTATION — kmr. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "kmr",
+    "wiki": "ku.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "di saetê de",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…ye. Barove, di çîna 5emîn kategoriya xwe de cih digre. Lez, di saetê de 185 mîlometre hate pîvankirin. == Çavkanî ==…",
+                "…na Aştiyê erê kir. 1997 – Stêrkadûmdar a bi navê Hale-Bopp, di saetê de 160 kîlometir di ber dinyayê re derbas bû. Derbasbûna Stêrk…",
+                "…ayê ya herî bilez a ku li Îngilîstanê bi leza 122 kîlometre di saetê de (196 km/s) hate tomarkirin, rekoreke demkî pêk hat. Bahozê…",
+                "…ext zirar daye avahiyan û bayê bi leza zêdeyî 120 kîlometre di saetê de (190 km/h) ku hatiye tomarkirin, heta niha buye sedema 17 m…",
+                "…s û trênê hatin betalkirin. Leza bayê bi leza 172 kîlometre di saetê de (107 mph) li deryayê li Fastnet Lighthouse hate tomar kirin…",
+                "…ktmotor bûn, kapasiteya wan 1,06 lître û hêza wan 4 PS bûn. Di saetê de 16 km/katjimêr diajotin. Dîsa Heinrich Büssing, sala 1903 l…"
+            ]
+        },
+        {
+            "word": "kîlometre di saetê de",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…harikîna bayê ya herî bilez a ku li Îngilîstanê bi leza 122 kîlometre di saetê de (196 km/s) hate tomarkirin, rekoreke demkî pêk hat. Bahozê…",
+                "…Bayên bi zext zirar daye avahiyan û bayê bi leza zêdeyî 120 kîlometre di saetê de (190 km/h) ku hatiye tomarkirin, heta niha buye sedema 17 m…",
+                "…erên otobus û trênê hatin betalkirin. Leza bayê bi leza 172 kîlometre di saetê de (107 mph) li deryayê li Fastnet Lighthouse hate tomar kirin…",
+                "…i rex motorên bi hêz ên ku kapasîteyên wan digihîje heya 50 kîlometre di saetê de zêde dibe, zêde dibe, hejmara bûyerên qezayên trafîkê jî zê…"
+            ]
+        },
+        {
+            "word": "saetê",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 38,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Beşa saetê an jî beşa demê, bi kurtasî UTC (bi inglîzî: Coordinated Un…",
+                "…ojava de derbaz bike jî rojakî winda dike. == Dîrok == Beşa saetê ya herî pêşîn li Brîtanyayê, di 1ê kanûna pêşîn a 1847an de…",
+                "…î Sandford Fleming endazeyarê rêhesinî li Kanada 1879an bi \"saetê rêhesin\" pêşniyarî kir. Di çiriya pêşîn a 1884an de Washing…",
+                "…idyanên Navneteweyî) de hat pejirandin ku dinya bi 24 beşên saetê, her yek di 15 meridyenan hatî pê, parve bibe. Navbera her…",
+                "…ch a li Londonê meridyena sifir be. Li dinya niha gorî beşa saetê (UTC) hatiye parvekirin. Ji bo wê Greenwich Mean Time tê hi…",
+                "…wichê li Londonê tê mîhengkirin. Her dewletek beşeke xwe ya saetê heye. Welatê li rojhelat û rojava dirêj dibin li yeka pitir…"
+            ]
+        },
+        {
+            "word": "lezê",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 20,
+            "articles": 16,
+            "substringOnly": 0,
+            "examples": [
+                "…Iskêyta Lezê Iskêyta Lezê werzîşek pêşbaziyek e ku tê de beşdar bi karan…",
+                "…Iskêyta Lezê Iskêyta Lezê werzîşek pêşbaziyek e ku tê de beşdar bi karanîna pêlavên q…",
+                "…a leza maratonê bikin. == Dîrok == Kokên dîrokî yên Iskêyta lezê ji hezar salan zêdetir vedigerin, li welatên Skandînavya, E…",
+                "…ra tiştekî bi giranbûnê kîlogramekê di sanîyekê da bigihîne lezê 1 m s {\\displaystyle 1{\\frac {m}{s}}} . Ew bi navî Isaac Ne…",
+                "…2 4 H e 2 + {\\displaystyle {}_{2}^{4}\\mathrm {He} ^{2+}} ). Lezê derketina atomên helyûman ji radyonuklîdê nêzîkî 15.000 km/…",
+                "…urt de amade dibin re tê gotin. Dema mirov behsa xwarina bi lezê dike, pirranî hambûrger, kartolên sorkirî, sosîsên biraştî…"
+            ]
+        },
+        {
+            "word": "kup",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…rin ku bi pileya ekvatorê re têkildar e. Tabletên çargoşe û kup ku ji 1ê heta 60an têne hesibandin, li Senkerayê hatine dît…"
+            ]
+        },
+        {
+            "word": "kûp",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 28,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…Milîmetre kûp ya mm³ dibêjin, çiqas di tiştekî da ye. Hindirê milîmetreye…",
+                "…î tomarên destpêk û nîvê sedsala bîstan wekî 20,9 kîlomêtre kûp li Kebanê, 36,6 kîlomêtre kûp li Hît û 21,5 kîlomêtre kûp l…",
+                "…la bîstan wekî 20,9 kîlomêtre kûp li Kebanê, 36,6 kîlomêtre kûp li Hît û 21,5 kîlomêtre kûp li Hindiyayê hatiye diyarkirin.…",
+                "…e kûp li Kebanê, 36,6 kîlomêtre kûp li Hît û 21,5 kîlomêtre kûp li Hindiyayê hatiye diyarkirin. Lêbelê ev navînî guhezbariy…",
+                "…lane hatine pîvandin ku di sala 1961an de ji 15,3 kîlomêtre kûp û di sala 1963an jî 42,7 kîlomêtre kûp hatiye tomarkirin. R…",
+                "…de ji 15,3 kîlomêtre kûp û di sala 1963an jî 42,7 kîlomêtre kûp hatiye tomarkirin. Rejîma deşarja Firatê ji dema avakirina…"
+            ]
+        },
+        {
+            "word": "metre kup",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "qebareya kupê",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…Di heman demê de sumerî yekem kes bûn ku rûbera sêgoşeyê û qebareya kupê (m³) dîtine. === Bijîşkî === Li Sumerê sîstema dermankirin…"
+            ]
+        },
+        {
+            "word": "metre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 48,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Metre (wekî metro, metir jî tê nivîsandin) di Sîstema Navneteweyî…",
+                "…n) di Sîstema Navneteweyî ya Yekînan û di Sîstema Metrîk da metre yek ji yekînên bingehîn e. Metre yekîna dirêjahiyê ye. Peyv…",
+                "…nan û di Sîstema Metrîk da metre yek ji yekînên bingehîn e. Metre yekîna dirêjahiyê ye. Peyva metre ji peyva yewnanî μέτρον,…",
+                "…ek ji yekînên bingehîn e. Metre yekîna dirêjahiyê ye. Peyva metre ji peyva yewnanî μέτρον, métron dihêt. Kurtenavê wê m ye. B…",
+                "…μέτρον, métron dihêt. Kurtenavê wê m ye. Bi awayekê dîrokî, metre ji aliyê Akademiya Zanistî ya Fransayê wekî 1/10,000,000 a…",
+                "…Metre kûb, hundirî metre ya m³ dibêjin, çiqas di tiştekî de ye. =…"
+            ]
+        },
+        {
+            "word": "mêtre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 29,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…vçeya Tetwanê 1.235 km² û bilindahiya ji asta deryayê 1.700 mêtre ye. Navçe ji aliyê nifûs û ji aliyê rûberê ve ji bajarê Bid…",
+                "…ayî û zozan in. Çiyayê Nemrûdê bi bilindahiya 2 hezar û 878 mêtre yê xala erdnîgarî ya herî bilindê navçeyê ye. Qada ku navçe…",
+                "…bilindê navçeyê ye. Qada ku navçe lê hatiye avakirin 1.690 mêtre bi ser asta deryayê ve ye. == Wêne == == Çavkanî == == Girê…",
+                "…bera navçeyê 650 km² ye û bilindahiya ji asta deryayê 1.320 mêtre ye. Norşîn di sala 1988an de bûye navçe û 25 gund û 13 mezr…",
+                "…418 km² ye û bilindahî li bakur, aliyê Çiyayê Bîngolê 3.000 mêtre û li hêla Çiyayê Şerevdînê jî 2.300 mêtre ye. == Wateya nav…",
+                "…ayê Bîngolê 3.000 mêtre û li hêla Çiyayê Şerevdînê jî 2.300 mêtre ye. == Wateya navê wê == Li ser bingeha navê Gimgimê zelalî…"
+            ]
+        },
+        {
+            "word": "mîlîmetre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 30,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…ema metreyî de yekeya pîvana dirêjiyê ye. Sentîmetreyek deh mîlîmetre ye. Sed santîmetre dike metreyek. Kurtenavê wê cm ye. Santî…",
+                "…iya wê digihêje heta 16 santîmetreyan û qalindbûna wê jî sê mîlîmetre ye. Mêweyên Kîrmiço yan gewr yanjî kesk dibin. == Cihên kîr…",
+                "…ne û du heb in. Ev kanalin pirr hûr û nazîk, nava wan çend mîlîmetre nin. Dawî fireh dibe mîna kovikin (mastêrik) gincirî, yên k…",
+                "…çol e ku xwedî avhewaya hişk e. Rêjeya baranê ya salane 148 mîlîmetre ye. Wekî din, avhewaya wê li gorî pîvanên îranî sar e. == N…",
+                "…rî nizm -25 °C e. Rêjeya barîna salane ya navîn li dora 337 mîlîmetre e û şilatiya hewayî ya salane ji %47 e. == Wênedank == == Ç…",
+                "…yên taybet pêk tê. Dirêjiya girê berika guhikeyê bi qasî 15 mîlîmetre, firehiya wê bi qasî 3 mîlîmetre û stûriya wê jî bi qasî 1…"
+            ]
+        },
+        {
+            "word": "santîmetre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 22,
+            "articles": 18,
+            "substringOnly": 0,
+            "examples": [
+                "…Santîmetre jî tê nivîsandin) di sîstema metreyî de yekeya pîvana dirêj…",
+                "…eya pîvana dirêjiyê ye. Sentîmetreyek deh mîlîmetre ye. Sed santîmetre dike metreyek. Kurtenavê wê cm ye. Santîmetreyek ev e: 1 10…",
+                "…}{100}}} desîmetre ye. 1 10 {\\displaystyle {\\frac {1}{10}}} santîmetre ye. == Çavkanî == Zana Farqînî (2004). Ferhenga kurdî-tirkî…",
+                "…iriye. == Şayes == Bejna Pepûkê ji nikulê heya poçikê 32-34 santîmetre dirêj dibe. Poçika Pepûkê di navbera 13-15 santîmetre dirêj…",
+                "…32-34 santîmetre dirêj dibe. Poçika Pepûkê di navbera 13-15 santîmetre dirêj dibe û dirêjahiya baskên Pepûkê di navbera 55-60 sant…",
+                "…6 metre bilinde. Dirêjahiya wan leşkeran di navbera 183-195 santîmetre ye. Îfadeya rûyê her yek ji van leşkeran, ji hev cuda ye. P…"
+            ]
+        },
+        {
+            "word": "kîlogram",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 23,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Kîlogram an kîlo (ji yewnanî: χίλιοι, khilioi, \"hezar\") yekeya pîvan…",
+                "…1,000 byte Kilojoulek =1,000 joule Di gelek zimananda ji bo kîlogram bi kurtasî peyva kîlo tê bikaranîn. == Mijarên têkildar ==…",
+                "…bi kurtasî peyva kîlo tê bikaranîn. == Mijarên têkildar == Kîlogram…",
+                "…{1000000}}} ton e. 1 1000 {\\displaystyle {\\frac {1}{1000}}} kîlogram e. == Girêdanên derve ==…",
+                "…e bi sîstema navneteweyî re tê bikaranîn. Tonek ev e: 1.000 kîlogram e. 1.000.000 gram e.…",
+                "…erabtirîn têkçûnan bû. 1872 – Parçeya zêr a herî mezin (215 kîlogram) li Wêlsa Başûr a Nû ya Awistralya hate dîtin. 1912 – Dewle…"
+            ]
+        },
+        {
+            "word": "berî zayînê",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 79,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Berî zayînê, beriya zayînê (bi kurtî BZ), beriya mîladê yan jî berî Îsa…",
+                "…tê qebûlkirin. Ji lewma bûyerên dîrokî gorî vê tarîxê mîna berî zayînê (BZ) an piştî zayînê (PZ) tên bicihkirin.…",
+                "…2emîn sedsala b.z. ango sedsala 2an berî zayînê di 1ê kanûna paşîn 200 b.z. dest pê dike û 31ê kanûna pêşîn…",
+                "…6emîn sedsala b.z. ango sedsala 6an berî zayînê di 1ê kanûna paşîn 600 b.z. dest pê dike û 31ê kanûna pêşîn…",
+                "…3emîn sedsala b.z. ango sedsala 3an berî zayînê di 1ê kanûna paşîn 300 b.z. dest pê dike û 31ê kanûna pêşîn…",
+                "…e lîsteya serekdewlet û hevserên Keyaniya ptolemeyî (305-30 berî zayînê li Misirê). == Fîrewnên ptolemeyî û hevserên wan == Ptolema…"
+            ]
+        },
+        {
+            "word": "heta",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 53,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Heta (herfa mezîn Ͱ, herfa biçûk ͱ) tîpa heftem a alfabeya yewna…",
+                "…ya Amedê ye. == Çîroka navê Bağlar a Amedê == Bajarê Amedê heta destpêka sedsala 20an jî tenê di nav sûran de bû. Heta wê d…",
+                "…medê heta destpêka sedsala 20an jî tenê di nav sûran de bû. Heta wê demê jî ji dervê sûrên Amedê ji rez û bîstanan û zeviyên…",
+                "…kî: Okçu İzzedinli) navê êla Kurdên Kilîsê ye û bi eslê xwe heta îro: Kurdên Êzdî, ya ku heta dest pêka sedsala 20'mîn weyne…",
+                "…Kurdên Kilîsê ye û bi eslê xwe heta îro: Kurdên Êzdî, ya ku heta dest pêka sedsala 20'mîn weyneke mezin li herêma Çiyayê Kur…",
+                "…Srî Lanka, heta sala 1972an wekî Seylon hatiye nasîn, girav û komarek e ya…"
+            ]
+        },
+        {
+            "word": "hejmarên neyînî",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "hejmara neyînî",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "neyînî 1",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "negatîf",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 35,
+            "articles": 16,
+            "substringOnly": 0,
+            "examples": [
+                "…le \\mathbb {Z} ^{+}=\\{\\,+1,+2,+3,\\ldots \\,\\}} == Tamjimarên negatîf (Nerênî) == Hejmarên ku ji sifirê biçûktirin negatîfin. Ali…",
+                "…erênî) == Hejmarên ku ji sifirê biçûktirin negatîfin. Aliyê negatîf di jimarxêzê de, aliyê çepe. Mezintirîn tamjimara negatîf -…",
+                "…ê negatîf di jimarxêzê de, aliyê çepe. Mezintirîn tamjimara negatîf -1 e. Z − = { … , − 3 , − 2 , − 1 } {\\displaystyle \\mathbb…",
+                "…asalde du plaqeyên ku bi navê elektroda pozîtîf u elektroda negatîf tê binavkirin heye u şileavekî u nivşileavekî ku bi navê el…",
+                "…atîfde ji, reaksiynekî paşpê çêdibe u elektron ji elektroda negatîf ber bi vêdore têne tendandin. ji bo reaksîyonekî bitewş ele…",
+                "…lektronane ya din jî herika kevneşopîyêye. Elektron bi bare negatîf barkirîne u ji cîheki voltaja negatîf berbi pozîtîfê diheri…"
+            ]
+        },
+        {
+            "word": "nuqte",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…endazezanî û topolojî û liqên dîtir ên Bîrkariyê da, xal an nuqte tişteka destnîşankirî ye di nav valagehekî da ku ne xwedî q…"
+            ]
+        },
+        {
+            "word": "dehik",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "dehî",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 5,
+            "substringOnly": 0,
+            "examples": [
+                "…Dehî (bi tirkî:Yığınlı) mezrayeke ser bi gundê Waltoê ku girêday…",
+                "…bajarê Colemêrgê ye. == Mezrayên gund == Davûş Mibûk Sirte Dehî…",
+                "…yîn li baxçe dixebitî, Habîl jî bi goşt dixebite; ew her du dehî yên xwe pêşkêşî Xwedê dikin. Xwedê pêşkêşa Habîl ji ya Qayî…",
+                "…ku zimaneke ji serî afirandin jê çêtir e. Ji emrên xwe yên dehî ve xebitiye ku zimaneke wiha çêbike. Dema fêrbûna xwe ya în…",
+                "…restgeha Amenhotep IV (hwt-ben-ben), ji Nefertîtî re hatiye dehî kirin. Nefertîtî bi keça xwe Merîtaten re hatiye teswîrkiri…",
+                "…estgehên mezin ên vekirî yên ku ji bo baweriya Atenê hatine dehî kirin vedihewîne. Nefertîtî û malbata wê ji xeynî Qesra Qra…"
+            ]
+        },
+        {
+            "word": "xala dehiyî",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "hejmarên dehiyî",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "kesr",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…i Esrar'il Ulumi'l Kemaliyye Mefatih'ul Gayb (Kilîta Xeybê) Kesr-u Esnam'il Cahiliyye (Sikeştina pûtên cehaletiyê) Risaletun…",
+                "…ûştin. Ala her miletî jê re beha ye. Di cejn û şahînetan de kesr, xanî û qûçayan pê dixemilînin, di ber wêre diborn, slavan…"
+            ]
+        },
+        {
+            "word": "vîrgul",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…xwe nivisandin û edîtoriya çand û hûnerê kir. Weşanên mîna, Vîrgul, Varlik, Edebiyat Eleştri, Cumhuriyet Pazar û Mesele jî di…"
+            ]
+        },
+        {
+            "word": "virgul",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "ji sedî",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 93,
+            "articles": 17,
+            "substringOnly": 0,
+            "examples": [
+                "…mên ji bo leşên mirova tê de hebe di nav de weka vîtamîn A (ji sedî 19 DV), û riboflavîn (ji sedî 42 DV), asîdê pantothenîk (ji…",
+                "…ebe di nav de weka vîtamîn A (ji sedî 19 DV), û riboflavîn (ji sedî 42 DV), asîdê pantothenîk (ji sedî 28 DV), vîtamîna B (ji s…",
+                "…dî 19 DV), û riboflavîn (ji sedî 42 DV), asîdê pantothenîk (ji sedî 28 DV), vîtamîna B (ji sedî 46 DV), kolîn (ji sedî 60 DV),…",
+                "…sedî 42 DV), asîdê pantothenîk (ji sedî 28 DV), vîtamîna B (ji sedî 46 DV), kolîn (ji sedî 60 DV), fosfor (ji sedî 25 DV), zinc…",
+                "…othenîk (ji sedî 28 DV), vîtamîna B (ji sedî 46 DV), kolîn (ji sedî 60 DV), fosfor (ji sedî 25 DV), zinc (ji sedî 11 DV) û vîta…",
+                "…vîtamîna B (ji sedî 46 DV), kolîn (ji sedî 60 DV), fosfor (ji sedî 25 DV), zinc (ji sedî 11 DV) û vîtamîna D (ji sedî 15 DV).…"
+            ]
+        },
+        {
+            "word": "mîlyon",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 53,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…rlandse taal), zimanekî germanî yê rojavayî ye, derdorên 25 mîlyon mirovî wek zimanê dayikê li seran serî cîhanê pê diaxivin.…",
+                "…rêmê bi qasî 31.813 km² ye. Gelhe ya vî herêmê ji 6.004.947 mîlyon kesan e. == Erdnîgarî == Herêm ji zêdetirî 31.813 km2 (12,2…",
+                "…ên sereke === Lille (227,560; parêzgeha herêmê; derdora 1.5 mîlyon niştecîhan malek e) Amiens (133,448) Roubaix (94,713) Tourc…",
+                "…Pir, 720 metir dirêje û li ser 5 lingan hatiye runandin û 5 mîlyon lîreyê Tirk mesref lê çû. == Jidayikbûn == (Kesen ku di vê…",
+                "…. Di nîsana sala 2019an de, Netflix li seranserê cîhanê 148 mîlyon abone hatine sencandin, di nav wan de 60 mîlyon li Dewletên…",
+                "…cîhanê 148 mîlyon abone hatine sencandin, di nav wan de 60 mîlyon li Dewletên Yekbûyî, û zêdetirî 154 mîlyon abone bi tevahî…"
+            ]
+        },
+        {
+            "word": "milyar",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 67,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…Milyar ya 1.000.000.000 li nav komê hejmarên xwezayî ye. == Hên se…",
+                "…rawêjên xurt gelheya cîhanê 7.475.182.600 e.. Heta niha 110 milyar mirov ji dayik bûne. == Xalên Werçexê == Gelheya cîhanê di…",
+                "…ûne. == Xalên Werçexê == Gelheya cîhanê di sala 1802an de 1 milyar bû. Gelheya cîhanê di sala 1927an de 2 milyar bû. Gelheya c…",
+                "…a 1802an de 1 milyar bû. Gelheya cîhanê di sala 1927an de 2 milyar bû. Gelheya cîhanê di sala 1961an de 3 milyar bû. Gelheya c…",
+                "…a 1927an de 2 milyar bû. Gelheya cîhanê di sala 1961an de 3 milyar bû. Gelheya cîhanê di sala 1971an de 4 milyar bû. Gelheya c…",
+                "…a 1961an de 3 milyar bû. Gelheya cîhanê di sala 1971an de 4 milyar bû. Gelheya cîhanê di sala 1987an de 5 milyar bû. Gelheya c…"
+            ]
+        },
+        {
+            "word": "bilyon",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 7,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…avtirîn standera telefonên gerok li cîhanê ye. Zêdetir ji 2 bilyon kesan li nêzî 212 welatan PGPG bikardiînin. Berbelaviya PGP…",
+                "…rê dixebitit û hersal bihayê zêdetir ji 44.28 hezar milyon (bilyon) Dolarên Emrîkî berhemên corane li seranserî cîhanê difroşi…",
+                "…ye. Li sala 1999ê, ji bo heyamekê dewlemendiya Gates ji 100 bilyon dolarên Emrîkî bihurî û bi vî awayî Gates bû sedbilyoniyê y…",
+                "…a. Li goreyê Kovara Forbes 2006ê, Gatesî niha zêdetir ji 50 bilyon dolaran hene. Malbata Gates bi dû malbata Waltonî malbata h…",
+                "…e. Dema sikur heta bilintirîn asta xwe tije bibit nêzî 10,4 bilyon m³ av dê bihêt pengandin, rûberekê bi qasî 313 km² dê bibit…",
+                "…eteweya Koreyê birîndar kiribû. Ew bi 10 salên zindanê û 22 bilyon dolarên Emrîkayî hat cezakirin, lê paşî li sala 2007ê ji bo…"
+            ]
+        },
+        {
+            "word": "xal",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 34,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…Xal, ji birayê dê re tê gotin. == Çavkanî ==…",
+                "…Di endazezanî û topolojî û liqên dîtir ên Bîrkariyê da, xal an nuqte tişteka destnîşankirî ye di nav valagehekî da ku n…",
+                "…e ye, ne xwedî qad e, ne jî xwedî dirêjahî ye. Bi vî awayî, xal tişteka 0-rehendî ye. Xal yek ji serekîtirîn û bingehîtirîn…",
+                "…î xwedî dirêjahî ye. Bi vî awayî, xal tişteka 0-rehendî ye. Xal yek ji serekîtirîn û bingehîtirîn çemkên endazezanî, fîzîk…",
+                "…Mîr Xal, gundekî girêdayî navçe Bardîza bi ser Erzîromê ve ye.…",
+                "…heta xalek (P2P): bi înternetê (IP) re têkildar e. Xizmeta xal-pir-xal (P2M) : bangên grûp ên pirjimar û xal-pir-xal. == Ç…"
+            ]
+        },
+        {
+            "word": "sedî",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 113,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Sedî, Se'dî, yan jî Sedî Şîrazî helbestvan, nivîskar û alimekî Î…",
+                "…Sedî, Se'dî, yan jî Sedî Şîrazî helbestvan, nivîskar û alimekî Îslamê ê faris yê îra…",
+                "…helbestvan, nivîskar û alimekî Îslamê ê faris yê îranî ye. Sedî navbera salên 600 heta salên 615 qemerî hatîye dinyayê. Tex…",
+                "…615 qemerî hatîye dinyayê. Texelusa (navê wî di helbesta da)sedî ku ji nave etabek mizeferedîn sedî kurê ebubekir kurê sedê…",
+                "…(navê wî di helbesta da)sedî ku ji nave etabek mizeferedîn sedî kurê ebubekir kurê sedê zengî hatîye girtin. Di ciwanîya xw…",
+                "…berhema xwe ya duem nivîsîye binavê gulistan. Ji xeynî wana sedî berhemên din ji nivisî ne weke xezelîyat, qesayîd, ribaîyat…"
+            ]
+        },
+        {
+            "word": "mînûs",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "neyînî",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 35,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Paşragihandina neyînî (bi înglîzî: negative feedback) rêbazek hevsengiya navekî y…",
+                "…ya navekî du cor paşragihandin bi kar tînin: paşragihandina neyînî û paşragihandina erenî (bi înglîzî: positive feedback). Paş…",
+                "…ndina erenî (bi înglîzî: positive feedback). Paşragihandina neyînî rêbaza bingehîn e bo rêkxistina hevsengiya navekî ya ajalan…",
+                "…e bo rêkxistina hevsengiya navekî ya ajalan. Paşragihandina neyînî di kontrolkirina hevsengiya navekî de, pêvajoya guhertina a…",
+                "…ya laş, rêjeya kalsiyuma laş û hvd bi rêbaza paşragihandina neyînî, ber bi nêzîkê xala asayî ve tên zivirîn. Heke guherîn ber…",
+                "…rîn. Heke guherîn ber bi jorê xala asayî be, paşragihandina neyînî guherînê dadixîne xala asayî. Na heke guherîn ber bi jêrê x…"
+            ]
+        },
+        {
+            "word": "pile",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 29,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Saint-Denis-de-Pile, komuneke departementa Girondaya li herêma başûrê rojavayê…",
+                "…Cours-de-Pile, komuneke li departmena Dordogne ya li herêma Nouvelle-Aqui…",
+                "…Cinq-Mars-la-Pile komuneke departmena Indre-et-Loire ya li herêma Centre-Val…",
+                "…e mir. 1970 – Li Gedîzê erdhejeke li gorî pîvana Richterê 9 pile, qewimî. Di karesatê de 1087 kes mirin, bi hezaran kes jî b…",
+                "…i heman cihî dest pê dikin\" e. Hoke bi yekeyên wekî radyan, pile an jî grad tê pîvandin. Gelek cureyên hokeyê hene. Vana ten…",
+                "…gerandina rasteyekê pêk tê. == Yekeyên pîvanê ya Hokeyê == Pile: Hokeya navendî ku kevaneke 1° yî dibîne, jê re hokeya 1°yî…"
+            ]
+        },
+        {
+            "word": "çarçik",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 21,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Çarçik di nav çargoşeyan de ya herî hêsan e. Dirêjahiya kêlekan ye…",
+                "…ometrîyê ye ku çar goşe û çar kêlekên xwe hene. Çend mînak: Çarçik Çargoşeya çarçik Çargoşeya yeksan Kelkot…",
+                "…r goşe û çar kêlekên xwe hene. Çend mînak: Çarçik Çargoşeya çarçik Çargoşeya yeksan Kelkot…",
+                "…deşta herî mezinê Norwêcê ye. Rûerda deştê 22.000 kîlomêtre çarçik e. Deşt, ji 300 mêtre heta 500 mêtreyê ji asta deryayê bili…",
+                "…zinê parêzgeha Tromsê ye. Pîvana rûava golê 79,71 kîlomêtre çarçik e û dirêjahiya golê 38 kîlomêtre ye. == Mijarên têkildar ==…",
+                "…golên mezin ên Norwêcê ye. Qada rûava golê 51,43 kîlomêtre çarçik e û kûrahiya golê 460 mêtre ye. == Mijarên têkildar == Lîst…"
+            ]
+        },
+        {
+            "word": "çargoşe",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 45,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Çargoşe an çarqorzî şiklekî geometrîyê ye ku çar goşe û çar kêlekên…",
+                "…Metre çargoşe ya m² dibêjin, çiqas rûber heye. Metreyek çargoşe 1 1000000…",
+                "…Metre çargoşe ya m² dibêjin, çiqas rûber heye. Metreyek çargoşe 1 1000000 {\\displaystyle {\\frac {1}{1000000}}} çargoşê kîlo…",
+                "…Kîlometre çargoşe ya bi kurtî km² dibêjin, çiqas rûbar heye. Nîşanê rûbarê A…",
+                "…ye. 1 1000000 {\\displaystyle {\\frac {1}{1000000}}} 'ê metre çargoşe ye. 1 10000 {\\displaystyle {\\frac {1}{10000}}} 'ê çargoşê d…",
+                "…avçeyan hatiye dabeşkirin. Parêzgeh rûberek 9,679 kîlometre çargoşe (3,737 mîl çargoşe) digire. Di sala 2017 de, nifûsa 1,259,5…"
+            ]
+        },
+        {
+            "word": "kare",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 41,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Di kimyayê de pir nîşanên xeterê hene. Mînak: Dema tiştek kare pir zû bişewte, ew nîşanekî xeterê pevedixin (). Li vir nîş…",
+                "…El-Qehhar,Navekî Xwedêye.Li her tiştî, her tiştê ku dixwaze kare bike û hakim û xalibe.…",
+                "…Di heman katî de jî ew jehredar e. Ew wexta ku bê sarkirin, kare bibe şile. Ew ji hewayê girantir e. === Gewşînên kîmyewî ==…",
+                "…reaktîftir û ji fluor kêm reaktîftir e. Ew bi gelek tişt re kare bikeve reaksiyonê. == Bikaranîna wê == Klorîn wek dezenfekt…",
+                "…otin. Heger gazên di hundirê zik de kombûyî dernekevîn, zik kare biêşe. == Çavkanî ==…",
+                "…ê yeû12 km dûrî navçeya çiyayê Mazî ye.Rûpîvana Qesrîk23 km kare ye. Gelê gundê Qesrîk ji gundên Ikisu, Tanriyolu Qesrîk Lal…"
+            ]
+        },
+        {
+            "word": "selsiyus",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…Pileya Celsius an jî selsiyus (herwesa bi navê pileya germahiyê santîgrad / ºC jî dihêt n…",
+                "…bi navê stêrnasê swêdî Anders Celsius (bilêv bikin: Anders Selsiyus) (1701-1744) hatiye kirin. Wî du salan berî mirina xwe pila…",
+                "…Gabriel Fahrenheit li sala 1724ê pêşnihand. Niha pilandina Selsiyus bi tivavî cihê Fahrenheitê girtiye. Tenê li hindek welatên…",
+                "…î Fahrenheit dihêt bikaranîn. Di karûbarên zanistî da, niha Selsiyus jî zêde nahêt bikaranîn û li şûna wê, Kelvin ko yek ji heft…",
+                "…nê (çend welatekên mîna Emrîkayê û Miyanmarê nebin) pileyên Selsiyus dihên bikarînan. Lê li Emrîkayê pileyên Farinhayt li kar in…",
+                "…r pileyên Kelvin bikardiînin, ko di koka xwe da her pileyên Selsiyus in, lê sifira Kelvin 273.15 pileyan ji sifira Selsiyusî kêm…"
+            ]
+        },
+        {
+            "word": "kêm",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…molekûlan li dagirtiya bingehîn e. Heger hejmara molekûlan kêm be madde (çêhand) ron dibe. Bo mînak mirov dikare bo mast b…",
+                "…mast bikarbîne. Heger di mast de av zêde be, mast ron dibe, kêm be tîr dibe.…",
+                "…Ev yeka han, baweriyê bi statîstîkên fermî yên dewleta Tirk kêm dike. == Hin agahiyên bikêr == Rûber: 1.386 km² Bilindahî j…",
+                "…Tê payîn ku dewlet etnopolîtîkayê dimeşîne û hejmara Kurdan kêm dide nîşandan. == Çend gundên Oxleyê == Avî (belde) Kaşikçî…",
+                "…Platîn (bi latînî: platinum, ji bi spanî: platina \"zîv kêm\") metalek û elementek e.…",
+                "…xwe de cureyan dihewînin. Ji cinsê mezintir famîle ye. Herî kêm du cins dibin famîleyek. Binavkirin ji Carl von Linné tê ku…"
+            ]
+        },
+        {
+            "word": "kîlometre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 43,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Kîlometre pîvaneyek e. Hezar metre kîlometreyek dike. Kurtenavê wê km…",
+                "…Kîlometre çargoşe ya bi kurtî km² dibêjin, çiqas rûbar heye. Nîşanê r…",
+                "…athrm {a} \\cdot {b}} ). Nimûne: \"Erdekî min heye. Alîyek 10 kîlometre û aliyê din 5 kîlometre.\" Naka gereke mera seke. Aliyê a =…",
+                "…Nimûne: \"Erdekî min heye. Alîyek 10 kîlometre û aliyê din 5 kîlometre.\" Naka gereke mera seke. Aliyê a = 10 k m {\\displaystyle \\…",
+                "…nê ye ku li rojavayê parêzgeha Hewlêrê cih digire. Bajar 60 kîlometre başûr-rojavaya Hewlêrê, 80 kîlometre bakur-rojhilata Kerkûk…",
+                "…ê cih digire. Bajar 60 kîlometre başûr-rojavaya Hewlêrê, 80 kîlometre bakur-rojhilata Kerkûkê û 80 kîlometre başûr-rojhilata Mûsi…"
+            ]
+        },
+        {
+            "word": "kîlomêtre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 52,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ova), bajarokekî bi ser navçeya Tîla Mûşê ve ye. Bajarok 30 kîlomêtre dûrî navenda navçeya Tîlê û 46 kîlomêtre dûrî navenda bajar…",
+                "…ve ye. Bajarok 30 kîlomêtre dûrî navenda navçeya Tîlê û 46 kîlomêtre dûrî navenda bajarê Mûşê ye. == Dîrok == Heta sala 1998an d…",
+                "…ê navçeyê çiyayê Qerejdaxê ye. Navbera Qulekê û Qonyeyê 150 kîlomêtre û navbera Qulekê û Enqereyê jî 96 kîlomêtre ye. Her çiqas n…",
+                "…ê û Qonyeyê 150 kîlomêtre û navbera Qulekê û Enqereyê jî 96 kîlomêtre ye. Her çiqas navçe yek ji navçeyên Qonyeyê be jî navçe zêd…",
+                "…stanê ye ku bi dirêjahiya giştî ya 2.800 kîlomêtreyan 1.100 kîlomêtre di nav axa Kurdistanê de derbaz dibe. Firat li Îraqê bi Çem…",
+                "…istanê ye, 710 km li Rojavaya Kurdistanê û li Sûriyê û 1060 kîlomêtre li Iraqê ye. Dirêjahiya Yekava Ereb (Şett al-Areb) ku Firat…"
+            ]
+        }
+    ],
+}

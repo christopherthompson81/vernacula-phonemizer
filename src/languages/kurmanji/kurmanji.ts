@@ -9,6 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeKurmanji } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const DIGRAPHS = MANIFEST.digraphs;
@@ -72,7 +73,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class KurmanjiPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeKurmanji(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
