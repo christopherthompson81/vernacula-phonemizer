@@ -317,6 +317,13 @@ def main() -> None:
     src, dst = sys.argv[1], sys.argv[2]
     cap = int(sys.argv[sys.argv.index("--max-articles") + 1]) if "--max-articles" in sys.argv else 0
     jobs = int(sys.argv[sys.argv.index("--jobs") + 1]) if "--jobs" in sys.argv else 1
+    # ⚠ `--title-prefix` EXISTS FOR THE LANGUAGES THAT HAVE NO WIKI OF THEIR OWN. Several do not — Jin (cjy)
+    # and Xiang (hsn) live on Wikimedia INCUBATOR, which holds every incubating project in ONE wiki namespaced
+    # by title (`Wp/hsn/長沙`). Without this the only route was the API, one page per request because
+    # `exlimit` caps a full extract at 1, which Incubator rate-limits into silence. With it, the incubator
+    # dump is an ordinary dump: `--title-prefix "Wp/hsn/"`. cjy's committed artifact records an Incubator
+    # source whose prose file was never committed, so this also makes THAT one regenerable (trap 32).
+    tp = sys.argv[sys.argv.index("--title-prefix") + 1] if "--title-prefix" in sys.argv else None
     kept = seen = 0
     batch: list = []
     pool = Pool(jobs) if jobs > 1 else None
@@ -331,10 +338,14 @@ def main() -> None:
                 continue
             seen += 1
             ns = elem.findtext(q("ns"))
+            title = elem.findtext(q("title")) or ""
             rev = elem.find(q("revision"))
             body = rev.findtext(q("text")) if rev is not None else None
             elem.clear()
             if ns != "0" or not body or body.lstrip()[:9].upper().startswith("#REDIRECT"):
+                continue
+            # Incubator project/talk pages (`Wp/hsn/Wikipedia:…`) are ABOUT the wiki, not IN the language.
+            if tp is not None and (not title.startswith(tp) or ":" in title[len(tp):]):
                 continue
             batch.append(body)
             # ⚠ ORDERED, ALWAYS. `Pool.imap` preserves input order; `imap_unordered` would be faster and would

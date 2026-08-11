@@ -99,6 +99,11 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // negatives (two latitudes, the electron charge, absolute zero, two BCE years). Omitting a minus
         // INVERTS the value, no Lingala word for it is attested, and a known-wrong reading does not get to
         // be a green gate — so `ln.minus` deliberately does not exist and `review.ts --lang ln` stays red.
+        // ⚠ AND hsn CLOSES THE PREDICTION THIS FILE MADE. The cjy note below says "Expect it in gan/hak/hsn
+        // too" of the romanization-tone-number hazard; hak was the fourth and Xiang is now the FIFTH, from a
+        // fifth source — the 湘語羅馬字 tables its incubator carries (/ʃɘ̃⁴⁵/, /mɔ⁴²/). 23 of its 24
+        // superscripts are tone numbers and exactly one is an exponent. Its `degree` entry is unrelated and
+        // small: one sentence's coordinate bounding box.
         // ps is the FIFTH corpus to produce the scientific-notation false positive (after wuu, nan, cjy and
         // hak produced the romanization-tone-number one from four different sources) — `4.1×10¹⁰ m³`,
         // `2×10³⁰`, `7.2 x 10¹³ jouls/kg`. Its `exponent` entry also records two things worth keeping
@@ -107,7 +112,7 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // all. Its `minus` entry is a single EN DASH inside a scientific-notation range (`10¹¹–10¹²`) whose
         // operands end in superscripts, so the range rule cannot reach it — a span, not a negative, and
         // Pashto's true negatives ARE read (`منفي`, sourced ×52 digit-adjacent).
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "ta", "tl", "wuu", "xh"]);
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

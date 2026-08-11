@@ -179,6 +179,47 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    hsn: {
+        // ⚠ THERE IS NO hsn.wikipedia AND NO REFEREE. Every reason below is read off the Wikimedia Incubator's
+        // `Wp/hsn` — 153 pages, 30,640 characters, the only Xiang text that exists — plus a DICT CHECK through
+        // the shipped engine, which is the harder gate: `sinitic/hanDictIpa.ts` skips an uncovered character
+        // SILENTLY, so an unsourced word does not mispronounce, it VANISHES.
+        times: "measured: `×` occurs ONCE in the whole corpus and it is SCIENTIFIC NOTATION — `質量5.9742×"
+            + "10²⁴公斤`, the mass of the Earth — which this layer reads for no language. And the word is not "
+            + "available anyway: ⟨乘⟩ is SILENT in this dict, so emitting it would delete the operator rather "
+            + "than read it",
+        equals: "measured: `=` is digit-adjacent 0 times; the corpus's `===` runs are wiki heading markup. "
+            + "⟨等於⟩/⟨等于⟩ is HALF — the engine emits tən˦˩, one syllable of two, dropping 於 — so the "
+            + "reading would be a truncated word",
+        plus: "measured: zero digit-adjacent `+` in 30,640 characters",
+        minus: "measured: the only digit-flanked dashes are the 3 ranges the layer READS (到, normalize.ts "
+            + "step 6) and the coordinate span `東經111°53'－114°5'`. No negative number occurs",
+        "plus-minus": "measured: zero ± in the corpus",
+        "less-than": "measured: zero < in the corpus",
+        "greater-than": "measured: zero > in the corpus",
+        divide: "measured: zero ÷ in the corpus. ⟨除⟩ does speak, unlike ⟨乘⟩, but there is nothing to read",
+        exponent: "⚠ THE SQUARED/CUBED UNIT IS READ (平方/立方 compose onto the unit noun, normalize.ts step "
+            + "4); a BARE superscript is not, and that is this corpus's sharpest finding. Of its 24 "
+            + "superscript runs **23 are ROMANIZATION TONE NUMBERS** from the 湘語羅馬字 tables the incubator "
+            + "carries — /ʃɘ̃⁴⁵/, /ye²⁴/, /mɔ⁴²/, /tɕiɑʌ⁴⁵/, /n̩⁴²/ — and exactly ONE is an exponent "
+            + "(5.9742×10²⁴). Reading superscripts as powers would turn a pronunciation table into "
+            + "arithmetic. hsn is the FIFTH Sinitic corpus to produce this hazard from a fifth source, after "
+            + "wuu, nan, cjy and hak; test/accepted-silent.test.ts predicted it here by name",
+        // ⚠ THE KEY IS `degrees`, PLURAL — it must match the PROBE name in review.ts's signCases, not the
+        // DROPPABLE class name. Spelled `degree` here it silently exempts nothing and the gate still fails.
+        degrees: "measured: the corpus's only 2 `°` are COORDINATES (`東經111°53'－114°5'`, `北緯27°51'－"
+            + "28°40'`), where neither the degree nor the primes has a reading. And the word is unavailable: "
+            + "⟨度⟩ is SILENT in this dict and ⟨攝氏⟩ is HALF (sz̩˦˥ — it would say 'shì' and drop 'shè'), so "
+            + "`20°C` would lose the WORD as well as the sign — strictly worse than the raw sign, which at "
+            + "least survives as a RAWMARK the scan can see",
+        currency: "measured: NO currency sign occurs in the 30,640-character corpus at all — not ¥, not $, "
+            + "not €. ⟨元⟩ speaks and appears ×33, but every instance is an already-spelled amount "
+            + "(`可支配收入12434元`) — the WORD, never a sign to rewrite. Declaring a currency would be "
+            + "robustness for input this language has never been observed to write, and the sign probe would "
+            + "then be reporting on a rule with no evidence behind it",
+        ampersand: "n/a — the ampersand IS read (跟, the corpus's own coordinator ×136 against 和 ×63; "
+            + "normalize.ts declares it through the shared tier)",
+    },
     ps: {
         // ⚠ NO ESPEAK PASHTO AT ALL, so every reason below is a corpus measurement over a fresh
         // ps.wikipedia dump (242,649 lines after markup and category-residue filtering) and nothing else can
@@ -733,6 +774,14 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         minus: ["-2, 0, +4", "+4, +6", "50'-114", "5'-25", "562-ngièn -560", "1906 -1979",
             "303-ngièn -349", "319-ngièn -351", "384-ngièn -407",
             "chṳ́ -yû", "chṳ́ -yu", "sṳ́ -yung", "Chhṳ́ -ngoi"],
+    },
+    hsn: {
+        // THE COORDINATE DEGREE, and it is the whole of this class: the corpus's only two `°` are one
+        // sentence's bounding box — `地圖座標為東經111°53'－114°5'，北緯27°51'－28°40'`. The TEMPERATURE
+        // degree is not read either, but for a different and harder reason recorded in ACCEPTED_SIGN_SILENCE:
+        // ⟨度⟩ is SILENT in this dict, so a `°C` rule would delete the word as well as the sign. Listed by
+        // instance rather than silencing the class, so if a Xiang temperature ever appears it still reports.
+        degree: ["111°", "114°", "27°", "28°"],
     },
     ps: {
         // THE BARE DEGREE SIGN, every instance a GEOGRAPHIC COORDINATE. ps/normalize.ts step 6 reads the

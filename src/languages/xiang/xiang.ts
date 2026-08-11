@@ -16,6 +16,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { createHanDictPhonemizer, type ForeignPhonemizer, type HanDictDef, phonemizeHanWord } from "../sinitic/hanDictIpa.ts";
+import { normalizeXiang } from "./normalize.ts";
 
 const DEF = loadManifest<HanDictDef>(import.meta.url, "xiang.jsonc");
 
@@ -24,9 +25,13 @@ function dict(): Map<string, string> {
     return (DICT ??= loadTsvMap(import.meta.url, "dict.tsv"));
 }
 
-/** Build the Xiang Chinese phonemizer. `foreign` handles embedded Latin runs. */
+/** Build the Xiang Chinese phonemizer. `foreign` handles embedded Latin runs.
+ *
+ *  NORMALIZATION wraps the engine rather than living inside it — the Han front-end takes a string and the
+ *  layer is pure text→text, so everything it emits is read by the ordinary dict path. Same shape as jin. */
 export function createXiang(foreign?: ForeignPhonemizer): Phonemizer {
-    return createHanDictPhonemizer(dict, DEF, foreign);
+    const engine = createHanDictPhonemizer(dict, DEF, foreign);
+    return { text: (input: string): string => engine.text(normalizeXiang(input)) };
 }
 
 /** Bare word→IPA (tests / eval): a Han run → IPA. */
