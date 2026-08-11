@@ -19,7 +19,8 @@
 // wikipron and 666 → 666 on kaikki, so the whole gain is denominator. And the engine scores HIGHEST on its own
 // variety — pbt 63.0% / pst 60.4% / pbu 58.1% — which is the second check that the slices are real.
 // (Those three are the Run-8 measurement, kept as the pair-wise ORDERING evidence they were cut to be; the
-// pbt figure has since moved to 69.6% — Run 10 — while pst/pbu were not re-run.)
+// pbt figure has since moved to 46.9% non-circular / 69.6% shipped — Runs 10 and 16 — while pst/pbu were
+// not re-run on either basis.)
 //
 // ⚠ THE AGGREGATE LEANS NORTHERN, WHICH IS THE REAL REASON THE UMBRELLA SCORE IS LOW. Counting the isogloss
 // across the primary: ښ is x(pbu) 138 · ʃ(broad) 99 · ʂ(pbt) 52 · ç(pst) 32, and ږ is ɡ(pbu) 151 · ʒ 84 ·
@@ -34,7 +35,7 @@
 //     pbt (ours)  50/97  = 51.5%        pbu  2/102 = 2.0%        pst (not re-run)
 //
 // A 26x separation between our variety and Northern. That is the number to quote when anyone asks why the
-// `pus` aggregate reads 42.5%: the umbrella is ~3:1 Northern on the isogloss, and this engine scores 5.9%
+// `pus` aggregate reads 42.5%: the umbrella is ~3:1 Northern on the isogloss, and this engine scores 2.0%
 // there. ⚠ AND THE SEPARATION WIDENED RATHER THAN NARROWED WHEN THE ENGINE IMPROVED — Run 10's carrier rules
 // took pbt 67.0% → 77.3% on the shipped basis and left pbu unmoved. An engine change that raised BOTH would
 // have been evidence the split was a difficulty artifact; this is the control that says it is a real one.
