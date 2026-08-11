@@ -53,3 +53,9 @@ tools/perso-arabic/silver.dakshina.tsv
 # path OUTSIDE the tree; this guard is for the canonical in-tree name in case a copy ever lands here.
 tools/khmer/km.aakanee-nc.txt
 tools/perso-arabic/silver.espeak-ps.tsv
+
+# The --no-referee-silver measurement lexicon (tools/perso-arabic/invert_harakat.ts). A ~600 KB GPL-derived
+# near-duplicate of lexicon.ps.tsv that exists only to measure how circular the ps referee score is; it
+# regenerates from one documented flag and must never be mistaken for a shipped artifact. Ignored so a
+# `git add -A` after a measurement run cannot commit it — which is exactly how it slipped into #797.
+tools/perso-arabic/lexicon.*.noref.tsv
