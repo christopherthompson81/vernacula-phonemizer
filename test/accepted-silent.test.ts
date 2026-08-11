@@ -112,7 +112,19 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // all. Its `minus` entry is a single EN DASH inside a scientific-notation range (`10¹¹–10¹²`) whose
         // operands end in superscripts, so the range rule cannot reach it — a span, not a negative, and
         // Pashto's true negatives ARE read (`منفي`, sourced ×52 digit-adjacent).
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "ta", "tl", "wuu", "xh"]);
+        // su's four classes are all "this is not the sign you think it is", and two of them are shapes no
+        // other language in this table carries. Its CURRENCY entries are LaTeX MATH DELIMITERS — su.wikipedia
+        // quotes `($10^{13}$–$10^{14}$ taun)` from an English physics article, and su/normalize.ts strips the
+        // pair so the exponent can be read, after which the scan sees a `$` whose removal changes nothing.
+        // Its MATH-SIGN entries are algebra over VARIABLES (`aX + b ~ N(aμ + b, (aσ)²)`, `X+b`, a baseball
+        // regression formula) plus an ION CHARGE `(H^+)` and an optical-isomer label `L(+)-asam`: the layer
+        // reads `+` before a digit, and widening it to letters would match the reduplication hyphen Sundanese
+        // writes constantly (kira-kira, béda-béda, rata-rata). Its MINUS is one IUPAC chemical name, the
+        // Burmese compound-hyphen case exactly. Its ITERATION is a Japanese repetition mark QUOTED in an
+        // article ABOUT Japanese writing (`Misuzu (みすゞ)`) — a mention, not a use, and Sundanese has no
+        // iteration mark to read it with. ⚠ Two `$28.ooUS`/`$60.ooUS` spans are the SOURCE'S OWN TYPO (`.00`
+        // mistyped with letter o's); the `$` there IS read, and what the scan sees is the `US` fragment.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kn", "ln", "mr", "my", "nan", "ps", "su", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
