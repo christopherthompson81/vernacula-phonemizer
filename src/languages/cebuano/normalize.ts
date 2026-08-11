@@ -92,6 +92,11 @@ export function normalizeCebuano(input: string): string {
     // measurement. ⚠ THE DISAMBIGUATION IS THE FOLLOWING MARKER, not the digits: `6.34 pulgada` is the same
     // shape and IS a decimal, so only a timezone or a part-of-day licenses the clock reading.
     s = s.replace(/(?<![\d.:])([01]?\d|2[0-3])\.([0-5]\d)(?!\d)(?=\s*(?:GMT|UTC|[ap]\.?m\b|sa (?:buntag|hapon|gabii)))/giu, clock);
+    // ⚠ AND THE MILITARY FORM, `0230 UTC` / `1200 GMT` — four digits and NO separator at all, which the
+    // number path read as the cardinal *usa ka libo ug duha ka gatos*. ×2, both immediately before a
+    // timezone, which is the only thing distinguishing them from an ordinary four-digit number (a YEAR is
+    // the same shape). The timezone is required, not optional.
+    s = s.replace(/(?<![\d.:])([01]\d|2[0-3])([0-5]\d)(?!\d)(?=\s*(?:GMT|UTC))/gu, clock);
 
     // ── 3. THE SHARED TIER — percent, currency, units, rates, `&`, `×` ──────────────────────────────────
     // ⚠ BEFORE THE DECIMAL RULE ("units before decimals", the playbook's coupling): the tier matches a unit

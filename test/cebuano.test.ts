@@ -53,6 +53,11 @@ describe("Cebuano canonical IPA", () => {
             expect(phonemize("alas 07:19 sa buntag", "ceb")).toContain("pˈito ʔˈuɡ napˈulo");
             expect(phonemize("sa 12.00 GMT", "ceb")).not.toContain("pˈunto"); // a TIME, not a decimal
             expect(phonemize("6.34 pulgada", "ceb")).toContain("pˈunto"); // …but this one IS a decimal
+            // ⚠ AND THE MILITARY FORM, four digits with NO separator (`0230 UTC`, `1200 GMT`, ×2). The number
+            // path read them as cardinals — *usa ka libo ug duha ka gatos*. A four-digit number is also the
+            // shape of a YEAR, so the timezone is REQUIRED, not optional.
+            expect(phonemize("0230 UTC", "ceb")).toContain("dˈuha ʔˈuɡ katlˈoʔan"); // 2:30
+            expect(phonemize("tuig 1990", "ceb")).toContain("lˈibo"); // a year is untouched
         });
 
         test("percent, currency, units and the range", () => {
