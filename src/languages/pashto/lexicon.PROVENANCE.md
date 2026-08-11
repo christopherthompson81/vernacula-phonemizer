@@ -1,6 +1,6 @@
 # pashto/lexicon.tsv — provenance
 
-**Artifact:** `src/languages/pashto/lexicon.tsv` — 13,828 `skeleton ⇥ vocalized` rows, one per key, the **shipped**
+**Artifact:** `src/languages/pashto/lexicon.tsv` — 14,021 `skeleton ⇥ vocalized` rows, one per key, the **shipped**
 Pashto short-vowel restoration lexicon (the COVERAGE layer of the two-layer rider phonemizer). Built by
 `tools/perso-arabic/invert_harakat.ts --lexicon ps` → `tools/perso-arabic/export_lexicons.sh`; re-runnable
 from the repo plus an espeak-ng checkout, no network.
@@ -14,14 +14,33 @@ It is a **mixed-source** artifact and takes the most restrictive licence in the 
 
 | source of the skeleton | licence | rows reachable |
 |---|---|---:|
-| **espeak-ng `dictsource/ps_list`** | **GPL-3.0** | 13,504 |
-| wikipron `pus` + kaikki `pus` | CC-BY-SA | 1,326 |
-| in both pools | — | 969 |
-| **espeak-only** (would vanish without it) | — | **12,535** |
+| **espeak-ng `dictsource/ps_list`** | **GPL-3.0** | 13,522 |
+| wikipron `pus` + kaikki `pus` | CC-BY-SA | 1,026 |
+| **ps.wiktionary** (`silver.pswikt-ps.tsv`) | CC-BY-SA | 548 |
+| in both pools | — | 150 |
+| **espeak-only** (would vanish without it) | — | **13,372** |
 
-12,535 of 13,828 rows (90.6%) exist only because of the GPL source, so the facts posture is not available
+13,372 of 14,021 rows (95.4%) exist only because of the GPL source, so the facts posture is not available
 here the way it is for `arabic/diacritization.tsv`: this is not a thin mechanical table that happens to
 overlap an upstream compilation, it *is* substantially that compilation's headword selection, re-derived.
+
+## A third source, and the only pbt-majority one — ps.wiktionary
+
+Added 2026-08-10 (investigation Run 13/14). `tools/perso-arabic/silver.pswikt-ps.tsv`, built by
+`tools/pashto/build_pswiktionary_silver.py` from the ps.wiktionary dump; see its PROVENANCE neighbour.
+
+It matters out of proportion to its 548 rows for two reasons. First, **it is the only Pashto source found
+that leans SOUTHERN** — ښ→ṣ̌ 68%, ږ→ẓ̌ 81%, where wikipron leans ~3:1 Northern and espeak is internally
+mixed — and it is independent of all three existing sources (427 of its rows are in none of them). Second,
+**its `{{IPA}}` template is not IPA but a Latin transliteration**, which is the point: the diacritics mark
+stress (87% of values) and length (49%), the two axes the abjad does not write.
+
+⚠ **Its yield is the best of any tranche: 548 rows → 222 shipped (40.5%), against 16.9% corpus-wide**, and
+169 of those are words no other source reaches. The same round-trip filter applies, so the dump's visible
+corruption (a nine-headword block all carrying the value `bāz`) costs nothing.
+
+⚠ **It is CC-BY-SA, not GPL**, so it counts on the CC side of the licence sentence above — which is why
+`export_lexicons.sh` reads three CC pools, not two.
 
 ## What was taken from espeak, and what was not
 
@@ -50,7 +69,7 @@ diacritized spelling of the word — not espeak's phoneme string. Three conseque
 - **espeak's errors self-filter.** It under-vocalizes ~26% of the words it shares with the wikipron referee
   (it drops the epenthetic schwa our g2p models: `اتل` → `a:tl` against the referee's `a t ə l`). A row
   exists only where a vocalization *reproduced* the reference, so those simply yield nothing.
-- **The yield is the accuracy measure.** 82,287 candidate rows → 21,743 labelled (**26.1%**) → 13,828 after
+- **The yield is the accuracy measure.** 82,835 candidate rows → 22,018 labelled (**26.6%**) → 13,828 after
   dropping identity rows and deduplicating by key (a word our g2p already reads correctly needs no entry). ⚠ The yield ROSE from 23.6%
   on 2026-08-10 without a single new source row, because the g2p learned to spell things it previously could
   not: while the mater-lectionis rule was gated to word-final position a medial ⟨ـُو⟩ read as u·w·ə, so a
@@ -67,7 +86,7 @@ used by `tools/pashto/build_espeak_silver.py`, is from the same source. Credited
 
 | | |
 |---|---|
-| rows | 351 → 10,698 → **13,828** (one per key, after the 2026-08-10 dedup fix) |
+| rows | 351 → 10,698 → 13,828 → **14,021** (one per key) |
 | running-text **token** coverage (13.4 M tokens, ps.wikipedia) | 2.80% → 5.78% → *not re-measured* |
 | referee (wikipron `pus`) | **unchanged**, 55.7% → 63.1% (see the caveat below) |
 

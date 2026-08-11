@@ -146,7 +146,7 @@ with the data: `perso-arabic/riderDiacritizer.onnx`, `persian/fa-vowel-restorer.
   engine that reads it at runtime is not thereby GPL.
   <https://github.com/rime/rime-wugniu>
 - **espeak-ng** (`dictsource/ps_list`, credited in its own header to **Hanif Rahman**, updated April
-  2025) — GPL-3.0. `pashto/lexicon.tsv` (13,828 rows) is a derived work and is distributed under a
+  2025) — GPL-3.0. `pashto/lexicon.tsv` (14,021 rows) is a derived work and is distributed under a
   **per-file GPL-3.0 fence**; the engine that reads it at runtime is not thereby GPL. ⚠ What derives
   from it is the SHORT-VOWEL PLACEMENT only — espeak's phoneme strings are never copied; each is fed
   to a g2p-inversion search that stores the diacritized *spelling* whose reading our own engine
