@@ -47,7 +47,6 @@ import xml.etree.ElementTree as ET
 ap = argparse.ArgumentParser()
 ap.add_argument("--dump", required=True, help="pswiktionary-latest-pages-articles.xml.bz2")
 ap.add_argument("--out", default="-")
-ap.add_argument("--report", action="store_true", help="print the drop reasons to stderr")
 a = ap.parse_args()
 
 # ── the transliteration → IPA map ────────────────────────────────────────────────────────────────────
@@ -79,7 +78,7 @@ MAP = {
 # Marks that carry information the map keys already encode (they are recomposed before lookup), vs marks that
 # are pure prosody and are dropped. ⚠ The acute is DROPPED, not translated: stress is real information but
 # PS_FULL_FOLD strips it, so carrying it here would only create spurious mismatches in the search.
-COMBINING_KEEP = {"̄", "̣", "̌", "̇", "̂"}  # macron, dot below, caron, dot above, CIRCUMFLEX
+COMBINING_KEEP = {"̄", "̣", "̌", "̇", "̂"}  # macron, dot below, caron, dot above, CIRCUMFLEX — letter-forming
 # ⚠ THE CIRCUMFLEX IS KEPT, AND IT IS A ONE-CHARACTER TRAP. It occurs exactly once in the dump — `ĵ` in
 # باجپازی = `baĵ-pā́zay` — as a variant of ǰ for ⟨ج⟩ d͡ʒ. Dropped as prosody, it left a BARE `j`, which this
 # map reads as ⟨ځ⟩ d͡z: a wrong PHONEME rather than a missing diacritic, silently, on a row that then passed
@@ -104,6 +103,13 @@ def to_ipa(rom):
     s = re.sub(r"^/|/$|^\[|\]$", "", s.strip())      # a minority are wrapped as true IPA
     s = s.replace("-", "").replace(".", "").replace("!", "").replace("`", "")
     s = s.replace("(", "").replace(")", "").replace("+", "").replace(",", "").replace(":", "")
+    # ⚠ AN UNRECOGNISED COMBINING MARK IS A LOUD DROP, NOT A SILENT PASS-THROUGH. The dump is a rolling
+    # `latest`, so a future edit can introduce a mark neither set knows. Left unhandled it would survive to the
+    # character loop, fail the lookup and drop the row as "unmapped" — indistinguishable from an ordinary
+    # unknown letter, and exactly how the circumflex bug hid. Counted separately so a new mark is visible.
+    for ch in unicodedata.normalize("NFD", s):
+        if unicodedata.combining(ch) and ch not in COMBINING_KEEP and ch not in COMBINING_DROP:
+            return "?mark"
     s = "".join(ch for ch in unicodedata.normalize("NFD", s) if ch not in COMBINING_DROP)
     s = unicodedata.normalize("NFC", s)
     if not s or any(("؀" <= ch <= "ۿ") for ch in s):
@@ -151,7 +157,7 @@ def skeleton_ok(word, ipa):
 
 
 IPA_T = re.compile(r"\{\{\s*IPA\s*\|([^}|]*)")
-rows, drops = [], {"no-value": 0, "unmapped": 0, "skeleton": 0, "multiword": 0, "dup": 0}
+rows, drops = [], {"no-value": 0, "unmapped": 0, "unknown-mark": 0, "skeleton": 0, "multiword": 0, "dup": 0}
 seen = set()
 for _, el in ET.iterparse(bz2.open(a.dump), events=("end",)):
     if not el.tag.endswith("}page"):
@@ -169,6 +175,9 @@ for _, el in ET.iterparse(bz2.open(a.dump), events=("end",)):
         drops["multiword"] += 1
         continue                                       # phrasal entries: the miner keys on single words
     ipa = to_ipa(m.group(1))
+    if ipa == "?mark":
+        drops["unknown-mark"] += 1
+        continue
     if ipa is None:
         drops["unmapped" if m.group(1).strip() else "no-value"] += 1
         continue
