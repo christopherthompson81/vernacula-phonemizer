@@ -226,7 +226,24 @@ export function phonemizeWordCore(word: string): string {
     ipa = ipa.replace(/n(?=[kɡq])/gu, "ŋ");
     // NOTE: no word-final-cluster ə-deletion — Pashto RETAINS the epenthetic ə before many final clusters
     // (اخښل→axʂəl), unlike Persian; deleting it there hurt the referee.
-    // Stress: default to the last long vowel (ɑ/o/u/e/i), else the last nucleus.
+    // ⚠ STRESS, AND IT IS MEASURED NOW — BY tools/pashto/eval_ps_stress.ts AND BY NOTHING ELSE. The
+    // referee-eval BACKBONE fold STRIPS stress before comparing, so eval.ts is blind to this line and always
+    // was. On the NON-CIRCULAR basis (314 comparable words, ps.wiktionary-derived lexicon rows excluded):
+    //
+    //     always the LAST nucleus (trivial baseline)          72.6%
+    //     THIS RULE: last long vowel, else last nucleus       75.5%
+    //     "last nucleus unless ə → penult (except after ل)"   74.8%
+    //
+    // ⚠ THAT SECOND ALTERNATIVE WAS BUILT, SHIPPED IN A BRANCH, AND REVERTED. It measured 83.8% against this
+    // rule's 73.8% — until the eval was made non-circular. 197 of the 463 referee words carry a lexicon row
+    // mined from the SAME ps.wiktionary romanization being scored against, and those rows fix the short
+    // vowels, which decides the nucleus count the stress index is measured over. Nine of the twelve points
+    // were feedback. On honest data the two rules differ by two words out of 314, which is noise.
+    //
+    // ⚠ SO THE REAL FINDING IS NOT THE RULE, IT IS THE CEILING: Pashto stress is ~73% predictable by "always
+    // the last nucleus", and nothing tried beats that by more than ~3 points. Do not replace this line
+    // without running the tool NON-circularly; a large win there is the signature of the feedback loop, not
+    // of a better rule.
     const longs = [...ipa.matchAll(/[ɑoue]|i(?!̯)/gu)];
     const marks = longs.length ? longs : [...ipa.matchAll(VOWEL_G)];
     if (marks.length) {

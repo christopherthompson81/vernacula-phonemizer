@@ -35,6 +35,19 @@ describe("pashto canonical IPA", () => {
     // The three carrier rules earned in the pbt engine pass. Each one is a MEASURED majority on the raw pbt+kaikki
     // references, not a tidy generalization — the counts live in the g2p's own comments, and the cases the counts
     // say are coin flips (⟨وی⟩ 50%, ⟨يو⟩ 44%) are deliberately absent here because they stay lexical.
+    // ⚠ STRESS IS INVISIBLE TO THE REFEREE EVAL — the BACKBONE fold strips it — so these goldens and
+    // tools/pashto/eval_ps_stress.ts are the only guards on it. Measured NON-circularly on 314 comparable
+    // words: this rule 75.5%, "always the last nucleus" 72.6%. ⚠ An alternative ("last nucleus unless ə →
+    // penult") was built and REVERTED: it measured 83.8% until the tool excluded the ps.wiktionary-derived
+    // lexicon rows it was being scored against, after which it came in BELOW this rule. Nine of its twelve
+    // points were feedback. Do not change this rule on a circular measurement.
+    test("stress: the last long vowel, else the last nucleus", () => {
+        expect(phonemizeWord("اندېښمن")).toBe("and̪ˈeʂman"); // ⚠ a referee MISS (andeṣ-mán) — kept as one
+        expect(phonemizeWord("سړی")).toBe("səɻəˈi"); //         the -ay diphthong ⟨ی⟩ takes it
+        expect(phonemizeWord("کور")).toBe("kˈor"); //           the single long vowel
+        expect(phonemizeWord("بندَول")).toBe("bənd̪awˈəl"); //   the infinitive ‑ə́l, which this rule gets right
+    });
+
     test("carrier letters: final ⟨ی⟩ vs ⟨ي⟩, the glide before ⟨ا⟩, and the mater lectionis", () => {
         // 1. WORD-FINAL ⟨ی⟩ IS THE -ay DIPHTHONG, ⟨ي⟩ IS PLAIN /i/ — Pashto distinguishes the two yehs where
         //    Persian/Urdu do not (108/125 = 86% vs 42/43 = 98% on the raw reference). Reading both as /i/ dropped

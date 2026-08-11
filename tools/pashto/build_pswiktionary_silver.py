@@ -54,6 +54,10 @@ import xml.etree.ElementTree as ET
 ap = argparse.ArgumentParser()
 ap.add_argument("--dump", required=True, help="pswiktionary-latest-pages-articles.xml.bz2")
 ap.add_argument("--out", default="-")
+# ⚠ THE STRESS REFEREE IS A SEPARATE OUTPUT, NOT AN EXTRA COLUMN. It has a different membership rule (exactly
+# one accent, and it must land on a vowel) and a different consumer (tools/pashto/eval_ps_stress.ts, which
+# compares POSITION, not segments). Mixing them would put rows in the silver that the miner cannot use.
+ap.add_argument("--stress-out", help="also write the STRESS referee: word ⇥ IPA-with-ˈ")
 a = ap.parse_args()
 
 # ── the transliteration → IPA map ────────────────────────────────────────────────────────────────────
@@ -106,43 +110,62 @@ SKEL = {
 }
 
 
-def to_ipa(rom):
+ACUTE, GRAVE = "\u0301", "\u0300"
+
+
+def clusters(s):
+    """Split into (base, marks) CLUSTERS — a base character plus every combining mark that follows it.
+
+    ⚠ CLUSTER-BASED, NOT A 1/2-CHARACTER LOOKAHEAD, and the difference is what makes stress recoverable. The
+    marks on one base can stack: `ā́` is a + MACRON + ACUTE, i.e. a long vowel that is ALSO the stressed one.
+    Scanning a fixed window cannot see that pair, so length and stress could not be read off the same vowel.
+    Clustering also removes the normalization guesswork — the key is rebuilt from the base plus the marks that
+    form a letter, and looked up once.
+    """
+    d = unicodedata.normalize("NFD", s)
+    i = 0
+    while i < len(d):
+        j = i + 1
+        while j < len(d) and unicodedata.combining(d[j]):
+            j += 1
+        yield d[i], d[i + 1:j]
+        i = j
+
+
+def to_ipa(rom, keep_stress=False):
     """One romanization → IPA, or None if a character is not in the map (an unmapped char means we do not
-    understand the row, and a guessed reading is worse than a dropped one)."""
+    understand the row, and a guessed reading is worse than a dropped one).
+
+    `keep_stress` emits IPA ˈ before the vowel carrying the acute/grave, for the STRESS referee. The silver
+    tranche does not use it: the miner compares under PS_FULL_FOLD, which strips stress, so carrying it there
+    would only create spurious mismatches.
+    """
     s = rom.strip()
     if not s or "=" in s or "<" in s:
         return None
     s = re.sub(r"^/|/$|^\[|\]$", "", s.strip())      # a minority are wrapped as true IPA
     s = s.replace("-", "").replace(".", "").replace("!", "").replace("`", "")
     s = s.replace("(", "").replace(")", "").replace("+", "").replace(",", "").replace(":", "")
-    # ⚠ AN UNRECOGNISED COMBINING MARK IS A LOUD DROP, NOT A SILENT PASS-THROUGH. The dump is a rolling
-    # `latest`, so a future edit can introduce a mark neither set knows. Left unhandled it would survive to the
-    # character loop, fail the lookup and drop the row as "unmapped" — indistinguishable from an ordinary
-    # unknown letter, and exactly how the circumflex bug hid. Counted separately so a new mark is visible.
-    for ch in unicodedata.normalize("NFD", s):
-        if unicodedata.combining(ch) and ch not in COMBINING_KEEP and ch not in COMBINING_DROP:
-            return "?mark"
-    s = "".join(ch for ch in unicodedata.normalize("NFD", s) if ch not in COMBINING_DROP)
-    s = unicodedata.normalize("NFC", s)
-    if not s or any(("؀" <= ch <= "ۿ") for ch in s):
+    if not s or any(("\u0600" <= ch <= "\u06ff") for ch in s):
         return None                                   # untransliterated leftovers
-    out, i = [], 0
-    while i < len(s):
-        # try the 2-char decomposed forms first (x̌, ṣ, č … may be NFD even after recomposition)
-        two = unicodedata.normalize("NFC", s[i:i + 2])
-        if len(s[i:i + 2]) == 2 and two in MAP:
-            out.append(MAP[two]); i += 2; continue
-        ch = s[i]
-        low = ch.lower()
-        if ch in MAP:
-            out.append(MAP[ch])
-        elif low in MAP:
-            out.append(MAP[low])
-        elif ch.isspace():
-            pass
-        else:
+    out = []
+    for base, marks in clusters(s):
+        # ⚠ AN UNRECOGNISED COMBINING MARK IS A LOUD DROP, NOT A SILENT PASS-THROUGH. The dump is a rolling
+        # `latest`, so a future edit can introduce a mark neither set knows. Left to fall through it would fail
+        # the lookup and drop the row as "unmapped" — indistinguishable from an ordinary unknown letter, which
+        # is exactly how the circumflex bug hid. Counted separately so a new mark is visible.
+        for mk in marks:
+            if mk not in COMBINING_KEEP and mk not in COMBINING_DROP:
+                return "?mark"
+        if base.isspace():
+            continue
+        key = unicodedata.normalize("NFC", base + "".join(m for m in marks if m in COMBINING_KEEP))
+        ipa = MAP.get(key) or MAP.get(key.lower())
+        if ipa is None:
             return None
-        i += 1
+        if keep_stress and (ACUTE in marks or GRAVE in marks):
+            out.append("\u02c8")
+        out.append(ipa)
     return "".join(out) or None
 
 
@@ -169,7 +192,7 @@ def skeleton_ok(word, ipa):
 
 
 IPA_T = re.compile(r"\{\{\s*IPA\s*\|([^}|]*)")
-rows, drops = [], {"no-value": 0, "unmapped": 0, "unknown-mark": 0, "skeleton": 0, "multiword": 0, "dup": 0}
+rows, stress_rows, drops = [], [], {"no-value": 0, "unmapped": 0, "unknown-mark": 0, "skeleton": 0, "multiword": 0, "dup": 0}
 seen = set()
 for _, el in ET.iterparse(bz2.open(a.dump), events=("end",)):
     if not el.tag.endswith("}page"):
@@ -201,9 +224,28 @@ for _, el in ET.iterparse(bz2.open(a.dump), events=("end",)):
         continue
     seen.add(word)
     rows.append((word, "pus", ipa))
+    # ── the STRESS referee, same guards plus two of its own ──────────────────────────────────────────
+    # ⚠ EXACTLY ONE ACCENT. 17 values carry two — real compound stress (`arzán-báya`, `ánd-o-žwánd`) — and
+    # which of the two is primary is a question this dump does not answer. Kept out rather than guessed at.
+    # ⚠ AND IT MUST LAND ON A VOWEL. A handful sit on a consonant or a stray Greek iota, i.e. a typo.
+    d = unicodedata.normalize("NFD", m.group(1))
+    if d.count(ACUTE) + d.count(GRAVE) == 1:
+        st = to_ipa(m.group(1), keep_stress=True)
+        if st and st.count("\u02c8") == 1 and re.search(r"\u02c8[aeiouɑə]", st):
+            stress_rows.append((word, st))
 
 out = sys.stdout if a.out == "-" else open(a.out, "w", encoding="utf8")
 for w, lang, ipa in rows:
     print(f"{w}\t{lang}\t{ipa}", file=out)
 print(f"# ps.wiktionary → {len(rows)} silver rows  (dropped: "
       + ", ".join(f"{k} {v}" for k, v in drops.items() if v) + ")", file=sys.stderr)
+if a.stress_out:
+    with open(a.stress_out, "w", encoding="utf8") as f:
+        print("# ps.wiktionary STRESS referee — undiacritized word ⇥ our IPA with ˈ before the stressed vowel.", file=f)
+        print("# Source: the acute/grave in ps.wiktionary's {{IPA}} romanization. CC-BY-SA; see", file=f)
+        print("# tools/perso-arabic/silver.pswikt-ps.PROVENANCE.md. Consumer: tools/pashto/eval_ps_stress.ts.", file=f)
+        print("# ⚠ POSITION ONLY. The SEGMENTS here come from the same romanization map as the silver and are no", file=f)
+        print("# better than it; what this file is evidence about is WHICH vowel carries the stress.", file=f)
+        for w, st in stress_rows:
+            print(f"{w}\t{st}", file=f)
+    print(f"# stress referee → {len(stress_rows)} rows", file=sys.stderr)

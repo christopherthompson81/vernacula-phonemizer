@@ -956,3 +956,71 @@ Every historical ps figure in this repo now means one of two things, and they ar
 number (63.1% / pbt 69.6% — coverage) or a **non-circular** one (42.5% / pbt 46.9% — engine). Run 10's carrier
 rules are correctly quoted as **42.2% → 46.9%**, which is what Run 11 already said they should be. The floor
 test moved 0.60 → 0.40 for the same reason and says so in place, so nobody reads it as a regression.
+
+
+## Run 17 — 2026-08-11 — the stress referee, and the "improvement" it took back
+
+ps.wiktionary marks the accent on 87% of its values, and Run 13 flagged that as the one axis nothing in the
+repo could measure. Built it. It produced a 9-point engine win, and then it took the win away.
+
+### The tool
+
+`build_pswiktionary_silver.py --stress-out` → `tools/pashto/ps.stress-pswikt.tsv`, 463 rows. Stricter
+membership than the silver: exactly one accent (17 values carry two — real compound stress, and which is
+primary the dump does not say) and it must land on a vowel.
+
+`tools/pashto/eval_ps_stress.ts` compares **which nucleus** carries the accent, not the string — ps is ~47%
+segmental, so comparing stressed strings would report the segmental error again with extra steps. Words whose
+nucleus counts disagree are a segmental failure and are reported separately. ⚠ A vowel + offglide is ONE
+nucleus: our g2p writes -ay as `əi`/`aɪ` while the romanization writes a vowel plus consonantal `y`, and
+counting naively would have dropped every masculine singular noun — the commonest shape in the language.
+
+### The part that was right
+
+Stress had shipped **unmeasured since the engine was written**, because the referee-eval BACKBONE fold strips
+it before comparing. The baselines are what make the number mean anything:
+
+```
+                                          314 comparable words, NON-CIRCULAR
+always the LAST nucleus (trivial)                    72.6%
+SHIPPED: last long vowel, else last nucleus          75.5%
+always the PENULTIMATE                               27.1%
+always the FIRST                                      3.8%
+```
+
+### The part that was wrong, and it was mine
+
+First run reported the shipped rule at **73.8%** against a 71.8% baseline, and an alternative — "last nucleus
+unless it is ə, then the penult" — at **82.8%**, rising to 83.8% with a ⟨ل⟩ carve-out for the infinitive
+‑ə́l. That looked like a clean 9-point win over a rule that barely beat trivial. It was written, tested,
+documented, committed and pushed.
+
+⚠ **THE STRESS EVAL WAS CIRCULAR, AND I HAD JUST SPENT TWO RUNS FIXING EXACTLY THIS.** The referee is built
+from ps.wiktionary — and so is a silver tranche of the shipped lexicon. **197 of the 463 referee words carry
+a lexicon row mined from the very romanization being scored against.** Those rows fix the short vowels, which
+decides how many nuclei a word has, which is what the stress index is measured over. They inflate the result
+twice: more words become comparable, and more of them land right.
+
+```
+                            comparable   accuracy
+shipped lexicon                    390    83.8%
+ps.wiktionary rows excluded        314    74.8%   ← and the old rule scores 75.5% here
+```
+
+**Nine of the twelve points were feedback, and on honest data the new rule is two words WORSE out of 314** —
+noise, but with no case for the change. Reverted: engine, goldens, and the claim.
+
+### What survives
+
+- **The referee and the tool**, non-circular by default (`--shipped` restores the old figure, labelled as not
+  the number to quote). This is the first and only Pashto stress measurement in the repo.
+- **The ceiling, which is the real finding.** Pashto stress is ~73% predictable by "always the last vowel",
+  and nothing tried beats that by more than ~3 points. That bounds how much effort this axis deserves.
+- **A warning in the engine, on the rule itself**: do not replace it without running the tool non-circularly,
+  because a large win there is the signature of the feedback loop rather than of a better rule.
+- One rejected refinement, measured: a final ⟨ه⟩ looked like it should mark a stressable -a; it predicts the
+  **opposite** (22% final-stressed against 51% for other final-schwa words) and is worth ~0.5pp.
+
+⚠ **The lesson is not "check for circularity", which Run 11 already said. It is that a NEW measurement built
+from a source already feeding the lexicon is circular BY DEFAULT, and the tell is a suspiciously large win.**
+83.8% against a 71.8% baseline should have been the trigger to check, not to celebrate.
