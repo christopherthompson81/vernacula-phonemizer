@@ -179,6 +179,30 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ceb: {
+        // ⚠ NO CEBUANO DEGREE WORD IS ATTESTED ANYWHERE IN THE CORPUS. `grado` ×0, `digri` ×0, `celsius` ×0 —
+        // and the corpus is FLEURS rather than the wiki (see cebuano/normalize.ts for why), so there is no
+        // larger haystack to fall back on for this language: ceb.wikipedia is ~99% Lsjbot boilerplate and an
+        // attestation there would be a fact about a template. The sign occurs ×2. Naming a reading would be
+        // invention of exactly the kind the Fula `tere` lesson forbids, so `°` stays unread and stays VISIBLE
+        // as a RAWMARK the scan can see, which is the better failure.
+        degrees: "no Cebuano degree word in FLEURS (grado/digri/celsius all ×0) and the wiki is bot-generated",
+        // ⚠ THE SAME REFUSAL, FIVE MORE TIMES, AND FOR THE SAME REASON: this corpus contains none of these
+        // signs (`=` `<` `>` `±` `÷` are ×0 apiece) AND no Cebuano word for any of them — `katumbas`
+        // (equals) ×0, `minus` ×0. The two arithmetic words it DOES carry are spent: `dugang` ×32 reads `+`
+        // and `pilo` ×14 reads `×`. Writing five more readings out of a 1,932-sentence corpus that attests
+        // neither the sign nor the word is exactly the Fula `tere` failure, so they stay unread.
+        // ⚠ AND ceb HAS NO SECOND HAYSTACK. For most languages an unattested word can be probed against
+        // Wikipedia; ceb.wikipedia is ~99% Lsjbot-generated, so a hit there is a fact about a template.
+        // That is why this list is longer here than anywhere else — the refusal is better evidenced, not
+        // lazier.
+        minus: "sign ×0 and no Cebuano word (minus ×0, kulang is 'lacking'); FLEURS is the only usable corpus",
+        "plus-minus": "sign ×0; the ± reading would compose two words, neither of which is attested",
+        equals: "sign ×0 and katumbas ×0 (parehas ×31 means 'the same', not the relation)",
+        "less-than": "sign ×0 and no comparative-magnitude phrase attested",
+        "greater-than": "sign ×0 and no comparative-magnitude phrase attested",
+        divide: "sign ×0; gibahin ×2 is 'divided' in the partition sense, not the operator",
+    },
     hsn: {
         // ⚠ THERE IS NO hsn.wikipedia AND NO REFEREE. Every reason below is read off the Wikimedia Incubator's
         // `Wp/hsn` — 153 pages, 30,640 characters, the only Xiang text that exists — plus a DICT CHECK through
@@ -613,6 +637,14 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
 export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    ceb: {
+        // THE YEN, and it is the ONE currency in this corpus with no Cebuano name. The dollar (`dolyar` ×4),
+        // the euro (×1) and the pound (`pound` ×3, in `Falkland pound (FKP)`) are all declared and read; `yen`
+        // scores ZERO, so the three ¥ amounts in this one sentence about Japanese event tickets stay unread.
+        // ⚠ Listed BY INSTANCE rather than silencing the class, so the moment a ¥ appears beside a Cebuano
+        // yen-word — or any other currency regresses — the scan reports it again.
+        currency: ["¥2,500", "¥130,000", "¥7,000"],
+    },
     so: {
         // A `+` JOINING TWO GREEK ETYMOLOGY GLOSSES, not arithmetic — `"waan gubaa" + ōps "wejiga"`, inside the
         // article on the name Αἰθιοπία. so/normalize.ts reads `+` before a digit or a bracketed one; this one
