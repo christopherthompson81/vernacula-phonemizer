@@ -41,20 +41,30 @@ for L in ur fa ps pa; do
             echo "# Source: g2p-inversion over espeak-ng dictsource/ps_list (GPL-3.0, Hanif Rahman) + wikipron + kaikki."
             # ⚠ COUNTED, NOT TYPED. This sentence is a LICENCE claim living in a shipped file, and it was hard-coded
             # ("9,588 of 10,698") until the 2026-08-10 re-mine grew the lexicon 29% and left it silently false.
-            # espeak-only = the key is in the GPL pool and in NEITHER CC-BY-SA pool, i.e. the row would vanish
-            # without espeak. Counted over the exported (non-identity) rows, which is what the file actually ships.
+            # espeak-only = the key is in the GPL pool and in NO CC-BY-SA pool, i.e. the row would vanish without
+            # espeak. Counted over the exported (non-identity) rows, which is what the file actually ships.
+            # ⚠ THE CC POOLS ARE FILTERED TO $2=="pus", WHICH IS NOT PEDANTRY. `silver.tsv` is MULTI-LANGUAGE, and
+            # Perso-Arabic spellings collide across ur/fa/pa/ps — counting every language's keys marked 860 rows as
+            # CC-reachable that the ps miner could never have produced from them (it filters lang=="pus"), and
+            # understated the GPL share as 12,512 where it is 13,372. A licence sentence has to count the rows this
+            # build could actually reach. (silver.espeak-ps.tsv is single-language, so it needs no filter.)
+            # ⚠ THE CC POOL IS THREE FILES, NOT TWO. ps.wiktionary (silver.pswikt-ps.tsv, CC-BY-SA) joined in
+            # 2026-08-10; until it was added here, a word reachable from BOTH espeak and ps.wiktionary counted as
+            # espeak-only and overstated the GPL share — a licence claim drifting because a source was added
+            # elsewhere. Any new ps tranche must be added to this regex and to the guard above.
             total=$(wc -l < "$body")
             # ⚠ AND THE COUNT NEEDS ITS INPUTS, WHICH THE COMMON CASE DOES NOT HAVE. silver.espeak-ps.tsv is
             # deliberately not committed (2.5 MB of GPL-derived intermediate), so a fresh checkout cannot
             # substantiate this licence claim. Say that, rather than crash or — far worse — print a plausible
             # wrong number into a file whose whole job is to state its provenance accurately.
-            if [ -f "$HERE/silver.espeak-ps.tsv" ] && [ -f "$HERE/silver.tsv" ] && [ -f "$HERE/silver.kaikki.tsv" ]; then
+            if [ -f "$HERE/silver.espeak-ps.tsv" ] && [ -f "$HERE/silver.tsv" ] && [ -f "$HERE/silver.kaikki.tsv" ] && [ -f "$HERE/silver.pswikt-ps.tsv" ]; then
                 gpl_only=$(awk -F'\t' '
                     FNR==NR   { if ($0 !~ /^#/ && NF) esp[$1]=1; next }
-                    FILENAME ~ /silver\.(tsv|kaikki\.tsv)$/ { if ($0 !~ /^#/ && NF) cc[$1]=1; next }
+                    FILENAME ~ /silver\.(tsv|kaikki\.tsv|pswikt-ps\.tsv)$/ { if ($0 !~ /^#/ && $2 == "pus") cc[$1]=1; next }
                     ($1 in esp) && !($1 in cc) { n++ }
                     END { print n+0 }
-                ' "$HERE/silver.espeak-ps.tsv" "$HERE/silver.tsv" "$HERE/silver.kaikki.tsv" "$body")
+                ' "$HERE/silver.espeak-ps.tsv" "$HERE/silver.tsv" "$HERE/silver.kaikki.tsv" \
+                  "$HERE/silver.pswikt-ps.tsv" "$body")
                 echo "# ${gpl_only} of ${total} rows are reachable only from the GPL source. Only the SHORT-VOWEL PLACEMENT"
             else
                 echo "⚠ ps: silver pools missing — the GPL-only row count cannot be recomputed; header says so." >&2

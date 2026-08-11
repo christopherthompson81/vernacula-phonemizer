@@ -215,6 +215,23 @@ function label(lang: string): void {
     // and it disagrees with our dialect on ږ (`موږ` → ʁ where we read ʐ). Neither is trusted: a row yields a label
     // only where some vocalization REPRODUCES that IPA under PS_FULL_FOLD, so espeak's errors and its dialect
     // disagreements self-filter rather than being imported. The yield rate IS the accuracy measurement.
+    // ps: ps.wiktionary's romanizations (tools/pashto/build_pswiktionary_silver.py). SMALL — ~550 rows against
+    // espeak's 81k — but the only tranche here that is BOTH pbt-majority (ښ→ṣ̌/x̌ 99%, ږ→ẓ̌/ǧ 100%, where wikipron
+    // leans ~3:1 Northern) and independent of every referee, so its rows add coverage without adding
+    // circularity. ⚠ ORDERED BEFORE espeak DELIBERATELY: `seenSkel` keeps the FIRST vocalization per skeleton,
+    // so for a word both sources cover, the Southern reading wins the tie. See investigation Run 13.
+    if (lang === "ps") {
+        const pw = join(HERE, "silver.pswikt-ps.tsv");
+        if (existsSync(pw)) {
+            const seen = new Set(rows.map((r) => r[0]));
+            rows = rows.concat(
+                readFileSync(pw, "utf8").split("\n")
+                    .filter((l) => l.includes("\t") && !l.startsWith("#"))
+                    .map((l) => l.split("\t"))
+                    .filter((a) => a.length >= 3 && !seen.has(a[0])),
+            );
+        }
+    }
     if (lang === "ps") {
         const esp = join(HERE, "silver.espeak-ps.tsv");
         // ⚠ SAY SO WHEN THE TRANCHE IS ABSENT. It is deliberately NOT committed — 2.5 MB of GPL-derived

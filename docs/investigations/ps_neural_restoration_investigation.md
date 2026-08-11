@@ -708,3 +708,190 @@ consonants the inversion round-trip is a perfect filter. For vowels there is no 
 measured contamination, if any, is small enough that a Southern engine still beats Northern 3.2:1 on exactly
 the subset where only vowels can decide. ⚠ What would actually change this is a dialect-tagged Pashto
 dictionary at espeak's scale, which does not exist — the same wall Run 4 hit.
+
+## Run 13 — 2026-08-10 — hunting a second pbt corpus: five dead ends and one real find
+
+Asked whether any other corpus could evaluate pbt, since Run 11 showed the current referee number is
+substantially circular. Everything below was checked, not recalled.
+
+| candidate | measured | verdict |
+|---|---|---|
+| wikipron `pus_arab_narrow` | 157 entries, 145 already in broad → **12 narrow-only** | dead end |
+| kaikki `ruwiktionary` (Пушту) | 660 entries, **57** with IPA, inconsistent (`[zōy]`, `[muʝ]`) | too small |
+| kaikki `dewiktionary` / `frwiktionary` | no Pashto section | none |
+| epitran `pbu-Arab` | exists; genuinely Northern (پښتو→pa**x**to, ښه→xa) | wrong variety; see below |
+| FLEURS ps / ps.wikipedia | text only | not a referee (but fixes the stale token-coverage row) |
+| **ps.wiktionary `{{IPA}}`** | **605 single-word headwords, 547 new** | **the find** |
+
+### epitran pbu-Arab — a control, not a referee
+
+It is rule-based and has never seen our lexicon, so it is genuinely independent, and it is unambiguously
+Northern. But it leaves ⟨ږ⟩ **untransliterated** (`موږ` → `muږ`, the raw letter passing through) and restores
+short vowels only erratically (`لمر` → `lmr`, `کتاب` → `ktɑb`). It cannot score pbt. Its use is as a control
+on unlimited vocabulary for the claim that the dialect split is real — which currently rests on kaikki's 102
+tagged words.
+
+### ps.wiktionary — 954 romanizations, and they are NOT IPA, which is why they are worth having
+
+The `{{IPA|…}}` template on ps.wiktionary holds an ad-hoc **Latin transliteration**, not IPA. Read from the
+dump (`pswiktionary-latest-pages-articles.xml.bz2`, 3.0 MB — not the API, per the standing lesson), 956 values
+over 954 headwords. The diacritics are the payload:
+
+```
+acute  ×938   STRESS        on 87% of values
+macron ×559   LENGTH        on 49%   (44% carry BOTH)
+dot    ×335   RETROFLEX     ḍ ṛ ṇ ṭ  = ډ ړ ڼ ټ
+caron  ×138   POSTALVEOLAR  č ǰ š ž
+```
+
+⚠ **STRESS IS THE PART NOTHING ELSE IN THIS REPO HAS.** `phonemizeWordCore` assigns stress by a heuristic
+("the last long vowel, else the last nucleus") that has never been validated against anything, because the
+referee-eval BACKBONE fold **strips stress** before comparing. 831 stress-marked values is the first Pashto
+stress data within reach. Using it needs a comparison mode that does not strip stress — real work, but the
+data side is solved.
+
+⚠ **AND IT LEANS SOUTHERN, WHICH NO OTHER SOURCE DOES.** The isogloss test on its own headwords:
+
+```
+ښ  →  ṣ̌ (pbt) 51/75 = 68%   ·  x (pbu) 15   ·  š (broad) 8
+ږ  →  ẓ̌ (pbt) 26/32 = 81%   ·  g (pbu)  4   ·  ž (broad) 2
+```
+
+That is MacKenzie's ṣ̌/ẓ̌ notation — Kandahari. Against wikipron's ~3:1 **Northern** lean, this is the first
+pbt-majority source found. And it is independent of wikipron/kaikki/espeak: of 603 distinct single-word
+headwords, **547 are in none of them**.
+
+### Two reasons it is silver, not a referee
+
+- **Register.** The bulk are Pashto Academy neologisms and technical compounds — اړيكغونډله `aṛík-ɤonḍla`,
+  پرمختگپال `par-max-tag-pā́l`, انځورگري `anjor-garí` — hyphenated at morpheme boundaries. This is the exact
+  confound `invert_harakat.ts` already records for the pa cross-script tranche: Wikipedia titles regressed
+  EVERY rider and were reclassified as "LEXICON material, not training material". A referee drawn from coined
+  terminology would not measure the language anyone speaks.
+- **Corruption, and it is not subtle.** A whole contiguous block (`باز` `ارمخچه` `اگن` `باښه` `برگېلۍ`
+  `پينگوين` `تارو` `ترکاڼک` `ټکټکانه`) all carry the single value `bāz`; `ټاپول` carries وگړپال's value;
+  `اوغز` carries اړاند's; `dictionnaire` → `/dik.sjɔ.nɛʁ/` is French; `بلوژنه` → `bǝlwažǝ` is truncated.
+
+⚠ **BUT THE NOISE SELF-FILTERS, BY THE MECHANISM RUN 12 MEASURED.** Fed to `invert_harakat.ts`, a row yields a
+label only where a vocalization of the *skeleton* makes OUR g2p reproduce the reading. `ټاپول` cannot produce
+`wagar-pāl` under any harakat assignment, so the corrupted rows contribute nothing — the same filter that took
+espeak's 501 unambiguously-Northern entries to exactly 0. **The yield rate would again be the quality measure.**
+
+### What this changes
+
+It is not a fix for the circularity — that is still the held-out split, which needs no new data. It is a
+**new information source**: 547 unseen, pbt-leaning words carrying short vowels, length and stress, in a
+language whose whole difficulty is that its script writes none of the three. Two uses, in order of value:
+
+1. **Inverter silver** (needs a romanization→skeleton-harakat mapping; noise self-filters; adds non-circular
+   lexicon coverage — the first CC-BY-SA-only tranche that is pbt-majority).
+2. **The first stress referee** (needs a stress-preserving comparison mode in eval.ts).
+
+⚠ Neither is done in this run. What is done is establishing that the source exists, what it contains, and
+that it is Southern — the three things that were unknown when the question was asked.
+
+## Run 14 — 2026-08-10 — ps.wiktionary wired as silver: 40.5% yield, the best of any tranche
+
+Run 13 established the source exists, is pbt-majority, and is independent. This run converts it and mines it.
+`tools/pashto/build_pswiktionary_silver.py` reads the dump, maps the romanization to this engine's IPA, and
+writes `tools/perso-arabic/silver.pswikt-ps.tsv` in the miner's `word ⇥ pus ⇥ IPA` shape.
+
+**The map is anchored, not assumed.** Every confusable letter is pinned to a headword in the dump where the
+Arabic and the Latin line up: `c`=څ (`asmān-cák`), `j`=ځ (`axaj-lík`), `ǰ`=ج (`ehteǰāǰ-lík`), `x̌`/`ṣ`=ښ,
+`ǧ`/`ẓ`=ږ, `ɤ`/`γ`=غ. That last one matters most — `ɤ` is a vowel-shaped glyph doing a consonant's job, and
+read as a vowel it would corrupt every غ word in the tranche.
+
+⚠ **WHAT HAD TO BE RIGHT WAS NARROWER THAN IT LOOKED.** The miner compares under `PS_FULL_FOLD`, which strips
+stress and length — so the acute can be dropped outright, and the macron matters only where it changes vowel
+QUALITY (ā is /ɑ/, a different vowel, not a longer /a/). The job reduces to segments plus the short-vowel
+qualities a/ə/i/u/o, which is exactly the axis the abjad loses.
+
+### Two bugs the first build shipped, both caught by reading the output
+
+- **`ټاپول → waɡarpɑl` passed the skeleton check.** The threshold was `max(2, int(0.75·n))`; for a 3-consonant
+  word that is 2, and the copy-paste row matched 2 of 3. `int` → `ceil` and the floor removed: a short word
+  must match ALL its consonants, and the 75% tolerance is for long compounds only (where the source
+  legitimately writes a plain `r` for ⟨ړ⟩).
+- **`باجپازی → bad͡zpɑzaj`** — should be d͡ʒ. `ĵ` (j + circumflex) is a variant of `ǰ` for ⟨ج⟩, but the
+  circumflex was in the DROP set as prosody, leaving a bare `j`, which the map reads as ⟨ځ⟩ **d͡z**. A wrong
+  PHONEME from a dropped diacritic, silently, on a row that then passed every downstream check. ⚠ The lesson
+  generalizes: prosody marks are droppable, letter-forming marks are not, and the two look identical in a
+  combining-character set.
+
+### The result
+
+```
+548 silver rows  →  222 shipped lexicon rows  =  40.5% yield   (corpus-wide: 16.9%)
+                    169 of them words NO other source reaches
+lexicon      13,828 → 14,021        mining yield  26.1% → 26.6%
+referee                UNCHANGED    63.1% / 72.3% / 69.6% / 77.3% / 5.9%
+```
+
+⚠ **THE REFEREE NOT MOVING IS THE EXPECTED RESULT, NOT A DISAPPOINTMENT.** 427 of the 548 rows are words
+wikipron and kaikki do not contain, so there is nothing there for them to score — the same posture the espeak
+tranche has had since it landed. What the tranche buys is production coverage on real words, in the variety
+this engine implements. ⚠ It also means this tranche cannot be validated by the referee, and its 40.5% yield
+is the only quality number available for it. Stated as such rather than dressed up.
+
+Validation attempted on the 19 words shared with a referee: 8 exact after folding, 10 more within 2 symbols,
+1 apparent disagreement that is mostly the probe's crude fold not normalizing the referee's `ä`/`ɾ`. n = 19 is
+too small to be evidence; recorded so nobody mistakes it for a validation that happened.
+
+### A licence bug the new source exposed
+
+`export_lexicons.sh` recomputes "N of M rows are reachable only from the GPL source" into the shipped file's
+header. Adding a second CC-BY-SA pool broke it twice:
+
+- ps.wiktionary was not in the CC set at all, so a word reachable from BOTH espeak and ps.wiktionary counted
+  as espeak-only (12,556 → 12,512 once added).
+- worse, and pre-existing: the CC pools were read **without filtering `lang == "pus"`**, and `silver.tsv` is
+  multi-language. Perso-Arabic spellings collide across ur/fa/pa/ps, so 860 rows counted as CC-reachable that
+  the ps miner could never have produced from them. Understated the GPL share as 12,512 where it is
+  **13,372 of 14,021 (95.4%)**.
+
+A licence sentence has to count the rows this build could actually reach. Both fixed; the header now agrees
+with an independent recount.
+
+## Run 15 — 2026-08-11 — reviewing Run 14: the source is not 68% Southern, it is 99%
+
+PR review of the ps.wiktionary tranche. Two findings, and they are the same finding twice.
+
+### The isogloss survey was wrong, in the conservative direction
+
+Run 13 reported ښ→ṣ̌ 68% / ږ→ẓ̌ 81% with 15 Northern `x` and 4 Northern `g`. Re-measured by classifying on
+explicit base+combining CLUSTERS, each NFC-normalized, instead of by substring presence:
+
+```
+ښ   74/75 = 99%  pbt (ṣ̌ / x̌)     ·  plain s 1  ·  NORTHERN x 0  ·  broad š 0
+ږ   32/32 = 100% pbt (ẓ̌ / ǧ / ğ)
+```
+
+**There are no Northern readings in this source at all.** The old probe used an elif chain that tested for a
+bare `x` before it recognised `x̌`, and compared `š` as a 1-char NFC string against 2-char NFD clusters. So
+MacKenzie's SOUTHERN x̌ and ǧ were counted as Northern x and g, and every š missed.
+
+⚠ **Third time in this investigation** that a diagnostic also matched something else — Run 5 keyed on ښ/ږ
+alone, Run 7 keyed on a folded vowel, Run 12's first pass counted genuine خ/ګ as Northern reflexes. The fix
+has been the same every time and is now written into the builder: classify on explicit clusters, normalized,
+never on substring presence.
+
+### And a `ğ` that was silently becoming a different phoneme
+
+`زېږندويي = zeğǝndoyí` spells ⟨ږ⟩ as **`ğ` (g + BREVE)**, a variant of ǧ. `MAP` has a `ğ` key — but the breve
+was still in `COMBINING_DROP` as prosody, so it was stripped before lookup, leaving a bare `g` → **ɡ**.
+
+That is precisely the `ĵ`/circumflex bug from Run 14, still live one mark over, and the comment warning about
+it was sitting three lines above the set that still contained the breve. It also **corrupted the survey that
+motivated the whole tranche**: the one `ğ` is what the old probe reported as a Northern bare `g`. Breve moved
+to `COMBINING_KEEP`; the shipped silver is byte-identical (that entry is multi-word and dropped anyway), so
+this is a latent-bug fix, not a data change.
+
+⚠ The general rule, now stated in the builder: **a MAP key can look handled while the mark that forms it is
+being stripped two lines earlier.** Any letter-forming mark needs an entry in KEEP, and an unrecognised mark
+is a counted drop rather than a silent pass-through.
+
+### What actually changed
+
+Nothing in the data — 548 silver rows, 14,021 lexicon rows, referee unchanged. What changed is that the claim
+"pbt-majority" was too weak by half, and one future dump's `ğ` would have imported a Northern ⟨ږ⟩ into a
+Southern lexicon.
