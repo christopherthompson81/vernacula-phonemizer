@@ -23,9 +23,41 @@ describe("pashto canonical IPA", () => {
             ["ورځ", "ˈorəd͡z"], // day — ځ → d͡z affricate
             ["اسپانيا", "aspɑnjˈɑ"], // Spain — ـيا: ی is the glide [j], the final ا the [ɑ] nucleus
             ["دنيا", "d̪ənjˈɑ"], // world — ـيا → jɑ
-            ["انګور", "aŋɡˈor"], // grapes — homorganic ن → [ŋ] before the velar ګ
+            // grapes — homorganic ن → [ŋ] before the velar ګ, which is what this case is here to pin. The VOWEL
+            // changed from [o] to [uː] when the mater-lectionis rule stopped being gated to word-final position:
+            // ⟨ـُو⟩ is now /uː/, the lexicon can finally SPELL a medial /u/, and انګور is one of the words that
+            // wanted one. wikipron agrees (`aŋɡur`), and so does the Persian loan it is (angūr).
+            ["انګور", "aŋɡˈuːr"],
         ];
         for (const [w, exp] of cases) expect(phonemizeWord(w)).toBe(exp);
+    });
+
+    // The three carrier rules earned in the pbt engine pass. Each one is a MEASURED majority on the raw pbt+kaikki
+    // references, not a tidy generalization — the counts live in the g2p's own comments, and the cases the counts
+    // say are coin flips (⟨وی⟩ 50%, ⟨يو⟩ 44%) are deliberately absent here because they stay lexical.
+    test("carrier letters: final ⟨ی⟩ vs ⟨ي⟩, the glide before ⟨ا⟩, and the mater lectionis", () => {
+        // 1. WORD-FINAL ⟨ی⟩ IS THE -ay DIPHTHONG, ⟨ي⟩ IS PLAIN /i/ — Pashto distinguishes the two yehs where
+        //    Persian/Urdu do not (108/125 = 86% vs 42/43 = 98% on the raw reference). Reading both as /i/ dropped
+        //    a whole segment from every masculine-singular noun and adjective.
+        expect(phonemizeWord("سړی")).toBe("səɻəˈi"); // man — saɽay, NOT *saɽi
+        expect(phonemizeWord("اسماني")).toBe("asmɑnˈi"); // heavenly — ⟨ي⟩ keeps /i/, unchanged
+        // 2. A CARRIER IMMEDIATELY BEFORE ⟨ا⟩ IS THE GLIDE (⟨وا⟩ 31/31, ⟨يا⟩ 25/25 — unanimous on both letters).
+        //    The rule used to be restricted to word-final ـيا, and after a consonant the و took the long-vowel
+        //    branch, which made the following ا glide instead — emitting [j] for ⟨ا⟩, a reading it never has.
+        expect(phonemizeWord("خواږه")).toBe("xwˈɑʐə"); // sweet — xwɑʐə, NOT *xojʐə
+        // independent — and the initial CLUSTER here is the LEXICON's doing, not the rule's. Pashto's word-initial
+        // cluster is lexical (measured: 30% cluster / 70% broken, with no sonority cell lopsided enough to be a
+        // rule), so the g2p's default ə is right on the majority and `lexicon.tsv` carries the exceptions.
+        expect(phonemizeWord("خپلواک")).toBe("xpəlwˈɑk");
+        expect(phonemizeWord("اسپانيا")).toBe("aspɑnjˈɑ"); // the word-final case still holds
+        // 3. HOMORGANIC CARRIER = MATER LECTIONIS, IN ANY POSITION: ⟨ـُو⟩ → /uː/, ⟨ـِی⟩ → /iː/. Gated to
+        //    word-final, a medial ⟨ـُو⟩ fell through to the glide arm and produced an epenthetic vowel and a
+        //    spurious /w/ — and `lexicon.tsv` feeds exactly these harakat, so it was live, not hypothetical.
+        expect(phonemizeWord("کُور")).toBe("kˈuːr"); // house, spelled with the damma — kur, NOT *kuwər
+        expect(phonemizeWord("آسُو")).toBe("ɑsˈuː"); // the word-final case that always worked
+        // …and the glide reading of ⟨ـول⟩ is still reachable, now via the fatḥa rather than the damma. This is
+        // the pair the re-mine turned on: one spelling per reading, where before the damma meant both.
+        expect(phonemizeWord("بندَول")).toBe("bənd̪awˈəl"); // to close (causative -awəl)
     });
 
     // NUMBERS — spellings from Omniglot "Pashto numbers and numerals" + learn101.org/pashto_numbers.php (see the
@@ -39,7 +71,10 @@ describe("pashto canonical IPA", () => {
     });
 
     test("numbers: irregular teens, the ⟨ویشت⟩ 21-29 series, and UNITS-FIRST 31-99", () => {
-        expect(phonemize("13", "ps")).toBe("d̪ˈijərləs"); // دیارلس — fused, not دری + لس
+        // دیارلس — fused, not دری + لس. ⚠ Was `d̪ˈijərləs`; the ⟨يا⟩-is-a-glide rule made it `d̪jˈɑrləs`, which
+        // is what wikipron says (`djɑrləs`) and what the spelling means. The old value read the ی as a vowel and
+        // then lost the ا's [ɑ] to a spurious glide — the ⟨ا⟩→[j] bug, showing up in the number path.
+        expect(phonemize("13", "ps")).toBe("d̪jˈɑrləs");
         expect(phonemize("19", "ps")).toBe("nˈoləs"); // نولس
         expect(phonemize("20", "ps")).toBe("ʃˈəl"); // شل — was EMPTY (the tens-key bug)
         expect(phonemize("21", "ps")).toBe("iwˈojʃət̪"); // یوویشت — the BOUND ویشت form of twenty, not شل
@@ -56,7 +91,8 @@ describe("pashto canonical IPA", () => {
         expect(phonemize("12345", "ps")).toBe("d̪ˈoləs zˈər ˈo d̪ərˈe sˈəl ˈo pənd͡zˈə t͡səlˈojʂət̪");
         expect(phonemize("1000000", "ps")).toBe("milˈiwən"); // میلیون — was EMPTY
         expect(phonemize("2000000", "ps")).toBe("d̪wˈə milˈiwən"); // دوه میلیون
-        expect(phonemize("1000000000", "ps")).toBe("milˈijrəd̪"); // میلیارد
+        // میلیارد — same rule, same shape: `milˈijrəd̪` had dropped the [ɑ] entirely. milyard is the word.
+        expect(phonemize("1000000000", "ps")).toBe("miljˈɑrəd̪");
     });
 });
 

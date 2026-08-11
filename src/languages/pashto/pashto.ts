@@ -5,6 +5,23 @@
  * but the SHORT vowels a/ə/i/u are usually UNWRITTEN, so a default [ə] (the zwarakay) + medial-schwa deletion
  * stand in for the deferred short-vowel-restoration subsystem (, as for Urdu/Persian). Word-final ه→[ə]
  * (ښه→ʂə); ع→ʔ. Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ.
+ *
+ * ⚠ THE THREE AMBIGUOUS-CARRIER RULES ARE THE FIDDLY PART OF THIS ENGINE, and each is a COUNTED majority on the
+ * raw pbt reference rather than a tidy generalization — they live on `longVowel` and the glide branch in `g2p`,
+ * with their counts. Summary: word-final ⟨ی⟩ is the -ay diphthong and ⟨ي⟩ is plain /i/; a carrier immediately
+ * before ⟨ا⟩ is the glide; a carrier homorganic with the preceding vowel is the mater lectionis (⟨ـُو⟩→uː). The
+ * cases that counted out as COIN FLIPS are deliberately absent and belong to `lexicon.tsv`: medial ⟨و⟩ is /u/
+ * 103 vs /o/ 100, and the word-initial cluster is 70% vowel-broken / 30% kept with no sonority conditioning.
+ *
+ * ⚠ THE COVERAGE LEXICON IS CALIBRATED TO THIS FILE, so a change to what a carrier MEANS invalidates it and the
+ * mine must be re-run — `invert_harakat.ts` searches vocalizations by round-tripping through this g2p, so it
+ * learns whatever convention the g2p has, including its bugs. (It had mined بندول as بندُول for /bandawəl/ back
+ * when a medial ⟨ـُو⟩ wrongly read u·w·ə.) Re-mine: `--lexicon ps --shard=k/14` → `export_lexicons.sh`.
+ *
+ * ⚠⚠ AND DO NOT QUOTE THIS ENGINE'S REFEREE SCORE WITHOUT THE CAVEAT: the lexicon is mined from wikipron/kaikki,
+ * which ARE the referees, so the shipped number is substantially circular (pbt slice: shipped 69.6%, espeak-only
+ * lexicon 46.7%, rules-only 46.9%). Engine changes are compared on RULES-ONLY. See tools/referee-eval/langs/
+ * ps.jsonc and docs/investigations/ps_neural_restoration_investigation.md Run 11.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -48,11 +65,28 @@ const isVowelCarrier = (c: string): boolean =>
     c === ALIF || c === WAW || c === YA || c === YA_AR || c === YA_E || c === YA_FEM || c === YA_HAMZA;
 const endsInVowel = (out: string): boolean => /[aeiouɑə]$/u.test(out);
 
-/** A vowel-carrier letter standing after a consonant → its long/mid vowel. */
-function longVowel(ch: string): string {
+/**
+ * A vowel-carrier letter standing after a consonant → its long/mid vowel.
+ *
+ * ⚠ `final` SEPARATES ⟨ی⟩ FROM ⟨ي⟩, AND THAT ONE BIT IS THE LARGEST SINGLE ENGINE WIN THIS ENGINE HAS HAD.
+ * Pashto's orthography distinguishes the two yehs word-finally where Persian/Urdu do not: ⟨ی⟩ (U+06CC) is the
+ * masculine-singular / adjectival **-ay diphthong** and ⟨ي⟩ (U+064A) is plain /i/. Reading both as /i/ cost a
+ * whole segment on every -ay word. Counted on the RAW pbt reference (never the folded string — Run 8):
+ *
+ *     word-final ی   108/125 (86%)  aɪ 53 · ai 52 · ɪ 2 · əi 1     ← the diphthong
+ *                      8       i        (ناڅاپی, لوی — loans and a few natives)
+ *                      5       j        (خدای, دوی — after a vowel, handled by the offglide branch instead)
+ *     word-final ي    42/43  (98%)  i                              ← plain /i/, unchanged
+ *
+ * Emitted as `əi` rather than `aɪ` to match ⟨ۍ⟩/⟨ئ⟩, which are the SAME suffix in feminine/verbal spelling and
+ * whose references write it `əi` 24× — one form for one morpheme. Under the eval fold all of aɪ/ai/əi/əɪ
+ * collapse together anyway, so the choice is about internal consistency, not about scoring.
+ */
+function longVowel(ch: string, final = false): string {
     if (ch === ALIF || ch === ALIF_MADDA) return "ɑ";
     if (ch === WAW) return "o";
-    if (ch === YA || ch === YA_AR) return "i";
+    if (ch === YA) return final ? "əi" : "i";
+    if (ch === YA_AR) return "i";
     if (ch === YA_E) return "e";
     if (ch === YA_FEM || ch === YA_HAMZA) return "əi";
     return "";
@@ -99,33 +133,55 @@ function g2p(word: string): string {
                 i += 2;
                 continue;
             }
-            const glideBeforeFinalHe =
-                s[i + 1] === HE && i + 2 === n && (ch === WAW || ch === YA || ch === YA_AR);
-            // ـيا: a ی before a word-final ا is the glide [j], and the ا is the [ɑ] nucleus (اسپانيا→əspɑnjɑ,
-            // دنيا→dunjɑ) — without this the ی reads as [i] and the ا wrongly glides (…nij).
-            const glideBeforeFinalAlif =
-                s[i + 1] === ALIF && i + 2 === n && (ch === YA || ch === YA_AR);
-            if (endsInVowel(out) || glideBeforeFinalHe || glideBeforeFinalAlif) {
+            const glideable = ch === WAW || ch === YA || ch === YA_AR;
+            const glideBeforeFinalHe = s[i + 1] === HE && i + 2 === n && glideable;
+            // ⚠ A و/ی/ي IMMEDIATELY BEFORE ا/آ IS THE GLIDE, AND THE ا IS THE [ɑ] NUCLEUS — ⟨وا⟩→wɑ, ⟨يا⟩→jɑ
+            // (خواږه→xwɑʐə, باغوان→bɑɣwɑn, خپلواک→xpəlwɑk, اسپانيا→əspɑnjɑ). Counted on the RAW pbt+kaikki
+            // references, this is the most one-sided fact in Pashto's carrier inventory:
+            //
+            //     ⟨وا⟩  31/31 = 100% glide          ⟨يا⟩  25/25 = 100% glide
+            //     ⟨وی⟩  5/10  =  50%  ⟨يو⟩ 4/9 = 44%  ⟨وي⟩ 5/7 — COIN FLIPS, left lexical on purpose
+            //
+            // ⚠ THE OLD RULE WAS THIS ONE RESTRICTED TO WORD-FINAL ـيا, AND THE RESTRICTION HID A BUG. After a
+            // CONSONANT the و took the `longVowel` branch → [o], which then made `endsInVowel` true at the ا, so
+            // the ا fell into the glide branch below and was emitted as **[j]** — a sound ⟨ا⟩ has in no position.
+            // خواږه read *xojʐə for xwɑʐə. That is why `ALIF` is excluded from the glide test: a carrier that
+            // reaches it before an ا is now already the glide, and an ا that reaches it is a hiatus [ɑ], never j.
+            const glideBeforeAlif = glideable && (s[i + 1] === ALIF || s[i + 1] === ALIF_MADDA);
+            const offglideAfterVowel = endsInVowel(out) && ch !== ALIF && ch !== ALIF_MADDA;
+            if (glideBeforeAlif || glideBeforeFinalHe || offglideAfterVowel) {
                 // A WORD-FINAL و/ی after a vowel is the DIPHTHONG offglide (سړی -ay→saɽaɪ, لوی→loɪ), not the
-                // consonantal glide — a medial glide (دنيا→dənjɑ) stays j/w. EXCEPT when homorganic with the
-                // preceding vowel (و after u / ی after i): there و/ی is the long-vowel mater lectionis, آسُو→ɑsuː.
-                const finalOffglide = i === n - 1 && endsInVowel(out);
-                if (finalOffglide) {
-                    const pv = out.at(-1);
-                    out +=
-                        (ch === WAW && (pv === "u" || pv === "ʊ")) || (ch !== WAW && (pv === "i" || pv === "ɪ"))
-                            ? "ː"
-                            : ch === WAW ? "ʊ" : "ɪ";
-                } else out += ch === WAW ? "w" : "j";
+                // consonantal glide — a medial glide (دنيا→dənjɑ) stays j/w.
+                //
+                // ⚠ BUT HOMORGANIC FIRST, AND IN **ANY** POSITION: a و after /u/ (or a ی after /i/) is the
+                // MATER LECTIONIS marking that vowel long — the ordinary Perso-Arabic ⟨ـُو⟩ = /uː/, ⟨ـِي⟩ =
+                // /iː/. This test used to be gated on `i === n - 1`, so it only ever fired word-finally
+                // (آسُو→ɑsuː) and a MEDIAL ⟨ـُو⟩ fell through to the glide arm: کُور read *kuwər for /kur/ and
+                // مُوک read *muwək for /muk/ — an epenthetic vowel and a spurious /w/ on every such word.
+                // ⚠ THAT WAS ON THE SHIPPED PATH, not a hypothetical: `lexicon.tsv` supplies exactly these
+                // harakat, and **416 of its 10,731 entries carry ⟨ُو⟩**, so the coverage layer was feeding the
+                // bug rather than avoiding it. The gate is gone; the glide arm now handles only the genuinely
+                // heterorganic cases it was written for.
+                const pv = out.at(-1);
+                const homorganic =
+                    (ch === WAW && (pv === "u" || pv === "ʊ")) || (ch !== WAW && (pv === "i" || pv === "ɪ"));
+                let emittedGlide = false;
+                if (homorganic && !glideBeforeAlif) out += "ː";
+                else if (i === n - 1 && endsInVowel(out)) out += ch === WAW ? "ʊ" : "ɪ";
+                else { out += ch === WAW ? "w" : "j"; emittedGlide = true; }
                 // A glide behaves like a coda consonant: before another consonant it takes an epenthetic ə (the
                 // verbal infinitive -ول = /awəl/: کَول→kawəl, not kawl). Mirrors the consonant-branch INH insertion.
                 // SUPPRESSED by a sukun on that consonant (ښایسْته→ʂɑjstə, not ʂɑjəstə) — glide+CC is lexically
                 // ambiguous (راوستل wants the ə, ښایسته doesn't), so the sukun makes it lexicon-correctable/mineable.
+                // ⚠ AND GATED ON `emittedGlide`, WHICH IS THE OTHER HALF OF THE MATER-LECTIONIS FIX. The rule is
+                // about a CODA CONSONANT needing a following nucleus; a length mark is not one. Without the gate
+                // مُوک came out *muːək — the /w/ was gone but the epenthetic ə it had licensed stayed behind, and
+                // the referee got WORSE (810 → 799) even though the segment it complained about was fixed.
                 const nx = s[i + 1];
-                if (nx !== undefined && nx in C && !isVowelCarrier(nx) && nx !== HE && nx !== HE_DO &&
-                    s[i + 2] !== DEF.sukun)
+                if (emittedGlide && nx !== undefined && nx in C && !isVowelCarrier(nx) && nx !== HE &&
+                    nx !== HE_DO && s[i + 2] !== DEF.sukun)
                     out += INH;
-            } else out += longVowel(ch);
+            } else out += longVowel(ch, i === n - 1);
             i++;
             continue;
         }

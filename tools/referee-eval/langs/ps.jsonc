@@ -18,6 +18,8 @@
 // was already scoring; if it does, it is a difficulty filter wearing a linguistic label. Ours: 744 → 744 on
 // wikipron and 666 → 666 on kaikki, so the whole gain is denominator. And the engine scores HIGHEST on its own
 // variety — pbt 63.0% / pst 60.4% / pbu 58.1% — which is the second check that the slices are real.
+// (Those three are the Run-8 measurement, kept as the pair-wise ORDERING evidence they were cut to be; the
+// pbt figure has since moved to 69.6% — Run 10 — while pst/pbu were not re-run.)
 //
 // ⚠ THE AGGREGATE LEANS NORTHERN, WHICH IS THE REAL REASON THE UMBRELLA SCORE IS LOW. Counting the isogloss
 // across the primary: ښ is x(pbu) 138 · ʃ(broad) 99 · ʂ(pbt) 52 · ç(pst) 32, and ږ is ɡ(pbu) 151 · ʒ 84 ·
@@ -29,12 +31,31 @@
 // tools/pashto/build_kaikki_dialect_referees.py. Those tagged referees are what finally show the split is
 // real rather than plausible. A SOUTHERN engine on ground-truth-labelled data:
 //
-//     pbt (ours)  65/97  = 67.0%        pbu  6/102 = 5.9%        pst  8/43 = 18.6%
+//     pbt (ours)  74/97  = 76.3%        pbu  6/102 = 5.9%        pst  8/43 = 18.6%
 //
-// An 11x separation between our variety and Northern. That is the number to quote when anyone asks why the
-// `pus` aggregate reads 55.7%: the umbrella is ~3:1 Northern on the isogloss, and this engine scores 5.9%
-// there. ⚠ The tags also VALIDATE the wikipron inference — ښ is pbt→ʂ 88% / pbu→x 94%, ږ is pbt→ʐ 94% /
+// A 13x separation between our variety and Northern. That is the number to quote when anyone asks why the
+// `pus` aggregate reads 63.0%: the umbrella is ~3:1 Northern on the isogloss, and this engine scores 5.9%
+// there. ⚠ AND THE SEPARATION WIDENED RATHER THAN NARROWED WHEN THE ENGINE IMPROVED — Run 10's carrier rules
+// took pbt 67.0% → 76.3% and left pbu at 6/102, not one word moved. An engine change that raised BOTH would
+// have been evidence the split was a difficulty artifact; this is the control that says it is a real one. ⚠ The tags also VALIDATE the wikipron inference — ښ is pbt→ʂ 88% / pbu→x 94%, ږ is pbt→ʐ 94% /
 // pbu→ɡ 91% — which is what licenses split_referee_by_dialect.py on a source that has no tags.
+//
+// ⚠⚠ READ THIS BEFORE QUOTING ANY NUMBER IN THIS FILE: THE ps SCORES ARE SUBSTANTIALLY CIRCULAR. The engine's
+// coverage layer (`pashto/lexicon.tsv`) is mined by tools/perso-arabic/invert_harakat.ts from `silver.tsv` and
+// `silver.kaikki.tsv` — which ARE wikipron and kaikki, i.e. the referees below. eval.ts scores ps through the
+// lexicon-aware `phonemizeWord`, so a row mined from a referee is then graded against that referee. Measured on
+// ps.wikipron-pbt.tsv (investigation Run 11):
+//
+//     shipped lexicon                              891/1281 = 69.6%
+//     espeak-only lexicon (--no-referee-silver)    598/1281 = 46.7%   ← the honest number
+//     rules only, no lexicon                       601/1281 = 46.9%
+//
+// The 22.7pp gap is the referee's own answers fed back. The espeak tranche is 97.4% of the lexicon and moves
+// this eval by −0.2pp — because it covers only 154/1281 (12%) of the referee's vocabulary, not because it is
+// bad; its value is production token coverage, which this eval cannot see. ⚠ Compare ENGINE changes on the
+// rules-only number (the three carrier rules of Run 10: 42.2% → 46.9%), never on the shipped one. The four
+// languages with the same hazard (en-GB, km, af, ilo) each export a `phonemizeWordRules` for eval to use; ps
+// does not yet, and giving it one would restate every historical ps number — a decision, not a cleanup.
 //
 // ⚠ TAGS ARE SPARSE (305 of 1,644 kaikki IPA records). The untagged remainder goes to ps.kaikki-untagged.tsv
 // and is NOT distributed into the three — an unlabelled reading is evidence about Pashto, not about a member.
@@ -44,9 +65,9 @@
     "referees": [
         { "file": "ps.wikipron-pus-broad.tsv", "source": "wikipron pus_arab broad (human) — MACROLANGUAGE aggregate, the honest floor", "role": "primary" },
         { "file": "ps.kaikki-pus.tsv", "source": "kaikki pus (Wiktionary, human)", "role": "secondary" },
-        { "file": "ps.wikipron-pbt.tsv", "source": "wikipron pus → pbt (Southern) slice — our variety, 744/1181 = 63.0%", "role": "secondary" },
-        { "file": "ps.kaikki-pbt-tagged.tsv", "source": "kaikki pbt (Southern) — assigned by kaikki's OWN dialect tags, GROUND TRUTH: 65/97 = 67.0%", "role": "secondary" },
-        { "file": "ps.kaikki-pbu-tagged.tsv", "source": "kaikki pbu (Northern) — ground truth, and the proof the split is real: 6/102 = 5.9% for a Southern engine", "role": "secondary" }
+        { "file": "ps.wikipron-pbt.tsv", "source": "wikipron pus → pbt (Southern) slice — our variety, 891/1281 = 69.6% shipped / 46.9% rules-only", "role": "secondary" },
+        { "file": "ps.kaikki-pbt-tagged.tsv", "source": "kaikki pbt (Southern) — assigned by kaikki's OWN dialect tags, GROUND TRUTH: 74/97 = 76.3% shipped / 51.5% rules-only", "role": "secondary" },
+        { "file": "ps.kaikki-pbu-tagged.tsv", "source": "kaikki pbu (Northern) — ground truth, and the proof the split is real: STILL 6/102 = 5.9% after Run 10 moved pbt +8pp", "role": "secondary" }
     ],
     "segmentJoin": true,
     "folds": [
