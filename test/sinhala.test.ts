@@ -119,3 +119,26 @@ describe("Sinhala anusvara before a sibilant", () => {
         expect(phonemizeWord("සංවිධාන")).toBe("sˈamʋid̪ʰˌaːnə"); // and a labial still falls to m
     });
 });
+
+// The review pass — trap 8, "probe the adversarial neighbour of every rule". Each of these was a defect
+// until the probe found it.
+describe("Sinhala normalization: the review pass", () => {
+    it("a truncated decimal keeps its dot out of the pause channel", () => {
+        // `ස්කන්ධයෙන් .9%` writes 0.9% without the zero; the dot survived the percent rule as a full stop.
+        expect(phonemize("ස්කන්ධයෙන් .9% ක්", "si")).not.toContain(" . ");
+        // …but the corpus's missing-space-after-a-full-stop MUST stay a pause. All twelve are glued.
+        expect(phonemize("ඇත.2011 සහ", "si")).toContain(" . ");
+        expect(phonemize("අවු.18 අඩු", "si")).toContain(" . ");
+    });
+
+    it("kelvin takes no degree word, and only when space-separated", () => {
+        expect(phonemize("90 K", "si")).toBe("kˈelʋin ˈanuːw");
+        expect(phonemize("5K", "si")).not.toContain("kˈelʋin"); // a glued designation
+        expect(phonemize("1990 K.M.", "si")).not.toContain("kˈelʋin"); // an initial
+    });
+
+    it("an abbreviation glued to its year still separates", () => {
+        // ×1 in the corpus: `ක්‍රි.ව.1940 දී පමණ`.
+        expect(phonemize("ක්‍රි.ව.1940", "si")).toBe(phonemize("ක්‍රි.ව. 1940", "si"));
+    });
+});

@@ -188,3 +188,38 @@ merely inherited.
 **Still open, and out of this layer:** ශ/ෂ/ස all read `s` where the referee has `ʃ` (`බංගලාදේශය`). That is a
 phoneme-inventory decision, and `eval.ts` prints a standing `secondary-source gap` warning for si — epitran
 `sin` would be the second opinion it needs.
+
+---
+
+## Run 5 — 2026-08-11 — the review pass: probe the adversarial neighbour of every rule
+
+Trap 8 says a rule is correct exactly where you looked. Thirty-three probes, of which three found a defect:
+
+| probe | before | after |
+|---|---|---|
+| `ස්කන්ධයෙන් .9% ක්` | `…ස්කන්ධයෙන් . සියයට 9 ක්` — a spurious SENTENCE BREAK | `සියයට 0 දශම 9` |
+| `90.20 K (−182.95 °C…)` | the kelvin dropped, the sentence half-read | `කෙල්වින් 90 දශම 2 0 (සෙල්සියස් අංශක ඍණ 182 දශම 9 5…)` |
+| `ක්‍රි.ව.1940 දී` | `ක්‍රිස්තු වර්ෂ1940` — the expansion glued to its year | `ක්‍රිස්තු වර්ෂ 1940` |
+
+**The truncated decimal is the interesting one, because the guard is the whole rule.** `.9%` writes `0.9%`
+without its zero. There are 13 dot-before-digit hits in the mined segments and **only that one is a
+decimal**: the other twelve are the corpus's missing-space-after-a-full-stop (`ඇත.2011`, `තිබේ.1930`,
+`ය.1958`) plus the abbreviation `අවු.18`, and every one of those is GLUED to a letter while the decimal is
+preceded by a SPACE. So the rule is `(?<=[\s(\[])\.(?=\p{Nd})` → `0.` and the twelve stay pauses. Had it
+been written on the shape instead, it would have deleted twelve sentence boundaries.
+
+**Kelvin needed sourcing before it could be read, and takes no degree word.** `කෙල්වින්` ×37 whole-word on
+si.wikipedia, in the right sense — *කෙල්වින් යනු උෂ්නත්වය මිනුමකි* ("Kelvin is a temperature measure") and
+*කෙල්වින් මගින් ඇති ද්‍රවාංකයයි* (a melting point stated in kelvin). Digit-adjacent `K` is ×2 and both are
+kelvin. But a bare one-letter uppercase key is the trap-46 shape, so it is claimed only SPACE-SEPARATED and
+not before a dot: `5K` (a designation) and `1990 K.M.` (an initial) both stay unread. The two corpus
+instances are the *same sentences* the °C/°F rule already handles, so this finishes them.
+
+**What the probes confirmed rather than changed**, worth recording so nobody re-tests it: `%25` prefix sign,
+`5$` sign-after, `₨500`, `98.6°f` lowercase, `50 m2`/`50 m3` ASCII exponents, `B&B`, `-5` and `(-5)`,
+`425KM` uppercase, ZWNJ conjuncts — all already correct. And the three refusals held: `1,0000` and `1,00`
+are not de-grouped, `ලකුණු 156ක්, තරග 90කදී` keeps its clause comma, `ප%තිපත්ති` keeps its manufactured `%`
+silent.
+
+Gates after: 3,363 tests, tsc OK, scan "no defects", review.ts clean, corpus diff 381/447 with DROP 85 → 33,
+referee 607/648.

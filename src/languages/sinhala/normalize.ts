@@ -124,17 +124,17 @@ const stripJoiners = (s: string): string =>
  */
 const DOTTED_ABBREV: readonly (readonly [RegExp, string])[] = [
     // Era markers first (playbook step 4: era before generic abbreviations), longest key first.
-    [/ක්රි\.\s?පූ\.?/gu, "ක්‍රිස්තු පූර්ව"],
-    [/ක්රි\.\s?පු\.?/gu, "ක්‍රිස්තු පූර්ව"],
-    [/ක්රි\.\s?ව\.?/gu, "ක්‍රිස්තු වර්ෂ"],
+    [/ක්රි\.\s?පූ\.?\s?/gu, "ක්‍රිස්තු පූර්ව "],
+    [/ක්රි\.\s?පු\.?\s?/gu, "ක්‍රිස්තු පූර්ව "],
+    [/ක්රි\.\s?ව\.?\s?/gu, "ක්‍රිස්තු වර්ෂ "],
     // Measure and currency abbreviations. `කි.මී` ×2 (`වර්ග කි.මී 65,610`, wiki `පැයට කි.මී. 250`),
     // `සෙ.මී.` ×2, `ඇ.ඩො.` from the wiki's own `(ඇ.ඩො. මිලියන 7.4)`. The trailing dot is optional
     // because the corpus writes it both ways.
-    [/ඇ\.\s?ඩො\.\s?මි\.?/gu, "ඇමෙරිකානු ඩොලර් මිලියන"],
-    [/ඇ\.\s?ඩො\.?/gu, "ඇමෙරිකානු ඩොලර්"],
-    [/කි\.\s?මී\.?/gu, "කිලෝමීටර්"],
-    [/සෙ\.\s?මී\.?/gu, "සෙන්ටිමීටර්"],
-    [/මි\.\s?මී\.?/gu, "මිලිමීටර්"],
+    [/ඇ\.\s?ඩො\.\s?මි\.?\s?/gu, "ඇමෙරිකානු ඩොලර් මිලියන "],
+    [/ඇ\.\s?ඩො\.?\s?/gu, "ඇමෙරිකානු ඩොලර් "],
+    [/කි\.\s?මී\.?\s?/gu, "කිලෝමීටර් "],
+    [/සෙ\.\s?මී\.?\s?/gu, "සෙන්ටිමීටර් "],
+    [/මි\.\s?මී\.?\s?/gu, "මිලිමීටර් "],
     // `රු.` only before a number — the bare word රු is not an abbreviation. `රු. (Rs)` is glossed in the
     // corpus; unhandled, `රු. 500` read *rˈu . pˈahə sˈijəjə*, a syllable and a full stop.
     [/රු\.\s*(?=\p{Nd})/gu, "රුපියල් "],
@@ -151,7 +151,12 @@ export function normalizeSinhala(input: string): string {
     s = stripJoiners(s);
 
     // 2) DOTTED ABBREVIATIONS, closed list — era markers first (see DOTTED_ABBREV).
+    //    ⚠ EACH REPLACEMENT RE-EMITS A SPACE, because the corpus writes the era GLUED to its year
+    //    (`ක්‍රි.ව.1940 දී පමණ`, ×1). Without it the expansion came out `ක්‍රිස්තු වර්ෂ1940`; the tokenizer
+    //    would still split letters from digits, but the text is what the next rules match on and a rule
+    //    that leaves its output unspaced is one edit away from a real bug (trap 10's neighbourhood).
     for (const [rx, word] of DOTTED_ABBREV) s = s.replace(rx, word);
+    s = s.replace(/  +/gu, " ");
 
     // 3) SINHALA-LETTER INITIALS — `එෆ්.ආර්.ප්‍රනාන්දු`, `ජේ.ආර්.ජයවර්ධන`, `ටී.ආර්.එන්.සී`, `බී.එම්.ඩබ්ලිව්`.
     //    Each initial is already a pronounceable Sinhala syllable; the only defect is the dot becoming a
@@ -168,6 +173,13 @@ export function normalizeSinhala(input: string): string {
     //    punctuation: `1,001,450` read *ˈekə , ˈekə , hˈat̪ərə sˈijəjə pˈanəhə*. `grouped` ×6,913 in the dump.
     //    Only 3-digit groups, so a genuine clause comma between numbers (`ලකුණු 156ක්, තරග 90කදී`) is safe.
     s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}{1,3}(?:,\p{Nd}{3})+)(?![\p{Nd}])/gu, (m) => m.replaceAll(",", ""));
+
+    //    A TRUNCATED DECIMAL — `ස්කන්ධයෙන් .9% ක්` writes `0.9%` without its zero, and the leading dot then
+    //    survived the percent rule and became a sentence break (*…ස්කන්ධයෙන් . සියයට 9…*). Restoring the zero
+    //    is the whole fix. ⚠ THE SPACE GUARD IS THE ENTIRE RULE: the other twelve dot-before-digit hits in
+    //    the mined segments are the corpus's missing-space-after-a-full-stop (`ඇත.2011`, `තිබේ.1930`,
+    //    `ය.1958`) plus the abbreviation `අවු.18` — all GLUED to a letter, all correctly left as pauses.
+    s = s.replace(/(?<=[\s(\[])\.(?=\p{Nd})/gu, "0.");
 
     // 5) DEGREES — before units and before the decimal rule, because `20.5 °C` needs both of those still
     //    intact. `සෙල්සියස් අංශක 38 (ෆැරන්හයිට් අංශක 100.4)` is si.wikipedia's own frame, four times over in
@@ -195,6 +207,14 @@ export function normalizeSinhala(input: string): string {
         (_m, n: string, d: string) => `අංශක ${n} ${COMPASS[d]}`);
     s = s.replace(new RegExp(SIGN + NUM + "\\s*[°º\\u2070]", "gu"),
         (_m, sg: string, n: string) => `අංශක ${neg(sg)}${n}`);
+    // KELVIN, and it takes NO degree word — the scale is the noun. `කෙල්වින්` ×37 whole-word on the wiki,
+    // in the right sense (*කෙල්වින් යනු උෂ්නත්වය මිනුමකි*, "Kelvin is a temperature measure", and
+    // *කෙල්වින් මගින් ඇති ද්‍රවාංකයයි*, a melting point stated in kelvin). ⚠ A BARE ONE-LETTER UPPERCASE KEY
+    // IS THE trap-46 SHAPE, so it is claimed only when SPACE-SEPARATED, which is what the corpus's two
+    // instances are — `90.20 K (−182.95 °C…)` and `54.36 K (−218.79 °C…)`, 2/2 kelvin — and what excludes
+    // the glued `5K` designation the corpus does not contain but arbitrary input will. A following DOT
+    // is excluded too, so an initial (`1990 K.M. Silva`) cannot be read as a temperature.
+    s = s.replace(new RegExp(NUM + " K(?![\\p{L}\\p{M}.])", "gu"), "කෙල්වින් $1");
 
     // 6) NEGATIVE NUMBERS — and the discriminator is the CHARACTER, measured rather than guessed. U+2212 is
     //    ×5 in the mined segments and **all five are genuine negatives** (`−1 °C`, `−182.95`, `−297.31`,
