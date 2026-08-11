@@ -105,3 +105,39 @@ describe("Kurmanji text normalization", () => {
         expect(normalizeKurmanji("A & B")).toBe("A û B");
     });
 });
+
+// The review pass — trap 8, "probe the adversarial neighbour of every rule". Each of these was a defect
+// until the probe found it, and each fix is measured in normalize.ts.
+describe("Kurmanji normalization: the review pass", () => {
+    it("the rate is a circumfix, and the tier composes it", () => {
+        // `120 kîlometre di saetê de (190 km/h)` — the wiki glosses the phrase against the symbol.
+        expect(normalizeKurmanji("120 km/h")).toBe("120 kîlometre di saetê de");
+    });
+
+    it("a scale letter is never fused onto the degree word", () => {
+        // `°c` is ×0 in this corpus, but a case-SENSITIVE arm let the bare rule emit `20 pilec`.
+        expect(normalizeKurmanji("20 °c")).toBe("20 pile Selsiyus");
+        expect(normalizeKurmanji("98 °f")).toBe("98 pile");
+        // …and the refusal is ONE letter only: a degree followed by a WORD must still read.
+        expect(normalizeKurmanji("carna 40° germ dibe")).toBe("carna 40 pile germ dibe");
+        expect(normalizeKurmanji("20 °K")).toBe("20 °K"); // an unhandled scale stays visible
+    });
+
+    it("a URL escape is not a price", () => {
+        // The corpus's catalogue string, ×17. The tier read `$002f` as *002 dolar f*.
+        expect(normalizeKurmanji("$002f$002fSD")).not.toContain("dolar");
+        expect(normalizeKurmanji("$16")).toContain("dolar"); // and a real price still reads
+    });
+
+    it("the dotted ordinal fires below 31 and never on a sentence end", () => {
+        expect(normalizeKurmanji("hene: 1. rêbaza kevin")).toBe("hene: yekem rêbaza kevin");
+        expect(normalizeKurmanji("Ji Sedsala 19. Heya Îro")).toBe("Ji Sedsala nozdehem Heya Îro");
+        // N > 31 is 12/12 a sentence-final year or page number in this corpus.
+        expect(normalizeKurmanji("Duhok, 2006. Pîvana")).toBe("Duhok, 2006. Pîvana");
+        // the one ≤31 counter-example is the END OF A RANGE, excluded by its own shape
+        expect(normalizeKurmanji("r. 24-31. Statuya")).toBe("r. 24-31. Statuya");
+        // …and it must run ABOVE the suffix rule, which creates letters where digits were: below it,
+        // `16. 11. 2006'an` read the date's MONTH as an ordinal.
+        expect(normalizeKurmanji("Di 16. 11. 2006an de")).toBe("Di 16. 11. du hezar û şeşan de");
+    });
+});

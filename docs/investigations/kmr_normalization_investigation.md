@@ -183,3 +183,56 @@ decimal, a version and a date — four readings, one shape), `=`/`+`/`×` (every
 etymology, EasyTimeline markup or scientific notation), `±`/`<`/`>`/`÷` (×0 apiece — and `<`'s one upstream
 instance arrives as the mangled pseudo-entity `&kêm;`, which is a corpus-repair question, not a reading
 one), and `bareExponent` (`E=mc²` is the only mined superscript with no unit under it).
+
+---
+
+## Run 7 — 2026-08-11 — the review pass: four defects, and one whole class the first pass missed
+
+Trap 8: probe the adversarial neighbour of every rule. Thirty probes, four findings.
+
+**1. The rate IS sourceable, and the tier composes it exactly.** The first pass left `120 km/h` reading
+*120 kîlometre/h* — the numerator read, the denominator orphaned. `attest.ts --lang kmr --wiki ku --words
+'kîlometre di saetê de'` returns ×4, and **three of the four are glossed against the symbol in the same
+sentence**: `120 kîlometre di saetê de (190 km/h)`, `122 … (196 km/s)`, `172 … (107 mph)`. It is a
+CIRCUMFIX — "kilometres in the hour" — and splitting it as `unitPer: "di"` + `rateDenominators: {h: "saetê
+de"}` reproduces the phrase from the tier's own composition. Only `h` is declared; no per-SECOND reading is
+attested, so `m/s` stays incomplete and is recorded rather than guessed.
+
+**2. A scale letter was being FUSED onto the degree word.** `°c` is ×0 in this corpus, so the
+case-sensitive `C` arm looked free — but with it the *bare* degree arm claimed `20 °c` and emitted
+**`20 pilec`**, a nonsense token reaching the g2p, which is worse than the dropped sign it replaced. Trap 7,
+with the twist that the miss was worse than the gap. Fixed by making both scale arms case-insensitive AND
+refusing a following single letter — **one letter only**, because the corpus's own `carna 40° germ dibe`
+("becomes 40 degrees hot") is a degree followed by a WORD and must still read.
+
+**3. A URL escape is not a price.** The corpus carries a URL-encoded library-catalogue string whose escapes
+are `$` + four hex digits (`$002f$002f…$0026sm$003dfalse`, **×17**), and the tier read `$002f` as
+*002 dolar f* — confidently wrong where the old behaviour was merely silent. The `$` is spent before the
+tier sees it.
+
+**4. THE DOTTED ORDINAL — a whole class the first pass had not looked at.** `ordinal-latin` is 1,484 in the
+dump and Kurmanji uses the German-style `N.`: `1. rêbaza kevin … 2. rêbaza Êzidiyan … 3. Rêbaza Botanê`.
+Every one was a CLAUSE PAUSE, so a numbered list read as a sequence of sentences.
+
+The trap-4 tabulation, over all 30 mined `N.` followed by whitespace:
+
+```
+N > 31   ×12   ALL sentence-final — `Duhok, 2006.` `Köln 2012.` `Barselona, 1951.` `pp. 67–78.`
+N ≤ 31   ×18   14 ordinals (`1./2./3./4. rêbaza|helbesta` ×10, `17. Gulan`, `19. Heya`, `2. Peyva`,
+                `7.-8. Piştî sedsalan`), 3 dates, and ONE sentence end — `r. 24-31. Statuya…`
+```
+
+So the threshold is 31, and the single counter-example inside it is excluded by its own shape: it is the
+END OF A RANGE. **Capitalisation is not the discriminator, though it looks like one** — both classes take
+either (`3. Rêbaza` and `19. Heya` are ordinals before a capital; the sentence ends are followed by capitals
+too). Only the number's MAGNITUDE separates them, which is why it was tabulated rather than guessed.
+
+⚠ **And it had to move above the suffix rule — trap 39 pointing the other way.** That rule *creates* letters
+where digits were, so below it `Di 16. 11. 2006'an de` had already become `16. 11. du hezar û şeşan`, and
+`11.` then saw "whitespace then a letter" and read the date's MONTH as an ordinal. Above it, the lookahead
+sees the original `2006` and declines. The first ordering bug in this layer was the same trap in the other
+direction (the suffix rule spending the digit the percent path needed) — **one rule, two ordering
+constraints, discovered from opposite ends by two different gates.**
+
+Gates after: 3,380 tests, tsc OK, scan "no defects", review.ts clean, corpus diff **206/450 (45.8%)** with
+DROP 92 → 24, referee 97.4% unchanged.

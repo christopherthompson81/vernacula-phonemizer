@@ -21,6 +21,68 @@
     "tier": "wikipedia",
     "findings": [
         {
+            "word": "di saetê de",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…ye. Barove, di çîna 5emîn kategoriya xwe de cih digre. Lez, di saetê de 185 mîlometre hate pîvankirin. == Çavkanî ==…",
+                "…na Aştiyê erê kir. 1997 – Stêrkadûmdar a bi navê Hale-Bopp, di saetê de 160 kîlometir di ber dinyayê re derbas bû. Derbasbûna Stêrk…",
+                "…ayê ya herî bilez a ku li Îngilîstanê bi leza 122 kîlometre di saetê de (196 km/s) hate tomarkirin, rekoreke demkî pêk hat. Bahozê…",
+                "…ext zirar daye avahiyan û bayê bi leza zêdeyî 120 kîlometre di saetê de (190 km/h) ku hatiye tomarkirin, heta niha buye sedema 17 m…",
+                "…s û trênê hatin betalkirin. Leza bayê bi leza 172 kîlometre di saetê de (107 mph) li deryayê li Fastnet Lighthouse hate tomar kirin…",
+                "…ktmotor bûn, kapasiteya wan 1,06 lître û hêza wan 4 PS bûn. Di saetê de 16 km/katjimêr diajotin. Dîsa Heinrich Büssing, sala 1903 l…"
+            ]
+        },
+        {
+            "word": "kîlometre di saetê de",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…harikîna bayê ya herî bilez a ku li Îngilîstanê bi leza 122 kîlometre di saetê de (196 km/s) hate tomarkirin, rekoreke demkî pêk hat. Bahozê…",
+                "…Bayên bi zext zirar daye avahiyan û bayê bi leza zêdeyî 120 kîlometre di saetê de (190 km/h) ku hatiye tomarkirin, heta niha buye sedema 17 m…",
+                "…erên otobus û trênê hatin betalkirin. Leza bayê bi leza 172 kîlometre di saetê de (107 mph) li deryayê li Fastnet Lighthouse hate tomar kirin…",
+                "…i rex motorên bi hêz ên ku kapasîteyên wan digihîje heya 50 kîlometre di saetê de zêde dibe, zêde dibe, hejmara bûyerên qezayên trafîkê jî zê…"
+            ]
+        },
+        {
+            "word": "saetê",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 38,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Beşa saetê an jî beşa demê, bi kurtasî UTC (bi inglîzî: Coordinated Un…",
+                "…ojava de derbaz bike jî rojakî winda dike. == Dîrok == Beşa saetê ya herî pêşîn li Brîtanyayê, di 1ê kanûna pêşîn a 1847an de…",
+                "…î Sandford Fleming endazeyarê rêhesinî li Kanada 1879an bi \"saetê rêhesin\" pêşniyarî kir. Di çiriya pêşîn a 1884an de Washing…",
+                "…idyanên Navneteweyî) de hat pejirandin ku dinya bi 24 beşên saetê, her yek di 15 meridyenan hatî pê, parve bibe. Navbera her…",
+                "…ch a li Londonê meridyena sifir be. Li dinya niha gorî beşa saetê (UTC) hatiye parvekirin. Ji bo wê Greenwich Mean Time tê hi…",
+                "…wichê li Londonê tê mîhengkirin. Her dewletek beşeke xwe ya saetê heye. Welatê li rojhelat û rojava dirêj dibin li yeka pitir…"
+            ]
+        },
+        {
+            "word": "lezê",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 20,
+            "articles": 16,
+            "substringOnly": 0,
+            "examples": [
+                "…Iskêyta Lezê Iskêyta Lezê werzîşek pêşbaziyek e ku tê de beşdar bi karan…",
+                "…Iskêyta Lezê Iskêyta Lezê werzîşek pêşbaziyek e ku tê de beşdar bi karanîna pêlavên q…",
+                "…a leza maratonê bikin. == Dîrok == Kokên dîrokî yên Iskêyta lezê ji hezar salan zêdetir vedigerin, li welatên Skandînavya, E…",
+                "…ra tiştekî bi giranbûnê kîlogramekê di sanîyekê da bigihîne lezê 1 m s {\\displaystyle 1{\\frac {m}{s}}} . Ew bi navî Isaac Ne…",
+                "…2 4 H e 2 + {\\displaystyle {}_{2}^{4}\\mathrm {He} ^{2+}} ). Lezê derketina atomên helyûman ji radyonuklîdê nêzîkî 15.000 km/…",
+                "…urt de amade dibin re tê gotin. Dema mirov behsa xwarina bi lezê dike, pirranî hambûrger, kartolên sorkirî, sosîsên biraştî…"
+            ]
+        },
+        {
             "word": "kup",
             "verdict": "attested",
             "bounded": true,

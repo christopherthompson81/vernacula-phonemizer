@@ -83,6 +83,13 @@ const SYMBOLS = makeSymbolNormalizer({
     // (`22.000 kîlomêtre çarçik`-style area figures; `20,9 kîlomêtre kûp`, `42,7 kîlomêtre kûp` ×5).
     // ⚠ `kûp` carries the circumflex: `kup` ×1 without it is the geometric CUBE ("Tabletên çargoşe û kup").
     exponentWords: { squared: ["çargoşe"], cubed: ["kûp"], position: "after" },
+    // ⚠ THE RATE IS A CIRCUMFIX, AND THE TIER COMPOSES IT EXACTLY. Kurmanji says `kîlometre di saetê de`
+    // ("kilometres in the hour"), attested ×4 on ku.wikipedia and three of the four GLOSSED AGAINST THE
+    // SYMBOL in the same sentence: `120 kîlometre di saetê de (190 km/h)`, `122 … (196 km/s)`,
+    // `172 … (107 mph)`. Splitting it as unitPer `di` + denominator `saetê de` reproduces the phrase.
+    // Only `h` is declared: no Kurmanji reading of a per-SECOND rate is attested.
+    unitPer: "di",
+    rateDenominators: { h: "saetê de" },
     ampersand: "û",
 });
 
@@ -147,6 +154,11 @@ export function normalizeKurmanji(input: string): string {
     // 5) THE SHARED TIER — percent, currency, units, the squared/cubed modifier and `&`. Runs ABOVE step 7 because
     //    the tier matches a unit only when a NUMBER is adjacent and the decimal rewrite destroys that
     //    adjacency (the playbook's "units before decimals" coupling).
+    //    ⚠ ONE GUARD RUNS FIRST. This corpus carries a URL-encoded library-catalogue string whose escapes
+    //    are `$` + four hex digits (`$002f$002f…$0026sm$003dfalse`, ×17), and the tier read `$002f` as a
+    //    dollar amount — *002 dolar f*, confidently wrong where the old behaviour was merely silent. The
+    //    `$` there introduces a percent-style escape, not a price, so it is spent here.
+    s = s.replace(/\$(?=00[0-9a-fA-F]{2})/gu, "");
     s = SYMBOLS(s);
 
     // 6) DEGREES, AND THE NEGATIVE SIGN RIDES WITH THEM — because in this corpus the two are the same rule.
@@ -178,13 +190,20 @@ export function normalizeKurmanji(input: string): string {
     // article title is *"Pileya Celsius an jî selsiyus … / ºC"*. No Fahrenheit spelling is attested beyond
     // the same article's `Farinhayt`, which is a transliteration inside a comparison, so `°F` gets the
     // degree word and no scale.
-    s = s.replace(new RegExp(TEMP + "C(?![\\p{L}])", "gu"),
+    s = s.replace(new RegExp(TEMP + "C(?![\\p{L}])", "giu"),
         (_m, sg: string, n: string) => `${neg(sg)}${n} pile Selsiyus`);
-    s = s.replace(new RegExp(TEMP + "F(?![\\p{L}])", "gu"),
+    s = s.replace(new RegExp(TEMP + "F(?![\\p{L}])", "giu"),
         (_m, sg: string, n: string) => `${neg(sg)}${n} pile`);
     // A bare degree — every mined instance is a coordinate, where the direction word (`bakûr`, `rojhilat`)
     // is already spelled out beside it, so only the sign needs a reading.
-    s = s.replace(new RegExp(String.raw`(-?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°`, "gu"),
+    // ⚠ The two scale arms are case-INSENSITIVE and this arm refuses a following LETTER, which are the same
+    // fix twice. `°c` is ×0 in this corpus, but with a case-sensitive `C` the bare arm claimed `20 °c` and
+    // emitted `20 pilec` — a letter FUSED onto the degree word, which is a nonsense token reaching the g2p
+    // rather than a merely dropped sign. Trap 7: a class that is not case-insensitive misses half of what
+    // it is aimed at, and here the miss was worse than the gap. ⚠ The refusal is ONE letter only, not any
+    // letter: the corpus's `carna 40° germ dibe` ("becomes 40 degrees hot") is a degree followed by a WORD
+    // and must still read, so only an unhandled SCALE letter (`°K`, `°R`) is left visible.
+    s = s.replace(new RegExp(String.raw`(-?)(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°(?!\s*\p{L}(?!\p{L}))`, "gu"),
         (_m, sg: string, n: string) => `${neg(sg)}${n} pile`);
     // …and a negative that has already lost its `°` to the two rules above, or that leads a `pile` phrase
     // the corpus wrote out itself (`heta -24 û -30 pileyan`).
@@ -223,7 +242,37 @@ export function normalizeKurmanji(input: string): string {
     s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+),(\p{Nd}{1,2})(?![\p{Nd}.,])/gu, (_m, w: string, f: string) => spell(w, f));
     s = s.replace(/(?<![\p{Nd}.,])(\p{Nd}+)\.(\p{Nd})(?![\p{Nd}.,])/gu, (_m, w: string, f: string) => spell(w, f));
 
-    // 8) THE BOUND SUFFIX — and it runs LAST among the number rules, which is a trap-39 ordering and was
+    // 8) THE DOTTED ORDINAL — `1. rêbaza kevin … 2. rêbaza Êzidiyan … 3. Rêbaza Botanê`, the German-style
+    //    `N.`. `ordinal-latin` is 1,484 in the dump and the period was a CLAUSE PAUSE in every one, so a
+    //    numbered list read as a sequence of sentences.
+    //
+    //    ⚠ THE TRAP-4 TABULATION, because a bare `N.` is also every sentence that ends in a year. All 30
+    //    mined `N.` followed by whitespace, split at 31:
+    //      N > 31  ×12  ALL sentence-final — `Duhok, 2006.` `Köln 2012.` `Barselona, 1951.` `pp. 67–78.`
+    //      N ≤ 31  ×18  fourteen ordinals (`1./2./3./4. rêbaza|helbesta` ×10, `17. Gulan`, `19. Heya`,
+    //                   `2. Peyva`, `7.-8. Piştî sedsalan`), three dates (`Di 16. 11. 2006'an de`,
+    //                   `14.-15. Oktober`), and ONE sentence end — `r. 24-31. Statuya…`
+    //    So the threshold is 31 and the single counter-example inside it is excluded by its own shape: it
+    //    is the END OF A RANGE. Requiring whitespace-then-a-LETTER after the dot additionally leaves the
+    //    D.M.Y date alone (`16.` is followed by a digit), which is the conservative outcome — Kurmanji
+    //    writes a spoken date with the suffix (`2ê sibata`), not with a dot, and step 8 already reads that.
+    //    Net: fires ~13 times on the mined evidence with zero counter-examples.
+    //
+    //    ⚠ IT MUST RUN ABOVE THE SUFFIX RULE, and this is trap 39 pointing the other way — that rule
+    //    CREATES letters where digits were. Below it, `Di 16. 11. 2006'an de` had already become
+    //    `16. 11. du hezar û şeşan`, so `11.` now saw "whitespace then a letter" and the date's month was
+    //    read as an ordinal. Above it, the lookahead sees the original `2006` and declines.
+    //
+    //    ⚠ Capitalisation is NOT the discriminator, though it looks like one. Both classes take either:
+    //    `3. Rêbaza`, `17. Gulan`, `19. Heya` are ordinals before a capital; `1. rêbaza`, `2. rêbaza` are
+    //    ordinals before a lowercase; and the sentence ends are followed by capitals too. Only the number's
+    //    MAGNITUDE separates them, which is why it was tabulated rather than guessed.
+    s = s.replace(
+        /(?<![\p{Nd}.,\-–—])(\p{Nd}{1,2})\.(?=\s+\p{L})/gu,
+        (whole, digits: string) => (Number(digits) <= 31 ? suffixed(Number(digits), "em") : whole),
+    );
+
+    // 9) THE BOUND SUFFIX — and it runs LAST among the number rules, which is a trap-39 ordering and was
     //    found by the artifact scan rather than by reasoning. Placed before the tier (its first position),
     //    it spent the very digit the percent path matches on: `%72yê` became `% heftê û duyê` and the sign
     //    was then orphaned with no numeral beside it, reported as `DROP percent`. A guard's evidence has a
@@ -239,7 +288,7 @@ export function normalizeKurmanji(input: string): string {
         },
     );
 
-    // 9) FOUR CLASSES DECLINED, each with the count that justifies it:
+    // 10) FOUR CLASSES DECLINED, each with the count that justifies it:
     //    · RANGES (`ranges` ×6,893; 71 digit-dash-digit in the mined segments). Kurmanji writes its own
     //      connective when it means one — `ji 300 mêtre heta 500 mêtreyê`, `di navbera 25 û 30 pile de` —
     //      and the bare dashes are dates (`27.10-6.11.2003`), page spans (`36.25–29`), coordinate spans
