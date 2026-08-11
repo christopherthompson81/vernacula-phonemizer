@@ -956,3 +956,70 @@ Every historical ps figure in this repo now means one of two things, and they ar
 number (63.1% / pbt 69.6% — coverage) or a **non-circular** one (42.5% / pbt 46.9% — engine). Run 10's carrier
 rules are correctly quoted as **42.2% → 46.9%**, which is what Run 11 already said they should be. The floor
 test moved 0.60 → 0.40 for the same reason and says so in place, so nobody reads it as a regression.
+
+## Run 17 — 2026-08-11 — the stress referee, and the rule it immediately falsified
+
+ps.wiktionary marks the accent on 87% of its values, and Run 13 flagged that as the one axis nothing in the
+repo could measure. Built and run. It found a problem on its first execution.
+
+### The measurement
+
+`build_pswiktionary_silver.py --stress-out` → `tools/pashto/ps.stress-pswikt.tsv`, 463 rows. Stricter
+membership than the silver: exactly one accent (17 values carry two — real compound stress, and which is
+primary the dump does not say) and it must land on a vowel.
+
+`tools/pashto/eval_ps_stress.ts` compares **which nucleus** carries the accent, not the string. ps is ~47%
+segmental, so comparing stressed strings would report the segmental error again with extra steps. Words whose
+nucleus counts disagree (73 of 463) are a segmental failure and are reported separately rather than scored as
+stress errors. ⚠ A vowel + offglide counts as ONE nucleus — our g2p writes -ay as `əi`/`aɪ` while the
+romanization writes a vowel plus consonantal `y`; counted naively, every masculine singular noun, the
+commonest shape in the language, would have dropped out as incomparable.
+
+### The rule that had been shipping was worth two points
+
+```
+                                                 390 comparable words
+always the LAST nucleus (trivial baseline)              71.8%
+SHIPPED: "last long vowel, else last nucleus"           73.8%   ← two points, for all that machinery
+always the PENULTIMATE                                  27.7%
+always the FIRST                                         4.1%
+```
+
+⚠ **A stress rule that barely beats "always the last vowel" is a decoration, and nothing in the repo could
+have told us** — the BACKBONE fold strips stress, so `eval.ts` has been blind to this since the engine was
+written. The baselines are the part that makes the number mean anything.
+
+### What was actually wrong: the long-vowel preference itself
+
+The misses were one-sided — the rule pulled the accent OFF the final syllable, which is where Pashto usually
+wants it (`اندېښمن` andeʂmˈan not and̪ˈeʂman; `آرمل` ɑrmˈal not ˈɑrmal). What blocks final stress is not
+weight, it is the **schwa** — the inflectional ⟨ه⟩ ending, which is unstressable.
+
+```
+last nucleus, unless it is ə → penult                   82.8%
+  … except after ⟨ل⟩ (the infinitive ‑ə́l IS stressed)   83.8%
+```
+
+⚠ **The exception fires on 152 of 390 words and takes them from 35.5% to 63.8%**, which is where the whole
+gain comes from — checked, because only **4** referee words have a final-schwa nucleus on the REFERENCE side
+and that could not have driven a 9-point move. The rule keys on OUR final schwa, not the reference's.
+
+⚠ **The ⟨ل⟩ carve-out is n=4 and is stated as n=4.** It exists because the old rule got that class right and
+the new one regressed it: `ارزول` arzawál, `پيلول` pajlawál — the infinitive ‑ə́l is the ENDING, not an
+epenthetic schwa. Four instances is thin evidence, but it coincides with documented Pashto infinitive stress
+and prevents a productive class regressing, which is a stronger warrant than the count alone.
+
+### One refinement measured and REJECTED
+
+A final ⟨ه⟩ looked like it should predict a real, stressable -a. **It predicts the opposite**: ه-final words
+take final stress 22% of the time against 51% for other final-schwa words. Conditioning on it is worth
+~0.5pp — a coin flip dressed as a rule. Not shipped, recorded so it is not re-derived.
+
+### What this does not change
+
+⚠ **The segmental referee did not move by one word** — 42.5% / pbt 46.9% before and after — because the fold
+strips stress. That is the point of building a separate tool, and it is also the warning: this rule can be
+made better or worse indefinitely without any other gate noticing. The four goldens that moved are in
+`test/pashto.test.ts`, three of them numerals that are NOT in the referee and therefore follow the measured
+rule rather than being independently verified. One known MISS (`بېلگه` → bˈelɡə against the referee's belgá)
+is kept as a golden on purpose, so that a future fix changes the line instead of quietly passing.
