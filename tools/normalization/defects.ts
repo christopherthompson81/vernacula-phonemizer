@@ -752,6 +752,14 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // `5 ມິຖຸນາ`, `1 ມັງກອນ`). A one-letter unit key in an unspaced script is trap 27 and trap 46 at
         // once, and the price of refusing it is this one instance.
         exponent: ["i ² = −1", "10¹⁰⁰", "10.000ກມ²"],
+        // ⚠ A PERMISSIBLE DROP THE DIFFERENTIAL TEST CANNOT SEE — trap 12, and this layer CREATED it on
+        // purpose. The sentence already writes the percent word before its figure (`ຈະໄດ້ເປີເຊັນ 10%`,
+        // "the winner gets 10 percent"), so normalize.ts spends the sign rather than letting the tier add
+        // `ຮ້ອຍລະ` on top and say percent twice. The reading is then byte-identical with and without the
+        // `%`, which is exactly the shape the drop test cannot distinguish from a real loss — and the
+        // second question it asks (is the symbol's own word in the reading?) does not help either, because
+        // the word that is present is the LOAN `ເປີເຊັນ` and only the native `ຮ້ອຍລະ` is declared.
+        percent: ["ເປີເຊັນ 10%"],
     },
     kmr: {
         // ⚠ kmr DOES read the minus — inside its DEGREE rule, which is where the sign is unambiguous.

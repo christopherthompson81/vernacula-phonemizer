@@ -170,6 +170,18 @@ export function normalizeLao(input: string): string {
     s = s.replace(/(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*(?:°\s*[CF]|[cf]\s*°)(?![\p{L}])/giu, "$1 ອົງສາ");
     s = s.replace(/(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°/gu, "$1 ອົງສາ");
 
+    // 5b) A PERCENT WORD ALREADY IN THE TEXT SPENDS THE SIGN — trap 12 applied to a word, and the only
+    //     way to find it was to READ the reading. The corpus writes `ຜູ້ທີ່ຊະນະຈະໄດ້ເປີເຊັນ 10%` ("the
+    //     winner gets 10 percent") with the LOAN word before the figure and the sign after it, so the tier
+    //     added `ຮ້ອຍລະ` on top and the reading said percent twice. The scan cannot see this — the sign
+    //     DOES contribute, so there is no DROP to report. Both the loan and the native word are spent.
+    //     ⚠ The loan is not declared as a second CountForm instead, because the tier picks a form by COUNT
+    //     (n===1 → first, else last), which would emit `ເປີເຊັນ` for every plural figure.
+    //     ⚠ The word can sit on EITHER side of the figure, and the corpus's instance has it on the far
+    //     side: `ເປີເຊັນ 10%` is word-number-sign, so a pattern matching word-then-sign misses it entirely.
+    s = s.replace(/(ເປີເຊັນ|ຮ້ອຍລະ)(\s*\p{Nd}[\p{Nd}.,]*)\s*%/gu, "$1$2");
+    s = s.replace(/(ເປີເຊັນ|ຮ້ອຍລະ)\s*%(?=\s?\p{Nd})/gu, "$1");
+
     // 6) THE SHARED TIER — percent, currency, units and `&`. Runs ABOVE step 7, because the tier matches a
     //    unit only when a NUMBER is adjacent and the decimal rewrite destroys that adjacency (the
     //    playbook's "units before decimals" coupling).

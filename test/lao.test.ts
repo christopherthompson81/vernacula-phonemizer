@@ -104,3 +104,27 @@ describe("Lao text normalization", () => {
         expect(normalizeLao("p^e_{-1}")).toBe("p^e_{-1}"); // subscript markup
     });
 });
+
+// The review pass — trap 8. The finding here was invisible to every gate: the sign DOES contribute, so
+// there is no DROP to report, and only reading the output shows the word said twice.
+describe("Lao normalization: the review pass", () => {
+    it("a percent word already in the text spends the sign", () => {
+        // The corpus writes the LOAN word before its figure and the sign after it.
+        expect(normalizeLao("ຈະໄດ້ເປີເຊັນ 10% ພ້ອມ")).toBe("ຈະໄດ້ເປີເຊັນ 10 ພ້ອມ");
+        expect(normalizeLao("ຮ້ອຍລະ% 30")).toBe("ຮ້ອຍລະ 30");
+        // …and an ordinary percent still reads, on either side of its number.
+        expect(normalizeLao("ຈາກ 10% ຫາ 20%")).toBe("ຈາກ ຮ້ອຍລະ 10 ຫາ ຮ້ອຍລະ 20");
+        expect(normalizeLao("%72")).toBe("ຮ້ອຍລະ 72");
+    });
+
+    it("the era rule survives its adversarial neighbours", () => {
+        expect(normalizeLao("ຄ.ສ.1990")).toBe("ຄຣິດສັກກະລາດ 1990"); // glued to its year
+        expect(normalizeLao("ຄ. ສ. 1990")).toBe("ຄຣິດສັກກະລາດ 1990"); // spaced
+    });
+
+    it("Lao-script unit abbreviations are refused, and the reason is the calendar", () => {
+        // A digit-adjacent Lao ⟨ມ⟩ is ×35 in the mined segments and every one is a MONTH NAME.
+        expect(normalizeLao("19 ມີນາ 2008")).toBe("19 ມີນາ 2008");
+        expect(normalizeLao("5 ມິຖຸນາ")).toBe("5 ມິຖຸນາ");
+    });
+});

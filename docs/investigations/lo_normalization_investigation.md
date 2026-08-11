@@ -134,3 +134,35 @@ example, and the unit equivalences already write `ເທົ່າກັບ` in t
 say it twice), `>` (×1, inside a utility function whose Lao gloss already reads the relation aloud),
 `<`/`±`/`÷` (×0), ranges (Lao writes `ຫາ` when it means one), and the clock (`:` already produces no pause,
 and the mined `NN:NN` include a coordinate `ຄວາມຊັນ:51 ອົງສາ`).
+
+---
+
+## Run 7 — 2026-08-11 — the review pass: one finding, invisible to every gate
+
+Trap 8, twenty-eight probes. Most confirmed rather than changed — the era rule survives its glued and
+spaced forms, the percent reads on either side of its number, `℃` arrives folded, the month-name trap holds,
+`1.000.000` de-groups throughout, `21.2967` stays a decimal.
+
+**The one finding could not have been found by any gate in this tree.** The corpus writes
+
+> `ຜູ້ທີ່ຊະນະຈະໄດ້**ເປີເຊັນ** 10**%**` — "the winner gets 10 percent"
+
+with the LOAN percent word **before** the figure and the sign **after** it. The tier then added the native
+`ຮ້ອຍລະ` on top, and the reading said percent twice. `mine.ts scan` is silent because the sign DOES
+contribute — there is no DROP — and the drop test's second question (*is the symbol's own word in the
+reading?*) does not help either, because the word present is the loan and only the native word is declared.
+Only reading the output shows it.
+
+Fixed by spending the sign when either word already sits beside the figure — trap 12 applied to a word, the
+same move as Kurmanji's `ji %` strip. ⚠ **And the pattern had to reach the FAR side**: `ເປີເຊັນ 10%` is
+word-number-sign, so a rule matching word-then-sign misses it entirely.
+
+⚠ **The fix then creates a drop the scan CAN see**, and that is correct: with the word already spoken the
+reading is byte-identical with and without the `%`. Listed per instance in `defects.ts` with the reason,
+rather than silenced as a class, so a genuine percent regression still reports.
+
+⚠ **Not declared as a second CountForm instead**, which was the obvious alternative: the tier picks a form
+by COUNT (n===1 → first, else last), so adding `ເປີເຊັນ` would emit the loan for every plural figure.
+
+Gates after: 3,389 tests, tsc OK, scan "no defects", review.ts clean, corpus diff 169/431 with DROP 99 → 44
+(the extra one is the redundancy above), referee 97.7% unchanged.
