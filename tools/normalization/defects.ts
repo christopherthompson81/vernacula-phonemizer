@@ -244,6 +244,33 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         ampersand: "n/a — the ampersand IS read (跟, the corpus's own coordinator ×136 against 和 ×63; "
             + "normalize.ts declares it through the shared tier)",
     },
+    lo: {
+        // ⚠ EVERY MINED `=` AND `+` IS INSIDE A FORMULA OR A WORKED EXAMPLE, and in the clearest of them the
+        // corpus writes the reading ITSELF in the very next bracket: `1,000 Hz = 1 KHz (1 ພັນແຮັກ ເທົ່າກັບ
+        // 1 …)` — "1,000 Hz = 1 KHz (1 kilohertz EQUALS 1 …)". Voicing the sign there would say it twice.
+        // The rest are an economics illustration (`ລົດຈັກ x1/100 ຄັນ + ເຂົ້າ x2/50 ໂຕນ`), a coordinate
+        // conversion (`(D + M/60 + S/3600)`), matrix notation (`C_{2,1}=8`) and `3/4 = 0.75`.
+        equals: "measured: all 38 mined math-signs are formulas, matrix notation or unit equivalences — and "
+            + "the equivalences already write ເທົ່າກັບ beside the sign, so reading it would double the word",
+        plus: "measured: every mined `+` is an operand in a worked example or a DMS conversion "
+            + "(`(D + M/60 + S/3600)`); digit-flanked arithmetic `+` in running prose is ×0",
+        // ⚠ AND `×` IS THE OPPOSITE SHAPE — the WORD is sourced and the SIGN is not. lo.wikipedia's
+        // multiplication article glosses it directly: *"ການຄູນ (ມັກຈະສະແດງດ້ວຍ ສັນຍາລັກຂ້າມ ×, …)"*,
+        // "multiplication (often shown with the cross symbol ×, …)". But `×` is ×0 in the mined segments:
+        // there is nothing to read. Recorded here rather than declared, so the word is on file if a later
+        // corpus produces the sign.
+        times: "measured: `×` is ×0 in the artifact. The word IS sourced — ຄູນ, glossed against the symbol "
+            + "in lo.wikipedia's own multiplication article — and is left undeclared only for want of a sign",
+        // ⚠ `>` OCCURS EXACTLY ONCE AND IT IS INSIDE A UTILITY FUNCTION — `ຖ້າ u(x) > ຫຼື = u(y) (x R y)`,
+        // "if u(x) > or = u(y)" — where the Lao text around it already reads the relation aloud
+        // (`ຫຼາຍກ່ວາ ຫຼື ເທົ່າກັນ`, "greater than or equal to"). Reading the sign would double the phrase,
+        // which is the same argument as `equals` above. `<`, `±` and `÷` do not occur at all.
+        "greater-than": "measured: `>` occurs ONCE, in a utility function whose Lao gloss already says "
+            + "ຫຼາຍກ່ວາ ຫຼື ເທົ່າກັນ beside it — reading the sign would say the relation twice",
+        "less-than": "measured: `<` is ×0 in the artifact",
+        "plus-minus": "measured: ± is ×0 in the artifact",
+        divide: "measured: `÷` is ×0; ຫານ is attested as the word but there is no sign to attach it to",
+    },
     kmr: {
         // ⚠ NOT ONE OF THE 15 MINED `=` `+` `×` IS ARITHMETIC, and they are not even mostly prose. Three
         // classes, none of which wants an operator reading:
@@ -714,6 +741,25 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // ⚠ Listed BY INSTANCE rather than silencing the class, so the moment a ¥ appears beside a Cebuano
         // yen-word — or any other currency regresses — the scan reports it again.
         currency: ["¥2,500", "¥130,000", "¥7,000"],
+    },
+    lo: {
+        // THREE SUPERSCRIPTS WITH NOTHING THE TIER CAN ATTACH THEM TO. `i ² = −1` and `10¹⁰⁰` (a googol,
+        // in the article that names it) are BARE exponents — the base is a variable or a mantissa — and
+        // `bareExponent` is undeclared for this language because no Lao power phrase is attested.
+        // `10.000ກມ²` is the UNIT exponent written with the LAO abbreviation ⟨ກມ⟩ rather than `km`, and
+        // ⚠ that abbreviation is deliberately NOT a declared key: Lao is unspaced, and a digit-adjacent
+        // Lao ⟨ມ⟩ is ×35 in the mined segments with **every single one a MONTH NAME** (`19 ມີນາ`,
+        // `5 ມິຖຸນາ`, `1 ມັງກອນ`). A one-letter unit key in an unspaced script is trap 27 and trap 46 at
+        // once, and the price of refusing it is this one instance.
+        exponent: ["i ² = −1", "10¹⁰⁰", "10.000ກມ²"],
+        // ⚠ A PERMISSIBLE DROP THE DIFFERENTIAL TEST CANNOT SEE — trap 12, and this layer CREATED it on
+        // purpose. The sentence already writes the percent word before its figure (`ຈະໄດ້ເປີເຊັນ 10%`,
+        // "the winner gets 10 percent"), so normalize.ts spends the sign rather than letting the tier add
+        // `ຮ້ອຍລະ` on top and say percent twice. The reading is then byte-identical with and without the
+        // `%`, which is exactly the shape the drop test cannot distinguish from a real loss — and the
+        // second question it asks (is the symbol's own word in the reading?) does not help either, because
+        // the word that is present is the LOAN `ເປີເຊັນ` and only the native `ຮ້ອຍລະ` is declared.
+        percent: ["ເປີເຊັນ 10%"],
     },
     kmr: {
         // ⚠ kmr DOES read the minus — inside its DEGREE rule, which is where the sign is unambiguous.

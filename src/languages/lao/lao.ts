@@ -8,6 +8,7 @@ import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { normalizeLao } from "./normalize.ts";
 
 type Cls = "high" | "mid" | "low";
 
@@ -288,7 +289,7 @@ class LaoPhonemizer implements Phonemizer {
         // ⚠ FOLD THIS SCRIPT'S OWN DIGITS TO ASCII FIRST: the number token is `\d+`, and JavaScript
         // defines `\d` as ASCII-only, so a numeral written in Lao digits matches NO token at all and
         // is dropped (core/unicode.ts).
-        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
+        return assembleClauses(foldNativeDigits(normalizeLao(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) for (const wd of numberToLaoWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             // Canonical, UNPADDED pause marks: a padded value reaches the output as a double space, and
