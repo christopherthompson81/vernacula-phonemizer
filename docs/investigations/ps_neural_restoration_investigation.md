@@ -130,3 +130,384 @@ Asked whether more data / a literary reference could lift the ~30% multi-dialect
 CONCLUSION: the remaining Pashto gap is METHODOLOGICAL (multi-dialect referee), not engine- or data-bound — the
 true single-dialect quality is ~69%. The primary wikipron floor stays multi-dialect (not gamed); the Kandahari
 secondary reports the fair number. This is the right place to STOP engine work.
+
+## Run 4 — 2026-08-10 — the data hypothesis, tested with 25× the data and REFUTED
+
+The 2026-07-16 conclusion ("do NOT retrain/wire the neural") was correct, and this run establishes that it was
+correct for a *stronger* reason than the one recorded. The doc attributed the failure partly to data
+starvation — ps silver was 770 rows, 78% all-bare, against a repo starvation line of ~10k pairs. That
+hypothesis is now testable, because the doc's other claim turned out to be wrong.
+
+**"There is NO larger machine-readable Pashto IPA corpus" was a tooling artifact.** espeak-ng ships
+`dictsource/ps_list` — **82,583 word→pronunciation entries** (Hanif Rahman, updated April 2025), plus 1,513
+lines of letter-to-sound rules and a 729-line phoneme table that declares an explicit `ipa` string for every
+phoneme. It was missed because `tools/normalization/sources.ts` gates its espeak tier on `$ESPEAK_NG`, which
+was unset, so it printed *"espeak does not ship this language at all."* A false negative about the
+environment, not a fact about espeak. (The same false negative reached the ps NORMALIZATION commit, whose
+initialism refusal cites it — `ps_list` opens with a full letter-name table.)
+
+**Pipeline.** `tools/pashto/build_espeak_silver.py` converts ps_list to the miner's (word, lang, IPA) shape
+using the phoneme table's own `ipa` declarations — exact, not reconstructed from the mnemonics (`Q` is ʁ and
+`S.` is ʂ; neither is recoverable by eye). 81,259 rows mapped; 1,290 had an unmappable segment and were
+dropped rather than guessed. `invert_harakat.ts` then gained a ps tranche and a `--shard=k/N` flag: the
+search is a per-word brute force over up to 60,000 vocalizations, each a full g2p call, and it is
+embarrassingly parallel — 16 shards turned ~50 minutes of projected serial work into a few minutes.
+
+```
+82,287 candidate rows → labeled 19,400 (23.6%) · miss 60,196 · capped 2,691
+silver: 770 → 19,400 rows        (25×, and 55.3% now carry a harakat, against 22% before the 2026-07-16 fix)
+```
+
+**The tagger.** `tools/pashto/train_ps_harakat.py` — a per-grapheme BiLSTM that predicts HARAKAT rather than
+IPA chunks, unlike every other tagger in this tree. That choice is what makes espeak usable: espeak disagrees
+with our dialect on ږ (`موږ` → ʁ where our Kandahari engine reads ʐ), so an IPA tagger would import that
+reading, while a harakat tagger takes only espeak's VOWEL PLACEMENT and leaves the consonants to our g2p —
+which already encodes the glide epenthesis, the -ی diphthong and the sukun-marked medial glide that Runs 1–3
+built. It also cannot mis-align: a combining mark already sits after its consonant, so no aligner is needed.
+Trained on 17,574 words, held-out per-position accuracy 94.3% — which is near the 85.7% majority-class floor
+and measures agreement with espeak, not Pashto.
+
+**⚠ AND THE FIRST EVAL WAS WRONG, IN A WAY WORTH RECORDING.** It reported an "OOV" column that looked
+devastating (tagger 4.8% vs sync 9.1%). But "OOV" as defined there meant *the inverter could not label this
+word* — i.e. NO vowel assignment reproduces the reference under our g2p. That is a biased-hard subset by
+construction, and it measures the wrong thing. The fair test is words that ARE reachable but were held out of
+training, by the same md5 rule the trainer uses:
+
+| bucket (ex letter-names) | n | BARE | SYNC | TAGGER |
+|---|---:|---:|---:|---:|
+| wikipron TRAIN | 809 | 55.4% | 81.7% | 76.9% |
+| **wikipron HELDOUT** | **101** | **46.5%** | **79.2%** | **49.5%** |
+| wikipron UNREACHABLE | 396 | 0.8% | 0.8% | 1.0% |
+| kaikki TRAIN | 628 | 61.5% | 93.3% | 87.6% |
+| **kaikki HELDOUT** | **75** | **58.7%** | **94.7%** | **57.3%** |
+| kaikki UNREACHABLE | 352 | 2.3% | 2.3% | 2.3% |
+
+**Verdict: the data hypothesis is refuted.** On reachable unseen words the tagger is +3.0pp on wikipron and
+−1.4pp on kaikki against doing nothing — a wash. 25× the training data moved nothing, so the 2026-07-16
+failure was never about volume.
+
+**And the ceiling is now quantified rather than inferred.** 396/1,306 (30%) of wikipron and 352/1,055 (33%)
+of kaikki are UNREACHABLE — the inverter searched up to 60,000 vocalizations per word and no vowel assignment
+reproduces the reference. Those words fail on CONSONANTS, the multi-dialect ښ/ږ, which is exactly what Run 3's
+Kandahari-slice finding predicted (69.5% on a dialect-consistent slice against 55.7% aggregated). **No
+deterministic vowel restorer can satisfy this referee**, neural or otherwise, because a third of it is not a
+vowel question at all. The tagger is NOT shipped; the trainer and `eval_ps_tagger.ts` stay as the
+documented negative.
+
+**What DID move: the lexicon** — the same conclusion Run 1 reached ("the value was in the DATA/lexicon layer").
+
+```
+src/languages/pashto/lexicon.tsv   351 → 10,723 non-identity rows
+running-text token coverage       2.80% → 5.78%   (13.4M tokens of ps.wikipedia)
+referee                           UNCHANGED at 55.7% / 83.8%
+```
+
+⚠ **The referee cannot see this win, and that is not a defect in the win.** The old 351 entries were mined
+FROM wikipron, so they already covered the referee's words; the 10,372 new ones are words wikipron does not
+contain. Running text is where they land. ⚠ And 5.78% is the honest number, not the 37.2% that espeak's raw
+word list covers: the export drops IDENTITY rows, because a word our g2p already reads correctly needs no
+lexicon entry. 5.78% is the share of running tokens whose reading the lexicon CHANGES.
+
+⚠ **LICENSING — AN OWNER DECISION, NOT TAKEN HERE.** `ps_list` is GPL-3.0, so the shipped `lexicon.tsv` is
+now derived from a GPL source. The repo has an exact precedent (`wu/dict.tsv`, 101k entries from rime-wugniu,
+shipped under a per-file GPL-3.0 fence per `LICENSES/PROVENANCE.md` §4.3) and currently lists espeak-ng under
+"consulted without shipping anything". Moving it requires a PROVENANCE entry and the owner's call.
+
+## Run 5 — 2026-08-10 — the real problem: we were grading a variety against a MACROLANGUAGE
+
+Runs 1–4 kept hitting the same wall from different directions and each time called it a "multi-dialect
+ceiling". That framing was too soft. **ISO 639-3 `pus` is a MACROLANGUAGE** — members `pbt` (Southern /
+Kandahari), `pbu` (Northern / Peshawar), `pst` (Central / Waziri) — and `pashto.ts` declares one variety in
+its own header ("Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ"). So we ship a `pbt` engine and grade it against a
+`pus` aggregate. The primary referee's filename says it: `ps.wikipron-**pus**-broad.tsv`.
+
+**This repo already treats every other macrolanguage the other way.** Arabic (`ara`) ships as `ar` plus ten
+dialect codes, Chinese (`zho`) as cmn/yue/nan/wuu/hak/cjy/gan/hsn, Malay as id/zsm, Punjabi/Lahnda as pa/pnb —
+and `macrolanguage umbrella` is an explicit `rejection_reason` in the catalogue schema. Pashto is the sole
+macrolanguage carried as a single code with an umbrella referee.
+
+**Measured, on the primary (ex letter-names):**
+
+```
+242 words are spelled with ښ or ږ — the dialect-diagnostic letters
+ the referee lists NO reading in our fold-class for  102 of them
+`زموږ` appears TWICE, as `z m u ʝ` and as `z ə m u n ɡ`      — two varieties, one headword
+`اوږه` carries TEN readings in one entry: wáʐa | wíʒa | óɡa | óʝa | úɡa | úʐa | éʒa | jéʒa | ó ɡa | úʝa
+```
+
+⚠ **The scorer credits ANY listed variant**, so a ten-variant entry is not the harm — `اوږه` includes `óʐa`
+and we score it. The harm is entries that list only *other* varieties, and those our engine cannot win by
+construction.
+
+⚠ **AND THE OTHER SOURCE IS NO BETTER — I CHECKED THE ONE I HAD RECOMMENDED.** Run 4 introduced espeak-ng's
+`ps_list` and I described it as dialect-consistent with our engine, on the strength of the phoneme table's
+comment ("ښ in Pashto - retroflex fricative") and six sampled words. Counted properly across all 82,583
+entries that is **wrong**:
+
+```
+ښ  (2,605 words with exactly one)   ʃ 54.7%  ·  ʂ 29.6%  ·  x 21.7%
+ږ  (1,833 words with exactly one)   ʐ 40.5%  ·  ʁ 20.1%  ·  ɡ 16.6%  ·  ʒ 13.8%
+```
+
+The table DEFINES `S.` as retroflex; the DICTIONARY uses `S`, `S.` and `x` for that letter across different
+words. A phoneme definition is not a dictionary property. So wikipron, kaikki AND espeak are all `pus`
+aggregates: **the entire machine-readable resource base for Pashto is macrolanguage-shaped**, which is why
+every previous run found a ~30% floor it could not explain away.
+
+### The fix that is available now: a variety-consistent slice of the SAME source
+
+`tools/pashto/build_pbt_referee.py` filters the primary to entries that answer in our variety.
+
+⚠ **THE FILTER IS A VARIETY FILTER, NOT A DIFFICULTY FILTER, AND THAT DISTINCTION IS THE WHOLE POINT.** It
+would be trivial and worthless to raise a score by dropping words the engine gets wrong. So a word with NO
+ښ/ږ is kept unconditionally, whatever the engine does with it; a word with one is kept only where some
+variant realizes it in the fold-class our engine emits. Nothing else about the word is consulted.
+
+⚠ **AND THE TEST IS THE EVAL'S OWN FOLD, WHICH I GOT WRONG FIRST TIME.** `langs/ps.jsonc` already folds
+[ʂç]→ʃ and ʐ→ʒ, so Kandahari ʂ, Central ç and plain ʃ are ALREADY one class to the grader. My first filter
+required a literal ʂ/ʐ and therefore dropped 166 entries the engine could already score, reporting an
+inflated 63.2%. What the fold genuinely cannot absorb is Northern `x` (ښ) and `ɡ`/`ʝ` (ږ) — folding those
+would merge خ and ګ, which are real contrasts. Corrected, the filter tests exactly that.
+
+**Result, and its validation:**
+
+```
+wikipron pus (aggregate, primary)   787/1414 = 55.7%   symbol 83.8%
+wikipron pbt (Southern slice)       787/1312 = 60.0%   symbol 85.0%
+```
+
+⚠ **THE HIT COUNT IS IDENTICAL — 787 AND 787.** Every line the filter removes is one the engine scored zero
+on, so the entire +4.3pp is denominator: the correction removes questions asked in another variety and
+nothing else. That equality is the evidence the filter is honest; without it the number would be a claim.
+
+**The primary deliberately stays the aggregate.** It is the floor and must not be gamed; the slice sits beside
+it as a secondary, alongside the 95-row kaikki Kandahari slice it supersedes in size (1,312 vs 95) while
+reproducing its direction (69.5% there, 60.0% here — the kaikki slice is smaller and easier).
+
+### What this means for the engine, and what it does NOT license
+
+- The honest quality of the shipped Pashto engine is **60.0%**, not 55.7%. The ~4pp was never engine quality.
+- It does **not** license relabelling `ps` as `pbt` in the registry. `ps` should stay a first-class code
+  (the catalogue's belt-language policy is explicit that tiering the implementation is fine and erasing the
+  code is not), and users typing `ps` should keep getting a working phonemizer.
+- It does **not** rescue the neural tier. Run 4's tagger was a wash on reachable held-out words (+3.0pp /
+  −1.4pp) and that is unchanged by re-grading — the residual it failed on is the same residual.
+- The remaining honest gap is still not fully decomposed: 396 wikipron words are unreachable by ANY vowel
+  assignment and only 62 carry ښ/ږ, so the variety split accounts for the largest identified class and not
+  the whole of it. The rest (ف→p, ځ→z, diphthong and epenthesis variation) is probably the same phenomenon
+  and has not been counted. Recorded as open rather than claimed.
+
+## Run 6 — 2026-08-10 — the catalogue now says what is true: `pus` is not an implementable language
+
+Run 5 established the category error and worked around it with a variety-consistent referee. The owner's
+call went further, and is the right one: **you cannot say "these phonemes are correct for this Pashto
+orthography" without naming a variety**, so a measured implementation of `pus` cannot exist and the catalogue
+must stop claiming one.
+
+```
+ps    Pashto (macrolanguage)          unimplemented   macrolanguage umbrella   (no verdict)
+pbt   Pashto (Southern / Kandahari)   implemented     🟡   normalization done
+pbu   Pashto (Northern / Peshawar)    unimplemented   data scarcity
+pst   Pashto (Central / Waziri)       unimplemented   data scarcity
+```
+
+This is the treatment every other macrolanguage in the tree already gets — Arabic→dialects, Chinese→
+cmn/yue/…, Kanuri→knc — and Pashto was the last one carried as a single code with an umbrella verdict.
+
+- **`pbt` is now a registered code**, resolving to the same engine as `ps` (`registry.ts`, the `ms`/`zsm`
+  fall-through shape). The verdict, the referee counts and the espeak/normalization facts moved to that row.
+- **`ps` keeps resolving at runtime**, because it is what callers type. That is a labelled approximation, not
+  a claim — the umbrella row carries no verdict and no normalization.
+- **`pbu` and `pst` are blocked on a referee, not on rules.** The Northern delta is ~2 lines (ښ→x, ږ→ɡ) and
+  cannot be folded into the Southern engine, because that would merge خ and ګ. What is missing is anything to
+  verify it against: the revisit trigger is a Northern-consistent slice, cut from the same aggregate the way
+  `build_pbt_referee.py` cuts the Southern one by inverting the diagnostic.
+
+⚠ **A GATE CAUGHT THE INCOMPLETE CHANGE, which is worth recording.** Adding `pbt` to the registry failed
+`test/manifest-script.test.ts` — *"no script declaration: pbt"*. Every registered code must declare a script
+either in a manifest or in `MANIFESTLESS_SCRIPTS`, and an alias has no manifest of its own. The check exists
+because the field has no runtime consumer that would fail on a missing entry, so nothing else would have
+noticed. Added to the manifest-less table beside `ms`/`zsm`.
+
+**What is still open**, and is not resolved by relabelling: the 396 wikipron words unreachable by any vowel
+assignment are only 62 accounted for by ښ/ږ. The rest (ف→p, ځ→z, diphthong and epenthesis variation) is
+plausibly the same variety phenomenon and has not been counted. Counting it is what would tell us whether
+`pbt` at 60.0% is near its true ceiling or still has engine work in it.
+
+## Run 7 — 2026-08-10 — decomposing the 396: whose words are they, and why can't vowels fix them?
+
+Runs 4–6 left this open and it is the question that decides whether `pbt` at 60.0% is near its ceiling.
+The 396 are the wikipron words (ex letter-names) where the inverter searched up to 60,000 harakat
+vocalizations and NONE reproduced the reference. Classified by cause, most specific first, each word once:
+
+| | n | % | cause |
+|---|---:|---:|---|
+| **VARIETY** | **180** | **45%** | **not pbt's words at all** |
+| | 141 | 36% | the WAZIRI back-vowel shift — we read و as o/u, every reference has ə/e/i (`املوک` əmlok vs əmlək, `الوبالو` əlobɑlo vs ələbɑlə) → **pst** |
+| | 34 | 9% | ښ/ږ read Northern x/ɡ or Central c (`خواږه` xojʒə vs xwɑɡə) → **pbu** / **pst** |
+| | 5 | 1% | ف read as p (`فرانسه` fərɑnsə vs prɑnsə) — Pashto has no native /f/ |
+| **ENGINE** | **107** | **27%** | **pbt's own g2p, fixable in principle** |
+| | 86 | 22% | و/ی realized as a GLIDE by the reference where we read a vowel (`اورول` orol vs əərəwəl) — the Run 1/3 class, reopened |
+| | 11 | 3% | homorganic n→ŋ over- or under-applied (`فرانس` fərɑnəs vs frɑŋs) |
+| | 9 | 2% | residual و/ی glide-vs-vowel |
+| | 1 | 0% | initial ا read short by us, long by the reference |
+| **NOTATION** | 6 | 2% | the reference writes an initial ʔ we do not (`اسلام` əslɑm vs ʔəslɑm) — no phonemic initial-ʔ contrast in Pashto, so arguably a missing fold |
+| **unclassified** | 103 | 26% | dominated by the FINAL -ی DIPHTHONG — see below |
+
+**The unclassified bucket is mostly one thing, and it is engine-side.** Decoding the raw referee rows:
+`امريکايی` is `a m r i k ɑ j a ɪ` and `اوسېدونکی` is `o s e d u ŋ k a ɪ` — the word-final `-ay` diphthong,
+TWO segments, where our g2p emits a single ə. Run 2 built exactly this rule (a word-final و/ی after a vowel
+is the offglide ʊ/ɪ) and it is not firing on these spellings (ـايی, ـکی). 52 of the 396 (13%) differ from a
+reference in nothing but the final one or two segments, which is the signature.
+
+⚠ **This corrects Run 5's estimate.** Run 5 said "only 62 of the 396 are accounted for by ښ/ږ" and left the
+rest open. That undercounted the variety share badly: once the Waziri vowel shift is counted, **180 of 396
+(45%) are other varieties' words**, not 62. The ښ/ږ consonant test was the wrong instrument — Waziri differs
+from Kandahari in its VOWELS, so a consonant-keyed probe cannot see it.
+
+### The answer to "do they belong to pbt"
+
+**Roughly half do not.** 45% are pbu/pst words that a Southern engine is correct to read differently, and no
+amount of engine work will win them — they belong on those rows as evidence, not on pbt's ledger. The other
+~53% (engine + notation + the diphthong tail) IS pbt's, and it is concentrated in two classes that are
+already understood:
+
+- the **و/ی glide-vs-vowel** ambiguity, ~95 words across two buckets — Runs 1 and 3 opened this and closed
+  the -ول and medial cases; the reference's `əwrəŋɡzeb` for `اورنګزېب` shows the initial/other positions are
+  still open;
+- the **final -ی diphthong** on ـايی/ـکی, ~50-100 words — Run 2's rule exists and does not reach these
+  spellings.
+
+So `pbt` is NOT at its ceiling. A realistic bound: closing both classes is worth up to ~150 words of the
+1,312-word Southern referee, i.e. roughly **60.0% → 70%**, without touching the multi-dialect residual at
+all. That is ordinary g2p work of the kind Runs 1–3 already did, and it is a better use of effort than
+anything on the neural side — which Run 4 measured as a wash.
+
+## Run 8 — 2026-08-10 — the splitter, and Run 7's biggest class was my own artifact
+
+Run 7 classified the 396 unreachable words on FOLDED strings and reported a 141-word (36%) "Waziri
+back-vowel shift" — we emit o, the reference had ə/e/i. **Reading the RAW referee killed it:**
+
+```
+املوک    a m l u k        (we say əmlok)
+انګور    a ŋ ɡ u r        (we say əŋɡor)
+اهوړ     a h u ɽ          (we say əhor)
+الوبالو  a l u b ɑ l u    (we say əlobɑlo)
+```
+
+The reference says **/u/ and our g2p says /o/** — nothing to do with Waziri. The eval fold collapses
+`[əaiu]→ə` but leaves `o` alone, so an ENGINE/LEXICON question about which vowel ⟨و⟩ spells appeared, after
+folding, as a dialect vowel shift. ⟨و⟩ is /u/ or /o/ lexically and the abjad does not say which — that is
+precisely what `lexicon.tsv` exists for, and it is the class the espeak lexicon would resolve per word.
+
+⚠ **So the variety share is ~39 of 396 (10%), not 180 (45%).** I have now got this number wrong in both
+directions — Run 5 undercounted it at 62 by keying on ښ/ږ alone, Run 7 overcounted it at 180 by keying on a
+folded vowel. The lesson is the same one twice: **classify on the RAW reference, never on the folded string**,
+because the fold is asymmetric by design and its asymmetries look like linguistic findings.
+
+### `tools/pashto/split_referee_by_dialect.py`
+
+Replaces the single-purpose `build_pbt_referee.py`. Splits any `pus` aggregate into pbt / pbu / pst on the
+ښ/ږ isogloss alone (MacKenzie's ṣ̌/ẓ̌) — ښ→ʂ/x/ç, ږ→ʐ/ɡ/ʝ. Three properties it needs and has:
+
+- **A word with no ښ/ږ is variety-NEUTRAL and appears in all three slices** with all its readings. The slices
+  overlap heavily and differ exactly on the isogloss.
+- **A broad `ʃ`/`ʒ` is an UNCOMMITTED transcription, not a variety**, and also stays in every slice. Treating
+  it as "not Southern" cost 24 hits on this tool's first run — the same mistake as Run 5's, caught by the
+  hit-count check rather than by inspection.
+- **It never consults the engine.** Only vowels and consonants of the reference are read, and only the two
+  diagnostic letters at that.
+
+```
+                       wikipron              kaikki
+pus (aggregate)        744/1306  57.0%       666/1055  63.1%
+pbt  (ours)            744/1181  63.0%       666/1010  65.9%
+pst                    692/1146  60.4%
+pbu                    696/1197  58.1%
+```
+
+⚠ **THE VALIDATION IS THE HIT COUNT, NOT THE PERCENTAGE — 744 → 744 and 666 → 666.** A variety filter must
+remove nothing the engine was already scoring; if it does, it is a difficulty filter wearing a linguistic
+label. The second check is the ordering: the engine scores highest on its own variety and worst on Northern
+(x/ɡ, the furthest reflex from ʂ/ʐ), which is what a real split should produce.
+
+⚠ **A LIMIT WORTH KNOWING BEFORE ANYONE TRUSTS THE pst ROW.** The fold merges [ʂç]→ʃ and ʐ→ʒ, so the grader
+cannot currently tell pbt from pst on the isogloss — only pbu (x/ɡ) is separable. Grading a single-variety
+slice ought to DROP those two fold rules, since the slice already guarantees the reference answers in our
+variety and ʂ should have to match ʂ. That needs per-referee folds, which the harness does not support. Until
+then the pbt/pst numbers differ only by which entries were dropped, not by a stricter comparison.
+
+### Revised picture of the 396
+
+With the Waziri class retracted, the residual is overwhelmingly OURS, and concentrated:
+
+| | n | ~% | |
+|---|---:|---:|---|
+| ⟨و⟩ = /u/ where we emit /o/ | ~141 | 36% | lexical, and exactly what the (uncommitted) espeak lexicon encodes |
+| و/ی realized as a GLIDE | 86 | 22% | the Run 1/3 class, initial position still open |
+| final -ی diphthong (`a ɪ`) | ~50–100 | 13–25% | Run 2's rule does not reach ـايی/ـکی |
+| ښ/ږ another variety | 34 | 9% | genuinely pbu/pst — the only real variety class |
+| homorganic n↔ŋ | 11 | 3% | |
+| ف→p | 5 | 1% | variety |
+
+That is a better result than Run 7's: the ceiling is lower than "45% is somebody else's language" implied,
+and the top three classes are all tractable engine or lexicon work.
+
+## Run 9 — 2026-08-10 — derived, not inferred: kaikki tags the dialect, and the split is 67% vs 5.9%
+
+Run 8's splitter had a flaw worth naming before the fix. It classifies a READING only when the word contains
+ښ/ږ; for the other ~90% it keeps every reading in all three slices, so the "pbt" referee still accepted
+Northern readings for most of its words. Isogloss-constrained, unconstrained everywhere else — the same
+shape as the mistake that produced Run 7's phantom Waziri class.
+
+**kaikki carries per-pronunciation DIALECT TAGS**, so for that source the assignment can be read rather than
+guessed. The raw dump was not in the repo (the 95-row `ps.kaikki-kandahari.tsv` could not be regenerated —
+trap 32), so it was fetched: `kaikki.org-dictionary-Pashto.jsonl`, 1,646 entries, 1,644 IPA records.
+
+```
+Kandahar 65 · Southern 36 · Southwestern 12          → pbt
+Northern 51 · Peshawar 46 · Eastern 30 · NE 20 · …   → pbu
+Wardak 23 · Wazirwola 14 · Central 14 · SE 12        → pst
+```
+
+### The tags validate the inference
+
+Before using them, they were checked against the ښ/ږ reflex the wikipron splitter relies on:
+
+```
+ښ   pbt → ʂ 57/65 (88%)    pbu → x 65/69 (94%)    pst → ç 24/38 (63%, ʃ 8)
+ږ   pbt → ʐ 33/35 (94%)    pbu → ɡ 30/33 (91%)    pst → ʝ 8 / ʒ 10
+```
+
+So the inference is sound at 88–94% and the wikipron slices stand. ⚠ **And there is no SECOND diagnostic to
+find.** Mining all 318 same-word cross-variety pairs for systematic differences returns the ښ/ږ reflexes and
+then nothing but notation (tie bars, brackets, slashes). Vowels *do* differ in 79 of 318 pairs (25%) —
+پښتو is pbt /pəʂˈt̪o/, pbu /pʊxˈt̪o/, pst /paçˈt̪o/ — but the eval fold already collapses [əaiuɪʊ]→ə as
+unrecoverable from an undiacritized abjad, so that axis is invisible to scoring either way. **That is the
+measurement that licenses keeping a no-ښ/ږ word in every slice**, and it was an assumption until now.
+
+### The result
+
+`tools/pashto/build_kaikki_dialect_referees.py` emits four files from the tags. A SOUTHERN engine:
+
+| referee | | |
+|---|---:|---|
+| **pbt** — Kandahar/Southern | **65/97 = 67.0%** | our variety |
+| **pbu** — Northern/Peshawar | **6/102 = 5.9%** | |
+| pst — Central/Waziri | 8/43 = 18.6% | thin, treat as weak |
+| untagged | 663/1041 = 63.7% | not a variety referee |
+
+**An 11× separation between our variety and Northern.** That is the number to quote when anyone asks why the
+`pus` aggregate reads 55.7%: the umbrella is ~3:1 Northern on the isogloss (ښ x 138 / ʂ 52; ږ ɡ 151 / ʐ 28)
+and this engine scores 5.9% there. The aggregate was never a Pashto score — it was a weighted average of a
+test we pass and a test we were never taking.
+
+⚠ **UNTAGGED IS NOT NEUTRAL.** 1,339 of 1,644 records carry no variety tag and go to their own file rather
+than being distributed into the three, which would rebuild the aggregate this whole exercise exists to undo.
+
+⚠ **AND THE TAGGED REFEREES ARE SMALL** — 97 / 102 / 43 words. They are ground truth and they settle the
+question of whether the split is real; they are not a basis for tracking engine quality over time. The
+wikipron pbt slice (1,181 words, inferred at 88–94% precision) remains the working secondary.
+
+Retired in this run: `ps.kaikki-kandahari.tsv` (hand-cut, 95 rows, unregenerable) and the inferred kaikki
+slices, both superseded by the tag-derived files.

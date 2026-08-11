@@ -145,6 +145,14 @@ with the data: `perso-arabic/riderDiacritizer.onnx`, `persian/fa-vowel-restorer.
   a **per-file GPL-3.0 fence**; the TSV is its own source, satisfying the source condition. The
   engine that reads it at runtime is not thereby GPL.
   <https://github.com/rime/rime-wugniu>
+- **espeak-ng** (`dictsource/ps_list`, credited in its own header to **Hanif Rahman**, updated April
+  2025) — GPL-3.0. `pashto/lexicon.tsv` (10,698 rows) is a derived work and is distributed under a
+  **per-file GPL-3.0 fence**; the engine that reads it at runtime is not thereby GPL. ⚠ What derives
+  from it is the SHORT-VOWEL PLACEMENT only — espeak's phoneme strings are never copied; each is fed
+  to a g2p-inversion search that stores the diacritized *spelling* whose reading our own engine
+  reproduces, so the consonants are ours. espeak-ng is otherwise consulted-not-shipped throughout
+  this repo (§5); Pashto is the single exception.
+  <https://github.com/espeak-ng/espeak-ng>
 - **Tashkeela** — GPL-2.0. `arabic/diacritization.tsv` is a mechanical frequency aggregation over
   the Tashkeela corpus, whose underlying classical texts are public domain. It ships under the
   facts-not-expression posture stated in `LICENSES/licencing_posture.md`: the artifact reproduces

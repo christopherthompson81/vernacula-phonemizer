@@ -187,10 +187,60 @@ function label(lang: string): void {
         }
     }
 
+    // ps ONLY: espeak-ng's `dictsource/ps_list` (81,259 mappable entries after tools/pashto/build_espeak_silver.py),
+    // which is ~33× the wikipron+kaikki silver this miner otherwise has for Pashto. The investigation doc had
+    // recorded "there is NO larger machine-readable Pashto IPA corpus"; that was a false negative from
+    // `sources.ts` gating its espeak tier on an unset $ESPEAK_NG, not a fact about espeak.
+    // ⚠ IT IS SILVER AND THE INVERTER IS WHAT MAKES IT SAFE. espeak under-vocalizes ~26% of the words it shares
+    // with the referee (it drops the epenthetic schwa our g2p models: اتل `a:tl` against the referee's `a t ə l`)
+    // and it disagrees with our dialect on ږ (`موږ` → ʁ where we read ʐ). Neither is trusted: a row yields a label
+    // only where some vocalization REPRODUCES that IPA under PS_FULL_FOLD, so espeak's errors and its dialect
+    // disagreements self-filter rather than being imported. The yield rate IS the accuracy measurement.
+    if (lang === "ps") {
+        const esp = join(HERE, "silver.espeak-ps.tsv");
+        // ⚠ SAY SO WHEN THE TRANCHE IS ABSENT. It is deliberately NOT committed — 2.5 MB of GPL-derived
+        // intermediate, one command to rebuild — so the common case is that a fresh checkout does not have
+        // it. Silently skipping would take the shipped lexicon from 10,723 rows to ~351 with a clean exit
+        // and no diff to explain it, which is the worst kind of regression: a re-mine that looks like it
+        // worked. Loud, and with the exact command.
+        if (!existsSync(esp)) {
+            console.warn(
+                `⚠ ps: ${esp} is MISSING — the espeak tranche (81,259 rows) will be SKIPPED and the mined\n` +
+                "  lexicon will collapse from ~10,723 rows to ~351. Rebuild it first:\n" +
+                "    ESPEAK_NG=<espeak-ng checkout> python3 tools/pashto/build_espeak_silver.py \\\n" +
+                "        --out tools/perso-arabic/silver.espeak-ps.tsv",
+            );
+        }
+        if (existsSync(esp)) {
+            const seen = new Set(rows.map((r) => r[0]));
+            const extra = readFileSync(esp, "utf8").split("\n")
+                .filter((l) => l.includes("\t") && !l.startsWith("#"))
+                .map((l) => l.split("\t"))
+                .filter((a) => a.length >= 3 && !seen.has(a[0]));
+            rows = rows.concat(extra);
+        }
+    }
+
+    // ⚠ SHARDING, because this search is the pipeline's wall-clock. It is a per-word brute force over up to
+    // MAX_COMBOS vocalizations, each one a full g2p call, and it is EMBARRASSINGLY PARALLEL — every word is
+    // independent. Single-threaded it pins one core and leaves the other fifteen idle; the espeak tranche took
+    // it from ~2.5k words to ~84k, at which point that stopped being acceptable. `--shard k/N` takes every Nth
+    // row and writes `<name>.partK`; the driver concatenates. Row order within a shard is preserved, and the
+    // shard set is a partition, so the merged output is the same LABEL SET as a serial run (line order differs,
+    // and every consumer of these files either sorts or builds a map).
+    const shardArg = process.argv.find((a) => a.startsWith("--shard="))?.slice(8);
+    const [shardK, shardN] = shardArg ? shardArg.split("/").map(Number) : [0, 1];
+    if (shardN === undefined || shardN < 1 || shardK === undefined || shardK < 0 || shardK >= shardN) {
+        throw new Error(`--shard=k/N needs 0 <= k < N (got ${shardArg})`);
+    }
+
     const labeled: string[] = [];
     const seenSkel = new Set<string>(); // lexicon: one vocalization per skeleton (the lookup key)
     let ok = 0, capped = 0, miss = 0;
+    let rowIndex = -1;
     for (const [skel, , ipa] of rows) {
+        rowIndex++;
+        if (shardN > 1 && rowIndex % shardN !== shardK) continue;
         if (LEXICON && seenSkel.has(skel!)) continue;
         const chars = [...skel!.normalize("NFC")];
         const sl = slots(chars, cfg);
@@ -217,11 +267,12 @@ function label(lang: string): void {
         else miss++;
     }
 
-    const fname = LEXICON ? `lexicon.${lang}.tsv` : `harakat.${lang}.silver.tsv`;
+    const base = LEXICON ? `lexicon.${lang}.tsv` : `harakat.${lang}.silver.tsv`;
+    const fname = shardN > 1 ? `${base}.part${shardK}` : base;
     writeFileSync(join(HERE, fname), labeled.join("\n") + (labeled.length ? "\n" : ""));
-    const tot = rows.length || 1;
+    const tot = (shardN > 1 ? ok + miss + capped : rows.length) || 1;
     console.log(
-        `${lang}: ${rows.length} words · labeled ${ok} (${(100 * ok / tot).toFixed(1)}%) · ` +
+        `${lang}: ${tot} words · labeled ${ok} (${(100 * ok / tot).toFixed(1)}%) · ` +
         `miss ${miss} · capped(>${MAX_COMBOS} combos) ${capped} → ${fname}`,
     );
 }

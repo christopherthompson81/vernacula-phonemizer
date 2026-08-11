@@ -582,7 +582,16 @@ function build(lang: string): Phonemizer {
             return createSwahili();
         case "gu":
             return createGujarati((latin) => getPhonemizer("en").text(latin));
+        // ⚠ `ps`/`pus` IS A MACROLANGUAGE AND THIS ENGINE IS ONE OF ITS MEMBERS. ISO 639-3 `pus` covers pbt
+        // (Southern/Kandahari), pbu (Northern/Peshawar) and pst (Central/Waziri), and pashto.ts implements
+        // exactly one: "Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ". `pbt` is therefore the accurate code and is
+        // added here; `ps` keeps resolving because it is what callers type, as a labelled approximation for
+        // the umbrella — the same shape as `ms`/`zsm` above. The catalogue records the distinction (ps is an
+        // unimplemented macrolanguage umbrella; pbt carries the verdict), because the phoneme question is
+        // not answerable at umbrella level: the referees list Northern x/ɡ and Southern ʂ/ʐ for the same
+        // orthography and no single engine can be right for both.
         case "ps":
+        case "pbt":
             return createPashto((latin) => getPhonemizer("en").text(latin));
         case "kn":
             return createKannada((latin) => getPhonemizer("en").text(latin));

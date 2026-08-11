@@ -96,7 +96,9 @@ CC-BY-SA 4.0 + iTaigi CC0 + kaikki Hokkien chars; sidecar); `thai/dictionary.tsv
 `burmese/{dictionary.tsv,seg-words.txt,voicing-lexicon.tsv}`; `khmer/km-lexicon.tsv` +
 `km-lexicon-kaikki.tsv` (kaikki tier);
 `sindhi/sindhi-lexicon.tsv` (kaikki tier); `arabic/egyptian-lexicon.tsv`;
-`urdu/{lexicon.tsv,lexicon-ipa.tsv}`; `persian/lexicon.tsv`; `pashto/lexicon.tsv`;
+`urdu/{lexicon.tsv,lexicon-ipa.tsv}`; `persian/lexicon.tsv`;
+(⚠ `pashto/lexicon.tsv` LEFT this stratum on 2026-08-10 — it is now 89.6% espeak-derived and fenced
+GPL-3.0 in §4 item 3; a file cannot sit in two strata and the more restrictive one governs);
 `punjabi/{lexicon.tsv,crossscript.tsv,gurmukhi-lexicon.tsv}`; `indonesian/indonesian-e-lexicon.tsv`;
 `romanian/romanian-stress.tsv`; `welsh/lexicon.tsv`; `czech/loanwords.tsv`; `hausa/tone.tsv`;
 `zulu/tone.tsv`; `akan/akan-tone.tsv`; `zhuang/sawndip-readings.tsv`;
@@ -130,6 +132,14 @@ dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `englis
 **CC BY 3.0** (DAC / CSIR / NWU via SADiLaR); sidecar. Training input for the af tagger only — NOT a
 referee (96.6% identical to RCRL on their overlap, same lineage).
 
+**tools-only (ps variety referees):** `pashto/kaikki-pashto-sounds.jsonl` — a 92 KB two-field extract
+(`word`, `sounds[].{ipa,tags}`) of kaikki's Pashto dump, from which the four tag-derived variety referees
+(`ps.kaikki-{pbt,pbu,pst}-tagged.tsv`, `ps.kaikki-untagged.tsv`) rebuild byte-identically; sidecar.
+**Vendored deliberately**: kaikki.org regenerates its dumps, so referees built from a live fetch are a
+snapshot nobody can reproduce — which is how the hand-cut `ps.kaikki-kandahari.tsv` became unverifiable and
+was retired (trap 32). Only the fields the builder reads are kept; 4.1 MB of definitions, etymologies and
+senses are dropped.
+
 **tools-only:** the `af` SECONDARY referee `referee-eval/referees/af.rcrl-apd.tsv` — same RCRL source as
 the shipped lexicon above and under the same CC BY-SA 2.5 ZA terms, the one referee in the set that is NOT
 Wiktionary-derived (sidecar: `af.rcrl-apd.PROVENANCE.md`); the 246-referee eval set — 120 wikipron + 53 kaikki + 15 wiktionary-API + the
@@ -148,8 +158,9 @@ derives from it and it is not wired into referee-eval).
 
 ## 4. Copyleft — fenced under GPL
 
-Shipped files only. GPL-licensed sources that were *consulted* without shipping anything — espeak-ng
-1.52, calima-egy — are in §5 and item 3 below.
+Shipped files only. ⚠ **espeak-ng moved partly INTO this section on 2026-08-10**: it is still
+consulted-not-shipped for every language but Pashto, where `pashto/lexicon.tsv` (item 3) derives from
+`dictsource/ps_list`. calima-egy remains consulted-only — item 4 below and §5.
 
 1. **`arabic/diacritization.tsv`** — upstream compilation (Tashkeela) is tagged GPL-2.0; the
    underlying classical texts are PD. Shipped under the facts posture (mechanical
@@ -161,7 +172,28 @@ Shipped files only. GPL-licensed sources that were *consulted* without shipping 
    engine reading it at runtime is not thereby GPL. Alternatives if a GPL data file becomes
    unwanted: rebuild from kaikki Wu readings (CC-BY-SA, gan/hakka/jin/xiang pattern, coverage
    drops to ~10–20k), or ask Wugniu for a permissive grant of the dictionary data.
-3. **calima-egy (GPL-2.0)** — offline teacher for diacritizer-egy only; **not shipped**. Stated
+3. **`pashto/lexicon.tsv`** (10,698 rows) — the shipped Pashto short-vowel restoration lexicon,
+   derived from **espeak-ng `dictsource/ps_list`** (GPL-3.0, credited to Hanif Rahman). Per-file
+   **GPL-3.0 fence**, same treatment as `wu/dict.tsv`; the engine reading it at runtime is not
+   thereby GPL. Mixed-source and takes the most restrictive licence: 9,588 of 10,698 rows
+   (89.6%) are reachable only from the GPL source, the rest also from wikipron/kaikki (CC-BY-SA),
+   so the facts posture is **not** available here — the file substantially re-derives that
+   compilation's headword selection. ⚠ Note what was taken: only the SHORT-VOWEL PLACEMENT.
+   espeak's phoneme strings are never copied — each is fed to `invert_harakat.ts`, which searches
+   the vocalization whose output from *our own* g2p reproduces it, so the consonants are ours and
+   espeak's variety disagreements (ږ → ʁ where we read ʐ) do not enter. Full derivation, the
+   measured yield and the fallbacks: `src/languages/pashto/lexicon.PROVENANCE.md`.
+   ⚠ **This moves espeak-ng out of §5 for Pashto only.** It remains "consulted, not shipped" for
+   every other language; `ps` is the one place bytes derive from it.
+4. **tools-only, same espeak lineage as item 3** — `perso-arabic/harakat.ps.silver.tsv` (19,400
+   rows) and `perso-arabic/lexicon.ps.tsv` (19,400), the miner's outputs and the audit trail for the
+   shipped lexicon. Same **GPL-3.0 fence**; they are the intermediate form of the same derivation, so
+   they cannot sit outside it. ⚠ The 2.5 MB `silver.espeak-ps.tsv` between them is **deliberately not
+   committed** (gitignored): it is a pure intermediate, rebuilt in one command by
+   `tools/pashto/build_espeak_silver.py` from a *versioned* upstream — unlike kaikki's rolling dumps,
+   an espeak-ng release is reproducible, so vendoring buys nothing. `invert_harakat.ts` WARNS when it
+   is absent rather than silently mining a 30×-smaller lexicon.
+5. **calima-egy (GPL-2.0)** — offline teacher for diacritizer-egy only; **not shipped**. Stated
    in NOTICE; nothing distributed derives from it.
 
 ## 5. Referee and verification sources — consulted, not shipped
@@ -176,7 +208,7 @@ this section informed a decision and left no bytes.
 
 | Source | License | Role |
 |---|---|---|
-| **espeak-ng 1.52** — `dictsource/<lang>_list`, `<lang>_extra` | GPL-3.0 | word-hole witness, coverage baseline, and the instrument behind one measured fact-table (§5.1) |
+| **espeak-ng 1.52** — `dictsource/<lang>_list`, `<lang>_extra` | GPL-3.0 | word-hole witness, coverage baseline, and the instrument behind one measured fact-table (§5.1). ⚠ **Not consulted-only for `ps`**: `pashto/lexicon.tsv` derives from `ps_list` and is fenced GPL-3.0 in §4 item 3 |
 | **Wiktionary** — via wikipron, kaikki, and the MediaWiki API | CC-BY-SA 3.0/4.0 | the primary referee family: the 188 human sets in the §3 eval stratum, and the measured floor behind every language in `docs/language-maturity.md` |
 | **epitran** | MIT (code); the wordlists it was run over are often kaikki | the independent *programmatic* second opinion — 32 outputs, used as a deliberately fallible corroborator, never as a target |
 

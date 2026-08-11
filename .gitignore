@@ -52,3 +52,4 @@ tools/perso-arabic/silver.dakshina.tsv
 # (data/km.txt, CC BY-NC-SA 4.0). Measurement-only, consumed by tools/khmer/aakanee-crosscheck.ts from a
 # path OUTSIDE the tree; this guard is for the canonical in-tree name in case a copy ever lands here.
 tools/khmer/km.aakanee-nc.txt
+tools/perso-arabic/silver.espeak-ps.tsv

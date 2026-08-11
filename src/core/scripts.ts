@@ -166,6 +166,10 @@ export const MANIFESTLESS_SCRIPTS: Readonly<Record<string, readonly string[]>> =
     ms: ["Latin"], zsm: ["Latin"],          // Malay / Standard Malay
     bgc: ["Devanagari"],                    // Haryanvi, on the Hindi engine
     pnb: ["Arabic"], skr: ["Arabic"],       // Western Punjabi + Saraiki, both Shahmukhi
+    // Southern/Kandahari Pashto — the MEMBER code for the engine `ps` also resolves to. `pus` is a
+    // macrolanguage (pbt/pbu/pst) and src/languages/pashto/ implements the Southern variety only, so `pbt` is
+    // the accurate code; the manifest declares `ps`, which is why this one needs a row here.
+    pbt: ["Arabic"],
 };
 
 /**
