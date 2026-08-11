@@ -613,6 +613,37 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
 export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    su: {
+        // ⚠ ALGEBRAIC SUBTRACTION WITH A VARIABLE OPERAND. su/normalize.ts reads the minus before a DIGIT
+        // (`-1,00`, `antara -100`, `(−3)`); these are `1 - p` and `1 − p` inside a standard-deviation
+        // formula, where the operand is a letter. Reading them would mean matching a dash between two
+        // variables, which is the same shape as a compound hyphen in an ordinary Sundanese word — the
+        // language hyphenates reduplication constantly (`kira-kira`, `béda-béda`, `rata-rata`, ×thousands).
+        // The formula is niche; the hyphen is not. Left silent deliberately.
+        // Three lines, none of them arithmetic: `(H^+)` is an ION CHARGE, `L(+)-asam` is an optical-isomer
+        // label, and `aX + b ~ N(aμ + b, (aσ)²)` is algebra over VARIABLES — su/normalize.ts reads `+` only
+        // before a digit or a bracketed one. Widening it to letters would match a dash between two variables,
+        // the same shape as the reduplication hyphen Sundanese writes constantly (`kira-kira`, `béda-béda`).
+        "math-sign": ["(H^+)", "L(+)-asam", "aX + b ~ N(aμ + b, (aσ)²)", "X+b", "σ = (n p (1 - p))",
+            "σ = (p(1 − p)/n)", "1.5log((r+ra)/g)+.45", "((r+ra)/g)^.287"],
+        // THE SOURCE'S OWN TYPO, twice: `$28.ooUS` and `$60.ooUS` are `.00` mistyped with letter o's, so the
+        // amount is `28.oo` and no rule can make a number of it. The `$` IS read (*dua puluh dalapan dolar*);
+        // what the scan sees is the trailing `US` fragment. Not repairable from this side.
+        // LaTeX MATH DELIMITERS, not money — `($10^7$ nepi ka $10^{12}$)`, `($10^{13}$–$10^{14}$ taun)`.
+        // su/normalize.ts step 0 strips the pair so the exponent can be read; the scan then sees a `$` whose
+        // removal changes nothing, which is exactly right and exactly what it cannot tell from a real drop.
+        // ⚠ `$28.ooUS` / `$60.ooUS` are the SOURCE'S OWN TYPO (`.00` mistyped with letter o's). The `$` IS
+        // read there (*dua puluh dalapan dolar*); the fragment the scan sees is the trailing `US`.
+        currency: ["$10^7$", "$10^{12}$", "$10^{13}$", "$10^{14}$", "$28.ooUS", "$60.ooUS"],
+        // AN IUPAC CHEMICAL NAME — `2-(Buta-1,3-diynyl)-5-(but-3-en-1-ynyl)`. Every dash is a locant
+        // separator, none is a minus. The Burmese precedent exactly (playbook 5d): the flag needed the
+        // instances read, not a rule.
+        minus: ["2-(Buta-1,3-diynyl)-5-(but-3-en-1-ynyl)", "-5-(4-c", "-ynyl)-2,2'-b"],
+        // ⚠ A JAPANESE ITERATION MARK QUOTED IN A SUNDANESE ARTICLE ABOUT JAPANESE WRITING — `Misuzu (みすゞ)`.
+        // The article is ABOUT the mark, so the one instance is a mention rather than a use, and Sundanese has
+        // no iteration mark of its own to read it with.
+        iteration: ["みすゞ"],
+    },
     tl: {
         // ⟨EU$8.86 bilyon⟩ — a NONSTANDARD currency marker: the sentence is about EU aid, so reading the $
         // as ⟨dolyar⟩ would assert dollars for what the context says are EU funds, and rewriting it as euro

@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { aksaraToLatin, isAksaraSunda, normalizeSundaDigits } from "./sundaAksara.ts";
+import { normalizeSundanese } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -117,7 +118,12 @@ export type ForeignPhonemizer = (latin: string) => string;
 
 class SundanesePhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(normalizeSundaDigits(input), TOKEN, (m, sink) => {
+        // NORMALIZATION runs first — pure text→text, so everything it emits is then read by the ordinary word,
+        // number and clause paths below. It must see the text BEFORE tokenization, because most of what it
+        // repairs (a grouping `.`, a decimal `,`, a clock `:`) is a character `TOKEN` would otherwise hand to
+        // `clausePunctuation` as a pause. ⚠ AFTER `normalizeSundaDigits`, so Aksara Sunda digits are already
+        // ASCII and the number rules see one digit set rather than two.
+        return assembleClauses(normalizeSundanese(normalizeSundaDigits(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
