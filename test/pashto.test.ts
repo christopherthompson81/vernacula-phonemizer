@@ -35,26 +35,17 @@ describe("pashto canonical IPA", () => {
     // The three carrier rules earned in the pbt engine pass. Each one is a MEASURED majority on the raw pbt+kaikki
     // references, not a tidy generalization — the counts live in the g2p's own comments, and the cases the counts
     // say are coin flips (⟨وی⟩ 50%, ⟨يو⟩ 44%) are deliberately absent here because they stay lexical.
-    // ⚠ STRESS WAS UNMEASURED UNTIL 2026-08-11, because the referee-eval BACKBONE fold STRIPS it before
-    // comparing — so `eval.ts` cannot see this rule at all and these goldens are the only guard in the suite.
-    // Measured by tools/pashto/eval_ps_stress.ts against ps.wiktionary's accented romanizations (390
-    // comparable words): the old "last long vowel, else last nucleus" scored 73.8% against 71.8% for the
-    // trivial "always the last nucleus" — two points for all that machinery. The rule below scores 83.8%.
-    test("stress: the last nucleus, unless it is ə — then the penult, except after ⟨ل⟩", () => {
-        // the plain case — stress the last nucleus
-        expect(phonemizeWord("اندېښمن")).toBe("and̪eʂmˈan"); // referee: andeṣ-mán
-        expect(phonemizeWord("آرمل")).toBe("ɑrmˈal"); //          referee: ār-mál
-        // the exception — a final ə cannot bear stress, so it retracts to the penult, both referee-confirmed
-        expect(phonemizeWord("آرپوهه")).toBe("ɑrpˈohə"); //   referee: ār-pòha
-        expect(phonemizeWord("ارزپاڼه")).toBe("arzpˈɑɳə"); // referee: arzpā́ṇa
-        // ⚠ AND A KNOWN MISS, KEPT AS A GOLDEN ON PURPOSE. بېلگه is `belgá` in the referee — final-stressed
-        // despite ending in ⟨ه⟩ — and the rule cannot get it, because "ends in ه" predicts final stress only
-        // 22% of the time and conditioning on it was measured worth ~0.5pp. This is what the residual 16%
-        // looks like; if a future rule fixes it, this line should CHANGE rather than quietly still pass.
-        expect(phonemizeWord("بېلگه")).toBe("bˈelɡə");
-        // ⚠ AND THE ⟨ل⟩ CARVE-OUT, which exists to stop a productive verb class regressing. The infinitive
-        // ‑ə́l is the ENDING, not an epenthetic schwa, and it is stressed (referee: ارزول arzawál 4/4).
-        expect(phonemizeWord("بندَول")).toBe("bənd̪awˈəl"); // to close — NOT *bənd̪ˈawəl
+    // ⚠ STRESS IS INVISIBLE TO THE REFEREE EVAL — the BACKBONE fold strips it — so these goldens and
+    // tools/pashto/eval_ps_stress.ts are the only guards on it. Measured NON-circularly on 314 comparable
+    // words: this rule 75.5%, "always the last nucleus" 72.6%. ⚠ An alternative ("last nucleus unless ə →
+    // penult") was built and REVERTED: it measured 83.8% until the tool excluded the ps.wiktionary-derived
+    // lexicon rows it was being scored against, after which it came in BELOW this rule. Nine of its twelve
+    // points were feedback. Do not change this rule on a circular measurement.
+    test("stress: the last long vowel, else the last nucleus", () => {
+        expect(phonemizeWord("اندېښمن")).toBe("and̪ˈeʂman"); // ⚠ a referee MISS (andeṣ-mán) — kept as one
+        expect(phonemizeWord("سړی")).toBe("səɻəˈi"); //         the -ay diphthong ⟨ی⟩ takes it
+        expect(phonemizeWord("کور")).toBe("kˈor"); //           the single long vowel
+        expect(phonemizeWord("بندَول")).toBe("bənd̪awˈəl"); //   the infinitive ‑ə́l, which this rule gets right
     });
 
     test("carrier letters: final ⟨ی⟩ vs ⟨ي⟩, the glide before ⟨ا⟩, and the mater lectionis", () => {
@@ -100,12 +91,7 @@ describe("pashto canonical IPA", () => {
         expect(phonemize("19", "ps")).toBe("nˈoləs"); // نولس
         expect(phonemize("20", "ps")).toBe("ʃˈəl"); // شل — was EMPTY (the tens-key bug)
         expect(phonemize("21", "ps")).toBe("iwˈojʃət̪"); // یوویشت — the BOUND ویشت form of twenty, not شل
-        // ⚠ THE STRESS MOVED ON 2026-08-11 AND THE SEGMENTS DID NOT. `phonemizeWordCore` changed from "last
-        // long vowel, else last nucleus" to "last nucleus unless it is ə, then the penult (except after ⟨ل⟩)",
-        // measured 73.8% → 83.8% on tools/pashto/eval_ps_stress.ts. ⚠ These three numeral goldens are NOT in
-        // that referee, so they follow the measured rule rather than being independently verified — which is
-        // the honest status, and the reason the note is here rather than a claim that they were checked.
-        expect(phonemize("25", "ps")).toBe("pˈənd͡zə ˈojʃət̪"); // پنځه ویشت
+        expect(phonemize("25", "ps")).toBe("pənd͡zˈə ˈojʃət̪"); // پنځه ویشت
         expect(phonemize("31", "ps")).toBe("ˈiʊ d̪ˈerəʃ"); // یو دېرش — units-first, no connector
         expect(phonemize("71", "ps")).toBe("ˈiʊ ojˈɑ"); // یو اویا
         expect(phonemize("99", "ps")).toBe("nhˈə nˈoɪ"); // نهه نوی
@@ -113,9 +99,9 @@ describe("pashto canonical IPA", () => {
 
     test("numbers: hundreds, thousands, and the میلیون / میلیارد magnitudes", () => {
         expect(phonemize("101", "ps")).toBe("sˈəl ˈo ˈiʊ"); // سل و یو — ⟨و⟩ joins the group to its remainder
-        expect(phonemize("555", "ps")).toBe("pˈənd͡zə sˈəl ˈo pˈənd͡zə pənd͡zˈos"); // پنځه سل و پنځه پنځوس
+        expect(phonemize("555", "ps")).toBe("pənd͡zˈə sˈəl ˈo pənd͡zˈə pənd͡zˈos"); // پنځه سل و پنځه پنځوس
         expect(phonemize("1000", "ps")).toBe("zˈər"); // زر — the leading یو is omitted for a bare magnitude
-        expect(phonemize("12345", "ps")).toBe("d̪ˈoləs zˈər ˈo d̪ərˈe sˈəl ˈo pˈənd͡zə t͡səlˈojʂət̪");
+        expect(phonemize("12345", "ps")).toBe("d̪ˈoləs zˈər ˈo d̪ərˈe sˈəl ˈo pənd͡zˈə t͡səlˈojʂət̪");
         expect(phonemize("1000000", "ps")).toBe("milˈiwən"); // میلیون — was EMPTY
         expect(phonemize("2000000", "ps")).toBe("d̪wˈə milˈiwən"); // دوه میلیون
         // میلیارد — same rule, same shape: `milˈijrəd̪` had dropped the [ɑ] entirely. milyard is the word.
@@ -221,8 +207,8 @@ describe("pashto text normalization", () => {
 
     test("end to end — what the layer emits really is spoken by the g2p", () => {
         expect(phonemize("۲۰۱۸ز کال", "ps")).toContain("zeʐd̪ˈiz");
-        expect(phonemize("۱۹مه نېټه", "ps")).toBe("nolˈəsmə nˈeʈə"); // one word, not نولس + مه (stress: see the numeral note)
-        expect(phonemize("۲۵٪", "ps")).toContain("sˈəlnə"); // سلنه — stress per the 2026-08-11 rule (final ə → penult)
+        expect(phonemize("۱۹مه نېټه", "ps")).toBe("nˈoləsmə nˈeʈə"); // one word, not نولس + مه
+        expect(phonemize("۲۵٪", "ps")).toContain("səlnˈə");
         expect(phonemize("۷۸.۸", "ps")).toContain("aʔʃˈɑrjə"); // اعشاريه — the ع is [ʔ], per this g2p
     });
 });

@@ -35,6 +35,20 @@ error again. `eval_ps_stress.ts` therefore compares **which nucleus** carries th
 where both sides have the same nucleus count (390 of 463; the other 73 are segmental failures, reported
 separately rather than scored as stress errors).
 
+⚠⚠ **AND IT IS CIRCULAR AGAINST THE SHIPPED LEXICON UNLESS THE TOOL EXCLUDES IT.** This referee is built from
+ps.wiktionary, and so is a silver tranche of `pashto/lexicon.tsv` — **197 of these 463 words carry a lexicon
+row mined from the very romanization scored against**. Those rows fix the short vowels, which decides the
+nucleus count the stress index is measured over. `eval_ps_stress.ts` therefore excludes ps.wiktionary-derived
+lexicon rows **by default**; `--shipped` restores the circular figure and is not the number to quote.
+
+```
+                            comparable   accuracy
+shipped lexicon                    390    83.8%
+ps.wiktionary rows excluded        314    75.5%   ← what the tool reports
+```
+
+An engine rule change was built on the 83.8% figure and reverted when this was found (investigation Run 17).
+
 ⚠ **And the register caveat from the silver applies here too** — these are largely Pashto Academy
 neologisms and compounds. Compound stress may not generalize to ordinary vocabulary. The 463 rows are the
 only stress evidence available, not a representative sample of the language.

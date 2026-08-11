@@ -18,12 +18,6 @@
  * learns whatever convention the g2p has, including its bugs. (It had mined بندول as بندُول for /bandawəl/ back
  * when a medial ⟨ـُو⟩ wrongly read u·w·ə.) Re-mine: `--lexicon ps --shard=k/14` → `export_lexicons.sh`.
  *
- * ⚠ STRESS IS MEASURED BY A SEPARATE TOOL AND BY NOTHING ELSE — `tools/pashto/eval_ps_stress.ts`, against
- * ps.wiktionary's accented romanizations. The referee-eval BACKBONE fold STRIPS stress before comparing, so
- * `eval.ts` is blind to it and the segmental score will not move whatever this rule does. It shipped
- * unmeasured until 2026-08-11, at which point the rule then in place scored 73.8% against 71.8% for "always
- * the last nucleus"; the current one scores 83.8%. See the rule's own comment in `phonemizeWordCore`.
- *
  * ⚠⚠ AND DO NOT QUOTE THIS ENGINE'S REFEREE SCORE WITHOUT THE CAVEAT: the lexicon is mined from wikipron/kaikki,
  * which ARE the referees, so the shipped number is substantially circular (pbt slice: shipped 69.6%, espeak-only
  * lexicon 46.7%, rules-only 46.9%). Engine changes are compared on RULES-ONLY. See tools/referee-eval/langs/
@@ -232,30 +226,28 @@ export function phonemizeWordCore(word: string): string {
     ipa = ipa.replace(/n(?=[kɡq])/gu, "ŋ");
     // NOTE: no word-final-cluster ə-deletion — Pashto RETAINS the epenthetic ə before many final clusters
     // (اخښل→axʂəl), unlike Persian; deleting it there hurt the referee.
-    // ⚠ STRESS: THE LAST NUCLEUS, UNLESS IT IS THE SCHWA — then the penult. This replaced a "last LONG vowel,
-    // else last nucleus" rule that had shipped since the engine was written and had never been measured,
-    // because the referee-eval BACKBONE fold STRIPS stress before comparing. `tools/pashto/eval_ps_stress.ts`
-    // measures it against ps.wiktionary's accented romanizations (390 comparable words):
+    // ⚠ STRESS, AND IT IS MEASURED NOW — BY tools/pashto/eval_ps_stress.ts AND BY NOTHING ELSE. The
+    // referee-eval BACKBONE fold STRIPS stress before comparing, so eval.ts is blind to this line and always
+    // was. On the NON-CIRCULAR basis (314 comparable words, ps.wiktionary-derived lexicon rows excluded):
     //
-    //     last nucleus (the trivial baseline)          71.8%
-    //     OLD: last long vowel, else last nucleus      73.8%   ← beat the baseline by 2 points
-    //     NEW: last nucleus, unless ə → penult         82.8%
+    //     always the LAST nucleus (trivial baseline)          72.6%
+    //     THIS RULE: last long vowel, else last nucleus       75.5%
+    //     "last nucleus unless ə → penult (except after ل)"   74.8%
     //
-    // ⚠ THE OLD RULE'S PROBLEM WAS THE LONG-VOWEL PREFERENCE ITSELF: it pulled the accent OFF the final
-    // syllable, which is where Pashto usually wants it (اندېښمن andeʂmˈan, not and̪ˈeʂman; آرمل ɑrmˈal, not
-    // ˈɑrmal). What actually blocks final stress is not weight, it is the schwa — the inflectional ⟨ه⟩ ending,
-    // which is unstressable. Hence the exception rather than the preference.
-    // ⚠ EXCEPT AFTER ⟨ل⟩, WHERE THE FINAL SCHWA IS A REAL VOWEL AND IS STRESSED. The infinitive/verbal
-    // suffix ‑ə́l is not an epenthetic schwa, it is the ending itself (ارزول arzawˈal, پيلول pajlawˈal), and
-    // the rule this one replaced happened to get that class right. Attested 4/4 in the stress referee — thin,
-    // and stated as thin — but it matches the documented Pashto infinitive stress and prevents a REGRESSION
-    // in a productive class, which is a stronger warrant than the count alone. Worth +1.0pp (82.8 → 83.8).
-    const finalLam = /ل$/u.test(word.normalize("NFC"));
-    const nuc = [...ipa.matchAll(VOWEL_G)];
-    if (nuc.length) {
-        let k = nuc.length - 1;
-        if (nuc[k]![0] === "ə" && nuc.length > 1 && !finalLam) k--; // the final schwa cannot bear stress
-        const at = nuc[k]!.index!;
+    // ⚠ THAT SECOND ALTERNATIVE WAS BUILT, SHIPPED IN A BRANCH, AND REVERTED. It measured 83.8% against this
+    // rule's 73.8% — until the eval was made non-circular. 197 of the 463 referee words carry a lexicon row
+    // mined from the SAME ps.wiktionary romanization being scored against, and those rows fix the short
+    // vowels, which decides the nucleus count the stress index is measured over. Nine of the twelve points
+    // were feedback. On honest data the two rules differ by two words out of 314, which is noise.
+    //
+    // ⚠ SO THE REAL FINDING IS NOT THE RULE, IT IS THE CEILING: Pashto stress is ~73% predictable by "always
+    // the last nucleus", and nothing tried beats that by more than ~3 points. Do not replace this line
+    // without running the tool NON-circularly; a large win there is the signature of the feedback loop, not
+    // of a better rule.
+    const longs = [...ipa.matchAll(/[ɑoue]|i(?!̯)/gu)];
+    const marks = longs.length ? longs : [...ipa.matchAll(VOWEL_G)];
+    if (marks.length) {
+        const at = marks[marks.length - 1]!.index!;
         ipa = ipa.slice(0, at) + "ˈ" + ipa.slice(at);
     }
     return ipa.normalize("NFC");
