@@ -38,13 +38,32 @@
  * ⚠ NO `&`. All 297 instances sit inside LATIN text — `AT&T`, `P&T`, `Sight & Sound`, `N4 & N405`, and URL
  *   query strings. Reading it as `او` would put a Pashto word inside an English name.
  *
- * ⚠ NO INITIALISMS — AND THE REASON PRINTED HERE BEFORE WAS FALSE. It said espeak ships no Pashto, which
- *   came from `sources.ts` reporting `[NONE]` with `$ESPEAK_NG` unset. espeak-ng ships
- *   `dictsource/ps_list` (82,583 entries) and it OPENS with a complete letter-name table — ا alif, ب be:,
- *   پ pe:, … — which is exactly the data `core/initialisms.ts` needs to stop being a no-op. So this is
- *   DEFERRED WORK, not a sourcing block: the seam exists and so does the data (trap 16, failed the first
- *   time and re-checked). Wiring it wants its own corpus diff — `RDC`-shaped runs are ×10,087 here — and
- *   the letter names would carry the same GPL-3.0 fence as `lexicon.tsv`.
+ * ⚠ NO INITIALISMS — AND THIS REFUSAL HAS NOW BEEN WRONG TWICE BEFORE BEING MEASURED PROPERLY.
+ *   v1 said "espeak ships no Pashto at all", which was a false negative from an unset `$ESPEAK_NG`.
+ *   v2 said `ps_list`'s letter-name table is "exactly the data `core/initialisms.ts` needs". ⚠ IT IS NOT.
+ *   That table names the ARABIC alphabet (ا alif, ب be:, پ pe:); the runs that actually break are LATIN —
+ *   `DNA`, `RNA`, `GDP`, `CIA` — and what the seam needs is the Pashto reading of a LATIN letter name.
+ *   espeak has nothing to say about that. Third over-claim from the same source, so here is the measurement.
+ *
+ *   (1) THE CLASS IS CONTAMINATED. Of 23,014 all-caps Latin runs, 2,122 are CHEMICAL symbols (CH x611,
+ *       CO x359, OH x307, NH, PH, SO) and 1,336 are ROMAN NUMERALS (II x283, III x159). Reading `CO` as
+ *       "see-oh" inside a formula is worse than leaving it, and the roman pass upstream already owns
+ *       II/III. 19,654 remain as candidate acronyms — DNA x740, RNA x411, ISBN x212, GDP x150, CIA x127.
+ *   (2) THE CORPUS DOES GLOSS ITSELF, which is the one good sign: `روسي آر اېن اې RNA`,
+ *       `سره ډي اېن اې DNA`, `ايچ آی وي (HIV`, `اچ آی وي` x23. So Pashto writes Latin letter names in
+ *       Arabic script, and 15 of 26 are recoverable — A اې · D ډي · F اېف x94 · H اچ/ايچ · I آی ·
+ *       L اېل x127 · M اېم x77 · N اېن x292 · Q کيو x112 · R آر · S اېس x231 · V وي · W ډبليو x85 ·
+ *       X اېکس x146 · Z زېډ x2.
+ *   (3) ELEVEN ARE NOT: B C E G J K O P T U Y. Their short forms (بي، سي، ډي، جي، پي) are ordinary Pashto
+ *       words — `کې` alone is x458,151 — so a substring count cannot attest them, and aligning the gloss
+ *       pattern returns function words (د، په، چې) rather than letter names.
+ *
+ *   A PARTIAL TABLE IS THE WRONG SHIP. `GDP` needs G and P, `CIA` needs C, `ISBN` needs B — the
+ *   highest-traffic acronyms here are exactly the ones the missing eleven block, so the table would spell
+ *   out the rare acronyms and skip the common ones. That is worse than uniform silence, and it is the shape
+ *   trap 13 warns about: coverage of the instances you happened to source is not coverage of the rule. The
+ *   seam is wireable the day the other eleven are attested — `attest.ts` against a Pashto wiki is the next
+ *   instrument — and this refusal is now re-runnable in one grep.
  *
  * ⚠ NO EXPONENT WORD. `sources.ts` reports the sign occurring with no reading anywhere, and the corpus
  *   writes area as the WORDS `متر مربع` ×446 rather than `m²`, so the symbol form is a Latin-text residue

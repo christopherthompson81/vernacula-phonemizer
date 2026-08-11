@@ -240,3 +240,39 @@ is corpus-sourced with its count at the rule — سلنه ×3,327, ډالر ×2,
 
 Pashto is the FIFTH corpus to produce the scientific-notation exponent false positive, after four Sinitic
 wikis produced the romanization-tone-number one from four different sources.
+
+## Run 8 — 2026-08-11 — the initialism backlog item: a refusal, measured properly at last
+
+Carried as "deferred work, not a sourcing block" since the espeak discovery. Doing it turned it back into a
+refusal — for a third reason, after the first two were both wrong.
+
+- **v1**: "espeak ships no Pashto at all" — a false negative from an unset `$ESPEAK_NG`.
+- **v2**: "`ps_list` opens with a full letter-name table, exactly what `core/initialisms.ts` needs."
+  ⚠ **It is not.** That table names the **Arabic** alphabet (ا alif, ب be:, پ pe:). The runs that break are
+  **Latin** — `DNA`, `RNA`, `GDP`, `CIA` — and the seam needs the Pashto reading of a *Latin* letter name.
+  espeak has nothing to say about that. Third over-claim from the same source in this investigation.
+
+**The measurement.**
+
+```
+23,014 all-caps Latin runs, 4,793 distinct
+   2,122  CHEMICAL symbols     CH ×611 · CO ×359 · OH ×307 · NH · PH · SO
+   1,336  ROMAN numerals       II ×283 · III ×159   (the roman pass upstream already owns these)
+  19,654  candidate acronyms   DNA ×740 · RNA ×411 · ISBN ×212 · GDP ×150 · CIA ×127
+```
+
+**The corpus glosses its own initialisms**, which is the strongest attestation there is:
+`روسي آر اېن اې RNA`, `سره ډي اېن اې DNA`, `ايچ آی وي (HIV`, `اچ آی وي` ×23. So Pashto does write Latin
+letter names in Arabic script, and **15 of 26 are recoverable**: A اې · D ډي · F اېف ×94 · H اچ/ايچ ·
+I آی · L اېل ×127 · M اېم ×77 · N اېن ×292 · Q کيو ×112 · R آر · S اېس ×231 · V وي · W ډبليو ×85 ·
+X اېکس ×146 · Z زېډ ×2.
+
+⚠ **Eleven are not: B C E G J K O P T U Y.** Their short forms (بي، سي، ډي، جي، پي) are ordinary Pashto
+words — `کې` alone is ×458,151 — so a substring count cannot attest them, and aligning the gloss pattern
+across all acronyms returns function words (د ×793, په, چې) rather than letter names.
+
+**A partial table is the wrong ship.** `GDP` needs G and P, `CIA` needs C, `ISBN` needs B — the
+highest-traffic acronyms in this corpus are exactly the ones the missing eleven block. It would spell out
+the rare acronyms and skip the common ones, which is worse than uniform silence and is the shape trap 13
+warns about: coverage of the instances you sourced is not coverage of the rule. `attest.ts` against a
+Pashto wiki is the next instrument; the refusal is now re-runnable in one grep.
