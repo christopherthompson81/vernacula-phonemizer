@@ -51,8 +51,11 @@ describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", 
 // Cardinal numbers — Min Dong is Sinitic (myriad grouping 萬 10⁴ / 億 10⁸, internal zero spoken 零 lìng), but unlike
 // cantonese/minnan the numerals CANNOT route through a Han reading dict (cdo has none that is not this engine's own
 // referee), so the compositor emits BÀNG-UÂ-CÊ and the converter above reads it. Fuzhou specifics: a magnitude
-// multiplier of 1 is 蜀 siŏh (not 一 ék), of 2 is 兩 lâng before 百/千/萬/億 but 二 nê before 十; 八 báik (8) and
-// 百 báik (100) really are homophones. Source: Wikivoyage "Fuzhou dialect phrasebook" Numbers (see mindong.ts).
+// multiplier of 1 is 蜀 siŏh (not 一 ék), of 2 is 兩 lâng before 百/千/萬/億 but 二 nê before 十.
+// ⚠ 百 IS THE VERNACULAR ⟨báh⟩ pɑʔ˨˦, NOT the literary ⟨báik⟩ paiʔ˨˦ — so 八 (8, báik) and 百 (100, báh) are NOT
+// homophones, and the two spell out differently in the assertions below. Wikivoyage's phrasebook gives *báik and is
+// overruled by Wiktionary's own vernacular/literary gloss and by cdo.wikipedia's number articles (100 = siŏh-báh
+// with the recorded audio, 200 = lâng-báh, 300 = săng-báh); see mindong.ts for the full counts.
 describe("Min Dong (cdo) cardinal numbers — Bàng-uâ-cê composition", () => {
     const cdo = createMinDong();
     for (const [n, ipa] of [
@@ -62,10 +65,11 @@ describe("Min Dong (cdo) cardinal numbers — Bàng-uâ-cê composition", () => 
         [11, "sɛiʔ˨˦ ɛiʔ˨˦"], // 十一 sék-ék — the bare unit digit is ék
         [20, "nɛi˨˦˨ sɛiʔ˨˦"], // 二十 nê-sék — 二 nê before 十
         [21, "nɛi˨˦˨ sɛiʔ˨˦ ɛiʔ˨˦"], // 廿一/二十一
-        [100, "suoʔ˥ paiʔ˨˦"], // 蜀百 siŏh-báik — multiplier 1 is 蜀, not 一
+        [100, "suoʔ˥ pɑʔ˨˦"], // 蜀百 siŏh-báh — multiplier 1 is 蜀, not 一; 百 is the vernacular báh
         [1000, "suoʔ˥ t͡sʰieŋ˥˥"], // 蜀千 siŏh-chiĕng
-        [12345, "suoʔ˥ uɑŋ˨˦˨ lɑŋ˨˦˨ t͡sʰieŋ˥˥ saŋ˥˥ paiʔ˨˦ sɛi˨˩˧ sɛiʔ˨˦ ŋou˨˦˨"], // 蜀萬兩千… — 兩 lâng before 千
-        [1000000, "suoʔ˥ paiʔ˨˦ uɑŋ˨˦˨"], // 蜀百萬 — myriad grouping, no "million" word
+        [12345, "suoʔ˥ uɑŋ˨˦˨ lɑŋ˨˦˨ t͡sʰieŋ˥˥ saŋ˥˥ pɑʔ˨˦ sɛi˨˩˧ sɛiʔ˨˦ ŋou˨˦˨"], // 蜀萬兩千… — 兩 lâng before 千
+        [1000000, "suoʔ˥ pɑʔ˨˦ uɑŋ˨˦˨"], // 蜀百萬 siŏh-báh-uâng — myriad grouping, no "million" word; cdo.wikipedia
+        // writes exactly this compound ⟨báh-uâng⟩ ×36 ("siŏh-báh-uâng Ā-mī-nì-ā-nè̤ng", one million Armenians).
     ] as const) {
         test(`${n} → ${ipa}`, () => {
             expect(cdo.text(String(n)).trim()).toBe(ipa);
@@ -117,10 +121,10 @@ describe("Min Dong (cdo) text normalization — BUC out, never Han", () => {
         // ⚠ TESTED BY THE READING, NOT BY "no ASCII letters" — IPA is written in Latin letters too, so a
         // blanket letter class cannot separate a leaked `km` from a legitimate [k]. The abbreviation itself
         // is what must be absent, and the whole reading is what must be present.
-        expect(say("1400 mm")).toBe("suoʔ˥ t͡sʰieŋ˥˥ sɛi˨˩˧ paiʔ˨˦ ho˥˧ mi˧˧"); // …hò̤-mī
+        expect(say("1400 mm")).toBe("suoʔ˥ t͡sʰieŋ˥˥ sɛi˨˩˧ pɑʔ˨˦ ho˥˧ mi˧˧"); // …hò̤-mī
         expect(say("40cm")).toBe("sɛi˨˩˧ sɛiʔ˨˦ li˧˧ mi˧˧"); // …lī-mī, glued to its number
         expect(say("31 kg")).toBe("saŋ˥˥ sɛiʔ˨˦ ɛiʔ˨˦ kuŋ˥˥ kiŋ˥˥"); // …gŭng-gĭng
-        expect(say("600 m²")).toBe("løyʔ˥ paiʔ˨˦ piŋ˥˧ huoŋ˥˥ mi˧˧"); // bìng-huŏng mī — the bare `m` key
+        expect(say("600 m²")).toBe("løyʔ˥ pɑʔ˨˦ piŋ˥˧ huoŋ˥˥ mi˧˧"); // bìng-huŏng mī — the bare `m` key
         expect(say("84 km²")).toBe("paiʔ˨˦ sɛiʔ˨˦ sɛi˨˩˧ piŋ˥˧ huoŋ˥˥ kuŋ˥˥ li˧˧"); // 84 bìng-huŏng gŭng-lī
         for (const [s, abbr] of [["2,133 km²", "km"], ["1400 mm", "mm"], ["40cm", "cm"], ["31 kg", "kg"]] as const)
             expect(say(s)).not.toContain(abbr);
@@ -140,7 +144,7 @@ describe("Min Dong (cdo) text normalization — BUC out, never Han", () => {
     });
 
     test("the range connective is ⟨gáu⟩ — and the guards that keep identifiers out of it", () => {
-        expect(say("100 - 700 km")).toBe("suoʔ˥ paiʔ˨˦ kɑu˨˩˧ t͡sʰɛiʔ˨˦ paiʔ˨˦ kuŋ˥˥ li˧˧");
+        expect(say("100 - 700 km")).toBe("suoʔ˥ pɑʔ˨˦ kɑu˨˩˧ t͡sʰɛiʔ˨˦ pɑʔ˨˦ kuŋ˥˥ li˧˧");
         expect(say("23~27")).toContain("kɑu˨˩˧");
         // ⚠ THE THREE THINGS THAT MUST NOT BECOME RANGES, one per guard, none of them a corpus accident:
         expect(say("ISBN 3-88053-113-7")).not.toContain("kɑu˨˩˧"); // chained dashes
@@ -158,7 +162,7 @@ describe("Min Dong (cdo) text normalization — BUC out, never Han", () => {
         // reader; the corpus also writes `chiĕu-guó 2200 nièng` and `7,000 nièng sèng`, which are DURATIONS
         // and want exactly the cardinal below. See normalize.ts for the counts and how to re-open it.
         expect(say("1749 nièng")).toBe(`${say("1749")} nieŋ˥˧`);
-        expect(say("1749")).toBe("suoʔ˥ t͡sʰieŋ˥˥ t͡sʰɛiʔ˨˦ paiʔ˨˦ sɛi˨˩˧ sɛiʔ˨˦ kau˧˧"); // the CARDINAL
+        expect(say("1749")).toBe("suoʔ˥ t͡sʰieŋ˥˥ t͡sʰɛiʔ˨˦ pɑʔ˨˦ sɛi˨˩˧ sɛiʔ˨˦ kau˧˧"); // the CARDINAL
     });
 
     test("⚠ A SUPERSCRIPT IN A cdo ARTICLE IS A ROMANIZATION TONE NUMBER, NOT A POWER", () => {

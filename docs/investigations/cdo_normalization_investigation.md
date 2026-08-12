@@ -407,3 +407,86 @@ branch of the compositor (trap 20). The shared rule's dotted-designation and 3-d
    (wuu 搭, nan 佮, hak 摎, cjy 和, hsn 跟, gan 同到, cdo gáu). Its guard is additionally cdo-specific, Run 8.
 
 **Nothing in `src/core` was edited.**
+
+---
+
+## Run 12 — 2026-08-12 17:05 — 百, and the reading the layer already disagreed with
+
+**Question.** Run 7's leg (4) for `báh-hŭng-cĭ` recorded a disagreement and deliberately did not act on it:
+the normalization layer reads 百 as ⟨báh⟩ while `mindong.ts`'s number compositor reads it as ⟨báik⟩, from the
+Wikivoyage phrasebook. Is the vernacular/literary split conditioned by context (in which case the compositor
+may be right in the numeral slot), or is the number simply `báh`?
+
+**Search 1 — the dictionary.** en.wiktionary 百, Eastern Min (Fuzhou):
+
+```
+báh / báik — báh: vernacular ("hundred");  báik: literary ("numerous")
+```
+
+The gloss does the work: the COUNTING sense is assigned to the vernacular form, and the literary form is
+glossed with a different sense ("numerous"), not with a different register of the same sense. Min Nan's entry
+has the same shape (pah vernacular / pek literary), so this is the ordinary Min文白 split, not a cdo quirk.
+
+**Search 2 — cdo.wikipedia's own BUC prose, `insource:` counts through the Cirrus API.** A phrasebook is a
+tertiary source; the corpus this engine is measured against is not.
+
+```
+siŏh-báh  10     siŏh-báik  2
+lâng-báh   2     lâng-báik  0
+săng-báh   2     săng-báik  2   ← both FALSE, see below
+báh-uâng  36     báik-uâng  1   ← the one hit is 八萬, see below
+ngô-báh    2
+báh       136 (whole-corpus)
+```
+
+**Raw findings, read rather than counted.**
+
+- **The number articles are decisive and they are the wiki's own answer to exactly this question.** Article
+  `100` reads, in full: `'''100''' ({{Siăng|Cdo-fzho 100 (siŏh-báh).ogg|siŏh báh|help=no}}, siŏh báik) sê
+  [[99]] gâe̤ng [[101]] cĭ găng gì [[cê̤ṳ-iòng-só]].` — ⟨siŏh báh⟩ first, carrying the **recorded audio
+  file**, with ⟨siŏh báik⟩ as a parenthesised alternate. Article `200`: `lâng-báh`, with audio, and **no
+  variant at all**. Article `300`: `săng-báh`, with audio. Three articles, three multipliers, one form.
+- **`săng-báik` ×2 is a mirage** — `«Gĭ-dók-săng Báik-ciók»` (*Le Comte de Monte-Cristo*, a title) and
+  `Dŭng-săng báik-diōng`. Neither is 三百. Trap: the hyphen crosses a word boundary the search cannot see.
+- **`báik-uâng` ×1 is a hit for 八, not 百** — `găk Ĭng-guók ô báik-uâng séng-dù, găk [[Mī-guók]] ô lĕ̤k-uâng
+  séng-dù` = 8万 / 6万 believers, contrasted in one sentence. So the corpus has **zero** real `báik` +
+  magnitude hits.
+- **`siŏh-báik` ×2 are real but are running prose, not the numeral article** — `Gĭng-guó céng-hū siŏh báik
+  nièng gì ák-cié` (一百年 of suppression). So `báik` is not impossible in the numeral slot; it is a minority
+  free variant, ×2 against ×14 for `báh` in the same slot.
+- **`báh-uâng` ×36 is the compound the compositor emits for 10⁶** — `gê̤ṳng-cūng ô siŏh-báh-uâng
+  Ā-mī-nì-ā-nè̤ng` ("a total of one million Armenians"), and 35 more in GDP/population infoboxes.
+
+**Implication — the split is NOT context-conditioned in any way this compositor can see.** There is no rule
+to encode: the vernacular form is the number at every multiplier the corpus writes, and the two live `báik`
+hits are free variation in prose. So `BUC_SMALL[2]` becomes `"báh"`. **八 keeps `báik`** — which means the
+comment claiming 八/百 are homophones was documenting the defect, and is now removed. And this closes the
+internal disagreement: before this run, one engine read 百 two different ways depending on whether the
+normalization layer or the number compositor reached it.
+
+**⚠ FOUR SHIPPED GOLDENS MOVED, and each is the same one-syllable substitution `paiʔ˨˦ → pɑʔ˨˦`:**
+
+| `test/mindong.test.ts` | before | after |
+|---|---|---|
+| `100` | `suoʔ˥ paiʔ˨˦` | `suoʔ˥ pɑʔ˨˦` |
+| `12345` | `… saŋ˥˥ paiʔ˨˦ …` | `… saŋ˥˥ pɑʔ˨˦ …` |
+| `1000000` | `suoʔ˥ paiʔ˨˦ uɑŋ˨˦˨` | `suoʔ˥ pɑʔ˨˦ uɑŋ˨˦˨` — the corpus's own `báh-uâng` |
+| `1400 mm` · `600 m²` · `100 - 700 km` · `1749` | `… paiʔ˨˦ …` | `… pɑʔ˨˦ …` |
+
+They are not incidental damage: they are the assertion of the fix, and the golden `1000000` now matches a
+string cdo.wikipedia writes 36 times. `84 km²` and `94–98%` keep their `paiʔ˨˦` — that is 八, untouched.
+
+**`referee-eval.ts cdo` — before 1513/1514 folded (99.9%), 100.0% symbol; after 1513/1514 (99.9%), 100.0%.
+Measured both ways** (the table was toggled back to `báik`, re-run, and restored) rather than assumed.
+
+**⚠ AND THE REASON IT CANNOT MOVE IS ITSELF THE FINDING, recorded against the brief's expectation that a
+number-word change *can* move this meter.** `tools/referee-eval/eval.ts` binds cdo to `phonemizeWord` — a
+SINGLE BUC SYLLABLE → IPA — over a ~1500-syllable citation list from the kaikki Chinese dump. It never calls
+`numberToBucWords` and the word list contains no digits. So cdo's referee is structurally blind to the number
+compositor: it can confirm that both `báh` and `báik` are converted correctly, and it can never say which one
+the number is. The evidence for this change had to be, and is, entirely corpus- and dictionary-side.
+
+**Not changed, reported instead.** `tools/normalization/defects.ts:174` carries the leg-(4) note that says
+"mindong.ts's number compositor reads 百 as ⟨báik⟩ … Changing the compositor rewrites every number cdo speaks
+and a shipped golden — its own measurement". That measurement has now been made and the note is stale, but
+`tools/normalization/` is owned by concurrent work in this batch and was not touched.

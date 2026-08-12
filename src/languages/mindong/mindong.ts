@@ -103,19 +103,35 @@ function bucToIpa(word: string): string {
 // converter reads them — no IPA is authored here.
 //
 // Fuzhou specifics encoded below:
-//  • a magnitude multiplier of 1 is 蜀 siŏh, not 一 ék (蜀百 siŏh-báik 100, 蜀千 siŏh-chiĕng, 蜀萬 siŏh-uâng,
+//  • a magnitude multiplier of 1 is 蜀 siŏh, not 一 ék (蜀百 siŏh-báh 100, 蜀千 siŏh-chiĕng, 蜀萬 siŏh-uâng,
 //    蜀億 siŏh-é); ék is the bare/final unit digit (十一 sék-ék);
-//  • a multiplier of 2 is 兩 lâng before 百/千/萬/億 (兩百 lâng-báik, 兩千 lâng-chiĕng) but 二 nê before 十
+//  • a multiplier of 2 is 兩 lâng before 百/千/萬/億 (兩百 lâng-báh, 兩千 lâng-chiĕng) but 二 nê before 十
 //    (二十 nê-sék);
-//  • 八 báik (8) and 百 báik (100) are homophones — that is correct, not a copy-paste slip.
+//  • ⚠ 百 IS ⟨báh⟩ IN THE NUMBER, NOT ⟨báik⟩ — 八 báik (8) and 百 báh (100) are NOT homophones. See below.
 // Source: Wikivoyage "Fuzhou dialect phrasebook" Numbers section (https://en.wikivoyage.org/wiki/Fuzhou_dialect_phrasebook)
 // — 0 lìng, 1 ék/蜀 siŏh, 2 nê/兩 lâng, 3 săng, 4 sé, 5 ngô, 6 lĕ̤k, 7 chék, 8 báik, 9 gāu, 10 sék, 11 sék-ék,
-// 20 nê-sék, 21 niék-ék, 100 siŏh-báik, 200 lâng-báik, 1000 siŏh-chiĕng, 2000 lâng-chiĕng, 10⁴ siŏh-uâng,
-// 10⁸ siŏh-é. JUDGMENT CALLS: (a) the phrasebook leaves 30–90 blank — they are composed unit+sék on the attested
+// 20 nê-sék, 21 niék-ék, 1000 siŏh-chiĕng, 2000 lâng-chiĕng, 10⁴ siŏh-uâng, 10⁸ siŏh-é.
+//
+// ⚠ 百 — WHERE THE PHRASEBOOK IS OVERRULED. Wikivoyage gives 100 as *siŏh-báik / 200 *lâng-báik and that is what
+// this table shipped. It is the LITERARY reading in the numeral slot. Two independent sources say the number is
+// the VERNACULAR ⟨báh⟩:
+//  • Wiktionary 百, Eastern Min (Fuzhou): "báh — vernacular ('hundred'); báik — literary ('numerous')" — the gloss
+//    itself assigns the counting sense to báh;
+//  • cdo.wikipedia's OWN BUC prose, which is the corpus this engine is measured against. Its number articles are
+//    decisive: `100` reads "({{Siăng|Cdo-fzho 100 (siŏh-báh).ogg|siŏh báh}}, siŏh báik)" — báh first, with the
+//    recorded audio, báik as a parenthesised alternate; `200` reads "lâng-báh" with audio and NO variant; `300`
+//    reads "săng-báh" with audio. Corpus-wide `insource:` counts: siŏh-báh 10 / siŏh-báik 2, lâng-báh 2 /
+//    lâng-báik 0, báh-uâng 36 / báik-uâng 1 — and that single báik-uâng is 八萬 80 000 ("ô báik-uâng séng-dù …
+//    ô lĕ̤k-uâng", 8万/6万 in one sentence), i.e. a hit for 八, not for 百. Zero real counter-examples.
+// So the VERNACULAR báh is the number and the LITERARY báik is not conditioned by any context this compositor can
+// see (the two live siŏh-báik hits are 一百年 in running prose, free variation, not a rule). 八 keeps báik.
+// This is also what the normalization layer already assumes: it inserts 百分之 as ⟨báh-hŭng-cĭ⟩, so before this
+// fix one engine read 百 two different ways depending on which path reached it.
+// JUDGMENT CALLS: (a) the phrasebook leaves 30–90 blank — they are composed unit+sék on the attested
 // 二十 nê-sék pattern; (b) 20 is composed as the counting form 二十 nê-sék rather than the counter-word form 廿 niék,
 // which the phrasebook says is used with classifiers.
 const BUC_DIGITS = ["lìng", "ék", "nê", "săng", "sé", "ngô", "lĕ̤k", "chék", "báik", "gāu"];
-const BUC_SMALL = ["", "sék", "báik", "chiĕng"]; // 10¹ 十 · 10² 百 · 10³ 千
+const BUC_SMALL = ["", "sék", "báh", "chiĕng"]; // 10¹ 十 · 10² 百 (VERNACULAR báh — see above) · 10³ 千
 const BUC_MYRIAD = "uâng"; // 萬 10⁴
 const BUC_YI = "é"; // 億 10⁸
 

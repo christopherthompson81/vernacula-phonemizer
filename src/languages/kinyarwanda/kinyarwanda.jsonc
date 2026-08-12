@@ -65,6 +65,12 @@
         "thousands": "ibihumbi",
         "thousandsMul": ["", "", "bibiri", "bitatu", "bine", "bitanu", "bitandatu", "birindwi", "munani", "cyenda"],
         "million": "miriyoni",
+        // 10⁹. rw.wikipedia writes `miriyari` ×8 as a real numeral, including "akayabo ka miriyari 53 na
+        // miriyoni 910" — this compositor's exact output shape, in this table's own orthography. en.wiktionary
+        // `miliyari` glosses it "(Kinyarwanda) billion" and marks it for Kinyarwanda only. The l-spelling
+        // `miliyari` is corpus-dominant (×257) and is the same word (rw l~r is allophonic); see numbers.ts for
+        // why the r-form is the one authored here, and for why rn gets NO billion word at all.
+        "billion": "miriyari",
         "and": "na"
     }
 }

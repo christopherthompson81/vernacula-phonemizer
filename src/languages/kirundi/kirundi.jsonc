@@ -61,6 +61,13 @@
         "thousands": "ibihumbi",
         "thousandsMul": ["", "", "bibiri", "bitatu", "bine", "bitanu", "bitandatu", "birindwi", "munani", "cenda"],
         "million": "umuriyoni",
+        // ⚠ NO "billion" KEY, AND ITS ABSENCE IS THE FINDING. rn.wikipedia has zero hits for miliyari,
+        // miriyari, miliyaridi, miriyaridi, umuliyaridi, umuriyaridi and miliaridi, while writing the million
+        // word freely (imiliyoni ×19, miliyoni ×7, umuliyoni ×3, umuriyoni ×1). The one Kirundi attestation
+        // found anywhere is a news article giving the PLURAL `imiliyaridi 4` (and `miliaridi` in the next
+        // sentence); this slot needs a SINGULAR, so filling it would mean coining one. rw's `miriyari` is
+        // attested for KINYARWANDA and is not thereby a Kirundi word. Left unauthored — the compositor drops
+        // to digit-at-a-time above 10⁹ for rn. See ../kinyarwanda/numbers.ts.
         "and": "na"
     }
 }

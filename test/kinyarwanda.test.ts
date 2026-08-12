@@ -51,12 +51,45 @@ describe("Kinyarwanda numbers", () => {
         expect(numberToWords(12345)).toBe("ibihumbi icumi na kabiri na magana atatu na mirongo ine na gatanu");
     });
 
-    test("millions — miriyoni; ≥10⁹ falls back to digit-by-digit", () => {
+    test("millions — miriyoni", () => {
         expect(numberToWords(1000000)).toBe("miriyoni");
         expect(numberToWords(3000000)).toBe("miriyoni gatatu");
         expect(numberToWords(1000001)).toBe("miriyoni na rimwe");
-        expect(numberToWords(1000000000)).toBe("rimwe zeru zeru zeru zeru zeru zeru zeru zeru zeru");
         expect(phonemize("1000000", "rw")).toBe("miɾijoni");
+    });
+
+    // ⚠ 10⁹ USED TO SPELL ITSELF OUT — `1000000000` composed nothing and fell to "rimwe zeru zeru …", ten
+    // digit words for a round number Kinyarwanda has a word for. `miriyari` is attested in rw.wikipedia's own
+    // prose ×8, and the deciding hit is "akayabo ka miriyari 53 na miriyoni 910" — the compositor's exact
+    // output shape, with this table's `miriyoni` and `na`. en.wiktionary's `miliyari` entry glosses it
+    // "(Kinyarwanda) billion". The l-dominant spelling `miliyari` (×257) is the same word in the French-
+    // influenced orthography (rw l~r is allophonic); see numbers.ts for why the r-form is authored.
+    test("⚠ billions — miriyari, and the shape the corpus itself writes", () => {
+        expect(numberToWords(1000000000)).toBe("miriyari");
+        expect(numberToWords(2000000000)).toBe("miriyari kabiri");
+        expect(numberToWords(1000000001)).toBe("miriyari na rimwe");
+        // The corpus's own compound: 53 miriyari and 910 miriyoni.
+        expect(numberToWords(53_910_000_000)).toBe(
+            "miriyari mirongo itanu na gatatu na miriyoni magana cyenda na icumi",
+        );
+        expect(phonemize("1000000000", "rw")).toBe("miɾijaɾi");
+    });
+
+    // ⚠ THE CEILING IS A REFUSAL TO COMPOSE, NEVER A LICENCE TO GO SILENT (test/bignum-fallback.test.ts).
+    // No 10¹² word is authored — rw.wikipedia writes `tiriyoni` only ×2, both inside converted foreign units
+    // — so 10¹² and above must still be SPOKEN, digit-at-a-time, out of rw's own `units`.
+    test("⚠ above the authored ceiling the digits are still read — never empty, never ASCII", () => {
+        const over = numberToWords(1234567890123); // 13 digits, over 10¹², far under 2^53
+        expect(over).not.toBe("");
+        expect(over).not.toMatch(/\d/u);
+        expect(over).toBe(numberToWords(1234567890123)); // deterministic
+        // …and it reads the DIGITS, not a placeholder: change one digit, change the reading.
+        expect(numberToWords(1234567890124)).not.toBe(over);
+        // The unsafe-integer branch is the same fallback.
+        expect(numberToWords(9007199254740993)).not.toMatch(/\d/u);
+        expect(phonemize("1234567890123", "rw")).not.toMatch(/\d/u);
+        // …but 10¹¹ still COMPOSES — the new ceiling must not have swallowed the normal path.
+        expect(numberToWords(100000000000)).toBe("miriyari ijana");
     });
 });
 

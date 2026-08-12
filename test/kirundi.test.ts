@@ -71,6 +71,27 @@ describe("Kirundi numbers", () => {
         expect(rnNum(1000000)).toBe("umuriyoni"); // rw: miriyoni
         expect(phonemize("1000000", "rn")).toBe("umuɾijoni");
     });
+
+    // ⚠ THE EIGHTH PLACE KIRUNDI IS NOT KINYARWANDA — and here the divergence is an ABSENCE. rw gained a 10⁹
+    // word (`miriyari`, attested ×8 in rw.wikipedia); rn did NOT, and must not inherit it. rn.wikipedia has
+    // zero hits for miliyari / miriyari / miliyaridi / miriyaridi / umuliyaridi / umuriyaridi / miliaridi
+    // while writing the MILLION word freely (imiliyoni ×19, miliyoni ×7, umuliyoni ×3, umuriyoni ×1) — the
+    // silence is about the magnitude, not the corpus. The one Kirundi attestation found anywhere is a news
+    // article's PLURAL `imiliyaridi 4`; this slot needs a singular to match `umuriyoni`, and coining one from
+    // a bare plural is the Fula `tere` failure. So rn's ceiling STAYS at 10⁹ — and 10⁹ is still spoken.
+    test("⚠ 10⁹ is UNAUTHORED for Kirundi — it falls back to digits, and rw's word must not leak in", () => {
+        const billion = rnNum(1000000000);
+        expect(billion).toBe("rimwe zeru zeru zeru zeru zeru zeru zeru zeru zeru");
+        expect(billion).not.toContain("miriyari"); // rw's word, which rn has no evidence for
+        expect(rwNum(1000000000)).toBe("miriyari"); // proof the parent DOES compose it — the tables differ
+        // The fallback is never empty and never raw ASCII (test/bignum-fallback.test.ts), and it reads the
+        // digits rather than a placeholder.
+        expect(billion).not.toMatch(/\d/u);
+        expect(rnNum(1000000001)).not.toBe(billion);
+        expect(phonemize("1000000000", "rn")).not.toMatch(/\d/u);
+        // …and below the ceiling Kirundi still composes normally.
+        expect(rnNum(999999999)).toContain("umuriyoni");
+    });
 });
 
 // ── TEXT NORMALIZATION (src/languages/kirundi/normalize.ts) ────────────────────────────────────────────────

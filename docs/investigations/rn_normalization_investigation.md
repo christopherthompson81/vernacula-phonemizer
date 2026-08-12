@@ -515,3 +515,89 @@ Recorded so the next reader does not re-open them:
   percent`) — `kw'ijana` carries an apostrophe. A `[??]` prompt rather than a FAIL, and the word is the
   best-sourced item in this layer (corpus ×7, wiki 11/8, attested bare after a decimal in
   `amajwi 24,4 kw'ijana`). Noted so the blank is not read as an absence.
+
+---
+
+## Run 11 — 2026-08-12 17:20 — the 10⁹ ceiling, and the word Kirundi does not have
+
+**Question.** `composeRwandaRundi` (shared: rw authors it, rn borrows it) stops at 10⁹ — `1000000000` composed
+nothing and fell to `rimwe zeru zeru zeru zeru zeru zeru zeru zeru zeru`, ten digit words for a round number.
+What is the magnitude series above 10⁶, **for each language separately**? Run 7 of this doc found seven rw
+rules that were wrong for Kirundi (including `kare`, which means "early" in Kirundi, not "squared"), so a word
+attested for rw is not thereby attested for rn.
+
+**Searches — CirrusSearch `insource:` token counts against each language's OWN wiki, plus dictionaries.**
+
+```
+rw.wikipedia   miliyari 257 · miriyari 8 · miliyaridi 1 · miriyaridi 0 · biliyoni 5
+               miliyoni 757 · miriyoni 55            tiriyoni 2 · triliyoni 0 · tiriliyoni 0
+rn.wikipedia   miliyari 0 · miriyari 0 · miliyaridi 0 · miriyaridi 0 · umuliyaridi 0
+               umuriyaridi 0 · miliaridi 0
+               imiliyoni 19 · miliyoni 7 · umuliyoni 3 · umuriyoni 1 · ibihumbi 25 · amajana 36
+en.wiktionary  `miliyari` — ONE sense line, under a "Rwanda-Rundi" header: "(Kinyarwanda) billion"
+languagesandnumbers.com/how-to-count-in-kinyarwanda (kin) — "The word for billion (10⁹) is miliyaridi:
+               miliyaridi imwe [1 billion]".  The /how-to-count-in-rundi (run) page did not serve Rundi
+               content at all (it returned a Yakut page) — a dead end, recorded.
+igihe.bi, a Burundi Kirundi-language outlet, one article: "Imiliyaridi 4 z'amafaranga y'amarundi niyo
+               yaguzwe ico kibanza" … "ni hafi imiliyaridi zirenga 100 z'amarundi" … "izo miliaridi
+               ntizizobura ico zifasha" — TWO spellings in one article, both PLURAL.
+```
+
+**Raw findings.**
+
+- **rw (KINYARWANDA) has a 10⁹ word and the corpus writes it in the compositor's own shape.** The deciding
+  hit is `Gahunda yo gusiramura izatwara akayabo ka **miriyari 53 na miriyoni 910**` — billion + multiplier,
+  `na`, million + multiplier, written by a Kinyarwanda hand, using **this table's `miriyoni` and `na`**. The
+  other `miriyari` hits are ordinary numerals (`miriyari 55 m3`, `miriyari 1`, `babarirwa muri za miriyari`).
+- **The l/r question is orthographic, not lexical.** `miliyari` ×257 vs `miriyari` ×8 is the same 14:1-ish
+  split this table already faced and already settled the other way when it authored `miriyoni` (×55) against
+  `miliyoni` (×757); Kinyarwanda l~r is allophonic, so both spell one word. The r-form is authored because it
+  is what the one attested billion+million COMPOUND uses and because the rest of the table is in it. Both
+  counts are in the code comment so this is not re-derived as an oversight.
+- **rn (KIRUNDI) has NO attested 10⁹ word, and the silence is about the magnitude, not the corpus.** Seven
+  spellings probed, all zero — while the same wiki writes the MILLION word freely across four spellings
+  (×30 combined). A corpus that says `imiliyoni` 19 times and `miliyari` zero times is not simply too small.
+- **The one Kirundi attestation found anywhere is a PLURAL, and it is unstable.** `imiliyaridi` and
+  `miliaridi` in one article. `N.million` for rn is the SINGULAR `umuriyoni`, so filling the slot means
+  deriving `*umuliyaridi` from a bare plural — the Fula `tere` failure, playbook trap 37: a bare stem or a
+  bare inflection is never the attestation of the form you actually need.
+- **10¹² is declined for BOTH.** rw.wikipedia does write `tiriyoni` ×2 — `tiriyoni 1.53 z'amadolari ya
+  Amerika` and `gifite miriyari 55 m3 (tiriyoni 1,9 cu ft)` — so the word is not imaginary. But two hits,
+  both inside converted foreign units, with no dictionary or grammar corroboration, is under the bar when the
+  magnitude one step down already has three competing spellings (`miliyari` / `miriyari` / `biliyoni`).
+  Negative result kept so the next reader does not re-derive it and reach a different answer.
+
+**Implication — the ceiling is per-language, so it cannot be a constant in a SHARED compositor.** `billion`
+is now **optional** in `RwandaRundiNumbers`: the compositor's ceiling is 10¹² when the table has the word and
+stays 10⁹ when it does not. rw gets `"billion": "miriyari"`; rn's manifest gets a comment where the key would
+be, saying why there is no key. The absence is authored, not forgotten.
+
+**⚠ ONE SHIPPED GOLDEN MOVED, in `test/kinyarwanda.test.ts`:**
+
+| | before | after |
+|---|---|---|
+| `numberToWords(1000000000)` | `rimwe zeru zeru zeru zeru zeru zeru zeru zeru zeru` | `miriyari` |
+
+That golden was pinning the DEFECT — it asserted that Kinyarwanda spells its milliard out digit by digit,
+which the corpus contradicts ×8. The Kirundi golden for the same input is **unchanged and now asserted on
+purpose**, with `expect(rwNum(1e9)).toBe("miriyari")` beside it so the divergence is pinned from both sides.
+
+**Fallback, verified for both languages after the change** (the `ln`/`ha` defect class, commits `d38f00d` /
+`fdab9b1`): rw `1234567890123` → `rimwe kabiri gatatu … gatatu`, rn `1000000000` → `rimwe zeru …` — never
+empty, never raw ASCII, and one changed digit changes the reading. `npx vitest run
+test/bignum-fallback.test.ts` 118/118 before and after; new assertions added to both language files.
+
+**Gates.**
+
+| gate | before | after |
+|---|---|---|
+| `referee-eval.ts rw` | 1407/1600 folded (87.9%) · 96.6% symbol | **identical** |
+| `referee-eval.ts rn` | 1467/1600 folded (91.7%) · 98.0% symbol | **identical** |
+| `review.ts --lang rw` | 2 FAIL (the minus, argued) | 2 FAIL, **same two**, unchanged |
+| `review.ts --lang rn` | 2 FAIL (the minus, argued — Run 8) | 2 FAIL, **same two**, unchanged |
+| `npx vitest run` | 240 files pass | **240 files / 3767 pass** |
+| `npx tsc --noEmit` | clean | clean |
+
+Both referees are word lists over a Common Voice / epitran vocabulary with no digits in it, so — as in Run 8
+— they cannot move for a number-data change. Measured both ways anyway (the `billion` key was disabled, the
+three referees re-run, and the key restored) rather than argued.

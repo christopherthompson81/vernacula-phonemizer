@@ -23,6 +23,7 @@ export interface RwandaRundiNumbers {
     thousands: string; // plural "thousands" noun
     thousandsMul: string[]; // class-8 multiplier at indices 2–9
     million: string; // 10⁶
+    billion?: string; // 10⁹ — OPTIONAL: authored for rw (miriyari), deliberately absent for rn. See numbers.ts.
     and: string; // the "na" connector
 }
 
