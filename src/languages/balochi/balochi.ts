@@ -16,6 +16,7 @@ import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { renderNumber, spellDigits } from "../../core/numbers.ts";
 import { balochiNumberWords, encliticWord, type BalNumbersDef } from "./numbers.ts";
+import { makeBalochiNormalizer } from "./normalize.ts";
 
 interface BalochiDef {
     consonants: Record<string, string>;
@@ -137,8 +138,20 @@ function number(digits: string): string {
     return renderNumber(n, DEF.numbers, encliticWord(phonemizeWord, DEF.numbers), balochiNumberWords);
 }
 
-// A word (Arabic Balochi letters OR Roman incl. diacritics) / number / punctuation token.
-const TOKEN = new RegExp(`([ؠ-ۿ‌]+|${LATIN_RUN})|(\\d+)|([،؛؟.!?…,:])`, "giu");
+/**
+ * A word (Arabic Balochi letters OR Roman incl. diacritics) / number / punctuation token.
+ *
+ * ⚠ THE ARABIC ARM REACHES INTO THE ARABIC SUPPLEMENT (U+0750–U+077F), AND WITHOUT THAT ONE RANGE THE
+ * BALOCHI STANDARD ALPHABET'S ē IS DELETED. ݔ U+0754 sits outside U+0620–U+06FF, so it matched no arm at
+ * all: the letter vanished AND split its word in two — `وڈݔن` read as *wɖ n*, `شݔر` as *ʃ r*. It occurs
+ * ×506 in 149 of the corpus's 383 paragraphs (38.9%), which makes it the largest single reading defect
+ * this language had, and it is invisible to every DROP class because those hunt a symbol that SURVIVES.
+ * Same shape as ug's presentation forms; see `normalize.ts` step 3 for the other half of that family.
+ * ⚠ ADDING THE RANGE IS NOT ENOUGH ON ITS OWN — a letter the tokenizer now KEEPS but the manifest has no
+ * rule for is dropped one layer down instead, which is why `balochi.jsonc` gained ݔ and ۏ in the same
+ * change. The token class decides where the SCRIPT boundary falls; the manifest decides what is read.
+ */
+const TOKEN = new RegExp(`([ؠ-ۿݐ-ݿ‌]+|${LATIN_RUN})|(\\d+)|([،؛؟۔٬.!?…,:])`, "giu");
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where the
  * SCRIPT boundary falls (routing), while this one decides whether the g2p has rules for these letters. A token
@@ -155,10 +168,15 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 export type ForeignPhonemizer = (latin: string) => string;
 
+/** The text-normalization pass (`normalize.ts`), given the one thing it needs from this file: whether a
+ *  spelling is a lexicon headword. Passed as a dependency rather than imported the other way, because the
+ *  engine calls the normalizer and the reverse import would be a cycle. */
+const normalizeBalochi = makeBalochiNormalizer({ knownWord: (w) => lexicon().ar.has(w) });
+
 class BalochiPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeBalochi(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

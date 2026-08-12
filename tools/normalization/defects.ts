@@ -1329,6 +1329,59 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "digit-adjacent in the corpus or on rn.wikipedia",
         "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
     },
+    bal: {
+        // ⚠ THE EVIDENCE BEHIND EVERY LINE HERE IS UNUSUAL AND IS STATED ONCE, because this language has
+        // LESS to source from than any other entry in this table. Balochi has NO referee (kaikki 0,
+        // wikipron 0), espeak does not ship it in any variety, `referee-eval.ts` does not accept the code,
+        // and there is NO WIKIPEDIA — bal, bcc, bgn and bgp are all absent from Wikimedia's sitematrix and
+        // all four fail DNS, so `attest.ts` has nothing to probe. The only Southern-Balochi text that
+        // exists is Wikimedia Incubator's `Wp/bcc`, and 37.4% of its long paragraphs are PERSIAN or URDU.
+        // So the counts below are over the 383 paragraphs that survive `filter-by-language.py --lang bal`,
+        // and where a second number is given it is `Wp/bgn` — WESTERN Balochi, a different language of the
+        // macrolanguage, quoted as a labelled second opinion and never as Southern evidence.
+        // ⚠ AND THAT DISTINCTION IS WHAT DECIDES THE PERCENT LINE, which is the only class here where a
+        // word actually exists. Naming a Western word in a Southern engine is this language's version of
+        // the French-into-Haitian-Creole failure.
+        percent: "measured: `٪` ×2 Southern (`۷۷٪ جهانی`, `چہ ۸۰٪ بلۏچ`), and the word is attested only in "
+            + "WESTERN Balochi — `فیصد` ×14 in Wp/bgn, in slot (`۱۹٫۸ فیصد`, `۱۳ فیصد`) — against ×0 in "
+            + "Southern. The one Southern candidate `سدی` ×1 is the CENTURY (`دھمی سدی ءَ`), trap 37; "
+            + "`درصد` ×2 and `صدی` ×2 in the unfiltered project are in its Persian and Urdu paragraphs. A "
+            + "dictionary check was attempted as the playbook requires of a silence-based refusal and did "
+            + "not resolve: webonary.org's dialect-labelled Balochi dictionary returns HTTP 403",
+        currency: "measured: the corpus's only currency sign is `₿` ×1, and it is the sign being NAMED "
+            + "rather than used — `گۏن سیاھگ ₿` (\"with the symbol ₿\"), beside its own ticker `BTC`, in the "
+            + "article on Bitcoin. No amount, no Balochi currency word attested in either corpus; ×0 "
+            + "currency signs of any kind in Wp/bgn",
+        ampersand: "measured: `&` ×1 Southern and ×1 Western, and both are inside an ENGLISH gloss the "
+            + "article supplies for itself — `(Antigua & Barbuda)`. There is no Balochi ampersand to source "
+            + "from that, and the Balochi conjunction ⟨و⟩/⟨ۇ⟩ is written out wherever the language means one",
+        plus: "measured: `+` ×1 Southern and it is not arithmetic — `گِد + رۏچ اَنت`, an etymology in the "
+            + "calendar article showing that ⟨گدرۏچ⟩ is ⟨گِد⟩ plus ⟨رۏچ⟩. ×5 in Wp/bgn, of which the "
+            + "readable ones are a mathematical series (`3 − 4 + · · · ۱ − ۲ + ۳ − ۴ + …`) and a second "
+            + "etymology (`چَتیس: ۳۶ + گَر`). No plus word is attested in either corpus",
+        minus: "measured: `[-−–]` before a digit is ×4 Southern and every one is a RANGE — `2-7 پیش چه "
+            + "میلاد` (7–2 BC), `1960-1973`, `۱ - ۶`, `۳-۱`. There is no negative quantity in the corpus to "
+            + "read, and no minus word anywhere. ⚠ This refusal is DIFFERENT IN KIND from the plus's and is "
+            + "kept separate for the reason the playbook gives: omitting a plus is lossless and omitting a "
+            + "minus INVERTS — so this line records an ABSENCE of negatives, and the moment one appears it "
+            + "must be re-argued rather than inherited",
+        "plus-minus": "measured: `±` is ×0 in both corpora — nothing to read and nothing to source",
+        equals: "measured: `=` is ×0 Southern. ×11 in Wp/bgn and genuinely arithmetic there, so this is a "
+            + "refusal about the WORD rather than about the sign: no Balochi equals-word is attested in "
+            + "either corpus, and Balochi's own `برابر`-shaped candidates do not occur digit-adjacent",
+        "less-than": "measured: `<` is ×0 in both corpora",
+        "greater-than": "measured: `>` is ×0 in both corpora",
+        times: "measured: `×` is ×0 in both corpora. ⚠ And the dimension-cross sense that supplies most "
+            + "other languages' evidence is absent too, so there is not even a shape to argue about",
+        divide: "measured: `÷` is ×0 in both corpora",
+        exponent: "measured: superscripts are ×0 Southern. ×3 in Wp/bgn (`کیلومتر مربع` is written out in "
+            + "words beside them), and `units` is ×0 in the Southern artifact — so there is no unit for an "
+            + "exponent to attach to, which makes this a missing CLASS rather than a missing word",
+        degrees: "measured: `°` is ×0 Southern and ×5 Western, where it is coordinates and one temperature "
+            + "(`۴ درجه سانتیگراد(۵۷ °F)`). ⚠ That Western instance also shows the degree WORD `درجه` in "
+            + "the same sentence as the sign, i.e. Western Balochi glosses itself here — which is exactly "
+            + "the evidence Southern does not have, and exactly why it is not borrowed",
+    },
 };
 
 /**
@@ -2233,6 +2286,28 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // (`hakaba hakonje cane (nko munsi ya -39°C)`) and is NOT listed, so it keeps reporting: Kirundi has
         // no attested word for the sign and a dropped minus INVERTS the value, which must stay visible.
         minus: ["(Kindergaten –2ème année)"],
+    },
+    bal: {
+        // ⚠ THE CLASS-LEVEL REFUSALS AND THEIR MEASUREMENTS ARE IN `ACCEPTED_SIGN_SILENCE` ABOVE; this is
+        // the per-INSTANCE residue the artifact scan still reports, and all three are cases where silence
+        // is the CORRECT reading rather than a missing rule. Southern Balochi's whole sign inventory is
+        // these three characters, so the two lists happen to cover the same ground here — which is a fact
+        // about how little this corpus writes, not a redundancy.
+        // ⚠ A SIGN BEING NAMED, NOT USED. `₿` appears once in the corpus and twice in the artifact (the
+        // hard and sample tiers both selected the sentence): `بیتکوین یا گۏن نماد BTC گۏن سیاھگ ₿` —
+        // "Bitcoin, with the ticker BTC, with the symbol ₿". A symbol quoted as the thing under discussion
+        // has no amount attached and wants no currency word; this is the `su` iteration-mark shape, a
+        // mention rather than a use.
+        currency: ["گۏن سیاھگ ₿"],
+        // ⚠ AN ETYMOLOGY, NOT ARITHMETIC — and the plus is doing real work that no Balochi word would
+        // improve. The calendar article decomposes ⟨گدرۏچ⟩ into its two parts: `گِد + رۏچ اَنت`, "is گِد
+        // plus رۏچ". The operands are WORDS, so every guard the fleet uses (a digit on one side) already
+        // rejects it, and reading a plus-word here would put arithmetic into a word-formation gloss.
+        "math-sign": ["گِد + رۏچ اَنت"],
+        // ⚠ ENGLISH INSIDE A PARENTHETICAL, which is this wiki's constant habit — it glosses proper nouns
+        // with `(پہ انگرݔزی: …)` or a bare Latin parenthesis. The ampersand belongs to the English name
+        // `Antigua & Barbuda` and is already on the Latin fallback's side of the seam.
+        ampersand: ["(Antigua & Barbuda)"],
     },
 };
 

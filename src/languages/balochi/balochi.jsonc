@@ -27,8 +27,28 @@
     },
 
     // Written (long) vowels + the matres lectionis. Short /a i u/ have NO letter (unwritten).
+    //
+    // ⚠ ݔ AND ۏ ARE THE BALOCHI STANDARD ALPHABET'S OWN ANSWER TO THIS FILE'S "DEFECTIVE SCRIPT" HEADER, and
+    // they were added when the corpus turned out to be full of them. The header above says ⟨و⟩ conflates
+    // uː/oː and ⟨ی⟩ conflates iː/eː and that the distinction "is not recoverable from the spelling" — which
+    // is true of the Pakistan alphabet and FALSE of the Balochi Academy Sarbaz standard (32 letters) used in
+    // Iran, which invented a letter for each of the two vowels that ⟨و⟩/⟨ی⟩ swallow:
+    //     ݔ U+0754 "Cappi Yà"  = long ē, the INITIAL/MEDIAL form whose FINAL form is ⟨ے⟩ (already above)
+    //     ۏ U+06CF "Cappi Wà"  = long ō
+    // Sourced from Wikipedia's *Balochi alphabets* (Balochi Academy Sarbaz standard) and corroborated twice
+    // over inside this repository, which is what made it safe to add:
+    //   · the corpus GLOSSES ITSELF — the same word appears both ways, 32 type pairs for ݔ≡ی (مزنݔن/مزنین
+    //     17/32, انگرݔزی/انگریزی 26/3, نݔست/نیست) and 19 for ۏ≡و (گۏن/گون 63/6, بلۏچستان/بلوچستان 21/23);
+    //   · `balochi-lexicon.tsv` transcribes exactly those partners with the vowel claimed here — نیمگ→nēmag,
+    //     بلوچ→balōč, روچ→rōč, کوه→kōh, against the corpus's نݔمگ, بلۏچ, رۏچ, کۏہ;
+    //   · and the POSITIONAL claim is measurable: ݔ is word-final ×2 and non-final ×489 in the corpus, which
+    //     is the initial/medial allograph of ⟨ے⟩ behaving exactly as described.
+    // ⚠ THE FOLD IN normalize.ts IS LEXICON-FIRST AND THEREFORE OFTEN BEATS THESE ENTRIES, deliberately:
+    // `نݔمگ` respelled `نیمگ` is a lexicon hit and returns the full-voweled *neːmaɡ*, where these rules return
+    // the abjad skeleton *neːmɡ*. These are the OOV floor, and they are the reason that floor now has the
+    // right vowel QUALITY instead of iː/uː.
     "vowels": {
-        "ا": "aː", "آ": "aː", "ے": "eː"
+        "ا": "aː", "آ": "aː", "ے": "eː", "ݔ": "eː", "ۏ": "oː"
     },
 
     // Every letter that can WRITE a vowel — the three above plus the two ambivalent matres ⟨و⟩ and ⟨ی/ى⟩,
@@ -36,7 +56,10 @@
     // the glides [w]/[j] word-initially or ADJACENT TO another vowel letter, and the long vowels [uː]/[iː]
     // between consonants. Two matres in a row therefore make each other a glide, which is what the defective
     // abjad intends.
-    "vowelLetters": ["ا", "آ", "و", "ى", "ی", "ے"],
+    // ⚠ ݔ and ۏ join this list as well as `vowels`: this set is the ENVIRONMENT for the glide test, so a ⟨و⟩
+    // or ⟨ی⟩ standing next to one of them has a vowel beside it and is a glide, which is what the abjad
+    // intends. They are unambiguous vowels themselves and never take the glide branch.
+    "vowelLetters": ["ا", "آ", "و", "ى", "ی", "ے", "ݔ", "ۏ"],
 
     // ⚠ THE ROMAN ORTHOGRAPHY, a SECOND full g2p in the same engine — Balochi is written in both scripts and
     // this half is PHONEMIC where the Arabic half is defective, so it resolves to full IPA on its own rather
@@ -86,7 +109,16 @@
         "connectiveIpa": "u"
     },
 
+    // ⚠ ۔ U+06D4 ARABIC FULL STOP is the sentence terminator of every Perso-Arabic orthography on the Indian
+    // side — ur, ps and sd all declare it and Balochi (Pakistan) writes it too — and its absence here was a
+    // silently LOST PAUSE, not a wrong reading. ×1 in the 383 filtered Southern paragraphs and ×123 in the
+    // unfiltered project, the difference being that the Urdu articles use it throughout.
+    // ⚠ ٬ U+066C ARABIC THOUSANDS SEPARATOR IS A CLAUSE COMMA IN THIS CORPUS AND A GROUPING MARK IN WESTERN
+    // BALOCHI'S, which is why it is in both this table and normalize.ts. All 10 Southern instances are
+    // ordinary commas between clauses (`… اینت٬ که …`, `… کورته٬و …`) while Wp/bgn writes ۴۴۷٬۴۰۰ and
+    // ۲٬۲۷۵٬۰۰۰. normalize.ts claims the digit-grouped shape FIRST; whatever it leaves reaches this table as
+    // the pause the Southern corpus wants. Same split, decided by context rather than by mark.
     "clausePunctuation": {
-        "،": ",", "؛": ",", "؟": "?", ".": ".", "?": "?", "!": "!", ",": ",", ":": ",", "…": "."
+        "،": ",", "؛": ",", "؟": "?", "۔": ".", "٬": ",", ".": ".", "?": "?", "!": "!", ",": ",", ":": ",", "…": "."
     }
 }
