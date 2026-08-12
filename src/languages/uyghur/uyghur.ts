@@ -10,6 +10,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { makeUyghurNormalizer } from "./normalize.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -76,12 +77,29 @@ function number(digits: string): string {
     return renderNumber(n, MANIFEST.numbers, phonemizeWord, turkicNumberWords);
 }
 
+/**
+ * A non-negative integer → its Uyghur numeral SPELLING (words, not IPA) — the dependency the normalizer
+ * needs so it can attach the ordinal suffix `-ىنچى` to the LAST WORD of the numeral. A suffix cannot be
+ * applied to a digit run (playbook trap 14), so `1949-يىلى` has to become words inside that rule; composing
+ * it here keeps `uyghur.jsonc` the single place a Uyghur numeral spelling lives.
+ */
+export function numeralWords(n: number): string {
+    if (!Number.isSafeInteger(n) || n < 0) return "";
+    return turkicNumberWords(n, MANIFEST.numbers)
+        .filter((w): w is string => w !== null && w !== "")
+        .join(" ");
+}
+
+/** Text normalization (dates/ordinals, signs, units, the script folds) — see `normalize.ts`. It is a
+ *  FACTORY because the ordinal rule needs `numeralWords` above, and importing it there would be a cycle. */
+const normalizeUyghur = makeUyghurNormalizer({ numeralWords });
+
 // A word (Uyghur Arabic letters, U+0620–06FF, incl. the hamza-carrier ئ) / number / punctuation token.
 const TOKEN = /([ؠ-ۿ]+)|(\d+)|([؟؛،.!?…,])/gu;
 
 class UyghurPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeUyghur(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

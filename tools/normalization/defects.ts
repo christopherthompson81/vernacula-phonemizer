@@ -952,6 +952,47 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "digit-adjacent anywhere in the corpus or on rw.wikipedia",
         "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
     },
+    ug: {
+        // ⚠ ESPEAK SHIPS NO UYGHUR AT ALL, so every reason below is a measurement over the mined
+        // ug.wikipedia artifact (429 segments), `attest.ts` against that wiki, and the wikipron
+        // `uig_arab_broad` HUMAN referee. The refusals are argued in `src/languages/uyghur/normalize.ts`.
+        equals: "measured: `=` occurs 39 times and IS arithmetic, so this refusal is about the WORD. `تەڭ` "
+            + "is the one candidate — ×5 whole-word in the corpus and a wikipron referee headword — and "
+            + "every corpus instance is the ADJECTIVE 'equal' (`كۆلىمىگە تەڭ` 'equal to the area of', `تەڭ "
+            + "ھوقۇقلۇق` 'equal rights', `تەڭ پايدا`). Not one is digit-adjacent. Trap 37 with the count on "
+            + "the wrong side; `ff hakkunde` is what shipping it anyway would look like",
+        plus: "measured: `+` occurs 8 times and NONE is arithmetic — `+86/27` dialling codes ×3, `451 + 389 "
+            + "pp.` (a page count), `180=120t+16t2` (a formula), `24+3`, two lines of forum spam. And the "
+            + "audio tier's standing finding applies: omitting a plus is lossless where omitting a minus "
+            + "inverts, so this is the cheap half of the refusal",
+        times: "measured: `×` occurs 3 times and none is multiplication — `68 ×105 مېتىرلىق مەيدان` is a "
+            + "football pitch, i.e. a DIMENSION CROSS that reads 'by', and `1015× Hz30` is mangled "
+            + "scientific notation. No single reading is right for both",
+        "plus-minus": "the sign does not occur in the evidence (×0), and no Uyghur word for the tolerance "
+            + "relation is attested in corpus, wiki or referee",
+        "less-than": "the sign does not occur in the evidence (×0) and no comparative-magnitude phrase is "
+            + "attested digit-adjacent",
+        "greater-than": "the sign does not occur in the evidence (×0) and no comparative-magnitude phrase "
+            + "is attested digit-adjacent",
+        divide: "the sign does not occur in the evidence (×0); the corpus's only division is written with a "
+            + "backslash in an IQ formula (`ئەقلى يېشى \\ ئەمەلىي يېشى`), which is not this sign",
+        ampersand: "measured: all 9 `&` are markup or English — `&nbsp;` ×4 (removed as an HTML entity by "
+            + "normalize.ts step 2), `&amp;quot;` ×1, two lines of forum spam, `Heath, EG & Chiara` (an "
+            + "English citation) and `510 بەت & 1013 بەت`. Reading it as `ۋە` would put an Uyghur word "
+            + "inside an English name",
+        // ⚠ THE `minus` KEY IS HERE EVEN THOUGH THE SIGN *IS* READ, and that is this table's stated purpose
+        // rather than an exception to it: the synthetic probe `-5` will always report DROPPED and will
+        // always be right to. `مىنۇس` is sourced (a wikipron referee headword /m i n u s/ and ×7 tokens / 5
+        // articles on ug.wikipedia, in-slot as `يىللىق خاتالىق مىنۇس 0.9 دەقىقە`) and normalize.ts step 9
+        // emits it — but only with a TEMPERATURE to its right, because that is the only right context that
+        // separates a negative from the other two things this corpus writes with a dash. Measured over all
+        // 36 `[space or bracket] - digit` instances: 8 real negatives (every one followed by `℃`), 19 range
+        // dashes, 9 stray clause-opening dashes glued to a year. A probe with no right context is
+        // indistinguishable from the 28 that must stay silent.
+        minus: "READ, but only with a right context the synthetic probe cannot carry — `مىنۇس` is emitted "
+            + "for `- N°C` (8/8 of the corpus's real negatives) and withheld from the 19 range dashes and 9 "
+            + "clause-opening dashes that share the shape. See uyghur/normalize.ts step 9 for the tabulation",
+    },
 };
 
 /**
@@ -1714,6 +1755,28 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // through the shared tier (`kilometero kare`, `metero kibe`, both attested collocations), which is
         // why this is one instance and not a class.
         exponent: ["4⁰"],
+    },
+    ug: {
+        // ⚠ THE RESIDUE OF A CLASS THE LAYER DOES READ, listed by instance so the reading stays under test.
+        // `مىنۇس` IS emitted for a real negative (see ACCEPTED_SIGN_SILENCE above and normalize.ts step 9);
+        // these are the two mechanical families that share the shape and must stay silent — a clause-opening
+        // dash glued to a year (`. -2006يىلى مۇقىم تېلپون`, the corpus's country-infobox boilerplate) and a
+        // PERCENT RANGE (`ئىقتىسادى ئېشىش سۈرئىتى 5%-6%`, a growth rate). Plus one wiki signature.
+        // ⚠ AND THE ONE GENUINE GAP IS DELIBERATELY NOT LISTED: `ياۋروپا ۋاقتى(-2ۋاقىت رايونى)` is a real
+        // UTC offset, which the audio tier says IS voiced. One instance is not enough to widen a guard that
+        // 28 counter-examples argued for (trap 9), so that line stays RED rather than accepted.
+        minus: [
+            "-2006يىلى", "-2005يىلى", "-1810يىلى",
+            "2%-3%", "3%-4%", "5%-6%", "8%-9%",
+            "--203.173.138.159",
+        ],
+        // FORUM SPAM, not prose. One paragraph of a bulletin-board signature block survived extraction
+        // (`' i4 j9 k% K& x; y# K3 M5 @`) and carries a `%` and an `&`; another (`+ l# c9 ?& ]+ k`) and a
+        // third (`9 Z$ t, _# B4 X( m3 P`) carry a `&` and a `$`. Nothing is read there because nothing is
+        // said there. `%`, `&` and `$` are all read in this language's prose, which is why these are
+        // instance-listed rather than class-silenced.
+        percent: ["k% K&"],
+        currency: ["9 Z$ t,"],
     },
 };
 
