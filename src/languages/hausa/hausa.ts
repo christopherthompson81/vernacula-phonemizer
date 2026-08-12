@@ -56,9 +56,15 @@ class HausaPhonemizer implements Phonemizer {
         // number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeHausa(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]).replace(/’/g, "'")));
-            else if (m[2])
-                for (const wd of numberToWords(Number(m[2].replace(/,/gu, ""))).split(" "))
-                    sink.emit(phonemizeWord(wd));
+            else if (m[2]) {
+                // ⚠ `numberToWords` RETURNS "" ABOVE ITS AUTHORED 10¹² RANGE, and emitting that deleted the
+                // number from the reading with nothing to hear — the fleet's 2^53 defect one magnitude down
+                // (docs/investigations/bignum_fallback_investigation.md). Fall back to digit-at-a-time.
+                const bare = m[2].replace(/,/gu, "");
+                const composed = numberToWords(Number(bare));
+                const words = composed === "" ? [...bare].map((c) => numberToWords(Number(c))) : composed.split(" ");
+                for (const wd of words) if (wd !== "") sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

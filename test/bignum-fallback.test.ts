@@ -129,3 +129,42 @@ describe("an integer above 2^53 degrades to digit-at-a-time — it is never drop
         }
     });
 });
+
+/**
+ * ⚠ 2^53 IS NOT THE ONLY CLIFF, and finding that took a SECOND probe with a different question. The first
+ * one asked "what breaks above the float's exact-integer limit?" and could not see these at all: it skipped
+ * any engine whose safe integer did not read, and it only ever tried one magnitude. Seven engines cap their
+ * authored magnitude words at 10¹² and fell off there instead — `ha` returning "" (the number deleted) and
+ * `ps`/`pbt`/`am`/`ti`/`eu`/`ln` returning the raw digit string (ASCII inside the IPA).
+ *
+ * The distinction that matters: a missing magnitude word is a real limit and inventing one would be the
+ * Fula `tere` failure. Refusing to COMPOSE is right. Refusing to SPEAK is not — the digits are still there
+ * to be read one at a time, which is what every one of these now does.
+ */
+describe("the authored-range cap is a limit on composition, never a licence to go silent", () => {
+    const CAPPED = ["ha", "ps", "pbt", "am", "ti", "eu", "ln"] as const;
+    const OVER = "1234567890123"; // 13 digits — over the 10¹² cap, far under 2^53
+
+    test("⚠ a numeral past the 10¹² cap is still spoken, and does not leak ASCII", () => {
+        for (const lang of CAPPED) {
+            const read = phonemize(OVER, lang).trim();
+            expect(read, `${lang}: the numeral was dropped entirely`).not.toBe("");
+            expect(read, `${lang}: raw digits leaked into the IPA`).not.toMatch(/\d/u);
+            // …and the digits are READ, not replaced by one placeholder: change the last digit, change the
+            // reading. Before the fix both sides were "" (ha) or the literal digits (the rest).
+            expect(phonemize("1234567890124", lang).trim(), `${lang}: the fallback ignores the digits`)
+                .not.toBe(read);
+        }
+    });
+
+    test("…and the composed path BELOW the cap is untouched", () => {
+        for (const lang of CAPPED) {
+            // 12 digits still composes with the authored magnitude words, so it must NOT equal the reading
+            // of its own digits one at a time — that equality would mean the fallback had swallowed the
+            // normal path, which is the way this fix could silently do more harm than the defect.
+            const composed = phonemize("123456789012", lang).trim();
+            expect(composed, lang).not.toBe(phonemize([..."123456789012"].join(" "), lang).trim());
+            expect(composed, lang).not.toMatch(/\d/u);
+        }
+    });
+});

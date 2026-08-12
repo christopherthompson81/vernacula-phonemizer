@@ -124,7 +124,9 @@ export function createLingala(): Phonemizer {
                 else if (m[2]) {
                     const num = Number(m[2]);
                     if (Number.isSafeInteger(num) && num >= 0 && num < 1e12) for (const w of cardinalWords(num).split(" ")) sink.emit(phonemizeWord(w));
-                    else sink.emit(m[2]);
+                    // ⚠ THE ELSE USED TO EMIT THE RAW DIGIT STRING, i.e. ASCII inside the IPA. Above the
+                    // authored 10¹² range the digits are read one at a time instead — see amharic.ts.
+                    else for (const c of m[2]) for (const w of cardinalWords(Number(c)).split(" ")) sink.emit(phonemizeWord(w));
                 } else if (m[3]) {
                     const mk = DEF.clausePunctuation[m[3]];
                     if (mk) sink.pause(mk);

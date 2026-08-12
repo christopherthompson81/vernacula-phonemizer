@@ -182,3 +182,49 @@ passed (236)` / `Tests 1 failed | 3567 passed`, with no test name captured. Real
 **Kept as a negative result rather than deleted**, because the honest state is "seen once, name unknown,
 green four times since" and not "always green". If it recurs, the run duration is the thing to look at
 first: same test totals (3573), so it is one test timing out and not one assertion changing its answer.
+
+## Run 8 — 2026-08-11 21:30 — the second probe: 2^53 was not the only cliff
+
+**Command.** A follow-up probe over all 193 registry engines, asking a different question from the first
+one: instead of "what breaks above the float's exact-integer limit?", *"what breaks at ANY magnitude?"* —
+reading `1234`, `1234567`, `1234567890`, `1234567890123` and `1234567890123456` through every engine and
+flagging empty output or ASCII digits at each.
+
+**Why the first probe could not see this.** Two reasons, both structural rather than accidental:
+1. it tried exactly ONE magnitude (2^53±1), so a cap at 10¹² was invisible;
+2. it skipped any engine whose SAFE integer failed to read (`if (safe === "") continue`) — which is
+   precisely the shape `ha` has, so the engine with the worst version of the defect was excluded *by the
+   guard meant to avoid false positives*.
+
+**Raw finding.** 7 of 193 engines fall off a cliff at 10¹³, one magnitude below anything the first sweep
+looked at:
+
+    ha     13d:EMPTY 16d:EMPTY        ← the number is DELETED
+    ps     13d:RAW   16d:RAW
+    pbt    13d:RAW   16d:RAW
+    am     13d:RAW   16d:RAW
+    ti     13d:RAW   16d:RAW
+    eu     13d:RAW   16d:RAW
+    ln     13d:RAW   16d:RAW
+
+This also corrects the Run 7 report of `ha`, which said it "reads "" for the SAFE integer too — no number
+path at all, so it drops every number". Not so: `ha` reads `1234` as *dˈu˥bu˥ dˈa ɗˈa˩ri˥ bˈi˥ju˥ dˈa
+ta˩lˈa˩ti˥n dˈa hˈu˥ɗu˥*. It has a full number path and caps it at 10¹², returning `""` above — the same
+missing-`else` defect as the other 55, at a different threshold. "No number path" would have been a missing
+FEATURE and correctly out of scope; a missing `else` is this defect, and in scope.
+
+**Implication.** Fixed all seven the same way, and the distinction is the point: refusing to COMPOSE above
+the authored magnitude words is right — inventing a 10¹² word would be the Fula `tere` failure — but
+refusing to SPEAK is not, because the digits are still there to read one at a time. `eu`'s comment already
+said "10¹² (bilioi) not authored", so the limit was known and documented; what nobody had noticed is that
+the code answered it by leaking ASCII into the IPA.
+
+`ps` needed `toAscii` before the digit walk, or Eastern Arabic-Indic digits (۱۲۳) index the units table as
+undefined. Re-probed: **193/193 clean at every magnitude.** Composed readings below each cap are unchanged,
+which the new second test in `test/bignum-fallback.test.ts` pins by asserting the 12-digit reading is NOT
+equal to its own digit-at-a-time reading — the way this fix could quietly do more harm than the defect.
+
+**Negative result kept.** The four suite failures reported in Runs 5–7 (`onnx-optional`, `ajp`/`ar`/`ary`
+referee corroboration) were confirmed to be concurrency artefacts, not regressions: a serial `npm run ci`
+on the merged tree passes 236 files / 3580 tests. Three separate agents saw the same four, all as
+`Test timed out` with no assertion failures, while four vitest runs shared one machine.

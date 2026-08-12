@@ -84,7 +84,9 @@ function numberToText(n: number): string {
 }
 function number(digits: string): string {
     const n = Number(digits);
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return digits;
+    // ⚠ OUT OF RANGE MUST STILL BE READ — see amharic.ts; returning `digits` leaks ASCII into the IPA.
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12)
+        return [...digits].flatMap((c) => words(Number(c))).map(phonemizeWord).join(" ");
     return words(n).map(phonemizeWord).join(" ");
 }
 

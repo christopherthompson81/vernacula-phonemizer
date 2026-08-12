@@ -92,7 +92,10 @@ function cardinalWords(n: number): string {
 /** A digit string → canonical IPA of its Basque cardinal (each word phonemized, space-joined). Out-of-range → raw. */
 function number(digits: string): string {
     const n = Number(digits);
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1_000_000_000_000) return digits; // 10¹² (bilioi) not authored
+    // ⚠ 10¹² (bilioi) IS NOT AUTHORED — but that is a gap in the WORDS, not a licence to leak ASCII digits
+    // into the IPA. Read them one at a time instead, the fleet's fallback at the 2^53 cliff one magnitude down.
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1_000_000_000_000)
+        return [...digits].map((c) => cardinalWords(Number(c))).map(phonemizeWord).join(" ");
     return cardinalWords(n).split(" ").map(phonemizeWord).join(" ");
 }
 

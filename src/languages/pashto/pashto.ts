@@ -302,7 +302,14 @@ const MAGNITUDES: [number, string][] = [
 ];
 function number(digits: string): string {
     const nn = Number(toAscii(digits));
-    if (!Number.isSafeInteger(nn) || nn < 0 || nn >= 1e12) return digits;
+    // ⚠ OUT OF RANGE MUST STILL BE READ — see amharic.ts. `toAscii` first, so Eastern Arabic-Indic digits
+    // (۱۲۳) take the same path as ASCII ones rather than falling through the units table as undefined.
+    if (!Number.isSafeInteger(nn) || nn < 0 || nn >= 1e12)
+        return [...toAscii(digits)]
+            .filter((c) => c >= "0" && c <= "9")
+            .map((c) => numberToText(Number(c)))
+            .map(phonemizeWordCore)
+            .join(" ");
     return numberToText(nn).split(" ").map(phonemizeWordCore).join(" "); // numbers bypass the content lexicon
 }
 // The foreign arm is `LATIN_RUN`, ALL of Latin plus marks — not `[A-Za-z]+`, which ended the token at a
