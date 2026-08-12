@@ -19,6 +19,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { normalizeMinDong } from "./normalize.ts";
 
 interface MinDongDef {
     initials: Record<string, string>;
@@ -175,7 +176,12 @@ class MinDongPhonemizer implements Phonemizer {
         // helper, so it never got the GAP PASS and any script it does not claim was dropped. Min Dong is
         // written in a LATIN romanisation (BUC), so its own token class is Latin; the gap pass therefore
         // matters here for Han and every other script, routed via core/scripts.ts.
-        const nfd = input.normalize("NFD");
+        // ⚠ NORMALIZATION RUNS FIRST AND THE NFD FOLD RUNS AFTER IT, in that order. The layer INSERTS BUC
+        // words (`dô`, `gáu`, `báh-hŭng-cĭ`), which are written NFC in the source file; folding first would
+        // leave those insertions in NFC inside an otherwise-NFD string and the tokenizer's combining-mark
+        // class would truncate them — the same precomposed-⟨ṳ⟩ hazard the test below pins. Folding last
+        // means a word this layer inserts is tokenized exactly like one the corpus wrote.
+        const nfd = normalizeMinDong(input).normalize("NFD");
         return assembleClauses(nfd, tok, (m, sink) => {
             if (m[1]) sink.emit(bucToIpa(m[1]));
             else if (m[2]) sink.emit(bucToIpa(numberToBucWords(Number(m[2])).join("-")));

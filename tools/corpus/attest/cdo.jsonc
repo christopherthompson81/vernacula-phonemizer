@@ -1,0 +1,246 @@
+// WIKIPEDIA WORD ATTESTATION — cdo. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "cdo",
+        "wiki": "cdo.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+            {
+                "word": "báh-hŭng-cĭ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hŭng-cĭ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "diēng",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ng-kō̤ Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Diēng (碘) sê siŏh cṳ̄ng hĭ-gĭng-sṳ̆k nguòng-só. Nguòng-cṳ̄ sê̤ṳ-s…",
+                "…«Kŏng-hĭ Cê-diēng» (康熙字典) sê siŏh buōng diŏh 1716 nièng uòng-sìng gì Háng-ngṳ…",
+                "…字典) sê siŏh buōng diŏh 1716 nièng uòng-sìng gì Háng-ngṳ̄ cê-diēng.…",
+                "…Sôi-diēng (瑞典, Sôi-diēng-ngṳ̄‎: Sverige) sê sié-gāi huák-dăk gì gĕ̤ng…",
+                "…Sôi-diēng (瑞典, Sôi-diēng-ngṳ̄‎: Sverige) sê sié-gāi huák-dăk gì gĕ̤ng-ngiĕk-huá guók…",
+                "…verige) sê sié-gāi huák-dăk gì gĕ̤ng-ngiĕk-huá guók-gă. Sôi-diēng sê Ĕu-mèng gì sìng-uòng-guók. == Chăng-kō̤ cṳ̆-lâiu ==…"
+            ]
+            },
+        {
+                "word": "dô",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Éng-dô (印度) sê Nàng Ā gì siŏh ciáh guók-gă, nàng-buô sê Éng-dô-iòn…",
+                "…Éng-dô (印度) sê Nàng Ā gì siŏh ciáh guók-gă, nàng-buô sê Éng-dô-iòng.…",
+                "…Dô-giŏng-cô̤ (杜鵑座) sê siŏh ciáh sĭng-cô̤.…",
+                "…Punjab sê Éng-dô gì siŏh ciáh băng.…",
+                "…ēng-buōng. / 參考閩東語漢字其版本。 Dê-lī cô̤-biĕu hiê-tūng sê iù gĭng-dô gâe̤ng ūi-dô cū-siàng gì cô̤-biĕu-hiê, bô hô̤ lā̤ gĭng-ūi-d…",
+                "…參考閩東語漢字其版本。 Dê-lī cô̤-biĕu hiê-tūng sê iù gĭng-dô gâe̤ng ūi-dô cū-siàng gì cô̤-biĕu-hiê, bô hô̤ lā̤ gĭng-ūi-dô (經緯度).…"
+            ]
+            },
+        {
+                "word": "hŭng",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 62,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Hŭng (風) sê duâi huăng-ùi gì ké-tā̤ làu-dông gì hiêng-chiông.…",
+                "…Hŭng-làng (芬蘭, Hŭng-làng-ngṳ̄‎: Suomen tasavalta) sê sié-gāi huá…",
+                "…Hŭng-làng (芬蘭, Hŭng-làng-ngṳ̄‎: Suomen tasavalta) sê sié-gāi huák-dăk gì gĕ̤ng-…",
+                "…tasavalta) sê sié-gāi huák-dăk gì gĕ̤ng-ngiĕk-huá guók-gă. Hŭng-làng sê Ĕu-mèng gì sìng-uòng-guók.…",
+                "…Hŭng-buô (風部) sê Háng-cê diē-sié gì siŏh ciáh cê-buô, diŏh Kŏng-…",
+                "…ciáh cê-buô, diŏh Kŏng-hĭ Cê-diēng diē-sié bà̤ dâ̤ 182 ôi. Hŭng-buô kĕk Háng-cê \"風\" lì kī-miàng. == Cê-hìng == == Hŭng-buô…"
+            ]
+            },
+        {
+                "word": "miēu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Miēu, iâ hô̤ lā̤ miēu-cṳ̆ng, sê siŏh ciáh sì-găng dăng-ôi.…",
+                "…Miēu, iâ hô̤ lā̤ miēu-cṳ̆ng, sê siŏh ciáh sì-găng dăng-ôi.…",
+                "…Diŏng Miēu (張邈, ? - 195 n.), cê Mâing-dáuk (孟卓), sê Dĕ̤ng-háng(東漢) sì-…",
+                "…09, huá-hŏk hù-hô̤ sê Mt. Meitnerium gì buáng-sŏi-gĭ sê 7.6 miēu. == Huá-hŏk séng-cék == Hiêng-câi gó mò̤ ūng-dêng gì dùng-ô…",
+                "…, 1 gŭng-chióh sê guŏng diŏh cĭng-kŭng dâi-dŏng 1/299792458 miēu giàng gì gé̤ṳ-liê.…",
+                "…iéng-huá lṳ̆k gì hióng-liông, dăng-ôi sê mī muōi bìng-huŏng miēu (m·s−2).…"
+            ]
+            },
+        {
+                "word": "gáu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 151,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ng-kō̤ Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Gáu-huòng (教皇), iâ hô̤ lā̤ gáu-cŭng (教宗), sê sié-gái Lò̤-mā-tiĕ…",
+                "…-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Gáu-huòng (教皇), iâ hô̤ lā̤ gáu-cŭng (教宗), sê sié-gái Lò̤-mā-tiĕng-ciō-gáu gì có̤i gŏ̤ cŭng…",
+                "…(教皇), iâ hô̤ lā̤ gáu-cŭng (教宗), sê sié-gái Lò̤-mā-tiĕng-ciō-gáu gì có̤i gŏ̤ cŭng-gáu liāng-dô̤-ìng, iâ sê Vaticano gì guók-…",
+                "…cŭng (教宗), sê sié-gái Lò̤-mā-tiĕng-ciō-gáu gì có̤i gŏ̤ cŭng-gáu liāng-dô̤-ìng, iâ sê Vaticano gì guók-gă có̤i gŏ̤ nguòng-si…",
+                "…iâ sê Vaticano gì guók-gă có̤i gŏ̤ nguòng-siū. Gĭng-dáng gì gáu-huòng sê Leo 14-sié, ĭ diŏh 2025 nièng 5 nguŏk 8 hô̤ dŏng-s…",
+                "…Lò̤-mā-tiĕng-ciō-gáu (羅馬天主教), găk Hók-ciŭ gâe̤ng Dṳ̆ng-guók tĕ̤ng-chĭng ùi Tiĕng…"
+            ]
+            },
+        {
+                "word": "gŭng-lī",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…ng-kō̤ Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Gŭng-lī (公里) sê hèng-liòng dòng-dô gì guók-cié dăng-ôi. Siŏh gŭng-l…",
+                "…ŭng-lī (公里) sê hèng-liòng dòng-dô gì guók-cié dăng-ôi. Siŏh gŭng-lī dēng kó̤ siŏh-chiĕng mī.…",
+                "…uō-iéu găh Mī-guók sāi-ê̤ṳng. Siŏh ĭng-lī dēng kó̤ 1.609344 gŭng-lī.…",
+                "…dō̤, găh Dê-dṳ̆ng-hāi dĕ̤ng-buô, miêng-cék 8,303 bìng-huŏng gŭng-lī, 2011 nièng gì ìng-kēu sê 623,065. Gáik-lī-dī ké̤ṳk êng-ùi…",
+                "…h. - 1905 n. 1 ng. 30 h.) sê 19 sié-gī â buáng hiĕk Mī-guók Gŭng-lī-huôi găk Dṳ̆ng-guók Hók-ciŭ gì diòng-gáu-sê̤ṳ. == Sĕng-bìng…",
+                "…̆-sáik-ciŭ, 1852 nièng 10 nguŏk 13 hô̤ chăng-gă diē Mī-guók Gŭng-lī-huôi gì có̤ mŭk-sṳ̆, dùng nièng 11 nguŏk 3 hô̤ ké̤ṳk puái g…"
+            ]
+            },
+        {
+                "word": "hò̤-mī",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…ng-kō̤ Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Hò̤-mī (毫米) sê siŏh cṳ̄ng dòng-dô dăng-ôi, gé có̤ mm. Siŏh chiĕng…",
+                "…(毫米) sê siŏh cṳ̄ng dòng-dô dăng-ôi, gé có̤ mm. Siŏh chiĕng hò̤-mī dēng-ṳ̀ siŏh mī.…",
+                "…sá̤ (微細) ĭk-tái gáung-cūi, ṳ̄-dék gì dĭk-géng mâ̤ cé̤ṳk 0.5 hò̤-mī, ṳ̄-liông (雨量) iâ mâ̤ gáu 0.1 hò̤-mī. == Chăng-kō̤ ùng-hión…",
+                "…dĭk-géng mâ̤ cé̤ṳk 0.5 hò̤-mī, ṳ̄-liông (雨量) iâ mâ̤ gáu 0.1 hò̤-mī. == Chăng-kō̤ ùng-hióng ==…",
+                "…ng huô dék ciēu gi, gōng nièng bìng-gĭng gáung huô nâ ô 470 hò̤-mī. Gáung huô kṳ̆-mĭk mâ̤ bìng-hèng, dâi-lṳ̆k dĕ̤ng-buô hāi-gi…",
+                "…gièng gáe̤k Tasmania Dō̤ dâung huô dék sâ̤, â̤ dăk gáu 2000 hò̤-mī, dĕk-biék sê Tasmania Dō̤ sā̤ buô săng-kṳ̆ dâung huô dék sâ…"
+            ]
+            },
+        {
+                "word": "lī-mī",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gŭng-gĭng",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "bìng-huŏng",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…áik-chê guāng-hăk. Bìng-nàng-gâing dù-dê miêng-cék ô 1485.3 bìng-huŏng gŭng-lī, nè̤ng-só ô 18 uâng. Dŏ̤-só sê gōng Kŭ-chèng kiŏng…",
+                "…ìng-tàng ciòng gâing ô 38 uâng nè̤ng, tū-dê miêng-cék 371.1 bìng-huŏng gŭng-lī. === Dê-lī === Bìng-tàng găh báe̤k-ūi 25 dô 16 hŭng…",
+                "…hāi-méng gà̤-dēng. Bìng-tàng-gâing tū-dê miêng-cék sê 371.1 bìng-huŏng chiĕng-mī. Ciō-tā̤ gì Hāi-tàng dō̤ (海壇島) sê Hók-gióng dék d…",
+                "…. Bìng-tàng gì ìng-kēu mĭk-dô siŏng-dŏng gèng, dăk gáu siŏh bìng-huŏng chiĕng-mī 1200 nè̤ng cō̤-êu, ciŏng-gê̤ṳng gó̤-lòng Hók-gión…",
+                "…ī-guók Niū-iók-chê dék báe̤k gì siŏh ciáh kṳ̆, miêng-cék 42 bìng-huŏng ĭng-lī (109 bìng-huŏng gŭng-lī), 2015 nièng ìng-kēu 1,455,4…",
+                "…báe̤k gì siŏh ciáh kṳ̆, miêng-cék 42 bìng-huŏng ĭng-lī (109 bìng-huŏng gŭng-lī), 2015 nièng ìng-kēu 1,455,444.…"
+            ]
+            },
+        {
+                "word": "lĭk-huŏng",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gâe̤ng",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Saint Kitts gâe̤ng Nevis, iâ hô̤ có̤ Saint Christopher gâe̤ng Nevis, sê Báe̤k…",
+                "…Saint Kitts gâe̤ng Nevis, iâ hô̤ có̤ Saint Christopher gâe̤ng Nevis, sê Báe̤k Mī-ciŭ Caribe dê-kṳ̆ gì siŏh ciáh guók-gă.…",
+                "…Saint Vincent gâe̤ng Grenadines sê Báe̤k Mī-ciŭ Caribe dê-kṳ̆ gì siŏh ciáh guók-…",
+                "…São Tomé gâe̤ng Príncipe (Buò-dò̤-ngà-ngṳ̄: São Tomé e Príncipe) sê Hĭ-ciŭ…",
+                "…Trinidad gâe̤ng Tobago sê Báe̤k Mī-ciŭ Caribe dê-kṳ̆ gì siŏh ciáh guók-gă.…",
+                "…Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Bosnia gâe̤ng Herzegovina sê Nàng Ĕu gì siŏh biĕh guók-gă.…"
+            ]
+            },
+        {
+                "word": "hô",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Lăk-hô-cô̤ (獵戶座) sê siŏh ciáh sĭng-cô̤.…",
+                "…Hô-buô (戶部) sê Háng-cê diē-sié gì siŏh ciáh cê-buô, diŏh Kŏng-…",
+                "…h ciáh cê-buô, diŏh Kŏng-hĭ Cê-diēng diē-sié bà̤ dâ̤ 63 ôi. Hô-buô kĕk Háng-cê \"戶\" lì kī-miàng. == Cê-hìng == == Hô-buô gì…",
+                "…63 ôi. Hô-buô kĕk Háng-cê \"戶\" lì kī-miàng. == Cê-hìng == == Hô-buô gì Háng-cê == == Ngiê-dāu lièng-giék == Áng cê-buô că B…",
+                "…Hô-buô (父部) sê Háng-cê diē-sié gì siŏh ciáh cê-buô, diŏh Kŏng-…",
+                "…h ciáh cê-buô, diŏh Kŏng-hĭ Cê-diēng diē-sié bà̤ dâ̤ 88 ôi. Hô-buô kĕk Háng-cê \"父\" lì kī-miàng. == Cê-hìng == == Hô-buô gì…"
+            ]
+            },
+        {
+                "word": "nièng",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 81,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ng-kō̤ Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Nièng (年) sê siŏh ciáh sì-găng dăng-ôi, chă-bók-dŏ̤ siŏng-dŏng dê…",
+                "…Nièng-dâi sê siŏh ciáh sì-găng dăng-ôi, siŏh ciáh nièng-dâi sê 10…",
+                "…Nièng-dâi sê siŏh ciáh sì-găng dăng-ôi, siŏh ciáh nièng-dâi sê 10 nièng. Nièng-dâi ék-buăng nâ găk să̤-nguòng gī-ni…",
+                "…dâi sê siŏh ciáh sì-găng dăng-ôi, siŏh ciáh nièng-dâi sê 10 nièng. Nièng-dâi ék-buăng nâ găk să̤-nguòng gī-nièng (Common Era)…",
+                "…siŏh ciáh sì-găng dăng-ôi, siŏh ciáh nièng-dâi sê 10 nièng. Nièng-dâi ék-buăng nâ găk să̤-nguòng gī-nièng (Common Era) diē-si…",
+                "…ng-dâi sê 10 nièng. Nièng-dâi ék-buăng nâ găk să̤-nguòng gī-nièng (Common Era) diē-sié sāi. Chiông 2000 nièng gáu 2009 nièng…"
+            ]
+            }
+        ],
+    }
+    

@@ -151,6 +151,33 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
             + "Kaufmann and ×0 in both referees, so Cebuano's `$`→`dolyar` (which has ×4 corpus dollars "
             + "behind it) does not transfer.",
     },
+    cdo: {
+        "báh-hŭng-cĭ": "⚠ THE FOURTH SINITIC LECT WHOSE PERCENT WORD THE GATE CANNOT SEE, AND THE FIRST FOR "
+            + "WHICH THE WORD DOES NOT EXIST IN WRITING AT ALL. cjy, hak and nan each had the gate look in "
+            + "the wrong orthography; cdo's corpus IS the orthography the layer emits (cdo.wikipedia is "
+            + "written in Bàng-uâ-cê) and a BUC percent word is absent from it anyway. Measured, and every "
+            + "one of these is a zero: `attest.ts` → `báh-hŭng-cĭ` 0 tokens / 0 substring; CirrusSearch "
+            + "`insource:/hŭng-cĭ/` 0, `/báh-hŭng/` 0, `/báik-hŭng/` 0, `/báh-hŭng-bī/` 0. `insource:/百分/` "
+            + "returns exactly ONE hit and it is quoted PRC labour law in MANDARIN inside the 996工作制 "
+            + "article (`支付無低過工資其百分一百五其工資報酬`) — playbook trap 34, in the one place a grep "
+            + "would take it as evidence. So this is COMPOSED FROM ATTESTED PIECES, the Fula `e teemedere` "
+            + "move, on four legs. (1) THE CONSTRUCTION IS ATTESTED FOR cdo: 分之 occurs ×2 on "
+            + "cdo.wikipedia — 四分之一 in 艦隊收藏 and 七分之一弧秒 in 分點 — in Han, in the fraction slot, "
+            + "denominator-first, which is what makes 百分之 'of a hundred parts' rather than a borrowing. "
+            + "(2) 分 IS `hŭng` IN A NUMERIC CONTEXT BY cdo's OWN HAND: the Bìng-tàng article spells a "
+            + "coordinate out as `25 dô 16 hŭng gáu 25 dô 44 hŭng` — 分 as the arc-minute. Wiktionary's "
+            + "Eastern Min entry gives \"buŏng - vernacular; hŭng - literary\", and this is the literary "
+            + "slot. `attest.ts`: hŭng attested 62 tokens / 20 articles. (3) 之 IS `cĭ` (Wiktionary), ×40 "
+            + "whole-word in cdo's own corpus (cĭ-găng, cĭ-ék, cĭ-hâiu). (4) 百 IS `báh`: Wiktionary's "
+            + "Eastern Min entry says \"báh - vernacular ('hundred'); báik - literary ('numerous')\", and "
+            + "cdo.wikipedia's BUC prose writes it ×20 as the number (`gūi báh nièng`, `siŏh báh gūi "
+            + "cṳ̄ng`, `báh nièng hâu-kéng`). ⚠ NOTE THE DISAGREEMENT THAT LEG EXPOSES, recorded rather "
+            + "than resolved here: mindong.ts's number compositor reads 百 as ⟨báik⟩ from the Wikivoyage "
+            + "phrasebook, so the engine and this word disagree about the same character. Changing the "
+            + "compositor rewrites every number cdo speaks and a shipped golden — its own measurement, not "
+            + "a side effect of a text layer. ⚠ AND `hŭng-cĭ` ALONE IS THE SAME WORD MINUS ITS FIRST "
+            + "SYLLABLE, used by the fraction rule, on legs (1)–(3); it is `absent` in the same probe.",
+    },
     cjy: {
         "百分之": "⚠ THERE IS NO JIN CORPUS TO ATTEST ANYTHING IN — no cjy.wikipedia exists, and the "
             + "Wikimedia Incubator's Wp/cjy holds 3,060 Han characters whose artifact covers 7 of 35 cells "
@@ -302,6 +329,61 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // normalize.ts step 8 claims — but the coordinate `6.28ɛ; -1.850` is a GENUINE negative and no Akan
         // word for one is attested anywhere. Omitting a plus is lossless; omitting a minus INVERTS, so this
         // one stays red. Same stance as ln, bm and rw.
+    },
+    cdo: {
+        // ⚠ cdo IS THE ONE SINITIC LECT WHOSE HARD GATE IS NEITHER A DICT NOR AN ORTHOGRAPHY MISMATCH. There
+        // is no Han front-end and no reading dict at all (see mindong.ts): this is a Bàng-uâ-cê → IPA
+        // converter, and `baseToIpa` returns its INPUT when it cannot parse a rime, appending tone letters
+        // anyway. So an unreadable string does not vanish, it LEAKS (`km` → *km˥˥*). Every refusal below is
+        // therefore about a missing WORD, never a missing dict entry — and each names its measurement.
+        // espeak ships no Min Dong, so the haystack is the corpus, the artifact, the Wiktionary-derived
+        // referee and cdo.wikipedia.
+        // ⚠ `minus` IS DELIBERATELY ABSENT, and its absence is the most considered thing in this block.
+        // Measured: the artifact holds 2 GENUINE negatives, both temperatures (`dăk gáu -15 dô`,
+        // `ŭng-dô sê -6~7dô`); the other 9 leading signs are the mantissa exponents of scientific notation
+        // (`×10 −31 kg`, `×10 −27 kg`, `×10 −11`, `m·s −2`), two LaTeX bodies (`y^2=-2px`) and the
+        // census-style parentheticals `(3%-4%)` / `(1%-2%)`, which normalize.ts step 4 now reads as percent
+        // ranges. THE WORD IS WHAT IS MISSING, NOT THE RULE: ⟨負⟩ is `hô` (Wiktionary, Eastern Min) and
+        // nothing corroborates it in the mathematical sense — `attest.ts` returns 49 tokens across 20
+        // articles and EVERY example is a different morpheme (戶 in the radical article 戶部 and in the
+        // constellation 獵戶座, 父 in 父部). gan is the one lect in this family that could ship the rule,
+        // because its own integer article writes ⟨負⟩ beside the glyphs it names (`負值(-1、-2、-3...)`);
+        // cdo has no such sentence. Omitting a plus is lossless; omitting a minus INVERTS, so a known-wrong
+        // reading does not get to be a green gate and `review.ts --lang cdo` stays RED on this class.
+        // Same stance as ak, ln, bm, mad and rw.
+        plus: "measured: zero digit-adjacent `+` in the artifact that is arithmetic. What occurs is the "
+            + "language name `C++`, a GDP identity written as an equation of labelled terms (`… (C) + "
+            + "Dàu-cṳ̆ (I) + Céng-hū siĕu-hié ciĕ-chók (G)+ Chók-kāu (X) - Céng-kāu`), a number-theory "
+            + "example (`100 = 23 + 7 · 11`), balanced chemistry in LaTeX (`\\rm 2NaCl + H_2SO_4`) and an "
+            + "article ABOUT the sign (`Gă-huák gì hù-hô̤ sê „+“`). No cdo word for the operator is "
+            + "attested digit-adjacent anywhere",
+        equals: "measured: every `=` is either LaTeX/wiki markup (`y^2=-2px \\quad \\left (p>0 \\right)`, "
+            + "`isbn = InputBox(`, `S={\\color{Red}7}\\times10+…`), a definition of a labelled quantity "
+            + "(`GDP) = Sṳ̆-ìng siĕu-hié (C)`, `F = ma`), or a bibliographic gloss (`ISBN Users'Manual = "
+            + "[國際標準書號使用者手冊]`). No cdo equals word is attested in the slot",
+        times: "measured: all 8 `×` are SCIENTIFIC NOTATION (`9.10938356(11)×10 −31 kg`, `6.67 × 10 −11`, "
+            + "`1.672621898(21)×10 −27 kg`, `5×10 30`) plus one RELAY LEG (`nàng-gái 4×100 mī`), which is "
+            + "\"by\" and not \"times\" — the bm/ak finding again. This layer reads scientific notation for "
+            + "no language, and no cdo multiply word is attested",
+        divide: "measured: zero ÷ in the artifact",
+        "plus-minus": "measured: zero ± in the artifact",
+        "less-than": "measured: zero digit-adjacent < in the artifact (`≥10℃` is the only comparison and "
+            + "it is ≥, whose reading would need a word too)",
+        "greater-than": "measured: the only `>` are a LaTeX condition (`\\left (p>0 \\right)`) and the "
+            + "phonological-change arrows of the Fuzhou sound-change tables (`cṳā > cāi`, `hṳa > hie`), "
+            + "which are notation and not a relation at all",
+        ampersand: "measured, and this is a DELIBERATE DIVERGENCE FROM EVERY OTHER SINITIC LAYER, all of "
+            + "which declare the word. After the registry decodes entities and strips markup — the "
+            + "artifact's raw `&` are mostly `&nbsp;` and `&#x3A;` and never reach the layer — SIX remain "
+            + "and ALL SIX sit inside Latin proper names: `AT&T` ×3, `Ebaugh, Helen Rose Fuchs & Chafetz`, "
+            + "`Thames & Hudson`, `Ngâng-dièng Gáu-tuàng & THE Mìng-sĭng Rockets`. gan declared ⟨同到⟩ on "
+            + "the strength of ONE Han-flanked instance; cdo has ZERO BUC-flanked ones, so declaring "
+            + "⟨gâe̤ng⟩ (the language's ordinary 'and', ×162 in the corpus, attested 31/20 on the wiki) "
+            + "would only ever put a Fuzhou syllable inside an English company name. Trap 18's merge hazard "
+            + "is the argument on the other side and it is INERT here: cdo has no letter-name table, so "
+            + "`AT&T` and `ATT` both leak raw either way",
+        currency: "measured: `currency: 0` in the artifact — no $, €, £ or ¥ occurs anywhere in this "
+            + "corpus, so there is no sign to read and no name to source",
     },
     ceb: {
         // ⚠ NO CEBUANO DEGREE WORD IS ATTESTED ANYWHERE IN THE CORPUS. `grado` ×0, `digri` ×0, `celsius` ×0 —
@@ -1334,6 +1416,47 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // somewhere else in this language still reports. A bare figure would launder it.
         percent: ["ɔha mu nkyekyemu mmienu (2%", "ɔha mu nkyekyemu eduonu (50%", "ɔha mu nkyekyemu eduokron (90%",
             "ɔha mu nkyekyem eduasa-mmienu (32%", "ɔha mu nkyekyem eduosia-nsia(66%", "ɔha mu nkyekyemu eduonum-nson(57%"],
+    },
+    cdo: {
+        // ⚠ cdo IS THE SEVENTH SINITIC CORPUS TO PRODUCE THE ROMANIZATION-TONE HAZARD, which closes the
+        // prediction this file has been carrying since cjy ("Expect it in gan/hak/hsn too") for the whole
+        // family. And cdo produces it from THREE romanizations at once, because cdo.wikipedia glosses other
+        // varieties inline: Cantonese jyutping (`hoeng¹ gong²`), Min Nan Pe̍h-ōe-jī with Chao digits
+        // (`Choân-chiu-oē /t͡suan²⁴⁻²² t͡siu³³ ue⁴¹/`) and its own Fuzhou IPA (`/y⁵³ y³⁵ touŋ³³/`,
+        // `/touŋ⁵⁵ touŋ²¹³ t͡sʰiɑ²⁴²/`). Reading a bare superscript as a power would turn the engine's own
+        // source notation into arithmetic, which is why `bareExponent` is undeclared. A squared/cubed UNIT
+        // is still read — `84 km²` → 84 bìng-huŏng gŭng-lī — and listing these BY INSTANCE rather than
+        // silencing the class is what keeps a genuine km² regression visible.
+        // The genuine exponents left are ones no layer reads: a physics constant's mantissa and its
+        // dimensional formula (`6.67 × 10 −11 N m² kg⁻²` — the negative exponent sits on a unit this layer
+        // does not declare), a cube on a RATE denominator inside a quoted Han paragraph (`1,980 m³/s`), and
+        // a footnote marker (`ou³ mun 4*2`, a Cantonese tone-change notation).
+        exponent: ["hoeng¹", "gong²", "t͡suan²⁴⁻²²", "t͡siu³³", "ue⁴¹", "y⁵³", "y³⁵", "touŋ³³",
+            "touŋ⁵⁵", "touŋ²¹³", "t͡sʰiɑ²⁴²", "kg⁻²", "N m²", "m³/s", "ou³ mun"],
+        // NOT ARITHMETIC, ANY OF IT — the class refusals and their evidence are in ACCEPTED_SIGN_SILENCE;
+        // these spans exist because `acceptedSignClass` tests a sign regex against a SINGLE character while
+        // the minus pattern is CONTEXTUAL, the limitation gan, nan, hak, tl and wuu all record.
+        // The set: scientific notation, LaTeX bodies (conic sections and an ISBN check-digit worked example),
+        // the GDP identity, chemistry, a number-theory example, the Fuzhou sound-change arrows, a bibliographic
+        // gloss, a Visual Basic snippet, `C++`/`C#`, a track relay leg, and an article about the plus sign.
+        "math-sign": ["9.10938356(11)×10", "1.672621898(21)×10", "6.67 × 10", "5×10 30", "4×100 mī",
+            "cṳā > cāi", "hṳa > hie", "hṳa > ha̤", "(CD + VCD)", "C++", "C#",
+            "y^2=-2px", "x^2=-2py", "p>0", "100 = 23 + 7 · 11",
+            "(GDP) = Sṳ̆-ìng siĕu-hié (C)", "(I) + Céng-hū", "(G)+ Chók-kāu (X)", "F = ma",
+            "Sák-gā-lé-ā Cṳ̆ = 撒賈利亞書", "\\times10+", "\\times9+", "\\times8+", "\\times7+", "\\times6+",
+            "\\times5+", "\\times4+", "\\times3+", "\\times2=226", "isbn = InputBox",
+            "Users'Manual = [國際標準書號使用者手冊]", "2NaCl + H_2SO_4", "Na_2SO_4 + 2HCl",
+            "hù-hô̤ sê „+“"],
+        // ⚠ NOT NEGATIVES. `(3%-4%)` and `(1%-2%)` are PERCENT RANGES, which normalize.ts step 4 now reads
+        // whole (`báh-hŭng-cĭ 3 gáu 4`) — they are listed because the scan's minus probe sees the dash
+        // before the layer's rule has consumed it. `−2` is the exponent of an acceleration's dimensional
+        // formula. The two genuine temperature negatives are NOT here: they are the class refusal above,
+        // and they must keep reporting until a cdo minus word is sourced.
+        minus: ["(3%-4%)", "(1%-2%)", "bìng-huŏng miēu (m·s −2"],
+        // THE AMPERSAND, EVERY SURVIVING INSTANCE — all six inside Latin proper names. The class-level
+        // refusal and the gan comparison are in ACCEPTED_SIGN_SILENCE; these spans exist so that an `&`
+        // appearing between two BUC words would still report, which is the case that would reverse it.
+        ampersand: ["AT&T", "Fuchs & Chafetz", "Thames & Hudson", "Gáu-tuàng & THE"],
     },
     ceb: {
         // THE YEN, and it is the ONE currency in this corpus with no Cebuano name. The dollar (`dolyar` ×4),

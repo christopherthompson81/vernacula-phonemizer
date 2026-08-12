@@ -200,7 +200,24 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
 
 
 
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bar", "bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "so", "su", "syl", "ta", "tl", "ug", "wuu", "xh", "za"]);
+        // ⚠ AND cdo IS THE EIGHTH — the LAST untreated Sinitic lect, and it closes the romanization-tone
+        // prediction for the whole family by producing it from THREE romanizations in one corpus.
+        // cdo.wikipedia is itself written in a Latin orthography (Bàng-uâ-cê), and it glosses other
+        // varieties inline: Cantonese jyutping (`hoeng¹ gong²`), Min Nan Pe̍h-ōe-jī with Chao digits
+        // (`Choân-chiu-oē /t͡suan²⁴⁻²² t͡siu³³ ue⁴¹/`) and its own Fuzhou IPA (`/y⁵³ y³⁵ touŋ³³/`). Eight
+        // corpora, and the routes are now: Chao letters (wuu), jyutping quoted (nan, za), the lect's own
+        // romanization (cjy, hsn, gan), other varieties glossed (hak), and all three at once (cdo).
+        // ⚠ ITS `minus` ENTRY IS THE ln/rw SHAPE AND THE ABSENT SPANS ARE THE POINT: the two genuine
+        // temperature negatives (`dăk gáu -15 dô`, `-6~7dô`) are deliberately NOT listed, so
+        // `review.ts --lang cdo` stays red on that class. ⟨負⟩ is `hô` on Wiktionary and nothing corroborates
+        // it — `attest.ts` returns 49 tokens across 20 articles and every one is a different morpheme (戶 in
+        // 戶部 and 獵戶座, 父 in 父部). gan is the only lect in this family that could ship the rule, because
+        // its own integer article writes the word beside the glyphs it names; cdo has no such sentence.
+        // ⚠ AND ITS `ampersand` ENTRY IS A DIVERGENCE FROM EVERY OTHER SINITIC LAYER, listed by instance for
+        // exactly that reason: all six surviving `&` sit inside Latin proper names (`AT&T`, `Thames &
+        // Hudson`), where gan had one Han-flanked instance to justify declaring the word. An `&` between two
+        // BUC words would report, which is the case that would reverse it.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bar", "bm", "cdo", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "so", "su", "syl", "ta", "tl", "ug", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

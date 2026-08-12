@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createMinDong, phonemizeWord } from "../src/languages/mindong/mindong.ts";
+import { getPhonemizer } from "../src/registry.ts";
 
 // Min Dong / Eastern Min (cdo) — Fuzhou dialect, Sinitic, tonal (~9M). A Bàng-uâ-cê (BUC / Foochow Romanized) → IPA
 // converter (the only major Sinitic branch otherwise absent). BUC missionary convention: plain ⟨p t k⟩ = [pʰ tʰ kʰ],
@@ -70,4 +71,102 @@ describe("Min Dong (cdo) cardinal numbers — Bàng-uâ-cê composition", () => 
             expect(cdo.text(String(n)).trim()).toBe(ipa);
         });
     }
+});
+
+// ── Text normalization (src/languages/mindong/normalize.ts) ──────────────────────────────────────────────
+// ⚠ THESE GO THROUGH `getPhonemizer("cdo")`, NOT `createMinDong()`, and that is not incidental: ℃/℉ are
+// folded to °C/°F at the REGISTRY's single dispatch point (playbook trap 36), so a test that constructs the
+// engine directly would assert that `19.6℃` still drops its unit — the very defect this layer closes.
+// ⚠ AND THE ASSERTIONS PIN THE RULE'S BRANCHES, NOT THE CORPUS'S INSTANCES (trap 13): each block carries at
+// least one case the corpus does NOT contain, because a table-and-fallback rule is correct exactly where it
+// was looked at.
+describe("Min Dong (cdo) text normalization — BUC out, never Han", () => {
+    const cdo = getPhonemizer("cdo");
+    const say = (s: string): string => cdo.text(s).trim();
+
+    test("the grouping comma is not a clause pause — the value is destroyed without this", () => {
+        // `1,000` read *ɛiʔ˨˦ , liŋ˥˧* — "one … zero", with a pause in the middle. ×62 in the corpus.
+        expect(say("1,000")).toBe(say("1000"));
+        expect(say("30,221,532")).toBe(say("30221532"));
+        // ⚠ THE UNEXERCISED BRANCH: a 1–2 digit tail is a DECIMAL and must survive de-grouping intact.
+        expect(say("12.5")).toBe("sɛiʔ˨˦ nɛi˨˦˨ tieŋ˧˧ ŋou˨˦˨"); // 12 diēng 5
+    });
+
+    test("the decimal point is ⟨diēng⟩ and the fraction is read DIGIT BY DIGIT", () => {
+        // Not *saŋ˥˥ . sɛiʔ˨˦ sɛi˨˩˧* ("three, fourteen"), which is what it read before.
+        expect(say("3.14")).toBe("saŋ˥˥ tieŋ˧˧ ɛiʔ˨˦ sɛi˨˩˧"); // săng diēng ék sé
+        // ⚠ A ZERO IN THE FRACTIONAL PART is the branch the corpus's own decimals never reach — it must be
+        // the digit word ⟨lìng⟩ and not silence.
+        expect(say("6.0")).toBe("løyʔ˥ tieŋ˧˧ liŋ˥˧");
+        // ⚠ A DOTTED DESIGNATION IS NOT A DECIMAL (the jv guard, carried by core/sinitic.ts).
+        expect(say("1.2.3")).not.toContain("tieŋ˧˧");
+    });
+
+    test("the percent word PRECEDES its number, as in every Sinitic variety", () => {
+        // `%` was dropped outright ×64. ⟨báh-hŭng-cĭ⟩ 百分之 — see normalize.ts for the three-part sourcing.
+        expect(say("45%")).toBe("pɑʔ˨˦ huŋ˥˥ t͡si˥˥ sɛi˨˩˧ sɛiʔ˨˦ ŋou˨˦˨");
+        // ⚠ A PERCENT RANGE IS CLAIMED WHOLE, and says the word ONCE, in front — the shape gan counted and
+        // declined at one instance and cdo writes five times.
+        expect(say("3%-4%")).toBe("pɑʔ˨˦ huŋ˥˥ t͡si˥˥ saŋ˥˥ kɑu˨˩˧ sɛi˨˩˧"); // báh-hŭng-cĭ 3 gáu 4
+        expect(say("94–98%")).toBe("pɑʔ˨˦ huŋ˥˥ t͡si˥˥ kau˧˧ sɛiʔ˨˦ sɛi˨˩˧ kɑu˨˩˧ kau˧˧ sɛiʔ˨˦ paiʔ˨˦");
+    });
+
+    test("the unit abbreviations no longer LEAK RAW LATIN into the IPA", () => {
+        // ⚠ THE DEFECT NO GATE IN THE TREE COULD SEE: `2,133 km²` read *… **km˥˥***, a Latin run with a tone
+        // letter stuck on it, because `baseToIpa` returns its input when it cannot parse a rime.
+        // ⚠ TESTED BY THE READING, NOT BY "no ASCII letters" — IPA is written in Latin letters too, so a
+        // blanket letter class cannot separate a leaked `km` from a legitimate [k]. The abbreviation itself
+        // is what must be absent, and the whole reading is what must be present.
+        expect(say("1400 mm")).toBe("suoʔ˥ t͡sʰieŋ˥˥ sɛi˨˩˧ paiʔ˨˦ ho˥˧ mi˧˧"); // …hò̤-mī
+        expect(say("40cm")).toBe("sɛi˨˩˧ sɛiʔ˨˦ li˧˧ mi˧˧"); // …lī-mī, glued to its number
+        expect(say("31 kg")).toBe("saŋ˥˥ sɛiʔ˨˦ ɛiʔ˨˦ kuŋ˥˥ kiŋ˥˥"); // …gŭng-gĭng
+        expect(say("600 m²")).toBe("løyʔ˥ paiʔ˨˦ piŋ˥˧ huoŋ˥˥ mi˧˧"); // bìng-huŏng mī — the bare `m` key
+        expect(say("84 km²")).toBe("paiʔ˨˦ sɛiʔ˨˦ sɛi˨˩˧ piŋ˥˧ huoŋ˥˥ kuŋ˥˥ li˧˧"); // 84 bìng-huŏng gŭng-lī
+        for (const [s, abbr] of [["2,133 km²", "km"], ["1400 mm", "mm"], ["40cm", "cm"], ["31 kg", "kg"]] as const)
+            expect(say(s)).not.toContain(abbr);
+        // ⚠ THE ONE-LETTER KEY'S GUARD, which is why `unspacedScript` must stay unset: BUC's own metre word
+        // begins with the same letter, so `9.15 mī` must NOT match the bare `m` unit key.
+        expect(say("9.15 mī")).toBe("kau˧˧ tieŋ˧˧ ɛiʔ˨˦ ŋou˨˦˨ mi˧˧"); // …mī, not …bìng-huŏng anything
+    });
+
+    test("the degree, the temperature, and the scale letter that used to survive as an English letter", () => {
+        expect(say("20 °C")).toBe("nɛi˨˦˨ sɛiʔ˨˦ tou˨˦˨"); // was *… c˥˥*
+        expect(say("19.6℃")).toBe("sɛiʔ˨˦ kau˧˧ tieŋ˧˧ løyʔ˥ tou˨˦˨"); // the ℃ fold + the decimal part
+        // ⚠ THE UNEXERCISED BRANCH: `°F` is ×0 in this corpus and gets the same bare-degree reading, because
+        // cdo has no scale name in any source and the alternative is a stranded ⟨F⟩.
+        expect(say("100 °F")).toBe(say("100 °C"));
+        // A COORDINATE, claimed whole before the bare-degree rule can eat its `°` — ⟨dô⟩ 度 ⟨hŭng⟩ 分 ⟨miēu⟩ 秒.
+        expect(say("22° 11′ 47″")).toBe("nɛi˨˦˨ sɛiʔ˨˦ nɛi˨˦˨ tou˨˦˨ sɛiʔ˨˦ ɛiʔ˨˦ huŋ˥˥ sɛi˨˩˧ sɛiʔ˨˦ t͡sʰɛiʔ˨˦ mieu˧˧");
+    });
+
+    test("the range connective is ⟨gáu⟩ — and the guards that keep identifiers out of it", () => {
+        expect(say("100 - 700 km")).toBe("suoʔ˥ paiʔ˨˦ kɑu˨˩˧ t͡sʰɛiʔ˨˦ paiʔ˨˦ kuŋ˥˥ li˧˧");
+        expect(say("23~27")).toContain("kɑu˨˩˧");
+        // ⚠ THE THREE THINGS THAT MUST NOT BECOME RANGES, one per guard, none of them a corpus accident:
+        expect(say("ISBN 3-88053-113-7")).not.toContain("kɑu˨˩˧"); // chained dashes
+        expect(say("«Mā-tái Hók-ĭng» 22:37-40")).not.toContain("kɑu˨˩˧"); // a Bible verse — the `:` lookbehind
+        expect(say("ISO 639-3")).not.toContain("kɑu˨˩˧"); // an ALL-CAPS designation
+    });
+
+    test("the fraction is denominator-first, and a year pair is not a fraction", () => {
+        expect(say("1/4")).toBe("sɛi˨˩˧ huŋ˥˥ t͡si˥˥ ɛiʔ˨˦"); // sé hŭng-cĭ ék — "of four parts, one"
+        expect(say("2020/2021")).not.toContain("huŋ˥˥ t͡si˥˥"); // an academic year (the shared guard)
+    });
+
+    test("⚠ THE YEAR IS DELIBERATELY UNTOUCHED — the largest refusal in the layer", () => {
+        // Digit-by-digit is a fact about HAN orthography and nothing sources it for a Latin-script Fuzhou
+        // reader; the corpus also writes `chiĕu-guó 2200 nièng` and `7,000 nièng sèng`, which are DURATIONS
+        // and want exactly the cardinal below. See normalize.ts for the counts and how to re-open it.
+        expect(say("1749 nièng")).toBe(`${say("1749")} nieŋ˥˧`);
+        expect(say("1749")).toBe("suoʔ˥ t͡sʰieŋ˥˥ t͡sʰɛiʔ˨˦ paiʔ˨˦ sɛi˨˩˧ sɛiʔ˨˦ kau˧˧"); // the CARDINAL
+    });
+
+    test("⚠ A SUPERSCRIPT IN A cdo ARTICLE IS A ROMANIZATION TONE NUMBER, NOT A POWER", () => {
+        // cdo.wikipedia glosses pronunciations inline in jyutping, POJ+Chao digits and its own IPA. Reading
+        // a bare superscript as an exponent would turn this engine's own source notation into arithmetic —
+        // the seventh Sinitic corpus to force this refusal. A squared UNIT still reads (above), which is
+        // what keeps the exemption honest.
+        expect(say("hoeng¹ gong²")).not.toContain("piŋ˥˧ huoŋ˥˥"); // no "squared"
+        expect(say("/y⁵³ y³⁵ touŋ³³/")).not.toContain("piŋ˥˧ huoŋ˥˥");
+    });
 });
