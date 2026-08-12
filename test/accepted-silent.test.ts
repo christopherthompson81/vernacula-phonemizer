@@ -136,7 +136,17 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // article ABOUT Japanese writing (`Misuzu (みすゞ)`) — a mention, not a use, and Sundanese has no
         // iteration mark to read it with. ⚠ Two `$28.ooUS`/`$60.ooUS` spans are the SOURCE'S OWN TYPO (`.00`
         // mistyped with letter o's); the `$` there IS read, and what the scan sees is the `US` fragment.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh"]);
+        // ⚠ AND gan IS THE SIXTH, WHICH CLOSES THE PREDICTION COMPLETELY — the cjy note above named
+        // "gan/hak/hsn"; hak was the fourth, hsn the fifth, and Gan is now the sixth, from a sixth source.
+        // gan.wikipedia opens its articles with a NANCHANG PRONUNCIATION GLOSS — `亞細亞洲（南昌話：/ŋa²¹³
+        // ɕi³⁵ ŋa²¹³ t͡siiu⁴²/）`, `地球（南昌話：/tʰi¹¹ tɕʰiu²⁴/）` — i.e. the superscripts transcribe the
+        // very variety the engine speaks, in the same notation the shipped dict is derived from. Six Sinitic
+        // corpora, six independent routes to the same false positive. Its other classes are the family's
+        // usual residue (coordinates and compass bearings for `degree`, a Japanese iteration mark, four `$`
+        // in one article) plus one shape worth naming: gan's `minus` list is SHORT because the layer READS
+        // the real negatives — ⟨負⟩ speaks AND is attested in sense in the corpus's own integer article
+        // (`佢個哩嗰負值(-1、-2、-3...)`), which no other lect in this family could say.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

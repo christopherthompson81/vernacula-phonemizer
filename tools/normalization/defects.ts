@@ -203,6 +203,50 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         "greater-than": "sign ×0 and no comparative-magnitude phrase attested",
         divide: "sign ×0; gibahin ×2 is 'divided' in the partition sense, not the operator",
     },
+    gan: {
+        // ⚠ THE HARD GATE FOR THIS LANGUAGE IS THE DICT, NOT THE CORPUS — gan HAS a real corpus (a
+        // gan.wikipedia dump, 3,020 segments, 29/35 cells), which cjy and hsn did not. But
+        // `sinitic/hanDictIpa.ts` skips an uncovered character SILENTLY, so an unsourced word does not
+        // mispronounce — it VANISHES, which is worse than leaving the symbol unread. Every refusal below
+        // names which of the two evidences decided it.
+        plus: "measured: the corpus's 20-odd `+` contain NO arithmetic. They are a GRAMMAR NOTATION "
+            + "(`“動詞+得+補語+賓語”`, the Gan verb-complement schema, ×10 in one paragraph), the language "
+            + "name `C++` ×4, balanced CHEMICAL EQUATIONS (`2H₂O+2e⁻=H₂↑+2OH⁻`, `MnO₂+4HCl=MnCl₂+…`), a "
+            + "LaTeX body (`e\\,^{i \\pi} + 1 = 0\\;`), a naming schema (`「名 + 爺名 + 姓」`) and an "
+            + "asteroid designation (`沃虎+585`). And the word is unavailable anyway: ⟨加⟩ is SILENT in this "
+            + "dict, so emitting it would delete the operator rather than read it",
+        equals: "measured: every `=` is set theory (`0=0/1`, `2'=0' ' '={0,1,2}={0,{0}}`), a chemical "
+            + "equation, an abbreviation gloss (`American English = AE`) or EasyTimeline markup "
+            + "(`PlotArea = left:10`). ⟨等於⟩/⟨等于⟩ is HALF — the engine emits tɛn˨˩˧, one syllable of "
+            + "two, dropping 於 — so the reading would be a truncated word",
+        times: "measured: all 3 `×` are SCIENTIFIC NOTATION (`1.6 × 10⁻¹⁹ 庫侖`, `1.6726231 × 10⁻²⁷ kg`, "
+            + "`半衰期有1.9×10¹⁹年`), which this layer reads for no language. ⟨乘⟩ is SILENT in this dict",
+        divide: "measured: zero ÷ in the corpus. ⟨除⟩ does speak, unlike ⟨乘⟩, but there is nothing to read",
+        "plus-minus": "measured: both ± are a MEASUREMENT UNCERTAINTY in one sentence on luminescence "
+            + "dating (`36.1±2.6ka同到 64.2±4.9ka`). ⟨正負⟩ is HALF (emits fu˩˩, dropping 正), so the "
+            + "reading would be the minus word alone — which INVERTS the sense of a tolerance",
+        "less-than": "measured: zero digit-adjacent `<` in the corpus. ⟨小於⟩ is HALF (drops 於)",
+        "greater-than": "measured: the only `>` is a mathematical definition of π quoted in prose "
+            + "(`最細嗰 x > 0 讓 sin(x) = 0`) and two fullwidth `＞` inside a LaTeX chemistry condition "
+            + "(`（條件：＞900&nbsp;°C）`). ⟨大於⟩ is HALF (drops 於)",
+        degrees: "measured: the corpus's `°` are COORDINATES (`東經116°57′--117°42′`, `北纬27°33′-28°05′`), "
+            + "COMPASS BEARINGS (`係N90°E或者S90°E`, `符號090°`) and an article ABOUT the sign itself "
+            + "(`一份就係1度（1°）`) — plus exactly ONE real temperature (`熔點380℃`). And the word is "
+            + "unavailable: ⟨度⟩ is SILENT in this dict, ⟨攝氏⟩ is HALF (sz̩˩˩ — it would say 'shì' and drop "
+            + "'shè') and ⟨攝氏度⟩ emits 1 syllable of 3, so `20°C` would lose the WORD as well as the sign "
+            + "— strictly worse than the raw sign, which at least survives as a RAWMARK the scan can see. "
+            + "⚠ Note the corpus writes `係090度，符號090°`: the word is there and it is silent too, which is "
+            + "a DICT gap and not a normalization one",
+        currency: "n/a — the `$` IS read (美元, through the shared tier). ⚠ IT WAS DECLINED ON THE CORPUS "
+            + "FIRST and the reversal is worth recording: the corpus's 4 `$` are all in ONE article, a film's "
+            + "box office labelled as UK takings, and the only money word it attests is 美金 ×1 in a fine — "
+            + "so on corpus evidence a currency word would have been a guess of the Fula `tere` kind. "
+            + "`attest.ts` supplied the sense: gan.wikipedia writes 美元 ×5/4 articles in monetary amounts "
+            + "AND glosses the sign itself (`美金（United States dollar），又叫美圓、美元，符號USD或者US$`). "
+            + "Only `$` is declared; €, £ and ¥ are ×0 here and stay unread",
+        ampersand: "n/a — the ampersand IS read (同到, the corpus's own coordinator ×59, every instance "
+            + "coordinating; normalize.ts declares it through the shared tier)",
+    },
     hsn: {
         // ⚠ THERE IS NO hsn.wikipedia AND NO REFEREE. Every reason below is read off the Wikimedia Incubator's
         // `Wp/hsn` — 153 pages, 30,640 characters, the only Xiang text that exists — plus a DICT CHECK through
@@ -1050,6 +1094,61 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // shape; this one instance sits after `cm`. Listed rather than widening the tier, since a
         // `word × number` rule has exactly one attested instance to justify it (trap 9).
         "math-sign": ["cm × 3"],
+    },
+    gan: {
+        // ⚠ gan IS THE SIXTH SINITIC CORPUS TO PRODUCE THE ROMANIZATION-TONE HAZARD, and this file's own
+        // cjy note predicted it here by name ("worth expecting in gan/hak/hsn"). gan.wikipedia opens its
+        // articles with a NANCHANG PRONUNCIATION GLOSS — `亞細亞洲（南昌話：/ŋa²¹³ ɕi³⁵ ŋa²¹³ t͡siiu⁴²/）`,
+        // `地球（南昌話：/tʰi¹¹ tɕʰiu²⁴/）`, `江澤民（南昌話：[kɔŋ⁴⁴ tsʰik⁵ min³⁵]）` — so a superscript in
+        // this corpus is usually a TONE NUMBER on the very variety the engine speaks. Reading it as a power
+        // would turn the dict's own source notation into arithmetic. That is why `bareExponent` is
+        // undeclared; a squared UNIT is still read (`750萬 km²` → 750萬 平方公里, step 4), which is what
+        // keeps this list honest.
+        // The genuine exponents here are all things no layer reads: mantissa notation (`1.6 × 10⁻¹⁹`,
+        // `1.6726231 × 10⁻²⁷ kg`), a physics unit on a rate denominator (`938 百萬電子伏特 /c²（MeV/c²）`)
+        // and a cube on an undeclared one-character unit (`2.32g/cm³` — ⟨立方⟩ is undeclared because it is
+        // ×0 in this corpus against ⟨平方⟩'s ×29, the same evidence hak used).
+        exponent: ["10⁻¹⁹", "/c²", "MeV/c²", "10⁻²⁷", "cm³", "10¹⁹",
+            "ŋa²¹³", "ɕi³⁵", "t͡siiu⁴²", "tʰi¹¹", "tɕʰiu²⁴", "tsʰɔŋ⁴²", "tɕin⁴⁵", "tɕiu²¹³",
+            "u²¹³", "tɕʰi²¹³", "ȵi²¹", "nyy³", "kah⁶", "kɔŋ⁴⁴", "tsʰik⁵", "min³⁵"],
+        // THE DEGREE, EVERY INSTANCE — coordinates, compass bearings, and an article ABOUT the sign. The
+        // class-level refusal with its dict measurement is in ACCEPTED_SIGN_SILENCE; these spans exist
+        // because the two tables answer different questions, and listing the instances means a real
+        // temperature regression would still report. (The corpus's one real temperature, `熔點380℃`, is in
+        // that same class refusal: ⟨度⟩ is SILENT, so no rule can read it.)
+        degree: ["113°", "114°", "27°", "28°", "116°", "117°", "29°", "47.8°", "28.3°",
+            "090°", "N90°", "S90°", "180°", "S0°", "270°", "000°", "N0°", "「°」", "（1°）"],
+        // ⚠ NOT NEGATIVES — the minus rule (step 6) READS the corpus's real ones (`負4點六`, `負1、負2、負3`,
+        // and the word ⟨負⟩ is attested in sense in gan's own integer article). What is left is four
+        // COORDINATE SPANS, where the dash is a range between two bearings whose primes have no reading
+        // either, and one PERCENT RANGE: `3%-4%` reads as `百分之 3-百分之 4`, because step 4 claims each `%`
+        // and step 7 can then no longer see two digits across the dash. All five are correctly silent; the
+        // percent range is counted and declined in gan/normalize.ts.
+        // Listed by span because `acceptedSignClass` tests a sign regex against a SINGLE character and the
+        // minus pattern is CONTEXTUAL — the same limitation nan, hak, tl and wuu record.
+        minus: ["113°54′-114°", "27°33′-28°", "116°57′--117°", "28°44′--29°", "3%-4%"],
+        // NOT ARITHMETIC, ANY OF IT. The class refusal and its evidence are in ACCEPTED_SIGN_SILENCE; these
+        // spans exist for the same reason the minus ones do. The set is: the Gan verb-complement GRAMMAR
+        // SCHEMA (`“動詞+得+補語+賓語”`), `C++`, set-theory definitions of the naturals, balanced chemical
+        // equations, LaTeX bodies, a Cyrillic-name schema, an asteroid designation, a measurement tolerance
+        // and EasyTimeline chart code.
+        "math-sign": ["0=0/1", "3=3/1", "...=7/9", "0.1=0.10000", "0'={0}", "2'=0' ' '={0,1,2}={0,{0}",
+            "動詞+得+補語+賓語", "動詞+不+補語+賓語", "動詞+得+賓語+補語", "動詞+賓語+不+補語",
+            "C++", "1.6 × 10", "1.7×10", "1.6726231 × 10", "1.9×10",
+            "2H 2 O+2e - =H 2 ↑+2OH -", "2Cl - =Cl 2 +2e -",
+            "MnO 2 +4HCl=MnCl 2 +Cl 2 ↑+2H 2 O", "2KMnO 4 +16HCl=2MnCl 2 +2KCl+5Cl 2 ↑+8H 2 O",
+            "{CO}_2 + {ZnO}", "{CO}_2 + {C}", "{ZnO} + {CO}", "{Zn} + {CO}_2",
+            "x > 0", "sin(x) = 0", "π = 3.14159", "English = AE", "English = BE",
+            "\\pi} + 1 = 0", "PlotArea = left:10", "名 + 爺名 + 姓", "沃虎+585", "Wolfe+585",
+            "36.1±2.6ka", "64.2±4.9ka"],
+        // ⚠ NO `currency` KEY, DELIBERATELY, AND THE ABSENCE IS THE RECORD OF A REVERSED REFUSAL. The four
+        // `$` in this corpus WERE going to be listed here — one article, a film's box office, and no
+        // corpus-attested word for the sign. `attest.ts` then found 美元 ×5 on gan.wikipedia in monetary
+        // amounts and the wiki's own gloss of the symbol (`符號USD或者US$`), so the sign is now READ and an
+        // entry here would cover nothing. Deleted rather than left as ballast, per this table's own rule.
+        // A JAPANESE ITERATION MARK in a quoted list of Japanese surnames (`長谷川、佐々木、五十嵐…`), which
+        // Gan does not use. Reading it would need Japanese's rule, not this one's — the nan precedent.
+        iteration: ["佐々木"],
     },
     hak: {
         // ⚠ THE SAME SINITIC HAZARD wuu RECORDS: A SUPERSCRIPT IN THESE ARTICLES IS OFTEN A TONE NUMBER,
