@@ -8,6 +8,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeMalagasy } from "./normalize.ts";
 
 /** Phonemize a single Malagasy word to canonical IPA (penultimate stress, before the stressed vowel). */
 export function phonemizeWord(word: string): string {
@@ -39,7 +40,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class MalagasyPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeMalagasy(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

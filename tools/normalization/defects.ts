@@ -244,6 +244,29 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         ampersand: "n/a — the ampersand IS read (跟, the corpus's own coordinator ×136 against 和 ×63; "
             + "normalize.ts declares it through the shared tier)",
     },
+    mg: {
+        // ⚠ THE MINUS IS A BCE YEAR, NOT ARITHMETIC — and it is the bot template that writes it. Every one
+        // of the 22 mined instances is either an ancient-biography stub (`Croesus … dia teraka ny
+        // 1 Janoary -596 ary maty ny 1 Janoary -546`, "born 1 January -596, died 1 January -546") or a
+        // negative COORDINATE from the commune stubs (`-97.0602777778`). Neither wants "minus": the first
+        // means 596 BC and the second is a longitude. `signed-number` is 15,177 in the dump and that count
+        // IS the template.
+        // ⚠ And the only candidate word fails on PART OF SPEECH, which is the Fula `hakkunde` shape:
+        // `latsaka` ×24 is a comparative verb taking a whole clause — `tsy latsaka ny 8,5 %` ("not less
+        // than 8.5%"), `latsaka 40 kilometatra atsimon'ny` ("40 km south of") — never an infix before a
+        // numeral. No era phrase is attested either (`sources.ts`: "no era marker in the corpus").
+        minus: "measured: all 22 mined `-` are a bot-template BCE year (`1 Janoary -596`) or a negative "
+            + "coordinate; neither reading is 'minus', and latsaka is a clause-taking comparative",
+        // The mined `=` are ORTHOGRAPHY GLOSSES in the article on Malagasy spelling (`ny n̂ ilazana ny feo
+        // n`) and dimension crosses; no Malagasy reading of either sign is attested in corpus or wiki.
+        equals: "measured: the mined `=` are spelling-article glosses, not relations between numbers",
+        times: "measured: the mined `×` are dimension crosses; no Malagasy reading is attested",
+        plus: "measured: digit-flanked `+` is ×0 in the artifact",
+        "plus-minus": "measured: ± is ×0 in the artifact",
+        "less-than": "measured: `<` is ×0 in the artifact",
+        "greater-than": "measured: `>` is ×0 in the artifact",
+        divide: "measured: `÷` is ×0; the corpus's `/` instances are rates and dates",
+    },
     lo: {
         // ⚠ EVERY MINED `=` AND `+` IS INSIDE A FORMULA OR A WORKED EXAMPLE, and in the clearest of them the
         // corpus writes the reading ITSELF in the very next bracket: `1,000 Hz = 1 KHz (1 ພັນແຮັກ ເທົ່າກັບ
@@ -741,6 +764,53 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // ⚠ Listed BY INSTANCE rather than silencing the class, so the moment a ¥ appears beside a Cebuano
         // yen-word — or any other currency regresses — the scan reports it again.
         currency: ["¥2,500", "¥130,000", "¥7,000"],
+    },
+    mg: {
+        // ⚠ PER MILLE, NOT PER CENT. `‰` is in the percent DROPPABLE class, and these two are infant- and
+        // general-mortality rates (`42,50 ‰`, `64 ‰`) in one paragraph. Malagasy reads `%` as `isan-jato`
+        // ("per hundred") and the parallel `isan-arivo` is attested in NEITHER haystack, so the thousand
+        // sign stays unread rather than guessed — the per-hundred word would be actively wrong.
+        // ⚠ The spans carry `&nbsp;` because the corpus does: `42,50&nbsp;‰`. A span written with an
+        // ordinary space matches nothing, which is silent — the entry simply fails to accept.
+        percent: ["42,50&nbsp;‰", "64&nbsp;‰"],
+        // FOUR SHAPES THE UNIT PATH CANNOT REACH, none of them a missing word. Three are a square or cube
+        // inside a RATE (`30 mp/km²`, `8,5 mp/ km²`, `3 mp/ km²` — population per km²; `1,429 kg/m³`),
+        // where the numerator is an undeclared noun and no Malagasy "per" is attested in the slot; and two
+        // are FORMULAE, where the base is a variable rather than a unit — `C 12 H 22 O¹¹` (sucrose) and
+        // `χ²` (the chi-squared test). `bareExponent` is undeclared for this language for that reason.
+        // ⚠ The ordinary unit exponents ARE read (`km²` → kilaometatra toradroa, `km³` → …toratelo), which
+        // is what keeps this list honest.
+        exponent: ["mp/km²", "mp/ km²", "kg/m³", "O¹¹", "χ²"],
+        // TWO CURRENCIES THE TIER CORRECTLY DECLINES. `R$ 9.195.871,95` is the Brazilian real, which has no
+        // Malagasy name in either haystack; `$30 tapitrisa dolara` writes the sign AND the word, so the
+        // reading already says *dolara* and dropping the sign is trap 12's permissible drop — the same
+        // sentence is reported as REDUNDANT for its other instance.
+        currency: ["R$ 9.195.871,95", "$30 tapitrisa dolara"],
+        // THE FRENCH NUMERO SIGN, not a degree — `"Loi-n°-2023-007-Code-minier"`, a statute cited in a
+        // reference. The degree rule requires a DIGIT before the sign precisely so that `n°` cannot match.
+        // TWO SIGNS THAT ARE NOT DEGREES. `"Loi-n°-2023-007-Code-minier"` is the French NUMERO sign in a
+        // statute citation — the degree rule requires a DIGIT before the sign precisely so `n°` cannot
+        // match. `taonjato faha 17°` is "the 17TH century": ⟨faha-⟩ is the Malagasy ordinal prefix and the
+        // writer has used `°` as a raised ordinal marker. ⚠ It is U+00B0, the real degree sign — U+00BA,
+        // the masculine ordinal indicator, is ×0 here — so no character test separates them and the
+        // preceding `faha` is the guard.
+        degree: ["Loi-n°-2023-007", "faha 17°"],
+        // ⚠ THE MINUS INSTANCES, LISTED BESIDE THE CLASS REFUSAL rather than instead of it — because
+        // `acceptedSignClass` cannot accept this class at all. Its test asks whether the DROPPABLE regex
+        // matches a single character, and the minus regex is CONTEXTUAL (`[-−–](?=\p{Nd})` with two
+        // lookbehinds), so it can never match one. `tl` carries the same pair for the same reason, and for
+        // the same BCE-year shape.
+        //
+        // Three families, none of them arithmetic:
+        //   · BCE YEARS from the ancient-biography stub — `-596 ary maty`, `-546`, `-258`, `-209`,
+        //     `-3 000 taona`. "Born 1 January -596" means 596 BC.
+        //   · NEGATIVE COORDINATES from the commune stubs — `-97.0602777778`, `-83.6138888889`, `-0.6408°`.
+        //   · EasyTimeline CHART MARKUP that survived into the artifact — `from:-5000 till:-3000`,
+        //     `-30 align:center`, `-3200 align:right`. Axis origins and label offsets, i.e. code.
+        minus: ["-209", "-258", "-546", "-596", "-3 000", "-3 800",
+            "-0.6408", "-1.1956", "-119.3425", "-122.09", "-76.71", "-78.70", "-83.61", "-86.17",
+            "-97.06", "-97.785", "-99.47",
+            "-2000", "-30 ", "-3000", "-3200", "-5000", "-2023"],
     },
     lo: {
         // THREE SUPERSCRIPTS WITH NOTHING THE TIER CAN ATTACH THEM TO. `i ² = −1` and `10¹⁰⁰` (a googol,
