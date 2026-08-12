@@ -1,25 +1,44 @@
 // WIKIPEDIA WORD ATTESTATION — mad. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "mad",
-    "wiki": "mad.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "mad",
+        "wiki": "mad.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "sampè'",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 52,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…nna sè anyama Ḍora bân Sembaḍa. Ponakabân ḍuwâ arowa acarok sampè' paḍâ matè. == Bujud == === Aksara === ==== Aksara ghâjâng =…",
+                "…kowi toman dhâddhi gubernur Jakarta sajjhek 15 Oktober 2012 sampè’ 16 Oktober 2014 è kancaèh Basuki Tjahaja Purnama mènangka b…",
+                "…âddhi Wâlli kottah Surakarta, sajjhek tangghâl 28 Julè 2005 sampè’ 1 Oktober 2012, è kancaèh F.X. Hadi Rudyatmo mènangka bâkkè…",
+                "…ata’aghi je’ ta’ aparengah onèng callon prèsiden ḍâri PDI-P sampè’ salastarèna pemilu lègislatip 2014. Nèng tangghâl 14 Maret…",
+                "…orèng kabângsaan prances, sè ahèrrah aberri’ oloken popular sampè’ samangkèn, “Jokowi”. Kalabân kajhujhurna bân lakoh kerraseh…",
+                "…ibi’ sabennya’ Rp 729 jutah, samantara bhândhâh iklan radio sampè’ Rp 516 jutah. Jokowi aklaim jhâ’ sabegiyen bennya’ dana ègh…"
+            ]
+            },
         {
             "word": "sabellunna Masèhi",
             "verdict": "attested",
@@ -46,15 +65,6 @@
                 "…ḍâri mata’arè ombâr pajjhâr ḍâri tèmor sampe’ pokol 09:30, pokol 10:00 ampon lok ollè salat dhuha polè amarghâ ampon semma’…",
                 "…bâkto ISO 8601 (sistem 24 jhâm) ghulagghu para’ siang bisa pokol 10:00 otabâ pokol 09:30-10:00, è ḍâlem Bahasa Inggris (sist…"
             ]
-        },
-        {
-            "word": "sampè'",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 17,
-            "examples": []
         },
         {
             "word": "derajat",
@@ -282,5 +292,6 @@
                 "…a Bhumè mèdherri mata'arè. Mata arè pèra' sala sèttong ḍâri korang lebbi 200 milyar kongsè 400 milyar bintang sè madhâddhi bintang n…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

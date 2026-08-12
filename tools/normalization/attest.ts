@@ -142,9 +142,37 @@ async function api(params: Record<string, string>): Promise<any> {
     // A User-Agent is REQUIRED, per mine.ts: without one the API returns non-JSON and the fetch silently
     // yields nothing, which reads as "this word does not occur" rather than as an error — the worst possible
     // failure mode for an attestation tool, since it manufactures a confident negative.
-    const r = await fetch(u, { headers: { "User-Agent": UA } });
-    if (!r.ok) throw new Error(`${r.status} ${r.statusText} — ${wiki}.wikipedia.org`);
-    return r.json();
+    /**
+     * ⚠ A 429 IS NOT AN ERROR, IT IS A WAIT — and treating it as an error is what destroyed a cache.
+     *
+     * This threw on the first non-OK response, so a rate limit arriving at word 3 of 20 killed the process
+     * with a stack trace and the run wrote nothing. Combined with the carry-forward bug (see `BLOCK_RE`),
+     * which forced every cache to be built by a single all-or-nothing run, that made a small wiki's rate
+     * limiter able to make an entire language unprobeable: the `bar` run lost nine recorded findings exactly
+     * this way, and the fix it needed was to wait a few seconds.
+     *
+     * So the transient statuses are retried with exponential backoff, honouring `Retry-After` when the wiki
+     * sends one. Everything else still throws immediately — a 404 or a 414 is a fact about the request and
+     * waiting cannot improve it. When the retries are exhausted it throws too, because the alternative is
+     * returning an empty result, and this file's whole hazard is the manufactured confident negative.
+     */
+    const TRANSIENT = new Set([429, 502, 503, 504]);
+    let wait = 2000;
+    for (let attempt = 0; ; attempt++) {
+        const r = await fetch(u, { headers: { "User-Agent": UA } });
+        if (r.ok) return r.json();
+        if (!TRANSIENT.has(r.status) || attempt >= 5) {
+            throw new Error(`${r.status} ${r.statusText} — ${wiki}.wikipedia.org`
+                + (TRANSIENT.has(r.status) ? " (still rate-limited after 6 attempts — back off and retry later;"
+                    + " do NOT reduce --limit, which makes the counts incomparable with the tree's)" : ""));
+        }
+        const after = Number(r.headers.get("retry-after"));
+        const delay = Number.isFinite(after) && after > 0 ? Math.min(after * 1000, 60_000) : wait;
+        console.error(`  ${r.status} from ${wiki}.wikipedia.org — waiting ${Math.round(delay / 1000)}s `
+            + `(attempt ${attempt + 1}/6). Prior findings in the cache are untouched.`);
+        await new Promise((res) => setTimeout(res, delay));
+        wait = Math.min(wait * 2, 60_000);
+    }
 }
 
 /** Does the wiki exist at all? A negative from a nonexistent wiki is not evidence of anything. */
@@ -218,6 +246,18 @@ function boundedSource(body: string): string {
     return `(?<![${LM}])(?<![${LM}]${APOS_CLASS})${body}(?![${LM}])(?!${APOS_CLASS}[${LM}])`;
 }
 
+/**
+ * WHICH PROBES THE REMOTE TOKENIZER CANNOT BE TRUSTED TO HAVE SAMPLED — the search-side twin of the boundary
+ * rule above, exported so it can be pinned without a live wiki.
+ *
+ * A word containing a hyphen or an apostrophe is split by CirrusSearch exactly as this file's own tokenizer
+ * used to split it, so the plain word query returns articles matching the PARTS. See `probe()` for the cdo
+ * measurement. Unspaced scripts are excluded: they carry no such punctuation and their query is not split
+ * this way, and a phrase's internal space is already a term separator the search handles correctly.
+ */
+export const needsInsource = (word: string): boolean =>
+    !UNSPACED.test(word) && !isPhrase(word) && /['‘’‛ʼʻ´-]/u.test(word);
+
 /** A probe with internal whitespace is a COLLOCATION, tested as a phrase rather than as a single word. */
 const isPhrase = (word: string): boolean => /\s/u.test(word.trim());
 
@@ -280,6 +320,44 @@ interface Finding {
     /** False when the script has no word boundaries, so `tokenHits` is a bare substring count. */
     bounded: boolean;
     verdict: "attested" | "attested*" | "substring-only" | "absent";
+    /** Set when the article sample was widened with an `insource:` query — see `probe()`. */
+    via?: "insource";
+}
+
+/**
+ * THE ONE PLACE A FINDING BLOCK IS SHAPED — writer and parser derived from the same constant, because they
+ * drifted and the drift disabled the carry-forward entirely.
+ *
+ * `BLOCK_RE` expected a closing brace at **8** spaces; `renderFinding()` (then inline in the writer) emitted
+ * one at **12**. Every cache this tool had ever written therefore parsed as ZERO prior blocks, so the
+ * carry-forward guard below fired on every re-run — `REFUSING TO WRITE: N existing finding(s) could not be
+ * parsed` — and the cache could only ever be built by ONE run covering every word. That is not a cosmetic
+ * bug: the `bar` run deleted its cache to force the single clean run the tool demanded, the wiki then
+ * rate-limited it, and nine recorded findings existed afterwards only in an investigation document.
+ *
+ * The brace width is a range, not a number, because both widths are now in the tree: 71 cached files close
+ * their blocks at 12, and a block re-emitted through carry-forward keeps whatever it had. Anything inside a
+ * block sits at 12 or 16 spaces and none of it is a brace, so the lazy match still stops at the block's own
+ * closer. `test/normalization-attest.test.ts` pins the round trip against `renderFinding()` output rather
+ * than against a hand-typed fixture, so the two cannot drift apart again silently.
+ */
+export const BLOCK_RE = /\{\s*"word":[\s\S]*?\n {8,12}\}/gu;
+
+/** Render one finding exactly as the cache stores it — the input side of the round trip `BLOCK_RE` parses. */
+export function renderFinding(f: Finding): string {
+    const esc = (s: string): string => JSON.stringify(s);
+    return `        {
+                "word": ${esc(f.word)},
+                "verdict": ${esc(f.verdict)},
+                "bounded": ${f.bounded},${f.via === undefined ? "" : `
+                // The article sample was widened with an \`insource:\` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see \`probe()\`.
+                "via": ${esc(f.via)},`}
+                "tokenHits": ${f.tokenHits},
+                "articles": ${f.articles},
+                "substringOnly": ${f.substringOnly},
+                "examples": [${f.examples.map((x) => `\n                ${esc(x)}`).join(",")}${f.examples.length ? "\n            " : ""}]
+            }`;
 }
 
 /**
@@ -314,11 +392,52 @@ async function probe(word: string): Promise<Finding> {
     // and its own \b is ASCII-defined, which is the trap that disabled the initialism pass fleet-wide.
     // ⚠ THE SEARCH QUERY MAY CARRY `--context` TERMS; THE HIT TEST NEVER DOES. Widening the query narrows the
     // article sample to a register (see `--context` above); `hitRe` below still tests the probed word alone.
-    const s = await api({
-        action: "query", list: "search", srsearch: context === undefined ? word : `${word} ${context}`,
-        srlimit: String(Math.min(limit, 50)), srnamespace: "0", srprop: "snippet",
-    });
-    const hits: any[] = s?.query?.search ?? [];
+    const search = async (q: string): Promise<any[]> => {
+        const s = await api({
+            action: "query", list: "search", srsearch: context === undefined ? q : `${q} ${context}`,
+            srlimit: String(Math.min(limit, 50)), srnamespace: "0", srprop: "snippet",
+        });
+        return s?.query?.search ?? [];
+    };
+    let hits: any[] = await search(word);
+    let via: Finding["via"];
+    /**
+     * ⚠ TRAP 19 AGAIN, ONE LAYER OUT: THE REMOTE TOKENIZER SPLITS THE SAME WORDS THE LOCAL ONE DID.
+     *
+     * Commit `9539e03` fixed this tool's OWN boundary so a hyphenated or apostrophed word could be a token.
+     * That fixed the VERDICT and left the SAMPLE wrong, because CirrusSearch tokenises too, and it splits on
+     * the hyphen. Probing cdo's `lī-mī` (BUC for "kilometre") the wiki serves the query as the two terms `lī`
+     * and `mī` and returns a full 40 articles — `Mī-guók` (America), `Gŭng-lī`, `Hŭk-lò̤-lī-dăk` — not one of
+     * which contains the compound. The probe then reads twenty articles chosen for the wrong word, finds
+     * nothing, and reports `absent` with **0 substring hits too**, which is the reading that says "this word
+     * does not exist". `lī-mī`, `gŭng-gĭng` and `lĭk-huŏng` were all recorded `absent` on cdo. All three are
+     * in the wiki.
+     *
+     * ⚠ SO THE TRIGGER IS THE PUNCTUATION, NOT AN EMPTY RESULT. The obvious guard — retry when the search
+     * comes back with nothing — never fires, because the split query is not empty; it is *full of the wrong
+     * articles*. A punctuation-bearing probe simply cannot trust a tokenised word query to have sampled the
+     * word it was given, so the `insource:` query is fired for every such probe and its titles are read FIRST.
+     * (`insource:"…"` matches the literal string in the raw wikitext, so the hyphen survives the query: 2
+     * articles for `lī-mī` against the word query's 40 irrelevant ones.)
+     *
+     * This widens RECALL only. Every article either query returns still faces the same `hitRe` below, so
+     * nothing about what counts as an attestation is relaxed — and the word-query titles are kept after the
+     * `insource:` ones rather than replaced, because on a big wiki the tokenised query is the better net for a
+     * word whose hyphen is optional in practice. The retry is recorded in the cache as `"via": "insource"`,
+     * since a reader must be able to reproduce the sample that produced the verdict.
+     *
+     * The file header's objection to `insource:` stands for the general case (expensive on small wikis, and
+     * its regex form has an ASCII-defined `\b`). Neither applies here: it is the quoted literal form, fired
+     * once, only for probes the plain query provably mis-samples, and no `\b` of the wiki's is trusted.
+     */
+    if (needsInsource(word)) {
+        const exact = await search(`insource:"${word.replace(/"/gu, "")}"`);
+        if (exact.length > 0) {
+            via = "insource";
+            const seen = new Set(exact.map((h: any) => String(h.title)));
+            hits = [...exact, ...hits.filter((h: any) => !seen.has(String(h.title)))];
+        }
+    }
     if (hits.length === 0) {
         return { word, tokenHits: 0, articles: 0, substringOnly: 0, examples: [], bounded, verdict: "absent" };
     }
@@ -397,7 +516,7 @@ async function probe(word: string): Promise<Finding> {
     }
     const verdict: Finding["verdict"] = tokenHits > 0 ? (bounded ? "attested" : "attested*")
         : substringOnly > 0 ? "substring-only" : "absent";
-    return { word, tokenHits, articles, substringOnly, examples, bounded, verdict };
+    return { word, tokenHits, articles, substringOnly, examples, bounded, verdict, via };
 }
 
 /**
@@ -505,7 +624,7 @@ if (IS_CLI) {
     console.log(`  ${pad("word", 16)} ${pad("token", 6)} ${pad("arts", 5)} ${pad("substr-only", 12)} verdict`);
     for (const f of findings)
         console.log(`  ${pad(f.word, 16)} ${pad(String(f.tokenHits), 6)} ${pad(String(f.articles), 5)} `
-            + `${pad(String(f.substringOnly), 12)} ${f.verdict}`);
+            + `${pad(String(f.substringOnly), 12)} ${f.verdict}${f.via === undefined ? "" : "  ← via insource: (the word query was split on its own punctuation)"}`);
     console.log(`\n  READ THE EXAMPLES. A token hit proves the word EXISTS, never that it fits the slot — the`);
     console.log(`  Fula lesson. zu's amaphuzu is a real token meaning sports POINTS, not the decimal point.\n`);
     if (findings.some((f) => !f.bounded)) {
@@ -535,7 +654,7 @@ if (IS_CLI) {
      * A word probed in THIS run always wins — that is a fresh measurement of the same question. Everything else is
      * kept verbatim, block for block, so no re-parse can alter a finding this run did not make.
      */
-    const priorBlocks = [...prior.matchAll(/\{\s*"word":[\s\S]*?\n        \}/gu)].map((m) => m[0]);
+    const priorBlocks = [...prior.matchAll(BLOCK_RE)].map((m) => m[0]);
     const probed = new Set(findings.map((f) => f.word));
     const carried = priorBlocks.filter((b) => {
         const w = /"word":\s*"([^"]+)"/u.exec(b)?.[1];
@@ -581,15 +700,7 @@ if (IS_CLI) {
         // \`--context\` set to exactly this string.
         "context": ${esc(context)},`}
         "findings": [
-    ${findings.map((f) => `        {
-                "word": ${esc(f.word)},
-                "verdict": ${esc(f.verdict)},
-                "bounded": ${f.bounded},
-                "tokenHits": ${f.tokenHits},
-                "articles": ${f.articles},
-                "substringOnly": ${f.substringOnly},
-                "examples": [${f.examples.map((x) => `\n                ${esc(x)}`).join(",")}${f.examples.length ? "\n            " : ""}]
-            }`).join(",\n")}${carried.length ? `,\n${carried.map((b) => `        ${b.replace(/^\s+/u, "")}`).join(",\n")}` : ""}
+${[...findings.map(renderFinding), ...carried.map((b) => `        ${b.replace(/^\s+/u, "")}`)].join(",\n")}
         ],
     }
     `, "utf8");

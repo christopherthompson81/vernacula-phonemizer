@@ -24,8 +24,10 @@
  * The fixtures are hand-written sentences in the shape of the orthography under test, not fetched wiki text,
  * so this test carries no third-party content and cannot rot when an article is edited.
  */
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { fold, isHit, countHits, matchers } from "../tools/normalization/attest.ts";
+import { BLOCK_RE, fold, isHit, countHits, matchers, needsInsource, renderFinding } from "../tools/normalization/attest.ts";
 
 describe("attest.ts — words whose orthography contains punctuation", () => {
     /** The reported case. `corpus-words.ts` scores this `attested ×14`; `attest.ts` said `0 token`. */
@@ -176,5 +178,130 @@ describe("attest.ts — phrases and unspaced scripts keep their existing contrac
     test("a regex metacharacter in a probed word is matched literally, not as a pattern", () => {
         expect(isHit("a.b", "x aXb y")).toBe(false);
         expect(isHit("a.b", "x a.b y")).toBe(true);
+    });
+});
+
+/**
+ * THE CACHE ROUND TRIP — the writer and the parser of `tools/corpus/attest/<lang>.jsonc`, pinned against
+ * each other rather than against a hand-typed fixture.
+ *
+ * ⚠ WHY. `attest.ts` carries prior findings forward by re-parsing the file it wrote last time, and the two
+ * halves drifted: the merge regex expected a finding's closing brace at **8** spaces while the writer emitted
+ * one at **12**. So the parser found ZERO blocks in every cache this tool had ever written, the carry-forward
+ * guard fired on every re-run (`REFUSING TO WRITE: N existing finding(s) could not be parsed`), and the cache
+ * could only be built by one run covering every word at once.
+ *
+ * That is not cosmetic. A probe costs live Wikipedia fetches, so "one run covering every word" is a run that
+ * a rate limit can destroy — and did: an agent deleted its cache to force the single clean run the tool
+ * demanded, the wiki answered 429, and nine recorded findings survived only in an investigation document.
+ *
+ * A hand-typed fixture could not have caught this, because a hand-typed fixture is written by whoever is
+ * looking at the regex. These tests feed `renderFinding()`'s own output back through `BLOCK_RE`, and then
+ * check every cache actually in the tree, so the writer is the fixture.
+ */
+describe("attest.ts — the cache carry-forward round trip", () => {
+    const finding = (word: string, examples: string[] = []) => ({
+        word, tokenHits: examples.length, articles: examples.length, substringOnly: 0,
+        examples, bounded: true, verdict: "attested" as const,
+    });
+
+    /** The frame the writer puts round the blocks, reduced to the part that matters for parsing. */
+    const cache = (blocks: string[]): string =>
+        `    {\n        "language": "xx",\n        "findings": [\n${blocks.join(",\n")}\n        ],\n    }\n`;
+
+    const parse = (text: string): string[] =>
+        [...text.matchAll(new RegExp(BLOCK_RE.source, BLOCK_RE.flags))].map((m) => m[0]);
+    const wordsIn = (text: string): string[] =>
+        [...text.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!);
+
+    test("what renderFinding writes is what BLOCK_RE reads back — one block per finding", () => {
+        const written = cache([finding("Prozent"), finding("Eiro"), finding("Komma")].map(renderFinding));
+        expect(parse(written).length).toBe(3);
+        expect(parse(written).map((b) => /"word":\s*"([^"]+)"/u.exec(b)?.[1])).toEqual(["Prozent", "Eiro", "Komma"]);
+    });
+
+    test("examples do not end a block early — braces and brackets inside a quote are just characters", () => {
+        const written = cache([
+            finding("Grad", ["…0 bis –4 Grad Celsius {sic} [1]…", "…unta Nui Grad foin…"]),
+            finding("minus", ["…Moi via, minus 10%…"]),
+        ].map(renderFinding));
+        const blocks = parse(written);
+        expect(blocks.length).toBe(2);
+        expect(blocks[0]).toContain("Grad Celsius {sic} [1]");
+        // and the second block is not swallowed into the first
+        expect(blocks[0]).not.toContain("minus");
+    });
+
+    test("a finding carried forward re-parses after being re-indented for re-emission", () => {
+        // The writer re-emits a carried block verbatim at 8 spaces (`b.replace(/^\s+/, "")` behind a pad),
+        // so its interior keeps whatever indentation it was born with. Two generations must both parse.
+        const gen1 = parse(cache([renderFinding(finding("Kilometa", ["…2009 Kilometa…"]))]))[0]!;
+        const gen2 = cache([`        ${gen1.replace(/^\s+/u, "")}`, renderFinding(finding("Kubikmeta"))]);
+        expect(parse(gen2).length).toBe(2);
+        expect(wordsIn(gen2)).toEqual(["Kilometa", "Kubikmeta"]);
+    });
+
+    test("THE DEFECT: a brace pinned at exactly 8 spaces matches nothing the writer emits", () => {
+        const written = cache([finding("Prozent"), finding("Eiro")].map(renderFinding));
+        const eightOnly = /\{\s*"word":[\s\S]*?\n {8}\}/gu; // the shipped regex, verbatim
+        expect([...written.matchAll(eightOnly)].length).toBe(0); // …found nothing…
+        expect(parse(written).length).toBe(2);                  // …while every finding was right there.
+    });
+
+    /**
+     * The strongest form of the test, because it uses the artifacts rather than a model of them: every cache
+     * in the tree must round-trip, block count equal to word count. A file the parser cannot read is a file
+     * whose findings the next probe run refuses to write past — i.e. a language that can never be probed
+     * incrementally again.
+     */
+    test("every cache in the tree parses, block for word", () => {
+        const dir = "tools/corpus/attest";
+        const files = readdirSync(dir).filter((f) => f.endsWith(".jsonc"));
+        expect(files.length).toBeGreaterThan(50); // the test is only meaningful if it found the artifacts
+        const broken: string[] = [];
+        for (const f of files) {
+            const text = readFileSync(join(dir, f), "utf8");
+            const blocks = parse(text), words = wordsIn(text);
+            // `wordsIn` also counts the `"word"` key inside each block, once — so the counts are comparable.
+            if (blocks.length !== words.length) broken.push(`${f}: ${blocks.length} block(s), ${words.length} word(s)`);
+        }
+        expect(broken).toEqual([]);
+    });
+});
+
+/**
+ * THE SEARCH-SIDE HALF OF THE SAME BUG — because fixing the local boundary fixed the VERDICT and left the
+ * SAMPLE wrong.
+ *
+ * CirrusSearch tokenises, and it splits a probe on its hyphen just as this tool's own tokenizer used to.
+ * Probing cdo's `lī-mī` the wiki serves the query as `lī` + `mī` and returns a *full* 40 articles — none of
+ * which contains the compound. The probe then reads twenty articles chosen for the wrong word and reports
+ * `absent` with zero substring hits, which reads as "this word does not exist". `lī-mī`, `gŭng-gĭng` and
+ * `lĭk-huŏng` were all recorded `absent` on cdo; all three are in the wiki.
+ *
+ * ⚠ THE TRIGGER IS THE PUNCTUATION, NOT AN EMPTY RESULT — the obvious "retry when the search found nothing"
+ * guard never fires here, because the split query is not empty, it is full of the wrong articles. That is the
+ * property these tests exist to hold.
+ */
+describe("attest.ts — probes whose article sample the remote tokenizer would get wrong", () => {
+    test("a hyphen or an apostrophe in the probe forces the insource: sample", () => {
+        for (const w of ["lī-mī", "gŭng-gĭng", "lĭk-huŏng", "kilomɛtrɛ-kare", "isan-jato", "Liap-sī",
+            "sampè'", "baay’isuu", "Hawaiʻi"])
+            expect([w, needsInsource(w)]).toEqual([w, true]);
+    });
+
+    test("a plain word does not — the tokenised query samples exactly the word it was given", () => {
+        for (const w of ["Prozent", "amadola", "摄氏度", "koma", "sentimeter"])
+            expect([w, needsInsource(w)]).toEqual([w, false]);
+    });
+
+    test("a phrase is not an insource: case — its space is a term separator the search handles", () => {
+        expect(needsInsource("kiloomeeteer kaaree")).toBe(false);
+        // …but a phrase whose parts carry punctuation is still the split case.
+        expect(needsInsource("ist gleich")).toBe(false);
+    });
+
+    test("an unspaced script is excluded even if a stray hyphen appears", () => {
+        expect(needsInsource("摄氏度-x")).toBe(false);
     });
 });

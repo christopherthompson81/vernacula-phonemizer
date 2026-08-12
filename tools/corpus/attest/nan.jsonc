@@ -1,25 +1,96 @@
 // WIKIPEDIA WORD ATTESTATION — nan. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "nan",
-    "wiki": "nan.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "nan",
+        "wiki": "nan.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "pah-hun-chi",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ha), sī piáu-ta̍t pí-lu̍t (比率)--ê chò-huat, chiū sī \"1/100 (pah-hun-chi-it, 0.01)--ê kúi-poē\". Sò͘-ha̍k hû-hō sī \"%\", ke tī sò͘-ti̍…"
+            ]
+            },
+        {
+                "word": "Hôa-sī",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 12,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…-chè khah chia̍p teh iōng ê un-piau ū Liap-sī un-piau (°C), Hôa-sī un-piau (°F) iáu-koh-ū jia̍t-le̍k-ha̍k un-tō͘ (K).…",
+                "…saⁿ-chióng, hun-pia̍t sī Liap-sī (Celsius a̍h centigrade), Hôa-sī (Fahrenheit), kap Khái-sī (Kelvin) un-phiau, kî-tiong Khái-…",
+                "…k-ka lóng chhái-iōng chit-chióng khah-hong-piān ê un-phiau. Hôa-sī un-phiau gôan-té sī Eng-gí kok-ka só· sú-iōng--ê, put-kò ch…",
+                "…í-gōa, chin-chē Eng-gí kok-ka mā lóng chiām-chiām hòng-khì Hôa-sī un-phiau, chhái-iōng Liap-sī. Khái-sī un-phiau siāng-chú-ià…",
+                "…nî 4 goe̍h 19 ji̍t hòng-sàng khí tī Kong-sī Tâi-gí-tâi kap Hôa-sī hòng-sàng--ê Tâi-gí iáⁿ-chi̍p. Chú-iàu thàn-thó \"kho͘-toaⁿ…",
+                "…-it kah Lé-pài-gō͘ àm-sî 20:00 pò͘-chhut ê Hiong‑thó-kio̍k. Hôa-sī Kuaⁿ‑hong-bāng‑chām. Archived 2019-09-21 at the Wayback Mac…"
+            ]
+            },
+        {
+                "word": "Liap-sī",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 22,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…tō͘ khah kôan ê kok-tō͘ hun-bêng. I ê un-tō͘ chha-put-to tī Liap-sī 6 tō͘ kàu Liap-sī 36 tō͘ tiong-kan. Ē-sái-kóng sī sù-kùi-jû…",
+                "…k-tō͘ hun-bêng. I ê un-tō͘ chha-put-to tī Liap-sī 6 tō͘ kàu Liap-sī 36 tō͘ tiong-kan. Ē-sái-kóng sī sù-kùi-jû-chhun, chin sek-h…",
+                "…in hoat-bêng Lyon un-tō͘-kè, chia mi̍h-kiāⁿ sī thâu ê ū siá Liap-sī un-phiau ê chúi-gîn un-tō͘-kè. 1802 nî: Hoat-kok khai-sí si…",
+                "…m temperature) he̍k-chiá siông-un (常溫) it-poaⁿ ê tēng-gī sī Liap-sī 25-tō͘ (25°C). Nā khah lí-lūn ê bûn-hiàn khó-lêng ē siá chò…",
+                "…5-tō͘, Tāi-se-iûⁿ ê lâm-hūi 55-tō͘. Piáu-bīn un-tō͘ lak kàu Liap-sī 0-tō͘ í-hā. Hái-hoāⁿ-soàⁿ ū-ê só͘-chāi in-ūi lōe-tē ê kiông…",
+                "…-tio̍h. Bo̍k-chiân kok-chè khah chia̍p teh iōng ê un-piau ū Liap-sī un-piau (°C), Hôa-sī un-piau (°F) iáu-koh-ū jia̍t-le̍k-ha̍k…"
+            ]
+            },
+        {
+                "word": "kong-kin",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 23,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…-á ê bi̍t-tō͘ chin koân, bí 1 li̍p-hong kong-chhiò ū 19,300 kong-kin tāng. == Hòa-ha̍k == Kim-hún ē-tàng kap iâm-sò͘ tī 180 °C ū…",
+                "…àng hoat-io̍k kàu 1 kong-chhioh tn̂g (tùi thâu kàu bóe), 17 kong-kin tāng. Pat-kòa ki-pún-siōng sī 1 khoán kià-seⁿ-á. I ū-hoat-t…",
+                "…ot s^{2}}}}}} kî-tiong N sī newton, m sī kong-chhioh, kg sī kong-kin, ah s is the bió. == Poē-sò͘ kah iok-sò͘ == 10 chìn-uī poē-…",
+                "…Kong-kin (hû-hō: kg) sī chit-liōng ê SI ki-pún tan-ūi. 1 kg = 1000 g…",
+                "…ddendorffi chi̍t khoán chang-hîm chiū ē-tàng chhiau-kòe 750 kong-kin, ki-tiong kang--ê pêng-kin ū 480 kàu 533 kong-kin. Lēng-gōa…",
+                "…u-kòe 750 kong-kin, ki-tiong kang--ê pêng-kin ū 480 kàu 533 kong-kin. Lēng-gōa mā ū kha sè-hêng ê bu̍t-chéng, pí-lūn kang Má-lâi…"
+            ]
+            },
         {
             "word": "百分之",
             "verdict": "absent",
@@ -58,42 +129,7 @@
             "articles": 0,
             "substringOnly": 0,
             "examples": []
-        },
-        {
-            "word": "pah-hun-chi",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 1,
-            "examples": []
-        },
-        {
-            "word": "Hôa-sī",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 1,
-            "examples": []
-        },
-        {
-            "word": "Liap-sī",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 10,
-            "examples": []
-        },
-        {
-            "word": "kong-kin",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 4,
-            "examples": []
         }
-    ],
-}
+        ],
+    }
+    

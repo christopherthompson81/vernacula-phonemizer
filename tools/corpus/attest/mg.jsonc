@@ -1,25 +1,59 @@
 // WIKIPEDIA WORD ATTESTATION — mg. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "mg",
-    "wiki": "mg.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "mg",
+        "wiki": "mg.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "tora-telo",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…tra toratelo; 1 000 000 000 metatra toratelo ny kilômetatra tora-telo. Ampiasaina amin' ny fandrefesana ny hadirin' ny farihy na…",
+                "…arina amin'ny oktety ny tovana kilo, mega ary giga, dia tsy tora-telo ny isa folo (103n) intsony no soloiny fa tora-polon'ny isa…"
+            ]
+            },
+        {
+                "word": "isan-jato",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 21,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…na sy iraisam-pirenena. Ny harin-karena faobe dia nitombo 7 isan-jato isan-taona teo ambanin' ny fitantanany. Nandritra ny antsas…",
+                "…monja, nefa ny sampandraharaha mampiasa latsaky ny roapolo isan-jato dia 40 %n' ny harin-karena faobe. Mihoatra ny vola azo amin…",
+                "…osin' i Filipina dia mitondra marika fototarazo amin' ireto isan-jato manaraka ireto: 53 % Azia Atsimo-Atsinanana sy Ôseania, 36…",
+                "…aharoa azy manerana an' i Afrika, aorian' i Gabôna, raha ny isan-jato no heverina. === Ny fivavahana === Ny Repoblikan’ i Kôngô d…",
+                "…ka hatramin'ny 23 tapitrisa, ary toy izany ny salanisan'ny isan-jato noho ny ao amin'ny Repoblika Entim-Bahoakan' i Sina. Mandri…",
+                "…afika Nasionaly. == Data ara-toekarena == Nihoatra ny enina isan-jato hatrany ny fitomboan'ny harinkarena faobe ao Letonia hatram…"
+            ]
+            },
         {
             "word": "kilao",
             "verdict": "attested",
@@ -76,15 +110,6 @@
                 "…telo na ny kilômetatra toratelo. 1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra toratelo ny kilômetatra tora-telo. A…",
                 "…1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra toratelo ny kilômetatra tora-telo. Ampiasaina amin' ny fandrefesana…"
             ]
-        },
-        {
-            "word": "tora-telo",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 2,
-            "examples": []
         },
         {
             "word": "kiobika",
@@ -158,15 +183,6 @@
                 "…masoandro (taona trôpika) izay tsy mahafeno 365,25 andro fa latsaka kely noho izany. Ao amin' ny tetiadro joliana dia mihoatra…",
                 "…dron' ny ahitra na eny am-potony. Mitranga ny fanala rehefa latsaka ambanin' ny maripana mampandry rano ny an' ny rivotra (0 °C…"
             ]
-        },
-        {
-            "word": "isan-jato",
-            "verdict": "substring-only",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 19,
-            "examples": []
         },
         {
             "word": "ariary",
@@ -264,5 +280,6 @@
                 "…ilaometatra avaratrandrefan'i Ora fahiny io toerana io, 108 kilaometatra atsimoatsinanan'i Nippur fahiny ary 24 kilaometatra atsimoa…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

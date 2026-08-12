@@ -20,7 +20,50 @@
         "wiki": "cdo.wikipedia.org",
         "tier": "wikipedia",
         "findings": [
-            {
+        {
+                "word": "lĭk-huŏng",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…â̤ ciĕ-làu, cūi-liông hŭng-hó, bìng-gĭng làu-liông sê 1,980 lĭk-huŏng-mī/miēu, làu-mĭk miêng-cék găk Dṳ̆ng-guók ciō-iéu gĕ̤ng-ò̤…"
+            ]
+            },
+        {
+                "word": "gŭng-gĭng",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…) gì nèng-lĭk mâ̤ hō̤, gó-chṳ̄ siŏh nĭk diŏh siăh 15 gáu 20 gŭng-gĭng gì dé̤ṳk īng-iōng ciáh ô gáu. Mà-hṳ̀ng gì giāng sê huă-báu…"
+            ]
+            },
+        {
+                "word": "lī-mī",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…-dê diŏh uâ chók siáng-dèu, siáng kuăng ng-sāi chiĕu guó 12 lī-mī. Diòng-dê dĕng-dŏng uâ siŏh dèu siáng, hô̤ lā̤ dṳ̆ng-siáng.…",
+                "…iŏh iĕk-dái. Dô-dâing tā̤-hìng chă-biék cĭng duâi, téng gūi lī-mī dòng gì ciēng, gáu ciék-gê̤ṳng 3 mī dòng gì kuŏ-mò̤-dŏ̤-lṳ̀…"
+            ]
+            },
+        {
                 "word": "báh-hŭng-cĭ",
                 "verdict": "absent",
                 "bounded": true,
@@ -151,24 +194,6 @@
             ]
             },
         {
-                "word": "lī-mī",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
-                "word": "gŭng-gĭng",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
-            },
-        {
                 "word": "bìng-huŏng",
                 "verdict": "attested",
                 "bounded": true,
@@ -183,15 +208,6 @@
                 "…ī-guók Niū-iók-chê dék báe̤k gì siŏh ciáh kṳ̆, miêng-cék 42 bìng-huŏng ĭng-lī (109 bìng-huŏng gŭng-lī), 2015 nièng ìng-kēu 1,455,4…",
                 "…báe̤k gì siŏh ciáh kṳ̆, miêng-cék 42 bìng-huŏng ĭng-lī (109 bìng-huŏng gŭng-lī), 2015 nièng ìng-kēu 1,455,444.…"
             ]
-            },
-        {
-                "word": "lĭk-huŏng",
-                "verdict": "absent",
-                "bounded": true,
-                "tokenHits": 0,
-                "articles": 0,
-                "substringOnly": 0,
-                "examples": []
             },
         {
                 "word": "gâe̤ng",

@@ -1,0 +1,344 @@
+// WIKIPEDIA WORD ATTESTATION — bar. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "bar",
+        "wiki": "bar.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "Prozent",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 128,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ong. Ethnisch betrocht hod se de Bevejkarung zamm aus 86,01 Prozent Weißn, 6,71 Prozent Afroamerikana, 0,30 Prozent amerikanisc…",
+                "…ht hod se de Bevejkarung zamm aus 86,01 Prozent Weißn, 6,71 Prozent Afroamerikana, 0,30 Prozent amerikanische Ureihwohna, 3,48…",
+                "…m aus 86,01 Prozent Weißn, 6,71 Prozent Afroamerikana, 0,30 Prozent amerikanische Ureihwohna, 3,48 Prozent Asiatn, 0,21 Prozent…",
+                "…Afroamerikana, 0,30 Prozent amerikanische Ureihwohna, 3,48 Prozent Asiatn, 0,21 Prozent Bewohna ausm pazifischn Inslraum und 2…",
+                "…Prozent amerikanische Ureihwohna, 3,48 Prozent Asiatn, 0,21 Prozent Bewohna ausm pazifischn Inslraum und 2,17 Prozent aus ondan…",
+                "…atn, 0,21 Prozent Bewohna ausm pazifischn Inslraum und 2,17 Prozent aus ondan ethnischn Gruppm zammgsetzt; 1,11 Prozent hom vo…"
+            ]
+            },
+        {
+                "word": "Eiro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…R1 EUR = 1 EUR 1 CHF = 0,833 EUR1 EUR = 1,201 CHF }} --> Da Eiro (amtli: Euro, Symboi: €) is as Zoihungsmiddl vo da Eiropäis…",
+                "…wichtigsde Weahrung vo da Wejd. In 20 vo 27 EU-Lända is da Eiro as offizieje Zohlungsmiddl, in fimf ondane gibds an festn U…",
+                "…ngsmiddl, in fimf ondane gibds an festn Umrechnungskurs. Da Eiro is 1999 eascht amoi ois Buachgejd eihgfiahd worn und om 1.…",
+                "…d eihgfiahd worn und om 1. Jenna 2002 is donn s easchte Moi Eiro-Bargejd in Umlaff kemma. As Symbol € wead obkiazd mid: EUR,…",
+                "…R, s'Kloagejd hassd Zent (gschriem: \"Cent\"), 100 Zent san a Eiro. Seit'm 2. Mai 2013 gibds neie 5-Eiro Banknotn. == Gstoitun…",
+                "…ent\"), 100 Zent san a Eiro. Seit'm 2. Mai 2013 gibds neie 5-Eiro Banknotn. == Gstoitung == De Rickseitn vo de Eiro-Scheine (…"
+            ]
+            },
+        {
+                "word": "Dollar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 105,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…Dollar is da Name vo vaschiedne Weahrunga. De wichtigste Dollarwea…",
+                "…vaschiedne Weahrunga. De wichtigste Dollarweahrung is da US-Dollar, dea wo wejdweit de wichtigste Loatweahrung is. == Namashea…",
+                "…Loatweahrung is. == Namasheakunft und Entstehung == As Wort Dollar kimmt vom deitschn Woat Taler (niedadeitsch Daler; boarisch…",
+                "…ehmischen Joachimsthaler Guldengroschen, ana Suibaminzn. == Dollar-Weahrunga == In mehreren Kontinenten, international: United…",
+                "…ga == In mehreren Kontinenten, international: United States Dollar (z. B. in den USA, El Salvador, Panama, Ecuador, Liberia, O…",
+                "…lvador, Panama, Ecuador, Liberia, Osttimor) Internationaler Dollar (rechnarische Vagleichsweahrung) Nordamerika und Atlantik:…"
+            ]
+            },
+        {
+                "word": "Pfund",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Mit am Pfund (lat. pondus, Gwicht) bezeichnet ma a oide Moßeinheit fia d…",
+                "…heit a hoibs Kilo wiegt, hod bis voa ungefäa 20 Joar no oa Pfund gwogn. Ham de Leit a Packl Butta braucht, nacha hams a hoib…",
+                "…wogn. Ham de Leit a Packl Butta braucht, nacha hams a hoibs Pfund kafft - aa wenn auf da Vapackung 250 g draufgstandn is. Fos…",
+                "…Vapackung 250 g draufgstandn is. Fost oi Viktualien san in Pfund ogwogn worn, außa Guakn, Radi und so. De Estareicha hams Pf…",
+                "…nd ogwogn worn, außa Guakn, Radi und so. De Estareicha hams Pfund net, wei de in Deka rechna. S englische Pound is a Tei vom…",
+                "…Tei vom Angloamerikanischn Moßsystems mit da Umrechnung: 1 Pfund (1 Pound) = 0,453 592 370 kg (exakt, per Definition) 1 Kilo…"
+            ]
+            },
+        {
+                "word": "Kilometa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 65,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…agyarország. == Eadkunde == De Läng vo da Außngrenz is 2009 Kilometa. Davo foin auf Östareich 366 Kilometa, de Slowakei 515 Kilo…",
+                "…da Außngrenz is 2009 Kilometa. Davo foin auf Östareich 366 Kilometa, de Slowakei 515 Kilometa, de Ukraine 103 Kilometa, Rumänie…",
+                "…meta. Davo foin auf Östareich 366 Kilometa, de Slowakei 515 Kilometa, de Ukraine 103 Kilometa, Rumänien 443 Kilometa, Serbien 15…",
+                "…eich 366 Kilometa, de Slowakei 515 Kilometa, de Ukraine 103 Kilometa, Rumänien 443 Kilometa, Serbien 151 Kilometa, Krowozien 329…",
+                "…lowakei 515 Kilometa, de Ukraine 103 Kilometa, Rumänien 443 Kilometa, Serbien 151 Kilometa, Krowozien 329 Kilometa und Slowenien…",
+                "…de Ukraine 103 Kilometa, Rumänien 443 Kilometa, Serbien 151 Kilometa, Krowozien 329 Kilometa und Slowenien 102 Kilometa. === Gwä…"
+            ]
+            },
+        {
+                "word": "Quadratkilometa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…en wui, muass ma den duach Hundat doin. 1 mm² = 10−2 m² === Quadratkilometa === As Zeichn is km². A Quadratkilometa is a million moi so…",
+                "…1 mm² = 10−2 m² === Quadratkilometa === As Zeichn is km². A Quadratkilometa is a million moi so grouß wia a Quadratmeta. Wenn ma an Wea…",
+                "…million moi so grouß wia a Quadratmeta. Wenn ma an Weat vo Quadratkilometa in Quadratmeta umrechnen wui, muass ma den mit a Million mu…",
+                "…mit a Million muidiplizian. 1 km² = 106 m² De Grössnoadnung Quadratkilometa is de hägste im SI-System fia Flächn. Bei ganz groußn Fläch…",
+                "…61.758 Eihwohna und a Bevökarungsdichtn vo 30 Eihwohna pro Quadratkilometa ghod. Da Vawoitungssitz (County Seat) is in Huntsville. ==…",
+                "…20 km vom Golf von Mexiko entfeant. Es hod a Flächn vo 2076 Quadratkilometa, wovo 36 Quadratkilometa Wossaflächn san. Es grenzt im Uahz…"
+            ]
+            },
+        {
+                "word": "Kubikmeta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Kubikmeta is de SI-Einheit fias Voluman. A Kubikmeta is a Wiafl von a…",
+                "…Kubikmeta is de SI-Einheit fias Voluman. A Kubikmeta is a Wiafl von aan moi aan moi aan Meta. Schreim tuad ma de…",
+                "…sundas vawendt beim Hubraum vo aan Vabrennungsmotoa. In aan Kubikmeta bassn genau ozöhte 1 Mülliaunan Kubikzantimeta, des san 106…",
+                "…“ fia Lita. Aa Lita san 1000 Kubikzantimeta, umgekeat hod a Kubikmeta tausnd Lita. Des wiad aa gean bei Motoan vawendt, zum Beisp…",
+                "…wischn Schopfloch und Lehengütingen, 16,0 Kilometa und 23,1 Kubikmeta. Rotach, vo recht bei Wilburgstettn, 20,8 Kilometa und 87,7…",
+                "…Rotach, vo recht bei Wilburgstettn, 20,8 Kilometa und 87,7 Kubikmeta Ostlauf bis Wassatründinga: Suizach, vo links bei Wittelsho…"
+            ]
+            },
+        {
+                "word": "Grad",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…schn Koordinatn wean oft im Sexagesimaisystem ogem, d. h. 1 Grad is untateit in sechzg Minutn, 1 Minutn wiedarum in 60 Winke…",
+                "…ea redd ma, wann de Temparatuan in zwoa Meta Hächn unta Nui Grad foin. Vo Bodnfgfrea redd ma, wanns finf Zantimeta iwan Bodn…",
+                "…kimt. A Gfreadog is a Dog wo de Temparatua foiweis unta Nui Grad foit. Wann de Temparatua en ganzn Dog unta Nui geht, nacha…",
+                "…a vo an Eisdog. == Gfreaschtuafa == leichta Frost: 0 bis –4 Grad Celsius middlara Frost: –4 bis –10 Grad Celsius schtrenga F…",
+                "…hta Frost: 0 bis –4 Grad Celsius middlara Frost: –4 bis –10 Grad Celsius schtrenga Frost: –10 bis –15 Grad Celsius recht sch…",
+                "…Frost: –4 bis –10 Grad Celsius schtrenga Frost: –10 bis –15 Grad Celsius recht schtrenga: unta –15 Grad Celsius == Im Netz =…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…m Wossa (0,01°). Es gibt owa no weidare Messgressn wia Grod Celsius (°C), Grod Réaumur (°R) und Grod Fahrenheit (°F). Damid ma…",
+                "…renheit (°F). Damid ma se de olle meakt, gibt's den Spruch „Celsius, da Réaumur is seah zerfahrenheit“ == Schau aa == Physikali…",
+                "…an Eisdog. == Gfreaschtuafa == leichta Frost: 0 bis –4 Grad Celsius middlara Frost: –4 bis –10 Grad Celsius schtrenga Frost: –1…",
+                "…rost: 0 bis –4 Grad Celsius middlara Frost: –4 bis –10 Grad Celsius schtrenga Frost: –10 bis –15 Grad Celsius recht schtrenga:…",
+                "…: –4 bis –10 Grad Celsius schtrenga Frost: –10 bis –15 Grad Celsius recht schtrenga: unta –15 Grad Celsius == Im Netz ==…",
+                "…st: –10 bis –15 Grad Celsius recht schtrenga: unta –15 Grad Celsius == Im Netz ==…"
+            ]
+            },
+        {
+                "word": "Uhr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…A Uah (dt.: Uhr, engl.: clock) is a Inschtrument, wo de Zeid ozoagn oda a Z…",
+                "…thek Die Herren der Zeit – Auf der Suche nach der perfekten Uhr (Deutschlandfunk) Informationa zum Begriff Uah im Katalog v…",
+                "…tag bis Donnerstag: Bayern 3 - Die Frühaufdreher (5:00-9:00 Uhr) Bayern 3 - Am Vormittag (9:00-12:00 Uhr) Bayern 3 - Update…",
+                "…fdreher (5:00-9:00 Uhr) Bayern 3 - Am Vormittag (9:00-12:00 Uhr) Bayern 3 - Update (12:00-13:00 Uhr) Bayern 3 - Am Nachmitt…",
+                "…m Vormittag (9:00-12:00 Uhr) Bayern 3 - Update (12:00-13:00 Uhr) Bayern 3 - Am Nachmittag (13:00-16:00 Uhr) Bayern 3 - Die…",
+                "…ate (12:00-13:00 Uhr) Bayern 3 - Am Nachmittag (13:00-16:00 Uhr) Bayern 3 - Die Zwei für euren Feierabend (16:00-19:00 Uhr)…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…Foam van Privilegium Maius de oafoche Foam van Privilegium Minus Weahnd's Privilegium Minus duach's Breve easetzd worn is, i…",
+                "…de oafoche Foam van Privilegium Minus Weahnd's Privilegium Minus duach's Breve easetzd worn is, is on de Stej van Privilegiu…",
+                "…da Abendzeitung. De vakaffte Auflog san 114.612 Stickln, a Minus vo 23,6 Prozent seit 1998. De tz is 1968 ois Oblega vom Mün…",
+                "…knde Regl zan schnejn Umrechna vo m/s za km/h is: \"Moi via, minus 10%\". == Oanige Gschwindigkeitn in m/s ==…",
+                "…s za 1900 Millimeta. Im Winta sinkt's Thermometa sejtn unta minus 15 Grod, wärnd im Summa de middlan Temperatuan zwischn 20 u…",
+                "…Nui/Oans, Woah/Foisch, Straum/koa Straum, ...) kauna mit an Minus nix aunfaunga. Deswegn muass des Vuazeichn aa duach Nui oda…"
+            ]
+            },
+        {
+                "word": "plus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Adblock Plus (englisch fia ‚Werbesperre Plus‘; kuaz: ABP) is a kommerzie…",
+                "…Adblock Plus (englisch fia ‚Werbesperre Plus‘; kuaz: ABP) is a kommerziejs vo d Eyeo GmbH obotns Weakzei…",
+                "…nte ned aas dem Netz runtazuladn. Nebn Grafikn konn Adblock Plus aa Inlineframes, Java-Applets, Flash-Werbung sowia reine Te…",
+                "…ramm teilzuanehma, fihrte wiedaholt zu Kontroversn. Adblock Plus is ois Eaweidarung fia vaschiedene Browser (Mozilla Firefox…",
+                "…Mozilla Thunderbird vafigbar. Seit Novemba 2012 is Adblock Plus aa ois App fia Android-Geräte eahältlich. Seit 2015 wiad mi…",
+                "…rowser a eigena Webbrowser mid bereits integriertem Adblock Plus fia Android obotn. == Funktionsweis == Um ibahapt Werbung z…"
+            ]
+            },
+        {
+                "word": "easchte",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Mit Easchte Nationa (englisch: First Nations, franzesisch: Premières na…",
+                "…Cree mitgmoant san, dann sogt ma ob und zua First Peoples (Easchte Vejka) oda Aboriginal Peoples (Vejka vo Ureiwohnan). Da Beg…",
+                "…Za de Easchte Kuituan (dt.: Erste Kulturen), zön de, de wos zwoa scho in…",
+                "…Easchte Schpuan im Mayalaund oda Maya-Präklassik moant de easchtn S…",
+                "…0 v. Kr. gibts de ödastn Dauabsidlungsschpuan im Mayalaund. Easchte Weila de vo uma 20 Leid bwohnt woan. In Boakean aus Colha (…",
+                "…ize hod de Sesshoftweadung eascht uma 1000 v. Kr. agfaungt. Easchte Keramikfund hod ma aun da Pazifikküstn gmocht (La Victoria…"
+            ]
+            },
+        {
+                "word": "zwoate",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ISO 3166-2 is da zwoate Tei van ISO-Standard ISO 3166. Ea definiad de Codes fia Sto…",
+                "…Ludwig da Zwoate, dafft ois Ludwig Otto Friedrich Wilhelm (* 25. August 1845…",
+                "…h Βήτα, Majuskel Β, Minuskel β, in da Wortmittn aa ϐ) is da zwoate Buachstob vom griachischn Alphabet und hod im griachischn Z…",
+                "…Woch. Voa 1976 (Eifiahrung vo da ISO 8601/DIN 1355) wors da zwoate Dog. In manche Religiona (Judndum, Islam) iss da zwoate Dog…",
+                "…da zwoate Dog. In manche Religiona (Judndum, Islam) iss da zwoate Dog. Da Nam kimmt vo da Mondgeddin Luna. Es is a Iwasetzung…",
+                "…iadasächsischn aussabuid hod. De holländische Sproch hod de Zwoate Lautvaschiabung ned mitgmocht, de wo aa zum heitign Boarisc…"
+            ]
+            },
+        {
+                "word": "dritte",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…nsehen (bis 11. April 2016 as \"Bayerische Fernsehen\") is as Dritte Fernsehprogramm vum Bayerischen Rundfunk. 'S is a 24-Stundn…",
+                "…k an Relaunch vu seine Programm durchgführt. Dabai is aa as Dritte Programm mordernisiert worn. As oide Programm is obasst, er…",
+                "…ichnung == In Bayern hoißt ma dean Sender meisdns oafach as Dritte, wai ma's normalerwais afm drittn Platz am Fernseh houd und…",
+                "…u de Dritten Programme vu da ARD gheerd. Ma heerd owa aa as dritte Programm, Bayern 3 oda oafach Bayern. Affällig is, daß ma f…",
+                "…Im Biachl Studien aus dem oberösterreichischn Volksleben; Dritte Folge, vom owaöstareichischn Mundoatdichta Josef Krempl (11…",
+                "…tzan: De easchtn beidn Ziffan bezeichnan des Bundesland, de dritte Ziffa den Regierungsbeziak (bei Lända ohne Regierungsbezirk…"
+            ]
+            },
+        {
+                "word": "zehnte",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…De Zehnte Musä (dt.: Zehnte Muse) is a ironische Bezoachnung fias Kab…",
+                "…De Zehnte Musä (dt.: Zehnte Muse) is a ironische Bezoachnung fias Kabarett. Dea Begriff…",
+                "…. Joarhundad entstandn. Da Maximilian Bern hod as Buach Die zehnte Muse vaeffentlicht, mid'm Untatitl Dichtung vom Brettl und…",
+                "…cht, mid'm Untatitl Dichtung vom Brettl und fürs Brettl. De zehnte Musä is a ironische Obloatung vo de nein olympischn Musn. S…",
+                "…Jod (יוד), jidd. yud, is da zehnte Buachstob im Hebräischn Alphabet. Ea hod in Zoinweat 10. De…",
+                "…31 Dog. Im uaspringlichn remischn Kalenda woa da Dezemba da zehnte Monat, so is a zu seim Nauman kumma (lat.: decem = zehn). A…"
+            ]
+            },
+        {
+                "word": "zwanzigste",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Resch (ריש), jidd. reysh, is da zwanzigste Buachstob im Hebräischen Alphabet. Ea hod in Zoinweat 200.…",
+                "…it hau'm. De aundan Einakta woa'n des Melodram Der vier und zwanzigste Februar vom Zacharias Werner (1768–1823), in dem da bekaunn…",
+                "…a, a Gründung aus da russischn Kolonialzeit, de wos bis ins zwanzigste Joahundat in Naum Nei-Margelan ghobt hod; 70 km weida im Os…",
+                "…e Amnestie für einen Kopulations-Gravierten.“ (Zweiter Akt, zwanzigste Szene) Jetzt'n vakleidet si da Finkl ois „Waldbauer und Urä…",
+                "…en Engel? Den Schlag überlebt sie nicht.“ (Erste Abteilung, zwanzigste Szene) Da Mau': Sieb'n Jahre späta vaspüit da Simplicius –…"
+            ]
+            },
+        {
+                "word": "Komma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…i ad d'Donau. D'Soizachmündung is recht intaressant, wei do komma genau segn, wia se des Wossa vo de zwoa Flüsse vomischt. Da…",
+                "…Peasonenzig hingfahrn und 1995 da letzte Güdazug. Heitzutog komma am Gleis grod noc wandan und ralfoan.…",
+                "…nöadlich vo Wossaburg am Inn. Dass friara hoaß heaganga is, komma heid no feststein, wenn ma de oidn Burgn Hohenburg und Köni…",
+                "…die Peschd und nua a poa Jor späta der Dreißgjährige Kriag komma is. Grod die Schwedn ham furchtbar ghaust, und in den ersch…",
+                "…s, wie durch a Wunda is aba koana dobei irgendwia zu Schadn komma. Mitm Wiaderaufbau hot ma si gschickt, und scho 1873 is d'e…",
+                "…ert san: die Amerikaner san nämlich scho von Augschburg her komma, die in Friberg stationierten SS-Leit wollten aber trotz de…"
+            ]
+            },
+        {
+                "word": "zirka",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…uf 845 Meeter, in da Gmoah Góidégg an Póngau. Er befindt sé zirka 3,5 km westlich voh Góidéggwéng, am Orschtstoaé voh Góidégg…",
+                "…, am Orschtstoaé voh Góidégg. Da Béndlsee háud a Greess voh zirka oam Gwadratkilómeeter und is voh Liagewiasen umgeem und voh…",
+                "…Pobedit is a gsintatds Hoartmetoi aus zirka 90 % Wolframcarbid ois Hoartphase, zirka 10 % Cobalt ois Bi…",
+                "…tds Hoartmetoi aus zirka 90 % Wolframcarbid ois Hoartphase, zirka 10 % Cobalt ois Bindephase und gringe Zuasetz vo Kuinstoff.…",
+                "…uass a in Deitschland mindestns 2000 Eihwohna, in Östareich zirka 4500 Eihwohna (es gibd Ausnohma, z. B. Efading) hom. Ma unt…",
+                "…r Lónd an Póngau (Bezirk Seiger Hóns/Pg.) in Ésterreich mid zirka 1.500 Eihwóner. == Geografie == D' Gmoand liegg an Póngau i…"
+            ]
+            },
+        {
+                "word": "Beispui",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…oawoi innahoib vum Ort weglossn, in Italien oda Spanien zum Beispui muass ma's imma midnemma. Beispuie: (vu Östareich): 01 Wean…",
+                "…a de Lända, domid ma intanazionaje Gschpräche mocha ko. Zum Beispui: +1 d'USA +43 Östareich +49 Deitschland +39 Italien +233 Gh…",
+                "…sd mid ana bschtimmdn Nummanfoige easetzn, in Östareich zum Beispui \"00\" (oiso fia'd USA 001 ...), in Kuba oba zum Beispui \"119…",
+                "…zum Beispui \"00\" (oiso fia'd USA 001 ...), in Kuba oba zum Beispui \"119\".…",
+                "…ongreiche Webseiten sinnvoi. De Infoamationan wean donn zum Beispui aus Nutzaeigomn oda Datnbonkn zammtrong unn zum Browser gsc…",
+                "…ong unn zum Browser gschickt. Dynamische Webseiten wean zum Beispui in PHP, .NET, J2EE oda Perl programmiat oda vo Autornsistem…"
+            ]
+            }
+        ],
+    }
+    
