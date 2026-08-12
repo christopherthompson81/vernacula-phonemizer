@@ -238,3 +238,64 @@ Measuring the four candidates in a shell loop, I used `git checkout <file>` to r
 **destroyed my own uncommitted manifest edits** — runs 2–5 all reported the pre-change baseline before I
 noticed the constant number. The playbook bans `git stash` for being global; `git checkout <path>` is the
 same hazard at file scope. Revert by the inverse string edit, or measure in a copy.
+
+---
+
+## Run 9 — 2026-08-11 — the declined finals are LEXICAL, and the referee is the wrong population for them
+
+Question put by the reviewer: *"The declinations might be indicators of lexical behaviour?"* Yes — and
+measuring it overturns part of Run 8's framing.
+
+**First, the class is far smaller than it looked.** Run 8 counted 13 referee words "ending in a non-coda
+consonant". Most of those are not finals at all: they are ONSETS whose vowel is a LEADING vowel written
+before them. `ໄຟ` is *faj*, not a word-final ⟨ຟ⟩; `ໃຈ`, `ແປ`, `ໄທ`, `ໂອ`, `ທະເລ` are the same shape, and the
+reorder pass already reads every one correctly. Excluding leading-vowel onsets, ຫ-led clusters and the ⟨ອ⟩
+that is the second half of ɯːə, the genuine population is **six words in a 2,310-word referee**:
+
+```
+ທຫາຣ → tʰa.haːn      ນຄຣ → na.kʰɔːn      ປຼະເທສ → pa.tʰeːt̚
+ອີແມລ → ʔiː.mɛːn     ເທປ → tʰeːp̚         ໄວຣັສ → ʋaj.las
+```
+
+**Second — and this is the finding — none of those spellings occurs in running Lao.** Counted over the
+20,994-paragraph corpus against the modern spelling of the same word:
+
+| etymological | corpus | modern (reformed) | corpus |
+|---|---:|---|---:|
+| ປຼະເທສ | **×0** | ປະເທດ | **×250** |
+| ທຫາຣ | **×0** | ທະຫານ | ×20 |
+| ຣົຖ | **×0** | ລົດ | ×47 |
+| ສາທາຣະນະຣັຖ | **×0** | ສາທາລະນະລັດ | ×12 |
+| ນຄຣ | ×5 | ນະຄອນ | ×31 |
+| ໄວຣັສ · ອີແມລ · ເທປ | **×0 each** | (ໄວຣັດ ×1) | |
+
+The Lao-PDR spelling reform respelled these phonetically, and the corpus writes only the reformed forms —
+which **already read correctly**. The etymological spellings survive as *dictionary headwords*, which is
+exactly what the kaikki referee is.
+
+**So the right shape is a lexicon, not a coda table.** The reading is not predictable from the letter — the
+one letter with two instances contradicts itself, and the split is by ORIGIN: `ປຼະເທສ` (Pali *padesa*) takes
+[t̚] while `ໄວຣັສ` (English *virus*) keeps [s], a phone that is not a possible Lao coda at all. A letter-keyed
+rule cannot be right for both; a per-word entry can. This tree already has the precedent — Danish reads
+`km` from `da-lexicon.tsv` rather than from any rule (playbook trap 47), Czech and Slovak solved their loan
+tails the same way, and Santali carries "a loanword lexicon" as its own outstanding item.
+
+**Third, it explains the 69 corpus lines exactly.** They were the four candidate rules firing on MODERN
+words where the letter is not a final at all but a syllable-internal cluster member — `ມິລລິແມັດ`
+(millimetre), `ຄຣິສຕະການ` / `ຄຣິສຕະສະຕະວັດ` (the Christian era / century), `ອົສຕຣາລີ` (Australia),
+`ຣັຖທັມມະນູນ` (constitution). Some of those changes were plausibly improvements — `kʰa.li.sa.ta` →
+`kʰa.lit̚.ta` for *khrit-ta-* looks right — but **nothing available can verify them**, because the only
+referee is the dictionary that does not contain them.
+
+### ⚠ The methodological point: the referee and the corpus are different POPULATIONS
+
+`lo.kaikki-lao.tsv` is a Wiktionary HEADWORD list and carries archaic and etymological variants. The mined
+artifact is RUNNING TEXT and carries the reformed orthography. A rule tuned to gain +5 on the first fired 69
+times on the second, on words whose evidence was never examined. That is not the usual "zero corpus
+instances is not evidence of correctness" (trap 8) — it is the mirror: **a referee gain measured on a
+population the corpus does not overlap.** Worth checking wherever a language's referee is a dictionary
+rather than a transcript corpus, which in this tree is every `kaikki` referee.
+
+**Status of the four declined finals: not "deferred pending a pass" but RESOLVED AS OUT OF SCOPE for a
+rule.** If they are ever wanted, the shape is a small variant lexicon keyed on the whole word, and the gate
+is running text rather than the headword list.
