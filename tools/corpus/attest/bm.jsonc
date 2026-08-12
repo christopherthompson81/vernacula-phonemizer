@@ -1,0 +1,175 @@
+// WIKIPEDIA WORD ATTESTATION — bm. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "bm",
+    "wiki": "bm.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "kɛmɛsarada",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…manaw ladɔgɔman don Atlas kulu jɔjan fɛ. Masuruyala, binani kɛmɛsarada jamana la ye Sahara cencen ye, a tɔ ye sɛnɛkɛ dugukolo km 1…",
+                "…rber-kan ye min bɛ fɔ Maroko jamana na. San 2024, Marokokaw kɛmɛsarada la 24,8 tun bɛ Amazikikan fɔ, o bɛ tali kɛ Tachelhitkan, wa…",
+                "…o tnoma kɛ u ta ye. Bi-bi-in-na, Gambia jamanaden bikɔnɔtɔn kɛmɛsarada 90% ye Silamɛ ye. Kuranɛ kalanso ani foraba kalan bɛ u disi…",
+                "…taboloma. A kɛnbɛ ka kɔrɔn Asia caman ta ani 40% (biinaani kɛmɛsarada) Eropa la, wati yɔrɔ 11 b'a kɔnɔ; lamini ani dugukolo kɛcog…"
+            ]
+        },
+        {
+            "word": "kɛnɛ",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 20,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…omali bɛ jamana Afrika kɔnɔ. A boɳa bɛ 637,657 km2 (bametri kɛnɛ) jukɔrɔ a jamanaden jate ye mɔgɔ 10 428 043 (2014). A faaba…",
+                "…amana bɛ jamana Afrika kɔnɔ. A boɳa bɛ 619,745 km2 (bametri kɛnɛ) jukɔrɔ a jamanaden jate ye mɔgɔ 12 230 730 (2016). A faaba…",
+                "…dugu Afrika ka Fasojamana ye. A boya ye 17 364 km2 (bametri kɛnɛ) ni jamanadew ye min jatelen ka kɛ mɔgɔ 1 160.000. A faaba…",
+                "…ɔrɔn ani Jibuti sahelikɔrɔn. A boɳa ye 1100000 km2 (bametri kɛnɛ) ni jamanaden ye min mɔgɔ ka ca ni 85000000 ye. A faaba ye…",
+                "…nish Jigunw ye Eritrea dɔ ye. A boɳa bɛ 118000 km2 (bametri kɛnɛ) jukɔrɔ a jamanaden jate ye mɔgɔ miliyon 5. A faaba ye Asma…",
+                "…odugu Afrika ka Fasojamana ye. A boya ye 30355 km2 (bametri kɛnɛ) ni jamanadew ye min jatelen ka kɛ mɔgɔ 2 203 821. A faaba…"
+            ]
+        },
+        {
+            "word": "kubu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "kube",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…. Tumadɔ Gine bɛ wele \"Gine-Kɔnakry\" (Kɔnakry kɛli a faaba (kube) ye) walasa k'a danfara ni Gine-Bisau ye. Dugukolo lakafole…",
+                "…elen bee talanen a ta marada ni marada duula lu le di. Jine kube n'a Kubeso lu fele nin: Conakry, Kankan, Mamu, N'seregbede,…"
+            ]
+        },
+        {
+            "word": "wirigili",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "pwen",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "tomi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…Yiriw: mangoro pegun tomi balansan nɛrɛ nsirasun si dɔ̀nkɔri bàgànin I bɛ se ka yiri…"
+            ]
+        },
+        {
+            "word": "dolar",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…kɛmɛsara) a jamandew na bɛ jenselekenani fantanya ci jukɔrɔ dolar wari 1.25 don kɔnɔ.…",
+                "…asabanan fla bɛ balo jenselekenani fantaya ci jukɔrɔ n'o ye dolar wari US$ 1.25 don kɔnɔ.…",
+                "…IMF) [International Monetary Fund] ka fɔla, a ka ca ka tɛmɛ dolar miliyar $4 kan taji wari tnɔw la o tununa Angola warikesu l…",
+                "…a tɔrɔtaw Jɛnsɛna: Fox Searchlight Pictures U.S sinima dɔn: dolar wari $56065245…"
+            ]
+        },
+        {
+            "word": "wari",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 28,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…ra) a jamandew na bɛ jenselekenani fantanya ci jukɔrɔ dolar wari 1.25 don kɔnɔ.…",
+                "…an fla bɛ balo jenselekenani fantaya ci jukɔrɔ n'o ye dolar wari US$ 1.25 don kɔnɔ.…",
+                "…ry Fund] ka fɔla, a ka ca ka tɛmɛ dolar miliyar $4 kan taji wari tnɔw la o tununa Angola warikesu la san 2000w (baflaw) kɔnɔ…",
+                "…bɛ sɔrɔkoba dɔ jira min sinsinnen bɛ Robux kan, n’o ye a ka wari lakika ye. Wari in b’a to baarakɛlaw bɛ se ka fɛnw san, k’u…",
+                "…ira min sinsinnen bɛ Robux kan, n’o ye a ka wari lakika ye. Wari in b’a to baarakɛlaw bɛ se ka fɛnw san, k’u feere ani ka fɛ…",
+                "…'a do o yôrô de la ko ninu ye nson de ye. A yèrè ye sanu ni wari ceman ta, ka tila k'i jo dala ko: « Sezamu, i dayèlè » Kulu…"
+            ]
+        },
+        {
+            "word": "fo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 53,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…nsikan (français, la langue française) ye kan romane ye kan fo Fàransi, Beljiki, Swisi, Kanada, Côte d'Ivoire ani jamana w…",
+                "…Mali la faransikan ye jamana ka kan ye. Mali njeta faransi fo mi soro an ka kaladinba sabadedo peaduni an niakademinu aka…",
+                "…onon na folo mi kere Jean Baptiste Poquelin; je an u janman fo Molière kan na.…",
+                "…Maninka-kan be fo Jine ni a laminin do. n'a fo da ko Maninka-kan, o fonya bed…",
+                "…Maninka-kan be fo Jine ni a laminin do. n'a fo da ko Maninka-kan, o fonya bede le ko: Manden-ka-kan. min n…",
+                "…ye farafinna tlebe siya siyaman fodoba too le di.an be alah fo masa corotani alé mi yan dan maninkakan be fo konowari a be…"
+            ]
+        },
+        {
+            "word": "dɔgɔya",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…w ye minnu sinsinnen bɛ sɛbɛnniw, k’a sɔrɔ a ma baarakɛcogo Dɔgɔya navigatɔrɔw la minnu ka ca ni tɔw ye, bawo a kɔnɔkow bɛ Se…",
+                "…sɛbɛ (misali dɔ bɛ Wheldrake), nka a ka c’a la kɔfɛ sira bɛ dɔgɔya ka kɛ sira fitinin ye. Tuma caman na, kɔfɛ siraw tun bɛ sɔr…",
+                "…1970 waatiw la o bɛɛ n’a ta, o kɛra sababu ye ka jamanadenw dɔgɔya kosɛbɛ, ka sanni fanga bɔnɛ ani ka sigida kɛlɛw bonya kɛmɛ…",
+                "…a: Subjɛti (sujet) minw bɛ taga verbu kɔfɛ, u ka préfixe bɛ dɔgɔya. Bolenna bɛ bɔ ka taa kɛmɛ kɔrɔfɛ. Verbu: Verbu bɛ kɛ ni mɔ…",
+                "…a kama. Ilmenite, min ye titaniyɔmu minɛn nafama ye ani, ka dɔgɔya, nɛgɛ, o fɔra ka bɔ Senegali kɔgɔjida la kabini san 1931. T…",
+                "…dannaya bɛ se ka kɛ ni hakilijagabɔ ye wa jatew ka teli ka dɔgɔya . Ka fara o kan, jɛɲɔgɔnya jɛlen tɛ sɔrɔ yiriwali hakɛ, kɛn…"
+            ]
+        },
+        {
+            "word": "pilisi",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        }
+    ],
+}

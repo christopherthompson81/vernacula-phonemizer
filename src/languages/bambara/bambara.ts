@@ -11,6 +11,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { normalizeBambara } from "./normalize.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { isNko, nkoToLatin } from "./bambaraNko.ts";
 import { foldNkoDigits, numberToWords } from "./numbers.ts";
@@ -73,7 +74,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class BambaraPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeBambara(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // numbers: N'Ko digits folded to ASCII, composed to Bambara words, then through the same g2p
             else if (m[2]) for (const wd of numberToWords(Number(foldNkoDigits(m[2]))).split(" ")) sink.emit(phonemizeWord(wd));

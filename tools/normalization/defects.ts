@@ -805,6 +805,36 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // INVERTS, so a known-wrong reading does not get to be a green gate: `review.ts --lang za` stays
         // red on `minus` until a word is sourced. Same standing refusal as `ln`.
     },
+    bm: {
+        // ⚠ ESPEAK SHIPS NO BAMBARA AT ALL, so every reason below is a measurement over bm.wikipedia — the
+        // WHOLE of it, 2,359 lines / 430,646 characters — and nothing else can check it.
+        equals: "measured: `=` occurs 40 times and NONE is arithmetic. The majority is EasyTimeline markup "
+            + "residue that survived extraction (`ImageSize = width:420`, `DateFormat = yyyy`, `Period = "
+            + "from:0 till:2000000`); the rest are definitional glosses in the grammar and proverb articles "
+            + "(`sabu ba = ma`, `Misali: ka ji Bɔn = jibɔn`), one economic identity written between WORDS "
+            + "(`BSK = makoɲe + bakrunba nafolo + …`) and `E=mc^2`. Zero digit-flanked instances, and no "
+            + "Bambara word for the relation is attested anywhere",
+        plus: "measured: `+` occurs 6 times and not one is a sum between two numbers — a phone number's "
+            + "dialling prefix (`n'numero fayi +22379311167`), a UTC offset (`(UTC+8)`), the word-level terms "
+            + "of the BSK identity above, and a typographic dash run (`Empire français--+san 1809`). The "
+            + "playbook's own finding applies: a UTC offset is the only contentful plus and nothing attests "
+            + "how bm says it",
+        times: "measured: `×` occurs 3 times and every one is a CARTRIDGE DIMENSION — `7,62 × 39 mm`, "
+            + "`7.62 ×33 mm`, `7,62x41` — which is 'by' and not 'times'. No Bambara multiplication word is "
+            + "attested in the corpus or on bm.wikipedia",
+        "plus-minus": "measured: `±` is ×0 in the whole wiki",
+        divide: "measured: `÷` is ×0 in the whole wiki; the corpus's `/` instances are date pairs "
+            + "(`1994/1995`, `22/2009`) and rates",
+        "less-than": "measured: `<` is ×0 in the whole wiki",
+        "greater-than": "measured: `>` is ×0 in the whole wiki",
+        degrees: "measured: `°` occurs exactly TWICE in the whole bm wiki and both are geographic "
+            + "COORDINATES on one page (`Latitude: 44°27'56″`, `Longitude: 17°33'36″`) — no temperature, and "
+            + "the primes have no reading either. NEITHER SCALE NAME EXISTS ANYWHERE: `selsiyu`, `degere`, "
+            + "`digere` and `Celsius` are all ×0, and `sources.ts` reports `[  · ] scale-names — no ° in the "
+            + "corpus`. espeak ships no Bambara, so there is no second haystack. Naming a reading here would "
+            + "be the Fula `tere` invention exactly, and `20°C` losing the WORD as well as the sign is worse "
+            + "than the raw letter it would replace",
+    },
 };
 
 /**
@@ -1457,6 +1487,25 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // ⚠ Listed BY INSTANCE, never by class, because za's genuine unit exponents ARE read — `km²` →
         // *bingzfueng goengleix* (zhuang/normalize.ts step 5) — and a regression there must stay visible.
         exponent: ["hung¹ hei³", "dang¹ taap³", "ngaa⁴ caat²"],
+    },
+    bm: {
+        // A PER-MILLE SIGN WITH NO OPERAND — the source article's template lost its figures, so the sentence
+        // reads "… ka ca ( ‰ ka kɛɲɛ ni ‰ ye diɲɛ kɔnɔ)", three bare signs and not a number between them.
+        // Silence is the CORRECT output: there is no quantity to attach a reading to, and no Bambara
+        // per-mille word is attested either. The spans carry their neighbouring words deliberately, so a
+        // NUMBERED `‰` would still report.
+        percent: ["( ‰ ka kɛɲɛ ni ‰ ye diɲɛ kɔnɔ)", "ka kɛ ‰ ye Sahara"],
+        // AN ENGLISH PRESS HEADLINE quoted whole inside a citation — "RELX said to be planning £100mln
+        // takeover of Times Higher Education". `£` is the only non-`$` currency sign in the entire bm wiki
+        // and no Bambara name for the pound is attested anywhere; `$` IS read (`dolar`, normalize.ts step
+        // 10), so this is instance-listed rather than class-silenced to keep that reading under test.
+        currency: ["£100mln"],
+        // ⚠ NO BAMBARA CUBE WORD EXISTS, which is a sourcing block and not a rule gap. `kube` is attested ×2
+        // on bm.wikipedia and BOTH hits mean CAPITAL CITY ("Kɔnakry kɛli a faaba (kube) ye"); `kubu` is ×0.
+        // The corpus's own gloss writes raw French beside the symbol (`metre cube 135 000 m³`), i.e. it has
+        // no Bambara word to offer either. Instance-listed rather than class-silenced so a `km²` regression
+        // stays visible — km² IS read (`kilomɛtɛrɛ kɛnɛ`, sourced from 17 corpus glosses).
+        exponent: ["metre cube 135 000 m³", "152 000 m³"],
     },
 };
 

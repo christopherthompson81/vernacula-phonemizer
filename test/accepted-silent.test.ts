@@ -158,7 +158,13 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // headwords with Cantonese jyutping, labelled in the text (`Vahgvangjdungh：hung¹ hei³`). It landed
         // in the same sweep as gan, which is why both were authored as "the sixth"; gan is the sixth
         // Sinitic corpus and za the seventh corpus overall.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
+        // bm's three classes are each "there is nothing here to read": a `‰` whose template lost its
+        // figures (three bare signs, no quantity between them), an English press headline's `£` in a
+        // citation — the only non-`$` currency sign in the whole bm wiki, and `$` itself IS read — and
+        // `m³`, where the cube word is a sourcing block rather than a rule gap (`kube` is attested twice on
+        // bm.wikipedia and both hits mean CAPITAL CITY). All three are instance-listed rather than
+        // class-silenced so that `km²` and `$`, which the layer DOES read, stay under test.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
