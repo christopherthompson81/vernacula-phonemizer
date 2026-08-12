@@ -164,7 +164,15 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // `m³`, where the cube word is a sourcing block rather than a rule gap (`kube` is attested twice on
         // bm.wikipedia and both hits mean CAPITAL CITY). All three are instance-listed rather than
         // class-silenced so that `km²` and `$`, which the layer DOES read, stay under test.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
+        // mad's block is the ln shape and is listed here for the same reason ln is: what it does NOT carry
+        // is the argument. Its `minus` class stays OUT of ACCEPTED_SIGN_SILENCE because the corpus has two
+        // genuine negatives and no Madurese sign word is attested (`korang` ×17 is comparative-phrase-bound),
+        // so `review.ts --lang mad` stays red; the three spans named here are an ORDINAL prefix written with
+        // a space (`ka -8`, `kapèng -20`) and a coordinate span with a compass phrase between its endpoints.
+        // Its `math-sign` entry is the other shape worth naming: a ± the sentence ALREADY spells out
+        // (`ra-kèra ±335,28 km²`), i.e. the playbook's trap-12 permissible drop, listed by instance because
+        // the unglossed ± IS read (`korang lebbi`) and must stay under test.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

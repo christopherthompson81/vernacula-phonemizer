@@ -1,0 +1,286 @@
+// WIKIPEDIA WORD ATTESTATION — mad. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "mad",
+    "wiki": "mad.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "sabellunna Masèhi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…awi ka'angghuy nyerrat bhâsa Latin, rakèra molaèn abad ka-7 sabellunna Masèhi. Ka'dissa orèng ajhâr nyerrat dâri orèng-orèng Etruria, nam…"
+            ]
+        },
+        {
+            "word": "pokol",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 48,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ga malem sampe’ tengnga arè, bisa ḍâri tengnga malem sampe’ pokol 10:00, bisa ḍâri sobbhu sampe’ pokol 10:00, bân jhughân bis…",
+                "…i tengnga malem sampe’ pokol 10:00, bisa ḍâri sobbhu sampe’ pokol 10:00, bân jhughân bisa ḍâri sobbhu sampe’ tengnga arè. Ḍâl…",
+                "…bân ghi’ bâkto isya, tahajjud èlakonè marèna jhâghâ tèdung pokol 01:00-03:00, bâkto sobbhu èlakonè sabelluna mata’arè ombâr…",
+                "…dhuha èmolaèn ḍâri mata’arè ombâr pajjhâr ḍâri tèmor sampe’ pokol 09:30, pokol 10:00 ampon lok ollè salat dhuha polè amarghâ…",
+                "…ḍâri mata’arè ombâr pajjhâr ḍâri tèmor sampe’ pokol 09:30, pokol 10:00 ampon lok ollè salat dhuha polè amarghâ ampon semma’…",
+                "…bâkto ISO 8601 (sistem 24 jhâm) ghulagghu para’ siang bisa pokol 10:00 otabâ pokol 09:30-10:00, è ḍâlem Bahasa Inggris (sist…"
+            ]
+        },
+        {
+            "word": "sampè'",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 17,
+            "examples": []
+        },
+        {
+            "word": "derajat",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 14,
+            "articles": 11,
+            "substringOnly": 0,
+            "examples": [
+                "…âbây pemandangan sè èndâh bân murni. Suhu bisa ècapa' 10-15 derajat celcius è malem arè.[1] Lebak panèka èkennal jhughân mènang…",
+                "…tarana: GOR Bandung (ghâbay adḍhuwân bulutangkis bân tarung derajat), Lapangan Futsal Jatinangor ITB Jatinangor (kaangghuy Lapa…",
+                "…da'aghi Adḍhuwân bulutangkis ka GOR Bima Cirebon bân tarung Derajat ka GOR ITB Jatinangor. É Tangghâl 28 Mei 2016, Ketua PB PON…",
+                "…ka bulutangkis ḍâri GOR Bandung ka GOR BIMA Cirebon, tarung Derajat ḍâri GOR Bandung ka GOR Padjajaran, bân balap motor ḍâri Ko…",
+                "…gidentifikasi disproporsi janin-panggul, sikap, presentasi, derajat komitmen janin, ukuran rahim janin hamil, bân benjo è rahim…",
+                "…iometrium, gerakan janin setiap neoformasi (fibroid), otabâ derajat edema, sekabbhina telapa tanang bân grighi' ollè èghuna agh…"
+            ]
+        },
+        {
+            "word": "celcius",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 5,
+            "substringOnly": 0,
+            "examples": [
+                "…110 ° 50 ' Bujhur Tèmor kalabân suhu molaè dâri 20 ° -35 ° Celcius. == Sombher ==…",
+                "…âjât Cèlcius.Okoran suhu sèbiasana èyokor ḍâlem dhrâjât : - Celcius (°C) - Kelvin (°K) aguna’aghi antarana C sèatur saèngghâ 0…",
+                "…andangan sè èndâh bân murni. Suhu bisa ècapa' 10-15 derajat celcius è malem arè.[1] Lebak panèka èkennal jhughân mènangka Lemba…",
+                "…onsisten è sabâbhân taon, kalabân suhu rata-rata 30 derajat celcius. Ojan sè palèng bânnya' èkaolle è bulân Januari. Rata-rata…",
+                "…po' ḍâri sadhâjâna. È hawa khusus (èsebbhut titi' bekku, 0° Celcius, 32° Fahrenheit), salju bisa ngalèllè bân èlang. Prosès bâk…"
+            ]
+        },
+        {
+            "word": "koma",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 18,
+            "articles": 12,
+            "substringOnly": 1,
+            "examples": [
+                "…Bâgiyân-bâgiyân komèt == Bâgiyân-bâgiyân komèt aèssè inti, koma, ondem hidrogèn, bân bunto'. Bâgiyân-bâgiyân komèt akadhi è…",
+                "…ri-matèri ès panyoson komèt, sè kamodiyân aobâ dhâddhi gas. Koma, aropa'aghi daèra kabut otabâ ḍaèra sè mèbis kalambu è saka…",
+                "…èng-lènga inti. Lapèsan hidrogèn, panèka lapèsan sè notobhi koma. ta' nampa' sareng socana manossa. Ḍiamèter onḍem hidrogèn…",
+                "…hi nampa' abentu' lengkungan, bân bunto' gas abentu' loros. Koma otabâ bunto'na komèt abentu' bâkto nyemma'è Mata'arè, bâkto…",
+                "…us. Nuklèus èkalèng-lèngè sareng halo sè bhinar sè èsebbhut koma bân bunto' nradâng sè lanjhâng. Nuklèus aokoran sajumbla ki…",
+                "…o' nradâng sè lanjhâng. Nuklèus aokoran sajumbla kilomèter. Koma lanjhângnga bisa ḍâpa' 100 èbu km otab lebbi kalowar ḍâri n…"
+            ]
+        },
+        {
+            "word": "rupiah",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 19,
+            "articles": 16,
+            "substringOnly": 0,
+            "examples": [
+                "…ong tojjhuwân ka'angghuy ngaollè bân ajâgâ stabilitas nèlay rupiah. Stabilitas nèlay rupiah ngandung duwâ' dimensi, ya'ni stab…",
+                "…ngaollè bân ajâgâ stabilitas nèlay rupiah. Stabilitas nèlay rupiah ngandung duwâ' dimensi, ya'ni stabilitas nèlay mata uang è…",
+                "…o parjhâlânan ra-kèra 4 kantos 5 jhâm, arghâ ra-kèra 1 juta rupiah per orèng. Ka'angghuy bis ekonomi, sè mangkat ghu-lagghu ot…",
+                "…Tanjhung Pèrak, èghuna'aghi ra-kèra 6 jhâm bân arghâ 1 juta rupiah per orèng. == Kegiatan Wisata Ghili Labak == Salaèn pamanḍa…",
+                "…kona Alexanḍra bân maksa Alexanḍra makalowar pèssè 7,9 juta rupiah kalabân jhujhur. kaḍuwâ' pelaku ètangkep è malem sè paḍâ. S…",
+                "…èpilih kaangghuy ègambaraghi è edisi anyar 2016 uang kertas rupiah Indonesia, khusussa uang kertas Rp 10.000. == Sombher ==…"
+            ]
+        },
+        {
+            "word": "kubik",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 19,
+            "articles": 8,
+            "substringOnly": 0,
+            "examples": [
+                "…eter, struktur gravitasi beton kalabân volume 181.000 meter kubik. Tumpahan bendungan panèka bâḍâ è puncak bân èoperasiaghi n…",
+                "…ng gerbang banjir. Kapasitas aliran maksimumna 13.500 meter kubik per detik. Waduk bendungan panèka aghâḍhui kapasitas 8.930.…",
+                "…. Waduk bendungan panèka aghâḍhui kapasitas 8.930.000 meter kubik, kalabân kapasitas aktif 5.110.000 meter kubik. Loassah per…",
+                "…30.000 meter kubik, kalabân kapasitas aktif 5.110.000 meter kubik. Loassah permukaan waduk panèka 8 kilometer persegi. == Pem…",
+                "…gan kepala hidrolik 110 meter bân rancangan debit 200 meter kubik per detik. Pembangkit panèka molaè abadâh è taon 1975 bân p…",
+                "…an kepala hidrolik 57,9 meter bân rancangan debit 200 meter kubik per detik. Pabrik panèka molaè abâdâh è bulan Januari 1984.…"
+            ]
+        },
+        {
+            "word": "sèntimèter",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…tanḍu' sè anè mèrèp kaḍhi unikorn sè tèngghina 40 kantos 60 sèntimèter otabâ hiyasân jhâmbhul sè nempel è bâgiyân aḍâ'. Cula otabâ…",
+                "…ahèr kalabân berrâ' 3,84 kilo sareng lanjhângnga ra-kèra 49 sèntimèter. == Sombher ==…",
+                "…2,70 mèter. Bahanna Canḍhi dâri bâto bhâta okoran 10x20x40 sèntimèter. Stupa kasebbhut sabâgiyân rajâ ampon rosak, ghi karèna bâg…",
+                "…bisa 4-6 mèter (13-20 soko), bân buḍu' ḍâunna sè bisa 60-90 sèntimèter (2-3 soko); Bhungkel ḍâunna mon la towa bhâkal copplak bher…"
+            ]
+        },
+        {
+            "word": "sentimeter",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 12,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…a serviks. Lè'èr rahèm sè malèbâr sara iyâ arèya ra-kèra 10 sentimeter. Lèbârrâ bisa è okor ngangghuy ghârighi'na tanang, tapè pas…",
+                "…isa è okor ngangghuy ghârighi'na tanang, tapè pas è sebbhut sentimeter. Penipisan serviks: Penipisan artèna tèpès bân pèndâ'na ser…",
+                "…tebbel, sakoni' abulu, bân ijo zaitun. Lanjangnga kantos 5 sentimeter bân èbâgi dâ' pan-bârâmpan lobus sè lebar. Kembangnga tombu…",
+                "…i’an e salanjangnga ranca’na. Diamètèr kembangnga ra-kèra 6 sentimeter. Kembangnga èpamer bân èpadhâddhi lèma' sepal oranye tera'…",
+                "…r masa nganḍung, okoran ghâris tengngana arèya pan-bârâmpan sentimeter. Rahim kabânnya’an acora’ otot. Lapisan permanen jaringan a…",
+                "…èka dhèndhing sè èghâbây dâri bata cokop tebbel, ècapa' 120 sentimeter (cm). Alasan otamana polana masjid ka’dinto jughan eguna’ag…"
+            ]
+        },
+        {
+            "word": "kilogram",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 13,
+            "articles": 11,
+            "substringOnly": 0,
+            "examples": [
+                "…. Trafo tawon, pikep a kapasitas due’ orèng bi' bhâreng 500 kilogram 2. Tawon autogas, city car bân muwa' 4 orèng 3. Metro tawon…",
+                "…Siang harinya, mereka berhasil menempatkan bom seberat 12,5 kilogram di Basement Hotel Mc Donald, di Orchard Road. Misina arèya…",
+                "…èyang arèna, sadhâjâna berhasil mamandhâk bom saberrâ' 12,5 kilogram è Basement Hotel Mc Donald, è Orchard Road. Sèpa' pokol 03:…",
+                "…, sè tegghina 1 sampè' 1,7 mèter, bân berrâ'en 40 sampè' 90 kilogram. SImpanse anḍi' lengngen sè lanjhâng bân kowat, dhinèng tan…",
+                "…ghina 1,6 sampè' 1,8 mèter, dhinèng berrâ'en 135 sampè' 220 kilogram. Gorila anḍi' bhâdân sè rajâ , soko sè kowat, ḍâḍâ lèbâr, c…",
+                "…abân lanjang badan ra-kèra 65 cm bân berrâ'na korang dâri 1 kilogram. È dunnyana mano', hoatzin aghâdhui posisi khusus polana èa…"
+            ]
+        },
+        {
+            "word": "Masèhi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 40,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…âkto Nabi Muhammad hijrâ ḍâri Mekka ka Madina neng taon 622 Masèhi. Neng pan-brâmpan naghârâ sè bânnya' orèng Islamma, Panangg…",
+                "…gghuy perèdaran bulân, mon panangghâlân biasa (Panangghâlân Masèhi) ngangghuy perèdaran mataarè. == Sajhârâ == Panentoân èmola…",
+                "…angghâl neng pangghâlân hijriyâ bidhâ kalabhân Panangghâlân Masèhi. Neng sistem Panangghâlân Masèhi, arè bân tangghâl èmolaè n…",
+                "…idhâ kalabhân Panangghâlân Masèhi. Neng sistem Panangghâlân Masèhi, arè bân tangghâl èmolaè neng jhâm 00.00 tengnga malâm èbâk…",
+                "…kasaksè'ânna ḍâ' amir Mekka. == Iduladha ḍâlem panangghâlân Masèhi == Ḍâlem panangghâlân Hijriyâh, bitongan arè Iduladha paggh…",
+                "…gghun paḍâ sabbhân taonna, namong bhidhâ ḍâlem panangghâlân Masèhi sè segghut abâ-obâ sabbhân taon. Ḍâlem panangghâlân Hijriyâ…"
+            ]
+        },
+        {
+            "word": "Masehi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 39,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ngangghuy metode ilmiah ḍâri disiplin èlmo laèn (abad ke-18 Masehi), bân sosiologi mènangka èlmo kalabân metode ilmiah mandiri…",
+                "…ogi mènangka èlmo kalabân metode ilmiah mandiri (abad ke-19 Masehi).…",
+                "…ennengngan sè èkaollè rempah-rempah. E saparo aher taon 600 Masehi, Karajaan Sriwijaya nyebbut Janggi. Ta' kantos awal taon 70…",
+                "…ajaan Sriwijaya nyebbut Janggi. Ta' kantos awal taon 700-an Masehi, para dagang dâri Persia bân Gujarat molaè dhâtâng ka Papua…",
+                "…bâ konco'na tase'. Karaja’an Majapahit, e aher taon 1300-an Masehi, esebbut sareng Wanin sareng Sran. Wanin èmaksod dâ' Semena…",
+                "…Mongol toman maddhek Kekaisaran Mongol sè rajâ è abad ke-13 Masehi. Para ahli sejarah kadhâng nyebbhut Bhângsa Mongol aropa'ag…"
+            ]
+        },
+        {
+            "word": "fahrenheit",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…ntarana C sèatur saèngghâ 0 kelvin paḍâ sareng nol motlak - Fahrenheit (°F) - Rankie (°R) otabâ Ra) aguna’aghi okoran fahrenhèit s…",
+                "…âjâna. È hawa khusus (èsebbhut titi' bekku, 0° Celcius, 32° Fahrenheit), salju bisa ngalèllè bân èlang. Prosès bâkto salju/ès aobâ…"
+            ]
+        },
+        {
+            "word": "persegi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 41,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…hi è tana sè èghâdhui Kesultanan bân bâdâ è attas 120 meter persegi (1.300 sq ft).[1] Sejarah Masjid Pathok Negara Kauman Babad…",
+                "…hâddhi è tana sè èghâdhui Kesultanan bân èkobâsaè 120 meter persegi (1.300 kaki persegi).[1] È bâkto Kesultanan Ngayogyakarta H…",
+                "…âdhui Kesultanan bân èkobâsaè 120 meter persegi (1.300 kaki persegi).[1] È bâkto Kesultanan Ngayogyakarta Hadiningrat, salaèn a…",
+                "…ana sè èghâdhui Kesultanan bân èbâdâ'aghi è attas 120 meter persegi (1.300 kaki persegi).[1] Masjid ka'dhinto perna eojuk saren…",
+                "…ltanan bân èbâdâ'aghi è attas 120 meter persegi (1.300 kaki persegi).[1] Masjid ka'dhinto perna eojuk sareng tentara Jeppang e…",
+                "…panèka bhâkal aghânḍhu' okoran bhândhârâ, dâri 25.662 meter persegi dâddhi 55.222 meter persegi. Kennangan parkir torngabeng, s…"
+            ]
+        },
+        {
+            "word": "pasagi",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "tamba",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 15,
+            "articles": 9,
+            "substringOnly": 0,
+            "examples": [
+                "…000 emmas ka'angghuy kabutowan pânḍuḍuk Katolik Semarang sè tamba bânnya'. Gereja panèka tombu è ḍâlem sèket taon salanjhângn…",
+                "…ema'at sè bânnya' orèng pribhumè. Saellana pânḍuḍuk Katolik tamba bânnya', okoran paroki èkorangè polana èpaḍhâḍḍhi paroki sè…",
+                "…amenopause) Sè segghut tumor jinak rahim è arah rongga rèya tamba rajâ bân tombu kalowar ḍâ’ colo’na rahim. Tumor sè bâḍâ è ḍ…",
+                "…== Metode penanganan == Manabi tumor aokoran kènnè’ bân lok tamba rajâ, cokop alakonè pamarèksaan sè rotèn sabbhân 2-6 bulân…",
+                "…988 bân Goodbye Dreams è taon 1989. Karir mènangka panyanyi tamba kalonta polana lagu Cintaku Padamu è taon 1992. == Prestasi…",
+                "…e Truth\" sè ènyanyi'aghi sareng Dwiki Dharmawan. Karir Anto tamba mapan bherkat pamaḍḍhekghân grup musik Potret kalabân Melly…"
+            ]
+        },
+        {
+            "word": "korang lebbi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…â arèya sala sèttong polo è Inḍonesia sè ghunghung orèngnga korang lebbi 136 juta. Polo arèya tamaso' ka 13 polo sè palèng lowas nom…",
+                "…) iyâ arèya sala sèttong propènsi è tèmor Polo Jâbâ. Loassa korang lebbi 47.922 km² (palèng loas ḍâri sakâbhinna propènsi è Polo Jhâ…",
+                "…loas ḍâri sakâbhinna propènsi è Polo Jhâbâ), bân pendudukna korang lebbi 41,15 juta orèng (taon 2022) kalabân kepadatan penduduk 857…",
+                "…a sèttong propinsi è Polo Somattra. Lowassa propinsi panèka korang lebbi 87.017.41 km². Bân pendudukna korang lebbi 8.550.849 orèng…",
+                "…propinsi panèka korang lebbi 87.017.41 km². Bân pendudukna korang lebbi 8.550.849 orèng (taon 2021) kalabân kepadatan penduduk 93/k…",
+                "…a Bhumè mèdherri mata'arè. Mata arè pèra' sala sèttong ḍâri korang lebbi 200 milyar kongsè 400 milyar bintang sè madhâddhi bintang n…"
+            ]
+        }
+    ],
+}

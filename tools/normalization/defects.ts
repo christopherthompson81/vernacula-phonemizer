@@ -835,6 +835,43 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "be the Fula `tere` invention exactly, and `20°C` losing the WORD as well as the sign is worse "
             + "than the raw letter it would replace",
     },
+    mad: {
+        // ⚠ ESPEAK SHIPS NO MADURESE AT ALL and there is no machine referee for it (no wikipron/epitran/
+        // kaikki), so every reason below is a measurement over the mined mad.wikipedia artifact plus
+        // `attest.ts` against that same wiki — there is no third tier to appeal to.
+        // ⚠ AND `minus` IS DELIBERATELY ABSENT FROM THIS BLOCK, which is the point of the entry as a whole.
+        // Madurese has TWO genuine negatives in the artifact (`-1 mèter dpl`, and the integers article's
+        // `0, 1, -1, 2, - 2, ...`), omitting a minus INVERTS the value, and `korang` ×17 — the only
+        // candidate word — is bound into a COMPARATIVE PHRASE in every instance (`korang lebbi` "more or
+        // less" ×13, `korang ḍâri` "less than" ×4), never a prefixed sign. That is the Fula `hakkunde`
+        // failure: a real word whose part of speech does not fit the slot. So `review.ts --lang mad` stays
+        // RED on the minus, exactly as `ln` does, and the designation instances are named in
+        // `ACCEPTED_SILENT` instead so the two true negatives remain visible.
+        plus: "measured: FOUR `+` in the artifact and not one is a sum — two PHONE DIALLING PREFIXES "
+            + "(`Kode telepon: +31 (Èropa), +599 (Amerika)`), one UTC OFFSET (`bâkto lokal (UTC+7)`) and a "
+            + "SONG TITLE (`single sè andhi' judhul \"1+1\"`). The playbook's fleet sweep already settled "
+            + "the UTC case: it is the one contentful plus and nothing in any corpus attests how it is "
+            + "said. And the candidate word refutes itself on sense — `tamba` is attested in 9 articles on "
+            + "mad.wikipedia and every hit is the verb/adverb 'to increase' (`pânḍuḍuk Katolik tamba "
+            + "bânnya'`, `Karir mènangka panyanyi tamba kalonta`), not the operator",
+        equals: "measured: FIVE `=` in the artifact and NONE is arithmetic. Four are BILINGUAL GLOSSES — "
+            + "`Eatore, konye' gunong = Silahkan dimakan, seadanya`, `\"dahana\" = apoy, \"pura\" = kotta`, "
+            + "`tangghâl 1 bulân Tisyri = Rosh Hashanah`, and a German/Indonesian book-title equation in a "
+            + "citation — and the fifth is the physics formula `E = mc²`. A reading for the RELATION would "
+            + "be wrong in every attested instance, and no Madurese equals word is attested in the corpus "
+            + "or on the wiki (`sarowa` ×0, `padha` ×0)",
+        "less-than": "measured: `<` is ×0 in the artifact. The comparative Madurese does write is the "
+            + "PHRASE `korang ḍâri` ×4 (`korang ḍâri 50%`, `korang ḍâri sèttong milimeter`), which is a "
+            + "quantity comparison in prose and not a reading for a notational relation — the same "
+            + "distinction Indonesian's and Sundanese's layers record",
+        "greater-than": "measured: `>` is ×0 in the artifact, and `lebbi ḍâri` ×9 is the prose 'more than' "
+            + "rather than the magnitude relation the sign denotes",
+        divide: "measured: `÷` is ×0 in the artifact. Every `/` in this corpus is a date (`10/01/2007`), a "
+            + "year pair (`1998/1999-2008/2009`), a document number (`SK No. 17/1961`, `No 01/0/SKB/2004`), "
+            + "a RATE (`jiwa/km²`, `mm/taon` — which normalize.ts step 7 reads with `per`) or the 'or' "
+            + "slash Madurese writes constantly (`bân/otabâ`, `daging/ajam/tempe`, `atoran/kabiyasaan`). "
+            + "`bagi` ×2 is 'for' (`Requiem bagi ROCKER`), not the operator",
+    },
 };
 
 /**
@@ -1506,6 +1543,41 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // no Bambara word to offer either. Instance-listed rather than class-silenced so a `km²` regression
         // stays visible — km² IS read (`kilomɛtɛrɛ kɛnɛ`, sourced from 17 corpus glosses).
         exponent: ["metre cube 135 000 m³", "152 000 m³"],
+    },
+    mad: {
+        // ⚠ THREE DESIGNATIONS AND A SPAN, AND WHAT IS *NOT* HERE IS THE POINT. Madurese's `minus` class is
+        // deliberately NOT in `ACCEPTED_SIGN_SILENCE` (see there for why), so the two GENUINE negatives in
+        // this corpus — `ka'dissa' -1 mèter dpl` and the integers article's `0, 1, -1, 2, - 2, ...` — keep
+        // reporting. These three do not, because none of them is a sign at all:
+        //   · `ka -8` and `kapèng -20` are the SPACED spelling of the ORDINAL prefix ⟨ka-⟩ ("the 8th prime
+        //     minister", "the 20th century"), which the engine already reads correctly as a word plus a
+        //     cardinal — the hyphen is orthographic, and normalize.ts adds no rule for it (playbook trap 16).
+        //   · `35° Lintang Dâjâ -71° Lintang Dâjâ` is a COORDINATE SPAN whose endpoints have a two-word
+        //     compass phrase between them, so no digit-adjacent rule can reach it; step 3 claims the spans
+        //     whose mark and digit are contiguous and correctly declines this one.
+        minus: ["ka -8", "kapèng -20", "Dâjâ -71°"],
+        // A ± THE SENTENCE ALREADY SPELLS OUT — `Sorbhâjâ anḍi' lowas ra-kèra ±335,28 km²`. ⟨ra-kèra⟩ is
+        // "approximately", which is exactly what this corpus's ± means (all four instances are a rounded
+        // area or height, and one of them GLOSSES the sign: `korang lebbi ±1.752,21 km²`). normalize.ts
+        // step 5 therefore CONSUMES the redundant sign rather than doubling the connective — the playbook's
+        // trap-12 permissible drop, which no differential test can distinguish from a swallowed sign.
+        // ⚠ `±` IS OTHERWISE READ (`korang lebbi`), which is why this is instance-listed and `plus-minus`
+        // is absent from the class table: a regression on the unglossed form must stay visible.
+        "math-sign": ["ra-kèra ±335,28"],
+        // THREE CURRENCY SIGNS WITH NO MADURESE NAME, in a corpus where `$`, `US$`, `AS$`, `Rp` and `€` are
+        // all read. `S$8 miliar` (Singapore) and `HK$ 490,3 miliar` (Hong Kong) cannot be reached by the
+        // bare `$` key at all — the tier is letter-bounded on the left, correctly — and `¥ 150.000` has no
+        // yen word anywhere in the corpus or on mad.wikipedia. The su/xh/ceb residue exactly: a currency
+        // borrowing the language plausibly uses and no in-repo source records. Instance-listed rather than
+        // class-silenced so the five signs that ARE read stay under test.
+        currency: ["S$8 miliar", "¥ 150.000", "HK$ 490,3 miliar"],
+        // A BARE-BASE EXPONENT INSIDE A FORMULA — `rumus persamaan massa-energi E = mc²`, the only one in
+        // the corpus. `bareExponent` is deliberately not declared for mad (see normalize.ts): this wiki's
+        // superscripts are overwhelmingly UNIT exponents, which the tier reads (`km²` → *kilomèter
+        // persegi*), and the only things a bare-base rule would newly claim are this formula and a mangled
+        // scientific notation. Same call `so` records for `E = mc²`, and instance-listed for the same
+        // reason — a `km²` regression must stay visible.
+        exponent: ["E = mc²"],
     },
 };
 
