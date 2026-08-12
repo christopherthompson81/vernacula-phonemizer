@@ -18,7 +18,10 @@ export interface ZhuangManifest {
         ten: string;
         hundred: string;
         thousand: string;
-        million: string;
+        /** 萬 = 10⁴. Zhuang groups by myriads, so this is the step above `thousand`, not a "million". */
+        myriad: string;
+        /** 億 = 10⁸. */
+        hundredMillion: string;
     };
 }
 

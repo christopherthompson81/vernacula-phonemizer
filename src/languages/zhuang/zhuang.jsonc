@@ -45,12 +45,17 @@
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",",
     },
 
-    // Cardinal number words (Standard Zhuang; run through the g2p). Tens: cib(10), ngeihcib(20)… units join directly.
+    // Cardinal number words (Standard Zhuang; run through the g2p). See numbers.ts for the compositor and
+    // for the sourcing of every word here. ⚠ THE SERIES IS MYRIAD-GROUPED, NOT THOUSAND-GROUPED: after
+    // `cien` (10³) the next lexical step is `fanh` 萬 = 10⁴, then `ik` 億 = 10⁸ — so there is no "million"
+    // word and never was. The field that used to say `"million": "fanh"` was mislabelling 万 by a factor
+    // of 100, and nothing read it.
     "numbers": {
         "units": ["lingz", "it", "ngeih", "sam", "seiq", "haj", "roek", "caet", "bet", "gouj"],
         "ten": "cib",
         "hundred": "bak",
         "thousand": "cien",
-        "million": "fanh"
+        "myriad": "fanh",
+        "hundredMillion": "ik"
     }
 }

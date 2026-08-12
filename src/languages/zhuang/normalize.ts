@@ -116,27 +116,20 @@
  *   text marks them as such, and the same shape is how genuine Sawndip prose reaches this engine
  *   (`za.text("gou 佲")` is a pinned behaviour). Stated as a limit rather than guessed at.
  *
- * ── AND TWO FINDINGS THAT ARE NOT THIS LAYER'S TO FIX ─────────────────────────────────────────────────
+ * ── AND THE FINDING THIS LAYER RAISED AND `numbers.ts` ANSWERED ───────────────────────────────────────
  *
- * ⚠ THE NUMBER DATA DISAGREES WITH THE CORPUS, AND THE CORPUS GLOSSES ITSELF 172 TIMES. za.wikipedia
- *   carries a series of natural-number stub articles that write the word and the digits side by side —
- *   `Bak lingz it(101) dwg aen swhyienzsoq`, `Bak bat cib(180)`, `Ngeih cib loeg(26)` — which is the
- *   strongest form of attestation there is. Against `numbers.ts`:
+ * ⚠ THE NUMBER DATA DISAGREED WITH THE CORPUS AND HAS SINCE BEEN FIXED — but not in the direction the
+ *   count suggested, so the correction is worth keeping next to the count that raised it. za.wikipedia
+ *   carries 172 natural-number stub articles that write the word and the digits side by side
+ *   (`Bak lingz it(101) dwg aen swhyienzsoq`, `Ngeih cib loeg(26)`). They are ONE hand-typed series with
+ *   copy errors in it — 110 and 111 carry the same title — and the whole of their apparent majority for
+ *   `loeg`/`bat` lives inside them (`roek` 58 : `loeg` 9 and `bet` 26 : `bat` 4 once they are removed).
+ *   What they did settle is the CONSTRUCTION: the `lingz` zero-filler, and `bak it cib` for 110. The
+ *   words `roek`, `bet` and `it bak` stand. The whole argument is in `numbers.ts`'s header.
  *
- *       n      corpus            numberToWords()      the divergence
- *       100    bak               it bak               a leading `it` the corpus does not write
- *       101    bak lingz it      it bak it            and no `lingz` zero-filler for the empty tens
- *       6/8    loeg / bat        roek / bet           `loeg` ×125 vs `roek` ×58, `bat` ×112 vs `bet` ×28
- *
- *   NOT CHANGED HERE. It rewrites every number in the language, it needs its own corpus diff and its own
- *   sourcing argument (roek/bet are the Wuming standard forms the manifest is authored from, and the stub
- *   series may be one editor's dialect), and this layer emits DIGITS throughout so nothing below is built
- *   on top of it. Recorded so the measurement is re-runnable in one grep.
- *
- * ⚠ `numbers.million` IS DECLARED AND DEAD. The manifest says `"million": "fanh"` — but `fanh` is 万,
- *   10,000, not 10⁶ — and `numberToWords` never reads the field, falling back to digit-by-digit at 1e6.
- *   The corpus writes `fanh` as an ordinary word after a numeral (`737 fanh`, `5,047 fanh`), which the
- *   word path already handles. Left alone for the same reason as above.
+ * ⚠ AND `numbers.million` WAS A MISLABEL OF 萬 — `fanh` is 10⁴, not 10⁶. The field is now `myriad`, with
+ *   `hundredMillion: "ik"` (10⁸) above it, and `numberToWords` composes myriad groups like Chinese.
+ *   This layer still emits DIGITS throughout, so nothing here is built on top of either.
  */
 
 /** The CJK-ideograph blocks Sawndip draws on — the same set `sawndip.ts` recognises, as a class body. */

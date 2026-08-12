@@ -15,6 +15,7 @@ import { describe, expect, test } from "vitest";
 
 import { getPhonemizer } from "../src/registry.ts";
 import { normalizeZhuang } from "../src/languages/zhuang/normalize.ts";
+import { numberToWords } from "../src/languages/zhuang/numbers.ts";
 
 const za = getPhonemizer("za");
 const n = normalizeZhuang;
@@ -180,5 +181,70 @@ describe("za normalization — the readings, through the phonemizer", () => {
         // vowel-less numeral that would be unreadable if the order were ever reversed.
         expect(za.text("Elizabeth II")).toBe(za.text("Elizabeth 2"));
         expect(za.text("baez XV")).toBe(za.text("baez 15"));
+    });
+});
+
+describe("za cardinals — a myriad-grouped series with a spoken zero", () => {
+    // ⚠ THE EVIDENCE FOR EVERY WORD AND EVERY BRANCH IS IN `src/languages/zhuang/numbers.ts`'s header.
+    // In short: Wiktionary's za usexes (`song bak it` = 210, `song cien ngeih` = 2200, `it cien` = 1000,
+    // `bak lingz sam` = 103), za.wikipedia's 172 self-glossing number stubs, and the Zhuang-only subset of
+    // the wiki dump (`bak it cib` ×30 vs `bak cib` ×0; `1 ik 3 cien fanh` = 130 000 000).
+
+    test("units, teens and tens", () => {
+        expect(numberToWords(0)).toBe("lingz");
+        expect(numberToWords(10)).toBe("cib"); // a STANDALONE ten is bare — no leading `it`
+        expect(numberToWords(15)).toBe("cib haj");
+        expect(numberToWords(20)).toBe("ngeih cib"); // stub: `Ngeih cib(20)`
+        expect(numberToWords(26)).toBe("ngeih cib roek"); // stub writes `loeg`; see the header for why `roek` stands
+        expect(numberToWords(28)).toBe("ngeih cib bet"); // …and `bat` there likewise
+    });
+
+    test("⚠ THE ZERO IS SPOKEN, because a trailing bare unit means the NEXT MAGNITUDE DOWN", () => {
+        // Wiktionary za `it`: `song bak it` = "two hundred and TEN". So the old `it bak it` for 101 was not
+        // an unidiomatic 101, it was a correct 110 — the single most consequential defect in this file.
+        expect(numberToWords(101)).toBe("it bak lingz it"); // stub: `Bak lingz it(101)`
+        expect(numberToWords(103)).toBe("it bak lingz sam"); // Wiktionary usex on `lingz`, verbatim
+        expect(numberToWords(1001)).toBe("it cien lingz it");
+        expect(numberToWords(5047)).toBe("haj cien lingz seiq cib caet"); // 五千零四十七
+        // ONE filler however wide the gap — the Chinese rule, and what the stubs write.
+        expect(numberToWords(100000005)).toBe("it ik lingz haj");
+        // …and NO filler when the group simply ends early.
+        expect(numberToWords(150)).toBe("it bak haj cib"); // stub: `Bak haj cib(150)`
+        expect(numberToWords(180)).toBe("it bak bet cib"); // stub: `Bak bat cib(180)`
+    });
+
+    test("a ten under a higher magnitude keeps its own `it`", () => {
+        // `bak cib` ×0 in the Zhuang subset, `bak it cib` ×30.
+        expect(numberToWords(110)).toBe("it bak it cib"); // stub: `Bak it cib(110)`
+        expect(numberToWords(112)).toBe("it bak it cib ngeih"); // stub: `Bak it cib ngeih(112)`
+        expect(numberToWords(210)).toBe("ngeih bak it cib"); // Wiktionary abbreviates this to `song bak it`
+        expect(numberToWords(2010)).toBe("ngeih cien lingz it cib");
+    });
+
+    test("⚠ MYRIADS, NOT THOUSANDS — `fanh` is 10⁴ and `ik` is 10⁸", () => {
+        expect(numberToWords(10000)).toBe("it fanh"); // was `cib cien`
+        expect(numberToWords(43000)).toBe("seiq fanh sam cien"); // 四万三千 — was `seiq cib sam cien`
+        expect(numberToWords(12345)).toBe("it fanh ngeih cien sam bak seiq cib haj");
+        expect(numberToWords(1000000)).toBe("it bak fanh"); // the corpus writes this solid, as `bakfanh`
+        // ⚠ THE CORPUS COMPOSES THIS ONE ITSELF: `1 ik 3 cien fanh boux sawjyungh` (Japanese speakers).
+        expect(numberToWords(130000000)).toBe("it ik sam cien fanh");
+        expect(numberToWords(1400000000)).toBe("cib seiq ik"); // corpus: `haeujvunz miz 14 ik` (India)
+        // The corpus's one grouped seven-digit figure, which used to fall off the old 1e6 cliff into
+        // digit-by-digit (`it caet lingz caet haj seiq lingz lingz`).
+        expect(numberToWords(17075400)).toBe("it cien caet bak lingz caet fanh haj cien seiq bak");
+    });
+
+    test("the cliff moved to 10¹², and digit-by-digit is still what is beyond it", () => {
+        expect(numberToWords(999999999999)).toBe(
+            "gouj cien gouj bak gouj cib gouj ik gouj cien gouj bak gouj cib gouj fanh gouj cien gouj bak gouj cib gouj",
+        );
+        // ⚠ NOT A COMPOSED 10¹²: no Zhuang word for 兆 is attested anywhere I could source, and inventing
+        // one is the named failure this project already has (Fula `tere`). The fallback reads the digits.
+        expect(numberToWords(1e12)).toBe("it lingz lingz lingz lingz lingz lingz lingz lingz lingz lingz lingz lingz");
+    });
+
+    test("and the digits reach it through the phonemizer, not just the compositor", () => {
+        expect(za.text("101")).toBe(za.text("it bak lingz it"));
+        expect(za.text("43000 bingzfueng")).toBe(za.text("seiq fanh sam cien bingzfueng"));
     });
 });
