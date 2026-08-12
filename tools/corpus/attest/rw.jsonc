@@ -1,0 +1,455 @@
+// WIKIPEDIA WORD ATTESTATION — rw. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "rw",
+    "wiki": "rw.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "mililitiro",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…rama, mu gihe inyanja itagira ibinyabuzima birenga 107 kuri mililitiro (garama) y’amazi yo mu nyanja. Carbone organique ifashwe mu…",
+                "…sida rushobora kugera kuri miliyoni nyinshi za virusi kuri mililitiro yamaraso mu mubiri. Iki gisubizo kijyana nigabanuka ryagara…",
+                "…sida rushobora kugera kuri miliyoni nyinshi za virusi kuri mililitiro yamaraso mu mubiri. Iki gisubizo kijyana nigabanuka ryagara…"
+            ]
+        },
+        {
+            "word": "mirilitiro",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "mililitro",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "garama",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 38,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…kuba zikungahaye kuri Vitamini C. Aya makuru avuga ko muri garama 100 z’urubuto rwa pome, habamo ubushobozi bwa anti oxidant,…",
+                "…wa pome, habamo ubushobozi bwa anti oxidant, bungana n’ubwa garama 1500 za vitamini C ibonetse mu zindi mbuto cyangwa ishobora…",
+                "…litz's Plover ni inyoni ntoya ifite uburemer buri hagati ya garama 35-40. ifite uburebure bwa fagitiri burihagati ya 26-33MM ,…",
+                "…ora, ikaraha ibyo irya, imwe ikunze kwitwa inyarwanda. Muri garama 100 z’iyi nyama dusangamo ingufu zingana na 215kCal, garama…",
+                "…garama 100 z’iyi nyama dusangamo ingufu zingana na 215kCal, garama 18 za poroteyine, garama 15 z’ibinure, 75mg za cholesterol.…",
+                "…sangamo ingufu zingana na 215kCal, garama 18 za poroteyine, garama 15 z’ibinure, 75mg za cholesterol. Dusangamo imyunyungugu n…"
+            ]
+        },
+        {
+            "word": "iminota",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 36,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…6 muri 2002 == Ibyiza byawe bwite == Metero 1500 - 4: 08.05 iminota (1999) Metero 3000 - 8: 42.39 iminota (2001) Metero 5000 -…",
+                "…etero 1500 - 4: 08.05 iminota (1999) Metero 3000 - 8: 42.39 iminota (2001) Metero 5000 - 16: 04.40 iminota (1997) == Ihuza ryo…",
+                "…tero 3000 - 8: 42.39 iminota (2001) Metero 5000 - 16: 04.40 iminota (1997) == Ihuza ryo hanze == Genet Gebregiorgis at World At…",
+                "…mpike yo muri 2008 na 2012. Afite ibihembo bye bwite harimo iminota 4: 02.12 kuri metero 1500, iminota 8: 46.37 kuri metero 300…",
+                "…bihembo bye bwite harimo iminota 4: 02.12 kuri metero 1500, iminota 8: 46.37 kuri metero 3000 n'amasaha 2:25:11 kuri marato . M…",
+                "…Afurika muri 2007, aho yashyize ku mwanya wa kane yiruka 4: Iminota 09.83. Umwaka ukurikira yazanye umudari wa mbere ukomeye -…"
+            ]
+        },
+        {
+            "word": "saa",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 159,
+            "articles": 19,
+            "substringOnly": 1,
+            "examples": [
+                "…amavuta arinda uruhu igihe uri hanze cyane cyane hagati ya saa 10:00 za mbere ya saa sita na saa 3:00 za nyuma ya saa sita…",
+                "…igihe uri hanze cyane cyane hagati ya saa 10:00 za mbere ya saa sita na saa 3:00 za nyuma ya saa sita z’amanywa. == Imiyobo…",
+                "…nze cyane cyane hagati ya saa 10:00 za mbere ya saa sita na saa 3:00 za nyuma ya saa sita z’amanywa. == Imiyoboro == https:…",
+                "…i ya saa 10:00 za mbere ya saa sita na saa 3:00 za nyuma ya saa sita z’amanywa. == Imiyoboro == https://web.archive.org/web…",
+                "…angwa ryari? - Guhera ku wa mbere kugeza ku wa kane: ➢ Kuva saa moya z’igitondo kugeza saa sita z’amanywa ➢ Kuva saa saba k…",
+                "…mbere kugeza ku wa kane: ➢ Kuva saa moya z’igitondo kugeza saa sita z’amanywa ➢ Kuva saa saba kugeza saa kumi n’imwe za ni…"
+            ]
+        },
+        {
+            "word": "amasaha",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…abo ijana batangiye isiganwa, yaje ku mwanya wa 62 akoresha amasaha 2, iminota 26, amasegonda 5. Akaba yitoreza mu ikipe yitwa…",
+                "…ro 10,000 - 27: 25.48 min (1996) Igice cya marato - 1:01:41 amasaha (2000) Marato - 2:09:55 amasaha (2000) == Reba == Urutonde…",
+                "…Igice cya marato - 1:01:41 amasaha (2000) Marato - 2:09:55 amasaha (2000) == Reba == Urutonde rwabakinnyi bagaragaye cyane mum…",
+                "…cyiswe (haymarket affair) aho aba police bishe abasabaga ko amasaha yahinduka akava kuri 12 agagera kuri 8 kumunsi.[1] uyumunsi…",
+                "…a bigaragambya kuri buri iyi talikikujyirango bashyirirweho amasaha umunani y'akazi atarenga.[2] Andi makuru arambuye k'umunsi…",
+                "…ku mwanya wa 32 arangiza marato yose y'abagabo, akoresheje amasaha 2:19:31, ku shuro ya kabiri, Mu mikino y'Olempike yabereye…"
+            ]
+        },
+        {
+            "word": "ikirometero",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…47 (Zürich 2016) Mu nzu Metero 1500 - 4: 10.15 (Ghent 2015) Ikirometero kimwe - 4: 39.27 (Stockholm 2016) == Ihuza ryo hanze ==…",
+                "…Metero 1000 - 2: 37.82 (1999) Metero 1500 - 3: 58.43 (1998) Ikirometero kimwe - 4: 39.04 (1997) Ibirometero 15 - 50:28 (2005) Igice…",
+                "…(Nassau 1999) NR Metero 1500 - 3: 38.16 (Palo Alto 2000) NR Ikirometero kimwe - 3: 57.82 (Falmouth 2000) Mu nzu Metero 1500 - 3: 49…"
+            ]
+        },
+        {
+            "word": "munsi ya zeru",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…no mu bushyuhe bugera kuri dogere 160 no munsi ya dogere 40 munsi ya zeru.\" Amasezerano yikaramu yafashije guhanga imirimo kubakozi b…"
+            ]
+        },
+        {
+            "word": "negatifu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "gukuramo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 34,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…: Locking clothing) ni imyenda ibuza umuntu wambaye imyenda gukuramo imyenda. Urugero rumwe rwaba imyenda yagenewe kubuza umuntu…",
+                "…ashobora kwomekwa kumyenda isanzwe kugirango birinde umuntu gukuramo imyenda. Nubwo amazina menshi akoreshwa kuri ibyo bintu, ri…",
+                "…ni cyane kugirango gisubire muri buto. Abarwayi barashobora gukuramo buto, ariko. Utubuto tumwe na tumwe, cyane cyane twometse k…",
+                "…asanzwe ufata ishati n'ipantaro hamwe. Ibi birinda abarwayi gukuramo ishati cyangwa gukuramo ipantaro. == Reba ibindi == Medical…",
+                "…pantaro hamwe. Ibi birinda abarwayi gukuramo ishati cyangwa gukuramo ipantaro. == Reba ibindi == Medical restraint Straitjacket…",
+                "…amazi bikoresha imiti itandukanye hashingiwe ku cyo ushaka gukuramo cyangwa urwego amazi agezeho atunganywa: Imiti y'ibanze n'i…"
+            ]
+        },
+        {
+            "word": "kuramo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ishe murukuta kandi mubisanzwe ishyirwa hafi yintambwe. === Kuramo ibiti byimbere murugo === Imashini itwara urugo rutwara uru…"
+            ]
+        },
+        {
+            "word": "munsi ya zero",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ika. Ikindi kandi yishimira ubukonje bwo hasi bwa dogere 20 munsi ya zero, ni igihingwa cyaba ahantu hose ku isi cyanecyane i Burayi.…"
+            ]
+        },
+        {
+            "word": "hasi ya zeru",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "selisiyusi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 17,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…e two mu mujyi wa Kigali, ubushyuhe bwo hejuru bwari dogere selisiyusi 31. Ni ubushyuhe bujya kwegera dogere selisiyusi 32.4 ari n…",
+                "…ari dogere selisiyusi 31. Ni ubushyuhe bujya kwegera dogere selisiyusi 32.4 ari nabwo bwo hejuru uwo mujyi uheruka mu mwaka wa 201…",
+                "…Kamena ubwo muri Nyarugenge habonekaga ubushyuhe bwa dogere selisiyusi 33. Tariki 22 Gashyantare 2005, mu karere ka Kicukiro habon…",
+                "…2005, mu karere ka Kicukiro habonetse ubushyuhe bwa dogere selisiyusi 35.4, ari nabwo bushyuhe bwo hejuru umujyi wa Kigali wagize…",
+                "…ite ikirere gishyuha gifite ubushyuhe buri hagati ya dogere selisiyusi 26-28 umwaka wose. Nkigihugu cyibirwa, Indoneziya nayo ifit…",
+                "…e bwo gusobanura. Umunzani ukunze kugaragara ni umunzani wa selisiyusi ufite ikimenyetso cya C ° (cyahoze cyitwa centigrade ), igi…"
+            ]
+        },
+        {
+            "word": "farenheti",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "kibe",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ero 59, metero 11 z'ubusa . Ubushobozi: miliyoni 634 metero kibe 10% Umusaruro: miliyoni 210 metero kibe Ibikoresho Byakores…",
+                "…miliyoni 634 metero kibe 10% Umusaruro: miliyoni 210 metero kibe Ibikoresho Byakoreshejwe N'uburemere bwabyo Beto : 300.000…",
+                "…esho Byakoreshejwe N'uburemere bwabyo Beto : 300.000 metero kibe Quarry : 400.000 metero kibe Igipimo cya sima / Igipimo cya…",
+                "…e bwabyo Beto : 300.000 metero kibe Quarry : 400.000 metero kibe Igipimo cya sima / Igipimo cyamazi : 0.55 Kuguruka kw'ivu /…",
+                "…985, ubwo bushobozi bwongereweho bugera bugera kuri (metero kibe) 7,200 cubic metres (254,266 cu ft) buri munsi. Muri 2008,…",
+                "…ft) . Kugeza mu Kwakira 2020, sisitemu yatunganyije (metero kibe) 15,000 cubic metres (529,720 cu ft) y'amazi yo kunywa yatu…"
+            ]
+        },
+        {
+            "word": "metero",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 259,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…sitaraliya . == Ibisubizo ku byabaye == === Siporo === ==== metero 100 ==== Edward Ajado Icyiciro cya 1: muri Heat 11 (umwanya…",
+                "…egonda 11.10 (yahagaze mu buryo bwikora) ==== Gusiganwa kwa metero 4 × 100 ==== Edward Ajado, Abdul Amu, Titus Erinle na Rafiu…",
+                "…amasegonda 47.39 (yahagaze mu buryo bwikora), yemerewe ==== metero 400 ==== Abdul Amu 1. Icyiciro: Yakuwe mu cyiciro cya 3 (um…",
+                "…imbuka gatatu ==== Paul Bamela Engo Icyiciro cy'amajonjora: metero 14.81, babashije kugera ku mukino wa nyuma Gerageza kimwe:…",
+                "…14.81, babashije kugera ku mukino wa nyuma Gerageza kimwe: metero 14.81 Gerageza bibiri: byasibwe Gerageza bitatu: byasibwe U…",
+                "…iri: byasibwe Gerageza bitatu: byasibwe Urugendo rwa nyuma: metero 15.03, ku mwanya wa 17 Gerageza kimwe: metero 14.98 Geragez…"
+            ]
+        },
+        {
+            "word": "toni",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 77,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Toni-Ann Singh (yavutse ku ya 1 Gashyantare 1996) ni umuririmbyi…",
+                "…uzamuka buri mwaka ku buryo bukurikira: muri 2000 habonetse toni 6996, muri 2001 habonetse toni 7 308, muri 2002 habonetse t…",
+                "…urikira: muri 2000 habonetse toni 6996, muri 2001 habonetse toni 7 308, muri 2002 habonetse toni 7 600, muri 2003 habonetse…",
+                "…i 6996, muri 2001 habonetse toni 7 308, muri 2002 habonetse toni 7 600, muri 2003 habonetse toni 7 600, muri 2004 habonetse…",
+                "…7 308, muri 2002 habonetse toni 7 600, muri 2003 habonetse toni 7 600, muri 2004 habonetse toni 8 126, muri 2005 habonetse…",
+                "…7 600, muri 2003 habonetse toni 7 600, muri 2004 habonetse toni 8 126, muri 2005 habonetse toni 8 089, muri 2006 habonetse…"
+            ]
+        },
+        {
+            "word": "hegitari",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 85,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…hyamba yashaje, aho mu muhigo rwihaye wo kuba habungabunzwe hegitari miliyoni ebyiri bitarenze 2030, rumaze kubungabunga hegitar…",
+                "…egitari miliyoni ebyiri bitarenze 2030, rumaze kubungabunga hegitari miliyoni imwe. Mu 2011 isi yihaye intego yo gutera amashyam…",
+                "…shyamba binyuze mu cyiswe Bonn Challenge ku buso bungana na hegitari miliyoni 150 kugeza muri 2020, u Rwanda rwiyemeza kugarura…",
+                "…ri 2020, u Rwanda rwiyemeza kugarura amashyamba ku buso bwa hegitari miliyoni ebyiri. Mu mwaka wa 2016 u Rwanda rwaje kwihuza n’…",
+                "…kwihuza n’ibihugu bya Afurika mu kugarura ubuso bungana na hegitari miliyoni 100 bitarenze umwaka wa 2030 muri gahunda yiswe [A…",
+                "…Yavuze ko u Rwanda rwiyemeje kubungabunga ubuso bungana na hegitari miliyoni ebyiri z’ubutaka kandi ibigaragara n’amaso ari uko…"
+            ]
+        },
+        {
+            "word": "litiro",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 46,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…e urugero ugereranyi n’igipimo kiba gisabwa gukorehswa muri litiro y’ikinyobwa gisembuye n’ikidasembuye. Ikigereranyo fatizo c…",
+                "…idasembuye. Ikigereranyo fatizo cy’amazi kigomba kujya muri litiro imwe y’ikinyobwa ni Litiro enye z’amazi. Alexis Ruzibukira,…",
+                "…tizo cy’amazi kigomba kujya muri litiro imwe y’ikinyobwa ni Litiro enye z’amazi. Alexis Ruzibukira, ushinzwe inganda nini ,int…",
+                "…rugaragaza ko mu mwaka w’ 2010 bakoreshaga amazi angana na litiro 4,5 muri litiro imwe y’ ikinyobwa mu gihe bari barihaye. Ku…",
+                "…u mwaka w’ 2010 bakoreshaga amazi angana na litiro 4,5 muri litiro imwe y’ ikinyobwa mu gihe bari barihaye. Kuri ubu uruganda…",
+                "…ari barihaye. Kuri ubu uruganda rw’Inyange rukaba rukoresha litiro 4 z’amazi muri ilitiro imwe y’ ikinyobwa. Ku ruhande rw’uru…"
+            ]
+        },
+        {
+            "word": "kirogarama",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…avuga igikuri,gikuri cyangwa gasongo,nzovu,zakayo,gasyukuri,kirogarama bavuga Umuntu ufite ubugufi budasanzwe. Kandi haracyagaraga…",
+                "…bwe cy'hinga B). Igerambuto n‘uburyo bwo gutera : Hakenerwa kirogarama ijana z‘imbuto kuri hegitari imwe (100kg/ha). Imbuto zinyan…"
+            ]
+        },
+        {
+            "word": "santimetero",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 43,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Buri shami rigira amahwa atatu, rimwe rimwe rifite hafi ya santimetero 15 na 20 z’uburebure. Imbuto z’ibi biti (mu ishusho ry’umut…",
+                "…i (mu ishusho ry’umutemeri) zigira uburebure buri hagati ya santimetero 5 kugera ku 9 noneho intete zikagira hagati ya santimetero…",
+                "…santimetero 5 kugera ku 9 noneho intete zikagira hagati ya santimetero 1,5 kugera kuri 2,5. Inkomoko y’amahwa ya Kasi ni mu karere…",
+                "…sisitemu yo kugenda-buhoro imbere. Hafi ya milimetero 200 (santimetero 8) z'imvura yaguye mu majyaruguru ya Texas, havugwa ko hapf…",
+                "…ura nyinshi mu majyepfo ya Amerika. Hafi ya milimetero 200 (santimetero 8) z'imvura yibasiye amajyaruguru ya Texas. Imvura yaguye k…",
+                "…Isumo rya Marble, kamwe mu turere twibasiwe cyane, kakiriye santimetero 18 (460 mm) y'imvura mugihe cy'amasaha atandatu. Amazi y’ik…"
+            ]
+        },
+        {
+            "word": "milimetero",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 38,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…irahinduka, ivugako Imvura iruta izindi izaba iri hagati ya milimetero 40 na 60 mu intara y'uburengerazuba ndetse n'imvura iri hag…",
+                "…60 mu intara y'uburengerazuba ndetse n'imvura iri hagati ya milimetero 20 na 40 mu intara y'amajyauguru. Imvura iri munsi ya milim…",
+                "…etero 20 na 40 mu intara y'amajyauguru. Imvura iri munsi ya milimetero 10 ni yo mvura nke izajya. igipimo cy’impuzandengo y’imvura…",
+                "…ura isanzwe igwa mu kwezi kwa Mutarama, kiba kiri hagati ya milimetero 0 na 70. == AMASHAKIRO ==…",
+                "…== Ibipimo == Ibipimo by’imvura biri hafi hagati ya milimetero‘’millemètre’’ 900 mu burasirazuba no mu majyepfo ashyira Ub…",
+                "…900 mu burasirazuba no mu majyepfo ashyira Uburasirazuba na milimetero‘’millemètre’’ 1500 mu turere tw’imisozi miremire n’utw’ibir…"
+            ]
+        },
+        {
+            "word": "ku ijana",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 109,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…rwego rw’ubuhinzi rwariyongereye rugira impuzandengo ya 9,5 ku ijana mu bihe bya 1996 - 2000; ariko, iryo zamuka ryagabanutse mu…",
+                "…6 - 2000; ariko, iryo zamuka ryagabanutse mu kigero cya 4,8 ku ijana z’ubwiyongere buri mwaka mu 2001-2006 aho bwabaye ku buryo…",
+                "…w’ibihingwa mu 2008 wabaye munini cyane muri rusange, 14.8 ku ijana. Habayeho na none ubwiyongere ku musaruro w’ibiribwa no ku…",
+                "…biribwa no ku bihingwa bijyanwa mu mahanga bwa 16,4 na 13,5 ku ijana kuri buri cyiciro.Mu 2001, uruhare rwo mu urwego rw’ubuhinz…",
+                "…1, uruhare rwo mu urwego rw’ubuhinzi muri PIB rwari hafi 46 ku ijana mu buryo nyakuri, rukaba rwari rugize 80 ku ijana ry’ibicur…",
+                "…i hafi 46 ku ijana mu buryo nyakuri, rukaba rwari rugize 80 ku ijana ry’ibicuruzwa bisohoka. - Uruhare rwo mu urwego rw’ubuhinzi…"
+            ]
+        },
+        {
+            "word": "amadolari",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 66,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…Amadolari ya Amerika ( Afite ikimenyetso cya $ n'ikimenyetso cya USD,…",
+                "…USD, cyangwa US $ kugirango ayitandukanye n’andi mafranga y’amadolari; yitwa amadolari, amadolari y’Amerika, cyangwa amafaranga y…",
+                "…kugirango ayitandukanye n’andi mafranga y’amadolari; yitwa amadolari, amadolari y’Amerika, cyangwa amafaranga y’amadolari ) ni i…",
+                "…ayitandukanye n’andi mafranga y’amadolari; yitwa amadolari, amadolari y’Amerika, cyangwa amafaranga y’amadolari ) ni ifaranga rye…",
+                "…yitwa amadolari, amadolari y’Amerika, cyangwa amafaranga y’amadolari ) ni ifaranga ryemewe muri leta zunze Ubumwe z'Amerika n'ib…",
+                "…na Federal Reserve System, ikora nka banki nkuru y’igihugu. Amadolari y'Abanyamerika yabanje gusobanurwa muburyo bwa bimetalike i…"
+            ]
+        },
+        {
+            "word": "amafaranga",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 160,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Amafaranga ni kimwe mu bintu biyoboye iyi si ya none. Mu RWANDA dufite…",
+                "…iyoboye iyi si ya none. Mu RWANDA dufite ubwoko bwinshi bwa amafaranga. == UBWOKO BW' AMAFARANGA == Amafaranga arimo ubwoko bwinsh…",
+                "…RWANDA dufite ubwoko bwinshi bwa amafaranga. == UBWOKO BW' AMAFARANGA == Amafaranga arimo ubwoko bwinshi hari ibiceri ndetse n' i…",
+                "…ubwoko bwinshi bwa amafaranga. == UBWOKO BW' AMAFARANGA == Amafaranga arimo ubwoko bwinshi hari ibiceri ndetse n' inote , mu Rwan…",
+                "…Amafaranga yu Rwanda ( Afite ikimenyetso cya FRw, cyangwa se RF ) ni i…",
+                "…ryu Rwanda . rikaba r'igabanyijemo ibice 100. == Amateka == Amafaranga yabaye ifaranga ry’u Rwanda kuva muri 1916, mu gihe Ububili…"
+            ]
+        },
+        {
+            "word": "iyero",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…aranga rikoreshwa aho, nko mu bihugu byinshi by'i Burayi ni iyero (€). Ni igihugu gisurwa n'abakerarugendo benshi, cyane cyan…"
+            ]
+        },
+        {
+            "word": "dogere",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…u turere two mu mujyi wa Kigali, ubushyuhe bwo hejuru bwari dogere selisiyusi 31. Ni ubushyuhe bujya kwegera dogere selisiyusi…",
+                "…juru bwari dogere selisiyusi 31. Ni ubushyuhe bujya kwegera dogere selisiyusi 32.4 ari nabwo bwo hejuru uwo mujyi uheruka mu m…",
+                "…riki 2 Kamena ubwo muri Nyarugenge habonekaga ubushyuhe bwa dogere selisiyusi 33. Tariki 22 Gashyantare 2005, mu karere ka Kic…",
+                "…yantare 2005, mu karere ka Kicukiro habonetse ubushyuhe bwa dogere selisiyusi 35.4, ari nabwo bushyuhe bwo hejuru umujyi wa Ki…",
+                "…ziya ifite ikirere gishyuha gifite ubushyuhe buri hagati ya dogere selisiyusi 26-28 umwaka wose. Nkigihugu cyibirwa, Indoneziy…",
+                "…epens mu 1999. Yagura umurima (Visual field) ugaragara kuri dogere 20. Yagerageje iki gitekerezo ku barwayi benshi mu bikorwa…"
+            ]
+        },
+        {
+            "word": "kilometero",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 59,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…barirwa hafi ya 10,216,190,ubwo rero n’abantu 367 kuri buri kilometero karre Umukuru w'igihugu c' Burundi ni Evariste Ndayishimiye…",
+                "…epfo gihana imbibi n'inyanja ku nkombe zifite uburebure bwa kilometero 2,798 zogerwa n'Inyanja ya Atalantika y'Amajyepfo n'Inyanja…",
+                "…i kizengurutse igihugu cya Lesotho. Gifite ubuso bungana na kilometero kare 1,221,037, kikaba gituwe n'abaturage barenga miliyoni…",
+                "…baturage bagera ku 5,000, ubwami bukaba bwarafite ubuso bwa kilometero kare 30,000 kandi bukungukira cyane ku bucuruzi bwakorwaga…",
+                "…Afurika, ikagira inkombe z'inyanja zifite uburebure burenga kilometero 2,500, zihana imbibi n'Inyanja ya Atalantika y'Amajyepfo nd…",
+                "…jyepfo ndetse n'Inyanja y'u Buhinde. Ifite ubuso bungana na kilometero kare 1,219,912, bikayigira igihugu cya 24 kinini ku isi. Ur…"
+            ]
+        },
+        {
+            "word": "akadomo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 9,
+            "articles": 8,
+            "substringOnly": 0,
+            "examples": [
+                "…ze kw'abakwe, ikaba intambwe ya mbere y'imikoranire ishyira akadomo ku kurambagiza. == Uko bikorwa == Gufata irembo Uko bikorwa…",
+                "…iga gisa n’iki neza ariko ku isongi ry’umunwa hakaba hariho akadomo k’umukara. Icyo gisiga gifite akadomo k’umukara kiracyafatw…",
+                "…’umunwa hakaba hariho akadomo k’umukara. Icyo gisiga gifite akadomo k’umukara kiracyafatwa nk’iki gifite umunwa w’umuhondo gusa…",
+                "…lle kirimo amagambo ahinnye, amwe yaranzwe nudomo 4 cyangwa akadomo 5 (koma), bidasobanuwe hano. Inama yabereye muri Arabiya Sa…",
+                "…Massif, birashoboka ko ibisigisigi byubuso bwakera bwisuri, akadomo. == Amashakiro ==…",
+                "…o ibanzirizwa na octave yayo, yanditswe nkumubare wongeyeho akadomo ko hejuru: ⟨':' ⟩ 5 8va, ⟨''' ⟩ 2 8va, nibindi 4th-8va C-wh…"
+            ]
+        }
+    ],
+}

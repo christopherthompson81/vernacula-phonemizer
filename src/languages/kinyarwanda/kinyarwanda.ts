@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeKinyarwanda } from "./normalize.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 
 const G = MANIFEST.graphemes;
@@ -56,7 +57,11 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class KinyarwandaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ THE NORMALIZER OWNS THE SHARED SYMBOL TIER CALL, so there is only one entry point here. rw needs
+        // rules on BOTH sides of that tier — de-grouping before it (or `NOT_VERSION` refuses `1.300m`) and
+        // the decimal spell-out after it (or the tier sees no number beside the sign) — and neither the
+        // Xhosa order nor the Chichewa one can express that. See normalize.ts's header.
+        return assembleClauses(normalizeKinyarwanda(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

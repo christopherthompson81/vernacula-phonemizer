@@ -919,6 +919,39 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // (`kiltive ant 60 degre latitid nò`). What is NOT read is the numero sign — which is read as
         // `nimewo` instead — and the birth marker `(° )`, which has no digit before it.
     },
+    rw: {
+        // ⚠ EVERY REFUSAL BELOW IS MEASURED OVER `tools/corpus/mined/rw.jsonc` AND ARGUED IN
+        // `src/languages/kinyarwanda/normalize.ts`'s header. rw has no FLEURS corpus and espeak ships no
+        // Kinyarwanda at all, so the artifact, the referee word list and `attest.ts` against rw.wikipedia are
+        // the whole haystack — which is why each entry names WHICH of those was asked.
+        // ⚠ AND `minus` IS DELIBERATELY ABSENT FROM THIS TABLE, so `review.ts --lang rw` stays RED on it. The
+        // corpus contains a genuine negative that is NOT a temperature — the latitude `−2.010556` in the
+        // Kabarondo article — omitting a minus INVERTS the value, and no general Kinyarwanda sign word is
+        // attested. The `ln` precedent exactly: a known-wrong reading does not get to be a green gate. What
+        // rw DOES read is the negative TEMPERATURE (`−27.2 °C` → `dogere selisiyusi 27 2 munsi ya zeru`),
+        // which is the one slot with an attested phrase; the class stays failing for the rest.
+        plus: "measured over the artifact: all 7 `+` are CHEMICAL FORMULATIONS (`Cypermethrin 4%+profenofos "
+            + "40%`, `Acetamiprid 20g/l + Lambda-Cyhalothrin 16g/l`), COLOUR MIXING in a children's teaching "
+            + "text (`umutuku + umuhondo = ikijuju`, ×3), an English sentence (`jobs for 11+ people`) and an "
+            + "album title (`Amatsiko Y'ibigeragezo + Abantu`). No arithmetic addition anywhere. And no word "
+            + "is available: `concept.ts` returns NO rw label for addition or subtraction at all (Wikidata has "
+            + "neither), which is the playbook's fleet-wide finding for the plus. Omitting a plus is lossless",
+        equals: "measured: all 13 `=` are FOREIGN-LANGUAGE GLOSSES (`Yağ Camii = 'Umusigiti w'Amavuta'`, "
+            + "`anesthésie = perte de la sensibilité au tact`, a Rwanda-French dictionary title), an INFOBOX "
+            + "FIELD that survived stripping (`population_estimate = 2,944,459`), EasyTimeline chart markup "
+            + "(`PlotArea = left:50 right:20`) and the colour-mixing text above. Kinyarwanda prose contains no "
+            + "equation, and no equals word is attested in any source this repo has for rw",
+        times: "measured: both `×` are LOST SUPERSCRIPTS, not multiplication — `gigawatt 100 (130 × 106 hp)` "
+            + "and `toni 500 × 106` are `10⁶` with the power flattened by the dump pipeline, so ANY reading of "
+            + "those two sentences is wrong. No rw multiplication word is attested either",
+        divide: "measured: `÷` is ×0 in the artifact. The 432 `/` shapes are dd/mm/yyyy DATES "
+            + "(`13/04/1994`) and decree numbers (`029/2005`), never division",
+        "plus-minus": "measured: `±` is ×0 in the artifact, and the reading would compose two words neither "
+            + "of which is attested",
+        "less-than": "measured: `<` is ×0 in the artifact and no comparative-magnitude phrase is attested "
+            + "digit-adjacent anywhere in the corpus or on rw.wikipedia",
+        "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
+    },
 };
 
 /**
@@ -1654,6 +1687,33 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         "math-sign": ["ScaleMajor =", "ScaleMinor =", "PlotArea =", "Radix = rasin", "lang=bon", "kreyòl=pa",
             "R = 4S", "R = 4(20) = 80", "a n =(-1) n", "(< 1.00mm)", "anba Lisans >", "2 % (+38 %)",
             "0 + 0 = 0 0 + 1 = 1 1 + 0 = 1 1 + 1 = 0"],
+    },
+    rw: {
+        // ⚠ THE CLASS-LEVEL REFUSALS AND THEIR MEASUREMENTS ARE IN `ACCEPTED_SIGN_SILENCE` ABOVE; these are the
+        // per-INSTANCE residue the artifact scan still reports, and each is a case where silence is the
+        // CORRECT reading rather than a missing rule.
+        // ⚠ `minus` LISTS ONE DESIGNATION AND DELIBERATELY NOT THE OTHER LINE. `(HIV -1)` is a virus type
+        // name whose hyphen is silent in speech — the `चंद्रयान -1` shape exactly. The corpus's OTHER minus is
+        // a genuine negative LATITUDE (`ku bubangikane bwa −2.010556`, the Kabarondo coordinates) and is NOT
+        // listed, so it keeps reporting: rw reads the negative TEMPERATURE it has a phrase for
+        // (`munsi ya zeru`) and has no reading for a bare negative number, which must stay visible.
+        minus: ["(HIV -1)"],
+        // TWO SIGNS WITH NO KINYARWANDA MONEY BEHIND THEM, for two different reasons.
+        // · `K¢` is not currency at all — it sits in a CYRILLIC TRANSLITERATION TABLE that reached the dump
+        //   as `indagkk. K¢ 19: б [b], в [v], …`, i.e. dump debris where the cent sign is a lost glyph.
+        // · `€` is the euro, and it is a SOURCING refusal: `iyero` scores 1 token in 1 article on
+        //   rw.wikipedia, and that article is the SAME machine-translated Spain piece the corpus already
+        //   carries — so the second haystack is not independent evidence. One hit in one article is a lead,
+        //   not a finding. `$`/`US$` and `FRw`/`Rwf`/`RWF` ARE read (`amadolari`, `amafaranga y'u Rwanda`,
+        //   both named beside their own symbols in rw.wikipedia's currency articles), so this is listed by
+        //   INSTANCE rather than class-silenced to keep those two readings under test.
+        currency: ["K¢ 19", "iyero (€)"],
+        // A SUPERSCRIPT ZERO USED AS A SECTION MARKER, French `N°` style — `4⁰ Ihame ryo kumenyesha`, the
+        // fourth principle in a numbered list of environmental principles. It is an ORDINAL indicator, not a
+        // power, so reading it as one would be the defect. rw's real exponents ARE read: `km²`/`m³` compose
+        // through the shared tier (`kilometero kare`, `metero kibe`, both attested collocations), which is
+        // why this is one instance and not a class.
+        exponent: ["4⁰"],
     },
 };
 

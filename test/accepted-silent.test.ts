@@ -183,7 +183,17 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // ⚠ AND ht's ABSENT `minus` KEY IS DELIBERATE, for exactly ln's reason: its ten drops include real
         // temperatures (`−20°C`) and the corpus's only candidate word is `mwen`, which is Haitian for "I".
         // A known-wrong silence does not get to be a green gate, so `review.ts --lang ht` stays red.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
+        // rw's three classes are each a different KIND of correct silence, which is why none of them is a
+        // class-level entry: a virus-type designation (`(HIV -1)`, the `चंद्रयान -1` shape), a cent sign that
+        // is dump debris inside a Cyrillic transliteration table plus a euro whose only rw.wikipedia hit is
+        // the machine-translated article the corpus already contains, and a superscript zero used as a
+        // French-style SECTION MARKER (`4⁰ Ihame`) rather than a power. Kinyarwanda's `$`, `FRw` and `km²`
+        // are all READ, so instance-listing is what keeps those three readings under test.
+        // ⚠ AND rw's SECOND minus is deliberately NOT listed — a genuine negative LATITUDE (`−2.010556`),
+        // which keeps `review.ts --lang rw` red on the minus class. Same stance as `ln`: rw reads the
+        // negative TEMPERATURE it has an attested phrase for and nothing else, and a bare negative that
+        // would INVERT must stay visible.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "rw", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

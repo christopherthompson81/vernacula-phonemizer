@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { numberToWords } from "../src/languages/kinyarwanda/numbers.ts";
+import { normalizeKinyarwanda as N } from "../src/languages/kinyarwanda/normalize.ts";
 
 // Kinyarwanda (rw) cardinal numbers — Bantu (JD61), Latin orthography, composed as TEXT and then run through the
 // g2p (hence ⟨r⟩→ɾ, ⟨j⟩→ʒ, ⟨cy⟩→kʲ, ⟨cu⟩→t͡ʃu, ⟨ng⟩→ŋ in the expected IPA).
@@ -56,5 +57,172 @@ describe("Kinyarwanda numbers", () => {
         expect(numberToWords(1000001)).toBe("miriyoni na rimwe");
         expect(numberToWords(1000000000)).toBe("rimwe zeru zeru zeru zeru zeru zeru zeru zeru zeru");
         expect(phonemize("1000000", "rw")).toBe("miɾijoni");
+    });
+});
+
+// ── TEXT NORMALIZATION (src/languages/kinyarwanda/normalize.ts) ────────────────────────────────────────────
+//
+// Asserted through `phonemize` wherever the reading is the point, and through `normalizeKinyarwanda` where
+// the ORDER of the rewritten words is (the g2p obscures word boundaries less than it obscures spellings, but
+// the text form is what the file's ordering comments are about).
+//
+// ⚠ PIN THE RULE'S BRANCHES, NOT THE CORPUS'S INSTANCES (trap 13). Every table-plus-composition rule here has
+// at least three: the shared tier's number-then-unit path, the LOCAL unit-then-number path the tier cannot
+// see, and the boundary between them. Several cases below are deliberately shapes the rw corpus does NOT
+// contain — the adversarial neighbour of a rule is where trap 8 says the defect lives.
+//
+// Sourcing for every word asserted here is in normalize.ts's header and in tools/corpus/attest/rw.jsonc.
+describe("Kinyarwanda text normalization", () => {
+    test("percent — POSTPOSED `ku ijana`, on an integer and on a decimal", () => {
+        expect(N("60%")).toBe("60 ku ijana");
+        // The decimal is spelled digit-by-digit (no separator word is sourced), and the percent word must
+        // still have attached BEFORE that happened — this is the coupling that forces the tier to run in the
+        // middle of the pass rather than at either end.
+        expect(N("49.5%")).toBe("49 5 ku ijana");
+        expect(N("98,6%")).toBe("98 6 ku ijana");
+        expect(phonemize("60%", "rw")).toBe("miɾoŋo itandatu ku iʒana");
+    });
+
+    test("percent SPAN keeps exactly one sign", () => {
+        // Without this the tier reads each side separately and the hyphen is dropped, leaving the joiner
+        // silent inside a doubled noun (`25 ku ijana-30 ku ijana`).
+        expect(N("25%-30%")).toBe("25 kugeza kuri 30 ku ijana");
+    });
+
+    test("currency — PREFIXED, and the ISO codes are keys too", () => {
+        expect(N("$1,000")).toBe("amadolari 1000");
+        expect(N("US $ 115,600,000")).toBe("US amadolari 115600000");
+        expect(N("Rwf120,250")).toBe("amafaranga y'u Rwanda 120250");
+        expect(N("miliyari 290 Frw")).toBe("miliyari amafaranga y'u Rwanda 290");
+        // ⚠ THE EURO IS DELIBERATELY UNREAD — one hit in one article, and that article is the one the corpus
+        // already carries. A dropped sign is missing; a wrong currency word is confidently wrong.
+        expect(N("ni iyero (€)")).toBe("ni iyero (€)");
+    });
+
+    test("units — BOTH written orders converge on the same reading", () => {
+        // The tier sees this one…
+        expect(N("26,338 km²")).toBe("kilometero kare 26338");
+        // …and cannot see this one, which is 30 of the artifact's 72 unit instances (trap 47 reason 2).
+        expect(N("km² 26,338")).toBe("kilometero kare 26338");
+        expect(N("m 900")).toBe("metero 900");
+        expect(N("cm 25")).toBe("santimetero 25");
+        expect(N("kg 250")).toBe("kirogarama 250");
+        // ⚠ THE UNSPACED FORM IS NOT THE PREFIX SHAPE: `km2` is `km²` with an ASCII exponent, and an optional
+        // space in the prefix rule read its `2` as the unit's number and emitted `kilometero2`.
+        expect(N("450,1hab/km2")).toBe("450 1hab kuri kilometero kare");
+    });
+
+    test("⚠ a GROUPED thousand glued to a one-letter unit — the reason de-grouping runs before the tier", () => {
+        // The tier's `NOT_VERSION` guard (`802.11g` is not eleven grams) rejects `\d+[.,]\d+[a-zA-Z]`, so
+        // `1.300m` reaches it as a version designation and the metre is refused. De-grouped first it reads.
+        expect(N("hagati ya 1.300m na 1.800m")).toBe("hagati ya metero 1300 na metero 1800");
+        // …and the guard still does its job on a real dotted designation: no unit word appears.
+        expect(N("802.11g")).toBe("802 1 1g");
+    });
+
+    test("the exponent words, on both powers and on a bare denominator", () => {
+        expect(N("8090 km²")).toBe("kilometero kare 8090");
+        expect(N("metero kibe 256")).toBe("metero kibe 256"); // already spelled out — untouched
+        expect(N("kilometero kibe 65")).toBe("kilometero kibe 65");
+        expect(N("16.598/km²")).toBe("16598 kuri kilometero kare");
+        // A unit standing behind a quantifier with no numeral of its own — the tier's rate path cannot see it.
+        expect(N("abantu 438 kuri buri km²")).toBe("abantu 438 kuri buri kilometero kare");
+    });
+
+    test("rates compose with the attested `kuri`", () => {
+        // The corpus glosses its own symbol: "kirogarama ijana z'imbuto KURI hegitari imwe (100kg/ha)".
+        expect(N("100kg/ha")).toBe("kirogarama 100 kuri hegitari");
+        expect(N("200g/l")).toBe("garama 200 kuri litiro");
+    });
+
+    test("degrees — Celsius is named, Fahrenheit is claimed but UNnamed", () => {
+        expect(N("20 °C")).toBe("dogere selisiyusi 20");
+        // ⚠ `farenheti` is 0 tokens / 0 articles on rw.wikipedia. The letter is claimed so it cannot reach the
+        // g2p as a phoneme; the scale is left unsaid rather than invented, and the °C beside it already said
+        // the number's meaning.
+        expect(N("24 ° C (75 ° F)")).toBe("dogere selisiyusi 24 (dogere 75)");
+        // The redundancy guard: the writer already typed the noun, so it is not repeated (BOTH directions).
+        expect(N("hagati ya dogere 22° na 35°")).toBe("hagati ya dogere 22 na 35");
+    });
+
+    test("a NEGATIVE temperature — the one slot with an attested sign reading", () => {
+        expect(N("–7 °C")).toBe("dogere selisiyusi 7 munsi ya zeru");
+        expect(N("−27.2 °C")).toBe("dogere selisiyusi 27 2 munsi ya zeru");
+        // ⚠ AND NOT A BARE NEGATIVE. `munsi ya zeru` is "below zero" — it presupposes a scale with a zero
+        // point and says nothing about a plain `-5`, for which nothing is attested. Deliberately unread, and
+        // `review.ts --lang rw` stays RED on the minus class because of it.
+        expect(N("ubushyuhe bwa -5")).toBe("ubushyuhe bwa -5");
+    });
+
+    test("coordinates — the compass letter is a DIRECTION, and its decimal is spelled here", () => {
+        expect(N("2° 36′ 58″ S")).toBe("dogere 2 36′ 58″ amajyepfo");
+        // ⚠ THE ONLY THREE-PLACE DECIMALS IN THE CORPUS ARE COORDINATES, which is why de-grouping rejects a
+        // following `°` and why the degree arms spell their own operand: step 10 takes a 1–2 digit tail only.
+        expect(N("1.867 ° S 30.367 ° E")).toBe("dogere 1 8 6 7 amajyepfo dogere 30 3 6 7 iburasirazuba");
+    });
+
+    test("ranges — `kugeza kuri`, ascending only, and the unit is HOISTED", () => {
+        expect(N("15-24")).toBe("15 kugeza kuri 24");
+        expect(N("1250-1750mm")).toBe("milimetero 1250 kugeza kuri 1750");
+        expect(N("80-94 cm")).toBe("santimetero 80 kugeza kuri 94");
+        expect(N("dogere selisiyusi 26-28")).toBe("dogere selisiyusi 26 kugeza kuri 28");
+        expect(N("40-42 °")).toBe("dogere 40 kugeza kuri 42");
+        // ⚠ NON-ASCENDING SPANS ARE DECLINED — seasons, scores and formulations, all measured in the corpus.
+        expect(N("1990–91")).toBe("1990–91");
+        expect(N("igitego 1-0")).toBe("igitego 1-0");
+        expect(N("NPK(17-17-17)")).toBe("NPK(17-17-17)");
+        // …and a hyphen that is not a span at all.
+        expect(N("COVID-19")).toBe("COVID-19");
+        expect(N("Kuva 2006-Ukwakira")).toBe("Kuva 2006-Ukwakira");
+    });
+
+    test("times — the marker identifies a clock; three fields are a duration unless a zone says otherwise", () => {
+        expect(N("saa 10:00 za mbere")).toBe("saa 10 za mbere");
+        expect(N("saa 3:15")).toBe("saa 3 na iminota 15");
+        // A race duration, composed from the wiki's own spell-out of the same quantity.
+        expect(N("igihe cya 2:51:07")).toBe("igihe cya amasaha 2 iminota 51 amasegonda 7");
+        // An ISO timestamp is NOT a duration — the timezone is the discriminator, and nothing is invented.
+        expect(N("11:59:59 UTC")).toBe("11 59 59 UTC");
+        // ⚠ AN UNMARKED TWO-FIELD TIME KEEPS ITS DIGITS AND LOSES ONLY THE SPURIOUS PAUSE. `:` is
+        // clausePunctuation, so a bible verse was reading as two clauses; there is no attested Kinyarwanda
+        // reading for a verse reference or a pace, so the colon is spent on a space and nothing else.
+        expect(N("Marko 14:25")).toBe("Marko 14 25");
+    });
+
+    test("de-grouping and decimals — both separators do both jobs, and the 3-digit block decides", () => {
+        expect(N("2,944,459")).toBe("2944459");
+        expect(N("19.000.700")).toBe("19000700");
+        expect(N("8 000 000")).toBe("8000000");
+        expect(N("7.87")).toBe("7 8 7");
+        expect(N("1157,3 km²")).toBe("kilometero kare 1157 3");
+        // ⚠ A DOTTED CHAIN IS NOT A DECIMAL. `NPK17.17.17` is a fertiliser grade, and a `(?!\d)` guard let its
+        // first pair through because the character after it is a dot rather than a digit.
+        expect(N("NPK17.17.17")).toBe("NPK17.17.17");
+        // …while a decimal at a SENTENCE END still reads, which the obvious wider guard would have broken.
+        expect(N("ni 49.5.")).toBe("ni 49 5.");
+        // A date comma has a four-digit tail and is excluded by de-grouping and by the decimal rule alike.
+        expect(N("Ukuboza 26,2008")).toBe("Ukuboza 26,2008");
+    });
+
+    test("dotted capital runs — the interior dots were sentence breaks, and a dot is never ADDED", () => {
+        expect(N("muri U.R.S.S. no muri Pologne")).toBe("muri URSS no muri Pologne");
+        expect(N("muri U.R.S.S.")).toBe("muri URSS."); // the sentence really does end
+        // ⚠ THE DOTLESS SHAPE IS rw's COMMONEST, and the Chichewa rule this is copied from would have
+        // manufactured a sentence break in the middle of an agency's own name.
+        expect(N("R.R.A Rwanda Revenue Authority")).toBe("RRA Rwanda Revenue Authority");
+    });
+
+    test("the ampersand takes the manifest's own conjunction, spaced on both sides", () => {
+        expect(N("Arts & Sciences")).toBe("Arts na Sciences");
+        // Spaced, or two initialisms fuse into one token (the merge defect of trap 18).
+        expect(N("E&D Limited")).toBe("E na D Limited");
+    });
+
+    test("⚠ ORDINARY TEXT SURVIVES — no rule may fire on a plain Kinyarwanda sentence", () => {
+        const plain = "U Rwanda ni igihugu giherereye muri Afurika y'uburengerazuba, mu karere k’ibiyaga bigari.";
+        expect(N(plain)).toBe(plain);
+        // `kare`/`kibe`/`na`/`kuri` are all ordinary words as well as rule output; none of them is a trigger.
+        const words = "Mu karere ka Huye, abantu bahageze kare kandi bagumye kuri gahunda.";
+        expect(N(words)).toBe(words);
     });
 });
