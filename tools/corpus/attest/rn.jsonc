@@ -1,0 +1,235 @@
+// WIKIPEDIA WORD ATTESTATION — rn. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "rn",
+        "wiki": "rn.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+            {
+                "word": "kwadarato",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…n’Uburaya. Umurwa Mukuru: Ankara Uburinganire: Ibirometero kwadarato ibihumbi amajana indwi na mirongo umunani na gatatu n'amaja…",
+                "…dana: Abantu ijana na babiri (102 personnes ) ku kirometero kwadarato ( 1km²).…",
+                "…urwa mukuru: Ville de Saint-Marin Uburinganire: Ibirometero kwadarato 61,19 Abanyagihugu: 33 191 (2016) Ukurundana: Abantu 542 ku…",
+                "…agihugu: 33 191 (2016) Ukurundana: Abantu 542 ku kirometero kwadarato.…",
+                "…89 (2008) Umurwa mukuru: Muramvya Uburinganire: Ibirometero kwadarato 695.52…",
+                "…0 (2019) Umurwa mukuru: Bujumbura Uburinganire: Ibirometero kwadarato 127 ukurundana kw'abantu:8,605…"
+            ]
+            },
+        {
+                "word": "kare",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…u DNA, ariko hari uburyo bwo kuyirinda kwiyongera, kuyifata kare, no kugabanya ibibazo itera: 1. Kumenya uko wayifise hakiri…",
+                "…no kugabanya ibibazo itera: 1. Kumenya uko wayifise hakiri kare Gupimisha amaraso (screening) kugira umenye niba ufise gene…",
+                "…Kugenda kwa muganga buri gihe bifasha kubona ibibazo hakiri kare. Ico wamenya gikomeye: Sickle-cell ntikurindwa n’isuku cank…",
+                "…rondoka (genes). Ico umuntu yokora cane ni kuyimenya hakiri kare no kuyigabanya ingaruka.…",
+                "…wa cangwa guhungabanywa. - Guhorana isuku no kwivuza hakiri kare niba harimwo uburibwe, kuvyimba, cangwa impinduka idasanzwe…",
+                "…nyuma y’u Burusiya, aho gifise uburinganire bwa kilometero kare 9,984,670. Kanada ihana imbibe na Leta Zunze Ubumwe z’Ameri…"
+            ]
+            },
+        {
+                "word": "ibirometero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…i muri Aziya n’Uburaya. Umurwa Mukuru: Ankara Uburinganire: Ibirometero kwadarato ibihumbi amajana indwi na mirongo umunani na gata…",
+                "…ihugu: 292,589 (2008) Umurwa mukuru: Muramvya Uburinganire: Ibirometero kwadarato 695.52…",
+                "…gu: 1,100,000 (2019) Umurwa mukuru: Bujumbura Uburinganire: Ibirometero kwadarato 127 ukurundana kw'abantu:8,605…",
+                "…agihugu: 333,510 (2008) Umurwa mukuru: Rutana Uburinganire: Ibirometero kwadarato 1,959.45. == == Gasange Kanarunyonga Gasenga Rusu…",
+                "…agihugu: 400,530 (2008) Umurwa mukuru: Ruyigi Uburinganire: Ibirometero kwadarato 2,338.88 == == Bweru Busuma Kivoga Musenyi == ==…",
+                "…agihugu: 436,443 (2008) Umurwa mukuru: Karuzi Uburinganire: Ibirometero kwadarato 1,457.40. == == Butaha Nyabisaka Ramba Bukirasazi…"
+            ]
+            },
+        {
+                "word": "kirometero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…019) Ukurundana: Abantu ijana na babiri (102 personnes ) ku kirometero kwadarato ( 1km²).…",
+                "…a Gitega iri muntara cumi n'umunani z'Uburundi, ikaba ifise kirometero kwadaro 1,979 kandi ibamwo abantu 725,223 (2008). Ifise ama…",
+                "…61,19 Abanyagihugu: 33 191 (2016) Ukurundana: Abantu 542 ku kirometero kwadarato.…",
+                "…42 Abanyagihugu: 143.975.923 (2015) Ukurundana: Abantu 8 ku kirometero kwadarato. == Ibisagara == Krasnodar Moscou Novossibirsk Sa…",
+                "…8 Abanyagihugu: 37.873.253 (2021) Ukurundana: Abantu 137 ku kirometero kwadarato.…",
+                "…6 Abanyagihugu: 38.454.576 (2016) Ukurundana: Abantu 123 ku kirometero kwadarato.…"
+            ]
+            },
+        {
+                "word": "metero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ntara ya Ruyigu mu gihugu c' Uburundi. Rufise uburebure bwa Metero 1 539…",
+                "…ntara ya Ruyigi mu gihugu c' Uburundi. Rufise uburebure bwa metero 1214.…",
+                "…u gihugu c' Uburundi. Bagundi ni uruzi rufise uburebure bwa metero 1330.…",
+                "…u gihugu c' Uburundi. Urwo ruzi rukaba rufise uburebure bwa metero 1 566.…",
+                "…a ya Cankuzo mu karere ka Mwiyanike, rukagira uburebure bwa Metero 1 265 .…",
+                "…ozi mu buraruko bw'Uburundi. Urwo ruzi rufise umurebure bwa Metero 1 543…"
+            ]
+            },
+        {
+                "word": "milimetero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ya cane ari Nzero (dogere 18). Imvura yo hagati mu mwaka ni milimetero 1.086; ukwezi kugwamwo imvura nyinshi ni Kigarama (milimete…",
+                "…limetero 1.086; ukwezi kugwamwo imvura nyinshi ni Kigarama (milimetero 154), naho gukakara cane kwizuba ni mukwezi kwa Mukakaro (m…",
+                "…o 154), naho gukakara cane kwizuba ni mukwezi kwa Mukakaro (milimetero 3). == Ibibazo == Imyuzure ya Muha n'iya Mpimba irabangamir…",
+                "…afi 18 ° C k'umwaka wose. Imvura igwa buri mwaka igera kuri milimetero 800, cank metero 0.8. Imvura iragwa cane kuva mu kwicenda g…"
+            ]
+            },
+        {
+                "word": "dogere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…iri vyanditswe mugihe kiba gisigaye cumwaka, ni ukuvuga nka dogere 22/25 ku mutaga mu kiyaya, no hafi ya 27/28 ° C mu biyaya v…",
+                "…irenza urugero, kubera ko ubushuhe ntarengwa buri hagati ya dogere 29 hafi yumwaka wose, nubwo bugera kuri 30/31 ° C kuva haga…",
+                "…uha cane kuva muri Nyakanga kugeza muri Ntwarante, hamwe na dogere zigera kuri 35 zubushuhe mu burengero bw'igihugu. Mu buseru…",
+                "…gihe c'izuba, ibipimo vy'ubushuhe mu karere biri hagati ya dogere selisiyusi 20 na 25. Amezi ashushe ahanini ni Gitugutu na M…",
+                "…biri hejuru gatoya, biba bifise uburinganire buri hejuru ya dogere selisiyusi 28. Imvura mu karere k'Imbo iratandukanye bitewe…",
+                "…c'ako karere ni ica savane. Ubushuhe bwo hagati mu mwaka ni dogere 20. Ukwezi gushushe cane ni Myandagaro (dogere 25), naho gu…"
+            ]
+            },
+        {
+                "word": "selisiyusi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…'izuba, ibipimo vy'ubushuhe mu karere biri hagati ya dogere selisiyusi 20 na 25. Amezi ashushe ahanini ni Gitugutu na Munyonyo.Mu…",
+                "…juru gatoya, biba bifise uburinganire buri hejuru ya dogere selisiyusi 28. Imvura mu karere k'Imbo iratandukanye bitewe naho utumb…"
+            ]
+            },
+        {
+                "word": "farenheti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kw'ijana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…ongo itatu iheze, bakagwira kurugero rungana n’ibice bitatu kw'ijana (3%) ku mwaka. Tugereranije, dusanga hafi ica kabiri c’abar…",
+                "…undi bafise munsi y’imyaka 15, ibice bingana mirongo icenda kw'ijana (90%) babeshwaho n’uburimyi. Abangana n’ibice mirondo indwi…",
+                "…canecane n´uburimyi hamwe n´ubworozi. Ibice mirongo icenda kw'ijana (90%) vy´abarundi nico bakora. Kuva mu 1993 aho ingwano ite…",
+                "…(5) 2020. Aho yashitse mu kibanza ca 2 anaronka amajwi 24,4 kw'ijana inyuma y'umukandida wa CNDD-FDD, Evariste Ndayishimiye, yar…",
+                "…umukandida wa CNDD-FDD, Evariste Ndayishimiye, yaronse 68,7 kw'ijana. Rwasa n'umugambwe wiwe CNL bakaba bamenyeshejeko ayo mator…",
+                "…bihumbi ijana (60 000 na 100 000). Hafi y'ibice mirongo ine kw'ijana (40%) y'ubwo bwoko bw'ibiti bwoba bugeramiwe, bugenda buzim…"
+            ]
+            },
+        {
+                "word": "gushika",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…undi mu 1962. Batwaye bakurikirana guhera mu mwaka w'i 1966 gushika mu 1993 vyisubiriza kandi kuva mu 1996 gushika mu 2003. Abo…",
+                "…aka w'i 1966 gushika mu 1993 vyisubiriza kandi kuva mu 1996 gushika mu 2003. Abo bakuru b'igihugu akaba araba bakurikira: - Mic…",
+                "…i mukiringo c'imyaka cumi n'itanu kuva muri Myandagaro 2005 gushika muri Ruheshi 2020. == Ubuzima == Nkurunziza yavutse 1963 mu…",
+                "…, imyaka 71. Perezida w'Ubufaransa kuva kuwa 15 Rusama 2012 gushika kuwa 14 Rusama 2017.…",
+                "…Guhahamuka (PTSD). Ivyo bishobora gushika igihe umuntu yagize ubwoba cane canke yahuye n’ingorane zim…",
+                "…oreshejwe n'aba isilamu bo mu bwoko bwose mu gutazira Imana gushika ubu.…"
+            ]
+            },
+        {
+                "word": "amadorari",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…era kuri 13,000 kuri miliyoni zirindwi kuri Spotify binjije amadorari ibihumbi 50 cyangwa arenga mu 2020.…"
+            ]
+            },
+        {
+                "word": "idorari",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "amadolari",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ifaranga",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "amarundi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    

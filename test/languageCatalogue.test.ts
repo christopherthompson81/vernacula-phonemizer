@@ -83,8 +83,15 @@ describe("language catalogue", () => {
                 rows.slice(1).map((r) => r.split("\t")).find((r) => r[col.code] === code)?.[col.norm] ?? "MISSING";
 
             // Borrows one helper across a directory boundary; runs no other language's normalizer.
+            // ⚠ THE ASSERTION IS "NOT inherited", NOT "EMPTY", AND THE DIFFERENCE IS THE WHOLE POINT. These
+            // five are named because a borrowed helper must never be read as delegation — not because they
+            // must stay untreated. `rn` (Kirundi) now has `src/languages/kirundi/normalize.ts` of its own and
+            // correctly reads `done`, which the original `.toBe("")` failed: it pinned the accident that none
+            // of the five had a layer yet, and would have fired on whichever of them was treated first. The
+            // invariant to protect is that borrowing `composeRwandaRundi` never makes Kirundi look like it
+            // runs Kinyarwanda's layer — `done` and `""` both satisfy that; only `inherited` breaks it.
             for (const code of ["rn", "bar", "fo", "ba", "bs"])
-                expect(value(code), `${code} borrows a helper — it must not read as inherited`).toBe("");
+                expect(value(code), `${code} borrows a helper — it must not read as inherited`).not.toBe("inherited");
 
             // Calls another language's FACTORY, so that engine — and its layer — is what actually runs.
             for (const code of ["es-419", "awa", "bho", "mai", "pt-BR", "en-GB"])

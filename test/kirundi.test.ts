@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord as rn } from "../src/languages/kirundi/kirundi.ts";
+import { MANIFEST } from "../src/languages/kirundi/manifest.ts";
+import { normalizeKirundi } from "../src/languages/kirundi/normalize.ts";
 import { numberToWords as rnNum } from "../src/languages/kirundi/numbers.ts";
 import { phonemizeWord as rw } from "../src/languages/kinyarwanda/kinyarwanda.ts";
 import { numberToWords as rwNum } from "../src/languages/kinyarwanda/numbers.ts";
@@ -68,5 +70,106 @@ describe("Kirundi numbers", () => {
         expect(rnNum(12345)).toBe("ibihumbi icumi na kabiri na amajana atatu na mirongo ine na gatanu");
         expect(rnNum(1000000)).toBe("umuriyoni"); // rw: miriyoni
         expect(phonemize("1000000", "rn")).toBe("umuɾijoni");
+    });
+});
+
+// ── TEXT NORMALIZATION (src/languages/kirundi/normalize.ts) ────────────────────────────────────────────────
+// Evidence: tools/corpus/mined/rn.jsonc (4,125 rn.wikipedia paragraph segments) + tools/corpus/attest/rn.jsonc.
+// ⚠ These pin the rule's BRANCHES, not the corpus's instances (trap 13) — and in particular they pin the SEVEN
+// places where Kirundi diverges from Kinyarwanda, because rw's layer is the template this one deliberately did
+// not copy. A regression toward rw is the failure mode these tests exist to catch.
+describe("Kirundi text normalization", () => {
+    test("the squared word is kwadarato, NOT Kinyarwanda's kare (which means 'early' in Kirundi)", () => {
+        // corpus 36:1, rn.wikipedia 29/20, slot probe `--after ibirometero,kirometero` → kwadarato ×3, no competitor
+        expect(normalizeKirundi("606km²")).toBe("ibirometero kwadarato 606");
+        expect(normalizeKirundi("km² 517")).toBe("ibirometero kwadarato 517"); // unit BEFORE the number
+        expect(normalizeKirundi("3.287.263 km2")).toBe("ibirometero kwadarato 3287263"); // ASCII exponent
+        // the DENOMINATOR takes the class-7 SINGULAR — `Abantu 542 ku kirometero kwadarato`
+        expect(normalizeKirundi("(233/km²)")).toBe("(233 kuri kirometero kwadarato)");
+        expect(normalizeKirundi("kilometero kare")).toContain("kare"); // never rewritten TO kare
+    });
+
+    test("three grouping conventions coexist — French dots, Anglo commas, and spaces", () => {
+        expect(normalizeKirundi("12.100.000")).toBe("12100000");
+        expect(normalizeKirundi("104 000 000 000")).toBe("104000000000");
+        // ⚠ THE ANGLO FORM: comma grouping AND a dot decimal in ONE number, ×9 in the corpus. rw's trailing
+        // guard `(?!\d|[.,]\d)` rejects this outright, which is why rn's comma arm uses `(?!\d|,\d)`.
+        expect(normalizeKirundi("1,964.54")).toBe("1964 5 4");
+        expect(normalizeKirundi("Ibirometero kwadarato 1,457.40.")).toBe("Ibirometero kwadarato 1457 4 0.");
+    });
+
+    test("a dotted d.m.yyyy date spends its dots — a cell rw's corpus does not contain", () => {
+        expect(normalizeKirundi("26.08.1940")).toBe("26 08 1940");
+        expect(normalizeKirundi("2.2.1946")).toBe("2 2 1946");
+        // and the date span stays declined, because it now runs backwards
+        expect(normalizeKirundi("24.11.1949 - 17.12.2020")).toBe("24 11 1949 - 17 12 2020");
+    });
+
+    test("the span joiner is chosen by what is spanned — years take the kuva frame, quantities do not", () => {
+        // 14/14 of Kirundi's four-digit year spans carry `kuva`; zero stand bare
+        expect(normalizeKirundi("(1981-1989)")).toBe("(kuva 1981 gushika 1989)");
+        expect(normalizeKirundi("kuva 2008 - 2009")).toBe("kuva 2008 gushika 2009"); // an existing kuva is not doubled
+        // a QUANTITY span takes the bare infix — `ibilometero 26 gushika kuri 28`
+        expect(normalizeKirundi("metero 1.500 / 1.800")).toBe("metero 1500 gushika kuri 1800");
+        expect(normalizeKirundi("2009-2005")).toBe("2009-2005"); // descending: declined
+    });
+
+    test("a TEMPERATURE span takes `na`, not the gushika frame", () => {
+        // `hagati ya 17°C na 29°C` (corpus) and `dogere selisiyusi 20 na 25` (wiki) — one noun, `na` between
+        expect(normalizeKirundi("27/28 ° C")).toBe("dogere 27 na 28");
+        expect(normalizeKirundi("dogere 22/25")).toBe("dogere 22 na 25"); // the noun is already there
+    });
+
+    test("degrees: the scale LETTER is claimed but NO scale name is emitted", () => {
+        // rn reads a Celsius temperature as bare `dogere` in 6 of its 8 wiki instances; `selisiyusi` is ×0 in
+        // the corpus and the Burundian press writes `degre Celsius`. The C must not reach the g2p as [t͡ʃ].
+        expect(normalizeKirundi("30 ° C")).toBe("dogere 30");
+        expect(normalizeKirundi("0,6 ° C")).toBe("dogere 0 6");
+        expect(phonemize("20 °C", "rn")).toBe("doɡeɾe miɾoŋo ibiɾi");
+        expect(normalizeKirundi("9°55'")).toBe("dogere 9 55'"); // a coordinate; rn spells its directions out
+    });
+
+    test("percent is kw'ijana, postposed, and said ONCE when the clause already spells it", () => {
+        expect(normalizeKirundi("30%")).toBe("30 kw'ijana");
+        // trap 12 — the corpus writes the word AND the parenthesised sign five times
+        expect(normalizeKirundi("bane kw'ijana (4%)")).toBe("bane kw'ijana (4)");
+        expect(normalizeKirundi("ibice mirongo icenda kw’ijana (90%)")).toBe("ibice mirongo icenda kw’ijana (90)");
+    });
+
+    test("the dollar is amadorari — the ⟨r⟩ spelling Kirundi's own orthography ruling prescribes", () => {
+        // probing Kinyarwanda's `amadolari` returned 0/0 and nearly shipped a refusal (trap 40)
+        expect(normalizeKirundi("27 664 $")).toBe("amadorari 27664");
+        expect(normalizeKirundi("$ 4,000")).toBe("amadorari 4000");
+    });
+
+    test("the minus stays UNREAD, deliberately — no Kirundi word for the sign is attested", () => {
+        // trap 24: a red gate that is correct beats a green gate that is wrong. rw's `munsi ya zeru` is a
+        // KINYARWANDA citation and is not borrowed; the sign inverts, so the defect stays visible.
+        expect(normalizeKirundi("-39°C")).toBe("dogere -39");
+        expect(normalizeKirundi("+1 000 000")).toBe("+1000000");
+    });
+
+    test("no clock and no duration rule — rn's colons are Bible verses, not times", () => {
+        // `saa`/`amasaha`/`iminota`/`amasegonda` are all ×0 in rn's corpus, and all 6 colon runs are references
+        expect(normalizeKirundi("IVYAKOZW 11:22")).toBe("IVYAKOZW 11 22");
+        expect(normalizeKirundi("Mariko 16:16")).toBe("Mariko 16 16");
+        expect(normalizeKirundi("12:22/24")).toBe("12 22/24"); // the slash span guard declines a verse
+    });
+
+    test("dotted capital runs lose their interior sentence breaks, and a dot is only ever KEPT", () => {
+        expect(normalizeKirundi("( E.P.E.L )")).toBe("( EPEL )"); // the dotless-final shape
+        expect(normalizeKirundi("(B.E.R.)")).toBe("(BER)");
+        expect(normalizeKirundi("L. L. Zamenhof")).toBe("LL Zamenhof");
+    });
+
+    test("the one-letter unit key `m` is NOT declared — Kirundi's locative elision needs it", () => {
+        // rw declares `m`; rn writes `50 m’ubumwe`, where m' is the locative and not a metre
+        expect(normalizeKirundi("zigira 49 na 50 m’ubumwe bwa Leta")).toBe("zigira 49 na 50 m’ubumwe bwa Leta");
+        // and a genuine decimal glued to the two-letter key still reads, because NOT_VERSION needs one letter
+        expect(normalizeKirundi("196.7km²")).toBe("ibirometero kwadarato 196 7");
+    });
+
+    test("the ampersand reads as the manifest's own conjunction", () => {
+        expect(normalizeKirundi("R & D")).toBe(`R ${MANIFEST.numbers.and} D`);
     });
 });

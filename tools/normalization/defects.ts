@@ -1074,6 +1074,39 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "that bears its name (`ꠐꠦꠈꠣ (ꠝꠥꠖ꠆ꠞꠣ ꠙ꠆ꠞꠔꠤꠇ ꠪ ৳ ॥ ꠛ꠆ꠎꠣꠋꠇ ꠇꠧꠒ ꠪ BDT)`). No dollar, euro, "
             + "pound or yen amount occurs, so no name for one is claimed",
     },
+    rn: {
+        // ⚠ EVERY REFUSAL BELOW IS MEASURED OVER `tools/corpus/mined/rn.jsonc` (4,125 paragraph segments from
+        // an rn.wikipedia dump) AND ARGUED IN `src/languages/kirundi/normalize.ts`'s header. rn has no FLEURS
+        // corpus and espeak ships no Kirundi at all, so the artifact, the referee word list and `attest.ts`
+        // against rn.wikipedia are the whole haystack — which is why each entry names WHICH was asked.
+        // ⚠ AND `minus` IS DELIBERATELY ABSENT FROM THIS TABLE, so `review.ts --lang rn` stays RED on it. rn's
+        // one genuine negative is the temperature `(nko munsi ya -39°C)`, and Kirundi has no attested word for
+        // the sign: the corpus, the referee list and rn.wikipedia are all silent, and Kinyarwanda's phrase
+        // (`munsi ya zeru`) is a KINYARWANDA citation that this language does not get to borrow — the whole
+        // premise of rn's layer. Omitting a minus INVERTS the value where omitting a plus is lossless, so the
+        // class stays failing. Same stance as `ln` and `rw`, reached from rn's own evidence.
+        plus: "measured over the artifact: both `+` are WIKIPEDIA PORTAL SIZE MARKERS, not arithmetic — "
+            + "`+1 000 000 : English · Deutsch · Français · Español` and `+100 000 : Nederlands · Polski · "
+            + "Svenska`, i.e. the interwiki lists of wikis above an article count. No addition appears in "
+            + "Kirundi prose anywhere in the corpus, and no Kirundi word for the sign is attested in the "
+            + "corpus, the referee list or on rn.wikipedia. Omitting a plus is lossless",
+        equals: "measured: the single `=` is a LEXICAL GLOSS in a vocabulary explainer, not an equation — "
+            + "`gushavura canke gutungurwa = gutangara` ('to be angry or surprised = to be astonished'), "
+            + "where the sign means 'that is'. Kirundi prose in this corpus contains no equation at all, and "
+            + "no equals word is attested in any source this repo has for rn",
+        times: "measured: `×` is ×0 in the artifact. The corpus's multiplicative idiom is written out as a "
+            + "word (`igitigiri c'abantu caraduze incuro kabiri`, 'doubled'), never as a sign, and no Kirundi "
+            + "multiplication word is attested digit-adjacent anywhere",
+        divide: "measured: `÷` is ×0 in the artifact. The 12 `fractions`-cell `/` shapes are dd/mm/yyyy DATES "
+            + "(`01/07/1962`, `13/07/1982`, `27/01/2013`), rate denominators (`hab/km²`, `233/km²`) and five "
+            + "measurement SPANS (`22/25`, `1.500 / 1.800`) that normalize.ts step 5 reads as spans — never "
+            + "division",
+        "plus-minus": "measured: `±` is ×0 in the artifact, and a reading would compose two words neither of "
+            + "which is attested for Kirundi",
+        "less-than": "measured: `<` is ×0 in the artifact and no comparative-magnitude phrase is attested "
+            + "digit-adjacent in the corpus or on rn.wikipedia",
+        "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
+    },
 };
 
 /**
@@ -1889,6 +1922,18 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // for it is attested anywhere. Omitting a minus INVERTS, so that line must keep reporting. See
         // `ACCEPTED_SIGN_SILENCE` above for why the CLASS is not silenced either.
         minus: ["০°–১০০°", "–5088"],
+    },
+    rn: {
+        // ⚠ THE CLASS-LEVEL REFUSALS AND THEIR MEASUREMENTS ARE IN `ACCEPTED_SIGN_SILENCE` ABOVE; this is the
+        // per-INSTANCE residue the artifact scan still reports, and it is a case where silence is the CORRECT
+        // reading rather than a missing rule.
+        // ⚠ ONE OF rn's TWO MINUSES IS LISTED AND THE OTHER DELIBERATELY IS NOT. `(Kindergaten –2ème année)`
+        // is a FRENCH grade range inside a parenthetical about English-language schooling — "Kindergarten to
+        // 2nd year" — so the dash is a French connective in French text, not a Kirundi negative, and no
+        // Kirundi reading of it could be right. The corpus's OTHER minus is a genuine negative TEMPERATURE
+        // (`hakaba hakonje cane (nko munsi ya -39°C)`) and is NOT listed, so it keeps reporting: Kirundi has
+        // no attested word for the sign and a dropped minus INVERTS the value, which must stay visible.
+        minus: ["(Kindergaten –2ème année)"],
     },
 };
 

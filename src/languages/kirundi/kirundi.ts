@@ -12,6 +12,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { normalizeKirundi } from "./normalize.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 
@@ -59,7 +60,9 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class KirundiPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ TEXT NORMALIZATION RUNS FIRST, before tokenization — see normalize.ts for the ordered rules
+        // and for why that file owns the shared symbol tier's call rather than being wrapped by it.
+        return assembleClauses(normalizeKirundi(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
