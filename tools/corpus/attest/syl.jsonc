@@ -1,0 +1,151 @@
+// WIKIPEDIA WORD ATTESTATION — syl. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "syl",
+        "wiki": "syl.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+            {
+                "word": "ꠡꠔꠣꠋꠡ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…꠨ ꠁꠎꠣꠔ ꠜꠣꠡꠣ ꠍꠤꠟꠐ ꠅꠘ꠆ꠌꠟꠞ ꠜꠣꠡꠣ ⁕ 1974 ꠡꠘꠞ ꠞꠤꠙꠥꠐ ꠅ ꠖꠦꠈꠣ ꠎꠣꠄ 4 ꠡꠔꠣꠋꠡ ꠙꠣꠀꠠꠤ ꠝꠣꠁ꠆ꠡꠦ ꠍꠤꠟꠐ-ꠘꠣꠉꠞꠤꠕꠘꠦ ꠛꠣꠇ꠆ꠇꠣ ꠀꠟꠣꠉ ꠝꠣꠔ ꠝꠣꠔꠂꠘ ⁕ ꠁ ꠎꠦꠉꠣꠔ…",
+                "…ꠍꠦ ⁕ ꠖꠦꠡꠤꠐꠣꠞ ꠉꠠ ꠃꠌ꠆ꠌꠔꠣ 460 metres (1,510 ft) ꠀꠞ ꠝꠥꠟ ꠜꠥꠈꠘ꠆ꠒꠞ ꠡꠔꠣꠋꠡ ꠅꠘ꠆ꠌꠟ ꠉꠣꠍꠞꠦꠈꠣꠞ ꠃꠙꠞꠦ ꠙꠞꠍꠦ ⁕ ꠘꠞꠅꠦꠞ ꠁ ꠖꠤꠞ꠆ꠊ ꠙꠞ꠆ꠛꠔꠍꠞꠦꠘꠤ ꠜꠥꠔꠣꠔ꠆ꠔ…",
+                "…ꠣꠇꠞ ꠚꠣꠞꠞ ꠟꠂꠀ ꠍꠤꠟꠐ ꠅꠘ꠆ꠌꠟꠞ ꠀꠡꠙꠣꠡꠞ ꠜꠣꠡꠣ ⁕ ꠡꠘꠞ ꠞꠤꠙꠥꠐ ꠅ ꠖꠦꠈꠣ ꠎꠣꠄ ꠡꠔꠣꠋꠡ ꠙꠣꠀꠠꠤ ꠝꠣꠁ꠆ꠡꠦ ꠍꠤꠟꠐ-ꠘꠣꠉꠞꠤꠕꠘꠦ ꠛꠣꠇ꠆ꠇꠣ ꠀꠟꠣꠉ ꠝꠣꠔ ꠝꠣꠔꠂꠘ ⁕ ꠁ ꠎꠦꠉꠣꠔ…"
+            ]
+            },
+        {
+                "word": "ꠡꠔꠈꠞꠣ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ꠙꠞ꠆ꠍꠦꠘ꠆ꠐ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ꠙꠣꠞꠍꠦꠘ꠆ꠐ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ꠖꠡꠝꠤꠇ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ꠥꠡ꠆ꠐꠤꠉꠘ == ꠚꠔ꠆ꠔꠦꠈ ১০০ ꠉ꠆ꠞꠣꠝ ꠛꠦꠟꠚꠁꠔ ꠈꠣꠘꠤꠡꠈꠔꠤ ৭০ ꠇꠤꠟꠧꠇꠦꠟꠞꠤ, ৯ ꠖꠡꠝꠤꠇ ৭ ꠡꠞ꠆ꠇꠞꠣ, ৫৯ ꠝꠤꠟꠤꠉ꠆ꠞꠣꠝ ꠇꠦꠟꠡꠤꠀꠝ, ১৩ ꠝꠤꠟꠤꠉ꠆ꠞꠣꠝ ꠜꠤꠐꠣꠝꠤꠘ-ꠍꠤ⁕…",
+                "…꠩ ꠅꠁꠟꠧ ꠇꠥꠘꠥ ꠡꠁꠋꠇꠣ ꠚꠖ꠆ꠖꠔꠤ ⁕ ꠎꠦꠉꠥꠁꠘ ꠛꠦꠛꠀꠞ ꠇꠞꠤ ꠉꠘꠣ ꠅꠄ ⁕ ꠎꠦꠟꠣꠘ- ꠖꠡꠝꠤꠇ ꠡꠁꠋꠇꠣ ꠚꠖ꠆ꠖꠔꠤꠔ ১০ ꠐꠣ ꠚꠔꠤꠇ ꠀꠍꠦ- ০, ১, ২, ৩, ৪, ৫, ৬, ৭, ৮, ৯…"
+            ]
+            },
+        {
+                "word": "ꠝꠣꠁꠘꠣꠍ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ꠞꠤꠘꠣꠔ꠆ꠝꠇ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ꠐꠦꠈꠣ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…ꠐꠦꠈꠣ (ꠝꠥꠖ꠆ꠞꠣ ꠙ꠆ꠞꠔꠤꠇ ꠪ ৳ ॥ ꠛ꠆ꠎꠣꠋꠇ ꠇꠧꠒ ꠪ BDT) ꠅꠁꠟ ꠛꠣꠋꠟꠣꠖꠦꠡꠦꠞ ꠝꠥꠖ꠆ꠞ…",
+                "…ꠡꠦꠞ ꠝꠥꠖ꠆ꠞꠣ ⁕ ꠡꠣꠟ ꠛꠣꠋꠟꠣꠖꠦꠡꠞ ꠡꠣꠗꠤꠘꠔꠣꠞ ꠚꠞꠦ ꠖꠦꠡꠞ ꠝꠥꠖ꠆ꠞꠣ ꠢꠤꠡꠣꠛꠦ \"ꠐꠦꠈꠣ\" ꠍꠣꠟꠥ ꠈꠞꠣ ꠅꠄ ⁕ ꠈꠣꠉꠎꠞ ꠐꠦꠈꠣ ꠛꠣꠋꠟꠣꠖꠦꠡꠞ ꠝꠦꠁꠘ ꠛꠦꠘꠇ - \"ꠛꠣꠋꠟꠣꠖꠦꠡ ꠛ…",
+                "…ꠡꠣꠗꠤꠘꠔꠣꠞ ꠚꠞꠦ ꠖꠦꠡꠞ ꠝꠥꠖ꠆ꠞꠣ ꠢꠤꠡꠣꠛꠦ \"ꠐꠦꠈꠣ\" ꠍꠣꠟꠥ ꠈꠞꠣ ꠅꠄ ⁕ ꠈꠣꠉꠎꠞ ꠐꠦꠈꠣ ꠛꠣꠋꠟꠣꠖꠦꠡꠞ ꠝꠦꠁꠘ ꠛꠦꠘꠇ - \"ꠛꠣꠋꠟꠣꠖꠦꠡ ꠛꠦꠋꠇ\" ꠅꠞ ꠔꠘꠦ ꠛꠣꠞ ꠈꠞꠣ ꠅꠄ ॥-…",
+                "…ꠝ ꠛꠟꠔꠦ ꠛꠟꠔꠦ ꠁꠖꠞ ꠖꠤꠘꠇꠥꠅ ꠓꠣꠈꠣ, ꠏꠣꠟꠇꠣꠐꠤ ꠡꠁꠔꠦ ꠛꠃꠔ ꠏꠦꠉꠣꠔ ꠖꠣꠝ V00 ꠐꠦꠈꠣ ꠖꠦꠈꠣ ꠏꠣꠄ ⁕ ꠎꠤꠘꠣꠁꠖꠢꠞ ꠡꠂꠟꠇꠥꠙꠣ ꠃꠚꠎꠤꠟꠣꠔ ꠟꠣ ꠎꠥꠟꠣꠁ ꠡꠘꠤꠛꠣꠞꠇꠥ ꠄꠈ ꠇꠦ…",
+                "…ꠍ ꠃꠙꠢꠣꠞ ꠖꠤꠀ ꠄꠈꠏꠘ ꠀꠟꠥꠎꠘꠣꠔ ꠀꠁꠘ ⁕ == ꠏꠦꠉꠣ ꠀꠘꠝꠣꠘ ꠖꠣꠝ == ꠄꠘ꠆ꠒꠤꠀꠘ ꠐꠦꠈꠣ ꠖꠣꠝꠞ ꠈꠣꠍꠣ ꠝꠞꠤꠍ 480 ꠔꠘꠦ 600 ꠐꠦꠈꠣ ꠚꠞ꠆ꠏꠘ꠆ꠔ ꠛꠦꠍꠔꠦ ꠈꠛꠞ ꠝꠤꠟꠦ ⁕ ꠍꠤ…",
+                "…= ꠏꠦꠉꠣ ꠀꠘꠝꠣꠘ ꠖꠣꠝ == ꠄꠘ꠆ꠒꠤꠀꠘ ꠐꠦꠈꠣ ꠖꠣꠝꠞ ꠈꠣꠍꠣ ꠝꠞꠤꠍ 480 ꠔꠘꠦ 600 ꠐꠦꠈꠣ ꠚꠞ꠆ꠏꠘ꠆ꠔ ꠛꠦꠍꠔꠦ ꠈꠛꠞ ꠝꠤꠟꠦ ⁕ ꠍꠤꠟꠐꠞ ꠛꠣꠏꠣꠞꠣꠁꠘ꠆ꠔꠅ ꠈꠣꠍꠣ ꠝꠞꠤꠍꠞ ꠇꠦꠏꠤ…"
+            ]
+            },
+        {
+                "word": "ꠒꠤꠉ꠆ꠞꠤ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…ꠚꠝꠣꠔ꠆ꠞꠣꠞꠦ ꠈꠅꠀ ꠅꠄ ꠈꠣꠐꠤꠡꠥꠘ꠆ꠘ ꠔꠣꠚꠝꠣꠔ꠆ꠞꠣ, ꠎꠦꠈꠐꠣ ꠔꠣꠚꠉꠔꠤꠛꠤꠖ꠆ꠖꠣꠔ ০ ꠒꠤꠉ꠆ꠞꠤ ꠇꠦꠟꠜꠤꠘ ꠈꠅꠀ ꠅꠄ⁕ ꠁꠇꠐꠣ ꠍꠦꠟꠍꠤꠀꠍ ꠁꠃꠘꠤꠐꠅ -২৭৩.১৫° ꠍꠦ. ꠀꠞ ꠚꠣꠞꠦꠘꠢꠣꠁ…",
+                "…ꠦꠒꠤꠇꠟ ꠁꠡ꠆ꠇꠥꠟ ꠀꠍꠦ ꠀꠞ ꠎꠥꠇ꠆ꠔꠞꠣꠎ꠆ꠎꠞ ꠁ ꠜꠣꠞꠍꠤꠐꠤꠔ ꠙꠄꠟꠣ ꠇꠥꠘꠥ ꠛꠦꠐꠤ ꠄ ꠒꠤꠉ꠆ꠞꠤ ꠘꠦꠅꠀꠞ ꠟꠣꠉꠤ ꠜꠞ꠆ꠔꠤ ꠅꠂꠘ ꠀꠞ ꠁꠘꠅ ꠙꠄꠟꠣ ꠇꠥꠘꠥ ꠘꠣꠞꠤꠞꠦ ꠃꠙꠣꠌꠣꠞ꠆ꠎ ꠇꠞꠣ ꠅ…",
+                "…ꠟ ꠛꠤꠄ (ꠡꠝ꠆ꠝꠣꠘ) ꠀꠞ ꠍꠦꠁꠘ꠆ꠐ ꠎꠦꠜꠤꠄꠞ ꠇꠟꠦꠎ ꠕꠣꠇꠤ ꠡꠣꠟ ꠛꠤꠄꠟ (ꠡꠝ꠆ꠝꠣꠘ) ꠒꠤꠉ꠆ꠞꠤ ꠚꠣꠡ ꠈꠞꠁꠘ == ꠈꠣꠝꠞ ꠎꠤꠛꠘ == ꠞꠣꠎꠘꠤꠔꠤꠔ ꠒꠥꠇꠣꠞ ꠀꠉꠦ ꠔꠣꠁꠘ ꠍꠤꠟꠦꠐ ꠒꠤꠡ꠆…",
+                "…⁕ ꠛꠣꠖꠦ ꠄꠝ ꠍꠤ ꠇꠟꠦꠎ ꠨ ꠇꠥꠝꠤꠟ꠆ꠟꠣ ꠐꠤ.ꠐꠤ. ꠇꠟꠦꠎ ꠨ ꠡꠥꠘꠣꠝꠉꠋꠎ ꠡꠞꠈꠣꠞꠤ ꠒꠤꠉ꠆ꠞꠤ ꠇꠟꠦꠎ ꠞ ꠜꠣꠁꠍ ꠙ꠆ꠞꠤꠘꠍꠤꠙꠣꠟ ꠢꠤꠡꠣꠛꠦ ꠍꠣꠈꠞꠤ ꠕꠣꠇꠤ ꠅꠛꠡꠞ ꠟꠁꠍꠁꠘ ⁕ ꠍꠤꠟꠐ…",
+                "…꠆ꠇꠣꠞ ꠖꠤ ꠡꠝ꠆ꠝꠣꠘ ꠖꠦꠄ ⁕ ꠀꠟꠤꠉꠠ ꠝꠥꠍꠟꠤꠝ ꠛꠤꠡ꠆ꠡꠛꠤꠖ꠆ꠖꠣꠟꠄ ꠕꠣꠇꠤ ꠍ꠆ꠘꠣꠔꠇ ꠒꠤꠉ꠆ꠞꠤ ꠙꠣꠁꠘ ꠡꠣꠟꠧ ⁕ == ꠀꠞ꠆ꠝꠤ ꠎꠤꠛꠘ == ꠛꠤꠡ꠆ꠡꠛꠤꠖ꠆ꠖꠣꠟꠄ ꠡꠦꠡ ꠇꠞꠤꠀ ꠎꠦꠘꠣꠞꠦꠟ…",
+                "…ꠝꠖꠣꠞ ꠡꠣꠟꠧ ꠓꠣꠇꠣ ꠛꠤꠡ꠆ꠡꠛꠤꠖ꠆ꠖꠣꠟꠄ ꠕꠣꠇꠤ ꠁꠋꠞꠦꠎꠤ ꠡꠣꠁꠔ꠆ꠔ ꠍ꠆ꠘꠣꠔꠇꠃꠔ꠆ꠔꠞ ꠒꠤꠉ꠆ꠞꠤ ꠈꠞꠍꠁꠘ ꠀꠞ ꠛꠤ×ꠄꠟ ꠡꠣꠟꠅ ꠇꠟꠇꠣꠔꠣ ꠕꠣꠇꠤ ⁕ ꠔꠣꠁꠘ ꠡꠣꠟꠧ ꠢꠣꠁꠟꠣꠇꠣꠘ꠆ꠖꠤ ꠛꠣꠞ…"
+            ]
+            },
+        {
+                "word": "ꠍꠦꠟꠍꠤꠀꠍ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ꠇ꠆ꠍꠤꠎꠦꠘ ꠙꠞꠝꠣꠘꠥꠞ ꠟꠉꠦ ꠡꠋꠎꠥꠇ꠆ꠔ ꠕꠣꠈꠦ ⁕ ꠛꠣꠁꠃꠝꠘ꠆ꠒꠟꠤꠅ ꠌꠣꠙꠦ ০°–১০০° ꠍꠦꠟꠍꠤꠀꠍ ꠔꠣꠚꠝꠣꠔ꠆ꠞꠣꠞ ꠝꠣꠏꠦ H2O ꠔꠞꠟ ꠛꠣ ꠎꠂꠟꠡꠣ ꠖꠡꠣꠔ ꠕꠣꠈꠦ— ꠅꠃ ꠔꠞꠟ H2O-ꠞꠦ ꠃ…",
+                "…O ꠔꠞꠟ ꠛꠣ ꠎꠂꠟꠡꠣ ꠖꠡꠣꠔ ꠕꠣꠈꠦ— ꠅꠃ ꠔꠞꠟ H2O-ꠞꠦ ꠃ ꠀꠝꠞꠣ ꠚꠣꠘꠤ ꠈꠁ ⁕ ০° ꠍꠦꠟꠍꠤꠀꠍ ꠔꠣꠚꠝꠣꠔ꠆ꠞꠣꠔ ꠎꠟ ꠛꠣ ꠚꠣꠘꠤ ꠎꠝꠤꠀ ꠒꠣꠐ꠆ꠐꠣ ꠛꠞꠚꠦ ꠚꠞꠤꠘꠔ ꠅꠄ ꠀꠞ ১০০° ꠍꠦꠟ…",
+                "…ꠔꠣꠚꠝꠣꠔ꠆ꠞꠣ, ꠎꠦꠈꠐꠣ ꠔꠣꠚꠉꠔꠤꠛꠤꠖ꠆ꠖꠣꠔ ০ ꠒꠤꠉ꠆ꠞꠤ ꠇꠦꠟꠜꠤꠘ ꠈꠅꠀ ꠅꠄ⁕ ꠁꠇꠐꠣ ꠍꠦꠟꠍꠤꠀꠍ ꠁꠃꠘꠤꠐꠅ -২৭৩.১৫° ꠍꠦ. ꠀꠞ ꠚꠣꠞꠦꠘꠢꠣꠁꠐ ꠁꠃꠘꠤꠐꠅ -৪৫৯.৬৭° ꠚꠣ. ꠀꠞ ꠞꠣꠘ…"
+            ]
+            },
+        {
+                "word": "ꠚꠣꠞꠦꠘꠢꠣꠁꠐ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…০ ꠒꠤꠉ꠆ꠞꠤ ꠇꠦꠟꠜꠤꠘ ꠈꠅꠀ ꠅꠄ⁕ ꠁꠇꠐꠣ ꠍꠦꠟꠍꠤꠀꠍ ꠁꠃꠘꠤꠐꠅ -২৭৩.১৫° ꠍꠦ. ꠀꠞ ꠚꠣꠞꠦꠘꠢꠣꠁꠐ ꠁꠃꠘꠤꠐꠅ -৪৫৯.৬৭° ꠚꠣ. ꠀꠞ ꠞꠣꠘꠇꠤꠘ ꠁꠃꠘꠤꠐꠅ ০.০০° R ꠖꠤ ꠟꠦꠈꠣ ꠅꠄ⁕ ꠔꠣ…"
+            ]
+            }
+        ],
+    }
+    

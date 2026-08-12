@@ -89,7 +89,26 @@
         }
     },
 
+    // CLAUSE PUNCTUATION — RE-DERIVED FROM THE CORPUS, because the first version was both wrong and
+    // unreachable. Two separate defects, and neither is in the normalization layer (playbook step 3):
+    //
+    //  1. THE SENTENCE TERMINATOR WAS NOT DECLARED AT ALL. syl.wikipedia writes the full stop as
+    //     ⁕ U+2055 FLOWER PUNCTUATION MARK — 476 occurrences in the mined artifact's 122 excerpt
+    //     segments, more than every other mark in this table combined, and it read as NOTHING: no
+    //     pause, no token. `॥` (8) and `꠫` (6) are the other terminators.
+    //  2. ꠨ WAS DECLARED AS A FULL STOP AND IS A COMMA — and the corpus says so in its own words. One
+    //     article glosses the punctuation inventory outright: ꠅꠞ ꠝꠣꠏꠈꠣꠘꠧ ꠇꠝꠣ (꠨) ꠀꠞ ꠖꠥꠁ ꠒꠦꠘ꠆ꠒꠣꠞ (॥)
+    //     — "…the COMMA (꠨) and the DOUBLE DANDA (॥)". Usage agrees: a list of colleges runs
+    //     ꠇꠥꠟ ꠨ ꠄꠝꠍꠤ ꠇꠟꠦꠎ ꠨ ꠇꠟꠇꠣꠔꠣ ꠞꠤꠙꠘ ꠇꠟꠦꠎ ॥ — separated by ꠨, TERMINATED by ॥. 226 occurrences.
+    //  ꠪ is a COLON: every one of its 24 instances introduces a gloss (ꠀꠋꠞꠦꠎꠤ ꠪ FIFA World Cup,
+    //  ꠛꠦꠋꠉꠟꠤ ꠝꠣꠔꠖꠤ ꠪ বাংলাদেশ, IPA ꠪ [rɐˈsʲijə]). The fleet reads a colon as a comma-length pause.
+    //
+    // ⚠ DECLARING THESE IS ONLY HALF THE FIX. ꠨ ꠩ ꠪ ꠫ are U+A828–A82B, INSIDE the Syloti Nagri block,
+    // so the engine's old word class `[ꠀ-꠬]` (U+A800–A82C) claimed them as WORDS before the punctuation
+    // arm could see them — a mark declared here was unreachable. See the TOKEN comment in sylheti.ts.
     "clausePunctuation": {
-        "꠨": ".", "꠩": ".", "।": ".", ".": ".", "?": "?", "!": "!", ",": ","
+        "⁕": ".", "꠫": ".", "॥": ".", "।": ".", ".": ".",
+        "꠨": ",", "꠩": ",", "꠪": ",",
+        "?": "?", "!": "!", ",": ","
     }
 }

@@ -1006,6 +1006,45 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "for `- N°C` (8/8 of the corpus's real negatives) and withheld from the 19 range dashes and 9 "
             + "clause-opening dashes that share the shape. See uyghur/normalize.ts step 9 for the tabulation",
     },
+    syl: {
+        // ⚠ THE MINUS IS DELIBERATELY ABSENT FROM THIS BLOCK, and that is the whole shape of Sylheti's
+        // sign situation. syl's corpus contains three GENUINE negatives (`ꠍꠦꠟꠍꠤꠀꠍ ꠁꠃꠘꠤꠐꠅ -২৭৩.১৫° ꠍꠦ.`,
+        // `ꠚꠣꠞꠦꠘꠢꠣꠁꠐ ꠁꠃꠘꠤꠐꠅ -৪৫৯.৬৭° ꠚꠣ.` — absolute zero on both scales), no word for the sign is
+        // attested anywhere (ꠝꠣꠁꠘꠣꠍ, ꠝꠣꠁꠘꠥꠍ, ꠞꠤꠘꠣꠔ꠆ꠝꠇ, ꠘꠦꠉꠦꠐꠤꠛ are all 0/0 on syl.wikipedia and
+        // en.wiktionary carries no Sylheti entries at all), and omitting a minus INVERTS. So that class
+        // stays RED — same stance as `ht` and `rw`. Everything below is a class where the SIGN ITSELF is
+        // never used for its arithmetic meaning in this corpus, which is a different and answerable claim.
+        //
+        // ⚠ AND THE TAXONOMY BELOW WAS READ, NOT COUNTED. The first draft of this entry said "all citation
+        // residue"; reading every instance found four kinds, only one of which is residue, and one of them
+        // is a real equation. State what is there.
+        equals: "37 instances, none of them a Sylheti relation. 31 are unstripped citation-template "
+            + "residue (`|last1=Lawson`, `|s2cid=144496795`, `|ꠜꠧꠟꠤꠃꠝ=69`, `|doi=10.1016/…`); 3 are "
+            + "ORTHOGRAPHIC composition in the script article (`ꠏꠦꠝꠘ ꠔ+ꠤ=ꠔꠤ`, \"for example ta + i = ti\"); "
+            + "1 is a Latin gloss (`ꠟꠦꠐꠤꠘ: columba = ꠚꠣꠞꠧ`). The ONE real equation is a currency "
+            + "conversion, `1 ꠒꠟꠣꠞ = 84 ꠐꠦꠇꠣ` — and no Sylheti equals word is attested (sources.ts reports "
+            + "`chk?`, and the probe found none), so reading it would be invention",
+        plus: "3 instances, all the same orthographic-composition formula as above (`ꠔ+ꠤ=ꠔꠤ`, `ꠕ+ꠥ=ꠕꠥ`, "
+            + "`ꠝ+ꠦ=ꠝꠦ`) — a spelling rule, not an addition. No arithmetic `+` occurs and no word is sourced",
+        times: "6 instances and NOT ONE is a multiplication. Four are an acronym written with the sign as "
+            + "a separator (`ꠝꠦ×ꠅ×ꠍ`, `ꠀꠁ×ꠅ×ꠄꠍ`); one is inside a mojibake'd `ꠛꠤ×ꠄꠟ`; and the last is the "
+            + "corpus GLOSSING the character in a punctuation list — `ꠅꠞ ꠝꠣꠏꠈꠣꠘꠧ ꠇꠝꠣ (꠨) ꠀꠞ ꠖꠥꠁ ꠒꠦꠘ꠆ꠒꠣꠞ "
+            + "(॥) ꠎꠦꠉꠣꠔ (×)`, where ꠎꠦꠉꠣꠔ is 'junction', a NAME for the mark and not a reading of it",
+        "greater-than": "3 instances, all in one sentence, and it is a LANGUAGE-DESCENT chain rather than a "
+            + "comparison: `ꠡꠋꠍꠇ꠆ꠞꠤꠔ > ꠝꠣꠉꠗꠤ (ꠝꠂꠕꠤꠟꠤ) > ꠍꠤꠟꠐꠤ > ꠛꠣꠋꠟꠣ` — Sanskrit gives Magadhi gives "
+            + "Sylheti gives Bangla. A 'greater than' reading would be actively wrong there",
+        ampersand: "2 instances, BOTH inside a Latin-script run where a Sylheti word cannot go — a URL "
+            + "query string (`lsi.php?volume=5-1&pages=463`) and an English proper name "
+            + "(`Bangladesh B.M.H.M School & College`). Sylheti's `ꠀꠞ` is everywhere in this corpus and is "
+            + "the right word for 'and'; the slot is the problem, not the vocabulary",
+        "plus-minus": "the sign is ×0 in the corpus and no Sylheti reading is attested for either half",
+        "less-than": "the sign is ×0 in the corpus (its twin `>` occurs and is a descent arrow, above)",
+        divide: "the sign is ×0 in the corpus and no Sylheti division word is attested",
+        currency: "the synthetic probe uses `$`, which is ×0 in this corpus. The currency Sylheti actually "
+            + "writes is `৳` ×5, and that IS read — `৳৫` → `ɸas ʈexa`, from ꠐꠦꠈꠣ, defined by the article "
+            + "that bears its name (`ꠐꠦꠈꠣ (ꠝꠥꠖ꠆ꠞꠣ ꠙ꠆ꠞꠔꠤꠇ ꠪ ৳ ॥ ꠛ꠆ꠎꠣꠋꠇ ꠇꠧꠒ ꠪ BDT)`). No dollar, euro, "
+            + "pound or yen amount occurs, so no name for one is claimed",
+    },
 };
 
 /**
@@ -1790,6 +1829,19 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // instance-listed rather than class-silenced.
         percent: ["k% K&"],
         currency: ["9 Z$ t,"],
+    },
+    syl: {
+        // TWO OF THE FOUR HYPHENS THE MINUS PROBE FINDS, and deliberately not the other two — this is the
+        // instance list that keeps `review.ts --lang syl` HONESTLY red rather than quietly green.
+        //  · `০°–১০০°` is a RANGE between two degree readings ("between 0° and 100° Celsius"). The range
+        //    rule cannot claim it because the operands end in `°` rather than a digit, and the en-dash is
+        //    correctly silent between two spoken temperatures.
+        //  · `–5088` is a JSTOR citation's page span (`ꠜ꠆ꠞꠝꠘ –5088 |jstor=4414346`), not a quantity.
+        // ⚠ WHAT IS NOT LISTED is the sentence carrying `-২৭৩.১৫°` and `-৪৫৯.৬৭°` — absolute zero in
+        // Celsius and Fahrenheit, two real negatives whose sign this engine drops because no Sylheti word
+        // for it is attested anywhere. Omitting a minus INVERTS, so that line must keep reporting. See
+        // `ACCEPTED_SIGN_SILENCE` above for why the CLASS is not silenced either.
+        minus: ["০°–১০০°", "–5088"],
     },
 };
 

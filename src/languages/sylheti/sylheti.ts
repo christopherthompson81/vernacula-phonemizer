@@ -14,6 +14,7 @@ import { indicNumberWords, renderNumber, spellDigits, type NumbersDef } from "..
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { loadSharedPhonology } from "../../core/phonology.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { normalizeSylheti } from "./normalize.ts";
 
 interface SylhetiDef extends AbugidaDef {
     numbers: NumbersDef;
@@ -60,12 +61,30 @@ function number(digits: string): string {
     return renderNumber(n, DEF.numbers, phonemizeWord, indicNumberWords);
 }
 
-// A word (Syloti Nagri block U+A800–A82C) / number / punctuation token.
-const TOKEN = /([ꠀ-꠬]+)|(\d+)|([꠨꠩।.?!,])/gu;
+/**
+ * A word / number / punctuation token.
+ *
+ * ⚠ THE WORD CLASS IS U+A800–A827 PLUS U+A82C, NOT THE WHOLE BLOCK, and the difference is the single
+ * largest defect this language had. `[ꠀ-꠬]` is U+A800–A82C, which CONTAINS the four Syloti Nagri poetry
+ * marks ꠨ ꠩ ꠪ ꠫ (U+A828–A82B) — and the word alternative is first in the alternation, so a standalone
+ * poetry mark was claimed as a WORD and never reached the punctuation arm. Every mark `clausePunctuation`
+ * declared for them was unreachable: `ꠘꠎꠞꠈꠣꠞꠣ ꠨ ꠜꠣꠃꠀꠁꠟ` read `nɔzɔɾxaɾa bauail`, with the comma
+ * silently deleted. 226 instances of ꠨ alone in the mined artifact's excerpt tier.
+ *
+ * The punctuation class gains ⁕ (U+2055) — the corpus's actual SENTENCE TERMINATOR, ×476, previously
+ * unread entirely — plus ॥ and ꠫ ꠪. See `sylheti.jsonc`'s `clausePunctuation` for the evidence.
+ *
+ * ⚠ THE NUMBER ARM STAYS `\d+` AND THAT IS DELIBERATE, even though this corpus writes 63% of its digits
+ * in Bengali (৫২৬). `registry.ts` folds native digits to ASCII at the single dispatch point before any
+ * engine sees them, so by the time `text()` runs there are none left; widening this to `\p{Nd}` would
+ * hand `number()` a string `Number()` cannot value if the engine were ever driven without that wrapper.
+ * `normalize.ts` keys every one of its own patterns on `\p{Nd}` instead, because it inspects SHAPES.
+ */
+const TOKEN = /([ꠀ-ꠧ꠬]+)|(\d+)|([꠨꠩꠪꠫।॥⁕.?!,])/gu;
 
 class SylhetiPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeSylheti(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2])); // Syloti Nagri has no digits of its own — ASCII/Bengali used
             else if (m[3]) {

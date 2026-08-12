@@ -194,7 +194,7 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // negative TEMPERATURE it has an attested phrase for and nothing else, and a bare negative that
         // would INVERT must stay visible.
 
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "rw", "si", "so", "su", "ta", "tl", "ug", "wuu", "xh", "za"]);
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "rw", "si", "so", "su", "syl", "ta", "tl", "ug", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
