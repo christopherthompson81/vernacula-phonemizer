@@ -1,0 +1,268 @@
+// WIKIPEDIA WORD ATTESTATION — mg. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "mg",
+    "wiki": "mg.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "kilao",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 32,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ondro ny kilômetatra (1 000 metatra) ny tovona hoe kilô- na kilao- (103). Mitovy amin' ny iray tapitrisa metatra toradroa ny…",
+                "…ina bala (hatramin'ny halavany: 50 sm na 1,6 ft, lanja: 1,8 kilao na 4 lb) ka hatramin'ny tononkalo (hatramin'ny halavany: 4,…",
+                "…nonkalo (hatramin'ny halavany: 4,6). m na 15 ft, lanja: 684 kilao na 1 508 lb), izay mirefy 2 m eo ho eo, ary inoana fa velon…",
+                "…imetatra ny halavany, ary milanja eo anelanelan'ny 18 sy 52 kilao (40 sy 115 kilao). Karazana loko roa no hita mazava tsara a…",
+                "…any, ary milanja eo anelanelan'ny 18 sy 52 kilao (40 sy 115 kilao). Karazana loko roa no hita mazava tsara amin'ny palitao ma…",
+                "…Ny raharaha Volamena 73 kilao dia trangan-javatra mahakasika ny volamena avy eto Madagasi…"
+            ]
+        },
+        {
+            "word": "kilograma",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "santimetatra",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 32,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Ny santimetatra, izay hafohezina amin' ny hoe sm, dia ventin-drefin-kalavan…",
+                "…ahazaton' ny metatra. Mitovy amin' izany ihany dia misy 100 santimetatra ny 1 metatra. Ny santimetatra dia mijanona ho ventin-kalava…",
+                "…min' izany ihany dia misy 100 santimetatra ny 1 metatra. Ny santimetatra dia mijanona ho ventin-kalavana ho an' ny fandrefesana amin…",
+                "…a, ny halavan' ny olombelona dia matetika refesina amin' ny santimetatra. Mirefy iray santimetatra eo ho eo ny sakan' ny hohon-tanan…",
+                "…na dia matetika refesina amin' ny santimetatra. Mirefy iray santimetatra eo ho eo ny sakan' ny hohon-tanan' ny olon-dehibe salantsal…",
+                "…olon-dehibe salantsalany. Fafana maneho ny fifandraisan' ny santimetatra amin' ny ventin-kalavana hafa. == Jereo koa == Kilômetatra…"
+            ]
+        },
+        {
+            "word": "toratelo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 15,
+            "articles": 10,
+            "substringOnly": 0,
+            "examples": [
+                "…izany dia ampiasaina ny metatra toradroa (m2) sy ny metatra toratelo (m3). === Refin-kalavirana === Ny anaran' ny fizaràn' ny me…",
+                "…ampiasaina matetika ny litatra, izany hoe iray desimetatra toratelo. Ampiasaina ihany koa ny atao hoe metatra toratelo na ny ki…",
+                "…imetatra toratelo. Ampiasaina ihany koa ny atao hoe metatra toratelo na ny kilômetatra toratelo. 1 000 litatra ny 1 metatra tora…",
+                "…na ihany koa ny atao hoe metatra toratelo na ny kilômetatra toratelo. 1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra…",
+                "…telo na ny kilômetatra toratelo. 1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra toratelo ny kilômetatra tora-telo. A…",
+                "…1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra toratelo ny kilômetatra tora-telo. Ampiasaina amin' ny fandrefesana…"
+            ]
+        },
+        {
+            "word": "tora-telo",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 2,
+            "examples": []
+        },
+        {
+            "word": "kiobika",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "metatra toratelo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 10,
+            "articles": 7,
+            "substringOnly": 2,
+            "examples": [
+                "…. Araka izany dia ampiasaina ny metatra toradroa (m2) sy ny metatra toratelo (m3). === Refin-kalavirana === Ny anaran' ny fizaràn' ny me…",
+                "…iray desimetatra toratelo. Ampiasaina ihany koa ny atao hoe metatra toratelo na ny kilômetatra toratelo. 1 000 litatra ny 1 metatra tora…",
+                "…tra toratelo na ny kilômetatra toratelo. 1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra toratelo ny kilômetatra tora-telo. A…",
+                "…oratelo. 1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra toratelo ny kilômetatra tora-telo. Ampiasaina amin' ny fandrefesana…",
+                "…diry. Ny habe dia matetika refesina amin' ny isa amin'ny ny metatra toratelo (m3). Ohatra, ny hadirin' ny goba dia a2 (a ny rirany), fa…",
+                "…nan-kakitrok'isa latsaky ny atôma hidrozenina iray isaky ny metatra toratelo ary mari-pana miisa tapitrisa kelvin ao amin'ny habakabaka…"
+            ]
+        },
+        {
+            "word": "toradroa",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 29,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Ny kilômetatra toradroa na kilaometatra toradroa, soratana hoe km2 dia venty ampias…",
+                "…Ny kilômetatra toradroa na kilaometatra toradroa, soratana hoe km2 dia venty ampiasaina handrefesana ny vela…",
+                "…ny efamira iray misy lafiny iray kilômetatra ny kilômetatra toradroa. Songantombon' ny ventim-belarana ao amin' ny Rafitra Irais…",
+                "…tés; anglisy: International System of Units) ny kilômetatra toradroa, izany entim-belarana izany dia ny metatra toradroa. Manond…",
+                "…metatra toradroa, izany entim-belarana izany dia ny metatra toradroa. Manondro ny kilômetatra (1 000 metatra) ny tovona hoe kilô…",
+                "…lô- na kilao- (103). Mitovy amin' ny iray tapitrisa metatra toradroa ny velaran' ny iray kilômetatra toradroa, ohatra 1 000 meta…"
+            ]
+        },
+        {
+            "word": "faingo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 48,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Ny faingo (,) dia mari-piatoana ampiasaina rehefa manoratra mba hanas…",
+                "…amin' ny fitanisana. Manamarika fiatona farany izay fohy ny faingo, tsy tahaka ny teboka amam-paingo (;) na ny teboka (.). Amp…",
+                "…teboka amam-paingo (;) na ny teboka (.). Ampiasaina koa ny faingo mba hanasarahana tarehimarika roa (ohatra: 2,3) na tarehin-…",
+                "…a roa (A,B) na singa roa soratana. == Jereo koa == Baraingo Faingo mihantona Farango lava Farango sosona Fonon-teny Teboka Teb…",
+                "…Ny faingo mihevaheva (frantsay: virgule flottante ; anglisy: floating…",
+                "…ny isa tsimivaky izay ampiasaina amin'ny solosaina. Amin'ny faingo mihevaheva, ny isa iray dia ahitana famantarana s (izay -1…"
+            ]
+        },
+        {
+            "word": "latsaka",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 24,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ron'ny ranomasimbe Atlantika, any atsimo andrefan'i Marôka, latsaka 40 kilometatra atsimon'ny Kenitra sy 240 kilometatra atsimo…",
+                "…amin' ny kolontsaina == === Ohabolana malagasy === Volamena latsaka am-bovoka: tsy avelan' ny soa tsy hihiratra. Ny herana aman…",
+                "…niry amin' ny tany, ary ny volamena sy ny volafotsy dia tsy latsaka avy any an-danitra. == Jereo koa == Alimo Fanitso Firaka Fi…",
+                "…y handroatra mihitsy. Araka ny famaritana eorôpeana dia tsy latsaka ny 8,5 % ny alkaola ao amin' ny divay. == Jereo koa == Labi…",
+                "…masoandro (taona trôpika) izay tsy mahafeno 365,25 andro fa latsaka kely noho izany. Ao amin' ny tetiadro joliana dia mihoatra…",
+                "…dron' ny ahitra na eny am-potony. Mitranga ny fanala rehefa latsaka ambanin' ny maripana mampandry rano ny an' ny rivotra (0 °C…"
+            ]
+        },
+        {
+            "word": "isan-jato",
+            "verdict": "substring-only",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 19,
+            "examples": []
+        },
+        {
+            "word": "ariary",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 69,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Ny ariary (MGA, Ar) dia sandam-bola Malagasy miasa ao amin' ny Repobl…",
+                "…asy (FMG) tamin' ny Repoblika voalohany, dia nampiasaina ny Ariary. Ny teny hoe Ariary dia mety avy amin' ny teny arabo al ria…",
+                "…Repoblika voalohany, dia nampiasaina ny Ariary. Ny teny hoe Ariary dia mety avy amin' ny teny arabo al rial izay avy amin' ny…",
+                "…== Sandam-bola == Valeur AR 5080 == Tantara == Ny teny hoe ariary dia teny efa misy talohan' ny nahatongavan' ny mpanjana-tan…",
+                "…atramin' ny 2007. Ny franc malagasy dia nifototra tamin' ny ariary, ny iraimbilanja (1 F) dia 1/5 ariary ary 5 F ny ariary ira…",
+                "…a nifototra tamin' ny ariary, ny iraimbilanja (1 F) dia 1/5 ariary ary 5 F ny ariary iray. Ohatra, rehefa miteny 2 500 F, dima…"
+            ]
+        },
+        {
+            "word": "dolara",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 58,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…bola, sns) arivo tapitrisa (miliara) farafakeliny, matetika dolara amerikana na euro. Arakin’ny «Forbes», izay tranom-printy i…",
+                "…ranom-printy iray mpamokatra lisitry ny miliaridera amin’ny dolara amerikana isan-taona, dia nisy 1 210 miliaridera tamin’ny t…",
+                "…y manana sanda mitentina $4,5 triliona (tapitrisatapitrisa) dolara amerikana ny fitambarany. Mitsinjara toy izao ny isan’izy i…",
+                "…be ny baoksita. Ny harin-karena faobe isan-kapita dia 6.333 dolara amerikana tamin'ny taona 2016, izay mametraka ny haavon'ny…",
+                "…merika Atsimo. Namokatra ambim-bola tokony ho 1,2 lavitrisa dolara teo anelanelan'ny taona 2004 sy 2008 i Sorinama. Ny akora v…",
+                "…y tetibolam-panjakana ny fandaniana mitentina 664 tapitrisa dolara, raha oharina amin’ny vola miditra mitentina 470 tapitrisa…"
+            ]
+        },
+        {
+            "word": "eorô",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…nomasimbe Atlantika dia vokatry ny fisarahan' ny Kôntinenta Eorô-Afrikana sy ny Kôntinanta Amerikana 180 tapitrisa taona las…",
+                "…ny raharaham-barotra maneran-tany, ankoatra ny dôlara sy ny eorô. == Tantara == Miteny ny maribolana fa foaforona tamin' ny…",
+                "…ny 75 %n’ny mponina no miaina amin'ny vola latsaky ny iray eorô isan’andro. Ny Repoblika Demôkratikan’i Kôngô dia afaka nid…",
+                "…gô. Tamin’ ny taona 2006 dia mitentina 655,95 F CFA ny iray Eorô. == Jereo koa == Tantaran' ny Repoblikan' i Kôngô Jeôgrafia…",
+                "…' Andriamanitra momba ny famaliana zato heny\": \"Manomeza 10 eorô ianao, dia homen' Andriamanitra 1 000 !\". Izany anefa dia n…",
+                "…y 75 %n’ ny mponina no miaina amin’ ny vola latsaky ny iray eorô isan’ andro. Ny Repoblika Demôkratikan’ i Kôngô dia afaka n…"
+            ]
+        },
+        {
+            "word": "degre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 21,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…sotombony) andrefesana ny haben' ny zoro ka anisan'izany ny degre (°) sy ny grady (gr na g na gon) ary ny radian (rad). Ny jo…",
+                "…ady (gr na g na gon) ary ny radian (rad). Ny jotsotombon'ny degre (°) dia ny minitran-joro (') sy ny segondran-joro (\"). Ny 1…",
+                "…nosy dia lava avy any avaratra mianatsimo mitongilana iray degre eo ho eo. Mahafinaritra ny endri-paritra. Feno hazo lehibe…",
+                "…lia elanelany dia 18.00818.. Ny fironany indray dia 6.42406 degre. == Jereo koa == Hainkintana Zavatra ara-kainkintana : ireo…",
+                "…ia elanelany dia 248.77425.. Ny fironany indray dia 4.65736 degre. == Jereo koa == Hainkintana Zavatra ara-kainkintana : ireo…",
+                "…lia elanelany dia 59.20371.. Ny fironany indray dia 5.10595 degre. == Jereo koa == Hainkintana Zavatra ara-kainkintana : ireo…"
+            ]
+        },
+        {
+            "word": "metatra",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 50,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Ny metatra, izay hafohezina amin' ny hoe m, dia ventin-kalavana ampias…",
+                "…ntimetatra, ny milimetatra, sns. Amin' izao fotoana izao ny metatra dia ny halavirana vitan' ny voankazavana andehanana ao anat…",
+                "…asaina rehefa mandrefy halavirana na habe. == Tantara == Ny metatra atao hoe \"metra filamatra\" (frantsay: mètre étalon) dia nof…",
+                "…nasaraka ny tendrontany iray sy ny fehibe. == Fampiasana ny metatra == Ampiasaina amin' ny fandrefesana halavana na velarana na…",
+                "…amin' ny fandrefesana halavana na velarana na hadiry koa ny metatra. Araka izany dia ampiasaina ny metatra toradroa (m2) sy ny…",
+                "…ana na hadiry koa ny metatra. Araka izany dia ampiasaina ny metatra toradroa (m2) sy ny metatra toratelo (m3). === Refin-kalavi…"
+            ]
+        },
+        {
+            "word": "kilaometatra",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 24,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…'isan'ny mponina isaky ny velaran-tany voafaritra (isaky ny kilaometatra tsy mivadi-mandry).…",
+                "…Ny kilômetatra toradroa na kilaometatra toradroa, soratana hoe km2 dia venty ampiasaina handrefesan…",
+                "…Ny kilômetatra na kilaometatra, izay hafohezina amin' ny hoe km, dia ventim-pandrefasan-ka…",
+                "…simon'i Afrika mirefy 900.000 kilometatra toradroa (350.000 kilaometatra toradroa), mandrakotra ny ankamaroan'i Bôtsoana, ary koa ny…",
+                "…amin'ny faritra atsinanan'i Eofrata fahiny. Any amin'ny 58 kilaometatra avaratrandrefan'i Ora fahiny io toerana io, 108 kilaometatr…",
+                "…ilaometatra avaratrandrefan'i Ora fahiny io toerana io, 108 kilaometatra atsimoatsinanan'i Nippur fahiny ary 24 kilaometatra atsimoa…"
+            ]
+        }
+    ],
+}
