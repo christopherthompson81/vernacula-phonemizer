@@ -572,6 +572,51 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         divide: "measured: the sign does not occur in the corpus at all (0 digit-flanked, 0 leading)",
         exponent: "measured: `sources.ts` reports the sign does not occur in the evidence for this language",
     },
+    bar: {
+        // ⚠ THE SIGNS ARE PRESENT AND NONE OF THEM IS ARITHMETIC — which is a genuine divergence from
+        // Standard German, whose layer reads `=`, `<`, `>` and `÷`. A dialect wiki's subject matter is
+        // largely ITS OWN LANGUAGE, so these characters are doing morphology, not maths. All 22 enumerated
+        // over the artifact, and measured over the BAVARIAN subset (24% of bar.wikipedia is Standard German
+        // — see bavarian/normalize.ts):
+        //   · the DERIVATION ARROW, the single largest group: `da- (< der-)`, `dabogga (< der+packen)`,
+        //     `daduan (< der+tun)`, `si dabarma (< der+barmen)`, `(si) darenna (< der+rennen)`,
+        //     `magy (< ugrisch *mańćε)` — and note the `+` inside them is a MORPHEME BOUNDARY;
+        //   · the SOUND-CHANGE ARROW: `Lautwandlregl ei > oa`;
+        //   · the GLOSSING EQUALS: `bei dem = beim`, `an dem = am`, `(= nach)`, `(= in)`, `ius = es Recht`,
+        //     `ys = schnej`, `grad = Buag und ec = die Nochsübn`, `caribaria = Duacheinanda`,
+        //     `on = „zehn“ + ogur = „Stamm“`;
+        //   · a CAST LIST's "and": `mit Ludwig Prell + Josef Amann`, `Hörspiel von + mit Bally + Ludwig Prell`;
+        //   · an AWARD TALLY's multiplier: `26 × Annie Award (… 2 × 1995, 4 × 1997 …)`, `26 × Emmy`;
+        //   · x86 ASSEMBLY: `movl $4,%eax # Syscall-ID 4 (= __NR_write)`;
+        //   · a Y-DNA HAPLOGROUP table: `P* (xR1a) 56%`.
+        // Reading `<` as a comparison would be confidently wrong in every instance, and porting German's
+        // words here is exactly the Standard-German-for-Bavarian substitution this language's layer exists to
+        // avoid. `review.ts --lang bar` stays red on the class, correctly (trap 24).
+        equals: "measured: all 22 math-sign instances in the artifact, zero arithmetic. `=` is a GLOSSING "
+            + "equals in a dialect wiki writing about its own language (`bei dem = beim`, `(= nach)`, "
+            + "`ius = es Recht`, `ys = schnej`) or x86 assembly (`movl $4,%eax # (= __NR_write)`)",
+        "less-than": "measured: every `<` is the ETYMOLOGICAL DERIVATION ARROW, which is what a dialect wiki "
+            + "uses it for — `da- (< der-)`, `dabogga (< der+packen)`, `si dabarma (< der+barmen)`, "
+            + "`magy (< ugrisch *mańćε)`. Not one comparison in the corpus",
+        "greater-than": "measured: the only `>` is a SOUND-CHANGE arrow in the phonology section "
+            + "(`Ausnahma vo da Lautwandlregl ei > oa`), i.e. 'becomes', not 'is greater than'",
+        plus: "measured: no `+` is addition. Inside a derivation it is a MORPHEME BOUNDARY (`der+packen`, "
+            + "`der+tun`, `on = „zehn“ + ogur`), and in a radio-play credit it is 'and' (`mit Ludwig Prell + "
+            + "Josef Amann`). ⚠ The signed-TEMPERATURE plus IS read — `+15 °C` — by a degree-guarded rule in "
+            + "bavarian/normalize.ts; this refusal is the bare sign everywhere else",
+        times: "measured: both `×` are an AWARD TALLY's occurrence count (`26 × Emmy (… 6 × 1992, 2 × 1997)`), "
+            + "and no Bavarian operator word is attested — `moi` appears as 'moi so grouß wia' (times as "
+            + "large) but never between two operands",
+        divide: "measured: the sign does not occur in the artifact at all",
+        "plus-minus": "measured: the sign does not occur in the artifact at all; the ± rule in "
+            + "bavarian/normalize.ts is robustness, composed from the two words its own sign rules already use",
+        ampersand: "measured: 83 of the 83 `&` in the Bavarian subset are the HTML entity `&nbsp;`, which "
+            + "bavarian/normalize.ts folds to a space at step 1 because the engine was phonemizing `nbsp` as "
+            + "a WORD. There is not one real ampersand in Bavarian text — the only four in the whole artifact "
+            + "are Standard German publisher names in bibliographies (`Königshausen & Neumann`, `W W Norton & "
+            + "Co`, `Quelle & Meyer`, `Rosa & Karl`). `und` is abundant, but declaring it would be a rule "
+            + "about German bibliography filed under Bavarian",
+    },
     km: {
         // ⚠ SPACING SPLITS THIS SHAPE, which is why only the unspaced form is refused. A refusal that
         // describes `=` as a whole ("glosses and code") throws away 1,649 spaced operand-flanked sites, the
@@ -1710,6 +1755,42 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // reading is byte-identical with the mark deleted. The mark IS read wherever the base character is
         // in the dict — 佐々木 → 佐佐木, wu/normalize.ts step 13.
         iteration: ["様々"],
+    },
+    bar: {
+        // ⚠ THE POINT OF THIS BLOCK IS THAT `minus` IS HERE AND NOT IN ACCEPTED_SIGN_SILENCE. Bavarian DOES
+        // read the sign — `-13 °C`, `−20 °C`, `−45,9 Grad Celsius` all come out with *minus*, via the
+        // degree-guarded rule in bavarian/normalize.ts. What is left over is five instances that are not
+        // negatives at all, and unlike ln/ht/rw there is no genuine unreadable negative hiding among them:
+        //   · a BCE year RANGE with the era marker on both ends (`4400 v. Kr.-4000 v. Kr.`);
+        //   · a typo'd year range where a bracket has replaced a digit (`(180]–1927)`);
+        //   · EasyTimeline CHART MARKUP, twice — `shift:(-10,5)` is a label offset in pixels, not a quantity,
+        //     and it reaches the corpus because the dump-to-text keeps the template body;
+        //   · an ELIDED YEAR — `de Finanzkrise vu de Joa 2007 und -8`, i.e. "2007 and '08", where the hyphen
+        //     stands in for the dropped century exactly as an apostrophe would.
+        // Listed by instance rather than silenced by class precisely so that a real negative outside the
+        // degree slot would still surface.
+        minus: ["v. Kr.-4000", "(180]–1927", "shift:(-10,5)", "und -8"],
+        // ⚠ NEITHER IS A DEFECT THIS LAYER CAN CLOSE, and they are different in kind.
+        //   · `3,2 Eihwohna/km²` is an exponent in a RATE DENOMINATOR. bar declares no `unitPer`, because its
+        //     denominator nouns are unattested and the Bavarian subset has zero `km/h` (see normalize.ts) —
+        //     and the numerator here is `Eihwohna`, a head noun no unit table would ever carry anyway.
+        //   · `13.000 k² Eihkaaffsflächen` is a CORPUS TYPO: `k²` for `km²`, in an article about a shopping
+        //     centre. `km²` itself IS read (→ *Quadratkilometa*), so no rule should learn `k²`.
+        exponent: ["Eihwohna/km²", "13.000 k²"],
+        // AN x86 ASSEMBLY LISTING in the article on assembly language. `%eax` and `%ebx` are REGISTER names —
+        // the `%` is AT&T syntax, not a percentage — and `$4` is an immediate operand, not four dollars.
+        // Silence is the correct reading for both, and the same two lines carry the `math-sign` refusal above.
+        // ⚠ No `currency` key, although those same two lines contain `$4` and `$1`: the `$` there is an
+        // IMMEDIATE OPERAND and the tier reads it as a currency, so the sign contributes and never reports.
+        // An entry that cannot fire is ballast that would mask the regression this table exists to show.
+        percent: ["%eax", "%ebx"],
+        // ⚠ No `iteration` key either, and checking that was worth the two minutes. The artifact does carry a
+        // Japanese iteration mark — `Yukihiro "chachamaru" Fujimura (茶々丸)`, a musician credit — and against
+        // `bavarian.ts` alone it reports a drop. Through the REGISTRY's `phonemize`, which routes the Han run
+        // to the CJK fallback, `々` SURVIVES into the IPA (`ʈ͡ʂʰɑ˧˥ 々 wɑn˧˥`), so it is a leak and not a drop
+        // and the entry could never fire. An entry that cannot fire is ballast that would mask a real
+        // regression — the `mi` lesson at the head of accepted-silent.test.ts.
+        // ⚠ Measure an acceptance against the gate's OWN path (`phonemize(t, lang)`), not the engine's.
     },
     gu: { minus: ["એચજેઆર -3"] },
     kn: { minus: ["ಎಚ್‌ಜೆಆರ್ -3"] },

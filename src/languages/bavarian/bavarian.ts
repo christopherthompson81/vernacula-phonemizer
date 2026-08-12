@@ -21,6 +21,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeBavarian } from "./normalize.ts";
 
 interface BarDef {
     digraphs: Record<string, string>;
@@ -197,7 +198,10 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class BavarianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NORMALIZATION FIRST — see normalize.ts. It rewrites `&nbsp;`, the grouping dot, the ordinal `N.`,
+        // the abbreviations, the clock, the degree signs and the symbol tier into words, so everything
+        // reaching TOKEN below is already something this g2p can speak.
+        return assembleClauses(normalizeBavarian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

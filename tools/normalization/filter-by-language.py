@@ -52,11 +52,38 @@ MARKERS = {
     # mu/ho/so, the complementiser sɛ, and the pronoun set — all shared by both varieties.
     "ak": "yɛ wɔ na ne no mu sɛ nso nyinaa de ma ho so wɔn yɛn me nti bio saa anaa firi kɔ ase "
           "deɛ ɔno afe da mmom bɛ aa ɔyɛ",
+    # bar: Bavarian, and the relative to be diagnostic against is STANDARD GERMAN, not English — see
+    # CONTRAST below. Every word here is one bar.wikipedia's orthography spells differently from de:
+    # is/san (ist/sind), vo (von), ned·net (nicht), de·dea (die/der), des (das), wead·wean (wird/werden),
+    # hod·hom (hat/haben), wia (wie), ois (als), owa (aber), iwa (über), mid (mit), vui (viel), nua (nur),
+    # aa (auch), af (auf), duach (durch), oiso (also), koa (kein), wos (was), eana (ihre), i·mia (ich/wir).
+    # ⚠ `is` COLLIDES WITH THE ENGLISH LIST, and it is kept anyway: it is one of the highest-frequency
+    # Bavarian markers, and an English paragraph that scores +1 here scores far more on the other side —
+    # measured, the artifact's one English quotation ("The greatest cultural extravaganza…") still drops.
+    "bar": "is san sand vo ned net de dea des wead wean woan hod houd hom ham wia ois owa iwa mid vui "
+           "nua aa af duach oiso koa wos eana eppa woa gwen boarisch joar joah oa oans zwoa moa ma "
+           "se si z hoaßt easchte deitsch deitschland minga wean stod",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
     "an be or not they their he she we you have had also".split()
 )
+# ⚠ THE CONTRAST SET IS PART OF THE TEST, and English is only the right one when the contaminating
+# language IS English. bar.wikipedia's contamination is STANDARD GERMAN — bibliographies, quotations and
+# whole imported paragraphs — and German shares no function word with the English list, so the stock test
+# would have kept every German paragraph as "Bavarian". A language whose contaminant is a close relative
+# supplies that relative's function words here, and they are merged with (never replace) ENGLISH.
+#
+# ⚠ Words bar and de SHARE are deliberately absent: `und in im an auf für oder bei aus nach noch` are
+# written identically in both, and — the sharpest one — `des` is Standard German's genitive article AND
+# Bavarian's ordinary word for "das", so listing it would score Bavarian text as German.
+CONTRAST = {
+    "bar": set(
+        "der die das ist sind war waren nicht auch von eine einen einem einer wird werden wurde "
+        "über viel nur mit hat haben wie als aber sich durch jahr jahre jahren zwischen deutsche "
+        "deutschen deutsch er sie es ich wir sein ihre".split()
+    ),
+}
 
 
 def main():
@@ -68,6 +95,7 @@ def main():
     a = ap.parse_args()
 
     target = set(MARKERS[a.lang].split())
+    contrast = ENGLISH | CONTRAST.get(a.lang, set())
     word_rx = re.compile(r"[^\W\d_]+", re.UNICODE)
     tally = collections.Counter()
 
@@ -78,12 +106,12 @@ def main():
                 tally["short"] += 1
                 continue
             w = set(m.lower() for m in word_rx.findall(s))
-            t, e = len(w & target), len(w & ENGLISH)
+            t, e = len(w & target), len(w & contrast)
             if t > e:
                 tally["kept"] += 1
                 fout.write(s + "\n")
             elif e > t:
-                tally["dropped: english"] += 1
+                tally["dropped: contrast"] += 1
             else:
                 tally["dropped: undecidable"] += 1
 

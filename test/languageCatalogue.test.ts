@@ -83,13 +83,17 @@ describe("language catalogue", () => {
                 rows.slice(1).map((r) => r.split("\t")).find((r) => r[col.code] === code)?.[col.norm] ?? "MISSING";
 
             // Borrows one helper across a directory boundary; runs no other language's normalizer.
-            // ⚠ THE ASSERTION IS "NOT inherited", NOT "EMPTY", AND THE DIFFERENCE IS THE WHOLE POINT. These
-            // five are named because a borrowed helper must never be read as delegation — not because they
-            // must stay untreated. `rn` (Kirundi) now has `src/languages/kirundi/normalize.ts` of its own and
-            // correctly reads `done`, which the original `.toBe("")` failed: it pinned the accident that none
-            // of the five had a layer yet, and would have fired on whichever of them was treated first. The
-            // invariant to protect is that borrowing `composeRwandaRundi` never makes Kirundi look like it
-            // runs Kinyarwanda's layer — `done` and `""` both satisfy that; only `inherited` breaks it.
+            // ⚠ THE ASSERTION IS "NOT inherited", NOT "EMPTY", AND THE DIFFERENCE IS THE WHOLE POINT — it is
+            // the invariant the docstring above actually states. `toBe("")` pinned a second, weaker claim
+            // with a shelf life: that these five HAVE NO LAYER. That was true the day it was written and
+            // false within a day — `rn` and `bar` were both treated in the very next batch and now read
+            // `done`. The borrowing fact is what survives and what matters: `rn` takes `composeRwandaRundi`
+            // from kinyarwanda and `bar` takes `unitsFirstNumberToWords` from danish, and neither runs the
+            // donor's normalizer. `done` and `""` both satisfy that; only `inherited` breaks it.
+            //
+            // ⚠ Written twice, independently, by the two agents treating rn and bar — each hit the failure,
+            // each diagnosed it the same way. A test that fires the moment its subject gets fixed is pinning
+            // the accident rather than the rule.
             for (const code of ["rn", "bar", "fo", "ba", "bs"])
                 expect(value(code), `${code} borrows a helper — it must not read as inherited`).not.toBe("inherited");
 
