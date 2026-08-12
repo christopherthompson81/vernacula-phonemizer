@@ -126,9 +126,28 @@
         "deadShort": { "low": "˧", "default": "˧˥" },                 // dead-short → low: mid; high/mid: rising
     },
 
+    // ⚠ THE CANCELLATION MARK ໌ (U+0ECC, karan / ໄມ້ກັນ) — it SILENCES the consonant it sits on, and it is
+    // how Lao spells a loanword's unpronounced tail: ໄຟລ໌ "file" is [faj], ເວັບໄຊຕ໌ "website" [ʋep̚.saj],
+    // ວຽງຈັນທນ໌ (the capital's formal spelling) [ʋiːəŋ.t͡ɕan]. Unhandled it was not a DROP but an INSERTION —
+    // the silent consonant took its inherent vowel and became a whole extra syllable (ໄຟລ໌ → *fa˧˥j.la˧).
+    // ×65 in the mined corpus and ×6 in the kaikki referee, where all six were wrong.
+    //
+    // ⚠ IT CANCELS A CLUSTER, NOT JUST ONE LETTER, and the referee is what says so: ອາທິຕຍ໌ keeps its ຕ as
+    // the coda ([ʔaː.tʰit̚], only ຍ silent) while ວຽງຈັນທນ໌ silences ທ as well as ນ. The rule that produces
+    // both is "leave exactly one consonant as the coda" — see cancelSilent() in lao.ts.
+    "cancellationMark": "໌",
+
     // Final (coda) consonant → IPA. Lao has the 8-way final set (stops unreleased; sonorants + glides).
     "codas": {
         "ກ": "k̚", "ດ": "t̚", "ບ": "p̚", "ງ": "ŋ", "ນ": "n", "ມ": "m", "ຍ": "j", "ວ": "w",
+        // ⚠ TWO MORE FINALS, AND BOTH ONLY IN LOANS. Native Lao has the 8-way set above; ⟨ຕ⟩ and ⟨ຖ⟩ occur
+        // word-finally in Pali/Sanskrit and English borrowings, where both are the unreleased [t̚] like
+        // ⟨ດ⟩. The referee demands them: ສັຕວ໌ → sat̚, ອາທິຕຍ໌ → ʔaː.tʰit̚ (both only reachable once the
+        // cancellation mark has stripped the silent tail), ຣົຖ → lot̚ "vehicle", ທາງຣົຖ → tʰaːŋ.lot̚,
+        // ສາທາຣະນະຣັຖ → …lat̚ "state". Unhandled, each was read as a whole extra syllable (*lo˧.tʰa˧˥).
+        // Safe to add because the scanner already treats any coda letter FOLLOWED BY A VOWEL as the next
+        // syllable's onset, so ordinary ⟨ຕ⟩/⟨ຖ⟩ onsets (ຕາ, ຖາ) are untouched.
+        "ຕ": "t̚", "ຖ": "t̚",
     },
 
     // Cardinal number words (LAO-SCRIPT spellings — the compositor reads them back through the ordinary

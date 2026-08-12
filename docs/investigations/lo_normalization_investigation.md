@@ -166,3 +166,75 @@ by COUNT (n===1 → first, else last), so adding `ເປີເຊັນ` would e
 
 Gates after: 3,389 tests, tsc OK, scan "no defects", review.ts clean, corpus diff 169/431 with DROP 99 → 44
 (the extra one is the redundancy above), referee 97.7% unchanged.
+
+---
+
+## Run 8 — 2026-08-11 — coverage: which Lao code points does the g2p actually read?
+
+Question, asked after the manifest refactor made the tables inspectable: **is the whole Lao block handled,
+or is something silently dropped?** Enumerating U+0E80–0EFF against every table the g2p reads (onsets,
+codas, leading vowels, tone marks, every character in `vowelPatterns`, plus ຼ, ໆ and the digits):
+
+```
+handled: 63 code points.  UNHANDLED and OCCURRING:
+   U+0ECC ໌  LAO CANCELLATION MARK (karan)   corpus ×65   referee ×6
+   U+0EAF ຯ  LAO ELLIPSIS                    corpus ×3    referee ×0
+   (+63 more unhandled, ×0 in both — the archaic Pali consonants ຆ ຉ ຌ ຎ ຏ ຐ ຑ ຒ ຓ ຘ ຠ ຨ ຩ ຬ,
+    the Khmu additions, U+0EBA, U+0EC5. A defensible gap.)
+```
+
+⚠ **The cancellation mark's failure mode was INSERTION, not omission**, which is why nothing caught it: the
+silenced consonant took its inherent vowel and became a whole extra syllable. **All six referee words
+carrying it were wrong**, and the referee is what shows the rule:
+
+```
+                    engine (before)          referee
+ໄຟລ໌      "file"    fa˧˥j.la˧                faj˧˥
+ເວັບໄຊຕ໌ "website"  ʋe˧p̚.sa˧˥j.ta˧˥         ʋep̚˧.saj˧˥
+ສັຕວ໌               sa˧˥.tuːə˩               sat̚˧˥
+ວຽງຈັນທນ໌ "Vientiane" ʋiːə˧˥ŋ.t͡ɕa˩n.tʰa˧˥n  ʋiːə̯ŋ˧˥.t͡ɕan˩
+```
+
+**It cancels a CLUSTER, not a letter, and the referee gives both halves.** `ອາທິຕຍ໌` keeps ⟨ຕ⟩ as its coda
+([ʔaː.tʰit̚] — only ⟨ຍ⟩ silent) while `ວຽງຈັນທນ໌` silences ⟨ທ⟩ as well as ⟨ນ⟩. One rule produces both: delete
+the marked consonant, then keep walking left while the character *before* the current one is also a
+consonant — i.e. strip the tail down to a single coda and stop. Verified against all six by hand before
+coding it.
+
+**It also exposed two loan finals.** Native Lao has an 8-way final set and ⟨ຕ⟩ is not in it, so `ສັຕວ໌` and
+`ອາທິຕຍ໌` still mis-read after cancelling. ⟨ຕ⟩ → [t̚] fixed both; its twin ⟨ຖ⟩ → [t̚] fixed three more
+(`ຣົຖ` → lot̚ "vehicle", `ທາງຣົຖ`, `ສາທາຣະນະຣັຖ` → …lat̚ "state"). Both are safe because the scanner already
+treats a coda letter FOLLOWED BY A VOWEL as the next syllable's onset, so ordinary ⟨ຕ⟩/⟨ຖ⟩ onsets are
+untouched.
+
+**Referee 2256/2310 (97.7%) → 2267/2310 (98.1%)**, symbol accuracy 99.2% → 99.4%. Corpus: 47 of 431
+utterances changed — 23 carrying the mark, 24 from the two finals, and the 24 were read.
+
+### The measured refusal: four more loan finals, NOT taken
+
+The same probe found 37 referee words where the engine emits more syllables than the referee, 13 of them
+ending in a non-coda consonant. Four more mappings are visible in that residue and each was measured
+individually:
+
+| addition | referee gain | evidence |
+|---|---:|---|
+| ⟨ຣ⟩ → n | +1 | `ທຫາຣ` → tʰa.haːn, `ນຄຣ` → na.kʰɔːn |
+| ⟨ລ⟩ → n | +1 | `ອີແມລ` → ʔiː.mɛːn ("email") |
+| ⟨ປ⟩ → p̚ | +1 | `ເທປ` → tʰeːp̚ ("tape") |
+| ⟨ສ⟩ → t̚ | +2 | ⚠ **split in the referee itself** — `ປຼະເທສ` → pa.tʰeːt̚ but `ໄວຣັສ` → ʋaj.las, a plain [s] |
+
+**All four together are +5 referee words and 69 CORPUS LINES** — against ຕ/ຖ's +11 for 24. That ratio is the
+reason they are not in this change: ⟨ລ⟩ and ⟨ຣ⟩ are among the commonest letters in the language, the corpus
+sample I read looked like improvements but "looked like" is not a measurement, and ⟨ສ⟩ contradicts itself in
+the only referee available. They deserve their own pass with all 69 lines read, not a ride-along.
+
+⚠ **Also still open: ຯ** (U+0EAF, ×3). Two of the three are `ຯລຯ`, the abbreviation for "etc."; the third is
+`ເກົ້າຯ` in a royal formula. That is a normalization question rather than a g2p one, and no Lao reading of
+either is attested.
+
+### A process note against myself
+
+Measuring the four candidates in a shell loop, I used `git checkout <file>` to revert between iterations and
+**destroyed my own uncommitted manifest edits** — runs 2–5 all reported the pre-change baseline before I
+noticed the constant number. The playbook bans `git stash` for being global; `git checkout <path>` is the
+same hazard at file scope. Revert by the inverse string edit, or measure in a copy.
