@@ -46,10 +46,13 @@ describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
         expect(phonemizeWord("ߓߊ߲")).toBe(phonemizeWord("ban")); // N'Ko ≡ the Latin spelling
     });
 
-    // NUMBERS — DECIMAL (Bambara is NOT quinary: 6–9 are opaque stems). Bespoke because 10 tan / 20 mugan are
-    // lexical while 30–90 are solid bi- derivations, and every magnitude noun takes a FOLLOWING multiplier —
-    // except 100, which is the bare kɛmɛ. Slots join with ni 'and'. Sources: Omniglot "Numbers in Bambara",
-    // languagesandnumbers.com bam (the 1234 worked example), kasahorow (fu 'zero').
+    // NUMBERS — DECIMAL. Bambara is NOT quinary (6–9 are opaque stems) and NOT vigesimal either, despite the
+    // areal reputation of Mande: tan/mugan are a lexical fossil but bi- is ×10, and bm.wikipedia glosses its
+    // own arithmetic — `biwɔɔrɔ ni wɔɔrɔ (66)`, `tone ba saba dɔrɔn (3 000 tonnes)`. Bespoke because 10 tan /
+    // 20 mugan are lexical while 30–90 are solid bi- derivations, and every magnitude noun takes a FOLLOWING
+    // multiplier — except 100, which is the bare kɛmɛ. Slots join with ni 'and'.
+    // Sources: Bamadaba (Bailleul 2007 / Corpus Bambara de Référence) for every headword spelling, An ka taa,
+    // Omniglot "Numbers in Bambara", languagesandnumbers.com bam (the 1234 worked example), kasahorow (fu).
     // See src/languages/bambara/numbers.ts.
     test("numbers: units, lexical tan/mugan, bi- tens, ni compounds", () => {
         expect(numberToWords(7)).toBe("wolonwula");
@@ -58,17 +61,29 @@ describe("Bambara canonical IPA — greedy g2p + nasalisation", () => {
         expect(numberToWords(20)).toBe("mugan"); // lexical, not *bifila
         expect(numberToWords(21)).toBe("mugan ni kelen");
         expect(numberToWords(42)).toBe("binaani ni fila"); // bi- + unit, written solid
+        expect(numberToWords(8)).toBe("segin"); // Bamadaba headword; seegin is its listed variant
+        expect(numberToWords(66)).toBe("biwɔɔrɔ ni wɔɔrɔ"); // the wiki writes `biwɔɔrɔ ni wɔɔrɔ (66)` — bi- is ×10
+        expect(numberToWords(80)).toBe("bisegin");
+        // 90 KEEPS its medial ⟨n⟩: all four lexica agree, against bm.wikipedia's `bikɔnɔtɔn` ×2
         expect(numberToWords(99)).toBe("bikɔnɔntɔn ni kɔnɔntɔn");
     });
 
-    test("numbers: kɛmɛ hundreds (bare at 100), waga thousands, milyɔn millions", () => {
+    test("numbers: kɛmɛ hundreds (bare at 100), ba thousands, miliyɔn millions, miliyari milliards", () => {
         expect(numberToWords(100)).toBe("kɛmɛ"); // the multiplier is omitted for exactly 100
         expect(numberToWords(101)).toBe("kɛmɛ ni kelen");
         expect(numberToWords(555)).toBe("kɛmɛ duuru ni biduuru ni duuru");
-        expect(numberToWords(1000)).toBe("waga kelen"); // the thousand DOES keep its multiplier
-        expect(numberToWords(12345)).toBe("waga tan ni fila ni kɛmɛ saba ni binaani ni duuru");
-        expect(numberToWords(1_000_000)).toBe("milyɔn kelen");
-        expect(numberToWords(2_000_000)).toBe("milyɔn fila");
+        expect(numberToWords(1000)).toBe("ba kelen"); // the thousand DOES keep its multiplier
+        expect(numberToWords(12345)).toBe("ba tan ni fila ni kɛmɛ saba ni binaani ni duuru");
+        // the wiki glosses this exact shape itself: `tone ba kɛmɛ fila (200 000 tonnes)`
+        expect(numberToWords(200_000)).toBe("ba kɛmɛ fila");
+        expect(numberToWords(1_000_000)).toBe("miliyɔn kelen");
+        expect(numberToWords(2_000_000)).toBe("miliyɔn fila");
+        // 10⁹ is a real Bambara loan (Bamadaba \lx míliyari \ge milliard; bm.wikipedia ×5, always with a
+        // figure), so it composes rather than falling back to digit-by-digit.
+        expect(numberToWords(1_000_000_000)).toBe("miliyari kelen");
+        expect(numberToWords(1_500_000_000)).toBe("miliyari kelen ni miliyɔn kɛmɛ duuru");
+        // above miliyari there is no attested numeral — read the digits rather than invent a "trillion"
+        expect(numberToWords(1e12)).toBe("kelen fu fu fu fu fu fu fu fu fu fu fu fu");
     });
 
     test("numbers: both registered scripts — N'Ko digits (߀–߉) ≡ ASCII", () => {

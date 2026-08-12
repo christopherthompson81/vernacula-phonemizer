@@ -89,27 +89,29 @@
  *   The same applies to `letter-name` (×575: the pronoun `A`) and `latin-in-native` (×1517: the language
  *   is written in Latin, so the cell matches every word).
  *
- * ── AND ONE FINDING THAT IS NOT THIS LAYER'S TO FIX ───────────────────────────────────────────────────
+ * ── AND ONE FINDING THIS LAYER RAISED AND `numbers.ts` SETTLED ────────────────────────────────────────
  *
  * `numbers.ts` was verified word by word against the dump rather than assumed. Ten of its fifteen literals
  * are confirmed in running Bambara text — `fu` ×2, `kelen` ×210, `fila` ×77, `saba` ×46, `naani` ×19,
  * `duuru` ×19, `wɔɔrɔ` ×8, `wolonwula` ×6, `kɔnɔntɔn` ×4, `tan` ×45, `mugan` ×20, `kɛmɛ` ×45, and the
- * bi- tens `bisaba` ×2 / `binaani` ×15 / `biduuru` ×3 / `biwɔɔrɔ` ×1 / `biwolonwula` ×1. FIVE ARE NOT:
+ * bi- tens `bisaba` ×2 / `binaani` ×15 / `biduuru` ×3 / `biwɔɔrɔ` ×1 / `biwolonwula` ×1. FIVE WERE NOT,
+ * and each was then adjudicated against Bamadaba (Bailleul/Vydrin) rather than against the wiki alone —
+ * see `numbers.ts`'s header and investigation Runs 5–9. THREE of the five moved, ONE was refused:
  *
- *     seegin (8)     ×0 — the corpus spells it `segin`, and its bare count of 24 is the VERB "to return"
- *                          (`ka fanga segin`); the ONE numeral instance is inside the spelled-out year
- *                          "san ba kelen keme segin ani biwolofila ni kononto" (1879). Trap 37 exactly.
- *     biseegin (80)  ×0
- *     bikɔnɔntɔn (90)×0 — the corpus writes `bikɔnɔtɔn` ×2, one ⟨n⟩ fewer
- *     waga (1000)    ×0 — the corpus's thousand is `ba`: `ba kelen keme segin …` (1000+800+…),
- *                          `san ba 2 fo 3` ("2 to 3 thousand years"), `kilomɛtɛrɛ ba 7` (7000 km).
- *                          `numbers.ts`'s own header records `ba kelen` as the variant it did not take.
- *     milyɔn         ×0 — the corpus writes `miliyɔn` ×27
+ *     seegin  → segin   (8)    Bamadaba \lx ségin, \va séegin. The corpus's 24 bare `segin` are 23 of the
+ *                              VERB sègin 'revenir' (`ka fanga segin`) — trap 37 — and one numeral, inside
+ *                              the spelled-out year `san ba kelen keme segin ani biwolofila ni kononto` (1879).
+ *     biseegin → bisegin (80)  Bamadaba \lx bíségin, no seegin variant. Neither form occurs in the corpus.
+ *     bikɔnɔntɔn        (90)   REFUSED — kept. All four lexica keep the medial ⟨n⟩; the corpus's
+ *                              `bikɔnɔtɔn` ×2 are the same percent-gloss construction twice, and the same
+ *                              corpus writes the UNIT `kɔnɔntɔn` ×4 WITH the ⟨n⟩.
+ *     waga    → ba     (1000)  Bamadaba has no numeral `waga` at all (wàga = brousse). The corpus agrees:
+ *                              `ba kelen keme segin …`, `san ba 2 fo 3`, `kilomɛtɛrɛ ba 7`, and the wiki's
+ *                              own gloss `tone ba kɛmɛ fila (200 000 tonnes)`.
+ *     milyɔn  → miliyɔn        Bamadaba \lx míliyɔn; the corpus writes `miliyɔn` ×27, `milyɔn` ×0.
  *
- * NOT CHANGED HERE, for the Lingala reason: it is authored DATA with three citations, it rewrites every
- * number in the language, and it needs its own corpus diff and its own sourcing argument. This layer emits
- * DIGITS wherever a number is involved and lets the engine's own number path speak them, so nothing below
- * is built on top of it. Recorded so the measurement is re-runnable in one grep.
+ * Nothing below rests on any of it: this layer emits DIGITS wherever a number is involved and lets the
+ * engine's own number path speak them. Recorded so the measurement is re-runnable in one grep.
  */
 
 /** ⚠ THE UNIT NOUN COMES BEFORE THE NUMBER IN BAMBARA, which is why units are local and not the shared
@@ -211,8 +213,8 @@ function expandDotted(s: string, body: string, word: string): string {
 }
 
 /** Every rule here emits DIGITS wherever a number is involved and lets the engine's own number path speak
- *  them, so this layer carries no number words of its own — which is why the `waga`/`ba` question in the
- *  header is orthogonal to it. */
+ *  them, so this layer carries no number words of its own — which is why the `waga`→`ba`
+ *  correction in the header was orthogonal to it. */
 export function normalizeBambara(input: string): string {
     // 1) NFC at the entry, so a literal in this file matches whichever normalization the corpus used.
     //    Bambara's own letters (ɛ ɔ ɲ ŋ) do not decompose, but the wiki's non-standard orthography is full
@@ -266,7 +268,7 @@ export function normalizeBambara(input: string): string {
 
     // 5) ISBN, before every numeric rule — an identifier is read DIGIT BY DIGIT, not as a quantity. ×5, all
     //    of the shape `ISBN 978-84-8168-394-3.`, and each was reading as FOUR SEPARATE CARDINALS (*kɛmɛ
-    //    kɔnɔntɔn ni biwolonwula ni seegin, biseegin ni naani, …*) — a catalogue number spoken as
+    //    kɔnɔntɔn ni biwolonwula ni segin, bisegin ni naani, …*) — a catalogue number spoken as
     //    arithmetic. ⚠ MUST PRECEDE THE RANGE RULE. RANGE's chain guard already rejects these, but claiming
     //    the identifier whole removes the question rather than resting it on one lookahead.
     s = s.replace(/(?<![\p{L}\p{M}])(ISBN(?:[- ]1[03])?)\s*:?\s*(\d[\d– -]*[\dXx])/gu,
