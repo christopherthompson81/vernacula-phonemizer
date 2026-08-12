@@ -45,6 +45,13 @@ MARKERS = {
     # frequency function words (iyo "and", ee/oo linkers, waxaa/waxay focus markers, ku/ka/la prepositions).
     "so": "iyo ee ah ka ku la oo waa in uu ay si ugu kala ayaa waxaa waxay lagu loo soo dhexe "
           "magaalada dalka sanadkii badan mid oo dhan ka mid",
+    # ak (Akan): Twi and Fante are two varieties of ONE language, so this row is deliberately NOT
+    # diagnostic between them — it is diagnostic against ENGLISH, which is what tw.wikipedia and
+    # fat.wikipedia actually carry (4.5% / 8.1% English-dominant paragraphs). The words are the copula
+    # yɛ, the locative/possessive wɔ, the linkers na/ne/nso, the postposed article no, the postpositions
+    # mu/ho/so, the complementiser sɛ, and the pronoun set — all shared by both varieties.
+    "ak": "yɛ wɔ na ne no mu sɛ nso nyinaa de ma ho so wɔn yɛn me nti bio saa anaa firi kɔ ase "
+          "deɛ ɔno afe da mmom bɛ aa ɔyɛ",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "

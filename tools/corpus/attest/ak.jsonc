@@ -1,0 +1,149 @@
+// WIKIPEDIA WORD ATTESTATION — ak. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ak",
+        "wiki": "tw.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+            {
+                "word": "dɔla",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 65,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…no fii ase yɛɛ adwuma bi a wɔde besiesie nneɛma a ɛyɛ U.S. dɔla ɔpepem 36 de ama adwumakuw no nneɛma ayɛ kɛse. Wɔ afe 1992…",
+                "…ɔkyerɛe sɛ wɔde nneyɛe bɔne ahorow so yii sika a ɛboro U.S. dɔla ɔpepem 2.3 fii adwuma no mu, na wɔkyeree mpanyimfo dodow bi…",
+                "…no fii ase yɛɛ adwuma bi a wɔde besiesie nneɛma a ɛyɛ U.S. dɔla ɔpepem 36 de ama adwumakuw no nneɛma ayɛ kɛse. Wɔ 1992 mu n…",
+                "…992 mu no, wɔkyerɛe sɛ wɔfaa nneyɛe bɔne ahorow so yii U.S. dɔla ɔpepem 2.3 fii adwuma no mu, na wɔkyeree mpanyimfo dodow bi…",
+                "…awia nneɛma foforo a ɛkame ayɛ sɛ sika a ɛyɛ den a ɛyɛ U.S. dɔla ɔpepem 50 wɔ 1980 mfe no mu. Wɔ 1992 mu no, aban no fii ase…",
+                "…a sen biara. Efi 1983 no, kwaeyɛ anya mfaso afi bɛboro U.S. dɔla ɔpepem 120 a wɔde asie no mu na wɔayɛ nsakrae kɛse, na ama…"
+            ]
+            },
+        {
+                "word": "sidi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…== Nhyehyɛeɛ a ɛfa ɔsan a wɔbɛsan aba no ho == Berɛ a wɔpaw Sidi Ould Cheikh Abdallahi sɛ ɔmampanyin wɔ afe 2007 mu no, Maur…",
+                "…\" nso di dwuma pa ara wɔ Ghanaman mu. Wɔhunu kasasini yi wɔ sidi ahodoɔ 50, 200, 100, 500, ne 5000 a Ghana Sikakorabea Baata…"
+            ]
+            },
+        {
+                "word": "akyiri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 119,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ne aduokron nan (21,794) a agyina hɔ ma ɔha aduoson nnwɔtwe akyiri pɔ du nson (78.17%). Emmanuel William Amoako a ɔno nso firi…",
+                "…kron nkron (5,899) a agyina hɔ ma ɔha nkyekyɛmu aduonu bako akyiri pɔ du-nsia (21.16%). Opoku kyei Clliford a ɔfiri akɔko amay…",
+                "…nya mma ɔha ne aduowɔtwe nnwɔtwe (188) a agyina hɔ ma hwii akyiri pɔ aduosia nson (0.67%). ==== Mmrahyɛbɛdwafoɔ abatoɔ wɔ kum…",
+                "…wɔtwe (18,858) a agyina hɔ ma ɔha nkyekyɛmu aduosia nnwɔtwe akyiri pɔ aduokron nsia (68.96%). Asiamah Samuel nso a ɔgyina ma k…",
+                "…e aduonan mmienu (4,142) a agyina hɔ ma ɔha nkyekyɛmu dunum akyiri pɔ dunum (15.15%). Dominic Oteng a ɔgyina ma IND amayɔkuo n…",
+                "…ko (3,991) a sɛ wode kɔ ɔha nkyekyɛmu a agyina hɔ ma du-nan akyiri pɔ aduonum nkron (14.59%) Collins Kumi Boateng a ɔgyina ma…"
+            ]
+            },
+        {
+                "word": "kilomita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilomita ahinanan, agyiraehyɛde km2, yɛ beae a wɔsusuw. Wɔ SI nhyehy…",
+                "…no mu no, ahinanan a n’afa horow tenten yɛ 1 no kɛse km yɛ kilomita ahinanan biako. Kilomita ahinanan no yɛ susudua a ɛtɔ so mm…",
+                "…fa horow tenten yɛ 1 no kɛse km yɛ kilomita ahinanan biako. Kilomita ahinanan no yɛ susudua a ɛtɔ so mmienu wɔ SI nhyehyɛeɛ no m…",
+                "…eɛ no mu. km2 biako ne: Ahinanan bi a n'afa horow tenten yɛ kilomita 1 no kɛse . 1 000 000 m2 100 hekta 0,386 102 akwansin ahina…",
+                "…den a yenya no fa kese no fi. Apuei Mantam asase no kɛse yɛ kilomita no 19,323 a egyina hɔ ma ɔha mu nkyekyem 8.1 wɔ Ghana nsase…",
+                "…antam ne Afar mantam hye so, na abɔnten so atrae no kɛse yɛ kilomita 827 ahinanan, na ne fa kɛse no ara da beae a ɛkorɔn mita 90…"
+            ]
+            },
+        {
+                "word": "kosi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 68,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Wɔakyerɛw nsɛm yi wɔ Akuapem kasa mu Kosi Kedem sɛnea yɛbɔ \"Kosi Kedem\" (wɔwoo no Oforisuo bosome da…",
+                "…Wɔakyerɛw nsɛm yi wɔ Akuapem kasa mu Kosi Kedem sɛnea yɛbɔ \"Kosi Kedem\" (wɔwoo no Oforisuo bosome da ɛtɔso edu num wɔ afe ap…",
+                "…Gaana. Kane no na wɔ frɛ no Asante Akim Atifi Mansini kese kosi sɛ wɔ kyɛɛ mansini no mu mienu wɔ Kitawonsa bosome no wɔ af…",
+                "…mu. Wɔhyɛ saa fa yi ase wɔ yawada wɔ Kitawonsa bosome no mu kosi nawotwe a edi kan wɔ Ɔsanaa bosome no mu. sɛnea wɔbekae nne…",
+                "…ɔ hɔ. Adangmefo no yɛ wɔn a wɔte bɛn Ghana mpoano efi Kpone kosi Ada, nsuo Frao ne Gulf of Guinea. Adangmefo no ne Ada, Kpon…",
+                "…fa Kokrobite kɔpem Weija, ɛtoa so kɔpem Mfinifini Mantam mu kosi Elubo wɔ Atoe mantam mu. N2 no nam Apeui Mantam mu de si As…"
+            ]
+            },
+        {
+                "word": "nkyekyɛmu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 149,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…m wei ɛwɔ Asante kasa mu Mansini yɛ adwumam kwankyerɛfoɔ no nkyekyɛmu baako a, wɔ amaman bi mu no aban a ɛwɔ mpɔtam na ɛhwɛ so. W…",
+                "…am mantam anaa amamam pii, mansini adantam, mansini adantam nkyekyɛmu, sukuu mansini anaa amanyɛsɛm mansini. == Ɔman/mantam. == =…",
+                "…=== Wɔ Afghanistan no, mansini (Persian/Pashto) yɛ ɔman no nkyekyɛmu fa baako. Wɔwɔ mansini bɛyɛ ahanan (400) wɔ ɔman nom. === A…",
+                "…ho pan a wɔnyɛ so hwee. \"New South wales\" wɔ mansini ahodoɔ nkyekyɛmu bebree a wɔde dii dwuma wɔ (21st century\".…",
+                "…num ahannwɔtwe ne aduokron nkron (5,899) a agyina hɔ ma ɔha nkyekyɛmu aduonu bako akyiri pɔ du-nsia (21.16%). Opoku kyei Clliford…",
+                "…we ahanwɔtwe ne aduonum nnwɔtwe (18,858) a agyina hɔ ma ɔha nkyekyɛmu aduosia nnwɔtwe akyiri pɔ aduokron nsia (68.96%). Asiamah S…"
+            ]
+            },
+        {
+                "word": "sɛntimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 54,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ɛtɔ mmere bi a ɛkɔ soro kodu mita aduasa(30), ne tɛtrɛtɛ yɛ sɛntimita aduasa(30), ne dua no taa yɛ akokɔ saadeɛ su bere a ɛyɛ ket…",
+                "…yɛ fitaa bere a anyini no. Mpɛn pii no, n'haban tenten boro sɛntimita aduanan(40), ɛtɔ mmerɛ bi a ɛkɔ soro koduru sɛntimita ɔha a…",
+                "…boro sɛntimita aduanan(40), ɛtɔ mmerɛ bi a ɛkɔ soro koduru sɛntimita ɔha aduonum(150), na ne tɛtrɛtɛ taa boro sɛntimita nnan(4)…",
+                "…o koduru sɛntimita ɔha aduonum(150), na ne tɛtrɛtɛ taa boro sɛntimita nnan(4) a ne tɛtrɛtɛ kodu sɛntimita du(10); n'haban no yɛ n…",
+                "…na ne tɛtrɛtɛ taa boro sɛntimita nnan(4) a ne tɛtrɛtɛ kodu sɛntimita du(10); n'haban no yɛ ntiantiaa a ɛyɛ oblanceolate wɔ ne nh…",
+                "…i a, ɛyɛ nkatabo. N'ahaban no yɛ nkatabo a ne tenten yɛ 1.5 sɛntimita kosi 10 sɛntimita. N'apɔw no yɛ nkatabo a wɔakyekyere ho, n…"
+            ]
+            },
+        {
+                "word": "kilogram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…nnuro ma HIV/AIDS ma nkwadaa ne mpanin a ɔmo mu duru yɛ 35 kilogram. Ɛkura lamivudine ne tenofovir disaproɔil. Ɔnom fa wanum.…",
+                "…ɛwowɔ ntini, ne kɛse te sɛ volleyball, na emu duru tumi yɛ kilogram 8.5 (19 lb). Wɔahunu sɛ wɔn a wɔn ho yɛ hyew no tumi de nnw…",
+                "…inaa. Afrika abodoo aba yɛ aba kɛse a ne mu duru betumi adu kilogram 8.5. Wubetumi adi nnuaba akɛse a aba wɔ mu yi nyinaa. Nanso…",
+                "…wah sii akan wɔ powerlifting mu, wɔ mmarima a ɛkɔ soro kodu kilogram 52 mu. Botsyo ne Mohammed san baeɛ sɛ wɔrebɛsi akan bio wɔ…",
+                "…no ɔha ne aduoson mmiensa (173cm) na ne mu duru nso bɛyɛ sɛ kilogram no aduosia num (65kg). Banwaa bɔ bɔɔl sɛ bɔɔl kyefoɔ anaa s…",
+                "…pepepem 630), na sɛ wɔkyekyɛ mu a, onipa biara mu duru bɛyɛ kilogram 62 (137 lb). Han Chinafoɔ yɛ wiase abusuakuo baako a ɛso se…"
+            ]
+            }
+        ],
+    }
+    

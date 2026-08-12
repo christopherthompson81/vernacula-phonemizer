@@ -1,0 +1,60 @@
+# MINING TERMS — Akan / Twi (ak). Read by `mine.ts --terms`, for the LEXICAL cells only.
+#
+# WHY THIS FILE IS COMMITTED. `ak.jsonc` is mined from a Wikipedia dump, and two of the inventory's cells
+# (`calendar`, `ordinal-native`) are LEXICAL: they are found by matching the language's own WORDS rather
+# than a shape, so they cannot be filled without a term list. Without the list a re-mine silently empties
+# both cells and nothing says so — the Burmese lesson (playbook trap 32), which is why the list lives
+# beside the artifact instead of in a scratch directory.
+#
+# `cell<TAB>term` scopes a term to one cell; a bare line applies to every lexical cell.
+#
+# ⚠ PROVENANCE, AND WHY THE LIST IS IN TWO HALVES. ak.wikipedia is LOCKED (its whole extract is the lock
+# notice), so the corpus is tw.wikipedia (Asante/Akuapem Twi) + fat.wikipedia (Fante). The two varieties
+# do NOT share a single month name, so both series are listed and each row says which variety it is from.
+# Every term was mined from the corpus's own date slots — the word immediately before a day number, the
+# word between a day and a year, and the frame `bosome <X>` — never asserted from a grammar; the count
+# beside each is its occurrence in that variety's filtered dump. These are SEARCH terms, not pronunciation
+# data: a wrong one costs recall in one cell and can never produce a wrong reading.
+
+# ── calendar: the Gregorian months as TWI (tw.wikipedia) writes them ──
+calendar	Ɔpɛpɔn
+calendar	Ɔgyefoɔ
+calendar	Ɔbɛnem
+calendar	Oforisuo
+calendar	Kotonimma
+calendar	Ayɛwohomumɔ
+calendar	Kitawonsa
+calendar	Ɔsanaa
+calendar	Ɛbɔ
+calendar	Ahinime
+calendar	Obubuo
+calendar	Ɔpɛnimma
+# The English-derived October, which tw.wikipedia writes beside the native Ahinime (×95 in date slots).
+calendar	Ɔkɔtɔberɛ
+
+# ── calendar: the Gregorian months as FANTE (fat.wikipedia) writes them — a disjoint series ──
+calendar	Kwakwar
+calendar	Ebɔw
+calendar	Ebɔbira
+calendar	Ɔbɛsɛ
+calendar	Aketseaba
+calendar	Ayɛwoho
+calendar	Dzifuu
+calendar	Ɔsanamma
+calendar	Ɛbɔ
+calendar	Obiradzi
+calendar	Ɔberɛfɛw
+calendar	Mumu
+calendar	Sanda
+calendar	Fankwa
+
+# ── ordinal-native: Akan has no ordinal SUFFIX; the ordinal is a relative CLAUSE that follows its noun.
+# Twi `a ɛtɔ so N` / `a ɛto so N` ("that falls on N") ×4,904; Fante `a ɔtɔ do N` ×1,742. `edi kan` /
+# `odzi kan` ("that comes first") is the suppletive first, ×1,046 / ×612. These are the whole native
+# ordinal system, which is why no ordinal RULE is written for this language.
+ordinal-native	ɛtɔ so
+ordinal-native	ɛto so
+ordinal-native	ɔtɔ do
+ordinal-native	ɔto do
+ordinal-native	edi kan
+ordinal-native	odzi kan

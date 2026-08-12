@@ -739,10 +739,18 @@ if (mode === "__module__") {
      * reconstructed, and they are what this preserves.
      *
      * Arguments containing spaces are quoted so the line can be pasted back with the paths filled in.
+     *
+     * ⚠ AND THE REDUCTION IS PER COMMA-SEPARATED SOURCE, because `--in` takes a LIST. `^.*\/` is greedy
+     * across the whole argument, so `--in a/tw.txt,b/fat.txt` reduced to `fat.txt` — the artifact recorded
+     * a command that would rebuild it from ONE of its two corpora and say nothing about the loss. Found on
+     * the Akan run, whose corpus is two variety wikis (ak.wikipedia is locked); it would equally have hit
+     * the documented `--in fleurs:xx,fill.txt` hybrid, which is the shape trap 25 recommends. This is trap
+     * 32's own failure mode reached by a different door: an artifact that cannot be regenerated from the
+     * repository is not really committed.
      */
     const command = ["npx tsx tools/normalization/mine.ts", ...process.argv.slice(2)
         // Only the ARGUMENTS are reduced — the tool's own repo-relative path is not a leak and is worth keeping.
-        .map((a) => (a.includes("/") ? a.replace(/^.*\//u, "") : a))
+        .map((a) => a.split(",").map((p) => (p.includes("/") ? p.replace(/^.*\//u, "") : p)).join(","))
         .map((a) => (/\s/u.test(a) ? `"${a}"` : a))].join(" ");
     const perCell = Number(arg("per-cell", "8"));
     const sampleN = Number(arg("sample", "0"));

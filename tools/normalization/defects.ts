@@ -179,6 +179,35 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ak: {
+        // ⚠ ak.wikipedia IS LOCKED — its entire extract is the notice pointing at the Twi and Fante wikis —
+        // so every measurement below is over tw.wikipedia (27,415 paragraphs) + fat.wikipedia (9,029), and
+        // `sources.ts` reports espeak does not ship this language at all. The refusals are argued at length
+        // in src/languages/akan/normalize.ts's header.
+        degrees: "measured: `°C`/`°F` ×103 tw + 24 fat and NO Akan degree word or scale name exists. "
+            + "`Celsius` ×1 and `Fahrenheit` ×2 are leads, not findings. The 354 tw + 353 fat hits for "
+            + "*degree* are the ACADEMIC degree — `Master's degree`, `bakyela degree wɔ Law` — which is the "
+            + "trap-37 shape with a count healthy enough to convince. `sources.ts` agrees: `[NONE] "
+            + "scale-names`. The `C` still reads as a bare [k], which is the visible half of the same gap",
+        plus: "measured: 18 tw + 3 fat, and not one is arithmetic — `Senegal + Liberia` (a range of "
+            + "countries), the etymological gloss `pseudo + epistaxis`, `Mixed (Cultural + Natural)` (a "
+            + "UNESCO category) and `UTC +14:00`. No Akan word for the operator is attested digit-adjacent",
+        "plus-minus": "measured: zero ± across both wikis",
+        equals: "measured: 108 tw + 5 fat, and the bulk is WIKI SECTION HEADING residue that survived "
+            + "extraction (`== Ankorankoro asetra ==`, `== Amanyɔsɛm ==`) — reading the sign would say an "
+            + "equals word twice on every heading. The handful that are real are a vote tally (`no mu = "
+            + "78.6%`) and one linguistic gloss. No Akan equals word is attested in the slot",
+        times: "measured: 19 tw + 11 fat, and every one read is either a BOTANICAL HYBRID (`Citrus × "
+            + "latifolia`) or a RELAY/DIMENSION cross (`mita 4 × 100`, `4x100m`), which is \"by\" and not "
+            + "\"times\" — the bm finding, reproduced here",
+        divide: "measured: zero ÷ across both wikis",
+        "less-than": "measured: zero < across both wikis (the `<` in the artifact is markup residue)",
+        "greater-than": "measured: zero > across both wikis",
+        // ⚠ `minus` IS DELIBERATELY ABSENT. All 39 tw leading minuses read back as EN-DASH RANGES, which
+        // normalize.ts step 8 claims — but the coordinate `6.28ɛ; -1.850` is a GENUINE negative and no Akan
+        // word for one is attested anywhere. Omitting a plus is lossless; omitting a minus INVERTS, so this
+        // one stays red. Same stance as ln, bm and rw.
+    },
     ceb: {
         // ⚠ NO CEBUANO DEGREE WORD IS ATTESTED ANYWHERE IN THE CORPUS. `grado` ×0, `digri` ×0, `celsius` ×0 —
         // and the corpus is FLEURS rather than the wiki (see cebuano/normalize.ts for why), so there is no
@@ -1115,6 +1144,24 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
 export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    ak: {
+        // A REDUNDANT PERCENT SIGN, WHICH THIS CORPUS WRITES CONSTANTLY — and the six below are where the
+        // scan's own REDUNDANT test cannot see it. Akan reads `%` as `ɔha mu nkyekyɛmu` (PREPOSED, ×1,387
+        // tw + 215 fat) and akan/normalize.ts step 5 suppresses the word when the sentence has ALREADY
+        // written it, which is 893 of the 5,154 percent signs across the two wikis: the writer spells the
+        // figure out in words and then repeats it in digits — "ɔha mu nkyekyemu eduokron (90%)". Saying it
+        // once is the correct reading (trap 12), and the correct reading is byte-identical with the sign
+        // deleted, so the differential test reports a drop and is right to.
+        // ⚠ WHY THESE SIX AND NOT THE OTHER FIVE. `isRedundant` looks for the symbol's own contribution
+        // tokens in the reading, and it FINDS them for the five sentences that spell the word the way the
+        // rule does. These six use the corpus's ⟨e⟩ variants — `nkyekyem`, `nkyekyemu` — which phonemize to
+        // ŋt͡ɕɪt͡ɕem(u) rather than ŋt͡ɕɪt͡ɕɛmu, so the token test misses a word that is plainly there. That is a
+        // limitation of the probe, not a defect in the reading.
+        // ⚠ Listed with the WORD in the span rather than as a bare `90%`, so a genuinely dropped `2%`
+        // somewhere else in this language still reports. A bare figure would launder it.
+        percent: ["ɔha mu nkyekyemu mmienu (2%", "ɔha mu nkyekyemu eduonu (50%", "ɔha mu nkyekyemu eduokron (90%",
+            "ɔha mu nkyekyem eduasa-mmienu (32%", "ɔha mu nkyekyem eduosia-nsia(66%", "ɔha mu nkyekyemu eduonum-nson(57%"],
+    },
     ceb: {
         // THE YEN, and it is the ONE currency in this corpus with no Cebuano name. The dollar (`dolyar` ×4),
         // the euro (×1) and the pound (`pound` ×3, in `Falkland pound (FKP)`) are all declared and read; `yen`

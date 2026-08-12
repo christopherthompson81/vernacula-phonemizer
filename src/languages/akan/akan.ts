@@ -31,6 +31,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
+import { normalizeAkan } from "./normalize.ts";
 
 // Tone + vowel-nasality lexicon (word → comma-joined per-nucleus tokens: H/L, +~ if nasal). Akan tone is lexical
 // (unpredictable from the toneless orthography), so — the Romanian-stress pattern — a lexicon carries it and the
@@ -207,7 +208,11 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 export function createAkan(foreign?: (s: string) => string): Phonemizer {
     return {
         text(input: string): string {
-            return assembleClauses(input, TOKEN, (m, sink) => {
+            // TEXT NORMALIZATION first — the pre-tokenizer pass that rewrites what is not already a
+            // pronounceable word (grouping marks, the percent and currency signs, ranges, the decimal
+            // point, the elision apostrophe) into words this tokenizer already speaks. See normalize.ts
+            // for the corpus counts behind every rule and for what it deliberately declines.
+            return assembleClauses(normalizeAkan(input), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
                 else if (m[2]) {
                     // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO BE EMITTED STRAIGHT INTO THE IPA. Refusing to
