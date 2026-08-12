@@ -1136,6 +1136,52 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "slash Madurese writes constantly (`bân/otabâ`, `daging/ajam/tempe`, `atoran/kabiyasaan`). "
             + "`bagi` ×2 is 'for' (`Requiem bagi ROCKER`), not the operator",
     },
+    he: {
+        // ⚠ ESPEAK SHIPS NO HEBREW AT ALL and there is no FLEURS corpus, so every reason below is a
+        // measurement over `tools/corpus/mined/he.jsonc` (he.wikipedia, 380 segments) plus `attest.ts` and
+        // targeted `insource:` searches against that wiki. The refusals are argued in
+        // `src/languages/hebrew/normalize.ts`'s header and logged in
+        // `docs/investigations/he_normalization_investigation.md`.
+        //
+        // ⚠ NO `minus` KEY, DELIBERATELY, AND THE GATE STAYS RED ON IT — the `rw`/`ht` position exactly.
+        // Hebrew's negative IS read, in the one slot the corpus writes it: the sign follows the unit
+        // (`18°C-`, `נמוכות מ-60°C-`, ×5), because in RTL display a trailing hyphen renders to the LEFT of
+        // the quantity. `מִינוּס` is well sourced for that — ×145 tokens / 18 articles, always PREPOSED to
+        // its quantity (`מינוס 273.15 מעלות צלזיוס`, `מינוס 38 מעלות`). What is NOT read is a LEADING `-5`,
+        // and the reason is trap 24 rather than sourcing: all 7 leading instances in the corpus are a date
+        // RANGE dash inside a birth–death parenthetical (`9 בדצמבר 1942 - 7 בדצמבר 1997`, ×5), a clause dash
+        // (`בעולם - 783.84 קילומטר רבוע`) or an aircraft designation (`-700W`) — **not one is a negative** —
+        // so a rule would be 0-for-7. hi's escape (a narrower rule keyed on a following degree word) buys
+        // nothing here, because that is the arm already shipped on the other side. Omitting a minus INVERTS,
+        // so the class stays failing rather than being declared correct.
+        plus: "measured: 6 `+` in the artifact and none is arithmetic — `date +%s` (a shell format string in "
+            + "the Unix-time article), `דיסני+` (the brand Disney+), `+1.9%` (a population growth figure, "
+            + "where the sign is redundant with the word `שינוי` before it) and three AGE BRACKETS "
+            + "(`34% מבני +65`, `42% מבני +75`, `24% מבני +20`) — which an RTL renderer displays as `65+`, "
+            + "i.e. the sign is written first and read last. The playbook's audio tier settles the rest: "
+            + "omitting a plus is lossless where omitting a minus inverts",
+        equals: "measured: 5 `=` and every one is a written EQUATION quoted as a display object rather than "
+            + "read aloud — `\"שמונה בריבוע\" (כי 8² = 64)` (the sentence has already SPOKEN the equality in "
+            + "words, so the sign is redundant, trap 12) and one line of `2030 = 27² + 26² + 25² = 24² + "
+            + "23² + 22² + 21²` from the same numerology article. No he candidate was probed because the "
+            + "corpus supplies no slot for one: there is no sentence where a reader must voice the relation",
+        times: "measured: `×` is ×0 in the artifact. The `/` shapes that could stand in for it are football "
+            + "SEASONS (`2010/11`, `2012/2013`, ×5), Israeli court docket numbers (`ע\"א 136/71`, `513/89`, "
+            + "`41/92`, ×3) and two genuine fractions — never multiplication",
+        divide: "measured: `÷` is ×0 in the artifact, and `sources.ts` reports the sign as not occurring in "
+            + "the evidence at all",
+        "plus-minus": "measured: `±` is ×0 in the artifact. Its reading would compose the plus and minus "
+            + "words, and the plus half is refused above",
+        "less-than": "measured: `<` is ×0 in the artifact; no Hebrew comparative-magnitude phrase is "
+            + "attested digit-adjacent in the corpus or in the attest.ts probes",
+        "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
+        ampersand: "measured: 12 `&` and ten are inside ENGLISH titles the registry's Latin fallback owns "
+            + "(`אצטדיון AT&T`, `\"Key & Peele\"`, `\"Safe & Sound\"` ×2, `Boys & Girls Clubs`, `בן & "
+            + "ג'ריס`, `\"Live & Kicking\"`). Two more are markup residue from a broken entity (`שלט ב "
+            + "?–848&`, `ב-847–838&`). That leaves TWO Hebrew instances (`מצעד שירי הרוק & האלטרנטיביים`), "
+            + "and their reading is the PROCLITIC ו־ — a bound prefix that would have to be welded onto the "
+            + "following token, not an infix word. `ff hakkunde` is what emitting it as a free word would be",
+    },
     ht: {
         // ⚠ ESPEAK SHIPS NO HAITIAN CREOLE, so every reason below is a measurement over an ht.wikipedia dump
         // (800,158 paragraphs), and — because this wiki is 15.1% FRENCH — over its Creole-only 154,110 as
@@ -2183,6 +2229,31 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // scientific notation. Same call `so` records for `E = mc²`, and instance-listed for the same
         // reason — a `km²` regression must stay visible.
         exponent: ["E = mc²"],
+    },
+    he: {
+        // ⚠ BOTH ENTRIES ARE THE RESIDUE OF CLASSES THE LAYER DOES READ, listed by instance so the readings
+        // stay under test — `25 %` → *ʔesʁim veχameʃ ʔaχuz* and `$5` → *χameʃ dolaʁ* both work, and a
+        // regression in either must report again immediately.
+        //
+        // A PERCENT SIGN THAT IS NOT A PERCENTAGE. The corpus's Unix-time article quotes a SHELL COMMAND —
+        // "ניתן לקבל את זמן יוניקס … על ידי הקלדת date +%s בשורת הפקודה" — where `%s` is strftime's
+        // seconds-since-epoch format specifier. There is no quantity, and the `+` beside it is the same
+        // non-arithmetic instance the ACCEPTED_SIGN_SILENCE `plus` entry counts. 1 of the corpus's 79
+        // percent signs; the other 78 are read.
+        percent: ["date +%s"],
+        // A CURRENCY SIGN INSIDE AN ISO-STYLE CODE, AND A TEXTBOOK TRAP-12 REDUNDANCY. The sentence is
+        // "ראש ממשלת טרינידד וטובגו עומד על 576,000 דולר טרינידדי (TT$)" — the amount is already stated
+        // with the currency SPELLED OUT in Hebrew (`דולר טרינידדי`, Trinidadian dollars) and the code in
+        // brackets repeats it. Saying it once, in the position Hebrew puts it, is the correct reading, and
+        // the correct reading is byte-identical with the sign deleted — so the differential test reports a
+        // drop and is right to. The rule cannot claim it in any case: there is no number adjacent to the
+        // sign, which is the guard that keeps `$` from biting into ordinary Latin runs.
+        currency: ["(TT$)"],
+        // ⚠ THE MINUS IS NOT LISTED HERE, AND THAT IS DELIBERATE — see the ACCEPTED_SIGN_SILENCE header
+        // above. The 8 hyphens the scan reports are compound hyphens (`מזון אולטרה-מעובד`, `דרום-קוריאני`,
+        // `על-פני`, `אל-אסד`), date-range dashes and the designation `-700W`, every one correctly silent;
+        // but accepting them by instance would make the class green, and a LEADING negative genuinely is
+        // unread in this language. A red gate that is correct beats a green gate that is wrong (trap 24).
     },
     ht: {
         // A `km²` WITH NO NUMERAL IN FRONT OF IT. The unit rule keys on number-unit adjacency, which is

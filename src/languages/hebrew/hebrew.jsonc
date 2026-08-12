@@ -43,6 +43,18 @@
     // pronunciation change (gemination is not realised in Modern Hebrew).
     "dageshHard": { "ב": "b", "כ": "k", "ך": "k", "פ": "p", "ף": "p" },
 
+    // ⚠ THE GERESH DIGRAPHS — a letter plus GERESH ׳ (U+05F3, and the ASCII ' that stands in for it) is ONE
+    // grapheme standing for a phoneme the abjad cannot otherwise write. These three are the live set in
+    // Modern Israeli Hebrew and are the Academy's standard transcription of the foreign sounds:
+    //   ג׳ = d͡ʒ (ג'יימס James, בייג'ינג Beijing)   צ׳/ץ׳ = t͡ʃ (צ'רלי Charlie, ־ביץ' ‑vich)   ז׳ = ʒ (ז'אן Jean)
+    // Attested 183× across the 380 mined he.wikipedia segments (ג ×101, צ ×52, ז ×9, and the word-final ץ׳),
+    // which is more than every sign class in the corpus combined.
+    // ⚠ THE OTHER BASE LETTERS ARE DELIBERATELY ABSENT. ת׳ ד׳ ח׳ ר׳ ק׳ are an Arabic-transliteration
+    // convention that Modern Israeli reads as the PLAIN letter, and a word-final geresh is at least as often
+    // an abbreviation mark (וכו׳, פרופ׳) or a closing quote. For all of those the geresh contributes nothing
+    // and is simply skipped — what it must NOT do is split the word, which is what the token class fixes.
+    "gereshDigraphs": { "ג": "d͡ʒ", "צ": "t͡ʃ", "ץ": "t͡ʃ", "ז": "ʒ" },
+
     // Niqqud (vowel points) → IPA. Sheva (ְ) is context-dependent → handled in code (default ∅).
     "vowels": {
         "ַ": "a", "ָ": "a", "ֵ": "e", "ֶ": "e", "ִ": "i", "ֹ": "o", "ֺ": "o", "ֻ": "u",

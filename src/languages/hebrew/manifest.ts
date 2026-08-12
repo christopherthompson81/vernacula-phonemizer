@@ -37,6 +37,8 @@ export interface HebrewManifest {
     /** The one-letter prefixes under which a word-initial sheva is realised [e]. */
     proclitics: readonly string[];
     dageshHard: Record<string, string>;
+    /** Letter + GERESH ׳ = one grapheme for a phoneme the abjad cannot write (ג׳ d͡ʒ, צ׳ t͡ʃ, ז׳ ʒ). */
+    gereshDigraphs: Record<string, string>;
     vowels: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: HebrewNumbers;

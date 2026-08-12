@@ -11,19 +11,26 @@
  */
 import { assembleClauses } from "../../core/clauses.ts";
 import { phonemizeWord } from "./hebrew.ts";
+import { normalizeHebrew } from "./normalize.ts";
 import { createHebrewTagger, type HebrewTagger } from "./hebrewTagger.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToIpa } from "./numbers.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([א-ת][֑-ׇ־']*(?:[א-ת][֑-ׇ]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
+// ⚠ KEPT IDENTICAL TO `hebrew.ts`'s TOKEN, including the word-MEDIAL geresh — see the note there. This class
+// used to admit the apostrophe only after the first letter, so `בייג'ינג` split where `ג'יימס` did not.
+const TOKEN = /([א-ת][֑-ׇ־'׳’]*(?:[א-ת][֑-ׇ'׳’]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
 const NIQQUD = /[֑-ׇ]/u;
 const MAX_CHARS = 200; // keep clauses in-distribution (the tagger trained on ≤220-char runs)
 
 let taggerP: Promise<HebrewTagger | undefined> | undefined;
 
 /** Phonemize Hebrew text, restoring the vowels of UNVOCALIZED words with the sentence-level neural nakdan. */
-export async function phonemizeHebrewNeural(text: string): Promise<string> {
+export async function phonemizeHebrewNeural(input: string): Promise<string> {
+    // Same pre-tokenizer pass as the sync engine (normalize.ts), applied ONCE so the two TOKEN sweeps below
+    // see the same string. It matters more here than on the sync path: the tagger is handed WORDS, so an
+    // acronym left as `ד"ר` reaches it as two one-letter fragments it can only guess at.
+    const text = normalizeHebrew(input);
     if (taggerP === undefined) taggerP = createHebrewTagger();
     const tagger = await taggerP;
     if (!tagger) return sync(text); // no model → sync rule-engine path
