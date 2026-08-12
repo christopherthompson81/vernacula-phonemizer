@@ -12,6 +12,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeHiligaynon } from "./normalize.ts";
 
 interface HiligaynonDef {
     digraphs: Record<string, string>;
@@ -91,7 +92,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class HiligaynonPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeHiligaynon(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Native cardinal numbers (numbers.ts): one word per emitted token so each takes its own penult stress.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

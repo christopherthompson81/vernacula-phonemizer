@@ -63,6 +63,19 @@ MARKERS = {
     "bar": "is san sand vo ned net de dea des wead wean woan hod houd hom ham wia ois owa iwa mid vui "
            "nua aa af duach oiso koa wos eana eppa woa gwen boarisch joar joah oa oans zwoa moa ma "
            "se si z hoaßt easchte deitsch deitschland minga wean stod",
+    # hil (Hiligaynon/Ilonggo): the contaminants are TAGALOG and CEBUANO, its two nearest neighbours, plus
+    # English — see CONTRAST below. Every word here is one hil writes differently from BOTH: the genitive
+    # `sang`/`sng` (tl `ng`, ceb `sa`), the conjunction `kag` (tl `at`, ceb `ug`), the deictics
+    # `ini`/`sini`/`ina`/`sina` (tl `ito`/`nito`, ceb `kini`/`niini`), the disjunction `ukon` (tl/ceb `o`),
+    # the negator `indi` (tl `hindi`, ceb `dili`), `halin` (ceb `gikan`), `subong` (tl `ngayon`),
+    # `damo`/`madamo` (ceb `daghan`), `bilog` and the numeral `isa` (tl `isa` is shared but `duha`/`tatlo`
+    # are not tl's `dalawa`/`tatlo` pair). ⚠ `nga` is Cebuano's too and is kept anyway for the same reason
+    # bar keeps `is`: it is the highest-frequency hil marker and a Cebuano paragraph scores far more on the
+    # contrast side. ⚠ `sa`, `ang`, `mga`, `may`, `ka` are ABSENT: all three languages write them
+    # identically, so they discriminate nothing.
+    "hil": "sang sng kag nga ini sini ina sina ukon indi halin subong damo madamo iya ila amo yara "
+           "bisan tanan gid kon diri sia akon imo aton amon agod samtang tungod parte ginhalinan "
+           "isa duha tuig banwa syudad probinsya kalaparon nabata makita kabahin",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
@@ -82,6 +95,20 @@ CONTRAST = {
         "der die das ist sind war waren nicht auch von eine einen einem einer wird werden wurde "
         "über viel nur mit hat haben wie als aber sich durch jahr jahre jahren zwischen deutsche "
         "deutschen deutsch er sie es ich wir sein ihre".split()
+    ),
+    # hil's contaminants are TAGALOG and CEBUANO — the Incubator's Wp/hil carries verbatim tl passages
+    # (Philippine topics get written in Tagalog first) and ceb-shaped stub text. ⚠ Words hil SHARES with
+    # them are deliberately absent, and the list was pruned twice for exactly that: `sa ang mga may ka`
+    # are identical in all three; `duha` and `tatlo` are hil's OWN numerals as much as Cebuano's; `nila`,
+    # `didto`, `karon`, `lamang`, `gamay`, `tanang` and `usab` are ordinary Hiligaynon. What remains is
+    # what tl and ceb write and hil does not — tl's genitive `ng`, conjunction `at`, inversion marker `ay`,
+    # deictics `ito/nito`, `hindi`, `dalawa`, `ngayon`, `upang`, `habang`, `bawat`; ceb's `ug`, `gikan`,
+    # `kini/niini`, `dili`, `daghan`, `usa`, `aduna(y)`, `kaayo`, `unya`, `matud`, `ilaha/iyaha`.
+    "hil": set(
+        "ng at ay ito nito iyan iyon hindi mayroon dalawa noong ngayon dito doon kanila kanilang "
+        "naman upang nang mula habang bawat sila'y ako'y siya'y "
+        "ug gikan kini niini niana dili daghan usa ilaha iyaha pud kaayo unya matud sumala "
+        "aduna adunay mao kanunay".split()
     ),
 }
 

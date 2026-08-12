@@ -109,6 +109,48 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * gate. Name the work, the headword and the sense.
  */
 export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    hil: {
+        porsiyento: "⚠ THE WORD IS ATTESTED IN THE CORPUS AND THE ARTIFACT CANNOT SHOW IT — a sampling "
+            + "limit, not a sourcing gap, and worth stating precisely because the two look identical from "
+            + "here. There is no hil.wikipedia (meta's sitematrix lists bcl/ceb/ilo/pag/pam/tl/war and no "
+            + "hil site of any kind), so `attest.ts` cannot be run for this language at all and the whole "
+            + "evidence base is the Wikimedia Incubator's Wp/hil — 3,799 paragraphs after "
+            + "`filter-by-language.py`. In THAT text the percent word occurs twice, both times "
+            + "DIGIT-ADJACENT, i.e. in the exact slot: `4.4 porsiyento ang ginasakup sang Panay` and "
+            + "`23 porsyento sang mga nagaduaw diri naghalin`. Both sentences are unambiguously Hiligaynon "
+            + "(ginasakup sang, kun sa diin, naghalin). The committed artifact is a 133-line adversarial "
+            + "selection of those 3,799 and did not pick either paragraph — the `percent` cell selected the "
+            + "one carrying the SIGN instead — so the gate reads a corpus that does contain the word "
+            + "through a window that does not. ⚠ THE SPELLINGS TIE AT ×1 EACH and `porsiyento` is taken as "
+            + "the fuller lemma; `porsyento` is its co-equal variant and is recorded in normalize.ts so "
+            + "nobody re-derives this from a single hit. ⚠ AND THE WEB IS NOT THE CITATION HERE: searching "
+            + "for this word returns almost entirely TAGALOG dictionaries, which is the exact substitution "
+            + "this language's brief warns against, so they are not relied on. Kaufmann, *Visayan-English "
+            + "Dictionary* (Iloilo, 1934) predates the loan and carries neither spelling — it gives the "
+            + "NATIVE frame instead, s.v. `gatús`: \"Napúlò sa gatús. Ten per cent.\", which is a "
+            + "construction (`N sa gatos`) and not a drop-in word for the sign.",
+        punto: "Kaufmann, *Visayan-English Dictionary* (Iloilo, 1934; 23,557 entries), headword `púnto`: "
+            + "\"(Sp. punto) Point, full stop, period; tone, tune, pitch, key, clef.\" — the PUNCTUATION "
+            + "sense, given for Hiligaynon, in the standard reference for this language and independent of "
+            + "both the corpus and the two referees. This is the trap the playbook records for Igbo's "
+            + "`ǹtụ̀kpọ` and it lands the same way: a written corpus is the weakest evidence there is about "
+            + "how a SYMBOL is spoken — writers type `302.18`, they never spell out how they would say it — "
+            + "so the dictionary outranks the corpus silence. The corpus is not silent anyway, merely "
+            + "oblique: its one `punto` is `ang pinakamataas nga punto sa Negros`, the highest POINT, the "
+            + "same sense in a different application. ⚠ Cebuano ships the same word on the WEAKER argument "
+            + "(inference from sense, its own `punto` instances being a point of exposure and sports "
+            + "points); hil does not have to, and the difference is recorded so the two are not read as one "
+            + "borrowing.",
+        piso: "Corpus-attested ×6 including a MONETARY use — `ang suplay sang piso sa Pilipinas nag-abot "
+            + "569.2 bilyon` — plus Kaufmann s.v. `gásto`: \"Gingastohán ko na sing duhá ka líbo ka PÍSOS "
+            + "ang bág-o ko nga baláy\" (\"I have spent two thousand pesos on my new house\"), the currency "
+            + "in a monetary amount. The corpus's single `₱` is a MENTION — `simbolo sang kurensiya: ₱; "
+            + "kodigo: PHP` — which is why the artifact scan reports this class REDUNDANT rather than "
+            + "dropped: that sentence names the currency in words either way. ⚠ `$` is deliberately NOT "
+            + "declared beside it: `$` is ×0 in the corpus and `dolyar`/`dolar` are ×0 in the corpus, ×0 in "
+            + "Kaufmann and ×0 in both referees, so Cebuano's `$`→`dolyar` (which has ×4 corpus dollars "
+            + "behind it) does not transfer.",
+    },
     cjy: {
         "百分之": "⚠ THERE IS NO JIN CORPUS TO ATTEST ANYTHING IN — no cjy.wikipedia exists, and the "
             + "Wikimedia Incubator's Wp/cjy holds 3,060 Han characters whose artifact covers 7 of 35 cells "
@@ -179,6 +221,59 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    hil: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE WIKIMEDIA INCUBATOR'S Wp/hil, because there is no hil.wikipedia
+        // and no FLEURS hil. meta's sitematrix lists Wikipedias for bcl, ceb, ilo, pag, pam, tl and war and
+        // NO hil site of any kind, so `attest.ts` cannot be run for this language and there is no second
+        // haystack behind the corpus. The corpus is 3,799 paragraphs after `filter-by-language.py --lang
+        // hil` (whose CONTRAST row had to be tl+ceb, not English). The second source throughout is
+        // Kaufmann, *Visayan-English Dictionary* (Iloilo, 1934), 23,557 entries. Both are argued at length
+        // in src/languages/hiligaynon/normalize.ts.
+        // ⚠ AND THE ARITHMETIC SIGNS ARE NOT A SOURCING PROBLEM HERE, THEY ARE AN ABSENCE: `± < > × ÷` are
+        // ×0 in the whole corpus, `=` is ×1 and `+` is ×1. This is the playbook's trap-48 shape — a
+        // definitive negative, worth spending the effort on because it closes the question.
+        minus: "measured: ZERO. The `minus` DROPPABLE shape — a dash opening a string or following a "
+            + "space/bracket with a digit after it — has no instances at all in 3,799 paragraphs. Every one "
+            + "of the corpus's 10 digit-flanked dashes is a RANGE and every one IS read (`hasta`, "
+            + "normalize.ts step 4): year spans (`(1910-1912)`, `1967-1972`, `c. 1303–1213 BC`), a date "
+            + "span (`9 Enero 1902–26 Hunyo 1975`) and one decimal span (`3.5–3.8 bilyon ka tinúig`). No "
+            + "negative-value word occurs either: `menos` ×1 is the Spanish adverbial phrase `mas o menos "
+            + "23.9 ka milyon` (\"more or less\"), never an operator",
+        plus: "measured: ONE `+` in the corpus, and it is a GREEK ETYMOLOGY GLOSS — `naghalin ni siya sa "
+            + "Griyego arkhitekton (arkhi-, lider + tekton, ga obra bilding)`, the same shape tl records "
+            + "(`astron + nomos`) and ak records (`pseudo + epistaxis`). ⚠ That paragraph is itself part "
+            + "Tagalog (`Ang arkitekto AY may kaalam`), which is one more reason not to build a Hiligaynon "
+            + "rule on it. No plus word is attested digit-adjacent: `dugang` ×3 is the ADJECTIVE "
+            + "\"additional\" (`ang dugang nga sugpon`, `may dugang nga 73 ka mga pwesto`), never an "
+            + "operator — so Cebuano's `dugang` plus rule does not transfer to hil",
+        "plus-minus": "measured: zero ± in the corpus",
+        equals: "measured: ONE `=` in 3,799 paragraphs and it is not an operator — `buttonlabel=Maghimo "
+            + "sang bag-o nga artikulo`, MediaWiki `<inputbox>` markup that survived extraction. "
+            + "`katumbas` ×1 is the ADJECTIVE \"equivalent\" (`isa ka katumbas nga organisasyon sang mga "
+            + "girl scout`), not a copula for a sign, and it is never digit-adjacent",
+        "less-than": "measured: zero < in the corpus",
+        "greater-than": "measured: zero > in the corpus",
+        times: "measured: zero × in the corpus. `beses` ×2 is the ITERATION sense — `Tatlo ka beses siya "
+            + "nagsilbi bilang Presidente` (\"three times he served\") — which is trap 37's shape: a real "
+            + "word, healthy-looking, and the wrong sense for a multiplication sign. `pilo`, the Cebuano "
+            + "multiplier, is ×0",
+        divide: "measured: zero ÷ in the corpus",
+        degrees: "measured: FOUR ° and they are all in ONE SENTENCE, a geographic COORDINATE — `Ang banwa "
+            + "sang Tapaz yara sa latitudo nga 11° 09’ hasta 11° 09’ 42\"`. There is no temperature "
+            + "instance anywhere: `°C`/`°F`/`℃` are ×0, and so are `Celsius`, `Fahrenheit`, `selsiyus`, "
+            + "`sentigrado` and `digri`. ⚠ THE REFUSAL IS ON SENSE, NOT ABSENCE OF A WORD, which is the "
+            + "distinction the Igbo lesson turns on: Kaufmann DOES carry `grádo, (Sp. grado) Grade, class, "
+            + "degree`, so hil has a degree word — but a coordinate needs a coordinate reading (degrees, "
+            + "arc-minutes, arc-seconds, hemisphere letter), not a bare degree word bolted onto the number, "
+            + "and voicing ° alone would leave the ’ and \" silent beside it. tl and yo record the same "
+            + "coordinate-only refusal",
+        currency: "measured: the ONLY currency sign in the corpus is `₱` ×1, and it IS declared and read "
+            + "(→ `piso`; the artifact scan reports that instance as REDUNDANT, not dropped, because the "
+            + "sentence names the currency in words as well). This exemption covers the probe's `$5`: `$`, "
+            + "`€`, `£` and `¥` are ×0 in the corpus, and `dolyar`/`dolar` are ×0 in the corpus, ×0 in "
+            + "Kaufmann's 23,557 entries and ×0 in both referees. Cebuano declares `$`→`dolyar` on ×4 "
+            + "corpus dollars; hil has none, and inventing one is the Fula `tere` failure",
+    },
     ak: {
         // ⚠ ak.wikipedia IS LOCKED — its entire extract is the notice pointing at the Twi and Fante wikis —
         // so every measurement below is over tw.wikipedia (27,415 paragraphs) + fat.wikipedia (9,029), and
