@@ -63,7 +63,6 @@ MARKERS = {
     "bar": "is san sand vo ned net de dea des wead wean woan hod houd hom ham wia ois owa iwa mid vui "
            "nua aa af duach oiso koa wos eana eppa woa gwen boarisch joar joah oa oans zwoa moa ma "
            "se si z hoaßt easchte deitsch deitschland minga wean stod",
-<<<<<<< HEAD
     # hil (Hiligaynon/Ilonggo): the contaminants are TAGALOG and CEBUANO, its two nearest neighbours, plus
     # English — see CONTRAST below. Every word here is one hil writes differently from BOTH: the genitive
     # `sang`/`sng` (tl `ng`, ceb `sa`), the conjunction `kag` (tl `at`, ceb `ug`), the deictics
@@ -77,7 +76,6 @@ MARKERS = {
     "hil": "sang sng kag nga ini sini ina sina ukon indi halin subong damo madamo iya ila amo yara "
            "bisan tanan gid kon diri sia akon imo aton amon agod samtang tungod parte ginhalinan "
            "isa duha tuig banwa syudad probinsya kalaparon nabata makita kabahin",
-=======
     # bal (Balochi): the contaminants are PERSIAN and URDU, both in the same Perso-Arabic script, which is
     # what makes them invisible — see CONTRAST. Every word here was checked to be frequent in the Balochi
     # paragraphs of the Incubator projects AND near-absent from their Persian ones: the copulas انت/اینت
@@ -94,7 +92,6 @@ MARKERS = {
     # (playbook trap 34) — the same two graphemes are a different word one language over.
     "bal": "انت اینت ئنت اے ئے په پہ وتی بیت بیتنت کنت کننت کرت کتگ بوتگ بوتگین مروچی تها تهء تھا "
            "گون گوں گؤں منی تئی شه ئان هستنت دارنت داریت زانت هچ گشت آییءَ آیی چہ ین ایں مه جهل نیمگ",
->>>>>>> norm/bal
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
@@ -115,7 +112,6 @@ CONTRAST = {
         "über viel nur mit hat haben wie als aber sich durch jahr jahre jahren zwischen deutsche "
         "deutschen deutsch er sie es ich wir sein ihre".split()
     ),
-<<<<<<< HEAD
     # hil's contaminants are TAGALOG and CEBUANO — the Incubator's Wp/hil carries verbatim tl passages
     # (Philippine topics get written in Tagalog first) and ceb-shaped stub text. ⚠ Words hil SHARES with
     # them are deliberately absent, and the list was pruned twice for exactly that: `sa ang mga may ka`
@@ -129,7 +125,7 @@ CONTRAST = {
         "naman upang nang mula habang bawat sila'y ako'y siya'y "
         "ug gikan kini niini niana dili daghan usa ilaha iyaha pud kaayo unya matud sumala "
         "aduna adunay mao kanunay".split()
-=======
+    ),
     # bal: TWO contaminants, and both had to be measured before the set could be written. Wikimedia
     # Incubator's Wp/bcc (Southern Balochi) carries whole PERSIAN articles (physics, geography) and whole
     # URDU ones (Balochistan tribal histories); 37.4% of its paragraphs are one or the other.
@@ -147,7 +143,6 @@ CONTRAST = {
         "در است این را های می شود بود نیز دارای باشد شده هستند کند بوده آنها توسط بیشتر خود برای مورد "
         "از وی همچنین کرد دارد شد کرده هایی آن نیست "
         "ہے ہیں کے کا میں سے نے رہتے ہوئے وہ اور بھی کیا مشتمل ان".split()
->>>>>>> norm/bal
     ),
 }
 
