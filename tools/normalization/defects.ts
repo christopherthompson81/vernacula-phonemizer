@@ -764,6 +764,47 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "word is in the corpus, the referees or ny.wikipedia, and naming one would be the Fula `tere` "
             + "failure. The other plus context — a leading `+` on a temperature — does not occur here",
     },
+    za: {
+        // ⚠ EVERY COUNT HERE IS OVER THE ZHUANG-ONLY SUBSET of a fresh za.wikipedia dump — 2,929 of 7,328
+        // paragraphs — because that wiki carries whole imported GERMAN and ENGLISH articles and `mine.ts`
+        // selects adversarially, so the artifact's hard-set is dominated by them (the su.wikipedia lesson).
+        // The filter is validated on words that cannot cross the boundary: `nienz` 907 / `bi` 115 /
+        // `nyied` 288 in the Zhuang subset and ALL ZERO in the other 814. See zhuang/normalize.ts.
+        degrees: "no Zhuang degree or scale word exists in any source. `doh` (度) ×33 is 'throughout' "
+            + "(`faenbouh doh daengx siqgyaiq`, `cienz doh lajbiengz`) or the country INDIA (`Yaenq Doh`); "
+            + "`dohraeuj` ×1 is the noun 'temperature', not a unit; `Sesi`/`Sipsi` (摄氏) ×0; espeak does "
+            + "not ship Zhuang at all. The four `°C` are one climate sentence, and normalize.ts step 6 "
+            + "CONSUMES the sign rather than reading it — a deliberate downgrade from the scale letter "
+            + "reaching the IPA as a bare [ɕ] to a silence, which is the better of the two available failures",
+        currency: "measured: `$` occurs ZERO times in Zhuang text. All three instances in the artifact are "
+            + "inside ENGLISH sentences imported into za.wikipedia (`a $500,000 award`, `grant of $179,113`, "
+            + "`the $15,000 prize`) — a cell about English text that happens to sit in this wiki. `¥ € £` "
+            + "are ×0 everywhere, and the corpus's 7 `元` are all Chinese dynastic and personal names "
+            + "(元朝, 元世祖忽必烈, 蒙元耀), never money. No Zhuang currency word is attested in any source",
+        plus: "measured: two `+`, neither arithmetic — `insectum «Non» + caedo` joins two Latin etymology "
+            + "glosses, `laengconghndaeng+gwnz hoz` joins two anatomical sites in a clinical checklist",
+        "plus-minus": "measured: zero ± in the Zhuang subset",
+        equals: "measured: zero `=` in Zhuang prose. The artifact's instances are EasyTimeline TEMPLATE "
+            + "DEBRIS that survived the dump extractor (`PlotArea = left:50 bottom:30`, `ScaleMajor = "
+            + "gridcolor:darkgrey increment:200`) — chart markup, not text anyone reads aloud",
+        "less-than": "measured: one `<`, and it is a stray glyph closing a sentence about a hand gesture "
+            + "(`duiyenz dog haengj yungq fajfwngz <.`), not a relation between two quantities",
+        "greater-than": "measured: zero `>` in the Zhuang subset",
+        // ⚠ THE OPERATION NOUNS EXIST AND ARE THE WRONG REGISTER, which is trap 35's Hindi जोड़/धन split.
+        times: "measured: two `×`. One is SCIENTIFIC NOTATION (`gij dijgiz dwg 10830 ik laebfueng "
+            + "goengleix, 5.976×10(27) seuq`), which this layer reads for no language; the other is "
+            + "METALINGUISTIC — the wiki's own stub article on multiplication naming the symbol in quotes "
+            + "(`Swngzfap dwg cungj suenqsoq, fouzhauh dwg \"×\", gezgoj dwg \"giz\"`). That stub gives the "
+            + "OPERATION noun `Swngzfap` and the RESULT noun `giz`, and neither is what a reader says "
+            + "BETWEEN two operands",
+        divide: "measured: one `÷`, in the parallel division stub (`Cawzfap dwg cungj suenqsoq, fouzhauh "
+            + "dwg \"÷\", gezgoj dwg \"sieng\"`) — the symbol MENTIONED, not used. Same refusal as `times`",
+        // ⚠ NO `minus` KEY, AND ITS ABSENCE IS THE POINT. The corpus has three TRUE negatives — one
+        // article's Dead Sea elevations, `dwg -422m`, `dwg -418m`, `gemj daengz -420m` — and no Zhuang word
+        // for a negative number is attested anywhere. Omitting a plus is lossless; omitting a minus
+        // INVERTS, so a known-wrong reading does not get to be a green gate: `review.ts --lang za` stays
+        // red on `minus` until a word is sourced. Same standing refusal as `ln`.
+    },
 };
 
 /**
@@ -1406,6 +1447,16 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // SINGLE CHARACTER, which a contextual regex can never satisfy. The `=` lines above need no such
         // entry because `math-sign` is the plain character class `[+±×÷=<>]`.
         minus: ["shift:(-10,5)", "shift:(-60,-5)", "shift:(-15,5)", "shift:(-14,5)"],
+    },
+    za: {
+        // ⚠ za IS THE SIXTH CORPUS TO PRODUCE THE ROMANIZATION-TONE-NUMBER FALSE POSITIVE, from a sixth
+        // source — and unlike wuu/nan/cjy/hak/hsn, Zhuang is not Sinitic at all. za.wikipedia glosses its
+        // headwords with CANTONESE readings, labelled in the text itself: `Vahgvangjdungh：hung¹ hei³`
+        // (空氣), `Vahgvangjdungh：dang¹ taap³` (燈塔), `Vahgvangjdungh：ngaa⁴ caat²` (牙刷). Those
+        // superscripts are jyutping tones, so voicing them would read a pronunciation gloss as arithmetic.
+        // ⚠ Listed BY INSTANCE, never by class, because za's genuine unit exponents ARE read — `km²` →
+        // *bingzfueng goengleix* (zhuang/normalize.ts step 5) — and a regression there must stay visible.
+        exponent: ["hung¹ hei³", "dang¹ taap³", "ngaa⁴ caat²"],
     },
 };
 

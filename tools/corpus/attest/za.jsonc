@@ -1,0 +1,152 @@
+// WIKIPEDIA WORD ATTESTATION — za. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "za",
+    "wiki": "za.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "faenh cih",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…emhdoh raeuh ndeu. Ninz ciemq le seizgan seiqvunz gaenh sam faenh cih it. Gij caetliengh ninz caeuq gij gengangh bouxvunz miz gva…"
+            ]
+        },
+        {
+            "word": "faen cih",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…z. Ndaundeiqsauqbaet mbaeumbeng, cijmiz digiuz geij cien ik faen cih it caemq, doengciengz riengz lohmban humx daengngoenz baenq…"
+            ]
+        },
+        {
+            "word": "bak faenh cih",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "daengz",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 40,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…naeuz nyied (月), dwg cungj seizgan danvih, aen ndwen miz 28 daengz 31 aen ngoenz.…",
+                "…youq 1921 nienz 7 nyied youq Sanghaij laebbaenz, 1949 nienz daengz seizneix dwg Cunghgoz caepcwngdangj, youq Cunghgoz sizhingz…",
+                "…uj aeu faenz rox daih ndaw faenz mbwnj, gwn aeu guhloek aeu daengz faenz ndangz mbouj haenq, mbouj gwn daengz faenz ndwen mbou…",
+                "…aeu guhloek aeu daengz faenz ndangz mbouj haenq, mbouj gwn daengz faenz ndwen mbouj. Faenz ndangz gwnz yienh daih cuj mbouj d…",
+                "…yienh, cuj rox haenq, de faenz ndwen gaenj ndaw mbouj, daih daengz gwnz aeu zoux rox. Haenq, mbouj saengq ok, aeu aeu youq gwn…",
+                "…. Haenq, mbouj saengq ok, aeu aeu youq gwnz faenz ndwen aeu daengz goek. Mbwnj mbouj aeu, cuj goek daih goek aeu gwnz yaek nei…"
+            ]
+        },
+        {
+            "word": "goengleix",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 20,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Cunghvaz Yinzminz Gunghozgoz. Gijgvangj dwg 2755 bingzfueng goengleix. 2016 nienz haeujvunz miz 737 fanh. Yanghgangj miz 18 gih.…",
+                "…youq baihnamz Meijgoz ndeu。Gijgvangj dwg 468.484 bingzfueng goengleix. 2021 nienz haeujvunz miz 880 fanh。…",
+                "…Zagreb dwg soujduh Croatia. Gijgvangj dwg 641 bingzfueng goengleix, miz 78 fanh(2007). == Baihrog lienzcanh (拜󶸨 连撰) == Sagwzl…",
+                "…ngzgyangh dwg dah Cunghgoz. 度厘佚扽６３８０公里。 Dohraez de dwg 6380 goengleix.…",
+                "…a dwg soujduh Hahsazgwswhdanj. Gijgvangj dwg 722 bingzfueng goengleix, miz 70 fanh(2010). == Baihrog lienzcanh == Hahsazgwswhdanj…",
+                "…gh Swcigih Cungzcoj Si guenj. Gijgvangj dwg 2836 bingzfueng goengleix. Daengx yen comzyouq miz Bouxcuengh, Bouxgun, Bouxmienh, Bo…"
+            ]
+        },
+        {
+            "word": "bingzfueng goengleix",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 20,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…ngzcwnggih Cunghvaz Yinzminz Gunghozgoz. Gijgvangj dwg 2755 bingzfueng goengleix. 2016 nienz haeujvunz miz 737 fanh. Yanghgangj miz 18 gih.…",
+                "…Zagreb dwg soujduh Croatia. Gijgvangj dwg 641 bingzfueng goengleix, miz 78 fanh(2007). == Baihrog lienzcanh (拜󶸨 连撰) == Sagwzl…",
+                "…Astana dwg soujduh Hahsazgwswhdanj. Gijgvangj dwg 722 bingzfueng goengleix, miz 70 fanh(2010). == Baihrog lienzcanh == Hahsazgwswhdanj…",
+                "…auzyazvah: Brasília) dwg soujduh Bahsih. Gijgvangj dwg 5802 bingzfueng goengleix, miz 256 fanh(2010). == Baihrog lienzcanh == Bahsihleihya/w…",
+                "…yingh:Canberra) dwg soujduh Audaihleihya. Gijgvangj dwg 814 bingzfueng goengleix, miz 35 fanh(2009). == Baihrog lienzcanh == Canberrah/www.a…",
+                "…Gizlungzpoh dwg soujduh Majlaizsihya. Gijgvangj dwg 243 bingzfueng goengleix, miz 147 fanh(2009). == Baihrog lienzcanh == Gizlungzpoh/ch…"
+            ]
+        },
+        {
+            "word": "meix",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…cingjganghsan si guenj. Aen san ceiq laux miz haijbaz 2129 meix. == Lizsij == 1927 nienz 10 nyied, Mauz Cwzdungh dengj goen…"
+            ]
+        },
+        {
+            "word": "gunghyenz",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…youh miz faex raemhrwdrwd, daengx singz gyaeundei lumj aen gunghyenz nei. Baekging hwnj roengz bae dauq gig fuengbienh, miz hauj…",
+                "…ujlai giz miz mingz gujciz. Gyang singz miz Gugungh、Bwzhaij Gunghyenz、Cunghsanh Gunghyenz、Denhdanz; singz baihsae miz aen Dungvuz…",
+                "…gujciz. Gyang singz miz Gugungh、Bwzhaij Gunghyenz、Cunghsanh Gunghyenz、Denhdanz; singz baihsae miz aen Dungvuzyenz caeuq Yihozyen.…",
+                "…ginhsw’gyah caeuq cwngci’gyah youq Cinzciuz satbyai haenx. Gunghyenz gonq 202 bi, Hang Yij deng Liuz Bangh（劉邦） dwkbaih, youq Vuz…"
+            ]
+        },
+        {
+            "word": "gaxgonq gunghyenz",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "doh",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 5,
+            "substringOnly": 0,
+            "examples": [
+                "…gz.Vunz daih'iek miz 13 ik, ciemq 19% vunz biengz, faenbouh doh daengx siqgyaiq.…",
+                "…e Edine Pottier) ndeu 1871 nienz guh baenz, doeklaeng cienz doh lajbiengz, deng hoiz baenz haujlai cungj vah.…",
+                "…Yindugyau（Sawgun：印度教） roxnaeuz Gyauq Yaenq Doh，dwg aen cunghgyau youq Yindu caeuq seiqgyaiq ndeu，de miz 10…",
+                "…Yindu roxnaeuz Yaenq Doh (印度, Vah Yindi:भारत गणराज्य) dwg aen guekgya youq baihnamz…",
+                "…Saenzdaugyau（Sawgun：神道教） roxnaeuz Gyauq Saenz Doh，dwg aen cunghgyau cujyau Yizbwnj ndawde ndeu，gij daegsaek d…"
+            ]
+        }
+    ],
+}

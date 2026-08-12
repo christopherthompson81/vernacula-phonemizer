@@ -153,7 +153,12 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // by instance, never by class. Its minus and math-sign refusals are CLASS-level and live in
         // ACCEPTED_SIGN_SILENCE instead, because every one of those signs in this corpus is EasyTimeline
         // chart markup rather than Chichewa prose.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh"]);
+        // ⚠ AND za IS THE SEVENTH — the FIRST that is not Sinitic at all, which is what makes this a
+        // property of the WRITING CULTURE rather than of the language family. za.wikipedia glosses its
+        // headwords with Cantonese jyutping, labelled in the text (`Vahgvangjdungh：hung¹ hei³`). It landed
+        // in the same sweep as gan, which is why both were authored as "the sixth"; gan is the sixth
+        // Sinitic corpus and za the seventh corpus overall.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

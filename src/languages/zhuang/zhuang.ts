@@ -13,6 +13,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { sawndipToReadings } from "./sawndip.ts";
+import { normalizeZhuang } from "./normalize.ts";
 
 const ONSETS = MANIFEST.onsets;
 const CONS = MANIFEST.consonants;
@@ -192,7 +193,10 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class ZhuangPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // The normalization pre-pass runs BEFORE tokenization: it rewrites CJK punctuation into the marks
+        // `CLAUSE_MARK` knows, expands symbols into Zhuang words, and strips the foreign-script glosses
+        // that would otherwise reach the Sawndip reader as Chinese. See normalize.ts for the ordering.
+        return assembleClauses(normalizeZhuang(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
