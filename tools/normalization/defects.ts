@@ -731,6 +731,39 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         divide: "measured: one `÷`, in the same `195 kg ÷ 3 = 65 kg` worked example as the `=` above; 除以 "
             + "occurs zero times in the corpus",
     },
+    nya: {
+        // ⚠ EVERY ONE OF THESE SIGNS IS EASYTIMELINE CHART MARKUP IN THIS CORPUS, NOT CHICHEWA PROSE — the
+        // sharpest instance yet of the playbook's "a small wiki is not all in its own language" warning
+        // arriving as MARKUP rather than as another language. `mine.ts` selects adversarially, so a handful
+        // of ny.wikipedia population-graph articles supply almost the whole `arithmetic` and `signed-number`
+        // evidence. Counted over the mined artifact and read one by one, not sampled.
+        // ⚠ AND THERE IS NO SECOND HAYSTACK: espeak does not ship Chichewa AT ALL, so `sources.ts` reports
+        // `[chk?]` for every one of these and the corpus plus ny.wikipedia is the entire evidence base.
+        minus: "measured: 10 candidate instances, of which 9 are EasyTimeline PIXEL OFFSETS "
+            + "(`shift:(-10,5)`, `shift:(-60,-5)`, `shift:(-14,5)`) — a chart directive, never a quantity — "
+            + "and the 10th is a spaced RANGE dash (`2004 -2009`) which normalize.ts step 8 now reads as "
+            + "`mpaka`. ZERO negative numbers occur in Chichewa prose, and no minus word is attested in the "
+            + "corpus, in the referees or on ny.wikipedia. Omitting a minus INVERTS a value, so this is a "
+            + "refusal that would have to be revisited the moment a real negative appears — see ln, which "
+            + "deliberately has no entry here because its six drops ARE genuine negatives",
+        // ⚠ THE SIX ARITHMETIC SIGNS ARE ONE REFUSAL, WRITTEN SIX TIMES because `SIGN_CASES` is per sign
+        // while `DROPPABLE` is coarse. Every one rests on the same two measurements: the sign is absent from
+        // Chichewa prose, and no Chichewa word for it is attested in the corpus, the referees or
+        // ny.wikipedia — and espeak, the usual third tier, does not ship this language at all.
+        equals: "measured: all 14 `=` in the artifact are MARKUP — 9 EasyTimeline directives "
+            + "(`ScaleMajor = unit:year increment:11000`, `PlotArea = left:50 right:20`) and 5 CSS "
+            + "declarations (`.reflist-columns-2{column-width:30em}`). Zero occur in Chichewa prose, and no "
+            + "equals word is attested",
+        "plus-minus": "measured: `±` ×0 in the artifact; the ± reading would compose two unattested words",
+        "less-than": "measured: `<` ×0 in the artifact",
+        "greater-than": "measured: `>` ×0 in the artifact",
+        times: "measured: `×` ×0 in the artifact. The `x` between digits does not occur either",
+        divide: "measured: `÷` ×0 in the artifact",
+        plus: "measured: `+` occurs twice, both a UTC OFFSET (`(UTC + 7)`, `(GMT+1)`), which the playbook's "
+            + "fleet sweep found is the one contentful plus and the one nothing attests. No Chichewa plus "
+            + "word is in the corpus, the referees or ny.wikipedia, and naming one would be the Fula `tere` "
+            + "failure. The other plus context — a leading `+` on a temperature — does not occur here",
+    },
 };
 
 /**
@@ -1351,6 +1384,28 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // 40 mph" — so reading it as *thabatha* ("minus") would be confidently wrong. xhosa/normalize.ts
         // step 14 records this and measures its guarded pattern at 0 corpus matches.
         minus: ["kangange -40"],
+    },
+    nya: {
+        // THE EURO, and it is the ONE currency sign in this corpus with no usable Chichewa name. The dollar
+        // (`madola` ×29 in 19 ny.wikipedia articles, in monetary amounts) and the pound (`mapaundi` ×3, two
+        // of them Nyasaland stamp denominations) are both declared and read; `yuro` scores ONE hit in ONE
+        // article — and that article is the same machine-translated Europe piece the corpus itself carries,
+        // so the wiki is not an independent source for it at all. One hit in one article is a lead, not a
+        // finding, and a wrong currency word is confidently wrong where a silent sign is only missing.
+        // ⚠ Listed BY INSTANCE rather than silencing the class, so the moment a `$` or `£` regresses — or a
+        // € appears beside an attested Chichewa euro-word — the scan reports it again. Both listed lines
+        // contain € and nothing else; the mixed `€ 94 miliyoni (£ 80 miliyoni)` line does NOT report,
+        // because its pound IS read and the differential therefore changes.
+        currency: ["€ 100 miliyoni", "€ 12 miliyoni"],
+        // EASYTIMELINE PIXEL OFFSETS — a graph directive's x/y shift, not a number in any language. Nine
+        // lines of ny.wikipedia population-graph source reach the artifact because `mine.ts` selects
+        // adversarially and a chart is dense in exactly the characters the `signed-number` cell hunts.
+        // ⚠ LISTED BY INSTANCE EVEN THOUGH THE CLASS REFUSAL IS ALREADY ARGUED IN `ACCEPTED_SIGN_SILENCE`,
+        // for the same mechanical reason tl and wuu are: the `minus` DROPPABLE pattern is CONTEXTUAL
+        // (`(?<!…)[-−–](?=\p{Nd})`), and `acceptedSignClass` tests a coarse class by matching it against a
+        // SINGLE CHARACTER, which a contextual regex can never satisfy. The `=` lines above need no such
+        // entry because `math-sign` is the plain character class `[+±×÷=<>]`.
+        minus: ["shift:(-10,5)", "shift:(-60,-5)", "shift:(-15,5)", "shift:(-14,5)"],
     },
 };
 

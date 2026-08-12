@@ -1,0 +1,509 @@
+// WIKIPEDIA WORD ATTESTATION — nya. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "nya",
+    "wiki": "ny.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "madola miliyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "miliyoni madola",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "madola mabiliyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "miliyoni ya madola",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "zikwi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 9,
+            "articles": 8,
+            "substringOnly": 0,
+            "examples": [
+                "…ndi yakuti Amwenye Achimereka akhala akukhala kumeneko zaka zikwi zambiri asanalowe. Komabe, Achimereka Achimerika sanalembed…",
+                "…wo cha Kahramanmaraş. Panali kuwonongeka kwakukulu ndi imfa zikwi makumi ambiri. Chivomezi chachikulu ndi chivomezi champhamv…",
+                "…i Alaska zakhala kwa anthu amitundu yosiyanasiyana kwa zaka zikwi; Anthu ambiri amakhulupirira kuti derali linali polowera ku…",
+                "…a za anthu okhala mdziko lino la Argentina zikuchokera zaka zikwi khumi ndi zitatu BP, nthawi ya Paleoamerican. M'masiku otuk…",
+                "…apansi pa Halo 2 . \" Halos \" ndi malo akuluakulu, kuyambira zikwi mpaka makilomita masauzande makilomita, omwe amabalalika mu…",
+                "…we amabalalika mu mlalang'amba. Mipukutuyi inamangidwa zaka zikwi zambiri zapitazo ndi mpikisano wotchedwa Forerunners monga…"
+            ]
+        },
+        {
+            "word": "miliyoni",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 67,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…si, chifukwa chiwelengelo cha anthu ku Afilika ku ndi 1 300 miliyoni ( malinga ndi chiwelengelo cha anthu chomwe chinachitika mu…",
+                "…thu ndipo anapezako zotsalira za anthu amene analipo zaka 7 miliyoni zapitazo. Dera la Afilika lili mbali zonse ziwiri za mzere…",
+                "…hi 2021, malowa ali ndi mafayilo azomangamanga opitilira 70 miliyoni, oyang'aniridwa ndi kusinthidwa ndi odzipereka olembetsa. M…",
+                "…== Ziwerengero zokhutira == Novembara 30, 2006: Mafayilo 1 miliyoni September 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafa…",
+                "…30, 2006: Mafayilo 1 miliyoni September 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafayilo 10 miliyoni Disembala 4, 2012: Maf…",
+                "…er 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafayilo 10 miliyoni Disembala 4, 2012: Mafayilo 15 miliyoni July 14, 2013: 100,…"
+            ]
+        },
+        {
+            "word": "mayuro",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "paundi",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "mapaundi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…u a positi ndi mbiri ya positi ya Britain Central Africa == Mapaundi awiri, 1896 Masitampu oyamba azotetezedwa adatulutsidwa mu…",
+                "…ROTECTORATE , ndi zipembedzo kuyambira ndalama imodzi mpaka mapaundi khumi. Masitampu otsatila adaperekedwa ndi a Nyasaland Prot…",
+                "…Africa. Ndiwo anyani akuluakulu kwambiri. DNA yake ili ndi mapaundi 3,041,976,159 omwe amakhala ndi ma protein 20,962 okhala nd…"
+            ]
+        },
+        {
+            "word": "sekondi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…si yofananira. Kuwerengera uku kutha kuchitika pakagawanika sekondi. Koma m'malo mwake, kupanga kiyi yachinsinsi ya adilesi yom…"
+            ]
+        },
+        {
+            "word": "masekondi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…mbana komaliza 2-0, ndi penalty yomwe idagoledwa pambuyo pa masekondi 106 ndi Mohamed Salah komanso chigoli cholowa m'malo mwa Di…"
+            ]
+        },
+        {
+            "word": "kilogalamu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "mamita",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 16,
+            "articles": 11,
+            "substringOnly": 0,
+            "examples": [
+                "…unov , mfuti ya ku Russia. Juba amawonedwa akupha mkati mwa mamita mazana angapo mpaka mamita chikwi osamvetseka mu mavidiyo o…",
+                "…Juba amawonedwa akupha mkati mwa mamita mazana angapo mpaka mamita chikwi osamvetseka mu mavidiyo otulutsidwa ndi molondola kw…",
+                "…maikidwa m’gulu lalikulu kwambiri, kutengera m’lifupi mwake mamita 1,708 (5,604 ft) ndi kutalika kwa mamita 108 (354 ft), zomw…",
+                "…era m’lifupi mwake mamita 1,708 (5,604 ft) ndi kutalika kwa mamita 108 (354 ft), zomwe zimapangitsa kuti mathithiwo akhale aak…",
+                "…okera ku 80 metres (260 ft) kumapeto kwake kumadzulo kufika mamita 108 (354 ft) pakati. Njira yokhayo yopita ku First Gorge nd…",
+                "…akati. Njira yokhayo yopita ku First Gorge ndi kusiyana kwa mamita 110 m'lifupi (360 ft) pafupifupi magawo awiri pa atatu a nj…"
+            ]
+        },
+        {
+            "word": "mita",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…i yemwe amapikisana nawo mtunda wautali kuchokera ku 10,000 mita mpaka marathon. Ndiwosunga rekodi-marathon yapadziko lonse…",
+                "…ga ndi a Tara Air, matupi 14 adapezedwa mkati mwa mtunda wa mita 100 kuchokera pomwe ngoziyo idachitika. Chojambulira ndege…",
+                "…di mamita 3 (0.91 m) kutalika pakati. Maukondewo amakhala 3 mita (0.91 m) kunja kwa khothi lowirikiza mbali zonse kapena, kw…"
+            ]
+        },
+        {
+            "word": "Khristu asanabadwe",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "Kristu asanabadwe",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "asanabadwe",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 5,
+            "substringOnly": 0,
+            "examples": [
+                "…ku Lincolnshire, England. Bambo ake anamwalira miyezi itatu asanabadwe. Pamene Isaki anali ndi amayi ake atatu, anakwatiwanso, ndi…",
+                "…o chifukwa chakuti ndi agogo anu omwe sanaphedwe mwana wawo asanabadwe (kholo lanu). Lingaliro limeneli sikutanthauza chabe kuti m…",
+                "…pa 25 December 1ACN (kutanthauza kuti zaka za kumbuyo Yesu asanabadwe) ndipo anatchila chaka chitsatiracho 1 AD- ndipo chomwecho…",
+                "…mbe la Mediterranean. Iyo idakhalapo zaka mazana angapo iye asanabadwe. Iyo inali yotchuka kwa yunivesite yake. Panthawi ya Alexan…",
+                "…ndi a mchimwene wake anabadwa chimodzimodzi chaka chimodzi asanabadwe.Vincent anali dzina lofala m'banja la Van Gogh: agogo ake a…"
+            ]
+        },
+        {
+            "word": "Chisanafike Khristu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "chitatha Khristu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "Khristu",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 35,
+            "articles": 10,
+            "substringOnly": 2,
+            "examples": [
+                "…Yesu Khristu (8–2 BC/BCE to 29–36 AD/CE)[1], amene amatchulidwanso kuti…",
+                "…amatchulidwanso kuti Yesu wa ku Nazareti, ndi mzati wa chi Khristu. Iye amatchulidwanso ndi dzina loti Yesu Khristu, lomwe lin…",
+                "…ati wa chi Khristu. Iye amatchulidwanso ndi dzina loti Yesu Khristu, lomwe linachokela potanthauzila ku Chizungu dzina lake la…",
+                "…lomwe limatanthauza kuyi \"Yehova ndiye Chipulumutso\", pomwe Khristu ndi mutu wochokera ku chi Helene Christós, kutanthauza \"Wod…",
+                "…esu mu mburi ya dziko la pansi, ndipo ena amanena kuti Yesu Khristu ndi nthano chabe.[4] A Khristu amakhulupilira kuti Yesu ndi…",
+                "…ndipo ena amanena kuti Yesu Khristu ndi nthano chabe.[4] A Khristu amakhulupilira kuti Yesu ndi Mpulumutsi ndipo kubwera kwake…"
+            ]
+        },
+        {
+            "word": "atabadwa Khristu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "ola",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 10,
+            "articles": 9,
+            "substringOnly": 0,
+            "examples": [
+                "…Kuchokera mu mzinda wa Blantyre, ulendo wopita umatenga ma ola osachepera atatu (3 Hours), koma ntawi iyi imatengela ndi l…",
+                "…imathamanga kwambiri padziko lonse lapansi pa 321 miles pa ola (517 kilomita pa ola) ndi Doppler on Wheels radar. Popeza k…",
+                "…padziko lonse lapansi pa 321 miles pa ola (517 kilomita pa ola) ndi Doppler on Wheels radar. Popeza kuti chimphepo chamkun…",
+                "…za ziphuphu koma anamasulidwa tsiku lomwelo. Patangopita ma ola ochepa, munthu amene ankafufuza za mulandu wa a Muluzi, a G…",
+                "…zira pa \"chaka\" 'adafotokozedwa ndi Ule pochiyerekezera ndi ola la msewu wodutsa (Wegstunde). Buku lina la ku Germany lotch…",
+                "…ang'ono pa Facebook, Instagram, ndi WhatsApp zambiri kuposa ola limodzi pambuyo pake, atatha kupitirira maola asanu ndi awi…"
+            ]
+        },
+        {
+            "word": "maola",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Mapillary, ndi Oculus, adapezeka padziko lonse lapansi kwa maola opitilira asanu ndi awiri. Mapulogalamuwa atawonongeka, ogw…",
+                "…zambiri kuposa ola limodzi pambuyo pake, atatha kupitirira maola asanu ndi awiri. == Zoyambitsa == Akatswiri azachitetezo ad…",
+                "…Schroepfer adalemba kupepesa patatha nthawi yopumula mpaka maola angapo, akunena kuti, \"Matimu akugwira ntchito mwachangu mo…",
+                "…amwalira, ndipo ena 41 avulala. Moto unazimitsidwa patatha maola anayi ndi theka. Zomwe zimayaka moto zikuwunikiridwa, ngakh…",
+                "…yerekezedwa kuti linali lalikulu kilomita imodzi, limayenda maola 8.7 aliwonse. Michira yake yafumbi ndi gasi idatambasulidwa…",
+                "…hindi 12 pambuyo pa 10:07. Zowonongekazo zinapezeka patatha maola 20 m'mphepete mwa phiri. Onse 22 okwera ndi ogwira nawo ntc…"
+            ]
+        },
+        {
+            "word": "koloko",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…edwe enieni omwe amatha nthawi. Mu moyo wa tsiku ndi tsiku, koloko imafunsidwa kwa nthawi zosakwana tsiku koma kalendala imaka…",
+                "…sogoleri olanda boma alengeza zakufika panyumba kuyambira 8 koloko masana. pa 5 Seputembala \"mpaka chidziwitso china\", pomwe a…",
+                "…ana ndi dziko lakunja kukhala kotheka. Wahl anamwalira pa 3 koloko masana pa March 9, 1948. Anaikidwa m'manda pa March 14 ku m…"
+            ]
+        },
+        {
+            "word": "milimita",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "sentimita",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…ku France, Claude Monet. (Mafuta pa kanvas, 98.1 ndi 129.9 sentimita (38.6 in × 51.1 in)). Chithunzichi chidasankhidwa ndi Metro…"
+            ]
+        },
+        {
+            "word": "makilogalamu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "mailosi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…zakuthambo ndi makilomita 9,5 trillion kapena 5,9 trillion mailosi. Monga momwe tafotokozera ndi International Astronomical Un…",
+                "…ropolitan Borough of Trafford, Greater Manchester, England, mailosi awiri (3.2 km) kumwera chakumadzulo kwa mzinda wa Mancheste…",
+                "…oyamba yachangu ya magetsi EP20 (2011). Magalimoto oyamba a mailosi awiri mod. 61-4465, 61-4465.01, 61-4472, 61-4473 (2013). Si…",
+                "…hamvu kwambiri ya magetsi 4ES5K (2014). Magalimoto oyamba a mailosi amodzi ndi awiri olumikizika (2019-2020). Sitima yoyamba ya…",
+                "…6:23 p.m. Central Daylight Time ku Grady County, pafupifupi mailosi awiri (makilomita 3.2) kumwera chakumwera chakumadzulo kwa…"
+            ]
+        },
+        {
+            "word": "kotala",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 4,
+            "articles": 4,
+            "substringOnly": 0,
+            "examples": [
+                "…Anali membala wa magulu a Belgian omwe adafika kumapeto kwa kotala pa 2014 FIFA World Cup ndi UEFA Euro 2016. Iye adayimira Be…",
+                "…mu 16 yapambana pomwe adapambana Germany Zambia idagonja mu kotala-fainala motsutsana ndi Italy pambuyo pa nthawi yowonjezera.…",
+                "…a chifukwa chotsika kwa malonda apadziko lonse a Samsung mu kotala lachiwiri la 2020, chifukwa chakukhudzidwa ndi mliri wa COV…",
+                "…dwa pulezidenti, pambuyo John F. Kennedy. Adakweza kwambiri kotala yoyamba ya 1987 kuposa wina aliyense. Pofika mu Ogasiti mau…"
+            ]
+        },
+        {
+            "word": "limodzi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…Zimbabwe ndi limodzi mwa maiko a kumwera kwa Afrika ndipo dzikoli ndi lomwe kale…",
+                "…tes ndi dziko lotukuka kwambiri, ndipo chuma chake ndi gawo limodzi mwa magawo anayi a GDP yapadziko lonse lapansi ndipo ndicho…",
+                "…ons Security Council. Dzikoli limapanga ndalama zoposa gawo limodzi mwa magawo atatu a ndalama zomwe zimagwiritsidwa ntchito pa…",
+                "…a kuti zibalitse pakati pa zowawa zamphamvu kwambiri pagulu limodzi la nyama zomwe zilipo. Imasaka nyama zomwe zimadya. Ngakhal…",
+                "…i zimakhala zokhazokha, nthawi zina zimadya ndikudziyimbira limodzi pagulu. Mosiyana ndi ma dasyurid ena ambiri, mdierekezi ama…",
+                "…Italy, Belgium, Netherlands, ndi Luxembourg anapanga bungwe limodzi la European Coal and Steel mu 1952. Mu 1957 mu mzinda wa It…"
+            ]
+        },
+        {
+            "word": "zana",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 35,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…di zitatu. Atapita kukachezera ofufuza a ku Ulaya m'zaka za zana lachisanu ndi chitatu, derali linakhala otetezera ku Britai…",
+                "…pofika nthawi yomwe atsamunda aku Europe adafika m'zaka za zana la 16. United States idatuluka m'makoloni khumi ndi atatu a…",
+                "…azikitsa ufulu wodziyimira pawokha. Chakumapeto kwa zaka za zana la 18, US idayamba kukula kudutsa North America, pang'onopa…",
+                "…di awiri) amene adaphunzitsa uthenga wa Khristu ku dziko la zana loyamba. == Mayina == Anthu ambiri amaganiza kuti dzina la…",
+                "…Isles. Zilumba za Cape Verde zidalibe anthu mpaka m'zaka za zana la 15, pomwe ofufuza aku Portugal adazindikira ndikulanda z…",
+                "…a aukapolo ku Atlantic, Cape Verde idayamba chuma m'zaka za zana la 16 ndi 17, ikukopa amalonda, anthu wamba, komanso achifw…"
+            ]
+        },
+        {
+            "word": "dola",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…kasanu ndi katatu kuposa S&P 500, ndi 18 kuwirikiza kuposa dola yaku US. [235] Hodl ndi meme yopangidwa ponena za kugwira (…"
+            ]
+        },
+        {
+            "word": "madola",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 29,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…adzamaliza ndi South America ndi $ 12. Chifukwa chake, pali madola 195 omwe amadziwika okha. == Mayiko Apadziko Lonse == === (…",
+                "…mtengo wogulitsira katemerayu pachipiku unali woyambira pa madola a ku America 0.58 mpaka 13.20 pa katemera m'modzi. Koma ku…",
+                "…. Koma ku United States, mtengo wa katemerayu umayambira pa madola 50 mpaka 100. == Malifalensi ==…",
+                "…patala. Ku United States mtengo wa katemerayu umayambira pa madola 50 mpaka kufika pa madola 100. == Zolemba ==…",
+                "…tengo wa katemerayu umayambira pa madola 50 mpaka kufika pa madola 100. == Zolemba ==…",
+                "…aka cha 2014, mtengo wa chipiku wa katemerayu umayambira pa madola 3.23 mpaka kufika pa 10.77 pa katemera m'modzi. Koma ku Uni…"
+            ]
+        },
+        {
+            "word": "kwacha",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 12,
+            "articles": 7,
+            "substringOnly": 0,
+            "examples": [
+                "…Kwacha: Kwacha ya Malaŵi‎ Kwacha ya Zambia…",
+                "…Kwacha: Kwacha ya Malaŵi‎ Kwacha ya Zambia…",
+                "…Kwacha: Kwacha ya Malaŵi‎ Kwacha ya Zambia…",
+                "…Kwacha ya Malaŵi (MWK) ndi ndalama la dziko la Malaŵi.…",
+                "…Kwacha ya Zambia (ZMW) ndi ndalama la dziko la Zambia.…",
+                "…One hundred kwacha note ndi chipembedzo cha ndalama za Zambia . Lamulo la pama…"
+            ]
+        },
+        {
+            "word": "yuro",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…% ya padziko lonse. The ambiri amangoti ntchito ndalama ndi yuro. Europe, makamaka wakale Greece, ndi adzabadwira Azungu. Iw…"
+            ]
+        },
+        {
+            "word": "peresenti",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 33,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…a osapitirira miyezi 9 akalandira katemera mmodzi yekha, 85 peresenti ya anawo amakhala otetezeka moti sangadwale matendawa, ndip…",
+                "…nawo amakhala otetezeka moti sangadwale matendawa, ndipo 95 peresenti ya ana opitirira miyezi 12 sangadwale akalandira katemerayu…",
+                "…chigawo cha mzindawo amayendetsa malo ambiri, malo oposa 90 peresenti ya malo a tawuni ndi malo akumidzi, ndipo m'tawuni muli gaw…",
+                "…goziyi kukamalizidwa. VariFlight inanena kuti pafupifupi 74 peresenti ya ndege 11,800 zomwe zidakonzedwa pa Marichi 22 zidathetse…",
+                "…masheya ku US, magawo a Boeing poyambilira adatsika ndi 7.8 peresenti ndipo magawo aku China Eastern ndi 8.2 peresenti zitachitik…",
+                "…ka ndi 7.8 peresenti ndipo magawo aku China Eastern ndi 8.2 peresenti zitachitika. Pa Hong Kong Stock Exchange China Eastern mash…"
+            ]
+        },
+        {
+            "word": "sikweya",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…'onozing'ono Africa ndi padziko area, zofunda za 10.180.000 sikweya makilomita (3,930,000 m'litali mi) kapena 2% ya Dziko lapan…",
+                "…agram idasiyanitsidwa poyambilira pongololeza zomwe zili mu sikweya (1: 1) mulingo woyenera ndi pixels 640 kuti zifanane ndi ch…",
+                "…u Caribbean Sea. North America linatenga malo za 24.709.000 sikweya makilomita (9,540,000 linali lalikulu kwambiri), za 16,5% a…"
+            ]
+        },
+        {
+            "word": "madigiri",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 7,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…es. Kumeneko, anapita ku Randolph School. Kenaka adalandira madigiri a bachelor ndi a master pa ndalama. Mu 1996, iye ndi anzake…",
+                "…owonjezereka zakhala zikuwonjezeka kuti zikhale ndi dera la madigiri pafupifupi madigiri atatu (pafupifupi 6 kuchuluka kwake, ka…",
+                "…zikuwonjezeka kuti zikhale ndi dera la madigiri pafupifupi madigiri atatu (pafupifupi 6 kuchuluka kwake, kapena malo okwana 36,…",
+                "…ima lopanda mwezi. Pofika pa 5 February comet ili mkati mwa madigiri 6 a Capella (pafupi ndi malo owonera ma binoculars wamba) n…",
+                "…a adaphunzira ku Christ Church College, ku Canterbury, omwe madigiri awo anali panthawi yomwe amapatsidwa ndi University of Lond…",
+                "…a ndi pafupifupi kutentha kuyambira pakati pa 10 ° C 20 ° C madigiri, koma chapakati Greenland wapangidwa ndi waukulu kwambiri a…"
+            ]
+        },
+        {
+            "word": "mphindi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 48,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…amu la 29,423 ku Olympiastadion adawona Brugge akutsogolera mphindi ya 11 pamasewera achiwiri. Liverpool idafanana mphindi zina…",
+                "…lera mphindi ya 11 pamasewera achiwiri. Liverpool idafanana mphindi zinayi pambuyo pake Keegan adagoletsa. Masewerawa adakhala…",
+                "…masewerowa bwino kwambiri mbali ziwirizo ndipo adatsogolera mphindi yachisanu. Kulowera kumbuyo kwa Phil Neal kulibe wosewera m…",
+                "…onya pamwamba pa Clemence ndikulowa ku Liverpool. Patadutsa mphindi zisanu ndi ziwiri Brugge adakulitsa chitsogozo chawo pomwe…",
+                "…la bwalo adasokoneza aku Belgian. Zotsatira zonse zidabwera mphindi ya 59 pomwe Liverpool idagoletsa; Steve Heighway adadutsa k…",
+                "…y yemwe adagoletsa mayadi 20 (18 m). Liverpool idalinganiza mphindi ziwiri pambuyo pake; kuwombera kochokera kwa Kennedy kudakw…"
+            ]
+        }
+    ],
+}

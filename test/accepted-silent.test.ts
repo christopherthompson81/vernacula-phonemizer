@@ -146,7 +146,14 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // in one article) plus one shape worth naming: gan's `minus` list is SHORT because the layer READS
         // the real negatives — ⟨負⟩ speaks AND is attested in sense in the corpus's own integer article
         // (`佢個哩嗰負值(-1、-2、-3...)`), which no other lect in this family could say.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh"]);
+        // nya has ONE, and it is the same shape ceb's is: the single currency sign in its corpus with no
+        // usable name. Chichewa's dollar and pound are both attested in monetary amounts on ny.wikipedia and
+        // are read; its euro scores one hit in one article, and that article is the machine-translated piece
+        // the corpus already contains — so the "second haystack" is not independent evidence at all. Listed
+        // by instance, never by class. Its minus and math-sign refusals are CLASS-level and live in
+        // ACCEPTED_SIGN_SILENCE instead, because every one of those signs in this corpus is EasyTimeline
+        // chart markup rather than Chichewa prose.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
