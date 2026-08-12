@@ -71,6 +71,17 @@
         "ordinal-caps": 31,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 440 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Chili gen twa zòn jewografik. Premye a se Chili kontinantal, ki gen ladan yon teren sou kòt lwès Kòn Sid la, ki pwolonje ant paralèl 17°29′57″ S ak 56°32′12″ S, prensipalman soti nan kòt sidès Oseyan Pasifik la rive nan pi wo somè nan chèn montay And yo. Li gen yon longè 4270 km, yon lajè maksimòm 445 km nan 52°21′ S ak yon minimòm 90 km nan 31°37′ S. Li gen pou vwazen Pewou nan nò, Bolivi nan nòdwès, ak Ajantin nan bò solèy leve, totalize 7801 km fwontyè tè, epi li gen pasaj Drake nan sid la. Dezyèm zòn nan, Chili zile, gen ladann yon seri zile vòlkanik nan sid Oseyan Pasifik la: achipèl Juan Fernández ak zile Desventuradas yo, ki fè pati Amerik disid, ansanm ak zile Salas ak Gómez ak zile Pak, ki sitiye nan limit triyang Polinezi a, ki fè pati Oseyanik. Twazyèm zòn nan, Teritwa Antatik Chili a, se yon pati nan kontinan Antatik la ki gen yon zòn 1 250 257,6 km² , ant meridyen 53° O ak 90° O, kote Ajantin ak Wayòm Ini fè reklamasyon tou, ki pwolonje jiska Pòl Sid la, men ki sijè a sa ki prevwa nan Trete Antatik la, ke Chili siyen tou. Paske de sa yo, Chili konsidere kòm yon peyi trikonental." },

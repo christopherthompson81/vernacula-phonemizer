@@ -71,6 +71,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 322 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 287
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "ꠇꠙꠦꠘ ꠎꠟꠛꠣꠁꠃ ꠜꠣꠉꠛꠣꠐꠥꠀꠞꠣꠞ ꠚꠣꠍꠉꠥ ꠝꠥꠟ ꠎꠟꠛꠣꠁꠃ ꠉꠥꠁꠐꠞ ꠝꠣꠏꠦ ꠄꠉꠥ ꠅꠁꠟꠧ ꠉꠤꠀ ꠃꠡ꠆ꠝꠣꠁꠀ ꠎꠟꠛꠣꠁꠃ ꠛꠣ ꠉꠞꠝꠍꠇ꠆ꠞꠤ ꠎꠟꠛꠣꠁꠃ (Tropical climate) ⁕ ꠃꠡ꠆ꠝꠣꠁꠀ ꠎꠟꠛꠣꠁꠃꠞ ꠎꠦꠉꠣꠁꠘ꠆ꠔꠞ ꠛꠂꠡꠤꠡ꠆ꠐ ꠅꠁꠟꠧ ꠝꠣꠡꠥꠞꠣ ꠉꠠ ꠔꠣꠚꠝꠣꠔ꠆ꠞꠣ ১৮°ꠍꠦ. (৬৪.৪° ꠚꠣ.) ꠛꠣ ꠃꠌ꠆ꠌꠔꠞ ꠉꠞꠝ ꠔꠣꠚꠝꠣꠔ꠆ꠞꠣ ꠕꠣꠈꠦ ⁕ ꠛꠍꠞꠤ ꠝꠦꠊꠛꠣꠖꠟꠤ ꠃꠡ꠆ꠝꠣꠁꠀ ꠎꠟꠛꠣꠁꠃꠔ ꠎꠦꠔꠧꠔꠣ ꠅꠄ ⁕ ꠉꠞꠝꠍꠇ꠆ꠞꠤ ꠎꠟꠛꠣꠁꠃꠔ ꠡꠣꠗꠣꠞꠘꠔ ꠖꠥꠇ꠆ꠍꠣ ꠝꠃꠡꠥꠝ ꠕꠣꠈꠦ, ꠄꠉꠥ ꠎꠟ꠆ꠟꠥꠡ ꠝꠃꠡꠥꠝ, ꠀꠞ꠆ꠉꠥ ꠢꠥꠇꠘꠣ ꠛꠣ ꠐꠣꠘꠧꠞ ꠝꠃꠡꠥꠝ ⁕ ꠃꠡ꠆ꠝꠣꠁꠀ ꠎꠟꠛꠣꠁꠃꠔ ꠛꠍ꠆ꠞꠤ ꠔꠣꠚꠝꠣꠔ꠆ꠞꠣꠞ ꠚꠞꠤꠡꠤꠝꠣ ꠡꠣꠗꠣꠞꠘꠔ ꠎꠦ ꠔꠥꠠꠣ ꠕꠣꠈꠦ ꠀꠞ ꠔꠣꠔꠣꠚꠥꠠꠣ ꠞꠁꠖ ꠃꠑꠦ ⁕" },

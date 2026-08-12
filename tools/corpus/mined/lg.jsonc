@@ -71,6 +71,17 @@
         "ordinal-caps": 10,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 448 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Ku 580,367 km2 (224,081 sq mi), Kenya ekwata ekifo kya 47 mu nsi ezisinga obunene mu nsi yonna (oluvannyuma lwa Madagascar). Esangibwa wakati wa latitudi 5°N ne 5°S, ne longitudi 34° ne 42°E. Okuva ku lubalama lwa Ssemayanja Indian Ocean, olusenyi olwansi lulinnya okutuuka ku nsozi ez'omu masekkati agayawulwamu ekiwonvu ekinene, era waliwo ebitundu ebirimu ettaka eggimu ku njuyi zombi, okwetooloola Ennyanja Nnalubaale n'Ebuvanjuba." },

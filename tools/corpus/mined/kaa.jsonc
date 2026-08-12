@@ -71,6 +71,17 @@
         "ordinal-caps": 120,   // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 443 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Boliviya batısında jılına 150 mm ge shekem, shıǵısında 500-600 mm, And tawları janbawırında 2000 mm ge shekem jawın jawadı. Punada iyuldıń ortasha temperaturası 3-7°, yanvar ayında 9-11°. Shıǵıs tegisliklerde (arqada) 4-5 aydan (qublada) 9 ayǵa shekem qurǵaqshılıq boladı. Iyuldıń ortasha temperaturası 17-22°, yanvar ayında 24-28°. Jılına arqada 1300-1600 mm, qublasında 800 mm ge shekem jawın jawadı. Boliviyada tezaǵar, kishi taw dáryaları da bar. Mámleket arqasındaǵı dáryalar tropikalıq jawın dáwirinde tasadı hám 120 mıń km² ge shekem maydanın suw basadı. Boliviya batısında shala shól ósimlikleri, shıǵısında biyik taw tropikalıq sahra ósimlikleri ósedi. And tawlarınıń shıǵıs janbawırında tropikalıq ormanlar, shıǵıs tegisliklerde tiykarınan savanna ósimlikleri ósedi; arqasında gileya, qublada siyrek tropikalıq ormanlar da ushıraydı. Haywanlardan meshin, zirhaor, tapir, kemiriwshiler, quslar, jer bawırlawshılar, shıbın-shirkeyler hám basqalar bar. Milliy baǵları: Isıboro-Sekurs, Uanchaka, Pilon-Laxas hám basqalar." },

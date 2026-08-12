@@ -80,6 +80,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 49 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 38
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "digit-run", "text": "晉語 是漢藏語系漢語族的一種語言，也是中國北廂漢族地勢唯獨一種不是官話的語言，到了1996年，晉語的使用人口約莫4500萬（不算上汾河片），按使用人口排世界第22名，在漢語中影響力僅次於官話（北方話）、吳語、粵語和閩南語。到2007年，晉語的母語使用人數有4762萬人（不算上汾河片），還是世界100大語言之一。" },

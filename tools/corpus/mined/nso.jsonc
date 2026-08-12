@@ -71,6 +71,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 405 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Lewatle la India ke lewatle le borutho kudu lefaseng. Direkoto tša themperetšha ya lewatle tša nako ye telele di bontšha go ruthetša ka lebelo, mo go tšwelago pele ka lewatleng la India, mo e ka bago 1.2 °C (2.2.)°F bakeng sa selete sa letamo le borutho nakong ya 1901–2012. Di nyakišišo di bontšha gore go ruthetša ga ntlo ya go godiša dimela mo go hlohleletšwago ke batho, le diphetogo tša kgafetša kgafetša le bogolo bja (El Niño) goba Dipole ya Lewatle la India , di tiragalo ke dihlohleletši tša go ruthetša mo mo go maatla Lewatleng la India.Mola Lewatle la India le ile la ruthetša ka lebelo la 1.2°C ka ngwaga kgolo magareng ga 1950–2020, dika tša tlelaemete di bolelela pele go ruthetša ka lebelo, ka seelo sa 1.7 °C (3.1.)°F – 3.8 °C (6.8.) °F ka lekholong la dilemo nakong ea 2020-2100." },

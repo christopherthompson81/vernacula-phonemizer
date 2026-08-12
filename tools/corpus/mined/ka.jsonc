@@ -71,6 +71,17 @@
         "ordinal-caps": 46,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 453 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "კლიმატი – მხარის კლიმატი კონტინენტურია, საშუალო წლიური ტემპერატურაა დაახლოებით 11 °C, შესაძლებელი მაქსიმუმია 42 °C, ხოლო შესაძლებელი მინიმუმი - 32 °C. ქარის ენერგეტიკული რესურსი (1000 კვტ/სთ 1 კმ²-ზე) — 1000-1500. ნალექების რაოდენობა წელიწადში საშუალოდ 500 მმ-ია, მაქსიმუმი – 760 მმ, მინიმუმი 330 მმ." },

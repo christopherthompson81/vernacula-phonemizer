@@ -71,6 +71,17 @@
         "ordinal-caps": 8,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 436 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Maselese, o tsejwang hape ele morbilli, rubeola, kapa maselese o mofubedu, ke tshwaetso e fetisetsanwang haholo e bakwang ke vaerase ya maselese. Matshwao a qalang a akarelletsa feberu, hangata ya motjheso o fetang 40 °C (104.0 °F), ho kgohlela, lemina, le mahlo a mafubedu. Matsatsi a mabedi kapa a mararo ka mora hore ho hlahe matshwao a qalang matheba a masweu a ka nna a hlaha ka hanong, a tsejwang ele matheba a Koplik. Lekgopho le sephara le lefubedu hangata le qala sefahlehong ebe le namela mmeleng kaofela hangata le qala matsatsi a mararo ho isa ho a mahlano ka mora hore ho qale matshwao. Matshwao a hangata a bonahala ka mora matsatsi a 10-12 ka mora hore motho a kopane le motho ya tshwaeditsweng mme a ba teng ho fihlela matsatsing a 7-10. Mathata a ba teng ho batho ba etsang 30% mme a ka nna a akarelletsa letshollo, bofofu, ho tjha ha booko le serame sa matshwafong hara tse ding. Rubella (Maselese wa Jeremane) le roseola ke malwetse a fapaneng." },

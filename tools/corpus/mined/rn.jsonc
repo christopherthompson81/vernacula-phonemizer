@@ -71,6 +71,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 374 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Ubushyuhe burashobora kugabanuka hafi 0,6 ° C kuri metero 100 z'uburebure kandi imvura ikiyongera mugihugu, I bujumbura umurwa mukuru w'ubutunzi, mu burengerazuba bw'igihugu ndetse no ku nkombe z'ikiyaga cya Tanganyika, hakunda gushuha niyo aba ari murushana. Ubushyuhe bwumunsi burashuha cane umwaka wose, hafi 30 ° C. Ubushuhe bworoheje burashobora kugera hafi 18 ° C k'umwaka wose. Imvura igwa buri mwaka igera kuri milimetero 800, cank metero 0.8. Imvura iragwa cane kuva mu kwicenda gushika muri nzero, ikanabandanya gushika mukwezi kwa gatanu canke mumpera zukwakane. Muri Nyanza-Lac, mu majepfo ashira uburengerazuba bw'Uburundi ndetse no ku nkombe z'ikiyaga ca Tanganyika, ubushuhe burasa cane n'ubw'umurwa mukuru w'ubutunzi. I Gitega kumurwa mukuru w'igihugu c'U Burundi, ubushyuhe ntarengwa (bityo kumurango) burashusha (hafi ya 25 ° C), Mwijoro (hafi 13 ° C). Igihe cimvura naco kirakomeye kuruta mu murwa mukuru w'ubutunzi." },

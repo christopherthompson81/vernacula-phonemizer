@@ -71,6 +71,17 @@
         "ordinal-caps": 59,    // \d would miss 41
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 448 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 290
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "په کرابين کې ډومينيکن جمهوريت هغه هېواد دی چې زيات سيلانيان ورځي. د کال په اوږدو کې د ګالف سيمې هغه دي چې ډېر توجه راجلبوي. د کرابيين تر ټولو لوړه غر څوکه چې «پيکو ډوارټي» نومېږي او د کرابيین تر ټولو ستر جهيل او ښکته نقطه چې د «جهيل اينريکيلو» په نوم ياديږي، له جغرافيايي اړخه يو منتوع هېواد ډومينيکن جمهوريت کې موقعيت لري. د دې ټاپو د تودوخې منځنۍ درجه 26 °C (78.8 °F) وي او دا هېواد يو ستر اقليم او بيالوژيکي تنوع څخه برخمن دی. دا هېواد همدا راز په امريکاګانو کې د جوړو شويو لومړۍ کليسا، کلا، خانقا او جنګي کلا ځای هم دی، کوم چې د سينټو ډومنګو په نوې جوړې شوې سيمه کې موقعيت لري، دا د نړيوال ميراث يوه سيمه ده. بيسبال د دې هېواد ملي لوبه ده." },

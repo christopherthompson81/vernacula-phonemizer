@@ -71,6 +71,17 @@
         "ordinal-caps": 8,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 440 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Ny toetanin' Antananarivo dia araka ny fanasokajian' i Köppen ny toetany dia Cwb izany hoe manana toetany trôpikaly antonontonony noho ny haavon' ny tany. Amin' ny volana Oktobra hatramin' ny volana Marsa dia mafana ny andro ary mety mahatratra hatrany amin' ny 35°C any ho any ny mari-pana, amin' io enimbolana io dia mahery ny 50 mm isam-bolana ny latsak' orana. Amin' ny volana Aprily ka hatamin' ny volana Septambtra dia antonontonony ny hafanana. Amin' io enimbolana io dia latsaky ny 50 mm ny latsak' orana." },

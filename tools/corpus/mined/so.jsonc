@@ -80,6 +80,17 @@
         "ordinal-caps": 92,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 448 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Muqdisho waxay ku taallaa ama u dhowdahay geedka geedaha kulaylaha ah ee geedka geedka dabiiciga ah ee Holdridge . Celceliska heerkulka magaalada sanadka oo dhan waa 27 °C (81 °F), celceliska ugu badnaan waa 30 °C (86 °F) iyo celceliska ugu yaraan 24 °C (75 °F). Aqrinta heerkulka celceliska bishii waa 3 °C (5.4 °F), taas oo u dhiganta hyperoceanic iyo nooca hoose ee dhabta ah nooca qaarad-badeedka hyperoceanic . Celcelis ahaan roobab sanadkiiba 429.2 mm (16.9 in). Waxaa jira 47 maalmood oo qoyan sannadkii, kuwaas oo la xidhiidha 12% suurtagalnimada roobka maalinlaha ah ee maalinlaha ah. Magaaladu waxay leedahay celcelis ahaan 3,066 saacadood oo qorrax ah sannadkii, oo leh 8.4 saacadood oo qorrax ah maalintii. Saacadaha iftiinka maalintii iyo daqiiqadaha maalintii waa 8 saacadood iyo 24 daqiiqo. Boqolkiiba cadceedda suurtogalka ah waa 70%. Celcelis ahaan joogga qorraxda ee duhurnimada qorraxda maalinta 21aad ee bisha waa 75%" },

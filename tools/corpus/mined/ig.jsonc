@@ -71,6 +71,17 @@
         "ordinal-caps": 320,   // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 460 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Ethnologue na-akọ na a na-asụ ya na Ama (Wopolu I) (4°06′12′′S 141°39′54′′E / 4.1035012°E / -4.103263; 141.665012 (Ama)), Kauvia (Kawiya) (4°07′24′′E /4.1336S 14167E /14161616163161616\"\"EEEE1413131 (Kavia) WWWW1616161), Wanik (4°12°12°141414141S1\"\"E141414164164168EEE12°141\"\"EE1414168E1\"\"E12°171\"\"E168E161\"\"E1\"\"SSSS1\"\"S1\"\"NNN1\"\"E11\"\"E1248\"\"E124262626268EE12481\"\"E\"\"E1236\"\"EE1\"\"N1\"\"S11\"\"EE1241248\"\"S14,1416\"\"E12\"\"EE16\"\"E16\"\"S1S14,16\"\"E" },

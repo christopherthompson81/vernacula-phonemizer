@@ -71,6 +71,17 @@
         "ordinal-caps": 26,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 448 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Alcheria se troba prencipalment situata entre as latituz 19° y 37°N (una chicota aria ye a o norte d'o 37°), y lonchituz 11°U y 12°E. A mayoria d'a suya costa ye montayosa y bi ha bels puertos natuarals. L'aria situata entre a mar y l'Atlas Telliano ye fértil. A o sud de l'Atlas Telliano se troba un paisache d'estepa, que remata en l'Atlas Sahariano; mas enta o sud se troba o disierto d'o Sahara." },

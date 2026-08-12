@@ -71,6 +71,17 @@
         "ordinal-caps": 4,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 432 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 1
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "ປະເທດລາວເປັນປະເທດດຽວທີ່ບໍ່ມີທາງອອກສູ່ທະເລໃນອາຊີຕາເວັນອອກສຽງໃຕ້ ຕັ້ງຢູ່ລະຫວ່າງເສັ້ນຂະໜານທີ 14° ແລະ 23° ເໜືອ, ແລະເສັ້ນແວງທີ 100° ແລະ 108° ຕາເວັນອອກ. ເຂດທີ່ປະກອບດ້ວຍປ່າສ່ວນຫຼາຍແມ່ນຕັ້ງຢູ່ພູເຂົາສ່ວນໃຫຍ່, ຈຸດທີ່ສູງທີ່ສຸດແມ່ນພູເບ້ຍຢູ່ທີ່ 2,818 ແມັດທີ່ມີທົ່ງພຽງແລະພູພຽງບາງສ່ວນ. ແມ່ນໍ້າຂອງເປັນສ່ວນໜຶ່ງໃນການແຍກຊາຍແດນທາງທິດຕາເວັນຕົກທີ່ຕິດກັບປະເທດໄທ, ສາຍພູຫຼວງເປັນທີ່ກັ້ນຊາຍແດນທາງທິດຕາເວັນອອກຕິດກັບຫວຽດນາມ ແລະ ພູເຂົາຫຼວງພຣະບາງເປັນທີ່ກັ້ນຊາຍແດນທາງທິດຕາເວັນຕົກສ່ຽງເໜືອຕິດກັບເຂດເນີນສູງຂອງໄທ. ມີພູພຽງຢູ່ 2 ແຫ່ງຄື: ພູພຽງຊຽງຂວາງທາງທິດເໜືອ ແລະ ພູພຽງບໍລະເວນຢູ່ພາກໃຕ້ສຸດ. ປະເທດລາວສາມາດຖືວ່າປະກອບດ້ວຍ 3 ພູມສັນຖານຄື: ພາກເໜືອ, ພາກກາງ, ແລະ ພາກໃຕ້. ປະເທດລາວມີດັດຊະນີຄວາມສົມບູນທາງດ້ານພູມສັນຖານປ່າໄມ້ປີ 2019 ຢູ່ທີ່ 5.59/10, ຢູ່ໃນອັນດັບທີ 98 ທົ່ວໂລກຈາກທັງໝົດ 172 ປະເທດ." },

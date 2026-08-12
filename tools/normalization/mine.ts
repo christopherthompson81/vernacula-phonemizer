@@ -33,13 +33,14 @@
  *        [--fill percent,clock,degrees] [--per-cell-articles 20] [--concurrency 4]
  *   npx tsx tools/normalization/mine.ts mine  --in raw.txt --out my.hard.tsv [--per-cell 8] [--sample 200]
  *        [--terminators "။"] [--terms months.txt] [--audit-ascii]
+ *   npx tsx tools/normalization/mine.ts backfill [--dir tools/corpus/mined] [--dry]
  */
 import { readFileSync, writeFileSync, appendFileSync, readdirSync, openSync, readSync, closeSync } from "node:fs";
 import { StringDecoder } from "node:string_decoder";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allOccurrencesInMarkup, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
-import { CELLS, type Cell } from "./cells.ts";
+import { CELLS, type Cell, staleness } from "./cells.ts";
 import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
 
 // NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo, `bara 1945 tti`).
@@ -721,10 +722,80 @@ if (mode === "scan") {
     process.exit(0);
 }
 
+/**
+ * BACKFILL — evaluate cells that entered the inventory AFTER an artifact was mined, using the artifact's own
+ * retained text, without re-fetching anything and without moving one existing number.
+ *
+ * WHY IT EXISTS. `counts` is a whole-corpus count over a `raw.txt` that is not in this repository, so the only
+ * way to give a NEW cell a mined count is to re-fetch the wiki — 160 of them, when this was written, because
+ * the fleet was 160/160 current and one added cell makes every artifact stale at once. Re-fetching would also
+ * resample every tier, and the ×N and "% of the corpus" figures quoted in rule comments and investigation docs
+ * across the fleet are all figures about THESE samples. Regenerating the fleet so a gate reads green would
+ * quietly invalidate all of them, which is a far worse outcome than an artifact honestly saying it has not
+ * counted something yet.
+ *
+ * ⚠ WHAT IT PRODUCES IS NOT A COUNT, AND IS KEPT OUT OF `counts` FOR THAT REASON. The retained text is `hard`
+ * (adversarially selected — the artifact's own header says an instance count inside it means nothing) plus
+ * `sample`. A number over that answers "does this language WRITE this pattern" — a presence lower bound, the
+ * question a cell actually asks — and answers nothing about frequency. It gets its own block, its own warning
+ * inside every file it touches, and its own line in `review.ts`, and `renderJsonc` never emits one, so a real
+ * re-mine drops it.
+ *
+ * LEXICAL CELLS CANNOT BE BACKFILLED and are refused rather than written as 0. Their `re` is `/$^/` and the
+ * evidence lives in a `--terms` list that the artifact does not retain, so a 0 would read as "this language has
+ * no month names", which is the "an empty cell is not evidence" trap in its most confident form.
+ */
+if (mode === "backfill") {
+    const dir = arg("dir", "tools/corpus/mined")!;
+    const dry = argv.includes("--dry");
+    const { parseJsonc } = await import(new URL("../../src/core/jsonc.ts", import.meta.url).href);
+    let touched = 0, already = 0;
+    const refused = new Set<string>();
+    for (const file of readdirSync(dir).filter((f) => f.endsWith(".jsonc")).sort()) {
+        const path = join(dir, file);
+        const src = readFileSync(path, "utf8");
+        const st = staleness(src);
+        const todo = st.missing.map((k) => CELLS.find((c) => c.key === k)!).filter((c) => {
+            if (c.lexical) { refused.add(c.key); return false; }
+            return true;
+        });
+        if (todo.length === 0) { already++; continue; }
+        const doc = parseJsonc(src) as { hard?: { text: string }[]; sample?: string[]; backfill?: Record<string, number> };
+        const lines = [...(doc.hard ?? []).map((h) => h.text), ...(doc.sample ?? [])];
+        const merged: Record<string, number> = { ...(doc.backfill ?? {}) };
+        for (const c of todo) merged[c.key] = lines.filter((s) => c.re.test(s)).length;
+        const keys = Object.keys(merged).sort();
+        const width = Math.max(...keys.map((k) => k.length));
+        const block = `\n    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and\n`
+            + `    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this\n`
+            + `    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",\n`
+            + `    // ${lines.length} segments — and the number is how many of those segments match. "hard" is adversarially selected, so\n`
+            + `    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.\n`
+            + `    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.\n`
+            + `    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.\n`
+            + `    "backfill": {\n`
+            + keys.map((k) => `        "${k}":${" ".repeat(width - k.length + 1)}${merged[k]}`).join(",\n")
+            + `\n    },\n`;
+        // Spliced textually, immediately after `counts`, so every other byte of the artifact is preserved —
+        // re-rendering the file would rewrite fields the mine step no longer has the inputs to reproduce.
+        const anchor = /"counts"\s*:\s*\{[\s\S]*?\n {4}\},\n/u.exec(src);
+        if (anchor === null) { console.error(`${file}: no "counts" block — skipped`); continue; }
+        const stripped = src.replace(/\n {4}\/\/[^\n]*\n(?: {4}\/\/[^\n]*\n)*? {4}"backfill"\s*:\s*\{[\s\S]*?\n {4}\},\n/u, "");
+        const at = /"counts"\s*:\s*\{[\s\S]*?\n {4}\},\n/u.exec(stripped)!;
+        const out = stripped.slice(0, at.index + at[0].length) + block + stripped.slice(at.index + at[0].length);
+        if (!dry) writeFileSync(path, out);
+        console.log(`${file.padEnd(12)} +${todo.map((c) => `${c.key}=${merged[c.key]}`).join(" ")}  (over ${lines.length} retained segments)`);
+        touched++;
+    }
+    console.log(`\n${dry ? "would touch" : "backfilled"} ${touched} artifact(s); ${already} already complete`);
+    if (refused.size > 0) console.log(`lexical cells REFUSED (no shape to match, evidence is in --terms): ${[...refused].join(" ")}`);
+    process.exit(0);
+}
+
 if (mode === "__module__") {
     // imported as a library — export only, run nothing
 } else if (mode !== "mine") {
-    console.error("usage: fetch --wiki my --out raw.txt [--random N] [--fill cell,cell] [--digits ၀-၉] [--terms f] [--concurrency 4]\n       mine --in raw.txt --out hard.tsv [--per-cell 8] [--sample N] [--terminators \"။\"] [--terms f] [--audit-ascii]");
+    console.error("usage: fetch --wiki my --out raw.txt [--random N] [--fill cell,cell] [--digits ၀-၉] [--terms f] [--concurrency 4]\n       mine --in raw.txt --out hard.tsv [--per-cell 8] [--sample N] [--terminators \"။\"] [--terms f] [--audit-ascii]\n       backfill [--dir tools/corpus/mined] [--dry]");
     process.exit(2);
 } else {
     const inPath = arg("in"), outPath = arg("out");

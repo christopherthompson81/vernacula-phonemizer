@@ -554,15 +554,25 @@ async function main(): Promise<void> {
     if (existsSync(artifact)) {
         const st = staleness(readFileSync(artifact, "utf8"));
         const current = st.missing.length === 0 && st.unknown.length === 0;
+        /**
+         * A BACKFILLED CELL PASSES BUT IS NAMED, EVERY RUN. It was evaluated against the artifact's own
+         * retained text rather than mined from the corpus, so it answers "does this language write this"
+         * and NOT "how often" — and the whole reason the block exists is that the honest answer stays
+         * visible instead of being absorbed into `counts`. Saying `mined against all N cells` when one of
+         * them was backfilled would be the exact laundering this check exists to prevent.
+         */
+        const backfilled = st.backfilled.length > 0
+            ? `${st.backfilled.length} backfilled from retained text, NOT corpus-counted: ${st.backfilled.join(" ")}` : "";
         const detail = current
-            ? `mined against all ${CELLS.length} cells`
+            ? [`${CELLS.length - st.backfilled.length}/${CELLS.length} cells mined`, backfilled].filter(Boolean).join(" | ")
             : [
                 st.minedAgainst !== undefined && st.minedAgainst !== CELLS.length
                     ? `mined against ${st.minedAgainst} cells, inventory is now ${CELLS.length}` : "",
                 st.missing.length > 0 ? `NEVER EVALUATED: ${st.missing.join(" ")}` : "",
                 st.unknown.length > 0 ? `dead key(s): ${st.unknown.join(" ")}` : "",
+                backfilled,
             ].filter(Boolean).join(" | ");
-        note("artifact current", current, current ? detail : `${detail} — re-mine with mine.ts`);
+        note("artifact current", current, current ? detail : `${detail} — re-mine with mine.ts, or backfill the new cell(s) with \`mine.ts backfill\``);
     }
 
     // ── 4. the probes. PRINTED, not merely asserted — see the header. ─────────────────────────────────

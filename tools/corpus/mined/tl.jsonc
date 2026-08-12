@@ -71,6 +71,17 @@
         "ordinal-caps": 145,   // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 459 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Ang Pilipinas ay isang kapuluan ng 7,641 mga pulo na ang kabuoan ng sukat ng lupa, kasama ang mga nakapaloob na bahagi ng tubig, ay tinatayang nasa . Ang baybayin nito na ang sukat ay ang dahilan kung bakit ikalima ang Pilipinas sa pinakamalawak ang baybayin sa buong daigdig. Nasa pagitan ito ng 116°&nbsp;40', at 126°&nbsp;34' E. longhitud at 4°&nbsp;40' at 21°&nbsp;10' N. latitud at humahangga sa Dagat Pilipinas sa silangan, sa Dagat Timog Tsina sa kanluran, at sa Dagat Sulawesi sa Timog (kasalukuyang Dagat Celebes). Ang pulo ng Borneo ay matatagpuan ilang daang kilometro sa timog kanluran at ang Taiwan ay nasa hilaga. Ang labing-isang pinakamalaking isla ng bansa ay ang Luzon, Mindanao, Samar, Negros, Palawan, Panay, Mindoro, Leyte, Cebu, Bohol at Masbate, na bumubuo sa humigit-kumulang siyamnapu't-limang porsiyento ng kabuuang lawak ng bansa." },

@@ -62,6 +62,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 108 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "ఉపగ్రహం నుండి అందిన చిత్రాల ప్రకారం అట్లాంటిక్‌లో ఫ్రెడ్ మాత్రమే ఇప్పటివరకు దక్షిణ మరియు తూర్పున నమోదైన బలమైన ఉష్ణమండల తుఫాను మరియు 35°W తూర్పున నమోదైన మూడవ అతి పెద్ద తుఫాను." },

@@ -71,6 +71,17 @@
         "ordinal-caps": 47,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 460 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Башҡортостан климаты континенталь. Республика биләмәһендә уртаса йыллыҡ һауа температураһы — +0,3 °C-тан (тауҙарҙа) +2,8 °C-ҡа тиклем (тигеҙлектәрҙә). Ғинуарҙа уртаса темпратура — −18 °C булһа, июлдә — +18 °C. Яуым-төшөмдөң йыллыҡ миҡдары — 300—600 мм. Вегетация миҙгеле — 120—135 көн." },

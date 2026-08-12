@@ -71,6 +71,17 @@
         "ordinal-caps": 2,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 419 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 404
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "བོད་རྒྱལ་ཁབ་ཆེན་པོ་ 《 Tibet Autonomous Region 》《 [ 西藏自治区] 》 ནི་ཀྲུང་གོའི་ལྷོ་ནུབ་ཀྱི་མཐའ་མཚམས་ཁུལ་དུ་ཡོད་ཅིང་། འཕྲེད་ཐིག་བྱང་མ་ 26°50’ ནས་ 36°53′ བར་དང་། ཤར་ཀྱི་གཞུང་ཐིག་ 78°25′ ནས་ 99°06′ བར་དུ་གནས་ཡོད་ཅིང་། རྒྱ་ཁྱོན་ལ་སྤྱི་ལེ་ངོས་སྙོམས་གྲུ་བཞི་མ་ས་ཡ་གཅིག་དང་འབུམ་གཉིས་ལྷག་ཙམ་ཡོད་པ་དེས་ཀྲུང་གོའི་སྤྱིའི་རྒྱ་ཁྱོན་གྱི་བརྒྱད་ཆ་གཅིག་ཟིན་གྱི་ཡོད། བོད་ལྗོངས་ཀྱི་བྱང་ངོས་ནི་ཤིན་ཅང་དང་མཚོ་སྔོན་བོད་རིགས་ས་ཁུལ་དང་འབྲེལ་ཡོད་པ་དང་། ཤར་ཕྱོགས་སི་ཁྲོན་དང་། ཡུན་ནན་ལ་འབྲེལ་ཡོད་ཅིང་། ལྷོ་ནུབ་གཉིས་འབར་མ་དང་། རྒྱ་གར། འབྲས་ལྗོངས། འབྲུག་ཡུལ། བལ་ཡུལ། ཀ་ཤི་སྨིར།མོན། ལ་དྭགས་སོགས་དང་འབྲེལ་ཡོད་པ་དང་། རྒྱལ་མཚམས་ས་ཐིག་གི་རིང་ཚད་ལ་སྤྱི་ལེ་4000 ཙམ་ལ་ཉེ་བས་ཕྱི་ཕྱོགས་ལ་སྒོ་མོ་འབྱེད་རྒྱུར་ཆ་རྐྱེན་བཟང་པོ་ཡོད།" },

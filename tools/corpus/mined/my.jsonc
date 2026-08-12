@@ -71,6 +71,17 @@
         "ordinal-caps": 88,    // \d would miss 11
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 473 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 392
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "ပျမ်းမျအပူဒီဂရီဖာရင်ဟိုက်သည် ၁° ဒီဂရီသာ ရှိသည်။ ဆောင်းရာသီ အပူဒီဂရီဖာရင်ဟိုက်ကား ၅၉° ဒီဂရီရှိ၍ နွေရာသီတွင် ၅၉° ဒီဂရီရှိ၏။ ယင်းမှာ နွေနှင့် ဆောင်းအပူဒီဂရီ အကွာဆုံး" },

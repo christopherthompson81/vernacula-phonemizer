@@ -71,6 +71,17 @@
         "ordinal-caps": 7,     // \d would miss 1
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 450 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 346
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "កម្ពុជាមានក្រឡាផ្ទៃ ១៨១០៣៥ សហាតិមាត្រការ៉េ (គីឡូម៉ែត្រការ៉េ) (៦៩៨៩៨ ម៉ាយ ការ៉េ) និងសណ្ដូកទាំងមូលចូលក្នុងតំបន់និវត្តន៍ រវាងរយៈទទឹងជ១០°និង១៥° និងរយៈបណ្ដោយក១០២°និង១០៨°។ កូអរដោនេភូមិសាស្ដ្រនេះ បញ្ជាក់ឲ្យឃើញច្បាស់ថា ព្រះរាជាណាចក្រកម្ពុជា ស្ថិតនៅក្នុងតំបន់ត្រូពិច គឺ ក្តៅហើយសើម ម្យ៉ាងទៀត ស្ថិតនៅក្នុង តំបន់អាស៊ីមូសុងគឺ សម្បូរភ្លៀង ដែលជាតំបន់មាន លក្ខណៈល្អប្រសើរ ដល់ការលូតលាស់នៃរុក្ខជាតិ និងដំណាំគ្រប់ប្រភេទ។ ដោយយោងទៅលើលក្ខណៈ ទាំងអស់នេះហើយ បានធ្វើឲ្យប្រទេសយើង មានលក្ខណៈល្អក្នុងការអភិវឌ្ឍលើ វិស័យទេសចរណ៍ជាតិ ព្រោះជាតំបន់ទទួលឥទ្ធិពលក្តៅស្ទើរពេញមួយឆ្នាំ។ ប្រទេសនេះមានព្រំដែនទល់នឹងថៃនៅភាគខាងជើងនិងខាងលិច ៨០០ គ.ម និងលាវនៅភាគខាងកើតឆៀងខាងជើង ៥៤១ គ.ម និង វៀតណាមនៅភាគខាងកើត និងខាងកើតឆៀងខាងត្បូង ១២២៨ គ.ម។ វាមានខ្សែច្រាំងសមុទ្រ ៤៤៣ សហាតិមាត្រ (គីឡូម៉ែត្រ) (២៧៥ ម៉ាយ) តាមបណ្ដោយឈូងសមុទ្រថៃ។" },

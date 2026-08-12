@@ -71,6 +71,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 407 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 370
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "ပုၼ်ႈတႃႇ ဢၼႃႇၵၢတ်ႈ ၵမ်ႇၽႃႇမိူဝ်းၼႃႈၼၼ်ႉ မၼ်းၵပ်းၵၢႆႇၵၼ် တင်းလႅတ်ႇဝႆႉယူႇ။ ပေႃးထႅင်ႈ ပီပွင်း 1.1 ၿီႇလီႇယၢၼ်ႇၸိုင် လွင်ႈႁိူဝ်ႈလႅင်း လႅတ်ႇၼႆႉ တေႁႅင်းလိူဝ်သေၼႆႉ 10%၊ ပေႃးထႅင်ႈ ပီပွင်း 3.5 ၿီႇလီႇယၢၼ်ႇၸိုင် တေလိူတ်ႇႁိူဝ်ႈလႅင်းလိူဝ်ၼႆႉ 40% ၼႆယဝ်ႉ။ ၵမ်ႇၽႃႇ မိူင်းၵူၼ်းၵေႃႈ တေမႆႈလိူဝ်မႃး ႁႅင်းၶွၼ်ႈ ထၢတ်ႈၶႃႇပုၼ်ႇတၢႆႇဢွၵ်ႉသၢႆႉ တေယွမ်းမႃးယူႇ။ ပေႃးပဵၼ်ၼၼ်မႃးၸိုင် ၼႂ်းပီပွင်း 500 တေႃ 900 မီႇလီႇယၢၼ်ႇၼၼ်ႉ တူၼ်ႈမႆႉ တူၼ်ႈမွၵ်ႇၸိူဝ်းၼႆႉ ဢဝ်လၢႆးၾူဝ်ႇတူဝ်ႇသိၼ်ႇတိတ်ႉသိတ်ႉသေ တေဢမ်ႇၸၢင်ႈ ႁဵတ်းၵၢၼ် တႃႇမုၼ်းယႂ်ႇမႂ်ႇၵီႈမႃးလႄႈ တူၼ်ႈမႆႉ တေလဵၵ်ႉၵေႇဢေႇမၢင်ၵႂႃႇ။ ယွၼ်ႉၼၼ် လူမ်းဢွၵ်ႉသီႇၵျိၼ်ႇၵေႃႈ တေဢေႇၵႂႃႇ။ ပေႃးႁိုင်မႃးထႅင်ႈ ပီပွင်း 1 ၿီႇလီႇယၢၼ်ႇၸိုင် ၼမ်ႉဢၼ်မီးၼိူဝ်လိၼ်တင်းသဵင်ႈ တေႁႅင်ႈႁႅတ်းၵႂႃႇ၊ ႁႅင်းမႆႈ ၵမ်ႇၽႃႇၵေႃႈ တေထိုင်ၵႂႃႇ 70°C (158°F) ယူႇ၊ တႄႇဢဝ် ၶၢဝ်းယၢမ်းၼၼ်ႉၵႂႃႇ ထႅင်ႈပီပွင်းမွၵ်ႈ 500 မီႇလီႇယၢၼ်ႇၼၼ်ႉ တူဝ်မီးၸႂ် လႅပ်ႈတေသိုပ်ႇယူႇသဝ်းၵႂႃႇလႆႈယူႇ။ သင်ဝႃႈ ပၢၵ်ႈပႅတ်ႈလူမ်း ၼၢႆႇထရူဝ်ႇၵျိၼ်ႇၸိုင် ထႅင်ႈပီပွင်း 2.3 ၿီႇလီႇယၢၼ်ႇၼၼ်ႉ တူဝ်မီးၸႂ် တေလႅပ်ႈယူႇလႆႈယူႇ။ သင်ယုမ်ႇယမ်ဝႃႈ လႅတ်ႈၼႆႉ တေသိုပ်ႇ ၼိမ်မၼ်ႈယူႇၸိုင် ၼႂ်းပီပွင်း 1 ၿီႇလီႇယၢၼ်ႇၼၼ်ႉ ၼမ်ႉသမုတ်ႇတရႃႇ မွၵ်ႈ 27% ၼၼ်ႉ တေႁွတ်ႈထိုင်ၵႂႃႇ တီႈၼႂ်းပိုၼ်ႉလိၼ်ၵမ်ႇၽႃႇယူႇ ၼႆယဝ်ႉ။" },

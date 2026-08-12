@@ -71,6 +71,17 @@
         "ordinal-caps": 3,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 398 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Le ƒe bla nane siwo gbɔna me la, wole mɔ kpɔm be dzoxɔxɔ atso yame ƒe nɔnɔme ƒe tɔtrɔ gbɔ le Anyigba ƒe akpa sia akpa kloe, eye tsidzadza ƒe mama dedie le xexeame katã adzi ɖe edzi.[40] Fifia la, Afrika le dzo dam kabakaba wu xexeame ƒe akpa mamlɛa le mamã dedie nu. Anyigbagã la ƒe akpa gãwo ate ŋu ava zu afisi womate ŋu anɔ o le yame ƒe nɔnɔme ƒe tɔtrɔ ƒe ŋusẽkpɔɖeamedzi kabakaba ta, si akpɔ ŋusẽ gbegblẽ ɖe amegbetɔwo ƒe lãmesẽ, nuɖuɖu ƒe dedienɔnɔ, kple ahedada dzi.[41][42][43] Wole mɔ kpɔm be nutome ƒe ŋusẽkpɔɖeamedzi ɖe tsidzadza dzi le teƒe xɔdzowo atrɔ le teƒe xɔdzowo wu eye zi geɖe la, kakaɖedzi menɔa tɔtrɔ ƒe dzesi le teƒe ɖeka ɖesiaɖe ŋu o, togbɔ be wole mɔ kpɔm na tɔtrɔwo hã. Le ɖekawɔwɔ me kple esia la, zi geɖe la, anyigba ƒe dzoxɔxɔ si wokpɔ la dzi ɖe edzi le Afrika tso ƒe alafa 19 lia ƒe nuwuwu vaseɖe ƒe alafa 21 lia ƒe gɔmedzedze abe 1 °C ene, gake le nutoa me la, ede 3 °C na dzoxɔxɔ suetɔ kekeake le Sahel le kuɖiɣia ƒe nuwuwu. Tsidzadza ƒe nɔnɔme siwo wokpɔ ɖee fia be teƒe kple ɣeyiɣi ƒe vovototowo le abe alesi wokpɔ mɔe ene. Tɔtrɔ siwo wokpɔ le dzoxɔxɔ kple tsidzadza me la toa vovo le nuto vovovowo me." },

@@ -139,6 +139,33 @@ export const CELLS: Cell[] = [
     // stranded — the exact defect those rules exist to fix, in af and uz both. The suffix is orthography,
     // not a lowercase convention.
     { key: "ordinal-caps", langs: 2, re: /\p{Nd}+(?:ST|ND|RD|TH|DE|STE|De|Ste|Nd|Th)(?![\p{L}\p{Nd}])|\p{Nd}+-\p{Lu}\p{Ll}+/u, search: "[{D}]+(ST|ND|TH|De)" },
+    // ─── THE SENTENCE BOUNDARY ITSELF, which this inventory never had a cell for. Added from the `syl`
+    // run, which found ⁕ U+2055 — the Sylheti corpus's sentence terminator, ×476, MORE THAN EVERY OTHER
+    // MARK IN THE LANGUAGE COMBINED — completely undeclared, so it reached the g2p as nothing and every
+    // sentence in the corpus ran into the next one.
+    //
+    // WHY IT IS SHARED AND NOT SYLHETI'S OWN DATA (the local-vs-core question, asked properly). Grepping
+    // `src/languages/*/` for a script-specific boundary mark — the same metric `langs` means everywhere
+    // else in this table, "treated languages that authored a rule in that category" — finds **50 layers**:
+    // danda in 20, the CJK marks in 14, the Arabic marks in 10, Ethiopic 2, Burmese 2, and one apiece for
+    // Khmer, Santali, Tibetan, Javanese and Sylheti. That is the LARGEST langs figure in this file, ahead
+    // of `exponent` (24) and `degrees` (22), for a category with no cell at all. Filing it under Sylheti
+    // would have named a fifty-language phenomenon after the one language that happened to trip on it.
+    //
+    // Every one of the 35 cells above was tested against these marks first, in twelve scripts: not one
+    // matched any of them. The inventory had no punctuation-boundary cell whatsoever — its only non-numeric
+    // members are `zero-width`, `quote-letter`, `ampersand` and `iteration`, and `iteration` is the
+    // precedent, admitted at `langs: 1` because it was the largest single defect in the one language.
+    //
+    // THE SET IS "BOUNDARY MARKS WITH NO ASCII IDENTITY", and the exclusions carry as much weight as the
+    // inclusions. Fullwidth ！？；： are ASCII characters at another width — a folding problem, not an
+    // undeclared-mark problem — whereas 。 and 、 have no ASCII identity and are in. ASCII `|` is OUT
+    // despite occurring in 49 artifacts (252 hits: syl 33, awa 31, mai 26, hyw 20): it is table markup that
+    // survived extraction, `filter-markup.py`'s business, and admitting it would fire this cell on noise in
+    // half the fleet. `٫ ٬` are OUT — Arabic decimal and thousands separators belong to `decimals` and
+    // `grouped`. Marks no treated language declares yet (Syriac, Mongolian, Vai, Lisu, Balinese, Philippine,
+    // UCAS) are IN, because an undeclared mark is exactly what this cell is for.
+    { key: "native-terminator", langs: 50, re: /[।॥۔؛؟،܀-܄።-፨᙮᠂᠃᠉។-៖᱾᱿꓾꓿꘍-꘏꠨-꠫⁕᜵᜶᭞᭟꧈꧉။၊།-༔。、]/u, search: "[।॥۔؟።။།។᱾⁕]" },
 ];
 
 /**
@@ -155,24 +182,48 @@ export const CELLS: Cell[] = [
  * `signed-number`, so 35 artifacts carry a count under a key that no longer exists AND report nothing for the
  * key that replaced it. `fetch --fill negative` answers `unknown cell: negative`, which is the only place the
  * fleet ever said so.
+ *
+ * ⚠ AND THE CHECK AS FIRST WRITTEN HAD A COST IT COULD NOT PAY. Measured again when `native-terminator` was
+ * added: **160 of 160 artifacts current, 0 stale** — the fleet had caught up completely. So one new cell
+ * flips every language to stale in a single commit, and the only way back is 160 re-fetches, because
+ * `counts` is a WHOLE-CORPUS count over a `raw.txt` that is not in the repo. A gate that can only ever be
+ * red is a gate readers learn to skip, and re-mining the fleet to make it green would silently resample
+ * every artifact whose figures a rule comment or an investigation doc already quotes.
+ *
+ * SO A CELL CAN ALSO BE EVALUATED FROM AN ARTIFACT'S OWN RETAINED TEXT — its `hard` and `sample` tiers —
+ * which needs no fetch and moves no existing number. That is NOT a corpus count and must never be written
+ * into `counts`: the `hard` tier is adversarially selected, so a figure from it means nothing as a
+ * frequency. It is a sound LOWER BOUND ON PRESENCE, which is the question a cell actually asks — does this
+ * language write this thing at all. It lives in its own `backfill` block, `staleness` reports it separately
+ * from a genuinely mined count, and `review.ts` prints the distinction on every run, so nothing is
+ * laundered. A later re-mine drops the block naturally, since `renderJsonc` does not emit one.
  */
 export interface Staleness {
-    /** Cells in today's inventory that this artifact has no count for — never evaluated. */
+    /** Cells in today's inventory with neither a mined count nor a backfill in this artifact — never evaluated. */
     missing: string[];
+    /** Cells evaluated from the artifact's OWN retained text rather than mined. A presence lower bound, not a count. */
+    backfilled: string[];
     /** Keys the artifact carries that the inventory no longer has — renamed or removed. */
     unknown: string[];
     /** The inventory size the artifact was mined against, if it recorded one. */
     minedAgainst: number | undefined;
 }
 
+const keysIn = (src: string, block: string): Set<string> => {
+    const m = new RegExp(`"${block}"\\s*:\\s*\\{([\\s\\S]*?)\\}`, "u").exec(src);
+    return new Set(m === null ? [] : [...m[1]!.matchAll(/"([\w-]+)"\s*:\s*\d+/gu)].map((x) => x[1]!));
+};
+
 export function staleness(artifactSource: string): Staleness {
     const tot = /"cellsTotal"\s*:\s*(\d+)/u.exec(artifactSource);
-    const block = /"counts"\s*:\s*\{([\s\S]*?)\}/u.exec(artifactSource);
-    const have = new Set(block === null ? [] : [...block[1]!.matchAll(/"([\w-]+)"\s*:\s*\d+/gu)].map((m) => m[1]!));
+    const have = keysIn(artifactSource, "counts");
+    const back = keysIn(artifactSource, "backfill");
     const keys = new Set(CELLS.map((c) => c.key));
     return {
-        missing: CELLS.map((c) => c.key).filter((k) => !have.has(k)),
-        unknown: [...have].filter((k) => !keys.has(k)).sort(),
+        missing: CELLS.map((c) => c.key).filter((k) => !have.has(k) && !back.has(k)),
+        backfilled: CELLS.map((c) => c.key).filter((k) => back.has(k) && !have.has(k)),
+        // A dead key is dead wherever it is written, so both blocks are checked for one.
+        unknown: [...new Set([...have, ...back])].filter((k) => !keys.has(k)).sort(),
         minedAgainst: tot === null ? undefined : Number(tot[1]),
     };
 }

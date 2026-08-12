@@ -11,7 +11,7 @@
 import { describe, expect, test } from "vitest";
 import { parseJsonc } from "../src/core/jsonc.ts";
 import { SAMPLE_CAVEAT, extracts, mapPool, segment, selectCells, renderJsonc } from "../tools/normalization/mine.ts";
-import { CELLS } from "../tools/normalization/cells.ts";
+import { CELLS, staleness } from "../tools/normalization/cells.ts";
 
 const TERMINATORS = ".!?။።۔؟।॥…。！？៕";
 
@@ -179,5 +179,63 @@ describe("mapPool", () => {
     test("a limit wider than the list, and an empty list, are both safe", async () => {
         expect(await mapPool([1, 2], 99, async (v) => v)).toEqual([1, 2]);
         expect(await mapPool([], 4, async (v) => v)).toEqual([]);
+    });
+});
+
+/**
+ * THE SENTENCE-BOUNDARY CELL and the backfill channel that let it be added at all. Both encode a
+ * distinction that is invisible in a passing run: which marks belong to the cell, and the difference
+ * between a mined corpus count and a presence lower bound read off an artifact's own retained text.
+ */
+describe("native-terminator", () => {
+    const cell = CELLS.find((c) => c.key === "native-terminator")!;
+
+    test("claims the boundary marks of every script that has one", () => {
+        // Twelve scripts, and none of them was matched by ANY of the 35 cells that predate this one —
+        // the inventory had no punctuation-boundary cell at all.
+        for (const m of "।॥۔؛؟،܀።፣᙮᠃។៕᱾꓿꘎꠨⁕᜶᭞꧈။၊།。、")
+            expect(cell.re.test(`word${m} word`), `${m} U+${m.codePointAt(0)!.toString(16)}`).toBe(true);
+    });
+
+    test("refuses ASCII lookalikes, fullwidth ASCII and the Arabic number separators", () => {
+        // `|` is table markup that survived extraction — 252 hits across 49 artifacts — and admitting it
+        // would fire this cell on noise in half the fleet. Fullwidth ！？ are ASCII at another width, a
+        // folding problem. `٫ ٬` are the decimal and thousands separators, i.e. `decimals` and `grouped`.
+        for (const m of "|!?.,;:！？；：٫٬")
+            expect(cell.re.test(`word${m} word`), `${m} U+${m.codePointAt(0)!.toString(16)}`).toBe(false);
+    });
+});
+
+describe("staleness", () => {
+    const artifact = (counts: string, extra = ""): string =>
+        `{ "cellsTotal": 2, "counts": {\n${counts}\n    },${extra}\n    "hard": [] }`;
+    const all = CELLS.map((c) => `        "${c.key}": 1`).join(",\n");
+
+    test("a cell present only in `backfill` counts as evaluated, and is reported APART from a mined one", () => {
+        // The whole point of the separate block: it satisfies the gate without being laundered into
+        // `counts`, where it would read as a corpus frequency it cannot support.
+        const mined = all.split(",\n").filter((l) => !l.includes("native-terminator")).join(",\n");
+        const st = staleness(artifact(mined, `\n    "backfill": {\n        "native-terminator": 7\n    },`));
+        expect(st.missing).toEqual([]);
+        expect(st.backfilled).toEqual(["native-terminator"]);
+        expect(st.unknown).toEqual([]);
+    });
+
+    test("a genuinely mined cell is NOT reported as backfilled, even if both blocks name it", () => {
+        const st = staleness(artifact(all, `\n    "backfill": {\n        "native-terminator": 7\n    },`));
+        expect(st.backfilled).toEqual([]);
+        expect(st.missing).toEqual([]);
+    });
+
+    test("a dead key is dead in EITHER block — a rename cannot hide in the backfill", () => {
+        // `negative` → `signed-number` was silent in both directions across 35 artifacts. A new block that
+        // only the counts check inspected would have re-opened exactly that hole.
+        expect(staleness(artifact(`${all},\n        "negative": 3`)).unknown).toEqual(["negative"]);
+        expect(staleness(artifact(all, `\n    "backfill": {\n        "negative": 3\n    },`)).unknown).toEqual(["negative"]);
+    });
+
+    test("a missing cell is still missing when neither block mentions it", () => {
+        const mined = all.split(",\n").filter((l) => !l.includes("native-terminator")).join(",\n");
+        expect(staleness(artifact(mined)).missing).toEqual(["native-terminator"]);
     });
 });

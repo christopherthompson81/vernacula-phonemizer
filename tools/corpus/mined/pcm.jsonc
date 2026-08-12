@@ -71,6 +71,17 @@
         "ordinal-caps": 17,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 432 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 1
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Ikogisi warm Spring na one jolifikashon ples wey dey one town for Ekiti Stet, wey stand gidigba for Sautwest inside Obodo Naijá.E get one Kold spring wey stil dey totori muv togeda as di wom spring sef dey to jolifiket dey muv o, na im dem join bodi for di point wey dem de kol Konfluens. Wey bi sey di two of dem get there hot wota propati-dem. Na dis one kon mek di Ikogosi warm spring where pipul go kon dey jolli jolli for Naijá. Pipul wey dey chuke hand for different mata kon find out sey di wom spring hot wota temperazho bi like 70°C from di ples wey e tek de kom from an bi like 37°C for di ples wey e tek join bodi wit kold wota spring (Confluence). Dis ples na di ogbonge historical siti for Naijá for kontri pipul wey enjoi to dey swim wel wel" },

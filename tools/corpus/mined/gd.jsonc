@@ -71,6 +71,17 @@
         "ordinal-caps": 6,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 442 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 1
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Cha tàinig na pàirtean mu thuath agus mu dheas na Breatainn teannta, no còmhla, gu 75 muillean bliadhnan roimh toiseach na Bholcanas ann an Lodainn an Ear. Bha Alba agus pàirt de cheann a tuath na Sasainn nam pàirt de thìr-mòr Laurentian ro -làimh, far an robh Aimearaga mu Thuath agus a’ Ghraonlainn. Aig a h-aon àm, bha an dara leth de 'n Bhreatainn torr nas fhada (mu 40° de domhainn leud) do 'n dheas, faisg air Afraga agus Aimearaga mu Dheas ann an tìr-mòr de Gondwana." },

@@ -71,6 +71,17 @@
         "ordinal-caps": 6,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 437 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 394
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "中华人民共和国官方认定此岛为中国仅次于台湾岛、海南岛个第三大岛屿，有“长江门户、东海瀛洲”之称。全岛三面环江，一面临海，西接长江，东濒东海，南搭上海浦东新区、宝山区及江苏省太仓市隔水相望，北搭江苏省海门市、启东市一衣带水。全岛面积大约1225平方公里，东西长80公里，南北宽13到18公里。岛浪地势平坦，呒得山搭丘陵，西北部搭中部稍微高点，西南部搭东部低点。90%以上个土地标高（以吴淞标高0米为参照）勒3.21米到4.20米之间。岛屿地理位置勒东经121°09′30〃至121°54′00〃，北纬31°27′00〃至31°51′15〃，地处北亚热带，气候温和潮湿，年平均气温15.2℃，日照充足，雨水充沛，四季分明。" },

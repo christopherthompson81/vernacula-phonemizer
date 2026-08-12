@@ -71,6 +71,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 380 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "בשנים 1839–1843 פיקד ג'יימס קלארק רוס על משלחת לחקר הקוטב הדרומי שהגיעה לקו הרוחב 78° דרום, המקום הדרומי ביותר אליו הגיע אדם עד אז. 60 שנה חלפו בטרם הגיעה משלחת אחרת לנקודה דרומית יותר. בסוף המאה ה-19 נפתח העידן ההרואי של חקר אנטארקטיקה. בשנים 1897–1899 ביקרה באנטארקטיקה המשלחת האנטארקטית הבלגית שהייתה הראשונה ששהתה בה בחורף. בשנים 1901–1904, בקרו ביבשת המשלחת השוודית לאנטארקטיקה בהנהגת אוטו נורדנשלד ומשלחת דיסקברי. בדצמבר 1911 הגיעה משלחת הקוטב הדרומי אל הקוטב וזמן קצר לאחר מכן הגיעו אליה משלחת טרה נובה שכל חבריה נספו בדרכם חזרה." },

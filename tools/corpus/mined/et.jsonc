@@ -71,6 +71,17 @@
         "ordinal-caps": 169,   // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 464 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Aasta keskmine õhutemperatuur on umbes 5–10°C. Talved on pikad ja külmad , mahedalt jahedad, väga külmad ainult kõrgemates piirkondades. Suved on mõõdukad ja päikesepaistelised , niisked ja jahedad. Jaanuari keskmine temperatuur on −7&nbsp;°C (teistel andmetel −2,1 °C (Ransol) kuni 1,1 °C (Les Escaldes) ). Suvel ulatub temperatuur +26&nbsp;°C kraadini. Juuli keskmine temperatuur on 18–13,7 °C (Ransolis) ). Detsember ja veebruar (teistel andmetel jaanuar ) on kõige külmemad kuud, juuli on kõige soojemad kuu . Ransolis ei ole haruldased temperatuurid alla −15 °C. Seal on kolmel kuul aastas keskmine temperatuur alla nulli. Keskmiselt 188 päeval aastal on seal öökülma. Seevastu juulis ja augustis on õhutemperatuur sageli keskmiselt 25 °C." },

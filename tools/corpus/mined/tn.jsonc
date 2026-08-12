@@ -71,6 +71,17 @@
         "ordinal-caps": 33,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 448 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Motse ono o mo Tropic ya Capricorn. Ka jalo mo e ka nnang ka diura tsa 13:11 ka Sedimonthole 21, kgotsa ka nako ya sethoboloko sa letsatsi ka letsatsi la Selemo , letsatsi le tla bo le le kwa godimo ga tlhogo ka tlhamalalo mo lefelong leno. Go tshwaya karolo eno ya thutafatshe go na le sefikantswe se sennye fela kwa ntle ga toropo mo phalale ya bo 23 , kgotsa dikirii di le 23 kwa Borwa jwa ekhweitha. Ka nako e letsatsi le tlhamaletse fa godimo ga sefikantswe seno kwa letsatsi le fitlhang kwa ntlheng ya lone e e kgakala thata kwa Borwa. Mo nakong eno ga go na moriti mo sefikantsweng. Thempheretšha e e kwa godimo e e kileng ya kwadisiwa kwa Mahalapye e ne e le 41.9 °C (107.4 °F). Themphereitšhara e e kwa tlase thata e e kwadisitsweng kwa Mahalapye e ne e le −6.0 °C (21.2 °F)." },

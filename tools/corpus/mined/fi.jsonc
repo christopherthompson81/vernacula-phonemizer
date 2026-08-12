@@ -71,6 +71,17 @@
         "ordinal-caps": 0,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 406 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "KTM 990 Super Duke on KTM:n valmistama nakupyörä-tyylinen moottoripyörä, jossa on kaksisylinterinen V-moottori. Malli esiteltiin vuonna 2005. Mallista on myös urheilullisempi versio 990 Super Duke R. 990 Super Duken moottori on kehitelty vuonna 2003 esitellystä LC8-moottorista, joka esiteltiin KTM 950 Adventuren yhteydessä. Moottorin alkuperäinen iskutilavuus on 942 cm³, josta on tehty 999 kuutioinen porausta ja iskua kasvattamalla. Sylintereiden välinen kulma on 75°. Polttoaineen syöttönä on Keihinin valmistama epäsuora suihkutusjärjestelmä. Pyörässä on teräksinen putkirunko, ja takarunko sekä takahaarukka ovat alumiinia. Siinä on Brembon valmistamat jarrut, jotka pysäyttävät pyörän sadan kilometrin tuntinopeudesta vajaassa 37 metrissä. Etuhaarukka on mallia USD (Up Side Down)." },

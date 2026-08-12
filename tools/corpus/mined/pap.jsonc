@@ -71,6 +71,17 @@
         "ordinal-caps": 10,    // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 448 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "E tratado a establese un liña imaginario di e meridian nort ba suit 370 luega wesy di e islanan Cape Verde, aproksimadamente 46° 37' W. Den termino di e tratado tur tera ku a keda west di e liña ei (kasi tur di e tera merikano) lo bira si Spaña, anto tor kos ku keda ost di e liña ei, na Portugal. Komo midimentu di longitud no tabata hopi eksakto e tempu ei e liña no a wordu enforsa striktamente anto Protugal por a ekspande Brazil pasando e liña kompletamente." },

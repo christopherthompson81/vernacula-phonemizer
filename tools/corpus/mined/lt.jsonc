@@ -71,6 +71,17 @@
         "ordinal-caps": 127,   // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 464 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Nuo Lietuvos teritorijos geografinio centro ties Ruoščiais iki šiaurės ašigalio yra 3870 km, iki pusiaujo apie 6130 km, iki Grinvičo dienovidinio – 1488 kilometrai. 26 km į šiaurę nuo Vilniaus, tarp Purnuškių kaimo ir Bernotų piliakalnio, yra Prancūzijos nacionalinio geografijos instituto nustatytas Europos geografinis centras (54° 54′ šiaurės platumos ir 25° 19′ rytų ilgumos). Labiausiai į rytus nutolusi Lietuvos vietovė yra Ignalinos rajono savivaldybės teritorijoje ties Rimaldiškių ir Vosiūnų kaimais (26° 51′ rytų ilgumos), į vakarus – ties Nida (20° 56′ rytų ilgumos), į šiaurę – Biržų rajono savivaldybės teritorijoje ties Aspariškių kaimu (56° 27′ šiaurės platumos), į pietus – Varėnos rajono savivaldybės teritorijoje ties Musteikos kaimu (53° 54′ šiaurės platumos). Toje pačioje geografinėje platumoje vakariau Lietuvos yra Danija, Didžioji Britanija (Anglijos šiaurinė dalis), ryčiau – Baltarusija ir Rusijos centrinės sritys, toje pačioje geografinėje ilgumoje šiauriau yra Latvija, Estija, Suomija, piečiau – Rytų Lenkija, Ukrainos vakarinė dalis, Rumunija, Bulgarija, Graikija." },

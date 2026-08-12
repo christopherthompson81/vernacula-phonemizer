@@ -71,6 +71,17 @@
         "ordinal-caps": 458,   // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 452 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 0
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Deitschland liegt in Middleiropa, zwischn 47°16′15″ und 55°03′33″ neadlicha Broadn und 5°52′01″ und 15°02′37″ estlicha Leng. Im Noadn grenzt Deitschland an Dänemark (auf ana Läng vo 67&nbsp;km), im Nordostn an Poin (442&nbsp;km), im Ostn an d Tschechei (811&nbsp;km), im Südosten an Östareich (815&nbsp;km; ohne Grenz im Bodnsee), im Sidn an d Schweiz (316&nbsp;km; mid Grenzn vo da Exklave Büsingen, owa ohne Grenz im Bodnsee), im Siidwestn an Frankreich (448&nbsp;km), im Westn an Luxmburg (135&nbsp;km) und Belgien (156&nbsp;km) und im Nordwestn an Holland (567&nbsp;km). De Grenzläng betrogt insgesamt 3757&nbsp;km. Wearend im Nordwestn de Kistn vo da Nordsee und im Nordostn de vo da Ostsee de natialichn Stootsgrenzn buidn, hod Deitschland im Sidn Ontei on de Oipn." },

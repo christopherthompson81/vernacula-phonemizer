@@ -71,6 +71,17 @@
         "ordinal-caps": 1,     // in 2 treated languages
     },
 
+    // ⚠ NOT A CORPUS COUNT. These cells entered the inventory after this artifact was mined, and
+    // re-mining means re-fetching the wiki, which would resample the tiers that every figure quoted from this
+    // file elsewhere rests on. So they were evaluated against THIS FILE'S OWN retained text — "hard" + "sample",
+    // 429 segments — and the number is how many of those segments match. "hard" is adversarially selected, so
+    // this establishes that the language WRITES the pattern (a presence lower bound) and NOTHING about how often.
+    // A 0 here is not evidence of absence either; it means the retained text does not happen to show it.
+    // Re-mine to replace this with a real corpus count in "counts" above — mine.ts never emits this block.
+    "backfill": {
+        "native-terminator": 355
+    },
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "پىچان ناھىيىسى ئىسسىق مۆتىدىل بەلۋاغ ئىنتايىن قۇرغاق ئىقلىم رايونىغا كىرىدۇ. يىللىق ئوتتۇرىچە تېمپېراتۇرىسى 11.3℃، ئەڭ يۇقىرى تېمپېراتۇرىسى 44.8℃، ئەڭ تۆۋەن تېمپېراتۇرىسى - 28.7℃، يىلىغا ئوتتۇرا ھېساب بىلەن 126.5 كۈن ئەڭ يۇقىرى تېمپېراتۇرا 30℃ دىن يۇقىرى بولىدۇ. كۈننىڭ ئوتتۇرىچە يىللىق چۈشۈش ۋاقتى 3112.4 سائەت، 10℃ يىغىندى تېمپېراتۇرا 4518.1℃، قىروسىز مەزگىلى 263 كۈن. ئوتتۇرىچە يىللىق ھۆل - يېغىن مىقدارى 25.2 مىللىمېتىر، سۇنىڭ يىللىق ئوتتۇرىچە پارغا ئايلىنىش مىقدارى 2727.0 مىللىمېتىر كېلىدۇ." },
