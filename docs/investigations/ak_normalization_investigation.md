@@ -1,6 +1,6 @@
 # ak (Akan / Twi) — text-normalization investigation
 
-Worktree `/tmp/vp-norm-ak`, branch `norm/ak`. Method: `docs/normalization_playbook.md`.
+Method: `docs/normalization_playbook.md`.
 
 ## Run 1 — 2026-08-12 09:10 (orientation and the baseline gates)
 
