@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -57,6 +57,38 @@ describe("language catalogue", () => {
             // practice. The count only appears in the tool's output when it is non-zero.
             const out = run("derive-normalization.py", "--check");
             expect(out, `a normalizer exists but is not wired:\n${out}`).not.toContain("partial=");
+        });
+
+        /**
+         * ⚠ `inherited` MUST MEAN DELEGATION, NEVER BORROWING — the one way this column can lie in the
+         * direction that costs work. A missing layer reported as `inherited` drops the language out of the
+         * planning query entirely, so it reads as done and is never picked up again.
+         *
+         * The original test was "imports something from ../Y and calls it", and five rows were wrong under
+         * it. `rn` (Kirundi) borrows exactly one function from Kinyarwanda — `composeRwandaRundi`, a number
+         * composer — and flipped to `inherited` the moment kinyarwanda gained a normalize.ts, though no
+         * Kinyarwanda normalizer runs for it. `bar`/`fo` borrow danish's `unitsFirstNumberToWords`, `ba`
+         * borrows russian's `phonemizeWord`, `bs` borrows serbian's. All five are ordinary engines with no
+         * layer at all. Caught by the rw normalization run, when its own regeneration flipped `rn`.
+         *
+         * Both directions are pinned, because the fix is a NARROWING and a narrowing can cut too deep: the
+         * genuine wrappers below have no normalize.ts of their own and must keep reading `inherited`, or
+         * 420 million speakers of es-419 reappear at the head of the planning query for work already done.
+         */
+        it("⚠ `inherited` is delegation to a factory, not a borrowed helper", () => {
+            const rows = readFileSync(join(CAT, "catalogue.tsv"), "utf8").trim().split("\n");
+            const cols = rows[0]!.split("\t");
+            const col = { code: cols.indexOf("code"), norm: cols.indexOf("normalization") };
+            const value = (code: string): string =>
+                rows.slice(1).map((r) => r.split("\t")).find((r) => r[col.code] === code)?.[col.norm] ?? "MISSING";
+
+            // Borrows one helper across a directory boundary; runs no other language's normalizer.
+            for (const code of ["rn", "bar", "fo", "ba", "bs"])
+                expect(value(code), `${code} borrows a helper — it must not read as inherited`).toBe("");
+
+            // Calls another language's FACTORY, so that engine — and its layer — is what actually runs.
+            for (const code of ["es-419", "awa", "bho", "mai", "pt-BR", "en-GB"])
+                expect(value(code), `${code} is a wrapper — it must still read as inherited`).toBe("inherited");
         });
 
         it("languages.db is in sync with catalogue.tsv", () => {

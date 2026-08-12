@@ -71,8 +71,24 @@ def main():
             is_wired.add(d)
 
     # ⚠ THEN FOLLOW DELEGATION. A wrapper directory has no normalize.ts and does not need one: it calls another
-    # language's factory, and that engine normalizes on its behalf. `X imports from ../Y AND calls something it
-    # imported from Y` is the test — an import alone is not enough, since a wrapper may borrow only a vowel table.
+    # language's FACTORY, and that engine normalizes on its behalf.
+    #
+    # ⚠ "IMPORTS SOMETHING FROM ../Y AND CALLS IT" WAS THE TEST, AND IT WAS TOO WIDE — the comment here already
+    # worried that "a wrapper may borrow only a vowel table", but the test it settled on could not tell borrowing
+    # from delegation, and five rows were wrong because of it. `rn` (Kirundi) borrows ONE function from
+    # Kinyarwanda — `composeRwandaRundi`, a number composer — and reported `inherited` the moment kinyarwanda
+    # gained a normalize.ts, though no Kinyarwanda normalizer runs for it. Four rows were already committed on
+    # the same premise: `bar`/`fo` borrow danish's `unitsFirstNumberToWords`, `ba` borrows russian's
+    # `phonemizeWord`, `bs` borrows serbian's `phonemizeWord` + `composeSlavicNumber`. All five are ordinary
+    # engines with no layer at all, and marking them `inherited` hid them from the planning query this column
+    # EXISTS to answer — the worst failure available to it, since a language that needs work reads as done.
+    #
+    # THE NARROWED TEST: the imported-and-called symbol must be a FACTORY — `createX` / `makeX`. That is what a
+    # wrapper actually does (spanish-419 calls `createSpanish`, the Hindi belt calls `makeNativeHindi`, four
+    # Sinitic lects call `createHanDictPhonemizer`), and it is exactly what borrowing a word function or a
+    # number composer does not do. test/languageCatalogue.test.ts pins BOTH directions — the five borrowers must
+    # stay empty and the genuine wrappers must stay `inherited` — so this cannot silently widen back.
+    FACTORY = re.compile(r"^(?:create|make)[A-Z]")
     delegates = {}
     for d in sorted(os.listdir(SRC)):
         dp = os.path.join(SRC, d)
@@ -83,7 +99,7 @@ def main():
             if other == "core":
                 continue
             symbols = [sym.strip().split(" as ")[-1].strip() for sym in names.split(",") if sym.strip()]
-            if any(re.search(rf"\b{re.escape(sym)}\s*\(", src) for sym in symbols):
+            if any(FACTORY.match(sym) and re.search(rf"\b{re.escape(sym)}\s*\(", src) for sym in symbols):
                 delegates[d] = other
                 break
 
