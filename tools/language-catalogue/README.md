@@ -12,7 +12,18 @@ data-availability verdicts** every time we pick the next language.
 - **`gen-seed.py`** — regenerates `catalogue.tsv` from inline data blocks (the bootstrap/bulk-edit aid).
 - **`derive-normalization.py`** — recomputes the `normalization` column from the repo. Run it after treating a
   language; `--check` reports what it would write without touching the file.
-- **`languages.db`** — the built SQLite database (committed for immediate querying).
+- **`languages.db`** — the built SQLite database (committed for immediate querying). `build.py --check`
+  compares the committed db's ROW CONTENT against the tsv without touching it.
+
+**⚠ Both derived facts are gated by `test/languageCatalogue.test.ts`, so `npm test` fails if either is stale.**
+That is there because both are manual steps and both drifted: the `normalization` column went four rows out of
+date across one working session — `si`, `kmr`, `lo`, `mg`, each sitting empty after its layer had shipped, i.e.
+*exactly the four most recent rows*, the ones a planner would trust most. After changing anything here:
+
+```sh
+python3 derive-normalization.py    # if a language gained or lost a normalize.ts
+python3 build.py                   # always, after catalogue.tsv changes
+```
 
 ## Schema (columns)
 
