@@ -69,7 +69,7 @@ function langDir(code: string): string | undefined {
 
 const read = (f: string): string => { try { return readFileSync(f, "utf8"); } catch { return ""; } };
 
-interface Ctx {
+export interface Ctx {
     code: string;
     dir: string | undefined;
     espeak: string;
@@ -78,7 +78,7 @@ interface Ctx {
     corpus: string;
 }
 
-function context(code: string): Ctx {
+export function context(code: string): Ctx {
     const dir = langDir(code);
     let corpus = "";
     if (existsSync(CORPUS_ROOT))
@@ -121,8 +121,15 @@ function context(code: string): Ctx {
     return { code, dir, espeak: read(join(DICT, `${code}_list`)) + read(join(DICT, `${code}_extra`)), referee, langSrc, corpus };
 }
 
-type Verdict = "have" | "partial" | "none" | "check" | "n/a";
-interface Row { klass: string; verdict: Verdict; detail: string }
+/**
+ * `unknown` is NOT `check`, and the distinction is the point of the scale-names repair. `check` says "a source
+ * probably exists, go confirm it with review.ts". `unknown` says **this tool could not read the evidence** —
+ * an unread script, or a layer arm whose output is computed — so it is refusing to answer rather than
+ * guessing. It prints `[??]`, and it is deliberately not counted as blocked work in `--all`: nothing is
+ * blocked, the instrument simply cannot see.
+ */
+export type Verdict = "have" | "partial" | "none" | "check" | "unknown" | "n/a";
+export interface Row { klass: string; verdict: Verdict; detail: string }
 
 /**
  * LETTER NAMES — the class that blocks `core/initialisms.ts`, and the one worth the most care, because the
@@ -231,18 +238,381 @@ function eraPhrase(c: Ctx): Row {
         : { klass: "era-phrase", verdict: "none", detail: "marker occurs and no era vocabulary anywhere" };
 }
 
-/** TEMPERATURE SCALE NAMES. `°C` is common and the scale name is unsourceable in more languages than not; om
- *  and xh and zu all stop at the degree word. Worth reporting because "drop the letter" is a decision, and
- *  the code should say so rather than the reader discovering it. */
-function scaleNames(c: Ctx): Row {
-    const hay = `${c.corpus}\n${c.referee}\n${c.espeak}\n${c.langSrc}`;
-    const hasDeg = /\d\s?°/u.test(c.corpus);
-    const cels = /(?<![\p{L}\p{M}])(celsi|selsi|셀시|celzi|t͡selsi)/iu.test(hay);
-    const fahr = /(?<![\p{L}\p{M}])(fahren|faren|fahrenh)/iu.test(hay);
-    if (!hasDeg) return { klass: "scale-names", verdict: "n/a", detail: "no ° in the corpus" };
-    return cels || fahr
-        ? { klass: "scale-names", verdict: cels && fahr ? "have" : "partial", detail: `${cels ? "Celsius " : ""}${fahr ? "Fahrenheit" : ""}`.trim() }
-        : { klass: "scale-names", verdict: "none", detail: "° occurs, neither scale name anywhere — the letter gets dropped" };
+/**
+ * TEMPERATURE SCALE NAMES. `°C` is common and the scale name is unsourceable in more languages than not; om
+ * and xh and zu all stop at the degree word. Worth reporting because "drop the letter" is a decision, and
+ * the code should say so rather than the reader discovering it.
+ *
+ * ⚠ THIS CHECK WAS WRONG IN BOTH DIRECTIONS AT ONCE, which is how it was found — one language reading `ok`
+ * with nothing sourced and another reading `NONE` with both names written out in its corpus. The two are the
+ * same mistake seen from either end: **the check was a substring search over a haystack that included the
+ * layer's own source text, using an enumeration of LATIN transliterations.**
+ *
+ *   FALSE GREEN. cdo reported `[ ok ] scale-names Celsius Fahrenheit`. Its layer is one line —
+ *   `readDegrees(s, { celsius: (n) => `${n} dô`, fahrenheit: (n) => `${n} dô`, bare: (n) => `${n} dô` })` —
+ *   in which all three arms emit the BARE degree word and the scale letter is deliberately dropped, because
+ *   `攝氏` has no Eastern Min reading anywhere. The words "celsius" and "fahrenheit" in that line are the
+ *   OPTION KEYS of a shared helper. A helper's parameter names are not the language's vocabulary, and this is
+ *   the same shape as the Oromo bug already recorded above — a file documenting an ABSENCE read as evidence of
+ *   presence — except comments were stripped and identifiers were not. Nothing was sourced.
+ *
+ *   FALSE NEGATIVE. syl reported `[NONE] … the letter gets dropped`, and its corpus writes `০°–১০০° ꠍꠦꠟꠍꠤꠀꠍ`
+ *   and `ꠚꠣꠞꠦꠘꠢꠣꠁꠐ ꠁꠃꠘꠤꠐꠅ -৪৫৯.৬৭° ꠚꠣ.` — both names IN FULL, each beside the abbreviation it expands. The
+ *   probe is a list of Latin spellings (`celsi|selsi|celzi`), so it cannot read a Syloti Nagri corpus, or a
+ *   Bengali, Arabic or Shahmukhi one: arz has `مئويه` and `فهرنهايت` degree-adjacent, pnb has `سیلسیس`, hi has
+ *   `सेंटीग्रेड`, and every one of them was reported as a settled absence.
+ *
+ * WHY THE FALSE GREEN IS THE WORSE HALF. A `NONE` that is wrong costs a re-investigation and teaches the
+ * reader to skim the line. An `ok` that is wrong is this instrument failing at the one thing it exists for:
+ * it caught a Lao layer that had INVENTED a currency word by reporting it "in NO source", and an `ok` sourced
+ * from the layer's own identifiers would have waved that through. So the rule below is asymmetric on purpose —
+ * an unreadable layer shape yields `[??]`, never `ok`.
+ *
+ * THE BOUNDARY.
+ *  1. TEXT EVIDENCE is corpus + referee + espeak, and NEVER the layer source. Source text is not a source.
+ *  2. CODE EVIDENCE is read as ARMS, not as substrings: the `°C` arm's output is compared with the `°F` and
+ *     bare-`°` arms'. Arms that differ declare a scale name (and the emitted text is reported verbatim, so
+ *     yue reads `攝氏…度` rather than the English word "Celsius"). Arms that are IDENTICAL are a positive
+ *     statement that the letter is dropped — which is how cdo now earns its `NONE` on evidence rather than by
+ *     the probe failing to find anything.
+ *  3. AN ARM WHOSE OUTPUT CANNOT BE READ STATICALLY IS `[??]`, NOT `none` AND NOT `ok`. rw computes it through
+ *     a ternary over a `const CELSIUS`, ab through `MANIFEST.symbols.celsius`, syl through a lookup table
+ *     keyed on the abbreviation. All three DO have a scale word; a `none` for any of them would be a fresh
+ *     false negative of exactly the kind being fixed.
+ *  4. `none` REQUIRES A PROBE THAT COULD HAVE READ THE CORPUS. The transliteration list is Latin-script, so a
+ *     miss over a non-Latin corpus is not an absence — it is an unread haystack, and it reports `[??]` with
+ *     the degree-adjacent tokens listed so the reader has the candidate in hand rather than a verdict.
+ *
+ * ⚠ WHAT IS DELIBERATELY NOT ATTEMPTED. Deciding, script-generally, whether a degree-adjacent token IS a scale
+ * name. The syl corpus writes `০° ꠍꠦꠟꠍꠤꠀꠍ` (Celsius) and `১৮° ꠘꠤꠍꠦ ꠘꠣꠝꠦ` ("18 degrees BELOW") in the same
+ * artifact, and km writes `° និង` ("and") four times; no rule over adjacency separates them without knowing
+ * the language. So adjacency produces CANDIDATES inside a `[??]`, never a verdict. An honest unknown is the
+ * whole point: this class's job is to stop someone asserting an absence they never checked.
+ */
+const SCALE_PROBES = {
+    celsius: /(?<![\p{L}\p{M}])(celsi|selsi|셀시|celzi|t͡selsi|selisi|centigrad|sentigrad)/iu,
+    fahrenheit: /(?<![\p{L}\p{M}])(fahren|faren|farengey|farenhaj)/iu,
+} as const;
+
+/**
+ * Every string LITERAL in the layer source, with OBJECT KEYS excluded.
+ *
+ * ⚠ THIS HAD TO BE A SCANNER, and the first attempt — one `matchAll` pairing quotes — reproduced the very bug
+ * it was written to fix. A normalization layer is full of REGEX literals containing lone quotes (`/['’]/u`)
+ * and of NESTED template literals, so naive pairing runs one "string" across hundreds of lines and swallows
+ * the source in between: on cdo it returned a single 400-character "literal" that contained
+ * `celsius: (n) => …` verbatim, and the check reported `ok` again. Pairing quotes without tracking regex
+ * literals and `${}` nesting is not parsing, it is guessing, and it guessed the same way twice.
+ *
+ * The regex-literal heuristic is the standard one — a `/` opens a regex when the previous significant
+ * character cannot end an expression — which is exact for every shape these layers actually write.
+ *
+ * KEYS ARE EXCLUDED because a quoted key names a SLOT, not a word: ab's manifest writes
+ * `"celsius": "Цельси иградус"`, where the English is the field name and the Abkhaz is the vocabulary.
+ */
+function literals(src: string): string[] {
+    const out: string[] = [];
+    let i = 0;
+    let prev = ""; // previous significant character, for the regex-vs-division decision
+    while (i < src.length) {
+        const ch = src[i]!;
+        if (ch === '"' || ch === "'" || ch === "`") {
+            const quote = ch;
+            let j = i + 1;
+            let buf = "";
+            for (; j < src.length; j++) {
+                const d = src[j]!;
+                if (d === "\\") { j++; continue; }
+                if (d === quote) break;
+                // A `${…}` HOLE IS CODE, AND ITS OWN LITERALS COUNT. Skipping it outright lost sr and hr,
+                // whose scale words live inside the hole's ternary —
+                // `${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}` — so the two languages that spell both
+                // names out most explicitly read as having neither. So: recurse into the hole.
+                if (quote === "`" && d === "$" && src[j + 1] === "{") {
+                    let depth = 1;
+                    const from = j + 2;
+                    j += 2;
+                    for (; j < src.length && depth > 0; j++) {
+                        if (src[j] === "{") depth++;
+                        else if (src[j] === "}") depth--;
+                    }
+                    out.push(...literals(src.slice(from, j - 1)));
+                    j--;
+                    continue;
+                }
+                if (quote !== "`" && d === "\n") break; // unterminated — a regex we misread; give up on it
+                buf += d;
+            }
+            // A LITERAL FOLLOWED BY `:` IS A KEY ONLY WHERE A KEY CAN STAND — after `{` or `,`. Testing the
+            // colon alone threw away the TRUE branch of every ternary (`cond ? "Farenhajta" : "Celzijusa"`),
+            // which is precisely how hr and sr write their scale words: the two layers that spell both names
+            // out in full read as having only one.
+            const isKey = /^\s*:/u.test(src.slice(j + 1)) && (prev === "{" || prev === "," || prev === "");
+            if (!isKey) out.push(buf);
+            i = j + 1;
+            prev = quote;
+            continue;
+        }
+        if (ch === "/" && (prev === "" || "(,=:[!&|?{};+-*%~^<>".includes(prev))) { // a REGEX literal, not division
+            let j = i + 1;
+            let cls = false;
+            for (; j < src.length; j++) {
+                const d = src[j]!;
+                if (d === "\\") { j++; continue; }
+                if (d === "[") cls = true;
+                else if (d === "]") cls = false;
+                else if (d === "/" && !cls) break;
+                else if (d === "\n") { j = i; break; } // not a regex after all
+            }
+            i = j + 1;
+            prev = "/";
+            continue;
+        }
+        if (!/\s/u.test(ch)) prev = ch;
+        i++;
+    }
+    return out;
+}
+
+type Slot = "c" | "f" | "bare";
+/** The three degree arms a layer can write, as the TEXT each emits. A slot in `unreadable` HAS an arm whose
+ *  output is computed — tracked per slot, because a layer whose bare-° arm is a callback (ht, uk) can still
+ *  have perfectly readable `°C` and `°F` arms, and one poisoned slot must not blind the other two. */
+interface Arms { c?: string | undefined; f?: string | undefined; bare?: string | undefined; unreadable: Set<Slot>; any: boolean }
+
+/**
+ * Which degree arm is this `.replace` pattern? Decided by what follows the `°`, never by "is there a C
+ * anywhere in the pattern" — that reading calls `/(\d+)\s?[°º]\s?([NSEW])/` (om's LONGITUDE arm, `35°W`) a
+ * scale arm and then finds its output unreadable, so om reported `[??]` when its real state is the settled
+ * refusal this file's own header cites: om stops at *digirii* and drops the letter, on purpose.
+ *
+ * `undefined` means "not a degree-scale arm at all" — a compass bearing, an angle — and it is skipped rather
+ * than counted as unreadable.
+ */
+function armSlots(pattern: string): Slot[] | "ambiguous" | undefined {
+    const at = pattern.indexOf("°");
+    if (at === -1) return undefined;
+    let inClass = false; // is the ° itself inside a [...]?
+    for (let i = 0; i < at; i++) {
+        if (pattern[i] === "\\") { i++; continue; }
+        if (pattern[i] === "[") inClass = true;
+        else if (pattern[i] === "]") inClass = false;
+    }
+    let rest = pattern.slice(at + 1);
+    if (inClass) rest = rest.replace(/^[^\]]*\]/u, "");
+    // OPTIONAL WHITESPACE BETWEEN THE SIGN AND THE LETTER, in every shape the fleet writes it — `\s?`, a
+    // literal space, and the CHARACTER CLASS of space + no-break space (`[  ]?`) that the African and Bantu
+    // layers use. Handling only `\s?` read xh's `°[  ]?[CF]` as a class whose letters are two spaces, i.e.
+    // as the BARE arm, and a layer with an explicit scale arm reported as having none.
+    for (;;) {
+        const next = rest.replace(/^(?:\\s[?*+]?|[\s ]|\[[\s   ]*\][?*+]?)/u, "");
+        if (next === rest) break;
+        rest = next;
+    }
+    // ⚠ A NEGATIVE LOOKAHEAD IS NOT THE FOLLOWING LETTER. Nearly every degree rule in the fleet ends
+    // `°(?![\p{L}\p{M}])` — a guard saying nothing may follow — and reading the class INSIDE it as the scale
+    // letter yields the letters `p L p M`, which are not C or F, so the rule is discarded as "not a scale arm
+    // at all". ht lost its bare-degree arm that way and then reported `none` — "the layer declares no scale
+    // arm" — about a layer whose very next line emits `degre Sèlsiyis`. A negative guard means the ° is BARE.
+    if (/^\(\?<?!/u.test(rest)) return ["bare"];
+    const group = /^\(/u.test(rest) ? rest.slice(rest.indexOf("(") + 1).replace(/^\?<?[:=]?/u, "") : rest;
+    // A DIGIT AFTER THE ° IS A COORDINATE, NOT A TEMPERATURE — `118°08'`, `22° 11′ 47″`. cdo claims that whole
+    // shape in one rule with a callback, and reading it as the bare degree arm made the layer "unreadable",
+    // which is how the language whose three temperature arms are provably identical went back to `[??]`.
+    if (/^(?:\\d|\\p\{Nd\}|\[?[0-9])/u.test(group)) return undefined;
+    const cls = /^\[([^\]]*)\]/u.exec(group);
+    const letters = cls !== null ? cls[1]!.replace(/[^\p{L}]/gu, "") : /^[\p{L}]/u.test(group) ? group[0]! : "";
+    if (letters === "") return ["bare"];
+    // ⚠ THE SCALE LETTER IS OFTEN WRITTEN TWICE, IN TWO SCRIPTS. ru, uk and sr all match `[CСc]` / `[FФf]`,
+    // because a Cyrillic corpus writes `20°С` with Cyrillic С as readily as Latin C and the layer must catch
+    // both. Reading С as "some other letter, so not a scale arm" made three layers that spell Цельсия and
+    // Фаренгейта out in full unreadable — a false `[??]` for the languages with the clearest evidence.
+    const LOOKALIKE: Readonly<Record<string, string>> = { "С": "C", "Ф": "F", "Ϲ": "C", "Ⅽ": "C" };
+    const up = [...new Set([...letters.toUpperCase()].map((ch) => LOOKALIKE[ch] ?? ch))];
+    if (up.every((ch) => ch === "C" || ch === "F")) return up.map((ch) => (ch === "C" ? "c" : "f"));
+    // A LATIN NON-C/F LETTER IS A COMPASS BEARING and the rule is not about temperature at all (`35°W`). A
+    // NON-LATIN one is the language's own scale ABBREVIATION — syl matches `°\s*(ꠍꠦ|ꠚꠣ)` — and calling that
+    // "not a scale arm" would let the layer fall through to an absence verdict. It is a scale arm this tool
+    // cannot classify, which is `[??]`, so it is reported as ambiguous rather than skipped.
+    return up.every((ch) => /\p{sc=Latn}/u.test(ch)) ? undefined : "ambiguous";
+}
+
+/** The text a replacement argument emits, or `undefined` when it is computed. A bare literal and an arrow
+ *  returning one literal (`(_m, n) => \`${n} градусів Цельсія\``) are the same declaration written two ways;
+ *  reading only the first left uk, xh and rn `[??]` for no reason but syntax. */
+function replacementText(arg: string): string | undefined {
+    const body = /^\([^)]*\)\s*=>\s*([\s\S]*)$/u.exec(arg.trim())?.[1] ?? arg.trim();
+    const lit = /^(["'`])((?:\\.|(?!\1)[^\\])*)\1$/u.exec(body.trim());
+    return lit === null ? undefined : lit[2]!.replace(/\$\{[^}]*\}|\$\d|\$&/gu, "");
+}
+
+function degreeArms(src: string): Arms {
+    const arms: Arms = { unreadable: new Set(), any: false };
+    // SHAPE A — the shared Sinitic helper, whose OPTION KEYS are what produced the false green. The key names
+    // the slot; only the arrow BODY is the language's text, and `${n}` is the number, not a word.
+    // ⚠ THE OPTIONS OBJECT MUST BE BRACE-MATCHED, not lazily regexed to the first `}`. Every arm body is a
+    // template literal containing `${n}`, so `\{([\s\S]*?)\}` stops inside the FIRST HOLE and hands back
+    // `celsius: (n) => \`${n` — from which no arm is readable and cdo went straight back to `[??]`. The whole
+    // point of the arm comparison is that cdo's three arms are IDENTICAL; that is unmeasurable if the object
+    // is truncated at the first brace it contains.
+    const call = ((): string | undefined => {
+        const at = /readDegrees\s*\([^,]*,\s*\{/u.exec(src);
+        if (at === null) return undefined;
+        let depth = 1;
+        let i = at.index + at[0].length;
+        for (; i < src.length && depth > 0; i++) {
+            if (src[i] === "{") depth++;
+            else if (src[i] === "}") depth--;
+        }
+        return src.slice(at.index + at[0].length, i - 1);
+    })();
+    if (call !== undefined) {
+        arms.any = true;
+        for (const [slot, key] of [["c", "celsius"], ["f", "fahrenheit"], ["bare", "bare"]] as const) {
+            const at = new RegExp(`(?<![\\p{L}])${key}\\s*:`, "u").exec(call);
+            if (at === null) continue;
+            const body = call.slice(at.index + at[0].length);
+            const lit = /^\s*\([^)]*\)\s*=>\s*(["'`])((?:\\.|(?!\1)[^\\])*)\1/u.exec(body);
+            if (lit === null) arms.unreadable.add(slot);
+            else arms[slot] = lit[2]!.replace(/\$\{[^}]*\}/gu, "");
+        }
+    }
+    // SHAPE B — a local `.replace(/…°…C…/, "…")`. The replacement counts only when it is a plain string
+    // literal: a callback or a `new RegExp` built from a table is exactly the shape that must read `[??]`.
+    // The `new RegExp(…)` alternative is ONE level paren-balanced: the pattern is a template string that
+    // almost always contains a capture group (`(ꠍꠦ|ꠚꠣ)`), and `[^)]*` stops at that group's own paren, after
+    // which the whole call fails to match and the arm vanishes instead of counting as unreadable.
+    for (const m of src.matchAll(/\.replace\(\s*(?:\/((?:\\.|\[[^\]]*\]|[^/\n])+)\/[a-z]*|new RegExp\((?:[^()]|\([^()]*\))*\))\s*,\s*([\s\S]{0,120}?)\)/gu)) {
+        let pat = m[1];
+        if (pat === undefined) {
+            if (!/°/u.test(m[0])) continue;
+            // A `new RegExp(…)` whose pattern is ONE STRING can still be classified — unescape it and ask the
+            // same question. ⚠ Without this, hak's COORDINATE rules (`new RegExp(`(\\d+)\\s*°\\s*(\\d+)…`)`)
+            // counted as unreadable temperature arms and blanked a layer that emits 攝氏 and 華氏 outright.
+            // A pattern ASSEMBLED from named parts (si: `SIGN + NUM + "\\s*[°º]"`) genuinely cannot be read,
+            // and that is the case that stays unreadable rather than becoming an absence.
+            const lit = /new RegExp\(\s*(["'`])((?:\\.|(?!\1)[^\\])*)\1\s*[,)]/u.exec(m[0]);
+            if (lit === null) {
+                arms.any = true;
+                for (const s of ["c", "f", "bare"] as const) arms.unreadable.add(s);
+                continue;
+            }
+            pat = lit[2]!.replace(/\\\\/gu, "\\").replace(/\$\{[^}]*\}/gu, "~");
+        }
+        const slots = armSlots(pat);
+        if (slots === undefined) continue;
+        arms.any = true;
+        if (slots === "ambiguous") { for (const s of ["c", "f", "bare"] as const) arms.unreadable.add(s); continue; }
+        const text = replacementText(m[2]!);
+        if (text === undefined) for (const slot of slots) arms.unreadable.add(slot);
+        else for (const slot of slots) arms[slot] ??= text;
+    }
+    if (!arms.any && /°\s*\\?s?\*?\s*\[?[CF]/u.test(src)) {
+        arms.any = true;
+        for (const s of ["c", "f", "bare"] as const) arms.unreadable.add(s);
+    }
+    return arms;
+}
+
+/** Tokens the corpus writes immediately after a `°` — candidates only, never a verdict (see the header). */
+function degreeAdjacent(corpus: string): string[] {
+    const seen = new Map<string, number>();
+    for (const m of corpus.matchAll(/°\s*([\p{L}\p{M}]{1,24})/gu)) {
+        const w = m[1]!;
+        if (/^[\p{sc=Latn}]{1,2}$/u.test(w)) continue; // C, F, N, E, W — the abbreviation or a compass bearing
+        seen.set(w, (seen.get(w) ?? 0) + 1);
+    }
+    return [...seen].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([w, n]) => `${w}×${n}`);
+}
+
+/** Is the corpus written in a script the Latin transliteration probe could have read? */
+function probeCanRead(corpus: string): boolean {
+    const letters = corpus.match(/\p{L}/gu)?.length ?? 0;
+    if (letters === 0) return false;
+    return (corpus.match(/[\p{sc=Latn}]/gu)?.length ?? 0) / letters > 0.5;
+}
+
+export function scaleNames(c: Ctx): Row {
+    // ⚠ THE CLASS NAME IS WRITTEN AS A LITERAL FIELD, not hoisted into a shared `const`, because
+    // `normalization-sources.test.ts` reconciles this file's classes against `DROPPABLE` by GREPPING for
+    // `klass: "…"`. Hoisting it hid `scale-names` from that reconciliation and the pre-flight row for `degree`
+    // read as missing — the exact "silent class" failure that test was written to make impossible.
+    const row = (verdict: Verdict, detail: string): Row => ({ klass: "scale-names", verdict, detail });
+    // ⚠ `\p{Nd}`, NOT `\d` — `\d` is ASCII-only even under `/u`, so a corpus that writes its temperatures in
+    // its own digits (`১৮°ꠍꠦ.`, `০°–১০০° ꠍꠦꠟꠍꠤꠀꠍ`) reported "no ° in the corpus" and skipped the class
+    // entirely. Same false-absence shape as the rest of this repair, one layer further out: the tool was not
+    // deciding wrongly, it was declining to look.
+    if (!/\p{Nd}\s?°/u.test(c.corpus)) return row("n/a", "no ° in the corpus");
+    // 1. TEXT EVIDENCE — corpus, referee, espeak. The layer's own source is NOT a text source.
+    const text = `${c.corpus}\n${c.referee}\n${c.espeak}`;
+    const lits = literals(c.langSrc).join("\n");
+    const found = (slot: "celsius" | "fahrenheit"): string | undefined =>
+        SCALE_PROBES[slot].test(text) ? "attested in corpus/referee/espeak"
+            : SCALE_PROBES[slot].test(lits) ? "emitted by the layer" : undefined;
+    // 2. CODE EVIDENCE, read as ARMS. Identical arms are the layer SAYING the letter is dropped.
+    // ⚠ THE TWO KINDS OF EVIDENCE ARE MERGED, NOT SHORT-CIRCUITED. Returning on the first text hit cost nan
+    // its Celsius: its `°C` arm emits 攝氏…度 and its corpus contains the string "Fahrenheit" exactly once — in
+    // the FILM TITLE `Fahrenheit 9/11` — so the weaker of the two findings answered for both slots.
+    const arms = degreeArms(c.langSrc);
+    const norm = (a: string): string => a.replace(/\s+/gu, " ").trim();
+    /**
+     * THE SCALE WORD IS THE RESIDUE — what the `°C` arm emits that the BARE-degree arm does not.
+     *
+     * ⚠ "DIFFERS FROM THE OTHER ARM" IS NOT THE TEST, and it produced a fresh false green on the first fleet
+     * run: uz reads `°C` as `N daraja` (just "degree") and `°F` as `N daraja farengeyt`. The two arms differ,
+     * so a difference test declared a Uzbek Celsius word that does not exist — the identical mistake to the
+     * one being repaired, arrived at from the other side. Only Fahrenheit is declared there, and the residue
+     * says so: `°C` minus bare is empty, `°F` minus bare is `farengeyt`.
+     *
+     * The residue is computed by trimming the longest common PREFIX and SUFFIX rather than by splitting on
+     * spaces, because half the fleet does not space its words: hak's `攝氏N度` against a bare `N度` yields
+     * `攝氏`, and ru's `N градусов Цельсия` against `N градусов` yields `Цельсия`, under one rule.
+     */
+    const residue = (mine: string | undefined, base: string | undefined): string | undefined => {
+        if (mine === undefined || base === undefined) return undefined;
+        const a = norm(mine);
+        const b = norm(base);
+        let s = 0;
+        while (s < a.length && s < b.length && a[s] === b[s]) s++;
+        let e = 0;
+        while (e < a.length - s && e < b.length - s && a[a.length - 1 - e] === b[b.length - 1 - e]) e++;
+        const left = a.slice(s, a.length - e).trim();
+        return /\p{L}/u.test(left) ? left : undefined;
+    };
+    // The baseline is the bare-° arm — the reading with the letter dropped. Absent one, the other scale arm
+    // is the only baseline available, which is still sound for the identical-arms case (cdo, om).
+    const base = (other: string | undefined): string | undefined => arms.bare ?? other;
+    const armSays = (slot: Slot, mine: string | undefined, other: string | undefined): string | undefined => {
+        if (arms.unreadable.has(slot)) return undefined;
+        const r = residue(mine, base(other));
+        return r === undefined ? undefined : `the °${slot.toUpperCase()} arm adds ${JSON.stringify(r)}`;
+    };
+    const cels = found("celsius") ?? armSays("c", arms.c, arms.f);
+    const fahr = found("fahrenheit") ?? armSays("f", arms.f, arms.c);
+    if (cels !== undefined || fahr !== undefined) {
+        const say = [cels && `Celsius — ${cels}`, fahr && `Fahrenheit — ${fahr}`].filter(Boolean).join(" · ");
+        return row(cels !== undefined && fahr !== undefined ? "have" : "partial", say);
+    }
+    // IDENTICAL ARMS ARE THE LAYER SAYING THE LETTER IS DROPPED — a `none` earned on evidence rather than
+    // handed out because a probe found nothing. cdo's three arms all emit ` dô`; om's both emit `digirii `.
+    const pair: [Slot, string | undefined][] = [["c", arms.c], ["f", arms.f], ["bare", arms.bare]];
+    const readablePair = pair.filter(([s, a]) => a !== undefined && !arms.unreadable.has(s));
+    if (readablePair.length >= 2 && new Set(readablePair.map(([, a]) => norm(a!))).size === 1) {
+        return row("none", `the layer's ${readablePair.map(([s]) => (s === "bare" ? "°" : `°${s.toUpperCase()}`)).join("/")} arms all emit `
+            + `the same text (${JSON.stringify(norm(readablePair[0]![1]!))}) — the letter IS dropped, deliberately`);
+    }
+    const adj = degreeAdjacent(c.corpus);
+    const candidates = adj.length > 0 ? ` — degree-adjacent corpus tokens: ${adj.join(" ")}` : " — nothing follows ° in the corpus but the bare letter";
+    if (arms.any && arms.unreadable.size > 0) {
+        return row("unknown", `the layer HAS a °${[...arms.unreadable].map((s) => (s === "bare" ? "" : s.toUpperCase())).join("/°")} arm but its `
+            + `output is computed, not written (table lookup, ternary or manifest field) — read ${c.dir ?? "?"}/${candidates}`);
+    }
+    // 3. `none` ONLY WHERE THE PROBE COULD HAVE READ THE CORPUS.
+    if (!probeCanRead(c.corpus)) {
+        return row("unknown", `the scale probe reads LATIN spellings and this corpus is not Latin — a miss is an unread haystack, `
+            + `not an absence${candidates}`);
+    }
+    return row("none", `° occurs, neither scale name in corpus/referee/espeak, and the layer declares no scale arm${candidates}`);
 }
 
 /** PERCENT and CURRENCY, the two the review gate already checks — reported here so one command answers the
@@ -393,7 +763,7 @@ function rowsFor(code: string): { ctx: Ctx; rows: Row[] } {
     return { ctx: c, rows: [letterNames(c), decimalWord(c), eraPhrase(c), scaleNames(c), ...tierWords(c), fractionSeries(c), ...signWords(c)] };
 }
 
-const MARK: Record<Verdict, string> = { have: " ok ", partial: "part", none: "NONE", check: "chk?", "n/a": "  · " };
+const MARK: Record<Verdict, string> = { have: " ok ", partial: "part", none: "NONE", check: "chk?", unknown: " ?? ", "n/a": "  · " };
 
 /**
  * ⚠ THE CLI MUST NOT RUN ON IMPORT — the fourth file in this directory to need this guard, after `mine.ts`,
@@ -409,16 +779,26 @@ function main(): void {
         console.log(`\n── vocabulary sources across ${codes.length} registered languages ──\n`);
         console.log(`      ${klasses.map((k) => k.slice(0, 9).padEnd(10)).join("")}`);
         const blockedBy: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
+        const unreadable: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
         for (const code of codes) {
             const { rows } = rowsFor(code);
             const by = new Map(rows.map((r) => [r.klass, r]));
             for (const k of klasses) if (by.get(k)?.verdict === "none") blockedBy[k]!.push(code);
+            for (const k of klasses) if (by.get(k)?.verdict === "unknown") unreadable[k]!.push(code);
             if (has("blocked") && !rows.some((r) => r.verdict === "none")) continue;
             console.log(`  ${code.padEnd(4)}${klasses.map((k) => MARK[by.get(k)?.verdict ?? "n/a"].padEnd(10)).join("")}`);
         }
         console.log(`\n── blocked counts (a NONE is work that needs a SOURCE, not code) ──`);
         for (const k of klasses)
             console.log(`  ${k.padEnd(16)} ${String(blockedBy[k]!.length).padStart(3)}  ${blockedBy[k]!.slice(0, 22).join(" ")}${blockedBy[k]!.length > 22 ? " …" : ""}`);
+        // A `[??]` IS NOT BLOCKED WORK, and listing it under the blocked heading would restore the very
+        // confusion this repair removed: nothing is missing, the tool cannot read the evidence.
+        const anyUnknown = klasses.filter((k) => unreadable[k]!.length > 0);
+        if (anyUnknown.length > 0) {
+            console.log(`\n── [??] counts (NOT blocked — the tool could not READ the evidence; go and look) ──`);
+            for (const k of anyUnknown)
+                console.log(`  ${k.padEnd(16)} ${String(unreadable[k]!.length).padStart(3)}  ${unreadable[k]!.slice(0, 22).join(" ")}${unreadable[k]!.length > 22 ? " …" : ""}`);
+        }
         console.log(`\n  AVAILABILITY IS NOT CORRECTNESS — an ` + "`ok`" + ` says a source exists, never that the word fits the`);
         console.log(`  slot. ff hakkunde, ms paun, zu amaphuzu and the Gabonese district Idola all passed here.\n`);
     } else {
