@@ -124,6 +124,17 @@ function integerToHan(n: number): string {
     return out;
 }
 
+/**
+ * The digit-at-a-time reading — the fallback for a numeral `integerToHan` cannot compose. Deliberately the
+ * LOCAL `DIGITS`, not `core/sinitic.ts`'s `spellHanDigits`: this string is read straight back through the
+ * same dict as `integerToHan`'s output, so the two tables must be the same table. A shared one could drift
+ * to 〇 (a real corpus choice for years) and the composed and fallback paths would then read one numeral two
+ * ways for no reason the caller can see.
+ */
+function spellDigits(s: string): string {
+    return [...s].map((c) => DIGITS[Number(c)] ?? c).join("");
+}
+
 // The greedy-segmentation window = the longest dict key (in code points). Cached per dict Map instance so it is
 // scanned once, not on every phonemizeHanWord() call (the eval sweeps thousands of words through one dict).
 const MAX_WORD_CACHE = new WeakMap<Map<string, string>, number>();
@@ -159,8 +170,21 @@ class HanDictPhonemizer implements Phonemizer {
         return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1], d, max, this.def.chao));
             else if (m[2]) {
+                // ⚠ AN UNSAFE INTEGER USED TO EMIT NOTHING AT ALL. The `isSafeInteger` test is right and
+                // stays — above 2^53 the float has already lost its low digits, so `integerToHan` would
+                // compose a numeral that is confidently WRONG (9007199254740993 arrives as …992) — but the
+                // guard had no else, so the numeral was SILENTLY DELETED from the reading instead:
+                // `9460730472580800 米` (a light-year in metres, and exactly what de-grouping a comma-grouped
+                // figure produces) read as just *mi˨˩˧*. Seven engines shared this — gan hak cjy hsn wuu nan
+                // yue — and cmn did not, because it composes numbers on another path; that asymmetry is why
+                // no corpus diff or referee ever named it. A dropped digit is audible; a dropped NUMBER is
+                // not, because the sentence still scans.
+                // Digit-at-a-time is the fallback rather than BigInt: it is what Sinitic already does for a
+                // year and a decimal tail, so it needs no new words and cannot be wrong about magnitude —
+                // whereas composing 兆/京 above 億 would invent a register the dicts were never measured on.
+                // The cost is stated plainly: above 2^53 the reading is a digit string, not a quantity.
                 const n = Number(m[2]);
-                if (Number.isSafeInteger(n)) sink.emit(hanRun(integerToHan(n), d, max, this.def.chao));
+                sink.emit(hanRun(Number.isSafeInteger(n) ? integerToHan(n) : spellDigits(m[2]), d, max, this.def.chao));
             } else if (m[3]) sink.emit(this.foreign ? this.foreign(m[3]) : "");
             else if (m[4]) {
                 const mk = this.def.clausePunctuation[m[4]];

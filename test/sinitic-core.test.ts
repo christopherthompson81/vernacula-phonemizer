@@ -114,4 +114,37 @@ describe("core/sinitic — the guard now holds in every language that shares it"
         for (const lang of ["yue", "wuu"] as const)
             expect(phonemize("20  °C", lang), lang).toBe(phonemize("20°C", lang));
     });
+
+    /**
+     * ⚠ AN INTEGER ABOVE 2^53 WAS SILENTLY DELETED FROM THE READING — in all seven lects at once, found by
+     * gan's normalization run and reproduced by probing every engine in the registry. `Number.isSafeInteger`
+     * correctly refuses to compose a numeral whose low digits the float has already lost, but the guard had
+     * no else: `9460730472580800 米` (a light-year in metres — and exactly what de-grouping a comma-grouped
+     * figure produces) read as bare *mi˨˩˧*. A dropped digit is audible; a dropped NUMBER is not, because
+     * the sentence still scans, which is why no corpus diff, referee or review checklist ever named it.
+     *
+     * ⚠ `cmn` IS IN THE LIST DELIBERATELY. It composes numbers on its own path and was never affected —
+     * so it is the control that says this test is measuring the shared behaviour and not one engine's.
+     */
+    test("⚠ an integer above 2^53 DEGRADES to digit-at-a-time, and is never dropped", () => {
+        const BIG = "9007199254740993"; // 2^53 + 1: the smallest integer the float cannot hold exactly
+        for (const lang of ["gan", "hak", "cjy", "hsn", "wuu", "nan", "yue", "cmn"] as const) {
+            const read = phonemize(`${BIG}米`, lang);
+            expect(read, lang).not.toBe(phonemize("米", lang)); // the numeral did not vanish
+            expect(read, lang).not.toMatch(/\d/u); // …and did not leak raw digits either
+            // ⚠ AND THE DIGITS ARE ACTUALLY READ, not replaced by one placeholder: two unsafe integers that
+            // differ only in their last digit must read differently. Before the fix both were "", so an
+            // emptiness check alone would have passed on a fallback that emitted a constant.
+            expect(read, lang).not.toBe(phonemize("9007199254740994米", lang));
+        }
+    });
+
+    test("…and the safe range is untouched — the guard still composes a real numeral", () => {
+        for (const lang of ["gan", "hak", "cjy", "hsn", "wuu", "nan", "yue", "cmn"] as const) {
+            // 2^53 - 1 still COMPOSES (億/萬 …), which is a different reading from its digit string — so the
+            // fallback cannot have quietly swallowed the normal path for everything.
+            expect(phonemize("9007199254740991米", lang), lang).not.toBe(phonemize("9007199254740992米", lang));
+            expect(phonemize("1234米", lang), lang).not.toMatch(/\d/u);
+        }
+    });
 });

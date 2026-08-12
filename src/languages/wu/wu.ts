@@ -14,6 +14,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
+import { spellHanDigits } from "../../core/sinitic.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
@@ -165,8 +166,12 @@ class WuPhonemizer implements Phonemizer {
         return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
+                // ⚠ ABOVE 2^53 THIS USED TO EMIT NOTHING — see hanDictIpa.ts for the full account. The
+                // `isSafeInteger` test is right (the float has already lost its low digits) but had no else,
+                // so the numeral was deleted from the reading rather than degraded. Digit-at-a-time is what
+                // wu already gives a year, so the fallback needs no word this engine has not measured.
                 const n = Number(m[2]);
-                if (Number.isSafeInteger(n)) sink.emit(hanRun(integerToHan(n)));
+                sink.emit(hanRun(Number.isSafeInteger(n) ? integerToHan(n) : spellHanDigits(m[2], DIGITS)));
             } else if (m[3]) sink.emit(this.foreign ? this.foreign(m[3]) : "");
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];

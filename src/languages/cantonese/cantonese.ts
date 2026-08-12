@@ -9,6 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { spellHanDigits } from "../../core/sinitic.ts";
 import { DIGITS, normalizeCantonese } from "./normalize.ts";
 
 interface CantoneseDef {
@@ -242,8 +243,11 @@ class CantonesePhonemizer implements Phonemizer {
         return assembleClauses(input, tok, (m, sink) => {
             if (m[1]) sink.emit(hanRun(m[1]));
             else if (m[2]) {
+                // ⚠ ABOVE 2^53 THIS USED TO EMIT NOTHING — see hanDictIpa.ts for the full account. The guard
+                // is right and stays; what was missing is the else, so the numeral was deleted rather than
+                // degraded. Digit-at-a-time is what yue already gives a year.
                 const n = Number(m[2]);
-                if (Number.isSafeInteger(n)) sink.emit(numeralRun(integerToHan(n)));
+                sink.emit(numeralRun(Number.isSafeInteger(n) ? integerToHan(n) : spellHanDigits(m[2], DIGITS)));
             } else if (m[3]) sink.emit(latinRun(m[3], this.foreign));
             else if (m[4]) {
                 const mk = CLAUSE_MARK[m[4]];
