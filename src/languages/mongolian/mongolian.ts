@@ -8,7 +8,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
-import { numberToWords } from "./numbers.ts";
+import { numberToWords, spellDigits } from "./numbers.ts";
 import { bichigToCyrillic, isBichig } from "./mongolBichig.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -77,7 +77,14 @@ class MongolianPhonemizer implements Phonemizer {
     text(input: string): string {
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // cardinal → words → IPA
+            // cardinal → words → IPA. ⚠ ABOVE 2^53 `numberToWords` RETURNS "" AND THE NUMBER USED TO VANISH:
+            // the split produced one empty word and nothing was emitted, so the sentence scanned without its
+            // numeral. Refusing to compose is right (the float has lost the low digits); the else was missing.
+            else if (m[2]) {
+                const composed = numberToWords(Number(m[2]));
+                for (const wd of (composed === "" ? spellDigits(m[2]) : composed).split(" "))
+                    sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
         });
     }

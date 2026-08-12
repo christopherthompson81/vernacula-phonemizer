@@ -357,9 +357,17 @@ export function createRomanian(): Phonemizer {
             return assembleClauses(normalizeRomanian(rawInput), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
                 else if (m[2]) {
+                    // ⚠ ABOVE 2^53 THIS USED TO EMIT NOTHING AT ALL — the guard is right (the float has
+                    // already lost the low digits, so a composed numeral would be confidently WRONG) but it
+                    // had no else, so the NUMBER was deleted from the reading and the sentence still
+                    // scanned. Digit-at-a-time is what normalize.ts already gives a decimal tail; above 2^53
+                    // the reading is a digit string, not a quantity.
                     const num = Number(m[2]);
                     if (Number.isSafeInteger(num)) {
                         for (const w of numberWords(num).split(" ")) sink.emit(phonemizeWord(w));
+                    } else {
+                        for (const d of m[2])
+                            for (const w of numberWords(Number(d)).split(" ")) sink.emit(phonemizeWord(w));
                     }
                 } else if (m[3]) {
                     const mk = CLAUSE_MARK[m[3]];

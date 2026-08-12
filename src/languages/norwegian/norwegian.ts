@@ -10,7 +10,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
-import { renderNumber, westernNumberWords } from "../../core/numbers.ts";
+import { renderNumber, spellDigits, westernNumberWords } from "../../core/numbers.ts";
 import { normalizeNorwegian } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -179,7 +179,12 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…—])`, "gu");
 // phonemizeWord is correct here and the neural path's tagged map (populated only from input tokens) never holds them.
 function number(digits: string): string {
     const nn = Number(digits);
-    if (!Number.isSafeInteger(nn)) return digits;
+    // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. `isSafeInteger` is right to
+    // refuse to COMPOSE — the float has already lost the low digits, so the numeral would be confidently
+    // wrong — but the refusal returned the digit string, which no g2p in this fleet reads. Read it out
+    // digit-at-a-time through this engine's own number words instead; see core/numbers.ts `spellDigits`
+    // for the full account and the cost (above 2^53 the reading is a digit string, not a quantity).
+    if (!Number.isSafeInteger(nn)) return spellDigits(digits, MANIFEST.numbers, phonemizeWord);
     return renderNumber(nn, MANIFEST.numbers, phonemizeWord, westernNumberWords);
 }
 

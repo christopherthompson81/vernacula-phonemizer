@@ -10,7 +10,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { renderNumber } from "../../core/numbers.ts";
+import { renderNumber, spellDigits } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { turkicNumberWords, type UzbekNumberWords } from "./numbers.ts";
@@ -75,7 +75,12 @@ export function phonemizeWord(word: string): string {
 
 function number(digits: string): string {
     const n = Number(digits);
-    if (!Number.isSafeInteger(n)) return digits;
+    // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. `isSafeInteger` is right to
+    // refuse to COMPOSE — the float has already lost the low digits, so the numeral would be confidently
+    // wrong — but the refusal returned the digit string, which no g2p in this fleet reads. Read it out
+    // digit-at-a-time through this engine's own number words instead; see core/numbers.ts `spellDigits`
+    // for the full account and the cost (above 2^53 the reading is a digit string, not a quantity).
+    if (!Number.isSafeInteger(n)) return spellDigits(digits, DEF.numbers, phonemizeWord);
     return renderNumber(n, DEF.numbers, phonemizeWord, turkicNumberWords);
 }
 

@@ -400,11 +400,18 @@ class ItalianPhonemizer implements Phonemizer {
         return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
+                // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO BE EMITTED STRAIGHT INTO THE IPA. Refusing to
+                // COMPOSE is right — the float has already lost the low digits — but the else emitted the
+                // token itself, which is not a reading. Digit-at-a-time through the same number words
+                // instead; see core/numbers.ts `spellDigits` for the account and the cost.
                 const num = Number(m[2]);
                 if (Number.isSafeInteger(num))
                     for (const wd of numberWords(num).split(" "))
                         sink.emit(phonemizeWord(wd));
-                else sink.emit(m[2]);
+                else
+                    for (const d of m[2])
+                        for (const wd of numberWords(Number(d)).split(" "))
+                            sink.emit(phonemizeWord(wd));
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

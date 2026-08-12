@@ -6,7 +6,7 @@
  * elsewhere.
  */
 import type { Phonemizer } from "../../registry.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { normalizeSindhi } from "./normalize.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
@@ -191,7 +191,11 @@ const SD_WORD = "ء-ٟٮ-ۿ";
 /** A digit run → Sindhi number words → IPA through this engine's own g2p. Indic lakh/crore grouping. */
 function number(digits: string): string {
     const n = Number(digits);
-    if (!Number.isSafeInteger(n)) return "";
+    // ⚠ ABOVE 2^53 THIS USED TO RETURN "" AND THE NUMBER VANISHED — the same silent deletion this file's
+    // header records for the pre-composer era, reintroduced at the top of the range. Refusing to COMPOSE is
+    // right (the float has lost the low digits); the guard simply had no else. Digit-at-a-time out of the
+    // manifest's own unit words invents nothing. Above 2^53 the reading is a digit string, not a quantity.
+    if (!Number.isSafeInteger(n)) return spellDigits(digits, DEF.numbers, (w) => phonemizeWordWith(w));
     return renderNumber(n, DEF.numbers, (w) => phonemizeWordWith(w));
 }
 

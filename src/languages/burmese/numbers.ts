@@ -44,6 +44,26 @@ const CRORE = 10_000_000; // 10⁷ ကုဋေ — the place at which the serie
  * tokens is what lets the engine segmenter and compound voicing apply across the joins: 100 renders
  * [təja˨] as a speaker says it, not [tɪʔ ja˨] as two isolated words.
  */
+/**
+ * THE DIGIT-AT-A-TIME READING — the fallback for a digit run `numberToWords` must refuse.
+ *
+ * ⚠ ABOVE 2^53 `numberToWords` RETURNS ITS ASCII ARGUMENT, AND THE NUMBER USED TO VANISH FROM THE READING:
+ * the engine's g2p has no rules for Latin digits, so the returned string was dropped on the floor and the
+ * sentence scanned without its numeral. Refusing to compose is right — `Number()` has already lost the low
+ * digits, so the composed numeral would be confidently WRONG about the quantity — but there was no else.
+ *
+ * ⚠ SPACED, NOT SOLID, which is the opposite of the composed path above. There the solid join is load-bearing
+ * (it is what lets compound voicing run across တစ်+ရာ → [təja˨]); here the digits are being READ OUT, not
+ * composed into one numeral, so joining them would fuse voicing across a boundary no speaker articulates.
+ * `N.units[0]` is empty by design (the composed path never says a zero place), so a zero digit reads N.zero.
+ */
+export function spellDigits(digits: string): string {
+    return [...digits]
+        .filter((c) => c >= "0" && c <= "9")
+        .map((c) => (c === "0" ? N.zero : N.units[Number(c)]!))
+        .join(" ");
+}
+
 export function numberToWords(n: number): string {
     if (!Number.isSafeInteger(n) || n < 0) return String(n);
     if (n === 0) return N.zero;

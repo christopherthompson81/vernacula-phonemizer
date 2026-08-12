@@ -11,7 +11,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { makeUrduNormalizer } from "./normalize.ts";
 import { applyWeightStress } from "../../core/weightStress.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { HARAKAT } from "../../core/harakatLexicon.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -131,8 +131,14 @@ function number(digits: string): string {
     // Without this the guard below returned the raw string and "1.5" LEAKED ASCII DIGITS into the IPA.
     const [intPart, frac] = toAscii(digits).split(".");
     const n = Number(intPart);
-    if (!Number.isSafeInteger(n)) return "";
-    const head = renderNumber(n, DEF.numbers, phonemizeWordCore); // numbers bypass the content lexicon
+    // ⚠ ABOVE 2^53 THIS USED TO RETURN "" AND THE NUMBER VANISHED FROM THE READING. Refusing to COMPOSE is
+    // right — the float has already lost the low digits, so the numeral would be confidently wrong — but the
+    // guard had no else. Digit-at-a-time is exactly what the decimal tail below already does, so the
+    // fallback needs no word this engine's data was never measured on. Above 2^53 the reading is a digit
+    // string, not a quantity.
+    const head = Number.isSafeInteger(n)
+        ? renderNumber(n, DEF.numbers, phonemizeWordCore) // numbers bypass the content lexicon
+        : spellDigits(intPart!, DEF.numbers, phonemizeWordCore);
     if (frac === undefined || frac === "") return head;
     const dot = DEF.numbers.decimalWord;
     const tail = [...frac].map((d) => renderNumber(Number(d), DEF.numbers, phonemizeWordCore));

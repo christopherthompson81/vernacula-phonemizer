@@ -9,7 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadHarakatLexicon, restoreHarakat } from "../../core/harakatLexicon.ts";
 import { encliticWord, persianNumberWords, type FaNumbersDef } from "./numbers.ts";
@@ -224,7 +224,13 @@ const toAscii = (d: string): string =>
     [...d].map((c) => EASTERN_DIGITS[c] ?? c).join("");
 function number(digits: string): string {
     const nn = Number(toAscii(digits));
-    if (!Number.isSafeInteger(nn)) return digits;
+    // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. `isSafeInteger` is right to
+    // refuse to COMPOSE — the float has already lost the low digits, so the numeral would be confidently
+    // wrong — but the refusal returned the digit string, which no g2p in this fleet reads. Read it out
+    // digit-at-a-time through this engine's own number words instead; see core/numbers.ts `spellDigits`
+    // for the full account and the cost (above 2^53 the reading is a digit string, not a quantity).
+    if (!Number.isSafeInteger(nn))
+        return spellDigits(toAscii(digits), DEF.numbers, encliticWord(phonemizeWordCore, DEF.numbers));
     // The DECIMAL IRANIAN compositor (persian/numbers.ts), not the default Indic lakh/crore one — Persian's
     // hundreds are irregular fused words and every group is linked by the enclitic ⟨و⟩ /o/, which `encliticWord`
     // appends to the already-phonemized head word. Numbers bypass the content lexicon (homograph collisions).

@@ -9,7 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { clauseSink, emitUnclaimed } from "../../core/clauses.ts";
-import { numberToWords } from "./numbers.ts";
+import { numberToWords, spellDigits } from "./numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { segmentByDag, loadSegWords } from "../../core/segment.ts";
@@ -297,7 +297,14 @@ class BurmesePhonemizer implements Phonemizer {
                 }).join("");
                 // One token: the numeral is a single Burmese word, so the segmenter and the compound
                 // voicing apply across it (100 renders [təja˨], not [tɪʔ ja˨]).
-                sink.emit(phonemizeWord(numberToWords(Number(ascii))));
+                // ⚠ ABOVE 2^53 THE NUMBER USED TO VANISH ENTIRELY. `numberToWords` correctly refuses to
+                // compose an integer whose low digits the float has already lost — but it returns the ASCII
+                // digits, and this g2p has no rules for Latin, so the numeral was silently DROPPED and the
+                // sentence still scanned. Read it out digit-at-a-time instead: separate words, because the
+                // digits are being read rather than composed (see spellDigits).
+                const n = Number(ascii);
+                if (Number.isSafeInteger(n) && n >= 0) sink.emit(phonemizeWord(numberToWords(n)));
+                else for (const wd of spellDigits(ascii).split(" ")) sink.emit(phonemizeWord(wd));
             }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

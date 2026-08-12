@@ -324,7 +324,16 @@ class TagalogPhonemizer implements Phonemizer {
         return assembleClauses(SYMBOLS(normalizeTagalog(input)), TOKEN, (m, sink) => {
             const emitNumber = (digits: string): void => {
                 const n = Number(digits);
-                if (!Number.isSafeInteger(n)) return;
+                // ⚠ ABOVE 2^53 THIS USED TO `return` AND THE NUMBER VANISHED FROM THE READING. Refusing to
+                // compose is right — the float has already lost the low digits — but the guard had no else.
+                // Digit-at-a-time reuses the same number words and the same NUMBER-sense stress below, so it
+                // invents nothing; above 2^53 the reading is a digit string, not a quantity.
+                if (!Number.isSafeInteger(n)) {
+                    for (const d of digits)
+                        for (const wd of numberWords(Number(d)).split(" "))
+                            sink.emit(phonemizeCore(wd, numberStressIdx(wd)));
+                    return;
+                }
                 // Number words take the NUMBER-sense stress (numberStressIdx: final-except-penult, correct for
                 // the number reading of homographs like isá/limá/pitó) and bypass the final-glottal set, which
                 // fires inconsistently by incidental membership (sampu→sampuʔ but dalawampu not).

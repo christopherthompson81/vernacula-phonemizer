@@ -210,9 +210,15 @@ export function createAkan(foreign?: (s: string) => string): Phonemizer {
             return assembleClauses(input, TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
                 else if (m[2]) {
+                    // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO BE EMITTED STRAIGHT INTO THE IPA. Refusing to
+                    // COMPOSE is right — the float has already lost the low digits — but the else emitted the
+                    // token itself, which is not a reading. Digit-at-a-time through the same number words
+                    // instead; see core/numbers.ts `spellDigits` for the account and the cost.
                     const num = Number(m[2]);
                     if (Number.isSafeInteger(num)) for (const w of numberWords(num).split(" ")) sink.emit(phonemizeWord(w));
-                    else sink.emit(m[2]);
+                    else
+                        for (const d of m[2])
+                            for (const w of numberWords(Number(d)).split(" ")) sink.emit(phonemizeWord(w));
                 }
                 else if (m[3]) {
                     const mk = DEF.clausePunctuation[m[3]];

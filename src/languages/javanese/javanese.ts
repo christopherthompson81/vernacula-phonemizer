@@ -222,12 +222,24 @@ const NATIVE_CLASS = "[a-zA-ZéèêÉÈÊ]";
 const nat = makeNativiser(NATIVE_CLASS, "u");
 
 /** Speak an integer: emit each ngoko numeral word separately (so word-final laxing / a→ɔ apply per word). */
-function emitNumber(n: number, sink: { emit: (s: string) => void }): void {
-    if (Number.isSafeInteger(n))
-        // Number words bypass the content lexicon — the ngoko spellings collide with taling homographs (the
-        // number seket [səkət̪] vs a taling seket [sekət̪]); the compositor's words are the rule-form pronunciation.
-        for (const wd of numberToText(n).split(" "))
-            sink.emit(phonemizeWordRules(wd));
+function emitNumber(n: number, sink: { emit: (s: string) => void }, digits?: string): void {
+    // ⚠ ABOVE 2^53 THIS USED TO EMIT NOTHING AND THE NUMBER VANISHED FROM THE READING. The guard is right —
+    // the float has already lost the low digits, so `numberToText` would compose a confidently WRONG numeral
+    // — but it had no else. Digit-at-a-time is what normalize.ts already gives a decimal tail, so the
+    // fallback needs no word this engine was never measured on; above 2^53 it is a digit string, not a
+    // quantity. `digits` is the ORIGINAL spelling: by the time this sees `n` the low digits are already
+    // gone, so a caller that has the source string must hand it over or the tail reads as zeros.
+    if (!Number.isSafeInteger(n)) {
+        for (const d of digits ?? String(n)) {
+            if (d < "0" || d > "9") continue;
+            for (const wd of numberToText(Number(d)).split(" ")) sink.emit(phonemizeWordRules(wd));
+        }
+        return;
+    }
+    // Number words bypass the content lexicon — the ngoko spellings collide with taling homographs (the
+    // number seket [səkət̪] vs a taling seket [sekət̪]); the compositor's words are the rule-form pronunciation.
+    for (const wd of numberToText(n).split(" "))
+        sink.emit(phonemizeWordRules(wd));
 }
 
 class JavanesePhonemizer implements Phonemizer {
@@ -240,9 +252,12 @@ class JavanesePhonemizer implements Phonemizer {
             // ⚠ Only the LATIN group is nativised. Group 2 is the Aksara Jawa run — this language's own
             // script, where there is no inventory question to ask.
             if (m[1] || m[2]) sink.emit(phonemizeWord(m[1] !== undefined ? nat(m[1]) : m[2]!));
-            else if (m[3])
-                emitNumber(Number([...m[3]].map(aksaraDigit).join("")), sink);
-            else if (m[4]) emitNumber(Number(m[4]), sink);
+            else if (m[3]) {
+                // The Aksara Jawa digit run, transliterated to ASCII — handed over as well as converted, so
+                // an above-2^53 run degrades to ITS OWN digits and not to the float's rounded ones.
+                const ascii = [...m[3]].map(aksaraDigit).join("");
+                emitNumber(Number(ascii), sink, ascii);
+            } else if (m[4]) emitNumber(Number(m[4]), sink, m[4]);
             else if (m[5]) {
                 const mk = aksaraPada(m[5]);
                 if (mk) sink.pause(mk);

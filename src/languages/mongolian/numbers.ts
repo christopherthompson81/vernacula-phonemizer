@@ -37,6 +37,26 @@ function words(n: number): W[] {
     return out;
 }
 
+/**
+ * THE DIGIT-AT-A-TIME READING — the fallback for a digit run `numberToWords` must refuse.
+ *
+ * ⚠ ABOVE 2^53 `numberToWords` RETURNS "" AND THE NUMBER USED TO VANISH FROM THE READING: the caller split
+ * that "" and emitted nothing, so the sentence still scanned with the numeral simply gone. The refusal is
+ * right — `Number()` has already lost the low digits, so the composed words would be silently WRONG — but it
+ * needed an else. Digit words are `N.units`, already authored; nothing is invented, and above 2^53 the
+ * reading is a digit string rather than a quantity.
+ *
+ * Each digit is its own utterance here, so every one takes the ABSOLUTE form (гурав, not attributive гурван)
+ * — attributive is precisely the "another number word follows in the same numeral" form, which is not what a
+ * read-out digit string is.
+ */
+export function spellDigits(digits: string): string {
+    return [...digits]
+        .filter((c) => c >= "0" && c <= "9")
+        .map((c) => unit(Number(c)).abs)
+        .join(" ");
+}
+
 /** n → Cyrillic number words (space-separated); attributive for every word but the last. */
 export function numberToWords(n: number): string {
     // Guard beyond 2^53: Number() has already lost precision, so the composed words would be silently WRONG.

@@ -16,7 +16,7 @@
  */
 import { makeAbugidaG2P } from "../../core/abugida.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
-import { renderNumber, type NumbersDef } from "../../core/numbers.ts";
+import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { deleteMedialSchwa } from "../../core/schwa.ts";
 import { loadSharedPhonology, type Phonology } from "../../core/phonology.ts";
 import type { AbugidaDef } from "../../core/abugida.ts";
@@ -269,13 +269,22 @@ export function makeNativeBengali(
         const ascii = toAscii(digits);
         const dot = ascii.indexOf(".");
         if (dot >= 0 && def.numbers.decimalWord) {
+        // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA, in every engine built from
+        // this maker — bn as bpy, one bug reaching three languages.
+        // `isSafeInteger` is right to refuse to COMPOSE (the float has already lost the low digits) but the
+        // refusal returned the digit string, and no g2p here reads Latin digits. Digit-at-a-time out of
+        // `def.numbers.units` is exactly what the decimal tail on the line below already does, so the
+        // fallback needs no word these languages' data was never measured on. See core/numbers.ts
+        // `spellDigits`: above 2^53 the reading is a digit string, not a quantity.
             const intN = Number(ascii.slice(0, dot) || "0");
-            if (!Number.isSafeInteger(intN)) return ascii;
+            const head = Number.isSafeInteger(intN)
+                ? renderNumber(intN, def.numbers, w)
+                : spellDigits(ascii.slice(0, dot), def.numbers, w);
             const frac = [...ascii.slice(dot + 1)].map((d) => w(def.numbers.units[Number(d)]!));
-            return [renderNumber(intN, def.numbers, w), w(def.numbers.decimalWord), ...frac].join(" ");
+            return [head, w(def.numbers.decimalWord), ...frac].join(" ");
         }
         const n = Number(ascii);
-        if (!Number.isSafeInteger(n)) return ascii;
+        if (!Number.isSafeInteger(n)) return spellDigits(ascii, def.numbers, w);
         return renderNumber(n, def.numbers, w);
     }
 

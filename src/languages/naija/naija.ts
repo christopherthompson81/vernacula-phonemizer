@@ -294,10 +294,17 @@ class NaijaPhonemizer implements Phonemizer {
             if (m[1] !== undefined && m[2] !== undefined) {
                 for (const wd of timeWords(Number(m[1]), Number(m[2]))) sink.emit(wd);
             } else if (m[3]) {
+                // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO BE EMITTED STRAIGHT INTO THE IPA. Refusing to
+                // COMPOSE is right (the float has already lost the low digits); emitting the token is not a
+                // reading. The ORDINAL fallback keeps the marker and reads the digits after it — `ordinalWords`
+                // is itself `marker + numberWords`, so nothing new is invented; only the quantity is lost.
                 const n = Number(m[3]);
                 if (Number.isSafeInteger(n))
                     for (const wd of ordinalWords(n).split(" ")) if (wd) sink.emit(wd);
-                else sink.emit(m[3]);
+                else {
+                    sink.emit(ORD.marker);
+                    for (const d of m[3]) sink.emit(NUM.units[Number(d)]!);
+                }
             } else if (m[4]) {
                 // dotted initialism — the dots ARE the instruction to spell it out
                 for (const ph of spellOut(m[4].replace(/\./gu, ""))) sink.emit(ph);
@@ -323,7 +330,16 @@ class NaijaPhonemizer implements Phonemizer {
                         sink.emit(NUM.point);
                         for (const d of frac) sink.emit(NUM.units[Number(d)]!);
                     }
-                } else sink.emit(m[6]);
+                } else {
+                    // ⚠ ABOVE 2^53 the token itself used to be emitted. `NUM.units` is already how the
+                    // decimal tail just above is read, so the digit-at-a-time fallback is the house
+                    // convention applied to the whole numeral — including any tail, which the old branch
+                    // dropped along with everything else.
+                    for (const d of m[6].replace(/,/gu, "")) {
+                        if (d === ".") sink.emit(NUM.point);
+                        else sink.emit(NUM.units[Number(d)]!);
+                    }
+                }
             } else if (m[7]) {
                 const mk = CLAUSE_MARK[m[7]];
                 if (mk) sink.pause(mk);

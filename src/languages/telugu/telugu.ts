@@ -54,7 +54,17 @@ const toAscii = (d: string): string =>
  */
 function number(digits: string): string {
     const n = Number(toAscii(digits));
-    if (!Number.isSafeInteger(n)) return digits;
+    // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. `isSafeInteger` is right to
+    // refuse to COMPOSE — the float has already lost the low digits, so the numeral would be confidently
+    // wrong — but the refusal returned the digit string, which no g2p in this fleet reads. Read it out
+    // digit-at-a-time instead, THROUGH THE SAME COMPOSER: a one-digit number is a call this engine already
+    // answers, so the fallback cannot invent a word. See core/numbers.ts `spellDigits` for the full
+    // account and the cost — above 2^53 the reading is a digit string, not a quantity.
+    if (!Number.isSafeInteger(n))
+        return [...toAscii(digits)]
+            .flatMap((d) => numberToWords(Number(d)).split(" "))
+            .map(phonemizeWord)
+            .join(" ");
     return numberToWords(n).split(" ").map(phonemizeWord).join(" ");
 }
 

@@ -235,8 +235,17 @@ class IndonesianPhonemizer implements Phonemizer {
                 // lexicon (their ⟨e⟩ is pepet; avoid any taling homograph).
                 const [intPart, frac] = m[2].replace(/\./gu, "").split(",");
                 const n = Number(intPart);
-                if (!Number.isSafeInteger(n)) return;
-                for (const wd of numberWords(n).split(" ")) sink.emit(phonemizeWordRules(wd));
+                // ⚠ ABOVE 2^53 THIS USED TO `return` AND THE WHOLE NUMBER VANISHED FROM THE READING — the
+                // decimal tail with it. Refusing to compose is right (the float has already lost the low
+                // digits, so the composed numeral would be confidently wrong), but the guard had no else.
+                // Digit-at-a-time is exactly what the fractional part below already does, so the fallback
+                // needs no word this engine was never measured on: above 2^53 the reading is a digit
+                // string, not a quantity. Inherited by `ms`/`zsm`, which wrap this engine.
+                if (Number.isSafeInteger(n))
+                    for (const wd of numberWords(n).split(" ")) sink.emit(phonemizeWordRules(wd));
+                else
+                    for (const dch of intPart!)
+                        for (const wd of numberWords(Number(dch)).split(" ")) sink.emit(phonemizeWordRules(wd));
                 if (frac !== undefined && frac !== "") {
                     const dot = DEF.numbers.decimalWord;
                     if (dot) sink.emit(phonemizeWordRules(dot));

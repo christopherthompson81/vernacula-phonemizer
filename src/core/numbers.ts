@@ -320,3 +320,31 @@ export function renderNumber(
         .map((w) => (w === null ? "?" : word(w)))
         .join(" ");
 }
+
+/**
+ * THE DIGIT-AT-A-TIME READING — the fallback for a digit run `renderNumber` must refuse.
+ *
+ * ⚠ WHY THIS EXISTS. `Number.isSafeInteger` is used, correctly, to refuse composing a numeral whose low
+ * digits the float has already lost: `9007199254740993` arrives as `…992`, so a composed reading would be
+ * confidently WRONG about the quantity. That guard is right and stays. What was missing across the fleet
+ * is the `else` — the numeral was either DELETED from the reading (11 engines) or its raw ASCII digits were
+ * emitted straight into the IPA (44 engines), where no g2p reads them.
+ *
+ * Digit-at-a-time rather than BigInt, following commit 49f9a08's decision for Sinitic: every caller here
+ * ALREADY reads a decimal tail this way, out of `d.units`, so the fallback needs no word the language's
+ * data was never measured on — whereas composing a higher magnitude register (trillion, and above) would
+ * invent words the dicts were never measured on and trade a silent drop for a confidently-wrong numeral.
+ *
+ * The cost is stated plainly: above 2^53 the reading is a DIGIT STRING, not a quantity. That is the honest
+ * degradation, and it is what a speaker does with an account number anyway.
+ *
+ * Non-digit characters (a grouping comma, a stray sign) are skipped rather than guessed at. A `units`
+ * entry that is empty is a genuine gap in the language's data and is likewise skipped, not invented.
+ */
+export function spellDigits(digits: string, d: NumbersDef, word: (w: string) => string): string {
+    return [...digits]
+        .map((c) => (c >= "0" && c <= "9" ? d.units[Number(c)] : undefined))
+        .filter((w): w is string => w !== undefined && w !== "")
+        .map(word)
+        .join(" ");
+}
