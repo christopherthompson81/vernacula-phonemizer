@@ -33,10 +33,21 @@
  * The substring column is printed anyway, because seeing `0 token / 7 substring` is what teaches you that the
  * word is absent and your grep was lying.
  *
+ * ── AND THE ERROR THAT PRECISION CAN MAKE IN THE OTHER DIRECTION ───────────────────────────────────────
+ *
+ * A boundary test can also be too narrow, and then it manufactures the negative instead of the positive.
+ * This tool split words on every non-letter, so a word whose ORTHOGRAPHY CONTAINS PUNCTUATION was cut in
+ * half before the test ran and could never be a token: `sampè'` (mad) came back `0 token / 17 substring`
+ * while the run's own examples read `ḍâri sobbhu sampe’ pokol 10:00`. Of 522 recorded findings in
+ * `tools/corpus/attest/`, ALL 11 whose probed word held an apostrophe or hyphen were `substring-only`,
+ * against an 82% `attested` rate for plain words — five languages, one bug. Since a `substring-only` reads
+ * as unattested and this project leaves an unattested word unauthored, the instrument was producing refusals
+ * for exactly those languages that write a glottal stop, an elision or a compound hyphen. See `matchers()`.
+ *
  * ── EXCEPT WHERE THERE ARE NO WORD BOUNDARIES ──────────────────────────────────────────────────────────
  *
  * The paragraph above is right for every alphabetic script and WRONG for a spaceless one, and the original
- * `tokens()` comment here claimed it "works for a spaceless orthography's words too" while doing the exact
+ * tokenizer's comment here claimed it "works for a spaceless orthography's words too" while doing the exact
  * opposite. Splitting Chinese prose on non-letters yields ONE token per sentence, so `toks.has(word)` is
  * false for every real Chinese word and the verdict is `substring-only` no matter what. Measured on cmn:
  *
@@ -70,7 +81,15 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
+/** ⚠ Only dispatch when this file IS the entry point — the same guard `mine.ts` and `wiki-health.ts` carry,
+ *  and for the same reason: without it the CLI runs on import, and the `process.exit(2)` below would kill a
+ *  test process before it could call `matchers()`. The boundary rule this file turns on is the one thing here
+ *  that is pure and testable, and it stayed untested — and wrong — for as long as it was unreachable. */
+const IS_CLI = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+const USAGE = "usage: --lang <code> [--words a,b,c | --from-review | --after noun,noun] [--wiki <wikicode>] [--limit N]";
 const argv = process.argv.slice(2);
 const arg = (n: string, d?: string): string | undefined => {
     const i = argv.indexOf(`--${n}`);
@@ -79,11 +98,7 @@ const arg = (n: string, d?: string): string | undefined => {
 const has = (n: string): boolean => argv.includes(`--${n}`);
 
 const lang = arg("lang");
-if (lang === undefined) {
-    console.error("usage: --lang <code> [--words a,b,c | --from-review | --after noun,noun] [--wiki <wikicode>] [--limit N]");
-    process.exit(2);
-}
-const wiki = arg("wiki", lang)!;
+const wiki = arg("wiki", lang) ?? "";
 const limit = Number(arg("limit", "40"));
 /**
  * `--context` — THE REGISTER TIER, and the one the sign-reading work showed is not optional.
@@ -141,12 +156,110 @@ async function wikiExists(): Promise<boolean> {
 }
 
 /** Escape a probed word for use inside a regex — a term list may contain a dot or a hyphen. */
-const reEsc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
-const fold = (s: string): string => s.toLowerCase().normalize("NFD").replace(/\p{M}+/gu, "");
-/** TOKEN membership, the whole point of this file — for a script that HAS tokens. Splits on anything that is
- *  not a letter or mark, and folds diacritics the way the review gate does. */
-function tokens(text: string): Set<string> {
-    return new Set(fold(text).split(/[^\p{L}\p{M}]+/u).filter((t) => t !== ""));
+export const reEsc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+
+/**
+ * THE APOSTROPHE IS ONE CHARACTER WEARING SEVEN CODEPOINTS, and which one a wiki uses is a typographic
+ * accident, not a fact about the language.
+ *
+ * `mad.wikipedia.org` writes the glottal with U+2019 (`sampe’`); the probe list, the corpus and this repo's
+ * own source files write it with U+0027 (`sampè'`). Before this class existed the two never met: the probed
+ * word could not match the wiki's spelling of the SAME WORD, and the tool answered with a negative.
+ *
+ * ⚠ U+02BC ʼ AND U+02BB ʻ ARE `\p{Lm}` — LETTERS. A ʼokina therefore sailed straight through every
+ * letters-only boundary as though it were an `a`, welding the word to whatever stood next to it. Folding
+ * them here puts Hawaiian-style orthography under the same boundary rule as everything else.
+ */
+const APOS_CHARS = /['‘’‛ʼʻ´]/gu;
+/** The same set as a regex CLASS, for matching against text that has NOT been folded (the example quotes). */
+const APOS_CLASS = "['‘’‛ʼʻ´]";
+export const fold = (s: string): string =>
+    s.toLowerCase().normalize("NFD").replace(/\p{M}+/gu, "").replace(APOS_CHARS, "'");
+
+/**
+ * THE WORD BOUNDARY — the whole point of this file, and the thing it had wrong for every language whose
+ * orthography puts punctuation INSIDE a word.
+ *
+ * This tool used to gate on token-set membership (`tokens(text).has(w)`) while COUNTING with the lookaround
+ * regex below. For a probe made only of letters the two are equivalent — a token is a maximal run of
+ * letters, so `w` is in the token set iff `w` occurs flanked by non-letters — but for a word containing an
+ * apostrophe or a hyphen they disagree completely, because splitting on non-letters cuts such a word in half
+ * and the whole word can never be a token. Measured over `tools/corpus/attest/*.jsonc`: of 522 recorded
+ * findings, the 11 whose probed word contained an apostrophe or hyphen were `substring-only` — **all
+ * eleven, 0 token hits** — against an 82% `attested` rate for plain words. Five languages, one cause:
+ *
+ *   ln  kilomɛtrɛ-kare · mad sampè' · mg tora-telo, isan-jato · nan Liap-sī, kong-kin, … · om baay’isuu, …
+ *
+ * A `substring-only` verdict READS AS A NEGATIVE and this project's rule is to leave a word unauthored when
+ * it is unattested, so the failure was one-directional: it manufactured refusals, and only for languages
+ * that write a glottal stop, an elision or a compound hyphen.
+ *
+ * WHY NOT SIMPLY WIDEN THE SPLIT CLASS, the way `corpus-words.ts` does (`[^\p{L}\p{M}‌'’-]+`). Because that
+ * makes the tokenizer swallow punctuation wherever it sits, including where it is NOT part of the word — a
+ * closing quote (`said 'ak'` → token `ak'`), an English possessive, a sentence-final apostrophe. That is the
+ * OVER-report direction, and it is the worse one: this file's header records four occasions where a
+ * substring was mistaken for an attestation, and a false positive is what lets a word be authored on
+ * evidence that is not there. The lookarounds below add nothing to the token test for plain words; they only
+ * stop cutting words that contain punctuation.
+ *
+ * ONE TIGHTENING, in the precision direction. Bare `(?<![\p{L}\p{M}])` treats any non-letter as a boundary,
+ * so probing `sampe` against `sampe'an` would match — the `Libyen` error arriving through punctuation rather
+ * than through a letter. So a flanking apostrophe THAT IS ITSELF GLUED TO A LETTER is not a boundary either.
+ *
+ * ⚠ THE HYPHEN IS DELIBERATELY NOT IN THAT REJECTION CLASS. An apostrophe binds tightly — glottal stop,
+ * elision, ʼokina — so a letter on its far side belongs to the same word. A hyphen is a compound or syllable
+ * joiner whose halves are routinely words in their own right (POJ `chit-ê`, and the hyphenated-compound
+ * habit of Malagasy and Lingala). Rejecting it would newly make `chit` fail inside `chit-ê`: a change in the
+ * FALSE-REFUSAL direction, which is the failure being fixed here. Hyphens keep exactly their old behaviour
+ * as a boundary; what changes is that a hyphenated PROBE is no longer torn apart before the test runs.
+ */
+const LM = "\\p{L}\\p{M}";
+function boundedSource(body: string): string {
+    return `(?<![${LM}])(?<![${LM}]${APOS_CLASS})${body}(?![${LM}])(?!${APOS_CLASS}[${LM}])`;
+}
+
+/** A probe with internal whitespace is a COLLOCATION, tested as a phrase rather than as a single word. */
+const isPhrase = (word: string): boolean => /\s/u.test(word.trim());
+
+/**
+ * The two regexes a probe needs, built once and derived from the SAME boundary rule so the gate, the count
+ * and the quote can never again disagree about what a word is.
+ *
+ * `hit` runs against FOLDED text (where every apostrophe variant is already U+0027); `quote` runs against the
+ * ORIGINAL text with the ORIGINAL word, because slicing original text at a folded index lands the window off
+ * by however many combining marks preceded it. The apostrophes in the quote pattern are widened to the class
+ * so an `'`-spelled probe still finds its examples in an `’`-spelled wiki.
+ */
+export function matchers(word: string): { hit: RegExp; quote: RegExp; bounded: boolean; phrase: boolean } {
+    const bounded = !UNSPACED.test(word);
+    const phrase = isPhrase(word);
+    // Internal whitespace is relaxed to `\s+` so a phrase still matches across a line break or a double space.
+    const classed = (t: string): string => reEsc(t).replace(APOS_CHARS, APOS_CLASS);
+    const part = (t: string, esc: (x: string) => string): string =>
+        phrase ? t.trim().split(/\s+/u).map(esc).join("\\s+") : esc(t);
+    const hitBody = part(fold(word), reEsc);
+    const quoteBody = part(word, classed);
+    return {
+        hit: new RegExp(bounded ? boundedSource(hitBody) : hitBody, "gu"),
+        quote: new RegExp(bounded ? boundedSource(quoteBody) : quoteBody, "giu"),
+        bounded, phrase,
+    };
+}
+
+/** Does `text` attest `word`? The gate, exported so both failure directions can be pinned by test. */
+export function isHit(word: string, text: string): boolean {
+    const { hit, bounded } = matchers(word);
+    // In an unspaced script no boundary exists, so the substring match IS the hit test — see UNSPACED below.
+    if (!bounded) return fold(text).includes(fold(word));
+    hit.lastIndex = 0;
+    return hit.test(fold(text));
+}
+
+/** How many times, on the same rule. */
+export function countHits(word: string, text: string): number {
+    const { hit } = matchers(word);
+    hit.lastIndex = 0;
+    return [...fold(text).matchAll(hit)].length;
 }
 
 /**
@@ -192,14 +305,10 @@ function titleBatches(titles: string[], budget = 1500): string[][] {
 
 async function probe(word: string): Promise<Finding> {
     const w = fold(word);
-    const bounded = !UNSPACED.test(word);
-    /** A probe with internal whitespace is a COLLOCATION, tested as a phrase rather than as a token. */
-    const phrase = /\s/u.test(word.trim());
     // In an unspaced script the hit test is a plain substring; everywhere else it is flanked by the
-    // not-a-letter lookarounds that make `Yen` fail inside `Libyen`. Internal whitespace is relaxed to `\s+`
-    // so a phrase still matches across a line break or a double space in the extract.
-    const body = phrase ? w.trim().split(/\s+/u).map(reEsc).join("\\s+") : w;
-    const hitRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${body}(?![\\p{L}\\p{M}])` : body, "gu");
+    // boundary that makes `Yen` fail inside `Libyen` and `sampe` fail inside `sampe'an`, while letting
+    // `sampè'` and `Liap-sī` be words. `quoteRe` carries the SAME boundary — see `matchers()`.
+    const { hit: hitRe, quote: quoteRe, bounded } = matchers(word);
     // CirrusSearch tokenises, so a plain term search is the right recall net; the token test below is what
     // supplies the precision. `insource:` regex was tried and is worse here — it is expensive on small wikis
     // and its own \b is ASCII-defined, which is the trap that disabled the initialism pass fleet-wide.
@@ -239,15 +348,19 @@ async function probe(word: string): Promise<Finding> {
     for (const p of pages) {
         const text = String(p.extract ?? "").replace(/\s+/gu, " ");
         if (text === "") continue;
-        // The token set gates the count for a bounded SINGLE WORD only. For an unspaced script it would gate
-        // on a sentence-sized token and reject everything, so the substring hit stands as the hit — and for a
-        // MULTI-WORD PHRASE it can never match at all, because `tokens()` splits on the very space the phrase
-        // contains. That made every phrase probe report `substring-only`, which reads as a NEGATIVE, while the
-        // phrase was sitting in the quoted example directly above it: ff's `kiloomeeteer kaaree` was called
-        // substring-only in the same run whose example was "468 kiloomeeteer kaaree (181 mi kaaree)". A phrase
-        // is the collocation test this file exists to support (⚠ the bare modifier is never the attestation)), so it is gated by `hitRe`, which
-        // already flanks the WHOLE probe with the not-a-letter lookarounds.
-        if (phrase ? hitRe.test(fold(text)) : bounded ? tokens(text).has(w) : fold(text).includes(w)) {
+        // ⚠ ONE GATE, AND IT IS THE ONE THAT COUNTS. This line used to read
+        // `bounded ? tokens(text).has(w) : …` — it GATED on token-set membership while the count two lines
+        // below has always used `hitRe`. The two agree for a word made only of letters and disagree utterly
+        // for one containing an apostrophe or a hyphen, because splitting on non-letters cuts such a word in
+        // half: `sampè'` (mad), `Liap-sī` (nan), `isan-jato` (mg), `baay’isuu` (om) could not match a token
+        // no matter how often the wiki wrote them. All 11 such findings in `tools/corpus/attest/` came back
+        // `substring-only` — a NEGATIVE — and the same failure had already been caught for MULTI-WORD
+        // PHRASES, which `tokens()` splits on the very space they contain: ff's `kiloomeeteer kaaree` was
+        // called substring-only in the run whose own example read "468 kiloomeeteer kaaree (181 mi kaaree)".
+        // The phrase was special-cased then; the general cause is fixed now. `tokens()` is gone.
+        //
+        // For an unspaced script no boundary exists, so the substring match stands as the hit.
+        if (bounded ? hitRe.test(fold(text)) : fold(text).includes(w)) {
             articles++;
             // Count and quote the occurrences, so a human can judge the SENSE — the part no tool can do.
             // `amaphuzu` (zu) is a real token meaning sports POINTS, not the decimal point; `paun` (ms) is
@@ -266,9 +379,13 @@ async function probe(word: string): Promise<Finding> {
             // different marks the fold still COUNTS the hit and no example is quoted — a missing quote is a
             // prompt to look; a misaligned one is a wrong finding, and these quotes are the whole of the
             // evidence for unspaced scripts.
+            //
+            // The apostrophe is the one exception the quote pattern makes, and it is not a mark: `matchers()`
+            // widens each apostrophe in the probe to the whole variant CLASS, so a `'`-spelled probe still
+            // quotes its examples from an `’`-spelled wiki. That is not laundering — the word is the same
+            // word; only the typography differs, and the count already folded them together.
             tokenHits += [...fold(text).matchAll(hitRe)].length;
-            const qBody = phrase ? word.trim().split(/\s+/u).map(reEsc).join("\\s+") : reEsc(word);
-            const quoteRe = new RegExp(bounded ? `(?<![\\p{L}\\p{M}])${qBody}(?![\\p{L}\\p{M}])` : qBody, "giu");
+            quoteRe.lastIndex = 0;
             for (const m of text.matchAll(quoteRe)) {
                 if (examples.length >= 6) break;
                 const at = m.index!;
@@ -350,127 +467,133 @@ async function slotProbe(nouns: string[]): Promise<void> {
     console.log();
 }
 
-const exists = await wikiExists();
-if (!exists) {
-    console.error(`${wiki}.wikipedia.org does not respond as a wiki — a negative from here is NOT evidence.`);
-    console.error(`Pass --wiki <code> if this language's wiki is filed under a different code.`);
-    process.exit(3);
-}
+if (IS_CLI) {
+    if (lang === undefined) {
+        console.error(USAGE);
+        process.exit(2);
+    }
+    const exists = await wikiExists();
+    if (!exists) {
+        console.error(`${wiki}.wikipedia.org does not respond as a wiki — a negative from here is NOT evidence.`);
+        console.error(`Pass --wiki <code> if this language's wiki is filed under a different code.`);
+        process.exit(3);
+    }
 
-// `--after` is its own mode: it discovers candidates rather than judging them, so it prints and exits
-// without writing the artifact — nothing here is a finding yet.
-const afterArg = arg("after");
-if (afterArg !== undefined) {
-    await slotProbe(afterArg.split(",").map((n) => n.trim()).filter((n) => n !== ""));
-    process.exit(0);
-}
+    // `--after` is its own mode: it discovers candidates rather than judging them, so it prints and exits
+    // without writing the artifact — nothing here is a finding yet.
+    const afterArg = arg("after");
+    if (afterArg !== undefined) {
+        await slotProbe(afterArg.split(",").map((n) => n.trim()).filter((n) => n !== ""));
+        process.exit(0);
+    }
 
-// A MISSING ARGUMENT IS A USAGE ERROR, not a stack trace: `words()` throws, and at top level that surfaced
-// as an unhandled rejection with a Node banner, which reads like the tool is broken rather than misinvoked.
-let wordList: string[];
-try {
-    wordList = words();
-} catch (e) {
-    console.error(`${(e as Error).message}`);
-    console.error("usage: --lang <code> [--words a,b,c | --from-review | --after noun,noun] [--wiki <wikicode>] [--limit N]");
-    process.exit(2);
-}
-const findings: Finding[] = [];
-for (const w of wordList) findings.push(await probe(w));
+    // A MISSING ARGUMENT IS A USAGE ERROR, not a stack trace: `words()` throws, and at top level that surfaced
+    // as an unhandled rejection with a Node banner, which reads like the tool is broken rather than misinvoked.
+    let wordList: string[];
+    try {
+        wordList = words();
+    } catch (e) {
+        console.error(`${(e as Error).message}`);
+        console.error("usage: --lang <code> [--words a,b,c | --from-review | --after noun,noun] [--wiki <wikicode>] [--limit N]");
+        process.exit(2);
+    }
+    const findings: Finding[] = [];
+    for (const w of wordList) findings.push(await probe(w));
 
-const pad = (s: string, n: number): string => s.padEnd(n);
-console.log(`\n── ${wiki}.wikipedia.org — TOKEN attestation ──\n`);
-console.log(`  ${pad("word", 16)} ${pad("token", 6)} ${pad("arts", 5)} ${pad("substr-only", 12)} verdict`);
-for (const f of findings)
-    console.log(`  ${pad(f.word, 16)} ${pad(String(f.tokenHits), 6)} ${pad(String(f.articles), 5)} `
-        + `${pad(String(f.substringOnly), 12)} ${f.verdict}`);
-console.log(`\n  READ THE EXAMPLES. A token hit proves the word EXISTS, never that it fits the slot — the`);
-console.log(`  Fula lesson. zu's amaphuzu is a real token meaning sports POINTS, not the decimal point.\n`);
-if (findings.some((f) => !f.bounded)) {
-    console.log(`  * = UNSPACED SCRIPT: no word boundary exists, so the count is a SUBSTRING count and this`);
-    console.log(`  tool supplied no precision at all. The hit may be a fragment of a longer compound. The`);
-    console.log(`  examples below are the whole of the evidence — an unread \`attested*\` is worth nothing.\n`);
-}
-for (const f of findings) {
-    if (f.examples.length === 0) continue;
-    console.log(`  ${f.word}:`);
-    for (const x of f.examples) console.log(`    ${x}`);
-    console.log();
-}
+    const pad = (s: string, n: number): string => s.padEnd(n);
+    console.log(`\n── ${wiki}.wikipedia.org — TOKEN attestation ──\n`);
+    console.log(`  ${pad("word", 16)} ${pad("token", 6)} ${pad("arts", 5)} ${pad("substr-only", 12)} verdict`);
+    for (const f of findings)
+        console.log(`  ${pad(f.word, 16)} ${pad(String(f.tokenHits), 6)} ${pad(String(f.articles), 5)} `
+            + `${pad(String(f.substringOnly), 12)} ${f.verdict}`);
+    console.log(`\n  READ THE EXAMPLES. A token hit proves the word EXISTS, never that it fits the slot — the`);
+    console.log(`  Fula lesson. zu's amaphuzu is a real token meaning sports POINTS, not the decimal point.\n`);
+    if (findings.some((f) => !f.bounded)) {
+        console.log(`  * = UNSPACED SCRIPT: no word boundary exists, so the count is a SUBSTRING count and this`);
+        console.log(`  tool supplied no precision at all. The hit may be a fragment of a longer compound. The`);
+        console.log(`  examples below are the whole of the evidence — an unread \`attested*\` is worth nothing.\n`);
+    }
+    for (const f of findings) {
+        if (f.examples.length === 0) continue;
+        console.log(`  ${f.word}:`);
+        for (const x of f.examples) console.log(`    ${x}`);
+        console.log();
+    }
 
-if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
-const outPath = join(OUT_DIR, `${lang}.jsonc`);
-const prior = existsSync(outPath) ? readFileSync(outPath, "utf8") : "";
-/**
- * ⚠ PRIOR FINDINGS ARE CARRIED FORWARD, BECAUSE THIS TOOL USED TO DESTROY THEM. The cache is per LANGUAGE and
- * the file was rewritten from this run's findings alone, so probing one word deleted every word probed before
- * it — `--lang hi --words दशमलव` replaced seven existing findings (ऋण, गुणा, भाजित, घन, माइनस, बराबर, ऋणात्मक)
- * and the only trace was a cheerful "(replaced 7 prior finding(s))" in the log. The loss is worse than it
- * sounds: each finding costs a live Wikipedia fetch, `review.ts`'s haystack reads the cache for its example
- * prose, and its "wikipedia NOT probed" hint sends the next reader to this exact command. Following the gate's
- * own advice silently unsourced seven other words.
- *
- * A word probed in THIS run always wins — that is a fresh measurement of the same question. Everything else is
- * kept verbatim, block for block, so no re-parse can alter a finding this run did not make.
- */
-const priorBlocks = [...prior.matchAll(/\{\s*"word":[\s\S]*?\n        \}/gu)].map((m) => m[0]);
-const probed = new Set(findings.map((f) => f.word));
-const carried = priorBlocks.filter((b) => {
-    const w = /"word":\s*"([^"]+)"/u.exec(b)?.[1];
-    return w !== undefined && !probed.has(w);
-});
-const replaced = priorBlocks.length - carried.length;
-// ⚠ AND THE CARRY-FORWARD IS CHECKED, because the block pattern above depends on the indentation THIS FILE
-// writes, and a hand-edited cache could defeat it — reintroducing the silent deletion by another route. The
-// word list is matched with a pattern that cannot miss, so any word neither probed nor carried means the
-// block parse failed. Loud, and non-zero exit, because the failure mode is data loss.
-const priorWords = new Set([...prior.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!));
-const carriedWords = new Set(carried.map((b) => /"word":\s*"([^"]+)"/u.exec(b)?.[1]));
-const lost = [...priorWords].filter((w) => !probed.has(w) && !carriedWords.has(w));
-if (lost.length > 0) {
-    console.error(`\n  REFUSING TO WRITE: ${lost.length} existing finding(s) could not be parsed for carry-forward `
-        + `— ${lost.join(", ")}. Writing now would delete them. The block pattern expects the indentation this `
-        + `tool emits; if ${outPath} was hand-edited, restore it from git and re-run.`);
-    process.exit(1);
+    if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
+    const outPath = join(OUT_DIR, `${lang}.jsonc`);
+    const prior = existsSync(outPath) ? readFileSync(outPath, "utf8") : "";
+    /**
+     * ⚠ PRIOR FINDINGS ARE CARRIED FORWARD, BECAUSE THIS TOOL USED TO DESTROY THEM. The cache is per LANGUAGE and
+     * the file was rewritten from this run's findings alone, so probing one word deleted every word probed before
+     * it — `--lang hi --words दशमलव` replaced seven existing findings (ऋण, गुणा, भाजित, घन, माइनस, बराबर, ऋणात्मक)
+     * and the only trace was a cheerful "(replaced 7 prior finding(s))" in the log. The loss is worse than it
+     * sounds: each finding costs a live Wikipedia fetch, `review.ts`'s haystack reads the cache for its example
+     * prose, and its "wikipedia NOT probed" hint sends the next reader to this exact command. Following the gate's
+     * own advice silently unsourced seven other words.
+     *
+     * A word probed in THIS run always wins — that is a fresh measurement of the same question. Everything else is
+     * kept verbatim, block for block, so no re-parse can alter a finding this run did not make.
+     */
+    const priorBlocks = [...prior.matchAll(/\{\s*"word":[\s\S]*?\n        \}/gu)].map((m) => m[0]);
+    const probed = new Set(findings.map((f) => f.word));
+    const carried = priorBlocks.filter((b) => {
+        const w = /"word":\s*"([^"]+)"/u.exec(b)?.[1];
+        return w !== undefined && !probed.has(w);
+    });
+    const replaced = priorBlocks.length - carried.length;
+    // ⚠ AND THE CARRY-FORWARD IS CHECKED, because the block pattern above depends on the indentation THIS FILE
+    // writes, and a hand-edited cache could defeat it — reintroducing the silent deletion by another route. The
+    // word list is matched with a pattern that cannot miss, so any word neither probed nor carried means the
+    // block parse failed. Loud, and non-zero exit, because the failure mode is data loss.
+    const priorWords = new Set([...prior.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!));
+    const carriedWords = new Set(carried.map((b) => /"word":\s*"([^"]+)"/u.exec(b)?.[1]));
+    const lost = [...priorWords].filter((w) => !probed.has(w) && !carriedWords.has(w));
+    if (lost.length > 0) {
+        console.error(`\n  REFUSING TO WRITE: ${lost.length} existing finding(s) could not be parsed for carry-forward `
+            + `— ${lost.join(", ")}. Writing now would delete them. The block pattern expects the indentation this `
+            + `tool emits; if ${outPath} was hand-edited, restore it from git and re-run.`);
+        process.exit(1);
+    }
+    const esc = (s: string): string => JSON.stringify(s);
+    writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang}. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so \`articles\` is recorded beside \`tokenHits\`: one hit in one article is a LEAD, not a finding.
+    //
+    // \`substringOnly\` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's \`Yen\` in \`Libyen\`, xh's \`iiyeni\` in \`yeNintendo\`. A substring-only verdict is a NEGATIVE result.
+    //
+    // \`bounded\` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so \`tokenHits\` is a substring count and the verdict is written \`attested*\`. The precision
+    // that makes \`Libyen\` fail for \`Yen\` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": ${esc(lang)},
+        "wiki": ${esc(`${wiki}.wikipedia.org`)},
+        "tier": ${esc(context === undefined ? "wikipedia" : "wikipedia (register-restricted)")},${context === undefined ? "" : `
+        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+        // \`--context\` set to exactly this string.
+        "context": ${esc(context)},`}
+        "findings": [
+    ${findings.map((f) => `        {
+                "word": ${esc(f.word)},
+                "verdict": ${esc(f.verdict)},
+                "bounded": ${f.bounded},
+                "tokenHits": ${f.tokenHits},
+                "articles": ${f.articles},
+                "substringOnly": ${f.substringOnly},
+                "examples": [${f.examples.map((x) => `\n                ${esc(x)}`).join(",")}${f.examples.length ? "\n            " : ""}]
+            }`).join(",\n")}${carried.length ? `,\n${carried.map((b) => `        ${b.replace(/^\s+/u, "")}`).join(",\n")}` : ""}
+        ],
+    }
+    `, "utf8");
+    console.log(`  → ${outPath}${replaced ? `  (re-probed ${replaced} existing finding(s))` : ""}`
+        + `${carried.length ? `, ${carried.length} earlier finding(s) kept` : ""}`);
+    console.log(`  Only an \`attested\` verdict WITH a sense you have checked belongs in a sourcing argument.\n`);
 }
-const esc = (s: string): string => JSON.stringify(s);
-writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang}. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so \`articles\` is recorded beside \`tokenHits\`: one hit in one article is a LEAD, not a finding.
-//
-// \`substringOnly\` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's \`Yen\` in \`Libyen\`, xh's \`iiyeni\` in \`yeNintendo\`. A substring-only verdict is a NEGATIVE result.
-//
-// \`bounded\` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so \`tokenHits\` is a substring count and the verdict is written \`attested*\`. The precision
-// that makes \`Libyen\` fail for \`Yen\` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": ${esc(lang)},
-    "wiki": ${esc(`${wiki}.wikipedia.org`)},
-    "tier": ${esc(context === undefined ? "wikipedia" : "wikipedia (register-restricted)")},${context === undefined ? "" : `
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // \`--context\` set to exactly this string.
-    "context": ${esc(context)},`}
-    "findings": [
-${findings.map((f) => `        {
-            "word": ${esc(f.word)},
-            "verdict": ${esc(f.verdict)},
-            "bounded": ${f.bounded},
-            "tokenHits": ${f.tokenHits},
-            "articles": ${f.articles},
-            "substringOnly": ${f.substringOnly},
-            "examples": [${f.examples.map((x) => `\n                ${esc(x)}`).join(",")}${f.examples.length ? "\n            " : ""}]
-        }`).join(",\n")}${carried.length ? `,\n${carried.map((b) => `        ${b.replace(/^\s+/u, "")}`).join(",\n")}` : ""}
-    ],
-}
-`, "utf8");
-console.log(`  → ${outPath}${replaced ? `  (re-probed ${replaced} existing finding(s))` : ""}`
-    + `${carried.length ? `, ${carried.length} earlier finding(s) kept` : ""}`);
-console.log(`  Only an \`attested\` verdict WITH a sense you have checked belongs in a sourcing argument.\n`);
