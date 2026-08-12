@@ -171,11 +171,15 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
             + "whole-word in cdo's own corpus (cĭ-găng, cĭ-ék, cĭ-hâiu). (4) 百 IS `báh`: Wiktionary's "
             + "Eastern Min entry says \"báh - vernacular ('hundred'); báik - literary ('numerous')\", and "
             + "cdo.wikipedia's BUC prose writes it ×20 as the number (`gūi báh nièng`, `siŏh báh gūi "
-            + "cṳ̄ng`, `báh nièng hâu-kéng`). ⚠ NOTE THE DISAGREEMENT THAT LEG EXPOSES, recorded rather "
-            + "than resolved here: mindong.ts's number compositor reads 百 as ⟨báik⟩ from the Wikivoyage "
-            + "phrasebook, so the engine and this word disagree about the same character. Changing the "
-            + "compositor rewrites every number cdo speaks and a shipped golden — its own measurement, not "
-            + "a side effect of a text layer. ⚠ AND `hŭng-cĭ` ALONE IS THE SAME WORD MINUS ITS FIRST "
+            + "cṳ̄ng`, `báh nièng hâu-kéng`). ⚠ THE DISAGREEMENT THIS LEG EXPOSED IS NOW SETTLED, and the "
+            + "record is kept because the leg is what found it: mindong.ts's compositor read 百 as ⟨báik⟩ "
+            + "from the Wikivoyage phrasebook, so the engine and this word disagreed about the same "
+            + "character — the engine read 百 two ways depending on which path reached it. Measured "
+            + "separately (a0bc243): Wiktionary assigns the counting sense to the vernacular `báh` and gives "
+            + "`báik` the distinct sense 'numerous'; cdo.wikipedia's number articles carry the recorded "
+            + "AUDIO on `siŏh báh` with `siŏh báik` only a parenthesised alternate; `insource:` runs 14:2 "
+            + "for báh, and both apparent counter-hits are false (a film title, and 八萬). The compositor "
+            + "now reads `báh`; 八 keeps `báik`. ⚠ AND `hŭng-cĭ` ALONE IS THE SAME WORD MINUS ITS FIRST "
             + "SYLLABLE, used by the fraction rule, on legs (1)–(3); it is `absent` in the same probe.",
     },
     cjy: {
