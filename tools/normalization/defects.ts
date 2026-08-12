@@ -838,7 +838,20 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     mad: {
         // ⚠ ESPEAK SHIPS NO MADURESE AT ALL and there is no machine referee for it (no wikipron/epitran/
         // kaikki), so every reason below is a measurement over the mined mad.wikipedia artifact plus
-        // `attest.ts` against that same wiki — there is no third tier to appeal to.
+        // `attest.ts` against that same wiki.
+        // ⚠ A THIRD TIER DOES EXIST FOR THIS LANGUAGE, and an earlier version of this comment said it did
+        // not. Off-repo Madurese lexicography is reachable and it settled two questions the corpus could
+        // not: the Madurese–Indonesian dictionary at willnode.github.io/madura (9,789 entries) carries
+        // `koma`, `jutah` and `milyad` as headwords, and ruangbudaya.com's "Numeral dalam Bahasa Madura"
+        // supplies a whole composed numeral (1,508,070 = *sajuta lèmaratos bâllu' èbu pèttongpolo*) that
+        // fixes the magnitude WORD ORDER. Both are cited at their point of use (madurese.jsonc,
+        // numbers.ts, normalize.ts step 10). The classes below are still refused — none of these sources
+        // offers a sign word — but "the corpus is silent" is not by itself the end of the enquiry here.
+        // ⚠ AND `attest.ts`'s wiki probe SUBSTRING-MATCHES, which under-counted `koma` into invisibility:
+        // `insource:/koma/` on mad.wikipedia is dominated by `komandan`/`hokoman`/`okoman`, and the one
+        // snippet that names the punctuation mark (`tandhâ bâca koma`, in `Bhâsa Jeppang`) only surfaced
+        // when all thirty were read by hand. Read the snippets, not the count — the same lesson `sampè'`
+        // taught from the other direction (trap 41).
         // ⚠ AND `minus` IS DELIBERATELY ABSENT FROM THIS BLOCK, which is the point of the entry as a whole.
         // Madurese has TWO genuine negatives in the artifact (`-1 mèter dpl`, and the integers article's
         // `0, 1, -1, 2, - 2, ...`), omitting a minus INVERTS the value, and `korang` ×17 — the only

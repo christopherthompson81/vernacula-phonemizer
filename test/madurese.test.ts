@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord } from "../src/languages/madurese/madurese.ts";
+import { numberToWords } from "../src/languages/madurese/numbers.ts";
 import { normalizeMadurese } from "../src/languages/madurese/normalize.ts";
 import { phonemize } from "../src/index.ts";
 
@@ -170,5 +171,56 @@ describe("text normalization", () => {
             "Madhurâ iyâ arèya polo sè bâḍâ è tèmor tasè' polo Jhâbâ.",
         );
         expect(normalizeMadurese("Taon 2008.")).toBe("Taon 2008.");
+    });
+});
+
+// ── THE MAGNITUDE SERIES ABOVE 10⁶ ───────────────────────────────────────────────────────────────────
+// ⚠ THIS IS THE NUMBER PATH, NOT THE NORMALIZATION LAYER, and it was uncovered BY that layer: de-grouping
+// newly handed `numbers.ts` whole millions, which it then read one digit at a time because its authored
+// range stopped at 10⁶ (26 instances in the artifact's 437 lines, all populations and areas). The words
+// are sourced at their declaration in madurese.jsonc — `juta` ×18, `miliar` ×11, `triliun` ×3 in the
+// corpus's own magnitude slot, plus a Madurese numeral description and a Madurese–Indonesian dictionary.
+describe("cardinal numbers above a million", () => {
+    // ⚠ THE WORD ORDER IS THE ASSERTION HERE, because it is the thing that had to be established rather
+    // than assumed — `nya` (Chichewa) found a language whose digit-retaining and spelled-out orders were
+    // opposites. Madurese is multiplier-then-magnitude, descending: 1,508,070 is *sajuta lèmaratos bâllu'
+    // èbu pèttongpolo* in the numeral description this series is sourced from.
+    test("the magnitude follows its count, largest group first", () => {
+        expect(numberToWords(1508070)).toBe("juta bân lèma' atos bân ballu' èbu bân petto' polo");
+        // …and the grouping is by 10⁶ then 10³, so 752,425,214 is "752 million", never "0.75 miliar".
+        expect(numberToWords(752425214)).toBe(
+            "petto' atos bân lèma' polo bân duwâ juta bân empa' atos bân duwâ polo bân lèma' èbu"
+            + " bân duwâ atos bân sapolo bân empa'",
+        );
+        expect(numberToWords(1e9)).toBe("miliar");
+        expect(numberToWords(1e12)).toBe("triliun");
+        // A bare magnitude at count 1 — this file's existing convention for `atos` and `èbu`, since the
+        // fuller counting forms fuse the prefix instead (saratos, saèbu, sajuta) rather than prefixing
+        // `settong`.
+        expect(numberToWords(1e6)).toBe("juta");
+    });
+
+    // The corpus instance that motivated the work: Saudi Arabia's area, `2.150.000 km²`, which de-grouping
+    // handed over whole and which used to read *duwâ settong lèma' nolla nolla nolla nolla*.
+    test("the corpus instance that uncovered the cap", () => {
+        expect(phonemize("2.150.000 km²", "mad")).toBe(
+            "duwɤ ɟuta bɤn atɔs bɤn lɛmaʔ pɔlɔ ɛbu kilɔmɛtəɾ pəɾsəɡi",
+        );
+    });
+
+    // ⚠ ABOVE THE AUTHORED RANGE THE NUMBER IS STILL SPOKEN — the fleet rule from d38f00d / fdab9b1 and
+    // test/bignum-fallback.test.ts. Madurese caps at 10¹⁵ because no quadrillion word is attested for it
+    // (the only source offering `kuwadriliyun` is one blog post, and the corpus never writes it), and
+    // refusing to COMPOSE must never become refusing to SPEAK: never empty, never raw ASCII digits, and
+    // the digits actually READ rather than replaced by a constant.
+    test("past the authored cap it degrades to digit-at-a-time, never silence and never ASCII", () => {
+        const over = phonemize("1000000000000000", "mad").trim(); // 10¹⁵ — the first quantity unnameable
+        expect(over).not.toBe("");
+        expect(over).not.toMatch(/\d/u);
+        expect(over).not.toBe(phonemize("1000000000000001", "mad").trim());
+        // …and the composed path just below the cap is untouched: 999 triliun still gets its words.
+        const under = phonemize("999000000000000", "mad").trim();
+        expect(under).toContain("tɾilijun");
+        expect(under).not.toMatch(/\d/u);
     });
 });

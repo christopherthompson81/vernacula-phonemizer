@@ -88,6 +88,7 @@
  * generic rule would eat ordinary words. Only their range-dash role is claimed, in step 3.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { MANIFEST } from "./manifest.ts";
 
 /** Not-a-letter, on both sides. `\b` cannot be used — see the header. */
 const L = "[\\p{L}\\p{M}]";
@@ -389,21 +390,40 @@ export function normalizeMadurese(input: string): string {
     // the clock and the range operands. 1,541 corpus-wide, and before this rule the separator was read as a
     // CLAUSE PAUSE, which destroys the value rather than merely leaving it unread: `1,6% aèng` came out
     // *sətːɔŋ , ənːəm aɛŋ*.
-    // ⚠ THE WORD IS THE ONE THING IN THIS FILE THE CORPUS CANNOT ATTEST, AND THAT IS SAID PLAINLY.
-    // ⟨koma⟩ scores 0 whole-token hits in the artifact and ×18 in 12 articles on mad.wikipedia — where
-    // EVERY recorded instance is the astronomical COMA of a comet (`Bâgiyân-bâgiyân komèt aèssè inti,
-    // koma, ondem hidrogèn, bân bunto'`). That is a real competing sense and it is not an attestation of
-    // the reading. What justifies shipping it anyway is the playbook's own rule that a written corpus is
-    // the WEAKEST evidence there is about how a SYMBOL is spoken — writers type `1,6` and never spell out
-    // how they say it — plus the fact that Madurese's entire numeric-technical stratum here is the
-    // Indonesian one and every other member of it IS attested in this corpus (persen, derajat, celcius,
-    // persegi, kubik, mèter, kilogram, rupiah, dolar, triliun, miliar, per). Indonesian's decimal word is
-    // `koma`. The alternative is 1,541 values destroyed by a phrase break.
-    // ⚠ A MADURESE SPEAKER REVIEWING THIS LAYER SHOULD START HERE. It is the one unattested reading shipped.
+    // ⚠ THE WORD WAS SHIPPED ON INFERENCE ONCE AND HAS SINCE BEEN SETTLED ON EVIDENCE. Read the history,
+    // because the correction is the useful part:
+    //   · The first pass looked only at the mined artifact (0 whole-token hits) and at an `attest.ts` probe
+    //     of mad.wikipedia that scored ×18 in 12 articles — every one of which was the astronomical COMA of
+    //     a comet (`Bâgiyân-bâgiyân komèt aèssè inti, koma, ondem hidrogèn, bân bunto'`) or the optical
+    //     coma of a lens. So the word shipped flagged as the layer's one unattested reading, which is the
+    //     shape of the Fula `tere` failure even when the guess is a good one.
+    //   · ⚠ THE PROBE WAS UNDER-COUNTING BECAUSE IT WAS SUBSTRING-MATCHING. A raw
+    //     `insource:/koma/` over mad.wikipedia is dominated by `komandan`/`hokoman`/`okoman`/`komando`, and
+    //     the hits that matter were buried in that noise. Reading all thirty snippets by hand turned up the
+    //     one that names the SYMBOL, in the punctuation section of mad.wikipedia's own `Bhâsa Jeppang`:
+    //         「、(読点/toten) Fungsina para' paḍâ'â sarenf tandhâ bâca koma, ka'angghuy mèsa
+    //          bâgiyä-bâgiyân sè pentèng ḍâlem kalimat sopajâ lebbi ghâmpang èbâcâ.」
+    //     — "its function is nearly the same as the punctuation mark KOMA, to separate the important parts
+    //     within a sentence". That is Madurese prose naming ⟨,⟩ `koma`, which is precisely this slot.
+    //   · SECOND, INDEPENDENT SOURCE: the Madurese–Indonesian dictionary at willnode.github.io/madura
+    //     (9,789 entries) carries `koma` as a Madurese headword glossing Indonesian `koma` — the same
+    //     dictionary that gives `jutah`/`milyad` for the magnitudes numbers.ts now composes with.
+    // ⚠ WHAT IS STILL INFERENCE, NAMED HONESTLY. No source reachable from here shows a Madurese decimal
+    // READ OUT (`1 koma 5`); mad.wikipedia has `desimal` in four articles and spells no value. What is
+    // attested is the WORD and its symbol sense; the remaining step is that Madurese, like Indonesian,
+    // reads the separator by NAMING the sign rather than with some other construction. That step is
+    // narrow, it is the same one every other member of this corpus's Indonesian numeric-technical stratum
+    // supports (persen, derajat, celcius, persegi, kubik, mèter, kilogram, rupiah, dolar, triliun, miliar,
+    // per — all attested here), and the failure mode if it is wrong is a WRONG CONNECTIVE between two
+    // correct numbers. The alternative is 1,541 values destroyed by a phrase break, which is a wrong VALUE.
+    // ⚠ THE OUTCOME IS VISIBLE RATHER THAN BURIED: the word is declared as `numbers.decimalWord` in
+    // madurese.jsonc, so `sources.ts --lang mad` now reports `[have] decimal-point — manifest decimalWord`
+    // where it used to report `[NONE]`. A reviewer who disagrees changes one manifest field.
     // ⚠ THE FRACTION IS READ DIGIT BY DIGIT, the Austronesian convention `indonesian.ts` and `sundanese.ts`
     // both take (`43,34` → *… koma telu empa'*, never "thirty-four"), and emitted as SPACED DIGITS so the
     // engine's own cardinal path speaks each one.
-    const decimal = (int: string, frac: string): string => `${int} koma ${[...frac].join(" ")}`;
+    const KOMA = MANIFEST.numbers.decimalWord;
+    const decimal = (int: string, frac: string): string => `${int} ${KOMA} ${[...frac].join(" ")}`;
     s = s.replace(/(?<![\d.,])(\d+),(\d{1,3})(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
     // ⚠ THE PERIOD ARM CARRIES TWO EXTRA GUARDS THE COMMA ARM DOES NOT NEED.
     //   · `(?!\.\d)` KEEPS A VERSION/SECTION TRIPLE OUT. The corpus writes `2.4.1` and `No 01/0/SKB/2004`;

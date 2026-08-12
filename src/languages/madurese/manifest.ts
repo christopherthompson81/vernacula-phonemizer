@@ -22,7 +22,11 @@ export interface MadureseManifest {
         tens: string;
         hundred: string;
         thousand: string;
+        million: string;
+        billion: string;
+        trillion: string;
         and: string;
+        decimalWord: string;
     };
 }
 

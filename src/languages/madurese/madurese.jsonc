@@ -49,12 +49,30 @@
     },
 
     // Cardinal number words (Madurese). Simplified counting form; unmeasured (no referee for numbers).
+    //
+    // ⚠ THE MAGNITUDE WORDS ABOVE 10³ ARE SOURCED, NOT INFERRED, and the series stops where the sourcing
+    // does. `juta` ×18, `miliar` ×11 / `milyad` ×6 and `triliun` ×3 / `triliyun` ×1 all occur in the
+    // magnitude slot in tools/corpus/mined/mad.jsonc (`361 juta kilometer persegi`, `19,1 miliar`,
+    // `150 triliun`, `7,2 triliyun`), and a Madurese numeral description gives the same three with the
+    // counting prefix — `sajuta` 10⁶, `samilyar` 10⁹, `tellotrilyun` 3×10¹² (ruangbudaya.com, "Numeral
+    // dalam Bahasa Madura"), as does the Madurese–Indonesian dictionary at willnode.github.io/madura
+    // (`juta` → `jutah`, `milyar` → `milyad`). The corpus-dominant spellings are taken.
+    // ⚠ NO QUADRILLION IS AUTHORED. The one source that offers `kuwadriliyun` is that same blog post and
+    // nothing in the corpus or on mad.wikipedia writes it; numbers.ts falls back to digit-at-a-time at
+    // 10¹⁵ instead of coining one (the Fula `tere` rule).
     "numbers": {
         "units": ["nolla", "settong", "duwâ", "tello", "empa'", "lèma'", "ennem", "petto'", "ballu'", "sanga'"],
         "ten": "sapolo",
         "tens": "polo",
         "hundred": "atos",
         "thousand": "èbu",
-        "and": "bân"
+        "million": "juta",
+        "billion": "miliar",
+        "trillion": "triliun",
+        "and": "bân",
+
+        // ⚠ THE DECIMAL SEPARATOR'S NAME, and the evidence for it is lexicographic rather than corpus —
+        // see src/languages/madurese/normalize.ts step 10, which is where the argument lives.
+        "decimalWord": "koma"
     }
 }

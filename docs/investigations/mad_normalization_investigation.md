@@ -312,3 +312,174 @@ while the examples it prints in the SAME run contain `ḍâri sobbhu sampe’ po
 `sampe’ tengnga arè`. The word ends in the orthographic GLOTTAL `'`/`’`, and `tokens()` splits on
 non-letters, so the boundary test cannot see it. `corpus-words.ts` scores it `attested ×14` on the same
 language. Believe the example.
+
+---
+
+## Run 6 — 2026-08-11 (settling `koma` on evidence rather than inference)
+
+**Question.** Run 3 shipped `koma` flagged as the layer's one unattested reading, on the argument that a
+written corpus is weak evidence about how a SYMBOL is spoken. That is a coherent argument and it is still
+an inference. Is there any *attestation* — dictionary, teaching material, wordlist, the Madurese wiki's own
+maths articles, any reachable Madurese corpus?
+
+**1. The mad.wikipedia probes, all negative for the decimal READING.**
+
+```
+$ WebFetch mad.wikipedia.org/w/api.php?…srsearch=insource:/[0-9] koma [0-9]/     → 0 results
+$ WebFetch …srsearch=insource:/koma/ desimal                                     → 0 results
+$ WebFetch …srsearch=insource:/koma/ tandâ bâca                                  → 0 results
+$ WebFetch …srsearch=desimal                                                     → 4 articles, and NOT ONE
+   spells a value out: `Korangan` ("…bilangan negatif, peccàan, bilangan irasional, vektor, desimal…"),
+   `Taqiyuddin Muhammad bin Ma'ruf`, `Al-Biruni`, `Al-Khawarizmi`. The wiki knows the CONCEPT and never
+   voices an instance.
+```
+
+So the direct question — "does anyone write *1 koma 5* in Madurese" — is still unanswered, and I could not
+find a source anywhere that answers it. **That negative is the honest core of this run and it stays.**
+
+**2. ⚠ BUT RUN 3'S POSITIVE FINDING WAS WRONG, AND THE ERROR WAS IN THE PROBE.** Run 3 recorded "×18 in 12
+articles on mad.wikipedia — EVERY recorded instance is a comet's coma". Re-running the probe raw and reading
+all thirty snippets by hand shows what `attest.ts` was actually counting:
+
+```
+$ WebFetch …srsearch=insource:/koma/&srlimit=30&srprop=snippet
+  → 30 hits, of which the overwhelming majority are SUBSTRING NOISE:
+    komandan (×8: Syam'un, Soegito, Tuanku Lintau, Hermanto, Al-Muhtadi, Muhammad Sroedji, Baabullah…),
+    okoman / hokoman "punishment" (×7), komando (×3), komancer, komangè, komak, koman, komandhin, Ikoma…
+```
+
+The `koma` probe is a SUBSTRING probe, so the twelve "articles" were mostly `komandan`. Two hits are the
+real word, and one of them is the finding:
+
+```
+Bhâsa Jeppang, section "Tandhâ bâca":
+  「、(読点/toten) Fungsina para' paḍâ'â sarenf tandhâ bâca koma, ka'angghuy mèsa bâgiyä-bâgiyân
+    sè pentèng ḍâlem kalimat sopajâ lebbi ghâmpang èbâcâ.」
+  — "its function is nearly the same as the punctuation mark KOMA, to separate the important parts
+    within a sentence"                                        (verified by fetching the article raw)
+Bernhard Schmidt: "…jennis ghâmbhâr sè bureng sè èkennal mènangka koma" — the OPTICAL coma. The competing
+    sense is real, as Run 3 said; it is just not the only sense.
+```
+
+**That is Madurese prose naming the mark ⟨,⟩ `koma`.** It is the SYMBOL-NAME slot exactly.
+
+**3. A second, independent source — lexicography, which Run 3 had written off as unreachable.**
+
+```
+$ curl https://willnode.github.io/madura/kamus.json     (a Madurese–Indonesian dictionary, 9,789 entries)
+  ['', 'koma',   'koma']      ← Indonesian koma → Madurese koma
+  ['', 'juta',   'jutah']
+  ['', 'milyar', 'milyad']
+  ['alos tengghi', 'ribu', 'èbuh'] / ['', 'seribu', 'saèbu']
+$ id.glosbe.com/id/mad/koma   → "Saat ini kami tidak memiliki terjemahan untuk koma" (nothing; negative)
+$ web search: Pawitra, "Kamus Lengkap Bahasa Madura–Indonesia" (Dian Rakyat 2009) exists in print, no
+  reachable digital text. Negative.
+```
+
+**VERDICT — `koma` STAYS, and the note that called it unattested is deleted rather than softened.** What is
+attested is the WORD and its symbol sense, twice over and independently. What remains inferred is narrower
+and is now stated in the code: that Madurese, like Indonesian, reads the separator by NAMING the sign. If
+that inference is wrong the failure mode is a **wrong connective between two correct numbers**; the
+alternative — no reading at all — destroys 1,541 VALUES with a phrase break. That asymmetry, plus two
+citations, is a different footing from Run 3's.
+
+**Made visible rather than buried**, as required: the word is now declared as `numbers.decimalWord` in
+`madurese.jsonc`, so
+
+```
+$ npx tsx tools/normalization/sources.ts --lang mad
+  BEFORE  [NONE] decimal-point   no _dpt, no _., no manifest word — read the fraction digit-by-digit
+  AFTER   [ ok ] decimal-point   manifest decimalWord
+```
+
+and `defects.ts`'s `mad` header now records both the third-tier sources and the substring-probe trap that
+hid the attestation in the first place.
+
+**Implication.** `attest.ts`'s counts are a haystack size, not a verdict — Run 5 already learned this from
+the other direction (`sampè'` scored 0 while its own examples contained the word). Read the snippets.
+
+## Run 7 — 2026-08-11 (the magnitudes above 10⁶)
+
+**Question.** `numbers.ts` capped composition below 10⁶, so the 26 corpus millions de-grouping newly handed
+it read digit-by-digit. What magnitude series does the evidence support, in what WORD ORDER, and where does
+the evidence stop?
+
+**The order, which is the part that could not be assumed.** `nya` (Chichewa) found a language whose
+digit-retaining order and spelled-out order were opposites, and Madurese's Indonesian-adjacent neighbours do
+not all agree. A Madurese numeral description (ruangbudaya.com, "Numeral dalam Bahasa Madura") supplies a
+whole composed numeral, which settles it:
+
+```
+1.508.070  →  sajuta lèmaratos bâllu' èbu pèttongpolo
+              [1×10⁶]  [500  8 ×10³]        [70]      ← MULTIPLIER then MAGNITUDE, descending
+999.999    →  sangangatos sangangpolo sanga' ebu sangangatos sangangpolo sanga'
+hundreds:  satos/saratos duratos telloratos pa'ratos lèmaratos nematos pèttongatos bâllungatos sangangatos
+thousands: saèbu duèbu telloèbu pa'èbu lèmaèbu nemèbu pèttongèbu bâllungèbu sangangèbu
+millions:  sajuta dujuta tellojuta pa'juta lèmajuta nemjuta pèttongjuta bâllungjuta sangangjuta
+above:     samilyar dumilyar · tellotrilyun pa'trilyun · lèmakuwadriliyun nemkuwadriliyun
+```
+
+The corpus agrees on the order wherever a figure and a magnitude word are adjacent — `361 juta kilometer
+persegi`, `19,1 miliar`, `150 triliun`, `4,54 miliar`, never *juta 361*.
+
+**The corpus's own magnitude-slot counts** (`grep` over `tools/corpus/mined/mad.jsonc` for a figure
+immediately followed by a magnitude word): `juta` ×18 (`65 juta`, `550 juta`, `747,6 juta`), `miliar` ×11
+(`587 miliar`, `490,3 miliar`), `milyad` ×6 (`62,63 milyad`, `16,09 milyad`), `triliun` ×3 (`150 triliun`,
+`56 triliun`, `1,3 triliun`), `triliyun` ×1 (`7,2 triliyun`), `jutah` ×2, `èbu` ×2.
+
+**What I authored:** `juta` 10⁶, `miliar` 10⁹, `triliun` 10¹² — the corpus-dominant spelling of each, every
+one of them attested twice over (corpus + numeral description, and `jutah`/`milyad` are dictionary
+headwords).
+
+**What I REFUSED:** the quadrillion. `kuwadriliyun` appears in exactly one blog post, in no corpus instance
+and on no wiki page. `numbers.ts` therefore caps at 10¹⁵ and falls back to digit-at-a-time rather than
+coining a word to complete a series that "should" have one — the Fula `tere` rule. I also did not switch the
+engine to the fused counting forms above (`sajuta`, `pèttongatos`): the file's existing register is the
+simplified counting form with `bân` between groups, the fused forms are a different register throughout
+(that source writes no `bân` anywhere, even inside 999.999), and changing register mid-file would rewrite
+every number the engine already reads. Recorded here as a measurement someone may want to revisit; NOT a
+silent choice.
+
+**Gates, before and after.**
+
+```
+                              BEFORE                       AFTER
+tsc --noEmit                  clean                        clean
+vitest run                    237 files / 3629 tests pass  237 files / 3632 tests pass (+3 new, 0 changed)
+referee-eval mad              33/35 (94.3%), symbol 98.9%  33/35 (94.3%), symbol 98.9%  — unchanged
+corpus-diff (mined:mad)       DROP 16 DIGIT 0 SLOT-GAP 0   DROP 16 DIGIT 0 SLOT-GAP 0 RAWMARK 0 THROW 0
+                              RAWMARK 0 THROW 0            24/435 utterances changed (5.5%)
+review.ts --lang mad          2 FAIL (minus; artifact scan) 2 FAIL — unchanged, and correctly so (trap 24)
+sources.ts --lang mad         [NONE] decimal-point         [ ok ] decimal-point — manifest decimalWord
+vitest test/bignum-fallback   118 pass                     118 pass
+```
+
+**NO GOLDEN CHANGED ITS EXPECTED VALUE.** Every value pinned in `test/madurese.test.ts` is below 10⁶ (the
+largest is `5.168 km²`), so the whole existing file is untouched; the three new tests are additions.
+
+**Read the 24 changed utterances, not the count.** All 24 are the same defect closing — a digit run becoming
+a composed numeral — and every one is a population or an area, which is what Run 5 predicted:
+
+```
+- lɔwas nakʰɤɾɤna panɛka duwɤ sətːɔŋ lɛmaʔ nɔla nɔla nɔla nɔla kilɔmɛtəɾ pəɾsəɡi   2.150.000 km² (Saudi)
++ lɔwas nakʰɤɾɤna panɛka duwɤ ɟuta bɤn atɔs bɤn lɛmaʔ pɔlɔ ɛbu kilɔmɛtəɾ pəɾsəɡi
+- ɾa kɛɾa lɛmaʔ nɔla nɔla nɔla nɔla nɔla nɔla ɔɾɛŋ                                 5.000.000 orèng
++ ɾa kɛɾa lɛmaʔ ɟuta ɔɾɛŋ
+- … sətːɔŋ bɤluʔ saŋaʔ nɔla nɔla nɔla nɔla nɔla ɾupijah pɤnbulɤn                   18.900.000 rupiah
++ … sapɔlɔ bɤn bɤluʔ ɟuta bɤn saŋaʔ atɔs ɛbu ɾupijah pɤnbulɤn
+- … pətːɔʔ lɛmaʔ duwɤ əmpaʔ duwɤ lɛmaʔ duwɤ sətːɔŋ əmpaʔ                           752.425.214
++ … pətːɔʔ atɔs bɤn lɛmaʔ pɔlɔ bɤn duwɤ ɟuta bɤn əmpaʔ atɔs bɤn duwɤ pɔlɔ bɤn lɛmaʔ ɛbu bɤn
+  duwɤ atɔs bɤn sapɔlɔ bɤn əmpaʔ        ← grouped by 10⁶ then 10³: "752 juta", never "0,75 miliar"
+```
+
+**And the fleet invariant re-verified for mad** (d38f00d / fdab9b1, `test/bignum-fallback.test.ts`): mad is
+not in that file's lists, so it is now pinned in `test/madurese.test.ts` instead. Probed directly —
+
+```
+10¹⁵            settong nolla ×15        (digit-at-a-time; the first unnameable quantity)
+10¹⁵+1          … sətːɔŋ                 (differs — the digits are READ, not a constant)
+2⁵³+1 / 2⁵³+2   differ in their last word; no ASCII in either
+999·10¹²        saŋaʔ atɔs bɤn saŋaʔ pɔlɔ bɤn saŋaʔ tɾilijun     (still composes below the cap)
+```
+
+Never empty, never raw ASCII, and the composed path below the cap is untouched.
