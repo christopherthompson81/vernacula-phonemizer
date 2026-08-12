@@ -2,6 +2,7 @@ import { describe, expect, it, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/lao/lao.ts";
 import { normalizeLao } from "../src/languages/lao/normalize.ts";
+import { MANIFEST } from "../src/languages/lao/lao.ts";
 
 // Diagnostic gold for the Lao (lo) authored g2p — verified-correct common words + one per structural feature
 // (leading-vowel reorder, discontinuous vowels, ຫ-led high sonorant, Cວ→uːə, ຳ→am, tone-mark extraction).
@@ -126,5 +127,39 @@ describe("Lao normalization: the review pass", () => {
         // A digit-adjacent Lao ⟨ມ⟩ is ×35 in the mined segments and every one is a MONTH NAME.
         expect(normalizeLao("19 ມີນາ 2008")).toBe("19 ມີນາ 2008");
         expect(normalizeLao("5 ມິຖຸນາ")).toBe("5 ມິຖຸນາ");
+    });
+});
+
+// ⚠ THE PATTERN LIST'S ORDER IS SEMANTIC. It is walked top-down and the first match wins, so a shorter
+// pattern must never precede a longer one it prefixes — `ົ` before `ົະ` would make the two-sign vowel
+// unreachable and silently change the language. Sorting the list would do exactly that, which is why the
+// invariant is pinned here rather than left to the comment in lao.jsonc.
+describe("Lao manifest: the vowel pattern table", () => {
+    const PATTERNS = MANIFEST.vowelPatterns;
+
+    it("no pattern is shadowed by an earlier, shorter one in its own group", () => {
+        const shadowed: string[] = [];
+        for (let i = 0; i < PATTERNS.length; i++) {
+            for (let j = 0; j < i; j++) {
+                const a = PATTERNS[j]!, b = PATTERNS[i]!;
+                if ((a.pre ?? "") !== (b.pre ?? "")) continue;
+                if (b.signs.startsWith(a.signs)) shadowed.push(`${b.pre ?? ""}+${b.signs} unreachable behind ${a.pre ?? ""}+${a.signs}`);
+            }
+        }
+        expect(shadowed).toEqual([]);
+    });
+
+    it("every leading-vowel group ends in a catch-all, so it never falls through to the non-leading set", () => {
+        for (const lead of MANIFEST.leadingVowels) {
+            const group = PATTERNS.filter((p) => p.pre === lead);
+            expect(group.length, `no patterns for ${lead}`).toBeGreaterThan(0);
+            expect(group.at(-1)!.signs, `${lead} has no catch-all`).toBe("");
+        }
+    });
+
+    it("the discontinuous and reordered vowels still read", () => {
+        expect(phonemizeWord("ຄວາຍ")).toContain("kʰuːə"); // ວາ is the VOWEL uːə, not a kʷ cluster
+        expect(phonemizeWord("ເຊັຽ")).toContain("iːə"); // ເ◌ັຽ, a three-part pattern
+        expect(phonemizeWord("ເກົ້າ")).toBe("ka˥˨w"); // ເ◌ົາ → a + w glide, tone letter between them
     });
 });

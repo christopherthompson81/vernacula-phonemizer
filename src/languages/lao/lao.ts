@@ -1,8 +1,8 @@
 /**
- * Lao (lo) phonemizer — canonical IPA (authored). This file owns the abugida machinery: the leading-vowel
- * reorder pass, the vowel-PATTERN resolver (the crux of Lao g2p — positional logic over discontinuous
- * signs), the ຫ-led cluster handling, and the tone table (class × live/dead × length × mark). The
- * onset/coda values, number words and the encyclopedic record live in lao.jsonc.
+ * Lao (lo) phonemizer — canonical IPA (authored). This file owns the ALGORITHMS: the leading-vowel reorder
+ * pass, the ຫ-led cluster handling, the syllable scanner, the ordered first-match walk over the vowel
+ * patterns, and the number compositor. Every TABLE it reads — onsets, codas, the vowel patterns, the tone
+ * table and the number words — is data in lao.jsonc.
  */
 import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
@@ -19,24 +19,44 @@ interface LaoNumbers {
     finalOne: string;
     magnitudes: [number, string][];
 }
+/** One vowel PATTERN (lao.jsonc). `pre` is the reordered leading vowel, `signs` the characters that follow
+ *  the onset; the number consumed is `signs.length`. Absent `pre` means "only when there is no leading
+ *  vowel"; empty `signs` is a group's catch-all. */
+interface VowelPattern {
+    pre?: string;
+    signs: string;
+    q: string;
+    long?: boolean;
+    glide?: string;
+}
+/** The tone table (lao.jsonc): a per-class row with a `default` for the classes that share a value. */
+type ToneRow = Partial<Record<Cls, string>> & { default?: string };
+
 interface LaoDef {
     onsets: Record<string, [string, Cls]>;
+    vowelPatterns: readonly VowelPattern[];
+    tone: { marks: Record<string, ToneRow>; live: ToneRow; deadLong: ToneRow; deadShort: ToneRow };
     leadingVowels: readonly string[];
     hLedSonorants: readonly string[];
     toneMarks: readonly string[];
     codas: Record<string, string>;
     numbers: LaoNumbers;
 }
-const DEF = loadManifest<LaoDef>(import.meta.url, "lao.jsonc");
+/** The Lao data manifest (lao.jsonc): the letter values, the vowel PATTERN table, the tone table and
+ *  the number words. Exported under the tree's conventional name so the tables can be inspected and
+ *  invariant-tested as DATA — the pattern list's order is load-bearing (see test/lao.test.ts). */
+export const MANIFEST = loadManifest<LaoDef>(import.meta.url, "lao.jsonc");
 // Onset consonant → [IPA, tonal class] and the 8-way final set (lao.jsonc). The ຫ-led sonorants (ໜ ໝ,
 // ຫຼ ຫງ …) become HIGH class — handled in the scanner below.
-const CONS = DEF.onsets;
-const CODA = DEF.codas;
+const CONS = MANIFEST.onsets;
+const CODA = MANIFEST.codas;
 
 // Vowel signs (combining/spacing) used by the scanner.
-const LEAD = new Set(DEF.leadingVowels); // written before the consonant
-const HSON = new Set(DEF.hLedSonorants); // the sonorants ຫ leads → HIGH class (ຫ + others is NOT a lead)
-const TONEMARK = new Set(DEF.toneMarks);
+const LEAD = new Set(MANIFEST.leadingVowels); // written before the consonant
+const HSON = new Set(MANIFEST.hLedSonorants); // the sonorants ຫ leads → HIGH class (ຫ + others is NOT a lead)
+const TONEMARK = new Set(MANIFEST.toneMarks);
+const VOWELS = MANIFEST.vowelPatterns; // ORDERED — see resolveVowel and lao.jsonc
+const TONE = MANIFEST.tone;
 const isCons = (c: string): boolean => c in CONS;
 
 /** Reorder a leading vowel (ເ ແ ໂ ໃ ໄ) to AFTER its consonant (cluster): ເມ → ມເ, so the scanner reads L→R. */
@@ -63,72 +83,33 @@ function reorder(w: string): string {
 // After reorder, resolve the vowel PATTERN around a consonant. Returns [quality, long, glide, consumedTail].
 // `pre` = a leading vowel now sitting AFTER the consonant (ເ ແ ໂ ໄ ໃ), `signs` = the following sign string.
 // This is the crux of Lao g2p.
+/**
+ * Resolve the vowel at this position: walk the pattern table in order and take the FIRST whose leading
+ * vowel and following signs both match. Returns null when nothing matches, which for a syllable with no
+ * leading vowel means it takes the inherent vowel (the caller supplies it).
+ *
+ * ⚠ THE TABLE'S ORDER IS THE ALGORITHM. A longer pattern must precede any shorter one it starts with, and
+ * each leading-vowel group ends in an empty-`signs` catch-all — which is what makes a bare ⟨ເ⟩ read as eː
+ * AND what stops a leading-vowel syllable from falling through to the non-leading patterns. See lao.jsonc.
+ */
 function resolveVowel(
     pre: string,
     after: string[],
 ): { q: string; long: boolean; glide: string; used: number } | null {
-    const a0 = after[0] ?? "", a1 = after[1] ?? "";
-    const two = a0 + a1;
-    // helper
-    const R = (q: string, long: boolean, glide: string, used: number) => ({ q, long, glide, used });
-    // ---- LEADING-vowel patterns (pre set) ----
-    if (pre === "ໄ" || pre === "ໃ") return R("a", false, "j", 0); // ໄC/ໃC → aj
-    if (pre === "ເ") {
-        if (a0 === "ົ" && a1 === "າ") return R("a", false, "w", 2); // ເົາ → aw
-        if (a0 === "ຶ" && (a1 === "ອ" || true)) return R("ɯːə", false, "", a1 === "ອ" ? 2 : 1); // ເຶອ → ɯə
-        if (a0 === "ື" && a1 === "ອ") return R("ɯːə", false, "", 2); // ເືອ → ɯːə
-        if (a0 === "ຍ") return R("iːə", false, "", 1); // ເ...ຍ → iːə
-        if (a0 === "ິ") return R("ɤ", false, "", 1); // ເິ → ɤ
-        if (a0 === "ີ") return R("ɤ", true, "", 1); // ເີ → ɤː
-        if (a0 === "າ" && a1 === "ະ") return R("ɔ", false, "", 2); // ເາະ → ɔ
-        if (a0 === "ະ") return R("e", false, "", 1); // ເ...ະ → e
-        if (a0 === "ັ" && (a1 === "ຽ" || a1 === "ຍ")) return R("iːə", false, "", 2); // ເ◌ັຽ/ເ◌ັຍ → iːə (ເຊັຽ→siːə)
-        if (a0 === "ັ") return R("e", false, "", 1); // ເັC → e (closed short)
-        return R("e", true, "", 0); // ເ → eː
+    for (const p of VOWELS) {
+        if ((p.pre ?? "") !== pre) continue;
+        const n = [...p.signs].length;
+        if (n > 0 && after.slice(0, n).join("") !== p.signs) continue;
+        return { q: p.q, long: p.long ?? false, glide: p.glide ?? "", used: n };
     }
-    if (pre === "ແ") {
-        if (a0 === "ະ") return R("ɛ", false, "", 1);
-        if (a0 === "ັ") return R("ɛ", false, "", 1);
-        return R("ɛ", true, "", 0); // ແ → ɛː
-    }
-    if (pre === "ໂ") {
-        if (a0 === "ະ") return R("o", false, "", 1);
-        if (a0 === "ັ") return R("o", false, "", 1);
-        return R("o", true, "", 0); // ໂ → oː
-    }
-    // ---- NON-leading (signs after / above / below the consonant) ----
-    if (a0 === "ວ" && a1 === "າ") return R("uːə", false, "", 2); // ວາ → uːə (ຄວາຍ→kʰuːəj), NOT a kʷ cluster
-    if (two === "ົວ") return R("uːə", false, "", 2); // ົວ → uːə
-    if (a0 === "ົ" && a1 === "ະ") return R("o", false, "", 2); // ົະ (rare)
-    if (a0 === "ັ") return R("a", false, "", 1); // ັC → a (closed short "mai kan")
-    if (a0 === "ົ") return R("o", false, "", 1); // ົC → o (closed short "mai kong")
-    if (a0 === "ະ") return R("a", false, "", 1); // ະ → a
-    if (a0 === "າ" && a1 === "ະ") return R("a", false, "", 2);
-    if (a0 === "າ") return R("a", true, "", 1); // າ → aː
-    if (a0 === "ຳ") return R("a", false, "m", 1); // ຳ → am
-    if (a0 === "ິ") return R("i", false, "", 1);
-    if (a0 === "ີ") return R("i", true, "", 1);
-    if (a0 === "ຶ") return R("ɯ", false, "", 1);
-    if (a0 === "ື") return R("ɯ", true, "", 1);
-    if (a0 === "ຸ") return R("u", false, "", 1);
-    if (a0 === "ູ") return R("u", true, "", 1);
-    if (a0 === "ໍ") return R("ɔ", true, "", 1); // ໍ → ɔː
-    if (a0 === "ຽ") return R("iːə", false, "", 1); // ຽ → iːə
-    if (a0 === "ອ") return R("ɔ", true, "", 1); // C + ອ → ɔː (ອ as vowel)
-    if (a0 === "ວ") return R("uːə", false, "", 1); // C + ວ → uːə (open)
-    return null; // no vowel sign → inherent vowel handled by caller
+    return null;
 }
 
-// Vientiane Lao tone (Wiktionary Module:lo-pron system), DERIVED empirically from the kaikki Chao contours:
-// LOW ˩ · RISING ˧˥ · MID ˧ · HIGH-FALLING ˥˨ · LOW-FALLING ˧˩. Tone = consonant class × live/dead × length × mark.
+/** Tone = a written MARK if there is one, else (live | dead-long | dead-short) × the onset's CLASS.
+ *  Both the contours and which classes share one are data (lao.jsonc "tone"). */
 function tone(cls: Cls, live: boolean, long: boolean, mark: string): string {
-    if (mark === "່") return "˧"; // mai ek → mid, all classes
-    if (mark === "້") return cls === "high" ? "˧˩" : "˥˨"; // mai tho → high: low-falling; low/mid: high-falling
-    if (mark === "໊") return "˥"; // mai ti (rare) → high
-    if (mark === "໋") return "˧˥"; // mai catawa (rare) → rising
-    if (live) return cls === "low" ? "˧˥" : "˩"; // live → low: rising; high/mid: low
-    if (long) return cls === "low" ? "˥˨" : "˧˩"; // dead-long → low: high-falling; high/mid: low-falling
-    return cls === "low" ? "˧" : "˧˥"; // dead-short → low: mid; high/mid: rising
+    const row = TONE.marks[mark] ?? (live ? TONE.live : long ? TONE.deadLong : TONE.deadShort);
+    return row[cls] ?? row.default ?? "";
 }
 
 /** Pull the tone marks (which combine ABOVE the onset and appear BEFORE the vowel signs in the stream: ຂ່າ)
@@ -243,7 +224,7 @@ const TOKEN = /([຀-໿]+)|(\d+)|([.!?…,;:])/gu;
 // ── Numbers ──────────────────────────────────────────────────────────────────────────────────────────
 // The compositor emits LAO-SCRIPT words (data + provenance in lao.jsonc) and reads them back through the
 // ordinary g2p, so no IPA is authored here.
-const NUM = DEF.numbers;
+const NUM = MANIFEST.numbers;
 const LO_UNITS = NUM.units;
 
 function numberToLaoWords(n: number): string[] {
