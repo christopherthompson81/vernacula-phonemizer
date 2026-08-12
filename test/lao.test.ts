@@ -163,3 +163,29 @@ describe("Lao manifest: the vowel pattern table", () => {
         expect(phonemizeWord("ເກົ້າ")).toBe("ka˥˨w"); // ເ◌ົາ → a + w glide, tone letter between them
     });
 });
+
+// ⚠ THE CANCELLATION MARK ໌ (karan) SILENCES the consonant it sits on. Unhandled it was not a DROP but an
+// INSERTION — the silent letter took its inherent vowel and became a whole extra syllable — so no leak or
+// drop gate could see it. ×65 in the mined corpus and ×6 in the kaikki referee, where all six were wrong.
+describe("Lao cancellation mark", () => {
+    it("silences its consonant, in the referee's own words", () => {
+        expect(phonemizeWord("ໄຟລ໌")).toBe("fa˧˥j"); // "file" — was fa˧˥j.la˧
+        expect(phonemizeWord("ເວັບໄຊຕ໌")).toBe("ʋe˧p̚.sa˧˥j"); // "website"
+        expect(phonemizeWord("ອິນທະວົງສ໌")).toBe("ʔi˩n.tʰa˧.ʋo˧˥ŋ");
+    });
+
+    it("cancels the whole final CLUSTER, leaving exactly one coda", () => {
+        // ອາທິຕຍ໌ keeps ⟨ຕ⟩ as its coda — only ⟨ຍ⟩ is silent…
+        expect(phonemizeWord("ອາທິຕຍ໌")).toBe("ʔaː˩.tʰi˧t̚");
+        // …while ວຽງຈັນທນ໌ silences ⟨ທ⟩ as well as ⟨ນ⟩. One rule yields both.
+        expect(phonemizeWord("ວຽງຈັນທນ໌")).toBe("ʋiːə˧˥ŋ.t͡ɕa˩n");
+    });
+
+    it("the two loan finals it exposes", () => {
+        expect(phonemizeWord("ສັຕວ໌")).toBe("sa˧˥t̚"); // ⟨ຕ⟩ as a coda, only reachable after cancelling
+        expect(phonemizeWord("ຣົຖ")).toBe("lo˧t̚"); // ⟨ຖ⟩, no mark involved — "vehicle"
+        // …and an ordinary ⟨ຕ⟩/⟨ຖ⟩ ONSET is untouched, because a coda letter followed by a vowel starts
+        // the next syllable.
+        expect(phonemizeWord("ຕາ")).toBe("taː˩");
+    });
+});

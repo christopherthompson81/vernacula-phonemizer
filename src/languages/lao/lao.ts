@@ -40,6 +40,7 @@ interface LaoDef {
     hLedSonorants: readonly string[];
     toneMarks: readonly string[];
     codas: Record<string, string>;
+    cancellationMark: string;
     numbers: LaoNumbers;
 }
 /** The Lao data manifest (lao.jsonc): the letter values, the vowel PATTERN table, the tone table and
@@ -57,6 +58,7 @@ const HSON = new Set(MANIFEST.hLedSonorants); // the sonorants ຫ leads → HIG
 const TONEMARK = new Set(MANIFEST.toneMarks);
 const VOWELS = MANIFEST.vowelPatterns; // ORDERED — see resolveVowel and lao.jsonc
 const TONE = MANIFEST.tone;
+const CANCEL = MANIFEST.cancellationMark;
 const isCons = (c: string): boolean => c in CONS;
 
 /** Reorder a leading vowel (ເ ແ ໂ ໃ ໄ) to AFTER its consonant (cluster): ເມ → ມເ, so the scanner reads L→R. */
@@ -83,6 +85,33 @@ function reorder(w: string): string {
 // After reorder, resolve the vowel PATTERN around a consonant. Returns [quality, long, glide, consumedTail].
 // `pre` = a leading vowel now sitting AFTER the consonant (ເ ແ ໂ ໄ ໃ), `signs` = the following sign string.
 // This is the crux of Lao g2p.
+/**
+ * Apply the CANCELLATION MARK ໌ (karan): delete the consonant it sits on, and the mark.
+ *
+ * ⚠ IT CANCELS THE WHOLE FINAL CLUSTER, LEAVING EXACTLY ONE CODA. The referee gives both halves of that:
+ * `ອາທິຕຍ໌` keeps ⟨ຕ⟩ as its coda ([ʔaː.tʰit̚] — only ⟨ຍ⟩ is silent) while `ວຽງຈັນທນ໌` silences ⟨ທ⟩ as well
+ * as ⟨ນ⟩ ([ʋiːəŋ.t͡ɕan]). The rule that yields both is to keep walking left while the character BEFORE the
+ * current one is also a consonant — i.e. strip the tail down to a single coda and stop.
+ *
+ * Runs after `reorder`, so a leading vowel already sits between the onset and the final cluster and
+ * terminates the walk by itself (ໄຟລ໌ → ຟໄລ໌ → ຟໄ → faj).
+ */
+function cancelSilent(w: string): string {
+    if (!w.includes(CANCEL)) return w;
+    const s = [...w];
+    const drop = new Set<number>();
+    for (let i = 0; i < s.length; i++) {
+        if (s[i] !== CANCEL) continue;
+        drop.add(i);
+        let j = i - 1;
+        while (j >= 0 && drop.has(j)) j--; // two marks in a row, or a mark on an already-cancelled letter
+        if (j < 0 || !isCons(s[j]!)) continue; // a stray mark with no consonant under it: just drop the mark
+        drop.add(j);
+        for (let k = j - 1; k >= 1 && isCons(s[k]!) && isCons(s[k - 1]!); k--) drop.add(k);
+    }
+    return s.filter((_, i) => !drop.has(i)).join("");
+}
+
 /**
  * Resolve the vowel at this position: walk the pattern table in order and take the FIRST whose leading
  * vowel and following signs both match. Returns null when nothing matches, which for a syllable with no
@@ -262,7 +291,7 @@ export function wordFeatures(word: string): { cls: Cls; live: boolean; long: boo
 
 /** One Lao word → canonical IPA. */
 export function phonemizeWord(word: string): string {
-    return scan(reorder(word));
+    return scan(cancelSilent(reorder(word)));
 }
 
 class LaoPhonemizer implements Phonemizer {
