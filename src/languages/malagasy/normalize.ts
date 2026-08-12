@@ -114,7 +114,10 @@ export function normalizeMalagasy(input: string): string {
     //    ⚠ The scale LETTER is consumed rather than left behind: no Malagasy Celsius word is attested in
     //    either haystack, and unread the ⟨C⟩ was reaching the IPA as a bare [k] (`20 °C` → *ruapˈulu k*).
     //    Dropping the scale loses information; leaving a stray consonant in the phoneme stream is worse.
-    s = s.replace(/(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°\s*[CF](?![\p{L}])/gu, "$1 degre ");
+    //    ⚠ CASE-INSENSITIVE, which is trap 7 and cost the Kurmanji pass the same bug: with a case-sensitive
+    //    `[CF]` the scale letter in `35°c` was not consumed and reached the IPA as a bare letter. The
+    //    corpus writes it uppercase, so nothing here would have caught it — the probe did.
+    s = s.replace(/(\p{Nd}+(?:[.,]\p{Nd}+)?)\s*°\s*[CF](?![\p{L}])/giu, "$1 degre ");
     //    ⚠ ONE GUARD, AND THE CORPUS SUPPLIES IT: `taonjato faha 17°` is "the 17TH century", not seventeen
     //    degrees — ⟨faha-⟩ is the Malagasy ordinal prefix, and the writer has used `°` the way French uses
     //    a raised ordinal marker. It is U+00B0, the real degree sign, so no character test separates them;
@@ -133,7 +136,7 @@ export function normalizeMalagasy(input: string): string {
     s = s.replace(/%\s*n['’]/gu, " isan-jaton'");
     //    Steps 4 and 5 emit a trailing/leading space so an expansion cannot glue itself to what follows
     //    (`4°40'` was becoming `4 degre40'`); where the source already had one, collapse the pair.
-    s = s.replace(/ {2,}/gu, " ");
+    s = s.replace(/ {2,}/gu, " ").replace(/ +$/u, "");
 
     // 6) THE SHARED TIER — percent, currency, units, the squared modifier and `&`. Runs ABOVE step 7,
     //    because the tier matches a unit only when a NUMBER is adjacent and the decimal rewrite destroys

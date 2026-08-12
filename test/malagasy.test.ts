@@ -108,3 +108,17 @@ describe("Malagasy normalization: the review pass", () => {
         expect(normalizeMalagasy("lafarinina 2 kg")).toBe("lafarinina 2 kilao");
     });
 });
+
+// The review pass — trap 8 again. This one is trap 7 as well: the corpus writes the scale letter
+// uppercase, so nothing in the corpus or the gates would have caught a case-sensitive class.
+describe("Malagasy normalization: the scale letter is case-insensitive", () => {
+    it("consumes ⟨c⟩/⟨f⟩ in either case", () => {
+        expect(normalizeMalagasy("35°c")).toBe("35 degre"); // was `35 degre c`, the letter reaching the IPA
+        expect(normalizeMalagasy("98°f")).toBe("98 degre");
+        expect(normalizeMalagasy("35°C any")).toBe("35 degre any");
+    });
+
+    it("…but a following WORD is not a scale letter", () => {
+        expect(normalizeMalagasy("35° celsius")).toBe("35 degre celsius");
+    });
+});

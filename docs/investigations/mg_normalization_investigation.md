@@ -141,3 +141,29 @@ class the sourcing gate **deliberately excludes** (playbook 5e, because kilogram
 from every source in some thirty languages), so nothing would have caught a guess. Probed afterwards:
 `kilao` ×32 across 20 wiki articles, `kilograma` ×0. The guess was right, and it was still a guess until
 measured.
+
+---
+
+## Run 7 — 2026-08-11 — the review pass: one bug, and it is trap 7 for the second time in this sweep
+
+Forty adversarial probes over every rule. **Thirty-nine confirmed rather than changed** — the space-grouping
+rule declines a four-digit lead (`1947 250`), a comma-separated pair (`taona 2007, 500 olona`), a
+word-separated pair (`olona 5 na 300 hafa`) and a date (`4 Mey 2005 300 olona`), while claiming a
+three-part group (`12 345 678`); the `Ar` currency key is letter-bounded so `Arivo` and `Arabia` are
+untouched; `n°`/`N°` are refused for want of a preceding digit; the `%n'` rule takes the curly apostrophe
+as well as the straight one; and the `faha` guard holds at the start, middle and end of a string.
+
+**The one finding: the scale letter was case-SENSITIVE.** `35°c` read as `35 degre **c**`, with the letter
+reaching the IPA as a bare consonant. This corpus writes the scale uppercase every time, so neither
+`mine.ts scan`, the corpus diff, nor `review.ts` could see it — only the probe.
+
+⚠ **This is the second time in this sweep**: the Kurmanji pass shipped the identical bug (`20 °c` →
+`20 pilec`) and it was found the same way, by probing the case the corpus does not contain. Trap 7 says a
+character class that is not case-insensitive misses half the writing system; the sharper form for THIS
+class is that a scale letter left unconsumed is worse than a dropped sign, because it becomes a phoneme.
+
+Worth carrying: **whenever a rule consumes a unit or scale LETTER, probe the other case immediately** — the
+corpus's own consistency is exactly what hides it.
+
+Gates after: 3,406 tests, tsc OK, scan "no defects", review.ts clean, corpus diff 150/439 with DROP
+123 → 43, referee 78.6% unchanged.
