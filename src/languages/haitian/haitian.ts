@@ -13,6 +13,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeHaitian } from "./normalize.ts";
 
 interface HaitianDef {
     digraphs: Record<string, string>;
@@ -93,7 +94,10 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class HaitianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // TEXT NORMALIZATION runs before tokenization: symbols, grouped numbers, ordinals and units become
+        // ordinary Haitian words, which then take the same word path as any other. Pure text→text — nothing
+        // below sees a symbol this pass has already spent. See normalize.ts for the ordering couplings.
+        return assembleClauses(normalizeHaitian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Haitian Creole number WORDS, each phonemized like any other word.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

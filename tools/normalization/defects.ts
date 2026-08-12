@@ -872,6 +872,53 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "slash Madurese writes constantly (`bân/otabâ`, `daging/ajam/tempe`, `atoran/kabiyasaan`). "
             + "`bagi` ×2 is 'for' (`Requiem bagi ROCKER`), not the operator",
     },
+    ht: {
+        // ⚠ ESPEAK SHIPS NO HAITIAN CREOLE, so every reason below is a measurement over an ht.wikipedia dump
+        // (800,158 paragraphs), and — because this wiki is 15.1% FRENCH — over its Creole-only 154,110 as
+        // well. Both numbers are given where they differ, because the gap IS the finding.
+        //
+        // ⚠ NO `minus` KEY, DELIBERATELY, AND THE GATE STAYS RED ON IT. Omitting a plus is lossless;
+        // omitting a minus INVERTS. There are genuine negatives here — `−20°C`, `−4 °C`, `-17.2°C`, and the
+        // maths article's `(-1)` — and the corpus's one candidate reading is a self-gloss that names the
+        // word `mwen`: `2+ (-2) = 0 i.e de plis (mwen de) fè zewo … (-2) se mwen de ou byen zewo mwen de`.
+        // `mwen` is Haitian for **"I / me"**, the commonest word in the language, and the actual comparative
+        // `mwens` (×569) is never digit-adjacent. One sentence proposing a reading homographic with the 1SG
+        // pronoun is not enough, so the sign stays unread AND unaccepted — a green gate here would claim a
+        // known-wrong silence is correct. The same refusal is argued in src/languages/haitian/normalize.ts.
+        plus: "measured: 55 leading `+` in Creole text and the largest class is the DEATH MARKER of this "
+            + "wiki's anniversary lists — `(+ 1987)`, `(† 1867)`, partner of the `(° )` birth marker the "
+            + "degree rule guards against. The rest are binary arithmetic tables quoted verbatim "
+            + "(`0 + 0 = 0 0 + 1 = 1 1 + 0 = 1`), a percentage delta (`2 % (+38 %)`) and a UTC-style offset. "
+            + "So the corpus DISQUALIFIES the reading rather than merely failing to supply it: `plis` is a "
+            + "real Haitian word (×many, as the comparative `plis pase`) and reading a death marker with it "
+            + "would be confidently wrong",
+        equals: "measured: `=` counts 93,254 in the dump and 304 in Creole text, and NONE of the 304 is an "
+            + "arithmetic equality a reader would voice. They are EasyTimeline markup that survived "
+            + "extraction (`ScaleMajor = unit:year increment:500`, `PlotArea = left:50 right:20`), template "
+            + "attributes (`|alt=Foto`, `langue=es`), a rhetorical pair in the creole-prestige article "
+            + "(`nou ta di lang=bon, kreyòl=pa bon`), a Latin etymology gloss (`Radix = rasin`), school "
+            + "algebra (`R = 4S`, `R = 4(20) = 80 goud`) and the binary table above. No Haitian word for the "
+            + "relation is attested digit-adjacent anywhere",
+        times: "measured: 185 `×` in the dump, 32 in Creole text, and they are DIMENSION CROSSES "
+            + "(`Big book, 11 x 17`) and SCIENTIFIC NOTATION (`6.02 X 10²³ patikil`) — 'by' and a mantissa "
+            + "power, neither of which is multiplication. `miltipliye` is attested as the VERB in prose "
+            + "(`li miltipliye pa (1/2)`) and never as an infix between two operands",
+        divide: "measured: `÷` is ×0 in the whole dump. The corpus writes division in words when it means "
+            + "it — `Si senk divize pa de, li ap bay 2,50` — which is a verb phrase, not an operator",
+        "plus-minus": "measured: 14 `±` in the dump and 3 in Creole text, all measurement tolerances in "
+            + "physics prose. Its reading would compose the plus and the minus words, and neither is "
+            + "available: see the plus entry above and the minus refusal in the header",
+        "less-than": "measured: 156 `<`/`>` in the dump and 88 in Creole text, and the readable ones are "
+            + "inside ENGLISH paper titles quoted in reference lists (`Improved Staging Criteria for Thin "
+            + "(< 1.00mm) Invasive Cutaneous Melanoma`); the rest are stripped-markup residue (`anba Lisans "
+            + "> .`). No Haitian comparative-magnitude phrase is attested in the slot",
+        "greater-than": "measured: the same 88, same two families — an English abstract's `>` and markup "
+            + "residue. Zero digit-flanked instances in Creole prose",
+        // ⚠ NO `degrees` KEY: the degree sign IS read. `°C` → `degre Sèlsiyis` (the corpus glosses its own
+        // symbol: `yon tanperati mwayèn 25 °C (25 degre Sèlsiyis)`) and a digit-preceded bare `°` → `degre`
+        // (`kiltive ant 60 degre latitid nò`). What is NOT read is the numero sign — which is read as
+        // `nimewo` instead — and the birth marker `(° )`, which has no digit before it.
+    },
 };
 
 /**
@@ -1578,6 +1625,35 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // scientific notation. Same call `so` records for `E = mc²`, and instance-listed for the same
         // reason — a `km²` regression must stay visible.
         exponent: ["E = mc²"],
+    },
+    ht: {
+        // A `km²` WITH NO NUMERAL IN FRONT OF IT. The unit rule keys on number-unit adjacency, which is
+        // right; both of these lost their figures when the source article's template was stripped, so the
+        // sentence reads `te gen abitan ak yon sifas tè km² ( mil kare)` and `pou chak km² ( pou chak mil
+        // kare)` — a bare unit with nothing to measure. The ordinary exponents ARE read (`131 669 km²` →
+        // *kilomèt kare*, normalize.ts step 5, sourced from `kilomèt kare` ×24 in the corpus's own prose),
+        // which is what keeps this pair honest as a tier limitation rather than a data gap.
+        exponent: ["sifas tè km²", "chak km²"],
+        // THE POUND, the one currency sign here with no Haitian name. `$` IS read (`dola` ×493,
+        // sense-checked, normalize.ts step 9) and `€` is dropped where the sentence already says *dola*
+        // (trap 12, reported as REDUNDANT for exactly that reason). The pound has neither: no Haitian word
+        // for it is attested anywhere in 800,158 paragraphs, and all three instances are one sentence about
+        // the Chagos lease (`peman lwaye anyèl £165 milyon … apre sa £120 milyon pa ane`).
+        // ⚠ Instance-listed rather than class-silenced, so a `$` regression reports again the moment it
+        // happens — which is the whole reason the currency class is not in ACCEPTED_SIGN_SILENCE above.
+        currency: ["£165 milyon", "£120 milyon"],
+        // THE `=` AND `+` INSTANCES, LISTED BESIDE the class refusals above rather than instead of them,
+        // because `acceptedSignClass` cannot accept `math-sign` — that class's regex matches a single
+        // character and the scan reports per SENTENCE. Three families, none arithmetic a reader would voice:
+        //   · EasyTimeline CHART MARKUP that survived extraction — `ScaleMajor = unit:year`, `PlotArea =
+        //     left:50 right:20`, `ScaleMinor = unit:year increment:1000000`. This is code.
+        //   · A BINARY ADDITION TABLE quoted whole from the computer-arithmetic article — `0 + 0 = 0 0 + 1
+        //     = 1 1 + 0 = 1 1 + 1 = 0`, where the signs are a truth table's column headings.
+        //   · DEFINITIONAL GLOSSES and school algebra — `(Radix = rasin)`, `lang=bon, kreyòl=pa bon`,
+        //     `R = 4S`, `R = 4(20) = 80 goud`, `a n =(-1) n`, and the English melanoma title's `(< 1.00mm)`.
+        "math-sign": ["ScaleMajor =", "ScaleMinor =", "PlotArea =", "Radix = rasin", "lang=bon", "kreyòl=pa",
+            "R = 4S", "R = 4(20) = 80", "a n =(-1) n", "(< 1.00mm)", "anba Lisans >", "2 % (+38 %)",
+            "0 + 0 = 0 0 + 1 = 1 1 + 0 = 1 1 + 1 = 0"],
     },
 };
 

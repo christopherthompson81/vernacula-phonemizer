@@ -1,0 +1,104 @@
+// WIKIPEDIA WORD ATTESTATION — ht. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+//
+// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+//
+// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": "ht",
+    "wiki": "ht.wikipedia.org",
+    "tier": "wikipedia",
+    "findings": [
+        {
+            "word": "pousan",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 50,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Pousan se yon pa nan san. == Tradiksyon == Lòt kreyòl: Franse: Ang…",
+                "…fè se lè ki antoure latè ; li fòme avèk gaz yo, avèk tou 78 pousan nitwojèn, 21 pousan oksijèn ak 0.03 pousan diyoksid kabòn.…",
+                "…latè ; li fòme avèk gaz yo, avèk tou 78 pousan nitwojèn, 21 pousan oksijèn ak 0.03 pousan diyoksid kabòn. == Referans == == Ly…",
+                "…yo, avèk tou 78 pousan nitwojèn, 21 pousan oksijèn ak 0.03 pousan diyoksid kabòn. == Referans == == Lyen deyò ==…",
+                "…e apeprè 66 ̬pousan fòs travay la e te reprezante apeprè 35 pousan GDP ak 24 pousan ekspòtasyon an 1987. Wòl agrikilti a nan e…",
+                "…an fòs travay la e te reprezante apeprè 35 pousan GDP ak 24 pousan ekspòtasyon an 1987. Wòl agrikilti a nan ekonomi an te bese…"
+            ]
+        },
+        {
+            "word": "vigil",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 27,
+            "articles": 16,
+            "substringOnly": 0,
+            "examples": [
+                "…Vigil se yon vil nan pwovens Camaguey, nan peyi Kiba. Li genyen k…",
+                "…li ap toujou bay yon rezilta ki gen senkant (,50) apre yon vigil. Si senk divize pa de, li ap bay 2,50. 10.005 divize an de…",
+                "…lè fraz yo mete youn apre lòt san konektè, men yo separe ak vigil (vègil, pwen-vig, elatriye). Egzanp: – Li vini, li pa di an…",
+                "…en, oswa…” - Jistapozisyon → pa gen mo koneksyon, separe ak vigil - Sibòdone → yon fraz depann de lòt, lye pa “paske, si, ke……",
+                "…m Beto Nubia Martí César Bono (1982-1984) kòm César Xóchitl Vigil (1982-1984) kòm Xóchitl María Rosa Bono (1982-1984) kòm Mar…",
+                "…o Jerardo kòm Efraín Miguel Suárez kòm Don Fernando Gerardo Vigil kòm Ledezma Lucero Rojas kòm Daniela Jorge Fegan kòm Doktè…"
+            ]
+        },
+        {
+            "word": "dola",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 129,
+            "articles": 20,
+            "substringOnly": 0,
+            "examples": [
+                "…Dola, Senk goud. Senk-san kòb. San santim nan lajan peyi Etazini…",
+                "…-san kòb. San santim nan lajan peyi Etazini. Moun toujou di dola menm lè yo vle di yon dola. Nan anpil peyi nan lemond, siy…",
+                "…jan peyi Etazini. Moun toujou di dola menm lè yo vle di yon dola. Nan anpil peyi nan lemond, siy ki reprezante dola ($) ranp…",
+                "…e di yon dola. Nan anpil peyi nan lemond, siy ki reprezante dola ($) ranplase kantite nan kòb peyi sa yo moun peyi a panse k…",
+                "…kantite nan kòb peyi sa yo moun peyi a panse ki egal a yon dola. Konsa dola ameriken reprezante yon lidè pou tout kòb nan l…",
+                "…kòb peyi sa yo moun peyi a panse ki egal a yon dola. Konsa dola ameriken reprezante yon lidè pou tout kòb nan lemond; se so…"
+            ]
+        },
+        {
+            "word": "degre",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 34,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…Degre, Nivo yon moun, yon bagay rive. Dènye klas yon moun te pase…",
+                "…Degre Sèlsiyis (senbòl °C) se inite a nan echèl la tanperati Sèls…",
+                "…Etazini, Beliz ak Zile Kayiman yo, ki toujou itilize echèl degre Farennayt la. == Definisyon == == Istwa == == Diferans avèk…",
+                "…] Degre (nonm) oksidasyon se yon chaj pozitif oswa negatif yon iyon…",
+                "…== Ekwasyon premye degre == == Gade tou == Postila Bètran Fonksyon ki konte kantite…",
+                "…e Nonm zanmi Primoryel Pwisansyèl Rezolisyon ekasyon premye degre ak sentèz == Referans == == Lyen deyò ==…"
+            ]
+        },
+        {
+            "word": "nimewo",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 94,
+            "articles": 19,
+            "substringOnly": 0,
+            "examples": [
+                "…Yon liy nimewo se yon foto avèk yon dimansyon ki montre nonm antye tankou…",
+                "…tout nonm reyèl e li kontwi \"ajamè\" nan chak direksyon. Liy nimewo a souvan sèvi tankou èd pou montre adisyon senp ou soustrak…",
+                "…{\\sqrt {2}}} , nonm Euler e, ak nonm Pi (pi). == Ap fe liy nimewo-a == Liy nimewo a yo souvan reprezante li tankou orizantal.…",
+                "…nonm Euler e, ak nonm Pi (pi). == Ap fe liy nimewo-a == Liy nimewo a yo souvan reprezante li tankou orizantal. Nonm pozitif se…",
+                "…ou ekran an pa ale ajamè. Koleksyon an ak tout nonm sou liy nimewo a rele koleksyon nonm reyèl yo (ann anglè: the set of the r…",
+                "…Yon International Standard Book Number (« ISBN » oswa « Nimewo Entènasyonal Nòmalize Liv ») se yon chèn nimerik pou idanti…"
+            ]
+        }
+    ],
+}

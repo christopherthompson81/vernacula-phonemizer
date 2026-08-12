@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { createHaitian, phonemizeWord } from "../src/languages/haitian/haitian.ts";
+import { normalizeHaitian } from "../src/languages/haitian/normalize.ts";
 import { numberToWords } from "../src/languages/haitian/numbers.ts";
 
 // Haitian Creole (ht) — kreyòl ayisyen, a French-lexified creole of Haiti (~12M). The IPN orthography is
@@ -79,5 +80,123 @@ describe("Haitian Creole canonical IPA — phonemic IPN g2p + the nasal-vowel ru
         expect(ht.text("70").trim()).toBe("swasãndis"); // ⟨ann⟩ → nasal vowel + [n]
         expect(ht.text("99").trim()).toBe("katɣevɛ̃diznɛf"); // ⟨r⟩→ɣ, ⟨en⟩→ɛ̃
         expect(ht.text("22").trim()).toBe("vɛ̃nde"); // ⟨enn⟩ → [ɛ̃n] (contrast a bare ⟨en⟩ → [ɛ̃])
+    });
+});
+
+// ── TEXT NORMALIZATION (src/languages/haitian/normalize.ts) ────────────────────────────────────────────
+// Evidence: tools/corpus/mined/ht.jsonc plus an ht.wikipedia dump (800,158 paragraphs, of which 154,110 are
+// Creole — this wiki is 15.1% FRENCH, and every count in normalize.ts is quoted over the Creole subset).
+// Full log: docs/investigations/ht_normalization_investigation.md.
+describe("Haitian Creole text normalization", () => {
+    const ht = createHaitian();
+
+    test("percent, the layer's largest class — `pousan`, postposed", () => {
+        // `pousan` x82 in exactly this slot (`Plis pase 90 pousan nan bidje gouvenman an`). ⚠ `pousantaj`
+        // x138 is the NOUN "percentage" and is a different word, not an inflection of this one.
+        expect(normalizeHaitian("Plis pase 90% nan bidjè")).toBe("Plis pase 90 pousan nan bidjè");
+        expect(ht.text("25%").trim()).toBe("vɛ̃nsɛ̃k pusã");
+    });
+
+    test("the degree sign does FIVE jobs, and only two of them are a degree", () => {
+        // Measured over the 276 `°` in Creole text: coordinate 80, angle 59, scale 57, numero 45, birth 28.
+        expect(normalizeHaitian("26 °C")).toBe("26 degre Sèlsiyis"); // the corpus glosses `25 °C (25 degre Sèlsiyis)`
+        expect(normalizeHaitian("23°")).toBe("23 degre"); // an angle — `degre latitid` is attested
+        expect(normalizeHaitian("Symphonie n°1")).toBe("Symphonie nimewo 1"); // the NUMERO sign, `nimewo` x381
+        expect(normalizeHaitian("wout nasyonal N ° 1")).toBe("wout nasyonal nimewo 1"); // spaced variant
+        // ⚠ THE BIRTH MARKER of an anniversary list is NOT a degree, and the guard that stops it is the
+        // requirement of a DIGIT before the sign — this wiki writes `(° )` x28 for "born".
+        expect(normalizeHaitian("aktè fransè (° )")).toBe("aktè fransè (° )");
+        expect(normalizeHaitian("(° 1657)")).toBe("(° 1657)");
+    });
+
+    test("digit de-grouping in all three conventions the corpus mixes", () => {
+        expect(normalizeHaitian("26,338 km2")).toBe("26338 kilomèt kare"); // American comma
+        expect(normalizeHaitian("2 470 762 moun")).toBe("2470762 moun"); // French space
+        expect(normalizeHaitian("5.002,50")).toBe("5002 vigil 50"); // BOTH in one number, as the corpus writes it
+    });
+
+    test("decimals — `vigil`, and a SHORT tail is a number while a long one is spelled out", () => {
+        // `vigil` is attested in the decimal sense in four articles, and one of them settles the tail too:
+        // `yon rezilta ki gen senkant (,50) apre yon vigil` calls the `,50` *senkant*, i.e. a NUMBER.
+        expect(normalizeHaitian("2,50")).toBe("2 vigil 50");
+        // Three digits or more has no such citation, so those go one at a time.
+        expect(normalizeHaitian("3,14159")).toBe("3 vigil 1 4 1 5 9");
+        expect(normalizeHaitian("0.03 pousan")).toBe("0 vigil 0 3 pousan"); // a leading zero is never a number
+    });
+
+    test("units are POSTPOSED (Haitian, not Lingala) and hop a magnitude word", () => {
+        expect(normalizeHaitian("1 250 257,6 km²")).toBe("1250257 vigil 6 kilomèt kare");
+        expect(normalizeHaitian("10.4 milyon km 2")).toBe("10 vigil 4 milyon kilomèt kare"); // magnitude + spaced exponent
+        // ⚠ A SLASHED UNIT IS NOT CLAIMED — `km/h` has no attested Haitian reading, and claiming `km` alone
+        // would strand the `/h` rather than fix anything.
+        expect(normalizeHaitian("9 km/h")).toBe("9 km/h");
+    });
+
+    test("ranges take `a`, ascending only, and a percent span keeps both signs", () => {
+        expect(normalizeHaitian("François Duvalier (1907-1971)")).toBe("François Duvalier (1907 a 1971)");
+        expect(normalizeHaitian("70-80% Afriken")).toBe("70 a 80 pousan Afriken");
+        expect(normalizeHaitian("10%-15% nan salè")).toBe("10 pousan a 15 pousan nan salè");
+        // NON-ASCENDING is left alone: `1403-04` is a truncated year span and reads with a different
+        // connective, so claiming it would be confidently wrong.
+        expect(normalizeHaitian("1403-04")).toBe("1403-04");
+    });
+
+    test("currency — `dola`, and the sign is DROPPED when the word is already there (trap 12)", () => {
+        expect(normalizeHaitian("$1,800")).toBe("1800 dola");
+        expect(normalizeHaitian("$ 120 milyon dola")).toBe("120 milyon dola"); // named twice → say it once
+        // ⚠ THE `US` CODE IS RE-EMITTED, not spent with the sign: an earlier version deleted it and
+        // `US$200.000` came out as a bare *de san mil* (trap 10).
+        expect(normalizeHaitian("US$200.000")).toBe("US 200000");
+    });
+
+    test("ORDINAL BRANCHES — the table, the composition, and the boundary between them (trap 13)", () => {
+        // The table branch, all corpus-attested spellings:
+        expect(normalizeHaitian("1yèm")).toBe("premye"); // suppletive, x6723 — never *enyèm
+        expect(normalizeHaitian("4yèm")).toBe("katriyèm");
+        expect(normalizeHaitian("17yèm")).toBe("disetyèm"); // x9 attested, and the tail rule reproduces it
+        expect(normalizeHaitian("20yèm syèk")).toBe("ventyèm syèk"); // was *ven* + a bare *yèm*
+        // The COMPOSITION branch, which the corpus writes only in digits — this is the half a table misses:
+        expect(normalizeHaitian("28yèm")).toBe("ventwityèm"); // the attested dizuit→dizwityèm shift, inside a compound
+        expect(normalizeHaitian("70yèm")).toBe("swasanndizyèm"); // the vigesimal band: 60+10
+        expect(normalizeHaitian("90yèm")).toBe("katrevendizyèm"); // x1 attested — the check on the composition
+        expect(normalizeHaitian("145yèm")).toBe("san karannsenkyèm");
+        // ⚠ AND THE REFUSAL, which falls out of the same mechanism: `venteyen` ends in `-en`, no attested
+        // tail matches, and the rule returns its input rather than inventing *venteyenyèm*.
+        expect(normalizeHaitian("21yèm syèk")).toBe("21yèm syèk");
+        expect(normalizeHaitian("81yèm")).toBe("81yèm");
+        // All three written suffixes, including the French `ème` of this wiki's French half:
+        expect(normalizeHaitian("13èm")).toBe("trèzyèm");
+        expect(normalizeHaitian("klas 4em")).toBe("klas katriyèm");
+        expect(normalizeHaitian("329 èm jou")).toBe("twa san ventnevyèm jou"); // the suffix may be spaced
+        expect(ht.text("20yèm").trim()).toBe("vɛ̃tjɛm");
+    });
+
+    test("fractions compose through the ordinal, and the cap is what makes the rule safe", () => {
+        expect(normalizeHaitian("1/5 lè atmosferik")).toBe("yon senkyèm lè atmosferik"); // `yon senkyèm` attested
+        expect(normalizeHaitian("2/3 nan moun")).toBe("2 twazyèm nan moun");
+        expect(normalizeHaitian("3/4")).toBe("3 katriyèm"); // the corpus writes this only in words (`twa ka`)
+        expect(normalizeHaitian("14/16")).toBe("14/16"); // a chess score — denominator over ten
+        expect(normalizeHaitian("Paris, 10/18")).toBe("Paris, 10/18"); // a publisher's collection
+    });
+
+    test("identifiers, era markers, page abbreviations and the ampersand", () => {
+        // An ISBN is read digit by digit; a 13-digit run used to exceed the engine's number guard and LEAK.
+        expect(normalizeHaitian("ISBN 1-58432-005-2")).toBe("ISBN 1 5 8 4 3 2 0 0 5 2");
+        expect(ht.text("ISBN 9780829703962").trim()).toBe("isbn nɛf sɛt ɥit zewo ɥit de nɛf sɛt zewo twa nɛf sis de");
+        // The era phrase is the corpus's own gloss of its own abbreviation: `anvan Jezi Kris (av. J.-K.)`.
+        expect(normalizeHaitian("500 av. J.-C. santèn")).toBe("500 anvan Jezi Kris santèn");
+        // ⚠ A SENTENCE-FINAL abbreviation keeps its period, so the pause is not deleted.
+        expect(normalizeHaitian("8000 av. J.-C. Des Sit")).toBe("8000 anvan Jezi Kris. Des Sit");
+        expect(normalizeHaitian("1976, p. 157-177")).toBe("1976, paj 157 a 177");
+        // ⚠ SPACED ON BOTH SIDES: `A&B` deletes to `AB`, one token instead of two (traps 18/26).
+        expect(normalizeHaitian("Arends, Muysken & Smith")).toBe("Arends, Muysken ak Smith");
+    });
+
+    test("ordinary text survives the layer untouched", () => {
+        expect(normalizeHaitian("Mwen pale kreyòl.")).toBe("Mwen pale kreyòl.");
+        expect(ht.text("Mwen pale kreyòl.").trim()).toBe("mwɛ̃ pale kɣejɔl .");
+        // The clock is deliberately NOT claimed: the majority of colon-numerals here are SCRIPTURE
+        // references (`Travay 11:25-26`, `Matye 16:18`), not times.
+        expect(normalizeHaitian("Travay 11:25-26")).toBe("Travay 11:25-26");
     });
 });

@@ -172,7 +172,18 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // Its `math-sign` entry is the other shape worth naming: a ± the sentence ALREADY spells out
         // (`ra-kèra ±335,28 km²`), i.e. the playbook's trap-12 permissible drop, listed by instance because
         // the unglossed ± IS read (`korang lebbi`) and must stay under test.
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
+        // ht is the SECOND entry after ln whose story is one character doing several jobs on a
+        // French-influenced wiki, and it does one MORE than Lingala's three: `°` is the temperature degree
+        // (read, `degre Sèlsiyis`), the coordinate/angle degree (read, `degre`), the French NUMERO sign
+        // (read as `nimewo` — the one place ht can do what ln could not) and, uniquely here, the BIRTH
+        // MARKER of an anniversary list (`aktè fransè (° )`), whose partner `(+ 1987)` is what disqualifies
+        // the plus word. So ht's `degree` key is ABSENT — the sign is read — and what it lists instead is
+        // the pound (no Haitian name anywhere, while `$`→`dola` IS read), two `km²` whose template lost
+        // their figures, and the `=`/`+` of chart markup and a quoted binary addition table.
+        // ⚠ AND ht's ABSENT `minus` KEY IS DELIBERATE, for exactly ln's reason: its ten drops include real
+        // temperatures (`−20°C`) and the corpus's only candidate word is `mwen`, which is Haitian for "I".
+        // A known-wrong silence does not get to be a green gate, so `review.ts --lang ht` stays red.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["bm", "ceb", "cjy", "gan", "gu", "hak", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mr", "my", "nan", "nya", "ps", "si", "so", "su", "ta", "tl", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
