@@ -293,3 +293,151 @@ They do not arise in Chichewa: `letter-hyphen-digit` ×13 is entirely CSS and En
 never a detached bound morpheme. Chichewa numerals ARE bound concord-taking stems — the concord simply goes
 on the numeral WORD, and the corpus never writes it on a digit. So every rule leaves its operand as digits,
 which is also what keeps the tier's number–unit adjacency alive.
+
+## Run 5 — 2026-08-11 (the ≥10⁶ cap from Run 4, sourced and lifted)
+
+Run 4 flagged the cap and refused to fix it in the normalization worktree for two reasons: it is engine
+number DATA, and the composition needed a word-order decision the corpus did not settle. Both are settled
+here. **espeak ships no Chichewa**, so there is no second machine-readable haystack — every word below is
+either a ny.wikipedia token (`attest.ts --wiki ny`; note the wiki is `ny`, not `nya`) or a web source, and
+anything neither attests is left unauthored.
+
+### 5a. Which magnitude words the language actually uses
+
+`npx tsx tools/normalization/attest.ts --lang nya --wiki ny --words …` — over three probes:
+
+```
+miliyoni    31 tok / 6 arts   attested        mamiliyoni   6 / 6   attested
+biliyoni    13 tok / 6 arts   attested        mabiliyoni   1 / 1   attested
+milioni      3 / 3  attested (variant spelling, not authored — one spelling per slot)
+sauzande     1 / 1  attested (English "thousand" loan; `chikwi` already holds the slot)
+triliyoni 0 · trilioni 0 · thililiyoni 0 · thiriliyoni 0 · tiliyoni 0 · matiliyoni 0 · matriliyoni 0
+```
+
+**The SENSE was read, not assumed** (the Fula lesson). `biliyoni` is the SHORT scale, 10⁹, in every
+example: Instagram bought for `US $ 1 biliyoni`, `zithunzi zopitilira 40 biliyoni` uploaded, `anthu 4.7
+mabiliyoni` able to watch a World Cup — 4.7 × 10⁹ against a world population of ~8 × 10⁹ is the only
+reading that works. No long-scale ("million million") reading survives any of those three.
+
+**Trillion is REFUSED.** Zero tokens under six spellings on ny.wikipedia. The only web evidence is a
+crowd-sourced lughayangu.com entry `eyiti-tiliyoni` — glossed "Eyiti tiliyoni ndi bajeti ya malawi", a
+single 2022 user contribution that transliterates the whole English phrase *eight trillion*. A word that
+appears only inside a transliterated English phrase is not an attestation of the word in its slot
+(playbook trap 37; the Fula `tere` failure). So composition stops below 10¹² and ≥10¹² keeps the
+digit-by-digit fallback.
+
+### 5b. THE WORD ORDER — the Run 4 conflict was a spelling convention, not a grammar conflict
+
+Run 4 read `5 miliyoni` as postposing and `zikwi ziwiri` as preposing and called them irreconcilable.
+They are not: **the corpus's `5 miliyoni` is a DIGIT next to a word; `zikwi ziwiri` is two WORDS.** When
+ny.wikipedia spells the multiplier out, the magnitude noun comes FIRST, every time:
+
+```
+mamiliyoni awiri              "otsatira oposa mamiliyoni awiri a Twitter"          (2 000 000)
+mamiliyoni asanu              "Magazini opitirira mamiliyoni asanu anagulitsidwa"  (5 000 000)
+mamiliyoni asanu ndi anayi    "Msilikali oposa mamiliyoni asanu ndi anayi"         (9 000 000)
+miliyoni imodzi               "ogwiritsa ntchito miliyoni imodzi m'miyezi iwiri"   (1 000 000)  ×2
+milioni imodzi ndi theka      "anthu opembedza pafupifupi milioni imodzi ndi theka"(1 500 000)
+```
+
+against the same shape in the already-shipped magnitudes — `zikwi makumi ambiri`, `mazana awiri`,
+`mazana asanu, makumi atatu ndi awiri (532)`. NOUN-then-MULTIPLIER, 5 spelled-out magnitude instances and
+no counter-example. Digit order (`Mafayilo 5 miliyoni`, ×36 in Run 3) is the orthographic convention the
+language borrows along with the numeral glyphs, exactly as English writes *5 million* but Bantu word order
+is unaffected.
+
+**This does not supersede Run 3's withdrawal of `magnitudes` from the symbol tier — it explains it.** That
+measurement was about text that KEEPS its digits (`$ 350 miliyoni` → *madola 350 miliyoni*), where the
+magnitude must stay where the writer put it. `numberToWords` emits WORDS, and words take the other order.
+Both facts are the same grammar seen through two spellings; nothing here changes the tier.
+
+### 5c. Concord, which is the reason this is not a one-line edit
+
+Two series already exist because a Chichewa numeral agrees with what it counts. The magnitudes add a
+third agreement:
+
+```
+miliyoni / biliyoni    class 9 singular   → concord imodzi      (attested: "miliyoni imodzi" ×2)
+mamiliyoni/mabiliyoni  class 6 plural     → concord a-/li-      (attested: "mamiliyoni asanu ndi anayi")
+zikwi                  class 8            → concord zi-         (= the existing `units` series)
+```
+
+`mamiliyoni asanu ndi anayi` is the load-bearing one: it shows the a- series in BOTH slots of the 5+4
+compound, i.e. the whole multiplier agrees, not just its head. So `below100`/`below1000` had to be
+parameterised by the unit-slot series — `makumi`/`mazana` keep taking `classSix` (they agree with
+themselves, not with the counted noun), and only the final unit slot varies. `zikwi` passes `units` and so
+every existing thousands golden is byte-identical.
+
+**One inference is recorded as an inference:** `biliyoni imodzi` (1 000 000 000) is not attested as a
+phrase — `biliyoni` is (13 tokens), `imodzi` is, and `miliyoni imodzi` is. Composing an attested class-9
+loan with the attested class-9 concord of its exact structural twin is morphology, not invention. The
+alternative (bare `biliyoni`) is attested in no smaller way and would be inconsistent with the twin.
+
+### 5d. Independent web sourcing (there is no espeak to fall back on)
+
+- ny.wikipedia is one haystack and the mined corpus is derived from it, so a second was required.
+  **Malawi24's Chichewa desk** (malawi24.com/tag/chichewa) uses both words in native-language journalism
+  outside Wikipedia: a headline *"…agula galimoto ya mamiliyoni ambirimbiri…"* ("bought a car of many
+  millions") and *"K931 Biliyoni ku Ulimi"* ("K931 billion for agriculture"), plus *"ndalama zokwana
+  5 miliyoni"* in Malawian broadcast copy. Both magnitudes are current, ordinary register.
+- **Omniglot's Chichewa numbers page** — the source already cited in `chichewa.jsonc` for the tens — gives
+  1 000 000 as *"nambala ya maziro asanu ndi limodzi"*, literally "a number of six zeros". That is a
+  DESCRIPTION of the numeral, not a numeral, and it is the origin of the shipped comment "Chichewa has no
+  well-attested native million". The comment was right about a NATIVE word and wrong about the language:
+  Chichewa writes and speaks the loan. Recorded as the negative result it is.
+- **Wiktionary** has no Chichewa entry for `miliyoni` at all (only Rwanda-Rundi *milíyōni*, class 9 /
+  plural class 10) — so the noun-class evidence for Chichewa is the corpus concord above, not a lexicon.
+
+### 5e. Gates
+
+```
+                       before                                   after
+vitest                 235 files, 3452 passed, 5 skipped        (see below)
+tsc --noEmit           clean                                    clean
+review.ts --lang nya   checklist clean 10/10                    checklist clean 10/10
+referee wikipron       raw 708/1562 45.3%  folded 99.4%          (word-only referees: expect byte-identical)
+referee kaikki         raw  15/1526  1.0%  folded 98.2%
+referee epitran        raw 644/1562 41.2%  folded 92.7%
+```
+
+**After.** `tsc --noEmit` clean · `review.ts --lang nya` checklist clean 10/10 (unchanged — this touches no
+normalizer rule) · **all three referees BYTE-IDENTICAL** (wikipron 708/1562 45.3% raw, 1553/1562 99.4%
+folded; kaikki 15/1526 1.0%, 1498/1526 98.2%; epitran 644/1562 41.2%, 1448/1562 92.7%), which is the
+predicted result and the whole value of running them: they are word→IPA lists containing no digit, so they
+are a regression tripwire for the grapheme scan and never a progress meter for number data.
+
+`npx vitest run` → 3458 tests, chichewa.test.ts fully green. The whole-suite run reported 4 unrelated
+failures — `onnx-optional` and three Arabic (`acw`/`ajp`/`ar`) referee-corroboration cases — all of them
+`Test timed out`, none an assertion. Re-run in isolation on the same tree: **192/192 pass**. They are
+machine-load artifacts from concurrent worktrees, not regressions. Recorded rather than swept.
+
+### 5f. The golden that changed — one, and it is the point
+
+```
+- numberToWords(1000000) === "chimodzi ziro ziro ziro ziro ziro ziro"
++ numberToWords(1000000) === "miliyoni imodzi"
+```
+
+This is the only pre-existing expectation that moved. It was pinned under the comment "Chichewa has no
+well-attested native million", i.e. **a sourcing gap was committed as if it were a language fact**, and
+5a/5d show why it was wrong. Replaced with a test that pins the concord and the order (the attested
+`mamiliyoni asanu ndi anayi` is asserted verbatim, and it is the case `units` would get wrong), plus a
+second test pinning the 10¹² ceiling so the refusal to coin a trillion cannot be silently undone. Every
+other number golden — 555, 1000, 2000, 12345, `phonemize("200")`, `phonemize("1000")` — is byte-identical,
+because `zikwi` passes the `units` series and reproduces the old code path exactly.
+
+Re-running Run 4's measurement through the full pipeline, the 19 affected corpus utterances now read:
+
+```
+1,600,000    → miɽijoni imod͡zi ⁿdi zikwi mazana asanu ⁿdi ɽimod͡zi
+2,780,400    → mamiɽijoni awiɽi ⁿdi zikwi mazana asanu ⁿdi awiɽi ⁿdi makumi asanu ⁿdi atatu ⁿdi mazana anaji
+147,000,000  → mamiɽijoni zana ⁿdi makumi anaji ⁿdi asanu ⁿdi awiɽi
+```
+
+(was: seven to nine digit words apiece.)
+
+**Implication / what is left.** Two things are deliberately still open. (1) No trillion — reopen only if a
+source appears; the probe is one `attest.ts` command. (2) The connective: ny.wikipedia writes one long
+numeral with `mphambu` ("mazana awiri, makumi anayi ndi mphambu zisanu ndi ziwiri (248)") where the engine
+writes `ndi` throughout. That is a register/style question over the WHOLE compositor, not the magnitudes,
+so it was not touched here — 1 instance, and changing it would move every number golden in the file.

@@ -21,6 +21,255 @@
     "tier": "wikipedia",
     "findings": [
         {
+            "word": "tiliyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "matiliyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "khumi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 5,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…lo aliyense adzakhala ndi ISBN yosiyana. ISBN ndi manambala khumi utali ngati idaperekedwa chaka cha 2007 chisanafike, ndipo…",
+                "…ti idaperekedwa chaka cha 2007 chisanafike, ndipo manambala khumi ndi atatu ngati ataperekedwa pa 1 January 2007 kapena pambu…",
+                "…e adapangidwa mu 1966. Mtundu wa ISBN wokhala ndi manambala khumi adapangidwa ndi International Organisation for Standardizat…",
+                "…kakhala, derali linakhudzidwa ndi kukula kwa Bantu kwa zaka khumi ndi zitatu. Atapita kukachezera ofufuza a ku Ulaya m'zaka z…",
+                "…lake, lomwe lili ndi likulu ku Madrid, lakonzedwa m'magulu khumi ndi asanu ndi awiri odziyimira pawokha, nawonso amapangidwa…"
+            ]
+        },
+        {
+            "word": "zikwi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…ndi yakuti Amwenye Achimereka akhala akukhala kumeneko zaka zikwi zambiri asanalowe. Komabe, Achimereka Achimerika sanalembed…",
+                "…wo cha Kahramanmaraş. Panali kuwonongeka kwakukulu ndi imfa zikwi makumi ambiri. Chivomezi chachikulu ndi chivomezi champhamv…",
+                "…i Alaska zakhala kwa anthu amitundu yosiyanasiyana kwa zaka zikwi; Anthu ambiri amakhulupirira kuti derali linali polowera ku…"
+            ]
+        },
+        {
+            "word": "mazana",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…kubadwa kwa mulungu wawo wa dzuwa, Sol Ivictus Mu chaka cha mazana awiri, makumi anayi ndi mphambu zisanu ndi ziwiri (248) pa…",
+                "…pita chibadwireni Yesu ndipo anawelenga kuti panadutsa zaka mazana anasu ndi chiwiri ndi makumu asanu ndi atatu (753) chikhazi…",
+                "…a Chaka cha Mulungu). DOngosololi linapangidwa mu chaka cha mazana asanu, makumi atatu ndi awiri (532), ndipo patapita zaka pa…",
+                "…kumi atatu ndi awiri (532), ndipo patapita zaka pafupi fipi mazana awiri anthu anavomereza kuti likhale dongosolo lomwe maiko…",
+                "…iko la Roma linali lopanda mkangano waukulu kwa zaka zoposa mazana aŵiri ngakhale kuti panali nkhondo zopitirizabe za kufaliki…",
+                "…sungunuka wa zikhalidwe ndi mafuko, US idapangidwa ndi zaka mazana ambiri zakusamuka. United States ndi dziko lotukuka kwambir…"
+            ]
+        },
+        {
+            "word": "milioni",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 3,
+            "articles": 3,
+            "substringOnly": 0,
+            "examples": [
+                "…, m'chaka cha 1917. Lero uli ndi anthu opembedza pafupifupi milioni imodzi ndi theka m'maiko makumi anayi ndi asanu (45), mu ko…",
+                "…era ena enieni . Pa tsiku lomwe asanamasulidwe, 4.2 Miyendo milioni ya Halo 3 inali muzipinda zamalonda. Halo 3 yapambana US $…",
+                "…. \"Mulungu adalitse mwanayo\", yemwe adagulitsa magulu oposa milioni, adayika nambala 3 pa nyimbo za Billboard za kumapeto kwa c…"
+            ]
+        },
+        {
+            "word": "bilioni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "thililiyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "thiriliyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "trilioni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "matriliyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "mamiliyoni awiri",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…betsa opitilira 6 miliyoni a YouTube komanso otsatira oposa mamiliyoni awiri a Twitter. Kudzera munjira izi, amafalitsa nkhani zakatanga…"
+            ]
+        },
+        {
+            "word": "miliyoni imodzi",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 2,
+            "articles": 2,
+            "substringOnly": 0,
+            "examples": [
+                "…la 2010, Instagram idayamba kutchuka, ndi ogwiritsa ntchito miliyoni imodzi m'miyezi iwiri, 10 miliyoni pachaka, ndi 1 biliyoni kuyambi…",
+                "…Lavigne wagulitsa zoposa 40 albhamu miliyoni ndi zoposa 50 miliyoni imodzi padziko lonse, kumupanga iye wojambula wachitsikana wotchuk…"
+            ]
+        },
+        {
+            "word": "mamiliyoni atatu",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "mabiliyoni awiri",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "biliyoni imodzi",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "miliyoni",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 31,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…si, chifukwa chiwelengelo cha anthu ku Afilika ku ndi 1 300 miliyoni ( malinga ndi chiwelengelo cha anthu chomwe chinachitika mu…",
+                "…thu ndipo anapezako zotsalira za anthu amene analipo zaka 7 miliyoni zapitazo. Dera la Afilika lili mbali zonse ziwiri za mzere…",
+                "…hi 2021, malowa ali ndi mafayilo azomangamanga opitilira 70 miliyoni, oyang'aniridwa ndi kusinthidwa ndi odzipereka olembetsa. M…",
+                "…== Ziwerengero zokhutira == Novembara 30, 2006: Mafayilo 1 miliyoni September 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafa…",
+                "…30, 2006: Mafayilo 1 miliyoni September 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafayilo 10 miliyoni Disembala 4, 2012: Maf…",
+                "…er 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafayilo 10 miliyoni Disembala 4, 2012: Mafayilo 15 miliyoni July 14, 2013: 100,…"
+            ]
+        },
+        {
+            "word": "biliyoni",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 13,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…00 ndipo linawononga zinthu zokwana pafupifupi 18. ma ruble biliyoni (pafupifupi US$84.5) biliyoni mu 2025). Ikadali ngozi yoops…",
+                "…kwana pafupifupi 18. ma ruble biliyoni (pafupifupi US$84.5) biliyoni mu 2025). Ikadali ngozi yoopsa kwambiri ya nyukiliya komans…",
+                "…biri m'mbiri yonse, yokhala ndi mtengo woyerekeza wa US$700 biliyoni. == Zolemba ==…",
+                "…Mu Epulo 2012, Facebook idapeza ntchitoyi pafupifupi US $ 1 biliyoni ndi ndalama. Pulogalamuyi imalola ogwiritsa ntchito kutsits…",
+                "…miliyoni imodzi m'miyezi iwiri, 10 miliyoni pachaka, ndi 1 biliyoni kuyambira Juni 2018. Mtundu wa Android udatulutsidwa mu Epu…",
+                "…bala 2016. Kuyambira Okutobala 2015, zithunzi zopitilira 40 biliyoni zidakwezedwa. Ngakhale adatamandidwa chifukwa cha zomwe ada…"
+            ]
+        },
+        {
+            "word": "triliyoni",
+            "verdict": "absent",
+            "bounded": true,
+            "tokenHits": 0,
+            "articles": 0,
+            "substringOnly": 0,
+            "examples": []
+        },
+        {
+            "word": "mamiliyoni",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 6,
+            "articles": 6,
+            "substringOnly": 0,
+            "examples": [
+                "…u Kwachiwiri, makamaka mu nthawi ya 1800-1840, adatembenuza mamiliyoni kukhala Chiprotestanti chauvangeli. Kumpoto, idalimbikitsa…",
+                "…etsedwa m'madera ena. Malowa anawonongeka ogwiritsa ntchito mamiliyoni 7 ku United States ndi Canada mu May 2011 poyerekezera ndi…",
+                "…aliwonse. Michira yake yafumbi ndi gasi idatambasulidwa kwa mamiliyoni a makilomita ndipo, mu Januware 2023, anti-mchira wachitatu…",
+                "…kukonzekera ndi kuthandiza pambuyo pa mphepo, popeza anthu mamiliyoni anexpectedwa kuti akhudzidwe. Madera ofanana adakhudzidwa n…",
+                "…Halo: Master Master Collection mu 2014. Magazini opitirira mamiliyoni asanu anagulitsidwa padziko lonse mu November 2005. == Mase…",
+                "…mu nkhondo yaikulu kwambiri m'mbiri yonse. Msilikali oposa mamiliyoni asanu ndi anayi ndi anthu asanu ndi awiri (7 miliyoni) omwe…"
+            ]
+        },
+        {
+            "word": "mabiliyoni",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…tsidwa m'magawo 212 kunyumba 643 miliyoni komanso anthu 4.7 mabiliyoni akhoza kuonerera. M'nyengo ya 2018-19, opezekapo pamasewera…"
+            ]
+        },
+        {
+            "word": "sauzande",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": [
+                "…yoni amatenga matendawa ndipo anthu oyambira pa 20 mpaka 50 sauzande amamwalira ndi matendawa chaka chilichonse. Anthu pafupifup…"
+            ]
+        },
+        {
             "word": "madola miliyoni",
             "verdict": "absent",
             "bounded": true,
@@ -55,38 +304,6 @@
             "articles": 0,
             "substringOnly": 0,
             "examples": []
-        },
-        {
-            "word": "zikwi",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 9,
-            "articles": 8,
-            "substringOnly": 0,
-            "examples": [
-                "…ndi yakuti Amwenye Achimereka akhala akukhala kumeneko zaka zikwi zambiri asanalowe. Komabe, Achimereka Achimerika sanalembed…",
-                "…wo cha Kahramanmaraş. Panali kuwonongeka kwakukulu ndi imfa zikwi makumi ambiri. Chivomezi chachikulu ndi chivomezi champhamv…",
-                "…i Alaska zakhala kwa anthu amitundu yosiyanasiyana kwa zaka zikwi; Anthu ambiri amakhulupirira kuti derali linali polowera ku…",
-                "…a za anthu okhala mdziko lino la Argentina zikuchokera zaka zikwi khumi ndi zitatu BP, nthawi ya Paleoamerican. M'masiku otuk…",
-                "…apansi pa Halo 2 . \" Halos \" ndi malo akuluakulu, kuyambira zikwi mpaka makilomita masauzande makilomita, omwe amabalalika mu…",
-                "…we amabalalika mu mlalang'amba. Mipukutuyi inamangidwa zaka zikwi zambiri zapitazo ndi mpikisano wotchedwa Forerunners monga…"
-            ]
-        },
-        {
-            "word": "miliyoni",
-            "verdict": "attested",
-            "bounded": true,
-            "tokenHits": 67,
-            "articles": 20,
-            "substringOnly": 0,
-            "examples": [
-                "…si, chifukwa chiwelengelo cha anthu ku Afilika ku ndi 1 300 miliyoni ( malinga ndi chiwelengelo cha anthu chomwe chinachitika mu…",
-                "…thu ndipo anapezako zotsalira za anthu amene analipo zaka 7 miliyoni zapitazo. Dera la Afilika lili mbali zonse ziwiri za mzere…",
-                "…hi 2021, malowa ali ndi mafayilo azomangamanga opitilira 70 miliyoni, oyang'aniridwa ndi kusinthidwa ndi odzipereka olembetsa. M…",
-                "…== Ziwerengero zokhutira == Novembara 30, 2006: Mafayilo 1 miliyoni September 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafa…",
-                "…30, 2006: Mafayilo 1 miliyoni September 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafayilo 10 miliyoni Disembala 4, 2012: Maf…",
-                "…er 2, 2009: Mafayilo 5 miliyoni Epulo 15, 2011: Mafayilo 10 miliyoni Disembala 4, 2012: Mafayilo 15 miliyoni July 14, 2013: 100,…"
-            ]
         },
         {
             "word": "mayuro",

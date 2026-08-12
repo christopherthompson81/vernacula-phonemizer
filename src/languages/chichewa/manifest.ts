@@ -20,6 +20,11 @@ export interface ChichewaManifest {
         hundreds: string;
         thousand: string;
         thousands: string;
+        million: string; // class-9 loan (singular), takes the classNineOne concord
+        millions: string; // class-6 ma- plural, takes the classSix multiplier series
+        billion: string; // short scale, 10⁹ — the sense is measured, see chichewa.jsonc
+        billions: string;
+        classNineOne: string; // "one" agreeing with a class-9 noun: miliyoni imodzi
         and: string;
     };
 }

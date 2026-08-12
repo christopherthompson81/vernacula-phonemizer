@@ -65,9 +65,28 @@ describe("Chichewa numbers", () => {
         expect(phonemize("1000", "nya")).toBe("t͡ʃikwi");
     });
 
-    test("≥10⁶ falls back to digit-by-digit (Chichewa has no well-attested native million)", () => {
-        expect(numberToWords(1000000)).toBe("chimodzi ziro ziro ziro ziro ziro ziro");
+    // ⚠ THIS GOLDEN CHANGED, and the change is the point. It used to pin 1000000 → "chimodzi ziro ×6" under the
+    // comment "Chichewa has no well-attested native million". That was true of a NATIVE word and false of the
+    // language: ny.wikipedia writes miliyoni 31× / 6 articles and biliyoni 13× / 6, and Malawi24's Chichewa desk
+    // writes both off-wiki. The old expectation was a sourcing gap pinned as if it were a fact.
+    test("millions and billions — the loan magnitudes, and the concord that reaches inside the multiplier", () => {
+        expect(numberToWords(1000000)).toBe("miliyoni imodzi"); // class-9 singular concord, attested ×2
+        expect(numberToWords(2000000)).toBe("mamiliyoni awiri"); // attested verbatim
+        expect(numberToWords(9000000)).toBe("mamiliyoni asanu ndi anayi"); // attested verbatim — the a- series
+        // …in BOTH slots of the compound. `units` here would give *mamiliyoni zisanu ndi zinayi. That is the whole
+        // reason below100/below1000 take a series parameter, and it is measured, not inferred.
+        expect(numberToWords(12000000)).toBe("mamiliyoni khumi ndi awiri");
+        expect(numberToWords(1000000000)).toBe("biliyoni imodzi"); // COMPOSED: noun attested, concord attested
+        expect(numberToWords(4700000000)).toBe("mabiliyoni anayi ndi mamiliyoni mazana asanu ndi awiri");
+        expect(numberToWords(1600000)).toBe("miliyoni imodzi ndi zikwi mazana asanu ndi limodzi");
         expect(numberToWords(0)).toBe("ziro");
+    });
+
+    // The ceiling is a SOURCING boundary, not a numeric one: no trillion word is attested under any of six
+    // spellings, so 10¹² and up keep the digit-by-digit fallback rather than get a coined magnitude.
+    test("≥10¹² still falls back to digit-by-digit — no trillion word is attested", () => {
+        expect(numberToWords(1e12)).toBe("chimodzi " + "ziro ".repeat(12).trim()); // 13 digits
+        expect(numberToWords(999999999999)).toMatch(/^mabiliyoni /); // the last composed number
     });
 });
 

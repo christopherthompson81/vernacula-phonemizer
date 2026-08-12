@@ -62,6 +62,27 @@
     // word agrees with THAT word instead: makumi and mazana are class 6 → the a-/li- series in "classSix"
     // (limodzi, awiri, atatu, anayi, asanu); zikwi is class 8 → the zi- series, i.e. "units" again. Conflating the
     // two was the old bug: 60 came out as *makumi zisanu ndi chimodzi, identical to 51.
+    //
+    // MILLION AND BILLION are the English loans the language actually writes; espeak ships no Chichewa, so both
+    // were sourced from ny.wikipedia (`attest.ts --wiki ny` — the wiki is ny, NOT nya) and corroborated off-wiki.
+    //   miliyoni  31 tokens / 6 articles   mamiliyoni 6/6      ("mamiliyoni awiri", "mamiliyoni asanu ndi anayi")
+    //   biliyoni  13 tokens / 6 articles   mabiliyoni 1/1      ("US $ 1 biliyoni", "anthu 4.7 mabiliyoni")
+    // biliyoni is the SHORT scale, 10⁹, checked against the sense of every example rather than assumed — "anthu
+    // 4.7 mabiliyoni" (a World-Cup audience) admits no long-scale reading. Off-wiki: Malawi24's Chichewa desk
+    // writes "galimoto ya mamiliyoni ambirimbiri" and "K931 Biliyoni ku Ulimi". Omniglot — the source cited above
+    // for the tens — gives 1000000 only as "nambala ya maziro asanu ndi limodzi", "a number of six zeros", which
+    // is a description of the numeral and not a numeral; that gloss is where the old "no well-attested native
+    // million" comment came from, and it was right about a NATIVE word and wrong about the language.
+    // TRILLION IS DELIBERATELY UNAUTHORED: triliyoni / trilioni / tiliyoni / thililiyoni / matiliyoni are 0
+    // tokens apiece on ny.wikipedia, and the only web hit is one crowd-sourced entry transliterating the whole
+    // English phrase ("eyiti tiliyoni"), which is not attestation of the word in its slot. numbers.ts therefore
+    // stops composing below 10¹².
+    //
+    // CONCORD OF THE LOANS. Singular miliyoni/biliyoni are class 9 → the concord "imodzi" ("miliyoni imodzi", ×2
+    // attested); the ma- plurals are class 6 → the "classSix" series, and "mamiliyoni asanu ndi anayi" shows the
+    // a- series in BOTH slots of a compound multiplier, which is why numbers.ts parameterises the unit slot.
+    // "biliyoni imodzi" is the one COMPOSED form: the noun is attested, the concord is attested, the phrase is
+    // not — recorded as morphology over its attested structural twin, not as a coined word.
     "numbers": {
         "units": ["ziro", "chimodzi", "ziwiri", "zitatu", "zinayi", "zisanu", "zisanu ndi chimodzi", "zisanu ndi ziwiri", "zisanu ndi zitatu", "zisanu ndi zinayi"],
         "classSix": ["", "limodzi", "awiri", "atatu", "anayi", "asanu", "asanu ndi limodzi", "asanu ndi awiri", "asanu ndi atatu", "asanu ndi anayi"],
@@ -71,6 +92,11 @@
         "hundreds": "mazana",
         "thousand": "chikwi",
         "thousands": "zikwi",
+        "million": "miliyoni",
+        "millions": "mamiliyoni",
+        "billion": "biliyoni",
+        "billions": "mabiliyoni",
+        "classNineOne": "imodzi",
         "and": "ndi"
     }
 }
