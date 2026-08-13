@@ -113,6 +113,7 @@
  * Nothing below rests on any of it: this layer emits DIGITS wherever a number is involved and lets the
  * engine's own number path speak them. Recorded so the measurement is re-runnable in one grep.
  */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 
 /** ⚠ THE UNIT NOUN COMES BEFORE THE NUMBER IN BAMBARA, which is why units are local and not the shared
  *  tier's — `normalizeSymbols` can only POSTPOSE (playbook §47 reason 2, the Oromo case). Measured over the
@@ -150,6 +151,13 @@ const UNITS: readonly (readonly [string, string])[] = [
     ["m²", "mɛtɛrɛ kɛnɛ"], ["m2", "mɛtɛrɛ kɛnɛ"],
     ["km", "kilomɛtɛrɛ"], ["cm", "santimɛtɛrɛ"], ["mm", "milimɛtɛrɛ"],
 ];
+
+/** THE SAME SYMBOLS STANDING ALONE. Every arm of the unit step needs a numeral, so a bare `km` — a caption,
+ *  a table header, or a figure whose numeral a bracket or an `&nbsp;` put out of reach — went to the phoneme
+ *  sink as raw ASCII, which in a Latin-script language no leak gate can see. The guards are the shared ones
+ *  (core/normalizeSymbols.ts): multi-letter vowel-free keys only, so the exponent keys and any one-letter
+ *  hazard are excluded automatically; exact case; and never beside a numeral, a rate slash or an exponent. */
+const BARE_UNITS = makeBareUnitNormalizer(UNITS);
 
 /** A MAGNITUDE WORD MAY STAND BETWEEN THE FIGURE AND ITS UNIT, and the unit rule has to hop it or the
  *  adjacency it matches on is not there. The corpus writes `A boya bɛse 30.2 million km² (11.7 million sq
@@ -339,6 +347,9 @@ export function normalizeBambara(input: string): string {
             (_m: string, n: string, mag: string | undefined) => `${word} ${n}${mag ?? ""}`,
         );
     }
+    // …and the ones with NO numeral at all — see BARE_UNITS. Last, so the counted arms above keep every
+    // match they can make and only what they could not reach is left for this.
+    s = BARE_UNITS(s);
 
     // 8) RANGES, before percent — a range OF percents must be claimed while both operands are still bare
     //    digits, since once step 9 has inserted `kɛmɛsarada` between them there is no pair left to match.

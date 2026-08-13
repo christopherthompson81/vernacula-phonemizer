@@ -348,6 +348,85 @@ export function resolveUnitSymbol<V>(
 }
 
 /**
+ * IS THIS UNIT SYMBOL SAFE TO READ WHEN IT STANDS ALONE, with no number attached?
+ *
+ * The unit path proper only fires AFTER a numeral, which is right for `10 km` and leaves the far commoner
+ * failure untouched: a bare `km` reaches the phoneme sink as raw ASCII. In a Latin-script language that leak
+ * is INVISIBLE to every existing gate — DIGIT hunts digits and RAWMARK hunts punctuation, while a Latin run
+ * in a Latin-script language looks exactly like a word. 50 engines leaked it while already declaring the word.
+ *
+ * A bare token cannot lean on an adjacent numeral for evidence, so the KEY itself has to carry it. Three
+ * tests, each of them a measurement rather than a preference:
+ *
+ * ⚠ NEVER ONE LETTER. The standing trap: `m` collides with a Madurese locative, with `US$ 1m`, with Kirundi
+ * `50 m'ubumwe`, and in Hmong RPA the final letter IS the tone. A bare `m`/`g`/`l` is left alone, and this is
+ * the same rule `resolveUnitSymbol` applies for the same reason.
+ *
+ * ⚠ NO VOWEL, AND THAT IS THE WHOLE DISCRIMINATOR. Scanning the mined corpora for standalone occurrences of
+ * every declared multi-character key, the hits split cleanly in two. The vowel-free symbols (`km` ×68, `kg`,
+ * `cm`, `mm`) were units in every instance. The keys WITH a vowel were mostly ordinary words of their own
+ * language: `ha` ×24 (Somali particle — *si kastaba **ha** ahaatee*; Spanish *se **ha** registrado*), `mi`
+ * ×29 (Yoruba possessive — *ìmò **mi***; and `sq mi` in an English parenthetical), and the spelled-out keys
+ * a few languages declare, `katao`, `kilometro`, `naninirahan` — all of them ordinary nouns. An alphabet that
+ * writes its vowels does not write vowel-less words, so "no vowel" separates a symbol from a word without
+ * needing a lexicon per language. `y` counts as a vowel (it is a word in Welsh).
+ *
+ * ⚠ LATIN SCRIPT ONLY, which is narrower than the vowel argument strictly needs and deliberately so. Khmer
+ * separates words with U+200B, so its `គម` key matched INSIDE សហ​គម ("community") — in an abugida a
+ * consonant-only run is a word fragment, not a symbol. And in Cyrillic the very same shape is taken:
+ * Russian `см` is not only the centimetre but the standard abbreviation of *смотри* ("see"), so the test
+ * would license a wrong reading there. Latin `km`/`kg`/`cm`/`mm` carry no such second life, measured.
+ */
+export function isBareUnitKey(key: string): boolean {
+    return key.length > 1 && /^[A-Za-z]+$/u.test(key) && !/[aeiouy]/iu.test(key);
+}
+
+/**
+ * THE BARE-UNIT REWRITE ITSELF — `key → the word to say when the symbol stands alone`, as a text→text pass.
+ *
+ * ⚠ EXPORTED, because six of the fifty engines that leak this do NOT go through `makeSymbolNormalizer`:
+ * ak, bm, ht, ln, om and ro each keep a local unit table, for reasons their own headers give (ro's
+ * `802.11ah` lookbehind, ht's refusal to claim `km/h`, om's noun-first order). Giving them a second,
+ * hand-written copy of the guards below is how the guards drift apart; they call this instead.
+ *
+ * Every guard, and the measurement behind it:
+ *
+ * ⚠ EXACT CASE, no folding — the opposite of the digit-adjacent path, which folds `KM`→`km` because the
+ * numeral in front of it has already established that a unit is meant. Alone, the upper-case forms are
+ * mostly NOT units, measured across the mined corpora: `MM` is the Mercalli scale (kmr), `MI` is Michigan in
+ * a bibliography (nya), `Cm` is a variable in a rendered formula (cmn), `Mi` is the Yoruba word capitalised
+ * at the head of a title. The one genuine upper-case unit found fleet-wide was `$5 pa Kg` (sn) ×2 — so
+ * folding would buy two readings and cost four, and `Kg` keeps leaking VISIBLY, the honest side to fail on.
+ *
+ * ⚠ NOT AFTER A NUMERAL, so the digit-adjacent path — correct in all 50 of these engines — keeps every match
+ * it can make, and the count it computes is never overwritten by an uncounted citation form.
+ * ⚠ BUT IT DOES READ SYMBOLS THAT PATH COULD NOT REACH, and that is the point rather than a side effect:
+ * `10-15(-17) cm` (jv) and `2 zillion km` have a bracket or an undeclared word between the numeral and the
+ * symbol. That distance is a reason not to COUNT the unit; it was never a reason to leave raw ASCII in the
+ * phoneme stream. Where the digit path declines because a reading would be HALF a reading, though, this one
+ * declines too — hence the `/` guard, a rate whose denominator noun the language may not declare.
+ *
+ * ⚠ NOT BEFORE AN EXPONENT, superscript or ASCII. `245&nbsp;km 2` (yo) is a squared kilometre written with
+ * the entity in the way; reading the unit and leaving a stray "2" behind is worse than the visible leak.
+ *
+ * ⚠ NOT BEFORE `.` + LETTER. `km.t` is the transliterated Ancient Egyptian name of Egypt (arz) — a
+ * standalone `km` by every other test, and not a kilometre. A sentence-final `km.` still reads.
+ */
+export function makeBareUnitNormalizer(
+    readings: Iterable<readonly [string, string]>,
+): (text: string) => string {
+    const map = new Map([...readings].filter(([k]) => isBareUnitKey(k)));
+    if (map.size === 0) return (text) => text;
+    const keys = [...map.keys()].sort((a, b) => b.length - a.length);
+    const re = new RegExp(
+        `(?<![\\p{L}\\p{M}\\p{Nd}'’ʼ/-])(?<!\\p{Nd}\\s)(${keys.join("|")})` +
+            `(?![\\p{L}\\p{M}\\p{Nd}'’ʼ/²³-])(?!\\.\\p{L})(?!\\s?[23](?![\\d\\p{L}]))`,
+        "gu",
+    );
+    return (text: string): string => text.replace(re, (_whole: string, u: string) => map.get(u)!);
+}
+
+/**
  * The SIGN AND MATH WORDS a language reads for ± + − & = < > × ÷.
  *
  * ⚠ AN EXACT SHAPE RATHER THAN `Record<string, string>`, so the .ts side of a language cannot read a key
@@ -489,6 +568,21 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
               "giu",
           )
         : null;
+    /**
+     * THE SAME UNIT SYMBOL STANDING ALONE — a table header, a caption, a legend, a sentence that names the
+     * unit without counting it. The guards live in `makeBareUnitNormalizer`; two decisions are made here:
+     *
+     * ⚠ NOT IN AN UNSPACED SCRIPT. There "standalone" is not a thing a pattern can see — the Khmer `គម` hit
+     * that `isBareUnitKey` records was a fragment of សហ​គម, split by a zero-width space — and these languages
+     * resolve their units locally in any case.
+     *
+     * The SINGULAR is emitted (the count form for 1) because a bare symbol is a citation, not a count.
+     */
+    const bareUnit = makeBareUnitNormalizer(
+        d.unspacedScript === true
+            ? []
+            : Object.entries(d.units ?? {}).map(([k, forms]) => [k, pick(forms, 1, cf)] as const),
+    );
     // All three percent signs: ASCII `%`, U+066A ٪ (Arabic script) and U+FF05 ％ (full-width, ordinary CJK
     // typography). Accepted here so no language has to pre-fold them locally.
     const PCT = "[%\u066a\uff05]";
@@ -682,6 +776,10 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     return d.unitPrefix ? `${head} ${q}` : `${q} ${head}`;
                 },
             );
+
+        // THE BARE UNIT TOKEN, after the digit-adjacent path has had every chance at the text — a `km` still
+        // standing here has no numeral of its own, which is the case `bareUnitKeys` describes.
+        s = bareUnit(s);
 
         // A BARE EXPONENT, LAST — after the unit path, which must have its chance first or this would steal
         // every `km²` and read it as "kilometre squared" instead of "square kilometres". By the time control

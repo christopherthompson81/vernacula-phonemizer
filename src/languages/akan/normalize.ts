@@ -103,6 +103,7 @@
  *   engine's output is therefore an attested VARIANT, not a defect, and this layer does not churn a
  *   committed golden to swap one for the other.
  */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 
 /** ⚠ TWI-SOURCED, and the Fante form differs. `akyiri pɔ` is the decimal point ×1,137 in tw and ×1 in fat;
  *  Fante writes `ekyir pɔw` ("nyaa ɔha nkyekyɛmu esia na n'ekyir pɔw eduowɔtwe"). Every instance sits
@@ -170,6 +171,13 @@ const UNITS: readonly (readonly [string, string])[] = [
     // before the bare `m`.
     ["km", "kilomita"], ["cm", "sɛntimita"], ["mm", "milimita"], ["kg", "kilogram"], ["m", "mita"],
 ];
+
+/** THE SAME SYMBOLS STANDING ALONE. Every arm of step 4 needs a numeral, so a bare `km` — a caption, a
+ *  table header, or a figure whose numeral a bracket or an `&nbsp;` put out of reach — went to the phoneme
+ *  sink as raw ASCII, which in a Latin-script language no leak gate can see. The guards are the shared
+ *  ones (core/normalizeSymbols.ts): multi-letter vowel-free keys only, so `m` is untouched and the trap-46
+ *  hazards above are unaffected; exact case; and never beside a numeral, a rate slash or an exponent. */
+const BARE_UNITS = makeBareUnitNormalizer(UNITS);
 
 /** CURRENCY, PREPOSED — the corpus writes the currency noun in front of the amount: "dɔla 10,000",
  *  "U.S. dɔla ɔpepem 2.3", "Canada dɔla ɔpepem 481", "sika a ɔkɔr mu no bɛyɛ sidi 51,000". `dɔla` ×125 tw,
@@ -301,6 +309,9 @@ export function normalizeAkan(input: string): string {
     for (const [sym, word] of UNITS) {
         s = s.replace(new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³])`, "gu"), `$1 ${word}`);
     }
+    // …and the ones with no numeral at all — see BARE_UNITS. Last, so the counted arm above keeps every
+    // match it can make and only what it could not reach is left for this.
+    s = BARE_UNITS(s);
 
     // 5) PERCENT, before the range rule and before decimals. The word is PREPOSED (see PERCENT), so it
     //    cannot be emitted by a rule that runs after the range rule has already split the operands.

@@ -72,9 +72,12 @@ describe("shared symbol normalizer (core)", () => {
         expect(n("1 million km")).toBe("1 million kilometres");
         expect(n("1 km")).toBe("1 kilometre"); // …and a bare 1 still takes the singular
         expect(n("5 km")).toBe("5 kilometres");
-        // A magnitude the language did not declare is not a magnitude: leave the text alone rather than
-        // silently swallow the word between.
-        expect(n("2 zillion km")).toBe("2 zillion km");
+        // A magnitude the language did not declare is not a magnitude: the word between is NOT swallowed and
+        // the count does not reach across it — "zillion" survives and the noun stays in its citation form,
+        // uncounted. ⚠ The symbol itself is still read: an undeclared word between a number and a unit is a
+        // reason not to COUNT the unit, never a reason to leave raw ASCII in the phoneme stream, and the
+        // bare-token path (which cannot see the numeral at all) reads it as the standalone symbol it is.
+        expect(n("2 zillion km")).toBe("2 zillion kilometre");
     });
 
     // A SPACE BEFORE THE MAGNITUDE IS NOT UNIVERSAL. Chinese and Japanese are written without spaces, so
@@ -783,5 +786,95 @@ describe("⚠ the currency mark guard follows unspacedScript (abugida word endin
         // written for. Measured before the change: across the five unspacedScript languages' corpora, ZERO
         // currency signs sit adjacent to a combining mark in cmn, yue, ja or th — the fix is inert for all four.
         expect(phonemize("$5", "en")).toContain("dˈɑːlɚz");
+    });
+});
+
+/**
+ * THE BARE UNIT TOKEN — `10 km` read in 50 engines and `km` alone did not, reaching the phoneme sink as the
+ * raw ASCII abbreviation. Same class as `syllableToIpa` (hmn) and `baseToIpa` (cdo): a path that returns its
+ * own input. It survived every gate because DIGIT hunts digits and RAWMARK hunts punctuation, while a Latin
+ * run in a Latin-script language looks exactly like a word.
+ *
+ * The fix reads the word the language ALREADY declares — nothing is invented — and the question it stands or
+ * falls on is which KEYS may take a path with no numeral to lean on. Answered by scanning the mined corpora
+ * for standalone occurrences of every declared multi-character key: the hits split on whether the key has a
+ * VOWEL. Vowel-free (`km` ×68, `kg`, `cm`, `mm`) were units in every instance; keys with a vowel were mostly
+ * ordinary words — `ha` ×24 (Somali particle, Spanish auxiliary), `mi` ×29 (Yoruba possessive, and `sq mi`),
+ * and tl's spelled-out `katao`/`kilometro`/`naninirahan`.
+ */
+describe("a unit symbol standing alone", () => {
+    const n = makeSymbolNormalizer({
+        percent: ["percent"],
+        units: { km: ["kilometre", "kilometres"], m: ["metre", "metres"], mm: ["millimetre", "millimetres"],
+                 ha: ["hectare", "hectares"], mi: ["mile", "miles"] },
+        rateDenominators: { h: "hour" },
+        unitPer: "per",
+    });
+
+    test("the bare token reads, in its citation form, and the counted path is untouched", () => {
+        expect(n("km")).toBe("kilometre");
+        expect(n("Distance: km")).toBe("Distance: kilometre");
+        // The SINGULAR: a bare symbol is a citation, not a count. The counted readings keep their agreement.
+        expect(n("10 km")).toBe("10 kilometres");
+        expect(n("1 km")).toBe("1 kilometre");
+        expect(n("100 km/h")).toBe("100 kilometres per hour");
+    });
+
+    test("⚠ A SINGLE-LETTER KEY STILL DOES NOT FIRE — trap 46, which has bitten four times", () => {
+        // `m` collides with a Madurese locative, with `US$ 1m`, with Kirundi `50 m'ubumwe`, and in Hmong RPA
+        // the final letter IS the tone. One letter is also where unit case is contrastive (s/S, t/T, a/A).
+        expect(n("m")).toBe("m");
+        expect(n("a m b")).toBe("a m b");
+        expect(n("5 m")).toBe("5 metres"); // …while the counted reading is unaffected
+        expect(phonemize("50 m’ubumwe", "rn")).toBe("miɾoŋo itanu m ubumwe");
+        expect(phonemize("US$ 1m", "ak")).toBe("dɔla baako m");
+    });
+
+    test("⚠ AND A KEY WITH A VOWEL DOES NOT FIRE, because it is usually a word", () => {
+        expect(n("ha")).toBe("ha");
+        expect(n("mi")).toBe("mi");
+        expect(n("5 ha")).toBe("5 hectares"); // the numeral is the evidence, and it is still enough
+        // The instances behind that rule, in the languages that declare these very keys.
+        expect(phonemize("se ha registrado", "es")).toBe("se ˈa rexistɾˈaðo");
+        expect(phonemize("mi casa", "es")).toBe("mi kˈasa");
+        expect(phonemize("mi", "yo")).toBe("mi˧"); // the Yoruba possessive, ×11 standalone in its corpus
+    });
+
+    test("⚠ EXACT CASE, no folding — the upper-case standalone forms measured are NOT units", () => {
+        // `MM` is the Mercalli scale (kmr), `MI` is Michigan in a bibliography (nya), `Cm` a variable in a
+        // rendered formula (cmn), `Mi` a Yoruba word at the head of a title. The one genuine upper-case unit
+        // fleet-wide was `$5 pa Kg` (sn) ×2 — folding would buy two readings and cost four.
+        expect(n("KM")).toBe("KM");
+        expect(n("Km")).toBe("Km");
+        expect(n("MM")).toBe("MM");
+        expect(n("10 KM")).toBe("10 kilometres"); // …the numeral still licenses the fold, as it always did
+    });
+
+    test("it fires only on a STANDALONE token — never inside a word, a rate, an exponent or a name", () => {
+        expect(n("kmx")).toBe("kmx");
+        expect(n("xkm")).toBe("xkm");
+        expect(phonemize("makmur", "id")).toBe("mˈaʔmur"); // a real word with `km` inside it
+        // Half a rate is what this module refuses everywhere else, so a `/` on either side declines.
+        expect(phonemize("km/h", "de")).toBe("km h");
+        // `245&nbsp;km 2` (yo) is a squared kilometre with the entity in the way; a stray "2" is worse.
+        expect(n("km 2")).toBe("km 2");
+        expect(n("km²")).toBe("km²");
+        // `km.t` is the transliterated Ancient Egyptian name of Egypt (arz) — not a kilometre.
+        expect(phonemize("km.t", "de")).toBe("km . t");
+        expect(phonemize("km.", "de")).toBe("kilomˈeːtɐ ."); // …but a sentence-final unit still reads
+    });
+
+    test("the reading arrives in all 50, across families and across both implementations", () => {
+        // The shared tier serves 44; ak, bm, ht, ln, om and ro keep local unit tables and call the same
+        // exported pass, so both routes are pinned here.
+        const bare: Record<string, string> = {
+            de: "kilomˈeːtɐ", pl: "kilˈɔmɛtr", tr: "ciɫometɾˈe", rw: "kilometeɾo", cy: "kilˈɔmɛdr",
+            id: "kilomətˈər", sr: "kilometar", mad: "kilɔmɛtəɾ",
+            ht: "kilomɛt", ro: "kilomeˈtri",
+        };
+        for (const [l, ipa] of Object.entries(bare)) {
+            expect(phonemize("km", l)).toBe(ipa);
+            expect(phonemize("m", l)).toBe("m"); // …and the one-letter guard holds in every one of them
+        }
     });
 });

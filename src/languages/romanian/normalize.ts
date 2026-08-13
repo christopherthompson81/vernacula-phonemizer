@@ -33,6 +33,7 @@
  *   · DEGREES BEFORE the unit rules — the C of `20 °C` was read as Romanian [k].
  *   · km² BEFORE the plain unit rule, or the `km` is consumed first and the exponent left stranded.
  */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 
 /** Unit abbreviations → Romanian words, all probed through the g2p. Longest first so `km` is not matched
  *  as `m` with a stray k left over. */
@@ -55,6 +56,19 @@ const UNITS: [RegExp, string][] = [
     [/(?<!\d[.,]\d{1,4})(?<!802[.,]11[a-z]{0,3})\bm\b/giu, "metri"],
     [/(?<!\d[.,]\d{1,4})(?<!802[.,]11[a-z]{0,3})\bg\b/giu, "grame"],
 ];
+
+/** THE SAME SYMBOLS STANDING ALONE. Step 9 requires a digit in front, so a bare `km` — a caption, a table
+ *  header, or a figure whose numeral a bracket or an `&nbsp;` put out of its reach — reached the phoneme
+ *  sink as raw ASCII, which in a Latin-script language no leak gate can see.
+ *
+ *  ⚠ THE KEYS ARE READ OFF THE TABLE ABOVE rather than written out again, so the two cannot drift; every
+ *  source ends in its literal key. The shared guards (core/normalizeSymbols.ts) then drop `m` and `g` for
+ *  being one letter — which is also what keeps the `802.11ah` and `1,5 m` hazards this table documents out
+ *  of reach of this path entirely — and the rest fire only on an exact-case token with no numeral, no rate
+ *  slash and no exponent beside it. */
+const BARE_UNITS = makeBareUnitNormalizer(
+    UNITS.map(([re, word]) => [/\\b([a-z]+)\\b$/u.exec(re.source)?.[1] ?? "", word] as const),
+);
 
 /** Squared / cubed units. Romanian POSTPOSES the modifier — *kilometri pătrați*, "square kilometres" with
  *  the adjective after the noun, which is the opposite of the Germanic compounds and of Burmese. */
@@ -140,6 +154,9 @@ export function normalizeRomanian(input: string): string {
     // 9) LATIN UNIT ABBREVIATIONS after a number (45).
     for (const [re, word] of UNITS)
         t = t.replace(new RegExp(`(\\d)\\s*(?:${re.source.replace(/\\b/gu, "")})(?![\\p{L}])`, "gu"), `$1 ${word}`);
+    //    …and the same abbreviations with NO number — see BARE_UNITS. After the loop, so every reading the
+    //    counted rule can make is already made and only what it could not reach is left for this.
+    t = BARE_UNITS(t);
 
     // 10) RANGES (38). Spoken `până la`, which the corpus writes out — `25 până la 30`.
     t = t.replace(/(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 până la $2");

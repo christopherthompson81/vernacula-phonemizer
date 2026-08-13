@@ -24,6 +24,7 @@
  */
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 
 /** The decimal point */
@@ -72,6 +73,9 @@ const UNIT: Readonly<Record<string, string>> = {
     kg: "kiiloo giraama",    // corpus ×1 (kiiloo giraama 90)
     mi: "maayilii",          // corpus ×16
 };
+/** …and the reading for one of those symbols STANDING ALONE — see the (e) arm of the unit block. */
+const BARE_UNITS = makeBareUnitNormalizer(Object.entries(UNIT));
+
 /** Rate denominators, already in the LOCATIVE — the corpus's own way of saying "per": *sekoondiitti
  *  meeggaabiitii 600* ("600 megabits per second"), *sa’aatii tokkotti kiilomeetira 56-64*. The denominator
  *  leads the phrase, so this is not the tier's "A per B" idiom and cannot be expressed with `unitPer`. */
@@ -302,6 +306,14 @@ export function normalizeOromo(input: string): string {
     //         is the adversarial neighbour of (c) and of the review's `1 km`/`5 km` probes.
     s = s.replace(new RegExp(`(?<![\\p{L}\\p{M}\\d])(\\d[\\d.]*)\\s?(${units})(?![\\p{L}\\p{M}’'ʼ])`, "giu"),
         (_m, n: string, u: string) => `${UNIT[u.toLowerCase()]!} ${n}`);
+    //     (e) …and the abbreviation with NO NUMBER AT ALL — a caption, a header, or a figure whose numeral
+    //         a bracket or an `&nbsp;` put out of reach of (c) and (d), which both require one. It reached
+    //         the phoneme sink as raw ASCII, invisible to every leak gate because Oromo is written in
+    //         Latin. Shared guards (core/normalizeSymbols.ts): multi-letter vowel-free keys only — so `m`
+    //         is untouched and so is `mi`, which is *maayilii* here but an ordinary word in half the fleet
+    //         — exact case, and never beside a numeral, a rate slash or an exponent. Last in the block, so
+    //         every arm above keeps the matches it can make.
+    s = BARE_UNITS(s);
 
     // 13) MATH SIGNS.
     s = s.replace(/(\d+)\s*<\s*(\d+)/gu, "$1 $2 caalaa xiqqaa");

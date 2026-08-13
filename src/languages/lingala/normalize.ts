@@ -72,6 +72,7 @@
  * language, and it needs its own diff and its own sourcing argument. This layer emits DIGITS, so nothing
  * below is built on top of it. Recorded so the measurement is re-runnable in one grep.
  */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 
 /** ⚠ THE UNIT NOUN COMES BEFORE THE NUMBER IN LINGALA, which is why units are local and not the shared
  *  tier's — `normalizeSymbols` can only POSTPOSE (playbook §47 reason 2, the Oromo case). The corpus is
@@ -104,6 +105,13 @@ const UNITS: readonly (readonly [string, string])[] = [
     ["m²", "mɛtrɛ-kare"], ["m2", "mɛtrɛ-kare"],
     ["km", "kilomɛtrɛ"], ["cm", "sɛntimɛtɛlɛ"], ["mm", "milimɛtrɛ"], ["kg", "kilogálame"],
 ];
+
+/** THE SAME SYMBOLS STANDING ALONE. Every arm of the unit step needs a numeral, so a bare `km` — a caption,
+ *  a table header, or a figure whose numeral a bracket or an `&nbsp;` put out of reach — went to the phoneme
+ *  sink as raw ASCII, which in a Latin-script language no leak gate can see. The guards are the shared ones
+ *  (core/normalizeSymbols.ts): multi-letter vowel-free keys only, so the exponent keys and any one-letter
+ *  hazard are excluded automatically; exact case; and never beside a numeral, a rate slash or an exponent. */
+const BARE_UNITS = makeBareUnitNormalizer(UNITS);
 
 /** ⚠ ASCENDING PAIRS ONLY, and the guards are what make this rule survivable at all. `\d+ ?[-–] ?\d+`
  *  matches 1,141 times in this corpus and the great majority are NOT ranges: ISBNs (`1-59427-034-1`),
@@ -265,6 +273,9 @@ export function normalizeLingala(input: string): string {
             `${word} $1`,
         );
     }
+    // …and the ones with NO numeral at all — see BARE_UNITS. Last, so the counted arms above keep every
+    // match they can make and only what they could not reach is left for this.
+    s = BARE_UNITS(s);
 
     // 6) DEGREES — the scale name only, because no Lingala word for *degree* is attested (`Celsius` ×3,
     //    `kelvin` ×4, and `degré` ×1 is French). `25 °C` → *Celsius 25*, unit-first like every other

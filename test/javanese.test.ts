@@ -145,7 +145,12 @@ describe("jv text normalization", () => {
     test("⚠ the dash shapes that are NOT ranges stay untouched", () => {
         // This wiki is full of bibliographic debris and none of it is a range to read aloud.
         expect(normalizeJavanese("157-167 doi:10.1016/0301-0104")).not.toContain("nganti");
-        expect(normalizeJavanese("10-15(-17) cm")).toBe("10 nganti 15(-17) cm"); // botanical extreme
+        // Botanical extreme — the parenthetical is not a range. ⚠ THE UNIT WAS LEAKING HERE and the old
+        // golden pinned the leak: the `)` between the numeral and `cm` puts the symbol out of reach of the
+        // digit-adjacent unit rule, so `cm` reached the IPA as raw ASCII in a Latin-script language, where no
+        // leak gate can see it. It is a centimetre in every corpus instance of this shape, and the bare-token
+        // path now reads it; the dash behaviour this test is about is unchanged.
+        expect(normalizeJavanese("10-15(-17) cm")).toBe("10 nganti 15(-17) sèntimèter");
     });
 
     test("units, exponents and the rate word, all corpus- or wiki-sourced", () => {

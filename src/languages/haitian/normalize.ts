@@ -76,6 +76,7 @@
  *   `ROMAN_NATIVE` (only en/fr are), so `core/roman.ts` has already turned `XIX` into digits before `text()`
  *   runs. The 2,180 romans the artifact counts are handled upstream.
  */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 
 /**
@@ -104,6 +105,13 @@ const UNITS: readonly (readonly [string, string])[] = [
     ["m³", "mèt kib"], ["m3", "mèt kib"],
     ["km", "kilomèt"], ["cm", "santimèt"], ["mm", "milimèt"], ["kg", "kilogram"],
 ];
+
+/** THE SAME SYMBOLS STANDING ALONE. Every arm of the unit step needs a numeral, so a bare `km` — a caption,
+ *  a table header, or a figure whose numeral a bracket or an `&nbsp;` put out of reach — went to the phoneme
+ *  sink as raw ASCII, which in a Latin-script language no leak gate can see. The guards are the shared ones
+ *  (core/normalizeSymbols.ts): multi-letter vowel-free keys only, so the exponent keys and any one-letter
+ *  hazard are excluded automatically; exact case; and never beside a numeral, a rate slash or an exponent. */
+const BARE_UNITS = makeBareUnitNormalizer(UNITS);
 
 /**
  * ⚠ ASCENDING PAIRS ONLY, and the guards are what make this rule survivable. `\d+ ?[-–] ?\d+` matches
@@ -290,6 +298,9 @@ export function normalizeHaitian(input: string): string {
             `$1 ${word}`,
         );
     }
+    // …and the ones with NO numeral at all — see BARE_UNITS. Last, so the counted arms above keep every
+    // match they can make and only what they could not reach is left for this.
+    s = BARE_UNITS(s);
 
     // 6) THE DEGREE SIGN, WHICH DOES FIVE DIFFERENT JOBS ON THIS WIKI — and only two of them are a degree.
     //    Measured over the 276 `°` in Creole text (the Lingala layer records the same hazard with four jobs;
