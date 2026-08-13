@@ -103,4 +103,21 @@ describe("Assamese text normalization", () => {
     test("the squared/cubed measure word", () => {
         expect(getPhonemizer("as").text("19,500 km²").trim()).toContain("bɔɹɡo kilomitaɹ");
     });
+
+    /**
+     * THE UNIT NOUNS ARE ASSAMESE, not the Bengali ones the shared tier ships — `unitWords` in
+     * assamese.jsonc, where each word's sourcing is recorded.
+     *
+     * ⚠ `cm` IS THE ONE THAT CHANGES THE READING, and it is the reason the override exists at all. Bengali's
+     * `সেন্টিমিটার` meets the Assamese sibilant merger — স is [x] here — and read *xentimitaɹ*, a word of no
+     * language. The other six differ only in র vs ৰ, which both read [ɹ]; the corpus's own `৩৫mm` is
+     * unchanged, and that is expected rather than a weak test — it is what says the fix moved nothing else.
+     */
+    test("unit nouns are Assamese: cm is *sentimitaɹ*, not the Bengali *xentimitaɹ*", () => {
+        expect(ph("5 cm")).toBe("pãs sentimitaɹ");
+        expect(ph("৩৫mm")).toBe("pãs tɹix milimitaɹ");
+        expect(ph("10 km")).toBe("dɔɦ kilomitaɹ");
+        expect(ph("5 kg")).toBe("pãs kiloɡɹam");
+        expect(ph("50 km/h")).toBe("pɔnsax kilomitaɹ pɹɔti ɡʱɔnta");
+    });
 });

@@ -59,10 +59,27 @@ export interface BengaliDef extends AbugidaDef {
     medialSchwaDeletion?: boolean;
     /** Skip the (Bengali-specific) whole-word lexicon override — set true for a reusing language (Assamese). */
     skipLexicon?: boolean;
+    /**
+     * UNIT ABBREVIATION → the reusing language's OWN unit nouns, replacing the Bengali table below wholesale.
+     *
+     * ⚠ THE SHARED TIER'S UNIT WORDS ARE BENGALI VOCABULARY, and a reusing language inherits the SPELLING as
+     * well as the word. For Assamese most of that is invisible — র and ৰ both read [ɹ], so `মিলিমিটার` and
+     * `মিলিমিটাৰ` give byte-identical IPA — but `cm` is not: Bengali's `সেন্টিমিটার` runs through the Assamese
+     * sibilant merger (স → [x], the signature of the language) and reads *xentimitaɹ*, where Assamese's own
+     * `চেণ্টিমিটাৰ` reads *sentimitaɹ*. One declared word, one wrong phoneme, and nothing in the tier could
+     * have known — so the words are language data, not engine data, and a reuser may bring its own.
+     */
+    unitWords?: Record<string, string[]>;
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */
 export type ForeignPhonemizer = (latin: string) => string;
+
+/** The symbol tier's unit nouns, in BENGALI — the default a reusing language overrides with `unitWords`. */
+const BENGALI_UNITS: Record<string, string[]> = {
+    km: ["কিলোমিটার"], cm: ["সেন্টিমিটার"], mm: ["মিলিমিটার"], kg: ["কিলোগ্রাম"],
+    m: ["মিটার"], g: ["গ্রাম"], "km/h": ["কিলোমিটার প্রতি ঘন্টা"],
+};
 
 const VOWEL_G = new RegExp(`[${IPA_VOWELS}]`, "g");
 const DIGIT_CLASS = "0-9" + Object.keys(BENGALI_DIGITS).join("");
@@ -115,8 +132,13 @@ export function makeNativeBengali(
         // is the standard Bengali form of the currency name — ordinary lexis, not an audio finding, and marked
         // as such so a later pass does not credit the corpus with attesting it.
         currency: { "৳": ["টাকা"], "₹": ["রুপি"], $: ["ডলার"], "€": ["ইউরো"], "£": ["পাউন্ড"], "¥": ["ইয়েন"] },
-        units: { km: ["কিলোমিটার"], cm: ["সেন্টিমিটার"], mm: ["মিলিমিটার"], kg: ["কিলোগ্রাম"],
-            m: ["মিটার"], g: ["গ্রাম"], "km/h": ["কিলোমিটার প্রতি ঘন্টা"] },
+        // ⚠ THE DEFAULT IS BENGALI VOCABULARY — a reusing language declares `unitWords` in its manifest and
+        // gets its own spellings; see the field's note for the Assamese `cm` that made the override necessary.
+        // ⚠ THE DEFAULT IS A NAMED CONSTANT, NOT AN INLINE OBJECT, so the sourcing tools can still read the
+        // words. `sources.ts` reads a tier's `units` value as a literal or through ONE named identifier;
+        // `def.unitWords ?? { … }` was neither, and bn's seven declared words went from readable to
+        // `[??] the words are computed, not written`.
+        units: def.unitWords ?? BENGALI_UNITS,
         // `বর্গকিলোমিটার` ×8. SPACED rather than fused, because this tier is shared with ASSAMESE and the
         // two corpora disagree about the space — bn fuses it onto কিলোমিটার but writes `বর্গ মাইল` spaced in
         // the very same sentence, and as writes `বৰ্গ কিলোমিটাৰ` (×7) spaced throughout. `before` is

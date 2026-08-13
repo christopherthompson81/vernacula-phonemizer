@@ -1,25 +1,153 @@
 // WIKIPEDIA WORD ATTESTATION — as. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "as",
-    "wiki": "as.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "as",
+        "wiki": "as.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "মিলিমিটাৰ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 71,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…আৱিষ্কাৰ কৰে। ১৬৫৮ - ঔৰংজেৱ মোগল সম্ৰাট হৈছিল। ১৮৬১ - ৯৩০০ মিলিমিটাৰ বৰষুণৰ বাবে চেৰাপুঞ্জীত বিশ্ব ৰেকৰ্ড হৈছিল। ১৯৩৩ - পুণেৰপৰা…",
+                "…ত হিচাপে দিয়া হয়। এইক্ষেত্ৰত ঘণ্টাত ০.২৫ মিলিমিটাৰৰ পৰা ১ মিলিমিটাৰ পৰ্যন্ত বৃষ্টিপাতক পাতল, ৪ মিলিমিটাৰৰ পৰা ১৬ মিলিমিটাৰ পৰ্য…",
+                "…ৰা ১ মিলিমিটাৰ পৰ্যন্ত বৃষ্টিপাতক পাতল, ৪ মিলিমিটাৰৰ পৰা ১৬ মিলিমিটাৰ পৰ্যন্ত বৃষ্টিপাতক প্ৰচুৰ, ১৬ মিলিমিটাৰৰ পৰা ৫০ মিলিমিটাৰ প…",
+                "…৬ মিলিমিটাৰ পৰ্যন্ত বৃষ্টিপাতক প্ৰচুৰ, ১৬ মিলিমিটাৰৰ পৰা ৫০ মিলিমিটাৰ পৰ্যন্ত বৃষ্টিপাতক অতি প্ৰচুৰ আৰু ৫০ মিলিমিটাৰতকৈ অধিক বৃষ্…",
+                "…ক বৰষুণ হোৱা ঠাই। ই পৃথিৱীৰ আচৰিত স্থান, গড় বাৰ্ষিক ১১,৮৭২ মিলিমিটাৰ (৪৬৭.৬ ইঞ্চি) বৰষুণৰ সৈতে, কিন্তু দাবীটো কলম্বিয়াৰ লোৰেৰ দ…",
+                "…্বাৰা বিতৰ্কিত কৰা হৈছে, য'ত ১৯৫২ আৰু ১৯৮৯ চনৰ ভিতৰত ১২,৭১৭ মিলিমিটাৰ (৫০০.৭ ইঞ্চি) বাৰ্ষিক বৰষুণৰ খবৰ পোৱা গৈছিল। লেপেজ ডি মাইকো…"
+            ]
+            },
+        {
+                "word": "চেণ্টিমিটাৰ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 54,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…আৰু V আয়তন। == ঘনত্বৰ একক: == কিলোগ্ৰাম/ঘন মিটাৰ গ্ৰাম/ঘন চেণ্টিমিটাৰ পাউণ্ড/ঘন ফুট উদাহৰণস্বৰূপে, পানীৰ ঘনত্ব ১ গ্ৰাম/ঘন চেণ্টিম…",
+                "…টিমিটাৰ পাউণ্ড/ঘন ফুট উদাহৰণস্বৰূপে, পানীৰ ঘনত্ব ১ গ্ৰাম/ঘন চেণ্টিমিটাৰ; অৰ্থাৎ ১ ঘন চেণ্টিমিটাৰ পানীৰ ভৰ ১ গ্ৰাম। ঘনত্বৰ মাপৰ সহায…",
+                "…হৰণস্বৰূপে, পানীৰ ঘনত্ব ১ গ্ৰাম/ঘন চেণ্টিমিটাৰ; অৰ্থাৎ ১ ঘন চেণ্টিমিটাৰ পানীৰ ভৰ ১ গ্ৰাম। ঘনত্বৰ মাপৰ সহায়ত কোনো বস্ত্ত পানীত (বা…",
+                "…টাৰক প্ৰতিনিধিত্ব কৰা হয়। ই ১ ঘন ডেচিমিটাৰ (dm3), ১,০০০ ঘন চেণ্টিমিটাৰ (cm3) বা ১/১,০০০ ঘনমিটাৰৰ সৈতে সমান। ১ ঘন ডেচিমিটাৰ বুলিলে…",
+                "…সমতূল্য হিচাপ === এটি ঘনবস্তু, যাৰ প্ৰতিটো ধাৰৰ দৈৰ্ঘ্য ১০ চেণ্টিমিটাৰ, তাৰ আয়তন ১ লিটাৰৰ সমান। ১ ঘনফুটত প্ৰায় ২৭ লিটাৰ হৈ থাকে।…",
+                "…য়নো ১৭৯৫ চনত এক গ্ৰাম ওজনক, বৰফৰ গলনাংকৰ উত্তাপত থকা এক ঘন চেণ্টিমিটাৰ পানীৰ ভৰৰ সৈতে সমান বুলি পোৱা গৈছিল। মূল ডেচিমিটাৰৰ দৈঘ্য আ…"
+            ]
+            },
+        {
+                "word": "ছেণ্টিমিটাৰ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 71,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ৰ আন ঠাইতকৈ বেছি বৰষুণ হয়। হিমালয় পৰ্বতাঞ্চলত ১৫ ৰ পৰা ৬০ ছেণ্টিমিটাৰ বৰষুণ হয়। ৰাজস্থান,গুজৰাট,মহাৰাষ্ট্ৰ মধ্যপ্ৰদেশ,উত্তৰ কৰ্ণ…",
+                "…লনাডু উপত্যকা আৰু কৰ্ণাটকৰ বাহিৰে বাকীবোৰ ৰাজ্যত ৫ ৰ পৰা ১০ ছেণ্টিমিটাৰ বৰষুণ হয়। ডিচেম্বৰ-জানুৱাৰী মাহত মাজে মাজে ভূমধ্যসাগৰীয় ন…",
+                "…বৰদৈচিলা\" বুলি কোৱা হয়। ধুমুহা বৰষুণৰ ফলত অসমত এই সময়ত ৫০ ছেণ্টিমিটাৰ বৰষুণ হয়। আনহাতে হিমালয় অঞ্চল,উৰিষ্যাৰ উপকূল আৰু পশ্চিমবং…",
+                "…হয়। আনহাতে হিমালয় অঞ্চল,উৰিষ্যাৰ উপকূল আৰু পশ্চিমবংগত ২৫ ছেণ্টিমিটাৰ বৰষুণ দিয়ে আৰু তামিলনাডু আৰু কৰ্ণাটক ৰাজ্যৰ কাষৰীয়া অঞ্চল…",
+                "…়ে আৰু তামিলনাডু আৰু কৰ্ণাটক ৰাজ্যৰ কাষৰীয়া অঞ্চলবিলাকত ১০ ছেণ্টিমিটাৰ বৰষুণ হয়। এইটো ঋতুৰ বৰষুণ,চাহ খেতিৰ কাৰণে অতি উপযোগী। ===…",
+                "…ম আৰু শীতকালত অত্যন্ত শীত হয়। বছৰি গড়ে ইয়াত ৬০ ৰ পৰা ১৫০ ছেণ্টিমিটাৰ বৰষুণ হয়। পঞ্জাব,হাৰিয়ানা আদিত শীতকালতো ভূমধ্য সাগৰীয় নি…"
+            ]
+            },
+        {
+                "word": "কিলোমিটাৰ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…কিলোমিটাৰ ৩১ (ইংৰাজী: Kilómetro 31 বা km 31) হ’ল ২০০৬ চনত মুক্তিপ্ৰাপ…",
+                "…্ত্ৰণা আৰু সন্ত্ৰাস অনুভৱ কৰিবলৈ আৰম্ভ কৰে। কেটালিনাই ৩১ নং কিলোমিটাৰ চিহ্নৰ ওচৰত হোৱা তাইৰ ভগ্নীৰ দুৰ্ঘটনাৰ ৰহস্য সমাধান কৰিবলৈ…",
+                "…ক পণ্ডিতসকলৰ বাবে হোষ্টেলৰ সুবিধাও আছে। কোকৰাঝাৰ চহৰৰ পৰা ৮ কিলোমিটাৰ উত্তৰে দেবৰগাঁৱৰ ৰঙীলাখাটাত বিশ্ববিদ্যালয়খনৰ অৱস্থিত।বিশ্ব…",
+                "…, কোকৰাঝাৰ ৰেলৱে ষ্টেচন (১০ কিমি) আৰু ৰূপসী বিমানবন্দৰৰ (৭০ কিলোমিটাৰ) পৰা সংযুক্ত। বাংলাদেশ (১১০ কিলোমিটাৰ) আৰু ভূটান (৪০ কিলোমি…",
+                "…ৰূপসী বিমানবন্দৰৰ (৭০ কিলোমিটাৰ) পৰা সংযুক্ত। বাংলাদেশ (১১০ কিলোমিটাৰ) আৰু ভূটান (৪০ কিলোমিটাৰ) আৰু পশ্চিম বংগৰ ৰাজ্যিক সীমা (৪৫…",
+                "…োমিটাৰ) পৰা সংযুক্ত। বাংলাদেশ (১১০ কিলোমিটাৰ) আৰু ভূটান (৪০ কিলোমিটাৰ) আৰু পশ্চিম বংগৰ ৰাজ্যিক সীমা (৪৫ কিলোমিটাৰ)-ৰ পৰা দূৰৈত অৱ…"
+            ]
+            },
+        {
+                "word": "মিটাৰ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 114,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…মিটাৰ (আন্তৰ্জাতিক বানান metre বা আমেৰিকান বানান meter) গ্ৰীক বিশ…",
+                "…ূন্যস্থানত পোহৰে 1/299 792 458 ছেকেণ্ডত অতিক্ৰম কৰা দূৰত্বক মিটাৰ হিচাপে সংজ্ঞাবদ্ধ কৰা হয়। ১৭৯৩ চনত বিষুৱ ৰেখাৰ পৰা উত্তৰ ম…",
+                "…এভাগ হিচাপে সংজ্ঞাবদ্ধ কৰা হৈছিল। ১৭৯৯ চনত ইয়াক প্ৰট'টাইপ মিটাৰ বাৰৰ সহায়ত পুনৰবাৰ সংজ্ঞাবদ্ধ কৰা হয় (১৮৮৯ চনত প্ৰকৃত বাৰ…",
+                "…৮৩ চনত বৰ্তমানৰ সংজ্ঞাটো আগবঢ়োৱা হয়। এক ইঞ্চি হৈছে ০.০২৫৪ মিটাৰ (২.৫৪ ছেণ্টিমিটাৰ বা ২৫.৪ মিলিমিটাৰ)। == বানান == Metre হৈছ…",
+                "…পাইৰেন' মিটাৰ (ইংৰাজী: pyranometer) হৈছে সৌৰ বিকিৰণ মাপ কৰা এবিধ সঁজুলি।…",
+                "…োগো কৰা যায়। গ্ৰীক ভাষাৰ পাইয়াৰ আৰু এন' শব্দৰ পৰা পাইৰেন' মিটাৰ শব্দটো দিয়া হৈছে,যাৰ অৰ্থ হৈছে ক্ৰমে জুই আৰু আকাশৰ ওপৰত। =…"
+            ]
+            },
+        {
+                "word": "কিলোগ্ৰাম",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 64,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…কিলোগ্ৰাম (চমুকৈ কি:গ্ৰা: বা কেজি) হৈছে ভৰৰ একক। ধ্ৰুপদী (অনা-আপেক্ষি…",
+                "…সেই অৱস্থাত বস্তুটোৰ ভৰ অসীম হ'ব লাগিব। == কিমান পৰিমাণে এক কিলোগ্ৰাম == ফ্ৰান্সৰ পেৰিছ মহানগৰৰ চেইণ্ট ক্লাউদ নামৰ ঠাইত থকা ওজন আ…",
+                "…েটিনাম-ইৰিডিয়াম সংকৰ-ধাতুৰে তৈয়াৰী চুঙাকৃতিৰ দগাৰ ভৰকে এক কিলোগ্ৰাম ভৰ বুলি আন্তৰ্জাতিক ভাৱে বিজ্ঞানত ধৰি লোৱা হৈছিল। == কিলোগ্…",
+                "…োগ্ৰাম ভৰ বুলি আন্তৰ্জাতিক ভাৱে বিজ্ঞানত ধৰি লোৱা হৈছিল। == কিলোগ্ৰাম নিজে সাজি লোৱা পৰিমাণ == পদাৰ্থ বিজ্ঞানত ভৰ এবিধ মৌলিক ৰাশি…",
+                "…ভিন্ন ৰাষ্ট্ৰৰ বিজ্ঞানী সকলে মাজে মাজে নিজৰ নিজৰ ৰাষ্ট্ৰীয় কিলোগ্ৰাম দগাটোৰ সঠিকতা পৰীক্ষা কৰিবৰ বাবে সেই ঠাইলৈ তীৰ্থ কৰাদি যাব…",
+                "…rand K বুলি সম্বোধিত হয়, সিংহাচ্যুত হৈছে। বিজ্ঞানী সকলে এক কিলোগ্ৰাম ভৰৰ এক প্ৰাকৃতিক আৰু বিশ্ব-জনীন সংজ্ঞা বিচাৰি পাইছে। ১৬ নৱে…"
+            ]
+            },
+        {
+                "word": "গ্ৰাম",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 80,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…হান্স খ্ৰীষ্টিয়ান জোৱাচিম গ্ৰাম (ইংৰাজী: Hans Christian Gram; ১৩ ছেপ্টেম্বৰ ১৮৫৩ – ১৪ নৱেম্…",
+                "…াকী ডেনিছ বীজাণুবিদ, ঔষধবিজ্ঞানী আৰু অণুজীৱবিদ। তেওঁক গ্ৰেট গ্ৰাম ষ্টেইনৰ উন্নীতকৰণত আগবঢ়োৱা অৱদানৰ বাবে বিশেষ ভাবে জনাজাত।…",
+                "…ষ্টেইনৰ উন্নীতকৰণত আগবঢ়োৱা অৱদানৰ বাবে বিশেষ ভাবে জনাজাত। গ্ৰাম ষ্টেইন এবিধ ৰঞ্জক। ইয়াৰ সহায়ত বেক্টেৰিয়া সমূহ অণুবীক্ষণ…",
+                "…িয়া সমূহ অণুবীক্ষণ যন্ত্ৰত সহজে দৃশ্যমান হয়। ইয়াৰ সহায়ত গ্ৰাম পজিটিভ আৰু গ্ৰাম নেগেটিভ হিচাপে বেক্টেৰিয়াৰ শ্ৰেণীবিভাজনো…",
+                "…ষণ যন্ত্ৰত সহজে দৃশ্যমান হয়। ইয়াৰ সহায়ত গ্ৰাম পজিটিভ আৰু গ্ৰাম নেগেটিভ হিচাপে বেক্টেৰিয়াৰ শ্ৰেণীবিভাজনো কৰা হয়। ২০১৯ চনৰ…",
+                "…াচিম গ্ৰামৰ জন্ম হৈছিল। তেওঁৰ পিতৃ ফ্ৰেডৰিক টাৰকেল জুলিয়াছ গ্ৰাম আইনীবিদ্যাৰ অধ্যাপক আৰু মাতৃ লুচী খ্ৰীষ্টিয়ান ৰলেণ্ড। তেওঁ…"
+            ]
+            },
+        {
+                "word": "ঘণ্টা",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 54,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…নীলা ঘণ্টা (ফৰাচী ভাষাৰপৰা l'heure bleue; উচ্চাৰণ [lœʁ blø]) হৈছে গধূল…",
+                "…ওচৰৰ অঞ্চলত সূৰ্য্য উদয় আৰু ঠেক কোণত অস্ত যোৱাৰ বাবে নীলা ঘণ্টা কম হয়। মেৰুৰ ওচৰৰ ঠাইত সূৰ্য্য উদয় আৰু অগভীৰ কোণত অস্ত যো…",
+                "…এই ঘণ্টাৰ ৰং কিয় ইমান নীলা সেইটো ব্যাখ্যা কৰে। আচলতে নীলা ঘণ্টা তেতিয়া হয় যেতিয়া সূৰ্য দিগন্তৰ তলত যথেষ্ট দূৰত থাকে যাতে…",
+                "…যৰ (ৰঙা ৰশ্মি) আপেক্ষিকভাৱে প্ৰসাৰণ ক্ষমতাৰ বাবে হয়। নীলা \"ঘণ্টা\"ৰ সময়ত ৰঙা পোহৰ মহাকাশৰ মাজেৰে পাৰ হৈ যায় আৰু নীলা পোহৰ ব…",
+                "…ত সিঁচৰতি হৈ থাকে, আৰু এইদৰে পৃথিৱীৰ পৃষ্ঠত উপনীত হয়। নীলা ঘণ্টা সাধাৰণতে সূৰ্যাস্তৰ ঠিক পিছত আৰু সূৰ্য্য উদয়ৰ ঠিক আগতে প্ৰ…",
+                "…প্ৰতি ২১ জুন তাৰিখে), যেতিয়া সূৰ্যাস্ত ৭:৫৯ বজাত হয়: নীলা ঘণ্টা সন্ধিয়া ৭:৫৯ বজাৰ পৰা ৯:৩৫ বজালৈকে হয়। যেতিয়া সূৰ্য উদয়…"
+            ]
+            },
         {
             "word": "দশমিক",
             "verdict": "attested",
@@ -36,5 +164,6 @@
                 "…বিবেচনাতহে আজিকালিৰ দশমিক সংখ্যাৰ লগত সামঞ্জস্যপূৰ্ণ। তেওঁৰ দশমিক সংখ্যা পদ্ধতিত শূন্য আছিল নে নাই সেই বিষয়ে দ্বিমত আছে। শূন…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

@@ -113,6 +113,48 @@
         "decimalWord": "দশমিক"
     },
 
+    // UNIT NOUNS — Assamese's own, replacing the Bengali table the shared symbol tier ships (see `unitWords`
+    // in bengali.ts). The corpus writes `৩৫mm`, `২৪mm`, `৩৬mm` in its `units` cell and nothing was declared
+    // HERE, so the layer read as "declares no unit word" even though the tier below it was reading them — as
+    // BENGALI words. Two things follow, one cosmetic and one not:
+    //
+    //  · র vs ৰ is invisible to the phonology (both read [ɹ]), so `মিলিমিটার` and `মিলিমিটাৰ` give
+    //    byte-identical IPA. The Assamese spelling is still the one to declare: it is what the corpus and the
+    //    wiki write, and it is what a reader of this file has to be able to check.
+    //  · `cm` IS NOT COSMETIC. Bengali's `সেন্টিমিটার` meets the Assamese sibilant merger — স is [x] here, the
+    //    signature of the language — and read *xentimitaɹ*. `চেণ্টিমিটাৰ` reads *sentimitaɹ*, which is the word.
+    //
+    // ALL POSTPOSED, which is what both evidence tiers write: `5 মিলিমিটাৰ (1/5 ইঞ্চি)`, `৪৮৯২ মিটাৰ`,
+    // `19,500 বৰ্গ কিলোমিটাৰ`, `800 কিমি` in the artifact; `৮ কিলোমিটাৰ উত্তৰে`, `১০ চেণ্টিমিটাৰ` on the wiki.
+    // No prefix order occurs anywhere in the evidence, so the tier's default (noun after the number) stands.
+    //
+    // SOURCING, per word — corpus = tools/corpus/mined/as.jsonc, wiki = tools/corpus/attest/as.jsonc, all
+    // `attested` with the sense READ, not counted:
+    //   মিটাৰ       corpus ×7 (`৪৮৯২ মিটাৰ`) · wiki 114/16, its own SI article ("আন্তৰ্জাতিক বানান metre")
+    //   কিলোমিটাৰ   corpus ×2 · wiki 49/11 (`৮ কিলোমিটাৰ উত্তৰে`)
+    //   মিলিমিটাৰ   corpus ×1, directly after a number · wiki 71/16 (`২৫.৪ মিলিমিটাৰ`)
+    //   চেণ্টিমিটাৰ  wiki 54/20 (`১ ঘন চেণ্টিমিটাৰ পানীৰ ভৰ ১ গ্ৰাম`). ⚠ ছেণ্টিমিটাৰ (71/20) is an equally
+    //               attested variant spelling — চ and ছ are both [s] here, so the two READ identically and the
+    //               choice is orthographic only.
+    //   কিলোগ্ৰাম    wiki 64/13, its own article: "কিলোগ্ৰাম (চমুকৈ কি:গ্ৰা: বা কেজি) হৈছে ভৰৰ একক" — the unit of mass.
+    //   গ্ৰাম        ⚠ THE ONE THAT NEEDED READING. Its top wiki hits are the PROPER NAME (Hans Christian Gram,
+    //               Gram stain), which is exactly how a count attests the wrong sense. The unit sense is read
+    //               in the density article: "১ ঘন চেণ্টিমিটাৰ পানীৰ ভৰ ১ গ্ৰাম" — the mass of one cubic
+    //               centimetre of water is one gram. Referee-listed too (as.kaikki, as.wikipron).
+    //   km/h        COMPOSED, and marked as such: প্ৰতি "per" is corpus-attested (`প্ৰতি অপৰাধত`) and ঘণ্টা
+    //               "hour" is corpus- and wiki-attested (`ঘণ্টাত প্ৰায় 17,500 মাইল বেগেৰে`), but the phrase
+    //               itself occurs in no source searched. It is the same composition the tier already shipped
+    //               from Bengali; only the spelling changes.
+    "unitWords": {
+        "km": ["কিলোমিটাৰ"],
+        "cm": ["চেণ্টিমিটাৰ"],
+        "mm": ["মিলিমিটাৰ"],
+        "kg": ["কিলোগ্ৰাম"],
+        "m": ["মিটাৰ"],
+        "g": ["গ্ৰাম"],
+        "km/h": ["কিলোমিটাৰ প্ৰতি ঘণ্টা"]
+    },
+
     "clausePunctuation": {
         "।": ".",
         "॥": ".",

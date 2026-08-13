@@ -33,6 +33,10 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
+// ⚠ FROM `defects.ts`, NOT FROM `review.ts`. The sister set is `review.ts`'s, but `review.ts` is a CLI that
+// RUNS ON IMPORT — the hazard this directory has hit four times — so the table already lives in `defects.ts`,
+// which is a pure module (`candidates.ts` and `review.ts` both import it from there). One copy, no drift.
+import { sistersOf } from "./defects.ts";
 import { pathToFileURL } from "node:url";
 
 const argv = process.argv.slice(2);
@@ -47,14 +51,45 @@ const DICT = join(ESPEAK, "dictsource");
 const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 const REFEREES = "tools/referee-eval/referees";
 
+/** The registry source, read once. `langDir` is called per code and `evidenceKin` calls it once per code in
+ *  the fleet, which re-read a 100 KB file ~36,000 times in an `--all` run. */
+let REGISTRY: string | undefined;
+const registrySrc = (): string => (REGISTRY ??= readFileSync("src/registry.ts", "utf8"));
+
 /** Every `case "xx":` in the registry — the fleet, in the order the registry lists it. */
 function fleet(): string[] {
-    const reg = readFileSync("src/registry.ts", "utf8");
-    return [...new Set([...reg.matchAll(/case "([a-z][a-z0-9-]*)":/gu)].map((m) => m[1]!))];
+    return [...new Set([...registrySrc().matchAll(/case "([a-z][a-z0-9-]*)":/gu)].map((m) => m[1]!))];
+}
+
+/**
+ * THE CODES WHOSE EVIDENCE SPEAKS FOR THIS ONE'S DECLARATION — a sister standard, or any code served off the
+ * SAME LAYER DIRECTORY.
+ *
+ * ⚠ WHY THIS EXISTS. `apd`, `zsm`, `pbt` and `bgc` have no corpus, no referee and no espeak of their own, and
+ * they do not have a layer of their own either: the registry serves them off `arabic/`, `malay/`, `pashto/`
+ * and `hindi/`. So the unit words this file judges for them are not *their* declaration in any meaningful
+ * sense — they are the SHARED LAYER'S declaration, being read a second time under a second code. Reporting
+ * `[??] nothing could attest them` said something true about their own evidence and nothing at all about the
+ * question, while the language the declaration belongs to has a corpus that answers it.
+ *
+ * ⚠ IT IS DERIVED, NOT HAND-KEPT, and that is the whole point of computing it from `langDir`. A second
+ * hand-kept table of "these codes are related" is a table that drifts from `SISTER_STANDARDS` — the hazard
+ * that file's own header states — and it would have to be extended by hand every time the registry serves a
+ * new code off an existing engine. The registry already knows; asking it cannot go stale.
+ *
+ * `SISTER_STANDARDS` is imported rather than restated for exactly the same reason, and it is NOT redundant
+ * with the directory rule: `nb`/`nn`/`no` and `hr`/`sr`/`bs` are separate directories.
+ *
+ * ⚠ BORROWED EVIDENCE MAY ONLY ATTEST, NEVER REFUTE. See the call site.
+ */
+export function evidenceKin(code: string): string[] {
+    const dir = langDir(code);
+    const sameLayer = dir === undefined ? [] : fleet().filter((c) => c !== code && langDir(c) === dir);
+    return [...new Set([...sistersOf(code), ...sameLayer])];
 }
 
 function langDir(code: string): string | undefined {
-    const reg = readFileSync("src/registry.ts", "utf8");
+    const reg = registrySrc();
     const imports = new Map<string, string>();
     for (const m of reg.matchAll(/import \{\s*(create\w+)[^}]*\} from "\.\/languages\/([^/]+)\//gu))
         imports.set(m[1]!, m[2]!);
@@ -737,6 +772,21 @@ const UNIT_ABBREVIATIONS = [
  *  inside of `\p{M}` and every other construct that happens to contain that letter. */
 const UNIT_MULTI = UNIT_ABBREVIATIONS.filter((u) => u.length > 1);
 
+/**
+ * "IS THIS TWO LETTERS OR MORE" — the test that separates a WORD from an abbreviation, a numeral or a stray
+ * symbol, and it may NOT be written `\p{L}{2}`.
+ *
+ * ⚠ `\p{L}{2}` MEANS TWO *ADJACENT* LETTERS, WHICH AN ABUGIDA NEVER HAS. Assamese `কিলোমিটাৰ` is
+ * ক ি ল ো ম ি ট া ৰ — nine code points, five of them combining matras (`\p{M}`), and no two letters touch.
+ * So the test was false for every Bengali-Assamese word, and the unit table Assamese declares was dropped
+ * word by word until nothing was left: the tool printed `NONE — the layer declares NO unit word` at a
+ * manifest naming all seven of them. Devanagari, Gujarati, Kannada, Khmer and Thai are the same shape;
+ * Burmese passed only by accident, on the bare letter pair inside `ဂရမ်`.
+ *
+ * A letter with its trailing marks is one letter, so that is what the test counts.
+ */
+const TWO_LETTERS = /(?:\p{L}\p{M}*){2}/u;
+
 /** Unit abbreviations the corpus writes after a number, most frequent first — the evidence that the class
  *  applies at all. ⚠ `\p{Nd}`, never `\d`: a corpus that writes its numbers in its own digits is still a
  *  corpus (the same false absence the scale probe had). */
@@ -866,7 +916,7 @@ function pairTails(body: string): string[] {
         const open = body.indexOf("[", i);
         if (open === -1) break;
         const end = scanTop(body, open + 1, "]");
-        const lits = literals(body.slice(open + 1, end)).filter((w) => /\p{L}{2}/u.test(w));
+        const lits = literals(body.slice(open + 1, end)).filter((w) => TWO_LETTERS.test(w));
         if (lits.length > 0) out.push(lits.length > 1 ? lits[1]! : lits[0]!);
         i = end + 1;
     }
@@ -886,7 +936,7 @@ function pairTails(body: string): string[] {
  * A modifier letter is the tell for the second and an exact abbreviation match for the first.
  */
 function wordLike(w: string): boolean {
-    if (!/\p{L}{2}/u.test(w)) return false;
+    if (!TWO_LETTERS.test(w)) return false;
     if (/\p{Lm}/u.test(w)) return false;
     const bare = w.trim().toLowerCase().replace(/[²³23]$/u, "");
     return !(UNIT_ABBREVIATIONS as readonly string[]).includes(bare);
@@ -1003,7 +1053,7 @@ function localUnitTable(langSrc: string): string[] {
     const out: string[] = [];
     const keys = new Set<string>();
     for (const m of langSrc.matchAll(re)) {
-        if (!/\p{L}{2}/u.test(m[3]!)) continue;
+        if (!TWO_LETTERS.test(m[3]!)) continue;
         keys.add(m[1]!.toLowerCase());
         out.push(m[3]!);
     }
@@ -1122,6 +1172,38 @@ export function unitWords(c: Ctx): Row {
     // attest a word, and reporting its declaration as unattested would be an assertion about evidence nobody
     // has.
     if (!/\p{L}/u.test(hay)) {
+        /**
+         * …UNLESS THE DECLARATION IS SOMEONE ELSE'S, WHICH FOR FOUR CODES IT IS. `apd`, `zsm`, `pbt` and `bgc`
+         * carry no corpus, referee or espeak — and no layer either. The registry serves them off `arabic/`,
+         * `malay/`, `pashto/` and `hindi/`, so the words being judged here are the SHARED LAYER'S words, read
+         * a second time under a second code, and the language they belong to has evidence that answers.
+         *
+         * ⚠ WHAT THE VERDICT IS ABOUT IS THE SHARED LAYER'S DECLARATION, NOT THIS CODE'S USAGE, and the
+         * detail says so in words. Haryanvi is served by the Hindi engine as a LABELLED APPROXIMATION, not as
+         * Hindi, so "absent from the Hindi corpus" would be an unsupported claim about Haryanvi — but it is a
+         * supported claim about the Hindi tier's declared word, which is the thing this class judges and the
+         * thing `bgc` actually reads. Same relation `review.ts` has always assumed for a sister standard.
+         *
+         * The check reproduces the owning language's own row exactly, which is the evidence that the relation
+         * is the right one: apd 0/7 = ar 0/7, pbt 4/5 = ps 4/5, bgc 6/8 = hi 6/8 (zsm gets 1/4 where ms gets
+         * 0/4, because `id` is a sister of both and attests *kilometer*).
+         */
+        const kin = evidenceKin(c.code);
+        const kinHay = kin.map((k) => {
+            const kc = context(k);
+            return `${kc.corpus}\n${kc.referee}\n${kc.espeak}\n${attestProse(k)}`;
+        }).join("\n").toLowerCase();
+        if (/\p{L}/u.test(kinHay)) {
+            const kinTokens = new Set(kinHay.split(/[^\p{L}\p{M}'’ʻ·-]+/u).filter((t) => t !== ""));
+            const gone = words.filter((w) => !attestedIn(w, kinHay, kinTokens));
+            const via = `the evidence of the layer it shares (${kin.join(" ")}), this code having no corpus, referee or espeak of its own`;
+            if (gone.length === 0)
+                return row("have", `${words.length} unit word(s) in ${decl.where}, all attested in ${via}: ${words.slice(0, 6).join(" ")}`);
+            return row("partial", `${words.length - gone.length}/${words.length} unit word(s) in ${decl.where} attested in ${via}`
+                + `; UNATTESTED: ${gone.slice(0, 8).join(" ")} — a shortfall here is about the SHARED LAYER's declaration,`
+                + ` not about this code's own usage, and a unit borrowing is legitimately absent from every source in ~30`
+                + ` languages: a prompt to READ them, not a defect`);
+        }
         return row("unknown", `${words.length} unit word(s) declared in ${decl.where} (${words.slice(0, 6).join(" ")}) and this `
             + `language has NO corpus, referee or espeak dictionary — nothing could attest them, which is an unread haystack`);
     }

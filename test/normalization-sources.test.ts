@@ -19,7 +19,7 @@
 import { describe, expect, test } from "vitest";
 import { DROPPABLE } from "../tools/normalization/defects.ts";
 import {
-    SOURCES_EXEMPT, context, scaleNames, strippedOfComments, unitDeclaration, unitWords, type Ctx,
+    SOURCES_EXEMPT, context, evidenceKin, scaleNames, strippedOfComments, unitDeclaration, unitWords, type Ctx,
 } from "../tools/normalization/sources.ts";
 import { readFileSync } from "node:fs";
 
@@ -297,9 +297,60 @@ describe("unit-word on the real fleet", () => {
         expect(r.detail).toContain("kilomita");
     });
 
-    test("as: a written layer with no unit word anywhere — the state ig was in", () => {
-        // Assamese writes `৩৫mm`, `২৪mm`, `৩৬mm` and reads none of them; there is no unit word in the layer.
-        expect(unitWords(context("as")).verdict).toBe("none");
+    test("as: the fleet's one `NONE`, now sourced — and it was never the state ig was in", () => {
+        // ⚠ THIS TEST ASSERTED `none` AND THE PREMISE WAS WRONG, which is worth keeping rather than
+        // rewriting away. Assamese writes `৩৫mm`, `২৪mm`, `৩৬mm`, and the layer's own directory declared no
+        // unit word — but the reading was never raw: as reuses the Bengali engine, whose symbol tier ships
+        // BENGALI unit words, so `mm` was read all along as `মিলিমিটার`. What the `NONE` actually found was a
+        // language reading its measurements through another language's vocabulary, and for `cm` that was a
+        // wrong phoneme (`সেন্টিমিটার` → *xentimitaɹ*, the Assamese স being [x]). The manifest now declares
+        // Assamese's own seven; see assamese.jsonc for the per-word sourcing.
+        const r = unitWords(context("as"));
+        expect(r.verdict, `as lost its unit words: ${r.detail}`).toBe("have");
+        expect(r.detail).toContain("চেণ্টিমিটাৰ");
+    });
+
+    test("AN ABUGIDA WORD IS STILL A WORD — `\\p{L}{2}` cannot see one", () => {
+        // The bug that hid the line above: in `কিলোমিটাৰ` every letter is followed by a combining matra, so
+        // no two letters are adjacent and a `\p{L}{2}` word test was false for the whole script. The table
+        // was read, then filtered down to nothing, and the tool reported "declares NO unit word" at a
+        // manifest naming all seven. Devanagari, Gujarati, Kannada, Khmer and Thai are the same shape.
+        const d = unitDeclaration('{ "unitWords": { "km": ["किलोमीटर"], "cm": ["सेंटीमीटर"] } }');
+        expect(d?.words.length, `an abugida unit table read as empty: ${JSON.stringify(d)}`).toBe(2);
+    });
+
+    /**
+     * THE FOUR CODES WITH NO EVIDENCE AND NO LAYER OF THEIR OWN. `apd`, `zsm`, `pbt` and `bgc` are served off
+     * `arabic/`, `malay/`, `pashto/` and `hindi/`, so the unit words judged for them are the SHARED LAYER's.
+     * Reporting `[??] nothing could attest them` was true about their own evidence and silent about the
+     * question — while the language the declaration belongs to has a corpus that answers it.
+     */
+    test("a code with no evidence of its own is judged on the layer it shares — apd zsm pbt bgc", () => {
+        for (const code of ["apd", "zsm", "pbt", "bgc"]) {
+            const r = unitWords(context(code));
+            expect(r.verdict, `${code} is back to an unread haystack: ${r.detail}`).not.toBe("unknown");
+            expect(r.detail, `${code} does not say whose evidence answered`).toContain("the layer it shares");
+        }
+    });
+
+    test("and it reproduces the OWNING language's row, which is what says the relation is right", () => {
+        // The borrowed reading must agree with the reading the owner gets from the same evidence, or the
+        // relation is not the one claimed. pbt/ps and bgc/hi are the two clean pairs (zsm also sees `id`).
+        for (const [code, owner] of [["pbt", "ps"], ["bgc", "hi"], ["apd", "ar"]]) {
+            const ratio = (d: string): string => /(\d+\/\d+)/u.exec(d)?.[1] ?? "?";
+            expect(ratio(unitWords(context(code!)).detail), `${code} disagrees with ${owner}`)
+                .toBe(ratio(unitWords(context(owner!)).detail));
+        }
+    });
+
+    test("evidenceKin is DERIVED from the registry, and includes the sister set it does not duplicate", () => {
+        // Same layer directory: the four above. Sister standards: separate directories, so the imported
+        // `SISTER_STANDARDS` is not redundant with the directory rule — `nb`/`nn` are the proof.
+        expect(evidenceKin("pbt")).toContain("ps");
+        expect(evidenceKin("bgc")).toContain("hi");
+        expect(evidenceKin("zsm")).toEqual(expect.arrayContaining(["id", "ms"]));
+        expect(evidenceKin("nb")).toContain("nn");
+        expect(evidenceKin("pbt")).not.toContain("pbt");
     });
 
     test("SETTLED REFUSALS MUST NOT BECOME NOISE — za, mg and syl", () => {
