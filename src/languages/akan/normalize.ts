@@ -35,11 +35,14 @@
  *     24th February    → adwonu nnan th febrwarj       the ordinal suffix letters reach the IPA
  *     S&P              → s p                           the ampersand is silent
  *
- * ⚠ THE ENGLISH FOREIGN-WORD READER IS DEAD CODE. `registry.ts` builds this language as
- * `createAkan((latin) => getPhonemizer("en").text(latin))`, but `createAkan`'s body never references its
- * `foreign` parameter — every `LATIN_RUN` match goes through the Akan `phonemizeWord`. So an unrecognised
- * run is read as AKAN-ish gibberish (`February` → *febrwarj*), not as a plausible English word. Probed
- * before writing any rule here, because it decides what a defect looks like when it hides.
+ * ⚠ THERE IS NO ENGLISH FOREIGN-WORD READER, and every rule below is written for that fact. `registry.ts`
+ * used to build this language as `createAkan((latin) => getPhonemizer("en").text(latin))` while
+ * `createAkan`'s body never referenced the argument; the wiring has since been removed rather than
+ * connected, because Akan is Latin-script — `TOKEN` claims every Latin run and `phonemizeWord` always
+ * answers, so there is no unclaimed run for a reader to take. An unrecognised run is therefore read as
+ * AKAN-ish gibberish (`February` → *febrwarj*), NOT as a plausible English word, which is the better
+ * failure for this layer: a defect that sounds English hides, and one that sounds like gibberish gets
+ * reported. Probed before writing any rule here, because it decides what a defect looks like when it hides.
  *
  * ── WHAT IS DELIBERATELY NOT DONE, each with the check that refused it ────────────────────────────────
  *

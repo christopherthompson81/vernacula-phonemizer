@@ -204,8 +204,21 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 // every gate: no digit or raw mark survives and nothing VANISHES.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:])`, "gu");
 
-/** Build the Akan phonemizer. `foreign` handles embedded Latin/other runs (none native — Akan IS Latin). */
-export function createAkan(foreign?: (s: string) => string): Phonemizer {
+/**
+ * Build the Akan phonemizer.
+ *
+ * ⚠ NO `foreign` PARAMETER, AND THAT IS A DECISION RATHER THAN AN OMISSION. The signature used to take one
+ * and the registry used to pass `getPhonemizer("en").text` into it; the body never referenced it, so every
+ * Latin run went through `phonemizeWord` regardless and `February` read *febrwarj*. The parameter is gone
+ * rather than wired because there is nothing for it to be wired TO: Akan is a Latin-script language, `TOKEN`
+ * claims every Latin run, `nat()` folds any out-of-inventory letter to one this g2p has a rule for, and
+ * `phonemizeWord` always answers. Routing to English would require deciding which Latin words are NOT Akan,
+ * which is a lexicon this repo does not have for this language — and normalize.ts records why a wrong answer
+ * there is worse than none: an English reader makes a defect sound like a plausible English word instead of
+ * showing up as the gibberish that gets it noticed. `core/foreign.ts` still serves runs in OTHER SCRIPTS
+ * through the shared script router, which needs no per-language argument.
+ */
+export function createAkan(): Phonemizer {
     return {
         text(input: string): string {
             // TEXT NORMALIZATION first — the pre-tokenizer pass that rewrites what is not already a

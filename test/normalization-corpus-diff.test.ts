@@ -69,9 +69,31 @@ describe("the case that started this: before-empty, after-nonempty", () => {
     });
 
     test("an empty reading carries no defect class, so the before column is unmoved by keeping it", () => {
-        // The reason no other language's recorded counts move: "" matches none of DIGIT/SLOT-GAP/RAWMARK/
-        // DROP/THROW. Only the denominator and the CHANGED set can move, and only where an empty exists.
-        expect(scan([""], undefined)).toStrictEqual({ DIGIT: 0, "SLOT-GAP": 0, RAWMARK: 0, DROP: 0, THROW: 0 });
+        // The reason no other language's recorded counts move: "" matches none of the classes. The class SET
+        // is now `LEAK_CLASSES` + this file's own DROP marker + THROW, so it grew by ZERO-WIDTH and RAW-CAPS
+        // when the private copy of the table was replaced by the shared one — measured over 45,306 fleet
+        // readings before the swap: 0 lines each. Only the denominator and the CHANGED set can move, and
+        // only where an empty exists.
+        expect(scan([""], undefined)).toStrictEqual({
+            DIGIT: 0, "SLOT-GAP": 0, RAWMARK: 0, "ZERO-WIDTH": 0, "RAW-CAPS": 0, DROP: 0, THROW: 0,
+        });
+    });
+
+    test("the DROP annotation this file writes is not measured as a leak", () => {
+        // ⚠ ` ⟪DROP:currency⟫` carries UPPERCASE ASCII, which is exactly what RAW-CAPS detects, and it opens
+        // with a SPACE, which is what SLOT-GAP detects on an empty reading. Scanning the annotated line
+        // reported RAW-CAPS on 5,188 of 45,306 fleet readings — every line the tool annotated, none of them
+        // a leak — and `compare` prints ⚠ REGRESSED on any class that rises.
+        expect(scan(["ba \u27EADROP:currency\u27EB"], undefined)["RAW-CAPS"]).toBe(0);
+        expect(scan(["\u27EADROP:currency\u27EB"], undefined)["SLOT-GAP"]).toBe(0);
+        expect(scan([" \u27EADROP:currency\u27EB"], undefined)["DROP"]).toBe(1);
+        // ⚠ And the strip takes the separator WITH the mark rather than trimming afterwards, so a reading
+        // that genuinely ends in a space still reports its own SLOT-GAP.
+        expect(scan(["ba \u27EADROP:currency\u27EB"], undefined)["SLOT-GAP"]).toBe(0);
+        expect(scan(["ba  \u27EADROP:currency\u27EB"], undefined)["SLOT-GAP"]).toBe(1);
+        // A THROW placeholder is this file's record that the engine raised, not a reading: it has its own
+        // column and is kept out of the leak classes, whose leading space and capitals are not an engine's.
+        expect(scan([" THROW Error: boom"], undefined)).toMatchObject({ THROW: 1, "SLOT-GAP": 0, "RAW-CAPS": 0 });
     });
 });
 

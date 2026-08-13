@@ -574,8 +574,19 @@ function build(lang: string): Phonemizer {
             return createXiang((latin) => getPhonemizer("en").text(latin));
         case "gan":
             return createGan((latin) => getPhonemizer("en").text(latin));
+        // ⚠ NO FOREIGN READER, AND THE ABSENCE IS THE DECISION. This case read
+        // `createAkan((latin) => getPhonemizer("en").text(latin))` and `createAkan` never referenced the
+        // argument — wiring with no routing behind it. Akan IS written in Latin, so its tokenizer claims
+        // every Latin run and NATIVISES it; there is no unclaimed-run seam for a reader to sit in, and
+        // handing one in would need a discriminator ("is this word Akan?") that no lexicon in this repo can
+        // answer. Reading `February` as *ˈfɛbɹuɛɹi* instead of *febrwarj* would not be a fix either: the
+        // normalize.ts header makes the point that an English reader lets a defect hide as a plausible
+        // English word rather than showing up as visible gibberish. Fleet: 45 cases here hand a factory a
+        // reader; 9 of those factories never invoke it (this one, plus am bal ckb ig my nan ti yo, which
+        // store it in a field and never read it — their embedded Latin is served by `setDefaultForeign`
+        // above). Only `ak` is fixed here; the other eight are engines this change does not own.
         case "ak":
-            return createAkan((latin) => getPhonemizer("en").text(latin));
+            return createAkan();
         case "jv":
             return createJavanese();
         case "sw":

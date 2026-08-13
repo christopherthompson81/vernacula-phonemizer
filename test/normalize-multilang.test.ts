@@ -104,19 +104,33 @@ describe("shared symbol normalizer (core)", () => {
     });
 
     // A DOTTED DESIGNATION IS NOT A QUANTITY. `802.11g` read as "802.11 grams" in ten languages, because the
-    // one-letter unit key matched the version suffix. Measured over all 66 corpora: 444 dotted-version
-    // instances against 4 decimals glued to a one-letter unit (and those are period thousands separators).
-    test("a dotted version is not a unit", () => {
+    // one-letter unit key matched the version suffix.
+    //
+    // ⚠ THE GUARD IS ANCHORED ON THE DESIGNATION, NOT ON ITS SHAPE, and this test pins the difference because
+    // the shape version cost more than it bought. Measured by emitting all 161 mined artifacts (45,306
+    // readings) with the shape guard and without it: 33 readings differ — 9 are the IEEE designation
+    // (ar bn cmn de el es id ja pt) and 24 are genuine measurements it was suppressing, among them ary's
+    // eleven airport terminal areas (`28.000m²` read *ˈɛm skwˈɛɹd*, an English letter name inside Moroccan
+    // Arabic) and pt's `4.892m`, the height of the Vinson Massif, pinned below.
+    test("a dotted designation is not a unit, and a glued decimal still is", () => {
         const n = makeSymbolNormalizer({ percent: ["pct"], units: { g: ["gram"], km: ["km-word"], m: ["metre"] } });
         expect(n("802.11g")).toBe("802.11g"); // was "802.11 gram"
         expect(n("802.11n")).toBe("802.11n");
+        expect(n("802,11g")).toBe("802,11g"); // the designation is not localised; the text around it is
         // The narrowness is the point — all of these still read:
         expect(n("12.5 g")).toBe("12.5 gram"); // not glued
         expect(n("12.5km")).toBe("12.5 km-word"); // two-letter key
         expect(n("1,000 km")).toBe("1,000 km-word");
         expect(n("3,5 m")).toBe("3,5 metre");
-        // The measured cost: a decimal GLUED to a one-letter unit is no longer read. 4 corpus instances.
-        expect(n("4.892m")).toBe("4.892m");
+        // ⚠ THE 24 LINES THE SHAPE GUARD WAS COSTING. A decimal glued to a one-letter unit is a measurement
+        // everywhere the corpus can be read, and the designation list is what separates the two.
+        expect(n("4.892m")).toBe("4.892 metre");
+        expect(n("28.000m")).toBe("28.000 metre");
+        // ⚠ AND NOT THE MAGNITUDE CASE, which never depended on this guard: the currency rule runs first and
+        // consumes the number, so `m` has no number left to attach to. Probed on en with the shape guard
+        // fully removed and unchanged either way — `$1.5m` is a question for the currency path, not this one.
+        const c = makeSymbolNormalizer({ percent: ["pct"], currency: { $: ["dollar"] }, units: { m: ["metre"] } });
+        expect(c("$1.5m")).toBe("1.5 dollarm");
     });
 
     test("an unspaced magnitude still hops, and keeps its own spacing", () => {

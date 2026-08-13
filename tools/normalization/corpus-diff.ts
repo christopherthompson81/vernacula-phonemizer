@@ -17,11 +17,11 @@
  * Emitting to a file from a read-only worktree has the same effect with no shared mutable state — see
  * the fan-out procedure, which sets the worktree up once for the whole batch.
  *
- * THE DEFECT CLASSES are the ones the thirteen languages kept producing. A rule that looks right on a
- * handful of probes still lands these at corpus scale:
- *   DIGIT     an ASCII digit survived into the IPA — the number path declined and leaked its input
- *   SLOT-GAP  a double/leading/trailing space, almost always a padded `clausePunctuation` value
- *   RAWMARK   a punctuation or symbol character reached the phoneme string
+ * THE DEFECT CLASSES ARE `LEAK_CLASSES` FROM `defects.ts`, not a list kept here — this file held its own
+ * copy for a long time and it went stale, which is what let the hmn run move 95.7 % of a language and report
+ * an unchanged leak summary. Today that shared table is DIGIT, SLOT-GAP, RAWMARK, ZERO-WIDTH and RAW-CAPS;
+ * see `defects.ts` for what each one is for and `DEFECTS` below for the two classes that are this file's own:
+ *   DROP      a symbol VANISHED — measured differentially by `emit`, and annotated onto the reading
  *   THROW     the engine raised on an input it used to accept
  * `--foreign` additionally counts utterances carrying phonemes outside the language's own inventory, which
  * is what the embedded-Latin fallback produces (see core/foreign.ts); pass it a regex of foreign phonemes.
@@ -35,7 +35,7 @@
  * measure.
  */
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
-import { dropsIn, makeContribution } from "./defects.ts";
+import { LEAK_CLASSES, dropsIn, makeContribution } from "./defects.ts";
 import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
@@ -108,30 +108,43 @@ function corpusLines(corpus: string): string[] {
     return [...seen];
 }
 
+/**
+ * ⚠ DERIVED FROM `LEAK_CLASSES`, NOT COPIED FROM IT — and it WAS a copy, which had drifted.
+ *
+ * The literal table that stood here held `\p{Nd}`, the slot gap, a hand-listed RAWMARK set and the local
+ * `DROP` marker. It predated `ZERO-WIDTH` and `RAW-CAPS`, so THE STRONGEST GATE IN THE REPO could not see
+ * either — the hmn run moved 95.7 % of that language's utterances and its leak summary did not move at all,
+ * because the class that went 100 → 0 was not in this file's table. Third drifted copy found in a week
+ * (`coverage.ts` was the second), and `defects.ts`'s own header names the hazard: add a class there, never
+ * in a caller.
+ *
+ * ⚠ THE COST OF CLOSING IT WAS MEASURED FIRST, over every mined artifact — 161 languages, 45,306 readings:
+ *   · `ZERO-WIDTH` 0 lines and `RAW-CAPS` 0 lines. Both are new here and both are silent today; `RAW-CAPS`
+ *     was 100 lines in hmn until that engine stopped emitting its own spelling, and is carried as the
+ *     tripwire for the next engine that does.
+ *   · `RAWMARK` widens from a hand-listed `$€£¥` to `\p{Sc}`, and the SAME 2 lines fire (bo, ka).
+ *   · `DIGIT` and `SLOT-GAP` are character-identical to what stood here.
+ * So no count in any investigation doc moves; what changes is what the gate can SEE NEXT.
+ */
 const DEFECTS: [string, RegExp][] = [
-    // `\p{Nd}`, NOT `\d`: under the `u` flag `\d` is ASCII 0-9 and nothing else, so this class was blind to
-    // a digit leak in every language that writes its own numerals — Burmese ၀-၉, Thai ๐-๙, Bengali ০-৯,
-    // Khmer, Lao. RAWMARK below happened to list the Devanagari, Arabic-Indic and Persian ranges, which
-    // made the gap look smaller than it was: those three scripts were covered by accident and the rest
-    // were not covered at all. Found while mining a Burmese hard-set.
-    ["DIGIT", /\p{Nd}/u],
-    ["SLOT-GAP", /\s{2,}|^\s|\s$/u],
-    // NOT `.,;:!?` — those are the CANONICAL inline pause marks every engine emits via clauseSink, so
-    // including them flags every utterance in the corpus and the check tells you nothing. What belongs
-    // here is a mark that should have been converted to one of those and wasn't: a native terminator, a
-    // symbol, or a non-ASCII digit.
-    // U+00BA º and U+00AA ª are here because the Italian run found the class silently missing them: it had
-    // `°` (U+00B0) only, so the ordinal-indicator leak `dell'11º` → `undˈit͡ʃi º` passed the scan clean and
-    // was caught by probing instead. The three characters look alike and are routinely confused; a scan
-    // that knows one and not the others gives false assurance.
-    ["RAWMARK", /[…。、，％℃°ºª〜～・！？²³$€£¥०-९٠-٩۰-۹।॥۔؟،؛]/u],
-    // A SYMBOL THAT VANISHED. Every class above detects a character that SURVIVES into the IPA; none of
-    // them can see one that is silently DISCARDED, and that blind spot is why a currency drop
-    // went unnoticed through thirty-seven languages of corpus-driven work. `emit` appends this marker
-    // after phonemizing the utterance a second time with the symbol deleted and finding the two readings
-    // identical — proof the symbol contributed nothing.
+    ...LEAK_CLASSES.map(([name, re]) => [name, re] as [string, RegExp]),
+    // A SYMBOL THAT VANISHED — the one class that is this file's own, and rightly not in `LEAK_CLASSES`.
+    // Every class above detects a character that SURVIVES into the IPA; none of them can see one that is
+    // silently DISCARDED, and that blind spot is why a currency drop went unnoticed through thirty-seven
+    // languages of corpus-driven work. `emit` appends this marker after phonemizing the utterance a second
+    // time with the symbol deleted and finding the two readings identical — proof the symbol contributed
+    // nothing. It is a marker THIS FILE writes rather than a leak an engine emitted, so it cannot live in
+    // the shared table; `defects.ts` owns the drop CLASSES, and `dropsIn` is where they are shared from.
     ["DROP", /\u27EADROP:/u],
 ];
+
+/**
+ * The annotation `emit` appends to a reading — written here, and removed before anything is measured.
+ * ⚠ THE LEADING SPACE IS PART OF THE MATCH. Stripping the brackets alone leaves the separator behind, and a
+ * trailing space is itself a `SLOT-GAP`; trimming afterwards instead would ERASE a genuine trailing-space
+ * defect in a reading that also carries a drop. Take exactly what `emit` wrote and nothing else.
+ */
+const DROP_MARK = / \u27EADROP:[a-z-]+\u27EB/gu;
 
 // The defect tables and the REDUNDANT discrimination live in `defects.ts`, shared with `mine.ts scan`
 // and `coverage.ts`. They were three copies and they had DRIFTED — this file's `minus` class was missing
@@ -227,10 +240,30 @@ function srcOf(artifact: string): string[] | undefined {
     return existsSync(p) ? readRecords(readFileSync(p, "utf8")) : undefined;
 }
 
+/**
+ * ⚠ A LEAK CLASS IS MEASURED ON THE READING, NOT ON THE ANNOTATED LINE — and this is exactly why deriving
+ * the table had to be measured rather than assumed.
+ *
+ * `emit` writes ` ⟪DROP:currency⟫` after a reading that silently lost a symbol. That annotation contains
+ * `DROP` in **uppercase ASCII**, which is precisely what `RAW-CAPS` detects: scanning the annotated line
+ * would have reported `RAW-CAPS` on **5,188 of 45,306** fleet readings (11.4 %) — every line the tool
+ * annotated, none of them a leak. `compare` prints `⚠ REGRESSED` on any class that rises, so a change that
+ * merely surfaced one more silent drop would have lit up a leak class that no engine emitted.
+ *
+ * The old private table had a smaller version of the same bug: cjy's `{| style="border-spacing…` reads as
+ * the EMPTY STRING, and the annotation gave that empty reading a LEADING SPACE, which `SLOT-GAP` reports.
+ * One line fleet-wide, and it was in the counts before this fix.
+ *
+ * A ` THROW` placeholder is not a reading either — it is this file's record that the engine raised — and it
+ * carries both a leading space and uppercase letters. It has its own column and is excluded from the rest.
+ * (Zero of the 45,306 fleet readings throw today, so this exclusion moves no number that has been quoted.)
+ */
 export function scan(lines: string[], foreign: RegExp | undefined): Record<string, number> {
     const out: Record<string, number> = {};
-    for (const [name, re] of DEFECTS) out[name] = lines.filter((l) => re.test(l)).length;
-    out["THROW"] = lines.filter((l) => l.startsWith(" THROW")).length;
+    const threw = (l: string): boolean => l.startsWith(" THROW");
+    const readings = lines.filter((l) => !threw(l)).map((l) => l.replace(DROP_MARK, ""));
+    for (const [name, re] of DEFECTS) out[name] = (name === "DROP" ? lines : readings).filter((l) => re.test(l)).length;
+    out["THROW"] = lines.filter(threw).length;
     if (foreign) out["FOREIGN"] = lines.filter((l) => foreign.test(l)).length;
     return out;
 }

@@ -553,15 +553,45 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // `(?<=[a-zA-Z])` then sees the SPACE rather than the unit letter, so `km 2` (a kilometre, then two) is
     // still not an exponent while `km ²` is.
     //
-    // ⚠ A DOTTED DESIGNATION IS NOT A QUANTITY. `802.11g` read as "802.11 GRAMS" and `802.11n` as the letter
-    // *ˈɛn*, the one-letter key matching a version suffix. The guard rejects a number-with-a-dot glued to
-    // exactly ONE trailing letter — deliberately narrow, so `12.5km` (two-letter key) and `12.5 g` (not glued)
-    // both keep working.
+    // ⚠ A DOTTED DESIGNATION IS NOT A QUANTITY, AND THE SHAPE OF ONE IS NOT A RULE. `802.11g` read as
+    // "802.11 GRAMS" and `802.11n` as the letter *ˈɛn*, a one-letter key matching a version suffix. The guard
+    // that shipped first rejected ANY number-with-a-dot glued to exactly one trailing letter, and that shape
+    // is also how the world writes a measurement.
     //
-    // ⚠ BOTH HALVES ARE NEEDED. The lookahead alone is not enough: rejected at `802`, the engine retries from
-    // the FRACTIONAL part and matches `11g` on its own. The lookbehind stops a match beginning inside a
+    // ⚠ MEASURED, over all 161 mined artifacts (45,306 readings), by emitting the fleet with the shape guard
+    // and without it and diffing line by line: **33 readings** change. **9 are the IEEE designation**
+    // (`802.11a/b/g`, one line each in ar bn cmn de el es id ja pt — the same sentence, translated) and
+    // **24 are genuine measurements** that the shape guard was silently costing:
+    //
+    //     ary ×11  `28.000m²` `76.000m²` … airport terminal areas — and the suppressed reading is a MIS-READ,
+    //              not a silence: *sˤifr sˤifr sˤifr ˈɛm skwˈɛɹd*, an English letter name inside Moroccan
+    //              Arabic, where `28.000 m²` reads *mˈitr murˈabːaʕ*
+    //     awa ×3   `4.5m`, `१.७०m`, `३०.०m`     lo ×1 `146.6m`   mad ×1 `1.6m`   nan ×1 `1.2m`
+    //     pcm ×2   `25,000 m²`, `3.7m`          pnb ×1 `6.5m`    pt ×1 `4.892m` (Vinson Massif)
+    //     rw ×1    `1,5l`                       si ×1 `69.5m`    so ×1 `1,800m`
+    //
+    // So the guard is anchored on the DESIGNATION instead of on the shape, which gets all 33 right. A list of
+    // known designations is not a general rule and is not pretending to be one — it is the only thing that
+    // separated the two populations in 45,306 readings (the shape discriminators are recorded, with their
+    // rates, in the small-backlog investigation: two dot-groups matches only dates and grouped numbers; the
+    // `NNN.NN` digit shape spares the 24 here by accident and would take `150.25 m` and `220.50 g`).
+    //
+    // ⚠ IT IS NOT WHAT KEEPS `$1.5m` FROM READING AS METRES — that was the stated reason this was left alone,
+    // and it is measurably not so. The currency rule runs FIRST and consumes the number, so by the time the
+    // unit pattern is tried the string is `1.5 dollarsm` and there is no number for `m` to attach to. Probed
+    // with the shape guard fully removed: en `$1.5m` and `£2.3m` read exactly as they do today, unchanged.
+    // The magnitude-vs-unit question (`$1.5m` = 1.5 MILLION) is real, is still open, and lives in the
+    // currency path — it never depended on this guard.
+    //
+    // ⚠ BOTH HALVES ARE STILL NEEDED. The lookahead alone is not enough: rejected at `802`, the engine retries
+    // from the FRACTIONAL part and matches `11g` on its own. The lookbehind stops a match beginning inside a
     // number; the lookahead stops one beginning at its front.
-    const NOT_VERSION = "(?<![\\d.,])(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
+    //
+    // Either decimal separator, because a designation is not localised but the text around it is (`802,11` in
+    // mr and hr). Add a designation here only with the same measurement — the whole point is that this list is
+    // evidence, not intuition.
+    const DESIGNATIONS = ["802[.,]11"];
+    const NOT_VERSION = `(?<![\\d.,])(?!(?:${DESIGNATIONS.join("|")})[a-zA-Z](?![a-zA-Z\\d]))`;
     const unitRe = d.units
         ? new RegExp(
               `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
