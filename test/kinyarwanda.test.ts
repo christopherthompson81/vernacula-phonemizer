@@ -258,4 +258,18 @@ describe("Kinyarwanda text normalization", () => {
         const words = "Mu karere ka Huye, abantu bahageze kare kandi bagumye kuri gahunda.";
         expect(N(words)).toBe(words);
     });
+
+    // TWO NON-SI SPELLINGS OF THE GRAM SYMBOL, written in ONE corpus sentence — the fertiliser-dosing
+    // instructions: "Gushyiramo ifumbire ya NPK GR 12.5 kuri buri m2 1 … agafuniko 1 kagira GM 6".
+    // `garama` is already the declared reading of ⟨g⟩; what is claimed is only that this text spells that
+    // symbol `gr` and `gm`. The unit PRECEDES its figure in both, so the tier's digit-adjacent arm cannot
+    // reach them and the bare-unit arm is what reads them.
+    // ⚠ `gr` is the half the raw-Latin gate CANNOT SEE — this engine reads ASCII ⟨r⟩ as ɾ, so `gr` echoed
+    // as *ɡɾ*, not byte-identical to its source and never reported, while `gm` one clause away was.
+    test("the gram symbol in both of the spellings this corpus uses", () => {
+        expect(phonemize("agafuniko 1 kagira gm 6", "rw")).toContain("ɡaɾama");
+        expect(phonemize("ifumbire ya NPK gr 12.5", "rw")).toContain("ɡaɾama");
+        // exact case on the bare-unit path — an upper-case pair is not a unit
+        expect(phonemize("imodoka ya GM", "rw")).not.toContain("ɡaɾama");
+    });
 });

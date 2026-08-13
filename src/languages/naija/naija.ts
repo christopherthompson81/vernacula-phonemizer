@@ -276,6 +276,14 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ ONLY THE TWO THAT ARE ATTESTED. ⟨kilogram⟩, ⟨kilo⟩ and ⟨sentimita⟩ each return ZERO hits there, so
     // kg/cm stay undeclared rather than extrapolated — and the cost of guessing is concrete, since this
     // engine's nativisation reads English ⟨kilometer⟩ as [kalamata].
+    // ⚠ RE-OPENED AND RE-REFUSED, INCLUDING ⟨ft⟩, WHICH IS THE INTERESTING ONE. The mined artifact leaks
+    // `ft` ×3 (`29,031.7ft`, `330ft`, `114000 sq ft`), `kg` ×1 (`75kg`) and `nm` ×1 (`500nm thick`), so all
+    // three shapes are real. `attest.ts --lang pcm`: `kilogram` 0, `kilo` 0, `nanomita` 0 — the refusal
+    // above, re-measured. And `fut` comes back ATTESTED, 4 tokens / 2 articles, WHICH IS THE TRAP: every
+    // one of the four is `fut-bola` / `fut-bol`, FOOTBALL (*"na profeshunal fut-bola, im dey pley
+    // centa-bak"*). `fit` ×116 is the modal verb "can", not the foot either. This is the Fula `tere` shape
+    // exactly — a token count that says *attested* about a different word — and a grep would have shipped
+    // it. So the imperial length keeps leaking visibly, which is the honest side to fail on.
     units: { km: ["kilomita"], m: ["mita"] },
 });
 

@@ -247,4 +247,23 @@ describe("naija (Nigerian Pidgin) canonical IPA", () => {
         // and read the tail `20:20` as a clock, swallowing a pause. `40:20:20` is in the mined corpus.
         expect(phonemize("40:20:20", "pcm")).toBe("foti , twɛnti , twɛnti");
     });
+
+    // ⟨bn⟩ GLUED TO A FIGURE — the money magnitude of Nigerian press copy. The artifact's instance glosses
+    // itself one clause later: "sign N195.3BN kontrat … e don pay N150 BILLION fest". ⟨billion⟩ is already
+    // a declared magnitude word in naija.ts, so the abbreviation is expanded into a word the tier and the
+    // g2p both already speak, rather than a reading being sourced.
+    // ⚠ DIGIT-ANCHORED, because the other ⟨bn⟩ is *ibn* in an Arabic name — routine in northern-Nigerian copy.
+    test("bn is the magnitude, and only beside a figure", () => {
+        expect(phonemize("N195.3bn kontrat", "pcm")).toContain("biljan");
+        expect(phonemize("N200bn", "pcm")).toContain("biljan");
+        expect(phonemize("Abdullahi bn Fodio", "pcm")).not.toContain("biljan");
+    });
+
+    // ⚠ ⟨ft⟩ IS REFUSED AND THE CANDIDATE WORD IS THE TRAP. `fut` attests 4 tokens / 2 articles on
+    // pcm.wikipedia and every one is `fut-bola`/`fut-bol`, FOOTBALL; `fit` ×116 is the modal "can".
+    // The Fula `tere` shape — a token count that says *attested* about a different word.
+    test("ft, kg and nm keep leaking visibly rather than being guessed", () => {
+        expect(phonemize("330ft", "pcm")).toContain("ft");
+        expect(phonemize("75kg", "pcm")).toMatch(/k[ɡg]/u);
+    });
 });

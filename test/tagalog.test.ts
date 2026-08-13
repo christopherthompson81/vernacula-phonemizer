@@ -209,4 +209,27 @@ describe("tagalog normalization — symbols, numbers, ordinals, times", () => {
         // ⚠ `s` is a rate DENOMINATOR and not a unit, so a bare trailing s is never claimed (the Il-76s lesson).
         expect(phonemize("76s", "tl")).not.toContain("seɡˈundo");
     });
+
+    // ⟨nm⟩ ⟨lb⟩ ⟨lbs⟩ — the raw-Latin residual set. `nanometro` 25 tokens / 15 arts, every example
+    // digit-adjacent in the length slot; `libra` 71/20, and tl.wikipedia names the abbreviation itself:
+    // "ang kasalukuyang gamit ng libra (o pound sa Ingles at dinadaglat bilang lb)".
+    // ⚠ ⟨fm⟩ IS REFUSED THOUGH ITS WORD IS ATTESTED (`femtometro` 2/1, both in the corpus's own
+    // nuclear-radius slot): multi-character keys resolve case-FOLDED on the digit path, so a radio
+    // frequency `101.1 FM` would read *101.1 femtometro*. The leak stays visible instead.
+    test("nm and lb/lbs are read; fm is refused for the radio-FM collision", () => {
+        expect(phonemize("400-700 nm", "tl")).toContain("nanomˈetɾo");
+        expect(phonemize("40 kg (90 lbs)", "tl")).toContain("lˈibɾa");
+        expect(phonemize("5 lb", "tl")).toBe("limˈa lˈibɾa");
+        expect(phonemize("1.07 fm", "tl")).toContain("fm");      // refused, and visibly so
+        expect(phonemize("101.1 FM", "tl")).not.toContain("femtomˈetɾo");
+    });
+
+    // ⚠ THE ONE ⟨km⟩ THAT STILL LEAKS IS NOT A MISSING KEY. A PARENTHETICAL between the number and the
+    // unit breaks the adjacency the tier's unit pattern matches on (it admits a magnitude there and
+    // nothing else), and the bare-unit fallback then declines by its own `/` guard, which exists so a
+    // rate is never read half-way. The same rate WITHOUT the parenthetical reads correctly.
+    test("the rate reads, unless a parenthetical stands between the number and the unit", () => {
+        expect(phonemize("43,079 katao/km²", "tl")).toContain("bˈawat kilomˈetɾo kuwadɾˈado");
+        expect(phonemize("64,710 (ikalawa) katao/km²", "tl")).toContain("km");
+    });
 });

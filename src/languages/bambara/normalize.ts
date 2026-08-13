@@ -141,6 +141,16 @@ import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
  *  whole wiki and ALL FOUR are inside `m³`; bare `l` is ×1 and it is the elision `2007 l’a ye`, not a
  *  litre. `kg`, `ha`, `t`, `g` as a Bambara unit word: ×0 attested. Declaring any of them would be pure
  *  exposure with nothing bought.
+ *  ⚠ `kg` WAS RE-OPENED AND RE-REFUSED ON BETTER EVIDENCE, because the corpus DOES write it — `bagani foro
+ *  tari kelen be se ka KG 1500 walima 2000 dii`, a yield in kilograms, in ordinary Bambara prose and with
+ *  the symbol BEFORE the figure exactly as this language orders its unit nouns. So the shape is real and
+ *  the reading is missing. What is still absent is a word: `kilogaramu` and `kilogram` are both ×0 on
+ *  bm.wikipedia, and the one candidate that is attested — `kilo`, 5 tokens / 3 articles — SPLITS ITS SENSE.
+ *  Read: `a kilo be daminɛ binani ni saba la` (cotton, priced per kilo) and `cory kilo san mugan ni wɔrɔ`
+ *  are the WEIGHT; `Bamakɔ ni Dakar … tiɛ kilo ba kɛlɛ (1 000)` and `Bamako-Sénou kilo tan ni duru` are
+ *  DISTANCES, i.e. kilometres clipped to `kilo`. Three of five hits are the wrong unit, so `kilo` cannot be
+ *  keyed to `kg` and cannot be keyed to `km` either — this is trap 37's shape with the bare count replaced
+ *  by a read one, and the honest outcome is that `kg` keeps leaking VISIBLY.
  *
  *  ⚠ `m²`/`m2` ARE ×0 IN THIS CORPUS and are declared anyway, because they are the compositional neighbour
  *  of the `km²` the corpus writes ×13 and trap 8 says a table is correct exactly where you looked. Both
@@ -220,6 +230,51 @@ function expandDotted(s: string, body: string, word: string): string {
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
 
+/**
+ * HOMOGLYPHS FOR BAMBARA'S FOUR NON-ASCII LETTERS — the largest single defect this layer has left, and the
+ * one no leak class could name, because the damage it does is a DELETION.
+ *
+ * Bambara's alphabet needs ⟨ɛ⟩ U+025B, ⟨ɔ⟩ U+0254 and ⟨ɲ⟩ U+0272, none of which is on a French AZERTY
+ * keyboard. So the wiki's writers reach for whatever look-alike their input method offers, and a census of
+ * every non-ASCII character in the artifact says exactly which ones:
+ *
+ *     ɛ U+025B  2910   ← correct        ε U+03B5 GREEK SMALL LETTER EPSILON            179
+ *     ɔ U+0254  2461   ← correct        ԑ U+0511 CYRILLIC SMALL LETTER REVERSED ZE      26
+ *     ɲ U+0272   265   ← correct        ᴐ U+1D10 LATIN LETTER SMALL CAPITAL OPEN O       9
+ *                                       ɳ U+0273 LATIN SMALL LETTER N WITH HOOK          8
+ *
+ * ⚠ THE READING IS UNAMBIGUOUS IN EVERY INSTANCE, checked rather than inferred from the code chart. `bε`
+ * `tε` `kεra` `cε` `Sεbεnna` `Ntεnεndon` are bɛ, tɛ, kɛra, cɛ, Sɛbɛnna, Ntɛnɛndon; `fᴐ` `sᴐrᴐ` `kᴐnᴐ`
+ * `ɲᴐgᴐn` `bᴐra` are fɔ, sɔrɔ, kɔnɔ, ɲɔgɔn, bɔra; `boɳa` is boɲa ("size", in `A boɳa bɛ 241 038 km2`).
+ * ⚠ ԑ AND ᴐ ARRIVE TOGETHER, in the same articles and often the same word — `bԑ fᴐ`, `sԑbԑn sᴐrᴐ`,
+ * `Kԑnyԑrԑye` — i.e. one author's substitution set, not four independent typos.
+ *
+ * ⚠ WHAT THE ENGINE DID WITH THEM IS NOT A MIS-READING, IT IS AN AMPUTATION. None of the four is in this
+ * g2p's grapheme table and none is ASCII, so the tokenizer ends the word at the character and the letter is
+ * DROPPED; the word comes out in fragments:
+ *
+ *     Ntεnεndon ne bε Taa           → nt n ndõ ne b taa            (the day of the week, in three pieces)
+ *     sԑbԑn sᴐrᴐ ka baara kԑ        → s b n sr ka baara k
+ *     A boɳa bɛ …                   → a boa bɛ …                   (the ɲ silently gone)
+ *
+ * ⚠ AND THAT IS WHY IT REACHED THIS BRIEF AT ALL. Three of the fragments — `nt` (Ntɛnɛndon), `nw` ×2
+ * (labɛnw, ɲɔgɔnnafɛnw) — are vowelless ASCII runs, so the raw-Latin gate reports them, while the far
+ * larger silent-deletion population (`boɳa` → *boa*) is invisible to every counter in the tree. The three
+ * hits are the symptom; the 222 characters are the defect.
+ *
+ * ⚠ NOT DONE GLOBALLY, AND THAT IS THE CORRECT LAYER. `core/unicode.ts`'s `foldLatinConfusables` already
+ * folds Greek/Cyrillic look-alikes inside a Latin word, but it folds toward the ASCII letter a reader of
+ * ANY Latin orthography would see — ε would have to become `e`, and `e` and `ɛ` are two different Bambara
+ * phonemes (/e/ vs /ɛ/). The right target is knowable only from the alphabet of THIS language, which is
+ * exactly the case the registry's header reserves for a per-language fold.
+ *
+ * ⚠ ⟨ʃ⟩ U+0283 IS DELIBERATELY LEFT ALONE. It is ×3 and its target is genuinely uncertain — `ʃi fɔcogo`,
+ * `ʃyanw`, `Taamaʃyɛn` could be ⟨s⟩ or the digraph ⟨sh⟩ (which this g2p does read, as /ʃ/), and the
+ * corpus offers no pair that settles it. Three instances is not enough to guess a phoneme with.
+ */
+const HOMOGLYPH: Readonly<Record<string, string>> = { "ε": "ɛ", "ԑ": "ɛ", "ᴐ": "ɔ", "ɳ": "ɲ" };
+const HOMOGLYPH_RE = new RegExp(`[${Object.keys(HOMOGLYPH).join("")}]`, "gu");
+
 /** Every rule here emits DIGITS wherever a number is involved and lets the engine's own number path speak
  *  them, so this layer carries no number words of its own — which is why the `waga`→`ba`
  *  correction in the header was orthogonal to it. */
@@ -235,6 +290,12 @@ export function normalizeBambara(input: string): string {
     //    BEFORE the ampersand rule at step 12, or `&nbsp;` is read as the word "and" followed by the
     //    letters n-b-s-p. The artifact's `zero-width` cell is ×2; a rendering hint is not speech.
     s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍⁠﻿]/gu, "");
+
+    // 2b) HOMOGLYPHS FOR ɛ ɔ ɲ — see HOMOGLYPH. Immediately after NFC and the entity strip, and before ANY
+    //     rule that inspects a letter: the ELISION rule at step 3 has ⟨ɛ ɔ⟩ in its vowel class and the unit
+    //     and range rules read letter boundaries, so a word still carrying a Greek epsilon is invisible to
+    //     all of them in the same way it is invisible to the tokenizer.
+    s = s.replace(HOMOGLYPH_RE, (c) => HOMOGLYPH[c]!);
 
     // 3) THE ELISION APOSTROPHE — see ELISION. Placed here because it is orthographic rather than numeric
     //    and touches no character any later rule inspects, and BEFORE step 4 so that a name like `d'A.R.P.`

@@ -134,6 +134,19 @@
  * cannot match a bare tone number. ⚠ The exemptions are listed BY INSTANCE above and never by class, so a
  * genuine `km²` regression stays visible — and `km²` is exactly what the tier still claims.
  *
+ * ⚠ NO `unitPer`, WHICH IS WHY ⟨km⟩ STILL LEAKS ONCE — and the refusal is about WORD ORDER, not about a
+ * missing word. The residual is `ìng-kēu mik dô dék gèng … dak gáu 5720 nè̤ng/km`, a population density.
+ * ⟨km⟩ itself IS declared and reads everywhere else; here the slash makes it a RATE, and a rate is composed
+ * only when the language supplies a connective. `mūi` 每 is the candidate and it is genuinely attested —
+ * `attest.ts` 12 tokens / 9 articles, every example read and every one the distributive: `mūi bĭk dê-ciĕ`
+ * (each planet), `mūi nièng`, `mūi gĕ̤ng cā-tàu` (every morning), `mūi siâ diē 1 giù`. ⚠ AND THAT IS
+ * PRECISELY WHY IT CANNOT BE DECLARED HERE. In this family 每 is PRENOMINAL AND PRECEDES THE DENOMINATOR —
+ * 每平方公里5720人, "per square kilometre, 5720 people" — while `unitPer` emits `<number> <head> PER <denom>`,
+ * i.e. *5720 nè̤ng mūi gŭng-lī*, which puts the distributive where this language never puts it. The other
+ * half is worse: the numerator `nè̤ng` is a HEAD NOUN ("person"), and declaring an ordinary noun as a unit
+ * key to make a rate match is the shape bar's `Eihwohna/km²` refusal already names. A right word in the
+ * wrong order is a confident mis-reading; the raw `km` is a visible gap. Re-open it if a cdo sentence turns
+ * up that writes a density in words.
  * ⚠ NO CLOCK. `\d{1,2}:\d{2}` is ×4 in the artifact text and every one is a BIBLE VERSE — `«Mā-tái Hók-ĭng»
  * 22:37-40`, `«Chók Ăi-gĭk Gé» 20:2-17`, `«Sĕng-mêng Gé» 5:6-21`, `Sé̤ṳ-dù Hèng-duông 2:1-4`. The artifact's
  * `clock: 38` is the cell's `[:.]` alternative, i.e. decimals (trap 21: a filled cell is a lead, not a
@@ -195,6 +208,13 @@ import { degroupThousands, readDecimals, readDegrees, reorderFraction } from "..
  * actually earns its keep here is the ordinary trailing `(?![\p{L}\p{M}])`: BUC's own metre word is `mī`, so
  * `9.15 mī`, `172.4 mī`, `2,228 mī` all present as `<digits> m` + a letter and are correctly refused. That
  * is the guard `unspacedScript` would have disarmed.
+ *
+ * ⚠ THE REST OF THIS ENGINE'S RAW-LATIN RESIDUAL IS NOT LANGUAGE DATA AT ALL, and it is listed so that it
+ * is not mistaken for a unit table with holes in it. ⟨ts⟩ ×2 is this wiki's own PHONETIC NOTATION — the
+ * phonology article's `聲母/ts/, /tsʰ/ 共 /i/, /y/` and the pronunciation gloss `bék-cáe̤ /pitˀ˥ tsʰɔ˨˩˧/`,
+ * i.e. IPA quoted inside slashes, which is the one string a phonemizer must NOT re-read. ⟨px⟩ is the `2px`
+ * of a LaTeX body (`y^2=-2px \quad \left (p>0 \right)`, a parabola, `p` times `x`), ⟨pdf⟩ is a Commons
+ * filename and ⟨html⟩ a mailing-list URL. Four hits, no missing word behind any of them.
  */
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["báh-hŭng-cĭ"],

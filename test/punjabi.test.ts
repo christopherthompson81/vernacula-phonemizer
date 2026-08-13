@@ -127,4 +127,29 @@ describe("punjabi text normalization", () => {
         expect(phonemize("783,562 km²", "pa")).toContain("ʋˈəɾəɡ kɪloːmˈiːʈəɾ");
         expect(phonemize("120 m³", "pa")).toContain("kˈə˨˩ɳ mˈiːʈəɾ");
     });
+
+    // ⚠ THE LATIN KEYS ARE pnb's, NOT pa's. pa_in is essentially Latin-free; pnb (Shahmukhi, same engine)
+    // writes `kg` in ordinary running text — its SI article quotes `"25 kg" (not "25 kgs")` — and the
+    // symbol was reaching the phoneme stream raw. ਕਿਲੋਗਰਾਮ: attest.ts 5 tokens / 3 articles, both read
+    // examples Olympic weight classes. The Gurmukhi word is right for the Shahmukhi sentence too — the
+    // engine routes per WORD, exactly as the pre-existing ਕਿਲੋਮੀਟਰ already did.
+    test("kg reads in both scripts", () => {
+        expect(phonemize("ਇਹ 25 kg", "pa")).toContain("kɪloːɡɾˈaːm");
+        expect(phonemize("ایہ 25 kg اے", "pnb")).toContain("kɪloːɡɾˈaːm");
+        expect(phonemize("ایہ 50 km دور اے", "pnb")).toContain("kɪloːmˈiːʈəɾ");
+    });
+
+    // HTML ENTITIES core/markup.ts cannot see, both specific to a Perso-Arabic corpus.
+    // · terminated by the ARABIC SEMICOLON ⟨؛⟩ — pnb's dump has been through a punctuation conversion that
+    //   rewrote the semicolon inside the entities too (`&nbsp؛` ×3 against 20 correct `&nbsp;`). The
+    //   symbol tier's ampersand rule then voiced the name: *ˈət̪eː nbsp*, "and n-b-s-p".
+    // · ⟨&lrm;⟩ ×7 — correctly terminated but simply not in the shared NAMED table, so it read *ˈət̪eː lˈɝm*,
+    //   a leak NO gate can see (the IPA token is not byte-identical to the source run).
+    test("entity residue: the Arabic-semicolon terminator, and the bidi mark", () => {
+        expect(phonemize("ایہ &nbsp؛ اے", "pnb")).not.toContain("nbsp");
+        expect(phonemize("ایہ &lrm; اے", "pnb")).not.toContain("ɝm");
+        expect(phonemize("ایہ &nbsp؛ اے", "pnb")).toBe(phonemize("ایہ اے", "pnb"));
+        // a REAL ampersand is still the conjunction — the entity step must not have eaten the rule
+        expect(phonemize("ਸਾਡਾ & ਘਰ", "pa")).toContain("ˈət̪eː");
+    });
 });

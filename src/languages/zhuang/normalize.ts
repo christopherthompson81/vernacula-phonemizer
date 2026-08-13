@@ -222,6 +222,19 @@ const UNITS: readonly (readonly [string, string])[] = [
     // ⚠ AND `mij` IS WHY A ONE-LETTER-ADJACENT GUESS HERE WOULD HAVE BEEN WORSE THAN SILENCE: as a free
     // word `mij` is the NEGATOR "not" (dictionary: 不; `mij lae okbae`, `mij raen`, `mij rox`), ×6 on the
     // wiki and every one a negation. The metre reading only exists inside a compound.
+    //
+    // ⚠ THE `mm` REFUSAL WAS RE-OPENED AND STANDS, and re-reading the hits ALSO SHRINKS WHAT IT COSTS. The
+    // raw-Latin scan reports `mm` ×4, which reads as four missing millimetre readings. It is not: THREE of
+    // the four sit in wholly GERMAN sentences that reached this artifact as dump debris from the tank
+    // articles — `Frontpanzerung von 80 mm und der 7,5-cm-KwK L/48`, `die bis zu 80 mm starke Panzerung des
+    // schwerfälligen Matilda`, `Seine lange Kanone war der 75-mm-Kanone des Sherman weit überlegen`. Not one
+    // Zhuang word is in any of them, and a millimetre inside a German sentence tests German. The GENUINE
+    // Zhuang instance is the ONE already named above (`Bi bingzyinz doekfwn noix gvaq 50mm`), which is
+    // exactly why that sentence and no other is what this refusal is argued against. No new evidence has
+    // appeared for the word; the search above is unchanged and `hauzmij` is still absent from every tier.
+    // ⚠ `pp` ×3 IS THE OTHER HALF OF za's RESIDUAL AND IS NOT A UNIT AT ALL — English bibliographic page
+    // ranges in reference lists (`Vol. 14, pp443-446`, `Vol. 5, No. 2, pp. 8-16`, `(Bloomington, Indiana)
+    // 1993 pp. 101–9`). Citation furniture in a foreign language, correctly left reported.
 ];
 
 /** Expand a foreign-script gloss out of one bracket group, or drop the group if nothing else is in it. */

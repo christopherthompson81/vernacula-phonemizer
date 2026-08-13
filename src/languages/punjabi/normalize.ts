@@ -30,10 +30,14 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * The SHARED symbol tier, with Punjabi's data. Punjabi count nouns do not inflect after a numeral
  * (ਇੱਕ ਡਾਲਰ / ਪੰਜ ਡਾਲਰ), so every `CountForms` here is a 1-element array.
  *
- * No `units`: the corpus contains essentially no Latin text at all (three runs in 1,589 utterances — Il,
- * Giancarlo, Fisichella), so Latin unit keys would be all risk and no reward. Punjabi writes its unit
- * abbreviations in Gurmukhi, which step 6 handles. No `magnitudeConnective`: Punjabi takes none
- * ("2.3 ਅਰਬ ਡਾਲਰ", corpus).
+ * ⚠ THIS TABLE IS TWO LANGUAGES', AND THE SECOND ONE IS WHERE THE LATIN LIVES. The header above measures
+ * pa_in, whose text is essentially Latin-free (three runs in 1,589 utterances — Il, Giancarlo, Fisichella),
+ * and an early note here concluded from that that Latin unit keys were "all risk and no reward". The
+ * registry puts **pnb** (Western Punjabi, Shahmukhi) on this same engine, and pnb's wiki-mined artifact
+ * carries Latin abbreviations in ordinary running text — `km`, `kg` ×2, `m²` — so a key that is inert for
+ * pa is the reading for pnb. Both `units` and the entity step below exist for that second corpus; each says
+ * which text it was measured on. Punjabi's own Gurmukhi abbreviations are a separate table, at step 6.
+ * No `magnitudeConnective`: Punjabi takes none ("2.3 ਅਰਬ ਡਾਲਰ", corpus).
  */
 const SYMBOLS = makeSymbolNormalizer({
     // ⚠ THE AMPERSAND WAS A MISSING CELL, NOT A SOURCING PROBLEM — the tier's own `ampersand` note says so,
@@ -53,8 +57,23 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["ਪ੍ਰਤੀਸ਼ਤ"],
     // `5 km` read as *pˈə̃ɲd͡ʒ ˈʊkm*: no unit was declared. Verified in pa_in:
     // ਕਿਲੋਮੀਟਰ ×31 "50 ਕਿਲੋਮੀਟਰ (31 ਮੀਲ) ਦੂਰ", ਮੀਟਰ ×17 "4892 ਮੀਟਰ ਮਾਉਂਟ ਵਿਨਸ".
-    // ਕਿਲੋਗਰਾਮ is ×0 in the corpus and is left undeclared rather than taken from Wikidata's label alone.
-    units: { km: ["ਕਿਲੋਮੀਟਰ"], m: ["ਮੀਟਰ"] },
+    // ⚠ ਕਿਲੋਗਰਾਮ WAS REFUSED ON THE pa_in CORPUS AND IS NOW DECLARED, and it is the SISTER LANGUAGE that
+    // supplied both halves of the reason. The old note ("×0 in the corpus, not taken from Wikidata's label
+    // alone") was right about pa_in and measured the wrong text: this table is also **pnb**'s — Western
+    // Punjabi in Shahmukhi, registered onto the same engine — and pnb's mined artifact writes `kg` twice,
+    // in its SI article, where the sentence is Punjabi and the symbol is quoted as itself:
+    //   `اکائیاں دے چنھ بہووعدہ وچ نئيں لکھے جایاں۔ ، for example "25 kg" (not "25 kgs")`
+    //   `انک تے چنھ نو‏‏ں اک بلینک سپیس … وکھ کردا اے، "2.21 kg"، "7.3 m²"، "22 K"`
+    // Undeclared, both reached the phoneme stream as the raw run `kg`. The word is now sourced outside this
+    // repo and outside Wikidata: `attest.ts --lang pa --words ਕਿਲੋਗਰਾਮ` returns 5 tokens / 3 articles, and
+    // the read examples are Olympic weight classes (`ਫ੍ਰੀਸਟਾਇਲ 60 ਕਿਲੋਗਰਾਮ ਮੁਕਾਬਲਾ`, `96 ਕਿਲੋਗਰਾਮ`) — the
+    // kilogram sense, digit-adjacent, in the slot. ⚠ `ਕਿਲੋ` alone is 89/19 and is NOT used: its examples are
+    // `ਕਿਲੋ ਮੀਟਰ` and `ਕਿਲੋ ਹਰਟਜ਼`, i.e. the prefix spaced off some other unit, not a word for the kilogram.
+    // ⚠ THE GURMUKHI WORD IS CORRECT FOR THE SHAHMUKHI SIDE TOO, and this is the established mechanism
+    // rather than a new claim: `km` already emits ਕਿਲੋਮੀਟਰ into pnb text and `punjabi.ts` routes per WORD,
+    // so the Gurmukhi spelling takes the Gurmukhi branch of the same phonology — `pnb: "ایہ 50 km دور اے"`
+    // reads *…pə̃ɲd͡ʒˈaːɦ kɪloːmˈiːʈəɾ…*, the Punjabi word, in either script's sentence.
+    units: { km: ["ਕਿਲੋਮੀਟਰ"], m: ["ਮੀਟਰ"], kg: ["ਕਿਲੋਗਰਾਮ"] },
     // `ਵਰਗ ਕਿਲੋਮੀਟਰ` ×4 and `ਘਣ ਮੀਟਰ` ×1, both word-first.
     // ⚠ Bare ਵਰਗ is ×12 and its first instance is `ਉੱਚ ਵਰਗ` — "upper CLASS". The bare count would have
     // triple-counted a different word; only the collocation with the unit noun attests the unit sense.
@@ -118,11 +137,33 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
     };
 
     return (input: string): string => {
+        // 0) HTML ENTITIES THAT `core/markup.ts` CANNOT SEE, and both misses are specific to a
+        //    Perso-Arabic corpus. They must run BEFORE the symbol tier, whose ampersand rule reads EVERY
+        //    ⟨&⟩ and so voices the entity NAME as a word.
+        //
+        //    · AN ENTITY TERMINATED BY THE ARABIC SEMICOLON ⟨؛⟩ U+061B. The shared decoder's pattern ends
+        //      at an ASCII `;`, and pnb's dump has been through a punctuation conversion that rewrote the
+        //      semicolon along with the comma and the question mark — INSIDE the entities too. The
+        //      artifact's Archimedes sentence is the whole of it: `(؛ &nbsp؛ای.پو.&nbsp؛– &nbsp؛ای.پو.)`,
+        //      3 instances against 20 correctly-terminated `&nbsp;` that the shared decoder already
+        //      resolves. Read: *ˈət̪eː nbsp* — "and n-b-s-p" — which is the raw run this brief reports.
+        //    · ⟨&lrm;⟩, the LEFT-TO-RIGHT MARK, ×7 and CORRECTLY terminated. It is simply not in the shared
+        //      NAMED table, and an unknown entity is deliberately left literal there — right for a name
+        //      nothing can render, wrong for this one, which is a bidi formatting hint and says nothing at
+        //      all. It read *ˈət̪eː lˈɝm*, a leak no gate in the tree can see: the IPA token `lˈɝm` is not
+        //      byte-identical to the source run `lrm`, so the raw-Latin differential never fires. ⚠ The
+        //      general fix belongs in `core/markup.ts` beside `nbsp`; it is done locally here because this
+        //      is the corpus that proves it, and an RTL bidi mark is a Perso-Arabic fact.
+        //    An entity NOT in this list still falls through to the shared decoder unchanged.
+        let s = input.replace(/&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]/giu,
+            (_m, name: string) => (name.toLowerCase() === "amp" ? "&" : name.toLowerCase() === "ndash" ? "–"
+                : name.toLowerCase() === "mdash" ? "—" : name.toLowerCase() === "nbsp" ? " " : ""));
+
         // 1) THE SHARED SYMBOL TIER FIRST. It matches a sign only when a NUMBER is ADJACENT, and its own
         //    numeral pattern reads "2,500" / "2.3" as ONE token. Steps 2 and 3 below split exactly those
         //    into two tokens, so running them first would strand every sign on half a numeral. (This is
         //    units are resolved BEFORE decimals; here the sign tier precedes both.)
-        let s = SYMBOLS(input);
+        s = SYMBOLS(s);
 
         // 2) DIGIT DE-GROUPING, before anything else that reads punctuation. A grouping comma is otherwise
         //    claimed by `clausePunctuation` as a phrase break AND it truncates the numeral: "1,000" was

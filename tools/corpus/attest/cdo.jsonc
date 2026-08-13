@@ -21,6 +21,66 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "muōi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ng-kō̤ Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Muōi, ék-buăng hô̤ lā̤ muōi-muōi, sê diŏh dông-ŭk piăng có̤i â-d…",
+                "…Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Muōi, ék-buăng hô̤ lā̤ muōi-muōi, sê diŏh dông-ŭk piăng có̤i â-dā̤ gì siŏh ciáh buô-hôn…",
+                "…cê gì bēng-buōng. / 參考閩東語漢字其版本。 Muōi, ék-buăng hô̤ lā̤ muōi-muōi, sê diŏh dông-ŭk piăng có̤i â-dā̤ gì siŏh ciáh buô-hông, dĕ…",
+                "…kō̤ Mìng-dĕ̤ng-ngṳ̄ Háng-cê gì bēng-buōng. / 參考閩東語漢字其版本。 Mā-muōi-kṳ̆ (馬尾區) sê Hók-ciŭ-chê â-dā̤ gì siŏh ciáh kṳ̆, iâ sê Hók-…",
+                "…iâ sê Hók-ciŭ gì lĕ̤k-kṳ̆ cĭ ék. == Hèng-céng kṳ̆-mĭk == Mā-muōi-kṳ̆ â-dā̤ ô 1 ciáh gă̤-dô̤ gâe̤ng 3 ciáh déng: Lò̤-sĭng gă̤…",
+                "…ciáh gă̤-dô̤ gâe̤ng 3 ciáh déng: Lò̤-sĭng gă̤-dô̤ (羅星街道) Mā-muōi-déng (馬尾鎮) Dìng-gĕ̤ng-déng (亭江鎮) Làu-giè-déng (琅岐鎮)…"
+            ]
+            },
+        {
+                "word": "muōi-",
+                "verdict": "substring-only",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 11,
+                "examples": []
+            },
+        {
+                "word": "nè̤ng",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 83,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Nè̤ng (儂), ciáng-sék miàng-cê hô̤ lā̤ ìng-lôi (人類), sê siŏh cṳ̄ng…",
+                "…sĭk, â̤ cháung-cô̤ huák-mìng. Gĭng-dáng sié-gái gà̤-dēng gì nè̤ng chă-bók-dŏ̤ ô 70 é. Nè̤ng nâ sê áng séng-biék lì buŏng, â̤…",
+                "…ng. Gĭng-dáng sié-gái gà̤-dēng gì nè̤ng chă-bók-dŏ̤ ô 70 é. Nè̤ng nâ sê áng séng-biék lì buŏng, â̤ dé̤ṳng buŏng nàng-gái gâe̤…",
+                "…ng; nâ sê áng ìng-cṳ̄ng lì buŏng, â̤ dé̤ṳng buŏng băh cṳ̄ng nè̤ng, ŭ cṳ̄ng nè̤ng gâe̤ng uòng cṳ̄ng nè̤ng; nâ sê áng nièng-lìn…",
+                "…ng-cṳ̄ng lì buŏng, â̤ dé̤ṳng buŏng băh cṳ̄ng nè̤ng, ŭ cṳ̄ng nè̤ng gâe̤ng uòng cṳ̄ng nè̤ng; nâ sê áng nièng-lìng lì buŏng, â̤…",
+                "…̤ṳng buŏng băh cṳ̄ng nè̤ng, ŭ cṳ̄ng nè̤ng gâe̤ng uòng cṳ̄ng nè̤ng; nâ sê áng nièng-lìng lì buŏng, â̤ dé̤ṳng buŏng niè-giāng,…"
+            ]
+            },
+        {
+                "word": "mūi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…ng-ôi dê-ciĕ gâe̤ng săng-ngáu siŏh-iông, dŭ sê 12 bĭk, sū-ī mūi bĭk dê-ciĕ dŭ gâe̤ng siŏh bĭk săng-ngáu siŏng-dó̤i.…",
+                "…) sê ìng-lôi dò̤ lì gău-liù gì siŏh tó̤ hiê-tūng. Chŭi-iòng mūi ciáh ciáng-siòng gì duâi-nè̤ng dŭ â̤ gōng uâ, dáng-sê nè̤ng…",
+                "…uâng-iū-īng-lĭk gâe̤ng dê-giù cê̤ṳ-duóng gì īng-hiōng, găk mūi gĕ̤ng cā-tàu gâe̤ng màng-buŏ gáuk ô siŏh huòi cūi-dōng gâe̤…",
+                "…g-hông ô sŭk-mī, è̤ng-tòng, huă-sĕng, cō̤, lèng-ngēng-găng, mūi-lì, è̤ng-dâu, hŏk-dò̤-nìng, ciĕ-muài dēng-dēng. == Chăng-kō…",
+                "…âi. Gék-dê céng, chiáh-dô iĕk, gáung-ṳ̄-liông ô gì dê-huŏng mūi nièng iā sâ̤ mī, ô gì dê-huŏng siŏh hò̤-mī dŭ mâ̤ gáu. Hāi-…",
+                "…liông ké̤ṳk kă-giù siâ diē dó̤i-huŏng gì giù-muòng diē-sié, mūi siâ diē 1 giù cêu ô nièng-ài dáik gáu 1 hông, diŏh bī-suói…"
+            ]
+            },
+        {
                 "word": "lĭk-huŏng",
                 "verdict": "attested",
                 "bounded": true,

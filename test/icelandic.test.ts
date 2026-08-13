@@ -179,4 +179,26 @@ describe("icelandic normalization", () => {
         expect(createIcelandic().text("120 km/h").trim()).toContain("ciloumɛtrar au");
         expect(createIcelandic().text("133 m/s").trim()).toContain(" s");  // untouched: no word for it
     });
+
+    // DOTTED ABBREVIATIONS — the whole of this corpus's raw-Latin residual apart from `mph`. `o.s.frv.` ×3
+    // and `o.fl.` ×1 were reaching the g2p as the vowelless runs `frv` and `fl`, one clause break per dot.
+    // The expansions are is.wikipedia's own, from its abbreviations article: `og fleira → o.fl.`,
+    // and `og svo framvegis` (attest.ts: framvegis 24/17, fleira 27/20, both in the slot).
+    // ⚠ Only the two the corpus writes; `t.d.`/`m.a.`/`a.m.k.` are the same shape and deliberately absent.
+    test("the dotted abbreviations o.s.frv. and o.fl.", () => {
+        expect(normalizeIcelandic("handlegginn o.s.frv.")).toBe("handlegginn og svo framvegis");
+        expect(normalizeIcelandic("(James o.fl., 1995)")).toBe("(James og fleira, 1995)");
+        expect(normalizeIcelandic("o.s.frv. og fleira")).toBe("og svo framvegis og fleira");
+        // a word that merely BEGINS with the letters is not the abbreviation — no dot, no match
+        expect(normalizeIcelandic("ofl og osfrv")).toBe("ofl og osfrv");
+    });
+
+    // ⟨mph⟩ — a rate written as ONE token, so the `km/klst` rule has no slash to key on and it belongs in
+    // the unit table instead. ×2 here (`300 mph`, `40 mph (64 km/klst)`). is.wikipedia glosses the
+    // abbreviation itself: "kílómetrar á klukkustund, (tákn km/h) mílur á klukkustund, (tákn mph)".
+    test("mph is a rate in one token", () => {
+        expect(normalizeIcelandic("300 mph")).toBe("300 mílur á klukkustund");
+        expect(normalizeIcelandic("40 mph (64 km/klst)")).toBe("40 mílur á klukkustund (64 kílómetrar á klukkustund)");
+        expect(createIcelandic().text("300 mph").trim()).toContain("milʏr au");
+    });
 });

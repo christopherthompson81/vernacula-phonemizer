@@ -301,6 +301,31 @@ function numberStressIdx(token: string): number | undefined {
  *   <ligated magnitude>` is ×21 in the artifact (`109 milyong katao`, `28 bilyong dolyar`, `3.9 milyong
  *   tao`) against 0 genuine grams. Refused on 21:0, and the number that decided it was invisible to the
  *   scan that would normally settle a one-letter key.
+ * · ⟨nm⟩ ⟨lb⟩ ⟨lbs⟩ — THE RAW-LATIN RESIDUAL SET, and the two that survived a collision audit.
+ *     nanometro   25 tokens / 15 arts   EVERY example digit-adjacent in the length slot: *"may kapal na
+ *                                       10 nanometro"*, *"sa pagitan ng halos 585 at 620 nanometro"*,
+ *                                       *"0.01 hanggang 10 nanometro"*. The artifact's own instance is
+ *                                       the same shape — *"wavelength ng liwanag (400-700 nm)"*.
+ *     libra       71 / 20               and tl.wikipedia NAMES THE ABBREVIATION: *"ang kasalukuyang gamit
+ *                                       ng libra (o pound sa Ingles at DINADAGLAT BILANG LB)"*. Both
+ *                                       spellings are keyed because the corpus writes the plural — *"40 kg
+ *                                       (90 lbs)"* — and `lbs` must be tried before `lb`, which the tier's
+ *                                       longest-key-first sort already guarantees.
+ *   ⚠ ⟨fm⟩ IS REFUSED, AND THE WORD IS NOT WHAT IS MISSING. `femtometro` is attested 2 tokens / 1 article
+ *   and BOTH sit in the corpus's own slot (*"mga 1 hanggang 3 femtometro"*, *"0.8 femtometro na radyus ng
+ *   nukleyo"*), matching the artifact's `1.07 fm` / `2.5 fm` in the same physics article. The counter-shape
+ *   is the collision: multi-character keys resolve CASE-FOLDED on the digit path, so a Philippine radio
+ *   frequency — `101.1 FM`, `DZBB 594 FM`, the commonest `<number> FM` string a tl wiki has — would read
+ *   *101.1 femtometro*. Three instances of a unit nobody outside nuclear physics writes, against a
+ *   station-name shape this corpus's own register is full of. The leak stays VISIBLE, which is the honest
+ *   side to fail on and the same trade `g` was refused on four lines above.
+ *   ⚠ AND ⟨km⟩ STILL REPORTS ONCE, FOR A REASON THAT IS NOT IN THIS TABLE. `64,936 (una) at 64,710
+ *   (ikalawa) katao/km²` leaks, while the identical `43,079 katao/km²` and `20,164 katao/km²` in the same
+ *   sentence read correctly as *…katao bawat kilometro kuwadrado*. The difference is a PARENTHETICAL
+ *   between the number and the unit: the tier's unit pattern admits a MAGNITUDE there and nothing else, so
+ *   the numerator `katao` is not adjacent to a numeral and the match never starts; the bare-unit fallback
+ *   then declines by its own `/` guard, which exists so a rate is never read half-way. No tl declaration
+ *   can reach it — it is the tier's shape, recorded here so the residual is not re-diagnosed as a missing key.
  *   ⚠ Nothing here can reach a CAPITAL: the two digit-adjacent capitals in the artifact are `2GO` (a
  *   shipping line) and `15 GB`, and one-letter symbols resolve EXACT-CASE (`resolveUnitSymbol`), with
  *   case-folding restricted to multi-character symbols precisely so a bare ⟨G⟩ is never read as grams.
@@ -331,7 +356,7 @@ const SYMBOLS = makeSymbolNormalizer({
     // (see `resolveUnitSymbol`): both cases are official for this unit, the exact branch is case-sensitive,
     // and tl.wikipedia's own litre article names them together — "L o l ang daglat ng litro".
     units: { km: ["kilometro"], kilometro: ["kilometro"], m: ["metro"], cm: ["sentimetro"], mm: ["milimetro"],
-        kg: ["kilogramo"], mg: ["miligramo"],
+        kg: ["kilogramo"], mg: ["miligramo"], nm: ["nanometro"], lb: ["libra"], lbs: ["libra"],
         l: ["litro"], L: ["litro"], ha: ["ektarya"],
         katao: ["katao"], naninirahan: ["naninirahan"] },
     rateDenominators: { s: "segundo" },

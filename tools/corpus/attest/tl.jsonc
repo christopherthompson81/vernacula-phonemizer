@@ -21,6 +21,50 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "nanometro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…Ang Nanometro (Griyego: Nanos, mas maliit) ay 0.000001 (10−6) ng isang mi…",
+                "…sa 10,000). Ang dalawang pader ay parehong may kapal na 10 nanometro, subalit ang parehang pader ng bakteryang positibo sa metod…",
+                "…g positibo sa metodo ni Gram ay may kapal na 10 hanggang 50 nanometro. Ang penisilin ang pumipigil sa pagdami ng peptidoglikan na…",
+                "…ngibabaw na haba ng daluyong sa pagitan ng halos 585 at 620 nanometro. Sa pagpipinta at tradisyonal na teorya ng kulay, ito ay is…",
+                "…g mga x-ray ay may wavelength sa saklaw na 0.01 hanggang 10 nanometro na tumutugon sa mga prekwensiya sa saklaw na 30 petahertz h…",
+                "…ong pisiko. Ångström, isang yunit ng habang katumbas ng 0.1 nanometro. Ångström (hukay), isang hukay sa buwan. distribusyong Angs…"
+            ]
+            },
+        {
+                "word": "femtometro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…an sa dalawang area: sa mas malaking skala(mga 1 hanggang 3 femtometro), ito ang puwersa na nagbibigkis sa proton at neutron upang…",
+                "…nukleyo ng atomo. Sa mas maliit na skala(mas maliit sa 0.8 femtometro na radyus ng nukleyo), ito ang puwersa(na dala ng gluon) na…"
+            ]
+            },
+        {
+                "word": "libra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 71,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ang libra ay isang salita sa Latin para sa \"timbangan\". Maaaring tumu…",
+                "…lita sa Latin para sa \"timbangan\". Maaaring tumukoy ito sa: Libra (astrolohiya), isang simbolo sa astrolohiya Libra (konstela…",
+                "…y ito sa: Libra (astrolohiya), isang simbolo sa astrolohiya Libra (konstelasyon), isang konstelasyon ng mga butuin sa langit…",
+                "…(konstelasyon), isang konstelasyon ng mga butuin sa langit Libra, isang lumang Romanong panukat sa bigat, kung saan nagmula…",
+                "…nukat sa bigat, kung saan nagmula ang kasalukuyang gamit ng libra (o pound sa Ingles at dinadaglat bilang lb), at gayon din a…",
+                "…at dinadaglat bilang lb), at gayon din ang mga pananalaping libra na kabilang ang libra esterlina o pound sterling ng United…"
+            ]
+            },
+        {
                 "word": "sentimetro",
                 "verdict": "attested",
                 "bounded": true,

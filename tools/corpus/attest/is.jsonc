@@ -1,0 +1,105 @@
+// WIKIPEDIA WORD ATTESTATION — is. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "is",
+        "wiki": "is.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "framvegis",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…ns á tilteknu tímabili, æxlunartíðni, þekktar ógnir, og svo framvegis. Þekktasti listinn yfir ástand stofna lífvera er Rauði list…",
+                "…en merar kasta, læður og tíkur gjóta, kýr og ær bera og svo framvegis. Til er þekkt vísa sem minnir á þetta: Kæpir selur, kastar…",
+                "…gar ákveðið var að forsætis- og menntamálaráðuneytið skyldu framvegis starfa undir sama ráðuneytisstjóra. Þetta hélst óbreytt til…",
+                "…um hætti, eins og til dæmis með munnmökum, snertingu og svo framvegis. Einnig geta fleiri en tvær manneskjur tekið þátt í kynlífi…",
+                "…il dæmis getnaðarvarnarpilla, hetta, lykkja, smokkur og svo framvegis. Smokkurinn dregur verulega úr líkum á hvoru tveggja getnað…",
+                "…ilvist, tilfinningar, hugsanir, skynja umhverfi sitt og svo framvegis. Meðvitund er mikið rannsökuð af hugspeki, sálfræði, taugav…"
+            ]
+            },
+        {
+                "word": "fleira",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ngjafir, breytingar á hjúskaparstöðu, flutningar, andlát og fleira. Einhvers konar þjóðskrár eru haldnar víða í Evrópu. Í Band…",
+                "…er punktur á eftir hverju heilu orði sem er stytt t.d. „og fleira“ sem er skammstafað sem „o.fl.“ og „þar á meðal“ sem er ska…",
+                "…eru stytt eru settir punktar á eftir hverju styttu orði: og fleira → o.fl. berist til → b.t. Hins vegar er ekki settur punktur…",
+                "…enda er næst síðasti liðurinn (‚m.‘) aðeins einn stafur) og fleira → o.fl. (ekki bil- enda er næst síðasti liðurinn (‚o.‘) aðe…",
+                "…nsta kosti þannig hér‘ → ‚Það er t.d. a.m.k. þannig hér‘ og fleira og fleira → o.fl. o.fl. Því að liðirnir á undan þeim síðast…",
+                "…þannig hér‘ → ‚Það er t.d. a.m.k. þannig hér‘ og fleira og fleira → o.fl. o.fl. Því að liðirnir á undan þeim síðasta eru anna…"
+            ]
+            },
+        {
+                "word": "mílur",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a orðinu kilo sem merkir þúsund. Einn kílómetri er um 0,621 mílur.…",
+                "…, í Suður-Póllandi. Það liggur um það bil átta kílómetra (5 mílur) suðvestur af Żywiec og 68 kílómetra (42 mílur) suður af hö…",
+                "…kílómetra (5 mílur) suðvestur af Żywiec og 68 kílómetra (42 mílur) suður af höfuðborgarsvæði Katowice. Íbúafjöldinn er um það…",
+                "…mi. Lengd Gulafljótsins er áætluð 5464 kílómetrar (eða 3395 mílur). Fljótið á upptök sín í Bayan Har-fjöllum í Qinghai-héraði…",
+                "…ór eru töfraskór sem geta flutt þann sem er í skónum um sjö mílur í hverju skrefi. Minnið er þekkt úr mörgum ævintýrum. == He…",
+                "…dir síðar meir. Platon taldi að ummál jarðar væri um 40.000 mílur, eða um 64.000 km. Arkímedes sagði það vera nær 50.000 km,…"
+            ]
+            },
+        {
+                "word": "mílna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kambatflói er 80 mílna langur fjörður sem gengur inn í vesturströnd Gujarat-fylkis…",
+                "…Kachchh-flói er 99 mílna langur fjörður sem gengur inn í Gujaratfylki á Indlandi úr…",
+                "…gissamningur við Breta frá 1901 sem gerði ráð fyrir þriggja mílna landhelgi til 50 ára. Því var fátt gert í fyrstu en þó var…",
+                "…in austantjalds, auk þriðja heims ríkja, mörg hver fyrir 12 mílna landhelgi en mörg ríki Suður-Ameríku vildu 200 mílna lögsög…",
+                "…rir 12 mílna landhelgi en mörg ríki Suður-Ameríku vildu 200 mílna lögsögu. Endaði svo að vinsælustu tillögurnar kváðu á um þr…",
+                "…ði svo að vinsælustu tillögurnar kváðu á um þriggja eða sex mílna landhelgi og síðan níu eða 6 mílna fiskveiðilögsögu (gjarna…"
+            ]
+            },
+        {
+                "word": "klukkustund",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Klukkustund eða klukkutími er mælieining fyrir tíma, táknuð með h, en e…",
+                "…iningakerfisins (SI). (Algeng íslensk skammstöfun er klst.) Klukkustund eru sextíu mínútur, eða 3.600 sekúndur, sem er um það bil 1…",
+                "…sú hraðaeining sem SI einingakerfið notast við kílómetrar á klukkustund, (tákn km/h) mílur á klukkustund, (tákn mph) hnútar (sjómíl…",
+                "…ið notast við kílómetrar á klukkustund, (tákn km/h) mílur á klukkustund, (tákn mph) hnútar (sjómílur á klukkustund, merki kt) Mach…",
+                "…kn km/h) mílur á klukkustund, (tákn mph) hnútar (sjómílur á klukkustund, merki kt) Mach tala, þar sem Mach 1 er hraði hljóðsins; Ma…",
+                "…íu sekúndur eru ein mínúta (mín.) og 3.600 sekúndur eru ein klukkustund (klst.) (hvorug eininganna eru þó SI-mælieining). Gráða, í…"
+            ]
+            }
+        ],
+    }
+    

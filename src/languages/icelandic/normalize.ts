@@ -82,8 +82,47 @@ const MONTHS = /^(janúar|febrúar|mars|apríl|maí|júní|júlí|ágúst|septem
 /** `öld` is FEMININE; its oblique forms take the `-u` ordinal — *átjándu aldar*. 15 instances. */
 const FEM_OBLIQUE = /^(aldar|öldinni|aldarinnar|aldir)/u;
 
+/**
+ * DOTTED ICELANDIC ABBREVIATIONS — the ⟨o.s.frv.⟩ / ⟨o.fl.⟩ family, and the reason they are a normalization
+ * problem rather than a spelling one. Each is a chain of one- to three-letter pieces separated by periods, so
+ * the tokenizer sees a CLAUSE BREAK after every piece and the g2p is handed `frv` and `fl` — consonant runs
+ * with no nucleus, which reach the phoneme stream as raw ASCII. They are the whole of this corpus's raw-Latin
+ * residual apart from `mph`: `o.s.frv.` ×3, `o.fl.` ×1.
+ *
+ * ⚠ THE EXPANSION IS is.wikipedia's OWN, from its article on abbreviations, which spells the pair out in the
+ * definitional frame: *„og fleira“ sem er skammstafað sem „o.fl.“* and *og fleira → o.fl.* The phrase behind
+ * the other is `og svo framvegis` (attest.ts: `framvegis` 24 tokens / 17 articles, every example the
+ * sentence-final *og svo framvegis* = "and so forth"; `fleira` 27 / 20). So the words are the language's, in
+ * the slot, and named beside the abbreviation itself.
+ *
+ * ⚠ ONLY THE TWO THE CORPUS WRITES. `t.d.`, `m.a.`, `þ.e.`, `a.m.k.` are the same shape and are NOT listed:
+ * this table would grow to the whole of an abbreviation dictionary, and each entry is a claim the corpus here
+ * cannot check. `t.d.` in particular is already spelled out in running text in this corpus (*Til dæmis er
+ * bent á…*), i.e. the writer, not the layer, resolved it.
+ *
+ * ⚠ THE TRAILING DOT IS CONSUMED. Leaving it turned the expansion into a sentence break of its own — the same
+ * `\.?(?![\p{L}])` reasoning naija's ⟨Dr⟩ rule records. A following capital is not a reason to keep it: these
+ * abbreviations are clause-medial or clause-final list-closers and the corpus never starts a sentence after
+ * one without other punctuation.
+ */
+const ABBREV: [RegExp, string][] = [
+    [/(?<![\p{L}\p{M}])o\.\s?s\.\s?frv\.?(?![\p{L}])/giu, "og svo framvegis"],
+    [/(?<![\p{L}\p{M}])o\.\s?fl\.?(?![\p{L}])/giu, "og fleira"],
+];
+
 /** Latin unit abbreviations → Icelandic words (57 instances). */
 const UNITS: [RegExp, string][] = [
+    // ⚠ ⟨mph⟩ IS A RATE WRITTEN AS ONE TOKEN, which is why it sits in this table and not beside the `km/klst`
+    // rule below: there is no slash for that rule to key on. ×2 here (`300 mph`, `40 mph (64 km/klst)`), both
+    // in foreign-sourced weather copy, which is exactly where an Icelandic text meets the imperial unit.
+    // ⚠ is.wikipedia GLOSSES THE ABBREVIATION ITSELF, in its units-of-speed list: *„kílómetrar á
+    // klukkustund, (tákn km/h) MÍLUR Á KLUKKUSTUND, (TÁKN MPH) hnútar (sjómílur á klukkustund, merki kt)"* —
+    // the word, the symbol and the frame in one sentence. `mílur` is independently attested 20 articles deep
+    // in exactly the measure slot (*68 kílómetra (42 mílur) suður af*), and `klukkustund` is the same noun
+    // the `km/klst` rule two steps down already spends.
+    // Placed FIRST so no later two-letter key can bite into it; `mm`/`km` cannot in any case, since every
+    // entry is anchored to a preceding digit.
+    [/mph/giu, "mílur á klukkustund"],
     [/km/giu, "kílómetrar"],
     [/kg/giu, "kílógrömm"],
     [/cm/giu, "sentímetrar"],
@@ -117,6 +156,12 @@ const CURRENCY: Readonly<Record<string, string>> = {
 
 export function normalizeIcelandic(input: string): string {
     let t = input;
+
+    // 0) DOTTED ABBREVIATIONS, BEFORE every rule that reasons about a period. They carry no digit, so no
+    //    numeric rule below could claim one — but the ordering is stated rather than relied on, because the
+    //    period is contested by three separate rules in this file and an abbreviation that survives into any
+    //    of them arrives as a clause break plus a vowelless ASCII run.
+    for (const [re, word] of ABBREV) t = t.replace(re, word);
 
     // 1) PERIOD-GROUPED THOUSANDS (22), FIRST — before the ordinal rule, which would otherwise claim the
     //    `1.` of `1.234`. The period is clause punctuation, so the numeral read as "one" + a SENTENCE

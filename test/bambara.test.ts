@@ -178,4 +178,21 @@ describe("Bambara text normalization", () => {
         // ⚠ THE N'KO PATH IS UNTOUCHED — no rule in this layer keys on a character N'Ko uses.
         expect(bm.text("ߒߞߏ ߂߁")).toBe(bm.text("ߒߞߏ 21"));
     });
+
+    // HOMOGLYPHS FOR ɛ ɔ ɲ — a census of the artifact's non-ASCII characters: ε U+03B5 ×179, ԑ U+0511 ×26,
+    // ᴐ U+1D10 ×9, ɳ U+0273 ×8, against the correct ɛ ×2910 / ɔ ×2461 / ɲ ×265. None is in this g2p's
+    // grapheme table and none is ASCII, so the tokenizer ENDED THE WORD at the character and dropped it:
+    // `Ntεnεndon` came out `nt n ndõ`, three fragments, two of them vowelless ASCII runs in the IPA.
+    // ⚠ Not foldable globally — `core/unicode.ts` would have to send ε to `e`, and /e/ and /ɛ/ are two
+    // different Bambara phonemes. ⚠ ⟨ʃ⟩ is ×3 with an unsettled target and is deliberately left alone.
+    test("homoglyphs for ɛ ɔ ɲ are folded to the language's own letters", () => {
+        expect(normalizeBambara("Ntεnεndon")).toBe("Ntɛnɛndon");
+        expect(normalizeBambara("sԑbԑn sᴐrᴐ")).toBe("sɛbɛn sɔrɔ");
+        expect(normalizeBambara("A boɳa")).toBe("A boɲa");
+        expect(normalizeBambara("ʃi fɔcogo")).toBe("ʃi fɔcogo"); // unsettled target, left alone
+        const bm = createBambara();
+        // the word is whole again, and identical to the correctly-spelled input
+        expect(bm.text("Ntεnεndon ne bε Taa")).toBe(bm.text("Ntɛnɛndon ne bɛ Taa"));
+        expect(bm.text("A boɳa bɛ")).toBe(bm.text("A boɲa bɛ"));
+    });
 });

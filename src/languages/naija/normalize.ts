@@ -30,7 +30,27 @@
 const ABBREV: Record<string, string> = { Dr: "Doctor", dr: "Doctor" };
 const ABBREV_RE = new RegExp(`\\b(${Object.keys(ABBREV).join("|")})\\.?(?![\\p{L}])`, "gu");
 
+/**
+ * ⟨bn⟩ GLUED TO A FIGURE — the money magnitude of Nigerian press copy, and the one raw-Latin residual in
+ * this corpus that has a reading already shipped in this engine.
+ *
+ * The artifact's instance GLOSSES ITSELF one clause later: *"Sim Fabura sign N195.3BN kontrat wit Julius
+ * Berger … Di govnor tok sey e don pay N150 BILLION fest"* — the same figure class, abbreviated once and
+ * spelled once, by the same writer in the same sentence. `naija.ts` already declares ⟨billion⟩ as a
+ * magnitude word (×13 beside a currency sign in this corpus), so nothing is being sourced here: the
+ * abbreviation is expanded into a word the tier and the g2p both already speak, and the magnitude then
+ * hops the currency exactly as the written-out form does.
+ *
+ * ⚠ DIGIT-ANCHORED AND GLUED, which is what makes it safe against the other ⟨bn⟩. Outside a figure the
+ * string is *ibn* in an Arabic name — routine in northern-Nigerian copy — and a bare-token rule would have
+ * read *Abdullahi bn Fodio* as a billion. Requiring a digit immediately to the left admits `195.3bn` and
+ * `200bn` and no name at all.
+ * ⚠ NO ⟨m⟩ AND NO ⟨tn⟩. `100m` is the one-letter hazard the whole tree refuses (it is also a metre, a
+ * version suffix and, in this corpus's sports copy, the sprint distance — `di 100 mita race`); `tn` is ×0.
+ */
+const MAGNITUDE_ABBREV = /(?<=\d)\s?bn(?![\p{L}\p{M}\d])/gu;
+
 /** Naija text → text, before tokenization. */
 export function normalizeNaija(input: string): string {
-    return input.replace(ABBREV_RE, (_m, w: string) => ABBREV[w]!);
+    return input.replace(ABBREV_RE, (_m, w: string) => ABBREV[w]!).replace(MAGNITUDE_ABBREV, " billion");
 }

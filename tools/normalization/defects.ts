@@ -143,12 +143,24 @@ export const VOWELLESS_WORDS: Readonly<Record<string, readonly string[] | "*">> 
     mt: ["fl", "bl"],
     /**
      * Rundi and Kinyarwanda noun-class concords, elided before a vowel and written with an apostrophe:
-     * `bw'u Rwanda`, `kw'ijana`, `nk'igihugu`, `mw'ijoro`, `tw'abana`. These are the whole of each language's
-     * firing population — with them listed, rn falls to 0 residual hits and rw to 8, and rw's 8 (`hp`, `nd`,
-     * `gm`, `zh`, `kh`, `ts`, `php`, `ppm`) are genuine echoes.
+     * `bw'u Rwanda`, `kw'ijana`, `nk'igihugu`, `mw'ijoro`, `tw'abana`. These are very nearly the whole of
+     * each language's firing population — with them listed, rn falls to 0 residual hits and rw to 8.
+     *
+     * ⚠ `nd` IS THE EIGHTH ENTRY AND IT CORRECTS THIS COMMENT'S OWN CLASSIFICATION. The list above once
+     * named rw's eight residuals — `hp`, `nd`, `gm`, `zh`, `kh`, `ts`, `php`, `ppm` — as "genuine echoes",
+     * which was decided from the RUN and not from the source. Read in the artifact, `nd` is the ELIDED
+     * COPULA: `gahunda ya nd' Umunyarwanda`, i.e. *ndi* ("I am") + a vowel-initial word, elided and
+     * apostrophised exactly as the concords above are. The programme's own name is *Ndi Umunyarwanda*
+     * ("I am Rwandan"), so the unelided form is beside it in the same corpus. It is a word of the language
+     * being emitted correctly, which is what this table is for; the other seven stand.
+     * ⚠ AND THE COST IS NAMED RATHER THAN HIDDEN: `nd` is also the English ordinal suffix, so a `2nd` in an
+     * English citation inside rw text will now report as ACCEPTED-PHONOTACTIC instead of as a leak. That is
+     * the same exposure `rw` and `cy` already carry (both are also ISO codes), it is a NOTE and not a
+     * silence — the scan still prints the line — and the alternative is to keep failing a real Kinyarwanda
+     * word to catch a hypothetical English one.
      */
     rn: ["bw", "kw", "nk", "mw", "tw", "rw", "cy"],
-    rw: ["bw", "kw", "nk", "mw", "tw", "rw", "cy"],
+    rw: ["bw", "kw", "nk", "mw", "tw", "rw", "cy", "nd"],
     /**
      * ⚠ TASHELHIYT IS A WILDCARD, AND IT HAS TO BE. Berber phonology admits syllables with no vowel at all,
      * so vowelless words are not a closed list to enumerate — the artifact alone yields `gr ×184`,

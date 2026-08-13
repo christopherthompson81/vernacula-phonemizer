@@ -1,28 +1,53 @@
 // WIKIPEDIA WORD ATTESTATION — pa. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "pa",
-    "wiki": "pa.wikipedia.org",
-    "tier": "wikipedia (register-restricted)",
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // `--context` set to exactly this string.
-    "context": "ਗਣਿਤ ਹਿਸਾਬ ਜੋੜ",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "pa",
+        "wiki": "pa.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "ਕਿਲੋਗਰਾਮ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ਵਿੱਚ ਹੋਏ ੨੦੦੮ ਓਲੰਪਿਕ ਖੇਡਾਂ ਦੇ ਵਿੱਚ ਪੁਰਸ਼ਾਂ ਦਾ ਫ੍ਰੀਸਟਾਇਲ 60 ਕਿਲੋਗਰਾਮ ਮੁਕਾਬਲਾ ਅਗਸਤ 19 ਨੂੰ ਚਾਈਨਾ ਐਗਰੀਕਲਚਰਲ ਯੂਲੀਵਰਸਿਟੀ ਜਿਮਨੇਜੀਅਮ ਵਿ…",
+                "…ਵਿੱਚ ਹੋਏ 2008 ਓਲੰਪਿਕ ਖੇਡਾਂ ਦੇ ਵਿੱਚ ਪੁਰਸ਼ਾਂ ਦਾ ਫ੍ਰੀਸਟਾਇਲ 96 ਕਿਲੋਗਰਾਮ ਮੁਕਾਬਲਾ ਅਗਸਤ 21 ਨੂੰ ਚਾਈਨਾ ਐਗਰੀਕਲਚਰਲ ਯੂਲੀਵਰਸਿਟੀ ਜਿਮਨੇਜੀਅਮ ਵਿ…"
+            ]
+            },
+        {
+                "word": "ਕਿਲੋ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 89,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…84 ਕਿ. ਮੀ. ਵਰਗ ਹੈ। ਇਹ ਪਿੰਡ ਮਾਨਸਾ-ਬਰਨਾਲਾ ਰੋਡ ਤੇ ਮਾਨਸਾ ਤੋਂ 22 ਕਿਲੋ ਮੀਟਰ ਦੀ ਦੂਰੀ ਤੇ ਸਥਿਤ ਹੈ ਬਰਨਾਲਾ ਤੋ 28 ਕਿਲੋ ਮੀਟਰ ਦੀ ਦੂਰੀ ਤੇ ਸ…",
+                "…ਡ ਤੇ ਮਾਨਸਾ ਤੋਂ 22 ਕਿਲੋ ਮੀਟਰ ਦੀ ਦੂਰੀ ਤੇ ਸਥਿਤ ਹੈ ਬਰਨਾਲਾ ਤੋ 28 ਕਿਲੋ ਮੀਟਰ ਦੀ ਦੂਰੀ ਤੇ ਸਥਿਤ ਹੈ। == ਪਿਛੋਕੜ ਅਤੇ ਯਾਦਗਾਰਾਂ == ਜੋਗਾ ਆਬਾ…",
+                "…ਮੀ. ਵਰਗ ਹੈ। ਇਹ ਪਿੰਡ ਬੁਢਲਾਡਾ ਤੋਂ 7 ਕਿਲੋਮੀਟਰ ਅਤੇ ਭੀਖੀ ਤੋਂ 13 ਕਿਲੋ ਮੀਟਰ ਦੀ ਦੂਰੀ ਤੇ ਸਥਿਤ ਹੈ। ਇਸ ਪਿੰਡ ਵਿੱਚ ਕਈ ਜਾਤਾਂ ਅਤੇ ਧਰਮਾਂ ਦੇ…",
+                "…ਫਰੀਕਵੈਂਸੀ ਨੂੰ ਇੱਕ ਹਰਟਜ਼ ਕਹਿੰਦੇ ਹਨ। ਇੱਕ ਹਜ਼ਾਰ ਹਰਟਜ਼ ਨੂੰ ਇੱਕ ਕਿਲੋ ਹਰਟਜ਼ ਆਖਦੇ ਹਨ। ਇੱਕ ਹਜ਼ਾਰ ਕਿਲੋ ਹਰਟਜ਼ ਤੋਂ ਇੱਕ ਮੈਗਾ ਹਰਟਜ਼ ਬਣਦਾ…",
+                "…ੇ ਹਨ। ਇੱਕ ਹਜ਼ਾਰ ਹਰਟਜ਼ ਨੂੰ ਇੱਕ ਕਿਲੋ ਹਰਟਜ਼ ਆਖਦੇ ਹਨ। ਇੱਕ ਹਜ਼ਾਰ ਕਿਲੋ ਹਰਟਜ਼ ਤੋਂ ਇੱਕ ਮੈਗਾ ਹਰਟਜ਼ ਬਣਦਾ ਹੈ। ਇੱਕ ਹਜ਼ਾਰ ਮੈਗਾ ਹਰਟਜ਼ ਨੂੰ…",
+                "…ਰਟਜ਼ ਆਖਦੇ ਹਨ। == ਉਦਾਹਰਨ == ਰੇਡੀਓ ਦੀ ਵਾਰਵਾਰਤਾ ਜਾਂ ਫਰੀਕਵੈਂਸੀ …ਕਿਲੋ ਹਰਟਜ਼/…ਮੈਗਾ…ਹਾਰਟਜ਼ ਹੁੰਦੀ ਹੈ।’’ ਰੇਡੀਓ ਸਟੇਸ਼ਨ ਤੋਂ ਬਿਜਲ ਚੁੰਬਕੀ…"
+            ]
+            },
         {
             "word": "ਜੋੜ",
             "verdict": "attested",
@@ -100,5 +125,6 @@
                 "…ਰ ਵਿਭਾਜਿਤ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਉੰਨੀ ਹੀ ਵਾਰ ਉਸਦਾ ਭਾਗ ਹੁੰਦਾ ਜਾਵੇਗਾ। ਭਾਗ ਨੂੰ / ਜਾਂ ÷ ਦੇ ਚਿੰਨ੍ਹਾਂ ਨਾਲ ਦਰਸਾਇਆ ਜਾਂਦਾ ਹੈ। ਉਦਾਹਰਨਾਂ: 24 /…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

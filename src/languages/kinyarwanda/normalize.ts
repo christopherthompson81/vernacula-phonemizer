@@ -148,6 +148,24 @@ const UNIT: Readonly<Record<string, string>> = {
     mm: "milimetero",
     kg: "kirogarama",
     g: "garama",
+    // ⚠ TWO NON-SI SPELLINGS OF THE GRAM SYMBOL, and this corpus writes BOTH IN ONE SENTENCE — the
+    // fertiliser-dosing instructions: *"Gushyiramo ifumbire ya NPK GR 12.5 kuri buri m2 1 … agafuniko 1
+    // kagira GM 6"* (apply NPK 12.5 g per m²; one bottle cap holds 6 g). Neither is the SI symbol, and
+    // neither is a word being invented: `garama` is already the declared reading of ⟨g⟩ two lines up,
+    // sourced there. What is claimed here is only that this text spells that symbol `gr` and `gm`.
+    // ⚠ THE UNIT PRECEDES ITS FIGURE IN BOTH, which is why the shared tier's DIGIT-ADJACENT arm cannot
+    // reach them (it matches number-then-symbol whatever `unitPrefix` does to the output order) and why
+    // the BARE-UNIT arm is what reads them — it declines only beside a numeral, a slash or an exponent,
+    // and emits the singular, which is right for a symbol standing on its own.
+    // ⚠ `gr` IS THE ONE THE GATE CANNOT SEE, and that is why it is declared alongside the reported `gm`.
+    // The raw-Latin differential compares the source run with the IPA token, and this engine reads ASCII
+    // ⟨r⟩ as ɾ — so `gr` echoed as *ɡɾ*, which is not byte-identical to `gr` and never reported, while the
+    // identical defect one clause away did. Fixing only the visible half would have left the same sentence
+    // half-read.
+    // ⚠ Exposure: the bare-unit path is EXACT-CASE, so `GM`/`Gr` (General Motors, a grade) cannot match;
+    // the digit-adjacent path does fold case, so a `1968 GM` would read as grams. ×0 in this corpus.
+    gm: "garama",
+    gr: "garama",
     ml: "mililitiro",
     l: "litiro",
     ha: "hegitari",
