@@ -14,7 +14,7 @@
  */
 import { describe, expect, test } from "vitest";
 
-import { CITED_WORDS, DROPPABLE, acceptedSignClass, allOccurrencesForeign, inForeignSpan } from "../tools/normalization/defects.ts";
+import { CITED_WORDS, DROPPABLE, LEAK_CLASSES, VOWELLESS_WORDS, acceptedSignClass, allOccurrencesForeign, inForeignSpan, rawLatinIn } from "../tools/normalization/defects.ts";
 
 describe("a symbol in a FOREIGN-language span is not this language's defect", () => {
     // Mined artifacts contain BILINGUAL lines — legitimately, since most of such a line IS the language — and a
@@ -130,5 +130,126 @@ describe("⚠ a superscript with nothing before it is not an exponent", () => {
 
     test("a bare footnote marker with no base is not flagged", () => {
         expect(hits("¹¹ ཚུནི་ཡིས")).toEqual([]);
+    });
+});
+
+/**
+ * RAW ASCII LATIN SURVIVING INTO THE IPA — pinned in BOTH directions, because this class has two ways to be
+ * worthless and only one of them is loud.
+ *
+ * The loud failure is a miss: `km` reaching the IPA in 97 engines with every gate green. The quiet one is the
+ * opposite — IPA is written in ASCII Latin, so a detector that is even slightly too eager flags every
+ * utterance in the fleet and teaches its reader to skip the line, which is exactly how the scale-names row in
+ * `sources.ts` became worthless. Half the tests below are therefore NEGATIVE: strings that contain ASCII
+ * letters in the output and MUST NOT fire.
+ */
+describe("raw ASCII Latin that survived into the IPA", () => {
+    test("the defect that started this: a unit abbreviation echoed verbatim", () => {
+        // cdo's `baseToIpa` returned its own input and appended a tone letter. The tone letter is why the
+        // output token must be stripped of suprasegmentals before it is compared with the source run.
+        expect(rawLatinIn("cdo", "2,133 km² gì", "nê˨˦ 2,133 km˥˥ gì˨˦").map((h) => h.run)).toEqual(["km"]);
+    });
+
+    test("⚠ ASCII `g` is folded to IPA ɡ, or the class misses the defect in its own brief", () => {
+        // ig PRONOUNCED `48 kg` as `iɾi anɔ na asatɔ kɡ`: the engine mapped the ASCII g (U+0067) to the IPA
+        // one (U+0261) and left the k alone. `g` is the only ASCII letter that is not itself an IPA symbol,
+        // and without the fold a byte-identical comparison reads this line clean.
+        expect(rawLatinIn("ig", "48 kg", "iɾi anɔ na asatɔ kɡ").map((h) => h.run)).toEqual(["kg"]);
+    });
+
+    test("an English ordinal suffix surviving out of a numeral", () => {
+        expect(rawLatinIn("ig", "Nigeria bụ mba 8th nke", "niɡeɾia bu mba 8th nke").map((h) => h.run)).toEqual(["th"]);
+    });
+
+    // ── the negative half ──────────────────────────────────────────────────────────────────────────────────
+
+    test("⚠ ordinary IPA full of ASCII letters does NOT fire", () => {
+        // The naive `/[A-Za-z]/` test fires on 460 of ig's 460 lines. Every letter here is a genuine IPA
+        // symbol and nothing was echoed.
+        expect(rawLatinIn("ig", "Enugu dị na Naijiria", "enuɡu di na naid͡ʒiɾia")).toEqual([]);
+    });
+
+    test("⚠ a real word that phonemizes to ITSELF does NOT fire", () => {
+        // This is why a bare source↔output token differential is useless in a Latin-script language: Igbo
+        // `na` (and), `nke` (of) read as themselves, and that rule fires on 96.1% of the ig corpus. The vowel
+        // test is what rejects them.
+        expect(rawLatinIn("ig", "nke a na ya maka", "nke a na ja maka")).toEqual([]);
+    });
+
+    test("⚠ a SYLLABIC-CONSONANT word does NOT fire, and that is the differential's job", () => {
+        // Czech `vlk`, Serbian `krv` are vowelless words. A bare "output token with no vowel" rule reports
+        // them. Requiring byte-identity with the source rejects them first, because a syllabic reading is
+        // never its own spelling. Measured over the fleet: cs, ru, sr all fire zero.
+        expect(rawLatinIn("cs", "vlk a krk", "vl̩k a kr̩k")).toEqual([]);
+        expect(rawLatinIn("sr", "krv", "kr̩ʋ")).toEqual([]);
+    });
+
+    test("a single ASCII letter is never reported", () => {
+        // One letter is almost always a genuine phone, and a `k` in the output is not evidence of anything.
+        expect(rawLatinIn("ig", "a k na", "a k na")).toEqual([]);
+    });
+
+    test("a run the engine actually READ is not a leak, however vowelless the spelling", () => {
+        // The differential, not the vowel test, is what says so: the output is not the input.
+        expect(rawLatinIn("en", "the km mark", "ðə kɪlˈɑmitɚ mˈɑɹk")).toEqual([]);
+    });
+
+    describe("the phonotactic exemption, and the two things it must not do", () => {
+        test("a language's own vowelless word is excused — but REPORTED, not dropped", () => {
+            // Maltese `fl-` is fi + l- (in the), ×266 in the artifact. `phonotactic: true` makes mine.ts
+            // print it under ACCEPTED-, which keeps it visible: a silent exemption is indistinguishable from
+            // a clean scan, and that is how this whole class stayed invisible.
+            expect(rawLatinIn("mt", "fl-1091 segwita", "fl-1091 seɡwita")).toEqual([{ run: "fl", phonotactic: true }]);
+            // Rundi/Kinyarwanda noun-class concords elided before a vowel.
+            expect(rawLatinIn("rn", "bw'u Rwanda", "bw u rwanda")).toEqual([{ run: "bw", phonotactic: true }]);
+        });
+
+        test("⚠ AN EXEMPT LANGUAGE IS NOT AN EXEMPT LANGUAGE FOR EVERYTHING", () => {
+            // mt is both the largest false-positive source in the fleet and a real defect site: `km ×76` sits
+            // in the same corpus as `fl ×266`. Conflating the two is how a class becomes worthless.
+            expect(rawLatinIn("mt", "620 km mill-fruntiera", "620 km mill-fruntiera").map((h) => h.run)).toContain("km");
+            expect(rawLatinIn("mt", "620 km", "620 km").every((h) => !h.phonotactic)).toBe(true);
+        });
+
+        test("⚠ a WILDCARD language still reports the metric abbreviations", () => {
+            // Berber admits vowelless syllables, so shi's vowelless words are not a closed list and the
+            // language is exempted wholesale. That would blind the class to shi's own `km ×32` / `kg ×7`,
+            // which is why ALWAYS_REPORTED overrides the wildcard — and only the wildcard.
+            expect(rawLatinIn("shi", "gr ungigt", "gr ungigt")).toEqual([{ run: "gr", phonotactic: true }]);
+            expect(rawLatinIn("shi", "tjumma nns 8665 km²", "tjumma nns 8665 km").filter((h) => !h.phonotactic).map((h) => h.run)).toEqual(["km"]);
+        });
+
+        test("⚠ an explicit word entry OUTRANKS the metric list, and the asymmetry is deliberate", () => {
+            // rn's `mw` is the concord mw', stated with its reason. `mw` is also "megawatt". A grammatical
+            // fact about a named language beats a general claim about an abbreviation; a wildcard, which says
+            // nothing about any particular string, does not.
+            expect(rawLatinIn("rn", "mw'ijoro", "mw ijoɾo")).toEqual([{ run: "mw", phonotactic: true }]);
+        });
+
+        test("⚠ no entry may name a unit abbreviation — that would be a defect being silenced", () => {
+            const listed = Object.values(VOWELLESS_WORDS).flatMap((v) => (v === "*" ? [] : [...v]));
+            for (const w of listed) expect(["km", "kg", "mm", "cm", "ml", "kb", "mb", "gb", "ft", "lb", "hz"]).not.toContain(w);
+        });
+    });
+
+    describe("RAW-CAPS, the half decidable from the output alone", () => {
+        const caps = new Map(LEAK_CLASSES).get("RAW-CAPS")!;
+        const fires = (ipa: string): boolean => { caps.lastIndex = 0; return caps.test(ipa); };
+
+        test("an uppercase ASCII letter in the IPA is always a leak", () => {
+            // hmn passes unreadable words straight through: `Crocodile Dundee`, `United Nations`, `BBC`.
+            expect(fires("ʈau̯˧ hau̯˧˦ Hemisphere lu˥")).toBe(true);
+        });
+
+        test("⚠ the IPA small capitals are NOT ASCII uppercase and must not fire", () => {
+            // ⟨ʀ ɢ ɪ ʏ ʟ ɴ ʙ⟩ are U+0280, U+0262, U+026A, U+028F, U+029F, U+0274, U+0299 — the one reason
+            // this class can be a bare regex over the output at all.
+            expect(fires("ʀɢɪʏʟɴʙ")).toBe(false);
+            expect(fires("paʀi ʁɛɡa")).toBe(false);
+        });
+
+        test("ordinary lowercase IPA does not fire", () => {
+            expect(fires("enuɡu di na naid͡ʒiɾia")).toBe(false);
+        });
     });
 });

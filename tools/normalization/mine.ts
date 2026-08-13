@@ -39,7 +39,7 @@ import { readFileSync, writeFileSync, appendFileSync, readdirSync, openSync, rea
 import { StringDecoder } from "node:string_decoder";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allOccurrencesInMarkup, dropsIn, isAcceptedSilent, makeContribution } from "./defects.ts";
+import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allOccurrencesInMarkup, dropsIn, isAcceptedSilent, makeContribution, rawLatinIn } from "./defects.ts";
 import { CELLS, type Cell, staleness } from "./cells.ts";
 import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
 
@@ -658,6 +658,28 @@ if (mode === "scan") {
         // → true, false, true on the same pattern. The scan was therefore skipping about half of its
         // candidate sentences, silently, in both the leak and the drop loop.
         for (const [name, re] of LEAK_CLASSES) { re.lastIndex = 0; if (re.test(ipa)) bump(`LEAK ${name}`, sentence); }
+        // RAW LATIN — the one leak class that cannot be a `LEAK_CLASSES` row, because it is DIFFERENTIAL: an
+        // ASCII run is only a leak if the SOURCE typed it and the IPA still says it, and a row in that table
+        // sees the output alone. See `rawLatinIn` for why a vowel test plus byte-identity is what makes it
+        // specific and why nothing shallower survived the fleet measurement.
+        for (const { run, phonotactic } of rawLatinIn(lang, sentence, ipa)) {
+            // ⚠ A VOWELLESS WORD OF THE LANGUAGE IS NOT A LEAK, and it is reported under its own label rather
+            // than dropped — Maltese `fl-`, Rundi `bw'`, Berber generally. Labelled distinctly for the same
+            // reason `ACCEPTED-CLASS` is: a gate run should say which table spoke, and a silent exemption is
+            // indistinguishable from a clean scan, which is exactly how this defect class survived unseen.
+            // ⚠ THE `ACCEPTED-` PREFIX IS LOAD-BEARING, not cosmetic: `isNote` below keys on it, so these two
+            // print as notes instead of failing the gate. A label outside that prefix would make every
+            // Maltese `fl-` a hard failure.
+            if (phonotactic) { bump("ACCEPTED-PHONOTACTIC RAW-LATIN", sentence); continue; }
+            // A run occurring only inside LaTeX or template markup is a formula copied into the wiki, not
+            // prose — the same discrimination the drop loop below draws, on the same helper. km's only hit is
+            // the `bd` of `\,(a + bi)(c + di) = ac + bci + adi + bd i^2`.
+            if (allOccurrencesInMarkup(sentence, new RegExp(`\\b${run}\\b`, "gu"))) {
+                bump("ACCEPTED-MARKUP RAW-LATIN", sentence);
+                continue;
+            }
+            bump(`LEAK RAW-LATIN ${run}`, sentence);
+        }
         // REDUNDANT is a permissible drop and is reported as a NOTE, not a defect: where the sentence
         // itself says what the symbol means, the correct reading is byte-identical with and without it.
         for (const d of dropsIn(sentence, ipa, say, contribution)) {

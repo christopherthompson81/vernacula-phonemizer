@@ -28,7 +28,7 @@
  * Usage:  npx tsx tools/normalization/coverage.ts [--langs hu,ro,th] [--max 400]
  */
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { ACCEPTED_SIGN_SILENCE, DROPPABLE, SIGN_CASES, isAcceptedSilent, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
+import { ACCEPTED_SIGN_SILENCE, DROPPABLE, LEAK_CLASSES, SIGN_CASES, isAcceptedSilent, isRedundant, makeContribution, withoutSymbol } from "./defects.ts";
 import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { join } from "node:path";
 import { CELLS } from "./cells.ts";
@@ -181,7 +181,19 @@ const DROP_CELL: Record<string, string> = {
     minus: "signed-number", "math-sign": "arithmetic",
 };
 
-const LEAK = /\p{Nd}|[…。、，％℃°ºª〜～・！？²³\p{Sc}।॥۔؟،؛]/u;
+/**
+ * ⚠ DERIVED FROM `LEAK_CLASSES`, NOT COPIED FROM IT — and it WAS a copy, which had drifted.
+ *
+ * The literal that stood here was `\p{Nd}` plus the RAWMARK set: two of the table's classes, missing
+ * `SLOT-GAP` and `ZERO-WIDTH` entirely and predating `RAW-CAPS`. That is the exact failure `defects.ts` was
+ * extracted to end, one level up — "add a class here, never in a caller", and this caller had its own.
+ *
+ * ⚠ THE COST OF CLOSING IT WAS MEASURED FIRST, over every `hard` line of all 161 artifacts: `SLOT-GAP` fires
+ * on 0 lines, `ZERO-WIDTH` on 0, and `RAW-CAPS` on 68 lines in exactly one language (hmn, whose engine passes
+ * unreadable words through verbatim). So this widening reports one real defect and invents nothing — worth
+ * stating, because a shared table adopted without measuring is how a gate turns red for the wrong reason.
+ */
+const LEAK = new RegExp(LEAK_CLASSES.map(([, re]) => re.source).join("|"), "u");
 
 const argv = process.argv.slice(2);
 const arg = (n: string, d?: string): string | undefined => {

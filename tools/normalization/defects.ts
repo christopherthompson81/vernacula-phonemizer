@@ -20,7 +20,181 @@ export const LEAK_CLASSES: readonly (readonly [string, RegExp])[] = [
     // `undˈit͡ʃi º` pass the scan clean.
     ["RAWMARK", /[…。、，％℃°ºª〜～・！？²³\p{Sc}।॥۔؟،؛]/u],
     ["ZERO-WIDTH", /[​-‍⁠﻿]/u],
+    /**
+     * ⚠ NOT `[A-Za-z]` — THAT FLAGS EVERY UTTERANCE. IPA is WRITTEN IN ASCII LATIN: `m n s a i k p t b d e o
+     * u l r j w h f v z q x y` are all IPA symbols, so a lowercase test over the output is a tautology, not a
+     * detector. Measured on ig: `/[A-Za-z]/` fires on 460 of 460 lines.
+     *
+     * **No IPA symbol is an uppercase ASCII letter.** The small capitals the alphabet does use — ⟨ʀ ɢ ɪ ʏ ʟ ɴ
+     * ʙ⟩ — are their own codepoints (U+0280, U+0262, U+026A, …), not `R G I Y L N B`, so this class cannot
+     * collide with them. That makes it the one part of the raw-Latin problem decidable from the OUTPUT ALONE,
+     * which is why it fits this table at all; the rest needs the source and lives in `rawLatinIn` below.
+     *
+     * ⚠ IT IS ALSO WHY THIS SITS HERE AND NOT IN `DROPPABLE`. A drop is tested by substituting the symbol and
+     * comparing readings; there is nothing to substitute here, and `review.ts` would rightly demand a probe
+     * string for a class that has no universal one.
+     *
+     * Measured across all 161 mined artifacts, 45 830 lines: it fires in **exactly one language** (hmn, 100
+     * lines), where the engine passes unreadable words through verbatim — `Crocodile Dundee`, `United
+     * Nations`, `BBC`, `COVID` all reach the IPA untouched. A class with a 1-in-161 fleet footprint that
+     * lands squarely on a known-broken engine is a detector, not noise.
+     */
+    ["RAW-CAPS", /[A-Z]/u],
 ];
+
+/**
+ * RAW ASCII LATIN THAT SURVIVED INTO THE IPA — the class every counter above is blind to by construction.
+ *
+ * ## The instrument gap this closes
+ *
+ * Every other defect class in this file keys on a SIGN: a digit, a currency mark, a superscript, a zero-width
+ * character. `km` is two ASCII letters, and in a Latin-script language a run of ASCII letters looks exactly
+ * like a word. So four separate engines echoed a unit abbreviation straight into their output and no gate in
+ * the repo could see it — hmn's `syllableToIpa("km")` returning its own input and appending a tone letter,
+ * cdo's `2,133 km²` reading `… km˥˥`, ig's `48 kg` PRONOUNCED `iɾi anɔ na asatɔ kɡ`. hmn's referee scored a
+ * perfect 455/455 throughout.
+ *
+ * ## The rule, and why each half is load-bearing
+ *
+ * > An ASCII run of **≥ 2 letters** in the SOURCE, containing **no vowel letter** (`aeiouy`, either case),
+ * > that survives **verbatim as a whole token** into the IPA.
+ *
+ * ⚠ **THE VOWEL TEST IS WHAT MAKES IT SPECIFIC, AND NOTHING ELSE MEASURED DOES.** A phonemized word has a
+ * syllable; `km kg cm mm th nd pdf mln` have no nucleus. The proxies tried first all failed on the fleet and
+ * are recorded in the investigation doc with their rates: a source↔output token differential alone fires on
+ * 96.1 % of ig (Igbo `na` reads `na`); a 50-entry unit-abbreviation list fires on English `in`, Igbo `ha`,
+ * `mi`, `ft`; "the run sits next to a digit" fires on `na ×14, nke ×8, maka, dika`. Every one of those is a
+ * guess about the CONTEXT of the run, and no amount of context repairs a rule that is wrong about the RUN.
+ *
+ * ⚠ **AND THE DIFFERENTIAL IS WHAT KEEPS THE VOWEL TEST HONEST.** A vowelless OUTPUT token on its own is not
+ * a defect: Czech *vlk*, Serbian *krv* are syllabic-consonant words, and a bare "output token with no vowel"
+ * rule reports them. Requiring byte-identity with the source rejects them before the vowel test is consulted,
+ * because a syllabic reading is never its own spelling (`krv` → `kr̩ʋ`). Measured: cs, ru, sr all fire ZERO.
+ * The two halves cover each other's blind spot and neither works alone.
+ *
+ * ⚠ **FOLD ASCII `g` → IPA `ɡ` BEFORE COMPARING.** ig's `48 kg` reads `kɡ`: the engine had already mapped the
+ * ASCII `g` (U+0067) to the IPA one (U+0261) and left the `k` alone. `g` is the ONLY ASCII letter that is not
+ * itself an IPA symbol, and that single codepoint is enough for a byte-identical comparison to miss the exact
+ * defect in the brief.
+ *
+ * ⚠ **AND STRIP SUPRASEGMENTALS FROM THE OUTPUT TOKEN.** cdo's leak is `km˥˥` — the tone letter is appended
+ * to the echoed input, so the raw token never equals the raw run and the scan reads clean.
+ */
+const RAW_LATIN_RUN = /[A-Za-z]+/gu;
+/** A run with no vowel letter. `y` counts as a vowel: it is one in Welsh, Guaraní and Turkic orthography. */
+const VOWELLESS_RUN = /^(?![A-Za-z]*[AEIOUYaeiouy])[A-Za-z]{2,}$/u;
+/**
+ * Marks that hang OFF a phone rather than being one, plus the punctuation `clauseSink` attaches to a token.
+ * Stripped from an output token before it is compared with a source run.
+ *
+ * ⚠ `\p{Nd}` IS IN HERE and has to be, because an echoed run does not always arrive alone. `8th` reads `8th`
+ * — the digit leak and the letter leak are the SAME token, and a scan that compares whole tokens sees a
+ * string that matches no source run and reports neither. The digit is `LEAK DIGIT`'s business; this class
+ * asks only what happened to the letters. Same for Maltese `fl-1091`.
+ */
+const SUPRASEGMENTAL = /[ˈˌːˑ˞ʰʲʷˡˤ˥-˩↗↘|‖‿()\[\],.;:!?"'’“”«»…-]|\p{Nd}|\p{M}/gu;
+/**
+ * ⚠ THE SYLLABICITY DIACRITICS ARE NOT STRIPPED — THEY ARE A VETO, and getting this wrong silently disarms
+ * the differential's whole purpose. U+0329 ◌̩ and U+030D ◌̍ say "this consonant IS the nucleus", which is the
+ * one thing that makes a vowelless output token a legitimate word. Fold them away with the rest of `\p{M}`
+ * and Czech `krk` → `kr̩k` compares EQUAL to its own spelling and reports as a leak — measured, in the test
+ * beside this file. A token carrying one is a syllabic reading and can never be an echo.
+ */
+const SYLLABIC = /[̩̥̍]/u;
+/** ⚠ ASCII `g` is not IPA; every engine that reads a `g` at all emits `ɡ` U+0261. Fold before comparing. */
+const foldToIpa = (run: string): string => run.replace(/g/gu, "ɡ").replace(/'/gu, "ʼ");
+
+/**
+ * LANGUAGES WHOSE PHONOLOGY GENUINELY WRITES VOWELLESS WORDS — the rule's one real false-positive population,
+ * measured rather than guessed, and named rather than narrowed around.
+ *
+ * ⚠ THIS IS NOT AN `ACCEPTED_SILENT`-STYLE PER-LINE ESCAPE HATCH, and it must not be allowed to become one.
+ * Every entry is a claim about the language's PHONOTACTICS — that a particular vowelless string is a word or
+ * bound morpheme of the language — which is the one thing "no vowel ⇒ not a word" cannot know and cannot be
+ * taught by any amount of context. An entry naming a unit abbreviation would be a defect being silenced and
+ * belongs nowhere near this table.
+ *
+ * ⚠ AND THE ALTERNATIVE WAS MEASURED AND IS WORSE. Narrowing the rule to digit-adjacent runs — the obvious
+ * way to avoid naming any language — was scored over the whole fleet: it fixes rn (97 → 2) and rw (94 → 4),
+ * does NOT fix mt (201 → 111) or shi (192 → 130), and costs 780 true positives, 39 % of the class. Maltese
+ * `fl-` means *in*, and what one is most often *in* is a YEAR (`fl-1091`, `fl-2007`), so the filter and the
+ * false positives are correlated, not orthogonal. See the investigation doc, Run 4.
+ */
+export const VOWELLESS_WORDS: Readonly<Record<string, readonly string[] | "*">> = {
+    /**
+     * Maltese proclitic prepositions. `fl-` is *fi* + the definite article `l-` (*in the*), `bl-` is *bi* +
+     * `l-` (*with the*); both are written bound to their host with a hyphen and are ordinary running text.
+     * ×266 and ×43 in the artifact. ⚠ `km ×76`, `ft ×2` and `pm ×1` in the same corpus are NOT listed and
+     * remain reported — mt is both a false-positive source and a real defect site, and conflating the two is
+     * how a class becomes worthless.
+     */
+    mt: ["fl", "bl"],
+    /**
+     * Rundi and Kinyarwanda noun-class concords, elided before a vowel and written with an apostrophe:
+     * `bw'u Rwanda`, `kw'ijana`, `nk'igihugu`, `mw'ijoro`, `tw'abana`. These are the whole of each language's
+     * firing population — with them listed, rn falls to 0 residual hits and rw to 8, and rw's 8 (`hp`, `nd`,
+     * `gm`, `zh`, `kh`, `ts`, `php`, `ppm`) are genuine echoes.
+     */
+    rn: ["bw", "kw", "nk", "mw", "tw", "rw", "cy"],
+    rw: ["bw", "kw", "nk", "mw", "tw", "rw", "cy"],
+    /**
+     * ⚠ TASHELHIYT IS A WILDCARD, AND IT HAS TO BE. Berber phonology admits syllables with no vowel at all,
+     * so vowelless words are not a closed list to enumerate — the artifact alone yields `gr ×184`,
+     * `tlkm ×117`, `ns ×22`, `tn`, `tg`, `sg`, `dg`, `tskflt`, `skrn`, `lqblt`, `tmrslt`, `twtmt`, and 40
+     * more in 403 lines. Listing them would be transcribing a dictionary, and the next artifact would add to
+     * it. The premise "no vowel ⇒ not a word" is simply false here.
+     *
+     * ⚠ THE COST IS STATED, NOT HIDDEN: a wildcard blinds the class to this language, and shi DOES leak —
+     * `km ×32` and `kg ×7` are in that same corpus. That is why `ALWAYS_REPORTED` below exists.
+     */
+    shi: "*",
+};
+
+/**
+ * WHAT A WILDCARD CANNOT EXCUSE — the metric abbreviations, spelled the same in every language that uses them.
+ *
+ * ⚠ IT OVERRIDES ONLY `"*"`, NEVER AN EXPLICIT WORD LIST, and the asymmetry is the point. A wildcard is a
+ * claim about a language's own phonotactics, and a language's phonotactics have nothing to say about a
+ * borrowed SI abbreviation — so `km` in shi is still a leak and is still reported. An explicit entry is a
+ * claim about THAT STRING in THAT LANGUAGE, which does outrank this: rn's `mw` is the concord *mw'*, and it
+ * would be plainly wrong for "megawatt" to overrule a grammatical fact stated with its reason.
+ *
+ * ⚠ AND IT IS DELIBERATELY TINY. This is not the unit list rejected in Run 1 — that list failed as a
+ * DETECTOR, firing on `in`, `ha`, `mi`. Here it can only ever RE-REPORT something a wildcard silenced, so its
+ * failure mode is a stray report rather than a hidden defect, and it is kept to the unambiguous SI forms.
+ */
+const ALWAYS_REPORTED: ReadonlySet<string> = new Set(["km", "kg", "mm", "cm", "ml", "kw", "mw", "kb", "mb", "gb"]);
+
+/**
+ * Every raw-Latin run that survived into `ipa`, tagged with whether the language's phonotactics excuse it.
+ *
+ * Returns BOTH kinds rather than filtering: `mine.ts` reports an excused run under its own label, so a gate
+ * run says which table spoke — the same discrimination `ACCEPTED` and `ACCEPTED-CLASS` already draw for signs.
+ * A quiet exemption is indistinguishable from a clean scan, and that is precisely how this defect survived.
+ */
+export function rawLatinIn(lang: string, sentence: string, ipa: string): { run: string; phonotactic: boolean }[] {
+    const exempt = VOWELLESS_WORDS[lang];
+    const tokens = new Set(
+        ipa.split(/\s+/u)
+            .filter((t) => !SYLLABIC.test(t))
+            .map((t) => foldToIpa(t.replace(SUPRASEGMENTAL, "")))
+            .filter(Boolean),
+    );
+    const out: { run: string; phonotactic: boolean }[] = [];
+    const seen = new Set<string>();
+    RAW_LATIN_RUN.lastIndex = 0;
+    for (const m of sentence.matchAll(RAW_LATIN_RUN)) {
+        const run = m[0];
+        if (seen.has(run) || !VOWELLESS_RUN.test(run) || !tokens.has(foldToIpa(run))) continue;
+        seen.add(run);
+        const lower = run.toLowerCase();
+        const phonotactic = exempt === "*"
+            ? !ALWAYS_REPORTED.has(lower)
+            : exempt !== undefined && exempt.includes(lower);
+        out.push({ run, phonotactic });
+    }
+    return out;
+}
 
 /**
  * A DROP is a symbol that VANISHED — detected differentially: phonemize the sentence, then phonemize it again
