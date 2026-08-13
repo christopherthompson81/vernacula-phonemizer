@@ -1478,6 +1478,42 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "the same sentence as the sign, i.e. Western Balochi glosses itself here — which is exactly "
             + "the evidence Southern does not have, and exactly why it is not borrowed",
     },
+    ti: {
+        // ⚠ EVERY COUNT BELOW IS OVER `tools/corpus/mined/ti.jsonc` (323 deduplicated lines from a
+        // ti.wikipedia dump) and argued in src/languages/tigrinya/normalize.ts and in
+        // docs/investigations/ti_normalization_investigation.md.
+        //
+        // ⚠ `minus` AND `plus` ARE DELIBERATELY ABSENT FROM THIS BLOCK, and that omission is the whole point
+        // of the split. Each has exactly ONE genuine Tigrinya instance that this layer does not read — the
+        // electron's charge, `ኤሌክትሮናት -1 ኣሃዱ ዝኾነ ኣሉታዊ ቻርጅ`, and the proton's, `+1 ኣሃዱታት ዝኾነ ኣወንታዊ ቻርጅ`
+        // — so they are real unclosed defects and must keep failing (playbook trap 24: a red gate that is
+        // correct beats a green gate that is wrong). The seven classes below are different in kind: the
+        // SIGN does not occur in Tigrinya text at all, so there is nothing a word could fix.
+        equals: "measured: `=` ×2 and NEITHER is a Tigrinya relation. One is inside an English gloss "
+            + "(`„መቀለ ድሓር ሰፈነ“ (= divide and conquer)`), the other is a URL query string "
+            + "(`index.php?title=Ethiopia_national_football_team&action=edit`). ⚠ AND THE WORD IS NOT THE "
+            + "BLOCKER, which is what makes this trap 48's shape rather than a sourcing gap: `ማዕረ` "
+            + "\"equal\" is attested ×9 in this corpus. The word is available and the sign is not Tigrinya",
+        divide: "measured: `÷` ×5 and NOT ONE IS DIVISION — every instance is clause-final, introducing a "
+            + "list (`ንሳቶም ድማ÷`, `ገለ ካብቶም ብቐንዲ ዝጥቐሱ ጥራሕ ንርአ÷`, `እዞም ዝስዕቡ ረብሓታት ኪጎናጸፍ ይኽእል÷`), i.e. "
+            + "an idiosyncratic typographic stand-in for the Ethiopic preface colon ፦. Reading it as "
+            + "\"divided by\" would turn a list introduction into arithmetic — confidently wrong replacing "
+            + "merely silent. The Ethiopic marks this corpus DOES use for that job (። ፣ ፤ ፥ ፦ ፧) are all "
+            + "declared and all read",
+        "plus-minus": "measured: `±` is ×0 in the corpus",
+        "less-than": "measured: `<` is ×0 in the corpus",
+        "greater-than": "measured: `>` is ×0 in the corpus",
+        times: "measured: `×` is ×0 in the corpus. ⚠ Amharic's whole relational/division block (its "
+            + "normalize.ts step 16, the ከ-prefixed comparative and በ-prefixed division) therefore has NO "
+            + "instances to transfer to, which is one of the seven am rules this language's re-measurement "
+            + "failed — the script makes them look applicable and the count says they are not",
+        ampersand: "measured: `&` ×27 and NOT ONE IS A TIGRINYA AMPERSAND. 13 are `&nbsp;`, 11 are numeric "
+            + "character entities (`&#x5B;`, `&#x5D;`, `&#x2013;`, `&#x3A;`) and the rest sit inside "
+            + "English strings (`Shoe Shine & Piano`, a mangled `R & amp;B`, a `?...&action=edit` URL). "
+            + "This is unstripped WIKI MARKUP that survived the dump extraction, not orthography — so the "
+            + "refusal is for want of a SIGN, not of a word, and adding a conjunction here would attach a "
+            + "Tigrinya word to a non-breaking space",
+    },
 };
 
 /**
@@ -2429,6 +2465,34 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // with `(پہ انگرݔزی: …)` or a bare Latin parenthesis. The ampersand belongs to the English name
         // `Antigua & Barbuda` and is already on the Latin fallback's side of the seam.
         ampersand: ["(Antigua & Barbuda)"],
+    },
+    ti: {
+        // ⚠ THE CLASS-LEVEL REFUSALS AND THEIR MEASUREMENTS ARE IN `ACCEPTED_SIGN_SILENCE` ABOVE; these
+        // spans exist because `acceptedSignClass` tests a sign regex against a SINGLE character while the
+        // artifact scan matches in context — the limitation cdo, gan, nan, hak, tl, wuu and syl all record.
+        //
+        // ⚠ AND THE POINT OF LISTING BY IDENTITY RATHER THAN SILENCING THE CLASS is visible in this
+        // language better than anywhere: the ONE span deliberately left off the `minus` list below is the
+        // only genuine Tigrinya negative in the corpus, and it keeps reporting.
+        //
+        // The `÷`-as-list-punctuation instances, the English gloss and the URL — argued in
+        // ACCEPTED_SIGN_SILENCE. `+1 ኣሃዱታት` is NOT here: it is a real positive charge and a real defect.
+        "math-sign": ["(= divide and conquer)", "ንሳቶም ድማ÷", "ጥራሕ ንርአ÷", "ኣብነት ንርአ÷", "ኪጎናጸፍ ይኽእል÷",
+            "ኣብእስልምና÷", "football_team&action="],
+        // ⚠ ONE SPAN ONLY, AND IT IS AN ERA DASH, NOT A NEGATIVE: `( –500 ቅድሚ ልደተ ክርስቶስ)` is "(500 BC)" —
+        // the phrase after it says so in the corpus's own words, which is what makes this decidable where
+        // the fleet's `चंद्रयान -1` cases are not. The sentence's other digit-adjacent dashes are all year
+        // spans.
+        // ⚠ `ኤሌክትሮናት -1 ኣሃዱ ዝኾነ ኣሉታዊ ቻርጅ` IS ABSENT FROM THIS LIST ON PURPOSE — the electron's charge is
+        // a genuine negative that this layer declines to read (1 true against 1 false positive over 323
+        // lines, and hi's narrowing arms do not separate them, since the false positive IS the
+        // bracket-opening arm). It must keep failing until a ti minus rule earns its place.
+        minus: ["( –500 ቅድሚ ልደተ ክርስቶስ)"],
+        // EVERY SURVIVING `&`, and not one is an ampersand: unstripped HTML entities from the dump
+        // extraction (`&nbsp;` ×13, `&#x…;` ×11) plus three English names. Listed by identity rather than
+        // silenced so that a genuine Tigrinya `&`, if this wiki ever grows one, still reports.
+        ampersand: ["&nbsp;", "&#x5B;", "&#x5D;", "&#x2013;", "&#x3A;", "R & amp;B",
+            "\"Shoe Shine & Piano\"", "football_team&action="],
     },
 };
 

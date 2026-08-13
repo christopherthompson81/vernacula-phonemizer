@@ -10,6 +10,8 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { makeGeezG2P } from "../../core/geez.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { makeTigrinyaNormalizer } from "./normalize.ts";
 
 interface NumbersDef {
     units: string[];
@@ -91,14 +93,58 @@ function number(digits: string): string {
 }
 
 // Ethiopic letters (U+1200–U+135A, incl. combining marks) · Arabic digits · Ethiopic + ASCII punctuation.
+//
+// ⚠ THE LETTER CLASS MUST NOT REACH THE PUNCTUATION SUB-BLOCK — the hazard for any script whose punctuation
+// lives inside its own Unicode block, and the one that left Sylheti's terminator declared but unreachable.
+// MEASURED for ti: the class ends at ፚ = U+135A while ። ፣ ፤ ፥ ፦ ፧ ፨ are U+1362–U+1368, above the range, so
+// the letter branch cannot swallow them and all seven declarations fire. DO NOT widen this to the full block
+// without moving the punctuation branch ahead of it.
+//
+// ⚠ AND THE NUMERALS ARE OUTSIDE EVERY BRANCH ON PURPOSE. U+1369–U+137C is above the class, is not `\d`, and
+// is not punctuation, so `፻፲` reached no branch and read as the EMPTY STRING (20 instances in the artifact).
+// They are rewritten to words in normalize.ts §12 rather than added here, because a numeral is a NUMBER and
+// the reading it needs is the composer's, not the fidel table's.
 const TOKEN = /([ሀ-ፚ]+)|(\d+)|([።፣፤፥፦፧፨.?!,;:])/gu;
 
 export type ForeignPhonemizer = (latin: string) => string;
 
+// ሚእታዊት is the percent word, POSTPOSED. SOURCED THREE WAYS: this corpus ×2 (`ናይ ዝልከፋ ሚእታዊት ደቀኣንስትዮ ካብ 5%
+// ክሳዕ 70%`), ti.wikipedia ×2, and Gaim (arXiv:2601.03403) Table 1 — the paper this manifest already cites for
+// its cardinals — which names it as the percent word.
+// ⚠ THE MAGNITUDE LIST IS LOAD-BEARING: the corpus writes `ብ1.65 ቢልዮን ዶላር` and `$17 ሚልዮን`, and without it
+// the currency noun is inserted BEFORE the written magnitude. ⚠ ti SPELLS THEM WITH ል, NOT AMHARIC'S ሊ —
+// ሚልዮን ×17, ቢልዮን ×6, ትሪልዮን ×4, against ×0 for ሚሊዮን/ቢሊዮን/ትሪሊዮን. Copying am's list would have matched
+// nothing. No `magnitudeConnective`; ti takes none.
+// ⚠ NO AMPERSAND AND NO MATH SIGNS: `&` ×27 is entirely wiki markup (`&nbsp;`, `&#x5B;`) and English strings,
+// and `=` ×2 is an English gloss and a URL — the SIGN is absent from Tigrinya text, not the word. See
+// normalize.ts's header for the counts.
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["ሚእታዊት"],
+    // Each currency name is attested in a monetary amount, which is the sense check the sign alone cannot
+    // make: ዶላር corpus ×6 (`1.65 ቢልዮን ዶላር`, `ልዕሊ 1 ትሪልዮን ዶላር`) + wiki ×12; ፓውንድ corpus ×3 (`800 ፓውንድ`)
+    // + wiki ×3; ዩሮ wiki ×2, of which ONE is the slot (`222 ሚልዮን ዩሮ ዝውውር`) and one is the football
+    // tournament `ዩሮ 2024` — recorded as resting on a single right-slot attestation.
+    // ⚠ NO ናቕፋ. The Eritrean currency is ×5 in this corpus and every one is the TOWN of Nakfa
+    // (`ናቕፋ ብድፋዓት ተኸቢባ ትርከብ`) — trap 37 — and no `Nfk` sign occurs to key it on anyway.
+    currency: { "$": ["ዶላር"], "€": ["ዩሮ"], "£": ["ፓውንድ"] },
+    // `20 km` read as `ʕɨsɾa ˈʊkm`, a raw Latin leak. The corpus writes the word out ×6 (ኪሎሜተር / ኪሎ ሜተር)
+    // and ሜትሮ ×13, so both keys are the corpus's own spellings. ⚠ NO BARE ONE-LETTER KEY (traps 28/46):
+    // ኪ.ሜ is handled locally in normalize.ts §8b because it also occurs with no adjacent number.
+    units: { km: ["ኪሎ ሜተር"], m: ["ሜተር"], kg: ["ኪሎ ግራም"] },
+    // ትርብዒት PRECEDES the unit — corpus ×7, wiki ×11, `916,445 ትርብዒት ኪ.ሜ`, `172,300 ትርብዒት ማይል`. No cube
+    // word is declared: `m³`/`cubed` is ×0 in this corpus and ti.wikipedia offers nothing in the slot, which
+    // is trap 51's floor rather than an oversight.
+    exponentWords: { squared: ["ትርብዒት"], position: { squared: "before" } },
+    magnitudes: ["ሚልዮን", "ቢልዮን", "ትሪልዮን"],
+});
+
+/** Text normalization. SYMBOLS is threaded through it — the ordering is load-bearing (normalize.ts §9). */
+const NORMALIZE = makeTigrinyaNormalizer(numberToText, SYMBOLS);
+
 class TigrinyaPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(NORMALIZE(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
