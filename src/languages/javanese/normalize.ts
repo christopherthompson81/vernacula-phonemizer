@@ -81,14 +81,47 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⟨g⟩ is declared for the DENSITY shape the corpus writes (`3,95 g/cm³`, `15g/cm³`, `1,66 g/cm³`),
     // where the tier needs the numerator to engage its rate path at all. jv.wikipedia defines the word
     // outright — "Gram (basa Yunani/Latin: grámma) yaiku ékan saka massa" — and ⟨kilogram⟩ is corpus-attested.
-    units: { km: ["kilomèter"], kg: ["kilogram"], cm: ["sèntimèter"], g: ["gram"], m: ["mèter"] },
+    //
+    // ⚠ ⟨mm⟩, ⟨l⟩/⟨L⟩ AND ⟨ha⟩ WERE MISSING AND ALL FOUR HAD A CORPUS INSTANCE, which is the part that makes
+    // the omission a defect rather than a judgement. `10 mm` reached the IPA as *səpˈulʊh mm* — the raw
+    // letters — and `10 ha` as *səpˈulʊh hˈɔ*, the g2p reading ⟨ha⟩ as a Javanese word.
+    //   ⟨mm⟩ — jv.wikipedia has a MILIMÈTER ARTICLE that opens by disambiguating from the symbol: "Milimèter
+    //         utawi millimèter punika salah satunggalipun unit SI ingkang…", and the metric ladder is written
+    //         out in five separate articles (`milimèter << sèntimèter << dhèsimèter << mèter`). The corpus
+    //         writes the abbreviation after a number twice — `2000 mm/taun` (rainfall) and `105 x 45 x 18
+    //         mm` (a phone's dimensions). The ⟨è⟩ spelling is the one the ladder and the article title use.
+    //   ⟨l⟩/⟨L⟩ — jv.wikipedia's LITER article defines the unit ("Liter yaiku unit ukur saka volume") and
+    //         then states the SYMBOL CONVENTION itself: "Simbol liter yaiku huruf l cilik, utawa hurup
+    //         kapitale, L" — the lower-case letter or its capital. That sentence is the attestation for the
+    //         KEYS as much as the word, and it is why both cases are declared (the module's own note: ⟨L⟩ and
+    //         ⟨l⟩ are both official, so the exact branch must resolve either). `liter` probes ×77 in 20
+    //         articles. ⚠ TRAP 46, MEASURED RATHER THAN ASSUMED: digit-adjacent bare `l` in the mined
+    //         artifact is **×0** — no dotted designation, no bound clitic, nothing for the key to eat.
+    //   ⟨ha⟩ — the corpus writes it FIVE TIMES after a number and always capitalised (`198.000 Ha`,
+    //         `183.000 Ha`, `2000 Ha`, `13.000 Ha`, `5 Ha`); the folded index resolves the case, since ⟨ha⟩
+    //         is multi-character and no other unit is spelt with those letters. jv.wikipedia's km² article
+    //         glosses the symbol against the word in one line — "100 ha (hèktar)" — and gives the conversion
+    //         "1 hèktar = 0.01 (10−2) km2". The ⟨è⟩ spelling is that article's, and matches this file's
+    //         register (`mèter`, `sèntimèter`); `hektar` ×30 and `héktar` ×34 are the other two spellings in
+    //         running text and are unaffected, because the tier only rewrites the ABBREVIATION.
+    units: {
+        km: ["kilomèter"], kg: ["kilogram"], cm: ["sèntimèter"], g: ["gram"], m: ["mèter"],
+        mm: ["milimèter"], l: ["liter"], L: ["liter"], ha: ["hèktar"],
+    },
     // ⚠ STANDARD MEASUREMENT REGISTER, NOT A CORPUS ATTESTATION — flagged the way Cantonese flags the same
     // field. All 10 of the corpus's ⟨×⟩ are BOTANICAL DIMENSIONS (`10-15(-17) cm × 3-4,5(-1) cm`, a leaf),
     // and ⟨kaping⟩ is the language's "times" word — but every attested instance of it is FREQUENCY or
     // ordinal (`kaping 4 saben dina`, `juwara liga kaping loro`), never a dimension. The word is right and
     // the slot is an inference; one word, so `by` defaults to it.
     multiply: { times: "kaping" },
-    rateDenominators: { jam: "jam", detik: "detik", s: "detik" },
+    // ⚠ ⟨taun⟩ IS HERE BECAUSE THE CORPUS'S OWN ⟨mm⟩ INSTANCE IS A RATE: `2000 mm/taun`, the annual rainfall
+    // of a regency. With the numerator declared and the denominator not, the tier matches `2000 mm`, leaves
+    // `/taun` behind, and the tokenizer drops the slash — so the reading was *milimèter taun*, "millimetre
+    // year", with the relation deleted. `taun` is the ordinary Javanese word for a year and is on hundreds
+    // of corpus lines; `unitPer` already supplies "per", which is the corpus's own rate word
+    // (`mèter kubik per detik`). Denominator keys are not matchable standalone, so this cannot make a bare
+    // `taun` into a unit.
+    rateDenominators: { jam: "jam", detik: "detik", s: "detik", taun: "taun" },
     unitPer: "per",
     exponentWords: { squared: ["persegi"], cubed: ["kubik"], position: "after" },
     // `$` is the sign the corpus actually writes (`$64 juta dolar AS`, `AS$143 milyar`, `1$ = Rp.`), and both

@@ -80,6 +80,28 @@ describe("Māori cardinal numbers", () => {
         expect(mi.text("B&B").trim()).toContain("me");                        // ×2, the fleet's usual pair
     });
 
+    // ⚠ THE THREE SI KEYS THIS LAYER USED TO LEAVE UNDECLARED, and two of them did not even leak visibly:
+    // `10 mm` reached the IPA as the raw letters, but `10 l` came out `tekau ˈɛɫ` — the ENGLISH LETTER NAME,
+    // routed there by `isNativeWord` failing on a letter Māori does not have — and `10 ha` as a bare `ha`.
+    // Sources are Te Aka (`mirimita` noun, (loan) millimetre; `heketea` (loan) hectare; `rita` (loan) litre)
+    // and Paekupu's Te Ine list, which pairs each with the symbol declared here.
+    test("mm, ha and l — the SI keys, and the register that was NOT taken", () => {
+        const mi = createMaori();
+        // mi.wikipedia's own climate table: "E 688 mirimita te toharite o te ua o te tau".
+        expect(mi.text("688 mm").trim()).toContain("miɾimita");
+        // "200 heketea (2.0 km2; 490 eka)" — the wiki glosses the word against the symbol.
+        expect(mi.text("200 ha").trim()).toContain("heketea");
+        // ⚠ BOTH CASES: BIPM makes ⟨l⟩ and ⟨L⟩ equally official, and a one-letter key only resolves EXACTLY.
+        expect(mi.text("10 l").trim()).toContain("ɾita");
+        expect(mi.text("10 L").trim()).toContain("ɾita");
+        // ⚠ AND THE COINED SERIES IS DELIBERATELY ABSENT. Paekupu gives mitamano (mm) / mitarau (cm) /
+        // manomita (km); all three probe 0 token / 0 substring on mi.wikipedia, while the transliterations
+        // kiromita ×38, mirimita ×2 and henimita ×1 are what running Māori writes. This layer already reads
+        // ⟨km⟩ as kiromita, so the coined series would have to beat 38 counter-instances to be consistent.
+        expect(mi.text("5 km").trim()).toContain("kiɾomita");
+        expect(mi.text("5 km").trim()).not.toContain("manomita");
+    });
+
     // ⚠ THE TRAPS, each one a word whose count BEATS the word that is right.
     test("the shape words and tāngata are not units", () => {
         const mi = createMaori();

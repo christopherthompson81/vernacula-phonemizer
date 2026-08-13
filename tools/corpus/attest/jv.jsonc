@@ -1,25 +1,130 @@
 // WIKIPEDIA WORD ATTESTATION — jv. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "jv",
-    "wiki": "jv.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "jv",
+        "wiki": "jv.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "milimèter",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…gadhah mumpangat sanèsipun, preksani ugi MM (disambiguasi). Milimèter utawi millimèter punika salah satunggalipun unit SI ingkang…",
+                "…ajeroning babagan punika kaitung mèter) déning 1/1000. Ékan milimèter (utawi asring kaserat sentimeter) ugi dimumpangatake ing sa…",
+                "…ben mèter pasagi punika identik. == Ugi pirsani == mèter SI milimèter << sèntimèter << dhèsimèter << mèter << dhékamèter << hèkto…",
+                "…a-kira antara 0,621 mil, 1094 yard utawa 3281 sikil (feet). milimèter << sentimèter << dèsimèter << mèter << dhékamèter << hèktom…",
+                "…tus saka sak mèter saprosepuluh saka sak dhèsimèter sepuluh milimèter. milimeter << sentimeter << desimeter << mèter << dekameter…",
+                "…299.792.458 dhetik. Mèter asring dicekak nganggo aksara m.. milimèter << sèntimèter << dhèsimèter << mèter << dhékamèter << hèkto…"
+            ]
+            },
+        {
+                "word": "milimeter",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…déning liter per mèter pasagi. Saatunggal liter punika 106 milimeter kubik Ugi sameter pasagi punika 106 milimeter pasagi. Kadad…",
+                "…er punika 106 milimeter kubik Ugi sameter pasagi punika 106 milimeter pasagi. Kadadean kang wonten ing nginggil milimeter minangk…",
+                "…ika 106 milimeter pasagi. Kadadean kang wonten ing nginggil milimeter minangka liter saben mèter pasagi punika identik. == Ugi pi…",
+                "…k mèter saprosepuluh saka sak dhèsimèter sepuluh milimèter. milimeter << sentimeter << desimeter << mèter << dekameter << hektome…",
+                "…ya ta pizza lan roti pita . Roti rata wiwit ing ngisor siji milimeter nganti sawetara sentimeter nganti bisa gampang dipangan tan…",
+                "…litudo maksimum kang karekam déning seismometer (sajeroning milimeter) lan béda wektu tempuh antarané gelombang-P lan gelombang-S…"
+            ]
+            },
+        {
+                "word": "liter",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 77,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Liter yaiku unit ukur saka volume. Liter dudu salah siji saka uni…",
+                "…Liter yaiku unit ukur saka volume. Liter dudu salah siji saka unit SI, sanajan dianggep \"unit sakjab…",
+                "…l = 1 dm3 = 1.000 cm3 = 1.000 cc 1 ml = 1 cm3 = 1 cc Simbol liter yaiku huruf l cilik, utawa hurup kapitale, L. Huruf l cilik…",
+                "…gunakake sanajan ora ditampa déning BIPM. == Dhéfinisi == 1 liter padha karo: 0.001 mèter kubik, 1 desimeter kubik, 1000 sent…",
+                "…timeter kubik volume kubus kang sisih-sisine 10 sentimeter. Liter uga bisa dipara dadi unit kang luwih cilik, yaiku 1 liter p…",
+                "…. Liter uga bisa dipara dadi unit kang luwih cilik, yaiku 1 liter padha karo: 1.000.000 mikroliter (µL) 1.000 mililiter (mL)…"
+            ]
+            },
+        {
+                "word": "lliter",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hektar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…malaya. Wonten objek wisata lan wanawisata kang jembare 120 hektar kanggo narik wisatawan kang dikelola déning Perum Perhutani…",
+                "…ang dikelola déning Perum Perhutani. Objek liyané jembare 3 hektar wujud papan kanggo adus banyu panas (Cipanas) lengkap karo…",
+                "…iyané. Jembar wewengkon kabupatèn iki ± 1.975,865 km² utawa hektar. == Géografi == Grobogan diapit anatarané Pegunungan Kenden…",
+                "…11, konstruksi durung diwiwiti, nanging wis nyawisake 1.800 hektar kanggo bangun papan anggegana, lan 500 hektar wis cumepak k…",
+                "…awisake 1.800 hektar kanggo bangun papan anggegana, lan 500 hektar wis cumepak kanggo yasa papan anggegana. Dalan tol kang dad…",
+                "…an ing provinsi Riau lan Jambi. Ambane kurang luwih 143.143 hektar iki kagawe saka alas udan tropis. Ing kana uga ana spésies…"
+            ]
+            },
+        {
+                "word": "hèktar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…tawa sak kilomèter pesagi) padha karo: 1,000,000 m2 100 ha (hèktar) 0.386102 mil2 247.105381 acre Suwaliké: 1 m2 = 0.000 001 (…",
+                "…il2 247.105381 acre Suwaliké: 1 m2 = 0.000 001 (10−6) km2 1 hèktar = 0.01 (10−2) km2 1 mil2 = 2.589 988 km2 1 acre = 0.004 047…",
+                "…èni padunung cacahé 25.000 jiwa lan jembar wewengkon 182,60 hèktar.…",
+                "…liyané. Jembar wewengkon kabupatèn iki ± 732,85 km² utawa---hèktar. == Géografi == == Papréntahan == kabupatèn Pamekasan ketat…",
+                "…i Jawa Kulon. Jembar wewengkon kutha iki ± 113,59 km² utawa hèktar. == Géografi == == Papréntahan == Kutha Banjar ketata sakin…",
+                "…iyané: lan liya-liyané. Jembar wewengkon Kutha iki ±--utawa hèktar. == Papréntahan == Kutha Makassar ketata sajeroning 14 kaca…"
+            ]
+            },
+        {
+                "word": "héktar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…kak awit 21 Mei 1804. Pisanané, kuburan iku jembaré mung 17 héktar amarga sing gelem dikubur ana ing kono mung sethithik. Piha…",
+                "…yune, kuburan Père-Lachaise jembaré ditambah nganti dadi 44 héktar. == Obyèk wisata == Sanajan Père Lachaise iku kuburan, nang…",
+                "…kèli. Gunggungipun aréal ingkang karendhem toya ngantos 10 héktar. Kurban tiwas wonten 99 jiwa.(Kompas) 20 - Israèl dipunangg…",
+                "…ka dipunwangun wonten sanginggilipun siti wiyaripun gangsal héktar, dumunung wonten ing Kutha Surakarta. == Latar wingking ==…",
+                "…aning Indhiya Nèderlan. Pabrik gendhis menika wiyaripun 1,3 héktar (3,2 ékar) wonten ing siti awiyar 6,4 héktar (16 ékar). Won…",
+                "…wiyaripun 1,3 héktar (3,2 ékar) wonten ing siti awiyar 6,4 héktar (16 ékar). Wonten ing taun 1928, pabrik menika dipunwiyarak…"
+            ]
+            },
         {
             "word": "tévé",
             "verdict": "absent",
@@ -302,5 +407,6 @@
                 "…p\" bisa uga asale saka setengah daging babi asli, komposisi setengah daging sapi, bahan lan metode persiapan asap. Panjelasan li…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

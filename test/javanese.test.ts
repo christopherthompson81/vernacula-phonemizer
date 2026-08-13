@@ -161,6 +161,27 @@ describe("jv text normalization", () => {
         expect(phonemize("475 jiwa/km²", "jv")).toContain(phonemizeWord("per"));
     });
 
+    // ⚠ THE FOUR SI KEYS THAT WERE MISSING WHILE THE CORPUS WROTE ALL OF THEM. `10 mm` and `10 l` reached
+    // the IPA as raw letters; `10 ha` was worse than a leak — the g2p read ⟨ha⟩ as a Javanese WORD, `hˈɔ`,
+    // so no leak class could see it.
+    test("mm, l/L and ha — declared because the corpus writes the abbreviation", () => {
+        // jv.wikipedia's Milimèter article: "Milimèter utawi millimèter punika salah satunggalipun unit SI".
+        expect(phonemize("18 mm", "jv")).toContain(phonemizeWord("milimèter"));
+        // ⚠ THE CORPUS'S OWN ⟨mm⟩ IS A RATE — `2000 mm/taun`, a regency's rainfall — and declaring only the
+        // numerator read it "millimetre YEAR": the denominator went undeclared, the optional rate group did
+        // not match, and the tokenizer then dropped the slash silently. `taun` is a rate denominator now.
+        expect(phonemize("2000 mm/taun", "jv")).toContain(phonemizeWord("per"));
+        // The Liter article states the symbol convention itself: "Simbol liter yaiku huruf l cilik, utawa
+        // hurup kapitale, L" — which is the attestation for BOTH KEYS, not only for the word.
+        expect(phonemize("10 l", "jv")).toContain(phonemizeWord("liter"));
+        expect(phonemize("10 L", "jv")).toContain(phonemizeWord("liter"));
+        // The corpus writes the hectare five times and always CAPITALISED (`198.000 Ha`, `5 Ha`); ⟨ha⟩ is
+        // multi-character, so the tier's folded index resolves the case. The km² article glosses the pair
+        // in one line: "100 ha (hèktar)".
+        expect(phonemize("198.000 Ha", "jv")).toContain(phonemizeWord("hèktar"));
+        expect(phonemize("10 ha", "jv")).toContain(phonemizeWord("hèktar"));
+    });
+
     test("temperature is POSTPOSED, and °C runs before the bare degree", () => {
         // Left to the bare rule, `20°C` read *rˈɔŋ pˈulʊh t͡ʃ* — the scale letter as a bare consonant.
         expect(normalizeJavanese("20°C")).toBe("20 drajat celsius");

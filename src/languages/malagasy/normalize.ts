@@ -49,6 +49,28 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  *   ariary / dolara / eorô — `ariary` ×69 and `dolara` ×58 across 20 wiki articles each, and the corpus
  *            puts the noun AFTER the magnitude (`iray tapitrisa dolara`, "one million dollars"), which is
  *            the tier's default order. `25.000fmg(5000ar)` shows the old franc beside the ariary.
+ *   milimetatra / litatra — the two SI words this layer was missing, and both are glossed by the corpus or
+ *            the wiki AGAINST THE SYMBOL being declared. mg.wikipedia's MILIMETATRA article opens
+ *            *"Ny milimetatra, izay hafohezina amin' ny hoe mm, dia ventin-kalava…"* — "the millimetre,
+ *            which is abbreviated **mm**, is a unit of length" — and goes on to place it on the ladder
+ *            (*"misy arivo milimetatra ny iray metatra"*, a thousand millimetres to the metre). ×30 hits in
+ *            20 articles. The MINED CORPUS writes the abbreviation in the slot twice, both rainfall:
+ *            `mahery ny 50 mm isam-bolana ny latsak' orana` and `latsaky ny 50 mm ny latsak' orana`.
+ *            `litatra` ×25/20 is defined by the wiki as the volume unit (*"ny litatra, dia nofaritana ho
+ *            mitovy amin' ny iray desimetatra toratelo"*) and the corpus writes it POSTPOSED after a
+ *            magnitude chain — `1.33 hetsy tapitrisa (133.000.000.000) litatra ny labiera`, litres of beer.
+ *            It is already quoted in this file's `toratelo` note (`1 000 litatra ny 1 metatra toratelo`).
+ *            ⚠ BOTH CASES OF THE LITRE KEY, because BIPM makes ⟨l⟩ and ⟨L⟩ equally official and the module's
+ *            exact branch is the only one that can resolve a one-letter symbol.
+ *            ⚠ TRAP 46, MEASURED: digit-adjacent bare `l` in the mined artifact is **×0**. Malagasy's
+ *            apostrophes are the thing to fear here — `amin'ny`, `latsak' orana`, `n'` — but every one of
+ *            them binds a LETTER run, never a digit, so nothing collides with the key. The unit path only
+ *            fires with a number adjacent, and there is no `<digit> l` in the corpus to be wrong about.
+ *            ⚠ ⟨ha⟩ IS DELIBERATELY NOT DECLARED although `hektara` probes ×28/20 and the corpus writes the
+ *            WORD (`7,6 tapitrisa hektara no tany ampiasaina amin' ny fambolena voaloboka`). The corpus has
+ *            no `<digit> ha` anywhere, so the key would be a rule with no instance — trap 9, the same test
+ *            this file's `kilao` note applies. The word being real is not the question; the ABBREVIATION
+ *            being written is.
  *   metatra / kilaometatra / santimetatra / kilao — ×50, ×24, ×32 and ×32 on the wiki. ⚠ `kilao` is the
  *            kilogram and `kilograma` probes ×0, so the French-style clipping is the word, not the Latinate
  *            one — checked because `units` is the class the sourcing gate deliberately excludes (playbook
@@ -76,7 +98,10 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["isan-jato"],
     currency: { $: ["dolara"], "US$": ["dolara amerikana"], "€": ["eorô"], Ar: ["ariary"] },
     magnitudes: ["arivo", "tapitrisa", "lavitrisa"],
-    units: { km: ["kilaometatra"], m: ["metatra"], cm: ["santimetatra"], kg: ["kilao"] },
+    units: {
+        km: ["kilaometatra"], m: ["metatra"], cm: ["santimetatra"], kg: ["kilao"],
+        mm: ["milimetatra"], l: ["litatra"], L: ["litatra"],
+    },
     exponentWords: { squared: ["toradroa"], cubed: ["toratelo"], position: "after" },
     ampersand: "sy",
 });

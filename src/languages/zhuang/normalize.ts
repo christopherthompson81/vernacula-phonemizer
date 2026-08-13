@@ -194,6 +194,34 @@ const UNITS: readonly (readonly [string, string])[] = [
     // lookbehind AND the lookahead, and step 5 runs while the decimal point still EXISTS for them to
     // inspect (trap 39). The gain is real: without it `m` reaches the IPA as a bare [m].
     ["m", "meix"],
+    // ⚠⚠ ⟨mm⟩ AND ⟨l⟩ ARE REFUSED, AND THIS IS THE SEARCH THAT REFUSED THEM — recorded because a bare
+    // "no attested word" is exactly the note that turned out to be wrong for Māori's millimetre, and
+    // because the corpus DOES write the millimetre: `Bi bingzyinz doekfwn noix gvaq 50mm` ("mean annual
+    // rainfall under 50 mm"), so the key has an instance and only the WORD is missing.
+    //
+    //   ⟨mm⟩ — Zhuang borrows the metre in TWO shapes and this wiki writes both: `-meix` (`leizmeix` 厘米,
+    //          ×1, `166.4 leizmeix sang`) and `-mij` (`bingzmij` 平方米 ×2 in one article, `namij`/`Nazmij`
+    //          nanometre — the wiki has a NAZMIJ ARTICLE and writes `daj 630 namij daengz 750 namij` for a
+    //          wavelength). Composing 毫米 from either would give `hauzmeix` or `hauzmij`, and BOTH ARE
+    //          ABSENT EVERYWHERE PROBED: 0 hits on za.wikipedia (`insource:"hauz"` returns 0 for the bare
+    //          morpheme too), no entry in the Zhuang lemma set of en.wiktionary (1,291 lemmas — it has
+    //          `goengleix` "kilometre" but nothing below the centimetre), no translation on Glosbe zyb,
+    //          and no 毫米 row in a 13,619-entry Chinese→Zhuang dictionary. What that dictionary DOES have
+    //          is 毫 → `hauz` — the bare MODIFIER, which trap 37 says is never the attestation. This is the
+    //          Fula `tere` shape precisely: a composable prefix, a composable head, and no evidence anyone
+    //          composes them. 釐米 → `leizmeix, lizmij` in the same source is why the head is trusted and
+    //          the compound is not.
+    //   ⟨l⟩  — `swng` (升) is the obvious candidate and it is ATTESTED WITH THE WRONG SENSE, which is the
+    //          `bar`/`ti`/`ht` failure. The Zhuang→Chinese dictionary glosses it "升; 提高" (to rise, to
+    //          promote) and then, as a measure, 量米筒 — a rice-measuring TUBE holding about a catty, the
+    //          traditional dry measure, not the litre; 公升 has no Zhuang row at all. Both za.wikipedia
+    //          tokens are the wrong sense too (直升機 "helicopter", and 《頌》 of the Book of Odes), and in a
+    //          4,944-sentence Zhuang–Chinese parallel corpus every `swng` is 升级 / 提升 / 上升, the verb.
+    //          Declaring it would read "ten litres" as "ten rice-tubes".
+    //
+    // ⚠ AND `mij` IS WHY A ONE-LETTER-ADJACENT GUESS HERE WOULD HAVE BEEN WORSE THAN SILENCE: as a free
+    // word `mij` is the NEGATOR "not" (dictionary: 不; `mij lae okbae`, `mij raen`, `mij rox`), ×6 on the
+    // wiki and every one a negation. The metre reading only exists inside a compound.
 ];
 
 /** Expand a foreign-script gloss out of one bracket group, or drop the group if nothing else is in it. */

@@ -1,25 +1,154 @@
 // WIKIPEDIA WORD ATTESTATION — mi. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "mi",
-    "wiki": "mi.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "mi",
+        "wiki": "mi.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "mitamano",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mitarau",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "manomita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kiromita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Launceston) he taone nui o Tāhimania, Ahitereiria. Kei 190 kiromita te tawhiti atu i Hopataone, te taone nui o te kawanatanga.…",
+                "…Ko te Papatūānuku ō mātou aorangi (tohu: ) He 12756 kiromita te tawhā, Papatūānuku te aorangi toka nui rawa atu o te Rau…",
+                "…o Aotearoa, i roto i te raro Te Ika-a-Māui. Ko e waru tekau kiromita ki te raki-rawhiti o Te Ūpoko o te Ika me te e rua tekau ma…",
+                "…raki-rawhiti o Te Ūpoko o te Ika me te e rua tekau ma rima kiromita te tonga o Whakaoriori.…",
+                "…i Te Ūpoko o te Ika i te Rimutaka pae. Ko reira kotahi rau kiromita ki te raki-rawhiti o Te Ūpoko o te Ika, e toru tekau ma iwa…",
+                "…ki te raki-rawhiti o Te Ūpoko o te Ika, e toru tekau ma iwa kiromita ki te tonga o Eketahuna, i runga i te awa o Ruamāhanga.…"
+            ]
+            },
+        {
+                "word": "henimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ke te noho o ngā moutere nei, ka panuku haere te tai, he 20 henimita i te tau. Ki tā Ahorangi Richard Moyle nō Te Whare Wānanga…"
+            ]
+            },
+        {
+                "word": "mirimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…hana tino wera. E -9.4 °C te paemahana tino makariri. E 688 mirimita te toharite o te ua o te tau. E 194.3 mirimita te ua nui ra…",
+                "…ariri. E 688 mirimita te toharite o te ua o te tau. E 194.3 mirimita te ua nui rawa i te rā kotahi i hinga i te 25 o Huitanguru…"
+            ]
+            },
+        {
+                "word": "mirimitakau",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "heketea",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…akamahere o te Western Water Catchment, e kapi ana i te 200 heketea (2.0 km2; 490 eka) o te whenua, koia te puni whare wānanga…",
+                "…u 1950 ka whakaae te kāwanatanga kia rāhuitia tētahi 15,600 heketea o te wao kauri i Waipoua. Me kore ake tā rātou pērā e tū to…",
+                "…Tekau mā tahi ngā kaupapa ahuwhenua (e 98,000 eka, e 40,000 heketea rānei) ka tū ki te takiwā o Hokianga, ko Whina te kaiwhakah…",
+                "…tāne kei Te Whanganui-a-Tara, Aotearoa. Kei runga i ngā 12 heketea o te whenua kākāriki te kāreti, kei te takiwā nohonoho o Ma…",
+                "…Maniapoto, heoi 1.2 miriona eka (tata ki te haurua miriona heketea) o ngā whenua o Waikato i raupatutia. I te tau 1882 ka maun…"
+            ]
+            },
+        {
+                "word": "hēkitea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hekitea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "rita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Ko Rita Lee Jones Carvalho (31 Tīhema 1947, Hao Pāoro) he kaiwaiata…",
+                "…Rita Lee Lee Flat Lee Stream…"
+            ]
+            },
+        {
+                "word": "ritaa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
             "word": "putu",
             "verdict": "attested",
@@ -61,5 +190,6 @@
             "substringOnly": 0,
             "examples": []
         }
-    ],
-}
+        ],
+    }
+    

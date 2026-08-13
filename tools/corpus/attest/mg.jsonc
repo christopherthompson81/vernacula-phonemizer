@@ -21,6 +21,54 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "milimetatra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ny milimetatra, izay hafohezina amin' ny hoe mm, dia ventin-kalava ao amin…",
+                "…n' ny halava ao amin' io rafitra io. Noho izany, misy arivo milimetatra ny iray metatra. Misy folo milimetatra ny iray santimetatra…",
+                "…ho izany, misy arivo milimetatra ny iray metatra. Misy folo milimetatra ny iray santimetatra. Ny milimetatra iray dia mitovy amin'…",
+                "…ray metatra. Misy folo milimetatra ny iray santimetatra. Ny milimetatra iray dia mitovy amin' ny 1 000 mikrômetatra na 1 000 000 na…",
+                "…, ny savaivon' ny tariby mpampita aratra dia omena amin' ny milimetatra toradroa. High-quality engineering rulers may be graduated…",
+                "…. Amin' ny fitsipika metrika, ny refy kely indrindra dia ny milimetatra. Ny fitsipiky ny injenieria avo lenta dia mety hisy teti-dr…"
+            ]
+            },
+        {
+                "word": "litatra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…kadiry === Amin' ny refin-kadiry dia ampiasaina matetika ny litatra, izany hoe iray desimetatra toratelo. Ampiasaina ihany koa…",
+                "…atao hoe metatra toratelo na ny kilômetatra toratelo. 1 000 litatra ny 1 metatra toratelo; 1 000 000 000 metatra toratelo ny ki…",
+                "…azy. Misy singa hafa levona latsaky ny iray grama isaky ny litatra (toy ny sira, ny metaly ary ny otrikaina) ny ranomamy amin'…",
+                "…evona mihoatra ny 30 ary ny serôma fiziôlôjika dia misy 9 g/litatra (0,9 %). == Jereo koa == Rano masira Rano masirasira Ranon-…",
+                "…ventim-pandrefesana mahazatra tsy ao amin' ilay rafitra, ny litatra, dia nofaritana ho mitovy amin' ny iray desimetatra toratel…",
+                "…964, dia nisy fahasamihafana kely teo amin' izy roa noho ny litatra nofaritana tamin' ny fampiasana ny kilôgrama fa tsy tamin'…"
+            ]
+            },
+        {
+                "word": "hektara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…indrindra amin’ny fambolena. Amin'ny fitambarany, 547 arivo hektara natokana ho an'ny fambolena, 300 arivo hekitara natokana ho…",
+                "…arivo hekitara natokana ho an'ny famokarana soja, 180 arivo hektara ho an'ny katsaka ary eo anelanelan'ny 70 arivo sy 80 arivo…",
+                "…ho an'ny katsaka ary eo anelanelan'ny 70 arivo sy 80 arivo hektara ho an'ny landihazo. Ny halavirana mankany an-drenivohitra (…",
+                "…kaominina. Ny fambolena kafe dia manana velaran-tany 6.000 hektara miaraka amin'ny famokarana 80.000 kitapo. Mandritra ny foto…",
+                "…ena kely tsirairay. Ny fambolena mangahazo dia mirefy 1.500 hektara miaraka amin'ny famokarana 30.000 taonina. == Jereo koa ==…",
+                "…dia miaraka amin'ireo nosy kely enina tsy misy mponina (11 hektara amin'ny fitambarany), nosy sy kaominina atsinanana indrindr…"
+            ]
+            },
+        {
                 "word": "tora-telo",
                 "verdict": "attested",
                 "bounded": true,

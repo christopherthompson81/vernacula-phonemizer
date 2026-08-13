@@ -122,6 +122,25 @@ describe("za normalization — text→text", () => {
         expect(n("meix")).toBe("meix"); // no bare-letter misfire without a digit
     });
 
+    // ⚠ A REFUSAL PINNED AS A TEST, because the corpus DOES write the millimetre — `Bi bingzyinz doekfwn
+    // noix gvaq 50mm` — so the key has an instance and only the WORD is missing. A future reader will reach
+    // for `hauzmij`/`hauzmeix` and should find the search that says no, not an empty table.
+    test("⚠ mm and l stay UNREAD — the word is missing, not the instance", () => {
+        // The head noun is attested in two borrowing shapes (`leizmeix` 厘米 here; `namij`/`bingzmij` on the
+        // wiki) and the modifier 毫 → `hauz` is in the Zhuang–Chinese dictionary — but the COMPOUND is
+        // absent from za.wikipedia, from en.wiktionary's 1,291-lemma Zhuang set, from Glosbe zyb and from a
+        // 13,619-entry Chinese→Zhuang dictionary. A bare modifier is never the attestation (trap 37, the
+        // Fula `tere` shape), so nothing is emitted.
+        expect(n("doekfwn noix gvaq 50mm.")).toBe("doekfwn noix gvaq 50mm.");
+        // ⟨l⟩: `swng` (升) is ATTESTED WITH THE WRONG SENSE — the dictionary gives "升; 提高" (to rise) and,
+        // as a measure, 量米筒, a rice-measuring tube, with no 公升 row; both wiki tokens are the verb and a
+        // book title; and in a 4,944-sentence parallel corpus every hit is 升级/提升/上升. Declaring it would
+        // read "ten litres" as "ten rice-tubes" — the `bar`-Komma / `ti`-ናቕፋ / `ht`-pwen failure.
+        expect(n("gvaq 10 l.")).toBe("gvaq 10 l.");
+        // ⚠ AND NO ONE-LETTER FALLBACK EXISTS EITHER: as a free word `mij` is the NEGATOR "not".
+        expect(n("gijraemx de mij lae okbae")).toContain("mij lae okbae");
+    });
+
     test("degrees are CONSUMED, not read — a silence replacing a wrong consonant", () => {
         // No Zhuang degree or scale word is attested; what this replaces is the scale letter reaching the
         // IPA as a bare [ɕ]. Recorded in ACCEPTED_SIGN_SILENCE.za.degrees.

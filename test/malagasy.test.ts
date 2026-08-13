@@ -107,6 +107,26 @@ describe("Malagasy normalization: the review pass", () => {
         // a guess: kilao ×32 on the wiki, kilograma ×0.
         expect(normalizeMalagasy("lafarinina 2 kg")).toBe("lafarinina 2 kilao");
     });
+
+    // ⚠ TWO SI KEYS DECLARED AND A THIRD REFUSED, and the refusal is the point of the last two lines.
+    it("the millimetre and the litre read; the hectare abbreviation is not written here", () => {
+        // mg.wikipedia glosses the word against the very symbol: "Ny milimetatra, izay hafohezina amin' ny
+        // hoe mm, dia ventin-kalava". The corpus writes it twice, both monthly rainfall.
+        expect(normalizeMalagasy("mahery ny 50 mm isam-bolana")).toBe("mahery ny 50 milimetatra isam-bolana");
+        // `litatra` is corpus-attested IN THE SLOT — "(133.000.000.000) litatra ny labiera" — and this
+        // file's own `toratelo` note already quotes "1 000 litatra ny 1 metatra toratelo". Both cases,
+        // because BIPM makes ⟨l⟩ and ⟨L⟩ equally official and a one-letter key resolves only EXACTLY.
+        expect(normalizeMalagasy("misotro 2 l isan'andro")).toBe("misotro 2 litatra isan'andro");
+        expect(normalizeMalagasy("misotro 2 L isan'andro")).toBe("misotro 2 litatra isan'andro");
+        // ⚠ TRAP 46, MEASURED RATHER THAN ASSUMED: digit-adjacent bare `l` in the mined artifact is ×0, and
+        // Malagasy's apostrophes — `amin'ny`, `latsak' orana`, `n'` — all bind LETTER runs, never digits.
+        expect(normalizeMalagasy("ny 81 isan-jaton'ny mponina")).toContain("isan-jaton'ny");
+        // ⚠ ⟨ha⟩ REFUSED. `hektara` is the best-attested of the three words (×28 in 20 articles, and the
+        // corpus writes "7,6 tapitrisa hektara"), but the corpus has NO `<digit> ha` — so the key would be
+        // a rule with no instance. Trap 9, the same test the `kilao` note above applies.
+        expect(normalizeMalagasy("7,6 tapitrisa hektara")).toContain("hektara");
+        expect(normalizeMalagasy("100 ha")).toBe("100 ha");
+    });
 });
 
 // The review pass — trap 8 again. This one is trap 7 as well: the corpus writes the scale letter

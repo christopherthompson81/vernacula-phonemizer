@@ -15,7 +15,43 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
  * denominator the tier would read it as *metres* per hour. The slashed key sorts first because `unitAlt` is
  * longest-first.
  *
- * Deliberately absent: `mm`, `t` and `kg` have no attested Māori word, so their abbreviations leak rather than be
+ * ⚠ THE "NO ATTESTED WORD" NOTE THAT USED TO NAME `mm` HERE WAS WRONG, and it is worth seeing why. It read
+ * "`mm`, `t` and `kg` have no attested Māori word, so their abbreviations leak rather than be invented".
+ * `t` and `kg` still stand. `mm` did not survive a look: Te Aka lists ⟨mirimita⟩ as a headword — *noun,
+ * (loan) millimetre* — and mi.wikipedia writes it in the unit slot twice in one climate table,
+ * *"E 688 mirimita te toharite o te ua o te tau"* ("688 mm is the annual average rainfall") and
+ * *"E 194.3 mirimita te ua nui rawa i te rā kotahi"*. The mined artifact has the abbreviation in the same
+ * slot — `5 mm (1/5 inihi)` — so the key had an instance too. A unit is not unattested because the first
+ * reader did not look; the SI words are the ones every written language settles.
+ *
+ * ⚠ AND THE TWO REGISTERS DISAGREE, so the choice is recorded rather than assumed. Paekupu (Te Ine, the
+ * measurement topic of the Ministry of Education / Te Taura Whiri terminology bank) gives a COINED series —
+ * `mitamano` (mm), `mitarau` (cm), `manomita` (km) — built on `mano` "thousand" and `rau` "hundred". The
+ * running-text register is the TRANSLITERATION — `kiromita` ×38, `mirimita` ×2, `henimita` ×1 — and all
+ * three coined forms probe **0 token / 0 substring** on mi.wikipedia. This file already reads `kiromita`
+ * for ⟨km⟩, so `mirimita` is the register-consistent choice AND the attested one; taking Paekupu's series
+ * would mean re-reading ⟨km⟩ as `manomita` against 38 counter-instances. Paekupu's value here is that it
+ * confirms the CONCEPT has a settled Māori form and pairs each with its symbol.
+ *
+ * ⚠ `heketea` AND `rita` ARE AGREED BY BOTH REGISTERS, which is why they need no such argument. Te Aka:
+ * *heketea, noun, (loan) hectare — a metric unit of square measure equal to 2.471 acres or 10,000 square
+ * metres*; *rita, noun, (loan) litre*, "the main unit for measuring capacity". Paekupu pairs `heketea` with
+ * ⟨ha⟩ and `rita` with ⟨l⟩. mi.wikipedia writes `heketea` ×5 across 5 articles, every one an area after a
+ * number and one glossed against the symbols it is being declared for: `200 heketea (2.0 km2; 490 eka)`.
+ *
+ * ⚠ `rita` IS THE ONE WHOSE WIKI HITS ARE A TRAP, and the dictionary is what rescues it. Both mi.wikipedia
+ * tokens are **Rita Lee**, the Brazilian singer — the `bar`/`ti`/`ht` failure mode exactly, where an
+ * `attested` verdict is a proper noun. The verdict is therefore taken from Te Aka and Paekupu, which gloss
+ * the sense, and NOT from the hit count.
+ *
+ * ⚠ THE ONE-LETTER KEYS ⟨l⟩/⟨L⟩ SHIP, and in this language the usual trap-46 argument runs the other way:
+ * ⟨l⟩ IS NOT A LETTER OF THE MĀORI ALPHABET. Māori has no /l/, so a digit-adjacent `l` in Māori text cannot
+ * be the tail of a native word or a bound clitic — it is a symbol or it is foreign. Measured on the mined
+ * artifact: digit-adjacent bare `l` ×0, i.e. no counter-example to find. Unread it was not even silent —
+ * `10 l` reached the IPA as *tekau ˈɛɫ*, the ENGLISH LETTER NAME, routed there by `isNativeWord` failing on
+ * the `l` exactly as `plus`/`minus` do below. Both cases are declared because BIPM makes both official.
+ *
+ * Deliberately absent: `t` and `kg` have no attested Māori word, so their abbreviations leak rather than be
  * invented — and a digit-adjacent `t` here is usually `tāngata` ("people"), not a tonne.
  */
 const SYMBOLS = makeSymbolNormalizer({
@@ -29,7 +65,10 @@ const SYMBOLS = makeSymbolNormalizer({
     // read "rua . toru TĀRA piriona" — the sign is adjacent to the digits, so the word is emitted there and the
     // magnitude stranded behind it. Māori writes the magnitude first and takes no connective.
     magnitudes: ["miriona", "piriona", "mano"],
-    units: { km: ["kiromita"], m: ["mita"], "m/h": ["maero ia hāora"] },
+    units: {
+        km: ["kiromita"], m: ["mita"], "m/h": ["maero ia hāora"],
+        mm: ["mirimita"], ha: ["heketea"], l: ["rita"], L: ["rita"],
+    },
     unitPer: "ia",
     rateDenominators: { h: "hāora", s: "hēkona" },
     exponentWords: { squared: ["pūrua"], cubed: ["pūtoru"], position: "after" },
