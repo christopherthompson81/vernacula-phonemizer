@@ -180,6 +180,15 @@ describe("jv text normalization", () => {
         // in one line: "100 ha (hèktar)".
         expect(phonemize("198.000 Ha", "jv")).toContain(phonemizeWord("hèktar"));
         expect(phonemize("10 ha", "jv")).toContain(phonemizeWord("hèktar"));
+        // ⚠ ⟨mg⟩ WAS THE FIFTH, found by the `RAW-LATIN` scan rather than by the sign classes: it is two
+        // ASCII letters in a Latin script, so `14 mg kalsium` read *pat̪bəlas mɡ* and nothing could see it.
+        // The corpus writes it six times in one nutrition table; `miligram` is ×40 / 13 articles on
+        // jv.wikipedia in this exact slot and is DEFINED there — "1 miligram = 0.001 gram".
+        expect(phonemize("14 mg", "jv")).toContain(phonemizeWord("miligram"));
+        expect(phonemize("1,1 mg besi", "jv")).toContain(phonemizeWord("miligram"));
+        // ⚠ AND THE ELEMENT SYMBOL IS NOT AT RISK: the bare-unit path is exact-case, so `Magnesium (Mg)`
+        // keeps its capital ⟨Mg⟩ and is not read as a milligram.
+        expect(phonemize("Magnesium (Mg)", "jv")).not.toContain(phonemizeWord("miligram"));
     });
 
     test("temperature is POSTPOSED, and °C runs before the bare degree", () => {

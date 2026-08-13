@@ -279,6 +279,30 @@ export function normalizeShonaPost(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+[.,]\d+)[  ]?m([²³])?(?![\p{L}\p{M}'’ʼ\d])/gu,
         (_w, n: string, exp: string | undefined) => (exp === "²" ? `${SQUARED} mamita ${n}` : `mamita ${n}`));
 
+    // 7b) A BARE COUNT OF HOURS → *maawa N*. `hr`/`hrs` were declared only as rate DENOMINATORS (shona.ts),
+    //    so `50 km/hr` composed correctly while a bare count had no reading at all and `(8hr)`, `(8hrs)`
+    //    and `2hrs` reached the IPA as *sere hr* — raw ASCII, and six of this language's twelve `RAW-LATIN`
+    //    hits. The noun is sourced at the `rateDenominators` declaration; the `ma-` plural is the HEAD form
+    //    (*maawa 2*, and sn.wikipedia's *"24 maawa echiedza"*, *"kukotsira maawa manomwe kusvika masere"*,
+    //    31 tokens / 16 articles) while the bare `awa` is the denominator form, which is the split the
+    //    corpus itself writes. The artifact GLOSSES the abbreviation against the word in the next clause:
+    //    *"panobhadhara $60 pazuva (8hr). Kana akashanda 6 AWA anenge…"* and *"N anomirira AWA dzashandwa
+    //    pazuva"*.
+    //    ⚠ LOCAL RATHER THAN A `units` KEY, and both reasons were measured rather than predicted:
+    //      · a `units` key is matchable as a DENOMINATOR too, so declaring it turned the attested
+    //        *makiromita 50 pa awa* into *pa maawa* — a regression in the slot that already worked;
+    //      · the tier cannot decline a clock. `06:00hrs` is TWO numerals and the unit belongs to neither
+    //        half; through the tier it read *matanhatu, maawa zero* — "six, hours zero", a confidently
+    //        wrong quantity where the old reading was merely raw.
+    //    ⚠ SO THE COLON IS IN THE LOOKBEHIND, and `06:00hrs` KEEPS ITS RAW `hrs` AND STAYS REPORTED. That
+    //    is the deliberate outcome: Shona has no attested 24-hour-clock reading here (the header's NO
+    //    CLOCK finding), and a visible leak beats inventing one. The two artifact instances are the only
+    //    colon-times with this suffix in the corpus.
+    //    ⚠ AND NO SPACE IS ALLOWED BEFORE `hr` ON THE RATE SIDE by construction: this arm needs a DIGIT
+    //    immediately before (bar one space), and `km/hr` has a slash there, so the rate path is untouched.
+    //    AFTER the tier, like step 7, and BEFORE step 9 so the concord pass agrees the numeral.
+    s = s.replace(/(?<![\d.,:\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?hrs?(?![\p{L}\p{M}\d])/gu, "maawa $1");
+
     // 8) DEGREES. `32 ° C / 90 ° F`, `17°51′50″S`, a bare `ne180 °`, and the mojibake-ish bare `o` this wiki
     //    writes for the sign in a dozen places (`0 o C`, `66.5 o N`, `+23.5 o`). The sign was dropped outright
     //    and the scale letter reached the g2p as a phoneme — `C` as [k], because Shona has no ⟨c⟩ grapheme.

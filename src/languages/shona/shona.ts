@@ -163,6 +163,12 @@ const SYMBOLS = makeSymbolNormalizer({
     units: {
         km: ["makiromita"], m: ["mamita"], cm: ["masendimita"], mm: ["mamirimita"],
         kg: ["makirogiramu"], t: ["matani"], ha: ["hekita"],
+        // ⚠ `hr`/`hrs` ARE DELIBERATELY NOT HERE, although the hour IS now read — see normalize.ts step 7b.
+        // Declaring them in this table was tried and MEASURED WRONG in two ways at once: a `units` key is
+        // matchable as a denominator too, so `50 km/hr` stopped reading the attested *pa awa* and started
+        // reading *pa maawa*; and the tier has no way to decline the MINUTE half of a 24-hour clock, so
+        // `06:00hrs` read *matanhatu, maawa zero* — "six, hours zero". Both cases need a guard the tier
+        // cannot express, so the head reading is claimed locally and this table keeps the denominator.
         // ⚠ BOTH CASES, the litre's documented exception to the one-letter rule (`resolveUnitSymbol`).
         l: ["rita"], L: ["rita"],
     },

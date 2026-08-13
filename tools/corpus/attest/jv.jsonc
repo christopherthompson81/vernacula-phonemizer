@@ -21,6 +21,109 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "lsp",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…hasa Indonesia yaiku kembaran barang (wong, kéwan, tuwuhan, lsp) sing digawé saka coret-coretan, lsp ing dluwang lsp . Mana…",
+                "…(wong, kéwan, tuwuhan, lsp) sing digawé saka coret-coretan, lsp ing dluwang lsp . Manawa kita gatekaké akèh tulisan \"lsp\" i…",
+                "…wuhan, lsp) sing digawé saka coret-coretan, lsp ing dluwang lsp . Manawa kita gatekaké akèh tulisan \"lsp\" ing pengerten gam…",
+                "…n, lsp ing dluwang lsp . Manawa kita gatekaké akèh tulisan \"lsp\" ing pengerten gambar mau, iku njlèntrèhaké manawa pangertè…",
+                "…, kéwan lan tuwuhan. Nanging bisa uga kembaran sing liyané. Lsp sing keloro uga ora kawates gambar ing kertas. Nanging bisa…",
+                "…sa uga nganggo pointer mouse ing program nggambar komputer. Lsp sing pungkasan nuduhaké manawa sarana dinggo gambar ora kaw…"
+            ]
+            },
+        {
+                "word": "lan sapiturute",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Primbon yaiku buku (layang) sing ngemot petungan, pethek lan sapiturute. Salah siji primbon kang umum dienggo ing masyarakat yaiku…",
+                "…janganan (kaya ta wortel, kentang, kacang, mrica lan tomat, lan sapiturute), daging, kaya ta daging sapi . Pitik, sosis lan panganan l…",
+                "…aking subgenera liyane ( peaches, cherries, cherries manuk, lan sapiturute) ing shoots gadhah terminal Bud lan tunas sisih dhewekan (o…",
+                "…uhé karo sambel bawang, gudhangan, bhesengèk, linting gerih lan sapiturute. Thiwul uga isa didadèkkaké sega gorèng dicampur karo godho…",
+                "…ta glepung, ragi, minyak utawa shortening, gula utawa madu, lan sapiturute karo jagung, roti utawa roti basi, ara, kismis, apel diced,…",
+                "…an Aceh, Kerajaan Demak, Kerajaan Pajang, Kerajaan Mataram, lan sapiturute. Gelar sultan iki diwenehke mara pemimpin lanang sing ana n…"
+            ]
+            },
+        {
+                "word": "lss",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Mahasiswa (STEMA) Unit Kebudayaan Acèh Lingkung Seni Sunda (LSS) Archived 2011-10-13 at the Wayback Machine. Unit Kesenian…"
+            ]
+            },
+        {
+                "word": "miligram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…tin: grámma) yaiku ékan saka massa. Kanthi simbol gram g. 1 miligram = 0.001 gram 1 sentigram = 0.01 gram 1 desigram = 0.1 gram…",
+                "…arna nutrisi kang migunani kanggo kaséhatan. Natrium (Na) 2 miligram Serat 3 gram Protein 1 gram Vitamin A 61 IU Vitamin C 34,4…",
+                "…Serat 3 gram Protein 1 gram Vitamin A 61 IU Vitamin C 34,4 miligram Vitamin E 0,2 miligram Asam folat 12 mikrogram Kalium (K) 1…",
+                "…gram Vitamin A 61 IU Vitamin C 34,4 miligram Vitamin E 0,2 miligram Asam folat 12 mikrogram Kalium (K) 133 miligram Fosfor (P)…",
+                "…tamin E 0,2 miligram Asam folat 12 mikrogram Kalium (K) 133 miligram Fosfor (P) 12 miligram Magnesium (Mg) 10 miligram Kalsium (…",
+                "…am folat 12 mikrogram Kalium (K) 133 miligram Fosfor (P) 12 miligram Magnesium (Mg) 10 miligram Kalsium (Ca) 3 miligram == Asil…"
+            ]
+            },
+        {
+                "word": "milligram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…18250 SI Vitamin B1 0.15 miligram per 100 gr, vitamin C 140 milligram per 100 gram godhong katés, kalori 79 saben 100 gram, proté…",
+                "…hidrasi / karbohidrat 11,9 gram saben 100 gram, kalsium 353 milligram per 100 gram, lan banyu75.4 gram saben 100 gram. Godhong ka…"
+            ]
+            },
+        {
+                "word": "lan sapanunggalané",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a iku kang dadi wasesa (predikat). Umpamané lungguh, mangan lan sapanunggalané. Tembung kriya kang isih kudu diwènèhi katrangan supaya dad…",
+                "…né antarané tembung nabrak, menthung, nyiram, nagih, nuthuk lan sapanunggalané. Déné tembung kriya kang wis cetha tanpa diwènèhi katrangan…",
+                "…tanpa lèsan. Tuladhané: adus, mangan, udud, nulis, nggambar lan sapanunggalané. Tembung kriya bisa dibédakaké: Kriya lingga, yaiku tembung…",
+                "…wanguné warna-warna kaya ta wujud ali-ali, kalung, liontin lan sapanunggalané. Rerenggan liya kang gunané kanggo ngrengga ruangan utawa o…",
+                "…a omah bisa wujud lukisan vas kembang, reca, lampu kristal, lan sapanunggalané.…",
+                "…bat, kaya ta: jaé, kencur, temulawak, kunir, blimbing wuluh lan sapanunggalané. Pekarangan kang cukup jembar uga kerep dadi papan panggona…"
+            ]
+            },
+        {
+                "word": "sapanunggalané",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…u kang dadi wasesa (predikat). Umpamané lungguh, mangan lan sapanunggalané. Tembung kriya kang isih kudu diwènèhi katrangan supaya dad…",
+                "…ntarané tembung nabrak, menthung, nyiram, nagih, nuthuk lan sapanunggalané. Déné tembung kriya kang wis cetha tanpa diwènèhi katrangan…",
+                "…a lèsan. Tuladhané: adus, mangan, udud, nulis, nggambar lan sapanunggalané. Tembung kriya bisa dibédakaké: Kriya lingga, yaiku tembung…",
+                "…guné warna-warna kaya ta wujud ali-ali, kalung, liontin lan sapanunggalané. Rerenggan liya kang gunané kanggo ngrengga ruangan utawa o…",
+                "…ah bisa wujud lukisan vas kembang, reca, lampu kristal, lan sapanunggalané.…",
+                "…kaya ta: jaé, kencur, temulawak, kunir, blimbing wuluh lan sapanunggalané. Pekarangan kang cukup jembar uga kerep dadi papan panggona…"
+            ]
+            },
+        {
                 "word": "milimèter",
                 "verdict": "attested",
                 "bounded": true,

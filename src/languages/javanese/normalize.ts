@@ -104,9 +104,22 @@ const SYMBOLS = makeSymbolNormalizer({
     //         "1 hèktar = 0.01 (10−2) km2". The ⟨è⟩ spelling is that article's, and matches this file's
     //         register (`mèter`, `sèntimèter`); `hektar` ×30 and `héktar` ×34 are the other two spellings in
     //         running text and are unaffected, because the tier only rewrites the ABBREVIATION.
+    // ⚠ ⟨mg⟩ WAS THE ONE METRIC KEY LEFT OUT OF THE LADDER ABOVE, and the corpus writes it FOUR TIMES in
+    // the measure slot — `14 mg kalsium`, `28 mg fosfor`, `1,1&nbsp;mg besi`, `0,02&nbsp;mg vitamin B1`,
+    // plus `49 mg saben 100 g` and `80-100 mg saben dina` — all in one nutrition table. Undeclared, they
+    // reached the IPA as *mɡ*, the raw letters, which is the `RAW-LATIN` class's three jv hits.
+    // `miligram` is 40 tokens / 13 articles on jv.wikipedia, in this exact slot after a figure
+    // (`Kalium (K) 133 miligram`, `Fosfor (P) 12 miligram`, `Vitamin C 34,4 miligram`) and DEFINED
+    // against the gram in the gram article — "1 miligram = 0.001 gram". ⚠ THE SPELLING IS THE ATTESTED
+    // ONE, not the one this file's ⟨è⟩ register would compose: the metre words are `mèter`/`milimèter`
+    // because that is what jv.wikipedia writes, and the gram words are `gram`/`miligram` for the same
+    // reason. `milligram` ×2 with the double ⟨l⟩ is the same word spelt the Dutch way and is the loser.
+    // ⚠ AND THE ELEMENT SYMBOL IS NOT AT RISK. The nutrition tables also write `Magnesium (Mg)`, but the
+    // bare-unit path is EXACT CASE (core/normalizeSymbols.ts) and the counted path needs a numeral in
+    // front, so capital ⟨Mg⟩ is untouched.
     units: {
         km: ["kilomèter"], kg: ["kilogram"], cm: ["sèntimèter"], g: ["gram"], m: ["mèter"],
-        mm: ["milimèter"], l: ["liter"], L: ["liter"], ha: ["hèktar"],
+        mm: ["milimèter"], mg: ["miligram"], l: ["liter"], L: ["liter"], ha: ["hèktar"],
     },
     // ⚠ STANDARD MEASUREMENT REGISTER, NOT A CORPUS ATTESTATION — flagged the way Cantonese flags the same
     // field. All 10 of the corpus's ⟨×⟩ are BOTANICAL DIMENSIONS (`10-15(-17) cm × 3-4,5(-1) cm`, a leaf),

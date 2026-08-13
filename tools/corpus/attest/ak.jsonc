@@ -17,10 +17,60 @@
     // speech and the sense against the examples before using any of this to justify a reading.
     {
         "language": "ak",
-        "wiki": "tw.wikipedia.org",
+        "wiki": "fat.wikipedia.org",
         "tier": "wikipedia",
         "findings": [
-            {
+        {
+                "word": "ahinanan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…, ix, x, na wɔakyerɛ dɛ #573. Akorae no nyinara yɛ kilomita ahinanan 77,360 (akwansin ahinanan 29,870), na ɔno maa ɔbɛyɛɛ abɔdze…",
+                "…73. Akorae no nyinara yɛ kilomita ahinanan 77,360 (akwansin ahinanan 29,870), na ɔno maa ɔbɛyɛɛ abɔdze akorae a ɔtɔ do ebien a ɔ…",
+                "…ama yɛ ɔman mmɔnten so atrae a nyi kɛse bɛyɛ akwansin 2,000 ahinanan (5,200 km2) a ɔwɔ Congo etsefi fam apuei. Ɔka Afrika mmɔnte…",
+                "…aduosia(160) (acre ahanan; nsɛntitiriw biako kilomita asia ahinanan{1.6} ) ntsi, na wɔato abakɔsɛm mu ɔfasu a nyi tenten yɛ kil…",
+                "…iosphere abɔntsen do atrae no ankasa yɛ bɛyɛ kilomita 9,130 ahinanan, wɔ afir kɛse bi a efi Ɔsor a ɔwɔ sor Casamance/Kolda Mantu…",
+                "…== Ɛnnɛ Nan Madol yɛ fam tutu mantam a ne kɛse bor kilomita ahinanan 18 (akwansin ahinanan 6.9) na dzea ɔka ho nye abo adan a wɔ…"
+            ]
+            },
+        {
+                "word": "square",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…ɔ hɔ paa no mu. Dɛm kurow yi gye asaase nyantam bɛyɛɛ 2,511 square kilometers (970 sq mi), afei so bea a w'atu mpɔn kakra wɔ h…",
+                "…a w'atu mpɔn kakra wɔ hɔ no gye asaase nyantam bɛyɛɛ 5,891 square kilometers (2,275 sq mi), na ne kurow a mpuntudwuma dzi ako…",
+                "…ma dzi akotsen wɔ hɔ paa no gye asaase nyantam bɛyɛɛ 26,000 square kilometers (10,000 sq mi). Moscow ka kurowpɔn akɛse a wɔwɔ…",
+                "…ɔyɛ asaase kakraba a ɔwɔ nsu ne mfinimfin a ɔyɛ bɛyɛ ''108 square kilometres (42 sq mi)'' wɔ bea hɔ. == Nkasaho == Sega Tambo…",
+                "…kraba wɔ Japan amantɔw duesia no nyina mu,a ne kɛse yɛ 1745 square kilometres. Iyi yɛ ɔha nkuɛmu 1.4 wɔ Japan asaase nyina mu.…",
+                "…raba wɔ Ghana amantɔw duesia no nyina mu,a ne kɛse yɛ 3,245 square kilometres. Iyi yɛ ɔha nkuɛmu 1.4 wɔ Ghana asaase nyina mu.…"
+            ]
+            },
+        {
+                "word": "ahinanan4",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sɛkwea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
                 "word": "dɔla",
                 "verdict": "attested",
                 "bounded": true,

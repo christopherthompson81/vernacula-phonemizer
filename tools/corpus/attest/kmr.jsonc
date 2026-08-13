@@ -1,25 +1,106 @@
 // WIKIPEDIA WORD ATTESTATION — kmr. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "kmr",
-    "wiki": "ku.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "kmr",
+        "wiki": "ku.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "mîlîgram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Mg (ya mg) kurtenavê Magnezyûm e. Mîlîgram e. Madagaskar di lîsteya kodên ISO yên dewletan da ye.…",
+                "…bi qasi 1 desî lîtreye û divê di nava wê da bi qasî 80-120 mîlîgram glukoz hebe). Di nav xwînê de asta glukozê bi navbeynkariya…",
+                "…kê bidin, nîv piyanek (qedeha avê) xwîn divê bi qasî 80-120 mîlîgram glukoz lixwe bigire). Eger di nav xwîna mirov de rêjeya şek…",
+                "…karbona dîoksîd pêk tê. Desîlîtreyek xwîna mirov 10 heta 20 mîlîgram (10 heta20 mg/dl) ure lixwe digire. Kreatîn paşmayiya ji tê…",
+                "…bi qasi 1 desî lîtreye û divê di nava wê da bi qasî 80-120 mîlîgram glukoz hebe). Di nav xwînê de asta glukozê bi navbeynkariya…"
+            ]
+            },
+        {
+                "word": "desîlître",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "di desîlîtreyê de",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hwd",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…kî navneteweyî yê agahdariyan e ku ji wêne, vîdeyo, muzîk û hwd pêk tê û ji bo çêkirina gotarên Wîkîpediya azadane tê bikar…",
+                "…dewletê lê ye, bi taybetî parlamen, hikûmet, serokdewlet û hwd. Gelek caran paytexta welatekî bajarê herî mezin e û tê de…",
+                "…gê , Çiyayê Eledaxê , Gola Sodo , Gola Tirşo û Gola Qulingê hwd xwedî sirûşteke pirr ciwan e. Aborî li ser xwedîkirina ajal…",
+                "…iye û bicihkiriye. Vêgav 87 % Kurd, 13 % jî Terekeme, Azerî hwd dijîn. Beriya Terteleya Filehan li herêmê gundên Filehan jî…",
+                "…engê rêya xurt == Radyo, reklam, reng, reş, rind, roj, rû û hwd. Pir (pirr) = gelek, ker (kerr) = guhgiran, şer (şerr), bir…",
+                "…guhgiran, şer (şerr), birrîn (jêkirin/ker kirin), qîrrîn û hwd.…"
+            ]
+            },
+        {
+                "word": "her wekî din",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…n teknîkî, ava dike.gorî zagona mafên berhemên nivîskaran û her wekî din wênesaz, peykervan û hunermendên din parastî ye. Nivîskar d…",
+                "…û felsefe wê == Li gorî zagona mafên berhemên nivîskaran û her wekî din wênesaz, peykervan û hunermendên din parastî ye. Nivîskar d…",
+                "…bi hunerê wergere xuyayîbûnî, wek bi hûnerên resm, peyker û her wekî din bê bikaranin. == Mînak == Aşitî bi kevoka sipî tê bikaranîn…",
+                "…aliyê Pirareş (bi tirkî: Karaköprü) digêjîne Çemê Dîcleyê. Her wekî din çemekî ku bi navê Xurxurkê tê nasîn di jêra gund derbas dib…",
+                "…elûçiyan li gorî çend zanistan zaravayekî zimanê kurdî ye û her wekî din bi genetîkî jî û bi dîroka kevnar jî ev derdikeve holê. Kur…",
+                "…stîtuya Kurdî ya Amedê, Lîs, Nûbihar, Ronahî, Tîroj, Vate û her wekî din tê de beşdar in. Ji xeynî pêşkêşkirina pirtûkên nûderketî,…"
+            ]
+            },
+        {
+                "word": "û hwd",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 47,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…hekî navneteweyî yê agahdariyan e ku ji wêne, vîdeyo, muzîk û hwd pêk tê û ji bo çêkirina gotarên Wîkîpediya azadane tê bikar…",
+                "…ya dewletê lê ye, bi taybetî parlamen, hikûmet, serokdewlet û hwd. Gelek caran paytexta welatekî bajarê herî mezin e û tê de…",
+                "…an jî Archizygoptera (fosîl) Odonata - Zencere, moza zêrîn û hwd. Jêreçîna Neoptera Serekoma Exopterygota (?) Caloneurodea (…",
+                "…ra Embioptera Zoraptera Dermaptera Orthoptera - Kulî, cobir û hwd. Serekoma pêşniyarkirî ya Dictyoptera Phasmatodea (?) Gryll…",
+                "…ndopterygota Hymenoptera - Mûrî, mêşhingiv, pîzalok, pîzang û hwd. Coleoptera - Bezimk, bizimk, gawuk an textebît Strepsipter…",
+                "…hoptera Perîdank - Pelatînk, perperok, pîrika titijê, gazûz û hwd. Incertae sedis Glosselytrodea (fosîl) Miomoptera (fosîl).…"
+            ]
+            },
         {
             "word": "di saetê de",
             "verdict": "attested",
@@ -619,5 +700,6 @@
                 "…istanê ye, 710 km li Rojavaya Kurdistanê û li Sûriyê û 1060 kîlomêtre li Iraqê ye. Dirêjahiya Yekava Ereb (Şett al-Areb) ku Firat…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

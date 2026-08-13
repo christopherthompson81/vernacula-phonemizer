@@ -172,6 +172,35 @@ const UNITS: readonly (readonly [string, string])[] = [
     ["km", "kilomita"], ["cm", "sɛntimita"], ["mm", "milimita"], ["kg", "kilogram"], ["m", "mita"],
 ];
 
+/**
+ * THE SQUARE-MEASURE WORD — and it is written here because the refusal the header used to record was a
+ * SOURCING gap that has since closed, not a permanent one.
+ *
+ * ⚠ THIS IS THE WHOLE OF ak's RAW-LATIN LEAK. The `RAW-LATIN` scan reports `km ×7` over ak's artifact
+ * even though `km` is declared and read correctly everywhere else, and every one of those hits is
+ * `km²`/`km2`: the artifact writes the abbreviation 19 times, 8 of them squared, and the 11 bare ones all
+ * read *kilomita* already. So the leak was never a missing KEY — it was step 4's deliberate refusal to
+ * read a unit before an exponent, standing in for a word nobody had found. Worth stating for the fleet:
+ * a declared unit that still reports is a signal to look at the exponent, not at the table.
+ *
+ * ⚠ AND THE WORD IS GLOSSED AGAINST THE SYMBOL BY tw.wikipedia'S OWN km² ARTICLE, which is the strongest
+ * shape of evidence this repo recognises: *"Kilomita ahinanan, agyiraehyɛde km2, yɛ beae a wɔsusuw"* —
+ * "square kilometre, symbol km2, is an area that is measured" — and, two sentences on, *"ahinanan a
+ * n'afa horow tenten yɛ 1 no kɛse km yɛ kilomita ahinanan biako"*. `attest.ts --lang ak --wiki tw` puts
+ * it at 20 tokens / 6 articles; the fat wiki uses it in running text in the measure slot — *"kilomita
+ * ahinanan 77,360 (akwansin ahinanan 29,870)"*, *"kilomita 9,130 ahinanan"*, *"akwansin 2,000 ahinanan
+ * (5,200 km2)"*, *"kilomita asia ahinanan"*.
+ *
+ * ⚠ THE WORD FOLLOWS THE UNIT NOUN, which is what those instances agree on even though they disagree
+ * about where the FIGURE goes (`kilomita ahinanan 77,360` against `kilomita 9,130 ahinanan`). This layer
+ * already emits the figure first on its own attested grounds (see UNITS), so the arm below appends the
+ * modifier to the unit word and leaves the numeral where this file's own evidence puts it.
+ *
+ * ⚠ NO CUBE WORD STILL. `km³`/`m³` is ×0 in this artifact and nothing attests a cubed modifier, so step 4
+ * keeps refusing `3`/`³` exactly as before. The header's refusal is narrowed, not deleted.
+ */
+const SQUARED = "ahinanan";
+
 /** THE SAME SYMBOLS STANDING ALONE. Every arm of step 4 needs a numeral, so a bare `km` — a caption, a
  *  table header, or a figure whose numeral a bracket or an `&nbsp;` put out of reach — went to the phoneme
  *  sink as raw ASCII, which in a Latin-script language no leak gate can see. The guards are the shared
@@ -243,6 +272,14 @@ export function normalizeAkan(input: string): string {
     //    `&nbsp;` is read as the word "and" followed by the letters n-b-s-p. `&#xFEFF;` is a rendering
     //    hint, not speech.
     s = s.replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ").replace(/[​‌‍﻿]/gu, "");
+    //    ⚠ AND A WIKITEXT TABLE PIPE BETWEEN A FIGURE AND ITS UNIT, for the same reason `&nbsp;` is here:
+    //    it is not speech, it is already silent, and it sits in exactly the gap step 4's number-unit
+    //    adjacency needs. `asaase bɛyɛ 973.78|km² so` is the artifact's ONE instance (`|` occurs once in
+    //    the whole artifact) and it is an infobox field that lost its markup, not a Twi sentence. Folding
+    //    it to a space cannot change any reading — the sink drops the character today — it can only let a
+    //    rule reach across it. ⚠ NARROW ON PURPOSE: digit on the left, letter on the right. A bare `|` is
+    //    left alone, so nothing that might be a genuine table column separator is touched.
+    s = s.replace(/(?<=\d)\|(?=\p{L})/gu, " ");
 
     // 2) THE ELISION APOSTROPHE — the largest class in the language, ×4,930 tw + ×2,664 fat.
     //    `n'` (3sg possessive *ne*), `w'` (2sg *wo*) and `m'` (1sg *me*) are CLITICS whose vowel elides
@@ -306,6 +343,14 @@ export function normalizeAkan(input: string): string {
     //      this point because step 6 has not run yet (which is the second reason units come first). The
     //      capital forms need no guard: `615M` and `1.132B` are magnitudes too, and this table is
     //      case-sensitive, so they were never at risk.
+    //    ⚠ THE SQUARED ARM RUNS FIRST, and it has to: the plain arm's lookahead refuses `2`/`²`, so with
+    //      the two in the other order `240 km2` would be rejected outright and never retried. Same
+    //      lookbehinds, same operand; the only differences are that it CONSUMES the exponent and that its
+    //      own lookahead still refuses a `3`/`³` (`km2` yes, `km23` no, `km3` no — there is no cube word).
+    //      See SQUARED for the citation and for why this is where ak's raw-Latin leak lived.
+    for (const [sym, word] of UNITS) {
+        s = s.replace(new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?:²|2)(?![\\p{L}\\p{M}\\d²³])`, "gu"), `$1 ${word} ${SQUARED}`);
+    }
     for (const [sym, word] of UNITS) {
         s = s.replace(new RegExp(`(?<![$€£₵][^\\d]{0,3}[\\d.,]{0,12})(?<![\\d.,\\p{L}\\p{M}])(${NUM})\\s?${sym}(?![\\p{L}\\p{M}\\d²³])`, "gu"), `$1 ${word}`);
     }

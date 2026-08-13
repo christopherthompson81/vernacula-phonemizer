@@ -244,4 +244,22 @@ describe("Shona — what is deliberately NOT read, pinned so a change is visible
         // The one attested Shona litre sits in the rate denominator slot, and now composes there exactly.
         expect(phonemize("10 km/l", "sn")).toBe("makiromita ɡumi pa rita");
     });
+
+    test("the HOUR — a bare count reads, the rate is untouched, and the clock is still refused", () => {
+        // `hr`/`hrs` were declared only as rate DENOMINATORS, so a bare count of hours had no reading and
+        // `(8hr)` reached the IPA as *sere hr*. The artifact glosses the abbreviation against the word in
+        // the next clause: "panobhadhara $60 pazuva (8hr). Kana akashanda 6 AWA anenge…".
+        expect(phonemize("8hr", "sn")).toBe("maawa masere");
+        expect(phonemize("8hrs", "sn")).toBe("maawa masere");
+        expect(phonemize("2 hrs", "sn")).toBe("maawa maʋiri");
+        // ⚠ THE `ma-` PLURAL IS THE HEAD FORM AND THE BARE `awa` THE DENOMINATOR FORM, which is the split
+        // the corpus writes — and declaring `hr` in `units` broke exactly this line, because a units key is
+        // matchable as a denominator too. That is why the head reading is claimed locally instead.
+        expect(phonemize("120 km/hr", "sn")).toBe("makiromita zana ne makumi maʋiri pa awa");
+        // ⚠ AND A 24-HOUR CLOCK IS DELIBERATELY STILL RAW. `06:00hrs` is two numerals and the unit belongs
+        // to neither half; through a units key it read "six, HOURS ZERO". Shona has no attested clock
+        // reading here (normalize.ts's NO CLOCK finding), so the colon is in the lookbehind and this stays
+        // a visible `RAW-LATIN` hit rather than a confidently wrong quantity.
+        expect(phonemize("06:00hrs", "sn")).toContain("hrs");
+    });
 });

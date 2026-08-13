@@ -151,10 +151,23 @@ describe("Akan (Twi) text normalization", () => {
         expect(normalizeAkan("62 m tenten")).toBe("62 mita tenten");
         expect(normalizeAkan("173cm")).toBe("173 sɛntimita"); // ⚠ sɛntimita ×91, NOT the composed sentimita
         expect(normalizeAkan("5 kg")).toBe("5 kilogram");
-        // ⚠ NO SQUARE WORD, so a key followed by an exponent is refused outright — reading `km²` as
-        // *kilomita* would state an AREA as a distance.
-        expect(normalizeAkan("45 km²")).toBe("45 km²");
-        expect(normalizeAkan("11.41 km2")).toBe("11 akyiri pɔ 41 km2");
+        // ⚠ THE SQUARE WORD, AND THIS EXPECTATION IS THE ONE THAT CHANGED. Both lines used to pin the
+        // REFUSAL — `45 km²` → `45 km²`, `11.41 km2` → `11 akyiri pɔ 41 km2` — on the stated grounds that
+        // no Akan square word was attested and that reading `km²` as *kilomita* would state an area as a
+        // distance. The word has since been found and GLOSSED AGAINST THE SYMBOL by tw.wikipedia's own km²
+        // article — *"Kilomita ahinanan, agyiraehyɛde km2, yɛ beae a wɔsusuw"* — so the refusal was a
+        // sourcing gap, not a permanent one, and it was ak's entire `RAW-LATIN` leak (`km ×7`, all of them
+        // squared). See normalize.ts `SQUARED`. The reading is unit-then-modifier, which is what every
+        // attested instance agrees on.
+        expect(normalizeAkan("45 km²")).toBe("45 kilomita ahinanan");
+        expect(normalizeAkan("11.41 km2")).toBe("11 akyiri pɔ 41 kilomita ahinanan");
+        // ⚠ AND THE CUBE IS STILL REFUSED — the narrowing is to the square only; nothing attests a cubed
+        // modifier and `km³` is ×0 in this artifact.
+        expect(normalizeAkan("45 km³")).toBe("45 km³");
+        expect(normalizeAkan("45 km3")).toBe("45 km3");
+        // ⚠ AND THE WIKITEXT TABLE PIPE IS FOLDED so step 4 can reach across it — the artifact's one `|`
+        // is an infobox field that lost its markup (`973.78|km²`), and the character was already silent.
+        expect(normalizeAkan("973.78|km²")).toBe("973 akyiri pɔ 78 kilomita ahinanan");
         // ⚠ AND `m` AFTER A MONEY AMOUNT IS THE MAGNITUDE, not the metre (×5 across the two wikis).
         expect(normalizeAkan("US$ 1m")).toBe("dɔla 1m");
         expect(normalizeAkan("5.20m")).toBe("5 akyiri pɔ 20 mita"); // …while a plain decimal still reads
