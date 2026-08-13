@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createSomali } from "../src/languages/somali/somali.ts";
 import { phonemize } from "../src/index.ts";
+import { normalizeSomali } from "../src/languages/somali/normalize.ts";
 
 // Canonical-IPA goldens for Somali / Af-Soomaali (so) — Cushitic, 1972 Latin orthography. A shallow near-phonemic
 // rule g2p; the signature Cushitic consonants ⟨c⟩→ʕ, ⟨x⟩→ħ (pharyngeals), ⟨dh⟩→ɖ (retroflex), ⟨q⟩→q (uvular),
@@ -98,5 +99,57 @@ describe("Somali canonical IPA", () => {
             expect(phonemize("1/2", "so")).toBe("nus");
             expect(phonemize("-5", "so")).toContain("laɡa d͡ʒaraj");
         });
+    });
+});
+
+// THE RAW-LATIN PASS — an ASCII run with no vowel that the source typed and the IPA still says verbatim.
+// ⚠ In Somali these are audible rather than silent, because ⟨c⟩ is /ʕ/ and the engine reads an unknown run:
+// `sq mi` reached the IPA as *sq mi*. Step 3b spends four populations, each a different mechanism.
+describe("Somali normalization: the raw-Latin runs", () => {
+    test("⚠ the ordinal tail, settled INSIDE one of its own two sentences", () => {
+        // *"longitudes 33aad meridian bari iyo 48th meridian bari"* — the Somali ordinal and the English
+        // one in the same clause about the same kind of thing. `-aad` is the corpus's suffix ×1,436, and
+        // the engine already reads `1aad` as *kow aad* with no rule, so the rewrite hands the result to a
+        // path known to work rather than inventing a reading.
+        expect(normalizeSomali("48th meridian bari")).toBe("48aad meridian bari");
+        expect(normalizeSomali("33aad meridian bari")).toBe("33aad meridian bari");
+    });
+
+    test("⚠ `sq` cost TWO readings, not one — it also broke the unit's digit adjacency", () => {
+        // `mi` is declared as `mayl` and read correctly everywhere else; with `sq` standing between the
+        // number and the symbol it went unread in all six of these, and `sq` itself reached the IPA.
+        expect(normalizeSomali("(426,372.61 sq mi)")).toBe("(426372 dhibic 6 1 mayl laba jibaaran)");
+        // ⚠ THE WORDS, NOT A SUPERSCRIPT. Rewriting `sq mi` to `mi²` is neat where a digit precedes and
+        // WRONG where one does not — `610 deggane/sq mi` has a word in front, the tier's digit-adjacent
+        // path declines, and a `²` this layer INVENTED reaches the phoneme sink as a RAWMARK. Trading a
+        // reported leak for an unreported one is the one move this class must not make.
+        expect(normalizeSomali("610 deggane/sq mi")).toBe("610 deggane halkii mayl laba jibaaran");
+        // ⚠ ONLY BEFORE A DECLARED UNIT. Somali has no foot, so `sq ft` keeps BOTH letters and both stay
+        // reported — half a reading is worse than a visible leak, the same rule the tier applies to rates.
+        expect(normalizeSomali("(430 sq ft) qofkiiba")).toBe("(430 sq ft) qofkiiba");
+    });
+
+    test("⚠ three `km` lines, four different shapes, and one of them was a MIS-READING", () => {
+        // `91 km 2` read as *kiiloomitir 2* — the kilometre correctly and then a stray "two", a number the
+        // source never said. That is not a leak and no leak counter would ever have found it.
+        expect(normalizeSomali("91 km 2 (35 sq mi)")).toBe("91 kiiloomitir laba jibaaran (35 mayl laba jibaaran)");
+        // A bare rate: a slash with a unit after it and none before, so the tier's rate branch has nothing
+        // to key on. `halkii` is the connective already declared as `unitPer`, and the corpus spells it out
+        // in this exact frame one clause later.
+        expect(normalizeSomali("26,800/km 2")).toBe("26800 halkii kiiloomitir laba jibaaran");
+        expect(normalizeSomali("1,200 qof halkii km2")).toBe("1200 qof halkii kiiloomitir laba jibaaran");
+        // A hyphen-attached unit. ⚠ The hyphen proves nothing on its own — Somali's commonest pattern is a
+        // numeral bound to morphology with one (`2010-kii` ×3,023) — so what separates the two is that a
+        // DECLARED UNIT KEY is not a Somali suffix.
+        expect(normalizeSomali("750-km (470 mi)")).toBe("750 kiiloomitir (470 mayl)");
+        expect(normalizeSomali("sanadkii 2010-kii")).toBe("sanadkii 2010-kii");
+    });
+
+    test("`mph` is spelled as the rate it abbreviates, out of words already sourced", () => {
+        // `mi` → mayl, `h` → saacad, `unitPer` → halkii. Nothing new is claimed about Somali; what is
+        // claimed is what `mph` stands for.
+        expect(normalizeSomali("300 km/h (190 mph)")).toBe(
+            "300 kiiloomitir halkii saacad (190 mayl halkii saacad)",
+        );
     });
 });

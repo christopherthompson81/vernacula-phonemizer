@@ -21,6 +21,79 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "sy ny sisa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…ny an' ny Baiboly ôrtôdôksa, ny an' ny Baiboly prôtestanta, sy ny sisa.). == Fiforonan-teny == Ny teny hoe kanôna dia avy amin' ny…",
+                "…in’ Andriamanitra ho mpaminany ho an' ny babo tany Babilôna sy ny sisa tavela tao Jerosalema i Ezekiela. Nanomboka tokony ho tamin…",
+                "…otanisaina ny tsy voalaza. Mahasolo ny andian-teny malagasy sy ny sisa (hafohezina hoe sns) ny teboka telo. Ampiasaina koa io mari…",
+                "…y mpaminany, ny pasitera, ny mpampianatra, ny evanjelistra, sy ny sisa.7 Mino ny fanomezam-pahasoavana amin' ny fiteny tsy fantatr…",
+                "…ana, ny fanasitranana, ny fandikana ny fiteny tsy fantatra, sy ny sisa izahay. 9 Mino izay rehetra nambaran' Andriamanitra, izay r…",
+                "…akafo sy amin' ny fampitana ny otrikaina ho any amin' ny ra sy ny sisa amin' ny vatana. Ity ampahany amin' ny sy fitaovam-pandevon…"
+            ]
+            },
+        {
+                "word": "sisa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…. Anisan' ny fianakaviana Hominidae izy io ary izy irery no sisa ao amin'ny vondron-karazana Homo ankehitriny, ary efa lany…",
+                "…min' ny fomba fijerin' ny etôlôjia, sy raha mitaha amin' ny sisa amin'ny fanjakan'ny biby (Animalia), ny Homo sapiens dia mi…",
+                "…ei Emet sy ny hoe חמש מגילות / Hamesh Megilot ary ireo boky sisa. === Ny Sifrei Emet na Bokim-Pahamarinana === Ny teny hoe ס…",
+                "…ר אסתר) na Megillat Ester (מגילת אסתר) (Estera) === Ny boky sisa === Tsy misy anarana manokana hanasokajiana azy ny boky sis…",
+                "…isa === Tsy misy anarana manokana hanasokajiana azy ny boky sisa ao amin' ny Ketuvim izay miisa telo, dia ireto avy: Sefer D…",
+                "…orchy ary i Clarence. Ny toerana misy ny ampahan'ny mponina sisa dia ao Launceston sy Devonport ary Burnie. Ny nosy Macquari…"
+            ]
+            },
+        {
+                "word": "sy ny maro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…oa ny manganezy (Mn) na ny nikela (Ni) na ny môlibdena (Mo) sy ny maro hafa, arakaraka ny hampiasana ilay metaly. == Jereo koa ==…",
+                "…tao amin' ny hetsika prôtestanta notarihan' i Martin Lotera sy ny maro hafa. Nanomboka tany Alemaina sy Soisa tamin’ ny taonjato f…"
+            ]
+            },
+        {
+                "word": "sy ny manaraka",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…a, araka ny Bokin' ny Eksôdôsy ao amin' ny Baiboly (Eks. 12 sy ny manaraka). Izany dia \"hiakam-paminaniana\" ho amin' ny fanjakan' ny f…",
+                "…koa, izany dia hita ao amin' ny Asan' ny Apôstôly (Asa. 2.6 sy ny manaraka). Voaresaka ihany koa ny hoe \"fitenin' ny anjely\" (fiteny t…",
+                "…apany atsimon'ny tany araka ny Bokin'ny Genesisy (Gen. 10.6 sy ny manaraka). Ny taranak'i Kanana (Kananita) dia nonina tao amin'ny tan…"
+            ]
+            },
+        {
+                "word": "isaky ny",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 44,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Ny hakitroky ny mponina dia ny salan'isan'ny mponina isaky ny velaran-tany voafaritra (isaky ny kilaometatra tsy mivadi-m…",
+                "…ny salan'isan'ny mponina isaky ny velaran-tany voafaritra (isaky ny kilaometatra tsy mivadi-mandry).…",
+                "…taona sy ilay tetiandro izay lasa misy elanelana iray andro isaky ny efa-taona. Raha ampitahaina amin'ny tetiandro joliana dia t…",
+                "…ovo ao anatin' ny lasantsy dia eo amin' ny 33.600.000 joule isaky ny litatra, na 46.700.000 joule isaky ny kilôgrama (misy kalôr…",
+                "…' ny 33.600.000 joule isaky ny litatra, na 46.700.000 joule isaky ny kilôgrama (misy kalôria ambony kokoa). Angovo tena makitrok…",
+                "…). Angovo tena makitroka izany: 2,9 heny eo ho eo ny angovo isaky ny kilôgrama noho ny hazo maina, ohatra. == Jereo koa == Solit…"
+            ]
+            },
+        {
                 "word": "milimetatra",
                 "verdict": "attested",
                 "bounded": true,

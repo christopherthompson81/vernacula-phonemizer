@@ -178,7 +178,10 @@ describe("nan text normalization", () => {
         // 5/5 and 4/4 genuine against 26 ASCII hyphens that are mostly the `ISO 8859-N` block, an ISBN,
         // arithmetic — and POJ's own word-internal syllable joiner.
         expect(normalizeMinNan("15–16 sè-kí")).toBe("15 到 16 sè-kí");
-        expect(normalizeMinNan("32~64 mg/kg")).toBe("32 到 64 mg/kg");
+        // ⚠ EXPECTED VALUE CHANGED when the milligram key was declared: the tilde is still the range this test is
+        // about, but the rate beside it is now READ instead of leaking `mg/kg` into the IPA as two toned
+        // ASCII syllables. The range assertion is unaffected — `到` sits where it always did.
+        expect(normalizeMinNan("32~64 mg/kg")).toBe("32 到 64 毫克 每 公斤");
         expect(normalizeMinNan("ISO 8859-1")).toBe("ISO 8859-1");
         expect(normalizeMinNan("ko͘-1-ê")).toBe("ko͘-1-ê"); // a POJ compound, not a range
         // ⚠ THE LEFT ENDPOINT MAY CARRY ITS UNIT — captured and PUT BACK so step 3 still sees `25°C`.
@@ -200,5 +203,36 @@ describe("nan text normalization", () => {
         // ⟨tō͘⟩ is attested (`lâm-hūi 65-tō͘`); no arc-minute or arc-second word is.
         expect(normalizeMinNan("118°04'04\"")).toBe("118度 04 04");
         expect(normalizeMinNan("24°26'")).toBe("24度 26");
+    });
+});
+
+// THE RAW-LATIN PASS. ⚠ POJ IS UNUSUALLY EXPOSED TO THIS CLASS: the orthography IS ASCII, so an
+// abbreviation and a word are written in the same alphabet, and the converter gives a leaked run A TONE —
+// `cm˥`, `mg˥`. It does not merely survive into the IPA; it is spoken as a syllable of Min Nan.
+describe("min nan normalization: the raw-Latin units", () => {
+    test("⚠ cm / mg / ml are declared on the DICTIONARY alone, which is the weaker leg", () => {
+        // `km`/`m`/`kg` came from the corpus's own POJ prose (`kong-lí` ×21) and were then written in Han.
+        // For these three the first leg is ABSENT — `kong-hun`, `hô-khik`, `hô-seng` are ×0 and the corpus
+        // writes only the abbreviation, ×13 digit-adjacent. The shipped MOE dictionary (dict.tsv) supplies
+        // 公分 kong-hun, 毫克 hô-khik, 毫升 hô-sing — the same published source that validated 百分之.
+        expect(normalizeMinNan("bóe-liu liōng-iok-á 16.5-28 cm tn̂g")).toBe("bóe-liu liōng-iok-á 16點五-28 公分 tn̂g");
+        expect(normalizeMinNan("ū boé tn̂g 3cm")).toBe("ū boé tn̂g 3 公分");
+    });
+
+    test("⚠ a RATE left BOTH units raw, and `ml` had to be a denominator too", () => {
+        // The blood-sugar article writes the concentration as a rate throughout. With the milligram key
+        // undeclared the tier's unit path never matched at all, so both units leaked side by side.
+        expect(normalizeMinNan("sī 32~64 mg/kg")).toBe("sī 32 到 64 毫克 每 公斤");
+        expect(normalizeMinNan("chhiau-kòe 200mg/ml")).toBe("chhiau-kòe 200 毫克 每 毫升");
+        // A NUMERIC denominator is not a rate the tier can compose, but both units are now read.
+        expect(normalizeMinNan("khah-kē î 120mg/100ml")).toBe("khah-kē î 120 毫克/100 毫升");
+    });
+
+    test("⚠ the magnitude-confusable pairs read DIFFERENTLY — misread.ts's question", () => {
+        // 公分 ≠ 公里 (cm/km) and 毫克 ≠ 公斤 (mg/kg); `l` stays undeclared so ml/l cannot collide either.
+        // `misread.ts --langs nan` reports 0 collisions after this change, and nan's core mis-read cells
+        // fall 5 → 4.
+        expect(normalizeMinNan("5 cm")).not.toBe(normalizeMinNan("5 km"));
+        expect(normalizeMinNan("5 mg")).not.toBe(normalizeMinNan("5 kg"));
     });
 });

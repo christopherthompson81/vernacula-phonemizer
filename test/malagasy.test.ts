@@ -142,3 +142,56 @@ describe("Malagasy normalization: the scale letter is case-insensitive", () => {
         expect(normalizeMalagasy("35° celsius")).toBe("35 degre celsius");
     });
 });
+
+// THE RAW-LATIN PASS. `rawLatinIn` reports an ASCII run with no vowel that the source typed and the IPA
+// still says verbatim — a class every other leak counter is blind to, because in a Latin-script language an
+// ASCII run looks exactly like a word. Malagasy's engine PHONEMIZES an unknown run rather than dropping it,
+// so none of these was silence: `sns` was the syllable *sns* spoken at the end of every list in the corpus.
+describe("Malagasy normalization: the raw-Latin runs", () => {
+    it("⚠ `sns` is the Malagasy *etc.*, and the wiki glosses its OWN abbreviation", () => {
+        // *"Mahasolo ny andian-teny malagasy sy ny sisa (hafohezina hoe sns) ny teboka telo"* — the
+        // ellipsis article, naming the abbreviation and its expansion in one sentence. The phrase attests
+        // 11 tokens / 9 articles and every use is the *etc.* slot after a list. ×7 in the artifact, the
+        // largest single raw-Latin run in this language.
+        expect(normalizeMalagasy("mihalava, mihafohy, mihavitsy, mihafeno, sns.")).toBe(
+            "mihalava, mihafohy, mihavitsy, mihafeno, sy ny sisa.",
+        );
+        expect(normalizeMalagasy("(kintana, sns), sns.")).toBe("(kintana, sy ny sisa), sy ny sisa.");
+    });
+
+    it("⚠ `snm` is argued from the SLOT, not from a gloss — the weaker of the two legs", () => {
+        // `sy ny manaraka` ("and the following") attests 3/3, and all three are a scripture citation:
+        // *"(Eks. 12 sy ny manaraka)"*, *"(Asa. 2.6 sy ny manaraka)"*, *"(Gen. 10.6 sy ny manaraka)"*.
+        // Both artifact `snm` are that same frame, and the initials match the way `sns` matches `sy ny sisa`.
+        expect(normalizeMalagasy("(Sal.Sal. 2.34 snm.)")).toBe("(Sal.Sal. 2 faingo 3 4 sy ny manaraka.)");
+        // ⚠ THE GUARD EXCLUDES LETTERS, NOT WORD CHARACTERS: the corpus FUSES the abbreviation to the verse
+        // number, and a `\b` boundary — which a digit satisfies on both sides — matched nothing here.
+        expect(normalizeMalagasy("(Sal. Sal. 4.1snm, 6.14-20)")).toBe(
+            "(Sal. Sal. 4 faingo 1 sy ny manaraka, 6 faingo 1 4-20)",
+        );
+    });
+
+    it("⚠ a RATE leaked BOTH of its units, and both were already declared", () => {
+        // The tier reads a rate only when it can read the whole of it — with no `unitPer` its rate branch
+        // returns the text untouched "rather than emit half a reading". So `kg` and `m` were declared, read
+        // correctly everywhere else, and `1,429 kg/m³` kept both abbreviations raw. The bare-unit rewrite
+        // could not save it either: that pass refuses a `/` and refuses an exponent, for the same reason.
+        expect(normalizeMalagasy("1,429 kg/m³")).toBe("1 faingo 4 2 9 kilao isaky ny metatra toratelo");
+        // `isaky ny` — 44/19, and the examples are this slot and no other, including the population-density
+        // definition that IS the artifact's `mp/km²`: *"ny mponina isaky ny velaran-tany voafaritra"*.
+        expect(normalizeMalagasy("salan-kakitroka 30 mp/km².")).toBe(
+            "salan-kakitroka 30 mponina isaky ny kilaometatra toradroa.",
+        );
+        // The corpus writes the slash spaced too, and two of the three instances gloss `mp` themselves —
+        // *"Ny hakitroky ny mponina dia 8,5 mp/ km²"* says the word in the same sentence as the symbol.
+        expect(normalizeMalagasy("(3 mp/ km²)")).toBe("(3 mponina isaky ny kilaometatra toradroa)");
+    });
+
+    it("⚠ a text talking about its OWN LETTERS is not a leak, and stays reported", () => {
+        // The Malagasy orthography article names its digraphs: the run is a citation, not a word, and no
+        // rule should read it. This is the detector's own documented false-positive population.
+        expect(normalizeMalagasy("ary ny [ts] sy [dz] dia soratana hoe ts sy j")).toBe(
+            "ary ny [ts] sy [dz] dia soratana hoe ts sy j",
+        );
+    });
+});

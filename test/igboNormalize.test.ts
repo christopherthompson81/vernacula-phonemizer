@@ -127,4 +127,34 @@ describe("igbo normalization", () => {
         expect(normalizeIgbo("Il-76 na 1990")).toBe("Il-76 na 1990");
         expect(normalizeIgbo("COVID19 na 2020")).toBe("COVID19 na 2020");
     });
+
+    test("⚠ the ENGLISH ORDINAL TAIL — the largest single raw-Latin leak in the artifact", () => {
+        // Igbo has no digit-ordinal orthography of its own, so ig.wikipedia writes the English suffix inside
+        // Igbo prose. The number was already read; only the two letters survived, and igbo.ts PRONOUNCES an
+        // unknown ASCII run — `32nd` came out *"iri atọ na abụọ nd"*. 13 of 31 raw-Latin hits, one shape.
+        //
+        // The reading is `nke` + the CARDINAL, which the corpus states rather than implies: 48 instances of
+        // `nke` before a numeral, ordinal in sense every time it is checkable (*"ụbọchị nke iri na isii"*,
+        // *"narị afọ nke iri na itoolu"*). ⚠ And one of them is inside a sentence this rule fires on —
+        // *"Nigeria bụ mba 8th nke kacha emepụta mmanụ, na nke iri kachasị"* writes the English ordinal and
+        // the Igbo one in the same breath.
+        expect(normalizeIgbo("mba 32nd kachasị")).toBe("mba nke 32 kachasị");
+        expect(String(phonemize("Nigeria bụ mba 8th", "ig"))).toBe("niɡeɾia bʊ mba nke asatɔ");
+        expect(String(phonemize("Naijiria na 2007 bu 37th", "ig"))).toBe(
+            "naid͡ʒiɾia na puku abʊɔ na asaa bu nke iɾi atɔ na asaa",
+        );
+        // ⚠ No word is coined and no numeral is recomposed here: the rule emits `nke` plus the ORIGINAL
+        // DIGITS and hands them to the one compositor, so a grouped ordinal survives rule 1 first.
+        expect(normalizeIgbo("1,000th")).toBe("nke 1000");
+    });
+
+    test("⚠ the ordinal rule is anchored on the DIGIT, because the two letters are Igbo material", () => {
+        // Igbo's dotted vowels ⟨ị ọ ụ⟩ are not ASCII, so a plain-ASCII run falls out of the middle of an
+        // ordinary word — `ndị` yields `nd` and `Kraịst` yields `st`, both of which RAW-LATIN reports. A
+        // letter-anchored rule would rewrite the language; only the digit separates the ordinal from the
+        // orthography.
+        expect(normalizeIgbo("Ndị Kraịst na ndị ọzọ")).toBe("Ndị Kraịst na ndị ọzọ");
+        // `St.` the saint title is not a digit ordinal either, and stays untouched (and reported).
+        expect(normalizeIgbo("nke Ndị Kraịst bịa St. Columba")).toBe("nke Ndị Kraịst bịa St. Columba");
+    });
 });

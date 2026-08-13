@@ -21,6 +21,47 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "wdg",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 78,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Ochie mkpuchi (Ụlọ ọrụ, wdg) Mgbakọ, 1933 (sheelved) bụ Mgbakọ Òtù Na-ahụ Maka Ndị Ọrụ…",
+                "…unye nke akara kwụ ọtọ maka ụda dị n'etiti: à á ā a̍ à, à á wdg. Ebe ụda na-ebili ma na-ada ada na-apụta naanị na ụdaume og…",
+                "…ada na-apụta naanị na ụdaume ogologo, a na-ekewa ha: áá, áà wdg. A na-eji akara ụda dị elu eme ihe maka nrụgide dị iche ich…",
+                "…ng-Jing Olumba Tong ling Olumba Jing County Olumba fanchang wdg. Shi-Ling Shi tai olumba Ling yang () olumba wdg. Tai-Gao O…",
+                "…a fanchang wdg. Shi-Ling Shi tai olumba Ling yang () olumba wdg. Tai-Gao Olumba Tai ping Olumba Gao chun wdg. == Ntụaka ==…",
+                "…yang () olumba wdg. Tai-Gao Olumba Tai ping Olumba Gao chun wdg. == Ntụaka == Asụsụ obodo nke ngwaa…"
+            ]
+            },
+        {
+                "word": "fiiti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ụkwụ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 197,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ụkwụ bọọdụ ma ọ bụ ụkwụ bọọdụ bụ otu ihe atụ maka olu osisi na U…",
+                "…Ụkwụ bọọdụ ma ọ bụ ụkwụ bọọdụ bụ otu ihe atụ maka olu osisi na United States na Can…",
+                "…isi na United States na Canada. Ọ hà nhata olu bọọdụ dị otu ụkwụ (305 mm) n'ogologo, otu ụkwụ (305 mm) n'obosara, na otu anụ…",
+                "…a. Ọ hà nhata olu bọọdụ dị otu ụkwụ (305 mm) n'ogologo, otu ụkwụ (305 mm) n'obosara, na otu anụ ọhịa (25.4 mm) n'ọkpụrụkpụ..…",
+                "…na otu anụ ọhịa (25.4 mm) n'ọkpụrụkpụ.. Enwere ike ịbelata ụkwụ bọọdụ dị ka FBM (maka “ụkwụ, nha bọọdụ”), BDFT, ma ọ bụ BF.…",
+                "…'ọkpụrụkpụ.. Enwere ike ịbelata ụkwụ bọọdụ dị ka FBM (maka “ụkwụ, nha bọọdụ”), BDFT, ma ọ bụ BF. Enwere ike idebe otu puku ụ…"
+            ]
+            },
+        {
                 "word": "square",
                 "verdict": "attested",
                 "bounded": true,

@@ -30,8 +30,53 @@
  * ⚠ AND SOMALI ⟨c⟩ IS /ʕ/, WHICH IS WHY THE LATIN ABBREVIATIONS ARE NOT MERELY UNREAD BUT AUDIBLY WRONG.
  * `CE` read as *ʕe*, `BC` as *bʕ*, `°C` as *ʕ* — the g2p is correct to do that, since ⟨c⟩ is a real Somali
  * consonant; it is the abbreviations that have to be spent before they reach it.
+ *
+ * ── THE RAW-LATIN PASS: 18 HITS, AND THE ENGLISH SPELLINGS OF THINGS SOMALI ALREADY WRITES ─────────────
+ *
+ * `rawLatinIn` reports an ASCII run with no vowel that the source typed and the IPA still says verbatim.
+ * With ⟨c⟩ = /ʕ/ these were audible, not silent: `sq mi` reached the IPA as *sq mi*, `48th` as *afartan th*.
+ * Step 3b spends four of the five populations, and each one is a different mechanism:
+ *
+ *   `sq ×7`, `cu ×1`   the ENGLISH measure words, standing between the number and the unit — so they cost
+ *                      TWO readings each, since `mi` (declared `mayl`) lost its digit adjacency too.
+ *   `th ×2`            the English ordinal tail, in a corpus whose own ordinal suffix is `-aad` ×1,436 —
+ *                      and one of the two sentences writes BOTH (`33aad meridian bari iyo 48th meridian`).
+ *   `km ×3`            six occurrences over three lines, and no two are the same shape: a spaced exponent
+ *                      (`91 km 2`), a bare rate (`26,800/km 2`), the connective spelled out (`1,200 qof
+ *                      halkii km2`) and a hyphen-attached unit (`750-km`). ⚠ The first of those was not a
+ *                      leak at all but a MIS-READING — *kiiloomitir 2*, a number the source never said.
+ *   `mph ×1`           spelled as the rate it abbreviates, out of words this file already sourced.
+ *
+ * ── AND THE SIX LEFT REPORTED ──────────────────────────────────────────────────────────────────────────
+ *
+ *   `ft ×3`, `sq ×1`   ⚠ THE IMPERIAL FOOT, AND IT IS REFUSED RATHER THAN GUESSED. `4 ft 8+1⁄2 in`, `cu
+ *                      ft`, `430 sq ft` — and because `sq`/`cu` are only spent BEFORE A DECLARED UNIT, one
+ *                      `sq` stays with its `ft` instead of half the phrase being read. No Somali foot is
+ *                      attested in a corpus that has no `kiilogaram` either (see `SYMBOLS`), and half a
+ *                      reading is the thing the shared tier refuses on principle.
+ *   `pm ×1`            a clock in the English convention — `saacaddu marka ay ahayd 8:28PM … 10:50 pm`.
+ *                      Step 3 reads the TIME; the meridiem word is unsourced and stays visible.
+ *   `ps ×1`            ⚠ NOT A DEFECT — Greek `ὤψ` transliterated `ōps` in an etymology. The ⟨ō⟩ is not
+ *                      ASCII, so a plain-ASCII run falls out of the middle of the word. The same shape as
+ *                      Igbo `ndị` → `nd`, and the detector's documented false-positive population.
  */
-import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { isBareUnitKey, makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+
+/**
+ * THE UNIT TABLE, named once so the tier and the four local rules in step 3b cannot disagree about which
+ * keys exist. ⚠ `kg` IS ABSENT ON PURPOSE — see the note above `SYMBOLS`.
+ */
+const UNIT = { km: "kiiloomitir", m: "mitir", cm: "sentimitir", mm: "milimitir", ha: "hektar", mi: "mayl" } as const;
+/** The measure words, so step 3b-vi reads a bare exponent with the same words the tier uses. */
+const EXPONENT = { "\u00b2": "laba jibaaran", "\u00b3": "cubo", 2: "laba jibaaran", 3: "cubo" } as const;
+/** Any declared key, longest first so `km` cannot be matched as `m`. */
+const UNIT_KEYS = Object.keys(UNIT).sort((a, b) => b.length - a.length).join("|");
+/**
+ * The keys safe to read with NO NUMBER ATTACHED — `isBareUnitKey`'s test, applied to this language's own
+ * table rather than restated. It excludes the one-letter `m` and the vowel-carrying `mi`/`ha`, which are
+ * ordinary Somali material (`ha` is the corpus's own particle, *si kastaba ha ahaatee*).
+ */
+const BARE_KEYS = Object.keys(UNIT).filter(isBareUnitKey).sort((a, b) => b.length - a.length).join("|");
 
 /**
  * The shared symbol tier. Somali marks number on the noun but the measure words below are used in their
@@ -53,7 +98,8 @@ const SYMBOLS = makeSymbolNormalizer({
     // milyan ×1,506 · bilyan ×519 · malyan ×36 · tirilyan ×2 · kun ×1,355. ⚠ `balyan` was in this list and
     // scores ZERO — dropped. A magnitude that is not written cannot strand a currency noun.
     magnitudes: ["kun", "malyan", "milyan", "bilyan", "tirilyan"],
-    units: { km: ["kiiloomitir"], m: ["mitir"], cm: ["sentimitir"], mm: ["milimitir"], ha: ["hektar"], mi: ["mayl"] },
+    /** ⚠ From the ONE table above, so a key added there is covered by step 3b's rules without a second edit. */
+    units: Object.fromEntries(Object.entries(UNIT).map(([k, w]) => [k, [w]])),
     // ⚠ `cubo` FOR THE CUBE, NOT `saddex jibaaran`. The parallel form to `laba jibaaran` is what the pattern
     // suggests and it scores ZERO in 70,854 paragraphs; `cubo` ×4 is what the corpus actually writes, and it
     // writes it in exactly this frame — `11.548 Sentimitir cubo cm³`. Caught by auditing every declared word
@@ -120,6 +166,81 @@ export function normalizeSomali(input: string): string {
     // ⚠ ON THE HOUR THE MINUTES DROP OUT, as in every language treated so far.
     s = s.replace(/(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/gu,
         (_m, h: string, min: string) => (Number(min) === 0 ? `${Number(h)}` : `${Number(h)} iyo ${Number(min)}`));
+
+    // ── 3b. THE ENGLISH SPELLINGS OF THINGS SOMALI ALREADY WRITES ITS OWN WAY ──────────────────────────
+    //
+    // Four shapes, all of them found by `rawLatinIn` and none of them visible to any earlier gate, because
+    // in a Latin-script language an ASCII run looks exactly like a word. ⚠ AND SOMALI ⟨c⟩ IS /ʕ/, so these
+    // were not silence: `sq` reached the IPA as *sq* and `48th` as *afartan th*.
+    //
+    // 3b-i. THE ORDINAL TAIL. ×2, and the corpus settles it INSIDE ONE OF THE TWO SENTENCES: *"longitudes
+    //       33aad meridian bari iyo 48th meridian bari"* writes the Somali ordinal and the English one in
+    //       the same clause, about the same kind of thing. `-aad` is this corpus's ordinal suffix ×1,436
+    //       (header), and the engine already reads `1aad` as *kow aad* with no rule at all — so the
+    //       rewrite hands the result to a path that is known to work rather than inventing a reading.
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1aad");
+
+    // 3b-ii. THE BARE RATE — `26,800/km 2`, `69,000/sq mi`, `610 deggane/sq mi`. A slash with a unit after
+    //       it and NO unit before it, so the tier's rate branch has nothing to key on. `halkii` is the same
+    //       connective already declared as `unitPer` above, and the corpus writes it out in exactly this
+    //       frame one clause later — *"1,200 qof halkii km2"*. ⚠ FIRST of the four, because every rule
+    //       below rewrites the very text this one's lookahead is reading.
+    s = s.replace(
+        new RegExp(String.raw`(?<=[\d\p{L}])\s*/\s*(?=(?:sq |cu )?(?:${UNIT_KEYS})(?:[²³23])?(?![\p{L}\p{M}\d]))`, "gu"),
+        " halkii ",
+    );
+
+    // 3b-iii. THE EXPONENT WRITTEN WITH A SPACE — `91 km 2`, `26,800/km 2`. ⚠ THIS ONE IS A MIS-READING AND
+    //       NOT A LEAK, which is why it needs saying: the tier read `91 km 2` as *kiiloomitir 2* — the
+    //       kilometre correctly and then a stray "two" — so the utterance gained a number the source never
+    //       said. Joined only against a DECLARED unit and only when no digit follows, so a range or a
+    //       citation cannot be swallowed.
+    s = s.replace(new RegExp(String.raw`(?<![\p{L}\p{M}])(${UNIT_KEYS})\s+([23])(?![\d\p{L}\p{M}])`, "gu"), "$1$2");
+
+    // 3b-iv. `sq` AND `cu` — the ENGLISH measure words, ×7 and ×1, and every one of them is an imperial
+    //       parenthetical beside a metric figure the sentence has already given in Somali: *"1,104,300
+    //       kiiloomitir laba jibaaran (426,372.61 sq mi)"*. ⚠ THE COST OF LEAVING THEM IS NOT ONE LEAK BUT
+    //       TWO READINGS: `sq` stands BETWEEN the number and the unit, so it also breaks the digit
+    //       adjacency the tier's unit path requires, and `mi` — declared as `mayl` and read correctly
+    //       everywhere else — went unread in all six of these.
+    //       ⚠ IT EMITS THE WORDS RATHER THAN A SUPERSCRIPT, and the first version did the opposite. Turning
+    //       `sq mi` into `mi²` is neat where a digit precedes and WRONG where one does not: `610
+    //       deggane/sq mi` has a word in front, so the tier's digit-adjacent path declines and a `²` this
+    //       layer INVENTED reaches the phoneme sink as a RAWMARK — trading a reported leak for an
+    //       unreported one. Somali's measure words take no count agreement, so writing them here costs
+    //       nothing the tier would have done differently.
+    //       ⚠ ONLY BEFORE A DECLARED UNIT: `sq ft` stays raw, because Somali has no foot and half a
+    //       reading is worse than a visible leak — the same rule the shared tier applies to rates.
+    s = s.replace(
+        new RegExp(String.raw`(?<![\p{L}\p{M}])(sq|cu)\s+(${UNIT_KEYS})(?![\p{L}\p{M}\d])`, "giu"),
+        (_m, mod: string, u: string) =>
+            `${UNIT[u as keyof typeof UNIT]} ${mod.toLowerCase() === "sq" ? EXPONENT[2] : EXPONENT[3]}`,
+    );
+
+    // 3b-v. `mph` ×1 — spelled as the rate it abbreviates, so the tier reads it with words this file has
+    //       ALREADY sourced (`mi` → mayl, `h` → saacad, `unitPer` → halkii). Nothing new is claimed about
+    //       Somali; what is claimed is what `mph` stands for.
+    s = s.replace(/(?<![\p{L}\p{M}])(\d)\s*mph(?![\p{L}\p{M}])/gu, "$1 mi/h");
+
+    // 3b-vi. A BARE UNIT CARRYING AN EXPONENT — what 3b-ii and 3b-iii leave behind, and what the SHARED
+    //       bare-unit pass refuses on purpose: `makeBareUnitNormalizer` declines before a `²` because
+    //       "reading the unit and leaving a stray 2 behind is worse than the visible leak". That reason is
+    //       about a language which may not have a measure word; Somali has BOTH (`laba jibaaran` ×123,
+    //       `cubo` ×4, sourced above), so the whole phrase is read and nothing is stranded. The corpus
+    //       writes this shape with its own connective spelled out — *"1,200 qof halkii km2"* — and after
+    //       3b-ii the rate frames land here too (*"26,800 halkii km2"*).
+    //       ⚠ ONLY THE VOWEL-LESS MULTI-LETTER KEYS, via `isBareUnitKey`: a bare `m` or `ha` is ordinary
+    //       Somali, and that is the same test the shared pass applies for the same reason.
+    s = s.replace(
+        new RegExp(String.raw`(?<![\p{L}\p{M}\p{Nd}'’ʼ-])(${BARE_KEYS})([²³23])(?![\p{L}\p{M}\d])`, "gu"),
+        (_m, u: string, e: string) => `${UNIT[u as keyof typeof UNIT]} ${EXPONENT[e as keyof typeof EXPONENT]}`,
+    );
+
+    // 3b-vii. THE HYPHEN-ATTACHED UNIT — `750-km (470 mi)`. Somali's commonest pattern is a hyphen joining
+    //       a numeral to BOUND MORPHOLOGY (`2010-kii` ×3,023, header), so the hyphen itself proves nothing;
+    //       what separates this from that class is that the thing after it is a DECLARED UNIT KEY, which
+    //       is not a Somali suffix. Restoring the space hands it to the tier's ordinary digit-adjacent path.
+    s = s.replace(new RegExp(String.raw`(\d)-(?=(?:${UNIT_KEYS})(?:[²³23])?(?![\p{L}\p{M}\d]))`, "gu"), "$1 ");
 
     // ── 4. THE SHARED TIER — percent, currency, units, rates, exponents, `&`, `×` ───────────────────────
     // ⚠ BEFORE THE DECIMAL RULE ("units before decimals", the playbook's own coupling): the tier matches a

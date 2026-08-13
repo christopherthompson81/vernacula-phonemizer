@@ -41,10 +41,57 @@
  *
  * The same reading of the exposure table refuses the rest. `ha` is 0 after a digit and 54 as a bare token,
  * because `ha` is *"they"*; `in` (1 / 30) and `s` (0 / 19) are the same story — for a short key the
- * bare-token column measures the LANGUAGE, not the unit. `ft` (4), `mi` (3) and `in` (1) are imperial and
- * appear ONLY as a parenthetical gloss of a metric figure the sentence already gave (*"kilomita 115 (71
- * mi)"*), so reading them would say one measurement twice. No `unitPer`: there is no `km/h` in the artifact
- * at all and `h` is 0 after a digit, so a rate would need two more words sourced to serve nothing.
+ * bare-token column measures the LANGUAGE, not the unit. `mi` (3) and `in` (1) are imperial and appear only
+ * as a parenthetical gloss of a metric figure the sentence already gave (*"kilomita 115 (71 mi)"*), so
+ * reading them would say one measurement twice. No `unitPer`: there is no `km/h` in the artifact at all and
+ * `h` is 0 after a digit, so a rate would need two more words sourced to serve nothing.
+ *
+ * ⚠ `ft` IS ALSO REFUSED, AND THE ORIGINAL REASON FOR REFUSING IT WAS FACTUALLY WRONG — corrected here
+ * rather than quietly restated. This header said `ft` appears ONLY as a parenthetical gloss. The RAW-LATIN
+ * scan (`rawLatinIn`) found three `ft` lines and one of them is not a gloss: *"Ọdịdị alo dịgasị iche ma ọ
+ * nwere ike iru 6 ft"* — a bare imperial measurement in the alo/ogene article, no metric figure anywhere in
+ * the sentence. The refusal stands on a DIFFERENT ground, measured after the fact:
+ *
+ *   `ụkwụ` (the foot) — 197 tokens / 20 articles on the wiki, and the unit sense is real: the *Ụkwụ bọọdụ*
+ *   (board-foot) article writes *"olu bọọdụ dị otu ụkwụ (305 mm) n'ogologo"*, the imperial foot with its
+ *   own metric gloss. But that is ONE ARTICLE — a lead, not a finding, in this file's own terms — and in
+ *   the artifact all SEVEN instances are something else: the foot of an escarpment (*"dina n'ụkwụ
+ *   escarpment"*), a footstep (*"nzọụkwụ"*), and the idioms *gbara ụkwụ* ("came second") and *gbadoro
+ *   ụkwụ* ("is based on"). Zero unit uses in 460 lines. Trap 37's shape exactly — a real word, healthy
+ *   count, wrong sense in the slot that matters — so the three `ft` lines stay REPORTED rather than read.
+ *
+ * ── THE ENGLISH ORDINAL TAIL ───────────────────────────────────────────────────────────────────────────
+ *
+ * `8th`, `32nd`, `21st` — 13 of the artifact's 31 raw-Latin hits, the single largest defect in this layer,
+ * and invisible until RAW-LATIN existed because the digits were being read correctly and only the two
+ * letters survived. Rule 1b, `nke` + the cardinal, with the corpus evidence and the word-order cost.
+ *
+ * ── WHAT REMAINS REPORTED, AND WHY ─────────────────────────────────────────────────────────────────────
+ *
+ * 18 raw-Latin hits are left visibly failing. None is an Igbo reading this layer can source:
+ *
+ *   `pp ×4`, `pg`, `hg`   English and German BIBLIOGRAPHIC convention inside reference lists — *"Grants,
+ *                         26pp."*, *"(Home on Sunday, pg. 8)"*, *"na Therese Fuhrer (hg)"* (Hrsg., the
+ *                         German editor abbreviation). The surrounding text is not Igbo either.
+ *   `ft ×3`               see above.
+ *   `wdg`                 ⚠ THE ONE GENUINELY IGBO ABBREVIATION HERE, and it is refused for lack of an
+ *                         EXPANSION, not for lack of attestation: 78 tokens / 19 articles, used exactly as
+ *                         *etc.* (*"à á ā a̍ à, à á wdg."*, *"Ochie mkpuchi (Ụlọ ọrụ, wdg)"*). No source
+ *                         found spells out what the three letters stand for, and a reading would have to
+ *                         invent the phrase — the Fula `tere` failure. Reported, with its count recorded.
+ *   `st`                  `St.` the English saint title, ×4 in one hagiography line (*"St. Columba"*).
+ *   `ll`, `mw`            English `I'll`, and HTML that survived extraction (*`rel="mw:WikiLink"`*).
+ *   `gb`, `kp`            ⚠ NOT A DEFECT — the detector's own documented false-positive population: a
+ *                         sentence LISTING THE IGBO DIGRAPHS (*"Ihe iji wee maa atụ bụ:, ch, gb, gw, kp,
+ *                         kw, nw"*). A text talking about its own letters, left reported by design.
+ *   `dwt`, `pm`, `fm`     deadweight tonnage (*"ụgbọ mmiri 37,557 dwt"*), a clock (*"elekere 2.30pm"*) and
+ *                         a radio frequency (*"na 100.9fm"*). One instance each, no word sourced for any.
+ *
+ * ⚠ AND IGBO HAS NO REFEREE, so what these gates are is worth stating: `review.ts`'s artifact scan, the
+ * corpus diff and RAW-LATIN are METERS — they measure this layer against the corpus and against its own
+ * previous output. `test/igbo*.test.ts` are TRIPWIRES — adjudicated readings that fail if anything moves.
+ * There is no external transcription that can score a reading here, so a new word is only ever as good as
+ * the corpus sense it was read out of.
  *
  * ── SQUARED, and the word the obvious candidate was hiding ─────────────────────────────────────────────
  *
@@ -133,6 +180,17 @@ const DECIMAL = /(\d)\.(\d+)/gu;
 const RANGE = /(\d)\s*[-–—]\s*(?=\d)/gu;
 
 /**
+ * THE ENGLISH ORDINAL TAIL — `8th`, `32nd`, `21st`, `3rd`. See rule 1b.
+ *
+ * ⚠ THE DIGITS ARE REQUIRED AND THE WORD BOUNDARY AFTER IS REQUIRED, because the two letters alone are
+ * ordinary Igbo material: `nd` opens *ndị* (the commonest word in the corpus) and `st` sits inside *Kraịst*
+ * — both of which the RAW-LATIN detector reports, since Igbo's dotted vowels ⟨ị ọ ụ⟩ are not ASCII and a
+ * plain-ASCII run therefore falls out of the middle of an ordinary word. Anchoring on the DIGIT is what
+ * separates the ordinal from the orthography; nothing about the letters can.
+ */
+const ORDINAL_TAIL = /\b(\d+)(?:st|nd|rd|th)\b/giu;
+
+/**
  * A letter fused to the front of a QUANTITY — the space rule 2b restores. ⚠ Derived from `UNIT`, so a key
  * added there is covered here without a second edit; see rule 2b for what goes wrong without it.
  */
@@ -153,6 +211,40 @@ export function normalizeIgbo(text: string): string {
         GROUPED.lastIndex = 0;
         s = s.replace(GROUPED, "$1$2");
     }
+
+    // 1b. THE ENGLISH ORDINAL TAIL — `8th` → `nke 8`, which the number path then reads as *nke asatọ*.
+    //
+    //     ⚠ THIS IS A LEAK, NOT A COSMETIC GAP, and it is the largest single one in the artifact. Igbo has no
+    //     digit-ordinal orthography of its own, so ig.wikipedia writes the English suffix inside Igbo prose —
+    //     *"Naijiria na 2007 bu 37th n'uwa"*, *"mba 32nd kachasị n'ụwa"*, *"Nigeria bụ mba 8th nke kacha
+    //     emepụta mmanụ"*. The number was already read; only the two letters survived, and `igbo.ts` PRONOUNCES
+    //     an unknown ASCII run rather than dropping it, so *32nd* came out *"iri atọ na abụọ nd"*. 13 of the
+    //     artifact's 31 raw-Latin hits are this one shape (`th ×8`, `st ×3`, `nd ×2`).
+    //
+    //     THE READING IS `nke` + THE CARDINAL, and the corpus states it rather than implying it — 48 instances
+    //     of `nke` before a numeral, in the ordinal sense every time it is checkable: *"ụbọchị nke iri na isii
+    //     n'ọnwa Nọvemba"* (the 16th day), *"ọnwa nke atọ n'afọ, Machị"* (the third month, March), *"narị afọ
+    //     nke iri na itoolu"* (the 19th century), *"ọgbọ nke atọ, MediaWiki"* (third generation). ⚠ `nke` is
+    //     polysemous — it is also the relative/genitive particle — so the count alone would not settle it; what
+    //     settles it is that in EVERY numeral example the phrase denotes a rank. One of them is in a sentence
+    //     this rule fires on: *"Nigeria bụ mba 8th nke kacha emepụta mmanụ, na nke iri kachasị nwee mmanụ"*
+    //     writes the English ordinal and the Igbo one in the same breath, so the substitution is attested from
+    //     inside the defect itself.
+    //
+    //     ⚠ NO WORD IS INVENTED AND NO WORD IS EMITTED. The rule writes `nke` plus the ORIGINAL DIGITS and
+    //     hands them to the existing compositor — one source of truth for the numeral, and the ordinal marker
+    //     is a corpus word this file did not coin.
+    //
+    //     ⚠ THE STATED COST IS WORD ORDER. Igbo's ordinal FOLLOWS its noun (*ọnwa nke atọ*), and the corpus's
+    //     Igbo-frame instances are postnominal too (*mba 32nd*, *narị afọ nke iri na itoolu*), so in-place
+    //     substitution is the attested shape there. The English-frame instances in the artifact — *"200th
+    //     anniversary"*, *"4th Quarter 2005"*, *"7th Annual Leadership Awards"*, *"69th Primetime Emmy Awards"*
+    //     — are prenominal, and the reading keeps them prenominal, which is the minority Igbo order. That is
+    //     the same trade `unitPrefix` documents above, and it replaces a PRONOUNCED `th` with a real Igbo
+    //     ordinal in a line already being read as Igbo throughout.
+    //
+    //     ⚠ AFTER rule 1, so a grouped `1,000th` is one number by the time this sees it.
+    s = s.replace(ORDINAL_TAIL, "nke $1");
 
     // 2. ⚠ A DIGIT-FLANKED DASH IN IGBO IS A RANGE, NOT A MINUS — overwhelmingly year-year (`1967-1970`) or
     //    page-page (`peeji 90-120`). A minus rule here would read every date range as arithmetic, which is why

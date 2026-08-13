@@ -40,6 +40,33 @@
  *     period + 3 digits   ×8   MIXED — populations and money are thousands (25.000fmg, 30.000 eo ho eo,
  *                               isam-ponina 5.196) and the rest are coordinates, which all carry a `°`.
  *     period + other      ×53  decimal — the bot coordinate stubs (44.8358333333, 48.8239°)
+ *
+ * ── THE RAW-LATIN PASS: 19 HITS, 12 OF THEM ONE MECHANISM EACH ─────────────────────────────────────────
+ *
+ * `rawLatinIn` reports an ASCII run with no vowel that the source typed and the IPA still says. Malagasy's
+ * engine PHONEMIZES an unknown ASCII run rather than dropping it, so none of these was silence — `sns` was
+ * the syllable *sns* spoken aloud at the end of every list in the corpus.
+ *
+ *   `sns ×7`   the Malagasy *etc.*, and the wiki GLOSSES ITS OWN ABBREVIATION — see `ABBREVIATIONS`.
+ *   `snm ×2`   the scripture *and following*, argued from the citation slot — same table, weaker leg.
+ *   `km ×3`    `mp/km²`, and `kg ×1`, `1,429 kg/m³` — BOTH units were already declared and both leaked,
+ *              because the tier refuses a rate it cannot read whole. See `unitPer`.
+ *
+ * ── AND THE SEVEN LEFT REPORTED ────────────────────────────────────────────────────────────────────────
+ *
+ *   `ts`, `dz`  ⚠ NOT DEFECTS — the detector's documented false-positive shape, a text talking about its
+ *               own letters: *"ary ny [ts] sy [dz] dia soratana hoe ts sy j"*, the Malagasy ORTHOGRAPHY
+ *               article naming its digraphs. Reading them would be reading a citation as a word.
+ *   `st`        an English ordinal inside an English parenthetical gloss — *"ny ligy voalohany (1st
+ *               league)"*, where the sentence has ALREADY said `voalohany` ("first") in Malagasy. ×1, and
+ *               Malagasy's own ordinal is the `faha-` prefix (step 4's guard quotes `taonjato faha 17°`),
+ *               so an ordinal rule here would be reading English orthography into a language that has its
+ *               own and does not write digits with it.
+ *   `fmg`       the old Malagasy franc, `25.000fmg(5000ar)`, ×1. `Ar` is declared as a currency; `fmg` is
+ *               not, and one instance of a demonetised currency is not enough to source a word for.
+ *   `ff`        Latin bibliographic *ff.* ("and following") in `(GBd 30.1ff)` — the German/Latin
+ *               convention, not the Malagasy one, which this corpus writes as `sy ny manaraka`.
+ *   `www`, `mg` one URL, `www.assemblee-nationale.mg`, in a citation.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -101,10 +128,56 @@ const SYMBOLS = makeSymbolNormalizer({
     units: {
         km: ["kilaometatra"], m: ["metatra"], cm: ["santimetatra"], kg: ["kilao"],
         mm: ["milimetatra"], l: ["litatra"], L: ["litatra"],
+        /**
+         * ⚠ NOT AN SI UNIT — the POPULATION abbreviation, declared because it is the numerator of the only
+         * rate shape this corpus writes and the tier reads a rate only when it can read BOTH nouns. See the
+         * `unitPer` note below for the measurement; `mponina` is "inhabitants", the wiki's own word in this
+         * exact frame (*"ny salan'isan'ny mponina isaky ny velaran-tany voafaritra"*).
+         */
+        mp: ["mponina"],
     },
+    /**
+     * THE RATE CONNECTIVE — and the reason four of the artifact's raw-Latin hits existed.
+     *
+     * ⚠ WITHOUT IT THE TIER DECLINES THE WHOLE MATCH, not just the denominator: `resolveUnitSymbol`'s rate
+     * branch returns the text untouched when `unitPer` is undefined, "rather than emit half a reading". So
+     * `1,429 kg/m³` kept BOTH abbreviations raw while `kg` and `m` were declared and read everywhere else,
+     * and `kg` reached the IPA verbatim. The bare-unit rewrite could not save it either — that pass
+     * deliberately refuses a `/` and refuses an exponent, for this same "half a reading" reason.
+     *
+     * `isaky ny` — 44 tokens / 19 articles, and the examples are this slot and no other: *"ny salan'isan'ny
+     * mponina isaky ny velaran-tany voafaritra (isaky ny kilaometatra tsy mivadi-mandry)"* (the population
+     * density definition, which is the artifact's own `mp/km²`), *"33.600.000 joule isaky ny litatra"*,
+     * *"46.700.000 joule isaky ny kilôgrama"*. Quantity noun, connective, unit noun — the tier's own order.
+     */
+    unitPer: "isaky ny",
     exponentWords: { squared: ["toradroa"], cubed: ["toratelo"], position: "after" },
     ampersand: "sy",
 });
+
+/**
+ * THE TWO MALAGASY ABBREVIATIONS THE CORPUS WRITES AS BARE CONSONANT RUNS — see rule 5b.
+ *
+ * ⚠ `sns` IS GLOSSED BY THE WIKI ITSELF, which is as good as this evidence tier gets: *"Mahasolo ny
+ * andian-teny malagasy **sy ny sisa (hafohezina hoe sns)** ny teboka telo"* — "the ellipsis replaces the
+ * Malagasy phrase *sy ny sisa* (abbreviated *sns*)". The abbreviation and its expansion in one sentence, in
+ * the article on the ellipsis. The phrase itself attests 11 tokens / 9 articles and every use is the *etc.*
+ * slot after a list. It is the largest single raw-Latin run in this language, ×7.
+ *
+ * ⚠ `snm` HAS NO SUCH GLOSS AND IS DECLARED ON THE SLOT INSTEAD, which is the weaker of the two arguments
+ * and is said so here. `sy ny manaraka` ("and the following") attests 3 tokens / 3 articles, and all three
+ * are a SCRIPTURE CITATION — *"(Eks. 12 sy ny manaraka)"*, *"(Asa. 2.6 sy ny manaraka)"*, *"(Gen. 10.6 sy
+ * ny manaraka)"*. Both artifact instances of `snm` are the same citation frame — *"(Sal. Sal. 4.1snm,
+ * 6.14-20)"*, *"(Sal.Sal. 2.34 snm.)"* — and the initials match the phrase the way `sns` matches `sy ny
+ * sisa`. Two independent legs, neither of them a dictionary; recorded as an inference, not a gloss.
+ *
+ * Both are safe as bare word-boundary matches because Malagasy writes its vowels: no Malagasy word contains
+ * an ASCII run of three consonants, so `\bsns\b` cannot land inside one.
+ */
+const ABBREVIATIONS: readonly (readonly [RegExp, string])[] = [
+    [/(?<![\p{L}\p{M}])sns(?![\p{L}\p{M}])/gu, "sy ny sisa"],
+    [/(?<![\p{L}\p{M}])snm(?![\p{L}\p{M}])/gu, "sy ny manaraka"],
+];
 
 /** Every rule emits Malagasy WORDS or ASCII digits; nothing reaches the phoneme sink as a spelling. */
 export function normalizeMalagasy(input: string): string {
@@ -162,6 +235,26 @@ export function normalizeMalagasy(input: string): string {
     //    Steps 4 and 5 emit a trailing/leading space so an expansion cannot glue itself to what follows
     //    (`4°40'` was becoming `4 degre40'`); where the source already had one, collapse the pair.
     s = s.replace(/ {2,}/gu, " ").replace(/ +$/u, "");
+
+    // 5b) THE MALAGASY ABBREVIATIONS — `sns` → *sy ny sisa*, `snm` → *sy ny manaraka*. See the table above
+    //     for the wiki's own gloss of the first and the citation-slot argument for the second.
+    //
+    //     ⚠ THESE ARE READ, NOT DROPPED, AND THE DISTINCTION IS AUDIBLE HERE. Malagasy's engine phonemizes an
+    //     unknown ASCII run, so `sns` was not silence — it was the syllable *sns* spoken at the end of every
+    //     list in the corpus (*"mihafeno, sns."*, *"Bing Maps, sns."*, *"kintana, sns), sns."*). ×7, the
+    //     largest raw-Latin run in this language and the third largest in the whole group.
+    //
+    //     ⚠ BEFORE the tier, so nothing in the expansion can collide with a unit key.
+    //     ⚠ THE GUARD EXCLUDES LETTERS, NOT WORD CHARACTERS, because the corpus FUSES the abbreviation to a
+    //     digit: `(Sal. Sal. 4.1snm, 6.14-20)` writes the verse and the abbreviation with no space, so a
+    //     `\b` boundary — which a digit satisfies on both sides — matched nothing there. The expansion
+    //     carries its own spaces for the same reason, collapsed straight after.
+    //     ⚠ AND THE SEPARATOR IS RESTORED ONLY WHERE ONE IS MISSING, not by a global space collapse: an
+    //     unconditional `/ +([,.;])/ → "$1"` tidy-up here rewrote `taonjato faha 17° ; dia`, whose spaced
+    //     semicolon is the corpus's own and is pinned by a golden test. The lookbehind does the same job
+    //     with no reach outside the match.
+    for (const [re, words] of ABBREVIATIONS) s = s.replace(re, words);
+    s = s.replace(/(?<=\p{Nd})(?=sy ny )/gu, " ");
 
     // 6) THE SHARED TIER — percent, currency, units, the squared modifier and `&`. Runs ABOVE step 7,
     //    because the tier matches a unit only when a NUMBER is adjacent and the decimal rewrite destroys

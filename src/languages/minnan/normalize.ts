@@ -74,6 +74,36 @@
  * this corpus uses four times to define the Celsius scale, reports `0 token / 10 substring`. Trap 19 in a
  * new guise. For this language the substring count is the evidence, and an `absent` verdict only means
  * something at 0 substring.
+ *
+ * ── THE RAW-LATIN PASS: 16 HITS, 7 UNITS AND 9 THINGS THAT ARE NOT MIN NAN ─────────────────────────────
+ *
+ * `rawLatinIn` reports an ASCII run with no vowel that the source typed and the IPA still says verbatim.
+ * ⚠ IN POJ THAT CLASS IS UNUSUALLY EXPOSED, which is the hazard this file's `defects.ts` entry already
+ * names from the other direction: the orthography IS ASCII, so an abbreviation and a word are written in
+ * the same alphabet, and the converter gives the leaked run A TONE — `cm˥`, `mg˥`, `ssp˧˨`. It does not
+ * merely survive; it is spoken as a syllable of Min Nan.
+ *
+ * SEVEN ARE GENUINE UNITS and are declared — `cm ×3`, `mg ×2`, `kg ×1`, `ml ×1`. See the `units` note for
+ * the sourcing, which is weaker here than for `km`/`m`/`kg` and says so, and for the `kong-si` trap.
+ *
+ * ── AND THE NINE LEFT REPORTED, NONE OF WHICH IS MIN NAN ───────────────────────────────────────────────
+ *
+ *   `cn ×2`, `tw ×2`,  EASYTIMELINE TEMPLATE CODE that survived extraction — `color:cn1912tw1945`,
+ *   `jptw ×1`          `color:jptw`, on the same lines this header's CLOCK note and the `equals` entry in
+ *                      `defects.ts` already identify as template rather than prose (`from: 25/10/1945
+ *                      till: $now`, `ScaleMajor = unit:year`). ⚠ THEY ARE NOT SILENCED, because the
+ *                      shared `allOccurrencesInMarkup` recognises LaTeX and not EasyTimeline, and
+ *                      widening it is not this layer's to do. Reported, and correctly: the line is not a
+ *                      sentence of any language, and the run beside them (`color`) leaks too — invisibly,
+ *                      since it has a vowel.
+ *   `ssp ×1`           the Latin taxonomic *subspecies* in a binomial — `ha̍k-miâ: Zea mays ssp. mays`.
+ *                      The sentence marks it as a scientific name with `ha̍k-miâ` ("scientific name"), so
+ *                      the Latin is quoted material, not Min Nan.
+ *   `kjj`, `gg`,       ⚠ ONE LINE OF VANDALISM IN THE MINED ARTIFACT, in Vietnamese — *"Dêhs từ kjj đã đc
+ *   `gfgvbbvvfrhf`     mà bà gfgvbbvvfrhf kjj cyiggbd để gây khó₫44' gg 5_ Full gọn)+ km"*. A keyboard
+ *                      mash. Left reported rather than quietly excluded: a corpus-quality defect that
+ *                      shows up in a normalization gate is worth seeing, and a rule that made it quiet
+ *                      would be a rule that could quieten real text.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, readDegrees } from "../../core/sinitic.ts";
@@ -100,8 +130,32 @@ const SYMBOLS = makeSymbolNormalizer({
     ampersand: "佮",
     percent: ["百分之"],
     percentPrefix: true,
-    units: { km: ["公里"], m: ["公尺"], kg: ["公斤"] },
-    rateDenominators: { biáu: "秒", s: "秒", kg: "公斤" },
+    /**
+     * ⚠ `cm mg ml` ARE DECLARED ON THE DICTIONARY ALONE, AND THAT IS A WEAKER LEG THAN THE THREE ABOVE —
+     * said here rather than buried, because the two kinds of evidence must not be allowed to look alike.
+     *
+     * `km m kg` were sourced from the corpus's OWN POJ PROSE (`kong-lí` ×21, `kong-chhioh` ×10, `kong-kin`)
+     * and then written in Han. For these three the first leg is simply ABSENT: `kong-hun`, `hô-khik` and
+     * `hô-seng` are ×0 in the corpus, which writes only the ABBREVIATION — `36-45.7 cm`, `120mg/100ml`,
+     * `32~64 mg/kg`, ×13 digit-adjacent instances in all. What holds them up is the second leg on its own,
+     * the SHIPPED MOE DICTIONARY (`dict.tsv`, Taiwan Ministry of Education): 公分 kong-hun, 毫克 hô-khik,
+     * 毫升 hô-sing — the same published source that validated 百分之 in the sourcing note, giving the Han
+     * spelling and its Taiwanese reading together.
+     *
+     * ⚠ AND THE OBVIOUS CORPUS HIT IS A TRAP 37, CHECKED AND REJECTED. `kong-si` looks like the milligram
+     * (公絲) and occurs ×5 — every one of them is 公司, the COMPANY: *"khek-poâⁿ kong-si soan-thoân"*, a
+     * record company. Had that been taken for an attestation the layer would have read every milligram as
+     * "company". The count said yes and the examples said no.
+     *
+     * ⚠ THE MAGNITUDE-CONFUSABLE PAIRS ARE DISTINCT, which is `misread.ts`'s question: 公分 ≠ 公里 (cm/km)
+     * and 毫克 ≠ 公斤 (mg/kg). `l` stays undeclared, so ml/l cannot collide either.
+     */
+    units: { km: ["公里"], m: ["公尺"], kg: ["公斤"], cm: ["公分"], mg: ["毫克"], ml: ["毫升"] },
+    // ⚠ `ml` IS A RATE DENOMINATOR TOO, because the corpus's blood-sugar article writes the concentration
+    // that way throughout — `120mg/100ml`, `200mg/ml`, `180mg/100ml`. Without it the tier's rate branch
+    // declines the whole match and BOTH units stay raw, which is how `mg` and `ml` came to be leaking side
+    // by side on one line.
+    rateDenominators: { biáu: "秒", s: "秒", kg: "公斤", ml: "毫升" },
     // ⟨múi⟩ is the distributive "every/each", attested ×2 in exactly that sense: `Hoat-kok múi ji̍t ē-po͘
     // chhut-khan` (published every day) and `múi-chi̍t-hūn chiū-sī Liap-sī 1 tō͘` (each part is one degree).
     unitPer: "每",
