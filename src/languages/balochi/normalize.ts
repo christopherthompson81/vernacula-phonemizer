@@ -137,6 +137,7 @@
 /** Every digit the corpus writes. Written out rather than `\d` (which is ASCII-only and would miss 82% of
  *  this language's digit runs) and rather than `\p{Nd}` (which would admit Devanagari and friends). Must
  *  agree with the ENGINE's number token, which is `\d+` after the registry's native-digit fold. */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 const D = "0-9۰-۹٠-٩";
 /** "not inside a word", the trap-1/23 form: `\p{M}` beside `\p{L}`, and never `\b`. */
 const NW_B = "(?<![\\p{L}\\p{M}])";
@@ -280,6 +281,9 @@ const UNITS: readonly (readonly [string, string])[] = [
     ["km", "کیلومتر"],
     ["m", "متر"],
 ];
+
+/** The bare-token pass for the same table — see step 7b. */
+const BARE_UNITS = makeBareUnitNormalizer(UNITS);
 
 export interface BalochiNormalizerDeps {
     /** Is this exact Arabic-script spelling a headword of the cross-script lexicon? Supplied by the engine
@@ -429,6 +433,13 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    `37.4 per`, inside the artifact's own English provenance note rather than in Balochi text.
         //    0 version designations against a corpus that does write decimals (`2.5`), so the operand takes
         //    one. Step 8 then reads the point as the space it always did.
+        // 7b) …AND THE SAME UNITS STANDING ALONE. Every arm of step 7 needs a numeral before the
+        //     abbreviation, so a bare `km` — an infobox key, a caption, a figure whose numeral an
+        //     Arabic-Indic digit run or a template put out of reach — went to the phoneme sink as raw
+        //     Latin, which in an Arabic-script language is not even a plausible word. Guards are the
+        //     shared ones (core/normalizeSymbols.ts): multi-letter vowel-free keys only, so `m` is
+        //     untouched, exact case, and never beside a numeral, a rate slash or an exponent.
+        s = BARE_UNITS(s);
         for (const [abbr, word] of UNITS) {
             s = s.replace(
                 new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[  ]?${abbr}(?![\\p{L}\\p{M}‌])`, "giu"),

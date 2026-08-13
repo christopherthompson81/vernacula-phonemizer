@@ -150,6 +150,7 @@
  *  cannot match; DOI and JSTOR strings (`doi:10.2307/1291860`) have four; version dots (`802.11n`) have two.
  *  The `(?<![\d.,])` / `(?![\d.,])` guards stop a match beginning or ending inside a longer run, which is
  *  the lookbehind-AND-lookahead pair trap 28 says a lookahead alone cannot replace. */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
 const GROUPED_SPACE = /(?<![\d.,])(\d{1,3})((?: \d{3})+)(?![\d.,\d])/gu;
 const GROUPED_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d.,])/gu;
 const GROUPED_DOT = /(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?![\d.,])/gu;
@@ -241,6 +242,9 @@ const CURRENCY: readonly (readonly [string, string])[] = [
  *
  *  ⚠ BOTH LOOKAROUNDS ON EVERY ARM. `km` is two ASCII letters in a Latin-script language, so an unguarded key
  *  bites into ordinary words (trap 6: a Latin residue in a Latin script is invisible to every leak class). */
+/** The bare-token pass for the same word — see the step that applies it. */
+const BARE_UNITS = makeBareUnitNormalizer([["km", "kilometr"]]);
+
 const KM_PRE = /(?<![\p{L}\p{M}\d])km(?:\^?2|²)?\s+(?=\d)/gu;
 const KM_POST = /(?<![\d.,\p{L}\p{M}])(\d+(?:[.,]\d+)?(?:\s?-{1,2}\s?\d+(?:[.,]\d+)?)?)\s?km(?:\^?2|²)?(?![\p{L}\p{M}\d])/gu;
 
@@ -296,6 +300,11 @@ export function normalizeMossi(input: string): string {
     //    it replaces is worse than a silence: `km2 77.0` read as *km* raw plus the CARDINAL TWO.
     s = s.replace(KM_PRE, "kilometr ");
     s = s.replace(KM_POST, "kilometr $1");
+    //    …and the same symbol with no figure at all — a caption, a table header, or a figure a bracket put
+    //    out of reach. Both arms above require a digit, so those went to the sink as raw Latin. Shared
+    //    guards (core/normalizeSymbols.ts): multi-letter vowel-free keys, exact case, never beside a
+    //    numeral, a rate slash or an exponent — so the `km²` refusal above is untouched.
+    s = BARE_UNITS(s);
 
     return s;
 }

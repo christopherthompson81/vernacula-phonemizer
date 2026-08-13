@@ -236,6 +236,10 @@
  * `802.11n`-shaped designations are excluded by the trailing letter guard on the DECIMAL rule (step 11), not
  * by these.
  */
+import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
+/** The bare-token pass for the kilometre — see the step that applies it. */
+const BARE_UNITS = makeBareUnitNormalizer([["km", "kis lus mev"]]);
+
 const GROUP_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d]|,\d)/gu;
 const GROUP_DOT = /(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?![\d]|\.\d)/gu;
 
@@ -315,6 +319,10 @@ export function normalizeHmong(input: string): string {
     //    first, `9,85 lab km²` would already be `9 8 5 lab km²` and the lookbehind still matches on the `5`.
     //    It is placed here rather than at the end only so it sits with the other vocabulary rules.
     s = s.replace(/(?<=\d\s?|\d\s(?:lab|vam|roob)\s)km²?(?![\p{L}\p{M}\d])/gu, "kis lus mev");
+    //    …and a bare `km` with no figure, which the lookbehind above cannot reach. Shared guards
+    //    (core/normalizeSymbols.ts): multi-letter vowel-free keys ONLY, which is what keeps this away from
+    //    the RPA tone-letter hazard — no one-letter key can ever qualify.
+    s = BARE_UNITS(s);
 
     // 6) PERCENT → `feem pua`, POSTPOSED. ×7, and the layer's best-sourced rule (see the header: attested as
     //    the collocation, in the slot, three times, plus an outside dictionary).

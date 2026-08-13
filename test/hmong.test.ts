@@ -186,12 +186,18 @@ describe("Hmong (hmn) text normalization", () => {
 
     // ⚠ THE TONE-LETTER HAZARD, PINNED. `k` and `m` are ordinary RPA letters and `m` is itself a tone marker,
     // so an unguarded two-letter key would bite a real word in half and leave a DIFFERENT, legally-spelled
-    // word behind. Both lookarounds are asserted here, and so is the NUMERIC-CONTEXT lookbehind: a bare `km`
-    // with no figure near it belongs to the shared tier's bare-unit path, not to this file.
-    test("the unit key never bites an RPA word, and never fires without a figure", () => {
+    // word behind. Both lookarounds are asserted here, and so is the RPA-word guard.
+    //
+    // ⚠ THE BARE `km` ASSERTION FLIPPED, AND THE REASON IS WORTH KEEPING. This test was written on a branch
+    // where a standalone `km` was genuinely unread, and pinned that as "deliberately untouched here" — true
+    // at the time, because the bare-token path was a SIBLING branch's half of the same job. Both landed
+    // together, so the same input now reads. The invariant this test actually protects is the one below it:
+    // whatever claims `km`, it must never bite an RPA word. That is unchanged and is what the other three
+    // assertions cover. Cross-branch, an assertion about what a layer does NOT yet do has a shelf life.
+    test("the unit key never bites an RPA word, and the bare token now reads", () => {
         expect(normalizeHmong("koom kaum kev")).toBe("koom kaum kev");
-        expect(normalizeHmong("km")).toBe("km"); // no figure — deliberately untouched here
-        expect(normalizeHmong("kev km")).toBe("kev km");
+        expect(normalizeHmong("km")).toBe("kis lus mev"); // the shared bare-unit path, once both halves landed
+        expect(normalizeHmong("kev km")).toBe("kev kis lus mev");
         expect(say("koom")).toBe("kɒ̃˩̰"); // still one syllable, not `k` + a claimed unit
     });
 
