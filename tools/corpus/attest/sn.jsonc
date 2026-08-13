@@ -21,6 +21,126 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "mamirimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…: pebble) idombo rine mheu yakakura zvinosvika 4 kusvika 64 mamirimita. Anowanzo kunge akagadzirwa ne furindi (flint). Mahurungudz…",
+                "…ngudzo akakura kudarika magiranuri (granules) - 2 kusvika 4 mamirimita dhayamita uye madiki kudarika makobhoro (cobbles) - 64 kusv…",
+                "…ta uye madiki kudarika makobhoro (cobbles) - 64 kusvika 256 mamirimita dhayamita. Dombo rakagadzirwa zvikuru ne mahurungudo rinotu…"
+            ]
+            },
+        {
+                "word": "mahekita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "marita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Maruta (kureva Malta, Chimaruti: Repubblika ta' Malta) kana Marita, pachihofisi inonzi Rudhende rwe Maruta, ichitsuwa chenyika…"
+            ]
+            },
+        {
+                "word": "mamilimita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "milimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…asikati (mm) - haakwanise kushandiswa nekuti zvinopokana ne milimita. Kumashure kwe masikati (km) - inopokana ne kiromita. Kumas…"
+            ]
+            },
+        {
+                "word": "mirimita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hekita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…singavimbiki kudai. Minda yeIrigesheni iyi pamwechete inema hekita anodarika 44 (44.4 ha) nevarimi 180. Pavarimi 180 ava, 134…"
+            ]
+            },
+        {
+                "word": "mahekitare",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "rita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…rinowanikwa muZambia. Vanhu vane zita iri: Mulenga Mpumba, Rita Mpumba; Mpumba Chisanga, Petronella Mpumba. == Mitauro yeBa…",
+                "…kwa muMozambique. Vanhu vane zita iri: Luana Mario Chiholo; Rita Chiholo; Habu Chiholo; Chimene Chiholo. == Mitauro yeAfrika…",
+                "…uremu zvichingodaro. Sokuti tarakita yangu inofamba 10km pa Rita repeturu, kana kuti nyama iri kutengwa nemutengo we $5 pa K…",
+                "…inshasa. Vanhu vane zita iri: Pierre Mfunka; Brenda Mfunka; Rita Mfunka; Peter Mfunka. == Mitauro yeAfrika == Pano panyorwa…",
+                "…we. Vanhu vane zita iri: Arthur Makarau; Sabastian Makarau; Rita Makarau; Lydia Makarau. == Mitauro yeAfrika == Pano panyorw…",
+                "…vane zita iri: Lucia Hunde; Munyaradzi Hunde; Tendai Hunde; Rita Hunde. Hunde (stem or trunk of a tree; a large tree) kureva…"
+            ]
+            },
+        {
+                "word": "malita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…leasure Avenue 1990 - Tillfälligheternas spel 1993 - Du kan lita på mig 1996 - T 1997 - Sånger att älska till 2000 - Djävule…",
+                "…En dag på stranden 1993 – Släpp hästarna fria 1993 – Du kan lita på mig 1993 – En vind av längtan 1993 – Nyckeln till dej 19…",
+                "…by Nationalteatern \"Påtalåten\" by Ola Magnell \"Vem kan man lita på?\" by Hoola Bandoola Band \"Häng med på party\" by Ulf Neid…"
+            ]
+            },
+        {
                 "word": "koma",
                 "verdict": "attested",
                 "bounded": true,

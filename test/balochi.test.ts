@@ -103,4 +103,25 @@ describe("Balochi text normalization", () => {
         // digit-adjacent. Without it the era rule would read a place name as "before Christ".
         expect(phonemize("شارستان قم", "bal")).not.toContain("miːlaːd̪");
     });
+
+    test("SI length units — Balochi had NO length unit at all and every abbreviation leaked raw Latin", () => {
+        // Every word is a Wp/bcc token read in a Balochi sentence: "۴۷۳۱۹۰ کیلومتر مربع",
+        // "بُرزی=۱۳۸۵ متر چہ زرءِ آپءِ ھَددا", "گوارگءِ میان= ۷۲ میلی‌متر".
+        expect(phonemize("10 km", "bal")).toBe("d̪ah kiːluːmt̪r"); // was "d̪ah km"
+        expect(phonemize("10 m", "bal")).toBe("d̪ah mt̪r"); // was "d̪ah m"
+        expect(phonemize("10 mm", "bal")).toBe("d̪ah miːliːmt̪r"); // was "d̪ah mm"
+        // ⚠ THE LATIN ABBREVIATION IS REAL BALOCHI TYPOGRAPHY — Wp/bcc writes "|مزنی= ۱۱۰Km", capitalised
+        // and glued to Extended Arabic-Indic digits, which is why the match is case-insensitive.
+        expect(phonemize("۱۱۰Km", "bal")).toBe("sad̪u d̪ah kiːluːmt̪r");
+        // A decimal operand is admitted; the tier's NOT_VERSION guard would have refused it for nothing here.
+        expect(phonemize("2.5km", "bal")).toBe("d̪oː pant͡ʃ kiːluːmt̪r");
+    });
+
+    test("⚠ hectare and litre stay REFUSED — the `فیصد` split, on this language's own evidence", () => {
+        // `هکتار` is ×0 in Southern Balochi prose (its one Wp/bcc page is a Persian-template infobox) and
+        // ×4 pages in WESTERN Wp/bgn; `لیتر` and `لٹر` are ×0 in BOTH varieties. A dropped abbreviation is
+        // missing, a Western or Persian word read as Southern Balochi is wrong.
+        expect(phonemize("10 ha", "bal")).toBe("d̪ah ha");
+        expect(phonemize("10 l", "bal")).toBe("d̪ah l");
+    });
 });

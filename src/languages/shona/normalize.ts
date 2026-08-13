@@ -159,8 +159,13 @@ const spell = (int: string, sep: string, frac: string): string => `${int} ${sep}
 
 /** Class-6 measure and currency nouns this layer or the tier emits, for the concord pass (step 8). Every one
  *  is a `ma-` plural whose numeral agrees — see `withClass6Concord`. Listed here rather than derived from the
- *  tier's declaration because the degree noun and the metre word are emitted LOCALLY and would be missed. */
-const MA_NOUNS = "makiromita|masendimita|makirogiramu|mamita|matani|maawa|masekondi|madhora|maskweya|madhigiriyi";
+ *  tier's declaration because the degree noun and the metre word are emitted LOCALLY and would be missed.
+ *  ⚠ THE TIER'S NEWEST TWO UNIT NOUNS ARE DELIBERATELY NOT HERE. `hekita` and `rita` are the exact strings
+ *  sn.wikipedia attests (see the units note in shona.ts — `mahekita` is ×0 and `marita` is **Malta**), so
+ *  they are not `ma-` plurals and the concord pass has nothing to agree with. `mamirimita` IS one and is
+ *  listed. ⚠ Order is safe by inspection: `mamita` and `mamirimita` diverge at their fifth letter, so
+ *  neither is a prefix of the other and the alternation cannot mis-bind. */
+const MA_NOUNS = "makiromita|masendimita|makirogiramu|mamirimita|mamita|matani|maawa|masekondi|madhora|maskweya|madhigiriyi";
 
 /** Is `word` written within ~45 characters either side of this offset? The redundancy guard for the degree
  *  noun — playbook trap 12: a sentence that writes both the sign and its word must say it ONCE. BOTH sides,

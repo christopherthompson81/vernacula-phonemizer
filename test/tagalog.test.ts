@@ -173,4 +173,23 @@ describe("tagalog normalization — symbols, numbers, ordinals, times", () => {
         expect(phonemize("08:50:38", "tl")).toBe("walˈo limampˈu tatlumpˈut walˈo");
         expect(phonemize("5:00", "tl")).toBe("limˈa"); // zero minutes silent — the bare hour
     });
+
+    test("units — ⟨m⟩ ⟨mm⟩ ⟨l⟩ ⟨ha⟩, each with its SYMBOL named beside the word by tl.wikipedia", () => {
+        // "Ang metro (simbolo: m)", "dalawang milimetro (2mm)", "L o l ang daglat ng litro",
+        // "Ang ektarya, simbolo: ha". Before this, every one of these leaked raw ASCII into the IPA.
+        expect(phonemize("10 m", "tl")).toBe("sampˈu mˈetɾo");
+        expect(phonemize("10 mm", "tl")).toBe("sampˈu milimˈetɾo");
+        expect(phonemize("10 l", "tl")).toBe("sampˈu lˈitɾo");
+        expect(phonemize("10 L", "tl")).toBe("sampˈu lˈitɾo"); // ⚠ both cases are official for the litre
+        expect(phonemize("10 ha", "tl")).toBe("sampˈu ʔektˈaɾja");
+        // POSTPOSED — the artifact writes the noun after its number 11 times and before it 0 times.
+        expect(phonemize("23 m", "tl")).toBe("dalawampˈut tatlˈo mˈetɾo");
+    });
+
+    test("the m/s rate composes, which is what ⟨s⟩ → ⟨segundo⟩ is declared for", () => {
+        // tl.wikipedia glosses the whole frame: "metro bawat segundo para sa belosidad".
+        expect(phonemize("299 m/s", "tl")).toBe("dalawˈaŋ daʔˈan ʔˈat sijamnapˈut sijˈam mˈetɾo bˈawat seɡˈundo");
+        // ⚠ `s` is a rate DENOMINATOR and not a unit, so a bare trailing s is never claimed (the Il-76s lesson).
+        expect(phonemize("76s", "tl")).not.toContain("seɡˈundo");
+    });
 });

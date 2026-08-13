@@ -121,4 +121,27 @@ describe("yoruba text normalization", () => {
         for (const s of ["1945", "60%", "₦500", "3.5", "1967-1970", "2,500"])
             expect(String(phonemize(s, "yo")), s).not.toMatch(/θ|ʌ|ɹ|æ/u);
     });
+
+    test("units — ⟨mm⟩ and ⟨l⟩ join km/ha/mi, and the one-letter ⟨l⟩ is safe under the tier's own guard", () => {
+        expect(normalizeYoruba("10 mm")).toBe("10 mílímítà");
+        expect(normalizeYoruba("10 l")).toBe("10 lítà");
+        expect(normalizeYoruba("10 L")).toBe("10 lítà");
+        // ⚠ TRAP 46, MEASURED AND DECLINED BY THE EXISTING GUARD. Every one of the artifact's 13 `digit + l`
+        // shapes is Yoruba's proclitic `l-` glued to the next word, and a following letter rejects them all.
+        expect(normalizeYoruba("ọdún 1975 lẹ́yìn")).toBe("ọdún 1975 lẹ́yìn");
+        expect(normalizeYoruba("30,000 lábẹ́")).toBe("30000 lábẹ́");
+    });
+
+    test("⚠ the bare METRE is read here, not in the tier — and `9h 50m` is declined", () => {
+        // `mítà` is definitional on yo.wikipedia ("Mítà je eyo tìpìlẹ̀ ìwọ̀n ìgùn ninu Sistemu Kakiriaye").
+        expect(normalizeYoruba("2419 m")).toBe("2419 mítà");
+        expect(normalizeYoruba("10 m")).toBe("10 mítà");
+        // The decimal rule still runs last, so the operand reaches it intact and the metre survives it.
+        expect(normalizeYoruba("8.62 m")).toBe("8 àti dásímà 6 2 mítà");
+        // ⚠ THE TWO COUNTER-EXAMPLES THE LOCAL RULE EXISTS TO DECLINE: `Nh Nm Ns` is a DURATION, and its
+        // `m` is minutes. Reading it as fifty metres would be worse than the raw letter.
+        expect(normalizeYoruba("9h 50m 30.0s")).toContain("50m");
+        // And the tier still gets first refusal on every shape it can read.
+        expect(normalizeYoruba("126km/h")).toBe("126 kìlómítà ni wákàtí kan");
+    });
 });

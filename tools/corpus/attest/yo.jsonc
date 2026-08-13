@@ -1,25 +1,150 @@
 // WIKIPEDIA WORD ATTESTATION — yo. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "yo",
-    "wiki": "yo.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "yo",
+        "wiki": "yo.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "mítà",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 69,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Mítà je eyo tìpìlẹ̀ ìwọ̀n ìgùn ninu Sistemu Kakiriaye fun awon E…",
+                "…Ìlọ́poméjì mítà (ilopomeji metre) ni eyo dida SI fun ifesi ti ami-idamo rre…",
+                "…Sístẹ̀mù ìwọ̀n mítà je iwon sistemu alaayemewa ti orile-ede Fransi koko gba se…",
+                "…gba àwọn àmì-ẹ̀yẹ oníde àti onífàdákà nínú ìdíje ọgọ́rùn-ún mítà (100) àti igba (200) mítà níbi ayẹyẹ 1998 African Champions…",
+                "…i onífàdákà nínú ìdíje ọgọ́rùn-ún mítà (100) àti igba (200) mítà níbi ayẹyẹ 1998 African Championships in Athletics. == Ìdíj…",
+                "…e àgbáyé == == Ìkópa rẹ̀ nínú ìdíje tó pegedé == Ọgọ́rùn-ún mítà – 11.31 (1998) Igba mítà – 22.83 (1998) == Àwọn ìtọ́kasí ==…"
+            ]
+            },
+        {
+                "word": "mita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 99,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ọ̀n ìgùn ninu Sistemu Kakiriaye fun awon Eyo (SI). Awon eyo mita ipin ati asodipupo ti a n lo ni wonyi: pm mitarondo (pikome…",
+                "…Ciriaco de Mita je Alakoso Agba ile Italia tele. == Itokasi ==…",
+                "…e nínú àwọn ìṣẹlẹ eré ìjẹ . O ṣe aṣojú orílẹ-èdè rẹ ni àwọn mita 100 ni Olimpiiki Igba ooru 2000 ti o de opin-ipari. Oun ni…",
+                "…opin-ipari. Oun ni olusare tó gbé ipò kejì nínú àwọn ọgọrùn mita àti igba mita ni 1995 African Junior Athletics Championship…",
+                "…n ni olusare tó gbé ipò kejì nínú àwọn ọgọrùn mita àti igba mita ni 1995 African Junior Athletics Championships, lẹhinna o j…",
+                "…a ẹni jẹ 10.06 fun 100 m, 20.45 fun 200 m ati 6.52 fun awọn mita 60 . O ku leyin ìjàmbá ọkọ̀ kan ni Kaduna, Nigeria . == Igb…"
+            ]
+            },
+        {
+                "word": "míta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…inwo (400) mítà. Òun ló gba àmì-ẹ̀yẹ onídẹ fún ìdíje irinwo míta ní 2007 All-Africa Games, tó sì tún wa padà gba àmì-ẹ̀yẹ on…",
+                "…ti ìwọ̀n dídùn èso náà. Igi náà de gíga tí ó pọ̀jù ti àwọn míta 20. Ó dàgbà dáradára ní àwọn ipò òtútù tàbí àwọn agbègbè ag…",
+                "…ntii jẹ́ abemiegan tí ó dúró láíláí tí ó dàgbà sókè sí àwọn míta 4.5 ní gíga. Àwọn ewé náà ni gígùn púpọ sẹ̀ntímítà àti pé ó…",
+                "…llia bubalina jẹ́ abemiegan kékeré tàbí igi tí ó ga tó àwọn míta 8. Ó ní àwọn òdodo pupa, epo igi-awọ-awọ ewé àti àwọn ewé a…"
+            ]
+            },
+        {
+                "word": "mílímítà",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ẹwàá oṣù kẹsàn-án, ló fa ìkún omi náà, ó sì mú kí òjò tó ju mílímítà 250 rọ̀ láàárín àkókò méjì òwúrọ̀ sí àkókò mẹ́rin òwúrọ̀. È…"
+            ]
+            },
+        {
+                "word": "milimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…ó tilẹ̀ jẹ́ pé ó gbẹ jùlọ ní oṣù Kejì ti 74.5 nìkan. 1189.7 milimita gbogbo òjò tí ó rọ̀ ní ọdún kan. Òjò yìnyín ń kó jọ sí 303.…",
+                "…n pẹ̀lú àwọn lobes onígùn mẹ́ta mẹ́ta tí ó jẹ́ 10 nípasẹ 10 milimita tí ó wà sí ààyè títẹ̀. Àwọn ojú ìta tí àwọn sepals ti wà ní…",
+                "…irun grẹy daradara. Awọn petals inu tinrin jẹ 14-15 nipasẹ milimita 6 ati idakeji pẹlu awọn petals ita. Awọn petals inu jẹ conc…",
+                "…iwọn otutu ọdọọdun ti 30.31`C, awọn ọjọ ojo 82.13, ati awọn milimita 61.59 ti ojoriro. == Lilu bibọ Lilu bibo == O jẹ iranṣẹ nip…",
+                "…dlands àti North. Ile-iṣẹ Ayika naa ṣe igbasilẹ ojo ti o ju milimita 150 (5.9 in) lọ ni agbegbe omi Wansbeck laarin ọjọ karun Ẹt…",
+                "…nọ́mbà fihàn pé ní Morpeth nìkan, ìwọ̀n mẹ́rìndínláàdọ́rùn milimita (3.4 in) wà òjò ní ìfiwéra pẹ̀lú àròpín mẹ́rìnléláàdọ́rin m…"
+            ]
+            },
+        {
+                "word": "mílímítà",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ẹwàá oṣù kẹsàn-án, ló fa ìkún omi náà, ó sì mú kí òjò tó ju mílímítà 250 rọ̀ láàárín àkókò méjì òwúrọ̀ sí àkókò mẹ́rin òwúrọ̀. È…"
+            ]
+            },
+        {
+                "word": "lítà",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…rùn-ún, ìjì òjò \"Quartus\" kọlu àwọn odò Alps àríwá, ó sì mú lítà ọgọ́sàn án sí i ní m2, èyí sì mú kí àwọn odò Ammersee àti à…",
+                "…kan wà lábẹ́ iṣẹ́ Gram Vikas Jala Porimala Jojona ( 35,000 lítà), tó yí Bahadur Pentho ká, tó ń pèsè omi mímu sí gbogbo ilé…",
+                "…tó 117 mm (4.6 inches) ti rọ̀; omi tó pọ̀ jùlọ tó ń ṣàn jẹ́ lítà omi bílíọ̀nù 61.7 lójoojúmọ́, iye ìbàjẹ́ náà sì jẹ́ £12 míl…",
+                "…rùn lílo rẹ̀ dára síi, tí ó sì ní àpótí ẹrù (trunk) tí ó tó lítà 298 (ẹsẹ̀ onígun mẹ́ta 10.5). Wọ́n sọ orúkọ rẹ̀ fún Filippa…",
+                "…àti ẹ̀rọ ìṣiṣẹ́ afọwọ́ṣe oníyàrá mẹ́rin, tàbí ẹ̀rọ Ford OHC lítà 2.0 pẹ̀lú 110 hp (82) kW) . Nípa ẹrọ, ọkọ náà lo àákìṣù iwá…",
+                "…ọ̀rọ̀-orúkọ aṣojú-ẹni. Fún àpẹẹrẹ, wọ́n lè kọ \"one litre\" (lítà kan) gẹ́gẹ́ bíi: Àdàkọ:Not a typo, ọ̀nà àkọ́kọ́bẹ̀rẹ̀ rẹ̀,…"
+            ]
+            },
+        {
+                "word": "lita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…Ìkún omi eso Pepsi jẹ́ ìkún omi àwọn agba 94,000 (lita mílíọ̀nù 14; mita onigun 14,000; galọn mílíọ̀nù 3.4 ti Amẹ́…",
+                "…elevision host 1983 – Mike He, Taiwanese actor 1984 – Leroy Lita, English footballer 1984 – Alex Lloyd, British racing drive…",
+                "…983. Àwọn ọkọ̀ ayọ́kẹ́lẹ́ wọ̀nyí ní ẹ̀rọ Ford Crossflow 1.6 lita OHV pẹ̀lú 90 metric horsepower (66 kW) àti ẹ̀rọ ìṣiṣẹ́ afọw…",
+                "…orts tó kẹ́yìn tí wọ́n gba ẹ̀rọ Ford; àwọn ẹ̀rọ 1.8 àti 2.0-lita láti ọ̀dọ̀ ìdílé Zetec . Donkervoort ṣe àtúnṣe \"Sport\" kan…",
+                "…tún fi ẹ̀rọ Cosworth <i id=\"mwAZI\">YB</i> turbocharged 2.0-lita sori ẹ̀rọ D8 náà bẹ̀rẹ̀ láti ọdún 1995. Donkervoort D8 Audi…",
+                "…kervoort yípadà láti Ford sí ẹ̀rọ 20-valve turbocharged 1.8-lita <i id=\"mwAZ0\">R4</i> ti Audi, tí ó wà ní oríṣiríṣi ìjáde lá…"
+            ]
+            },
+        {
+                "word": "líta",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
             "word": "dásímà",
             "verdict": "attested",
@@ -68,5 +193,6 @@
                 "…ṣùpá jẹ́ ìdá àádọ́ta péré ti ilẹ̀-ayé. Fífà ìwúwosí rẹ̀ jẹ́ ìdá mẹ́fà sí ti ilẹ̀-ayé. Òṣùpá ń yípo ilẹ̀-ayé ní ẹ̀ẹ̀kan láàá…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

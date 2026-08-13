@@ -20,10 +20,41 @@ const SYMBOLS = makeSymbolNormalizer({
     percentPrefix: true,
     ampersand: SYM.and,
     /**
-     * ⚠ ONLY `km` AND `ha`. `mítà` is the right word for `m`, but a bare `m` is too ambiguous in running text
-     * to claim; cubed is undeclared because no cube word exists in the language's usage here.
+     * ⚠ `mm` AND `l` JOIN `km`/`ha`/`mi`; `m` IS STILL NOT HERE, and it is claimed locally instead — see
+     * `METRE` below for the two counter-examples that decide it. Cubed is undeclared because no cube word
+     * exists in the language's usage here.
+     *
+     * · `mm` → *mílímítà*, yo.wikipedia 1 token / 1 article and a flood article at that: *"ó sì mú kí òjò
+     *   tó ju MÍLÍMÍTÀ 250 rọ̀"* ("rain of more than 250 mm fell"). ⚠ One article is a lead, so the
+     *   UNTONED spelling was probed as its own word and carries the finding: `milimita` is 12 tokens / 9
+     *   articles, every readable hit rainfall or a botanical measurement — *"1189.7 milimita gbogbo òjò"*,
+     *   *"òjò tí ó ju milimita 150 (5.9 in) lọ"*, *"10 nípasẹ 10 milimita"*, *"àwọn milimita 61.59 ti
+     *   ojoriro"*. Same word, tone marks written or not, which is this corpus's normal condition; the
+     *   TONED form is emitted because every other unit noun in this file is toned and the g2p reads it.
+     * · `l` → *lítà*, 10 tokens / 5 articles, senses read and all volume: *"tó lítà 298 (ẹsẹ̀ onígun mẹ́ta
+     *   10.5)"* (a car's boot), *"ẹ̀rọ Ford OHC lítà 2.0"*, *"Jala Porimala Jojona (35,000 lítà)"*, *"lítà
+     *   omi bílíọ̀nù 61.7 lójoojúmọ́"*, and a Wikipedia style note that glosses the English outright:
+     *   *"wọ́n lè kọ \"one litre\" (LÍTÀ KAN)"*. `líta` is ×0; `lita` ×9 is mostly the footballer Leroy
+     *   Lita and a Ford engine displacement, which is why the toned form is the one taken.
+     *
+     * ⚠ THE ONE-LETTER KEY `l` IS SAFE HERE, AND THE MEASUREMENT IS THE OPPOSITE OF WHAT THE RAW COUNT
+     * SAYS (trap 46). A bare grep for a digit then `l` finds THIRTEEN hits in the mined artifact and not
+     * one is a litre: every one is Yoruba's proclitic `l-` glued to the next word after a number —
+     * `1975 lẹ́yìn`, `1829 látàrí`, `2.8 làti`, `30,000 lábẹ́`, `2015 lọ`, `1985 lóri`, `2012 láti`. That
+     * is exactly the shape that bit `mad`, `rn` and `hmn` this session. What saves it is that the tier's
+     * trailing guard is `(?![\p{L}\p{M}'’ʼ])` and a Yoruba letter follows the `l` in all thirteen: rebuilt
+     * with the guard, the count is 0 matches, so declaring `l` claims nothing the corpus would refuse.
+     * ⚠ `L` IS DECLARED ALONGSIDE `l` — the litre's documented exception to the one-letter rule
+     * (`resolveUnitSymbol`): both cases are official for this unit and the exact branch is case-sensitive.
+     *
+     * ⚠ POSTPOSED, AND THE MIXED COUNT RESOLVES ON A READING. Over the mined artifact the unit noun follows
+     * its number 4 times and precedes it 6, which looks like the `hil`/`rw` question — but the six are all
+     * ATHLETICS EVENT NAMES (`mita 5000`, `mita 3000`, `kilomita 10`, "the 5000 metres"), an idiom naming a
+     * race rather than measuring anything, while every genuine MEASUREMENT is digit-first: `4,180 kìlómítà
+     * (2,600 miles)`, `500 mítà (1,600 ẹsẹ̀ bàtà)`, `8.62 mítà (28.3 ft)`, `10,000 mita`. 4:0 once the
+     * event names are set aside, so the tier's default order stands and no `unitPrefix` is declared.
      */
-    units: { km: ["kìlómítà"], ha: ["hẹ́kítà"], mi: ["máìlì"] },
+    units: { km: ["kìlómítà"], ha: ["hẹ́kítà"], mi: ["máìlì"], mm: ["mílímítà"], l: ["lítà"], L: ["lítà"] },
     /** ⚠ `w` is the YORUBA abbreviation — wákàtí, "hour" — so both `km/w` and the borrowed `km/h` occur. */
     rateDenominators: { w: "wákàtí kan", h: "wákàtí kan" },
     unitPer: "ni",
@@ -49,6 +80,37 @@ const fold = (x: string): string =>
 /** The percent circumfix already spelled out in the text, so the rule does not read it a second time. */
 const SAID_AFTER = /ninu\s+[oọ]g[oọ]run/u;
 const SAID_BEFORE = /(?:[iì]da|[iì]pin)\s*$/u;
+
+/**
+ * THE BARE METRE, CLAIMED LOCALLY RATHER THAN IN THE TIER — and the reason is one measured counter-example
+ * class that a `units` entry has no way to decline.
+ *
+ * The word is not in doubt. *mítà* is 69 tokens / 20 articles on yo.wikipedia and its metre article is
+ * definitional — *"Mítà je eyo tìpìlẹ̀ ìwọ̀n ìgùn ninu Sistemu Kakiriaye fun awon Eyo (SI)"*, "the metre is
+ * the base unit of length in the International System of Units" — with running text to match: *"òkè òkúta
+ * iyanrìn tó ga tó 500 MÍTÀ (1,600 ẹsẹ̀ bàtà)"*, *"omi náà dé ibi gíga jùlọ ní 8.62 MÍTÀ (28.3 ft)"*. It is
+ * also the stem this file already ships inside `kìlómítà` and `mílímítà`.
+ *
+ * ⚠ WHAT IS IN DOUBT IS THE ONE-LETTER KEY, and unlike `l` above the measurement here is NOT clean. Rebuilt
+ * with the tier's own digit-adjacent guard over the mined artifact, `m` matches THREE times:
+ *     `2419 m (7936 ft)`   — Chappal Waddi's elevation. A genuine metre.
+ *     `9h 50m 30.0s`       — MINUTES. Jupiter's rotation period.
+ *     `9h 55m 40.6s`       — MINUTES. The same article, the System III period.
+ * One right against two wrong is not a key this file may hand to the tier: `50 mítà` for fifty minutes is
+ * confidently wrong, which is worse than the raw letter it replaces. But refusing outright leaves every
+ * Yoruba metre unread, and the brief's standing rule is that a thin corpus is evidence about the corpus.
+ *
+ * So the metre is read HERE, with a left guard that declines exactly the losing shape: a digit, an `h`, and
+ * a space immediately before the number is the `Nh Nm Ns` astronomical/duration notation, and nothing else
+ * in this corpus writes it. 1 of 1 genuine claimed, 2 of 2 counter-examples declined.
+ * ⚠ AND NOTHING IS LOST BY KEEPING IT OUT OF THE TIER, measured rather than assumed: the tier would add a
+ * rate and an exponent path, and this corpus has `m/s` ×0 and a bare `m²` ×0 (all 24 of its `m`-superscripts
+ * are `km²`, which `UNIT_SQUARED` and the tier already read).
+ * ⚠ POSTPOSED, like every other unit here — see the units note above for why the corpus's preposed
+ * instances are athletics event names rather than measurements.
+ */
+const METRE = /(?<![\p{L}\p{M}\d.,])(?<!\p{Nd}h[  ])(\d+(?:\.\d+)?)[  ]?m(?![\p{L}\p{M}'’\d])/gu;
+const METRE_WORD = "mítà";
 
 /** The unit nouns this layer expands, and a squared one with no number necessarily beside it. */
 const UNIT_WORDS: Record<string, string> = { km: "kìlómítà", ha: "hẹ́kítà" };
@@ -83,6 +145,11 @@ export function normalizeYoruba(text: string): string {
     // 4. Squared units, then the shared symbol tier.
     s = s.replace(UNIT_SQUARED, (_m, u: string) => `${UNIT_WORDS[u] ?? u} ${SYM.squared}`);
     s = SYMBOLS(s);
+    // 4b. ⚠ THE BARE METRE, AFTER THE TIER AND NOT INSIDE IT. See METRE for the two `9h 50m` counter-examples
+    //     that keep `m` out of `units`. After the tier so every shape the tier CAN read gets first refusal —
+    //     `10 km`, `56 km²`, `100 km/h` all consume their `m` there and never reach this pattern — and before
+    //     rule 7, which still needs `8.62` intact to be this reading's operand.
+    s = s.replace(METRE, (_m, num: string) => `${num} ${METRE_WORD}`);
     // 5. ⚠ ANOTHER CIRCUMFIX: `ìwọ̀n` before the number, the scale name after. The scale names are borrowed
     //    unchanged. Must run BEFORE the decimal rule so `100.4°F` is still one number when the scale is claimed.
     s = s.replace(

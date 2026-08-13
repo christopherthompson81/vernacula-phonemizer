@@ -82,7 +82,7 @@
  *
  * ⚠ NO DECIMAL WORD — the separator is replaced by a SPACE, ug's partial fix, for the same reason.
  *   `sources.ts` reports `[NONE] decimal-point` (no espeak, no manifest word) and no candidate is attested
- *   in either Balochi corpus. What step 6 buys is the removal of a spurious clause PAUSE from the middle of
+ *   in either Balochi corpus. What step 8 buys is the removal of a spurious clause PAUSE from the middle of
  *   a quantity; what it does not buy is a reading of the point, and it says so rather than inventing one.
  *
  * ⚠ NO `/` RULE, THOUGH IT IS A DECIMAL POINT HERE. Southern writes the Iranian-convention decimal slash —
@@ -102,8 +102,29 @@
  *   article. No Balochi word for any of them is attested in either corpus, and naming one here would be
  *   the `ff tere` failure.
  *
- * ⚠ NO CLOCK, DEGREES, UNITS, EXPONENT, RATE, ORDINAL, ROMAN OR FRACTION RULE: all ×0 in the Southern
- *   corpus. The Western corpus has 3 degrees and 3 exponents, which is a fact about Western Balochi.
+ * ⚠ NO CLOCK, DEGREES, EXPONENT, RATE, ORDINAL, ROMAN OR FRACTION RULE: all ×0 in the Southern corpus. The
+ *   Western corpus has 3 degrees and 3 exponents, which is a fact about Western Balochi.
+ *   ⚠ `UNITS` USED TO BE ON THIS LIST AND IS NOT ANY MORE — see `UNITS` below. The cell is ×0 in the
+ *   383-paragraph artifact, and that turned out to be a fact about a very small artifact rather than about
+ *   the language: `Wp/bcc` writes `۱۱۰Km` in a Balochi infobox and the unit WORDS in Balochi sentences.
+ *   The refusal is now per-unit, not wholesale, and the three that stay refused say what was searched.
+ *
+ * ⚠ NO HECTARE AND NO LITRE, AND THIS IS THE `فیصد` REFUSAL AGAIN, WORD FOR WORD.
+ *   · `هکتار` is ×0 in Southern Balochi prose. It has exactly one `Wp/bcc` page and that page's hit is a
+ *     PERSIAN-template infobox (`تاریخ تشکیل`, `رتبه مساحت`, `درصد آبها`) — the same Persian material
+ *     `filter-by-language.py` strips from the corpus, surviving because a search index does not filter.
+ *     Meanwhile it IS attested in WESTERN Balochi, 4 pages of `Wp/bgn`, one of them an unambiguously
+ *     Balochi sentence: *"ولایتی ٨٠ هزار هکتار دگارا آپ دنت"*. That is the `فیصد` situation exactly — a
+ *     word this macrolanguage's OTHER variety writes, absent from the variety this engine is — and it gets
+ *     the same answer, for the same reason.
+ *   · `لیتر` is ×0 in `Wp/bcc` **and** ×0 in `Wp/bgn`; the Urdu-shaped `لٹر` is ×0 in both. So the litre
+ *     has no Balochi attestation at all, in either variety.
+ *   · What was searched, so the next reader does not repeat it: the Incubator search API over `Wp/bcc` and
+ *     `Wp/bgn` (the only Balochi wikis that exist), the mined artifact, this engine's own lexicon, and
+ *     webonary.org's dialect-labelled Balochi dictionary — which still returns HTTP 403 to a fetch, the
+ *     same wall the percent refusal above hit. `cm` and `kg` are refused on the same evidence: `سانتی‌متر`
+ *     is ×0 in `Wp/bcc` and the single `کیلوگرم` page is Persian (*"۱۵۰ کیلوگرم بر سانتی متر مربع"*).
+ *     A dropped abbreviation is missing; a Persian or Western word read as Southern Balochi is wrong.
  *
  * ⚠ HARAKAT ARE STILL DELETED BY THE G2P, and that is a manifest question rather than this layer's.
  *   Kasra ×790, fatha ×467, damma ×454 in the Southern corpus — i.e. this text writes, explicitly, a large
@@ -214,6 +235,52 @@ const ERA: readonly (readonly [string, string])[] = ([
     ["ق", "م", "پیش چه میلاد"],
 ] as const).map(([a, b, w]) => [`${a}${ERA_SEP}${b}`, w] as const);
 
+/**
+ * THE SI LENGTH UNITS — the one cell this file gained after shipping, and the language that needed it most:
+ * before this rule `10 km` read *d̪ah km*, `10 m` read *d̪ah m* and `10 mm` read *d̪ah mm*, i.e. Balochi had
+ * no length unit at all and every abbreviation reached the phoneme stream as bare Latin letters.
+ *
+ * ⚠ EVERY WORD IS A `Wp/bcc` TOKEN IN A BALOCHI SENTENCE, READ. There is no Balochi Wikipedia at any code,
+ * so `attest.ts` cannot probe this language (its header says so); the substitute is the Wikimedia Incubator
+ * search API over the `Wp/bcc` prefix, which is the same body the corpus was mined from — and every hit was
+ * then checked for whether its SENTENCE is Balochi, because the Incubator carries the same 37.4% Persian and
+ * Urdu the corpus filter removes and a search index does not filter.
+ *
+ *   کیلومتر   16 pages.  *"بلوچستانی مساحت بیء پاکستانی تا ۴۷۳۱۹۰ کیلومتر مربع … و ایرانی تا ۱۸۱۷۵۸ کیلومتر
+ *                        مربع اینت"* (Wp/bcc/مزنین بلوچستان — `بیء`, `تا`, `شه`, `اینت` are Balochi, not
+ *                        Persian), *"مزنی= ۲۲۳۵ چارسریکی کیلومتر"* (Wp/bcc/تھران), *"۲۱٫۴ نپر مہ یک
+ *                        کیلومترے"* (Wp/bcc/اروپا). And the mined corpus's own single unit instance is the
+ *                        same word: *"۹/۸ ملیون چارسریکی کیلومتر"*.
+ *   متر       2 Balochi pages, both an elevation field with a Balochi label and a Balochi predicate:
+ *                        *"بُرزی=۱۳۸۵ متر چہ زرءِ آپءِ ھَددا"* (Wp/bcc/زائدان) and *"بُرزی= ۷ متر چہ زرءِ
+ *                        آپءِ ھَددا"* (Wp/bcc/چھبار) — "height = N metres from the level of the sea water".
+ *                        ⚠ The corpus's own two `متر` hits are NOT evidence and were discarded: one is
+ *                        inside `کیلومتر` and one inside `مھمترݔن`. A substring is not an attestation.
+ *   میلی‌متر  4 pages, 2 of them Balochi and both a rainfall field: *"گوارگءِ میان= ۷۲ میلی‌متر"*
+ *                        (Wp/bcc/زائدان) and *"گوارگءِ میان= ۲۳ میلی متر"* (Wp/bcc/چھبار). `ملیمتر` is ×0.
+ *
+ * ⚠ THE ZWNJ SPELLING IS THE ONE EMITTED, and it is a decision rather than a copy-paste. Balochi writes this
+ * word both ways — `میلی‌متر` with U+200C (2 Balochi pages) and `میلی متر` with a space (1). The joiner form
+ * keeps it ONE token: U+200C is inside this engine's token class, so the word survives the tokenizer whole
+ * and `phonemizeArabic` strips the control, where the spaced form would be read as two words. Verified:
+ * `میلی‌متر` → *miːliːmt̪r*.
+ *
+ * ⚠ POSTPOSED, and it is not in question: `۱۳۸۵ متر`, `۷۲ میلی‌متر`, `۴۷۳۱۹۰ کیلومتر`, `۲۲۳۵ چارسریکی
+ * کیلومتر`, `۱۱۰Km` — every attested instance in either script writes the number first. This is the `hil`/
+ * `rw` question asked and answered the ordinary way round.
+ *
+ * ⚠ AND THE LATIN ABBREVIATION IS REAL BALOCHI TYPOGRAPHY, which is the fact that makes this rule worth
+ * having at all. `Wp/bcc/زائدان` writes its area field as `|مزنی= ۱۱۰Km` — a Latin, CAPITALISED, unspaced
+ * abbreviation glued to Extended Arabic-Indic digits inside an otherwise Balochi infobox. Hence the
+ * case-insensitive match and the optional separator.
+ */
+const UNITS: readonly (readonly [string, string])[] = [
+    // Longest key first — `m` must not win over `mm` or the `km` tail.
+    ["mm", "میلی‌متر"],
+    ["km", "کیلومتر"],
+    ["m", "متر"],
+];
+
 export interface BalochiNormalizerDeps {
     /** Is this exact Arabic-script spelling a headword of the cross-script lexicon? Supplied by the engine
      *  so this file needs no import from `balochi.ts` — which would be a cycle, since the engine calls the
@@ -294,7 +361,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //        ،  ×1 Southern (`۶۵۲،۸۶۰`)                      · ×11 Western
         //        ٬  ×0 Southern                                  · ×30 Western (`۴۴۷٬۴۰۰`, `۲٬۲۷۵٬۰۰۰`)
         //    ⚠ THE MARKS DO NOT OVERLAP AT ALL IN SOUTHERN, which is what makes this rule safe to write as
-        //    a de-grouping rule and step 7 safe to write as a decimal rule. Counted over the corpus:
+        //    a de-grouping rule and step 8 safe to write as a decimal rule. Counted over the corpus:
         //        ,  3-digit groups ×3   1–2 digit tail ×0        ٬  groups ×0   tail ×0
         //        ،  3-digit groups ×1   1–2 digit tail ×0        .  groups ×0   tail ×1
         //    i.e. the comma family is ALWAYS grouping and the dot is ALWAYS a decimal. (Western Balochi is
@@ -332,7 +399,44 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
             s = s.replace(new RegExp(`${NW_B}${body}${ERA_SEP}\\.?\\s*(?=[${D}])`, "gu"), `${word} `);
         }
 
-        // 7) DECIMALS, LAST, because every rule above needs the number intact — and the separator is
+        // 7) SI LENGTH UNITS — the Latin abbreviation after a number, rewritten to the Balochi word. See
+        //    `UNITS` for each word, the Balochi sentence it was read in, and why `ha`, `l`, `cm` and `kg`
+        //    stay refused.
+        //    ⚠ WRITTEN HERE RATHER THAN TAKEN FROM `core/normalizeSymbols.ts`, and the reason is this
+        //    language's own percent refusal. `SymbolData.percent` is a REQUIRED field, so adopting the
+        //    shared tier would mean naming a Balochi percent word — and there isn't one to name (see the
+        //    header: `فیصد` is Western, `سدی` is the century). A layer does not get to invent a word as the
+        //    price of admission to a seam. What the tier would have added on top — a rate path, an exponent
+        //    path — this corpus does not exercise: it writes `چارسریکی کیلومتر` ("square kilometre") as
+        //    WORDS already, and `km/h` is ×0 in both Balochi corpora.
+        //    ⚠ BEFORE THE DECIMAL STEP, which is why it is numbered here and not after it. Step 8 replaces
+        //    the point with a SPACE, so `۲٫۵km` would already have become `۲ ۵km` and this rule would claim
+        //    a unit for the FRACTIONAL part alone. Every other numeric rule above needs the number intact
+        //    for the same reason, and this one now joins them.
+        //    ⚠ CASE-INSENSITIVE, because the one attested Latin instance is capitalised (`۱۱۰Km`), and the
+        //    separator is optional for the same reason — it is written glued.
+        //    ⚠ THE LEFT GUARD REJECTS A PRECEDING DIGIT OR SEPARATOR so a match cannot begin in the middle
+        //    of a number, and the RIGHT GUARD rejects any letter or mark in either script: without it `m`
+        //    would bite the front of a Latin word, which this corpus does carry inside its English glosses
+        //    (`Gross Domestic Product`). Measured over the 383 Southern paragraphs, the only digit-adjacent
+        //    Latin run of any kind is `04 via` ×4 — no key here matches it, and there are 0 counter-examples
+        //    for `m`, `mm` or `km`.
+        //    ⚠ A DECIMAL OPERAND IS ADMITTED, WHICH THE SHARED TIER WOULD NOT HAVE. `normalizeSymbols.ts`
+        //    carries a `NOT_VERSION` guard that rejects a dotted number glued to a ONE-letter key, because
+        //    `802.11g` once read as "802.11 grams" in ten languages — and Shona had to claim `1.5m` locally
+        //    for exactly that reason. Balochi pays that cost for nothing: counted over the 383 Southern
+        //    paragraphs, `\d+[.٫]\d+` followed by 1–3 Latin letters occurs FOUR times and all four are
+        //    `37.4 per`, inside the artifact's own English provenance note rather than in Balochi text.
+        //    0 version designations against a corpus that does write decimals (`2.5`), so the operand takes
+        //    one. Step 8 then reads the point as the space it always did.
+        for (const [abbr, word] of UNITS) {
+            s = s.replace(
+                new RegExp(`(?<![${D}.,٫])([${D}]+(?:[.٫][${D}]+)?)[  ]?${abbr}(?![\\p{L}\\p{M}‌])`, "giu"),
+                `$1 ${word}`,
+            );
+        }
+
+        // 8) DECIMALS, LAST, because every rule above needs the number intact — and the separator is
         //    replaced by a SPACE rather than by a word. See the header for why no decimal word is named.
         //    ⚠ SUBSTITUTE, NEVER DELETE (trap 26). Deleting the point would turn `2.5` into `25` — a
         //    different quantity, i.e. confidently wrong, which is the one outcome worse than the pause.

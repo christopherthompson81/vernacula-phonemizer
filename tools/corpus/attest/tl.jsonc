@@ -1,0 +1,162 @@
+// WIKIPEDIA WORD ATTESTATION — tl. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "tl",
+        "wiki": "tl.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "segundo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 135,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ang segundo ay ang batayang yunit ng panahon sa Pandaigdigang Sistema n…",
+                "…ras, at pagkatapos sa 60 minuto at sa wakas hanggang tig-60 segundo. Ang mga mekanikal at elektronikong orasan at relo ay karan…",
+                "…iwang mayroong mukha na may 60 tiktak na kumakatawan sa mga segundo at minuto, na dinadaanan ng pangalawang kamay at minutong k…",
+                "…roong dalawang tambilang na pambilang na mga umiikot sa mga segundo. Bahagi rin ang segundo ng ilang iba pang mga batayang-panu…",
+                "…na pambilang na mga umiikot sa mga segundo. Bahagi rin ang segundo ng ilang iba pang mga batayang-panukat tulad ng metro bawat…",
+                "…ng ilang iba pang mga batayang-panukat tulad ng metro bawat segundo para sa belosidad, metro sa bawat segundo bawat segundo par…"
+            ]
+            },
+        {
+                "word": "bawat segundo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…gundo ng ilang iba pang mga batayang-panukat tulad ng metro bawat segundo para sa belosidad, metro sa bawat segundo bawat segundo par…",
+                "…at tulad ng metro bawat segundo para sa belosidad, metro sa bawat segundo bawat segundo para sa akselerasyon, at bawat segundo para s…",
+                "…tro bawat segundo para sa belosidad, metro sa bawat segundo bawat segundo para sa akselerasyon, at bawat segundo para sa kadalasan. K…",
+                "…tro sa bawat segundo bawat segundo para sa akselerasyon, at bawat segundo para sa kadalasan. Kahit na nakabatay ang makasaysayang kah…",
+                "…ng tunay sa kanya. Ibig sabihin na magkapareho ang tagal ng bawat segundo, minuto at bawat iba pang paghahati ng oras na binibilang n…",
+                "…sukat ng hertz (segundo baligtad o segundo−1), bilis (metro bawat segundo) at pagliksi (metro bawat segundo na kuwadrado). Sinusukat…"
+            ]
+            },
+        {
+                "word": "metro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 119,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Para sa ibang gamit, tingnan ang Metro (paglilinaw). Ang metro (simbolo: m) ay ang sukat ng haba.…",
+                "…Para sa ibang gamit, tingnan ang Metro (paglilinaw). Ang metro (simbolo: m) ay ang sukat ng haba. Bilang pundamental na yu…",
+                "…s (SI: Système International d'Unités), nangangahulugan ang metro bilang katumbas ng haba ng daanang nilakbay ng isang liwana…",
+                "…8 ng isang segundo. Katumbas ng 10000/254 pulgada ang isang metro, tinatayang 39.37 pulgada. Ang simbolo para sa metro ay m.…",
+                "…isang metro, tinatayang 39.37 pulgada. Ang simbolo para sa metro ay m. Ito ay mainam gamitin sa pagsusukat ng tangkad o taas…",
+                "…Ang Linyang Metro Commuter ay isang serbisyo ng riles pangkomyuter na pinamam…"
+            ]
+            },
+        {
+                "word": "milimetro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…alawang patong, na ang kahabaa'y higit-kumulang sa dalawang milimetro (2mm). Kumakain ang hayop na ito ng nadurog na papantinging…",
+                "…ng lalong marami ng mga kinorinsa'y mas maliit kay sa isang milimetro. Naninirahan ang mga ito sa buhangin at putik ng mga karaga…",
+                "…a'y mga hayop na ang kahabaa'y nasa o nasa pagitan ng isang milimetro o apat na milimetro. Naninirahan ang mga ito sa kalaliman n…",
+                "…kahabaa'y nasa o nasa pagitan ng isang milimetro o apat na milimetro. Naninirahan ang mga ito sa kalaliman ng karagatan. === Nem…",
+                "…o ng kanilang katawan. Ang mga ito'y nasa pagitan ng limang milimetro hanggang dalawampung sentimetro (20 cm). === Nematoda === 2…",
+                "…y. Ang karamihang mga tardigrada ay mas maliit pa sa limang milimetro. Ang ilan ay nakatira sa karagatan o sa tubig-tabang, nguni…"
+            ]
+            },
+        {
+                "word": "litro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…A litro ay isang metrikong yunit ng bulumen. Ang isang litro ay may…",
+                "…A litro ay isang metrikong yunit ng bulumen. Ang isang litro ay may bulumen ng isang kubiko desimetro, na isa kubo na 10…",
+                "…x 10 sentimetro. May mga isang kilogramo na masa ang isang litro ng tubig. L o l ang daglat ng litro. Para sa maliliit na bu…",
+                "…gramo na masa ang isang litro ng tubig. L o l ang daglat ng litro. Para sa maliliit na bulumen, mililitro ang ginagamit: 1000…",
+                "…tro ang ginagamit: 1000 mL = 1 L. Iba't ibang mga tumbas: 1 litro = 0.2200 imperyal na galon 1 litro = 0.2642 Galon ng Estado…",
+                "…ba't ibang mga tumbas: 1 litro = 0.2200 imperyal na galon 1 litro = 0.2642 Galon ng Estados Unidos 1 imperyal na galon = 4.54…"
+            ]
+            },
+        {
+                "word": "ektarya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ang ektarya, simbolo: ha, (mula sa Espanyol na hectárea, sa Ingles: hec…",
+                "…km hilaga ng Maynila. Ito ay may kabuuang sukat na 8273.80 ektarya, na bumubuo sa 3.16% ng lupain ng lalawigan. Ang lupain ay…",
+                "…amalaking mga barangay ayon sa lawak ay ang Wangal sa 1,116 ektarya, Puguis sa 1,021.82 ektarya, at ang Alno 958.35 sa ektarya.…",
+                "…sa lawak ay ang Wangal sa 1,116 ektarya, Puguis sa 1,021.82 ektarya, at ang Alno 958.35 sa ektarya. Ang pinakamaliit ay ang bar…",
+                "…ektarya, Puguis sa 1,021.82 ektarya, at ang Alno 958.35 sa ektarya. Ang pinakamaliit ay ang barangay ng Cruz sa 56.69 ektarya.…",
+                "…ektarya. Ang pinakamaliit ay ang barangay ng Cruz sa 56.69 ektarya. == Demograpiko == == Mga sanggunian == == Mga Kawing Panla…"
+            ]
+            },
+        {
+                "word": "ektarea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ektaryang",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…, at bagong gusali ng Kataas-taasang Hukuman) sa loob ng 25 ektaryang (62 acre) sityong patambilog na tinatawag ngayong Quezon Me…",
+                "…ouis Croft. Ang nabanggit na sityo ay magkakaroon din ng 15 ektaryang (37 acre) pambansang eksposisyon sa may sangandaan ng Abeni…",
+                "…, at bagong gusali ng Kataas-taasang Hukuman) sa loob ng 25 ektaryang (62 acre) sityong patambilog na tinatawag ngayong Quezon Me…",
+                "…ouis Croft. Ang nabanggit na sityo ay magkakaroon din ng 15 ektaryang (37 acre) pambansang eksposisyon sa may sangandaan ng Abeni…",
+                "…, at bagong gusali ng Kataas-taasang Hukuman) sa loob ng 25 ektaryang (62 acre) sityong patambilog na tinatawag ngayong Quezon Me…",
+                "…ouis Croft. Ang nabanggit na sityo ay magkakaroon din ng 15 ektaryang (37 acre) pambansang eksposisyon sa may sangandaan ng Abeni…"
+            ]
+            },
+        {
+                "word": "metrong",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…lang talatakdaan. Bilang karagdagan, kapwa napalitan ng 100 metrong unahang-takbuhang may mga balakid (hurdle) at dekatlon ang…",
+                "…ang sa mga kalalakihan; samantalang napalitan naman ng 100 metrong unahang-takbuhang may mga balakid at heptatlon ang sa mga k…",
+                "…higit sa dalawang araw. Pinagsama-sama sa heptatlon ang 100 metrong takbuhang may balakid, mataasang talon, hagisang-pukol, 200…",
+                "…takbuhang may balakid, mataasang talon, hagisang-pukol, 200 metrong pagtakbo, malayuang pagtalon, suligi at 800 metrong pagtakb…",
+                "…ol, 200 metrong pagtakbo, malayuang pagtalon, suligi at 800 metrong pagtakbo. Pinagsama-sama sa dekatlong 100 metrong pagtakbo,…",
+                "…gi at 800 metrong pagtakbo. Pinagsama-sama sa dekatlong 100 metrong pagtakbo, malayuang pagtalon, hagisang-pukol, mataasang pag…"
+            ]
+            }
+        ],
+    }
+    

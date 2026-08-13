@@ -229,4 +229,19 @@ describe("Shona — what is deliberately NOT read, pinned so a change is visible
     test("a decimal range is declined — the guard that excludes a dot on either operand", () => {
         expect(normalizeShonaPre("Dzinoreba 2.1-3.4m")).toBe("Dzinoreba 2.1-3.4m");
     });
+
+    test("units — ⟨mm⟩ ⟨ha⟩ ⟨l⟩, the three that leaked raw ASCII, each sourced on sn.wikipedia", () => {
+        // mamirimita: "4 kusvika 64 mamirimita" (sediment grades) + the SI-prefix article's "ne milimita".
+        expect(phonemize("10 mm", "sn")).toBe("mamirimita ɡumi");
+        // hekita: glossed against the sign in its own clause — "hekita anodarika 44 (44.4 ha)".
+        expect(phonemize("10 ha", "sn")).toBe("hekita ɡumi");
+        // rita: "tarakita yangu inofamba 10km pa Rita repeturu". ⚠ `marita` is Malta and `lita` is Swedish.
+        expect(phonemize("10 l", "sn")).toBe("rita ɡumi");
+        expect(phonemize("10 L", "sn")).toBe("rita ɡumi");
+        // ⚠ PREPOSED, like every other Shona measure noun, and the class-6 concord still applies to the
+        // numeral — `mamirimita maviri`, not the recitation stem `piri`.
+        expect(phonemize("2 mm", "sn")).toBe("mamirimita maʋiri");
+        // The one attested Shona litre sits in the rate denominator slot, and now composes there exactly.
+        expect(phonemize("10 km/l", "sn")).toBe("makiromita ɡumi pa rita");
+    });
 });

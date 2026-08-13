@@ -241,9 +241,47 @@ function numberStressIdx(token: string): number | undefined {
  * · & → ⟨at⟩ (×23 REAL ampersands; the other 44 are HTML entities — normalize.ts disposes of those first,
  *   which is why it must run before this tier).
  * · km → ⟨kilometro⟩ (tl.wikipedia 5,907; the abbreviated unit appears digit-adjacent in the artifact).
- *   Other units are REFUSED for now: ⟨°⟩'s 18 artifact instances are nearly all coordinate notation
- *   (116°40' E), which is a different reading problem than temperature, and "digri Selsiyus" has 0
- *   tl.wikipedia phrase hits — declaring ⟨°C⟩ from parts would be the zu/xh Kristu mistake.
+ *   ⟨°⟩ is still REFUSED: its 18 artifact instances are nearly all coordinate notation (116°40' E), which is
+ *   a different reading problem than temperature, and "digri Selsiyus" has 0 tl.wikipedia phrase hits —
+ *   declaring ⟨°C⟩ from parts would be the zu/xh Kristu mistake.
+ * · ⟨m⟩ ⟨mm⟩ ⟨l⟩ ⟨ha⟩ — THE FOUR SI UNITS THIS LAYER LEAKED AS RAW ASCII (`10 m` read *sampˈu m*), and
+ *   tl.wikipedia names the SYMBOL beside the word for every one of them, which is as good as this kind of
+ *   evidence gets:
+ *     metro       119 tokens / 20 arts  *"Ang metro (SIMBOLO: m) ay ang sukat ng haba … Ang simbolo para
+ *                                        sa metro ay m."* — the metre article, definitional
+ *     milimetro    38 / 20              *"ang kahabaa'y higit-kumulang sa dalawang milimetro (2mm)"* —
+ *                                        glossed against the abbreviation in the same clause
+ *     litro        36 / 20              *"L o l ang daglat ng litro"* ("L or l is the abbreviation of
+ *                                        litro"), and *"1000 mL = 1 L"* — BOTH cases named by the article
+ *     ektarya      45 / 20              *"Ang ektarya, simbolo: ha, (mula sa Espanyol na hectárea …)"*
+ *   ⚠ NOT BORROWED FROM CEBUANO OR HILIGAYNON, which ship the same Spanish-loan shapes (`metro`,
+ *   `milimetro`) three files away. Every count above is tl.wikipedia's own; the sister languages were not
+ *   consulted, because a Philippine-language loan looking identical to its neighbour's is exactly how a
+ *   wrong-language word gets laundered into a layer.
+ *   ⚠ POSTPOSED, measured: over the mined artifact the unit noun follows its number 11 times
+ *   (`kilometro` ×4, `metro` ×7) and precedes it 0 times. So no `unitPrefix` — the tier's default is right
+ *   for Tagalog, and this is the OPPOSITE of the hil/rw Bantu-and-Visayan order the brief asks about.
+ *   ⚠ THE ONE-LETTER KEYS ⟨m⟩ AND ⟨l⟩, AND WHAT THE MEASUREMENT SAYS (trap 46). Rebuilding the tier's own
+ *   pattern — the number, the key, and the trailing `(?![\p{L}\p{M}'’ʼ])` guard — over the whole artifact:
+ *     m  → 2 matches, BOTH genuine metres: `c = 299,792,458m/s` and `Rio (23 m)`. 0 counter-examples.
+ *          ⚠ The 24 other `\d m` shapes in the artifact are `mílyon`/`metro` and similar words, and the
+ *          trailing letter guard rejects every one — the count without the guard is not the count.
+ *     l  → 1 match, and it is NOT a litre: *"bilang 91 L / kopyang elektroniko"*, a shelf number in an
+ *          English bibliographic citation quoted inside a Tagalog reference list. Declared ANYWAY, and the
+ *          reason is that this is not a Tagalog construction the way `mad`'s `m'`, `rn`'s `50 m'ubumwe` or
+ *          `hmn`'s tone-letter finals are — those recur because the LANGUAGE writes them; a library
+ *          catalogue string recurs only where a references section quotes English. One instance, named
+ *          here so a regression on it is recognised rather than rediscovered.
+ *   ⚠ `cm` IS DELIBERATELY STILL ABSENT, and its defect is a different class: Tagalog's g2p reads ⟨c⟩ as
+ *   /k/, so `10 cm` does not LEAK, it MIS-READS — *sampˈu km*, indistinguishable from a kilometre. Fixing
+ *   that is a reading bug, not an undeclared unit, and `sentimetro` is not sourced here.
+ * · `rateDenominators` ⟨s⟩ → ⟨segundo⟩, which is what makes the artifact's own `299,792,458m/s` compose
+ *   instead of stranding the `/s` as raw letters. tl.wikipedia glosses the whole rate: *"metro BAWAT
+ *   SEGUNDO para sa belosidad"*, and *"(metro bawat segundo na kuwadrado)"* for m/s² — the tier's existing
+ *   `unitPer: "bawat"` plus this one noun reproduces that phrase exactly. `segundo` 135 tokens / 20 arts,
+ *   the seconds article definitional (*"Ang segundo ay ang batayang yunit ng panahon"*). ⚠ In
+ *   `rateDenominators` and NOT in `units`, which is the declaration's whole point: a bare `76s` must not
+ *   become 76 seconds.
  */
 const SYMBOLS = makeSymbolNormalizer({
     percent: ["porsiyento"],
@@ -260,7 +298,13 @@ const SYMBOLS = makeSymbolNormalizer({
     ampersand: "at",
     // ⟨kilometro⟩ appears as a KEY too: "380 libong kilometro²" writes the full word with the superscript,
     // and the bare-exponent fallback only reads 1–3-letter bases.
-    units: { km: ["kilometro"], kilometro: ["kilometro"], katao: ["katao"], naninirahan: ["naninirahan"] },
+    // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH DECLARED, which is the litre's documented exception to the one-letter rule
+    // (see `resolveUnitSymbol`): both cases are official for this unit, the exact branch is case-sensitive,
+    // and tl.wikipedia's own litre article names them together — "L o l ang daglat ng litro".
+    units: { km: ["kilometro"], kilometro: ["kilometro"], m: ["metro"], mm: ["milimetro"],
+        l: ["litro"], L: ["litro"], ha: ["ektarya"],
+        katao: ["katao"], naninirahan: ["naninirahan"] },
+    rateDenominators: { s: "segundo" },
     // ⟨km²⟩ — the artifact's single largest dropped class (×22 of the 35 superscripts: katao/km², 56,594 km²).
     // The word is POSTPOSED: tl.wikipedia "kilometro kuwadrado" 1,605 against "kwadrado" 54 (spelling) and 0
     // for the preposed orders. ⟨kubiko⟩ ("metro kubiko" ×19) rides the same evidence, thinner but the same

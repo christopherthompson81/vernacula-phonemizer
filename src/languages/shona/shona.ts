@@ -98,6 +98,33 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
  *   that case locally. See its comment for the 7-against-0 measurement.
  *   `ft`, `in`, `oz`, `mi` are NOT declared: every instance is an English parenthetical glossing a metric
  *   figure already given, and `mi` only ever occurs inside `sk mi`.
+ *   ⚠ `mm`, `ha` AND `l` WERE UNDECLARED AND LEAKED AS RAW ASCII (`10 mm` read *ɡumi mm*), and all three
+ *   are ×0 in this corpus — which is a fact about a 439-segment artifact, not about Shona. Each is
+ *   sourced on sn.wikipedia instead, and each carries its own caveat:
+ *   · `mm` → *mamirimita*, 3 tokens in ONE article — a sediment-grade article that writes it three times
+ *     in the measure slot against digits: *"mheu yakakura zvinosvika 4 kusvika 64 mamirimita"*, *"2
+ *     kusvika 4 mamirimita dhayamita"*, *"64 kusvika 256 mamirimita dhayamita"*. One article is a LEAD by
+ *     this file's own article-count rule, and what lifts it is a SECOND article carrying the same stem and
+ *     naming the abbreviation: the SI-prefix article's *"masikati (mm) - haakwanise kushandiswa nekuti
+ *     zvinopokana ne MILIMITA"*. ⚠ The ⟨r⟩ spelling is the Shona one and it is not a guess — `mamilimita`
+ *     is ×0, exactly as `makiromita`/`masendimita` predict for a language with no /l/.
+ *   · `ha` → *hekita*, 1 token / 1 article, and GLOSSED AGAINST THE SIGN in the same clause: *"Minda
+ *     yeIrigesheni iyi pamwechete inema HEKITA anodarika 44 (44.4 ha)"*. ⚠ THE ATTESTED STRING IS TAKEN
+ *     RATHER THAN THE ONE THIS FILE'S SYMMETRY WANTS. `inema hekita` is `ine` + `ma` + a stray space +
+ *     `hekita`, and `anodarika` carries the class-6 subject prefix `a-`, so the writer plainly meant the
+ *     `ma-` plural every other unit here uses — but `mahekita` is ×0 on the wiki and composing it would be
+ *     asserting a token nobody wrote. `hekita` ships; the ma- reading is recorded, not taken. That is also
+ *     why `ha` is absent from normalize.ts's `MA_NOUNS`.
+ *   · `l` → *rita*, and the sense check is the whole of this bullet. `attest.ts` returns 10 tokens / 10
+ *     articles and NINE OF THEM ARE THE PERSONAL NAME RITA (*"Rita Mpumba"*, *"Rita Makarau"*). The tenth
+ *     is the litre, and it is this corpus's own already-quoted sentence: *"tarakita yangu inofamba 10km pa
+ *     RITA repeturu"* — "my tractor does 10 km per litre of petrol". ⚠ THE `ma-` PLURAL IS BLOCKED BY A
+ *     HOMOGRAPH: `marita` IS attested ×1 and it is **Malta** (*"Maruta (kureva Malta …) kana Marita"*).
+ *     That is `churu`-was-an-anthill caught before shipping rather than after. ⚠ AND `lita` IS A TRAP THE
+ *     OTHER WAY — attested ×3 and every hit is SWEDISH (*"Du kan lita på mig"*) inside a discography list.
+ *     ⚠ THE HONEST LIMIT: the one Shona litre instance sits in the rate DENOMINATOR slot (`pa rita`), not
+ *     the head slot. Declaring it in `units` serves both — a `units` key is matchable as a denominator too
+ *     — so `10 km/l` now composes as *makiromita 10 pa rita*, which is the attested sentence exactly.
  * · `unitPer` / `rateDenominators` — *pa*, in six independent slots and glossed against the English three
  *   times: *"chiyero chinonzi mita pa sekondi (m/s)"*, *"Dendera pa Mineti (Revolutions per minute)"*,
  *   *"radian pa mineti"*, *"10km pa Rita repeturu"*, *"$5 pa Kg"*, *"US$28,000 pa tonne"*. This is the one
@@ -134,8 +161,10 @@ const SYMBOLS = makeSymbolNormalizer({
     currency: { "US$": ["madhora"], "$": ["madhora"] },
     currencyPrefix: true,
     units: {
-        km: ["makiromita"], m: ["mamita"], cm: ["masendimita"],
-        kg: ["makirogiramu"], t: ["matani"],
+        km: ["makiromita"], m: ["mamita"], cm: ["masendimita"], mm: ["mamirimita"],
+        kg: ["makirogiramu"], t: ["matani"], ha: ["hekita"],
+        // ⚠ BOTH CASES, the litre's documented exception to the one-letter rule (`resolveUnitSymbol`).
+        l: ["rita"], L: ["rita"],
     },
     unitPrefix: true,
     unitPer: "pa",
