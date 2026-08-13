@@ -44,8 +44,41 @@ const UNITS: [RegExp, string][] = [
     [/kg/giu, "ကီလိုဂရမ်"],
     [/cm/giu, "စင်တီမီတာ"],
     [/mm/giu, "မီလီမီတာ"],
+    // ⚠ `mg` AND `ug` ARE DIGIT-GUARDED AND THAT IS WHAT MAKES THEM SAFE — `Mg` is also how Burmese writes
+    // the honorific မောင် (*Maung*) in Latin script, `Mg Mg` for Maung Maung, and it is the element symbol
+    // for magnesium besides. Neither ever follows a digit, and step 11 requires one immediately before the
+    // abbreviation, so the key claims the dose and declines the name. Both nouns are attested on
+    // my.wikipedia in exactly the measurement slot (tools/corpus/attest/my.jsonc): မီလီဂရမ် 57 tokens / 14
+    // articles (`ဗီတာမင် စီ ၅၀ မီလီဂရမ်ခန့်ပါဝင်သည်` — "contains about 50 mg of vitamin C"), မိုက်ခရိုဂရမ်
+    // 7 / 3 (`ဗီတာမင်ကေ (Vitamin K) ၂.၂ မိုက်ခရိုဂရမ်`), ကီလိုဂရမ် 31 / 13 with a definitional article.
+    // `µg` (U+00B5) as well as ASCII `ug`: the corpus writes the ASCII spelling, the sign is the standard one.
+    [/mg/giu, "မီလီဂရမ်"],
+    [/[uµμ]g/giu, "မိုက်ခရိုဂရမ်"],
     [/\bm\b/giu, "မီတာ"],
     [/\bg\b/giu, "ဂရမ်"],
+];
+
+/**
+ * A RATE — `၃၀ mg/kg`, a mass-per-mass drug dose.
+ *
+ * ⚠ **THE DENOMINATOR PHRASE COMES FIRST IN BURMESE, AND THE ATTESTATION IS WHAT SETTLES IT** rather than
+ * the English word order. `တစ်…လျှင်` ("per one …") is a PREPOSED adverbial in every corpus instance read
+ * (tools/corpus/attest/my.jsonc): `ကတိုးသည် တစ်ကီလိုဂရမ်လျှင် ဒေါ်လာ ၄၅၀၀၀ တန်လေသည်` ("civet is worth
+ * 45 000 dollars per kilogram"), `သစ်မွှေးတစ်ကီလိုဂရမ်လျှင် အမေရိကန်ဒေါ်လာ ၈၀၀မှ ၁၀,၀၀၀ကျော်`,
+ * `မြန်မာနိုင်ငံ၌ တစ်နာရီလျှင် ၇၅ မိုင်တိုက်ခတ်သော လေမုန်တိုင်း` ("winds of 75 miles per hour"), and
+ * `စက်နာရီက တစ်ရက်လျှင် ၂၄ နာရီ ရှိသည်` ("a clock has 24 hours per day"). Four denominators — kilogram,
+ * hour, day — all in the rate slot, all with the quantity FOLLOWING. Emitting `၃၀ မီလီဂရမ် တစ်ကီလိုဂရမ်လျှင်`
+ * would be the English order in Burmese words, and nothing in the corpus writes it.
+ *
+ * ⚠ IT RUNS EARLY, BEFORE THE DECIMAL AND RANGE RULES, because it MOVES the numeral: `0.75 mg/kg` and
+ * `10-15 mg/kg` must still be one intact token when the rule captures them, and once relocated they are read
+ * by the very same later rules in their new position (`၀ ဒသမ ၇ ၅`, `၁၀ မှ ၁၅ အထိ`). Written to run after the
+ * unit rules instead, the decimal rule has already split the operand and the rate has nothing to carry.
+ */
+const RATE_DENOMINATORS: [RegExp, string][] = [
+    [/kg/iu, "ကီလိုဂရမ်"],
+    [/h(?:rs?)?/iu, "နာရီ"],
+    [/d(?:ay)?/iu, "ရက်"],
 ];
 
 /** Currency signs → the Burmese word, postposed like the percent word. */
@@ -71,6 +104,21 @@ export function normalizeBurmese(input: string): string {
         prev = t;
         t = t.replace(new RegExp(`(${d()})[,٬](${d(3)})(?!${d()})`, "gu"), "$1$2");
     } while (t !== prev);
+
+    // 2b) RATES — `၃၀ mg/kg`, the drug-dose shape. ⚠ HERE, before the clock, the decimal and the range rules,
+    //     because this rule MOVES the numeral and every one of those three needs it intact to match; see
+    //     `RATE_DENOMINATORS` for the word order and its attestation. After de-grouping, though, so a grouped
+    //     figure arrives whole.
+    for (const [nre, nword] of UNITS)
+        for (const [dre, dword] of RATE_DENOMINATORS)
+            t = t.replace(
+                new RegExp(
+                    `(${d()}+(?:[.,]${d()}+)?(?:\\s*[-‐-―−]\\s*${d()}+(?:[.,]${d()}+)?)?)`
+                        + `\\s*(?:${nre.source})\\s*/\\s*(?:${dre.source})(?![\\p{L}${D}])`,
+                    "giu",
+                ),
+                `တစ်${dword}လျှင် $1 ${nword}`,
+            );
 
     // 3) CLOCK, before any rule that reads a bare number and before the decimal rule. The colon reaches the
     //    output as nothing at all, so `၁၄:၃၀` reads as two unrelated numerals.
@@ -118,9 +166,27 @@ export function normalizeBurmese(input: string): string {
     //    ⚠ The trailing `(?!digit)` is NOT redundant: without it the engine BACKTRACKS to a shorter second
     //    number to satisfy the `အထိ` guard, and `၁၂ - ၁၃ အထိ` comes out `၁၂ မှ ၁ အထိ၃ အထိ` — a digit spliced
     //    in half.
+    //
+    //    ⚠ AND A MANTISSA IS NOT A SPAN EITHER, WHICH IS HOW THIS RULE WAS COSTING A UNIT ITS READING. The
+    //    proton-mass line writes `1.67262192369(51)×10 −27 kg`; the exponent's sign is U+2212 and U+2212 is
+    //    in `DASH`, so the rule read "10 to 27" — and worse, the `အထိ` it inserted then stood BETWEEN the
+    //    number and `kg`, so step 11's digit-then-unit adjacency failed and a declared unit leaked into the
+    //    IPA as raw ASCII. A `×` (or an ASCII `x`, which step 12 treats as the same sign) before the left
+    //    operand is the discriminator: scientific notation is the only thing in this corpus that writes one.
+    //    ⚠ The negative exponent itself is still SILENT, and deliberately — negative result 1 in the header
+    //    holds, Burmese writes a real negative as the word အနုတ်. What this guard buys is the kilogram.
     const DASH = "[-‐-―−]";
     t = t.replace(
-        new RegExp(`(?<!${DASH}\\s*)(${d()}+)\\s*${DASH}\\s*(${d()}+)(?!${d()})(?!\\s*(?:${DASH}|အထိ|ထိ))`, "gu"),
+        new RegExp(
+            // ⚠ `(?<![${D}])` IS PART OF THE SAME FIX AND NOT A TIDY-UP. Without it the guard slides: rejected
+            // at the `1` of `×10`, the engine simply retries one character along and matches `0 −27`, so the
+            // range is read anyway and the only visible difference is where the `မှ` lands. A lookbehind that
+            // can be stepped past is not a guard. Anchoring the left operand to the START of its digit run is
+            // also right on its own terms — half a numeral was never the intended match.
+            `(?<!${DASH}\\s*)(?<![${D}])(?<![×xX]\\s{0,2})`
+                + `(${d()}+)\\s*${DASH}\\s*(${d()}+)(?!${d()})(?!\\s*(?:${DASH}|အထိ|ထိ))`,
+            "gu",
+        ),
         "$1 မှ $2 အထိ",
     );
 

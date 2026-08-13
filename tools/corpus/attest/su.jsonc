@@ -1,0 +1,77 @@
+// WIKIPEDIA WORD ATTESTATION — su. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "su",
+        "wiki": "su.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "miligram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…: grámma) nyaéta satuan tina massa. Simbol gram nyaéta g. 1 miligram (mg) = 0,001 gram 1 sentigram (sg) = 0,01 gram 1 desigram (…",
+                "…Kandungan Gizi == Kalium, saporsi sayur engkol ngandung 269 miligram kalium, nyaéta kurang leuwih 6% tina kabutuhan lalaki sawaw…",
+                "…panyakit jeung ruksakna jaringan. Vitamin C,dina kol aya 55 miligram Vitamin C per porsi, nyaéta kurang leuwih 61% tina jumlah a…",
+                "…l anu ruksak dina awak. Kalsium, saporsi engkol ngandung 67 miligram kalsium atawa 7% tina jumlah anu disarankeun keur lalaki sa…",
+                "…m, Fosfor 40,00 gram, Karbohidrat 34,00 gram, Kalsium 33,00 miligram, Vitamin C 30,00 miligram, Protéin 1,20 gram, Zat Besi 0,70…",
+                "…ohidrat 34,00 gram, Kalsium 33,00 miligram, Vitamin C 30,00 miligram, Protéin 1,20 gram, Zat Besi 0,70 miligram, Lemak 0,30 gram…"
+            ]
+            },
+        {
+                "word": "pikométer",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…kalawan panjang gelombang di antara 10 nanométer jeung 100 pikométer (frékuénsi antara 30 PHZ nepi ka 60 EHZ). Sinar-x umumna di…"
+            ]
+            },
+        {
+                "word": "pikometer",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Gram (basa Yunani/Latin: grámma) nyaéta satuan tina massa. Simbo…",
+                "…basa Yunani/Latin: grámma) nyaéta satuan tina massa. Simbol gram nyaéta g. 1 miligram (mg) = 0,001 gram 1 sentigram (sg) = 0…",
+                "…n tina massa. Simbol gram nyaéta g. 1 miligram (mg) = 0,001 gram 1 sentigram (sg) = 0,01 gram 1 desigram (dg) = 0,1 gram 1 d…",
+                "…éta g. 1 miligram (mg) = 0,001 gram 1 sentigram (sg) = 0,01 gram 1 desigram (dg) = 0,1 gram 1 dekagram (dag) = 10 gram 1 hek…",
+                "…001 gram 1 sentigram (sg) = 0,01 gram 1 desigram (dg) = 0,1 gram 1 dekagram (dag) = 10 gram 1 hektagram (hg) = 100 gram 1 ki…",
+                "…0,01 gram 1 desigram (dg) = 0,1 gram 1 dekagram (dag) = 10 gram 1 hektagram (hg) = 100 gram 1 kilogram (kg) = 1000 gram…"
+            ]
+            }
+        ],
+    }
+    

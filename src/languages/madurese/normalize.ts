@@ -361,6 +361,25 @@ export function normalizeMadurese(input: string): string {
     // for the same `C`.
     s = SYMBOLS(s);
 
+    // ── 8b. `dpl` — THE ABBREVIATION THIS WIKI GLOSSES WITH ITS OWN EXPANSION ──────────────────────
+    // ⚠ AND THE CORPUS SUPPLIES BOTH HALVES, WHICH IS THE ONLY REASON THIS IS NOT AN INDONESIAN LOAN
+    // GUESSED AT. mad.wikipedia writes the full phrase and puts the abbreviation after it in brackets,
+    // twice, in two different articles (tools/corpus/attest/mad.jsonc):
+    //     `bâḍâ è attas 1.000 mèter È ATTAS PARMUKA'AN TASÈ' (DPL)`
+    //     `sè tèngghina 0-600 mèter ḌÂRI PARMOKAAN TASÈ' (DPL)`
+    // and it writes the SHORT running form after the metre word four times more, which is the slot this
+    // rule fills and therefore the form it emits:
+    //     `199,27 mèter è attas tasè'` · `bâdâ è 199 m è attas tasè'` · `0-3 meter è attas tasè'`
+    //     `277 m (909 ft) è attas tasè'`   (`attas tasè'` 7 tokens / 5 articles, `è attas tasè'` 5 / 4)
+    // ⚠ BOUND TO THE METRE WORD, not free-standing, and that is what keeps it off the two GLOSS lines:
+    // there the `(dpl)` follows `tasè'`, not a metre, so the rule declines and the sentence is not made to
+    // say "above sea level" twice. It runs AFTER the tier because the tier is what turns `8 m` into
+    // `8 mèter` — before it, half the instances have no metre word to be bound to yet.
+    // ⚠ THE EMITTED PHRASE ENDS IN AN APOSTROPHE, which in this orthography is a LETTER (the glottal stop)
+    // and not punctuation — the hazard this language's file and `attest.ts`'s boundary test both record.
+    // It reaches the IPA as [tasɛʔ], the same as every corpus instance of the word.
+    s = s.replace(/\b(m[èe]t[èe]r)\s+dpl\b/giu, "$1 è attas tasè'");
+
     // ── 9. RANGES → `sampè'` ──────────────────────────────────────────────────────────────────────
     // ⚠ LAST OF THE RULES THAT OWN A DASH. Every earlier rule has already taken the dashes it owns — the
     // clock span in step 1 and the coordinate pair in step 3 — so what reaches here is a bare numeric span.

@@ -1,25 +1,147 @@
 // WIKIPEDIA WORD ATTESTATION — ht. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "ht",
-    "wiki": "ht.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ht",
+        "wiki": "ht.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "mw",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 76,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…= Istwa Sikhism Khalsa Gurgadi Gurpurab Joti Jot == Nòt == .mw-parser-output .reflist-columns-2{column-width:30em}.mw-pars…",
+                "…== .mw-parser-output .reflist-columns-2{column-width:30em}.mw-parser-output .reflist-columns-3{column-width:25em}body.ski…",
+                "….reflist-columns-3{column-width:25em}body.skin-vector-2022 .mw-parser-output .reflist-columns-2{column-width:27em}body.ski…",
+                "….reflist-columns-2{column-width:27em}body.skin-vector-2022 .mw-parser-output .reflist-columns-3{column-width:22.5em}.mw-pa…",
+                "…2 .mw-parser-output .reflist-columns-3{column-width:22.5em}.mw-parser-output .references[data-mw-group=upper-alpha]{list-s…",
+                "…ns-3{column-width:22.5em}.mw-parser-output .references[data-mw-group=upper-alpha]{list-style-type:upper-alpha}.mw-parser-o…"
+            ]
+            },
+        {
+                "word": "aprèmidi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…yon; de corridas te obligasyon denmen, yon maten ak lòt nan aprèmidi. Se te premye fwa nan pwofite de corridas yo te òganize yo…",
+                "…OM ak manm Konsèy Tranzisyon Prezidansyèl la te kòmanse nan aprèmidi Jedi 2 Me 2024. Yo prevwa ke diskisyon nan CPT a pral regle…",
+                "…anmò === ==== Enfòmasyon yo ==== 31 mas 2019 vè 3 zè 15 nan aprèmidi, yon fiziyad deklannche devan magazen rad li a The Marathon…",
+                "…lye Sikh yo avanse. Sikh yo te kite zòn nan anviwon 3 è nan aprèmidi. Yo te pèdi anviwon 20 moun pandan batay la. Nan denmen mat…",
+                "…is == Georges Seurat te ekspoze tablo moniman l Yon dimanch aprèmidi sou zile La Grande Jatte an 1886 nan Dènye ekspozisyon enpr…",
+                "…Langtry poze pou li. Li te rankontre Oscar Wilde pandan yon aprèmidi mizik Lady Lindsay te bay. Apre sa, Oscar envite l nan te a…"
+            ]
+            },
+        {
+                "word": "diswa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Diswa se nan aswè. == Tradiksyon == Lòt kreyòl: Franse: Angle: Al…",
+                "…soti an 1985. == Rezime == Catherine Carré prezante jounal diswa chak jou avèk pwofesyonalis. Yon aswè, li dekouvri nan divè…",
+                "…retans, faktori kouvrefe sou tout teritwa nasyonal ant uitè diswa ak senkè dimaten entèdiksyon nenpòt rasanbleman nan plis pa…",
+                "…\"Quarantaine Haïti\" (Karantèn Ayiti) ki pran plas nan uitè diswa sou 9 platfom mizik. Li se yon inisyativ Vama Events, Handz…",
+                "…premye komin nan Frans pou entwodui yon kouvrefe apati uitè diswa. === Rapò === Dezyèm wonn eleksyon minisipal yo ranvwaye po…",
+                "…an yo bay Fort Lockhart pa elyograf pandan y ap pase. Vè 9è diswa, apeprè 6,000–10,000 Afgan te rive nan pòs siyalizasyon an…"
+            ]
+            },
+        {
+                "word": "kilomèt alè",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pa èdtan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…an twopikal yo, ki gen van ki ap soufle omwen a 120 kilomèt pa èdtan, epi ki pèdi fòs lè li rive sou tè. == Referans == == Lyen…",
+                "…ufle anwo gwo kontras tanperati epi ki sikile a 185 kilomèt pa èdtan. == Referans ==…"
+            ]
+            },
+        {
+                "word": "chak èdtan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…), odè fad (dous ak degoutan) ak trè abondan (jiska 1 l pou chak èdtan). Dyare san rete sa a fatige malad la, yo te di an jè oswa…",
+                "…pouvwa epi ki kapab pwodui plis pase 1 000 Nm3 idwojèn pou chak èdtan. Yo sèvi ak potassa kòm yon elektwolit ak elektwòd nikèl. P…"
+            ]
+            },
+        {
+                "word": "pa lè",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "alè",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Vitès enstantane se yon vitès yon objè nan yon pwen alè; vitès sa a konstan pou yon objè k ap deplase avèk vitès ko…",
+                "…Se te premye tren a vapè Ozetazini ki depase vitès 100 mil alè.…",
+                "…deklare mouri. An reyalite, Denis te kapab kite bilding lan alè men anpil nan asosye ak konseye li yo te mouri. Aprè anpil…",
+                "…ki soti nan Overgne), \"ki plante nan Lavan, genyen yon ane alè\", \"tankou Lavan, tankou sezon prentan\" Yon Desanm ki pa mou…",
+                "…. == Itilizasyon == Dikdantan an eksprime yon aksyon ki fèt alè ki se lik dewoule e fini nan dantan. Fòk nou pa konfonn ni…",
+                "…pou gwo chabwak ikonik li yo, osi byen ke pou lanmò vyolan, alè, ak mistè ki kouvri l. Li konsidere kòm youn nan précurseur…"
+            ]
+            },
+        {
+                "word": "èdtan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 70,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Èdtan, Yon ekspresyon ki sib yon nonb pou eksplike kantite lè, ka…",
+                "…e lè, kantite tan. Pou di Trant lè, yon moun kapab di Trant èdtan. == Tradiksyon == Lòt kreyòl: Franse: Angle: Alman: Panyòl:…",
+                "…Jounen 8 èdtan, oswa revandikasyon pou travay yon maksimòm de 8 èdtan pa j…",
+                "…en 8 èdtan, oswa revandikasyon pou travay yon maksimòm de 8 èdtan pa jou, se yon revandikasyon istorik nan mouvman ouvriye na…",
+                "…n mas. Nan epòk sa a, longè jounen travay yon travayè te 10 èdtan oswa plis nan pifò peyi ki endistriyalize yo ; li ka dire j…",
+                "…ifò peyi ki endistriyalize yo ; li ka dire jiska 12 oswa 14 èdtan . eslogan \"8 èdtan travay, 8 èdtan lwazi, 8 èdtan repo», te…"
+            ]
+            },
         {
             "word": "pousan",
             "verdict": "attested",
@@ -100,5 +222,6 @@
                 "…Yon International Standard Book Number (« ISBN » oswa « Nimewo Entènasyonal Nòmalize Liv ») se yon chèn nimerik pou idanti…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

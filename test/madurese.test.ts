@@ -156,6 +156,26 @@ describe("text normalization", () => {
         expect(normalizeMadurese("Kode telepon: +31")).toBe("Kode telepon: +31"); // a dialling prefix
         expect(normalizeMadurese('"dahana" = apoy')).toBe('"dahana" = apoy'); // every `=` is a gloss
         expect(normalizeMadurese("PBB")).toBe("PBB"); // no letter-name table exists for Madurese
+        // ⚠ AND THE IMPERIAL FOOT, on a WRONG-SENSE result rather than an absent one. `kaki` (21/17) is
+        // Indonesian FILM TITLES to a hit — *Kaki Palsu*, *Rumah Kaki Seribu*, *Segitiga Lepas Kaki* — and
+        // `soko` (75/20) means an ETHNIC GROUP in Madurese (*soko Kaili*, *soko Mori*), not a leg and not
+        // a unit. `277 m (909 ft)` keeps its `ft`.
+        expect(normalizeMadurese("277 m (909 ft)")).toContain("ft");
+    });
+
+    // `dpl` — and mad.wikipedia supplies BOTH halves, which is what makes it a reading rather than a guess
+    // at an Indonesian loan: it writes the full phrase and then the abbreviation in brackets after it
+    // (`1.000 mèter è attas parmuka'an tasè' (dpl)`), and it writes the short running form after the metre
+    // word four times more (`199,27 mèter è attas tasè'`, `0-3 meter è attas tasè'`).
+    test("`dpl` reads as the phrase this wiki glosses it with", () => {
+        expect(normalizeMadurese("sirkana 8 mèter dpl bit")).toBe("sirkana 8 mèter è attas tasè' bit");
+        expect(normalizeMadurese("eyantara 12 – 74 meter dpl.")).toBe("eyantara 12 sampè' 74 meter è attas tasè'.");
+        expect(normalizeMadurese("8 m dpl")).toBe("8 mèter è attas tasè'"); // the tier supplies the metre word first
+        // ⚠ BOUND TO THE METRE WORD, which is what keeps it off the gloss lines — there the `(dpl)` follows
+        // `tasè'`, so the sentence is not made to say "above sea level" twice.
+        expect(normalizeMadurese("mèter è attas parmuka'an tasè' (dpl)")).toContain("(dpl)");
+        // The emitted phrase ends in an apostrophe, a LETTER in this orthography, and reaches the IPA as such.
+        expect(phonemize("sirkana 8 mèter dpl", "mad")).toContain("ɛ atːas tasɛʔ");
     });
 
     // ⚠ TWO SEAMS THAT ALREADY WORKED AND MUST NOT BE "FIXED" (playbook trap 16). Pinned through the real

@@ -21,6 +21,94 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "kaki",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…ore: Karma Lelaki Pengejar Harta (2015) Sinema Sore: Kucium Kaki Ayahku untuk Terakhir Kalinya (2015) Sinema Pintu Taubat: S…",
+                "…a Suami aḍalah Surga Istri Juga (2016) Sinema Pintu Taubat: Kaki Palsu untuk Anak Tukang Gorengan (2016) Hidayah Ramadan: Ḍo…",
+                "…Pandangan (1991) Senjakala Kebudayaan (1996) Buli-Buli Lima Kaki (2010)…",
+                "…èsia. Lia pernah dhâddhi bintang iklan taon 1995 neng è cap Kaki Tiga (satèya Cap Baḍak). Lia jhughân juara lomba moḍel favo…",
+                "…998) Aku Kendalikan Air, Api, Angin, dan Tanah (1998) Rumah Kaki Seribu (1998) Tangan-Tangan Kehidupan (1999) Bila Binatang…",
+                "…= Segi Empat Patah Sisi (novel remaja, 1990) Segitiga Lepas Kaki (novel remaja, 1991) Ben (novel remaja, 1992) Istana Ketiri…"
+            ]
+            },
+        {
+                "word": "soko",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 75,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…sala sèttong macem kalambhi tradisional ghâbây bâbinè' ḍâri soko Kaili è Sulawesi Tengnga . Kalambhi panèka biasana èangghuy…",
+                "…m ghâbây panampilan jogèt è ḍâlem bhân-sabbhân kagiadhân == Soko Kaili == Ngajhârbhâ'aghi Inḍonèsia mènangka naghârâ sè sogh…",
+                "…g asareng è Inḍonèsia. Bhâdhânna bhudhâjâ dâri pan-bârâmpan soko, bâḍâ sè èsebbhut soko Kaili, sè anḍi' kabhudhâjâ'an dhibi'…",
+                "…Bhâdhânna bhudhâjâ dâri pan-bârâmpan soko, bâḍâ sè èsebbhut soko Kaili, sè anḍi' kabhudhâjâ'an dhibi', sala sèttongnga ènggh…",
+                "…li aropa'aghi ra-kèra 20% ḍâri pandhudhu' Sulawesi Tengnga (soko Kaili, soko Mori, soko Saluan, soko Toli-toli, soko Buol, p…",
+                "…i ra-kèra 20% ḍâri pandhudhu' Sulawesi Tengnga (soko Kaili, soko Mori, soko Saluan, soko Toli-toli, soko Buol, panèka soko a…"
+            ]
+            },
+        {
+                "word": "è attas tasè'",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…bâdâ è attas bukit Batur Agung, panèka ra-kèra 199,27 mèter è attas tasè'. == Sajârâ == Canḍhi Barong ra-kèra èpaddhek è abad ka-9 bâ…",
+                "…nḍhi bâdâ è bun tèmor lao' kompleks Ratu Boko, bâdâ è 199 m è attas tasè'. È bun bârâ' dâjâ, è bâbâ bukit, è Canḍhi Banyunibo, Canḍhi…",
+                "…asana datarânna renda sareng tègghina kabânnya'an 0-3 meter è attas tasè'. Saèngghâ Kotta Tanjungbalai andi' Topografi kadhi engan da…",
+                "…èka bi' Jeddah 70 km bân bâḍâ è lembah kènè' 277 m (909 ft) è attas tasè'. Jumla orèng è kotta rèya mangkèn 2.150.000 orèng. Nabbhi M…"
+            ]
+            },
+        {
+                "word": "attas tasè'",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…dâ è attas bukit Batur Agung, panèka ra-kèra 199,27 mèter è attas tasè'. == Sajârâ == Canḍhi Barong ra-kèra èpaddhek è abad ka-9 bâ…",
+                "…hi bâdâ è bun tèmor lao' kompleks Ratu Boko, bâdâ è 199 m è attas tasè'. È bun bârâ' dâjâ, è bâbâ bukit, è Canḍhi Banyunibo, Canḍhi…",
+                "…ana datarânna renda sareng tègghina kabânnya'an 0-3 meter è attas tasè'. Saèngghâ Kotta Tanjungbalai andi' Topografi kadhi engan da…",
+                "…a bi' Jeddah 70 km bân bâḍâ è lembah kènè' 277 m (909 ft) è attas tasè'. Jumla orèng è kotta rèya mangkèn 2.150.000 orèng. Nabbhi M…",
+                "…upatèn Lamongan iyà arèya 902,4 km² mun èbitong ḍâri 12 mil attas tasè'. Daratan Kabhupatèn Lamongan èpèsa bi' Songay Bengawan Solo…"
+            ]
+            },
+        {
+                "word": "dpl",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…n laènna bâḍâ è attas 1.000 mèter è attas parmuka'an tasè' (dpl), temperature palèng kenè' sampè' 5°C. == Sombher ==…",
+                "…ah tenggi. Katenggian kabupaten neka eyantara 12 – 74 meter dpl. == Pemerentaan == Kabupaten Bhângkalan èbâgi daddi 18 keca…",
+                "…ombu è lahan sè tèngghina 0-600 mèter ḍâri parmokaan tasè' (dpl), kalabân cora ojhân sè rata-rata 1.259-2.500 mm per taon.…",
+                "…adhâton neng tèngghângan tondhâ ḍâ' anjhung sirkana 8 mèter dpl bit nokta taranjhungnga Jakarta èngghi panèka 91 mèter dpl…",
+                "…dpl bit nokta taranjhungnga Jakarta èngghi panèka 91 mèter dpl akennengan neng Kabâsan Buperta Cibubur, Cipayung, Jakarta…",
+                "…luhur. Bhinarèng nokta tatondhâna engghi ka'dissa' -1 mèter dpl bit lokasi neng wilayah Muara Baru tor Pluit, Jakarta Dâjâ…"
+            ]
+            },
+        {
+                "word": "mèter è attas tasè'",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…du sè bâdâ è attas bukit Batur Agung, panèka ra-kèra 199,27 mèter è attas tasè'. == Sajârâ == Canḍhi Barong ra-kèra èpaddhek è abad ka-9 bâ…"
+            ]
+            },
+        {
                 "word": "sampè'",
                 "verdict": "attested",
                 "bounded": true,

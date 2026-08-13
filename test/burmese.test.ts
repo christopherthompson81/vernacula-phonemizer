@@ -153,6 +153,29 @@ describe("burmese normalization", () => {
 
     test("Latin unit abbreviations after a number", () => {
         expect(normalizeBurmese("၁၀ km")).toBe("၁၀ ကီလိုမီတာ");
+        // The drug formulary's units. ⚠ `Mg` is also how Burmese writes the honorific မောင် in Latin and
+        // is magnesium's symbol besides — the digit guard is what separates the dose from the name.
+        expect(normalizeBurmese("500 mg TDS")).toBe("500 မီလီဂရမ် TDS");
+        expect(normalizeBurmese("Mg Mg")).toBe("Mg Mg");
+    });
+
+    // `mg/kg` ×7 + `ug/kg` ×1 leaked a DECLARED unit as raw ASCII: step 11 needs a digit immediately before
+    // the abbreviation and a slash was there instead. ⚠ THE DENOMINATOR PHRASE IS PREPOSED — every
+    // corpus instance of တစ်…လျှင် puts the quantity after it (`တစ်ကီလိုဂရမ်လျှင် ဒေါ်လာ ၄၅၀၀၀`).
+    test("a rate reads with its denominator phrase FIRST", () => {
+        expect(normalizeBurmese("30 mg/kg")).toBe("တစ်ကီလိုဂရမ်လျှင် 30 မီလီဂရမ်");
+        expect(normalizeBurmese("5 mg/day")).toBe("တစ်ရက်လျှင် 5 မီလီဂရမ်");
+        // The moved numeral is still read by the later rules, in its new position.
+        expect(normalizeBurmese("0.75 mg/kg BD")).toBe("တစ်ကီလိုဂရမ်လျှင် 0 ဒသမ 7 5 မီလီဂရမ် BD");
+        expect(normalizeBurmese("10-15 mg/kg QID")).toBe("တစ်ကီလိုဂရမ်လျှင် 10 မှ 15 အထိ မီလီဂရမ် QID");
+        expect(normalizeBurmese("1.4 ug/kg daily")).toBe("တစ်ကီလိုဂရမ်လျှင် 1 ဒသမ 4 မိုက်ခရိုဂရမ် daily");
+    });
+
+    // A MANTISSA IS NOT A SPAN. U+2212 is in the range rule's DASH class, so `×10 −27` read as "10 to 27"
+    // and the inserted အထိ then stood between the number and `kg`, costing a declared unit its reading.
+    // The negative exponent stays silent (negative result 1 in the header); the kilogram is what is bought.
+    test("a scientific-notation exponent is not a range", () => {
+        expect(normalizeBurmese("×10 −27 kg").trim()).toBe("မြှောက် 10 −27 ကီလိုဂရမ်");
     });
 
     // Each period was becoming a clause pause: "yu . es ." — two spurious breaks mid-phrase.

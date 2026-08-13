@@ -127,9 +127,23 @@ describe("Haitian Creole text normalization", () => {
     test("units are POSTPOSED (Haitian, not Lingala) and hop a magnitude word", () => {
         expect(normalizeHaitian("1 250 257,6 km²")).toBe("1250257 vigil 6 kilomèt kare");
         expect(normalizeHaitian("10.4 milyon km 2")).toBe("10 vigil 4 milyon kilomèt kare"); // magnitude + spaced exponent
-        // ⚠ A SLASHED UNIT IS NOT CLAIMED — `km/h` has no attested Haitian reading, and claiming `km` alone
-        // would strand the `/h` rather than fix anything.
-        expect(normalizeHaitian("9 km/h")).toBe("9 km/h");
+        // ⚠ THIS EXPECTATION USED TO BE `9 km/h` UNCHANGED, on the grounds that the per-hour idiom had no
+        // Haitian attestation. It has one, in the same meteorological register as every corpus instance:
+        // `van ki ap soufle omwen a 120 kilomèt pa èdtan` and `ki sikile a 185 kilomèt pa èdtan` on
+        // ht.wikipedia. The half-reading the old comment feared — `9 kilomèt` with a stranded `/h` — is
+        // still forbidden, and the way it is forbidden is that the RATE arm claims the whole phrase before
+        // any arm that could take the unit on its own.
+        expect(normalizeHaitian("9 km/h")).toBe("9 kilomèt pa èdtan");
+        expect(normalizeHaitian("(118 km/h)")).toBe("(118 kilomèt pa èdtan)");
+    });
+
+    // The template lost every figure in `yon sifas tè km² … pou chak km²`, so the unit stood alone with an
+    // exponent on it — invisible to the shared bare-unit pass, whose guard excludes `²³` outright.
+    test("a bare exponent unit with no numeral at all", () => {
+        expect(normalizeHaitian("yon dansite de abitan pou chak km²")).toBe("yon dansite de abitan pou chak kilomèt kare");
+        expect(normalizeHaitian("m³")).toBe("mèt kib");
+        // …but a COUNTED one still belongs to the counted arm, number and all.
+        expect(normalizeHaitian("605 km ²")).toBe("605 kilomèt kare");
     });
 
     test("ranges take `a`, ascending only, and a percent span keeps both signs", () => {

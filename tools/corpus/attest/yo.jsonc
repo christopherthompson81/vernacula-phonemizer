@@ -21,6 +21,65 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "ẹsẹ̀ bàtà",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…lè gbígbẹ náà ga ní ẹgbẹ̀rún méjì mítà (2,000metres), ìwọ̀n ẹsẹ̀ bàtà Ẹ́ẹ́rìn- dín- lọ́gbọ̀n- lé- ̀ẹẹ́dẹ́gbẹ̀ta- lé -lẹ́ ẹgbẹ̀rún…",
+                "…- lógún -lenírinwó- lé lẹ́gbẹ̀rún méjì( 2,419meters), ìwọ̀n ẹsẹ̀ bàtà Éérìn -dín- lógójì -lé- lẹ̀ẹ́dẹ́gbẹ̀rún -lé - lẹ́gbẹ̀rún mé…",
+                "…, pẹ̀lú ìyípo tí ó ga ní ẹ̀ẹ́dẹ́gbẹ̀rún mítà (900m), ìwọ̀n ẹsẹ̀ bàtà ẹ́ẹ́tà lé- láádọ̀ta -lé- lẹ́gbẹ̀rún méjì (2,953ft) . Òkè ná…",
+                "…and, ló fa ìkún omi Perth ní ọdún 1814, tó ga tó mítà méje (ẹsẹ̀ bàtà mẹ́tàlélógún àti ìnṣì) ju ìwọ̀n rẹ̀ lọ. Ó ṣẹlẹ̀ ní ọjọ́ kej…",
+                "…ọwọ ìlù Gbẹ̀du. (a) Aféré:- Ìlù nla ni afẹrẹ. Ó ga tó iwọ̀n ẹsẹ̀ bàtà mẹ́rin ó sì gùn gbọọgì. Géńdé ti ko ba dara rẹ loju ko le g…",
+                "…o jẹ́ apá kan lára Lamu Archipelago ni Kenya. Ó wà ní ìwọ̀n ẹsẹ̀ bàtà 341 (212 mi) ní ojú ọ̀nà ilá-oòrùn àríwá tí Mombasa ó sì pa…"
+            ]
+            },
+        {
+                "word": "ẹsẹ bàtà",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…Ilé kòkó, tí wọ́n kọ́ ní ọdún 1965 tí gíga tó ẹsẹ bàtà mítà márùnlé-lógọ́rún, jẹ́ ilé tí ó ga jùlọ ní iwọ̀ oòru Af…",
+                "…wọ́n fún Ọgbà èranko Edinburgh ní ère idẹ Nils Olav tí ó tó ẹsẹ bàtà mẹrin (1.2 m). Wọ́n fí ère yìí ṣèrántí oníṣẹ́ ọba àti ọnà o…",
+                "…tó ti ṣòfò. Ọkọ̀ náà kọ lu kòtò, ó sì tàkìtì sí òdìkejí, ni ẹsẹ bàtà ọdúrún (91m) kí ó tó dé àlìkámà ààyè tó ti dúró. Ó tó wákàt…"
+            ]
+            },
+        {
+                "word": "ẹsẹ bata",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…lo tóbi jù nínú mẹ́rèẹ̣́rin. Igi la fi n gbẹ ẹ. Ó sì gbà tó ẹsẹ bata ti a fi bo o loju mọ ara igi ti a gbẹ ti a si da ìho sinu r…",
+                "…bata ẹsẹ kan, ẹsẹ osi, sibẹsibẹ, o bori nipa fifo ifo iwon ẹsẹ bata mẹfa o le mẹjo (mita 2.03), eleyi ti o ta yọ ohun ti ẹnikẹn…"
+            ]
+            },
+        {
+                "word": "mililítà",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mílílítà",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
                 "word": "mítà",
                 "verdict": "attested",
                 "bounded": true,

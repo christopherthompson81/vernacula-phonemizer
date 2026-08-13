@@ -132,6 +132,27 @@ describe("yoruba text normalization", () => {
         expect(normalizeYoruba("30,000 lábẹ́")).toBe("30000 lábẹ́");
     });
 
+    // ⚠ THE ONE PLACE THIS LANGUAGE PARTS COMPANY WITH THE FLEET-WIDE IMPERIAL REFUSAL. ak/sn/mos/jv all
+    // leave `ft` reported inside a metric gloss because they have no foot word; Yoruba has one, and this
+    // corpus's own sentence is the gloss — `tí ọkọọkan tó 150 ẹsẹ̀ (ft) ní gíga`. `ẹsẹ̀ bàtà` is 19 tokens
+    // / 15 articles on yo.wikipedia and every read example is the imperial foot in a metric parenthetical.
+    test("⚠ the imperial FOOT is read here, because the corpus glosses the abbreviation with the word", () => {
+        expect(normalizeYoruba("2419 m (7936 ft)")).toBe("2419 mítà (7936 ẹsẹ̀ bàtà)");
+        expect(normalizeYoruba("(75 ft)")).toBe("(75 ẹsẹ̀ bàtà)");
+        // ⚠ THE COMPOUND, NEVER BARE `ẹsẹ̀` — that word is a foot/leg and a verse-line, the same wrong-sense
+        // argument that keeps it out of the decimal-point slot in this file's header.
+        expect(normalizeYoruba("(75 ft)")).toContain("bàtà");
+    });
+
+    // `sq` stands BETWEEN the number and the unit, so it costs TWO readings and not one: the tier's
+    // digit-adjacent unit path declines as well, and `705.78sq km` leaked its `km` raw AND lost the area.
+    test("⚠ the English measure word `sq` is spent before a DECLARED unit only", () => {
+        expect(normalizeYoruba("705.78sq km")).toBe("705 àti dásímà 7 8 kìlómítà onígun mẹ́rin"); // glued, as written
+        expect(normalizeYoruba("500 sq mi")).toBe("500 máìlì onígun mẹ́rin");
+        // An undeclared unit keeps its `sq` rather than half the phrase being spoken.
+        expect(normalizeYoruba("430 sq yd")).toBe("430 sq yd");
+    });
+
     test("⚠ the bare METRE is read here, not in the tier — and `9h 50m` is declined", () => {
         // `mítà` is definitional on yo.wikipedia ("Mítà je eyo tìpìlẹ̀ ìwọ̀n ìgùn ninu Sistemu Kakiriaye").
         expect(normalizeYoruba("2419 m")).toBe("2419 mítà");

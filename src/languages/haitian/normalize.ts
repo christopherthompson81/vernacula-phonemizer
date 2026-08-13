@@ -95,9 +95,22 @@ import { numberToWords } from "./numbers.ts";
  *  one-letter key would read the day-of-year ordinal as a length. That is trap 28/46's shape with the
  *  language supplying its own counter-example, so `m` stays out and `mèt` is reached only through `m²`/`m2`.
  *
- *  ⚠ A SLASHED UNIT IS NOT CLAIMED. `km/h` ×9 has no attested Haitian reading (`kilomèt` is attested, the
- *  per-hour idiom is not), and the trailing guard below therefore rejects a `/` as well as a letter — else
- *  `9 km/h` would read `9 kilomèt` with a stranded `/h`, which is a new defect rather than a fix. */
+ *  ⚠ THE SLASHED UNIT IS NOW CLAIMED, AND THIS PARAGRAPH USED TO SAY THE OPPOSITE. It read: *"`km/h` ×9 has
+ *  no attested Haitian reading (`kilomèt` is attested, the per-hour idiom is not)"*, and the trailing guard
+ *  still rejects a `/` for exactly the reason given then — `9 km/h` must never read `9 kilomèt` with a
+ *  stranded `/h`. What changed is the evidence, not the reasoning: the refusal was measured on the MINED
+ *  ARTIFACT, and ht.wikipedia writes the idiom out in full, in the same meteorological register as every
+ *  leaking line (tools/corpus/attest/ht.jsonc):
+ *
+ *      pa èdtan   2 tokens / 2 articles   `van ki ap soufle omwen a 120 KILOMÈT PA ÈDTAN`
+ *                                         `ki sikile a 185 KILOMÈT PA ÈDTAN`
+ *      èdtan     70 / 20                  `8 èdtan PA jou` — the same connective, a different denominator
+ *
+ *  Two hits is thin and is stated as thin; what makes it usable is that both are the WHOLE PHRASE this rule
+ *  emits, number-first and postposed, next to the very noun already declared. ⚠ `alè` (×28) also occurs in a
+ *  rate — `premye tren a vapè Ozetazini ki depase vitès 100 mil ALÈ` — but the other 27 are "on time" / "at
+ *  the moment" (`yon objè nan yon pwen alè`), so `pa èdtan` is the form taken and `alè` is not claimed.
+ *  See RATE below. */
 const UNITS: readonly (readonly [string, string])[] = [
     // longest key first — `km²`/`km2` must be tried before `km`, or the exponent is orphaned as a number.
     ["km²", "kilomèt kare"], ["km2", "kilomèt kare"],
@@ -112,6 +125,30 @@ const UNITS: readonly (readonly [string, string])[] = [
  *  (core/normalizeSymbols.ts): multi-letter vowel-free keys only, so the exponent keys and any one-letter
  *  hazard are excluded automatically; exact case; and never beside a numeral, a rate slash or an exponent. */
 const BARE_UNITS = makeBareUnitNormalizer(UNITS);
+
+/**
+ * ⚠ AND THE SAME THING WITH AN EXPONENT ON IT, WHICH THE SHARED PASS CANNOT REACH BY CONSTRUCTION. Its
+ * trailing guard excludes `²³` outright and `isBareUnitKey` rejects a key that is not all letters, so
+ * `km²` standing alone is invisible to it — and this corpus has exactly that line, twice in one sentence:
+ * `yon sifas tè km² ( mil kare) e donk yon dansite de abitan pou chak km² ( pou chak mil kare)`, where the
+ * template lost EVERY figure and left the unit with nothing to attach to. That is the same "a figure a
+ * bracket put out of reach" case `BARE_UNITS` was written for, one superscript further on.
+ *
+ * ⚠ THE GUARDS ARE THE STRICT ONES AND ONE OF THEM IS NOT OPTIONAL: no digit before, because a counted
+ * `605 km ²` belongs to the counted arm above and running this first would strand the number. The reading
+ * itself claims nothing new — `kilomèt kare` ×24, `mèt kare` ×11, `mèt kib` ×3, all in `UNITS` already.
+ */
+const BARE_EXPONENT_UNITS: readonly (readonly [RegExp, string])[] = UNITS
+    .filter(([sym]) => /[²³]$/u.test(sym))
+    .map(([sym, word]) =>
+        [
+            new RegExp(
+                `(?<![\\p{L}\\p{M}\\d.,/-])${sym.slice(0, -1)}\\s?${sym.slice(-1)}(?![\\p{L}\\p{M}\\d/])`,
+                "gu",
+            ),
+            word,
+        ] as const
+    );
 
 /**
  * ⚠ ASCENDING PAIRS ONLY, and the guards are what make this rule survivable. `\d+ ?[-–] ?\d+` matches
@@ -270,6 +307,21 @@ export function normalizeHaitian(input: string): string {
     //    single-operand arm below would otherwise reach the SECOND operand of a hyphen span on its own and
     //    strand the unit inside it, so the span arm runs first and re-emits both endpoints — and it has to
     //    run HERE rather than after step 7, because step 7 would already have spent the dash.
+    // ⚠ THE RATE FIRST, BEFORE ANY ARM THAT TAKES A UNIT ON ITS OWN. `63 km/h` has a number adjacent to
+    //    `km`, so the single-operand arm below would claim it, emit `63 kilomèt` and leave `/h` stranded —
+    //    which is exactly the new defect the old refusal was protecting against. Claiming the whole phrase
+    //    first is what makes it safe to claim at all. Word order is the ordinary one for this language:
+    //    number, unit noun, connective, denominator — `120 kilomèt pa èdtan`, the corpus's own sentence.
+    for (const [sym, word] of UNITS) {
+        if (/[²³23]$/u.test(sym)) continue; // a rate never carries an exponent on its NUMERATOR here
+        s = s.replace(
+            new RegExp(
+                `(?<![\\p{L}\\p{M}\\d.,])(\\d+(?:[.,]\\d+)?)\\s?${sym}\\s?/\\s?(h|èdtan)(?![\\p{L}\\p{M}\\d])`,
+                "gu",
+            ),
+            `$1 ${word} pa èdtan`,
+        );
+    }
     for (const [sym, word] of UNITS) {
         // ⚠ THE EXPONENT MAY BE SET OFF BY A SPACE, and this corpus does it often enough to matter:
         // `10.4 milyon km 2`, `2.7 milyon km 2`, `yon zòn sèlman 605 km ²`. So a key whose last character
@@ -301,6 +353,7 @@ export function normalizeHaitian(input: string): string {
     // …and the ones with NO numeral at all — see BARE_UNITS. Last, so the counted arms above keep every
     // match they can make and only what they could not reach is left for this.
     s = BARE_UNITS(s);
+    for (const [re, word] of BARE_EXPONENT_UNITS) s = s.replace(re, word);
 
     // 6) THE DEGREE SIGN, WHICH DOES FIVE DIFFERENT JOBS ON THIS WIKI — and only two of them are a degree.
     //    Measured over the 276 `°` in Creole text (the Lingala layer records the same hazard with four jobs;

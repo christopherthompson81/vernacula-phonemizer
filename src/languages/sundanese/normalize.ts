@@ -77,11 +77,43 @@ const SYMBOLS = makeSymbolNormalizer({
     // the form the engine's own numeral manifest uses, and a magnitude that is written but not declared is
     // precisely the one that gets stranded.
     magnitudes: ["rébu", "rebu", "juta", "yuta", "milyar", "miliar", "triliun"],
+    /**
+     * ⚠ `mg`, `gr` AND `pm` JOIN THE TABLE, and each rests on a different strength of evidence — stated
+     * rather than levelled (tools/corpus/attest/su.jsonc):
+     *
+     * · `mg` → *miligram*, 16 tokens / 7 articles, and su.wikipedia's own *Gram* article is a DEFINITION
+     *   list that glosses every symbol in this table: *"Simbol gram nyaéta g. 1 MILIGRAM (MG) = 0,001 gram
+     *   1 sentigram (sg) = 0,01 gram … 1 kilogram (kg) = 1000 gram"*. The corpus instance is a nutrient
+     *   mass in Sundanese prose (`ngandung nepi ka 5 mg séng`), the same register as *"269 miligram
+     *   kalium"*, *"55 miligram Vitamin C per porsi"*.
+     * · `gr` is NOT A NEW WORD — it is a second SPELLING of an abbreviation whose word (`gram` ×34 / 20) is
+     *   already declared under `g`. ⚠ And that is the whole of what is claimed: the *Gram* article's symbol
+     *   list has `g` and not `gr`, so `gr` is the colloquial Indonesian-style spelling rather than the
+     *   standard one, which is a fact about how the corpus WRITES the unit, not about the unit. Digit-bound
+     *   like every key here; the artifact's single instance is `beuratna 150 gr` — a kidney's mass, and
+     *   150 g is the right order of magnitude for one.
+     * · `pm` → *pikométer* is THIN AND SAID TO BE THIN: 1 token / 1 article, *"kalawan panjang gelombang di
+     *   antara 10 nanométer jeung 100 PIKOMÉTER"*. One hit in one article is a lead and not a finding — but
+     *   the sense is exactly this one (a length in a wavelength range, beside its neighbouring SI prefix),
+     *   the corpus instance is the same physics register (`0.96 Å (96 pm)`, a bond length), and the form is
+     *   the transparent compound of a `-méter` series this file already ships four members of. Declared on
+     *   that, in the same spirit as this file's `liwat`, whose thinness is recorded the same way.
+     */
     units: {
         km: ["kilométer"], m: ["méter"], cm: ["séntiméter"], mm: ["miliméter"],
-        kg: ["kilogram"], g: ["gram"], ha: ["héktar"], l: ["liter"],
+        kg: ["kilogram"], g: ["gram"], gr: ["gram"], mg: ["miligram"], pm: ["pikométer"],
+        ha: ["héktar"], l: ["liter"],
     },
-    rateDenominators: { jam: "jam", detik: "detik" },
+    /**
+     * ⚠ `h` JOINS THE WORD KEYS, AND WITHOUT IT A RATE LOST ITS DENOMINATOR SILENTLY. `160 km/h (100 mph)`
+     * read *sarátus genep puluh kilométer **h*** — the tier resolved the head unit, failed to resolve the
+     * one-letter denominator against a table keyed only on the Sundanese WORDS, and re-emitted the letter.
+     * ⚠ **NO LEAK GATE IN THIS REPO COULD SEE THAT**, and that is why it survived a mature layer: `h` is ONE
+     * letter, and `rawLatinIn` requires a run of two or more. It was found by READING the line a `mph` hit
+     * pointed at. No new word — `jam` is the same noun the `km/jam` spelling already resolves to, ×186 in
+     * the corpus's own clock rule.
+     */
+    rateDenominators: { jam: "jam", detik: "detik", h: "jam", s: "detik" },
     unitPer: "per",
     exponentWords: { squared: ["pasagi"], cubed: ["kubik"] },
     // ⚠ THE BARE EXPONENT IS DECLARED ON A NARROW MARGIN, AND THE COST IS NAMED. Counted on the filtered

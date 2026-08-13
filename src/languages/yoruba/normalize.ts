@@ -54,7 +54,32 @@ const SYMBOLS = makeSymbolNormalizer({
      * (2,600 miles)`, `500 mítà (1,600 ẹsẹ̀ bàtà)`, `8.62 mítà (28.3 ft)`, `10,000 mita`. 4:0 once the
      * event names are set aside, so the tier's default order stands and no `unitPrefix` is declared.
      */
-    units: { km: ["kìlómítà"], ha: ["hẹ́kítà"], mi: ["máìlì"], mm: ["mílímítà"], l: ["lítà"], L: ["lítà"] },
+    /**
+     * ⚠ `ft` IS DECLARED, AND IT IS THE ONE PLACE THIS FILE PARTS COMPANY WITH THE FLEET-WIDE IMPERIAL
+     * REFUSAL. ak, sn, mos and jv all leave `ft` reported inside a metric-glossing parenthetical, and the
+     * reason each of them gives is that the language has NO FOOT WORD to give it. Yoruba has one, and this
+     * corpus's own line is the gloss: `tí ọkọọkan tó 150 ẹsẹ̀ (FT) ní gíga` — the abbreviation set beside
+     * the Yoruba noun, in the same sentence, as the definition of it. The layer's `METRE` note already
+     * quotes a second: `500 mítà (1,600 ẹsẹ̀ bàtà)`.
+     *
+     * · `ẹsẹ̀ bàtà` — 19 tokens / 15 articles on yo.wikipedia (tools/corpus/attest/yo.jsonc), and every
+     *   example read is the imperial foot in a metric gloss: *"ẹ̀ẹ́dẹ́gbẹ̀rún mítà (900m), ìwọ̀n ẹsẹ̀ bàtà
+     *   ẹ́ẹ́tà lé-láádọ̀ta-lé-lẹ́gbẹ̀rún méjì (2,953ft)"*, *"mítà méje (ẹsẹ̀ bàtà mẹ́tàlélógún àti ìnṣì)"*,
+     *   *"ère … tí ó tó ẹsẹ bàtà mẹrin (1.2 m)"*. The untoned `ẹsẹ bàtà` ×9/8 is the same word.
+     * ⚠ THE COMPOUND, NEVER BARE `ẹsẹ̀`, and the header already says why: bare `ẹsẹ̀` is a foot/leg and a
+     *   verse-line, which is exactly the wrong-sense argument that keeps it out of the decimal-point slot.
+     *   `bàtà` ("shoe") is what makes the measure sense unambiguous, and it is the collocation the corpus
+     *   writes.
+     * ⚠ POSTPOSED LIKE THE REST, AND THE COUNT LOOKS PREPOSED UNTIL IT IS READ — the same trap this file's
+     *   `units` note records for the athletics event names. Six of the attested hits put the noun first,
+     *   and in every one of those the number is SPELLED OUT (`ẹsẹ bàtà mẹrin`, `ẹsẹ̀ bàtà mẹ́tàlélógún`) or
+     *   the phrase is framed by `ìwọ̀n` ("the measure of"). Where a DIGIT is involved — which is the only
+     *   shape this rule can ever match — the corpus writes `1,600 ẹsẹ̀ bàtà` and `150 ẹsẹ̀`, number first.
+     */
+    units: {
+        km: ["kìlómítà"], ha: ["hẹ́kítà"], mi: ["máìlì"], mm: ["mílímítà"], l: ["lítà"], L: ["lítà"],
+        ft: ["ẹsẹ̀ bàtà"],
+    },
     /** ⚠ `w` is the YORUBA abbreviation — wákàtí, "hour" — so both `km/w` and the borrowed `km/h` occur. */
     rateDenominators: { w: "wákàtí kan", h: "wákàtí kan" },
     unitPer: "ni",
@@ -114,6 +139,9 @@ const METRE_WORD = "mítà";
 
 /** The unit nouns this layer expands, and a squared one with no number necessarily beside it. */
 const UNIT_WORDS: Record<string, string> = { km: "kìlómítà", ha: "hẹ́kítà" };
+/** The remaining `units` keys `sq` may precede — see rule 4a. Kept beside `UNIT_WORDS` rather than merged
+ *  into it, because that table is also `UNIT_SQUARED`'s, and `mi²`/`ft²` are ×0 in this corpus. */
+const SQ_UNITS: Record<string, string> = { mi: "máìlì", ft: "ẹsẹ̀ bàtà" };
 const UNIT_SQUARED = /(?<![\p{L}\p{M}])(km|ha)\s*²/gu;
 /** `38°C`, `79.63 °F` — a number, the sign, and a scale letter. The bare ° is refused; see the header. */
 const SCALED_DEGREE = /(\d+(?:\.\d+)?)\s*°\s*([CFK])(?![\p{L}\p{M}])/gu;
@@ -144,6 +172,20 @@ export function normalizeYoruba(text: string): string {
     );
     // 4. Squared units, then the shared symbol tier.
     s = s.replace(UNIT_SQUARED, (_m, u: string) => `${UNIT_WORDS[u] ?? u} ${SYM.squared}`);
+    // 4a. ⚠ THE ENGLISH MEASURE WORD `sq`, WHICH COSTS TWO READINGS RATHER THAN ONE — the `so` finding
+    //     exactly. `ìwọ̀n ilẹ̀ tó tó 705.78sq km 2` is Ibarapa East's area, and the `sq` stands BETWEEN the
+    //     number and the unit, so the tier's digit-adjacent unit path declines as well: the `km` leaks raw
+    //     AND the area is lost. Note it is GLUED to the number here, which is why the gap is optional.
+    //     ⚠ ONLY BEFORE A DECLARED UNIT, so `sq ft`-style phrases whose unit this file cannot read keep
+    //     their `sq` rather than half the phrase being spoken. Emitted as unit-then-modifier, the position
+    //     `exponentWords` already declares for this language.
+    s = s.replace(
+        /(?<![\p{L}\p{M}])sq\.?\s*(km|ha|mi|ft)(?![\p{L}\p{M}\d])/giu,
+        // ⚠ A LEADING SPACE, because the corpus writes `705.78sq` GLUED and the replacement would otherwise
+        // fuse the noun onto the numeral (`8kìlómítà`) for the tokenizer to swallow whole. The trailing
+        // whitespace collapse at the end of this function spends the extra one in the spaced case.
+        (_m, u: string) => ` ${UNIT_WORDS[u.toLowerCase()] ?? SQ_UNITS[u.toLowerCase()] ?? u} ${SYM.squared}`,
+    );
     s = SYMBOLS(s);
     // 4b. ⚠ THE BARE METRE, AFTER THE TIER AND NOT INSIDE IT. See METRE for the two `9h 50m` counter-examples
     //     that keep `m` out of `units`. After the tier so every shape the tier CAN read gets first refusal —

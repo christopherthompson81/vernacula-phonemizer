@@ -90,6 +90,26 @@ describe("Sundanese canonical IPA", () => {
             expect(phonemize("5 + (−3) = 2", "su")).toContain("tˈambah kˈuraŋ");
         });
 
+        // su.wikipedia's own *Gram* article glosses the whole symbol series — "1 miligram (mg) = 0,001
+        // gram" — which is what `mg` rests on. `gr` is no new word, only the colloquial second SPELLING of
+        // the abbreviation whose word `g` already declares. `pikométer` is 1 token / 1 article and that
+        // thinness is recorded in the layer, not hidden.
+        test("the three units this corpus writes and the table did not have", () => {
+            expect(phonemize("5 mg séng", "su")).toContain("milˈiɡram");
+            expect(phonemize("beuratna 150 gr", "su")).toContain("ɡram");
+            expect(phonemize("(96 pm)", "su")).toContain("pikomˈetər");
+        });
+
+        // ⚠ A DEFECT NO LEAK GATE IN THIS REPO CAN SEE. `160 km/h` read *…kilométer H*: the tier resolved
+        // the head unit and re-emitted the one-letter denominator raw, because `rateDenominators` was keyed
+        // on the Sundanese WORDS only. `rawLatinIn` needs a run of TWO letters, so a one-letter leak is
+        // invisible to it; this was found by reading the line a neighbouring `mph` hit pointed at.
+        test("a one-letter rate denominator, which no counter reported", () => {
+            expect(phonemize("160 km/h", "su")).toContain("kilomˈetər pər d͡ʒam");
+            expect(phonemize("160 km/h", "su")).not.toMatch(/\bh\b/u);
+            expect(phonemize("10 m/s", "su")).toContain("mˈetər pər dətˈik");
+        });
+
         // ⚠ THE `$` THAT IS NOT MONEY. A shared pre-pass (core/unicode.ts) folds caret exponents to real
         // superscripts BEFORE this layer runs, so `$10^{12}$` arrives as `$10¹²$` — a rule keyed on `^` or `{`
         // can never fire, and testing normalizeSundanese() directly would not show it because that call
