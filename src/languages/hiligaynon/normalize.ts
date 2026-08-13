@@ -240,5 +240,30 @@ export function normalizeHiligaynon(input: string): string {
     // header): it is ×20 and already correct.
     s = s.replace(/(?<![\p{L}\p{M}])(ika-\d+)ng(?![\p{L}\p{M}])/giu, "$1 nga");
 
+    // ── 8. `sg` → `sang` — THE CORPUS'S OWN SHORTHAND FOR THE GENITIVE PARTICLE ───────────────────────────
+    // ×6, and it is this artifact's ENTIRE raw-ASCII-Latin leak: `sg` has no vowel, so it can never be a
+    // Hiligaynon word, and it reached the IPA as the bare cluster the letters spell. ⚠ NO OTHER GATE IN THE
+    // REPO CAN SEE THIS. `sg` is Latin letters in a Latin-script language: DIGIT hunts digits, RAWMARK hunts
+    // punctuation, and a two-letter run looks exactly like a word to everything else.
+    //
+    // ⚠ THE EXPANSION IS NOT A GUESS AND IT IS NOT `sing`. Hiligaynon has TWO particles that could abbreviate
+    // to these letters — `sang` (genitive/definite, and the past-time marker) and `sing` (indefinite) — so
+    // the reading was decided by reading all six in their slots, not by picking the commoner word:
+    //     `sa tunga sg tuig 1431 kag 1442`      · `Republika sg Pilipinas`
+    //     `Pila ka mga paktorya sg panit`       · `ang pagtulu-ohan sg sining simbahan`
+    //     `sa edad sg 25 años`                  · `ini nga barrio guin tagaan sg diretso`
+    // Every one is the "of / of the" slot, which is `sang`; not one is the indefinite `sing`. And the
+    // artifact writes `sang` ×324 in that same slot against `sg` ×6, including the identical collocation in
+    // full — `sentro sang negosyo` beside `paktorya sg panit`. So this substitutes one of the corpus's OWN
+    // commonest words, not a word brought in from outside: the strongest evidence available for a language
+    // whose only referee is a 1934 dictionary and for which `attest.ts` cannot be run at all (no hil wiki of
+    // any kind exists — the corpus is the Wikimedia Incubator's Wp/hil).
+    //
+    // ⚠ LOWER CASE ONLY, AND BOUNDED AGAINST DOT, SLASH, COLON AND HYPHEN. `SG`/`Sg` are ×0 here, and upper
+    // case is where the collisions live: `zh-sg` (a MediaWiki language-conversion variant tag — it is a real
+    // raw-Latin hit in ANOTHER language's artifact in this same batch, wuu's), a `.sg` domain, and an `sg:`
+    // interwiki prefix. Matching the shape case-insensitively would claim all three.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}.:/-])sg(?![\p{L}\p{M}\p{Nd}.:/-])/gu, "sang");
+
     return s;
 }

@@ -293,6 +293,29 @@ const normalizeSymbols = makeSymbolNormalizer({
         kg: ["kilogramm"],
         "mérföld": ["mérföld"],
         mbit: ["megabit"],
+        /**
+         * ⚠ `mp` IS THE SECOND, AND IT IS A NUMERATOR KEY EVEN THOUGH `s` IS A DENOMINATOR-ONLY ONE. The
+         * artifact's `133 m/s, 300 mp/h` left `ˈmp ˈh` raw: the tier resolved neither half, so the rate arm
+         * declined and the whole phrase reached the IPA as ASCII. `s` cannot be promoted to fix it (see the
+         * docblock above — a standalone `s` bites into `802.11a`-shaped codes), and `mp` has no such second
+         * life: it is two letters, vowel-free, and not a Hungarian word.
+         *
+         * SOURCING — hu.wikipedia states the equivalence twice, from both ends, and `attest.ts --lang hu`
+         * has both cached:
+         *   · the *másodperc* article: "…(szövegben – az **mp** rövidítést is)" — the second, abbreviated
+         *     ⟨mp⟩ in running text. 110 tokens / 19 articles.
+         *   · the ⟨mp⟩ disambiguation page: "mp, Mp – időre vonatkozó mértékegységként a másodperc egyik
+         *     jelölése, helyesen: s". 156 tokens / 18 articles.
+         * ⚠ THAT SAME PAGE LISTS A SECOND UNIT SENSE AND IT IS READ AND REJECTED, not skipped: `mp` is also
+         * the MILLIPOND, a CGS-era force unit. It is obsolete, it is not what a Hungarian text with a figure
+         * in front of it means, and the ⟨s⟩-gloss above is the wiki's own account of ordinary written usage.
+         * Declaring the millipond instead would be the *kong-si* error — the attested sense that is not the
+         * one in the slot.
+         * ⚠ AND THE CORPUS SENTENCE IS ITSELF A MISTRANSLATION — English "300 mph" rendered as `300 mp/h`,
+         * so what it MEANS is miles per hour. That is not this layer's business and must not become it: the
+         * layer reads the Hungarian that is written, and *háromszáz másodperc per óra* is what is written.
+         */
+        mp: ["másodperc"],
     },
     unitPer: "per",
     rateDenominators: { h: "óra", s: "másodperc", "ó": "óra", "óra": "óra", "órás": "órás" },

@@ -492,3 +492,19 @@ describe("Afrikaans text normalization", () => {
     });
 
 });
+
+describe("Afrikaans — `mnr.`, the artifact's only raw-ASCII-Latin run", () => {
+    const ph = (s: string): string => getPhonemizer("af").text(s).trim();
+
+    test("`mnr.` expands to meneer; the dot stops being a phrase break", () => {
+        // ⟨mnr⟩ has no vowel and is not a possible Afrikaans word; it reached the IPA as the letters.
+        expect(ph("om mnr. Reid te meet")).toContain("məniər");
+        expect(ph("om mnr. Reid te meet")).not.toContain("mnr");
+        expect(ph("Mnr. Blake was hier.")).toContain("məniər"); // the corpus's own slot: title + surname
+    });
+
+    test("the bare stem is NEVER matched — the `dr` guard covers `mnr` too", () => {
+        // Only the DOTTED keys may appear without their dot. `dr` is the start of "Dromaeosauridae".
+        expect(ph("Die Dromaeosauridae is groot.")).not.toContain("dɔktər");
+    });
+});

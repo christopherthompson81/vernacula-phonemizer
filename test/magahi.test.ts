@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../src/index.ts";
 
 import { phonemizeWord } from "../src/languages/magahi/magahi.ts";
 import { phonemizeWord as bho } from "../src/languages/bhojpuri/bhojpuri.ts";
@@ -21,5 +22,17 @@ describe("Magahi canonical IPA — Bhojpuri base + glide hardening", () => {
         expect(phonemizeWord("बैल")).toBe("bˈɛl"); // ऐ → ɛ monophthong (== bho)
         expect(phonemizeWord("गणेश")).toBe("ɡˈənes"); // ण → n (== bho)
         expect(phonemizeWord("देश")).toBe(bho("देश")); // shared features → identical to Bhojpuri here
+    });
+});
+
+describe("Magahi — `nm`, and the tier it inherits from Hindi", () => {
+    const say = (s: string): string => phonemize(s, "mag").trim();
+
+    test("the nanometre reads, from a key declared in the HINDI symbol tier", () => {
+        // ⚠ THE LEAK WAS MAGAHI'S AND THE FIX IS HINDI'S. mag has no symbol tier of its own — it is
+        // `makeNativeHindi`'s, shared with awa, bgc, bho, hne, mai and rkt — and hi's own artifact contains
+        // no `nm` at all, so this key could only ever have been found from a rider.
+        expect(say("५८० nm")).toContain("nˈɛnomiʈəɾ");
+        expect(say("५८० nm")).not.toContain("nm");
     });
 });

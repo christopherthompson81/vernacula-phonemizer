@@ -370,9 +370,43 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         const MAG = `(?:\\s(?:مىڭ|مىليون|مېليون|مىلىيون|مىليۇن|مېليۇن|مىليارد|مىليارت|مېليارت|تۈمەن))?`;
         for (const [sym, word] of UNITS) {
             const key = sym.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+            /**
+             * ⚠ A BOUND CASE SUFFIX MAY BE GLUED STRAIGHT ONTO A LATIN UNIT KEY, and the flat `\p{L}` guard
+             * declines the whole match when it is. Measured, and it is this artifact's only unit leak:
+             * `1-1.5kgغىچە` ("up to 1–1.5 kg") read as `… kɡ ʁit͡ʃɛ` — `kg` IS declared and `1.5 kg` reads
+             * `kiloɡrɑm` correctly; the only difference is the suffix. Same family as the `%`+suffix shape
+             * this file already handles above, arriving on the unit instead of the sign.
+             *
+             * ⚠ THE RELAXATION IS FOR LATIN KEYS ONLY, and that restriction is the whole safety argument. A
+             * Latin `km`/`kg` cannot CONTINUE into an Arabic-script letter — the script change IS the word
+             * boundary — so widening the guard there can only ever admit a suffix. Doing the same for the
+             * Arabic keys would be a different and much worse bet: `كم` relaxed to allow any following
+             * letter would start biting into ordinary Uyghur words that happen to open with those two
+             * characters, which is the exact hazard the `%` docblock records for an open suffix arm.
+             *
+             * ⚠ AND THE SUFFIX IS RE-EMITTED AS WRITTEN, NOT RE-DERIVED — the deliberate opposite of the
+             * percent rule two blocks up, and the reason is stated because the asymmetry looks like an
+             * oversight. There the written suffix is chosen for the DIGITS and is systematically wrong for
+             * `پىرسەنت` (a voiceless-ت stem), so 27+11 instances gave the evidence to rebuild it. Here there
+             * is ONE instance in the whole corpus, and its `غىچە` already agrees with `كىلوگرام` (back
+             * vowel), so there is nothing to correct and no sample to build a harmony table from. Leaving
+             * the author's own morphology in place is the conservative reading; inventing agreement rules
+             * from a single token is trap 22.
+             *
+             * ⚠ A GLUED NEXT WORD IS NOT A SUFFIX, AND ⟨ئ⟩ IS WHAT TELLS THEM APART. The relaxation above
+             * also reaches `180kmئېگىزلىكتە` ("at a height of 180 km"), where the corpus has simply left
+             * the space out between the unit and the NEXT WORD; gluing there would emit one fused token.
+             * ⟨ئ⟩ U+0626 is Uyghur's word-initial vowel carrier: every vowel-initial WORD opens with it and
+             * no suffix ever does (`-غا -نى -دىن -لىق -تىن -گە -چە -دا` are the whole shape), so it is an
+             * orthographic word boundary rather than a lexical guess. A space is restored before it and
+             * nowhere else. Measured on that sentence: `ˈʊkm ʔeɡizliktɛ` → `kilometir ʔeɡizliktɛ` — a
+             * SECOND leak closed, and one the raw-Latin scan could not see, since `km` was reaching the
+             * English fallback rather than being echoed byte-for-byte.
+             */
+            const tail = /^[A-Za-z]/u.test(sym) ? "A-Za-z" : "\\p{L}";
             s = s.replace(
-                new RegExp(`(?<![\\p{L}\\p{M}${D}.,،])(${NUM}${MAG})\\s?${key}(?![\\p{L}\\p{M}${D}²])`, "gu"),
-                `$1 ${word}`,
+                new RegExp(`(?<![\\p{L}\\p{M}${D}.,،])(${NUM}${MAG})\\s?${key}(?![${tail}\\p{M}${D}²])(ئ?)`, "gu"),
+                (_m, q: string, hamza: string) => `${q} ${word}${hamza === "" ? "" : ` ${hamza}`}`,
             );
         }
         //    ⚠ AND THE UNIT NOUN IS OFTEN ALREADY SPELLED OUT WITH A BARE `²` HANGING OFF IT

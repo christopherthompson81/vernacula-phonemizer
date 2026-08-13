@@ -91,3 +91,21 @@ describe("Hausa text normalization", () => {
         expect(ph("Roe v. Wade")).toBe("rˈoe dˈa wˈade");
     });
 });
+
+describe("Hausa — the unit symbol BEFORE its numeral, which is Hausa's own order", () => {
+    const ph = (s: string): string => phonemize(s, "ha").trim();
+
+    it("`km 2` reads kilomita, with the count left where Hausa puts it", () => {
+        // ⚠ MEASURED, NOT ASSUMED: the artifact writes the SPELLED-OUT noun in this position five times
+        // (`kilomita 1`, `kilomita 7` ×2, `kilomita 2` ×2) against one abbreviated `km 2`. The shared tier
+        // fires only AFTER a numeral, so `mai nisan km 2-3` left `km` in the IPA as raw ASCII.
+        expect(ph("km 2")).toBe("kilomˈita bˈi˥ju˥");
+        expect(ph("mai nisan km 2-3")).toContain("kilomˈita bˈi˥ju˥ zˈu˥wa˩ ˈu˥ku˩"); // the range survives
+        expect(ph("mai nisan km 2-3")).not.toContain("km");
+    });
+
+    it("the digit-first order the tier already handled is untouched", () => {
+        expect(ph("5 km")).toBe("bˈi˩ja˥r kilomˈita");
+        expect(ph("100 km/h")).toBe("ɗˈa˩ri˥ kilomˈita ˈa ˈa˥wa˩");
+    });
+});

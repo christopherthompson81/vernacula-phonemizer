@@ -276,8 +276,19 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ ONE-LETTER KEYS MEASURED (trap 46): over the artifact `<digit> g`, `<digit> l`, `<digit> L` are ×0
     // apiece, matching the bare-`m` check the line below already records, and Hindi declares no
     // `magnitudes`, so no ligature can put a stray letter where the tier expects a unit.
+    // ⚠ `nm` WAS ADDED FROM A MAGAHI LEAK, NOT A HINDI ONE, and that is the clearest demonstration of the
+    // inheritance note above. mag's artifact carries `एकर तरङ्गदैर्घ्य ५७०–५८० nm हे` — the visible-light
+    // wavelength, in the colour article — and it read *… pˈɑ̃t͡ʃ sˈɔ ˈʌsːi nm* with the symbol echoed raw.
+    // mag has no symbol tier of its own; it is this one. hi's own artifact contains no `nm` at all, so the
+    // key could only ever have been found from a rider, and fixing it in the rider was never an option.
+    // SOURCING, and hi.wikipedia GLOSSES THE SYMBOL ITSELF: the नैनोमीटर article opens
+    // "नैनोमीटर (प्रतीक: नैमी या nm)" — the language's own statement that ⟨nm⟩ denotes this word — and the
+    // word is in digit-adjacent use across unrelated articles ("380 नैनोमीटर से 750 नैनोमीटर तरंगदर्घ्य",
+    // "1000 नैनोमीटर के तरंगदैघ्य पर 0.17 नैनोमीटर"). `attest.ts --lang hi`: 6 examples, every one the unit.
+    // ⚠ नेनोमीटर IS A REAL VARIANT AND IS NOT DECLARED. It probes ×1, in a gloss of the symbol itself
+    // ("100 nm (100 नेनोमीटर)"), against the article-title spelling with the ऐ. One form, the fuller lemma.
     units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मीटर"],
-        g: ["ग्राम"], l: ["लीटर"], L: ["लीटर"], ha: ["हेक्टेयर"] },
+        g: ["ग्राम"], l: ["लीटर"], L: ["लीटर"], ha: ["हेक्टेयर"], nm: ["नैनोमीटर"] },
     // `km²` → वर्ग किलोमीटर. Undeclared, the tier left the whole match alone and `km²` reached the IPA as a
     // Latin fragment — `5 km²` read as *pˈaː̃t͡ʃ ˈʊkm*, worse than the raw text, and the review gate could not
     // flag it as a DROP because deleting the `²` changes the output.

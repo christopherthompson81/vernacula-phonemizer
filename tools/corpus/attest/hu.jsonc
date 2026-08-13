@@ -1,25 +1,73 @@
 // WIKIPEDIA WORD ATTESTATION — hu. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "hu",
-    "wiki": "hu.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "hu",
+        "wiki": "hu.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "mp",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 156,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…== A rövidítés jelentései == Mértékrendszerekben: mp – erőre vonatkozó mértékegységként millipond, egy milligram…",
+                "…kegységként millipond, egy milligrammnak megfelelő súlyerő; Mp – erőre vonatkozó mértékegységként megapond, az előbbinek e…",
+                "…mértékegységként megapond, az előbbinek egymilliárdszorosa; mp, Mp – időre vonatkozó mértékegységként a másodperc egyik je…",
+                "…ékegységként megapond, az előbbinek egymilliárdszorosa; mp, Mp – időre vonatkozó mértékegységként a másodperc egyik jelölé…",
+                "…ó mértékegységként a másodperc egyik jelölése, helyesen: s; MP – a fényképezésben használt mértékegységként megapixel, pél…",
+                "…képek készítésére képes gép \"tudásszintjének\" értékmérője; mP – a Planck-tömegnek, mint a tömeg természetes egységének a…"
+            ]
+            },
+        {
+                "word": "másodperc",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 110,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…A másodperc (szekundum) SI-alapegység, az idő mértékegysége, jele: s. (…",
+                "…szövegben – az mp rövidítést is). Hivatalos definíciója: A másodperc az alapállapotú 133Cs atom két hiperfinom energiaszintje kö…",
+                "…megfelelő sugárzás 9 192 631 770 periódusának időtartama. A másodperc a metrikus időszámítás alapegysége. A másodperc 60-szorosa…",
+                "…őtartama. A másodperc a metrikus időszámítás alapegysége. A másodperc 60-szorosa a perc, 3600-szorosa az óra, a 86 400-szorosa a…",
+                "…alapvető időegységként is ezt választotta. Így alakult ki a másodperc mint mérték. Az óra, perc és másodperc hatvanas váltószáma…",
+                "…ta. Így alakult ki a másodperc mint mérték. Az óra, perc és másodperc hatvanas váltószáma babilóniai örökség. A sumerek, akik az…"
+            ]
+            },
+        {
+                "word": "perc",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 58,
+                "articles": 14,
+                "substringOnly": 6,
+                "examples": [
+                "…A perc egy mértékegység, melynek időbeli és geometriai vonatkozása…",
+                "…ele s, a latin secundum szóból. == Az idő mértékegységei == Perc, jele: min, 1 min = 60 s Óra, jele: h, 1 h = 60 min = 3600…",
+                "…30 vagy 31 napból áll. Év, mely 365 vagy 366 napból áll. == Perc a geometriában == A geometriában a perc a szög egyik mérték…",
+                "…366 napból áll. == Perc a geometriában == A geometriában a perc a szög egyik mértékegysége. Egy szögperc egy fok 1/60-ad ré…",
+                "…A 141 perc a befejezetlen mondatból Fábri Zoltán 1975-ben bemutatott j…",
+                "…k díja – Illés György == Megjegyzések == == Források == 141 perc a befejezetlen mondatból a PORT.hu-n (magyarul) 141 perc a…"
+            ]
+            },
         {
             "word": "mínuszjel",
             "verdict": "attested",
@@ -36,5 +84,6 @@
                 "…özi fonetikai ábécé szerint a felső indexben lévő plusz- és mínuszjel (mint mellékjel) előrébb vagy hátrébb képzett beszédhangot…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

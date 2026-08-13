@@ -185,3 +185,20 @@ describe("Hungarian text normalization", () => {
         expect(say("32000")).toBe("ˈhɒrmint͡skeːtɛzɛr");
     });
 });
+
+describe("Hungarian — `mp`, the second, as a unit NUMERATOR", () => {
+    const say = (s: string): string => getPhonemizer("hu").text(s).trim();
+
+    test("`mp` reads másodperc, alone and as the head of a rate", () => {
+        expect(say("10 mp")).toBe("ˈtiːz ˈmaːʃotpɛrt͡s");
+        // The artifact's line: `300 mp/h`. The tier resolved NEITHER half, so the rate arm declined and
+        // `ˈmp ˈh` reached the IPA as ASCII. `s` cannot be promoted to fix it — a standalone `s` bites
+        // into the corpus's `802.11a`-shaped codes — and `mp` has no such second life.
+        expect(say("300 mp/h")).toBe("ˈhaːromsaːz ˈmaːʃotpɛrt͡s ˈpɛr ˈoːrɒ");
+    });
+
+    test("the denominator-only keys still compose, and are still denominator-only", () => {
+        expect(say("133 m/s")).toBe("ˈsaːzhɒrmint͡shaːrom ˈmeːtɛr ˈpɛr ˈmaːʃotpɛrt͡s");
+        expect(say("480 km/h")).toBe("ˈneːcsaːzɲolt͡svɒn ˈkilomeːtɛr ˈpɛr ˈoːrɒ");
+    });
+});

@@ -151,3 +151,25 @@ describe("Uyghur text normalization", () => {
         expect(norm("227&nbsp;km²").trim()).toBe("227 كۋادرات كىلومېتىر");
     });
 });
+
+describe("Uyghur — a bound suffix glued straight onto a Latin unit key", () => {
+    const say = (s: string): string => phonemize(s, "ug").trim();
+
+    test("`kgغىچە` reads the unit and keeps the author's own morphology", () => {
+        // `kg` IS declared, and `1.5 kg` always read. The unit arm's right guard was a flat `\p{L}`, so a
+        // Uyghur case suffix touching the key made it decline the whole match and `kɡ` reached the IPA.
+        expect(say("1.5kgغىچە")).toContain("kiloɡrɑmʁit͡ʃɛ");
+        expect(say("1.5 kg")).toContain("kiloɡrɑm");
+    });
+
+    test("⟨ئ⟩ is a word boundary, so a glued next WORD is not fused into the unit", () => {
+        // Uyghur's word-initial vowel carrier: every vowel-initial word opens with it and no suffix does.
+        // `180kmئېگىزلىكتە` used to read `ˈʊkm ʔeɡizliktɛ` — the unit through the English fallback.
+        expect(say("180kmئېگىزلىكتە")).toBe("jyz sɛksɛn kilometir ʔeɡizliktɛ");
+    });
+
+    test("the existing unit and exponent readings are unchanged", () => {
+        expect(say("450,295 km²")).toBe("tøt jyz ʔɛllik miŋ ʔikki jyz toqsɑn bɛʃ kwɑdrɑt kilometir");
+        expect(say("10 مىڭ كم²")).toBe("ʔon miŋ kwɑdrɑt kilometir");
+    });
+});

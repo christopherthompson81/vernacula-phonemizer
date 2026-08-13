@@ -155,3 +155,29 @@ describe("Hiligaynon text normalization", () => {
         expect(say("sa tunga sang mga atomo")).toBe("sˈa tˈuŋa sˈaŋ mˈaŋa ʔatˈomo");
     });
 });
+
+/**
+ * The raw-ASCII-Latin class: an ASCII run the source typed and the IPA still says, byte for byte. In a
+ * LATIN-SCRIPT language no other gate can see it — DIGIT hunts digits, RAWMARK hunts punctuation, and a
+ * two-letter run looks exactly like a word.
+ */
+describe("Hiligaynon — `sg`, the corpus's shorthand for the genitive particle", () => {
+    const say = (s: string): string => createHiligaynon().text(s).trim();
+
+    test("`sg` reads as `sang`, in every slot the corpus writes it in", () => {
+        // ×6 in the artifact, against `sang` ×324 in the SAME slot. `sg` has no vowel, so it can never be
+        // a Hiligaynon word; before this rule it reached the IPA as the bare cluster [sɡ].
+        expect(say("Republika sg Pilipinas")).toBe(say("Republika sang Pilipinas"));
+        expect(say("Pila ka mga paktorya sg panit")).toBe("pˈila kˈa mˈaŋa paktˈoɾja sˈaŋ pˈanit");
+        // ⚠ NOT `sing`. Hiligaynon has two particles that could abbreviate to these letters; all six corpus
+        // instances are the "of / of the" slot, which is `sang`, and none is the indefinite `sing`.
+        expect(say("sa edad sg 25 años")).toContain("sˈaŋ");
+    });
+
+    test("the collisions that make this LOWER CASE AND BOUNDED", () => {
+        // A MediaWiki language-conversion variant tag — and a real raw-Latin hit in ANOTHER language's
+        // artifact in the same batch (wuu's `-{zh-cn:0814; zh-sg:814;}-`). Case-insensitive would claim it.
+        expect(say("zh-sg:814")).not.toContain("sˈaŋ");
+        expect(say("http://a.sg/x")).not.toContain("sˈaŋ"); // a domain, not a particle
+    });
+});

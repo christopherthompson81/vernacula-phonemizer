@@ -251,8 +251,20 @@
     // undotted vm/nm AM/PM suffixes are handled by the clock rule instead — they attach to a clock.
     // ⚠ Only the DOTTED keys may appear without their trailing dot; a plain word like `dr` is never matched
     // bare, since it starts "Dromaeosauridae" and would misfire (the split is computed in normalize.ts).
+    // ⚠ `mnr` WAS ADDED FROM A MEASURED LEAK — the artifact's only raw-ASCII run. `mnr. Reid` ×2 in one
+    // sentence reached the IPA as the letters ⟨mnr⟩, which is not a possible Afrikaans word (no vowel), and
+    // no gate but the raw-Latin one could see it: in a Latin-script language a Latin run looks like a word.
+    // The dotted-abbreviation rule is exactly the right home — same shape as `dr`, one key, no new machinery.
+    // SOURCING (`attest.ts --lang af`, both cached): `meneer` 6 examples, every one the honorific before a
+    // NAME (`Meneer Cee`, `Meneer Ibrahim`); `mnr` likewise, and always in the same slot the corpus uses it
+    // in — `Mnr. G.J. Bisschop`, `Mnr. G. Goodwin`, `Mnr. Blake`. The abbreviation and its expansion are
+    // attested independently, in the same construction, which is the pair this table needs.
+    // ⚠ `mev` (mevrou) IS THE IDENTICAL SHAPE AND IS DELIBERATELY NOT DECLARED. It attests just as well
+    // (`Mev. Peperpot`, `Mev. Ples`) but it is ×0 in this language's artifact, so declaring it would be
+    // widening on a guess rather than repairing a measurement. It is recorded here so the next reader does
+    // not have to re-derive it — one line, whenever a corpus instance appears.
     "dottedAbbreviations": {
-        "dr": "Dokter", "m.p.u": "myl per uur", "m.p.u.": "myl per uur",
+        "dr": "Dokter", "mnr": "Meneer", "m.p.u": "myl per uur", "m.p.u.": "myl per uur",
         "n.m": "namiddag", "n.m.": "namiddag"
     },
 

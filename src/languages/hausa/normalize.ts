@@ -167,6 +167,25 @@ export function normalizeHausa(input: string): string {
     s = s.replace(/(?<!\d)(\d+)\s?Mbit\/s(?![\p{L}\p{M}])/giu, (m0, n: string) =>
         `${hausaNumber(Number(n))} megabit a daƙiƙa`);
 
+    // 10b) THE UNIT SYMBOL BEFORE ITS NUMERAL — `km 2-3`, and this is HAUSA'S OWN ORDER, not a typo.
+    //     The shared tier fires only AFTER a numeral, so `mai nisan km 2-3 ya rufe shi` left `km` in the
+    //     IPA as raw ASCII — the artifact's one genuine unit leak, and invisible to every gate but the
+    //     raw-Latin one, since a Latin run in a Latin-script language looks like a word.
+    //     ⚠ THE ORDER IS MEASURED, NOT ASSUMED. This artifact writes the SPELLED-OUT noun in exactly this
+    //     position five times — `kilomita 1`, `kilomita 7` ×2, `kilomita 2` ×2 — against one abbreviated
+    //     `km 2`. Hausa puts the measure noun in front of its count, and the corpus is consistent about it;
+    //     the abbreviation is simply the one spelling the tier could not reach.
+    //     ⚠ SO THE NUMBER IS LEFT WHERE IT STANDS and only the symbol is spelled out. Rewriting to
+    //     `2-3 kilomita` would "fix" the leak by imposing the tier's digit-first order on a language whose
+    //     own corpus writes the other one; the point is to say the noun, not to move the count.
+    //     ⚠ MULTI-LETTER, VOWEL-FREE, EXACT CASE — trap 46 and `isBareUnitKey`'s argument. A bare `m`
+    //     collides with far too much to claim on a following digit alone, and upper-case `KM`/`Cm` are
+    //     mostly not units at all; both are ×0 here, so neither is guessed at.
+    //     ⚠ AFTER THE RANGE STEP, which has already turned `2-3` into `2 zuwa 3`. Run before it and the
+    //     lookahead would have to admit the hyphen and would then also match a compound designation.
+    s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])(km|kg|mm|cm)(?=\s\p{Nd})/gu,
+        (_m, u: string) => ({ km: "kilomita", kg: "kilogram", mm: "milimita", cm: "santimita" })[u]!);
+
     // 11) SIGNS. `+30°C` — the plus was dropped. `&` → *da* (and). A TRUE minus (`-5`) reads "rashin";
     //     the corpus's `-\d` are all ranges/scores, now handled above. `%` → *kashi* (the tier's prefix).
     s = s.replace(/\+\s?(?=\d)/gu, " ƙari ");

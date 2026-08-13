@@ -1,0 +1,89 @@
+// WIKIPEDIA WORD ATTESTATION — af. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "af",
+        "wiki": "af.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "mnr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 106,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Burgemeesters van Batavia == Sedert hul instelling in 1916: Mnr. G.J. Bisschop Prof. Ir. H. van Breen Mnr. A. Meijroos Ir.…",
+                "…stelling in 1916: Mnr. G.J. Bisschop Prof. Ir. H. van Breen Mnr. A. Meijroos Ir. E.A. Voorneman (tot in 1942) == Eksterne s…",
+                "…in Februarie 1960 onder leierskap van sy eerste skoolhoof, Mnr. G. Goodwin geopen. Die eerste 127 studente het in voorafve…",
+                "…olweni- en Dan Pienaarstraat skoolgegaan. == Skoolhoofde == Mnr. G.M.N. Goodwin (1960–1961) Mnr. Blake (waarnemend tot Jan…",
+                "…olgegaan. == Skoolhoofde == Mnr. G.M.N. Goodwin (1960–1961) Mnr. Blake (waarnemend tot Jan 1962) Mnr. J.F. Dixon (Jan 1962…",
+                "…N. Goodwin (1960–1961) Mnr. Blake (waarnemend tot Jan 1962) Mnr. J.F. Dixon (Jan 1962 – Dec 1962) Dr G.S. Jackson (waarneme…"
+            ]
+            },
+        {
+                "word": "mev",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 107,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Mev. Peperpot (Noors: Teskjekjerringakode: no is verouderd , \"d…",
+                "…rste boek in die reeks is in 1956 gedruk. Die hoofkarakter, mev. Peperpot, is 'n ou dametjie wat saam met haar man, mnr. Pe…",
+                "…r man, mnr. Peperpot, in 'n kothuis op die platteland woon. Mev. Peperpot het 'n geheim – sy krimp af en toe tot die groott…",
+                "…lmal te verstaan en met diere te kan praat. Sommige van die Mev. Peperpot-stories is: == Aanpassings == In 1967 en 1976 was…",
+                "…Mev. Ples is die gewilde naam van Sts 5, die volledigste kopbee…",
+                "…n die kopbeen gegee het. Dit is deur medewerkers van Broom \"Mev. Ples\" gedoop. Die geslag van die fossiel is nie heeltemal…"
+            ]
+            },
+        {
+                "word": "meneer",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…pril 1998 in Reiger Park, Boksburg) professioneel bekend as Meneer Cee is 'n Suid-Afrikaanse kletsrymer wat veral bekend is vi…",
+                "…van meer as 40 miljoen kyke geïnspireer het. == Loopbaan == Meneer Cee het oorspronklik as komediant begin en na twee jaar van…",
+                "…die hashtag #WaarsJouNanas gekry het. == Styl en invloed == Meneer Cee se musiek meng kletsrym en melodiese elemente met Kaaps…",
+                "…Monsieur Ibrahim et les fleurs du Coran (2003, Afrikaans Meneer Ibrahim en die blomme van die Koraan) is op die gelyknamige…",
+                "…ekostig, steel hy gereeld iets in die kruidenierswinkel van Meneer Ibrahim (Omar Sharif), 'n Turkse immigrant wat as die \"Arab…",
+                "…dawater te verkoop of wat 'n glimlag kan bewerkstellig. Vir Meneer Ibrahim is die Koran 'n bron van geluk en wysheid. Ná die s…"
+            ]
+            },
+        {
+                "word": "mevrou",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…anse aktrise en skrywer. Sy is ook bekend as Suid-Afrika se Mevrou Etiket. == Bibliografie == Goeie Maniere en Etiket, Human e…",
+                "…1963 == Verwysings == == Eksterne skakels == Onderhoud met Mevrou Etiket op YouTube…",
+                "…haar rubrieke en sketse is later in boekvorm uitgegee, soos Mevrou jy’s lastig (1967), Kwellings en kwinkslae (1974) en Afdraa…",
+                "…rnalis. Cecile Cilliers is haar suster. == Werke == Sketse: Mevrou, jy’s lastig. Voortrekkerpers, 1967 Kwellings en kwinkslae.…",
+                "…en word ryklik deur die eienaar van 'n groot juwelewinkel, Mevrou Weissman daarvoor beloon. Dit stel hom in staat om nuwe kan…",
+                "…armee saam die diefstal van juwele uit die vertoonkaste van Mevrou Weissman. Boerboel se ondersoek bring hom in aanraking met…"
+            ]
+            }
+        ],
+    }
+    

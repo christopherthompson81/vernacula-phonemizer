@@ -1,25 +1,50 @@
 // WIKIPEDIA WORD ATTESTATION — ug. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "ug",
-    "wiki": "ug.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ug",
+        "wiki": "ug.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "سېكۇنت",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…سېكۇنت [sékunt] — ھازىرقى ئەڭ كىچىك ۋاقىت بىرلىكىنىڭ نامى، 60 سېكۇ…",
+                "…كۇنت [sékunt] — ھازىرقى ئەڭ كىچىك ۋاقىت بىرلىكىنىڭ نامى، 60 سېكۇنت 1 مىنۇتقا تەڭ، 1 سېكۇنت 60 دەقىقىگە تەڭ. == مەنبەلەر ==…",
+                "…ئەڭ كىچىك ۋاقىت بىرلىكىنىڭ نامى، 60 سېكۇنت 1 مىنۇتقا تەڭ، 1 سېكۇنت 60 دەقىقىگە تەڭ. == مەنبەلەر ==…",
+                "…قىشىغا كېتىدىغان ۋاقىت. بىر يىل 365 كۈن 5 سائەت 48 مىنۇت 46 سېكۇنت. 1 يىل تۆت پەسىل، 12 ئاي بولىدۇ. == مەنبەلەر ==…",
+                "…ەڭ كەڭ قوللىنىلغان تەقۋىم بولمىش مىلادى تەقۋىم ھەر يىل 10.8 سېكۇنت خاتالىق ئورانى بىلەن ئەڭ ئىشەنچىلىك ۋە ئەڭ نازۇك تەقۋىمدۇر.…",
+                "…دۇنيا رېكورتىنى ياراتقان. ھازىر بۇ تۈرنىڭ دۇنيا رېكورتى 12 سېكۇنت 1.9 دەقىقىغە كۆتۈرۈلگەن بولۇپ، ئۇنى ئەنگلىيە تەنھەرىكەتچىسى…"
+            ]
+            },
+        {
+                "word": "skt",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 1,
+                "examples": []
+            },
         {
             "word": "نۇقتا",
             "verdict": "attested",
@@ -221,5 +246,6 @@
                 "…، 2017-يىلى 11- ئاينىڭ 16-كۈنى ئاندىرويىد (ئەنجۈر): 6.5.19 -ئىنچى نۇسخسى، 2017-يىلى 11- ئاينىڭ 16-كۈنى ۋىندوۋىس 10 يانڧۇن نۇس…"
             ]
         }
-    ],
-}
+        ],
+    }
+    
