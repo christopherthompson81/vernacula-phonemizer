@@ -467,3 +467,234 @@ the *method* one: a corpus concordance could not settle a loanword, trap 37's ta
 incapable of answering, and only an outside pedagogical source could close it. The three dictionaries that
 came back empty (Glosbe, Heimbach, the Daw phrasebook) are kept in Run 9 for the same reason — they bound
 how well documented this word is, and they explain why one textbook had to carry the weight.
+
+---
+
+## Run 11 — 2026-08-13 07:15 (RAW-CAPS: the engine was emitting its own input as IPA)
+
+**Command.** `npx tsx tools/normalization/mine.ts scan --in tools/corpus/mined/hmn.jsonc --lang hmn`
+**Question.** The new `RAW-CAPS` leak class (commit `9a3626c`) fires on 100 of 113 sampled lines in hmn and
+**nowhere else in the fleet** — 1 language of 161. What is actually reaching the IPA?
+
+**Raw finding.**
+
+```
+LEAK RAW-CAPS      ×100   e.g. Guj kuj txoj hauj lwm nyob rau hauv sab qaum teb Eurasia …
+LEAK RAW-LATIN Ch  ×4  ·  BBC ×3 · Wp ×2 · mww ×2 · GDP ×2 · BC ×2 · TV ×2 · tswjfwm · st · th
+                          · NSW · NT · Tswjhwm · pH · kg          — 15 labels, 17 runs
+DROP minus ×2 · DROP exponent ×2 · ACCEPTED-CLASS math-sign ×3 · degree ×2 · REDUNDANT currency ×1
+```
+
+**The path, confirmed rather than assumed.** `syllableToIpa` ends with `if (rime === undefined) return syl`
+— it returns **its own input**, and `text()` emitted that return value straight into the sink. So the failure
+mode is not a drop and not a mis-read: it is the SPELLING, with its capitals, presented as IPA.
+
+⚠ **And it was invisible behind a perfect referee.** `referee-eval hmn` is 455/455, 100.0%, and stayed
+byte-identical across this entire change. Its referee is 455 **single-syllable RPA words** with no foreign
+material in it, so nothing about foreign-word handling can move it in either direction. **It is a TRIPWIRE,
+not a meter** — a rule that mis-cut an RPA word or bit off a tone letter would show there instantly — and
+byte-identity is exactly its pass condition. This is the same headline Runs 8 and 10 recorded from the other
+side, now reproduced a third time on a much larger repair.
+
+---
+
+## Run 12 — 2026-08-13 07:20 (what the 100 lines contain — read, not summarised)
+
+**Command.** a probe over `tools/corpus/mined/hmn.jsonc`: every `\p{Script=Latin}+` token where
+`phonemizeWord(t) === t`, i.e. every token the converter handed back.
+**Question.** Proper nouns, initialisms, English quotation and untranslated residue are four different
+problems with four different right answers. Which are these?
+
+**Raw finding — 503 distinct types / 978 tokens.** Sorted by count, the head is:
+
+```
+Austria 16 · tebchaws 16 · Fabkis 15 · km 14 · Miao 14 · COVID 12 · Guj 11 · European 9 · Esperanto 9
+Pannonia 8 · Australian 7 · German 7 · Mong 7 · Cantonese 7 · New 6 · Papua 6 · Lavxias 6 · L 6
+Asmeskas 6 · Europe 6 · Yelemees 6 · virus 5 · pejxeem 5 · Vienna 5 · BBC 5 · Hmongb 5
+Crocodile 4 · Dundee 4 · United 4 · Union 4 · distinguished 4 · Ch 4 · BC 4 · Habsburg 4 · enzymes 4
+```
+
+⚠ **THE HEAD OF THE LIST IS NOT FOREIGN AT ALL, AND THAT WAS THE SURPRISE.** `tebchaws` ×16, `haujlwm` ×4,
+`lossis` ×4, `pejxeem` ×5, `xovtooj` ×3, `qhovntsej`, `pabcuam`, `Tsoomfwv`, `kevcai`, `tswvcuab`,
+`ywjpheej`, plus the **nativised** country names `Fabkis` (France) ×15, `Lavxias` (Russia) ×6, `Asmeskas`
+(America) ×6, `Suavteb` (China), `Nyablaj` (Vietnam), `Lostsuas` (Laos), `Thaibteb` (Thailand), `Askiv`
+(English), `Kauslim` (Korea). These are **ordinary Hmong words written SOLID** — RPA spaces its syllables,
+but the corpus writes compounds both ways (`teb` ×178 and `chaws` ×75 stand alone in the same corpus). The
+engine read **exactly one syllable per Latin run**, so every solid compound fell through to the passthrough.
+
+This is the item `hmn_native_bringup_investigation.md` Run 3 recorded as deferred — *"the polysyllabic loan
+proper-nouns (written space-separated in real text; the referee's spaceless forms are excluded)"* — and the
+referee's own header says the same thing from the other end: it **excludes** the wikipron entries that are
+spaceless polysyllables. Both sources knew this shape existed; neither could measure what it cost.
+
+**So the 100 lines hold four shapes, not one:**
+
+| shape | examples | tokens |
+|---|---|---|
+| **A** solid-written native / nativised RPA polysyllables | `tebchaws` `haujlwm` `Fabkis` `Nyablaj` | ~110 |
+| **B** foreign proper nouns | `Austria` `Vienna` `Crocodile Dundee` `Papua` `Zamenhof` | ~350 |
+| **C** untranslated English residue | `distinguished` `occupying` `enzymes` `digested` `version` | ~380 |
+| **D** initialisms and letter labels | `BBC` `GDP` `TV` `UK` `COVID` `BC` `pH` `L. L.` `Ch.` | ~60 |
+
+**Implication.** B and C are the same problem (the corpus is `Wp/mww`, translated *from* English, and
+`filter-by-language.py` drops **0 paragraphs** because the contamination is word-level — the bringup header
+already said so). A is a bug in the engine's own reading of its own language. D is the one that needs a
+letter-name decision. Three answers, not four.
+
+---
+
+## Run 13 — 2026-08-13 07:25 (shape A: how far can a syllable segmenter be trusted?)
+
+**Command.** a DP tiling of every unread token into legal RPA syllables (onset longest-first + rime +
+optional tone letter), scored against a hand-labelled list of the 33 genuinely-Hmong types.
+**Question.** Solid compounds can be re-cut, because RPA is a tight phonemic orthography. But how many
+ENGLISH words does bare syllable legality also swallow?
+
+**Raw finding — bare legality is not usable.**
+
+```
+segmenter                                  genuine kept      FOREIGN read as Hmong     genuine missed
+syllable legality alone                    33 types / 107    52 types / 102 tok        2 / 3
+  + non-initial syllables need an onset    33 / 107          ~40 / ~80                 2 / 3
+  + first syllable tone-marked             31 / 98            6 / 15                   4 / 12
+  + EVERY syllable tone-marked             28 / 95            1 / 1  (`Assam`)          7 / 15
+```
+
+The words bare legality claims are the point: `Cantonese` → ca·nto·ne·se, and equally `Wikipedia`, `Canada`,
+`Monaco`, `Coronavirus`, `Esperanto`, `Hemisphere`, `Papua`, `Paris`, `Chinese`, `Silesia`, `familiaris`,
+`domesticus`, `Panthera`. Every one is a legal RPA tiling and not one is a Hmong word.
+
+⚠ **THE TONE LETTER IS THE ONLY BOUNDARY SIGNAL RPA GIVES, AND THAT IS THE RULE THAT SHIPPED.** In a solid
+string a tone letter is the one piece of positive evidence that a syllable ENDED there; an unmarked
+(mid-tone) boundary is not recoverable without a lexicon. So the engine tiles a run only when **every**
+syllable carries an explicit tone letter, fewest syllables first, longest match on ties.
+
+⚠ **THE COST IS NAMED, NOT HIDDEN.** `kevcai`, `tebchaw`, `Yexus`, `Yelemees`, `Amelikas`, `Asmesliska`,
+`Ntauwd` — **7 types / 15 tokens** — each contain an unmarked syllable, are refused, and go to the foreign
+reader instead. That is a *wrong reading*, not a leak. The trade buys those 15 tokens back only at the price
+of 102 tokens of English pronounced as pseudo-Hmong, which is the `ak` run's failure mode exactly.
+
+### ⚠ The negative that decided it: THE ONLY AVAILABLE LEXICON WOULD HAVE BEEN CIRCULAR
+
+The obviously better gate is a dictionary: split a solid run only when every piece is an attested Hmong
+syllable. Measured, it is better — 31 types / 100 tokens kept with only 4 false positives (`Taurisci`,
+`Paris`, `Papua`, `IPA`). **It was rejected anyway**, on two grounds:
+
+- the lexicon would be **625 syllable types mined from `tools/corpus/mined/hmn.jsonc` itself** — i.e. gating
+  the fix on the very corpus the gate then measures it against;
+- the one independent source in the tree cannot supply it. The wikipron referee is **455 single-syllable
+  words** and covers **17 of the 43** syllables the corpus's own compounds decompose into (`teb` ✓ `fab` ✓
+  `kev` ✓ but `chaws` ✗ `kis` ✗ `lav` ✗ `xias` ✗ `mes` ✗ `kas` ✗ `pej` ✗ `hauj` ✗ `tooj` ✗ `fwv` ✗ …).
+
+Recorded as a kept negative: this is *not* "a lexicon would not help". It would. There is no non-circular one
+to be had, and Run 9's dictionary sweep (Glosbe, Heimbach 1969 ~4,900 entries, the Daw phrasebook) is why —
+White Hmong is thinly documented online, which is the same wall the kilometre word hit.
+
+---
+
+## Run 14 — 2026-08-13 07:30 (shapes B/C/D: what do comparable engines do, and is English right HERE?)
+
+**Command.** read `src/core/foreign.ts`, `src/core/clauses.ts` `emitUnclaimed`, `src/registry.ts`, and
+`src/languages/akan/akan.ts`; then `phonemize(<run>, "en")` on the actual corpus tokens.
+**Question.** Several engines route a foreign run to an injected reader — `createAkan((latin) =>
+getPhonemizer("en").text(latin))`. Is that right for Hmong, or does it import an English accent?
+
+**Raw finding — the `ak` precedent is NOT what it looks like.** `createAkan(foreign?)` **never references
+`foreign` in its body**; its own `ak_normalization_investigation.md` says so (Run at line 190). Akan
+NATIVISES every Latin run, so `February` → *febrwarj*, and its recorded warning is that a defect there hides
+as plausible-sounding **Akan-ish gibberish**. The wiring exists; the routing does not. That negative is worth
+keeping, because "several engines route" was the premise this run started from and it is half false.
+
+**What the shared path actually is.** `assembleClauses` → `emitUnclaimed(gap, sink)`: script router first
+(`readForeignRun`), then Latin→English (`getDefaultForeign`, registered once in `registry.ts`). hmn already
+uses it for non-Latin runs — `test/foreign-runs.test.ts` pins `phonemize("kuv Москва 7", "hmn")` →
+*mɐskvˈa*. **The fix reuses that exact function** for a Latin run that is not RPA. No registry edit, no new
+machinery, and the same behaviour every other engine has for the same question.
+
+⚠ **Three pieces of evidence that English is right for hmn specifically, stated because it cuts both ways.**
+
+1. The corpus is `Wp/mww`, translated **from** English; `filter-by-language.py --lang hmn` drops **0
+   paragraphs** precisely because the residue is word-level. Shapes B and C are *English text*.
+2. The speech community is largely US-based.
+3. ⚠ **RPA gives hmn a native/foreign test almost no other Latin-script engine has.** It is a tight phonemic
+   orthography, so "does it parse as RPA" is a real discriminator — which is why routing can be conditional
+   here and could not be in `ak`.
+
+⚠ **AND THE COST IS THE `ak` COST, INHERITED KNOWINGLY:** a future defect can now hide as a plausible
+**English** word rather than as raw ASCII. It is still strictly better than emitting a spelling as if it were
+a phoneme string — an English reading is *a* reading; `Crocodile Dundee` in the IPA is not.
+
+**Shape D, and the refusal inside it.** English reads the initialisms correctly as letter names:
+`BBC` → *bˌiːbisˈiː*, `GDP` → *ɡˈiːdˈiːpʰˈiː*, `TV`, `UK`, `NSW`, `NT`, `BC`, `pH`, and the corpus's own
+`L. L. Zamenhof` → *ˈɛɫ . ˈɛɫ . …*.
+
+⚠ **NO HMONG LETTER-NAME TABLE IS INVENTED, BECAUSE NONE IS ATTESTED.** Searched: the corpus names letters by
+**writing the Latin letter** — `Lub cim rau duas yog ib daim ntawv loj S` ("the symbol for the dollar is a
+large letter S", the same sentence that sources `duas`), plus `J-puab`, `G8`, `K-pop`. No source in this tree
+glosses a Hmong name for a letter, and Run 9's dictionaries have none. So the English letter names arrive as
+a **consequence of the foreign route**, not from a table this engine made up. This is the fleet's standard
+recorded reason for leaving initialisms unread; here the route supplies a reading anyway.
+
+---
+
+## Run 15 — 2026-08-13 07:40 (the gates, before and after)
+
+| gate | before | after |
+|---|---|---|
+| `npx tsc --noEmit` | clean | clean |
+| `npx vitest run` | 242 files / 3,916 passing / 5 skipped | **242 files / 3,921 passing (the 5 new hmn tests), 0 goldens changed** |
+| `mine.ts scan` **LEAK RAW-CAPS** | **×100** (of 113 lines) | **0** |
+| `mine.ts scan` **LEAK RAW-LATIN** | **15 labels / 17 runs** | **1 label / 1 run** (`kg` ×1) |
+| `mine.ts scan` DROP minus / exponent | ×2 / ×2 | ×2 / ×2 — unchanged |
+| `mine.ts scan` ACCEPTED-CLASS math-sign / degree · REDUNDANT currency | ×3 / ×2 · ×1 | identical |
+| `corpus-diff` utterances changed | — | **88 / 92 (95.7%)** |
+| `corpus-diff` DROP | 5 | **5 — UNCHANGED** |
+| `referee-eval hmn` | raw exact 455/455 (100.0%), folded 455/455, symbol 100.0% | **byte-identical** |
+| `review.ts --lang hmn` | 2 FAILING (`sign classes: DROPPED minus exponent`, artifact scan) | **2 FAILING — same two** |
+
+**⚠ `referee-eval` byte-identity IS the pass condition, and the mechanism is worth stating.** The splitter
+prefers the FEWEST syllables, so a run the direct single-syllable path already reads can never be re-cut;
+the referee's 455 words are single syllables by construction. Verified directly as well: tiling **0** of the
+455 into more than one syllable.
+
+**⚠ `corpus-diff` moved 95.7% of utterances and its own leak summary did not move at all** — it prints
+`{ DIGIT, SLOT-GAP, RAWMARK, DROP, THROW }`, all zero before and after. That is because `corpus-diff.ts`
+carries its **own private copy** of the leak table (lines 114–127) which predates `ZERO-WIDTH` and
+`RAW-CAPS` — the exact drift `defects.ts`'s header warns about, reproduced here from the other direction.
+So the before/after gate that is *supposed* to measure a leak repair was blind to this one too. Recorded,
+not fixed: `corpus-diff.ts` is outside this branch's file scope. `coverage.ts`'s header carries a third,
+also-stale copy of the same fact ("68 lines in exactly one language").
+
+**All four unchanged utterances were checked**: they are the four sample lines containing no non-RPA Latin
+token at all. Spot-read of the changed ones:
+
+```
+Tug tswv cuab ntawm lub tebchaws United Nations, lub European Union.
+ -  … lu˥ TEBCHAWS UNITED NATIONS , lu˥ EUROPEAN UNION .
+ +  … lu˥ te˥ cʰaɨ̯˩ juːnˈaᶦt̬ᵻd nˈeᶦʃənz , lu˥ jˌʊɹəpʰˈiːʲən jˈuːnjən .     ← A and B/C in one line
+"Crocodile" Dundee yog ib xyoo 1986 Australian American romantic comedy
+ -  CROCODILE DUNDEE ʝɒ˧˩̤ … AUSTRALIAN AMERICAN ROMANTIC COMEDY
+ +  kɹˈɑːkəd̬ˌaᶦɫ dəndˈiː ʝɒ˧˩̤ … ɔːstɹˈeᶦɫjən əmˈɛɹəkən …
+Guj kuj … Eurasia …
+ -  GUJ ku˥˧ … EURASIA …                 ⚠ `Guj` is not RPA: ⟨g⟩ is a TONE letter, never an onset
+ +  ɡˈuːd͡ʒ ku˥˧ … jʊɹˈeᶦʒə …
+```
+
+### ⚠ WHAT IS LEFT ACCEPTED, WITH ITS MEASUREMENT
+
+- **`LEAK RAW-LATIN kg ×1`, and it is no longer hmn's own passthrough.** `phonemize("kg","en")` = `"kɡ"` —
+  the ENGLISH engine's leak, the exact shape `defects.ts` documents for ig's `48 kg` (ASCII `k` + IPA `ɡ`).
+  English expands `kg` only after a number, and hmn reads the number with its own compositor, so English
+  only ever receives the bare run. Fixing it means either editing `english.ts` (out of scope) or sourcing a
+  Hmong word for *kilogram* — and Run 9's sweep found **no metric vocabulary at all** in Heimbach (1969),
+  Glosbe or the Daw phrasebook beyond the textbook's `kis lus mev`. Not invented. `kg` also sits in
+  `ALWAYS_REPORTED`, so it must and does stay reported: 1 token, red.
+- **7 types / 15 tokens of genuine Hmong compounds routed to English** (Run 13's named cost).
+- **1 type / 1 token of foreign read as Hmong** (`Assam` → as·sam, both syllables tone-marked).
+- **`DROP minus ×2` and `DROP exponent ×2` are UNCHANGED and still RED** — Run 10's refusals, untouched here.
+  hmn remains *not* an accepted silence for either (trap 24).
+
+**No golden's expected value changed.** The five new tests are additions; the 28 existing hmn assertions,
+including Run 10's `9 8 5 lab kis lus mev`, pass unmodified. `tools/corpus/attest/hmn.jsonc` is still
+**absent and stays absent** — `attest.ts` probes `<lang>.wikipedia.org`, no Hmong Wikipedia exists at any
+code, and the only wiki that does is already this corpus, so a probe would be the corpus answering itself.

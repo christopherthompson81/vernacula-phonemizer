@@ -34,10 +34,22 @@ export const LEAK_CLASSES: readonly (readonly [string, RegExp])[] = [
      * comparing readings; there is nothing to substitute here, and `review.ts` would rightly demand a probe
      * string for a class that has no universal one.
      *
-     * Measured across all 161 mined artifacts, 45 830 lines: it fires in **exactly one language** (hmn, 100
-     * lines), where the engine passes unreadable words through verbatim — `Crocodile Dundee`, `United
-     * Nations`, `BBC`, `COVID` all reach the IPA untouched. A class with a 1-in-161 fleet footprint that
+     * Measured across all 161 mined artifacts, 45 830 lines: it fired in **exactly one language** (hmn, 100
+     * lines), where the engine passed unreadable words through verbatim — `Crocodile Dundee`, `United
+     * Nations`, `BBC`, `COVID` all reached the IPA untouched. A class with a 1-in-161 fleet footprint that
      * lands squarely on a known-broken engine is a detector, not noise.
+     *
+     * ⚠ **THAT ONE LANGUAGE IS NOW FIXED, AND THE CLASS IS THEREFORE AT ZERO ACROSS THE FLEET.** hmn's
+     * `syllableToIpa` returned its own input on an unknown rime and the caller emitted it; it now tiles a
+     * solid run into tone-marked RPA syllables, and hands anything that is not RPA to the shared
+     * `emitUnclaimed` foreign reader. Rescanned: **hmn `LEAK RAW-CAPS` 100 → 0** on the same 113 lines.
+     * ⚠ A ZERO HERE IS NOT A REASON TO DELETE THE CLASS. It is the only part of the raw-Latin problem
+     * decidable from the OUTPUT ALONE, it costs one regex, and the engine shape that produced the 100 —
+     * a g2p returning its own input as a fallback — is not unique to hmn; it is merely the only place the
+     * fallback was reached. The class earns its keep as the tripwire that catches the next one.
+     * (⚠ `coverage.ts`'s header still quotes the pre-fix "68 lines in exactly one language" figure. It is
+     * a second, DRIFTED copy of this fact — the exact hazard this file's own header names — and it is left
+     * for whoever owns that file rather than edited from here.)
      */
     ["RAW-CAPS", /[A-Z]/u],
 ];

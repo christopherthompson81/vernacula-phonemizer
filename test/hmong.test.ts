@@ -225,3 +225,72 @@ describe("Hmong (hmn) text normalization", () => {
         expect(phonemize("II", "hmn").trim()).toBe("ʔɒ˥"); // `ob`, two — not two letters
     });
 });
+
+// ── THE RAW-LATIN PASSTHROUGH, and the two paths that replaced it ──────────────────────────────────────
+// ⚠ `syllableToIpa` returns ITS OWN INPUT when the rime lookup fails, and `text()` emitted that return
+// value — so a word the converter could not read reached the IPA VERBATIM, capitals and all. Measured on
+// the mined artifact: `LEAK RAW-CAPS` fired on 100 of 113 lines, and across all 161 mined artifacts it
+// fired in THIS LANGUAGE AND NOWHERE ELSE. 503 distinct unread types / 978 tokens.
+// ⚠ AND THE REFEREE COULD NOT SEE ANY OF IT: `referee-eval hmn` is 455/455, 100.0%, before and after —
+// 455 single-syllable RPA words with no foreign material in them. A tripwire, not a meter.
+describe("Hmong (hmn) — a Latin run the converter cannot read", () => {
+    const say = (s: string): string => phonemize(s, "hmn").trim();
+
+    // ⚠ THE FIRST HALF OF THE REPAIR IS NOT ABOUT FOREIGN WORDS AT ALL. RPA writes syllables
+    // space-separated, but the corpus writes compounds SOLID too — `tebchaws` ×16 beside `teb` ×178 and
+    // `chaws` ×75 — and the engine read exactly ONE syllable per Latin run, so every one of them fell
+    // through to the passthrough. This is the item the bringup run deferred as "the polysyllabic loan
+    // proper-nouns". The identity below is the whole claim: solid and spaced must read the SAME.
+    test("a solid-written RPA polysyllable reads as its syllables", () => {
+        expect(say("tebchaws")).toBe(say("teb chaws")); // "country" — the commonest instance, ×16
+        expect(say("tebchaws")).toBe("te˥ cʰaɨ̯˩");
+        expect(say("lossis")).toBe(say("los sis")); // "or"
+        expect(say("haujlwm")).toBe(say("hauj lwm")); // "work"
+        expect(say("qhovntsej")).toBe(say("qhov ntsej")); // "ear"
+        expect(say("Fabkis")).toBe(say("fab kis")); // France — a NATIVISED name, not a foreign one
+        expect(say("Nyablaj Suavteb Lostsuas")).toBe(say("nyab laj suav teb los tsuas")); // Vietnam China Laos
+    });
+
+    // ⚠⚠ THE TONE LETTER ON EVERY SYLLABLE IS A PRECISION GATE, NOT A RULE OF RPA — the mid tone is
+    // unmarked, so this REFUSES a genuine compound containing an unmarked syllable. It is here because a
+    // segmenter over bare syllable legality reads ENGLISH AS HMONG: `Cantonese` tiles as ca·nto·ne·se, and
+    // so do `Wikipedia`, `Canada`, `Monaco`, `coronavirus`, `Papua`, `Paris`. Measured over the artifact's
+    // 978 unread tokens, legality alone admits 52 foreign types / 102 tokens; requiring the tone letter
+    // everywhere admits ONE (`Assam`, 1 token) and costs 7 genuine types / 15 tokens. See hmong.ts.
+    test("a run that does not tile into TONE-MARKED RPA syllables is not treated as RPA", () => {
+        expect(say("Cantonese")).not.toContain("˧"); // ca·nto·ne·se is legal RPA and is NOT read as Hmong
+        expect(say("Cantonese")).toBe(say("Cantonese").toLowerCase()); // …it is read, though — no capitals
+        expect(say("kevcai")).toBe(phonemize("kevcai", "en").trim()); // the stated COST: `cai` is unmarked
+    });
+
+    // ⚠ THE FOREIGN READER IS ENGLISH, AND THE REASON IS THE CORPUS. `Wp/mww` is translated FROM English, so
+    // its residue IS English (`filter-by-language.py` drops 0 paragraphs — the contamination is word-level);
+    // the speech community is largely US-based; and RPA is a tight phonemic orthography, which gives hmn a
+    // native/foreign test most Latin-script engines lack. The cost the `ak` run names: a future defect can
+    // now hide as a plausible ENGLISH word instead of as raw ASCII — still better than emitting a spelling.
+    test("a run that is not RPA is READ, not echoed", () => {
+        expect(say("Crocodile Dundee")).toBe("kɹˈɑːkəd̬ˌaᶦɫ dəndˈiː");
+        expect(say("United Nations")).toBe("juːnˈaᶦt̬ᵻd nˈeᶦʃənz");
+        // THE INVARIANT, stated as such: no ASCII capital may reach the IPA. No IPA symbol is one — the
+        // small capitals the alphabet uses (ʀ ɢ ɪ ʏ ʟ ɴ ʙ) are their own codepoints. This is the exact
+        // predicate `defects.ts`'s RAW-CAPS class tests, pinned here so the class cannot regress unnoticed.
+        expect(say('"Crocodile" Dundee yog ib xyoo 1986 Australian American romantic comedy')).not.toMatch(/[A-Z]/u);
+    });
+
+    // ⚠ NO HMONG LETTER-NAME TABLE IS INVENTED. There is none attested: the corpus names letters by WRITING
+    // THE LATIN LETTER — `ib daim ntawv loj S` ("a large letter S", the sentence that sources `duas`),
+    // `J-puab`, `G8`, `K-pop`. So English letter names arrive as a CONSEQUENCE of the foreign route above,
+    // not from a table this engine made up.
+    test("an initialism gets ENGLISH letter names, because no Hmong letter-name table is attested", () => {
+        expect(say("BBC")).toBe("bˌiːbisˈiː");
+        expect(say("GDP")).toBe("ɡˈiːdˈiːpʰˈiː");
+        expect(say("L. L. Zamenhof")).toBe("ˈɛɫ . ˈɛɫ . zˈæmənhf"); // the corpus's own `L. L. Zamenhof`
+    });
+
+    // The routing must not reach a word the engine CAN read: an ordinary RPA sentence is untouched, and a
+    // one-syllable word still takes the direct path (which is why the 455-word referee is byte-identical).
+    test("ordinary RPA is untouched by any of this", () => {
+        expect(say("Kuv hais lus Hmoob.")).toBe("ku˧˦ hai̯˩ lu˩ m̥ɒ̃˥ .");
+        expect(phonemizeWord("nrhiav")).toBe("ᶯʈʰiə̯˧˦");
+    });
+});
