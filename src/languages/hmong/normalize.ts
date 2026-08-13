@@ -73,7 +73,7 @@
  *     357.021 km2                  → pe˥ puə̯˩ … . nẽ˩ ᵑɡau̯˩̰ ʔi˥ km ʔɒ˥                 `km` raw AND the `2` read as the NUMBER *ob*
  *     1438-1806                    → two bare cardinals, no connective                      ×6
  *
- * ── HOW THE THREE WORDS THIS LAYER EMITS ARE SOURCED ───────────────────────────────────────────────────
+ * ── HOW THE FOUR WORDS THIS LAYER EMITS ARE SOURCED ────────────────────────────────────────────────────
  *
  * ⚠ `feem pua` (PERCENT) IS ATTESTED AS THE COLLOCATION, IN THE SLOT, THREE TIMES, IN THREE ARTICLES — which
  *   is trap 37's requirement rather than a bare token count. Each instance follows a SPELLED-OUT number, so
@@ -98,27 +98,69 @@
  *
  * ⚠ `mus rau` (THE RANGE CONNECTIVE) IS THE CORPUS'S OWN, WRITTEN BETWEEN TWO NUMERALS. Not a dictionary
  *   word pressed into a slot: `6 mus rau -50 ° C`, `Lub Xya hli ntuj 1 mus rau 25 ° C`, `5% mus rau 6%` —
- *   three instances of exactly the construction step 8 emits, plus `150 rau 2000 hli` with the bare
+ *   three instances of exactly the construction step 9 emits, plus `150 rau 2000 hli` with the bare
  *   preposition. ×29 in the artifact overall.
  *
  * ── WHAT IS DELIBERATELY NOT DONE, each with the check that refused it ─────────────────────────────────
  *
- * ⚠ NO KILOMETRE WORD, AND THE NEAR-MISS IS THE INSTRUCTIVE PART. `km` ×10, written as the symbol every
- *   time, and it reaches the IPA RAW (see the hazard section). Searching the slot rather than the word —
- *   trap 40 — turned up ONE candidate, `kis lus mev`, in `…rau Papua - Tshiab Guinea - tsuas yog 5 kis lus
- *   mev` (Boigu Island to PNG, which really is ~5 km, so the reading fits). It is still declined:
- *     · one hit, one article, in a machine-translated wiki — a lead, never a finding;
- *     · its two-word tail is attested TWICE IN THIS CORPUS IN AN UNRELATED SENSE — `lus Mev` is SPANISH
- *       (`Mev (español) yog ib hom lus Romance`, `cov lus Mev Netherlands`), and `Mev` ×4 is Spain/Spanish
- *       throughout. So `kis lus mev` decomposes into a phrase the corpus uses for something else, which is
- *       exactly the shape trap 37 says to distrust;
- *     · no dictionary, no phrasebook and no web search corroborates it; espeak ships no Hmong.
- *   What the corpus DOES attest is `mais` ×3 = MILE (`242,500 square mais`, `peb caug mais ib teev` — thirty
- *   miles an hour), and a mile cannot stand in for a kilometre. So `km` stays raw, and that is recorded as a
- *   known defect rather than papered over. ⚠ Note that NO LEAK CLASS CAN SEE IT: a Latin-letter residue in a
- *   Latin-script language looks exactly like a word (trap 6), which is why it needed a hand probe.
+ * ⚠⚠ `kis lus mev` (KILOMETRE) WAS REFUSED BY THIS LAYER'S FIRST RUN AND IS NOW DECLARED. The refusal was
+ *   CORRECT ON THE EVIDENCE IT HAD, and the reversal is worth reading in full, because what changed is the
+ *   evidence and not the bar.
  *
- * ⚠ NO DEGREE OR SCALE WORD — so step 7 CONSUMES `° C` without reading it. `sources.ts` reports
+ *   WHAT THE FIRST RUN SAW. `km` ×10 after a digit / ×13 as a token, written as the symbol every time and
+ *   reaching the IPA RAW (see the hazard section). Slot-searching the corpus (trap 40) turned up exactly one
+ *   candidate — `…rau Papua - Tshiab Guinea - tsuas yog 5 kis lus mev`, Boigu Island to PNG, which really is
+ *   ~5 km — and it was declined on three grounds: one hit in one article of a machine-translated wiki; no
+ *   outside corroboration; and, decisively, its two-word TAIL is attested TWICE IN THIS SAME CORPUS meaning
+ *   SPANISH (`Mev (español) yog ib hom lus Romance`, `cov lus Mev Netherlands`, with `Mev` ×4 = Spain/Spanish
+ *   throughout). A candidate that decomposes into a phrase the corpus uses for something else is trap 37's
+ *   exact shape, and one hit is a lead.
+ *
+ *   ⚠ THE DECOMPOSITION WAS A COINCIDENCE, AND THAT IS THE LESSON. `kis lus mev` is not `kis` + `lus mev`;
+ *   it is a THREE-SYLLABLE LOAN RENDERING of *kilomèt* (French via Lao ກິໂລແມັດ), spelled the way RPA spells
+ *   any foreign polysyllable — one syllable at a time, each with a legal onset, rime and tone letter. Read as
+ *   morphemes it looks like "Spanish"; read as a transliteration it is *ki-lo-me*. The first run applied a
+ *   sound test (does the tail mean something else?) to a word for which that test cannot return a useful
+ *   answer, because a syllabic loan has no morphemes to test. ⚠ SO trap 37's decomposition check is NOT VALID
+ *   AGAINST A LOANWORD — a new entry for the playbook, and the reason a slot search must be finished by a
+ *   dictionary rather than by a corpus concordance.
+ *
+ *   WHAT SETTLES IT — an OUTSIDE source, which is precisely what the first run went looking for and did not
+ *   find. A first-year Hmong language textbook (*1st Year Hmong Book 1 — Koj Xyaum Hais Lus*), Unit 5C,
+ *   "Tham txog sij hawm mus thiab deb li cas" / "Talking About Time and Distance", carries the word TWICE and
+ *   in the two forms that matter most:
+ *
+ *       kis lus mev – kilometer                                   ← an EXPLICIT ENGLISH GLOSS, in the unit's
+ *                                                                   own vocabulary list
+ *       B: Deb li ntawm 218 tawm kis lus mev.                     ← IN THE SLOT, in the unit's dialogue
+ *          "It's about 218 kilometres away."
+ *
+ *   A gloss list is a dictionary entry in all but binding, and this is the "sense you have READ" the bar
+ *   demands — the source itself says what the word means, so this is not `Komma` attested ×24 as a verb, nor
+ *   `ናቕፋ` ×5 as a town. Three instances in the slot across TWO INDEPENDENT SOURCES (the textbook's dialogue,
+ *   the textbook's gloss, the corpus's Boigu sentence), one of them a definition. That is at least the
+ *   evidence `feem pua` shipped on, and the definition is the stronger half of it.
+ *
+ *   ⚠ NEGATIVES KEPT, because they bound the claim. Glosbe en→hmn answers "we have no translations for
+ *   kilometer"; Heimbach's *White Hmong–English Dictionary* (1969, ~4,900 entries, rural Laos) has no metric
+ *   entry at all; the Hmong Daw phrasebook at davecurtis.net has none; espeak ships no Hmong. The word is
+ *   real and it is THINLY documented online — which is why a corpus concordance alone could not reach it.
+ *
+ *   ⚠ POSTPOSED, AND EVERY INSTANCE AGREES — `218 tawm kis lus mev`, `5 kis lus mev`, and the corpus's own
+ *   symbol order `145 km deb`, `(784 km)`, `9,85 lab km2`. There is no preposed hit anywhere, so step 5 does
+ *   not reorder: the symbol is swapped for the word where it already stands. This matches `feem pua` and
+ *   `duas`, and is the opposite of the Mooré kilometre in this same batch, which is head-initial.
+ *
+ *   ⚠ AND IT WAS PUT THROUGH THE ENGINE'S OWN G2P BEFORE BEING DECLARED, per this file's central hazard —
+ *   a word whose final letters are TONES cannot be declared on the page alone:
+ *       phonemize("kis lus mev", "hmn") → ki˩ lu˩ me˧˦          three clean syllables, nothing raw
+ *   `kis`, `lus` and `mev` each parse as onset + rime + tone; `lus` ×many is an ordinary corpus word. No
+ *   letter of the declared string reaches the IPA unread, which is the check `km` itself fails.
+ *
+ *   What the corpus ALSO attests is `mais` ×3 = MILE (`242,500 square mais`, `peb caug mais ib teev` — thirty
+ *   miles an hour). A mile still cannot stand in for a kilometre, and no mile rule is written.
+ *
+ * ⚠ NO DEGREE OR SCALE WORD — so step 8 CONSUMES `° C` without reading it. `sources.ts` reports
  *   `scale-names [NONE] ° occurs, neither scale name in corpus/referee/espeak`, and nothing follows `°` in
  *   this corpus but a bare letter. ⚠ THIS IS A DOWNGRADE FROM A WRONG READING TO A SILENCE, NOT A FIX: what
  *   it replaces is the scale letter `C` reaching the IPA raw, ×5. Recorded in `ACCEPTED_SIGN_SILENCE`, class
@@ -130,9 +172,16 @@
  *   attested anywhere. ⚠ SO hmn IS NOT IN `ACCEPTED_SIGN_SILENCE` FOR `minus`, and `review.ts --lang hmn`
  *   stays RED on it. An accepted silence claims the drop is correct; this one is not (trap 24).
  *
- * ⚠ NO EXPONENT WORD, for the same reason as the unit — a squared word needs a head noun and there is no
- *   sourced unit noun to head. `km²`/`km2` ×2. Step 3 does the one repair that needs no vocabulary; the `²`
- *   itself stays dropped and hmn is NOT recorded as an accepted silence for `exponent`.
+ * ⚠ NO EXPONENT WORD — AND THE REASON HAS NARROWED, WHICH IS WORTH SAYING RATHER THAN SILENTLY EDITING. This
+ *   used to read "a squared word needs a head noun and there is no sourced unit noun to head"; that second
+ *   clause is now false, because `kis lus mev` IS the head noun. What remains true is the first: no Hmong
+ *   word for *squared* is attested anywhere in this corpus, in the textbook, in Glosbe or in Heimbach, and
+ *   `km²`/`km2` is ×2. So step 5 CONSUMES the exponent and emits the bare unit — `17.125.187 km²` reads as
+ *   *seventeen million … kilometres*, not *square kilometres*. ⚠ THAT IS A LOSS OF MEANING AND IT IS STILL A
+ *   STRICT IMPROVEMENT ON WHAT IT REPLACES, which was `km` RAW IN THE IPA plus, before step 3's fold, the `2`
+ *   of `km2` read as the CARDINAL *ob*. hmn REMAINS NOT recorded as an accepted silence for `exponent` and
+ *   `review.ts --lang hmn` stays RED on it (trap 24) — an accepted silence claims the drop is correct, and
+ *   this one is not.
  *
  * ⚠ NO EQUALS, TIMES, DIVIDE OR RELATIONAL SIGNS. The only `+` and `=` in the corpus are METALINGUISTIC —
  *   one sentence NAMING the symbols (`qhov kos npe ntxiv (+)`, `qhov sib npaug sib npaug (=)`), which is the
@@ -184,7 +233,7 @@
  * written.
  *
  * COST, STATED: a genuine three-decimal-place number would be de-grouped. There are ZERO in this corpus, and
- * `802.11n`-shaped designations are excluded by the trailing letter guard on the DECIMAL rule (step 10), not
+ * `802.11n`-shaped designations are excluded by the trailing letter guard on the DECIMAL rule (step 11), not
  * by these.
  */
 const GROUP_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d]|,\d)/gu;
@@ -217,12 +266,12 @@ export function normalizeHmong(input: string): string {
     // 1) NFC, HTML entities and zero-width marks, before anything else looks at a character. RPA is
     //    unaccented ASCII so NFC is identity for Hmong's own letters, but the corpus's embedded foreign
     //    names arrive in both compositions. Zero-width ×4, every one paragraph-initial. The entity strip
-    //    must precede step 9 or `&nbsp;` reads as "and" plus the letters n-b-s-p.
+    //    must precede step 10 or `&nbsp;` reads as "and" plus the letters n-b-s-p.
     let s = input.normalize("NFC")
         .replace(/&nbsp;|&#(?:x[0-9a-f]+|\d+);/giu, " ")
         .replace(/[​‌‍⁠﻿]/gu, "");
 
-    // 2) DASH FOLD, so step 8 can see the corpus's en dash. `–` (U+2013) ×3 and one of them is a real year
+    // 2) DASH FOLD, so step 9 can see the corpus's en dash. `–` (U+2013) ×3 and one of them is a real year
     //    span (`1859–1917`); leaving it unfolded would make the range rule miss a sixth of its instances.
     //    Folding is safe because a bare `-` is already silent in this engine. ⚠ NOT a blanket `NFKC`
     //    (trap 36): that would turn `²` into `2` and re-create precisely the defect step 3 exists to fix.
@@ -246,17 +295,38 @@ export function normalizeHmong(input: string): string {
     //    discriminator is the tail's length.
     s = s.replace(GROUP_COMMA, (w) => w.replace(/,/gu, "")).replace(GROUP_DOT, (w) => w.replace(/\./gu, ""));
 
-    // 5) PERCENT → `feem pua`, POSTPOSED. ×7, and the layer's best-sourced rule (see the header: attested as
+    // 5) THE KILOMETRE → `kis lus mev`, IN PLACE. Sourced in the header, including why this file's first run
+    //    refused it and what changed. The symbol is postposed in every attestation, so nothing moves: the
+    //    token is swapped for the word and the operand is never touched, which is why this rule needs no
+    //    capture group and cannot desynchronise a number (trap 10 does not arise — there is no operand to
+    //    put back).
+    //    ⚠ AFTER STEP 3, which folds `km2` onto `km²`, and AFTER STEP 4, so a grouped area (`17.125.187 km²`)
+    //    is already one figure when the lookbehind looks for a digit. Before step 3 this would see `km` with
+    //    a bare `2` glued to it and leave the `2` behind as the cardinal *ob*.
+    //    ⚠ THE LOOKBEHIND IS WHAT KEEPS THIS OFF A BARE TOKEN. `km` is claimed only in a NUMERIC context —
+    //    a digit, optionally with one of the three magnitude words this corpus writes after a digit between
+    //    them (`9,85 lab km2` is "9.85 million square kilometres", so the magnitude sits INSIDE the
+    //    measure phrase). A standalone `km` with no figure anywhere near it is left alone here; that shape
+    //    belongs to the shared tier's bare-unit path, not to this file.
+    //    ⚠ BOTH LOOKAROUNDS, per the tone-letter rule at the top: `k` and `m` are ordinary RPA letters and
+    //    `m` is itself a tone marker, so an unguarded key would bite two letters off a real word and leave a
+    //    different, legally-spelled word behind.
+    //    ⚠ ORDER-INSENSITIVE WITH RESPECT TO STEP 11 by construction, and checked: if the decimal rule ran
+    //    first, `9,85 lab km²` would already be `9 8 5 lab km²` and the lookbehind still matches on the `5`.
+    //    It is placed here rather than at the end only so it sits with the other vocabulary rules.
+    s = s.replace(/(?<=\d\s?|\d\s(?:lab|vam|roob)\s)km²?(?![\p{L}\p{M}\d])/gu, "kis lus mev");
+
+    // 6) PERCENT → `feem pua`, POSTPOSED. ×7, and the layer's best-sourced rule (see the header: attested as
     //    the collocation, in the slot, three times, plus an outside dictionary).
-    //    ⚠ AFTER STEP 4, so a grouped percentage is one number, and BEFORE STEP 10, or the rule matches `5%`
+    //    ⚠ AFTER STEP 4, so a grouped percentage is one number, and BEFORE STEP 11, or the rule matches `5%`
     //    out of `83.5%` and splits the quantity in half.
-    //    ⚠ AND BEFORE STEP 8, WHICH IS WHAT MAKES `5-10%` COME OUT RIGHT. The corpus writes the span with
-    //    the sign on the RIGHT END ONLY, so claiming the percent first leaves `5-10 feem pua`, which step 8
+    //    ⚠ AND BEFORE STEP 9, WHICH IS WHAT MAKES `5-10%` COME OUT RIGHT. The corpus writes the span with
+    //    the sign on the RIGHT END ONLY, so claiming the percent first leaves `5-10 feem pua`, which step 9
     //    still matches as an ascending pair and reads *tsib mus rau kaum feem pua* — five to ten percent.
     //    Claiming the range first would strand the sign after a connective.
     s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?%/gu, "$1 feem pua");
 
-    // 6) CURRENCY → `duas`, POSTPOSED, with the magnitude word kept BETWEEN the number and the noun. `$10
+    // 7) CURRENCY → `duas`, POSTPOSED, with the magnitude word kept BETWEEN the number and the noun. `$10
     //    lab` is "ten million dollars", so the reading has to be `10 lab duas` and not `10 duas lab`; the
     //    magnitude is re-emitted rather than consumed (trap 10). The three magnitudes admitted are the ones
     //    this corpus writes after a digit — `lab` ×11, `vam` ×2, `roob` ×1 — and no others, because a wider
@@ -268,14 +338,14 @@ export function normalizeHmong(input: string): string {
     //    specific than the source text and is not WRONG, which is the trade this tree prefers.
     //    ⚠ THE LEADING GUARD IS WHAT FORCES THE `US` ARM: starting a match at the bare `$` of `US$30` fails
     //    the lookbehind on the letter `S`, so the optional arm cannot be skipped where it is present.
-    //    ⚠ AFTER STEP 4 (`46,330` must already be one token) and BEFORE STEP 10 (the operand keeps its
+    //    ⚠ AFTER STEP 4 (`46,330` must already be one token) and BEFORE STEP 11 (the operand keeps its
     //    decimal tail).
     s = s.replace(
         /(?<![\p{L}\p{M}\d])(?:US\s?)?\$\s?(\d+(?:[.,]\d+)?)(\s(?:lab|vam|roob)(?![\p{L}\p{M}]))?/gu,
         (_m, n: string, mag: string | undefined) => `${n}${mag ?? ""} duas`,
     );
 
-    // 7) DEGREES — the sign AND the scale letter are CONSUMED AND UNREAD, because no Hmong degree or scale
+    // 8) DEGREES — the sign AND the scale letter are CONSUMED AND UNREAD, because no Hmong degree or scale
     //    word is attested (see the header; `sources.ts` says `scale-names [NONE]`). ×5, all temperatures.
     //    ⚠ A DOWNGRADE FROM A WRONG READING TO A SILENCE, NOT A FIX: what it replaces is the letter `C`
     //    reaching the IPA raw — and `c` is a real Hmong onset, so a bare `C` is not even visibly foreign.
@@ -283,16 +353,16 @@ export function normalizeHmong(input: string): string {
     //    ⚠ ONLY `C`/`F`. The corpus's sixth `°` is the coordinate `50 ° N. M.)`, and a compass direction is
     //    CONTENTFUL where a scale name beside `° C` is redundant with nothing — dropping it would be a real
     //    loss, so that instance is deliberately left alone (its `N` still reaches the IPA raw, ×1).
-    //    ⚠ BEFORE STEP 10, so the operand still carries its decimal tail (`+45,4 ° C`, `116,6 ° C`).
+    //    ⚠ BEFORE STEP 11, so the operand still carries its decimal tail (`+45,4 ° C`, `116,6 ° C`).
     s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?[CF](?![\p{L}\p{M}])/gu, "$1");
 
-    // 8) RANGES → `mus rau`, the connective the corpus itself writes between two numerals (header). AFTER
-    //    step 5 so a percent span is already carrying its word, and AFTER step 4 so a grouped endpoint is one
+    // 9) RANGES → `mus rau`, the connective the corpus itself writes between two numerals (header). AFTER
+    //    step 6 so a percent span is already carrying its word, and AFTER step 4 so a grouped endpoint is one
     //    token. See RANGE above for why this is glued-only and for the 53 spaced dashes and 124 hyphenated
     //    proper nouns that forced it. ASCENDING only.
     s = s.replace(RANGE, (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} mus rau ${b}` : whole));
 
-    // 9) THE AMPERSAND → `thiab`. ⚠ ×0 IN THE CORPUS — this is ROBUSTNESS FOR PLAUSIBLE INPUT, not a
+    // 10) THE AMPERSAND → `thiab`. ⚠ ×0 IN THE CORPUS — this is ROBUSTNESS FOR PLAUSIBLE INPUT, not a
     //    measured repair, and the comment says so rather than letting the rule look earned (trap 22's
     //    discipline). It needs no sourcing argument: `thiab` is Hmong's ordinary conjunction, ×355 here, and
     //    the ampersand has one reading everywhere it occurs.
@@ -300,7 +370,7 @@ export function normalizeHmong(input: string): string {
     //    traps 18/26 — so the replacement must insert the boundary the sign was supplying.
     s = s.replace(/\s?&\s?/gu, " thiab ");
 
-    // 10) DECIMALS, LAST, after every rule that needs the number intact. BOTH marks, and a tail of one or two
+    // 11) DECIMALS, LAST, after every rule that needs the number intact. BOTH marks, and a tail of one or two
     //     digits only — the other half of the tail-length discriminator documented above. The separator
     //     becomes NOTHING and the fractional digits are spaced apart so the number path speaks them one at a
     //     time: there is no Hmong decimal-point word (`sources.ts`: `decimal-point [NONE] no _dpt, no _., no

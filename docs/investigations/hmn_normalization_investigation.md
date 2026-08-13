@@ -300,3 +300,170 @@ Four things that did NOT work, recorded so nobody repeats them:
 And one that is worth stating positively: **the corpus's own definitional sentence for `$` is better evidence
 than anything `attest.ts` could have returned**, because it names the sign and the word together. A wiki that
 is too small to have a search index can still contain the one sentence that settles a rule.
+
+---
+
+## Run 9 — 2026-08-12 21:20 (the kilometre word: Run 8's refusal, revisited and OVERTURNED)
+
+**Question.** Run 8 recorded `kis lus mev` as found-and-declined. The refusal was correct on the evidence it
+had. Is there evidence it did not have?
+
+**What Run 8 saw, restated so the reversal can be judged.** `km` ×10 after a digit / ×13 as a token, written
+as the symbol every time and reaching the IPA RAW. Slot-searching the corpus (trap 40) produced exactly one
+candidate — `…rau Papua - Tshiab Guinea - tsuas yog 5 kis lus mev`, Boigu Island to PNG, which really is
+~5 km. Declined on three grounds: one hit in one article of a machine-translated wiki; no outside
+corroboration; and, decisively, its two-word TAIL is attested twice in the same corpus meaning **Spanish**
+(`Mev (español) yog ib hom lus Romance`, `cov lus Mev Netherlands`, `Mev` ×4 = Spain/Spanish throughout).
+
+### ⚠ The decomposition was a COINCIDENCE, and that is the transferable lesson
+
+`kis lus mev` is not `kis` + `lus mev`. It is a **three-syllable RPA rendering of *kilomèt*** (French, via
+Lao ກິໂລແມັດ), spelled the way RPA spells any foreign polysyllable — one syllable at a time, each with a
+legal onset, rime and tone letter: *ki · lo · me*. Read as morphemes it looks like "Spanish"; read as a
+transliteration it is the loanword.
+
+⚠ **Trap 37's decomposition check is NOT VALID AGAINST A LOANWORD** — a syllabic loan has no morphemes for
+the tail test to bite on, so the test cannot return a useful answer and its "failure" carries no
+information. New entry for the playbook. The practical consequence: **a slot search must be finished by a
+dictionary, not by a corpus concordance.** Run 8 stopped at the concordance because its own header records
+that `attest.ts` cannot be run for this language (there is no Hmong Wikipedia to probe) — which is true, and
+which made a plain web search the only remaining route rather than an optional extra.
+
+### What settles it: an OUTSIDE source, which is exactly what Run 8 went looking for and did not find
+
+A first-year Hmong language textbook (*1st Year Hmong Book 1 — Koj Xyaum Hais Lus*), **Unit 5C, "Tham txog
+sij hawm mus thiab deb li cas" / "Talking About Time and Distance"**, carries the word twice, in the two
+forms that matter most. Both verified in the page's RAW text, not via a summarizer:
+
+```
+kis lus mev – kilometer                      ← an EXPLICIT ENGLISH GLOSS, in the unit's own vocabulary list
+B: Deb li ntawm 218 tawm kis lus mev.        ← IN THE SLOT, in the unit's dialogue
+   "It's about 218 kilometres away."
+```
+
+A gloss list is a dictionary entry in all but binding, and this is the **"sense you have READ"** the bar
+demands — the source itself says what the word means. This is not `Komma` attested ×24 as a verb, nor `ናቕፋ`
+×5 as a town: nothing here has to be inferred from a count.
+
+**Tally: three instances in the slot across TWO INDEPENDENT SOURCES** (the textbook's dialogue, the
+textbook's gloss, the corpus's Boigu sentence), one of them a definition. That is at least the evidence
+`feem pua` shipped on in Run 4, and the definition is the stronger half of it.
+
+### ⚠ Negatives kept, because they bound the claim
+
+| source | result |
+|---|---|
+| Glosbe en→hmn `kilometer` | "Currently, we have no translations for **kilometer** in the dictionary" |
+| Heimbach, *White Hmong–English Dictionary* (1969, ~4,900 entries) | **no metric entry at all** — full text searched, `kilomet` ×0 |
+| davecurtis.net English–Hmong Daw phrasebook | `kilomet` ×0, `kis lus` ×0 |
+| espeak | ships no Hmong |
+| `attest.ts` | still unusable — no Hmong Wikipedia exists to probe |
+
+The word is real and **thinly documented online**. That is why a corpus concordance alone could not reach
+it, and it is why the refusal was reasonable rather than careless.
+
+### Word order: POSTPOSED, and every instance agrees
+
+`218 tawm kis lus mev` · `5 kis lus mev`, and the corpus's own symbol order `145 km deb`, `(784 km)`,
+`9,85 lab km2`. **No preposed hit anywhere.** So the rule does not reorder: the symbol is swapped for the
+word where it already stands, which also means it has no operand to put back (trap 10 does not arise).
+This matches `feem pua` and `duas`, and is the exact opposite of the Mooré kilometre landed in the same
+batch, which is head-initial — the two languages were sourced independently and disagreed, which is the
+point of doing it per-language.
+
+### ⚠ Put through the engine's own g2p BEFORE being declared
+
+This file's central hazard is that in RPA the final consonant letter IS the tone, so a word cannot be
+declared on the page alone:
+
+```
+phonemize("kis lus mev", "hmn") → ki˩ lu˩ me˧˦          three clean syllables, nothing raw
+phonemize("kis","lus","mev")    → ki˩ · lu˩ · me˧˦      each parses as onset + rime + tone
+phonemize("10 km", "hmn")       → kau̯˩̰ ki˩ lu˩ me˧˦   ← was: kau̯˩̰ KM
+```
+
+`lus` is an ordinary corpus word (×many). **No letter of the declared string reaches the IPA unread** —
+which is the check `km` itself fails, and the whole reason the word was needed.
+
+Guards verified: `koom`, `kaum`, `kev` untouched; a bare `km` with no figure near it is deliberately left
+alone here (that shape belongs to the shared tier's bare-unit path, not to this file).
+
+### The exponent stays refused, and the REASON has narrowed
+
+The header used to say "a squared word needs a head noun and there is no sourced unit noun to head". The
+second clause is now **false** — `kis lus mev` is the head noun. What remains true is the first: no Hmong
+word for *squared* is attested in the corpus, the textbook, Glosbe or Heimbach. So `km²`/`km2` (×2) emits
+the bare unit and the squared-ness is dropped. ⚠ hmn REMAINS **not** an accepted silence for `exponent` and
+`review.ts` stays RED on it (trap 24). Stated rather than silently edited, because a narrowed reason that
+looks like an unchanged one is how a refusal quietly becomes unearned.
+
+---
+
+## Run 10 — 2026-08-12 21:35 (the gates, and one golden whose expected value changed)
+
+| gate | before | after |
+|---|---|---|
+| `npx tsc --noEmit` | clean | clean |
+| `npx vitest run` | 242 files / 3,851 passing | **242 files / 3,851 passing + 2 new hmn tests** |
+| `referee-eval.ts hmn` | raw exact **455/455 (100.0%)**, folded 455/455, symbol 100.0% | **byte-identical, 455/455** |
+| `corpus-diff` utterances changed | — | **5 / 92 (5.4%)** |
+| `corpus-diff` DROP | 5 | **5 — UNCHANGED** |
+| `mine.ts scan` | DROP minus ×2 · exponent ×2 · ACCEPTED-CLASS math-sign ×3 · degree ×2 · REDUNDANT currency ×1 | **identical, class for class** |
+| `review.ts --lang hmn` | 2 FAILING (`sign classes: DROPPED minus exponent`, artifact scan) | **identical, 2 FAILING** |
+| `sources.ts --lang hmn` | 3 NONE / 3 chk? | **identical** |
+
+⚠⚠ **THE SAME HEADLINE AS THE mos RUN, INDEPENDENTLY REPRODUCED: every gate except corpus-diff's
+utterance count is byte-identical across a change that repairs 5 utterances.** There is no `unit` sign
+class — every leak counter in this repo is keyed on a SIGN (`%`, `$`, `°`, `−`, `²`, `&`) and `km` is two
+ASCII letters. Run 8 predicted exactly this ("NO LEAK CLASS CAN SEE IT … it took a hand probe", trap 6);
+this run confirms it from the other side, on a language whose referee is a **perfect 455/455** and stayed
+perfect. A green board was fully compatible with `km` reaching the IPA ×13.
+
+`referee-eval hmn` is worth running anyway and byte-identical IS its pass condition: it is 455 single-syllable
+RPA words with no digit and no symbol, so it cannot see this layer — but a rule that bit a TONE LETTER off
+an RPA word would show up there immediately. It did not.
+
+### All 5 changed utterances were read. Every one is the intended repair.
+
+```
+(362 km) rau            -  … ʈau̯˧ cau̯˩̰ ʔɒ˥ KM ʈau̯˧ ʂa˥ …
+                        +  … ʈau̯˧ cau̯˩̰ ʔɒ˥ KI˩ LU˩ ME˧˦ ʈau̯˧ ʂa˥ …
+145 km deb              -  … pˡau̯˥ cau̯˧˩̤ t͡ʂi˥ KM de˥ …
+                        +  … pˡau̯˥ cau̯˧˩̤ t͡ʂi˥ KI˩ LU˩ ME˧˦ de˥ …
+9,85 lab km2            -  … ʝi˩̰ t͡ʂi˥ la˥ KM tʰiə̯˥ …          the magnitude sits INSIDE the measure phrase
+                        +  … ʝi˩̰ t͡ʂi˥ la˥ KI˩ LU˩ ME˧˦ tʰiə̯˥ …
+17.125.187 km²          -  … ʝi˩̰ cau̯˩̰ ça˧ KM . …
+                        +  … ʝi˩̰ cau̯˩̰ ça˧ KI˩ LU˩ ME˧˦ . …
+```
+
+The Austria border-lengths paragraph alone accounts for 8 of the 13 tokens (`362 · 91 · 366 · 330 · 430 ·
+35 · 164 · 784 km`), which is why one utterance carries most of the repair.
+
+### ⚠ ONE GOLDEN'S EXPECTED VALUE CHANGED, and it is the right change
+
+`test/hmong.test.ts`, the ASCII-exponent test:
+
+```
+-  expect(normalizeHmong("9,85 lab km2")).toBe("9 8 5 lab km²");
++  expect(normalizeHmong("9,85 lab km2")).toBe("9 8 5 lab kis lus mev");
+```
+
+**Justification.** The old expectation ended in a bare `km²` — the unit reaching the IPA raw — and that was
+correct *at the time*, because Run 6 had sourced no unit noun and the test was pinning the `km2`→`km²` fold
+in isolation. The fold still happens (it is what stops the `2` being read as the cardinal *ob*, the `za`
+`810km2` bug); what changed is that the head noun is now read. The `²` is **still** dropped and hmn is
+**still** not an accepted silence for `exponent`, and the test's comment now says so explicitly rather than
+pointing at Run 8's refusal. No other golden in the tree moved.
+
+The test's stale comment — "No unit word exists for hmn (see normalize.ts on why `kis lus mev` was
+declined)" — was rewritten in the same edit. A comment that outlives the decision it explains is how a
+reversal gets lost.
+
+### The negative that is no longer the deliverable, and the one that is
+
+Run 8's kilometre bullet was recorded as a kept negative. **It is now superseded and should be read as
+history, not as current state** — the word is declared. The negative that survives and is worth keeping is
+the *method* one: a corpus concordance could not settle a loanword, trap 37's tail test was structurally
+incapable of answering, and only an outside pedagogical source could close it. The three dictionaries that
+came back empty (Glosbe, Heimbach, the Daw phrasebook) are kept in Run 9 for the same reason — they bound
+how well documented this word is, and they explain why one textbook had to carry the weight.

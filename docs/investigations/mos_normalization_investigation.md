@@ -434,3 +434,175 @@ no Mooré). The meters were `corpus-diff`, `mine.ts scan` and `review.ts`, plus 
 evidence tier outside the corpus itself. Unlike `hil` and `bal`, mos does have a directly dumpable
 Wikipedia, so the Incubator route was not needed — but 11.6% of it is English, and every count in this
 layer is over the filtered text for that reason.
+
+---
+
+## Run 9 — 2026-08-12 20:50 (the kilometre word: sourcing it, and settling a word order the corpus writes both ways)
+
+**Question.** The layer landed without a unit noun, so `km` survived normalization and reached the IPA as
+two raw ASCII letters — measured exposure `km` ×6 after a digit / ×10 as a token. Is there a Mooré
+kilometre word, and if so which side of the figure does it go?
+
+### The word
+
+```
+npx tsx tools/normalization/attest.ts --lang mos --words kilometr,kilomɛtre,kilometre,kilomeetre
+
+  word        token  arts  verdict
+  kilometr    31     20    attested
+  kilomɛtre   2      1     attested
+  kilometre   0      0     absent
+  kilomeetre  0      0     absent
+```
+
+**And the sense did not have to be inferred from the count — the corpus GLOSSES THE WORD AGAINST THE
+SYMBOL, in two unrelated articles.** This is the same evidence that settled `Ero` for the euro in Run 4,
+and here it is available twice:
+
+```
+Lake Tengrela      Kulgà ya kilometr a yiibu woglem ni yaadem a yéndé la pusuka.
+                   Woglem: kilometr a yiibu (2 km)   Yaadem: kilometr yéndé la pʋsʋka (1.5 km)
+Acacus Mountains   … kilometr ramba koabga (62 mi)(Ãnglindi: 100 kilometres)
+                   … n na ta kilometr kobga 100km (62mi)                        (same article, body text)
+```
+
+`kilomɛtre` ×2 is one article, a table of protected-area sizes. Spelling settled: **`kilometr`**.
+
+### The word order — the part that nearly went wrong
+
+⚠ **A raw count would have settled nothing, because this corpus writes BOTH orders.**
+`insource:/kilometr/` over mos.wikipedia (50 articles) splits roughly **17 preposed to 11 postposed**.
+On that alone the answer is "unclear", which is the state the Haitian `pwen` failure started from.
+
+What settles it is restricting to instances where **the numeral is SPELLED OUT IN MOORÉ** — i.e. the
+SPOKEN form, which is the only form this layer's output has to match, since the digits it re-emits become
+Mooré numerals downstream:
+
+| | count | instances |
+|---|---|---|
+| **PREPOSED**, numeral spelled out | **×11** | `kilometr a yiibu` · `kilometr yéndé la pʋsʋka` · `kilometr kobga` · `kilometr pis-naase (40)` · `kilometr tus-pis-nii(8000km)` · `kilometr piso-poe la a nu(75km)` · `kilometr a nii 8km` · `kilometr a tãab 3km` · `kilometr a yi` · `kilometr ramba koabga` · `kilometres koabg la pis-naas la a yopoe` |
+| **POSTPOSED**, numeral spelled out | **×1** | `… pis-yoopoe la yoobe kilometr (18,476km)` (Upper West Region) |
+
+**11:1 on the form that matters, against a near-even split on the raw shapes.** And the postposed hits are
+precisely the DIGIT ones — `85 kilometr (53 ml)`, `4,596 kilometr`, `219 kilometr`, `182 kilometr (113 ml)`
+— i.e. figures copied across from a source wiki with their Anglo-French order intact, which is exactly the
+11.6% contamination this language's Run 1 had to filter for.
+
+⚠ **Independent corroboration from the SYMBOL.** The corpus writes `km` itself in front of its own figure:
+`km 2,04`, `km 3,245`, `km 179.0`, `km2 77.0`, `km2 199.4`, and the marathon splits `zoe km 10 … km 15 …
+km 30`. Writers reaching for the symbol still put the unit where Mooré puts the noun. This also matches the
+currency rule Run 4 already landed (`doolaar 100 000`, `Ero wã milyo a naase`) — two rules, two routes, one
+head-initial answer.
+
+**Implication.** Declare `kilometr`, PREPOSED, with two arms: one for the already-native `km 2,04` shape
+(swap the symbol, the figure never moves) and one for `140 km` / `100km` / `18,476km` (reorder).
+
+### The particle `a` is NOT emitted
+
+The corpus writes `kilometr a yiibu`, `kilometr a 5`, `kilometr a nii`, `kilometr a tãab`, `kilometr a yi`
+— the enumerative particle before a small numeral — but also `kilometr kobga` and `kilometr pis-naase`
+without it. Whether `a` appears is a fact about `numbers.ts`, not about this noun, and the currency rule
+already emits `doolaar 300` bare on the same reasoning. Left alone.
+
+### The squared reading is REFUSED — three rivals that agree on nothing
+
+```
+npx tsx tools/normalization/attest.ts --lang mos --words kars,zem-taas,zemtaas
+  kars      1  1  attested
+  zem-taas  3  3  attested
+  zemtaas   0  0  absent
+```
+
+Reading them is what refuses them:
+
+- `kars` ×1 — `A ziiga yalem taa kilometr kars 923.769` (Nigeria's area). One hit, one article.
+- `zem-taas` ×3 — and one is a **square MILE** (`2,000 zem-taas yaremde mile (5,200 km²)`), while the other
+  two sit on **opposite sides of the unit noun**: `24,389 kilometrẽ zem-taas yalem` against `(8,842)
+  zem-taas ya remde kilometrē (square kilometer)`. A word whose slot flips between its own two
+  attestations cannot be emitted into a slot.
+- `men-yɩlende` ×2 — `9826 kilometr men-yɩlende`, `6,000 mètr men-yɩlende`. The most consistent of the
+  three and still two hits.
+
+Three candidates at ×1–3 with no agreement is a LEAD, not a finding — the `koabg pʋgẽ` shape from Run 6
+again. **So `km²`/`km2`/`km^2` emit the BARE unit and the squared-ness is dropped.** That is a real loss of
+meaning, and it ships only because what it replaces is worse than a silence: `km2 77.0` read as *km* RAW
+plus the `2` claimed by the number path as the CARDINAL TWO — the `za` `810km2` bug, reproduced here.
+⚠ mos is deliberately **NOT** added to `ACCEPTED_SIGN_SILENCE` for `exponent`; `review.ts` stays RED on it
+(trap 24). An accepted silence claims the drop is correct, and this one is not.
+
+### A shape only a head-initial language gets for free
+
+`20--40 km (12-25 mi)` is in the corpus and mos has **no range joiner** (Run 6: that cell is 47% Mooré and
+dominated by football scores). Matching only the right endpoint would emit `20--kilometr 40` — the unit
+noun dropped into the middle of the span. Because Mooré is head-initial the whole span can keep its shape
+behind one noun instead: `kilometr 20--40`, which reads as the two bare cardinals it already read as, now
+with the unit attached. The postposing languages in this tree cannot have this.
+
+### Verified through the engine
+
+```
+phonemize("kilometr", "mos")   → kilometɾ          pronounceable, nothing raw
+"10 km"          → kilometr 10             → kilometɾ piːɡa
+"140 km (87 mi)" → kilometr 140 (87 mi)    → kilometɾ koabɡa la pis naːse …
+"km2 77.0"       → kilometr 77.0           → kilometɾ pis jopoe la a jopoe . zaːlem   (no stray *jiːbu*)
+"18,476km"       → kilometr 18476          (de-grouping coupling holds)
+"kmall" / "akm 5" → unchanged              (both lookarounds hold)
+```
+
+## Run 10 — 2026-08-12 21:05 (the gates — and the finding that MOST OF THEM CANNOT SEE THIS AT ALL)
+
+| gate | before | after |
+|---|---|---|
+| `npx tsc --noEmit` | clean | clean |
+| `npx vitest run` | 242 files / 3,851 passing | **242 files / 3,851 passing + 4 new mos tests**; `onnx-optional` passed in-suite this run |
+| `referee-eval.ts mos` | raw exact 0/39, folded backbone **37/39 (94.9%)**, symbol accuracy 98.5% | **byte-identical** |
+| `corpus-diff` utterances changed | — | **9 / 431 (2.1%)** |
+| `corpus-diff` DROP | 88 | **88 — UNCHANGED** |
+| `mine.ts scan` | DROP currency ×9 · exponent ×2 · minus ×1 | **identical, class for class** |
+| `review.ts --lang mos` | 2 FAILING (`sign classes: DROPPED minus`, artifact scan) | **identical, 2 FAILING** |
+| `sources.ts --lang mos` | 4 NONE / 1 part / 7 chk? | **identical** |
+
+⚠⚠ **THE HEADLINE IS THE COLUMN THAT DID NOT MOVE.** `referee-eval`, `mine.ts scan`, `review.ts`,
+`sources.ts` and even corpus-diff's own DROP counter are **byte-identical before and after a change that
+repairs the reading of 9 utterances**. This is not a bug in the tooling; it is the shape of the defect:
+
+- **There is no `unit` sign class.** Every leak counter in this repo is keyed on a SIGN — `%`, `$`, `°`,
+  `−`, `²`, `&`. `km` is not a sign; it is two ASCII letters, and the DROP counters have nothing to count.
+- **And no leak class could be added cheaply,** because in a LATIN-SCRIPT language a Latin-letter residue
+  is indistinguishable from a word (trap 6). `km` reaching the IPA looks exactly like an ordinary token.
+- `referee-eval.ts mos` is a **tripwire only** and Run 1 said so: 39 ordinary lexical words, no digit, no
+  symbol, no punctuation. It cannot arbitrate one line of this layer. Byte-identical IS its pass condition,
+  and it is worth running precisely because a rule that bit into a Mooré word WOULD show up here.
+- `sources.ts` has **no row for a unit noun at all**, so it cannot even prompt for one.
+
+**The only instrument that sees this defect is `corpus-diff`'s utterance-change count, plus reading the
+changes.** Recorded because it generalises: the fleet's unit words are invisible to the sourcing gate, and
+the only reason this one was found is that it was named in the brief. `km` ×6 digit-adjacent / ×10 as a
+token sat in a layer whose own gates all reported green.
+
+### All 9 changed utterances were read. Every one is the intended repair.
+
+```
+760km (290sqm)     -  … ja kobs a jopoe la pis joːbe km kobs a ji …
+                   +  … ja kilometɾ kobs a jopoe la pis joːbe kobs a ji …
+
+km2 77.0           -  … taɾ zĩiɡa jaː km JIːBU pis jopoe la a jopoe …     ← the `2` read as the CARDINAL TWO
+                   +  … taɾ zĩiɡa jaː kilometɾ pis jopoe la a jopoe …     ← the za `810km2` bug, gone
+
+(20.4 km2)         -  … tiɡisɡã pʊɡa pisi . naːse km JIːBU sẽn jaː …
+                   +  … tiɡisɡã pʊɡa kilometɾ pisi . naːse sẽn jaː …      ← reordered AND the cardinal gone
+
+zoe km 10 … km 30  -  … n wa zoe km piːɡa n pa …                          ← the native-order arm
+                   +  … n wa zoe kilometɾ piːɡa n pa …                       (figure never moved)
+```
+
+⚠ **ONE HONEST COST, in 2 of the 9: the unit is now read TWICE where the SOURCE glosses itself.**
+`kilometr kobga 100km (62mi)` and `nao kilometr piso-poe la a nu(75km)` write the Mooré word and then
+repeat the figure with the symbol, so the output is `kilometɾ kobɡa kilometɾ koabɡa …`. This is the
+REDUNDANT class (playbook trap 12) rather than a wrong reading — the source text really does say it twice —
+and it is the same trade `hmn`'s `duas` made in its Run 7. Reading the unit twice beats leaving `km` raw;
+recorded rather than hidden.
+
+**What is still RED, deliberately:** `sign classes: DROPPED minus` (Run 6 — omitting a minus INVERTS and no
+Mooré word is attested) and `artifact scan DROP exponent ×2` (this run — the squared-ness is dropped and
+mos is deliberately not an accepted silence for it). Both are sourced refusals, not oversights.

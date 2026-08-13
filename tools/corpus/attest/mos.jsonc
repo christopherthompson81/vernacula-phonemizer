@@ -21,6 +21,88 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "kars",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…e ko-kãsengã sẽn be goabgã sʋka. A ziiga yalem taa kilometr kars 923.769, la a nin-buiidã sõor taa milyõ 230. Nizɛɛr ne Nizɛ…"
+            ]
+            },
+        {
+                "word": "zem-taas",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ia, encyclopedia zaalem'a Garamba National Park kolga 2,000 zem-taas yaremde mile (5,200 km²) têng garga m'be wĩn-dɩtgo Républiq…",
+                "…iig la yoobe n be Ghana. A tẽnga vẽenen ya 24,389 kilometrẽ zem-taas yalem Ghana.Ashanti Region tẽng-zugu ya Kumasi.Asente ya bũ…",
+                "…veenem reege Tus nii la kob-nii la pis-naase la yii (8,842) zem-taas ya remde kilometrē (square kilometer) Ghana. Wilgira mé tà…"
+            ]
+            },
+        {
+                "word": "zemtaas",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…g ni nèba. Ub naansin n nyé nyɛbsi kulgà pugin yɛ. Kulgà ya kilometr a yiibu woglem ni yaadem a yéndé la pusuka. Woglem: kilomet…",
+                "…ilometr a yiibu woglem ni yaadem a yéndé la pusuka. Woglem: kilometr a yiibu (2 km) Yaadem: kilometr yéndé la pʋsʋka (1.5 km) kʋ…",
+                "…a yéndé la pusuka. Woglem: kilometr a yiibu (2 km) Yaadem: kilometr yéndé la pʋsʋka (1.5 km) kʋmandaaog yûuré: Lac de Tingrela…",
+                "…m'be Guinea bõn-vɩɩlɩ m'be ziiga chiti a monme 9,130 sqaure kilometr bé zĩi-kasenga gilgi Casamance/Kolda Region zugu == Tẽn-bao…",
+                "…oaaga ne Guinea. Biosphere zĩiga chiti a monme 9,130 sqaure kilometr bé zĩi-kasenga kogla ne Casamance/Kolda Regions n'be Guinea…",
+                "…ons n'be Guinea-Bissau toaaga ne Tambacounda Region tɩ a be kilometr kobga ne Guine-ramba toaaga m pẽ ne Senegal goabg ziiga. ==…"
+            ]
+            },
+        {
+                "word": "kilomɛtre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ʋgo B sigla la yʋʋm-vẽkr kiuug pipi daare yʋʋm 19888 64 560 kilomɛtre Ayir la Tenere Addaks Sãktiyɛɛri B sigla la yʋʋm-vẽkr kiuug…",
+                "…ɛri B sigla la yʋʋm-vẽkr kiuug pipi daare yʋʋm 19888 12 800 kilomɛtre Aïr and Ténéré National Nature Reserve IUCN type IV Sɩnga 1…"
+            ]
+            },
+        {
+                "word": "kilometre",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilomeetre",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
                 "word": "koabg pʋgẽ gɛɛlga",
                 "verdict": "attested",
                 "bounded": true,

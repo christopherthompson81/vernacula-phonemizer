@@ -79,7 +79,25 @@
  *   choice this tree ranks above a confidently wrong word; step 4 reads the two signs it can source and no
  *   more.
  *
- * ⚠ NO `°`/`°C`/`km²`/`=`/`×`/`>`/`&`/`−`. Counted in the filtered corpus: `°` ×41, `²`/`³` ×24, the whole
+ * ⚠ THE SQUARED READING IS REFUSED WHILE THE UNIT NOUN IS ACCEPTED, and the two decisions are independent.
+ *   Step 5 emits `kilometr` for `km²`/`km2`/`km^2` and lets the SQUARE fall silent, because Mooré has no
+ *   settled square-word and the corpus offers three rivals that do not agree with each other — on the count
+ *   OR on the position:
+ *     · `kars`        ×1, one article — `A ziiga yalem taa kilometr kars 923.769` (Nigeria's area). One hit.
+ *     · `zem-taas`    ×3, three articles, and READING them is what refuses it. One is a SQUARE MILE
+ *       (`2,000 zem-taas yaremde mile (5,200 km²)`), and the other two put it on OPPOSITE SIDES of the unit
+ *       noun — `24,389 kilometrẽ zem-taas yalem` against `(8,842) zem-taas ya remde kilometrē (square
+ *       kilometer)`. A word whose slot flips between its own two attestations cannot be emitted into a slot.
+ *     · `men-yɩlende` ×2 — `9826 kilometr men-yɩlende`, `6,000 mètr men-yɩlende`. The most consistent of the
+ *       three and still two hits.
+ *   Three candidates at ×1–3 with no agreement is a LEAD, not a finding (the `koabg pʋgẽ` shape again). ⚠ AND
+ *   THIS IS STILL A STRICT IMPROVEMENT ON WHAT IT REPLACES, which is the only reason it ships: `km2 77.0`
+ *   read as *km* RAW followed by the `2` claimed by the number path as the CARDINAL TWO (the `za` `810km2`
+ *   bug, reproduced here), and now reads *kilometɾ … *. A dropped modifier beats a raw symbol plus an
+ *   invented number. ⚠ mos is deliberately NOT added to `ACCEPTED_SIGN_SILENCE` for `exponent` — the drop is
+ *   a real loss of meaning, so `review.ts --lang mos` stays RED on it (trap 24).
+ *
+ * ⚠ NO `°`/`°C`/`=`/`×`/`>`/`&`/`−`. Counted in the filtered corpus: `°` ×41, `²`/`³` ×24, the whole
  *   math-sign class ×75, `&` ×111. `sources.ts` reports `[NONE] scale-names — ° occurs, neither scale name
  *   in corpus/referee/espeak`, and the ampersand cell is only 44% Mooré (its instances are English
  *   publisher names in citations — `Room, Adrian (2008). African placenames …`). Nothing to source, and
@@ -162,6 +180,70 @@ const CURRENCY: readonly (readonly [string, string])[] = [
     ["$", "doolaar"],
 ];
 
+/** ⚠ THE KILOMETRE, AND THE UNIT NOUN COMES BEFORE THE FIGURE — the same head-initial order the currency
+ *  rule above already found, arrived at independently and by a different route.
+ *
+ *  SOURCING. `kilometr` is `attested ×31 across 20 articles` (`attest.ts --lang mos --words kilometr`), and
+ *  the sense is not inferred from the count — the corpus GLOSSES THE WORD AGAINST THE SYMBOL, twice, in two
+ *  unrelated articles:
+ *
+ *      Woglem: kilometr a yiibu (2 km)   Yaadem: kilometr yéndé la pʋsʋka (1.5 km)      (Lake Tengrela)
+ *      … kilometr ramba koabga (62 mi)(Ãnglindi: 100 kilometres)                        (Acacus Mountains)
+ *      … n na ta kilometr kobga 100km (62mi)                                            (same article, body)
+ *
+ *  A word written beside the symbol it reads, in one sentence, is the strongest evidence this corpus offers —
+ *  it is what settled `Ero` for the euro, and it is available here twice over. The spelling is decided by the
+ *  same probe: `kilometr` ×31/20 against `kilomɛtre` ×2/1 (one table of protected-area sizes) and
+ *  `kilometre`/`kilomeetre` ×0. The stray `kilometres`/`kilometrē`/`kilometrẽ` forms in the wiki sit inside
+ *  English parentheticals or carry a nasal that the ×31 majority does not.
+ *
+ *  ⚠ THE POSITION IS MEASURED, NOT ASSUMED, AND THE CORPUS WRITES BOTH ORDERS — so a count of raw hits would
+ *  have settled nothing. `insource:/kilometr/` over mos.wikipedia (50 articles) splits roughly 17 preposed to
+ *  11 postposed, which on its own is a lead. What settles it is restricting to the instances where the
+ *  numeral is SPELLED OUT IN MOORÉ — i.e. the SPOKEN form, which is the only form this layer's output has to
+ *  match, since the digits it re-emits become Mooré numerals downstream:
+ *
+ *      PREPOSED, numeral spelled out  ×11   kilometr a yiibu · kilometr yéndé la pʋsʋka · kilometr kobga ·
+ *                                           kilometr pis-naase (40) · kilometr tus-pis-nii (8000km) ·
+ *                                           kilometr piso-poe la a nu (75km) · kilometr a nii 8km ·
+ *                                           kilometr a tãab 3km · kilometr a yi · kilometr ramba koabga ·
+ *                                           kilometres koabg la pis-naas la a yopoe
+ *      POSTPOSED, numeral spelled out  ×1   … pis-yoopoe la yoobe kilometr (18,476km)     (Upper West Region)
+ *
+ *  11:1 on the form that matters, against a near-even split on the raw shapes. ⚠ THE POSTPOSED HITS ARE THE
+ *  DIGIT ONES — `85 kilometr (53 ml)`, `4,596 kilometr`, `219 kilometr`, `182 kilometr (113 ml)` — i.e. the
+ *  figure copied across from a source wiki with its Anglo-French order intact, which is exactly the
+ *  contamination this language's run had to filter for in the first place. And the corpus corroborates the
+ *  native order with the SYMBOL too, writing it in front of its own figure: `km 2,04`, `km 3,245`, `km 179.0`,
+ *  `km2 77.0`, `km2 199.4`, and the marathon splits `zoe km 10 … km 15 … km 30`. Writers who reach for the
+ *  symbol still put the unit where Mooré puts the noun. That is why this rule REORDERS (playbook §47 reason 2)
+ *  rather than postposing, and why the shared tier could not have expressed it.
+ *
+ *  ⚠ THE PARTICLE `a` IS NOT EMITTED. The corpus writes `kilometr a yiibu`, `kilometr a 5`, `kilometr a nii`,
+ *  `kilometr a tãab`, `kilometr a yi` — the enumerative particle before a small numeral — but it also writes
+ *  `kilometr kobga` and `kilometr pis-naase` without it. Whether `a` appears is a fact about the NUMBER path
+ *  (`numbers.ts`), not about this noun, and the currency rule above already emits `doolaar 300` / `doolaar
+ *  4000` bare on the same reasoning. Inserting it here would be this layer legislating for a file it does not
+ *  own (trap 10's neighbour: put the operand back, do not re-spell it).
+ *
+ *  ⚠ TWO ARMS, BECAUSE THE SYMBOL IS WRITTEN ON BOTH SIDES, and both converge on ONE output order.
+ *  `KM_PRE` handles the already-native `km 2,04` shape — the symbol is simply swapped for the word and the
+ *  figure never moves. It requires WHITESPACE before the figure, which is what keeps it off `20.4 km2`
+ *  (whose `2` is the exponent, not an operand) while still consuming the exponent on `km2 77.0`.
+ *  `KM_POST` handles `140 km`, `100km`, `18,476km`, `225.67km^2` and reorders.
+ *
+ *  ⚠ `KM_POST` SPANS A RANGE DELIBERATELY. `20--40 km (12-25 mi)` is in the corpus, and mos has NO range
+ *  joiner (see the header — 47%-Mooré cell, football scores). Matching only the right endpoint would emit
+ *  `20--kilometr 40` and drop the unit noun into the middle of the span; because Mooré is head-initial the
+ *  whole span can keep its shape behind one noun instead — `kilometr 20--40` — which reads as the two bare
+ *  cardinals it already read as, now with the unit attached. This is a shape the postposing languages in this
+ *  tree cannot have, and it is free here.
+ *
+ *  ⚠ BOTH LOOKAROUNDS ON EVERY ARM. `km` is two ASCII letters in a Latin-script language, so an unguarded key
+ *  bites into ordinary words (trap 6: a Latin residue in a Latin script is invisible to every leak class). */
+const KM_PRE = /(?<![\p{L}\p{M}\d])km(?:\^?2|²)?\s+(?=\d)/gu;
+const KM_POST = /(?<![\d.,\p{L}\p{M}])(\d+(?:[.,]\d+)?(?:\s?-{1,2}\s?\d+(?:[.,]\d+)?)?)\s?km(?:\^?2|²)?(?![\p{L}\p{M}\d])/gu;
+
 /** Mooré normalization. A numbered, order-dependent sequence; the coupling is stated at each step. */
 export function normalizeMossi(input: string): string {
     // 1) NFC at the entry, so a literal in this file matches whichever normalization the dump used. Mooré's
@@ -197,6 +279,23 @@ export function normalizeMossi(input: string): string {
         const rx = new RegExp(`${sign.replace(/[$]/gu, "\\$&")}\\s?(\\d)`, "gu");
         s = s.replace(rx, `${word} $1`);
     }
+
+    // 5) THE KILOMETRE, LAST — and AFTER step 3 for the same reason step 4 is: the symbol is written against
+    //    a grouped figure (`18,476km`, `km 3,245`), so the operand this rule re-emits has to be the one
+    //    de-grouping has already joined up. Run before step 3 it would emit `kilometr 18` and leave `,476`
+    //    behind as a clause pause. It does not interact with step 4 — no corpus instance carries a currency
+    //    sign and a unit on the same figure — and is placed after it only so the two reordering rules read in
+    //    one direction.
+    //
+    //    ⚠ PRE-ARM FIRST. The two arms are disjoint by construction (`KM_PRE` demands whitespace-then-digit
+    //    after the symbol, `KM_POST` demands a digit before it), so the order is documentation rather than
+    //    load-bearing — but running the native-order arm first keeps the reordering arm from ever seeing a
+    //    figure that was already correctly placed.
+    //
+    //    ⚠ THE EXPONENT IS CONSUMED AND UNREAD, and that is a stated loss, not a fix — see the header. What
+    //    it replaces is worse than a silence: `km2 77.0` read as *km* raw plus the CARDINAL TWO.
+    s = s.replace(KM_PRE, "kilometr ");
+    s = s.replace(KM_POST, "kilometr $1");
 
     return s;
 }

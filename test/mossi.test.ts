@@ -158,4 +158,54 @@ describe("Mooré text normalization — de-grouping and the two sourceable curre
         expect(say("$5")).toBe("doːlaːɾ nu");
         expect(say("£50,000")).toBe("tus pis nu"); // de-grouped, sign correctly still silent
     });
+
+    // ⚠ THE KILOMETRE, AND THE UNIT NOUN COMES FIRST — the same head-initial order the currency rule found,
+    // reached independently. `kilometr` is attested ×31 across 20 articles and the corpus GLOSSES IT AGAINST
+    // THE SYMBOL in two unrelated articles (`kilometr a yiibu (2 km)`, `kilometr ramba koabga (62 mi)`),
+    // which is the evidence that settled `Ero` for the euro. The position is measured, not assumed: the wiki
+    // writes both orders, but restricted to instances where the numeral is SPELLED OUT IN MOORÉ — the spoken
+    // form, which is the only form this layer's output has to match — it is 11 preposed to 1.
+    test("reads km as the preposed noun `kilometr`, whichever side the symbol was written on", () => {
+        expect(normalizeMossi("10 km")).toBe("kilometr 10");
+        expect(normalizeMossi("140 km (87 mi)")).toBe("kilometr 140 (87 mi)");
+        expect(normalizeMossi("100km (62mi)")).toBe("kilometr 100 (62mi)"); // glued
+        expect(say("10 km")).toBe("kilometɾ piːɡa");
+        // ⚠ AND THE OTHER ARM: the corpus already writes the SYMBOL in front of its own figure — `km 2,04`,
+        // `km2 77.0`, and the marathon splits `zoe km 10 … km 15 … km 30`. Writers reaching for the symbol
+        // still put the unit where Mooré puts the noun, which is the independent corroboration of the order.
+        // Here the figure never moves; only the symbol is swapped.
+        expect(normalizeMossi("a zoe km 10 n pa ta")).toBe("a zoe kilometr 10 n pa ta");
+        expect(normalizeMossi("zĩiga yaa km2 77.0")).toBe("zĩiga yaa kilometr 77.0");
+    });
+
+    // ⚠ THE EXPONENT IS CONSUMED AND UNREAD, and that is a stated LOSS rather than a fix — Mooré offers three
+    // rival square-words that agree neither on count nor on position (`kars` ×1; `zem-taas` ×3, one of which
+    // is a square MILE and whose other two sit on OPPOSITE SIDES of the unit noun; `men-yɩlende` ×2), which
+    // is a lead and not a finding. It ships only because what it replaces is worse than a silence: `km2 77.0`
+    // read as `km` RAW plus the `2` claimed by the number path as the CARDINAL TWO — the `za` `810km2` bug.
+    // mos is deliberately NOT added to ACCEPTED_SIGN_SILENCE for `exponent`; review.ts stays red on it.
+    test("km² is read as the bare unit and the squared-ness is dropped, not invented", () => {
+        expect(normalizeMossi("(20.4 km2)")).toBe("(kilometr 20.4)");
+        expect(normalizeMossi("225.67km^2")).toBe("kilometr 225.67");
+        expect(normalizeMossi("(akre 860; km² 3.5)")).toBe("(akre 860; kilometr 3.5)");
+        expect(say("km2 77.0")).not.toContain("jiːbu"); // no stray cardinal TWO from the exponent
+    });
+
+    // ⚠ THE SPAN KEEPS ITS SHAPE BEHIND ONE NOUN, which is a move only a head-initial language gets for free.
+    // `20--40 km (12-25 mi)` is in the corpus and mos has NO range joiner (that cell is only 47% Mooré and is
+    // dominated by football scores). Matching just the right endpoint would emit `20--kilometr 40` and drop
+    // the unit into the middle of the span; preposing lets the pair stay the two bare cardinals it already
+    // read as, now with the unit attached.
+    test("a hyphenated span takes one preposed unit noun rather than being split by it", () => {
+        expect(normalizeMossi("yaa 20--40 km (12-25 mi)")).toBe("yaa kilometr 20--40 (12-25 mi)");
+    });
+
+    // ⚠ THE ADVERSARIAL NEIGHBOURS (trap 6): `km` is two ASCII letters in a Latin-script language, so a
+    // residue is invisible to every leak class and an unguarded key bites into ordinary words. Both
+    // lookarounds are asserted. The de-grouping coupling is asserted too — run before step 3 the rule would
+    // emit `kilometr 18` and leave `,476` behind as a clause pause.
+    test("the km key never bites a word, and sees the figure de-grouping has already joined up", () => {
+        expect(normalizeMossi("kmall akm 5")).toBe("kmall akm 5");
+        expect(normalizeMossi("18,476km")).toBe("kilometr 18476");
+    });
 });

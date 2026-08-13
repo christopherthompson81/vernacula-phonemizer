@@ -152,12 +152,47 @@ describe("Hmong (hmn) text normalization", () => {
     });
 
     // ⚠ THE ASCII EXPONENT, and it is a real defect rather than tidying: `357.021 km2` read the `2` as the
-    // CARDINAL *ob*, which is the `za` `810km2` finding reproduced. No unit word exists for hmn (see
-    // normalize.ts on why `kis lus mev` was declined), so the `²` itself stays dropped and hmn is NOT
-    // recorded as an accepted silence for `exponent`.
-    test("`km2` folds onto `km²` so the exponent stops reading as a cardinal", () => {
-        expect(normalizeHmong("9,85 lab km2")).toBe("9 8 5 lab km²");
+    // CARDINAL *ob*, which is the `za` `810km2` finding reproduced. Step 3 folds `km2` onto `km²` so the
+    // digit can never be claimed by the number path; step 5 then reads the unit and lets the `²` fall.
+    //
+    // ⚠ THIS GOLDEN'S EXPECTED VALUE CHANGED when the kilometre word was declared. It previously ended in a
+    // bare `km²` — the unit reaching the IPA raw — because no unit noun was sourced at the time. It is now
+    // `kis lus mev`, i.e. the fold still happens and the head noun is finally read. The `²` is STILL dropped
+    // and hmn is STILL not an accepted silence for `exponent`: no Hmong word for *squared* is attested in the
+    // corpus, the textbook, Glosbe or Heimbach, so `review.ts --lang hmn` stays red on that class (trap 24).
+    test("`km2` folds onto `km²`, the exponent stops reading as a cardinal, and the unit is read", () => {
+        expect(normalizeHmong("9,85 lab km2")).toBe("9 8 5 lab kis lus mev");
         expect(say("357.021 km2")).not.toContain("ʔɒ˥"); // no stray *ob*
+    });
+
+    // ⚠ THE KILOMETRE, DECLARED AFTER THIS LAYER'S FIRST RUN REFUSED IT — and the refusal was correct on the
+    // evidence it had. The corpus offers one slot hit (`tsuas yog 5 kis lus mev`, Boigu Island to PNG, which
+    // really is ~5 km) whose two-word TAIL `lus Mev` is attested twice in the same corpus meaning SPANISH.
+    // That decomposition is a coincidence: `kis lus mev` is a three-syllable RPA rendering of *kilomèt*
+    // (French via Lao), so it has no morphemes for trap 37's tail test to bite on. What settles it is an
+    // OUTSIDE source — a first-year Hmong textbook, Unit 5C "Talking About Time and Distance", which both
+    // GLOSSES it (`kis lus mev – kilometer`) and USES it (`Deb li ntawm 218 tawm kis lus mev`).
+    // POSTPOSED in every attestation, so nothing is reordered: the symbol is swapped where it stands.
+    test("`km` reads as the postposed unit noun `kis lus mev`", () => {
+        expect(normalizeHmong("10 km")).toBe("10 kis lus mev");
+        expect(normalizeHmong("tsuas yog 145 km deb")).toBe("tsuas yog 145 kis lus mev deb");
+        expect(normalizeHmong("(362 km) rau")).toBe("(362 kis lus mev) rau");
+        expect(normalizeHmong("17.125.187 km²")).toBe("17125187 kis lus mev"); // de-grouped first, then read
+        // ⚠ THE POINT OF THE WHOLE RULE: the two ASCII letters no longer reach the IPA. `km` used to be
+        // parsed as onset `k` + the `m` AS A TONE, fail its rime lookup and come out raw.
+        expect(say("10 km")).toBe("kau̯˩̰ ki˩ lu˩ me˧˦");
+        expect(say("10 km")).not.toContain("km");
+    });
+
+    // ⚠ THE TONE-LETTER HAZARD, PINNED. `k` and `m` are ordinary RPA letters and `m` is itself a tone marker,
+    // so an unguarded two-letter key would bite a real word in half and leave a DIFFERENT, legally-spelled
+    // word behind. Both lookarounds are asserted here, and so is the NUMERIC-CONTEXT lookbehind: a bare `km`
+    // with no figure near it belongs to the shared tier's bare-unit path, not to this file.
+    test("the unit key never bites an RPA word, and never fires without a figure", () => {
+        expect(normalizeHmong("koom kaum kev")).toBe("koom kaum kev");
+        expect(normalizeHmong("km")).toBe("km"); // no figure — deliberately untouched here
+        expect(normalizeHmong("kev km")).toBe("kev km");
+        expect(say("koom")).toBe("kɒ̃˩̰"); // still one syllable, not `k` + a claimed unit
     });
 
     // ⚠ ×0 IN THE CORPUS — robustness for plausible input, not a measured repair (trap 22's discipline).
