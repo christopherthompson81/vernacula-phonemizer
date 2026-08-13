@@ -69,6 +69,75 @@ function langDir(code: string): string | undefined {
 
 const read = (f: string): string => { try { return readFileSync(f, "utf8"); } catch { return ""; } };
 
+/**
+ * COMMENTS OUT, CODE IN — and it had to become a SCANNER, for the third time in this file and for the same
+ * reason each time.
+ *
+ * ⚠ THE TWO-REGEX VERSION DELETED LIVE CODE, and Italian is how it was found: writing the unit-word class,
+ * `it` reported "the layer declares NO unit word" over a layer that declares nineteen of them, three lines
+ * below the point where its source stops. Italian's currency note ends by naming two magnitude words in
+ * emphasis, separated by a slash — an asterisk, a slash, an asterisk — which is a comment CLOSE and a comment
+ * OPEN overlapping in three characters. Stripping block comments first, with no notion of a line comment,
+ * therefore opened a comment inside a `//` line and ran it to the next close in the file, swallowing
+ * `magnitudes`, `units`, `exponentWords` and everything else the tier declares.
+ *
+ * That is not a units-class bug. `percent-word`, `currency-word` and `scale-names` were all reading a
+ * truncated Italian layer, and any language whose prose puts an emphasis marker against a slash is exposed —
+ * which is one line of ordinary technical writing away in a repo whose comments quote forms in asterisks.
+ * ⚠ And this very comment reproduced it once: written with the offending sequence quoted literally, it closed
+ * itself early and broke the parse. The sequence is spelled out in words above for that reason.
+ *
+ * A line comment therefore has to be recognised BEFORE a block comment can open inside it, and strings and
+ * regex literals have to be stepped over rather than pattern-matched. The regex-vs-division heuristic is the
+ * same one `literals()` uses. The `[^:]` guard the old expression carried for `https://` is gone with it: a
+ * URL lives inside a string, and the scanner does not read inside strings.
+ */
+export function strippedOfComments(t: string): string {
+    let out = "";
+    let prev = ""; // previous significant character, for the regex-vs-division decision
+    for (let i = 0; i < t.length; i++) {
+        const ch = t[i]!;
+        if (ch === "/" && t[i + 1] === "/") {
+            const nl = t.indexOf("\n", i);
+            i = nl === -1 ? t.length : nl - 1;
+            out += " ";
+            continue;
+        }
+        if (ch === "/" && t[i + 1] === "*") {
+            const end = t.indexOf("*/", i + 2);
+            i = end === -1 ? t.length : end + 1;
+            out += " ";
+            continue;
+        }
+        if (ch === '"' || ch === "'" || ch === "`") {
+            const end = skipString(t, i);
+            out += t.slice(i, end + 1);
+            i = end;
+            prev = ch;
+            continue;
+        }
+        if (ch === "/" && (prev === "" || "(,=:[!&|?{};+-*%~^<>".includes(prev))) { // a REGEX literal
+            let j = i + 1;
+            let cls = false;
+            for (; j < t.length; j++) {
+                const d = t[j]!;
+                if (d === "\\") { j++; continue; }
+                if (d === "[") cls = true;
+                else if (d === "]") cls = false;
+                else if (d === "/" && !cls) break;
+                else if (d === "\n") { j = i; break; } // not a regex after all
+            }
+            out += t.slice(i, j + 1);
+            i = j;
+            prev = "/";
+            continue;
+        }
+        out += ch;
+        if (!/\s/u.test(ch)) prev = ch;
+    }
+    return out;
+}
+
 export interface Ctx {
     code: string;
     dir: string | undefined;
@@ -110,8 +179,7 @@ export function context(code: string): Ctx {
     // Fahrenheit` — from its own source, where the only occurrences are the COMMENT recording that neither is
     // sourceable, part of it written during that PR's review. A file documenting an absence was being read as
     // evidence of presence, which is as close to a self-refuting measurement as this tool could produce.
-    const stripComments = (t: string): string =>
-        t.replace(/\/\*[\s\S]*?\*\//gu, " ").replace(/(^|[^:])\/\/[^\n]*/gu, "$1 ");
+    const stripComments = strippedOfComments;
     let langSrc = "";
     if (dir !== undefined && existsSync(join("src/languages", dir)))
         for (const f of readdirSync(join("src/languages", dir)))
@@ -615,6 +683,472 @@ export function scaleNames(c: Ctx): Row {
     return row("none", `° occurs, neither scale name in corpus/referee/espeak, and the layer declares no scale arm${candidates}`);
 }
 
+/**
+ * UNIT WORDS — the class this file did not have, and whose absence is the NAMED ROOT CAUSE of a missing unit
+ * word surviving a review cycle.
+ *
+ * ⚠ `units` WAS EXCLUDED BY DESIGN, and the design was wrong. `review.ts`'s sourcing prompt excludes units for
+ * a good and measured reason — a unit borrowing (*kilomita*, *milimetre*) is absent from every source in ~30
+ * languages and is perfectly correct there, so failing on an unattested unit word would be noise. But that is
+ * an argument about ATTESTATION, and this file's question is the other one: *is there a word at all?* Igbo
+ * called the shared tier with NO `units` key for the whole life of its layer — `10 km` read *iɾi km* and
+ * `48 kg` read *iɾi anɔ na asatɔ kɡ*, the letters not merely left alone but pronounced as a cluster — and the
+ * mandated pre-flight said nothing, because the class did not exist. Eleven languages with a normalization
+ * layer were in that state. A silent class is how folklore replaces a lookup; that is this file's own header.
+ *
+ * ⚠ `units` IS TWO KEYS WITH ONE NAME, and a substring probe cannot tell them apart. `core/numbers.ts`
+ * declares `units: string[]` for the DIGIT SPELLINGS 0–9, and every manifest carries
+ * `"numbers": { "units": ["аноль", "акы", …] }`. A search for `units` over the layer source therefore finds a
+ * unit table in every language in the fleet — the Oromo shape (a file documenting an absence read as evidence
+ * of presence) arrived at through a homonym. So the reader below is SCOPED: the brace-matched argument object
+ * of a `makeSymbolNormalizer({…})` call, and nothing else.
+ *
+ * THE BOUNDARY, following the `scale-names` rebuild.
+ *  1. TEXT EVIDENCE is corpus + referee + espeak (+ the `attest.ts` cache's ATTESTED example prose, the same
+ *     tier `review.ts` admits and under the same restriction — an `absent` finding records the word it probed,
+ *     so reading the cache wholesale would attest every word it was ever asked about). The layer source is
+ *     NEVER text evidence: a declaration cannot be its own attestation.
+ *  2. CODE EVIDENCE is the DECLARATION, read scoped, with ONE level of indirection resolved — a named
+ *     `const UNIT = { km: "kilomita" }` (ig, rw, rn) and a manifest pair array
+ *     `"units": [["км", "километра"]]` (ab). Without that resolution four languages that demonstrably HAVE
+ *     unit words all read `[??]`, starting with the one that motivated the class.
+ *  3. A DECLARATION WHOSE WORDS CANNOT BE READ IS `[??]`, never `none` and never `ok`.
+ *  4. `none` MEANS "THE LAYER IS WRITTEN AND DECLARES NO UNIT WORD" — a statement about code this tool can
+ *     read, the counterpart of the identical-arms rule in `scale-names`. A language with NO layer yet reports
+ *     `check`, not `none`: nothing is blocked there, nobody has looked.
+ *
+ * ⚠ WHAT IS DELIBERATELY NOT CHECKED: the BARE-TOKEN path (`makeBareUnitNormalizer`, the seam that reads a
+ * unit standing in a table header rather than after a number), which ~50 languages lacked while having the
+ * word. That is a WIRING question, not a vocabulary one — the word is already sourced — and this file reports
+ * on sources. It is the leak gates' business, and answering it here would let a `[ ok ]` mean two things.
+ */
+const UNIT_ABBREVIATIONS = [
+    // SI/metric and digital, in the two scripts that write them. ⚠ `s` and `h` are OUT, for the reason the
+    // symbol tier itself gives for keeping one-letter denominators out of its standalone alternation: `1990s`
+    // is a decade, not four seconds (en s×4, tl s×6, crh s×25). `in` is out because it is the preposition in
+    // every Latin-script language that has one (nci in×15, la in×13). And the IMPERIAL set (ft mi lb oz) is
+    // out because the Igbo audit established what it is: a parenthetical gloss of a metric figure the sentence
+    // already gave (*"kilomita 115 (71 mi)"*), which a layer is right to leave unread.
+    "km/h", "km/s", "km", "kg", "cm", "mm", "ml", "mg", "kb", "mb", "gb", "tb", "kw", "mw", "gw",
+    "khz", "mhz", "ghz", "hz", "ha", "m", "g", "l", "t",
+    "км/ч", "км", "кг", "см", "мм", "мл", "мг", "га", "м", "г", "л", "т",
+] as const;
+/** The multi-letter keys only — safe to look for inside a REGEX PATTERN, where a one-letter key matches the
+ *  inside of `\p{M}` and every other construct that happens to contain that letter. */
+const UNIT_MULTI = UNIT_ABBREVIATIONS.filter((u) => u.length > 1);
+
+/** Unit abbreviations the corpus writes after a number, most frequent first — the evidence that the class
+ *  applies at all. ⚠ `\p{Nd}`, never `\d`: a corpus that writes its numbers in its own digits is still a
+ *  corpus (the same false absence the scale probe had). */
+function unitsAfterNumber(corpus: string): string[] {
+    const esc = (u: string): string => u.replace(/\//gu, "\\/");
+    const num = "(?<![\\p{L}\\p{M}])\\p{Nd}[\\p{Nd}.,\u00a0\u066b ]*";
+    const tail = "(?![\\p{L}\\p{M}\\p{Nd}])";
+    // ⚠ A ONE-LETTER KEY MUST BE SPACED FROM ITS NUMBER, and a Syloti false positive is why. `syl` reported
+    // `NONE — the layer declares no unit word` against a layer whose header records the opposite as a MEASURED
+    // refusal (`units` and `rate` are both ×0 in its artifact). Its two "unit" hits were `(Γ00l)` and `l99l` —
+    // a Latin ⟨l⟩ standing in for the DIGIT ONE in a transliterated Syloti date. Glued to digits, a one-letter
+    // key is a numeral lookalike, a decade plural or a version suffix far more often than it is a unit;
+    // spaced, it is `5 m`, `20 g`, `1,2 t`, which is how a corpus that means the unit writes it.
+    const res = [
+        new RegExp(`${num}\\s?(${UNIT_MULTI.map(esc).join("|")})${tail}`, "giu"),
+        new RegExp(`${num}[ \u00a0\u202f](${UNIT_ABBREVIATIONS.filter((u) => u.length === 1).join("|")})${tail}`, "giu"),
+    ];
+    const seen = new Map<string, number>();
+    for (const re of res)
+        for (const m of corpus.matchAll(re)) {
+            const k = m[1]!.toLowerCase();
+            seen.set(k, (seen.get(k) ?? 0) + 1);
+        }
+    return [...seen].sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, n]) => `${k}×${n}`);
+}
+
+const CLOSER: Readonly<Record<string, string>> = { "{": "}", "[": "]", "(": ")" };
+
+/** From just past a quote, the index OF its closing quote. Escapes are honoured; a template's `${}` needs no
+ *  special case, since its braces are balanced and are skipped as part of the string either way. */
+function skipString(src: string, at: number): number {
+    const q = src[at]!;
+    for (let i = at + 1; i < src.length; i++) {
+        if (src[i] === "\\") i++;
+        else if (src[i] === q) return i;
+    }
+    return src.length;
+}
+
+/** Walk from `from`, skipping strings and BALANCED brackets, to the first character in `stop` that is at this
+ *  level — or to `end` when there is none. This is what makes the reader scoped rather than substring-based.
+ *  ⚠ A REGEX LITERAL IS NOT STEPPED OVER, deliberately: this only ever walks a tier CONFIG object, which is
+ *  data, and every one in the fleet is arrays and strings. A layer that put `/[/u` in one would need the same
+ *  regex-vs-division heuristic `literals()` carries, and would announce itself as a wrong verdict, not a
+ *  silent one — the value would fail to parse as an object and read `[??]`. */
+function scanTop(src: string, from: number, stop: string, end = src.length): number {
+    for (let i = from; i < end; i++) {
+        const ch = src[i]!;
+        if (ch === '"' || ch === "'" || ch === "`") { i = skipString(src, i); continue; }
+        if (CLOSER[ch] !== undefined) { i = scanTop(src, i + 1, CLOSER[ch]!, end); continue; }
+        if (stop.includes(ch)) return i;
+    }
+    return end;
+}
+
+/** The argument object of every `makeSymbolNormalizer({…})` call in the layer, brace-matched. Every call site
+ *  in the fleet is written this way, so this is exact rather than a heuristic. */
+function tierObjects(src: string): string[] {
+    const out: string[] = [];
+    for (const m of src.matchAll(/makeSymbolNormalizer\s*\(\s*\{/gu)) {
+        const from = m.index! + m[0].length;
+        out.push(src.slice(from, scanTop(src, from, "}")));
+    }
+    return out;
+}
+
+/** A TOP-LEVEL property's value text. Top-level is the point: `rateDenominators: { … }` and a nested
+ *  `numbers: { units: … }` must not answer for the tier's own `units`. */
+function property(obj: string, key: string): string | undefined {
+    for (const m of obj.matchAll(new RegExp(`(?<![\\w$.])["']?${key}["']?\\s*:`, "gu"))) {
+        if (depthAt(obj, m.index!) !== 0) continue; // a nested `numbers: { units: … }` is a DIFFERENT key
+        const from = m.index! + m[0].length;
+        return obj.slice(from, scanTop(obj, from, ",")).trim();
+    }
+    return undefined;
+}
+
+/** Bracket depth at `at`, strings skipped. */
+function depthAt(src: string, at: number): number {
+    let depth = 0;
+    for (let i = 0; i < at; i++) {
+        const ch = src[i]!;
+        if (ch === '"' || ch === "'" || ch === "`") { i = skipString(src, i); continue; }
+        if (CLOSER[ch] !== undefined) depth++;
+        else if (ch === "}" || ch === "]" || ch === ")") depth--;
+    }
+    return depth;
+}
+
+export interface UnitDecl { words: string[]; where: string; unreadable: boolean }
+
+/**
+ * THE CITATION FORM OF EACH ENTRY — the FIRST count form, and not the rest.
+ *
+ * ⚠ MEASURED, AND THE FIRST VERSION WAS NOISE. Reading every literal in the table demanded attestation of
+ * every inflected form a layer declares: ru declares three case forms per unit and fr, es and pt each declare
+ * a plural, so 58 of 108 languages came back "some declared unit word is unattested" — a line that says
+ * something about almost everyone says nothing about anyone, which is the failure the `scale-names` header
+ * calls teaching the reader to skim.
+ *
+ * The first form is the right one on the tier's OWN terms: it emits exactly this form for a bare unit,
+ * "because a bare symbol is a citation, not a count". Whether *kilometrov* is the right genitive plural of an
+ * attested *kilometr* is a morphology question; whether the language has a word for the kilometre at all is
+ * this one.
+ */
+function entryHeads(objBody: string): string[] {
+    const out: string[] = [];
+    let i = 0;
+    while (i < objBody.length) {
+        const colon = scanTop(objBody, i, ":");
+        if (colon >= objBody.length) break;
+        const end = scanTop(objBody, colon + 1, ",");
+        const first = literals(objBody.slice(colon + 1, end)).find((w) => /\p{L}/u.test(w));
+        if (first !== undefined) out.push(first);
+        i = end + 1;
+    }
+    return out;
+}
+
+/** An ARRAY of pairs — `[["km", "километра"], …]` and `[[/km/giu, "ကီလိုမီတာ"], …]`, the two shapes a layer
+ *  that owns its rule writes. The word is the SECOND literal where there are two (the first is the
+ *  abbreviation) and the first where there is one (the abbreviation was a regex, which is not a literal). */
+function pairTails(body: string): string[] {
+    const out: string[] = [];
+    let i = 0;
+    while (i < body.length) {
+        const open = body.indexOf("[", i);
+        if (open === -1) break;
+        const end = scanTop(body, open + 1, "]");
+        const lits = literals(body.slice(open + 1, end)).filter((w) => /\p{L}{2}/u.test(w));
+        if (lits.length > 0) out.push(lits.length > 1 ? lits[1]! : lits[0]!);
+        i = end + 1;
+    }
+    return out;
+}
+
+/**
+ * The unit words the layer declares, or `unreadable` when a unit path plainly exists and its words do not.
+ * `undefined` is the third state and the loud one: no unit path at all.
+ */
+/**
+ * Is this candidate a WORD, or the thing the word was supposed to replace?
+ *
+ * ⚠ TWO SHAPES GOT THROUGH AND BOTH WOULD HAVE READ AS `ok`. A `.replace` arm that rewrites `km²` to `km²`
+ * (hmn, before it sourced its noun) yields the ABBREVIATION as its own "word" — a green line for a language
+ * whose unit was still reaching the sink raw. And a G2P entry yields IPA, not vocabulary: `mˡ`, `k͡χʰ`, `ᵐb`.
+ * A modifier letter is the tell for the second and an exact abbreviation match for the first.
+ */
+function wordLike(w: string): boolean {
+    if (!/\p{L}{2}/u.test(w)) return false;
+    if (/\p{Lm}/u.test(w)) return false;
+    const bare = w.trim().toLowerCase().replace(/[²³23]$/u, "");
+    return !(UNIT_ABBREVIATIONS as readonly string[]).includes(bare);
+}
+
+export function unitDeclaration(langSrc: string): UnitDecl | undefined {
+    const d = readUnitDeclaration(langSrc);
+    if (d === undefined) return undefined;
+    const words = d.words.filter(wordLike);
+    // A declaration whose every "word" was an abbreviation or an IPA string is not a declaration this tool
+    // could read — `[??]`, never an absence and never an `ok`.
+    return { ...d, words, unreadable: d.unreadable || (d.words.length > 0 && words.length === 0) };
+}
+
+function readUnitDeclaration(langSrc: string): UnitDecl | undefined {
+    for (const tier of tierObjects(langSrc)) {
+        const value = property(tier, "units");
+        if (value === undefined) continue;
+        if (value.startsWith("{")) {
+            // The words are the VALUES — `{ "គម": ["គីឡូម៉ែត្រ"] }` declares the Khmer word, not the Khmer
+            // abbreviation — which is what reading entries rather than literals gets right for free.
+            const words = entryHeads(value.slice(1, scanTop(value, 1, "}")));
+            return { words, where: "the symbol tier", unreadable: words.length === 0 };
+        }
+        // ONE LEVEL OF INDIRECTION, and no more. `Object.fromEntries(Object.entries(UNIT).map(…))` over a local
+        // table (ig, rw, rn) and `MANIFEST.symbols.units.map(([sym, word]) => …)` over a manifest pair array
+        // (ab) are the two shapes the fleet writes; both are the layer's own text, one identifier away.
+        const named = [...value.matchAll(/(?<![\w$.])([A-Z][A-Z0-9_]*)(?![\w$])/gu)].map((m) => m[1]!);
+        for (const id of named) {
+            if (id === "MANIFEST") continue;
+            // ⚠ THE TYPE ANNOTATION AND THE ARRAY FORM BOTH HAD TO BE ALLOWED FOR, and neither is exotic:
+            // rw and rn write `const UNIT: Readonly<Record<string, string>> = {`, and pl's tier table is
+            // `const UNITS: [string, string][] = [`. Matching only `const X = {` left three layers that
+            // plainly declare unit words reading `[??]`.
+            const at = new RegExp(`(?:const|let|var)\\s+${id}\\b[^=\\n]*=\\s*([{[])`, "u").exec(langSrc);
+            if (at === null) continue;
+            const from = at.index + at[0].length;
+            const body = langSrc.slice(from, scanTop(langSrc, from, at[1] === "{" ? "}" : "]"));
+            const words = at[1] === "{" ? entryHeads(body) : pairTails(body);
+            if (words.length > 0) return { words, where: `the local \`${id}\` table`, unreadable: false };
+        }
+        if (/\.units\b/u.test(value)) {
+            const words = manifestUnitWords(langSrc);
+            if (words.length > 0) return { words, where: "the manifest's symbol units", unreadable: false };
+        }
+        return { words: [], where: "the symbol tier", unreadable: true };
+    }
+    // NO TIER `units` KEY — which is not yet an absence, because a layer may resolve its units LOCALLY, and
+    // fourteen do. Japanese states the reason: it owns the rule so its own decimal rewrite and the exponent
+    // stay adjacent to the number the tier matches on. Same reasoning that made percent/currency read the
+    // emission as well as the declaration, and the same measured consequence — reading only the declaration
+    // reported five false NONEs there, and ten here.
+    const table = localUnitTable(langSrc);
+    if (table.length > 0) return { words: table, where: "a unit table the layer owns", unreadable: false };
+    return localUnitRule(langSrc);
+}
+
+/** The manifest's SYMBOL units — `[["км", "километра"], …]` or `{ "км": ["километра"] }`. ⚠ NOT the NUMBER
+ *  units, which are a flat array of digit spellings under the same key name; a flat array is rejected here,
+ *  and that rejection is the whole reason this reads structure rather than a name. */
+function manifestUnitWords(langSrc: string): string[] {
+    const out: string[] = [];
+    for (const m of langSrc.matchAll(/"units"\s*:\s*[[{]/gu)) {
+        const open = langSrc[m.index! + m[0].length - 1]!;
+        const from = m.index! + m[0].length;
+        const body = langSrc.slice(from, scanTop(langSrc, from, CLOSER[open]!));
+        if (open === "[") {
+            for (const p of body.matchAll(/\[\s*(["'])(?:\\.|(?!\1)[^\\])*\1\s*,\s*(["'])((?:\\.|(?!\2)[^\\])*)\2/gu))
+                out.push(p[3]!);
+        } else {
+            out.push(...entryHeads(body));
+        }
+    }
+    return out;
+}
+
+/**
+ * A UNIT TABLE THE LAYER OWNS RATHER THAN DECLARING TO THE TIER — an abbreviation PAIRED with a word, in any
+ * of the four shapes the fleet writes it:
+ *
+ *     km: "کیلۆمەتر"                  ckb, ja — an object keyed on the abbreviation
+ *     km: ["kilometer", "kilometers"]  en — the same with count forms
+ *     ["km", "километра"]              bg, ug — an array of pairs
+ *     [/km/giu, "ကီလိုမီတာ"]            my — pairs whose key is a regex
+ *
+ * ⚠ THIS IS NOT OPTIONAL DECORATION, AND THE FIRST FLEET RUN PROVES IT. Reading only the tier declaration and
+ * `.replace` arms reported `NONE — the layer declares no unit word` for TEN languages, and reading them found
+ * that en, bg, ckb, my, he, ko, ug, ps and za all own a local table: bg's `["km", "километра"]`, my's
+ * `[/km/giu, "ကီလိုမီတာ"]`, za's `goengleix` (the commonest noun in its corpus, ×162). That is a false NONE
+ * rate of 9 in 10 — the same accusation-by-silence the percent/currency check made on ITS first run, in a
+ * class where the accusation is "you left every measurement unread".
+ *
+ * ⚠ MULTI-LETTER KEYS ONLY. A one-letter key matches the inside of `\p{M}`, of `\s*` and of half the
+ * constructs a layer writes; this is source text, not prose.
+ */
+function localUnitTable(langSrc: string): string[] {
+    // ⚠ THE KEY SET IS NARROWER HERE THAN IN THE CORPUS PROBE, AND MEASURING IS WHY. Unscoped, this scan reads
+    // a G2P GRAPHEME TABLE as a unit table: `mb: "ᵐb"` in Guaraní, `kw`/`ng` in every Bantu digraph map,
+    // `kh: "k͡χʰ"` in Tswana — the computing keys (kb mb gb tb kw mw gw hz) are all ordinary digraphs, and a
+    // phoneme map pairs them with a string exactly the way a unit table pairs a word. It reported `[ ok ]
+    // unit-word … all attested: ᵐb` for four languages that have no normalization layer at all.
+    //
+    // So: the METRIC core only, in both scripts that write it, and TWO DISTINCT KEYS required — one pairing is
+    // a coincidence, `km` beside `cm` is a table. Every local table in the fleet clears that bar.
+    // ⚠ `ml` IS NOT IN THIS SET, and Hmong is why: RPA writes ⟨ml⟩ as a digraph, its G2P maps `ml: "mˡ"`, and
+    // with `ml` admitted that pairing was the second key that turned a phoneme map into a "unit table" —
+    // reporting the IPA cluster *mˡ* as a declared Hmong unit word. Same family of error as the Guaraní `mb`
+    // above, one key further in, and the reason the set here is only what no orthography writes as a digraph.
+    const KEYS = ["km/h", "km", "kg", "cm", "mm", "км/ч", "км", "кг", "см", "мм"];
+    const re = new RegExp(
+        `(?<![\\p{L}\\p{M}])["'\`/]?(${KEYS.map((k) => k.replace(/\//gu, "\\/")).join("|")})(?:[²³]|\\^?[23])?["'\`]?(?:\\/[a-z]*)?\\s*[,:]\\s*\\[?\\s*(["'\`])((?:\\\\.|(?!\\2)[^\\\\])*)\\2`,
+        "giu",
+    );
+    const out: string[] = [];
+    const keys = new Set<string>();
+    for (const m of langSrc.matchAll(re)) {
+        if (!/\p{L}{2}/u.test(m[3]!)) continue;
+        keys.add(m[1]!.toLowerCase());
+        out.push(m[3]!);
+    }
+    return keys.size >= 2 ? out : [];
+}
+
+/**
+ * A unit rule written LOCALLY rather than declared: a `.replace()` whose PATTERN carries a number and a unit
+ * abbreviation, with the word read as the RESIDUE of its replacement — the same arms reading `scale-names`
+ * uses, and the same refusal at the end of it (a computed replacement is unreadable, never an absence).
+ *
+ * ⚠ MULTI-LETTER KEYS ONLY, for the reason `localUnitTable` gives.
+ */
+function localUnitRule(langSrc: string): UnitDecl | undefined {
+    const alt = UNIT_MULTI.map((u) => u.replace(/\//gu, "\\/?")).join("|");
+    const key = new RegExp(`(?<![\\p{L}\\p{M}])(?:${alt})(?![\\p{L}\\p{M}])`, "iu");
+    const words: string[] = [];
+    let unreadable = false;
+    for (const m of langSrc.matchAll(/\.replace\(\s*(?:\/((?:\\.|\[[^\]]*\]|[^/\n])+)\/[a-z]*|new RegExp\((?:[^()]|\([^()]*\))*\))\s*,\s*([\s\S]{0,120}?)\)/gu)) {
+        const pat = m[1] ?? /new RegExp\(\s*(["'`])((?:\\.|(?!\1)[^\\])*)\1/u.exec(m[0])?.[2];
+        if (pat === undefined) continue;
+        // ⚠ NO SEPARATE "AND A DIGIT" TEST. It was there to keep an unrelated `.replace` out, and it threw
+        // away the Hebrew unit arm instead: he builds its pattern as a template
+        // (`(?<![\p{L}\p{M}0-9.])(${NUM})\s?km³…`), where the number is an interpolated const and the only
+        // literal digits are `0-9` inside a lookbehind CLASS. The metric key as a whole token is specific
+        // enough on its own — and a rule that rewrites `km` at all is a unit reading whether or not this tool
+        // can see the number beside it.
+        if (!key.test(pat)) continue;
+        const text = replacementText(m[2]!)?.trim();
+        if (text === undefined || !/\p{L}/u.test(text)) unreadable = true;
+        else words.push(text);
+    }
+    if (words.length > 0) return { words, where: "a local `.replace` rule", unreadable: false };
+    if (unreadable) return { words: [], where: "a local `.replace` rule", unreadable: true };
+    // THE BARE-UNIT CALL'S OWN ARGUMENT, when it is written out. `makeBareUnitNormalizer([["km", "kilometr"]])`
+    // is a declaration in every sense — and mos, which sourced `kilometr` at ×31 across 20 articles and wrote
+    // the audit into its header, read `[??]` until this was here. One key, so the two-key guard that keeps
+    // G2P digraph tables out cannot apply; inside this call there is nothing else the argument could be.
+    const bare = /makeBareUnitNormalizer\s*\(\s*\[/u.exec(langSrc);
+    if (bare !== null) {
+        const from = bare.index + bare[0].length;
+        const words = pairTails(langSrc.slice(from, scanTop(langSrc, from, "]")));
+        return words.length > 0
+            ? { words, where: "the bare-unit call", unreadable: false }
+            : { words: [], where: "a bare-unit call", unreadable: true };
+    }
+    // A UNIT PATH WITH NO TABLE THIS TOOL CAN SEE must not read as an absence. The words are elsewhere; that
+    // is `[??]`, which is the honest answer.
+    return /makeBareUnitNormalizer\s*\(/u.test(langSrc)
+        ? { words: [], where: "a bare-unit call", unreadable: true }
+        : undefined;
+}
+
+/** SCRIPTS WITH NO WORD SEPARATOR, where a token test has nothing to tokenise and substring is the only test
+ *  available — the same accommodation `review.ts`'s attestation haystack makes, for the same reason. */
+const UNSPACED = /[\p{sc=Han}\p{sc=Hira}\p{sc=Kana}\p{sc=Khmr}\p{sc=Thai}\p{sc=Laoo}\p{sc=Mymr}\p{sc=Tibt}]/u;
+
+/** Is this word attested in the TEXT evidence? Token-wise, because `hay.includes("tere")` is satisfied by any
+ *  longer word containing those four letters — the substring test that passed the Fula word this whole
+ *  discipline exists to catch. A multi-word reading (`kilómetro por hora`) counts when every token of it does. */
+function attestedIn(word: string, hay: string, tokens: ReadonlySet<string>): boolean {
+    if (UNSPACED.test(word)) return hay.includes(word);
+    const parts = word.toLowerCase().split(/[^\p{L}\p{M}'’ʻ·-]+/u).filter((t) => t !== "");
+    return parts.length > 0 && parts.every((t) => tokens.has(t));
+}
+
+/** The `attest.ts` cache, ATTESTED findings only and only their example PROSE. ⚠ Never the file: the cache
+ *  records the word it probed even when the verdict is `absent`, so reading it wholesale would attest every
+ *  word it was ever asked about — a self-fulfilling haystack, worse than no haystack. */
+function attestProse(code: string): string {
+    const f = new URL(`../corpus/attest/${code}.jsonc`, import.meta.url).pathname;
+    if (!existsSync(f)) return "";
+    let hay = "";
+    for (const block of read(f).split(/\}\s*,?\s*(?=\{)/u))
+        if (/"verdict":\s*"attested"/u.test(block))
+            for (const ex of block.matchAll(/"…([^"\\]*)…"/gu)) hay += ` ${ex[1]!} `;
+    return hay;
+}
+
+export function unitWords(c: Ctx): Row {
+    // ⚠ THE CLASS NAME IS A LITERAL FIELD — see the identical note in `scaleNames`. `normalization-sources.ts`
+    // greps this file for `klass: "…"`, and hoisting the name would hide the row from that reconciliation.
+    const row = (verdict: Verdict, detail: string): Row => ({ klass: "unit-word", verdict, detail });
+    const inCorpus = unitsAfterNumber(c.corpus);
+    const decl = unitDeclaration(c.langSrc);
+    // ⚠ "HAS A LAYER" IS THREE QUESTIONS, and asking only the first got ug and ps wrong: both have a
+    // `normalize.ts` and neither calls the shared tier (they export `make<Lang>Normalizer` and own every
+    // rule), so a tier-call test reported "no normalization layer yet" about 250 KB of written layer.
+    const hasLayer = /makeSymbolNormalizer\s*\(/u.test(c.langSrc)
+        || /export function make\w*Normalizer/u.test(c.langSrc)
+        || (c.dir !== undefined && existsSync(join("src/languages", c.dir, "normalize.ts")));
+    if (decl === undefined) {
+        // ⚠ THE TWO ABSENCES ARE NOT THE SAME ABSENCE, and collapsing them would bury the eleven languages
+        // this class exists for under the forty nobody has started. A WRITTEN layer that declares no unit word
+        // is a fact about code this tool can read — every abbreviation reaches the phoneme sink — and it is
+        // the Igbo state exactly. An UNWRITTEN one is a class nobody has looked at yet: `check`, not blocked.
+        if (inCorpus.length === 0) return row("n/a", "no unit abbreviation after a number in the evidence, and none declared");
+        return hasLayer
+            ? row("none", `the layer declares NO unit word — every abbreviation reaches the phoneme sink verbatim `
+                + `(after a number in the corpus: ${inCorpus.join(" ")})`)
+            : row("check", `no normalization layer yet; the corpus writes ${inCorpus.join(" ")} after a number — `
+                + `source the unit words when writing it`);
+    }
+    if (decl.unreadable) {
+        return row("unknown", `${decl.where} declares units but the words are computed, not written — read ${c.dir ?? "?"}/`
+            + (inCorpus.length > 0 ? ` (after a number in the corpus: ${inCorpus.join(" ")})` : ""));
+    }
+    // TEXT EVIDENCE. ⚠ NOT `c.langSrc`: a declaration cannot be its own attestation, which is the door the
+    // Igbo `ntụkpọ` finding closed in `review.ts` — the word was extracted FROM the manifest and then
+    // "attested" by searching a haystack containing that manifest.
+    const hay = `${c.corpus}\n${c.referee}\n${c.espeak}\n${attestProse(c.code)}`.toLowerCase();
+    const tokens = new Set(hay.split(/[^\p{L}\p{M}'’ʻ·-]+/u).filter((t) => t !== ""));
+    const words = [...new Set(decl.words)];
+    // ⚠ NO HAYSTACK IS NOT AN ABSENCE — rule 4 of the `scale-names` rebuild, one class further out. A language
+    // with no FLEURS corpus, no mined artifact, no referee and no espeak dictionary has nothing that COULD
+    // attest a word, and reporting its declaration as unattested would be an assertion about evidence nobody
+    // has.
+    if (!/\p{L}/u.test(hay)) {
+        return row("unknown", `${words.length} unit word(s) declared in ${decl.where} (${words.slice(0, 6).join(" ")}) and this `
+            + `language has NO corpus, referee or espeak dictionary — nothing could attest them, which is an unread haystack`);
+    }
+    const missing = words.filter((w) => !attestedIn(w, hay, tokens));
+    const n = words.length - missing.length;
+    if (missing.length === 0) return row("have", `${n} unit word(s) in ${decl.where}, all attested: ${words.slice(0, 6).join(" ")}`);
+    /**
+     * ⚠ AN UNATTESTED UNIT WORD IS A PROMPT, NEVER A DEFECT VERDICT, AND THAT BOUNDARY IS MEASURED TWICE.
+     *
+     * `review.ts` excludes units from its sourcing gate for a reason it states: a unit borrowing (*kilomita*,
+     * *millimetre*) is absent from every source in ~30 of the 66 languages it checked and is perfectly correct
+     * there. This class's own first fleet run reproduces that at full scale — with the evidence tiers actually
+     * present, 79 of 108 layers have at least one declared unit word that nothing attests, INCLUDING de, whose
+     * `Kilometer` appears in its referee only inside the compound *Kilometerzähler*. A line that is amber for
+     * three quarters of the fleet teaches the reader to skim it, which is how the ten `NONE`s below it would
+     * be lost — the precise failure the `scale-names` header describes.
+     *
+     * So: `partial` for any shortfall, with the ratio and the names in the detail, and the reader told what
+     * the shortfall does and does not mean. What it may NOT do is read `ok`: the layer's own text is not a
+     * source (rule 1), and an `ok` assembled from a declaration is what would have waved the invented Lao
+     * currency word through.
+     */
+    return row("partial", `${n}/${words.length} declared unit word(s) attested in corpus/referee/espeak/attest`
+        + `${c.corpus === "" ? " (no corpus for this language)" : ""}; UNATTESTED: ${missing.slice(0, 8).join(" ")}`
+        + ` — a unit borrowing is legitimately absent from every source in ~30 languages, so this is a prompt to READ them, not a defect`);
+}
+
 /** PERCENT and CURRENCY, the two the review gate already checks — reported here so one command answers the
  *  whole planning question rather than two. */
 function tierWords(c: Ctx): Row[] {
@@ -760,7 +1294,7 @@ function fractionSeries(c: Ctx): Row {
 
 function rowsFor(code: string): { ctx: Ctx; rows: Row[] } {
     const c = context(code);
-    return { ctx: c, rows: [letterNames(c), decimalWord(c), eraPhrase(c), scaleNames(c), ...tierWords(c), fractionSeries(c), ...signWords(c)] };
+    return { ctx: c, rows: [letterNames(c), decimalWord(c), eraPhrase(c), scaleNames(c), ...tierWords(c), unitWords(c), fractionSeries(c), ...signWords(c)] };
 }
 
 const MARK: Record<Verdict, string> = { have: " ok ", partial: "part", none: "NONE", check: "chk?", unknown: " ?? ", "n/a": "  · " };
@@ -775,7 +1309,7 @@ const IS_CLI = process.argv[1] !== undefined && import.meta.url === pathToFileUR
 function main(): void {
     if (has("all")) {
         const codes = fleet();
-        const klasses = ["letter-names", "decimal-point", "era-phrase", "scale-names", "percent-word", "currency-word", "fraction-series"];
+        const klasses = ["letter-names", "decimal-point", "era-phrase", "scale-names", "percent-word", "currency-word", "unit-word", "fraction-series"];
         console.log(`\n── vocabulary sources across ${codes.length} registered languages ──\n`);
         console.log(`      ${klasses.map((k) => k.slice(0, 9).padEnd(10)).join("")}`);
         const blockedBy: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));

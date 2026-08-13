@@ -18,7 +18,9 @@
  */
 import { describe, expect, test } from "vitest";
 import { DROPPABLE } from "../tools/normalization/defects.ts";
-import { SOURCES_EXEMPT, context, scaleNames, type Ctx } from "../tools/normalization/sources.ts";
+import {
+    SOURCES_EXEMPT, context, scaleNames, strippedOfComments, unitDeclaration, unitWords, type Ctx,
+} from "../tools/normalization/sources.ts";
 import { readFileSync } from "node:fs";
 
 /** The class names `sources.ts` actually reports on, read from its own source rather than re-declared here. */
@@ -174,5 +176,184 @@ describe("scale-names on the real fleet", () => {
         // om and mg are SETTLED REFUSALS this file's own header cites — they must not become noise.
         for (const code of ["om", "mg"])
             expect(scaleNames(context(code)).verdict, `${code} lost a settled refusal`).toBe("none");
+    });
+});
+
+/**
+ * THE UNIT-WORD CLASS, PINNED IN BOTH DIRECTIONS — for the same reason `scale-names` is, and with the same
+ * asymmetry: an honest `[??]` costs a look, a false `ok` costs the catch.
+ *
+ * ⚠ THIS CLASS EXISTS BECAUSE ITS ABSENCE WAS THE ROOT CAUSE. `sources.ts` excluded `units` by design, so Igbo
+ * called the shared tier with no `units` key for the whole life of its layer — `48 kg` read as
+ * *iɾi anɔ na asatɔ kɡ*, the letters PRONOUNCED as a cluster — and the mandated pre-flight said nothing about
+ * it, because the class did not exist. The `none` cases below are that state; the `ok` cases are the ways a
+ * probe can be fooled into calling something a unit word when it is a numeral spelling, a G2P digraph, or the
+ * abbreviation itself.
+ */
+const UCTX = (over: Partial<Ctx>): Ctx =>
+    ({ code: "xx", dir: "xx", espeak: "", referee: "", langSrc: "", corpus: "48 kg and 10 km", ...over });
+
+describe("unit-word finds the missing word", () => {
+    test("THE IGBO STATE: a tier call with no `units` key at all is a NONE, not a silence", () => {
+        const r = unitWords(UCTX({ langSrc: 'const S = makeSymbolNormalizer({ percent: ["pasent"], currency: { "₦": ["naira"] } });' }));
+        expect(r.verdict, `a layer with no unit word must be loud: ${r.detail}`).toBe("none");
+        expect(r.detail).toContain("kg");
+    });
+
+    test("a language with NO layer is `check`, never `none` — nothing is blocked, nobody has looked", () => {
+        expect(unitWords(UCTX({ langSrc: "" })).verdict).toBe("check");
+    });
+
+    test("no unit abbreviation in the evidence and nothing declared is not a judgement", () => {
+        expect(unitWords(UCTX({ corpus: "no measurements here", langSrc: "" })).verdict).toBe("n/a");
+    });
+
+    test("a ONE-LETTER key glued to its digits is not a unit (the syl `l99l` shape)", () => {
+        // A Latin ⟨l⟩ standing in for the digit ONE in a transliterated date. Spaced, `2 l` would count.
+        const r = unitWords(UCTX({ corpus: "(Γ00l) l99l ৪৫৯", langSrc: "" }));
+        expect(r.verdict, `a numeral lookalike was read as a litre: ${r.detail}`).toBe("n/a");
+    });
+});
+
+describe("unit-word tells a declared word from a lookalike", () => {
+    test("FALSE GREEN: `units` is also the DIGIT SPELLINGS, and a nested one must not answer", () => {
+        // Every manifest in the fleet carries `numbers: { units: [...] }` for 0–9. A substring probe finds a
+        // unit table in every language there is.
+        const r = unitWords(UCTX({
+            langSrc: 'const N = { numbers: { units: ["otu", "abụọ", "atọ"] } };'
+                + 'const S = makeSymbolNormalizer({ percent: ["pasent"] });',
+        }));
+        expect(r.verdict, `the digit spellings were read as unit words: ${r.detail}`).toBe("none");
+    });
+
+    test("FALSE GREEN: a G2P digraph table is not a unit table", () => {
+        // The Guaraní shape (`mb: "ᵐb"`) and the Hmong one (`ml: "mˡ"`) — a phoneme map pairs a two-letter
+        // key with a string exactly the way a unit table pairs a word.
+        const r = unitWords(UCTX({
+            langSrc: 'const G = { mb: "ᵐb", nd: "ⁿd", ng: "ᵑɡ", ml: "mˡ", kw: "kʷ" };'
+                + 'const S = makeSymbolNormalizer({ percent: ["p"] });',
+        }));
+        expect(["have", "partial"], `a phoneme map was read as vocabulary: ${r.detail}`).not.toContain(r.verdict);
+    });
+
+    test("FALSE GREEN: an arm that emits the ABBREVIATION is not a word", () => {
+        const r = unitWords(UCTX({ langSrc: 's.replace(/(\\d)\\s?km²/gu, "$1 km²");' }));
+        expect(r.verdict, `the abbreviation was accepted as its own reading: ${r.detail}`).not.toBe("have");
+    });
+
+    test("FALSE GREEN: the layer's own source is not text evidence", () => {
+        // The word is declared and appears NOWHERE else. A declaration cannot be its own attestation — the
+        // door the Igbo `ntụkpọ` finding closed in review.ts, where the needle was extracted from the very
+        // manifest being searched.
+        const r = unitWords(UCTX({
+            corpus: "48 kg and 10 km", langSrc: 'makeSymbolNormalizer({ units: { km: ["zzqqxwood"], kg: ["zzqqxfood"] } });',
+        }));
+        expect(r.verdict).toBe("partial");
+        expect(r.detail).toContain("zzqqxwood");
+    });
+
+    test("attestation is TOKEN-wise: a compound containing the word does not attest it", () => {
+        // The German shape exactly — `Kilometer` occurs in its referee only inside `Kilometerzähler`. Same
+        // discipline as the Fula `tere`, which any longer word containing those four letters satisfied.
+        const decl = 'makeSymbolNormalizer({ units: { km: ["Kilometer"] } });';
+        expect(unitWords(UCTX({ langSrc: decl, referee: "kilometerzähler\tkiloˈmeːtɐˌt͡sɛːlɐ" })).verdict).toBe("partial");
+        expect(unitWords(UCTX({ langSrc: decl, referee: "zehn kilometer weit" })).verdict).toBe("have");
+    });
+});
+
+describe("unit-word refuses to answer rather than inventing an absence", () => {
+    test("a computed table with nothing to resolve is `[??]`, never `none`", () => {
+        const r = unitWords(UCTX({ langSrc: "makeSymbolNormalizer({ units: buildUnits(LOCALE, table) });" }));
+        expect(r.verdict).toBe("unknown");
+    });
+
+    test("ONE level of indirection IS resolved — the ig/rw/rn shape", () => {
+        const r = unitWords(UCTX({
+            corpus: "48 kg and 10 km kilomita kilogram",
+            langSrc: 'const UNIT = { km: "kilomita", kg: "kilogram" };'
+                + "makeSymbolNormalizer({ units: Object.fromEntries(Object.entries(UNIT).map(([k, w]) => [k, [w]])) });",
+        }));
+        expect(r.verdict, `the local table was not resolved: ${r.detail}`).toBe("have");
+        expect(r.detail).toContain("kilomita");
+    });
+
+    test("a declaration with NO haystack is an unread haystack, not an unattested word", () => {
+        const r = unitWords(UCTX({
+            corpus: "", referee: "", espeak: "", langSrc: 'makeSymbolNormalizer({ units: { km: ["kilometro"] } });',
+        }));
+        expect(r.verdict).toBe("unknown");
+        expect(r.detail).toContain("nothing could attest");
+    });
+
+    test("`none` stays reachable — softening every negative would cost the class its meaning", () => {
+        expect(unitWords(UCTX({ langSrc: "makeSymbolNormalizer({ percent: [\"p\"] });" })).verdict).toBe("none");
+    });
+});
+
+describe("unit-word on the real fleet", () => {
+    test("ig: the language that motivated the class reads its four words", () => {
+        const r = unitWords(context("ig"));
+        expect(r.verdict, `ig lost its unit words: ${r.detail}`).toBe("have");
+        expect(r.detail).toContain("kilomita");
+    });
+
+    test("as: a written layer with no unit word anywhere — the state ig was in", () => {
+        // Assamese writes `৩৫mm`, `২৪mm`, `৩৬mm` and reads none of them; there is no unit word in the layer.
+        expect(unitWords(context("as")).verdict).toBe("none");
+    });
+
+    test("SETTLED REFUSALS MUST NOT BECOME NOISE — za, mg and syl", () => {
+        // za and mg both source their unit nouns (za's `goengleix` is the commonest noun in its corpus); syl
+        // refuses the class on measured grounds (`units` and `rate` are ×0 in its artifact).
+        for (const code of ["za", "mg"]) expect(unitWords(context(code)).verdict, `${code} regressed`).toBe("have");
+        expect(unitWords(context("syl")).verdict, "syl's measured refusal became a defect").toBe("n/a");
+    });
+
+    test("a layer that owns its table locally is not an absence — bg, my, ko, en", () => {
+        for (const code of ["bg", "my", "ko", "en"])
+            expect(unitWords(context(code)).verdict, `${code} reads as having no unit word`).not.toBe("none");
+    });
+});
+
+/**
+ * ⚠ THE COMMENT STRIPPER HAD TO BECOME A SCANNER, and this pins the case that forced it: a line comment that
+ * ends with an emphasis marker against a slash contains a comment CLOSE and a comment OPEN overlapping. The
+ * two-regex version opened a block comment inside that line and ran it to the next close in the file, deleting
+ * the live code in between — which is how Italian, a layer declaring nineteen unit words, reported having none.
+ */
+describe("the comment stripper does not delete code", () => {
+    test("an emphasis marker against a slash inside a line comment", () => {
+        const src = "// a note about *milioni* and *miliardi*, written as *milioni*"
+            + "/" + "*miliardi*.\nconst KEPT = { units: { km: [\"chilometro\"] } };\n/** doc */\nconst AFTER = 1;";
+        const out = strippedOfComments(src);
+        expect(out, "the tier declaration was swallowed by a comment that never opened").toContain("chilometro");
+        expect(out).toContain("AFTER");
+        expect(out).not.toContain("miliardi");
+    });
+
+    test("a `//` inside a STRING is not a comment", () => {
+        expect(strippedOfComments('const u = "https://example.invalid/x"; const v = 1;')).toContain("example.invalid");
+    });
+
+    test("it: the layer whose source used to stop three lines above its unit table", () => {
+        const d = unitDeclaration(context("it").langSrc);
+        expect(d?.words ?? [], "italian's unit table is unreadable again").toContain("chilometro");
+    });
+});
+
+/**
+ * ⚠ WHY THERE IS NO `SOURCES_EXEMPT` ENTRY FOR UNITS, stated as a test so the next reader does not add one.
+ *
+ * The reconciliation runs ONE WAY: every `DROPPABLE` class needs a source row or a declared exemption. A unit
+ * is LETTERS, not a sign — `km` is not droppable typography, it is a token the reader must be given a word
+ * for — so `units` is not in `DROPPABLE`, needs no probe in `review.ts`, and must NOT be added to
+ * `SOURCES_EXEMPT`, whose own test asserts that every exemption names a real `DROPPABLE` class. A row with no
+ * sign behind it is exactly what the one-way direction leaves room for.
+ */
+describe("the units row fits the reconciliation without bending it", () => {
+    test("unit-word is reported, is not DROPPABLE, and is not exempt", () => {
+        expect(reported.has("unit-word")).toBe(true);
+        expect([...DROPPABLE].map(([k]) => k)).not.toContain("units");
+        expect(Object.keys(SOURCES_EXEMPT)).not.toContain("units");
     });
 });
