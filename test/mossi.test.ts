@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createMossi } from "../src/languages/mossi/mossi.ts";
 import { numberToWords } from "../src/languages/mossi/numbers.ts";
+import { normalizeMossi } from "../src/languages/mossi/normalize.ts";
 
 // Canonical-IPA goldens for Mossi / Mooré (mos) — Niger-Congo GUR (Oti-Volta), Latin (Burkinabé) orthography,
 // Hand-adjudicated against en.wiktionary Moore (Wiktionary). The greedy g2p
@@ -71,12 +72,90 @@ describe("Mooré canonical IPA — greedy g2p + gemination", () => {
         expect(numberToWords(555)).toBe("kobs a nu la pis nu la a nu");
         expect(numberToWords(1000)).toBe("tusri");
         expect(numberToWords(12345)).toBe("tus piig la a yi la kobs a tã la pis naase la a nu");
-        // No attested Mooré numeral above tusri → the digits are read out rather than inventing a "million".
-        expect(numberToWords(1_000_000)).toBe("yembre zaalem zaalem zaalem zaalem zaalem zaalem");
+    });
+
+    // ⚠ THIS GOLDEN CHANGED. It used to assert that 10⁶ read digit-by-digit ("yembre zaalem zaalem …"), on
+    // the stated ground that no Mooré numeral above tusri was attested in any source consulted. The
+    // mos.wikipedia dump, filtered to Mooré paragraphs, refutes that: `milyõ` ×219 and `milyaar` ×51 are
+    // ordinary running vocabulary, and the corpus supplies the syntax too — `milyõ a ye`, `milyõ a yopoe`,
+    // `milyaar a ye` below ten, `milyõ 37` and `milyaar 128` above it, which is the same particle-plus-SHORT
+    // stem compound as `tus a yi` and `kobs a nu`. Neither word alternates for number, so 1 million is
+    // `milyõ a ye` and not a bare singular. See src/languages/mossi/numbers.ts.
+    // Pinned per BRANCH rather than per corpus instance (playbook trap 13): the under-ten particle branch,
+    // the ten-and-above composed branch, the remainder join, and the boundary above which nothing is attested.
+    test("numbers: milyõ 10⁶ / milyaar 10⁹; ≥ 10¹² falls back to digit-by-digit", () => {
+        expect(numberToWords(1_000_000)).toBe("milyõ a ye"); // no bare singular — the particle is obligatory
+        expect(numberToWords(7_000_000)).toBe("milyõ a yopoe"); // corpus: `ligd milyõ a yopoe`
+        expect(numberToWords(37_000_000)).toBe("milyõ pis tã la a yopoe"); // ≥10 multiplier → composed figure
+        expect(numberToWords(1_000_000_000)).toBe("milyaar a ye");
+        expect(numberToWords(1_001_000_000)).toBe("milyaar a ye la milyõ a ye"); // both scales in one figure
+        expect(numberToWords(19_811_000)).toBe("milyõ piig la a wɛ la tus kobs a nii la piig la a ye");
+        // Nothing above milyaar is attested, so 10¹² still reads its digits rather than inventing a word.
+        expect(numberToWords(1e12)).toBe("yembre zaalem zaalem zaalem zaalem zaalem zaalem zaalem zaalem zaalem zaalem zaalem zaalem");
     });
 
     test("numbers: end-to-end through the g2p (text path)", () => {
         expect(createMossi().text("20")).toBe("pisi");
         expect(createMossi().text("1000")).toBe("tusɾi"); // ⟨r⟩ → the tap ɾ
+    });
+});
+
+// TEXT NORMALIZATION (src/languages/mossi/normalize.ts). ⚠ There is no FLEURS for Mooré, no kaikki and no
+// wikipron, and espeak does not ship the language, so the 39-word wiktionary referee is a TRIPWIRE for the
+// word path and can arbitrate none of this. The evidence is the mos.wikipedia dump — 12,650 paragraphs —
+// filtered to Mooré with `filter-by-language.py --lang mos`, because 11.6% of that wiki is English.
+// Full log: docs/investigations/mos_normalization_investigation.md.
+describe("Mooré text normalization — de-grouping and the two sourceable currency signs", () => {
+    const say = (s: string): string => createMossi().text(s);
+
+    // The pass asserted at its own layer as well as through the phonemizer: this is pure text→text, so the
+    // rewrite is readable on its own and a failure here localises to the rule rather than to the g2p.
+    test("normalizeMossi is a pure text→text rewrite", () => {
+        expect(normalizeMossi("vote 21,552 tɩ")).toBe("vote 21552 tɩ");
+        expect(normalizeMossi("koees 15.043")).toBe("koees 15043");
+        expect(normalizeMossi("doolaar 100 000")).toBe("doolaar 100000");
+        expect(normalizeMossi("€10,000 la $5")).toBe("Ero 10000 la doolaar 5");
+        expect(normalizeMossi("29.6 la 53,6")).toBe("29.6 la 53,6"); // decimals: untouched, no word to use
+        expect(normalizeMossi("£50,000")).toBe("£50000"); // de-grouped; the unsourceable sign left alone
+    });
+
+    // The layer's largest fix, and the only one needing no vocabulary at all: a grouping separator was
+    // being read as CLAUSE PUNCTUATION, dropping a pause into the middle of one figure. ~983 instances.
+    // The role is decided by the DIGIT COUNT after the mark — 3 is a group, 1–2 is a decimal — which is
+    // how the corpus itself uses both marks for both roles (comma groups ×698 / comma decimals ×365;
+    // period groups ×61 / period decimals ×1,050).
+    test("de-groups a comma-, period- and space-separated thousands figure", () => {
+        expect(say("vote 21,552")).toBe("vote tus pisi la a je la kobs a nu la pis nu la a ji");
+        expect(say("koees 15.043")).toBe("koeːs tus piːɡ la a nu la pis naːse la a tã");
+        expect(say("doolaar 100 000")).toBe("doːlaːɾ tus koabɡa");
+        // ⟨y⟩ → j and ⟨õ⟩ stays nasal, so the milyõ of numbers.ts surfaces as *miljõ* through the g2p.
+        expect(say("1,234,567")).toBe("miljõ a je la tus kobs a ji la pis tã la a naːse la kobs a nu la pis joːbe la a jopoe");
+    });
+
+    // ⚠ THE ADVERSARIAL NEIGHBOURS (trap 8): every one of these is a shape the rule must NOT claim, and each
+    // is attested in this corpus. 1–2 digits after the mark is the DECIMAL and keeps its current reading,
+    // because no decimal-point word is sourceable for Mooré (see normalize.ts's header).
+    test("leaves decimals, comma lists, DOIs and version dots exactly where they were", () => {
+        expect(say("29.6")).toBe("pisi la a wɛ . joːbe"); // period decimal — 1 digit, untouched
+        expect(say("53,6")).toBe("pis nu la a tã , joːbe"); // comma decimal — the French convention
+        expect(say("(1,5,13)")).toBe("jembɾe , nu , piːɡ la a tã"); // a LIST of small numbers, not a group
+        expect(say("802.11n")).toBe("kobs a niː la a ji . piːɡ la a je n"); // version dot — 2 digits
+    });
+
+    // Sentence periods must survive, which is the whole reason no abbreviation rule exists here: the
+    // artifact's `abbrev` cell (×6,148) is ordinary Mooré words before a full stop — `wã.` ×4,316,
+    // `ye.` ×2,660, `pʋgẽ.` ×1,962 — and claiming them would delete ~6,000 real pauses.
+    test("does not touch a sentence-final period", () => {
+        expect(say("Yʋʋm 2006 wã. Yaa sõma ye.")).toBe("jʊːm tus a ji la a joːbe wã . jaː sõma je .");
+    });
+
+    // The currency NOUN precedes the figure in Mooré, so the rule reorders — the shared tier can only
+    // postpose. `Ero` is glossed against its own sign in the corpus (`Ero wã milyo a naase(€4 million)`);
+    // `doolaar` is ×8 across 7 articles, always in this slot. ⚠ `£` is DECLINED and stays silent: it is the
+    // corpus's most frequent sign (×18) and no Mooré word for the pound is attested anywhere.
+    test("reads € and $ as preposed nouns, and leaves the unsourceable £ unread", () => {
+        expect(say("€10,000")).toBe("eɾo tus piːɡa");
+        expect(say("$5")).toBe("doːlaːɾ nu");
+        expect(say("£50,000")).toBe("tus pis nu"); // de-grouped, sign correctly still silent
     });
 });

@@ -1,0 +1,268 @@
+// WIKIPEDIA WORD ATTESTATION — mos. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "mos",
+        "wiki": "mos.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "koabg pʋgẽ gɛɛlga",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…in-buiida ya 73153 sõdga sẽn loge yʋʋm 2006 wan. Yʋʋm 2006, koabg pʋgẽ gɛɛlga 50,28 da ya pagba,37,4 ya neb sẽn ya yʋʋm 14 talle wa yʋʋma…",
+                "…i yʋʋm 64 da ya 58,2 neb sẽn kʋdge 65 ti sẽndb yiida ya 3,7 koabg pʋgẽ gɛɛlga. == Arezek koglgo tuuma == == Logtor Yiya == Ouahigouya pʋɩ…"
+            ]
+            },
+        {
+                "word": "pʋɩɩre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…oogo. A yɩɩ kʋdgo â kadenga na-tẽnga British Togoland marsa pʋɩɩre ni â Volta Soolem. Nin-buiidu sẽn be Ho Komindi tũ-noore tɩ…",
+                "…n-buiidu ne ro-gãase sõadga yaa 177,281 mamse 8.4 koabg zug pʋɩɩre sẽ â zĩiga fãa nin-buiidu. Paare mamse 52.7 koabg zug pʋɩɩr…",
+                "…ʋɩɩre sẽ â zĩiga fãa nin-buiidu. Paare mamse 52.7 koabg zug pʋɩɩre ne raoogo mamse 47.3 koabg zug pʋɩɩre. Poorẽ 62 koabg zug p…",
+                "…mamse 52.7 koabg zug pʋɩɩre ne raoogo mamse 47.3 koabg zug pʋɩɩre. Poorẽ 62 koabg zug pʋɩɩre sẽ â nin-buiidu zi teng beda pug…",
+                "…e ne raoogo mamse 47.3 koabg zug pʋɩɩre. Poorẽ 62 koabg zug pʋɩɩre sẽ â nin-buiidu zi teng beda puga. â Komindi pʋɩta toaag ne…",
+                "…7 Agona East sullã pʋgẽ, sẽn yaa vot 50.6% sẽn yaa vote fãa pʋɩɩre, tɩ NPP sullã taoor soab a Kwesi Yankah paam vot 22,292 sẽn…"
+            ]
+            },
+        {
+                "word": "pʋɩɩr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…sẽn be Rajasthan, Ɛnd soolmẽ wã. Rɩk-kãngã yaa b buud-gomdã pʋɩɩr n kɩt tɩ pagb ne rap maand-a. == Kalbelia buudã == A Kalbel…",
+                "…boond tɩ Majestic FC wã bi-bɩɩga, Ouattara kẽnga Lorient wã pʋɩɩr yʋʋmd 2020. A sigla a pipi tʋʋmde ne klubã yʋʋmd 2021 kiuug…",
+                "…boond tɩ Majestic FC wã bi-bɩɩga, Ouattara kẽnga Lorient wã pʋɩɩr yʋʋmd 2020. A sigla a pipi tʋʋmde ne klubã yʋʋmd 2021 kiuug…",
+                "…boond tɩ Majestic FC wã bi-bɩɩga, Ouattara kẽnga Lorient wã pʋɩɩr yʋʋmd 2020. A sigla a pipi tʋʋmde ne klubã yʋʋmd 2021 kiuug…",
+                "…d 1989 n tãag 1991. Rẽ poore, a paama tʋʋmd sẽn kẽed ne pʋɩ-pʋɩɩr wɛɛngẽ sẽn na n sõng taoor soab ning sẽn get pʋɩ-pʋɩɩr yell…",
+                "…pʋɩ-pʋɩɩr wɛɛngẽ sẽn na n sõng taoor soab ning sẽn get pʋɩ-pʋɩɩr yellã sẽn boond tɩ State Insurance Company Of Ghana la masã…"
+            ]
+            },
+        {
+                "word": "sõor koabg",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kob-gĩnd",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 44,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Takayama Matsuri) sẽn be Takayama sẽn be Zapõ wã sɩnga yʋʋm kob-gĩnd 16-17 soabã pʋgẽ. B tẽedame tɩ b sɩnga kibsã Kanamori roogã…",
+                "…n get-b lame. Yaa b sẽn kẽnd n gilgd tẽngã yʋngã. Yaa yʋʋm kob-gĩnd a 17 soabã la b maan-b tɩ b naage, tɩ b maan-b ne raado, tɩ…",
+                "…ndã-rũndã wã yaa Heian wakatẽ wã (794 - 1185) sẽn zems yʋʋm kob-gĩnd 10th soabã. Rũndã-rũndã, yaa b sẽn boond tɩ Board of Ceremo…",
+                "…me ra be Tōgaku pʋga. Gaku wã nebã ra nong-a lame hal yʋʋm kob-gĩnd 9 soabã la 10 soabã sʋka, tɩ b sɩng n maand yɩɩl ne b taabã…",
+                "…ã wã sõor yaa sõor sẽn ta 100 000. A paama a meng pãng yʋʋm kob-gĩnd 18 soabã pʋgẽ, la yaa Rus rãmb n bãng-a yʋʋmd 1870 wã. B gʋ…",
+                "…elle. Sebr ning sẽn yaa kʋdemdã pʋgẽ, b yeelame tɩ yaa yʋʋm kob-gĩnd a 13 soabã pʋgẽ la b sɩng n gʋls-a. Yaa a Cristobal Sanz sẽ…"
+            ]
+            },
+        {
+                "word": "pursaã",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poursã",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "koabga pʋgã",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "zĩig koabg",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "koabg pʋgẽ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…in-buiida ya 73153 sõdga sẽn loge yʋʋm 2006 wan. Yʋʋm 2006, koabg pʋgẽ gɛɛlga 50,28 da ya pagba,37,4 ya neb sẽn ya yʋʋm 14 talle w…",
+                "…i yʋʋm 64 da ya 58,2 neb sẽn kʋdge 65 ti sẽndb yiida ya 3,7 koabg pʋgẽ gɛɛlga. == Arezek koglgo tuuma == == Logtor Yiya == Ouahigo…",
+                "…udmã pʋgẽ. Yaa a sẽn da yaa a sẽn da zãad a meng to-to yʋʋm koabg pʋgẽ. Orom dãmba rɩka b mens na-kẽndre sẽn zems ne Gadaa soogã s…",
+                "…tũudmã. === Vɩɩm paalgã (1930 ⁇ rũndã) === Sẽn na maan yʋʋm koabg pʋgẽ, ra pa maand Ommegang ye. Yʋʋmd 1930, Bɛlg revolisyonã yʋʋm…"
+            ]
+            },
+        {
+                "word": "koabga pʋgẽ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pursã",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pourcent",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sãnem",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 117,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…b sẽn yit a Song la Tang soolmẽ wã. A yaa b sẽn da maand ne sãnem la sãnem la a naag ne sãnem sãnem la silk sẽn tar sãnemã. M…",
+                "…a Song la Tang soolmẽ wã. A yaa b sẽn da maand ne sãnem la sãnem la a naag ne sãnem sãnem la silk sẽn tar sãnemã. Ming soolm…",
+                "…lmẽ wã. A yaa b sẽn da maand ne sãnem la sãnem la a naag ne sãnem sãnem la silk sẽn tar sãnemã. Ming soolmẽ wã, yunjin-rãmb r…",
+                "…. A yaa b sẽn da maand ne sãnem la sãnem la a naag ne sãnem sãnem la silk sẽn tar sãnemã. Ming soolmẽ wã, yunjin-rãmb ra tara…",
+                "…condi Takoradi noba 1900 yʋʋmde tɩ ya tẽr sore la b me kẽng sãnem ziise.Secondi Takoradi paka b bato-yasg-zĩiga 1928 yʋʋmde,a…",
+                "…ya; cocoa koob tʋʋma,suodo koob tʋʋma ni kaam rɩtga tʋʋma, sãnem be beẽ tib tuda, tɩ kaam-boko leb n yi beẽ tɩ b sɩnge tuubu…"
+            ]
+            },
+        {
+                "word": "zaalem",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Sõngr sẽn yaa zaalem n yit Wikipedia pʋgẽ == Botswana Postal Services Workers' U…",
+                "…Sõngr sẽn yaa zaalem n yit Wikipedia pʋgẽ…",
+                "…Sõngr sẽn yaa zaalem n yit Wikipedia pʋgẽ Botswana Power Corporstion Workers' Un…",
+                "…Sõngr sẽn yaa zaalem n yit Wikipedia pʋgẽ Botswana National Development Bank Sta…",
+                "…Sõngr sẽn yaa zaalem n yit Wikipedia pʋgẽ Botswana Railways Amalgamated Workers'…",
+                "…Sõngr sẽn yaa zaalem n yit Wikipedia pʋgẽ Botswana Telecommunication Employees'…"
+            ]
+            },
+        {
+                "word": "koabga",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…\". == Kũuni La A Yãkr A Sẽn Paam == Sarkodie nan tara kũuni koabga la a yopoe(107) yãkre koabga la pis-wae la a ye(191) m paas…",
+                "…aam == Sarkodie nan tara kũuni koabga la a yopoe(107) yãkre koabga la pis-wae la a ye(191) m paase \"Ghana Music Awards\" pisi l…",
+                "…kuuna n da ân nan ko sa ninga o b da ân déég ka ordinatɛɛre koabga n kẽs karemsaam ramba o tênga pugin Effutuman m'be Ebenezer…",
+                "…baobgo rɩk-n kẽng Algeria tẽnga toaag sẽne, kilometr ramba koabga (62 mi)(Ãnglindi: 100 kilometres). Ziiga tara kʋdemd pĩisi…",
+                "…soab kãnga mee yĩng lalga la a kõ na-zaka neng-paale. Yʋʋm koabga pipi pʋ-sʋka bilga Wed-rʋʋdba Krak wa \"sãnem yʋʋmde\". A sẽn…",
+                "…g be Malezi ekosẽ wã. Dũniyã gill zugu, mangã buud sõor yaa koabga. Sã n yaa ne buud ning sẽn be-a wã, mangã biis yaa toɛy-toɛ…"
+            ]
+            },
+        {
+                "word": "doolaar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…A paama yʋʋm 2012 Nigeria Prize for Literature;; a yõod yaa doolaar 100 000 la a yaa Afirik sɛb kũun sẽn yaa kãseng n yɩɩdã. ==…",
+                "…Nigeriya sɛb kũun a sẽn kõ sɛb wɛɛngẽ; a paama ligd sẽn ta doolaar 100 000 la a yaa Afirik sɛb kũun sẽn yɩɩd fãa. Sẽn paase, y…",
+                "…e ne a Onaedo: The Blacksmith's Daughter n paam ligd sẽn ta doolaar 100 000 Nigeria Liquified Natural Gas NLNG Nigeria Prize fo…",
+                "…r sʋka, a kõo ordinatɛɛr dãmb a nu la bũmb a taab sẽn na ta doolaar 4000 n kõ Sekondi sɛbã. Woto ra yaa sẽn na yɩl tɩ karengã l…",
+                "…atricia ne a Bill Gick wã, b sẽn na n wa n yao ligd sẽn yaa doolaar 217,464.00 ne zu-loees sẽn yaa 50%. A Catherine ne a sɩdã p…",
+                "…maand-b yel-wẽn naoor a yiib-n-soabã na n paama ligd sẽn ta doolaar 300 la b na n paama bʋ-kaoodb sẽn na n sɩbg-b to-to wã. [1]…"
+            ]
+            },
+        {
+                "word": "dolaar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…sõngrã (ODA) ligd sẽn kẽed ne koomã wɛɛngẽ wã paasame n ta dolaar milyaar a 9 yʋʋmd 2018 pʋgẽ. SDG 6 yaa bũmb sẽn loe ne a ta…",
+                "…ipi ko-bõoneg a ye ligd sẽn zems yen 650 000 (dãmb sõor taa dolaar 6300), tɩ rẽ kɩt tɩ b lebg ko-bõoneg ning sẽn yaa ligd sẽn…"
+            ]
+            },
+        {
+                "word": "faranga",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "seefa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    

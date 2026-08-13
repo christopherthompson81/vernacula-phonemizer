@@ -106,6 +106,20 @@ MARKERS = {
     "hmn": "lub ntawm rau cov yog thiab teb hauv nyob muaj kev los ntau neeg uas tau tus nws lus "
            "chaws qhov feem tug nrog mus tshaj hmoob sib tsis siv lawv yam loj hom lwm hais ntiaj "
            "xyoo tias raws txhua thiaj kuj tsuas nkaus tseem hnub tsev txiv poj niam",
+    # mos (Mooré/Mossi): Burkina Faso is FRANCOPHONE, so French is the contaminant one expects — and
+    # measuring it first said otherwise. Counted over mos.wikipedia's 12,650 paragraphs, French function
+    # words are rare (`de` ×774 whole-corpus, `dans` ×56, `pour` ×44) while ENGLISH is everywhere:
+    # `of` ×4,460 and `the` ×2,658, from bibliographic citation blocks and from the wiki's large body of
+    # Ghana/Anglophone-topic articles. Both sides are therefore in the contrast set, English carrying the
+    # weight. The markers are the highest-frequency Mooré grammatical words: the relativiser `sẽn`
+    # (×61,919), the copula `yaa`, the definite `wã`, the complementiser `tɩ`, the locative `pʋgẽ`,
+    # `yʋʋmd` "year", `boond` "is called", `rasem` "days", `kiuug` "month".
+    # ⚠ `la`, `n`, `a` and `b` ARE ABSENT even though they are the corpus's four commonest tokens. `la`
+    # is Mooré "and" ×19,073 AND the French article; `n`/`a` collide with the French elision `n'`/`l'`
+    # split and with English `a`; single letters are not markers.
+    "mos": "sẽn yaa wã tɩ pʋgẽ yʋʋmd yʋʋm taoor boond tẽnga tẽng bũmb nins rasem wʋsg kiuug sõma fãa "
+           "tõe tõog paam paama maan maand soaba soab soabã sull sulli tar tara yɩɩd lebg neb ned "
+           "buud yãk toor woto tʋʋm zĩig wakat sʋka poore nin-buiid bãngr gomd",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
@@ -157,6 +171,18 @@ CONTRAST = {
         "در است این را های می شود بود نیز دارای باشد شده هستند کند بوده آنها توسط بیشتر خود برای مورد "
         "از وی همچنین کرد دارد شد کرده هایی آن نیست "
         "ہے ہیں کے کا میں سے نے رہتے ہوئے وہ اور بھی کیا مشتمل ان".split()
+    ),
+    # mos: FRENCH, merged with (never replacing) ENGLISH — which on this wiki is the larger contaminant.
+    # ⚠ `le`, `de` and `la` ARE DELIBERATELY ABSENT, and each for its own measured reason. `le` ×652
+    # inside strongly-Mooré paragraphs is the Mooré adverb "again/any more" (`a pa le get radio wã`,
+    # `zũngã pa le tõe n paam tɩbsg`), not the French article. `de` ×399 in the same set is never French
+    # prose — every instance is inside a francophone PROPER NAME the Mooré sentence is naming
+    # (`Cascades de Karfiguéla`), so listing it would drop real Mooré text about Burkinabè places.
+    # `la` is Mooré "and". ⚠ `region` (×142 in strong-mos) is out for the same reason: it is the English
+    # loan inside Mooré sentences about Ghana (`Ghana Ashanti region`), a topic word and not a marker.
+    "mos": set(
+        "les des du et en un une dans pour par sur est sont avec au aux qui que ce cette son ses "
+        "il elle nous ou comme entre ainsi selon depuis leur cet".split()
     ),
 }
 

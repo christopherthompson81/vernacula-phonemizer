@@ -1514,6 +1514,72 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "refusal is for want of a SIGN, not of a word, and adding a conjunction here would attach a "
             + "Tigrinya word to a non-breaking space",
     },
+    mos: {
+        // ⚠ EVERY COUNT HERE IS OVER THE FILTERED MOORÉ WIKI, AND THE FILTER IS THE POINT. mos.wikipedia
+        // dumps directly (2,088 pages → 12,650 paragraphs) but 11.6% of it is not Mooré, and — measured
+        // rather than assumed, because Burkina Faso is francophone — the contaminant is ENGLISH (`of`
+        // ×4,460, `the` ×2,658, from citation blocks and Ghana-topic articles) rather than French (`de`
+        // ×774). It does not spread evenly: the `ampersand` cell is 44% Mooré and the `era-marker` cell
+        // 24%, against `percent` at 99.8%. Counts below are over the 12,733 paragraphs that survive
+        // `filter-by-language.py --lang mos`. There is no FLEURS, no kaikki and no wikipron for Mooré and
+        // espeak does not ship it, so the corpus and `attest.ts` are the whole haystack. Argued at length
+        // in src/languages/mossi/normalize.ts.
+        // ⚠ `minus` AND `currency` ARE DELIBERATELY ABSENT FROM THIS LIST — both are real gaps and
+        // `review.ts --lang mos` stays red on them. See the notes at the end.
+        percent: "measured: `\\d ?%` ×1,328 — this language's largest unread class, in the one cell whose "
+            + "evidence is 99.8% Mooré. The corpus writes the GLYPH every time and never spells the "
+            + "reading, so the silence alone would not settle it and a dictionary check was owed (the Igbo "
+            + "lesson). Every route ran dry: `concept.ts` returns NO Wikidata label and NO article for mos "
+            + "on either Q11229 or Q137985650; the French loan is ×0 in every spelling tried (`pourcent`, "
+            + "`pursã`, `poursã`, `pursaã`) and Glosbe fr→mos answers \"nous n'avons pas de traductions "
+            + "pour pour cent\"; espeak ships no Mooré at all. ⚠ THE COMPOSED NATIVE FORM IS THE ONE THAT "
+            + "NEARLY SHIPPED and it is refused on POSITION, which is the Fula `hakkunde` failure exactly. "
+            + "`koabg pʋgẽ` (\"in a hundred\", from `pʋgẽ` ×6,707 and the 100-stem the corpus glosses "
+            + "itself — `kilometr ramba koabga (62 mi)(Ãnglindi: 100 kilometres)`) comes back attested ×4; "
+            + "TWO are the CENTURY sense `yʋʋm koabg pʋgẽ`, and the two percent-sense hits are the SAME "
+            + "SENTENCE of ONE article (the Ouahigouya demographics paragraph, in a visibly non-standard "
+            + "register). That is a lead, not a finding — and even in that lead the phrase PRECEDES its "
+            + "figure (`koabg pʋgẽ gɛɛlga 50,28`) where a normalizer would postpose it. Nothing attests "
+            + "the postposed order, so the composition is refused where Fula's `e teemedere` was accepted",
+        plus: "measured: `+` ×26 and NOT ONE is a signed number or an operator needing a plus word. One "
+            + "arithmetic gloss in one article (`b sõorã yaa tres la torre sẽn naag taab (3 + 2 = 5)`), a "
+            + "Tamil ETYMOLOGY gloss (`\"Man\" (\"mangre tɩɩga\") + \"Kay\"`) — the same shape hil, tl and "
+            + "ak each record — a biology label pair (`LFS- ne LFS+`), and a telephone country code "
+            + "(`Tẽnga code ya +233`). No Mooré plus word is attested anywhere",
+        "plus-minus": "measured: `±` ×2, both a TOLERANCE rather than a sign to read: `andante ± 96 bpm` "
+            + "and `yʋʋmd 19 600 ± 400 BC`. No word attested",
+        equals: "measured: `=` ×25 and only ONE is arithmetic (the `3 + 2 = 5` gloss above). The other 24 "
+            + "are MediaWiki heading markup that survived extraction — `==A sẽn wilg tɩ b sẽn maand bũmb "
+            + "ningã==` — which is the same residue bm records. Nothing to read and no copula word "
+            + "attested digit-adjacent",
+        "less-than": "measured: `<` ×1 and it is a DERIVATION ARROW in an etymology, not a comparison: "
+            + "`a dotar do tār (< du do \"kẽmba\")`",
+        "greater-than": "measured: `>` ×6 and none is a comparison. Four are derivation or translation "
+            + "arrows (`Byzantine Greek la Late Latin pitta > pizza`, `\"…vrane\" -> \"Chiro zĩi…\"`) and "
+            + "the rest are a blockquote marker. Same class as `<` above",
+        times: "measured: `×` ×15 and every one is \"BY\", never \"times\". Nine are the BOTANICAL HYBRID "
+            + "sign (`Musa × paradisiaca sẽn yaa Musa acuminata × M. balbisiana`) and the rest a DIMENSION "
+            + "CROSS (`kɩls sẽn zem 30 cm × 14 cm × 9 cm (11.8 in × 5.5 in × 3.5 in)`). That is the th and "
+            + "bm finding reproduced, and a multiplication word would be wrong for all 15",
+        divide: "measured: `÷` ×0 in the whole filtered corpus",
+        ampersand: "measured: `&` ×111, and the cell is only 44% Mooré — the lowest-scoring cell this "
+            + "layer looked at bar `era-marker`. Read back, the instances are ENGLISH PROPER NAMES inside "
+            + "citation and company strings: `Mim Cashew & Agric Products LTD`, `Leadership & "
+            + "Development`, `(Camargo & L.B.Sm.) Coppens & F.Leal`, `Room, Adrian (2008). African "
+            + "placenames`. Mooré's own \"and\" is `la` (×23,594) and it is never written as `&`, so a "
+            + "rule here would be reading English text with a Mooré word",
+        exponent: "measured: superscripts ×24, and they are TWO DIFFERENT THINGS — which is why no rule "
+            + "fits. Some are a genuine area exponent (`hɛktaar 350 mamsgo (akre 860; km² 3.5)`), but "
+            + "others are SUPERSCRIPT TONE NUMBERS in Cantonese-opera transliterations (`Siu² Sang¹`, "
+            + "`Mou⁵ Sang¹`, `Faa¹ Daan²`), where a squared reading would be nonsense. No Mooré "
+            + "squared/cubed word is attested either: `attest.ts --after` on the metre nouns returns "
+            + "nothing, which is the playbook's trap-51 floor — a small wiki does not discuss area",
+        degrees: "measured: `°` ×41, all genuine temperature and all in the SAME translated agronomy "
+            + "articles (`zĩig sẽn yaa 18 °C n ta 24 °C (64 °F n ta 75 °F)`). The refusal is about the "
+            + "WORD, not the sign: `sources.ts` reports `[NONE] scale-names — ° occurs, neither scale name "
+            + "in corpus/referee/espeak`, and nothing follows the ° in this corpus but the bare letter. "
+            + "espeak ships no Mooré, so there is no phonetic fallback to derive one from",
+    },
 };
 
 /**
@@ -1584,6 +1650,30 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
 export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    mos: {
+        // ⚠ TWO OF THE THREE, AND THE THIRD IS THE WHOLE REASON THIS IS AN INSTANCE LIST AND NOT A CLASS
+        // ENTRY. The Mooré artifact has exactly three matches of the `minus` shape. Two are RANGES written
+        // with a DOUBLE ASCII HYPHEN — a wiki `--` convention that survived extraction, so the regex's
+        // digit lookbehind rejects the first hyphen and matches the second — and mos declines the range
+        // class outright (no Mooré connective between two figures is attested, so the pair reads as two
+        // bare cardinals, the Swahili/Lingala state). A silent hyphen is the correct output for both.
+        // The THIRD is a genuine negative temperature written with U+2212, `n yɩɩg −1 °C la 2 °C`, and it
+        // is deliberately NOT listed: omitting a plus is lossless and omitting a minus INVERTS, so
+        // `review.ts --lang mos` stays red on this class and `minus` is absent from ACCEPTED_SIGN_SILENCE.
+        minus: ["A.D. 800--1532", "yaa 20--40 km"],
+        // SUPERSCRIPTS THAT ARE NOT EXPONENTS — Jyutping and Pinyin TONE NUMBERS, in the Cantonese-opera
+        // article. ⟨cing⁴ sik¹ sing³⟩ is a romanisation with tone digits raised; reading them as powers
+        // would be nonsense, so silence is correct here rather than merely harmless. ⚠ THE ARTIFACT'S ONE
+        // GENUINE `km²` (`hɛktaar 350 mamsgo (akre 860; km² 3.5)`) IS DELIBERATELY NOT LISTED, so the
+        // exponent class stays red on the real gap — no Mooré squared word is attested (trap 51's floor:
+        // `attest.ts --after` on the metre nouns returns nothing, because a small wiki does not discuss
+        // area). Listing the tone numbers is what makes that one instance visible instead of buried in ×9.
+        exponent: [
+            "cing⁴ sik¹ sing³", "heoi¹ ji⁵ sing³", "sin¹ ming⁴ sing³",
+            "zung³ hap⁶ ngai⁶ seot⁶ jing⁴ sik¹", "sei³ gung¹ ng⁵ faat³",
+            "Siu² Sang¹", "Siu² Mou⁵ Sang¹",
+        ],
+    },
     ak: {
         // A REDUNDANT PERCENT SIGN, WHICH THIS CORPUS WRITES CONSTANTLY — and the six below are where the
         // scan's own REDUNDANT test cannot see it. Akan reads `%` as `ɔha mu nkyekyɛmu` (PREPOSED, ×1,387
