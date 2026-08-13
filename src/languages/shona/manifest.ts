@@ -14,10 +14,19 @@ export interface ShonaManifest {
     clausePunctuation: Record<string, string>;
     numbers: {
         units: string[];
+        /** Class-6 (ma-) and class-8 (zvi-) concord series, indexed 2–9 — see shona.jsonc's number header. */
+        unitsMa: string[];
+        unitsZvi: string[];
         ten: string;
         tens: string;
         hundred: string;
+        hundreds: string;
         thousand: string;
+        thousands: string;
+        million: string;
+        millions: string;
+        billion: string;
+        billions: string;
         and: string;
     };
 }

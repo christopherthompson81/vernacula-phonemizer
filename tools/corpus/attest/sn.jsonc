@@ -1,0 +1,574 @@
+// WIKIPEDIA WORD ATTESTATION — sn. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "sn",
+        "wiki": "sn.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "koma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 9,
+                "substringOnly": 1,
+                "examples": [
+                "…Koma mutauro weAfrika unowanikwa kuGhana == Mazwi Anotodza Bantu…",
+                "…auro weAfrika unowanikwa kuGhana == Mazwi Anotodza Bantu == Koma vanoti ba (pn. they, them) kureva va-. Mamwe mazwi: Koma va…",
+                "…== Koma vanoti ba (pn. they, them) kureva va-. Mamwe mazwi: Koma vanoti faaŋ (n. baboon; gorilla) kureva bveni. Mamwe mazwi:…",
+                "…boon; gorilla) kureva bveni. Mamwe mazwi: == Mamwe Mazwi == Koma vanoti alivasa; alibesa (n. onion) kureva onyenzi. Fananidz…",
+                "…ibesa (n. onion) kureva onyenzi. Fananidzai nokuti chivasa? Koma vanoti ankaa (n. orange) kureva orenji. Mamwe mazwi: bala (…",
+                "…(n. orange) kureva orenji. Mamwe mazwi: bala (n. placenta). Koma vanoti beri (v. to have sexual intercourse, to cohabit). Ma…"
+            ]
+            },
+        {
+                "word": "dhigiriyi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…aramukana. Gonyo kana ichipimwa inopimwa nechiyero chinonzi dhigiriyi chinova chinomirirwa nevara iri (o). Mitsetse miviri kana i…"
+            ]
+            },
+        {
+                "word": "madhigirii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mbiri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 53,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Mbiri (Number 2) apa kureva kuvengwa kwezvinhu zviviri. Mbiri apa…",
+                "…Mbiri (Number 2) apa kureva kuvengwa kwezvinhu zviviri. Mbiri apa kureva kukurumbira zvokusivikanwa nevazhinji. Mbiri. Mb…",
+                "…ri. Mbiri apa kureva kukurumbira zvokusivikanwa nevazhinji. Mbiri. Mbiri, sezita izita remhuri uye zita rekutanga remunhu. ==…",
+                "…ri apa kureva kukurumbira zvokusivikanwa nevazhinji. Mbiri. Mbiri, sezita izita remhuri uye zita rekutanga remunhu. == Mitaur…",
+                "…a remunhu. == Mitauro yeBantu == Lugwere vanoti lubiri kana mbiri pakuwanda (palace). Xilenge vanoti mbiri (n. virgin) kureva…",
+                "…vanoti lubiri kana mbiri pakuwanda (palace). Xilenge vanoti mbiri (n. virgin) kureva mhandara. Chuabo vanoti mbilri (n. fish)…"
+            ]
+            },
+        {
+                "word": "nhanhatu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Tanhatu (nhanhatu) inhamba inotevera shanu iyo yoteverwa nenomwe. == Tsika ==…",
+                "…Nomwe kana kuti Chinomwe inhamba inotevera nhanhatu iyo yoteverwa nesere. == Tsika == Vhiki rimwe rina mazuva m…",
+                "…egore (330 pagore re mucherikwa). makumimanhatu(30) tanhatu/nhanhatu (6) - kana wo manhatunhanhatu (kupfupisa)…",
+                "…yekiromita 274,200. Bhurukina Faso yakakomberedzwa nenyika nhanhatu dzinoti: Maari kumaodzanyemba; Nayizhe kumabvazuva; Bhenini…",
+                "…,11,12,15,18,27,30 chipakati anenge ari 9 nokuti ane nhamba nhanhatu kurudyi nekuruboshwe.…",
+                "…ChiShona tichiona 0.286 tinenge toti, zero koma mbiri nomwe nhanhatu. KuEnglish vachiona 12.286 vanoti, twelve comma two eight s…"
+            ]
+            },
+        {
+                "word": "churu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Churu kana chidzere (anthill) murwi wevhu unovakwa nemuchenje. ==…",
+                "…. == Mitauro yeBantu == Bemba vanoti icilu (anthill) kureva churu. Herero vanoti otyi-tundu (anthill) kureva churu. VaDigo va…",
+                "…ll) kureva churu. Herero vanoti otyi-tundu (anthill) kureva churu. VaDigo vanoti chitsulu kana tsulu (anthill) kureva churu.…",
+                "…a churu. VaDigo vanoti chitsulu kana tsulu (anthill) kureva churu. Giryama vanoti kitsulu (anthill, hillock) kureva churu. Le…",
+                "…eva churu. Giryama vanoti kitsulu (anthill, hillock) kureva churu. Lenje vanoti kapili (mound) kureva kachuru. Noni vanoti ku…",
+                "…oni vanoti kule (habitat of white ants) - zvichida vanoreva churu. Kidawida vanoti mbalyo (n. anthill) kureva churu.…"
+            ]
+            },
+        {
+                "word": "motsi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 18,
+                "substringOnly": 2,
+                "examples": [
+                "…Motsi (1) poshi kana chimwe iri ivara rehuwandu, chiperengo chehu…",
+                "…ra huwandu uhu. Chinomirira huwandu hwechinhu chimwe chete. Motsi kana kuti chiposhi zvinorevawo pfungwa yokuva chikamu chimw…",
+                "…kwanisa kunzi mhando yechiposhi kana mhando yechimotsi kana motsi wemhando. Zvichida pane kutodzana pamazwi anoti: posi, posh…",
+                "…Motsi izita remhuri rinowanikwa muZimbabwe. Motsi (Short curly ha…",
+                "…Motsi izita remhuri rinowanikwa muZimbabwe. Motsi (Short curly hair; short woolly hair) kureva vhudzi rakamon…",
+                "…y hair; short woolly hair) kureva vhudzi rakamonyana. Kuita motsi (to curl hair). == Mitauro yeBantu == Pano panyorwa mazwi a…"
+            ]
+            },
+        {
+                "word": "poshi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…re re mucherikwa). motsi, moshi, modza, bodzi, bodza, imwe, poshi, potsi - zvese zvinoreva 1. makumiviri (20) modza (1) - kan…",
+                "…es) apa kureva chinhu chechiposhi. Mazwi anoti motsi; posi, poshi haasiwo anoshandiswa pakutaura huwandu hwezvinhu. Aya mazwi…",
+                "…huwandu hwezvinhu. Aya mazwi anoshandiswa pakurava sokuti: poshi, piri; tatu; ina; shanu; zvichingodaro. Imba yechimotsi iyo…",
+                "…Piri (n. two) kana mbiri inumeri inotevera poshi. Chepiri (second) zvinotaura chinhu chiri panzvimbo inoteve…",
+                "…Motsi (1) poshi kana chimwe iri ivara rehuwandu, chiperengo chehuwandu, uye…",
+                "…otsi wemhando. Zvichida pane kutodzana pamazwi anoti: posi, poshi, bodzi, mhodzi, bodzwa, chibodzwa kana mbodzwa? == Mitauro…"
+            ]
+            },
+        {
+                "word": "hwaradada",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…Hwaradada kana hwa-a (ideophone of Being empty; 2. of Lacking complet…",
+                "…Being empty; 2. of Lacking completely). Musoro wake wakati hwaradada: he has nothing on his head. Kuhwaradadidza (Remove content…",
+                "…ive. Tauya tested HIV negative: Kuvhenekwa kwaTauya akabuda hwaradada yeHIV. Tangai tested HIV positive: Kuvhenekwa kwaTangai aka…",
+                "…ive: HIV yakadaradadika pakavhenekwa Ranganai. -236 inhamba hwaradada: -236 is a negative number. +275 inhamba nharadada: +275 is…",
+                "…Mazwi anoti nhamba hwaradada (negative number in English) ari kushandiswa pano kureva nh…",
+                "…a pano kureva nhamba diki kuna zero iri pasi pazero. Nhamba hwaradada dzinoshandiswa kutaridza kurasikirwa nehuwandu, kuderera kw…"
+            ]
+            },
+        {
+                "word": "kuwanzana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…u. Pakutaura muchidimbu, four times five inenge yonzi zvina kuwanzana neshanu. Cherechedzai kuti zviri kutaurwa zvakafanana nezvi…",
+                "…swa chiratidzo chekuwanza huwandu \"x\" pakati penhamba dziri kuwanzana. Mhedzisiro yacho inopangidzwa nechiratidzo chekuenzana (eq…",
+                "…\\displaystyle 2\\times 3=6} (Pakutaura muchidimbu, mbiri (2) kuwanzana nenhatu (3) zvakaenzana na 6) 3 × 4 = 12 {\\displaystyle 3\\t…",
+                "…{\\displaystyle 3\\times 4=12} (Pakutaura zvizere, nhatu (3) kuwanzana neina zvakaenzana negumi nembiri) 2 × 3 × 5 = 6 × 5 = 30 {\\…",
+                "…uri kuAlgebra, kuwanza kunopangidzwa kuchinyorwa mavara ari kuwanzana ari pedo-nepedo kana nhamba dziri mubhuraketi (e.g. xy kure…",
+                "…pedo-nepedo kana nhamba dziri mubhuraketi (e.g. xy kureva x kuwanzana nay kana kuti 5x kureva 5 kuwanzana nax). Manyorero aya ano…"
+            ]
+            },
+        {
+                "word": "mineti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Dendera pa Mineti (Revolutions per minute)- iri izwi rinodudzira mudida wechi…",
+                "…wa chiri kutenderera pa akiso uye kuchishandiswa Dendera pa Mineti sechiyero. Chiyero ichi chinoshandiswa zvakare kutaura mudi…",
+                "…Muchacha pima negonya unopimwa nechiyero chinonzi radian pa mineti uye unonyorwa uchiratidzwa nevara rinoti omega (ω, kana kut…",
+                "…i yepaGonyo yeinjini unopimwa nechiyero chinonzi dendera pa mineti. Injini inokwanisa kumhanya nemuchacha wepa gonya unosvika…",
+                "…isa kumhanya nemuchacha wepa gonya unosvika 2000 dendera pa mineti kana kuti 2000 revs per minute. Zvakakosha tionesane kuti d…",
+                "…kureva short space of time - uye ndiro shoko ringareva kuti mineti muChishona) iyuniti yekupima nguva pfupi paChingezi chirati…"
+            ]
+            },
+        {
+                "word": "mapondo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pondo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "maminitsi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…utanga rinowanzotora maawa 12 kusvika ku19, danho rechipiri maminitsi 20 kusvika kumaawa maviri, uye danho rechitatu maminitsi ma…",
+                "…ri maminitsi 20 kusvika kumaawa maviri, uye danho rechitatu maminitsi mashanu kusvika ku30. Danho rekutanga rinotanga nekukaka ne…",
+                "…. Muchetura wayo wakaipa zvokuti uno gona kuvuraya gonzo pa maminitsi mana. Kana mhuka yainenge yaruma yakada kutiza kana kurwisa…",
+                "…National Stadium yechiFascist Party muRoma. [12] [ 13] Asi maminitsi mashanu gare gare, Italy dzakagadzira mutambo pamwe Raimund…",
+                "…mwe Raimundo Orsi uye akatora mutambo mumba ovhataimu. With maminitsi mashanu kutamba iri nguva, Angelo Schiavio akakundisa 2-1 k…",
+                "…utanga wechipiri nguva, Brazil scored pamwe Friaça. Mushure maminitsi 21, Juan Alberto Schiaffino equalized kuti Uruguay uye 34,…"
+            ]
+            },
+        {
+                "word": "kirogiramu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "makirogiramu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kirograму",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "makiro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kubhiki",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kubhiku",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poindi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dhigirii",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…t Britain akadzidza paKent yunivhesiti, Cantebury. Akapedza dhigirii reBachelor mugore ra1978 uye dhigirii reMasters mugore ra19…",
+                "…, Cantebury. Akapedza dhigirii reBachelor mugore ra1978 uye dhigirii reMasters mugore ra1979. Dissertation rake reMasters rakazo…",
+                "…ani Komisheni we Mubatanidzwa we Afurika, Moussa Faki. Vane dhigirii re chibhachera muChemishonga Chechikumbi, dhigirii re chima…",
+                "…ki. Vane dhigirii re chibhachera muChemishonga Chechikumbi, dhigirii re chimasta muChemushonga cheChihoganika, uye vane dhigirii…",
+                "…dhigirii re chimasta muChemushonga cheChihoganika, uye vane dhigirii ra Dhokotera we Muti. VaChihombori vaive nyanzvi we muti we…",
+                "…Town, South Africa . Dhlakama akaberekerwa muZimbabwe . Ane dhigirii reMasters of Arts muArt Gallery neMuseum Studies kubva kuYu…"
+            ]
+            },
+        {
+                "word": "masendimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…nyoka dzese pasi rese. Mazino acho anonzi anokwanisa kureba masendimita 5.5 Mu Zimbabwe inongowanikwa nzvimbo dziri kumabvazuva kwe…"
+            ]
+            },
+        {
+                "word": "matani",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…a Gamal Abdel Nasser anovhura kuvaka paAswan Dam nekuputika matani gumi edhamu kuti aparadze matani makumi maviri egranite kum…",
+                "…aka paAswan Dam nekuputika matani gumi edhamu kuti aparadze matani makumi maviri egranite kumahombekombe ekumabvazuva kweNairi…",
+                "…si. Parizvino fungidziro yekugadzirwa kwepasi rose inosvika matani 25 miriyoni kana 110 miriyoni mabhero pagore, inoverengera…",
+                "…cola), zvinonwiwa pasirose muhuwandu hwakawanda. Muna 2020, matani anoda kusvika miriyoni gumi ebhinzi dzekofi akadyiwa pasi r…",
+                "…Joice Mujuru vakapinzwa mhosva muna 2009 vakaedza kutengesa matani egoridhe anosvika 3.5 tonnes kubva kuDemocratic Republic of…"
+            ]
+            },
+        {
+                "word": "makiromita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…rwe ruwa rwechisi runotora chifungidzirwa che 4,033 skweya makiromita (1,557 sk mi). Zvituswa izvi zvakagadzikwa pakati pe makiro…",
+                "…romita (1,557 sk mi). Zvituswa izvi zvakagadzikwa pakati pe makiromita mazanamatanhatu (600) ne mazanamasere ne makumimashanu (850…",
+                "…furika. Kubva kumaodzanyemba kusvika kuchamhembe kwayo pane makiromita 200, uye kubva kumabvazuva kusvika kumadokero pane makiromi…",
+                "…kiromita 200, uye kubva kumabvazuva kusvika kumadokero pane makiromita 130. Asi zvakadaro nyika iyi inowanikwa rutaranyika rwakats…",
+                "…iskepi ye zvikomo zvinofukidza ruwa rwunotora 78,871 skweya makiromita (30,452 sk mi) ine kiraimeti ye temperate iri continental u…",
+                "…(34°51'15\" S). Pakati penzvimbo idzi pane nhambwe inokwana makiromita ezvuruzvisere (8000km). Uko kwakanyanya kuenda nechekuMabva…"
+            ]
+            },
+        {
+                "word": "mamita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…inogara mumatondo esavhana nedzimwewo nhanga dziri 50-2000 mamita pauzuru pegungwa. Mbeva iyi yajairira kupinda kwevanhu munh…",
+                "…teriyani uye neMakomo e Atlasi. Iyo Atlasi yakakura kusvika mamita ezvuruzviviri mazanamatatu-nesere (2,308m) pamusoro pemwero…",
+                "…seTassili n'Aijier ne Ahaggar, idzi dzine hurefu hwunosvika mamita ezvuruzviviri mazanamapfumbamwe-neguminesere (2,918m), rich…",
+                "…s). Mwena yechitsere ine buri rekupinda rimwe, uye yakareba mamita 1-3. Mberi kwemwena kune dendere risina mashe. Zvitsere zvi…",
+                "…wa ichikandwa padunhu iri mafungo makurusa anoreba kudarika mamita 10. Matutuzenga emafungo emvura iwaya ane simba nespidhi yo…",
+                "…(Kukadzi), 5 °C (41 °F) (Chikumi) Poyindi irikumusoro: 170 mamita (560 ms) == Mashoko == rumaniko - kureva strait - kubva pas…"
+            ]
+            },
+        {
+                "word": "maawa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…aya chikume chenyika chinowana chiedza chine manhambo kana maawa arakarebesa, chimwe chikamu chichiwana chiedza chine manham…",
+                "…besa, chimwe chikamu chichiwana chiedza chine manhambo kana maawa akashomekesa (kureva akapfupikisa). Pamazuva Chikumi 20-21…",
+                "…ti North pole haipinde murima zvokuti North pole inowana 24 maawa echiedza. Denderedzwa reChiedza rinenge rakaita muganhu pal…",
+                "…okuti South pole inoramba iri murima. South pole inowana 24 maawa erima. Pamazuva aya, nzvimbo dzose dziri kuMaodzanyemba eMu…",
+                "…ti South pole haipinde murima zvokuti South pole inowana 24 maawa echiedza. Denderedzwa reChiedza rinenge rakaita muganhu pal…",
+                "…okuti North pole inoramba iri murima. Nouth pole inowana 24 maawa erima. Pamazuva aya, nzvimbo dzose dziri kuChamhembe kweMut…"
+            ]
+            },
+        {
+                "word": "peresenti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "maskweya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…pahuwandu hwehugari hwevanhu. Nharaunda yeItopiya yakakura maskweya ekiromita 1,100,000; gutaguru remo rinonzi Addis Ababa. Van…",
+                "…nhu unosvika 45.70 miriyoni muna 2022 uye inotora 1,886,068 maskweya kiromita (728,215 sk mi), zvichiita nyika yechitatu muAfuri…",
+                "…eni. Nyika iyi ine nharaunda inoda yakakura kusvika 117,600 maskweya kiromita tichisanganisira Zvitsuwa zve Hanishi ne Gurutsuwa…",
+                "…vagari mushure meEzhiya. Unda we Afurika hwakakura kusvika maskweya emakiromita mamiriyoni emakumimatanhatu-nekeripiri (30.2 km…",
+                "…a (c. 600 mamairi) muhupamhi, rinofukidza ruwa re 3,053,200 maskweya kiromita (1,178,850 skw mi). == Mabviro eruzivo ==…"
+            ]
+            },
+        {
+                "word": "skweya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Muchidzidzo chePimanyika (geometry), skweya (square) chiumbwa chine mativi mana ose akaenzana negonya i…",
+                "…ne mativi mana ose akaenzana negonya ina dzose dzakaenzana. Skweya riri mumupanda wegonyaina. == Pimamuganhu neNharaunda == Pi…",
+                "…sazaniso inoti: Nharaunda, A = K2 == Zvifaniro zveSkweya == Skweya iri mumupanda wegonyaina tsazamativi neruramamakonyo, saka…",
+                "…= Kupima nharaunda == Nharaunda inomimwa nezviyero zvinoti: skweya remita; skweya rekiromita; skweya refutu zvichingodaro. Kan…",
+                "…nda == Nharaunda inomimwa nezviyero zvinoti: skweya remita; skweya rekiromita; skweya refutu zvichingodaro. Kana kuchinzi skwe…",
+                "…omimwa nezviyero zvinoti: skweya remita; skweya rekiromita; skweya refutu zvichingodaro. Kana kuchinzi skweya remita zvinoreva…"
+            ]
+            },
+        {
+                "word": "chiuru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Chiuru (thousand) zvinoreva mazana gumi. == Mitauro yeBantu == VaN…",
+                "…Bantu == VaNyungwe vanoti culu kana bzulu (thousand) kureva chiuru. Baila vanoti chulu (thousand) kureva chiuru. MaXhosa vanot…",
+                "…ousand) kureva chiuru. Baila vanoti chulu (thousand) kureva chiuru. MaXhosa vanoti iwaka (thousand) kureva chiuru. VaKikuyu va…",
+                "…sand) kureva chiuru. MaXhosa vanoti iwaka (thousand) kureva chiuru. VaKikuyu vanoti ngiri inya (four thousand) kureva zviuru z…",
+                "…Miriyoni (1,000,000) zvinoreva chiuru chezviuru. == MitauroyeAfrika == Sangho vanoti kutu (n. Mil…",
+                "…== Mashoko == Wurukati,- kureva millennium, kubva pa Churu/Chiuru uye mwaka (season, age) Mwakauru - millenary, chiliad? Wuru…"
+            ]
+            },
+        {
+                "word": "zviuru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…gumirana 1,000 = chiuru, ichi chiri gumi ramazana 10,000 = Zviuru gumi kana kuti mazazanana awa ari mazana akazanirana 100,00…",
+                "…mi kana kuti mazazanana awa ari mazana akazanirana 100,000= Zviuru zana kana kuti zviuru zana kana kuti zana rezviuru (zvuru z…",
+                "…a awa ari mazana akazanirana 100,000= Zviuru zana kana kuti zviuru zana kana kuti zana rezviuru (zvuru zana) 1,000,000 = miriy…",
+                "…we nesere. Mamiriyoni mazana mana ane makumi matatu neimwe, zviuru mazana maviri ane makumi mashanu nenomwe, mazana matanhatu…",
+                "…sh sezvizvi: Miriyoni mazana mana ane makumi matatu neimwe, zviuru mazana maviri ane makumi mashanu nenomwe, mazana matanhatu…",
+                "…akumi mapfumbamwe nesere Miriyoni zanaina guminhatu neimwe, zviuru zanambiri gumishanu nenomwe, zana nhanhatu gumipfumbamwe ne…"
+            ]
+            },
+        {
+                "word": "madhigiriyi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "masekondi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…si emuZimbabwe ane rudido rwe 60 hertz. Ruwoko rwunotaridza masekondi pachiringazuva rwune rudido rwe 60 pamineti hour imwe. Inji…",
+                "…utaura tinoti mineti zve tichitodza Chingezi. === Zvepiri / Masekondi === Chepiri ndiro shoko rinoshandiswa kureva masekondi kuCh…",
+                "…ri / Masekondi === Chepiri ndiro shoko rinoshandiswa kureva masekondi kuChishona, nekumwe kutaura tinoti Chinguva. === Zvidimbu /…"
+            ]
+            },
+        {
+                "word": "madhora",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…versity mu2020. === BTS === Chikumi 13, 2013 - Jimin akaita madhora ake senhengo yeBTS nekuburitswa kweiyo imwechete 2 Kutonho…",
+                "…avhareji muna 2022. Mukupera kwesvondo rechipiri, yakawana madhora miriyoni 1.1 kubva ku38 theatre, ichipedza yepfumbamwe kuho…",
+                "…edza chechina. Mukupera kwesvondo rechitanhatu, yakawedzera madhora 5.5 miriyoni, chikamu chayo chakakonzerwa nekuburitswa kuku…",
+                "…munyika. Pakazosvika Chikumi 9 yaive yawana mari inodarika madhora makumi masere emamiriyoni, ichipfuura Hereditary sefirimu r…",
+                "…84, Shoney's akabva kuBig Boy system, achibhadhara Marriott madhora miriyoni gumi nematatu (yakaenzana ne${{Inflation|US|13|198…"
+            ]
+            },
+        {
+                "word": "dhora",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyindi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 13,
+                "substringOnly": 1,
+                "examples": [
+                "…Muchidzidzo chePimanyika, poyindi kana shanga (point) izita rinoreva kanzvimbo katokotoko, ka…",
+                "…Takatsimbidzira penzura papepa tingaedzesera kucherechedza poyindi; asi kana nepo doo rinoitwa nemurumo wepenzura rine nhambwe…",
+                "…si kana nepo doo rinoitwa nemurumo wepenzura rine nhambwe - poyindi haina nhambwe. Munzi (a pointed sharp object) Kuva nomunzi…",
+                "…go kana lusonga (a point, a tip; a pointed stick) vachireva poyindi kana chimuti chine munzi. VaYao vanoti kusongoka (to be poi…",
+                "…uva nemunzi kana kutesva. VaGanda vanoti msa (point) kureva poyindi.…",
+                "…nderedzwa rine ruvara green padariro riri kurudyi). Sarudza poyindi A iri padenderedzwa ichava iyo chisuvi chegonyashanu. Dhara…"
+            ]
+            },
+        {
+                "word": "pazana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ogen ndiyo ins huwandu hwemakumi masere nemapfumbamwe kubva pazana (79%). Oxygen ine 20%, hwemakumi maviri kubva pazana. Magas…",
+                "…kubva pazana (79%). Oxygen ine 20%, hwemakumi maviri kubva pazana. Magasi Nharangani anoonekera pakuti haana munhuwi, haana r…",
+                "…a. Mukaka unotengeswa uine mafuta anotanga pazvikamu chimwe pazana (1%), zviviri pazana (2%), zvitatu nehafu (3.5%) zvichingod…",
+                "…uine mafuta anotanga pazvikamu chimwe pazana (1%), zviviri pazana (2%), zvitatu nehafu (3.5%) zvichingodaro. == Mitauro yeBan…",
+                "…leniyamu itatu Mukorezana, Zanagore - kureva century, kubva pazana uye kati kureva mwaka (age, season). Zanakati - centenary,…",
+                "…leniyamu itatu Mukorezana, Zanagore - kureva century, kubva pazana uye kati kureva mwaka (age, season). Zanakati - centenary,…"
+            ]
+            },
+        {
+                "word": "muzana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 56,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…reto akacherechedza kuti zvikamu zvevhu makumi masere kubva muzana (80%) zvakanga zviri mumawoko echikamu chevanhu makumi mavi…",
+                "…akanga zviri mumawoko echikamu chevanhu makumi maviri kubva muzana (20%). Mutemo waPareto unoti, pakuverengwa kwehonzeri nemus…",
+                "…kuverengwa kwehonzeri nemusaka, zvikamu makumi masere kubva muzana (80%) zvemusaka inoonekwa zvinokonzerwa nehonzeri zvikamu m…",
+                "…oonekwa zvinokonzerwa nehonzeri zvikamu makumi maviri kubva muzana (20%). Zvichitodzana nemutemo uyu, kunonzi mumabhindauko ch…",
+                "…emo uyu, kunonzi mumabhindauko chikamu makumi manomwe kubva muzana (80%) chezvinotengwa chinotengwa nechikamu makumi maviri ku…",
+                "…%) chezvinotengwa chinotengwa nechikamu makumi maviri kubva muzana (20%) chevatengi - kureva kuti ruzhinji rwevatengi (80%) va…"
+            ]
+            },
+        {
+                "word": "kusvika",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kusvika (to arrive, until) zvinoreva kubata nzvimbo yanga yakanangw…",
+                "…until). Kuguma (come to, come upon) izwi reChiNdau rinoreva kusvika panhu. == Kurerutsa Mutauro == Vaenzi vakabva kwaGutu vakas…",
+                "…nd went to the well. Handisati ndamuona chiendero chaakaita kusvika pazuva ranhasi. Ngirosi mbiri dzakaguma Sodhoma madeekoni .…",
+                "…andu hwe vagari mushure meEzhiya. Unda we Afurika hwakakura kusvika maskweya emakiromita mamiriyoni emakumimatanhatu-nekeripiri…",
+                "…vimwewo zvidiki. Huwandu hwevagari we Afurika unoverengerwa kusvika kumabhiriyoni maviri (zvichienderana negore raZvuruzviviri…",
+                "…okero kune Kabho Vherite (17°33'22\" W). Kubva paRasi Hafuni kusvika kuKabho Vherite pane nhambwe inosvika makiromita ezvuruzvin…"
+            ]
+            },
+        {
+                "word": "pfumbamwe",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Pfumbamwe (Nine) inhamba inotevera sere, iyo ichizoteverwa nagumi. Pf…",
+                "…we (Nine) inhamba inotevera sere, iyo ichizoteverwa nagumi. Pfumbamwe ndiyo nhamba yeminwe inosara kana munhu apfumba munwe mumwe…",
+                "…a (n. nine). VaGungu neVaBwisi vanoti mwenda (nine), kureva pfumbamwe. VaGulu vanoti kenda (n. nine) kureva pfumbamwe. Lela vanot…",
+                "…ne), kureva pfumbamwe. VaGulu vanoti kenda (n. nine) kureva pfumbamwe. Lela vanoti dóorè (num. nine, 9).…",
+                "…ara misi 296 kusvika pakupera kwegore. makumimatanhatu (60) pfumbamwe (9) - matanhatupfumbamwe (kupfupisa)…",
+                "…akupera kwegore (317 pagore re mucherikwa). makumimana (40) pfumbamwe (9) - manamapfumbabwe (kupfupiswa)…"
+            ]
+            }
+        ],
+    }
+    

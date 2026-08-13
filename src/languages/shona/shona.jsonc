@@ -44,14 +44,55 @@
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },
 
-    // Cardinal number words (Standard Shona). Units 1–10; the compositor (numbers.ts) handles the noun-class-free
-    // counting form (makumi maviri = 20, zana = 100, churu = 1000).
+    // Cardinal number words (Standard Shona).
+    //
+    // ⚠ NOUN-CLASS CONCORD REACHES INSIDE A SHONA NUMERAL, and it does so in TWO slots that are NOT the same
+    // problem. Measured over the mined artifact and sn.wikipedia (see docs/investigations/):
+    //
+    //   1. THE MAGNITUDE SLOT is computable and is fixed here. `makumi` and `mazana` are class-6 nouns and
+    //      `zviuru` is class 8, so the numeral counting them takes that class's prefix REGARDLESS of what the
+    //      whole phrase counts: `makumi maviri` (20), `mazana mana` (400), `zviuru zvisere` (8000). The
+    //      corpus writes the ma- form 20 times out of 20 after `makumi`/`mazana` and never the bare stem, and
+    //      sn.wikipedia glosses the zvi- forms against digits — `makiromita ezvuruzvisere (8000km)`,
+    //      `ezvuruzvinomwe-nemazanamana (7,400km)`, `zviuru zvina` (four thousand).
+    //   2. THE TRAILING UNIT SLOT agrees with the HEAD NOUN, which this layer cannot see (playbook trap 14 —
+    //      a digit becomes words downstream of every rule, so there is nothing to agree with). One corpus
+    //      sentence writes each of `makumi manomwe ne MAVARI` (72), `makumi matanhatu ne ZVINA` (64),
+    //      `makumi mapfumbamwe ne VANOMWE` (97). Left as the bare RECITATION stem, which is what a digit read
+    //      out of context is — sn.wikipedia states that series explicitly: *"Aya mazwi anoshandiswa pakurava
+    //      sokuti: poshi, piri; tatu; ina; shanu; zvichingodaro"*.
+    //
+    // ⚠ `churu` WAS THE THOUSAND WORD HERE AND IT IS THE ANTHILL. `attest.ts --lang sn --words churu` returns
+    // 33 tokens across 20 articles and every readable one is the mound — *"Churu kana chidzere (anthill) murwi
+    // wevhu unovakwa nemuchenje"*, plus a comparative-Bantu list of other languages' anthill words. The
+    // thousand is `chiuru`, 36 tokens / 20 articles and definitionally glossed: *"Chiuru (thousand) zvinoreva
+    // mazana gumi"*, *"1,000 = chiuru"*. Same shape as zu's `amaphuzu` and rn's `kare`.
     "numbers": {
         "units": ["zero", "motsi", "piri", "tatu", "ina", "shanu", "tanhatu", "nomwe", "sere", "pfumbamwe"],
+        // The class-6 (ma-) and class-8 (zvi-) concord series, indexed 2–9. Slots 0 and 1 are unused: a
+        // magnitude of one is the SINGULAR noun (`gumi`, `zana`, `chiuru`), never "one ten".
+        // Attested directly: ma- all eight; zvi- viri/tatu/na/tanhatu/nomwe/sere. `zvishanu` and
+        // `zvipfumbamwe` are COMPOSED from the productive class-8 prefix and the attested stems — the
+        // playbook's "prefer composing from the language's morphology" over tabulating what was seen.
+        "unitsMa": ["", "", "maviri", "matatu", "mana", "mashanu", "matanhatu", "manomwe", "masere", "mapfumbamwe"],
+        "unitsZvi": ["", "", "zviviri", "zvitatu", "zvina", "zvishanu", "zvitanhatu", "zvinomwe", "zvisere", "zvipfumbamwe"],
         "ten": "gumi",
         "tens": "makumi",
         "hundred": "zana",
-        "thousand": "churu",
+        "hundreds": "mazana",
+        "thousand": "chiuru",
+        "thousands": "zviuru",
+        // Million and billion, in the same MAGNITUDE-then-COUNT order as `zviuru` and with the same class-6
+        // concord. The corpus's own worked reading of 431,257,698 supplies both the words and the order:
+        // *"MAMIRIYONI mazana mana ane makumi matatu neimwe, ZVIURU mazana maviri ane makumi mashanu
+        // nenomwe, mazana matanhatu ane makumi mapfumbamwe nesere"*. Corroborated by `matani 25 miriyoni`,
+        // `mamiriyoni 210`, `mabhiriyoni makumi maviri nematatu emadhora`, and sn.wikipedia's
+        // *"kusvika kumabhiriyoni maviri"*. `miriyoni` singular is glossed there too: *"Miriyoni (1,000,000)
+        // zvinoreva chiuru chezviuru"*.
+        "million": "miriyoni",
+        "millions": "mamiriyoni",
+        "billion": "bhiriyoni",
+        "billions": "mabhiriyoni",
         "and": "ne"
     }
 }

@@ -1580,6 +1580,61 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "in corpus/referee/espeak`, and nothing follows the ° in this corpus but the bare letter. "
             + "espeak ships no Mooré, so there is no phonetic fallback to derive one from",
     },
+    sn: {
+        // ⚠ EVERY REFUSAL BELOW IS MEASURED OVER `tools/corpus/mined/sn.jsonc` (439 deduplicated segments) AND
+        // ARGUED IN `src/languages/shona/normalize.ts`'s header. Shona has NO FLEURS corpus, NO wikipron, a
+        // kaikki extract under 25 entries, and espeak does not ship it at all — so the artifact, `attest.ts`
+        // against sn.wikipedia and, where named, a cited outside source are the whole haystack. The referee
+        // (`epitran sna-Latn`) is programmatic AND word-only, so it can say nothing about any of this.
+        // ⚠ AND `minus` IS DELIBERATELY ABSENT FROM THIS TABLE, so `review.ts --lang sn` stays RED on it —
+        // the `ln` / `rw` / `ht` stance. Read one by one, the class's 10 lines are FOUR genuine negative
+        // LATITUDES (`-18.3`, `-23.5 o S`, `-18.4622700S`, `-18.4468360S`) and six where the hyphen is a
+        // DECIMAL RANGE that normalize.ts step 6 declines by design (`0.5-8.9kg`, `3.2-3.6kg`, `0.3-1.2m`,
+        // `40-90cm`, `0.5-1.0m`, `2-2.5kg`) — and beside them, outside this class because the sign is not
+        // digit-flanked, sit two negative dollar amounts (`-$100`, `-$50`, from a worked example about debt)
+        // and `-273,15K`. So Shona has real negatives, and omitting a minus INVERTS a value where omitting a
+        // plus is lossless. Two
+        // Shona candidates are attested and NEITHER fits the slot: `hwaradada` (23 tokens / 9 articles,
+        // glossed `-236 inhamba hwaradada: -236 is a negative number`, but also meaning "empty" —
+        // `Musoro wake wakati hwaradada`) and `yakagon'a` (this corpus's own gloss of `-$100`). Both are
+        // CONCORDED ADJECTIVES taking the frame NOUN + adjective, never `hwaradada <number>` — the Fula
+        // `hakkunde` failure, a real word whose part of speech is not the operator slot. A known-wrong
+        // reading does not get to be a green gate.
+        equals: "measured over the artifact: 20 `=`, and they ARE Shona prose — a physics/maths article "
+            + "cluster (`Basa = Fosi x nhambwe`, `Spidhi = (nhambwe/nguva)`, `0 o C = 273,15K`, "
+            + "`431,257,698 = Mazana mana ane makumi matatu…`). So this is a VOCABULARY refusal, not an "
+            + "absence one. The word IS attested — `-enzana`, 'be equal': `0 Kelvins inenge YAENZANA ne "
+            + "-273,15K`, `inoda KUYENZANA na (22/7)`, and a maths article reading `mbiri (2) kuwanzana "
+            + "nenhatu (3) ZVAKAENZANA na 6`. Every finite form carries a SUBJECT CONCORD (`ya-` cl.9, "
+            + "`zva-` cl.8, `ra-` cl.5) which this layer cannot compute from a digit, and that article's own "
+            + "`zvakaenzana` is already a class mismatch for a numeric subject. A wrong concord is "
+            + "confidently wrong; the sign stays silent",
+        plus: "measured over the artifact: 11 `+`, and NOT ONE is an arithmetic addition. Eight are a "
+            + "COORDINATE SIGN redundant with the letter beside it (`+30 o E`, `+23.5 o`, `+29.9`, `+90 o`, "
+            + "`+180 o`, `+20 o`) — and the corpus names that convention itself, `nhamba dzichipiwa vara "
+            + "(+)`. Two are ION CHARGES (`Zn 2+`, `Mg 2+`). One is a UTC offset (`GMT + 2hrs`), which the "
+            + "playbook's fleet finding identifies as the one contentful plus and the one nothing attests. "
+            + "No Shona plus word is attested in the corpus, on sn.wikipedia or in any source this repo can "
+            + "reach. Omitting a plus is lossless",
+        ampersand: "measured over the artifact: 12 `&`, and EVERY ONE is markup or English. Three are "
+            + "`&nbsp;` sitting in the number-unit gap (`46–76&nbsp;kg`, `80&nbsp;km/h`) and two are Greek "
+            + "letter entities in a coordinate caption (`&phi;`, `&lambda;`) — normalize.ts step 1 folds all "
+            + "five, which is the real defect. The other seven are inside the ENGLISH parentheticals this "
+            + "wiki's comparative-Bantu dictionary carries (`flour & water`, `crushers & mills`, `procedures "
+            + "& protocols`, `physical & psychological`). ZERO bare ampersands occur in a Shona sentence, so "
+            + "the language's conjunction `ne` is deliberately not spent — Chichewa reached the same "
+            + "conclusion on its own evidence, and this is Shona's",
+        divide: "measured: `÷` is ×0 in the artifact. The 12 `N/N` shapes are FRACTIONS in worked examples "
+            + "(`22/7`, `27/16`, `8/10`), two DATES (`31/07/1920`, `12/12/2000`) and rate abbreviations the "
+            + "shared tier reads through `unitPer` (`m/s`, `km/hr`). `sources.ts` reports `[NONE] "
+            + "fraction-series` and there is no denominator series to compose from — `hafu` is attested "
+            + "(`zvitatu nehafu (3.5%)`) and nothing else is",
+        "plus-minus": "measured: `±` is ×0 in the artifact, and the reading would compose two words of "
+            + "which only one side has any candidate at all — see the minus note above",
+        "less-than": "measured: `<` is ×0 in the artifact. Shona expresses the comparison with a verb phrase "
+            + "(`chiri pasi pe 10%`, `hunodarika`), which is not a sign reading",
+        "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
+    },
 };
 
 /**
@@ -2583,6 +2638,35 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         // silenced so that a genuine Tigrinya `&`, if this wiki ever grows one, still reports.
         ampersand: ["&nbsp;", "&#x5B;", "&#x5D;", "&#x2013;", "&#x3A;", "R & amp;B",
             "\"Shoe Shine & Piano\"", "football_team&action="],
+    },
+    sn: {
+        // ⚠ WHAT THIS `exponent` LIST DOES *NOT* CARRY IS THE POINT, and it is the stance `ln` and `rw` take
+        // on their minus. The superscripts this layer CAN read it reads: `1m²` → `maskweya mamita motsi`,
+        // `0,5m²` the same through normalize.ts step 7, `25339 m²` through the shared tier. Listed here are
+        // only the instances where the exponent sits on a RATE ABBREVIATION cited in parentheses with NO
+        // NUMBER AT ALL — a symbol being NAMED, not a quantity being stated, which is why nothing can attach
+        // to it. ⚠ The bare-base line (`Kumucheto kurudyi kuna 2⁰, panotevera … 2¹ … 2²`) is deliberately
+        // NOT listed: that is a real reading Shona declines for want of a connective — `pawa` is attested as
+        // the power word (`pawa ra 2`, `pawa wa 2`, `nhamba b iri kuradanurwa ne pawa n`) but its
+        // associative changes with the base's noun class, the same blocker as the `=` — so
+        // `review.ts --lang sn` stays red on it.
+        exponent: [
+            "Rufangu (Acceleration)- iri izwi rinoreva kuchinja kwemuchacha paumwe hwechiyero chenguva. Kufangura kune chiyero (m/s²). Tsazaniso inoti Rufangu = (kuchinja kwemuchacha/nguva).",
+            "Rufangu (Acceleration)- iri izwi rinoreva kuchinja kweSpidhi paumwe hwechiyero chenguva. Rufangu rune chiyero (m/s²). Rufangu runowanikwa nekugova spidhi pane nguva.",
+            "a yakamirira rufangu runoyerwa muma(m/s²)",
+            "Muchidzidzo Fundoyetsimba, (Physics), puresha (Pressure) izwi rinotsanangudza huhwandu hweFosi iri kudzvanya pamusoro penharaunda yakapimwa. Puresha inopimwa nechiyero chinonzi Pascal kana kuti N/m². Puresha inopimwa nerudzivo rwakarurama panharaunda yakadzvanyiwa nepuresha yacho.",
+        ],
+        // THE POUND, and it is the one currency sign in this corpus with no usable Shona name. The dollar is
+        // declared and read — `madhora`, which the corpus itself glosses against the sign in `chikwereti
+        // chezana remadhora chinonyorwa senhamba yakagon'a sezvizvi -$100` — and so is `US$`, through its own
+        // compound key. `mapondo` and `pondo` are BOTH ×0 on sn.wikipedia, and this sign's only two instances
+        // are inside a quotation of Virginia Woolf in a literary biography. One quotation is not an
+        // attestation, and a wrong currency word is confidently wrong where a silent sign is merely missing.
+        // ⚠ Listed BY INSTANCE rather than silencing the class, so the moment a `$` regresses — or a Shona
+        // pound word appears — the scan reports it again.
+        currency: [
+            "Achibvunzwa nezve kushomeka kwake kwekunyora kubvira Nervous Conditions, Dangarembga akatsanangura muna 2004: \"Chekutanga, riini rakaburitswa mushure mekunge ndashandura kuita firimu sesvikiro; chechipiri, kuona kwaVirginia Woolf kwakangwara kuti mukadzi anoda £500 nekamuri. zvake kuti anyore zvine musoro zvachose. Sezvineiwo, ndiri kufamba uye ndinovimba kuti, kekutanga kubvira Nervous Conditions, ndichave nekamuri yangu ndega. Ndichaedza kufuratira zvishoma nezve £500.\" Zvechokwadi, makore maviri gare gare muna 2006, akaburitsa chinyorwa chake chechipiri, Bhuku reKwete, sequel kune Nervous Conditions . Vakapindawo mune zvematongerwo enyika, uye muna 2010 vakadomwa semunyori wezvedzidzo mubato rezvematongerwo enyika reMovement for Democratic Change rinotungamirwa naVaArthur Mutambara . Akataura nezvekwaakabva kumhuri yevadzidzisi, nguva yake pfupi semudzidzisi, uye kupinda kwake muchikamu chedzidzo sekumugadzirira basa iri. Akapedza zvidzidzo zvekuva chiremba muzvidzidzo zveAfrica paHumboldt University yeBerlin, uye akanyora dzidziso yake yePhD pamusoro pekugamuchirwa kwefirimu reAfrica.",
+        ],
     },
 };
 

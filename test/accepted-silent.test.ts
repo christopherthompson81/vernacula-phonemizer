@@ -220,8 +220,16 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
 
 
 
+        // ⚠ sn IS THE THIRD ENTRY (after `ln` and `rw`) WHOSE ABSENT KEYS CARRY THE ARGUMENT. Its `minus`
+        // key is deliberately missing — Shona has six GENUINE negatives (coordinates, a debt in dollars, a
+        // Kelvin) and two attested candidate words, `hwaradada` and `yakagon'a`, both of which are CONCORDED
+        // ADJECTIVES in the frame NOUN + adjective and neither of which fits the operator slot. Omitting a
+        // minus inverts a value, so the class stays failing rather than being silenced. Its `exponent` key
+        // lists only the two RATE ABBREVIATIONS cited with no number (`(m/s²)`), never the bare-base run
+        // `2⁰ … 2¹ … 2²`, which is a real reading declined for want of a class-invariant connective.
 
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bal", "bar", "bm", "cdo", "ceb", "cjy", "gan", "gu", "hak", "he", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mos", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "so", "su", "syl", "ta", "ti", "tl", "ug", "wuu", "xh", "za"]);
+
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bal", "bar", "bm", "cdo", "ceb", "cjy", "gan", "gu", "hak", "he", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mos", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "sn", "so", "su", "syl", "ta", "ti", "tl", "ug", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {

@@ -9,7 +9,9 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeShonaPre, normalizeShonaPost } from "./normalize.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 
 const G = MANIFEST.graphemes;
@@ -55,9 +57,101 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d+)|([.!?…,;:
 const NATIVE_CLASS = "[a-z'’]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
+/**
+ * The shared symbol tier. EVERY WORD BELOW IS A CORPUS OR sn.wikipedia TOKEN READ IN ITS OWN SLOT — espeak
+ * ships no Shona at all and the referee is word-only, so the corpus, the mined artifact and `attest.ts` are
+ * the whole in-repo haystack; the two entries that needed more say where they came from.
+ *
+ * · `percent` — *pazana*, 22 tokens / 20 articles, and GLOSSED AGAINST THE SIGN in both sources:
+ *   *"chikamu chimwe pazana (1%), zviviri pazana (2%)"* on the wiki, *"chikamu che 71 pazana (71%)"* and
+ *   *"makumi masere nemapfumbamwe kubva pazana (79%)"* in the corpus. Postposed, so no `percentPrefix`.
+ *   ⚠ `muzana` IS THE HIGHER-COUNT LOSER — 56 tokens / 20 articles against 22, and it is the wrong pick
+ *   because every one of its hits sits inside the frame `kubva muzana` ("out of a hundred") while the tier
+ *   emits a BARE word after the number. `pazana` is the only one attested bare-postposed, which is exactly
+ *   the shape produced here. Trap 37's "picking by count picks the wrong unit", one language on.
+ *   ⚠ AND `peresenti` — THE WORD CHICHEWA SHIPS — IS ×0 ON sn.wikipedia. A sibling's rule, refuted.
+ * · `currency` / `currencyPrefix` — *madhora* in monetary amounts and BEFORE the number: *madhora miriyoni
+ *   1.1*, *madhora 5.5 miriyoni*, *madhora makumi masere emamiriyoni*, and the corpus's own gloss of the
+ *   sign, *"chikwereti chezana remadhora chinonyorwa senhamba yakagon'a sezvizvi -$100"*. The singular
+ *   `dhora` is ×0 on the wiki; the class-6 plural is the citation form.
+ *   ⚠ `US$` NEEDS ITS OWN KEY, AND THAT IS A DIVERGENCE FROM CHICHEWA, whose file records that its corpus
+ *   writes the code SPACED so a bare `$` matches. Shona GLUES it — `US$28,000`, `US$7 000`, `US$22 billion`,
+ *   `US$100,000`, 4 of this corpus's 19 currency instances — and the tier's `$` key is letter-bounded on the
+ *   left precisely so a code prefix is not split. Copied verbatim, nya's declaration reads none of them.
+ *   ⚠ `£` IS DELIBERATELY ABSENT: `mapondo` and `pondo` are both ×0, and the sign's only two instances here
+ *   are inside a quotation of Virginia Woolf. A dropped sign is missing; a wrong currency word is wrong.
+ * · `units` / `unitPrefix` — a measure noun heads its phrase in Shona, in every source and without
+ *   exception: *makiromita 200*, *makilomita 305*, *mamita anosvika*, *masendimita 5.5*, *matani gumi*,
+ *   *maawa 2*, *mita pa sekondi*, *maskweya kiromita 1,886,068*.
+ *   ⚠ `kg` IS DECLARED ON A SOURCE OUTSIDE THIS REPO, and that is worth flagging rather than burying. It is
+ *   the most-written unit after km and m (8 digit-adjacent instances here) and sn.wikipedia is SILENT:
+ *   `makirogiramu`, `kirogiramu` and `makiro` are all ×0, and the wiki's own substitute is `keiji`, from a
+ *   self-declared neologism article this layer rejects. The word comes from JW.org's Shona corpus — a large
+ *   human-translated Standard Shona body that writes *makirogiramu 34* — and it is the productive SI pattern
+ *   this language already uses for the units the wiki DOES attest (`kiromita`/`makiromita`,
+ *   `sendimita`/`masendimita`). Recorded here so the next reader can re-weigh it.
+ *   ⚠ `cm` IS A LEAD, NOT A FINDING, and is declared anyway: `masendimita` is 1 token in 1 article on the
+ *   wiki (*"anokwanisa kureba masendimita 5.5"*), which is under the article-count bar — but the same JW.org
+ *   corpus writes it repeatedly (*masendimita 51,8*, *masendimita 168*) and the corpus writes `cm` 8 times.
+ *   ⚠ BARE `m` IS DECLARED and the tier reads `3m`, `500m`, `1,752 m` from it. What it CANNOT read is
+ *   `1.5m` — `NOT_VERSION` rejects a dotted number glued to a one-letter key — so normalize.ts step 7 claims
+ *   that case locally. See its comment for the 7-against-0 measurement.
+ *   `ft`, `in`, `oz`, `mi` are NOT declared: every instance is an English parenthetical glossing a metric
+ *   figure already given, and `mi` only ever occurs inside `sk mi`.
+ * · `unitPer` / `rateDenominators` — *pa*, in six independent slots and glossed against the English three
+ *   times: *"chiyero chinonzi mita pa sekondi (m/s)"*, *"Dendera pa Mineti (Revolutions per minute)"*,
+ *   *"radian pa mineti"*, *"10km pa Rita repeturu"*, *"$5 pa Kg"*, *"US$28,000 pa tonne"*. This is the one
+ *   word Chichewa found that transfers to Shona unchanged.
+ * · `exponentWords` — *maskweya* / *skweya*, 5 and 38 tokens, and the position is settled by a definitional
+ *   list in the geometry article: *"Nharaunda inomimwa nezviyero zvinoti: skweya remita; skweya rekiromita;
+ *   skweya refutu"*. Running text writes *maskweya ekiromita 1,100,000* and *1,886,068 maskweya kiromita*.
+ *   ⚠ WHAT `before` CANNOT EXPRESS is the associative concord Shona writes on the following unit —
+ *   `maskweya EMAkiromita`, whose `e-` is inside the next word. The tier emits `maskweya makiromita`; the
+ *   bare juxtaposition `maskweya kiromita` is itself attested twice, so the shape is right and one prefix is
+ *   missing. Recorded rather than hidden.
+ *   ⚠ NO `cubed`: see normalize.ts's header — trap 51's floor.
+ * · `multiply` — *kuwanzana ne*, glossed FOUR TIMES in the infix slot by a Shona maths article: *"four times
+ *   five inenge yonzi zvina KUWANZANA NEshanu"*, *"mbiri (2) KUWANZANA NEnhatu (3)"*, *"nhatu (3) KUWANZANA
+ *   NEina"*, *"5x kureva 5 KUWANZANA NAx"*. ⚠ `attest.ts` puts all 7 tokens in ONE article, which is a lead
+ *   by the article-count rule — taken anyway because it is a DEFINITIONAL article glossing the operation
+ *   against both the English and the digit form four separate times, and because the 5 genuine `N x N`
+ *   instances in Shona prose here currently read as bare juxtaposition. The one-article limit is the
+ *   recorded caveat. No `by` word is attested, so a `4x100` relay takes the `times` reading; its 3 instances
+ *   are all inside the imported English swimming table.
+ * · `magnitudes` IS DELIBERATELY WITHHELD, and Shona's reason is NOT Chichewa's. nya withheld it because its
+ *   corpus attests only NOUN + NUMBER + MAGNITUDE. Shona attests BOTH orders, in the same article — *madhora
+ *   miriyoni 1.1* and *madhora 5.5 miriyoni* — so declaring the field would assert a preference the evidence
+ *   does not support, while withholding leaves the magnitude exactly where the writer put it, which is right
+ *   either way. ⚠ THE PLAYBOOK'S "one declaration, two consumers" WARNING WAS CHECKED, NOT ASSUMED: the
+ *   field also gates `magAltU`, the UNIT path's connective hop, and the shape that needs it — a digit, a
+ *   magnitude word, then a unit ABBREVIATION — is ×0 in this corpus. Every magnitude here is followed by a
+ *   noun or a clause.
+ * · `ampersand` IS NOT DECLARED — the sign's only Shona-sentence instances are HTML entities, which
+ *   normalize.ts step 1 folds. Same conclusion as Chichewa, reached on Shona's own evidence.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["pazana"],
+    currency: { "US$": ["madhora"], "$": ["madhora"] },
+    currencyPrefix: true,
+    units: {
+        km: ["makiromita"], m: ["mamita"], cm: ["masendimita"],
+        kg: ["makirogiramu"], t: ["matani"],
+    },
+    unitPrefix: true,
+    unitPer: "pa",
+    rateDenominators: { h: "awa", hr: "awa", hrs: "awa", s: "sekondi", min: "mineti" },
+    exponentWords: { squared: ["maskweya"], position: "before" },
+    multiply: { times: "kuwanzana ne" },
+});
+
 class ShonaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ RULES ON BOTH SIDES OF THE TIER — the Kinyarwanda shape. Ranges and de-grouping have to reach the
+        // tier already rewritten (Shona writes the unit after the SECOND operand of a range, so the tier
+        // would otherwise break the pair); the decimal spell-out and the class-6 concord pass have to follow
+        // it (the tier needs the digit beside its sign, and the concord pass needs to see which measure noun
+        // the tier just attached). Documented at length in normalize.ts's header.
+        return assembleClauses(normalizeShonaPost(SYMBOLS(normalizeShonaPre(input))), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
