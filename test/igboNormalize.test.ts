@@ -70,4 +70,61 @@ describe("igbo normalization", () => {
         // The decimal rule requires a digit on BOTH sides, so ordinary prose keeps its clause boundaries.
         expect(normalizeIgbo("Afọ 2020. Ọ dị mma.")).toBe("Afọ 2020. Ọ dị mma.");
     });
+
+    test("⚠ the unit WORD precedes the number even though the ABBREVIATION follows it", () => {
+        // This layer shipped with NO `units` table at all, so every metric abbreviation reached the phoneme
+        // string verbatim: `10 km` → *iɾi km*. `kg` was worse than a leak — it was PRONOUNCED, *iɾi anɔ na
+        // asatɔ kɡ*, a cluster asserting itself as Igbo phonology.
+        expect(String(phonemize("10 km", "ig"))).toBe("kilomita iɾi");
+        expect(String(phonemize("48 kg", "ig"))).toBe("kiloɡɾam iɾi anɔ na asatɔ");
+        expect(String(phonemize("24 cm", "ig"))).toBe("sentimita iɾi abʊɔ na anɔ");
+        // Order, established from the SPELLED-OUT instances — the ones that show what a reader says rather
+        // than how the abbreviation is typed. `kilomita` precedes a spelled numeral 330 times on ig.wikipedia
+        // and follows one 61 (84% noun-first), because an Igbo numeral follows the noun it counts (*ụlọ atọ*).
+        // Same split this layer already records for `%`: sign after the number, word before it.
+        expect(normalizeIgbo("10 km")).toBe("kilomita 10");
+        expect(normalizeIgbo("1500 mm")).toBe("milimita 1500");
+    });
+
+    test("mm is rainfall, and the corpus glosses its own abbreviation", () => {
+        // ⚠ `milimita`'s wiki hit count is a TRAP: the densest passage is a banknote list (*5 milimita 10
+        // milimita … dinar 1*), which is the Tunisian *millime*, a currency subunit. What settles the sense is
+        // the artifact, where all nine after-a-digit `mm` are rainfall and one line spells the word out beside
+        // the figure: *"mmiri ozuzo kwa afọ nke 580 milimita (22.8 in)"*.
+        expect(String(phonemize("1,100mm na 1,300mm", "ig"))).toBe(
+            "milimita otu puku na otu naɾɪ na milimita otu puku na naɾɪ atɔ",
+        );
+    });
+
+    test("⚠ `m` is REFUSED — the corpus contains a counterexample", () => {
+        // `m` has the HIGHEST after-a-digit exposure of any abbreviation (14, against mm's 9 and km's 7) and is
+        // still not declared. One of the 14 is *"a $60 m big-screen adaptation"*, where `m` is *million*; and
+        // `m` is the Igbo first-person singular pronoun, which makes the tier's one-letter-key trap sharper
+        // here than its own `Il-76s` example. The letter stays unread — silently, unlike `kg`.
+        expect(String(phonemize("$60 m", "ig"))).toBe("iɾi isii dollaɾ m");
+    });
+
+    test("the squared word is `skwea`, and the obvious candidate was the wrong word", () => {
+        // The artifact writes `km2` in ASCII (4 after a digit; it contains no `km²` at all). Declaring `km`
+        // WITHOUT a measure word made that worse, not better: the tier re-emits the exponent, and an ascii `2`
+        // is not a visible leak — it is a NUMBER, so `790 km2` read *"… kilomita abʊɔ"*, "790 kilometres two".
+        // ⚠ Both corpora write *"square kilomita"* and `square` attests ×154 — but every example is a proper
+        // noun (`P-Square`, `Cabot Square`, `Square Records`). The measure word is `skwea` (×44 / 19 articles),
+        // and every one of ITS examples is this slot: *"kilomita skwea 7,223 (maịl skwea 2,789)"*. Noun, then
+        // modifier, then number — `position: "after"` plus `unitPrefix`, which is that shape exactly.
+        expect(normalizeIgbo("790 km2")).toBe("kilomita skwea 790");
+        expect(String(phonemize("790 km²", "ig"))).toBe("kilomita skʷea naɾɪ asaa na iɾi itoolu");
+    });
+
+    test("⚠ rule 2b: a letter fused to a quantity, because unitPrefix moves the noun LEFT", () => {
+        // The artifact writes *"mpaghara ala198 km2"* with no space. Before units existed this read fine — the
+        // number path inserts its own boundary. The unit rule rewrites `198 km2` starting AT the digit, so the
+        // noun lands against `ala` and the utterance gained a fused word, *alakilomita*. A defect this layer
+        // INTRODUCED, one utterance in 459, caught by the corpus diff and not by any probe.
+        expect(normalizeIgbo("mpaghara ala198 km2")).toBe("mpaghara ala kilomita skwea 198");
+        // ⚠ Deliberately narrow — it fires only when a DECLARED UNIT follows, which is what makes the digits a
+        // quantity. A general letter/digit split would maul every alphanumeric designation in the corpus.
+        expect(normalizeIgbo("Il-76 na 1990")).toBe("Il-76 na 1990");
+        expect(normalizeIgbo("COVID19 na 2020")).toBe("COVID19 na 2020");
+    });
 });

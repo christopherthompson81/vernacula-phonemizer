@@ -1,0 +1,169 @@
+// WIKIPEDIA WORD ATTESTATION — ig. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ig",
+        "wiki": "ig.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "square",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 154,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…P-Square bu umu ejima abuo si Obodo Naijiria ana akpó Peter na Paul…",
+                "…Okoye na eti egwu nke R&B. Ha gúrù ma bupute album ha sina Square Records. Na Önwa iri na abuó 2011, ha mechara banyé na Konv…",
+                "…Cabot Square bụ obodo mepere emepe na Montreal, Quebec, Canada n'etiti m…",
+                "…Underground City, Montreal (Réso) n'egwú ugwu ugwu ahụ nke square ahụ. Ejikọtara ihe osise nwụnye na ihe ọkpụkpụ echiche n'im…",
+                "…abot, ịkwachaa osisi na ikpokọta irighiri ihe. == The Cabot Square Project == Cabot Square abụrụla ebe ndị na-akụzi ezi maka m…",
+                "…ikpokọta irighiri ihe. == The Cabot Square Project == Cabot Square abụrụla ebe ndị na-akụzi ezi maka mba mbụ na Inuit na Montr…"
+            ]
+            },
+        {
+                "word": "skwea",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 44,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ara ya gburugburu na-ekpuchi mpaghara dị ihe dị ka kilomita skwea 7,223 (maịl skwea 2,789), ma gụnye ụdị ebe obibi dị iche ic…",
+                "…na-ekpuchi mpaghara dị ihe dị ka kilomita skwea 7,223 (maịl skwea 2,789), ma gụnye ụdị ebe obibi dị iche iche dịka mmiri mepe…",
+                "…ikapa.Ọdọ mmiri ahụ n'onwe ya na-ekpuchi ihe dị ka kilomita skwea 900 (maịl skwea 350).Na 2 Febrụwarị 2003, a kpọpụtara Ọdọ m…",
+                "…ahụ n'onwe ya na-ekpuchi ihe dị ka kilomita skwea 900 (maịl skwea 350).Na 2 Febrụwarị 2003, a kpọpụtara Ọdọ mt Alaotra dịka a…",
+                "…Alaotra gentle lemur fọdụrụ naanị n'ime ihe dị ka kilomita skwea 220 nke ahịhịa amị ndị ka dị. N'ime afọ ndị na-adịbeghị any…",
+                "…eny.Mpaghara nnakọta mmiri ya na-ekpuchi ihe dị ka kilomita skwea 49,800. N'ime ya, kilomita skwea 7,025 dị n'ime mpaghara nn…"
+            ]
+            },
+        {
+                "word": "skwuea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilomita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 99,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Akụkọ ifo ahụ dị kilomita 3,000 na-ezo aka na-achọ a na-, ngwaọrụ na United States, n…",
+                "…na ndagwurugwu San Fernando. Ọ na-ekpuchi ihe dị ka square kilomita 469 (1,210 km2), [3] na ọ bụ oche Los Angeles County, nke b…",
+                "…hara, na akụkụ 2 na-eru nso na mmecha. Ala ahụ dị ihe dị ka kilomita 70 ruo 80 n'ogologo, na nkezi obosara nke kilomita 10. Lekk…",
+                "…he dị ka kilomita 70 ruo 80 n'ogologo, na nkezi obosara nke kilomita 10. Lekki ugbu a nwere ọtụtụ ụlọ obibi, ugbo ugbo, ebe e ke…",
+                "…ekki Free Trade Zone, nke na-ekpuchi ngụkọta nke 155 square kilomita na njedebe ọwụwa anyanwụ nke ala ahụ, bụ nke Gọmentị Steeti…",
+                "…steeti tụpụtara, nke na-ekpuchi mpaghara ọzọ nke 600 square kilomita. Ọ bụ Messrs Dar al Handersah, Shair na Partners, kwadebere…"
+            ]
+            },
+        {
+                "word": "mita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 213,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ọsọ mita 3000 ma ọ bụ mita 3000 bụ mmemme na-agba ọsọ nke egwu, nke…",
+                "…Ọsọ mita 3000 ma ọ bụ mita 3000 bụ mmemme na-agba ọsọ nke egwu, nke a na-akpọkarị \"3K\"…",
+                "…m na ​​lactic acid achọrọ maka Mile. N'egwuregwu ụmụ nwoke, mita 3000 abụrụla ịdọ aka ná ntị Olympic naanị dị ka otu agbụrụ…",
+                "…anya dị na asọmpi ime ụlọ IAAF ụwa. N'egwuregwu ụmụ nwanyị, mita 3000 bụ ihe omume a ma ama n'egwuregwu Olympic (1984 ruo 19…",
+                "…orld Championships in Athletics na 1996 Olympic Games, e ji mita 5000 dochie ya, ya na asọmpi ndị ọzọ IAAF haziri na-agbaso.…",
+                "…ihe mgbochi mita 80 bụ ihe mgbochi nke ụmụ nwanyị na-agba ruo 1972 na asọmpi…"
+            ]
+            },
+        {
+                "word": "milimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 47,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ugbu a na nke akụkọ ihe mere eme na akwụkwọ ego). Otu nde 5 milimita 10 milimita 20 milimita 50 milimita 100 milimita 200 milimi…",
+                "…e akụkọ ihe mere eme na akwụkwọ ego). Otu nde 5 milimita 10 milimita 20 milimita 50 milimita 100 milimita 200 milimita dinar 1 d…",
+                "…mere eme na akwụkwọ ego). Otu nde 5 milimita 10 milimita 20 milimita 50 milimita 100 milimita 200 milimita dinar 1 dinar Dinar 2…",
+                "…akwụkwọ ego). Otu nde 5 milimita 10 milimita 20 milimita 50 milimita 100 milimita 200 milimita dinar 1 dinar Dinar 2 Dinar 5 Ọ b…",
+                "…Otu nde 5 milimita 10 milimita 20 milimita 50 milimita 100 milimita 200 milimita dinar 1 dinar Dinar 2 Dinar 5 Ọ bụ na 26 Disem…",
+                "…limita 10 milimita 20 milimita 50 milimita 100 milimita 200 milimita dinar 1 dinar Dinar 2 Dinar 5 Ọ bụ na 26 Disemba 2013 ka ew…"
+            ]
+            },
+        {
+                "word": "sentimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 97,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…mpi n'ebumnobi bụ isi nke ịgba bọọlụ basketball (ihe dị ka sentimita 9.4 (ihe dị ka sentimita 24) na dayameta) site na hoop onye…",
+                "…e ịgba bọọlụ basketball (ihe dị ka sentimita 9.4 (ihe dị ka sentimita 24) na dayameta) site na hoop onye na-agbachitere (ihe dị k…",
+                "…4) na dayameta) site na hoop onye na-agbachitere (ihe dị ka sentimita 24). nkata dị sentimita 18 (cm 46) na dayameta gbagoro 10 ụ…",
+                "…hoop onye na-agbachitere (ihe dị ka sentimita 24). nkata dị sentimita 18 (cm 46) na dayameta gbagoro 10 ụkwụ (3.048 m) n'elu bọọd…",
+                "…ike iwepụ okwu otu narị. A gaakpọkarị osisi ahụ battens (7 sentimita nobosara), deals (karịa 7, naabụkarị sentimita 9 nobobosara…",
+                "…ụ battens (7 sentimita nobosara), deals (karịa 7, naabụkarị sentimita 9 nobobosara) na planks (11 sentimita n\"obosara); bọọdụ dị…"
+            ]
+            },
+        {
+                "word": "kilogram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 85,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…2010, ọ meriri ihe nkiri ọlaọcha na ihe omume ụmụ nwoke 55 kilogram ma kwughachi nke a n'afọ 2014 na ihe nrite ọlaọcha n'ihe om…",
+                "…a n'afọ 2014 na ihe nrite ọlaọcha n'ihe omume ụmụ nwoke 57 kilogram. Egwuregwu Commonwealth nke ụmụ nwoke 55 kilogram 57 kilogr…",
+                "…nwoke 57 kilogram. Egwuregwu Commonwealth nke ụmụ nwoke 55 kilogram 57 kilogram N'afọ 2018, o ritere otu n'ime ọla nchara n'asọ…",
+                "…logram. Egwuregwu Commonwealth nke ụmụ nwoke 55 kilogram 57 kilogram N'afọ 2018, o ritere otu n'ime ọla nchara n'asọmpi ụmụ nwok…",
+                "…2018, o ritere otu n'ime ọla nchara n'asọmpi ụmụ nwoke nke kilogram 57. 57 kilogram nke ụmụ nwoke O meriri nrite ọlaọcha na 57…",
+                "…otu n'ime ọla nchara n'asọmpi ụmụ nwoke nke kilogram 57. 57 kilogram nke ụmụ nwoke O meriri nrite ọlaọcha na 57 kilogram nke ụmụ…"
+            ]
+            },
+        {
+                "word": "kilomịta",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mịta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ụ onye nkuzi nke Angelo Taylor, onye nwetara ọla edo na ọsọ mịta nari ano na 2008 Summer Olympics, onye nkuzi Chris Brown, o…",
+                "…08 Summer Olympics, onye nkuzi Chris Brown, onye nke anọ na mịta nari anọ na 2008 Summer Olympic Games. Ugbu a Egbunike bụ o…",
+                "…rụ ọrụ ugbo ma na-enyekwa ego mgbazinye ka ngwaahịa ndi ọrụ mịta nnukwu mmịmmị. == Oge eji arụ ọrụ == Ọrụ ugbo nwere mgbe e…",
+                "…ma kpo ha chi Monye, onye gbapụtara onwe ya site na mgbalị mịta iri asaa nke e jidere n'agbanyeghị na Lions tụfuru usoro 2-…"
+            ]
+            }
+        ],
+    }
+    
