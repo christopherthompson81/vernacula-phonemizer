@@ -92,6 +92,20 @@ MARKERS = {
     # (playbook trap 34) — the same two graphemes are a different word one language over.
     "bal": "انت اینت ئنت اے ئے په پہ وتی بیت بیتنت کنت کننت کرت کتگ بوتگ بوتگین مروچی تها تهء تھا "
            "گون گوں گؤں منی تئی شه ئان هستنت دارنت داریت زانت هچ گشت آییءَ آیی چہ ین ایں مه جهل نیمگ",
+    # hmn (White Hmong / Hmoob Dawb, RPA): the ONLY contaminant is ENGLISH — Wikimedia Incubator's Wp/mww
+    # is written largely by translating English articles, so a paragraph that was never translated stays
+    # English, and the ordinary Hmong paragraphs around it are dense with untranslated English proper nouns.
+    # There is no close relative in this table to be diagnostic against: Green Hmong (hnj) has no project
+    # here, and it shares this function-word core anyway.
+    # ⚠ EVERY WORD HERE IS ≥3 LETTERS AND ENDS IN A TONE LETTER OR A VOWEL, which is what keeps the row
+    # safe: in RPA a word-final consonant letter is a TONE marker, not a coda, so `yog`, `cov`, `nyob`,
+    # `tus` cannot be truncations of anything and cannot collide with an English word.
+    # ⚠ SHORT RPA MONOSYLLABLES ARE DELIBERATELY ABSENT even though they are the commonest tokens: `ib`
+    # (one), `ob` (two), `li`, `no` (this), `ua` (do), `us`. `no` and `is` are English words, and a
+    # two-letter token is worth nothing as evidence either way.
+    "hmn": "lub ntawm rau cov yog thiab teb hauv nyob muaj kev los ntau neeg uas tau tus nws lus "
+           "chaws qhov feem tug nrog mus tshaj hmoob sib tsis siv lawv yam loj hom lwm hais ntiaj "
+           "xyoo tias raws txhua thiaj kuj tsuas nkaus tseem hnub tsev txiv poj niam",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "

@@ -1379,6 +1379,52 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "digit-adjacent in the corpus or on rn.wikipedia",
         "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
     },
+    hmn: {
+        // ⚠ WHITE HMONG (mww) SPECIFICALLY — `hmn` is a macrolanguage and nothing here is evidence about
+        // Green Hmong (hnj). And the haystack behind these refusals is the SMALLEST in this table after bal:
+        // there is NO Hmong Wikipedia at any code (hmn, mww and hnj all fail DNS; Wp/hnj does not exist on
+        // Incubator and Wp/hmn is one page, in English, saying hmn is a macrolanguage), so `attest.ts`
+        // cannot be run at all. The only Hmong text that exists is Incubator's `Wp/mww` — 112 pages, 190
+        // paragraphs — and that IS the corpus these counts are over, so there is no second tier to appeal
+        // to. `sources.ts` reports espeak does not ship this language either. Full argument in
+        // src/languages/hmong/normalize.ts.
+        degrees: "measured: SIX `°`, and the refusal has two halves. FIVE are temperatures (`6 mus rau -50 "
+            + "° C`, `1 mus rau 25 ° C`, `+45,4 ° C`, `-71,2 ° C`, `116,6 ° C`) and normalize.ts step 7 "
+            + "CONSUMES them unread, which is a downgrade from a wrong reading to a silence rather than a "
+            + "fix: what it replaces is the scale letter `C` reaching the IPA RAW — and in RPA `c` is a real "
+            + "onset, so a stray `C` is not even visibly foreign. No degree or scale word exists to put "
+            + "there: `sources.ts` says `scale-names [NONE] ° occurs, neither scale name in "
+            + "corpus/referee/espeak`, nothing follows `°` in this corpus but a bare letter, and no "
+            + "dictionary or phrasebook search returned one. The SIXTH is a COORDINATE (`ntawm 50 ° N. M.)`, "
+            + "a latitude) and is deliberately left alone, because a compass direction is CONTENTFUL where a "
+            + "scale name beside `° C` is not — the coordinate-only refusal hil, tl and yo also record",
+        plus: "measured: TWO `+`, neither of them arithmetic between two operands. One is METALINGUISTIC — "
+            + "the corpus's own sentence NAMING the symbol, `qhov kos npe ntxiv (+)` (\"the added-sign "
+            + "mark\"), the `za` stub-article shape. The other is a MEASUREMENT PLUS, `+45,4 ° C`, and the "
+            + "playbook's own convention is that a measurement plus is frequently omitted and that omitting "
+            + "it is LOSSLESS (`+45°` and `45°` are the same temperature). No Hmong plus word is attested "
+            + "digit-adjacent anywhere: `ntxiv` ×12 is the ordinary verb/adverb \"to add, additionally\" "
+            + "(`cov tswv yim ntxiv`), never an operator",
+        equals: "measured: TWO `=` and both are the same GLOSS construction inside one sentence, not a "
+            + "copula for a quantity: `'Ch.' = Suav lub npe, 'auto.' = autonym Court npe` — an abbreviation "
+            + "key in a list of Miao ethnonyms. ⚠ AND THE CANDIDATE WORD FAILS ITS SENSE CHECK, which is "
+            + "trap 37: `npaug` ×2 is both times *sib npaug* = \"balance/equilibrium\", in a sentence about "
+            + "the VESTIBULAR SYSTEM (`lub cev sib npaug siv lub vestibular system`), never equality",
+        times: "measured: `×` is ×0 in the corpus",
+        divide: "measured: `÷` is ×0 in the corpus",
+        "plus-minus": "measured: `±` is ×0 in the corpus",
+        "less-than": "measured: `<` is ×0 in the corpus",
+        "greater-than": "measured: `>` is ×0 in the corpus",
+        // ⚠ THERE IS DELIBERATELY NO `minus` KEY AND NO `exponent` KEY, and their absence is the point —
+        // the ln/za/cdo shape. hmn's two true negatives are temperatures (`-50 ° C`, `-71,2 ° C`); omitting
+        // a plus is lossless but omitting a MINUS INVERTS, and no Hmong word for a negative quantity is
+        // attested in the corpus, in any dictionary searched, or in espeak (which does not ship this
+        // language). The two `²` are `17.125.187 km²` and its sibling, and an exponent word needs a head
+        // noun — hmn has no sourced unit noun to head it, because the corpus writes `km` as the symbol every
+        // time and its one spelled-out candidate (`kis lus mev`, ×1) decomposes into `lus Mev` = SPANISH,
+        // which this corpus uses in that sense twice. So `review.ts --lang hmn` stays RED on both classes.
+        // An accepted silence claims a drop is correct; neither of these is.
+    },
     bal: {
         // ⚠ THE EVIDENCE BEHIND EVERY LINE HERE IS UNUSUAL AND IS STATED ONCE, because this language has
         // LESS to source from than any other entry in this table. Balochi has NO referee (kaikki 0,
