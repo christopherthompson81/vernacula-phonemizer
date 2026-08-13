@@ -57,6 +57,14 @@ const UNITS: Record<string, [string, string]> = {
     // ⚠ ⟨W⟩ IS CAPITAL — watt is named after Watt, and #763 resolves a one-letter symbol case-SENSITIVELY,
     // so a lower-case ⟨w⟩ is not a unit. The multi-letter kw/hz/gb below still fold, so sloppy case reads.
     g: ["gram", "grams"], t: ["ton", "tons"], W: ["watt", "watts"],
+    // ⚠ ⟨ha⟩ WAS NOT LEAKING, IT WAS MIS-READING — the one unit English got wrong, and the reason no gate
+    // caught it. `12,700,000 ha` read *…hˈɑː*: the letters are a pronounceable English word, so nothing
+    // survived as ASCII and nothing vanished, and the leak classes, the DROP counter and the corpus diff
+    // are all blind to it by construction (see tools/normalization/misread.ts). The evidence is this
+    // language's OWN artifact, which glosses the unit against acres in the same clause — "farms in 2010
+    // (−32% since 2000) covering 12,700,000 ha or 31,382,383 acres" — and `hectare`/`hectares` are already
+    // in g2p-dict.tsv and the accent lexicon, so nothing new is being asserted about the word.
+    ha: ["hectare", "hectares"],
     hz: ["hertz", "hertz"], khz: ["kilohertz", "kilohertz"], mhz: ["megahertz", "megahertz"],
     ghz: ["gigahertz", "gigahertz"], kb: ["kilobyte", "kilobytes"], mb: ["megabyte", "megabytes"],
     gb: ["gigabyte", "gigabytes"], tb: ["terabyte", "terabytes"], kw: ["kilowatt", "kilowatts"],

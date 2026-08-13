@@ -74,7 +74,16 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
     // read out as letter names. Owning them here settles the ordering. Single-letter `m` is deliberately
     // NOT here: ⚠ a one-letter unit key matches alphanumeric designations, and the `100m`/`200m`
     // that occur are swim events, not measurements.
+    // ⚠ ⟨ha⟩ ⟨l⟩ ⟨L⟩ BELONG HERE FOR THE SAME REASON, and declaring them ONLY in the shared tier is
+    // audibly wrong rather than merely redundant. Left to the tier, `100 ha` read *ˈeːk ʃˈeː ɦˈeːkʈəɾ* —
+    // शे is the COMBINING hundred, and the bare-hundred rewrite that produces शंभर for `100 km` never got
+    // to run. Same path, same number word: `100 ha` → शंभर हेक्टर. Their words are sourced in marathi.ts.
+    // ⚠ Single-letter ⟨g⟩ is NOT here either, and its counter-example is the one `NOT_VERSION` cannot
+    // see — a SPACED version designation, `802.11 g`. The shared guard requires the letter glued to the
+    // number, because `12.5 g` is a real measurement of exactly the spaced shape; this local rule has no
+    // version guard at all, so the key would be worse here than in the tier.
     "km": "किलोमीटर", "cm": "सेंटीमीटर", "mm": "मिलीमीटर", "kg": "किलोग्रॅम",
+    "ha": "हेक्टर", "l": "लिटर", "L": "लिटर",
 };
 const UNIT_ALT = Object.keys(UNIT_WORD)
     .sort((a, b) => b.length - a.length)

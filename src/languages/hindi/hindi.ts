@@ -251,7 +251,33 @@ const SYMBOLS = makeSymbolNormalizer({
     // `m` — मीटर ×8, and digit-adjacent bare `m` is ×0 in this corpus, so the one-letter-key hazard is
     // checked rather than assumed. `घन` was declared below but unreachable without it: the exponent branch
     // resolves the unit from `units` first, so `5 m³` read as the bare letter *ˈɛm*.
-    units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मीटर"] },
+    // ⚠ ⟨g⟩ ⟨l⟩ ⟨L⟩ ⟨ha⟩ WERE MIS-READING, NOT LEAKING — `10 ha` read *d̪ˈəs hˈɑː* and `10 l` *d̪ˈəs ˈɛɫ*,
+    // the English letter name, out of a Devanagari engine. `tools/normalization/misread.ts` is the probe.
+    //   लीटर     85/20  the litre article NAMES BOTH SYMBOLS: "लीटर आयतन की मात्रक है। इसके दो आधिकारिक
+    //                   चिह्न (ℓ) और (L) हैं" — and writes them in use, "1 L ≡ 1 dm3", "मोल प्रति लीटर (mol/L)"
+    //   हेक्टेयर  74/14  every example a digit-adjacent area glossed against acres — "1,281.67 हेक्टेयर
+    //                   (3,167.1 एकड़)", "2,266.69 हेक्टेयर (5,601.1 एकड़)"
+    //   ग्राम    130/10  the gram article, definitional — "ग्राम (… इसे gramme भी लिखा जाता है; एस आई इकाई…)"
+    // ⚠ हेक्टर IS NOT THE WORD, and it probes better than the one that is (56 tokens / 12 arts). It is
+    // HECTOR, the Trojan prince — "यूनानी मिथों के अनुसार 'हेक्टर' एक ट्रोजन सेनापति और राजकुमार था". The
+    // hectare is हेक्टेयर, and taking the higher count would have put a mythological name in the unit slot.
+    // ⚠ ग्राम IS A HOMOGRAPH and most of its 130 tokens are the OTHER sense — ग्राम पंचायत, "village
+    // council". That is harmless HERE and would not be in a lexicon: this key emits the word only after a
+    // number, where Hindi's village is not a possible reading, and the unit sense is the one the gram
+    // article itself defines. The count is not the evidence; the definitional hit is.
+    // ⚠ THIS TIER IS INHERITED BY SEVEN OTHER LANGUAGES, so these four keys are declared for them too.
+    // `makeNativeHindi` resolves `overrides.symbols ?? SYMBOLS`, and awa, bgc, bho, hne, mag, mai and rkt
+    // pass no override — mr is the one rider that does. Adding a key here therefore declares a word for
+    // eight engines from ONE wiki's evidence, and it is stated rather than left to be discovered: the
+    // words below are sourced from hi.wikipedia and were NOT separately attested against Awadhi, Haryanvi,
+    // Bhojpuri, Chhattisgarhi, Magahi, Maithili or Rangpuri. That is the same footing the pre-existing
+    // km/cm/mm/kg have stood on since they were declared, and the alternative — eight tiers differing only
+    // in which SI units they omit — is worse. A rider that writes a different word should override.
+    // ⚠ ONE-LETTER KEYS MEASURED (trap 46): over the artifact `<digit> g`, `<digit> l`, `<digit> L` are ×0
+    // apiece, matching the bare-`m` check the line below already records, and Hindi declares no
+    // `magnitudes`, so no ligature can put a stray letter where the tier expects a unit.
+    units: { km: ["किलोमीटर"], cm: ["सेंटीमीटर"], mm: ["मिलीमीटर"], kg: ["किलोग्राम"], m: ["मीटर"],
+        g: ["ग्राम"], l: ["लीटर"], L: ["लीटर"], ha: ["हेक्टेयर"] },
     // `km²` → वर्ग किलोमीटर. Undeclared, the tier left the whole match alone and `km²` reached the IPA as a
     // Latin fragment — `5 km²` read as *pˈaː̃t͡ʃ ˈʊkm*, worse than the raw text, and the review gate could not
     // flag it as a DROP because deleting the `²` changes the output.

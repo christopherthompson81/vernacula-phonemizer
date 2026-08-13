@@ -1,28 +1,177 @@
 // WIKIPEDIA WORD ATTESTATION — mr. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "mr",
-    "wiki": "mr.wikipedia.org",
-    "tier": "wikipedia (register-restricted)",
-    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-    // `--context` set to exactly this string.
-    "context": "अंकगणित गणितीय क्रिया",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "mr",
+        "wiki": "mr.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "हेक्टर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…हेक्टर हे क्षेत्रफळ मोजण्याचे एकक आहे. सहसा जमिनीचे क्षेत्रफळ मोजण…",
+                "…्यासाठी हे एकक वापरतात. मेट्रिक परिमाणांमधील मीटर या एककाशी हेक्टर अशा रितीने समीकरणबद्ध आहे : १०० मीटर X १०० मीटर = १ हेक्टर…",
+                "…हेक्टर अशा रितीने समीकरणबद्ध आहे : १०० मीटर X १०० मीटर = १ हेक्टर = १०००० वर्ग मीटर आणि १०० आर = १ हेक्टर…",
+                "…मीटर X १०० मीटर = १ हेक्टर = १०००० वर्ग मीटर आणि १०० आर = १ हेक्टर…",
+                "…हेक्टर मोरेनो (स्पॅनिश: Héctor Moreno; १७ जानेवारी १९८८, कुल्याकान…",
+                "…शॉनिशा हेक्टर ही अँटिग्वाची क्रिकेटपटू असून ती लीवर्ड आयलंड्स, त्रिनबागो…"
+            ]
+            },
+        {
+                "word": "ग्रॅम",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 88,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…किलोग्रॅम हे वजनाचे एकक आहे. एका किलोग्रॅमचे एक हजार ग्रॅम होतात. याचे एस. आय. संक्षिप्त नाम kg आहे. == मोजण्याच्या पद…",
+                "…ू केल्यावर जगभरात वैज्ञानिक मापनांसाठी सी.जी.एस. (सेंटिमीटर-ग्रॅम-सेकंद) ही पद्धत सुरू झाली. यांतली सेंटिमीटर आणि ग्रॅम ही मू…",
+                "…िमीटर-ग्रॅम-सेकंद) ही पद्धत सुरू झाली. यांतली सेंटिमीटर आणि ग्रॅम ही मूल एकके फार लहान असल्यामुळे मोजमापांचे आकडे फार मोठे अस…",
+                "…त्या डब्यात मावत नाहीत. काही बाहेर राहतात. वस्तुमानाचे एकक ग्रॅम व आकारमानाचे एकक घन सेंटीमीटर म्हणून ग्रॅम प्रति घनसेंटीमीट…",
+                "…वस्तुमानाचे एकक ग्रॅम व आकारमानाचे एकक घन सेंटीमीटर म्हणून ग्रॅम प्रति घनसेंटीमीटर हे घनतेचे एकक आहे. वरील उदाहरणात तांदळाच्…",
+                "…त्यांचे आकारमान भिन्न असेल. याचे व्यवहारातील उदाहरण बघू. १० ग्रॅम शुद्ध सोन्याचा एक ठोकळा केल्यास, त्याचे आकारमान ०.५२ घनसेंट…"
+            ]
+            },
+        {
+                "word": "लिटर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…क्युबिक सेंटीमीटर) डब्यात मावणाऱ्या द्रवाबरोबरचे आकारमान हे लिटर होय. तसेच, १००० मिली लिटर = १ लिटर…",
+                "…मावणाऱ्या द्रवाबरोबरचे आकारमान हे लिटर होय. तसेच, १००० मिली लिटर = १ लिटर…",
+                "…द्रवाबरोबरचे आकारमान हे लिटर होय. तसेच, १००० मिली लिटर = १ लिटर…",
+                "…त मावणाऱ्या द्रवाबरोबरचे आकारमान हे मिलीलिटर होय. १००० मिली लिटर = १ लिटर.…",
+                "…या द्रवाबरोबरचे आकारमान हे मिलीलिटर होय. १००० मिली लिटर = १ लिटर.…",
+                "…पट्टी संख्या ५६४ घोषित झोपडपट्टी ३५३ पाणीपुरवठा १३०० दशलक्ष लिटर / दिवस पाणी निचरा ५६७ दशलक्ष लिटर / दिवस अखेरचे अद्यतनित :ज…"
+            ]
+            },
+        {
+                "word": "किलोमीटर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…किलोमीटर अंतर मोजण्याचे एकक आहे. किमी हे किलोमीटरचे लघुरूप आहे. १,००…",
+                "…याचे एकक आहे. किमी हे किलोमीटरचे लघुरूप आहे. १,००० मीटर = १ किलोमीटर.…",
+                "…२०१६ उन्हाळी ऑलिंपिकमधील पुरुषांची ५० किलोमीटर चाल शर्यत रियो दी जानेरोमध्ये १९ ऑगस्ट रोजी पार पडली. == वे…",
+                "…२०१६ उन्हाळी ऑलिंपिकमधील पुरुष २० किलोमीटर चाल शर्यत रियो दी जानेरोमधील पाँटल येथे पार पडली. == वेळापत…",
+                "…चौरस किलोमीटर (संक्षेपः किमी२) हे क्षेत्रफळ मोजण्याचे एक एकक आहे. १ किमी२…"
+            ]
+            },
+        {
+                "word": "मीटर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…मीटर (meter or metre) (चिन्ह: m) हे आंतरराष्ट्रीय प्रमाण पद्धतीत…",
+                "…ानतात, त्यामुळे मीटरची निःसंदिग्ध अशी व्याख्या करता येते. १ मीटर = १०० सेंटीमीटर १००० मीटर = १ किलोमीटर…",
+                "…संदिग्ध अशी व्याख्या करता येते. १ मीटर = १०० सेंटीमीटर १००० मीटर = १ किलोमीटर…",
+                "…एक चौरस मीटर म्हणजे १ मीटर लांब आणि १ मीटर रुंद एवढ्या चौरसाने व्यापलेल्…",
+                "…एक चौरस मीटर म्हणजे १ मीटर लांब आणि १ मीटर रुंद एवढ्या चौरसाने व्यापलेल्या क्षेत्रफळाच…",
+                "…एक चौरस मीटर म्हणजे १ मीटर लांब आणि १ मीटर रुंद एवढ्या चौरसाने व्यापलेल्या क्षेत्रफळाचे माप होय. प्रत्…"
+            ]
+            },
+        {
+                "word": "सेंटीमीटर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…सेंटीमीटर हे मोजमाप करण्याचे एकक आहे. १० मिलीमीटर म्हणजे एक सेंटीमीटर…",
+                "…सेंटीमीटर हे मोजमाप करण्याचे एकक आहे. १० मिलीमीटर म्हणजे एक सेंटीमीटर…",
+                "…चा संबंध जूलशी वॅट (जे / एस) च्यासारखाच आहे.अ‍ॅम्पीयर मूळतः सेंटीमीटर – ग्रॅम – युनिट्सच्या दुसऱ्याप्रणाली मध्ये विद्युत प्रवाहाच…",
+                "…ुनिटचा दहावा भाग म्हणून परिभाषित केला होता.अ‍ॅम्पीयर मूळत: 'सेंटीमीटर – ग्रॅम-सेकंद' युनिट प्रणालीमध्ये विदयुत प्रवाहाच्या युनिटच…",
+                "…ंबेपियर म्हणून ओळखले जाते. जे असे परिभाषित केले होते की, एक सेंटीमीटर अंतरावरच्या दोन तारांमध्ये दोन डायन्स प्रति सेंटीमीटर लांबी…",
+                "…ी, एक सेंटीमीटर अंतरावरच्या दोन तारांमध्ये दोन डायन्स प्रति सेंटीमीटर लांबीवर बल निर्माण करणाऱ्या विदयुत प्रवाहाचे प्रमाण होय.…"
+            ]
+            },
+        {
+                "word": "मिलीमीटर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…सेंटीमीटर हे मोजमाप करण्याचे एकक आहे. १० मिलीमीटर म्हणजे एक सेंटीमीटर…",
+                "…ळी असतो. पुरूषांसाठी- वजन- ७.२६ किलोग्रॅम, परिघ- ११० ते १३० मिलीमीटर. स्त्रियांसाठी- वजन- ४ किलोग्रॅम, परिघ- ९५ ते ११० मिलीमीटर.…",
+                "…मिलीमीटर. स्त्रियांसाठी- वजन- ४ किलोग्रॅम, परिघ- ९५ ते ११० मिलीमीटर. == खेळाचे स्वरूप व नियम == या खेळात एकावेळी एकच खेळाडू असत…",
+                "…े. एप्रिल ते जून उन्हाळा असतो.सरासरी वार्षिक पर्जन्यमान ६०० मिलीमीटर असते. == लोकजीवन == == प्रेक्षणीय स्थळे == == नागरी सुविधा…",
+                "…गेली, तेंव्हापासून आंतरराष्ट्रीय इंच हा नेमका २५.५४ एम एम (मिलीमीटर) इतका ठरविण्यात आला.१२ इंचाचा एक फूट होतो. एका यार्डमध्ये ३…",
+                "…शतक === २००५ - मुंबई व परिसरात २४ तासात जवळजवळ १ मीटर (९९५ मिलीमीटर) पाउस. महापूरात शेकडो मृत्युमुखी. २०११ - मोरोक्कोमध्ये सी.१…"
+            ]
+            },
+        {
+                "word": "किलोग्रॅम",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…किलोग्रॅम हे वजनाचे एकक आहे. एका किलोग्रॅमचे एक हजार ग्रॅम होतात. याच…",
+                "…्रीय मापन पद्धतीनुसार, सी.जी.एस. पद्धतीऐवजी एम.के.एस. (मीटर-किलोग्रॅम-सेकंद) ही लांबी-वस्तुमान-काळ मोजण्याची नवी पद्धत वापरात आली…",
+                "…रान्समध्ये ठेवलेल्या एका विशिष्ट ठोकळ्याच्या वस्तुमानाला एक किलोग्रॅम असे म्हणतात..1 == बाह्य दुवे == नॅशनल इन्स्टिट्यूट ऑफ स्टॅं…",
+                "…राशी आहे. वस्तुमानाचे आंतरराष्ट्रीय गणना (SI) पद्धतीतील एकक किलोग्रॅम असून, सेंटिमीटर-ग्रॅम-सेकंद (CGS) पद्धतीतील एकक ग्रॅम आहे.…",
+                "…रंतु दैनंदिन व्यवहारात वजनाचे माप म्हणून वस्तुमानाची ग्रॅम, किलोग्रॅम ही एकके वापरली जातात. वस्तुमान माहित नसलेल्या वस्तूचे वस्तु…",
+                "…हिमाचल प्रदेशातील भारतीय किकबॉक्सर आहे. तो पुरुषांच्या −51 किलोग्रॅम फुल कॉन्टॅक्ट गटात स्पर्धा करतात. त्यांनी वाको इंडिया किकबॉ…"
+            ]
+            },
+        {
+                "word": "किलोग्राम",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…हे बल मोजण्याचे एक एकक आहे.हे, एक किलोग्राम वस्तूमान असलेल्या पदार्थास १ मीटर प्रती सेकंद२ इतकी गती देण…",
+                "…लोन्यूटन=१००० न्यूटन पृथ्वीवर १ किलोन्यूटन सूमारे १०१.९७१६२ किलोग्राम भाराइतके असते. परंतु प्रत्यक्ष वापरात याला ढोबळमानाने १०० इ…",
+                "…एम.के.एस.(मीटर किलोग्राम सेकंद) पद्धतीत द्रवरूप पदार्थ मोजण्याचे एकक. १० सेंटी मीटर…",
+                "…रा राशीवर अवलंबून नसते त्याना मूलभूत एकक म्हणतात. जसे: मीटर,किलोग्राम,सेकंद,केल्व्हिन, मोल (२) साध्य एकक (Derived quantity/Unit)…",
+                "…धवन अंतराळ केंद्रावरून प्रक्षेपित केला. == वर्णन == वजन-९६० किलोग्राम प्रक्षेपण यान-भारताने विकसित केलेले पी एस एल व्ही- सी १४ या…",
+                "…ेकंद (प्रतीक: से, काळाचे एकक), मीटर (मी, लांबी), किलोग्रॅम (किलोग्राम, वस्तुमान), अँपिअर (A, विद्युत धारा), केल्विन (K, थर्मोडायन…"
+            ]
+            },
+        {
+                "word": "हेक्टेअर",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
             "word": "बरोबर आहे",
             "verdict": "absent",
@@ -66,5 +215,6 @@
             "substringOnly": 0,
             "examples": []
         }
-    ],
-}
+        ],
+    }
+    

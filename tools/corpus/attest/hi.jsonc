@@ -1,25 +1,89 @@
 // WIKIPEDIA WORD ATTESTATION — hi. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "hi",
-    "wiki": "hi.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "hi",
+        "wiki": "hi.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "ग्राम",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 130,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…ग्राम (ब्रिटिश अंग्रेज़ी में इसे gramme भी लिखा जाता है; एस आई इक…",
+                "…ाई माधोपुर जिले की चौथ का बरवाड़ा तहसील में आने वाली प्रमुख ग्राम पंचायत है ! ग्राम पंचायत का सबसे बड़ा गाँव झोंपड़ा है जिसमे…",
+                "…चौथ का बरवाड़ा तहसील में आने वाली प्रमुख ग्राम पंचायत है ! ग्राम पंचायत का सबसे बड़ा गाँव झोंपड़ा है जिसमें मीणा जनजाति का न…",
+                "…ं मीणा जनजाति का नारेड़ा गोत्र मुख्य रूप से निवास करता हैं। ग्राम पंचायत में झोंपड़ा, बगीना, सिरोही, नाहीखुर्द एवं झड़कुंड गा…",
+                "…बगीना, सिरोही, नाहीखुर्द एवं झड़कुंड गाँव शामिल है। झोंपड़ा ग्राम पंचायत की कुल जनसंख्या 2011 की जनगणना के अनुसार 5184 है और…",
+                "…पंचायत की कुल जनसंख्या 2011 की जनगणना के अनुसार 5184 है और ग्राम पंचायत में कुल घरों की संख्या 1080 है। ग्राम पंचायत की सबसे…"
+            ]
+            },
+        {
+                "word": "लीटर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 85,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…लीटर आयतन की मात्रक है। इसके दो आधिकारिक चिह्न (ℓ) और (L) हैं। य…",
+                "…्वीकृत किया गया है। इसकी SI मात्रक है घन मीटर यानि (m3). एक लीटर समतुल्य है 0.001 घन मीटर के और 1 घन डेसीमीटर (dm3) दर्शित क…",
+                "…मीटर (dm3) दर्शित किया जाता है। == मूल == == व्याख्या == एक लीटर है घन डेसीमीटर के लिये विशेष नाम (1 L = 1 dm3). अतएव 1 L ≡…",
+                "…रसायन विज्ञान में मोलरता के उल्लेख की सबसे सामान्य इकाई एक लीटर में उपस्थित मोलों की संख्या है। अतः इसकी इकाई मोल प्रति लीट…",
+                "…ीटर में उपस्थित मोलों की संख्या है। अतः इसकी इकाई मोल प्रति लीटर (mol/L) है। १ मोल प्रति लीटर को प्रायः 1 M कहा जाता है। एक…",
+                "…या है। अतः इसकी इकाई मोल प्रति लीटर (mol/L) है। १ मोल प्रति लीटर को प्रायः 1 M कहा जाता है। एक लीटर विलयन में किसी विलेय के…"
+            ]
+            },
+        {
+                "word": "हेक्टेयर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…मिरबरणी नदी पर बांधों की सूची: कोडाइमेलागैन एनीकट, 1,281.67 हेक्टेयर (3,167.1 एकड़) नाथियुनी एनीकट, 1,049.37 हेक्टेयर (2,593.0 ए…",
+                "…, 1,281.67 हेक्टेयर (3,167.1 एकड़) नाथियुनी एनीकट, 1,049.37 हेक्टेयर (2,593.0 एकड़) कन्नडियन एनीकट, 2,266.69 हेक्टेयर (5,601.1 ए…",
+                "…, 1,049.37 हेक्टेयर (2,593.0 एकड़) कन्नडियन एनीकट, 2,266.69 हेक्टेयर (5,601.1 एकड़) अरियानायागिपुरम एनीकट, 4,767.30 हेक्टेयर (11…",
+                "….69 हेक्टेयर (5,601.1 एकड़) अरियानायागिपुरम एनीकट, 4,767.30 हेक्टेयर (11,780.3 एकड़) पलवूर एनीकट, 3,557.26 हेक्टेयर (8,790.2 एकड…",
+                "…कट, 4,767.30 हेक्टेयर (11,780.3 एकड़) पलवूर एनीकट, 3,557.26 हेक्टेयर (8,790.2 एकड़) सुथमल्ली एनीकट, 2,559.69 हेक्टेयर (6,325.1 ए…",
+                "…, 3,557.26 हेक्टेयर (8,790.2 एकड़) सुथमल्ली एनीकट, 2,559.69 हेक्टेयर (6,325.1 एकड़) मरुदुर एनीकट, 7,175.64 हेक्टेयर (17,731.4 एक…"
+            ]
+            },
+        {
+                "word": "हेक्टर",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 56,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…यूनानी मिथों के अनुसार \"हेक्टर\" एक ट्रोजन सेनापति और राजकुमार था। वह ट्रौय के युद्ध के सबस…",
+                "…,००० यूनानी सैनिक को मारा था। ग्रीक लेखक \"होमर\" के हिसाब से हेक्टर एक शान्ति-प्रिय, विचारशील, निडर, ज़िम्मेदार बेटा, पती और बा…",
+                "…स कोई बुरा मकसद नहीं था। == व्युत्पत्ति == यूनानी भाषा में \"हेक्टर\" का मतलब 'अपने पास होना' या 'पकड़ना' होता है। एक और लेखक के…",
+                "…जो सब कुछ जोड़े रखता है\"। == ऐतिहासिक युद्ध == == एजाक्स == हेक्टर के भाई हेलेनस को एक आकाशवाणी में यह पता चलता है कि हेक्टर क…",
+                "…= हेक्टर के भाई हेलेनस को एक आकाशवाणी में यह पता चलता है कि हेक्टर की मृत्यु एजाक्स के हाथों नहीं लिखी गई थी। इस आकाशवाणी के ब…",
+                "…एजाक्स के हाथों नहीं लिखी गई थी। इस आकाशवाणी के बल पर चलते हेक्टर दोनो सेनाओ को इकट्ठा करके किसी भी एक यूनानी योद्धा को लड़ने…"
+            ]
+            },
         {
             "word": "दशमलव",
             "verdict": "attested",
@@ -124,5 +188,6 @@
                 "…ियाँ (algorithms for compression) ट्री-सर्च अल्गोरिद्म (min-max तथा alpha-beta) क्रिप्टोग्राफी के अल्गोरिद्म == इतिहास == प्र…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

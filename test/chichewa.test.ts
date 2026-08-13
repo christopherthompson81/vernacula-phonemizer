@@ -218,4 +218,21 @@ describe("Chichewa symbol tier", () => {
         // it is pinned because the whole construction (`kilomita pa ola`) comes from ONE wiki sentence.
         expect(phonemize("480 km/h", "nya")).toBe("makiɽomita mazana anaji ⁿdi makumi asanu ⁿdi atatu pa oɽa");
     });
+
+    // ⚠ THE MASS/VOLUME/AREA HALF OF THE SAME DEFECT AS ⟨cm⟩ ABOVE — pronounceable letter runs, no ASCII
+    // surviving, nothing vanishing. The artifact's own `25.5 g (0,60 mpaka 0,90 oz)` read *…zisanu ɡ*.
+    // ⚠ ny.wikipedia has ZERO token hits for every one of these words, so the evidence is outside it: the
+    // Chichewa Chalero New Testament, a Malawian agricultural-extension corpus, MBC news and a Malawian
+    // newspaper. `gramu`'s only wiki hit is INSTAGRAM.
+    test("units that MIS-READ rather than leak — ⟨kg⟩ ⟨g⟩ ⟨l⟩ ⟨ha⟩, sourced off the wiki", () => {
+        expect(phonemize("10 kg", "nya")).toBe("makiɽoɡaɽamu kʰumi");   // "makilogalamu 32", John 19:39
+        expect(phonemize("10 ha", "nya")).toBe("mahekitaɽa kʰumi");     // "pa mahekitala 240", MBC news
+        expect(phonemize("10 l", "nya")).toBe("maɽita kʰumi");          // "malita 100", John 2:6
+        expect(phonemize("10 L", "nya")).toBe("maɽita kʰumi");
+        // ⚠ magalamu RESTS ON ONE SENTENCE ("Ikani magalamu 15 pa phando") and is pinned as such, so that
+        // a later pass finds the thinness recorded rather than rediscovers it.
+        expect(phonemize("10 g", "nya")).toBe("maɡaɽamu kʰumi");
+        // ⚠ PREFIXED, like every other unit here — and that is the order all four sourced sentences use.
+        expect(phonemize("240 ha", "nya")).toBe("mahekitaɽa mazana awiɽi ⁿdi makumi anaji");
+    });
 });

@@ -1,25 +1,160 @@
 // WIKIPEDIA WORD ATTESTATION — nya. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "nya",
-    "wiki": "ny.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "nya",
+        "wiki": "ny.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kilogalamu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilogramu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilogalam",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magalamu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gramu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…(yomwe nthawi zambiri imasindikizidwa ndi IG, Insta kapena gramu) ndi chithunzi chaku America komanso kanema wogawana nawo m…"
+            ]
+            },
+        {
+                "word": "malitala",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "malitilo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hekitala",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mahekitala",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…land pansi pa malamulo a Metropolitan Commons Act 1878. Ndi mahekitala makumi asanu ndi atatu (89 hectares) a malo obiriwira, omwe…"
+            ]
+            },
+        {
+                "word": "ekala",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…$ 140 miliyoni mu 2021), kapena pafupifupi masenti awiri pa ekala ($ 4.74 / km2). == Zolemba ==…"
+            ]
+            },
+        {
+                "word": "maekala",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ye yomwe inakakamiza amwenye kukhalanso. Izi zidakulitsanso maekala omwe amalimidwa ndi makina, ndikuwonjezera zotsalira zamisi…",
+                "…Ngakhale kuti Mtsinje wa Sacramento umatulutsa madzi okwana maekala 22,600 miliyoni chaka chilichonse, madziwo amayenda kwambir…"
+            ]
+            },
+        {
+                "word": "galamu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "malita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
         {
             "word": "tiliyoni",
             "verdict": "absent",
@@ -357,15 +492,6 @@
             "examples": [
                 "…mbana komaliza 2-0, ndi penalty yomwe idagoledwa pambuyo pa masekondi 106 ndi Mohamed Salah komanso chigoli cholowa m'malo mwa Di…"
             ]
-        },
-        {
-            "word": "kilogalamu",
-            "verdict": "absent",
-            "bounded": true,
-            "tokenHits": 0,
-            "articles": 0,
-            "substringOnly": 0,
-            "examples": []
         },
         {
             "word": "mamita",
@@ -722,5 +848,6 @@
                 "…y yemwe adagoletsa mayadi 20 (18 m). Liverpool idalinganiza mphindi ziwiri pambuyo pake; kuwombera kochokera kwa Kennedy kudakw…"
             ]
         }
-    ],
-}
+        ],
+    }
+    

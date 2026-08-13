@@ -21,6 +21,77 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "sentimetro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…mga ito, na may mga nakatayong sangang humahaba hanggang 60 sentimetro. Mabalahibo ang mga dulo ng mga sangang ito, samantalang pa…",
+                "…naman at bilohaba ang mga dahon na may habang 2 hanggang 5 sentimetro. Sumisibol ang mga asul na bulaklak nito sa gawing itaas na…",
+                "…raniwan) o lanceolate ang mga dahon nito na may habang 5–15 sentimetro at luwang na 2–8 sentimetro. May hugis trompeta ang mga bul…",
+                "…a dahon nito na may habang 5–15 sentimetro at luwang na 2–8 sentimetro. May hugis trompeta ang mga bulaklak na may diyametrong 3–5…",
+                "…hugis trompeta ang mga bulaklak na may diyametrong 3–5 mga sentimetro, at karaniwang puti ang kulay. == Mga sanggunian == == Mga…",
+                "…uni upang matiyak ang katatagan nito. Ini-angat ito nang 70 sentimetro upang makayanan nito ang lindol na may magnitud na 7.2. Bin…"
+            ]
+            },
+        {
+                "word": "kilogramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 44,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ang kilogramo ay isang metrikong yunit na naglalarawan ng masa. Katumbas…",
+                "…ang kilo na may sagisag na kg o kgs. Katumbas ng opisyal na kilogramo ang masa ng partikular na piraso ng platino-iridyo nakatago…",
+                "…ga bagay. Mayroon na ngayon mga pagsubok upang ilarawan ang kilogramo sa ibang paraan, halimbawa ang pagtukoy ng bilang mga atomo…",
+                "…partikular na temperatura. Bahagyang mas mahigit ang isang kilogramo kaysa 2.2 mga libra. Katumbas ng isang tonelada ang 1,000 m…",
+                "…ysa 2.2 mga libra. Katumbas ng isang tonelada ang 1,000 mga kilogramo. Nasa bandang isang kilogramo ang isang litro ng tubig. Ang…",
+                "…isang tonelada ang 1,000 mga kilogramo. Nasa bandang isang kilogramo ang isang litro ng tubig. Ang lathalaing ito na tungkol sa…"
+            ]
+            },
+        {
+                "word": "miligramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…a isang sampol tulad ng biodiesel. Ito ang dami ng beis, sa miligramo ng potassium hydroxide (hidroksido potasiko) na kailangan u…",
+                "…nlapi; ang isang bahagi ng isang milyong kilogramo ay isang miligramo at hindi isang mikrokilogramo. == Pagsulat ng SI yunit == A…",
+                "…ndo bilang ang yunit ng oras sa kanyang sistemang milimetro-miligramo-segundo ng mga yunit. Nagsabi ang British Association for t…",
+                "…a) ng keso ay naglalaman ng pitong gramo ng proteina at 200 miligramo ng calcio. Sa nutrisyon, isang pinatapang na gatas ang keso…"
+            ]
+            },
+        {
+                "word": "sentimetro kuwadrado",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ba ng hayop ang krema. Sa kasalukuyan, sapat na ang 500 mga gramo ng halayang petrolyo o kaya ng pagkit ng parapina, at 60 mg…",
+                "…g halayang petrolyo o kaya ng pagkit ng parapina, at 60 mga gramo ng tuyong yerba. === Mga kagamitan === Sa pagluluto ng ungg…",
+                "…kilala sa Ingles bilang resin serate) na binubuo ng 350 mga gramo ng rosin o rosina (dagta mula sa mga puno ng aguho at pino)…",
+                "…o rosina (dagta mula sa mga puno ng aguho at pino), 150 mga gramo ng dilaw na pagkit, at 500 mga gramo ng mantika, upang maka…",
+                "…guho at pino), 150 mga gramo ng dilaw na pagkit, at 500 mga gramo ng mantika, upang makabuo ng 1,000 mga gramo. Isang bahagya…",
+                "…it, at 500 mga gramo ng mantika, upang makabuo ng 1,000 mga gramo. Isang bahagyang pampasigla o istimulanteng antiseptiko ang…"
+            ]
+            },
+        {
                 "word": "segundo",
                 "verdict": "attested",
                 "bounded": true,

@@ -1,25 +1,73 @@
 // WIKIPEDIA WORD ATTESTATION — de. Written by tools/normalization/attest.ts.
-//
-// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-// idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
-//
-// `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
-// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-// lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
-//
-// `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-// exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
-// that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
-// compound — so for those the examples are not a courtesy, they are the entire finding.
-//
-// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-// speech and the sense against the examples before using any of this to justify a reading.
-{
-    "language": "de",
-    "wiki": "de.wikipedia.org",
-    "tier": "wikipedia",
-    "findings": [
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "de",
+        "wiki": "de.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "Gramm",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 176,
+                "articles": 17,
+                "substringOnly": 3,
+                "examples": [
+                "…Ein Gramm ist eine physikalische Einheit für die Masse, sein Einheite…",
+                "…che Einheit für die Masse, sein Einheitenzeichen ist g. Ein Gramm ist gleich ein Tausendstel eines Kilogramms (kg), der SI-Ba…",
+                "…einheit für die Masse. In dieser Art, als 0,001 kg, ist das Gramm in nationalen Einheitengesetzen und in Normen definiert. ==…",
+                "…nze entsprach. == Definition == Das Kilogramm und damit das Gramm sind dadurch festgelegt, dass der Planck-Konstante h ein fe…",
+                "…h ein fester Wert zugewiesen ist. Eine erste Definition von Gramm und Kilogramm stammen aus der Zeit des revolutionären Frank…",
+                "…ist (ein Liter für das Kilogramm). Präzise formuliert: Ein Gramm destilliertes Wasser nimmt bei einer Temperatur von 3,98 °C…"
+            ]
+            },
+        {
+                "word": "Hektar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 356,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Das oder der Hektar, schweizerisch die Hektare (Einzahl), ist eine Maßeinheit d…",
+                "…einem quadratischen Feld mit der Seitenlänge 100 Meter. Der Hektar bzw. die Hektare ist in Deutschland, Österreich und der Sch…",
+                "…hweiz eine gesetzliche Einheit. == Wortherkunft == Das Wort Hektar ist dem Französischen entlehnt und beruht auf Griechisch he…",
+                "…tet also Hekto-Ar = 100 Ar. == Geschichte == 1868 wurde das Hektar Bestandteil der Maß- und Gewichtsordnung des Norddeutschen…",
+                "…samten im Vorjahr gegründeten Deutschen Reich in Kraft. Ein Hektar entsprach vier Morgen je 2500 m². 1879 wurde der Hektar vom…",
+                "…Ein Hektar entsprach vier Morgen je 2500 m². 1879 wurde der Hektar vom Internationalen Büro für Maß und Gewicht (Bureau Intern…"
+            ]
+            },
+        {
+                "word": "Liter",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 468,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…Der (außerhalb der Schweiz auch: das) Liter ist eine Einheit für das Volumen und wird durch die Einheit…",
+                "…yle \\mathrm {L} } symbolisiert oder mit Ltr. abgekürzt. Ein Liter entspricht einem Kubikdezimeter (dm³). Ein Würfel mit einer…",
+                "…ner Kantenlänge von 10 cm hat demnach ein Volumen von einem Liter. Der Liter gehört zwar nicht zum Internationalen Einheitens…",
+                "…änge von 10 cm hat demnach ein Volumen von einem Liter. Der Liter gehört zwar nicht zum Internationalen Einheitensystem (SI),…",
+                "…mit dem SI aber zugelassen. Durch nationale Gesetze ist der Liter eine gesetzliche Maßeinheit. == Schreibweise == Der deutsch…",
+                "…e Maßeinheit. == Schreibweise == Der deutsche Einheitenname Liter [ˈliːtɐ, auch: ˈlɪtɐ] stammt von französisch litre [aus mit…"
+            ]
+            },
         {
             "word": "ist gleich",
             "verdict": "absent",
@@ -59,5 +107,6 @@
             "substringOnly": 0,
             "examples": []
         }
-    ],
-}
+        ],
+    }
+    

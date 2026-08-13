@@ -365,4 +365,18 @@ describe("german normalization", () => {
         expect(phonemize("5 m³", "de")).toContain("kˈuːbɪkmeːtɐ"); // compound, one word
         expect(phonemize("BMW M3", "de")).toContain("m dʁaɪ̯");    // not a volume
     });
+
+    // ⚠ THESE FOUR WERE NOT LEAKING, THEY WERE MIS-READING — the class tools/normalization/misread.ts
+    // exists to see. `10 ha` read *t͡seːn haː*, a German interjection; `10 g` read as the letter's own
+    // sound. Nothing in the tree could flag either: no ASCII survives into the IPA and nothing VANISHES,
+    // so neither a leak class nor the differential DROP test can reach it.
+    test("units that MIS-READ rather than leak — ⟨g⟩ ⟨ha⟩ ⟨l⟩ ⟨L⟩", () => {
+        // Each word definitional on de.wikipedia, and each article names its own symbol.
+        expect(phonemize("10 g", "de")).toBe("t͡seːn ɡʁam");
+        expect(phonemize("10 ha", "de")).toBe("t͡seːn hˈɛktaːɐ̯");
+        expect(phonemize("10 l", "de")).toBe("t͡seːn lˈɪtɐ");
+        expect(phonemize("10 L", "de")).toBe("t͡seːn lˈɪtɐ"); // ⚠ both cases are official for the litre
+        // ⚠ A DOTTED DESIGNATION IS NOT A QUANTITY — the artifact's only `<digit> g` is a Wi-Fi standard.
+        expect(phonemize("802.11g", "de")).not.toContain("ɡʁam");
+    });
 });

@@ -410,8 +410,22 @@ const SYMBOLS = makeSymbolNormalizer({
     // `m` is declared because a digit-adjacent bare `m` in German is a metre (`4892 m Höhe`, `133 m/s`).
     // ⚠ Without it `Kubik`/`Quadrat` below cannot reach a bare metre, so `5 m³` reads as the raw letter while
     // `5 km³` reads correctly.
+    // ⚠ ⟨g⟩ ⟨ha⟩ ⟨l⟩ ⟨L⟩ WERE NOT LEAKING, THEY WERE MIS-READING — the class `tools/normalization/misread.ts`
+    // exists to see. `10 ha` read *t͡seːn haː*, which is a German interjection; `10 g` read as the letter.
+    // Nothing in the tree could flag either, because neither the ASCII nor a DROP survives into the IPA.
+    // Each word is definitional on de.wikipedia and each names its own symbol:
+    //   Gramm  176/17  "Ein Gramm ist eine physikalische Einheit für die Masse, sein EINHEITENZEICHEN IST G"
+    //   Hektar 356/20  "Das oder der Hektar … ist eine Maßeinheit der Fläche … in Deutschland, Österreich
+    //                   und der Schweiz eine gesetzliche Einheit"
+    //   Liter  468/18  "Der … Liter ist eine Einheit für das Volumen … mit \mathrm{L} symbolisiert"
+    // ⚠ ⟨l⟩ AND ⟨L⟩ BOTH, the litre's documented exception to the one-letter rule (`resolveUnitSymbol`).
+    // ⚠ THE ONE-LETTER KEYS MEASURED, not assumed (trap 46), and measured against the shape the tier will
+    // actually build — a number, an optional MAGNITUDE, then the key. Over the artifact `<digit> g` is ×1
+    // and it is `802.11g`, a Wi-Fi standard, which `NOT_VERSION` already rejects; `<digit> l` and
+    // `<digit> L` are ×0. German's magnitudes are `Million(en)`/`Milliarde(n)` and none of them ends in a
+    // unit letter, so the ligature trap that refused Tagalog's ⟨g⟩ does not arise here.
     units: { km: ["Kilometer"], cm: ["Zentimeter"], mm: ["Millimeter"], kg: ["Kilogramm"], mg: ["Milligramm"],
-        m: ["Meter"] },
+        m: ["Meter"], g: ["Gramm"], ha: ["Hektar"], l: ["Liter"], L: ["Liter"] },
     // ⚠ AN UNDECLARED MEASURE WORD MAKES THE TIER ABANDON THE WHOLE MATCH, so `5 km²` reads as *fʏnf km* —
     // the abbreviation reaching the phoneme sink verbatim and the QUANTITY lost, not merely its power.
     // German FUSES the measure word onto the front, which is `compound`: *Quadratkilometer*, *Kubikmeter*.

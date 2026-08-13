@@ -46,6 +46,18 @@ describe("English text normalization", () => {
         expect(normalizeEnglish("the km marker")).toBe("the km marker"); // bare abbrev in prose → untouched
     });
 
+    // ⚠ THE ONE UNIT ENGLISH GOT WRONG, AND IT WAS NOT A LEAK. `12,700,000 ha` read *…hˈɑː* — the letters
+    // are a pronounceable English word, so nothing survived as ASCII and nothing vanished, and the leak
+    // classes, the DROP counter and the corpus diff are blind to that by construction. The sentence is
+    // this language's own artifact, glossing the unit against acres in the same clause.
+    // See tools/normalization/misread.ts.
+    test("the hectare, which MIS-READ rather than leaked", () => {
+        expect(normalizeEnglish("covering 12,700,000 ha or 31,382,383 acres"))
+            .toBe("covering 12,700,000 hectares or 31,382,383 acres");
+        expect(normalizeEnglish("1 ha")).toBe("1 hectare"); // count agreement, like every other unit here
+        expect(normalizeEnglish("ha ha")).toBe("ha ha");    // only after a NUMBER
+    });
+
     test("roman numerals: cardinal after context words, regnal ordinal otherwise", () => {
         expect(normalizeEnglish("world war ii")).toBe("world war 2");
         expect(normalizeEnglish("chapter iv")).toBe("chapter 4");

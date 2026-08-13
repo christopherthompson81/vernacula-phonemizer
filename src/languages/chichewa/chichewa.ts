@@ -115,7 +115,46 @@ const SYMBOLS = makeSymbolNormalizer({
     percent: ["peresenti"],
     currency: { "$": ["madola"], "£": ["mapaundi"] },
     currencyPrefix: true,
-    units: { km: ["makilomita"], cm: ["sentimita"], mm: ["milimita"], mi: ["mailosi"] },
+    // ⚠ ⟨kg⟩ ⟨g⟩ ⟨l⟩ ⟨ha⟩ — THE MASS/VOLUME/AREA HALF OF THE DEFECT THIS FILE ALREADY NAMES FOR ⟨cm⟩.
+    // `10 kg` read *kʰumi kɡ* and `10 ha` *kʰumi ha*, which is the same failure as the 150cm one recorded
+    // in the header: a pronounceable letter run, no ASCII surviving, nothing vanishing, invisible to every
+    // gate in the tree. `tools/normalization/misread.ts` is the probe that finds it.
+    // ⚠ ny.WIKIPEDIA IS BARREN FOR ALL FOUR AND THAT IS NOT AN ANSWER ABOUT CHICHEWA. `attest.ts` returns
+    // 0 token hits for makilogalamu, kilogalamu, malita, lita, magalamu, galamu and hekitala; `gramu`'s
+    // single hit is INSTAGRAM ("IG, Insta kapena gramu"), the trap-37 shape. The evidence is therefore
+    // corpus evidence from outside the wiki, every sentence read for its sense:
+    //   makilogalamu  Chichewa Chalero NT, Rev 6:6, giving BOTH numbers in one verse — "Kilogalamu imodzi
+    //                 ya tirigu … makilogalamu atatu a barele"; John 19:39 "wolemera pafupifupi
+    //                 makilogalamu 32"; corroborated in the independent JW Chichewa rendering of Rev 6:6,
+    //                 so it is not one translator's coinage; and a Malawian agricultural-extension corpus
+    //                 writes it as a rate — "makilogalamu 2000 pa hekitala imodzi"
+    //   mahekitala    MBC (the state broadcaster), Chichewa news — "chimanga chomwe analima pa mahekitala
+    //                 240"; the same extension corpus uses `pa hekitala` as the per-hectare idiom
+    //                 throughout; and ny.wikipedia's one hit glosses it against the sign, "mahekitala
+    //                 makumi asanu ndi atatu (89 hectares)"
+    //   malita        Chichewa Chalero NT, John 2:6 "Uliwonse unali ndi malita 100 kapena kupitirirapo",
+    //                 and a Malawian newspaper quoting a dairy farmer — "patsiku ndimagulitsa malita 18"
+    //   magalamu      ⚠ THE THIN ONE, recorded as thin: ONE sentence, from the extension corpus — "Ikani
+    //                 magalamu 15 pa phando" (apply 15 g per planting station). Unambiguously the mass
+    //                 unit, and morphologically the stem inside the well-attested makilogalamu, but there
+    //                 is no second sentence and no dictionary entry. Declared because the corpus DOES
+    //                 write the key — `25.5 g (0,60 mpaka 0,90 oz)`, a genuine gram glossed against
+    //                 ounces — so refusing leaves a live defect to protect a word that was read.
+    // ⚠ ⟨lita⟩ AND ⟨litala⟩ ARE NOT THE LITRE, and the monolingual Mtanthauziramawu wa Chinyanja says so:
+    // `lita` is a VERB (to bend without snapping) and `litala` a class-5 noun for the grass hut put over a
+    // termite mound. Only the `ma-` form carries the litre, which is the sn `marita`/`lita` trap met from
+    // the other side — there the plural was unavailable, here the SINGULAR is.
+    // ⚠ ⟨ekala⟩ STAYS THE ACRE, confirmed rather than assumed: the dictionary defines it in yards, and the
+    // extension corpus contrasts the two in one breath at the correct 2.47 ratio — "18500 pa hekitala
+    // kapena 7400 pa ekala". So the hectare could not be taken from the word this corpus writes most.
+    // ⚠ Plural forms throughout, matching `makilomita`/`mailosi`, and `unitPrefix` below already puts the
+    // noun BEFORE its number — which is the order every sourced sentence above uses (`mahekitala 240`,
+    // `makilogalamu 32`, `malita 100`, `magalamu 15`).
+    // ⚠ The one-letter key ⟨l⟩ is measured, not assumed (trap 46): `<digit> l` is ×0 in the artifact, as
+    // is `<digit> L`, and Chichewa declares no `magnitudes` at all (the header records why), so no ligated
+    // linker can put a stray letter where the tier expects a unit — the trap that refused Tagalog's ⟨g⟩.
+    units: { km: ["makilomita"], cm: ["sentimita"], mm: ["milimita"], mi: ["mailosi"],
+        kg: ["makilogalamu"], g: ["magalamu"], l: ["malita"], L: ["malita"], ha: ["mahekitala"] },
     unitPrefix: true,
     unitPer: "pa",
     rateDenominators: { h: "ola" },

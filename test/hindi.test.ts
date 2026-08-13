@@ -178,6 +178,20 @@ describe("Hindi ordinal suffix boundary", () => {
         expect(phonemize("802.11m", "hi")).toContain("ˈɛm"); // a dotted designation is not a quantity
     });
 
+    // ⚠ MIS-READING, NOT LEAKING (tools/normalization/misread.ts). `10 ha` read *d̪ˈəs hˈɑː* and `10 l`
+    // *d̪ˈəs ˈɛɫ* — the ENGLISH LETTER NAME, out of a Devanagari engine, with no ASCII surviving and
+    // nothing vanishing, so no leak class or differential DROP test in the tree could see it.
+    test("units that MIS-READ rather than leak — ⟨g⟩ ⟨l⟩ ⟨L⟩ ⟨ha⟩", () => {
+        // लीटर — the litre article names BOTH symbols: "इसके दो आधिकारिक चिह्न (ℓ) और (L) हैं".
+        expect(phonemize("10 l", "hi")).toBe("d̪ˈəs lˈiːʈəɾ");
+        expect(phonemize("10 L", "hi")).toBe("d̪ˈəs lˈiːʈəɾ");
+        // ⚠ हेक्टेयर, NOT हेक्टर — the latter probes HIGHER (56/12) and is HECTOR, the Trojan prince.
+        expect(phonemize("10 ha", "hi")).toBe("d̪ˈəs ɦˈeːkʈeːjəɾ");
+        // ग्राम is a homograph — most of its wiki tokens are ग्राम पंचायत, "village council" — which is
+        // harmless in this slot, since the key emits the word only after a number.
+        expect(phonemize("10 g", "hi")).toBe("d̪ˈəs ɡɾˈaːm");
+    });
+
     test("⚠ accented Latin stays ONE word for the foreign reader (17 languages)", () => {
         // `[A-Za-z]+` ended the token at a diacritic, so the letter carrying it became an unclaimed gap read as
         // an English LETTER NAME and the rest of the word started over: `São Paulo` read *ˈɛs ˈə ˈoᶷ pʰˈɔːloᶷ* —

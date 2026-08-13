@@ -272,9 +272,38 @@ function numberStressIdx(token: string): number | undefined {
  *          `hmn`'s tone-letter finals are — those recur because the LANGUAGE writes them; a library
  *          catalogue string recurs only where a references section quotes English. One instance, named
  *          here so a regression on it is recognised rather than rediscovered.
- *   ⚠ `cm` IS DELIBERATELY STILL ABSENT, and its defect is a different class: Tagalog's g2p reads ⟨c⟩ as
- *   /k/, so `10 cm` does not LEAK, it MIS-READS — *sampˈu km*, indistinguishable from a kilometre. Fixing
- *   that is a reading bug, not an undeclared unit, and `sentimetro` is not sourced here.
+ * · ⟨cm⟩ ⟨kg⟩ ⟨mg⟩ — THE MIS-READING SET, and ⟨cm⟩ is the case the previous pass left open with the
+ *   note that it "does not LEAK, it MIS-READS": Tagalog's g2p reads ⟨c⟩ as /k/, so `10 cm` came out
+ *   *sampˈu km* — the letter pair, silent to every leak class, DROP counter and corpus diff in the tree.
+ *   `misread.ts` now names the class mechanically, and the four keys below are what it reports for tl.
+ *     sentimetro  39 tokens / 20 arts   *"humahaba hanggang 60 sentimetro"*, *"5–15 sentimetro at luwang
+ *                                       na 2–8 sentimetro"*, *"Ini-angat ito nang 70 sentimetro"* — every
+ *                                       example a genuine LENGTH, digit-adjacent and postposed
+ *     kilogramo   44 / 20               the kilogram article NAMES THE SYMBOL: *"Ang kilogramo ay isang
+ *                                       metrikong yunit na naglalarawan ng masa … ang kilo na may SAGISAG
+ *                                       NA KG o kgs"* — definitional, and as good as this evidence gets
+ *     miligramo    4 / 4                thin but unambiguous: *"200 miligramo ng calcio"*, and the SI
+ *                                       article's own *"sistemang milimetro-miligramo-segundo"*
+ *   ⚠ THE CORPUS DOES NOT WRITE TWO OF THE THREE, and that is not a reason to decline. Over the mined
+ *   artifact `cm` is ×0, `mg` ×0 and `kg` ×1 (*"masa o kasalansanang 40 kg (90 lbs)"*). A rare token is
+ *   evidence about a 400-line artifact, not about Tagalog — these are SI units, tl.wikipedia writes all
+ *   three words in their own unit articles, and the pre-existing `km`/`m`/`mm` were declared off the same
+ *   wiki evidence. Declining here would leave a silent defect in place to protect a diff.
+ *   ⚠ ⟨g⟩ IS REFUSED, AND THE COUNTER-EXAMPLE IS THE LIGATED MAGNITUDE — trap 46 through a door the
+ *   existing measurement cannot see. `gramo` is the best-attested word of the four (49 tokens / 20 arts,
+ *   *"500 mga gramo ng halayang petrolyo"*, *"pitong gramo ng proteina"*), and scanning the artifact for
+ *   the tier's own shape — a digit, an optional space, `g`, the trailing guard — gives 0 matches with the
+ *   guard and 0 without it. That measurement is WRONG, because the tier's pattern admits a MAGNITUDE
+ *   between the number and the unit, and Tagalog's magnitudes are declared in their ligated forms three
+ *   lines below: `milyong`, `bilyong`, `trilyong`, `libong` all END IN ⟨g⟩. Declared, the rule split the
+ *   linker off the magnitude and `11 milyong mga Pilipino` read *labiŋʔisˈa mˈiljon ɡɾˈamo maŋˈa
+ *   pilipˈino* — eleven million GRAMS of Filipinos. Re-measured against the right shape, `<digit>
+ *   <ligated magnitude>` is ×21 in the artifact (`109 milyong katao`, `28 bilyong dolyar`, `3.9 milyong
+ *   tao`) against 0 genuine grams. Refused on 21:0, and the number that decided it was invisible to the
+ *   scan that would normally settle a one-letter key.
+ *   ⚠ Nothing here can reach a CAPITAL: the two digit-adjacent capitals in the artifact are `2GO` (a
+ *   shipping line) and `15 GB`, and one-letter symbols resolve EXACT-CASE (`resolveUnitSymbol`), with
+ *   case-folding restricted to multi-character symbols precisely so a bare ⟨G⟩ is never read as grams.
  * · `rateDenominators` ⟨s⟩ → ⟨segundo⟩, which is what makes the artifact's own `299,792,458m/s` compose
  *   instead of stranding the `/s` as raw letters. tl.wikipedia glosses the whole rate: *"metro BAWAT
  *   SEGUNDO para sa belosidad"*, and *"(metro bawat segundo na kuwadrado)"* for m/s² — the tier's existing
@@ -301,7 +330,8 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH DECLARED, which is the litre's documented exception to the one-letter rule
     // (see `resolveUnitSymbol`): both cases are official for this unit, the exact branch is case-sensitive,
     // and tl.wikipedia's own litre article names them together — "L o l ang daglat ng litro".
-    units: { km: ["kilometro"], kilometro: ["kilometro"], m: ["metro"], mm: ["milimetro"],
+    units: { km: ["kilometro"], kilometro: ["kilometro"], m: ["metro"], cm: ["sentimetro"], mm: ["milimetro"],
+        kg: ["kilogramo"], mg: ["miligramo"],
         l: ["litro"], L: ["litro"], ha: ["ektarya"],
         katao: ["katao"], naninirahan: ["naninirahan"] },
     rateDenominators: { s: "segundo" },

@@ -186,6 +186,23 @@ describe("tagalog normalization — symbols, numbers, ordinals, times", () => {
         expect(phonemize("23 m", "tl")).toBe("dalawampˈut tatlˈo mˈetɾo");
     });
 
+    test("units — ⟨cm⟩ ⟨kg⟩ ⟨mg⟩, the keys that MIS-READ rather than leaked", () => {
+        // ⚠ THE DEFECT THIS PINS IS NOT A LEAK. Tagalog's g2p reads ⟨c⟩ as /k/, so `10 cm` came out
+        // *sampˈu km* — the letter pair, pronounceable, plausible, and invisible to every leak class, DROP
+        // counter and corpus diff in the tree. `tools/normalization/misread.ts` is the probe that names it.
+        expect(phonemize("10 cm", "tl")).toBe("sampˈu sentimˈetɾo");
+        expect(phonemize("150cm", "tl")).toBe("sandaʔˈan ʔˈat limampˈu sentimˈetɾo");
+        expect(phonemize("40 kg", "tl")).toBe("ʔapatnapˈu kiloɡɾˈamo"); // the artifact's own "40 kg (90 lbs)"
+        expect(phonemize("200 mg", "tl")).toBe("dalawˈaŋ daʔˈan miliɡɾˈamo");
+        // ⚠ AND THE ONE THAT IS REFUSED. `gramo` is the best-attested of the four (49/20), but Tagalog's
+        // magnitudes are declared LIGATED — `milyong`, `bilyong`, `libong` all end in ⟨g⟩ — and the tier's
+        // pattern admits a magnitude between the number and the unit. Declared, `11 milyong mga Pilipino`
+        // read as eleven million GRAMS of Filipinos. ×21 in the artifact against 0 genuine grams.
+        expect(phonemize("11 milyong mga Pilipino", "tl")).toBe("labiŋʔisˈa mˈiljoŋ maŋˈa pilipˈino");
+        // ⚠ A CAPITAL IS NOT A UNIT. One-letter symbols resolve exact-case, so `2GO` stays a shipping line.
+        expect(phonemize("2GO Travel", "tl")).not.toContain("ɡɾˈamo");
+    });
+
     test("the m/s rate composes, which is what ⟨s⟩ → ⟨segundo⟩ is declared for", () => {
         // tl.wikipedia glosses the whole frame: "metro bawat segundo para sa belosidad".
         expect(phonemize("299 m/s", "tl")).toBe("dalawˈaŋ daʔˈan ʔˈat sijamnapˈut sijˈam mˈetɾo bˈawat seɡˈundo");

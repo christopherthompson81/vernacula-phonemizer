@@ -124,6 +124,24 @@ describe("marathi text normalization", () => {
         expect(mr("35 mm")).toBe(mr("पस्तीस मिलीमीटर"));
     });
 
+    // ⚠ MIS-READING, NOT LEAKING (tools/normalization/misread.ts). `10 ha` read *d̪ˈəɦaː hˈɑː* and `10 l`
+    // *d̪ˈəɦaː ˈɛɫ* — the ENGLISH LETTER NAME out of a Devanagari engine — with no ASCII surviving and
+    // nothing vanishing, so no leak class and no differential DROP test in the tree could reach it.
+    test("units that MIS-READ rather than leak — ⟨ha⟩ ⟨l⟩ ⟨L⟩, and the ⟨g⟩ that is refused", () => {
+        // ⚠ हेक्टर IS THE HECTARE IN MARATHI AND HECTOR IN HINDI — the same string, opposite verdicts.
+        expect(mr("10 ha")).toBe(mr("दहा हेक्टर"));
+        expect(mr("10 l")).toBe(mr("दहा लिटर"));
+        expect(mr("10 L")).toBe(mr("दहा लिटर")); // ⚠ both cases are official for the litre
+        // ⚠ DECLARED IN normalize.ts AS WELL AS THE TIER, and not for tidiness: left to the tier alone,
+        // `100 ha` read *ˈeːk ʃˈeː …* — शे is the COMBINING hundred, and the bare-hundred rewrite that
+        // gives शंभर for `100 km` never ran.
+        expect(mr("100 ha")).toBe(mr("शंभर हेक्टर"));
+        // ⚠ ⟨g⟩ REFUSED. ग्रॅम is the best-attested word of the set (88/20), but the artifact's only
+        // `<digit> g` is `802.11 g` — a Wi-Fi standard written WITH A SPACE, which `NOT_VERSION` cannot
+        // see: that guard requires the letter GLUED, because `12.5 g` is a real spaced measurement.
+        expect(mr("802.11 g")).not.toContain(phonemizeWord("ग्रॅम"));
+    });
+
     test("ranges take ते only when ASCENDING — a sports score is not a range", () => {
         // 4 of the corpus's 17 hyphenated pairs are results (5-3, 7-2, ६-६, २६-००) where ते is wrong, and
         // every one of them is descending or equal; all 11 genuine ranges ascend.
