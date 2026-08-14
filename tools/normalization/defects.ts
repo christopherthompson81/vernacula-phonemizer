@@ -1918,6 +1918,63 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "in corpus/referee/espeak`, and nothing follows the ° in this corpus but the bare letter. "
             + "espeak ships no Mooré, so there is no phonetic fallback to derive one from",
     },
+    tg: {
+        // ⚠ EVERY COUNT BELOW IS OVER `tools/corpus/mined/tg.jsonc` (455 retained segments of a 237,973-segment
+        // tg.wikipedia dump), corroborated where stated by `insource:` REGEX article counts against that wiki,
+        // and argued in `src/languages/tajik/normalize.ts` and
+        // `docs/investigations/tg_normalization_investigation.md`. tg has NO FLEURS corpus and espeak ships no
+        // Tajik at all, so the artifact, `attest.ts` against tg.wikipedia and Wikidata are the whole haystack;
+        // the wikipron/epitran referees are WORD lists and can say nothing about any sign.
+        //
+        // ⚠ `minus` AND `equals` ARE DELIBERATELY ABSENT, and each for a different reason — the omissions are
+        // the point of this block, not an oversight.
+        //   `minus`: Tajik HAS real negatives (`ҳарорати миёнаи моҳи январ -4`, `-9`, `-7,8 °C`, `–26°С`) and
+        //   no word for them. `манфӣ` is attested ×37 in 20 articles and fails on SENSE every time —
+        //   "ҷонишини манфӣ" is a negative PRONOUN, a grammar term; "иттилооти манфӣ" is negative information;
+        //   and `Манфӣ` is a Libyan politician's surname. Omitting a minus INVERTS a value where omitting a
+        //   plus is lossless, so this stays a red, unclosed defect (playbook trap 24).
+        //   `equals`: it IS read — `1 доллар = 100 сент` becomes *як доллар баробар аст ба сад сент*, from the
+        //   corpus's own phrasing («Як километри мураббаъ баробар аст ба:»). The rule is guarded to a Cyrillic
+        //   or digit operand on both sides, so `review.ts`'s synthetic Latin probe `x = y` reports DROPPED and
+        //   is right to: the artifact's Latin-operand instances are optics formulae (`D = ℓlgI 0 /I = k λ ℓ`)
+        //   and EasyTimeline markup (`ScaleMinor = gridcolor:lightgrey`), which are not statements about
+        //   quantities at all. That is a guard, not a refusal, so it does not belong in this table.
+        plus: "measured: `+` ×17 in 10 segments and NOT ONE IS ARITHMETIC. Seven are a MEASUREMENT plus on a "
+            + "temperature (`+16°С`, `+37°С`, `аз +24°С то +36°С`, `+28`, `+26`, `+15`, `+22,2 °C`), where "
+            + "the sign is redundant with the reading and omitting it is lossless — the playbook's trap-48 "
+            + "finding, and the reason a plus may never borrow the minus's argument. The remaining ten are "
+            + "DESIGNATIONS: a UTC offset (`UTC+5`), a diplomatic format (`«С5+1»`), two display specs "
+            + "(`HD+ (1280x768)`, `FHD + 1080x2400`), a product name (`Super AMOLED Plus`) and a dialling "
+            + "code written twice (`Тел.: +992 (3522)`, `Факс: +992`). ⚠ AND THE WORD FAILS ON REGISTER "
+            + "INDEPENDENTLY: `ҷамъ` is Wikidata's tg label for ADDITION (Q32043) and all 29 of its "
+            + "tg.wikipedia instances are `ҷамъ намудан`, to COLLECT/gather (`ҷамъ намудани далелҳо`) — "
+            + "trap 37's wrong-register shape, which is harder to catch than a wrong word because the "
+            + "citation looks correct",
+        "plus-minus": "measured: ZERO. `±` does not occur in the artifact at all, and no tolerance is "
+            + "written any other way. Nothing a word could fix",
+        divide: "measured: ZERO. `÷` does not occur in the artifact. The corpus's only division-shaped "
+            + "notation is the slash, and every digit-flanked slash in it is either a genuine fraction "
+            + "(`1/3 ҳиссаи`, `3/4 тамоми силоҳҳо` — read by normalize.ts step 10 as *як сеюм* / *се чорум*), "
+            + "a RATE (`нафар/км²`, `кВт/соат` — read through the tier's `дар`) or a STREET ADDRESS "
+            + "(`кӯчаи Ҳусейнзода, 31/1`, `Хиёбони Абӯалӣ Сино, 29/31`), which is why that rule is bounded "
+            + "by numerator < denominator ≤ 10",
+        "less-than": "measured: ZERO. `<` does not occur in the artifact",
+        "greater-than": "measured: `>` ×1, and it is NOT A COMPARISON — it is the historical-linguistics "
+            + "DERIVATION arrow in an etymology: `Исфара ( > аз *’spr «сипар» дар суғдӣ )`, \"Isfara (< from "
+            + "*’spr 'shield' in Sogdian)\". Reading it as \"greater than\" would turn a sound-change note "
+            + "into arithmetic. The comparative word is not the blocker and would not help: `зиёда аз` "
+            + "(\"more than\") is everywhere in this corpus, spelled, in exactly the sentences that make a "
+            + "comparison — trap 48's shape, where the word is available and the SIGN is not the language's",
+        times: "measured: `×` ×2, both in ONE sentence, and both a DIMENSION rather than a product: "
+            + "`Бадминтонро дар майдони 13,4×5,2 м (як ба як) ё 13,4×6,1 м (ҷуфт-ҷуфт)` — the badminton "
+            + "court, singles and doubles. Beside them the corpus writes the same shape with Cyrillic `х` "
+            + "(`16 х 25 миллиметр`, ×2) and with Latin `x` (`1080x2400`, `1280x768`, ×9). ⚠ NO OPERATOR "
+            + "WORD IS SOURCEABLE: `зарб` is Wikidata's tg label for MULTIPLICATION (Q40276) and is the "
+            + "abstract NOUN — nothing attests it, or anything else, as what a reader says BETWEEN two "
+            + "operands. `ба` appears in that very sentence (`як ба як`) and there it means \"one against "
+            + "one\", the singles format, not \"one by one\" — the same word in the same line meaning "
+            + "something else, which is exactly why a bare count could not settle it",
+    },
     sn: {
         // ⚠ EVERY REFUSAL BELOW IS MEASURED OVER `tools/corpus/mined/sn.jsonc` (439 deduplicated segments) AND
         // ARGUED IN `src/languages/shona/normalize.ts`'s header. Shona has NO FLEURS corpus, NO wikipron, a

@@ -8,24 +8,10 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
+import { normalizeTajik, normalizeTajikInitialisms } from "./normalize.ts";
 
-interface TajikDef {
-    vowels: Record<string, string>;
-    glides: Record<string, string>;
-    consonants: Record<string, string>;
-    numbers: {
-        units: string[];
-        teens: string[];
-        tens: Record<string, string>;
-        hundred: string;
-        thousand: string;
-        million: string;
-        and: string;
-    };
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<TajikDef>(import.meta.url, "tajik.jsonc");
+const DEF = MANIFEST;
 const VOWEL = DEF.vowels;
 const GLIDE = DEF.glides;
 const CONS = DEF.consonants;
@@ -97,14 +83,25 @@ export function phonemizeWord(word: string): string {
 
 // ── Cardinal numbers — Persian composition with the connector у (va) ─────────────────────────────────────────
 const N = DEF.numbers;
-/** Compose the Tajik SPELLING of a non-negative integer, then phonemize it (space-separated where appropriate). */
-function numberWords(n: number): string {
+/**
+ * Compose the Tajik SPELLING of a non-negative integer, then phonemize it (space-separated where appropriate).
+ *
+ * ⚠ THE SCALE LADDER USED TO STOP AT `миллион`, AND THE FAILURE WAS SILENT. The million branch called
+ * `three(n / 1e6)`, which for n ≥ 10⁹ has a hundreds digit of 10 or more and indexed `units[10]` —
+ * `undefined`. String concatenation turned that into the literal `"undefinedсад"`, and `toSegments` skips
+ * characters it does not know, so `1000000000` came out *сад миллион* ("one hundred million") and
+ * `1234567890` *саду сию чор миллион…* — a 10× error emitted with no marker any gate could see. The ladder
+ * now runs to триллион and `three` refuses a group it cannot spell instead of fabricating one.
+ */
+export function numberWords(n: number): string {
+    if (!Number.isFinite(n) || n < 0) return "";
     if (n === 0) return N.units[0]!;
     const parts: string[] = [];
     const three = (x: number): string[] => {
         const p: string[] = [];
         const h = Math.floor(x / 100);
         const rem = x % 100;
+        if (h > 9) return []; // never reachable once the ladder covers the magnitude — a guard, not a branch
         if (h > 0) p.push(h === 1 ? N.hundred : N.units[h]! + N.hundred); // сад / дусад / сесад …
         if (rem >= 10 && rem < 20) p.push(N.teens[rem - 10]!);
         else {
@@ -115,15 +112,28 @@ function numberWords(n: number): string {
         }
         return p;
     };
-    const million = Math.floor(n / 1_000_000);
-    const thousand = Math.floor((n % 1_000_000) / 1000);
-    const rest = n % 1000;
-    if (million > 0) parts.push(...three(million), N.million);
-    if (thousand > 0) parts.push(...(thousand === 1 ? [] : three(thousand)), N.thousand);
-    if (rest > 0) parts.push(...three(rest));
+    // Largest magnitude first. `1` before ҳазор is dropped (ҳазор, not *як ҳазор*) — the corpus's own form,
+    // e.g. `ҳазору сад`; the larger scale words keep their multiplier (як миллион).
+    const SCALES: readonly [number, string, boolean][] = [
+        [1_000_000_000_000, N.trillion, false],
+        [1_000_000_000, N.milliard, false],
+        [1_000_000, N.million, false],
+        [1000, N.thousand, true],
+    ];
+    let left = n;
+    for (const [value, word, dropOne] of SCALES) {
+        const q = Math.floor(left / value);
+        if (q > 0) {
+            if (!(dropOne && q === 1)) parts.push(...three(q));
+            parts.push(word);
+            left %= value;
+        }
+    }
+    if (left > 0) parts.push(...three(left));
+    if (parts.length === 0) return "";
     // The Persian connector -у (va) glues to the END of the preceding word (бисту як, сесаду чилу панҷ), EXCEPT
     // before a magnitude word, which just follows its multiplier with a space (ду ҳазор, not ду-у ҳазор).
-    const MAG = new Set([N.thousand, N.million]);
+    const MAG = new Set([N.thousand, N.million, N.milliard, N.trillion]);
     let out = parts[0]!;
     for (let i = 1; i < parts.length; i++) {
         out += (MAG.has(parts[i]!) ? " " : "у ") + parts[i]!;
@@ -135,7 +145,12 @@ const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class TajikPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NORMALIZE FIRST, THEN INITIALISMS. The order is load-bearing in both directions: normalize's
+        // abbreviation, unit and rate steps must see `МВт`, `км` and `с.` before an all-caps pass could
+        // spell them out letter by letter, and the initialism pass must run before the tokenizer so a
+        // vowel-less caps run has already become words. The shared symbol tier is called from INSIDE
+        // normalize.ts (its step 9) rather than wrapped around it — see the comment there.
+        return assembleClauses(normalizeTajikInitialisms(normalizeTajik(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 for (const w of numberWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(w));

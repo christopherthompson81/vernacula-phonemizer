@@ -34,6 +34,14 @@
         "ӯ": "ɵ",
         "э": "e",
         "ы": "i",
+        // ⚠ TWO CONFUSABLES THE CORPUS ACTUALLY WRITES, and each one LOST A VOWEL from a word without any
+        // gate seeing it. `ѝ` (U+045D, и with grave) appears in the artifact's `БЕНЍН` — the Benin headword —
+        // and read as *bˈenn*, one syllable short; `ў` (U+045E, the Belarusian/Uzbek short u) arrives in
+        // quoted Uzbek (`Ўзбекистон Республикаси`). Neither is a Tajik letter, so neither belongs in the
+        // convention above; both are unambiguous in value, which is why they are folded here rather than
+        // left to the confusable pass.
+        "ѝ": "i",
+        "ў": "u",
     },
 
     // Iotated letters → a fixed IPA sequence (the vowel is the nucleus). й is a pure glide (no nucleus).
@@ -70,6 +78,12 @@
     },
 
     // Tajik cardinal numbers (Persian-based). The compositor in tajik.ts glues them; these are the atoms.
+    //
+    // ⚠ `milliard` AND `trillion` ARE NOT DECORATION. Without them the compositor's million branch indexed
+    // `units[10]` for any n ≥ 10⁹ and produced the literal string "undefinedсад"; the g2p skips Latin letters
+    // inside a token, so 1 000 000 000 read as *сад миллион* — one HUNDRED million, a silent 10× error with
+    // no marker of any kind. Both words are attested: миллиард ×123 in 20 tg.wikipedia articles ("104
+    // миллиард доллар") and ×12 in the mined artifact; триллион in "0,67 триллион метри мукааб".
     "numbers": {
         "units": ["сифр", "як", "ду", "се", "чор", "панҷ", "шаш", "ҳафт", "ҳашт", "нӯҳ"],
         "teens": ["даҳ", "ёздаҳ", "дувоздаҳ", "сездаҳ", "чордаҳ", "понздаҳ", "шонздаҳ", "ҳабдаҳ", "ҳаждаҳ", "нуздаҳ"],
@@ -77,8 +91,39 @@
         "hundred": "сад",
         "thousand": "ҳазор",
         "million": "миллион",
+        "milliard": "миллиард",
+        "trillion": "триллион",
         "and": "у",
     },
+
+    // MONTH NAMES, in the IZOFAT form the corpus writes them in — `16 ноябри соли 1992`, `11 октябри соли
+    // 2020`, `29 декабри соли 1939`, `28 майи соли 2018`. Used only to read a DOTTED date (1.01.2017), which
+    // is otherwise spoken as three separate clauses. `майи` (not *маии*) is the corpus's own spelling and is
+    // what fixes the izofat after a vowel.
+    "months": ["январи", "феврали", "марти", "апрели", "майи", "июни", "июли", "августи", "сентябри", "октябри", "ноябри", "декабри"],
+
+    // TAJIK CYRILLIC LETTER NAMES, for `core/initialisms.ts`. espeak does not ship Tajik at all, so this
+    // table is the Tajik-alphabet name column of en.wikipedia's `Tajik alphabet`, corroborated against
+    // tg.wikipedia itself for the three non-obvious entries: `и дароз` (ӣ) appears in *Қоидаҳои имлои
+    // забони тоҷикӣ*, `и кӯтоҳ` (й) in seven articles, `аломати сакта` (ъ) in *Апостроф*.
+    //
+    // ⚠ THE NAMES ARE NOT RUSSIAN'S. Tajik says бе ве ге де for Russian's бэ вэ гэ дэ, ле ме не ре се for
+    // эль эм эн эр эс, and has six letters Russian does not (ғе қе ҳе ҷе, и дароз, ӯ). Copying the Russian
+    // table would have been the ru-standing-in-for-tg failure this language is most exposed to.
+    "letterNames": {
+        "а": "а", "б": "бе", "в": "ве", "г": "ге", "ғ": "ғе", "д": "де", "е": "е", "ё": "ё",
+        "ж": "же", "з": "зе", "и": "и", "ӣ": "и дароз", "й": "и кӯтоҳ", "к": "ке", "қ": "қе",
+        "л": "ле", "м": "ме", "н": "не", "о": "о", "п": "пе", "р": "ре", "с": "се", "т": "те",
+        "у": "у", "ӯ": "ӯ", "ф": "фе", "х": "хе", "ҳ": "ҳе", "ч": "че", "ҷ": "ҷе", "ш": "ше",
+        "ъ": "аломати сакта", "э": "э", "ю": "ю", "я": "я",
+    },
+
+    // LEXICAL: all-caps runs read letter-by-letter although the OOV phonotactic test would pass them as
+    // words. Deliberately EMPTY — every caps run the artifact contains is decided correctly by phonotactics
+    // alone (ИМА and КАРБОН are readable and stay words; СММ, ММД, ТВ, НБО have no legal Tajik onset and are
+    // spelled), and this project does not bulk-invent language data. Add an entry when a corpus instance
+    // proves one is needed.
+    "acronymLetters": [],
 
     "clausePunctuation": {
         ".": ".",
