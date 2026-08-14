@@ -176,6 +176,27 @@ MARKERS = {
           "llaqtaqa llaqtanqa mamallaqta mamallaqtapi suyu suyupi simi simipi runa runakuna runakunam "
           "mayu qucha urqu pacha wata watapi killapi punchaw p'unchaw iskay kimsa tawa pichqa qhichwa "
           "qichwa kichwa pruwinsya pruwinsyapi distritu distritum kawsachkanku uma kanku karqa",
+    # gn (Paraguayan Guaraní / Avañe'ẽ): the contaminant is SPANISH, not English — Paraguay is officially
+    # bilingual and the written register is JOPARA, Guaraní grammar with dense Spanish lexical borrowing.
+    # See CONTRAST below for why that makes the usual English test useless here. The markers are the
+    # highest-frequency Guaraní grammatical words: the coordinator `ha` (the corpus's commonest token by a
+    # factor of 3), the postposition `pe`, the demonstratives `ko`/`upe`/`umi`, `avei` "also", `térã` "or",
+    # `jave` "while", the relational suffixes written as separate tokens in this wiki (`pegua`, `gotyo`,
+    # `rehe`, `rupi`, `rupive`, `guive`, `ndive`, `peve`, `rire`), the verb forms `oĩ`/`oiko`/`ojapo`/
+    # `oguereko`/`oñepyrũ`, the plural `hikuái`, `heta` "many", `opa`/`opaite` "all", and the content
+    # nouns a wiki paragraph cannot avoid — `ary` "year", `ára` "day", `táva` "town", `tetã` "country",
+    # `yvy` "land".
+    # ⚠ `la` IS DELIBERATELY ABSENT FROM BOTH SIDES. It is the Spanish article AND the Jopara determiner
+    # that ordinary written Guaraní uses (×68 here, inside otherwise unambiguous Guaraní clauses), so it
+    # discriminates nothing — the same call `bal` made for the words Balochi shares with Persian.
+    # ⚠ `ha` IS KEPT even though Spanish has a `ha` (3sg *haber*): at ×932 against a Spanish auxiliary that
+    # barely occurs in encyclopedic prose, a Spanish paragraph scores far more on the contrast side.
+    # ⚠ NO PROPER NOUNS — `paraguay`, `paraguái` and `pindoráma` are frequent here and are exactly what a
+    # SPANISH article about Paraguay also says. A topic word is not a language marker (the `bal` lesson).
+    "gn": "ha pe ary umi ko upe avei gotyo heta jave pegua guasu ára oiko táva yvy rupi rire oĩ oĩva "
+          "upéicha ndive ojapo oguereko hikuái katu peve térã hína niko ramo péicha opa opaite guive "
+          "rehe rupive ojejuhu tapicha oñepyrũ tetã tetãnguéra ñemby yvate ysyry hérava peteĩ mokõi "
+          "mbohapy irundy oñemboepy oñemoheñói ha'e ha'ekuéra ojehai ojeporu oñeñe'ẽ",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
@@ -286,6 +307,23 @@ CONTRAST = {
     "ilo": set(
         "ito nito iyan iyon noong ngayon dito doon kanila kanilang naman upang habang bawat "
         "dalawa marami lahat kung sila nila niya ninyo tayo kami ako din rin".split()
+    ),
+    # gn: SPANISH, merged with (never replacing) ENGLISH. Paraguay is officially bilingual and gn.wikipedia
+    # carries verbatim Spanish — legal texts, place-name lists, bibliographies, untranslated stubs — so the
+    # stock English test would keep every one of them as "Guaraní". This is the `bar` situation (the
+    # contaminant is a prestige relative, not English) with the extra difficulty that the target register,
+    # JOPARA, borrows Spanish lexicon on purpose.
+    # ⚠ `la`, `ha` and `ka` ARE DELIBERATELY ABSENT. `la` is the Jopara determiner ordinary Guaraní writes;
+    # `ha` is Guaraní "and", its commonest word; `ka` opens a great many Guaraní stems. Listing any of them
+    # would score Guaraní prose as Spanish — the failure the `bal` row documents for Persian.
+    # ⚠ `de` IS KEPT and is the sharpest single discriminator, at ×171 in this corpus against a language
+    # whose own genitive is the suffix `-gua`/`-pegua`/`-rehegua` and never a preposition. Its false
+    # positives are Spanish place names quoted inside Guaraní sentences, and those paragraphs carry many
+    # markers; its true positives are whole Spanish paragraphs, which carry none.
+    "gn": set(
+        "el los las del en y que con por para es son se su una uno como más al sus fue este esta "
+        "sobre entre también cuando desde hasta pero muy donde ser tiene había años ciudad "
+        "departamento nacional presidente gobierno".split()
     ),
 }
 

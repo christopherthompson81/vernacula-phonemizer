@@ -11,6 +11,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { normalizeGuarani } from "./normalize.ts";
 
 interface GuaraniDef {
     acuteVowels: readonly string[];
@@ -98,7 +99,10 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class GuaraniPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts runs BEFORE tokenization — which is where the puso fold has to be, because two of the
+        // three glyphs Guaraní writes it with (U+A78C saltillo, U+02BC) are outside this TOKEN class and
+        // would otherwise be deleted or split the word before `phonemizeWord` could fold them.
+        return assembleClauses(normalizeGuarani(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 // ≤9 digits stays inside the attested range (< 10⁹); longer reads the raw digit string.

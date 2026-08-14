@@ -471,6 +471,65 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    gn: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE RETAINED TEXT OF `tools/corpus/mined/gn.jsonc` — 433 segments
+        // (233 hard + 200 sample) out of a 35,143-paragraph gn.wikipedia dump — with the artifact's
+        // whole-corpus `counts` quoted where they differ. `attest.ts` against gn.wikipedia is the second
+        // tier; espeak does not ship Guaraní at all, so there is no third. Every refusal is argued in
+        // src/languages/guarani/normalize.ts.
+        // ⚠ `minus` IS DELIBERATELY ABSENT, AND THAT IS WHY `review.ts --lang gn` STAYS RED ON IT — the
+        // ak / ln / bm / ilo stance. Guaraní has GENUINE negatives and they are not ranges in disguise:
+        // three in the retained text, every one a temperature minimum — `-89,2°C` (Antarctica's record
+        // low), `mínima araro'y jave -1ºC`, `araro'y jave katu -8 °C-pe`. Omitting a plus is lossless;
+        // omitting a minus INVERTS. And the rule SHAPE is available — every one of the three is a sign
+        // directly before a number followed by a degree mark, which is exactly trap 24's Hindi
+        // discriminator — so what is missing is a WORD, not a guard. Both candidates fail on sense:
+        // `menos` reports "attested ×8/7" and every hit is inside SPANISH prose (`las especies menos
+        // corrientes`, `por lo menos` ×4), the adverb "less/at least"; `negativo` ×4/2 is a photographic
+        // NEGATIVE (the Boggiani glass-plate collection) or a negative test result (`osẽ negativo pe
+        // RADT`). Trap 37 twice, with healthy counts on the wrong sense. The gate comes green the day a
+        // Guaraní negative-number word is attested, not before.
+        ampersand: "×46 in the retained text and NOT ONE of them is a conjunction — every single "
+            + "occurrence is an HTML ENTITY the dump preserved: `&nbsp;` ×45 (`11&nbsp;000&nbsp;000`, "
+            + "`21&nbsp;696 ava`, `30&nbsp;°C-pe`, `US$ 5.188.250&nbsp;sua`, `3152&nbsp;km`) and "
+            + "`&thinsp;` ×1 (`176&thinsp;215&nbsp;km²`). The `ampersand` cell reports ×765 whole-corpus "
+            + "and it is measuring the same thing. `stripMarkup` decodes `&nbsp;` to a space at the "
+            + "registry's dispatch point, ABOVE this language's layer, so by the time any gn rule runs "
+            + "there is no ampersand left — which is why the probe is the only place it can still be seen. "
+            + "This is not a sourcing gap: Guaraní's coordinator `ha` is the corpus's commonest token at "
+            + "×932 and would be available instantly. There is simply nothing in this language to read. "
+            + "(⚠ `&thinsp;` is the one entity `src/core/markup.ts` lacks, so it reaches the IPA as "
+            + "*tˈhinsp* — a real defect, REPORTED rather than fixed here, because that file is shared.)",
+        equals: "×18, and reading them splits three ways, none of which wants an arithmetic word. "
+            + "(1) MEDIAWIKI HEADING MARKUP the dump extraction left in — `=== Mboꞌehára ha aranduka "
+            + "ñeꞌẽtekuaaguigua ===`, which is the very example `mine.ts scan` prints for this class; "
+            + "silence there is not merely harmless, it is the only correct reading. (2) A GRAMMAR "
+            + "ARTICLE'S GLOSS SEPARATOR, where `=` means \"conjugates as\" or \"is realised as\": "
+            + "`karu = rekaru, okaru, jakaru, rokaru, pekaru`, `vyꞌa = revyꞌa, ovyꞌa`, `hiꞌ = avaite "
+            + "mbohapyha`. Reading it as \"equals\" would say *karu equals rekaru* about a paradigm. "
+            + "(3) ONE RAW CALCULATION DUMP inside a land-survey article — `17 .17=289 .13.75 =3973.75 = "
+            + "39,73 cúbicos` — which is arithmetic and is also not prose anyone reads aloud. ⚠ This is "
+            + "why the `arithmetic` CELL, ×69 whole-corpus, measures 0% arithmetic and only 50% Guaraní: "
+            + "all eight of its hard instances are that grammar article's conjugation and pronoun tables. "
+            + "No equals word is attested in Guaraní and none of these three shapes would take one.",
+        plus: "×1 in the retained text, and `signed-number` is ×26 whole-corpus against `digit-run` "
+            + "×19,814 — trap 48's shape, a definitive negative rather than a probe failure. Nothing "
+            + "attests how Guaraní voices a plus, `concept.ts` returns no gn label for the operation, and "
+            + "the playbook's own measurement applies unchanged here: a written corpus is silent about "
+            + "signs BY CONSTRUCTION, and in the one context that recurs across the fleet (`+30°C`) the "
+            + "sign is redundant with the comparative anyway. Not read.",
+        "plus-minus": "×0 in the retained text. A definitive absence, recorded so the negative is not "
+            + "re-investigated (trap 48): the class costs a probe line and answers nothing about Guaraní.",
+        "less-than": "×0 in the retained text. Same definitive absence as `plus-minus`.",
+        "greater-than": "×0 in the retained text. Same definitive absence as `plus-minus`.",
+        times: "×0 in the retained text — neither `×` nor a digit-flanked ASCII `x`. ⚠ AND THE ONE PLACE "
+            + "A DIMENSION CROSS DOES OCCUR IS SPANISH: `colección orekóva 175 negativo de vidrio 18 x 24 "
+            + "cm, 81 de 13 x 18` — a photographic-plate inventory quoted from a Spanish catalogue, inside "
+            + "an article whose surrounding prose is Guaraní. Declaring a Guaraní word for it on that "
+            + "evidence would be reading a Spanish measurement idiom in Guaraní, which is the failure this "
+            + "language's whole Jopara measurement exists to prevent. Not read.",
+        divide: "×0 in the retained text. Same definitive absence as `plus-minus`.",
+    },
     ilo: {
         // ⚠ EVERY COUNT BELOW IS OVER THE MINED ilowiki CORPUS — 38,655 paragraphs extracted from the
         // `ilowiki` dump, 43,258 kept by `filter-by-language.py --lang ilo` (a new row whose CONTRAST set

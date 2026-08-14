@@ -1,0 +1,585 @@
+// WIKIPEDIA WORD ATTESTATION — gn. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "gn",
+        "wiki": "gn.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "menos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Man - con fotos y descripción de las especies y cultivares menos corrientes…",
+                "…bros publicados de César Vallejo Hoy me gusta la vida mucho menos en la voz de César Calvo…",
+                "…i, restaurant ha churrasquería rupi, péicha ohupyty, por lo menos, tembiꞌu cada día ohasávape. Avei oikundaha umi kuatiahaipy…",
+                "…gata. No se conoce en la historia de América del Sur por lo menos, ningún crimen de guerra más hediondo que ese,” he’i avei C…",
+                "…no, péva osẽgui peteĩ posición oimèva mbombyry, térã por lo menos, ijeporavópe ndaha'éi iporãmbáva. Obispo Palacios itúva, Pa…",
+                "…lo ojagarrarõ guare podér. Peteĩ tradición oho jeýva por lo menos Menander-pe (Fr. 258 K) o’insisti Safo ojejuka hague osaltá…"
+            ]
+            },
+        {
+                "word": "negativo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ica Argentina de Aficionados, Leopoldo Miarte, ome'ẽva ko'ã negativo. Péicha explorador ojuhúva ikámara rupive umi tribu angaite…",
+                "…fotográfica oñotỹ hikuái, ogueroviágui péicha ombyáiha umi negativo. Guido Boggiani retekue oĩ depositado Cementerio Italiano P…",
+                "…ma Guaná\"\" Colección de Fotografías : colección orekóva 175 negativo de vidrio 18 x 24 cm, 81 de 13 x 18, 29 de 12 x 16, 8 de 9…",
+                "…gueteri ramo hina kuri. tapicha kakuaávape, tekotevẽnte osẽ negativo pe RADT oje’e hag̃ua upe máva ndoguerekoiha ko mba’asy, kat…"
+            ]
+            },
+        {
+                "word": "sa'i",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 24,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ẽ Tetãnguéra Joaju rehegua. Pohtugéñe'ẽ oñeñe'ẽ 260 tapicha sa'i rõ, ha upévare ha'e ñe'ẽ 6 térã 7 tuichavéva arapýpe. Pindo…",
+                "…Pindoráma-pe oĩ hetavéva oñe'ẽva pohtugéñe'ẽme: 210 tapicha sa'i rõ. == Tembiasakue == Poytugañe'ẽ oñepyrũ Ivéria yvýpe, ko'…",
+                "…porã ha tekoha renda ñangareko mba'etuichavéva ko tetãme ha sa'i ojehecha tekohatyai. == Mandu'apy == == Joaju == Tetã rekuá…",
+                "…e'ẽnguéra tetã Nepal-guáramo', hákatu apoukapy ñe'ẽ rehegua sa'i mba'e ikatu ojapo, ha, añeteháme, haimete ndojejapói he'ihá…",
+                "…i tetã oneĩgui peteĩ ñe'ẽme oĩha hikuái peteĩ yvyvusúpe, ha sa'i oñemohenda yvy aty ituichaitéva rehe. Pe yvyvusu tuichave g…",
+                "…atogua retãyguágui oñe'ẽkuaa karaiñe'ẽ. Yvypóra tekoiterape sa'i ojehecha Ginéa Ekuatogua retãme he'iháicha kuatia momarandu…"
+            ]
+            },
+        {
+                "word": "mboyve",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Marandeko-mboyve ha'e ojeheroháicha pe ára pukukue oñepyrũ va'ekue umi yvypó…",
+                "…i yvypóra ypykue ou raẽ Yvy ape ári, umi ou va'ekue yvypóra mboyve, oñepyrũ meve yvypóra ohai hembiasakue, upéva niko oiko raẽ…",
+                "…niko oiko raẽ Kuarahyresẽ Ag̃uiguápe amoite ary 3300 Kirito mboyve, ha upéi Yvy ape vore ambuévape. Jepémo upéicha, jahechávo…",
+                "…hesa'ỹijóva tekove ha tekoha. Oĩ ambuéva he'i ko 'marandeko-mboyve' ára pukukue opahague peteĩ Yvy ape vorépe opa mboyve peteĩ…",
+                "…ndeko-mboyve' ára pukukue opahague peteĩ Yvy ape vorépe opa mboyve peteĩ tenda ambuévape, oĩgui yvypehẽ jahechahápe oikohague…",
+                "…== Joajuha == Wikimedia Commons oguereko ta'ãnga Marandeko-mboyve rehegua Commons.…"
+            ]
+            },
+        {
+                "word": "michĩ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Yvóra michĩ (planeta enano) ha'e peteĩ yvága mba'e, yvóra joguaha. Pete…",
+                "…a enano) ha'e peteĩ yvága mba'e, yvóra joguaha. Peteĩ yvóra michĩ ha'e oimeraẽa yvága mba'e ojeréva Kuarahýre ha ndaha'éiva p…",
+                "…ai, ha michĩvéva yvóragui. Kuarahy Ypykatu oguereko 5 yvóra michĩ.…",
+                "…Aka'ẽ morotĩ michĩ (karaiñeꞌẽme: Frutero overo) / (latinañe'ẽme: Cissopis leve…",
+                "…aju == Wikiespecies oguereko peteĩ kuatiarogue Aka'ẽ morotĩ michĩ rehegua. Wikispecies…",
+                "…Rrúsia Michĩ térã Rrús Michĩ (rrusiañe'ẽme: Малороссия, Малая Россия), h…"
+            ]
+            },
+        {
+                "word": "porsiento",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sa gui",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "peteĩ sa gui",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sasyry",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ciento",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…óra omohu’ãva guerra opytáva 300 mil, umíva apytégui 10 por ciento kuimba’e –ko’ãva uni tapuja mimi ha opyta vaíva (inválidos)…"
+            ]
+            },
+        {
+                "word": "pysãkõi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 2,
+                "examples": [
+                "…Pysãkõi (Artiodactyla) ha'e umi mymba juehegua hekovety okambúva ip…",
+                "…aiñeꞌẽme: rumiantes) - (ruminantia) ha'e okambúva aty mymba pysãkõi hekovety michĩ oñemohendava heta mymba kapi'iuha jeikuaavev…",
+                "…a) - (Lama glama) ha'e peteĩ mymba okambúva juehegua, mymba pysãkõi ha kapi'i'uha oikoveva Ñembyamérika rendápe, yvytyrysyi And…",
+                "…- (Lama guanicoe) ha'e peteĩ mymba okambúva juehegua, mymba pysãkõi ha kapi'i'uha oikoveva Ñembyamérika rendápe. Ko mymba oiko…"
+            ]
+            },
+        {
+                "word": "sa rupi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 2,
+                "examples": [
+                "…peteĩ empresa privada hérava Colonizadora Salto del Guairá SA rupi, oĩháicha jehaipyre umi motenondehára upépegua omboguapy ha…"
+            ]
+            },
+        {
+                "word": "kyguái",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…vape ñanepytyvõ taꞌãngaꞌi kuatiapyre, haꞌéva: Kyta (punto), Kyguái (coma), Kytaguái (punto y coma), Kytakõi (dos puntos), Taik…",
+                "…Por cierto \"kyta paha\" significa \"el punto de la paja\". == Kyguái (,) == Kóva hína taꞌãngaꞌi oñandukáva paꞌu mbykyvéva jajapó…",
+                "…== Kytaguái (;) == Ko taꞌãngaꞌi ohechauka paꞌũ ipukumivéva kyguái oñandukávagui. Ndahaꞌéi ku ojoavyguasúva kyguáigui. Jaipuru…",
+                "…7 .17=289 .13.75 =3973.75 = 39,73 cúbicos osẽ ichugui ha pe kyguái rire hembýva upéa héra centivaras, péa ñambojo’a ambue ndiv…"
+            ]
+            },
+        {
+                "word": "Kytakõi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ꞌéva: Kyta (punto), Kyguái (coma), Kytaguái (punto y coma), Kytakõi (dos puntos), Taikõi (comillas), Taiky (guión), Ñeꞌẽrokái (…",
+                "…ai oñemonguꞌe ápe ha pépe; ha katu ore rohovérõnte roho. == Kytakõi (:) == Kóva katu ohechauka paꞌũ ipukuvéva kytaguái oñanduká…"
+            ]
+            },
+        {
+                "word": "aravo'i",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 13,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…mbohéra unidad astronómica. Kuarahy mimbi og̃uahẽ ñandéve 8 aravo'i ha 20 aravo'ivépe. Ñande Kuarahy Ypykatúpe oĩ 8 yvóra ha ko…",
+                "…óvo ára rembiasa 24 pehẽnguére ijojáva. Peteĩ aravo ha'e 60 aravo'i térã 3600 aravo'ive. == Ehecha avei == Yvy arapehẽ Ára pavẽ…",
+                "…vo guive paporundy aravo peve; arapehẽ mokõiha katu mokõipa aravo'i guive mokõi aravo peve, ha upe arapehẽ mbohapyha katu po ar…",
+                "…'i guive mokõi aravo peve, ha upe arapehẽ mbohapyha katu po aravo'i guive mbohapypa aravo'i peve. Upe arapehẽ peteĩha oñepyrũ t…",
+                "…e, ha upe arapehẽ mbohapyha katu po aravo'i guive mbohapypa aravo'i peve. Upe arapehẽ peteĩha oñepyrũ tye apa térã atukupe rasy…",
+                "…ha oñepyrũ tye apa térã atukupe rasy reheve, hi'aréva peteĩ aravo'i mbytere, ha oiko jeýva pa térã mbohapypa aravo'ípe. Apa has…"
+            ]
+            },
+        {
+                "word": "porsiénto",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sa rehe",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "peteĩ sa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…mini) térã sa ary paporundyha Hesu Kiríto heñói rire), haꞌe peteĩ sa ary oñepyrũvaꞌekue 1 jasyteĩ ary 1801 ha opa 31 jasypakõi a…",
+                "…visetope) Peteĩ ary ha'e 365 ára kuéra (térã 366 ára kuéra) Peteĩ sa ro'y ha'e 36.525 ára kuéra (75 ary orekóva 365 ára kuéra +…"
+            ]
+            },
+        {
+                "word": "Fahrenheit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…aristócrata toscano (ñemano ary 1737). 1686: Daniel Gabriel Fahrenheit, físico Alemáña pegua (ñemano ary 1736). 1723: Antonio Caba…",
+                "…asiõ apoukapyicha haꞌeháicha. Grádo Celsius = (5/9)*( Grádo Fahrenheit - 32) . Kombutadora jepaparogue softwarepe, peteĩ mboyraiha…"
+            ]
+            },
+        {
+                "word": "Grádo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…aiha oñemeꞌẽ jepi ñemíme kõputasiõ apoukapyicha haꞌeháicha. Grádo Celsius = (5/9)*( Grádo Fahrenheit - 32) . Kombutadora jepa…",
+                "…kõputasiõ apoukapyicha haꞌeháicha. Grádo Celsius = (5/9)*( Grádo Fahrenheit - 32) . Kombutadora jepaparogue softwarepe, pete…"
+            ]
+            },
+        {
+                "word": "kokatu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 62,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…MOAMBUEHA === 3.1. Papapy (número) 3.2. Meña (género) 3.3. Kokatu (grado) 3.1. Papapy Ñe’ẽteja naiñambuéi papapýpe. Techapyrã…",
+                "…mombyry / 3.2. Meña Ñe’ẽteja naiñambuéi avei imeñáme. 3.3. Kokatu Ñe’eteja rehe ñambojoapykuaa umi ñe’ẽpehẽtai kokatuguigua,…",
+                "…pyrã: 3.3.1. Kokatu’ypy : mombyry (naiñe’ẽpehẽtaíri) 3.3.2. Kokatu Mbojojáva : mombyryve 3.3.3. Kokatu Tuicháva : mombyryete 3…",
+                "…aiñe’ẽpehẽtaíri) 3.3.2. Kokatu Mbojojáva : mombyryve 3.3.3. Kokatu Tuicháva : mombyryete 3.3.4. Kokatu Tuichavéva : mombyryete…",
+                "…jáva : mombyryve 3.3.3. Kokatu Tuicháva : mombyryete 3.3.4. Kokatu Tuichavéva : mombyryeterei 3.3.5. Kokatu Tuichaitéva : momb…",
+                "…mombyryete 3.3.4. Kokatu Tuichavéva : mombyryeterei 3.3.5. Kokatu Tuichaitéva : mombyryrasa 3.3.6. Kokatu Tuichaitevéva : mom…"
+            ]
+            },
+        {
+                "word": "aravo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Aravo (karaiñeꞌẽme: hora) ha'e ára jehasa ra'ãha, oñemboja'óvo ár…",
+                "…ãha, oñemboja'óvo ára rembiasa 24 pehẽnguére ijojáva. Peteĩ aravo ha'e 60 aravo'i térã 3600 aravo'ive. == Ehecha avei == Yvy…",
+                "…Arahaku ára térã arahaku aravo ha'e aravo ñemoambue peteĩ tendápe, omotenonde hína peteĩ a…",
+                "…Arahaku ára térã arahaku aravo ha'e aravo ñemoambue peteĩ tendápe, omotenonde hína peteĩ aravo ñónte,…",
+                "…o ha'e aravo ñemoambue peteĩ tendápe, omotenonde hína peteĩ aravo ñónte, arapoty ñepyrũme ha omomoĩjey ro'yñepyrũme. Ojepurúv…",
+                "…Yvóra ára tekomemegua. Omohenda opaite aravopapahakuéra ha aravo Yvórape.…"
+            ]
+            },
+        {
+                "word": "por ciento",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…yvypóra omohu’ãva guerra opytáva 300 mil, umíva apytégui 10 por ciento kuimba’e –ko’ãva uni tapuja mimi ha opyta vaíva (inválidos)…"
+            ]
+            },
+        {
+                "word": "pa rehegua",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "koma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Cardozo, vakapipopo ha'ãhára Argentina pegua. 1987: Matthew Koma, opurahéiva Tetãvore Joapykuéra pegua. 1988: Sergio Agüero,…"
+            ]
+            },
+        {
+                "word": "kyta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…ehaꞌévape. Umívape ñanepytyvõ taꞌãngaꞌi kuatiapyre, haꞌéva: Kyta (punto), Kyguái (coma), Kytaguái (punto y coma), Kytakõi (d…",
+                "…os de admiración) ha Kyporandu (signos de interrogación) == Kyta (.) == Péva hina pe taꞌãngaꞌi oñandukáva jehai rupi tahaꞌeh…",
+                "…ẽapesã, uperire ñamoñepyrũ hag̃ua ambue ñeꞌẽjoaju ipyahúva. Kyta oñemohendajey, péicha jaguereko: 1.1. Kyta syry (punto segu…",
+                "…ẽjoaju ipyahúva. Kyta oñemohendajey, péicha jaguereko: 1.1. Kyta syry (punto seguido), 1.2. Kyta iguýpe (punto a parte) ha 1…",
+                "…jey, péicha jaguereko: 1.1. Kyta syry (punto seguido), 1.2. Kyta iguýpe (punto a parte) ha 1.3. Kyta paha (punto final) 1.1.…",
+                "…y (punto seguido), 1.2. Kyta iguýpe (punto a parte) ha 1.3. Kyta paha (punto final) 1.1. Kyta syry: Jaipurúva ñambopaha jave…"
+            ]
+            },
+        {
+                "word": "puso",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Puso térã pundie peteha ahyꞌopyꞌapegua haꞌe peteĩ ñeꞌẽpu pundieg…",
+                "…– tekoymaguare (karaiñeꞌẽme: tradicional) morromaraitý​pe, puso ojembohaity apóhtrofo ⟨ʼ⟩ térã techaukaha ⟨ʾ⟩ reheve, haꞌév…",
+                "…pykue. Heta Polinésia ñeꞌẽ​me oiporúva Rróma raity, jepémo, puso ojehai peteĩ apóhtrofo ojeréva reheve, ⟨ʻ⟩ (ojeheróvaʻokina…",
+                "…pytuhẽha farĩhepegua oñeꞌẽsẽva ⟨ʕ⟩-pe g̃uarã. Malajoñeꞌẽ​me puso ojehechauka tai ⟨k⟩ rupive (ñeꞌẽpy pahápe), vyro ñeꞌẽ ha ma…",
+                "…o ñeꞌẽ ha maltañeꞌẽ​me ⟨q⟩ rupive. Ambue tape ojehai hag̃ua puso haꞌe saltillo ⟨Ꞌ ꞌ⟩ (majúhkula ha minúhkula), ojeporúva ñeꞌ…",
+                "…Ambue taitýpe oreko avei tai ojeporúva ombohechauka hag̃ua puso, techapyrã evréo rai aleph ⟨א⟩ ha Sirílo raity rai ''paloch…"
+            ]
+            },
+        {
+                "word": "cuadrado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…iko amo 636.000 tapicha ha ijyvy apekue hína 2586 kilómetro cuadrado.…",
+                "…kuarahyreike gotyo. Ijyvy apekue hína amo 622 984 kilómetro cuadrado ha oiko upépe amo 4,4 sua tetãyguakuéra, ojeipapaháicha 200…",
+                "…Ypa'ũnguéra Salomõ. Fíji retã apekue hína 18 274 kilómetro cuadrado, upévare ha'e es el tetã michĩvéva 156ha, ha ha'e tetã 161h…",
+                "…, Mburuvi Rrúsia oguereko vaʼekue amo 22,8 millón kilómetro cuadrado, heʼiséva amo peteĩ poteĩ yvy ape rehegua. Upéicha rupi, ha…",
+                "…boja’o mokõi tendápe Zona Sur ha Zona Norte, oguereko 21 km cuadrado pukukue. Oguereko 62 okarusu. Ko távape oĩ heta mbo’ehao, o…",
+                "…uke Honda Genki Haraguchi Juan Quintero Radamel Falcao Juan Cuadrado M'Baye Niang Sadio Mané Moussa Wagué Grzegorz Krychowiak Ja…"
+            ]
+            },
+        {
+                "word": "kuadrado",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilómetro cuadrado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…o retãme oiko amo 636.000 tapicha ha ijyvy apekue hína 2586 kilómetro cuadrado.…",
+                "…ha Kamerũ kuarahyreike gotyo. Ijyvy apekue hína amo 622 984 kilómetro cuadrado ha oiko upépe amo 4,4 sua tetãyguakuéra, ojeipapaháicha 200…",
+                "…Tuválu ha Ypa'ũnguéra Salomõ. Fíji retã apekue hína 18 274 kilómetro cuadrado, upévare ha'e es el tetã michĩvéva 156ha, ha ha'e tetã 161h…",
+                "…paha rupi, Mburuvi Rrúsia oguereko vaʼekue amo 22,8 millón kilómetro cuadrado, heʼiséva amo peteĩ poteĩ yvy ape rehegua. Upéicha rupi, ha…",
+                "…ardino peve. == Ikorapy == Ko tetãvore’i korapy oguereko 81 kilómetro cuadrado, tapichakuéra oikovéva ipype 26,73 hab por k m 2 {\\displays…"
+            ]
+            },
+        {
+                "word": "cúbico",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…g̃ua mba'épa oha'ã. Ymaguare, peteĩ gramo ha'e 1 centímetro cúbico pe y másagui oikóvo 3,98 °C, ha ko'ãga ha'e vore 1000 peteĩ…",
+                "…hákatu ojepuru ijoapy ramo. Peteĩ litro ojogua 1 decímetro cúbico (dm³), 1000 centímetros cúbicos (cm³) térã 1/1000 metros cú…",
+                "…ambue ndive ha ohupyty vove 100 centivaras oikoma ichugui 1 cúbico jevy. Péicha ojejapo ka’aguýpe ojeikuaa hagua mbovy cúbicop…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…hapa pe ararova, iporãpa térã ivaípa. Ohechauka umi ta'ãha \"Celsius\" rupive térã \"Kelvin\" rupive, ára haku térã ára ro'y jekuaa…",
+                "…e unidades de temperatura: Kelving, grado Farenheit y grado Celsius (en español)…",
+                "…ha ituichakue opaichagua. Pe y oñembohykúvo (ohasa rire 0° Celsius), yrypy'avevúi oñemongu'e ha oiko chugui y hykúva, sapy'ánt…",
+                "…músico francés, creador de la ópera francesa. 1744: Anders Celsius, astrónomo y físico sueco. 1800: William Cowper, poeta brit…",
+                "…chupe mba'epytu ro'ysãitevéva (0 Kelvin térã -273.15 kokatu Celsius), entropía sa'imi okakuaáta. Upe he'ise ro'yitéramo mba'eku…",
+                "…ñemeꞌẽ jepi ñemíme kõputasiõ apoukapyicha haꞌeháicha. Grádo Celsius = (5/9)*( Grádo Fahrenheit - 32) . Kombutadora jepaparogue…"
+            ]
+            },
+        {
+                "word": "grado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 46,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…62 Conversor online entre unidades de temperatura: Kelving, grado Farenheit y grado Celsius (en español)…",
+                "…e entre unidades de temperatura: Kelving, grado Farenheit y grado Celsius (en español)…",
+                "…Simplement, 1911 El Arca de Noé: libro de lectura. Segundo grado, 1916 Cuentos de Navidad, 1917 La Nouvelle moisson, 1918 Po…",
+                "…iempos de hoy, 1926 Escuela: lecturas escolares para tercer grado, 1933 Hogar, 1933 Lectura para cuarto grado escolar, 1933 E…",
+                "…res para tercer grado, 1933 Hogar, 1933 Lectura para cuarto grado escolar, 1933 El Reino de Dios, 1934 Oro, incienso y mirra,…",
+                "…1935 La Belleza en la vida cotidiana, 1936 Lecturas, cuarto grado escolar, Buenos Aires, Cabaut, 1936. Iniciación literaria,…"
+            ]
+            },
+        {
+                "word": "dólar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Dólar Tetãvore Joapykuéra pegua ha'e hína viru tee Tetãvore Joapy…",
+                "…e Tetãvore Joapykuéra pegua. Tetãnguéra ambuéva oipuru avei Dólar Tetãvore Joapykuéra pegua, Ekuator, El Salvador, Panama ha…",
+                "…Mandu'apy == == Joaju == Wikimedia Commons oguereko ta'ãnga Dólar sobre el Commons. Billetes de dólar históricos de gran valo…",
+                "…ommons oguereko ta'ãnga Dólar sobre el Commons. Billetes de dólar históricos de gran valor facial Historia del dólar \"Dólar (…",
+                "…letes de dólar históricos de gran valor facial Historia del dólar \"Dólar (Billetes de dólar históricos y actuales) (in en,de)…",
+                "…e dólar históricos de gran valor facial Historia del dólar \"Dólar (Billetes de dólar históricos y actuales) (in en,de).\" Nuor…"
+            ]
+            },
+        {
+                "word": "guaraníes",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…ojekuaáva chupe pe umi téro rupive «La Albirroja» térã «Los Guaraníes», ha'e pe atyguasu omyakãva ko tetãme umi ñeha'ãnguéra ko j…",
+                "…i oguero-jera ojeupe.\" == Joaju okapeguávandi == | Estudios Guaraníes I “Ñamandu Py’a Guachu” Dominique TEMPLE 2006…",
+                "…Arte de la Lengua Guarani – Antonio Ruíz de Montoya Cuentos Guaraníes Diccionario Guarani Sermones y Ejemplos – Nicolás Japugua’ỹ…",
+                "…1986); “Poemas de mi otoño” (1991); “Sobre mitos y leyendas Guaraníes” (1991); “Rumores de la selva” (1995); “El gaucho Lega - Un…",
+                "…TO) EL PUEBLO GUARANI COLONIAL - INQUIETUDES DE LOS PUEBLOS GUARANÍES (Autora: BRANISLAVA SUSNIK) PRESENCIA FRANCISCANA EN EL PAR…",
+                "…ra ramo guase ha upéichante avei [[Asociación de Escritores Guaraníes (ADEG)]] heñóiramo. == Hogapy == Omenda puraheihára ha mbo’…"
+            ]
+            },
+        {
+                "word": "porciento",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilómetro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilómetro ha'e hína pe pukukue ra'ãha ohechaukáva su metro (1000 m),…",
+                "…a ohechaukáva su metro (1000 m), ojehechauka tai km rupive. Kilómetro hína pe mba'e ra'ãha Ta'ãhakuéra Ypykatu Hetatetãgua oipurú…",
+                "…458 aravo'ive. Jerekóvo 1000 metro, ikatu ja'e ha'eha peteĩ Kilómetro.…",
+                "…o retãme oiko amo 636.000 tapicha ha ijyvy apekue hína 2586 kilómetro cuadrado.…",
+                "…emby kuarahyreikeguápe, ko tetã ypa'ũnguéra ojejuhu amo 900 kilómetro Mandagaka retãgui, ha amo 3800 kilómetro Índia retãgui. Ita…",
+                "…ra ojejuhu amo 900 kilómetro Mandagaka retãgui, ha amo 3800 kilómetro Índia retãgui. Itavusu ha itáva orekovéva tekovekuéra ipype…"
+            ]
+            },
+        {
+                "word": "mîlla",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "metro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Metro ha'e pukukue ra'ãha tenondeguáva ojepurúva pe Ta'ãhakuéra Y…",
+                "…u Hetatetãguápe (SI), oñemoha'anga pe tai \"m\" rupive. Peteĩ metro ha'e pe pukukue tesape ohóva nandiguasúpe ohasávo 1/299 792…",
+                "…nandiguasúpe ohasávo 1/299 792 458 aravo'ive. Jerekóvo 1000 metro, ikatu ja'e ha'eha peteĩ Kilómetro.…",
+                "…Kilómetro ha'e hína pe pukukue ra'ãha ohechaukáva su metro (1000 m), ojehechauka tai km rupive. Kilómetro hína pe mba'…",
+                "…jojáva. Ha'e hína irundykejoja apekue opa ijyke orekóva 100 metro (temira'ãha). Héra mbyky hína ha. == Mandu'apy == == Joaju…",
+                "…peteĩ ita aty térã yvyku'i aty renda oĩva yguasu guýre, 11 metro térã mbykyre y guýre. Ko rendápe oĩ heta pira ha itapoty, y…"
+            ]
+            },
+        {
+                "word": "milímetro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…subtropical, subhúmeda, ya okykue peteĩ arykue javeve 1.540 milímetro rupi, arahakue 22º C rupi, oguejýva 3º C ha hakukue 40ª C p…",
+                "…ue 18 °C rupi. Amakuéra rehegua katu ohupyty 1.400 ha 1.600 milímetro rupi ary jave. Jasy okyveha haꞌe jasypateĩ, ha saꞌiveha oky…",
+                "…ubtropical, subhúmeda, ya okyrupi peteĩ arykue javeve 1.540 milímetro rupi, arahakue 22º C rupi, oguejýva 3º C ha hakukue 40ª C p…",
+                "…opárupi oky ave, upéicha ohupyty jepi 1.500 ha oguãhẽ 1.700 milímetro peve ary jave. Ara hakukué ohupyty 21ºC ha 22 ºC rupi, pyha…"
+            ]
+            },
+        {
+                "word": "kilogramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilogramo ha'e mása ra'ãha, Ta'ãhakuéra Ypykatu Hetatetãgua mba'éva (…",
+                "…éra \"kg\" (ndaha'éi \"Kg\") ohechauka hag̃ua pe oha'ãva. Peteĩ kilogramo ha'e upe mba'e apu'a imása oĩva Pohyikue ha Ta'ãha Kotyguas…",
+                "…mba'e apu'a ojejapo akue platino ha iridio, ha oreko peteĩ kilogramo. == Mba'e joja == 1 kilogramo ijoja: 1 000 000 mg 100 000 c…",
+                "…ino ha iridio, ha oreko peteĩ kilogramo. == Mba'e joja == 1 kilogramo ijoja: 1 000 000 mg 100 000 cg 10 000 dg 1000 g 100 dag 10…",
+                "…Mása ha'e pe oha'ãva mbovýpa mba'e retakue oĩ. Oipuru kilogramo oha'ã hag̃ua. Techapyrãme, peteĩ yvyty imása tuichavéva pet…",
+                "…kekuérape. Peteĩ litro ýgui oreko mása haimete ojogua peteĩ kilogramo, ary 1795-pe ojeikuaaukágui peteĩ kilogramo ha'e hague pete…"
+            ]
+            },
+        {
+                "word": "hectárea",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Hectárea (ñe'ẽpehẽ hecto-, gyresiañe'ẽme ἑκατόν [hekatón], he'iséva…",
+                "…Mandu'apy == == Joaju == Wikimedia Commons oguereko ta'ãnga Hectárea rehegua Commons.…",
+                "…tyo. Upepe oi reserva nacional de Mbarakaju oguereko 64.405 hectárea.…",
+                "…ndáva 25°33´40,6´´ijyvatékue; 54°38´00,1´´pukukue, ha ipe 9 hectárea rupi. == Ára pytu == Oñeñandu ára pytu media anual 21 ºC; i…",
+                "…icipal Monday, oreko peteĩ reserva natural orekóva prorundy hectárea henyhẽva upe tekoha ka’avo ha mymba opaichaguáva, katuete n…",
+                "…utĩ. Umi área oñeñangarekóva ha’e: Ka’aguy Estrella, 30.000 hectárea Ka’aguy Pira'y, 22.500 hectárea Cerro Guasu, 15.000 hectáre…"
+            ]
+            }
+        ],
+    }
+    
