@@ -2904,6 +2904,60 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "not a sourcing gap: Armenian's coordinator `և` is ubiquitous in the corpus and would be "
             + "available instantly. There is simply no Armenian `&` here to read",
     },
+    mt: {
+        // ⚠ EVERY COUNT IS OVER THE RETAINED TEXT OF `tools/corpus/mined/mt.jsonc` — 449 segments
+        // (249 hard + 200 sample) out of a 118,526-paragraph mt.wikipedia dump — with the artifact's
+        // whole-corpus `counts` quoted where they differ. There is no FLEURS corpus for Maltese, so the
+        // tiers are that artifact, `mt.wikipron-mlt-broad.tsv`, espeak's `mt_list`, and `attest.ts`
+        // against mt.wikipedia — WHICH IS THE SAME WIKI THE ARTIFACT WAS MINED FROM, and therefore a
+        // bigger sample of one source rather than a second one. Every refusal is argued in
+        // src/languages/maltese/normalize.ts.
+        //
+        // ⚠ THREE CLASSES ARE DELIBERATELY ABSENT FROM THIS BLOCK, AND THAT IS WHY `review.ts --lang mt`
+        // STAYS RED ON THEM — the ak / ki / lg / mos stance, that a sourcing gap with a reading still to
+        // find is a TODO and not an exemption:
+        //   · `math-sign` (×17). `×` is ×5 in the retained text and BOTH of its senses are present — a
+        //     DIMENSION (`361 cm × 520 cm (142.13 in × 204.72 in)`, a painting's measurements) and
+        //     SCIENTIFIC NOTATION (`2.2 × 1012 m3`, `1.2 × 10 10 cu ft`, exponents already flattened by
+        //     the source). The rule SHAPE exists — `SymbolData.multiply` takes `times` and `by` and the
+        //     tier picks between them mechanically — so what is missing is a WORD. Both Maltese candidates
+        //     fail: `bi` is the ordinary preposition "with/by" and is far too common for a token count to
+        //     mean anything (trap 37 in its purest form), and `darbiet` ("times", the noun) is attested
+        //     nowhere between two operands. Refused whole rather than half (trap 53), so the two figures
+        //     stay juxtaposed exactly as they were rather than acquiring a confidently wrong connective.
+        //   · `degree` (×4 residual, from ×12). `°C` and `°F` are read — the collocations `grad Celsius`
+        //     ×16/13, `gradi Celsius` ×6/6, `grad Ċelsju` ×7/5 and `grad Fahrenheit` ×3/3 are attested in
+        //     the numeral slot. What is left is the BARE sign, and all four are COORDINATES
+        //     (`bejn il-latitudnijiet 42° u 47° N`, `f'19° 16' 50" lonġitudni`) plus one Richter magnitude
+        //     (`b'intensità ta' 7.6°`). `grad` is sourced (×96/20) and still buys nothing there: a rule
+        //     would cut a coordinate in half and has no minutes/seconds reading to put back. lg's position,
+        //     reached independently on this corpus.
+        //   · `minus` (×2 residual, from ×11). Nine of the eleven are read; the rule is narrowed by
+        //     measurement to a sign whose number is followed by `°` or `%`, because the fleet's usual
+        //     "sign after a space or bracket" shape produces a FALSE POSITIVE in this orthography — the
+        //     definite article is written with a hyphen (`it-43.8°C`, `l-1%`, and `fl -2021` with a stray
+        //     space) and 3,322 of the retained text's hyphens are that. What is knowingly left is
+        //     `(Neuendorf bei Wilster) -3.54 m`, Germany's lowest point: a GENUINE negative where omitting
+        //     the sign puts the place above sea level. Buying it would mean admitting a bare unit after the
+        //     sign, which is one token away from `fl -2021`. Omitting a minus inverts, so this stays red.
+        equals: "×12 in the retained text and NOT ONE is arithmetic. Every instance is a GLOSS inside a "
+            + "parenthesis — `etimoloġija ta' Bibbja hi Griega (= kotba)`, `Technische Lehranstalt HTL = "
+            + "istituzzjoni ta' edukazzjoni`, `HBLA = istituzzjoni ta' edukazzjoni`, `il-Kotba Profetiċi "
+            + "(ta' Kmieni = Kotba Storiċi u tat-Tard = profeti)`, `tissostitwixxi is-suġġett (EN = dummy "
+            + "subject)` — or a Greek ETYMOLOGY quoted verbatim (`astronomija (Grieg: αστρονομία = άστρον "
+            + "+ νόμος, astronomia = astron + nomos)`). The sign is a typographic 'means' between a term "
+            + "and its explanation, not an operator between two operands, and the sentences read correctly "
+            + "with it silent. This is not a sourcing gap either: the artifact cell reports `arithmetic` "
+            + "×318 whole-corpus and that figure is measuring the same three shapes",
+        plus: "×10 in the retained text and, like `equals`, not one is an operator. Six are the Greek "
+            + "etymology above (`άστρον + νόμος`, `astron + nomos`), three are a TELEPHONE COUNTRY CODE "
+            + "(`biex iċempel lil xi ħadd barra l-Ġermanja jkollu iċempel +49 89 123456`), and one is a "
+            + "sentence ABOUT the character itself (`fejn il-+ ifisser il-kodiċi internazzjonali`). The "
+            + "playbook's standing finding applies with full force here: omitting a plus is LOSSLESS "
+            + "(`+30°` and `30°` are the same temperature) while omitting a minus INVERTS, so silence is "
+            + "the correct reading for this sign and a missing one for that sign — which is why `minus` is "
+            + "absent from this block and `plus` is in it. `±`, `÷`, `<` and `>` are ×0",
+    },
     ka: {
         // ⚠ EVERY COUNT IS OVER THE RETAINED TEXT OF `tools/corpus/mined/ka.jsonc` — 453 segments
         // (253 hard + 200 sample) out of a 1,025,770-paragraph ka.wikipedia dump. espeak does not ship

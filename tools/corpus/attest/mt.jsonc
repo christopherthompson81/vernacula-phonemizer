@@ -1,0 +1,649 @@
+// WIKIPEDIA WORD ATTESTATION — mt. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "mt",
+        "wiki": "mt.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kilometru fis-sekonda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…il mil) u li laqtet id-Dinja b'veloċità vertikali ta' 15-25 kilometru fis-sekonda (34,000-56,000 mph). Huwa stmat li l-istruttura oriġinali t…",
+                "…irali, b'veloċitajiet orbitali osservati normalment ta' 200 kilometru fis-sekonda, kieku l-galassja kienet magħmula mill-materja li tidher bi…"
+            ]
+            },
+        {
+                "word": "metri kwadri fis-sekonda",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ċiklu fis-sekonda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…omanjetiżmu ta' James Clerk Maxwell. L-unità tal-frekwenza, ċiklu fis-sekonda, issemmiet \"hertz\" f'ġieħu. == Bijografija == Heinrich Rudo…"
+            ]
+            },
+        {
+                "word": "fis-sekonda",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 12,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…' 6 x 1014 newtrina kull metru kwadru tas-superfiċi xemxija fis-sekonda. Huma jgħaddu rapidament ukoll mill-Art. Imbnew detectors t…",
+                "…'rata aktar mgħaġġla minn ta' dubbiena tal-frott (200 darba fis-sekonda) li hi 80 darba iżgħar. Fl-2008 Barbara Shipman skopriet ko…",
+                "…etwork ta' kompjuters huma ġeneralment deskritti bħala bits fis-sekonda (bps), li mhix l-istess bħal baud. == Referenzi ==…",
+                "…eloċitajiet orbitali osservati normalment ta' 200 kilometru fis-sekonda, kieku l-galassja kienet magħmula mill-materja li tidher bi…",
+                "…tiżmu ta' James Clerk Maxwell. L-unità tal-frekwenza, ċiklu fis-sekonda, issemmiet \"hertz\" f'ġieħu. == Bijografija == Heinrich Rudo…",
+                "…espressjoni tal-għadd ta' drabi li avveniment ripetut jiġri fis-sekonda. Ġiet adottata mis-CGPM (Conférence générale des poids et m…"
+            ]
+            },
+        {
+                "word": "metri fis-sekonda",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "metru fis-sekonda",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sekonda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…fna drabi l-gowler jista' jagħżel li jżomm il-puck (għal xi sekonda jew aktar, skond il-ġudizzju tar-referì) biex iwaqqaf il-lo…",
+                "…bqa' fil-pussess tal-ballun fil-kaxxa protettiva għal erba' sekonda (il-ħin li jdum bil-ballun jiddependi skond il-livell tal-l…",
+                "…fel. Hakan Şükür skorja l-ewwel gowl tat-Turkija wara 11-il sekonda li huwa l-iktar gowl kmieni fl-istorja tat-Tazza tad-Dinja.…",
+                "…15-il sena, u kanzunetta oriġinali ta' madwar 2 minuti u 30 sekonda u 2 minuti u 45 sekonda biex jikkompetu kontra kompetituri…",
+                "…oriġinali ta' madwar 2 minuti u 30 sekonda u 2 minuti u 45 sekonda biex jikkompetu kontra kompetituri oħra. Kull kanzunetta ti…",
+                "…, ġo spazju mingħajr ebda arja (vacuum) f'1/299,792,458 ta' sekonda. Is-simbolu ta' metru hu m. Ġie maħsub fl-antik biex isarra…"
+            ]
+            },
+        {
+                "word": "kilometri fis-sekonda",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Ċelsju",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…r tal-bażilika li issa hija ddedikata lil San Nażarju u San Ċelsju. Fil-508 il-Viżigosti rnexxielhom jirreżistu l-attakki tar-…",
+                "…a bnew ix-Château Comtal u l-Bażilika ta' San Nażarju u San Ċelsju. Fl-1096, il-Papa Urban II bierek il-ġebla tax-xewka tal-pe…",
+                "…diġà kien qed jirrestawra l-Bażilika ta' San Nażarju u San Ċelsju, ġie kkummissjonat għar-rinnovazzjoni tal-monument. Fl-1853…",
+                "…zzjonijiet oħra jinkludu: il-Bażilika ta' San Nażarju u San Ċelsju, il-Katidral ta' Carcassonne, il-Knisja ta' San Vinċenz. ==…",
+                "…tul is-sena kollha, b'temperaturi għoljin medji ta' 30 grad Ċelsju u b'temperaturi baxxi medji ta' 24 grad Ċelsju. Paramaribo…",
+                "…ta' 30 grad Ċelsju u b'temperaturi baxxi medji ta' 24 grad Ċelsju. Paramaribo bħala medja jkollha madwar 2,135 millimetru jew…"
+            ]
+            },
+        {
+                "word": "grad Ċelsju",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ti matul is-sena kollha, b'temperaturi għoljin medji ta' 30 grad Ċelsju u b'temperaturi baxxi medji ta' 24 grad Ċelsju. Paramaribo…",
+                "…medji ta' 30 grad Ċelsju u b'temperaturi baxxi medji ta' 24 grad Ċelsju. Paramaribo bħala medja jkollha madwar 2,135 millimetru jew…",
+                "…azzjoni klimatika ta' Köppen). B'temperatura medja ta' 28.0 grad Ċelsju (82.4 grad Fahrenheit), Ġunju huwa l-iktar xahar sħun tas-s…",
+                "…zzjonata biex it-temperatura tinżamm kostanti għal 17-18-il grad Ċelsju (62-64 Fahrenheit), b'tidwil li jarmi ftit sħana. Gruppi sa…",
+                "…t-temperatura annwali bejn wieħed u ieħor tkun bejn 26 u 27 grad Ċelsju. L-iżjed xahar sħun huwa April, b'temperatura medja ta' 27.…",
+                "…L-iżjed xahar sħun huwa April, b'temperatura medja ta' 27.1 grad Ċelsju. == Distretti amministrattivi == Il-belt ta' Yogyakarta hij…"
+            ]
+            },
+        {
+                "word": "gradi Ċelsju",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…eoroloġika mhix disponibbli. Il-klima regolari tkun qrib -2 gradi Ċelsju. === Veġetazzjoni === Il-veġetazzjoni tkopri 79.9 % tal-inħ…"
+            ]
+            },
+        {
+                "word": "grad Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…tremi tat-temp b’temperaturi li jvarjaw minn massimu ta' 48 grad Celsius (118 °F) fis-sajf għal minimu ta' 15-il grad Celsius (59 °F…",
+                "…ta' 48 grad Celsius (118 °F) fis-sajf għal minimu ta' 15-il grad Celsius (59 °F) fix-xitwa b'silġ fuq xi wħud. okkażjonijiet.. It-te…",
+                "…. okkażjonijiet.. It-temperaturi medji fix-xitwa huma 17-il grad Celsius (63 °F) u fis-sajf 45 grad Celsius (113 °F). L-aktar staġun…",
+                "…dji fix-xitwa huma 17-il grad Celsius (63 °F) u fis-sajf 45 grad Celsius (113 °F). L-aktar staġun pjaċevoli fil-kapitali tal-Baħrejn…",
+                "…n irreġistrat fid-deżert ta' Lut fejn it-temperatura ta' 54 grad Celsius ġiet irreġistrata darbtejn u huwa t-tielet post bl-ogħla te…",
+                "…rreġistrat f'Kebili, peress li fl-1931 ġew irreġistrati 55 grad Celsius u huwa t-tieni post bl-ogħla temperatura rreġistrata fid-di…"
+            ]
+            },
+        {
+                "word": "gradi Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…28 grad Celsius; f'Ġunju u f'Lulju t-temperatura tilħaq -2 gradi Celsius Elevazzjoni medja: 1,116-il metru; l-ogħla punt huwa Pico d…",
+                "…jinsab f'Onslow, li fl-2022 irreġistra temperatura ta' 50.7 gradi Celsius u huwa r-raba' post bl-ogħla temperatura rreġistrata fid-di…",
+                "…ce Creek fin-Nevada peress li fl-1913 ġew irreġistrati 56.7 gradi Celsius. L-Stati Uniti għandha l-akbar ajruport fid-dinja (Fortword…",
+                "…żaw tnaqqis fit-temperaturi annwali medji ta' madwar għaxar gradi Celsius fuq il-kosta u varjetà kbira ta' klimi simultanji madwar il…",
+                "…emperatura miti, u iktar minn 18-il jum f'temperatura ta' 4 gradi Celsius (39 grad Fahrenheit), u dan jgħin lit-trażmissjoni tal-viru…",
+                "…biex jgħixu f'temperaturi insupportabbli ta' inqas minn 10 gradi Celsius. Eventwalment id-dejn ġie mħallas kompletament fis-sajf tal…"
+            ]
+            },
+        {
+                "word": "grad Fahrenheit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ta' Köppen). B'temperatura medja ta' 28.0 grad Ċelsju (82.4 grad Fahrenheit), Ġunju huwa l-iktar xahar sħun tas-sena. Jannar huwa l-iżj…",
+                "…iktar minn 18-il jum f'temperatura ta' 4 gradi Celsius (39 grad Fahrenheit), u dan jgħin lit-trażmissjoni tal-virus. Huwa magħruf li l…",
+                "…eratura qrib il-kosta fil-biċċa l-kbira tibqa' bejn 40 u 60 grad Fahrenheit (4–15 °C) matul is-sena kollha. Is-siġar tal-injam tal-aħma…"
+            ]
+            },
+        {
+                "word": "gradi Fahrenheit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…u), iż-żoni tan-nofs tal-mesa kienu jkunu tipikament għaxar gradi Fahrenheit (5 °C) iktar friski mill-quċċata, u b'hekk dan kien inaqqas…"
+            ]
+            },
+        {
+                "word": "fis-siegħa",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…l-ferroviji tal-klassi ETR li jivvjaġġaw bit-300 kilometru fis-siegħa. == Politika == Il-Kap tal-Istat huwa Sergio Mattarella, li…",
+                "…tax-xogħol temm l-edukazzjoni terzjarja. F'termini ta' PGD fis-siegħa maħduma, l-Isvezja kienet id-disa' l-ogħla fid-dinja fl-200…",
+                "…ti, jew 148 siegħa mgħoddija f'konġestjonijiet tat-traffiku fis-siegħa għal kull vettura fl-2023). ==== Taxis ==== It-taxis suwed…",
+                "…-gvern, l-ogħla livell fl-OECD. Il-livelli tal-produttività fis-siegħa, kif ukoll il-pagi medji fis-siegħa fin-Norveġja, huma fost…",
+                "…ivelli tal-produttività fis-siegħa, kif ukoll il-pagi medji fis-siegħa fin-Norveġja, huma fost l-ogħla fid-dinja. Il-valuri ugwali…",
+                "…ti mill-gvern, l-ogħla fl-OECD. Il-livelli ta' produttività fis-siegħa, kif ukoll il-pagi medji fis-siegħa fin-Norveġja, huma fost…"
+            ]
+            },
+        {
+                "word": "kilometri fis-siegħa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…sa' erba' passiġġieri u kienet tiċċaqlaq b'veloċità ta' 3.6 kilometri fis-siegħa. Ġie rrapportat li l-vettura kienet instabbli ħafna minħabb…",
+                "…à medja ta 'karozza li tivvjaġġa fil-belt hija inqas minn 7 kilometri fis-siegħa (4.3 mph). Rikshaws awtomatiċi li jaħdmu bil-gass naturali…"
+            ]
+            },
+        {
+                "word": "Qabel Kristu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…natum (li bil-Latin tfisser qabel it-twelid ta' Kristu) jew Qabel Kristu, ġeneralment imqassar bil-Malti għal Q.K., jindika s-snin t…",
+                "…e Christum natum tidher ukoll imqassra għal ante Christum (\"qabel Kristu\"), imqassra bl-istess mod għal a. Chr., AC jew AC. Frażi re…",
+                "…b'hekk sar l-ewwel awtur li ddeskriva sena bħala li kienet Qabel Kristu. Kemm Dionysius Exiguus kif ukoll San Bede, li kienu familj…",
+                "…nza li din l-għolja kienu jgħixu fiha sa mir-raba' millenju qabel Kristu, kien Periklew (għall-ħabta tal-495 – 429 Q.K.) li fis-sekl…",
+                "…eriklew (għall-ħabta tal-495 – 429 Q.K.) li fis-seklu ħamsa qabel Kristu kien ikkoordina l-kostruzzjoni tal-iktar binjiet importanti…",
+                "…iet ta' tempju megalitiku li jmur lura daqs tlett elef sena qabel Kristu. Imbagħad daqs tefa' ta' gebla 'l bogħod, fuq l-istess għol…"
+            ]
+            },
+        {
+                "word": "Wara Kristu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…nin fil-lingwa Maltija, it-terminu W.K. jalludi għall-frazi Wara Kristu u joqrob l-iktar lejn it-terminu bil-Latin Anno Domini li j…",
+                "…utli biex jinftiehem aħjar l-ambjent reliġjuz tas-sekli ta' wara Kristu), anke għall-ġeneru letterarju mħarref-leġġendarju li jiddi…",
+                "…ografija tal-Imperatur Klawdju, miktuba mija u għoxrin sena wara Kristu, jgħarrafna dwar it-tkeċċija tal-Lhud minn Ruma għaliex, \"i…",
+                "…jiet\". Plinju ż-Żgħir, gvernatur ta' Bitinja, li, mitt sena wara Kristu, għarraf lill-Imperatur Trajanu, li għadd kbir ta' nies kie…",
+                "…stu fl-Antiquitates Judaicae, li nkitbu f'Ruma disgħin sena wara Kristu. Jgħid hekk: \"F'dak iż-żmien kien jgħix Ġesù – bniedem għar…",
+                "…għal \"Anno Domini \" (AD), li bil-Malti nsibuha wkoll bħala Wara Kristu (W.K.) Bl-Ingliż, dawn il-frażijiet huma rari u AC, ACN, u…"
+            ]
+            },
+        {
+                "word": "Fahrenheit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Daniel Gabriel Fahrenheit (/ˈfærənhaɪt/; pronunzja bil-Ġermaniż: [ˈfaːʁənhaɪt]; twiel…",
+                "…kien fiżiku, inventur u produttur ta' strumenti xjentifiċi. Fahrenheit twieled f'Danzig (Gdańsk), li dak iż-żmien kienet belt fejn…",
+                "…iż, prattiku u li kien jintuża b'mod mifrux) u l-iskala ta' Fahrenheit (l-ewwel skala standardizzata tat-temperatura li kienet tin…",
+                "…tintuża b'mod mifrux). Fi kliem ieħor, l-invenzjonijiet ta' Fahrenheit li saru fl-ewwel rivoluzzjoni fl-istorja tat-termometrija (…",
+                "…fidabbli u preċiżi li qatt ġew ivvintati. == Bijografija == Fahrenheit twieled f'Danzig (Gdańsk), li dak iż-żmien kienet fil-Commo…",
+                "…biċċa l-kbira ta' ħajtu fir-Repubblika Olandiża. Il-familja Fahrenheit kienu familja Anseatika Ġermaniża ta' merkanti li kienu għe…"
+            ]
+            },
+        {
+                "word": "kwadru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 61,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Fil-matematika, għerq kwadru ta' numru x huwa numru y tali li y 2 = x {\\displaystyle y^{…",
+                "…= x {\\displaystyle y^{2}=x} ; fi kliem ieħor, numru ta li l-kwadru tiegħu (ir-riżultat tal-multiplikazzjoni tan-numru minnu nn…",
+                "…għandu għerq kwadrat uniku mhux negattiv, imsejjaħ l- għerq kwadru prinċipali jew sempliċement l-għerq kwadru. li huwa indikat…",
+                "…msejjaħ l- għerq kwadru prinċipali jew sempliċement l-għerq kwadru. li huwa indikat b’ x , {\\displaystyle {\\sqrt {x}},} fejn i…",
+                "…ali jew radix . Pereżempju, biex nesprimi l-fatt li l-għerq kwadru prinċipali ta '9 huwa 3, niktbu 9 = 3 {\\displaystyle {\\sqrt…",
+                "…ikali, f'dan il-każ, 9. Għal L-għerq mhux negattiv, l-għerq kwadru prinċipali jista 'jinkiteb ukoll f'notazzjoni esponenti, bħ…"
+            ]
+            },
+        {
+                "word": "kwadri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 57,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…daqs tagħha huwa ta' 274,200 kilometru kwadru (105,900 mili kwadri) u huwa stmat li jgħixu 'l fuq minn 15,757,000 ruħ. Preċede…",
+                "…magħmul minn żewġ gżejjer b'erja totali ta' art ta' 104 mil kwadri biss (270 km²). Il-gżira ta’ San Cristóbal, l-akbar mit-tne…",
+                "…jiż interkjuż fl-Asja t'Isfel. B'erja ta' 147,181 kilometri kwadri (56,827 mi kw) u b'popolazzjoni ta' madwar 27 miljun, in-Ne…",
+                "…li qabel is-sena 1770. Dari f'din il-knisja kien hemm bosta kwadri żgħar pittura għall-wegħdi, xogħlijiet bla valur artistiku…",
+                "…u storiku u finanzjarju tal-belt għandu blokki perfettament kwadri, estiżi mit-tramuntana għan-nofsinhar u mill-lvant għall-pu…",
+                "…anuel Ludueña). Buenos Aires għandha total ta '640 kwadru u kwadri żgħar. U n-nuqqas ta’ parks u kwadri huwa ta’ 2,400 ettaru.…"
+            ]
+            },
+        {
+                "word": "kilogramma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilogramma hi l-kejl bażiku fis-Sistema Metrika u fis-sistema SI (Sist…",
+                "…ieħed li jieħu l-prefiss k, li jfisser kilo u li jindika li kilogramma magħmulha minn 1000 gramma. Ir-raġuni għalfejn dan hu minnu…",
+                "…Ir-raġuni għalfejn dan hu minnu għandha għeruq storiċi. Il-Kilogramma hi l-unika unità bażika SI li għadha definita billi tiġi mq…",
+                "…huma t-tieni (simbolu s, l-unità tal -ħin), metru (m, tul), kilogramma (kg, massa), ampere (A, kurrent elettriku), kelvin (K, temp…",
+                "…, għalhekk hija bbażata fuq is- sistema ta' unitajiet metru-kilogramma-tieni (MKS) aktar milli kwalunkwe varjant tas-CGS.…",
+                "…mali u fuselage u ġwienaħ eħfef. Dan wassal biex kien 1,000 kilogramma (2,200 libbra) eħfef minn Columbia, għalkemm xorta 2,600 ki…"
+            ]
+            },
+        {
+                "word": "kilogrammi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…minn 40 sa massimu ta' 48 ċentimetru twil u jiżen madwar 2 kilogrammi. Id-denb jista jkun bejn 4.5 u 7.5 ċentimetri twil u l-widn…",
+                "…45 sa massimu ta' 54 ċentimetru twil u jiżen bejn 2.1 u 2.6 kilogrammi. Id-denb jista jkun bejn 2 u 5 ċentimetri twil u l-widnejn…",
+                "…r: b'daqs ta' bejn 35 u 40 ċentimetru fit-tul u minn 1 sa 2 kilogrammi fil-piż. Is-saqajn u l-idejn huma rqaq, ta' tul moderat bl-…",
+                "…b'10 ċentimetri oħra f'denb u b'piż li jvarja bejn 2 u 2.5 kilogrammi. == Klassifikazzjoni == Dan il-liebru wara ħafna riklassifi…",
+                "…. == Deskrizzjoni == Fenek ta' Assam adult jiżen madwar 2.5 kilogrammi, jikber bejn 405 u 538 millimetru (40.5 – 53.8 ċentimetri),…",
+                "…ċi jilaħħaq id-daqs ta' 60 ċentimetru f' tul u bejn 1.5 u 4 kilogrammi f' piż. == Klassifikazzjoni == Dan il-liebru huwa 1 minn 8…"
+            ]
+            },
+        {
+                "word": "milimetru",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ettaru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 110,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…izju: Pigeon Rock, Amber Island (l-unika waħda kbira, b'128 ettaru), Bird Rock, gżira de los Locos, Vacoas Island, Fouquet Gżi…",
+                "…atross. bank, li huma bħal atolli mgħaddsa. Port Louis, 331 ettaru, mit-Torri Martello f'pointe aux Sables sa Fort Georges. Po…",
+                "…ello f'pointe aux Sables sa Fort Georges. Poudre d'Or, 2542 ettaru, grigal tal-gżira ta' Mawrizju, ħdejn il-gżira ta' Ambre. P…",
+                "…ta' Ambre. Post Lafayette Trou d'eau douce Xmara Iswed, 797 ettaru, minn Petite Casa Noyale sa Tamarin. Jista 'wkoll jitqies b…",
+                "…l-għasafar ta' interess internazzjonali. Corps de garde, 90 ettaru, fil-lvant tal-ġibjun La Ferme, fil-punent tal-gżira, Le Po…",
+                "…ant tal-ġibjun La Ferme, fil-punent tal-gżira, Le Pouce, 69 ettaru, fiċ-ċentru-majjistral tal-gżira, bejn 400 u 700 m altitudn…"
+            ]
+            },
+        {
+                "word": "tunnellati",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…id-Dreikönigsglocke (\"il-Qanpiena tat-Tliet Maġi\") ta' 3.8 tunnellati, li ġiet fonduta fl-1418, ġiet installata fl-1437, u reġgħe…",
+                "…ġiet fonduta fl-1880. Żewġ qniepen oħra, il-Pretiosa (10.5 tunnellati; li dak iż-żmien kienet l-ikbar qanpiena fid-dinja tal-Pune…",
+                "…t l-ikbar qanpiena fid-dinja tal-Punent) u l-iSpeciosa (5.6 tunnellati) ġew installati fl-1448 u għadhom hemm fil-post sa llum. Ma…",
+                "…logramma Kapitelsglocke – 1.4 tunnellata Josephglocke – 2.2 tunnellati Ursulaglocke – 2.5 tunnellati Dreikönigsglocke – 3.8 tunnel…",
+                "…tunnellata Josephglocke – 2.2 tunnellati Ursulaglocke – 2.5 tunnellati Dreikönigsglocke – 3.8 tunnellati Speciosa – 5.6 tunnellati…",
+                "…ellati Ursulaglocke – 2.5 tunnellati Dreikönigsglocke – 3.8 tunnellati Speciosa – 5.6 tunnellati Pretiosa – 10.5 tunnellati St. Pe…"
+            ]
+            },
+        {
+                "word": "mili",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 57,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…insabu fiċ-ċentral tal-Oċean Atlantiku , 570 kilometri (350 mili) barra mill-kosta tal-Afrika tal-Punent. Il-gżejjer, li jko…",
+                "…. Id-daqs tagħha huwa ta' 274,200 kilometru kwadru (105,900 mili kwadri) u huwa stmat li jgħixu 'l fuq minn 15,757,000 ruħ.…",
+                "…a' Saint Kitts. Il-gżira ż-żgħira ta' Nevis tinsab madwar 2 mili (3 km) l-lbiċ ta' Saint Kitts, madwar kanal baxx imsejjaħ T…",
+                "…eżiljat fil-gżira ta' Sant Elena (gżira ċkejkna li tinstab mili 'l bogħod fin-naħa tal-Lvant ta' fejn illum hemm l-Angola,…",
+                "…Mdina (il-belt kapitali antika ta' Malta) u 10 kilometri (6 mili) 'l bogħod mill-Belt Valletta, il-belt kapitali kontemporan…",
+                "…bħal l-ossidu tas-siliċju u tvarja mill-ħxuna ta' 10 km- (6 mili-), krosta oċejanika, għal 50 km- (30 mil-) tal-krosta konti…"
+            ]
+            },
+        {
+                "word": "grad",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 96,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Il-Pjanura ta’ Stari Grad, li tagħmel parti mir-raħal ta’ Stari Grad fil-gżira ta’ Hv…",
+                "…janura ta’ Stari Grad, li tagħmel parti mir-raħal ta’ Stari Grad fil-gżira ta’ Hvar, il-Kroazja, hija pajsaġġ agrikolu li ġi…",
+                "…huwa wkoll riżerva naturali. Għalhekk, il-Pjanura ta’ Stari Grad titqies bħala eżempju tajjeb tas-sistema tal-biedja tal-Gre…",
+                "…-sistema tal-biedja tal-Greċja Antika. Il-Pjanura ta’ Stari Grad tniżżlet bħala Sit ta’ Wirt Dinji tal-UNESCO fl-2008. == St…",
+                "…Pharos (jew chora Pharu), li llum hija magħrufa bħala Stari Grad. L-għan tiegħu kien li jipprovdi bażi għal iktar kolonizzaz…",
+                "…har u l-għoljiet baxxi fit-Tramuntana, il-Pjanura ta’ Stari Grad kienet għammiela ħafna u kienet ilha abitata minn Żmien il-…"
+            ]
+            },
+        {
+                "word": "gradi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…jinħadmu puġġamani, nagħal taż-żwiemel, ktajjen, imsiemer, gradi u affarijiet oħra ta' tiżjin u artiġjanat li jiġu maħduma m…",
+                "…o Della Valle, Nanni, Donati, Rauch, Bernabeu, Mezzano, and Gradi. L-istaġun formattiv tagħhom intefaq fil-kampjonat reġjonal…",
+                "…rmattiv tagħhom intefaq fil-kampjonat reġjonali taħt Arrigo Gradi bħala kaptan, Bologna rebħu l-kampjonat tagħhom billi kisbu…",
+                "…izzjoni. F'din iż-żona t-temperaturi jogħlew bosta eluf ta' gradi iżjed. Ma nifmhux kompletament ir-raġuni għaliex il-korona…",
+                "…did. Madanakollu, l-orbita Qamrija hija inklinata għal xi 5 gradi lejn l-elitiku, għaldaqstnat il-Qamar xi kultnat jgħaddi fu…",
+                "…u l-Kosta Rika fin-nofsinhar. Il-pajjiż jinsab bejn 11 u 14 gradi fit-tramuntana tal-Ekwatur fil-emisferu tat-Tramuntana, li…"
+            ]
+            },
+        {
+                "word": "ċentimetru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 54,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…t differenti mill-kuritur: huwa għoli ħarira iktar minn 200 ċentimetru u wiesa' 180 ċentimetru, filwaqt li l-kuritur huwa għoli 18…",
+                "…r: huwa għoli ħarira iktar minn 200 ċentimetru u wiesa' 180 ċentimetru, filwaqt li l-kuritur huwa għoli 185 ċentimetru u l-wisa' t…",
+                "…wiesa' 180 ċentimetru, filwaqt li l-kuritur huwa għoli 185 ċentimetru u l-wisa' tvarja bejn 130 ċentimetru fid-daħla sa 160 ċenti…",
+                "…kuritur huwa għoli 185 ċentimetru u l-wisa' tvarja bejn 130 ċentimetru fid-daħla sa 160 ċentimetru fil-punt fejn jingħaqad mal-kom…",
+                "…metru u l-wisa' tvarja bejn 130 ċentimetru fid-daħla sa 160 ċentimetru fil-punt fejn jingħaqad mal-kompartiment. Il-kuritur huwa k…",
+                "…jn itwal minn 21 metru. Il-ħxuna tal-ħaġriet tvarja bejn 20 ċentimetru sa 50 ċentimetru. Id-dolmen huwa mirdum b'tumbata funebri j…"
+            ]
+            },
+        {
+                "word": "ċentimetri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…lli adult kapaċi jilħaq 80 gramma u jitwal bejn 13.2 u 14.4 ċentimetri. Id-denb iqsar mil-ġisem (wieħed mil ftit opossumi li għand…",
+                "…iqsar minn ġismu) ikun bejn wieħed u ieħor minn 8.1 sa 9.9 ċentimetri twil, is-saqajn ta' wara jkunu madwar 1.57 u mhux aktar min…",
+                "…is-saqajn ta' wara jkunu madwar 1.57 u mhux aktar minn 1.77 ċentimetri, filwaqt li l-widnejn ikunu bejn 1.8 u 2.2 ċentimetri kbar…",
+                "…1.77 ċentimetri, filwaqt li l-widnejn ikunu bejn 1.8 u 2.2 ċentimetri kbar (Kalafut, 2005; Marshall, 1977; Redford and Eisenberg,…",
+                "…iżen madwar 2 kilogrammi. Id-denb jista jkun bejn 4.5 u 7.5 ċentimetri twil u l-widnejn normalment ikunu minn 7.5 sa 10.4 ċentimet…",
+                "…ntimetri twil u l-widnejn normalment ikunu minn 7.5 sa 10.4 ċentimetri. == Klassifikazzjoni == Dan il-liebru huwa wieħed minn 10 s…"
+            ]
+            },
+        {
+                "word": "punt deċimali",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…rappreżentazzjoni deċimali ta' isir perjodiku eżatt wara l- punt deċimali, jirrepeti ċ-ċifra waħda \"3\" għal dejjem, jiġifieri 0.333..…",
+                "…li d-deċimali tiegħu jsir perjodiku fit -tieni ċifra wara l-punt deċimali u mbagħad jirrepeti s-sekwenza \"144\" għal dejjem, jiġifieri…",
+                "…imali. Eżempju ieħor ta 'dan huwa, li ssir perjodika wara l-punt deċimali, tirrepeti l-mudell bi 13-il ċifra \"1886792452830\" għal dej…",
+                "…azju bejn kull grupp ta 'tliet ċifri, kif muri hawn fuq. Il-punt deċimali huwa miktub bħala perjodu (punt) jew virgola, skont il-pref…",
+                "…tess mod ippronunzjat bħala Punto jew Virgula. Ċifri wara l-punt deċimali huma sempliċement elenkati: tre punto un cuatro un ses – 3.…",
+                "…ex jisseparaw l-oġġetti ta' lista. Meta tikteb in-numri, il-punt deċimali jista 'jinkiteb jew bħala virgola jew punt (tikka). Gruppi…"
+            ]
+            },
+        {
+                "word": "nieqes",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…nti. == Kritika == Il-Premju Nobel matul l-istorja ma kienx nieqes mill-kritika, partikolarment fl-istorja riċenti tiegħu. L-i…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…oriġinali. Numri negattivi huma normalment miktuba b'sinjal minus quddiem. Pereżempju, -3 tirrappreżenta kwantità negattiva b…",
+                "…ant is-sinjal negattiv jitqiegħed kemmxejn ogħla mis-sinjal minus (bħala superscript). Bil-maqlub, numru li huwa akbar minn ż…",
+                "…t aritmetiċi fundamentali. Huwa normalment indikat b'sinjal minus infiss (\"-\"). Minħabba żewġ numri naturali n u m, l-ewwel i…",
+                "…gun tal-aġġettivi huma espressi permezz tal-avverbji plus u minus. === Verbi === Il-verbi fl-Interlingua m'għandhomx konjugaz…",
+                "…ħat-territorju tal-Marka Babenberg. Fl-1156, il-Privilegium Minus elevat lill-Awstrija għall-istatus ta' dukat. Fl-1192, il-B…",
+                "…ittizji fil-Gżejjer Bonin. Fil-film kaiju tal-2023 Godzilla Minus One, Koichi Shikishima u l-ekwipaġġ tiegħu jivvjaġġaw fil-G…"
+            ]
+            },
+        {
+                "word": "Ċelsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…-seklu 20, iżda llum il-ġurnata ġiet sostwita bl-iskala ta' Celsius bħall-bqija tad-dinja, għajr fl-Istati Uniti, fejn it-tempe…",
+                "…tat-temp b’temperaturi li jvarjaw minn massimu ta' 48 grad Celsius (118 °F) fis-sajf għal minimu ta' 15-il grad Celsius (59 °F…",
+                "…8 grad Celsius (118 °F) fis-sajf għal minimu ta' 15-il grad Celsius (59 °F) fix-xitwa b'silġ fuq xi wħud. okkażjonijiet.. It-te…",
+                "…ażjonijiet.. It-temperaturi medji fix-xitwa huma 17-il grad Celsius (63 °F) u fis-sajf 45 grad Celsius (113 °F). L-aktar staġun…",
+                "…ix-xitwa huma 17-il grad Celsius (63 °F) u fis-sajf 45 grad Celsius (113 °F). L-aktar staġun pjaċevoli fil-kapitali tal-Baħrejn…",
+                "…eġistrat fid-deżert ta' Lut fejn it-temperatura ta' 54 grad Celsius ġiet irreġistrata darbtejn u huwa t-tielet post bl-ogħla te…"
+            ]
+            },
+        {
+                "word": "kubu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 44,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…razzjoni tas-Servizzi tal-Ilma pproduċiet 31.2 miljun metru kubu ta' ilma tax-xorb f'Malta u f'Għawdex. Madwar 13.4 miljun (…",
+                "…x-xorb f'Malta u f'Għawdex. Madwar 13.4 miljun (43 %) metru kubu ġew prodotti minn diversi għejun taħt l-art fejn jinġabar l…",
+                "…et (2.6 m) fl-għoli. Il-volum estern tiegħu huwa 1,360 pied kubu, ekwivalenti għal 38.51 m³, filwaqt li l-kapaċità tagħha hi…",
+                "…al 38.51 m³, filwaqt li l-kapaċità tagħha hija 1,165.4 pied kubu, ekwivalenti għal 33 m³. Il-piż massimu tal-kontenitur huwa…",
+                "…anza. L-unità tal-kejl SI hija l-kilogramma għal kull metru kubu, li tindika kemm hemm massa preżenti f'metru kubu wieħed ta…",
+                "…ull metru kubu, li tindika kemm hemm massa preżenti f'metru kubu wieħed ta' sustanza. d = m V {\\displaystyle d={\\dfrac {m}{V…"
+            ]
+            },
+        {
+                "word": "kubi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 15,
+                "substringOnly": 1,
+                "examples": [
+                "…stja saret laħam u l-inbid sar demm. Id-demm għaqad f'ħames kubi li huma differenti fid-daqs u l-għamla. == Kif tidher illum…",
+                "…biex jeżaminaw dan il-fenomenu. Fl-1574, instab li l-ħames kubi tad-demm, meta kkumbinati, ilkoll jiżnu l-istess. Hekk ngħi…",
+                "…230 metru taħt l-ilma. Il-volum tal-għar huwa 229600 metri kubi, u l-erja totali tal-art huwa 39400 metri kwadri. Il-wisa'…",
+                "…fl-istampi tiegħu insibu riflessi fil-mera ta' koni, sferi, kubi, ċrieki u spirali. Barra d-disinji tal-veduti u n-natura fl…",
+                "…orazzjoni ta' oġġetti tridimensjonali bħal sferi, kolonni u kubi fis-xogħlijiet tiegħu. Per eżempju, f'stampa imsejħa \"ir-Re…",
+                "…l-istil fil-pajjiż. Il-bini jikkonsisti f’numru ta’ volumi kubi flett mibnija fuq grupp ta’ garaxxijiet. Il-faċċati huma kk…"
+            ]
+            },
+        {
+                "word": "litru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ħabbret rata ta’ sisa fuq l-inbid se tkun ta’ 20 ċenteżmu l-litru. L-inbid huwa l-uniku alkoħol li mhux intaxxat u għalhekk q…",
+                "…li jintuża mill-ajruport biss, se jiżdied b’2 ċenteżmi kull litru filwaqt li dak fuq “unleaded petrol” se jiżdied b’ċenteżmu…",
+                "…aqt li dak fuq “unleaded petrol” se jiżdied b’ċenteżmu kull litru. Id-dazju fuq il-“gas oil”, “diesel”, “biodiesel”, “heavy f…",
+                "…“heavy fuel oil” u l-pitrolju se jiżdied b’2 ċenteżmi kull litru. Għalkemm se jiżdied id-dazju, il-prezz tal-“petrol” u d-“d…",
+                "…l-“petrol unleaded” se jorħos b’2 ċenteżmi għal €1.42c kull litru u dak tad-“diesel” ukoll se jorħos b’ċenteżmu għal €1.35c k…",
+                "…ak tad-“diesel” ukoll se jorħos b’ċenteżmu għal €1.35c kull litru. Dawn il-prezzijiet se jibqgħu stabbli sal-aħħar ta’ Marzu…"
+            ]
+            },
+        {
+                "word": "dollari",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…40% tal-popolazzjoni jgħixu taħt l-linja ta' faqar ta' 1.25 dollari Amerikani kuljum. Il-belt kapitali hija Maseru, u l-pajjiż…",
+                "…Illum, il-Lesotho jirċievi wkoll dħul (stmat f'biljuni ta 'dollari) mill-bejgħ ta' ilma tax-xorb lill-Afrika t'Isfel, biex tis…",
+                "…ipprevjenu 65 ettaru (160 acres) taʼ art għall-inqas għaxar dollari. Fl-1874, in-nazzjonijiet indiġeni tan-nofsinhar tas-Saskat…",
+                "…qabilha, ta' rispettivament, 30% u 63% (żieda f'termini ta' dollari Amerikani). Wara l-attakki terroristiċi tal-11 ta' Settembr…",
+                "…etti ta' forestazzjoni. Proġett ieħor ta' bosta miljuni ta' dollari kien ir-restawr ta' Cheonggyecheon, nixxiegħa li tgħaddi mi…",
+                "…li, kisbu fama fid-dinja tal-Punent, u ġġeneraw miljuni ta' dollari fi dħul mill-esportazzjoni lil hinn mill-konfini tas-suq tr…"
+            ]
+            },
+        {
+                "word": "ewro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 227,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ewro huwa l-isem tal-munita Ewropea. L-ewro (simbolu: €; kodiċi…",
+                "…Ewro huwa l-isem tal-munita Ewropea. L-ewro (simbolu: €; kodiċi bankarju: EUR), il-flus ta' wieħed u għ…",
+                "…vakkja is-Slovenja u Spanja li flimkien jissejħu ż-żona tal-ewro. Pajjiżi oħra li jinsabu barra ż-żona tal-ewro iżda jużaw l…",
+                "…u ż-żona tal-ewro. Pajjiżi oħra li jinsabu barra ż-żona tal-ewro iżda jużaw l-ewro bħala l-munita ta' pajjiżhom huma: Andorr…",
+                "…Pajjiżi oħra li jinsabu barra ż-żona tal-ewro iżda jużaw l-ewro bħala l-munita ta' pajjiżhom huma: Andorra il-Kosovo Monako…",
+                "…lon, Guadeloupe, Martinique u Mayotte. Fil-qasam tal-flus l-ewro ġab riforma sinifikattiva fl-Ewropa; bidla li kontinent kie…"
+            ]
+            },
+        {
+                "word": "fil-mija",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 140,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…tiddependi fuq ir-riżervi ta' taħt l-art tal-ilma ħelu (40 fil-mija), li jinġieb minn sistema ta' riżervi tal-ilma msejħin gall…",
+                "…-xorb ta' Malta huwa prodott permezz tad-desalinazzjoni (60 fil-mija), li twassal għal aktar użu ta' kombustibbli fossili u għal…",
+                "…zjoni Trent. It-turiżmu f’Malta jikkontribwixxi madwar 11.6 fil-mija tal-prodott gross domestiku tal-pajjiż. Xjenza u teknoloġij…",
+                "…l-Uffiċċju Nazzjonali tal-Istatistika ta’ Malta jgħid li 90 fil-mija tal-popolazzjoni Maltija għandha mill-inqas għarfien bażiku…",
+                "…ni Maltija għandha mill-inqas għarfien bażiku tal-Malti, 96 fil-mija tal-Ingliż, 62 fil-mija tat-Taljan, u 20 fil-mija tal-Franċ…",
+                "…inqas għarfien bażiku tal-Malti, 96 fil-mija tal-Ingliż, 62 fil-mija tat-Taljan, u 20 fil-mija tal-Franċiż. Dan l-għarfien mifru…"
+            ]
+            }
+        ],
+    }
+    

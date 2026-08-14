@@ -13,6 +13,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
+import { normalizeMaltese } from "./normalize.ts";
 import { type MalteseNumbers, numberToWords, readDigits } from "./numbers.ts";
 
 interface MalteseDef {
@@ -117,7 +118,12 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class MaltesePhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ TEXT NORMALIZATION FIRST — normalize.ts rewrites grouping commas, decimal points, %, currency
+        // signs, units, exponents, °C/°F, the minus, `&` and the Q.K./W.K. era markers into Maltese WORDS,
+        // and it carries the shared symbol tier with them. Everything it emits is plain text, so it reaches
+        // the g2p through the tokenizer below like any other word (playbook trap 6); nothing here writes a
+        // spelling into the phoneme sink. Its own header states the internal step order and why.
+        return assembleClauses(normalizeMaltese(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string so the
