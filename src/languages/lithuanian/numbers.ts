@@ -27,8 +27,16 @@ const N = MANIFEST.numbers;
 const { units: UNITS, teens: TEENS, tens: TENS } = N;
 const MAG = N.magnitudes;
 
-/** The Lithuanian concord form of a counted noun for `count`. See the header table. */
-function agree(count: number, forms: LithuanianAgreement): string {
+/**
+ * The Lithuanian concord form of a counted noun for `count`. See the header table.
+ *
+ * ⚠ EXPORTED FOR normalize.ts, and that is the whole reason Lithuanian cannot use
+ * `core/normalizeSymbols.ts`: the shared tier holds ONE invariant string per unit, and every Lithuanian
+ * counted noun — procentas, laipsnis, kilometras, doleris — takes this same three-way split. A digit has
+ * no word for a noun to agree WITH (playbook trap 14), so each rule must words-ify its operand and call
+ * this itself. The magnitudes above and the units in `normalization.countedNouns` share one function.
+ */
+export function agree(count: number, forms: LithuanianAgreement): string {
     const m100 = count % 100,
         m10 = count % 10;
     if (m100 >= 11 && m100 <= 19) return forms.gen; // vienuolika tūkstančių … devyniolika tūkstančių

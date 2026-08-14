@@ -62,6 +62,15 @@
     //     a bare numeral has no counted noun to agree with → masculine, as in the sibling Latvian engine.
     "numbers": {
         "units": ["nulis", "vienas", "du", "trys", "keturi", "penki", "šeši", "septyni", "aštuoni", "devyni"],
+        // ⚠ THE FEMININE 1–9, used by normalize.ts when the counted noun is feminine. Lithuanian numerals
+        // agree in GENDER as well as concord, and the masculine list above is the citation form a BARE
+        // numeral takes (see the note at the end of this block). It is wrong the moment a noun turns up:
+        // `4 val.` is *keturios valandos*, never *keturi valandos*, because *valanda* is feminine. Only
+        // 1–9 differ; the teens, the tens and the magnitude nouns are gender-invariant, which is why this
+        // is a nine-word list and not a second paradigm. espeak's `_4 k;etur'I` is the masculine form and
+        // does not record the feminine, so these come from the standard paradigm — the same one that gives
+        // `viena`/`dvi`, which this file's closing note already names.
+        "unitsFem": ["nulis", "viena", "dvi", "trys", "keturios", "penkios", "šešios", "septynios", "aštuonios", "devynios"],
         "teens": [
             "dešimt", "vienuolika", "dvylika", "trylika", "keturiolika",
             "penkiolika", "šešiolika", "septyniolika", "aštuoniolika", "devyniolika"
@@ -76,5 +85,157 @@
             "million": { "sg": "milijonas", "pl": "milijonai", "gen": "milijonų" },
             "billion": { "sg": "milijardas", "pl": "milijardai", "gen": "milijardų" }
         }
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────
+    // NORMALIZATION DATA — read by normalize.ts. Every entry carries its SOURCE and, where the source is
+    // a corpus or a wiki, the SENSE that was read. Two tiers only, and they are not independent:
+    //   espeak  $ESPEAK_NG/dictsource/lt_list — its character-name and abbreviation blocks, which state
+    //           how a SYMBOL is read rather than merely using it (the register a written corpus lacks).
+    //           espeak is PHONETIC, so every spelling below was round-tripped through this repo's own
+    //           g2p and checked against espeak's mnemonic (playbook §5c).
+    //   wiki    tools/corpus/mined/lt.jsonc (464 retained segments of an lt.wikipedia dump) and
+    //           attest.ts against THAT SAME WIKI — a bigger sample of ONE source, never a second one.
+    // ─────────────────────────────────────────────────────────────────────────────────────────────────
+    "normalization": {
+
+        // COUNTED NOUNS, in the same three-way concord as the magnitudes above — `agree()` in numbers.ts
+        // picks the form, which is the whole reason none of this can go through core/normalizeSymbols.ts
+        // (playbook trap 14: a digit has no word for a noun to agree WITH, so the rule must words-ify the
+        // operand itself). Every lemma is the regular -as / -is / -a declension, and the corpus attests
+        // the concord in the wild: "(2 procentai)", "(5 procentai)", "(17 procentų)", "10 procentų".
+        "countedNouns": {
+            // espeak `%  pr'Otsentai` (nom pl) · attest.ts procentų ×38/18, procentai ×38/19 — the senses
+            // read are percentages throughout ("kalba apie 20 procentų gyventojų", "sudaro 76 procentus").
+            "percent":    { "sg": "procentas",  "pl": "procentai",  "gen": "procentų" },
+            // espeak `°  l'Aaipsnis`. ⚠ THE BARE WORD IS POLYSEMOUS AND THE BARE PROBE FOUND THE WRONG
+            // SENSE (trap 37): attest.ts `laipsnių` ×49/15 is MILITARY RANK ("SS kariuomenės laipsnių
+            // sistema") and `laipsnio` ×89/18 is the mathematical POWER ("keliamas laipsniu … laipsnio
+            // pagrindu") or an academic degree. The COLLOCATION is the evidence: `laipsnių Celsijaus`
+            // ×13/11 and `Celsijaus laipsnių` ×3/3, every hit a temperature ("45,7 laipsnių Celsijaus",
+            // "870 laipsnių Celsijaus temperatūra", "2040 laipsnių Celsijaus").
+            "degree":     { "sg": "laipsnis",   "pl": "laipsniai",  "gen": "laipsnių" },
+            "hour":       { "sg": "valanda",    "pl": "valandos",   "gen": "valandų", "fem": true },
+            // `min.` ×1 in the retained text ("pūga, kuri truko 78 val. 25 min."), and it reached the g2p
+            // as *mʲɪn* plus a spurious sentence break. attest.ts minučių ×35/12, minutės ×52/15,
+            // minutė ×44/7 — senses read and all three are the time unit ("valanda turi 60 minučių, o
+            // minutė 60 sekundžių"; "Laiko minutės simbolis – min", which states the abbreviation itself);
+            // the collocation `25 minutės` is attested ×4/4. FEMININE, like *valanda*.
+            "minute":     { "sg": "minutė",     "pl": "minutės",    "gen": "minučių", "fem": true },
+            // UNITS. attest.ts, senses read, all in the measurement slot: kilometrų ×45/18 ("maždaug 10
+            // kilometrų už Viduržemio jūros"), milimetrų ×26/16 ("1520 milimetrų pločio vėžės"),
+            // centimetrų ×22/17 ("100 centimetrų atitinka 1 metrą"), kilogramų ×17/13 ("1 tona yra lygi
+            // 1000 kilogramų"), hektarų ×29/18 ("100 hektarų"). `metrų` ×4 and `kilometrai` ×1 are in the
+            // mined corpus itself ("1488 kilometrai", "Aikštelės ilgis – 40 metrų").
+            "kilometre":  { "sg": "kilometras", "pl": "kilometrai", "gen": "kilometrų" },
+            "metre":      { "sg": "metras",     "pl": "metrai",     "gen": "metrų" },
+            "millimetre": { "sg": "milimetras", "pl": "milimetrai", "gen": "milimetrų" },
+            "centimetre": { "sg": "centimetras","pl": "centimetrai","gen": "centimetrų" },
+            "kilogram":   { "sg": "kilogramas", "pl": "kilogramai", "gen": "kilogramų" },
+            "hectare":    { "sg": "hektaras",   "pl": "hektarai",   "gen": "hektarų" },
+            // MASS BELOW THE KILOGRAM, added because both leaked: `Jis sveria 90 g,` reached the g2p as a
+            // bare *ɡ* and `25-100 mg` as a raw `mg` (the scan's LEAK RAW-LATIN mg). attest.ts gramų
+            // ×21/10, gramai ×12/6, gramas ×15/11 — senses read, the mass unit throughout ("Gramas –
+            // masės matavimo vienetas", "svoris iki 7 gramų"), and `90 gramų` is attested verbatim ×1/1.
+            // miligramų ×12/8, miligramai ×1/1, miligramas ×4/4 — "Miligramas – svorio matavimo vienetas,
+            // 1/1000 gramo" and "vienas miligramas (mg)", which names the abbreviation itself.
+            // ⚠ espeak's lt_list has NEITHER, and says so: its `g` is the LETTER NAME `gee`. This pair is
+            // wiki-attested only, which is the weaker tier — recorded so the sourcing is not overstated.
+            "gram":       { "sg": "gramas",     "pl": "gramai",     "gen": "gramų" },
+            "milligram":  { "sg": "miligramas", "pl": "miligramai", "gen": "miligramų" },
+            "tonne":      { "sg": "tona",       "pl": "tonos",      "gen": "tonų", "fem": true },
+            // CURRENCY. espeak `$  d'o:l;er;is` and `€  'Euras`; the corpus writes the genitive plural in
+            // its own money amounts — dolerių ×5 ("9 986 mlrd. JAV dolerių", "50 000 JAV dolerių bauda"),
+            // eurų ×2 ("16,27 mlrd. eurų veikusiomis kainomis"), litų ×1, "svarų sterlingų" ×1.
+            "dollar":     { "sg": "doleris",    "pl": "doleriai",   "gen": "dolerių" },
+            "euro":       { "sg": "euras",      "pl": "eurai",      "gen": "eurų" },
+            "pound":      { "sg": "svaras",     "pl": "svarai",     "gen": "svarų" },
+            "litas":      { "sg": "litas",      "pl": "litai",      "gen": "litų" },
+            // THE SQUARED MODIFIER agrees with its head noun, so it needs the same three forms.
+            // `kvadratinių kilometrų` ×19/18, senses read and every one an area ("Šalies plotas –
+            // 1 267 000 kvadratinių kilometrų", "užima 44 kvadratinių kilometrų plotą"); `kvadratinių`
+            // ×1 in the mined corpus ("10,1 milijono kvadratinių kilometrų"). Only the gen-pl member is
+            // directly attested — it is the form an area figure almost always takes — and the other two
+            // are that adjective's regular paradigm, round-tripped through the g2p.
+            "squared":    { "sg": "kvadratinis","pl": "kvadratiniai","gen": "kvadratinių" }
+        },
+
+        // INVARIANT WORDS.
+        "words": {
+            // espeak `_dpt  _kabl;'el;is  // comma` — the DECIMAL-POINT slot, named as such in espeak's own
+            // comment. attest.ts kablelis ×13/6 and the article is about the punctuation mark itself
+            // ("Kablelis – skyrybos ženklas"). Lithuanian writes the decimal separator as a comma.
+            "decimalPoint": "kablelis",
+            // espeak `_-  m'Inus` and `+  p;l;'us` — the character-NAME block, i.e. what espeak says when
+            // reading the character aloud, which is exactly the register a sign reading needs.
+            // ⚠ THE BARE-WORD WIKI PROBE FAILED THE SENSE CHECK IN BOTH DIRECTIONS and is recorded so it is
+            // not re-run: `minus` reports attested ×13/3 and every hit is the Cypriot band „Minus One“ or
+            // the plant binomial *Arctium minus*; `plius` ×52/15 is the radio stations „M1 Plius“ and „LRT
+            // Plius“. Two healthy counts, two wrong senses (the ki `digirii` / nan `kong-si` shape). What
+            // DOES confirm them is the collocation: `minuso ženklas` ×4/4, every hit the mathematical sign
+            // ("formulėje naudojamas minuso ženklas"), and `pliuso ženklas` ×2/2, one of which is an
+            // article naming the character ("Pliuso ženklas + (Unicode:U+002B; ASCII: &#43;)").
+            "minus": "minus",
+            "plus": "plius",
+            // The Celsius scale name, from the attested collocation above. POSTPOSED — `laipsnių Celsijaus`
+            // ×13/11 against `Celsijaus laipsnių` ×3/3, so the corpus's own order is unit-then-scale.
+            "celsius": "Celsijaus",
+            "fahrenheit": "Farenheito",  // same temperature-conversion article: "Verčiant iš Celsijaus laipsnių į Farenheitą"
+            // The range correlative. ⚠ `iki` IS A PREPOSITION IN A CORRELATIVE FRAME, NOT AN INFIX, and it
+            // had to be tested as one (the Fula `hakkunde` lesson): all 15 ` iki ` in the retained text and
+            // ALL SIX that sit between two numerals have `nuo` in front of them — "nuo 0 iki 1 °C", "nuo 1
+            // iki 6", "nuo 467 000 iki 114 000", "nuo 10 iki 1", "Nuo 1952 iki 1967 metų". Not one bare
+            // `N iki M`. So the rule emits BOTH halves, which is what this corpus writes verbatim.
+            "rangeFrom": "nuo",
+            "rangeTo": "iki",
+            "and": "ir",              // the ampersand; the commonest conjunction in the corpus
+            // Date / era vocabulary. `metais` ×21 and `metų` ×30 in the mined corpus, both directly after a
+            // numeral, and the frame that chooses between them is attested there too — see normalize.ts
+            // step 10. `dieną` ×5 including the fully spelled-out date "1936 metų liepos 24 dieną", which is
+            // the exact shape `NNNN m. <month> NN d.` abbreviates. `amžiuje` ×50/20 ("Piratavimas XXI
+            // amžiuje", "V amžiuje"); `amžiaus` ×9 / `amžius` ×10 in the corpus. `mūsų eros` ×2 ("nuo
+            // maždaug mūsų eros pradžios").
+            "yearInstr": "metais",
+            "yearGen": "metų",
+            "day": "dieną",
+            "centuryGen": "amžiaus",
+            "month": "mėnesį",
+            "eraBefore": "prieš mūsų erą",
+            "eraOur": "mūsų eros",
+            "thatIs": "tai yra",      // `t. y.` ×7 — the standard expansion
+            "forExample": "pavyzdžiui", // `pvz.` ×9
+            "etCetera": "ir kita",    // `kt.` ×6, in the frozen `ir kt.` = "ir kita"
+            "number": "numeris",      // espeak `nr  n'um;er;is`
+            "page": "puslapis",
+            "inhabitants": "gyventojų" // `gyv.` ×2, in "BVP/1 gyv."
+        },
+
+        // THE MONTH NAMES IN THE GENITIVE — the only form a Lithuanian date writes them in, and the
+        // discriminator that tells `1930 m. balandžio 25 d.` (→ metų, a full date) from `1970 m.` (→
+        // metais, a bare year). Tabulated in the retained text: birželio ×9, sausio ×6, gegužės ×5,
+        // rugsėjo ×5, kovo ×4, gruodžio ×4, balandžio ×4, spalio ×3, liepos ×3, lapkričio ×3, vasario ×2,
+        // rugpjūčio ×2 — 50 of the 347 `m.` instances.
+        "monthsGen": [
+            "sausio", "vasario", "kovo", "balandžio", "gegužės", "birželio",
+            "liepos", "rugpjūčio", "rugsėjo", "spalio", "lapkričio", "gruodžio"
+        ],
+
+        // LETTER NAMES for core/initialisms.ts. SOURCE: espeak dictsource/lt_list's letter block, which is
+        // PHONETIC — so each spelling below was written from the mnemonic and then round-tripped through
+        // this repo's own g2p and compared back (playbook §5c). 26 of 29 match espeak exactly; the three
+        // that do not are named in normalize.ts's header, and none of them changes the letter.
+        "letterNames": {
+            "a": "a", "b": "bė", "c": "cė", "č": "čė", "d": "dė", "e": "e", "ė": "ė", "f": "ef",
+            "g": "gė", "h": "ha", "i": "i", "j": "jot", "k": "ka", "l": "el", "m": "em", "n": "en",
+            "o": "o", "p": "pė", "r": "er", "s": "es", "š": "eš", "t": "tė", "u": "u", "v": "vė",
+            "z": "zė", "ž": "žė", "q": "kū", "w": "dviguba vė", "x": "iks", "y": "ygrek"
+        },
+
+        // ACRONYMS SPELLED OUT ALTHOUGH THEY ARE PRONOUNCEABLE — a LEXICAL fact no phonotactic test can
+        // derive (core/initialisms.ts's own note). Kept to the runs this corpus actually contains and whose
+        // letter reading is not in question: JAV ×26 (Jungtinės Amerikos Valstijos), ES ×4 (Europos
+        // Sąjunga), JT ×3 (Jungtinės Tautos), GMO ×5, IP ×3, UTC ×6, ISBN ×9. Everything else is left to
+        // the OOV path, which spells a run only when it cannot be syllabified at all.
+        "acronymLetters": ["jav", "es", "jt", "gmo", "ip", "utc", "isbn"]
     }
 }

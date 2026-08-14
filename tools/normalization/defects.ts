@@ -799,6 +799,55 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    lt: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE RETAINED TEXT OF `tools/corpus/mined/lt.jsonc` — 464 segments
+        // (264 hard + 200 sample) out of a 1,193,488-paragraph lt.wikipedia dump — with the artifact's
+        // whole-corpus `counts` quoted where they differ. `attest.ts` against lt.wikipedia is the second
+        // tier and is THE SAME WIKI, so it is a bigger sample of one source; espeak's Lithuanian
+        // `dictsource/lt_list` is the only genuinely independent one. Every refusal is argued in
+        // src/languages/lithuanian/normalize.ts.
+        // ⚠ `degree`, `exponent` and `minus` ARE DELIBERATELY ABSENT, WHICH IS WHY THE ARTIFACT SCAN FOR
+        // lt STAYS RED — the ak / ln / bm / ilo / lg stance, and here it names three separate real gaps
+        // rather than one. (1) The BARE degree sign, ×16 in the retained text and 14 of them coordinates
+        // (`54° 54′ šiaurės platumos`, `81° 20´ v. ilg.`): the degree WORD is sourced (`laipsnių
+        // Celsijaus` ×13/11) and the layer reads `°C` with it, so what is missing is the ARCMINUTE and
+        // ARCSECOND words and the compass letters, not the degree. Reading the degree alone would fuse
+        // `54° 54′` into one 54-and-54 reading, so the whole coordinate is refused instead (trap 53).
+        // (2) `exponent` on `140–160 kcal/cm²`: a RATE whose numerator this tree cannot name, refused
+        // whole so the `²` is not invented onto it (trap 54's so/si case). (3) `minus` ×2, both the same
+        // shape — `1936 metų liepos 20 d.–22 dienomis`, a DATE SPAN whose dash sits after an abbreviation
+        // dot rather than a digit, so neither the range rule nor the sign rule may claim it. All three
+        // come green the day the missing reading is sourced, and not before.
+        equals: "×39, and reading them finds no arithmetic anywhere — which matters because the word is "
+            + "NOT the blocker: espeak's lt_list states `=  l;'i:gu`, so *lygu* is available and is still "
+            + "the wrong thing to say here. The instances split three ways. (1) RAW LaTeX the dump "
+            + "extraction left in — `\\mathbb{N}^0 = \\mathbb{N}_0 = \\{ 0, 1, 2, \\ldots \\}`, which is the "
+            + "very example `mine.ts scan` prints for this class, and which nobody reads aloud. (2) An "
+            + "ETYMOLOGY GLOSS where `=` means \"means\" or \"is\": `γράφω = graphō 'rašau'`, `φιλο – "
+            + "'myliu' + σοφία = išmintis`, `Biotopas + Biocenozė = Ekosistema`. Saying *lygu* there would "
+            + "assert an equation about a translation. (3) A BILINGUAL TITLE SEPARATOR in a Latvian "
+            + "bibliography — `Baltu valodu atlants: prospekts = Baltų kalbų atlasas`. The `arithmetic` "
+            + "cell is ×3,936 whole-corpus and measures the same three things. A sourced word in the "
+            + "wrong register is trap 37's deeper form, so it is not shipped.",
+        times: "×3 and every one is a DIMENSION CROSS, which reads \"by\" and not \"times\": "
+            + "`Jis sveria 90 g, yra 110 x 46 x 21 mm dydžio` (a device's dimensions) and "
+            + "`250–300×150 m`. The th finding on its own corpus, reproduced here. espeak's lt_list "
+            + "leaves `×` commented out and offers nothing, so this is a sense refusal AND a sourcing "
+            + "gap at once — but the sense settles it alone: no multiplication word would be correct in "
+            + "any of the three, and a dimension word is a separate rule with its own sourcing.",
+        "plus-minus": "×0 in the retained text. A definitive absence recorded so the negative is not "
+            + "re-investigated (trap 48). espeak's lt_list has `±  plus_minus`, which is its own internal "
+            + "directive rather than a Lithuanian reading, so even the apparent source is not one — worth "
+            + "knowing before someone reads that line as an attestation.",
+        "less-than": "×0 in the retained text, and `<` does not occur in the artifact at all — "
+            + "`sources.ts --lang lt` reports the sign absent from the evidence. Same definitive absence "
+            + "as `plus-minus`.",
+        "greater-than": "×0 in the retained text; `>` likewise absent from the evidence. Same definitive "
+            + "absence as `plus-minus`.",
+        divide: "×0 in the retained text; `÷` absent from the evidence. Note this is NOT the same as the "
+            + "SLASH, which is ×14 and is a fraction, a rate or a document number (`Nr. 130/63`) — never "
+            + "a division sign. Same definitive absence as `plus-minus`.",
+    },
     gn: {
         // ⚠ EVERY COUNT BELOW IS OVER THE RETAINED TEXT OF `tools/corpus/mined/gn.jsonc` — 433 segments
         // (233 hard + 200 sample) out of a 35,143-paragraph gn.wikipedia dump — with the artifact's

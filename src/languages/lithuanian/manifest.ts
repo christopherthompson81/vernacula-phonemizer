@@ -11,6 +11,10 @@ export interface LithuanianAgreement {
     sg: string;
     pl: string;
     gen: string;
+    /** The noun is FEMININE, so the numeral's 1–9 component takes the feminine form (*keturios valandos*,
+     *  never *keturi valandos*). Only `normalization.countedNouns` sets this; the magnitude nouns are all
+     *  masculine. See `numbers.unitsFem`. */
+    fem?: boolean;
 }
 
 export interface LithuanianManifest {
@@ -27,6 +31,8 @@ export interface LithuanianManifest {
     clausePunctuation: Record<string, string>;
     numbers: {
         units: string[];
+        /** The FEMININE 1–9. See `LithuanianAgreement.fem`. */
+        unitsFem: string[];
         teens: string[];
         tens: string[];
         magnitudes: {
@@ -35,6 +41,32 @@ export interface LithuanianManifest {
             million: LithuanianAgreement;
             billion: LithuanianAgreement;
         };
+    };
+    /** Text-normalization data (normalize.ts). Every entry's source + sense is recorded in lithuanian.jsonc. */
+    normalization: {
+        /** Counted nouns, in the same three-way concord as `numbers.magnitudes` — see `agree()`. */
+        countedNouns: Record<
+            | "percent" | "degree" | "hour" | "minute"
+            | "kilometre" | "metre" | "millimetre" | "centimetre" | "kilogram" | "hectare" | "tonne"
+            | "gram" | "milligram"
+            | "dollar" | "euro" | "pound" | "litas" | "squared",
+            LithuanianAgreement
+        >;
+        /** Invariant words the rules insert (decimal point, signs, range correlative, date vocabulary). */
+        words: Record<
+            | "decimalPoint" | "minus" | "plus" | "celsius" | "fahrenheit"
+            | "rangeFrom" | "rangeTo" | "and"
+            | "yearInstr" | "yearGen" | "day" | "centuryGen" | "month"
+            | "eraBefore" | "eraOur" | "thatIs" | "forExample" | "etCetera"
+            | "number" | "page" | "inhabitants",
+            string
+        >;
+        /** Month names in the GENITIVE — the discriminator between a full date and a bare year. */
+        monthsGen: readonly string[];
+        /** Lowercase letter → its Lithuanian NAME, for core/initialisms.ts. */
+        letterNames: Record<string, string>;
+        /** Lowercase acronyms spelled out although pronounceable — a lexical fact (core/initialisms.ts). */
+        acronymLetters: readonly string[];
     };
 }
 

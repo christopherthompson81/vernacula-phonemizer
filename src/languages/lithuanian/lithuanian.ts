@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { toSegments } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
+import { normalizeLithuanian, normalizeLithuanianInitialisms } from "./normalize.ts";
 import { numberToWords } from "./numbers.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -36,7 +37,14 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 class LithuanianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NORMALIZATION FIRST — see normalize.ts. Every unit, sign and currency reading lives there rather
+        // than in `core/normalizeSymbols.ts`, because every Lithuanian counted noun takes the Baltic
+        // three-way concord (`1 procentas` / `2 procentai` / `10 procentų`) and the shared tier holds one
+        // invariant string per unit. The rules words-ify their own operands and call `agree()` (trap 14).
+        // ⚠ THE INITIALISM PASS RUNS SECOND, and the order is load-bearing: it must see abbreviation dots
+        // that are already spent, or `1802 m.` reads as the letter EM. Romans are digits before either
+        // runs — lt is not in `registry.ts`'s ROMAN_NATIVE, so `normalizeRomans` wraps `text()`.
+        return assembleClauses(normalizeLithuanianInitialisms(normalizeLithuanian(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))

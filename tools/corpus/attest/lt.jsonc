@@ -1,0 +1,621 @@
+// WIKIPEDIA WORD ATTESTATION — lt. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "lt",
+        "wiki": "lt.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "miligramų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…. === Poreikis === Suaugusiam žmogui dienos norma – apie 10 miligramų tokoferolio ekvivalentų, nėščiosioms – 12 miligramų, žindyv…",
+                "…apie 10 miligramų tokoferolio ekvivalentų, nėščiosioms – 12 miligramų, žindyvėms – 14 miligramų. === Trūkumas === Sveikiems žmonė…",
+                "…lio ekvivalentų, nėščiosioms – 12 miligramų, žindyvėms – 14 miligramų. === Trūkumas === Sveikiems žmonėms vitamino E netrūksta, t…",
+                "…io efekto norima. Dozės vartojant per burną: Maža dozė: 3-5 miligramų Vidutinė dozė: 5-10 miligramų Didelė dozė: virš 10 miligram…",
+                "…ant per burną: Maža dozė: 3-5 miligramų Vidutinė dozė: 5-10 miligramų Didelė dozė: virš 10 miligramų == Veikimas == Veikimas laba…",
+                "…iligramų Vidutinė dozė: 5-10 miligramų Didelė dozė: virš 10 miligramų == Veikimas == Veikimas labai dažnai būna nenuspėjamas, kie…"
+            ]
+            },
+        {
+                "word": "miligramai",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 7,
+                "examples": [
+                "…sių Ca ir Mg druskų kiekį): mmol/l (milimoliai litre) mg/l (miligramai litre, CaCO3 ekvivalentas) == Kietumo lygiai == minkštas –…"
+            ]
+            },
+        {
+                "word": "miligramas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…riešdėliai. Pavyzdžiui, apie 10-6 kg sakoma, jog tai vienas miligramas (mg), bet ne vienas „mikrokilogramas“ (būtų µkg) Tiksliai v…",
+                "…, reiškiantis daugiklį 10-3 arba 1/1000 arba 0,001. Pvz.: 1 miligramas = 1/1000 gramo (arba 1 mg = 1/1000 g) 1 milimetras = 1/1000…",
+                "…nt azotu aukštoje temperatūroje. Tai mirtini nuodai. Vienas miligramas viename litre ar kilograme yra mirtina dozė suaugusiam žmog…",
+                "…odas pagal ISO 639-1 standartą; Malagasių Vikipedija (mg:); Miligramas – svorio matavimo vienetas, 1/1000 gramo.…"
+            ]
+            },
+        {
+                "word": "875 miligramai",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gramų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 10,
+                "substringOnly": 1,
+                "examples": [
+                "…olino dideliame kiaušinyje), bifšteksas (58,5 mg cholino 85 gramų porcijoje), žiediniai kopūstai (43,9 mg cholino šimte gramų…",
+                "…gramų porcijoje), žiediniai kopūstai (43,9 mg cholino šimte gramų). == Savybės == Cholinas tirpsta vandenyje, yra lecitino su…",
+                "…šdėliu ir apibrėžtas kaip tūkstantis nesisteminių vienetų – gramų. Kilogramas žymimas kg. Išvestiniai vienetai sudaromi pride…",
+                "…kankamai trumpi (1,5 - 2,1 m). Masalai lengvi, svoris iki 7 gramų (kai kurie gamintojai nurodo svori iki 10 gramų)(visos sukr…",
+                "…voris iki 7 gramų (kai kurie gamintojai nurodo svori iki 10 gramų)(visos sukriukės, mažos vartiklės, vobleriai, guminukai su…",
+                "…gali būti bet kokio ilgio, jų užmetamo masalo svoris iki 12 gramų, kai kurie gamintojai nurodo svori iki 14 gramų M- ši klasė…"
+            ]
+            },
+        {
+                "word": "gramai",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 6,
+                "substringOnly": 1,
+                "examples": [
+                "…kaip pusė svaro (vok. Pfund). 1 svaras = 2 markės = 467,71 gramai 1 markė = 8 uncijos = 233,856 gramai 1 uncija = 2 lotai = 2…",
+                "…as = 2 markės = 467,71 gramai 1 markė = 8 uncijos = 233,856 gramai 1 uncija = 2 lotai = 29,232 gramai 1 lotas = 4 Quentchen =…",
+                "…kė = 8 uncijos = 233,856 gramai 1 uncija = 2 lotai = 29,232 gramai 1 lotas = 4 Quentchen = 14,616 gramai 1 Quentchen = 4 pfeni…",
+                "…ja = 2 lotai = 29,232 gramai 1 lotas = 4 Quentchen = 14,616 gramai 1 Quentchen = 4 pfenigai = 3,654 gramai 1 pfenigas = 1⁄16 l…",
+                "…Quentchen = 14,616 gramai 1 Quentchen = 4 pfenigai = 3,654 gramai 1 pfenigas = 1⁄16 loto = 0,9135 gramo 1 granas = 1⁄18 loto=…",
+                "…apie 653-jų kilogramų ribos , ar aukso turima mažiau nei 85 gramai ir sidabro mažiau nei 595 gramai. Pastarosios sumos yra vad…"
+            ]
+            },
+        {
+                "word": "gramas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 11,
+                "substringOnly": 1,
+                "examples": [
+                "…Gramas (gr. γράμμα 'du obolai') – masės matavimo vienetas, žymimas…",
+                "…1×10−3 kilogramo. Originalioje prancūzų metrinėje sistemoje gramas buvo vienas bazinių vienetų. Gramas vis dar rašomas lyg būt…",
+                "…ūzų metrinėje sistemoje gramas buvo vienas bazinių vienetų. Gramas vis dar rašomas lyg būtų bazinis vienetas, jei vartojami pr…",
+                "…Gramas (gr. Γράμμος, alb. Gramoz) – kalnų masyvas Balkanuose, Grai…",
+                "…Gramas − upė vidurio Lietuvoje, Kėdainių rajone, Lankesos dešinysi…",
+                "…sos dešinysis intakas. Upė teka pro eglyną ir Šniūrų mišką. Gramas įteka į Lankesą 7 km nuo jos žiočių. Visa vaga sureguliuota…"
+            ]
+            },
+        {
+                "word": "minučių",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…po minutės simbolis – ′ (& prime;). Pavyzdžiui, penkiolikos minučių kampas būtų rašomas kaip 15′. Kartais minutei žymėti naudoj…",
+                "…as apostrofas ('). Labiausiai tikėtina, kad valanda turi 60 minučių, o minutė 60 sekundžių, dėl babiloniečių, naudojusių šešias…",
+                "…Penkiolika šlovės minučių (angl. Fifteen minutes of fame) – plačiai pagarsėjusi žinom…",
+                "…a iš jo posakio „Ateityje kiekvienas bus garsus penkiolikai minučių“ (angl. In the future everybody will be world famous for fi…",
+                "…au pasitvirtino: ateityje kiekvienas bus garsus penkiolikai minučių“. Laikui bėgant, kuomet iškilo trumpalaikių žvaigždžių, tel…",
+                "…o YouTube, ši pranašiška replika pilnai pateisino save – 15 minučių šlovė tapo vienu pagrindinių populiariosios kultūros koncep…"
+            ]
+            },
+        {
+                "word": "minutės",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…, lygus 1/60 laipsnio. Dalinama į 60 kampo sekundžių. Laiko minutės simbolis – min Kampo minutės simbolis – ′ (& prime;). Pavyz…",
+                "…ma į 60 kampo sekundžių. Laiko minutės simbolis – min Kampo minutės simbolis – ′ (& prime;). Pavyzdžiui, penkiolikos minučių ka…",
+                "…88 minutės (angl. 88 Minutes) – 2007 JAV trileris, kuriame pagrindinį…",
+                "…Auksinės minutės (angl. Golden Minutes) – 2019 m. lietuvių režisieriaus Saul…",
+                "…7 minutės (it. 7 minuti) – 2016 m. režisieriaus Michele Placido sukur…",
+                "…4 minutės (vok. Vier Minuten) – 2006 m. Vokietijoje sukurta muzikinė…"
+            ]
+            },
+        {
+                "word": "minutė",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 44,
+                "articles": 7,
+                "substringOnly": 6,
+                "examples": [
+                "…Minutė: laiko matavimo vienetas, lygus 60 sekundžių, taip pat 1/60…",
+                "…as ('). Labiausiai tikėtina, kad valanda turi 60 minučių, o minutė 60 sekundžių, dėl babiloniečių, naudojusių šešiasdešimtainę…",
+                "…== == Įdomi statistika == Įvarčiai Greičiausias įvartis: 4 minutė – Luka Modrić už Kroatiją, varžybose prieš Austriją Vėliaus…",
+                "…roatiją, varžybose prieš Austriją Vėliausias įvartis: 120+2 minutė – Semih Şentürk už Turkiją, varžybose prieš Kroatiją Daugia…",
+                "…Ludovic Magnin iš Šveicarijos, varžybose prieš Čekiją – 59 minutė Pirmasis įvartis: Václav Svěrkoš už Čekiją, varžybose prieš…",
+                "…: Václav Svěrkoš už Čekiją, varžybose prieš Šveicariją – 71 minutė Pirmi „sausi vartai“: Petr Čech už Čekiją, varžybose prieš…"
+            ]
+            },
+        {
+                "word": "90 gramų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ra apie 6 cm, skersmuo – apie 4,5–5,5 cm. Kivių svoris – 86–90 gramų. Odelė žalsvai ruda, padengta smulkiais pūkeliais. Auginami…"
+            ]
+            },
+        {
+                "word": "25 minutės",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…simfonija. Vidutinis simfonijos orkestro atlikimo laikas – 25 minutės. == Istorija == Ši simfonija buvo sukurta kaip užuomina Hai…",
+                "…tatas yra lygus, tada yra žaidžiamos dvi greitųjų partijos: 25 minutės plius 10 sekundžių po kiekvieno ėjimo. Jei mačo rezultatas…"
+            ]
+            },
+        {
+                "word": "pirmo amžiaus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "antro amžiaus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…kontroversiškų darbų, ginančių idėją, kad Jėzus tėra mitas, antro amžiaus graikų, romėnų ir judaizmo teologijos mišinys. == Pagrindin…",
+                "…enas, Tertulianas ir kiti. Klementas Aleksandrietis maždaug antro amžiaus pabaigoje pasakojo, kad romėnai, klausęsi Petro kalbų, ragi…"
+            ]
+            },
+        {
+                "word": "trečio amžiaus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…jas, poetas, satyrikas-humoristas bei MČTAU (Medardo Čoboto trečio amžiaus universiteto) politologijos, literatūros ir istorijos fakul…"
+            ]
+            },
+        {
+                "word": "ketvirto amžiaus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ai. Kaladėlėmis vytos vytinės juostos žinomos Lietuvoje nuo ketvirto amžiaus. Gausiausiai Lietuvoje audžiamos rinktinės juostos, žinomos…"
+            ]
+            },
+        {
+                "word": "penkto amžiaus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "šešto amžiaus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dešimto amžiaus",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 2,
+                "examples": []
+            },
+        {
+                "word": "penkiolikto amžiaus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…me saugomi senovės istorijos rankraščiai iš keturiolikto ir penkiolikto amžiaus. Vėliau archyvas pradėjo bendradarbiauti su daugeliu valsty…",
+                "…05, t. 70, z. 4, s. 7-26. Rowell, S. C. „Smulkios žinios iš penkiolikto amžiaus Klaipėdos (apie 1400–1525 m.)“. In Klaipėdos visuomenės ir…"
+            ]
+            },
+        {
+                "word": "devyniolikto amžiaus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…buvo pradėta nešioti pirmiausia kalnakasių ir uosto krovikų devyniolikto amžiaus pabaigoje kaip patogus drabužis karštoje aplinkoje. == Isto…",
+                "…oje ir Pietų Amerikoje buvo atrasti ir pradėti eksploatuoti devyniolikto amžiaus pradžioje. Didžiausias vientisas užfiksuotas žėručio (flogo…",
+                "…e bei kai kuriose kitose šalyse pagalbos telefonas yra 999. Devyniolikto amžiaus aštuntame dešimtmetyje Londone gyvavo muzikos grupė, pasiva…",
+                "…ikas. Jo romanas \"Tėvai ir vaikai\" laikomas vienu geriausių devyniolikto amžiaus darbų. Rusų literatūros populiarizatorius Vakaruose. == Gyv…",
+                "…ilės futbolo federacija. Čilėje futbolas yra žaidžiamas nuo devyniolikto amžiaus paskutinių dešimtmečių. Daugiausia buvo žaidžiamas uostų mi…",
+                "…ikas. Jo romanas \"Tėvai ir Vaikai\" laikomas vienu geriausių devyniolikto amžiaus darbų (m. 1883 m.). Gruodžio 12 d. – Mary Todd Lincoln, JAV…"
+            ]
+            },
+        {
+                "word": "dvidešimto amžiaus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…adelic“ tapo bendriniu terminu apibūdinti šiuos muzikantus. Dvidešimto amžiaus devintojo dešimtmečio pradžioje George Clinton pradėjo soli…",
+                "…o ir Viano kūrybą. 2001 m. išleido romaną Europeana. Trumpa dvidešimto amžiaus istorija, išverstą į trisdešimt tris kalbas. == Gyvenimas =…",
+                "…(Pojednání o případném pití vína…), 1995. Europeana. Trumpa dvidešimto amžiaus istorija (Europeana. Stručné dějiny dvacátého věku), 2001 (…",
+                "…Manual of Rules of Order for Deliberative Assemblies“. Iki dvidešimto amžiaus pradžios „Robert’s Rules of Order“ išpopuliarėjo, išstūmė k…",
+                "…metyje vadovavo svingo grupei, o penktajame – bigbendo. Nuo dvidešimto amžiaus penktojo dešimtmečio daugiausia atlikdavo ritmenbliuzo, rok…",
+                "…itingas, leistas nuo 1952 m. lapkričio 14 d. == Istorija == Dvidešimto amžiaus aštuntajame dešimtmetyje „NME“ tapo perkamiausiu britišku m…"
+            ]
+            },
+        {
+                "word": "aštuonriolikto",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Celsijaus laipsnių",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 1,
+                "examples": [
+                "…barono titulą (Baronas Kelvinas). Santykis tarp kelvinų ir Celsijaus laipsnių išreiškiamas formulėmis: K = °C + 273,16 °C = K – 273,16 ==…",
+                "…gai apskaičiuoti pagrindines Farenheito laipsnių reikšmes 5 Celsijaus laipsnių žingsniais: == Šaltiniai ==…",
+                "…į Celsijaus, taikoma formulė: °C = (5/9)(°F-32) Verčiant iš Celsijaus laipsnių į Farenheitą: °F = °C × 1,8 + 32. === Informacijos kiekio m…"
+            ]
+            },
+        {
+                "word": "laipsnių Celsijaus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…tirpusių Glauberio druskų nuosėdos tai pasirodo (iškrenta 5 laipsnių Celsijaus temperatūroje), tai vėl išnyksta (ištirpsta, atšilus orams)…",
+                "…ždės ir Žemės stebėtojų. Šios egzoplanetos temperatūra 2040 laipsnių Celsijaus. Tai kol kas pati karščiausia atrasta planeta[reikalingas š…",
+                "…ratūra. 2007 m. liepos 24 d. termometro stulpelis rodė 45,7 laipsnių Celsijaus.…",
+                "…temperatūros skirtumas 1 m gylyje kartais svyruoja tarp 5-6 laipsnių Celsijaus. Nešvarus ir neskaidrus vanduo neleidžia augti vandens auga…",
+                "…žiemos. Vėsiausias mėnuo – sausis (vidutinė temperatūra 18 laipsnių celsijaus), karščiausias – liepa (vidutinė temperatūra 28,7 celsijaus…",
+                "…s yra tik dujos ir riebalai. Kremavimui reikalinga bent 870 laipsnių Celsijaus temperatūra, kurioje kūnas laikomas apie dvi valandas. Sava…"
+            ]
+            },
+        {
+                "word": "minuso ženklas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…s tuo mažesnis, kuo žvaigždė ryškesnė, formulėje naudojamas minuso ženklas. Praktikoje naudingos dvi taisyklės: Šviesos srauto sumažėj…",
+                "…tyle \\varphi =-\\int _{a}^{b}{\\vec {E}}{\\text{d}}{\\vec {r}}} Minuso ženklas reikalingas, nes darbas atliekamas prieš elektrinio lauko j…",
+                "…rodo, kad sniegas krenta vidutiniu intensyvumu; pliuso arba minuso ženklas (+/-) rodytų, kad krituliai gali būti atitinkamai smarkūs a…",
+                "…\\forall \\mathbf {v} \\in V:(-1)\\mathbf {v} =-\\mathbf {v} .} Minuso ženklas daugyboje iš skaliaro gali būti perkeliamas laisvai: ∀ a ∈…"
+            ]
+            },
+        {
+                "word": "pliuso ženklas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…{i=m}^{n}x_{i}=x_{m}+x_{m+1}+x_{m+2}+\\dots +x_{n-1}+x_{n}.} Pliuso ženklas + (Unicode:U+002B; ASCII: &#43;) yra lotyniško žodžio et (r…",
+                "…riesagos atėmus priebalsį t (āigas 'laike', pūsõ 'medyje'). Pliuso ženklas (+) reiškia, kad daiktavardis, dažniausiai – vietovardis, t…"
+            ]
+            },
+        {
+                "word": "dešimtainis kablelis",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kvadratinių kilometrų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…neturinti išėjimo prie vandenyno. Šalies plotas – 1 267 000 kvadratinių kilometrų. Vanduo užima 300 kvadratinių kilometrų plotą. Pagal plotą…",
+                "…plotas – 1 267 000 kvadratinių kilometrų. Vanduo užima 300 kvadratinių kilometrų plotą. Pagal plotą Nigeris yra beveik 20 kartų didesnis už…",
+                "…rapijų. Ji yra pietrytinėje salos dalyje. Parapija užima 44 kvadratinių kilometrų plotą, joje gyvena 11 486 (2001) gyventojai. Šv. Dovydo par…",
+                "…ę daugumą. Pietuose yra įsikūręs Rusijai priklausantis 7360 kvadratinių kilometrų ploto Baikonuro kosmodromas.…",
+                "…oliuojamas Azerbaidžano kariuomenės. Eksklavo dydis apie 40 kvadratinių kilometrų ir yra visiškai apsuptas Azerbaidžano, kuris buvo okupuotas…",
+                "…a Romos kariuomenės užsiėmimams ir mokymams. Maždaug dviejų kvadratinių kilometrų ploto Marso lauke stovėjo viena svarbiausių romėnų karo die…"
+            ]
+            },
+        {
+                "word": "procentų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…. 1584 m. belgų mokslininkas S. Stevin pirmą kartą paskelbė procentų lentelę, tuo įvesdamas dešimtaines trupmenas Europoje. Nuo…",
+                "…Dešimties procentų mitu vadinamas labai plačiai paplitęs mitas, kad žmogus nau…",
+                "…valstijos šiaurės vakaruose. Kumaonių kalba – kalba apie 20 procentų gyventojų valstijos pietryčiuose. Džaunsarių kalba – kalba…",
+                "…ų valstijos pietryčiuose. Džaunsarių kalba – kalba apie 1,3 procentų gyventojų – Dehraduno apygardoje, esančioje valstijos vakar…",
+                "…ie sudaro 76 procentus visų gyventojų, musulmonų sunitų (17 procentų), krikščionių (2 procentai) ir drūzų (5 procentai). ==== Gy…",
+                "…investuota daugiau kaip 5 procentai, bet ne daugiau kaip 10 procentų grynųjų aktyvų, su sąlyga, kad tokių investicijų bendra sum…"
+            ]
+            },
+        {
+                "word": "amžiuje",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Piratavimas XXI amžiuje dažniausiai siejamas su piratavimu Somalyje, prasidėjusiu 2…",
+                "…sas, užsitęses daugiau nei 180 metų ir pasibaigė iš esmės V amžiuje. Karas tarp britų ir anglosaksų V amžiuje buvo tarp Romos i…",
+                "…ibaigė iš esmės V amžiuje. Karas tarp britų ir anglosaksų V amžiuje buvo tarp Romos imperijos ir barbarų, kurie užkariavo ją.…",
+                "…eną ir pasibaigęs 901 m. pr. m. e. gruodžio 31 dieną. Šiame amžiuje tęsėsi bronzos amžiaus žlugimas ir tautų (ypač, indoeuropie…",
+                "…ala, Kuru, Košala ir Videha. Spėjama, kad apytiksliai šiame amžiuje galėjo būti pastatyta Jeruzalės šventykla. Izraelio karalys…",
+                "…enas I – XXI dinastijos Egipto faraonas. Spėjama, kad šiame amžiuje galėjęs gyventi pusiau legendinis žydų karalius Saliamonas.…"
+            ]
+            },
+        {
+                "word": "metais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…intys 366 dienas, viena diena daugiau nei įprastai. Tokiais metais vasaris turi 29 dienas. Papildoma diena pridedama tam, kad…",
+                "…tikslų dienų skaičių, todėl kalendorius, kuris kiekvienais metais turi vienodą dienų skaičių per laiką atitoltų nuo astronomi…",
+                "…Gerekas, Lenkijos komunistų lyderis, į valdžią atėjęs 1970 metais po smurtinių susirėmimų su darbininkais, tačiau buvo nuvers…",
+                "…Liuftvafės struktūra Antrojo pasaulinio karo metais atitiko daugelio kitų šalių karinių oro pajėgų struktūrą, t…",
+                "…ių. JT šiuos metus paskelbė šeimos ūkių ir kristalografijos metais. == Įvykiai Lietuvoje == 2014 metus Lietuvos Respublikos Se…",
+                "…2014 metus Lietuvos Respublikos Seimas paskelbė Oršos mūšio metais. === Gegužė === Gegužės 11 d. Lietuvoje vyko Respublikos Pr…"
+            ]
+            },
+        {
+                "word": "kablelis",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Kablelis – skyrybos ženklas, skirtingose kalbose naudojamas skirting…",
+                "…forma panaši kaip ir apostrofo arba vienos kabutės, tačiau kablelis rašomas apačioje, ant pagrindinės linijos. Vieni šriftai va…",
+                "…trumpą liniją arba kaip mažą devynetą su užtušuotu centru. Kablelis naudojamas atskirti sakinio dalims (prijungiamųjų sakinių,…",
+                "…mųjų sakinių, vienarūšėms...). Daugumoje kalbų ir kontekstų kablelis naudojamas atskyrimui. Žodis kablelis kilęs iš žodžio kably…",
+                "…je kalbų ir kontekstų kablelis naudojamas atskyrimui. Žodis kablelis kilęs iš žodžio kablys, o pastarasis iš kabėti. Kai kableli…",
+                "…ablelis kilęs iš žodžio kablys, o pastarasis iš kabėti. Kai kablelis jungiamas su kitais ženklais, jis gali būti naudojamas kaip…"
+            ]
+            },
+        {
+                "word": "procentai",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…ą padalinti iš 100. Pavyzdžiui, 45 % („keturiasdešimt penki procentai“) yra lygu 45/100 arba 0,45. Panaši sistema, kuri žymi tūks…",
+                "…o nors kiekio ar skaičiaus dalis, vartoja sąvoką „promilė“. Procentai naudojami norint palyginti tam tikrus kiekius, kurie papras…",
+                "…didėjimas lygus 6 %. Žodis „procentas“ reiškia „nuo šimto“. Procentai įprastai naudojami apibūdinant dydžius tarp nulio ir vienet…",
+                "…o 1 525 985 šalies gyventojai (iš 2 578 711), tai yra 59,18 procentai. Už referendumo nuostatą balsavo 40,99 procentai rinkimuose…",
+                "…yra 59,18 procentai. Už referendumo nuostatą balsavo 40,99 procentai rinkimuose dalyvavusių rinkėjų, prieš buvo 15,13 procento;…",
+                "…riai – gyvena Čakrate ir Kalsyje (Dehraduno apygarda) 69,77 procentai gyventojų gyvena kaimų vietovėse. Didžiausią dalį valstijoj…"
+            ]
+            },
+        {
+                "word": "laipsnių",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 15,
+                "substringOnly": 3,
+                "examples": [
+                "…a ir tam tikrų dalykinių įgūdžių. == Kariuomenės be karinių laipsnių == Karinius laipsnius paprastai turi visos kariuomenės, nor…",
+                "…buvo ir išimčių. TSRS Raudonoji armija 1918–1935 m. karinių laipsnių neturėjo. Tuo metu kariškiai turėjo pareigybinius rangus (p…",
+                "…35 m., specialistams jie buvo suteikti 1942–1943 m. Karinių laipsnių neturėjo ir Kinijos Liaudies Respublikos armija 1965–1988 m…",
+                "…nkami respublikai kaip aristokratinis atributas. == Karinių laipsnių klasifikacija == Kariniai laipsniai paprastai skirstomi į t…",
+                "…SS laipsnių ir skiriamųjų ženklų lentelėje pateikta SS kariuomenės laip…",
+                "…snių ir skiriamųjų ženklų lentelėje pateikta SS kariuomenės laipsnių sistema prieš pat Trečio Reicho žlugimą, parodyti skiriamie…"
+            ]
+            },
+        {
+                "word": "laipsnio",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 89,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…tam tikras pareigas karinėje organizacijoje, nors tam vien laipsnio nepakanka, reikia ir tam tikrų dalykinių įgūdžių. == Kariuo…",
+                "…met karininkus vadindavo vadais) bataliono vadas. Bet tokio laipsnio negalėjo turėti karinis inžinierius (to paties hierarchinio…",
+                "…in \\mathbb {N} .} Skaičius, keliamas laipsniu (a) vadinamas laipsnio pagrindu, o skaičius, kurio laipsniu yra keliama (n) – laip…",
+                "…snio pagrindu, o skaičius, kurio laipsniu yra keliama (n) – laipsnio rodikliu. Skaičiaus kėlimas dvejeto laipsniu yra vadinamas…",
+                "…kvadratu, kėlimas trejeto laipsniu – kėlimu kubu. Šių laikų laipsnio simbolį, pvz., 4³, 1628 m. įvedė prancūzų filosofas ir mate…",
+                "…ėlimo neigiamuoju laipsniu rezultatas yra dalmuo vieneto ir laipsnio pagrindo, pakelto laipsniu, priešingo rodikliui: a − b = 1…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…„Minus One“ (dar žinoma kaip Marianne’s Wish) – Kipro roko muzikos…",
+                "…lų balų skaičių, o žiūrovai pasirodymo neįvertino ir skyrė „Minus One“ paskutinę vietą. Bendroje rezultatų lentelėje grupė li…",
+                "…Mažoji varnalėša (Arctium minus) – astrinių (Asteraceae) šeimos varnalėšų (Arctium) genties…",
+                "…s ir penkios formos (Gali būti, kad tai sinonimai): Arctium minus f. laciniatum Clute Arctium minus f. minus Arctium minus f.…",
+                "…d tai sinonimai): Arctium minus f. laciniatum Clute Arctium minus f. minus Arctium minus f. pallidum Farw. Arctium minus f. p…",
+                "…onimai): Arctium minus f. laciniatum Clute Arctium minus f. minus Arctium minus f. pallidum Farw. Arctium minus f. purpureum…"
+            ]
+            },
+        {
+                "word": "plius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 15,
+                "substringOnly": 4,
+                "examples": [
+                "…M1 Plius – nacionalinė radijo programa, transliuojama iš Vilniaus nu…",
+                "…dieniais 8:00 - 19:00 val. == Renginiai ir konkursai == „M1 Plius“ rengia įvairius renginius ir konkursus. Tarp jų „Geriausio…",
+                "…Tarp jų „Geriausio metų boso rinkimai“, „Femme Fatale“, M1 Plius gimtadienio fiesta „Starfest“. Keletą kartų „M1 Plius“ buvo…",
+                "…“, M1 Plius gimtadienio fiesta „Starfest“. Keletą kartų „M1 Plius“ buvo paminėta Lietuvos rekordų knygoje. Taip pat rengiami…",
+                "…LRT Plius – Lietuvos televizija, transliuojama nuo 2003 m. vasario 16…",
+                "…os formatu. 2018 m. spalio 1 d. pavadinimas pakeistas į LRT Plius. == Sezonų šūkiai == 2003–2012 m. „Tavo kultūros kanalas“ 2…"
+            ]
+            },
+        {
+                "word": "kilometrų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…s asmenims ir jų šeimos nariams buvo draudžiama gyventi 100 kilometrų spinduliu aplink Maskvą, Leningradą, TSRS respublikų sostin…",
+                "…Šv. Petro katedra. == Geografija == Monpeljė yra maždaug 10 kilometrų už Viduržemio jūros, 45 kilometrų nuo Nimo, 130 kilometrų n…",
+                "…= Monpeljė yra maždaug 10 kilometrų už Viduržemio jūros, 45 kilometrų nuo Nimo, 130 kilometrų nuo Marselio ir 270 kilometrų nuo N…",
+                "…0 kilometrų už Viduržemio jūros, 45 kilometrų nuo Nimo, 130 kilometrų nuo Marselio ir 270 kilometrų nuo Nicos. Miestas yra subtro…",
+                "…s, 45 kilometrų nuo Nimo, 130 kilometrų nuo Marselio ir 270 kilometrų nuo Nicos. Miestas yra subtropinio klimato zonoje. == Istor…",
+                "…uropoje. Nuo ištakų iki žiočių upės ilgis yra maždaug 1 230 kilometrų, iš jų 883 km tinkami laivybai. Upės baseino plotas užima 1…"
+            ]
+            },
+        {
+                "word": "milimetrų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 16,
+                "substringOnly": 1,
+                "examples": [
+                "…drovei „Lietuvos Geležinkeliai“. Didžioji dalis jų yra 1520 milimetrų pločio vėžės, taip pat egzistuoja kelios siaurojo geležinke…",
+                "…eležinkelio atkarpos (iš viso ilgis apie 150 kilometrų, 750 milimetrų vėžė), iš kurių naudoti tebetinkama tik viena – Aukštaitijo…",
+                "…au ir ten vykdomi tik užsakomieji reisai. Taip pat yra 1435 milimetrų vėžės atkarpa nuo Lenkijos sienos iki Šeštokų. Skirtingi vė…",
+                "…škos žiedyno ašies viršūnės. Dydis labai įvairus: nuo kelių milimetrų iki kelių dešimčių centimetrų. Morfologiniu atžvilgiu graiž…",
+                "…raumeninėms ir liaukinėms ląstelėms. Aksonas yra nuo kelių milimetrų iki metro ilgio, o skersmuo – 1-20 mikrometrai. Aksoną deng…",
+                "…itvirtinęs prie dumblių ar augalų. Kai kurie pasiekia kelių milimetrų ilgį, gali būti žalios, mėlynos ar mėlynai violetinės spalv…"
+            ]
+            },
+        {
+                "word": "centimetrų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…. μέτρον – matas) – SI sistemos ilgio dalinis vienetas. 100 centimetrų atitinka 1 metrą. Priešdėlis centi reiškia 1/100 dalį. Iki…",
+                "…ia, kad 1 cm³ ≡ 1 ml. Daugelyje mokslo šakų vietoje kubinių centimetrų yra vartojami mililitrai. Medicina ir automobilių pramonė y…",
+                "…sunkusis pėstininkas. Ginkluotė: 2-3 metrų ietis (Dory), 60 centimetrų ilgio dviašmenis kardas (Xiphos) arba 65 centimetrų vienašm…",
+                "…ry), 60 centimetrų ilgio dviašmenis kardas (Xiphos) arba 65 centimetrų vienašmenis kardas su lenktu priekiu (Kopis). Šarvai: 91 cm…",
+                "…lis vandentakis (upė), kurio plotis siekia nuo keliasdešimt centimetrų iki kelių metrų. Upelių ilgis būna nuo 5 iki 10 km, o upokš…",
+                "…Dydis labai įvairus: nuo kelių milimetrų iki kelių dešimčių centimetrų. Morfologiniu atžvilgiu graižas yra monopodinis žiedynas. P…"
+            ]
+            },
+        {
+                "word": "kilogramų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 13,
+                "substringOnly": 1,
+                "examples": [
+                "…niuose ginkluose vietoj plutonio. Jo kritinė masė - apie 60 kilogramų. 2001 m. Los Alamoso nacionalinėje laboratorijoje buvo paga…",
+                "…. Los Alamoso nacionalinėje laboratorijoje buvo pagaminta 6 kilogramų neptūnio sfera.[reikalingas šaltinis] Tačiau elemento panau…",
+                "…ntas yra gana sunkus. Akordeonas gali sverti nuo 1 iki 9-10 kilogramų (kai kurie sveria ir 13, ar net 15 kilogramų). Tai priklaus…",
+                "…nuo 1 iki 9-10 kilogramų (kai kurie sveria ir 13, ar net 15 kilogramų). Tai priklauso nuo to, iš ko ir kaip jis pagamintas. Taip…",
+                "…Tona (t) – masės vienetas lygus 1000 kilogramų. Tai nėra SI sistemos vienetas, bet yra priimtas vartoti SI…",
+                "…m. == Apibrėžimas ir kitos reikšmės == 1 tona yra lygi 1000 kilogramų. Taip apibrėžiama vadinamoji metrinė tona. Vartojama (daugi…"
+            ]
+            },
+        {
+                "word": "hektarų",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…– tęsiasi į vakarus beveik 24 kilometrus. Tai 37 tūkstančių hektarų ploto užimantis parkas. 28,694 hektarų jo ploto sudaro lauk…",
+                "…s. Tai 37 tūkstančių hektarų ploto užimantis parkas. 28,694 hektarų jo ploto sudaro laukinė gamta. Tiek viena, tiek kita parko…",
+                "…pusėje pastatyta vasaros rezidencija su didžiuliu (beveik 3 hektarų) reguliariai suplanuotu parku. XIX a. pradžioje čia veikė g…",
+                "…1 000 000 kvadratinių metrų. 1 km² taip pat yra lygus: 100 hektarų 1 000 000 m² 10 000 000 000 cm² 0,386102 kvadratinių mylių…",
+                "…jaus Konstantinovičiaus perkasas ėmė drėkint apie 19 tūkst. hektarų. 1900 m. irigacinė sistema dar išplėsta, o visumoje pradėjo…",
+                "…karinės suirutės drėkinamas plotas susiaurėjo iki 18 tūkst. hektarų ir tik 1928–1929 m. padidėjo iki 68 tūkst. hektarų.…"
+            ]
+            }
+        ],
+    }
+    
