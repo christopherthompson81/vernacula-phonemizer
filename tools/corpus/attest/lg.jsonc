@@ -1,0 +1,598 @@
+// WIKIPEDIA WORD ATTESTATION — lg. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "lg",
+        "wiki": "lg.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kyebiriga",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 93,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a !! Okwebiriga namba kuba kugamba nti namba n x n == n eya kyebiriga (n squared) .The resulting shape (enkula) is called kyebiri…",
+                "…ebiriga (n squared) .The resulting shape (enkula) is called kyebiriga. Why? Kyebiriga etymologically comes from the Luganda numer…",
+                "…ed) .The resulting shape (enkula) is called kyebiriga. Why? Kyebiriga etymologically comes from the Luganda numeral “bbiri” (two)…",
+                "…self two times the resulting product (ekitondeko) is called kyebiriga. Watch this: 5 x 5 = 25 25 is therefore \"namba ya kyebiriga…",
+                "…kyebiriga. Watch this: 5 x 5 = 25 25 is therefore \"namba ya kyebiriga\", (square number) number which is in Luganda. The mathemati…",
+                "…Namunigina za kyebiriga (Square units) Mu kibalangulo ky'essomampimo mulimu emiramw…"
+            ]
+            },
+        {
+                "word": "kiromita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 61,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a Sahara; ebicweka bingi ebisigaireho n'eitaka ry'obuhingi. Kiromita zaayo 1,300 (mayiro 810) z'enyanja zirimu okukwatanisa kwa…",
+                "…i ku ludda olw'obugwanjuba olw'oluguudo lwa Fort Portal nga kiromita nga 48 mu maserengeta ga Kampala 's Busega Roundabout ne ki…",
+                "…ta nga 48 mu maserengeta ga Kampala 's Busega Roundabout ne kiromita 9 mu buvanjuba bwa Enro Hotel e Mityana. Kumpi kiromita 2 o…",
+                "…ne kiromita 9 mu buvanjuba bwa Enro Hotel e Mityana. Kumpi kiromita 2 okuva ku nkulungo okutuuka ku mulyango oguyingira. == Ebi…",
+                "…emisinde: 8:23.61, Brazzaville, Congo, 10 Ogwomukaaga 2012 Kiromita 10: 28:42, Birmingham, Bungereza, 30 Ogwokuna 2017 Kiromita…",
+                "…Kiromita 10: 28:42, Birmingham, Bungereza, 30 Ogwokuna 2017 Kiromita 12: 33:48, Cape Town, South Afrika, nga 17 Ogwokutaano 2015…"
+            ]
+            },
+        {
+                "word": "sentimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…kimera kiyimiridde, nga kirimu amatabi agali mu buwanvu bwa sentimita 25 ne 60 . Okusinziira ku mbeera y’obutonde, esobola okutuu…",
+                "…mbeera y’obutonde, esobola okutuukira daaka ku buwanvu bwa sentimita 150 . Ebikoola byakyo by'eyawulamu obukola obulala obutono…",
+                "…kigonvu era nga kiringa ekikuta, era kipima mu buwanvu bwa sentimita 12 n'obugazi bwa milimita 8–10 . Mu kiseera ky’okwengera, l…",
+                "…nga nkulu. Ensigo yetaaga okulima mu ngeri etali nnene (nga sentimita 15 wansi mu ttaka), okukoola omuddo n’okusalako amatabi ama…",
+                "…okusimibwa mu ngeri etali nnene mu nnyiriri eziri wakati wa sentimita 30 nga zawuddwa mu nyiriri ez'eyawudde sentimita 1 ebuziba.…",
+                "…wakati wa sentimita 30 nga zawuddwa mu nyiriri ez'eyawudde sentimita 1 ebuziba. === Okukoola === Okukoola kwetaagisa mu ntandikw…"
+            ]
+            },
+        {
+                "word": "milimita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…maggigavamu ensiringanyi eziwereza ddala obuwanvu bwa [2mm] milimita bbiri ate nga ziri mu langi njeru.Bwewayitawo ennaku nga nn…",
+                "…maggigavamu ensiringanyi eziwereza ddala obuwanvu bwa [2mm] milimita bbiri ate nga ziri mu langi njeru.Bwewayitawo ennaku nga nn…",
+                "…ikuta, era kipima mu buwanvu bwa sentimita 12 n'obugazi bwa milimita 8–10 . Mu kiseera ky’okwengera, langi y’ebikoola ekuyuka ok…"
+            ]
+            },
+        {
+                "word": "mmita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 125,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a 1986 mu Singare) muddusi wa Uganda ow'engendo empanvu eza.mmita 5000. Ye muwanguzi w'omudaali gw'ekikomo mu mpaka z'emisind…",
+                "…paka za 2008 Beijing Olympics, nga yamalirira mu kyakuna mu mmita 5000 . Kipsiro awangudde emidaali mu mpaka za mmita 5000 mu…",
+                "…kuna mu mmita 5000 . Kipsiro awangudde emidaali mu mpaka za mmita 5000 mu African Championships in Athletics ne All-Africa Ga…",
+                "…an Championships in Athletics ne All-Africa Games. Yamalako mmita 5000/10,000 mu mizannyo gya 2010 Commonwealth Games. Ye mun…",
+                "…uva mu 2008 okutuuka mu 2011. Y'alina likodi y'aUgandan eya mmita 3000 ne mmita 5000 era n'emisinde gya10K road distance. ==…",
+                "…utuuka mu 2011. Y'alina likodi y'aUgandan eya mmita 3000 ne mmita 5000 era n'emisinde gya10K road distance. == Emisinde gye y…"
+            ]
+            },
+        {
+                "word": "kilo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 88,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…byawa ebirina okugobererwa ng’otabula emmere y’embizzi: Mu kilo kikumi eza cacu, tabulamu bino wammanga: Mukene……………….Kilo…",
+                "…kilo kikumi eza cacu, tabulamu bino wammanga: Mukene……………….Kilo 10 okutuuka ku kilo 12 Ensigo za pamba………Kilo 8 Omunnyo …………",
+                "…u, tabulamu bino wammanga: Mukene……………….Kilo 10 okutuuka ku kilo 12 Ensigo za pamba………Kilo 8 Omunnyo ……………….Kilo bbiri n’eki…",
+                "…Mukene……………….Kilo 10 okutuuka ku kilo 12 Ensigo za pamba………Kilo 8 Omunnyo ……………….Kilo bbiri n’ekitundu Obusonko…………………Kilo…",
+                "…okutuuka ku kilo 12 Ensigo za pamba………Kilo 8 Omunnyo ……………….Kilo bbiri n’ekitundu Obusonko…………………Kilo 5 Pulimisi……………………..Kw…",
+                "……Kilo 8 Omunnyo ……………….Kilo bbiri n’ekitundu Obusonko…………………Kilo 5 Pulimisi……………………..Kwota ya kilo Byonna nga biwedde , oba…"
+            ]
+            },
+        {
+                "word": "ddoola",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 77,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…aka 52 egiyise. Omulimu gwabalirirwa okumalawo obukadde bwa ddoola US$29 n'ebikozesebwa byabalirirwa okumalawo obukadde bwa dd…",
+                "…la US$29 n'ebikozesebwa byabalirirwa okumalawo obukadde bwa ddoola US$20 (Omugatte gwa bukadde bwa ddoola US$49), ezaafunibwa…",
+                "…umalawo obukadde bwa ddoola US$20 (Omugatte gwa bukadde bwa ddoola US$49), ezaafunibwa okuva mu kwewola mu African Development…",
+                "…menti ya Uganda yalina okukwatirako mu kuwaayo obukadde bwa ddoola US$9.5, ekyaweza omugatte ogw'obukadde bwa ddoola US$54.5.…",
+                "…kadde bwa ddoola US$9.5, ekyaweza omugatte ogw'obukadde bwa ddoola US$54.5. Ng'ekimu ku nkyukakyuka ezateekebwateekebwa, inten…",
+                "…a kakkiriza okuta obuwumbi bwa Uganda USh35.5 (obukadde bwa ddoola US$9.5) okumaliriza omulimu gw'okuddabiriza eddwaliro. Nga…"
+            ]
+            },
+        {
+                "word": "doola",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a asizeeyo ensimbi ezissukka mu kawumbi kamu n’ekitundu aka doola z’Amerika, nga nyinji kuzzo ziri mu kuzimba bizimbe. == Mu…",
+                "…linna 14%. Mu March yayamba abakubi b’ebikonde, nasaasaanya doola z’Amerika nga 500,000 nga tiimu ya Yuganda eyebikonde, The…",
+                "…Mu June y’etema okusalula Govumenti ya Yuganda obukadde bwa doola 30 okugula ekisaawe kya Yuganda National Stadium (Mandela N…",
+                "…a ogusunsula aba Africa Cup of Nations. Mu Novemba yasasula doola ezissukka mu 250,000 okugula essaawa eyokumukono eya Mont B…",
+                "…eri Museveni. === 2007 === Mu September yagabura aba Cranes doola 100,000. Kooki yagabana doola 15,000, ababiri abamuyambako…",
+                "…September yagabura aba Cranes doola 100,000. Kooki yagabana doola 15,000, ababiri abamuyambako bagabana 2,500 bulyomu nazzaak…"
+            ]
+            },
+        {
+                "word": "ku kikumi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…mmere gyolya == kyamugaso nnyo Kigambibwa nti , Abantu 75% ku kikumi tutambula n'endwadde naye nga tetumanyi olw'endya embi' Aba…",
+                "…la n'endwadde naye nga tetumanyi olw'endya embi' Abantu 15% ku kikumi be balwadde. Abantu 10% ku buli kikumi be balamu munsi yonn…",
+                "…1 kyokka kisoboka okulaga omugerageranyo gwonna ng’ekitundu ku kikumi, eky’okulabirako, 232%, kiba 2.32 ate 46% kiba 0.46. Omuger…",
+                "…\". Eky’okulabirako, 25 % (kisomwa ebitundu abiri mu bitaano ku kikumi) kyenkana 25/100 oba 0.25. Omugeranyakikumi n’olwekyo guba…",
+                "…kozesa akabonero % : (i) 10/100 = 10% kisomwa ebitundu kumi ku kikumi (ii) 25/100 = 25% kisomwa ebitundu abiri mu bitaano ku kiku…",
+                "…kikumi (ii) 25/100 = 25% kisomwa ebitundu abiri mu bitaano ku kikumi (iii) 50/100=50% kisomwa ebitundu ataano ku kikumi (iv) 75/…"
+            ]
+            },
+        {
+                "word": "ebitundu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 225,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Template:Charles Muwanga \"Ebitundu by’ekimera\" Munnabyamalimiro alina okumanya ebitundu bino e…",
+                "…wanga \"Ebitundu by’ekimera\" Munnabyamalimiro alina okumanya ebitundu bino eby’enjawulo ku bimera bwe biyitibwa n’omugaso gwabyo.…",
+                "…ti!! (iv) Ebimuli Ebimuli mwe muva ensigo z’ebimera. Birina ebitundu eby’enjawulo. Ekitundu ekikazi kye kiyitibwa nakimuli (pist…",
+                "…kimuli kitera kusangibwa mu makkati ga kimuli era kikolebwa ebitundu bisatu omuli: segima (stigma), siteero (style) ne walugi (o…",
+                "…taffaali bw’amagi g’ekikazi agayitibwa entabamagi (ovules). Ebitundu ebisajja biyitibwa sekimuli (stamens), era bitera okuba nga…",
+                "…kuba nga byebulungudde nakimuli. Obusajja bw’ekimuli buliko ebitundu bibiri: sekizaalirizi n’obuwaniriro. Sekizaalizi kye kireet…"
+            ]
+            },
+        {
+                "word": "okutuuka ku",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 87,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Abantu b’e Rooma). Ekigambo kino kyafuulibwa ekifupi (SPQR) okutuuka ku mutindo gw’amagye g’Abaruumi, era ne bwe baali bamaze okutu…",
+                "…ka ku mutindo gw’amagye g’Abaruumi, era ne bwe baali bamaze okutuuka ku mbeera ey’obufuzi obw’obuntu obw’enjawulo obw’obuntu, baage…",
+                "…wekkumi 2005) Mukulembeze w'eby'obufuzi eyakulembera Uganda okutuuka ku meefuga gaayo okuva mu nfuga y'abangereza ey'amatwale mu 19…",
+                "…ng’ogattika byonna? e) Omuzadde oyamba otya omwana okuyiga okutuuka ku kumanya okwetengerevu? • Ng’amuyigiriza okulambika ensonga?…",
+                "…buwangwa kitegeeza nti abasajja abanyooma abakyala basobola okutuuka ku balabi abangi n'abawagizi abalina endowooza emu. Mu mbeera…",
+                "…isa. Ebizibu bino biteeberezebwa okuba nga bikosa abantu 2% okutuuka ku 5% mu nsi eya Amerika ne mu bugwanjuba bwa Bulaaya, era nga…"
+            ]
+            },
+        {
+                "word": "Selsiyasi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sentigureedi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sikwere",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "esikwere",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sikeeya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "square",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 81,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…tch this: 5 x 5 = 25 25 is therefore \"namba ya kyebiriga\", (square number) number which is in Luganda. The mathematical shape…",
+                "…Namunigina za kyebiriga (Square units) Mu kibalangulo ky'essomampimo mulimu emiramwa gino:…",
+                "…kyebiriga n'olwekyo , okusinziira ku Muwanga, kivvuunulwa \"square units\". Singa oba obalangula bwagaagavu bwa nkula yonna ey'…",
+                "…ina za kyebiriga ziyinza okubaamu: (a) miita eza kyebiriga (square meters) (b) kiromiita eza kyebiriga (square kilometers) (c)…",
+                "…eza kyebiriga (square meters) (b) kiromiita eza kyebiriga (square kilometers) (c) mayiro eza kyebiriga (square miles) (d) sen…",
+                "…eza kyebiriga (square kilometers) (c) mayiro eza kyebiriga (square miles) (d) sentimiita eza kyebiriga( square centimeters) (e…"
+            ]
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 9,
+                "substringOnly": 2,
+                "examples": [
+                "…Frank-Walter SteinmeierChancellor Friedrich Merz | nsimbi = Euro | Erinnya lyazo = EUR | saawa = +1 | Namba y'ensi = 49 | Nn…",
+                "…iinistö (President)Petteri Orpo (Prime Minister) | nsimbi = Euro | Erinnya lyazo = EUR | saawa = +2 | Namba y'ensi = 358 | N…",
+                "…(President)Kyriakos Mitsotakis (Prime Minister) | nsimbi = Euro | Erinnya lyazo = EUR | saawa = +2 | Namba y'ensi = 30 | Nn…",
+                "…ufalansa bw'eyaweereza okuyamba ku mbeera z’abantu eziri mu Euro ekkumi bbiri mu bitaano mu emu. == Ebijulizo ==…",
+                "…i palamenti egikirize okwewola obuwumbi bwa uganda 450 (eza euro obukadde 110.54 oba doola za Amerika obukadde 121) okulinyi…",
+                "…ttunka ne Cyprus ne Kazakhstan mu mpaka za Bulaaya eza UEFA Euro 2020 olw'okufuna obuvune mu ssaabiro. Mu gwekkumi 2020, yaw…"
+            ]
+            },
+        {
+                "word": "okusaawa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…BWA ATYA? Osooka n'otegeka ekisambu nga mu kutegeka mwemuli okusaawa n'okutema ebikata. Naye nze kye nneetegerezza ebikata byeta…",
+                "…wammanga: Okwokya ebikoomi Okukaliza entobazi Okutema emiti Okusaawa okuyitiridde Okulimira ennyo ku ttaka Ebiva mu bino: Okufii…",
+                "…okwoza engoye , amasowaani , okwera n’okusiimuula enyumba, okusaawa olujja n’okulima oba okulabiria ebisolo by’awaka , kino olu…",
+                "…nzi, n’okukola emirimu gy’awaka nga okwoza engoye , ebibya, okusaawa olujja, okweera n’okusiimuula enju oba okuwaata , okusaniik…"
+            ]
+            },
+        {
+                "word": "okutuusa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 88,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…nnyo ku nsi yonna era tewali yalowooza nti eno eriyo abantu okutuusa abatambuze abeetooloola ensi bwe baazula ebitundu bino nga…",
+                "…nga, yaweerezako nga Ssaabaminisita wa Uganda okuva mu 1962 okutuusa mu 1966 era yali Pulezidenti wa Uganda okuva mu 1966 okutuu…",
+                "…utuusa mu 1966 era yali Pulezidenti wa Uganda okuva mu 1966 okutuusa mu 1971, era naddamu n'akulembera okuva mu 1980 okutuusa mu…",
+                "…66 okutuusa mu 1971, era naddamu n'akulembera okuva mu 1980 okutuusa mu 1985. Yatandikawo ekibiina ky'ebyobufuzi ekya Uganda Peo…",
+                "…ite-Ojok. Obote y'asuubira okunyomola obukulembeze bwa Amin okutuusa lwaddamu okulumbagana Amin wamu n'abawagizi be ob'omubuwang…",
+                "…'ekimuli ky'ekitooke ettooke mwe liva ne ligenda nga likula okutuusa eminwe gyonna lwe givaayo. Ettooke bwe lyeyongera okukula,…"
+            ]
+            },
+        {
+                "word": "okwa Kristo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "okutuuka mu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 104,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…mu Gulf era nga bya dda nnyo nga by’omu kyasa eky’okutaano okutuuka mu ky’omunaana. Okufaanagana n'ebifo ebiriwo kati nga Mkokoton…",
+                "…rwa kya Nyerere eky'okukulaakulanya eggwanga. Okuva mu 1970 okutuuka mu 1975, China yawaayo ssente era n'eyamba okuzimba oluguudo l…",
+                "…iri esinga kuba mu Bukiikakkono okuva ku Nnyanja Nnalubaale okutuuka mu Buvanjuba okutuuka ku mwalo. Enkuba ey'ekika eky'okubiri er…",
+                "…a Mapinduzi (CCM) ekiri mu buyinza. Okuva lwe kyatondebwawo okutuuka mu 1992, kye kyali ekibiina kyokka ekyali kikkirizibwa mu mate…",
+                "…'omusolo era ng'ewa Tanzania, Uganda ne Kenya okuva mu 1919 okutuuka mu 1948, East Africa High Commission (EAHC) okuva mu 1948 okut…",
+                "…a mu 1948, East Africa High Commission (EAHC) okuva mu 1948 okutuuka mu 1961, ne East African Common Services Organization (EACSO)…"
+            ]
+            },
+        {
+                "word": "skwea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "santimita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "maili",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mairo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…ivunda nebiteeka kaboni mu ttaka . Ebimu ku bino biziikibwa mairo ne mairo wansi mu ttaka oluvannyuma lw’ekiseera ekiwanvu en…",
+                "…biteeka kaboni mu ttaka . Ebimu ku bino biziikibwa mairo ne mairo wansi mu ttaka oluvannyuma lw’ekiseera ekiwanvu ennyo (myak…",
+                "…ti gayita mu bwengula ku misinde egya 299,792 km/s (186,282 mairo/kasikonda). Kino kye kiyitibwa emisinde gy’ekitangaala (spe…",
+                "…kya nattabikira bweeru era ekozesa amafuta matono nnyo buli mairo ate era eba ntono nny o. Emmotoka okusobola okukola erina o…",
+                "…iira ku article 15 ettaka eriweza mailo 1500 ery’ebibira ne mairo eziri wakati wa 8,000 – 9.000 byaweebwa Kabaka wa Bungereza…",
+                "…i wakati wa 8,000 – 9.000 byaweebwa Kabaka wa Bungereza ate mairo nga 8,000 ne ligabanyizibwa ku lw’empaka mu Kabaka, abakung…"
+            ]
+            },
+        {
+                "word": "kilogaramu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hekitaa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sawa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ersity ne United Kingdom. Acaye alina ebikolwa omuli; Lwang sawa (Ekitegeeza \"Mu bwenyi bw'ebiseera\" ne \"Oyokya\" mu lulimi O…",
+                "…taano mwe yasookera ddala okwoleseza, Acaye yayolesa \"Lwang Sawa\" (ekivuunulibwa nga \"mu bwenyi bw'ebiseera\" mu Alur) ku Afr…",
+                "…erye nga 26, 2022, okutuusa mu Gwokusatu nga 26, 2022 Iwang Sawa Acaye E. Pamela | okuva mu Gwomwenda nga 18, 2021 okutuusa…"
+            ]
+            },
+        {
+                "word": "plus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…are, trois gouttes par jour suffisent, bientot il y en aura plus vivit l'air == Engeri y’Okukuuma amazzi == Tetusobola kukol…",
+                "…a = Oluwunziko olwa kyebiriga. Mu Lungereza: Height squared Plus Base squared is equal to Hypotenuse sqaured Essomampuyisatu…",
+                "…okuyimba. == Ennyimba ze == Zino ze zimu ku ntambi ze: Coco Plus Vanilla (2024) Walala (2024) What Are We (2024) Yaaya (2023…",
+                "…ddwa aba Reach a Hand Uganda, Light for the World, ne Sauti Plus Media Hub; akola ku nsonga z'embeera z'abantu omuli okusaas…",
+                "…ddwa aba Reach a Hand Uganda, Light for the World, ne Sauti Plus Media Hub; akola ku nsonga z‟embeera z‟abantu omuli okusaas…",
+                "…ion Cup Empaka ez'okusunsulwamu: nga yawangulwa ASSM Elgeco Plus ku njawulo ya Ggoolo 4–2 Mu lawundi esooka: bawangulwa Orla…"
+            ]
+            },
+        {
+                "word": "pulasa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Kristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Yesu Kristo…",
+                "…ubuzi naye nga mukusinga balwanyi ate nga babbi. Eddiini ya Kristo yatuuka e Buswedi mu biseera bya ba vaiking naye yataandika…",
+                "…Reymond, ne Morton H. Smith . == Ebitabo ebifulumizibwa == Kristo w'endagaano (1980) . Endagaano : Ekkubo lya Katonda n'abant…",
+                "…003) . Ebitabo bya Nakumu, Kaabakuuku ne Zeffaniya (2005) . Kristo wa bannabbi (2008) . Abantu ba Katonda mu ddungu : ekkanisa…",
+                "…ya Zabbuli : okuzuula ensengeka yaabwe n'eby'eddiini (2015) Kristo ow’amagezi : okunoonyereza okw'ebyafaayo-okununula ku bitab…",
+                "…okununula ku bitabo by'Amagezi eby'Endagaano Enkadde (2017) Kristo ow’okutuukirizibwa : teyologiya ya Bayibuli ey'Endagaano Em…"
+            ]
+            },
+        {
+                "word": "pesenta",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyinti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyint",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyinti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyint",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyintu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyinti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyinti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyinti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "poyinti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pesenti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "percent",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…nd Proportion) (viii) Omugerageranyo gwe 100 (Ratio of 100, Percent) (ix) Namunigina z’ebipimo (Units of measurements) (x) Kalo…"
+            ]
+            },
+        {
+                "word": "persenti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "digiri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 59,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…, a “vertex” is “akafumito” (formed by semantic extension). Digiri z’Amaweto Amaweto gayinza okupimibwa mu digiri oba ladiyaan…",
+                "…extension). Digiri z’Amaweto Amaweto gayinza okupimibwa mu digiri oba ladiyaani. Mu kitabo kino tugenda kwesiba ku bipimo by’…",
+                "…ani. Mu kitabo kino tugenda kwesiba ku bipimo by’amaweto mu digiri .Akabonero ka digiri kalagibwa nga “ ° “. Amaweto gayinza o…",
+                "…ugenda kwesiba ku bipimo by’amaweto mu digiri .Akabonero ka digiri kalagibwa nga “ ° “. Amaweto gayinza okupimibwa okuva ku 0°…",
+                "…gina bbiri ezikozesebwa okupima empeto ze : (a)Ladiyaani (b)Digiri . Namunigina eya digiri ekozesa digiri, ekiragibwa nga “ °”…",
+                "…okupima empeto ze : (a)Ladiyaani (b)Digiri . Namunigina eya digiri ekozesa digiri, ekiragibwa nga “ °” digi. ) –omugendo ogwet…"
+            ]
+            },
+        {
+                "word": "digri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "digree",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    
