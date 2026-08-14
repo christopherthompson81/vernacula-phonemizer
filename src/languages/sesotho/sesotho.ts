@@ -12,6 +12,7 @@ import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeSesotho } from "./normalize.ts";
 
 interface SesothoDef {
     graphemes: Record<string, string>;
@@ -56,7 +57,10 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class SesothoPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ `normalizeSesotho` OWNS THE SHARED SYMBOL TIER and calls it mid-pass, because st needs rules on
+        // both sides of it: ranges and the currency-glued magnitude letter must run BEFORE (the tier's
+        // `unitPrefix` moves the noun in front of its number), the decimal spell-out AFTER. See its header.
+        return assembleClauses(normalizeSesotho(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

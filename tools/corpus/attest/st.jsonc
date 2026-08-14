@@ -1,0 +1,569 @@
+// WIKIPEDIA WORD ATTESTATION — st. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "st",
+        "wiki": "st.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "didikirii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikhelsiase",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mocheso",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…kehlekeng sena. Ka lebaka la sebaka sa tsona se kaholimo ho mocheso o khelosang mocheso, lithaba tse telele tsa lihlekehleke ts…",
+                "…ebaka la sebaka sa tsona se kaholimo ho mocheso o khelosang mocheso, lithaba tse telele tsa lihlekehleke tsena li loketse ho bo…",
+                "…. Nako ena e bitsoa nako ea estrus. Likatse tsa Van li kena mocheso selemo se seng le se seng ka February-March-June. Nako ena…",
+                "…a maiketsetso le a futhumetseng, likatse tsa Van li ka kena mocheso selemo ho pota. == Lihokelo tsa kantle == Katse ea Van ea T…",
+                "…motor(s) ea motlakase. Ha e le hantle, e fapane le koloi ea mocheso ka nako e telele ea ho tsosolosa ho feta ho tlatsa mafura,…",
+                "…haha ​​le ho o boloka ho feta oa koloi e nang le mochine oa mocheso oa matla a tšoanang. Kakaretso ea mofuta ona oa koloi e ken…"
+            ]
+            },
+        {
+                "word": "dikhoutu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "diphesente",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 1,
+                "examples": [
+                "…a mora ho beleha ho tlwaelehileng Hona ho eketseha ho ya ho diphesente tse hlano ho isa ho tse leshome le metso e meraro hara ba n…",
+                "…o e meraro hara ba nang le bothata ba ho beleha le ho ya ho diphesente tse mashome a mahlano ho ba entsweng C-section pele ho tshe…",
+                "…o dihlopheng tsa batho ba dilemo tse fapaneng. Ho ka etsang diphesente tse 35 ho isa ho tse 45 tsa batho ba ba le nako e kgutshwan…",
+                "…o tlerefala le bohloko sebakeng se hlabilweng. Ho ka etsang diphesente tse 5 ho isa ho tse 15 tsa batho ba kanna ba ba le [[]]febe…",
+                "…mantswe, di fane ka ditekanyo tse latelang tsa phapang (ka diphesente tse phahameng tse bontshang phapang e kgolwanyane le diduma…"
+            ]
+            },
+        {
+                "word": "khilograma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikhilogramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dilekgolo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ka hora",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…la tseba ka lebotho la Brithani mme la itokisetsa tlhaselo ka hora ea bohlano hoseng. Ka botjhabela ho Cayinggubo, De Wet le e…",
+                "…g le ya Majuba ka 1881. Ba ile ba hlwa leralla ka hloko mme ka hora ya leshome le motso o mong ba ne ba hasane ho potoloha le k…",
+                "…ka bona. De Wet o ile a qala tlhaselo ea hae ya ho qetela. Ka hora ea leshome le metso e mmedi masole a mangata a Brithani ler…",
+                "…tho a Erasmus, a ileng a ba lelekisa ho khutlela leralleng. Ka hora ya pele hoseng mabotho a Brithani a ile a inehela mme Carle…",
+                "…5:00 le ya 18:00, le Moqebelo ho Top 30 Count Down ho tloha ka hora ya 09:00 ho isa ho ya 12:00. Ka selemo sa 2026, Leine o se…",
+                "…o ya hae ya sehopotso e ile ya tshwarwa ka la 26 Phupu 2021 ka hora ya 1 thapama Sebokeng, Sebakeng sa dipapali sa kotelo 14. H…"
+            ]
+            },
+        {
+                "word": "dimilimithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikhilomithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ke motsemoholo wa Setereke sa Mefeteng, Lesotho. E fumaneha dikhilomithara tse ka bang 76 ka borwa ho motse-moholo wa naha, Maseru mme…",
+                "…ic Borwa, sa United Kingdom. Sehlekehleke sena se bohole ba dikhilomithara tse 1,950 (1,210 mi) ka bophirima ho lebopo la borwa-bophir…",
+                "…mi) ka bophirima ho lebopo la borwa-bophirima ho Afrika, le dikhilomithara tse 4,000 (2,500 mi) ka bochabela ho Rio de Janeiro lebopon…",
+                "…lena, Ascension le Tristan da Cunha. Saint Helena e lekanya dikhilomithara tse 16 ho isa ho tse 8 (10 ka 5 mi) mme e na le baahi ba 4,…",
+                "…ke toropo e nyane, e nang le kgotso Foreisetata, e ka bang dikhilomithara tse 30 ho tloha Klerksdorp. Qalong e ne e le sechaba sa mer…",
+                "…herekgong 1900 haufi le motsana wa Salt Lake, hoo e ka bang dikhilomithara tse 40 ka leboya ho Belmont, Cape Colony, Afrika Borwa. Mab…"
+            ]
+            },
+        {
+                "word": "ho isa ho",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…nana ba tlwaetse ho sarolla malwebe ho tloha dilemong tsa 8 ho isa ho tse 14, pele ba qala ho ba le nako ya ho qala ho nyopa. Ban…",
+                "…inaheng tse tswetseng pele ho ka etsang phesente e le nngwe ho isa ho tse pedi tsa batswetse di ba le tshwaetso ya motjha wa mose…",
+                "…lwaelehileng Hona ho eketseha ho ya ho diphesente tse hlano ho isa ho tse leshome le metso e meraro hara ba nang le bothata ba ho…",
+                "…pa ho sa bolokehang, leha ho le jwalo, ho qetella ho bakile ho isa ho ho ka isang ho mafu a 47,000 a bommele ho amohelwa ha ba di…",
+                "…idente wa bo 44 wa United States ho tloha ka selemo sa 2009 ho isa ho sa 2017. E ne e le setho sa Mokga wa Demokrasi, hape e ne e…",
+                "…nited States ya emelang Illinois ho tloha ka selemo sa 2005 ho isa ho sa 2008, e le mosenatoro wa naha ya Illinois ho tloha ka se…"
+            ]
+            },
+        {
+                "word": "disekwere-dikilomitara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "digiri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "didigiri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikhutlo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "disekonto",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "metsotsoana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…oela pele. Teko ea lebelo la limithara tse 20 e tla qala ka metsotsoana e 30. Etsa mola qalong. Lebelo la ho matha le qala butle, e…",
+                "…oela pele. Teko ea lebelo la limithara tse 20 e tla qala ka metsotsoana e 30. Etsa mola qalong. Lebelo la ho matha le qala butle, e…",
+                "…oela pele. Teko ea lebelo la limithara tse 20 e tla qala ka metsotsoana e 30. Etsa mola qalong. Lebelo la ho matha le qala butle, e…",
+                "…oela pele. Teko ea lebelo la limithara tse 20 e tla qala ka metsotsoana e 30. Etsa mola qalong. Lebelo la ho matha le qala butle, e…",
+                "…oela pele. Teko ea lebelo la limithara tse 20 e tla qala ka metsotsoana e 30. Etsa mola qalong. Lebelo la ho matha le qala butle, e…",
+                "…o leo o ile a ntlafatsa mabelo a hae a limithara tse 800 ka metsotsoana e supileng ka nako e ka tlase ho likhoeli tse robong, ho ke…"
+            ]
+            },
+        {
+                "word": "disheleng",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a ka thato ya Monghadi Steyn ka theko ya diponto tse nne le disheleng tse hlano ka acre, e ileng ya rekwa ka la 11 Mphalane 1912,…",
+                "…swa ka thato ya Monghadi Steyn ka theko ya diponto tse 4 le disheleng tse 5 ka acre, e ileng ya rekwa ka la 11 Mphalane 1912, e l…"
+            ]
+            },
+        {
+                "word": "dikoranta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…== Dikoranta == === Dikoranta ke eng? === Dikoranta ke dingolwa tse re b…",
+                "…== Dikoranta == === Dikoranta ke eng? === Dikoranta ke dingolwa tse re bolellang ditaba t…",
+                "…== Dikoranta == === Dikoranta ke eng? === Dikoranta ke dingolwa tse re bolellang ditaba tsa letsatsi, tsa beke,…",
+                "…o wa boraditaba ke ho nnetefatsa hore ditaba tse ka hare ho dikoranta steo ba di lokollang di nepahetse ka mehla; ebile ha di kge…",
+                "…g ho rekisa ba kgona ho fihlella karolo e kgolo ya batho ka dikoranta. Melaetsa e bohlokwa ya naha kapa e ka thoko e phatlalatswa…",
+                "…haholo hlakoreng la bongodi ba masedinyana le boqolotsi ba dikoranta. Ene e le karolo ya sehlopha sa baqolotsi ba ditaba ba neng…"
+            ]
+            },
+        {
+                "word": "dikilogeramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilograma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikhilograma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…sona seo, o ile a qothisana lehlokoa le basadi ba boima ba dikhilograma tse 50 ho Ditlhodisano tsa Lefatshe tsa ho phahamisa Boima…"
+            ]
+            },
+        {
+                "word": "dikgato",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "digerii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dilikgerii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Celsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dieuro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "diyuro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "diponto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ne e fetisetswa ho masepala ka tumellano ya hore ho lefswe diponto tse 33 ke masepala kerekeng selemo le selemo. Nakong ya Ntw…",
+                "…ana a mabedi a ile a aroloa ka diteishene mme a rekiswa ka diponto tse mashome a mahlano e le ’ngoe. Komisi e ile ea khethoa k…",
+                "…ile ya rekiswa ho ya ka thato ya Monghadi Steyn ka theko ya diponto tse nne le disheleng tse hlano ka acre, e ileng ya rekwa ka…",
+                "…ka bala le ho ngola Senyesemane kapa SeDatjhe mme ba fumana diponto tse fetang 50 ka selemo. Kahoo, ha a le dilemo di 21 ka 189…",
+                "…ein e ile ya rekiswa ka thato ya Monghadi Steyn ka theko ya diponto tse 4 le disheleng tse 5 ka acre, e ileng ya rekwa ka la 11…"
+            ]
+            },
+        {
+                "word": "kilomitara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikilomithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…a Borwa. Toropo ena e fumaneha ka botjhabela ho Thaba Nchu, dikilomithara tse ka ba 27 mme ka leboya ho Hobhouse ka dikilomitara tse…",
+                "…hole le Welkom ka dikhilomithara tse 60 le Bloemfontein ka dikilomithara tse 80. E na le mabenkele a mmalwa. Template:- == Mehlodi =…",
+                "…ka bophirimela ho ya motse-moholo wa provense Bloemfontein, dikilomithara tse ka bang 340 ka borwa-bophirimela. Tsela ena ya bohlokwa…"
+            ]
+            },
+        {
+                "word": "disentimithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "disenthimitara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dilithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…la batho ba batšo, se ne se na le matla a selemo a ka bang dilithara tse dimilione tse peli. Potefolio e ne e kenyeletsa Soweto…"
+            ]
+            },
+        {
+                "word": "dikilograma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dimilione",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…e baholoholo ba bona ba bile teng moo ka dilemo tse ka bang dimilione tse 3,3. hoo e ka bang dilemo tse 2000 tse fitileng, mskhoe…",
+                "…Baahi == Aforika Borwa ke naha e nang le batho ba ka fetang dimilione tse 65, ke naha e nang le botjhaba, maleme a fapaneng a puo…",
+                "…e diphio. Lefu la tswekere le baka lefu la batho ba ka bang dimilione tse 4.2 selemo se seng le se seng, ka karolelano ya dimilio…",
+                "…milione tse 4.2 selemo se seng le se seng, ka karolelano ya dimilione tse 1.5 e bakwang ke lefu la tswekere kapa le sa phekolwang…",
+                "…a tse 1 648 195, le km2 (636,372 sq mi), e nang le baahi ba dimilione tse 83. Ke naha ya bobedi ho tse kgolo Middle East, mme mot…",
+                "…wa popelong yamosadi Ka 2015 ho bile le ho hlaha ha bana ba dimilione tse 135 lefatshe ka bophara. Ba ka bang dimilione tse 15 ba…"
+            ]
+            },
+        {
+                "word": "dimiliyone",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…nyehelo tsa tsamaiso tsa lekgotla di eketsehile ho tloha ho dimiliyone tse 8 ho ya ho dimiliyone tse 11 tsa diranta, ha ditshenyeh…",
+                "…ekgotla di eketsehile ho tloha ho dimiliyone tse 8 ho ya ho dimiliyone tse 11 tsa diranta, ha ditshenyehelo tse amanang le thomo y…",
+                "…henyehelo tse amanang le thomo ya lona di theohile ho tloha dimiliyone tse 23 ho ya ho tse dimiliyone tse 17 tsa diranta.…",
+                "…ya lona di theohile ho tloha dimiliyone tse 23 ho ya ho tse dimiliyone tse 17 tsa diranta.…"
+            ]
+            },
+        {
+                "word": "dibilione",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…moetapele wa IOC. Dipapadi tsa 2024 di lebelletswe ho bitsa dibilione tse 9 tsa Yuropa. == Tshebetso ya ho fana ka dikopo == Dito…",
+                "…Amerika Ed Fagan o ile a e tella pele hlahlelo ya nyewe ya dibilione tse mashome a mahlano tsa didolara tsa Amerika ya dinyewe t…",
+                "…etang 150 dikontinenteng tsohle ntle le Antatika. Ho fetang dibilione tse 3 tsa batho ba phela mabatoweng a lefatshe moo marabi e…",
+                "…mabotho a hlometseng a Aforika Borwa a ka reka diranta tse dibilione tse 30 tsa thepa ya sesole sa Yuropa.[261] Moetsi oa litšoa…"
+            ]
+            },
+        {
+                "word": "dikilomitara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…porofense ya Foreistata, naheng ya Afrika Borwa Motse ona o dikilomitara tse mashome a mararo ho tloha ho moeedi wa naha ya Lesotho.…",
+                "…a tseo di fumaneng sebakeng sena di tloha Kapa. Motse ona o dikilomitara tse mashome a mararo ho tloha moeedi wa naha ya Lesotho. O…",
+                "…a ya Senqu ke yona etelele haholo Afrika Borwa. E bolele ba dikilomitara tse 2, 432 Noka ya Senqu e phalla ho tloha karolong ya Leso…",
+                "…hu, dikilomithara tse ka ba 27 mme ka leboya ho Hobhouse ka dikilomitara tse 47.…",
+                "…a Borwa, mosikong o ka leboya wa Pilanesberg, hoo e ka bang dikilomitara tse 65. km ka leboya ho Rustenburg . E ile ya rehellwa ka m…",
+                "…e nyenyane ya tsa temo pakeng tsa Mafahlaneng le Maokeng,e dikilomitara di le mashome a mararo le metso e mehlano botjhabela ho mot…"
+            ]
+            },
+        {
+                "word": "dimithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…wana le Zimbabwe . Boema-fofane bo sebakeng se bophahamo ba dimithara tse 792 (2,600 ft) ka holima bophahamo ba lewatle. Bo na le…",
+                "…loeng 10/28, e nang le bokahodimo ba sekontiri bo boholo ba dimithara tse 1,450 ka bolelele ba dimithara tse 30 (4,757 ft × 98 ft…",
+                "…a sekontiri bo boholo ba dimithara tse 1,450 ka bolelele ba dimithara tse 30 (4,757 ft × 98 ft). == Ditshupiso ==…",
+                "…Transkei . == Meralo wa motheo == Boema-fofane bo fumaneha dimithara tse 740 (2) 429 maoto) ka hodima bophahamo ba lewatle mme e…",
+                "…ditsela le katilweng (le kgethilweng 14/32) le bolelele ba dimithara tse 2. E bolelele ba dimithara tse 600 le bophara ba dimith…",
+                "…ilweng 14/32) le bolelele ba dimithara tse 2. E bolelele ba dimithara tse 600 le bophara ba dimithara tse 45. Ho feta moo, ke meh…"
+            ]
+            },
+        {
+                "word": "disenthimithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dihekthere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…lara ho bakile ho putlama ha dipilara sebakeng se kwahelang dihekthere tse 324. Mabaka a tlatsetsang ho putlama hona a ne a kenyel…"
+            ]
+            },
+        {
+                "word": "diperesente",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ophirima le Zimbabwe ka botjhabela. Botswana e akaretswe ke diperesente tse fetang tse 70 ke lehwatata Kalahari. ke naha e nang le…",
+                "…ho fumanehang setjhaba sa ba Tswana, e leng bona ba etsang diperesente tse 80 tsa baahi naheng . == Nalane == Botswana e ne e le n…",
+                "…rwa. E dutse hodimo,le ha e le hore Gauteng e ikarabella ho diperesente tse 1.5% ka hara naha, ke enngwe ya diporofense tse subehla…",
+                "…hlallaneng ka ho fitisisa ka hara hana ya Aforika Borwa, ka diperesente tse fetang kotara ya (26%) naheng ka bopphara; Ka dipalopal…",
+                "…, setereke se ne se ena le baahi ba 431,998 bao e neng e le diperesente tse 23.02 tsa baahi bohle ba naha. Kakaretso ya sebaka sa s…",
+                "…Equality di bontsha hore ha dintlha tsena di sebetsa mmoho, diperesente tsa basadi ba fumanang mesebetsi, moputso le boemedi boetap…"
+            ]
+            },
+        {
+                "word": "didolara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…nong 2026 , Forbes e hakanya hore letlotlo la hae le tla ba didolara tse dimilione tse dikete tse 788. O hlahetse lelapeng le ru…",
+                "…bo Botle. Ditjeho tsa ho di reka holeseileng di mahareng a Didolara tsa Amerika tse 44 le 78 bakeng sa kalafo e phetwaphetwang…",
+                "…a Amerika kalafo e phetwaphethwang ya ente ya marabi e feta Didolara tsa Amerika tse 750. == Lekala la meriana le sebetsang ka t…",
+                "…le hlahlelo ya nyewe ya dibilione tse mashome a mahlano tsa didolara tsa Amerika ya dinyewe tsa sehlopha ke mahlatsipa a nako ea…",
+                "…le boshodu ba ho reka dibetsa tsa Afrika Borwa ka theko ya didolara tse 4bn ho tswa ho baqapi ba Borithane le ba bang ba Europe…"
+            ]
+            },
+        {
+                "word": "diranta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…ho tloha ho dimiliyone tse 8 ho ya ho dimiliyone tse 11 tsa diranta, ha ditshenyehelo tse amanang le thomo ya lona di theohile…",
+                "…tloha dimiliyone tse 23 ho ya ho tse dimiliyone tse 17 tsa diranta.…",
+                "…irst Division . Ka 2002 Ria Stars e ile ya rekwa ke liki ka diranta tse dimilione tse 8 (e ka bang US$800,000) molemong wa ho f…",
+                "…bisisi, filimi e ne e le katleho ya di-box office, e kentse diranta tse dimilione tse 70.1 kgahlanong le tekanyetso ya yona ya…",
+                "…tse dimilione tse 70.1 kgahlanong le tekanyetso ya yona ya diranta tse dimilione tse 19, 'mme e bululetse difilimi tse ngata t…",
+                "…hahuwa le ho ntlafatswa ha boema-fofane bohle ka boleng ba diranta tse dimilione tse 46 ho lokisetsa Mohope wa Lefatsehe wa FI…"
+            ]
+            },
+        {
+                "word": "disekwere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…soeng ka lebitso la boswaswi la \"Rotto\", ke sehlekehleke sa disekwere-kilometara tse 19 (7.3 sq mi) lebopong la Oseteralia Bophir…",
+                "…ibbean; le ka botjhabela ke Kou ya Mexico. Mexico e kwahela disekwere-khilomithara tse 1,972,550 (761,610 sq mi) mme e na le baah…"
+            ]
+            }
+        ],
+    }
+    
