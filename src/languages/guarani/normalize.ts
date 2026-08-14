@@ -154,8 +154,9 @@ import { numberToWords } from "./numbers.ts";
  *   · `ampersand` — the `ampersand` cell counts 765 whole-corpus and EVERY instance in the retained text is
  *     an HTML entity, `&nbsp;` or `&thinsp;`, not a conjunction: `11&nbsp;000&nbsp;000`, `176&thinsp;215`,
  *     `30&nbsp;°C`. `stripMarkup` already decodes `&nbsp;` at the registry's dispatch point, so there is no
- *     ampersand in this language to read. (`&thinsp;` is the one entity that table lacks — ×1 retained,
- *     reading as *tˈhinsp* — reported rather than fixed, because `src/core/markup.ts` is shared.)
+ *     ampersand in this language to read. (`&thinsp;` was the one entity that table lacked — ×1 retained,
+ *     reading as *tˈhinsp* — reported rather than fixed here because `src/core/markup.ts` is shared; it has
+ *     since been added there, to an ASCII space for the reason step 6 below documents from the other side.)
  *   · `multiply` — the `arithmetic` cell is ×69 whole-corpus and 0% arithmetic: all eight hard instances are
  *     a grammar article's conjugation tables (`karu = rekaru, okaru, jakaru…`) and pronoun lists, where `=`
  *     means "conjugates as". Reading it as "equals" would say *"karu equals rekaru"* about a paradigm.

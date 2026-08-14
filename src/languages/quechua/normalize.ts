@@ -286,6 +286,12 @@ const SYMBOLS = makeSymbolNormalizer({
  * else occurs. `&sup2;` matters out of proportion to its count because it sits in the exponent slot —
  * `2.766.890 km&sup2;` is an AREA whose square marker is spelled as an entity, so without this fold the
  * unit step sees a bare `km` and the square is lost twice over (the sign AND the word).
+ *
+ * ⚠ ALL FOUR ROWS ARE NOW REDUNDANT WITH `core/markup.ts`, which runs first (registry.ts) and decodes every
+ * one of them — `&bull;` was added there on the strength of THIS corpus line, and to a space for the reason
+ * this table already chose one: U+2022 is read by no engine, and a bullet's reading is the break a space
+ * gives. Kept rather than deleted because the table is this file's stated record of what the corpus
+ * contains, and a corpus-diff over qu is inert either way (measured: 0/445 utterances move).
  */
 const ENTITY: Readonly<Record<string, string>> = {
     "&nbsp;": " ", "&bull;": " ", "&sup2;": "²", "&sup3;": "³",

@@ -49,6 +49,74 @@ const NAMED: Readonly<Record<string, string>> = {
     micro: "µ",
     permil: "‰",
     cent: "¢",
+
+    // ── THE SPACE FAMILY, AND WHY `nbsp` DECODES TO AN ASCII SPACE RATHER THAN U+00A0 ──────────────────
+    // ⚠ THIS ROW IS A DELIBERATE INFIDELITY AND IT IS LOAD-BEARING. `&nbsp;` denotes U+00A0, but 42 of the
+    // 188 engines de-group a thousands separator ONLY on an ASCII space — their grouping classes are
+    // `[ ]`, not `[    ]` — so decoding faithfully would read `1 904 569` as three numbers
+    // in all 42 (ln, km, bm, mos, ki, rn … measured: *one, nine hundred four, five hundred sixty-nine*).
+    // `&thinsp;` joins on the same terms and for the same reason; la writes `1&thinsp;904&thinsp;569` and
+    // `250&thinsp;000`, gn writes `176&thinsp;215`.
+    // ⚠ THE INFIDELITY HAS A COST, AND IT IS THE REASON THIS COMMENT EXISTS. Folding to ASCII here MASKS
+    // that fleet defect: a dump carrying the RAW character reaches those 42 engines untouched and still
+    // loses its numeral, and no corpus can show it because every corpus instance arrives as an entity.
+    // gn hit exactly this from the other side — its grouping class needed U+00A0 written in explicitly and
+    // passed the corpus without it, because the entity had already become an ASCII space by then
+    // (`languages/guarani/normalize.ts` step 6). The general fix belongs in the engines' grouping classes,
+    // not here; changing this row instead would regress 42 languages to fix a shape no corpus contains.
+    // ⚠ `&bull;` IS IN THIS GROUP, NOT A CHARACTER ROW. U+2022 is read by NOTHING — it is silent in all 188
+    // — so a faithful decode would trade the audible-but-wrong *and bull* for a silent deletion. A bullet
+    // is a list marker whose reading IS a break, which is what a space already gives; `languages/quechua`
+    // reached the same conclusion locally on the same corpus instance (`&nbsp;&bull; 100 ¢ = 1 $`).
+    thinsp: " ",
+    bull: " ",
+
+    // ── THE INVISIBLE FORMATTING CONTROLS — decoded FAITHFULLY, because the fleet strips them ──────────
+    // ⚠ THE HAZARD HERE IS THE OPPOSITE ONE: these decode to characters that render as nothing, so
+    // decoding is right only if the engines then strip them — otherwise a visible literal becomes an
+    // invisible defect, and `ZERO-WIDTH` is a leak class precisely because that is a real failure mode.
+    // Measured before adding, all 188 engines × both characters: ZERO leaks. U+200C additionally does the
+    // ONE thing it means in 26 Indic engines — it suppresses the join without inserting a break — so the
+    // faithful decode is also the more correct one. Left literal they were spoken: kaa's Persian gloss
+    // `فضل&zwnj;الله` read *zwnʒ*, and pnb's `&lrm;` read *lˈɝm* (a leak no gate can see — the IPA token is
+    // not byte-identical to the source run, so the raw-Latin differential never fires).
+    lrm: "‎",
+    zwnj: "‌",
+
+    // ── PRECOMPOSED ACCENTED LATIN — readable only since the accent work, which is what licenses these ──
+    // These are here BECAUSE of `f269a4b` and the `latinPhone` last resort, not independently of it: before
+    // that work the decoded letter was DELETED by a dozen engines, and decoding would have swapped a wrong
+    // word for a missing one. Re-measured after it, all 188 engines: each letter is READ in 186-188 of them.
+    // oc is the corpus that needs them — its dump escapes the accent inside ordinary words, so the entity
+    // sits mid-token and the literal is not merely wrong, it SHATTERS the word:
+    //     `fon&ccedil;age`   *fu ksedil , ad͡ʒe*  → *funsad͡ʒe*      `p&egrave;s`  *p eɡɾabe , s* → *pɛs*
+    //     `peri&ograve;de`   *peɾi uɡɾabe , de*  → *peɾjɔde*        `N&ograve;rd` *n uɡɾabe , ɾt* → *nɔɾt*
+    // ps is the same shape in a Perso-Arabic dump (`trypa&ocirc;` *tɹˈɪpə ˈʌʃəɚk* → *tɹˈaᶦpʰaᶷ*).
+    aacute: "á",
+    agrave: "à",
+    ccedil: "ç",
+    eacute: "é",
+    egrave: "è",
+    ecirc: "ê",
+    iacute: "í",
+    icirc: "î",
+    ocirc: "ô",
+    ograve: "ò",
+
+    // ⚠ DELIBERATELY ABSENT, THOUGH ALL NINE OCCUR IN THE MINED CORPORA — `&fnof;` (lo), `&gamma;` (gd),
+    // `&phi;` `&lambda;` (sn), `&Pi;` `&alpha;` `&nu;` (si), `&real;` `&image;` (yo). The test for a row
+    // here is not "does it occur", it is "does the engine READ what it decodes to", and these fail it:
+    //   · `ℜ` `ℑ` are read by NOTHING, not even el — silent in all 188. Decoding trades yo's audible
+    //     *ati real* for a deletion, which is the `<sub>` trap below in another costume.
+    //   · `ƒ` is WORSE than silent: it survives into the IPA in 93 of 188 engines, lo among them, so
+    //     decoding `&fnof;(x)` swaps a spoken *fnˈɔː* for a raw U+0192 in the phoneme stream.
+    //   · The Greek letters split on CONTEXT, which a per-entity table cannot express. A RUN of two or
+    //     more is routed to the Greek reader by the script router and read correctly everywhere — si's
+    //     `&Pi;&alpha;&nu;` would go from six spurious words (*sahə pʰaᶦ , sahə æɫfə , sahə nuː*) to *pan*
+    //     — but a LONE letter is silently deleted in 186 of 188, which is gd's `&gamma;-iarann` and both
+    //     of sn's. Adding the three that happen to occur in a run and not the three that do not would make
+    //     the decoder's behaviour depend on which letters a corpus reached for. The defect worth fixing is
+    //     the lone-letter deletion, and it lives in the foreign/router fall-through, not in this table.
 };
 
 /**

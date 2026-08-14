@@ -151,9 +151,11 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //      NAMED table, and an unknown entity is deliberately left literal there — right for a name
         //      nothing can render, wrong for this one, which is a bidi formatting hint and says nothing at
         //      all. It read *ˈət̪eː lˈɝm*, a leak no gate in the tree can see: the IPA token `lˈɝm` is not
-        //      byte-identical to the source run `lrm`, so the raw-Latin differential never fires. ⚠ The
-        //      general fix belongs in `core/markup.ts` beside `nbsp`; it is done locally here because this
-        //      is the corpus that proves it, and an RTL bidi mark is a Perso-Arabic fact.
+        //      byte-identical to the source run `lrm`, so the raw-Latin differential never fires.
+        //      ⚠ THE GENERAL FIX HAS SINCE LANDED — `lrm` and `zwnj` are in the shared `NAMED` table, which
+        //      runs FIRST (registry.ts, before this file), so those two names no longer reach this arm at
+        //      all. It is kept because the ARABIC-SEMICOLON arm below is not general and cannot be: the
+        //      shared decoder's pattern ends at an ASCII `;`, and `&nbsp؛` is a fact about this dump.
         //    An entity NOT in this list still falls through to the shared decoder unchanged.
         let s = input.replace(/&(nbsp|lrm|rlm|zwnj|zwj|amp|ndash|mdash)[;؛]/giu,
             (_m, name: string) => (name.toLowerCase() === "amp" ? "&" : name.toLowerCase() === "ndash" ? "–"
