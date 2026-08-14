@@ -11,17 +11,10 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
-import { loadManifest } from "../../core/loadManifest.ts";
+import { MANIFEST } from "./manifest.ts";
+import { normalizeKyrgyz } from "./normalize.ts";
 
-interface KyrgyzDef {
-    vowels: Record<string, string>;
-    backVowels: string;
-    iotated: Record<string, string>;
-    consonants: Record<string, string>;
-    numbers: NumbersDef; // canonical schema: units[], tens{"10".."90"}, magnitudes{hundred,thousand,million,billion}
-    clausePunctuation: Record<string, string>;
-}
-const DEF = loadManifest<KyrgyzDef>(import.meta.url, "kyrgyz.jsonc");
+const DEF = MANIFEST;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const V = DEF.vowels;
 const BACK = new Set([...DEF.backVowels]);
@@ -63,8 +56,16 @@ export function phonemizeWord(word: string): string {
     return out.join("");
 }
 
-/** Turkic decimal composition: tens + units + hundred/thousand/million/billion, all SPACE-separated (жыйырма бир =
- *  21; the hundred/thousand-multiplier omits a leading 1: жүз, миң). */
+/** Turkic decimal composition: tens + units + hundred/thousand/million/billion, all SPACE-separated
+ *  (жыйырма бир = 21).
+ *
+ *  ⚠ THE HUNDRED-MULTIPLIER OMITS A LEADING 1 AND THE THOUSAND-MULTIPLIER DOES NOT — жүз, but **бир** миң.
+ *  This used to omit both, so every year in the language read one word short. ky.wikipedia settles it in two
+ *  independent places: its YEAR ARTICLES gloss the digits with the spelled ordinal — «1989 (бир миң тогуз жүз
+ *  сексен тогузунчу) жыл», «1914 (бир миң тогуз жүз он төртүнчү) жыл» — and its orthography article's §49
+ *  numeral list writes «он беш, бир миң тогуз жүз токсон беш» beside «жүз элүү эки», i.e. `бир` before миң
+ *  and nothing before жүз, in one sentence. 6 articles carry `бир миң тогуз жүз`; the bare `миң тогуз жүз`
+ *  is 7, and 6 of those 7 ARE these same articles. */
 function kyrgyzNumberWords(n: number, d: NumbersDef): (string | null)[] {
     if (n < 10) return [d.units[n]!];
     if (n < 100) {
@@ -80,7 +81,7 @@ function kyrgyzNumberWords(n: number, d: NumbersDef): (string | null)[] {
     if (n < 1_000_000) {
         const th = Math.floor(n / 1000);
         const r = n % 1000;
-        return [...(th > 1 ? kyrgyzNumberWords(th, d) : []), d.magnitudes.thousand, ...(r ? kyrgyzNumberWords(r, d) : [])];
+        return [...kyrgyzNumberWords(th, d), d.magnitudes.thousand, ...(r ? kyrgyzNumberWords(r, d) : [])];
     }
     if (n < 1_000_000_000) {
         const m = Math.floor(n / 1_000_000);
@@ -90,6 +91,21 @@ function kyrgyzNumberWords(n: number, d: NumbersDef): (string | null)[] {
     const b = Math.floor(n / 1_000_000_000);
     const r = n % 1_000_000_000;
     return [...kyrgyzNumberWords(b, d), d.magnitudes.billion!, ...(r ? kyrgyzNumberWords(r, d) : [])];
+}
+
+/**
+ * Integer → its Kyrgyz cardinal in ORTHOGRAPHY, space-separated. This is what `normalize.ts` needs and what
+ * the tokenizer cannot give it: an ordinal suffix, a case suffix and a fraction denominator all attach to
+ * the LAST WORD of a spoken numeral, and a digit run has no last word until it has been composed (playbook
+ * trap 14). The words are emitted back as TEXT and phonemized by the ordinary word path, so nothing here
+ * reaches the phoneme sink as a spelling (trap 6).
+ *
+ * Bounded at 10¹² because that is where `NumbersDef` stops carrying a magnitude; above it the caller must
+ * fall back to leaving the digits alone rather than emitting a partial numeral.
+ */
+export function numberWords(n: number): string | undefined {
+    if (!Number.isSafeInteger(n) || n < 0 || n >= 1_000_000_000_000) return undefined;
+    return kyrgyzNumberWords(n, DEF.numbers).filter((w): w is string => w !== null && w !== "").join(" ");
 }
 
 function number(digits: string): string {
@@ -107,7 +123,9 @@ const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.?!,;:…—])/gu;
 
 class KyrgyzPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // TEXT NORMALIZATION runs first and is pure text→text — see normalize.ts for the rules, their order
+        // and the counts behind each. Everything below it sees only Cyrillic words, digits and clause marks.
+        return assembleClauses(normalizeKyrgyz(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

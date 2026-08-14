@@ -36,5 +36,36 @@
         "units": ["нөл", "бир", "эки", "үч", "төрт", "беш", "алты", "жети", "сегиз", "тогуз"],
         "tens": { "10": "он", "20": "жыйырма", "30": "отуз", "40": "кырк", "50": "элүү", "60": "алтымыш", "70": "жетимиш", "80": "сексен", "90": "токсон" },
         "magnitudes": { "hundred": "жүз", "thousand": "миң", "million": "миллион", "billion": "миллиард" }
-    }
+    },
+
+    // LETTER NAMES, for the shared initialism seam (core/initialisms.ts). Kyrgyz Cyrillic acronyms are the
+    // corpus's largest untreated class — 39,075 occurrences of the `initialism` cell, АКШ ×15, СССР ×11,
+    // КМШ ×7, УДК/ИДП/КМУ/ФПИ ×3 each in 456 retained segments — and unspelled they reach the g2p as
+    // vowel-less clusters (СССР → [ssːr], КМШ → [qmʃ]), which is exactly what that seam exists to prevent.
+    //
+    // SOURCE: espeak-ng `dictsource/ky_list`'s own `_а`…`_я` letter block, which is an ORTHOGRAPHIC fact and
+    // the one thing the playbook's §5c explicitly sanctions taking from espeak. espeak is PHONETIC, so each
+    // spelling below was DERIVED from its mnemonic and then round-tripped back through this engine's own g2p
+    // and compared: 34 of the 36 come back byte-identical with espeak's phoneme string (эл→el, ың→ɯŋ, же→d͡ʒe,
+    // ха→χa, ий→ij, ы→ɯ, ө→ø, ү→y …). The two that do not are both explained rather than papered over:
+    //   ⟨к⟩ ka  → this engine reads ка as [qɑ] because ITS OWN velar/uvular harmony rule fires before back ɑ;
+    //             espeak's mnemonic is simply underspecified for the same allophony its rules also apply.
+    //   ⟨щ⟩ StSa→ this manifest maps ⟨щ⟩ to [ʃ] (a Russian-loan letter), so ща comes back [ʃɑ], not [ʃt͡ʃɑ].
+    // ⟨ъ⟩ and ⟨ь⟩ are DELIBERATELY ABSENT: their espeak names are whole phrases (ажыратуу белгиси /
+    // ичкертүү белгиси) rather than letter names, and `spellOut` returns undefined when any letter is
+    // missing — so an acronym containing one is left alone instead of getting a half reading.
+    "letterNames": {
+        "а": "а", "б": "бе", "в": "ве", "г": "ге", "д": "де", "е": "е", "ё": "ё", "ж": "же",
+        "з": "зе", "и": "и", "й": "ий", "к": "ка", "л": "эл", "м": "эм", "н": "эн", "ң": "ың",
+        "о": "о", "ө": "ө", "п": "пе", "р": "эр", "с": "эс", "т": "те", "у": "у", "ү": "ү",
+        "ф": "эф", "х": "ха", "ц": "це", "ч": "че", "ш": "ша", "щ": "ща", "ы": "ы", "э": "э",
+        "ю": "ю", "я": "я"
+    },
+
+    // Acronyms spelled letter-by-letter although their lowercase form is phonotactically readable. EMPTY on
+    // purpose, the same position Tajik and Russian are in: this tree has no Kyrgyz pronunciation dictionary,
+    // so the decision rests on the phonotactic test alone, and a readable string is left readable. That is
+    // the conservative direction — a missed acronym keeps the reading it already had, whereas an invented
+    // list would spell out ordinary words. ГЭС ×3 and БУУ ×4 are the corpus cases that correctly stay words.
+    "acronymLetters": []
 }

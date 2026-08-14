@@ -2750,6 +2750,64 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "tibetan.jsonc as the number composer's joiner — it is that reading `&` as དང inside an "
             + "English phrase would be wrong, and there is no Tibetan `&` to read",
     },
+    ky: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE RETAINED TEXT OF `tools/corpus/mined/ky.jsonc` — 456 segments
+        // (256 hard + 200 sample) out of a 233,521-paragraph ky.wikipedia dump — with the artifact's
+        // whole-corpus `counts` quoted where they differ. `attest.ts` against ky.wikipedia is the second
+        // tier and espeak's `dictsource/ky_list` the third. Every refusal is argued in
+        // src/languages/kyrgyz/normalize.ts, at the foot of the file.
+        // ⚠ THE CLASS IS READ — this exemption is about the PROBE'S SHAPE, not about the sign. normalize.ts
+        // step 8b claims a dash whose number is followed by a DEGREE mark and which is not itself preceded by
+        // a digit, a degree, a prime or a letter: 18 hits over the 456 retained segments and ZERO false
+        // positives, every one a genuine negative temperature (`-38°С`, `−10 °Cга`, `-18°Сден`, `—40°С`,
+        // `-23...-29 °C`). Before it, `-38°С` read as *отуз сегиз градус* — thirty-eight degrees ABOVE zero,
+        // the sign silently INVERTED. The word is ky.wikipedia's own: «Минус (латынча minus – кем) – кемитүү
+        // амалын, ошондой эле терс санды…», and «белгилер [+ (плюс), — (минус), . (чекит)]».
+        minus: "READ where the corpus can be told apart, and the probe `-5` is the shape that CANNOT be. "
+            + "Dash-before-digit is 285 instances in 456 segments and the overwhelming majority are RANGES "
+            + "(`2750-3800 метр`, `25-35 см`, `20-23 күндү`, `6-16 °C`) or coordinates (`39°11′–43°16′`); a "
+            + "bare `-5` with no right context is exactly the ambiguous case, so claiming it would claim all "
+            + "285. The degree-flanked arm that IS shipped covers 18/18 with no false positive — see the note "
+            + "above. ⚠ The artifact scan still reports `DROP minus ×9` and that is a REAL, argued gap left "
+            + "deliberately red: those nine are the RANGE dashes, and the range joiner is refused because "
+            + "Kyrgyz's `чейин` is a postposition needing the ablative on one operand and the dative on the "
+            + "OTHER — and the corpus puts that dative on the following UNIT (`16дан 19 ммге чейин`), not on "
+            + "the number the rule would have",
+        plus: "20 retained instances and NOT ONE is arithmetic: `+4 °Cдан`, `+22 °C`, `+8...+10 °C` are "
+            + "temperatures where the sign is REDUNDANT with the degree word the layer now emits (trap 12, "
+            + "and the playbook's own audio finding that a measurement plus is routinely unspoken while a "
+            + "minus INVERTS — the two never share an argument); `UTC+5:45` and `UTC-08:00` are offsets. "
+            + "espeak's `ky_list` gives `+ qoS'u:` = кошуу, but that is the NOUN 'addition' — the ky.wikipedia "
+            + "минус article calls the operation `кемитүү амалы`, i.e. the same nominal register — and trap 37 "
+            + "warns that a correctly-sourced word from the wrong register is harder to catch than a wrong one",
+        "plus-minus": "the sign does not occur in the corpus at all (0 in 456 retained segments, and the "
+            + "artifact's whole-corpus `signs` cell carries no ± instance). No candidate word, and nothing to "
+            + "measure a candidate against",
+        "less-than": "0 occurrences. espeak's `ky_list` does carry names — `> azd'Iq belgisi`, "
+            + "`< kOptyk belgisi` — and they read as 'the LESS sign' for `>` and 'the MORE sign' for `<`, "
+            + "i.e. the pair is inverted or is naming something else entirely. An unverifiable source on a "
+            + "class with zero instances is not a reading",
+        "greater-than": "0 occurrences; see less-than — the same espeak pair, with the same inversion",
+        times: "×1 in 456 segments. espeak gives `× kObOjty:` = көбөйтүү, which is the NOUN "
+            + "'multiplication' (ky.wikipedia's arithmetic prose uses it that way: «кошуу, кемитүү, "
+            + "көбөйтүү, бөлүү» as a list of OPERATIONS), and nothing attests what a reader says BETWEEN two "
+            + "operands. One instance is not enough to settle a register question that trap 37 says is the "
+            + "hard one",
+        divide: "0 occurrences of `÷`. The `/` that does occur is a fraction (claimed, as the attested "
+            + "«ондон бир» construction) or a rate denominator (declined whole — see normalize.ts), never a "
+            + "division between two prose operands",
+        // ⚠ NOT A REFUSAL — READ IT AS ONE AND YOU WILL DELETE A WORKING RULE. `=` IS read, as postposed
+        // `барабар` (×56 over 20 ky.wikipedia articles, every one this relation with the second operand in
+        // the DATIVE: «суммасы нөлгө барабар», «Бир доллар жалпысынан 100 центке барабар»; espeak's
+        // `= barab'ar` agrees). The rule requires a CYRILLIC OR DIGIT operand on BOTH sides, and the probe
+        // `x = y` is Latin on both, so it reports DROPPED and is CORRECT to: the corpus's Latin-operand `=`
+        // is a bibliographic TITLE SEPARATOR — «Модернизация и ремонт ПК = Upgrading and Repairing PCs» —
+        // and reading it as an equation would be confidently wrong. 14 retained instances, ~6 of them real
+        // equations, all of which the rule claims.
+        equals: "READ, not refused — see the note above. Exempt because the synthetic probe's operands are "
+            + "LATIN, which this layer deliberately declines (the bibliographic `ПК = Upgrading` separator), "
+            + "so the probe can only ever report DROPPED",
+    },
 };
 
 /**
