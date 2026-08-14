@@ -67,12 +67,15 @@
  *   ⚠ THE REDUNDANCY ESCAPE DOES NOT RESCUE IT EITHER: only 17 of the 234 instances have `tigmiḍi`/`attay`
  *   within 90 characters to the left, so 217 are contentful and the drop is real. NOT in `ACCEPTED_SILENT`.
  *
- * ⚠ AND THAT REFUSAL IS WHY THIS FILE IS LOCAL RATHER THAN `makeSymbolNormalizer`. `SymbolData.percent` is a
- *   REQUIRED field and its arm is unconditional (`core/normalizeSymbols.ts:641,689`), so a language with no
- *   sourceable percent word cannot declare the shared tier at all — even though shi's units, postposed
- *   exponent and invariant `unitPer` (`ɣ tasragt`) would otherwise all fit it. That is a FIFTH reason for
- *   playbook trap 47's list: not idiom, not ordering, but a mandatory data field the language cannot fill.
- *   Reported rather than fixed — making `percent` optional is a `src/core` change across 191 languages.
+ * ⚠ THAT REFUSAL USED TO BE WHY THIS FILE WAS LOCAL, AND IT NO LONGER IS. `SymbolData.percent` was a
+ *   REQUIRED field with an unconditional arm, so a language with no sourceable percent word could not
+ *   declare the shared tier at all — even though shi's units, postposed exponent and invariant `unitPer`
+ *   (`ɣ tasragt`) all fit it. This run reported that as a FIFTH candidate for playbook trap 47's list: not
+ *   idiom, not ordering, but a mandatory data field the language cannot fill. The field is now OPTIONAL
+ *   (its arm skipped, the sign left visible), so the reason is spent and shi's units, rates, exponents and
+ *   currency are DATA on the shared tier at step 5 — see `SYMBOLS` below and
+ *   `docs/investigations/tier_optional_fields_investigation.md`. The refusal itself is unchanged: shi still
+ *   declares no percent word, and the `%` is still dropped visibly rather than read wrongly.
  *
  * ⚠ NO DECIMAL-POINT WORD. `sources.ts` reports `[NONE] decimal-point`. `tanqqiḍt` is attested ×4 and means
  *   "point" in the GEOGRAPHIC (`ittubna ɣ tanqqiḍt akkʷ yattuyn`, "built at the highest point"), MELTING
@@ -127,7 +130,7 @@
  *   `n=2,& (x + y)^2 &= x^2 + 2xy + y^2,\\`). That is a mining artifact, not Tashelhit orthography, and no
  *   reading of it is correct.
  */
-import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
 /**
  * UNIT ABBREVIATION → the word to say, longest key first so `km²` is tried before `km`.
@@ -173,20 +176,70 @@ import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
  * HERE rather than being inherited because step 6 spends the decimal dot, and a guard that needs a character
  * cannot live downstream of the rule that rewrites it (trap 39).
  */
-const UNITS: readonly (readonly [string, string])[] = [
-    ["km/h", "kilumitr ɣ tasragt"], ["km/s", "kilumitr ɣ tsnat"],
-    ["m³/s", "mitr mukaɛɛab ɣ tsnat"], ["m3/s", "mitr mukaɛɛab ɣ tsnat"],
-    ["km²", "kilumitr amkkuẓ"], ["km2", "kilumitr amkkuẓ"],
-    ["m²", "mitr amkkuẓ"], ["m2", "mitr amkkuẓ"],
-    ["m³", "mitr mukaɛɛab"], ["m3", "mitr mukaɛɛab"],
-    ["km", "kilumitr"], ["cm", "santim"], ["mm", "milimitr"], ["kg", "kilugram"],
-    ["m", "mitru"], ["g", "gram"],
-];
-
-/** THE SAME SYMBOLS STANDING ALONE — a caption, a table header, or a figure a bracket put out of reach.
- *  The shared guards (`core/normalizeSymbols.ts`) admit only multi-letter vowel-free keys, so the one-letter
- *  `m`/`g` above are excluded automatically, as are the exponent and rate keys. */
-const BARE_UNITS = makeBareUnitNormalizer(UNITS);
+const SYMBOLS = makeSymbolNormalizer({
+    // ⚠ NO `percent` KEY, AND THAT ABSENCE IS THE DECLARATION. See the header: the reading of this sign is
+    // absent from shi text by construction. The tier now skips the arm rather than requiring a word, so the
+    // `%` is left exactly where it was and the DROP gate keeps counting it.
+    units: {
+        km: ["kilumitr"], m: ["mitru"], cm: ["santim"], mm: ["milimitr"], kg: ["kilugram"], g: ["gram"],
+        // ⚠ THE CUBED-METRE RATE IS ITS OWN KEY, because the tier composes an exponent on the DENOMINATOR
+        // (`katao/km²`) but not on the HEAD: after `m` the alternation offers `/denominator` OR an exponent,
+        // never both, so `24.3 m³/s` would read "24.3 mitr mukaɛɛab" and strand the `/s`. Declared whole, it
+        // is matched first (keys are longest-first) and the corpus's own `24.3 mitr mukaɛɛab ɣ tsnat` is
+        // preserved. The plain `km/h`/`km/s` rates need no such entry — they compose from `unitPer`.
+        "m³/s": ["mitr mukaɛɛab ɣ tsnat"], "m3/s": ["mitr mukaɛɛab ɣ tsnat"],
+        // ⚠ AND THE SQUARED/CUBED METRE IS ALSO ITS OWN KEY, FOR A REASON THAT IS THE LANGUAGE AND NOT THE
+        // TIER: shi's metre LOSES ITS FINAL VOWEL under a measure word. The corpus writes `1 351 m` →
+        // *mitru* standing alone but `60,000 id mitr amkkuẓ` and `24.3 mitr mukaɛɛab` — the annexed form —
+        // when the modifier follows. `exponentWords` composes head + word and cannot change the head, so
+        // composing would read *mitru amkkuẓ*, which is not the form the corpus writes. The kilometre has no
+        // such alternation (`kilumitr` either way) and composes normally, which is why only this noun is
+        // enumerated. Caught by test/tashelhit.test.ts, not by the corpus diff — the artifact's own
+        // instances are all `km²`.
+        "m²": ["mitr amkkuẓ"], m2: ["mitr amkkuẓ"], "m³": ["mitr mukaɛɛab"], m3: ["mitr mukaɛɛab"],
+    },
+    // shi's "per" is the locative `ɣ`, invariant across denominators — `6 kilumitr ɣ tasragt` (corpus),
+    // `24.3 mitr mukaɛɛab ɣ tsnat` (wiki). ⚠ THE TIME NOUNS ARE DENOMINATOR-ONLY, never standalone units:
+    // declaring `h`/`s` in `units` is the `Il-76s` hazard, and bare `s` after a decimal is ×60+ in this
+    // corpus and every one is a COORDINATE hemisphere letter (`28.1 n`, `60.45 s`). This field is the seam
+    // that was written for exactly that distinction.
+    rateDenominators: { h: "tasragt", s: "tsnat" },
+    unitPer: "ɣ",
+    // ⚠ THE MEASURE WORD IS POSTPOSED, and one measurement fixes both the word and the position: the wiki
+    // glosses its own symbol, `510.072.000 km² (yikilumitren imkuẓn)`, and writes `673 kilumitr amkkuẓ
+    // (260 mil amkkuẓ)` ×5 across independent articles. The cube is `mitr mukaɛɛab`, same order. Declaring
+    // them here generalises to `cm²`/`mm³`, which the local key list could only have got by enumeration.
+    exponentWords: { squared: ["amkkuẓ"], cubed: ["mukaɛɛab"], position: "after" },
+    // The corpus's own magnitude words, longest first handled by the tier. `id` is the Berber plural marker
+    // that precedes one of them (`2.15 id mlyun`), so the pair is declared as one magnitude.
+    magnitudes: ["id mlyun", "id mlyar", "mlyun", "mlyar", "mlayn", "mlayr", "milyar", "mlyaṛ"],
+    // ⚠ NO `magnitudeConnective`, AND THAT IS MEASURED RATHER THAN AN OMISSION. shi writes the linker `n`
+    // after the PLURAL magnitude and not after the singular one — `2 id mlyun n Uṛu` and `€3 id mlyun n
+    // Wuṛu` against `40 mlyun dulaṛ`, `440 mlyun dulaṛ amirikani` and `18 mlyun Uṛu`. The field is ONE
+    // string for every magnitude, so declaring it emits `n` in all four and reads `$440 mlyun` as
+    // *440 mlyun N dulaṛ*, which is not what the wiki writes. Declined; the suppression that needed it is
+    // handled by the extra `currency` spellings instead.
+    //   `$` → `dulaṛ`   wiki `440 mlyun dulaṛ amirikani`, `40 mlyun dulaṛ`; corpus
+    //                   `1 agndid n dulaṛ (¥ … nɣd € … nɣd £ …)` — monetary in every instance.
+    //   `€` → `uṛu`     wiki `18 mlyun Uṛu`, `s 17.1 mlyun Uṛu`, `2 id mlyun n Uṛu`; corpus
+    //                   `s watig n €3 id mlyun n Wuṛu`.
+    // ⚠ THE `€` ENTRIES AFTER THE FIRST ARE SUPPRESSION SPELLINGS, NOT COUNT FORMS, and the tier's own
+    // documentation is what licenses them: the "the text already says it" guard tests EVERY declared form
+    // against the text immediately following the match, which is the only reason more than one is ever
+    // useful for a language that does not inflect. shi's corpus writes the noun there as `n Wuṛu` — the
+    // linker `n` plus the Berber construct-state `w-` — so the bare `uṛu` does not match it and the corpus's
+    // one running-text `€` reads the currency TWICE (trap 12: `€3 id mlyun n Wuṛu` → *…n uṛu n Wuṛu*).
+    // Declaring the whole following string is what shuts it up without emitting an `n` the `$` case does
+    // not take. `countForm` below is what keeps these from ever being SAID; the guard is case-insensitive,
+    // so `n Wuṛu` covers `n wuṛu` and `n Uṛu` covers `n uṛu`.
+    // ⚠ `¥` AND `£` ARE NOT CLAIMED. See the header: one instance each and no attested word.
+    currency: { $: ["dulaṛ"], "€": ["uṛu", "n Wuṛu", "n Uṛu"] },
+    // ⚠ SHI DOES NOT INFLECT THESE NOUNS FOR COUNT in the quantified slot — the corpus writes `40 mlyun
+    // dulaṛ` and `1 agndid n dulaṛ` with the same form — so the selector is pinned to the first entry. That
+    // is also what makes the extra `€` spelling safe: it is reachable by the suppression guard and by
+    // nothing else.
+    countForm: () => 0,
+});
 
 /**
  * THE ERA MARKERS, and the corpus GLOSSES ITS OWN ABBREVIATION, which is the strongest attestation there is.
@@ -226,9 +279,6 @@ function expandDotted(s: string, body: string, word: string): string {
     const inline = new RegExp(`(?<![\\p{L}\\p{M}])${body}\\.`, "gu");
     return s.replace(atEnd, `${word}.`).replace(inline, word);
 }
-
-/** Escape a literal for interpolation into a pattern. */
-const esc = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 
 /**
  * Every rule here emits DIGITS wherever a number is involved and lets the engine's own number path
@@ -340,36 +390,28 @@ export function normalizeTashelhit(input: string): string {
         "$1 n tskflt",
     );
 
-    //    THE UNIT ARMS. See UNITS for every word's attestation and for the one-letter-key measurement.
-    //    ⚠ CASE-INSENSITIVE, AND THAT IS MEASURED (trap 7): the corpus writes `91,982 Km²` and `180.000Km²`
-    //    with a capital K, i.e. exactly the instances the rule exists for.
-    //    ⚠ THE OPERAND MUST INCLUDE ITS OWN DECIMAL TAIL, or the rule matches the FRACTIONAL part and cuts
-    //    the number in half — the Lingala `0,44 km²` lesson, and this corpus offers `105,40 km²`,
-    //    `2.15 id mlyun`, `24.3 mitr mukaɛɛab`.
-    //    ⚠ THE LEADING GUARD REJECTS A DOT AND A DIGIT, which is trap 28's lookbehind: a lookahead alone
-    //    cannot stop a match that BEGINS inside a dotted designation's fractional part.
-    //    ⚠ A MAGNITUDE MAY STAND BETWEEN THE FIGURE AND ITS UNIT and the rule has to hop it, or the
-    //    adjacency is not there. The corpus writes `2.15 id mlyun n Wuṛu`-shaped quantities and
-    //    `14,000,000 kilumitr amkkuẓ`; the magnitude words are the corpus's own (`mlyun` ×5, `mlyar` ×2,
-    //    `mlayn`, `milyar`, and the plural marker `id` that precedes them in `2.15 id mlyun`). They are LEFT
-    //    IN PLACE, not consumed — they are already ordinary words the tokenizer speaks.
-    //    ⚠ AND `NOT_VERSION`, LIFTED FROM THE TIER, because a leading `(?<![\d.,])` alone does NOT stop this:
-    //    rejected at `802`, the engine simply retries from the FRACTIONAL part and matches `11m` on its own,
-    //    so `802.11m` read as "…eleven METRES" until this guard was added. Caught by the spot probe, not by
-    //    the corpus — this corpus contains ZERO dotted designations, so the arm is robustness for plausible
-    //    input rather than a measured repair, and it is here rather than inherited because step 6 below will
-    //    have spent the dot by the time the shared tier ever runs (traps 39/46). The designation list is the
-    //    tier's own, and either separator, since a designation is not localised but the text around it is.
-    const NOT_VERSION = "(?<![\\d.,])(?!(?:802[.,]11)[a-zA-Z](?![a-zA-Z\\d]))";
-    const MAG = "(?:\\s*(?:id\\s+)?(?:mlyun|mlyar|mlayn|mlayr|milyar|mlyaṛ))?";
-    for (const [sym, word] of UNITS) {
-        s = s.replace(
-            new RegExp(`${NOT_VERSION}(?<![\\p{L}\\p{M}])(\\d+(?:[.,]\\d+)?)(${MAG})\\s?${esc(sym)}(?![\\p{L}\\p{M}\\d²³])`, "giu"),
-            (_m: string, n: string, mag: string) => `${n}${mag} ${word}`,
-        );
-    }
-    //    …and the ones with NO numeral at all. Last, so the counted arms above keep every match they can make.
-    s = BARE_UNITS(s);
+    //    THE UNIT, RATE, EXPONENT AND CURRENCY ARMS — the SHARED TIER, `core/normalizeSymbols.ts`, with
+    //    this language's readings as pure data. See `SYMBOLS` above for every word's attestation.
+    //
+    //    ⚠ THIS FILE USED TO HAND-WRITE ALL OF IT, and the reason was a single missing cell: `SymbolData`
+    //    required a `percent` word, so a language that correctly refuses to invent one could not declare the
+    //    tier at all. The field is optional now (see the tier's own header and
+    //    `docs/investigations/tier_optional_fields_investigation.md`), so the ~25 lines of unit-matching,
+    //    magnitude-hopping and currency-suppression machinery that were duplicated here are gone and shi
+    //    inherits the measured guards instead of a copy of them that can drift:
+    //      · `NOT_VERSION` — the `802.11m` lookbehind+lookahead pair, trap 46. It is INHERITED rather than
+    //        re-declared, and the placement argument is unchanged: the tier runs HERE, before step 6 spends
+    //        the decimal dot, so the guard still has the character its evidence depends on (trap 39).
+    //      · case-insensitive matching with exact-then-folded resolution — `91,982 Km²`, `180.000Km²`.
+    //      · the decimal tail inside the operand — `105,40 km²`, the Lingala `0,44 km²` lesson.
+    //      · the magnitude hop between figure and unit, re-emitted in place — `14,000,000 kilumitr amkkuẓ`.
+    //      · the standalone-symbol pass, which this file already called into (`makeBareUnitNormalizer`).
+    //
+    //    ⚠ AND IT RUNS BEFORE DECIMALS, WHICH MOVES CURRENCY EARLIER THAN IT WAS. The local layer ran its
+    //    currency arm LAST, after step 6 had already split `$1.5` into `$1 5` — so a decimal amount read as
+    //    "1 dulaṛ 5", the noun inside its own number. There is no such instance in this corpus, so nothing
+    //    moves here; it is stated because the ordering is now the tier's and not this file's.
+    s = SYMBOLS(s);
 
     // 6) DECIMALS, after units and after de-grouping. Both marks reach here only as genuine separators, by
     //    step 4's measurement. The integer part stays a number for the engine's own number path; the
@@ -385,29 +427,10 @@ export function normalizeTashelhit(input: string): string {
     s = s.replace(/(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)/gu, (_m, int: string, frac: string) =>
         `${int} ${[...frac].join(" ")}`);
 
-    // 7) CURRENCY, last of the numeric steps — its operands are already de-grouped and its signs are
-    //    untouched by every rule above. `currency` is ×4 over the whole corpus and the scan reports
-    //    `DROP currency ×4`, so this is a small class; it is here because a sign that is silent is
-    //    inaudible, not because it is frequent.
-    //      `$` → `dulaṛ`   wiki `440 mlyun dulaṛ amirikani`, `40 mlyun dulaṛ`; corpus
-    //                      `1 agndid n dulaṛ (¥ … nɣd € … nɣd £ …)` — monetary in every instance.
-    //      `€` → `uṛu`     wiki `18 mlyun Uṛu`, `s 17.1 mlyun Uṛu`, `2 id mlyun n Uṛu`; corpus
-    //                      `s watig n €3 id mlyun n Wuṛu`. (`Wuṛu` is the same noun with the Berber
-    //                      construct-state w-; the bare form is what a postposed slot wants.)
-    //    ⚠ THE SIGN PRECEDES THE FIGURE IN EVERY CORPUS INSTANCE and the WORD goes after it, which is what
-    //    the corpus's own prose does (`440 mlyun dulaṛ`). So the rewrite MOVES the reading across the number.
-    //    ⚠ TRAP 12: the corpus's one `€` in running text already spells the noun — `€3 id mlyun n Wuṛu` —
-    //    so the guard looks right for it, past an optional magnitude, and emits the bare figure when it is
-    //    there. Without that, `€3 id mlyun n Wuṛu` reads the currency twice.
-    //    ⚠ `¥` AND `£` ARE NOT CLAIMED. See the header: one instance each and no attested word.
-    for (const [sign, word] of [["$", "dulaṛ"], ["€", "uṛu"]] as const) {
-        const already = new RegExp(`^${MAG}\\s*(?:n\\s+)?[Ww]?${esc(word)}`, "iu");
-        s = s.replace(
-            new RegExp(`${esc(sign)}\\s?(\\d+(?:[.,]\\d+)?)(${MAG})`, "gu"),
-            (_m: string, n: string, mag: string, off: number, all: string) =>
-                already.test(all.slice(off + _m.length)) ? `${n}${mag}` : `${n}${mag} ${word}`,
-        );
-    }
+    // 7) THE CURRENCY ARM IS NOW STEP 5's, not its own. It moved into `SYMBOLS` with everything else — see
+    //    that declaration for the two signs, their attestation, the `Wuṛu` construct-state spelling that
+    //    keeps trap 12's suppression working, and why `¥`/`£` are still declined. `currency` is ×4 over the
+    //    whole corpus, so this was always a small class; it is read because a silent sign is inaudible.
 
     return s;
 }

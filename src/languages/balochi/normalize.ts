@@ -406,13 +406,21 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         // 7) SI LENGTH UNITS — the Latin abbreviation after a number, rewritten to the Balochi word. See
         //    `UNITS` for each word, the Balochi sentence it was read in, and why `ha`, `l`, `cm` and `kg`
         //    stay refused.
-        //    ⚠ WRITTEN HERE RATHER THAN TAKEN FROM `core/normalizeSymbols.ts`, and the reason is this
-        //    language's own percent refusal. `SymbolData.percent` is a REQUIRED field, so adopting the
-        //    shared tier would mean naming a Balochi percent word — and there isn't one to name (see the
-        //    header: `فیصد` is Western, `سدی` is the century). A layer does not get to invent a word as the
-        //    price of admission to a seam. What the tier would have added on top — a rate path, an exponent
-        //    path — this corpus does not exercise: it writes `چارسریکی کیلومتر` ("square kilometre") as
-        //    WORDS already, and `km/h` is ×0 in both Balochi corpora.
+        //    ⚠ WRITTEN HERE RATHER THAN TAKEN FROM `core/normalizeSymbols.ts`, AND THE ORIGINAL REASON IS
+        //    NOW SPENT — kept, corrected, because a stale reason is how a layer drifts. That reason was this
+        //    language's own percent refusal: `SymbolData.percent` used to be a REQUIRED field, so adopting
+        //    the shared tier would have meant naming a Balochi percent word, and there isn't one to name
+        //    (see the header: `فیصد` is Western, `سدی` is the century). A layer does not get to invent a word
+        //    as the price of admission to a seam. That field is OPTIONAL now — shi hit the same wall and it
+        //    was fixed in core (`docs/investigations/tier_optional_fields_investigation.md`), so the door is
+        //    open and this layer is DECLINING it rather than being refused:
+        //      · what the tier would add on top, this corpus does not exercise — it writes
+        //        `چارسریکی کیلومتر` ("square kilometre") as WORDS already, and `km/h` is ×0 in BOTH Balochi
+        //        corpora, so the rate and exponent paths would buy nothing;
+        //      · and the ordering below is a real constraint, not a preference — this rule must run before
+        //        step 8, which is the shape shi's conversion had to place the tier call around too.
+        //    Revisit if a rate or an exponent ever appears in the evidence; until then this is a table of
+        //    single substitutions, which is exactly what a local table is allowed to be.
         //    ⚠ BEFORE THE DECIMAL STEP, which is why it is numbered here and not after it. Step 8 replaces
         //    the point with a SPACE, so `۲٫۵km` would already have become `۲ ۵km` and this rule would claim
         //    a unit for the FRACTIONAL part alone. Every other numeric rule above needs the number intact

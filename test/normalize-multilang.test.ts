@@ -55,6 +55,52 @@ describe("shared symbol normalizer (core)", () => {
         expect(n("40%")).toBe("yüzde 40");
     });
 
+    /**
+     * A LANGUAGE WITH NO SOURCEABLE PERCENT WORD MUST STILL BE ABLE TO USE THE TIER.
+     *
+     * `percent` was the one REQUIRED field on `SymbolData` and its arm was unconditional, so Tashelhit —
+     * whose units, postposed exponent and invariant `unitPer` all fit the tier — had to hand-write a local
+     * table for want of one cell it correctly refuses to invent (13 candidate spellings at ×0; the wiki
+     * never spells a numeral out, so the sign's reading is absent from text by construction).
+     *
+     * ⚠ THE TYPE CANNOT DEFEND THIS, which is why these are tests. `loadManifest<T>` casts, so a missing
+     * key type-checks cleanly and reaches the output as the literal six-letter word "undefined" — the
+     * hazard this module's own header states. The two halves below are the contract: ABSENT is inert,
+     * MALFORMED throws.
+     */
+    test("percent may be OMITTED — the sign is left visible, not read as an empty or undefined word", () => {
+        const n = makeSymbolNormalizer({ units: { km: ["kilumitr"] } });
+        // The sign survives verbatim, with no word inserted and no stray space — the DROP/RAWMARK gates
+        // can then see it, which is the honest side to fail on.
+        expect(n("17,9%")).toBe("17,9%");
+        expect(n("40 %")).toBe("40 %");
+        expect(n("%40")).toBe("%40"); // the prefix form too
+        expect(n("99,854 ٪")).toBe("99,854 ٪"); // and the Arabic-script sign
+        // ⚠ THE ASSERTIONS THAT ACTUALLY BITE: neither the literal word nor a stripped sign.
+        for (const s of ["17,9%", "%40", "40 %"]) {
+            expect(makeSymbolNormalizer({})(s)).not.toMatch(/undefined/u);
+            expect(makeSymbolNormalizer({})(s)).toContain("%");
+        }
+        // …and every OTHER arm still works in the same normalizer, which is the point of converting.
+        expect(n("8665 km")).toBe("8665 kilumitr");
+    });
+
+    test("a DECLARED percent that arrived empty or undefined THROWS, naming the field", () => {
+        // The manifest-shaped hazard, verbatim: `percent: [MANIFEST.symbols.percent]` where the .jsonc has
+        // lost the key. Before the check this produced "40 undefined" — a word the phoneme sink cannot
+        // distinguish from a real one.
+        const missing = { symbols: {} } as unknown as { symbols: { percent: string } };
+        expect(() => makeSymbolNormalizer({ percent: [missing.symbols.percent] })).toThrow(/percent/u);
+        expect(() => makeSymbolNormalizer({ percent: [] })).toThrow(/percent/u);
+        expect(() => makeSymbolNormalizer({ percent: [""] })).toThrow(/percent/u);
+        // The same check covers the other CountForms fields, which have the identical failure mode.
+        expect(() => makeSymbolNormalizer({ currency: { $: [""] } })).toThrow(/currency\[\$\]/u);
+        expect(() => makeSymbolNormalizer({ units: { km: [] } })).toThrow(/units\[km\]/u);
+        expect(() => makeSymbolNormalizer({ exponentWords: { squared: [""] } })).toThrow(/exponentWords\.squared/u);
+        // ⚠ AND OMISSION IS NOT MALFORMATION — an empty declaration is a bug, no declaration is a decision.
+        expect(() => makeSymbolNormalizer({})).not.toThrow();
+    });
+
     // A MAGNITUDE MAY SIT BETWEEN THE NUMBER AND A UNIT too, not just a currency sign. Without it the
     // number is not adjacent to the unit, the match fails, and the unit reaches the IPA as RAW LETTERS —
     // `2,2 Millioune km²` read `km` plus a stranded "2". Seven corpus utterances across af/az/nl/el/lb/mk/ta,

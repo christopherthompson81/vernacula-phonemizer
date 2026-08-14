@@ -51,8 +51,30 @@ const BARE_EXPONENT = new RegExp(
 export type ExponentPosition = "before" | "after" | "compound" | "suffix";
 
 export interface SymbolData {
-    /** The word for %, e.g. "percent", "Prozent", "por ciento", or count forms for Slavic. */
-    percent: CountForms;
+    /**
+     * The word for %, e.g. "percent", "Prozent", "por ciento", or count forms for Slavic.
+     *
+     * ⚠ OPTIONAL, AND THE ONLY REASON TO OMIT IT IS THAT THE LANGUAGE HAS NO SOURCEABLE WORD. Every other
+     * field here was already optional; this one was required and its arm unconditional, so a language with
+     * no attested percent word could not declare the shared tier AT ALL and had to hand-write a local table
+     * — duplicating the guards this file already owns. Tashelhit (shi) is the case that reported it: 234
+     * number+% instances in its retained corpus, `tigmiḍi` a heading noun before its figure rather than a
+     * postposed reading, 13 candidate spellings at ×0, and `attest.ts --after` on five numerals returning
+     * nothing because shi.wikipedia never spells a numeral out — so the sign's reading is absent from text
+     * by construction, not merely unfound. A wrong percent word is worse than a dropped sign.
+     *
+     * Omitted, the percent arm is SKIPPED ENTIRELY: the sign is left exactly where it was, visible to the
+     * RAWMARK/DROP leak gates — the same choice `exponentWords` and `bareExponent` already make for a
+     * missing measure word, and for the same reason. It does NOT emit an empty word, and it must never
+     * emit the literal string "undefined".
+     *
+     * ⚠ OMITTING IS NOT THE SAME AS DECLARING NOTHING USEFUL. `loadManifest<T>` parses JSON and CASTS, so a
+     * manifest that has lost this key type-checks cleanly and `percent: [MANIFEST.symbols.percent]` becomes
+     * `[undefined]` — which would interpolate into the output as the six-letter word. That is why the
+     * declared form is VALIDATED below (`assertForms`) rather than trusted: absent is inert, malformed
+     * throws. See test/normalize-multilang.test.ts, which asserts both halves.
+     */
+    percent?: CountForms;
     /**
      * Currency sign → count forms. The sign may precede or follow the number in text; the word is emitted
      * after the number by default, or before it with `currencyPrefix`.
@@ -273,6 +295,31 @@ function withMagnitude(
     return pick(forms, mag !== undefined && mag !== "" ? MANY : n, countForm);
 }
 
+/**
+ * ⚠ ABSENT IS A DECISION; MALFORMED IS A BUG — and only a runtime check can tell them apart here.
+ *
+ * Every data field on `SymbolData` is optional, so "this language declines this reading" is expressible and
+ * inert. The failure mode that optionality creates is the OTHER one: a field the language MEANT to declare
+ * whose value arrived empty or undefined. `loadManifest<T>` parses JSON and casts, so a manifest missing a
+ * key type-checks cleanly (the hazard this module's header states, and the reason
+ * test/manifest-signwords.test.ts exists); `percent: [MANIFEST.symbols.percent]` then yields `[undefined]`
+ * and `${w}` writes the literal word "undefined" into the phoneme stream, which no leak gate can tell from
+ * a real word.
+ *
+ * So a declared CountForms is checked at CONSTRUCTION, where the message can name the field, rather than
+ * being discovered as a TypeError several frames down inside `pick`. Undeclared costs nothing and is never
+ * checked — that is the whole point of the optional fields.
+ */
+function assertForms(field: string, forms: CountForms): void {
+    const bad =
+        !Array.isArray(forms) || forms.length === 0 || forms.some((w) => typeof w !== "string" || w === "");
+    if (bad)
+        throw new Error(
+            `SymbolData.${field}: declared, but not a non-empty list of non-empty words (got ${JSON.stringify(forms)}). ` +
+                `Omit the field entirely if this language has no word to say; do not declare an empty one.`,
+        );
+}
+
 function pick(forms: CountForms, n: number, countForm: (n: number) => number): string {
     const i = Math.min(countForm(n), forms.length - 1);
     return forms[Math.max(0, i)]!;
@@ -456,6 +503,12 @@ export interface SignWords {
 }
 
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
+    // Validate what IS declared, before any of it is compiled into a pattern. See `assertForms`.
+    if (d.percent !== undefined) assertForms("percent", d.percent);
+    for (const [k, forms] of Object.entries(d.currency ?? {})) assertForms(`currency[${k}]`, forms);
+    for (const [k, forms] of Object.entries(d.units ?? {})) assertForms(`units[${k}]`, forms);
+    for (const p of ["squared", "cubed"] as const)
+        if (d.exponentWords?.[p] !== undefined) assertForms(`exponentWords.${p}`, d.exponentWords[p]);
     const cf = d.countForm ?? defaultCountForm;
     const unitsFolded = foldedIndex(d.units);
     const denomFolded = foldedIndex(d.rateDenominators);
@@ -615,11 +668,15 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     );
     // All three percent signs: ASCII `%`, U+066A ٪ (Arabic script) and U+FF05 ％ (full-width, ordinary CJK
     // typography). Accepted here so no language has to pre-fold them locally.
+    //
+    // \u26a0 BUILT ONLY WHEN THE LANGUAGE HAS A WORD TO SAY. Undeclared, both patterns are null and the arm below
+    // never runs \u2014 the sign stays in the text where the leak gates can see it. Same shape as `curBefore` /
+    // `curAfter` / `unitRe` above, and for the same reason.
     const PCT = "[%\u066a\uff05]";
-    const pctRe = new RegExp(`(${NUM})${OPT_SEP}${PCT}`, "gu");
+    const pctRe = d.percent ? new RegExp(`(${NUM})${OPT_SEP}${PCT}`, "gu") : null;
     // The %-before-number form (%40). The lookbehind stops a misfire after other rules run: currency turns
     // "88% $2" into "88% 2 doler", and without the guard this rule would glue "% 2" into 88's replacement.
-    const pctPreRe = new RegExp(`(?<!\\d)${PCT}\\s?(${NUM})`, "gu");
+    const pctPreRe = d.percent ? new RegExp(`(?<!\\d)${PCT}\\s?(${NUM})`, "gu") : null;
 
     const esc = (t: string): string => t.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
     /**
@@ -638,8 +695,8 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     };
     /** The mirror, for a PREFIX word: Turkish `yüzde 40%` was reading *yüzde yüzde kırk*. */
     const saidBefore = (forms: CountForms): RegExp => new RegExp(`(?:${forms.map(esc).join("|")})[  ]*$`, "iu");
-    const PCT_AFTER = saidAfter(d.percent);
-    const PCT_BEFORE = saidBefore(d.percent);
+    const PCT_AFTER = d.percent ? saidAfter(d.percent) : null;
+    const PCT_BEFORE = d.percent ? saidBefore(d.percent) : null;
 
     return (text: string): string => {
         // THE AMPERSAND FIRST, and spaced — see `ampersand`. Before every other rule because a `&` between
@@ -683,15 +740,22 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             );
         // The percent word is suppressed when the text already carries it — on whichever side this
         // language puts it. `93% ശതമാനം` doubled the suffix; `yüzde 40%` doubled the prefix.
-        const pct = (num: string, offset: number, full: string, matchLen: number): string => {
-            const before = full.slice(0, offset),
-                after = full.slice(offset + matchLen);
-            const w = pick(d.percent, numValue(num), cf);
-            if (d.percentPrefix) return PCT_BEFORE.test(before) ? num : `${w} ${num}`;
-            return PCT_AFTER.test(after) ? num : `${num} ${w}`;
-        };
-        s = s.replace(pctPreRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
-        s = s.replace(pctRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
+        //
+        // ⚠ AND THE WHOLE ARM IS SKIPPED WHEN THE LANGUAGE DECLARES NO PERCENT WORD — not run with an empty
+        // one. Emitting `${num} ` for a missing word would leave a trailing space and DELETE the sign; the
+        // `%` is left in place instead, which is the visible failure the DROP gate counts.
+        if (d.percent !== undefined && pctRe && pctPreRe && PCT_AFTER && PCT_BEFORE) {
+            const forms = d.percent;
+            const pct = (num: string, offset: number, full: string, matchLen: number): string => {
+                const before = full.slice(0, offset),
+                    after = full.slice(offset + matchLen);
+                const w = pick(forms, numValue(num), cf);
+                if (d.percentPrefix) return PCT_BEFORE.test(before) ? num : `${w} ${num}`;
+                return PCT_AFTER.test(after) ? num : `${num} ${w}`;
+            };
+            s = s.replace(pctPreRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
+            s = s.replace(pctRe, (m: string, num: string, off: number, full: string) => pct(num, off, full, m.length));
+        }
         // THE MULTIPLICATION SIGN, both `×` and ASCII `x` — BEFORE the unit path, and that ordering is load-bearing.
         // Placed after it, a `unitPrefix` language broke: Swahili's unit path MOVES the noun ahead of its number,
         // so `6x6 cm` became *sita KS sentimita sita* — the pattern no longer had a digit after the sign and the
