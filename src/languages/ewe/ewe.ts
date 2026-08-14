@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeEwe } from "./normalize.ts";
 
 interface EweDef {
     digraphs: Record<string, string>;
@@ -84,7 +85,10 @@ const TOKEN = /([a-zɖƒʋɣŋɔɛA-ZƉƑƲƔŊƆƐ̀-ͯ']+)|(\d+)|([.!?…,;:])
 
 class EwePhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input.normalize("NFD"), TOKEN, (m, sink) => {
+        // normalize.ts runs FIRST — it is a pre-tokenizer text→text pass, and its opening step folds the
+        // homoglyphs (Ð Đ → Ɖ, Ƞ → Ŋ, U+0342 → U+0303) that TOKEN below cannot see. NFD after it, so the
+        // folded ⟨ã⟩ decomposes into a base the token class admits plus a mark in the ̀-ͯ range.
+        return assembleClauses(normalizeEwe(input).normalize("NFD"), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // numbers: composed to Ewe words (numbers.ts: wui-/bla- decimal), then through the same scan
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

@@ -588,6 +588,37 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "Kaufmann's 23,557 entries and ×0 in both referees. Cebuano declares `$`→`dolyar` on ×4 "
             + "corpus dollars; hil has none, and inventing one is the Fula `tere` failure",
     },
+    ee: {
+        // ⚠ THERE IS NO FLEURS FOR EWE, so every count below is over `tools/corpus/mined/ee.jsonc` (an
+        // ee.wikipedia dump, 5,921 paragraphs, 398 retained) with `attest.ts` against ee.wikipedia as the
+        // second tier, and `sources.ts` reports espeak does not ship this language at all. Every refusal is
+        // argued at length in src/languages/ewe/normalize.ts's header.
+        degrees: "measured: `°C` ×3 and NO Ewe degree word or scale name exists. `Selsius`/`selsius` are "
+            + "×0 on ee.wikipedia and `sources.ts` agrees: `[NONE] scale-names — nothing follows ° in the "
+            + "corpus but the bare letter`. ⚠ AND THE COST IS WORSE THAN A DROPPED SIGN, which is why it is "
+            + "stated here rather than left implicit: ⟨C⟩ reads through Ewe's OWN ⟨c⟩ = /t͡s/, so `22 °C` is "
+            + "*blaeve vɔ eve t͡s* — a phantom syllable (trap 56). Deleting the letter would lose the unit "
+            + "outright and a word would be an invention, so it stands",
+        exponent: "measured: NO square or cube word exists — `attest.ts --after kilometa,meta,milimeta` "
+            + "returns only `ɖeka` and `miliɔn`, i.e. the slot is filled by the FIGURE and there is no "
+            + "modifier to find. ⚠ THE SILENCE IS DELIBERATE AND IT IS THE LESSER OF TWO WRONG READINGS "
+            + "(trap 53). All 8 of this corpus's area figures write the ASCII `km2`, so ak's refusal — "
+            + "leave the key unclaimed before an exponent — would ship Igbo's `790 km2` → \"kilometres "
+            + "TWO\", an invented quantity. What this wiki DOES is write an area with the bare unit noun: "
+            + "`eƒe lolome nye kilometa 20,271 sq`, `tsi si ƒe lolome nye kilometa 19,022 (7,344 mi2)`, and "
+            + "Africa's 30 million km² as `kilometa miliɔn 30`. normalize.ts step 4 therefore reads `km2` "
+            + "and `km²` as `kilometa` — this corpus's own convention for exactly this slot — and loses the "
+            + "\"square\" the corpus also loses, instead of inventing a number",
+        times: "measured: the only × in the corpus is `meta 4 × 100`, a RELAY dimension — which is \"by\" "
+            + "and not \"times\" (the ak and bm finding, reproduced). No Ewe multiply word is attested "
+            + "digit-adjacent, and `sources.ts` reports `chk?` with nothing found",
+        // ⚠ `minus` IS DELIBERATELY ABSENT, and the class is not clean. Its 6 corpus instances read back as
+        // a lifespan dash (`24 September 1844 –1938`), a judo WEIGHT CLASS (`−63 kg`, i.e. "under 63 kg"),
+        // `Nigeria -7`, and four `[ -1]`…`[ -4]` REFERENCE markers — not one a negative quantity. But
+        // omitting a plus is lossless where omitting a minus INVERTS, and no Ewe word for a negative is
+        // attested anywhere, so this one stays red rather than being declared correct. Same stance as ak,
+        // ln, bm and rw.
+    },
     ak: {
         // ⚠ ak.wikipedia IS LOCKED — its entire extract is the notice pointing at the Twi and Fante wikis —
         // so every measurement below is over tw.wikipedia (27,415 paragraphs) + fat.wikipedia (9,029), and

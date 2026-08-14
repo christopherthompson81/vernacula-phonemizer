@@ -1,0 +1,458 @@
+// WIKIPEDIA WORD ATTESTATION — ee. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ee",
+        "wiki": "ee.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "yuro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…ƒe 2023 me la, ede asi agbalẽ te na Paris Saint-Germain ɖe euro miliɔn 45 ƒe asiɖeɖe le eŋu ta, eye wòyi edzi ɖu dzi le duk…",
+                "…le June 2024 me, eye wònye France ƒe bɔlƒoha me tɔ na UEFA Euro 2024. == Agbenɔnɔ le ɖevime == Wodzi Barcola le September 2…",
+                "…nye Paris Saint-Germain (PSG) me ɖe fetu si wogblɔ be enye euro miliɔn 45 ta, ede asi ƒe atɔ̃ ƒe nubabla te kple habɔbɔa. W…",
+                "…a xɔ eƒe yɔyɔ gbãtɔ ɖe France dukɔa ƒe bɔlƒoha me hena UEFA Euro 2024. Le 5 June 2024 dzi la, edze ŋgɔ abe Marcus Thuram teƒ…",
+                "…ne 2024 dzi la, Barcola dze egɔme zi gbãtɔ na France le eƒe Euro 2024 ƒe ŋgɔdonya ta, eye mlɔeba la, woda 1–1 kple Poland le…",
+                "…akpɔ eƒe ƒomea dzi o. Agent si dzra eƒe nuwɔwɔ, ɖeko wònaa euro 50 le ɣleti 6 ɖesiaɖe me. Le gɔmedzedzea me la, womena mɔnu…"
+            ]
+            },
+        {
+                "word": "pound",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…woɖe asi le woƒe ame siwo wowɔ kluviwoe ŋu. Woxe ga si ade pound miliɔn 20 na kluvi siwo wu 40,000. Ga sia nye na amesiwo wo…",
+                "…zã bliboa me hena ƒe ɖeka. Le egbegbe ga nu la, ema anɔ abe pound biliɔn 16.5 xexe ene! Wotrɔ ga siawo dometɔ aɖewo wozu gade…",
+                "…e Barbados, eye wogblɔ be Richard Drax ŋutɔ ƒe asixɔxɔ nye “pound miliɔn 150 ya teti.” Ne wogbe Dɔdzikpɔhaa ƒe biabia be woag…",
+                "…gaɖo ɖe Ethiopia ta. Wobu akɔnta be esia axɔ Britaintɔwo ƒe pound biliɔn 72.5 (si ade dɔlar 150,000 na ame ɖeka). Gake Britai…",
+                "…. Nyatakakawo ɖee fia be Jamaica dziɖuɖua nɔ Britaintɔwo ƒe pound biliɔn 7 lɔƒo dim be woatsɔ axe fe ɖe nusiwo kluvinyenye gb…",
+                "…nusiwo kluvinyenye gblẽ le eŋu ta. Wogblɔ be ga home sia lɔ pound miliɔn 20 siwo Britain dziɖuɖua xe na amesiwo nye kluviwo t…"
+            ]
+            },
+        {
+                "word": "paun",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ga",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 54,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…iamlɔm elabena enye tsidzaɣi eyata wonɔna nuwo siam ɖe xexe ga gbugbɔwo nɔ lɔlɔm enu enu ne tsi ga dze dzadzam ko. Le blem…",
+                "…onɔna nuwo siam ɖe xexe ga gbugbɔwo nɔ lɔlɔm enu enu ne tsi ga dze dzadzam ko. Le blema ŋɔli la, Romatɔwo wotsɔ ŋkɔ na ɣle…",
+                "…ŋu woŋlɔ nu le le Mose ƒe agbalẽ gbãtɔ me le Bibliaa me. Wo ga ŋlɔ nu le eya ke ŋuti le Koran la hã me. Kristotɔwo kple Mɔ…",
+                "…dzi la, Abraham subɔ Mawu (YHWH) dzaa ko abe Mawu ene. Mawu ga do ŋugbe na Abraham hã bena eƒe dzidzimeviwo woadzi xexlẽma…",
+                "…liƒoŋudzɔsrafowo ƒe amegã. Wotso afia nawo be woɖu dukɔa ƒe ga zã eye womenye nuteƒewɔlawo o. Le Masa 26, 1979 dzi la, wog…",
+                "…srafomegãwo geɖe kpe ɖe enyi siawo ŋu eye wode wodemtɔ geɖe ga me. Rawlings kple eƒe amewo tso ɖe asitsalawo hã ŋu. Hafi R…"
+            ]
+            },
+        {
+                "word": "D.M.Ŋ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 189,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…pewo. Le ƒe 1857 me la, Charles Newton ke ɖe ƒe alafa 4 lia D.M.Ŋ. Le ƒe 1840 kple 1850 ƒeawo katã me la, blemanudzraɖoƒea do…",
+                "…kuwo dzi le ƒuta, eye John Turtle Wood ke ɖe ƒe alafa 4 lia D.M.Ŋ. === Agbalẽsɔsrɔ̃ Kple Nudzɔdzɔ Veviwo (ƒe 1875–1900) === D…",
+                "…ewoe nye Mesopotamiatɔwo ƒe kesinɔnu siwo tso Ur le ƒe 2600 D.M.Ŋ (ƒe 1946). Wozã ƒe siwo kplɔ aʋaa ɖo teti tsɔ gbugbɔ nu siw…",
+                "…to (Nubia hã le eme), tso Kpeɣeyiɣia me (anɔ abe ƒe 10,000 D.M.Ŋ.) va ɖo Kristotɔwo ƒe ɣeyiɣi gbãtɔ (ƒe alafa 12 lia M.Ŋ.),…",
+                "…ewo kple Fiaƒome Gbãtɔ ƒe Ɣeyiɣi (anɔ ƒe 6000 va ɖo ƒe 2690 D.M.Ŋ.) === Ginger the Mummy kple ame kuku atɔ̃ bubu siwo woɖe ts…",
+                "…kple ame kuku atɔ̃ bubu siwo woɖe tso Gebelein (anɔ ƒe 3400 D.M.Ŋ.) Kpe hɛ si ƒe asi le abe nyiɖu ene, si woyɔna be Pit-River…"
+            ]
+            },
+        {
+                "word": "Ŋɔli",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…i. Eƒe dukɔmenɔlawo ƒe xexlẽme ɖo 19,553,397 lɔƒo. Le blema ŋɔli la, dukɔ etɔ̃ siwo xɔ ŋkɔ ŋtɔ nɔ afisi Mali le egbe la. Woa…",
+                "…e ɣleti siame la, pepi dona eye gbewo hã bina dzo. Le blema ŋɔli la, Romatɔwo xɔese be Ianus nye mawu na agbowo, ʋɔtruwo, gɔ…",
+                "…nye ʋɔtru le Latingbe me. Tedoxe enye ɣleti gbãtɔ le blema ŋɔli gake tso ƒe 153 BC la, Romatɔwo trɔe, eye Dzove va zu ɣleti…",
+                "…Gregoria ɣletigbalẽa me. Ŋkeke 30 ye le ɣletia me. Le blema ŋɔli la, Romatɔwo tsɔ Yuno si nye woƒe mawu ɖeka ƒe ŋkɔ na ɣleti…",
+                "…bugbɔwo nɔ lɔlɔm enu enu ne tsi ga dze dzadzam ko. Le blema ŋɔli la, Romatɔwo wotsɔ ŋkɔ na ɣleti sia be Yuli elabena eya me…",
+                "…ia le Gregoria ɣletigbalẽa me. Ŋkeke 31 ye le eme. Le blema ŋɔli la, Romatɔwo yɔna ɣleti sia be Martius si nye woƒe aʋa mawu…"
+            ]
+            },
+        {
+                "word": "point",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ɖibɔa ƒe akpa aɖe eye wòle Sydney ƒe gbɔtodu si nye Darling Point ƒe ƒuta, le Sydney Melidzeƒea ƒe ɣedzeƒekpa dzi le Melidzeƒ…"
+            ]
+            },
+        {
+                "word": "pɔint",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kɔma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "koma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sɛdi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sedzi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "inch",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…meta 170 (afɔ 560) xe ta la. Tsidzadza si ade milimeta 565 (inch 22.2) dzana le Chala ta ƒe sia ƒe le mama dedie nu. Ta la h…",
+                "…. Ta la hã kpɔa yaƒoƒo ƒe agbɔsɔsɔme si ade milimeta 1,735 (inch 68.3) le mama dedie nu ƒe sia ƒe . Anɔ abe 80% le ta la me…"
+            ]
+            },
+        {
+                "word": "afɔ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Dã nye gbemelãwo dometɔ ɖeka. Me to afɔ aɖeke o. E zɔ na le eƒe ƒodo dzi.…",
+                "…si wonyi na le aƒeme kple agbleme siãa. Enye lã si zɔ na le afɔ ene dzi.…",
+                "…xɔm la woanyrɔe blibo ɖe tsi me, eƒe mo nanɔ anyigba kpɔm. Afɔ kɔklɔ - Afɔ kɔklɔ ƒe sakramentoe nana be miwɔna ɖeka kple Y…",
+                "…yrɔe blibo ɖe tsi me, eƒe mo nanɔ anyigba kpɔm. Afɔ kɔklɔ - Afɔ kɔklɔ ƒe sakramentoe nana be miwɔna ɖeka kple Yesu Kristo.…",
+                "…asi. Edze be amesiame sixɔ mawutsideta tó tsi me la, woaklɔ afɔ nɛ le Yesu Kristo ƒe ŋkɔme. Miawɔ Afɔklɔ na mianɔewo gasiag…",
+                "…nɔme == Dzata ɖi dadi le go geɖe me. Enye lã triakɔ̃ aɖe si afɔ kako ene li na. Afɔdidɛ atɔ̃ siwo nu fe ɖaɖɛwo le la le eƒe…"
+            ]
+            },
+        {
+                "word": "meta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…July 1963) nye Togo duɖimekela tsã si ʋli ho le ŋutsuwo ƒe meta 100 hoʋiʋli me le ƒe 1992 ƒe Dzomeŋɔli Olympics. Eŋlɔ 10.69…",
+                "…Le ƒe 1988 ƒe Dzomeŋɔli Olympics me la, exɔ dzesi 10.59 le meta 100 me. Le ƒe 1992 kple 1996 siaa me la, egaƒu du meta 200…",
+                "…9 le meta 100 me. Le ƒe 1992 kple 1996 siaa me la, egaƒu du meta 200 eye wònye meta 4 × 100 ƒe ƒuƒoƒoawo ƒe akpa aɖe. == Nus…",
+                "…e ƒe 1992 kple 1996 siaa me la, egaƒu du meta 200 eye wònye meta 4 × 100 ƒe ƒuƒoƒoawo ƒe akpa aɖe. == Nusiwo ŋu woke ɖo ==…",
+                "…(si wodzi le Dzome 31, 1997 dzi) nye Togotɔ duƒula si bi ɖe meta 200 me. Eƒe dzidzedzekpɔkpɔ gãtɔ enye be wòaɖo afã mamlɛa g…",
+                "…Afrika ƒe Hoʋiʋli (200 m), ƒe 2015 ƒe Afrika Kamedefefewo (meta 100 kple 200, ƒe 2016 ƒe Afrika Hoʋiʋli (meta 100 kple 200,…"
+            ]
+            },
+        {
+                "word": "sentimeta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…bɔlƒola bibi si ƒoa bɔl abe ametaʋlila ene. )). Kɔkɔme nye sentimeta 156 == Kluviwo ƒe Bɔlƒoƒo == Anasthesia Achiaa nye Ghana ny…",
+                "…bɔgbɔ kple ɖoƒe. Ati sesẽwo kpa ndop siwo ƒe kɔkɔme anɔ abe sentimeta 48-55 ene, si mebɔ le Afrikatɔwo ƒe aɖaŋudɔwo me o, eye wol…",
+                "…81, August 2006, eye le June 27, 2007 dzi,[29] eƒo ƒu va ɖo sentimeta 10 (3.9 in) le dzigbe gome. Tsɔ kpe ɖe eŋu la, sno dzana ed…"
+            ]
+            },
+        {
+                "word": "kilogram",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilogaram",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "va ɖo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 63,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…anyidzedze le ƒe 1969 me, si wɔe be U.S. nye dukɔ gbãtɔ si va ɖo amegbetɔwo ɖe Ɣletia dzi vaseɖe fifia. Esi Soviet Union mu…",
+                "…unyaheha me tɔ. Enye France ƒe Dukplɔlagã tso July 17, 1984 va ɖo March 20, 1986. Fabius xɔ ƒe 37 esime woɖoe eye vaseɖe fifi…",
+                "…Fabius nye Dukɔa ƒe Sewɔtakpekpe ƒe Dukplɔla hã tso ƒe 1988 va ɖo ƒe 1992 eye wògaganye tso ƒe 1997 va ɖo ƒe 2000. Enye Ganya…",
+                "…lɔla hã tso ƒe 1988 va ɖo ƒe 1992 eye wògaganye tso ƒe 1997 va ɖo ƒe 2000. Enye Ganyawo ƒe Dɔdzikpɔla tso ƒe 2000 va ɖo ƒe 20…",
+                "…1997 va ɖo ƒe 2000. Enye Ganyawo ƒe Dɔdzikpɔla tso ƒe 2000 va ɖo ƒe 2002 eye wònye Dutanyawo Gbɔkpɔla tso ƒe 2012 va ɖo ƒe 2…",
+                "…2000 va ɖo ƒe 2002 eye wònye Dutanyawo Gbɔkpɔla tso ƒe 2012 va ɖo ƒe 2016. == Nyatakakadzraɖoƒe bubuwo ==…"
+            ]
+            },
+        {
+                "word": "Selsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "selsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dzoxɔxɔdzidzenu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…megbe wova ɖo kpe esia dzi be alakpae, elabena wokpɔe tso a dzoxɔxɔdzidzenu. Le nyateƒe me la, teƒe si dzoxɔxɔ le wu le xexeame enye Ku…"
+            ]
+            },
+        {
+                "word": "akpasesẽ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilomita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…dzieheɣedzeƒe gome eye wòdidi tso Kenya ƒe ɣedzeƒe gome abe kilometa 1,600 ene. Nuto siwo le Seychelles dometɔ aɖewoe nye: Anse…",
+                "…ovenia ƒe akpa gãtɔ nye towo kple avewo,[17] eƒe lolome nye kilometa 20,271 sq,[18] eye amewo ƒe xexlẽme nye miliɔn 2.1 (ame 2,1…",
+                "…ŋu. Tso Bagbe kple Bafi ƒe gododo le Kono Nutome, Sewa sina kilometa 240 le dzigbe-dzieheɣetoɖoƒe gome eye wòɖea tsi si ƒe lolom…",
+                "…e dzigbe-dzieheɣetoɖoƒe gome eye wòɖea tsi si ƒe lolome nye kilometa 19,022 (7,344 mi2). == Nusiwo ŋu woke ɖo ==…",
+                "…ado aɖe me. Eƒe gaxɔa didi tso sɔlemexɔ gã si le Nitria gbɔ kilometa 40 eye wòdidi tso tsidzɔƒe gã la gbɔ kilometa 12. Wobunɛ am…",
+                "…le Nitria gbɔ kilometa 40 eye wòdidi tso tsidzɔƒe gã la gbɔ kilometa 12. Wobunɛ ame kɔkɔe le Ɣedzeƒe Orthodɔkstɔwo ƒe kɔnyinyi m…"
+            ]
+            },
+        {
+                "word": "mita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…France) nye Franse-Togotɔ kamedefefewɔla 1990 TP 2000. 400 mita junior record si tsi tso 1995. 53sec73 . 2001 to Togolese S…"
+            ]
+            },
+        {
+                "word": "milimeta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ugust, si ƒe dzoxɔxɔ nye 19 °C. Tsidzadza ƒe mamã dedie nye milimeta 1,439 ƒe sia ƒe. Ɣleti si me tsi dzana wu enye September, e…",
+                "…ƒe. Ɣleti si me tsi dzana wu enye September, eye tsi dzana milimeta 226, eye esi me tsi dzana wu enye December, eye tsi dzana m…",
+                "…a 226, eye esi me tsi dzana wu enye December, eye tsi dzana milimeta 13. == Nya siawo ƒe tsoƒe ==…",
+                "…ƒe kɔkɔme nye meta 170 (afɔ 560) xe ta la. Tsidzadza si ade milimeta 565 (inch 22.2) dzana le Chala ta ƒe sia ƒe le mama dedie n…",
+                "…le mama dedie nu. Ta la hã kpɔa yaƒoƒo ƒe agbɔsɔsɔme si ade milimeta 1,735 (inch 68.3) le mama dedie nu ƒe sia ƒe . Anɔ abe 80%…",
+                "…ƒo. Wobu akɔnta be tsidzadza le mama dedie nu le Egipte nye milimeta 18 alo m3 biliɔn 1.8 ƒe sia ƒe. Gawu la, anyigba te tsidzɔƒ…"
+            ]
+            },
+        {
+                "word": "alafa me",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…o dzi, eye xexlẽme si woɖo ɖi la to vovo tso 25 va ɖo 33 le alafa me. Kuku gblɔ mɔnu tɔxɛ siwo hiã be nyɔnuwo ƒe gomenɔamesiwo k…",
+                "…Sewɔtakpekpe me tɔ) na Nord ƒe nuto 1 lia. Exɔ ame 50.11 le alafa me le tiatia la ƒe akpa evelia me. Eva zu Dukɔa ƒe Sewɔtakpekp…"
+            ]
+            },
+        {
+                "word": "dɔla",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…gblɔ na eƒe amewo le be: “Miawoe nye nye ɖasefowo kple nye dɔla, si metia, ne mianyae, miaxɔ dzinye ase, eye miadze sii be,…",
+                "…siwo woɖo ɖe Eŋlisiawo ƒe anyigba siwo dzi woɖu la be wonye dɔla siwo wotsɔ de asi na amewo, eye woƒe nɔnɔme sɔ kple dɔwɔla…",
+                "…me gblɔ be nutoa me tɔwo ʋli ho kple wo nɔewo le kluvi kple dɔla siwo le wo si ƒe xexlẽme me eye wona kluvi ŋutsuvi ye ŋutɔ…"
+            ]
+            },
+        {
+                "word": "dɔlar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 48,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…984 me le Niger. Wodzrae wòzu kluvi esime wòxɔ ƒe wuieve ɖe dɔlar 500 nu. Kluvinyenye nye sedzidada le Niger, gake tso ƒe 200…",
+                "…wòzã ʋɔnudrɔ̃ƒewo tsɔ te fli ɖe eƒe fɔbubua me vɔ la, wona dɔlar 20,000 ɖe nusiwo dome wògblẽ ta eye emegbe wode bubu eŋu kp…",
+                "…ed States ƒe dukplɔla adrelia. Enye Democrat gbãtɔ eye wòle dɔlar blaeve ƒe gagbalẽa dzi. Eƒe megbeŋkɔe nye \"Old Hickory\". Ez…",
+                "…na Faso ƒe nuwɔwɔ aduadu ƒe gazazã sue aɖe (anɔ abe Amerika dɔlar miliɔn 1 ene) eye wòkpɔ dzidzedze le dukɔwo dome dɔwɔwɔ me,…",
+                "…k-ƒua dzi kluvinyenye gblẽ, le edzɔɣi kple emegbe siaa, axɔ dɔlar triliɔn 100 kple edzivɔ be woaɖɔe ɖo. Ema nye ga gbogbo aɖe…",
+                "…le vovototodedeameme le ɖoɖo nu ŋu na Afrika-Amerikatɔwo bu dɔlar triliɔn 1.4. Gaŋutinunyala Robert Browne xɔe se be ele be n…"
+            ]
+            },
+        {
+                "word": "sedi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cedi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…4, 2007. Wodze ga yeyea ŋdɔ wɔwɔm le Ghana. Woawɔ Ghanaian cedi yeyea kple ga xoxoa katã ŋudɔ vaseɖe Dzome 2007 hafi woaɖe…",
+                "…i woaɖe asi le xoxoa ŋu susue. Wogbaa GH¢ 1 yeyea na 10,000 cedi xoxoawo.…",
+                "…ovember 12, 2023 dzi la, etsɔ avɔlɔ̃mɔ̃wo kple Ghanatɔwo ƒe cedi 1,000 na Bogoso avɔlɔ̃ƒe, kple taɖodzinu be yeado alɔ eƒe h…",
+                "…John Dramani Mahama ƒe dziɖuɖua gblẽ fe si womexe o si nye cedi biliɔn 7 si le dɔwɔƒe vovovowo si le dukɔa me la ɖi. Ame ʋɛ…"
+            ]
+            },
+        {
+                "word": "sidi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "vaseɖe",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…awo gbɔ. (Tedoxe 6) Ash Wednesday (Kuɖagbea ɖe tso Dzodze 4 vaseɖe Tedoxe10) \"The Ides of March\", Brutus kple ame bubuwo wu Yu…",
+                "…u Asia titina dukɔwo hã. Fiɖa Kɔkɔe (Fiɖaa ɖe tso Tedoxe 20 vaseɖe Afɔfiɛ 23, si nye Fiɖamamlea hafi Easter ɖuɖu.) Easter (Kɔs…",
+                "…amamlea hafi Easter ɖuɖu.) Easter (Kɔsiɖaa ɖe tso Tedoxe 22 vaseɖe Afɔfiɛ 25) Pakistan Ŋkeke (Tedoxe 23). Nyɔnuwo le xexeame g…",
+                "…metɔ aɖeke meɖu wo dzi kpɔ o, ke boŋ Eʋeawo nɔ wo ɖokui si, vaseɖe esime yevunya va . == Eʋe ŋɔŋlɔdzesiwo == Ablɔɖegbeɖiɖi adr…",
+                "…ɔ == Aƒetɔ Olympio nye Togo ƒe dudɔnunɔla gbātɔ tso ƒe 1958 vaseɖe ƒe 1961 me. Le ɣeyiɣi siawo me la, wo da akɔ̃ nɛ wozu Togo…",
+                "…i siawo me la, wo da akɔ̃ nɛ wozu Togo dukplɔla tso ƒe 1961 vaseɖe 1963 me. Le Olympio ƒe dziɖuɖu ɣeɣiɣi wo me la, Togo dze du…"
+            ]
+            }
+        ],
+    }
+    
