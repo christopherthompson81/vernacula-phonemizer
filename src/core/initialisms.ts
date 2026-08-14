@@ -33,6 +33,26 @@ export interface InitialismData {
      *  because CMUdict carries all 26 single letters with their letter-name pronunciations. */
     letterName: (letter: string) => string | undefined;
     /**
+     * LOWERCASE, IF THE LANGUAGE'S IS NOT JAVASCRIPT'S. Defaults to `String.prototype.toLowerCase`, which is
+     * LOCALE-BLIND, and for the Turkic dotted-I pair it is not merely imprecise but destructive in two
+     * different directions. Measured on this pass before the hook existed:
+     *
+     *     tr  "IMF raporu"  → "i me fe raporu"   ⚠ `I` is the DOTLESS capital; its name is *ı*, not *i*
+     *     tr  "İETT"        → /iˈetː/            ⚠ read as a WORD, never spelled out at all
+     *
+     * The second is the one that hides. `"İ".toLowerCase()` is not `"i"` — it is `i` + U+0307 COMBINING DOT
+     * ABOVE, two code points — so `spellOut` asks for the name of a combining mark, gets `undefined`, and
+     * correctly declines to emit a partial reading. The token then falls through to the phonotactic test,
+     * which sees a vowel and says "pronounceable", and the initialism is read as a word. A defect that
+     * expresses itself as the pass silently doing nothing is exactly the shape a gate cannot see.
+     *
+     * ⚠ IT MUST BE THE SAME FUNCTION THE G2P USES, not a second copy, because every consumer here is a
+     * lookup key: `letterName`, `acronymLetters`, `isRecorded` and `isUnreadable` are all keyed on the
+     * language's own lowercase, and two spellings of it means the tables answer for one and not the other.
+     * `turkish/g2p.ts`'s `trLower` and `azerbaijani/g2p.ts`'s `azLower` are those functions.
+     */
+    lower?: (s: string) => string;
+    /**
      * LEXICAL: acronyms read letter-by-letter although their lowercase form is an ordinary word, so the
      * dictionary cannot express the distinction — `US`/`UN`/`IT`/`LED`/`WHO` in English, `USA`/`ONG`/`PIB`
      * in French. Authored in the language's manifest, not here.
@@ -78,9 +98,12 @@ const LONE_INITIAL = /(?<=\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})/gu;
  * must run after abbreviation expansion, or French `MM.` becomes EM-EM.
  */
 export function makeInitialismNormalizer(d: InitialismData): (text: string) => string {
+    // See `InitialismData.lower`. Every `.toLowerCase()` in this file used to be written out inline; they
+    // are all the same decision and are all routed through here so a language cannot fix one and miss another.
+    const lower = d.lower ?? ((s: string): string => s.toLowerCase());
     const spellInitials = (run: string): string =>
         [...run.matchAll(/\p{Lu}/gu)]
-            .map((m) => d.letterName(m[0]!.toLowerCase()) ?? m[0]!)
+            .map((m) => d.letterName(lower(m[0]!)) ?? m[0]!)
             .join(" ");
 
     return (rawText: string): string => {
@@ -88,7 +111,7 @@ export function makeInitialismNormalizer(d: InitialismData): (text: string) => s
         // one-letter tokens, and after the caller's abbreviation pass for the usual reason.
         const text = rawText
             .replace(INITIAL_RUN, (run) => `${spellInitials(run)} `)
-            .replace(LONE_INITIAL, (_m, letter: string) => d.letterName(letter.toLowerCase()) ?? letter);
+            .replace(LONE_INITIAL, (_m, letter: string) => d.letterName(lower(letter)) ?? letter);
         return inner(text);
     };
 
@@ -108,12 +131,12 @@ export function makeInitialismNormalizer(d: InitialismData): (text: string) => s
         // did nothing for them — США came out as the cluster [sʂa]. Russian was the first non-Latin script
         // to reach this pass and exposed it.
         return text.replace(/(?<![\p{L}\p{M}])\p{Lu}{2,}(?![\p{L}\p{M}])|(?<![\p{L}\p{M}])\p{Lu}+(?=\d)/gu, (tok) => {
-            const lower = tok.toLowerCase();
-            const spelled = spellOut(lower, d.letterName);
+            const low = lower(tok);
+            const spelled = spellOut(low, d.letterName);
             if (tok.length < 2) return spelled ?? tok; // attached code: a letter, never a word
-            if (d.acronymLetters.has(lower)) return spelled ?? tok; // lexical: a listed exception
-            if (d.isRecorded(lower)) return tok; // lexical: the dictionary owns it
-            if (d.isUnreadable(lower)) return spelled ?? tok; // OOV: nothing else could be said
+            if (d.acronymLetters.has(low)) return spelled ?? tok; // lexical: a listed exception
+            if (d.isRecorded(low)) return tok; // lexical: the dictionary owns it
+            if (d.isUnreadable(low)) return spelled ?? tok; // OOV: nothing else could be said
             return tok; // OOV but pronounceable — the OOV g2p reads it as a word
         });
     };

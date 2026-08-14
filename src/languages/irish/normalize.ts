@@ -184,7 +184,13 @@ export function normalizeIrish(input: string): string {
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break.
     s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[  ]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
-    s = s.replace(/(?<=[A-Z])\.(?=\s+[A-Z])/gu, "");
+    //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
+    //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
+    //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
+    //    Irish's own fada'd ⟨Á É Í Ó Ú⟩ — and ⟨Ó⟩ is the surname particle. The minimal pair, measured before the fix:
+    //        "S. Mac Gearailt" → "S Mac Gearailt"
+    //        "S. Ó Riain" → unchanged   ← the dot survives as a spurious clause break
+    s = s.replace(/(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
     // 3) SINGLE-DOT ABBREVIATIONS. `Dr.` → "dochtúir", `etc.` → "srl", `Mrs.` → "bean Uí".
     s = s.replace(/(?<![\p{L}\p{M}])Dr\.(\s+)(?=[\p{L}\d])/giu, "Dochtúir$1");

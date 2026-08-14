@@ -398,7 +398,14 @@ export function normalizeAkan(input: string): string {
     //    would silently delete the pause (trap 17's "a mark that should be a pause and instead vanishes").
     //    ⚠ AND IT RUNS AFTER DE-GROUPING BUT BEFORE THE DECIMAL RULE: its own pattern is letter-dot-letter
     //    so it cannot collide with either, but stating the position keeps that true if either widens.
-    s = s.replace(/(?<=[^\W\d_])\.(?=[^\W\d_]\.)/gu, "");
+    //    ⚠ `\p{L}` AND NOT THE FLEET'S OLD `[^\W\d_]`, which is trap 1 wearing a different mask: `\w` — and
+    //    so its negation `\W` — is ASCII-defined EVEN UNDER THE `u` FLAG, so `[^\W\d_]` is "an ASCII letter"
+    //    and contains none of ⟨Ɔ ɛ Ŋ Ɲ⟩ — which is to say, none of the letters that make this Akan. The
+    //    class was measured before it was replaced: `A.B.C.`→`ABC.` and `U.S.A.`→`USA.` were already
+    //    correct, but `Ɔ.K.` and `Ɛ.Ɔ.A.` came back UNCHANGED and `D.M.Ŋ.` came back HALF-APPLIED as
+    //    `DM.Ŋ.` — a rule that quietly stops working at the language's own alphabet. `\p{M}` rides along
+    //    on both sides so a marked letter is still a letter (trap 23). The ee run hit the identical bug.
+    s = s.replace(/(?<=[\p{L}\p{M}])\.(?=\p{L}\p{M}*\.)/gu, "");
 
     // 8) RANGES — ×1,125 bare pairs in tw and ×264 in fat, read today as two juxtaposed cardinals with no
     //    connective at all. `kosi` is the infix (see TO). ⚠ ASCENDING PAIRS ONLY, AND CHAIN-GUARDED:

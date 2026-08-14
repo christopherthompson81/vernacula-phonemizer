@@ -72,13 +72,24 @@ function numberTokenToWords(tok: string): string {
 
 class AzerbaijaniPhonemizer implements Phonemizer {
     text(input: string): string {
-        // Normalise the Azerbaijani dotted-I pair BEFORE tokenizing: capital İ (U+0130) has no Unicode simple
-        // case-fold to i, so the /i/-flag TOKEN class would silently DROP it (İki → ki). Map İ→i and I→ı up front
+        // Normalise the Azerbaijani dotted-I pair before TOKENIZING: capital İ (U+0130) has no Unicode simple
+        // case-fold to i, so the /i/-flag TOKEN class would silently DROP it (İki → ki). Map İ→i and I→ı
         // (azLower does the same per-token, but the tokenizer must see the lowercase forms to match at all).
-        const normalized = input.replace(/İ/gu, "i").replace(/I/gu, "ı");
+        //
+        // ⚠ AFTER normalize.ts, NOT BEFORE IT, and this line is why. Folding up front does not merely change
+        // case — it DESTROYS THE ALL-CAPS SIGNAL, because `ı` and `i` are lowercase letters and an acronym
+        // containing either capital I stops being a `\p{Lu}{2,}` run. The initialism pass then never sees it:
+        //
+        //     "IBM sistemi"  → /ˈɯbm sistemˈi/    read as a WORD — the pass matched nothing at all
+        //     "İTV kanalı"   → /ˈitv kɑnɑɫˈɯ/     likewise
+        //
+        // Every other acronym in the language spelled out correctly (BMT → *be em te*), so the failure was
+        // invisible except on the letter that caused it. Moved down here, where the only consumer left is the
+        // tokenizer that genuinely needs the lowercase forms.
+        const normalized = SYMBOLS(normalizeAzerbaijani(input)).replace(/İ/gu, "i").replace(/I/gu, "ı");
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/era steps need the
         // number and its suffix still adjacent, which the tier would break.
-        return assembleClauses(SYMBOLS(normalizeAzerbaijani(normalized)), TOKEN, (m, sink) => {
+        return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberTokenToWords(m[2]).split(" ")) sink.emit(phonemizeWord(wd));

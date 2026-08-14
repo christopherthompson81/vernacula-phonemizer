@@ -56,6 +56,7 @@
  *     exactly as it was rather than spelled with an invented name.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { trLower } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 
 const VOWEL = /[aeıioöuü]/u;
@@ -143,6 +144,12 @@ export const isUnreadableTurkish = makeUnreadableTest({
 /** Turkish has no pronunciation dictionary here (the g2p is rule-based), so nothing is "recorded" and the
  *  decision rests on the phonotactic OOV test alone. `acronymLetters` is empty on purpose — see the header. */
 const normalizeInitialisms = makeInitialismNormalizer({
+    // ⚠ `trLower`, NOT the shared default `toLowerCase`, which is locale-blind and gets the dotted-I pair
+    // wrong in both directions: `I` (DOTLESS capital) lowercased to `i` was spelled with the wrong letter
+    // name — `IMF` → *i me fe* where Turkish says *ı me fe* — and `İ` lowercases to `i` + U+0307, a name
+    // `LETTER_NAME` cannot have, so `spellOut` declined and `İETT` was read as the WORD /iˈetː/. The g2p
+    // already owns this function; the pass now borrows it rather than keeping a second, wrong copy.
+    lower: trLower,
     letterName: (l) => LETTER_NAME[l],
     acronymLetters: new Set<string>(),
     isRecorded: () => false,

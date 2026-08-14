@@ -17,6 +17,7 @@
  * this pass in azerbaijani.ts, and the TOKEN swallows the separators.
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { azLower } from "./g2p.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
 
@@ -127,7 +128,11 @@ export const isUnreadableAzerbaijani = makeUnreadableTest({
 const WORD_ACRONYMS: ReadonlySet<string> = new Set(["abş", "nasa", "unesco", "aol", "covid", "fiba", "opec", "rem"]);
 
 const normalizeInitialisms = makeInitialismNormalizer({
-    letterName: (l) => LETTER_NAME[l.toLowerCase()],
+    // ⚠ `azLower`, NOT `toLowerCase`, for the reason turkish/normalize.ts states at the same line: JS
+    // lowercase maps the DOTLESS capital `I` to dotted `i`, so `IMF` was spelled *i em fe* where
+    // Azerbaijani says *ı em fe*, and it maps `İ` to `i` + U+0307, which no letter-name table can key on.
+    lower: azLower,
+    letterName: (l) => LETTER_NAME[azLower(l)],
     acronymLetters: new Set(["bmt", "gps", "ms", "knp", "cep", "mt", "mri", "dnt", "ftb", "cctv", "dvd", "pbs", "utc", "gmt"]),
     isRecorded: (w) => WORD_ACRONYMS.has(w),
     isUnreadable: isUnreadableAzerbaijani,
@@ -152,7 +157,13 @@ export function normalizeAzerbaijani(input: string): string {
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `Corc V. Buş` — the W.-style initial dot is a break.
     s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[  ]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
-    s = s.replace(/(?<=[A-Z])\.(?=\s+[A-Z])/gu, "");
+    //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
+    //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
+    //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
+    //    Azerbaijani's own ⟨Ə Ç Ğ İ Ö Ş Ü⟩ — ⟨Ə⟩ above all. The minimal pair, measured before the fix:
+    //        "M. Bayramov" → "M Bayramov"
+    //        "M. Əliyev" → unchanged   ← the dot survives as a spurious clause break
+    s = s.replace(/(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
 
     // 3) SINGLE-DOT ABBREVIATIONS. Two branches: mid-sentence the dot is CONSUMED so it cannot become a
     //    phrase break; at a phrase end it is kept. `Şək.` (şəkil, figure) is the corpus's abbreviation.

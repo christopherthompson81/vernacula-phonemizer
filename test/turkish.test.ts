@@ -114,7 +114,13 @@ describe("Turkish text normalization", () => {
     it("initialisms: a vowelless or illegal-cluster letter run is spelled with TDK letter names", () => {
         expect(phonemize("ABD raporu", "tr")).toBe("ˈa bˈe dˈe ɾapoɾˈu"); // ×31; was ˈabd
         expect(phonemize("BM uzmanı", "tr")).toBe("bˈe mˈe uzmanˈɯ"); // ×5; was bm
-        expect(phonemize("FBI'ın uyarısı", "tr")).toBe("fˈe bˈe ˈi ˈɯn ujaɾɯsˈɯ");
+        // ⚠ THE THIRD LETTER IS *ı* /ɯ/, NOT *i*, and this golden used to say *i*. `FBI` is written with the
+        // DOTLESS capital I, whose TDK name is *ı*; the old value came from `String.prototype.toLowerCase`,
+        // which is locale-blind and maps `I`→`i`. THE CORPUS ITSELF SETTLES IT: it writes the suffix as
+        // `FBI'ın`, not `FBI'in`. Turkish vowel harmony picks `ı` after a BACK vowel and `i` after a front
+        // one, so the writer's own suffix says the letter was read *ı*. Note the comment two lines down
+        // already stated the fold for the g2p path — this layer was the one place still doing it wrong.
+        expect(phonemize("FBI'ın uyarısı", "tr")).toBe("fˈe bˈe ˈɯ ˈɯn ujaɾɯsˈɯ");
         expect(phonemize("GPS uygulaması", "tr")).toBe("ɟˈe pˈe sˈe ujɡuɫamasˈɯ");
         // Syllabifiable runs are left to the OOV g2p, which already reads them as words (I→ı is the
         // Turkish-locale lowercase fold, so FIFA is read as *fıfa* — a g2p matter, not this layer's).

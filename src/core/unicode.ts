@@ -147,10 +147,23 @@ const NATIVE_DIGIT_BASES: readonly number[] = [
  * — so the number VANISHES. Auditing 21 scripts found six engines returning an EMPTY STRING for their own
  * numerals: Punjabi, Tamil, Telugu, Malayalam, Sinhala and Lao. Total content loss, silent.
  *
- * Applied per engine rather than fleet-wide at the registry, deliberately: Telugu's corpus uses ౦ (U+0C66,
- * its digit zero) as a HOMOGLYPH for ం (sunna) in 144 places, so a blanket fold ahead of Telugu's own
- * homoglyph rule would corrupt exactly the language that found the problem. Ordering has to stay the
- * language's decision.
+ * ⚠ APPLIED FLEET-WIDE AT THE REGISTRY, with an opt-out list — this comment used to say the opposite and
+ * was stale. `registry.ts` calls this on every `text()`/`phonemize()` through the shadow wrapper, so the
+ * ASCII `\d` in every downstream normalizer is reading a string whose native digits are already ASCII.
+ * That single fact is what makes the fleet's ~386 ASCII digit classes correct rather than blind, and it
+ * is worth stating here because this is the file a reader checks when they doubt one of them.
+ *
+ * THE OPT-OUT IS THE ORIGINAL PER-ENGINE ARGUMENT, narrowed to the one language that earned it: Telugu's
+ * corpus uses ౦ (U+0C66, its digit zero) as a HOMOGLYPH for ం (sunna) in 144 places, so a blanket fold
+ * ahead of Telugu's own homoglyph rule would corrupt exactly the language that found the problem. `te` is
+ * therefore in `FOLD_OPT_OUT` and folds inside its own normalize.ts, after the homoglyph rule. The dozen
+ * per-language folds that predate the registry one stay: folding is idempotent.
+ *
+ * ⚠ AND IT RUNS LAST AMONG THE REPAIRS, which is a live ordering constraint rather than a detail. Every
+ * fold composed around it in `registry.ts` — the caret exponents, the vulgar fractions, the markup strip —
+ * sees the string BEFORE this one has run, so an ASCII-only digit guard inside any of them is blind to a
+ * native digit. Rare in the corpora and left as-is, but it is the reason a `\d` in this file is not
+ * automatically as safe as a `\d` in a normalizer.
  */
 export function foldNativeDigits(s: string): string {
     return s.replace(/\p{Nd}/gu, (ch) => {
@@ -170,8 +183,8 @@ export function foldNativeDigits(s: string): string {
  * of it in this file, after the double-encoding repair and the squared-degree fold. Real text carries them —
  * `proteϊen` and `ruϊnes` are written with U+03CA GREEK SMALL LETTER IOTA WITH DIALYTIKA in place of Latin `ï`.
  *
- * ⚠ THE LATIN FLANK IS THE WHOLE GUARD, and it is what makes a fleet-wide fold safe here where
- * `foldNativeDigits` has to stay per-engine. A genuinely Greek or Cyrillic word has no Latin neighbours, so
+ * ⚠ THE LATIN FLANK IS THE WHOLE GUARD, and it is what makes this fold safe with no opt-out list at all,
+ * where `foldNativeDigits` needs one. A genuinely Greek or Cyrillic word has no Latin neighbours, so
  * `Ελλάδα` and `Владимир` cannot match however they are hosted; only a letter WEDGED INSIDE a Latin word can.
  *
  * ⚠ MOSTLY PRECAUTIONARY, NOT CORPUS-ATTESTED, and the distinction matters for how much weight the rows carry.

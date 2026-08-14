@@ -74,7 +74,13 @@ export function normalizeHausa(input: string): string {
     // 3) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `George W. Bush` — the W. suffix dot is a break. `Roe v. Wade` — the v. is a dotted lowercase.
     s = s.replace(/(?<![\p{L}\p{M}])\p{Lu}\.(?:[  ]?\p{Lu}\.)+/gu, (m0) => m0.replace(/[.\s]/gu, ""));
-    s = s.replace(/(?<=[A-Z])\.(?=\s+[A-Z])/gu, "");
+    //    ⚠ `\p{Lu}`, NOT `[A-Z]`, which is the line above's class dropped to ASCII on the way past —
+    //    the same trap as `[^\W\d_]`, in the spelling that looks least like a mistake. Six languages
+    //    carried this line verbatim and every one of them has capitals outside ASCII; here it is
+    //    Hausa's own hooked ⟨Ɓ Ɗ Ƙ⟩. The minimal pair, measured before the fix:
+    //        "M. Bello"    → "M Bello"
+    //        "M. Ɗanjuma" → unchanged   ← the dot survives as a spurious clause break
+    s = s.replace(/(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
     // `v.` in a legal case name (Roe v. Wade) reads "da" (and). The v. sits between two NAMES, not two
     // initials, so match a word-boundary "v." with a capital following (Wade).
     s = s.replace(/(?<=\p{L})\s+v\.\s+(?=[A-Z])/gu, " da ");
