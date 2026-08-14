@@ -15,6 +15,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { MANIFEST } from "./manifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeQuechua } from "./normalize.ts";
 
 const DEF = MANIFEST;
 const DIGRAPHS = DEF.digraphs;
@@ -64,7 +65,9 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class QuechuaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // The pre-tokenizer normalization pass — see normalize.ts. Pure text→text, so everything it emits
+        // still reaches the g2p through the TOKEN below (playbook trap 6).
+        return assembleClauses(normalizeQuechua(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {

@@ -2117,6 +2117,74 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "`na` is everywhere in the corpus, so the word is not the gap; the SLOT is. Shona reached "
             + "the identical conclusion from the identical evidence",
     },
+    qu: {
+        // ⚠ THERE IS NO FLEURS FOR QUECHUA, so every count below is over `tools/corpus/mined/qu.jsonc`'s
+        // 446 retained segments (246 hard + 200 sample) from a qu.wikipedia dump, with the whole-corpus
+        // cell counts quoted where they exist. espeak does not ship Quechua at all and there is no
+        // wikipron, so the haystack is the corpus, the artifact, the kaikki referee and qu.wikipedia via
+        // `attest.ts`. Every refusal is argued at length in src/languages/quechua/normalize.ts's header.
+        // ⚠ AND THE CORPUS IS 19.7% SPANISH-DOMINANT, measured with `filter-by-language.py --lang qu` (a
+        // row added for this run). That matters here specifically: the arithmetic and bibliography cells
+        // are the DIRTIEST ones, so several of the counts below are counts of Spanish or Latin text and
+        // are labelled as such rather than being read as facts about Quechua.
+        equals: "measured: 28, and the DOMINANT SENSE IS NOT ARITHMETIC AT ALL — it is TAXONOMIC "
+            + "SYNONYMY. Six of the eight `arithmetic` hard-set instances are a pair of Latin binomials "
+            + "either side of the sign (`Anas specularoides = Lophonetta specularioides`, `Pseudalopex "
+            + "culpaeus = Dusicyon culpaeus`, `Centropelma microptera = Rollandia microptera`, `Felis "
+            + "colocolo = Leopardus colocolo`), where the sign means \"is the same species as\" and no "
+            + "operator word is right. The rest are a GLOSS (`km² = t'asra waranqa thatki`, `Muyuk'uchu = "
+            + "360 patakuna = 400 patachakkuna`, `Sapan Churi = Hijo solo`) — the `ket`-style copular use "
+            + "Ilocano also found — and LaTeX residue (`\\mathbb{R} = \\{x / x\\}`, `T = 6l²`). No "
+            + "Quechua equals word is attested digit-adjacent anywhere in the corpus or on qu.wikipedia",
+        plus: "measured: 60 in the artifact, and every one read back. The single largest block is one "
+            + "CORRUPT paragraph of keyboard mash (`+9+98+95FT+9D59NG5+GFH9+…`, 40 signs in one line), "
+            + "which is not text. What remains is exactly the two classes trap 48 settled fleet-wide, plus "
+            + "one that is neither: a MEASUREMENT PLUS on an Andean elevation — `+4.200 mitrum aswan "
+            + "hanaq`, `+4.600 m`, `+4.800 m`, `+4.400 m`, `+4.000 m` — where the sign is REDUNDANT with "
+            + "the `aswan hanaq` (\"higher than\") the sentence already carries, so omitting it is "
+            + "lossless in the playbook's own sense; a complex-number worked example rendered in LaTeX "
+            + "(`(2 + 5i) + (-8 +17i) = (2 + -8) + (5 + 17)`); and a Gantt-chart offset "
+            + "(`shift:(25,-10)`). Nothing in this language attests how a plus would be said",
+        times: "measured: 6, AND THE SENSES DO NOT AGREE, which is why no `multiply` is declared. "
+            + "`2.9–4.8 × 109 inti masayuq` is a PRODUCT (a mantissa in scientific notation); `1874, 80 × "
+            + "100 cm, musée Courbet` is a painting's DIMENSIONS, which wants \"by\"; `4×100 m estilo "
+            + "libre` and `4×200 m estilo libre` are SWIMMING RELAYS inside a Spanish results table, which "
+            + "want \"by\" too and are not Quechua text. `kuti` is the only candidate and it is attested "
+            + "exactly ONCE in the product slot — `huk Newton N nisqaqa huk kilugramu kuti mitru t'asra "
+            + "sikunduman` (kg·m/s², qu.wikipedia's SI article) — while `multiply.by` defaults to "
+            + "`multiply.times`, so declaring the one word would read the canvas as \"eighty TIMES one "
+            + "hundred centimetres\". One article, one slot, and wrong for the majority of instances",
+        "greater-than": "measured: 4, and NOT ONE is a comparison. All four are the ASCII arrow `--->` "
+            + "in two name-evolution chains that are themselves Spanish glosses — `Suti: Virú ---> Pirú "
+            + "---> Perú (kastilla simipi) ---> Piruw (qhichwa simipi)` and `República Peruana [1821 - "
+            + "1950] ---> República del Perú`. Reading the sign there would speak \"greater than\" three "
+            + "times inside a list of spellings",
+        "less-than": "measured: zero `<` in 446 segments. A query that was run, not a gap",
+        divide: "measured: zero `÷` in 446 segments. ⚠ The `/` that DOES occur is a different question and "
+            + "is not this class: it is a rate denominator (`14 m³/s`, `217 km/s`, which normalize.ts now "
+            + "reads with the dative `sikunduman`), a common-noun ratio the unit table cannot name "
+            + "(`8,76 runa/km²`, `0,59 gol/partido`), or a year pair (`1615/1616`, `1803/04`)",
+        "plus-minus": "measured: zero ± in 446 segments",
+        // ⚠ `minus` IS DELIBERATELY ABSENT AND `review.ts --lang qu` STAYS RED ON IT — the ak / ln / bm /
+        // ilo / shi stance. Omitting a plus is lossless; omitting a minus INVERTS, so a class whose drop
+        // would be wrong the moment a negative appears does not get to be a green gate. Measured: U+2212 is
+        // ×0 and the two `DROP minus` instances are an ASCII hyphen inside the complex-number example and
+        // inside the Gantt offset above, so this corpus contains no negative QUANTITY at all — Hindi's
+        // position, re-measured here. That is a fact about this corpus and not about Quechua, and no
+        // Quechua sign word is attested in any source, so nothing is read and the gate stays red.
+        // ⚠ `percent` IS ALSO DELIBERATELY ABSENT, and for the OTHER reason: `%` is ×170 whole-corpus and
+        // `DROP percent ×11` here, so the drop is a real lost reading rather than a correct silence. The
+        // two candidates both fail on SENSE — `pachakmanta` ×13/13 is "N HUNDRED" twelve times over
+        // (`qanchis pachakmanta aswan rikch'aqkunam`, "more than seven hundred species") and its one
+        // remaining hit writes the SIGN as well (`sapa pachakmanta 14.6%`); `pursintu`, `pursyintu`,
+        // `porsyentu` and `pachakchasqa` are ×0 on qu.wikipedia. This is Tashelhit's position: a wrong
+        // percent word is worse than a dropped sign, and the day one is attested the gate goes green.
+        // ⚠ `degrees` IS ABSENT TOO, and NOT because the sign is unread — normalize.ts reads a bare `°` as
+        // `k'atma`. What the probe tests is `20 °C`, and the SCALE name is what has no source: `°C`, `°F`,
+        // `℃` and `℉` are ALL ×0 in this corpus and `sources.ts` reports `scale-names [NONE]`. The rule
+        // refuses the whole match rather than half of it (trap 53), so `°C` reads exactly as it did
+        // before; the class stays red because a missing scale word is a real gap, not a correct silence.
+    },
 };
 
 /**

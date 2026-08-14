@@ -1,0 +1,507 @@
+// WIKIPEDIA WORD ATTESTATION — qu. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "qu",
+        "wiki": "qu.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "puntu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…Puntu distritu nisqaqa (kastilla simipi: distrito de Pontó) Piruw…",
+                "…i distritum, Wari pruwinsyapi, Anqash suyupi. Uma llaqtanqa Puntu llaqtam. == Maymanta sutin == Qhiswa simi Puntuwmanta ( pla…",
+                "…chiwa, waywansa (Polypodium vulgare) k'ichkiraphi qalawala, puntu-puntu (Campyloneurum angustifolium syn. Polypodium angustif…",
+                "…waywansa (Polypodium vulgare) k'ichkiraphi qalawala, puntu-puntu (Campyloneurum angustifolium syn. Polypodium angustifolium)…",
+                "…chiwa, waywansa (Polypodium vulgare) k'ichkiraphi qalawala, puntu-puntu (Campyloneurum angustifolium syn. Polypodium angustif…",
+                "…waywansa (Polypodium vulgare) k'ichkiraphi qalawala, puntu-puntu (Campyloneurum angustifolium syn. Polypodium angustifolium)…"
+            ]
+            },
+        {
+                "word": "kuma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Q'uma, kichwapi Kuma nisqaqa ima mana allin, wakip, huk runakunap mana saqillasq…",
+                "…Suñay == Kaypipas qhaway == Le Corbusier Kenzō Tange Kengo Kuma Pedro Ramírez Vázquez Ieoh Ming Pei == Hawa t'inkikuna == C…",
+                "…a == == Kaypipas qhaway == Le Corbusier Arata Isozaki Kengo Kuma Pedro Ramírez Vázquez Ieoh Ming Pei == Hawa t'inkikuna == C…",
+                "…== Pilikulakuna === Izin (1975) Merhaba (1976) Maden (1978) Kuma (1979) (TV pilikula) Yolcular (1979) Kırık bir aşk hikayesi…",
+                "…1968: En mi casa mando yo. 1969: El profesor hippie. 1969: Kuma Ching. 1970: El profesor patagónico. 1970: Pimienta y pimen…"
+            ]
+            },
+        {
+                "word": "t'uqyachiq",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "angstrom",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Ångström icha angstrom (sanancha: Å) nisqaqa mana-SI tupuy nasyunpura chaninchasqa…",
+                "…u. Mikrumitru (µm): 10-6 mitru. Nanumitru (nm): 10-9 mitru. Angstrom (Å): 10-10 mitru. Pikumitru (pm): 10-12 mitru. Phimtumitru…",
+                "…skaynin kikin aksispi qiwirisqam kanku, hinallataq kikin 34 angstrom (3.4nm) tonuyuqmipas kanku. Iskayninpa radyunqa 10 Å (1.0 n…"
+            ]
+            },
+        {
+                "word": "urapacha",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pachakchasqa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "k'atma",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 8,
+                "articles": 3,
+                "substringOnly": 2,
+                "examples": [
+                "…siq'imanta qhipakunakama yupasqam. Chawpipachapiqa ch'usaq k'atma (0°), chinchay qhipapiqa chinchay hanaq isqun chunka k'atma…",
+                "…k'atma (0°), chinchay qhipapiqa chinchay hanaq isqun chunka k'atma (90° Ch / 90° N), urin qhipapitaq urin hanaq isqun chunka k…",
+                "…a (90° Ch / 90° N), urin qhipapitaq urin hanaq isqun chunka k'atma (90° Ur / 90° S). Suni siwi icha Tinkurachina suni (longitu…",
+                "…aymanmi yupasqa. Greenwich siwipiqa London llaqtapi ch'usaq k'atma (0°), chay siwipqa huk kinrayman, anti puriyllaman anti pac…",
+                "…qa huk kinrayman, anti puriyllaman anti pachak pusaq chunka k'atma (180° An / 180° E) nisqakama, kunti puriyllaman kunti pacha…",
+                "…° E) nisqakama, kunti puriyllaman kunti pachak pusaq chunka k'atma (180° Ku / 180° W) nisqakamam yupanchik.…"
+            ]
+            },
+        {
+                "word": "dular",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…mantapas. 2023 watapi Iniru killakama yaqa 140 waranqa hunu dular qullqiyuq, Muskqa iskay ñiqin astawan qhapaq runam Muskqa i…",
+                "…atispa, 2021 watapi beta llaqtapaq kichasqanmanta, $20 hunu dular qullqita chaskirqa Marc Benioff, Salesforce kamaqmanta. 202…"
+            ]
+            },
+        {
+                "word": "thular",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Amirikanu dollar icha Amirikamanta thular nisqaqa (inlish simipi: United States dollar, USD, US$, HAS…",
+                "…ama $2.953 hunu thularkunawan. 2021 watapi, HSBC $10.8 hunu thular qullqita p'itukunapi arariway urapi (AUC) hinallataq $4.9 h…",
+                "…lqita p'itukunapi arariway urapi (AUC) hinallataq $4.9 hunu thular qullqita p'itupi kamachiy urapi (AUA). == Pukyukuna ==…",
+                "…hay llamk'ayqa 1947 watapi Motorola sutiman tikrarqan. $4.3 thular qullqita chinkachisqanmanta waranqa hunumanta 2007 watamant…"
+            ]
+            },
+        {
+                "word": "sikundu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 1,
+                "examples": [
+                "…hap tupunkuna: wata killa pacha simana p'unchaw uras minutu sikundu…",
+                "…a == arruba (arroba) liwa (legua) hukkunapas == SI tupuy == Sikundu s: Mit'awi (Pacha) Mitru m: Karu kay Litru l: P'ulin Kilugr…",
+                "…tupuypi == === Qhapaq Tupukuna === Kaymi huk SI tupukunam: Sikundu s: Mit'awi (Pacha) Mitru m: Karu kay Litru l: P'ulin Kilugr…",
+                "…== Huk chhikan kaykuna, tupunkunawan == Mit'awi (Pacha) t - Sikundu s Karu kay s - Mitru m Utqa kay v - Mitru sikunduman m/s P'…",
+                "…a yapuy killapi 2007, 23:40:56 UTC pachapi qallarirqan, 210 sikundu pachata kuyuchispa, 8.0 graduyuq. Qallariy chawpinqa Piruwp…"
+            ]
+            },
+        {
+                "word": "ura",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ura nisqaqa huk sut'ikunayuqmi; Ura (sut'ichana) rikuy. Ura (la…",
+                "…Ura nisqaqa huk sut'ikunayuqmi; Ura (sut'ichana) rikuy. Ura (latin simi icha kastilla simimanta…",
+                "…Ura nisqaqa huk sut'ikunayuqmi; Ura (sut'ichana) rikuy. Ura (latin simi icha kastilla simimanta: hora) nisqaqa huk pach…",
+                "…Ura sahun simi icha Ura aliman simi (Plattdüütsch) nisqaqa chin…",
+                "…Ura sahun simi icha Ura aliman simi (Plattdüütsch) nisqaqa chincha Alimanya runakun…",
+                "…t'ikray tukusqanrayku. Ñawpa pacha, 14, 15 kaq pachakwatapi ura sahun simi Hansa nisqa qhatuqkunap huñunpa qhatuna siminmi…"
+            ]
+            },
+        {
+                "word": "chiku",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Tapuna unancha nisqamanta ñawirinaykipaq chaypi qhaway. Chiku nisqaqa wakap uñanmi.…",
+                "…Chiku simi (Čeština) nisqaqa Chiksuyu mama llaqtap rimayninmi, is…",
+                "…Chiku Silisya (Chiku simipi: České Slezsko, Aliman simipi: Tschec…",
+                "…Chiku Silisya (Chiku simipi: České Slezsko, Aliman simipi: Tschechisch-Schlesien…",
+                "…a == Commons nisqaqa multimidya kapuyninkunayuqmi kay hawa: Chiku Silisya.…",
+                "…Chikusuyu icha Chika Ripuwlika (Chiku simipi: Česko) nisqaqa Iwrupapi huk mama llaqtam. Uma llaqt…"
+            ]
+            },
+        {
+                "word": "nanumitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a huk micha rikch'aqmi, ima k'anchaqpas. 380-manta 780-kama nanumitru pillunya suni kayniyuq iliktrumaqnitiku illanchaymi. Achkiy…",
+                "…u. Milimitru (mm): 10-3 mitru. Mikrumitru (µm): 10-6 mitru. Nanumitru (nm): 10-9 mitru. Angstrom (Å): 10-10 mitru. Pikumitru (pm)…"
+            ]
+            },
+        {
+                "word": "mikrumitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…u. Sintimitru (cm): 10-2 mitru. Milimitru (mm): 10-3 mitru. Mikrumitru (µm): 10-6 mitru. Nanumitru (nm): 10-9 mitru. Angstrom (Å):…"
+            ]
+            },
+        {
+                "word": "t'asra mitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…a - Mitru t'asra sikunduman m/s2 Hallka k'iti k'anchar A - T'asra mitru m2 P'ulin V - Machina mitru m3 = 1000 Litru l Wisnu m - Kil…",
+                "…i, urqu kinraynipi. Inkakunap manqus wasinchá karqan, 3.500 t'asra mitru hatun. == Rikchakuna == == Hawa t'inkikuna == Commons nisqa…",
+                "…kinrayninpi, mama quchap hawanmanta 2.210 hanaq, 2.500-chá t'asra mitru hatun. Yakunqa utqayllam chinkan, 25 watamantapacha isqun m…"
+            ]
+            },
+        {
+                "word": "t'asra kilumitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…chay-inti lluqsimuy waqtapi. Niwi llaqtap allpanqa yaqa 261 t'asra kilumitru (101 sq mi) chaymanta runankuna, aswanta Pulinisia, yaqa 1.…"
+            ]
+            },
+        {
+                "word": "machina mitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…n m/s2 Hallka k'iti k'anchar A - T'asra mitru m2 P'ulin V - Machina mitru m3 = 1000 Litru l Wisnu m - Kilugramu kg Q'uñi kay T - Kelv…"
+            ]
+            },
+        {
+                "word": "pachak patma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pachak patmanta",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "t'asra",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 18,
+                "articles": 16,
+                "substringOnly": 2,
+                "examples": [
+                "…i, urqu kinraynipi. Inkakunap manqus wasinchá karqan, 3.500 t'asra mitru hatun. == Rikchakuna == == Hawa t'inkikuna == Commons…",
+                "…huk piruwanu pruwinsyam, Ayakuchu suyupi. Hawanqa 2.260,19 t'asra kilumitrum. Uma llaqtanqa Wankapi nisqam. == Wiñay kawsay =…",
+                "…kinrayninpi, mama quchap hawanmanta 2.210 hanaq, 2.500-chá t'asra mitru hatun. Yakunqa utqayllam chinkan, 25 watamantapacha i…",
+                "…tupuqa kaymi: Huk Newton N nisqaqa huk kilugramu kuti mitru t'asra sikunduman. Tiksimuyup hawanpiqa huk kilugramuqa 9,81 N lla…",
+                "…T'asra, Tawak'a icha Millka (kastilla simipi: cuadrado) nisqaqa ta…",
+                "…. Manya sunin P, kayhina P = 4l . == Qhapaq lluqsina == Huk t'asra manyapa suninnin kan 1, t'iksupa suninin d; kayhina lluqsin…"
+            ]
+            },
+        {
+                "word": "machina",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Wayrukunawan pukllanchik. Wayru icha Machina nisqaqa suqta kaqlla chiruyuq, chunka iskayniyuq kaqlla man…",
+                "…Machina k'arachiq (Cubozoa) nisqakunaqa machinaman rikch'akuq, kach…",
+                "…ruwi (kastilla simimanta: adobe) nisqaqa t'urumanta rurasqa machina hinam wasichanapaq. T'urumantaqa machina hina p'itikunata t…",
+                "…t'urumanta rurasqa machina hinam wasichanapaq. T'urumantaqa machina hina p'itikunata tikanchik. Chaymantataqmi intip q'uñichisq…",
+                "…, suqta t'asra hina, kaqlla chiruyuq suqtawask'ataqa wayru (machina) ninchikmi.…",
+                "…a) Suqtawask'a (ortoedro, suqta wask'a kaq uyayuq pachanka) Machina (cubo, suqta t'asra kaq uyayuq pachanka) Rump'u (esfera) Ch…"
+            ]
+            },
+        {
+                "word": "pursintu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pursyintu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "porsyentu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "waranqa-thatki",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 3,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…qan qucham, 2 raqtayuq Rheinland-Pfalz, Alimanyapi, yaqa 24 waranqa-thatki (15 kimsa chiqta tupu) Koblenz llaqtap chinchay-qunti waqta…",
+                "…sa chiqta tupu) Koblenz llaqtap chinchay-qunti waqtanpi, 37 waranqa-thatki (23 kimsa chiqta tupu) Bonn llaqtap urinninpi, hinaspa 8 wa…",
+                "…ki (23 kimsa chiqta tupu) Bonn llaqtap urinninpi, hinaspa 8 waranqa-thatki (5.0 kimsa chiqta tupu) Andernach llaqtap quntinpi. Eifel u…"
+            ]
+            },
+        {
+                "word": "kilugramu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilugramu, waranqa k'isura icha waranqa aqnu nisqaqa (grigu simimanta…",
+                "…aqa pachaykamay phinuminukunapi tiksikunkum; wisnu tuputaq, kilugramu, nasyunpura kilugramu prututipup wisnunmi: haqay hallchasqa…",
+                "…inukunapi tiksikunkum; wisnu tuputaq, kilugramu, nasyunpura kilugramu prututipup wisnunmi: haqay hallchasqa qullqiya irityupas si…",
+                "…ikundu s: Mit'awi (Pacha) Mitru m: Karu kay Litru l: P'ulin Kilugramu kg: Wisnu Voltyu V: Pinchikilla mast'ay Watyu W: Arpay Newt…",
+                "…Wisnuqa llasaqmi. Wisnu tupukunaqa kaymi: Waranqa k'isura, kilugramu icha kilu [kg] K'isura icha gramu [g] Waranqa patma k'isura…",
+                "…ikundu s: Mit'awi (Pacha) Mitru m: Karu kay Litru l: P'ulin Kilugramu kg: Wisnu Voltyu V: Pinchikillay mast'ay Watyu W: Arpay New…"
+            ]
+            },
+        {
+                "word": "gramu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 1,
+                "examples": [
+                "…K'isura icha gramu nisqaqa (grigu simimanta: γράμμα [grámma] = ñawpa pacha Gri…",
+                "…ymi: Waranqa k'isura, kilugramu icha kilu [kg] K'isura icha gramu [g] Waranqa patma k'isura icha miligramu [mg]…",
+                "…Ñawpaqtataq gramum qhapaq tupu karqan, kilugramutaq waranqa gramu hinam sut'inchasqa karqan. 1 kg = 1000 g = 103 g == Kaypipa…"
+            ]
+            },
+        {
+                "word": "litru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…== SI tupuy == Sikundu s: Mit'awi (Pacha) Mitru m: Karu kay Litru l: P'ulin Kilugramu kg: Wisnu Voltyu V: Pinchikillay mast'a…",
+                "…SI tupukunam: Sikundu s: Mit'awi (Pacha) Mitru m: Karu kay Litru l: P'ulin Kilugramu kg: Wisnu Voltyu V: Pinchikilla mast'ay…",
+                "…char A - T'asra mitru m2 P'ulin V - Machina mitru m3 = 1000 Litru l Wisnu m - Kilugramu kg Q'uñi kay T - Kelvin K Pinchikilla…"
+            ]
+            },
+        {
+                "word": "iktarya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "iktaria",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sigundu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pachakmanta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…alyptus) nisqaqa huk Awstralyapi wiñaq sach'akunam, qanchis pachakmanta aswan rikch'aqkunam. Huk kalistu rikch'aqkunaqa Urin Awya Y…",
+                "…ranchik. Agave nisqa rikch'anaqa ancha rikch'aqsapam, iskay pachakmanta aswan rikch'aqmi, ahinataq paqpa (Agave americana), sisal (…",
+                "…wan chaninchasqa allpapi puquq chakra yuram. Piruwpiqa tawa pachakmanta aswan papa rikch'aqkunatam riqsinchik. == Papa tarpuy == Pa…",
+                "…qakunaqa huk wayuq, waraqu hina kichkasapa yurakunam, kimsa pachakmanta aswan rikch'aqkunam, tukuy Abya Yalapi, kunanqa Iwrupapi, A…",
+                "…laya takiq pisqum, rikch'aq chhaqim. Huk pisqukunap - iskay pachakmanta aswan rikch'aq, ahinataq tiluchip - q'isanta qichuspa chayp…",
+                "…ukllachasqa Qhapaq Suyu yalliq-qhatuwasi rantikuykunap sapa pachakmanta 14.6% rantikuyniyuq kanmi. == Hawa t'inkikuna == Wakiykurku…"
+            ]
+            },
+        {
+                "word": "kilumitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…uq. Qallariy chawpinqa Piruwpa chalanpi karqan, tawa chunka kilumitru Hanan Chinchamanta karu kuntinpi, pachak pichqa chunka kilu…",
+                "…itru Hanan Chinchamanta karu kuntinpi, pachak pichqa chunka kilumitru Lima llaqtamanta karum urin kuntinpi, kimsa chunka isqunniy…",
+                "…ma llaqtamanta karum urin kuntinpi, kimsa chunka isqunniyuq kilumitru allpa pachap ukhunpi. Pichqa pachak runam wañurqan, waranqa…",
+                "…5.018 mitrum aswan hanaq. Chimpurasu urqumantaqa chunkalla kilumitru karum. == Kaypipas qhaway == Chimpurasu fauna risirwa == Pu…",
+                "…ta huk tawa taq'allan. Paypaqa sayay 151,215 tawa k'uchuyuq kilumitru.…",
+                "…{\\frac {m}{s}}} icha m s − 1 {\\displaystyle {m}{s^{-1}}\\,} Kilumitru urapachaman k m h {\\displaystyle {\\frac {km}{h}}} icha k m…"
+            ]
+            },
+        {
+                "word": "mitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Mitru (metro) icha thatki nisqaqa (grigu simimanta: μέτρον [métro…",
+                "…isqaqa karu kaypa tupunkunam: Thatki = meter == SI Tupuy == Mitru multiplukuna: Yuttamitru (Ym): 1024 mitru. Sittamitru (Zm):…",
+                "…er == SI Tupuy == Mitru multiplukuna: Yuttamitru (Ym): 1024 mitru. Sittamitru (Zm): 1021 mitru. Ixamitru (Em): 1018 mitru. Pi…",
+                "…plukuna: Yuttamitru (Ym): 1024 mitru. Sittamitru (Zm): 1021 mitru. Ixamitru (Em): 1018 mitru. Pitamitru (Pm): 1015 mitru. Tir…",
+                "…024 mitru. Sittamitru (Zm): 1021 mitru. Ixamitru (Em): 1018 mitru. Pitamitru (Pm): 1015 mitru. Tiramitru (Tm): 1012 mitru. Gi…",
+                "…1021 mitru. Ixamitru (Em): 1018 mitru. Pitamitru (Pm): 1015 mitru. Tiramitru (Tm): 1012 mitru. Gigamitru (Gm): 109 mitru. Mig…"
+            ]
+            },
+        {
+                "word": "sintimitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…p Multiplunkuna Ura-multiplunkunapas == (pachakcha thatki / sintimitru (cm) - chunkacha thatki / disimitru (dm) - waranqacha thatk…",
+                "…Inkakunap yupaychasqansi. Such'iqa bagricham, kimsa chunka sintimitru sunim, pisilla ñawiyuq, lluchk'a, ch'ikchi qarayuq, sinqa s…",
+                "…waqrayuqmi, chinataq manam waqrayuqchu. Kay suntuqa qanchis sintimitru sunikamam wiñan. == Pukyukuna == == Hawa t'inkikuna == Comm…",
+                "…chinataq manam waqrayuqchu. Kay suntuqa chunka qanchisniyuq sintimitru sunikamam wiñan. Chawpi Awya Yala, Urin Awya Yalapim kawsan…",
+                "…atunmi, 130 sintimitrukama sunim, chupanqa 65-manta 90-kama sintimitru sunim, 25-manta 60-kama kilugramu llasaqmi. == Pukyukuna ==…",
+                "…uqmi, Urin Awya Yalapi kawsaq. Kay suntuqa tawa kuskanniyuq sintimitru sunikamam wiñan. == Pukyukuna == == Hawa t'inkikuna == Comm…"
+            ]
+            },
+        {
+                "word": "milimitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…) - chunkacha thatki / disimitru (dm) - waranqacha thatki / milimitru (mm)) === Metromanta Rimaypa Wiñay Kawsaynin === == Kaypipa…",
+                "…a: Disimitru (dm): 10-1 mitru. Sintimitru (cm): 10-2 mitru. Milimitru (mm): 10-3 mitru. Mikrumitru (µm): 10-6 mitru. Nanumitru (n…"
+            ]
+            },
+        {
+                "word": "kilumitrukuna",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mitrukuna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…rpuy killantin. 225.146 runakuna (2007) kaypiqa tiyan, 3824 mitrukuna kachkan, wichay Titiqaqa qucha, qaylla Chakas quchantin, Si…"
+            ]
+            }
+        ],
+    }
+    

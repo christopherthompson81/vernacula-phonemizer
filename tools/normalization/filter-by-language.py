@@ -157,6 +157,25 @@ MARKERS = {
            "kenkuana kadakuada laeng met pay uray urayno nupay tapno gapu bayat kabayatan "
            "aginggana dua tallo uppat lima innem pito walo siam sangapulo tawen ili probinsia "
            "pagilian paset bassit adu kaaduan nangruna mabirukan agnanaed naisasao kadawyan",
+    # qu (Quechua): the contaminant is SPANISH, and this is the row where the CONTRAST set below matters
+    # most — qu.wikipedia's non-Quechua paragraphs are bibliographies, Ministry-of-Education catalogue
+    # entries and untranslated Spanish talk-page prose, none of which share a function word with English.
+    # ⚠ QUECHUA IS AGGLUTINATIVE AND ITS FUNCTION WORDS ARE MOSTLY SUFFIXES, so a whole-word marker list
+    # is thinner here than for an isolating language. The commonest inflected forms are therefore listed
+    # alongside their stems (`llaqta llaqtam llaqtapi llaqtaqa`, `suyu suyupi`, `simi simipi`) — the
+    # tokenizer splits on non-letters, so `llaqtapi` is a token and the bare stem never appears in it.
+    # ⚠ THE MACROLANGUAGE IS NOT SPLIT BY THIS ROW, deliberately. Southern Quechua, Ancash and Ecuadorian
+    # Kichwa share this core (`nisqa`, `huk`, `kay`, `chay`, `wan`, `-pi`), and the row's job is to
+    # separate Quechua from SPANISH, not one variety from another. Variety is settled by reading, not by
+    # a word count — see docs/investigations/qu_normalization_investigation.md.
+    # ⚠ `kan` AND `wan` ARE TWO-TO-THREE LETTERS AND KEPT ANYWAY: `kan` is the copula "there is" and
+    # `wan` the comitative "and/with", both among the highest-frequency Quechua tokens, and neither is a
+    # Spanish or English word. Genuinely short and ambiguous tokens (`mi`, `pi`, `ta`, `qa`) are absent.
+    "qu": "nisqaqa nisqa nisqam nisqakuna icha huk kaq kan karqan kay chay chaymanta wan aswan hina "
+          "hinaspa hinallataq mana manam achka ancha tukuy sapa wakin allin llaqta llaqtam llaqtapi "
+          "llaqtaqa llaqtanqa mamallaqta mamallaqtapi suyu suyupi simi simipi runa runakuna runakunam "
+          "mayu qucha urqu pacha wata watapi killapi punchaw p'unchaw iskay kimsa tawa pichqa qhichwa "
+          "qichwa kichwa pruwinsya pruwinsyapi distritu distritum kawsachkanku uma kanku karqa",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
@@ -248,6 +267,22 @@ CONTRAST = {
     # ⚠ `ay`, `at`, `ang`, `ng`, `sa`, `mga` are also absent: all six occur inside genuine Ilocano
     # paragraphs (×989, ×539, ×212, ×195, ×92, ×15), mostly in quoted Tagalog institution and song titles,
     # so listing them would drop Ilocano prose for naming a Philippine thing in Tagalog.
+    # qu: SPANISH, merged with (never replacing) ENGLISH. qu.wikipedia's contaminant is overwhelmingly
+    # Spanish — Peruvian/Bolivian bibliography blocks, Ministry-of-Education catalogue records and
+    # untranslated editorial prose — and English arrives separately in scientific citations, so both
+    # sides are needed.
+    # ⚠ `de` AND `la` ARE DELIBERATELY ABSENT, for the same measured reason mos leaves out `de`. Counted
+    # over the 143 strongly-Quechua paragraphs of the mined artifact, `de` occurs ×25 and `la` ×6, and
+    # every one is inside a Spanish PROPER NAME that the Quechua sentence is naming or glossing
+    # (`kastilla simipi: Provincia de Espinar`, `Santiago de Chile`). A gloss of a Spanish place name is
+    # the most ordinary thing a Quechua encyclopaedia paragraph does; listing those two would drop the
+    # text this filter exists to keep. `del`/`al`/`el`/`los`/`las`/`y` are ×2-4 in the same set, low
+    # enough that a real Quechua paragraph out-scores them, and they are kept.
+    "qu": set(
+        "el los las del al en que y con por para un una es son fue como su sus se no lo este esta "
+        "entre sobre desde hasta cuando tambien todos donde tiene sido segun mas pero sin ni "
+        "provincia distrito departamento historia lengua edicion".split()
+    ),
     "ilo": set(
         "ito nito iyan iyon noong ngayon dito doon kanila kanilang naman upang habang bawat "
         "dalawa marami lahat kung sila nila niya ninyo tayo kami ako din rin".split()
