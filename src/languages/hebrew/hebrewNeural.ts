@@ -10,6 +10,7 @@
  * See src/languages/hebrew/he-tagger.PROVENANCE.md.
  */
 import { assembleClauses } from "../../core/clauses.ts";
+import { withHost } from "../../core/foreign.ts";
 import { phonemizeWord } from "./hebrew.ts";
 import { normalizeHebrew } from "./normalize.ts";
 import { createHebrewTagger, type HebrewTagger } from "./hebrewTagger.ts";
@@ -58,18 +59,21 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
     await flush();
 
     let wi = 0;
-    return assembleClauses(text, TOKEN, (m, sink) => {
+    // `withHost` — every await above has already settled, so this is one synchronous turn, which is what
+    // core/foreign.ts's host stack requires. This path builds no registry engine, so nothing else pushes the
+    // host and an embedded foreign run would be dropped outright.
+    return withHost("he", () => assembleClauses(text, TOKEN, (m, sink) => {
         if (m[1]) sink.emit(queue[wi++] ?? "");
         else if (m[2]) sink.emit(numberToIpa(m[2]));
         else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
-    });
+    }));
 }
 
 /** The sync rule-engine path (vocalized-only) — the model-absent fallback. */
 function sync(text: string): string {
-    return assembleClauses(text, TOKEN, (m, sink) => {
+    return withHost("he", () => assembleClauses(text, TOKEN, (m, sink) => {
         if (m[1]) sink.emit(phonemizeWord(m[1]));
         else if (m[2]) sink.emit(numberToIpa(m[2]));
         else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
-    });
+    }));
 }

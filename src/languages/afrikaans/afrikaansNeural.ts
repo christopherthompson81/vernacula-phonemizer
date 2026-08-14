@@ -12,6 +12,7 @@
  * tagger is `undefined` and this returns exactly the sync path (no throw). The sync engine is untouched.
  */
 import { createAfrikaans, afrikaansLexiconHas, afrikaansRuleReserved } from "./afrikaans.ts";
+import { withHost } from "../../core/foreign.ts";
 import { createAfrikaansTagger, type AfrikaansTagger } from "./afrikaansTagger.ts";
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
@@ -28,7 +29,7 @@ const afEngine = (): ReturnType<typeof createAfrikaans> => (engine ??= createAfr
 export async function phonemizeAfNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createAfrikaansTagger();
     const tagger = await taggerP;
-    if (!tagger) return afEngine().text(text); // no model → sync path
+    if (!tagger) return withHost("af", () => afEngine().text(text)); // no model → sync path
     return wordLevelNeuralPrepass(text, {
         word: WORD,
         // ⚠ NFC, matching phonemizeWord's own key. Without it the prepass stores under the NFD key while the
@@ -39,6 +40,8 @@ export async function phonemizeAfNeural(text: string): Promise<string> {
         // by the rule path. The engine enforces the latter at the seam too — this just avoids a wasted tag().
         lexHas: (w) => afrikaansLexiconHas(w) || afrikaansRuleReserved(w),
         tag: (w) => tagger.tag(w),
-        render: (t, oov) => afEngine().text(t, oov),
+        // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
+        // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.
+        render: (t, oov) => withHost("af", () => afEngine().text(t, oov)),
     });
 }

@@ -198,7 +198,7 @@ import { ROMAN_POLICY as romanAz } from "./languages/azerbaijani/romanOrdinals.t
 import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
 import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 
-import { setDefaultForeign, setScriptReader, pushHost, popHost } from "./core/foreign.ts";
+import { setDefaultForeign, setScriptReader, withHost } from "./core/foreign.ts";
 import { CYRILLIC_HOSTS, readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
 import { foldCaretExponents, foldCyrillicConfusables, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
@@ -262,22 +262,113 @@ const VULGAR_FOLD_OPT_OUT: ReadonlySet<string> = new Set(["az", "ca", "el", "ga"
 
 const cache = new Map<string, Phonemizer>();
 
+/** The UNWRAPPED `text` of each built engine — the function the pre-passes are wrapped around, keyed by the
+ *  code it was built for. Populated when `getPhonemizer` installs the shadow; read by `renderInHost` for the
+ *  one caller that has already run the pre-passes itself (see there). */
+const unwrapped = new Map<string, (input: string) => string>();
+
 /** Languages whose own normalization already resolves Roman numerals, with more context than a shared
  *  pass can have — English distinguishes regnal ("henry viii" → the eighth) from cardinal ("world war
  *  ii" → two); French reads the ordinal `XIVe`. The shared pass must not pre-empt them. */
 const ROMAN_NATIVE: ReadonlySet<string> = new Set(["en", "en-GB", "en-IN", "fr", "fr-CA"]);
+
+/** Shared ROMAN NUMERAL pass (core/roman.ts), applied at the single dispatch point rather than in 190
+ *  engines — and BEFORE the engine's tokenizer, which is what lets it work in the engines that drop Latin
+ *  runs (`XIX век` would otherwise lose the numeral). It rewrites to DIGITS, so each language's own cardinal
+ *  compositor does the pronouncing. A no-op for the languages that read Roman numerals themselves. */
+function romanPass(lang: string, input: string): string {
+    if (ROMAN_NATIVE.has(lang)) return input;
+    // A language's own policy wins; otherwise it still gets its homograph exclusions.
+    const policy: RomanPolicy = ROMAN_POLICIES[lang] ?? { exclude: ROMAN_EXCLUSIONS[lang] };
+    return normalizeRomans(input, policy);
+}
+
+/**
+ * The shared CHARACTER-LEVEL pre-passes, in order. Runs AFTER `romanPass` — see `prePass`.
+ *
+ * MARKUP first, and for EVERY language including the ROMAN_NATIVE ones: a tag is not text in any of them.
+ * Without it `km<sup>2</sup>` was spoken as "sup … sup" (core/markup.ts).
+ *
+ * NATIVE DIGITS ARE FOLDED FOR EVERY LANGUAGE, at the single dispatch point.
+ *
+ * A digit is script-MARKED but language-NEUTRAL in value, and that is what separates it from a letter. A
+ * Cyrillic word inside English text is Russian and wants the script router; `٢٠٢٤` inside English text is
+ * just 2024, and an English reader says "twenty twenty-four" — routing it to Arabic would be wrong.
+ *
+ * Two defects this closes at once. Embedded foreign digits were DROPPED everywhere: the gap pass surfaces
+ * runs of `\p{L}`, so a digit run matched nothing and the router never saw it — `phonemize("Year ٢٠٢٤",
+ * "en")` was "jˈɪɹ". And seven engines read their OWN digits as an empty string (sd ug ps bal syl rkt shn),
+ * because a raw block range in the tokenizer's LETTER class swallowed them — the Central Kurdish defect,
+ * which no gate could see because a claimed-but-empty token leaves no gap.
+ *
+ * Per-language folds already in twelve normalize.ts files stay: folding is idempotent, and they document the
+ * reason locally where the corpus proved it.
+ * ⚠ A NATIVE DIGIT IS NOT ALWAYS A DIGIT. Telugu ౦ (DIGIT ZERO) is a homoglyph for the anusvara ం and is a
+ * typo for it in all 144 corpus instances; folding it to "0" globally would pre-empt the language's own
+ * disambiguation, which uses context the registry does not have. Such a language opts out and folds inside
+ * its own normalize.ts, AFTER the homoglyph rule — see telugu/normalize.ts.
+ * ℃/℉ ARE FOLDED FOR EVERY LANGUAGE TOO, and unconditionally — there is no opt-out list because there is no
+ * language for which `℃` means something other than `°C`. 52 of the 65 languages with an artifact already
+ * read `°C` and dropped `℃` entirely, losing the unit and not merely the sign; the 13 that handled both had
+ * written the arm out by hand, and folding is idempotent so they are unaffected. See `foldSquaredDegrees`
+ * for why the list stops at two characters instead of being NFKC.
+ * DOUBLE-ENCODED UTF-8 IS REPAIRED FIRST, before anything reads a character: mojibake is the one corruption
+ * that makes every downstream guard misfire, because the injected `Â` and `Ã` are LETTERS. `19.500 kmÂ²`
+ * lost its whole unit that way — the tier's trailing guard saw a letter after `km` and refused the match.
+ * Measured safe across all 67 corpora (31 occurrences, all in id_id, none elsewhere); see
+ * `repairDoubleEncoded`.
+ * `foldLatinConfusables` sits with the other repairs, and AFTER the mojibake decode: a double-encoded
+ * sequence can produce Latin-1 letters, so the confusable check wants the decoded string.
+ */
+function foldPass(lang: string, input: string): string {
+    const folded = foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)))), CYRILLIC_HOSTS.has(lang))));
+    const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
+    return FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre);
+}
+
+/**
+ * EVERY shared pre-pass `getPhonemizer` applies, as one function — the whole of what an engine's `text` sees
+ * before its own tokenizer does.
+ *
+ * ⚠ EXPORTED FOR THE ASYNC PATH. `phonemizeAsync` dispatches through `neuralRegistry.ts`, whose entries build
+ * their engine directly (they need constructor arguments the registry's instance does not carry — Khmer's
+ * `segment: false`, Arabic's variety, and the `oovOverride` extra argument the shadow below would drop). So
+ * they never reach the shadow, and every pre-pass silently did not run for them: `phonemizeAsync("سال ۲۰۲۴
+ * ۾", "sd")` lost its own script's digits outright. `getNeuralPhonemizer` calls this on the input instead, so
+ * there is ONE definition of the chain and the opt-out lists (`te`'s digit fold above all) cannot drift
+ * between the two entry points.
+ *
+ * ⚠ ROMANS OUTERMOST — before markup stripping, matching the layering in `getPhonemizer`. Not
+ * interchangeable: `stripMarkup` decodes entities, so running it first would let `&amp;lt;` become a real
+ * `<` for the numeral scan.
+ */
+export function prePass(lang: string, input: string): string {
+    return foldPass(lang, romanPass(lang, input));
+}
+
+/**
+ * Render `input` with `lang`'s engine and `lang` as the foreign-run host, WITHOUT re-running `prePass`.
+ *
+ * For a caller that has already pre-passed — the async entries, which pre-pass once at
+ * `getNeuralPhonemizer` before their tagger sees the text. Going back through `getPhonemizer(lang).text`
+ * would apply the chain a SECOND time, and it is not idempotent: `stripMarkup` decodes entities, so a
+ * doubly-escaped `&amp;lt;` — an author writing ABOUT a tag, the exact case core/markup.ts orders its passes
+ * to protect — would decode to `<` on the first pass and be stripped as markup on the second.
+ */
+export function renderInHost(lang: string, input: string): string {
+    getPhonemizer(lang); // builds and installs, populating `unwrapped`
+    const engine = unwrapped.get(lang);
+    if (engine === undefined) throw new Error(`no engine for language: ${lang}`);
+    return withHost(lang, () => engine(input));
+}
 
 /** Get (and memoize) the phonemizer for a language code. */
 export function getPhonemizer(lang: string): Phonemizer {
     let p = cache.get(lang);
     if (p === undefined) {
         p = build(lang);
-        // Shared ROMAN NUMERAL pass (core/roman.ts), wrapped here so it applies at the single dispatch
-        // point rather than in 190 engines — and so it runs BEFORE the engine's tokenizer, which is what
-        // lets it work in the engines that drop Latin runs (`XIX век` would otherwise lose the numeral).
-        // It rewrites to DIGITS, so each language's own cardinal compositor does the pronouncing.
-        // MARKUP first, and for EVERY language including the ROMAN_NATIVE ones: a tag is not text in any
-        // of them. Without it `km<sup>2</sup>` was spoken as "sup … sup" (core/markup.ts).
+        // The shared PRE-PASSES (`prePass` above) run here, at the single dispatch point, before the
+        // engine's own tokenizer sees a character.
         //
         // This SHADOWS `text` on the engine instance rather than wrapping it in a fresh `{ text }` object,
         // because some engines expose more than the interface — the registry itself casts the English
@@ -286,60 +377,18 @@ export function getPhonemizer(lang: string): Phonemizer {
         {
             const engine = p;
             const original = engine.text.bind(engine);
-            (engine as { text: (input: string) => string }).text = (input) => {
+            unwrapped.set(lang, original);
+            (engine as { text: (input: string) => string }).text = (input) =>
                 // The host language has to be known while the engine runs, because a foreign run is
-                // resolved DURING tokenization, deep inside `emitUnclaimed`. Pushed as a stack since
-                // reading a foreign run re-enters this same wrapper for another language.
-                pushHost(lang);
-                try {
-                    // NATIVE DIGITS ARE FOLDED FOR EVERY LANGUAGE, at the single dispatch point.
-                    //
-                    // A digit is script-MARKED but language-NEUTRAL in value, and that is what separates
-                    // it from a letter. A Cyrillic word inside English text is Russian and wants the
-                    // script router; `٢٠٢٤` inside English text is just 2024, and an English reader says
-                    // "twenty twenty-four" — routing it to Arabic would be wrong.
-                    //
-                    // Two defects this closes at once. Embedded foreign digits were DROPPED everywhere:
-                    // the gap pass surfaces runs of `\p{L}`, so a digit run matched nothing and the
-                    // router never saw it — `phonemize("Year ٢٠٢٤", "en")` was "jˈɪɹ". And seven engines
-                    // read their OWN digits as an empty string (sd ug ps bal syl rkt shn), because a raw
-                    // block range in the tokenizer's LETTER class swallowed them — the Central Kurdish
-                    // defect, which no gate could see because a claimed-but-empty token leaves no gap.
-                    //
-                    // Per-language folds already in twelve normalize.ts files stay: folding is
-                    // idempotent, and they document the reason locally where the corpus proved it.
-                    // ⚠ A NATIVE DIGIT IS NOT ALWAYS A DIGIT. Telugu ౦ (DIGIT ZERO) is a homoglyph for
-                    // the anusvara ం and is a typo for it in all 144 corpus instances; folding it to "0"
-                    // globally would pre-empt the language's own disambiguation, which uses context the
-                    // registry does not have. Such a language opts out and folds inside its own
-                    // normalize.ts, AFTER the homoglyph rule — see telugu/normalize.ts.
-                    // ℃/℉ ARE FOLDED FOR EVERY LANGUAGE TOO, and unconditionally — there is no opt-out list
-                    // because there is no language for which `℃` means something other than `°C`. 52 of the 65
-                    // languages with an artifact already read `°C` and dropped `℃` entirely, losing the unit
-                    // and not merely the sign; the 13 that handled both had written the arm out by hand, and
-                    // folding is idempotent so they are unaffected. See `foldSquaredDegrees` for why the list
-                    // stops at two characters instead of being NFKC.
-                    // DOUBLE-ENCODED UTF-8 IS REPAIRED FIRST, before anything reads a character: mojibake is
-                    // the one corruption that makes every downstream guard misfire, because the injected `Â`
-                    // and `Ã` are LETTERS. `19.500 kmÂ²` lost its whole unit that way — the tier's trailing
-                    // guard saw a letter after `km` and refused the match. Measured safe across all 67 corpora
-                    // (31 occurrences, all in id_id, none elsewhere); see `repairDoubleEncoded`.
-                    // `foldLatinConfusables` sits with the other repairs, and AFTER the mojibake decode: a double-encoded
-                    // sequence can produce Latin-1 letters, so the confusable check wants the decoded string.
-                    const folded = foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)))), CYRILLIC_HOSTS.has(lang))));
-                    const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
-                    return original(FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre));
-                } finally {
-                    popHost();
-                }
-            };
+                // resolved DURING tokenization, deep inside `emitUnclaimed`. A stack, since reading a
+                // foreign run re-enters this same wrapper for another language.
+                withHost(lang, () => original(foldPass(lang, input)));
         }
         if (!ROMAN_NATIVE.has(lang)) {
+            // Roman numerals OUTSIDE the shadow, so they are rewritten to digits before markup stripping —
+            // see `prePass`, which reproduces this layering for the async path.
             const engine = p;
-            // A language's own policy wins; otherwise it still gets its homograph exclusions.
-            const own = ROMAN_POLICIES[lang];
-            const policy: RomanPolicy = own ?? { exclude: ROMAN_EXCLUSIONS[lang] };
-            p = { text: (input) => engine.text(normalizeRomans(input, policy)) };
+            p = { text: (input) => engine.text(romanPass(lang, input)) };
         }
         cache.set(lang, p);
     }

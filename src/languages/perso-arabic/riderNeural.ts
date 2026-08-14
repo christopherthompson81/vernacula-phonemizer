@@ -7,7 +7,7 @@
  * is a no-op and you get exactly the sync `phonemize(text, lang)` (lexicon + default). Bare Arabic uses the
  * separate `phonemizeArabic`; this is its rider analogue.
  */
-import { getPhonemizer } from "../../registry.ts";
+import { renderInHost } from "../../registry.ts";
 import { createRiderDiacritizer, type RiderDiacritizer } from "./riderDiacritizer.ts";
 import { coverageLexicon as ur } from "../urdu/urdu.ts";
 import { harakatLexicon as fa } from "../persian/persian.ts";
@@ -36,5 +36,10 @@ export async function phonemizeRiderNeural(text: string, lang: string): Promise<
     if (diacritizer === undefined) diacritizer = createRiderDiacritizer();
     const diac = await diacritizer; // undefined when the model or onnxruntime-node is unavailable → sync fallback
     const vocalized = diac ? await diac.diacritize(text, lang, lex()) : text;
-    return getPhonemizer(lang).text(vocalized);
+    // `renderInHost`, NOT `getPhonemizer(lang).text`: the shared pre-passes have already run once, at
+    // `getNeuralPhonemizer`, and the chain is not idempotent — `stripMarkup` decodes entities, so a second pass
+    // would turn an author's `&amp;lt;` into a real `<` and strip it. This renders in `lang`'s host with the
+    // engine only. (This file was the ONE async entry that already reached the registry wrapper; the pre-passes
+    // moved up rather than away.)
+    return renderInHost(lang, vocalized);
 }

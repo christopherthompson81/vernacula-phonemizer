@@ -17,6 +17,7 @@
  * See km-segmenter.PROVENANCE.md.
  */
 import { createKhmer } from "./khmer.ts";
+import { withHost } from "../../core/foreign.ts";
 import { createKhmerSegmenter, type KhmerSegmenter } from "./khmerSegmenter.ts";
 
 let segmenterP: Promise<KhmerSegmenter | undefined> | undefined;
@@ -34,11 +35,17 @@ export async function phonemizeKmNeural(text: string): Promise<string> {
         // No BiLSTM → the ordinary sync path, perceptron boundaries and all (end-to-end 79.2% against the
         // BiLSTM's 83.5%). Falling back to `segment: false` here would silently be the WORST of the three.
         segmenting ??= createKhmer();
-        return segmenting.text(text);
+        const fallback = segmenting;
+        return withHost("km", () => fallback.text(text));
     }
     // segment: false — this path supplies its own (better) boundaries; see createKhmer's note.
     unsegmented ??= createKhmer({ segment: false });
+    const engine = unsegmented;
     // The segmenter inserts U+200B, which `khmer.ts`'s TOKEN already treats as a run break, so the sync engine
     // needs no knowledge of this path at all.
-    return unsegmented.text(await segmenter.restore(text));
+    // The await is HOISTED out of `withHost`: core/foreign.ts's host stack is only correct within one
+    // synchronous turn. Both engines here are built locally rather than by the registry, so without the push
+    // a foreign run inside the sentence is dropped for want of a host.
+    const segmented = await segmenter.restore(text);
+    return withHost("km", () => engine.text(segmented));
 }

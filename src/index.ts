@@ -24,7 +24,13 @@ export function phonemize(text: string, lang: string): string {
  *  neural-upgrade languages (en's BiLSTM OOV, bn/da/nb/fr taggers, he NAKDAN, fa + the ur/ps/pnb Perso-Arabic
  *  riders) use their ONNX model. Every other language resolves synchronously. When a model / `onnxruntime-node`
  *  is absent each path degrades to the sync engine, so this is always safe to call. Use this for undiacritized /
- *  novel-word text. */
+ *  novel-word text.
+ *
+ *  ⚠ THE TWO ENTRIES SHARE THE REGISTRY'S PRE-PASSES. Markup stripping, the native/fullwidth digit folds, the
+ *  vulgar-fraction fold, the Roman-numeral pass and the foreign-run host apply here exactly as they do to
+ *  `phonemize` — they used not to, because the async registry's entries build their engine directly and so
+ *  never reached the wrapper `getPhonemizer` installs. `getNeuralPhonemizer` applies them now; see the note
+ *  there, and `test/phonemizeAsync.test.ts` for the invariant that keeps the two in step. */
 export async function phonemizeAsync(text: string, lang: string): Promise<string> {
     const neural = getNeuralPhonemizer(lang);
     return neural ? neural(text) : phonemize(text, lang);

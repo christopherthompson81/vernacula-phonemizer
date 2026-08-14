@@ -14,6 +14,7 @@
  * are untouched. See src/languages/bengali/bn-g2p-tagger.PROVENANCE.md.
  */
 import { createBengali, bengaliLexicon } from "./bengali.ts";
+import { withHost } from "../../core/foreign.ts";
 import { createBengaliTagger, type BengaliTagger } from "./bengaliTagger.ts";
 import { getPhonemizer } from "../../registry.ts";
 import { BENGALI_WORD } from "../../core/unicode.ts";
@@ -35,12 +36,14 @@ const bnEngine = (): ReturnType<typeof createBengali> =>
 export async function phonemizeBnNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createBengaliTagger();
     const tagger = await taggerP;
-    if (!tagger) return bnEngine().text(text); // no model → sync path
+    if (!tagger) return withHost("bn", () => bnEngine().text(text)); // no model → sync path
     const lex = bengaliLexicon();
     return wordLevelNeuralPrepass(text, {
         word: WORD,
         lexHas: (w) => lex.has(w.normalize("NFC")), // lexicon-covered words are served by the sync lexicon path
         tag: (w) => tagger.tag(w),
-        render: (t, oov) => bnEngine().text(t, oov),
+        // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
+        // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.
+        render: (t, oov) => withHost("bn", () => bnEngine().text(t, oov)),
     });
 }

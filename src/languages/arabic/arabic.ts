@@ -9,6 +9,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { withHost } from "../../core/foreign.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToIpa, type ArabicNumberData } from "./numbers.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
@@ -377,7 +378,7 @@ function repairSentence(ipa: string, epenthetic = "i"): string {
 export async function phonemizeArabic(
     text: string,
     variety?: string,
-    opts?: { lexicon?: boolean },
+    opts?: { lexicon?: boolean; host?: string },
 ): Promise<string> {
     const dkey = variety === "egyptian" ? "egyptian" : "msa";
     let diacP = diacritizers.get(dkey);
@@ -394,5 +395,11 @@ export async function phonemizeArabic(
     const key = `${variety ?? "msa"}${useLexicon ? "" : ":nolex"}`;
     let phon = phonemizers.get(key);
     if (!phon) phonemizers.set(key, (phon = createArabic(variety, useLexicon)));
-    return repairSentence(phon.text(restored));
+    // The registry code, when the caller has one (`neuralRegistry.ts` passes it), so a foreign run inside the
+    // sentence reaches the script router instead of being dropped for want of a host — the async path builds
+    // this engine directly and therefore never passes through the registry's own `pushHost`. Synchronous, as
+    // core/foreign.ts's stack requires. Without a code the run behaves as it did before: unrouted.
+    const engine = phon;
+    const read = opts?.host === undefined ? engine.text(restored) : withHost(opts.host, () => engine.text(restored));
+    return repairSentence(read);
 }

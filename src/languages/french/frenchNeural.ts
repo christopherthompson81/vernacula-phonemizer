@@ -10,6 +10,7 @@
  * untouched.
  */
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
+import { withHost } from "../../core/foreign.ts";
 import { createFrench, frenchLexicon } from "./french.ts";
 import { createFrenchTagger, type FrenchTagger } from "./frenchTagger.ts";
 
@@ -27,7 +28,7 @@ export async function phonemizeFrNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createFrenchTagger();
     const tagger = await taggerP;
     const E = frEngine();
-    if (!tagger) return E.text(text); // no model → sync path
+    if (!tagger) return withHost("fr", () => E.text(text)); // no model → sync path
 
     // Shared pre-pass, keyed by the LOWERCASED form (the key the sync resolver consults oovOverride with).
     // Lexicon-covered words are served by the sync lexicon path; a word outside the tagger's training vocab
@@ -38,6 +39,8 @@ export async function phonemizeFrNeural(text: string): Promise<string> {
         key: (w) => w.toLowerCase(),
         lexHas: (lower) => lex.has(lower) || !IN_VOCAB.test(lower),
         tag: (lower) => tagger.tag(lower),
-        render: (t, oov) => E.text(t, oov),
+        // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
+        // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.
+        render: (t, oov) => withHost("fr", () => E.text(t, oov)),
     });
 }

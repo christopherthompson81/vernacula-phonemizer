@@ -9,6 +9,7 @@
  * `onnxruntime-node` or the model is absent the tagger is `undefined` and this is exactly the sync path (no throw).
  */
 import { createSindhiEngine, sindhiLexiconHas } from "./sindhi.ts";
+import { withHost } from "../../core/foreign.ts";
 import { createSindhiTagger, type SindhiTagger } from "./sindhiTagger.ts";
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
@@ -21,11 +22,13 @@ const sdEngine = () => (engine ??= createSindhiEngine());
 export async function phonemizeSdNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createSindhiTagger();
     const tagger = await taggerP;
-    if (!tagger) return sdEngine().text(text);
+    if (!tagger) return withHost("sd", () => sdEngine().text(text));
     return wordLevelNeuralPrepass(text, {
         word: WORD,
         lexHas: (w) => sindhiLexiconHas(w), // same lookup the engine does — see sindhiLexiconHas
         tag: (w) => tagger.tag(w),
-        render: (t, oov) => sdEngine().text(t, oov),
+        // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
+        // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.
+        render: (t, oov) => withHost("sd", () => sdEngine().text(t, oov)),
     });
 }

@@ -4,6 +4,7 @@
  * self-falls-back to the sync engine when `onnxruntime-node` or its model is absent, so routing
  * here is always safe. Every language entry lives beside its engine in src/languages/<lang>/.
  */
+import { prePass } from "./registry.ts";
 import { phonemizeArabic } from "./languages/arabic/arabic.ts";
 import { phonemizeEnNeural } from "./languages/english/englishNeural.ts";
 import { phonemizeBnNeural } from "./languages/bengali/bengaliNeural.ts";
@@ -46,8 +47,27 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     pnb: (t) => phonemizeRiderNeural(t, "pa"),
 };
 
-/** The language's best ASYNC path, or undefined when its best path is the sync engine. */
+/**
+ * The language's best ASYNC path, or undefined when its best path is the sync engine.
+ *
+ * ⚠ THE SHARED PRE-PASSES ARE APPLIED HERE, not in the entries. `phonemize` reaches them because it goes
+ * through `getPhonemizer`, which wraps every engine's `text`; the entries below build their engine directly —
+ * they have to, since they need constructor arguments and extra `text` arguments the registry's instance does
+ * not carry — so they used to reach NONE of them. Measured cost, before this: `phonemizeAsync("سال ۲۰۲۴ ۾",
+ * "sd")` was *sˈaːlʊ mˈẽ*, the language's own digits gone; `<i>` was read aloud in every language; `XIV` was
+ * read as a word; a vulgar fraction vanished. 153 sync/async disagreements over 23 codes × 8 probes, and 0 of
+ * them in `ur`/`ps`/`pnb` — the three that ride `riderNeural`, the one entry that already routed through the
+ * registry. See tools/eval/async-sync-differential.ts.
+ *
+ * Applied to the INPUT, before the entry runs, because that is where the sync path applies it: ahead of the
+ * tokenizer. The async analogue is ahead of the TAGGER — a tagger handed un-stripped `<i>` tags them as words.
+ *
+ * The FOREIGN-RUN HOST is the other half and cannot live here: `core/foreign.ts`'s stack is only correct
+ * within one synchronous turn, so holding a host across the `await` below would let concurrent callers
+ * interleave. Each entry wraps its own synchronous render in `withHost` instead.
+ */
 export function getNeuralPhonemizer(lang: string): ((text: string) => Promise<string>) | undefined {
-    if (lang in ARABIC_VARIETY) return (t) => phonemizeArabic(t, ARABIC_VARIETY[lang]);
-    return NEURAL[lang];
+    if (lang in ARABIC_VARIETY) return (t) => phonemizeArabic(prePass(lang, t), ARABIC_VARIETY[lang], { host: lang });
+    const neural = NEURAL[lang];
+    return neural && ((t) => neural(prePass(lang, t)));
 }

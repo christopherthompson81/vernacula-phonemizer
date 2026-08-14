@@ -11,7 +11,8 @@
  * IPA DIRECTLY, so this assembles IPA itself.
  */
 import { assembleClauses } from "../../core/clauses.ts";
-import { getPhonemizer } from "../../registry.ts";
+import { getPhonemizer, renderInHost } from "../../registry.ts";
+import { withHost } from "../../core/foreign.ts";
 import { stripHarakat } from "../../core/harakatLexicon.ts";
 import { createFaVowelRestorer, type FaVowelRestorer } from "./vowelRestorer.ts";
 import { createFaContextRestorer, type FaContextRestorer } from "./contextRestorer.ts";
@@ -91,14 +92,16 @@ export async function phonemizeFaNeural(text: string): Promise<string> {
     await flush();
 
     let wi = 0;
-    return assembleClauses(text, TOKEN, (m, sink) => {
+    // Host pushed around the assembly: every await above has settled, so this is one synchronous turn (which is
+    // what core/foreign.ts's stack requires), and without it an embedded foreign run has no host and is dropped.
+    return withHost("fa", () => assembleClauses(text, TOKEN, (m, sink) => {
         if (m[2]) sink.emit(ipaQueue[wi++] ?? "");
-        else if (m[1]) sink.emit(getPhonemizer("fa").text(toAsciiDigits(m[1]))); // digits → the sync number path
+        else if (m[1]) sink.emit(renderInHost("fa", toAsciiDigits(m[1]))); // digits → the sync number path
         else if (m[3]) {
             const mk = MARK[m[3]];
             if (mk) sink.pause(mk);
         }
-    });
+    }));
 }
 
 /**
@@ -106,7 +109,7 @@ export async function phonemizeFaNeural(text: string): Promise<string> {
  * for when the context model is unavailable, and as the guard target for degenerate context decodes.
  */
 async function phonemizeFaWordLevel(text: string, restorer: FaVowelRestorer | undefined): Promise<string> {
-    if (!restorer) return getPhonemizer("fa").text(text); // no model at all → sync lexicon+default path
+    if (!restorer) return renderInHost("fa", text); // no model at all → sync lexicon+default path
     const lex = harakatLexicon();
     const neural = new Map<string, string>();
     for (const m of text.matchAll(WORD)) {
@@ -114,14 +117,14 @@ async function phonemizeFaWordLevel(text: string, restorer: FaVowelRestorer | un
         // The seq2seq is unreliable on 1–2 letter function words (و، به، او), which the lexicon/g2p handles anyway.
         if ([...w].length >= 3 && !lex.has(stripHarakat(w)) && !neural.has(w)) neural.set(w, await restorer.restore(w));
     }
-    return assembleClauses(text, TOKEN, (m, sink) => {
+    return withHost("fa", () => assembleClauses(text, TOKEN, (m, sink) => {
         if (m[2]) sink.emit(neural.get(m[2]) ?? phonemizeWord(m[2]));
-        else if (m[1]) sink.emit(getPhonemizer("fa").text(toAsciiDigits(m[1])));
+        else if (m[1]) sink.emit(renderInHost("fa", toAsciiDigits(m[1])));
         else if (m[3]) {
             const mk = MARK[m[3]];
             if (mk) sink.pause(mk);
         }
-    });
+    }));
 }
 
 let contextP: Promise<FaContextRestorer | undefined> | undefined;

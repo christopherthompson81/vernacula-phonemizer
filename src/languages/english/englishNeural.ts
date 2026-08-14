@@ -10,6 +10,7 @@
  * model is absent the tagger is `undefined` and this returns exactly the sync path (no throw).
  */
 import { createEnglish } from "./english.ts";
+import { withHost } from "../../core/foreign.ts";
 import { createEnglishTagger, type EnglishTagger } from "./englishTagger.ts";
 
 const WORD = /[A-Za-z][A-Za-z']*/gu;
@@ -35,7 +36,7 @@ export async function phonemizeEnNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createEnglishTagger();
     const tagger = await taggerP;
     const E = enEngine();
-    if (!tagger) return E.text(text); // no model → sync path
+    if (!tagger) return withHost("en", () => E.text(text)); // no model → sync path
 
     // PRE-PASS: tag each distinct OOV word once. Skip words the sync engine already knows (dict/heteronym) — they are
     // served authoritatively by the sync path; genuinely-OOV pure-alpha words go to the BiLSTM. An empty tag ("")
@@ -51,5 +52,7 @@ export async function phonemizeEnNeural(text: string): Promise<string> {
     }
     // Run the SYNC engine with the tagger readings injected between the lexicon and the n-gram — everything else
     // (numbers, heteronym POS, possessives, punctuation) is the sync path, so only OOV word readings differ.
-    return E.text(text, undefined, (g2pKey) => tagged.get(g2pKey));
+    // `withHost` — this engine is built here, not by the registry, so nothing else pushes the host and a
+    // foreign run would be dropped for want of one (core/foreign.ts). Synchronous, as that stack requires.
+    return withHost("en", () => E.text(text, undefined, (g2pKey) => tagged.get(g2pKey)));
 }

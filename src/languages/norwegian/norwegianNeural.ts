@@ -8,6 +8,7 @@
  * exactly the sync path (no throw). This is a SEPARATE async path; the sync engine is untouched.
  */
 import { createNorwegian, norwegianLexicon } from "./norwegian.ts";
+import { withHost } from "../../core/foreign.ts";
 import { createNorwegianTagger, type NorwegianTagger } from "./norwegianTagger.ts";
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 
@@ -24,12 +25,14 @@ const nbEngine = (): ReturnType<typeof createNorwegian> => (engine ??= createNor
 export async function phonemizeNbNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createNorwegianTagger();
     const tagger = await taggerP;
-    if (!tagger) return nbEngine().text(text); // no model → sync path
+    if (!tagger) return withHost("nb", () => nbEngine().text(text)); // no model → sync path
     const lex = norwegianLexicon();
     return wordLevelNeuralPrepass(text, {
         word: WORD,
         lexHas: (w) => lex.has(w.toLowerCase()), // lexicon-covered words are served by the sync lexicon path
         tag: (w) => tagger.tag(w),
-        render: (t, oov) => nbEngine().text(t, oov),
+        // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
+        // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.
+        render: (t, oov) => withHost("nb", () => nbEngine().text(t, oov)),
     });
 }

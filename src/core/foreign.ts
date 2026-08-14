@@ -57,6 +57,26 @@ export function popHost(): void {
 }
 
 /**
+ * Run one SYNCHRONOUS render with `lang` as the host, restoring the previous host afterwards.
+ *
+ * ⚠ `fn` is typed sync ON PURPOSE, and that is the whole point of this helper existing rather than callers
+ * pairing `pushHost`/`popHost` themselves. The stack above is only correct while every push and its pop sit
+ * in the same synchronous turn; hold a host across an `await` and two concurrent callers interleave into
+ * each other's frames. The ASYNC (neural) entries each end in a synchronous engine call, so they wrap THAT
+ * — not the whole promise. Without it their foreign runs are dropped outright: `readForeignRun` declines
+ * with an empty stack, and the Latin-only default never sees a non-Latin run
+ * (`phonemizeAsync("বছর Владимир শেষ", "bn")` lost the name entirely).
+ */
+export function withHost<T>(lang: string, fn: () => T): T {
+    pushHost(lang);
+    try {
+        return fn();
+    } finally {
+        popHost();
+    }
+}
+
+/**
  * Read one foreign run in the current host's context. `undefined` when there is no router, no host, or
  * the router declines (an unknown script, or a target equal to the host — which would hand the engine
  * back text its own tokenizer already refused, and recurse).
