@@ -12,6 +12,7 @@ import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeSepedi } from "./normalize.ts";
 
 interface SepediDef {
     graphemes: Record<string, string>;
@@ -56,7 +57,10 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class SepediPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // TEXT NORMALIZATION FIRST — %, currency, units, ranges, decimals and the grouping separators become
+        // words before anything is tokenized. Pure text→text; the words it emits are phonemized by the very
+        // same branches below, so no spelling can reach the phoneme sink (normalize.ts, playbook trap 6).
+        return assembleClauses(normalizeSepedi(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

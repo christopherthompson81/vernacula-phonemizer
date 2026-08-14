@@ -1,0 +1,590 @@
+// WIKIPEDIA WORD ATTESTATION — nso. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "nso",
+        "wiki": "nso.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "dikhilograma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…wa34.5cm(131/2in), gomme di ka ba le boima bja go fihla go dikhilograma tše 7.5 (diponto tše 17). Gape di na le dibopego tša methal…",
+                "…moso wa mokokotlo. [1]Dipoo di na le palogare ya boima bja dikhilograma tše 5 (diponto tše 11) go fihla go dikhilograma tše 8 (dipo…",
+                "…a boima bja dikhilograma tše 5 (diponto tše 11) go fihla go dikhilograma tše 8 (diponto tše 18), mola tše tshadi di na le boima bja…",
+                "…to tše 18), mola tše tshadi di na le boima bja palogare bja dikhilograma tše 3.5 (diponto tše 8). Boima bja tšona bo a fetoga go ya…",
+                "…bo a fetoga go ya ka sehla, gomme bo ka fetoga go fihla go dikhilograma tše 2.5 (diponto tše 6). Dikatse tša naga tša Yuropa di na…",
+                "…o go tloga go maruarua a peu a dwarf a dimithara tše 2,6 le dikhilograma tše 135 (298 lb) go ya go maruarua a matala a dimithara tše…"
+            ]
+            },
+        {
+                "word": "khilograma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikhilogramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "disenthimetara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "disekwere-khilomithara",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…24 ka bontši bja badudi lefaseng gomme e akaretša lefelo la disekwere-khilomithara tše 1 221 037 (disekwere-khilomithara tše 471 445). Pretori…",
+                "…e akaretša lefelo la disekwere-khilomithara tše 1 221 037 (disekwere-khilomithara tše 471 445). Pretoria ke motse-mošate wa taolo, mola Motse…",
+                "…la India . Lefelo la maruarua la Lewatle la Borwa le nabile disekwere-khilomithara tše 30 560 860 gomme le apeša Antarctica. Lefelo la maruaru…"
+            ]
+            },
+        {
+                "word": "motsotswana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Motsotswana (taetšo ya SI : s) ke leina la motšo wa nako. Motsotswana k…",
+                "…Motsotswana (taetšo ya SI : s) ke leina la motšo wa nako. Motsotswana ke yona letlase la motšo wa nako wo o šumiswago ke SI. == M…",
+                "…Brazil eupša o kgonne go tswalela sekgoba gomme a fetša ka motsotswana o tee ka pele ga Brazil ka nako ya metsotswana ya 38.71. Ka…"
+            ]
+            },
+        {
+                "word": "iri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…Iri ke motso wa kelo ya nako. == Nako == Iri e lekana le metsot…",
+                "…Iri ke motso wa kelo ya nako. == Nako == Iri e lekana le metsotso ye 60. Iri e lekana le.metsotswana ye…",
+                "…wa kelo ya nako. == Nako == Iri e lekana le metsotso ye 60. Iri e lekana le.metsotswana ye 3600.…",
+                "…o o lekana le metsotswana ye 60. Metsotso ye 60 e lekana le iri ye tee.…",
+                "…ke SI. == Metšo ye mengwe ya nako == 1/60 motsotso 1/3,600 iri 1/86,400 letšatši 1/31,557,600 la ngwaga…",
+                "…le a bohlokwa kudu. sekotwana sa mabitla gantši di bewa ka iri ya pele mesong ya letšatši le lengwe le le lengwe, e lego n…"
+            ]
+            },
+        {
+                "word": "diranta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Dirtolara tše dimilione tše 4 tša USA (Dimilione tše 60 tša diranta tša Afrika Borwa). Ga e sa le ditshwantšho tša tiragalo ye…",
+                "…go babegi ba ditaba gore o be a sepetša gauta, dithunya le diranta ka sephiring magareng ga Namibia, Angola le Afrika Borwa. O…",
+                "…a Borwa, ka lehumo le le akanyetšwago dipilione tše 6.4 tša diranta ($450 milione). Ka 2011, Ramaphosa o ile a lefa tumelelano…",
+                "…na le merwalo. Go na le dikoloi tša ka godimo ga dikete tsa diranta tše dikete tše 1,6 tšeo di dirišwago lefaseng ka bophara go…",
+                "…Mhlongo o \"boditše kgorotsheko gore Mkhize o mo tshepišitše diranta tše dikete e le go ananya polao ya Nkabinde\". Mkhize o rile…",
+                "…ri ya go rema maruarua, ka go emišwa ga mošomo, e tšweletša diranta tše dimilione tše 100 (GB£20 milione) ka ngwaga. Bogolo le…"
+            ]
+            },
+        {
+                "word": "ranta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Ranta (rand) ke mašeleng a Afrika Borwa. Leina rand le tšwa go Wi…",
+                "…šeleng a Afrika Borwa. Leina rand le tšwa go Witwatersrand. Ranta e šomišwa CMA ke Afrika Borwa, Namibia, Eswatini le Lesotho…",
+                "…Afrika Borwa, Namibia, Eswatini le Lesotho. === Histori === Ranta e thomilwe go šomišwa ka 1961 ge e tšea legato la South Afr…",
+                "…ntšhi. maloti) ke mašeleng a mmušo wa Lesotho. E fegiloe go ranta ya Afrika ka 1:1. Loti le Ranta eya amogeloa blao ka mašele…",
+                "…šo wa Lesotho. E fegiloe go ranta ya Afrika ka 1:1. Loti le Ranta eya amogeloa blao ka mašeleng Lesotho.…",
+                "…ibia, lilangeni ya Eswatini le loti ya Lesotho di lekana le ranta ya Afrika Borwa. Ranta ea dumelaga ebile ea dinageng tse. G…"
+            ]
+            },
+        {
+                "word": "ditolara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ka Borwa, ka tšhelete ya go feta $450 dimilione tše 450 tša ditolara gomme o tšweletše ka dimakasineng tša ditšhelete tša go swa…",
+                "…ka 2019 , bontšhi bja baagi ba lefase ba phela bodiiding ka ditolara tša PPP. 85% ya batho ba phela ka tšhelete ya ka tlase ga R…"
+            ]
+            },
+        {
+                "word": "tolara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…loto ka moka, tša setšhaba le tša poraebete\", mo go taba ya tolara ya United States .…"
+            ]
+            },
+        {
+                "word": "diponto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…mme di ka ba le boima bja go fihla go dikhilograma tše 7.5 (diponto tše 17). Gape di na le dibopego tša methaladi tšeo di sa ph…",
+                "…[1]Dipoo di na le palogare ya boima bja dikhilograma tše 5 (diponto tše 11) go fihla go dikhilograma tše 8 (diponto tše 18), mo…",
+                "…rama tše 5 (diponto tše 11) go fihla go dikhilograma tše 8 (diponto tše 18), mola tše tshadi di na le boima bja palogare bja di…",
+                "…shadi di na le boima bja palogare bja dikhilograma tše 3.5 (diponto tše 8). Boima bja tšona bo a fetoga go ya ka sehla, gomme b…",
+                "…sehla, gomme bo ka fetoga go fihla go dikhilograma tše 2.5 (diponto tše 6). Dikatse tša naga tša Yuropa di na le methaladi ya m…"
+            ]
+            },
+        {
+                "word": "diyuro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "desimale",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tikimale",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "khutlo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ehlala yeo e latelago ya maswaodikga polelong ya gabo rena, khutlo(.) ; fegelwana(,) ; leswao potsiso(?) , leswao la makalo (!…",
+                "…siso(?) , leswao la makalo (!) ; ditsebjana (\"\"); fegelwana khutlo(;) le tse dingwe. = Bohlokwa bo bongwe gape ba maswaodikga…"
+            ]
+            },
+        {
+                "word": "ntlha",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Bay kua Namibia ya mehleng yeno). Se e be e le ka borwa bja ntlha ya kgole kudu yeo e fihleletšwego ka 1485 ke yo a tlilego p…",
+                "…e lebopo, o ile a sesa ka ntle ga pono ya naga gomme a feta ntlha ya borwa bja Afrika ntle le go e bona. O fihlile go fihla k…",
+                "…s Tormentas (‘Kapa ya Madimo'). Kgoši John II o ile a reela ntlha yeo leina le lefsa la Cabo da Boa Esperança, goba Kapa ya K…",
+                "…uta ye mengwe ya kanisi ka ditsebe tša yona tše di sego tša ntlha le molomo, gammogo le setho sa mmele se se kopana le mosela…",
+                "…e tshepedišo ya tšona ya diiri tše masome pedi nne bjalo ka ntlha ya go rekiša, le ge e le gore ka ge se bjale e le molao go…",
+                "…yeo e bego e le nakong ye e fetilego, bjale kudu e fetogile ntlha ya go rekiša ya weposaete ya seteišene goba didirišwa tša d…"
+            ]
+            },
+        {
+                "word": "khoma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "diperesente",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ona le boleng bjo bo nnyane bja senotagi (gantši ka fase ga diperesente tše tharo (3%)) gomme e tsebja ka go ba le monkgo wo boima…",
+                "…reng ga August 2015, Deez Nuts e ile ya dira dinyakišišo ka diperesente go seswai, tše seswai le tše senyane, ka go latelelana, e l…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…retšhara profesnseng di be di le magareng ga 2.24º le 1.02º Celsius mola tša Capricorn di bile fasefase go - 3.12º Celsius,” a…",
+                "….02º Celsius mola tša Capricorn di bile fasefase go - 3.12º Celsius,” a realo. Go amegile dibjalwa tše mmalwa tšeo di sa kgoneg…"
+            ]
+            },
+        {
+                "word": "Fahrenheit",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikgato",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…porofense Mpumalanga kamoka Afrika Borwa. Motse o bopago ka dikgato tše tharo tšeo e lego Merry Pebble Stream A, B, C. Motse wo…",
+                "…tlo ao gantši a diregago ka go se rate monaganong nakong ya dikgato tše itšego tša boroko . Batho ba fela dikgokologo tše fetan…",
+                "…okgwa wa chess yeo go yona baphenkgišani ba boledišanago ka dikgato tša bona ka imeile. Nako ya karabelo e balwa ka matšatši go…",
+                "…ka mehla le ba 2 bao ba tšeago legato la yona. E swarwa ka dikgato tše pedi: Makgaolakgang a Olympiad e tee le Semifinal ya ye…",
+                "…melelwago kua ditikologong tša ditoropong. Ke ka lebaka leo dikgato tša taolo di tšewago kua ditikologong tša ditoropong. Tše b…",
+                "…eletšo. Mokoti gantši o epiwa ka bodiba bja dimetara tše 3 (dikgato tše 10) le metara o 1 wa go putlaganya(dikgato tše 3.2). Mo…"
+            ]
+            },
+        {
+                "word": "digerii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tikirii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikhutlo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…lego tseleng ya rena, ra tšea kgahlego maphelong a batho le dikhutlo tša kgole kudu tša lefase le. Go nna nywaga yeo e ile ya ne…",
+                "…e hlaloša go feta bjalo ka go ba le dikoba tše ka bago 62, dikhutlo tše mmalwa tša tšona di bogale kudu. Ka fao thanele ke sebo…"
+            ]
+            },
+        {
+                "word": "digrii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikilogeramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…hudu tše kgolo tša Galápagos le Aldabra di ka imela go feta dikilogeramo tše 250 gomme tša gola go feta mithara e tee ka botelele. B…"
+            ]
+            },
+        {
+                "word": "kilogeramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "disekwere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…24 ka bontši bja badudi lefaseng gomme e akaretša lefelo la disekwere-khilomithara tše 1 221 037 (disekwere-khilomithara tše 471…",
+                "…e akaretša lefelo la disekwere-khilomithara tše 1 221 037 (disekwere-khilomithara tše 471 445). Pretoria ke motse-mošate wa taol…",
+                "…ya Kruger e akaretša dikhilomithara tše di nyakilego go ba disekwere tše 20,000 ka leboa-bohlabela bja Afrika Borwa, e le mollwa…",
+                "…la India . Lefelo la maruarua la Lewatle la Borwa le nabile disekwere-khilomithara tše 30 560 860 gomme le apeša Antarctica. Lefe…"
+            ]
+            },
+        {
+                "word": "sekwere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…\"bašweu fela\" a akaretša Sandton, yeo e tsebjago bjalo ka \"Sekwere-maele se se hwetšago kudu sa Afrika,Randburg le Roodeport.…"
+            ]
+            },
+        {
+                "word": "dilithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "milimithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dimilimithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…meriri ye serolane goba ye sootho. Matlakala a botelele bja dimilimithara tše 60 goya go 200(21/4 go ya go 73/4 inches) le bophara bj…",
+                "…masehla gomme a rwala godimo ga mahlaka a boya bja botelele dimilimithara tše 40(11/2 inches). Letšoba le lengwe le le lengwe le gola…"
+            ]
+            },
+        {
+                "word": "dikhilomithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…a bopa Ngwedi. Bogolo le Sekgala Ngwedi o na le bophara bja dikhilomithara tše ka bago tše 3 474, e lego seo se dirago gore o ka ba ko…",
+                "…ase. E dikologa polanete ya rena ka palogare ya bokgole bja dikhilomithara tše ka bago 384 400 (dikhilomithara tše 238 855). Go sa šet…",
+                "…palogare ya bokgole bja dikhilomithara tše ka bago 384 400 (dikhilomithara tše 238 855). Go sa šetšwe bokgole bjo bjo bogolo, e bonaga…",
+                "…. O hwetšagala karolong ya lebowa-botlhaba ya naga, e ka ba dikhilomithara tše 300 ka lebowa la Johannesburg. Motse wo ke lefelo la bo…",
+                "…Borwa, ke naga ya borwa bja Afrika. E lekantšwe ka borwa ke dikhilomithara tše 2,798 (1,739 mi) tša lebopong leo le otlollwago go bapa…",
+                "…Borwa, Jacob Zuma, e lego e lego gona. Lefelo la bodulo le dikhilomithara tše 40 ka borwa bja toropo ya Nkandla, ka kua ga Sethokgwa…"
+            ]
+            },
+        {
+                "word": "khilomithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ši bja badudi lefaseng gomme e akaretša lefelo la disekwere-khilomithara tše 1 221 037 (disekwere-khilomithara tše 471 445). Pretori…",
+                "…a lefelo la disekwere-khilomithara tše 1 221 037 (disekwere-khilomithara tše 471 445). Pretoria ke motse-mošate wa taolo, mola Motse…",
+                "…Lefelo la maruarua la Lewatle la Borwa le nabile disekwere-khilomithara tše 30 560 860 gomme le apeša Antarctica. Lefelo la maruaru…"
+            ]
+            },
+        {
+                "word": "dimithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…frika Borwa yo a nago le bokgoni bja go kitima ka lebelo la Dimithara tše 100. E be e le wa bohlano go 2016 Summer Olympics go ba…",
+                "…0. E be e le wa bohlano go 2016 Summer Olympics go banna ba dimithara tše 100 gomme e be e le Mong wa rekoto ya Afrika ya dimitha…",
+                "…mithara tše 100 gomme e be e le Mong wa rekoto ya Afrika ya dimithara tše 100, ka nako ya metsotswana ya 9.84 yeo e beilwego ka J…",
+                "…i wa makgaola-kgang wa diphadišano tša lefase tša banna tša dimithara tše 100 ka 2017 (wa bohlano), 2019 (wa bone), le 2022 (wa b…",
+                "…(wa bone), le 2022 (wa bohlane) gomme e be e ri nkgwete ya dimithara tše 100. Mo phadišanong ya 4 × 100 metres, o thušitše Afrik…",
+                "…e De Grasse. Ka morago ga go lahlegelwa ke mentlele gape go dimithara tše 100 tša banna go di-Olympics tša Paris tša 2024 - a fet…"
+            ]
+            },
+        {
+                "word": "mithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…a imela go feta dikilogeramo tše 250 gomme tša gola go feta mithara e tee ka botelele. Bodulo le Dijo Dikhudu di phela mafelong…"
+            ]
+            },
+        {
+                "word": "senthimetara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ng wa Actinidia. <i id=\"mwQw\">​</i><i id=\"mwQg\">​</i>​ ​5–8 senthimetara (2–3 inches) ka bophara. Kiwi e na le letlalo le lesesane,…"
+            ]
+            },
+        {
+                "word": "dikhilogeramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilogerama",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hektare",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ed Nations Lijo le Temo Organization tlhaloso, meru koahela hektare bilione tse nè (limilione tse 15 lisekoere-k'hilomithara ts…",
+                "…, le Savanna ya go tloga go mehlare ya 800 go ya go 3300 ka hektare le dithokgwa tše di bapilego le mehlare ya go 800-2000/ha.…",
+                "…a Australia di na le palo ya mehlare ya mo e ka bago 100 ka hektare, go swana le dithokgwa tše di lego seleteng se swanago. Dis…",
+                "…e savanna ya go tloga go mehlare ya 800 go ya go 3300 ya di hektare le dithokgwa tše di bapilego ke mehlare ya go 800-2000. Ka…",
+                "…a Australia di na le palo ya mehlare ya mo e ka bago 100 ka hektare, go swana le dithokgwa tše di lego seleteng se swanago. Dis…"
+            ]
+            },
+        {
+                "word": "metsotswana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…== Nako == Iri e lekana le metsotso ye 60. Iri e lekana le.metsotswana ye 3600.…",
+                "…o ke motso wa kelo ya nako. == Nako == Motsotso o lekana le metsotswana ye 60. Metsotso ye 60 e lekana le iri ye tee.…",
+                "…Internation System of Units (SI) === Letšatši le lekana le metsotswana ye 86400. Go ya ka tšhupamabaka ya Gregorian yeo e šomišwag…",
+                "…e Mong wa rekoto ya Afrika ya dimithara tše 100, ka nako ya metsotswana ya 9.84 yeo e beilwego ka July 2021 go fihlela e robja ke F…",
+                "…018 Commonwealth Games ka nako ya rekoto ya Afrika Borwa ya metsotswana ya 38.24. O kgomaretše Afrika Borwa go gauta ka 2021 World…",
+                "…roba rekoto ya Afrika Borwa ya dimithara tše 100 ka nako ya metsotswana ya 9.89 kua Gyulai István Memorial kua Székesfehérvár ka la…"
+            ]
+            },
+        {
+                "word": "peresente",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…tlo wa Setšhaba wa Thuto wa United States o laodišitše gore peresente ye masometharo tshela(36) ya barutiši ba boletše taba ya go…",
+                "…kudukudu Ivory Coast le Ghana, tšeo di tsenyago letsogo ka peresente ya mosometshela ya kabo ya kokoa ya lefase. Go ba gona ga g…"
+            ]
+            },
+        {
+                "word": "dipersente",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…še dingwe tše tshela. Go na le maleme a ka bago 6800. Eupša dipersente tše nne tša badudi di bolela 96 lekgolong ya maleme, gomme…",
+                "…lekgolong ya maleme, gomme 96 lekgolong ya badudi e bolela dipersente tše nne tša maleme. Tše.\" dipersente tše nne di bolelwa ke…",
+                "…ong ya badudi e bolela dipersente tše nne tša maleme. Tše.\" dipersente tše nne di bolelwa ke dihlopha tše kgolo tša maleme gomme k…",
+                "…mehlano go Kopano ya Setšhaba. Dikemedi tša makala di bopa dipersente tša go ka ba 90 tša dikemedi tše di boutago go Kopano ya Bo…"
+            ]
+            },
+        {
+                "word": "persente",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "phesente",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…udi mo nakong ya nako ya yuniti, gantši e bontšhwa bjalo ka phesente ya palo ya batho ka o tee ka o tee ka setšhabeng mathomong…"
+            ]
+            },
+        {
+                "word": "protsente",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    
