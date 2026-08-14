@@ -97,6 +97,16 @@ describe("language catalogue", () => {
             for (const code of ["rn", "bar", "fo", "ba", "bs"])
                 expect(value(code), `${code} borrows a helper — it must not read as inherited`).not.toBe("inherited");
 
+            // ⚠ AND A THIRD SHAPE, WHICH PASSES THE FACTORY TEST AND STILL INHERITS NOTHING: `hyw` calls
+            // `makeArmenianEngine`, a genuine factory — but that factory takes the normalizer as a PARAMETER
+            // (`pre`, defaulting to identity) and Western Armenian passes no argument for it, so no Armenian
+            // normalizer runs. It flipped to `inherited` the moment `armenian/normalize.ts` existed while
+            // being wholly untreated: `5%` reads *hinkʰ* with the sign dropped where hy reads *hinɡ tokos*,
+            // and hyw's entire mined corpus is BYTE-IDENTICAL across the change (442/442 utterances). Same
+            // failure as the five above, one narrowing later — a language that needs work reading as done.
+            expect(value("hyw"), "hyw calls a factory that takes its normalizer as an argument it never passes")
+                .not.toBe("inherited");
+
             // Calls another language's FACTORY, so that engine — and its layer — is what actually runs.
             for (const code of ["es-419", "awa", "bho", "mai", "pt-BR", "en-GB"])
                 expect(value(code), `${code} is a wrapper — it must still read as inherited`).toBe("inherited");

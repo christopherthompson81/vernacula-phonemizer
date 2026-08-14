@@ -103,13 +103,59 @@ def main():
                 delegates[d] = other
                 break
 
-    def normalizes(d, seen=()):
+    # ⚠ AND A THIRD NARROWING: A FACTORY CAN TAKE THE NORMALIZER AS AN ARGUMENT, and then calling it does NOT
+    # inherit anything. `westarmenian.ts` calls `makeArmenianEngine(loadManifest(...))` — a genuine factory, so
+    # the FACTORY test above passes — but that factory's signature is
+    # `makeArmenianEngine(def, pre: (s) => string = (s) => s)`, and Western Armenian passes no second argument,
+    # so `pre` is the IDENTITY and no Armenian normalizer runs for hyw. The moment `armenian/normalize.ts`
+    # existed, hyw flipped to `inherited` while being completely untreated: `5%` still drops the sign, `35,6`
+    # still breaks on a clause pause, `20 °C` still reads ⟨C⟩ as the English letter name. Verified the other
+    # way too — hyw's whole mined corpus is BYTE-IDENTICAL across the change (442/442 utterances).
+    #
+    # That is the same failure as the `rn`/`bar`/`fo`/`ba`/`bs` row above, one narrowing later: a language that
+    # needs work reading as done, which is the worst answer this column can give.
+    #
+    # THE TEST: the target's normalizer must be reached somewhere OTHER than inside a factory call's argument
+    # list. A genuine wrapper's target calls its normalizer in the engine body, on the path every consumer of
+    # the factory takes (`spanish.ts` runs `normalizeSpanish(input, …)` inside `text()`); a parameterised
+    # engine only names it at ITS OWN call site, which a different caller does not share.
+    CALL = re.compile(r"\b(?:create|make)[A-Z]\w*\s*\(")
+
+    def without_factory_args(src):
+        """`src` with the ARGUMENT LIST of every create*/make* call removed (balanced parens)."""
+        out, i = [], 0
+        while i < len(src):
+            m = CALL.search(src, i)
+            if m is None:
+                out.append(src[i:])
+                break
+            out.append(src[i:m.end()])
+            depth, j = 1, m.end()
+            while j < len(src) and depth:
+                depth += (src[j] == "(") - (src[j] == ")")
+                j += 1
+            i = j
+        return "".join(out)
+
+    def wired_for_consumers(d):
+        """Is d's own normalizer on the path a CALLER of d's factory would take?"""
+        if d not in is_wired:
+            return False
+        norm = open(os.path.join(SRC, d, "normalize.ts"), encoding="utf8").read()
+        names = [n for n in re.findall(r"export function ((?:normalize|make|create)\w+)", norm)
+                 if n.startswith("normalize") or "Normalizer" in n]
+        body = without_factory_args(engine_src(os.path.join(SRC, d)))
+        return any(re.search(rf"\b{re.escape(n)}\s*\(", body) for n in names)
+
+    def normalizes(d, seen=(), via_delegation=False):
         """Does a layer run for this directory, its own or a delegate's? Cycle-guarded."""
-        if d in is_wired:
+        if d in is_wired and not via_delegation:
+            return True
+        if via_delegation and wired_for_consumers(d):
             return True
         if d in seen or d not in delegates:
             return False
-        return normalizes(delegates[d], (*seen, d))
+        return normalizes(delegates[d], (*seen, d), via_delegation=True)
 
     rows = list(csv.DictReader(open(TSV, encoding="utf8"), delimiter="\t"))
     cols = list(rows[0].keys())
