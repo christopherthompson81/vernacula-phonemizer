@@ -59,3 +59,49 @@ describe("Shan (shn) cardinal numbers", () => {
         });
     }
 });
+
+// The three findings of the silent-deletion scan, and the one it got right for the wrong reason.
+// Evidence and sourcing: docs/investigations/silent_sea_investigation.md Run 4.
+describe("Shan (shn) — the characters that used to read as nothing", () => {
+    /**
+     * ⚠ THE VOICED SERIES OF THE SHAN LETTER BLOCK WAS ABSENT FROM `onsets`. U+1075–U+1081 is the Shan run;
+     * the table held 1075 1076 1078 107A 107C 107D 107E 1080 1081 and skipped exactly ၷ ၹ ၻ ၿ. Standard
+     * Shan has no voiced plosives, so these are loan-only — which is why they were missed and not a reason
+     * to omit them: the corpus writes ⟨ၻ⟩ ×34, ⟨ၿ⟩ ×22, ⟨ၷ⟩ ×13, all in English loans and Pali.
+     * Values: Wikipedia "Help:IPA/Shan and Tai Lue" — ၻ [d], ၿ [b], ၷ [ɡ] "in foreign words", ၹ [z].
+     */
+    test("⟨ၻ ၿ⟩ are /d/ and /b/ — loan letters, not missing ones", () => {
+        expect(phonemizeWord("ၻွၵ်ႇ")).toBe("dɔk̚˩"); // ၻွၵ်ႇတႂ်ႇ 'doctor' — was *kaː˨˦*, the ၻ and its ⟨ွ⟩ gone
+        expect(phonemizeWord("ၻီႇ")).toBe("diː˩"); // ၻီႇၵရီႇ 'degree' ×6 in the corpus
+        expect(phonemizeWord("ၿီႇလီႇယၢၼ်ႇ")).toBe("biː˩liː˩jaːn˩"); // 'billion' — was *liː˩jaːn˩*
+    });
+
+    /**
+     * ⟨ꧦ⟩ U+A9E6 SHAN REDUPLICATION, the ໆ/ๆ-style "say that again" mark the module header has claimed since
+     * bring-up. TWO holes had to close before it could work: it is not an onset (so the scan stepped over
+     * it), AND U+A9E6 is in Myanmar Extended-B, which the TOKEN class did not admit — so the word was cut
+     * in two before `phonemizeWord` ever saw the mark.
+     */
+    test("⟨ꧦ⟩ repeats the preceding syllable, and the token class now keeps it in the word", () => {
+        expect(phonemizeWord("လၢႆꧦ")).toBe("laːj˨˦laːj˨˦"); // လၢႆလၢႆ 'various'
+        expect(phonemize("ႁတ်းꧦႁၢၼ်ꧦ", "shn")).toBe("hat̚˥hat̚˥haːn˨˦haːn˨˦"); // ႁတ်းႁၢၼ် 'bold' → 'boldly'
+        expect(phonemize("ငၢႆႈꧦ", "shn")).toBe("ŋaːj˧˧˨ŋaːj˧˧˨"); // ငၢႆႈငၢႆႈ 'easily'
+    });
+
+    /**
+     * ⚠ ⟨က န အ ည ခ⟩ ARE NOT SHAN LETTERS. The scan reported them ×76/×70/×59/×41/×30 as silent and it was
+     * right about the silence and wrong about the cause: 15 of the corpus's 407 lines are BURMESE, and the
+     * detector's native-script filter cannot see that, Burmese and Shan being the same script. The silence
+     * was also the lesser half — the surrounding Burmese vowel signs latched onto the next consonant and
+     * `ပတ်ဝန်းကျင်` read *pat̚˨˦waː˨˦ŋaː˨˦*. A run carrying a Burmese-only consonant now goes to the script
+     * router, i.e. to `my`.
+     */
+    test("a Burmese run inside Shan text is read by the Burmese engine, not mis-scanned as Shan", () => {
+        for (const w of ["ပတ်ဝန်းကျင်", "သည်", "တောင်ကြီး", "အမြင့်"])
+            expect(phonemize(w, "shn"), w).toBe(phonemize(w, "my"));
+        // ⚠ AND A SHAN WORD MUST NEVER TAKE THAT BRANCH. The Burmese-only set is the COMPLEMENT of the Shan
+        // inventory — ⟨င တ ထ ပ မ ယ ရ လ ဝ သ⟩ are shared and excluded — so this is a property, not a sample.
+        for (const w of ["တႆး", "မိူင်းတႆး", "ၵိၼ်", "ႁတ်းႁၢၼ်"])
+            expect(phonemize(w, "shn"), w).toBe(phonemizeWord(w));
+    });
+});

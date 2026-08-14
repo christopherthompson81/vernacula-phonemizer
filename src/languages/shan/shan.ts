@@ -8,6 +8,7 @@
 import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { readForeignRun } from "../../core/foreign.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
 interface ShanNumbers {
@@ -74,13 +75,29 @@ function rime(keys: string[], medialW: boolean, closed: boolean, offglide: strin
     return { nucleus, glide: offglide };
 }
 
+/**
+ * ⟨ꧦ⟩ U+A9E6 MYANMAR MODIFIER LETTER SHAN REDUPLICATION — "say the preceding syllable again".
+ *
+ * ⚠ THE MODULE HEADER HAS CLAIMED "the ໆ-style repetition mark" SINCE BRING-UP AND NOTHING IMPLEMENTED IT.
+ * The character is not an onset, so the scan below stepped over it and it read as nothing: `silentCharsIn`
+ * reported it ×10, `ႁတ်းꧦႁၢၼ်ꧦဝႃႈ → hat̚˥ haːn˨˦ waː˧˧˨`. Every one of the corpus's ten instances follows a
+ * COMPLETE syllable and intensifies it — ႁတ်းꧦႁၢၼ်ꧦ (ႁတ်းႁၢၼ် "bold" → "boldly"), တႅမ်ႈꧦမၢႆꧦ, လၢႆꧦ
+ * ("various"), ငၢႆႈꧦ ("easily"), တႄႉꧦ, ဝႃႈꧦ — which is precisely how Lao ໆ and Thai ๆ behave, and
+ * `lao.ts` already reads its own mark by copying the last syllable. Same rule, same shape.
+ */
+const REDUPLICATION = "ꧦ";
+
 /** Phonemize one Shan word → canonical IPA: per-syllable abugida scan + explicit tone. */
 export function phonemizeWord(word: string): string {
     const s = [...word.normalize("NFC")];
     const n = s.length;
     let out = "";
+    let last = ""; // the syllable just emitted, for ⟨ꧦ⟩ to repeat
     let i = 0;
     while (i < n) {
+        // ⚠ BEFORE the onset test, because ⟨ꧦ⟩ is not an onset and the `continue` below would step over it.
+        // A mark with nothing before it repeats nothing rather than guessing at the previous WORD.
+        if (s[i] === REDUPLICATION) { out += last; i++; continue; }
         if (!isOnset(s[i])) { i++; continue; } // stray sign / space handled by text()
         let onset = ONSET[s[i]!]!;
         i++;
@@ -123,7 +140,8 @@ export function phonemizeWord(word: string): string {
         const realSigns = keys.filter((k) => k !== "FINAL_Y").length;
         const medialGlide = glide === "r" ? "r" : plainW || (roundW && realSigns !== 0) ? "w" : "";
         // Order: onset + (-w-) + nucleus + offglide + coda + tone (the Chao tone sits at the syllable end).
-        out += onset + medialGlide + nucleus + og + coda + tone;
+        last = onset + medialGlide + nucleus + og + coda + tone;
+        out += last;
     }
     return out.normalize("NFC");
 }
@@ -164,7 +182,36 @@ function numberToShanWords(n: number): string[] {
 
 // A Shan word (Myanmar-block letters/signs, EXCLUDING the dandas U+104A/104B and the Shan digits U+1090–99) / number
 // (ASCII or Shan digits) / punctuation (incl. the Myanmar dandas). Space-separated.
-const TOKEN = /([က-၉၌-ႏႚ-႟ꩠ-ꩿ]+)|(\d+|[႐-႙]+)|([၊။.!?…,;:])/gu;
+// ⚠ `ꧠ-꧿` IS MYANMAR EXTENDED-B, AND ITS ABSENCE CUT EVERY REDUPLICATED WORD IN TWO. The class
+// listed the main block, Extended-A (`ꩠ-ꩿ`) and the two tails, and skipped Extended-B — where ⟨ꧦ⟩ U+A9E6
+// lives, along with the Shan Pali letters ⟨ꧠ ꧡ ꧣ ꧤ⟩. So `ႁတ်းꧦႁၢၼ်ꧦဝႃႈ` tokenized as three separate words
+// with the marks stranded in the gap, and no reduplication rule inside `phonemizeWord` could ever have seen
+// one. The token class and the grapheme table both had a hole, and only fixing both shows a change.
+const TOKEN = /([က-၉၌-ႏႚ-႟ꧠ-꧿ꩠ-ꩿ]+)|(\d+|[႐-႙]+)|([၊။.!?…,;:])/gu;
+
+/**
+ * BURMESE-ONLY CONSONANTS — the letters of the Myanmar block that the SHAN alphabet does not use.
+ *
+ * ⚠ THE SILENT-DELETION SCAN NAMED ⟨က ×76 န ×70 အ ×59 ည ×41 ခ ×30⟩ AND NONE OF THEM IS A SHAN LETTER.
+ * They are Burmese, and they are in a Shan corpus because 15 of its 407 lines are BURMESE TEXT — quotations,
+ * Burmese-language passages, Burmese proper names. `silentCharsIn` cannot filter them the way it filters an
+ * IPA gloss: its native-script test asks whether a word is in the corpus's dominant SCRIPT, and Burmese and
+ * Shan are the same script. So the report is right that the characters say nothing and wrong about why.
+ *
+ * ⚠ AND THE SILENCE WAS THE LESSER HALF. `phonemizeWord` steps over a character that is not an onset, which
+ * leaves the surrounding Burmese vowel signs to attach to whatever consonant comes next: `ပတ်ဝန်းကျင်`
+ * ("environment") read *pat̚˨˦waː˨˦ŋaː˨˦*, `သည်` read *sʰaː˨˦*. That is a wrong reading, not a gap.
+ *
+ * So a run carrying one of these goes to the SCRIPT ROUTER, which sends Myanmar to `my` — the Burmese engine
+ * this file's own syllable scan was modelled on. `ပတ်ဝန်းကျင် → paʔwʊ˥˩ɴd͡ʑɪ˨ɴ`, `သည် → ðɛ˨`.
+ *
+ * ⚠ THE SET IS THE COMPLEMENT OF THE SHAN INVENTORY, not a list of "Burmese-looking" letters: ⟨င တ ထ ပ မ ယ
+ * ရ လ ဝ သ⟩ are shared and are excluded, so a Shan word can never match. Measured on the corpus: 123 distinct
+ * tokens contain one, and all 123 are Burmese — no false positive. The converse is not claimed and cannot
+ * be: a Burmese word built only from shared letters is indistinguishable from Shan without language ID, and
+ * those still read as Shan. This is a floor, not a fence.
+ */
+const BURMESE_ONLY = /[က-ဃစ-ဏဒ-နဖ-ဘဟ-အ]/u;
 
 class ShanPhonemizer implements Phonemizer {
     text(input: string): string {
@@ -172,7 +219,15 @@ class ShanPhonemizer implements Phonemizer {
         // exactly like a Western one. The token class still admits ႐-႙ so an unfolded digit could never
         // fall between the WORD ranges and vanish.
         return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) {
+                // ⚠ THE ROUTER FIRST, THE OLD BEHAVIOUR AS THE FALLBACK. `readForeignRun` declines when no
+                // router is registered — which is what a direct `import` of this module in a test looks
+                // like — and declining must not delete the text, so the run then reads as Shan exactly as
+                // it did before. In the shipped pipeline the registry always has a router.
+                const foreign = BURMESE_ONLY.test(m[1]) ? readForeignRun(m[1]) : undefined;
+                if (foreign !== undefined) { if (foreign !== "") sink.emit(foreign); return; }
+                sink.emit(phonemizeWord(m[1]));
+            }
             else if (m[2]) for (const wd of numberToShanWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "။" || m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });

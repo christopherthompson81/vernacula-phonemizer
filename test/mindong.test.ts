@@ -24,6 +24,23 @@ describe("Min Dong (Fuzhou) canonical IPA — Bàng-uâ-cê → IPA converter", 
         expect(phonemizeWord("siŏh")).toBe("suoʔ˥"); // ⟨-h⟩ checked, breve → 陽入 5
     });
 
+    /**
+     * ⚠ `silentCharsIn` REPORTS ⟨◌̆⟩ U+0306 AS INERT (×295, `Dṳ̆ng → tyŋ˥˥`) AND THE READING IS CORRECT.
+     * The breve is Bàng-uâ-cê's 陰平 mark, and `syllableParts` reads it — but an UNMARKED syllable also
+     * falls back to tone 1, so deleting the mark cannot change the reading and the differential calls it
+     * silent. Redundancy with a default is not the same thing as being ignored, and the difference is only
+     * decidable from outside the engine: these three readings come from the cdo referee
+     * (`tools/referee-eval/referees/cdo.buc-ipa.tsv`, Wiktionary Module:cdo-pron), which agrees on all of
+     * them. ⚠ THE POINT OF PINNING THEM HERE is that the day the unmarked fallback stops being tone 1 —
+     * which it may well should, the corpus having 1 420 unmarked syllables against 15 891 marked ones — the
+     * breve must keep reading 陰平 on its own account rather than by coincidence.
+     */
+    test("⚠ the breve is redundant with the unmarked-tone fallback, and reads 陰平 on its own account", () => {
+        expect(phonemizeWord("dṳ̆ng")).toBe("tyŋ˥˥"); // referee: dṳ̆ng  tyŋ⁵⁵
+        expect(phonemizeWord("gṳ̆")).toBe("ky˥˥"); //     referee: gṳ̆   ky⁵⁵
+        expect(phonemizeWord("sṳ̆k")).toBe("syʔ˥"); //    referee: sṳ̆k  syʔ⁵  (陽入, the checked counterpart)
+    });
+
     test("韻變 rime alternation: the SAME rime is TIGHT under 陰平/陽平/上聲, LOOSE under 陰去/陽去/陰入", () => {
         expect(phonemizeWord("găng")).toBe("kaŋ˥˥"); // 間 ⟨ang⟩ TIGHT [aŋ] (breve = 陰平 55)
         expect(phonemizeWord("gáng")).toBe("kɑŋ˨˩˧"); // 間 ⟨ang⟩ LOOSE [ɑŋ] (acute = 陰去 213)

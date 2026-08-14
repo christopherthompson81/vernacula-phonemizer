@@ -160,3 +160,33 @@ describe("Tigrinya text normalization", () => {
             .toBe("ʃɨħn tɨʃʕatə miʔɨtn səlasan ʃəwʕatən ʃɨħn tɨʃʕatə miʔɨtn səlasan ʃəmontən");
     });
 });
+
+// The silent-deletion finding in ti, and the systematic hole it turned out to be.
+// Evidence: docs/investigations/silent_sea_investigation.md Run 6.
+describe("Tigrinya (ti) — the labiovelar orders", () => {
+    /**
+     * ⚠ THREE OF THE SIX LABIOVELAR SUB-SERIES WERE INCOMPLETE, AND WHAT WAS PRESENT WAS OFF BY ONE ORDER.
+     * `silentCharsIn` reported ⟨ኲ⟩ U+12B2 ×28 and ⟨ቊ⟩ U+124A ×6 as inert — a fidel with no row reads as
+     * nothing, so `ኲናት` ("war") came out `nat`, a whole syllable gone. Enumerating the block showed the
+     * shape: KXW ⟨ዀ ዂ ዃ ዄ ዅ⟩ and QHW ⟨ቘ ቚ ቛ ቜ ቝ⟩ are complete and correct, while QW/KW/GW held only three
+     * of five each AND mapped their 1st-order member to the 5th order's vowel.
+     *
+     * The 1st order is /ə/ throughout this very table (ሀ hə, ሰ sə, and the labiovelars ዀ xʷə, ቘ kʼʷə) and
+     * the 5th is /e/ (ሄ he) — so ቈ/ኰ/ጐ reading `kʼʷe`/`kʷe`/`ɡʷe` was internally contradicted by the file
+     * itself. The epitran tir-Ethi referee agrees on all three: `ቈለ qʷələ`, `ኰርኰረ kʷərɨkʷərə`,
+     * `ተርጐመ tərɨɡʷəmə`.
+     */
+    test("⟨ኲ ቊ⟩ have rows at all — a fidel with no row deletes its whole syllable", () => {
+        expect(phonemizeWord("ኲናት")).toBe("kʷinat"); // 'war' — was *nat*
+        expect(phonemizeWord("ቊጽሪ")).toBe("kʼʷit͡sʼɨɾi"); // 'number' — was *t͡sʼɨɾi*
+        expect(phonemizeWord("ቱርኲ")).toBe("tuɾkʷi"); // Turkey — was *tuɾ*
+    });
+
+    test("the 1st-order labiovelar is /ʷə/, not /ʷe/ — ⟨ቈ ኰ ጐ⟩ were an order out", () => {
+        expect(phonemizeWord("ቈለ")).toBe("kʼʷələ"); // referee: qʷələ
+        expect(phonemizeWord("ኰርኰረ")).toBe("kʷəɾkʷəɾə"); // referee: kʷərɨkʷərə
+        expect(phonemizeWord("ተርጐመ")).toBe("təɾɡʷəmə"); // referee: tərɨɡʷəmə
+        // ⚠ And the orders that were already right must stay right: 4th ⟨ʷa⟩, 6th ⟨ʷɨ⟩.
+        expect(phonemizeWord("ቋንቋ")).toBe("kʼʷankʼʷa"); // 'language'
+    });
+});

@@ -96,3 +96,31 @@ describe("Tibetan (bo) cardinal numbers — ASCII digits + the full magnitude la
         });
     }
 });
+
+// The silent-deletion findings in bo. Evidence and sourcing: docs/investigations/silent_sea_investigation.md
+// Run 5. ⚠ Neither bo referee holds a single ⟨ྥ⟩ or ⟨ཿ⟩, so these are pinned here or nowhere.
+describe("Tibetan (bo) — the characters that used to read as nothing", () => {
+    /**
+     * ⟨ཧྥ⟩ (Wylie *hpha*) is the loanword digraph for /f/, a sound native Tibetan does not have. The parser
+     * treated ⟨ཧ⟩ as the root and dropped the subjoined ⟨ྥ⟩ — so the graphic CARRIER was read and the
+     * actual consonant deleted, giving every one of these words an /h/ it does not have. All 35 corpus
+     * instances are this digraph and all 31 distinct forms are Western loans with /f/ in this position.
+     */
+    test("⟨ཧྥ⟩ is /f/ — the carrier was being read and the letter thrown away", () => {
+        expect(phonemizeWord("ཧྥ་རན་སི")).toBe("fa˥ɻɛ̃ː˥si˥"); // France — was *ha˥ɻɛ̃ː˥si˥*
+        expect(phonemizeWord("ཨ་ཧྥེ་རི་ཀ")).toBe("ʔa˥fe˥ɻi˥ka˥"); // Africa
+        expect(phonemizeWord("ཧ")).toBe("ha˥"); // ⚠ and a BARE ⟨ཧ⟩ is still /h/ — the digraph is the trigger
+    });
+
+    /**
+     * ཿ U+0F7F RNAM BCAD ("cutting off") is the Sanskrit visarga and terminates its syllable. Without it in
+     * the splitter, `ཀཿཐོག` — the monastery Kaḥtog — parsed as ONE stack, ⟨ཀ⟩ was taken for a prefix and
+     * deleted, and a whole syllable was lost. Its own /h/ value is deliberately NOT emitted: Lhasa has no
+     * coda /h/ and no referee holds an instance, so splitting is a fact where a phone would be a guess.
+     */
+    test("ཿ terminates its syllable — ⟨ཀཿཐོག⟩ was losing its first syllable outright", () => {
+        expect(phonemizeWord("ཀཿཐོག")).toBe("ka˥tʰoʔ˥"); // Kaḥtog — was *tʰoʔ˥*
+        expect(phonemizeWord("ན་མཿཧི")).toBe("na˩ma˥hi˥"); // namaḥ-hi
+        expect(phonemizeWord("བྷཿ")).toBe("pʰa˥"); // word-final: unchanged, and must stay so
+    });
+});

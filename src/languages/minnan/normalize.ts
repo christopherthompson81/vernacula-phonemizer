@@ -176,6 +176,20 @@ const SYMBOLS = makeSymbolNormalizer({
 export function normalizeMinNan(input: string): string {
     let s = input;
 
+    // ── 0. the SECOND SPELLING OF ⟨o͘⟩ ───────────────────────────────────────────────────────────
+    // POJ's ⟨o͘⟩ is U+0358 COMBINING DOT ABOVE RIGHT, but running text writes it just as often with a
+    // free-standing MIDDLE DOT — this corpus has 366 of the combining mark and 146 of the dot
+    // (`un-tō·`, `Kó·-lōng-sū`, `kàng-hō·-liōng`). `pojToTailo` in minnan.ts folds both spellings, and
+    // ⚠ IT NEVER SAW THE SECOND ONE: U+00B7 is `Script=Common`, so the tokenizer's Latin word arm ENDS
+    // at it and the dot was never part of the token. The vowel contrast /ɔ/ vs /ə/ was lost in all 146.
+    // ⚠ FOLDED HERE RATHER THAN WIDENED INTO THE TOKEN CLASS, because the dot is also word-FINAL
+    // (`un-tō·`) — `medialOnly` cannot reach it, and making it lead-legal would let a bare `·` open a
+    // word. A pre-tokenizer rewrite is exactly what this layer is for.
+    // ⚠ THE GUARD IS THE ⟨o⟩ VOWEL IN BOTH SPELLINGS, precomposed and decomposed. Counted over the
+    // corpus, 145 of the 146 dots follow one (`ō· ×61, ó· ×37, ò· ×16, o· ×16, ô· ×13, O· ×2`); the one
+    // that does not follows a hyphen and is not this vowel, so it is left alone rather than rewritten.
+    s = s.replace(/([oOòóôōǒÒÓÔŌǑ]\p{M}*)[·‧]/gu, "$1͘");
+
     // ── 1. de-group thousands ────────────────────────────────────────────────────────────────────
     // ⚠ FIRST, and this language's number format is unambiguous, unlike Javanese's: the corpus is
     // ENGLISH-STYLE by a wide margin — comma groups ×45 (`181,040 km²`, `¥147,778`, `331,210 pêng-hong

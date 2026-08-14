@@ -127,6 +127,29 @@ describe("nan POJ → Tâi-lô fold (the converter was Tâi-lô-only)", () => {
         expect(phonemizeWord("台灣")).toBe(phonemizeWord("tâi-uân"));
     });
 
+    /**
+     * ⚠ THROUGH `phonemize`, NOT `phonemizeWord` — AND THAT DISTINCTION IS THE WHOLE POINT OF THIS BLOCK.
+     * Every POJ assertion above calls `phonemizeWord`, which goes straight to `tailoToIpa`; the TEXT path
+     * additionally runs `normalizeMinNan` and the tokenizer's NATIVISER, and the nativiser was folding away
+     * exactly what the tests above pin. So the suite was green while `phonemize` deleted the tone of
+     * roughly one syllable in four and the ⟨o͘⟩ vowel of all 366 corpus instances. A word-level golden
+     * cannot see a tokenizer-level defect; these assertions are the same words, entered as TEXT.
+     */
+    test("⚠ the TEXT path reads the tone diacritic and the ⟨o͘⟩ vowel — the nativiser used to strip both", () => {
+        for (const w of ["gō͘", "tō͘", "sò͘", "kho͘", "tê", "hó", "kú", "bí", "tāi-lio̍k", "pêng-hong"])
+            expect(phonemize(w, "nan"), w).toBe(phonemizeWord(w));
+        // ⟨o͘⟩ is /ɔ/ against plain ⟨o⟩ /ə/ — a VOWEL contrast, and the reported silence deleted it.
+        expect(phonemize("tō͘", "nan")).toBe("tɔ˧");
+        expect(phonemize("tō", "nan")).toBe("tə˧");
+        // Tone 5 ⟨ê⟩ against toneless ⟨e⟩: the ⟨a⟩ series was listed in NATIVE_CLASS and the rest was not.
+        expect(phonemize("tê", "nan")).toBe("te˨˦");
+        expect(phonemize("te", "nan")).toBe("te˥");
+        // The free-standing MIDDLE DOT never even reached `pojToTailo`: U+00B7 is Script=Common, so the
+        // Latin word arm ended at it. Folded in `normalizeMinNan` now, and it is also word-FINAL.
+        expect(phonemize("un-tō·", "nan")).toBe(phonemize("un-tō͘", "nan"));
+        expect(phonemize("Kó·-lōng-sū", "nan")).toBe(phonemize("Kó͘-lōng-sū", "nan"));
+    });
+
     test("⚠ canonical IPA uses ɡ U+0261, never ASCII g — which is what exposed the leak", () => {
         // wuu/cmn/yue/jv emit zero ASCII `g`; nan emitted 1,482 across the corpus, all unmapped syllables.
         expect(phonemizeWord("gō͘")).toContain("\u0261");

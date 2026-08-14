@@ -12,9 +12,30 @@
     "script": ["Myanmar"],
 
     // Onset consonants (Shan letters + shared Myanmar letters) → IPA.
+    //
+    // ⚠ THE FOUR VOICED LOAN LETTERS WERE MISSING, AND THEY ARE A CONTIGUOUS BLOCK OF THE SHAN RANGE.
+    // U+1075–U+1081 is the Shan letter run; this table held 1075 1076 1078 107A 107C 107D 107E 1080 1081
+    // and skipped exactly ၷ 1077, ၹ 1079, ၻ 107B and ၿ 107F — the voiced series. `phonemizeWord` skips a
+    // character that is not an onset, so ⟨ၻ ၿ⟩ read as NOTHING and dragged their vowel signs down with
+    // them: `ၻွၵ်ႇတႂ်ႇ` ("doctor") → *kaː˨˦*, `ၿီႇလီႇယၢၼ်ႇ` ("billion") → *liː˩jaːn˩*.
+    // `silentCharsIn` reported ⟨ၻ⟩ ×34 and ⟨ၿ⟩ ×22 on that.
+    //
+    // Standard Shan phonology has NO voiced plosives, so all four are loan-only — which is the reason they
+    // were easy to miss and NOT a reason to leave them out: the corpus writes them ×34/×22/×13, in English
+    // loans (ၻီႇၵရီႇ "degree" ×6, ၻေႃႇလႃႇ "dollar", ၻွၵ်ႇတႂ်ႇ "doctor", ၿီႇလီႇယၢၼ်ႇ "billion",
+    // ၿရၼ်ႇတီႇ "brandy") and in Pali (ၻေဝꩪမ်မ devadhamma, ဝိၽင်ၷႃၻိပႃလိ). ⟨ၹ⟩ has 0 corpus instances and
+    // is added anyway, to close the block rather than leave one member of a series to be found later.
+    //
+    // Sources: Wikipedia "Help:IPA/Shan and Tai Lue" consonant table — ၻ [d], ၿ [b], ၷ [ɡ] ("in foreign
+    // words"), ၹ [z] ("in Burmese loanwords"); Wikipedia "Shan alphabet", which lists the same five rare
+    // consonants as inherited from Burmese for non-native sounds. ⚠ NOTHING IS NEUTRALISED TOWARD THE
+    // NATIVE INVENTORY (⟨ၻ⟩→t, ⟨ၿ⟩→p): that would make a loan letter indistinguishable from ⟨တ⟩/⟨ပ⟩ and is
+    // not what the cited tables say. It is also the convention this table ALREADY follows for the other two
+    // loan letters it carries — ⟨ရ⟩ → r and ⟨ႀ⟩ → θ are equally absent from native Shan.
     "onsets": {
         "ၵ": "k", "ၶ": "kʰ", "ၸ": "t͡ɕ", "သ": "sʰ", "ထ": "tʰ", "ပ": "p", "ၽ": "pʰ", "ၾ": "f", "တ": "t", "ၼ": "n",
         "မ": "m", "လ": "l", "ဝ": "w", "ယ": "j", "ရ": "r", "ႁ": "h", "ႀ": "θ", "ဢ": "ʔ", "င": "ŋ", "ၺ": "ɲ",
+        "ၷ": "ɡ", "ၹ": "z", "ၻ": "d", "ၿ": "b",
     },
 
     // Coda consonants (a killed consonant, C + asat ်) → IPA. Nasals + checked stops (unreleased).

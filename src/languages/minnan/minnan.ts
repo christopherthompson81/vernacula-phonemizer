@@ -313,6 +313,29 @@ export function phonemizeWord(word: string): string {
  * vowels means `TÂI` fails the inventory test where `tâi` passes, so a CAPITALISED native word is treated as
  * foreign and the fold strips its tone diacritic — a silent DELETION, since this class drives the fold and
  * not merely the tokenization. Any class that omits the upper case of its own letters has the same bug.
+ *
+ * ⚠ AND THE VERY SAME BUG WAS STILL HERE, ONE VOWEL OVER: THE CLASS LISTED THE ⟨a⟩ SERIES ONLY. The letters
+ * are tested per cluster **after NFC**, so a precomposed ⟨ê ī ū ō î ó í ô ē ò ú é û è ì ù ń ǹ⟩ is ONE
+ * codepoint that this class did not contain — and every one of them was folded to a bare vowel, taking its
+ * tone with it. The `̀-̍` range only ever protected the marks that have no precomposed form (tone 8 ⟨a̍⟩,
+ * syllabic ⟨m̄ ŋ̍⟩), which is why ⟨tâi⟩ and ⟨ta̍k⟩ read correctly and hid the hole. Measured on the mined
+ * corpus: **8 772 clusters in the ⟨e i o u n⟩ series folded**, i.e. `tê` → *te˥* (tone 1) for tone 5
+ * *te˨˦*, `hó` → *hə˥*, `kú` → *ku˥*, `bí` → *bi˥*, against 1 541 for ⟨ê⟩ alone. The tone diacritic is the
+ * only thing POJ writes the tone with, so this deleted the tone of roughly one syllable in four.
+ *
+ * ⚠ ⟨o͘⟩ U+0358 IS IN THE CLASS, AND ITS ABSENCE IS WHAT `silentCharsIn` REPORTED (×366, `tō͘ → tə˥`). It is
+ * not a tone mark but a VOWEL: POJ ⟨o͘⟩ = Tâi-lô ⟨oo⟩ = /ɔ/, against plain ⟨o⟩ = /ə/ — a contrast
+ * `minnan.jsonc` already carries and `pojToTailo` already folds. The fold never ran, because the cluster
+ * carrying U+0358 failed this class first and was flattened to a bare ⟨o⟩ before `pojToTailo` saw it.
+ *
+ * ⚠ THE MARK RANGE IS NOW THE SEVEN TÂI-LÔ TONE MARKS, NOT `̀-̍`. The old range swept in U+0303
+ * TILDE, U+0306 BREVE, U+0307/U+0308 and the rest, which is precisely the hazard `makeNativiser`'s own note
+ * names (`ñ` decomposes into it). Listing the marks the orthography actually uses — the keys of `TONE_MARK`
+ * — is both narrower and complete.
  */
-const NATIVE_CLASS = "[A-Za-zàáâāǎÀÁÂĀǍ̀-̍]";
+const NATIVE_CLASS =
+    "[A-Za-zàáâāǎÀÁÂĀǍèéêēěÈÉÊĒĚìíîīǐÌÍÎĪǏòóôōǒőÒÓÔŌǑŐùúûūǔűÙÚÛŪǓŰńǹŃǸⁿ" +
+    // U+0300 ̀ (3) U+0301 ́ (2) U+0302 ̂ (5) U+0304 ̄ (7) U+030B ̋ (9) U+030C ̌ (6) U+030D ̍ (8), and
+    // U+0358 ͘ — the ⟨o͘⟩ vowel, not a tone.
+    "̀-̂̄̋-̍͘]";
 const nat = makeNativiser(NATIVE_CLASS, "u");

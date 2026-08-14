@@ -1,3 +1,13 @@
+# ⚠ THE LABIOVELAR SUB-SERIES: FIVE MEMBERS EACH, AND THE ORDER IS ⟨ʷə ʷi ʷa ʷe ʷɨ⟩.
+# `makeGeezG2P` reads a fidel with no row here as the EMPTY STRING, so a missing member deletes its whole
+# syllable: `ኲናት` ('war') read *nat*, `ቊጽሪ` ('number') read *t͡sʼɨɾi*. `silentCharsIn` reported ⟨ኲ⟩ ×28 and
+# ⟨ቊ⟩ ×6 on that, and enumerating the Unicode block showed it was systematic — KXW ⟨ዀ ዂ ዃ ዄ ዅ⟩ and QHW
+# ⟨ቘ ቚ ቛ ቜ ቝ⟩ were complete and correct, while QW/KW/GW held THREE of five each AND mapped their 1st-order
+# member (ETHIOPIC SYLLABLE QWA/KWA/GWA) to the 5th order's vowel — ቈ kʼʷe, ኰ kʷe, ጐ ɡʷe.
+# The 1st order is /ə/ everywhere else in THIS FILE (ሀ hə, ዀ xʷə, ቘ kʼʷə) and the 5th is /e/ (ሄ he), so the
+# file contradicted itself. The epitran tir-Ethi referee agrees: ቈለ qʷələ, ኰርኰረ kʷərɨkʷərə, ተርጐመ tərɨɡʷəmə.
+# ⚠ ጔ and ቌ have ZERO corpus instances and are written anyway — a series with one member left out is the
+# defect this note exists to explain, and leaving the same hole in a different order repeats it.
 ሀ	hə
 ሁ	hu
 ሂ	hi
@@ -63,7 +73,9 @@
 ቅ	kʼɨ
 ቆ	kʼo
 ቋ	kʼʷa
-ቈ	kʼʷe
+ቈ	kʼʷə
+ቊ	kʼʷi
+ቌ	kʼʷe
 ቍ	kʼʷɨ
 በ	bə
 ቡ	bu
@@ -114,7 +126,9 @@
 ክ	kɨ
 ኮ	ko
 ኳ	kʷa
-ኰ	kʷe
+ኰ	kʷə
+ኲ	kʷi
+ኴ	kʷe
 ኵ	kʷɨ
 ወ	wə
 ዉ	wu
@@ -303,4 +317,5 @@
 ጭ	t͡ʃʼɨ
 ጮ	t͡ʃʼo
 ጯ	t͡ʃʼʷa
-ጐ	ɡʷe
+ጐ	ɡʷə
+ጔ	ɡʷe

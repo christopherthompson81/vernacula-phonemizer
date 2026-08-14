@@ -82,6 +82,7 @@ interface Stack {
     root: string;
     subscript?: string;
     subH?: boolean; // subjoined ha (lha, hra…)
+    subF?: boolean; // ⟨ཧྥ⟩ ha + subjoined PHA — the loanword digraph for /f/ (see readStack)
     vowel: string;
     vowel2?: string; // a second vowel from a hiatus ⟨'⟩+vowel — the diminutive འུ ('u) etc. → diphthong
     nasalMark?: boolean; // anusvara
@@ -136,8 +137,11 @@ function parseSyllable(cps: number[]): Stack | null {
         root = rootFromSub;
     }
     const subH = subs.includes("h");
+    // ⟨ཧྥ⟩ = ROOT ha + SUBJOINED pha. Not a superscript (⟨h⟩ is not one) and not a subscript (⟨ph⟩ is not
+    // one), so the parser dropped the subjoined letter on the floor and the stack read as a bare ⟨ཧ⟩.
+    const subF = rootUnit.full === "h" && subs.includes("ph");
     const subscript = subs.find((x) => ["y", "r", "l", "w"].includes(x));
-    return { prefix, superscript, root, subscript, subH, vowel, vowel2, nasalMark, suffix: sufUnits[0]?.full, postsuffix: sufUnits[1]?.full };
+    return { prefix, superscript, root, subscript, subH, subF, vowel, vowel2, nasalMark, suffix: sufUnits[0]?.full, postsuffix: sufUnits[1]?.full };
 }
 
 /** Realize a parsed stack as Lhasa IPA (onset + vowel + tone + coda). `first` = word-initial syllable: Lhasa word
@@ -184,6 +188,27 @@ function readStack(s: Stack, first: boolean): string {
         }
     }
     if (s.subH) high = true; // a subjoined ha devoices the onset (ɬ, ʂ) and raises the tone to HIGH
+    /**
+     * ⟨ཧྥ⟩ (Wylie *hpha*) — THE LOANWORD DIGRAPH FOR /f/, a sound native Tibetan does not have.
+     *
+     * `silentCharsIn` reported U+0FA5 SUBJOINED PHA ×35 inert (`ཧྥ → ha˥`), and the silence understates it:
+     * the graphic CARRIER ⟨ཧ⟩ was being read and the actual consonant letter deleted, so every one of these
+     * words came out with an /h/ it does not have.
+     *
+     * ⚠ SOURCED FROM THE CORPUS'S OWN 31 DISTINCT FORMS, and that is the strongest leg available. All 35
+     * instances are this digraph, every one of them opens a Western loan, and every source word has /f/ in
+     * exactly this position: ཧྥ་རན་སི *France*, ཨ་ཧྥེ་རི་ཀ *Africa*, ཧྥོ་ལོ་རི་ཌ *Florida*, ཧྥུ་ནན *Funen*,
+     * ཧྥི་ཤར *Fischer*, ཧྥེ་མན *Fehman*, ཧྥེས་ལི་པེན *Philippines*. A 31-form correspondence with no
+     * counter-example is an attestation, not an inference.
+     * ⚠ THE EXTERNAL REFERENCES DOCUMENT THE SISTER CONVENTION, NOT THIS ONE, and the gap is stated rather
+     * than glossed: Wikipedia *Tibetan alphabet* gives ⟨ཕ༹⟩ (pha + tsa-'phru U+0F39) for /f/ in CHINESE
+     * loans — confirming that Tibetan lacks /f/ and fills the gap with a modified ⟨ཕ⟩, which is the same
+     * base letter this digraph subjoins. The corpus contains zero tsa-'phru. Neither `bo` referee holds a
+     * single ⟨ྥ⟩, so this cannot be adjudicated against them in either direction.
+     * ⚠ IF /f/ IS EVER DISPUTED, THE FALLBACK IS /pʰ/ — the value of the subjoined letter itself — and never
+     * /h/, which reads the carrier and throws the letter away.
+     */
+    if (s.subF) { onset = "f"; high = true; }
     // db- cluster: prefix ⟨d⟩ + root ⟨b⟩ is historically /w/ (HIGH) — དབང dbang→waŋ, དབུ dbu→ʔu, དབྱངས dbyangs→jaŋ.
     if (s.prefix === "d" && s.root === "b") {
         high = true;
@@ -222,8 +247,24 @@ function readStack(s: Stack, first: boolean): string {
 /** Phonemize one Tibetan word (one or more tsheg-separated syllables). */
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC");
-    // Split into syllables on tsheg (U+0F0B) / space (U+0F0C non-breaking tsheg) / shad handled by tokenizer.
-    const sylls = w.split(/[་༌]/u).filter((x) => x.length > 0);
+    /**
+     * Split into syllables on tsheg (U+0F0B) / space (U+0F0C non-breaking tsheg) / shad handled by tokenizer.
+     *
+     * ⚠ ཿ U+0F7F RNAM BCAD ("cutting off") IS A SYLLABLE TERMINATOR AND WAS NOT SPLITTING. It is the Sanskrit
+     * VISARGA (Unicode Standard §13.4: "U+0F7F … is the visarga"), and its Tibetan name says what it does to
+     * the syllable. Without it here, `ཀཿཐོག` — the monastery Kaḥtog — was parsed as ONE stack, ⟨ཀ⟩ was taken
+     * for a prefix and DELETED, and the word read *tʰoʔ˥*: a whole syllable lost. `silentCharsIn` reported
+     * the character ×7 as `inert`, which is the deletion probe agreeing with the split probe by accident.
+     * Resolved over the corpus's 7 instances: 5 improve (`ཀཿཐོག`, `ཀཿདཔལ`, `ན་མཿཨཪྱ`, `ན་མཿཧི`, `ཨོཾ་ཨཱཿཧཱུཾ`
+     * all recover a lost or garbled syllable) and 2 are unchanged (`བྷཿ`, `བི་དྷིཿ`, where it is word-final).
+     *
+     * ⚠ ITS OWN VALUE IS DELIBERATELY LEFT UNREAD, so this character STAYS REPORTED — now as `separator`,
+     * which is what it correctly is. Wikipedia's *Tibetan alphabet* glosses it "ḥ /h/ visarga; marks
+     * post-vocalic breath", but Lhasa Tibetan has no coda /h/ and neither `bo` referee holds one instance, so
+     * emitting a phone here would be a guess where splitting is a fact. Half the question answered is
+     * recorded as half.
+     */
+    const sylls = w.split(/[་༌ཿ]/u).filter((x) => x.length > 0);
     const out: string[] = [];
     for (const syl of sylls) {
         const cps = [...syl].map((ch) => ch.codePointAt(0)!);
