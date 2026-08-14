@@ -1,0 +1,731 @@
+// WIKIPEDIA WORD ATTESTATION — et. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "et",
+        "wiki": "et.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kolmanda sajandini",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…sev riik, mis eksisteeris alates teisest sajandist eKr kuni kolmanda sajandini pKr. Pärsia lahest põhjas, tänapäeva Iraani Khūzestāni prov…"
+            ]
+            },
+        {
+                "word": "kolmandani sajandini",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "üheksateistkümnenda sajandini",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kolmandani",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ideks ja nummerdatakse nagu Newtoni seaduseidki - esimesest kolmandani. Nagu mehaanika liikumisintegraalid, kujutavad ka termodüna…",
+                "…ini viivad liftid tehti kahekorruseliste kabiinidega. Sealt kolmandani viiv sai ajamiks 81 meetri pikkused hüdraulilised tungrauad…"
+            ]
+            },
+        {
+                "word": "neljandani",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ümberlükkeid omavahel ning järjestab võistkonnad esimesest neljandani. === Peaminister / opositsiooni liider === Esimese valitsus…"
+            ]
+            },
+        {
+                "word": "kaheksandani",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…itatakse esinelik ja väikese finaali käigus kohad viiendast kaheksandani. Sotši olümpiamängudel läks meeste kolmikvõit Prantsusmaale…",
+                "…se tehet. Kui üheksas bitt on 1, siis on iga bitt esimesest kaheksandani kodeeritud XOR-i (välistava või) abil eelmisega. Kui üheksa…",
+                "…s kuues järgmises elemendis on see teistsugune, kuid kaldub kaheksandani jõudes taasilmuma, mis tähendab, et kaheksas keemiliselt ak…"
+            ]
+            },
+        {
+                "word": "kolm kuni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "viis kuni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "10 kuni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "20 kuni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kaks kuni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "miinus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 18,
+                "substringOnly": 2,
+                "examples": [
+                "…Miinus Seitse (ka -7) on Tallinnas tegutsev vokaalansambel. Ansamb…",
+                "…it. == Viited == == Välislingid == http://www.moostefolk.ee/miinus-seitse.html…",
+                "…\"Miinus 192 meetrit\" on 1985. aastal valminud dokumentaalfilm, mill…",
+                "…mine kevadel ja suvel 1984. == Viited == == Välislingid == \"Miinus 192 meetrit\" (1985) EFIS…",
+                "…ohad === == Liigatabel == 2Rakvere FC Flora alustas hooaega miinus 2 punktiga ja JK Tallinna Kalev miinus 5 punktiga, kuna lit…",
+                "…lora alustas hooaega miinus 2 punktiga ja JK Tallinna Kalev miinus 5 punktiga, kuna litsentsitingimused polnud täidetud. Hilje…"
+            ]
+            },
+        {
+                "word": "pluss",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 77,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Pluss ehk plussmärk (+) on märk, mida kasutatakse eeskätt matemaa…",
+                "…\"Pluss üks\" on kuues singel HU? albumilt \"HU2\". Loo muusika on kir…",
+                "…Tervis Pluss on alates 2000. aastast ilmuv tervisetemaatikat käsitlev aj…",
+                "…Eesti inimeste tervena elatud aastaid oleks rohkem. Tervis Pluss pakub terviseinfot ja -teadmisi, jagab ekspertnõu ja vahend…",
+                "…Mobilitas Pluss ehk pikema nimega „Teaduse rahvusvahelistumine, mobiilsuse…",
+                "…larengu Fond. Programm kestab kuni 2023. aastani. Mobilitas Pluss on aastatel 2008–2015 kestnud Mobilitase jätkuprogramm. ==…"
+            ]
+            },
+        {
+                "word": "võrdub",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'veinivaat') on nüüdisajal meetermõõdustiku massiühik, see võrdub 1000 kilogrammiga. Tonni lühend on t või Mg (megagramm). To…",
+                "…00 kilogrammiga. Tonni lühend on t või Mg (megagramm). Tonn võrdub ka 61,0459 puudaga. Algselt oli tonn kuni 252-gallonilise t…",
+                "…eiste alade pindala iseloomustamisel kasutatav näitaja, mis võrdub alale jäävate siseveekogude osade pindalade summaga. Sisse…",
+                "…Kilomeeter (tähis km) on SI-süsteemi pikkusühik, mis võrdub tuhande meetriga: 1 km = 103 m = 1000 m. == Vaata ka == Mee…",
+                "…kauguste mõõtmiseks merenduses ja lennunduses. Üks meremiil võrdub Maa meridiaani ühe kaareminuti (laiuseminuti) pikkusega. Me…",
+                "…kusega 1852 meetrit (ka 1851,8 m, st 40000/360/60). Viimane võrdub meridiaani ühe kaareminuti pikkusega laiusel 45°. Meremiili…"
+            ]
+            },
+        {
+                "word": "kuni",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 47,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…n 31 päeva. == Nimi == August oli Rooma kalendri kuues kuu (kuni aastani 154 eKr) ning kandis seetõttu nimetust sextilis sen…",
+                "…stani 154 eKr) ning kandis seetõttu nimetust sextilis seni, kuni 8 eKr otsustas senat selle kuu ümber nimetada keiser August…",
+                "…1866. aastal, Eestimaal 1869). Rüütlimõisate omanikud olid kuni 1917. aastani Baltimaades seisusliku omavalitsuskorralduse…",
+                "…m (mõisapolitsei) ja maksuvabadus, ainuõigus pidada veskit (kuni 1871) ja pidada kõrtsi, põletada viina (kuni 1900), õlut pr…",
+                "…pidada veskit (kuni 1871) ja pidada kõrtsi, põletada viina (kuni 1900), õlut pruulida ja jahti pidada (kuni 1916). Rüütlimõi…",
+                "…põletada viina (kuni 1900), õlut pruulida ja jahti pidada (kuni 1916). Rüütlimõisad olid kuni 1881. aastani vabastatud maam…"
+            ]
+            },
+        {
+                "word": "kolmandikku",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…oni juhis, mis asetab objekti pildi vasakusse või paremasse kolmandikku, jättes ülejäänud kaks kolmandikku rohkem avatuks. Kolmandi…",
+                "…vasakusse või paremasse kolmandikku, jättes ülejäänud kaks kolmandikku rohkem avatuks. Kolmandiku reeglit kasutatakse peamiselt vi…",
+                "…egli eesmärk on saada objekt kaadri vasakusse või paremasse kolmandikku, sellega tekib asümmeetriline ja silmapaistev pilt. Paljude…",
+                "…maa) nii rahvaarvult kui ka pindalalt suurem, hõlmates kaks kolmandikku Suurbritannia saare lõunaosast. Inglismaal on maismaapiir p…",
+                "…tut, millest üks kolmandik on Eesti autorite teosed ja kaks kolmandikku tõlkeraamatud. Kirjastuse ampluaad iseloomustavad sellised…",
+                "…lised neegerorjade järeltulijad, 12% on valgenahalisi. Kaks kolmandikku rahvastikust elab New Providence'i saarel, ülejäänud kolman…"
+            ]
+            },
+        {
+                "word": "lehekülg",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…incipit \"Liber generationis\". == Raamatukunstis == Incipit-lehekülg ehk teksti või raamatu alguslehekülg on keskaegsetes käsiki…",
+                "…lislingid == Kennedy kosmosekeskus kui vaatamisväärsus NASA lehekülg: Kennedy kosmosekeskus…",
+                "…See lehekülg esitab 2004. aasta jalgpalli Euroopa meistrivõistluste osal…",
+                "…aised === == Medalid == == Välislingid == Võrkpalli ametlik lehekülg Londoni OM-il Rannavõrkpalli ametlik lehekülg Londoni OM-il…",
+                "…palli ametlik lehekülg Londoni OM-il Rannavõrkpalli ametlik lehekülg Londoni OM-il FIVB-i koduleht…",
+                "…e Fall of Max Payne\". == Välislingid == Max Payne – ametlik lehekülg Max Payne – juhendid – ametlik lehekülg Max Payne: Payne &…"
+            ]
+            },
+        {
+                "word": "ruutkilomeetrit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…õgi on Amazonas – 6400 km. Suurim järv on Ülemjärv – 82 097 ruutkilomeetrit. Suurim kõrb on Sonora, mille suurus on 310 000 ruutkilomee…",
+                "…kilomeetrit. Suurim kõrb on Sonora, mille suurus on 310 000 ruutkilomeetrit. == Inimasustus == 2019. aastal avaldatud teadustöös väidet…",
+                "…Euraasia on suurim manner Maal. Tema pindala on 52 990 000 ruutkilomeetrit. Rahvaarv on 4,6 miljardit inimest. Euraasia koos ümbritsev…",
+                "…4 meetrit lai. Saare pindala on 1,5 hektarit (ha) ehk 0,015 ruutkilomeetrit (km2) ja kõrgus merepinnast on 27 meetrit. Kindlus, mõned m…",
+                "…t pikk ja 87 meetrit lai. Pindala on 1,7 hektarit ehk 0,017 ruutkilomeetrit. Isle de Mar on lame, 4 meetri kõrgune saareke, mis paikneb…",
+                "…k ja kuni 70 meetrit lai. Pindala on 1,4 hektarit ehk 0,014 ruutkilomeetrit. Saarestiku kogupindala on 4,6 hektarit ehk 0,046 ruutkilom…"
+            ]
+            },
+        {
+                "word": "ruutmeetrit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…ki põiktänav 5 ning Kalašnõi põiktänav 8A üldpinnaga 4857,4 ruutmeetrit. Venemaa annab Eestile tasuta tähtajatuks kasutamiseks maaü…",
+                "…tasuta tähtajatuks kasutamiseks maaüksuse suurusega 2445,1 ruutmeetrit, mis asub aadressil Malõi Kislovski põiktänav 5. Eesti andi…",
+                "…k 19 ja 21, Hobusepea tänav 3 ning Lai 18 üldpinnaga 3308,3 ruutmeetrit ning hooned asukohaga Pikk 23 ja 25 ning Hobusepea 1 üldpin…",
+                "…d asukohaga Pikk 23 ja 25 ning Hobusepea 1 üldpinnaga 872,3 ruutmeetrit. Lisaks sai Venemaa enda omandisse hooned ja rajatiste komp…",
+                "…sukohaga Mähe tee 9 // Lauri tee 2, mille üldpind on 1721,6 ruutmeetrit. Kokkuleppe järgi andis Eesti Venemaale tasuta tähtajatuks…",
+                "…haga Pikk 19 ja 21, Hobusepea 3 ning Lai 18 üldpinnaga 1571 ruutmeetrit; maaüksuse asukohaga Pikk 23 ja 25 ning Hobusepea 1 üldpinn…"
+            ]
+            },
+        {
+                "word": "kuupmeetrit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 48,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…ng aasta keskmine vooluhulk on Vigala jõega ühinemiskohas 8 kuupmeetrit sekundis. Suuremad vasakpoolsed lisajõed on Vardi jõgi ja K…",
+                "…st Teenuse jõega on Vigala jõel aasta keskmine vooluhulk 15 kuupmeetrit sekundis (Teenuse jõel 8 kuupmeetrit sekundis).…",
+                "…keskmine vooluhulk 15 kuupmeetrit sekundis (Teenuse jõel 8 kuupmeetrit sekundis).…",
+                "…000 liitriga ja 1 000 000 kuupsentimeetriga. Varem nimetati kuupmeetrit kantmeetriks. 1 kantmeeter võrdus: 0,1030 kantsüllaga 2,033…",
+                "…kuupdetsimeeter (dm³) = 1000 kuupsentimeetrit (cm³) = 0,001 kuupmeetrit (m³). 1 liiter = 1000 milliliitrit (ml) = 100 sentiliitrit…",
+                "…== 2004. ja 2005. aastal tarbis Ukraina umbes 80 miljardit kuupmeetrit maagaasi aastas. Sellest tootis Ukraina 20 miljardit kuupme…"
+            ]
+            },
+        {
+                "word": "kraadi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 67,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…isumisel põhineval termomeetril tähistas vee keemispunkti 0 kraadi ja jää sulamispunkti 100 kraadi. Nende püsipunktide vahe ol…",
+                "…tähistas vee keemispunkti 0 kraadi ja jää sulamispunkti 100 kraadi. Nende püsipunktide vahe oli jaotatud 100 võrdseks osaks. K…",
+                "…Üheksanda Kraadi väin eraldab Minicoy saart Lakadiividest. Ta on 183 km laiu…",
+                "…Kaheksanda Kraadi väin on väin, mis ühendab Araabia merd Lakadiivi merega ja…",
+                "…Kümnenda Kraadi väin (inglise Ten Degree Channel) ühendab Bengali lahte And…",
+                "…m akadeemiline kraad. Termin \"filosoofia\" filosoofiadoktori kraadi nimetuses ei viita filosoofiale kui akadeemilisele distsipl…"
+            ]
+            },
+        {
+                "word": "protsenti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 76,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…st on kõik vabariikliklaste kandidaadid võitnud vähemalt 90 protsenti maakonna häältest. Viimane demokraat, kes maakonnas võitis,…",
+                "…Truman 1948. aastal (75,8%). Viimase demokraadina võitis 40 protsenti maakonna häältest Lyndon B. Johnson 1964. aastal, 30 protse…",
+                "…tsenti maakonna häältest Lyndon B. Johnson 1964. aastal, 30 protsenti Jimmy Carter 1976. aastal (35,9%), 20 protsenti Bill Clinto…",
+                "…aastal, 30 protsenti Jimmy Carter 1976. aastal (35,9%), 20 protsenti Bill Clinton 1996. aastal (20,9%) ja 10 protsenti Al Gore 2…",
+                "…5,9%), 20 protsenti Bill Clinton 1996. aastal (20,9%) ja 10 protsenti Al Gore 2000. aastal (13,1%). 2016. aastal oli maakond Dona…",
+                "…skindlustusmakse määr on korduvalt muutunud: 2002–2005: 1,5 protsenti, millest töötaja tasus 1 protsendi ja tööandja 0,5 protsent…"
+            ]
+            },
+        {
+                "word": "eurot",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 93,
+                "articles": 12,
+                "substringOnly": 1,
+                "examples": [
+                "…ttevõtetes. Sularahana tuli euro käibele 1. jaanuaril 2002. Eurot kontrollib Euroopa Keskpank. Euro eelised on vahetuskursiri…",
+                "…omineerivaks põhi- ja emissioonivaluutaks. Euroopas kasutab eurot 350 miljonit eurotsoonis elavat inimest, lisaks millele kas…",
+                "…83 miljardit rahatähte, mille koguväärtus oli 684 miljardit eurot, ja 80,677 miljardit münti, mille koguväärtus oli üle 20 mi…",
+                "…inglusse lastud euromündid kaaluvad kokku 692 335 tonni. == Eurot kasutavad maad == Rahaliidu liikmed (2026. aasta seisuga):…",
+                "…aanas, Réunionil ning Saint Pierre'is ja Miquelonis, mis on eurot kasutavate Euroopa Liidu riikide osad. Monacol, Vatikanil j…",
+                "…amiseks tõendust, et piirmäära ületamine ei ole ajutine. Ka eurot mitte kasutusele võtnud Euroopa Liidu riigid peavad esitama…"
+            ]
+            },
+        {
+                "word": "naela",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 103,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…d 16. juuli 1912). Eestit esindas kergekeskkaalus (kuni 147 naela ehk 66,7 kg) Valter Palm. Esimest korda osalesid olümpiamän…",
+                "…poksivõistlusel ka Soome, keda esindas sulgkaalus (kuni 126 naela ehk 57,2 kg) Kaarlo Väkevä, kergekaalus (kuni 135 naela 61,…",
+                "…126 naela ehk 57,2 kg) Kaarlo Väkevä, kergekaalus (kuni 135 naela 61,2 kg) Walfrid Resch ja kergekeskkaalus (kuni 147 naela e…",
+                "…5 naela 61,2 kg) Walfrid Resch ja kergekeskkaalus (kuni 147 naela ehk 66,7 kg) Johan Hellström ning Leedu, keda esindas kerge…",
+                "…an Hellström ning Leedu, keda esindas kergekaalus (kuni 135 naela 61,2 kg) Kazys Markevičius ja poolraskekaalus (kuni 175 nae…",
+                "…ela 61,2 kg) Kazys Markevičius ja poolraskekaalus (kuni 175 naela ehk 79,4 kg) Juozas Vinča. == Medalitabel == Kokku said med…"
+            ]
+            },
+        {
+                "word": "hektarit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 101,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ieņi mõisale 367 ha. Valla tänapäevasele alale jääb veel 21 hektarit Pūre mõisa (Puhren) maid ja 23 hektarit Cērkste mõisa (Zerx…",
+                "…alale jääb veel 21 hektarit Pūre mõisa (Puhren) maid ja 23 hektarit Cērkste mõisa (Zerxten) maid, lisaks natuke Kārese (Kahre)…",
+                "…ikseid järvi: Baltene pindalaga 4,3 ha, Ciemene pindalaga 4 hektarit, Ķelda pindalaga 4,6 hektarit, Koknesis pindalaga 1,3 hekta…",
+                "…a 4,3 ha, Ciemene pindalaga 4 hektarit, Ķelda pindalaga 4,6 hektarit, Koknesis pindalaga 1,3 hektarit, Līkaiņi järv pindalaga 3,…",
+                "…tarit, Ķelda pindalaga 4,6 hektarit, Koknesis pindalaga 1,3 hektarit, Līkaiņi järv pindalaga 3,9 hektarit, Mucenieki järv pindal…",
+                "…Koknesis pindalaga 1,3 hektarit, Līkaiņi järv pindalaga 3,9 hektarit, Mucenieki järv pindalaga 3,2 hektarit, Sēme järv pindalaga…"
+            ]
+            },
+        {
+                "word": "sentimeetrit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…kusühik. 1 toll = 0,0254 m = 1/36 jardi = 1/12 jalga = 2,54 sentimeetrit. Toll jaguneb veeranditeks (neljandikeks) ja need omakorda…",
+                "…a veetasemega kohati reise ära jätta. Kui veetase langes 49 sentimeetrit alla keskmise, ei saanud suurima süvisega liinilaev (St. Ol…",
+                "…teks Scania ja Harilaid liiklesid seni, kuni veetase oli 55 sentimeetrit alla keskmise. Parvlaev Muhumaa on sõitnud ka veetasemega 5…",
+                "…lla keskmise. Parvlaev Muhumaa on sõitnud ka veetasemega 59 sentimeetrit alla keskmise. Samas, 14. septembril 2011 jäeti Hiiumaa kap…",
+                "…lt laadida. Kujult olid 17.–18. sajandi täägid ligikaudu 40 sentimeetrit pikad ja kolme- või neljakandilise teraga. 19. sajandiks ol…",
+                "…=== Isiklikud === FIFA 100 == Isiklikku == Eusebio oli 174 sentimeetrit pikk. Ta oli abielus Floraga, neil on kaks last. == Välisli…"
+            ]
+            },
+        {
+                "word": "millimeetrit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ka filter. Tööstuslikult toodetud sigaret on keskmiselt 84 millimeetrit pikk ja läbimõõduga 7–8 millimeetrit. == Ajalugu == Maisipa…",
+                "…garet on keskmiselt 84 millimeetrit pikk ja läbimõõduga 7–8 millimeetrit. == Ajalugu == Maisipaberi sisse rullitud tubakat suitsetas…",
+                "…usega alla ühe millimeetri. Terade alampiiriks loetakse 0,5 millimeetrit. Kivimi peeneteraline struktuur on makroskoopiliselt erista…",
+                "…mõõt 1-meetrise fookuskaugusega teleskoobi fookuses on 8,73 millimeetrit, 10-meetrise fookuskaugusega teleskoobi korral aga 87,3 mil…",
+                "…rit, 10-meetrise fookuskaugusega teleskoobi korral aga 87,3 millimeetrit. === Teleskoobi suurendus === Teleskoobi suurendus on võrdn…",
+                "…äielikult pimedusega kohanenud silmaava läbimõõt on umbes 7 millimeetrit. Minimaalne suurendus leitakse teleskoobi apertuuri ja silm…"
+            ]
+            },
+        {
+                "word": "kilomeetrit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 99,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…sama, kuid kahe kilomeetri pikkuse ringi asemel on ring 2,5 kilomeetrit pikk. Kokku läbib seega iga naine 6 kilomeetrit ja iga mees…",
+                "…on ring 2,5 kilomeetrit pikk. Kokku läbib seega iga naine 6 kilomeetrit ja iga mees 7,5 kilomeetrit. Segateatesõidu puhul on tiimis…",
+                "…. Kokku läbib seega iga naine 6 kilomeetrit ja iga mees 7,5 kilomeetrit. Segateatesõidu puhul on tiimis kaks meest ja kaks naist ni…",
+                "…ka kilomeetrite poolest kõige pikem. Meeste distants on 20 kilomeetrit ja naiste oma 15 kilomeetrit, mille jooksul läbitakse viis…",
+                "…e pikem. Meeste distants on 20 kilomeetrit ja naiste oma 15 kilomeetrit, mille jooksul läbitakse viis ringi ja neli lasketiiru. Mee…",
+                "…ringi ja neli lasketiiru. Meestel on ühe ringi pikkus neli kilomeetrit ja naistel kolm kilomeetrit. Esimene ja kolmas lasketiir on…"
+            ]
+            },
+        {
+                "word": "tuhande üheksasaja",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…üheksasada kakskümmend neli. 'aastal 1924', vrd See juhtus tuhande üheksasaja kahekümne neljandal aastal. '1924. aastal' Kellaaega väljen…"
+            ]
+            },
+        {
+                "word": "tuhande kaheksasaja",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kahe tuhande",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…te ühispärandisse, hinnangud vanusele varieeruvad tuhandest kahe tuhande aastani. Regilaulu täpset vanust on aga teadlastel siiani r…",
+                "…i esimesena A. D. Hall ja R. E. Fagen 1956. aastal. Viimase kahe tuhande aasta jooksul on vaheldunud vaid valdkonnad, kus süsteemi m…",
+                "…ustest 10. oktoobril 1911. Sellega lõppes Qingi dünastia ja kahe tuhande aastane keisrivõim Hiinas. Vabariigi esimene president Sun…",
+                "…e teise kuulsa esiisa Sun Wu \"Sõjakunst'iga\" Pärast peaaegu kahe tuhande aastast unustust leiti teose tekst aprillis 1972. Shandongi…"
+            ]
+            },
+        {
+                "word": "tuhande üheksasaja kaheksakümne",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "esimesel jaanuaril",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kolmandal märtsil",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kahekümne teisel",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…allas Raasiku alevikus. Tee saab alguse Aruvalla–Jägala tee kahekümne teisel kilomeetril Raasiku aleviku ja Salumäe küla piiril ning lõp…",
+                "…Tee pikkus on 10,8 km. Tee saab alguse Aruvalla–Jägala tee kahekümne teisel kilomeetril Raasiku aleviku (Raasiku vald) ja Linnakse küla…",
+                "…ja Harku vallas. Tee saab alguse Tallinna–Paldiski maantee kahekümne teisel kilomeetril Kiia ja Tutermaa küla piiril. Tee kulgeb läbi K…"
+            ]
+            },
+        {
+                "word": "kahekümnendatel aastatel",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "üheksateistkümnendal sajandil",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…iti aastal 1831. == Vaata ka == Belgia kultuur Belgia pikal üheksateistkümnendal sajandil == Kirjandus == Janssens, Jeroen (2001). De Belgische Natie…",
+                "…, Petrograd; Pierre-Joseph Proudhon, \"Revolutsiooni üldidee üheksateistkümnendal sajandil\" (\"The General Idea of the Revolution in the Nineteenth Cen…"
+            ]
+            },
+        {
+                "word": "kahekümnendal sajandil",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ser-Västrik on raamatu \"Eesti kriminaalõiguse üldosa reform kahekümnendal sajandil võrdleva analüüsi peeglis\" (2006) autor, millega kandideeri…"
+            ]
+            },
+        {
+                "word": "esimesel",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…rvisti, 3500 noorsõdurit ning ligi 14 500 maakaitseväelast. Esimesel sõja-aastal võeti Eestist teenistusse kokku üle 35 500 mehe…",
+                "…812. aastal, mil riik oli oma võimsuse tipul, oli Prantsuse esimesel keisririigil 130 departemangu 44 miljoni elanikuga. Lüüasaa…",
+                "…võistkond koosseisus valitsev maailmameister Olga Rubtsova (esimesel laual) ja Kira Zvorõkina (teisel laual) sai kuldmedali. Hõb…",
+                "…Hõbemedali sai Rumeenia ja pronksmedali Saksa DV võistkond (esimesel laual mängis Edith Keller-Herrmann). Pärast kuueaastast vah…",
+                "…kolmeliikmelised esindused. Kuldmedali sai Nõukogude Liit (esimesel laual mängis valitsev maailmameister Nona Gaphrindašvili).…",
+                "…mameister Nona Gaphrindašvili). Hõbemedali sai Jugoslaavia (esimesel laual Milunka Lazarević) ja pronksmedali taas Saksa DV võis…"
+            ]
+            },
+        {
+                "word": "teisel",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…-sõnalt kui enda oma, aga see on enese ja teise asümmeetria teisel kujul.) Kui ma saan vältida kas enda pikaajalist valu või s…",
+                "…\"Teisel pool vett\" on ansambel Ruja hilisema perioodi (1985-1988) ü…",
+                "…hitektuuristiil ja sisekujundusstiil, mis levis 19. sajandi teisel poolel ning 20. sajandi algusaastatel Lääne- ja Kesk-Euroop…",
+                "…musel, Optjoki jõe – Pankjavitsa – Laura joonele. Septembri teisel poolel alustasid sakslased rindejoone lühendamise otstarbel…",
+                "…ttevõte, millel on vähemalt üks tütarettevõte ja kus ühelgi teisel ettevõttel ei ole üle 50 protsendi hääleõigust. Tütarettevõ…",
+                "…üksus Kanadas. Ontario on pindalalt Québeci provintsi järel teisel kohal. Provints on nime saanud Ontario järve järgi. == Rahv…"
+            ]
+            },
+        {
+                "word": "kolmandal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…sus, mis on mingi riigi haldusüksuste hierarhias ülaltpoolt kolmandal tasemel. Albaania: vald (komunë ja bashki) Alžeeria: vald E…",
+                "…inguid teevad, ei ole neil kohtu jaoks õiguslikku tähtsust. Kolmandal isikul, kes ei nõustu kohtulahendiga, on õigus esitada apel…",
+                "…a kolmandad isikud. ==== Iseseisva nõudega kolmas isik ==== Kolmandal isikul on õigus esitada iseseisev nõue hageja ja kostja vai…",
+                "…pemiseni esitada hagi mõlema poole vastu. Iseseisva nõudega kolmandal isikul on hageja õigused ja kohustused. Kolmas isik võib es…",
+                "…asukohta), mis on asetatud noodijoonestikule nii, et C asub kolmandal joonel. Aldivõtit kasutatakse vioola, viola da gamba ja alt…",
+                "…e valla osa. == Regulaarsed sündmused == Kevadlaat, aprilli kolmandal nädalavahetusel Cadenberge laskevõistlus, juuni neljandal n…"
+            ]
+            },
+        {
+                "word": "neljandal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…oni piiri. Sama kuu seisuga oli .uk maailmas kasutatavuselt neljandal kohal ning tippdomeenidest edastasid seda .com, .de ja .net…",
+                "…Narva muutmist riigi teiseks pealinnaks, kus kuningas igal neljandal aastal ühe aasta resideeriks. Plaan ei teostunud. ... == Sü…",
+                "…õitjad == === Filmiauhinnad === Parim draamafilm: \"Sündinud neljandal juulil\" (Born On The Fourth Of July) Parim draamafilmi nais…",
+                "…oys\" Parim draamafilmi meesnäitleja: Tom Cruise – \"Sündinud neljandal juulil\" Parim muusika- või komöödiafilm: \"Sõidutades miss D…",
+                "…aradiso), Itaalia Parim lavastaja: Oliver Stone – \"Sündinud neljandal juulil\" Parim stsenaarium: Oliver Stone – \"Sündinud neljand…",
+                "…ljandal juulil\" Parim stsenaarium: Oliver Stone – \"Sündinud neljandal juulil\" Parim muusika: Alan Menken – \"Väike merineitsi\" (Th…"
+            ]
+            },
+        {
+                "word": "viiendal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…em kasutatakse F-võtit, mis määrab väikese oktavi F asukoha viiendal noodijoonel, nimetusega sub-bassivõti. == C-võti == C-võtme…",
+                "…l noodijoonel. Baritonivõti määrab esimese oktavi C asukoha viiendal noodijoonel. Tenorivõti määrab esimese oktavi C asukoha nel…",
+                "…a. 2017. aastal osales ta talendisaate \"The Voice Portugal\" viiendal hooajal ning sai seal kuuenda koha. 2018. aasta Eurovisioon…",
+                "…essera lennujaam oli 2013. aastal reisijate arvult Itaalias viiendal kohal. Veneetsia lennujaamade süsteem (Marco Polo ja Trevis…",
+                "…14. aastal võitis ansambel telesaate \"The Voice of Holland\" viiendal hooajal esikoha ning sai auhinnaks plaadilepingu EMI-ga. An…",
+                "…s on 22,0 km. Tee saab alguse Jõelähtme–Kemba tee kahekümne viiendal kilomeetril Kuusalu ja Kupu küla piiril ning lõpeb Leesi–Ha…"
+            ]
+            },
+        {
+                "word": "kuuendal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…kide presidendi partei toetuse märgatav tema teise ametiaja kuuendal aastal. USA-s toimuvad presidendivalimised iga nelja aasta…",
+                "…al minutil, aga islandlaste kaks väravat (Ragnar Sigurðsson kuuendal ja Kolbeinn Sigþórsson 18 minutil) kindlustasid Islandi eda…",
+                "…võitis ta Vene telesaate \"Fabrika Zvjozd\" (\"Star Factory\") kuuendal hooaja. Pärast võitu sai Dzmitry väga populaarseks. Ta võit…",
+                "…kilomeetril Kiiu alevikus ning lõpeb Kaberla–Kaberneeme tee kuuendal kilomeetril Kaberneeme külas. Tee kulgeb läbi Valkla, Kulla…",
+                "…leviku. Tee ületab ühe silla (Räägu sild üle Valkla oja tee kuuendal kilomeetril) ja 6 truupi. Bussipeatusi teele ei jää. Teega…",
+                "…rjaga \"Ema roosid\") on Johnny Cashi laul, mis avaldati tema kuuendal, 1959. aastal ilmunud stuudioplaadil \"Songs of Our Soil\". E…"
+            ]
+            },
+        {
+                "word": "seitsmendal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 13,
+                "substringOnly": 1,
+                "examples": [
+                "…mida tuntakse eelkõige hingamispäeva pidamise tõttu nädala seitsmendal päeval – laupäeval. Kogudus sai alguse milleristide äratusl…",
+                "…el (sündinud 13. oktoobril 1998) on eesti laulja. Ta osales seitsmendal hooajal saates \"Eesti otsib superstaari\", kus jäi kümnendak…",
+                "…nit (sündinud 4. novembril 1998) on eesti laulja. Ta osales seitsmendal hooajal (2018) saates \"Eesti otsib superstaari\", kus jäi ka…",
+                "…dil 2019–2024 Euroopa jalgpalli kõrgliigade seas tugevuselt seitsmendal kohal. == Meeskonnad 2024–2025 hooajal == == Meistrid == ==…",
+                "…aastal võistluslikus saatesarjas \"Eesti otsib superstaari\" (seitsmendal hooajal) teise koha. Võistlusel Eesti Laul 2019 osales ta l…",
+                "…eal ligi 1,34 miljonit inimest, millega see oli rahvaarvult seitsmendal kohal Saudi Araabia 13 provintsi seas. Provintsi keskus on…"
+            ]
+            },
+        {
+                "word": "kaheksandal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…. Väina laius on 114 km. Nimi tuleneb sellest, et väin asub kaheksandal põhjalaiuskraadil.…",
+                "…dil 2020–2025 Euroopa jalgpalli kõrgliigade seas tugevuselt kaheksandal kohal. == Klubid == Hooajal 2025–26 mängivad liigas järgmis…",
+                "…küla tee, viiendal kilomeetril kaks korda Jõesuu silla tee, kaheksandal kilomeetril Põllküla–Madise tee. Tee esimene kilomeeter on…",
+                "…as, ülejäänud teel kuni 200 autot ööpäevas. Tee seitsmendal-kaheksandal kilomeetril on kiiruspiirang 40 km/h. Teevalgustuse kohta a…",
+                "…See saab alguse Tallinna–Tartu–Võru–Luhamaa tee kolmekümne kaheksandal kilomeetril Kuivajõe külas. Tee pikkus on 36,1 km. Tee lõpe…",
+                "…ravat. 10. augustil 2011 Eestiga peetud sõprusmängus lõi ta kaheksandal mänguminutil penaltist matši esimese värava, viies Türgi 1:…"
+            ]
+            },
+        {
+                "word": "üheksandal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…dil 2018–2023 Euroopa jalgpalli kõrgliigade seas tugevuselt üheksandal kohal. == Klubid == Hooajal 2023–2024 mängivad liigas järgm…",
+                "…ania talendisaatega \"Operación Triunfo\", kui saavutas selle üheksandal hooajal neljanda koha. Ta esindas 2018. aasta Eurovisiooni…",
+                "…elanikke 270 056. See on elanike arvult Illinoisi osariigis üheksandal kohal. Läänes piirneb maakond mööda Mississippi jõge Missou…",
+                "…744 769 ja 2000. aastal 569 463. Rahvaarvult on see Texases üheksandal kohal. Osariigis on see rahvaarvult suurim maakond väljaspo…",
+                "…provintsiga. Drenthe on Hollandi provintside seas pindalalt üheksandal ja rahvaarvult kümnendal kohal. Rahvastiku tihedus on 186 i…",
+                "…küll aga 4 truupi. Bussipeatusi teele ei jää. Teega ristub üheksandal kilomeetril Hara tee. Tee on pinnatud kruusatee. Tee klass…"
+            ]
+            },
+        {
+                "word": "kümnendal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…gi seadus (kui ei ole vastavas seaduses teisiti sätestatud) kümnendal päeval pärast selle avaldamist Riigi Teatajas.…",
+                "…maailma suurimate ettevõtete Fortune Global 500 nimekirjas kümnendal kohal. 2025. aasta alguse seisuga oli ettevõtte turuväärtus…",
+                "…i 711 000 külastajaga Ameerika Ühendriikide külastatavuselt kümnendal kohal. == Viited == == Välislingid == Honolulu koduleht…",
+                "…as. Tee on 2,6 km pikk. Tee saab alguse Viimsi–Randvere tee kümnendal kilomeetril Randvere külas ning lõpeb Metsakasti ja Muuga k…",
+                "…u, keskkool, luteri kirik. Esimest korda on Elejat mainitud kümnendal sajandil. Mõis pärineb 16. sajandist. Aastal 1915 rajati as…",
+                "…llandi provintside seas pindalalt üheksandal ja rahvaarvult kümnendal kohal. Rahvastiku tihedus on 186 inimest ruutkilomeetri koh…"
+            ]
+            },
+        {
+                "word": "üheteistkümnendal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 11,
+                "substringOnly": 1,
+                "examples": [
+                "…tee viiendal kilomeetril, Pudisoo sild üle Pudisoo jõe tee üheteistkümnendal kilomeetril) ja 27 truupi. Bussipeatusi jääb teele kümme: R…",
+                "…la. Teega ristub viiendal kilomeetril Kahala–Andineeme tee, üheteistkümnendal kilomeetril Kolga–Pudisoo tee, kolmeteistkümnendal kilomeet…",
+                "…e pikkus on 9,6 km. Tee saab alguse Liiapeksi–Loksa maantee üheteistkümnendal kilomeetril Kolgaküla külas ning lõpeb Valgejõe tee kolmand…",
+                "…kkus on 0,8 km. Tee saab alguse Tallinna–Rapla–Türi maantee üheteistkümnendal kilomeetril Saustinõmme külas. Tee läbib Saustinõmme ja Män…",
+                "…aiba ja Kernu. Teega ristub esimesel kilomeetril Nissi tee, üheteistkümnendal kilomeetril Kernu tee. Tee on täies ulatuses mustkattega. K…",
+                "…e pikkus on 6,1 km. Tee saab alguse Jägala–Käravete maantee üheteistkümnendal kilomeetril Soodla külas. Tee läbib Soodla, Lilli, Looküla…"
+            ]
+            },
+        {
+                "word": "kahekümnendal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a Alexander Peterson ja Peter Henry, kes lõpetasid võrdselt kahekümnendal kohal. Kahemehelises võistluses oli täiesti lumeta riigi pa…",
+                "…ser-Västrik on raamatu \"Eesti kriminaalõiguse üldosa reform kahekümnendal sajandil võrdleva analüüsi peeglis\" (2006) autor, millega k…"
+            ]
+            },
+        {
+                "word": "sajandal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 8,
+                "substringOnly": 1,
+                "examples": [
+                "…külm\", \"Põrgupõhja uus Vanapagan\"). Muuseum avati kirjaniku sajandal sünniaastapäeval 30. jaanuaril 1978, mil kogu majas oli Tam…",
+                "…Maubeuge'i 200 km sõidu viiendana. 2003. aastal, tema võidu sajandal aastapäeval, mälestati teda temanimelise tänavaga. == Inime…",
+                "…is TBS Europe 2015. aastal. Selle EMBA-programm on maailmas sajandal kohal. Õppekavadel on kolm rahvusvahelist akrediteeringut:…",
+                "…gi Presidendi ülesandeis Tõnis Kint Karl Jaanuse lipnikuks. Sajandal sünnipäeval anti talle üle uus Vabadusrist, mille ta sai en…",
+                "…tuur sallitati ja avati uuesti 2018. aastal Eesti Vabariigi sajandal aastapäeval. Skulptuuri kõrgus on 3,3 meetrit ning see on v…",
+                "…udis viieaastane õppekursus. 1896. aastal, keiser Nikolai I sajandal sünniaastapäeval, nimetati instituut tema järgi. Alates 190…"
+            ]
+            },
+        {
+                "word": "tuhandel",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…eeled == Elanike emakeelteks on valdavalt somaali keel (500 tuhandel) ja afari keel (300 tuhandel). Riigikeeli on kaks – araabia…",
+                "…on valdavalt somaali keel (500 tuhandel) ja afari keel (300 tuhandel). Riigikeeli on kaks – araabia keel ja prantsuse keel. == L…",
+                "…varem ei olnud antud. Ordenit anti kahe sajandi vältel ligi tuhandel korral, aastatel 1699–1725 40, 1726–1796 231 ja 1801–1916 u…",
+                "…le järgnes 29,5 tuhande tonniga rukis. Kaera kasvatati 31,6 tuhandel hektaril ning selle saagikus oli 1982 kg/ha. == Sordid == H…"
+            ]
+            }
+        ],
+    }
+    

@@ -2605,6 +2605,55 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "corpus, so the word is not the gap — one instance is not a rule (trap 9). ki and sn reached "
             + "the identical conclusion from the identical evidence",
     },
+    et: {
+        // ⚠ ESTONIAN'S HAYSTACK, so the strength of every "measured" below is legible. There is no FLEURS et
+        // on this machine, so the corpus evidence is the 464 retained segments of `tools/corpus/mined/et.jsonc`
+        // (a 1,931,621-paragraph et.wikipedia dump) plus `attest.ts` against THAT SAME WIKI — a bigger sample
+        // of one source, never two. What is genuinely independent is espeak-ng's `dictsource/et_list` (380
+        // lines, and it declares readings for `+`, `-`, `=`, `<`, `>`, `%`, `$`, `€`, `£`) and the referee
+        // `et.wikipron-est-broad.tsv`. Every refusal is argued at length in src/languages/estonian/normalize.ts.
+        // ⚠ `minus`, `plus`, `ampersand`, `percent`, `currency`, `degrees` AND `exponent` ARE ABSENT FROM THIS
+        // BLOCK BECAUSE THEY ARE SHIPPED, not because they are unresolved — `review.ts --lang et` is green on
+        // all seven. The six entries here are the whole of this language's sign silence.
+        equals: "measured: `=` ×9, and the DOMINANT SENSE IS NOT ARITHMETIC — it is EQUIVALENCE-OF-NAME. "
+            + "Two are title glosses giving a work's other language's title (`\"Kuitund = The If Hour\"`, "
+            + "`Henriku Liivimaa kroonika = Heinrici chronicon Livoniae`), where the sign means \"also "
+            + "known as\"; three are currency-conversion statements (`£1 = 240p`, `£1 = 100p`, `400 rubla = "
+            + "1 USA dollar`); three are mathematics (`x = log a N`, `siis y = z`, `f(x) = sin(x) + x³`); "
+            + "and one is a raw LaTeX fragment the dump preserved (`\\lim_{\\Delta x\\to 0} \\, \\Delta y = "
+            + "0`), which the scan reports separately as `MARKUP math-sign ×1`. "
+            + "⚠ AND THE WORD IS NOT THE GAP, WHICH IS WHY THIS ENTRY IS LONGER THAN ITS COUNT DESERVES. "
+            + "Estonian's equals verb is `võrdub` and it is attested ×39 tokens / 20 articles on "
+            + "et.wikipedia, DEFINITIONALLY and beside the sign itself: \"Kilomeeter (tähis km) on "
+            + "SI-süsteemi pikkusühik, mis VÕRDUB tuhande meetriga: 1 km = 103 m = 1000 m\". But every hit "
+            + "shows it GOVERNS THE COMITATIVE on its complement — *võrdub 1000 kilogrammiGA*, *võrdub "
+            + "tuhande meetriGA*, *võrdub 61,0459 puudaGA*, *võrdub alale jäävate siseveekogude pindalade "
+            + "summaGA* — and this layer's right-hand operand is DIGITS, which become words in the "
+            + "tokenizer downstream of every rule here. `240p võrdub` cannot be inflected, so *võrdub 240p* "
+            + "would be ungrammatical. Trap 14 arriving as a reason to DECLINE rather than as a conversion "
+            + "to make, and the same shape as lg's noun-class `kyenkana`. ⚠ espeak's `_= v8R:dus||m,&rk:` "
+            + "does NOT rescue it: that is *võrdusmärk*, the sign's NAME, which is the wrong REGISTER for "
+            + "what a reader says between two operands — the Hindi `धन` mistake exactly",
+        "plus-minus": "measured: `±` is ×0 in the retained text and ×0 in the artifact's `signs` cell "
+            + "examples. A definitive absence, recorded so the negative is not re-investigated (trap 48). "
+            + "Estonian would compose it from the two words this layer already ships (`pluss` + `miinus`), "
+            + "so this is not a sourcing gap either — there is simply nothing here to read",
+        "less-than": "measured: `<` is ×0 in the retained text. espeak declares `_< v&ik:sem` (*väiksem*, "
+            + "\"smaller\"), so the word exists; what is missing is the FRAME. Estonian's comparative takes "
+            + "the elative on its standard (*väiksem kui*, *väiksem kolmest*), and with digit operands "
+            + "neither the `kui` complementiser nor the case can be placed — the same trap 14 wall the "
+            + "equals entry hits. ×0 instances means nothing is pressing the question",
+        "greater-than": "measured: `>` is ×0 in the retained text. Same as `less-than`, and espeak's "
+            + "`_> su:rem` (*suurem*) has the same comparative frame problem",
+        times: "measured: `×` is ×0. The one multiplication-shaped string this corpus writes is spelled "
+            + "with an ASCII letter and is a RELAY EVENT, not an operator — `medali Ivar Stukolkin 4x200 m "
+            + "vabaujumises (7:23.50)`, the 4×200 m freestyle relay, where Estonian says *neli korda "
+            + "kakssada meetrit* and the reading is a dimension idiom rather than arithmetic. One instance "
+            + "of a shape the sign does not even use is not a rule (trap 9)",
+        divide: "measured: `÷` is ×0 in the retained text. The corpus's only division is written with a "
+            + "slash inside a fraction (`2/3`, `1/5`) or a rate (`$/kg`, `kg/ha`, `in/km²`), both of which "
+            + "normalize.ts declines for their own measured reasons. A definitive absence, like `plus-minus`",
+    },
     qu: {
         // ⚠ THERE IS NO FLEURS FOR QUECHUA, so every count below is over `tools/corpus/mined/qu.jsonc`'s
         // 446 retained segments (246 hard + 200 sample) from a qu.wikipedia dump, with the whole-corpus
