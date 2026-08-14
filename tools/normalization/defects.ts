@@ -307,6 +307,27 @@ export const DROPPABLE: readonly (readonly [string, RegExp])[] = [
  * gate. Name the work, the headword and the sense.
  */
 export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ilo: {
+        libra: "⚠ THE BARE WORD IS THE UNIT OF WEIGHT AND ONLY THE COLLOCATION IS THE CURRENCY — trap 37, "
+            + "and this is Cebuano's `libra`/`pound` split arriving from the other side. Measured over the "
+            + "mined ilowiki corpus (38,673 paragraphs): bare `libra` is x4 and THREE are avoirdupois — "
+            + "`12,546 a kilo (27,659 a libra)` of milk, `114 a libra (51 kg)`. `attest.ts` against "
+            + "ilo.wikipedia reproduces it independently: `libra` attested x5, and its examples are "
+            + "`250 libra (110 kg)`, `76 libra kada kubiko kadapan (1.03 iti 1.22 kg/dm3)` and the same "
+            + "`114 a libra` sentence. ⚠ SO WHAT IS DECLARED IS THE TWO-WORD KEY `libra esterlina`, whose "
+            + "single attestation is a sentence listing the world's reserve currencies in Ilocano — "
+            + "`maysa a reserba a kuarta kalpasan ti doliar ti Estados Unidos, ti euro ken ti libra "
+            + "esterlina` — i.e. the currency, named beside the other two this layer reads. ⚠ AND THE "
+            + "THINNESS IS STATED RATHER THAN HIDDEN: that is ONE instance, and the corpus hit and the "
+            + "attest.ts hit are the SAME SENTENCE (ilo.wikipedia is the corpus). It is declared because "
+            + "`libra esterlina` has no competing sense (`esterlina` occurs nowhere else in the language's "
+            + "whole written record), because the five corpus pound signs are otherwise dropped outright, "
+            + "and because there is no rival candidate anywhere. If a later run finds a second reading, "
+            + "this is the entry to revisit.",
+        esterlina: "The second half of the `libra esterlina` key — see `libra` above. x1 in the mined "
+            + "ilowiki corpus and x1 in `attest.ts`, and they are the same sentence. It occurs in Ilocano "
+            + "ONLY in that collocation, which is what makes the compound key unambiguous even at x1.",
+    },
     hil: {
         porsiyento: "⚠ THE WORD IS ATTESTED IN THE CORPUS AND THE ARTIFACT CANNOT SHOW IT — a sampling "
             + "limit, not a sourcing gap, and worth stating precisely because the two look identical from "
@@ -450,6 +471,70 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ilo: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE MINED ilowiki CORPUS — 38,655 paragraphs extracted from the
+        // `ilowiki` dump, 43,258 kept by `filter-by-language.py --lang ilo` (a new row whose CONTRAST set
+        // had to be measured: `para`, `mula`, `hindi`, `wala`, `usa`, `mao` and `dili` all look like
+        // Tagalog/Cebuano markers and are ordinary Ilocano or ordinary Ilocano topics), 38,673 unique
+        // mined. `attest.ts` against ilo.wikipedia is the second tier. Every refusal is argued at length
+        // in src/languages/ilocano/normalize.ts.
+        // ⚠ THE ARITHMETIC SIGNS ARE NOT ONE PROBLEM BUT TWO, AND THEY ARE SEPARATED HERE. `<` x10,
+        // `>` x37, `÷` x0 and `±` x15 are essentially an ABSENCE — trap 48's shape, a definitive negative.
+        // `+` x243, `=` x150 and `×` x19 are the harder case: the signs are common and every candidate
+        // WORD fails on sense. Both kinds are recorded with their evidence rather than collapsed.
+        // ⚠ `minus` IS DELIBERATELY ABSENT, AND THAT IS WHY `review.ts --lang ilo` STAYS RED ON IT — the
+        // ak / ln / bm stance. An accepted silence claims the drop is CORRECT, and this one is not: omitting
+        // a plus is lossless, omitting a minus INVERTS. Unlike most of the fleet, ilo's leading minuses are
+        // not ranges in disguise — they are GENUINE NEGATIVES, and there are six of them in the artifact
+        // alone: `nalawag a kapigsa iti \u22124.6` (a stellar magnitude), `temperatura ti 49 K
+        // (\u2212224 \u00b0C)`, `Manipud \u22120.4 aginggana ti 5.5`, `-9.3 \u00b0C`, `naabutanna ti
+        // \u221289 \u00b0C (\u2212129 \u00b0F)`, and the UTC offsets `ti timbengan ti oras ket -5 nga oras`.
+        // ⚠ WHAT IS MISSING IS A WORD, AND EVERY CANDIDATE FAILED ON SENSE. `minus` is x3 in the corpus and
+        // all three are SPECIES EPITHETS — `Syzygium minus`, `Hypocalymma minus`, `Empodisma minus` (trap 37
+        // with a healthy-looking count). `menos` is x0. `negatibo` is x48 and every instance is the
+        // ADJECTIVE, never digit-adjacent — `negatibo a komento`, `negatibo a kargo nga elektron`, `negatibo
+        // wenno positibo a bisiesto a segundo` — a modifier of a noun and not the sign of a number, which is
+        // the Fula `hakkunde` part-of-speech lesson. `kurang` x12 is 'lacking/insufficient'. Reading any of
+        // them would be confidently wrong in the one class where confidently wrong INVERTS THE VALUE, so
+        // the sign stays unread and the gate comes green the day an Ilocano negative-number word is
+        // attested, not before.
+        plus: "x243, and the sign is real while no operator word is. Read in context the instances split "
+            + "three ways and none wants the arithmetic word: a STELLAR MAGNITUDE or declination "
+            + "(`ti patingnga a kadakkel iti init ket +4.83`, `panagpababa a +27.4\u00b0`, `iti +6.1`), a "
+            + "UTC OFFSET (`ti UTC iti +08:00`, and there are 103 of those), and ETYMOLOGY or TITLES "
+            + "(`pre- 'sakbay' + sedere 'agtugaw'`, `Travel + Leisure`, the Christian cross glossed as "
+            + "`addaan iti porma a '+' a senial`). Cebuano's `dugang` does NOT transfer \u2014 it is x0 "
+            + "here \u2014 and `nayon` x6 is 'increase/addition' in a salary sense, never an operator. "
+            + "The playbook's own conclusion for this sign holds: a measurement plus is frequently omitted "
+            + "and only a UTC offset is contentful, and nothing in this language attests how to say it",
+        "plus-minus": "x15, and every one is a TOLERANCE rather than an operation: `24 nga oras \u00b1 30 "
+            + "a segundo`, `iti agarup a \u00b10.001%`, `glusemiko nga indeks a 39\u00b13`, `sumakop ti "
+            + "\u00b140 \u00b0C`. No Ilocano word for the sign occurs anywhere in the corpus or on "
+            + "ilo.wikipedia, and composing one would need the minus word this language does not have "
+            + "(see above), so the compound cannot be built from attested pieces either",
+        equals: "x150, and reading it as an arithmetic word would be wrong for most of them. The dominant "
+            + "sense is a GLOSS \u2014 `(Am=amianan; Dy=daya)` expanding a compass abbreviation, "
+            + "`Griego zoion = ayup ken logia = agadal`, `mikron = bassit` \u2014 where the sign means "
+            + "'is', not 'equals', and Ilocano writes that with the topic marker `ket`, which the "
+            + "sentence usually already has. The genuinely arithmetic instances are a handful "
+            + "(`A = Z + N`, `26 \u00d7 26 \u00d7 26 = 17576`). `katumbas` \u2014 the obvious candidate "
+            + "\u2014 is x1 and it is not the operator: `ti akinbaba a Mamberamo ket awan iti katumbas "
+            + "iti dayta a pamilia` ('has no counterpart in that family'). One instance, wrong sense",
+        "less-than": "x10, `>` x37, and neither has a word. Both signs occur almost entirely inside "
+            + "chemical, mathematical or markup residue (`< 0.4 gr/ku pie`), and no Ilocano reading for "
+            + "either is attested in the corpus or on ilo.wikipedia. A definitive negative (trap 48)",
+        "greater-than": "See `less-than`. x37, and the same absence of any candidate word",
+        times: "x19, AND THE SENSES DO NOT AGREE, which is why no `multiply` is declared even though "
+            + "Cebuano declares one. The instances are a PRODUCT (`17 \u00d7 2\u00b9\u2076`, "
+            + "`26 \u00d7 26 \u00d7 26`, `2.5 \u00d7 10\u2076 km\u00b3`), a DIMENSION "
+            + "(`10\u00d710\u00d710`), and \u2014 the ones that settle it \u2014 the BOTANICAL HYBRID "
+            + "SIGN: `Musa \u00d7 paradisiaca`, `Musa acuminata \u00d7 M. balbisiana`. That last is read "
+            + "as neither 'times' nor 'by' in any language. `pilo` x69 is the corpus's multiplicative "
+            + "(`ka pilo`), but it is a nominal '-fold', not an infix operator, and it is never "
+            + "digit-flanked here; `daras` x8 is 'times' in the frequency sense (`iti maikadua a daras`, "
+            + "'for the second time'), which is a different word for a different concept",
+        divide: "x0. The sign does not occur in 38,673 paragraphs. A query that was run, not a gap",
+    },
     hil: {
         // ⚠ EVERY COUNT BELOW IS OVER THE WIKIMEDIA INCUBATOR'S Wp/hil, because there is no hil.wikipedia
         // and no FLEURS hil. meta's sitematrix lists Wikipedias for bcl, ceb, ilo, pag, pam, tl and war and

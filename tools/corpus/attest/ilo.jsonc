@@ -1,0 +1,322 @@
+// WIKIPEDIA WORD ATTESTATION — ilo. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ilo",
+        "wiki": "ilo.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kilogramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…Ti kilogramo ket ti baatayan a yunit ti masa iti sistema a metriko, a po…",
+                "…a kilo iti inaldaw a panagsasao. Kasisigud a naipalawag ti kilogramo idi 1795 a kas ti masa ti maysa a litro ti danum. Maysa idi…",
+                "…lindriko ti platino-iridio, ti Internasional a Prototipo ti Kilogramo (International Prototype of the Kilogram – IPK) ket nagbali…",
+                "…ma a metriko, ken nagtultuloy daytoy aginggana idi 2019. Ti kilogramo ket isu idi kadagiti naudi a naipalawag a yunit ti SI babae…",
+                "…babaen ti maysa a pisikal nga artepakto. Naipalawag itan ti kilogramo kadagiti termino ti segundo ken ti metro, a naibatay iti na…",
+                "…== == Dagiti akinruar a silpo == Dagiti midia a mainaig iti Kilogramo iti Wikimedia Commons…"
+            ]
+            },
+        {
+                "word": "pie",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…s naituding nga agdinama a naikugnalan ti metro: kuadrado a pie = 0.09290304 a kuadrado a metro kuadrado a yarda = 9 a kuad…",
+                "…290304 a kuadrado a metro kuadrado a yarda = 9 a kuadrado a pie = 0.83612736 a kuadrado a metro kuadrado a perch = 30.25 a…",
+                "…tro acre = 160 a kuadrado a perch wenno 43,560 a kuadrado a pie = 4046.8564224 a kuadrado a metro kuadrado a milia = 640 ng…",
+                "…nga adda dagiti bakrang nga agrukod iti agarup a 230 m (755 pie), a mangabbong kadagiti 13 nga acre. Dagiti uppat a bakrang…",
+                "…do. Ti kasisigud a katayag idi ti piramida ket 146.5 m (488 pie), ngem itan ket addaan laeng ti 137 m (455 pie) a katayag,…",
+                "…146.5 m (488 pie), ngem itan ket addaan laeng ti 137 m (455 pie) a katayag, ti 9 m (33 pie) nga awanen ket gapu ti panagtak…"
+            ]
+            },
+        {
+                "word": "doliar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…Ti doliar ti Estados Unidos (senial: $; kodigo: USD; naipangyababaan…",
+                "…SD; naipangyababaan pay ti US$), ken makunkuna pay a kas ti doliar ti U.S. wenno doliar nga Amerikano, ket isu ti opisial a ku…",
+                "…ay ti US$), ken makunkuna pay a kas ti doliar ti U.S. wenno doliar nga Amerikano, ket isu ti opisial a kuarta a pidusiario iti…",
+                "…== == Dagiti akinruar a silpo == Dagiti midia a mainaig iti Doliar ti Estados Unidos iti Wikimedia Commons Doliar ti Estados U…",
+                "…mainaig iti Doliar ti Estados Unidos iti Wikimedia Commons Doliar ti Estados Unidos - dagiti nota ti banko (iti Aleman ken In…",
+                "…uneg ti maysa a pagilian iti maysa a panawen). Dagiti GDP a doliar a ikarkulo a naited iti daytoy a panid ket naala manipud ti…"
+            ]
+            },
+        {
+                "word": "libra esterlina",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…kuarta kalpasan ti doliar ti Estados Unidos, ti euro ken ti libra esterlina. == Dagiti nota == == Dagiti akinruar a silpo == Dagiti mid…"
+            ]
+            },
+        {
+                "word": "esterlina",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…kalpasan ti doliar ti Estados Unidos, ti euro ken ti libra esterlina. == Dagiti nota == == Dagiti akinruar a silpo == Dagiti mid…"
+            ]
+            },
+        {
+                "word": "libra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 1,
+                "examples": [
+                "…kuarta kalpasan ti doliar ti Estados Unidos, ti euro ken ti libra esterlina. == Dagiti nota == == Dagiti akinruar a silpo ==…",
+                "…asayaat a mapasileng. Ti densidadna ket 64 aginggana iti 76 libra kada kubiko kadapan (1.03 iti 1.22 kg/dm3). == Dagiti nagib…",
+                "…da (154 cm) ken saan a nagdagsen iti nadagdagsen ngem 114 a libra (51 kg), uray iti diskriminasion iti puli iti dayta a panaw…",
+                "…4 in (1.93 m) wenno 6 ft 7 in (2.01 m),ken agdagsen iti 250 libra (110 kg) ken ammo idi a kas \"The Velvet Bulldozer\" gapu ti…",
+                "…elada-segundo, ken dagiti sistema ti pagbilangan ti kadapan-libra-segundo. == Dagiti nagibasaran == == Dagiti akinruar a silp…"
+            ]
+            },
+        {
+                "word": "pisos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Ti pisos ti Filipinas (Ingles: Philippine peso), ket isu ti opisial…",
+                "…makatawen a matgedan iti kabassitan a Lima pulo a Riwriw a Pisos (P50,000,000.00) a naibatay iti 1991 nga agnanayon a presio…",
+                "…1967–92. Isu ti immuna a Filipina nga agparang iti maysa a pisos a kuarta ti Filipinas, iti daytoy a kaso, ti maysa a 100 a…",
+                "…a kuarta ti Filipinas, iti daytoy a kaso, ti maysa a 100 a pisos manipud kadagiti Serye ti Ingles (1951–66). Ti Tandang Sora…",
+                "…ntos ken Vicente Lim, isu ket nailadawan iti maysa a ribu a pisos a papel de banko ti Filipinas isada nga Filipino a natay a…",
+                "…bayadan dagiti Espaniol dagiti rebolusionario iti 800,000 a pisos ken ni Aguinaldo ken dagiti sabali a daulo ket ageksiloda i…"
+            ]
+            },
+        {
+                "word": "Sakbay ti Kristo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Kalpasan ti Kristo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 5,
+                "substringOnly": 13,
+                "examples": [
+                "…Ti euro (senial: €; kodigo: EUR) ket isu ti opisial a kuarta ti eur…",
+                "…diay Aprika ket agus-usarda kadagiti kuarta a napalseng iti euro. Ti euro ket isu ti maikadua a kadakkelan a reserba a kuart…",
+                "…ka ket agus-usarda kadagiti kuarta a napalseng iti euro. Ti euro ket isu ti maikadua a kadakkelan a reserba a kuarta ken ti…",
+                "…ro 2012, nga ad-adu ngem €890 bilion a maibalbalikuskos, ti euro ket adda ti kangatuan a naitipon a pateg dagiti nota ti ban…",
+                "…i maikadua a kadakkelan nga ekonomia iti lubong. Ti nagan a euro ket opisial a naampon idi 16 Disiembre 1995. Ti euro ket na…",
+                "…agan a euro ket opisial a naampon idi 16 Disiembre 1995. Ti euro ket naiyamammo kadagiti busbos a tiendaan ti lubong a kas t…"
+            ]
+            },
+        {
+                "word": "euros",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "porsiento",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…ddaan iti agarup a 2.6 a riwriw nga agtataeng – agarup a 11 porsiento iti nailian a dagup – nga iti kaaduan ket (92 a porsiento)…",
+                "…1 porsiento iti nailian a dagup – nga iti kaaduan ket (92 a porsiento) agtataeng iti suli ti abagatan-laud, 79 a porsiento iti po…",
+                "…(92 a porsiento) agtataeng iti suli ti abagatan-laud, 79 a porsiento iti populasion nga agtataeng iti lugar ti Perth, a mangibat…",
+                "…serbisio ken konstruksion. Ti estado ket agpataud iti 46 a porsiento kadagiti eksport ti Australia. Ti Akinlaud nga Australia ke…",
+                "…kteria. Dagiti bakir ti kayo ket abbonganna ti agarup a 9.4 porsiento iti rabaw ti Daga (wenno 30 porsiento iti dagup a kadakkel…",
+                "…ganna ti agarup a 9.4 porsiento iti rabaw ti Daga (wenno 30 porsiento iti dagup a kadakkel ti daga), urayno idi ket ad-adu ti ina…"
+            ]
+            },
+        {
+                "word": "punto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 134,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ti Punto Batorampon ket ti akindaya unay a punto iti isla ti Mindana…",
+                "…Ti Punto Batorampon ket ti akindaya unay a punto iti isla ti Mindanao (7°6′32.5″N 121°53′51.8″E) iti Filipin…",
+                "…gpatinggaan ti Siudad ti Zamboanga, ket dati nga ammo a kas Punto Batalampon, ken nanaganan manen daytoy iti Punto Batorampon…",
+                "…ammo a kas Punto Batalampon, ken nanaganan manen daytoy iti Punto Batorampon kadagiti tawen ti 1940. Ti punto ket mabirukan b…",
+                "…anen daytoy iti Punto Batorampon kadagiti tawen ti 1940. Ti punto ket mabirukan bassit iti amianan ti Labuan, iti agarup a 35…",
+                "…seg ti ili ti Siudad ti Zamboanga. Naipampamattian pay a ti Punto Batorampon ket nagan pay ti kangatuan nga elebasion ti Siud…"
+            ]
+            },
+        {
+                "word": "kuadrado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 55,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…. It is equal to: 100 ektarias 106 m² or 1,000,000 m² 0.386 kuadrado milias 247 acres the area of a square of side length 1 km a…",
+                "…rger than 10 km² == Palawag == Ti \"km²\" ket kayatna a sawen kuadrado kilometro, saan a kilometro kuadrado. Kas pagarigan, 3 km²…",
+                "…²\" ket kayatna a sawen kuadrado kilometro, saan a kilometro kuadrado. Kas pagarigan, 3 km² is equal to 3 000 000 m² and not to 3…",
+                "…nidad == Dagiti unidad iti panangrukod iti kalawa ti rabaw: kuadrado a metro = SI derived unit are = 100 a kuadrado metro ektari…",
+                "…wa ti rabaw: kuadrado a metro = SI derived unit are = 100 a kuadrado metro ektaria = 10,000 a kuadrado metro kuadrado a kilometr…",
+                "…derived unit are = 100 a kuadrado metro ektaria = 10,000 a kuadrado metro kuadrado a kilometro = 1,000,000 a kuadrado metro kua…"
+            ]
+            },
+        {
+                "word": "kubiko",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…SI a yunit ti sistema ti metriko iti tomo a kapada iti 1 a kubiko desimeto (dm3), 1,000 kubiko sentimetro (cm3) wenno 1/1,000…",
+                "…riko iti tomo a kapada iti 1 a kubiko desimeto (dm3), 1,000 kubiko sentimetro (cm3) wenno 1/1,000 kubiko meto. Ti kubiko desim…",
+                "…desimeto (dm3), 1,000 kubiko sentimetro (cm3) wenno 1/1,000 kubiko meto. Ti kubiko desimetro (wenno litro) ket sakupenna ti to…",
+                "…1,000 kubiko sentimetro (cm3) wenno 1/1,000 kubiko meto. Ti kubiko desimetro (wenno litro) ket sakupenna ti tomo dagiti 10×10×…",
+                "…a) ken isu a daytoy ket kapada ti maysa a pagkasangaribo ti kubiko metro. Ti orihinal a Pranses a sistema ti metriko ket nagus…",
+                "…saan nga opisial a yunit ti SI—ti SI a yunit ti tomo ket ti kubiko metro (m3). Ti maysa a litro iti likido a danum ket addaan…"
+            ]
+            },
+        {
+                "word": "pulgada",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…dakkel manipud iti 30–40 a milimetro (1- aginggana ti 1.5-a pulgada) manabung a kurarapnit aginggana ti 33-metro (108-pié) a as…",
+                "…na. Ti Houstonia pusilla ket ti maysa a bassit a mula iti 6 pulgada (150 mm) wenno basbassit iti katayag nga agraman kadagiti b…",
+                "…ngnga ken uppat a pngir a sabong iti diametro iti 0.25–0.33 pulgada (6.4–8.4 mm). Ti mula ket addaan iti roseta atengnga ken be…",
+                "…atengnga ken berde e yierba a nulong iti kaatiddog iti 0.5 pulgada (13 mm). Agsumbangir dagiti bulong ken ti tunggal maysa a s…",
+                "…ti henero, ken agtubo laeng iti tallo aginggana iti innem a pulgada iti katayag. Dagiti naalid ken kankanayon a berde a bulong…",
+                "…maris iti magenta, naallid no masagid, ken agarup a kagudua pulgada no napno nga agtubo. == Etimolohia == Naipanagan ti Medinil…"
+            ]
+            },
+        {
+                "word": "milia",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…t Makassar. Ti kaatiddog ti lingsat ket agarup a 35 nautika milia, a maikapet iti Lingsat Makassar iti amianan ken ti Baybay…",
+                "…lingsat ket iti lugar ti Batulicin nga agarup a 3 a nautika milia ken ti kaakikidan ket 1 a nautika milia iti lugar ti Kotaba…",
+                "…garup a 3 a nautika milia ken ti kaakikidan ket 1 a nautika milia iti lugar ti Kotabaru. Adda dagiti uppat nga isla a mabiruk…",
+                "…indayon a nasukogan a grupo iti is-isla a sumurok a 2,000 a milia (3,200 km) a kaatiddogna a pannakaisina ti Golpo iti Karibe…",
+                "…a ti Estados Unidos, dagiti isla ket gumay-atda iti 1,200 a milia (1,900 km) nga akin-abagatan a daya, ken 500 a milia (800 k…",
+                "…,200 a milia (1,900 km) nga akin-abagatan a daya, ken 500 a milia (800 km) iti abagatan, ket laud ti kaigidan ti amianan nga…"
+            ]
+            },
+        {
+                "word": "dolyar",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dolar",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dollar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…nd) Leonardo DiCaprio (The Aviator) Clint Eastwood (Million Dollar Baby) 2005 Philip Seymour Hoffman - (Capote) Terrence Howar…",
+                "…America Naomi Watts - 21 Grams 2004 Hilary Swank - Million Dollar Baby Annette Bening - Being Julia Catalina Sandino Moreno -…",
+                "…Side of the World Karayan a Mystic Seabiscuit 2004 Million Dollar Baby - Warner Brothers - Clint Eastwood, Albert S. Ruddy, T…"
+            ]
+            },
+        {
+                "word": "piso",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 1,
+                "examples": [
+                "…a a sarita para iti ubbing Umuna: \"Ang Paglalakbay ni Pipoy Piso\" ni Maryrose Jairene C Cruz Maikadua: \"Ang Singsing-Pari sa…",
+                "…ldo Pirotta (1853–1936) Pisano – Edmundo Pisano (1919–1997) Piso – Willem (Guilielmus, Guilherme) Piso (Pies) (1611–1678) Pi…",
+                "…do Pisano (1919–1997) Piso – Willem (Guilielmus, Guilherme) Piso (Pies) (1611–1678) Pit. – Charles-Joseph Marie Pitard (1873…"
+            ]
+            },
+        {
+                "word": "peso",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Ti pisos ti Filipinas (Ingles: Philippine peso), ket isu ti opisial a kuarta iti Filipinas. == Kuarta a pa…",
+                "…estiko a Produkto ti industria ken agrikultura: 64.1 Bilion Peso para iti Rehion XI Populasion iti Baba ti Linia ti Kinapang…",
+                "…an ti ekonomia babaen ti napartak a panagpababa ti balor ti peso a pinataud babaen ti saan a naiget a panaggasto ti eleksion…"
+            ]
+            }
+        ],
+    }
+    

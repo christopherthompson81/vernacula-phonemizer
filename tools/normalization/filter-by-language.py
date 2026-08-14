@@ -136,6 +136,27 @@ MARKERS = {
     "ki": "nĩ ũrĩa ũcio ũyũ icio cia kĩa gĩa rĩa atĩ tondũ kana nĩguo thĩinĩ kũrĩ hĩndĩ mũndũ andũ "
           "bũrũri mũno nyingĩ maingĩ ũhoro rũthiomi gũkorwo nĩo nĩkĩo kuma arĩ ũguo gĩkũyũ agĩkũyũ "
           "itũũra ihinda mahinda ciothe othe rĩrĩa kĩrĩa ũrĩ nĩwe",
+    # ilo (Ilocano/Iloko): ilo.wikipedia is a real human-written wiki (15,526 articles, NOT a Lsjbot farm
+    # like ceb's), and its contaminant is ENGLISH by a factor of 17 over Tagalog — measured, 12,769
+    # English-dominant paragraphs against 730 Tagalog and 9 Cebuano. So the stock ENGLISH set carries the
+    # weight here and the CONTRAST row below is a narrow supplement, which is the reverse of the hil case.
+    # The markers are Ilocano's own grammar, every one of which tl, ceb and hil write differently: the
+    # articles `ti`/`iti` (tl `ang`/`sa`, ceb/hil `ang`), the plural `dagiti`/`kadagiti` (tl `mga`), the
+    # topic marker `ket`, the conjunction `ken` (tl `at`, ceb `ug`, hil `kag`), the linker `nga`, the
+    # deictics `daytoy`/`dayta`/`dagitoy` (tl `ito`, ceb `kini`, hil `ini`), the numeral `maysa`
+    # (ceb `usa`, tl/hil `isa`), `idi`/`idiay`, `manipud` "from", `wenno` "or", `ngem` "but",
+    # `saan` "not" (tl `hindi`, ceb `dili`, hil `indi`), `awan` "none", `babaen` "by means of",
+    # `laeng` "only", `kalpasan` "after", `aginggana` "until", `nupay`/`urayno` "although".
+    # ⚠ `a`, `ni`, `no` and `ta` ARE ABSENT although they are among the corpus's commonest tokens: single
+    # letters are not markers, `ni` is shared with Tagalog, and `no`/`ta` are two-letter tokens that
+    # collide with English and Spanish. `nga` is kept even though ceb and hil write it too, for the same
+    # reason bar keeps `is` — it is one of the highest-frequency Ilocano markers and a Cebuano paragraph
+    # scores far more on the contrast side.
+    "ilo": "ti iti ket nga ken dagiti kadagiti dagitoy kadagitoy daytoy dayta idi idiay maysa kas "
+           "babaen manipud wenno ngem saan awan adda addaan mabalin kalpasan isu isuna isuda "
+           "kenkuana kadakuada laeng met pay uray urayno nupay tapno gapu bayat kabayatan "
+           "aginggana dua tallo uppat lima innem pito walo siam sangapulo tawen ili probinsia "
+           "pagilian paset bassit adu kaaduan nangruna mabirukan agnanaed naisasao kadawyan",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
@@ -213,6 +234,23 @@ CONTRAST = {
         "katika kwamba ambayo ambao ambaye hii hiyo hivyo huo kuwa alikuwa walikuwa ilikuwa yao zao "
         "hadi lakini pia sana kutoka baada ndani watu mji nchi wengi kila zaidi wakati yote ili bila "
         "chini juu kwenye wote hao huyu wenye kama ndiyo".split()
+    ),
+    # ilo: a NARROW Tagalog supplement to ENGLISH, which is this wiki's real contaminant. Every word here
+    # was counted inside 30,340 strongly-Ilocano paragraphs first and kept only at ≤5 occurrences.
+    # ⚠ EIGHT OBVIOUS CANDIDATES WERE CUT BECAUSE THEY ARE ORDINARY ILOCANO OR ORDINARY ILOCANO TOPICS —
+    # trap 37, four times in one row:
+    #   `para` ×4,748 and `mula` ×4,112 are Ilocano words (the benefactive "for"; a PLANT/crop — it is
+    #       Tagalog, not Ilocano, where `mula` means "from");
+    #   `hindi` ×33 is the LANGUAGE Hindi ("am-ammo kas mung iti Hindi"), not the Tagalog negator;
+    #   `wala` ×7 is a LANGUAGE NAME ("Ti pagsasao a Langalanga, wenno Wala");
+    #   `usa` ×6, `mao` ×14, `dili` ×11, `kaayo` ×1 are the USA, Mao Tse-tung, Dili in East Timor, and
+    #       the Ilocano word for a tree — not the Cebuano function words they look like.
+    # ⚠ `ay`, `at`, `ang`, `ng`, `sa`, `mga` are also absent: all six occur inside genuine Ilocano
+    # paragraphs (×989, ×539, ×212, ×195, ×92, ×15), mostly in quoted Tagalog institution and song titles,
+    # so listing them would drop Ilocano prose for naming a Philippine thing in Tagalog.
+    "ilo": set(
+        "ito nito iyan iyon noong ngayon dito doon kanila kanilang naman upang habang bawat "
+        "dalawa marami lahat kung sila nila niya ninyo tayo kami ako din rin".split()
     ),
 }
 
