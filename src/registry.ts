@@ -237,10 +237,13 @@ setDefaultForeign((text) => getPhonemizer("en").text(text));
 // the Cyrillic silently gone. The router picks a reader from the run's SCRIPT, with the host language's
 // own overrides applied (a Han run inside Japanese is Japanese, not Mandarin).
 setScriptReader((run, host) => {
-    const target = readerFor(run, host);
-    if (target === undefined) return undefined;
+    // `text` is the run itself except for the LONE GREEK LETTER, which core/scripts.ts rewrites to its
+    // Greek-spelled NAME (⟨α⟩ → «άλφα») — the run used to be declined here, and a declined run is deleted.
+    const routed = readerFor(run, host);
+    if (routed === undefined) return undefined;
+    const { target, text } = routed;
     try {
-        return getPhonemizer(target).text(run);
+        return getPhonemizer(target).text(text);
     } catch {
         // An unbuilt or unknown target must not take the whole utterance down; declining here falls back
         // to the Latin-to-English path, which is what happened before this existed.

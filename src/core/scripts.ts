@@ -18,11 +18,10 @@
  * that makes an arbitrary run most likely readable (Cyrillic → Russian, Latin → English, Devanagari →
  * Hindi), and any engine that knows better injects its own reader.
  *
- * ⚠ KNOWN LIMIT, recorded rather than guessed at: a LONE Greek letter in a Latin-script text is usually
- * MATHEMATICS (α, β, π, Δ) and should be read as the host language's letter name — "alpha", "pi" — not as
- * a Greek word. This router has no way to tell that from a one-letter Greek word, so it requires a run of
- * two or more before routing to Greek, and a single stray letter stays dropped as it was. Doing better
- * needs a per-host letter-name table, which is lexical data and belongs in the host language.
+ * ⚠ THE LONE GREEK LETTER — the limit this file used to record, and now reads. A lone Greek letter in
+ * another script is usually MATHEMATICS (α, β, π, Δ) and wants its NAME — "alpha", "pi" — not a Greek
+ * word's worth of phonology, so the router declined it and the letter was DELETED in 186 of 188 engines.
+ * See `GREEK_LETTER_NAME` for what replaced that, and why the name did not need a per-host table.
  */
 
 /** The scripts worth routing. Ordered longest-lived first; detection tries each in turn. */
@@ -195,15 +194,98 @@ export function scriptOf(run: string): ScriptName | undefined {
 }
 
 /**
- * Which language should read `run`, given the host language reading the document. `undefined` means
- * "leave it dropped": either the script is unknown, or the answer is the host itself — which would mean
- * handing the engine back text its own tokenizer already declined, and recursing.
+ * THE LONE GREEK LETTER, AND WHY ITS NAME IS SPELLED IN GREEK.
+ *
+ * A run of two or more Greek letters is Greek text and routes to the Greek reader: si's `Παν` reads *pan*.
+ * A run of ONE was declined — and a declined run is a DELETED run, because `emitUnclaimed`'s only
+ * fall-through is the Latin-to-English path and a Greek letter is not Latin. Measured across the fleet:
+ * **the letter vanished in 186 of 188 engines** (the two exceptions being Greek itself, which owns the
+ * script, and Ancient Greek). That is gd's `γ-iarann` → *ˈiərˠən̪ˠ*, both of sn's lone letters, and the
+ * reason six Greek HTML entities were declined from `core/markup.ts`'s table: decoding `&gamma;` would have
+ * fed the decoder's output straight into this deletion, so which entities were safe to add depended on
+ * which letters a corpus happened to reach for.
+ *
+ * ⚠ ROUTING THE LONE LETTER AS GREEK TEXT IS THE WRONG FIX, and is why the threshold was there. `α` in
+ * "the value is α" is not a Greek word being quoted, it is a mathematical symbol, and its reading is the
+ * LETTER NAME. A phone (`γ` → /ɣ/) would be a wrong reading where there had been a silence, which is the
+ * worse trade.
+ *
+ * ⚠ AND THE NAME DOES NOT NEED A PER-HOST TABLE — the objection that kept this unfixed. The name of a Greek
+ * letter is a GREEK WORD; the international names (alpha, beta, delta, sigma) ARE those words borrowed. So
+ * the letter's own script supplies its own lexical data, one table for all 193 engines instead of 193
+ * tables, and the Greek engine speaks it: ⟨α⟩ → «άλφα» → *alfa*, ⟨π⟩ → «πι» → *pi*, ⟨Δ⟩ → «δέλτα» →
+ * *ðelta*, ⟨σ⟩ → «σίγμα» → *siɣma*. Reading an embedded run with the phonology of the script's own language
+ * is exactly what this router already does everywhere else — a Cyrillic name inside Greek is read as
+ * Russian, not transliterated into Greek — so the lone letter is now the same rule, not a special case.
+ *
+ * ⚠ THE ACCENT IS THE DISCRIMINATOR, AND IT WAS MEASURED, NOT REASONED. The one-letter GREEK WORD is the
+ * real ambiguity — `ή` "or", `ὁ`/`ἡ` the article — and reading those as letter names would be a wrong
+ * reading put where a silence had been, which is the worse trade. A census of every lone Greek letter in
+ * all 162 mined artifacts separates the two populations with nothing left over:
+ *
+ *   MATHEMATICS, ~34 languages, and every instance BARE — an `α Scorpii` (an), `Ψ 1 und … Ψ 2` (bar),
+ *   `圓周率，一般用 π 表示` (gan), `π × i` (gd), `χ² kritēriju` (lv), `[Ω m]`, `Φ से प्रदशित` (mag), `δ(G)`
+ *   (mn), `α, β, γ радиоактивдүүлүк` (ky), `θ बलके दिशा` (mag), `μ = np` (su), `λ′ − λ` (skr).
+ *   GREEK PROSE, 2 languages, and every instance ACCENTED — crh's `ἡ θάλασσα` ×5 (the article, quoted from
+ *   Ancient Greek) and lg's `Ελευθερία ή θάνατος` (the conjunction "or").
+ *
+ * A mathematical symbol is never written with a Greek accent or breathing; a Greek one-letter word always
+ * is. So the lone letter is named only when it is BARE, and an accented one stays declined exactly as it
+ * was — the two cost cases above are unchanged by this fix rather than newly mis-read.
+ *
+ * ⚠ BOTH CASES, ONE NAME. `Δ` is the commonest lone letter of all in mathematics, and ⟨ς⟩ final sigma is
+ * the same letter as ⟨σ⟩, so the lookup lowercases. It does NOT strip accents — see above. Names are the
+ * modern Greek ones as the Greek Wikipedia's own alphabet article spells them.
  */
-export function readerFor(run: string, host: string): string | undefined {
+// prettier-ignore
+const GREEK_LETTER_NAME: Readonly<Record<string, string>> = {
+    α: "άλφα", β: "βήτα", γ: "γάμμα", δ: "δέλτα", ε: "έψιλον", ζ: "ζήτα", η: "ήτα", θ: "θήτα",
+    ι: "ιώτα", κ: "κάππα", λ: "λάμδα", μ: "μι", ν: "νι", ξ: "ξι", ο: "όμικρον", π: "πι",
+    ρ: "ρο", σ: "σίγμα", ς: "σίγμα", τ: "ταυ", υ: "ύψιλον", φ: "φι", χ: "χι", ψ: "ψι", ω: "ωμέγα",
+};
+const GREEK_LETTER = /\p{Script=Greek}/u;
+
+/**
+ * The name of the ONE BARE Greek letter in `run` — `undefined` if the run holds none, holds several, or
+ * holds one that carries an accent or breathing, which is the Greek-prose signal (see the table above).
+ */
+function loneGreekLetterName(run: string): { letter: string; name: string } | undefined {
+    const letters = [...run].filter((c) => GREEK_LETTER.test(c) && !/\p{M}/u.test(c));
+    if (letters.length !== 1) return undefined;
+    const letter = letters[0]!;
+    // NFD, so a PRECOMPOSED accent (`ή` U+03AE) is caught as surely as a combining one (`ἡ` U+1F21). A run
+    // whose letter is followed by a loose combining mark fails the `length !== 1` test above already.
+    const nfd = letter.normalize("NFD");
+    if (nfd.length !== 1) return undefined;
+    const name = GREEK_LETTER_NAME[nfd.toLowerCase()];
+    return name === undefined ? undefined : { letter, name };
+}
+
+/**
+ * Which language should read `run`, given the host language reading the document, and WHAT TEXT it should
+ * be handed. `undefined` means "leave it dropped": either the script is unknown, or the answer is the host
+ * itself — which would mean handing the engine back text its own tokenizer already declined, and recursing.
+ *
+ * `text` differs from `run` only for the lone Greek letter, which is rewritten to its NAME — see
+ * `GREEK_LETTER_NAME`. Returning the pair rather than just the target is what keeps that rewrite a fact
+ * about the SCRIPT, next to the table that states it, instead of a special case in the registry's callback.
+ */
+export function readerFor(run: string, host: string): { target: string; text: string } | undefined {
     const script = scriptOf(run);
     if (script === undefined) return undefined;
-    // See the KNOWN LIMIT above: one Greek letter in another script is far more likely mathematics.
-    if (script === "Greek" && [...run].filter((c) => /\p{Script=Greek}/u.test(c)).length < 2) return undefined;
+    let text = run;
+    if (script === "Greek" && [...run].filter((c) => GREEK_LETTER.test(c)).length < 2) {
+        const named = loneGreekLetterName(run);
+        // An unnamed lone symbol (an archaic letter, an accented one, a lone combining mark) stays
+        // declined, exactly as the whole class was before this existed.
+        if (named === undefined) return undefined;
+        // ⚠ SUBSTITUTED IN PLACE, not substituted FOR the run. `FOREIGN_RUN` carries a trailing superscript
+        // and a joining hyphen along with the letter (`χ²`, gd's `γ-`), and replacing the whole run would
+        // delete those before the reader ever saw them — trading one silent deletion for a smaller one.
+        // (What the reader then does with them is its own business: `el` reads `χ²` as *çi* today either
+        // way. The point is that this function stops making that decision on its behalf.)
+        text = run.replace(named.letter, named.name);
+    }
     const target = OVERRIDES[host]?.[script] ?? DEFAULT_READER[script];
-    return target === host ? undefined : target;
+    return target === host ? undefined : { target, text };
 }

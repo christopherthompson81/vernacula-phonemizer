@@ -38,6 +38,42 @@ const FRONT = new Set(DEF.frontLetters); // ⟨gu⟩ is u-silent [ɰ] before a f
 const GLIDE: Record<string, string> = { i: "j", u: "w", ɨ: "j" };
 const GLIDE_OUT = new Set(["j", "w"]);
 
+/**
+ * ⟨g̃⟩ — THE ACHEGETY'S 33RD-ALPHABET LETTER THAT THIS ENGINE WAS DELETING, and the saltillo's sibling.
+ *
+ * `normalize.ts` fixed the PUSO ⟨ꞌ⟩ (×301) two batches ago; ⟨g̃⟩ is the other mark Guaraní writes that has
+ * no precomposed codepoint, and it was missed. `silentCharsIn` reports it as U+0303 ×82, inert, 8 words:
+ * `og̃uahẽ → owaˈhẽ`, `ág̃a → ˈaɰa`, `hag̃ua → haˈwa` — the tilde gone and the word read as though it had
+ * been written with a plain ⟨g⟩.
+ *
+ * ⚠ THE DELETION HAPPENS IN THE NATIVISER, NOT THE SCAN, which is why it survived a reading of this file.
+ * `makeNativiser` judges per CLUSTER: `g̃` is ⟨g⟩ + U+0303, that combining mark was absent from
+ * `NATIVE_CLASS`, so the cluster failed `known()` and `foldLatinToBase` stripped the mark before
+ * `phonemizeWord` ever saw it. The scan below could not have claimed a character that no longer existed.
+ *
+ * ⚠ THE VALUES, SOURCED, and note that they complete a FOUR-WAY paradigm this engine already had three
+ * corners of. es.wikipedia's Guaraní consonant chart:
+ *
+ *     aproximante velar sonora ORAL      [ɰ]   ⟨g⟩      ← already read
+ *     aproximante velar sonora NASAL     [ɰ̃]   ⟨g̃⟩      ← added here
+ *     aproximante labiovelar sonora      [w]   ⟨gu⟩     ← already read
+ *     aproximante labiovelar NASAL       [w̃]   ⟨g̃u⟩     ← added here
+ *
+ * and en.wikipedia's achegety list carries ⟨G̃⟩ as one of the 33 letters ("A, Ã, Ch, E, Ẽ, G, G̃, H, …").
+ * ⚠ [ŋ] IS THE ATTESTED SIMPLIFICATION AND IS NOT USED: two learner-facing sources give ⟨g̃⟩ = [ŋ], but the
+ * same sources give ⟨ng⟩ its own value, and this engine reads ⟨ng⟩ → [ŋ] — so taking [ŋ] would COLLAPSE two
+ * distinct letters of the alphabet into one phone, which is the deletion again wearing a phone.
+ *
+ * ⚠ AND ⟨g̃u⟩ MATTERS MORE THAN ⟨g̃⟩ HERE: the two commonest corpus forms, `hag̃ua` and `og̃uahẽ`, are both
+ * the DIGRAPH, so a bare-⟨g̃⟩ rule alone would still have mis-read them — as [ɰ̃u] rather than [w̃].
+ *
+ * ⚠ STRESS IS NOT TOUCHED. ⟨g̃⟩ is a nasal CONSONANT, and the "a nasal vowel attracts stress" rule below
+ * reads written nasal VOWELS. Guaraní's nasal harmony does spread from it across the word, but that is a
+ * separate rule with its own blocking conditions, and inventing it on the back of a grapheme fix is the
+ * sort of guess this file's other notes refuse.
+ */
+const TILDE = "̃";
+
 /** Phonemize one Guaraní word → canonical IPA: longest-match scan + ⟨gu⟩ context + glide formation + stress. */
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC").toLowerCase().replace(/[’ʼ]/gu, "'"); // normalise the puso apostrophe glyphs → U+0027
@@ -46,6 +82,19 @@ export function phonemizeWord(word: string): string {
     const vseg: { at: number; acute: boolean; nasal: boolean }[] = [];
     let i = 0;
     outer: while (i < w.length) {
+        // ⟨g̃⟩ AND ⟨g̃u⟩ — the NASAL counterparts of the two branches below, and a LETTER of the achegety in
+        // their own right. FIRST, because ⟨g̃u⟩ has to be claimed before the plain ⟨gu⟩ test sees its ⟨g⟩.
+        if (w[i] === "g" && w[i + 1] === TILDE) {
+            const after = w[i + 2], vowelAt = w[i + 3];
+            if (after === "u" && vowelAt !== undefined && G[vowelAt] !== undefined && VOWEL.has(G[vowelAt]!)) {
+                segs.push(FRONT.has(vowelAt) ? "ɰ̃" : "w̃");
+                i += 3;
+                continue;
+            }
+            segs.push("ɰ̃");
+            i += 2;
+            continue;
+        }
         // ⟨gu⟩ is Spanish-style: before a back vowel → [w] (gua→wa), before a front vowel → [ɰ] (gue→ɰe, u silent).
         if (w[i] === "g" && w[i + 1] === "u" && i + 2 < w.length && G[w[i + 2]!] !== undefined && VOWEL.has(G[w[i + 2]!]!)) {
             segs.push(FRONT.has(w[i + 2]!) ? "ɰ" : "w");
@@ -94,7 +143,9 @@ const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'’")})|(\\d+)|([.!?…,;:
  * token this class REJECTS carries a letter the language does not use — i.e. a foreign name. See
  * core/hostWord.ts.
  */
-const NATIVE_CLASS = "[a-zãẽĩõũỹáéíóúýñA-ZÃẼĨÕŨỸÁÉÍÓÚÝÑ'’]";
+// ⚠ U+0303 IS IN THE CLASS, and it has to be: ⟨g̃⟩ has no precomposed form, so without the mark the
+// nativiser folds the cluster to a bare ⟨g⟩ and the letter is gone before the g2p runs. See TILDE above.
+const NATIVE_CLASS = "[a-zãẽĩõũỹáéíóúýñA-ZÃẼĨÕŨỸÁÉÍÓÚÝÑ'’̃]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class GuaraniPhonemizer implements Phonemizer {

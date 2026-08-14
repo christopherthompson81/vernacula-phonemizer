@@ -28,10 +28,33 @@
         "éé": "eː", "óó": "oː", "ée": "eː", "óo": "oː", "ëë": "əː",
         "aa": "aː", "ee": "ɛː", "oo": "ɔː", "ii": "iː", "uu": "uː",
         "a": "a", "à": "aː", "e": "ɛ", "é": "e", "ë": "ə", "i": "i", "o": "ɔ", "ó": "o", "u": "u",
-        "b": "b", "c": "c", "d": "d", "f": "f", "g": "ɡ", "j": "ɟ", "k": "k", "l": "l", "m": "m",
-        "n": "n", "ñ": "ɲ", "ŋ": "ŋ", "p": "p", "q": "q", "r": "r", "s": "s", "t": "t", "w": "w",
-        "x": "x", "y": "j"
+        "b": "b", "c": "c", "d": "d", "f": "f", "g": "ɡ", "h": "h", "j": "ɟ", "k": "k", "l": "l",
+        "m": "m", "n": "n", "ñ": "ɲ", "ŋ": "ŋ", "p": "p", "q": "q", "r": "r", "s": "s", "t": "t",
+        "w": "w", "x": "x", "y": "j"
     },
+
+    // ⚠ ⟨h⟩ WAS MISSING FROM THIS TABLE AND WAS THEREFORE DELETED — ×252 in the mined artifact, found by
+    // `silentCharsIn`: `sahraa → saraː`, `Mohamad → mɔamad`, `hadis → adis`. It is the 21-consonant
+    // alphabet's own letter and it is /h/, the voiceless glottal fricative — a DIFFERENT letter from ⟨x⟩=x
+    // above, which is why the deletion is a lost phoneme rather than a spelling variant.
+    //
+    // ⚠ THE ORTHOGRAPHY DECREE NAMES IT TWICE, and the second time is the decisive one. Décret n° 2005-992
+    // (21 octobre 2005), art. 2: "L'alphabet wolof compte vingt-sept lettres, dont vingt et une consonnes
+    // et six voyelles" — the consonant list is b c d f g **h** j k l m n ñ ŋ p q r s t w x y. Art. 3 then
+    // puts it inside a PHONOLOGICAL rule: "toutes les consonnes peuvent être géminées à l'exception de f,
+    // **h**, q, s, et x." A silent letter is not named in a rule about which consonants may geminate. Art.
+    // 4 cites the native derived form `lehal` ("faire manger"), so it is not confined to loans either.
+    // (en.wikipedia's Wolof alphabet table gives the same value: "H h — [h]".)
+    //
+    // ⚠ AND SO IT IS NOT AN `ORTHOGRAPHIC_SILENCE` ENTRY — the case it was closest to. Maltese ⟨h⟩ IS in
+    // that table because Maltese writes its /ħ/ with a different letter; Wolof writes its /h/ with THIS
+    // one. The detector log had already reached the same conclusion from the other side (its family 4,
+    // "a foreign-letter deletion rather than an orthographic silence"); the decree settles which.
+    //
+    // ⚠ KNOWN RESIDUAL, not fixed here: the artifact's ⟨h⟩ also occurs in UNADAPTED FRENCH (`mégalithes`),
+    // where it is silent IN FRENCH. That is the foreign-word question — `NATIVE_CLASS` in wolof.ts admits
+    // all of `a-z`, so a French loan is nativised rather than routed — and it wants a French-loan rule
+    // (⟨th⟩→/t/, ⟨ph⟩→/f/), not a blanket deletion of a Wolof consonant.
 
     // The VOWEL LETTERS, including the +ATR ⟨é ó⟩, the schwa ⟨ë⟩ and the long ⟨à⟩. This is what splits the
     // DOUBLING rule in wolof.ts — a doubled vowel is length, a doubled consonant is a geminate [Cː] — so an

@@ -79,13 +79,30 @@ describe("entities deliberately left literal", () => {
         expect(phonemize("a &fnof; b", "lo")).not.toContain("ƒ");
     });
 
-    /** ⚠ THE MEASURED TRADE, kept executable. A LONE Greek letter is silently deleted, which is why the
-     *  entity is left literal even though the literal reads wrong. A RUN is read — the counter-case, and
-     *  the reason the decision is recorded as contextual rather than as "Greek is unreadable". */
-    test("a lone Greek letter is deleted but a run is read", () => {
+    /** ⚠ THE MEASURED TRADE, KEPT EXECUTABLE — AND ITS FIRST HALF HAS NOW MOVED. The lone Greek letter used
+     *  to be silently DELETED (in 191 of 193 engines, measured), which is the whole reason these six
+     *  entities were declined: decoding `&gamma;` fed the decoder's output into that deletion. The router
+     *  now reads the lone letter as its NAME (`core/scripts.ts`, `GREEK_LETTER_NAME`), so both halves of
+     *  this case are read and the blocker on the six is gone.
+     *
+     *  ⚠ THE DECLINES STAY UNTIL THE ENTITY TABLE IS REVISITED AS A GROUP, which is what the file header
+     *  asks for. This test now pins the NEW behaviour so that revisit starts from a measurement rather than
+     *  from this comment. */
+    test("a lone Greek letter is read as its name, and a run is read as Greek", () => {
         for (const lang of ["gd", "sn", "si", "yo"]) {
-            expect(phonemize(`xa γ ax`, lang)).toBe(phonemize(`xa ax`, lang));
+            expect(phonemize(`xa γ ax`, lang)).not.toBe(phonemize(`xa ax`, lang));
+            expect(phonemize(`xa γ ax`, lang)).toContain("ɣama");
             expect(phonemize(`xa Παν ax`, lang)).toContain("pan");
+        }
+    });
+
+    /** ⚠ THE ONE-LETTER GREEK WORD IS THE COUNTER-CASE, and it is still declined — an ACCENT or breathing
+     *  is what separates Greek prose (`ή` "or", `ἡ` the article) from a mathematical symbol, and the census
+     *  behind that split is in `GREEK_LETTER_NAME`. lg's and crh's corpus lines are the live instances. */
+    test("an ACCENTED lone Greek letter is still declined", () => {
+        for (const lang of ["lg", "crh", "en"]) {
+            expect(phonemize(`xa ή ax`, lang)).toBe(phonemize(`xa ax`, lang));
+            expect(phonemize(`xa ἡ ax`, lang)).toBe(phonemize(`xa ax`, lang));
         }
     });
 

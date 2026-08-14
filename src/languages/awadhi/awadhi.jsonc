@@ -145,6 +145,23 @@
     "schwaDeletion": {
         "deleteWordFinal": true,
         "retainInMonosyllable": true,
+        // ⚠ A word-final AVAGRAHA ⟨ऽ⟩ RETAINS the vowel — the Eastern Hindi / Bihari use magahi.jsonc
+        // documents from the grammar literature, and Awadhi is Eastern Hindi ("more frequently used in the
+        // Eastern Hindi and Bihari languages", en.wikipedia Avagraha).
+        // ⚠ AND IT IS PROPHYLACTIC HERE, WHICH IS WHY IT IS SAID OUT LOUD. Awadhi's ×12 in the mined
+        // artifact are ALL WORD-MEDIAL, before the oblique/plural suffix ⟨न्⟩ or the purposive ⟨य् व्⟩:
+        // लोगऽन्, किताबऽन्, पत्रकारऽन्, बुद्धिजीवियऽन्, कर्मकाण्डऽन्, थोड़ेऽन्, ग्रीकऽन, क्षेत्रऽन, मसालऽन, भागऽन,
+        // स्थापनऽय्, अउरऽव्. There the suffix's virama would kill an unwritten vowel, so the writer supplies
+        // it with the sign — and this engine ALREADY emits that vowel from its own schwa rules, so all
+        // twelve read identically with the mark and without it, and this flag changes none of them.
+        // Measured: 0 lines of the artifact move. It is set because a word-final avagraha is not attested
+        // in a 396-line sample rather than not possible in the language, and the flag is what makes the
+        // unattested case right when it arrives.
+        // ⚠ THIS IS ALSO WHY `ऽ` IS NOT PUT IN `ORTHOGRAPHIC_SILENCE` FOR awa. `silentCharsIn` reports it
+        // inert and the reading is nonetheless CORRECT — but an exemption entry is a claim about the
+        // WRITING SYSTEM ("Awadhi ⟨ऽ⟩ is silent"), and the word-final case above falsifies that claim. The
+        // report stays; see docs/investigations/silent_rest_investigation.md.
+        "retainOnAvagraha": true,
         "medialRule": "ohala-VCaCV",
         "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
     },

@@ -294,7 +294,44 @@ export function rawLatinIn(lang: string, sentence: string, ipa: string): { run: 
 const CORE_FLOOR = 0.0005, CORE_MIN = 20;
 /** A word for probing purposes: a run of letters and marks. Digits and punctuation end it. */
 const PROBE_WORD = /[\p{L}\p{M}]+/gu;
-/** At most this many probe words per candidate, spread across the corpus rather than taken from its head. */
+/**
+ * At most this many probe words per candidate, spread across the corpus rather than taken from its head.
+ *
+ * ⚠ THIS NUMBER IS THIS CLASS'S KNOWN FALSE-POSITIVE MECHANISM, and it is measured rather than suspected.
+ * The universality claim is only ever made over the words SAMPLED, and `spread` takes a fixed stride —
+ * eight words out of however many are admissible. For a rare intruder that is the whole population (ee's
+ * perispomeni has six words in its artifact and all six are tested). For a HIGH-FREQUENCY character it is a
+ * thin sample of a large one, and Hebrew ⟨א⟩ is the case that shows it:
+ *
+ *     admissible probe words 399; sampled 8; the 8 chosen were קלארק כאל בגאזטים האמנויות להיראות
+ *     האחרות ראשת מדינאי — every one with a NON-INITIAL aleph, where the letter is a mater lectionis and
+ *     the engine's consonantal reading correctly emits nothing. But ~30 % of the population is
+ *     INITIAL-aleph (אליו אדם אז אזרח אוסטרלי), where the engine emits /ʔ/ and the letter plainly
+ *     contributes: `אזרח → ʔzʁχ` against `זרח → zʁχ`. The stride landed on none of them, and the class
+ *     reported ⟨א⟩ ×4,618 as universally silent.
+ *
+ * ⚠ AND IT IS LEFT AT 8, WHICH IS THE MEASUREMENT, NOT AN OVERSIGHT. Raising it was tried over all 162
+ * artifacts before this note was written:
+ *
+ *     PROBE_WORDS   8 → 83 findings      16 → 78      24 → 76      32 → 76   (whole-fleet run time ~13 s
+ *                                                                             at every setting, so cost is
+ *                                                                             not the objection)
+ *
+ * The five findings that 8 → 16 removes are `he` ⟨א⟩ — the false positive — and FOUR that the class's own
+ * log names as real: pnb ⟨ء ى⟩ and shn ⟨ၻ ၿ⟩. Read by hand, pnb's two are disproved the same honest way
+ * ⟨א⟩ is (`تھى → t̪ʰˈə` against `تھ → t̪ʰ`, a vowel), while shn's two are disproved only by a KNOCK-ON —
+ * removing ⟨ၻ⟩ makes a coda t̚ appear, removing ⟨ၿ⟩ moves a tone — which is a perturbation of the
+ * neighbours rather than a phone of the character's own. So the trade at 16 is one clear false positive
+ * removed against two marginal true positives lost, and at 24 two more of the same shape go.
+ *
+ * That is the same shape as the filter this file's header REJECTS in its last table row: a tightening that
+ * removes true positives faster than false ones. `rawLatinIn` shipped with three residual false positives
+ * NAMED rather than narrowed around, and Run 7 of the investigation named this class's three; ⟨א⟩ is the
+ * fourth, and it is named here.
+ *
+ * ⚠ ANY FUTURE CHANGE TO THIS NUMBER MOVES THE WHOLE FLEET'S FINDINGS AT ONCE — 83 lines that several
+ * people read as their input. Re-run the table above before touching it.
+ */
 const PROBE_WORDS = 8;
 /** Fewer distinct words than this is not evidence about a LANGUAGE, only about a word. */
 const MIN_PROBE_WORDS = 3;

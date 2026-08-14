@@ -85,7 +85,14 @@ describe("Croatian text normalization", () => {
         expect(ph("II. svjetskom ratu")).toBe("druɡom sʋjetskom ratu");
         expect(ph("itd.")).toBe("i tako daʎe .");
         expect(ph("Dr. Moll")).toBe("doktor moll");
-        expect(ph("George W. Bush")).toBe("ɡeorɡe busx");
+        // ⚠ GOLDEN CHANGED, and it was pinning a DELETION. ⟨W⟩ is outside Gaj's Latin, the shared g2p had
+        // no rule for it, and the middle initial simply vanished (`ɡeorɡe busx`). It now folds to ⟨v⟩ —
+        // the reading Croatian gives the letter in *Velšani*, *velški* — so the initial is audible.
+        // ⚠ AND IT IS NOT A NEW CONVENTION, IT IS THE EXISTING ONE. This engine already reads a lone
+        // initial as its bare phone rather than its letter name: `V.` → *ʋ*, `B.` → *b*. ⟨W⟩ now joins
+        // them instead of being the one initial that disappears. See FOREIGN_LETTER in croatian.ts.
+        expect(ph("George W. Bush")).toBe("ɡeorɡe ʋ busx");
+        expect(ph("George V. Bush")).toBe("ɡeorɡe ʋ busx"); // the native letter, for the comparison
     });
 
     test("degrees, fractions, ranges and signs read their Croatian words", () => {

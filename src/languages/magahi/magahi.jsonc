@@ -145,6 +145,21 @@
     "schwaDeletion": {
         "deleteWordFinal": true,
         "retainInMonosyllable": true,
+        // ⚠ A word-final AVAGRAHA ⟨ऽ⟩ RETAINS the vowel — and Magahi is the language the reference grammar
+        // literature names for this use, not an inference from Bhojpuri. The Devanagari description states
+        // it as a minimal pair: "In Magahi, the avagraha is used to mark the non-elision of word-final
+        // inherent a, which otherwise is a modern orthographic convention: बइठऽ baiṭha 'sit' versus *बइठ
+        // baiṭh." (en.wikipedia, Devanagari § Letters/Vowels; en.wikipedia Avagraha adds that the sign "is
+        // more frequently used in the Eastern Hindi and Bihari languages".) bhojpuri.jsonc carries the
+        // fuller note and the same flag for the sister Bihari language.
+        // ⚠ THE MARK IS LIVE IN THIS CORPUS AND IT IS THE VERB SYSTEM. ×37 in the mined artifact, every one
+        // word-final on an imperative/participial stem: होवऽ ×8, करऽ ×8, रहऽ ×4, लौकऽ ×3, मानऽ ×3, डालऽ ×2,
+        // आवऽ ×2, सकऽ, पावऽ, पहुँचऽ, पड़ऽ, कहऽ. Without the flag every one of them lost its final vowel —
+        // `करऽ` read *kˈəɾ*, identical to `कर`, which is the minimal pair the grammar draws.
+        // ⚠ SHORT ⟨ə⟩, NOT LONG. What the mark encodes is vowel PRESENT vs vowel DELETED — the schwa
+        // contrast — and no source describes the Bihari verbal avagraha as a length mark. Retention is the
+        // certain part; a per-language avagraha vowel would be invented, exactly as maithili.jsonc says.
+        "retainOnAvagraha": true,
         "medialRule": "ohala-VCaCV",
         "note": "Final-first, then medial VCəCV → VCCV right-to-left. भारत → bʱaːɾət̪ (medial ə RETAINED because the following त̪ is word-final, no CV context).",
     },

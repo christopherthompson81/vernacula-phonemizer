@@ -31,6 +31,65 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?|\\d+,
 const NATIVE_CLASS = "[a-zčćšžđ]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
+/**
+ * ⟨q w x y⟩ — THE FOUR LETTERS GAJ'S LATIN DOES NOT HAVE, AND THIS ENGINE WAS DELETING.
+ *
+ * Found by `silentCharsIn`: ⟨w⟩ ×19 and ⟨y⟩ ×10 in the mined artifact, inert — `Downing → doninɡ`,
+ * `Whitehallu → xitexallu`, `web → eb`, `Toyota → toota`, `Dylana → dlana`. Reading the same corpus by hand
+ * finds the other two behaving identically: `taxi → tai`, `quiz → uiz`. One family, four letters.
+ *
+ * ⚠ WHY THE NATIVISER DOES NOT CATCH THEM, which is the part worth recording. `NATIVE_CLASS` above is
+ * `[a-zčćšžđ]`, so ⟨q w x y⟩ are inside it and the token is never judged foreign; and even if they were
+ * outside it, `foldLatinToBase` only strips ACCENTS — `w` folds to `w`, which the shared g2p still has no
+ * rule for. The nativiser handles the letter that is a decorated native letter; this is the letter that is
+ * simply not in the alphabet, and that needs a reading.
+ *
+ * ⚠ THE FLEET ALREADY AGREES, WHICH IS HOW LARGE THE HOLE IS. The same four probes across the neighbours:
+ *
+ *     hr  Downing → doninɡ   taxi → tai     quiz → uiz     New York → ne ork      ← this engine, before
+ *     sl  Downing → dɔʋnink  taxi → taksi   quiz → kuis    New York → nɛʋ iɔrk
+ *     cs  Downing → dˈovɲɪŋk taxi → tˈaksɪ  quiz → kˈuɪs   New York → nˈɛf ˈɪjork
+ *     pl  Downing → dˈɔvɲiŋk taxi → tˈaksi  quiz → kˈuis   New York → nˈɛf ˈɨɔrk
+ *
+ * ⚠ THE READINGS ARE THE ORTHOGRAPHY'S OWN, taken from what Croatian writes when it DOES adapt the
+ * spelling — which is the least speculative evidence available for how the letter is read:
+ *
+ *     w → v     `Wales` keeps its ⟨W⟩ but the derivatives are *Velšani*, *velški* (hr.wikipedia, Gajica)
+ *     x → ks    `taxi` → *taksi*, `boxing` → *boks*
+ *     qu → kv   `quiz` → *kviz*, `quality` → *kvaliteta*, `quart` → *kvart*
+ *     q → k     the residue, when no ⟨u⟩ follows
+ *     y → i     `Dylan` → *Dilan*, `Barry` → *Bari*
+ *
+ * The letters themselves are documented as outside the alphabet and used only in foreign material —
+ * *Hrvatski pravopis* (pravopis.hr/slova): "Pri abecediranju q dolazi iza p, a w, x, y iza v", "U pisanju
+ * stranih imena i stranih riječi"; hr.wikipedia (Gajica): "Slova Ww, Yy i Qq u hrvatskom jeziku koriste se
+ * samo pri pisanju stranih vlastitih imena i stranih zemljopisnih imena."
+ *
+ * ⚠ ⟨y⟩ IS THE ONE WITH A CONDITION, and it is taken NARROWLY. Croatian reads final ⟨-ay -ey -oy⟩ as a /j/
+ * offglide — *Nestroy*, *Gray*, *Hemingway* (jezicni-savjeti.com.hr, on why no epenthetic ⟨j⟩ is inserted
+ * in their oblique cases: "ni kad se završno y izgovara kao j"). Everywhere else it is the vowel /i/. So:
+ * ⟨y⟩ after a vowel → ⟨j⟩, otherwise → ⟨i⟩. `Toyota` → *tojota*, `Dylana` → *dilana*.
+ *
+ * ⚠ WHAT THIS DELIBERATELY DOES NOT DO. It does not touch `serbian/serbian.ts`, whose `phonemizeWord` this
+ * engine borrows: sr and bs share the same hole and the same fix would serve them, but they are two other
+ * languages' referees and are not this change's to move. It is a SPELLING fold, not a g2p rule, for the
+ * same reason — the shared g2p stays byte-identical for its other two callers.
+ * ⚠ AND IT WILL BE WRONG ON FRENCH ⟨qu⟩ (`Québec` is *kebek*, not *kvebek*). That is a source-language
+ * override on a proper name, a much smaller and rarer error than deleting the letter, and inventing a
+ * French-name detector here would be guessing at a population the artifact does not contain.
+ */
+const FOREIGN_LETTER = /qu|[qwxy]/giu;
+const foreignLetters = (w: string): string =>
+    w.replace(FOREIGN_LETTER, (m, at: number, s: string) => {
+        const lower = m.toLowerCase();
+        if (lower === "qu") return "kv";
+        if (lower === "q") return "k";
+        if (lower === "w") return "v";
+        if (lower === "x") return "ks";
+        // ⟨y⟩: the /j/ offglide after a vowel, the vowel /i/ otherwise.
+        return /[aeiouAEIOU]/u.test(s[at - 1] ?? "") ? "j" : "i";
+    });
+
 // symbol normalization — Croatian: % is "posto" (indecilnable), the units/rates/exponents follow the
 // Serbian tier, and the currency signs the corpus writes (¥, $, €, £) are declared. Kept in the ENGINE
 // file so the review tool's sourcing check can see the words.
@@ -71,7 +130,9 @@ class CroatianPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/era/rate steps need the
         // number and its suffix still adjacent, which the tier would break.
         return assembleClauses(SYMBOLS(normalizeCroatian(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(nat(m[1]))); // shared Serbo-Croatian g2p
+            // `foreignLetters` BEFORE `nat`: the fold is spelled in Gaj's Latin, so what reaches the
+            // nativiser is a word the shared g2p has rules for. See FOREIGN_LETTER.
+            if (m[1]) sink.emit(phonemizeWord(nat(foreignLetters(m[1])))); // shared Serbo-Croatian g2p
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2].replace(/\./gu, "").replace(/,/gu, ""))).split(" ")) sink.emit(phonemizeWord(wd)); // Croatian numbers
             else if (m[3]) {

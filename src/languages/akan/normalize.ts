@@ -242,6 +242,47 @@ const NL = String.raw`(?![\p{L}\p{M}])`;
 const NLB = String.raw`(?<![\p{L}\p{M}])`;
 
 /**
+ * HOMOGLYPHS FOR AKAN'S TWO NON-ASCII VOWELS — a DELETION, and the same defect Bambara's layer names, in a
+ * language nobody had read for it. Found by `silentCharsIn` (⟨ε⟩), then by a full non-ASCII census of the
+ * artifact (⟨כ⟩, which the detector cannot see — see the last warning below).
+ *
+ * Akan needs ⟨ɛ⟩ U+025B and ⟨ɔ⟩ U+0254, neither of which is on an ordinary keyboard. A census of every
+ * letter in the mined artifact that is neither ASCII nor Akan's own says which look-alikes the wiki's
+ * writers reached for instead:
+ *
+ *     ɛ U+025B  2771  ← correct        ε U+03B5 GREEK SMALL LETTER EPSILON   164
+ *     ɔ U+0254  3088  ← correct        כ U+05DB HEBREW LETTER KAF             70
+ *
+ * ⚠ THE READING IS UNAMBIGUOUS IN EVERY INSTANCE, checked against the corpus rather than inferred from the
+ * code chart. For ⟨ε⟩: `yε` `sε` `deε` `kεseε` `mmerε` `εkwan` `εnti` `εfiri` are yɛ, sɛ, deɛ, kɛseɛ,
+ * mmerɛ, ɛkwan, ɛnti, ɛfiri — every one an ordinary Twi word whose ⟨ɛ⟩ spelling occurs in the SAME
+ * artifact (`ɛmmerɛ` ×2 beside `mmerε` ×2). For ⟨כ⟩: `כhene` `כyɛ` `כbεfa` `כbaa` `כdwene` `כtan` `wכn`
+ * `awoכ` `soכ` `wɔnbכ` `כbofoכ` `ɔkככ` are ɔhene, ɔyɛ, ɔbɛfa, ɔbaa, ɔdwene, ɔtan, wɔn, awoɔ, soɔ, wɔnbɔ,
+ * ɔbofoɔ, ɔkɔɔ. ⚠ `ɔkככ` and `כbofoכ` SETTLE IT ON THEIR OWN: the correct ⟨ɔ⟩ and the substitute stand in
+ * the same word, so the substitution is one writer's input method and not a different letter.
+ *
+ * ⚠ THE DAMAGE IS AN AMPUTATION, NOT A MIS-READING. Neither character is in this g2p's grapheme table, so
+ * the letter is dropped and the word is read without it — `εwɔ` → *wɔ*, `Neε` → *ne*, `εmaa` → *maa*,
+ * `כhene` → *hene*. ⟨ɛ⟩/⟨e⟩ and ⟨ɔ⟩/⟨o⟩ are four distinct Akan vowels, and the +ATR/−ATR harmony in
+ * `akan.ts` is DRIVEN by ⟨ɛ ɔ⟩ as its unambiguous −ATR triggers — so a deleted ⟨ε⟩ does not merely lose a
+ * vowel, it removes the evidence the rest of the word's vowels are resolved from.
+ *
+ * ⚠ NOT DONE GLOBALLY, AND THAT IS THE CORRECT LAYER — the same argument Bambara's table records.
+ * `core/unicode.ts`'s `foldLatinConfusables` folds toward the ASCII letter a reader of ANY Latin
+ * orthography would see, i.e. ⟨ε⟩→`e`, and `e` and `ɛ` are two different Akan phonemes. The right target
+ * is knowable only from THIS language's alphabet.
+ *
+ * ⚠ AND ⟨כ⟩ IS THE ONE THE INSTRUMENT COULD NOT REPORT, which is worth recording where the fix is. Its
+ * probe words are `כyɛ`, `wכn`, `כhene` — one Hebrew character against one or two Latin ones — and
+ * `silentCharsIn`'s `majorityScript` filter admits a probe word only when the corpus's own script is in
+ * the MAJORITY of it. That filter is what removes the IPA-gloss false positives, so it is not wrong; but a
+ * homoglyph inside a SHORT word is exactly the shape it cannot see, and the census remains the instrument
+ * that finds those. ×164 of ⟨ε⟩ in the artifact reached the detector as ×85 for the same reason.
+ */
+const HOMOGLYPH: Readonly<Record<string, string>> = { "ε": "ɛ", "כ": "ɔ" };
+const HOMOGLYPH_RE = new RegExp(`[${Object.keys(HOMOGLYPH).join("")}]`, "gu");
+
+/**
  * Read a decimal's FRACTIONAL part the way this corpus reads it.
  *
  * ⚠ TWO BRANCHES, PINNED SEPARATELY (trap 13), because the corpus only exercises one of them. Akan reads
@@ -283,6 +324,13 @@ export function normalizeAkan(input: string): string {
     //    rule reach across it. ⚠ NARROW ON PURPOSE: digit on the left, letter on the right. A bare `|` is
     //    left alone, so nothing that might be a genuine table column separator is touched.
     s = s.replace(/(?<=\d)\|(?=\p{L})/gu, " ");
+
+    // 1b) HOMOGLYPHS FOR ⟨ɛ ɔ⟩ — see HOMOGLYPH. Immediately after NFC and the entity strip, and before ANY
+    //     rule that inspects a letter: step 2's elision rule carries ⟨ɛ ɔ⟩ in its vowel class, step 5's
+    //     `PERCENT_WRITTEN` is spelled with them, and the unit and range guards read letter boundaries — so
+    //     a word still carrying a Greek epsilon or a Hebrew kaf is invisible to all of them in exactly the
+    //     way it is invisible to the tokenizer.
+    s = s.replace(HOMOGLYPH_RE, (c) => HOMOGLYPH[c]!);
 
     // 2) THE ELISION APOSTROPHE — the largest class in the language, ×4,930 tw + ×2,664 fat.
     //    `n'` (3sg possessive *ne*), `w'` (2sg *wo*) and `m'` (1sg *me*) are CLITICS whose vowel elides

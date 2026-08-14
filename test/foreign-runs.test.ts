@@ -70,9 +70,13 @@ describe("embedded foreign (Latin) runs", () => {
     test("script routing honours the host's overrides and declines self-routing", () => {
         // Cyrillic inside Greek was read as English (so: dropped, since English cannot claim it).
         expect(phonemize("Ο Πούτιν και ο Владимир", "el")).toContain("vɫɐdʲ");
-        // A lone Greek letter in another script is far more likely MATHEMATICS than a Greek word, so the
-        // router declines it rather than guessing — see the KNOWN LIMIT in core/scripts.ts.
+        // A lone Greek letter in another script is far more likely MATHEMATICS than a Greek word, so it is
+        // read as its NAME rather than for its sound — and the name is a GREEK word, so the Greek reader
+        // speaks it (*alfa*, not English *ˈaɫfa*). See GREEK_LETTER_NAME in core/scripts.ts.
+        expect(phonemize("The value is α", "en")).toContain("alfa");
         expect(phonemize("The value is α", "en")).not.toContain("ˈaɫfa");
+        // ⚠ AND IT IS NOT ROUTED AS GREEK TEXT: `α` alone would be /a/, a phone where a word belongs.
+        expect(phonemize("The value is α", "en")).not.toMatch(/ɪz ˈ?a$/u);
     });
 
     test("the run is delegated verbatim, accents included", () => {
