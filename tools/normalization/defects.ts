@@ -532,6 +532,61 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // word for one is attested anywhere. Omitting a plus is lossless; omitting a minus INVERTS, so this
         // one stays red. Same stance as ln, bm and rw.
     },
+    shi: {
+        // ⚠ THERE IS NO FLEURS FOR TASHELHIT, so every count below is over `tools/corpus/mined/shi.jsonc`'s
+        // 403 retained segments (203 hard + 200 sample) from a shi.wikipedia dump, and `sources.ts` reports
+        // espeak does not ship this language at all — so the haystack is the corpus, the artifact, two
+        // Wiktionary-derived referees and shi.wikipedia via `attest.ts`. Every refusal is argued at length
+        // in src/languages/tashelhit/normalize.ts's header.
+        // ⚠ THE ARITHMETIC BLOCK IS A DEFINITIVE NEGATIVE, NOT A SOURCING GAP — the playbook's trap-48
+        // shape. Almost every sign in this corpus is RAW TeX that survived extraction from two articles (the
+        // natural logarithm and the binomial theorem), and no reading of markup is correct.
+        percent: "NOT a markup case and this language's LARGEST class — `DROP percent ×136` before this "
+            + "layer, 234 number+% instances in 403 segments, 24,338 in the whole-corpus cell count. It is "
+            + "nevertheless unsourceable, and the reason is structural. `tigmiḍi` is attested 120 tokens / "
+            + "20 shi.wikipedia articles and is the wrong slot: every instance is the section heading "
+            + "`Tigmiḍi n tagufi (…) : 17,9%`, i.e. the NOUN \"percentage\" standing BEFORE its figure and "
+            + "written BESIDE the sign, so emitting it after the number gives \"17.9 percentage\" — the Fula "
+            + "`tere` shape. `attay` (×5) fails identically. Every candidate SPELLING is ×0 on "
+            + "shi.wikipedia: afmiḍi, tamiḍi, amiḍi, `ɣ mya`, `f mya`, `zɣ mya`, `g mya`, `ɣ timiḍi`, lmya, "
+            + "lmiya, almya, pursan, purṣan. `timiḍi` ×20 IS attested and is the literary numeral 100 plus a "
+            + "douar name (×18 of the 20). `concept.ts` on Q11229/Q137985650 finds no article in shi, kab, "
+            + "zgh OR ary. ⚠ AND `attest.ts --after ɛcrin,xmsin,tlatin,mya,sbɛin` returns NOTHING — this "
+            + "wiki never spells a numeral out at all, so the reading of the SIGN is absent from text by "
+            + "construction and no extra corpus would find it; the escalation tier for that is the corpus's "
+            + "own AUDIO, and shi has none. Web search offers only the Moroccan DARIJA `f-lmya`, which is a "
+            + "fact about Darija. A wrong percent word is worse than a dropped sign",
+        equals: "measured: 23, and NOT ONE is arithmetic in running prose. 22 are raw LaTeX from the "
+            + "logarithm and binomial-theorem articles (`\\ln(a^n) = n \\ln(a)`, `n=2,& (x + y)^2 &= x^2 + "
+            + "2xy + y^2`); the 23rd is a glossary SYNONYM list, `Tibḍit = afukku = afray`, where an equals "
+            + "word would be wrong even if one were attested. No shi equals word occurs digit-adjacent",
+        ampersand: "measured: 20, and EVERY ONE is the LaTeX ALIGNMENT ampersand in a single displayed "
+            + "equation array (`n=3,& (x + y)^3 &= …`, `+ y^4,&&\\\\`). There is no conjunction use in the "
+            + "corpus at all, so this is markup residue rather than the fleet's `B&B` defect, and no "
+            + "reading of it — including the correct Tashelhit `d` — would be right in a single instance",
+        times: "measured: 1. `attayen n 1,989 1 × 1030 kg` — the Sun's mass in SCIENTIFIC NOTATION, where "
+            + "the sign is a mantissa multiplier rather than a dimension cross or a product, so neither a "
+            + "`times` nor a `by` word fits it. ASCII `\\d ?x ?\\d` is ×0, so the `4x4` arm has nothing to "
+            + "claim either. One instance is not a rule",
+        plus: "measured: 55, and every one read back. The bulk is LaTeX (`\\in ]0 ; + \\infty[`, `x + y`, "
+            + "`x^7+7x^6y`) and π-series terms (`(4/1)-(4/3)+(4/5)-(4/7)`). What remains splits two ways, "
+            + "and BOTH are the classes trap 48 settled fleet-wide: UTC-style offsets (`tlla gr -12 d +12`, "
+            + "`gr +1 ar +12`, a timezone-letter table) and a MEASUREMENT plus (`i ur izzrayn +25 n tskflt` "
+            + "— and this layer now reads that `n tskflt` itself, so the figure is spoken as a temperature "
+            + "either way). Omitting a plus is lossless. Nothing attests how shi would say one",
+        "plus-minus": "measured: zero ± in the artifact",
+        divide: "measured: zero ÷ in the artifact",
+        "less-than": "measured: zero < in the artifact",
+        "greater-than": "measured: 5, and none is a comparison this layer could read: three are LaTeX "
+            + "(`x > 0`, `y > 0`), one is the HTML comment terminator `-->` that survived extraction, and "
+            + "the last is a clinical threshold whose UNIT is undeclared (`tawsmulalit tablazmant > 295 "
+            + "mOsm/kg`) — reading the sign there would speak half a measurement",
+        // ⚠ `minus` IS DELIBERATELY ABSENT AND STAYS RED. Omitting a plus is lossless; omitting a minus
+        // INVERTS. The 15 leading minuses in the retained text split THREE ways — a genuine negative
+        // temperature (`ingr -45°Silsyus ar 30°Silsyus`), NEGATIVE YEARS used as an era marker (`sg -945
+        // armi ar -924`) and UTC offsets (`gr -12 d +12`) — which is three readings and not one, and no shi
+        // word for a negative is attested anywhere. Same stance as ak, ln, bm and rw.
+    },
     cdo: {
         // ⚠ cdo IS THE ONE SINITIC LECT WHOSE HARD GATE IS NEITHER A DICT NOR AN ORTHOGRAPHY MISMATCH. There
         // is no Han front-end and no reading dict at all (see mindong.ts): this is a Bàng-uâ-cê → IPA

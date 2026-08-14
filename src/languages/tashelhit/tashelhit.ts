@@ -16,6 +16,7 @@ import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { normalizeTashelhit } from "./normalize.ts";
 
 interface TashelhitDef {
     graphemes: Record<string, string>; // Berber Latin alphabet → IPA
@@ -56,6 +57,18 @@ function phonemize(word: string): string {
     return out.join("");
 }
 
+// Latin (with emphatic dot-below + combining marks) OR Tifinagh LETTERS (U+2D30–2D6F, incl. the Tamatart
+// labial ⵯ) — one word class; the Tifinagh separator ⵰ (U+2D70) is punctuation, not a letter.
+// A DIGIT group was missing entirely, so numbers used to be dropped silently; ٠-٩ (Arabic-Indic) are
+// accepted alongside 0-9 because Moroccan text mixes them.
+// ⚠ The word class is the SCRIPTS (Latin + Tifinagh), not a letter list — see core/hostWord.ts.
+// ⚠ MODULE SCOPE, not rebuilt per call, which is the fleet's convention (bambara.ts's `TOKEN` is the same
+// shape). `matchAll` clones the regex, so the shared `g` flag carries no state between calls. It also stops
+// `review.ts`'s trap-6 check — "no word SPELLING reaches the phoneme sink" — reading the SCRIPT NAMES
+// "Latin"/"Tifinagh" inside `text()` as unphonemized word literals, which is a false positive it cannot
+// distinguish from the real defect while the constructor sits in the method.
+const TOKEN = new RegExp(`(${hostWordRun(["Latin", "Tifinagh"])})|([0-9٠-٩]+)|([.,?!;:،؟⵰])`, "gu");
+
 class TashelhitPhonemizer implements Phonemizer {
     text(input: string): string {
         // `assembleClauses` rather than a private exec loop: this loop was already that shape and only
@@ -64,18 +77,12 @@ class TashelhitPhonemizer implements Phonemizer {
                 // NFC first so a precomposed regex class matches emphatics even on NFD input (combining dot-below U+0323
         // would otherwise shatter the word); phonemize() re-NFCs (idempotent). The class also allows the combining
         // dot-below/marks (U+0300–036F) defensively for any letter without a precomposed form.
-        const nfc = input.normalize("NFC");
-        // Latin (with emphatic dot-below + combining marks) OR Tifinagh LETTERS (U+2D30–2D6F, incl. the Tamatart
-        // labial ⵯ) — one word class; the Tifinagh separator ⵰ (U+2D70) is punctuation, not a letter.
-        // A DIGIT group was missing entirely, so numbers used to be dropped silently; ٠-٩ (Arabic-Indic) are
-        // accepted alongside 0-9 because Moroccan text mixes them.
-        // ⚠ The word class is the SCRIPTS (Latin + Tifinagh), not a letter list — see core/hostWord.ts.
-        const tok = new RegExp(
-            `(${hostWordRun(["Latin", "Tifinagh"])})|([0-9٠-٩]+)|([.,?!;:،؟⵰])`,
-            "gu",
-        );
+        // TEXT NORMALIZATION runs FIRST, before tokenization — see normalize.ts. It NFCs at its own entry
+        // (its era and unit literals carry dot-below emphatics), and NFC is idempotent, so the fold below
+        // still guarantees the tokenizer's class sees a composed string whatever the layer emitted.
+        const nfc = normalizeTashelhit(input).normalize("NFC");
 
-        return assembleClauses(nfc, tok, (m, sink) => {
+        return assembleClauses(nfc, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemize(nat(m[1])));
             else if (m[2]) {
                 const d = [...m[2]].map((c) => (c >= "٠" && c <= "٩" ? String(c.codePointAt(0)! - 0x0660) : c)).join("");

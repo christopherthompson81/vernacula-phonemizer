@@ -1,0 +1,775 @@
+// WIKIPEDIA WORD ATTESTATION — shi. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "shi",
+        "wiki": "shi.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "dulaṛ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…s d rad kullu ɣʷint trubba lli rad drunt ɣ ukrwas 1,5 mlyun dulaṛ amirikani dat ad ibdu tbrza bac ad frunt aylli tnt d iqqan…",
+                "…t d iqqan ɣ usḥyyl d wassay, mad ittggan kra n 9 id mlyun n dulaṛ ɣ tmuttrt. Tlkm tamuttrt n tsmɣurin tiẓṛfann n ukrwas ad 44…",
+                "…rt. Tlkm tamuttrt n tsmɣurin tiẓṛfann n ukrwas ad 440 mlyun dulaṛ amirikani, lli yugrn tin tad izrin n ukrwas n 2018 s 40 mly…",
+                "…irikani, lli yugrn tin tad izrin n ukrwas n 2018 s 40 mlyun dulaṛ. == Timdinin n isurarn == == Tawala n trubba == === Tarabbu…",
+                "…ma yutin 100 n rubut zund asimu iḥtajja kun yan 1 agndid n dulaṛ (¥ 106٬710٬325 nɣd € 638186 nɣd £ 504720). == Assaɣ nss ==…"
+            ]
+            },
+        {
+                "word": "dular",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…Iqqariḍn == Amṛṛuk: Drḥm Dzayr: Dinar Tuns: Dinar Marikan: Dular == Amzruy == == Tisaɣulin ==…",
+                "…at ɣ tmurranin n tdamsa n umaḍal s yan PIB n 1482 n mlyar n Dular amirikani (USD) == Immussutn n takatin n ifgan == == Iwalak…",
+                "…ufɣ n tzmrt tafukant g umaḍal s mayd igan 9,000,000,000,000 Dular. == Iwttasn == Awttas amzwaru n Lmɣrib g igr n tazmrt tafug…",
+                "…ggasn 2007 d 2006. Iqqaridn di ikkan tammallayt s lmlayer n dular n Marikan. == Amawal mẓẓin ittawsn == == Iɣbula == http://v…"
+            ]
+            },
+        {
+                "word": "Wuṛu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…kkuẓt tkkal dat ad iddu s Baṛcaluna s watig n €3 id mlyun n Wuṛu ɣ Innayr n 2011. Izzri Afllay arzaf amsnjji (visite médical…"
+            ]
+            },
+        {
+                "word": "uṛu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ɣ usggʷas n 2015, nna ɣ illa yan waddad n ussufɣ n 18 mlyun Uṛu. inna Ṛuys mas iga Ṭumas Rusitski amdya nns anaflla. === Bu…",
+                "…isgmḍ Marku Ṛuys d trabbut n Burusya Durtmund s 17.1 mlyun Uṛu ɣ umsasa n smmus n isggʷasn, isawl xf umzizzl nns, yini: «…",
+                "…nna illan ɣ yan usgnaf ɣ tmdint n Barcaluna, Ifk yan mlyun uṛu f ufirus n Kuṛuna ɣ Barcaluna. === Imukrisn n urgay === Ɣ Y…",
+                "…aḍt n urgay, tfk as 21 n yirn g uɣzu, tettr as 2 id mlyun n Uṛu ɣ tfgurt. Ur jju ikcim Missi s uɣzu, ifsi umukris s ibḍi d…"
+            ]
+            },
+        {
+                "word": "drhm",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…wwuriwin nns tisnflulin, ili gis ula atig n udlis igan 30 n drhm. == Asktur n udlis == Talɣa 1: assaɣ n umara, d assaɣ n tzl…",
+                "…yaz d kra inɣmisn fllas, ili gis awd atig n udlis igan 45 n drhm. == Amara == Amara Lmsɛudi Muḥmma, ilul ɣ usggʷas n 1991 ɣ…",
+                "…as n tzduɣt i twjiwin ilkm umalad s usrag n undudi: 2,500 n drhm i ku tawja azmz 12 n wayyur (mad ittggan 30,000 n drhm am a…",
+                "…00 n drhm i ku tawja azmz 12 n wayyur (mad ittggan 30,000 n drhm am atig amsmun). 140,000 n drhm tga tiwisi taẓṛfant tusridt…",
+                "…ayyur (mad ittggan 30,000 n drhm am atig amsmun). 140,000 n drhm tga tiwisi taẓṛfant tusridt i tgʷmma nna akkʷ ixʷlan. 80,00…",
+                "…tiwisi taẓṛfant tusridt i tgʷmma nna akkʷ ixʷlan. 80,000 n drhm i twuriwin n walas n tsɣiyt n tgʷmma lli ɣ ixʷla kra. == In…"
+            ]
+            },
+        {
+                "word": "adrim",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…izri wuṭṭun n wida ṭtafnin taɣlant nns 10,000. Luru ad igan adrim nns, mqqar ur tamu Munaku gɣ Tamunt Tawurubbt. Tettwassan M…",
+                "…r mmalnt mas imṛabḍn ad gis iskrn ḍaṛ sskka, Ar gis sgaddan adrim n imṛabḍn da mi gan s ism \"lriaḍ\" nɣ \"lqṛaṛit\", Tasutin tin…",
+                "…urɣ, anas d udrim, mayan a f ddan akkʷ id butaṛkyulujit mas adrim n imṛabḍn iga win wurɣ d wanas, == Igrramn == Sg isagurn il…"
+            ]
+            },
+        {
+                "word": "taskflt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…rnin ɣikkad, bḍan f 44 n taggayin. Uggar n uzgn nnsn gan sɣ taskflt tugḍiḍt niɣ d tiqnbiw. == Imdyaten : == == Igḍaḍ n ill: ==…",
+                "…dars tmatart n \"K\" , iga yan usqqul iqqurn i trɣi acku iga taskflt lliɣ ar tlkkm tatrupiyt azwl n \"0\", iɣ tt nsbṛṛm s Usilsus…",
+                "…ad tafuḍ s usrag n unkcam n ucngu n isblyuniyn. == Anzwi == Taskflt n ​​trɣi ɣ tɣrmt n Arukas tiwḍ ɣ uzal ger 21.2 n tskflt d 2…",
+                "…iskr ma izrin 50 n lkaṣiṭa. G usggʷas n 1995 iskr idabuṛḥim taskflt imqquṛn allig iskr lfilm nns amzwaru nna mi ism \"Ɣassa ddun…",
+                "…wi n yill Agrakal tanammast n taɣlt tlla gr 12 d 26 tafsna (taskflt) silasyuz (°C), d unẓar itawḍ ar 500 ml ɣ usggwas . == Imzd…",
+                "…urru, ikk gis smmus n isggʷasn ddu ism n Blaṭuf aylliɣ yumẓ taskflt n ulyutnan, iwrri d daɣ s Rusya ad gis ig amcawri n ixf n t…"
+            ]
+            },
+        {
+                "word": "tskflt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…== Taskflt n ​​trɣi ɣ tɣrmt n Arukas tiwḍ ɣ uzal ger 21.2 n tskflt d 28° , d 18 n tskflt ɣ yiḍ. ɣ wayyur n innayr ، ar ittawḍ…",
+                "…tɣrmt n Arukas tiwḍ ɣ uzal ger 21.2 n tskflt d 28° , d 18 n tskflt ɣ yiḍ. ɣ wayyur n innayr ، ar ittawḍ waddad unzwi nns ger 1…",
+                "…ldan adusturi s unbaḍ abṛlamani d tdamsa ibuɣlan. Mk tlla ɣ tskflt tamzwarut ɣ umaḍal ɣ umuɣ n ikunumist n tdimuqraṭit d tiss…",
+                "…yiḍan yaḍni. D ar ittddr ɣ unzwi ikʷrmn i ur izzrayn +25 n tskflt d ar ittuẓla waydi yad s wazzar nns iɣzzifn d ukṭṭu ns idus…",
+                "…Walter White (Bryan Cranston), yan uslmad n tcimit ilan yat tskflt yattuyn ɣ twssna, ig bab n twja. Lliɣ issn is yuḍn s gar aṭ…",
+                "…zruy g tsdawit n tskla d tmassanin tinafganin g ṛṛbaṭ s yat tskflt yattuyn g usntl n \"رحلة الوافد، تقديم وتحقيق\". - tiwwuriwin…"
+            ]
+            },
+        {
+                "word": "Silsus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ign. Tanqqiḍt n ufsay n waṛẓan n ukalsyum tga 842 taskflt n Silsus. == Ɣ tɣssa n ufgan == Uggar n 98% n Ukalsyum n ufgan iḥḍa…"
+            ]
+            },
+        {
+                "word": "ɣ tasragt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…tidu nɣd ayt tazzal f iḍarn ns s tazzla ar tṛwaḥ 6 kilumitr ɣ tasragt. ṣubn asimu may yruḥ usggʷas n 2009, tkka tn darsn ma yutin…"
+            ]
+            },
+        {
+                "word": "mukaɛɛab",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…m². Iwḍ aɣzaf n wasif nig n 1200 km, d acrcur nns 24.3 mitr mukaɛɛab ɣ tsnat. == Tisaɣulin ==…"
+            ]
+            },
+        {
+                "word": "santim",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…lkkem n gr 375 d 450 gram d ar tlkkem tiɣzi nns gr 24 ar 34 santim, d dars yan akʷlu ifulkiin n isams nns ar t ittajja ad ur i…"
+            ]
+            },
+        {
+                "word": "milimitr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…nnqqub iɣar d ar digs ittdris unẓaṛ, ar gis ittawḍ unẓaṛ 20 milimitr g usggʷas. Waxxa d imk ad, yusa d nnqqub tama n saɣru nna g…",
+                "…i taquṭbit, dars uṭṭun n waggaz n unẓar ɣ usggas nig n 2000 milimitr , ɣ uftas, maca ɣ tmnaḍin n ugʷns uṭṭun n waggaz n unẓar id…"
+            ]
+            },
+        {
+                "word": "tiskfal",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ɣaṣṣaḍ wisssin ɣ timizar ntmallayt ɣ ifriqya. ɣid maymmalan tiskfal n ussns s lkatri n timdayyin n umṛṛuk ɣ usggas n 2008: Mrra…"
+            ]
+            },
+        {
+                "word": "Fahrinhayt",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "taskflt n Silsus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…an wa izddign. Tanqqiḍt n ufsay n waṛẓan n ukalsyum tga 842 taskflt n Silsus. == Ɣ tɣssa n ufgan == Uggar n 98% n Ukalsyum n ufgan iḥḍa…"
+            ]
+            },
+        {
+                "word": "ɣ tsnat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ɣzaf n wasif nig n 1200 km, d acrcur nns 24.3 mitr mukaɛɛab ɣ tsnat. == Tisaɣulin ==…"
+            ]
+            },
+        {
+                "word": "santimitr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…n hunḍa n usigl d asbuɣlu n atiqniy ɣ jjabun. tiɣzi ns 130 santimitr, astal ns 54 kilugram, izḍaṛ ayt tidu nɣd ayt tazzal f iḍar…"
+            ]
+            },
+        {
+                "word": "kilugram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…u imqquṛn ɣ izmawn, dar tlkkm taẓḍuyt n wawtm gr 200 ar 300 kilugram d tiwtmin gr 120 ar 190 kilugram d maya d ar immala mas yad…",
+                "…ḍuyt n wawtm gr 200 ar 300 kilugram d tiwtmin gr 120 ar 190 kilugram d maya d ar immala mas yadlli illa tagadda n iksiln ibangal…",
+                "…ga tagadda n igrzamn n yiffus n tiniri tamqqrant ilkkmn 200 kilugram. Afuḍn izmawn ɣ tagut n Libya ɣ usggʷas n 1700 s usuds, d ɣ…",
+                "…ɣlu n atiqniy ɣ jjabun. tiɣzi ns 130 santimitr, astal ns 54 kilugram, izḍaṛ ayt tidu nɣd ayt tazzal f iḍarn ns s tazzla ar tṛwaḥ…",
+                "…iɣctr gr 24 cm d 40 cm, d ar tlkkm taẓḍuyt nns gr 1 ar 1,5 kilugram, d iṭṭaf yan ucṭṭab ilkkmn ar azgn n tfkka nns, d kra n imz…"
+            ]
+            },
+        {
+                "word": "mitr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…000 km². Iwḍ aɣzaf n wasif nig n 1200 km, d acrcur nns 24.3 mitr mukaɛɛab ɣ tsnat. == Tisaɣulin ==…",
+                "…amm s ufus ula udm ! Ad ur tettgiwirm d imuḍan ! Ffalat yan mitr gratun ! Ḥbbuyat imi iɣ ar tettusum ! Ad ur tslaym udm s uf…",
+                "…s kraḍt lli akkʷ imqqurn g umaḍal, s yat tjumma n 60,000 id mitr amkkuẓ n tdala n ufsar. Nttat ad igan tsnniɣt n tẓuṛi nna d…",
+                "…gis illan. Tg amnru n tsga n Mṛṛakc-asfi. Taga 580 id kilu mitr d tɣrmt n Ṭanja ɣ iffus aminig, 327 id kilu mitr d tmaẓunt…",
+                "…80 id kilu mitr d tɣrmt n Ṭanja ɣ iffus aminig, 327 id kilu mitr d tmaẓunt n tgldit n lmṛṛuk Ṛṛbaṭ ɣ iffus aminig, 239 id ki…",
+                "…tmaẓunt n tgldit n lmṛṛuk Ṛṛbaṭ ɣ iffus aminig, 239 id kilu mitr d Tgmmi tumlilt (ḍḍaṛlbiḍa) ɣ iffus aminig, 246 id kilu mit…"
+            ]
+            },
+        {
+                "word": "mitru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…alu nns iga t idrarn n Waṭlas anammas ɣ yat tuttuyt n 1 627 mitru ɣ yan udrar iga s yism Adrar n Mturzgan (ɣ tmnaḍt n Xmissat…",
+                "…allig nn ufan yat tusut n iẓṛan, zaydn ar qqazn, g 3.6 d 9 mitru, ufanen tusutin n ukccuḍ, mayadd atn iwddjan as gan i wanu…",
+                "…imddukk°al nns, kmmaln f taɣuzi n wanu n idrimn. ɣazn ar 27 mitru, kaygat 3 nid mitru ar gis nn ttafan yat tusut n izṛan nɣ t…",
+                "…ln f taɣuzi n wanu n idrimn. ɣazn ar 27 mitru, kaygat 3 nid mitru ar gis nn ttafan yat tusut n izṛan nɣ tusut n udccuḍ. dag l…",
+                "…nn ttafan yat tusut n izṛan nɣ tusut n udccuḍ. dag lkmen 27 mitru, ufanen yan uẓṛu unziɣ nɣdd yat taflallayt, tyaran gis uskk…",
+                "…ḍa, yan ur izḍar atn iɣer, ikmml umzraw nnaɣ ar iqqaz ar 33 mitru, nɣ tusut tiss 11, acku tlla tusut kudd 3 mitru. seg tusut…"
+            ]
+            },
+        {
+                "word": "gram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…yat tfkka tamjahdit d taẓḍuyt nns ar tlkkem n gr 375 d 450 gram d ar tlkkem tiɣzi nns gr 24 ar 34 santim, d dars yan akʷlu…",
+                "…idɣarn akkʷ marɣnin ɣ yiggi wakal, gisn dili n kṛaḍt tmaḍ n gram n tisnt ɣ yan llitru n waman, ini mrawt tikkal tamarɣt n wa…",
+                "…lkkmn gr 15 ar 20 cm, d ar tlkkm taẓḍuyt nns zzɣ 200 ar 300 Gram. == Tirmt == Utci nns ɣ tasila iga amsicekan zund: Amud [Am…",
+                "…56%. Tuggt n id buɣṛum ar ttggan ngr 60% d 75% n waman. 500 gram n uggurn ar yakka snat tkumirin. === Aggurn === Aggurn iga…"
+            ]
+            },
+        {
+                "word": "kilumitr amkkuẓ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…na mysstl ugaraw n unẓul. tiwḍ tjumma nns nnig n 14,000,000 kilumitr amkkuẓ mast ittajan ad tg amnẓaw amqqran. Adfl yumẓ nig n 98% n An…",
+                "…yr tamazirt akkʷ mqqurn ɣ tfriqt, tlkm tjumma nns 2,381,741 kilumitr amkkuẓ, tḍfr tt inn Sudan s 1,865,813 kilumitr amkkuẓ, ama tamazir…",
+                "…ns 2,381,741 kilumitr amkkuẓ, tḍfr tt inn Sudan s 1,865,813 kilumitr amkkuẓ, ama tamazirt akkʷ mẓẓiyn tga tt Sicl nna igan yan warkabil…",
+                "…rmt ad ɣ iggi n yan usarag imẓẓiyn ur akkʷ bahra issurf 673 kilumitr amkkuẓ (260 mil amkkuẓ). == Aẓuṛ n ism == Ism n Bɣdad izwur Lislam…",
+                "…r agmmuḍan n iffus n usammr n Wasya, s yan usarag n 331,000 kilumitr amkkuẓ (128,000 sq mi) d yan wuṭṭun n imzdaɣn yutin 100 mlyun, ɣay…"
+            ]
+            },
+        {
+                "word": "mitr amkkuẓ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…s kraḍt lli akkʷ imqqurn g umaḍal, s yat tjumma n 60,000 id mitr amkkuẓ n tdala n ufsar. Nttat ad igan tsnniɣt n tẓuṛi nna d akkʷ t…"
+            ]
+            },
+        {
+                "word": "tanqqiḍt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…ɣ Tanzɣt Amqqim Asmmud Asmmud n uskkin Bu usmmud War asmmud Tanqqiḍt Amggay Tajṛṛumt Asnmarra Amawal == Tisaɣulin ==…",
+                "…s yat tgrumma n inkraf ilimann afnsu sidi buwafi. ittubna ɣ tanqqiḍt akk° yattutyn ɣ tsga n maziɣn, tama n usmḍl n sidi buwafi.…",
+                "…1808, yan urgaz ism as Dabi iẓḍaṛ ad iẓli aṛẓan wa izddign. Tanqqiḍt n ufsay n waṛẓan n ukalsyum tga 842 taskflt n Silsus. == Ɣ…",
+                "…awbdar ɣ kra n tsaɣult iṛun, ukan ikka tt inn waggur ad iga tanqqiḍt tamzwarut n tiḍaf, mnid nit n trga n tfllagt dar ism ad nit…"
+            ]
+            },
+        {
+                "word": "tasdidt",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lmya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lmiya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "almya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pursan",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "purṣan",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "n mya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ar imuzaɣ taẓmmart (tẓmrt), ẓmr Charles de Foucauld. lɛwwad n mya. asdasiy, buhrrud == Izdayn == Avidyu ɣ Yutub == Tisaɣulin…"
+            ]
+            },
+        {
+                "word": "zɣ 100",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ɣ 100",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "f 100",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…inf yan umsasa 1 zɣ imḍann imnza. 25 n imḍann imnza imẓẓiyn f 100 : 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 5…",
+                "…manik a s hḍṛn imsgbarn nns. Yawi imir wis smmus score n 99 f 100 ɣ wansa n 'Metacritic'. Ɣ usggʷas n 2013, tsti t tmrslt n '…"
+            ]
+            },
+        {
+                "word": "tamiṭi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tasragt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…du nɣd ayt tazzal f iḍarn ns s tazzla ar tṛwaḥ 6 kilumitr ɣ tasragt. ṣubn asimu may yruḥ usggʷas n 2009, tkka tn darsn ma yutin…",
+                "…utti zɣ wuṭṭunn n 7-yizwal s win 8-yizwal === Ɣ 2000-10-13, tasragt tis 23:00, ittubḍa usuṭṭun n tmnaḍin f smmus s tmrna n yan…",
+                "…n 04 ɣ 02 d 05 ɣ 03 === Ḍaṛat n ṣḍiṣ isggʷasn (2006-03-24, tasragt 23:00) ittusnfal yan uzgzzum n tiṭṭit afad ad iskr adɣar i…",
+                "…ad nik, s umdya gr tsragt tiss 15 d uzgn n 1 innayr 2968 ar tasragt tiss 15 d uzgn n 2 innayr 2968. Ɣ imalass ar nttfa sa wussa…",
+                "…tḍfuṛ i wadud nɣ i uzmz, ass ad ar ssmrasn middn \"Lmagan nɣ tasragt\" macc g ma izrin ar ssmrasn middn \"Tanast\" nɣ \"Lmagana n wa…"
+            ]
+            },
+        {
+                "word": "imik",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 58,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ta imunn i usgmi, tamassant d tadlsa, tutlayt n Ayt Iznassn imik s imik ar t ittiliḥ d ar ttidrus ɣ yilsawn n tarwa n imsiwl…",
+                "…n i usgmi, tamassant d tadlsa, tutlayt n Ayt Iznassn imik s imik ar t ittiliḥ d ar ttidrus ɣ yilsawn n tarwa n imsiwln nns d…",
+                "…qqan tutlayt ad, mac aylli d yujjan tutlayt ad ad t ittiliḥ imik s imik iga t acku ar ttannayn tutlayt ad zun iɣ tga tutlayt…",
+                "…tlayt ad, mac aylli d yujjan tutlayt ad ad t ittiliḥ imik s imik iga t acku ar ttannayn tutlayt ad zun iɣ tga tutlayt n tmaz…",
+                "…d ar ittaɣul icqqa d middn lli sawalnin s trifit mqqar illa imik n urmas dar ayt rif i tutlayt n Ayt Iznasn. Armas ad ar itt…",
+                "…(ta)sṭṭat- iga uẓuṛ nns amaziɣ, tg yan zɣ wanawn n sksu. == Imik n umzruy == Ar ttinin Sksu ur dikka abla dar imaziɣn art sk…"
+            ]
+            },
+        {
+                "word": "ammas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 98,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ammas (s tɛṛabt: المركز), iga yan uḍwwaṛ imunn, yili ɣ tgrawt n l…",
+                "…ṭanja-tiṭṭawin-lḥusima ɣ lmɣrib. iḍfaṛ uḍwwaṛ ad i trfiqt n ammas nna ɣ llan 16 n iḍuṛan. ilkm umḍan n imzdaɣn nns 489 n umzd…",
+                "…n == === tisnaddadin timatayin === iggʷiz umḍan n imzdaɣn n ammas s 27.8%, iggʷiz umḍan n twjiwin s 7.4% gr 2004 d 2014. ɣ 20…",
+                "…iwin: === iwl d tarwa === g 2014, gan wina yiwln ɣ uḍwwaṛ n ammas 51.6 s tgmiḍi n 10.6%, ig unammas n wawtay ɣ wakud n yiwl a…",
+                "…=== g 2014. tlkm tgmiḍi n mddn nna ẓḍaṛnin i twuri 42.2% ɣ ammas, ar nit swurin niɣ suln ar siggiln tawuri. tlkm tgmiḍi n ta…",
+                "…cbika ammas (s tɛṛabt: شبيكة المركز), iga yan uḍwwaṛ imunn, yili ɣ tgra…"
+            ]
+            },
+        {
+                "word": "azgn",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…yidṣ sɣ uzmz g ar ittili uzggaɣ g ignwan ar ttulut n yiḍ nɣ azgn n yiḍ. == Tiknnayyin == Gis g Tiyiḍṣ Snat n tiknnayyin ar t…",
+                "…dayt d yan imnɣi izri ɣ umzruy... Aḥudri amaziɣ s waṭṭaṣ... Azgn n tussna...azgn n umassn...azgn n urgaz...azgn n usgd...azg…",
+                "…izri ɣ umzruy... Aḥudri amaziɣ s waṭṭaṣ... Azgn n tussna...azgn n umassn...azgn n urgaz...azgn n usgd...azgn n tɛilmanit...…",
+                "…. Aḥudri amaziɣ s waṭṭaṣ... Azgn n tussna...azgn n umassn...azgn n urgaz...azgn n usgd...azgn n tɛilmanit...d kigan n tudart…",
+                "…s waṭṭaṣ... Azgn n tussna...azgn n umassn...azgn n urgaz...azgn n usgd...azgn n tɛilmanit...d kigan n tudart inu giɣ war as…",
+                "…zgn n tussna...azgn n umassn...azgn n urgaz...azgn n usgd...azgn n tɛilmanit...d kigan n tudart inu giɣ war asgd... Azgn n t…"
+            ]
+            },
+        {
+                "word": "kraḍ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Tcarlz Wis Kraḍ (Tcarlz Filip Arthur Djurj; s tinglizit Charles III) iga ag…",
+                "…Izwal). == Izwiln s tclḥit == 0 : Amya 1 : Yan 2 : Sin 3 : Kraḍ 4 : Kkuẓ 5 : Smmus 6 : Ṣḍiṣ 7 : Sa 8 : Tam 9 : Tẓa 10 : Mra…",
+                "…Assaɣ tga yat tguri ilan Kraḍ inumak : Assaɣ (Amagut : Assaɣn) dars anamk n Ism (Asgt. Is…",
+                "…zt : Elephants Dream) iga yan usaru n usmusu s amssuds n bu kraḍ uggugn ittyawskarn s blendr. == Tisaɣulin ==…",
+                "…d VI) iga agllid n Lmɣrib nttan ad igan agllid wis simraw d kraḍ zɣ igldann n Lmɣrib iɛalawiyn, ilul ɣ wass n 21 ɣuct 1963 ɣ…",
+                "…cture, s taɛrabt: عمالة أݣادير إداوتنان) tga yat tmnbaḍt zɣ kraḍ d mraw n tmnbaḍin lli illan ɣ tmazirt n Lmɣrib ḍaṛt ttqsim…"
+            ]
+            },
+        {
+                "word": "tanqqiṭ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "virgul",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "fasila",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tuqqna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…amqqran wiss sin ɣ unagraw nnɣ, macc ntta ammu kullu tdrus tuqqna gr imtiwgn n unagraw anafuk, d iga ɣir aftam (ttmn) n tuqqn…",
+                "…uqqna gr imtiwgn n unagraw anafuk, d iga ɣir aftam (ttmn) n tuqqna n wakal, d iga amtiwg amyiwn i mmu tdrus tuqqna n waman. ==…",
+                "…am (ttmn) n tuqqna n wakal, d iga amtiwg amyiwn i mmu tdrus tuqqna n waman. == Tindrt == Iṭṭaf awihaḍ yan unagraw n tindrt ihy…",
+                "…imas. == Tanɣa == Awihaḍ ɣ ugns irwas adanbala, macc awihaḍ tuqqna nns a kullu idrusn ɣ unagraw anafuk ɣmklli s ya d nenna. ==…",
+                "…n kigan n inmmaln idusn mas d tigniwt n imzwiɣ tṭṭaf yadlli tuqqna uggar n ɣil, d llan yad lli gis waman ɣ tsna nns, d llan ki…",
+                "…ad iskrn imuɣlin ittuẓlanin n umtiwg. == Wul == Zund akal, tuqqna n ul n imzwiɣ tggut zzɣ uzzal d inikl, d tlla gis ma ilkkmn…"
+            ]
+            },
+        {
+                "word": "abaraz",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Abaraz Mqqurn n Adrar (s tfransist: Stade Adrar, s tɛrabt: ملعب أد…",
+                "…Jamɛ Lfna nɣ s wassaɣ ns iɣzzifn Asarag n Jamɛ Lfna nɣ Abaraz n Jamɛ Lfna (s Taɛrabt : ساحة جامع الفنا, s Tfransist : Pla…",
+                "…tull alɣu nns f mayan asggʷas n 2001. == Amzruy n ubaraz == Abaraz n Jamɛ Lfna ila iẓuṛan imqquṛn g umzruy n Lmɣrib, acku abar…",
+                "…araz n Jamɛ Lfna ila iẓuṛan imqquṛn g umzruy n Lmɣrib, acku abaraz ad ttrsn iwttasn ns sg ma ttrsn iwttas n tɣrmt n Mrrakc g u…",
+                "…r sgis ssaɣn, macc ḍaṛt lbni n timzgida n Lktbiyya s tusut, abaraz n Jamɛ Lfna issnti ar ittgga yan udɣar istawhmman, acku igl…",
+                "…murt akkʷ addur, tɣudu dar maṛṛa inmmudda lli gis izrin. == Abaraz : == iga ubaraz n Jamɛ Lfna Ul n tamdint n Mrrakc, acku ar…"
+            ]
+            },
+        {
+                "word": "afmiḍi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "timiḍi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…100 nɣ Timiḍi == tisaɣulin == Msmun awal n SGSM : Msmun awal amatay asnma…",
+                "…t, tamnaḍt n sus masst ɣ lmɣrib. iḍfaṛ uḍwwaṛ ad i trfiqt n timiḍi nna ɣ llan 1 n iḍuṛan. ilkm umḍan n imzdaɣn nns 124 n umzda…",
+                "…t, tamnaḍt n sus-masst ɣ lmɣrib. iḍfaṛ uḍwwaṛ ad i trfiqt n timiḍi nna ɣ llan 12 n iḍuṛan. ilkm umḍan n imzdaɣn nns 59 n umzda…",
+                "…t, tamnaḍt n sus-masst ɣ lmɣrib. iḍfaṛ uḍwwaṛ ad i trfiqt n timiḍi nna ɣ llan 12 n iḍuṛan. ilkm umḍan n imzdaɣn nns 190 n umzd…",
+                "…t, tamnaḍt n sus-masst ɣ lmɣrib. iḍfaṛ uḍwwaṛ ad i trfiqt n timiḍi nna ɣ llan 12 n iḍuṛan. ilkm umḍan n imzdaɣn nns 98 n umzda…",
+                "…t, tamnaḍt n sus-masst ɣ lmɣrib. iḍfaṛ uḍwwaṛ ad i trfiqt n timiḍi nna ɣ llan 12 n iḍuṛan. ilkm umḍan n imzdaɣn nns 95 n umzda…"
+            ]
+            },
+        {
+                "word": "tamiḍi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ɣ mya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "f mya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "zɣ mya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "g mya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ɣ timiḍi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "afmiḍiy",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "amiḍi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tigmiḍi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 120,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…i usiḍn lli ittyuskarn ɣ usggʷas n 2014 maya: === Aslmd === Tigmiḍi n taqubbanit (middn lli ur ssin ad aqran wala ad ttaran) :…",
+                "…ubbanit (middn lli ur ssin ad aqran wala ad ttaran) : 21.9% Tigmiḍi n imzdaɣ lli iɣran ar usinan n usmdi nɣd uggar : 9.5% === T…",
+                "…li iɣran ar usinan n usmdi nɣd uggar : 9.5% === Tadamsa === Tigmiḍi n imzdaɣ lli llan ɣ isggasn nnsn n twuri : 51.4% Tigmiḍi n…",
+                "…== Tigmiḍi n imzdaɣ lli llan ɣ isggasn nnsn n twuri : 51.4% Tigmiḍi n tarwuri (middn lli ur iṭṭifn tawuri) : 12.2% Tigmiḍi n im…",
+                "…1.4% Tigmiḍi n tarwuri (middn lli ur iṭṭifn tawuri) : 12.2% Tigmiḍi n imzdaɣ lli iswurin dar lmxzn (nɣ kkan-tt-inn swurin gis)…",
+                "…ɣ lli iswurin dar lmxzn (nɣ kkan-tt-inn swurin gis) : 14.9% Tigmiḍi n imzdaɣ lli iswurin ɣ uslig (nɣ kantin swurin gis) : 41.9%…"
+            ]
+            },
+        {
+                "word": "attay",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…ggar n yifḍ n tutlayin ttusawalnin ɣ tfriqt (Yunisku tssutg attay n sin ifḍn). Tugtt nnsnt gant tiwfrikin s usala, illint tin…",
+                "…ɣ tfriqt, nɣ d akkʷ ɣ umaḍal. Tawja tutlayant (Khoisan) gis attay n smmumrawt n tutlayin, da tnt sawal 400.000 n umdan ɣ iffu…",
+                "…an ula umanent fllasn tmitar-nns, middn-a akkʷ, amata gisn (attay n 80%) ar ttjjin min ad ḍfrn kra n usafar iẓlin. Yan zɣ sḍi…",
+                "…tln i Walili ittuzdaɣ zɣ uzmz Atlanti (en) d unyuliti (en), attay n 5.000 n isggʷasn aya. Irzzutn irkyulujitn ttuskarnin ɣ ud…",
+                "…ar igi nes, skerɣ-n sis akal a yan imyaren luz ar sisen san attay ira ad asen giɣ ɣ akudan ɣ immi tififelt ad ur isellaḥ Rebb…"
+            ]
+            },
+        {
+                "word": "mya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…imuzaɣ taẓmmart (tẓmrt), ẓmr Charles de Foucauld. lɛwwad n mya. asdasiy, buhrrud == Izdayn == Avidyu ɣ Yutub == Tisaɣulin…"
+            ]
+            },
+        {
+                "word": "kilumitr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…n tmazirt n Ssaɛudiyya, taggug f Tamdint Ifawn s kran 4000 kilumitr ɣ umnid n iffus ataram, d f tɣrmt Ṭṭayf s kran n 1200 kilum…",
+                "…f tɣrmt Ṭṭayf s kran n 1200 kilumiṭr ɣ amnid acrqi, d f 72 kilumitr zɣ tiɣrmt n Jadda d aftas n yill azggaɣ. Tga Makka Lmukarra…",
+                "…is 19. Tga Iswatini yat tmazirt imẓẓiyn, ur gis uggar n 200 Kilumitr zɣ ugafa ar aẓul, d 130 Kilumitr zɣ utaram ar ugmuḍ. Ssutln…",
+                "…mẓẓiyn, ur gis uggar n 200 Kilumitr zɣ ugafa ar aẓul, d 130 Kilumitr zɣ utaram ar ugmuḍ. Ssutlnt as tmizar yaḍnin s wakal, ayall…",
+                "…iẓẓlmḍ agmuḍan s Ubadu n Suwis nna mi tlla ɣ tirut nns 163 kilumitr. (ɣ trakalt, ar tettusmil tmgzirt sina tawmiṣrt nna illan ɣ…",
+                "…s d agzzum zzɣ tfriqt) ttyn i tfriqt iftasn s tɣzi n 26.000 kilumitr. Zzɣ ttmi n iwtta n tfriqt ɣ iẓẓlmḍ, Ras Bn Saqqa ɣ Tuns (3…"
+            ]
+            },
+        {
+                "word": "amkkuẓ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…ugaraw n unẓul. tiwḍ tjumma nns nnig n 14,000,000 kilumitr amkkuẓ mast ittajan ad tg amnẓaw amqqran. Adfl yumẓ nig n 98% n An…",
+                "…rt akkʷ mqqurn ɣ tfriqt, tlkm tjumma nns 2,381,741 kilumitr amkkuẓ, tḍfr tt inn Sudan s 1,865,813 kilumitr amkkuẓ, ama tamazir…",
+                "…741 kilumitr amkkuẓ, tḍfr tt inn Sudan s 1,865,813 kilumitr amkkuẓ, ama tamazirt akkʷ mẓẓiyn tga tt Sicl nna igan yan warkabil…",
+                "…tawaṭfa nns ar tlkkm gr 165,2 d 181,3 n umlyun n ukilumtiru amkkuẓ, ɣar waḥdu t igadda d unuḍu (double) n ugaru aṭlanṭiy, is y…",
+                "…n n Tamunt Tawruppit, s kra n 20,755 umzdaɣ i yan ukilumiṭṛ amkkuẓ. Ar izray wasif n Sinn ɣ tuddurin tiqburin n tmdint n Bariz…",
+                "…ḍt lli akkʷ imqqurn g umaḍal, s yat tjumma n 60,000 id mitr amkkuẓ n tdala n ufsar. Nttat ad igan tsnniɣt n tẓuṛi nna d akkʷ t…"
+            ]
+            },
+        {
+                "word": "Silsyus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…S tɣarast yaḍni ayfs izzḍaṛ a izdɣ g tazɣlt illan ingr -45°Silsyus ar 30°Silsyus . == Amawal == Mṛẓgli : immortel Tasnalɣa : m…",
+                "…ni ayfs izzḍaṛ a izdɣ g tazɣlt illan ingr -45°Silsyus ar 30°Silsyus . == Amawal == Mṛẓgli : immortel Tasnalɣa : morphologie Tiz…"
+            ]
+            }
+        ],
+    }
+    
