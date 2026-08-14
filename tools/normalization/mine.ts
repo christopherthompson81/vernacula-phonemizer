@@ -39,7 +39,7 @@ import { readFileSync, writeFileSync, appendFileSync, readdirSync, openSync, rea
 import { StringDecoder } from "node:string_decoder";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allOccurrencesInMarkup, dropsIn, isAcceptedSilent, makeContribution, rawLatinIn } from "./defects.ts";
+import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allOccurrencesInMarkup, dropsIn, isAcceptedSilent, makeContribution, rawLatinIn, silentCharsIn } from "./defects.ts";
 import { CELLS, type Cell, staleness } from "./cells.ts";
 import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
 
@@ -741,8 +741,26 @@ if (mode === "scan") {
             bump(`${d.redundant ? "REDUNDANT" : "DROP"} ${d.klass}`, sentence);
         }
     }
-    function bump(k: string, s: string): void {
-        hits.set(k, (hits.get(k) ?? 0) + 1);
+    /** The codepoint, because a homoglyph is invisible in a terminal: bm's ⟨ε⟩ and ⟨ɛ⟩ print identically. */
+    const cpOf = (ch: string): string =>
+        [...ch].map((c) => `U+${c.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`).join("");
+    // SILENT DELETION — the third mechanism, and the only one that needs the WHOLE CORPUS rather than a line.
+    // A letter that reaches the engine, is not rejected and produces nothing is invisible to every loop above:
+    // the leak classes can only see a character that SURVIVES, the drop loop only a SIGN that vanished, and a
+    // corpus diff only a difference. Nothing appears that should not — something fails to appear. See
+    // `silentCharsIn` for the two probes, the universality requirement, and the designs that were rejected.
+    for (const s of silentCharsIn(lang, lines, say, nativeScript)) {
+        const where = `${s.mode}, ${s.words} words — ${s.examples.join(" ; ")}`;
+        // ⚠ AN ORTHOGRAPHIC SILENCE IS REPORTED, NOT DROPPED, under the `ACCEPTED-` prefix `isNote` keys on —
+        // Maltese ⟨h⟩ and the Arabic tatweel are correctly silent, and a silent exemption would be
+        // indistinguishable from a clean scan.
+        bump(`${s.orthographic ? "ACCEPTED-ORTHOGRAPHIC" : "SILENT"} ${s.ch} ${cpOf(s.ch)}`, where, s.occurrences);
+    }
+    // ⚠ `n` DEFAULTS TO 1 BECAUSE EVERY OTHER CLASS COUNTS LINES. The silent-deletion class counts CHARACTER
+    // OCCURRENCES instead — it is decided once for the whole corpus, so "×1 line" would understate ee's ×6 and
+    // gn's ×301 alike and make the two look the same size.
+    function bump(k: string, s: string, n = 1): void {
+        hits.set(k, (hits.get(k) ?? 0) + n);
         if (!example.has(k)) example.set(k, s.slice(0, 80));
     }
     console.log(`scanned ${lines.length} lines of ${inPath} as ${lang}\n`);

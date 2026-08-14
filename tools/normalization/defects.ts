@@ -7,6 +7,8 @@
  * while the others could see them. Add a class here, never in a caller.
  */
 
+import { SCRIPTS } from "./scripts.ts";
+
 /** A LEAK is a character that SURVIVED into the IPA and should not have. */
 export const LEAK_CLASSES: readonly (readonly [string, RegExp])[] = [
     // ⚠ `\p{Nd}`, NOT `\d`: under the `u` flag `\d` is ASCII 0-9 and nothing else, so `\d` is blind to a digit
@@ -218,6 +220,236 @@ export function rawLatinIn(lang: string, sentence: string, ipa: string): { run: 
         out.push({ run, phonotactic });
     }
     return out;
+}
+
+/**
+ * A SILENT DELETION is a LETTER that reaches the engine, is not rejected, and produces NOTHING — the class
+ * found six times by hand and never by an instrument.
+ *
+ * ## The instrument gap this closes
+ *
+ * `LEAK_CLASSES` sees a character that SURVIVED and should not have. `DROPPABLE` sees a SIGN that vanished.
+ * Neither can see a LETTER that vanished, and nor can the referee or a corpus diff, because nothing appears
+ * that should not — something simply fails to appear. So the same defect was found six times, each time by a
+ * human reading a corpus or hand-running a character census:
+ *
+ * | language | character | scale |
+ * |---|---|---|
+ * | bm | ⟨ε⟩ U+03B5 ×166, ⟨ԑ⟩ U+0511 ×26, ⟨ᴐ⟩, ⟨ɳ⟩ — homoglyphs for ⟨ɛ ɔ ɲ⟩ | ~200 chars |
+ * | ki | ⟨ű ī ū û î⟩ — keyboard substitutes for ⟨ĩ ũ⟩ | 7 % of paragraphs |
+ * | bal | ⟨ݔ⟩ U+0754, a letter outside the token class | 38.9 % of paragraphs |
+ * | gn | ⟨ꞌ⟩ U+A78C SALTILLO — the puso, a PHONEME | ×301 in 433 segments |
+ * | ee | ◌͂ U+0342 perispomeni, written for the nasal tilde | ×6 |
+ * | sat | ⟨ᱻ⟩ U+1C7B RELAA, inside the word class and claimed by no branch | ×7 |
+ *
+ * ## The rule, and why each half is load-bearing
+ *
+ * > A character that is a LETTER OR MARK (`\p{L}`/`\p{M}`), tested on the words of the corpus that CONTAIN it,
+ * > where the reading of every such word is byte-identical to the reading of that word **with the character
+ * > deleted**, or to the reading of it **with the character replaced by a space** — in EVERY word tested.
+ *
+ * ⚠ **BOTH PROBES ARE NEEDED AND THEY ARE DIFFERENT DEFECTS.** Deletion catches the character that is inside
+ * the token class and mapped by nothing (gn, ee, sat); space-substitution catches the character that is
+ * OUTSIDE it, which the engine treats as a word boundary — bal's ⟨ݔ⟩ turns `مسترݔن` into two fragments, and
+ * `say(w)` there equals `say(w with ݔ → space)` and NOT `say(w without ݔ)`. A detector with one probe misses
+ * half the class, and which half depends on where each engine draws its token class.
+ *
+ * ⚠ **AND UNIVERSALITY IS WHAT SEPARATES THIS FROM "A SILENT LETTER"**, which is the trap the naive version
+ * falls into. French `parlent`, English `knight`, Spanish `hombre` all contain a letter that says nothing
+ * HERE — and says something in the next word. A character is only reported when it says nothing in EVERY word
+ * of the corpus it was tested in (≥ 3 distinct words). Measured: a single-word version fires on ⟨h⟩ in every
+ * Ibero-Romance engine in the fleet, all of which read ⟨ch⟩ correctly.
+ *
+ * ## The rejected designs, with their measured fleet rates (investigation doc, Runs 2-5)
+ *
+ * | design | fleet result |
+ * |---|---|
+ * | "an input character absent from the output" | fires on every space, pause mark and silent letter — 100 % |
+ * | per-word differential over ANY character | re-reports what `DROPPABLE` already discriminates, minus its REDUNDANT test |
+ * | per-word differential, letters only, ONE probe word | fires on every orthographic silent letter |
+ * | + universal over ≤8 probe words | **736 findings in 64 of 162 languages** — unreadable |
+ * | + the CORE-INVENTORY word filter below | 736 → **176** |
+ * | + case folding and the Han exclusion | 176 → **90 in 39 languages** |
+ * | "the character is not MENTIONED in the engine's own source" | REJECTED: 41 of 46 hit characters are "mentioned", including every false positive and most true ones — this repo's design-note comments quote the corpus, and the question is not whether a character is mentioned but whether it is claimed IN THIS COMBINATION. It removes true positives at ~7× the rate it removes false ones. |
+ */
+
+/**
+ * ⚠ THE CORE-INVENTORY FILTER IS WHAT REMOVES THE IPA-GLOSS FALSE POSITIVES, AND NOTHING SHALLOWER DOES.
+ *
+ * A wiki article's lead contains PRONUNCIATION GLOSSES — `ˈhɑːn`, `kaʊˈɑɪ`, `əˈkrɑː` — which are not words of
+ * the language and are not in its script's ordinary use. Tested as words they report ⟨ɑ ɪ ʊ ə ː ˈ⟩ silent in
+ * ki, haw, mos, sn, so, nya, lt, bar: about 60 % of every non-Han hit before this filter.
+ *
+ * ⚠ AND A HAND-WRITTEN LIST OF "IPA SYMBOLS" CANNOT BE THE FILTER. ⟨ɛ ɔ ŋ ɲ ɖ ƒ ʋ ɣ⟩ ARE the orthography in
+ * bm, ee, ig and thirty more engines in this fleet; a blacklist of them would blind the class to exactly the
+ * languages it was built for. So the test is about the CORPUS, not about IPA: a probe word is admissible only
+ * when every character in it OTHER THAN THE CANDIDATE is a core character — one occurring at least
+ * `max(20, 0.05 %)` of the corpus's letter occurrences. A gloss is built of characters that are themselves
+ * rare in a Kikuyu corpus; a Kikuyu word is not.
+ *
+ * ⚠ THE CANDIDATE IS EXEMPT FROM THE FLOOR, AND HAS TO BE. The intruder is rare BY DEFINITION — ee's
+ * perispomeni is ×6 in its whole artifact — so a rule that also required the candidate to be core would be
+ * blind to the smallest and most interesting half of the class.
+ */
+const CORE_FLOOR = 0.0005, CORE_MIN = 20;
+/** A word for probing purposes: a run of letters and marks. Digits and punctuation end it. */
+const PROBE_WORD = /[\p{L}\p{M}]+/gu;
+/** At most this many probe words per candidate, spread across the corpus rather than taken from its head. */
+const PROBE_WORDS = 8;
+/** Fewer distinct words than this is not evidence about a LANGUAGE, only about a word. */
+const MIN_PROBE_WORDS = 3;
+
+/**
+ * CHARACTERS WHOSE SILENCE IS THE ORTHOGRAPHY'S OWN — this class's measured false-positive population, named
+ * rather than narrowed around, exactly as `VOWELLESS_WORDS` is for `rawLatinIn`.
+ *
+ * ⚠ EVERY ENTRY IS A CLAIM ABOUT A WRITING SYSTEM, not a per-corpus escape hatch, and an entry that named a
+ * letter an engine merely FAILS to read would be a defect being silenced. Both entries below are characters
+ * that a correct engine must read as nothing.
+ *
+ * ⚠ AND AN ENTRY DOES NOT HIDE THE HIT — `mine.ts` reports it under `ACCEPTED-ORTHOGRAPHIC`, because a quiet
+ * exemption is indistinguishable from a clean scan, which is how this defect class survived six times.
+ */
+export const ORTHOGRAPHIC_SILENCE: Readonly<Record<string, readonly string[]>> = {
+    /**
+     * ⚠ FLEET-WIDE, AND THE ONE CHARACTER THAT EARNS IT. U+0640 TATWEEL is not a letter at all: it is a
+     * justification stroke that stretches the joining line between two letters, so a reader voices nothing for
+     * it in ANY Arabic-script language. Reported in ary ×429, arz ×37 and skr ×3 before this entry. Unicode
+     * gives it category `Lm`, which is why the `\p{L}` candidate test sees it in the first place.
+     */
+    "*": ["ـ"],
+    /**
+     * Maltese ⟨h⟩ is silent — the /ħ/ of the language is written ⟨ħ⟩, a different letter, which this engine
+     * reads. `hija → ɪja`, `iqaddsilhom → ɪʔattsɪlɔm` are both correct. ×1,315 in the artifact, and it is the
+     * archetype of the population this table exists for: the letter that is silent BY RULE, in every word.
+     * ⚠ Its Ibero-Romance cousins are NOT listed and must not be: es/an/ast/gl/it/oc all read ⟨ch⟩, so their
+     * ⟨h⟩ demonstrably contributes and the case-folded probe below already clears them without a table entry.
+     */
+    mt: ["h"],
+};
+
+/** A character the LEAK tables already own is not this class's business — derived, never re-listed. */
+const claimedByLeakClass = (ch: string): boolean =>
+    LEAK_CLASSES.some(([, re]) => { re.lastIndex = 0; return re.test(ch); });
+
+/** One reported character, with the evidence that produced it. */
+export interface SilentChar {
+    /** The character, case-folded: `H` and `h` are the same letter and are judged together. */
+    ch: string;
+    /** How often it occurs in the corpus's words (all case variants). */
+    occurrences: number;
+    /** How many distinct words the verdict rests on. */
+    words: number;
+    /** `inert` — mapped by nothing inside the token; `separator` — treated as a word boundary. */
+    mode: "inert" | "separator";
+    /** `word → reading`, for a reader who has to judge whether the silence is correct. */
+    examples: string[];
+    /** Its silence is the orthography's own (`ORTHOGRAPHIC_SILENCE`) — a note, not a defect. */
+    orthographic: boolean;
+}
+
+const escapeChar = (s: string): string => s.replace(/[.*+?^${}()|[\]\\-]/gu, "\\$&");
+/** Spread across the list rather than its head — the first N words of an artifact are all one article. */
+const spread = <T>(list: readonly T[], n: number): T[] =>
+    list.length <= n ? [...list] : Array.from({ length: n }, (_, i) => list[Math.floor(i * (list.length / n))]!);
+
+/**
+ * Every letter of this corpus that says NOTHING, wherever it is used.
+ *
+ * ⚠ CORPUS-LEVEL, NOT PER-SENTENCE, AND THAT IS THE THIRD MECHANISM THIS FILE NOW CARRIES. `LEAK_CLASSES` is
+ * decidable from one output; `rawLatinIn` needs one source and its output; this needs THE WHOLE CORPUS,
+ * because the evidence is that a character says nothing in EVERY word — a claim no single line can support or
+ * refute. A per-line version was tried first and it is the single-probe-word design in the table above: it
+ * reports every orthographic silent letter in the fleet.
+ *
+ * ⚠ HAN, HIRAGANA AND KATAKANA CORPORA ARE EXCLUDED BY SCRIPT, and the exclusion is stated rather than
+ * hidden. There the candidate alphabet IS the corpus's whole character set, so this degenerates into a
+ * DICTIONARY-COVERAGE meter — measured: gan 417, hsn 122, cjy 20, wuu 2, i.e. 76 % of the fleet's findings,
+ * every one of them "a hanzi outside the dictionary reads as nothing". That is real and it already has an
+ * instrument (`10741c3`'s dict-silence probe). Left in, it swamps the other 38 languages 4:1 and teaches the
+ * reader to skip the section.
+ *
+ * `nativeScript` is the caller's `dominantScript(corpus)`; `undefined` (thin evidence or a genuine two-script
+ * mix) disables the native-word filter, which fails toward REPORTING rather than hiding.
+ */
+export function silentCharsIn(
+    lang: string,
+    lines: readonly string[],
+    say: Say,
+    nativeScript: string | undefined,
+): SilentChar[] {
+    if (nativeScript === "Han" || nativeScript === "Hiragana" || nativeScript === "Katakana") return [];
+    const occurrences = new Map<string, number>();
+    const variants = new Map<string, Set<string>>();
+    const words = new Map<string, Set<string>>();
+    const nativeRe = SCRIPTS.find(([name]) => name === nativeScript)?.[1];
+    for (const line of lines) {
+        for (const m of line.matchAll(PROBE_WORD)) {
+            const word = m[0];
+            // A 40-character "word" is a run-on from a table or a missing space, not a probe.
+            if (word.length > 40 || (nativeRe !== undefined && !majorityScript(word, nativeRe))) continue;
+            for (const ch of word) {
+                occurrences.set(ch, (occurrences.get(ch) ?? 0) + 1);
+                // ⚠ CASE-FOLDED. ⟨H⟩ fires in an, ast, es, gl, it and oc while ⟨h⟩ does not, because ⟨ch⟩ is a
+                // digraph those engines read: the capital happens to occur only in names. A letter's case
+                // variants are the SAME LETTER, and one contributing variant claims it.
+                const key = ch.toLowerCase();
+                let vs = variants.get(key);
+                if (vs === undefined) { vs = new Set(); variants.set(key, vs); }
+                vs.add(ch);
+                let ws = words.get(key);
+                if (ws === undefined) { ws = new Set(); words.set(key, ws); }
+                if (ws.size < 400) ws.add(word);
+            }
+        }
+    }
+    const total = [...occurrences.values()].reduce((a, b) => a + b, 0);
+    const floor = Math.max(CORE_MIN, total * CORE_FLOOR);
+    const core = new Set([...occurrences].filter(([, n]) => n >= floor).map(([c]) => c));
+    const exempt = new Set([...(ORTHOGRAPHIC_SILENCE["*"] ?? []), ...(ORTHOGRAPHIC_SILENCE[lang] ?? [])]);
+
+    const out: SilentChar[] = [];
+    for (const [ch, ws] of words) {
+        if (claimedByLeakClass(ch)) continue;
+        const vs = [...(variants.get(ch) ?? new Set([ch]))];
+        const strip = new RegExp(`[${vs.map(escapeChar).join("")}]`, "gu");
+        const probes = spread(
+            [...ws].filter((w) => w.replace(strip, "").length > 0 && [...w].every((c) => vs.includes(c) || core.has(c))),
+            PROBE_WORDS,
+        );
+        let tested = 0, inert = 0, separator = 0, contributed = false;
+        const examples: string[] = [];
+        for (const word of probes) {
+            const read = say(word);
+            if (read === undefined || read.trim() === "") continue;
+            tested++;
+            const deleted = say(word.replace(strip, "")), spaced = say(word.replace(strip, " "));
+            if (deleted === read) inert++;
+            else if (spaced === read) separator++;
+            else { contributed = true; break; }
+            if (examples.length < 3) examples.push(`${word} → ${read}`);
+        }
+        if (contributed || tested < MIN_PROBE_WORDS) continue;
+        out.push({
+            ch,
+            occurrences: vs.reduce((a, c) => a + (occurrences.get(c) ?? 0), 0),
+            words: tested,
+            mode: separator > inert ? "separator" : "inert",
+            examples,
+            orthographic: exempt.has(ch),
+        });
+    }
+    return out.sort((a, b) => b.occurrences - a.occurrences);
+}
+
+/** Is this word mostly in the corpus's own script? A gloss or a foreign name is not evidence about it. */
+function majorityScript(word: string, nativeRe: RegExp): boolean {
+    let native = 0, other = 0;
+    for (const ch of word) {
+        if (nativeRe.test(ch)) native++;
+        else if (SCRIPTS.some(([, re]) => re.test(ch))) other++;
+    }
+    return native > other;
 }
 
 /**
