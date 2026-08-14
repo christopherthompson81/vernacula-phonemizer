@@ -2244,6 +2244,35 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // refuses the whole match rather than half of it (trap 53), so `°C` reads exactly as it did
         // before; the class stays red because a missing scale word is a real gap, not a correct silence.
     },
+    sat: {
+        // ⚠ SANTALI IS THE OPPOSITE SHAPE TO EVERY OTHER ENTRY IN THIS TABLE, AND ONLY TWO CLASSES BELONG
+        // HERE. Elsewhere a class is silenced because the SIGN is never used for its arithmetic meaning in
+        // that corpus (syl's `×` is an acronym separator, bal's `+` is an etymology, ki's `&` is an English
+        // name). sat's `+ − × ÷ = <` ARE arithmetic — every one is in the wiki's own zero/arithmetic
+        // article, `᱐ × ᱑ = ᱐`, `᱑ + ᱐ = ᱑`, `᱐ - ᱑ = -᱑`, `᱑<᱒<᱓` — and Santali HAS a complete native
+        // vocabulary for them, each with a dedicated sat.wikipedia article that states its own sign:
+        //     +  ᱥᱮᱞᱮᱫ   "ᱥᱮᱞᱮᱫ (ᱤᱝᱞᱤᱥ: Addition) (ᱱᱚᱶᱟ ᱨᱮᱭᱟᱜ ᱪᱤᱱᱦᱟᱹ ᱫᱚ \"+\")"   44 tok / 11 arts
+        //     −  ᱵᱷᱮᱜᱮᱫ  ×  ᱜᱟᱵᱟᱬ   ÷  ᱦᱟᱴᱟᱬ   =  ᱥᱚᱢᱟᱱ ᱪᱤᱱᱦᱟᱹ
+        // (ᱥᱮᱞᱮᱫ is independently in en.wiktionary from Hansdah's *Concise English-Santali Dictionary*.)
+        // What blocks the reading is SYNTAX, not vocabulary: these are operation NOUNS and the articles'
+        // own worked examples put the infix on `ᱟᱨ` with the operation POSTPOSED —
+        // `᱒+᱓ = ᱕ (ᱢᱮᱱᱫᱚ ᱒ ᱟᱨ ᱓ ᱥᱮᱞᱮᱫ ᱞᱮᱠᱷᱟᱱ ᱕ ᱦᱩᱭᱩᱜᱼᱟ)`, with subtraction taking the ablative ᱠᱷᱚᱱ on
+        // the minuend. So `᱑ ᱥᱮᱞᱮᱫ ᱐` is ungrammatical and a correct rule restructures the expression.
+        // **That is an addressable gap, not a permissible silence**, so `plus`, `minus`, `times`, `divide`,
+        // `equals` and `less-than` are DELIBERATELY ABSENT from this block and `review.ts --lang sat` stays
+        // RED on them — the `ak` exponent stance and the `syl` minus stance, for the same reason. The
+        // minus is the sharpest case: this corpus writes a real negative result (`᱐ - ᱑ = -᱑`) and omitting
+        // a minus INVERTS.
+        ampersand: "17 instances and NOT ONE is a Santali conjunction. 11 are the HTML entity `&nbsp;` "
+            + "surviving the dump (`83,883&nbsp;km²`, `$25&nbsp;ᱢᱤᱞᱤᱭᱚᱱ`) — markup, not text, and "
+            + "normalize.ts step 1 repairs those to a space because they sat between a number and its unit "
+            + "and broke the adjacency the shared tier matches on. The rest belong to English proper names "
+            + "inside a Latin run (`A. P. J. Abdul kalam`, `ᱰᱤᱯᱷᱮᱱᱥ ᱨᱤᱥᱚᱨᱪ & ᱰᱮᱵᱷᱞᱚᱯᱢᱮᱱᱴ ᱚᱨᱜᱟᱱᱤᱡᱮᱥᱚᱱ "
+            + "(DRDO)`). Santali's conjunction `ᱟᱨ` is everywhere in this corpus, so the word is not the "
+            + "gap; the SLOT is — the same conclusion ki and sn reached from the same evidence",
+        "plus-minus": "the sign is ×0 in the corpus and no Santali reading of it is attested. Unlike the "
+            + "arithmetic signs above there is nothing to restructure here, because there is nothing there",
+    },
 };
 
 /**

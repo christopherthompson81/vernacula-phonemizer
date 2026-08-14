@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { normalizeSantali } from "./normalize.ts";
 
 interface SantaliDef {
     letters: Record<string, string>;
@@ -78,7 +79,12 @@ const TOKEN = /([ᱚ-ᱽ]+)|([᱐-᱙]+|\d+)|([.!?…,;:᱾᱿])/gu;
 
 class SantaliPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ THE NORMALIZATION PASS RUNS FIRST, and for this language it is not mainly a number layer.
+        // sat.wikipedia types ⟨ᱹ GAAHLAA⟩ as an ASCII PERIOD and ⟨ᱼ PHAARKAA⟩ as an ASCII HYPHEN — 246 and
+        // 99 occurrences in the mined artifact's 242 retained segments — and both characters fall in
+        // `TOKEN`'s punctuation arm or outside it entirely, so each one splits its word and (for the dot)
+        // inserts a clause pause where the language has a modified vowel. See normalize.ts's header.
+        return assembleClauses(normalizeSantali(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
                 // Ol Chiki digits and Western digits are the same numbers — normalise, then compose. ≤15 digits
