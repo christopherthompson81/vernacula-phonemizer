@@ -1,0 +1,751 @@
+// WIKIPEDIA WORD ATTESTATION — tn. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "tn",
+        "wiki": "tn.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "khubiki",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a kgwedi ya Moranang kwa delateng se ka nna dimetara tse di khubiki di le 6,700 (maoto a khubiki a le 240,000) ka motsotswana.…",
+                "…teng se ka nna dimetara tse di khubiki di le 6,700 (maoto a khubiki a le 240,000) ka motsotswana. Morwalela o mogolo go feta ts…",
+                "…seno ka makgetlo a le mararo, ka phororo ya dimetara tse di khubiki di le 22,500 (maoto a khubiki a le 790,000) ka motsotswana…",
+                "…ka phororo ya dimetara tse di khubiki di le 22,500 (maoto a khubiki a le 790,000) ka motsotswana ka 1958. Ka fa letlhakoreng le…",
+                "…, phororo ya metsi e ne e le ka palogare ya dimetara tse di khubiki di le 500 (maoto a khubiki a le 18,000) ka motsotswana fela…",
+                "…e ka palogare ya dimetara tse di khubiki di le 500 (maoto a khubiki a le 18,000) ka motsotswana fela. Mo dingwageng tsa bo-1960…"
+            ]
+            },
+        {
+                "word": "kubiki",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikilogerama",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…14), o ne a gaisana mo kgaisanong ya basimane ya bokete jwa dikilogerama di le masome a matlhano le botlhano (55 )kwa Diolimpiking t…",
+                "…tsa banna tse di godileng gantsi di bokete jo bo fa gare ga dikilogerama di le 350 le 700, fa tsa basadi tsone ka kakaretso di le di…",
+                "…bokhutshwane jwa go ema. Dinare tsa kwa Kapa di bokete jwa dikilogerama di le makgolo a mane le masome a mabedi le botlhano go ya g…",
+                "…supa (937 go ya go 1,918 lb) (tse ditonanyana di bokete jwa dikilogerama di ka nna lekgolo (220 lb) go feta tse di namagadi).Fa go b…",
+                "…y. [3][4] Ouikene o ne a gaisana mo kgaisanong ya basadi ya dikilogerama di le 50 kwa Dikgaisanyong tsa Lefatshe tsa Karate tsa 2021…",
+                "…okete jwa mmele, ka banna ba bagolo ba bokete jwa 300 – 800 dikilogerama (660 -1 760 lb). Mofuta o o na le dipopego tse pedi tsa tho…"
+            ]
+            },
+        {
+                "word": "mililithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dimililithara",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "difiti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "diperesente",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 59,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…mpa, go senya mpa go tlwaelesegile, mme go fopholediwa gore diperesente di le masome a mabedi le bone tsa basadi ba kile ba senya m…",
+                "…Go na le basadi ba le bantsi go feta banna; basadi ba emela diperesente di le 50.3 tsa baagi ba naga ba le didikadike di le lesome…",
+                "…wa madi a a kwa tlase bo aname mo basading ba Malagasy, mme diperesente di le masome mararo le borataro tsa bone ba na le jone ka t…",
+                "…e kwa godimo sa mogote oo dirwang ke komelelo, selekanyo sa diperesente di le masome a mabedi le boraro sa metsi se a latlhega ka l…",
+                "…tsena 2008 selekanyo sa metsi mo letamong ene ele gotswa ka diperesente di le 39.1 ka ngwaga wa 2003 go tsena kwa go 100% ka ngwaga…",
+                "…aa maswe, letamo le la fokotsega go fitlhelela selekanyo sa diperesente di le masome a matlhano le bobedi. == Metswedi == == Metswe…"
+            ]
+            },
+        {
+                "word": "dikhubikimitara di le",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…le bokgoni jwa go tshegetsa selekanyo sa metsi a bokete jwa dikhubikimitara di le masome a mabedi le borataro a di dikadike (26 000 000.) ==…",
+                "…g leno. Tanka ya kgatelelo ya go kgaoga e na le bokgoni jwa dikhubikimitara di le 4 500 (160 000 cu ft) mme seteišene sa go pompa se na le bo…",
+                "…0 000 cu ft) mme seteišene sa go pompa se na le bokgoni jwa dikhubikimitara di le 1.51 (53 cu ft) ka motsotswana. Kgato ya bobedi ya NSC e ts…",
+                "…,ngwaga wa dikete tse pedi le borobabongwe. Letamo le ntsha dikhubikimitara di le dimilione di le masome a mane le bosupa ka ngwaga tsa metsi…",
+                "…a ngwaga tsa metsi a a nowang a phaseje ya Akbou-Béjaïa, le dikhubikimitara di le dimilione di le masome a mane le boraro ka ngwaga tsa go no…",
+                "…ka konkoreiti e e nonotshitsweng, mme le na le bokgoni jwa dikhubikimitara di le 78 000 (2 800 000 cu ft). Letamo le tswetswe go fokotsa tat…"
+            ]
+            },
+        {
+                "word": "ntlha bongwe",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 2,
+                "examples": []
+            },
+        {
+                "word": "ntlha bobedi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ntlha boraro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ntlha bone",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ntlha botlhano",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…le degree Celsius tse di kwa tlase ga lefela di le thataro ntlha botlhano (−6.5 °C), kgotsa degree Fahrenheit di le masome a mabedi n…"
+            ]
+            },
+        {
+                "word": "ntlha borataro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ntlha bosupa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ntlha lefela",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…1.1 °C), kgotsa degree Fahrenheit di le lekgolo le borataro ntlha lefela (106.0 °F) mme mogote o o kwa tlase o o kwadisitsweng e ne…"
+            ]
+            },
+        {
+                "word": "khutlo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 1,
+                "examples": [
+                "…e le mongwe o o yang magareng a dihuku tsa polygon. Ka jalo khutlo-nne, square , e na le didaegonale tse pedi, mme popego e e…",
+                "…ga dithaba. == Tlhaloso == Letsha leno le na le sebopego sa khutlo-gare, le bophara jwa dimetara di le makgolo a mararo, le le…",
+                "…dirisiwa mo SI. Letshwao la SI la metsotso ke min (ntle le khutlo). Letshwao la ntlha ′ le dirisiwa gape ka dinako dingwe go…",
+                "…no e e Tswelelang: o romela melaetsa go balosika le ditsala khutlo nngwe le nngwe. Kitso ya ka Bonako: o ka batla dintlha, dik…",
+                "…oenjenere jwa sesole. Kago e kgolo e ne e le ka sebopego sa khutlo tse nne, mme e ne e dikaganyeditswe mo sekhutlong sengwe le…",
+                "…meno a gagwe a a kwa godimo a a kwa pele go nna dintlha tsa khutlo tse tharo. E ka tswa e le ka nako eo fa a ne a simolola go…"
+            ]
+            },
+        {
+                "word": "ntlha",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 185,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…lefatshe jêno e êtêlêtswe pele ke Serêtsê Khama, tautona wa ntlha wa Botswana. Gompiêno Botswana ke lengwe la mafatshe a a tl…",
+                "…waga di ka nna dikete tse masome a supa le boraro. Baagi ba ntlha ba ba itsegeng ba borwa jwa Aforika go akanngwa gore e ne e…",
+                "…o dikgaolong tse di telele. Fa dikgomo di ne di tsenngwa la ntlha mo borwa jwa Aforika dingwaga di ka nna dikete tse padi tse…",
+                "…e gore batho ba ba buang Se-Bantu ba ne ba fudugela leng la ntlha mo nageng go tswa kwa bokone, le fa AD 600 e lebega e le ph…",
+                "…ga go phutlhama ga Mapungubwe. Mo pakeng eo, ditlhopha tsa ntlha tse di buang Setswana, Bakgalagadi, di ne tsa fudugela kwa…",
+                "…sekete. Thaba e ne e le karolo ya go tlhamiwa ga mafatshe a ntlha mo borwa jwa Aforika, ka dikgomo jaaka motswedi o mogolo wa…"
+            ]
+            },
+        {
+                "word": "kgao",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…tamong la Heyshope kwa kgampung ya noka ya Usutu. Borai jwa kgao ya letamo le bo kwa godimo thata. Ka nako ya komelelo e e n…"
+            ]
+            },
+        {
+                "word": "phoint",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tlosa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 60,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…go dirisa metsi a a nowang a a kgotletsweng. Malebana le go tlosa leswe, ke diperesente di le 14 fela tsa baagi botlhe ba Gha…",
+                "…e ba Ghana ba ba dirisang lefelo le le tokafaditsweng la go tlosa lesfe go tloga ka 2010. Tafole eno e bontsha go kgaoganngwa…",
+                "…tlhaela ga metsi a a phepa a a nowang le ditsamaiso tsa go tlosa leswe ke bothata jo bo masisi jwa boitekanelo jwa setšhaba…",
+                "…swana Patriotic Front (BPF).Khama o ne a kgala Masisi ka go tlosa thibelo ya go tsoma ditlou mme a bitsa tshwetso ya gagwe ya…",
+                "…itsholofetso tsa gagwe tsa ditlhopho, o ne a tshitshinya go tlosa thibelo ya go tsoma ditlou le go dira gore bosodoma e nne b…",
+                "…ikuela kgatlhanong le tshwetso ya kgotlatshekelo e e neng e tlosa go ratana ka bong joe se molato moragonyana mo ngwageng oo,…"
+            ]
+            },
+        {
+                "word": "minase",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kwa tlase ga lefela",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…kwa tlase o o kwadisitsweng e ne e le degree Celsius tse di kwa tlase ga lefela di le thataro ntlha botlhano (−6.5 °C), kgotsa degree Fahre…",
+                "…masome a mane le botlhano ka selemo, mme ka mariga di wela kwa tlase ga lefela, mme seno se dira gore metsi a letsha leno a gatsetse. == B…"
+            ]
+            },
+        {
+                "word": "le lefela",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…o sa bosa kgotsa loapi == Kwa Jamaare, e kwa dimithareng di le lefela kwa godimo ga lewatle,e itemogelang bokgola le komelelo ya…",
+                "…akgetlho a le lesome le borataro, go fenngwa ka makgetlho a le lefela le go fennya ka kgaa-tshoo makgetlho a le lesome le botlhan…"
+            ]
+            },
+        {
+                "word": "dikirii di le",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…sennye fela kwa ntle ga toropo mo phalale ya bo 23 , kgotsa dikirii di le 23 kwa Borwa jwa ekhweitha. Ka nako e letsatsi le tlhamalet…"
+            ]
+            },
+        {
+                "word": "dikirii tsa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…la se se ileng sa tshwaiwa jaaka setlamo sa dikirii,[7] mme dikirii tsa sone di ile tsa latlhwa jaaka \"tse e seng tsa nnete\".[8] ==…",
+                "…habeng sa rona, le mo bathong ba UCLA\".Mo godimo ga go bona dikirii tsa bongaka tsa tlotlo di le lesome le bobedi, Robinson o ne a…",
+                "…kirii ya Media Law and Journalism le e nngwe ya go aloga ga dikirii tsa Public Relations go tswa kwa London School of Journalism. =…",
+                "…puso e e gapelediwang ya baagi ba Nigeria ba ba nang le di-dikirii tsa mmadikolo. Ka nako ya fa a ne a le koo, o ne a bona filimi…",
+                "…imololang kwa ntlheng e e umakilweng fa godimo mme o latela dikirii tsa masome a mabedi tsa longitute ya botlhaba go ya kwa ntlheng…",
+                "…itute ya botlhaba go ya kwa ntlheng ya marakanelo a yone le dikirii tsa masome a mabedi le bobedi ya latitšhutu ya borwa . Mola o b…"
+            ]
+            },
+        {
+                "word": "ka ura",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…ome go ya ko go tse masome a mararo le boferabobedi (10-38) ka ura. == Metswedi ==…",
+                "…lapo. Rona bontsi jwa rona re le batho re gola re itse gore ka ura ya sethoboloko ga re a tshwanela go feta kwa molapong kgots…",
+                "…di ba ba bofefo go gaisa botlhe mo sephatlong sa marathone, ka ura e le 1 metsotso e le 4 le metsotswana e le 2 e e neng e le…",
+                "…huta gape ka maranyane. O ne a bolela gore o \"nna go fitlha ka ura ya boraro mo mosong letsatsi le letsatsi a ithuta\". O obame…",
+                "…di ne di foka ka lebelo le le fetang dikilometara di le 97 ka ura, mme sefefo seno se ne sa dira makhubu a a bogodimo jwa dim…",
+                "…ka \"mokgwa o o maswe wa go ja dijo tsa maitseboa go fitlha ka ura ya bosupa\". Mo e ka nnang ka 1850, dijo tsa maitseboa tsa b…"
+            ]
+            },
+        {
+                "word": "diura",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 113,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…na le diteišene di le mmalwa tsa leokwane, dingwe di bulwa diura di le masome a mabedi le bone ka letsatsi. Ka gonne toropo…",
+                "…otse ono o mo Tropic ya Capricorn. Ka jalo mo e ka nnang ka diura tsa 13:11 ka Sedimonthole 21, kgotsa ka nako ya sethoboloko…",
+                "…ng le borweng ba Aferika. Central Africa Time e kwa pele ka diura dele pedi go Coordinated Universal Time (UTC+02:00), go tsh…",
+                "…lhong wa babereki, segolobogolo mo mokgatlhong wa go bereka diura di le robedi ka letsatsi, o o neng o buelela diura di le ro…",
+                "…o bereka diura di le robedi ka letsatsi, o o neng o buelela diura di le robedi tsa tiro, diura di le robedi tsa boitapoloso l…",
+                "…a letsatsi, o o neng o buelela diura di le robedi tsa tiro, diura di le robedi tsa boitapoloso le diura di le robedi tsa go i…"
+            ]
+            },
+        {
+                "word": "motsotswana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…kwa godimo ga diphororo. Selekanyo sa metsi ke 12-13 m3 ka motsotswana ka paka ya komelelo, le go fitlha go 2430 m3 ka motsotswana…",
+                "…motsotswana ka paka ya komelelo, le go fitlha go 2430 m3 ka motsotswana ka paka ya dipula. Mmuso wa Mali le Senegal River Basin Dev…",
+                "…aro (850 ft). Ka median discharge ya 42,000 cubic metres ka motsotswana (1,500,000 cu ft/s), diphororo di ka tsewa e le tse di dito…",
+                "…. Bogolo jwa yone jo bo begilweng ke 71,000 cubic metres ka motsotswana (2,500,000 cu ft/s). Diphororo tsa Inga gape ke lefelo la m…",
+                "…a palogotlhe ya dikhubikimitara di le makgolo a matlhano ka motsotswana (18,000 cu ft/s) ya metsi. Magareng ga kgwedi ya Phatwe le…",
+                "…a metsi e lekanyeditswe go dikhubikimetara di le 150–200 ka motsotswana (5,300–7,100 cu ft/s) e e gololwang go tswa mo Letamong la…"
+            ]
+            },
+        {
+                "word": "mo lekgolong",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 156,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…i lesome le boraro fa go ne go fitlhelwa masome a le mararo mo lekgolong fela la Batswana ba ba dirisang inthanete. Se ke palo e e k…",
+                "…Aforika ka kakaretso, e e ka nnang masome a mane le boraro mo lekgolong. Go supa se, ka ngwaga wa dikete pedi masome a mabedi le bo…",
+                "…tsa badirisi ba inthanete ke masome a marataro le borataro mo lekgolong. == Dipalopalo == leina la teseletso ya Inthanete ya maemo…",
+                "…araro masome a marataro le borobabobedi, lesome le botlhano mo lekgolong la baagi (ngwaga wa dikete pedi lesome le boraro). badirisi…",
+                "…asome a mane le borobabobedi mo lefatsheng; lesome le motso mo lekgolong la baagi, ya lekgolo, masome a marataro le borataro mo lefa…",
+                "…ng ya metswedi mo kontineteng. Aforika o na le boferabongwe mo lekgolong la metswedi ya metsi a phepa le lesome le borataro mo lekgo…"
+            ]
+            },
+        {
+                "word": "dipula di le",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…e ka duedisiwa kotlhao e e akaretsang madi a a ka tshwarang dipula di le makgolo a matlhano kgotsa dingwaga di le tharo mo kgolegelo…",
+                "…o leno le umaka go gatelela ga ga Seane gore a hire ntlo ya dipula di le dimilione di le 2 (US$312,000 go tloga ka kgwedi ya Moranan…"
+            ]
+            },
+        {
+                "word": "madi a pula",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ataro le ngwaga wa dikete pedi masome a mabedi le bosupa ka madi a pula a a kanang ka didikadike di le masome mabedi le bosupa. ==…",
+                "…, puso ya Botswana e ne ya abela lefatshe leo sedikadike sa madi a pula. == Tlhabolo itsholelo == Go simolola ka dingwaga tsa seket…",
+                "…ya go makgolo a robabobedi masome a marataro le boraro tsa madi a pula ya Botswana (~32 go ya go ~97 US$). ADSL e simolotswe mo ma…"
+            ]
+            },
+        {
+                "word": "yuro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…zwei, o akareditse dikgaisano tse dikgolo tse di akaretsang Yuro ya Basadi ya UEFA ya 2017, Sejana sa Lefatshe sa Basadi sa…",
+                "…Sejana sa Lefatshe sa Basadi sa FIFA sa 2019, Matshwanelo a Yuro ya Basadi ya UEFA a 2020–21, Yuro ya Basadi ya UEFA ya 2020…",
+                "…FA sa 2019, Matshwanelo a Yuro ya Basadi ya UEFA a 2020–21, Yuro ya Basadi ya UEFA ya 2020 le Yuro2 ya Basadi ya UEFA ya 202…",
+                "…Basadi ya UEFA a 2020–21, Yuro ya Basadi ya UEFA ya 2020 le Yuro2 ya Basadi ya UEFA ya 2020 le Yuro ya Basadi ya UEFA2020. S…",
+                "…asadi ya UEFA ya 2020 le Yuro2 ya Basadi ya UEFA ya 2020 le Yuro ya Basadi ya UEFA2020. Sejana. == Dipalopalo tsa botsamaisi…",
+                "…pedia ya Sejeremane. Bertelsmann o ne a duela ka go ithaopa Yuro e le nngwe ka kopololo nngwe le nngwe e e rekisitsweng kwa…"
+            ]
+            },
+        {
+                "word": "diyuro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "disenti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dikirii",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Sekolo se neelana ka thuto ya bongaka kwa maemong a pele ga dikirii, le morago ga dikirii. == Lefelo == Sekolo se se mo khampha…",
+                "…huto ya bongaka kwa maemong a pele ga dikirii, le morago ga dikirii. == Lefelo == Sekolo se se mo khamphaseng e tona ya Mmadiko…",
+                "…di le masome a mararo (230) ba bone e neng e le baithuti ba dikirii ya ntlha mme ba le masome a supa le motso (71) e le ba diki…",
+                "…irii ya ntlha mme ba le masome a supa le motso (71) e le ba dikirii ya morago ga kalogo. Ka nako eo, mafelo a dithuto tsa morag…",
+                "…orago ga kalogo. Ka nako eo, mafelo a dithuto tsa morago ga dikirii a ne a akaretsa (a) Boitekanelo jwa Setšhaba (b) Kalafi ya…",
+                "…olo le masome a matlhano. Mmadikolo o o rutuntsha mananeo a dikirii le a eseng a dikirii mo dithutong tse di farologaneng jaaka…"
+            ]
+            },
+        {
+                "word": "dikgato tsa mogote",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tsa sekwere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…ka nna 645 mme e na le kgaolo ya dikilometara di le 34,635 tsa sekwere. == Tsela == Noka ya Gamtoos e bopiwa ke dinoka tsa Groot,…",
+                "…e botlhanoo mme e na le kgaolo ya dikilometara di le 34,635 tsa sekwere. == Tsela == Noka ya Gamtoos e bopiwa ke dinoka tsa Groot,…",
+                "…mo mafelong a a omileng.Dikilometara tse makgolo a matlhano tsa sekwere (190 sq mi) tsa Honde Valley kwa lefatsheng la Zimbabwe di…",
+                "…fetolwang mo Borwa jwa Afrika mme dikilometara di le 52,000 tsa sekwere (20,000 sq mi) tse di bopang molapo o o e dikologileng ke l…",
+                "…oketsege go fitlha go dikilometara di le dikete tse thatao tsa sekwere, go fitlha go dikilometara di le dikete di robabobedi tsa s…",
+                "…kwere, go fitlha go dikilometara di le dikete di robabobedi tsa sekwere ka nako ya dipula tse di nang thata. == Palo ya batho le go…"
+            ]
+            },
+        {
+                "word": "sekwere sa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…ga Meintjeskop kwa ntlheng ya bokone jwa Arcadia, gaufi le Sekwere sa Kereke sa hisitori . Ditshingwana tse dikgolo tsa The build…",
+                "…le sediba sa kelelo ya metsi sa dikilometara di le 14 000 (sekwere sa dimaele di le 5 400). Go tswa foo e tabogela kwa bokonebotl…",
+                "…ka banni ba le lekgole le masome a robabongwe le bosupa ka sekwere sa kilometara go tloga ka ngwaga wa 2016.Palogare ya themperet…",
+                "…bantsi thata, ka banni ba le lekgolo le lesome le motso mo sekwere sa kilometara go tloga ka ngwaga wa 2016. Palogare ya thempere…",
+                "…le makgolo a mararo le masome a marataro le borobabongwe mo sekwere sa kilometara. Seemo sa bosa sa Savanna e rena mo lefelong len…",
+                "…afi. == Lefelo == Ka bogolo jwa dikilometara di le 581 730 (sekwere sa dimaele di le 224 607), Botswana ke lefatshe la bo masome m…"
+            ]
+            },
+        {
+                "word": "didolara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ang dipalo tse di fitlhang go dikete di le makgolokgolo tsa didolara tsa dipusetso tsa moagi mongwe le mongwe wa California yo o…",
+                "…nngwe e ne ya akantsha gore \"ka fa tlase fela ga sekete sa didolara Mo-California mongwe le mongwe wa Montsho yo o tswang mo bo…",
+                "…Setlhopha sa tiro sa toropo se itsisitse go duela tuelo ya didolara di le dikete di le tlhano gangwe fela, go mongwe le mongwe…",
+                "…itshintse sekale se se relelang se se nang le tekanyetso ya didolara di le sekete le bobedi tsa bagodi ba Bantsho. Madi a a seat…",
+                "….Ka Diphalane 2021 Matshwaokgwebo a Animoca a ne a kokoanya didolara di le dimilione di le 65 ka boleng jwa didolara di le dibil…",
+                "…a kokoanya didolara di le dimilione di le 65 ka boleng jwa didolara di le dibilione di le 2,2 go tswa kwa Ubisoft, Sequoia Capi…"
+            ]
+            },
+        {
+                "word": "dolara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…o e ne ya gola go sena go dirisiwa ledi le sele kwa ntle ga dolara ya Zimbabwe. Ka ngwaga wa 2017, morago ga ngwaga wa dipopel…",
+                "…tseng le go lwantsha lehuma se supa fa ba tshela ka ledi la dolara ya America ele nngwe ka letsatsi. == Ditso tsa Lesotho == L…",
+                "…ff o rekile teemane e e sa rethefadiwa ka didikadike tsa di dolara di le masome a matlhano le boraro ka ngwaga wa dikete pedi…",
+                "…madi a pula a le dikete di le masome mabedi le botlhano (di dolara tsa America di le dikete pedi, lekgolo le masome a supa). K…",
+                "…g gore lejwe le ka rekisiwa ka tlhwatlhwa ya didikadike tsa dolara di le masome mane go tsena di le masome a marataro. Tsamais…",
+                "…borataro. E ne e solofetswe go rekiwa ka didikadike tsa di dolara di le masome a supa. Morago ga go sekasekiwa thata, teemane…"
+            ]
+            },
+        {
+                "word": "diranta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…o e ne e le ka 1947. Ba ne ba fopholetsa gore palogotlhe ya diranta di le dimilione di le 112 e ne ya duelwa ka ditshenyegelo,…",
+                "…etolwa go ya ka seelo sa tlhotlhwa ya madi e neng e tla nna diranta di le dimilione di le 560 ka 2022, mme fa go akanngwa gore…",
+                "…a beeletswa mo ikonoming ya Haiti, e ka nna ya tlhotlhwa go diranta di le dibilione di le 115.…",
+                "…ome le boraro gore e amogetse dikadimo tsa madi a a kana ka diranta di le dimilione di le makgolo a mararo le masome a mane go…",
+                "…dimilione di le makgolo a mararo le masome a mane go ya go diranta di le dimilione di le 468.60 tse di tlhokegang mo porojeken…",
+                "…hang motlakase o o tlhagisitsweng di ne di akanyediwa go ja diranta di le dimilione di le lekgolo le masome a mabedi le bongwe,…"
+            ]
+            },
+        {
+                "word": "randa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dipula",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 61,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ntsi le go tlhaela ga ditlamelo tsa motheo ya metsi a pula. Dipula tse di maatla tse di nang kwa Gauteng gantsi di baka mathat…",
+                "…mo Soweto, segolobogolo fa go na le merwalela ka dinako tsa dipula. == Tsela e e dirilweng Ka yone le Tiro ya yone == Soweto S…",
+                "…eletsi di dira gore go nne le kotsi ya merwalela ka nako ya dipula tse dikgolo, JRA e gatelela botlhokwa jwa go ntshas matlaka…",
+                "…mo dikarolong dingwe tsa Soweto, segolobogolo ka dinako tsa dipula tse di nang thata. Gantsi metsi a pula a tlala thata mo a f…",
+                "…Gauteng ka ntlha ya kotsi e e oketsegang ya pula ka paka ya dipula. Mo mabakeng mangwe, go senyega ga mafaratlhatlha go dirile…",
+                "…a ka kgwedi ya Sedimonthole 2022, maemo a bosa a a maswe le dipula tse di maatla di bakile merwalela e e tseneletseng go ralal…"
+            ]
+            },
+        {
+                "word": "diponto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…e ba: Na le lefatshe kgotsa ba le adimilwe ka tlhwatlhwa ya diponto di le makgolo a mabedi Ba na le didirisiwa tsa temothuo tsa…",
+                "…a mabedi Ba na le didirisiwa tsa temothuo tsa tlhwatlhwa ya diponto di le makgolo a mabedi Ba ne ba teseletso ya lebentlele pot…",
+                "…eletso ya lebentlele potlana. Ba na le letseno la ngwaga la diponto di feta makgolo a mabedi go tswa mo metsweding ya lefatshe…",
+                "…eng ditlhopho ba le batlhano, le go ntsha madi a peeletso a diponto di le masome mabedi le botlhano. Madi a peeletso a ne a bus…",
+                "…ba bo ba: Na le setsha kgotsa ba se tlhokometse, sa madi a diponto di le makgolo mabedi. Ba na le didirisiwa tsa temo tsa tlha…",
+                "…kgolo mabedi. Ba na le didirisiwa tsa temo tsa tlhatlhwa ya diponto di feta makgolo a mabedi Ba na le teseletso ya lebentle pot…"
+            ]
+            },
+        {
+                "word": "dikilometara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kumakwane ke motse yo mo kgaolong ya Kweneng mo Botswana. O dikilometara di le masome a mabedi le botlhano (25) go tswa bophirima jw…",
+                "…lo a le mane a a mo tikologong ya Kumakwane a le sekgele sa dikilometara di ka nna botlhano. Mafelo a a akaretsa: == Dipadi tse ding…",
+                "…e motse o o mo kgaolong ya Kweneng mo Botswana. O fitlhelwa dikilometara di le masome a mararo le botlhano go ​​tswa kwa Gaborone le…",
+                "…di le masome a mararo le botlhano go ​​tswa kwa Gaborone le dikilometara di ka nna masome a mararo go tswa kwa molelwaneng le Aforik…",
+                "…lo la mathata a magolo a kalafi. == Lefelo == Ka bogolo jwa dikilometara di le 581 730 (sekwere sa dimaele di le 224 607), Botswana…",
+                "…o gaisa tsotlhe mo lefatsheng tsa Aforika. Phaka e akaretsa dikilometara di ka nna dikete tse lesome le motso (4,247 sq mi) mme e ts…"
+            ]
+            },
+        {
+                "word": "dimetara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 115,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a Kunene kwa Bokone jwa Namibia. Phororo eno e bogodimo jwa dimetara di le lekgolo le masome a mabedi (120) le bophara jwa dimet…",
+                "…etara di le lekgolo le masome a mabedi (120) le bophara jwa dimetara di le makgolo a supa (700) fa e tletse ka morwalela. Ke nng…",
+                "…eng ga Namibia le Angola, e wela mo moseleng o o boteng jwa dimetara di le lekgolo le masome a mabedi (120) le bophara jwa dimet…",
+                "…etara di le lekgolo le masome a mabedi (120) le bophara jwa dimetara di le makgolo a supa (700). == Metswedi ==…",
+                "…ala se se fa gare wa Motswana yo o gaisanang mo lebelong la dimetara di le 800. O ne a gapa selefera kwa 2012 Summer Olympics, e…",
+                "…agwe, Amos o ne a tswa mo maemong a botlhano mo lebelong la dimetara di le 800 kwa mabelong a selekanye a banana a 2011 (2011 Wo…"
+            ]
+            },
+        {
+                "word": "dikilograma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sekwere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ga Meintjeskop kwa ntlheng ya bokone jwa Arcadia, gaufi le Sekwere sa Kereke sa hisitori . Ditshingwana tse dikgolo tsa The bu…",
+                "…nna 645 mme e na le kgaolo ya dikilometara di le 34,635 tsa sekwere. == Tsela == Noka ya Gamtoos e bopiwa ke dinoka tsa Groot,…",
+                "…tlhanoo mme e na le kgaolo ya dikilometara di le 34,635 tsa sekwere. == Tsela == Noka ya Gamtoos e bopiwa ke dinoka tsa Groot,…",
+                "…afelong a a omileng.Dikilometara tse makgolo a matlhano tsa sekwere (190 sq mi) tsa Honde Valley kwa lefatsheng la Zimbabwe di…",
+                "…o e leng karolo ya Cadogan Estate. == Thulaganyo == E dira sekwere se se makgwakgwa, se se nang le mabogo a a yang kwa ntlheng…",
+                "…tsege go fitlha go dikilometara di le dikete tse thatao tsa sekwere, go fitlha go dikilometara di le dikete di robabobedi tsa s…"
+            ]
+            },
+        {
+                "word": "disentimetara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…o tswa kwa kgaolong eno. Letlapa la Rosetta le bogodimo jwa disentimetara di le 112,3 kwa ntlheng ya lone e e kwa godimo, bophara jwa…",
+                "…di le 112,3 kwa ntlheng ya lone e e kwa godimo, bophara jwa disentimetara di le 75,7, le bokima jwa disentimetara di le 28,4. E boket…",
+                "…godimo, bophara jwa disentimetara di le 75,7, le bokima jwa disentimetara di le 28,4. E bokete jwa dikilogerama di ka nna 760 (1,680…",
+                "…lefatshe ka bophara mme bogolo jwa tsone bo simolola ka 5.5 disentimetara (2.2 mo) nonyane ya hummingbird ya notshi go ya go 2.8 m (9…",
+                "…to e leng sekgala sa ntlha sa jarata kana gongwe ketane, ka disentimetara e le sekgala sa bobedi). Ka 1267, moitsesaense wa metlha ya…",
+                "…la bone la bonno. == Tlhaloso == Puku e ka nna boleele jwa disentimetara di le masome a robabobedi (boeele jwa di inch di le masome…"
+            ]
+            },
+        {
+                "word": "dimilimetara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…metara, e e leng yuniti ya SI ya boleele. Ka jalo, go na le dimilimetara di le sekete mo mitareng. Go na le dimilimetara di le lesom…",
+                "…o, go na le dimilimetara di le sekete mo mitareng. Go na le dimilimetara di le lesome mo sentimetareng. Millimetara e le nngwe e lek…",
+                "…er di le 1 000 000. E re ka inchi e tlhalosiwa semmuso e le dimilimetara di le 25,4 fela, milimetara e lekana le 5⁄127 (≈ 0.03937) y…",
+                "…ntsi ka palogare ya pula ya ngwaga le ngwaga e e fa gare ga dimilimetara di le sekete le sekete le makgolo a supa le masome a matlha…",
+                "…a savannah a a kgabaganyang melelwane a amogela palogare ya dimilimetara di le makgolo a le robongwe go ya go di le sekete, mme dith…",
+                "…aolo e e dikologileng Letsha la Victoria di amogela pula ya dimilimetara di le makgolo a supa le makgolo a le robedi le masome a mat…"
+            ]
+            },
+        {
+                "word": "dilithara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…o a marataro a metsi ka letsatsi, baagi ba beetswe seelo sa dilithara di le lekgolo ka letsatsi, ba kganelwa go tlhatswa dikoloi,…",
+                "…amo le ne le le kwa tlase mo go sa siamang, se se baka gore dilithara tsa metsi di fokolediwe kwa go tse di masome matlhano motho…",
+                "…supa fa re le mo nakong ya komelelo 1mm wa pula o lekana le dilithara di le didikadike di le makgolo a matlhano mo lefelong leo.…",
+                "…United States, metsi a a nowang mo lolwapeng a selekanyo sa dilithara di le makgolo a mabedi, masome a marataro le bobedi ka lets…",
+                "…orre ba ba dingwaga di feta lesome le borobabobedi a ka nna dilithara di le nne ka letsatsi, fa di le tharo ka letsatsi di nowa k…",
+                "…tla le le okametseng pabalesego ya dijo kwa Yuropa le laela dilithara di le pedi tsa metsi go nowa ke bomme fa borre bone ba tshw…"
+            ]
+            },
+        {
+                "word": "dimaele",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…go tswa kwa lotshitshing lwa Belize. Setlhaketlhake seno se dimaele di le 12 kwa botlhaba go tswa kwa Placencia, dimaele di le…",
+                "…eno se dimaele di le 12 kwa botlhaba go tswa kwa Placencia, dimaele di le 9 go tswa kwa Belize Barrier Reef, mme se na le lebop…",
+                "…e e ka nnang dikhilometara di le makgolo a mabedi (200km) (dimaele di le 124) go tswa kwa toropong ya Francistown , motse ono…",
+                "…e jwa dikilometara di le makgolo a mane,lesome le borataro (dimaele di le 258) le sediba sa kelelo ya metsi sa dikilometara di…",
+                "…sa kelelo ya metsi sa dikilometara di le 14 000 (sekwere sa dimaele di le 5 400). Go tswa foo e tabogela kwa bokonebotlhaba, go…",
+                "…se nang le bogolo jwa diheketara di le pedi, mo e ka nnang dimaele di le 20 kwa bophirima jwa Placencia, kwa Belize.Setlhaketl…"
+            ]
+            },
+        {
+                "word": "diheketara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 64,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…noka ya Oued Leye. Botona jwa yone bo farologana go tswa go diheketara di le dikete tse thano, makgolo a mabedi le masome a matlha…",
+                "…asome a matlhano kwa bokhutlong jwa paka ya dipula go ya go diheketara di le makgolo a robabobedi le masome a supa (diheketara di…",
+                "…go diheketara di le makgolo a robabobedi le masome a supa (diheketara di le 2 100). Ke lefelo le le botlhokwa la go nna la mefuta…",
+                "…o bo seng kana ka sepe le e e se nang tsalo e ntsi. E na le diheketara di le dikete tse nne (4.000) (diheketara di le 9.900) mme e…",
+                "…lo e ntsi. E na le diheketara di le dikete tse nne (4.000) (diheketara di le 9.900) mme e na le lefelo le le nang le metsi la diki…",
+                "…si, le go tshegetsa porojeke ya go nosetsa ya Lower Ogun ya diheketara di le dikete tse tharo (3 000). Go ne ga tsenngwa ditereker…"
+            ]
+            },
+        {
+                "word": "dikhubikimitara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…g leno. Tanka ya kgatelelo ya go kgaoga e na le bokgoni jwa dikhubikimitara di le 4 500 (160 000 cu ft) mme seteišene sa go pompa se na…",
+                "…0 000 cu ft) mme seteišene sa go pompa se na le bokgoni jwa dikhubikimitara di le 1.51 (53 cu ft) ka motsotswana. Kgato ya bobedi ya NS…",
+                "…,ngwaga wa dikete tse pedi le borobabongwe. Letamo le ntsha dikhubikimitara di le dimilione di le masome a mane le bosupa ka ngwaga tsa…",
+                "…a ngwaga tsa metsi a a nowang a phaseje ya Akbou-Béjaïa, le dikhubikimitara di le dimilione di le masome a mane le boraro ka ngwaga tsa…",
+                "…le bokgoni jwa go tshegetsa selekanyo sa metsi a bokete jwa dikhubikimitara di le masome a mabedi le borataro a di dikadike (26 000 000…",
+                "…ka konkoreiti e e nonotshitsweng, mme le na le bokgoni jwa dikhubikimitara di le 78 000 (2 800 000 cu ft). Letamo le tswetswe go fokot…"
+            ]
+            }
+        ],
+    }
+    

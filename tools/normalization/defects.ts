@@ -2647,6 +2647,53 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         "plus-minus": "the sign is ×0 in the corpus and no Santali reading of it is attested. Unlike the "
             + "arithmetic signs above there is nothing to restructure here, because there is nothing there",
     },
+    tn: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE 448 RETAINED SEGMENTS OF `tools/corpus/mined/tn.jsonc` (240 hard +
+        // 200 sample, from a 44,271-paragraph tn.wikipedia dump), with the artifact's whole-corpus `counts`
+        // quoted where they differ, and every refusal is argued in `src/languages/setswana/normalize.ts`.
+        // Setswana has NO FLEURS corpus and espeak does not ship it at all; `concept.ts` returns no tn label
+        // for ANY of these concepts, not even an article title. So the artifact and `attest.ts` against
+        // tn.wikipedia are the whole haystack, and the referee (`epitran tsn-Latn`) is programmatic and
+        // word-only, so it can say nothing about any of this.
+        // ⚠ `minus` IS DELIBERATELY ABSENT FROM THIS BLOCK, so `review.ts --lang tn` STAYS RED on it — the
+        // gn / sn / ln stance. normalize.ts DOES read a negative TEMPERATURE (`−15.0 °C` →
+        // `dikirii tsa Celcius tse di kwa tlase ga lefela di le …`, from tn.wikipedia's own gloss
+        // *"degree Celsius tse di kwa tlase ga lefela di le thataro ntlha botlhano (−6.5 °C)"*), which
+        // covers five of the class's seven instances. What stays unread is the BARE negative — this
+        // corpus's negative LATITUDE, `selekanyo sa -21.95 (21° 56' 60 S)` — and "below zero" is not what a
+        // southern latitude says. The probe is `-5`, a bare number, so it reports DROPPED and is right to.
+        // Omitting a plus is lossless; omitting a minus INVERTS, so this line goes green the day a Setswana
+        // negative-number word is attested, and not before.
+        plus: "the only `+` in the retained text is `UTC+02:00`, and the playbook's fleet-wide finding is "
+            + "that the UTC-offset plus is the one contentful plus that nothing attests in any language. "
+            + "The measurement-plus context (`+30 °C`) does not occur here at all. No Setswana candidate "
+            + "exists to check: `concept.ts` has no tn label for 'addition' or 'plus sign'",
+        "plus-minus": "×0 in the retained text and ×0 in the whole-corpus `signs` cell breakdown. Nothing "
+            + "to read and no candidate word in any source",
+        equals: "×122 whole-corpus in the `arithmetic` cell, and NOT ONE is Setswana arithmetic. Every "
+            + "instance in the retained text is an EasyTimeline chart directive the dump preserved "
+            + "(`PlotArea = left:50 right:20 top:25 bottom:30`, `ScaleMajor = unit:year increment:11000 "
+            + "start:0 gridcolor:linegrey`, `ScaleMinor = …`) or an English book title in a citation "
+            + "(`Food × Mixing + Heat = Baking, New York: Stewart, Tabori & Chang`) or an infobox field "
+            + "(`| currency = Zimbabwe Gold …`). Setswana prose in this corpus contains no equation. This "
+            + "is the gn / nya conclusion from the same evidence: markup, not text",
+        "less-than": "×0 in the retained text. The comparison is written as WORDS throughout — "
+            + "`ka fa tlase ga 5%`, `e e kwa tlase ga`, `go feta` — so there is no sign to read",
+        "greater-than": "×0 in the retained text, for the same reason as `less-than`: the corpus writes "
+            + "`go feta` / `di fetang` in full",
+        divide: "×0 in the retained text. The `/` that does occur is a rate (`km/h`, `m/s`, `m3`), which "
+            + "the shared tier composes with `ka` — never a division",
+        times: "16 matches of the shape and NOT ONE has an attested Setswana reading. Six are RELAY "
+            + "FORMATS (`4×100m relay` ×3, `4 × 400 m relay` ×2, `4x400 relay`), two are scientific-"
+            + "notation mantissas whose superscript the dump lost (`3.9×109 cu ft`, `1×10−6 metre`), one "
+            + "is a product (`360×1024`), one a dental formula (`× 2 = 46-50`), one an English book title, "
+            + "and the rest are my own probe matching `&#x20;` entities. ⚠ THE CORPUS'S OWN GLOSS OF THE "
+            + "COMMONEST CASE IS A PARAPHRASE, NOT A WORD: `4×100m relay` is written out as *batho ba le "
+            + "bane dimmithara dile lekgolo mongwe le mongwe* — 'four people, one hundred metres each' — "
+            + "which no substitution rule can produce. The one candidate, `makgetlho` (*makgetlho a le "
+            + "lesome le borataro*, 'sixteen times'), is the OCCURRENCE word and not the multiplier: a real "
+            + "word whose slot is not this slot, which is the Fula `hakkunde` failure. Nothing is read",
+    },
 };
 
 /**
