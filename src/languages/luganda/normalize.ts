@@ -205,12 +205,44 @@ const KILOGRAM = "kilo";
  */
 const SQUARED = "eza kyebiriga";
 
-/** Words this layer must not double when the sentence already carries them — playbook trap 12. Checked on BOTH
- *  sides of the figure, because a Luganda measure or currency noun normally PRECEDES its number, so a
- *  before-only window would miss nothing and an after-only one would miss everything. */
-function saidNear(full: string, offset: number, end: number, word: string): boolean {
-    return full.slice(Math.max(0, offset - 45), end + 45).includes(word);
+/**
+ * Words this layer must not double when the sentence already carries them — playbook trap 12. Checked on BOTH
+ * sides of the figure, because a Luganda measure or currency noun normally PRECEDES its number, so a
+ * before-only window would miss nothing and an after-only one would miss everything.
+ *
+ * ⚠ THE NEEDLE IS WORD-BOUNDED AND CASE-INSENSITIVE, AND BOTH HALVES ARE REPAIRS RATHER THAN CAUTION. This
+ * started as `String.includes` and failed in both directions on this corpus's own sentences:
+ *   · SUBSTRING — `kilo` is four characters inside `kilometers`, which the header quotes from this corpus
+ *     (`kiri ku kilometers 333 (207 mi)`). `kilometers 333 ne 5kg` matched the guard, so the `kg` was
+ *     consumed and NO unit noun was emitted: the mass read as a bare number. Silently deleting a reading is
+ *     worse than the raw key it was guarding against (playbook trap 10 — a rule that consumes must put back).
+ *   · CASE — every one of these nouns is quoted sentence-initially in its own attestation block (`Kiromita 35`,
+ *     `Kiromita 2 okuva ku nkulungo`, `Kilo 10 okutuuka ku kilo 12`, `| nsimbi = Euro`), so a case-sensitive
+ *     needle misses exactly the capitalized half and doubles it: `Kiromita zaayo 1300 km` → *Kiromita zaayo
+ *     KIROMITA 1300*. Trap 7 — a class narrower than the orthography — arriving in a guard rather than a rule.
+ *
+ * ⚠ AND THE SPELLING VARIANTS ARE PART OF THE NEEDLE, not a nicety. `kiromiita`/`miita`/`sentimiita` are the
+ * maths textbook's long-vowel spellings (recorded at SQUARED above), and a guard that cannot see them doubles
+ * the noun in exactly the article the readings were sourced from.
+ */
+function saidNear(full: string, offset: number, end: number, ...words: string[]): boolean {
+    const alt = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&").replace(/ /gu, "\\s+")).join("|");
+    return new RegExp(`(?<![\\p{L}\\p{M}])(?:${alt})(?![\\p{L}\\p{M}])`, "iu")
+        .test(full.slice(Math.max(0, offset - 45), end + 45));
 }
+
+/** The spelling variants each trap-12 guard must recognise, beyond the word the rule emits. Every one is a
+ *  form attested in this corpus or on lg.wikipedia for the SAME noun — see each declaration above. */
+const ALSO_WRITTEN: Readonly<Record<string, readonly string[]>> = {
+    [KILOMETRE]: ["kiromiita", "kilomita", "kilomiita"],
+    [METRE]: ["mita", "miita"],
+    [CENTIMETRE]: ["sentimiita", "ssentimita"],
+    [MILLIMETRE]: ["milimiita"],
+    [KILOGRAM]: ["kiro"],
+};
+
+/** The needle list for a unit noun: the emitted spelling plus every variant attested for it. */
+const spellings = (noun: string): string[] => [noun, ...(ALSO_WRITTEN[noun] ?? [])];
 
 /**
  * Luganda text normalization. A numbered, ORDER-DEPENDENT sequence; each step states its coupling.
@@ -231,44 +263,31 @@ export function normalizeLuganda(input: string): string {
     //    Format characters are the same story: `zero-width` ×117 whole-corpus, and `\p{Cf}` is already stripped
     //    upstream, so `kku<U+200B>mi` reaches the tokenizer as one word without help from here.
 
-    // 1) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE PAUSE,
-    //    so `1,208,544` came out *emu , bikumi bibiri mu munaana , bikumi bitaano …* — one number read as
-    //    three, with two pauses. `grouped` ×1035 whole-corpus; 55 comma-grouped, 14 space-grouped and 6
-    //    period-grouped figures in the retained text.
-    //    ⚠ THIS LANGUAGE'S WIKI WRITES ALL THREE CONVENTIONS, which is Kirundi's finding (trap 55) and the
-    //    reason each arm is measured separately here rather than inherited from a sibling.
-    //    ⚠ EXACTLY THREE DIGITS PER BLOCK and a head starting 1–9, so a leading-zero run is never a grouped
-    //    thousand and a digit LIST is never claimed — the maths article's *"digito satu (0,1, ne 2)"* and
-    //    *"digito nnya(0,1,2 ne 3)"* are not numbers, and they are the whole of this corpus's `\d+,\d{1,2}`.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
-    //    The space-grouped form: `449 964 km²`, `1 244.7 km²`, `570 074`, `429 600`, `154 000`. Same shape,
-    //    and it must run before step 6, whose unit key sits immediately after the second block.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[  ]\d{3})+(?!\d)/gu, (w) => w.replace(/[  ]/gu, ""));
-    //    ⚠ THE PERIOD ARM IS THE RISKY ONE AND ITS EXPOSURE IS MEASURED RATHER THAN ASSERTED. A period-grouped
-    //    thousand is indistinguishable from a decimal with exactly three fractional digits, and this rule runs
-    //    ABOVE step 7, so a wrong call turns 0.628 into six hundred and twenty-eight. Counted over the retained
-    //    text: the pattern matches 6 strings and ALL SIX are the numeral glossary's own entries —
-    //    `200.000 Mitwalo abiri`, `300.000`, `600.000`, `700.000`, `900.000`, `1.000.000.000.000.000.000
-    //    Kafukunya kamu` — against ZERO three-decimal-place quantities. The 1–9 head is what keeps `0.628`
-    //    (an HDI figure in this corpus) out, and it is the guard doing the work: without it that arm would be
-    //    a defect generator rather than a fix.
-    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => w.replace(/\./gu, ""));
-
-    // 2) THE ENGLISH ORDINAL SUFFIX (`10th` ×2, `4th` ×1 retained; `ordinal-latin` ×5464 whole-corpus). Luganda
+    // 1) THE ENGLISH ORDINAL SUFFIX (`10th` ×2, `4th` ×1 retained; `ordinal-latin` ×5464 whole-corpus). Luganda
     //    writes its own ordinals as WORDS with a class-agreeing prefix — this corpus has *ekyasa eky'ekkumi*,
     //    *omulundi ogwokusatu*, *Omwezi ogwokuna*, *ekifo ekyokubiri* — so a Latin suffix glued to a digit is
     //    always foreign orthography, and it was reaching the phoneme stream as a bare `th` (the artifact scan's
     //    `LEAK RAW-LATIN th ×2`, from *"(4th ed.)"*). Stripping it is the whole fix; no ordinal morphology is
     //    invented, because Luganda's is already spelled out wherever the language means it. Case-insensitive
     //    (trap 7: a capitalized head is ordinary in titles).
-    //    ⚠ AFTER de-grouping, so a grouped ordinal is already one digit run; BEFORE the range rule, whose right
-    //    guard excludes a trailing letter and would otherwise decline `1990th-2000th`.
+    //    ⚠ FIRST, because the range rule's right guard excludes a trailing letter and would otherwise decline
+    //    `1990th-2000th`. A grouped ordinal is unaffected by running above the de-grouping step: `1,000th`
+    //    loses its suffix here and its separators at step 3, in either order.
     s = s.replace(/(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
-    // 3) RANGES → `okutuuka mu` for a year pair, `okutuuka ku` otherwise (see the declaration for both
+    // 2) RANGES → `okutuuka mu` for a year pair, `okutuuka ku` otherwise (see the declaration for both
     //    attestations and for the part-of-speech check). `ranges` ×2078 whole-corpus; 14 four-digit year spans
-    //    and ~20 quantity spans in the retained text. AFTER step 1 (a grouped endpoint must already be one
-    //    digit run) and BEFORE steps 4–7, so neither operand has been rewritten by the time this pairs them.
+    //    and ~20 quantity spans in the retained text. BEFORE steps 4–7, so neither operand has been rewritten
+    //    by the time this pairs them.
+    //    ⚠ THIS RUNS ABOVE THE DE-GROUPING STEP AND MATCHES A GROUPED OPERAND ITSELF, WHICH INVERTS THE ORDER
+    //    EVERY SIBLING LAYER USES, so the reason is worth stating. The playbook's coupling — "digit
+    //    de-grouping first, or a grouping comma is read as clause punctuation" — is about the rules that read
+    //    a number; this rule reads the SEPARATOR ITSELF as evidence. Whether a four-digit run is a YEAR or a
+    //    QUANTITY is exactly what the writer's grouping tells you: nobody writes `1,999` for a year and this
+    //    wiki writes `abantu 1,500` for a population. De-grouping first destroys that evidence and leaves the
+    //    length test to guess — `abantu 1,000-2,000` then read as *okutuuka MU*, the TEMPORAL locative, on a
+    //    population span. So the operand alternation admits the grouped form, the year arm requires the
+    //    absence of a separator, and step 3 cleans up whatever this rule emits.
     //    ⚠ ASCENDING ONLY, and in this corpus that guard is what declines three separate real hazards rather
     //    than being defensive habit:
     //      · FOOTBALL SCORES — `balemagana ne 0–0`, `negubeera 1–0`, `bawangula Aizawl F.C. 4-1`. A score is
@@ -282,19 +301,56 @@ export function normalizeLuganda(input: string): string {
     //    bibliography's DOI `doi:10.1186/1742-4690-3-72` matches at `1742-4690` — ascending, digit-dash-digit,
     //    with a slash rather than a digit in front. The trailing `-` guard also rejects it, so both halves are
     //    doing the job; the ISBN `978-0-7817-6299-1` is rejected by the leading one alone.
-    //    ⚠ A DOT OR COMMA ON EITHER SIDE IS EXCLUDED, so a DECIMAL range is declined (`0.1–0.4 ha`, `77.0–87.8
-    //    °F`): admitting it means re-implementing step 7 inside this rule to keep the operands intact, and the
-    //    same limit is accepted in the sibling layers.
+    //    ⚠ A DOT ON EITHER SIDE IS EXCLUDED, so a DECIMAL range is declined (`0.1–0.4 ha`, `77.0–87.8 °F`):
+    //    admitting it means re-implementing step 7 inside this rule to keep the operands intact, and the same
+    //    limit is accepted in the sibling layers.
+    const GROUPED = String.raw`[1-9]\d{0,2}(?:,\d{3})+|\d+`;
     s = s.replace(
-        /(?<![-+−–—/\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-+−/\d.,\p{L}\p{M}])/gu,
-        (whole, a: string, b: string) => {
-            if (Number(a) >= Number(b)) return whole;
-            // A four-digit pair in the era this wiki writes about is a YEAR span, and a year takes the temporal
-            // locative `mu`; anything else is a quantity and takes `ku`. Both are attested — see the header.
-            const year = a.length === 4 && b.length === 4 && Number(a) >= 1000;
+        new RegExp(
+            String.raw`(?<![-+−–—/\d.,\p{L}\p{M}])(${GROUPED})[ \u00A0]?[-–—][ \u00A0]?(${GROUPED})`
+            + String.raw`(?![-+−/\d.,\p{L}\p{M}])`,
+            "gu",
+        ),
+        (whole: string, a: string, b: string) => {
+            const na = Number(a.replace(/,/gu, "")), nb = Number(b.replace(/,/gu, ""));
+            if (na >= nb) return whole;
+            // A four-digit UNGROUPED pair in the era this wiki writes about is a YEAR span, and a year takes
+            // the temporal locative `mu`; anything else is a quantity and takes `ku`. Both are attested — see
+            // the header. The grouping test is the discriminator this step exists above de-grouping to keep.
+            const year = !a.includes(",") && !b.includes(",") && a.length === 4 && b.length === 4 && na >= 1000;
             return `${a} ${year ? YEAR_TO : NUM_TO} ${b}`;
         },
     );
+
+    // 3) THOUSANDS DE-GROUPING, before every remaining numeric rule: a grouping comma reads as a CLAUSE PAUSE,
+    //    so `1,208,544` came out *emu , bikumi bibiri mu munaana , bikumi bitaano …* — one number read as
+    //    three, with two pauses. `grouped` ×1035 whole-corpus; 55 comma-grouped, 14 space-grouped and 6
+    //    period-grouped figures in the retained text.
+    //    ⚠ THIS LANGUAGE'S WIKI WRITES ALL THREE CONVENTIONS, which is Kirundi's finding (trap 55) and the
+    //    reason each arm is measured separately here rather than inherited from a sibling.
+    //    ⚠ EXACTLY THREE DIGITS PER BLOCK and a head starting 1–9, so a leading-zero run is never a grouped
+    //    thousand and a digit LIST is never claimed — the maths article's *"digito satu (0,1, ne 2)"* and
+    //    *"digito nnya(0,1,2 ne 3)"* are not numbers, and they are the whole of this corpus's `\d+,\d{1,2}`.
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:,\d{3})+(?!\d)/gu, (w) => w.replace(/,/gu, ""));
+    //    The space-grouped form: `449 964 km²`, `1 244.7 km²`, `570 074`, `429 600`, `154 000`. Same shape,
+    //    and it must run before step 6, whose unit key sits immediately after the second block.
+    //    ⚠ THE SECOND MEMBER OF EVERY `[ \u00A0]` CLASS IN THIS FILE IS A NO-BREAK SPACE, WRITTEN AS AN ESCAPE
+    //    ON PURPOSE. It was originally typed as the literal character and had silently collapsed to a DUPLICATE
+    //    ASCII SPACE — `[  ]`, a class that reads as two alternatives and is one. Nothing regressed, because
+    //    `stripMarkup` decodes `&nbsp;` to ASCII above this layer (`core/markup.ts` documents that as a
+    //    deliberate infidelity for exactly this hazard) and the retained text contains U+0020 and U+000A and no
+    //    other whitespace at all — measured, 20,030 spaces, zero U+00A0. It is robustness for a dump that
+    //    preserves the raw character, and an escape cannot degrade invisibly the way the literal did.
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:[ \u00A0]\d{3})+(?!\d)/gu, (w) => w.replace(/[ \u00A0]/gu, ""));
+    //    ⚠ THE PERIOD ARM IS THE RISKY ONE AND ITS EXPOSURE IS MEASURED RATHER THAN ASSERTED. A period-grouped
+    //    thousand is indistinguishable from a decimal with exactly three fractional digits, and this rule runs
+    //    ABOVE step 7, so a wrong call turns 0.628 into six hundred and twenty-eight. Counted over the retained
+    //    text: the pattern matches 6 strings and ALL SIX are the numeral glossary's own entries —
+    //    `200.000 Mitwalo abiri`, `300.000`, `600.000`, `700.000`, `900.000`, `1.000.000.000.000.000.000
+    //    Kafukunya kamu` — against ZERO three-decimal-place quantities. The 1–9 head is what keeps `0.628`
+    //    (an HDI figure in this corpus) out, and it is the guard doing the work: without it that arm would be
+    //    a defect generator rather than a fix.
+    s = s.replace(/(?<![\d.,])([1-9]\d{0,2})(?:\.\d{3})+(?!\d)/gu, (w) => w.replace(/\./gu, ""));
 
     // 4) PERCENT → `N ku kikumi`, the one POSTPOSED reading in this layer. `percent` ×301 whole-corpus, 61 in
     //    the retained text.
@@ -308,8 +364,13 @@ export function normalizeLuganda(input: string): string {
     //    *"Abantu 75% ku kikumi"*, *"Abantu 10% ku buli kikumi"*, *"25 % (kisomwa ebitundu abiri mu bitaano ku
     //    kikumi)"*. Emitting into those would say "per hundred" twice.
     //    ⚠ THE LEFT GUARD IS `(?<![\p{L}\p{M}])` ON THE DIGIT so this cannot bite into a word ending in a digit.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[  ]?%/gu, (w, n: string, off: number, all: string) =>
-        saidNear(all, off, off + w.length, "kikumi") ? n : `${n} ${PERCENT}`);
+    //    ⚠ THE NEEDLE IS THE COLLOCATION, NOT `kikumi` ALONE, AND THAT IS A REPAIR. `kikumi` is this engine's
+    //    OWN cardinal for 100 (`luganda.jsonc`), so keying the guard on the bare word suppressed the reading
+    //    whenever a hundred was spelled out anywhere in the window: `abantu kikumi mu ataano ne 25%` lost the
+    //    sign outright. On a wiki that routinely writes a figure beside its spelled-out form that is not an
+    //    edge case, and the failure is silent — trap 12's guard eating the very reading it exists to protect.
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00A0]?%/gu, (w, n: string, off: number, all: string) =>
+        saidNear(all, off, off + w.length, PERCENT, "ku buli kikumi") ? n : `${n} ${PERCENT}`);
 
     // 5) CURRENCY — the noun BEFORE its amount, this language's order (see the header). `currency` ×80
     //    whole-corpus; 27 `$` (18 of them `US$`), 2 `€`, 1 `£` in the retained text.
@@ -320,13 +381,13 @@ export function normalizeLuganda(input: string): string {
     //    *"obukadde bwa ddoola US$29"*, *"obukadde bwa ddoola za Amerika $1.16"*, *"Obukadde bwa Doola US$10.5M"*,
     //    *"n'asasulwa pawundi £30"*. In every one of those the correct reading DROPS the sign.
     const NAMED_DOLLAR = /d+oola|dolla|doola/iu;
-    s = s.replace(/(?<![\p{L}\p{M}])US[  ]?\$[  ]?(?=\d)/giu, (w, off: number, all: string) =>
+    s = s.replace(/(?<![\p{L}\p{M}])US[ \u00A0]?\$[ \u00A0]?(?=\d)/giu, (w, off: number, all: string) =>
         NAMED_DOLLAR.test(all.slice(Math.max(0, off - 45), off + w.length + 45)) ? "" : `${DOLLAR} `);
-    s = s.replace(/\$[  ]?(?=\d)/gu, (w, off: number, all: string) =>
+    s = s.replace(/\$[ \u00A0]?(?=\d)/gu, (w, off: number, all: string) =>
         NAMED_DOLLAR.test(all.slice(Math.max(0, off - 45), off + w.length + 45)) ? "" : `${DOLLAR} `);
-    s = s.replace(/€[  ]?(?=\d)/gu, (w, off: number, all: string) =>
+    s = s.replace(/€[ \u00A0]?(?=\d)/gu, (w, off: number, all: string) =>
         saidNear(all, off, off + w.length, EURO) ? "" : `${EURO} `);
-    s = s.replace(/£[  ]?(?=\d)/gu, (w, off: number, all: string) =>
+    s = s.replace(/£[ \u00A0]?(?=\d)/gu, (w, off: number, all: string) =>
         saidNear(all, off, off + w.length, POUND) ? "" : `${POUND} `);
 
     // 6) UNITS — the measure noun FIRST, without exception in either source (see the header).
@@ -337,16 +398,16 @@ export function normalizeLuganda(input: string): string {
     //    this corpus writes both and the ASCII `2` is the worse of the two: it is not a visible leak, it is a
     //    NUMBER, so `580,367 km2` read *"…musanvu km bbiri"* — trap 53's Igbo defect exactly.
     const km2 = (w: string, n: string, off: number, all: string): string =>
-        saidNear(all, off, off + w.length, KILOMETRE) ? n : `${KILOMETRE} ${SQUARED} ${n}`;
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[  ]?km[²2](?![\p{L}\p{M}\d])/gu, km2);
+        saidNear(all, off, off + w.length, ...spellings(KILOMETRE)) ? n : `${KILOMETRE} ${SQUARED} ${n}`;
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00A0]?km[²2](?![\p{L}\p{M}\d])/gu, km2);
     //    ⚠ THE BARE `km` ARM IS ROBUSTNESS, AND THAT IS SAID RATHER THAN IMPLIED (trap 22). Digit-adjacent `km`
     //    with nothing after it is ×0 in the retained text — every occurrence is `km²`, `km2` or `km/s` — so this
     //    arm repairs no measured defect today. It is here because `kiromita` is the best-attested unit noun in
     //    the language (×61/20) and `km` is a two-letter key with no Luganda word to collide with. The `/` in the
     //    right guard is what keeps `299,792 km/s` out: there is no rate idiom (header).
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[  ]?km(?![\p{L}\p{M}\d²³/])/gu,
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+(?:\.\d+)?)[ \u00A0]?km(?![\p{L}\p{M}\d²³/])/gu,
         (w, n: string, off: number, all: string) =>
-            saidNear(all, off, off + w.length, KILOMETRE) ? n : `${KILOMETRE} ${n}`);
+            saidNear(all, off, off + w.length, ...spellings(KILOMETRE)) ? n : `${KILOMETRE} ${n}`);
     //    `cm` ×11 is the largest unit class in this corpus (*"obugulumivu bwa 10 cm"*, *"9” = 23 cm"*,
     //    *"mumabanga ga 30 ku 30 cm"*, *"ekinnya sima 30cm"*), and it was reaching the IPA as /cm/ — ⟨c⟩ is a
     //    REAL Luganda grapheme (the palatal stop), so this is trap 56's silent class rather than a visible leak.
@@ -354,9 +415,9 @@ export function normalizeLuganda(input: string): string {
     //    where those two readings come from.
     for (const [key, noun] of [["cm", CENTIMETRE], ["mm", MILLIMETRE], ["kg", KILOGRAM]] as const)
         s = s.replace(
-            new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:\\.\\d+)?)[  ]?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
+            new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+(?:\\.\\d+)?)[ \\u00A0]?${key}(?![\\p{L}\\p{M}\\d²³/])`, "gu"),
             (w, n: string, off: number, all: string) =>
-                saidNear(all, off, off + w.length, noun) ? n : `${noun} ${n}`);
+                saidNear(all, off, off + w.length, ...spellings(noun)) ? n : `${noun} ${n}`);
     //    ⚠ THE ONE-LETTER `m` KEY IS SPLIT AND NARROWED, ON A COUNTER-EXAMPLE THIS CORPUS ACTUALLY CONTAINS —
     //    which is the strongest form of trap 46's warning, because it is not a hypothetical version string.
     //    All four digit-adjacent `m` in the retained text:
@@ -371,9 +432,16 @@ export function normalizeLuganda(input: string): string {
     //    ⚠ The same shape also gives the version guard for free: `802.11m` cannot match, because the operand
     //    must be an integer that does not begin inside a number (trap 52 — a lookbehind rejects a POSITION, so
     //    the engine would otherwise simply restart at `11m`).
-    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+)[  ]m(?![\p{L}\p{M}\d.,²³/])/gu,
+    //    ⚠ AND ITS RIGHT GUARD MUST NOT CARRY `.` OR `,`, WHICH IS THE SAME MISTAKE STEP 7 DOCUMENTS ONE
+    //    SCREEN DOWN. The operand is already an integer with a mandatory space, so `1.5m` and `802.11m` are
+    //    excluded by the LEFT side alone; adding `.`/`,` to the right side bought nothing and declined every
+    //    CLAUSE-FINAL metre figure instead — `misinde egya 800 m.` came back untouched, leaving a bare `m` in
+    //    the phoneme stream, which is precisely the leak this step exists to close. The sibling `cm`/`mm`/`kg`
+    //    arms above never carried it, so this arm was the odd one out and the corpus's sentence-final `30 cm.`
+    //    read correctly throughout. A guard is only free when it rejects something.
+    s = s.replace(/(?<![\d.,\p{L}\p{M}])(\d+)[ \u00A0]m(?![\p{L}\p{M}\d²³/])/gu,
         (w, n: string, off: number, all: string) =>
-            saidNear(all, off, off + w.length, METRE) ? n : `${METRE} ${n}`);
+            saidNear(all, off, off + w.length, ...spellings(METRE)) ? n : `${METRE} ${n}`);
 
     // 7) DECIMALS, LAST of the numeric rules — steps 3 to 6 all need their number intact. The separator was
     //    reaching `clausePunctuation` and becoming a SENTENCE BREAK inside a number: `1 244.7 km²` read

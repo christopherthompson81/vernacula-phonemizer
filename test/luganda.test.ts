@@ -167,3 +167,48 @@ describe("Luganda text normalization — noun-first units, `ku kikumi`, `okutuuk
         expect(phonemize("20 °C", "lg").trim()).toBe("amakumi abiɾi c");
     });
 });
+
+// ⚠ THE GUARD BRANCHES, PINNED SEPARATELY BECAUSE THE CORPUS CANNOT SEE THEM. Every case below is a defect
+// that shipped in the first cut of this layer and that the corpus diff scored at 0/445 changed — the shapes
+// simply do not occur in the retained text. Playbook trap 8: zero corpus instances is not evidence of
+// correctness, and trap 13: pin the rule's branches, not the corpus's instances.
+describe("Luganda normalization — the trap-12 guards and the shapes the corpus never writes", () => {
+    test("a guard needle is WORD-BOUNDED — `kilo` must not match inside `kilometers`", () => {
+        // this corpus writes `kiri ku kilometers 333 (207 mi)`; a substring needle consumed the `kg` and
+        // emitted NO unit noun, so the mass read as a bare number — silent deletion, worse than the raw key
+        expect(normalizeLuganda("kilometers 333 ne 5kg")).toBe("kilometers 333 ne kilo 5");
+        // and it still suppresses when the noun really is there
+        expect(normalizeLuganda("Kilo 10 ne 5kg")).toBe("Kilo 10 ne 5");
+    });
+
+    test("a guard needle is CASE-INSENSITIVE and knows the long-vowel spellings", () => {
+        // every one of these nouns is quoted sentence-initially in its own attestation block
+        expect(normalizeLuganda("Kiromita zaayo 1300 km")).toBe("Kiromita zaayo 1300");
+        expect(normalizeLuganda("Euro 134 oba €134")).toBe("Euro 134 oba 134");
+        // the maths textbook's spelling — the article the squared reading was sourced from
+        expect(normalizeLuganda("kiromiita 20 ne 30 km")).toBe("kiromiita 20 ne 30");
+    });
+
+    test("the percent guard keys on the COLLOCATION — `kikumi` alone is this engine's own 100", () => {
+        expect(normalizeLuganda("abantu kikumi mu ataano ne 25%")).toBe("abantu kikumi mu ataano ne 25 ku kikumi");
+        // the real redundancies still suppress
+        expect(normalizeLuganda("Abantu 75% ku kikumi")).toBe("Abantu 75 ku kikumi");
+        expect(normalizeLuganda("ebitundu 8 ku buli kikumi")).toBe("ebitundu 8 ku buli kikumi");
+    });
+
+    test("a clause-final metre figure still reads — the `m` right guard carries no `.` or `,`", () => {
+        expect(normalizeLuganda("misinde egya 800 m.")).toBe("misinde egya mmita 800.");
+        expect(normalizeLuganda("yadduka 100 m, era")).toBe("yadduka mmita 100, era");
+        // and the counter-example and the version string are still excluded by the LEFT side
+        expect(normalizeLuganda("(1.5m)")).toBe("(1.5m)");
+        expect(normalizeLuganda("802.11m")).toBe("802.11m");
+    });
+
+    test("the year arm reads the GROUPING, which is why ranges run above de-grouping", () => {
+        // an ungrouped four-digit pair is a year span — the temporal locative
+        expect(normalizeLuganda("olwa 1775–1783")).toBe("olwa 1775 okutuuka mu 1783");
+        // a GROUPED one is a quantity, and de-grouping first would have destroyed the only evidence
+        expect(normalizeLuganda("abantu 1,000-2,000 mu kibuga")).toBe("abantu 1000 okutuuka ku 2000 mu kibuga");
+        expect(normalizeLuganda("1,500–2,000 mmita")).toBe("1500 okutuuka ku 2000 mmita");
+    });
+});
