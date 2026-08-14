@@ -121,3 +121,52 @@ describe("the two shapes, asserted directly", () => {
         expect(phonemize("UNESCO", "ja")).not.toBe(phonemize("Unesco", "ja"));
     });
 });
+
+/**
+ * ⚠ …AND IT IS NOT DELETED EITHER — the OTHER half of the same defect, which the sweep above cannot see.
+ *
+ * Keeping `Cañitas` in one piece says nothing about whether the ⟨ñ⟩ inside it was READ. A g2p with no rule for
+ * a letter advances one character, and that branch is a silent deletion: `café` → *kaf, `Málaga` → *mlaɡa,
+ * `bâton` → *btɔn, `enquête` → *ɛnkʋtə. Nothing vanishes at the WORD level, so this file's fragmentation sweep,
+ * the leak classes and the differential DROP test are all blind to it — 12 engines were doing it.
+ *
+ * ⚠ MEASURED DIFFERENTIALLY, NEVER AGAINST AN EXPECTED IPA STRING, because the right reading is a per-language
+ * question and this test has no business having an opinion on it. The accented frame is compared with the SAME
+ * frame carrying the base letter: whatever the engine makes of ⟨kek⟩, ⟨kék⟩ must not come out SHORTER. That
+ * catches a dropped segment in any language without asserting what the segment should have been.
+ *
+ * ⚠ A ROUTING ENGINE IS EXEMPTED BY MEASUREMENT, NOT BY A LIST. id/ms/om/hak and the Indic engines hand a token
+ * carrying a diacritic to the injected English reader, which is a deliberate design and legitimately reads the
+ * frame differently (English folds ⟨ñ⟩ to ⟨n⟩ and then says ⟨kn⟩ = /n/, as in *know*). The exemption is
+ * "this engine's answer IS English's answer", so a list of routers cannot go stale — and an engine that stops
+ * routing stops being exempt.
+ */
+describe("a letter with no rule is READ, not deleted", () => {
+    /** Accented letter in a fixed frame, against the same frame with its base letter. */
+    const FRAMES: [string, string][] = [
+        ["kék", "kek"], ["kák", "kak"], ["kók", "kok"], ["kàk", "kak"], ["kèk", "kek"], ["kâk", "kak"],
+        ["kôk", "kok"], ["kïk", "kik"], ["kük", "kuk"], ["kñk", "knk"], ["kçk", "kck"],
+    ];
+    const segments = (s: string): number => [...s.replace(/[ˈˌ.\s]/gu, "")].length;
+
+    test("⚠ the fleet-wide sweep — every code the registry serves", () => {
+        const deleting: string[] = [];
+        for (const { code } of registeredCodes()) {
+            for (const [accented, plain] of FRAMES) {
+                let acc: string, base: string, en: string;
+                try {
+                    acc = phonemize(accented, code);
+                    base = phonemize(plain, code);
+                    en = phonemize(accented, "en");
+                } catch {
+                    continue; // engine cannot take a bare Latin word at all; not this defect
+                }
+                if (base.trim() === "") continue; // the frame itself is unreadable here — says nothing
+                if (acc === en) continue; // routed to the injected reader (see the note above)
+                if (segments(acc) < segments(base))
+                    deleting.push(`${code}: ${accented} → ${acc}   vs   ${plain} → ${base}`);
+            }
+        }
+        expect(deleting, "engines that DELETE an accented letter rather than reading it").toEqual([]);
+    });
+});

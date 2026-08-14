@@ -6,6 +6,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // All French DATA — letter inventory, oral/nasal vowel-multigraph tables, yod groups, sounded-final set — is
 // consolidated in french.jsonc; here we bind it to the local names the scanning algorithm below uses.
@@ -386,9 +387,19 @@ export function toIpa(word: string): string {
                 out.push("œ", i);
                 i++;
                 break;
-            default:
+            default: {
+                // ⚠ NOT SILENTLY. Everything French has an opinion about was matched above (including the
+                // accents French WRITES — à â é è ê î ï ô ù û ü œ are all vowel letters or vowel groups), so
+                // what reaches here is a letter from someone else's orthography inside a name: `Málaga` was
+                // *mlaɡa, `Taínos` *tanos, `Cañitas` *kaita. `latinPhone` reads the letter the marks sit on,
+                // and gives ⟨ñ⟩ its own /ɲ/ — a phoneme French already has and spells ⟨gn⟩, so folding it to
+                // /n/ here would throw away a sound this language can pronounce. Non-letters (the apostrophe
+                // this branch also catches) return `undefined` and are still skipped.
+                const ph = latinPhone(c, { initial: i === 0 });
+                if (ph !== undefined) out.push(ph, i);
                 i++;
-                break; // unknown/apostrophe
+                break;
+            }
         }
     }
 

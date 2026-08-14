@@ -7,6 +7,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // Accent classes + letter sets are DATA (portuguese.jsonc).
 const ACCENTED = MANIFEST.accents.toBase; // accented vowel → base letter
@@ -60,10 +61,62 @@ function nasalizedHere(w: string, vi: number): boolean {
     return after === "" || !isV(after); // m/n before a consonant or word-end → nasal coda
 }
 
+/**
+ * Every letter this scan has a rule for — Portuguese's own alphabet, its five accents, and ⟨ñ⟩ (below).
+ * ⚠ ⟨ü⟩ IS IN IT because `vowelLetters` is: the trema survived in Brazilian spelling until 2009 and the corpus
+ * still writes it.
+ */
+const KNOWN_LETTERS = new Set([...VOWELS, ..."bcçdfghjklmnñpqrstvwxz"]);
+
+/**
+ * ⚠ ⟨y⟩ IS THE ONE ASCII LETTER THIS SCAN HAS NO CASE FOR, and it is a VOWEL letter in the words Portuguese
+ * borrows it in — so it folds to ⟨i⟩, the letter Portuguese itself uses for that sound (the 1911/1943
+ * orthographies replaced Greek-derived ⟨y⟩ with ⟨i⟩ throughout: *yoga* → ioga, *Yeda* → Ieda). That puts it
+ * through the ordinary ⟨i⟩ machinery, including the glide rule before another vowel:
+ *
+ *     Vichy → viʃi     curry → kuʁi     Madhya → madjɐ      (all three were *viʃ, *kuʁ, *madɐ)
+ *
+ * ⚠ NOT LEFT TO THE SHARED TABLE, which says /j/ — the consonantal value, right for German and English and
+ * wrong for every Portuguese reading of the letter. `curry` → *kuʁj is a worse answer than the deletion it
+ * replaces, which is the Chichewa ⟨cm⟩ → "kilometres" lesson: a fallback that fires where the language does
+ * have an opinion is not an improvement.
+ */
+const FOREIGN_LETTER: Readonly<Record<string, string>> = { y: "i" };
+
+/**
+ * ⚠ A LETTER FROM SOMEONE ELSE'S ORTHOGRAPHY IS READ AS ITS BASE, NOT DELETED.
+ *
+ * The scan's `default:` used to drop anything it had no case for, and a foreign vowel is exactly that: ⟨è⟩ and
+ * ⟨ï⟩ are not Portuguese accents, so `naïve` came out *nˈavɨ* and `Klöcker` *kɫkkˈeɾ* — a syllable short, with
+ * two consonants welded together. Folding the marks away first makes each one the vowel it sits on, and the
+ * whole vowel machinery downstream (nasalization lookahead, the falling-diphthong test, reduction, stress)
+ * then sees an ordinary vowel instead of a character it must skip.
+ *
+ * ⚠ ONE CHARACTER FOR ONE CHARACTER, so every index, lookahead and `atEnd` test below still refers to the same
+ * position it did before. A letter with no decomposition (ß, æ, ð) is left alone here and handled at the
+ * `default:` branch, which is also where a non-letter goes.
+ *
+ * ⚠ AND ⟨ñ⟩ IS EXCLUDED FROM THE FOLD ON PURPOSE — it is in `KNOWN_LETTERS` and has its own case. Portuguese
+ * has /ɲ/ and writes it ⟨nh⟩, so reading the Spanish letter as /n/ would discard a sound this language makes
+ * daily (`Cañitas`, `señor`, `El Niño`). Same decision as Tagalog's ⟨ñ⟩, pinned in test/latin-tokenizers.
+ */
+function foldForeignLetters(w: string): string {
+    if ([...w].every((c) => KNOWN_LETTERS.has(c))) return w; // the overwhelmingly common case: no work
+    return [...w]
+        .map((c) => {
+            if (KNOWN_LETTERS.has(c)) return c;
+            const named = FOREIGN_LETTER[c];
+            if (named !== undefined) return named;
+            const b = c.normalize("NFD").replace(/\p{M}+/gu, "");
+            return FOREIGN_LETTER[b] ?? (b.length === 1 && KNOWN_LETTERS.has(b) ? b : c);
+        })
+        .join("");
+}
+
 /** Scan a lowercased word into segments (consonants realized in place; vowels get stressed-quality IPA).
  *  `dialect` only affects the word-final -em nucleus (EP [ɐ̃j̃] vs BP [ẽj̃]); everything else is shared. */
 export function toSegments(word: string, dialect: "ep" | "bp" = "ep"): Seg[] {
-    const w = word.toLowerCase();
+    const w = foldForeignLetters(word.toLowerCase());
     const n = w.length;
     const segs: Seg[] = [];
     let i = 0;
@@ -201,6 +254,11 @@ export function toSegments(word: string, dialect: "ep" | "bp" = "ep"): Seg[] {
             case "ç":
                 pushC(segs, "s");
                 break;
+            case "ñ":
+                // Not a Portuguese letter, but Portuguese has the sound and spells it ⟨nh⟩ — so the Spanish
+                // names its own corpus quotes (`Cañitas`) read with the palatal rather than losing it.
+                pushC(segs, "ɲ");
+                break;
             case "d":
                 pushC(segs, "d");
                 break;
@@ -270,8 +328,13 @@ export function toSegments(word: string, dialect: "ep" | "bp" = "ep"): Seg[] {
             case "z":
                 pushC(segs, "z");
                 break; // coda → ʃ/ʒ downstream
-            default:
-                break; // skip unknown
+            default: {
+                // What is left has no decomposition to fold (ß, æ, ð, þ) — the shared table names the phone
+                // each of those letters denotes. Non-letters return `undefined` and are still skipped.
+                const ph = latinPhone(c, { initial: i === 0 });
+                if (ph !== undefined) pushC(segs, ph);
+                break;
+            }
         }
         i++;
     }

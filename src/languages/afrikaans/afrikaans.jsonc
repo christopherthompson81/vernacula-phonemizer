@@ -33,7 +33,16 @@
         "sch": "sk", "chr": "kr", "ng": "ŋ", "nk": "ŋk",
         "b": "b", "d": "d", "f": "f", "g": "χ", "h": "ɦ", "j": "j", "k": "k",
         "l": "l", "m": "m", "n": "n", "p": "p", "q": "k", "r": "r", "s": "s", "t": "t",
-        "v": "f", "w": "v", "x": "ks", "z": "z"
+        "v": "f", "w": "v", "x": "ks", "z": "z",
+        // ⚠ TWO LETTERS AFRIKAANS DOES NOT WRITE BUT DOES BORROW, and which the scan used to DELETE
+        // (garçon → *χarɔn, Cañitas → *kɑːitas). Both are attested on af.wikipedia in running Afrikaans
+        // prose, not only inside quoted foreign titles: ⟨ç⟩ in garçon ×15 and Provençaalse ×3, ⟨ñ⟩ in
+        // piñata ×4 ("tradisionele gebruike soos vir 'n piñata").
+        // ⟨ç⟩ = [s], its value in the French and Portuguese words Afrikaans takes it from — NOT the [t͡ʃ] of
+        // Turkish/Albanian, which is the shared table's default and would be wrong for every attestation here.
+        // ⟨ñ⟩ = ⟨nj⟩, the sequence this engine already emits for the palatal nasal (Spanje → spanjə). Not [ɲ]:
+        // Afrikaans has no such phone anywhere else in this table, and not [n], which discards the palatal.
+        "ç": "s", "ñ": "nj"
     },
 
     // Bare single vowels — the engine picks long (open syllable) or short (closed) per the length rule.

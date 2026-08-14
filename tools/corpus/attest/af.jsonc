@@ -21,6 +21,117 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "bâbâ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "señor",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…página más 1996: La Fichera Mas Rapida Del Oeste 2 1997: El señor de los cielos 1998: El bronko negro 1998: El señor de los c…",
+                "…1997: El señor de los cielos 1998: El bronko negro 1998: El señor de los cielos II 1998: El señor de los cielos III 2000: La…",
+                "…8: El bronko negro 1998: El señor de los cielos II 1998: El señor de los cielos III 2000: La camioneta gris 2 2004: Los más b…",
+                "…0). === Televisie === Genio y figura (1994–1995, Antena 3); Señor alcalde (1998; Telecinco) ¡Ala... Dina! (2000; TVE); El bur…",
+                "…g of the Rodeo 1929: Modern Love 1929: Red Hot Rhythm 1929: Señor Americano 1930: King of Jazz 1930: Safety in Numbers 1930:…",
+                "…Sir Lumberjack 1926: We're in the Navy Now 1926: The Yankee Señor 1927: Fireman, Save My Child 1928: Love Over Night 1928: Ma…"
+            ]
+            },
+        {
+                "word": "piñata",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…8: New Amsterdam 2015: Quality Time 2017: The Adventures of Piñata and Skyla === Video's === 2007: She Likes Girls 2014: Willo…",
+                "…mate Muscle: The Kinnikuman Legacy 2003: Sonic X 2006: Viva Piñata 2008: Yu-Gi-Oh! 5D's === Video's === 1996: Battle Arena Tos…",
+                "…s 2004: F-Zero GP Legend 2005: G.I. Joe: Sigma 6 2006: Viva Piñata 2006: Chaotic 2008: Yu-Gi-Oh! 5D's === Televisierolprente =…",
+                "…ne papiersamestelling, en tradisionele gebruike soos vir 'n piñata - 'n versierde figuur of diertjie wat met lekkergoed gevul…"
+            ]
+            },
+        {
+                "word": "garçon",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…helter (2014). == Filmografie == === Rolprente === 1995: Le garçon s'appelait Apache 1997: Journal de Rivesaltes 1941-1942 200…",
+                "…81: L'atterrissage 1983: Bon anniversaire Juliette 1985: Un garçon de France 1991: Mamie by Night: Marathon Girl 1992: Le secr…",
+                "…ut ça ne vaut pas l'amour 1931: Gloria 1931: La fille et le garçon 1932: He 1933: Don Quichotte 1933: Don Quichotte 1933: Le c…",
+                "…Liebe! 1931: Princesse, à vos ordres! 1931: La fille et le garçon 1931: Le congrès s'amuse 1931: Calais-Douvres 1932: A Blond…",
+                "…Tender Age 1965: The Lace Wars 1965: The Wise Guys 1966: Un garçon, une fille. Le dix-septième ciel 1967: The Thief of Paris 1…",
+                "…r David? 1982: A Captain's Honor 1983: Order of Death 1983: Garçon! 1983: Les mots pour le dire 1983: Stella 1983: Via degli s…"
+            ]
+            },
+        {
+                "word": "Provençaalse",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Die term sonnet is afgelei van die Provençaalse woord \"sonet\" en die Italiaanse woord \"sonetto\"; beide bete…",
+                "…, terwyl die bundel ook in gesprek tree met die Middeleeuse Provençaalse digter Betran de Born. Die gedigte oor die erotiek en liefd…",
+                "…oop voor. Die eerste literêre Italiaanse poësie is deur die Provençaalse liefdesliriek geïnspireer en het omstreeks 1220 by die Sici…"
+            ]
+            },
+        {
+                "word": "Cañitas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…s-straat geniet. Die Plaza Cortázar, Palermo Hollywood, Las Cañitas en Recoleta is gebiede waar die restourante hulle op die me…"
+            ]
+            },
+        {
+                "word": "façade",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Haydn, Mendelssohn en ander. Sy vroegste werk van statuur, Façade, is geskryf in samewerking met Edith Sitwell en het aan hom…",
+                "…l. Van sy belangrikste werke is die begeleidende musiek vir Façade, 'n reeks gedigte deur Edith Sitwell, die kantate Belshazza…",
+                "…Orb and Sceptre. == Komposisies == === Orkeswerke === 1922 Façade, An Entertainment, 1925 Portsmouth Point, ouverture 1926 Si…",
+                "…tainment, 1925 Portsmouth Point, ouverture 1926 Siesta 1926 Façade, suite no.1 Polka Valse Swiss jodelling song Tango - Paso d…",
+                "…Finale: Brioso et ardentemente, vivacissimo, maestoso 1938 Façade, suite no.2 Fanfare: Vivo Scotch rhapsody: Molto vivace Cou…",
+                "…Sceptre, koronasiemars 1956 Johannesburg Festival Overture Façade Spitfire, Prelude and Fugue === Teaterwerke === ==== Opera'…"
+            ]
+            },
+        {
+                "word": "enquête",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…pour deux 2001: La juge Beaulieu 2005: Le détective: Contre-enquête 2011: Adèle's Choice 2017: Fleur de Cactus == Eksterne skak…",
+                "…: End of the World 1931: Pour un soir..! 1931: Autour d'une enquête 1931: Y'en a pas deux comme Angélique 1932: Baroud 1932: He…",
+                "…r Bégonia 1937: La belle de Montparnasse 1937: La treizième enquête de Grey 1937: La chanson du souvenir 1938: L'avion de minui…",
+                "…ssassinations 1992: The Marilyn Files 2000: Marilyn: contre enquête sur une mort suspecte 2003: Hollywood Confidential 2005: Wh…",
+                "…tmartre 1931: Vacances 1931: Atout coeur 1931: Autour d'une enquête 1931: Ma tante d'Honfleur 1931: Gagne ta vie 1931: Mon coeu…",
+                "…29: Mascottchen 1929: Trois jeunes filles nues 1930: Contre-enquête 1930: Une femme a menti 1930: Lopez, le bandit 1931: Nuit d…"
+            ]
+            },
+        {
                 "word": "mnr",
                 "verdict": "attested",
                 "bounded": true,

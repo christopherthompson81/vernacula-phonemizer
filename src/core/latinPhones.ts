@@ -139,6 +139,13 @@ export interface PhoneOpts {
     includeH?: boolean;
 }
 
+/** The table proper, with the two positional rows applied — no fallback. */
+function tablePhone(c: string, opts: PhoneOpts): string | undefined {
+    if (c === "h") return opts.includeH === true ? LATIN_PHONE.h : undefined;
+    if (c === "x" && opts.initial === true) return X_INITIAL;
+    return LATIN_PHONE[c];
+}
+
 /**
  * The phone for `ch`, or `undefined` if this table has nothing to say — which is the correct answer for anything
  * that is not a letter.
@@ -146,11 +153,41 @@ export interface PhoneOpts {
  * ⚠ NOT FOR COMBINING MARKS, and the guard is here rather than left to each caller: the scan branch this is
  * consulted from also swallows stray combining marks, and a mark is not a segment. Giving one a phone would invent
  * a sound where the orthography has a diacritic the engine has already handled or declined.
+ *
+ * ## ⚠ THE LAST RESORT — A MARK IS DROPPED BEFORE THE LETTER IS
+ *
+ * The rows above are precomposed letters that are their own PHONEME somewhere (`ñ`, `ç`, `ß`, `ł`). They can
+ * never cover the open set: `é á ó à è â ô ï í ú ã õ ë ǎ ...` is thousands of code points, and an engine that
+ * fell through on one deleted it —
+ *
+ *     ki  café → ɕaf      mos café → kaf      umb naïve → nave      kam Márquez → mkez
+ *
+ * so before returning `undefined` this decomposes and looks the BASE letter up. `é` → `e`, `ï` → `i`, `ǹ` → `n`.
+ *
+ * ⚠ IT IS A LAST RESORT AND THE ORDER IS THE WHOLE POINT. The table is consulted on the precomposed character
+ * FIRST, so a letter with a phonemic identity of its own keeps it — `ñ` stays /ɲ/ and does not become /n/, `ç`
+ * stays /t͡ʃ/, `ü` stays /y/. Only a character the table has never heard of is stripped to its base. Folding
+ * first would silently destroy four rows this module was written to protect.
+ *
+ * ⚠ AND IT DOES NOT DECIDE WHAT THE LETTER MEANS IN THE HOST LANGUAGE, because it cannot: it fires only where
+ * the language said nothing (see the placement note at the top of this file). The claim it makes is the weak,
+ * defensible one — an `é` is at worst an `e`, and reading it as an `e` is nearer the writer's intent than
+ * deleting a vowel and welding two syllables into one. A language for which `é` is its OWN letter (Akan,
+ * Yoruba, Vietnamese) has a rule for it and never arrives here.
+ *
+ * ⚠ NOT A NATIVISER, EITHER. `hostWord.foldLatinToBase` rewrites the SPELLING before the g2p runs and is
+ * conditional on the engine's inventory; this returns a PHONE at the fall-through and has no opinion on
+ * spelling. An engine that has a nativiser rarely reaches this at all.
  */
 export function latinPhone(ch: string, opts: PhoneOpts = {}): string | undefined {
     if (/\p{M}/u.test(ch)) return undefined;
     const c = ch.toLowerCase();
-    if (c === "h") return opts.includeH === true ? LATIN_PHONE.h : undefined;
-    if (c === "x" && opts.initial === true) return X_INITIAL;
-    return LATIN_PHONE[c];
+    const direct = tablePhone(c, opts);
+    if (direct !== undefined) return direct;
+    // Last resort: the letter under the marks. NFD of a precomposed letter is exactly one base + its marks, so
+    // this is a single character; anything with no decomposition (`ə`, `ɨ`, a digit, punctuation) is unchanged
+    // by the strip and returns `undefined` as before.
+    const base = c.normalize("NFD").replace(/\p{M}+/gu, "");
+    if (base === c || base.length !== 1) return undefined;
+    return tablePhone(base, opts);
 }

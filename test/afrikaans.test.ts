@@ -132,7 +132,12 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         const voiceless = new Set(MANIFEST.voicelessPhones);
         const trigger = Object.keys(MANIFEST.fixed)
             .filter((k) => k.length === 1 && voiceless.has([...MANIFEST.fixed[k]!][0]!)).sort();
-        expect(trigger).toEqual(["f", "g", "k", "p", "q", "s", "t", "v", "x"]); // + ⟨c⟩, added in code (no `fixed` entry)
+        // ⚠ ⟨ç⟩ JOINED THE SET WHEN IT JOINED THE GRAPHEME TABLE, and that is the pin working as designed
+        // rather than a change to be waved through: ⟨ç⟩ = [s] in the French/Portuguese loans af.wikipedia
+        // writes (garçon, Provençaalse), [s] is in `voicelessPhones`, so a voiced obstruent before it
+        // devoices exactly as it does before ⟨s⟩. ⟨ñ⟩ was added in the same commit and correctly did NOT
+        // join — it is [nj], and [n] is voiced.
+        expect(trigger).toEqual(["f", "g", "k", "p", "q", "s", "t", "v", "x", "ç"]); // + ⟨c⟩, added in code (no `fixed` entry)
     });
 
     test("a vowel-initial SUFFIX resyllabifies, so the stem does not devoice", () => {

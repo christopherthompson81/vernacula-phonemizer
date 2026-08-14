@@ -7,6 +7,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 import { numberToWords } from "./numbers.ts";
 
 interface EweDef {
@@ -54,14 +55,25 @@ export function phonemizeWord(word: string): string {
             if (chars[i + 1] === "̃") i += 1;
             i += 1; continue outer;
         }
-        // A precomposed nasalized/toned vowel (ã ẽ ɛ̃ …): decompose, map the base, keep only the tilde.
+        // A precomposed letter carrying a mark (ã ẽ ɛ̃ é à ç ý …): decompose, map the BASE with Ewe's own value
+        // for that letter, and keep only the nasalization tilde.
+        // ⚠ THE BASE NEED NOT BE A VOWEL. This branch used to require `"aeiouɛɔ".includes(base)`, which was a
+        // restatement of "the tilde only nasalises a vowel" in the wrong place — it also threw away every
+        // marked CONSONANT, whose base letter Ewe reads perfectly well: `Podobský` → *podobsk (⟨y⟩ = /j/ is in
+        // the table), `Française` → *flanaise (⟨c⟩ = /t͡s/ is too). The vowel test belongs on the TILDE, which
+        // is where it now is, and this branch does what it says: read the letter under the mark.
         const nfd = [...c.normalize("NFD")];
         const base = nfd[0]!;
-        if (G[base] !== undefined && "aeiouɛɔ".includes(base)) {
-            segs.push((G[base]! + (nfd.includes("̃") ? "̃" : "")).normalize("NFC"));
+        if (G[base] !== undefined) {
+            const nasal = nfd.includes("̃") && "aeiouɛɔ".includes(base);
+            segs.push((G[base]! + (nasal ? "̃" : "")).normalize("NFC"));
             i += 1; continue;
         }
-        i += 1; // unmapped (stray tone mark / punctuation) — drop
+        // Still nothing: a letter from an alphabet Ewe does not use at all (ñ, ß, æ). The shared table names
+        // the phone the letter denotes rather than dropping it — ⟨ñ⟩ → /ɲ/, which Ewe has (⟨ny⟩).
+        const ph = latinPhone(c, { initial: i === 0 });
+        if (ph !== undefined) { segs.push(ph); i += 1; continue; }
+        i += 1; // unmapped (a stray combining mark of its own, punctuation) — drop
     }
     return segs.join("").normalize("NFC");
 }

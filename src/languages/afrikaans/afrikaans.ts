@@ -63,6 +63,43 @@ const VOICELESS_NEXT = new Set([
 const BARE_VOWELS = new Set(MANIFEST.bareVowels);
 const VOWEL_LETTER = new Set(MANIFEST.vowelLetters);
 
+/** Every single character the scan below has a rule for: the grapheme table, the diacritic vowels, the bare
+ *  vowels, and the two letters handled by code rules (⟨c⟩ soft/hard, the apostrophe of 'n). */
+const KNOWN_LETTERS = new Set([
+    ...Object.keys(FIXED).filter((k) => [...k].length === 1),
+    ...Object.keys(DIA),
+    ...MANIFEST.bareVowels,
+    "c",
+    "'",
+]);
+
+/**
+ * ⚠ AN ACCENT AFRIKAANS DOES NOT WRITE IS READ AS THE LETTER UNDER IT, NOT DELETED.
+ *
+ * Afrikaans has its own diacritics (ê î ô û ë ï, plus the é è á à ó ú ü ö of its loans) and every one of them
+ * is in `diacriticVowels`. What is left over is someone else's orthography arriving inside a name, and the
+ * scan's closing `i += 1` used to drop it: `bâton` → *btɔn, a nucleus short with the onset welded to the coda.
+ *
+ * Folding to the base BEFORE the scan — rather than emitting a phone at the fall-through — is what keeps
+ * `countNuclei` and `phonemizeMorpheme` in agreement: both walk this same string, and a vowel that appeared in
+ * one walk but not the other would put primary stress on the wrong syllable. One character for one character,
+ * so every index and lookahead is unmoved.
+ *
+ * ⚠ ⟨ñ⟩ AND ⟨ç⟩ ARE NOT FOLDED — they are in the grapheme table (see afrikaans.jsonc) because af.wikipedia
+ * writes them in words it uses as its own (`piñata` ×4, `garçon` ×15, `Provençaalse` ×3), and the base letter
+ * would be wrong for both: /n/ throws away the palatal, /k/ is not what ⟨ç⟩ ever says.
+ */
+function foldForeignLetters(w: string): string {
+    if ([...w].every((c) => KNOWN_LETTERS.has(c))) return w; // the common case, and it allocates nothing
+    return [...w]
+        .map((c) => {
+            if (KNOWN_LETTERS.has(c)) return c;
+            const b = c.normalize("NFD").replace(/\p{M}+/gu, "");
+            return b.length === 1 && KNOWN_LETTERS.has(b) ? b : c;
+        })
+        .join("");
+}
+
 /** Is the bare vowel at index `i` in an OPEN syllable (→ long/tense)? V ends a syllable when ≤1 consonant separates
  *  it from the next vowel: V# / V.V / V.CV are open; VC# and VCC are closed. */
 function isOpen(w: string, i: number): boolean {
@@ -154,7 +191,7 @@ function stressedNucleus(w: string): number {
  *  consonant is resyllabified as the onset of a following suffix (send·ing → sɛndəŋ). The REGRESSIVE half — a voiced
  *  obstruent before a voiceless one — is unaffected, since it depends on what follows, not on where the morpheme ends. */
 function phonemizeMorpheme(word: string, finalDevoice = true): string {
-    const w = word.normalize("NFC").toLowerCase();
+    const w = foldForeignLetters(word.normalize("NFC").toLowerCase());
     const stressNucleus = stressedNucleus(w); // primary-stress nucleus (native first-syllable + loan-suffix overrides)
     let out = "";
     let i = 0;

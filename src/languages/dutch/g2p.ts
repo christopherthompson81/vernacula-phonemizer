@@ -5,6 +5,7 @@
  * devoicing (hond→hɔnt, dag→dɑx). Stress is added downstream (dutch.ts).
  */
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const LONG = MANIFEST.vowels.long;
 const SHORT = MANIFEST.vowels.short;
@@ -13,7 +14,10 @@ const VOICED_FINAL = MANIFEST.voicedFinal;
 
 // Plain + trema vowel letters. The trema letters (ë ï ö ü) are vowels but never combine with a preceding vowel
 // into a digraph (the scanner's digraph tests only match the plain letters), so ⟨tweeën⟩ scans twe·e·ën.
-const VOWELS = "aeiouyáéíóúàèäëïöü";
+// ⚠ THE CIRCUMFLEXES ARE DUTCH SPELLING, NOT FOREIGN DECORATION — Dutch keeps them on the French loans it has
+// naturalised (enquête, crêpe, gêne, coûte, blessûre). They were missing from this string, so the scan fell all
+// the way past the consonant switch and DELETED them: enquête → *ɛnkʋtə, crêpe → *krpeː, a nucleus short each.
+const VOWELS = "aeiouyáéíóúàèâêîôûäëïöü";
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
 const isLiquid = (c: string): boolean => c === "l" || c === "r";
 
@@ -242,11 +246,15 @@ export function toSegments(word: string): Seg[] {
                 continue;
             }
             // Trema/accented letters and plain vowels use the open/closed length rule.
-            const base = "áàä".includes(c) ? "a"
-                : "éèë".includes(c) ? "e"
-                : "íìï".includes(c) ? "i"
-                : "óò".includes(c) ? "o"
-                : "úù".includes(c) ? "u"
+            // ⚠ The circumflex joins the row its base is already on, rather than getting a value of its own:
+            // this file's own precedent is that every accent Dutch writes on a vowel (á à ä é è ë …) reads as
+            // the plain letter under the open/closed length rule, and a separate quality for ⟨ê⟩ would be a new
+            // phonological claim with no referee behind it.
+            const base = "áàâä".includes(c) ? "a"
+                : "éèêë".includes(c) ? "e"
+                : "íìîï".includes(c) ? "i"
+                : "óòô".includes(c) ? "o"
+                : "úùû".includes(c) ? "u"
                 : c;
             const long = LONG[base] ?? LONG[c] ?? "";
             const short = SHORT[base] ?? SHORT[c] ?? "";
@@ -286,8 +294,22 @@ export function toSegments(word: string): Seg[] {
             continue;
         } // rr → single r (falls through to the r switch next iteration)
 
+        if (c === "ñ") {
+            // ⚠ READ AS ⟨nj⟩, WHICH IS HOW THIS ENGINE ALREADY SPELLS THE PALATAL NASAL (Spanje → spɑnjə,
+            // oranje). Not a Dutch letter, but Dutch borrows the names that carry it and used to DELETE it
+            // (Cañitas → *kaːitɑs, a consonant short). Emitting /ɲ/ instead would be a phone Dutch has nowhere
+            // else in this engine's output; emitting /n/ alone would throw the palatal away.
+            push("n", i);
+            push("j", i);
+            i++;
+            continue;
+        }
         const cp = CONS[c];
-        if (cp !== undefined) push(cp, i);
+        // ⚠ NOT SILENTLY when the consonant table has nothing either. Everything Dutch spells was matched
+        // above, so what reaches here is a letter out of someone else's alphabet inside a name; the shared
+        // table names the phone it denotes rather than dropping it. Non-letters return `undefined`.
+        const ph = cp ?? latinPhone(c, { initial: i === 0 });
+        if (ph !== undefined) push(ph, i);
         i++;
     }
 

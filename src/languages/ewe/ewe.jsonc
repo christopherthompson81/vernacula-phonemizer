@@ -23,5 +23,10 @@
         "b": "b", "d": "d", "ɖ": "ɖ", "f": "f", "ƒ": "ɸ", "g": "ɡ", "h": "h", "k": "k", "l": "l", "m": "m",
         "n": "n", "ŋ": "ŋ", "p": "p", "r": "r", "s": "s", "t": "t", "v": "v", "ʋ": "β", "x": "x",
         "y": "j", "z": "z", "ɣ": "ɰ", "c": "t͡s", "j": "d͡z", "q": "k", "'": "ʔ",
+        // ⚠ ⟨ñ⟩ NEEDS ITS OWN ROW OR IT BECOMES /n/. It is not an Ewe letter, but it decomposes to ⟨n⟩ + a
+        // tilde, so the base-letter branch in ewe.ts would read the Spanish names Ewe borrows as plain /n/ and
+        // throw the palatal away — while Ewe HAS /ɲ/ and writes it ⟨ny⟩ (the digraph above). Listed here, it
+        // is matched before that branch is reached.
+        "ñ": "ɲ",
     },
 }
