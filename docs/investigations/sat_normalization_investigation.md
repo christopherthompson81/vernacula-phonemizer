@@ -538,3 +538,196 @@ content is a REFUSAL: the range rule declining arithmetic/negative/clock, `°F` 
 regeneration plus `build.py` the catalogue is `(none)=78, done=124, inherited=13`, 0 cells differing, and
 `test/languageCatalogue.test.ts` is green. `tools/corpus/attest/sat.jsonc` is written and tracked, holding
 18 probed findings with their example prose.
+
+---
+
+## Run 14 — 2026-08-14 — ⟨ᱻ RELAA⟩ has a reading, and the Latin routing was right except in three places
+
+Opened on the two defects Run 13 reported and did not fix: RELAA contributing the empty string inside a
+live word, and Latin runs reading as English (`1st` → *street*).
+
+**Command.** `referee-eval sat` before anything; a census of every orphan Ol Chiki sign and every Latin run
+in the retained tier; `attest.ts` on the candidate unit words; then `corpus-diff emit/compare`,
+`mine.ts scan`, `review.ts`, `npx vitest run`, `npx tsc --noEmit`.
+
+### Defect 1 — what RELAA is
+
+**Question.** U+1C7B is inside `TOKEN`'s word class and no branch of `phonemizeWord` claims it, so it is
+consumed and contributes nothing. What should it read as?
+
+**Raw finding — it is the vowel-LENGTH mark, and it modifies its neighbour rather than having a phone.**
+Three independent sources agree and one of them is a dictionary:
+
+- r12a's Ol Chiki orthography notes: *"To indicate a prolonged vowel sound, ᱻ is used."*
+- the encoding material: a length mark that *"may combine with any oral or nasal vowel"*, written AFTER the
+  vowel — and AFTER ⟨ᱹ GAAHLAA⟩ when both are present, which is the opposite of the usual Indic diacritic
+  placement and is exactly the order this engine's left-to-right segment scan already produces.
+- en.wiktionary's ONLY RELAA headword, `ᱡᱤᱻ` "to smell", **romanises as *jiː*** and lists `ᱡᱤ` as its
+  alternative spelling. That is the length mark, spelled out in the transliteration column.
+
+So the branch appends a length mark to the preceding vowel and nothing else. `ᱟᱻ`→[aː], `ᱟᱹᱻ`→[əː],
+`ᱟᱸᱻ`→[ãː]. A RELAA with no vowel to its left is consumed silently — a modifier with an absent neighbour
+carries nothing, which is a claimed character rather than an unclaimed one.
+
+**⚠ Raw finding — the Run 11 guard was one character too short and would have destroyed two of the three
+shapes.** Step 2 rewrites a consonant-preceded RELAA to ⟨ᱼ PHAARKAA⟩ and its guard was `(?<!VOWEL)ᱻ`,
+testing the immediately preceding CHARACTER. In `ᱟᱹᱻ` and `ᱟᱸᱻ` that character is a SIGN, not the vowel
+letter, so the guard called it a consonant and rewrote a legitimate length mark into a PHAARKAA which then
+vanished. The sources are explicit that relaa follows the găhlă ṭuḍăg and combines with nasal vowels, so
+U+1C78–1C7A are now transparent to the guard. Found by probing the branch, not by the corpus — the corpus
+has no instance of either shape.
+
+**⚠ Raw finding — the referee DID NOT MOVE, and its one RELAA row is unreachable either way.**
+
+    referee-eval sat        before              after
+    raw exact               419/490 (85.5%)     419/490 (85.5%)
+    folded backbone         455/490 (92.9%)     455/490 (92.9%)
+    symbol accuracy         97.1%               97.1%
+
+The referee has exactly ONE headword containing RELAA — `ᱡᱤᱻ`, whose expected IPA is `ɟĩ`, a NASAL. We read
+`ɟi` before and `ɟiː` after; both differ from `ɟĩ`. The Wiktionary page for the same entry romanises it
+*jiː*, so its own two columns disagree with each other, and 1/490 is below the printed precision on all
+three measures anyway. **A word-level referee that does not move on a change that touches one of its 490
+rows is the expected result, not an absent one** — but unlike Run 13's zero, this one had a live path to a
+regression and did not take it.
+
+**⚠ Raw finding — the corpus's own five RELAAs are all keyboard slips, so this rule is WRONG on all five,
+and the trade is priced.** After step 2's repair, five vowel-preceded RELAA survive: `ᱵᱮᱲᱟᱻᱫᱚ` (= ᱵᱮᱲᱟ +
+topic ᱫᱚ), `ᱢᱤᱻᱢᱤᱫ` (the same paragraph writes `ᱢᱤ-ᱢᱤᱫ`), `ᱛᱤᱻ ᱛᱮ`, `ᱵᱚᱝᱜᱟᱻᱟᱭ`, `ᱡᱚᱻ`. Every one is a
+mistyped separator, so the length reading puts a spurious duration cue on a vowel in all five.
+**Priced rather than assumed (trap 53):** the alternative is the status quo, a character that vanishes
+silently inside a live word — the class found by hand in six languages now. A duration cue is a
+sub-phonemic error on a vowel that is already there; a deletion removes a segment. And no rule can repair
+the typos: only `ᱢᱤᱻᱢᱤᱫ` has an in-corpus twin, and the other four could be a space, a hyphen or nothing.
+The character's own function is the only defensible general reading, and the golden that pinned the silence
+(`ᱢᱤᱻᱢᱤᱫ` → *mimitʼ*) is changed to `miːmitʼ` with this reasoning attached.
+
+### Defect 1b — which of the orphan signs still had an unclaimed path
+
+**Question.** Run 13 counted 27 word tokens reading as the empty string, "all orphan ᱹ ᱼ ᱺ". Which are
+still unclaimed after the layer landed?
+
+**Raw finding — a census of every sign not attached to an Ol Chiki letter, before and after normalization.
+The count is now 12, in three shapes, and only two of them were defects:**
+
+- **⟨ᱹ GAAHLAA⟩ — already claimed, and this is where the 27 went.** The ~17 orphan GAAHLAAs are the
+  DECIMAL SEPARATOR (`᱗᱒ᱹ᱗%`, `᱒᱓ᱹ᱔᱔ ᱠᱤᱢᱤ²`, `᱘᱒ᱹ᱖᱑ %`) and step 3 already folds them onto the `.`
+  behaviour. Negative result: nothing to do. The one residue is `ᱹᱹᱹ` ×1, an ELLIPSIS typed with three
+  length-of-the-wrong-mark strokes (`᱐ - ᱒ = -᱒ ᱹᱹᱹ ᱾`) — now folded to `…`.
+  ⚠ A SINGLE orphan ⟨ᱹ⟩ is deliberately NOT claimed: `(ᱥᱤᱹᱰᱞᱤᱭᱩ ᱹᱣᱤᱭᱩ ᱹᱟᱨ)` is CWUR spelled out in Ol
+  Chiki with the sign glued to the FOLLOWING segment, where it is already harmless — claiming it would put
+  a pause inside an acronym, which is step 7's own lesson.
+- **⟨ᱺ MU-GAHLA⟩ ×3 — UNCLAIMED, and it is a COLON.** The glyph is two dots and that is what it was typed
+  for: `ᱚᱲᱟᱜ ᱵᱷᱤᱛᱤᱨ ᱥᱴᱟᱰᱤᱭᱚᱢ ᱺ ᱱᱚᱰᱮ …`, `(ᱤᱝᱞᱤᱥ ᱺSukhumi Babushara Airport)` — the wiki's own "in
+  English:" frame — and `ᱡᱮᱞᱮᱠᱟ ᱺ-` ("for example :-"). Folded to `:`, which `TOKEN` already reads as a
+  pause. Narrow on the left edge, because attached MU-GAHLA is ordinary and frequent (`ᱥᱟᱺᱜᱤᱧ`, `ᱦᱟᱺᱰᱤ`).
+- **⟨ᱼ PHAARKAA⟩ ×8 — unclaimed, and DELIBERATELY LEFT SO.** All eight are dashes: four are the year in a
+  births list (`᱑᱘᱖᱙ᱼ ᱢᱚᱦᱟᱛᱢᱟ ᱜᱟᱱᱫᱷᱤ`), the rest a film title (`ᱫᱷᱩᱢ ᱼ᱓`), a filmography separator and
+  `2014 ᱼ …`. A dash that reads as nothing is a dash read correctly, so no rule is written and this is a
+  negative result, not a gap.
+  **⚠ BUT ONE OF THE EIGHT WAS HIDING A REFUSED RANGE.** `᱑᱙᱙᱘ᱼ᱑᱙᱙᱙: ᱠᱟᱞᱤᱫᱟᱥ ᱥᱚᱢᱟᱱ` is an AWARDS LIST —
+  the colon introduces the prize — and step 8's right-hand guard `(?![:\d])` refused the whole span, after
+  which the abandoned ⟨ᱼ⟩ read as nothing and the refusal was invisible. The clock hazard the guard was
+  written for is a colon followed by a DIGIT, never a colon followed by a space and a name, so the guard now
+  says exactly that. The left-operand guard is untouched and `᱑᱐:᱓᱐ - ᱑᱑` is still refused.
+
+### Defect 2 — the Latin runs, and whether the routing is wired
+
+**Question 1: is sat's foreign-reader wiring live or dead?** **NEITHER — there is no wiring to look at.**
+`createSantali()` takes no argument at all, so `sat` is not among the 45 factories handed a foreign reader
+and there is nothing to remove (the `ak` case does not apply). The English reading comes from
+`core/clauses.ts`'s shared `emitUnclaimed`: script router first, Latin→English fallback second.
+
+**Question 2: what is the right behaviour?** A census of all 944 Latin runs in the retained tier
+(633 distinct) answers it, and the answer is mostly *leave it alone*:
+
+    English proper nouns / org names   Mars Orbiter Mission, PSLV, DRDO, Encyclopædia Britannica,
+                                       Sukhumi Babushara Airport, García Márquez, Googleplex …
+    English prose inside the wiki's    "(ᱤᱝᱞᱤᱥ: …)" — literally "in English: …". The corpus asks for an
+    OWN gloss frame                    English reading in so many words.
+    unit abbreviations                 km² ×22, sq ×20, mi ×20, ft ×1, Mw ×1, C ×10 (already claimed)
+
+**⚠ SANTALI'S OWN INITIALISMS ARE ALREADY IN OL CHIKI AND ARE ALREADY READ.** `ᱯᱤ.ᱮᱥ.ᱮᱞ.ᱵᱷᱤ` is PSLV
+written as the ENGLISH LETTER NAMES transliterated, and step 7 reads it. So the language's attested habit
+for a Latin initialism is the English letter names, and nothing here invents a Santali letter name — the
+`hmn` refusal, reached by the same road from different evidence. **English is the right foreign reader for
+this language**, and it has an unusually strong argument here: Santali has its own script and its own
+digits, so a Latin run is unambiguously foreign, and the wiki labels most of them as English itself.
+
+**Raw finding — THREE shapes were wrong, and none of them is the routing.**
+
+1. **`1st` → *mitʼ stɹˈiːt* is THIS ENGINE cutting an English expression in half.** `TOKEN`'s numeral arm
+   claimed the `1` and spoke it in Santali; the orphaned `st` fell to the English fallback, which expanded
+   the abbreviation *st* to **STREET**. Seven instances, every one inside an English phrase — `4th century
+   BCE`, `c. 6th century BCE`, `Languages attested from the 19th century`, and `(13th)`/`(14th)`/`(131st)`
+   as a country's world area RANK. English reads `13th` as *θˈɝtʰˈiːnθ* the moment it is handed the digits
+   too, so the fix is to stop cutting the run, which is `FOREIGN_RUN`'s own argument for carrying a trailing
+   superscript. A new `TOKEN` arm, narrow by construction: ASCII digits + one of the four English suffixes,
+   no Ol Chiki digits (a Santali numeral takes no Latin ordinal suffix and `᱑᱓th` does not occur).
+2. **`sq mi` ×20 read as *sk mˈiː* — A WRONG READING IN BOTH LANGUAGES.** English does not expand `sq`
+   either, so routing it "correctly" produced two plausible syllables and no leak the gates could see.
+   ⚠ AND BOTH WORDS ARE ATTESTED IN EXACTLY THIS SLOT, so the match is whole: `ᱢᱟᱭᱤᱞ` 32 tok / 14 arts and
+   **every example is the parenthetical gloss itself** (`᱖᱘,᱐᱔᱓ ᱠᱤᱞᱚᱢᱤᱴᱚᱨ (᱔᱒,᱒᱘᱐ ᱢᱟᱭᱤᱞ)`), and `ᱵᱚᱨᱜᱚ`
+   39/10 PRECEDES its noun (`ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ`, `᱑᱒᱘.᱖᱔ ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ`). `ᱵᱚᱨᱜᱚ ᱢᱟᱭᱤᱞ` is the corpus's own frame
+   with its own mile word in the noun slot — composed from attested pieces, not coined. Bare `mi` is NOT
+   declared as a unit key; only the two-token shape that was counted.
+3. **⚠ `LEAK RAW-LATIN ft ×1` WAS CLOSED ON A CLAIM THAT WAS FALSE.** Run 12 recorded "no foot word
+   sourced". Re-probing finds TWO, both attested and both in precisely this parenthetical slot:
+   ᱯᱷᱤᱴ 63/16 (`᱓᱐᱔ ᱢᱤᱴᱚᱨ (᱙᱙᱙ ᱯᱷᱤᱴ)`) and ᱯᱷᱩᱴ 25/13 (`᱔᱒᱘᱐ ᱢᱤᱴᱚᱨ (᱑᱔,᱐᱔᱐ ᱯᱷᱩᱴ)`). A real spelling tie
+   like the Celsius one, decided on count and article spread and stated rather than hidden: ᱯᱷᱤᱴ wins.
+   The lesson generalises: *a "no word is attested" note is a claim with a date on it, and it is cheap to
+   re-probe.*
+
+**Raw finding — what is LEFT REPORTED, with the reason for each (refusal priced, not assumed):**
+
+    people/km² ×1   the DENSITY frame needs a "per" word. `ᱯᱚᱨᱚᱛᱤ` is attested — but 13 tokens in ONE
+                    article, and reading half the expression (`ᱦᱚᱲ` for `people` would be invented) is
+                    the `ig` "790 kilometres two" shape. Refused whole.
+    Mw ×1           moment magnitude. No word, no near-miss, one instance.
+    www.…gov.pk ×1  a URL. Left as a visible leak on purpose; spelling out a hostname is not a reading.
+    math signs ×31  unchanged from Run 13 — declined on SYNTAX. review.ts stays RED and is right to.
+
+**⚠ A FLEET-LEVEL OBSERVATION, RECORDED AND NOT TOUCHED.** Roman numerals are folded to Arabic by the
+registry's shared `normalizeRomans`, ABOVE this layer, and then read as SANTALI NUMBERS: `Peak XV` →
+*ɡel mɔɳe*, `CITES Appendix II` → *bar*, `ᱞᱩᱭᱤᱥ XIII` → *ɡel pe*. For a monarch or a papal name that is
+arguably right; for `CITES Appendix II` it is a wrong reading. It is not this file's to fix and no change
+was made.
+
+### The gates, before and after
+
+    gate                              before                     after                    role
+    ───────────────────────────────── ────────────────────────── ──────────────────────── ─────────
+    npx vitest run                    242 files / 4057 pass      242 files / 4062 pass    TRIPWIRE
+    npx tsc --noEmit                  clean                      clean                    TRIPWIRE
+    referee-eval sat  raw exact       419/490 (85.5%)            419/490 (85.5%)          METER
+                      folded          455/490 (92.9%)            455/490 (92.9%)          METER
+                      symbol acc      97.1%                      97.1%                    METER
+    corpus-diff       changed         —                          34/441 (7.7%)            METER
+                      DROP            45                         45                       METER
+    mine.ts scan      LEAK RAW-LATIN  2 (ft, pk)                 1 (pk — a URL)           METER
+                      everything else unchanged                  unchanged                (refused)
+    review.ts                         2 FAILING                  2 FAILING                METER
+    catalogue                         0 cells differ             0 cells differ           TRIPWIRE
+
+⚠ `test/onnx-optional.test.ts` and two `referee-eval.test.ts` rows time out under a full parallel run;
+both files pass in isolation (`referee-eval.test.ts` 171/171, including sat's 0.89 floor). Discounted.
+
+**Raw finding — the word-level diff over the 34 changed rows is exactly the four intended edits and
+nothing else:**
+
+    REMOVED   sk ×20   mˈiː ×20            → ADDED  bɔrɡɔ ×20  majil ×20        (sq mi)
+              tʰˈiːʲˈeᶦt͡ʃ ×6  stɹˈiːt ×1  → ADDED  fˈɔːɹθ sˈɪksθ θˈɝtʰˈiːnθ fˈɔːɹtˈiːnθ nˈaᶦntˈiːnθ
+              + ɡel×4 pun×2 pe×2 mitʼ×2 …          fˈɪfθ  wˈʌn hˈʌndɹəd θˈɝd̬iː fˈɝst   (the ordinals)
+              ft ×1                        → ADDED  pʰiʈ ×1                            (the foot word)
+              beɽadɔ mimitʼ ti bɔŋɡaaj ɟɔ  → ADDED  beɽaːdɔ miːmitʼ tiː bɔŋɡaːaj ɟɔː    (RELAA, all 5)
+                                           → ADDED  , ×3                               (the orphan colons)
+                                           → ADDED  kʰɔn ×1                            (the awards range)
+
+Not one word was mangled and no new DROP/RAWMARK/LEAK class appeared.
+
+**Goldens.** ONE existing golden changed: `test/santali.test.ts`'s RELAA test pinned `ᱢᱤᱻᱢᱤᱫ` → *mimitʼ*,
+i.e. the sign reading as the empty string, and now pins `miːmitʼ`. That is the defect this run was opened
+on; the justification is the priced trade above and it is written into the test. Everything else in the
+file is APPENDED — four new tests (RELAA through GAAHLAA/MU, the orphan colon and its attached neighbour,
+the English ordinal with its Ol-Chiki-numeral refusal, `sq mi`/`ft` with a bare-`mi` refusal, and the range
+guard with the clock it must still decline). The file was never overwritten.

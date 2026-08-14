@@ -185,14 +185,36 @@ describe("Santali (sat) text normalization", () => {
         expect(say("ᱦᱚ‍ᱲ")).toBe("hɔɽ");
     });
 
-    // ⚠ ⟨ᱻ RELAA⟩ IS UNREADABLE TODAY — it is inside `TOKEN`'s word class but no branch of phonemizeWord
-    // claims it, so it contributes the empty string. Repaired to PHAARKAA only after a CONSONANT, where
-    // its own vowel-LENGTH function is impossible; after a vowel it is left alone, and that residual gap
-    // is real and stated rather than papered over.
-    test("⟨ᱻ RELAA⟩ after a consonant is repaired to ⟨ᱼ PHAARKAA⟩, after a vowel it is not", () => {
+    // ⚠ ⟨ᱻ RELAA⟩ NOW HAS A BRANCH — it is the vowel-LENGTH mark, so it MODIFIES its neighbour and has no
+    // phone of its own. Repaired to PHAARKAA only after a CONSONANT, where the length reading is
+    // impossible; after a vowel it lengthens.
+    // ⚠ THE THIRD LINE IS THE GOLDEN THAT CHANGED. It pinned `ᱢᱤᱻᱢᱤᱫ` → *mimitʼ*, i.e. the sign reading as
+    // the EMPTY STRING inside a live word, which is the defect this run was opened on. The corpus's own
+    // instance is a keyboard slip for the hyphen of `ᱢᱤ-ᱢᱤᱫ` and a length mark is the wrong reading OF THAT
+    // TYPO — but a spurious duration cue on a vowel is a smaller error than a character that vanishes, and
+    // the length reading is the only defensible one for the character itself (see santali.ts's block).
+    test("⟨ᱻ RELAA⟩ after a consonant is repaired to ⟨ᱼ PHAARKAA⟩, after a vowel it LENGTHENS", () => {
         expect(say("ᱦᱩᱭᱩᱜᱻᱟ")).toBe(say("ᱦᱩᱭᱩᱜᱼᱟ"));
         expect(say("ᱱᱟᱜᱟᱨᱻᱮ")).toBe(say("ᱱᱟᱜᱟᱨᱼᱮ"));
-        expect(say("ᱢᱤᱻᱢᱤᱫ")).toBe("mimitʼ"); // after a vowel: unchanged, and still unread. Known gap.
+        expect(say("ᱢᱤᱻᱢᱤᱫ")).toBe("miːmitʼ"); // was "mimitʼ" — the sign was silent
+        expect(say("ᱡᱤᱻ")).toBe("ɟiː"); // en.wiktionary's only RELAA headword, romanised *jiː*
+    });
+
+    // ⚠ AND THE LENGTH MARK SURVIVES THE OTHER VOWEL SIGNS, because relaa is written AFTER ⟨ᱹ GAAHLAA⟩ and
+    // combines with a NASAL vowel as readily as an oral one. The first draft's consonant guard looked at ONE
+    // character, saw the sign rather than the vowel letter, and destroyed both of these.
+    test("⟨ᱻ RELAA⟩ lengthens through ⟨ᱹ GAAHLAA⟩ and ⟨ᱸ MU⟩", () => {
+        expect(say("ᱟᱹᱻ")).toBe("əː");
+        expect(say("ᱟᱸᱻ")).toBe("ãː");
+        expect(say("ᱟᱻ")).toBe("aː");
+    });
+
+    // ⚠ AN ORPHAN SIGN IS A PUNCTUATION MARK TYPED WITH THE WRONG KEY, and read as the empty string until
+    // now. ⟨ᱺ MU-GAHLA⟩ standing alone is a COLON (the glyph is two dots); attached, it is the ordinary
+    // lowering nasal sign and must be untouched.
+    test("an orphan ⟨ᱺ MU-GAHLA⟩ is a colon, an attached one is still the nasal sign", () => {
+        expect(say("ᱥᱴᱟᱰᱤᱭᱚᱢ ᱺ ᱱᱚᱰᱮ")).toBe("sʈaɖijɔm , nɔɖe"); // was "sʈaɖijɔm nɔɖe"
+        expect(say("ᱥᱟᱺᱜᱤᱧ")).toBe("sə̃ɡiɲ"); // attached: unchanged
     });
 
     // ⚠ ORDINARY TEXT MUST SURVIVE, and a sentence end must not be lost. The dot rule rewrites a
@@ -202,5 +224,34 @@ describe("Santali (sat) text normalization", () => {
         const out = say(src);
         expect(out).toBe("hɔɽ kɔ dɔ əɖi hujukʼa . ar ləɡitʼ kəmi menakʼa .");
         expect(out.split(".").length - 1).toBe(2); // exactly the two native terminators, no extras
+    });
+
+    // ⚠ THE TOKENIZER WAS CUTTING AN ENGLISH ORDINAL IN HALF and the orphaned `st` was expanded to STREET.
+    // The whole run now goes to the same English reader the rest of the phrase already reaches.
+    test("an English ordinal goes to English WHOLE — `1st` is not *street*", () => {
+        expect(say("1st")).toBe("fˈɝst"); // was "mitʼ stɹˈiːt" — one Santali digit plus *street*
+        expect(say("13th")).toBe("θˈɝtʰˈiːnθ"); // was "ɡel pe tʰˈiːʲˈeᶦt͡ʃ"
+        expect(say("4th century BCE")).toBe("fˈɔːɹθ sˈɛnt͡ʃɚi bˈiː sˈiː ˈiː");
+        // ⚠ AND THE NEIGHBOUR IT MUST REFUSE: an Ol Chiki numeral takes no Latin ordinal suffix, and a
+        // plain ASCII number is still read in SANTALI, not handed to English.
+        expect(say("13")).toBe("ɡel pe");
+        expect(say("᱑᱓")).toBe("ɡel pe");
+    });
+
+    // ⚠ THE IMPERIAL GLOSS. `sq mi` ×20 fell to English and came out *sk mˈiː* — English does not expand
+    // `sq` either, so this was a wrong reading in BOTH languages. Both words are attested in this exact
+    // parenthetical slot and ᱵᱚᱨᱜᱚ precedes its noun, so the reading is the corpus's own `ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ` frame.
+    test("`sq mi` and `ft` read as their attested Santali words", () => {
+        expect(say("(302,455 sq mi)")).toContain("bɔrɡɔ majil"); // was "sk mˈiː"
+        expect(say("12,389 ft")).toContain("pʰiʈ"); // was the raw Latin `ft` — LEAK RAW-LATIN
+        // ⚠ THE NEIGHBOUR: no number, no unit. A bare `mi` is NOT a declared key and must stay English.
+        expect(say("mi")).toBe("mˈiː");
+    });
+
+    // ⚠ THE RANGE RULE'S RIGHT-HAND COLON GUARD WAS TOO WIDE — it refused an awards list and the abandoned
+    // ⟨ᱼ⟩ then read as nothing. A colon before a NAME is not a clock; a colon before a DIGIT is.
+    test("a year range keeps its ᱠᱷᱚᱱ before a list colon, and still refuses a clock", () => {
+        expect(say("᱑᱙᱙᱘ᱼ᱑᱙᱙᱙: ᱠᱟᱞᱤᱫᱟᱥ")).toContain("kʰɔn");
+        expect(say("᱑᱐:᱓᱐ - ᱑᱑")).not.toContain("kʰɔn");
     });
 });

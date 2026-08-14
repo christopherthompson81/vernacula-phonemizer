@@ -165,11 +165,26 @@
  *  • BARE LATIN `m` as a unit key — trap 46. Withdrawn where it buys nothing: the Ol Chiki `ᱢ.` form is
  *    what this corpus writes (step 5, with its own lookbehind), and a one-letter Latin key would expose
  *    the `802.11m` class for no measured gain.
- *  • THE LATIN GLOSSES (549 runs ≥2 characters) — `TOKEN` has no Latin arm, so `assembleClauses` routes
- *    them to the ENGLISH fallback and `1st` reads as *street*, `(Santal)` as *sˈæntɑːɫ*. That is trap 56's
- *    class, it is real, and it is the ENGINE's routing rather than this layer's — out of scope here and
- *    reported rather than patched around. What IS in scope is the unit abbreviations, which steps 5 and 10
- *    now claim before the fallback can see them.
+ *  • THE LATIN GLOSSES — 944 runs over the retained tier, and ⚠ THE ENGLISH ROUTING IS RIGHT FOR ALMOST ALL
+ *    OF THEM, which is the finding rather than a concession. `createSantali()` takes NO foreign reader: sat
+ *    is not one of the 45 factories handed one, so there is no dead wiring here, and the English reading
+ *    comes from `core/clauses.ts`'s shared `emitUnclaimed` fallback. Reading the census settles that this is
+ *    correct: the runs are English PROPER NOUNS and org names (`Mars Orbiter Mission`, `PSLV`, `DRDO`,
+ *    `Encyclopædia Britannica`, `Sukhumi Babushara Airport`) and English prose inside the wiki's OWN gloss
+ *    frame `(ᱤᱝᱞᱤᱥ: …)` — literally "in English: …". Santali also writes its own Ol Chiki initialisms
+ *    (`ᱯᱤ.ᱮᱥ.ᱮᱞ.ᱵᱷᱤ` = PSLV), which are the English letter names already transliterated, and step 7 reads
+ *    those; nothing here invents a Santali letter name, because none is attested (the `hmn` refusal).
+ *    THREE SHAPES WERE WRONG and each is fixed where it belongs, not by re-routing the class:
+ *      · `1st`/`13th`/`131st` ×7 — the ENGINE's tokenizer cut the run in half and the orphan `st` was
+ *        expanded to *street*. Fixed in `santali.ts`'s `TOKEN`, which now hands the whole ordinal to English.
+ *      · `sq mi` ×20 — step 5b, the attested `ᱵᱚᱨᱜᱚ ᱢᱟᱭᱤᱞ`.
+ *      · `ft` ×1 — the units tier, `ᱯᱷᱤᱴ`.
+ *    STILL REPORTED, with the reason: `people/km²` ×1 (the density frame needs a "per" word, and `ᱯᱚᱨᱚᱛᱤ`
+ *    is 13 tokens in ONE article — too thin), `Mw` ×1 (no moment-magnitude word), and the URL
+ *    `www.balochistanpolice.gov.pk` (a URL, correctly left as a visible leak rather than spelled out).
+ *  • ⚠ ROMAN NUMERALS ARE FOLDED TO SANTALI NUMBERS BY THE REGISTRY, ABOVE THIS LAYER — `Peak XV` reads
+ *    *ɡel mɔɳe* and `CITES Appendix II` reads *bar*. Recorded as a fleet-level observation, NOT touched
+ *    here: `normalizeRomans` is the registry's shared pass and this file cannot see it.
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -201,6 +216,7 @@ const A = "\\u1C5F";
 const D = "\\p{Nd}";
 
 const GAAHLAA = "ᱹ"; // ᱹ
+const MU_GAHLA = "ᱺ"; // ᱺ
 const PHAARKAA = "ᱼ"; // ᱼ
 const RELAA = "ᱻ"; // ᱻ
 
@@ -232,10 +248,33 @@ export function normalizeSantali(input: string): string {
     // with any oral or nasal vowel". So after a vowel it may be doing its own job and must not be
     // rewritten; after a CONSONANT the length reading is impossible and only PHAARKAA makes sense. That
     // splits the corpus's five: `ᱮᱱᱮᱡᱻᱮ` (after ᱡ) and `ᱱᱟᱜᱟᱨᱻᱮ` (after ᱨ) are repaired, and so is the
-    // wiki's `ᱦᱩᱭᱩᱜᱻᱟ` (after ᱜ); the three vowel-preceded ones are LEFT ALONE and stay unread. That
-    // residual gap is real and is recorded rather than papered over — it belongs to `santali.ts`'s sign
-    // machinery (RELAA has no branch there at all), not to a text-normalization rule.
-    s = s.replace(new RegExp(`(?<=${O})(?<!${VOWEL})${RELAA}`, "gu"), PHAARKAA);
+    // wiki's `ᱦᱩᱭᱩᱜᱻᱟ` (after ᱜ); the vowel-preceded ones are LEFT ALONE for `santali.ts` to read.
+    //
+    // ⚠ AND THE GUARD LOOKED AT ONE CHARACTER WHEN THE VOWEL CAN BE TWO. `ᱟᱹᱻ` and `ᱟᱸᱻ` have ⟨ᱹ GAAHLAA⟩ /
+    // ⟨ᱸ MU⟩ between the vowel LETTER and the RELAA, so a bare `(?<!VOWEL)` saw a sign, called it a
+    // consonant, and rewrote a legitimate length mark into a PHAARKAA that then vanished — the sources are
+    // explicit that relaa is written AFTER the găhlă ṭuḍăg and combines with a NASAL vowel as readily as an
+    // oral one, so the two vowel-modifying signs are TRANSPARENT here. U+1C78–1C7A is exactly ᱸ ᱹ ᱺ.
+    s = s.replace(new RegExp(`(?<=${O})(?<!${VOWEL}[\\u1C78-\\u1C7A]?)${RELAA}`, "gu"), PHAARKAA);
+
+    // ── 2b. AN ORPHAN SIGN IS A PUNCTUATION MARK SOMEBODY TYPED WITH THE WRONG KEY ────────────────────
+    // ⚠ THE COMPANION FINDING TO STEP 2, AND THE SAME CLASS: a sign that is not attached to a letter is not
+    // a sign at all. It still falls inside `TOKEN`'s word class, so `phonemizeWord` is handed a token with
+    // no vowel to modify and returns the EMPTY STRING — silent, and invisible to every leak gate.
+    //
+    //   ⟨ᱺ MU-GAHLA⟩ ×3, standing alone, is a COLON. The glyph is two dots and that is what it was typed
+    //   for: `ᱚᱲᱟᱜ ᱵᱷᱤᱛᱤᱨ ᱥᱴᱟᱰᱤᱭᱚᱢ ᱺ ᱱᱚᱰᱮ …` (indoor stadium: here …), `(ᱤᱝᱞᱤᱥ ᱺSukhumi Babushara Airport)`
+    //   — the wiki's own "in English:" gloss frame — and `ᱡᱮᱞᱮᱠᱟ ᱺ-` ("for example :-").
+    //   ⟨ᱹ GAAHLAA⟩ ×2 or more in a row, standing alone, is an ELLIPSIS: `᱐ - ᱒ = -᱒ ᱹᱹᱹ ᱾`.
+    //
+    // Both become the ASCII mark, which `TOKEN`'s punctuation arm already reads as a clause pause. NARROW
+    // ON THE LEFT EDGE, because both signs are ordinary and frequent when they ARE attached (`ᱥᱟᱺᱜᱤᱧ`,
+    // `ᱦᱟᱺᱰᱤ`, and GAAHLAA 1,181 times): only a sign with no Ol Chiki letter before it is claimed.
+    // ⚠ A SINGLE orphan ⟨ᱹ⟩ is deliberately NOT claimed — `(ᱥᱤᱹᱰᱞᱤᱭᱩ ᱹᱣᱤᱭᱩ ᱹᱟᱨ)` (CWUR spelled out in Ol
+    // Chiki) writes it as an initialism dot glued to the NEXT segment, where it is already harmless: the
+    // sign is dropped and `ᱣᱤᱭᱩ` reads. Claiming it would put a pause inside an acronym — step 7's mistake.
+    s = s.replace(new RegExp(`(?<!${O})${MU_GAHLA}`, "gu"), ":");
+    s = s.replace(new RegExp(`(?<!${O})${GAAHLAA}{2,}`, "gu"), "…");
 
     // ── 3. DIGIT-FLANKED ⟨ᱹ GAAHLAA⟩ IS A DECIMAL SEPARATOR ───────────────────────────────────────────
     // The corpus writes decimals TWO ways: `᱒᱒.᱓᱓` ×84 and `᱓᱐ᱹ᱑%` ×16 — the GAAHLAA sign standing in for
@@ -264,6 +303,23 @@ export function normalizeSantali(input: string): string {
     // trap 28's family, arriving in Ol Chiki.
     s = s.replace(new RegExp(`(?<!${D})(${D}+(?:\\.${D}+)?)\\s*(?<!${O})ᱠ\\.ᱢ\\.?(?!${O})`, "gu"), "$1 ᱠᱤᱞᱚᱢᱤᱴᱚᱨ");
     s = s.replace(new RegExp(`(?<!${D})(${D}+(?:\\.${D}+)?)\\s*(?<!${O})ᱢ\\.(?!${O})`, "gu"), "$1 ᱢᱤᱴᱚᱨ");
+
+    // ── 5b. `sq mi` — THE IMPERIAL GLOSS THIS CORPUS PUTS AFTER EVERY METRIC AREA ──────────────────────
+    // ⚠ THE SECOND-BIGGEST LATIN SHAPE IN THE CORPUS, AND IT READ AS GARBAGE IN ENGLISH TOO. `sq mi` ×20 —
+    // always the parenthetical imperial gloss of a km² figure, always in the same country-infobox sentence
+    // (`… ᱚᱛ ᱦᱟᱥᱟ ᱫᱚ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ 1,972,550 km² (761,610 sq mi)`) — fell to the English fallback and came out
+    // *sk mˈiː*, because English does not expand `sq` either. It is not a leak the gates could see: two
+    // plausible-looking syllables, trap 56's class.
+    // ⚠ BOTH WORDS ARE ATTESTED IN EXACTLY THIS SLOT, so the match is WHOLE (trap 53):
+    //   ᱢᱟᱭᱤᱞ  32 tok / 14 arts, and every example IS the parenthetical gloss — `᱖᱘,᱐᱔᱓ ᱠᱤᱞᱚᱢᱤᱴᱚᱨ
+    //          (᱔᱒,᱒᱘᱐ ᱢᱟᱭᱤᱞ)`, `᱑᱕,᱐᱐᱕ ᱢᱟᱭᱤᱞ` — postposed after the numeral, same as ᱠᱤᱞᱚᱢᱤᱴᱚᱨ.
+    //   ᱵᱚᱨᱜᱚ  39/10, the tier's own exponent word, and it PRECEDES its unit noun: `ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ`,
+    //          `᱑᱒᱘.᱖᱔ ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ`, `ᱯᱚᱨᱚᱛᱤ ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ ᱨᱮ ᱑᱑᱐᱑`. So `ᱵᱚᱨᱜᱚ ᱢᱟᱭᱤᱞ` is the corpus's own
+    //          `ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ` frame with its own mile word in the noun slot — composed, not coined.
+    // ⚠ BARE `mi` IS NOT DECLARED AS A UNIT KEY (trap 46/28). Only the two-token `sq mi` shape is claimed —
+    // the one that was counted — because a bare two-letter `mi` would fire on far more than a unit.
+    // ⚠ ABOVE the symbol tier so the `sq`/`mi` pair never reaches it as two unrelated fragments.
+    s = s.replace(new RegExp(`(?<=${D})\\s*sq\\s*mi(?![\\p{sc=Latn}])`, "gu"), " ᱵᱚᱨᱜᱚ ᱢᱟᱭᱤᱞ");
 
     // ── 6. THE ASCII HYPHEN AS ⟨ᱼ PHAARKAA⟩, NARROWLY ─────────────────────────────────────────────────
     // See the header's finding 2. Only the FINITE-VERB ENCLITIC is claimed — the shape that carries 70 of
@@ -314,9 +370,16 @@ export function normalizeSantali(input: string): string {
     // the wrong operand, because `᱓᱐` is a clock FIELD and not a number in its own right. Since the clock
     // is deliberately unclaimed (see the header), the honest move is to leave the whole shape alone: a
     // left operand preceded by a colon is refused. One instance, and refusing it costs nothing.
+    //
+    // ⚠ AND THE RIGHT-HAND COLON GUARD WAS TOO WIDE, which the orphan-PHAARKAA census found. `(?![:\d])`
+    // refused `᱑᱙᱙᱘ᱼ᱑᱙᱙᱙: ᱠᱟᱞᱤᱫᱟᱥ ᱥᱚᱢᱟᱱ` — an AWARDS LIST, where the colon introduces the prize and the
+    // span before it is a plain year range — and the refusal was invisible, because the abandoned ⟨ᱼ⟩ then
+    // read as the empty string. The clock hazard is a colon followed by a DIGIT (`᱒-᱓:᱓᱐`), never a colon
+    // followed by a space and a name, so the guard now says exactly that. The LEFT operand's own
+    // `(?<![:.]\d{0,4})` is untouched and still refuses the `᱑᱐:᱓᱐ - ᱑᱑` case it was written for.
     const RANGE_DASH = `[-–—${PHAARKAA}]`;
     s = s.replace(
-        new RegExp(`(?<![-+×÷=<>]\\s?)(?<![:.]${D}{0,4})(?<!${D})(${D}+(?:\\.${D}+)?)\\s?${RANGE_DASH}\\s?(${D}+(?:\\.${D}+)?)(?!\\s?[-+×÷=<>])(?![:${D}])`, "gu"),
+        new RegExp(`(?<![-+×÷=<>]\\s?)(?<![:.]${D}{0,4})(?<!${D})(${D}+(?:\\.${D}+)?)\\s?${RANGE_DASH}\\s?(${D}+(?:\\.${D}+)?)(?!\\s?[-+×÷=<>])(?!${D})(?!:${D})`, "gu"),
         "$1 ᱠᱷᱚᱱ $2");
 
     // ── 9. `°C` — THE SCALE NAME, AND ONLY THAT ONE ───────────────────────────────────────────────────
@@ -378,6 +441,14 @@ const SYMBOLS = makeSymbolNormalizer({
         km: ["ᱠᱤᱞᱚᱢᱤᱴᱚᱨ"],
         cm: ["ᱥᱮᱱᱴᱤᱢᱤᱴᱚᱨ"],
         mm: ["ᱢᱤᱞᱤᱢᱤᱴᱚᱨ"],
+        // ⚠ THE FOOT WORD EXISTS AND RUN 12 SAID IT DID NOT. `LEAK RAW-LATIN ft ×1` was left open on
+        // "no foot word sourced"; re-probing finds TWO, both attested and both in precisely this slot —
+        // the parenthetical imperial gloss after a metre figure, the same frame as ᱢᱟᱭᱤᱞ above:
+        //   ᱯᱷᱤᱴ 63 tok / 16 arts — `᱓᱐᱔ ᱢᱤᱴᱚᱨ (᱙᱙᱙ ᱯᱷᱤᱴ)`, `᱔,᱔᱗᱗ ᱯᱷᱤᱴ (᱑,᱓᱘᱒ ᱢᱤᱴᱚᱨ)`
+        //   ᱯᱷᱩᱴ 25/13        — `᱔᱒᱘᱐ ᱢᱤᱴᱚᱨ (᱑᱔,᱐᱔᱐ ᱯᱷᱩᱴ)`, `᱑᱕᱐ ᱯᱷᱩᱴ(᱔᱖ ᱢᱤᱴᱟᱹᱨ)`
+        // A real spelling tie like the Celsius one, decided on count and article spread rather than hidden:
+        // ᱯᱷᱤᱴ wins 63/16 against 25/13. The corpus's own instance is `3,776.24 m (12,389 ft)`, Mount Fuji.
+        ft: ["ᱯᱷᱤᱴ"],
     },
     // `ᱵᱚᱨᱜᱚ` PRECEDES its noun — `ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ`, `ᱯᱚᱨᱚᱛᱤ ᱵᱚᱨᱜᱚ ᱠᱤᱢᱤ ᱨᱮ ᱑᱑᱐᱑` — so `position: "before"`.
     // ⚠ `cubed` IS OMITTED, not guessed: no cube word is attested and `km³` is ×0 in this corpus. The tier
