@@ -17,6 +17,8 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { renderNumber, spellDigits, westernNumberWords, type NumbersDef } from "../../core/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeArmenian } from "./normalize.ts";
 
 export interface ArmenianDef {
     vowels: Record<string, string>;
@@ -35,8 +37,16 @@ export interface ArmenianDef {
 const isVowelPh = (p: string): boolean => /[ɑeiouəʏœ]/u.test(p); // a phoneme that carries a vowel (je/vo/jev included)
 const isSonorant = (p: string): boolean => /^[lmnɾrj]/u.test(p); // sonorants (for final-cluster sonority)
 
-/** Build a full Armenian engine (phonemizer + word g2p) from one dialect manifest. */
-export function makeArmenianEngine(def: ArmenianDef) {
+/**
+ * Build a full Armenian engine (phonemizer + word g2p) from one dialect manifest.
+ *
+ * `pre` is the dialect's own text-normalization pass, applied to the raw input before tokenizing. It is a
+ * PARAMETER rather than a fixed import because the two standards do not share one: hy's `normalize.ts` is
+ * measured against hy's own corpus, and Western Armenian has neither a layer nor a mined artifact to
+ * measure one against. A sibling is a hypothesis, not a source (trap 55) — so hyw passes nothing and its
+ * reading is byte-identical to what it was.
+ */
+export function makeArmenianEngine(def: ArmenianDef, pre: (s: string) => string = (s) => s) {
     const CLAUSE_MARK = def.clausePunctuation;
     const MAP: Record<string, string> = { ...def.consonants, ...def.vowels }; // vowels win the shared ⟨ո⟩ key (→o bare)
     // Digraph keys sorted longest-first so a 3-char sequence is tried before a 2-char one.
@@ -122,7 +132,7 @@ export function makeArmenianEngine(def: ArmenianDef) {
 
     class ArmenianPhonemizer implements Phonemizer {
         text(input: string): string {
-            return assembleClauses(input, TOKEN, (m, sink) => {
+            return assembleClauses(pre(input), TOKEN, (m, sink) => {
                 if (m[1]) sink.emit(phonemizeWord(m[1]));
                 else if (m[2]) sink.emit(number(m[2]));
                 else if (m[3]) {
@@ -136,8 +146,60 @@ export function makeArmenianEngine(def: ArmenianDef) {
     return { phonemizeWord, create: () => new ArmenianPhonemizer() };
 }
 
+/**
+ * The shared SYMBOL tier for EASTERN Armenian only. Every word here is sourced in the header of
+ * `normalize.ts`, with the sense read; the counts are from `tools/corpus/mined/hy.jsonc`.
+ *
+ * WHY THE TIER RATHER THAN LOCAL RULES (trap 47's test — can the tier say it?). Armenian postposes the
+ * percent word, the currency noun and the unit noun after an INVARIANT numeral (`83 տոկոս` and
+ * `95 տոկոսը` take the same form; `5 մետր`, `2500 մետր`), so one CountForms entry each is the whole of the
+ * agreement, and the magnitude hop `159,681 մլրդ $` → *…միլիարդ դոլար* is exactly what the tier composes.
+ * The two shapes it CANNOT reach — a bound suffix on the unit, and the ASCII exponent — are claimed in
+ * `normalize.ts` steps 5 and 6, which run first.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    // `տոկոս` ×11 in the corpus, every one postposed after a figure and no competing sense.
+    percent: ["տոկոս"],
+    // ⚠ ONLY THE SIGNS THIS CORPUS WRITES (trap 12): `$` ×30 and `€` ×1. The Armenian dram's own sign `֏`
+    // is ×0, so `դրամ` is deliberately not declared — and its bare corpus count of 3 is a trap-37 lead
+    // anyway (մետաղադրամներ "coins", դրամատիկական "dramatic").
+    currency: { "$": ["դոլար"], "€": ["եվրո"] },
+    // The magnitude abbreviations are expanded to these spellings in normalize.ts step 4, so by the time
+    // the tier runs `$2.81 տրլն` reads as `տրիլիոն` and the hop can match it.
+    // ⚠ `հազար` IS IN THE LIST although it is also the engine's own thousand-word, and the reason is the
+    // UNIT path, not the currency one: `magnitudes` gates the tier's connective hop in BOTH consumers, and
+    // hy writes `65 հազար ՀԱ` and `1,4 հազար ԿՄ²` — where without it the magnitude stands between the
+    // number and its unit, the adjacency guard declines, and `հա`/`կմ` reach the IPA raw. (The playbook's
+    // "one declaration, two consumers" note, arriving from the other direction: Italian withheld the field
+    // to protect the currency reading and silently broke the unit one.)
+    magnitudes: ["միլիոն", "միլիարդ", "տրիլիոն", "հազար"],
+    // ⚠ `գ` (gram) IS NOT DECLARED: this corpus writes `գ.` for ԳՅՈՒՂ, "village". See normalize.ts.
+    // The one-letter key `մ` IS declared — digit-adjacent `մ` is ×20 in the retained corpus and every one
+    // is a metre, and hy writes NO dotted versions at all (10 `\d+\.\d+`+letter shapes, all decimals), so
+    // trap 46's `802.11m` exposure does not exist here.
+    units: {
+        "կմ": ["կիլոմետր"], "սմ": ["սանտիմետր"], "մմ": ["միլիմետր"],
+        "կգ": ["կիլոգրամ"], "հա": ["հեկտար"], "դմ": ["դեցիմետր"], "մ": ["մետր"],
+        // The LATIN abbreviations, which hy.wikipedia's own definitional articles name as the
+        // international form of the same Armenian word — "Քառակուսի կիլոմետր (կմ², km², քառ. կմ)",
+        // "Սանտիմետր (հայերեն հապավումը. սմ; միջազգայինը. cm)", "Կիլոգրամ (նշանակումը՝ կգ, kg)" — and
+        // which the corpus does use (`800-2000 mm`, ×2). ⚠ LATIN `m` IS NOT AMONG THEM: a one-letter Latin
+        // key after a digit is the `Il-76s` exposure, and hy writes its metres as ⟨մ⟩ anyway (×20).
+        km: ["կիլոմետր"], cm: ["սանտիմետր"], mm: ["միլիմետր"], kg: ["կիլոգրամ"],
+    },
+    // BEFORE the noun, in both sources: `55 խորանարդ կիլոմետր` (corpus) and hy.wikipedia's own definitional
+    // "Քառակուսի կիլոմետր (կմ², km², քառ. կմ), մակերեսի չափման միավոր".
+    exponentWords: { squared: ["քառակուսի"], cubed: ["խորանարդ"], position: "before" },
+});
+
 // EASTERN Armenian (hy) — the default export path, loaded from armenian.jsonc.
-const eastern = makeArmenianEngine(loadManifest<ArmenianDef>(import.meta.url, "armenian.jsonc"));
+// ⚠ normalize FIRST, then the tier. normalize's ordinal, suffix and era steps need the number and its
+// written suffix still adjacent, which the tier would break; and its unit+suffix step (6) has to claim
+// `10 կմ-ից` before the tier matches the bare `կմ` and leaves the suffix stranded as a free word.
+const eastern = makeArmenianEngine(
+    loadManifest<ArmenianDef>(import.meta.url, "armenian.jsonc"),
+    (s) => SYMBOLS(normalizeArmenian(s)),
+);
 
 /** One Eastern Armenian word → canonical IPA. */
 export const phonemizeWord = eastern.phonemizeWord;

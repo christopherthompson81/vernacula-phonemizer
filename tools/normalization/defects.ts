@@ -2808,6 +2808,47 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "LATIN, which this layer deliberately declines (the bibliographic `ПК = Upgrading` separator), "
             + "so the probe can only ever report DROPPED",
     },
+    hy: {
+        // ⚠ COUNTS ARE OVER THE RETAINED TEXT OF `tools/corpus/mined/hy.jsonc` — 460 segments (260 hard +
+        // 200 sample) out of a 2,517,219-paragraph hy.wikipedia dump. Every refusal is argued in
+        // src/languages/armenian/normalize.ts; only these TWO are entered here, and the rest of the class
+        // stays RED on purpose (the ak/gn stance).
+        //
+        // ⚠ `minus` IS SHIPPED, NOT EXEMPTED, and `review.ts --lang hy` still reports it because the rule
+        // is DELIBERATELY NARROW. All four true negatives in the retained text are followed by a percent
+        // or a degree — `-4.9 %`, `-0,018 %`, `-20 °C`, `−15 °C` — which is trap 24's Hindi discriminator,
+        // and `մինուս` is attested (hy.wikipedia ×28/2, the article defining the + and − signs). Widening
+        // to a bare `(^|[\s(])[-−]\d` was measured and is NET NEGATIVE here: it adds no true instance and
+        // six false ones — the bibliographic separators `- 1. - Cambridge`, `. - 394 էջ`, `. - 455 էջ`,
+        // the record number `- 010401006121…` and the timeline markup `shift:(-10,5)`. The probe's bare
+        // `-5` has no corpus instance at all, so the red line is the guard reporting itself, not a gap.
+        //
+        // ⚠ `equals`, `times`, `divide`, `less-than`, `greater-than` are ALSO NOT HERE, because they are
+        // real sourcing gaps rather than correct silences: `×` is contentful in four instances of
+        // scientific notation (`6,022 × 10²³`, `3,086 × 10¹³`, `9,46 × 10¹²`) and no Armenian word for it
+        // has been sourced with its sense read. That stays red until one is.
+        plus: "×11 in the retained text and EVERY ONE IS A TEMPERATURE — `+15.2°С`, `+7 °C`, `+26-28°С`, "
+            + "`+8-9 °C`, `+24-25 °C`, `+28-ից +32 °C`, `+8-ից +10 °C`, `+ 30 … + 40 °C`, "
+            + "`+ 17 … + 20 °C`. There is no `UTC+N` in the corpus and no arithmetic plus; the whole class "
+            + "is the measurement plus, which the playbook's own trap-48 measurement settles: omitting it "
+            + "is LOSSLESS (`+30°` and `30°` are the same temperature) where omitting a minus INVERTS. "
+            + "This is why hy ships the minus and not the plus, rather than treating them as a pair. "
+            + "⚠ SOURCING IS NOT THE BLOCKER and that is stated so nobody re-opens it as one: `պլյուս` is "
+            + "attested on hy.wikipedia in the SAME article as `մինուս` («Պլյուս» և «մինուս» նշաններ "
+            + "(+ և −), մաթեմատիկական նշաններ), so the word is available and the rule shape is identical "
+            + "to the minus's. It is withheld because the reading it would add is redundant, not because "
+            + "it could not be written. (⚠ `գումարած` ×2 in the corpus is a DIFFERENT slot — the "
+            + "two-operand arithmetic participle, `մեկին գումարած երկրորդ մեկի կեսը` — the same "
+            + "part-of-speech trap as `հանած`, which is why neither is the sign's word.)",
+        ampersand: "×9 in the retained text and NINE OF NINE sit inside an ENGLISH phrase: `AT&T` ×2, "
+            + "`R&B` ×2, `\"Shake, Rattle & Roll\"`, `Gerry & The Pacemakers`, `Eddie & the Showmen`, "
+            + "`BBC Four Film & Drama`, `A. & C. Black, Ltd., London`. Every one reaches the engine "
+            + "through the registry's Latin-run router, so the reading that belongs there is ENGLISH's "
+            + "`and`, not an Armenian word substituted into the middle of an English band name — and the "
+            + "artifact scan reports five of them as `FOREIGN ampersand` for exactly that reason. This is "
+            + "not a sourcing gap: Armenian's coordinator `և` is ubiquitous in the corpus and would be "
+            + "available instantly. There is simply no Armenian `&` here to read",
+    },
 };
 
 /**
