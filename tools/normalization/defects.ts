@@ -2849,6 +2849,29 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "not a sourcing gap: Armenian's coordinator `և` is ubiquitous in the corpus and would be "
             + "available instantly. There is simply no Armenian `&` here to read",
     },
+    ka: {
+        // ⚠ EVERY COUNT IS OVER THE RETAINED TEXT OF `tools/corpus/mined/ka.jsonc` — 453 segments
+        // (253 hard + 200 sample) out of a 1,025,770-paragraph ka.wikipedia dump. espeak does not ship
+        // Georgian at all, so the tiers are this corpus, `ka.wikipron-kat-narrow.tsv` and `attest.ts`
+        // against ka.wikipedia. The refusal is argued in src/languages/georgian/normalize.ts.
+        // ⚠ `math-sign` IS DELIBERATELY ABSENT, AND THAT IS WHY `review.ts --lang ka` STAYS RED ON IT —
+        // the ak / gn / ln / bm stance. `+` and `=` ARE read (პლუს, უდრის, both attested in one
+        // ka.wikipedia sentence, „ორს პლუს ორი უდრის ხუთს“ (2 + 2 = 5)); what is refused is `×`, whose
+        // five instances are not one class — `17×11 კმ` and `6.9X3.6 მ` are DIMENSION crosses that read
+        // "by", `1 000 000 × 1 000 000 მ` is a genuine multiplication, and `1280x1024` is a screen
+        // resolution inside a Latin run. One word cannot serve all four, and `გამრავლებული` ×12/12 on the
+        // wiki is the ordinary participle "multiplied/propagated" (`ფოტოასლებით გამრავლებული` — copies of
+        // a book), never the operator: trap 37 with a healthy count on the wrong sense. Declaring the
+        // whole class silent here would also hide the two signs that ARE read, which is the wrong trade.
+        ampersand: "×9 in the retained text and NOT ONE is Georgian. Every occurrence sits inside a "
+            + "LATIN run that the shared unclaimed-run pass hosts out to the foreign path: `AT&T` ×2, "
+            + "`Simon & Schuster`, `Vandenhoeck & Ruprecht`, `Artemis & Winkler`, `.40 S&W`, "
+            + "`& Iankoshvili` (a citation author list), plus `&nbsp;` entity residue that `stripMarkup` "
+            + "decodes above this layer. Georgian prose writes its coordinator და as a word and does not "
+            + "use the character — so this is not a sourcing gap (და is in georgian.jsonc's number "
+            + "composer already) but a SENSE refusal: reading `&` as და inside `Simon & Schuster` would "
+            + "put a Georgian conjunction into an English publisher's name. There is no Georgian `&` to read",
+    },
 };
 
 /**
