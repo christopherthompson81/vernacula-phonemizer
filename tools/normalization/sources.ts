@@ -757,11 +757,18 @@ export function scaleNames(c: Ctx): Row {
         return row("unknown", `the scale probe reads LATIN spellings and this corpus is not Latin — a miss is an unread haystack, `
             + `not an absence${candidates}`);
     }
-    // A row that names an unsearched haystack and still returns `none` is asserting an absence it did not
-    // measure — and it fed the blocked count. Downgrade with the tier off; the wording already said so.
-    return ESPEAK_OFF
-        ? row("unknown", `° occurs, no scale name in ${HAYSTACK} and the layer declares no scale arm${candidates}`)
-        : row("none", `° occurs, neither scale name in ${HAYSTACK}, and the layer declares no scale arm${candidates}`);
+    // ⚠ THIS ROW KEEPS `none` WITH THE TIER OFF, AND THE LINE IS WORTH STATING because a review asked for the
+    // opposite and `normalization-sources.test.ts` refused it: *"not every negative is wrong, and softening
+    // all of them would cost the class its meaning."* The test constructs a corpus containing ° and no layer
+    // arm — a case where the probe genuinely COULD read the corpus and found nothing — and demands `none`.
+    //
+    // The principle that separates this class from letter-names, decimal-point and fraction-series: downgrade
+    // to `unknown` only when espeak was the ONLY source left. Those three fall back to the LAYER'S OWN
+    // declaration, and a layer not having declared a word is not evidence the language lacks one. Scale-names
+    // falls back to the CORPUS and the REFEREE — independent text, actually searched — so its negative is
+    // weaker with the tier off but still measured. What the tier being off changes is the HAYSTACK, and that
+    // is already what the detail says.
+    return row("none", `° occurs, neither scale name in ${HAYSTACK}, and the layer declares no scale arm${candidates}`);
 }
 
 /**
@@ -1448,7 +1455,7 @@ function main(): void {
         // COUNT — "letter names are absent for 94 of the registered languages" is a number people plan work
         // from. With $ESPEAK_NG unset that number is a fact about the shell, so say so before the matrix.
         if (ESPEAK_OFF) console.log(`  ${ESPEAK_OFF_NOTE}, so every cell below that rests on it\n`
-            + `  (letter-names, decimal-point, fraction-series, scale-names) reads ?? rather than NONE. Any COUNT taken from this run is a fact about the shell, not the fleet:\n`
+            + `  (letter-names, decimal-point, fraction-series) reads ?? rather than NONE. Any COUNT taken from this run is a fact about the shell, not the fleet:\n`
             + `      export ESPEAK_NG=/path/to/espeak-ng   # the checkout containing dictsource/\n`);
         console.log(`      ${klasses.map((k) => k.slice(0, 9).padEnd(10)).join("")}`);
         const blockedBy: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
