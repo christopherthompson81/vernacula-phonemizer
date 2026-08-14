@@ -298,6 +298,14 @@ Four things that design gets right, each one a lesson from this playbook:
   makes the point twice over: `amadola` appears as *izikhali alingene amaDola … wamaDola aseMelika* — the
   currency, in a monetary amount, which CLOSES that gap; but `idola` appears as *IDola yisifunda … eGabhoni*,
   a district in Gabon. A place name is not a currency. Check the sense (trap: the Fula `hakkunde` lesson).
+  **An `attested` verdict is only usable with a sense you have READ, and one batch produced five more:** nan's
+  `kong-si` ×5 looks like 公絲, the milligram, and is 公司, the COMPANY (`khek-poâⁿ kong-si soan-thoân`, a record
+  label) — taken as an attestation it would have read every milligram as "company"; pcm's `fut` is 4 tokens /
+  2 articles and every hit is `fut-bola`, FOOTBALL; bar's `Komma` ×24/19 is every time the verb ("zu Schadn
+  komma"), never the punctuation mark, and its `plus` ×45 is Adblock Plus; ilo's `dollar` reports "attested ×3"
+  and every hit is *Million Dollar Baby* (the word is `doliar` ×26, in a sentence that names the sign); ki's
+  `digirii` ×4/3 is every time the academic degree. Five languages, five green counts, five wrong words —
+  and in three of them the correct word was found only because the examples were read.
 - **`amaphuzu` ×2 is both a confirmation and a refusal.** Zulu declined it as a decimal-point word because
   its corpus instances were sports points; Wikipedia says the same independently. A probe that confirms a
   refusal is doing its job.
@@ -346,9 +354,9 @@ shaped the way it is.
 
 ## The traps, in order of how often they bit
 
-⚠ **THE NUMBERS ARE PERMANENT IDENTIFIERS. Do not renumber, merge or delete a trap.** 66 files across this
+⚠ **THE NUMBERS ARE PERMANENT IDENTIFIERS. Do not renumber, merge or delete a trap.** 112 files across this
 repository cite a trap by number — `src/languages/*/normalize.ts` comments and tool headers —
-spanning 25 distinct numbers. A merge that renumbers repoints every one of those citations at a different trap
+spanning 43 distinct numbers, and the citation count has grown faster than the trap count. A merge that renumbers repoints every one of those citations at a different trap
 and nothing detects it, which is the `negative` → `signed-number` rename that left 35 artifacts carrying a dead
 key. **New traps append. A superseded trap keeps its number and says what replaced it.**
 
@@ -359,7 +367,7 @@ you have already met.
 
 ### ⚠ Where a principle is ENFORCED, and why that column exists
 
-This document is 1,500 lines and 55 numbered traps. A Khmer session read it start to finish and then broke
+This document is 1,780 lines and 57 numbered traps. A Khmer session read it start to finish and then broke
 "a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
 បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
 gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
@@ -374,6 +382,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 | A guard written for one writing system is blind in another | `count.ts`, `scripts.ts` | `DIGIT` is `\p{Nd}` and never `\d`; word boundaries are `(?<![\p{L}\p{M}])`, never `\b`; the script table has ONE copy |
 | Regenerate from the recorded invocation, not from memory | `mine.ts` | every artifact records the `command` that produced it, paths reduced to basenames; omitting `--sample` or `--terms` silently changes the artifact and left no other trace |
 | A refusal needs a check, not a feeling | `sources.ts` + `defects.test.ts` | the pre-flight report must cover every `DROPPABLE` class or declare an exemption; a class-level refusal is consulted by the artifact scan instead of failing it |
+| A gate must be able to fail, and to read its own output | `pythonTools.test.ts`, `attest.ts`, `corpus-diff.ts` | every Python file under `tools/` must parse and no tracked file may carry a conflict marker (`npm run ci` was green over a module that could not be loaded); a cache's writer and parser come from one place, so the parser cannot stop matching the file it writes; `compare` pairs rows by SOURCE TEXT and reports unpaired rows as a number instead of throwing or sliding |
 | A differential test must hold everything but the variable still | `defects.ts` | substitute a space, never delete; and a harness measuring the DEFAULT path must build its baseline explicitly — shipping a change into the default silently rebased `eval_km_segmenter.mts`'s baseline and it compared a model against itself |
 
 ### Index — the eight principles, and which traps instance them
@@ -382,12 +391,12 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 |---|---|---|
 | **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin |
 | **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase |
-| **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it |
-| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe |
+| **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
+| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later |
 | **A differential test must hold everything but the variable still** | 18, 26 | **the same cause at two levels** — 18 is the probe (`A&B` → `AB`), 26 is real text; substitute a space, never delete |
-| **Evidence beats intuition, and the corpus arbitrates** | 3, 4, 5, 9, 12, 13, 20 | the diff sees what probes cannot; tabulate before ruling; a test can pin the bug; an unattested guard alternative misfires; a redundant symbol is a permissible drop; pin branches not instances; your emitted digits meet the number rules downstream |
+| **Evidence beats intuition, and the corpus arbitrates** | 3, 4, 5, 9, 12, 13, 20, 55 | the diff sees what probes cannot; tabulate before ruling; a test can pin the bug (and pinning a temporary ABSENCE has a shelf life); an unattested guard alternative misfires; a redundant symbol is a permissible drop; pin branches not instances; your emitted digits meet the number rules downstream; the closest sibling is a hypothesis |
 | **One shared source can settle a fleet-wide question, positively or negatively** | 45, 48, 35, 36, 40 | **45 and 48 are two halves of one technique** — FLEURS's shared source text finds a word AND proves an absence; ask what the language calls the thing; fold a compatibility character, never NFKC; name the slot when you have no candidate spelling |
-| **A tool that cannot see its evidence fails toward a confident negative** | 29, 30, 31, 32, 33, 42, 43, 49, 51, 6, 11, 14, 15, 22 | a green artifact can answer last month's question; measure whether a fetch is slow at work or at waiting; re-mining is not monotone; an artifact that cannot be regenerated is not committed; an index from a folded string addresses the wrong text; a check reading one file goes blind on the rest; a code the registry throws on looks like breakage; mojibake misattributes damage; the wiki route has a floor |
+| **A tool that cannot see its evidence fails toward a confident negative** | 29, 30, 31, 32, 33, 42, 43, 49, 51, 6, 11, 14, 15, 22, 54, 56, 57 | a green artifact can answer last month's question; measure whether a fetch is slow at work or at waiting; re-mining is not monotone; an artifact that cannot be regenerated is not committed; an index from a folded string addresses the wrong text; a check reading one file goes blind on the rest; a code the registry throws on looks like breakage; mojibake misattributes damage; the wiki route has a floor; a declared unit that still reports has a cause the table cannot show; a defect that produces a READING is worse than garbage; seven instruments failed toward confidence in one week and three were not running |
 
 
 **1. `\b` is ASCII-defined.** Six appearances, including in shared code. French matched *inside* `siècle`
@@ -409,6 +418,14 @@ guessing, and state the check that matters: *zero sentence-final pauses were los
 
 **5. Tests can pin the bug.** Several times a failing test was asserting the defective output. Correct the
 test; do not preserve the behaviour.
+
+**And a test that pins a temporary ABSENCE has a shelf life**, which is the same defect with a clock on it.
+`test/hmong.test.ts` asserted `normalizeHmong("km") === "km"` and annotated it "deliberately untouched here" —
+correct on the branch that wrote it, where the bare-unit path was a SIBLING branch's half of the same job.
+Both landed together and the input now reads (`1e8f3da`). The catalogue test taught it first: it pinned five
+languages as having no normalizer and two of them (rn, bar) got one the next day (`966fcbf`). Cross-branch, an
+assertion about what a layer does NOT yet do is an assertion about the schedule, not about the language. Pin
+the invariant instead — hmn's real one is that nothing may bite an RPA word, and that is unchanged.
 
 **6. A word your layer emits must come from the g2p.** Uzbek pushed the decimal word into the phoneme sink
 as ORTHOGRAPHY, so `12,5` read `ˈon ikkˈi vergul bˈeʃ` — ASCII `v`/`g` and no stress mark, where the g2p
@@ -636,6 +653,19 @@ as negatives. The one `attested` verdict hit only because a LaTeX dump had put s
   longer compound, and nothing else will catch that.
 - **A comment claiming the behaviour you wish you had is worse than no comment.** `tokens()` said it "works
   for a spaceless orthography's words too" while doing the exact opposite.
+- **PUNCTUATION INSIDE A WORD IS THE SECOND WAY THAT TEST GOES BLIND, and it is not confined to unspaced
+  scripts.** `attest.ts` split on `[^\p{L}\p{M}]+`, so a word-final orthographic glottal or a compound hyphen
+  cut the probe in half before the boundary test ran. Over the 71 recorded caches, **all 11 findings whose
+  probed word contains an apostrophe or a hyphen were `substring-only` with zero token hits, against an 82%
+  `attested` rate for the 330 plain words** — ln `kilomɛtrɛ-kare`, mad `sampè'`, mg `tora-telo`, nan
+  `kong-kin`, om `baay’isuu`. One-directional, because `substring-only` reads as unattested and an unattested
+  word is left unauthored: the instrument manufactured refusals, and only for languages that write a glottal
+  stop, an elision or a compound hyphen (`9539e03`).
+- **The REMOTE tokenizer splits it too, and that failure is silent rather than negative.** CirrusSearch serves
+  `lī-mī` as the two terms `lī` and `mī` and returns 40 articles about America and about kilometres, none
+  containing the compound; the probe reads twenty of them, finds nothing, and prints its most confident
+  negative. The obvious guard — "retry with `insource:` when the search returns nothing" — never fires,
+  because emptiness is not the symptom. Trigger on the punctuation in the probe.
 
 **20. THE ENGINE'S OWN NUMERAL RULES ARE DOWNSTREAM OF WHATEVER DIGITS YOU EMIT.** Writing an exponent as a
 digit (`5³` → `5的3次方`) let Mandarin's 两 rule claim it: 五的**两**次方, where 两 is the counting-two used
@@ -720,6 +750,16 @@ arc-second `″` in an imported/OCR'd text. FLEURS is transcribed speech and cle
 carries whatever the wiki carries. The fill is the right instrument, and its output stands in the same relation
 to a rule as `attest.ts`'s hits do to a word: necessary, never sufficient.
 
+**A LOW count is the same query, and it is the one that gets answered wrongly.** A zero announces itself; a
+three looks like a verdict. Declining an SI unit because the wiki writes its word three times conflates
+evidence about the CORPUS with evidence about the LANGUAGE — kilometre, metre, millimetre, litre and hectare
+have a settled form or a settled borrowing in essentially every written language, so a small count is grounds
+to source harder, not to leave raw ASCII in the phoneme string. Shona's `mm` shipped on `mamirimita` ×3 in one
+sediment-grade article, corroborated by `milimita` in a second article that names ⟨mm⟩ beside it (`81796dd`).
+The converse still binds and is not weakened by this: nothing is COINED, every word is a token somebody else
+wrote, and the sense is read (trap 37, and the standing rule on inventing data). Under-sourcing and inventing
+are two different failures, and "the count was low" is an argument for neither.
+
 
 **26. A DIFFERENTIAL TEST MUST HOLD EVERYTHING BUT THE VARIABLE STILL — SUBSTITUTE, DO NOT DELETE.** The drop
 test asks "did this symbol contribute?" by phonemizing the sentence with and without it. Deleting the symbol
@@ -736,6 +776,15 @@ bare *isˈip̚*. Replacing the symbol with a SPACE holds the boundary still. Mea
   kept its own copy of the LOOP, so the fix landed in one of two call sites and the fleet count did not move.
   The probe is now `withoutSymbol()`, exported and shared. Extracting shared DATA does not stop shared
   DECISIONS from drifting — hoist the decision too.
+- **THEN CHECK FOR THE THIRD COPY.** `corpus-diff.ts` held a private, pre-RAW-CAPS copy of the leak classes —
+  the third drifted copy found in one week, after `coverage.ts`'s (blind to SLOT-GAP and ZERO-WIDTH entirely)
+  and the one `defects.ts`'s own header warns about. It moved 95.7% of hmn's utterances while its leak summary
+  did not move at all. Derived from `LEAK_CLASSES` now, cost measured first over 161 artifacts / 45,306
+  readings: 0 lines move (`63d4d14`). ⚠ **And the measurement caught a trap inside its own fix** — `emit`
+  appends ` ⟪DROP:currency⟫`, which is uppercase ASCII, so a naive derivation reports RAW-CAPS on 5,188 of
+  45,306 readings, every one the tool's own writing, and `compare` prints ⚠ REGRESSED on any rise. Strip an
+  annotation WITH its separator (trimming after would erase a genuine trailing-space defect). A gate that reads
+  its own output must exclude its own signature first.
 - **Some blindness cannot be fixed cheaply, and then you document the count.** The exponent probe has the same
   merge problem (deleting `²` changes the unit token) and resists it: a spaced probe invents a failure for
   English, and asserting the unit survives gives 6 false positives in 19 because `compound`-position languages
@@ -1215,6 +1264,156 @@ principle as trap 48. What would move these is a source neither the corpus nor t
   Xhosa's `iimitha` ×1 is metres ("Iimitha ezili-167 ukuphakama") and `imitha` ×1 is RAYS ("ifunxa imitha
   ye-infrared", absorbs infrared radiation) — one noun-class prefix apart, and xh declares the right one.
   Worth knowing before anyone "simplifies" that key.
+
+**52. A LOOKBEHIND GUARD DOES NOT ANCHOR A MATCH — THE ENGINE SIMPLY STARTS LATER.** Trap 28 already says a
+lookahead alone does not work, because rejected at `802` the engine retries from the fractional part. The
+fuller statement cost three independent sightings in ONE batch, in three unrelated rules:
+
+    shi   802.11m   leading `(?<![\d.,])` — rejected at `802`, matched `11m`      → "802.11 metres"
+    ki    802.11m   matched from the FRONT: `802.11` is itself a valid operand    → *mita 802 11*
+    my    ×10 −27   guard rejected at the `1`, the engine stepped along to `0 −27` → the range rule ate it
+
+`8e2981b`, `58c1512`, `6ac81e8`. In my's case the damage was one hop further out: the mantissa was read as a
+span, and the inserted `အထိ` broke the unit step's number-adjacency, so `kg` reached the IPA raw — a guard
+failure surfacing as a leak in a language that declares the key.
+
+- **A lookbehind rejects one STARTING POSITION; it does not reject the string.** Anchor the OPERAND instead:
+  its digit run must begin where the match begins and end where it ends (`(?<![\d.,])` plus `(?![\d.,])` on
+  both edges of the whole number, not one edge of the key). my's fix was exactly that anchoring; ki split the
+  metre arm so a decimal operand must be SPACED from a one-letter key.
+- **Test the guard on the shape it is meant to reject, and read the output** — every one of these three passed
+  a test that asserted the guard rejected the string, because it did reject it, at position 0.
+- **Three sightings in one batch is a pattern, not a coincidence:** the `NOT_VERSION` family is spreading into
+  local layers (traps 39, 46), and each copy is written by someone reasoning about where a match should
+  START rather than about where the engine will try next.
+
+**53. A REFUSAL IS NOT NEUTRAL — PRICE IT AGAINST WHAT THE HALF-DECLARED READING SAYS.** Igbo declared `km`
+and, having no sourced square word, left `km²` alone. `790 km2` then read **"790 kilometres two"**: the tier
+re-emits the exponent, and an ASCII `2` is not a visible leak, it is a NUMBER (`fa16868`). Declining to author
+a word invented a quantity — worse than the raw `km` it replaced, and invisible to every leak class. The word
+existed: `skwea` ×44 over 19 articles in exactly that slot, while the obvious `square` ×154 is a proper noun
+every time (P-Square, Cabot Square, Square Records).
+
+- **"Do not bulk-invent language data" is a rule about ADDING a word. This is its mirror**, and it is not an
+  exception to it: withholding a word is also a decision with a reading attached, and that reading must be
+  read before the refusal is recorded as safe.
+- **Refuse the whole match, never half of it.** ak is the case where the refusal IS neutral, and the
+  difference is mechanical: its unit rule refuses a key followed by `2`/`3`/`²`/`³`, so `km²` reads exactly as
+  it did before rather than becoming a confidently wrong LENGTH. The exponent stays red in `review.ts` and is
+  deliberately not entered as an accepted silence.
+- **Trap 24 asks whether a narrower rule breaks the refusal. This asks what the refusal COSTS while it
+  stands** — and the two questions have different answers often enough to be worth asking separately.
+
+**54. A DECLARED UNIT THAT STILL REPORTS HAS A CAUSE THE UNIT TABLE CANNOT SHOW.** The recurring `kg`/`km` in
+the raw-Latin tail were read one at a time across 21 languages, and **none was a missing key** (`76a96b9`,
+plus the sibling runs). Nine distinct causes:
+
+| lang | the shape | the cause |
+|---|---|---|
+| ug | `180kmئېگىزلىكتە` | a bound suffix GLUED to the key — and it read `ˈʊkm` through the English fallback, never byte-identical, so never reported |
+| gan | `5 km²` with a superscript run | a superscript between the number and the unit breaks the adjacency |
+| ha | `km 6,387` | unit BEFORE numeral, which is Hausa's own order; the tier can only postpose (trap 47 reason 2) |
+| si | `1.9 kg/m3` | the rate declined WHOLE: `kg` is declared, `unitPer` deliberately is not, so the `/` fails the guard and numerator and denominator both stay raw |
+| wuu | a bare `km` | no numeral at all, with the bare-unit path off for `unspacedScript` by design |
+| bar | `Eihwohna/km²` | a COMMON-NOUN numerator — nothing the unit table can name |
+| mg | `1429 kg/m` | both keys declared, the rate branch entered, no `unitPer` — returns the text UNTOUCHED |
+| so | `610 deggane/sq mi` | an English modifier standing between number and unit; `mi: ["mayl"]` had been declared all along, so one raw run hid two lost readings |
+| nan | `120mg/100ml` | `ml` undeclared as a rate DENOMINATOR, so the tier declines the whole match and both units stay raw |
+
+- **Probe the SHAPE, not the key.** "Is `km` declared?" answers none of these. `10 km` reads in every one of
+  those nine languages; what fails is the shape the corpus actually writes.
+- ⚠ **The obvious repair has its own trap, and it trades a reported leak for an unreported one.** Rewriting
+  so's `sq mi` → `mi²` reads correctly where a digit precedes — and where one does not (`610 deggane/sq mi`,
+  four of eight instances) the tier's digit-adjacent path declines and the `²` the layer INVENTED reaches the
+  phoneme sink as a RAWMARK. The rule emits the measure words directly instead. This is the single move the
+  whole class must not make, and the wrong version passed every test written up to that point.
+- **Not every report is a defect** — ak's `km²` is refused on purpose (trap 53), and bar's `Eihwohna/km²`
+  resembles it and is not it: bar declares a square word and `5 km²` reads.
+
+**55. YOUR CLOSEST SIBLING IS A HYPOTHESIS, NOT A SOURCE — RE-MEASURE EVERY RULE AGAINST THE TARGET'S OWN
+CORPUS.** Trap 16 says go and look at what the sibling already wired. This is the other half: what you find
+there is a candidate, and copying it is how a working layer ships a confidently wrong reading.
+
+- **rn vs rw** (`809240c`). Kinyarwanda's layer landed ONE DAY earlier and was the obvious template; seven of
+  its rules diverge on Kirundi's own corpus. The worst is lexical: `kare` is rw's SQUARED word and is
+  Kirundi's ADVERB "early" (20 wiki hits / 15 articles, `hakiri kare`), so porting the table would have read
+  every area figure as "early kilometres". Also no Celsius name, no clock, three separate span joiners each
+  attested in its own frame, no one-letter unit key (`50 m’ubumwe`, the locative elision), no coordinate
+  guard, and no minus.
+- **ilo vs ceb/hil** (`10589b5`), where the number is the argument. ceb accepts a bare `\d{1,2}:\d{2}` as a
+  clock; that shape is ×205 in Ilocano and only ~23 are clocks — the rest are UTC OFFSETS ×103, SCRIPTURE
+  REFERENCES ×26 and flag ratios. **A ceb-shaped rule would have fixed 23 cases and broken 182.** hil's guard
+  is inverted rather than loose (`alas` must PRECEDE), and `alas` is ×12 in ilo with not one instance before a
+  digit. Three measured arms replaced both.
+- **hil vs ceb** (`416ed14`). ceb reads `1/2` as `tunga`, "half"; in Hiligaynon `tunga` is the PREPOSITION "in
+  the middle of" — all 21 corpus instances are `sa tunga sang X kag Y`. Copying it would have read every half
+  as "between". Three more ceb rules failed the same re-measurement, and a bare-colon clock would have fixed
+  1 instance and broken 2.
+- **The GUARDS travel as badly as the vocabulary, and less visibly.** rn writes three grouping conventions at
+  once, so rw's trailing de-grouping guard left its commonest numeric shape (`1,964.54` ×9) ungrouped; hil had
+  to run ranges ABOVE decimals where ceb does not, or `3.5-3.8 bilyon` becomes a backwards span inside a
+  number.
+- **What transfers is the PROCEDURE, never the table** — this document's opening premise, arriving one
+  taxonomic level down. The sibling is worth reading precisely because it tells you which questions to ask.
+
+**56. A DEFECT THAT PRODUCES A READING IS WORSE THAN ONE THAT PRODUCES GARBAGE, AND NO COUNTER SEES IT.** A raw
+`km` in the IPA is visibly wrong and every leak class is built for it. An undeclared abbreviation whose letters
+happen to be pronounceable comes out as a plausible word instead, and DIGIT, SLOT-GAP, RAWMARK, DROP and THROW
+are all blind to it. Five instances in one batch, none of which moved any counter:
+
+    nya   ⟨cm⟩ read as KILOMETRES (⟨c⟩→/k/); tl the same defect, found later      beb33dc, 81796dd
+    jv    `10 ha` → səpˈulʊh hˈɔ — the g2p read ⟨ha⟩ as a Javanese WORD           b96621d
+    ig    `790 km2` → "790 kilometres two"                                        fa16868 (trap 53)
+    tg    numberWords indexed units[10] for n ≥ 10⁹ and concatenated "undefined",
+          which the g2p skipped: 10⁹ read *сад миллион*, ONE HUNDRED MILLION      31e6336
+    bm    homoglyphs ε ×179, ԑ ×26, ᴐ ×9, ɳ ×8 for ɛ ɔ ɲ are in no grapheme table
+          and are not ASCII, so the tokenizer ENDED THE WORD and DROPPED them:
+          `Ntεnεndon` → *nt n ndõ*, ~222 characters, silently                     304f41d
+
+- **The class is sized, and the size is the argument.** `misread.ts`'s control token says **180 of 193 engines
+  phonemize unknown Latin rather than leaking it** — so the existing probes were only ever going to catch the
+  other 13, and the fleet's leaking-engine count is a lower bound (`ec1f48d`). 27 collisions in 24 engines,
+  nearly all `cm` = `km` = /km/.
+- **Ask three questions that never mention survival:** was the token converted AT ALL (token-multiset
+  subtraction, because ig and nya PREPOSE the unit noun and a prefix-strip fails on exactly the two languages
+  the class was found in); is it the RIGHT thing (compare the magnitude-confusable pairs `cm`/`km`, `mg`/`kg`,
+  `ml`/`l` for identical readings); and how does this engine route unknown Latin at all.
+- **The corpus-scale gates stay silent through the fix, in both directions.** de/hi/mr artifacts changed by
+  ZERO utterances; hmn's referee was a perfect 455/455 while `km` reached the IPA ×13 (`2c0f748`). A green
+  referee and a flat diff are not evidence here — only reading the output string is.
+- ⚠ **A silent 10× error is the extreme case of this**, because it is not even a foreign token: every word tg
+  emitted was Tajik and well-formed. Pin a number ladder at every branch boundary.
+
+**57. THE INSTRUMENTS FAIL TOWARD FALSE CONFIDENCE — SEVEN IN ONE WEEK, AND THREE WERE NOT RUNNING AT ALL.**
+Kept as a census rather than seven entries, because the direction is the finding:
+
+| instrument | what it said | what was true |
+|---|---|---|
+| `attest.ts` boundary | `substring-only` for every probe containing an apostrophe or hyphen | attested — 11 of 11 such findings false, against an 82% baseline (`9539e03`, trap 19) |
+| `attest.ts` cache | `REFUSING TO WRITE: N finding(s) could not be parsed` | the writer emits a finding's closing brace at 12 spaces and the parser expected 8: **not one cache in the tree had ever been parseable by the tool that wrote it** |
+| `corpus-diff` | `length mismatch: before 426, after 428 — different corpora?` | an EMPTY reading is a RECORD; filtering empty lines deleted rows from one side, so the instrument refused to measure exactly the improvement this layer exists to produce (`2e2613d`) |
+| `review.ts` sourcing | "no percent/currency/decimal word declared" for bm, my, ps, pbt, ug | all five declare, locally; that branch had **no true positive in the tree at all** (`50e1ab5`, trap 42) |
+| `sources.ts` scale-names | `[ ok ] Celsius Fahrenheit` for cdo, `[NONE]` for syl | wrong in both directions, and **41 of 117 verdicts changed** with the rebuild (`e5a3716`) |
+| `sources.ts` classes | 18 vocabulary classes reported | `units` excluded BY DESIGN — the named root cause of the Igbo defect, and 11 languages were in that state (`f0e9b58`) |
+| `npm run ci` | green, 240 test files / 3769 tests | over a `filter-by-language.py` that could not be parsed at all, for two commits (`637cfbd`) |
+
+- **The direction is not random.** Six of the seven manufacture a NEGATIVE or a silence. That is the
+  expensive direction here, because a false positive gets read, argued and corrected, while a false negative
+  closes the question and is recorded as a refusal — and this tree's standing rule is to leave an unattested
+  word unauthored.
+- **Three of them were not running.** A module that cannot be parsed, a parser that has never matched its own
+  writer's output, and a class excluded from the report — none of these can even be inconsistent, which is
+  why nothing surfaced them for months. **Ask of any green gate: what would it have printed if the thing it
+  checks were absent?** If the answer is "the same", it is not a gate.
+- **Two structural fixes came out of it, both cheap.** Writer and parser must come from one place
+  (`renderFinding()` + `BLOCK_RE`), or they drift the next time the template is touched; and `test/
+  pythonTools.test.ts` now compiles every Python file under `tools/` and fails on a conflict marker in any
+  tracked file — deliberately the weakest useful check, because the bug it exists for produced a file that
+  could not be parsed at all.
+- **A plausible wrong answer is worse than a crash**, and `corpus-diff` is the worked example: the throw was
+  the LUCKY case. One utterance going empty→text while another goes text→empty leaves the counts equal, the
+  filter slides the arrays past each other, and the tool prints FABRICATED rows — the right COUNT, every row
+  wrong, no error. Pair rows by the SOURCE TEXT that produced them, and report unpaired rows as a number.
 
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
