@@ -9,6 +9,7 @@ import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { normalizeTibetan } from "./normalize.ts";
 
 interface TibetanNumbers {
     zero: string;
@@ -322,7 +323,11 @@ class TibetanPhonemizer implements Phonemizer {
         // Tibetan digits (U+0F20–0F29) fold to ASCII up front (core/unicode.ts), so a Tibetan-numeral run
         // composes exactly like a Western one. The token class still admits ༠-༩ so an unfolded digit could
         // never fall into the WORD alternative and vanish inside parseSyllable.
-        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
+        //
+        // normalize.ts runs AFTER that fold and before the tokenizer: it rewrites the symbols, spans, units
+        // and stray spaces this TOKEN cannot read into Tibetan words, which the WORD alternative then
+        // phonemizes for free. Everything it emits is text, so nothing bypasses the g2p (playbook trap 6).
+        return assembleClauses(normalizeTibetan(foldNativeDigits(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(number(m[1]));
             else if (m[2]) sink.emit(phonemizeWord(m[2]));
             else if (m[3]) sink.pause(m[3]!);

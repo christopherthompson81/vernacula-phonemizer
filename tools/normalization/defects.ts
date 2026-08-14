@@ -2694,6 +2694,62 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "lesome le borataro*, 'sixteen times'), is the OCCURRENCE word and not the multiplier: a real "
             + "word whose slot is not this slot, which is the Fula `hakkunde` failure. Nothing is read",
     },
+    bo: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE RETAINED TEXT OF `tools/corpus/mined/bo.jsonc` — 419 segments out
+        // of an 89,427-paragraph bo.wikipedia dump — with the artifact's whole-corpus `counts` quoted where
+        // they differ. `attest.ts` against bo.wikipedia and `concept.ts` are the second tier; espeak does
+        // not ship Tibetan at all, so there is no third. Every refusal is argued in
+        // src/languages/tibetan/normalize.ts and worked in docs/investigations/bo_normalization_investigation.md.
+        // ⚠ `minus` IS DELIBERATELY ABSENT, AND THAT IS WHY `review.ts --lang bo` STAYS RED ON IT — the
+        // gn / ak / ln / bm / ilo stance. Tibetan has at least one genuine negative in the retained text
+        // (`Ayding Lake (−154m)`, a below-sea-level elevation), and omitting a minus INVERTS where omitting
+        // a plus is lossless. What is missing is a WORD, not a guard: Wikidata's bo label for subtraction
+        // (Q40754) is `འཕྲི་རྩིས`, the operation NOUN — trap 35's `जोड़`/`धन` split — and nothing attests
+        // what a reader says between two operands. The gate comes green the day one is attested.
+        plus: "×12 in the retained text and NOT ONE is a spoken plus between two numbers. Eight are one "
+            + "linguistics table's MORPHOLOGICAL FORMULA joining word-class names — `སྔོན་འཇུག+མིང་གཞི།"
+            + "+འདོགས་ཅན།` ('prefix + root + suffix'), where the sign concatenates labels the way a `-` "
+            + "does in a compound; two are ALGEBRA in a maths article (`X+Y=30`, `x²*20+x³*20=295,237,900`, "
+            + "with `x` and `y` as variables); one is CHEMISTRY (`Al 2 O 3 + 2NaOH → 2NaAlO 2 + H 2 O`); "
+            + "and one is a telephone COUNTRY CODE, `(+86)0973`. The playbook's own finding on this class "
+            + "(trap 48) is that the plus is written as a glyph everywhere and spelled nowhere, so corpus "
+            + "silence settles nothing on its own — but here the SENSE settles it: there is no arithmetic "
+            + "plus in this corpus to read, and a compound joiner is correctly spoken by simple adjacency",
+        "plus-minus": "×0 in the retained text and `signs`/`arithmetic` show no ± anywhere. `sources.ts` "
+            + "agrees: `[  · ] plus-minus-word — the sign does not occur in the evidence`. A definitive "
+            + "absence, not a gap",
+        equals: "×15 and every one is METALINGUISTIC or a formula, which is why this is the largest "
+            + "remaining drop and still not a reading gap. The bulk is bo.wikipedia's SI-unit stub series "
+            + "defining one unit in terms of another — `༡སྐར་ཆ། = ༡ ༠༠༠ སྐར་ཆ་ཕྲ་མོ།(ms) = ༡༠༠༠ ༠༠༠ཝེ་སྐར་ཆ།"
+            + "(µs)`, `༡ལི་སྨིད། = ༡/༡༠༠སྨི།`, `༡ཝ་ཐི། = ༡/༡ ༠༠༠ ༠༠༠ ས་ཡ་ཝ་ཐི།(MW)` — beside school algebra "
+            + "(`X=22ནི་མཉམ་བྱ་x+12=34`), a chemistry worked example (`2 x (1)² = 2`) and a Devanagari "
+            + "glossary line (`(Rig Veda / Vedic tradition) = वेद परम्परा`). ⚠ AND THE ONE CANDIDATE IS THE "
+            + "WRONG PART OF SPEECH, in the corpus's own sentence: `མཉམ་བྱ` in `X=22ནི་མཉམ་བྱ་x+12=34` is "
+            + "the NOUN 'equation' naming the whole expression, not what a reader says at the sign — the "
+            + "Fula `hakkunde` failure, and the sentence that supplies the word also shows it in the wrong "
+            + "slot. Nothing is read",
+        "less-than": "×0 in the retained text; `sources.ts` reports the sign as not occurring in the "
+            + "evidence at all",
+        "greater-than": "×0 in the retained text; `sources.ts` reports the sign as not occurring in the "
+            + "evidence at all",
+        times: "×2, and NEITHER IS A MULTIPLICATION. `དེབ་ཚད་༨༥༠×༡༡༦༨` is a book's PAGE SIZE, i.e. a "
+            + "dimension cross that reads 'by' rather than 'times', and `2 x (1)² = 2` is an ASCII `x` "
+            + "inside the electron-shell worked example, where it is the algebraic multiplier of a formula "
+            + "this layer reads for no language. One reading cannot serve both senses (the ug/si/tg "
+            + "finding), and no Tibetan operator word is attested for either: Wikidata has no bo label for "
+            + "multiplication and `attest.ts` returns nothing in the slot",
+        divide: "×0 in the retained text. The `/` that does occur is a UNIT RATE (`km/h`, `m/s༢`, read by "
+            + "normalize.ts step 4 with the corpus's own `ཆུ་ཚོད་རེར`) or a FRACTION inside the SI-unit "
+            + "stubs (`༡/༡༠༠སྨི།`), never a division between two prose operands",
+        ampersand: "×42 in the `ampersand` cell and not one is a Tibetan conjunction. Every occurrence is "
+            + "either an HTML ENTITY the dump preserved — `&nbsp;`, `&ndash;` ×5, `&#126;`, `&#x5B;` — "
+            + "which `stripMarkup` decodes at the registry's dispatch point ABOVE this layer, so the probe "
+            + "is the only place it can still be seen; or it sits inside an embedded ENGLISH title, "
+            + "`\"མེ་ཏོག་དང་ཟླ་འོད། flower & Moon\"`, where the film's Tibetan name is given first and the "
+            + "English gloss follows. This is not a sourcing gap — Tibetan's coordinator `དང` is already in "
+            + "tibetan.jsonc as the number composer's joiner — it is that reading `&` as དང inside an "
+            + "English phrase would be wrong, and there is no Tibetan `&` to read",
+    },
 };
 
 /**
@@ -3726,6 +3782,23 @@ export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, re
         currency: [
             "Achibvunzwa nezve kushomeka kwake kwekunyora kubvira Nervous Conditions, Dangarembga akatsanangura muna 2004: \"Chekutanga, riini rakaburitswa mushure mekunge ndashandura kuita firimu sesvikiro; chechipiri, kuona kwaVirginia Woolf kwakangwara kuti mukadzi anoda £500 nekamuri. zvake kuti anyore zvine musoro zvachose. Sezvineiwo, ndiri kufamba uye ndinovimba kuti, kekutanga kubvira Nervous Conditions, ndichave nekamuri yangu ndega. Ndichaedza kufuratira zvishoma nezve £500.\" Zvechokwadi, makore maviri gare gare muna 2006, akaburitsa chinyorwa chake chechipiri, Bhuku reKwete, sequel kune Nervous Conditions . Vakapindawo mune zvematongerwo enyika, uye muna 2010 vakadomwa semunyori wezvedzidzo mubato rezvematongerwo enyika reMovement for Democratic Change rinotungamirwa naVaArthur Mutambara . Akataura nezvekwaakabva kumhuri yevadzidzisi, nguva yake pfupi semudzidzisi, uye kupinda kwake muchikamu chedzidzo sekumugadzirira basa iri. Akapedza zvidzidzo zvekuva chiremba muzvidzidzo zveAfrica paHumboldt University yeBerlin, uye akanyora dzidziso yake yePhD pamusoro pekugamuchirwa kwefirimu reAfrica.",
         ],
+    },
+    bo: {
+        // A REDUNDANT PERCENT SIGN THE `isRedundant` PROBE CANNOT SEE — the ak situation exactly, and for
+        // the same reason. Tibetan PREPOSES `བརྒྱ་ཆ` ("hundred-part") to its figure and the corpus writes it
+        // beside the sign in seven of the retained text's twenty-two percent instances, so
+        // tibetan/normalize.ts step 7 SUPPRESSES its own word where the sentence has already said it.
+        // Saying it once is the correct reading (trap 12), and the correct reading is byte-identical with
+        // the sign deleted, so the differential test reports a drop and is right to.
+        // ⚠ WHY THESE FOUR AND NOT THE OTHER THREE. `isRedundant` looks for the symbol's own contribution
+        // tokens — the reading of a bare `25 %`, where `བརྒྱ་ཆ` is word-INITIAL and comes out *kʲa˩t͡ɕʰa˥*
+        // with LOW tone. In these four the corpus writes the word tsheg-bound into the phrase before it
+        // (`མི་འབོར་བརྒྱ་ཆ༩༩.༧%`, `བརྒྱ་ཆའི་30%`), so it is a NON-INITIAL syllable and Lhasa's word-tone
+        // template flattens it to *kʲa˥t͡ɕʰa˥* — a one-diacritic difference that the token test cannot match
+        // on a word that is plainly there. That is a limitation of the probe, not a defect in the reading.
+        // ⚠ Listed WITH THE WORD in the span rather than as a bare `30%`, so a genuinely dropped percent
+        // elsewhere in this language still reports. A bare figure would launder it.
+        percent: ["བརྒྱ་ཆ༩༩.༧%", "བརྒྱ་ཆའི་30%", "བརྒྱ་ཆ་ 95%", "བརྒྱ་ཆ་70%"],
     },
 };
 

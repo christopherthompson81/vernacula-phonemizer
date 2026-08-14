@@ -229,7 +229,20 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // `2⁰ … 2¹ … 2²`, which is a real reading declined for want of a class-invariant connective.
 
 
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bal", "bar", "bm", "cdo", "ceb", "cjy", "gan", "gu", "hak", "he", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mos", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "sn", "so", "su", "syl", "ta", "ti", "tl", "ug", "wuu", "xh", "za"]);
+        // ⚠ bo IS THE SECOND ENTRY (after `ak`) WHOSE SPANS EXIST BECAUSE THE PROBE CANNOT SEE ITS OWN WORD,
+        // and the mechanism is tonal rather than orthographic. Tibetan PREPOSES `བརྒྱ་ཆ` to its figure and the
+        // corpus writes the word beside the sign in seven of the retained text's twenty-two percent
+        // instances, so tibetan/normalize.ts suppresses its own copy — a permissible drop (trap 12) that is
+        // byte-identical with the sign deleted. `isRedundant` probes a bare `25 %`, where `བརྒྱ་ཆ` is
+        // word-INITIAL and reads *kʲa˩t͡ɕʰa˥*; in these four the corpus binds it into the phrase before it
+        // with a tsheg, so it is NON-INITIAL and Lhasa's word-tone template flattens it to *kʲa˥t͡ɕʰa˥*. One
+        // diacritic, and the token test misses a word that is plainly there.
+        // ⚠ ITS `minus` KEY IS DELIBERATELY ABSENT, the gn/ln/rw/sn shape: the retained text has a genuine
+        // negative (`Ayding Lake (−154m)`, a below-sea-level elevation), omitting a minus INVERTS where
+        // omitting a plus is lossless, and Wikidata's bo label for subtraction is the operation NOUN
+        // `འཕྲི་རྩིས` rather than anything a reader says between two operands. `review.ts --lang bo` stays red.
+
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bal", "bar", "bm", "bo", "cdo", "ceb", "cjy", "gan", "gu", "hak", "he", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mos", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "sn", "so", "su", "syl", "ta", "ti", "tl", "ug", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
