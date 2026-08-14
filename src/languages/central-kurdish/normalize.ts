@@ -43,7 +43,25 @@ const CURRENCY: Readonly<Record<string, string>> = {
     "$": "دۆلار", "€": "یۆرۆ", "£": "پاوەند", "¥": "یەن",
 };
 
+/**
+ * ARABIC-KEYBOARD LETTERFORMS → the Sorani codepoints for the same letters.
+ *
+ * ⚠ AN ENCODING QUESTION, AND THE CORPUS SETTLES IT INSIDE SINGLE WORDS. Sorani writes /k/ as ⟨ک⟩ U+06A9 and
+ * its yeh as ⟨ی⟩ U+06CC, but an Arabic keyboard produces ⟨ك⟩ U+0643 and ⟨ى⟩ U+0649, and neither is in
+ * `central-kurdish.jsonc` — so `silentCharsIn` found them deleted, ⟨ك⟩ ×12 and ⟨ى⟩ ×3. The evidence needs no
+ * outside source: the mined artifact writes BOTH FORMS IN THE SAME WORD — ⟨خولەکێك⟩ and ⟨تێكشکا⟩ each carry a
+ * ک and a ك — against ⟨ک⟩ ×414 and ⟨ی⟩ ×704 elsewhere. `كەسێک → aseːk` was losing its initial /k/ outright.
+ * ⟨ي⟩ U+064A is folded with them: same letter, same keyboard, and absent from the manifest for the same
+ * reason.
+ */
+const LETTERFORM: Readonly<Record<string, string>> = { "ك": "ک", "ى": "ی", "ي": "ی" };
+const LETTERFORM_RE = new RegExp(`[${Object.keys(LETTERFORM).join("")}]`, "gu");
+
 export function normalizeCentralKurdish(input: string): string {
+    // 0) THE ARABIC LETTERFORMS, before anything reads a word — a rule keyed on a Sorani spelling would
+    //    otherwise miss every instance typed the Arabic way.
+    input = input.replace(LETTERFORM_RE, (c) => LETTERFORM[c]!);
+
     // 1) FOLD THE NATIVE DIGITS FIRST — see the header. Without this every rule below is blind to the
     //    majority of the text's digits, and the engine reads them as an empty string.
     let t = foldNativeDigits(input);

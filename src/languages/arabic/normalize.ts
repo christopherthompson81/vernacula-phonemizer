@@ -46,8 +46,29 @@ const UNIT_WORD: Readonly<Record<string, string>> = {
 };
 const UNIT_ALT = Object.keys(UNIT_WORD).sort((a, b) => b.length - a.length).join("|");
 
+/**
+ * PERSO-ARABIC LETTERFORM VARIANTS → the Arabic codepoint for the same letter.
+ *
+ * ⚠ THIS IS AN ENCODING QUESTION, NOT A PHONOLOGICAL ONE. ⟨ی⟩ U+06CC FARSI YEH and ⟨ي⟩ U+064A ARABIC YEH are
+ * the same letter under two keyboard conventions, as are ⟨ک⟩ U+06A9 KEHEH and ⟨ك⟩ U+0643 KAF; Arabic writing
+ * that has passed through a Persian or Urdu keyboard carries the eastern forms. Unfolded they matched no arm
+ * of `TOKEN`, so they SPLIT their word: `silentCharsIn` reports arz ⟨ی⟩ ×24 in `separator` mode, and the
+ * fragments then read as letter NAMES — `فین → fˈe nˈuːn` for في + ن.
+ *
+ * ⚠ AND IT MUST RUN BEFORE THE NEURAL DIACRITIZER, which is why it is exported. `diacritizer.ts` only counts
+ * U+0620–U+064A / U+0671–U+06D3 as Arabic letters, so an unfolded ⟨ی⟩ makes its whole word unvocalizable —
+ * folded, `فی` reaches the model as `في` and comes back `فِي` → [fiː].
+ *
+ * ⚠ ⟨ى⟩ U+0649 ALIF MAQSURA IS DELIBERATELY NOT HERE. It is a letter of Arabic in its own right with its own
+ * g2p branch (word-final long /aː/, مصطفى), not a variant spelling of ⟨ي⟩ — folding it would silently rewrite
+ * every native ـى ending. Its Urdu-script cousins are handled in those engines, where the fact differs.
+ */
+export function foldLetterforms(input: string): string {
+    return input.replace(/ی/gu, "ي").replace(/ک/gu, "ك");
+}
+
 export function normalizeArabic(input: string): string {
-    let s = input;
+    let s = foldLetterforms(input);
 
     // 1) ARABIC SYMBOL CHARACTERS → their ASCII equivalents, so every shared rule downstream applies.
     s = s.replace(/٪/gu, "%").replace(/٫/gu, ".").replace(/٬/gu, ",");

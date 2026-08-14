@@ -126,12 +126,15 @@
  *     is ×0 in `Wp/bcc` and the single `کیلوگرم` page is Persian (*"۱۵۰ کیلوگرم بر سانتی متر مربع"*).
  *     A dropped abbreviation is missing; a Persian or Western word read as Southern Balochi is wrong.
  *
- * ⚠ HARAKAT ARE STILL DELETED BY THE G2P, and that is a manifest question rather than this layer's.
- *   Kasra ×790, fatha ×467, damma ×454 in the Southern corpus — i.e. this text writes, explicitly, a large
- *   share of exactly the short vowels `balochi.jsonc`'s header calls unrecoverable. Declaring
- *   `َ→a ِ→i ُ→u` there would recover them and is a g2p change with its own gold to earn. What this file
- *   does do is stop them BLOCKING the lexicon: they are stripped for the lookup in step 4, which is worth
- *   +39 tokens on its own, and are otherwise left in the text for a future manifest to read.
+ * ⚠ HARAKAT ARE NOW READ BY THE G2P — this note used to say they were deleted, and to predict exactly the
+ *   change that followed. Kasra ×790, fatha ×467, damma ×454 in the Southern corpus: this text writes,
+ *   explicitly, a large share of the short vowels `balochi.jsonc`'s header calls unrecoverable, and
+ *   `silentCharsIn` reported all of them producing nothing. `balochi.jsonc` now declares `َ→a ِ→i ُ→u` plus
+ *   the shadda, and `balochi.ts` reads them. ⚠ The manifest alone was NOT enough, and the reason is in this
+ *   engine's own wiring rather than in its data: the LATIN nativiser was being applied to Arabic tokens too,
+ *   and its cluster fallback strips combining marks, so every haraka was gone before the g2p saw the word.
+ *   What this file still does is stop them BLOCKING the lexicon: they are stripped for the lookup in step 4,
+ *   which is worth +39 tokens on its own, and a lexicon hit's full vowels beat the marks either way.
  */
 
 /** Every digit the corpus writes. Written out rather than `\d` (which is ASCII-only and would miss 82% of

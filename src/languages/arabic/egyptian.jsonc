@@ -16,6 +16,12 @@
     // variety rule, not learnable from silver.
     "articleVowel": "i",
     "consonantShifts": [
+        // ⚠ FIRST, AND IT HAS TO BE: ["θ","t"] below introduces a [t], and a later ["t͡ʃ","ʒ"] would then be
+        // matching a [t] this table produced rather than the one ⟨چ⟩ wrote.
+        // ⟨چ⟩ → [ʒ], the Egyptian exception to the pan-Arabic [t͡ʃ] in arabic.jsonc. Egyptian ⟨ج⟩ is [ɡ], so the
+        // foreign [ʒ~d͡ʒ] has no letter and ⟨چ⟩ takes it — چورچ George, چوزيف Joseph, تاچيكى Tajiki — while [t͡ʃ]
+        // is written as the DIGRAPH ⟨تش⟩ (ادڤانتشر "adventure", دچوكوڤيتش "Djoković", which uses BOTH in one word).
+        ["t͡ʃ", "ʒ"],
         ["d͡ʒ", "ɡ"], // ج → [ɡ] (Cairene; the signature Egyptian consonant)
         ["q", "ʔ"], // ق → [ʔ] (urban glottal stop)
         ["θ", "t"], // ث → [t] (native; the learned/loan [s] is a lexical tail)

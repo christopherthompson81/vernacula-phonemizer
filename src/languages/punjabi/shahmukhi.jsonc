@@ -27,7 +27,11 @@
         "ہ": "ɦ", "ھ": "ɦ", "ء": "ʔ", "ع": "ʔ",
         // Punjabi-specific Shahmukhi letters (not in Urdu): retroflex nasal ݨ (noon + small ṭāʾ) and retroflex
         // lateral ࣇ (lām + small ṭāʾ) — the abjad counterparts of Gurmukhi ਣ (ɳ) and ਲ਼ (ɭ).
-        "ݨ": "ɳ", "ࣇ": "ɭ",
+        // ⚠ ⟨ݪ⟩ U+076A LAM WITH BAR IS THE SAME PHONEME AS ⟨ࣇ⟩ IN A SECOND ENCODING, and `silentCharsIn`
+        // found it deleted ×6 in pnb — ناݪ → nˈaː (Punjabi ਨਾਲ਼ /naːɭ/ "with"), مݪݨ, دواݪے, رَݪدا, آݪے. Both
+        // codepoints circulate for the Lahnda retroflex lateral; ࣇ (lām + small ṭāʾ, matching ݨ) is the
+        // Punjabi-block form and ݪ the Arabic-Supplement one, and a corpus uses whichever its keyboard had.
+        "ݨ": "ɳ", "ࣇ": "ɭ", "ݪ": "ɭ",
         // Saraiki (skr) implosive letters — Lahnda, NON-tonal, retains the four implosives (cf. Sindhi). Punjabi
         // (Majhi) has none, so these never appear in pa/pnb text: harmless there, load-bearing for skr. The
         // retroflex-implosive letter ݙ (2002, coined to differ from Sindhi ڏ) → [ɗ] per the wikipron skr referee.

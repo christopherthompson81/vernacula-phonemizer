@@ -22,6 +22,9 @@ interface BalochiDef {
     consonants: Record<string, string>;
     vowels: Record<string, string>;
     vowelLetters: readonly string[];
+    harakat: Record<string, string>;
+    sukun: string;
+    shadda: string;
     roman: {
         vowelLetters: readonly string[];
         long: Record<string, string>;
@@ -60,14 +63,57 @@ function lexicon(): { ar: Map<string, string>; ro: Map<string, string> } {
 }
 
 // ── Arabic-script g2p (defective abjad → consonant + long-vowel skeleton) ─────────────────────────────────────
-/** One Balochi word in the Arabic script → skeleton IPA (short vowels unwritten; و→uː, ی→iː defaulted). */
+const HARAKAT = DEF.harakat;
+
+/**
+ * ⚠ SHADDA BEFORE ITS VOWEL MARK. The canonical Unicode order is the other way round — a vowel mark has
+ * combining class 30 and the shadda 33 — so ⟨لُّ⟩ arrives as ⟨ل⟩+ḍamma+shadda and a scan that reads the marks
+ * left to right meets the vowel first. Rewriting the pair puts the shadda back on its consonant.
+ */
+const SHADDA_AFTER_VOWEL = /([َُِ])ّ/gu;
+
+/**
+ * One Balochi word in the Arabic script → skeleton IPA (و→uː, ی→iː defaulted).
+ *
+ * ⚠ THE SHORT VOWELS ARE READ WHEN THEY ARE WRITTEN. This engine's manifest calls Balochi's abjad defective
+ * because /a i u/ have no letter, and that is true — but they do have MARKS, and the mined corpus uses them
+ * 449 times, so `silentCharsIn` reported all four as producing nothing (بُته → *bt̪h*, گُش → *ɡʃ*). Where the
+ * text supplies the vowel the ceiling does not apply, and the skeleton is now only the fallback.
+ *
+ * ⚠ AND A HARAKA ON THE WORD-INITIAL ALIF REPLACES IT rather than adding to it: in Perso-Arabic writing that
+ * alif is a SEAT with no sound of its own, so ⟨اَنت⟩ is /ant̪/ and not /aːant̪/ — reading both gave *aːnt̪*,
+ * the long vowel of the seat with the real vowel dropped. Likewise ⟨ـُو⟩ and ⟨ـِی⟩ are the ordinary
+ * Perso-Arabic mater-lectionis spellings of the LONG /uː iː/, so the mark pins the glide rather than
+ * preceding it (⟨اُوتاوا⟩ Ottawa → uːt̪aːwaː, not *uwt̪aːwaː*).
+ */
 export function phonemizeArabic(word: string): string {
-    const w = [...word.replace(/[‌ـ]/gu, "")];
+    const w = [...word.replace(/[‌ـ]/gu, "").replace(SHADDA_AFTER_VOWEL, "ّ$1")];
     const toks: string[] = [];
     for (let i = 0; i < w.length; i++) {
         const c = w[i]!, prev = w[i - 1] ?? "", nxt = w[i + 1] ?? "";
+        const hk = HARAKAT[c];
+        if (hk !== undefined) {
+            // ⟨ـُو⟩ → uː and ⟨ـِی⟩ → iː: the mark disambiguates the mater, which is then consumed.
+            if (hk === "u" && nxt === "و") { toks.push("uː"); i++; }
+            else if (hk === "i" && (nxt === "ی" || nxt === "ى")) { toks.push("iː"); i++; }
+            else toks.push(hk);
+            continue;
+        }
+        // The shadda geminates the consonant it now precedes. Guarded against a doubled length mark, which is
+        // what a corpus typo (a shadda on a long vowel, ⟨بیّهءن⟩) would otherwise produce.
+        if (c === DEF.shadda) {
+            const last = toks[toks.length - 1];
+            if (last !== undefined && !last.endsWith("ː")) toks[toks.length - 1] = `${last}ː`;
+            continue;
+        }
+        if (c === DEF.sukun) continue; // explicit "no vowel here"
         if (CONS[c] !== undefined) { toks.push(CONS[c]!); continue; }
-        if (VOW[c] !== undefined) { toks.push(VOW[c]!); continue; }
+        if (VOW[c] !== undefined) {
+            // A word-initial alif carrying a haraka is that vowel's SEAT and has no sound of its own.
+            if (i === 0 && (c === "ا" || c === "آ") && HARAKAT[nxt] !== undefined) continue;
+            toks.push(VOW[c]!);
+            continue;
+        }
         if (c === "ع" || c === "ئ" || c === "ء") continue;
         if (c === "ں") { toks.push("̃"); continue; }
         const glide = i === 0 || VOWEL_LETTERS.has(prev) || VOWEL_LETTERS.has(nxt);
@@ -117,6 +163,14 @@ const HAS_LATIN = /[a-zāēīōūšžčǰṭḍṛġ]/iu;
 export function phonemizeWord(word: string): string {
     const { ar, ro } = lexicon();
     if (HAS_LATIN.test(word)) {
+        // ⚠ THE NATIVISER BELONGS TO THE ROMAN HALF ONLY, AND APPLYING IT TO THE ARABIC HALF DELETED EVERY
+        // COMBINING MARK IN THE LANGUAGE. `NATIVE_CLASS` is a LATIN inventory, so an Arabic word never matches
+        // it; the fallback then folds each cluster with `foldLatinToBase`, which decomposes and strips marks —
+        // silently removing all 449 harakat in the mined corpus before the g2p could see one. It is why
+        // `silentCharsIn` reported ⟨ِ⟩ ⟨َ⟩ ⟨ُ⟩ ⟨ّ⟩ even after balochi.jsonc gained values for them, and it
+        // cannot be fixed in the manifest: nothing survives to be read. Scoped to the branch it was written
+        // for (`Klöcker` → klœkəɾ still folds; the Arabic arm is now untouched).
+        word = nat(word);
         const key = word.toLowerCase().normalize("NFC");
         return ro.get(key) ?? phonemizeRoman(word);
     }
@@ -177,7 +231,9 @@ class BalochiPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         return assembleClauses(normalizeBalochi(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
+            // ⚠ `nat` moved INSIDE phonemizeWord's Roman branch — see the note there. Applied here it also hit
+            // every Arabic token, whose marks it stripped.
+            if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

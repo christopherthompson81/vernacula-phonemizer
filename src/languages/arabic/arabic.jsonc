@@ -83,6 +83,35 @@
         "إ": "ʔ",
         "ؤ": "ʔ",
         "ئ": "ʔ",
+
+        // ── THE PERSO-ARABIC EXTENSION LETTERS, for the sounds the 28-letter alphabet cannot write ────────────
+        //
+        // ⚠ THESE ARE ORDINARY LETTERS OF THE LANGUAGES THAT USE THEM, NOT DECORATION. Before this block they
+        // were in no table and OUTSIDE `arabic.ts`'s TOKEN class, so each one both lost its own sound AND SPLIT
+        // ITS WORD IN TWO: ary `السوپر → ˈasw r`, `لݣلونضات → l lwndˤˈaːt`, arz `فین → fˈe nˈuːn` (the fragment
+        // ⟨ن⟩ then read as the LETTER NAME nūn). Found by `silentCharsIn` in `separator` mode — ary ⟨ݣ⟩ ×161,
+        // ⟨پ⟩ ×119, ⟨ڭ⟩ ×25, ⟨گ⟩ ×6; arz ⟨پ⟩ ×49, ⟨ڤ⟩ ×49, ⟨چ⟩ ×23.
+        //
+        // Values are the pan-Arabic ones, corroborated word by word in the mined corpora:
+        //   پ = /p/   — پاريس, اسپانيا, كليوپاترا, سوپر, پورتوجال, وپاركينݣ
+        //   ڤ = /v/   — ڤيينا, بوليڤيا, ݣيڤارا, كوڤيد, ڤييطنام, نوڤاك, سيلڤا
+        //   گ ڭ ݣ = /ɡ/ — the three glyphs Maghrebi and Mashriqi writing use for the same sound: ary writes
+        //     Guelmim ⟨ݣلميم⟩ AND ⟨گلميم⟩ and Agadir ⟨أݣادير⟩ AND ⟨وأگادير⟩ in the SAME corpus, which is the
+        //     evidence that they are one phoneme in three encodings (also أنتيݣوا, لكونݣو, مالاڭا, ݣيطار).
+        //     /ɡ/ is a full phoneme of Darija — ⟨ݣاع⟩ gāʕ "all" is a native word, not a loan.
+        //   ژ = /ʒ/   — zero in these corpora; listed because it is the Perso-Arabic partner of ⟨چ⟩ and a
+        //     missing letter here costs a word, not a segment.
+        //   چ = /t͡ʃ/  — the Mashriqi/Maghrebi value (Iraqi چان, Darija چ). ⚠ EGYPTIAN IS THE EXCEPTION AND
+        //     SHIFTS IT TO /ʒ/ in egyptian.jsonc: because Egyptian ⟨ج⟩ is already [ɡ], arz uses ⟨چ⟩ for the
+        //     foreign [ʒ~d͡ʒ] (چورچ George, چوزيف Joseph, تاچيكستان Tajikistan) and writes [t͡ʃ] as the DIGRAPH
+        //     ⟨تش⟩ instead — ادڤانتشر "adventure", دچوكوڤيتش "Djoković" — a contrast the corpus makes itself.
+        "پ": "p",
+        "چ": "t͡ʃ",
+        "ڤ": "v",
+        "ژ": "ʒ",
+        "گ": "ɡ",
+        "ڭ": "ɡ",
+        "ݣ": "ɡ",
     },
 
     // Sun letters: the definite article's ل assimilates into them (gemination); moon letters keep the l.

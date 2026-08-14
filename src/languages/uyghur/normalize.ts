@@ -283,6 +283,21 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    improvement in both, which is why it is unconditional.
         s = s.replace(/ه/gu, "ھ");
 
+        // 4b) ⚠ TWO MORE LETTERS OF THE SAME FAMILY, both found by `silentCharsIn` producing NOTHING.
+        //    ک U+06A9 KEHEH ×5 — the Persian/Urdu shape of the kāf Uyghur writes ك U+0643 (×2,891 here).
+        //    Same letter, other keyboard: `کربلا → rblɑ`, `کار → ɑr`, the /k/ gone.
+        //    ڧ U+06A7 ×19 — QAF WITH DOT ABOVE standing in for ف. This one is decided by its own word list
+        //    rather than by the glyph, and the list is unanimous: ڧىنلاندىيە (Finland ×3 + 5 inflections),
+        //    ڧېۋرال (February), ئاڧرىقا (Africa), تەرەڧلەر, تەڧسىر — 15 of 15 words are ordinary Uyghur words
+        //    whose standard spelling has ف, and NOT ONE is a /q/ word, so the Maghrebi reading of the glyph
+        //    (where ڧ IS the qāf) would be wrong in every instance. Uyghur has no /f/ and the manifest reads
+        //    ف as [p], so `ڧىنلاندىيە` now gives pinlandije — the actual Uyghur pronunciation.
+        //    ⚠ ی U+06CC ×35 IS NOT FOLDED WITH THEM, deliberately. Every one of its 24 words is PERSIAN
+        //    (برای, تاریخ, قمری, شیعه, شیرازی) — a Persian span inside a Uyghur article, which the detector's
+        //    same-script filter cannot separate — and Uyghur, unlike Persian, keeps ي /j/ and ى /i/ APART, so
+        //    the unified Farsi yeh has no single Uyghur value to fold to. Left reported rather than guessed.
+        s = s.replace(/ک/gu, "ك").replace(/ڧ/gu, "ف");
+
         // 5) ERA MARKERS, digit-anchored, and ABOVE the ordinal rule at step 6 for two separate reasons.
         //    (a) The abbreviation's anchor is the YEAR'S DIGITS, and step 6 turns those into words — running
         //        after it would leave `م. 656- يىلى` with no digit for `م\.` to attach to (trap 39).

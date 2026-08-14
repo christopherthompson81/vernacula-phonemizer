@@ -165,10 +165,15 @@ describe("an orthographic silence is a NOTE, not a defect, and not a silence", (
 
     test("the table may only name characters that are silent BY RULE", () => {
         // An entry naming a letter an engine merely fails to read would be a defect being silenced — the same
+        // ⚠ THE LIST IS A CHANGE-DETECTOR, NOT THE ARGUMENT — the argument is the comment above each entry
+        // in defects.ts, and this pin is what makes a new entry impossible to add without writing one.
+        expect(Object.keys(ORTHOGRAPHIC_SILENCE).sort()).toEqual(
+            ["*", "ab", "acm", "acw", "afb", "ajp", "apc", "apd", "ar", "ary", "arz", "ayl", "ba", "be", "chv", "ky", "mn", "mt", "pa", "pnb", "skr", "tg", "tt"],
+        );
+        // Fleet-wide: the tatweel (a justification stroke), the sukūn (the mark that MEANS "no vowel"), and
+        // the five Perso-Arabic honorific signs U+0610–U+0614, which abbreviate a phrase written above a name.
+        expect(ORTHOGRAPHIC_SILENCE["*"]).toEqual(["ـ", "ْ", "ؐ", "ؑ", "ؒ", "ؓ", "ؔ"]);
         // discipline `VOWELLESS_WORDS` keeps for `rawLatinIn`. Every entry is argued in the file.
-        expect(Object.keys(ORTHOGRAPHIC_SILENCE).sort())
-            .toEqual(["*", "ab", "ba", "be", "chv", "ky", "mn", "mt", "tg", "tt"]);
-        expect(ORTHOGRAPHIC_SILENCE["*"]).toEqual(["ـ"]);
         // ⚠ THE SOFT SIGN IS EXEMPT IN THREE LANGUAGES AND NOT IN THE FOURTH, and that asymmetry is the point:
         // tt/tg/ky have no palatalisation contrast for ⟨ь⟩ to mark (each language's own referee is quoted in
         // the table), while Chuvash's referee writes `выльӑх ˈʋɯlʲəχ` — so chv EMITS [ʲ] and is not exempt.
@@ -179,6 +184,16 @@ describe("an orthographic silence is a NOTE, not a defect, and not a silence", (
         // codepoint is letter-forming in vi, es and umbundu.
         for (const l of ["ab", "ba", "be", "chv", "mn", "tg", "tt"])
             expect(ORTHOGRAPHIC_SILENCE[l]).toContain("\u0301");
+        // discipline `VOWELLESS_WORDS` keeps for `rawLatinIn`. Both entries are argued in the file.
+        // ⚠ THE LIST IS A CHANGE-DETECTOR, NOT THE ARGUMENT — the argument is the comment above each entry,
+        // and this pin is what makes a new entry impossible to add without writing one.
+        // Fleet-wide: the tatweel (a justification stroke), the sukūn (the mark that MEANS "no vowel"), and the
+        // five Perso-Arabic honorific/annotation signs U+0610–U+0614, which abbreviate a phrase written above a
+        // name rather than spelling a sound.
+        // Every Arabic variety, and ONLY the Arabic varieties: tāʾ marbūṭa is silent in the pausal form these
+        // engines are built on, while ur/pnb/skr/sd read the same character as /a/ and are deliberately absent.
+        for (const v of ["ar", "arz", "ary", "apc", "apd", "acm", "afb", "ayl", "ajp", "acw"])
+            expect(ORTHOGRAPHIC_SILENCE[v]).toEqual(["ة"]);
     });
 });
 

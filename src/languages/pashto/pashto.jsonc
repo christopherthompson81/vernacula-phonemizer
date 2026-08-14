@@ -22,7 +22,12 @@
     },
 
     // Short-vowel diacritics (harakat) — usually ABSENT in running text (the restoration gap). Applied when present.
-    "harakat": { "َ": "a", "ِ": "i", "ُ": "u", "ٰ": "ɑ", "ٗ": "u" },
+    // ⚠ ⟨ً⟩ FATḤATĀN IS THE ARABIC ADVERBIAL ENDING AND IT IS PRONOUNCED IN PASHTO — تقریباً *taqriban*,
+    // اکثراً *aksaran*, نسبتاً *nisbatan*. `silentCharsIn` reported it ×13 with the /n/ deleted in 9 of 9 probe
+    // words (تقریباً → t̪əqribˈɑ), on the async path as well as the sync one. It is written on the ALIF that
+    // seats it, not on a consonant, so pashto.ts drops that alif word-finally and lets this entry read the
+    // mark where the scan can see it — which also removes the wrong long /ɑ/, since the ending is /-an/.
+    "harakat": { "َ": "a", "ِ": "i", "ُ": "u", "ٰ": "ɑ", "ٗ": "u", "ً": "an" },
     "sukun": "ْ",
     "shadda": "ّ",
 

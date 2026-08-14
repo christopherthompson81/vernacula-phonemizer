@@ -19,7 +19,7 @@ import {
 } from "./diacritizer.ts";
 import { lexiconPrimary } from "./restore.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
-import { normalizeArabic } from "./normalize.ts";
+import { foldLetterforms, normalizeArabic } from "./normalize.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -139,7 +139,18 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // The number class accepts GROUPING and DECIMAL separators. Without them "1,000" tokenized as 1 | , | 000
 // and the separator became a clause PAUSE ("واحد , صفر"); "1.5" likewise. Arabic-Indic digits are folded to
 // ASCII by normalizeArabic before this runs, so only the ASCII forms need matching here.
-const TOKEN = /([ء-يٰٱً-ْـ]+)|(\d+(?:,\d{3})*(?:\.\d+)?)|([۔.!؟?،,؛;:…])/gu;
+// ⚠ THE PERSO-ARABIC EXTENSION LETTERS ARE PART OF THE WORD CLASS, and leaving them out did not merely lose
+// their sound — it BROKE THE WORD. A character no arm of this pattern matches is not a token, so
+// `assembleClauses` walks past it and emits the two halves either side as separate words: ary `السوپر` came out
+// `ˈasw r`, `لݣلونضات` as `l lwndˤˈaːt`, and arz `فین` as `fˈe nˈuːn` — the orphaned ⟨ن⟩ read as its LETTER
+// NAME. Their phoneme values are in arabic.jsonc; this is only the tokenizer half of the same fix. Listed by
+// codepoint rather than as a range because the block between them holds Arabic-Indic digits (٠-٩, ۰-۹) and the
+// Arabic percent/decimal signs, which have their own arms above and in normalizeArabic.
+const EXTENDED = "\\u067E\\u0686\\u0698\\u06A4\\u06AD\\u06AF\\u0763"; // پ چ ژ ڤ ڭ گ ݣ
+const TOKEN = new RegExp(
+    `([ء-يٰٱً-ْـ${EXTENDED}]+)|(\\d+(?:,\\d{3})*(?:\\.\\d+)?)|([۔.!؟?،,؛;:…])`,
+    "gu",
+);
 /** Arabic-Indic digits ٠..٩ → ASCII. */
 const toAscii = (d: string): string =>
     d.replace(/[٠-٩]/g, (c) => String(c.charCodeAt(0) - 0x0660));
@@ -388,7 +399,10 @@ export async function phonemizeArabic(
     // variety g2p then transforms. Egyptian short vowels differ from MSA — the egyptian-lexicon.tsv supplies them.
     // symbol words must be inserted BEFORE diacritization — a percent word injected after it would
     // reach the g2p as a bare skeleton (المئة → ilimʔ) instead of being vocalized (fi ilmiʔa).
-    text = SYMBOLS(text);
+    // The eastern letterforms fold FIRST, ahead of the diacritizer: the model's own letter test does not know
+    // ⟨ی⟩/⟨ک⟩, so an unfolded word comes back unvocalized (see foldLetterforms). normalizeArabic folds again
+    // downstream; the rewrite is idempotent.
+    text = SYMBOLS(foldLetterforms(text));
     const vocalized = diac ? await diac.diacritize(text) : text;
     const restored = diac ? lexiconPrimary(vocalized, restoreLex()) : vocalized;
     const useLexicon = opts?.lexicon ?? true;

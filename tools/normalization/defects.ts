@@ -294,47 +294,14 @@ export function rawLatinIn(lang: string, sentence: string, ipa: string): { run: 
 const CORE_FLOOR = 0.0005, CORE_MIN = 20;
 /** A word for probing purposes: a run of letters and marks. Digits and punctuation end it. */
 const PROBE_WORD = /[\p{L}\p{M}]+/gu;
-/**
- * At most this many probe words per candidate, spread across the corpus rather than taken from its head.
- *
- * ⚠ THIS NUMBER IS THIS CLASS'S KNOWN FALSE-POSITIVE MECHANISM, and it is measured rather than suspected.
- * The universality claim is only ever made over the words SAMPLED, and `spread` takes a fixed stride —
- * eight words out of however many are admissible. For a rare intruder that is the whole population (ee's
- * perispomeni has six words in its artifact and all six are tested). For a HIGH-FREQUENCY character it is a
- * thin sample of a large one, and Hebrew ⟨א⟩ is the case that shows it:
- *
- *     admissible probe words 399; sampled 8; the 8 chosen were קלארק כאל בגאזטים האמנויות להיראות
- *     האחרות ראשת מדינאי — every one with a NON-INITIAL aleph, where the letter is a mater lectionis and
- *     the engine's consonantal reading correctly emits nothing. But ~30 % of the population is
- *     INITIAL-aleph (אליו אדם אז אזרח אוסטרלי), where the engine emits /ʔ/ and the letter plainly
- *     contributes: `אזרח → ʔzʁχ` against `זרח → zʁχ`. The stride landed on none of them, and the class
- *     reported ⟨א⟩ ×4,618 as universally silent.
- *
- * ⚠ AND IT IS LEFT AT 8, WHICH IS THE MEASUREMENT, NOT AN OVERSIGHT. Raising it was tried over all 162
- * artifacts before this note was written:
- *
- *     PROBE_WORDS   8 → 83 findings      16 → 78      24 → 76      32 → 76   (whole-fleet run time ~13 s
- *                                                                             at every setting, so cost is
- *                                                                             not the objection)
- *
- * The five findings that 8 → 16 removes are `he` ⟨א⟩ — the false positive — and FOUR that the class's own
- * log names as real: pnb ⟨ء ى⟩ and shn ⟨ၻ ၿ⟩. Read by hand, pnb's two are disproved the same honest way
- * ⟨א⟩ is (`تھى → t̪ʰˈə` against `تھ → t̪ʰ`, a vowel), while shn's two are disproved only by a KNOCK-ON —
- * removing ⟨ၻ⟩ makes a coda t̚ appear, removing ⟨ၿ⟩ moves a tone — which is a perturbation of the
- * neighbours rather than a phone of the character's own. So the trade at 16 is one clear false positive
- * removed against two marginal true positives lost, and at 24 two more of the same shape go.
- *
- * That is the same shape as the filter this file's header REJECTS in its last table row: a tightening that
- * removes true positives faster than false ones. `rawLatinIn` shipped with three residual false positives
- * NAMED rather than narrowed around, and Run 7 of the investigation named this class's three; ⟨א⟩ is the
- * fourth, and it is named here.
- *
- * ⚠ ANY FUTURE CHANGE TO THIS NUMBER MOVES THE WHOLE FLEET'S FINDINGS AT ONCE — 83 lines that several
- * people read as their input. Re-run the table above before touching it.
- */
+/** At most this many probe words per candidate, spread across the corpus rather than taken from its head. */
 const PROBE_WORDS = 8;
 /** Fewer distinct words than this is not evidence about a LANGUAGE, only about a word. */
 const MIN_PROBE_WORDS = 3;
+
+/** U+0301 COMBINING ACUTE, written as an escape — a bare combining mark in a string literal renders on top of
+ *  the quote and is unreviewable. See the `ab`/`ba`/`be`/`chv`/`mn`/`tg`/`tt` entries below. */
+const STRESS_MARK = "\u0301";
 
 /**
  * CHARACTERS WHOSE SILENCE IS THE ORTHOGRAPHY'S OWN — this class's measured false-positive population, named
@@ -347,10 +314,6 @@ const MIN_PROBE_WORDS = 3;
  * ⚠ AND AN ENTRY DOES NOT HIDE THE HIT — `mine.ts` reports it under `ACCEPTED-ORTHOGRAPHIC`, because a quiet
  * exemption is indistinguishable from a clean scan, which is how this defect class survived six times.
  */
-/** U+0301 COMBINING ACUTE, written as an escape — a bare combining mark in a string literal renders on top of
- *  the quote and is unreviewable. See the `ab`/`ba`/`be`/`chv`/`mn`/`tg`/`tt` entries below. */
-const STRESS_MARK = "\u0301";
-
 export const ORTHOGRAPHIC_SILENCE: Readonly<Record<string, readonly string[]>> = {
     /**
      * ⚠ FLEET-WIDE, AND THE ONE CHARACTER THAT EARNS IT. U+0640 TATWEEL is not a letter at all: it is a
@@ -358,7 +321,25 @@ export const ORTHOGRAPHIC_SILENCE: Readonly<Record<string, readonly string[]>> =
      * it in ANY Arabic-script language. Reported in ary ×429, arz ×37 and skr ×3 before this entry. Unicode
      * gives it category `Lm`, which is why the `\p{L}` candidate test sees it in the first place.
      */
-    "*": ["ـ"],
+    /**
+     * ⚠ FLEET-WIDE, AND THE SECOND CHARACTER THAT EARNS IT. U+0652 SUKŪN is the mark whose MEANING is "no
+     * vowel here" — a reader voices nothing for it by definition, in every Arabic-script orthography. Every
+     * engine in this half of the fleet already consumes it as an explicit no-vowel (ar's `resolveVowel`
+     * default arm, ps's and Shahmukhi's `DEF.sukun` branch), so its silence is the rule firing, not a rule
+     * missing. Reported in ary ×10 (`لْحرب → liħˈarb`, `تْجَاوَزُوهْ → taʒaːwazˈuːh`) before this entry.
+     */
+    /**
+     * ⚠ AND THE URDU-SCRIPT HONORIFIC AND ANNOTATION SIGNS — U+0610–U+0614 — ARE NOT LETTERS AT ALL. Each one
+     * ABBREVIATES A WHOLE PHRASE written above a name: ؐ SALLALLAHOU ALAYHE WASSALLAM (رسولؐ, حضورؐ), ؒ ALAYHE
+     * ASSALLAM / RAHMATULLAH ALAYH (قشیریؒ, اجمیریؒ), and ؔ TAKHALLUS, which is purely typographic — it marks
+     * that the word before it is a poet's PEN-NAME (ناصؔر, مخفیؔ) and has no reading in any register at all.
+     * Voicing the first two would splice a four-word Arabic formula into the middle of every name a pious text
+     * mentions; silence is the front-end convention and the one this fleet keeps. Reported in skr as ؒ ×5,
+     * ؔ ×3, ؐ ×3. Fleet-wide, like the tatweel, because the claim is about PERSO-ARABIC WRITING and not about
+     * Saraiki — ur, pnb and fa can all carry them, and a per-language list would go stale the first time one
+     * did. All five of the block are listed, not only the three a 436-line artifact happened to contain.
+     */
+    "*": ["ـ", "ْ", "ؐ", "ؑ", "ؒ", "ؓ", "ؔ"],
     /**
      * Maltese ⟨h⟩ is silent — the /ħ/ of the language is written ⟨ħ⟩, a different letter, which this engine
      * reads. `hija → ɪja`, `iqaddsilhom → ɪʔattsɪlɔm` are both correct. ×1,315 in the artifact, and it is the
@@ -367,6 +348,40 @@ export const ORTHOGRAPHIC_SILENCE: Readonly<Record<string, readonly string[]>> =
      * ⟨h⟩ demonstrably contributes and the case-folded probe below already clears them without a table entry.
      */
     mt: ["h"],
+    /**
+     * ⚠ TĀʾ MARBŪṬA IS SILENT IN PAUSAL FORM AND THESE ENGINES ARE PAUSAL BY CONSTRUCTION — the /a/ of
+     * `madīna` is the FATḤA ON THE NŪN, not the ⟨ة⟩. `arabic.jsonc`'s `convention` block has said so since the
+     * engine was written (`"taaMarbuta": "ة silent in pausal (phrase-final) form"`), `g2p.ts` implements it,
+     * and `diacritizer.ts`'s `pausalize` puts EVERY word in that form, so this is the whole contract and not a
+     * phrase-position accident.
+     *
+     * ⚠ AND THE ×5,951 REPORT THAT PUT IT HERE WAS AN ARTIFACT OF THE SYNCHRONOUS ENTRY POINT. `arabic.ts`
+     * has two, and its header says they expect different input: `phonemize` assumes VOWELLED Arabic and reads
+     * bare text off its consonant skeleton, while `phonemizeArabic` runs the neural diacritizer first.
+     * `mine.ts scan` calls the synchronous one, so on `سلسلة → slsl` it is not only ⟨ة⟩ that says nothing —
+     * every short vowel does; ⟨ة⟩ is singled out only because the other silent things there are marks that are
+     * not in the text for a probe to delete. Re-run through the async path, ⟨ة⟩ CONTRIBUTES in 30 of 30 probe
+     * words across ar/ary/arz: `سلسلة → silsˈila`, `مدينة → madˈiːna`, `منطقة → mintˤˈaʔa`.
+     *
+     * ⚠ NOT LISTED FOR ur/pnb/skr/sd, WHERE THE SAME CHARACTER IS A DIFFERENT LANGUAGE FACT: Urdu-script
+     * writing reads final ⟨ة⟩/⟨ۃ⟩ as /a/ (السنۃ as-sunna, سورة sūra), so there its silence is a real deletion
+     * and is fixed in that front end rather than exempted here.
+     */
+    ar: ["ة"], arz: ["ة"], ary: ["ة"], apc: ["ة"], apd: ["ة"],
+    acm: ["ة"], afb: ["ة"], ayl: ["ة"], ajp: ["ة"], acw: ["ة"],
+    /**
+     * ⚠ PUNJABI AND ITS LAHNDA SIBLINGS HAVE NO PHONEMIC /ʔ/, so the Arabic-loan hamza ⟨ء⟩ is silent BY RULE
+     * and the rule is already argued in `punjabi.ts` against the referee (`اعتراض → et̪raːz`, +13 net; the
+     * same line removes ⟨ع⟩). Reported in pnb ×158 — `علماء → ˈəlmaː` *ʿulamā*, `اشیاء → ˈeːʃjaː` *ashyā*,
+     * `فضاء` *fazā* — and every probe word is exactly that: an Arabic loan whose hamza Urdu-script writing
+     * keeps in the spelling and drops in the mouth.
+     * ⚠ THE OTHER 126 OF THOSE 158 WERE NOT THIS AT ALL, and finding that out is why the entry is narrow: a
+     * STANDALONE ⟨ء⟩ after a year is the era marker for عیسوی "CE" (`1238 ء وچ`), which is a real deletion
+     * and is now expanded in `punjabi/normalize.ts` instead of being exempted here. The detector could never
+     * have reported that half on its own — a one-character word is not a probe word, since deleting the
+     * candidate leaves nothing to read.
+     */
+    pa: ["ء"], pnb: ["ء"], skr: ["ء"],
     /**
      * ⚠ THE SOFT SIGN IS A PER-LANGUAGE QUESTION, AND THESE THREE ANSWER IT WITH "NOTHING". Russian's ⟨ь⟩
      * palatalises the preceding consonant, and copying that answer across the Cyrillic Turkic and Iranian

@@ -92,9 +92,30 @@ function longVowel(ch: string, final = false): string {
     return "";
 }
 
+/**
+ * The Arabic ADVERBIAL ENDING ⟨ـاً⟩ — the tanwīn's alif is a SEAT, not a long vowel, so word-finally it is
+ * dropped and the mark falls back onto its own consonant, where the `harakat` table reads it as /an/.
+ * تقریباً → t̪əqriban rather than t̪əqribˈɑ. Word-final only: a medial ⟨اً⟩ is not this ending.
+ */
+const TANWIN_ALIF = /[اىیي]([ًٌٍ])$/u;
+
+/**
+ * ⚠ SHADDA BEFORE ITS VOWEL MARK — AND WITHOUT THIS, A GEMINATE THAT CARRIES A VOWEL IS NOT A GEMINATE.
+ *
+ * The scan below reads the marks after a consonant in a FIXED order: shadda first, then one haraka. But the
+ * canonical Unicode ordering of the Arabic marks is the OPPOSITE for the commonest case — a vowel mark has
+ * combining class 30 and the shadda 33, so ⟨زَّ⟩ is stored ⟨ز⟩+fatḥa+shadda and text arrives that way. The
+ * shadda test therefore saw the fatḥa, fell through, and the shadda was skipped as an unknown mark:
+ * `الزَّادِ` read *alzaɑd̪i* with no length at all. Found while triaging the `silentCharsIn` report of ⟨ّ⟩ ×10
+ * in ps — whose own probe words are something else (a shadda mistyped onto an alif), but whose diagnosis
+ * turned this up underneath. Rewriting the pair into the order the scan expects is the whole fix, and it is
+ * a no-op on any word that already writes them that way.
+ */
+const SHADDA_AFTER_VOWEL = /([ً-ِٰٗ])ّ/gu;
+
 /** Pashto word → canonical IPA (consonant + written-vowel skeleton + default [ə]). */
 function g2p(word: string): string {
-    const s = [...word.normalize("NFC")];
+    const s = [...word.normalize("NFC").replace(TANWIN_ALIF, "$1").replace(SHADDA_AFTER_VOWEL, "ّ$1")];
     const n = s.length;
     let out = "";
     let i = 0;

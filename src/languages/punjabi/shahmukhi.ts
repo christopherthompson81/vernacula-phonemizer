@@ -54,10 +54,72 @@ function longVowelAfterConsonant(ch: string): string | undefined {
     return ch === WAW || ch === YA || ch === BARI_YE ? DEF.longVowels[ch] : undefined;
 }
 
+/**
+ * ARABIC-KEYBOARD LETTERFORMS AND THE ARABIC-LOANWORD SPELLINGS → their Shahmukhi equivalents.
+ *
+ * ⚠ EVERY ROW HERE IS A CHARACTER `silentCharsIn` CAUGHT PRODUCING NOTHING, and every one of them is an
+ * ENCODING or SPELLING variant of a letter this scanner already reads — not a sound it has no rule for. Left
+ * unfolded they matched no branch of the scan below and were skipped in silence:
+ *
+ *     pnb  ⟨ى⟩ U+0649 ×34   عوامى → əʋˈaːm, آبادى → aːbˈaːd̪, ذاتى → zˈaːt̪  — the final /iː/ of every
+ *                           ـی-ending adjective, gone, because the writer typed the ARABIC alif maqṣūra
+ *     skr  ⟨ك⟩ U+0643 ×5    شاكر → ʃˈaːɾ — the /k/ deleted outright (ک U+06A9 is the Shahmukhi kāf)
+ *     skr  ⟨أ⟩ U+0623 ×8    أکثر → kˈəsəɾ — the initial vowel gone; Urdu-script writing seats no hamza on ا
+ *     skr  ⟨ة⟩ ×9 ⟨ۃ⟩ ×7    السنة → ˈəlsən, السیاسۃ → ələsjˈaːs
+ *
+ * ⚠ AND ⟨ة⟩/⟨ۃ⟩ FOLD TO ⟨ہ⟩ HERE WHILE THE ARABIC ENGINE EXEMPTS THEM AS CORRECTLY SILENT — the same
+ * character, the opposite verdict, because the languages differ. Arabic reads تāʾ marbūṭa as nothing in
+ * pausal form (the /a/ is the fatḥa before it, which Arabic writes); Urdu-script writing has no fatḥa to
+ * carry it and reads the letter ITSELF as final /a/ — السنۃ *as-sunna*, سورۃ *sūra* — which is exactly what
+ * word-final ⟨ہ⟩ already does in this scanner.
+ *
+ * ⚠ NOT FOLDED: ⟨ڊ⟩ U+068A, reported ×4 in skr. All four occurrences are ONE sentence of one article, and
+ * they disagree with each other — ⟨ڊے⟩ is transparently دے /d̪eː/ "of", while ⟨پچاڊھ⟩ wants a retroflex, and
+ * the letter's own Sindhi value is the retroflex implosive /ɗ̢/ (Saraiki writes that ݙ). Four tokens from one
+ * sentence do not source a phoneme, and a wrong reading is worse than a silence. Left reported.
+ */
+const LETTERFORM: Readonly<Record<string, string>> = {
+    "ي": "ی", "ى": "ی", // Arabic yeh / alif maqṣūra → Urdu-script yeh
+    "ك": "ک", // Arabic kāf → Shahmukhi kāf
+    "أ": "ا", "إ": "ا", "ٱ": "ا", // hamza-seated alifs → bare alif
+    "ة": "ہ", "ۃ": "ہ", // tāʾ marbūṭa (both encodings) → the gol he that already reads final /a/
+};
+const LETTERFORM_RE = new RegExp(`[${Object.keys(LETTERFORM).join("")}]`, "gu");
+
+/**
+ * The Arabic ADVERBIAL ENDING ⟨ـاً⟩ — the tanwīn's alif is a SEAT, not a long vowel.
+ *
+ * `silentCharsIn` reports ⟨ً⟩ ×32 in skr: تقریباً → t̪əqɾˈiːbaː, مثلاً → mˈəslaː, عموماً → əmˈoːmaː — the /n/
+ * of *taqrīban*, *maslan*, *ʿumūman* deleted in every one. The cause is positional rather than missing data:
+ * `harakat` in shahmukhi.jsonc has carried `"ً": "ən"` all along, but the scan only reads a mark that sits
+ * directly on a CONSONANT, and in ⟨ـاً⟩ the mark sits on the alif. Dropping the alif puts the tanwīn back on
+ * its consonant, where the existing table reads it — and drops the wrong long /aː/ at the same time, since
+ * the ending is /-an/ and never /-aːn/. Word-final only: a medial ⟨اً⟩ is not this ending.
+ */
+ // ⚠ ⟨ی⟩ AND NOT ⟨ى⟩: this runs AFTER the letterform fold above, which has already unified the two.
+const TANWIN_ALIF = /[ای]([ًٌٍ])$/u;
+
+/**
+ * ⚠ SHADDA BEFORE ITS VOWEL MARK — AND WITHOUT THIS, A GEMINATE THAT CARRIES A VOWEL IS NOT A GEMINATE.
+ *
+ * The consonant branch below reads the marks in a FIXED order — shadda, then one haraka — but the canonical
+ * Unicode ordering is the opposite for the commonest case: a vowel mark has combining class 30 and the shadda
+ * 33, so ⟨کَّ⟩ is stored ⟨ک⟩+fatḥa+shadda and real text arrives that way. The shadda test saw the fatḥa, fell
+ * through, and the shadda was then skipped as an unknown diacritic — `مکَّہ` read *mˈəkəɦ*, losing both the
+ * gemination AND the word-final [aː] (the ہ was no longer word-final for the branch that reads it). The same
+ * bug, and the same one-line repair, as in `pashto.ts`; a no-op on the order the corpus usually writes.
+ */
+const SHADDA_AFTER_VOWEL = /([ً-ِٰ])ّ/gu;
+
 /** Scan one Shahmukhi word into raw canonical Punjabi IPA (breathy markers, doubled geminates, inherent schwas)
  *  — the SAME shape the Gurmukhi g2p emits, for punjabi.ts's shared post-processing. */
 export function scanShahmukhi(word: string): string {
-    const s = [...word.normalize("NFC")];
+    const s = [
+        ...word.normalize("NFC")
+            .replace(LETTERFORM_RE, (c) => LETTERFORM[c]!)
+            .replace(TANWIN_ALIF, "$1")
+            .replace(SHADDA_AFTER_VOWEL, "ّ$1"),
+    ];
     const n = s.length;
     let out = "";
     let i = 0;

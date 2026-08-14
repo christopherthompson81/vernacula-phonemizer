@@ -214,6 +214,18 @@ export function makePunjabiNormalizer(numbers: NumbersDef): (text: string) => st
         //    ਈਸਾ ਪੂਰਵ is the corpus's own spelling of the expansion ("323 ਈਸਾ ਪੂਰਵ", "ਤੀਜੀ ਸਦੀ ਈਸਾ ਪੂਰਵ").
         s = s.replace(/(?<![\p{L}\p{M}])ਈ\.\s?ਪੂ\.?/gu, "ਈਸਾ ਪੂਰਵ");
 
+        //    ⚠ AND THE SHAHMUKHI HALF HAS AN ERA MARKER TOO, WRITTEN AS A BARE HAMZA. `1238 ء وچ` is
+        //    "in 1238 CE": ⟨ء⟩ after a year abbreviates عیسوی, exactly as ⟨ਈ.ਪੂ.⟩ abbreviates ਈਸਾ ਪੂਰਵ above.
+        //    Unread it is silent content loss on a DATE — `silentCharsIn` reports ⟨ء⟩ ×158 in pnb, and ×126 of
+        //    those are this standalone marker rather than a hamza inside a word.
+        //    ⚠ THE EXPANSION IS THE CORPUS'S OWN. pnb writes both forms, in the same construction, in the same
+        //    artifact: `874 عیسوی وِچّ` and `985 عیسوی وِچّ` against `1238 ء وچ` and `57 ء وچ` — 10 spelled-out
+        //    against 126 abbreviated, so nothing here is supplied from outside the text.
+        //    ⚠ A PRECEDING DIGIT IS REQUIRED, and that is what keeps the rule off the ordinary word-final hamza
+        //    of an Arabic loan (علماء, اشیاء, فضاء), which is correctly SILENT in a language with no /ʔ/ — see
+        //    the ʔ-removal in punjabi.ts. Attached (`2016ء`) and spaced (`1238 ء`) are both attested.
+        s = s.replace(/(\d)\s?ء(?![\p{L}\p{M}])/gu, "$1 عیسوی");
+
         // 8) ABBREVIATION. The DOT IS REQUIRED here, unlike Hindi's डॉ — ਡਾ is a live word-medial sequence
         //    (ਸਾਡਾ, ਵੱਡਾ, ਕੈਨੇਡਾ), and the leading lookaround alone would not save a dot-optional rule from
         //    a word-FINAL ਡਾ. The dot is consumed so it cannot become a phrase break.

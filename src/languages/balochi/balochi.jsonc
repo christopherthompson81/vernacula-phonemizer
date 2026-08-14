@@ -61,6 +61,18 @@
     // intends. They are unambiguous vowels themselves and never take the glide branch.
     "vowelLetters": ["ا", "آ", "و", "ى", "ی", "ے", "ݔ", "ۏ"],
 
+    // ⚠ THE HARAKAT ARE THE SHORT VOWELS THIS FILE'S HEADER CALLS UNWRITTEN — AND THE CORPUS WRITES THEM 449
+    // TIMES. The header above is right that Balochi's abjad OMITS /a i u/ and that this is the honest ceiling
+    // of the g2p; what it did not anticipate is that a writer who wants the distinction reaches for the Arabic
+    // diacritics, and `tools/corpus/mined/bal.jsonc` is full of them: ⟨ِ⟩ ×212, ⟨َ⟩ ×139, ⟨ُ⟩ ×98, ⟨ّ⟩ ×5.
+    // `silentCharsIn` found all four deleted — بُته → *bt̪h*, گُش → *ɡʃ*, اَنت → *aːnt̪*, ڈارِک → *ɖaːrk* — so
+    // the ONE case where the script is not defective was being read as though it were. The values are Jahani &
+    // Korn Table 11.2's short vowels, which this manifest already names, mapped through the universal
+    // Perso-Arabic marks; nothing new is claimed about the language.
+    "harakat": { "َ": "a", "ِ": "i", "ُ": "u" },
+    "sukun": "ْ",
+    "shadda": "ّ",
+
     // ⚠ THE ROMAN ORTHOGRAPHY, a SECOND full g2p in the same engine — Balochi is written in both scripts and
     // this half is PHONEMIC where the Arabic half is defective, so it resolves to full IPA on its own rather
     // than leaning on the lexicon. The two halves share nothing but the language.
