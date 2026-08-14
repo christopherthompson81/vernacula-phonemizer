@@ -1,0 +1,442 @@
+// WIKIPEDIA WORD ATTESTATION — fi. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "fi",
+        "wiki": "fi.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "yhtä suuri kuin",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…. == Katso myös == Ekvivalenssirelaatio Samuus Suurempi tai yhtä suuri kuin Matemaattinen merkintä Yhtäläisyysmerkki == Lähteet == == K…",
+                "…teistä B ja C eteenpäin. On todistettava, että kulma ABC on yhtä suuri kuin kulma ACB ja että kulma CBD on yhtä suuri kuin kulma BCE.Va…",
+                "…kulma ABC on yhtä suuri kuin kulma ACB ja että kulma CBD on yhtä suuri kuin kulma BCE.Valitaan janalta BD mielivaltainen piste F. Valit…",
+                "…t nämäkin kolmiot keskenään yhtenevät, jolloin kulma FCB on yhtä suuri kuin kulma GBC ja kulma BCF yhtä suuri kuin kulma CBG. Kun kulma…",
+                "…jolloin kulma FCB on yhtä suuri kuin kulma GBC ja kulma BCF yhtä suuri kuin kulma CBG. Kun kulma ABG kokonaisuudessaan on näin todistet…",
+                "…b {\\displaystyle a\\leq b} merkitsee, että a on pienempi tai yhtä suuri kuin b; a ≥ b {\\displaystyle a\\geq b} merkitsee, että a on suure…"
+            ]
+            },
+        {
+                "word": "plusmiinus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…la 2013–2014 Niskanen teki oman piste-ennätyksensä ja hänen plusmiinus-tilasto oli joukkueen paras. Osittain hyvää kautta edesautt…",
+                "…, sillä mies merkkautti 57 ottelussa 18 tehopistettä (5+13) plusmiinus-sarakkeen näyttäessä nollaa. Kauden 2014–2015 Kousa vietti…",
+                "…Saipaa vastaan. Heinon suoritus oli tyydyttävä pisteiden ja plusmiinus -tilaston valossa, mutta edelliskauden pistetehtailuun hän…"
+            ]
+            },
+        {
+                "word": "jaettuna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…⋅ 1 = 1 ⋅ x = x . {\\displaystyle x\\cdot 1=1\\cdot x=x.} Luku jaettuna yhdellä on luku itse: x 1 = x . {\\displaystyle {\\frac {x}{1…",
+                "…{\\displaystyle {\\frac {x}{1}}=x.} Luku, joka ei ole nolla, jaettuna itsellään on yksi: x x = 1 , {\\displaystyle {\\frac {x}{x}}=…",
+                "…Karjalan lääni. Vuosina 1641–1650 lääni oli väliaikaisesti jaettuna Viipurin lääniksi ja Savonlinnan lääniksi. Vuonna 1650 nämä…",
+                "…osta johtivat luotsipäällysmiehet aikana, jolloin Suomi oli jaettuna neljään piiriin. Vuonna 1850 perustettiin Helsinkiin sotila…",
+                "…syi rodun 1. kesäkuuta 1992. Ocicateilla on viiteen ryhmään jaettuna yhteensä 12 rotumääritelmän mukaista väriä. Väreistä hyväks…",
+                "…{\\displaystyle \\hbar } on Diracin vakio eli Planckin vakio jaettuna 2π:llä, G on gravitaatiovakio ja c on valonnopeus tyhjiössä…"
+            ]
+            },
+        {
+                "word": "on yhtä kuin",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "yhtä kuin",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pienempi kuin",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…5} . Merkintä a < b {\\displaystyle a<b\\!\\ } tarkoittaa a on pienempi kuin b ja merkintä a > b {\\displaystyle a>b\\!\\ } tarkoittaa että…",
+                "…ja a ≮ b {\\displaystyle a\\not <b} merkitsee, että a ei ole pienempi kuin b. == Kuuluisia epäyhtälöitä == Kolmioepäyhtälö Cauchyn–Sch…",
+                "…≥ 3 {\\displaystyle x\\leq -3,-2\\leq x\\leq +2,x\\geq 3} . === Pienempi kuin === Pienempi kuin on kaksipaikkainen relaatio, jota käytetä…",
+                "…e x\\leq -3,-2\\leq x\\leq +2,x\\geq 3} . === Pienempi kuin === Pienempi kuin on kaksipaikkainen relaatio, jota käytetään reaalilukujen v…",
+                "…Pienempi kuin kolme voi tarkoittaa seuraavia asioita: Pienempi kuin kolme…",
+                "…Pienempi kuin kolme voi tarkoittaa seuraavia asioita: Pienempi kuin kolme, Loost Koos -rap-yhtyeen albumi vuodelta 2012 <3, Sal…"
+            ]
+            },
+        {
+                "word": "suurempi kuin",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…merkintä a > b {\\displaystyle a>b\\!\\ } tarkoittaa että a on suurempi kuin b. Nämä suhteet tunnetaan tiukkana epävastaavuutena , kun t…",
+                "…b; a ≯ b {\\displaystyle a\\not >b} merkitsee, että a ei ole suurempi kuin b ja a ≮ b {\\displaystyle a\\not <b} merkitsee, että a ei ol…",
+                "…luvulla kaupungin ruotsalainen seurakunta oli merkittävästi suurempi kuin suomalainen. Tähän vaikutti muun muassa Viaporin rakentamin…",
+                "…i vitamiineja ja kuituja, ja sen kokonaisflavonoidimäärä on suurempi kuin millään muulla kotimaisella marjallamme. Pohjoisen kansoill…",
+                "…n sinisorsan paino jää selvästi tämän alle. Uros on yleensä suurempi kuin naaras. Myskisorsa on sinisorsaa huomattavasti suurempi, ja…",
+                "…huomattavasti suurempi, ja sen sukupuolten kokoero on vielä suurempi kuin sinisorsan. Ankkakoiraan ja myskisorsanaaraan jälkeläistä k…"
+            ]
+            },
+        {
+                "word": "plus miinus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "miinus viisi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ennen ajanlaskun alkua",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…o poronhoidosta löytyy kiinalaisesta tekstistä vuodelta 499 ennen ajanlaskun alkua, koskien Fusangin maata Siperiassa. Eurooppalaisissa kirjoi…",
+                "…iden alueilta sekä Norjan rannikon kautta noin 8850-luvulla ennen ajanlaskun alkua. Ensimmäisten asukkaiden saapuessa Pohjois-Suomi oli vielä…",
+                "…toisen vuosituhannen toisella ja kolmannella neljänneksellä ennen ajanlaskun alkua. Ryhmät käyttivät siirtymiseensä ikivanhoja, jo vuosituhans…",
+                "…jä. Suomeen nämä ryhmät saapuivat noin 1600 tai 1500 vuotta ennen ajanlaskun alkua. Näiden yhteisöjen Sisä-Suomen järvialueelle päätyneistä jä…",
+                "…a siirtyivät jokea pitkin kohti Itämerta 1250–1000-luvuilla ennen ajanlaskun alkua. Toinen muuttoaalto toi itämerensuomalaisten pääjoukon Suom…",
+                "…ta taulun laista (lex duodecim tabularum) noin vuodelta 450 ennen ajanlaskun alkua. == Korko eri perusteiden mukaan == == Lähteet == == Aihees…"
+            ]
+            },
+        {
+                "word": "jälkeen ajanlaskun alun",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…en Ukrainan seudulle ensimmäisellä ja toisella vuosisadalla jälkeen ajanlaskun alun saapuneista iranilaisien alaanien alaheimoista. 300-luvulla…",
+                "…a vaihtoehtoina käytetään merkintöjä eaa. ja jaa. (ennen ja jälkeen ajanlaskun alun). == Katso myös == Holoseenin ajanlasku == Lähteet ==…",
+                "…Aurel Stein piti paikkaa rakennettuna 200- tai 300-luvulla jälkeen ajanlaskun alun. Vuonna 1976 Emil Trinklerin löytöjä tutkinut saksalainen r…",
+                "…terien heimoon ja hänet tunnetaan naisprofeettana vuonna 69 jälkeen ajanlaskun alun alkaneen batavien kapinan kautta. Nimi Veleda saattaa olla…",
+                "…uotta ennen ajanlaskun alkua ja rautakaudella pronssikauden jälkeen ajanlaskun alun paikkeille saakka. Saareen on tehty mahdollisesti viittauks…",
+                "…li ensimmäisenä Plinius vanhempi ensimmäisellä vuosisadalla jälkeen ajanlaskun alun. Siitä lähtien ilmiö on kiehtonut ja kauhistuttanut ihmisiä…"
+            ]
+            },
+        {
+                "word": "venäjäksi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…neljännes maailman tieteellisistä julkaisuista julkaistaan venäjäksi. Venäjän kieli on yksi Yhdistyneiden kansakuntien kuudesta…",
+                "…т «Военная литература» (verkkoversio) Viitattu 16.10.2011. (venäjäksi) Curtis, Glenn E.: Russia. Washington: GPO for the Library…",
+                "…isen ukrainalaisen kirjallisuuden isänä. Hän kirjoitti myös venäjäksi ja kirjallisen tuotannon lisäksi oli myös taitava taidemaal…",
+                "…parlamentti. (englanniksi) Ukrainan kartta 1:1 milj (jpg). (venäjäksi) ja (englanniksi) History of Ukraine (Albertan ja Toronton…",
+                "…laisuudessa. Historiansa alussa itäslaavit asuttivat Kiovan Venäjäksi kutsuttua valtakuntaa ja sen hajottua itäslaavit jakautuiva…",
+                "…ä. 1600-luvulta lähtien Venäjän länsiosaa on kutsuttu Valko-Venäjäksi. Itsenäistyessään 1991 maa halusi eroon venäjänkielisestä B…"
+            ]
+            },
+        {
+                "word": "kreikaksi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 7,
+                "substringOnly": 1,
+                "examples": [
+                "…i-idässä, ja myös Uusi testamentti kirjoitettiin alun perin kreikaksi. Koinee oli myöhemmin käytössä myös Bysantin valtakunnan ki…",
+                "…i. Ensimmäisen vakavamieliseksi tarkoitetun kirjan dimotikí-kreikaksi kirjoitti Giánnis Psycháris vuonna 1888. Kreikassa käytiin…",
+                "…ja ’tyranni’. Koska Uusi testamentti kirjoitettiin alkujaan kreikaksi, ovat myös monet kristinuskoon liittyvät termit kreikkalais…",
+                "…- Kreikan valtion virallinen matkailusivusto (englanniksi) (kreikaksi) Kreikka.net (Arkistoitu – Internet Archive) – tietoa Kreik…",
+                "…Ναυτικό – Hellenic Navy. Kreikan merivoimien verkkosivut. (kreikaksi) (englanniksi)…",
+                "…της Ελλάδας. Ιδιωτική Έκδοση, 2010. ISBN 978-960-93-2293-5 (kreikaksi)…"
+            ]
+            },
+        {
+                "word": "lyhenne",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 51,
+                "articles": 15,
+                "substringOnly": 1,
+                "examples": [
+                "…Lyhenne (lyhenne lyh.) on tilan tai kirjoitusvaivan säästämiseksi k…",
+                "…Lyhenne (lyhenne lyh.) on tilan tai kirjoitusvaivan säästämiseksi käytetty l…",
+                "…uitenkin kirjainlyhenteet sekä lyhennesanat eli akronyymit. Lyhenne voidaan muodostaa katkaisemalla sana (yleensä konsonantin j…",
+                "…itystä, tai kirjoittajalta voi jäädä huomaamatta, että sama lyhenne voi viitata eri asioihin. Arkikielessä lyhenteiksi usein ku…",
+                "…ka auttaa lukijaa hahmottamaan, että kyseessä on nimenomaan lyhenne (lyhennepisteet voidaan tosin jättää pois erityiseen tiiviy…",
+                "…a’), 10 v (’kymmenen vuotta’); kuitenkin pisteellisenä, jos lyhenne esiintyy muuten kuin mittayksikkönä: 10-v. (’kymmenvuotias’…"
+            ]
+            },
+        {
+                "word": "arabiaksi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Arabia (arabiaksi اللغة العربية) on seemiläinen kieli, jota puhuu äidinkielen…",
+                "…tu myös suomeksi (Globaali demokratia, 2003), espanjaksi ja arabiaksi. == Yhteiskunnallinen aktiivisuus == Teivainen on toiminut…",
+                "…rab. الريال‎) on Saudi-Arabian rahayksikkö. Se kirjoitetaan arabiaksi ر.س tai SR. Saudi-Arabiassa on käytössä 1, 5, 10, 50, 100 j…",
+                "…llä kanavalla. Saudi-Arabiassa ilmestyy useita päivälehtiä. Arabiaksi ilmestyy muun muassa Al-Riyadh ja englanniksi Saudi Gazette…",
+                "…a Amihai. Heprean lisäksi paljon kirjallisuutta julkaistaan arabiaksi, englanniksi ja ranskaksi. Miljoonan venäläisen maahanmuutt…",
+                "…i sanomalehtiä. Suurimmat päivälehdet ilmestyvät hepreaksi, arabiaksi, englanniksi ja venäjäksi. Sanomalehtiä julkaistaan myös ra…"
+            ]
+            },
+        {
+                "word": "japaniksi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…imedia Commonsissa === Viralliset === Japanin pääministeri (japaniksi, englanniksi) Keisariperheen sivusto (japaniksi, englanniks…",
+                "…äministeri (japaniksi, englanniksi) Keisariperheen sivusto (japaniksi, englanniksi) Japanin ulkoministeriö (englanniksi) (japanik…",
+                "…paniksi, englanniksi) Japanin ulkoministeriö (englanniksi) (japaniksi) Japanin parlamentin ylähuone (japaniksi, englanniksi) Japa…",
+                "…riö (englanniksi) (japaniksi) Japanin parlamentin ylähuone (japaniksi, englanniksi) Japanin parlamentin alahuone (japaniksi, engl…",
+                "…uone (japaniksi, englanniksi) Japanin parlamentin alahuone (japaniksi, englanniksi) Japanin tilastokeskus (japaniksi, englanniksi…",
+                "…in alahuone (japaniksi, englanniksi) Japanin tilastokeskus (japaniksi, englanniksi) Japan National Tourist Organization (englanni…"
+            ]
+            },
+        {
+                "word": "asukasta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 131,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…siellä ollut 1640-lukuun mennessä enempää kuin muutama sata asukasta. Vuonna 1640 Pietari Brahe siirrätti kaupungin meren äärell…",
+                "…olevan vuonna 2030 noin 716 000 ja vuonna 2060 noin 870 000 asukasta. === Asuminen === Helsingin suosituin asumismuoto on kerros…",
+                "…äestöstä. Näistä varsinaisia ulkomaan kansalaisia on 73 076 asukasta. Muita kieliä kuin suomea, ruotsia tai saamea puhui äidinki…",
+                "…uin suomea, ruotsia tai saamea puhui äidinkielenään 121 684 asukasta. Puhutuimmat vieraat kielet olivat venäjä, somali ja viro.…",
+                "…== Taajamat === Vuoden 2023 lopussa Helsingissä oli 674 500 asukasta, joista 661 276 asui taajamissa, 454 haja-asutusalueilla ja…",
+                "…uoden 2011 lopussa Helsingin keskustaajamassa oli 1 159 211 asukasta ja sen pinta-ala oli 631,11 neliökilometriä. Vuoden 2017 lo…"
+            ]
+            },
+        {
+                "word": "vähintään",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 96,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…jä varten. Tietokanta rajoittuu pääasiassa peleihin, joissa vähintään yksi pelaaja on mestarivahvuus, ja se alkaa varhaisimmista…",
+                "…Tämä on Luettelo vähintään 10 Itä-Länsi-ottelua pelanneista pesäpalloilijoista. Kaikki…",
+                "…alloilijoista. Kaikkiaan 40 miestä ja 22 naista on pelannut vähintään 10 pesäpallon Itä-Länsi-ottelua. == Kymppikerhon jäsenet ==…",
+                "…tuna. Vanhin suomalainen rengastettu harmaahaikara on ollut vähintään 16 vuotta 6 kuukautta 23 päivää vanha. Euroopan vanhin on o…",
+                "…utta 23 päivää vanha. Euroopan vanhin on ollut tanskalainen vähintään 37 vuoden ja 6 kuukauden ikäinen yksilö. == Levinneisyys ==…",
+                "…uksen valvontatarkastusten mukaan summa oli todellisuudessa vähintään 21 miljardia euroa. Vuoden 1976 Montrealin kesäolympialaist…"
+            ]
+            },
+        {
+                "word": "ja niin edelleen",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…749. Miljoonaa suurempien lukujen nimet biljoona, triljoona ja niin edelleen ovat peräisin 1400-luvulta. Ne johdettiin vaihtamalla miljo…",
+                "…n alkuosa latinalaisperäiseksi etuliitteeksi bi, tri, quadr ja niin edelleen siten, että etuliite ilmaisee, mihin potenssiin miljoona ko…",
+                "…iljardi (= tuhat biljoonaa), triljardi (= tuhat triljoonaa) ja niin edelleen; tällaiset sanat eivät ole kuitenkaan normien mukaisia eivä…",
+                "…biljoona on ”tuhat miljoonaa”, triljoona ”tuhat biljoonaa” ja niin edelleen. Vaikkakin jotkut yhä käyttävät vanhaa järjestelmää esimerk…",
+                "…miljoonaa” (1012), triljoona on ”miljoona biljoonaa” (1018) ja niin edelleen. Lyhyt asteikko on järjestelmä, jossa jokainen -iljoona-lop…",
+                "…hat miljoonaa” (109), triljoona on ”tuhat biljoonaa” (1012) ja niin edelleen. Ero järjestelmien välillä kasvaa sitä suuremmaksi, mitä su…"
+            ]
+            },
+        {
+                "word": "sekunnissa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 57,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Tuhat kuolemaa sekunnissa oli suomalainen neofolk-yhtye. Sen jäsenet olivat Antti Paa…",
+                "…007 Anima Arcticalla julkaistu nimikkoalbumi Tuhat kuolemaa sekunnissa.. == Diskografia == 2007: Tuhat kuolemaa sekunnissa, Anima…",
+                "…uolemaa sekunnissa.. == Diskografia == 2007: Tuhat kuolemaa sekunnissa, Anima Arctica == Lähteet == == Aiheesta muualla == Discogs…",
+                "…= Lähteet == == Aiheesta muualla == Discogs: Tuhat kuolemaa sekunnissa (englanniksi)…",
+                "…laulaja vaihtelee sävelkorkeutta viidestä seitsemään kertaa sekunnissa edestakaisin kahden puolisävelaskelen välillä. Vibratoa käy…",
+                "…Metri sekunnissa (tunnus m/s) on SI-järjestelmän mukainen nopeuden yksikkö.…"
+            ]
+            },
+        {
+                "word": "tunnissa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 86,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Tunnissa taiteentuntijaksi (ruots. Anvisning att på 60 minuter bliva…",
+                "…u sanakirjan muotoon ja hitaampikin lukija omaksuu sen alle tunnissa. Opas neuvoo välttämään perspektiiviin liittyviä kommenttej…",
+                "…vastasi Maija Hirvonen. == Suomennos == Strindberg, August: Tunnissa taiteentuntijaksi. ((Anvisning att på 60 minuter bliva kons…",
+                "…Kilometri tunnissa (tunnus km/h) on nopeuden SI-järjestelmän lisäyksiköistä jo…",
+                "…enteen nopeusrajoitukset ilmoitetaan yleisesti kilometreinä tunnissa. Britanniassa ja Yhdysvalloissa ne ilmoitetaan kuitenkin ma…",
+                "…nniassa ja Yhdysvalloissa ne ilmoitetaan kuitenkin maileina tunnissa. Toinen yleisesti etenkin fysiikan laskelmissa käytetty nop…"
+            ]
+            },
+        {
+                "word": "niin sanottu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Niin sanottu elämäni (My So-Called Life) on yhdysvaltalainen teini-ikäis…",
+                "…luvulla syntyi Hi-Hat (haitsu/haikka), jonka esiasteena oli niin sanottu sock symbals, joka koostui maassa olevasta ja jalkaan kiinn…",
+                "…orrashissi on lava, johon voidaan ajaa pyörätuolilla, mutta niin sanottu porrasnostin on liikkuva istuin. Porrashissi liikkuu johdep…",
+                "…e ja Memelin alueen Liettualle. Puolan alueisiin liitettiin niin sanottu Puolan käytävä ja osia Sleesiasta. Tšekkoslovakiaan liitett…",
+                "…lla hieman eri juoksuvauhdin. Lapsille järjestetään monesti niin sanottu puolicooper, jossa juostaan kuusi minuuttia. == Hapenkulutu…",
+                "…ronkielinen teksti on ensin. Lain noudattamista on valvonut niin sanottu kielipoliisi eli kielen tarkastusvirasto. Viroon on suunnit…"
+            ]
+            },
+        {
+                "word": "omaa sukua",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…nsinööri Aarne Mattilan ja terveydenhoitaja Kaija Mattilan (omaa sukua Vahtola) perheeseen. Hän avioitui valmistuspäällikkö Kaisa…",
+                "…perheeseen. Hän avioitui valmistuspäällikkö Kaisa Mattilan (omaa sukua Virtanen) kanssa vuonna 1984. Pariskunnalla on lapset Veera…",
+                "…oisena kesänä metsäteknikko Eino Nurmisen ja Anna Nurmisen (omaa sukua Svenström) perheeseen. Hän avioitui näyttelijä Arja Nurmise…",
+                "…enström) perheeseen. Hän avioitui näyttelijä Arja Nurmisen (omaa sukua Ala-Nikkilä) kanssa vuonna 1965. Pariskunnalla on kaksi tyt…",
+                "…== Ura == Katariina Kuisma syntyi Pertti ja Sirpa Kuisman (omaa sukua Jalovaara) perheeseen. Valmistuttuaan ylioppilaaksi vuonna…",
+                "…einz oli Frederick Trumpin pikkuserkku; Heinzin isoäiti oli omaa sukua Trump. == Lähteet ==…"
+            ]
+            },
+        {
+                "word": "pilkku",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 89,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…Pilkku on typografinen välimerkki, jota käytetään useissa kirjoite…",
+                "…ta käytetään useissa kirjoitetuissa kielissä erottimena. == Pilkku suomen kielessä == Suomen kielessä pilkulla on monta tehtäv…",
+                "…men kielessä == Suomen kielessä pilkulla on monta tehtävää: Pilkku erottaa pää- ja sivulauseen: Jäin kotiin, koska ulkona oli…",
+                "…pilkuilla: Irmeli, joka omistaa elefantin, on todella tyly. Pilkku erottaa rinnasteiset adjektiivit: Hänen pitäisi ostaa uusi,…",
+                "…oli jo entuudestaan tyylikäs auto, mutta hän haluaa uuden.) Pilkku erottaa listan jäsenet toisistaan: Tuo kaupasta kahvia, sok…",
+                "…aan: 3,141 (kolme ja sataneljäkymmentäyksi tuhannesosaa) == Pilkku muissa kielissä == Englannin kielessä pilkku on tuhansien e…"
+            ]
+            },
+        {
+                "word": "miinus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 53,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Miinus voi tarkoittaa seuraavia: Miinus (−), vähennyslaskun merkki…",
+                "…Miinus voi tarkoittaa seuraavia: Miinus (−), vähennyslaskun merkki Miinus (−) negatiivisen luvun et…",
+                "…voi tarkoittaa seuraavia: Miinus (−), vähennyslaskun merkki Miinus (−) negatiivisen luvun etumerkki Miinus (−), vastaluvun mer…",
+                "…hennyslaskun merkki Miinus (−) negatiivisen luvun etumerkki Miinus (−), vastaluvun merkki…",
+                "…Plus-miinus-tilastolla (+/−) tarkoitetaan jääkiekossa tehtyjen ja pääst…",
+                "…oman joukkueen jäsenistä tekee maalin, kenttäpelaajan plus–miinus-luku nousee yhdellä pisteellä. Vastaavasti kenttäpelaajalle…"
+            ]
+            },
+        {
+                "word": "neliökilometrin",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…aarin kokoisia lampia. Järvistä on pinta-alaltaan yli yhden neliökilometrin 2 609, yli kymmenen neliökilometrin 326 ja yli sadan neliök…",
+                "…inta-alaltaan yli yhden neliökilometrin 2 609, yli kymmenen neliökilometrin 326 ja yli sadan neliökilometrin 46. Yli 200 neliökilometri…",
+                "…metrin 2 609, yli kymmenen neliökilometrin 326 ja yli sadan neliökilometrin 46. Yli 200 neliökilometrin kokoisia suurjärviä Suomessa on…",
+                "…eliökilometrin 326 ja yli sadan neliökilometrin 46. Yli 200 neliökilometrin kokoisia suurjärviä Suomessa on 17 eli enemmän kuin missään…",
+                "…vat klassisista muotopuistoista ydinkeskustasta alkavaan 10 neliökilometrin laajuiseen Keskuspuistoon. Helsingissä on 60 luonnonsuojelu…",
+                "…skaan on vain vähän merimatkaa. Venäjä on noin 17 miljoonan neliökilometrin pinta-alallaan maailman suurin valtio, ja se peittää enemmä…"
+            ]
+            },
+        {
+                "word": "senttimetriä",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 122,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…on noin suuren kotikissan kokoinen. Ruumiin pituus on 45–58 senttimetriä ja hännän pituus 16–28 senttimetriä. Näätä painaa 500–1 800…",
+                "…Ruumiin pituus on 45–58 senttimetriä ja hännän pituus 16–28 senttimetriä. Näätä painaa 500–1 800 grammaa. Koossa on selvää vaihtelua…",
+                "…t ovat suurinpiirtein yhtä pitkiä. Vartalon pituus on 56–90 senttimetriä ja hännän pituus 11,5–20 senttimetriä. Naaraat painavat 6,5…",
+                "…talon pituus on 56–90 senttimetriä ja hännän pituus 11,5–20 senttimetriä. Naaraat painavat 6,5–14 kilogrammaa ja koiraat 9–17 kilogr…",
+                "…ammaa. Mäyrän turkki näyttää kirkkaan harmaalta, mutta 7–10 senttimetriä pitkät peitinkarvat ovat kaksivärisiä. Niiden tyvi ja kärki…",
+                "…vaaleita, mutta noin senttimetrin päästä kärjestä alkaa 1–2 senttimetriä pitkä musta osa. Tämä yhdistelmä saa aikaan harmaan vivahte…"
+            ]
+            },
+        {
+                "word": "kilogrammaa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 83,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…g, sekä dalton, jossa 1 Da = 1 u. == Johdannaisyksiköitä == Kilogrammaa on aikaisemmin käytetty myös voiman yksikkönä. Sellaisena s…",
+                "…n bengalintiikeriä pienempi. Urokset painoivat noin 170–240 kilogrammaa. == Lähteet ==…",
+                "…äkäkorkeus on 90–110 senttimetriä. Urokset painavat 175–260 kilogrammaa ja naaraat 100–160 kilogrammaa. Intiantiikerin turkki on ly…",
+                "…iä. Urokset painavat 175–260 kilogrammaa ja naaraat 100–160 kilogrammaa. Intiantiikerin turkki on lyhyt ja kiiltävä. Turkin pohjavä…",
+                "…on 220 senttimetriä, halkaisija 28 millimetriä ja paino 20 kilogrammaa (lukkoineen 25 kilogrammaa). Naisten levytangon pituus on 2…",
+                "…isija 28 millimetriä ja paino 20 kilogrammaa (lukkoineen 25 kilogrammaa). Naisten levytangon pituus on 201 senttimetriä, halkaisija…"
+            ]
+            }
+        ],
+    }
+    

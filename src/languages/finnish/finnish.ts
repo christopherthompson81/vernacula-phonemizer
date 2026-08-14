@@ -13,8 +13,10 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { normalizeFinnish, normalizeFinnishInitialisms } from "./normalize.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -62,8 +64,63 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
 const NATIVE_CLASS = "[a-zäöåšž]";
 const nat = makeNativiser(NATIVE_CLASS, "iu");
 
+/**
+ * The shared symbol tier (core/normalizeSymbols.ts), which composes number + sign / unit / rate /
+ * exponent in one pass. Runs AFTER normalize.ts, which is what lets that file keep its rewrites in
+ * DIGITS: `13,6 cm` leaves normalize.ts as `13 pilkku 6 cm`, so the number–unit adjacency this tier
+ * matches on is still intact.
+ *
+ * COUNT FORMS ARE `[singular, partitive]` AND THE DEFAULT SELECTOR IS EXACTLY RIGHT FOR FINNISH — a
+ * counted noun is nominative after 1 and PARTITIVE after everything else (*1 kilometri*, *10
+ * kilometriä*), which is the tier's `n === 1 ? 0 : 1` without an override.
+ *
+ * ⚠ `km/h` AND `m/s` ARE COMPOUND KEYS, NOT `unitPer` (trap 44 / trap 47 reason 1). The Finnish rate
+ * idiom is not "A per B": the denominator takes the INESSIVE and there is no joining word at all —
+ * *kilometriä tunnissa*, *metriä sekunnissa*. `unitPer` is one invariant string and none of these is one.
+ * `unitAlt` is sorted longest-first, so the 4-character key is tried before the bare `km`.
+ *
+ * ⚠ BARE `m` IS DECLARED, AND THE ONE-LETTER-KEY HAZARD (traps 28/46) WAS MEASURED FIRST: digit-adjacent
+ * `m` is ×1 in the retained corpus (`jopa 10 m korkeita`, a genuine metre) and the `version-dot` cell is
+ * ×0. The residual exposure is a dotted designation ending in ⟨m⟩ (`802.11m`), which the tier's
+ * `NOT_VERSION` guard rejects by SEEING THE DOT — and unlike fa/ckb/af/ca, this language's normalize.ts
+ * never spends a decimal POINT (Finnish decimals use a comma), so the dot is still there when the tier
+ * runs. The guard's evidence outlives the pass, which is what makes the key safe here (trap 39).
+ *
+ * ⚠ `°C` IS NOT ON THE TIER — normalize.ts step 10 owns it, because it also has to read the BARE `°` of
+ * a latitude and an angle, which is the same word (*astetta*) and no scale name.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["prosentti", "prosenttia"],
+    currency: { $: ["dollari", "dollaria"], "€": ["euro", "euroa"] },
+    units: {
+        // Longest-first inside the tier; both rate keys compose the inessive denominator themselves.
+        "km/h": ["kilometri tunnissa", "kilometriä tunnissa"],
+        "m/s": ["metri sekunnissa", "metriä sekunnissa"],
+        km: ["kilometri", "kilometriä"],
+        cm: ["senttimetri", "senttimetriä"],
+        mm: ["millimetri", "millimetriä"],
+        kg: ["kilogramma", "kilogrammaa"],
+        m: ["metri", "metriä"],
+    },
+    // Finnish welds the measure word onto the FRONT as one compound — *neliökilometriä*, *kuutiometriä* —
+    // which is `compound`, never `before` (that would give *neliö kilometriä*, two tokens).
+    // `neliökilometriä` is corpus-attested ×8 and `neliökilometrin` ×20/12 on the wiki; `kuutio` is a
+    // referee lemma and the cube has ×0 corpus instances, so it is declared for the shape rather than for
+    // a measured defect and is labelled as such.
+    exponentWords: { squared: ["neliö"], cubed: ["kuutio"], position: "compound" },
+    // The magnitude hop, for `1 850 miljardia dollaria` — and the field gates the UNIT path's connective
+    // hop too, which is the "one declaration, two consumers" note at the end of the playbook. Finnish
+    // takes NO connective (*viisi miljoonaa dollaria*), so `magnitudeConnective` stays undefined.
+    magnitudes: ["miljoona", "miljoonaa", "miljardi", "miljardia", "biljoona", "biljoonaa"],
+    ampersand: "ja",
+    // The corpus's `×` is a dimension cross (`4 096 × 2 304`, `7680×4320`) and a multiplier
+    // (`2×15 minuuttia`); Finnish says *kertaa* for both, so `by` defaults to `times`.
+    multiply: { times: "kertaa" },
+});
+
 class FinnishPhonemizer implements Phonemizer {
-    text(input: string): string {
+    text(rawInput: string): string {
+        const input = SYMBOLS(normalizeFinnishInitialisms(normalizeFinnish(rawInput)));
         return assembleClauses(input, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
