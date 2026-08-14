@@ -1164,6 +1164,18 @@ layers for classes the shared tier owns. Local is RIGHT in these cases, and each
    of `persen` is to consume the `%` first. Its comments read like dialect choices; they are override
    failures, now relabelled.
 
+⚠ A FIFTH REASON WAS PROPOSED AND IS SPENT — recorded so it is not re-derived from the layers it produced.
+`SymbolData.percent` used to be REQUIRED, so a language with no sourceable percent word could not declare the
+tier at all and had to hand-write everything. `shi` hit it (its units, postposed exponent and invariant
+`unitPer` all fit the tier) and refused to invent a word: `tigmiḍi` ×120/20 is the wrong slot, 13 spellings are
+×0, and `attest.ts --after` on five numerals returns nothing — this wiki never spells a numeral out, so the
+sign's reading is absent from text BY CONSTRUCTION. The field is now optional and shi is on the tier at
+`0/402` corpus change. ⚠ The FIX had to be more than optionality: `loadManifest` casts, so an absent key would
+have turned a crash into a SILENTLY DROPPED SIGN, and a construction-time check now rejects a declared-but-empty
+form. Of 16 top-level fields, exactly one was required; now none is. `bal` remains local — measured, the tier
+would buy it nothing — but its comment claimed the closed door, and a comment asserting a fact about `src/core`
+outlives the fact.
+
 And local is WRONG when it is simply older than the tier — which is diagnosable, because a hand-written table
 covers the SINGLE SUBSTITUTIONS and omits the COMPOSED ones:
 
