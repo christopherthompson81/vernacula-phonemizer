@@ -2550,6 +2550,61 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "`na` is everywhere in the corpus, so the word is not the gap; the SLOT is. Shona reached "
             + "the identical conclusion from the identical evidence",
     },
+    lg: {
+        // ⚠ LUGANDA'S HAYSTACK, so the strength of every "measured" below is legible. There is no FLEURS lg
+        // and espeak does not ship the language at all, so `sources.ts` reports `[NONE]` or `[chk?]` for
+        // every class it checks. The evidence is the 447 retained segments of `tools/corpus/mined/lg.jsonc`
+        // (a 43,455-paragraph lg.wikipedia dump), the artifact's whole-corpus `counts` where they exist, and
+        // `attest.ts` against that same wiki — a bigger sample of one source, never two. The one referee,
+        // epitran lug-Latn, is a WORD list and a rule system, and says nothing about a sign. All of it is
+        // argued at length in src/languages/luganda/normalize.ts.
+        // ⚠ `minus` AND `degrees` ARE DELIBERATELY ABSENT FROM THIS BLOCK, so `review.ts --lang lg` STAYS RED
+        // on both. Each is a SOURCING gap with a reading still to find, and this table is not where TODOs go:
+        // the corpus has one genuine negative (`Latitude:-0.214709`, a southern latitude that inverts if the
+        // sign is dropped) and no attested Luganda negative-number word; and the degree sign occurs ×13 with
+        // `digiri` well attested (×59/20, and the wiki's own maths textbook NAMES the sign — "Akabonero ka
+        // digiri kalagibwa nga ' ° '"), while the SCALE names are not — `Selsiyasi` and `sentigureedi` are
+        // both ×0 — so a rule would delete the scale and leave its letter to read as ⟨c⟩ → /c/.
+        plus: "measured: `+` ×7 and NOT ONE is an operator. Three are phone country codes "
+            + "(`+256753940995/+256788343739/ +256773940995`, `(+0045 6618 4058.)`), two are names or "
+            + "markers carrying the sign as a character (`REDD+`, `CD4+ Tcells`), one is the legal-wind "
+            + "reading in an athletics record (`100 m: 10.35s (+1.4 m/s)`). Nothing attests a plus word "
+            + "either: `plus` on lg.wikipedia is ×10 tokens / 10 articles and every hit is a PROPER NOUN "
+            + "(`Sauti Plus Media Hub`, `Coco Plus Vanilla`, `ASSM Elgeco Plus`, `Reach a Hand`), which is "
+            + "trap 37; `pulasa` is ×0",
+        "plus-minus": "measured: `±` is ×0 in the retained text, and the reading would compose two words of "
+            + "which the minus side has no candidate at all — see the plus note above and the header's minus "
+            + "paragraph",
+        equals: "measured: `=` ×19, and 19 of 19 resolve to something that is not an equation to read — 16 "
+            + "are MediaWiki infobox parameters (`| abakulembeze = President Frank-Walter Steinmeier`, "
+            + "`| luyimba lw'eggwanga = Das Lied der Deutschen`) and 3 are EasyTimeline directives "
+            + "(`PlotArea = left:50 right:20`, `ScaleMajor = unit:year increment:40000000`). ⚠ AND THE WORD "
+            + "IS NOT THE GAP, WHICH IS WHY THIS ENTRY IS LONGER THAN ITS COUNT DESERVES: Luganda's equals "
+            + "verb is attested twice over, in the corpus (`Obunene Buswedi YENKANA 449 964 km²`) and in the "
+            + "wiki's maths textbook (`25 % (kisomwa ebitundu abiri mu bitaano ku kikumi) KYENKANA 25/100 "
+            + "oba 0.25`) — but it is a VERB TAKING NOUN-CLASS CONCORD from its subject (kyenkana ~ yenkana "
+            + "~ zeenkana), so there is no invariant string to put between two operands and the concord "
+            + "cannot be computed from digits. Trap 14 arriving as a reason to DECLINE rather than as a "
+            + "conversion to make, and the Fula `hakkunde` part-of-speech test reaching the same place",
+        "less-than": "measured: `<` is ×0 in the retained text",
+        "greater-than": "measured: `>` ×1, and it is inside a quoted wikitext fragment rather than a "
+            + "comparison — `omu ku myaka 11 AD \">11 BCE, AD 11, 1911, 2011`, a disambiguation line whose "
+            + "quote mark and angle bracket are both markup residue",
+        times: "measured: `×` is ×0. The one multiplication this corpus writes is spelled with an ASCII "
+            + "letter and is a DIMENSION product, not a sign to read: `Ojja kufuna sekazzi 7200 k.k. "
+            + "(2x3x1200)`, three seeds per hole times 1200 holes",
+        divide: "measured: `÷` is ×0 in the retained text",
+        ampersand: "measured: THE CELL IS ENTITIES AND `core/markup.ts` ALREADY DECODES THEM, above this "
+            + "language's layer — `&nbsp;` ×4, `&#x5B;`/`&#x5D;` ×4 each (the bracketed `okujuliza "
+            + "kwetaagisa`, \"citation needed\") and `&#x2013;` ×1 (an en dash inside the year span "
+            + "`1861&#x2013;1865`, which normalize.ts's range step then claims). The `ampersand` cell "
+            + "reports ×1007 whole-corpus and is measuring the same thing. The BARE sign is ×3 and two are "
+            + "inside English names this wiki carries (`Zero & Nil`, `Wolters Kluwer/Lippincott Williams & "
+            + "Wilkins`); the third is a Luganda sentence (`omusunyi w'endongo Johnny Zero & omuyimbi Maxi "
+            + "Nil`) where it does mean \"and\". Luganda's conjunction `ne`/`n'` is everywhere in the "
+            + "corpus, so the word is not the gap — one instance is not a rule (trap 9). ki and sn reached "
+            + "the identical conclusion from the identical evidence",
+    },
     qu: {
         // ⚠ THERE IS NO FLEURS FOR QUECHUA, so every count below is over `tools/corpus/mined/qu.jsonc`'s
         // 446 retained segments (246 hard + 200 sample) from a qu.wikipedia dump, with the whole-corpus

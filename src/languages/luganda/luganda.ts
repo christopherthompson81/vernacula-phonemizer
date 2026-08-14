@@ -12,6 +12,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
+import { normalizeLuganda } from "./normalize.ts";
 import { numberToWords } from "./numbers.ts";
 
 const G = MANIFEST.graphemes;
@@ -76,7 +77,11 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class LugandaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NORMALIZATION FIRST — see normalize.ts. Every unit and currency reading lives there rather than in
+        // `core/normalizeSymbols.ts`, because Luganda puts the measure noun BEFORE its number (`mmita 800`,
+        // `kiromita 10`, `ddoola US$29`) and the shared tier can only POSTPOSE — playbook trap 47's second
+        // case. The percent reading is the one postposed rule and does not earn a second seam.
+        return assembleClauses(normalizeLuganda(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]).replace(/’/gu, "'")));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
