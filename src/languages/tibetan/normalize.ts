@@ -66,9 +66,32 @@ const D = "0-9༠-༩";
  * trailing clause comma, which is silent data loss the moment a rule stops re-emitting the operand verbatim
  * (playbook trap 14's third hazard).
  */
-const NUM = `[${D}]+(?:[.,][${D}]+)?(?:\\s*[-–—~～]\\s*[${D}]+(?:[.,][${D}]+)?)?`;
+/**
+ * EVERY DASH THAT CAN JOIN A SPAN, in ONE place.
+ *
+ * ⚠ IT WAS TWO PLACES AND THEY DISAGREED, which is how a rule that PREPOSES a word lands it in the MIDDLE of
+ * a span. `NUM` listed only `- – — ~ ～` while the span rule also read `‐ ‑ ‒ ― −`, so for a span joined by
+ * one of those five `NUM` matched the LEFT operand alone: `18‐25km` became `18‐་སྤྱི་ལེ་25`, read as
+ * "eighteen kilometre twenty-five", and `18‐25%` the same — the ig `790 km2` → "790 kilometres two" shape
+ * this file's header cites as the thing to avoid. Two copies of one decision drift; hoist the decision.
+ */
+const DASH = "[-‐-―−~～]";
+const NUM = `[${D}]+(?:[.,][${D}]+)?(?:\\s*${DASH}\\s*[${D}]+(?:[.,][${D}]+)?)?`;
 /** A Tibetan letter, vowel sign, subjoined letter or tsheg — NOT the shad, which is real clause punctuation. */
 const TIB = "\\u0F0B\\u0F40-\\u0F6C\\u0F71-\\u0F84\\u0F90-\\u0FBC";
+/**
+ * THE END OF A DECLARED WORD: not another Tibetan letter — EXCEPT ⟨འ⟩ U+0F60, which carries the grammatical
+ * suffixes (`འི` genitive, `འོ`, `འང`, `འམ`) that attach INSIDE the syllable.
+ *
+ * ⚠ WITHOUT IT THE REDUNDANCY ARM READS ONE UNIT AS ANOTHER, silently and by a factor of 100. `སྨི` (metre)
+ * is a substring of `ལི་སྨིད` (centimetre) at a tsheg boundary, so `ལི་སྨིད་ 30 m` looked to the metre rule
+ * like "the corpus already said metre", the `m` was DELETED, and 30 METRES read as 30 CENTIMETRES — with no
+ * leftover symbol for any leak class to catch (trap 56: a defect that produces a plausible reading).
+ * ⚠ AND ⟨འ⟩ HAS TO BE EXEMPTED OR THE ARM STOPS WORKING WHERE IT MUST: the corpus writes `བརྒྱ་ཆའི་30%`, the
+ * percent word plus its genitive, in the commonest redundant shape the language has. `ལི་སྨིད`'s ⟨ད⟩ is a
+ * root letter and no suffix particle, so the two cases separate cleanly on this one character.
+ */
+const WORD_END = "(?![\\u0F40-\\u0F5F\\u0F61-\\u0F6C\\u0F71-\\u0F84\\u0F90-\\u0FBC])";
 /**
  * ⚠ AN INSERTED WORD OPENS WITH A TSHEG, AND THAT IS A SYLLABLE-BOUNDARY FIX, NOT PUNCTUATION. The corpus
  * writes the figure hard against the preceding word (`མི་གྲངས་ཀྱི43%`), so preposing a bare word gives
@@ -173,7 +196,7 @@ function prepose(t: string, word: string, opts: { gap: number; lead?: string; ta
     //    so a `ཨ་སྒོར` in the PREVIOUS sentence could suppress this sentence's currency word — a silent drop
     //    where the gap is widest. All six of the corpus's `ཨ་སྒོར … $` windows sit inside one clause.
     t = t.replace(
-        new RegExp(`(${w}[^${D}།༎\\n]{0,${opts.gap}})${lead}(${NUM})${tail}`, "gu"),
+        new RegExp(`(${w}${WORD_END}[^${D}།༎\\n]{0,${opts.gap}})${lead}(${NUM})${tail}`, "gu"),
         "$1$2",
     );
     // b) It is not — prepose it. ⚠ Anchored at the START of the digit run: a lookbehind only rejects one
@@ -184,6 +207,10 @@ function prepose(t: string, word: string, opts: { gap: number; lead?: string; ta
         `${TSHEG}${word}་$1`,
     );
 }
+
+/** A digit run's numeric value, with Tibetan digits folded — see the span rule for why this is not `Number`. */
+const value = (run: string): number =>
+    Number(run.replace(/[༠-༩]/gu, (c) => String(c.codePointAt(0)! - 0x0F20)));
 
 /** Delete a space that merely separates a numeral from a Tibetan word. See step 12 for the measurement. */
 const squeezeNumeralSpace = (t: string): string =>
@@ -232,12 +259,17 @@ export function normalizeTibetan(input: string): string {
     //    operand and every one of those needs it intact to match; once relocated it is read by those same
     //    rules in its new position (the span inside this corpus's only instance becomes `118ནས་149བར`).
     //    After de-grouping, so a grouped figure arrives whole.
+    //    ⚠ THROUGH `prepose` LIKE EVERY OTHER RULE, so it gets the redundancy arm too. Written as a bare
+    //    `.replace` it was the one rule in this file without one, against the header's own statement — and
+    //    the corpus sentence that SOURCES the phrase is exactly the shape that needs it
+    //    (`མྱུར་ཚད་ཆུ་ཚོད་རེར་སྤྱི་ལེ་20`, both words already written), so `ཆུ་ཚོད་རེར་སྤྱི་ལེ་118-149km/h`
+    //    read "per-hour kilometre per-hour kilometre 118 to 149".
     for (const [dkey, dphrase] of RATE_DENOMINATORS)
         for (const [ukey, uword] of UNITS)
-            t = t.replace(
-                new RegExp(`(?<![${D}.,])(${NUM})\\s*${ukey}\\s*/\\s*${dkey}(?![A-Za-z${D}])`, "gu"),
-                `${TSHEG}${dphrase}་${uword}་$1`,
-            );
+            t = prepose(t, `${dphrase}་${uword}`, {
+                gap: 3,
+                tail: `\\s*${ukey}\\s*/\\s*${dkey}(?![A-Za-z${D}])`,
+            });
 
     // 5) SQUARED UNITS, ⚠ BEFORE the plain unit rule — otherwise `km²` has its `km` consumed first and the
     //    exponent is stranded with nothing to attach to, so an area reads as a plain length.
@@ -299,14 +331,18 @@ export function normalizeTibetan(input: string): string {
     //     exponent sign is a hyphen; a `*`/`×`/`x` before the left operand is the discriminator, and the
     //     operand is anchored at BOTH edges because a lookbehind alone only moves where the engine starts
     //     (playbook trap 52 — this is the shape that read `802.11m` as "802.11 metres" in three languages).
-    const DASH = "[-‐-―−~～]";
     t = t.replace(
         new RegExp(
             `(?<![*×xX]\\s{0,2})(?<!${DASH}\\s{0,2})(?<![${D}.,])`
                 + `([${D}]+)\\s*${DASH}\\s*([${D}]+)(?![${D}.,])(?!\\s*${DASH})`,
             "gu",
         ),
-        (whole, a: string, b: string) => (Number(b) > Number(a) ? `${a}ནས་${b}བར་` : whole),
+        //     ⚠ THE COMPARISON MUST FOLD THE DIGITS FIRST. `Number("༡༦༤༢")` is NaN and `NaN > NaN` is false,
+        //     so an unfolded Tibetan operand made the span rule SILENTLY NO-OP — a false negative, the
+        //     expensive direction (trap 57). It cannot happen through `text()`, where `foldNativeDigits` runs
+        //     ahead of this pass, but every other rule in this file is purely lexical and works on both digit
+        //     sets, so this one was the only place the class's "belt on that brace" claim was not true.
+        (whole, a: string, b: string) => (value(b) > value(a) ? `${a}ནས་${b}བར་` : whole),
     );
 
     // 12) THE SPACE AROUND A NUMERAL, last, so it also tidies what the rules above left behind.

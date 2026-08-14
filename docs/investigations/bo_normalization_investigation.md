@@ -327,3 +327,42 @@ Result: line 86 restored, **and two `℃` that had never been read** (`ལོ་
 read. `mine.ts scan` red only on `ft` ×2, the `º` RAWMARK, the pre-existing `SILENT ྋ`, and `DROP minus` —
 now ×2, and the surviving example is a wiki IP signature's double hyphen (`--113.63.113.54`), not a minus.
 vitest 245 files / 4217 passed, tsc and check:package clean.
+
+## Run 10 — 2026-08-14 13:38 — the `/code-review high` findings
+
+Six findings on the first commit. Three I had already closed in run 9 (the `\p{L}` guard on `°C` and on
+`UNIT_TAIL`, and the `Number("༡༦༤༢")` = NaN span comparison) — the review reproduced all three independently,
+which is a useful corroboration of that run rather than new information. Three were new, and **all three are
+LATENT: the corpus diff moves 0 lines** on each, so these are robustness for plausible input, not
+measured-defect repair (trap 22's discipline about saying which kind of fix a fix is). Two of the three are
+one sentence away from firing, and their failure MODE is the severe one.
+
+**a) A unit word that is a substring of a longer unit word satisfied the redundancy arm — a silent 100×
+error.** `སྨི` (metre) is a substring of `ལི་སྨིད` (centimetre), at a tsheg boundary, so `ལི་སྨིད་ 30 m` looked
+to the metre rule like "the corpus has already said metre": the `m` was DELETED and 30 METRES read as 30
+CENTIMETRES, with no leftover symbol for any leak class to see. That is trap 56's class — a defect that
+produces a plausible reading — and the `cm`/`km` collision this layer was written to fix, arriving from the
+inside.
+
+The boundary that separates the two cases is one character. A declared word must not be followed by another
+Tibetan letter — **except ⟨འ⟩ U+0F60**, which carries the grammatical suffixes (`འི` genitive, `འོ`, `འང`,
+`འམ`) that attach *inside* the syllable. `ལི་སྨིད`'s ⟨ད⟩ is a root letter and no suffix particle, while the
+corpus's commonest redundant shape is `བརྒྱ་ཆའི་30%`, the percent word plus its genitive — so a blanket
+"not followed by a Tibetan letter" would have fixed the metre and broken the percent.
+
+**b) `NUM` and the span rule each carried their own dash class and they disagreed.** `NUM` read `- – — ~ ～`
+while the span rule also read `‐ ‑ ‒ ― −`. For a span joined by one of those five, `NUM` matched the LEFT
+operand alone and a preposing rule landed its word in the MIDDLE of the span: `18‐25km` →
+`18‐་སྤྱི་ལེ་25`, "eighteen kilometre twenty-five", and `18‐25%` the same. That is the ig `790 km2` →
+"790 kilometres two" shape that this file's header names as the thing to avoid, produced by two copies of one
+decision drifting — the playbook's own recurring lesson about hoisting the DECISION and not only the data.
+One `DASH` constant now, used by both.
+
+**c) The rate rule was the only one without a redundancy arm**, against the header's own statement that every
+rule needs one — and the corpus sentence that SOURCES the phrase is exactly the shape that needs it
+(`མྱུར་ཚད་ཆུ་ཚོད་རེར་སྤྱི་ལེ་20`, both words already written), so `ཆུ་ཚོད་རེར་སྤྱི་ལེ་118-149km/h` read
+"per-hour kilometre per-hour kilometre 118 to 149". It was a bare `.replace` because it also MOVES its
+operand; routing it through `prepose` like everything else gives it both arms and removes the exception.
+
+Final: vitest 245 files / **4219 passed**, tsc and check:package clean, corpus-diff unchanged at 136/417 with
+DROP 27 → 22. `review.ts --lang bo` still reports its two deliberate reds (`minus`, and the `ft` / `º` leaks).

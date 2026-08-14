@@ -74,10 +74,37 @@ describe("Tibetan text normalization", () => {
         expect(normalizeTibetan("9.8m/s2")).toBe("9.8m/s2");
     });
 
+    /**
+     * ⚠ A UNIT WORD THAT IS A SUBSTRING OF A LONGER ONE MUST NOT SATISFY THE REDUNDANCY ARM. `སྨི` (metre) is
+     * a substring of `ལི་སྨིད` (centimetre) at a tsheg boundary, so the metre rule read the centimetre word as
+     * "the corpus already said metre", deleted the `m`, and 30 METRES came out as 30 CENTIMETRES — a silent
+     * 100× error with no leftover symbol for any leak class to catch (trap 56).
+     * ⚠ And ⟨འ⟩ has to be exempted from that boundary or the arm stops working where it matters most: the
+     * corpus's commonest redundant shape is the percent word plus its genitive, `བརྒྱ་ཆའི་30%`.
+     */
+    test("a unit word inside a longer unit word does not satisfy the redundancy arm", () => {
+        expect(normalizeTibetan("ལི་སྨིད་ 30 m")).toBe("ལི་སྨིད་་སྨི་30"); // the metre is READ, not inherited
+        expect(normalizeTibetan("བརྒྱ་ཆའི་30%")).toBe("བརྒྱ་ཆའི་30"); // the genitive still counts as the word
+    });
+
+    /**
+     * ⚠ ONE DASH CLASS. `NUM` and the span rule each carried their own, and they disagreed on `‐ ‑ ‒ ― −` —
+     * so for a span joined by one of those five, `NUM` matched the LEFT operand alone and a preposing rule
+     * landed its word in the MIDDLE of the span: `18‐25km` → "eighteen kilometre twenty-five", the ig
+     * `790 km2` shape. Two copies of one decision drift.
+     */
+    test("every dash that joins a span is one class", () => {
+        for (const dash of ["-", "‐", "‑", "‒", "–", "—", "―", "−", "~", "～"])
+            expect(normalizeTibetan(`18${dash}25km`)).toBe("་སྤྱི་ལེ་18ནས་25བར་");
+    });
+
     /** The rate's denominator phrase comes FIRST — `མྱུར་ཚད་ཆུ་ཚོད་རེར་སྤྱི་ལེ་20`, the corpus's own frame — and
      *  the rule runs before the span rule so the operand it moves is still intact when the span claims it. */
     test("a rate preposes its denominator phrase, and the span inside it still reads", () => {
         expect(normalizeTibetan("118-149km/h")).toBe("་ཆུ་ཚོད་རེར་སྤྱི་ལེ་118ནས་149བར་");
+        // ⚠ …and it goes through `prepose` like every other rule, so it has the redundancy arm too. The very
+        //   corpus sentence that SOURCES the phrase writes both words out, so without this it doubled them.
+        expect(normalizeTibetan("ཆུ་ཚོད་རེར་སྤྱི་ལེ་118-149km/h")).toBe("ཆུ་ཚོད་རེར་སྤྱི་ལེ་118ནས་149བར་");
     });
 
     test("percent and currency prepose, with the same redundancy arm", () => {
@@ -111,6 +138,10 @@ describe("Tibetan text normalization", () => {
         expect(normalizeTibetan("ཁལ་464 -5")).toBe("ཁལ་464 -5"); // descending — a land-register column pair
         expect(normalizeTibetan("220 – 14 – 3")).toBe("220 – 14 – 3"); // a chain
         expect(normalizeTibetan("1.6*10-19")).toBe("1.6*10-19"); // a scientific-notation exponent
+        // ⚠ AND THE ASCENDING TEST MUST FOLD THE DIGITS: `Number("༡༦༤༢")` is NaN, `NaN > NaN` is false, and
+        //   the rule silently no-opped. `foldNativeDigits` runs ahead of this pass inside `text()`, but every
+        //   other rule here is lexical and digit-set-agnostic, so this was the one place that was untrue.
+        expect(normalizeTibetan("༡༦༤༢-༡༧༢༠")).toBe("༡༦༤༢ནས་༡༧༢༠བར་");
     });
 
     /** Of the six colon shapes in the retained text only two are times of day; the rest are `hh:mm:ss`
