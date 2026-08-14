@@ -36,6 +36,24 @@ const BACK = new Set(DEF.backVowels); // back-harmony vowels — govern the dark
 const BASHKIR_LETTER = new Set(DEF.bashkirLetters);
 const BACK_V = BACK; // the same back vowels as the ⟨л⟩ rule — one set of them exists, so one list
 const FRONT_V = new Set(DEF.loanFrontVowels);
+/**
+ * ⟨ѳ⟩ U+0473 IS ⟨ө⟩ AND ⟨ӊ⟩ U+04CA IS ⟨ң⟩ — legacy-codepage artefacts, not letters of any alphabet in use.
+ *
+ * Pre-Unicode Bashkir/Tatar fonts had no slots for ⟨ө⟩ and ⟨ң⟩ and borrowed the Church-Slavonic FITA and the
+ * Khanty EN-WITH-TAIL for them; text typed that way keeps the wrong codepoint when it is pasted into the wiki.
+ * The corpus decides it: ⟨ѳ⟩ ×7 against ⟨ө⟩ ×1,323 and ⟨ӊ⟩ ×11 against ⟨ң⟩ ×921, and every occurrence is a
+ * word that exists with the real letter — `кѳньяғында`, `һѳрѳлгән`, `кѳтѳүлектәр`; `уныӊ`, `кешенеӊ`,
+ * `меӊдән`. Fita is in no modern Cyrillic alphabet at all, so there is no other reading to weigh.
+ *
+ * ⚠ AND THE DAMAGE WAS NOT ONLY THE DELETED LETTER. Both are outside the letter tables, so `кѳньяғында` read
+ * `knjɑʁɯnˈdɑ` with the vowel simply gone — AND the loan router saw a word with no front vowel in it, so a
+ * front-harmony Bashkir word was one ⟨ѳ⟩ away from being read as Russian. The fold therefore runs before
+ * `isRussianLoan`, not inside the native scan.
+ */
+const LEGACY_CODEPAGE: Readonly<Record<string, string>> = { "ѳ": "ө", "Ѳ": "Ө", "ӊ": "ң", "Ӊ": "Ң" };
+const LEGACY_RE = new RegExp(`[${Object.keys(LEGACY_CODEPAGE).join("")}]`, "gu");
+export const foldLegacyCodepage = (w: string): string => w.replace(LEGACY_RE, (c) => LEGACY_CODEPAGE[c]!);
+
 export function isRussianLoan(word: string): boolean {
     const w = word.normalize("NFC").toLowerCase();
     if ([...w].some((c) => BASHKIR_LETTER.has(c))) return false; // a native Bashkir letter → native word
@@ -45,12 +63,14 @@ export function isRussianLoan(word: string): boolean {
 /** Phonemize one Bashkir word → canonical IPA. A detected RUSSIAN LOAN is routed to the Russian g2p (Bashkir speakers
  *  read loans Russian-style); otherwise the native Bashkir scan (`phonemizeWordNative`) runs. */
 export function phonemizeWord(word: string): string {
-    return isRussianLoan(word) ? russianWord(word) : phonemizeWordNative(word);
+    const w = foldLegacyCodepage(word);
+    return isRussianLoan(w) ? russianWord(w) : phonemizeWordNative(w);
 }
 
 /** The NATIVE Bashkir g2p (Cyrillic grapheme scan + word-final stress), WITHOUT Russian-loan routing. */
 export function phonemizeWordNative(word: string): string {
-    const w = word.normalize("NFC").toLowerCase();
+    // Folded here too: this entry is exported and `referee-eval` calls it directly, bypassing the router above.
+    const w = foldLegacyCodepage(word.normalize("NFC").toLowerCase());
     const chars = [...w];
     const backWord = [...w].some((c) => BACK.has(c)); // ⟨л⟩ is dark [ɫ] in a back-harmony word, clear [l] in a front one
     const segs: string[] = [];

@@ -165,9 +165,20 @@ describe("an orthographic silence is a NOTE, not a defect, and not a silence", (
 
     test("the table may only name characters that are silent BY RULE", () => {
         // An entry naming a letter an engine merely fails to read would be a defect being silenced — the same
-        // discipline `VOWELLESS_WORDS` keeps for `rawLatinIn`. Both entries are argued in the file.
-        expect(Object.keys(ORTHOGRAPHIC_SILENCE).sort()).toEqual(["*", "mt"]);
+        // discipline `VOWELLESS_WORDS` keeps for `rawLatinIn`. Every entry is argued in the file.
+        expect(Object.keys(ORTHOGRAPHIC_SILENCE).sort())
+            .toEqual(["*", "ab", "ba", "be", "chv", "ky", "mn", "mt", "tg", "tt"]);
         expect(ORTHOGRAPHIC_SILENCE["*"]).toEqual(["ـ"]);
+        // ⚠ THE SOFT SIGN IS EXEMPT IN THREE LANGUAGES AND NOT IN THE FOURTH, and that asymmetry is the point:
+        // tt/tg/ky have no palatalisation contrast for ⟨ь⟩ to mark (each language's own referee is quoted in
+        // the table), while Chuvash's referee writes `выльӑх ˈʋɯlʲəχ` — so chv EMITS [ʲ] and is not exempt.
+        for (const l of ["tt", "tg", "ky"]) expect(ORTHOGRAPHIC_SILENCE[l]).toContain("ь");
+        expect(ORTHOGRAPHIC_SILENCE["chv"] ?? []).not.toContain("ь");
+        // U+0301 on a Cyrillic base is a dictionary STRESS ANNOTATION, not a letter — silent by rule once
+        // `foldCyrillicStressMarks` stops it splitting the word. Cyrillic-scoped, never `"*"`: the same
+        // codepoint is letter-forming in vi, es and umbundu.
+        for (const l of ["ab", "ba", "be", "chv", "mn", "tg", "tt"])
+            expect(ORTHOGRAPHIC_SILENCE[l]).toContain("\u0301");
     });
 });
 

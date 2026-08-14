@@ -310,6 +310,10 @@ const MIN_PROBE_WORDS = 3;
  * ⚠ AND AN ENTRY DOES NOT HIDE THE HIT — `mine.ts` reports it under `ACCEPTED-ORTHOGRAPHIC`, because a quiet
  * exemption is indistinguishable from a clean scan, which is how this defect class survived six times.
  */
+/** U+0301 COMBINING ACUTE, written as an escape — a bare combining mark in a string literal renders on top of
+ *  the quote and is unreviewable. See the `ab`/`ba`/`be`/`chv`/`mn`/`tg`/`tt` entries below. */
+const STRESS_MARK = "\u0301";
+
 export const ORTHOGRAPHIC_SILENCE: Readonly<Record<string, readonly string[]>> = {
     /**
      * ⚠ FLEET-WIDE, AND THE ONE CHARACTER THAT EARNS IT. U+0640 TATWEEL is not a letter at all: it is a
@@ -326,6 +330,46 @@ export const ORTHOGRAPHIC_SILENCE: Readonly<Record<string, readonly string[]>> =
      * ⟨h⟩ demonstrably contributes and the case-folded probe below already clears them without a table entry.
      */
     mt: ["h"],
+    /**
+     * ⚠ THE SOFT SIGN IS A PER-LANGUAGE QUESTION, AND THESE THREE ANSWER IT WITH "NOTHING". Russian's ⟨ь⟩
+     * palatalises the preceding consonant, and copying that answer across the Cyrillic Turkic and Iranian
+     * languages would INVENT a contrast none of them has. The evidence is each language's own independent
+     * referee, not an argument from Russian:
+     *   tt — `tt.kaikki-tatar.tsv`: `яшь jæʃ` (word-final, no trace at all), `дөнья døn.jɑ`, `көньяк
+     *        ˈkø̞nˌjɑq` — before ⟨я ю е⟩ it is a HIATUS mark whose [j] the vowel letter already supplies, and
+     *        this engine already emits it. No ʲ anywhere in the referee. ×275 in the artifact.
+     *   tg — `tg.wikipron-tgk-cyrl-broad.tsv`: `автомобиль a v t o m o b i l`, `бисьёр b i s j o r`,
+     *        `госпиталь ɡ o s p i t a l`. Tajik dropped ⟨ь⟩ from its alphabet in 1998; every one of the 34
+     *        corpus occurrences is a Russian word or loan carrying Russian spelling. ×34.
+     *   ky — no ⟨ь⟩ headword exists in `ky.wikipron-kir-broad.tsv`, so the corpus is the evidence instead: a
+     *        census of every ⟨ь⟩ word in the artifact returns Russian loans and Russian-mediated toponyms
+     *        without exception (Тянь, роль, Шань, Гумбольдт, декабрь, стиль, премьер, июль, Сибирь,
+     *        Беларусь, Вильнюс). Kyrgyz has no palatalised consonant series to put the mark on. ×196.
+     * ⚠ CHUVASH IS THE COUNTER-CASE AND IS DELIBERATELY ABSENT FROM THIS TABLE — its referee writes
+     * `выльӑх ˈʋɯlʲəχ`, so ⟨ь⟩ there is a real [ʲ] and the engine now emits it. Four languages, one
+     * character, two opposite verdicts: which is why this had to be decided per language rather than once.
+     */
+    tt: ["ь", STRESS_MARK],
+    tg: ["ь", STRESS_MARK],
+    ky: ["ь"],
+    /**
+     * ⚠ THE CYRILLIC DICTIONARY STRESS MARK, AND ITS SILENCE IS THE FIX RATHER THAN THE DEFECT. U+0301 on a
+     * Cyrillic base is not a letter of any Cyrillic alphabet: it is the lexicographic annotation a wiki lead
+     * writes to show where the word is stressed (`Абіса́ль`, `А́страхань`, `молоко́`). Before `foldCyrillicStressMarks`
+     * (core/unicode.ts) it was reported in `separator` mode — it fell outside every Cyrillic engine's
+     * `[Ѐ-ӿ]+` token class and BROKE THE WORD IN TWO, `Абіса́ль → abʲisa lʲ`. It now reports `inert` with the
+     * word intact (`→ abʲisalʲ`), which is the correct reading of an annotation the engines cannot honour:
+     * stress here is by rule or by lexicon, and none of them takes a per-word override.
+     * ⚠ NOT A `"*"` ENTRY, unlike the tatweel. The same codepoint is a LETTER-FORMING mark elsewhere in the
+     * fleet — the tone letter of vi, the stress letter of es, the tone mark of umbundu — and a fleet-wide
+     * exemption would quietly accept an engine that deleted one of those. The claim is Cyrillic-scoped, and
+     * this table has no script scope, so it is made once per language that carries the mark.
+     */
+    ab: [STRESS_MARK],
+    ba: [STRESS_MARK],
+    be: [STRESS_MARK],
+    chv: [STRESS_MARK],
+    mn: [STRESS_MARK],
 };
 
 /** A character the LEAK tables already own is not this class's business — derived, never re-listed. */

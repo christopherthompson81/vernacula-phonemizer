@@ -46,4 +46,14 @@ describe("Bashkir (Башҡорт теле) canonical IPA", () => {
         expect(isRussianLoan("балыҡ")).toBe(false); // all-back harmony → native
         expect(phonemizeWord("республика")).toContain("rʲ"); // routed to Russian → palatalization the native scan can't make
     });
+
+    test("⟨ѳ⟩ and ⟨ӊ⟩ are legacy-codepage ⟨ө⟩ and ⟨ң⟩ — a deleted vowel AND a mis-routed loan", () => {
+        // Found by the silent-deletion detector: ⟨ѳ⟩ ×7 against ⟨ө⟩ ×1,323, ⟨ӊ⟩ ×11 against ⟨ң⟩ ×921. Both
+        // fall outside the letter tables, so `кѳньяғында → knjɑʁɯnˈdɑ` lost its vowel outright — and with the
+        // front vowel gone the harmony test could route a native front word to the RUSSIAN g2p.
+        expect(phonemizeWord("кѳньяғында")).toBe(phonemizeWord("көньяғында"));
+        expect(phonemizeWord("һѳрѳлгән")).toBe(phonemizeWord("һөрөлгән"));
+        expect(phonemizeWord("уныӊ")).toBe(phonemizeWord("уның"));
+        expect(phonemizeWord("меӊдән")).toBe("mɪŋˈdæn");
+    });
 });

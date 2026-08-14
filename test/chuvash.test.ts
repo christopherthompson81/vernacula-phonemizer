@@ -54,4 +54,20 @@ describe("Chuvash (Чӑвашла) canonical IPA", () => {
         expect(phonemizeWord("шыв")).toBe("ˈʂɯʋ"); // ⟨ш⟩→[ʂ], ⟨ы⟩→[ɯ], ⟨в⟩→[ʋ]
         expect(phonemizeWord("ҫил")).toBe("ˈɕil"); // ⟨ҫ⟩→[ɕ]
     });
+
+    test("⟨ь⟩ PALATALIZES — the soft sign is not silent in Chuvash, and ⟨ъ⟩ keeps the glide", () => {
+        // Found by the silent-deletion detector: ⟨ь⟩ ×364 in the artifact, reading as NOTHING in every word.
+        // Chuvash palatalization before a front vowel is allophonic and unwritten here; ⟨ь⟩ marks it where no
+        // front vowel follows, which is where the contrast lives. The referee transcribes выльӑх [ʋɯlʲəχ].
+        expect(phonemizeWord("выльӑх")).toBe("ˈʋɯlʲəχ"); // the referee's own row, exactly
+        expect(phonemizeWord("тӑрать")).toBe("təˈratʲ"); // 3sg present — palatalized final ⟨т⟩ against a bare stem
+        expect(phonemizeWord("январь")).toBe("janˈʋarʲ");
+        // ⚠ THE VOICING TABLE STILL SEES A BARE SEGMENT: [ʲ] is applied AFTER the voicing pass, so a
+        // ⟨ь⟩-bearing word keeps the allophonic voicing it had (⟨ч⟩→[d͡ʑ] intervocalic here).
+        expect(phonemizeWord("Перечень")).toBe("pereˈd͡ʑenʲ");
+        // ⟨ъ⟩ before ⟨е⟩ is a SEPARATING sign — its whole job is the glide, which was being dropped
+        // (`объектов → obekˈtoʋ`). Russian loans are the only place Chuvash writes one.
+        expect(phonemizeWord("объектов")).toBe("objekˈtoʋ");
+        expect(phonemizeWord("съезде")).toBe("sjezˈde");
+    });
 });

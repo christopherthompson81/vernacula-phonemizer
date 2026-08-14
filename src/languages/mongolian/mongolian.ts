@@ -44,11 +44,33 @@ function reduce(segs: Seg[], initialFull = true, keepNonFinal = false): Seg[] {
     return out;
 }
 
+/**
+ * ⟨ї⟩ U+0457 IS ⟨ү⟩ — A LEGACY-CODEPAGE ARTEFACT, not a Ukrainian letter that wandered in.
+ *
+ * The pre-Unicode Mongolian Cyrillic fonts (and the Windows-1251 remaps that came with them) had no slot for
+ * ⟨ү⟩ or ⟨ө⟩ and borrowed the Ukrainian/Church-Slavonic codepoints for them; text typed that way and pasted
+ * into the wiki keeps the wrong codepoint. The corpus reads unambiguously: ⟨ї⟩ ×8 against ⟨ү⟩ ×2,703, and
+ * every one of the eight is a word that exists with ⟨ү⟩ — `бїр` (бүр), `бїлэг` (бүлэг), `їр` (үр). It is
+ * outside the letter tables, so the words read `pr`, `pɮeɡ`, `r` — a vowelless consonant string.
+ *
+ * ⟨ѳ⟩ U+0473 (fita) → ⟨ө⟩ is the OTHER HALF OF THE SAME PAIR, and it is ×0 in this artifact — it is included
+ * because Bashkir's artifact carries exactly that substitution (⟨ѳ⟩ ×7 against ⟨ө⟩ ×1,323, `кѳньяғында`,
+ * `һѳрѳлгән`) from the same font generation, and because fita is in no modern Cyrillic alphabet at all, so
+ * there is no reading it could be taken from. Stated rather than left silent: unattested HERE, today.
+ *
+ * ⚠ NOT A REGISTRY-LEVEL CONFUSABLE FOLD. `foldCyrillicConfusables` maps LATIN look-alikes into Cyrillic; ⟨ї⟩
+ * is a real Cyrillic letter of another language's alphabet, and folding it fleet-wide would corrupt Ukrainian,
+ * where it is the letter ⟨ї⟩ /ji/. The claim is about MONGOLIAN text specifically, so it lives here.
+ */
+const LEGACY_CODEPAGE: Readonly<Record<string, string>> = { "ї": "ү", "ѳ": "ө" };
+const LEGACY_RE = new RegExp(`[${Object.keys(LEGACY_CODEPAGE).join("")}]`, "gu");
+const foldLegacyCodepage = (w: string): string => w.replace(LEGACY_RE, (c) => LEGACY_CODEPAGE[c]!);
+
 /** One Mongolian word → canonical IPA. A word in the traditional Mongolian script (Mongol bichig) is transliterated
  *  to Cyrillic first (mongolBichig.ts) and then run through the same pipeline. */
 export function phonemizeWord(word: string): string {
     if (isBichig(word)) word = bichigToCyrillic(word);
-    const w = word.toLowerCase();
+    const w = foldLegacyCodepage(word.toLowerCase());
     const raw = toSegments(w);
     if (!raw.some((s) => s.nucleus)) return raw.map((s) => s.ph).join(""); // vowelless (a letter name) — no rules
     // Final н → ŋ keyed on the ORIGINAL spelling (before vowel deletion): н that is word-final or before a velar/

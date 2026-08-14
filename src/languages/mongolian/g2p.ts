@@ -54,7 +54,13 @@ export function toSegments(word: string): Seg[] {
         // Iotated vowel letter → optional glide + short vowel nucleus.
         if (c in IOTATED) {
             const last = segs[segs.length - 1];
-            if (segs.length === 0 || last?.nucleus) segs.push({ ph: "j", nucleus: false, short: false });
+            // ⚠ AND AFTER ⟨ъ⟩, WHICH IS THE ONLY REASON THE HARD SIGN IS WRITTEN. Mongolian uses ⟨ъ⟩ to say
+            // that the following iotated letter is [j]+V rather than a palatalising rider on the consonant —
+            // `томъёо` (formula) is [tʰɔmjɔː], `Сахъяа` is [saχjaː]. Treating it as a bare separator dropped
+            // the glide outright: `томъёоны → tʰɔmʊʊn`, `Сахъяа → saχə`. Nine occurrences in the artifact,
+            // and every one of them is this construction.
+            if (segs.length === 0 || last?.nucleus || chars[i - 1] === "ъ")
+                segs.push({ ph: "j", nucleus: false, short: false });
             segs.push({ ph: IOTATED[c]!, nucleus: true, short: true });
             i += 1;
             continue;

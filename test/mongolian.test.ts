@@ -51,4 +51,19 @@ describe("Mongolian (Khalkha) canonical IPA", () => {
         expect(phonemize("100","mn").trim()).toBe("t͡sʊː"); // зуу
         expect(phonemize("2000","mn").trim()).toBe("χɔjʊr maŋəɢ"); // хоёр мянга
     });
+
+    test("⟨ъ⟩ keeps the GLIDE of the following iotated letter (томъёо → tʰɔmjɔː), not just a break", () => {
+        // Found by the silent-deletion detector: the hard sign is written precisely to say that ⟨ё/я/ю/е⟩
+        // after it is [j]+V, and treating it as a bare separator dropped the [j] — `томъёоны → tʰɔmʊʊn`.
+        expect(phonemizeWord("томъёоны")).toBe("tʰɔmjʊʊn");
+        expect(phonemizeWord("Сахъяа")).toBe("saχjə");
+    });
+
+    test("⟨ї⟩ U+0457 is a legacy-codepage ⟨ү⟩ — a vowelless word, not a Ukrainian letter", () => {
+        // Pre-Unicode Mongolian fonts borrowed the Ukrainian codepoint for ⟨ү⟩; ×8 in the artifact against
+        // ⟨ү⟩ ×2,703, and outside the letter tables it read as nothing: `бїр → pr`, `їр → r`.
+        expect(phonemizeWord("бїр")).toBe(phonemizeWord("бүр"));
+        expect(phonemizeWord("бїлэг")).toBe(phonemizeWord("бүлэг"));
+        expect(phonemizeWord("їр")).toBe("ur");
+    });
 });

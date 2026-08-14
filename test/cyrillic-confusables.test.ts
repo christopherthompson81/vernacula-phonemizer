@@ -15,7 +15,7 @@ import { readFileSync, readdirSync } from "node:fs";
 
 import { describe, expect, test } from "vitest";
 import { CYRILLIC_HOSTS } from "../src/core/scripts.ts";
-import { foldCyrillicConfusables, foldLatinConfusables } from "../src/core/unicode.ts";
+import { foldCyrillicConfusables, foldCyrillicStressMarks, foldLatinConfusables } from "../src/core/unicode.ts";
 import { phonemize } from "../src/index.ts";
 import { stripJsonc } from "../src/core/jsonc.ts";
 
@@ -84,5 +84,46 @@ describe("foldCyrillicConfusables", () => {
     test("the Macedonian degree word reads as one word either way", () => {
         expect(phonemize("Фаренхаjт", "mk").trim()).toBe(phonemize("Фаренхајт", "mk").trim());
         expect(phonemize("90 °F", "mk").trim()).toContain("fˈarɛnxajt");
+    });
+});
+
+/**
+ * THE CYRILLIC DICTIONARY STRESS MARK — the same failure shape as the confusables above, one file over: a
+ * character inside a Cyrillic word that the `[Ѐ-ӿ]+` token class does not admit, so the WORD SPLITS. U+0301 is
+ * not a letter of any Cyrillic alphabet — it is the annotation a wiki lead writes to show stress — and it was
+ * breaking words in all 14 Cyrillic-corpus engines, `ru` included. Found by the silent-deletion detector.
+ */
+describe("foldCyrillicStressMarks", () => {
+    test("the annotation is dropped from a Cyrillic base", () => {
+        expect(foldCyrillicStressMarks("Абіса\u0301ль")).toBe("Абісаль");
+        expect(foldCyrillicStressMarks("А\u0301страхань")).toBe("Астрахань");
+        expect(foldCyrillicStressMarks("молоко\u0301")).toBe("молоко");
+        expect(foldCyrillicStressMarks("томъёо")).toBe("томъёо"); // no mark → returned untouched
+    });
+
+    test("⚠ A DECOMPOSED LETTER IS A LETTER, and a blind strip would DELETE IT", () => {
+        // Macedonian ⟨ѓ ќ⟩ ARE ⟨г к⟩ + U+0301 under NFD and ⟨ѐ ѝ⟩ are ⟨е и⟩ + U+0300 — real letters that a
+        // copy-paste can deliver decomposed. The pair is composed first and kept when NFC yields one character.
+        expect(foldCyrillicStressMarks("г\u0301")).toBe("ѓ");
+        expect(foldCyrillicStressMarks("к\u0301")).toBe("ќ");
+        expect(foldCyrillicStressMarks("е\u0300")).toBe("ѐ");
+        expect(foldCyrillicStressMarks("и\u0300")).toBe("ѝ");
+    });
+
+    test("a NON-Cyrillic base is not this fold's business", () => {
+        // The same codepoint is a tone letter in vi, a stress letter in es, a tone mark in umbundu.
+        expect(foldCyrillicStressMarks("cafe\u0301")).toBe("cafe\u0301");
+        expect(foldCyrillicStressMarks("α\u0301")).toBe("α\u0301");
+    });
+
+    test("the word is read as ONE word again, in every Cyrillic engine that carries the mark", () => {
+        for (const [lang, word] of [["be", "Абіса\u0301ль"], ["ru", "А\u0301страхань"], ["tt", "А\u0301страхань"],
+            ["chv", "Андрия\u0301н"], ["tg", "Банглоде\u0301ш"], ["mn", "кабу\u0301л"], ["ba", "Анта\u0301рктика"],
+            ["ab", "Афо\u0301н"], ["ky", "кы\u0301ргыз"], ["uk", "Ки\u0301їв"], ["bg", "мля\u0301ко"],
+            ["kk", "аба\u0301й"], ["mk", "ма\u0301јка"]] as [string, string][]) {
+            const marked = phonemize(word, lang).trim();
+            expect(marked).toBe(phonemize(word.replace(/\u0301/gu, ""), lang).trim());
+            expect(marked).not.toContain(" "); // one word in, one word out — this is what was broken
+        }
     });
 });

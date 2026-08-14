@@ -317,4 +317,12 @@ describe("Abkhaz (аҧсуа бызшәа) canonical IPA", () => {
         expect(ab.text("аԥсуа-аурыс").trim()).not.toContain("inarkʼnə");
     });
 
+
+    test("⟨щ⟩ — the Russian-loan letter that read as a HOLE in the middle of the word", () => {
+        // Found by the silent-deletion detector: ×7 in the artifact, all in Russian quoted in Abkhaz text.
+        // ⟨щ⟩ is not in the Abkhaz alphabet, but neither are ⟨в ф ц⟩, which the base table already carries at
+        // their nearest Abkhaz values. `обращаться` read `obraatʼʲsja` — the letter simply absent.
+        expect(phonemizeWord("обращаться")).toContain("ɕ");
+        expect(phonemizeWord("щ")).toBe("ɕ");
+    });
 });

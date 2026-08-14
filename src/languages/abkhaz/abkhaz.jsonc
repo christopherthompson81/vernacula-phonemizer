@@ -48,6 +48,13 @@
         "ԡ": "lʰ", "ԣ": "nʰ", "ԫ": "d͡ʒ", "ԭ": "d͡ʑ",
         "ꚁ": "dʷ", "ꚃ": "d͡ʑʷ", "ꚅ": "ʒʷ", "ꚇ": "t͡ʂʰ", "ꚉ": "d͡z", "ꚋ": "tʰ", "ꚍ": "tʷʰ", "ꚏ": "t͡ɕʷʰ",
         "ꚑ": "t͡sʼ", "ꚓ": "t͡ʃʼ", "ꚕ": "ħʷ", "ꚗ": "ʃʷ",
+        // ⚠ ⟨щ⟩ IS A RUSSIAN-LOAN LETTER AND BELONGS HERE ANYWAY, exactly as ⟨в ф ц⟩ do. It is not in the
+        // Abkhaz alphabet, but Abkhaz running text quotes Russian constantly and the corpus has it ×7
+        // (обращаться, общезападнокавказского) — where it read as NOTHING: `обращаться → obraatʼʲsja`, a
+        // hole in the middle of the word. Given its own nearest Abkhaz value, the alveolo-palatal ⟨ҫ⟩ [ɕ],
+        // on the same principle that gives ⟨ц⟩ the aspirated [t͡sʰ] of the Abkhaz series rather than the
+        // Russian [t͡s]. Length is not written: Abkhaz has no geminate contrast to carry Russian's [ɕː].
+        "щ": "ɕ",
         // ⟨ъ⟩ hard sign dropped; ⟨ь⟩/⟨ә⟩ handled as modifiers in abkhaz.ts.
     },
 

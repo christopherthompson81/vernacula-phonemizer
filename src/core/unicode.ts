@@ -291,6 +291,50 @@ export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): stri
 }
 
 /**
+ * THE CYRILLIC DICTIONARY STRESS MARK — a combining acute (or grave) on a Cyrillic letter, which is NOT a
+ * letter of any Cyrillic alphabet but a lexicographic annotation: `Абіса́ль`, `А́страхань`, `молоко́`. Wikipedia
+ * writes it in the lead of an article to show where the word is stressed, so it arrives in running text.
+ *
+ * ⚠ THE FAILURE IS NOT A LOST ACCENT — IT IS A SPLIT WORD, and it is fleet-wide. Every Cyrillic engine in this
+ * repo tokenizes on a BLOCK RANGE (`[Ѐ-ӿ]+`), and U+0301 is outside it, so the word breaks in two and BOTH
+ * halves are then read and stressed as words: measured before this fold, `be Абіса́ль → abʲisa lʲ`,
+ * `tt А́страхань → ˈɑ strɑˈxɑn`, `mn кабу́л → kʰap ɮ`, `kk аба́й → ɑbˈɑ jˈə`, `ru А́страхань → a strˈaxənʲ` —
+ * 14 of the fleet's 14 Cyrillic-corpus languages, and `ru`, `uk`, `bg`, `mk` and `kk` were affected without
+ * any of them appearing in the silent-deletion scan, because their artifacts simply happen not to carry one.
+ * Nothing leaks and nothing is obviously dropped, which is why only the differential detector saw it.
+ *
+ * ⚠ THE MARK IS DROPPED, NOT HONOURED. Stress in these engines is computed by rule (Turkic oxytone, Chuvash
+ * last-full-vowel, Tajik final) or by a lexicon (`ru`'s stress.tsv), and none of them takes a per-word stress
+ * argument. Honouring the annotation would mean plumbing an override through fourteen engines to serve a
+ * character that occurs a few dozen times per corpus; dropping it restores the CORRECT SEGMENTS, which is the
+ * defect actually being fixed. `ru А́страхань` reads `ˈastrəxənʲ` after the fold — the lexicon's own stress,
+ * which agrees with the annotation.
+ *
+ * ⚠ THE COMPOSITION CHECK IS LOAD-BEARING, and a blind strip would DELETE LETTERS. Macedonian ⟨ѓ⟩ and ⟨ќ⟩ ARE
+ * ⟨г⟩/⟨к⟩ + U+0301 under NFD, and ⟨ѐ⟩ ⟨ѝ⟩ are ⟨е⟩/⟨и⟩ + U+0300 — real letters of the alphabet that a keyboard
+ * or a copy-paste can deliver decomposed. So each base+mark pair is COMPOSED first: if NFC yields a single
+ * character it is a letter and is kept (in its composed form, which is also what the token class wants);
+ * only a pair that composes to nothing is an annotation and loses its mark.
+ *
+ * Restricted to a CYRILLIC base by design. The same mark is a tone letter in vi, a stress letter in es and a
+ * tone mark in umbundu; this fold makes no claim about any of them.
+ */
+// ⚠ WRITTEN AS ESCAPES, NOT AS CHARACTERS. A combining mark typed literally inside `[...]` renders on top of
+// the bracket and is invisible to review. U+0340/U+0341 are the deprecated "tone mark" spellings of the same
+// two marks; they compose away under NFC, which the pair check below applies anyway.
+const STRESS_MARKS = "\\u0300\\u0301\\u0340\\u0341";
+const CYRILLIC_STRESS = new RegExp(`(\\p{Script=Cyrillic})([${STRESS_MARKS}]+)`, "gu");
+const ANY_STRESS_MARK = new RegExp(`[${STRESS_MARKS}]`, "u");
+
+export function foldCyrillicStressMarks(s: string): string {
+    if (!ANY_STRESS_MARK.test(s)) return s;
+    return s.replace(CYRILLIC_STRESS, (_m, base: string, marks: string) => {
+        const composed = (base + marks).normalize("NFC");
+        return [...composed].length === 1 ? composed : base;
+    });
+}
+
+/**
  * REPAIR DOUBLE-ENCODED UTF-8 — text whose bytes were UTF-8 but got decoded as Latin-1 and re-encoded, so
  * `\u00b2` arrives as `\u00c2\u00b2` and `\u00f1` as `\u00c3\u00b1`. Mojibake is one of the commonest real-world corruptions in
  * scraped text, and a phonemizer is handed arbitrary text.

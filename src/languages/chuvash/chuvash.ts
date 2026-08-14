@@ -34,7 +34,7 @@ const NASAL_GLIDE = new Set(DEF.voicingSonorants);
 const LIQUID = new Set(DEF.liquids);
 const REDUCED = new Set(["ə", "ɘ"]); // reduced vowels — never stressed
 
-type Seg = { ipa: string; vowel: boolean; reduced: boolean };
+type Seg = { ipa: string; vowel: boolean; reduced: boolean; palatal?: boolean };
 
 /** Phonemize one Chuvash word → canonical IPA (Cyrillic scan + intervocalic/post-nasal voicing + reduced-vowel stress). */
 export function phonemizeWord(word: string): string {
@@ -44,7 +44,11 @@ export function phonemizeWord(word: string): string {
         const ch = chars[i]!;
         if (ch === "е") {
             // ⟨е⟩ → [je] word-initial / post-vowel, [e] otherwise.
-            const prevV = i > 0 && CYR_VOWEL.has(chars[i - 1]!);
+            // ⚠ AND AFTER ⟨ъ⟩/⟨ь⟩, which is the whole point of writing one: the SEPARATING sign says the
+            // following iotated letter keeps its glide instead of merging with the consonant. Chuvash writes
+            // both only in Russian loans, and the loans are exactly the words that need it — `объектов` read
+            // `obekˈtoʋ`, losing the [j] of [objekt]. ⟨я ю ё⟩ need no arm here: their glide is unconditional.
+            const prevV = i > 0 && (CYR_VOWEL.has(chars[i - 1]!) || chars[i - 1] === "ъ" || chars[i - 1] === "ь");
             if (i === 0 || prevV) segs.push({ ipa: "j", vowel: false, reduced: false });
             segs.push({ ipa: "e", vowel: true, reduced: false });
         } else if (VOWEL[ch] !== undefined) {
@@ -62,8 +66,21 @@ export function phonemizeWord(word: string): string {
             } else {
                 segs.push({ ipa: ONSET[ch]!, vowel: false, reduced: false });
             }
+        } else if (ch === "ь") {
+            // ⚠ THE SOFT SIGN IS NOT SILENT IN CHUVASH — it PALATALIZES the consonant it follows, and it is
+            // the one place the contrast is not predictable. Chuvash palatalization before a FRONT vowel is
+            // allophonic and this engine does not emit it (see the referee config's `ʲ` fold); ⟨ь⟩ marks it
+            // where no front vowel follows — before a REDUCED or back vowel, or word-finally, which is where
+            // the language's own minimal pairs live: `выльӑх` [ʋɯlʲəχ] (the referee's own transcription),
+            // `тӑрать` [təradʲ] the 3sg present against a bare stem. Reading it as nothing deleted the mark
+            // in all 364 of its corpus occurrences.
+            // ⚠ RECORDED AS A FLAG, APPLIED AFTER THE VOICING PASS. Appending [ʲ] to the segment here would
+            // change the string the voicing table is keyed on (`t` → `tʲ` is not a row in `voiced`), so the
+            // allophonic voicing of every ⟨ь⟩-bearing word would silently switch off.
+            const prev = segs[segs.length - 1];
+            if (prev !== undefined && !prev.vowel && prev.ipa !== "j") prev.palatal = true;
         }
-        // ъ ь and stray marks: dropped
+        // ъ and stray marks: dropped (⟨ъ⟩'s one job, the glide before ⟨е⟩, is in the ⟨е⟩ arm above)
     }
 
     // ⚠ VOICING pass: a voiceless obstruent voices when the previous seg is a vowel or a nasal AND the next seg is a
@@ -78,6 +95,11 @@ export function phonemizeWord(word: string): string {
         const trigger = prev.vowel || NASAL_GLIDE.has(prev.ipa) || (LIQUID.has(prev.ipa) && !next.reduced);
         if (trigger) s.ipa = voiced;
     }
+
+    // PALATALIZATION, after the voicing table has read the bare segment: `тӑрать` is [təradʲ], the voicing
+    // and the softening both. Applied to the FINAL segment string, so `t͡ɕ`-style multi-character segments
+    // take the modifier at the end where IPA wants it.
+    for (const s of segs) if (s.palatal === true) s.ipa += "ʲ";
 
     // ⚠ STRESS: the last FULL (non-reduced) vowel; if the word has only reduced vowels, the first vowel. ˈ before the
     // nucleus's onset consonant.
