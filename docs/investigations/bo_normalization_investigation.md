@@ -276,3 +276,54 @@ For the next reader, in descending cost:
    letter, none of them sourced; the `N`/`E` currently reads as an English letter name.
 4. **`ft`**, **the minus**, and **the `º` RAWMARK** — see run 7.
 5. **The `SILENT ྋ` report** belongs to `tibetan.ts`, not here.
+
+---
+
+## Run 9 — 2026-08-14 13:30 — self-review of the merged layer, and the two defects it found
+
+Three changes went in on PR review. Two are robustness with **0 lines changed** on this corpus (trap 22's
+discipline: say which kind of fix it is); the third is a real reading repair the corpus diff caught.
+
+**a) The redundancy window must not bridge a clause boundary.** `prepose`'s "has the corpus already written
+this word?" pass looked back over `[^digit]{0,gap}`, and with the currency's 12-character window that can
+contain a shad or a newline — so an `ཨ་སྒོར` in the *previous sentence* could suppress this sentence's
+currency word, a silent drop exactly where the window is widest. Measured first: all six of the corpus's
+`ཨ་སྒོར … $` windows sit inside one clause, so excluding `།༎\n` costs nothing here and closes the case.
+
+**b) The unit family is case-sensitive, and now deliberately so.** Step 4 (rates) carried an `i` flag copied
+from the sibling layers while steps 5 and 6 did not, so `KM/H` would have been read as a rate while `KM`
+alone would not. Measured: the ONLY uppercase unit-shaped token after a digit in the retained text is `Kg`,
+×2, and both are scientific notation this layer does not read (`1.672*10-27Kg`, `9.107*10-31Kg`) — matching
+them would read 10⁻²⁷ kg as "27 kilograms". The third uppercase hit is `W1KG14783`, a document ID inside a
+Latin word. So the correct answer is lowercase-only everywhere, and the `i` came out.
+
+**c) ⚠ THE GUARD AFTER A UNIT KEY WAS `(?!\p{L})` AND THAT IS TRAP 27 — a guard written for a spaced
+alphabet rejecting the ordinary case.** Found because of a fourth change, and the sequence is the point.
+
+The `°C` rule was leaving a pause it removes everywhere else: `དྲོད་ཚད་ ༢༠℃` became `དྲོད་ཚད་ ་སེ་དྲོད་20`,
+because the space was numeral-adjacent in the INPUT and letter-adjacent in the OUTPUT, so the step-12 squeeze
+could no longer see it. Running the squeeze a second time BEFORE the sign rules fixes that — **10 utterances,
+one fabricated pause each** — and the two positions genuinely do not cover each other: the late one is still
+needed because consuming a symbol exposes a space that was not numeral-adjacent before it ran
+(`38 ནས་ 50 ℃ བར` → `…སེ་དྲོད་50 བར`).
+
+**And the corpus diff immediately reported a REGRESSION from it**, which is the whole reason to read a diff
+rather than a count: line 86's `600km2` went from `སྤྱི་ལེ་གྲུ་བཞི་མ` back to `ˈʊkm ɲiː˥` — "km two", the ig
+defect. Cause: with the space gone, `600km2ཡོད་ཅིང་` puts a Tibetan letter immediately after the exponent,
+and the guard was `(?![\p{L}…])`. **The guard had been wrong all along** — the corpus writes its units hard
+against the next word and only the space- or punctuation-followed instances were ever surviving; the squeeze
+merely made it visible (trap 28's shape, where a new change surfaces an old defect).
+
+Narrowed to `(?![A-Za-z…])` in all four places (unit tail, exponent, rate denominator, degree scale letter).
+A Tibetan neighbour is already a token boundary by script change — the same reasoning the shared tier needed
+`unspacedScript` for, and that ja/ko/yue needed again for `℃`. What the guard has to stop is the key biting
+into a LATIN word (`m` inside `mm`, `Kg` inside `W1KG14783`, the `Han`/`Manchu` glosses this corpus is full
+of), and that is an ASCII question.
+
+Result: line 86 restored, **and two `℃` that had never been read** (`ལོ་འཁོར་མོའི་ཆ་སྙོམས་དྲོད་ཚད7℃ནས16℃བར`
+— the corpus's glued form) came back as `སེ་དྲོད` instead of the English letter *sˈiː*.
+
+**Final gates.** corpus-diff **changed 136/417 (32.6%), DROP 27 → 22**, every other leak class flat; the 136
+read. `mine.ts scan` red only on `ft` ×2, the `º` RAWMARK, the pre-existing `SILENT ྋ`, and `DROP minus` —
+now ×2, and the surviving example is a wiki IP signature's double hyphen (`--113.63.113.54`), not a minus.
+vitest 245 files / 4217 passed, tsc and check:package clean.

@@ -98,7 +98,18 @@ const TSHEG = "་";
  * confidently wrong LENGTH (playbook trap 53, ig's `790 km2`). It rejects `/` for the same reason: `9.8m/s2`
  * is a per-second-squared acceleration and only the `h` denominator of step 4 is sourced.
  *
- * ⚠ AND IT REJECTS A FOLLOWING LETTER, which is what makes the one-letter `m` key safe (trap 46). This corpus
+ * ⚠ IT REJECTS A FOLLOWING **LATIN** LETTER, NOT A FOLLOWING LETTER, and the difference is playbook trap 27.
+ * Tibetan writes its units hard against the next word (`600km2ཡོད་ཅིང་`, `སྨི6000m ལྷག`), so a `(?!\p{L})`
+ * guard rejects the ORDINARY case and only the punctuation- or space-followed instances survive — the
+ * shared tier needed `unspacedScript` for exactly this and Japanese/Korean/Cantonese needed it again for
+ * `℃`. A Tibetan neighbour is already a token boundary by script change; what the guard has to stop is the
+ * key biting into a LATIN word (`m` inside `mm`, `Kg` inside `W1KG14783`, the `Han`/`Manchu` glosses this
+ * corpus is full of), and that is an ASCII question.
+ * ⚠ THE CORPUS DIFF IS WHAT FOUND IT, and only after step 2b started removing the space that had been
+ * hiding it — trap 28's shape, where a new change surfaces an old defect. `600km2` was reaching the IPA as
+ * *ˈʊkm ɲiː˥*, "km two", before the guard was narrowed.
+ *
+ * ⚠ AND IT REJECTS A FOLLOWING LATIN LETTER, which is what makes the one-letter `m` key safe (trap 46). This corpus
  * writes no dotted version designation at all — the `version-dot` cell's 122 hits are decimals, and a
  * `\d+\.\d+[a-z]` grep over the retained text returns 4, all of them scientific notation or `m/s²` — but all 5
  * digit-adjacent bare `m` are genuine metres, so the key earns its place and the guard is what bounds it.
@@ -111,7 +122,7 @@ const UNITS: [key: string, word: string][] = [
     ["m", "སྨི"],
 ];
 /** What may not follow a unit key: another letter, a digit, a superscript, or the rate slash. */
-const UNIT_TAIL = `(?![\\p{L}${D}²³/])`;
+const UNIT_TAIL = `(?![A-Za-z${D}²³/])`;
 
 /**
  * THE SQUARED MODIFIER IS A SUFFIX ON THE UNIT NOUN, and the whole phrase still precedes the figure:
@@ -129,6 +140,14 @@ const SQUARED = "གྲུ་བཞི་མ";
  *
  * Only `h` is declared. `m/s` would need a per-second phrase, and this corpus's single instance is `m/s²`,
  * which refusal 4 declines whole.
+ *
+ * ⚠ THE WHOLE UNIT FAMILY IS CASE-SENSITIVE, DELIBERATELY, and this rule matches the others rather than
+ * carrying the sibling layers' `i` flag. Measured: the ONLY uppercase unit-shaped token after a digit in this
+ * corpus is `Kg`, ×2, and both are SCIENTIFIC NOTATION whose mantissa this layer does not read
+ * (`1.672*10-27Kg`, `9.107*10-31Kg`) — matching them would read 10⁻²⁷ kg as "27 kilograms". Case-insensitivity
+ * would also open the one-letter `m` key to `M`, which is a Roman numeral and an initial. Trap 7 is about a
+ * class narrower than its ORTHOGRAPHY; an ASCII unit abbreviation has one canonical case, and here the
+ * capitalized form is attested only where it must be declined.
  */
 const RATE_DENOMINATORS: [key: string, phrase: string][] = [["h", "ཆུ་ཚོད་རེར"]];
 
@@ -150,8 +169,11 @@ function prepose(t: string, word: string, opts: { gap: number; lead?: string; ta
     const tail = opts.tail ?? "";
     const w = lit(word);
     // a) The word is already there — drop the symbol, keep the text.
+    //    ⚠ THE WINDOW STOPS AT A CLAUSE BOUNDARY. `[^digit]` alone would let a shad or a newline inside it,
+    //    so a `ཨ་སྒོར` in the PREVIOUS sentence could suppress this sentence's currency word — a silent drop
+    //    where the gap is widest. All six of the corpus's `ཨ་སྒོར … $` windows sit inside one clause.
     t = t.replace(
-        new RegExp(`(${w}[^${D}]{0,${opts.gap}})${lead}(${NUM})${tail}`, "gu"),
+        new RegExp(`(${w}[^${D}།༎\\n]{0,${opts.gap}})${lead}(${NUM})${tail}`, "gu"),
         "$1$2",
     );
     // b) It is not — prepose it. ⚠ Anchored at the START of the digit run: a lookbehind only rejects one
@@ -162,6 +184,11 @@ function prepose(t: string, word: string, opts: { gap: number; lead?: string; ta
         `${TSHEG}${word}་$1`,
     );
 }
+
+/** Delete a space that merely separates a numeral from a Tibetan word. See step 12 for the measurement. */
+const squeezeNumeralSpace = (t: string): string =>
+    t.replace(new RegExp(`([${D}])[ \\t]+(?=[${TIB}])`, "gu"), "$1")
+        .replace(new RegExp(`([${TIB}])[ \\t]+(?=[${D}])`, "gu"), "$1");
 
 export function normalizeTibetan(input: string): string {
     let t = input;
@@ -179,6 +206,15 @@ export function normalizeTibetan(input: string): string {
     //    ℃/℉ are folded by the registry already; repeated here, idempotently, so the pass is correct when a
     //    test calls it directly.
     t = t.replace(/[％﹪٪]/gu, "%").replace(/℃/gu, "°C").replace(/℉/gu, "°F");
+
+    // 2b) THE SPACE AROUND A NUMERAL, ONCE HERE AND AGAIN AT STEP 12 — and it must be both.
+    //     Here, because a rule that PREPOSES a word puts a letter where the digit used to be, so a space that
+    //     was numeral-adjacent in the input is letter-adjacent in the output and step 12 can no longer see it
+    //     (`དྲོད་ཚད་ ༢༠℃` → `དྲོད་ཚད་ ་སེ་དྲོད་20`, keeping a pause that the same rule removes everywhere else).
+    //     Again at step 12, because a rule that CONSUMES a symbol exposes a space that was not numeral-adjacent
+    //     before it ran (`38 ནས་ 50 ℃ བར` → `…སེ་དྲོད་50 བར`). Neither position covers the other, and the
+    //     squeeze is idempotent, so running it twice costs nothing. The measurement is at step 12.
+    t = squeezeNumeralSpace(t);
 
     // 3) COMMA-GROUPED THOUSANDS, BEFORE the comma can be read as a clause pause and cut a numeral in half —
     //    `92,900` reads as "ninety-two, nine hundred" without this. Repeated for several groups (`༢,༡༩༣,༠༣༡`).
@@ -199,7 +235,7 @@ export function normalizeTibetan(input: string): string {
     for (const [dkey, dphrase] of RATE_DENOMINATORS)
         for (const [ukey, uword] of UNITS)
             t = t.replace(
-                new RegExp(`(?<![${D}.,])(${NUM})\\s*${ukey}\\s*/\\s*${dkey}(?![\\p{L}${D}])`, "giu"),
+                new RegExp(`(?<![${D}.,])(${NUM})\\s*${ukey}\\s*/\\s*${dkey}(?![A-Za-z${D}])`, "gu"),
                 `${TSHEG}${dphrase}་${uword}་$1`,
             );
 
@@ -207,7 +243,7 @@ export function normalizeTibetan(input: string): string {
     //    exponent is stranded with nothing to attach to, so an area reads as a plain length.
     //    Both spellings: the corpus writes `600km²` and `600km2` for the same place.
     for (const [key, word] of UNITS)
-        t = prepose(t, `${word}་${SQUARED}`, { gap: 3, tail: `\\s*${key}\\s*[²2](?![\\p{L}${D}])` });
+        t = prepose(t, `${word}་${SQUARED}`, { gap: 3, tail: `\\s*${key}\\s*[²2](?![A-Za-z${D}])` });
 
     // 6) PLAIN UNIT ABBREVIATIONS. A digit must be adjacent, so ordinary embedded English is left to the
     //    Latin fallback; see UNIT_TAIL for what the guard refuses and why.
@@ -234,7 +270,7 @@ export function normalizeTibetan(input: string): string {
     //    a mean annual temperature, i.e. an ASCII stand-in for the degree sign. It is admitted only before
     //    ⟨c⟩, so the arc-minute `’` of `26°50’` cannot reach it.
     //    ⚠ A BARE `°` IS DELIBERATELY NOT READ — refusal 3 in the header.
-    t = prepose(t, "སེ་དྲོད", { gap: 3, tail: "\\s*[°'′]\\s*[cC](?![\\p{L}])" });
+    t = prepose(t, "སེ་དྲོད", { gap: 3, tail: "\\s*[°'′]\\s*[cC](?![A-Za-z])" });
 
     // 10) CLOCK. ⚠ THE CHAIN GUARD IS THE WHOLE RULE. Of the six colon shapes in the retained text, THREE are
     //     `hh:mm:ss` datetimes (`2009-10-08 11:50:00`) and one an elapsed sports time (`ཆུ་ཚོད1:25:16`) —
@@ -287,8 +323,7 @@ export function normalizeTibetan(input: string): string {
     //     ⚠ DIGIT-SPACE-DIGIT IS DELIBERATELY UNTOUCHED (16 instances, e.g. the wiki's space-grouped
     //     `༡ ༠༠༠ ༠༠༠`). Deleting that space would MERGE two numerals, which is the one move in this file that
     //     can invent a quantity; here the two token classes are disjoint, so nothing else can.
-    t = t.replace(new RegExp(`([${D}])[ \\t]+(?=[${TIB}])`, "gu"), "$1");
-    t = t.replace(new RegExp(`([${TIB}])[ \\t]+(?=[${D}])`, "gu"), "$1");
+    t = squeezeNumeralSpace(t);
 
     return t;
 }

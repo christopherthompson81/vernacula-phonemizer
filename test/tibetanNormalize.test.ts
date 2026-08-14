@@ -35,6 +35,32 @@ describe("Tibetan text normalization", () => {
         expect(say("111 km")).toBe("t͡ɕi˥le˥ kʲa˩taŋ˥t͡ɕu˥t͡ɕiʔ˥");
     });
 
+    /**
+     * ⚠ THE UNIT GUARD REJECTS A FOLLOWING **LATIN** LETTER, NOT A FOLLOWING LETTER — playbook trap 27.
+     * Tibetan writes its units hard against the next word, so a `(?!\p{L})` guard rejects the ORDINARY case
+     * and only the space- or punctuation-followed instances survive. `600km2ཡོད་ཅིང་` was reaching the IPA as
+     * *ˈʊkm ɲiː˥* — "km two" — and two `℃` were being read as the English letter C for the same reason.
+     * What the guard has to stop is the key biting into a LATIN word, and that is an ASCII question.
+     */
+    test("a Tibetan letter after a unit key is the ordinary case; a Latin one is not", () => {
+        expect(normalizeTibetan("600km2ཡོད")).toBe("་སྤྱི་ལེ་གྲུ་བཞི་མ་600ཡོད");
+        expect(normalizeTibetan("20°Cཡོད")).toBe("་སེ་དྲོད་20ཡོད");
+        expect(normalizeTibetan("སྨི6000mལྷག")).toBe("སྨི6000ལྷག");
+        expect(normalizeTibetan("5 kg ཡོད")).toBe("་སྟོང་ཁེའུ་5ཡོད");
+        // …and the Latin cases the guard exists for, all present in this corpus's embedded English
+        expect(normalizeTibetan("25 mmol")).toBe("25 mmol");
+        expect(normalizeTibetan("W1KG14783")).toBe("W1KG14783");
+    });
+
+    /**
+     * ⚠ THE UNIT FAMILY IS CASE-SENSITIVE, DELIBERATELY. The only uppercase unit-shaped token after a digit
+     * in this corpus is `Kg` ×2, and both are SCIENTIFIC NOTATION whose mantissa this layer does not read —
+     * matching them would read 10⁻²⁷ kg as "27 kilograms".
+     */
+    test("an uppercase key is not a unit here", () => {
+        expect(normalizeTibetan("1.672*10-27Kg")).toBe("1.672*10-27Kg");
+    });
+
     /** The squared modifier is a SUFFIX on the unit noun and the whole phrase still precedes the figure. Both
      *  spellings, because the corpus writes `600km²` and `600km2` for the same place. */
     test("squared units, and the CUBE is refused WHOLE rather than half-read", () => {
@@ -128,6 +154,11 @@ describe("Tibetan text normalization", () => {
         expect(say("སྤྱི་ལེ་ ༡༣༡ ལྷག")).toBe("t͡ɕi˥le˥ kʲa˩taŋ˥so˥t͡ɕiʔ˥ ɬaʔ˥"); // no fabricated pauses
         expect(normalizeTibetan("འདུག བོད")).toBe("འདུག བོད"); // a shad-replacing space between letters
         expect(normalizeTibetan("1 000 000")).toBe("1 000 000"); // never merge two numerals
+        // ⚠ THE SQUEEZE RUNS TWICE AND BOTH POSITIONS ARE LOAD-BEARING. Once BEFORE the sign rules, because
+        //   preposing a word puts a letter where the digit was and the late pass can no longer see the space;
+        //   once AFTER, because consuming a symbol exposes a space that was not numeral-adjacent before.
+        expect(normalizeTibetan("དྲོད་ཚད་ 20°C")).toBe("དྲོད་ཚད་་སེ་དྲོད་20"); // the early pass
+        expect(normalizeTibetan("38 ནས་ 50 °C བར")).toBe("38ནས་་སེ་དྲོད་50བར"); // the late pass
     });
 
     /**
