@@ -48,6 +48,31 @@ const has = (n: string): boolean => argv.includes(`--${n}`);
 
 const ESPEAK = process.env["ESPEAK_NG"] ?? ""; // set ESPEAK_NG to an espeak-ng checkout to enable the dictsource tier
 const DICT = join(ESPEAK, "dictsource");
+
+/**
+ * ⚠ IS THE ESPEAK TIER EVEN CONNECTED? Three states, and this tool used to collapse two of them into the
+ * most confident one: with `ESPEAK_NG` unset, `DICT` is the relative path `dictsource`, every read returns
+ * "", and EVERY language then reported `letter-names: espeak does not ship this language at all` — a
+ * sentence about espeak's coverage, asserted from a shell variable.
+ *
+ * That is playbook trap 57's exact shape, and it was caught scoping a four-language batch: Lithuanian,
+ * Latvian, Estonian, Basque and Maltese all reported `[NONE]` for every class, and espeak ships letter
+ * tables for all five (30–65 letters each). The tell is uniformity — a gate that returns the same answer for
+ * every input is not a strict gate, it is a disconnected one — and the cost is the expensive direction:
+ * `letter-names` blocked is the single commonest deferral in this sweep (20 of 25 PRs), so a false NONE
+ * there closes the question and gets recorded as a refusal.
+ *
+ * The distinction is NOT "not probed" versus "probed and absent", which is still a sentence about the data.
+ * It names the VARIABLE, because that is the thing the reader has to change.
+ */
+const ESPEAK_OFF = ESPEAK === "" || !existsSync(DICT);
+/** The haystack these messages may honestly claim to have searched. `review.ts`'s sourcing line already makes
+ *  this distinction — *nobody has probed this* and *the probe ran and the word is absent there too* must not
+ *  read the same — and a class that names espeak while the tier is disconnected is making the same mistake. */
+const HAYSTACK = ESPEAK_OFF ? "corpus/referee (espeak NOT consulted)" : "corpus/referee/espeak";
+const ESPEAK_OFF_NOTE = ESPEAK === ""
+    ? "⚠ $ESPEAK_NG IS UNSET — the espeak tier was not consulted at all"
+    : `⚠ $ESPEAK_NG IS SET BUT HAS NO dictsource/ (${ESPEAK}) — the espeak tier was not consulted at all`;
 const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 const REFEREES = "tools/referee-eval/referees";
 
@@ -305,6 +330,10 @@ function letterNames(c: Ctx): Row {
             detail: `espeak has ${disabled.size} letter names but COMMENTED OUT — read its reason before porting`,
         };
     }
+    // ⚠ THE THIRD STATE COMES FIRST, because it is the one that used to masquerade as the second. With
+    // $ESPEAK_NG unset every language reaches here with `c.espeak === ""` and the old text asserted "espeak
+    // does not ship this language at all" — a claim about espeak's coverage derived from a shell variable.
+    if (ESPEAK_OFF) return { klass: "letter-names", verdict: "unknown", detail: ESPEAK_OFF_NOTE };
     const espeakAtAll = c.espeak !== "";
     return {
         klass: "letter-names", verdict: "none",
@@ -320,8 +349,10 @@ function decimalWord(c: Ctx): Row {
     const dot = /^_\.\s+\S/mu.test(c.espeak);
     const manifest = /"decimal(?:Word|Connector)"\s*:/u.test(c.langSrc);
     const parts = [dpt && "espeak _dpt", dot && "espeak _.", manifest && "manifest decimalWord"].filter(Boolean);
-    return parts.length > 0
-        ? { klass: "decimal-point", verdict: "have", detail: parts.join(" + ") }
+    if (parts.length > 0) return { klass: "decimal-point", verdict: "have", detail: parts.join(" + ") };
+    // Two of the three sources for this class live in espeak, so a disconnected tier must not read as absence.
+    return ESPEAK_OFF
+        ? { klass: "decimal-point", verdict: "unknown", detail: `no manifest word, and ${ESPEAK_OFF_NOTE}` }
         : { klass: "decimal-point", verdict: "none", detail: "no _dpt, no _., no manifest word — read the fraction digit-by-digit" };
 }
 
@@ -650,7 +681,7 @@ export function scaleNames(c: Ctx): Row {
     const text = `${c.corpus}\n${c.referee}\n${c.espeak}`;
     const lits = literals(c.langSrc).join("\n");
     const found = (slot: "celsius" | "fahrenheit"): string | undefined =>
-        SCALE_PROBES[slot].test(text) ? "attested in corpus/referee/espeak"
+        SCALE_PROBES[slot].test(text) ? `attested in ${HAYSTACK}`
             : SCALE_PROBES[slot].test(lits) ? "emitted by the layer" : undefined;
     // 2. CODE EVIDENCE, read as ARMS. Identical arms are the layer SAYING the letter is dropped.
     // ⚠ THE TWO KINDS OF EVIDENCE ARE MERGED, NOT SHORT-CIRCUITED. Returning on the first text hit cost nan
@@ -715,7 +746,7 @@ export function scaleNames(c: Ctx): Row {
         return row("unknown", `the scale probe reads LATIN spellings and this corpus is not Latin — a miss is an unread haystack, `
             + `not an absence${candidates}`);
     }
-    return row("none", `° occurs, neither scale name in corpus/referee/espeak, and the layer declares no scale arm${candidates}`);
+    return row("none", `° occurs, neither scale name in ${HAYSTACK}, and the layer declares no scale arm${candidates}`);
 }
 
 /**
@@ -1226,7 +1257,7 @@ export function unitWords(c: Ctx): Row {
      * source (rule 1), and an `ok` assembled from a declaration is what would have waved the invented Lao
      * currency word through.
      */
-    return row("partial", `${n}/${words.length} declared unit word(s) attested in corpus/referee/espeak/attest`
+    return row("partial", `${n}/${words.length} declared unit word(s) attested in ${HAYSTACK}/attest`
         + `${c.corpus === "" ? " (no corpus for this language)" : ""}; UNATTESTED: ${missing.slice(0, 8).join(" ")}`
         + ` — a unit borrowing is legitimately absent from every source in ~30 languages, so this is a prompt to READ them, not a defect`);
 }
@@ -1393,6 +1424,12 @@ function main(): void {
         const codes = fleet();
         const klasses = ["letter-names", "decimal-point", "era-phrase", "scale-names", "percent-word", "currency-word", "unit-word", "fraction-series"];
         console.log(`\n── vocabulary sources across ${codes.length} registered languages ──\n`);
+        // ⚠ THE FLEET VIEW IS WHERE A DISCONNECTED TIER DOES THE MOST DAMAGE, because its headline output is a
+        // COUNT — "letter names are absent for 94 of the registered languages" is a number people plan work
+        // from. With $ESPEAK_NG unset that number is a fact about the shell, so say so before the matrix.
+        if (ESPEAK_OFF) console.log(`  ${ESPEAK_OFF_NOTE}, so every letter-names and decimal-point cell below\n`
+            + `  reads ?? rather than NONE. Any COUNT taken from this run is a fact about the shell, not the fleet:\n`
+            + `      export ESPEAK_NG=/path/to/espeak-ng   # the checkout containing dictsource/\n`);
         console.log(`      ${klasses.map((k) => k.slice(0, 9).padEnd(10)).join("")}`);
         const blockedBy: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
         const unreadable: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
@@ -1423,7 +1460,9 @@ function main(): void {
         const { ctx, rows } = rowsFor(code);
         console.log(`\n── ${code} (${ctx.dir ?? "?"}) vocabulary sources ──\n`);
         for (const r of rows) console.log(`  [${MARK[r.verdict]}] ${r.klass.padEnd(16)} ${r.detail}`);
-        console.log(`\n  espeak: ${ctx.espeak === "" ? "NOT SHIPPED for this language" : `${ctx.espeak.split("\n").length} lines`}`
+        if (ESPEAK_OFF) console.log(`\n  ${ESPEAK_OFF_NOTE}.\n  Every verdict above that rests on it is UNKNOWN, not negative — export it and re-run:`
+            + `\n      export ESPEAK_NG=/path/to/espeak-ng   # the checkout containing dictsource/`);
+        console.log(`\n  espeak: ${ESPEAK_OFF ? "NOT CONSULTED ($ESPEAK_NG unset)" : ctx.espeak === "" ? "NOT SHIPPED for this language" : `${ctx.espeak.split("\n").length} lines`}`
             + ` · referee: ${ctx.referee === "" ? "none" : `${ctx.referee.split("\n").length} lines`}`
             + ` · corpus: ${ctx.corpus === "" ? "none" : `${ctx.corpus.split("\n").length} lines`}`
             + (existsSync(new URL(`../corpus/mined/${ctx.code}.jsonc`, import.meta.url).pathname) ? " (incl. mined artifact)" : ""));

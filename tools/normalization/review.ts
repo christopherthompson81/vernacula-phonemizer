@@ -975,9 +975,16 @@ async function main(): Promise<void> {
             }
             return undefined;
         };
+        // ⚠ AND THE SAME DISTINCTION APPLIES TO ESPEAK, which this line used to name unconditionally. With
+        // `$ESPEAK_NG` unset, `ESPEAK_DICT` is "" and the dictsource tier contributes nothing to the haystack —
+        // so "in NO source (… espeak …)" claimed a search that never ran, which is the stronger negative
+        // asserted from a shell variable. It is the identical mistake the wikipedia half of this string was
+        // written to avoid, one source over, and it is the mistake `sources.ts` was making fleet-wide.
+        const espeakSearched = ESPEAK_DICT !== "" && existsSync(ESPEAK_DICT);
         const verdictOf = (w: string): string => {
             const p = probed(w);
-            return `${w} — in NO source (corpus, artifact, referee, lexicon, espeak`
+            return `${w} — in NO source (corpus, artifact, referee, lexicon`
+                + `${espeakSearched ? ", espeak" : "; espeak NOT consulted — $ESPEAK_NG is unset"}`
                 + `${p === undefined ? "; wikipedia NOT probed — try tools/normalization/attest.ts" : `, and ${p}`})`;
         };
         // A CITATION IS SOURCING TOO — see CITED_WORDS. A corpus cannot attest how a SYMBOL is spoken (writers type
