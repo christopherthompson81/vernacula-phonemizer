@@ -13,6 +13,7 @@ import { latinPhone } from "../../core/latinPhones.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeWolof } from "./normalize.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -71,7 +72,11 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class WolofPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // TEXT NORMALIZATION FIRST — %, currency, units, the exponent, degrees, ranges, de-grouping and the
+        // decimal separator become words (or plain digit runs) before anything is tokenized. Pure text→text;
+        // every word it emits goes through the same g2p below, which is why nothing here reaches `sink.emit`
+        // as a spelling (playbook trap 6). See normalize.ts for the numbered order and its couplings.
+        return assembleClauses(normalizeWolof(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // numbers: spoken in the QUINARY/decimal Wolof system (numbers.ts), then through the same g2p
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

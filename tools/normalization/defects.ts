@@ -858,6 +858,52 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "language's whole Jopara measurement exists to prevent. Not read.",
         divide: "×0 in the retained text. Same definitive absence as `plus-minus`.",
     },
+    wo: {
+        // ⚠ EVERY COUNT BELOW IS OVER THE RETAINED TEXT of `tools/corpus/mined/wo.jsonc` — 408 segments
+        // (208 hard + 200 sample) out of a 10,278-paragraph wo.wikipedia dump — with the artifact's
+        // whole-corpus `counts` quoted where they differ. `attest.ts` against wo.wikipedia is the second
+        // tier and espeak does not ship Wolof AT ALL, so there is no third. Every refusal is argued in
+        // src/languages/wolof/normalize.ts.
+        // ⚠ `minus` IS DELIBERATELY ABSENT, AND THAT IS WHY `review.ts --lang wo` STAYS RED ON IT — the
+        // ak / ln / bm / ilo / gn stance. `mine.ts scan` reports `DROP minus ×2` and reading both shows
+        // they are not negatives: one is a LIST BULLET in a botanical description (`Doom bi: -Daa tàcc -5
+        // ba 7,5i sàntimet ci guddaay`, where the leading hyphens open each dashed line) and the other is
+        // the ASCII half of a scientific exponent (`1,602 189 2 ∙ 10 -19 C`). So there is no true negative
+        // here to read — but that is a fact about this corpus, not a licence, and omitting a minus INVERTS
+        // where omitting a plus is lossless. No Wolof negative-number word is attested in the corpus, on
+        // wo.wikipedia or in the kaikki referee, so the class stays red until one is.
+        equals: "×20 in the retained text, splitting three ways and none of them wanting an arithmetic "
+            + "word. (1) THREE PHYSICS EQUATIONS — `q e = 1,602 · 10⁻¹⁹ C`, `moo yem ak e = 1,602 189 2 ∙ "
+            + "10-19 C`, `ñu koy faral di binde e = -1,602 10⁻¹⁹ c` — and the second of those is decisive "
+            + "against reading the sign rather than for it: the sentence ALREADY writes the words, `moo "
+            + "yem ak` ('is equal to'), so this is trap 12's redundant shape and the correct reading says "
+            + "it once. (2) ~NINE LEXICAL AND TRANSLATION GLOSSES, where `=` means 'means' rather than "
+            + "'equals': `baziira = gisug xol`, `yax=nassu ci araab.=texte ci français`, `sotti = nusxa`, "
+            + "`marsiya = xasida gu niy waxe jëf ju baax`, `xarala(fr : économie ; en : economics) = "
+            + "koom-koom`, `vin= akusativo`. Reading those as 'equals' would say *baziira equals gisug "
+            + "xol* about a definition. (3) TWO MEDIAWIKI HEADING MARKERS the dump extraction left in — "
+            + "`==Melo wi==` and `Death forever=`, which is the very example `mine.ts scan` prints for "
+            + "this class — where silence is the only correct reading. `yem ak` IS attested (×4/4 on "
+            + "wo.wikipedia) and is a real Wolof phrase; what is missing is a shape it fits, not a word.",
+        plus: "×0 in the retained text — `sources.ts` reports `[ · ] plus-word: the sign does not occur in "
+            + "the evidence`, and the `signed-number` cell is ×7 whole-corpus against `digit-run` ×1928. "
+            + "Trap 48's shape: a definitive negative rather than a probe failure. Nothing attests how a "
+            + "Wolof reader voices a plus, and the playbook's fleet-wide finding is that the only "
+            + "contentful plus is the UTC offset — which this corpus does not write either.",
+        "plus-minus": "×0 in the retained text and ×0 whole-corpus. A definitive absence, recorded so the "
+            + "negative is not re-investigated (trap 48): the class costs a probe line and answers "
+            + "nothing about Wolof.",
+        "less-than": "×0 in the retained text. Same definitive absence as `plus-minus`; `sources.ts` "
+            + "reports the sign does not occur in the evidence.",
+        "greater-than": "×0 in the retained text. Same definitive absence as `plus-minus`.",
+        times: "×0 in the retained text — neither `×` nor a digit-flanked ASCII `x`. ⚠ THE ONE PLACE A "
+            + "MULTIPLICATION SIGN DOES OCCUR IS THE MIDDLE DOT of scientific notation, ×3, all in one "
+            + "physics article: `1,602 · 10⁻¹⁹ C`, `9,10 · 10−31 kg`, `1,602 189 2 ∙ 10 -19 C`. That is a "
+            + "shape the shared tier's `multiply` field does not match at all (it reads `×` and ASCII "
+            + "`x`), and no Wolof word for the operation is attested in the corpus, on wo.wikipedia or in "
+            + "the kaikki referee. Not read, and the mark stays visible to the RAWMARK gate.",
+        divide: "×0 in the retained text. Same definitive absence as `plus-minus`.",
+    },
     ilo: {
         // ⚠ EVERY COUNT BELOW IS OVER THE MINED ilowiki CORPUS — 38,655 paragraphs extracted from the
         // `ilowiki` dump, 43,258 kept by `filter-by-language.py --lang ilo` (a new row whose CONTRAST set

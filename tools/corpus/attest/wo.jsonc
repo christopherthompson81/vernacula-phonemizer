@@ -1,0 +1,448 @@
+// WIKIPEDIA WORD ATTESTATION — wo. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "wo",
+        "wiki": "wo.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "dërëm",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…jafe Xarit dëgg ŋooral ci xaalis bi yaw Te kat leegi seerub dërëm sax jafe Ngirug mag akug ràgg ak dee ngi ñëw Bu ñuy yegsi d…",
+                "…om-ñaar téemeeri milyoŋ ak juroom-ñaar-fukk ak juroom-ñaari dërëm ci CFA (777 millions de francs CFA). === Jëwriñ ju jëkk ===…",
+                "…lal ju bari ji mu daa joxe rekk ,nga xam ne daawul tëyye ab dërëm,lu ñëw mu joxe,di jox mag ak ndaw goor ak jigeen,gor ak ab…",
+                "…lal ju bari ji mu daa joxe rekk ,nga xam ne daawul tëyye ab dërëm,lu ñëw mu joxe,di jox mag ak ndaw goor ak jigeen,gor ak ab…",
+                "…alal ju bari jim daa joxe rekk ,nga xam ne daawul tëyye ab dërëm,lu ñëw mu joxe,di jox mag ak ndaw goor ak jigeen,ngor akub…"
+            ]
+            },
+        {
+                "word": "FCFA",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "CFA",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…Afrique Centrale (CEMAC), ñoom ñoo yor wàllu xaalis ci zone CFA, ak Bànk bu France, biy defar xaalis yu bees yooyu Ci wàllu…",
+                "…bees yooyu Ci wàllu kaaraange ci wàllu xaalis ci zone franc CFA, buñu sukkandikoo ci International Copper Study Group (ICSG…",
+                "…Study Group (ICSG), wen wi ñuy jëfandikoo ngir defar xaalis CFA, dañu ko gëna fonku ndax valeur marché bi, Askanu Koom-koom…",
+                "…ubbi nañu gëstu yu njëkk yi ci 2019, ginaaw bi ñu gisee ni CFA daa réer[1].…",
+                "…éemeeri milyoŋ ak juroom-ñaar-fukk ak juroom-ñaari dërëm ci CFA (777 millions de francs CFA). === Jëwriñ ju jëkk === Aminat…",
+                "…r-fukk ak juroom-ñaari dërëm ci CFA (777 millions de francs CFA). === Jëwriñ ju jëkk === Aminata Ture ñu ngi ko fal benn fa…"
+            ]
+            },
+        {
+                "word": "franc CFA",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…is yu bees yooyu Ci wàllu kaaraange ci wàllu xaalis ci zone franc CFA, buñu sukkandikoo ci International Copper Study Group (ICSG…"
+            ]
+            },
+        {
+                "word": "yuro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 1,
+                "examples": [
+                "…lam en France (fr) Royuwaay:Dmoz Royuwaay:Wiktionnaire (en) Euro-Islam Website Coordinator Jocelyne Cesari, Harvard Universi…",
+                "…bitigam tey jaay ay tòggi Senegaal yu tàng, plaat bu nekk 5 euro. Benn yoon ci ayu bis gi, lu ëpp ci murit yi nekk Rom danan…",
+                "…bitigam tey jaay ay tòggi Senegaal yu tàng, plaat bu nekk 5 euro. Benn yoon ci ayu bis gi, lu ëpp ci murit yi nekk Rom danan…"
+            ]
+            },
+        {
+                "word": "garaam",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…waa End dañ koy natte seen i wurus.( 12i xoox di dayob 11,6 garaam ci wurus). == Nataal == == Turu xam-xam == Abrus precatoriu…",
+                "…lool ay foytéefam manees na leen a natt ci 10 jàpp 57 ci ay garaam. == Njariñ yi == Garabu Karite nag bari na ay njariñ lool n…",
+                "…i di meññeef mi ñi ngi koy natt ci ñaari téemeer ak juróomi garaam, ci yaatuwaay mi ngi toll ci téemeeri milimet walla mu jàpp…"
+            ]
+            },
+        {
+                "word": "tomb",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ci benn bi ab gox (Dottub bëj-saalum) la di ci beneen bi ab tomb. Dottub Bëj-saalum mooy puju àdduna bi ci Bëj-saalum, maana…",
+                "…ottub Bëj-saalum mooy puju àdduna bi ci Bëj-saalum, maanaam tomb bi gën a féete Bëj-saalum ci àdduna bi. Moom ci boppam am n…",
+                "…dottub Bëj-saalum «gu bijjaakon» (dottub bijjaakon). Ñaari tomb yi bokk ñu ndaxte fi dottub Bëj-saalum gu bijjaakon di ne d…",
+                "…watatukaay faww toolu mbëj bi ci ëmbu di neen (tus) ci bépp tomb boo jël ci biir watatukaay bi. Su amee ag wuuteeg aj ci dig…",
+                "…biir watatukaay bi. Su amee ag wuuteeg aj ci diggante ñaari tomb ci watatukaay bi kon dees na fa am toolub mbëj bu wuute ak…",
+                "…ggéey bi jenn doole def mooy kàttan gi doole jooju joxe ngi tomb bi ñu ko jëfe man a topp, maanaam jóge fa mu nekkoon randu…"
+            ]
+            },
+        {
+                "word": "yem ak",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…dëppoo ak lolli bi moo tax ñu tudde ko ko. Ci wolof nak daa yem ak weer wees di màggalee juddug yonnent bi te màggal googu moo…",
+                "…nasu gudd ak baaraamu joxoñ ci loxo ndeyjóór. Tëgg na nasi yem ak gàtt ak baaraamu déy ci loxo ndeyjóór. Ekontiŋ dafa yam buc…",
+                "…a tuuti bu am ci dénd bi, dayoo bu mbëjfepp bu bon (-) moo yem ak e = 1,602 189 2 ∙ 10-19 C, tolloo te safaanoo ak bu feppsaa…",
+                "…iiwaanu Galasi. Jaamburi dëkk ba yépp amoon nañu yelleef yu yem ak yosu waa dëkku Room. Tamit, indi nañu ay xarekatu Room yu b…"
+            ]
+            },
+        {
+                "word": "tolloo ak",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Saasumaan Mooy waxambaane wu tollu ci ay jamonoom. Day tolloo ak xale bu góor bi, waaye ci biir xale bu góor man ngaa nekk x…",
+                "…bu góor te doo nekk Saasumaan. Ndax Saasuman dëgg dëgg day tolloo ak (booy diskoo) ci sunu jamono jii.…",
+                "…àddina ci weeru korite ci atum 1332 ginnaaw gàddaay gi. Di tolloo ak 1914 ca Njaaréem. == Am njàngam == Ba mu tollee cim njàng l…",
+                "…mel ni Senegaal. Garab gu yam lay doon te firiku. Di xaw a tolloo ak salaan. == Njariñ li == Ngeer garabu paj la, bokk na ci yi…",
+                "…anq-naaj la yor. Tóortóoram 4i xob yu xonq la yor yuy xaw a tolloo ak 8 sàntimet, ak uw ñeenteel wu gën a rëy wuy nekk ci digg bi…",
+                "…ci màggug gox bi. Taariixu askani Bëj-gànnaaru Afrig yi day tolloo ak bu Tugal ak bu Penku gu Diggu gi. Li ëpp ci Afrig gu Bëj-sa…"
+            ]
+            },
+        {
+                "word": "junni-junni",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 2,
+                "examples": [
+                "…: Melosuufug Tugal Tugal a ngi yaatoo 10 392 855 km² (fukki junni-junni ak ñetti-fukki-junni ak juroom-ñent-fukk ak ñaar ak juroom-…",
+                "…aal na itam géeju Ross ak bu Weddell. Réyaayam toll ci 13,9 junni-junni km², Dottub Bëj-saalum moo gën a tuuti Asi, Afrig, Bëj-gànn…",
+                "…k a fa man a dëkk. == Melosuuf == Ak réyaay bu toll ci 13,9 junni-junni km² mooy juroomeelu gox bi ëpp ci àdduna bi cig réyaay. Gox…"
+            ]
+            },
+        {
+                "word": "kilogaraam",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…= Melo == Ci gamgamlekaay disaayu doom bi danay àgg ba 1,5i kilogaraam. Day ëmb ndox mu saf suukar: \"ndoxu koko\". Reenam day dugg…"
+            ]
+            },
+        {
+                "word": "tamñareet",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…2017 allalu réew yooyu ca bokk àggoon na ci lu toll ci 565i tamñareet ciy dolaar u Amrig. Doonte bamu sosoo koom-koom rekka ko yi…"
+            ]
+            },
+        {
+                "word": "milyoŋ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…birum réew mi di 923,769 km2 (356,669 sq mi), ak lu ëpp 230 milyoŋ nit, mooy réew mi gën a bare nit ci Afrig, ak ñeenteelu rée…",
+                "…ci àdduna bi ci wàllu suuf ak askan.[ 12] Dafa am lu ëpp 44 milyoŋ kilometri kare, lu tollu ci 30% ci àll bi ak 8% ci àll bi.…",
+                "…dëkk yi: Ø Way dëkki goxub Afrig tollu nañu ci lu jege 350 milyoŋ ciy nit, maanaam lu tollook ay fukki yoon la dëkk Isipt ciy…",
+                "…la dëkk Isipt ciy way dëkk, ñi ngi séntu bii lim àgg ci 520 milyoŋ ciy nit atum 2000. Ø Way dëkki gox bi ñi ngi sosoo ci ay: ñ…",
+                "…g, Gànnaar ak Somaali. Séenub lim dees na ko nattale ci 100 milyoŋ ciy nit, maanaam luy tollook 2/7 ci way dëkki gox bi. Tàkk…",
+                "…ca bëj-gànnaaru Mosambik ak Keeñaa gépp. Lu tollook juroomi milyoŋ yu muy seen làkk wu njëkk a ngi fi (yu muy seen làkk wi ñu…"
+            ]
+            },
+        {
+                "word": "milyaar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…i, [1] moo nekkoon bérab bu bare bu jëkk bi. Réew mi am 4.7 milyaar ci nit[14] di lu tollu ci 60% ci askanu àdduna bi, am na lu…",
+                "…ag, xoolal li mu fi bàyyi ci xaalis, tollu na ci lu jege 17 milyaar, ñeel naal yu aju ci Dëkkub S Tuubaa bi, te loolu masut a a…",
+                "…a liggéey ci alali boppam, te loola gën jaa néew mu weesu 7 milyaar, lu sakkan ciy kër S Tuubaa sosoo na ciy loxoom, waxuma la…",
+                "…ag, xoolal li mu fi bàyyi ci xaalis, tollu na ci lu jege 17 milyaar, ñeel naal yu aju ci Dëkkub S Tuubaa bi, te loolu masut a a…",
+                "…liggéey ci alali boppam, te lool a gën jaa néew mu weesu 7 milyaar, lu sakkan ciy kër S Tuubaa sosoo na ciy loxoom, tollu nañu…",
+                "…aloo te toppante, ci diir bu tollu ci 23 at. Lu tollook 1,5 milyaar ciy jullit ñi ngi ci àdduna bi. Ñoon nag dañoo séddaliku ci…"
+            ]
+            },
+        {
+                "word": "kaareb",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ñatti kaare",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kubik",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ci téeméer",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ngoro ji ju man a rayaate la, lu ci ëpp ci 50% (juroom-fukk ci téeméer) ba 70% (juroom-ñeent-fukk ci téeméer) ci ñi muy dal ci dee…",
+                "…p ci 50% (juroom-fukk ci téeméer) ba 70% (juroom-ñeent-fukk ci téeméer) ci ñi muy dal ci dee lañuy mujjee. Jangoroy yaram-wu-tàng…",
+                "…ñaar fukki fan bu ñu ko jiyee ak it lu tolloog juróom-fukk ci téeméer bu ne ñu man a dund séen ug màgg nag gaawut lool ndax man n…",
+                "…dugal ci ekibu réew mi ak juróom-ñaar-fukk ak juróom-ñeent ci téeméer ak ñaar-fukk. Moom moo jël FIFA Confederations Cup 2013 bi,…"
+            ]
+            },
+        {
+                "word": "téeméer",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 60,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Téeméer : 100…",
+                "…tti-fukki-junni ak juroom-ñent-fukk ak ñaar ak juroom-ñetti-téeméer ak juroom-fukk ak juroom). Di benn ñetti Afrig walla benn ñ…",
+                "…tegu ci ak yeneen yépp, ba tay ci atum 2007 mat nañu ñaari-téeméer ak juróom-fukki làkk. Ci 1 diggi-gamu 2002 la Larry Sanger…",
+                "…ne Acogny, ca Benee la juddoo ca atum junni ak juróom ñenti téeméer ak ñent fukk ak ñent, ab fecckat ak naskatu pecc di doomi F…",
+                "…b feccukaay bu njëkk ci Afrig ci atum junni ak juróom ñenti téeméer ak juróom benn fukk ak juróom ñatt, ci Ndakaaru. Germaine A…",
+                "…barabu feccukaay ci Ndakaaru ci atum junni ak juróom ñenti téeméer ak juróom benn fukk ak juróom ñatt. Ci diggante atum junni…"
+            ]
+            },
+        {
+                "word": "kilomet",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ci 4,033 km2. [ 9] Wàll yii nekk na ci diggante 600 ak 850 kilomet (320 ak 460 milya) ci penku Kap Weer, di penku bu gën a pen…",
+                "…nguurug Holand, nekk ci bëj-saalum géej gi, lu tollu ci 29 kilomet (18 mi) ci bëj-gànnaaru peninsula bu Paraguaná ak 80 kilome…",
+                "…ilomet (18 mi) ci bëj-gànnaaru peninsula bu Paraguaná ak 80 kilomet (50 mi) ci bëj-gànnaaru Curaçao. 7] Mu ngi tollu 32 kilomet…",
+                "…kilomet (50 mi) ci bëj-gànnaaru Curaçao. 7] Mu ngi tollu 32 kilomet (20 mi) ci bëj-gànnaar-binni bi ba ci penku bëj-saalum-gànn…",
+                "…j-gànnaar-binni bi ba ci penku bëj-saalum-gànnaar bi, ak 10 kilomet (6 mi) ci bëj-gànnaar bi.[ 7] Ak Bonaire ak Curaçao, Aruba…",
+                "…p ci gox yi, ab tolluwaayam toll ci benn ñaareel 44 milyoŋi kilomet yu kaare , way-dëkk ya tollu ci 2200 milyoŋ ciy nit. 2 – Go…"
+            ]
+            },
+        {
+                "word": "meetar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 55,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…. == Tekkeem == Bennaanu nattu wommatiin wi mooy siemens ci meetar [s/m]. Nekk itam dawaanu mbëj ci kaw taraayu ab toolu mbëj…",
+                "…mooy Wommatiin wi ρ mooy dëgërluwiin wi (ñu koy natte ohm* meetar) R ndëgërlu gu mbëj gu ab wommatukaay (ñu koy natte ohm) l…",
+                "…koy natte ohm) l mooy guddaayu wommatukaay bi (ñu koy natte meetar) A mooy dijjaayu wommatukaay bi (ñu koy natte meetar kaare)…",
+                "…natte meetar) A mooy dijjaayu wommatukaay bi (ñu koy natte meetar kaare) == Lëkkalekaay yu biir == Wommat wu mbëj Dëgërluwiin…",
+                "…am ay màggalukaay rekk. Ëpp nañu fukk. Nekk na daanaka 100 meetar ca kaw niwo dëkk ba. Ca ñetti boor am na mbartal bu jub xoc…",
+                "…ba noppi amoon na 104 kenu marbar, bu nekk am kawewaayu 17 meetar ak yaatuwaayu 2 meetar! Kawewaayu màggalukaay ba moom ca bo…"
+            ]
+            },
+        {
+                "word": "sàntimet",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…yikoo. == Meloom wi == Man àgg ba 10i met ci guddaay ak 10i sàntimet ci yaatuwaayu dàtt. Xobam danay àgg ci guddaay 1 ba 2i sànt…",
+                "…imet ci yaatuwaayu dàtt. Xobam danay àgg ci guddaay 1 ba 2i sàntimet. Doom danay àgg ci guddaay 10 ba 15i milimet. == Njariña yi…",
+                "…yor. Tóortóoram 4i xob yu xonq la yor yuy xaw a tolloo ak 8 sàntimet, ak uw ñeenteel wu gën a rëy wuy nekk ci digg bi te yor wir…",
+                "…aar bi melo ñebbe la xaw a yor te guddaayam di àgg 40 ba 60 sàntimet. Yaatuwaayam danay àgg 5 sàntimet te da day ëmb 10i xoox. =…",
+                "…guddaayam di àgg 40 ba 60 sàntimet. Yaatuwaayam danay àgg 5 sàntimet te da day ëmb 10i xoox. == Mbaaxam == Barab yi xaw a naaje…",
+                "…s ciy safal. == Melo wi == Gàncax la guy tollu ci 20 ba 90i sàntimet ci guddaay. Xobam daa tàppndar, danay àgg 2 ba 3i sàntimet.…"
+            ]
+            },
+        {
+                "word": "milimet",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ddaay 1 ba 2i sàntimet. Doom danay àgg ci guddaay 10 ba 15i milimet. == Njariña yi == Dees na ko jëfandikoo ci defarug alkol, ñ…",
+                "…xam ni at mi yépo dañuy sëq. Xobu guy nag, dana yaatoo 20i milimet. == Mbotmbotaan == Botmbotaan mooy tóortóori guy, moom nag…",
+                "…eer ak juróomi garaam, ci yaatuwaay mi ngi toll ci téemeeri milimet walla mu jàpp sax ñaar fukk i sàntimet ba ci sax fan weeri…",
+                "…ay car ak reeni xobam tiye. Seen ug guddaay danay àgg ba 8i milimet. Doomam day tàcc, di yore melow puur, xonq mbaa baam tey àg…",
+                "…Day muñ bekkoor te ci barab yiy sotti lu toll ne 200 ba 700 milimet cib taw cim at lay meññ. Màggam daa gaaw. == Melow wi == Ra…",
+                "…ññ. Barab yooyu bu ñu xaymaa li muy taw ci at mi du ëpp 500 milimet ci taw . == Melokaanam == Ndaybarga garab la goo xam ne ay…"
+            ]
+            },
+        {
+                "word": "kare",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…àllu suuf ak askan.[ 12] Dafa am lu ëpp 44 milyoŋ kilometri kare, lu tollu ci 30% ci àll bi ak 8% ci àll bi. Bennoo bi, bu y…"
+            ]
+            },
+        {
+                "word": "kaare",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…itugalasi, ni ko ñenn ñi di waxee. Yaatuwaay: 54 000 000 km kaare Askan: 4,8 miliari way dëkk Tugalasi ak Afrik, ñoom la ñuy…",
+                "…i ci bëj-saalum. Mi ngi am yaatuwaay bu tollu ci 112.622 yu kaare. Bene ngi bawoo ca dexug Niseer gi ci bëj-gànnaar yem ci mb…",
+                "…, ab tolluwaayam toll ci benn ñaareel 44 milyoŋi kilomet yu kaare , way-dëkk ya tollu ci 2200 milyoŋ ciy nit. 2 – Goxub Afrig…",
+                "…: ab tolluwaayam di benn ñeenteel 30 milyoŋ ciy kilomet yu kaare , way-dëkk ya tollu ci 350 milyoŋ ciy nit. 3 – Goxub Amerig…",
+                "…ab tolluwaayam tollu ci benn ñeenteel 24 milyoŋi kilomet yu kaare, way-dëkk ya tollu ci 270 milyoŋi nit. 4 – Goxub Amerig gu…",
+                "…gi: tolluwaayam toolu ci ñatti ñeenteel 17 milyoŋi kilomet kaare, way-dëkk ya tollu ci 300 milyoŋi nit. 5 - Rëddu yamoo wi (…"
+            ]
+            },
+        {
+                "word": "dolaar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…oxla. Soo demee Etats Unis mingi fay jar diggante 50 ba 100 dolaar (USD).…",
+                "…2014. Soo demee Etats Unis mingi fay jar diggante 50 ba 100 dolaar (USD).Royuwaay:Drugbox…",
+                "…ew yooyu ca bokk àggoon na ci lu toll ci 565i tamñareet ciy dolaar u Amrig. Doonte bamu sosoo koom-koom rekka ko yitteeloon, M…",
+                "…tanos, diphtherie, polio, akHib vaccine ñuy koy jaaye 15,41 dolaar (USD) dose bu nekk ci atum 2014.…",
+                "…ekk sibbiru dina ñàkkloo Afrik lu tollu ci $12 miliyaar ciy dolaar ndax pajum feebar bi, ñàkk a mën a liggéey ak li muy yàq tu…",
+                "…ndax dafa jox bànk yi ci nord-est États-Unis téemeeri junni dolaar ngir ñu mëna jënd ay titre ci marse bu ubbeeku, loolu tax m…"
+            ]
+            },
+        {
+                "word": "aj",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 80,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…AJ MÀKKA Bind bu jëkk Nu fas yéenee jàngale aj ak ajiin yi, nu…",
+                "…AJ MÀKKA Bind bu jëkk Nu fas yéenee jàngale aj ak ajiin yi, nu tàmbalee ko nii: Xeeti ajiin yi ñatt lañu:…",
+                "…yi ñatt lañu: ▪︎Ifraad : (li muy tekki mooy bennal, wéetal, aj rekk a tax nga jug), su dee ci waa Senegaal ñu armale ca ar…",
+                "…u Hali), di jumaa ju nekk ca wetu Madiina, ngir def faratay aj. Soo noppee ci mbooleem jëfi aj ji aki jaamoom, dinga man a…",
+                "…u Madiina, ngir def faratay aj. Soo noppee ci mbooleem jëfi aj ji aki jaamoom, dinga man a def sunnas Umra, su boobaa jënd…",
+                "…), ca suba sa, ca ngay armale ca Màkka ci yéene def faratay Aj, ànd ak ajkat yi dem Munaa ngir def jaamuy aj yi ba ñu jeex…"
+            ]
+            },
+        {
+                "word": "frank",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 4,
+                "substringOnly": 1,
+                "examples": [
+                "…n ci mu woyofal xiimay kopparam bii nga xam ne daa tënku ci Frank bu Faraas, mu woyofal ko ba ci 50%. Jeexiitalu woyofal gii…",
+                "…i kat mujj na ay sànkam (ay deppaasam) àgg ci 130 milyoŋ yu Frank, atum 1789 g . Li mu ameele woon ciy bor àgg ci 206 milyoŋ…",
+                "…tum 1789 g . Li mu ameele woon ciy bor àgg ci 206 milyoŋ yu Frank, ngir lòtt gu njëlam li lòttoon. Baj-baji ak doxadi amoon n…",
+                "…raas ñeel Brusiya alamaanug xare gu toll ci juroomi bilyoŋi frank yu Fraans (loolu mooy tollook – daanak – alamaan bi Napoleo…",
+                "…or. Nguur gi kat mujj na ay deppaasam àgg ci 130 milyong yu Frank, atum 1789 g . Li mu ameele woon ciy bor àgg ci 206 milyon…",
+                "…tum 1789 g . Li mu ameele woon ciy bor àgg ci 206 milyon yu Frank, ngir lòtt gu njëlam li lòttoon. Baj-baji ak doxadi amoon n…"
+            ]
+            },
+        {
+                "word": "ba",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 252,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…b bi, di lu àddunawu te bariylàkk. Ag bindam nag mi ngi wéy ba tay, xaralaay wiki lañu jëfandikoo ngir sos ko. Yéeney Wiki…",
+                "…te woon mbind mi. Waaye Nupedia ag màggam dafa yeexoon lool ba waraloon, ci 2001, Larry Sanger xalaatoon ni sos ab wiki mo…",
+                "…eggu ci 23 gamu 2001, gu waa almaañ tegu ci ak yeneen yépp, ba tay ci atum 2007 mat nañu ñaari-téeméer ak juróom-fukki làk…",
+                "…kipedia ak ci Nupedia. Ci 26 weeru koor 2003 la Nupedia tëj ba fawwu, Wikipedia moom wéy di màgg. Boobu ba léegi Wikipedia…",
+                "…la Nupedia tëj ba fawwu, Wikipedia moom wéy di màgg. Boobu ba léegi Wikipedia di dox ci ay àtte yiy askanam tëral ndànk-n…",
+                "…Maryaama Ba Abla Pokou (wala Aura Poku, wala Abraha Pokou) lingeeru Afr…"
+            ]
+            },
+        {
+                "word": "CFA 2>&1",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    
