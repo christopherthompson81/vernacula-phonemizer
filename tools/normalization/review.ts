@@ -770,7 +770,11 @@ async function main(): Promise<void> {
     //
     // So: read the list. For each word, if you cannot say WHERE it came from, source it or leave the symbol
     // unread — a wrong word is worse than a dropped sign.
-    const ESPEAK_DICT = process.env["ESPEAK_NG"] === undefined ? "" : join(process.env["ESPEAK_NG"], "dictsource");
+    // ⚠ `=== undefined` LEAVES A HOLE: `export ESPEAK_NG=` sets it to the EMPTY STRING, which is not undefined,
+    // and `join("", "dictsource")` is the RELATIVE path `dictsource` — resolved against whatever the cwd
+    // happens to be. Falsy, not undefined, is the test; and the path must exist before it counts as searched.
+    const ESPEAK_ROOT = process.env["ESPEAK_NG"] ?? "";
+    const ESPEAK_DICT = ESPEAK_ROOT === "" ? "" : join(ESPEAK_ROOT, "dictsource");
     function attestationHaystack(): { tokens: ReadonlySet<string>; text: string } {
         let hay = "";
         const add = (f: string): void => { try { hay += readFileSync(f, "utf8"); } catch { /* absent source */ } };
@@ -980,11 +984,14 @@ async function main(): Promise<void> {
         // so "in NO source (… espeak …)" claimed a search that never ran, which is the stronger negative
         // asserted from a shell variable. It is the identical mistake the wikipedia half of this string was
         // written to avoid, one source over, and it is the mistake `sources.ts` was making fleet-wide.
+        // Two ways to be off and they need different fixes, so name the one that applies rather than asserting
+        // the commoner one — a reader who HAD exported the variable must not be told to export it.
         const espeakSearched = ESPEAK_DICT !== "" && existsSync(ESPEAK_DICT);
+        const espeakWhy = ESPEAK_ROOT === "" ? "$ESPEAK_NG is unset" : `$ESPEAK_NG has no dictsource/ (${ESPEAK_ROOT})`;
         const verdictOf = (w: string): string => {
             const p = probed(w);
             return `${w} — in NO source (corpus, artifact, referee, lexicon`
-                + `${espeakSearched ? ", espeak" : "; espeak NOT consulted — $ESPEAK_NG is unset"}`
+                + `${espeakSearched ? ", espeak" : `; espeak NOT consulted — ${espeakWhy}`}`
                 + `${p === undefined ? "; wikipedia NOT probed — try tools/normalization/attest.ts" : `, and ${p}`})`;
         };
         // A CITATION IS SOURCING TOO — see CITED_WORDS. A corpus cannot attest how a SYMBOL is spoken (writers type

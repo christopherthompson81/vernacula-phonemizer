@@ -66,6 +66,11 @@ const DICT = join(ESPEAK, "dictsource");
  * It names the VARIABLE, because that is the thing the reader has to change.
  */
 const ESPEAK_OFF = ESPEAK === "" || !existsSync(DICT);
+/** ⚠ TWO WAYS TO BE OFF, AND THEY NEED DIFFERENT FIXES: the variable is missing, or it points somewhere with
+ *  no `dictsource/`. The first cut of this change printed the UNSET text for both, so a reader who HAD
+ *  exported it was told to export it — the same "one string for two states" defect this whole change exists
+ *  to remove, made one level down. `ESPEAK_SHORT` is the inline/footer form. */
+const ESPEAK_SHORT = ESPEAK === "" ? "$ESPEAK_NG unset" : `no dictsource/ under $ESPEAK_NG (${ESPEAK})`;
 /** The haystack these messages may honestly claim to have searched. `review.ts`'s sourcing line already makes
  *  this distinction — *nobody has probed this* and *the probe ran and the word is absent there too* must not
  *  read the same — and a class that names espeak while the tier is disconnected is making the same mistake. */
@@ -321,7 +326,13 @@ function letterNames(c: Ctx): Row {
     const latinOnly = c.espeak.match(/^(?:_?[\p{sc=Latn}])\s+(?!\$)\S/gmu)?.length ?? 0;
     const disabled = latinOnly >= 20 ? new Set<string>() // already live, not disabled
         : new Set([...c.espeak.matchAll(/^\/\/\s*_?([\p{sc=Latn}])\s+(?!\$)\S/gmu)].map((m) => m[1]!.toLowerCase()));
-    if (inRepo) return { klass: "letter-names", verdict: "have", detail: `wired in ${c.dir}/ (espeak has ${n})` };
+    // ⚠ THE GUARD BELOW HAS TO COVER THIS BRANCH TOO. `inRepo` is a fact about the repo and stays true with the
+    // tier disconnected — but `n` is READ FROM the tier, so this printed "(espeak has 0)", a count of a file it
+    // never opened. The verdict is still `have`; only the parenthetical was fiction.
+    if (inRepo) return {
+        klass: "letter-names", verdict: "have",
+        detail: `wired in ${c.dir}/ (${ESPEAK_OFF ? `espeak NOT consulted — ${ESPEAK_SHORT}` : `espeak has ${n}`})`,
+    };
     if (n >= 20) return { klass: "letter-names", verdict: "have", detail: `espeak ${n} letters — WIREABLE, not yet wired` };
     if (n > 0) return { klass: "letter-names", verdict: "partial", detail: `espeak only ${n} letters — a partial table makes the seam a NO-OP` };
     if (disabled.size >= 20) {
@@ -746,7 +757,11 @@ export function scaleNames(c: Ctx): Row {
         return row("unknown", `the scale probe reads LATIN spellings and this corpus is not Latin — a miss is an unread haystack, `
             + `not an absence${candidates}`);
     }
-    return row("none", `° occurs, neither scale name in ${HAYSTACK}, and the layer declares no scale arm${candidates}`);
+    // A row that names an unsearched haystack and still returns `none` is asserting an absence it did not
+    // measure — and it fed the blocked count. Downgrade with the tier off; the wording already said so.
+    return ESPEAK_OFF
+        ? row("unknown", `° occurs, no scale name in ${HAYSTACK} and the layer declares no scale arm${candidates}`)
+        : row("none", `° occurs, neither scale name in ${HAYSTACK}, and the layer declares no scale arm${candidates}`);
 }
 
 /**
@@ -1402,7 +1417,12 @@ function fractionSeries(c: Ctx): Row {
     if (!hasFrac) return { klass: "fraction-series", verdict: "n/a", detail: "no fraction in the corpus" };
     return ordTable || espeakFrac
         ? { klass: "fraction-series", verdict: "partial", detail: "an ordinal/denominator series exists to compose from — verify each form" }
-        : { klass: "fraction-series", verdict: "none", detail: "fraction occurs, no series to compose from" };
+        // Half this class's evidence is espeak's `_1/`/`_frac` rows, so a disconnected tier must not read as
+        // absence here either — the same repair as letter-names and decimal-point, which the first cut of this
+        // change missed while its own banner promised only those two were affected.
+        : ESPEAK_OFF
+            ? { klass: "fraction-series", verdict: "unknown", detail: `no ordinal series in the layer, and ${ESPEAK_OFF_NOTE}` }
+            : { klass: "fraction-series", verdict: "none", detail: "fraction occurs, no series to compose from" };
 }
 
 function rowsFor(code: string): { ctx: Ctx; rows: Row[] } {
@@ -1427,8 +1447,8 @@ function main(): void {
         // ⚠ THE FLEET VIEW IS WHERE A DISCONNECTED TIER DOES THE MOST DAMAGE, because its headline output is a
         // COUNT — "letter names are absent for 94 of the registered languages" is a number people plan work
         // from. With $ESPEAK_NG unset that number is a fact about the shell, so say so before the matrix.
-        if (ESPEAK_OFF) console.log(`  ${ESPEAK_OFF_NOTE}, so every letter-names and decimal-point cell below\n`
-            + `  reads ?? rather than NONE. Any COUNT taken from this run is a fact about the shell, not the fleet:\n`
+        if (ESPEAK_OFF) console.log(`  ${ESPEAK_OFF_NOTE}, so every cell below that rests on it\n`
+            + `  (letter-names, decimal-point, fraction-series, scale-names) reads ?? rather than NONE. Any COUNT taken from this run is a fact about the shell, not the fleet:\n`
             + `      export ESPEAK_NG=/path/to/espeak-ng   # the checkout containing dictsource/\n`);
         console.log(`      ${klasses.map((k) => k.slice(0, 9).padEnd(10)).join("")}`);
         const blockedBy: Record<string, string[]> = Object.fromEntries(klasses.map((k) => [k, []]));
@@ -1462,7 +1482,7 @@ function main(): void {
         for (const r of rows) console.log(`  [${MARK[r.verdict]}] ${r.klass.padEnd(16)} ${r.detail}`);
         if (ESPEAK_OFF) console.log(`\n  ${ESPEAK_OFF_NOTE}.\n  Every verdict above that rests on it is UNKNOWN, not negative — export it and re-run:`
             + `\n      export ESPEAK_NG=/path/to/espeak-ng   # the checkout containing dictsource/`);
-        console.log(`\n  espeak: ${ESPEAK_OFF ? "NOT CONSULTED ($ESPEAK_NG unset)" : ctx.espeak === "" ? "NOT SHIPPED for this language" : `${ctx.espeak.split("\n").length} lines`}`
+        console.log(`\n  espeak: ${ESPEAK_OFF ? `NOT CONSULTED (${ESPEAK_SHORT})` : ctx.espeak === "" ? "NOT SHIPPED for this language" : `${ctx.espeak.split("\n").length} lines`}`
             + ` · referee: ${ctx.referee === "" ? "none" : `${ctx.referee.split("\n").length} lines`}`
             + ` · corpus: ${ctx.corpus === "" ? "none" : `${ctx.corpus.split("\n").length} lines`}`
             + (existsSync(new URL(`../corpus/mined/${ctx.code}.jsonc`, import.meta.url).pathname) ? " (incl. mined artifact)" : ""));
