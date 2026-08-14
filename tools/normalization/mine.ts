@@ -501,6 +501,31 @@ const PERSONAL = /[\w.+-]+@[\w-]+\.[a-z]{2,}|(?:facebook|instagram|twitter|tikto
 
 const WIKI_ERROR = /code:\s*\w[\w-]*\s+is\s+deprecated|Missing required parameter|Expression error|Template loop detected|Cite error|Invalid time|Unknown archive|script error|Lua error/iu;
 
+/**
+ * ⚠ TEMPLATESTYLES CSS, AND IT IS THE SAME ASYMMETRY AS `WIKI_ERROR` ONE STEP FURTHER ON. A dump carries the
+ * `<templatestyles src="Template:Reflist/styles.css">` TAG, which `RE_TAG` deletes; `explaintext` EXPANDS it,
+ * and the expansion is the stylesheet's declaration blocks pasted into the article as though they were a
+ * paragraph. Neither route was filtered, so the block reached five artifacts as running text.
+ *
+ * ⚠ IT WAS REPORTED THREE TIMES AS A LANGUAGE FINDING BEFORE ANYONE READ IT AS A PIPELINE ONE. `nya mw` ×2,
+ * `ln mw`, and — through `attest.ts`, which shares this route — ht's `mw` "attested, 76 token hits, 14
+ * articles", every hit inside `.mw-parser-output`. One block, three languages, no language finding at all.
+ *
+ * ⚠ AND THE CELLS PREFER IT TO PROSE. `font-size:90%` is the `percent` selector, `0.5em`/`22.5em` is
+ * `version-dot`, `reflist-columns-2` is `digit-run` — so a handful of instances captured cell slots that
+ * should have held real sentences. ln's ONE `version-dot` example was this block and nothing else.
+ *
+ * The pattern is stated here AND in `wikidump-to-text.py`'s `RE_MARKUP_RESIDUE` for the reason the personal
+ * and template-error guards already are: the two routes cannot import from each other across the
+ * Python/TypeScript line, and a fix on one is not a fix on the other. Kept identical alternation for
+ * alternation so a future edit to either is visibly an edit to both.
+ *
+ * The brace in the third alternation is load-bearing: a bare `color:` or `width:` is ordinary text, and
+ * wiki articles ABOUT stylesheets exist (nya and tk both write "CSS" in prose). Measured over all 162
+ * committed artifacts: 9 lines match, 8 of them this block, 0 prose.
+ */
+const TEMPLATE_STYLES = /mw-parser-output|@media\s+(?:screen|print|all|only)\b|\{[^{}]{0,200}\b(?:margin|padding|font-size|font-weight|font-family|line-height|list-style|column-width|column-count|columns|break-inside|page-break-inside|white-space|text-align|vertical-align|background|border|display|float|clear|overflow|content|color|width|height|position|z-index|visibility)\s*:/iu;
+
 export function extracts(json: any, intro: boolean): string[] {
     void intro;
     const out: string[] = [];
@@ -512,7 +537,7 @@ export function extracts(json: any, intro: boolean): string[] {
         // newlines, and a single `\n` inside one is a soft wrap rather than a boundary worth keeping.
         for (const para of text.split(/\n/u)) {
             const t = para.replace(/\s+/gu, " ").trim();
-            if (t.length > 40 && !WIKI_ERROR.test(t) && !PERSONAL.test(t)) out.push(t);
+            if (t.length > 40 && !WIKI_ERROR.test(t) && !PERSONAL.test(t) && !TEMPLATE_STYLES.test(t)) out.push(t);
         }
     }
     return out;

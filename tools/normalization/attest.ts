@@ -311,6 +311,44 @@ export function countHits(word: string, text: string): number {
  */
 const UNSPACED = /[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Thai}\p{sc=Lao}\p{sc=Khmer}\p{sc=Myanmar}\p{sc=Tibetan}\p{sc=Javanese}]/u;
 
+/**
+ * ⚠ THE PROBE'S OWN FALSE POSITIVE, AND IT WAS RECORDED AS A FINDING BEFORE IT WAS UNDERSTOOD. `ht.jsonc`
+ * carried `mw` — "attested, 76 token hits across 14 articles, 0 substring-only", the strongest verdict this
+ * tool can issue. Every one of the 76 was inside `.mw-parser-output`, the wrapper class of the CSS that
+ * `<templatestyles>` expands into the article. `mw` is not a Haitian word; it is half a CSS class name.
+ *
+ * ⚠ NO COLUMN OF THIS TOOL COULD HAVE CAUGHT IT. `substringOnly` is the designed defence against a word that
+ * only looks sourced, and it is BLIND here: `.mw-parser-output` puts a `.` before `mw` and a `-` after, and
+ * both are word boundaries, so the letters really are a token. `bounded` was true, `articles` was 14 —
+ * the CSS ships on every article with a reference list, which is exactly the plural-source evidence the
+ * header calls the difference between a lead and a finding. Precision cannot rescue a haystack that contains
+ * a stylesheet; the stylesheet has to leave the haystack.
+ *
+ * ⚠ AND THE SAME BLOCK WAS REPORTED TWICE MORE, THROUGH THE OTHER ROUTE. `nya mw` ×2 and `ln mw` came out of
+ * `mine.ts`'s artifacts, and all three are one MediaWiki CSS block, not three language findings. It is
+ * filtered in three places now — here, `mine.ts`'s `extracts()`, and `wikidump-to-text.py` — for the reason
+ * `mine.ts` states about the template-error guard: the routes cannot import from each other and a fix on one
+ * is not a fix on the others.
+ *
+ * ⚠ THE SPLIT HAS TO HAPPEN BEFORE THE WHITESPACE COLLAPSE, which is why this is a function and not a
+ * `.replace` at the call sites. Both callers used to write `extract.replace(/\s+/gu, " ")` as their first
+ * act, and that destroys the paragraph boundary the guard needs — after it, the CSS and the article's prose
+ * are one string with no seam to cut at, and the only remaining options are keeping the CSS or discarding a
+ * real article whole. Splitting first makes it the same LINE-LEVEL DISCARD every other stage of this
+ * pipeline performs: the stylesheet is its own paragraph in a plaintext extract, which is precisely why it
+ * became one line of a mined artifact.
+ */
+const TEMPLATE_STYLES = /mw-parser-output|@media\s+(?:screen|print|all|only)\b|\{[^{}]{0,200}\b(?:margin|padding|font-size|font-weight|font-family|line-height|list-style|column-width|column-count|columns|break-inside|page-break-inside|white-space|text-align|vertical-align|background|border|display|float|clear|overflow|content|color|width|height|position|z-index|visibility)\s*:/iu;
+
+export function articleText(extract: unknown): string {
+    return String(extract ?? "")
+        .split("\n")
+        .filter((para) => !TEMPLATE_STYLES.test(para))
+        .join(" ")
+        .replace(/\s+/gu, " ")
+        .trim();
+}
+
 interface Finding {
     word: string;
     tokenHits: number;
@@ -465,7 +503,7 @@ async function probe(word: string): Promise<Finding> {
     let tokenHits = 0, articles = 0, substringOnly = 0;
     const examples: string[] = [];
     for (const p of pages) {
-        const text = String(p.extract ?? "").replace(/\s+/gu, " ");
+        const text = articleText(p.extract);
         if (text === "") continue;
         // ⚠ ONE GATE, AND IT IS THE ONE THAT COUNTS. This line used to read
         // `bounded ? tokens(text).has(w) : …` — it GATED on token-set membership while the count two lines
@@ -560,7 +598,7 @@ async function slotProbe(nouns: string[]): Promise<void> {
                 prop: "extracts", explaintext: "1", exlimit: "20",
             });
             for (const p of Object.values<any>(e?.query?.pages ?? {})) {
-                const text = String(p.extract ?? "").replace(/\s+/gu, " ");
+                const text = articleText(p.extract);
                 // The noun, then a NUMBER-free following token. `\p{L}\p{M}` only, so a figure or a
                 // parenthesis ends the slot rather than being reported as the modifier.
                 const re = new RegExp(`(?<![\\p{L}\\p{M}])${reEsc(noun)}\\s+([\\p{L}\\p{M}]{2,})`, "giu");

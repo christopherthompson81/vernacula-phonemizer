@@ -79,6 +79,20 @@ SELF_TEST: list = [
      "between the x and the 5"),
     ("Ordinary prose about a town with 12,450 inhabitants and an area of 88 km2.", False,
      "the symbols this corpus exists to test must survive"),
+    (".mw-parser-output .reflist{margin-bottom:0.5em;list-style-type:decimal}@media screen{.mw-parser-output "
+     ".reflist{font-size:90%}}.mw-parser-output .reflist-columns-2{column-width:30em}", True,
+     "TEMPLATESTYLES CSS — the block that reached ki ×3, nya ×2, ln, lg and st, and that ht's attestation "
+     "probe read as 76 hits of the Haitian word `mw`. Stylesheet source, never speech"),
+    ("body.skin-vector-2022 .mw-parser-output .reflist-columns-3{column-width:22.5em}", True,
+     "the same block's skin-scoped half, which arrives WITHOUT a leading `.mw-parser-output` on the selector "
+     "— so the wrapper-class alternation has to match anywhere in the line, not only at its start"),
+    ("Ofuna ndi masamba otchedwa CSS amene amathandiza kuti Wikipediya iziyenda bwino.", False,
+     "⚠ PROSE ABOUT CSS IS NOT CSS. nya and tk both carry article text naming the technology; the brace in "
+     "`\\{[^{}]*prop:` is what separates a stylesheet from a sentence about stylesheets"),
+    ("Ein Wiki er forritað t.d. í PHP, og dátur verða goymdar í einum dátugrunni, ofta MySQL.", False,
+     "⚠ THE SAME TEST FOR THE OTHER RESIDUE WORDS. `php` ×19, `html` ×24 and `pdf` ×50 across the artifacts "
+     "are 16/23/47 PROSE — wiki articles about the web — so a word-level guard on them would delete real "
+     "sentences to remove three URLs. Measured, and declined"),
 ]
 
 

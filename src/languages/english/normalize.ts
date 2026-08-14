@@ -78,6 +78,49 @@ const CURRENCY: Record<string, [string, string]> = {
     $: ["dollar", "dollars"], "£": ["pound", "pounds"], "€": ["euro", "euros"], "¥": ["yen", "yen"],
 };
 
+/**
+ * A MAGNITUDE ABBREVIATION GLUED TO A MONEY FIGURE — `$1.5m`, `£2.3m`, `$2bn`, `£700k`.
+ *
+ * ⚠ THE ONE-LETTER ⟨m⟩ IS THE WHOLE PROBLEM, because it is ALSO the metre, and `UNITS` declares it as one.
+ * The two readings are separated by exactly one thing — a CURRENCY SIGN in front of the number — and that
+ * discriminator is not a guess here: three engines in this tree reached it independently before this rule
+ * existed. `akan/normalize.ts` guards its unit table with a currency lookbehind, noting *"a one-letter `m`
+ * after a money amount is the magnitude, not the metre… a currency sign in front is the discriminator"*;
+ * `sinhala/normalize.ts` spends `US$100m` as the magnitude for the same reason, having first shipped it as
+ * *ඩොලර් මීටර් 100*; `naija/normalize.ts` expands a glued ⟨bn⟩ and REFUSES ⟨m⟩ precisely because it has no
+ * currency guard to lean on (`di 100 mita race`).
+ *
+ * Measured over the 162 committed mined artifacts:
+ *
+ *   currency sign + digits + GLUED abbreviation   43 instances, 15 artifacts — every one a magnitude
+ *   bare digits + glued/spaced ⟨m⟩             1,327 instances, 110 artifacts — overwhelmingly METRES
+ *
+ * The currency sign separates those two populations completely, with no counterexample in either direction.
+ * `he ran 100m`, `a 5m drop` and `1,854 m` keep the metre; only a figure carrying a sign loses it.
+ *
+ * ⚠ GLUED ONLY — THE SPACED FORM IS NOT SEPARABLE AND IS DELIBERATELY DECLINED. Scanning the fleet for
+ * `$NN m` with an ASCII letter boundary returns 15 hits and TWELVE ARE FALSE: the ⟨m⟩ is the first letter
+ * of the next word, and the next word is usually the language's own spelled-out magnitude — Kurmanji
+ * `$ 125 mîlyon`, Yoruba `$500 mílíọ̀nù`, Hakka `$600 Mî-ngièn`, Estonian `$50, mängija`, Māori `$22,500 mō`.
+ * That is the ASCII-`\b` trap this repo already records for the initialism pass, arriving in a new place:
+ * `[a-z]` cannot see a boundary before `î`, `í` or `ä`. Under a Unicode letter class only 3 hits survive
+ * fleet-wide. A rule worth 3 instances that manufactures 12 wrong readings is not worth having, so the
+ * space is required to be absent.
+ *
+ * ⚠ THE KEYS ARE THE ATTESTED ONES AND NOTHING ELSE. ⟨m/M⟩, ⟨bn/BN⟩, ⟨B⟩ and ⟨k/K⟩ all occur glued to a
+ * signed figure in the artifacts (`£1M`, `$7.32B`, `$178k`, `$2bn`). ⟨tn⟩ for trillion is ×0 across the
+ * fleet — the same count on which naija declined it — and bare lowercase ⟨b⟩ is ×0 too; both are left out
+ * rather than added on the strength of being plausible English.
+ *
+ * Nothing is SOURCED here: "million", "billion" and "thousand" are already the words step 1 hops with when
+ * the text spells them, so this only lets the abbreviation reach the reading the spelled form already gets.
+ */
+const MONEY_MAGNITUDE: Readonly<Record<string, string>> = {
+    m: "million", M: "million", bn: "billion", BN: "billion", Bn: "billion", B: "billion",
+    k: "thousand", K: "thousand",
+};
+const MONEY_MAG_ALT = Object.keys(MONEY_MAGNITUDE).sort((a, b) => b.length - a.length).join("|");
+
 const MONTH_ALT = "january|february|march|april|may|june|july|august|september|october|november|december";
 
 // ── Title/place abbreviations (st, dr, mt, mr, mrs) ─────────────────────────────────────────────────
@@ -325,12 +368,31 @@ export function normalizeEnglish(input: string): string {
 
     // 1) CURRENCY before anything else touches the digits: the symbol precedes but is SPOKEN after, and a
     //    magnitude word hops with it ($5 million → "5 million dollars").
+    //
+    //    ⚠ AND THE ABBREVIATED MAGNITUDE HOPS THE SAME WAY — `$1.5m` → "1.5 million dollars". See
+    //    MONEY_MAGNITUDE for why the currency sign is the discriminator and why only the GLUED form is
+    //    claimed. It is spent HERE, in the currency rule, and not anywhere later, for two reasons:
+    //
+    //      · the currency rule runs first and CONSUMES THE NUMBER, so a later rule has nothing to attach to.
+    //        That is why `$1.5m` read as *… dˈɑːlɚzəm* rather than as a version string: the shape never
+    //        reached `NOT_VERSION` at all, and removing that guard entirely changed nothing — `$1.5m`,
+    //        `£2.3m` and `a $1.5m grant` all read identically with it gone. The defect was never in the
+    //        version guard; it was here.
+    //      · the UNIT step below would otherwise claim the `m` as a metre, since it runs later and `m` is a
+    //        declared unit key. Consuming it here is what makes `he ran 100m` and `$1.5m` differ.
     s = s.replace(
-        /([$£€¥])\s?(\d[\d,]*(?:\.\d+)?)(\s+(?:million|billion|trillion|thousand))?/gu,
-        (_m, sym: string, num: string, mag?: string) => {
+        new RegExp(`([$£€¥])\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?:(\\s+(?:million|billion|trillion|thousand))|(${
+            // ⚠ THE BOUNDARY GUARD SITS INSIDE THE ABBREVIATION ARM, NOT AFTER THE WHOLE GROUP. Placed
+            // outside, it applies even when no magnitude matched — and then `$2.5tn` cannot satisfy it, so
+            // the engine BACKTRACKS THE NUMBER to `$2` (the `.` passes the lookahead) and reads "2 dollars"
+            // with ".5tn" stranded, which is worse than the leak it was meant to fix. Inside the arm, a
+            // failed abbreviation simply leaves the optional group empty and the old behaviour stands.
+            MONEY_MAG_ALT})(?![\\p{L}\\p{M}\\d]))?`, "gu"),
+        (_m, sym: string, num: string, spelled?: string, abbrev?: string) => {
             const [sg, pl] = CURRENCY[sym]!;
+            const mag = spelled ?? (abbrev === undefined ? undefined : ` ${MONEY_MAGNITUDE[abbrev]!}`);
             const one = /^1(?:\.0+)?$/.test(num.replace(/,/g, ""));
-            return `${num}${mag ?? ""} ${one && !mag ? sg : pl}`;
+            return `${num}${mag ?? ""} ${one && mag === undefined ? sg : pl}`;
         },
     );
 

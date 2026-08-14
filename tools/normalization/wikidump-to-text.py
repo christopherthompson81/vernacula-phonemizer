@@ -127,7 +127,32 @@ RE_MARKUP_RESIDUE = re.compile(
     r"|\d{2,4}\s*px\b"
     # LaTeX that arrived without its <math> wrapper, e.g. from a template expansion.
     r"|\\(?:frac|int_|sum_|sqrt|begin\{|end\{|displaystyle|mathrm|cdot|times|leq|geq)\b"
-    r"|\|\s*(?:thumb|thumbnail|vignette|miniatur|miniatura|frame|frameless|border|upright|right|left|center|centre|droite|gauche)\s*\|",
+    r"|\|\s*(?:thumb|thumbnail|vignette|miniatur|miniatura|frame|frameless|border|upright|right|left|center|centre|droite|gauche)\s*\|"
+    # ⚠ TEMPLATESTYLES CSS, WHICH IS STYLESHEET SOURCE PRESENTED AS A PARAGRAPH. `<templatestyles>` names a
+    # `.css` subpage; whatever expands it emits the DECLARATION BLOCKS inline, and a plain-text renderer has no
+    # reason to treat them as anything but text. One `.mw-parser-output .reflist{…}` block reached FIVE mined
+    # artifacts — ki ×3, nya ×2, ln, lg, st — and the SAME block was independently reported three times as a
+    # language finding before anyone noticed it was one pipeline gap: `nya mw` ×2, `ln mw`, and ht's `mw`
+    # "attested" with 76 token hits across 14 articles, every one of them this stylesheet.
+    #
+    # ⚠ THE CELL SELECTORS PREFER IT TO PROSE, which is why so few instances did so much damage. CSS is dense
+    # in exactly what they hunt: `font-size:90%` is the `percent` cell, `0.5em`/`22.5em` is `version-dot` and
+    # `decimals`, `reflist-columns-2` is `digit-run`. ln's ONLY `version-dot` example was this block, so the
+    # cell read as covered on evidence that is not Lingala and not language at all.
+    #
+    # Three alternations, because the block is recognisable three ways and a rule may arrive without its
+    # wrapper class: the MediaWiki wrapper itself; an at-rule; and a declaration block naming a CSS property.
+    # The last needs the brace — `\{[^{}]{0,200}\bcolor\s*:` — since a bare property name is an ordinary word
+    # in many languages, and the brace is what makes it stylesheet source rather than prose about stylesheets.
+    # Measured across all 162 committed artifacts (≈50,000 retained lines): 9 lines match, 8 of them this
+    # block and the 9th a `{| style="border-spacing:0px; …"` table opener the first alternation already
+    # condemned. ZERO prose false positives — including the 3 nya/tk lines that discuss CSS by name.
+    r"|mw-parser-output"
+    r"|@media\s+(?:screen|print|all|only)\b"
+    r"|\{[^{}]{0,200}\b(?:margin|padding|font-size|font-weight|font-family|line-height|list-style"
+    r"|column-width|column-count|columns|break-inside|page-break-inside|white-space|text-align"
+    r"|vertical-align|background|border|display|float|clear|overflow|content|color|width|height"
+    r"|position|z-index|visibility)\s*:",
     re.I | re.M,
 )
 # ⚠ THE NAMESPACE PREFIX IS LOCALIZED, AND AN ENGLISH-ONLY LIST LEAKS IMAGE MARKUP AS PROSE. Bambara's wiki

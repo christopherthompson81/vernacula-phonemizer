@@ -1343,10 +1343,16 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // while `DROPPABLE` is coarse. Every one rests on the same two measurements: the sign is absent from
         // Chichewa prose, and no Chichewa word for it is attested in the corpus, the referees or
         // ny.wikipedia — and espeak, the usual third tier, does not ship this language at all.
-        equals: "measured: all 14 `=` in the artifact are MARKUP — 9 EasyTimeline directives "
-            + "(`ScaleMajor = unit:year increment:11000`, `PlotArea = left:50 right:20`) and 5 CSS "
-            + "declarations (`.reflist-columns-2{column-width:30em}`). Zero occur in Chichewa prose, and no "
-            + "equals word is attested",
+        // ⚠ THE COUNT MOVED 14 → 9 AND THE REFUSAL DID NOT, which is the shape a measured refusal should
+        // have. The 5 CSS `=` were TemplateStyles residue (`.reflist-columns-2{column-width:30em}`, and the
+        // `mw` "finding" reported twice against this language), removed from the artifact once the guard
+        // reached all three mining routes. Deleting evidence FOR a refusal is the direction that could
+        // invalidate one, so it is restated rather than left: what remains is 9 EasyTimeline directives and
+        // still zero Chichewa arithmetic, so the class is refused on the same ground with a smaller n.
+        equals: "measured: all 9 `=` in the artifact are MARKUP — EasyTimeline directives "
+            + "(`ScaleMajor = unit:year increment:11000`, `PlotArea = left:50 right:20`). Zero occur in "
+            + "Chichewa prose, and no equals word is attested. (Was 14 before 5 CSS declarations were "
+            + "removed from the artifact as MediaWiki stylesheet residue — same verdict, smaller n)",
         "plus-minus": "measured: `±` ×0 in the artifact; the ± reading would compose two unattested words",
         "less-than": "measured: `<` ×0 in the artifact",
         "greater-than": "measured: `>` ×0 in the artifact",
@@ -2058,10 +2064,13 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "labels, and the corpus's arithmetic vocabulary is a single sudoku article",
         "plus-minus": "measured: `±` is ×0 in 3921 paragraphs, and the reading would compose two words of "
             + "which neither side has a candidate — see the minus and plus notes above",
-        equals: "measured: `=` ×7, and NONE is a comparison to read. Two are the chess records (`=0`, "
-            + "`=2`, the draw count) and five are CSS attribute selectors in the wiki markup this dump "
-            + "carries (`.references[data-mw-group=upper-alpha]`). Kikuyu states equality with a verb "
-            + "phrase, which is not a sign reading, and the class has nothing to attach to",
+        // ⚠ 7 → 2, and the same note as nya's `equals`: the five CSS attribute selectors
+        // (`.references[data-mw-group=upper-alpha]`) were TemplateStyles residue and left the artifact when
+        // the guard reached all three mining routes. The two that remain still carry the whole refusal.
+        equals: "measured: `=` ×2, and NEITHER is a comparison to read. Both are chess records (`=0`, "
+            + "`=2`, the draw count). Kikuyu states equality with a verb phrase, which is not a sign "
+            + "reading, and the class has nothing to attach to. (Was 7 before 5 CSS attribute selectors "
+            + "were removed from the artifact as MediaWiki stylesheet residue — same verdict, smaller n)",
         "less-than": "measured: `<` is ×0 in 3921 paragraphs",
         divide: "measured: `÷` is ×0 in 3921 paragraphs. The corpus's one division is written as a VERB "
             + "phrase (`60 sekondi ikĩgayanio na 120`, \"60 seconds divided by 120\"), which is a clause "

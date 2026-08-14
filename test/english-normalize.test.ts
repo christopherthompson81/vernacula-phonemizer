@@ -204,6 +204,48 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
         expect(phonemize("£2.50 each", "en")).toBe("tʰˈuː pʰˈaᶷndz fˈɪfti ˈiːt͡ʃ");
     });
 
+    // ⚠ A GLUED MAGNITUDE ABBREVIATION AFTER A CURRENCY SIGN IS THE MAGNITUDE, NOT THE UNIT — and the
+    // discriminator is the sign and nothing else. `$1.5m` used to read *… dˈɑːlɚzəm*: the currency rule runs
+    // first and CONSUMES the number, so the `m` was left with nothing to attach to and reached the g2p as a
+    // suffix. It was never a version-guard problem — with `NOT_VERSION` removed entirely, `$1.5m`, `£2.3m`
+    // and `a $1.5m grant` read identically.
+    //
+    // Measured over the 162 mined artifacts: 43 glued instances after a currency sign in 15 languages, every
+    // one a magnitude, against 1,327 bare `NUMBER+m` in 110 artifacts that are overwhelmingly METRES. The
+    // two populations do not overlap, so both halves are pinned here.
+    test("a magnitude abbreviation glued to a money figure is million/billion/thousand", () => {
+        expect(normalizeEnglish("$1.5m")).toBe("1.5 million dollars");
+        expect(normalizeEnglish("a $1.5m grant")).toBe("a 1.5 million dollars grant");
+        expect(normalizeEnglish("£2.3m")).toBe("2.3 million pounds");
+        expect(normalizeEnglish("$2bn")).toBe("2 billion dollars");
+        expect(normalizeEnglish("$700k")).toBe("700 thousand dollars");
+        expect(normalizeEnglish("£1M")).toBe("1 million pounds");   // capitals occur too (`$7.32B`)
+        expect(normalizeEnglish("$7.32B")).toBe("7.32 billion dollars");
+        // ⚠ AND THE SAME LETTERS WITHOUT A SIGN ARE STILL THE UNIT. This is the half a bare-suffix rule
+        // would have destroyed, and it is why `naija/normalize.ts` refuses ⟨m⟩ outright: it has no currency
+        // guard to lean on, and its own corpus writes `di 100 mita race`.
+        expect(phonemize("he ran 100m", "en")).toContain("mˈiːt̬ɚz");
+        expect(phonemize("a 5m drop", "en")).toContain("mˈiːt̬ɚz");
+        expect(normalizeEnglish("1,854 m")).toBe("1,854 meters");
+        // ⚠ THE SPACED FORM IS DECLINED, DELIBERATELY. Fleet-wide it is 3 real instances under a Unicode
+        // letter boundary and 12 FALSE ones under an ASCII boundary, where the `m` is the first letter of
+        // the next word — and that word is usually the language's own magnitude (`$ 125 mîlyon`,
+        // `$500 mílíọ̀nù`, `$50, mängija`). So a space keeps the old reading rather than guessing.
+        expect(normalizeEnglish("$5 m")).toBe("5 dollars m");
+        // ⚠ AND THE UNATTESTED KEYS ARE LEFT ALONE. ⟨tn⟩ is ×0 across the fleet, which is the same count on
+        // which naija declined it. The number must NOT backtrack to `$2` here — see the boundary-guard note
+        // in normalize.ts.
+        expect(normalizeEnglish("$2.5tn")).toBe("2.5 dollarstn");
+        // The spelled form is untouched, and count agreement still holds at 1.
+        expect(normalizeEnglish("$5 million")).toBe("5 million dollars");
+        expect(normalizeEnglish("$1")).toBe("1 dollar");
+        expect(normalizeEnglish("$1m")).toBe("1 million dollars");   // a magnitude forces the plural
+        // The cents rule is untouched: it needs a word boundary after the two digits, which a glued letter
+        // denies it, so `$2.30bn` never becomes "2 dollars 30".
+        expect(normalizeEnglish("$5.50")).toBe("5 dollars 50");
+        expect(normalizeEnglish("$2.30bn")).toBe("2.30 billion dollars");
+    });
+
     test("a plus sign is spoken, like the minus", () => {
         // A dropped sign is silent content loss in both directions; "+5" read as "five" is as wrong as
         // "-5" was. The attached form occurs in the corpus as a timezone offset.

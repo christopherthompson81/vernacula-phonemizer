@@ -29,7 +29,7 @@
     "source": "ln.wikipedia.org dump (pages-articles, paragraphs)",
     "segmentMode": "paragraph",
     "totalSegments": 15486,
-    "cellsCovered": 30,
+    "cellsCovered": 29,   // ⚠ was 30 — see the TEMPLATESTYLES ERRATA below; `version-dot` was CSS, not Lingala
     "cellsTotal": 35,
 
     // Occurrences across the whole corpus, and what an ASCII-only \d selector would have found instead.
@@ -81,6 +81,20 @@
     "backfill": {
         "native-terminator": 0
     },
+
+    // ⚠ ERRATA — TEMPLATESTYLES CSS WAS REMOVED FROM THIS ARTIFACT BY HAND, AND "counts" ABOVE WAS NOT
+    // RECOMPUTED. `<templatestyles>` expands a stylesheet into the article body, and a plaintext renderer
+    // emits its declaration blocks as a paragraph; `.mw-parser-output .reflist{margin-bottom:0.5em;…}`
+    // reached five artifacts that way — ki, lg, ln, nya, st — and the cell selectors preferred it to prose,
+    // because CSS is dense in `%`, in `0.5em` and in digit runs. The guard now lives on all three routes
+    // (`wikidump-to-text.py`, `mine.ts extracts()`, `attest.ts`), so no future mine can carry it.
+    //
+    // 1 line removed from "hard", and it was this artifact's ONLY `version-dot` example — so the cell is now EMPTY and "cellsCovered" is 30→29. ⚠ That is the correction, not a loss: the cell read as covered on a CSS `0.5em`, and there is no evidence in this artifact that Lingala writes a version dot at all.
+    //
+    // ⚠ "counts" ABOVE IS A WHOLE-CORPUS FIGURE AND STILL INCLUDES THESE LINES. Recomputing it means
+    // re-mining, and re-mining RESAMPLES — every figure quoted from this file in an investigation doc or in
+    // a `defects.ts` refusal would move, to correct a handful of instances in a five-digit total. So the
+    // removal is a DELETION, which is exact, and the counts are left alone and flagged here instead.
 
     // The hard-set: up to N examples per cell.
     "hard": [
@@ -288,7 +302,6 @@
         { "cell": "ampersand", "text": "C'est une page spéciale, reconnaissable par son fond de couleur jaune, et le préfixe Discuter: dans l'adresse internet. Elle peut &mdash; et doit &mdash; être utilisée pour discuter entre contributeurs sur l'article encyclopédique, que ce soit pour donner une suggestion, exprimer un désaccord ou encore poser une question..." },
         { "cell": "ampersand", "text": "Mpo na kobalola lokasa moko, osengeli konyata na eteni kokoma na biteni na likolo. Okoki mpe kobongola ndambo muke na lokasa moko (elingi koloba eteni na katikati na mito muke mibale): osengeli kaka konyata na [&nbsp;kobalola&nbsp;] oyo ekokani na ndambo oponi." },
         { "cell": "ampersand", "text": "Modifier un article, c'est bien; suivre son évolution, c'est mieux. En tant qu'utilisateur enregistré, vous pouvez cocher la case Suivre cet article avant de le sauvegarder. Vous pouvez aussi, en lisant la page article, cliquer sur l'Eteni Suivre, pour le même résultat. Cela a pour effet de placer l'article dans votre liste de suivi : toute intervention sur l'article sera indiquée dans une page spéciale personnelle &mdash; voir Aide:Liste de suivi." },
-        { "cell": "version-dot", "text": ".mw-parser-output .reflist{margin-bottom:0.5em;list-style-type:decimal}@media screen{.mw-parser-output .reflist{font-size:90%}}.mw-parser-output .reflist .references{font-size:100%;margin-bottom:0;list-style-type:inherit}.mw-parser-output .reflist-columns-2{column-width:30em}.mw-parser-output .reflist-columns-3{column-width:25em}.mw-parser-output .reflist-columns{margin-top:0.3em}.mw-parser-output .reflist-columns ol{margin-top:0}.mw-parser-output .reflist-columns li{page-break-inside:avoid;break-inside:avoid-column}.mw-parser-output .reflist-upper-alpha{list-style-type:upper-alpha}.mw-parser-output .reflist-upper-roman{list-style-type:upper-roman}.mw-parser-output .reflist-lower-alpha{list-style-type:lower-alpha}.mw-parser-output .reflist-lower-greek{list-style-type:lower-greek}.mw-parser-output .reflist-lower-roman{list-style-type:lower-roman}" },
         { "cell": "quote-letter", "text": "lokóla elɔ́kɔ eye bato mpé bikólo binsɔ balingí bazwa, mpɔ̂ ’te bato mpé mangómbá mansɔ, na bobátelaka ntángo insɔ Lisakoli lyangó na motéma, basála makási na botéyi mpé bokólísí bwányá, mpɔ̂ ’te makokí mpé bonsɔ́mí yangó etósama mpé basála ’te bandima mpé basálélí yangó na bosɔ̂lɔ́ mpenzá na molɔ́ngɔ́ mobimba, ezala na káti ya bato ba Bikólo bya Lisangá bangó mɔ̌kɔ́ tǒ na káti ya ekólo mpé molɔ́ngɔ́ mobimba." },
         { "cell": "quote-letter", "text": "Moto nyɔ́nsɔ azalí na likokí ’te likambo lya yě lokóla lya bato bansɔ, lisámbisama na bosémbo mpé na mǐso mya bato bánsɔ na esámbiselo ya nsɔ́mi mpé ya epái mɔ̌kɔ́ tɛ́, eye ekozwa mikáno ɛngɛ́bɛ́nɛ́ na makokí mpé masɛ́ngínyá yě tǒ ɛngɛ́bɛ́nɛ́ na bosɔ̂lɔ́ bwa likambo yě afúndámí." },
         { "cell": "quote-letter", "text": "Bolingi bwangó bosɛngɛ́lí komɔ́nana na mapɔni ya sémbo maye masɛngɛ́lí kosalama mbala na mbala, na lipɔ́neli lya bato bansɔ mpé na bopɔni bwaa Lingómbá tǒ na ndéngé esúsu ekokani na yangó mpé ekosála ’te bato bapɔna na bonsɔ́mí bunsɔ." },

@@ -20,22 +20,27 @@
         "wiki": "ht.wikipedia.org",
         "tier": "wikipedia",
         "findings": [
-        {
-                "word": "mw",
-                "verdict": "attested",
-                "bounded": true,
-                "tokenHits": 76,
-                "articles": 14,
-                "substringOnly": 0,
-                "examples": [
-                "…= Istwa Sikhism Khalsa Gurgadi Gurpurab Joti Jot == Nòt == .mw-parser-output .reflist-columns-2{column-width:30em}.mw-pars…",
-                "…== .mw-parser-output .reflist-columns-2{column-width:30em}.mw-parser-output .reflist-columns-3{column-width:25em}body.ski…",
-                "….reflist-columns-3{column-width:25em}body.skin-vector-2022 .mw-parser-output .reflist-columns-2{column-width:27em}body.ski…",
-                "….reflist-columns-2{column-width:27em}body.skin-vector-2022 .mw-parser-output .reflist-columns-3{column-width:22.5em}.mw-pa…",
-                "…2 .mw-parser-output .reflist-columns-3{column-width:22.5em}.mw-parser-output .references[data-mw-group=upper-alpha]{list-s…",
-                "…ns-3{column-width:22.5em}.mw-parser-output .references[data-mw-group=upper-alpha]{list-style-type:upper-alpha}.mw-parser-o…"
-            ]
-            },
+    // ⚠ ERRATA — THE `mw` FINDING WAS REMOVED FROM THIS FILE BY HAND, AND IT WAS THIS TOOL'S OWN FALSE
+    // POSITIVE, NOT HAITIAN. It read `"verdict": "attested", "tokenHits": 76, "articles": 14,
+    // "substringOnly": 0` — the strongest verdict available here — and every one of the 76 hits was inside
+    // `.mw-parser-output`, the wrapper class of the CSS that `<templatestyles>` expands into an article body.
+    // All six recorded examples were that stylesheet; not one was a Haitian sentence.
+    //
+    // ⚠ NO COLUMN OF THIS ARTIFACT COULD HAVE FLAGGED IT. `substringOnly` is the designed defence against a
+    // word that merely looks sourced, and `.mw-parser-output` puts a `.` before the letters and a `-` after,
+    // both word boundaries — so `mw` genuinely IS a token, 76 times. `articles: 14` looked like the
+    // multi-source corroboration this file's header calls the difference between a lead and a finding; it is
+    // just the number of ht articles carrying a reference list.
+    //
+    // ⚠ AND IT WAS NOT INERT. `review.ts` folds the EXAMPLE PROSE of every `attested` finding into the
+    // sourcing haystack, so this entry was putting a MediaWiki stylesheet into the evidence base against
+    // which Haitian words are declared attested.
+    //
+    // Deleted rather than re-probed: re-running the probe would resample the search, and the finding is
+    // known-void from its own examples. `attest.ts` now discards a stylesheet paragraph before counting, so
+    // a re-probe of `mw` would return the honest verdict — which this file does not assert, because it has
+    // not been run.
+
         {
                 "word": "aprèmidi",
                 "verdict": "attested",

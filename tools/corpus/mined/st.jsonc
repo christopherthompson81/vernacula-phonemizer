@@ -82,6 +82,20 @@
         "native-terminator": 0
     },
 
+    // ⚠ ERRATA — TEMPLATESTYLES CSS WAS REMOVED FROM THIS ARTIFACT BY HAND, AND "counts" ABOVE WAS NOT
+    // RECOMPUTED. `<templatestyles>` expands a stylesheet into the article body, and a plaintext renderer
+    // emits its declaration blocks as a paragraph; `.mw-parser-output .reflist{margin-bottom:0.5em;…}`
+    // reached five artifacts that way — ki, lg, ln, nya, st — and the cell selectors preferred it to prose,
+    // because CSS is dense in `%`, in `0.5em` and in digit runs. The guard now lives on all three routes
+    // (`wikidump-to-text.py`, `mine.ts extracts()`, `attest.ts`), so no future mine can carry it.
+    //
+    // 1 line removed from "hard" (version-dot). `version-dot` 8→7 examples; no cell emptied, so "cellsCovered" is unchanged.
+    //
+    // ⚠ "counts" ABOVE IS A WHOLE-CORPUS FIGURE AND STILL INCLUDES THESE LINES. Recomputing it means
+    // re-mining, and re-mining RESAMPLES — every figure quoted from this file in an investigation doc or in
+    // a `defects.ts` refusal would move, to correct a handful of instances in a five-digit total. So the
+    // removal is a DELETION, which is exact, and the counts are left alone and flagged here instead.
+
     // The hard-set: up to N examples per cell.
     "hard": [
         { "cell": "degrees", "text": "Maselese, o tsejwang hape ele morbilli, rubeola, kapa maselese o mofubedu, ke tshwaetso e fetisetsanwang haholo e bakwang ke vaerase ya maselese. Matshwao a qalang a akarelletsa feberu, hangata ya motjheso o fetang 40 °C (104.0 °F), ho kgohlela, lemina, le mahlo a mafubedu. Matsatsi a mabedi kapa a mararo ka mora hore ho hlahe matshwao a qalang matheba a masweu a ka nna a hlaha ka hanong, a tsejwang ele matheba a Koplik. Lekgopho le sephara le lefubedu hangata le qala sefahlehong ebe le namela mmeleng kaofela hangata le qala matsatsi a mararo ho isa ho a mahlano ka mora hore ho qale matshwao. Matshwao a hangata a bonahala ka mora matsatsi a 10-12 ka mora hore motho a kopane le motho ya tshwaeditsweng mme a ba teng ho fihlela matsatsing a 7-10. Mathata a ba teng ho batho ba etsang 30% mme a ka nna a akarelletsa letshollo, bofofu, ho tjha ha booko le serame sa matshwafong hara tse ding. Rubella (Maselese wa Jeremane) le roseola ke malwetse a fapaneng." },
@@ -293,7 +307,6 @@
         { "cell": "version-dot", "text": "^ Burke, Jason (11 Mphalane 2019). \"Zuma o tla ema nyeoeng ka liqoso tsa bobolu tse amanang le konteraka ea libetsa ea $ 2.5bn\". Mohlokomedi. E khutlisitsoe ka la 23 Tšitoe 2020." },
         { "cell": "version-dot", "text": "Comrades Marathon ke lebelo la ho qetela la 88 kilometres (55 mi) le mathang selemo le selemo profinseng ya KwaZulu-Natal ya Afrika BorWa pakeng tsa ditoropo tsa Durban le Pietermaritzburg . Ke lebelo le leholo ka ho fetisisa lefatšeng le la kgale ka ho fetisisa la lebelo le phahameng. Ke lebelo la ho fapanyetsana selemo se seng le se seng pakeng tsa lebelo la \"ho nyoloha\" (87.6km) ho tloha Durban (bophahamo: 101 metara (331 ft) ) le lebelo la \"theosetsa\" (87.7km) ho tloha Pietermaritzburg (bophahamo: 921 metara (3,022 ft) )." },
         { "cell": "version-dot", "text": "O hlokahetse ka la 21 Mmesa 2020 a le dilemo di 47 ka 10.15pm ha a ntse a fumana kalafo Johannesburg. Sesosa sa lefu e ne e le ho hloleha ha pelo ka lebaka la kgatello e phahameng ya madi a matshwafo." },
-        { "cell": "version-dot", "text": ".mw-parser-output .reflist{margin-bottom:0.5em;list-style-type:decimal}@media screen{.mw-parser-output .reflist{font-size:90%}}.mw-parser-output .reflist .references{font-size:100%;margin-bottom:0;list-style-type:inherit}.mw-parser-output .reflist-columns-2{column-width:30em}.mw-parser-output .reflist-columns-3{column-width:25em}.mw-parser-output .reflist-columns{margin-top:0.3em}.mw-parser-output .reflist-columns ol{margin-top:0}.mw-parser-output .reflist-columns li{page-break-inside:avoid;break-inside:avoid-column}.mw-parser-output .reflist-upper-alpha{list-style-type:upper-alpha}.mw-parser-output .reflist-upper-roman{list-style-type:upper-roman}.mw-parser-output .reflist-lower-alpha{list-style-type:lower-alpha}.mw-parser-output .reflist-lower-greek{list-style-type:lower-greek}.mw-parser-output .reflist-lower-roman{list-style-type:lower-roman}" },
         { "cell": "version-dot", "text": "Lungisani Ndlela ( ya hlahileng ka la 8 Lwetse 1980 ho la Namahadi, Frankfort, Free State ) ke sebapadi sa bolo ea maoto sa Mokhatlo oa Afrika Boroa wa sehlopha sa Premier Soccer League Moroka Swallows le Afrika Borwa . Ha a eme bolelele ba 2.00m, ke e mong wa dibapali tse telele ka ho fetisisa lefatsheng la bolo ya maoto." },
         { "cell": "version-dot", "text": "Ka Phato 2025, ho ile ha tlalehwa hore Masemola o ile a tshwarwa ka lebaka la diqoso tsa bobolu. Masemola o qoswa ka hore o sebedisitse hampe ditjhelete tsa slush ho tswa akhaonteng ya ditshebeletso tsa lekunutu tsa mahlale a botlokotsebe le ho reka ditsha tse pedi Pretoria (Veroz Boutique Hotel) le Midrand (Kyalami Lodge) ntle le ho latela mekgwa e nepahetseng. E mong wa bo-mphato ba Masemola, Lieutenant-General Dumisani Khumalo ya okametseng mahlale a botlokotsebe, o tshwerwe ka bomenemene le bobolu bo amanang le theko ya hotele ya boutique Pretoria North, ho tlalehwa e rekilwe ka R22.7 milione le moaho ya kgwebo Durban, oa boleng ba R22.8m lengolo leha e le lefe la hore a tshwarwe le ne le fanwe, le bitsa ditlaleho tseo hore ha di na motheo, mme a hatisa hore diqoso tsena di ntse di sa tiisetswe lekgotleng." },
         { "cell": "quote-letter", "text": "Haebe mohlomong o ne o sa elellwe, ha o sa je dijo o tl'o shwa!" },
