@@ -120,6 +120,22 @@ MARKERS = {
     "mos": "sẽn yaa wã tɩ pʋgẽ yʋʋmd yʋʋm taoor boond tẽnga tẽng bũmb nins rasem wʋsg kiuug sõma fãa "
            "tõe tõog paam paama maan maand soaba soab soabã sull sulli tar tara yɩɩd lebg neb ned "
            "buud yãk toor woto tʋʋm zĩig wakat sʋka poore nin-buiid bãngr gomd",
+    # ki (Kikuyu/Gĩkũyũ): TWO contaminants and the second one is the reason this row needed care —
+    # ki.wikipedia carries English (bibliographies, untranslated articles, film/company names) AND
+    # SWAHILI, Kenya's lingua franca, which is a Bantu language with the same word shapes. See CONTRAST.
+    # The markers are the highest-frequency Gĩkũyũ grammatical words: the focus/copula `nĩ`, the
+    # relative/demonstrative `ũrĩa`/`ũcio`/`ũyũ`/`icio`, the class-agreeing associatives `kĩa`/`gĩa`/`rĩa`,
+    # the class-7/8 plural `cia`, `atĩ` ("that"), `tondũ` ("because"), `kana` ("or"), `nĩguo`, `thĩinĩ`,
+    # `kũrĩ`, `hĩndĩ` ("time"), `mũndũ`/`andũ` ("person/people"), `bũrũri` ("country"), `mũno` ("very"),
+    # `nyingĩ`/`maingĩ` ("many"), `ũhoro` ("matter"), `rũthiomi` ("language"), `gũkorwo`.
+    # ⚠ `na`, `wa`, `ya`, `kwa`, `mwaka`, `wake`, `yake` ARE DELIBERATELY ABSENT. Every one of them is
+    # written identically in Swahili and is ordinary Kikuyu — this corpus's own `ũhoro-inĩ wake wa 1972`
+    # and `mwaka wa 1963` are Kikuyu sentences — so listing them discriminates nothing and putting the
+    # Swahili twin in CONTRAST would score real Kikuyu as Swahili. The tilde vowels ⟨ĩ ũ⟩ do most of the
+    # work here: Swahili has no such letters, so a marker carrying one cannot be borrowed by accident.
+    "ki": "nĩ ũrĩa ũcio ũyũ icio cia kĩa gĩa rĩa atĩ tondũ kana nĩguo thĩinĩ kũrĩ hĩndĩ mũndũ andũ "
+          "bũrũri mũno nyingĩ maingĩ ũhoro rũthiomi gũkorwo nĩo nĩkĩo kuma arĩ ũguo gĩkũyũ agĩkũyũ "
+          "itũũra ihinda mahinda ciothe othe rĩrĩa kĩrĩa ũrĩ nĩwe",
 }
 ENGLISH = set(
     "the of and in to was were is are that with for by as from this which been has his its it on at "
@@ -183,6 +199,20 @@ CONTRAST = {
     "mos": set(
         "les des du et en un une dans pour par sur est sont avec au aux qui que ce cette son ses "
         "il elle nous ou comme entre ainsi selon depuis leur cet".split()
+    ),
+    # ki: SWAHILI, merged with (never replacing) ENGLISH. Kenya's lingua franca is in this wiki, and it is
+    # the contaminant the playbook's trap 34 warns about hardest here — a Swahili sentence inside a Kikuyu
+    # article is still Bantu, still Latin, still topical, and still the wrong evidence for a Kikuyu rule.
+    # ⚠ WORDS THE TWO SHARE ARE DELIBERATELY ABSENT, and there are many: `na wa ya za la cha kwa mwaka`
+    # are identical in both and ordinary Kikuyu. So is `wake`/`yake` (`ũhoro-inĩ wake` is this corpus's
+    # own Kikuyu). What is listed is what Swahili writes and Kikuyu does not — Kikuyu says `thĩinĩ wa`
+    # for `katika`, `andũ` for `watu`, `bũrũri` for `nchi`, `itũũra` for `mji`, `mũno` for `sana`,
+    # `kuma` for `kutoka`, `kana` for `au`, `no` for `lakini` — plus the `ku-`/`a-li-` verb morphology
+    # (`kuwa`, `alikuwa`, `walikuwa`) and the relativisers `ambayo`/`ambao`, which Kikuyu forms with `ũrĩa`.
+    "ki": set(
+        "katika kwamba ambayo ambao ambaye hii hiyo hivyo huo kuwa alikuwa walikuwa ilikuwa yao zao "
+        "hadi lakini pia sana kutoka baada ndani watu mji nchi wengi kila zaidi wakati yote ili bila "
+        "chini juu kwenye wote hao huyu wenye kama ndiyo".split()
     ),
 }
 

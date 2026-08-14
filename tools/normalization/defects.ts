@@ -1888,6 +1888,53 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "(`chiri pasi pe 10%`, `hunodarika`), which is not a sign reading",
         "greater-than": "measured: `>` is ×0 in the artifact, same evidence as `less-than`",
     },
+    ki: {
+        // ⚠ KIKUYU'S HAYSTACK, so the strength of every "measured" below is legible. There is no FLEURS ki,
+        // no kaikki per-language dump, no wikipron `kik`, no epitran `kik-Latn`, and espeak does not ship
+        // the language at all — `sources.ts` reports `[NONE]` or `[chk?]` for every class. The one real
+        // referee, en.wiktionary Kikuyu (1062 IPA words), is a WORD list and says nothing about a sign. So
+        // the evidence is the 3921-paragraph ki.wikipedia dump behind `tools/corpus/mined/ki.jsonc` plus
+        // `attest.ts` against that same wiki — a bigger sample of one source, never two. Counts below are
+        // over the artifact's 372 retained segments; all of it is argued at length in
+        // src/languages/kikuyu/normalize.ts.
+        // ⚠ `degrees` AND `greater-than` ARE DELIBERATELY ABSENT FROM THIS BLOCK, so `review.ts --lang ki`
+        // STAYS RED on them. Both are sourcing gaps rather than absences — the degree sign occurs and a
+        // degree word may well exist (this wiki's `digirii` is the academic one, ×4/3, every hit); `>`
+        // occurs 23 times and one of those, the GDP legend `>$60,000`, could plausibly take the corpus's
+        // own `makĩria ma` ("more than"). A class with a reading still to find is a TODO, and this table is
+        // not where TODOs go.
+        minus: "measured: ZERO true negatives in 3921 paragraphs. Every instance of the `minus` DROPPABLE "
+            + "shape resolves to something else on reading: RANGES, which step 5 of normalize.ts claims or "
+            + "deliberately declines (`1891-1978`, `1985-1995`, `1849 – 27 February 1936`); a list bullet "
+            + "(`fĩthiki - 47, űthagia - 63`); TWO CHESS TOURNAMENT RECORDS (`(+1 -3 =0)`, `(+2 -5 =2)`), "
+            + "whose signs are win/loss/draw tallies; and one EXPONENT (`r⋅min −1`, revolutions per "
+            + "minute). There is no negative quantity in the corpus at all. ⚠ The playbook's asymmetry is "
+            + "attached rather than assumed away: omitting a plus is lossless and omitting a minus INVERTS, "
+            + "so this exemption is void the moment a negative value appears in ki text",
+        plus: "measured: `+` ×2, and both are the chess records above, where the sign is a tally of wins "
+            + "and not an operator. Nothing on ki.wikipedia attests a plus word; `concept.ts` has no ki "
+            + "labels, and the corpus's arithmetic vocabulary is a single sudoku article",
+        "plus-minus": "measured: `±` is ×0 in 3921 paragraphs, and the reading would compose two words of "
+            + "which neither side has a candidate — see the minus and plus notes above",
+        equals: "measured: `=` ×7, and NONE is a comparison to read. Two are the chess records (`=0`, "
+            + "`=2`, the draw count) and five are CSS attribute selectors in the wiki markup this dump "
+            + "carries (`.references[data-mw-group=upper-alpha]`). Kikuyu states equality with a verb "
+            + "phrase, which is not a sign reading, and the class has nothing to attach to",
+        "less-than": "measured: `<` is ×0 in 3921 paragraphs",
+        divide: "measured: `÷` is ×0 in 3921 paragraphs. The corpus's one division is written as a VERB "
+            + "phrase (`60 sekondi ikĩgayanio na 120`, \"60 seconds divided by 120\"), which is a clause "
+            + "and not a word that fits between two operands — the Fula `hakkunde` part-of-speech test",
+        times: "measured: `×` ×2, both in one SUDOKU article (`ndaguro kaingĩ kĩa 9 × 9`, `cia 3×3`), "
+            + "where the sign is read \"by\" and denotes a grid rather than a product. That is the same "
+            + "dimension-cross the playbook records for Thai, and claiming it as multiplication would be "
+            + "confidently wrong about the one place ki writes the sign",
+        ampersand: "measured: FOLDING THE ENTITIES IS THE WHOLE DEFECT, and step 2 of normalize.ts does "
+            + "it. Of 28 `&` in the artifact, 16 are `&nbsp;` and 2 `&quot;` — markup, now folded — and "
+            + "every bare sign is inside an ENGLISH name this wiki carries (`Niia & Lil Wayne`, `Trinidad "
+            + "& Tobago`, `SM & Bar MMM KStJ`), never between two Kikuyu conjuncts. Kikuyu's conjunction "
+            + "`na` is everywhere in the corpus, so the word is not the gap; the SLOT is. Shona reached "
+            + "the identical conclusion from the identical evidence",
+    },
 };
 
 /**

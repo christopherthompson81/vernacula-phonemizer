@@ -1,0 +1,1206 @@
+// WIKIPEDIA WORD ATTESTATION — ki. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ki",
+        "wiki": "ki.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kĩmũrarĩ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mũrarĩ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cukwea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "thikwea",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…iria igukorűo na hinya muingĩ műno Abirika kuthini iritagűo thikwea Kiromita Arraĩ(rĩtwa rĩa gĩkaro kĩayo nĩ:http://www.ska.ac.…"
+            ]
+            },
+        {
+                "word": "kilomita cukwea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mĩena ĩna",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ndonge",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kabungo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "koma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…arũtĩte wĩra na kĩyo agatherema 11.4.1 kohora kahũra 11.4.2 koma koma gwĩtandaiya handũ kana kũigĩrĩra mũtwe handũ taarĩ tor…",
+                "…te wĩra na kĩyo agatherema 11.4.1 kohora kahũra 11.4.2 koma koma gwĩtandaiya handũ kana kũigĩrĩra mũtwe handũ taarĩ toro ũrĩ…",
+                "…komerera inamĩrĩra taarĩ kwĩhitha ũrehitha 11.4.4 komereria koma hamwe na mũndũ ũngĩ nĩgetha acũnge; nyamũ irĩa irekagia mat…",
+                "…muna muhano: arutĩte wĩra na kĩyo agatherema kohora kahura koma koma gwĩtandaiya handu kana kuigĩrĩra mutwe handu taarĩ tor…",
+                "…muhano: arutĩte wĩra na kĩyo agatherema kohora kahura koma koma gwĩtandaiya handu kana kuigĩrĩra mutwe handu taarĩ toro urT…",
+                "…muka komerera inarrwrTra taarT kwĩhitha urehitha komereria koma hamwe na mundu ungT nTgetha acunge; nyamu irĩa irekagia mat…"
+            ]
+            },
+        {
+                "word": "ndurumo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…no ĩhũthĩre kiugo 'mbagathi' ũ: Mbagathi, ndurumo kana kĩhumo gĩa gũcũga thĩĩ-inĩ wa mũtaratara wa karaaũ Mba…",
+                "…rũri wa “Lutèce”. Paris, 2008 == Nyĩmbo/Ũandĩki mũnene == ● Ndurumo (The Waterfall) ● Idylls ● Rwĩmbo rwa Wendo rwa Kĩroko (Aub…"
+            ]
+            },
+        {
+                "word": "ngingo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 65,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ngingo nĩ gĩcũnjĩ ya mwĩrĩ wa Nyamű kĩnyitanĩtie mũtwe na gĩthũri.…",
+                "…rothi ĩthondekagwo kũthiũrwo kan kũbĩrwo njohero, moko kana ngingo.…",
+                "…Gĩthũri nĩ gĩcunjĩ kĩa mwĩrĩ wa nyamű kĩrĩ gatagatĩ ka ngingo na nda.…",
+                "…gemio. Tũmuuto tũrĩa tũhũthagĩragwo ũrĩrĩ tũriraga mũtwe na ngingo.…",
+                "…hirt') nĩ itonyo kana nguo ya kũhumba mwĩrĩ wa igũrũ (kuuma ngingo nginya njohero).…",
+                "…, kanjũ kana itonyo rĩngĩ; rĩkoragwo rĩkĩoherera gĩcigo kĩa ngingo.…"
+            ]
+            },
+        {
+                "word": "tuti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gĩcunjĩ gĩa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…irĩ thĩĩ-inĩ wa cangure (denominator). Kwa ngerekano, harĩ gĩcunjĩ gĩa 3/4-rĩ, njerome ya 3 wonanagia atĩ gĩcunjĩ kĩu nĩ gĩcunjĩ k…",
+                "…u nĩ gĩcunjĩ kĩa 3, na mũtaratara-inĩ wa 4 wonanagia atĩ nĩ gĩcunjĩ gĩa 4. Mbica ĩrĩa ĩrĩ mwena wa ũrĩo nĩ ĩronania gĩcunjĩ gĩa ith…",
+                "…nĩ gĩcunjĩ gĩa 4. Mbica ĩrĩa ĩrĩ mwena wa ũrĩo nĩ ĩronania gĩcunjĩ gĩa ithatũ gĩa gĩcunjĩ gĩa inya gĩa keki.…",
+                "…a ĩrĩa ĩrĩ mwena wa ũrĩo nĩ ĩronania gĩcunjĩ gĩa ithatũ gĩa gĩcunjĩ gĩa inya gĩa keki.…",
+                "…Rũhĩndũ nĩ gĩcunjĩ gĩa thĩ kĩa igogo rĩa mwĩrĩ, gatagatĩ ka Nda na ciero.[1] Nĩ mw…",
+                "…<b>Rũhĩndũ</b>(kana 'Rũhonge') nĩ gĩcunjĩ gĩa thĩ kĩa igogo rĩa mwĩrĩ, gatagatĩ ka Nda na ciero.[1] Nĩ mw…"
+            ]
+            },
+        {
+                "word": "mũhũthĩrĩri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "nginya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Arap Moi.Athamakire bururi-ini wa Kenya kumia Dithemba 2002 nginya April 2013. Hau gabere miaka-ini ya 1978 nginya 1988 niwe w…",
+                "…themba 2002 nginya April 2013. Hau gabere miaka-ini ya 1978 nginya 1988 niwe wari munini wa munene wa bururi. Oro hau ni ari m…",
+                "…Bũrũri wa Kenya. Athamakire kuuma mwaka wa wĩyathi wa 1963 nginya gĩkuũ gĩake mwaka wa 1978.…",
+                "…cian ũrĩa warĩ Mũthĩgĩ Mũkaru wa bũrũri kuuma mwaka wa 1997 nginya mwaka wa 2006 na rĩngĩ kuuma mwaka wa 2011 nginya mwaka wa…",
+                "…a wa 1997 nginya mwaka wa 2006 na rĩngĩ kuuma mwaka wa 2011 nginya mwaka wa 2016. Arĩ mũtongoria wa kiama kia Saint Lucia Labo…",
+                "…ite wira wa mutongoria wa mung'ethaniro kuuma mwaka wa 2006 nginya mwaka wa 2011. Nĩ aatiga wĩra thutha wa SLP kũhootwo gĩthur…"
+            ]
+            },
+        {
+                "word": "dikirii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ndikirii",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "digirii",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…omo == Sekiwu nĩathomire Makerere University, kũrĩa aheirwo digirii ya mbere, Postgraduate Diploma in Education, hamwe na Maste…",
+                "…ragia mĩhianano ya quality assurance, ũthuthũri wa athomi a digirii cia igũrũ, hamwe na ũtongoria wa ciugo cia ũthomi. (Kabale…",
+                "…stouň, kilomita 21 (13 mi) nja ya Prague,[2] na nĩ aakirĩte digirii ya Bachelor in History and European Studies kuuma gĩthomo k…",
+                "…ũrĩ mwaka wa 1983, nĩarĩkirie thukuru mũnene wa Glasgow ena digirii ya B.A ya kũrutana kũhũra piano. Mwaka ũrĩa warũmĩrĩire, nĩ…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Cegĩcio",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Fahrenheit",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "thendimita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "thentimita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "thekondi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…mĩhang'o ya kwĩthara. Yaambarita \"yagwatire mwaki thutha wa thekondi ithatũ\" na ĩkĩhobokera andũ arĩa maarĩ thĩinĩ. Karagita nĩk…"
+            ]
+            },
+        {
+                "word": "sekondi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a (2 hertz), ihinda rĩa ũtiema rĩa mahũra meerĩ nĩ nuthu ya sekondi (60 sekondi ikĩgayanio na 120).…",
+                "…ihinda rĩa ũtiema rĩa mahũra meerĩ nĩ nuthu ya sekondi (60 sekondi ikĩgayanio na 120).…",
+                "…rĩire rekondi cia mahenya ma mita 100 na 200, na ihinda rĩa sekondi 9.58 (mita 100) na sekondi 19.19 (mita 200). Aigire rekondi…",
+                "…a mita 100 na 200, na ihinda rĩa sekondi 9.58 (mita 100) na sekondi 19.19 (mita 200). Aigire rekondi ici mahenya-ini ma IAAF Wo…",
+                "…e unyitĩrĩire rekondi cia Olympics cia mahenya ma mita 100 (sekondi 9.69) na mita 200 (sekondi 19.30), iria aigire mathako-inĩ…",
+                "…lympics cia mahenya ma mita 100 (sekondi 9.69) na mita 200 (sekondi 19.30), iria aigire mathako-inĩ ma Summer Olympics mweri wa…"
+            ]
+            },
+        {
+                "word": "ndagĩka",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…n, kana r⋅min−1) nĩ kĩo kĩa ũbĩrĩrĩki wa mĩro ĩrabĩrĩrĩka o ndagĩka. Rĩthi ĩmwe na kĩmonimoni nĩ HERTZ ngorio mĩrongo ĩtandatũ…",
+                "…na ngoingũa ya Rũraya mwaka nĩ mĩthenya365, mathaa matano, ndagĩka 48, na coho 45.…",
+                "…37 MAX 8 nĩ yagũire hakuhĩ na gĩcigo kĩa Bishoftu thutha wa ndagĩka ithathatũ kuuma ndege ĩyo kwambĩrĩria, na andũ othe 157 arĩ…",
+                "…erekano, korũo ngoro nĩ ĩrahũra na gĩthumba kĩa maita 120 o ndagĩka (2 hertz), ihinda rĩa ũtiema rĩa mahũra meerĩ nĩ nuthu ya s…",
+                "…The Flame Trees of Thika nĩ ndereti ya TV ya Ngeretha ya ndagĩka mĩrongo ĩtano matĩna mũgwanja ĩrĩa ĩrutĩtwo nĩ Euston Films…",
+                "…mĩhaka ĩno. Ta hihi ingĩthiĩ ndereti ya 'Nightline', kwaga, ndagĩka igĩrĩ na njuge Gaddafi nĩ gĩtoi, Khomeini nĩ mũragani kana…"
+            ]
+            },
+        {
+                "word": "mathaa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…ũthĩri, no no ĩgathĩkwo maniũrũ-inĩ kana igũcio ta thigara. Mathaa ma ũthaiga mambagĩria naiyũ magakorwo matanyihĩrĩirie matha…",
+                "…athaa ma ũthaiga mambagĩria naiyũ magakorwo matanyihĩrĩirie mathaa maiganona. [2]…",
+                "…<b>Thikũ</b> nĩ kahinda rĩa mathaa 24, rĩrĩa rĩgayanĩtio matĩna merĩ: mũthenya na ũtukũ.…",
+                "…ĩrĩ. Kũringana na ngoingũa ya Rũraya mwaka nĩ mĩthenya365, mathaa matano, ndagĩka 48, na coho 45.…",
+                "…Marakũeti nĩ njano ya kĩharĩro kĩa mathaa, ĩrĩ mũkũĩkũ wa matuĩka na itanya rĩa kũramata mahinda, kĩr…",
+                "…tee matarania. Mawathe maya macũngagĩrĩria wagi wa kũramata mathaa, kwambĩka mawĩra na ndũgũ.…"
+            ]
+            },
+        {
+                "word": "ithaa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…irie andũ mũno ta hau kabere. Radoje Domanović nĩ agĩkua ta ithaa na nuthu thutha wa thaa thita cia ũtukũ tariki 17 mweri wa…"
+            ]
+            },
+        {
+                "word": "gĩcunjĩ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Gĩcunjĩ kĩrũgamĩrĩire gakere kana kanuku ka mũigana wothe harĩ kind…",
+                "…a wothe harĩ kindũ kĩgayanĩtio na kĩũga. Thĩ-inĩ wa mathabu gĩcunjĩ nĩ mũigana wa njerome (numerator) iria irĩ thĩĩ-inĩ wa cang…",
+                "…irĩ thĩĩ-inĩ wa cangure (denominator). Kwa ngerekano, harĩ gĩcunjĩ gĩa 3/4-rĩ, njerome ya 3 wonanagia atĩ gĩcunjĩ kĩu nĩ gĩcun…",
+                "…rekano, harĩ gĩcunjĩ gĩa 3/4-rĩ, njerome ya 3 wonanagia atĩ gĩcunjĩ kĩu nĩ gĩcunjĩ kĩa 3, na mũtaratara-inĩ wa 4 wonanagia atĩ…",
+                "…cunjĩ gĩa 3/4-rĩ, njerome ya 3 wonanagia atĩ gĩcunjĩ kĩu nĩ gĩcunjĩ kĩa 3, na mũtaratara-inĩ wa 4 wonanagia atĩ nĩ gĩcunjĩ gĩa…",
+                "…u nĩ gĩcunjĩ kĩa 3, na mũtaratara-inĩ wa 4 wonanagia atĩ nĩ gĩcunjĩ gĩa 4. Mbica ĩrĩa ĩrĩ mwena wa ũrĩo nĩ ĩronania gĩcunjĩ gĩa…"
+            ]
+            },
+        {
+                "word": "igana rĩa",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "harĩ igana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a wonekaga ũrĩ igũrũ. right|thumb|Makĩria ma gĩcunjĩ gĩa 51 harĩ igana kĩa andũ nĩ andũ-a-nja. Addis Ababa (na rĩtwa rĩngĩ Addis A…",
+                "…ũnene biũ Kenya, rwĩna andũ mirioni 8.1 kana gĩcunjĩ kĩa 17 harĩ igana kĩa akenya othe. Maragia Gĩgĩkũyũ. O maikaraga gĩcigo kĩa G…"
+            ]
+            },
+        {
+                "word": "kũrĩ igana",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "thĩinĩ wa igana",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ndũrũrũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ithendi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dolari",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…, Henry nĩ aathiire na mbere kũgĩa na mũcaara wa makĩria wa dolari milioni 4.35 kũgerera wa dolari mirioni 4.33 cia Keane.…",
+                "…ĩa na mũcaara wa makĩria wa dolari milioni 4.35 kũgerera wa dolari mirioni 4.33 cia Keane.…"
+            ]
+            },
+        {
+                "word": "thiringi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ciringi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…o-inĩ 3.3.26 cingimana ũtheri kũhora; ndũma gũtumana 3.3.27 ciringi beca cĩa Kenya na mabũrũrĩ mangĩ ma Afrĩca; ciringi ĩmwe 3.…",
+                "…3.3.27 ciringi beca cĩa Kenya na mabũrũrĩ mangĩ ma Afrĩca; ciringi ĩmwe 3.3.28 ciũra kĩũra mũhĩrĩga wa cĩũmbe ĩrũgarũgaga na m…",
+                "…16.5.9 rũbaracũ rũkerecũ rũnene 16.5.10 rũbia Indian rupee ciringi igĩrĩ 16.5.11 rũbũa mũhiriga wa cuma ũtwekagio ũnyitithanie…",
+                "…16.5.9 rũbaracũ rũkerecũ rũnene 16.5.10 rũbia Indian rupee ciringi igĩrĩ 16.5.11 rũbũa mũhiriga wa cuma ũtwekagio ũnyitithanie…",
+                "…thaga ria andũ-a-nja ricũragio ngingo 11.3.42 kĩbaũ kĩrũmi: ciringi mĩrongo ĩrĩ 11.3.43 kĩbebero kĩndũ gĩcũrĩtĩo mũtĩ-inĩ kĩhũr…",
+                "…a ndeto cia kumenereria ciothe gĩothe hatarĩ king! gĩtigaru ciringi mbeca cia Kenya na mabururi mangĩ ma Africa; ciringi Tmwe c…"
+            ]
+            },
+        {
+                "word": "ngiri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ngiri kana 1000 nĩ ndari ĩrĩa ĩrĩ thutha wa 999 na mbere ya 1001.…",
+                "…ra ya kumĩhũthia. Mũndũ no mũhaka erute ndemwa cia hanzu ta ngiri ĩnya agikiya yunibacĩtĩ. == Matwĩka == Mũtĩrũkia wa Amerika…",
+                "…ũrũ cia Kĩ China. Mũndũ no mũhaka erute ndemwa cia Kanji ta ngiri ĩnya agikiya yunibacĩtĩ.…",
+                "…' kuuma Kĩngeretha 'Trillion') nĩ ndari ĩtũkĩtie ngirimbatũ ngiri ĩmwe nĩyo 1,000,000,000,000.…",
+                "…ba ĩmwe ya Nyamű cia iria. Kaingĩ nĩ mĩthangiri ya nyamũ ta ngiri, nguũ, ona njogu.…",
+                "…arabara ya mwaya ya gĩũthamaki ya gũthoma. Thabari ya mailu ngiri ĩmwe ya njagia na ikinya ria mbere. Kwendekana nĩ kwo nyina…"
+            ]
+            },
+        {
+                "word": "mita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…a kuuma bururi wa Jamaica. Bolt nĩwe muhotani wa mahenya ma mita 100, mita 200 na mita 100 relay mathako-inĩ ma Olympics na…",
+                "…ruri wa Jamaica. Bolt nĩwe muhotani wa mahenya ma mita 100, mita 200 na mita 100 relay mathako-inĩ ma Olympics na ma IAAF Wo…",
+                "…ica. Bolt nĩwe muhotani wa mahenya ma mita 100, mita 200 na mita 100 relay mathako-inĩ ma Olympics na ma IAAF World Athletic…",
+                "…l). Niwe muteng'eri urĩa unyitĩrĩire rekondi cia mahenya ma mita 100 na 200, na ihinda rĩa sekondi 9.58 (mita 100) na sekond…",
+                "…cia mahenya ma mita 100 na 200, na ihinda rĩa sekondi 9.58 (mita 100) na sekondi 19.19 (mita 200). Aigire rekondi ici maheny…",
+                "…00, na ihinda rĩa sekondi 9.58 (mita 100) na sekondi 19.19 (mita 200). Aigire rekondi ici mahenya-ini ma IAAF World Athletic…"
+            ]
+            },
+        {
+                "word": "kilomita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…ũũra rĩu rĩgayũkanĩtio meerĩ nĩ barabara ya R369, na nĩ irĩ kilomita 871 kuuma Cape Town na ta kilomita 680 kuuma Pretoria. Rĩer…",
+                "…abara ya R369, na nĩ irĩ kilomita 871 kuuma Cape Town na ta kilomita 680 kuuma Pretoria. Rĩera rĩake nĩ rĩtarĩ na maĩ.…",
+                "…ũrũrũku mwena wa irathĩro wa Libya. Mĩako ĩyo ĩrĩ ũraihu wa kilomita 10 na kilomita 6.8 na ĩkoragwo kilomita 70 mwena wa ithũĩro…",
+                "…a irathĩro wa Libya. Mĩako ĩyo ĩrĩ ũraihu wa kilomita 10 na kilomita 6.8 na ĩkoragwo kilomita 70 mwena wa ithũĩro wa Jabal Arkan…",
+                "…o ĩyo ĩrĩ ũraihu wa kilomita 10 na kilomita 6.8 na ĩkoragwo kilomita 70 mwena wa ithũĩro wa Jabal Arkanu mwena wa irathĩro wa gĩ…",
+                "…thĩ mwaka wa 2029, rĩrĩa ĩrererera hakuhĩ thĩ na ũraihu wa kilomita 38,000 igũrũ rĩa thĩ. Ningĩ nĩ ĩgakorwo ĩgĩkuhĩrĩria mweri…"
+            ]
+            },
+        {
+                "word": "kilo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ciande wa -70 (24-28 inchi). Arũme nĩ makoragwo na ũritũ wa kilo 30.9-72 (68-159 lb), na cia nga ikoragwo na ũritũ wa kg 20.…"
+            ]
+            },
+        {
+                "word": "kilogiramu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ekaha",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hegita",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mirioni",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…mũnene nĩ Moscow. Ni umwe wa mabururi manene na wĩ andu ta mirioni igana rimwe. Racia ni bururi ũmwe wa mabururi meri mana twa…",
+                "…mũigana wa andu nĩ nene mũno. Cuindeni ĩĩ andu matakinyite mirioni ikumi.…",
+                "…etherie mũhiano wa Mwaka wa 2012. Mũcara wake wa mũigana wa mirioni 5 ($ 5.6 million guaranteed) nĩ wamũtuire mũtongoria ũrĩa ũ…",
+                "…mũcara wa mũthingi wa Henry nĩ waahingire nginya thĩiniĩ wa mirioni 3.75 cia dollar, na akĩrũmĩrĩra mũcara wa mũcara wa mirioni…",
+                "…mirioni 3.75 cia dollar, na akĩrũmĩrĩra mũcara wa mũcara wa mirioni 4 wa Robbie Keane. O na kũrĩ ũguo, na mbeca cia goro, Henry…",
+                "…ũcaara wa makĩria wa dolari milioni 4.35 kũgerera wa dolari mirioni 4.33 cia Keane.…"
+            ]
+            },
+        {
+                "word": "mĩlioni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "meerĩ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ĩrũkia (president) wa Bũrũri ũcio wa ikumi na ĩmwe, matĩĩna meerĩ.…",
+                "…kuuma njohero nginya thũng'wa-inĩ na kũhumbĩra magũrũ mothe meerĩ. Kĩũndũire-inĩ nĩ nguo cia andũrũme.…",
+                "…ruaburika nĩ mũhari wa mwĩcirĩrie ũrĩa ũgayanagia thĩ maita meerĩ; thinwa-nginyo ya rũgongo na thinwa-nginyo ya rũgũrũ.…",
+                "…a mathenya matĩĩanu na thũgũnũĩ kana mũro ũngĩ. Matĩrĩngano meerĩ kana maigaigĩ ma thũgũnũĩ metagwo mũgithi. .…",
+                "…aca ta maaĩ. Thutha wa kũracia njakaranda ĩgayũkanaga maita meerĩ. Thiinĩ wa ũrigitani, kongwa nĩ muunju wa mũthaiga thutha w…",
+                "…wa 2000 . O ho nĩahotete Tokyo International Marathon maita meerĩ (1995, 2002), Hokkaido Marathon maita matatũ na Nagano Mara…"
+            ]
+            },
+        {
+                "word": "merĩ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…hikũ</b> nĩ kahinda rĩa mathaa 24, rĩrĩa rĩgayanĩtio matĩna merĩ: mũthenya na ũtukũ.…",
+                "…Baruhamba nĩ ica rĩmwe rĩa maica merĩ ma thĩ kabirũ ka mũgariũro gatũnganaga na ũthiũ.…",
+                "…Ndũgũ ya Ũhindĩ na Cicero nĩ ũrata wa mabũrũri merĩ gatagatĩ ka bũrũri wa Ihĩndĩ na wa Cicero. Ihĩndĩ nĩ kũrĩ n…",
+                "…thĩ ma marathon. Ndereba nĩ ahotete ngoga ya marathon maita merĩ igwĩtwo World Championships in Athletics na akĩheo ngerenwa…",
+                "…gĩ. Ningĩ nĩ ahotire maita mana Marathon ya Boston na maita merĩ Marathon ya Chicago. Mwaka wa 2001 nĩ guo aambĩrĩirie kũhũũ…",
+                "…wa Tanzania (na rwa Tanganyika na Zanzibar, mabũrũri marĩa merĩ maambĩrĩirie ngwatanĩro na bũrũri wa Tanzania mwaka wa 1964…"
+            ]
+            },
+        {
+                "word": "matano",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Mawatho matano ma Newton mawatho matano ma indo nene ta jata na thĩ nĩ nĩm…",
+                "…Mawatho matano ma Newton mawatho matano ma indo nene ta jata na thĩ nĩ nĩmo: Watho wa mbere : o ndi…",
+                "…Mahinya matano ma Porter Porter nĩ Brobetha na mũtwiria wa yunibaciti ya H…",
+                "…cara. Nĩ athondekire műkinyaniria(strategy) atĩ kwĩ Mahinya matano matindĩkanaga thiĩna wa ĩharo cĩa macindano ma biacara na t…",
+                "…ori na watho wa physics Atomiki thiori watho wa Ohm Mawatho matano ma Newton Kwotum thiori…",
+                "…ũringana na ngoingũa ya Rũraya mwaka nĩ mĩthenya365, mathaa matano, ndagĩka 48, na coho 45.…"
+            ]
+            },
+        {
+                "word": "matandatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ũ nĩ wakiri mũthitangi Luis Moreno Occampo yarutire marĩtwa matandatũ ma ekũĩrwo a ũcogeri wa ngũĩ ĩo. mũninĩ wa mũthĩgi mũkaru k…",
+                "…ĩra wake 17.5.14 thigiriri tũtambi tũthiagĩra thĩ na magũrũ matandatũ tũirũ na tũikara tũrima-inĩ twenjete 17.5.15 thiĩ wĩtware n…",
+                "…kũruta wĩra wake thigiriri tũtambi tũthiagĩra thĩ na magũrũ matandatũ tũirũ na tũikara tũrima-inĩ twenjete thiĩ wĩtware na magũrũ…"
+            ]
+            },
+        {
+                "word": "manana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…tọ' na rũthiomi rwa Igbo) nĩ nyamű itarĩ mahĩndĩ ĩrĩ mahati manana mena mĩgwĩ ĩhana gĩcandĩ. Kĩnacandĩ gĩkoragwo rũrĩrĩ rwa ũt…",
+                "…acandĩ gĩkoragwo na maitho merĩ na kanua gatagatĩ ka mahati manana. Mũnyogondere wa kĩnacandĩ nĩ mwega ũ atĩ noa ahote kwĩmirũ…",
+                "…ndĩ ya mbaara ya 拳亂 (mbũtũ ya ngundi) na mbũtũ cia mabũrũri manana itũũra rĩa Langfang, China.…",
+                "…'dandeitande' na rũthiomi rwa Kĩshona)nĩ thambo ĩrĩ magũrũ manana, na mĩthangiri ya kũmundia marathioni, na matera ma kũhũnga…",
+                "…ũgĩe na hinya 11.1.37 kang'aũrũ tũng'aũrũ kĩũmbe kĩa magũrũ manana kĩ mĩthece ĩrĩ kanũa-inĩ na ũngĩ mũting'oe-inĩ gĩthecaga ny…",
+                "…kura na ugTe na hinya kang'auru tung'auru kTumbe kTa maguru manana kT mTthece TrT kanua-inT na GngT muting'oe-inT gĩthecaga ny…"
+            ]
+            },
+        {
+                "word": "ĩnya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…kumĩhũthia. Mũndũ no mũhaka erute ndemwa cia hanzu ta ngiri ĩnya agikiya yunibacĩtĩ. == Matwĩka == Mũtĩrũkia wa Amerika Dona…",
+                "…a Kĩ China. Mũndũ no mũhaka erute ndemwa cia Kanji ta ngiri ĩnya agikiya yunibacĩtĩ.…"
+            ]
+            },
+        {
+                "word": "kĩbũgũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Kĩbũgũ (na Kĩsomari nĩ '𐒜𐒁𐒗𐒇'; na 'baŋ' rũthiomi-inĩ rwa Nuer)…",
+                "…demwa ĩrũgamĩrĩire mũigana ũtarĩ kĩndũ. Kũongerera ndari ya kĩbũgũ harĩ ndari ĩngĩ o yothe itigaga ndari icio ĩtakũgarũrũka.…",
+                "…ma, kĩndũ kĩrĩ na mbirũhathia angĩkorwo hinya wa magucia nĩ kĩbũgũ.…"
+            ]
+            },
+        {
+                "word": "thaa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…i,Radio , Spidi Gavana, Terebeceni,Train,Thimu, Transformer,Thaa.…",
+                "…se, Mũtĩrũkia wa 43 wa Haiti, nĩoragirwo tarĩki 7 July 2021 thaa mũgwanja cia ũtukũ (thaa ithatũ rũcii-inĩ Nairobi) mũciĩ-in…",
+                "…iti, nĩoragirwo tarĩki 7 July 2021 thaa mũgwanja cia ũtukũ (thaa ithatũ rũcii-inĩ Nairobi) mũciĩ-inĩ wake Port-au-Prince. Gĩ…",
+                "…ia cama wa kĩ thithitemu Thayathi ni kiugo githondeketwo ni thaa niyo itumagirwo guthima kahinda. Thaya ni kuyitithania na t…",
+                "…10 kia Haiti ni githingithia kia 7.0 MW kiria gikiire Haiti thaa 16:53 (thaa 00:53 Nairobi )muthenya wa ruciu, 12 mweri wa m…",
+                "…ni githingithia kia 7.0 MW kiria gikiire Haiti thaa 16:53 (thaa 00:53 Nairobi )muthenya wa ruciu, 12 mweri wa mbere mwaka w…"
+            ]
+            },
+        {
+                "word": "ithekondi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "igana rĩmwe",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ondekire thiori ya TRIZ. Nĩ athūngudire ĩndo cia mũũkana ta igana rĩmwe na okĩndu a kĩheo patenti. Arūtaga wĩra būrūri wa Urusi obi…",
+                "…mĩrongo ĩtandatũ na nĩ onĩkanĩte thĩinĩ wa mbica makĩria ma igana rĩmwe na mĩrongo itano. Imwe cia mbica anathaka nĩ hamwe na ' 我是誰…"
+            ]
+            },
+        {
+                "word": "magana meerĩ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana merĩ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana matatũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana mathatũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana mana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…oronjĩ nĩta koini ya shiringi ithano űmĩgayanie maita ngiri magana mana. Ninotekinoronjĩ bururiinĩ wa Kenya YunibacĨti imwe cĩa Ken…",
+                "…S Bookshop Lagos, 1938) (Mũguĩmi Njamba mũtitũ-inĩ wa makai magana mana) Igbó Olódùmarè (Edinburgh: Nelson, 1949)(mũtitũ wa Ngai) Ì…"
+            ]
+            },
+        {
+                "word": "magana matano",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana ithathatũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana ĩtandatũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana matandatũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana mũgwanja",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana inyanya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana manana",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "magana kenda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…a-inĩ rĩa Beijing, bũrũri wa Caina, mwaka-ini wa ngiri ĩmwe magana kenda na ikumi na mũgwanja (1917). Ũmũthĩ, wĩna arũmĩrĩri ota gwa…",
+                "…ka-inĩ ya kĩambĩrĩria, itĩna-inĩ rĩa mĩaka ya ngiri ĩmwe na magana kenda. Kuma mwaka wa ngiri ĩmwe magana kenda na mĩrongo kenda na…",
+                "…aka ya ngiri ĩmwe na magana kenda. Kuma mwaka wa ngiri ĩmwe magana kenda na mĩrongo kenda na mũgwanja-rĩ (1997), kanitha ũyũ nĩ wamb…",
+                "…i == Bũrũri wa Kenya ni waheirwo wĩathi mwaka wa ngirĩ imwe magana kenda mĩrongo ĩtandatũ na ithatũ (1963) kũma thrikari ya Ngeretha…",
+                "…ĩti gĩa ũtongoria harĩa aikarire nginya mwaka wa ngirĩ imwe magana kenda mĩrongo mũgwanja na inyanya (1978). Unangĩkorwo nĩtwagĩire…"
+            ]
+            },
+        {
+                "word": "ngiri ĩmwe",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…' kuuma Kĩngeretha 'Trillion') nĩ ndari ĩtũkĩtie ngirimbatũ ngiri ĩmwe nĩyo 1,000,000,000,000.…",
+                "…arabara ya mwaya ya gĩũthamaki ya gũthoma. Thabari ya mailu ngiri ĩmwe ya njagia na ikinya ria mbere. Kwendekana nĩ kwo nyina wa ũ…",
+                "…rĩirio itũra-inĩ rĩa Beijing, bũrũri wa Caina, mwaka-ini wa ngiri ĩmwe magana kenda na ikumi na mũgwanja (1917). Ũmũthĩ, wĩna arũm…",
+                "…a tungiruo mĩaka-inĩ ya kĩambĩrĩria, itĩna-inĩ rĩa mĩaka ya ngiri ĩmwe na magana kenda. Kuma mwaka wa ngiri ĩmwe magana kenda na m…",
+                "…-inĩ rĩa mĩaka ya ngiri ĩmwe na magana kenda. Kuma mwaka wa ngiri ĩmwe magana kenda na mĩrongo kenda na mũgwanja-rĩ (1997), kanith…",
+                "…rmain (PSG) mwaka wa 2017 na akĩruta wĩra wa kũruta wĩra na ngiri ĩmwe na milioni 222, na nĩ ũndũ ũcio akĩgĩa mũtongoria ũrĩa ũrĩ…"
+            ]
+            },
+        {
+                "word": "ngiri igĩrĩ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…igũrũ acagũrirwo kĩthurano-inĩ kĩa mweri wa kanana mwaka wa ngiri igĩrĩ na ikũmi na mũgwanja. Ann Waigũrũ nĩ ũmwe wa mangavana o er…",
+                "…o wone metha ici rũrendainĩ haha [8]. Kwĩ thiomi makĩria ya ngiri igĩrĩ cia Kĩabĩrika [4] na metha iria cia rurendaini ĩtikinyite m…"
+            ]
+            },
+        {
+                "word": "mĩrongo ĩrĩ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Mũkũyũ nĩ mũthemba wa mũtĩ ũkũraga ũraihu wa mĩrongo ĩrĩ ũ mita cia ngeretha(20 meters). Irutaga mahũa o mĩeri ikũmi…",
+                "…971 agĩkua tarĩki 13 september 1996 arĩ o na ũkũrũ wa mĩaka mĩrongo ĩrĩ na ĩtano. Nĩ ararĩ na njũgitano na mũini mũrunawe Biggie Sm…",
+                "…ĩra kĩnene bũrũri wa birimbinũ. Nĩngĩ kĩrĩ na andũ ngingiri mĩrongo ĩrĩ na mũgwanja (27,384,138) kũringana na ũtari wa mwaka wa 202…",
+                "…a andũ-a-nja ricũragio ngingo 11.3.42 kĩbaũ kĩrũmi: ciringi mĩrongo ĩrĩ 11.3.43 kĩbebero kĩndũ gĩcũrĩtĩo mũtĩ-inĩ kĩhũrũtagwo nĩ rũ…"
+            ]
+            },
+        {
+                "word": "mĩrongo igĩrĩ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mĩrongo ĩtatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Andũ a Kenya nĩ mahotete ngoga mĩrongo ĩtatũ na ĩtandatũ cia Paralympic: ngoga ikũmi na inya cia thahabu…",
+                "…iraya bũrũri, na rĩtĩmagio thutha wa mĩaka makĩria ma mĩaka mĩrongo ĩtatũ.. Karioki ka kũndũ gũtiganĩte nĩ kũomokagĩrwo nĩ ndũgũ ya r…",
+                "…go ũyũ. Paralipomena, ĩganyĩtio kĩngoga kũringana na ciongo mĩrongo ĩtatũ na imwe, na cikahumba maũndũ Mũgo anarica ta macĩgĩ ma Pare…"
+            ]
+            },
+        {
+                "word": "mĩrongo ithatũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mĩrongo ĩna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 8,
+                "substringOnly": 1,
+                "examples": [
+                "…rika continent ĩmwe ya thĩ. Ĩkoragwo na mabururi makĩria ya mĩrongo ĩna. Ni kibũruri gĩa kerĩ thutha wa Asia kwa ũnene thiini wa th…",
+                "…nĩ Mũteti ũrĩa atungatire ta Mũtĩrũkia (president) wa mĩrongo ĩna na kana wa Bũrũri wa ndegi nyũnganu cia america. == Rora ==…",
+                "…nited states) ũrĩa wa tungatire ta Mũtĩrũkia (president) wa mĩrongo ĩna na gatano (45th) wa Bũrũri ũcio. == Rora == >>Uuge…",
+                "…rua' na Rũthiomi rwa Gĩcũthũ (Sesotho)) nĩ ĩmwe ya mĩthemba mĩrongo ĩna ya nyamű ciũngũyaga iria-inĩ ĩna ĩkuruhanu na rũruka rwa rĩ…",
+                "…auntĩ Ya Kĩrinyaga == Kauntĩ ya Kĩrĩnyaga nĩ ĩmwe ya kauntĩ mĩrongo ĩna na mũgwanja cia bũrũri wa Kenya. Kauntĩ ya Kĩrĩnyaga oro ha…",
+                "…mĩrĩri ota gwata mirioni ĩmwe na nuthu, thĩiniĩ wa mabũrũri mĩrongo ĩna na matano, thĩ-inĩ wa thĩ ndaya ithathatu. Kanitha ũyũ umĩt…"
+            ]
+            },
+        {
+                "word": "mĩrongo inya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mĩrongo ĩtano",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…lame Trees of Thika nĩ ndereti ya TV ya Ngeretha ya ndagĩka mĩrongo ĩtano matĩna mũgwanja ĩrĩa ĩrutĩtwo nĩ Euston Films nĩ ũndũ wa Th…",
+                "…co Cirũ wa GP ũrĩa rĩu (30dec2020) arĩ na ang'etia mirrioni mĩrongo ĩtano na inya (54 million views). na o ho, Nyĩimbo cia mũgithi nĩ…"
+            ]
+            },
+        {
+                "word": "mĩrongo ithano",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mĩrongo ĩtandatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ĩrĩrĩka o ndagĩka. Rĩthi ĩmwe na kĩmonimoni nĩ HERTZ ngorio mĩrongo ĩtandatũ kana 1/60 hertz.…",
+                "…shu kana Kung fu na Hapkido. Nĩ atongoretie ũthaki wa mbica mĩrongo ĩtandatũ na nĩ onĩkanĩte thĩinĩ wa mbica makĩria ma igana rĩmwe na m…",
+                "…a Kenya ni waheirwo wĩathi mwaka wa ngirĩ imwe magana kenda mĩrongo ĩtandatũ na ithatũ (1963) kũma thrikari ya Ngeretha (Britain). Mũthe…"
+            ]
+            },
+        {
+                "word": "mĩrongo ithathatũ",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mĩrongo mũgwanja",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…oria harĩa aikarire nginya mwaka wa ngirĩ imwe magana kenda mĩrongo mũgwanja na inyanya (1978). Unangĩkorwo nĩtwagĩire wĩathi Kenya no y…"
+            ]
+            },
+        {
+                "word": "mĩrongo ĩnana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ma wa nyundo kũhũra ndigi. Igũkũira cia mahinda maya irĩ na mĩrongo ĩnana na ĩnana ya cabi njerũ na njirũ, na irĩ na mũtaratara wa kũ…",
+                "…ia, Bũrũri wa Amerika mũthenya wa 28 Mĩĩ 2025, arĩ na mĩaka mĩrongo ĩnana na mũgwanja. Ihinda-inĩ rĩa gĩkuũ gĩake, Ngũgĩ nĩ aakoretwo…"
+            ]
+            },
+        {
+                "word": "mĩrongo inyanya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mĩrongo kenda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…e na magana kenda. Kuma mwaka wa ngiri ĩmwe magana kenda na mĩrongo kenda na mũgwanja-rĩ (1997), kanitha ũyũ nĩ wambĩrĩirio thĩ-inĩ w…"
+            ]
+            },
+        {
+                "word": "ithathatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…ĩ itatũ >> ithatũ inya >> inya itano >> ithano thanthatũ >> ithathatũ mũonza >> mũgwanja nyanya >> inyanya kenda >> kenda ĩkũmi >…",
+                "…na paralipomena igaturumenq ũrutani ũcio. Parerga nĩ icunjĩ ithathatũ cia kũcĩgĩrĩra mawĩra ma mbere ma Mũgo ũyũ. Paralipomena, ĩ…",
+                "…nĩ yagũire hakuhĩ na gĩcigo kĩa Bishoftu thutha wa ndagĩka ithathatũ kuuma ndege ĩyo kwambĩrĩria, na andũ othe 157 arĩa maarĩ th…",
+                "…hatũ - seddé Áfar - inya - Áfar Shan - ithano - Shang Lix - ithathatũ - leh Toddobá - mũgwanja - todobé Sidéed - inyanya - siyeed…",
+                "…cia gũthuura == Thutha wa ithurano cia mwaka wa 2013, icigo ithathatũ cia Starehe nĩ Nairobi Central, Ngara, Pangani, Landimawe,…",
+                "…he, nĩ athagĩtwo ngoga inyanya cia Ballon d'Or, na ngerenwa ithathatũ cia European Golden Shoes.￼[Kũgemia 2] Nginya rĩrĩa aatigir…"
+            ]
+            },
+        {
+                "word": "ĩtandatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…o ndagĩka. Rĩthi ĩmwe na kĩmonimoni nĩ HERTZ ngorio mĩrongo ĩtandatũ kana 1/60 hertz.…",
+                "…Andũ a Kenya nĩ mahotete ngoga mĩrongo ĩtatũ na ĩtandatũ cia Paralympic: ngoga ikũmi na inya cia thahabu, ikũmi na i…",
+                "…ni waheirwo wĩathi mwaka wa ngirĩ imwe magana kenda mĩrongo ĩtandatũ na ithatũ (1963) kũma thrikari ya Ngeretha (Britain). Mũthe…",
+                "…Kung fu na Hapkido. Nĩ atongoretie ũthaki wa mbica mĩrongo ĩtandatũ na nĩ onĩkanĩte thĩinĩ wa mbica makĩria ma igana rĩmwe na m…",
+                "…aga mĩaka ĩrĩ gĩkĩro kĩa kamũira-mũthingi(pre-school) mĩaka ĩtandatũ mũthingi (grade 1-6) mĩaka ĩtatũ keerĩ-inĩ jĩthĩ(grade 7-9)…",
+                "…ja, akĩambĩrĩria, kũringana na ciugo ciake, \"mĩaka ikũmi na ĩtandatũ ya kũũrũra\". Aambĩrĩirie gũthoma gĩthomo gĩake gĩa thutha w…"
+            ]
+            },
+        {
+                "word": "ithatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…asintëin, mũigana wa thiomi cia Italia nĩ gĩcunjĩ kĩmwe gĩa ithatũ gĩa thiomi ciothe cia thĩ.…",
+                "…Hũma nĩ mũthemba wa gĩciko gĩkoragwo na hwang'i ithatũ kana igĩrĩ ĩhũthagĩragwo kũrĩa irio na njĩra ya kũcigweta.…",
+                "…amba raini itha ikigamanitio naguthondeka koine cia ndigiri ithatũ. Namba raini ikoragũo na namba negativu na positivu. Namba…",
+                "…rwa mathabu rũrĩa rũthũrimaga ndũgũ miuno na ũraihu wa hĩa-ithatũ. thuragia mĩikaranĩrio gatagatĩ ka njora na ũraihu wa mwena…",
+                "…uragia mĩikaranĩrio gatagatĩ ka njora na ũraihu wa mwena wa ithatũ. Makĩria ma ũguo, wĩra wa trigonometry nĩ ũhutanĩtie na mĩh…",
+                "…ũ cia Paralympic: ngoga ikũmi na inya cia thahabu, ikũmi na ithatũ cia betha na kenda cia gĩcangokie. Ũndũ ũcio ũratũma Kenya…"
+            ]
+            },
+        {
+                "word": "matatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kĩande kĩa mũndũ kĩrĩ na mahĩndĩ matatũ: gĩciri, makano na mũngotho.…",
+                "…g'ima harĩ maria ma Maaĩ Matheru. Iria rĩgayanĩtio mabũrũri matatũ: Tanzania gĩcunjĩ kĩa 49% (Template:Cvt), Uganda 45% (Templ…",
+                "…Marathon maita meerĩ (1995, 2002), Hokkaido Marathon maita matatũ na Nagano Marathon. == Ngemi ==…",
+                "…haro nĩ ndwari ya gũkorwo na kĩoro gĩtweku makĩria ma maita matatũ mũthenya ũmwe.…",
+                "…'eri wa marathon Kenya. Ahootanĩte Marathon ya Boston maita matatũ, na akĩhagĩrka ngerua ya hĩndĩ ĩyo ya 2:18:57 mwaka wa 2014…",
+                "…teithagia kũthikĩrĩria na gwĩtiria. Gũtũ nĩ kũrĩ na matiema matatũ: gũtũ kwa nja, gũtũ kwa gatagatĩ na gũtũ kwa thĩinĩ.. Tondũ…"
+            ]
+            },
+        {
+                "word": "mathatũ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Rũathia nĩ gĩtĩna kĩa nja biũ kĩa marũngo mathatũ marĩa mombĩte ngothi, igũrũ wa rũrũa na rũambũ. Gĩtĩna kĩa…"
+            ]
+            },
+        {
+                "word": "inya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Kĩrĩra kĩa thamiri inya nĩ gũanda ya mbũgĩ ĩmanĩrĩraga atĩ no njururo inya tu cia m…",
+                "…thamiri inya nĩ gũanda ya mbũgĩ ĩmanĩrĩraga atĩ no njururo inya tu cia mũnyaganio wa ũtũũro ta mbũgũigũ karũ ya mĩtugo maa…",
+                "…Kweria Inya nĩ gĩcigo kĩa mũhuro wa Amerika kĩrĩa kĩkoragwo na Colorado…",
+                "…Thĩinĩ wa mathabu, nĩ kĩũga kĩrĩ na thiũ inya, ndere itandatũ, na ica inya. Kĩũga gĩkĩ nĩ irigithathi ya…",
+                "…mathabu, nĩ kĩũga kĩrĩ na thiũ inya, ndere itandatũ, na ica inya. Kĩũga gĩkĩ nĩ irigithathi ya ciũga ciothe irĩ ndere nũngar…",
+                "…angĩrĩro wa Bloom Mũbangĩrĩro wa kwĩruta ũganyanitio cikaro inya: Gĩikaro kia ũgĩ, Gĩikaro kia wĩcirio,Gĩikaro kia saikomota…"
+            ]
+            },
+        {
+                "word": "ĩna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…tinent ĩmwe ya thĩ. Ĩkoragwo na mabururi makĩria ya mĩrongo ĩna. Ni kibũruri gĩa kerĩ thutha wa Asia kwa ũnene thiini wa th…",
+                "…Rũthiomi rwa Gĩcũthũ (Sesotho)) nĩ ĩmwe ya mĩthemba mĩrongo ĩna ya nyamű ciũngũyaga iria-inĩ ĩna ĩkuruhanu na rũruka rwa rĩ…",
+                "…ĩ ĩmwe ya mĩthemba mĩrongo ĩna ya nyamű ciũngũyaga iria-inĩ ĩna ĩkuruhanu na rũruka rwa rĩwiathani ra magego.…",
+                "…Thoome-inĩ ya mathabu, mũnĩtũ nĩ mbirigũ ĩna kĩharĩro kĩa ndari kana indo ingĩ cia mathabu na njakaranda…",
+                "…rĩro kĩa ndari kana indo ingĩ cia mathabu na njakaranda ici ĩna matĩna ma mĩhari ya mũkarara ngaranu iria irĩ na mũtugo mĩa…",
+                "…Mũteti ũrĩa atungatire ta Mũtĩrũkia (president) wa mĩrongo ĩna na kana wa Bũrũri wa ndegi nyũnganu cia america. == Rora ==…"
+            ]
+            },
+        {
+                "word": "ithano",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…murimu urehagwo ni vairasi ya Ebola. Kwi vairasi cia Ebola ithano imwe ciacio iruragia andu murimu wa Ebola kurigana na gikar…",
+                "…Mbuguiro Ithano Mbuguiro itethagĩa mũndũ kũmenya macigĩria marĩe mamũthiũrũ…",
+                "…itika rĩa hakuhĩ ũthakagwo nĩ mĩahũ erĩ cia athaki ikũmi na ithano kana mũgwanja. Mũhianĩre wa mũbira nĩ gĩtumbĩ.…",
+                "…mweri wa gatano 2019 harĩa nditimũrano iratumũkire njerainĩ ithano cia Amazonas, Brazil. Kũrĩ na andũ 55 arĩa mooragĩtwo. Andũ…",
+                "…Kambuni cĩana netiwaki ya thimu kenya ĩĩ kambuni ithano cĩana netiwaki cia thimu nĩ cio: Safaricom,Airtel, Orange n…",
+                "…rginia</b> mwaka wa 1869. Kappa Sigma nĩ ĩmwe ya ngwatanĩro ithano nene, ta mwaka wa 2013, maarĩ na ciũngano na mabibaũ 318 th…"
+            ]
+            },
+        {
+                "word": "ĩtano",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…mũbira wa magũrũ iria cikoretwo ikiĩkĩka o thutha wa mĩaka ĩtano. iramatagwo na mwĩrĩ wa gwatanĩro wĩtagwo FIFA. Arĩa manyit…",
+                "…ki 13 september 1996 arĩ o na ũkũrũ wa mĩaka mĩrongo ĩrĩ na ĩtano. Nĩ ararĩ na njũgitano na mũini mũrunawe Biggie Smalls. ==…",
+                "…igana wa andũ a rũrĩrĩ rũrũ bũrũri-inĩ wa Kenya nĩ mirrioni ĩtano(5million) kũrigana na ũtari-andũ ũrĩa wekĩkire 2019. mũcii…",
+                "…inaceidae. Nĩ kũrĩ mĩthemba 17 ya tũthangaraitĩ ya mĩthemba ĩtano ĩrĩa ĩkoragwo kũndũ kũingĩ thĩinĩ wa Rũraya, Asia, na Afrik…",
+                "…Ngarĩ (Panthera pardus) nĩ ĩmwe ya ĩtano ya rũruka rwa nyau ya gĩtĩrĩnge kĩa kĩratini kĩa Panthera.…",
+                "…es of Thika nĩ ndereti ya TV ya Ngeretha ya ndagĩka mĩrongo ĩtano matĩna mũgwanja ĩrĩa ĩrutĩtwo nĩ Euston Films nĩ ũndũ wa Th…"
+            ]
+            },
+        {
+                "word": "inyanya",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…u (Kĩnyamu) ticuma ĩkoragũo ĩĩ mĩruki. Atomic namba yayo ni inyanya (8). Nĩyo atomu ya kanana metha njokereriinĩ. Ĩkoragwo na E…",
+                "…o atomu ya kanana metha njokereriinĩ. Ĩkoragwo na Erektroni inyanya na Protoni inyanya. Karűgamiriri kayo nĩ O. Ũbanduithia way…",
+                "…etha njokereriinĩ. Ĩkoragwo na Erektroni inyanya na Protoni inyanya. Karűgamiriri kayo nĩ O. Ũbanduithia wayo nĩ [ He] 2s2 2p4.…",
+                "…ka (na mũno ĩtagwo Thika Superhighway) nĩ barabara ya njĩra inyanya na ikũmĩ na igĩrĩ kũmwe na kũmwe. Nĩ ĩnyitanagia itũũra ine…",
+                "…ithano thanthatũ >> ithathatũ mũonza >> mũgwanja nyanya >> inyanya kenda >> kenda ĩkũmi >> ikũmi thimo wĩkũma wĩlĩka - ona wa…",
+                "…Lix - ithathatũ - leh Toddobá - mũgwanja - todobé Sidéed - inyanya - siyeed Sagaal - kenda -Sagaal Toban - ikũmi - Tumung ngei…"
+            ]
+            },
+        {
+                "word": "ĩnana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ũtonga wa bũrũri wa Tanzania. Nane Nane nĩ Gĩthweri kuuga \"ĩnana ĩnana\" , rũthiomi rwa bũrũri wa Tanzania (na rwa Tanganyika…",
+                "…a wa bũrũri wa Tanzania. Nane Nane nĩ Gĩthweri kuuga \"ĩnana ĩnana\" , rũthiomi rwa bũrũri wa Tanzania (na rwa Tanganyika na Za…",
+                "…undo kũhũra ndigi. Igũkũira cia mahinda maya irĩ na mĩrongo ĩnana na ĩnana ya cabi njerũ na njirũ, na irĩ na mũtaratara wa kũ…",
+                "…ra ndigi. Igũkũira cia mahinda maya irĩ na mĩrongo ĩnana na ĩnana ya cabi njerũ na njirũ, na irĩ na mũtaratara wa kũhũmĩkithi…",
+                "…ri wa Amerika mũthenya wa 28 Mĩĩ 2025, arĩ na mĩaka mĩrongo ĩnana na mũgwanja. Ihinda-inĩ rĩa gĩkuũ gĩake, Ngũgĩ nĩ aakoretwo…",
+                "…rĩ mũgũnda-inĩ ũcio. Thutha wa kahinda kanini, arĩ na mĩaka ĩnana, nĩ aanyitanire na ariũ a nyina kĩrathi-inĩ kĩa Ihithe…"
+            ]
+            },
+        {
+                "word": "mĩrioni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "milioni",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…nada mwena wa ígúrú, Mexiko mwena wa ítherero . Îri na andú Milioni magana mathatu koguo ni ya kathatu nthí íría ina andu engí…",
+                "…ĩna andű angĩ műno gwĩ Kautĩ ĩria ingĩ. Ina makĩria ya andű milioni ithatu. Kurigana na KNBS Nairobi ina andu 3.1 milioni mwaka…",
+                "…andű milioni ithatu. Kurigana na KNBS Nairobi ina andu 3.1 milioni mwakaini wa 2010 . Obici nene cia Kautĩ ya Nairobi nĩ muno…",
+                "…nya December 2011, tetris nĩrendetie mĩtũkũ 202 hakuhĩ kobĩ milioni 70 cia ngora na kobĩ milioni 132 cia mĩthako ya thimũ ya kũ…",
+                "…endetie mĩtũkũ 202 hakuhĩ kobĩ milioni 70 cia ngora na kobĩ milioni 132 cia mĩthako ya thimũ ya kũgũra. Tetris nĩ ĩrĩ na ngerua…",
+                "…mĩharĩro mĩingĩ mũno ma Wikipedia ya Kĩngeretha, makĩria ma milioni ithano, na nĩ athondekete naarĩ irũmbũiyo kĩmwe haarĩ gĩcun…"
+            ]
+            }
+        ],
+    }
+    

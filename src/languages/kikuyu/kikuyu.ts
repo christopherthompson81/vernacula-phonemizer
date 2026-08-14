@@ -12,6 +12,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeKikuyu } from "./normalize.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -60,7 +61,13 @@ const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}'’]*)|(\d+)|([.!?
 
 class KikuyuPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // ⚠ TEXT NORMALIZATION RUNS FIRST, and no shared symbol tier is wired behind it. Kikuyu writes the
+        // measure and currency NOUN BEFORE its number in every corpus instance (`mita 200`, `kilomita 871`,
+        // `dolari mirioni 4.35`), and `core/normalizeSymbols.ts` can only POSTPOSE — playbook trap 47's
+        // second case, Oromo's finding. So every unit and currency reading lives in normalize.ts, in this
+        // language's own order, and there is one seam rather than two. See that file's header for the
+        // per-class counts and for everything deliberately declined.
+        return assembleClauses(normalizeKikuyu(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/gu, "'")));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

@@ -49,23 +49,66 @@
     // "Numbers in Gikuyu" for zero (kĩbũgũ), the magana hundreds series and mĩrioni ĩmwe = 1 000 000. The
     // composition rule (juxtaposed components, "na" only before the last) is the shared E5x algorithm —
     // see e5xNumbers.ts, where it is anchored on the ATTESTED Kikamba strings.
-    // SIMPLIFIED / EXTRAPOLATED (a reviewer should know): magana meerĩ (200) and magana matatũ (300) are
-    // attested; magana mana (400) / magana matano (500) are extrapolated from the same class-6 ma- concord, and
-    // 600–900 reuse the uninflected 6–9 stems (ithathatũ, mũgwanja, inyanya, kenda) because those numerals do
-    // not inflect. There is NO word for "billion" here: 10⁹ composes as mĩrioni ngiri ĩmwe ("a thousand
-    // million"), which follows the attested ngiri igana rĩmwe = 100 000 pattern rather than inventing a loan.
+    // ⚠ RE-MEASURED AGAINST THE CORPUS AND ki.wikipedia ON THE NORMALIZATION RUN, and SEVEN of the multiplier
+    // entries plus the MILLION word were forms this language does not write. This is the Shona `churu` shape
+    // (a thousand-word that was in fact the anthill, shipped for months) caught by asking the corpus first.
+    // The cause is one systematic mistake: the CONCORD in a multiplier slot agrees with the MAGNITUDE NOUN it
+    // follows, and the table had left most slots in the class-agnostic CITATION form.
+    //   · after `mĩrongo` (class 4, mĩ-) the multiplier takes ĩ-. `attest.ts` collocation counts on
+    //     ki.wikipedia, shipped form vs corrected form:
+    //       3  mĩrongo ithatũ    ×0 → mĩrongo ĩtatũ    ×3      6  mĩrongo ithathatũ ×0 → mĩrongo ĩtandatũ ×3
+    //       4  mĩrongo inya      ×0 → mĩrongo ĩna      ×8      8  mĩrongo inyanya   ×0 → mĩrongo ĩnana    ×2
+    //       5  mĩrongo ithano    ×0 → mĩrongo ĩtano    ×2
+    //     Correct already, and left alone: 2 `mĩrongo ĩrĩ` ×5 (against `mĩrongo igĩrĩ` ×0), 7 `mĩrongo
+    //     mũgwanja` ×1 and 9 `mĩrongo kenda` ×1 — 7 and 9 are mũ-/invariant stems that do not inflect.
+    //     The mined corpus corroborates independently: `mĩrongo ĩtandatũ na ithatũ (1963)`, `mĩrongo ĩtano na
+    //     inya (54)`, `mĩrongo ĩna na matano` (45 countries), `mĩrongo ĩnana na mũgwanja` (87 years).
+    //   · after `magana` (class 6, ma-) the multiplier takes ma-. 2–5 were already right and are corroborated
+    //     as class-6 numerals in their own right (`meerĩ` ×20 *matĩĩna meerĩ* two seasons, `matatũ` ×21
+    //     *mabũrũri matatũ*, `mana` ×2 + *maita mana* four times, `matano` ×20 *Mawatho matano ma Newton*).
+    //     6 and 8 were not: the file's own note claimed 6–9 "do not inflect", and the tens series above
+    //     refutes that for both. The class-6 forms are attested bare — `matandatũ` ×3 (*marĩtwa matandatũ*
+    //     six names, *magũrũ matandatũ* six legs) and `manana` ×6 (*mahati manana* eight legs, *mabũrũri
+    //     manana* eight countries) — so 600/800 are corrected to them. 7 and 9 stay invariant
+    //     (`magana kenda` ×5/2 attested; `magana mũgwanja` unattested either way, and nothing competes).
+    //   · MILLION: `mĩrioni` is ×0 in the 3921-paragraph corpus AND ×0 on ki.wikipedia. The word the language
+    //     writes is `mirioni` ×14 tokens / 11 articles — sense READ, and it is unambiguously the magnitude
+    //     (*andu ta mirioni igana rimwe*, *mirioni ikumi*, *dolari mirioni 4.33*). `milioni` is the same loan
+    //     with the l/r spelling the language does not distinguish and is equally attested (×14/12); `mirioni`
+    //     is preferred because it is the spelling this engine's own ⟨r⟩→ɾ grapheme reads natively, and the
+    //     mined corpus writes it 8 times against `milioni` 7.
+    // UNCHANGED AND STILL CORRECT, checked rather than assumed: the CITATION series (units 1–9) is attested
+    // whole — ithatũ ×22, inya ×24, ithano ×17, ithathatũ ×9, inyanya ×12 — and TWO independent gloss lists on
+    // ki.wikipedia pin its values, one against Kamba (*itatũ >> ithatũ … thanthatũ >> ithathatũ … nyanya >>
+    // inyanya*) and one against Somali (*Shan - ithano … Lix - ithathatũ … Toddobá - mũgwanja … Sidéed -
+    // inyanya*). ZERO `kĩbũgũ` ×3/2, sense READ and definitional: *ndari ya kĩbũgũ* — "the number zero", in
+    // the sentence saying that adding it to any number leaves that number unchanged. `ngiri ĩmwe` ×6/4 and
+    // `ngiri igĩrĩ` ×2, `igana rĩmwe` ×2.
+    // ⚠ THE `na` PLACEMENT IS NOT CHANGED, AND THE CORPUS IS SPLIT ON IT. Of the four fully spelled-out years,
+    // two match this composer exactly (*ngirĩ imwe magana kenda mĩrongo ĩtandatũ na ithatũ* = 1963, *… mĩrongo
+    // mũgwanja na inyanya* = 1978) and two carry an EXTRA `na` between components (*ngiri ĩmwe magana kenda na
+    // mĩrongo kenda na mũgwanja* = 1997, *ngiri igĩrĩ na ikũmi na mũgwanja* = 2017). Both orders are attested,
+    // so declaring either as the only one asserts a preference the evidence does not support — the reasoning
+    // that withheld `magnitudes` from Shona. The composer keeps the rule anchored on the Kikamba manual.
+    // ⚠ STILL EXTRAPOLATED, and a reviewer should know: `magana meerĩ` (200), `magana matatũ` (300),
+    // `magana matano` (500), `magana matandatũ` (600), `magana manana` (800) and `magana mũgwanja` (700) are
+    // each ×0 as a COLLOCATION on this wiki — only `igana rĩmwe`, `magana mana` ×2 and `magana kenda` ×5 are
+    // attested in the slot. The multiplier words themselves are attested in their class-6 form, which is what
+    // the corrections above rest on; the pairing with `magana` is composition, not citation.
+    // There is NO word for "billion" here: 10⁹ composes as mirioni ngiri ĩmwe ("a thousand million"), which
+    // follows the attested ngiri igana rĩmwe = 100 000 pattern rather than inventing a loan.
     "numbers": {
         "zero": "kĩbũgũ",
         "units": ["", "ĩmwe", "igĩrĩ", "ithatũ", "inya", "ithano", "ithathatũ", "mũgwanja", "inyanya", "kenda"],
         "ten": "ikũmi",
         "tens": "mĩrongo",
-        "tensMult": ["", "", "ĩrĩ", "ithatũ", "inya", "ithano", "ithathatũ", "mũgwanja", "inyanya", "kenda"],
+        "tensMult": ["", "", "ĩrĩ", "ĩtatũ", "ĩna", "ĩtano", "ĩtandatũ", "mũgwanja", "ĩnana", "kenda"],
         "hundredOne": "igana rĩmwe",
         "hundredRest": "igana rĩmwe",
         "hundreds": "magana",
-        "hundredsMult": ["", "", "meerĩ", "matatũ", "mana", "matano", "ithathatũ", "mũgwanja", "inyanya", "kenda"],
+        "hundredsMult": ["", "", "meerĩ", "matatũ", "mana", "matano", "matandatũ", "mũgwanja", "manana", "kenda"],
         "thousand": "ngiri",
-        "million": "mĩrioni",
+        "million": "mirioni",
         "and": "na"
     }
 }
