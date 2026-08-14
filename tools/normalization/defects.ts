@@ -1641,6 +1641,62 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         minus: "measured, then TESTED: a guarded rule read the spacecraft `சந்திரயான் -1` as minus one, the one "
             + "shape no guard can reject — see ACCEPTED_SILENT, which lists this instance as correctly silent",
     },
+    mn: {
+        // ⚠ MONGOLIAN'S HAYSTACK, so the strength of every "measured" below is legible. There is NO FLEURS mn.
+        // The evidence is the 452 retained segments of `tools/corpus/mined/mn.jsonc` (a 233,098-paragraph
+        // mn.wikipedia dump), the artifact's whole-corpus `counts`, and `attest.ts` against THAT SAME WIKI —
+        // a bigger sample of one source, never two. What Mongolian adds over the lg/qu position is espeak:
+        // `dictsource/mn_list` ships a SYMBOL block (`% xUvi`, `$ dOllar`, `_dpt tseg`, `+ nemex`,
+        // `= tentse:`) and a 35-row letter-name block, so several of the readings that DID land have two
+        // independent authorities. All of it is argued at length in src/languages/mongolian/normalize.ts.
+        // ⚠ `minus` AND `plus` ARE DELIBERATELY ABSENT FROM THIS BLOCK, so `review.ts --lang mn` STAYS RED on
+        // both. Each is a SOURCING gap with a reading still to find, and this table is not where TODOs go:
+        //   · MINUS is READ where it is unambiguous — `хасах` is attested ×33/18 with the sense checked
+        //     (`хасах ТЕМПЕРАТУРТАЙ болсон үед`, `хасах цэнэгтэй`) and the corpus names the sign outright
+        //     (`(хасах тэмдэг)`) — but only on a temperature. The residue the artifact still reports is the
+        //     RANGE hyphen (`1206-1635`, 112 digit-hyphen-digit shapes) and one exponent written `kmol -1`.
+        //     Mongolian reads a span with the ABLATIVE on the first operand, whose allomorph is chosen by the
+        //     harmony of the SPOKEN numeral and is suppletive (зуу→зуунаас, хорь→хориос) — trap 14, and
+        //     nothing in this tree attests those forms. A rule is still to find; the class stays red.
+        //   · PLUS has the same shape one step earlier. `нэмэх` is attested ×34/15 in the right paradigm
+        //     (`нэмэх бета задрал`, `протон (нэмэх цэнэгтэй)`), but this corpus's `+` is three senses and
+        //     `нэмэх` says only two: a positive temperature (`+41 хэм`, `+37`), ARITHMETIC (`12 + 16 × 2`),
+        //     and "over/more than" — `250000+орчим`, `160 000+ орчим`, `300000+ орчим`, and the judo weight
+        //     CLASSES `+100 кг-н аварга` and `+78 кг`. The playbook's asymmetry settles the first (omitting a
+        //     plus is lossless, omitting a minus INVERTS); the third has no attested word at all.
+        "plus-minus": "measured: `±` is ×0 in the retained text, and the reading would compose two words of "
+            + "which the plus side is the open question above",
+        equals: "measured: `=` ×22, and most are not equations — `=== Уур амьсгал ===` MediaWiki headings and "
+            + "`4X гэдэг маань = \"explore, expand…\"` glosses. ⚠ AND THE WORD IS NOT THE GAP: espeak's "
+            + "`mn_list` gives `= tentse:` and the corpus gives `тэнцүү` ×2 — but BOTH corpus instances "
+            + "case-mark their argument and put the verb last (`1 mol N A -ТЭЙ (Авогадрогийн тоо) ТЭНЦҮҮ`, "
+            + "`10 их наяд ам.доллар-ТАЙ ТЭНЦЭЖ`), so there is no invariant string to place BETWEEN two "
+            + "operands and the case cannot be computed from digits. Trap 14 arriving as a reason to DECLINE, "
+            + "the same place Luganda's noun-class concord landed",
+        "less-than": "measured: `<` is ×0 in the retained text (espeak names it `baga'temdeg`, the "
+            + "\"less sign\" — a NAME for the character, not a reading between operands; the hi `धन` register "
+            + "lesson)",
+        "greater-than": "measured: `>` ×0 as a comparison. The retained text's only angle brackets are the "
+            + "HTML-tag article's escaped markup (`&lt;h1&gt;`, `&lt;img&gt;`), which core/markup.ts decodes "
+            + "above this layer, plus one chemistry arrow (`H ->He`)",
+        times: "measured: `×` ×5, all genuine multiplication (`1000 W × 24 цаг × 365`, `12 + 16 × 2`) — AND "
+            + "THE WORD FAILS THE SENSE CHECK, which is why this is a refusal and not a rule. `үржих` is "
+            + "attested ×24/18 on mn.wikipedia and EVERY example is biological REPRODUCTION: `өсөж үржих` "
+            + "(grow and multiply), bacteria, `үржих үзүүлэлт` (breeding rate), `бэлгийн болон бэлгийн бус "
+            + "замаар үржих`. That is the `ilo dollar` / `ki digirii` shape — a green count and the wrong "
+            + "word — and espeak's `mn_list` has no `×` row to cross-check it against",
+        divide: "measured: `÷` is ×0 in the retained text. `хуваах` occurs ×1 and is the political sense "
+            + "(`эзэнт гүрнийг ХУВААХАД`, on partitioning an empire), not an operator",
+        ampersand: "measured: `&` ×27, of which 22 are HTML ENTITIES that core/markup.ts decodes above this "
+            + "layer (`&nbsp;` ×3, `&mdash;` ×4, `&ndash;` ×2, `&lt;`/`&gt;` ×8, `&sup2;` ×2, `&apos;`). All "
+            + "FIVE bare signs are inside FOREIGN LATIN titles this wiki carries — `Mr. & Mrs. Smith (2005)`, "
+            + "`C&C Red Alert`, `Warcraft: Orc & Humans`, `Global Banking & Finance Review`, `Lavlagaa & "
+            + "apos;` — so a Mongolian conjunction would be inserted into an English film title. Not one is a "
+            + "Mongolian sentence, and the conjunction is not the gap (`ба`/`болон` are everywhere): one "
+            + "instance would not be a rule (trap 9) and zero certainly is not. espeak's `& ampersand` is the "
+            + "English word transliterated and is not a reading for this slot. ki, sn and lg reached the same "
+            + "conclusion from the same evidence",
+    },
     mr: {
         // Devanagari compounds are written with a hyphen (आस-पास), and the corpus's one hyphen-before-digit
         // outside a range is `चंद्रयान -1`, a spacecraft name.

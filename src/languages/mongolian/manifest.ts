@@ -15,6 +15,10 @@ export interface MongolianManifest {
     diphthongs: Record<string, string>;
     consonants: Record<string, string>;
     backVowels: string;
+    /** Cyrillic letter → its NAME, for `core/initialisms.ts` (see the sourcing note in mongolian.jsonc). */
+    letterNames: Record<string, string>;
+    /** Acronyms read letter-by-letter although their lowercase form is a readable word. Empty; see the manifest. */
+    acronymLetters: readonly string[];
     clausePunctuation: Record<string, string>;
     numbers: {
         units: string[];

@@ -49,6 +49,85 @@
     // Back-harmony vowel letters: their presence makes the word back (pharyngeal) → г→ɢ, х→χ, reduced vowel backs.
     "backVowels": "аоуяёы",
 
+    // Cyrillic letter NAMES, for `core/initialisms.ts` (wired in normalize.ts). Without this table that seam
+    // is a total no-op and `ДНБ` reaches the g2p as the cluster [tnp] — and worse here than in a shallow
+    // orthography, because mongolian.ts's word-final short-vowel DELETION eats acronym letters: АНУ → [an],
+    // ОХУ → [ɔχ], МЭӨ → [me].
+    //
+    // SOURCE: espeak-ng `dictsource/mn_list`'s own `_а`…`_я` block — 35 rows, verified to be genuine letter
+    // names and not `$directive` entries (playbook trap 21: a plausible number deserves the same suspicion as
+    // an absurd one; the block contains ZERO `$` rows and its ⟨й⟩/⟨ъ⟩/⟨ь⟩ names are Mongolian's own terms
+    // rather than Russian's, so it is a Mongolian table and not a copied one).
+    //
+    // espeak is PHONETIC, so each spelling below was DERIVED from its mnemonic and then round-tripped back
+    // through THIS engine's g2p and compared (playbook §5c). All 33 come back with espeak's segment skeleton
+    // once this manifest's OWN three documented conventions are applied — they are engine-wide facts, not
+    // letter-name errors:
+    //   · the unaspirated/aspirated series: espeak be/de/ge/dZe/ze ↔ engine pe/te/ɡe/t͡ʃe/t͡se, and
+    //     espeak ka/pe/te/tse/tSe ↔ engine kʰa/pʰe/tʰe/t͡sʰe/t͡ʃʰe   ("convention.stops", above)
+    //   · ⟨в⟩ → w  (espeak ve, engine we)                            ("convention.devoicing")
+    //   · ⟨л⟩ → ɮ  (espeak el, engine eɮ)                            ("convention.l")
+    //   · ⟨н⟩ → ŋ word-finally (espeak en, engine eŋ)                ("convention.finalN")
+    // The only residue is VOWEL LENGTH on the six bare-vowel names: espeak writes a: O: U: y: 8: e:, and the
+    // single-letter spelling reads short. Doubling them (аа, оо…) would be inventing an orthography the
+    // language does not write for a letter name, so the length is left to espeak's mnemonic and recorded here.
+    //
+    // ⟨ъ⟩ and ⟨ь⟩ are DELIBERATELY ABSENT, the same call Kyrgyz made: their espeak names are whole PHRASES
+    // (хатуу тэмдэг / зөөлөн тэмдэг, "hard sign" / "soft sign") rather than letter names, and `spellOut`
+    // returns undefined when any letter is missing — so an acronym containing one is left alone instead of
+    // getting a half reading. ⟨й⟩'s name IS a phrase and is kept, because "хагас и" (half-i) is what the
+    // letter is called rather than a description of a mark.
+    "letterNames": {
+        "а": "а", "б": "бэ", "в": "вэ", "г": "гэ", "д": "дэ", "е": "е", "ё": "ё", "ж": "жэ",
+        "з": "зэ", "и": "и", "й": "хагас и", "к": "ка", "л": "эл", "м": "эм", "н": "эн",
+        "о": "о", "ө": "ө", "п": "пэ", "р": "эр", "с": "эс", "т": "тэ", "у": "у", "ү": "ү",
+        "ф": "эф", "х": "хэ", "ц": "цэ", "ч": "чэ", "ш": "ша", "щ": "ща", "ы": "ы", "э": "э",
+        "ю": "ю", "я": "я"
+    },
+
+    // ACRONYMS READ LETTER-BY-LETTER that the OOV phonotactic rule leaves alone because their lowercase form
+    // is phonotactically legal. A LEXICAL fact, exactly as in russian.jsonc (США/ДНК listed, СМИ/ООН not) —
+    // nothing in the spelling distinguishes the two, and this tree has no Mongolian pronunciation dictionary
+    // to ask.
+    //
+    // ⚠ THIS LIST WAS EMPTY IN THE FIRST CUT AND THE ARGUMENT FOR LEAVING IT EMPTY WAS WRONG ON ITS FACE. It
+    // said "a readable string is left readable, which is the conservative direction". In a shallow
+    // orthography that is true. Here it is not: mongolian.ts DELETES a word-final short vowel and reduces
+    // every non-initial one, so the alternative on offer is not "letter reading versus word reading" — it is
+    // "letters named versus letters DESTROYED". Measured on this corpus's own acronyms with the list empty:
+    //     АНУ ×15 → [an]     the ⟨У⟩ gone          ОХУ ×6 → [ɔχ]     the ⟨У⟩ gone
+    //     УИХ ×6  → [ʊəx]                          НҮБ ×4 → [nup]
+    //     МЭӨ ×4  → [me]     the ⟨Ө⟩ gone          ОУ  ×3 → [ɔ]      ONE phoneme for two letters
+    // Those are ~38 retained instances against the 17 the seam did claim, and `initialism` is this corpus's
+    // second-largest cell (×53329). Leaving them was not conservative, it was silent.
+    //
+    // ADMISSION CRITERION, applied to every all-caps token in the retained text and stated so the next reader
+    // can re-run it: the token's EXPANSION is written out beside it, which is what proves it is an initialism
+    // of separate words rather than a syllabic acronym said as one. The wiki states four of them
+    // definitionally, in the same `товчоор X` shape the unit articles use for their abbreviations:
+    //     `Америкийн Нэгдсэн Улс (ТОВЧООР АНУ; Англи: United States of America)`
+    //     `Оросын Холбооны Улс (ТОВЧООР ОХУ, орос. Российская Федерация)`
+    //     `Нэгдсэн Үндэстний Байгууллага ТОВЧ. НҮБ (англи. United Nations)`
+    //     `Олон улсын хөлбөмбөгийн холбоо (ОУХБХ)`                    — О+У = "Олон улсын", the ОУ- prefix
+    // and the corpus supplies the other two in its own running text: `Монгол Улсын Их Хурлын дэд даргаар …
+    // УИХ-ын гишүүнээр` (one sentence, both forms) and the era article's `Манай эриний өмнөх … МЭӨ анхны
+    // зуун` (`манай эриний` ×29/20 on the wiki). `МЭ` is the same series as `МЭӨ` and moves with it.
+    //
+    // EVERY LETTER NAME COMES FROM espeak's `mn_list` (rows `_а a:`, `_н en`, `_у U:`, `_о O:`, `_х xe`,
+    // `_м em`, `_э e:`, `_ө 8:`, `_и i:`, `_ү y:`, `_б be`), verified row by row; none is invented, and the
+    // readings are `а эн у`, `о хэ у`, `у и хэ`, `эн ү бэ`, `эм э ө`, `эм э`, `о у`.
+    //
+    // DELIBERATELY NOT LISTED, and each is a token in the retained text:
+    //   · МУ ×4 (Монгол Улс), УБ ×4 (Улаанбаатар) — no `товчоор` definition anywhere and no expansion beside
+    //     them, so the criterion above does not admit them. They also lose no letter today ([mʊ], [ʊp]).
+    //   · ДОХ, МИАТ, МАН, ДАШТ, ТЭЗҮ, ШУА, ӨМӨЗО — pronounceable acronyms said as WORDS (`дох` is AIDS,
+    //     `МИАТ` the airline). This is the СМИ/ООН row of the Russian file: readable AND conventionally read.
+    //   · МОНГОЛ, ДЭЭД, ХҮН, ГУРАВ, ДАРГА, ЕРӨНХИЙ … — ordinary words in a shouted phrase, which the
+    //     phonotactic test already leaves alone.
+    // Every listed form is ×0 as a lowercase running word in both the mined corpus and the attest artifact,
+    // so none of them can spell out a word of the language.
+    "acronymLetters": ["ану", "оху", "уих", "нүб", "мэө", "мэ", "оу"],
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ","
     },

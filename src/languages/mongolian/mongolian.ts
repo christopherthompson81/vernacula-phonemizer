@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords, spellDigits } from "./numbers.ts";
 import { bichigToCyrillic, isBichig } from "./mongolBichig.ts";
+import { normalizeMongolian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Word-final obstruent devoicing: only в→f (Женев→dʒɛnɛf). Final г stays voiced (хаг→xaɡ, хурга→xʊrəɢ).
@@ -97,7 +98,10 @@ const TOKEN = /([Ѐ-ӿᠠ-ᡂ᠋-᠎‌‍ ]+)|(\d+)|([.!?…,;:])/gu;
 
 class MongolianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // NORMALIZATION FIRST — see normalize.ts. Every unit, sign, ordinal and initialism reading lives
+        // there rather than in `core/normalizeSymbols.ts`: Mongolian glues a CASE SUFFIX to the percent sign
+        // (`67%-ийг` → *хувийг*), which is trap 14 and which the tier's invariant strings cannot express.
+        return assembleClauses(normalizeMongolian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // cardinal → words → IPA. ⚠ ABOVE 2^53 `numberToWords` RETURNS "" AND THE NUMBER USED TO VANISH:
             // the split produced one empty word and nothing was emitted, so the sentence scanned without its
