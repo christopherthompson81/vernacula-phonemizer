@@ -155,6 +155,22 @@ describe("Haitian Creole text normalization", () => {
         expect(normalizeHaitian("1403-04")).toBe("1403-04");
     });
 
+    // ⚠ TRAP 58 — a rule that is right in isolation gave up at a full stop. The trailing guard carried a
+    // bare `.`, so the rule declined at exactly a sentence end and `1950-1960.` came back untouched: two
+    // cardinals with nothing between them. The dot must reject a CONTINUATION of the number, not a clause
+    // mark. The COMMA stays rejected outright — this corpus writes the decimal comma (`1 a 1,5m`).
+    test("⚠ a clause-final range still takes its joiner (trap 58)", () => {
+        expect(normalizeHaitian("1950-1960.")).toBe("1950 a 1960.");
+        expect(normalizeHaitian("p. 347–368.")).toBe("paj 347 a 368.");
+        expect(normalizeHaitian("788–818!")).toBe("788 a 818!");
+        // …and the reasons the dot was there are all kept: a decimal right operand, and a DOI's inner pair,
+        // which the lookbehind cannot decline because a `/` precedes it.
+        expect(normalizeHaitian("5-13.7")).not.toContain(" a "); // the decimal step reads the tail, not RANGE
+        expect(normalizeHaitian("doi:10.1111/1469-8219.00039")).toContain("1469-8219");
+        // the comma guard, kept: a decimal right operand written the French way
+        expect(normalizeHaitian("1-1,5")).not.toContain(" a ");
+    });
+
     test("currency — `dola`, and the sign is DROPPED when the word is already there (trap 12)", () => {
         expect(normalizeHaitian("$1,800")).toBe("1800 dola");
         expect(normalizeHaitian("$ 120 milyon dola")).toBe("120 milyon dola"); // named twice → say it once

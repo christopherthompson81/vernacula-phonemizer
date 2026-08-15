@@ -132,8 +132,17 @@ const BARE_UNITS = makeBareUnitNormalizer(UNITS);
  *  The connective is `kino`, ×248 between two numbers and a genuine span in every instance read:
  *  `na mibu 1600 kino 1850`, `mikolo 30 kino 180`, `10 kino 30% ya batu`, `kilomɛtɛlɛ 1 kino 4`.
  *  (`na` ×82, `mpe` ×73 and `tii` ×43 also occur; `kino` is the plurality and the least ambiguous — `na`
- *  and `mpe` are the ordinary conjunctions and already carry the numeral compounds.) */
-const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)(\s?)[-–—]\s?(\d+)(?![\d.,\p{L}\p{M}-])/gu;
+ *  and `mpe` are the ordinary conjunctions and already carry the numeral compounds.)
+ *
+ *  ⚠ THE TRAILING GUARD EXCLUDES A DOT THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK — the same correction
+ *  this file already spells out for the de-grouping arms, and this rule did not follow it. A plain `.` in
+ *  the class declines the whole match at exactly a sentence end, so `1876-1900.` came back untouched and
+ *  read as two cardinals with nothing between them (trap 58, `review.ts`'s `clause-final` check). `\.\d`
+ *  keeps every reason the dot was there: a decimal right operand and the bibliography's DOIs, whose inner
+ *  pairs are ascending and digit-dash-digit, are still declined.
+ *  ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA, so `5–13,7` must not be claimed
+ *  with its fraction left behind. */
+const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)(\s?)[-–—]\s?(\d+)(?![,\d\p{L}\p{M}-]|\.\d)/gu;
 
 /** Era markers, sourced from the corpus text that spells them out BESIDE the abbreviation — the strongest
  *  form of attestation there is, because the source document glosses itself:

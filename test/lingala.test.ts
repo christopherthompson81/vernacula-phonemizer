@@ -132,6 +132,22 @@ describe("lingala text normalization", () => {
         expect(normalizeLingala("Malako 16:15-18")).toBe("Malako 16:15-18"); // a scripture span
     });
 
+    // ⚠ TRAP 58 — a rule that is right in isolation gave up at a full stop. The trailing guard carried a
+    // bare `.`, so the rule declined at exactly a sentence end and `1876-1900.` came back untouched: two
+    // cardinals with nothing between them. The dot must reject a CONTINUATION of the number, not a clause
+    // mark — the form this file's own de-grouping arms already spell out.
+    test("⚠ a clause-final range still takes its joiner (trap 58)", () => {
+        expect(normalizeLingala("77-81.")).toBe("77 kino 81.");
+        expect(normalizeLingala("1876-1900.")).toBe("1876 kino 1900.");
+        expect(normalizeLingala("1900-1910)")).toBe("1900 kino 1910)");
+        // …and the reasons the dot was there are kept: a decimal right operand, and a DOI's inner pair,
+        // which the lookbehind cannot decline because a `/` precedes it.
+        expect(normalizeLingala("5-13.7")).not.toContain("kino"); // the decimal step reads the tail, not RANGE
+        expect(normalizeLingala("doi:10.1186/1742-4690.3")).toContain("1742-4690");
+        // THE COMMA GUARD IS KEPT: this corpus writes the decimal comma.
+        expect(normalizeLingala("5-13,7")).not.toContain("kino");
+    });
+
     test("percent spans: the one dash the range rule may cross", () => {
         // ×2, one sentence. `%…-…%` cannot be arithmetic, and it costs no new word — `kino` either side.
         expect(normalizeLingala("pene na 20%-40% ya batu"))

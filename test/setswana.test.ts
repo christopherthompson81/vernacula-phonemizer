@@ -159,6 +159,22 @@ describe("Setswana normalization — the symbols a reader says aloud", () => {
         expect(words("ISBN 1-58479-341-4")).toBe("ISBN 1-58479-341-4"); // a hyphen CHAIN — declined
     });
 
+    // ⚠ TRAP 58 — a rule that is right in isolation gave up at a full stop. The trailing guard carried a
+    // bare `.`, so the rule declined at exactly a sentence end and `2005-2006.` came back untouched: two
+    // cardinals with nothing between them. The dot must reject a CONTINUATION of the number, not a clause
+    // mark — which is the `(?![\d]|[.,]\d)` form step 6 of this layer already argues for.
+    test("⚠ a clause-final range still takes its joiner (trap 58)", () => {
+        expect(words("486–501.")).toBe("486 go ya go 501.");
+        expect(words("2005-2006.")).toBe("2005 go ya go 2006.");
+        expect(words("1940-1947?")).toBe("1940 go ya go 1947?");
+        // …and the reasons the dot was there are kept: a decimal right operand, and a DOI's inner pair,
+        // which the lookbehind cannot decline because a `/` precedes it.
+        expect(words("5-13.7")).not.toContain("go ya go"); // the decimal step reads the tail, not the range
+        expect(words("doi:10.1080/1469-8219.00039")).toContain("1469-8219");
+        // THE COMMA GUARD IS KEPT: this corpus writes the decimal comma as well as the comma group.
+        expect(words("5-13,7")).not.toContain("go ya go");
+    });
+
     test("the clock needs a marker; a sports time never has one", () => {
         expect(words("7:00 p.m.")).toBe("diura di le 7 thapama");
         expect(words("6:19 p.m.")).toBe("diura di le 6 le metsotso e le 19 thapama");

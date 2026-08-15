@@ -165,8 +165,17 @@ const BARE_EXPONENT_UNITS: readonly (readonly [RegExp, string])[] = UNITS
  *  `soti nan 1942 a 1945`, `Prezidan an Ayiti soti 1957 a 1964`, `Li kapab grandi 1 a 1,5m`, `long de 50cm a
  *  1,80m`, `ant tanperati ki sòti nan 15 ° C a 35 ° C`. (`rive`/`rive nan` ×460 and `jiska` ×26 also occur;
  *  `a` is the one that appears with no framing preposition, which is the slot a bare `1965-1975` is in.
- *  `ant X ak Y` ×3,938 is the FRAMED form and needs the `ant` this rule cannot supply.) */
-const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d.,\p{L}\p{M}-])/gu;
+ *  `ant X ak Y` ×3,938 is the FRAMED form and needs the `ant` this rule cannot supply.)
+ *
+ *  ⚠ THE TRAILING GUARD EXCLUDES A DOT THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK — the same correction
+ *  this file already spells out for the de-grouping arms below, and this rule did not follow it. A plain
+ *  `.` in the class declines the whole match at exactly a sentence end, so `1950-1960.` came back untouched
+ *  and read as two cardinals with nothing between them (trap 58, `review.ts`'s `clause-final` check).
+ *  `\.\d` keeps every reason the dot was there: a decimal right operand and this corpus's DOIs
+ *  (`10.1111/1469-8219.00039`, whose inner pair is ascending and digit-dash-digit) are still declined.
+ *  ⚠ THE COMMA STAYS IN THE CLASS. This corpus writes the DECIMAL COMMA — its own attestations are
+ *  `1 a 1,5m` and `50cm a 1,80m` — so `5–13,7` must not be claimed with its fraction left behind. */
+const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![,\d\p{L}\p{M}-]|\.\d)/gu;
 
 /**
  * ⚠ THE ORDINAL IS A TAIL REWRITE OF THE CARDINAL WORD, and every pair here is attested in the corpus's own

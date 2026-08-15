@@ -109,6 +109,20 @@ describe("text normalization", () => {
         expect(normalizeMadurese("0-07-115221")).toBe("0-07-115221");
     });
 
+    // ⚠ TRAP 58, AND THIS LAYER IS THE ONE THAT DID NOT HAVE IT — pinned so it stays that way. The trailing
+    // guard here is `(?![\d,\p{L}\p{M}/-])` with NO `.`, so a clause-final range keeps its connective where
+    // five sibling layers lost theirs. The `,` IS in the guard and stays: this corpus writes the decimal
+    // comma ×55 (`tegghina 1 sampè' 1,7 mèter`), so a comma after the right operand may be a fraction and
+    // the rule is right to decline it rather than read half a number.
+    test("⚠ a clause-final range keeps its connective, and the comma guard is deliberate (trap 58)", () => {
+        expect(normalizeMadurese("1953 -1955.")).toBe("1953 sampè' 1955.");
+        expect(normalizeMadurese("05-15.")).toBe("05 sampè' 15.");
+        expect(normalizeMadurese("04-20.")).toBe("04 sampè' 20.");
+        // the comma arm, declined ON PURPOSE — the operand rule would otherwise have to guess whether the
+        // comma opens a fraction or closes a clause.
+        expect(normalizeMadurese("04-20,")).toBe("04-20,");
+    });
+
     // `±` IN THIS CORPUS IS "ABOUT", NOT A TOLERANCE — all four instances are a rounded area or height, and
     // one of them glosses the sign itself: `Loas wilayana korang lebbi ±1.752,21 km²`.
     test("± is read as 'about', and is not doubled where the text already says it", () => {

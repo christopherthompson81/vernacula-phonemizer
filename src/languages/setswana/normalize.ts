@@ -338,7 +338,16 @@ export function normalizeSetswanaPost(input: string): string {
     //    this runs and the two operands are no longer both digits. Moving ranges above the tier only moves
     //    the damage (`4 go ya go dikilogerama di le 5`); one instance did not earn a third pass.
     //    AFTER step 6, so a grouped endpoint is already one run of digits, and AFTER step 5.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d.,\p{L}\p{M}])/gu,
+    //    ⚠ THE TRAILING GUARD EXCLUDES A DOT THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK — `(?![\d]|[.,]\d)`
+    //    is the form step 6 above already argues for, and this arm did not follow it. A plain `.` in the
+    //    class declines the whole match at exactly a sentence end, so `2005-2006.` came back untouched and
+    //    read as two cardinals with nothing between them (trap 58, `review.ts`'s `clause-final` check).
+    //    `\.\d` keeps every reason the dot was there: a decimal right operand and a DOI's inner pair
+    //    (`10.1111/1469-8219.00039` — ascending, digit-dash-digit, and reached by no other guard here since
+    //    `/` is not in the lookbehind) are still declined.
+    //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
+    //    so `5–13,7` must not be claimed with its fraction left behind.
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-,\d\p{L}\p{M}]|\.\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact, the shared tier

@@ -370,8 +370,17 @@ export function normalizeJavanese(input: string): string {
     // `0301-0104`. A page range is not spoken as "157 nganti 167" in running prose, and the DOI is not
     // spoken at all. Both arms of the guard are needed: one for the citation that FOLLOWS the range, one for
     // the identifier the range sits INSIDE.
+    // ⚠ THE TRAILING GUARD EXCLUDES A DOT THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK. A plain `.` in the
+    // class declines the whole match at exactly a sentence end, so `2004-2005.` came back untouched and read
+    // as two cardinals with nothing between them (trap 58, `review.ts`'s `clause-final` check). `\.\d` keeps
+    // the one job the dot still has HERE — the identifier, e.g. a DOI's inner `0301-0104`. A dotted decimal
+    // or a period-grouped operand never reaches this rule at all: steps 3 and 4 have already turned
+    // `900 - 1.200` into `900 - 1200` and `5-13.7` into `5-13 koma 7` before the range runs.
+    // ⚠ THE COMMA STAYS IN THE CLASS on the same reasoning, though it is worth recording that in THIS layer
+    // neither separator is reachable as a DECIMAL at all — steps 3 and 4 own both marks and run first, so
+    // the guard's live job here is the identifier, not the number.
     s = s.replace(
-        /(?<![\d.,/-])(\d+)\s*[-–]\s*(\d+)(?![\d.,/-])(?!\s*doi)/giu,
+        /(?<![\d.,/-])(\d+)\s*[-–]\s*(\d+)(?![\d,/-]|\.\d)(?!\s*doi)/giu,
         (m, a: string, b: string, off: number, full: string) =>
             /doi:?\s*\S*$/iu.test(full.slice(Math.max(0, off - 40), off)) ? m : `${a} nganti ${b}`,
     );

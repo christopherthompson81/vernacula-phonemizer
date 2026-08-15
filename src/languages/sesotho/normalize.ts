@@ -360,7 +360,17 @@ export function normalizeSesotho(input: string): string {
     //    ⚠ THE GUARD EXCLUDES A HYPHEN ON EITHER SIDE, which declines a hyphen CHAIN, and a LETTER on
     //    either side, which declines `COVID-19` and `802.11n`-shaped designations.
     //    AFTER step 4, so a grouped endpoint is already one run of digits.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d.,\p{L}\p{M}])/gu,
+    //    ⚠ THE TRAILING GUARD EXCLUDES A DOT THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK — `(?![\d]|[.,]\d)`
+    //    is the form step 4 above already argues for, and this arm did not follow it. A plain `.` in the
+    //    class declines the whole match at exactly a sentence end, so `73–94.` came back untouched and read
+    //    as two cardinals with nothing between them (trap 58, `review.ts`'s `clause-final` check). `\.\d`
+    //    keeps every reason the dot was there, and the counter-example is IN THIS CORPUS: the citation
+    //    `73–94. etsa:10.1111/1469-8219.00039` carries the DOI pair `1469-8219`, ascending and
+    //    digit-dash-digit, preceded by `/` — which is not in the lookbehind, so the trailing dot is the ONLY
+    //    guard that declines it. `\.\d` still does; a bare removal would have read the DOI as a span.
+    //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
+    //    so `5–13,7` must not be claimed with its fraction left behind.
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-,\d\p{L}\p{M}]|\.\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${SPAN} ${b}` : whole));
 
     // 8) THE ENGLISH ORDINAL SUFFIX (`60th`, `1st`, `18th`). Sesotho writes its own ordinals as WORDS with a

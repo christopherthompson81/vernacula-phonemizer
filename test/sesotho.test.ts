@@ -108,6 +108,23 @@ describe("Sesotho text normalization", () => {
         expect(normalizeSesotho("COVID-19")).toBe("COVID-19"); // letter-flanked: a designation
     });
 
+    // ⚠ TRAP 58 — a rule that is right in isolation gave up at a full stop. The trailing guard carried a
+    // bare `.`, so the rule declined at exactly a sentence end and `73–94.` came back untouched: two
+    // cardinals with nothing between them. The dot must reject a CONTINUATION of the number, not a clause
+    // mark — which is the `(?![\d]|[.,]\d)` form step 4 of this layer already argues for.
+    test("⚠ a clause-final range still takes its joiner (trap 58)", () => {
+        expect(normalizeSesotho("7-10.")).toBe("7 ho isa ho 10.");
+        expect(normalizeSesotho("1933 - 1945.")).toBe("1933 ho isa ho 1945.");
+        expect(normalizeSesotho("73–94.")).toBe("73 ho isa ho 94.");
+        // …and the counter-example is IN THIS CORPUS, in the very sentence that carries `73–94.`: the DOI
+        // `10.1111/1469-8219.00039` offers an ascending digit-dash-digit pair preceded by `/`, which the
+        // lookbehind does not reject. Only the trailing dot declines it, and it still must.
+        expect(normalizeSesotho("etsa:10.1111/1469-8219.00039")).toContain("1469-8219");
+        expect(normalizeSesotho("5-13.7")).not.toContain("ho isa ho"); // the decimal step reads the tail
+        // THE COMMA GUARD IS KEPT: this corpus writes the decimal comma as well as the comma group.
+        expect(normalizeSesotho("5-13,7")).not.toContain("ho isa ho");
+    });
+
     test("a currency-glued magnitude letter is spent BEFORE the metre key can claim it", () => {
         // The artifact glosses the abbreviation itself: `R2.3m(di-milione tse pedi feelwane tharo)`.
         // Without step 5 this reads *diranta tse 2.3 dimithara tse* — a wrong unit, not a silence.

@@ -153,6 +153,23 @@ describe("jv text normalization", () => {
         expect(normalizeJavanese("10-15(-17) cm")).toBe("10 nganti 15(-17) sèntimèter");
     });
 
+    // ⚠ TRAP 58 — a rule that is right in isolation gave up at a full stop. The trailing guard carried a
+    // bare `.`, so the rule declined at exactly a sentence end and `2004-2005.` came back untouched: two
+    // cardinals with nothing between them. The dot must reject a CONTINUATION of the number, not a clause
+    // mark.
+    test("⚠ a clause-final range still takes its joiner (trap 58)", () => {
+        expect(normalizeJavanese("abad 15-16.")).toBe("abad 15 nganti 16.");
+        expect(normalizeJavanese("15-17.")).toBe("15 nganti 17.");
+        expect(normalizeJavanese("ing 2004-2005.")).toBe("ing 2004 nganti 2005.");
+        // …and the one job the dot still has HERE is kept — the identifier. (A dotted decimal never reaches
+        // this rule: steps 3 and 4 read `5-13.7` as `5-13 koma 7` before the range runs.)
+        expect(normalizeJavanese("157-167 doi:10.1016/0301-0104")).not.toContain("nganti");
+        // ⚠ THE COMMA STAYS IN THE GUARD, but it is worth recording that in THIS layer neither separator is
+        // reachable as a DECIMAL: steps 3 and 4 own both marks and run first, so `3-4,5(-12,5) cm` already
+        // reads as a span here and did before this change too. Pinned so the ordering stays visible.
+        expect(normalizeJavanese("3-4,5(-12,5) cm")).toBe("3 nganti 4 koma 5(-12 koma 5) sèntimèter");
+    });
+
     test("units, exponents and the rate word, all corpus- or wiki-sourced", () => {
         expect(phonemize("132.000 km²", "jv")).toContain(phonemizeWord("persegi"));
         expect(phonemize("1 m³/s", "jv")).toContain(phonemizeWord("kubik"));
