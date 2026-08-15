@@ -138,9 +138,24 @@ const SYMBOLS = makeSymbolNormalizer({
         "£": ["mārciņa", "mārciņas"],
     },
     units: UNITS,
-    // The compositor's own magnitude words (`latvian.jsonc` → numbers), so a figure separated from its unit
-    // by one of them is still adjacent to it: the corpus writes `45,46 miljardi USD` and `$1 miljards`.
-    magnitudes: ["miljardi", "miljards", "miljoni", "miljons", "tūkstoši", "tūkstotis"],
+    /**
+     * The compositor's own magnitude words (`latvian.jsonc` → numbers), so a figure separated from its unit by
+     * one of them is still adjacent to it: the corpus writes `45,46 miljardi USD` and `$1 miljards`.
+     *
+     * ⚠ THE INFLECTED FORMS ARE NOT OPTIONAL, and declaring only the nominative was a real defect. Latvian
+     * declines its magnitude nouns like any other, and the corpus writes the oblique forms MORE often than the
+     * nominative: miljoniem ×6, miljonu ×5, miljardus ×4, tūkstošiem ×3, miljardiem ×2. The tier matches a
+     * magnitude with no trailing word boundary — its own Russian note (миллион / миллионов) says exactly this —
+     * so the short form matched and stranded the suffix: the file's own quoted `$17.37 miljardiem` came out
+     * *miljardi dolāri EM*, a stray syllable sent to the g2p. The `-u`/`-us` forms failed differently and
+     * worse: no match at all, so the figure was not adjacent to the sign and the currency was DROPPED.
+     * Longest-first ordering is the tier's job, not this list's.
+     */
+    magnitudes: [
+        "miljardiem", "miljardus", "miljardi", "miljardu", "miljards",
+        "miljoniem", "miljonus", "miljoni", "miljonu", "miljons",
+        "tūkstošiem", "tūkstošus", "tūkstoši", "tūkstošu", "tūkstotis",
+    ],
     rateDenominators: RATE_DENOMINATORS,
     unitPer: "",
     /**
@@ -182,6 +197,23 @@ const GROUP_SPACE = /(?<=\d)[ \u00a0\u202f](?=\d{3}(?!\d))/gu;
  * which is wrong; a spurious sentence boundary in mid-clause is worse, and unlike the cardinal it also
  * corrupts every following clause's prosody. Both halves are stated here so the trade can be re-decided.
  *
+ * ⚠ THE OBVIOUS EXTENSION IS REFUSED, AND WHY IT IS REFUSED IS THE WHOLE ARGUMENT FOR THE CLOSED SET. The
+ * corpus writes `no 1990. līdz 1995. gadam` — the second figure is tabulated, the first is followed by `līdz`
+ * and is not — and the preposition `no` governs the genitive unambiguously, so the case looks derivable from
+ * the word BEFORE the figure. It is not, because the ordinal agrees in GENDER with a noun that may be several
+ * words away: `no 5. līdz 10. klasei` is *no piektāS līdz desmitajai klasei*, feminine, and the masculine
+ * `piektā` this file would compose is a different word. The table is closed to masculine head nouns precisely
+ * so that gender never has to be inferred; a preposition carries case but not gender. `2. vietā` (feminine)
+ * is left alone for the same reason, and correctly.
+ *
+ * ⚠ AN ORDINAL RANGE IS NOT HANDLED, and it is a real cell — `ordinal-range` is 9,936 corpus-wide. `9.—10.
+ * maijs` composes only its SECOND ordinal (*9.—desmitais maijs*), because the first is followed by a dash
+ * rather than by a noun. Reading it properly needs BOTH ordinals in cases the dash does not state — *no
+ * devītā līdz desmitajam maijam*, genitive then dative — which is the same underivable-case problem as above,
+ * arriving from a third direction. Left alone rather than half-composed: it is strictly better than the
+ * pre-layer reading (one false clause break removed, the second ordinal correct) and is a candidate for its
+ * own step, not for a guess here.
+ *
  * ⚠ THE GUARD IS `\s+` PLUS A LOWER-CASE LETTER. A digit after the dot is a decimal point or a clock time in
  * a foreign convention (the corpus has `$17.37 miljardiem` and `ap 16.00`), and an upper-case letter after it
  * is an ordinary sentence boundary. Neither may be touched.
@@ -191,7 +223,14 @@ function ordinalPeriod(text: string): string {
         const c = HEAD_NOUN[next.toLowerCase()];
         if (c === undefined) return `${fig}${gap}${next}`; // period dropped, figure left cardinal — see above
         const words = ordinalWords(Number(fig), c);
-        return words === undefined ? whole : `${words}${gap}${next}`;
+        /**
+         * ⚠ A REFUSED ORDINAL STILL LOSES ITS PERIOD. Returning `whole` here put the dot back, which
+         * contradicted this step's own policy two paragraphs up: the untabulated-noun branch drops it because
+         * it is never a full stop, and that reason does not depend on whether the ordinal could be composed.
+         * `200. gadā` and `1900. gadā` were keeping the spurious sentence break inside a date — the exact
+         * defect this step exists to remove. 8 of 262 sites.
+         */
+        return words === undefined ? `${fig}${gap}${next}` : `${words}${gap}${next}`;
     });
 }
 
@@ -206,8 +245,17 @@ function ordinalPeriod(text: string): string {
  *
  * ⚠ DECIMAL OPERANDS ARE ALLOWED (`0,3—0,6 mm`) because this runs above the decimal step, so the comma is
  * still part of the figure here.
+ *
+ * ⚠ A CHAINED HYPHEN IS NOT A RANGE, which is why the guards exclude a hyphen on either flank. An ISO date
+ * `2020-05-17` was reading as *2020 līdz 05-17* — the first pair claimed, the rest left as digits. Zero such
+ * sites in this corpus, so this is robustness rather than a measured repair (trap 22).
+ *
+ * ⚠ WHAT IS *NOT* FIXED, said rather than implied: `Boeing 737-800` still reads as a range. All six ASCII
+ * hyphens between digits in this corpus ARE ranges (`384-322`, `1841-1846`, `1890-1901`, `125-159`), so
+ * refusing the ASCII form would cost more than it saves — and a model designation is not distinguishable from
+ * a range by orthography alone. The en and em dashes carry no such ambiguity; only the ASCII hyphen does.
  */
-const RANGE = /(?<![\d,.\p{L}])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?![\d,.])/gu;
+const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?![\d,.-])/gu;
 
 /**
  * 5. DEGREES. `°C` and `°F` take the scale name; a bare `°` after a figure is `grādi`.
@@ -218,15 +266,34 @@ const RANGE = /(?<![\d,.\p{L}])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?![\d
  * place of a dropped mark. 4 sites in the artifact. The bare-degree arm below still reads their `°`, which is
  * why the pattern does not require the degree to end the figure.
  */
+/**
+ * ⚠ THE WHITESPACE AFTER `°` IS ONLY CONSUMED WHEN A SCALE LETTER IS ACTUALLY TAKEN, and the first cut's
+ * `\s*([CF])?` consumed it unconditionally: `6° virs nulles` — the corpus's own line — came out
+ * *6 grādivirs nulles*, one word where there were two.
+ *
+ * ⚠ AND THE SCALE LETTER NEEDS A LETTER BOUNDARY. Without it `20° Celsija skalā` matched the ⟨C⟩ of *Celsija*
+ * as the scale and left *elsija* behind — a truncated word reaching the g2p. With the boundary the group
+ * simply declines, and the bare-degree arm reads it as *20 grādi Celsija skalā*, which is the right sentence.
+ */
+const DEGREE_SIGN = /(\d+(?:,\d+)?)\s*°(?:\s*([CF])(?![\p{L}\p{M}]))?/gu;
+
 function degrees(text: string): string {
-    return text.replace(/(\d+(?:,\d+)?)\s*°\s*([CF])?/gu, (_whole, fig: string, scale: string | undefined) => {
+    return text.replace(DEGREE_SIGN, (whole: string, fig: string, scale: string | undefined, offset: number, full: string) => {
         const forms = scale ? SCALE[scale]! : DEGREE;
         /**
          * ⚠ A FIGURE WITH A FRACTION TAKES THE PLURAL, whatever its integer part. `21,5` ends in ...1 by
          * `countForm`'s arithmetic but is read *divdesmit viens komats pieci GRĀDI* — the singular agrees with
          * a count of exactly one, and 21,5 is not one. Taking the integer part would have said *grāds*.
          */
-        return `${fig} ${forms[fig.includes(",") ? 1 : countForm(Number(fig))]}`;
+        const word = forms[fig.includes(",") ? 1 : countForm(Number(fig))]!;
+        /**
+         * ⚠ THE EMITTED NOUN MUST NOT FUSE WITH WHAT FOLLOWS — the same defect, and the same fix, as the shared
+         * tier's currency arm (test/core-currency-fusion.test.ts). `6500°K` has no space to inherit, so without
+         * this the output is *grādiK*: ONE Latin run, one bogus stressed word, and the raw ⟨K⟩ hidden inside it
+         * where the RAW-LATIN gate cannot see it. Separating leaves the unread letter visible instead.
+         */
+        const fuses = /^[\p{L}\p{M}]/u.test(full.slice(offset + whole.length));
+        return `${fig} ${word}${fuses ? " " : ""}`;
     });
 }
 

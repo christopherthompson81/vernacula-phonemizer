@@ -142,4 +142,36 @@ describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + f
         expect(lv.text("5 <= 6").trim()).not.toContain("mˈazaːks");
         expect(lv.text("5 < 6").trim()).toContain("mˈazaːks");
     });
+
+    /**
+     * ⚠ REGRESSION GUARDS FROM REVIEW OF #818. Each of these DELETED OR CORRUPTED a word, and none was visible
+     * to a leak class, a DROP or the referee.
+     */
+    test("a last-two-digits value of exactly 10 keeps its numeral", () => {
+        // `>= 11` sent 10 to the round-tens arm, which indexes TEN[1] — the empty string. The numeral vanished
+        // and the ending was emitted alone: 10. → *ais*, 2010. → *divi tūkstoši ā*.
+        // ⟨d⟩ → t before the voiceless s — the engine's own regressive devoicing, not a normalization effect
+        expect(lv.text("10. gadsimtā").trim()).toBe("dˈɛsmitajaː ɡˈatsimtaː");
+        expect(lv.text("2010. gada").trim()).toBe("dˈivi tˈuːkstuɔ̯ʃi dˈɛsmitaː ɡˈada");
+    });
+
+    test("the degree word does not fuse with, or bite into, the token after it", () => {
+        // the whitespace after ° was consumed even when no scale letter was taken: *6 grādivirs nulles*
+        expect(lv.text("6° virs nulles").trim()).toBe("sˈɛʃi ɡrˈaːdi vˈirs nˈullɛs");
+        // no space to inherit at all — separate, so the unread ⟨K⟩ stays visible to the RAW-LATIN gate
+        expect(lv.text("6500°K").trim().split(/\s+/u)).toContain("k");
+        // the scale letter needs a letter boundary, or it eats the ⟨C⟩ of *Celsija* and leaves *elsija*
+        expect(lv.text("20° Celsija skalā").trim()).toBe("dˈiwdɛsmit ɡrˈaːdi t͡sˈɛlsija skˈalaː");
+    });
+
+    test("a refused ordinal still loses its period", () => {
+        // round hundreds/thousands are refused (divsimtais is 0 tokens on the wiki) — but the period is not a
+        // full stop whether or not the ordinal could be composed, and returning it kept the break in the date
+        expect(lv.text("1900. gadā").trim().split(/\s+/u)).not.toContain(".");
+    });
+
+    test("magnitudes are matched in their inflected forms, so no suffix is stranded", () => {
+        // nominative-only left *miljardi dolāri EM* — the tier matches with no trailing boundary
+        expect(lv.text("$17.37 miljardiem").trim().split(/\s+/u)).not.toContain("ˈɛm");
+    });
 });

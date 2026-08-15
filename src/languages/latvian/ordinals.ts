@@ -135,7 +135,14 @@ export function ordinalWords(n: number, c: Case): string | undefined {
     const within100 = n % 100;
     let atom: string;
     let head: number;
-    if (within100 >= 11 && within100 <= 19) {
+    /**
+     * ⚠ THE BOUND IS 10, NOT 11, AND STARTING AT 11 DELETED THE NUMERAL. A last-two-digits value of exactly 10
+     * is not `n % 10 !== 0`, so it fell through to the round-tens arm and indexed `TEN[1]` — the empty string,
+     * a placeholder that exists only because `TEN` is indexed by the tens digit and there is no "onety". The
+     * ending was then emitted alone: `10.` → *ais*, `2010. gada` → *divi tūkstoši ā gada*, `10. gadsimtā` →
+     * *ajā gadsimtā*. `TEEN[0]` (*desmit*) was unreachable, which is the tell. 5 sites in the artifact.
+     */
+    if (within100 >= 10 && within100 <= 19) {
         atom = TEEN[within100 - 10]!;
         head = n - within100;
     } else if (n % 10 !== 0) {
