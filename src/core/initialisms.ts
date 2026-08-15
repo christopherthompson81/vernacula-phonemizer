@@ -156,7 +156,36 @@ export interface PhonotacticsData {
     legalOnsets: ReadonlySet<string>;
     /** Two-consonant clusters the language can end a word with. */
     legalCodas: ReadonlySet<string>;
+    /**
+     * The letters that count as LIQUIDS for signal 2 — the sounds that break up a consonant run and keep it
+     * syllabifiable. Defaults to `LIQUIDS`, which covers the Latin and Cyrillic letters used by every
+     * language that wires this test today. A language in another script MUST declare its own, or signal 2
+     * will fire on every 3-consonant run it meets.
+     */
+    liquids?: RegExp;
 }
+
+/**
+ * ⚠ THE DEFAULT LIQUID SET IS SCRIPT-AWARE BECAUSE THE ASCII ONE WAS SILENTLY OFF FOR A WHOLE SCRIPT.
+ * This was `/[lr]/u`, so Cyrillic ⟨л⟩ and ⟨р⟩ never matched and signal 2 — "a 3+ consonant run with no
+ * liquid" — could not be satisfied by any Cyrillic word. That is playbook trap 1's family: a guard written
+ * for one writing system is blind in another, and the direction of the error is always MORE spelling-out.
+ *
+ * Measured before changing it, over the all-caps tokens of the six Cyrillic corpora that wire this test
+ * (ky mk mn ru tg uk) — those are the only strings the initialism pass ever inspects:
+ *
+ *     ky  109 caps tokens   2 verdicts flip   ТҮРКСОЙ · ОСФСР
+ *     mn  122              1                 ХӨГЖЛИЙН
+ *     tg  135              4                 АЖРВТ · РХФЮ · РСФЮ · ҶФШСР
+ *     mk / ru / uk  20 each  0
+ *
+ * Seven strings, and they split two ways, which is the whole reason signals 3 and 4 exist behind this one:
+ * `ХӨГЖЛИЙН` is an ORDINARY WORD inside a shouted title and `ТҮРКСОЙ` is an organisation said as a word —
+ * both were being spelled letter by letter and now are not. The remaining five ARE Soviet-era initialisms
+ * and must still be spelled out; they are, because their illegal onset or coda catches them one signal
+ * later. Verified string by string rather than assumed.
+ */
+export const LIQUIDS = /[lrлр]/u;
 
 /**
  * Build a "can this letter string be read as a word at all" test for one language.
@@ -185,7 +214,7 @@ export function makeUnreadableTest(d: PhonotacticsData): (word: string) => boole
         const w = word.toLowerCase();
         if (!d.vowels.test(w)) return true;
         const run = consonantRun.exec(w);
-        if (run !== null && !/[lr]/u.test(run[0])) return true;
+        if (run !== null && !(d.liquids ?? LIQUIDS).test(run[0])) return true;
         if (w.length >= 2 && isConsonant(w[0]!) && isConsonant(w[1]!) && !d.legalOnsets.has(w.slice(0, 2)))
             return true;
         const tail = w.slice(-2);
