@@ -41,9 +41,19 @@ const pair = (one: string, many: string): CountForms => [one, many];
  * milimetër 8/6 · milimetra 18/6 · kilogram 16/6 · kilogramë 11/5 · gram 21/6 · litër 17/6 · litra 16/6 ·
  * ton 32/6 · hektarë 28/5.
  *
- * ⚠ ONE-LETTER KEYS ARE THE HAZARD (trap 46), and `m`, `g` and `l` are all ordinary Albanian letters. They
- * are declared because the corpus writes each after a number (m×2, l×3), and it is the tier's own boundary
- * guards that make them safe — not anything in this table.
+ * ⚠ `l`, `g`, `t` AND `ha` WERE DECLARED AND HAVE BEEN REMOVED, which is worth recording because the reason
+ * is not "unused". `sources.ts` reports `l×3` and `g×2` after a number, so the first cut took them — and
+ * reading the instances shows what they actually are:
+ *     `62 00 V, 10 00 L`, `29 00 V, 24 00 L`  — ⟨L⟩ is LINDJE, the longitude compass letter
+ *     `4G / LTE`, `98% mbulim 4G`             — ⟨G⟩ is the mobile network generation
+ * Every corpus "instance" of both keys is a COLLISION, not a use, and `t`/`ha` are ×0 outright. A unit whose
+ * only evidence is a token in the wrong sense is trap 37 arriving through a counting tool; the tier's
+ * boundary guards happen to refuse these particular spellings (`L` and `4G` are not lowercase-and-spaced),
+ * but that is luck, and a lowercase `10 00 l` would have read as *litra*.
+ *
+ * ⚠ `m` STAYS, and it is the one one-letter key with real support: ×10 after a figure, all metres
+ * (`2,962 m`, `3.54m nën nivelin e detit`). One-letter keys are trap 46's hazard and it is the tier's own
+ * boundary guards that make this one safe — nothing in this table.
  */
 const UNITS: Record<string, CountForms> = {
     km: pair("kilometër", "kilometra"),
@@ -51,13 +61,24 @@ const UNITS: Record<string, CountForms> = {
     cm: pair("centimetër", "centimetra"),
     mm: pair("milimetër", "milimetra"),
     kg: pair("kilogram", "kilogramë"),
-    g: pair("gram", "gramë"),
-    l: pair("litër", "litra"),
-    t: pair("ton", "ton"),
-    ha: pair("hektar", "hektarë"),
+    // ⚠ `mb` and `mhz` are the two the leak gate found reaching the IPA raw — `3,5MB`, `32MB`, `294,912 Mhz`,
+    // `714 MHz`, ×3 each and written GLUED to the figure. `megabajt` 12 tok / 6 arts; `megaherc` is 2/2, the
+    // thinner of the two and taken because the alternative is the bare Latin letters.
+    mb: pair("megabajt", "megabajtë"),
+    mhz: pair("megaherc", "megahercë"),
 };
 
-/** `orë` 33 tok / 6 arts, `sekonda` 17/6 — denominators only, never standalone (the tier's `Il-76s` case). */
+/**
+ * `orë` 33 tok / 6 arts, `sekonda` 17/6 — denominators only, never standalone (the tier's `Il-76s` case).
+ *
+ * ⚠ POPULATION DENSITY IS NOT REACHABLE FROM HERE and stays a leak, which is said rather than implied. The
+ * corpus writes `22b/km²`, `48 banore/km²`, `81 banorë/km²`, `100 banorë/km2` — a rate whose NUMERATOR is a
+ * noun (*banorë*, inhabitants) rather than a unit abbreviation, so the tier's rate arm, which composes
+ * unit-over-unit, cannot match it and `km` reaches the IPA raw. ×6, and it is the same class Basque records
+ * for `bizt./km²`. Reading it would mean composing a rate construction (*banorë për kilometër katror*) out of
+ * a preposition this file has not sourced for that slot; the RAW-LATIN gate can see the leak, which is the
+ * correct failure mode until it is.
+ */
 const RATE_DENOMINATORS: Record<string, string> = { h: "orë", s: "sekonda" };
 
 /**
