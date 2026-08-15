@@ -247,6 +247,17 @@ function degrees(text: string): string {
  * (espeak `= viena:ds`, `_< m'aza:ks||p'aR`, `_> l'iela:ks||p'aR`; `vienāds` 6 tok / 2 arts and `mazāks` 1/1
  * on the wiki, `lielāks` 0/0 — espeak-only, and said rather than implied).
  */
+/**
+ * ⚠ AN EQUALS SIGN MUST BE OPERAND-FLANKED AND NOT PART OF A LONGER OPERATOR. The first cut replaced every
+ * `=` unconditionally, and self-review caught two defects it produced rather than repaired:
+ *   `a==b`           → *a vienāds  vienāds b* — the word said TWICE, and a DOUBLE SPACE, which is the
+ *                      SLOT-GAP class the fleet-wide audit exists to find
+ *   `url?q=1&t=2`    → *url?q vienāds 1 un t vienāds 2* — a query string read aloud as arithmetic
+ * Both are readings rather than drops, so no leak gate would have shown them. The flanking requirement and
+ * the `[=!<>]` guards are the same discipline `<` and `>` need, and for the same reason.
+ */
+const EQUALS = /(?<![=!<>])(?<=[\d\p{L}\p{M})²³])\s*=\s*(?=[\d\p{L}(])(?![=<>])/gu;
+
 function signs(text: string): string {
     return text
         // `≈200 MPa`, `≈-20 °C` — the corpus writes it 4 times and the sign was vanishing outright.
@@ -256,9 +267,9 @@ function signs(text: string): string {
         .replace(/(?<![\d\p{L}])\+(?=\s?\d)/gu, `${SIGN.plus} `)
         .replace(/(?<![\d\p{L}])[−–-](?=\s?\d)/gu, `${SIGN.minus} `)
         .replace(/(?<=\d)\s*÷\s*(?=\d)/gu, ` ${SIGN.dividedBy} `)
-        .replace(/\s*=\s*/gu, ` ${SIGN.equals} `)
-        .replace(/(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])/gu, ` ${SIGN.lessThan} `)
-        .replace(/(?<=[\d\p{L}])\s*>\s*(?=[\d\p{L}])/gu, ` ${SIGN.greaterThan} `);
+        .replace(EQUALS, ` ${SIGN.equals} `)
+        .replace(/(?<![=!<>])(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.lessThan} `)
+        .replace(/(?<![=!<>])(?<=[\d\p{L}])\s*>\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.greaterThan} `);
 }
 
 /**

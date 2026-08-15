@@ -130,4 +130,16 @@ describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + f
         // ...but a hyphen BETWEEN figures is a range, and a letter-attached one is neither
         expect(lv.text("1841-1846").trim()).toContain("lˈiːd͡z");
     });
+
+    /**
+     * ⚠ A CODE OPERATOR IS NOT AN EQUATION. The first cut replaced every `=` unconditionally and produced
+     * `a==b` → *a vienāds  vienāds b* — the word twice AND a double space, which is the SLOT-GAP class the
+     * fleet-wide audit exists to find. Caught in self-review, not by a gate, because both halves are readings.
+     */
+    test("=, < and > are read only when operand-flanked, never as part of a longer operator", () => {
+        expect(lv.text("x = y").trim()).toContain("vˈiɛnaːts");
+        expect(lv.text("a==b").trim()).not.toContain("vˈiɛnaːts");
+        expect(lv.text("5 <= 6").trim()).not.toContain("mˈazaːks");
+        expect(lv.text("5 < 6").trim()).toContain("mˈazaːks");
+    });
 });
