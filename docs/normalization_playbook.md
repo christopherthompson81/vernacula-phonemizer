@@ -383,6 +383,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 | Regenerate from the recorded invocation, not from memory | `mine.ts` | every artifact records the `command` that produced it, paths reduced to basenames; omitting `--sample` or `--terms` silently changes the artifact and left no other trace |
 | A refusal needs a check, not a feeling | `sources.ts` + `defects.test.ts` | the pre-flight report must cover every `DROPPABLE` class or declare an exemption; a class-level refusal is consulted by the artifact scan instead of failing it |
 | A gate must be able to fail, and to read its own output | `pythonTools.test.ts`, `attest.ts`, `corpus-diff.ts` | every Python file under `tools/` must parse and no tracked file may carry a conflict marker (`npm run ci` was green over a module that could not be loaded); a cache's writer and parser come from one place, so the parser cannot stop matching the file it writes; `compare` pairs rows by SOURCE TEXT and reports unpaired rows as a number instead of throwing or sliding |
+| A rule must survive a full stop | `review.ts` | every sign, unit and space-grouped probe is read bare and clause-final, and any token the bare reading has and the clause-final one lost is a `LOST` failure; ranges are printed rather than failed, because a trailing `1995.` is itself an ordinal marker in several languages |
 | A differential test must hold everything but the variable still | `defects.ts` | substitute a space, never delete; and a harness measuring the DEFAULT path must build its baseline explicitly — shipping a change into the default silently rebased `eval_km_segmenter.mts`'s baseline and it compared a model against itself |
 
 ### Index — the eight principles, and which traps instance them
@@ -392,7 +393,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 | **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin |
 | **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase |
 | **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
-| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later |
+| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure |
 | **A differential test must hold everything but the variable still** | 18, 26 | **the same cause at two levels** — 18 is the probe (`A&B` → `AB`), 26 is real text; substitute a space, never delete |
 | **Evidence beats intuition, and the corpus arbitrates** | 3, 4, 5, 9, 12, 13, 20, 55 | the diff sees what probes cannot; tabulate before ruling; a test can pin the bug (and pinning a temporary ABSENCE has a shelf life); an unattested guard alternative misfires; a redundant symbol is a permissible drop; pin branches not instances; your emitted digits meet the number rules downstream; the closest sibling is a hypothesis |
 | **One shared source can settle a fleet-wide question, positively or negatively** | 45, 48, 35, 36, 40 | **45 and 48 are two halves of one technique** — FLEURS's shared source text finds a word AND proves an absence; ask what the language calls the thing; fold a compatibility character, never NFKC; name the slot when you have no candidate spelling |
@@ -1427,6 +1428,32 @@ Kept as a census rather than seven entries, because the direction is the finding
   filter slides the arrays past each other, and the tool prints FABRICATED rows — the right COUNT, every row
   wrong, no error. Pair rows by the SOURCE TEXT that produced them, and report unpaired rows as a number.
 
+**58. A RULE THAT IS RIGHT IN ISOLATION CAN GIVE UP AT A FULL STOP — AND FOUR LAYERS IN A ROW DID.** Every
+probe in this document sits alone; real text ends sentences on figures. A right-hand guard written
+`(?![\d.,])` then declines the whole match at exactly that position, so the rule reads correctly everywhere
+except where a sentence ends, and the layer looks finished.
+
+    lg   `800 m.`        kept a bare `m` in the IPA                        found in review
+    lt   `už $800.`      the dollar silent                                 found in review
+    mn   `350 000.`      read as "three hundred fifty, zero"               found in review
+    et   `lk 137–151.`   lost its range joiner — 9 segments, 0 regressions found in review
+
+- **THE AUTHORS HAD READ THE WARNING.** mn's instance sits ONE LINE BELOW the arm its own author had just
+  fixed for this; lt's sits in a file whose comment explains the fix for the COMMA and leaves the DOT. That
+  is the signal this document's own header names for moving a rule off the page and into a tool, and it is
+  now `review.ts`'s `clause-final` check.
+- **THE TEST IS AN ASYMMETRY, WHICH IS WHY IT IS CHEAP.** A trailing mark may only ADD a pause token; it can
+  never remove one. So phonemize bare and clause-final and report any token the bare reading lost. Multiset,
+  not set — a reading legitimately repeats a word, and treating the repeat as already-seen would mask a loss.
+- **MEASURED OVER 189 LANGUAGES BEFORE WIRING IT, and the measurement is what split gate from prompt.** Signs,
+  units and space-grouping: 6 hits in 3 languages, all real — gated, and it caught `ne` reading `$5.` with the
+  currency word gone the moment it ran. Ranges: **174 hits across 49 languages**, and that is NOT 49 defects,
+  because in Slovene, Slovak and Latvian a trailing `1995.` is itself the ORDINAL marker and excluding a
+  following dot may be deliberate. Printed, never failed on.
+- **TWO SHAPES ARE DELIBERATELY NOT PROBED**, and the reason generalises: `5 m.` is *Monsieur* in French and
+  *metai* in Lithuanian, and the comma is the DECIMAL separator in half the fleet. Where the trailing mark
+  genuinely changes what the string means, a lost token is the right answer, not a defect.
+
 ## Before you defer a class, look it up — `tools/normalization/sources.ts`
 
 Reading back through all 25 merged normalization PRs, the "deliberately not done" lists are not 25 different problems.
@@ -1549,6 +1576,23 @@ Several agents may be treating different languages at once. Three rules make tha
 **1. Never run `git stash`.** It is global. One agent's stash silently pockets every other agent's
 uncommitted work. This is the single most dangerous operation in a shared checkout, and the hand recipe
 used to depend on it for the "before" baseline.
+
+**1b. THE SCRATCH DIRECTORY IS SHARED TOO, AND IT IS THE SAME HAZARD ONE LEVEL DOWN.** The worktrees make
+each agent's *repository* private; nothing makes its *working files* private. In a four-language batch two
+agents had a generically-named probe script (`probe.mts`, `probe2.mts`) overwritten mid-run by a sibling and
+got back IPA **for the wrong language** — one caught it because Lithuanian output from a Maltese probe is
+obvious, the other because the language was equally unmistakable. Both were lucky in the same way.
+
+- **Write only inside a per-language subdirectory** — `<scratch>/<lang>/` — and never a bare filename in the
+  shared root. Prefixing (`lt.before`) survived where `probe2.mts` did not, but a directory is the rule
+  because it cannot be forgotten one file at a time.
+- **The dangerous collision is not the script, it is the BASELINE.** A clobbered `probe.mts` announces itself
+  the moment you read its output; a clobbered `corpus-diff` `.before` is silent, and it corrupts the one gate
+  that has found more real defects than any other — while looking like a clean result. If you cannot prove a
+  baseline is yours *and* pre-change, re-derive it from a pinned worktree rather than trusting it. Both
+  affected agents did, and both came back byte-identical, which is what made the diffs usable.
+- **A gate you cannot vouch for is worse than no gate**, for the same reason a false negative outranks a
+  false positive everywhere else in this document: it closes the question.
 
 **2. Emit the "before" baseline BEFORE you edit anything.** This is the simplest correct method and needs
 no second checkout at all — your tree *is* the baseline until you touch it:
