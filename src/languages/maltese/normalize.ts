@@ -297,14 +297,17 @@ const MAGNITUDES = [
  * written as "not a whole number" so it does not depend on which sentinel `core/normalizeSymbols.ts` picks
  * for a fraction.
  *
- * ⚠ THE ONE PLACE THE TIER CANNOT BE MADE TO SAY THIS is after a MAGNITUDE word. `withMagnitude` asks this
- * function for a count of 5 — a many-count — and Maltese wants the SINGULAR there (*745 miljun dollaru*,
- * *31.6 biljun dollaru*, *ħames miljun tunnellata*), because a Maltese magnitude governs the singular exactly
- * as a numeral above ten does. There is no way to answer that from `countForm(n)`, which is not told whether
- * a magnitude was matched. The residue is ~9 retained instances reading *biljun dollari* for *biljun
- * dollaru* — an AGREEMENT slip inside the right word, not a wrong word, so it is left rather than closed by
- * declaring a single invariant form that would then be wrong for the attested *għaxar dollari* and *1.25
- * dollari*. Reported as a `src/core` observation and deliberately NOT edited here.
+ * ⚠ AFTER A MAGNITUDE WORD, MALTESE TAKES THE SINGULAR (*745 miljun dollaru*, *31.6 biljun dollaru*,
+ * *ħames miljun tunnellata*) — a magnitude governs it exactly as a numeral above ten does. This function
+ * cannot answer that on its own, because it is not told whether a magnitude was matched, and `withMagnitude`
+ * used to ask every language for a fixed many-count of 5. The residue was ~9 retained instances reading
+ * *biljun dollari* for *biljun dollaru*: an AGREEMENT slip inside the right word.
+ *
+ * That is now a declaration rather than a residue. `SymbolData.magnitudeCount` names the COUNT a magnitude
+ * should be resolved as, and Maltese passes 11 — the smallest count its own rule above maps to the singular,
+ * so the two facts stay in one place instead of being restated as a separate form. `countForm` is unchanged
+ * and the attested *għaxar dollari* (n ≤ 10) and *1.25 dollari* (a fraction) are untouched, which is what
+ * declaring a single invariant form would have broken.
  */
 const countForm = (n: number): number => (n === 1 || (n >= 11 && n % 1 === 0) ? 0 : 1);
 
@@ -666,6 +669,9 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: SQUARED, cubed: CUBED, position: "after" },
     ampersand: "u",
     countForm,
+    // A magnitude governs the SINGULAR in Maltese, exactly as a numeral above ten does — see `countForm`.
+    // 11 is the smallest count that rule maps to the singular, so the fact lives in one place.
+    magnitudeCount: 11,
 });
 
 /**

@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+
 import { createMaltese, phonemizeWord } from "../src/languages/maltese/maltese.ts";
 import { normalizeMaltese } from "../src/languages/maltese/normalize.ts";
 import { getPhonemizer } from "../src/registry.ts";
@@ -146,7 +148,12 @@ describe("Maltese text normalization — the rules' branches", () => {
         expect(normalizeMaltese("8.30 p.m.")).toBe("8.30 p.m.");
         expect(normalizeMaltese("fl-4.00 ta' filgħodu")).toBe("fl-4.00 ta' filgħodu");
         // …and the guard must be the RIGHT context, because the SHAPE cannot tell these two apart.
-        expect(normalizeMaltese("$88.08 biljun")).toBe("88 punt 08 biljun dollari");
+        // ⚠ THE AGREEMENT HERE USED TO BE `dollari` AND THAT WAS THE DOCUMENTED RESIDUE, not the target: a
+        // magnitude governs the SINGULAR in Maltese, and the shared tier resolved every magnitude as a fixed
+        // many-count. `SymbolData.magnitudeCount` now lets the language say so (trap 5 — correct the test,
+        // do not preserve the behaviour). The decimal half of this assertion is unchanged, which is what it
+        // was written to check.
+        expect(normalizeMaltese("$88.08 biljun")).toBe("88 punt 08 biljun dollaru");
     });
 
     // ── THE MINUS is narrowed to a number followed by ° or %, because in this orthography the character
@@ -359,5 +366,27 @@ describe("Maltese text normalization — the rules' branches", () => {
     test("nothing this layer does may bite an ordinary Maltese word", () => {
         for (const w of ["Il-Malti", "tal-Ingliż", "l-ilsien", "fil-mija", "iż-żmien", "ta' Malta", "mil-lvant"])
             expect(normalizeMaltese(w)).toBe(w);
+    });
+});
+
+
+/**
+ * A MAGNITUDE GOVERNS THE SINGULAR in Maltese, exactly as a numeral above ten does. The shared tier used to
+ * resolve every magnitude as a fixed many-count of 5, which gave the PLURAL — an agreement slip inside the
+ * right word, so no leak class, no DROP and no referee could see it. `SymbolData.magnitudeCount` lets the
+ * language say which count a magnitude means; `countForm` is unchanged.
+ *
+ * Six corpus utterances; both directions pinned, because the plural cases are what a wrong fix would break.
+ */
+describe("Maltese — a magnitude takes the singular, a small count still takes the plural", () => {
+    test("after a magnitude word: singular", () => {
+        expect(phonemize("$745 miljun", "mt").trim()).toContain("mɪljun dɔllaru");
+        expect(phonemize("€1 biljun", "mt").trim()).toContain("bɪljun ɛwrɔ");
+        expect(phonemize("5 miljun tunnellata", "mt").trim()).toContain("mɪljun tunnɛllata");
+    });
+    test("and WITHOUT one, `countForm` still decides — unchanged in both directions", () => {
+        expect(phonemize("$5", "mt").trim()).toBe("ħamsa dɔllarɪ"); // n ≤ 10 → plural
+        expect(phonemize("$11", "mt").trim()).toBe("ħdaʃ dɔllaru"); // n ≥ 11 → singular
+        expect(phonemize("3.6 km", "mt").trim()).toBe("tlɪta punt sɪtta kɪlɔmɛtrɪ"); // a fraction → plural
     });
 });

@@ -96,6 +96,13 @@ export interface SymbolData {
     /** Magnitude words that hop with a currency sign ("million" etc., in the language's spelling as it
      *  appears in running text). Omit if the language writes magnitudes after the currency word anyway. */
     magnitudes?: string[];
+    /**
+     * The COUNT whose form a magnitude word selects for the noun after it. Defaults to `MANY` (5), i.e. the
+     * slot a large count takes — right for most of the fleet. Declare it when the language disagrees:
+     * Maltese takes the SINGULAR after a magnitude (*745 miljun dollaru*) while still needing the plural for
+     * *ħames dollari*, so it declares a count its own `countForm` maps to the singular. See `MANY`.
+     */
+    magnitudeCount?: number;
     /** The word joining a magnitude to the currency noun: Spanish/Portuguese/French/Catalan "de", Italian
      *  "di" — *cinco millones **de** dólares*. Omit for the languages that take none (German "fünf
      *  Millionen Dollar", Swedish "fem miljoner dollar"). Only ever emitted when a magnitude was matched,
@@ -286,13 +293,28 @@ export const slavicCountForm = (n: number): number => {
  * is stable under both, because it is the language that knows.
  */
 const MANY = 5; // any count that selects a language's plural/genitive-plural slot
+
+/**
+ * ⚠ AND `MANY` IS THE DEFAULT, NOT A UNIVERSAL — `magnitudeCount` overrides it per language.
+ *
+ * A magnitude word governs the count form of the noun after it, and for most of the fleet that form is the
+ * one a large count selects, which is what `MANY` resolves through the language's own `countForm`. Maltese
+ * is the counter-example and it is not an edge case: after a magnitude it takes the SINGULAR
+ * (*745 miljun dollaru*), while `countForm(5)` must still return the plural for *ħames dollari*. The two
+ * facts are independent, so no single constant can express both and the language has to say which.
+ *
+ * Declared as a COUNT rather than a slot index for the reason the call sites already give: passing a literal
+ * 2 means the PAUCAL to a Slavic selector, and taking the last entry breaks the moment a fourth form is
+ * appended. A count goes through `countForm` like every other number in this module.
+ */
 function withMagnitude(
     forms: CountForms,
     mag: string | undefined,
     n: number,
     countForm: (n: number) => number,
+    magnitudeCount: number = MANY,
 ): string {
-    return pick(forms, mag !== undefined && mag !== "" ? MANY : n, countForm);
+    return pick(forms, mag !== undefined && mag !== "" ? magnitudeCount : n, countForm);
 }
 
 /**
@@ -721,7 +743,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             const already = saidAfter(forms);
             const body = `${num}${mag ?? ""}`;
             if (already.test(rest)) return body; // the text says it; do not say it twice
-            const w = withMagnitude(forms, mag, numValue(num), cf);
+            const w = withMagnitude(forms, mag, numValue(num), cf, d.magnitudeCount);
             /**
              * ⚠ THE EMITTED NOUN MUST NOT FUSE WITH WHATEVER FOLLOWS. `$110m` is a number glued to a
              * MAGNITUDE ABBREVIATION, and the match ends at the digits — so the currency noun landed directly
@@ -810,7 +832,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                     // entry breaks as soon as a fourth form is appended.
                     const hasMag = mag !== undefined && mag !== "";
                     const q = hasMag ? `${num}${mag}` : num;
-                    const n = hasMag ? MANY : numValue(num);
+                    const n = hasMag ? (d.magnitudeCount ?? MANY) : numValue(num);
                     // Correct-then-identify; see resolveUnitSymbol. A miss leaves the text alone — before
                     // #763 this was `units[u.toLowerCase()]!`, and the assertion turned an unreachable
                     // uppercase key into a THROW from inside pick().
