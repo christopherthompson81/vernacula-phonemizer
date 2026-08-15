@@ -1,0 +1,676 @@
+// WIKIPEDIA WORD ATTESTATION — sq. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "sq",
+        "wiki": "sq.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "për mijë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Është vërtetuar se sëmundjet ishemike janë të pranishme 3.4 për mijë, tek ata që nuk pinë duhan dhe 7.4 mijë tek ata që pinë duh…",
+                "…tikat e Oqeanit Indian janë : Kripshmëria arrinë prej 33-37 për mijë , Temperatura e ujit arrin nga 29celcius në vendet e nxehta…"
+            ]
+            },
+        {
+                "word": "promil",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ziston shkallëzimi seksagezimal (360 shkallë) dhe ndarja në promil (në një mijë pjesë). Materiali i përdorur për punimin e kom…"
+            ]
+            },
+        {
+                "word": "plus minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pjesëtim",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…uk është gjithmonë numër i plotë në ato raste themi se kemi pjesëtim me mbetje. Nëse kemi mbetje atëherë thyesa shkruhet si numë…",
+                "…esat e dyfishta == Pasi më lartë thamë se thyesa është edhe pjesëtim i dy numrave (d.m.th. i Emëruesit dhe Numëruesit) mund të k…",
+                "…thotë kur veprimet matematike (mbledhje, zbritje, shumëzim, pjesëtim) kryhen sipas radhës. Kjo radhitje është: 1. Shumëzimi dhe…",
+                "…athtas. Kjo do te thotë që kur kemi një detyrë me shumëzim, pjesëtim, mbledhje dhe zbritje së pari duhet te kryhet shumëzimi ose…",
+                "…e kryen veprimet aritmetike si mbledhje, zbritje, shumëzim, pjesëtim. Ajo gjithashtu përmban mekanizma te marrjes së vendimeve p…",
+                "…mbledhur dhe zbritur dy numra dhe për të kryer shumëzim dhe pjesëtim përmes mbledhjes ose zbritjes së përsëritur. == Përmbledhje…"
+            ]
+            },
+        {
+                "word": "pjestim",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…e joperiodikë është përfaqësimi i pjestimeve. Duke bërë një pjestim të thjeshtë del që, 1⁄9 = 0.111..., ku 1 përsëritet pambari…",
+                "…garitmave pjesëtimi reduktohet në zbritje dhe rrënjëzimi në pjestim. p. sh. log 2 ⁡ ( 16 ) = log 2 ⁡ ( 64 4 ) = log 2 ⁡ ( 64 )…"
+            ]
+            },
+        {
+                "word": "kilometra në orë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…j. Shumica e tornadove kanë shpejtësi të erës më pak se 180 kilometra në orë, janë rreth 80 metra të gjerë dhe udhëtojnë disa kilometra…",
+                "…ekstremë mund të arrijnë shpejtësinë e erës më shumë se 480 kilometra në orë, janë më shumë se 3 kilometra në diametër dhe qëndrojnë në…",
+                "…që pasqyron shpejtësinë maksimale të lejuar, të shprehur si kilometra në orë (km/orë). Kufizimet e shpejtësisë zakonisht përcaktohen nga…",
+                "…e shpejtë e regjistruar për një skifter shtegtues është 390 kilometra në orë (240 mph).…",
+                "…e derdhjen e farës. Sperma çan përpara përmes uretrit me 20 kilometra në orë. Nëse edhe partnerja arrin në të njëjtin çast në orgazmë at…"
+            ]
+            },
+        {
+                "word": "në orë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…kW/h për kilovat-orën është i pasaktë, pasi tregon kilovat në orë. Ora është një njësi kohe e listuar midis njësive jo-SI të…",
+                "…e energjisë së pajisjes në kilovat me kohën e funksionimit në orë dhe me çmimin për kilovat-orë (integrimi numerik është i ne…",
+                "…Kilometri në orë (simboli SI: km/h; shkurtesat jo standarde: kph, km/hr) ësh…",
+                "…të fikur tingullin ose dritën, shtypet një buton ose dorezë në orë; shumica e orëve fikin automatikisht alarmin nëse lihen mja…",
+                "…t: 1.) sipas intensitetit Pika shiu kur bien më pak se 1 mm në orë. Shi i dobët 1-2mm në orë Shi mesatar 2-6mm në orë Shi i fo…",
+                "…Pika shiu kur bien më pak se 1 mm në orë. Shi i dobët 1-2mm në orë Shi mesatar 2-6mm në orë Shi i fortë me shumë se 6 mm në or…"
+            ]
+            },
+        {
+                "word": "tonë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Filmi \"Në shtëpinë tonë\" prodhim i vitit 1979. Regjisor: Dhimiter Anagnosti dhe ske…",
+                "…Jeta në shtëpinë tonë tregime me autor Zija Çela. Botuar në Tiranë në vitin 1974…",
+                "…Në fshatin tonë malor vjersha për fëmijë me autor Tasim Gjokutaj. Botuar në…",
+                "…Tregime për botën tonë : për fëmijë të moshës së re shkollore, me autor Skënder Dr…",
+                "…oka (simboli astronomik: ) është planeti i tretë i sistemit tonë diellor. Toka është rreth 4.6 miliardë vjet e vjetër, dhe i…",
+                "…4.6 miliardë vjet e vjetër, dhe i vetmi planet në sistemin tonë diellor ku është zhvilluar jeta. Toka ka vetëm një satelit…"
+            ]
+            },
+        {
+                "word": "centimetër",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…ehur në centimetra, në metra bëhet duke marrë për bazë: një centimetër i përgjigjet të njëqindës pjesë të metrit. 1 cm = 100 mm =…",
+                "…tij të parë, realizuar në vitin 1991, dokumentarin “Për një centimetër”, ku ra në sy aftësia e sintezës dhe fantazia, me gjetje dh…",
+                "…(1988) Muri i gjallë (1989) Vetmi (1990) Regjisor: Për një centimetër (1990), dokumentar Qind për qind (1993), dhe skenarist Plum…",
+                "…të Filmit Sportiv, 1991, Torino, Itali, me filmin “Për një centimetër” \"Çmimi i Madh\" dhe \"Kupa e Artë\" në Festivalin \"MedFilm\",…",
+                "…gohen metale dhe legura që kanë një dendësinë 3,5 gramë për centimetër kub. Metalet e lehta më të rëndësishme janë Alumini, Magnez…",
+                "…origjinale... Këmbëngulja e tiranit për të mos lejuar asnjë centimetër \"privaci\", sjell pasojën e paparashikuar prej tij, atë të l…"
+            ]
+            },
+        {
+                "word": "milimetër",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…rehur në milimetra, në metra bëhet duke marrë për bazë: një milimetër i përgjigjet të njëmijtës pjesë të metrit. 1 mm =1000 µm =1…",
+                "…ët ngjitur; për shembull, një rezolucion prej 10 vijash për milimetër do të thotë 5 vija të errëta që alternohen me 5 vija të çel…",
+                "…a që alternohen me 5 vija të çelëta, ose 5 çifte vijash për milimetër (5 LP/mm). Lentet fotografike më shpesh citohen në çifte vi…",
+                "…). Lentet fotografike më shpesh citohen në çifte vijash për milimetër. == Shiko edhe == Rezolucioni i ekranit == Referime ==…",
+                "…Islandës është 4,988 km e gjatë ndërsa ajo nuk ndanë asnjë milimetër kufi tokësor me ndonjë shtet. Klima e Islandës është gjithn…",
+                "…. Rrjedh prej fjalës latinë mille. == Zëra të përbashkët == milimetër, miligram, milisekondë, mililitër Sistemi ndërkombëtar i nj…"
+            ]
+            },
+        {
+                "word": "metër",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Kjo gjatësi sipas përkufizimit aktual është 0,994 m. Termi \"metër\" hyri në përdorim për herë të parë në vitin 1675 nga Tito L…",
+                "…Metër katror është njësia e sipërfaqes në sistemin ndërkombëtar t…",
+                "…ërfaqja e një katrori, brinjët e të cilit janë saktësisht 1 metër. Metri katror derivohet nga njësia e metrit në SI i cili ve…",
+                "…shmorëve të Luftës së Dytë Botërore\" në Tiranë dhe është 12 metër i lartë. Statuja është në beton dhe është përuruar në varre…",
+                "…më të madhe prej 128 metra dhe një vëllim prej 2,7 miliardë metër kub ujë. Sipërfaqja e përgjithshme e pellgut ujëmbledhës ës…",
+                "…l ujëmbajtës i Liqenit të Fierzës, arrin rreth 3,2 miliardë metër kub ujë, ndërkohë që kapaciteti minimal, i cili mund të shk…"
+            ]
+            },
+        {
+                "word": "kilogram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…të joneve dhe kohën mund të matet masa e atomit në njësinë kilogram. Të gjitha këto ide e iniciativa janë në zhvillim e disa ng…",
+                "…ë të njohur në natyrë. 453,59237 g - funta == Masat mbi një kilogram == === 1 kg deri 10 kg === ≡ 1 · 100 kg deri 1 · 101 kg ca.…",
+                "…== Lidhje të jashtme == National Physical Laboratory FAQ on kilogram definition, the need for a new definition, and some alterna…",
+                "…tha kohërave në 2008/2009 prej 10.600 dollarë amerikanë për kilogram (US $ 4800 për paund). Për shkak të rritjeve në riciklimin…",
+                "…në katalizatorë, çmimi i reniumit ka rënë në US $ 2,844 për kilogram (1,290 $ US për kile) që nga korriku 2018.…",
+                "…shqiponja e detit të Salomoneve, mesatarisht 2 deri në 2.7 kilogram, deri te shqiponja detare e Paqësorit, që mund të peshojë 9…"
+            ]
+            },
+        {
+                "word": "litër",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…shprehur si acid tartarik nuk është më e vogël se 3,5 gram/litër ose 46,6 mill ekuivalenta/litër. == Burimi i të dhënave ==…",
+                "…shtë më e vogël se 3,5 gram/litër ose 46,6 mill ekuivalenta/litër. == Burimi i të dhënave ==…",
+                "…as dr. March-it, KEFIRI shëron sëmundjet vijuese: Nervat: 1 litër në ditë- deri sa të kërkon kjo sëmundje. Pagjumësia shërohe…",
+                "…h. Pagjakësia dhe shkatërrimi i gjakut shërohet duke pirë 1 litër kefir në ditë. Te pacientat e moshuar në raste të rënda pih…",
+                "…e shëndoshë. Tuberkuloza e lëkurës shërohet duke pirë nga 1 litër kefir në ditë e gjithashtu dhe te pezmatimi i fshikëzës së…",
+                "…mi i fshikëzës së urinës. Skleroza shërohet duke pirë nga 1 litër kefir në ditë. Skleroza e rëndë nuk përhapet më shumë në tr…"
+            ]
+            },
+        {
+                "word": "gram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Procedura e ortogonalizmit Gram-Shmit është një metodë nga algjebra lineare që aplikohet pë…",
+                "…te shprehen si kombinim linear njëri nga tjetri). Procedura Gram- Shmit kete bashkësi vektoresh e transformon ne nje bashkës…",
+                "…me tjetrin me fjalë tjera në bazë ortogonale. == Proçeduara Gram–Shmit == Le te percaktojme nje operator projektimi te dhene…",
+                "…or projekton vektorin v ortogonalisht mbi vektor u. Procesi Gram–Shmit aplikohet si me poshte: Sekuenca u1, …, uk eshte bash…",
+                "…me një gradë Celsius (ose një kelvin ). Kaloria e vogël ose gram kaloria përkufizohej si sasia e nxehtësisë e nevojshme për…",
+                "…ësisë e nevojshme për të shkaktuar të njëjtën rritje në një gram ujë. Kështu, 1 kalori e madhe është e barabartë me 1000 kal…"
+            ]
+            },
+        {
+                "word": "hektarë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ve ,arave,kullotave,livadheve etj.,të cilat të shprehura në hektarë dhe në përqindje janë: -Vise malore 872 hektarë,pëerkatësis…",
+                "…hprehura në hektarë dhe në përqindje janë: -Vise malore 872 hektarë,pëerkatësisht 54,02% -ara 348 hektarë,përkatësisht 21,56 -k…",
+                "…anë: -Vise malore 872 hektarë,pëerkatësisht 54,02% -ara 348 hektarë,përkatësisht 21,56 -kullosa 196 hektarë,përkatësisht 12.14%…",
+                "…sht 54,02% -ara 348 hektarë,përkatësisht 21,56 -kullosa 196 hektarë,përkatësisht 12.14% -livadhe 134 hektarë,përkatësisht 8,30%…",
+                "…21,56 -kullosa 196 hektarë,përkatësisht 12.14% -livadhe 134 hektarë,përkatësisht 8,30% -tokë pjellore 61 hektarë,përkatësisht 3…",
+                "…% -livadhe 134 hektarë,përkatësisht 8,30% -tokë pjellore 61 hektarë,përkatësisht 3,77% -pemishte 3 hektarë,përkatësisht 0.18% =…"
+            ]
+            },
+        {
+                "word": "ton",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…r për përdorim me SI. Në Shtetet e Bashkuara njihet edhe si ton metrik për ta dalluar nga njësitë jo-metrike të tonit të sh…",
+                "…tanike). Është ekuivalent me afërsisht 2,204.6 paund, 1.102 ton të shkurtër dhe 0.984 ton të gjatë. Njësia zyrtare SI është…",
+                "…me afërsisht 2,204.6 paund, 1.102 ton të shkurtër dhe 0.984 ton të gjatë. Njësia zyrtare SI është megagrami (Mg), një mënyr…",
+                "…Makarona me peshk ton është përgatitje ushqimore e bërë kryesisht me makarona dhe…",
+                "…loj tjetër po të doni) - 160 g ose një kuti konserve peshku ton - 2 speca jeshil apo të kuq - një grusht majdanoz - 2 lugë…",
+                "…, lëngun e limonit, kripën, piperin, majdanozin dhe peshkun ton të cilit ja keni hequr vajin më përpara. Së fundmi përzijin…"
+            ]
+            },
+        {
+                "word": "kubikë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Prerja në kubikë është një prerje me thikë kuzhine në të cilën ushqimi prite…",
+                "…njëtrajtshme për të siguruar gatim të barabartë. Prerja në kubikë mundëson shpërndarjen e shijes dhe strukturës në të gjithë…",
+                "…jatën, si dhe një kohë gatimi disi më të shpejtë. Prerja në kubikë zakonisht zbatohet për perimet e përgatitura në këtë mënyrë…",
+                "…lt. Pastaj shtohen qepë, karrota, rrënjë selino të prera në kubikë, lakër e freskët e prerë në copa katrore, fletë dafine, pip…",
+                "…inuta para përfundimit të zierjes hidhen patate të prera në kubikë. Kjo gjellë mund të rregullohet edhe me salcë të bardhë e h…",
+                "…Cantal . == Receta == Pritini bukën bajate ose e prisni në kubikë në një enë të zbrazët. Hidhni qumështin mbi të dhe lëreni t…"
+            ]
+            },
+        {
+                "word": "orë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Një orë (simbol: h; gjithashtu shkurtuar hr) është një njësi e kohë…",
+                "…i të shpejtësisë së rrotullimit të Tokës. Ka 60 minuta në 1 orë dhe 24 orë në 1 ditë. == Shiko edhe == Minuta Sekonda == Re…",
+                "…ësisë së rrotullimit të Tokës. Ka 60 minuta në 1 orë dhe 24 orë në 1 ditë. == Shiko edhe == Minuta Sekonda == Referenca ==…",
+                "…Një kilovat-orë (simboli i njësisë: kW⋅h ose kW h; zakonisht shkruhet si kW…",
+                "…është energjia e furnizuar nga një kilovat energji për një orë. Kilovat-orët janë një njësi e zakonshme faturimi për energ…",
+                "…ilovat (kW) të shumëzuar me (domethënë, të mbajtur për) një orë. Ndërkohë, njësia e energjisë në Sistemin Ndërkombëtar të N…"
+            ]
+            },
+        {
+                "word": "sekonda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Sekonda është njësi matëse e kohës. Sekonda është e një e gjashtëdh…",
+                "…Sekonda është njësi matëse e kohës. Sekonda është e një e gjashtëdhjeta pjesë e minutit. Një orë e plot…",
+                "…ëdhjeta pjesë e minutit. Një orë e plotë ka saktësisht 3600 sekonda. Përkufizimi i tanishëm dhe formal i Sistemit Ndërkombëtar…",
+                "…ormal i Sistemit Ndërkombëtar të Njësive për sekondën është:Sekonda [...] përkufizohet duke marrë vlerën numerike fikse të frek…",
+                "…e brishta shtohen kur duhet që të mbahet UTC-ja brenda 0.9 sekonda nga varianti kryesor i kohës universale, UT1. Shihni nëntit…",
+                "…Historia == === Numri i sekondave të brishta të shtuara === Sekonda e parë e brishtë u shtua më 30 qershor 1972. Që atëherë, se…"
+            ]
+            },
+        {
+                "word": "dollar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…shtë valuta kombëtare e ShBA-së dhe territoreve të saj. Një Dollar ka nënndarjet në 100 cent amerikanë (Simboli: ¢). Dollari a…",
+                "…0 cent. Ndërkohë që tashmë për një vlerë më të vogël se një dollar përdoret monedha (me përjashtim të monedhave të arta, plati…",
+                "…(talari), Hungarisht tallér, Italisht tallero dhe Anglisht dollar. Thuhet se fjala thaler e ka prejardhje nga monedha gjerman…",
+                "…r si \"dollari i luanit\" - që është në fakt origjina e emrit dollar. Edhe shprehja e sotme e Anglishtes moderne dollar ngjan me…",
+                "…e emrit dollar. Edhe shprehja e sotme e Anglishtes moderne dollar ngjan me atë Holandeze të shekullit të 17 daler. Në analogj…",
+                "…shkurt 2007, u prezantua një monedhe e re presidenciale $1 dollar. E bazuar në suksesin e serisë \"50 State Quarters\", monedha…"
+            ]
+            },
+        {
+                "word": "lek",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 1,
+                "examples": [
+                "…1 Lek është kartëmonedhë dhe monedhë metalike e emetuar nga Banka…",
+                "…mi ==== === Emetimi i vitit 1988 === ==== Përshkrimi ==== 1 Lek është monedhë e emetuar nga Banka e Shqipërisë në vitin 198…",
+                "…hë e emetuar nga Banka e Shqipërisë në vitin 1988. Shih : 1 Lek monedhë (1988) === Emetimi i vitit 1992 === ==== Përshkrimi…",
+                "…Monedha 1 Lek e emetuar nga Banka e Shqipërisë, ka vlerën e një leku shqi…",
+                "…Monedha 1 Lek e lëshuar në qarkullim nga Banka e Shqipërisë në vitin 1988…",
+                "…10 Lek është kartëmonedhë e emetuar nga Banka e Shqipërisë në viti…"
+            ]
+            },
+        {
+                "word": "për qind",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Filmi Qind për qind prodhim i vitit 1993. Regjia: Artan Minarolli, Petrit Ruka,…",
+                "…Qind për qind jam gjallë : roman me autor Sefer Pasha dhe me redaktorë Ha…",
+                "…1 kompani u krijuan në vitin 2004 në Haute-Savoie: rreth 80 për qind në sektorin e shërbimeve, me një përqindje të lartë shërbim…",
+                "…të reja. Sektorët më aktivë ishin pasuritë e patundshme (24 për qind), ndërtimi (15.4 për qind), shërbimet e biznesit (12.4 për…",
+                "…ë ishin pasuritë e patundshme (24 për qind), ndërtimi (15.4 për qind), shërbimet e biznesit (12.4 për qind) dhe industria ushqim…",
+                "…qind), ndërtimi (15.4 për qind), shërbimet e biznesit (12.4 për qind) dhe industria ushqimore (10 për qind). === Industri === Në…"
+            ]
+            },
+        {
+                "word": "presje",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…cën e vendeve anglishtfolëse, ai mund të shkruhet me ose pa presje ose ndonjëherë një pikë që ndan shifrat e mijërave: 1.000 N…",
+                "…Tomoe (Japonisht: 巴) është një simbol me formë si presje i përdorur në mon japonez. Ngjan shumë me formën e zakonshm…",
+                "…trar, ku me qëllim nuk përdoren lidhëza dhe zëvendësohen me presje në fjali për t'i dhënë gjallëri e intonacion të shpejtë. As…",
+                "…e vargëzimeve, pra listave të gjymtyrëve të cilat ndahen me presje dhe pa lidhëza. Nëna, motra, nusja dalin. Ngrehin krahët që…",
+                "…në një listë, veçanërisht kur vetë elementët e listës kanë presje të ngulitura. Pikëpresja është një nga shenjat standarde më…",
+                "…ompozicione të n≥1; Ja vërtetimi: Vendosim shenjën plus ose presje në secilën nga n-1 kutitë e vargut të kutive ( 1 ◻ 1 ◻ … ◻…"
+            ]
+            },
+        {
+                "word": "gradë Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…hkallë të ngjashme temperaturë dy vjet para vdekjes së tij. Gradë Celsius (°C), mund t'i referohet një temperature specifike në Celsi…",
+                "…tu edhe nga perëndimi në lindje. Zonat në perëndim janë 1-2 gradë Celsius më të ngrohta në dimër se zonat lindore sepse zonat perëndi…",
+                "…t mesatare të janarit në zonat perëndimore variojnë nga -20 gradë Celsius në Uralet Polare në -15 gradë Celsius në Uralet Jugore, dhe…",
+                "…more variojnë nga -20 gradë Celsius në Uralet Polare në -15 gradë Celsius në Uralet Jugore, dhe temperaturat përkatëse të korrikut ja…",
+                "…alet Jugore, dhe temperaturat përkatëse të korrikut janë 10 gradë Celsius (Uralet Polare) dhe 20 gradë Celsius (Uralet Jugore). == Re…",
+                "…se të korrikut janë 10 gradë Celsius (Uralet Polare) dhe 20 gradë Celsius (Uralet Jugore). == Referime ==…"
+            ]
+            },
+        {
+                "word": "përqind",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…shembull, me 63.7 %). Sipas DIN 5008 është midis numrit dhe përqind karakteri është një hapësirë e karakterit . Në përqindje ll…",
+                "…== Të gjitha komunat kanë shumicë shqiptare. Ferizaj (95.9 përqind), Shtimja (96.8 përqind), Kaçaniku (99.9 përqind) dhe Hani…",
+                "…në shumicë shqiptare. Ferizaj (95.9 përqind), Shtimja (96.8 përqind), Kaçaniku (99.9 përqind) dhe Hani i Elezit (99.5 përqind).…",
+                "…izaj (95.9 përqind), Shtimja (96.8 përqind), Kaçaniku (99.9 përqind) dhe Hani i Elezit (99.5 përqind). Shtërpca ka një popullsi…",
+                "…8 përqind), Kaçaniku (99.9 përqind) dhe Hani i Elezit (99.5 përqind). Shtërpca ka një popullsi të përzier me shqiptarë (54.1 pë…",
+                "…nd). Shtërpca ka një popullsi të përzier me shqiptarë (54.1 përqind) dhe me serbë. == Historia == == Shiko edhe == == Lidhje të…"
+            ]
+            },
+        {
+                "word": "gradë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…rioziteti i krimit të ngjashme — për shembull: vrasje parës gradë === Mjekësi === Intensiteti i djegës (nga i pari gradë deri…",
+                "…arës gradë === Mjekësi === Intensiteti i djegës (nga i pari gradë deri i treti gradë) === Gramatikë === shkalla krahasore / k…",
+                "…ësi === Intensiteti i djegës (nga i pari gradë deri i treti gradë) === Gramatikë === shkalla krahasore / komperativa dhe shka…",
+                "…360 Gradë (ose 360°) është një emision televiziv shqiptar i zhanrit d…",
+                "…me të ftuar Arben Imami dhe Genc Ruli. Që nga fillimi, “360 Gradë” është pozicionuar si një platformë për analiza të thelluar…",
+                "…a News == Referenca == == Lidhje të jashtme == Emisioni 360 Gradë në YouTube ABC News…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Celsius është një shkallë dhe njësi matëse për temperaturën. Ajo ës…",
+                "…peraturën. Ajo është emëruar sipas astronomit suedez Anders Celsius (1701-1744), i cili ka zhvilluar një shkallë të ngjashme te…",
+                "…të ngjashme temperaturë dy vjet para vdekjes së tij. Gradë Celsius (°C), mund t'i referohet një temperature specifike në Celsi…",
+                "…lsius (°C), mund t'i referohet një temperature specifike në Celsius, si dhe një njësie që tregon një interval temperature, një…",
+                "…es të dy temperatura. Njësia ishte e njohur deri më 1948 si celsius nga \"centum\" përkthyer nga latinishtja si 100 dhe \"gradus\"…",
+                "…Anders Celsius (27 nëntor 1701 - 25 prill 1744) ishte astronom, fizikan dh…"
+            ]
+            },
+        {
+                "word": "Fahrenheit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…sius. Kjo marrëdhënie mbetet e saktë, por shkallët Celsius, Fahrenheit dhe Rankine tani përcaktohen në termat e shkallës Kelvin. K…",
+                "…et e Bashkuara, jashtë shkencave fizike, mbizotëron shkalla Fahrenheit, me shkallën kelvin ose Rankine të përdorur për temperaturë…",
+                "…ane dhe aktore amerikane == Vdekje == 1736 - Gabriel Daniel Fahrenheit, fizikant gjerman 1824 - Luigji XVIII, , mbret francez 1932…",
+                "…ous 1962 Billy Liar 1963 Darling (1965) Doctor Zhivago 1965 Fahrenheit 451 (1966) Far from the Madding Crowd 1967 McCabe & Mrs. Mi…",
+                "…Rekomandohet të shërbehet paksa i ftohur në rreth 50 gradë Fahrenheit. Është me trup mesatar 13%. == Shih edhe == Vreshtaria në S…",
+                "…== Diskografia == === Albume === 1984: Bon Jovi 1985: 7800° Fahrenheit 1986: Slippery When Wet 1988: New Jersey 1992: Keep The Fai…"
+            ]
+            },
+        {
+                "word": "kilometra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…jug. Dalmatian Hinterland varion në gjerësi nga pesëdhjetë kilometra në veri, në vetëm disa kilometra në jug; është e mbuluar kr…",
+                "…në gjerësi nga pesëdhjetë kilometra në veri, në vetëm disa kilometra në jug; është e mbuluar kryesisht nga Alpet Dinarike. Shtat…",
+                "…qendrën e Strugës, ka një distancë rrugore prej vetëm 15.5 kilometra. Qyteti i Strugës gjendet në veri-perëndim. Fushat rrethues…",
+                "…ë afërsi të Pogradecit, është nga qendra e qytetit rreth 30 kilometra larg. Ai nuk e ka atë rrëndësinë ekonomike dhe infrastruktu…",
+                "…era në rrethinën e tij. Komuna ka një sipërfaqe prej 389.93 kilometra katrorë dhe një dendësie prej afro 140 banorë për kilometër…",
+                "…rmes Kërçovës, Gostivarit dhe Tetovës me Shkupin (rreth 170 kilometra), përmes Manastirit me Prilepin (rreth 110 kilometra) dhe p…"
+            ]
+            },
+        {
+                "word": "kilometër",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…rehur në kilometra, në metra bëhet duke marrë për bazë: një kilometër i përgjigjet njëmijë fishit të metrit. 1 km = 10 hm = 103 m…",
+                "…umëfishohet në lidhje me njësite lineare. Për shembull, një kilometër është 1,000 (një mijë) herë gjatësia e një metri por një ki…",
+                "…ër është 1,000 (një mijë) herë gjatësia e një metri por një kilometër katror është 1,000,000 (një milion) herë sipërfaqja e një m…",
+                "…e të censusit, densiteti i popullsisë është 37.1 banorë për kilometër katror ndërsa sipas regjistrit civil densiteti është 61.91…",
+                "…afërsisht 190 km i madh dhe matë një gjersi midis 20 dhe 32 kilometër. Sipërfaqja përbej 3.566 km², që gati sipërfaqjen e Mallork…",
+                "…nga 61 bashkitë në Shqipëri. Ajo ka një sipërfaqe prej 774 kilometër katror, dhe përfaqëson një tërësi prej 103 fshatrash. Këto…"
+            ]
+            },
+        {
+                "word": "centimetra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…nivelit centimetrike. Konvertimi i gjatësisë së shprehur në centimetra, në metra bëhet duke marrë për bazë: një centimetër i përgj…",
+                "…investim i Bashkisë Vlorë, është e lartë shtatë metra e 20 centimetra, nga të cilat tre metra bazamenti dhe katër metra e 20 cent…",
+                "…etra, nga të cilat tre metra bazamenti dhe katër metra e 20 centimetra skulptura, ndërsa peshon 3 ton. Vepër e skulptorëve Zeqir A…",
+                "…t, në një trofe më të madhë. Trofeu u ndërtua me përmasa 18 centimetra më i lartë dhe 2 kilogram më i rëndë duke arritur peshën to…",
+                "…uke arritur peshën totale në 8 kilogram dhe gjatësinë në 60 centimetra. == Formati == === Kualifikimet === Për tu kualifikuar në g…",
+                "…ra, me lëvore të lëmuar të bardhë. Gjethet e tij janë 12-25 centimetra të gjata dhe 10-18 centimetra të gjera, dhe të ndara thellë…"
+            ]
+            },
+        {
+                "word": "milimetra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…re, si Peligna ose Tirino (Ofena, Capestrano), ku vetëm 500 milimetra u regjistruan. Reshjet përgjatë bregdetit pothuajse gjithmo…",
+                "…jet përgjatë bregdetit pothuajse gjithmonë nuk bien nën 600 milimetra. Teramo ka relativisht më pak reshje (rreth 800 milimetra)…",
+                "…0 milimetra. Teramo ka relativisht më pak reshje (rreth 800 milimetra) sesa Chieti, ndërsa Ortona, Vasto dhe Costa dei Trabocchi…",
+                "…ht të prekshëm ndaj trazirave Atlantike. Rreth 1500 në 2000 milimetra të reshjeve janë tipike. === Provincat === == Historia == N…",
+                "…C, dhe janari më i ftohtë, me −4 C. Reshjet mesatare 1,395 milimetra në vit. Muaji maj, 158 milimetra shi, dhe gushti konsideroh…",
+                "…C. Reshjet mesatare 1,395 milimetra në vit. Muaji maj, 158 milimetra shi, dhe gushti konsiderohet të jetë muaji më i thatë, me 3…"
+            ]
+            },
+        {
+                "word": "metra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…të madhe mbidetare në Desivojcë janë : Drumi i Xhelës 1228 metra Rrafshi 1157 metra Strajdeja 1138 metra maja e Zezë 1094 me…",
+                "…në Desivojcë janë : Drumi i Xhelës 1228 metra Rrafshi 1157 metra Strajdeja 1138 metra maja e Zezë 1094 metra maja e Sreshnje…",
+                "…Drumi i Xhelës 1228 metra Rrafshi 1157 metra Strajdeja 1138 metra maja e Zezë 1094 metra maja e Sreshnjes 1070 metra Cipeli 1…",
+                "…ra Rrafshi 1157 metra Strajdeja 1138 metra maja e Zezë 1094 metra maja e Sreshnjes 1070 metra Cipeli 1037 metra. Sipërfaja e…",
+                "…eja 1138 metra maja e Zezë 1094 metra maja e Sreshnjes 1070 metra Cipeli 1037 metra. Sipërfaja e Desivojcës përbëhet prej mal…",
+                "…a e Zezë 1094 metra maja e Sreshnjes 1070 metra Cipeli 1037 metra. Sipërfaja e Desivojcës përbëhet prej maleve ,arave,kullota…"
+            ]
+            },
+        {
+                "word": "kilogramë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…të nënkuptojë: toni i gjatë, që është 2,240 paund (1,016.0 kilogramë) toni, i quajtur edhe toni metrik, që është 1,000 kilogramë…",
+                "…kilogramë) toni, i quajtur edhe toni metrik, që është 1,000 kilogramë (rreth 2,204.6 paund) ose 1 megagram. toni i shkurtër, që ë…",
+                "…se 1 megagram. toni i shkurtër, që është 2,000 paund (907.2 kilogramë) Përdorimi i saj fillestar si njësi vëllimi ka vazhduar në…",
+                "…var lufton në kategoritë e peshës deri në 66 dhe deri në 73 kilogramë. Kampion Evropian deri në 18 vjet në vitin 2013. Ai filloi…",
+                "…të madh të Kosovës në xhudon e meshkujve. Në kategorinë 73 kilogramë ai ishte i pandalshëm duke rrëmbyer të artën në Paris. Motr…",
+                "…mbajtja e yndyrës së hirrës është e ulët; për shembull 1000 kilogramë hirrë kërkohen për të bërë disa kilogramë gjalpë hirrë. Ësh…"
+            ]
+            },
+        {
+                "word": "litra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Një litra (shumës: litrae; greqishtja e lashtë: λίτρα) është një mone…",
+                "…shtë në përgjithësi dhe veçanërishtë në Sicili. Si monedhë, litra ishte e barasvlershme në vlerë me atë të obol-it dhe peshon…",
+                "…Indian \"për tre litrae argjendi të pastampuara\". Në Talmud, litra është një njësi matëse, ekuivalente e 60 shekeleve (para iz…",
+                "…galeri; 11 gal amerikanë). Ky është i përbërë nga rreth 19 litra (4,2 imp gal; 5,0 gal amerikanë) lëng jashtëqelizor duke pë…",
+                "…gal amerikanë) lëng jashtëqelizor duke përfshirë rreth 3,2 litra (0,70 imp gal; 0,85 US gal) plazmë gjaku dhe rreth 8,4 litr…",
+                "…itra (0,70 imp gal; 0,85 US gal) plazmë gjaku dhe rreth 8,4 litra (1,8 imp gal; 2,2 gal amerikanë) lëng intersticial dhe rret…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Vija ndarëse -minus ( - ) është një karakter i përdorur në dokumentet dixhitale…",
+                "…ormatikë për të përfaqësuar një grumbull (-) ose një shenjë minus (-). Eshtë e pranishme në Unicode si pikë kodi U + 002D - V…",
+                "…e pranishme në Unicode si pikë kodi U + 002D - Vija ndarëse-MINUS; është gjithashtu në ASCII me të njëjtën vlerë. == Referime…",
+                "…Shenja plus-minus, ±, është një simbol matematikor me shumë kuptime: Në matem…",
+                "…avantazh të qartë për lojtarin e bardhë; shenja plotësuese minus-plus, ∓, tregon të njëjtin avantazh për lojtarin me ngjyrë.…",
+                "…uar një simbol që mund të zëvendësohet nga shenjat plus dhe minus, + ose −, duke lejuar që formula të përfaqësojë dy vlera os…"
+            ]
+            },
+        {
+                "word": "plus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…80 Plus (me markën tregtare 80 PLUS) është një program çertifikimi…",
+                "…80 Plus (me markën tregtare 80 PLUS) është një program çertifikimi vullnetar i nisur në vitin 2…",
+                "…e shumë dalje që rrjedhin nga desktopi. Mars 2004: ideja 80 Plus u prezantua si një iniciativë në Simpoziumin e Transformimi…",
+                "…krijua nga Seasonic. 2006: Energy Star i shtoi kërkesat 80 Plus në specifikimet e kompjuterit të tyre të atëhershëm (në fuq…",
+                "…P dhe Dell certifikojnë PSU-të e tyre sipas specifikimit 80 Plus. 20 korrik 2007: Specifikimi i kompjuterit Energy Star 4.0…",
+                "…Energy Star 4.0 hyn në fuqi. Specifikimi përfshin nivele 80 Plus të efikasitetit të furnizimit me energji elektrike për komp…"
+            ]
+            },
+        {
+                "word": "deri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Kënga N´Kaçanik deri n´Buletin është një këngë pa përcjelljen e instrumenteve e…",
+                "…e strategët Isa Boletini e Idriz Seferi. Ej po n´Kaçanik o, Deri n´Boletin e Ej po tonë, o Kosova E po mlu, o me tyme E po m…",
+                "…, e E po dy dragoj, o O mer po luftojn, e E po n´Kaçanik, o Deri n´Sarajev, e E po Isa Beg, o O Idriz o Sefer-rej E po Dërgu…",
+                "…sha më e madhe që ka jetuar ndonjëherë në ujë, me një peshë deri në 190 ton dhe me një përmasë deri në 33.6 metra të gjatë.…",
+                "…erë në ujë, me një peshë deri në 190 ton dhe me një përmasë deri në 33.6 metra të gjatë. Ndërsa kafsha më e madhe e gjallë t…",
+                "…e është elefanti afrikan (Loxodonta africana), me një peshë deri në 12.25 ton dhe me një permasë deri në 10.67 metra të gjat…"
+            ]
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 60,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Stampa:Kartela valutë Euro (shenja valutore: €; kodi valutor: EUR) është valuta zyrtar…",
+                "…gjashtë shtete tjera pa marrëveshje të tilla. Si rezultat, euro është valuta e vetme për mbi 330 milion Evropianë. Përfshir…",
+                "…anë mbi 610 miliardë € në qarkullim që prej dhjetorit 2006, euro ështa valuta me vlerën më të madhe të përbashkët të monedha…",
+                "…në shtypjen dhe shpërndarjen e kartëmonedhave dhe monedhave euro, dhe operimin e sistemit pagues të Eurozonës. Megjithëse gj…",
+                "…hat === Euroja ndahet në 100 cent (gjithashtu të njohur si \"euro cent\" për t'i dalluar nga monedhat tjera). Të gjitha monedh…",
+                "…nt\" për t'i dalluar nga monedhat tjera). Të gjitha monedhat euro në qarkullim (ku përfshihen monedhat komemorative €2) kanë…"
+            ]
+            },
+        {
+                "word": "dollarë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Një grusht dollarë ( italisht: Per un pugno di dollari; anglisht: A Fistful of…",
+                "…imore dhe Spanjës, u filmua me një buxhet të ulët (200 mijë dollarë) ndërsa Clint Eastwood u pagua 15,000 dollarë për rolin e t…",
+                "…lët (200 mijë dollarë) ndërsa Clint Eastwood u pagua 15,000 dollarë për rolin e tij. Filmi është realizuar në Itali në vitin 19…",
+                "…n. Ai u pasua nga filmi tjetër i zhanrit të njëjtë Për disa dollarë më shumë dhe filmi I miri, i keqi dhe i shëmtuari, gjithash…",
+                "…Morricone. == Referime == == Linqe te jashtme == Një grusht dollarë në IMDb A Fistful of Dollars at the Spaghetti Western Datab…",
+                "…Vëlla, vëlla, kosi me dollarë është titulli i komedisë teksti i së cilës është kompozimi…"
+            ]
+            },
+        {
+                "word": "lekë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…uk prodhohen më. == Emri == Leku është emëruar në nderim të Lekë Dukagjinit në vitin 1921, me vendim të parlamentit shqiptar…",
+                "…por kryesisht emërtimi vjen në nderim të feudalit Shqiptar Lekë Dukagjini. Leku ka qënë në prerje ari, argjendi dhe bronzi.…",
+                "…500 Lekë është kartëmonedhë e emetuar nga Banka e Shqipërisë në vite…",
+                "…metimi i vitit 2022 === ==== Përshkrimi ==== Të gjitha këto lekë janë hequr nga qarkullimi përveç atij të fundit me fytyrën…",
+                "…50 Lekë është kartëmonedhë dhe monedhë metalike e emetuar nga Banka…",
+                "…e Pamja e prapme === Emetimet e viteve 1996 dhe 2000 === 50 Lekë është monedhë metalike e emetuar nga Banka e Shqipërisë. Pa…"
+            ]
+            },
+        {
+                "word": "katrorë",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…është ishulli më i madhi në Hawaii me sipërfaqe 4.028 milje katrorë (10,430 km2). Lartësi e kësaj ishulli është 4.205 metra. 'M…",
+                "…të ishulli i dytë i madh në Hawaii me sipërfaqe 727.2 milje katrorë (1.838 km2). Mahui është i 17-ti me sipëfaqe prej ishujve t…",
+                "…ë ishulli i tretë i madh në Hawaii me sipërfaqe 596.7 milje katrorë (1.545.4 km2). O'ahu është i 20-ti me sipërfaqe prej ishujv…",
+                "…ishulli i katërt i madh në Hawaii me sipërfaqe 552.3 milje katrorë (1.420.5 km2). Kaua'i është i 21-ti me sipërfaqe prej ishuj…",
+                "…ë ishulli i pestë i madh në Hawaii me sipërfaqe 260.0 milje katrorë (673.4 km2). Moloka'i është i 27-ti me sipërfaqe prej ishuj…",
+                "…ishulli i gjashtë i madh në Hawaii me sipërfaqe 140.5 milje katrorë (363.9 km2). Lana'i është i 42-ti me sipërfaqe prej ishujve…"
+            ]
+            }
+        ],
+    }
+    
