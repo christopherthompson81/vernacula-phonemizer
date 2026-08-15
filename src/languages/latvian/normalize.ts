@@ -239,7 +239,13 @@ function abbreviations(text: string): string {
         // bibliography line ends `— 160 lpp` with no period at all. A required dot left it as a raw leak.
         // Safe here in a way it would not be for `nr`, since `lpp` is not a word or a plausible fragment.
         .replace(/(?<![\p{L}\p{M}])(\d+)(\s*)lpp\.?(?![\p{L}\p{M}])/giu, (_w, fig: string, gap: string) => `${fig}${gap || " "}${PAGE[countForm(Number(fig))]}`)
-        .replace(/(?<![\p{L}\p{M}.])nr\.(?=\s*\d)/giu, NUMBER_ABBREV)
+        /**
+         * ⚠ THE GAP IS RE-EMITTED, AND SUPPLIED WHEN THERE IS NONE. `nr.859` is written without a space and
+         * the abbreviation's own period is consumed by the match, so a bare replacement fused the noun onto
+         * the digits — *numurs859*, one token, which the number path then cannot read at all. Same defect as
+         * the shared currency arm's (test/core-currency-fusion.test.ts) and the same fix: separate.
+         */
+        .replace(/(?<![\p{L}\p{M}.])nr\.(\s*)(?=\d)/giu, (_w, gap: string) => `${NUMBER_ABBREV}${gap || " "}`)
         .replace(ABBREVIATION_RE, (m: string) => ABBREVIATION[m.toLowerCase()] ?? m);
 }
 
