@@ -190,7 +190,11 @@ describe("pashto text normalization", () => {
         expect(normalizePashto("۱۹۶۵-۱۹۷۵.")).toBe("۱۹۶۵ تر ۱۹۷۵.");
         // ⚠ THE BRANCH WE DID NOT TAKE: `،` and `,` are BOTH grouping marks here (×1,517 / ×1,959) and both
         // are decimal separators at step 12, so a trailing comma can still be the right operand's own tail.
-        expect(normalizePashto("۱۹۶۵-۱۹۷۵، او")).toBe("۱۹۶۵-۱۹۷۵، او");
+                // ⚠ THE COMMA IS NOW READ, and this assertion used to pin the opposite. The argument for rejecting it
+        // was that a comma after the right operand may open a DECIMAL — true, and it only holds when a DIGIT
+        // follows. The guard is now `[.,]\d`, so a fraction is still declined and a clause comma is not.
+        // One shape, eleven layers: the same six characters were wrong in each. See test/clause-final-range.ts.
+        expect(normalizePashto("۱۹۶۵-۱۹۷۵، او")).toBe("۱۹۶۵ تر ۱۹۷۵، او");
         // a decimal RIGHT operand written with the DOT is now claimed, and step 12 still reads it whole
         expect(normalizePashto("۹۰-۹۵.۵")).toBe("۹۰ تر ۹۵ اعشاريه ۵");
     });

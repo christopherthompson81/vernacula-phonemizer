@@ -40,7 +40,8 @@
  *     sourceable for it: Basque spans are `-tik … -ra` (ablative-to-allative), which is two agreeing suffixes
  *     on the two operands, not an infix — the Fula `hakkunde` shape, refused for the same reason. `N eta N`
  *     occurs ×10 and every one is an ordinary conjunction between two independent figures, not a span.
- *   · NO MATH SIGNS (`math-sign` ×14, `minus` ×13). The corpus's `×` instances are `5.97×10²⁴` — scientific
+ *   · NO SUBTRACTION, TIMES OR DIVISION (`math-sign` ×14). ⚠ THE NEGATIVE SIGN *IS* NOW READ — see step 4b;
+ *     this bullet said "no math signs" and was wrong about the one that was changing a VALUE. The corpus's `×` instances are `5.97×10²⁴` — scientific
  *     notation, where the reading is an exponent predicate this layer has no word for — and `2.000 – 1.000`
  *     inside a worked arithmetic example that spells its own operation out in words either side. `ken`
  *     (subtract) and `bider` (times) are ×0 as whole words in the corpus; `zati` ×9 is the noun "part"
@@ -290,6 +291,38 @@ export function normalizeBasque(input: string): string {
     //    `% 93,55` would lose its sign. Same coupling the playbook records as "units before decimals",
     //    arriving through the percent side.
     s = SYMBOLS(s);
+
+    // 4b) THE NEGATIVE SIGN — a sign attached to an amount, with no left operand.
+    //    ⚠ THIS FIXES A SEMANTIC ERROR, NOT A SILENCE. `-89.2 ° C`, `−94,7 ° C` and `(-66 °C)` — the corpus's
+    //    record low temperatures — were dropping the sign and reading as POSITIVE. Eighty-nine below zero
+    //    became eighty-nine above it: a plausible number, wrong by 178 degrees, and invisible to every gate
+    //    because nothing leaks and nothing is unread.
+    //    ⚠ THE WORD IS DEFINITIONALLY SOURCED, and this file's header was wrong to say otherwise. It refused
+    //    the math signs on the ground that `ken` is ×0 in the CORPUS — true, and beside the point, because
+    //    the corpus is not the only tier. eu.wikipedia's article on the signs states both the name and the
+    //    use: *"Plus (+) eta minus (−) zeinuak zenbaki positiboak edo negatiboak identifikatzen"* — "the plus
+    //    and minus signs identify positive or negative numbers" — and `minus` is 26 tok / 8 arts.
+    //    ⚠ SUBTRACTION STAYS REFUSED, and the same article is why the split is principled rather than timid:
+    //    it gives the operator a DIFFERENT word — *"10 – 7, hamar KEN zazpi"*. Reading `ken` between two
+    //    figures would claim this corpus's 43 `\d-\d` sites, which the header shows are CLASSICAL CITATIONS
+    //    (`Am 2.18.19-26`), a reign (`1235-1400`) and a card range — not arithmetic. So the operator is
+    //    sourced and still not shipped; only the unambiguous no-left-operand case is.
+    //    ⚠ THE LOOKBEHIND SPANS WHITESPACE for exactly that reason: `2.000 – 1.000` has a figure to the left
+    //    across a space, so it is a subtraction and is refused. Without the span it would read *minus 1.000*.
+    //    ⚠ THE EN DASH IS EXCLUDED AND THE PERIOD IS IN THE LEFT GUARD, both because the first cut read two
+    //    things that are not negatives. `nahiko ugaria –700 inguru–` is a PARENTHETICAL pair of en dashes
+    //    ("about 700"), and it became *minus 700*; `21. - 29. liburuak` is a spaced ORDINAL RANGE, and it
+    //    became *21. minus 29.*. Both are readings, not drops, so nothing downstream would have shown them.
+    //    ASCII `-` and U+2212 `−` are what the three real negatives in this corpus are written with, and the
+    //    en dash is this corpus's range-and-parenthesis mark — so the character itself does the separating.
+    //    ⚠ NO SPACE BETWEEN THE SIGN AND THE FIGURE, and that is the discriminator review found was missing.
+    //    Guarding only on what is to the LEFT let the label-value dash through — `Bilbo - 400.000 biztanle`
+    //    and `Altuera - 1.234 metro`, the dash-separated shape wiki list prose is full of, have a LETTER to
+    //    the left and became *Bilbo minus 400000*. Widening the left lookbehind to letters (the obvious fix)
+    //    would have refused `baxuena -89.2 ° C` too, which is the very case this rule exists for.
+    //    What actually separates them is the writer's own spacing: all four genuine negatives in this corpus
+    //    are written TIGHT (`-89.2`, `−94,7`, `(-66`, `-2,8`), and every dash used as punctuation is spaced.
+    s = s.replace(/(?<![\d.]\s{0,3})(?<![\p{L}\p{M}.,])[−-](?=\d)/gu, "minus ");
 
     // 5) THE CASE ENDING GLUED TO A FIGURE — the largest class in this corpus at ×296, and the one that
     //    produced a stranded consonant cluster: `1980an` read *mila bederatziehun eta laurogei AN*, with the

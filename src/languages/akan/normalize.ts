@@ -481,7 +481,7 @@ export function normalizeAkan(input: string): string {
     //    ⚠ THIS CORPUS GAINS NOTHING FROM IT, and that is stated rather than hidden: its one clause-final
     //    span is `1964-1967, Belfast` — a COMMA — so the artifact diff is 0/237 and the repair is pinned as a
     //    branch in `test/akan.test.ts` instead of counted as corpus movement.
-    s = s.replace(new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d,\\p{L}\\p{M}\\-–—])`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d\\p{L}\\p{M}\\-–—]|,\\d)`, "gu"),
         (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${TO} ${b}` : whole));
 
     // 9) THE DECIMAL POINT, after every rule that needed to see a dot (steps 3, 4 and 7) and after every

@@ -188,4 +188,27 @@ describe("Basque — the six the review found", () => {
     test("the fraction is magnitude-bounded like the head, not left unguarded", () => {
         expect(normalizeBasque("3,14159265358979a")).toBe("3,14159265358979a");
     });
+
+    /**
+     * ⚠ A DROPPED NEGATIVE SIGN CHANGES THE VALUE, and this was the corpus's record low temperatures reading
+     * as POSITIVE: `-89.2 ° C` came out as eighty-nine ABOVE zero, wrong by 178 degrees and invisible to
+     * every gate. The word is definitionally sourced — eu.wikipedia's article on the signs states *"Plus (+)
+     * eta minus (−) zeinuak zenbaki positiboak edo negatiboak identifikatzen"*.
+     */
+    test("a negative sign attached to an amount is read; a range or a parenthetical is not", () => {
+        const eu = createBasque();
+        expect(eu.text("-66 °C").trim()).toContain("minus̺");
+        expect(eu.text("magnitudea -2,8 da").trim()).toContain("minus̺");
+        // ⚠ SUBTRACTION STAYS REFUSED: the same article gives the operator a DIFFERENT word (*hamar ken
+        // zazpi*), and this corpus's 43 digit-hyphen-digit sites are citations and reigns, not arithmetic
+        expect(eu.text("2.000 – 1.000").trim()).not.toContain("minus̺");
+        // a SPACED ordinal range and an en-dash parenthetical both read as a minus in the first cut
+        expect(eu.text("21. - 29. liburuak").trim()).not.toContain("minus̺");
+        expect(eu.text("ugaria –700 inguru– mota").trim()).not.toContain("minus̺");
+        // the case-ending hyphen must never be touched — the file's central claim
+        expect(eu.text("995-ko").trim()).not.toContain("minus̺");
+        // ⚠ THE LABEL-VALUE DASH, which is SPACED. Every genuine negative in this corpus is written tight,
+        // and guarding on the left operand's class instead would have refused `-89.2 ° C` as well.
+        expect(eu.text("Bilbo - 400.000 biztanle").trim()).not.toContain("minus̺");
+    });
 });

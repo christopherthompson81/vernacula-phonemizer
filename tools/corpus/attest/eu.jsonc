@@ -21,6 +21,70 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…Plus (+) eta minus (−) zeinuak zenbaki positiboak edo negatiboak identifikatze…",
+                "…n. Gainera, batuketa eta kenketa irudikatzen dute. Plus eta minus hitzak latinezko plus eta minus hitzetatik datoz. == Histor…",
+                "…irudikatzen dute. Plus eta minus hitzak latinezko plus eta minus hitzetatik datoz. == Historia == Zeinuak egungo alfabetoare…",
+                "…ta M letrak erabiltzen zituzten Europan (latinezko plus eta minus terminoengatik). Gaur egungo sinboloen hastapenak, dirudien…",
+                "…o. Robert Recordeek, berdin zeinuaren sortzaileak, plus eta minus sartu zituen zeinuak Ingalaterran (1517) The Whetstone of W…",
+                "…idaztea da. Unicodek sinbolo hori U+FB29 ﬩ posizioan du. == Minus zeinua == Minus zeinuak (−) hiru erabilera nagusi ditu mate…"
+            ]
+            },
+        {
+                "word": "ken",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 7,
+                "substringOnly": 1,
+                "examples": [
+                "…Ken zenbait adiera dituen terminoa da: Ken edo minus, kenketa a…",
+                "…Ken zenbait adiera dituen terminoa da: Ken edo minus, kenketa adierazten duen zeinua da (–); eta eragi…",
+                "…batean zeinu hori irakurtzen den era ere bai: 10 – 7, hamar ken zazpi. Japonieratik: Ken bat (間) luzeera unitate bat da Jap…",
+                "…zen den era ere bai: 10 – 7, hamar ken zazpi. Japonieratik: Ken bat (間) luzeera unitate bat da Japonian. Ken (剣), japoniera…",
+                "…Japonieratik: Ken bat (間) luzeera unitate bat da Japonian. Ken (剣), japonieraz ezpata; kendo (剣道, ezpataren bidea) kirolar…",
+                "…az ezpata; kendo (剣道, ezpataren bidea) kirolaren osagarria. Ken (県), Japoniako landa-prefektura. Besterik: Ken (panpina), M…"
+            ]
+            },
+        {
+                "word": "negatibo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 6,
+                "substringOnly": 2,
+                "examples": [
+                "…Negatibo terminoak adiera eta erabilera zenbait ditu: matematikan, z…",
+                "…antibiotikoekiko, kanpo mintzik ez dutelako. Bakterio gram-negatibo askok gaixotasunak eragiten dituzte, tartean gonorrea (Neis…",
+                "…Matematikan, zenbaki negatibo batek aurkako zenbaki bat adierazten du. Zenbaki errealen s…",
+                "…nbaki bat adierazten du. Zenbaki errealen sisteman, zenbaki negatibo bat zero baino txikiagoa dena da. Zenbaki negatiboak galera…",
+                "…boa da, hiruko magnitudea duena, eta «minus hiru» edo «hiru negatibo» ahoskatzen da. Kenketa-eragiketa baten eta zenbaki negatib…",
+                "…egatibo» ahoskatzen da. Kenketa-eragiketa baten eta zenbaki negatibo baten arteko diferentzia zehazten laguntzeko, batzuetan, ze…"
+            ]
+            },
+        {
+                "word": "gutxi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…iako onddo espezie bat da. Jangarritasuna ezezaguna. Haragi gutxi, espezie urria eta sukaldaritzan balio gutxi duelako, ez da…",
+                "…zaguna. Haragi gutxi, espezie urria eta sukaldaritzan balio gutxi duelako, ez da gomendatzen jatea. == Deskribapena == Kapela…",
+                "…circa hitza, c., ca. edo cca. laburtua, euskaraz inguru edo gutxi gorabehera esan nahi du. Bibliografia zientifikoa erabiltze…",
+                "…799, urte biak zehatzak dira. c. 1732–1799, lehenengo urtea gutxi gorabeherakoa da, eta bigarrena zehatza. 1732 – c. 1799, le…",
+                "…. 1732 – c. 1799, lehenengo urtea zehatza da, eta bigarrena gutxi gorabeherakoa. c. 1732–c. 1799, urte biak gutxi gorabeherak…",
+                "…a bigarrena gutxi gorabeherakoa. c. 1732–c. 1799, urte biak gutxi gorabeherakoak dira. == Erreferentziak == == Kanpo estekak…"
+            ]
+            },
+        {
                 "word": "kilometro karratu",
                 "verdict": "attested",
                 "bounded": true,

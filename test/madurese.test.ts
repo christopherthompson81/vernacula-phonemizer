@@ -120,7 +120,15 @@ describe("text normalization", () => {
         expect(normalizeMadurese("04-20.")).toBe("04 sampè' 20.");
         // the comma arm, declined ON PURPOSE — the operand rule would otherwise have to guess whether the
         // comma opens a fraction or closes a clause.
-        expect(normalizeMadurese("04-20,")).toBe("04-20,");
+                // ⚠ THE COMMA IS NOW READ, and this assertion used to pin the opposite. The argument for rejecting it
+        // was that a comma after the right operand may open a DECIMAL — true, and it only holds when a DIGIT
+        // follows. The guard is now `[.,]\d`, so a fraction is still declined and a clause comma is not.
+        // One shape, eleven layers: the same six characters were wrong in each. See test/clause-final-range.ts.
+        expect(normalizeMadurese("04-20,")).toBe("04 sampè' 20,");
+        // ⚠ AND THE DECIMAL THE OLD GUARD FEARED IS ALREADY HANDLED BY THE OPERAND ITSELF: `(\d+(?:[.,]\d+)?)`
+        // takes `1,7` WHOLE, so `1-1,7 mèter` is a range from one to one-point-seven and always was. The
+        // trailing comma guard was defending against a case the operand pattern had already covered.
+        expect(normalizeMadurese("1-1,7 mèter")).toBe("1 sampè' 1 koma 7 mèter");
     });
 
     // `±` IN THIS CORPUS IS "ABOUT", NOT A TOLERANCE — all four instances are a rounded area or height, and

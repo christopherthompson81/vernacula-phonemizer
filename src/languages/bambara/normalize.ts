@@ -205,7 +205,7 @@ const MAG = "million|milion|miliyon|miliyɔn|milyɔn|miliyar|milyar";
  *  verb `fɔ` "to say" spelled without the accent (`Maninka-kan be fo Jine`). Digit-flanked `fo` is ×19 and
  *  every one is a genuine span with both operands bare: `san ba 2 fo 3`, `san 1712 fo ka se san 1861`,
  *  `dɔgɔkun 1 fo dɔgɔkun 8`, `10 fo 15 dɔrɔn %`, `1969 … fo 1992`, `304 K.Ɲ. fo san 232 K.Ɲ.`. */
-const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d,\p{L}\p{M}-])/gu;
+const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d\p{L}\p{M}-]|,\d)/gu;
 
 /** THE ELISION APOSTROPHE, and it is this layer's largest class by an order of magnitude.
  *

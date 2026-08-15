@@ -21,6 +21,234 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "un citi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Mana ģimene un citi zvēri\" (angļu: My Family and Other Animals) ir dabaspētniek…",
+                "…uņi Rodžers, Čurulis, Korķelis, pūce Uliss,gekons Džeronimo un citi, kā arī liels skaits vārdā nenosauktu, bet ne mazāk interes…",
+                "…rakstīja jaunu, kuru arī piedāvāja izdevējam — \"Mana ģimene un citi zvēri\". Darels grāmatu sarakstīja 1955. gadā. Kā atceras vi…",
+                "…Miglas krogs un citi dzejoļi ir Gunara Saliņa pirmais dzejoļu krājums. To izdevi…",
+                "…ammēšanas atbalsta līdzekļi, informācijas drošības līdzekļi un citi. Lietojumprogrammatūra ietver programmsistēmas, kas ir orie…",
+                "…lietojumprogrammas (teksta redaktori, elektroniskās tabulas un citi), rūpniecisko izstrādājumu projektēšanas automatizācijas si…"
+            ]
+            },
+        {
+                "word": "tas ir",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Kas tas ir — kolhozs?\" ir Latvijas animācijas filma, kas izdota 1981.…",
+                "…Kas tas ir – PND? ir pirmais oficiālais albums, ko izdeva latviešu pan…",
+                "…Thales Alenia Space jeb TAS ir Francijas un Itālijas kopuzņēmums, kas dibināts 2007. gada…",
+                "…rēšanu. Irānai ir izveidots arī domēns ar persiešu burtiem, tas ir šāds: ایران.. == Ārējās saites ==…"
+            ]
+            },
+        {
+                "word": "un tā tālāk",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…nu domēnu bez maksas. Ja vēlas reģistrēt otru, trešo domēnu un tā tālāk, tad 2008. gadā bija jāmaksā 225 eiro gadā par domēna nosau…",
+                "…jā līmeņa domēnam, piemēram, organizācijas tips (.com, .org un tā tālāk) vai valsts koda augšējā līmeņa domēns (.lv, .ru un tā tālā…",
+                "…n tā tālāk) vai valsts koda augšējā līmeņa domēns (.lv, .ru un tā tālāk), bet kreisajā pusē var būt vārds vai vārdu sistēma, lai id…",
+                "…l Casino\", \"Ventura County\", \"Viet Cong\", \"Version Control\" un tā tālāk. == Ārējās saites ==…",
+                "…as nodarbojas ar dažādu produktu (gaļas, piena, olu, vilnas un tā tālāk) ražošanu un nogādāšanu tālāk uzpircējiem vai arī paši tos…",
+                "…itļu kopu. Veselo skaitļu piemēri ir 0, 1, -1, 2, −2, 3, -3 un tā tālāk, savukārt 9,75, 5 12 un 2 {\\displaystyle {\\sqrt {2}}} nav v…"
+            ]
+            },
+        {
+                "word": "pulksten",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 3,
+                "substringOnly": 9,
+                "examples": [
+                "…6. līdz piektdienai 02.10.2026. šādos laikos: pirmdien — no pulksten 17.00 līdz 20.00; otrdien — no pulksten 8.00 līdz 11.00; tr…",
+                "…ikos: pirmdien — no pulksten 17.00 līdz 20.00; otrdien — no pulksten 8.00 līdz 11.00; trešdien — no pulksten 17.00 līdz 20.00; c…",
+                "…20.00; otrdien — no pulksten 8.00 līdz 11.00; trešdien — no pulksten 17.00 līdz 20.00; ceturtdien — no pulksten 8.00 līdz 11.00;…",
+                "…0; trešdien — no pulksten 17.00 līdz 20.00; ceturtdien — no pulksten 8.00 līdz 11.00; piektdien — no pulksten 12.00 līdz 15.00.…",
+                "…0; ceturtdien — no pulksten 8.00 līdz 11.00; piektdien — no pulksten 12.00 līdz 15.00. Vēlēšanas norisināsies piecos vēlēšanu ap…",
+                "…Pulksten 4.50 no Pedingtonas (angļu: 4.50 from Paddington) ir angļu…"
+            ]
+            },
+        {
+                "word": "citi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Citi\" (spāņu: Los otros, angļu: The Others) ir 2001. gada Spānij…",
+                "…ar saviem diviem bērniem, sāk uzskatīt, ka mājā spokojas. \"Citi\" pirmizrāde notika 2001. gada 2. augustā. Filma bija komerc…",
+                "…\"Citi Zēni\" ir latviešu popmūzikas, hiphopa un poprepa grupa. 202…",
+                "…\"Mana ģimene un citi zvēri\" (angļu: My Family and Other Animals) ir dabaspētniek…",
+                "…bagātajā Vidusjūras piekrastes un salas dzīvnieku pasaulē. Citi galvenie grāmatas personāži ir pirms vairākiem gadiem par a…",
+                "…Rodžers, Čurulis, Korķelis, pūce Uliss,gekons Džeronimo un citi, kā arī liels skaits vārdā nenosauktu, bet ne mazāk interes…"
+            ]
+            },
+        {
+                "word": "tālāk",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Augstāk, tālāk, stiprāk ir latviešu repera Ozola otrais studijas albums, k…",
+                "…as i a? Paņemt visu Kopā Atslābsti (Beatbox skits) Augstāk, tālāk, stiprāk Tu un Es Klubs Nedziedāšu (skits) O Z O Ls Centrā…",
+                "…\"Ej tālāk, tālāk\" (angļu: C'mon C'mon) ir 2021. gada ASV drāmas filma…",
+                "…\"Ej tālāk, tālāk\" (angļu: C'mon C'mon) ir 2021. gada ASV drāmas filma, kuras…",
+                "…uzticēts pieskatīt deviņus gadus veco māsasdēlu. Filmas \"Ej tālāk, tālāk\" pirmizrāde notika 2021. gada 2. septembrī Teluraida…",
+                "…s pieskatīt deviņus gadus veco māsasdēlu. Filmas \"Ej tālāk, tālāk\" pirmizrāde notika 2021. gada 2. septembrī Teluraidas kinof…"
+            ]
+            },
+        {
+                "word": "pirms mūsu ēras",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Mūsu ēra un pirms mūsu ēras ir laika skaitīšanas sistēma, kas tiek izmantota Gregora ka…",
+                "…2. tūkstošgade pirms mūsu ēras ir laika periods pirms mūsu ēras, kas sākās 2000. gadā p.m.…",
+                "…2. tūkstošgade pirms mūsu ēras ir laika periods pirms mūsu ēras, kas sākās 2000. gadā p.m.ē. un beidzās 1001. gadā p.m.ē. p…",
+                "…25. gadsimts pirms mūsu ēras bija 46 gadsimtus senā pagātnē. Tas sākās 2500. gadā p.m.ē.…"
+            ]
+            },
+        {
+                "word": "mūsu ēras",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Mūsu ēra un pirms mūsu ēras ir laika skaitīšanas sistēma, kas tiek izmantota Gregora ka…",
+                "…\"Mūsu ēras Babilona\" (angļu: Babylon A.D.) ir 2008. gada Francijas, Ap…",
+                "…2. tūkstošgade pirms mūsu ēras ir laika periods pirms mūsu ēras, kas sākās 2000. gadā p.m.…",
+                "…2. tūkstošgade pirms mūsu ēras ir laika periods pirms mūsu ēras, kas sākās 2000. gadā p.m.ē. un beidzās 1001. gadā p.m.ē. p…"
+            ]
+            },
+        {
+                "word": "tai skaitā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…esma. T. Kruss ir rakstījis mūziku vairākiem māksliniekiem, tai skaitā Šerilai Kolai, The Saturdays, Dāvidam Getam. == Diskogrāfij…",
+                "…ā veidā tekstu visdažādākajās literārajās un zīmju valodās. Tai skaitā Unikods pieļauj vairāku valodu paralēlu izmantošanu tai paš…",
+                "…as māksliniekus darbam Šamboras pilī (Château de Chambord), tai skaitā Leonardo da Vinči, kas atveda sev līdzi \"Monu Lizu\". Fransu…",
+                "…Lizu\". Fransuā valdīšanas laikā notika nozīmīgas izmaiņas, tai skaitā Francijā nostiprinājās absolūtā monarhija, humānisma un pro…"
+            ]
+            },
+        {
+                "word": "tamlīdzīgi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…t cilvēka emocijas, tas ir, vai viņš ir priecīgs, bēdīgs un tamlīdzīgi. == Skatīt arī == Fizionomija == Ārējās saites == Vikikrātu…",
+                "…audzkārtnis ir hekto, piemēram, hektopaskāli, hektolitri un tamlīdzīgi. Binārajā skaitīšanas sistēmā simts ir 1100100. Skaitli 100…",
+                "…tnis ir mega-, piemēram, megavats, megadžouls, megabaits un tamlīdzīgi. Kādas mērvienības miljono daļu raksta kā 10-6 un tās apzīm…"
+            ]
+            },
+        {
+                "word": "lappuse",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Tīmekļa lappuse (angļu: Web page) ir vispasaules tīmekļa \"lapa\", parasti HT…",
+                "…Windows-1257 (Windows Baltic) ir viena baita kodu lappuse, ko izmanto latviešu, igauņu un lietuviešu valodas atbalsta…",
+                "…un lietuviešu valodas atbalstam Microsoft Windows. Šī kodu lappuse ir līdzīga ISO 8859-13, bet atšķiras kodi A1, A5, B4, FF un…",
+                "…appusē saiti ar rel=\"tag\" atribūtu, tiek norādīts, ka mērķa lappuse ir šīs lappuses atzīmes lappuse. Šo standartu savā programm…",
+                "…tu, tiek norādīts, ka mērķa lappuse ir šīs lappuses atzīmes lappuse. Šo standartu savā programmatūrā ir ieviesušas daudzas tīme…"
+            ]
+            },
+        {
+                "word": "lappuses",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…j pārvietoties no vienas lapas vai sadaļas uz citu. Tīmekļa lappuses parasti izmanto grafikas failus, lai nodrošinātu ilustrācij…",
+                "…anto grafikas failus, lai nodrošinātu ilustrācijas. Tīmekļa lappuses tiek attēlotas izmantojot tīmekļa pārlūkprogrammu, un var t…",
+                "…ek nodrošināta izmantojot PDF un Flash formātus. == Tīmekļa lappuses apskate == Tā kā tīmekļa lappuses lielākoties sastāv no tek…",
+                "…lash formātus. == Tīmekļa lappuses apskate == Tā kā tīmekļa lappuses lielākoties sastāv no teksta, tās var aplūkot ar jebkuru li…",
+                "…as māk attēlot teksta dokumentus. Taču lai aplūkotu tīmekļa lappuses tā, kā tas ir paredzēts, tiek lietotas speciālas programmas…",
+                "…as tīmekļa pārlūkprogrammas ar dažādām iespējām. == Tīmekļa lappuses izveide == Tīmekļa lappušu izveidē parasti lieto vai nu par…"
+            ]
+            },
+        {
+                "word": "numurs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Transportlīdzekļa identifikācijas numurs (arī VIN numurs no angļu: Vehicle identification number) ir…",
+                "…Transportlīdzekļa identifikācijas numurs (arī VIN numurs no angļu: Vehicle identification number) ir unikāls katram…",
+                "…sportlīdzeklim. Dažkārt to sauc arī par šasijas numuru. VIN numurs tiek piešķirts katram transportlīdzeklim individuāli – pasa…",
+                "…ransportlīdzekļu ar vienādiem identifikācijas numuriem. VIN numurs ir ne tikai vieglajiem automobiļiem, bet arī cita veida tra…",
+                "…s sastāda 17 rakstzīmes (burtu un skaitļu kombinācija). VIN numurs nesatur šādus burtus I, Q un O. Eiropas standartus izmanto…",
+                "…iemēram, ja VIN sākas ar \"J\", tā tika ražota Japānā, bet ja numurs sākas ar \"1\", tā ir ražota ASV. Otrā VIN numura daļa (VDS)…"
+            ]
+            },
+        {
+                "word": "piemēram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ievu daudzums un vieta reliģijās === Monoteiskās reliģijas (piemēram, kristietība, islāms un jūdaisms) apgalvo, ka eksistē viens…",
+                "…ķa būtne, nodalīta no mūsu pasaules. Politeiskās reliģijas (piemēram, seno grieķu un romiešu reliģijas) apgalvo, ka ir daudzi di…",
+                "…liģijas) apgalvo, ka ir daudzi dievi. Panteiskās reliģijas (piemēram, sintoisms, daļa hinduisma) uzskata, ka dievs ir visur dabā…",
+                "…dievs ir visur dabā, nedalāms no tās. Ne-teiskās reliģijas (piemēram, dažas budisma vai daoisma formas) neizsakās par dieva vai…",
+                "…dieva vai dievu esamību vai neesamību. Ateiskās reliģijas (piemēram, dažas budisma vai daoisma formas) noliedz jebkādu dievu es…",
+                "…== Citas atšķirības === Daudzām reliģijām ir svētie raksti (piemēram, Korāns, Bībele). To nozīme reliģijās ir atšķirīga. Daudzas…"
+            ]
+            },
+        {
+                "word": "gadsimts",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Gadsimts ir laika mērvienība, kas vienāds ar simts gadiem. Sākot ar…",
+                "…rēti un tie tiek nosaukti pēc kārtas skaitļa, piemēram, 20. gadsimts. Gadsimti pirms mūsu ēras arī tiek numurēti, bet tie tiek s…",
+                "…kaitīti pretējā virzienā. Pēc Gregora kalendāra mūsu ērā 1. gadsimts sākās 1. gadā un beidzās 100. gadā. Savukārt 2. gadsimts sā…",
+                "…1. gadsimts sākās 1. gadā un beidzās 100. gadā. Savukārt 2. gadsimts sākās 101. gadā un beidzās 200. gadā, 201. gadā sākās 3. ga…",
+                "…ts sākās 101. gadā un beidzās 200. gadā, 201. gadā sākās 3. gadsimts utt. Attiecīgi 20. gadsimts sākās 1901. gadā un beidzās 200…",
+                "…s 200. gadā, 201. gadā sākās 3. gadsimts utt. Attiecīgi 20. gadsimts sākās 1901. gadā un beidzās 2000. gadā, 21. gadsimts sākās…"
+            ]
+            },
+        {
                 "word": "nanometrs",
                 "verdict": "attested",
                 "bounded": true,

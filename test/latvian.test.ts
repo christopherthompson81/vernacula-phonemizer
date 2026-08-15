@@ -174,4 +174,71 @@ describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + f
         // nominative-only left *miljardi dolāri EM* — the tier matches with no trailing boundary
         expect(lv.text("$17.37 miljardiem").trim().split(/\s+/u)).not.toContain("ˈɛm");
     });
+
+    /**
+     * ⚠ A DOTTED ABBREVIATION IS NOT A SENTENCE, AND `p.m.ē.` WAS FOUR OF THEM. The era marker — ×20 in the
+     * retained text, 1,008 corpus-wide — read as *p . m . ēː .*: three letter-fragments and four clause
+     * breaks inside one three-word phrase. Every fragment is a legal Latvian sound, so nothing could see it.
+     */
+    test("dotted abbreviations expand, and their periods stop being sentence ends", () => {
+        // ⚠ THE TRAILING `.` IS KEPT because it ends the input, and therefore a sentence. This assertion used
+        // to end at `ˈɛːras` — the abbreviation rule was swallowing it. See the sentence-boundary test below.
+        expect(lv.text("500. gads p.m.ē.").trim()).toBe("pˈiɛt͡si sˈimti ɡˈats pˈirms mˈuːsu ˈɛːras .");
+        // ⚠ ALSO KEEPS ITS PERIOD, for the same reason: end of input is a sentence end.
+        expect(lv.text("u.c.").trim()).toBe("ˈun t͡sˈiti .");
+        expect(lv.text("t.i., netiek").trim()).toBe("tˈas ˈir , nˈɛtiɛk");
+        // a COUNTED abbreviation takes the agreement rule, and the corpus writes it with no trailing dot
+        expect(lv.text("160 lpp").trim()).toBe("sˈimts sˈɛʃdɛsmit lˈappusɛs");
+        expect(lv.text("nr. 859").trim()).toBe("nˈumurs ˈastuɔ̯ɲi sˈimti pˈiɛt͡sdɛsmit dˈɛviɲi");
+    });
+
+    /**
+     * ⚠ BOTH FIGURES IN AN ORDINAL RANGE AGREE WITH THE ONE NOUN THAT FOLLOWS, and all 17 sites in the
+     * retained text state that noun. Before this step only the SECOND was composed and the first kept its
+     * period — *astoņpadsmit . divdesmitajā gadsimtā*, a false clause break inside the range.
+     */
+    test("an ordinal range takes both ordinals from the following noun", () => {
+        expect(lv.text("18.—20. gadsimtā").trim()).toBe("ˈastuɔ̯ɲpatsmitajaː lˈiːd͡z dˈiwdɛsmitajaː ɡˈatsimtaː");
+        expect(lv.text("60.—70. gados").trim()).toBe("sˈɛʃdɛsmitajuɔ̯s lˈiːd͡z sˈɛptiɲdɛsmitajuɔ̯s ɡˈaduɔ̯s");
+    });
+
+    /**
+     * ⚠ A REFUSAL THE NEXT STEP CAN UNDO IS NOT A REFUSAL (trap 53). Returning the match untouched let the
+     * single-ordinal step claim the SECOND figure by itself: `3100.–1550. gadam` → *3100.–tūkstoš pieci simti
+     * piecdesmitajam gadam*, one half ordinalised and the other left with its period. The refusal now
+     * consumes both periods and falls back to the file's standing half-measure.
+     */
+    test("a refused ordinal range refuses BOTH halves and still drops both periods", () => {
+        // 3100 is a round hundred, which this file will not compose
+        const roundHundred = lv.text("3100.–1550. gadam").trim();
+        expect(roundHundred.split(/\s+/u)).not.toContain(".");
+        expect(roundHundred).toContain("lˈiːd͡z");
+        expect(roundHundred).not.toContain("pˈiɛt͡sdɛsmitajam"); // neither half ordinalised
+        // `gs.` hides its noun's case and is deliberately NOT expanded, so this range is refused too — and
+        // its own trailing period legitimately survives, because nothing in this layer claims it. What must
+        // go are the two periods belonging to the RANGE: one `.` left, and it is the last token.
+        const century = lv.text("10.—12. gs.").trim().split(/\s+/u);
+        expect(century.filter((t) => t === ".")).toHaveLength(1);
+        expect(century.at(-1)).toBe(".");
+        expect(century).toContain("lˈiːd͡z");
+    });
+
+    /**
+     * ⚠ THE MIRROR DEFECT: the abbreviation's final period is also the SENTENCE's, and swallowing it welds
+     * two sentences together. Trading spurious breaks for a swallowed real one is not a repair.
+     */
+    test("an abbreviation that ends a sentence keeps the sentence", () => {
+        expect(lv.text("Tas ir dārgi u.c. Nākamais teikums.").trim().split(/\s+/u)).toContain(".");
+        expect(lv.text("500. gads p.m.ē. Tas bija sen.").trim()).toContain("ˈɛːras .");
+        // ...and mid-clause it still expands with no break at all
+        expect(lv.text("t.i., netiek").trim().split(/\s+/u)).not.toContain(".");
+    });
+
+    /**
+     * ⚠ PERSONAL INITIALS ARE NOT ABBREVIATIONS. Matching case-insensitively made `T.I. Ivanovs` — an initial
+     * pair lv.wikipedia writes — introduce a surname with *tas ir*. Latvian writes these lower case.
+     */
+    test("an upper-case initial pair is not the `t.i.` abbreviation", () => {
+        expect(lv.text("T.I. Ivanovs bija").trim()).not.toContain("tˈas ˈir");
+    });
 });

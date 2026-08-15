@@ -358,11 +358,17 @@ export function normalizeWolof(input: string): string {
     //    fleet-wide measurement compared the numeral WORD for `5` against `5.` in all 47 languages whose range
     //    rule declined a clause-final dot and found ZERO ordinal readings, Wolof's included — the language
     //    writes its own ordinal as `-eel(u)`/`-eem` (step 7), never as a trailing period.
-    //    ⚠ THE `,` STAYS. Wolof writes the DECIMAL COMMA (`43,3 %`, `2,8 milyoŋ`, `9,10`, `5,5` — see the
-    //    header's separator census), so a following comma is what declines a decimal right operand. Measured:
-    //    removing it too gains 3 more segments here, all of them clause commas after a year span, and that is
-    //    not worth admitting `N-N,N` in a corpus that writes its decimals this way.
-    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d,\p{L}\p{M}])/gu,
+    //    ⚠ THE `,` NOW DECLINES ONLY WHEN A DIGIT FOLLOWS IT, which is a third option this note used to miss.
+    //    It framed the choice as reject-every-comma versus accept-every-comma, and took the first because
+    //    Wolof writes the DECIMAL COMMA (`43,3 %`, `2,8 milyoŋ`, `9,10`, `5,5` — see the header's separator
+    //    census) — paying 3 segments, all clause commas after a year span, to keep `N-N,N` out. But a comma
+    //    only makes a decimal when a DIGIT follows it: `,\d` in the lookahead refuses `1939-1940,5` exactly
+    //    as the old class did, while `atum 1939–1940,` is read. The trade was real and is no longer necessary.
+    //    ⚠ THE DOT IS DELIBERATELY NOT IN THAT ALTERNATION. The old class did not carry one either, so a
+    //    clause-final dot was already admitted (`15-20.` → *15 ba 20 .*) and adding `\.\d` here would be a
+    //    second, unrelated change smuggled into a comma fix.
+    //    Same shape as the clause-final period two paragraphs up, and the same trap (58) one step further on.
+    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) && !/[·∙×][  ]*$/u.test(full.slice(Math.max(0, off - 3), off))
                 ? `${a} ${SPAN} ${b}`
