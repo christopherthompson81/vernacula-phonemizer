@@ -230,6 +230,19 @@ describe("Shona — what is deliberately NOT read, pinned so a change is visible
         expect(normalizeShonaPre("Dzinoreba 2.1-3.4m")).toBe("Dzinoreba 2.1-3.4m");
     });
 
+    // ⚠ THE CLAUSE-FINAL BRANCH, PINNED SEPARATELY (trap 13), and the pair above is the reason it needs its
+    // own test: the decimal refusal lives in the LEADING guard, so the trailing one can stop rejecting `.`
+    // and `,` without admitting a decimal. A sentence period is not part of a number, and while the trailing
+    // guard rejected one, every range that ENDED A CLAUSE fell back to two juxtaposed cardinals. The comma
+    // goes with it because Shona writes the decimal POINT — and the ascending-only test, not the comma, is
+    // what declines a truncated endpoint here.
+    test("a range that ENDS A CLAUSE, or precedes a comma, is still a range", () => {
+        expect(normalizeShonaPre("makore 25-30.")).toBe("makore 25 kusvika 30.");
+        expect(normalizeShonaPre("March 20-21, 2019")).toBe("March 20 kusvika 21, 2019");
+        expect(normalizeShonaPre("50-70.")).toBe("50 kusvika 70.");
+        expect(normalizeShonaPre("Vhoriyamu 1984-5.")).toBe("Vhoriyamu 1984-5."); // still non-ascending
+    });
+
     test("units — ⟨mm⟩ ⟨ha⟩ ⟨l⟩, the three that leaked raw ASCII, each sourced on sn.wikipedia", () => {
         // mamirimita: "4 kusvika 64 mamirimita" (sediment grades) + the SI-prefix article's "ne milimita".
         expect(phonemize("10 mm", "sn")).toBe("mamirimita ɡumi");

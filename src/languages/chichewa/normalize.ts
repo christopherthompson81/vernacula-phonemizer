@@ -261,7 +261,19 @@ export function normalizeChichewa(input: string): string {
     //    a capitalised name — but a "not after a capitalised word" guard would also decline a
     //    sentence-initial *Mu 2004-2009*, so the trade was refused and the instance is stated instead.
     //    AFTER step 4, so a grouped endpoint is already one run of digits, and AFTER step 3.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d.,\p{L}\p{M}])/gu,
+    //    ⚠ THE TRAILING GUARD REJECTS NEITHER A `.` NOR A `,`, AND THE LEADING ONE STILL REJECTS BOTH. A
+    //    sentence period is not part of a number, so the symmetric guard declined every range that ENDS A
+    //    CLAUSE — `19-23.`, `2003-2004.`, `2004 -2009.` — and those came back as two juxtaposed cardinals
+    //    with nothing between them. Reported by `review.ts`'s `clause-final` check. Nor is the dot protecting
+    //    an ordinal: a fleet-wide comparison of the numeral WORD for `5` against `5.` over the 47 languages
+    //    whose range rule declined a clause-final dot found ZERO ordinal readings, and Chichewa writes its
+    //    ordinal out in words anyway (see step 7).
+    //    ⚠ THE COMMA GOES TOO, on Chichewa's own evidence. The language writes the DECIMAL POINT (step 10),
+    //    so a following comma is a CLAUSE comma and never a decimal tail; step 4 has already de-grouped
+    //    `30-40,000`; and the ASCENDING-ONLY test above is what declines the truncated second endpoints a
+    //    comma would otherwise be guarding by accident (`2018-19,`, `2015–16,`, `2009-10,`, `2-0,`).
+    //    +3 segments, all genuine spans, no regression.
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}])/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} mpaka ${b}` : whole));
 
     // 9) A LONE `+` BETWEEN OPERANDS IS LEFT UNREAD, deliberately — `(UTC + 7)`, `(GMT+1)`, 2 instances.

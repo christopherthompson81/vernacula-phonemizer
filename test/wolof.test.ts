@@ -149,6 +149,17 @@ describe("Wolof text normalization", () => {
         expect(normalizeWolof("1,602 189 2 ∙ 10 -19 C")).toBe("1602 189 2 ∙ 10 -19 C");
     });
 
+    // ⚠ THE CLAUSE-FINAL BRANCH, PINNED SEPARATELY (trap 13). A sentence period is not part of a number, and
+    // the trailing guard used to reject one — so every range that ENDED A CLAUSE was declined and fell back
+    // to the two juxtaposed cardinals this rule exists to replace. The `,` is a different question and is
+    // still rejected, because Wolof writes the DECIMAL COMMA (`43,3 %`, `2,8 milyoŋ`).
+    test("a range that ENDS A CLAUSE is still a range; the decimal comma still declines one", () => {
+        expect(normalizeWolof("yàggug 15-20.")).toBe("yàggug 15 ba 20.");
+        expect(normalizeWolof("atum 1939–1940.")).toBe("atum 1939 ba 1940.");
+        expect(normalizeWolof("115-128.")).toBe("115 ba 128.");
+        expect(normalizeWolof("atum 1939–1940,")).toBe("atum 1939–1940,");
+    });
+
     test("de-grouping: all three conventions, and the leading-zero guard that spares a decimal", () => {
         expect(normalizeWolof("$150,000")).toBe("150000 dolaar");
         expect(normalizeWolof("am na 605 695 ciy way-dëkk")).toBe("am na 605695 ciy way-dëkk");

@@ -268,8 +268,20 @@ export function normalizeSundanese(input: string): string {
     // 2. A HYPHEN CHAIN IS AN IDENTIFIER, NOT A RANGE. ×68 `N-N-N` — CAS registry numbers (`50-21-5`),
     //    ISBNs (`0-07-115221`) — and the rule read the first two operands as a span while the third became a
     //    clause pause. Trailing `-` is rejected, and the leading guard already rejects a preceding digit.
+    // ⚠ AND THE TRAILING GUARD DOES NOT REJECT A `.`, WHICH IS THE SAME `(?!\d)`-NOT-`(?![\d.,])` FINDING THE
+    // DE-GROUPING ARMS RECORD 80 LINES ABOVE — this arm was the one that had not followed its own file. A
+    // sentence period is not part of a number, so `(?![\d.,-])` declined every range that ENDS A CLAUSE:
+    // `Mangsa Taun 1270-1910.` came back as two juxtaposed cardinals with no connective at all, exactly the
+    // reading step 7 exists to repair, and `1884–1894.` / `1808-1811.` with it. Reported by `review.ts`'s
+    // `clause-final` check, the same check that caught the space-grouping arm. Nor is the dot protecting an
+    // ordinal: a fleet-wide comparison of the numeral WORD for `5` against `5.` across the 47 languages whose
+    // range rule declined a clause-final dot found ZERO ordinal readings.
+    // ⚠ THE `,` STAYS, and unlike the de-grouping arms that is on this language's own evidence. Sundanese
+    // writes the DECIMAL COMMA (`40,9 °C` ×many, and step 12 reads it), so a following comma is what declines
+    // a decimal right operand. Measured: dropping it as well gains 4 more segments, every one a clause comma
+    // after a year span, and admits `N-N,N` into a comma-decimal corpus for it.
     s = s.replace(
-        /(?<!\b(?:nepi ka|tepi ka|dugi ka|ti|antara)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d.,-])/gu,
+        /(?<!\b(?:nepi ka|tepi ka|dugi ka|ti|antara)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d,-])/gu,
         "$1 nepi ka $2",
     );
 

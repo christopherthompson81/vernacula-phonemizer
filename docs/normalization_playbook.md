@@ -1450,6 +1450,24 @@ except where a sentence ends, and the layer looks finished.
   currency word gone the moment it ran. Ranges: **174 hits across 49 languages**, and that is NOT 49 defects,
   because in Slovene, Slovak and Latvian a trailing `1995.` is itself the ORDINAL marker and excluding a
   following dot may be deliberate. Printed, never failed on.
+- **AND THE RANGE CLASS WAS THEN SWEPT, ONCE THE ORDINAL WORRY WAS MEASURED AWAY.** The 49 languages were not
+  49 defects only because a trailing `1995.` might be an ordinal — so that was checked directly, by comparing
+  the numeral WORD for `5` against `5.` in all 47 whose range rule declined a clause-final dot. **ZERO read it
+  as an ordinal.** The dot was protecting nothing, and it came out of the right-hand guard in wo, su, so, sn,
+  ee and nya (2/4/4/8/3/7 segments, 0 regressions) after lg, lt, mn and et.
+- **THE COMMA IS A SEPARATE QUESTION AND SPLIT THREE WAYS, WHICH IS THE REUSABLE PART.** Where the language
+  writes the DECIMAL COMMA (wo, su) it stays, because it is what declines a decimal right operand. Where the
+  language writes the decimal POINT it can go — but only because *something else* is refusing the shapes it
+  was accidentally refusing: in sn, ee and nya that is the ASCENDING-ONLY test, which declines the truncated
+  second endpoints (`2018-19,`, `1984-5`) and the scores. **Somali is the counter-example and the reason to
+  check rather than infer**: its rule deliberately has no ascending test (Somali spans run both ways), so the
+  comma was the only thing declining `1654-57,` → *1654 ilaa 57*. Dropping it there bought 5 gains for 2
+  confidently-wrong readings replacing silent ones, and was refused. A guard can be load-bearing for a reason
+  its own comment does not state.
+- **AND ONE OF THE GAINS WAS NOT SILENCE BUT A WRONG SIGN.** Somali's `Sanadihii 1960 -1969.` was declined by
+  the range rule and then CLAIMED by the signed-number rule, reading *1960 laga jaray 1969* — a subtraction
+  the source never wrote. A guard that declines does not hand the string back untouched; it hands it to the
+  next rule.
 - **TWO SHAPES ARE DELIBERATELY NOT PROBED**, and the reason generalises: `5 m.` is *Monsieur* in French and
   *metai* in Lithuanian, and the comma is the DECIMAL separator in half the fleet. Where the trailing mark
   genuinely changes what the string means, a lost token is the right answer, not a defect.

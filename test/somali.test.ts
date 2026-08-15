@@ -61,6 +61,20 @@ describe("Somali canonical IPA", () => {
             expect(phonemize("1268-69", "so")).toContain("ilaː"); // ×2,690 — digits both sides IS a range
         });
 
+        // ⚠ THE CLAUSE-FINAL BRANCH, PINNED SEPARATELY (trap 13). A sentence period is not part of a number,
+        // and the trailing guard used to reject one, so every range that ENDED A CLAUSE was declined. One of
+        // those was worse than silent: with the span rule out of the way, `1960 -1969.` reached the
+        // signed-number rule and read *1960 LAGA JARAY 1969* — a SUBTRACTION the source never wrote.
+        // ⚠ AND THE `,` IS DELIBERATELY STILL REJECTED — this rule has no ascending-only test, so the comma
+        // is the only thing declining a TRUNCATED SECOND ENDPOINT (`1654-57,` → *1654 ilaa 57*).
+        test("a range that ENDS A CLAUSE is still a range, and stops being a subtraction", () => {
+            expect(phonemize("Sanadihii 2012-2013.", "so")).toContain("ilaː");
+            expect(phonemize("boqolkiiba 19-30.", "so")).toContain("ilaː");
+            expect(phonemize("Sanadihii 1960 -1969.", "so")).toContain("ilaː");
+            expect(phonemize("Sanadihii 1960 -1969.", "so")).not.toContain("laɡa d͡ʒaraj"); // not a minus
+            expect(phonemize("Sanadihii 1654-57,", "so")).not.toContain("ilaː"); // truncated endpoint
+        });
+
         // ⚠ THE ERA MARKERS ARE THE LARGEST CLASS THIS LAYER REPAIRS, and Somali has its own pair alongside the
         // borrowed ones. `C.H.` ×121 and `C.D` ×213 are glossed by the corpus itself (Ciise Hortiis / Ciise
         // Dabadiis); the GLUED calendar letters are bigger than every spaced marker combined (H ×567, M ×25).

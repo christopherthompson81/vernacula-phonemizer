@@ -329,7 +329,19 @@ export function normalizeEwe(input: string): string {
     //      contains two ASCENDING pairs — and a score is not a span. It costs nothing measurable: all 17
     //      ascending pairs in the retained text have a two-or-more-digit operand (`207-213`, `25–33`,
     //      `10–15`, `15-49`, `48-55`, and eleven year spans).
-    s = s.replace(new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d.,\\p{L}\\p{M}\\-–—])`, "gu"),
+    //
+    //    ⚠ AND THE TRAILING GUARD REJECTS NEITHER `.` NOR `,`, WHILE THE LEADING ONE STILL REJECTS BOTH. A
+    //    sentence period is not part of a number, so the symmetric guard declined every range that ENDS A
+    //    CLAUSE — `207-213.`, `1-11.` — and each came back as the bare juxtaposition this rule exists to
+    //    replace. Reported by `review.ts`'s `clause-final` check. The dot is not protecting an ordinal: a
+    //    fleet-wide comparison of the numeral WORD for `5` against `5.` over the 47 languages whose range
+    //    rule declined a clause-final dot found ZERO ordinal readings.
+    //    ⚠ THE COMMA GOES TOO, on Ewe's own evidence. Ewe writes the DECIMAL POINT (step 9), so a following
+    //    comma is a CLAUSE comma, never a decimal tail; the grouping commas are already spent upstream; and
+    //    the two guards above are what decline the shapes a comma would otherwise be catching by accident —
+    //    the tennis scores `7–6, 4–6, 7–6, 2–6, 6–2` are rejected as non-ascending or as both-single-digit,
+    //    and the scripture spans `Mateo 21:1-11,` by the leading `:`. +1 segment (`le May 10-11, …`).
+    s = s.replace(new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d\\p{L}\\p{M}\\-–—])`, "gu"),
         (whole: string, a: string, b: string) =>
             (Number(a) < Number(b) && (a.length > 1 || b.length > 1) ? `${a} ${TO} ${b}` : whole));
 

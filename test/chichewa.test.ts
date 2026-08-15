@@ -170,6 +170,18 @@ describe("Chichewa normalization", () => {
         expect(normalizeChichewa("2-3-5")).toBe("2-3-5");                // a football formation
     });
 
+    // ⚠ THE CLAUSE-FINAL BRANCH, PINNED SEPARATELY (trap 13). A sentence period is not part of a number, and
+    // while the trailing guard rejected one, every range that ENDED A CLAUSE was declined and came back as
+    // two juxtaposed cardinals. The `,` goes with it — Chichewa writes the decimal POINT (step 10) and step 4
+    // has already de-grouped `30-40,000` — and the ASCENDING-ONLY test above, not the comma, is what keeps
+    // the seasons and scores out.
+    test("a range that ENDS A CLAUSE, or precedes a comma, is still a range", () => {
+        expect(normalizeChichewa("19-23.")).toBe("19 mpaka 23.");
+        expect(normalizeChichewa("2003-2004.")).toBe("2003 mpaka 2004.");
+        expect(normalizeChichewa("my 1994-1996,")).toBe("my 1994 mpaka 1996,");
+        expect(normalizeChichewa("2018-19,")).toBe("2018-19,"); // still a season, not a span
+    });
+
     test("ampersand, HTML entities and dotted capital runs", () => {
         expect(normalizeChichewa("Europu & Asia")).toBe("Europu ndi Asia");
         expect(normalizeChichewa("T&T Clark")).toBe("T ndi T Clark");   // spaced, or the two fuse into one token

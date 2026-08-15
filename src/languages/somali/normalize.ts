@@ -294,8 +294,23 @@ export function normalizeSomali(input: string): string {
     // is an identifier rather than a span. ⚠ AND A THIRD, SPECIFIC TO SOMALI AND THE REASON THIS RULE IS
     // ORDERED HERE: the bound-suffix form `2010-kii` is a hyphen between a number and a WORD, so the
     // digits-both-sides requirement is what keeps this rule off the language's single commonest pattern.
+    // ⚠ THE TRAILING GUARD DOES NOT REJECT A `.`. A sentence period is not part of a number, so `(?![\d.,-])`
+    // declined every range that ENDS A CLAUSE — `Sanadihii 2012-2013.`, `19-30.`, `2010-2012.` — and each one
+    // came back as two juxtaposed cardinals. Reported by `review.ts`'s `clause-final` check. The dot is not
+    // protecting an ordinal either: a fleet-wide comparison of the numeral WORD for `5` against `5.` over the
+    // 47 languages whose range rule declined a clause-final dot found ZERO ordinal readings, and Somali's own
+    // ordinal is the bound `-aad` ×1,436. ⚠ ONE OF THE FOUR GAINS IS NOT A CLAUSE-FINAL CASE AT ALL BUT A
+    // SIGN FIX: `Sanadihii 1960 -1969.` was falling through to the signed-number rule and reading *1960 LAGA
+    // JARAY 1969* — "1960 minus 1969" — precisely because the range rule had declined it. The span rule
+    // claiming it first is what removes the subtraction.
+    // ⚠ AND THE `,` STAYS, REFUSED ON MEASUREMENT rather than kept by default. Dropping it gains 7 more
+    // segments, but TWO of them are TRUNCATED SECOND ENDPOINTS: `1654-57,` → *1654 ilaa 57* and `1620-21,` →
+    // *1620 ilaa 21*. This rule has no ascending-only test — it cannot have one, since Somali year spans and
+    // percentages both run in either direction — so unlike its sn/ee/nya siblings it has nothing that
+    // declines a truncated endpoint, and the comma is doing that work by accident. Trading 5 real gains for 2
+    // confidently wrong readings replacing silent ones is the wrong trade; the `.` arm above is clean at 4/4.
     s = s.replace(
-        /(?<!\b(?:ilaa|dhaxaysay|inta)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d.,-])/gu,
+        /(?<!\b(?:ilaa|dhaxaysay|inta)\s)(?<![\d.,\p{L}-])(\d+)\s?[-–]\s?(\d+)(?![\d,-])/gu,
         "$1 ilaa $2",
     );
 

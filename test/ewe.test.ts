@@ -137,6 +137,17 @@ describe("Ewe text normalization", () => {
         expect(normalizeEwe("ISBN 0-582-49219-X")).toBe("ISBN 0-582-49219-X");
     });
 
+    // ⚠ THE CLAUSE-FINAL BRANCH, PINNED SEPARATELY (trap 13). A sentence period is not part of a number, and
+    // while the trailing guard rejected one, every range that ENDED A CLAUSE was declined and stayed the bare
+    // juxtaposition. The `,` goes with it — Ewe writes the decimal POINT (step 9), so a following comma is a
+    // clause comma; and the two branches above, not the comma, are what keep the tennis scores out.
+    test("a range that ENDS A CLAUSE, or precedes a comma, is still a range", () => {
+        expect(normalizeEwe("207-213.")).toBe("207 va ɖo 213.");
+        expect(normalizeEwe("le May 10-11, 2007")).toBe("le May 10 va ɖo 11, 2007");
+        expect(normalizeEwe("7–6, 4–6")).toBe("7–6, 4–6"); // both single digits — still a score
+        expect(normalizeEwe("Mateo 21:1-11.")).toBe("Mateo 21:1-11."); // still scripture
+    });
+
     // De-grouping first, or the separator is read as clause punctuation and the tail as its own number.
     // The decimal point is REMOVED and the tail spaced: no Ewe point word is attested (see the header), so
     // what this fixes is the spurious SENTENCE BREAK, not the missing word.

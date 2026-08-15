@@ -351,7 +351,18 @@ export function normalizeWolof(input: string): string {
     //    ⚠ AND NOT AFTER A MULTIPLICATION DOT, for the ASCII twin of the same sentence: `1,602 189 2 ∙ 10 -19`
     //    would otherwise become `10 ba 19`. One instance, and it is a confidently wrong reading replacing a
     //    silent one.
-    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d.,\p{L}\p{M}])/gu,
+    //    ⚠ THE TRAILING GUARD DOES NOT REJECT A `.`, AND THAT IS DELIBERATE. A SENTENCE PERIOD IS NOT PART OF
+    //    A NUMBER, so `(?![…\.…])` declined every range that ENDS A CLAUSE — `Ge 1:26-30; 2:4-8; 15-20.` came
+    //    back as two juxtaposed cardinals with nothing between them, the very defect this rule exists to fix.
+    //    Reported by `review.ts`'s `clause-final` check. And the dot is not protecting an ordinal reading: a
+    //    fleet-wide measurement compared the numeral WORD for `5` against `5.` in all 47 languages whose range
+    //    rule declined a clause-final dot and found ZERO ordinal readings, Wolof's included — the language
+    //    writes its own ordinal as `-eel(u)`/`-eem` (step 7), never as a trailing period.
+    //    ⚠ THE `,` STAYS. Wolof writes the DECIMAL COMMA (`43,3 %`, `2,8 milyoŋ`, `9,10`, `5,5` — see the
+    //    header's separator census), so a following comma is what declines a decimal right operand. Measured:
+    //    removing it too gains 3 more segments here, all of them clause commas after a year span, and that is
+    //    not worth admitting `N-N,N` in a corpus that writes its decimals this way.
+    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d,\p{L}\p{M}])/gu,
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) && !/[·∙×][  ]*$/u.test(full.slice(Math.max(0, off - 3), off))
                 ? `${a} ${SPAN} ${b}`

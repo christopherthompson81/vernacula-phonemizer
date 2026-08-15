@@ -249,7 +249,21 @@ export function normalizeShonaPre(input: string): string {
     //    operands intact, and the same limit is accepted in the sibling Bantu layers.
     //    ⚠ AND A TRAILING LETTER IS EXCLUDED, which declines `13-16million` — an English magnitude glued to
     //    the second operand, in an English sentence.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d.,\p{L}\p{M}])/gu,
+    //    ⚠ THE TRAILING GUARD REJECTS NEITHER A `.` NOR A `,`, AND THE LEFT ONE STILL REJECTS BOTH — which is
+    //    what keeps the decimal refusal above intact while fixing the clause-final one. A sentence period is
+    //    not part of a number: `(?![-\d.,…])` declined every range that ENDS A CLAUSE — `March 20-21
+    //    neSeptember 20-21.`, `25-30.`, `50-70.` — and those came back as two juxtaposed cardinals with no
+    //    connective, the defect this rule exists to fix. Reported by `review.ts`'s `clause-final` check. The
+    //    dot is not protecting an ordinal: a fleet-wide comparison of the numeral WORD for `5` against `5.`
+    //    over the 47 languages whose range rule declined a clause-final dot found ZERO ordinal readings.
+    //    ⚠ THE COMMA GOES TOO, AND HERE THAT IS SAFE ON SHONA'S OWN EVIDENCE (it is NOT in the so sibling —
+    //    see that file). Shona writes the DECIMAL POINT, not the decimal comma, so a following comma is a
+    //    CLAUSE comma and never a decimal tail; de-grouping (step 4) has already spent the grouping commas;
+    //    and the ASCENDING-ONLY test is what declines a truncated second endpoint (`1984-5`) that a comma
+    //    would otherwise be guarding by accident. +2 segments, both `March 20-21, ...`, no regression.
+    //    ⚠ A DECIMAL RIGHT OPERAND IS STILL DECLINED, by the LEFT guard rather than this one: in `2.1-3.4m`
+    //    the only candidate pair is `1-3`, and its `1` is preceded by a `.`.
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}])/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     return tidy(s);

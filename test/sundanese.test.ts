@@ -75,6 +75,18 @@ describe("Sundanese canonical IPA", () => {
             expect(phonemize("Nomer CAS 50-21-5", "su")).not.toContain("nəpˈi ka"); // ×68 identifier chains
         });
 
+        // ⚠ THE CLAUSE-FINAL BRANCH, PINNED SEPARATELY (trap 13), and it is this file's own `(?!\d)`-not-
+        // `(?![\d.,])` finding applied to the third arm that had not followed it — the two de-grouping arms
+        // already record the reasoning. A sentence period is not part of a number, so a range that ENDED A
+        // CLAUSE was declined and came back as two juxtaposed cardinals. The `,` still declines one, because
+        // Sundanese writes the DECIMAL COMMA.
+        test("a range that ENDS A CLAUSE is still a range; the decimal comma still declines one", () => {
+            expect(phonemize("Mangsa Taun 1270-1910.", "su")).toContain("nəpˈi ka");
+            expect(phonemize("taun 1884–1894.", "su")).toContain("nəpˈi ka");
+            expect(phonemize("jaman 1808-1811.", "su")).toContain("nəpˈi ka");
+            expect(phonemize("taun 1884–1894,", "su")).not.toContain("nəpˈi ka");
+        });
+
         test("units, currency, degrees and the signs", () => {
             expect(phonemize("300 km", "su")).toContain("kilomˈetər");
             expect(phonemize("100 km²", "su")).toContain("kilomˈetər pasˈaɡi");
