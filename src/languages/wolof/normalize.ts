@@ -365,7 +365,7 @@ export function normalizeWolof(input: string): string {
     //    only makes a decimal when a DIGIT follows it: `[.,]\d` in the lookahead refuses `1939-1940,5` exactly
     //    as the old class did, while `atum 1939–1940,` is read. The trade was real and is no longer necessary.
     //    Same shape as the clause-final period two paragraphs up, and the same trap (58) one step further on.
-    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d\p{L}\p{M}]|[.,]\d)/gu,
+    s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) && !/[·∙×][  ]*$/u.test(full.slice(Math.max(0, off - 3), off))
                 ? `${a} ${SPAN} ${b}`
