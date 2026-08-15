@@ -357,7 +357,15 @@ function ordinalPeriod(text: string): string {
  * refusing the ASCII form would cost more than it saves — and a model designation is not distinguishable from
  * a range by orthography alone. The en and em dashes carry no such ambiguity; only the ASCII hyphen does.
  */
-const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?![\d,.-])/gu;
+/**
+ * ⚠ THE TRAILING GUARD REJECTS A DIGIT, NOT A CLAUSE MARK — playbook trap 58, and the first cut of this file
+ * walked straight into it. `(?![\d,.-])` was written to refuse a chained hyphen and a decimal tail, and it
+ * also refused `1990-1995.` — a range at the end of a SENTENCE. The rule was right about every range that
+ * happens not to end a clause, which is exactly how this trap presents: `no 1990-1995. gadam` came out with
+ * the hyphen raw and no `līdz` at all. Found by a fleet sweep, not by this language's own gate, which treats
+ * the range probes as ungated.
+ */
+const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d|[,.]\d|-\d)/gu;
 
 /**
  * 7. DEGREES. `°C` and `°F` take the scale name; a bare `°` after a figure is `grādi`.

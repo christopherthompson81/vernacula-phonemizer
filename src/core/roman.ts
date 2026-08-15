@@ -39,6 +39,23 @@
  *     (`3-st` → *kˈolm st*), so it belongs in that language's layer, and its corpus has 8 instances of which
  *     two are fragments of an IUPAC chemical name (`…-1-üül)-2,4,6,8-nonatetraen-1-ool`) that any rule
  *     claiming `\d+-[a-z]{1,5}` would mangle.
+ * ⚠ LATVIAN WAS EVALUATED AS THE SECOND CANDIDATE CONSUMER AND REJECTED, and it is worth recording because it
+ * failed the SAME test as Estonian from the opposite direction. On paper it is the ideal case: it reads a
+ * Roman numeral as an ordinal, its `roman` cell is 21,482 corpus-wide, and unlike Estonian it now ships an
+ * ordinal compositor with a full case paradigm (`languages/latvian/ordinals.ts`) whose case is read off the
+ * FOLLOWING NOUN — exactly the context parameter this seam would pass. Then the corpus was counted:
+ *
+ *     multi-letter Roman numerals in the retained text        13
+ *     ...followed by a noun whose case is readable             2   (`XII gadsimts`, `XII gadsimta`)
+ *     ...followed by `gs.`, the abbreviation that HIDES it     3
+ *     ...not an ordinal at all                                 2   (`X ledus` — ice phase X, a designation)
+ *
+ * Two derivable sites. The blocker is not the mechanism and not the ordinal table; it is that the shapes a
+ * Roman numeral actually appears in are dominated by ones that hide the case (`gs.`) or are not ordinals
+ * (phase and regnal designations). Estonian's numerals were regnal and unattested; Latvian's are abbreviated
+ * and ambiguous. Two independent probes, same floor — which raises rather than lowers the bar for the next
+ * candidate: measure the FOLLOWERS, not the numerals.
+ *
  * So the work is: pick a language whose ordinal register is SOURCED, add the context parameter, and wire it.
  * Russian and Polish are the strongest candidates — both already have a policy here, both have oblique
  * century phrases in their own corpora (`XVIII века`, `XVII веку`, `XX wieku`, `XV wieku`), and both would
