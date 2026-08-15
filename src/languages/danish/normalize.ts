@@ -193,7 +193,15 @@ export function normalizeDanish(input: string): string {
     t = t.replace(/\b([A-Z]{2,3})\s*\$/gu, "$1 dollar");
     for (const [sign, word] of Object.entries(CURRENCY)) {
         const esc = sign.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+        // ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS, the same repair `core/normalizeSymbols.ts` carries for
+        // the shared arm. The preposed pattern ends at the digits, so an abbreviated magnitude glued to the
+        // number left the noun abutting it and the tokenizer read one word: `$110m` → *dˈolaʁm*, a plausible
+        // Danish-looking word that no leak class can see (trap 56). A trailing space keeps *110 dollar* and
+        // leaves the `m` visible to RAW-LATIN; refusing the match would drop the sign as well. Emitted only
+        // when a letter actually follows, so nothing else gains a stray space (`tidy` would collapse it, but
+        // the postposed arm has no such hazard and is left exactly as it was).
         t = t.replace(new RegExp(`(\\d+)\\s*${esc}`, "gu"), `$1 ${word}`);
+        t = t.replace(new RegExp(`${esc}\\s*(\\d+)(?=[\\p{L}\\p{M}])`, "gu"), `$1 ${word} `);
         t = t.replace(new RegExp(`${esc}\\s*(\\d+)`, "gu"), `$1 ${word}`);
     }
 

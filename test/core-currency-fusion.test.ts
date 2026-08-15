@@ -47,4 +47,20 @@ describe("a currency noun does not fuse with the token after the number", () => 
     test("English is unaffected — its own layer reads the magnitude before the tier", () => {
         expect(phonemize("$110m", "en").trim()).toBe("wˈʌn hˈʌndɹəd tʰˈɛn mˈɪɫjən dˈɑːlɚz");
     });
+
+    /**
+     * ⚠ `it` AND `da` NEEDED THE SAME REPAIR IN THEIR OWN FILES, because both claim `$` in `normalize.ts`
+     * rather than through the tier — Italian for the partitive *di* its magnitude hop needs, Danish because
+     * it reads the noun from its lexicon. The core fix did not reach them.
+     *
+     * ⚠ AND BOTH ARE ROBUSTNESS, NOT A MEASURED REPAIR — said rather than implied (trap 22). The glued shape
+     * is ×0 in both corpora and the corpus diff is 0/114 and 0/109. What justifies the change is that the
+     * defect is identical, was live in ten sibling languages, and is invisible to every gate when it fires.
+     */
+    test("the two languages that own their currency rule locally", () => {
+        expect(phonemize("$110m", "it").trim()).toBe("t͡ʃentodjˈet͡ʃi dollˈari m");
+        expect(phonemize("$110", "it").trim()).toBe("t͡ʃentodjˈet͡ʃi dollˈari");
+        expect(phonemize("$110m", "da").trim()).toBe("ˈɛd ˈhunʁɐðə ˈɐw ˈtiːˀ ˈdɐlɑ ˈɛm");
+        expect(phonemize("$110", "da").trim()).toBe("ˈɛd ˈhunʁɐðə ˈɐw ˈtiːˀ ˈdɐlɑ");
+    });
 });

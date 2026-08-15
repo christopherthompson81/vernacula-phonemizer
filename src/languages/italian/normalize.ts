@@ -289,7 +289,15 @@ export function normalizeItalian(input: string): string {
             if (CURRENCY_WORD.test(whole.slice(offset + m0.length))) return `${num}${mag ?? ""}`;
             const forms = CURRENCY[sign]!;
             const word = mag !== undefined || Number(num.replace(/[.,]/gu, "")) !== 1 ? forms[1]! : forms[0]!;
-            return `${num}${mag ?? ""} ${mag === undefined ? "" : "di "}${word}`;
+            // ⚠ THE NOUN MUST NOT FUSE WITH WHAT FOLLOWS, the same repair `core/normalizeSymbols.ts` carries
+            // for the shared arm. The match ends at the digits (or the magnitude), so an ABBREVIATED
+            // magnitude glued to the number left the noun abutting it and the tokenizer read one word:
+            // `$110m` → *dollˈarim*, a plausible Italian-looking word that no leak class can see (trap 56).
+            // Separating keeps *110 dollari* and leaves the `m` visible to RAW-LATIN; refusing would drop the
+            // sign as well. Reading an abbreviated magnitude is a job for step 10's spelled-out list, which
+            // is what `mag` already matches — this only stops the two tokens welding together.
+            const tail = /^[\p{L}\p{M}]/u.test(whole.slice(offset + m0.length)) ? " " : "";
+            return `${num}${mag ?? ""} ${mag === undefined ? "" : "di "}${word}${tail}`;
         },
     );
 
