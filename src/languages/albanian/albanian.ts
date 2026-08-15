@@ -13,6 +13,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { makeNumberToWords, type AlbanianNumbers } from "./numbers.ts";
+import { normalizeAlbanian } from "./normalize.ts";
 
 interface AlbanianDef {
     digraphs: Record<string, string>;
@@ -95,7 +96,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class AlbanianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeAlbanian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: compose the Albanian numeral phrase, then phonemize each word through the same g2p.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

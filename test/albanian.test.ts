@@ -78,4 +78,95 @@ describe("Albanian numbers", () => {
         expect(phonemize("21", "sq")).toBe("ˈɲəzɛt ˈɛ ˈɲə"); // njëzet e një — ⟨e⟩ is its own word [ˈɛ]
         expect(phonemize("1000000", "sq")).toBe("ˈɲə miˈlion"); // një milion
     });
+
+    /**
+     * ⚠ THE CENTRAL PROBLEM: Albanian mixes THREE grouping conventions with TWO decimal conventions, and both
+     * the comma and the period serve both roles. The discriminator was read off the corpus, not assumed — all
+     * 51 ambiguous `,\d{3}` sites were checked by hand and 50 are groupings. Three digits after the separator
+     * means grouping; one or two means decimal. The wiki states it definitionally: *"me ose pa presje ose
+     * ndonjëherë një pikë që ndan shifrat e mijërave: 1.000"*.
+     */
+    test("three digits after the separator is a group; one or two is a decimal", () => {
+        // comma grouping — the value was being read as TWO numbers with a pause between them
+        expect(phonemize("110,994 kilometra", "sq").trim()).toBe("ˈɲəcind ˈɛ ˈðjɛtə ˈmijə ˈɛ nəˈntəcind ˈɛ nəntəˈðjɛtə ˈɛ ˈkatəɾ kiloˈmɛtɾa");
+        // period grouping, and `000` was reading as a single *zero*
+        expect(phonemize("300.000 vjet", "sq").trim()).toBe("ˈtɾɛcind ˈmijə ˈvjɛt");
+        // space grouping
+        expect(phonemize("20 000", "sq").trim()).toBe("ˈɲəzɛt ˈmijə");
+        // ...and one or two digits is a decimal, through either mark
+        expect(phonemize("41.33", "sq").trim()).toContain("ˈpɾɛsja");
+        expect(phonemize("38,3", "sq").trim()).toContain("ˈpɾɛsja");
+    });
+
+    /**
+     * ⚠ TRAP 58 IN THE DE-GROUPING RULE ITSELF, and the first cut of it broke three things at once. A group is
+     * mis-segmented only if a further DIGIT follows, so that is the only thing the trailing guard rejects — a
+     * clause mark and the figure's own decimal tail both have to pass.
+     */
+    test("a group survives a clause mark and its own decimal tail", () => {
+        expect(phonemize("50 000.", "sq").trim()).toBe("pɛsəˈðjɛtə ˈmijə .");
+        expect(phonemize("1,110.03 km²", "sq").trim()).toContain("ˈpɾɛsja");
+        // ⚠ A DOTTED DATE needs no special case: de-grouping wants three-digit groups and the decimal rule's
+        // trailing guard refuses `30.04` because a period follows. It survives untouched.
+        expect(phonemize("30.04.1993", "sq").trim()).not.toContain("ˈpɾɛsja");
+    });
+
+    /**
+     * ⚠ `-38,3 °C` CARRIED FOUR DEFECTS AT ONCE — the minus dropped so a record LOW read as a high, the comma
+     * taken for a clause pause, the degree sign dropped, and ⟨C⟩ read as Albanian /t͡s/, a legal syllable no
+     * gate can see (trap 56).
+     */
+    test("the sign, the separator, the degree and its scale all survive one figure", () => {
+        expect(phonemize("-38,3 °C", "sq").trim()).toBe("ˈminus tɾiˈðjɛtə ˈɛ ˈtɛtə ˈpɾɛsja ˈtɾɛ ˈɡɾadə t͡sɛlˈsius");
+        // ⚠ DO NOT SAY IT TWICE (trap 12): the corpus writes the scale name as a word beside the sign, and the
+        // scale letter needs a LETTER BOUNDARY or it eats the ⟨C⟩ of *Celsius* and adds a second one.
+        expect(phonemize("+7° Celsius", "sq").trim()).toBe("ˈplus ˈʃtatə ˈɡɾadə t͡sɛlˈsius");
+    });
+
+    test("signs and units: percent is postposed, and the unit is not a fake word", () => {
+        expect(phonemize("75 %", "sq").trim()).toBe("ʃtatəˈðjɛtə ˈɛ ˈpɛsə ˈpəɾ ˈcind");
+        expect(phonemize("25 cm", "sq").trim()).toBe("ˈɲəzɛt ˈɛ ˈpɛsə t͡sɛntiˈmɛtɾa");
+        expect(phonemize("€2", "sq").trim()).toBe("ˈdy ɛˈuɾo");
+        expect(phonemize("45-55°", "sq").trim()).toContain("ˈdɛɾi");
+        // ⟨km2⟩ is ⟨km²⟩ with the superscript lost — unfolded, the unit fails and `km` reaches the IPA raw
+        expect(phonemize("349,223 km2", "sq").trim()).toContain("kiloˈmɛtɾa kaˈtɾoɾə");
+        expect(phonemize("999 ‰ ar", "sq").trim()).toContain("ˈpəɾ ˈmijə");
+    });
+
+    /** ⚠ A leading zero in the fraction is spoken, or `5.09` and `5.9` become byte-identical (the eu defect). */
+    test("a leading zero in the fraction is not swallowed", () => {
+        expect(phonemize("5.09", "sq").trim()).not.toBe(phonemize("5.9", "sq").trim());
+    });
+
+    /**
+     * ⚠ REGRESSION GUARDS FROM REVIEW OF #820. Each spoke a figure wrong, and none was visible to a gate.
+     */
+    test("a zero-headed figure is a decimal, never a thousands group", () => {
+        // `\d{1,3}` as the group head made `0,375` de-group to `0375`, which the number path reads as 375 —
+        // a probability or precision figure spoken a THOUSAND times too large, with nothing leaked.
+        expect(phonemize("0,375", "sq").trim()).toContain("ˈpɾɛsja");
+        expect(phonemize("p = 0,001", "sq").trim()).toContain("ˈpɾɛsja");
+        expect(phonemize("0.500 g", "sq").trim()).toContain("ˈpɾɛsja");
+    });
+
+    test("any separator surviving de-grouping is a decimal, whatever the fraction's length", () => {
+        // a 1–2 digit guard dropped π, which then read as two numbers with a sentence break between them
+        expect(phonemize("3.14159", "sq").trim().split(/\s+/u)).not.toContain(".");
+        expect(phonemize("3.14159", "sq").trim()).toContain("ˈpɾɛsja");
+    });
+
+    /**
+     * ⚠ NO FORM TO TAKE, ONLY ONE TO INVENT — the standard this file applies to `±` and had broken here.
+     * `megabajtë` is `absent` in the attestation artifact (0 tok / 0 arts) and the corpus writes the SINGULAR
+     * after every count (*deri në 50 megabajt*, *1024 megabajt*), so both count forms are the singular.
+     */
+    test("the loan units take their attested singular, not an invented plural", () => {
+        expect(phonemize("32MB", "sq").trim()).toBe("tɾiˈðjɛtə ˈɛ ˈdy mɛˈɡabajt");
+        expect(phonemize("714 MHz", "sq").trim()).toContain("mɛˈɡahɛɾt͡s");
+    });
+
+    /** ⚠ The plus rule must CONSUME the space it looks over, or it emits the SLOT-GAP double space. */
+    test("a spaced plus leaves no gap", () => {
+        expect(phonemize("+ 24° Celsius", "sq").trim()).toBe("ˈplus ˈɲəzɛt ˈɛ ˈkatəɾ ˈɡɾadə t͡sɛlˈsius");
+    });
 });
