@@ -722,9 +722,27 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
             const body = `${num}${mag ?? ""}`;
             if (already.test(rest)) return body; // the text says it; do not say it twice
             const w = withMagnitude(forms, mag, numValue(num), cf);
+            /**
+             * ⚠ THE EMITTED NOUN MUST NOT FUSE WITH WHATEVER FOLLOWS. `$110m` is a number glued to a
+             * MAGNITUDE ABBREVIATION, and the match ends at the digits — so the currency noun landed directly
+             * against the `m` and the tokenizer read ONE word: et *dˈolːɑritm*, fi *dolːɑriɑm*, de *dˈɔlaɐ̯m*,
+             * es *dˈolaɾesm*, nl/sv/pt/it/pl/da the same. Ten of the eleven languages probed; English escapes
+             * only because its own layer reads `m` as *million* before the tier runs.
+             *
+             * That is trap 56 — a defect that produces a READING rather than garbage. `dollaritm` is a
+             * plausible-looking word in every one of those orthographies, so no leak class, no DROP and no
+             * referee can see it, while a bare `m` is visible to the RAW-LATIN gate the moment it appears.
+             *
+             * ⚠ SEPARATE, DO NOT REFUSE, and the difference is a whole reading. Refusing the match would drop
+             * the sign as well, losing the currency; separating keeps *110 dollars* — which is right as far as
+             * it goes — and leaves the unread magnitude letter where a gate can find it. Reading the magnitude
+             * is a language's own job (`magnitudes`), not something this tier can invent from one letter.
+             */
+            const fuses = /^[\p{L}\p{M}]/u.test(rest);
+            const tail = fuses ? " " : "";
             return d.currencyPrefix
-                ? `${w}${mag ?? ""} ${join(mag)}${num}`.replace(/\s+/gu, " ")
-                : `${body} ${join(mag)}${w}`;
+                ? `${w}${mag ?? ""} ${join(mag)}${num}${tail}`.replace(/\s+/gu, " ")
+                : `${body} ${join(mag)}${w}${tail}`;
         };
         if (curBefore)
             s = s.replace(

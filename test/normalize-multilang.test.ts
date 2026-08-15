@@ -175,8 +175,16 @@ describe("shared symbol normalizer (core)", () => {
         // ⚠ AND NOT THE MAGNITUDE CASE, which never depended on this guard: the currency rule runs first and
         // consumes the number, so `m` has no number left to attach to. Probed on en with the shape guard
         // fully removed and unchanged either way — `$1.5m` is a question for the currency path, not this one.
+        //
+        // ⚠ THAT QUESTION IS NOW ANSWERED, AND THIS LINE USED TO ASSERT THE BUG (playbook trap 5). It read
+        // `"1.5 dollarm"` — the currency noun FUSED to the magnitude letter, which the tokenizer then reads as
+        // one word. Measured across eleven languages, ten produced a plausible-looking nonsense word that no
+        // leak class can see (et *dˈolːɑritm*, de *dˈɔlaɐ̯m*, es *dˈolaɾesm*, …). The tier now emits a
+        // boundary when the noun would abut a letter, so the currency still reads and the unread magnitude
+        // letter stays VISIBLE to the RAW-LATIN gate instead of hiding inside a word.
         const c = makeSymbolNormalizer({ percent: ["pct"], currency: { $: ["dollar"] }, units: { m: ["metre"] } });
-        expect(c("$1.5m")).toBe("1.5 dollarm");
+        expect(c("$1.5m")).toBe("1.5 dollar m");
+        expect(c("$1.5"), "and nothing is added when nothing follows").toBe("1.5 dollar");
     });
 
     test("an unspaced magnitude still hops, and keeps its own spacing", () => {
