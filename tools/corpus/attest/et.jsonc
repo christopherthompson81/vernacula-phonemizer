@@ -21,6 +21,88 @@
         "tier": "wikipedia",
         "findings": [
         {
+                "word": "Karl XII",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 108,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…Karl XII (27./17. juuni 1682 Stockholm, Stockholmi loss – 11. detsem…",
+                "…i naasnult kogus ta uue armee ning tungis sellega Norrasse. Karl XII sai surma 1718. aastal Fredrikshaldi piiramisel. Karl XII o…",
+                "…. Karl XII sai surma 1718. aastal Fredrikshaldi piiramisel. Karl XII on peetud Rootsi viimaseks absoluutseks monarhiks, pärast t…",
+                "…utus riigi valitsus vabariiklikumaks. == Karli lapsepõlv == Karl XII sündis 1682. aasta 17. juuni varahommikul. Tema vanemad oli…",
+                "…ka juhtus ning 14. detsembril 1697 krooniti Karl kuningaks Karl XII nime all. Kroonimistseremoonia ajal haaras Karl Uppsala pea…",
+                "…ostis mingi veider heli ning siis pikk ohe. Rootsi kuningas Karl XII oli 36-aastaselt püssilasust hukkunud. Kui ohvitserid olid…"
+            ]
+            },
+        {
+                "word": "kuningas Karl",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…tiast Pfalzi vürst, kes kuningana sai nimeks Karl X Gustav. Kuningas Karl X Gustav oli sunnitud sõdima nii Rzeczpospolita kui ka Taan…",
+                "…1715), kellega neil olid järglane: Karl (1655–1697), Rootsi kuningas Karl XI 1660–1697 == Vaata ka == Marss üle Beltide…",
+                "…Philipp oli kuurvürst ja Reini pfaltskrahv 1716–1742 Norra kuningas Karl III oli Rootsi kuningas Karl XIV Johan == Vaata ka == Böömi…",
+                "…ni pfaltskrahv 1716–1742 Norra kuningas Karl III oli Rootsi kuningas Karl XIV Johan == Vaata ka == Böömi kuningas Karel III oli Austr…",
+                "…1794–1816 Karl II oli Braunschweigi hertsog 1815–1831 Norra kuningas Karl II oli Rootsi kuningas Karl XIII Lääne-Frangi kuningas ja k…",
+                "…chweigi hertsog 1815–1831 Norra kuningas Karl II oli Rootsi kuningas Karl XIII Lääne-Frangi kuningas ja keiser Charles II Paljaspead…"
+            ]
+            },
+        {
+                "word": "teine",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 77,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Teine (inglise: other, saksa: andersartig, vene: другой; ka võõra…",
+                "…al sõna objekti asemel), mis tähendab teist, ehk mittemina. Teine on kõik see, mis ei ilmne minuna. Teine on inimese kui ühis…",
+                "…ist, ehk mittemina. Teine on kõik see, mis ei ilmne minuna. Teine on inimese kui ühiskondliku olendile see, kellel on suunatu…",
+                "…H.-G. Gadamer hakkasid suhtlemisõpetuses kasutama mõistet \"teine\". Emmanuel Levinasi mõtlemises ja eetikas oli teine teistsu…",
+                "…õistet \"teine\". Emmanuel Levinasi mõtlemises ja eetikas oli teine teistsuguse tunnistamine. Teise inimesega kohtudes ei püüta…",
+                "…(mingiks kindlaks vormiks või \"standardiks\"). Sartre'il on teine mõtlev olemus, mis pärineb minuga samast olevast. Tänapäeva…"
+            ]
+            },
+        {
+                "word": "kolmas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 85,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kolmas riik (ka Kolmas Riik või Kolmas Reich; saksa keeles Drittes…",
+                "…Kolmas riik (ka Kolmas Riik või Kolmas Reich; saksa keeles Drittes Reich) oli Saks…",
+                "…Kolmas riik (ka Kolmas Riik või Kolmas Reich; saksa keeles Drittes Reich) oli Saksamaa (Saksa Riig…",
+                "…tleri juhitud natsionaalsotsialistlik totalitaarne režiim. \"Kolmas riik\" tähistas natsionaalsotsialistliku mõtteviisi kohaselt…",
+                "…riik\") ja \"Saksa keisririik\" (1871–1918 kui \"Teine riik\"). \"Kolmas riik\" pidi pärast Weimari Vabariigi lõppu 1933. aastal hakk…",
+                "…Kolmas Maailm (ka enamusmaailm) on mõiste, mille all mõeldakse ena…"
+            ]
+            },
+        {
+                "word": "Paulus teine",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Karl kaheteistkümnes",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
                 "word": "kolmanda sajandini",
                 "verdict": "attested",
                 "bounded": true,

@@ -7,11 +7,42 @@
  * numeral data), and it works even in the engines whose tokenizer drops Latin runs — `XIX век` would
  * otherwise lose the numeral entirely before any numeral logic could run.
  *
- * KNOWN LIMIT, deliberate: this emits a CARDINAL. Several languages read a Roman numeral as an
- * ORDINAL — Russian `XIX век` is *девятнадцатый век*, Polish *dziewiętnasty*, Italian
+ * KNOWN LIMIT, deliberate: this emits a CARDINAL where no policy asks otherwise. Several languages read a
+ * Roman numeral as an ORDINAL — Russian `XIX век` is *девятнадцатый век*, Polish *dziewiętnasty*, Italian
  * *diciannovesimo*, and English regnal names are "the fourteenth". Those need per-language ordinal
  * formation with gender/case agreement, which is a separate piece of work; a cardinal is the wrong
  * register but is audible and recoverable, where the status quo silently drops or letter-spells it.
+ *
+ * ⚠ THAT "SEPARATE PIECE OF WORK" IS NOW SIZED, so the next person does not have to re-derive it, and so
+ * "it is big" stops being a feeling (trap 17). Measured over all 162 mined artifacts:
+ *
+ *     multi-letter Roman numerals            2,671  across 149 artifacts
+ *     with a hyphenated case/ordinal ending    237  across 157 (`III-st`, `XIV-ojo`)
+ *
+ * ⚠ AND THE SINGLE-LETTER COUNT IS A TRAP THAT CAUGHT THIS MEASUREMENT ON ITS FIRST PASS. Counting one-letter
+ * tokens too gives 7,529 — but 4,858 of those are `C` ×1712, `I` ×905, `D` ×709, `L` ×575, `M` ×433, and they
+ * are initials, list labels and unit letters, not numerals. The conservative single-letter rule below is what
+ * keeps them out at runtime; a probe written to size the work has to keep them out too (trap 2).
+ *
+ * ⚠ WHAT BLOCKS IT IS SOURCING, NOT MECHANISM, and the mechanism was built and then REVERTED for want of a
+ * consumer. Passing the matched context word to `ordinal` — which the note on `RomanPolicy.ordinal` invites,
+ * and which would make case and gender reachable — is about twenty lines. The consumer was going to be
+ * Estonian, whose layer already composes `ordinal(n, caseEnding)`. It does not work, for reasons worth
+ * recording because they recur:
+ *   · Estonian's Roman class is REGNAL, not centuries — `sajand` next to a numeral is ×0 in its corpus, while
+ *     `Johannes Paulus II`, `Louis XIII`, `Charles III`, `Salmanassar III` and a dozen more are there.
+ *   · Whether Estonian reads a regnal numeral as an ordinal is UNATTESTED and the corpus cannot settle it:
+ *     `Karl kaheteistkümnes` is 0 tokens / 0 articles on et.wikipedia, while every instance writes `Karl XII`.
+ *     Writers type the numeral; they never write how they say it — the playbook's Igbo lesson, where silence
+ *     is not a refusal and a dictionary is the next tier.
+ *   · The hyphen-suffix shape is not a Roman problem at all: Estonian strands the ending on DIGITS too
+ *     (`3-st` → *kˈolm st*), so it belongs in that language's layer, and its corpus has 8 instances of which
+ *     two are fragments of an IUPAC chemical name (`…-1-üül)-2,4,6,8-nonatetraen-1-ool`) that any rule
+ *     claiming `\d+-[a-z]{1,5}` would mangle.
+ * So the work is: pick a language whose ordinal register is SOURCED, add the context parameter, and wire it.
+ * Russian and Polish are the strongest candidates — both already have a policy here, both have oblique
+ * century phrases in their own corpora (`XVIII века`, `XVII веку`, `XX wieku`, `XV wieku`), and both would
+ * need per-case ordinal tables to use them.
  * Languages that already resolve Romans themselves (English's regnal/cardinal context rule, French's
  * ordinal `XIVe`) are excluded at the registry seam — this pass must not pre-empt them.
  *
