@@ -134,7 +134,7 @@ export function normalizeCantonese(input: string, measureWords: string): string 
     // than replaced. Without this arm the left endpoint stays a cardinal while step 4 gives the right one the
     // digit reading — the same split, one form later.
     s = s.replace(
-        /(?<![\d.,])(\d{4})\s*([-–—])\s*(\d{4})(?![\d.,])|(?<![\d.,])(\d{4})\s*([至到])\s*(\d{4})(?![\d.,])(?=\s*年)/gu,
+        /(?<![\d.,])(\d{4})\s*([-–—])\s*(\d{4})(?![\d]|[.,]\d)|(?<![\d.,])(\d{4})\s*([至到])\s*(\d{4})(?![\d.,])(?=\s*年)/gu,
         (_m, a1: string, _d: string, b1: string, a2: string, conn: string, b2: string) =>
             a1 !== undefined
                 ? `${spellDigits(a1)}至${spellDigits(b1)}`

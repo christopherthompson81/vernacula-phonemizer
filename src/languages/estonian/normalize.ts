@@ -776,7 +776,7 @@ export function normalizeEstonian(input: string): string {
     const NUM = String.raw`\d+`;
     t = t.replace(
         new RegExp(
-            String.raw`(?<![-+−–—/\d.,:\p{L}\p{M}])(${NUM})[ ]?[-–—][ ]?(${NUM})(?![-+−/\d,:\p{L}\p{M}])`,
+            String.raw`(?<![-+−–—/\d.,:\p{L}\p{M}])(${NUM})[ ]?[-–—][ ]?(${NUM})(?![-+−/\d:\p{L}\p{M}]|,\d)`,
             "gu",
         ),
         (whole: string, a: string, b: string) =>

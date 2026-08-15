@@ -151,13 +151,20 @@ describe("Wolof text normalization", () => {
 
     // ⚠ THE CLAUSE-FINAL BRANCH, PINNED SEPARATELY (trap 13). A sentence period is not part of a number, and
     // the trailing guard used to reject one — so every range that ENDED A CLAUSE was declined and fell back
-    // to the two juxtaposed cardinals this rule exists to replace. The `,` is a different question and is
-    // still rejected, because Wolof writes the DECIMAL COMMA (`43,3 %`, `2,8 milyoŋ`).
+    // to the two juxtaposed cardinals this rule exists to replace.
+    // ⚠ THE COMMA USED TO BE REJECTED TOO, and this assertion pinned that. Wolof does write the decimal comma
+    // (`43,3 %`, `2,8 milyoŋ`), but a comma only makes a decimal when a DIGIT follows it — so the guard now
+    // refuses `,\d` rather than every comma, which keeps `1939-1940,5` out and lets a clause comma through.
+    // Found by a fleet sweep: the same defect was live in ht, ln, st and tn with the identical trailing class.
     test("a range that ENDS A CLAUSE is still a range; the decimal comma still declines one", () => {
         expect(normalizeWolof("yàggug 15-20.")).toBe("yàggug 15 ba 20.");
         expect(normalizeWolof("atum 1939–1940.")).toBe("atum 1939 ba 1940.");
         expect(normalizeWolof("115-128.")).toBe("115 ba 128.");
-        expect(normalizeWolof("atum 1939–1940,")).toBe("atum 1939–1940,");
+        expect(normalizeWolof("atum 1939–1940,")).toBe("atum 1939 ba 1940,");
+        // ⚠ THE DECIMAL RIGHT OPERAND IS STILL REFUSED, which is what makes the looser comma safe. Asserted
+        // as "the span word is absent" rather than as a whole string: the decimal step downstream reads
+        // `1940,5` digit-by-digit on its own, so pinning the full output would pin that rule's behaviour too.
+        expect(normalizeWolof("atum 1939–1940,5")).not.toContain(` ${"ba"} `);
     });
 
     test("de-grouping: all three conventions, and the leading-zero guard that spares a decimal", () => {

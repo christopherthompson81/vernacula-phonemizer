@@ -364,7 +364,7 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //    — and because the dot is the one character with nothing left to defend it.
         s = s.replace(
             new RegExp(
-                `(?<![${D}.,،:\\p{L}\\p{M}-])([${D}]+)\\s?[-–—]\\s?([${D}]+)(?![${D},،\\p{L}\\p{M}-])`,
+                `(?<![${D}.,،:\\p{L}\\p{M}-])([${D}]+)\\s?[-–—]\\s?([${D}]+)(?![${D}\\p{L}\\p{M}-]|،[${D}])`,
                 "gu",
             ),
             (whole: string, a: string, b: string) => {

@@ -347,7 +347,7 @@ export function normalizeSetswanaPost(input: string): string {
     //    `/` is not in the lookbehind) are still declined.
     //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
     //    so `5–13,7` must not be claimed with its fraction left behind.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-,\d\p{L}\p{M}]|\.\d)/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     // 9) DECIMALS, LAST of the numeric rules — steps 5 to 8 all need their number intact, the shared tier

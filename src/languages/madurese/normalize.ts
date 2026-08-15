@@ -400,7 +400,7 @@ export function normalizeMadurese(input: string): string {
     //      (ISBN ×8 in the artifact) and a designation (`Ḍ3-Akuntansi`).
     //   3. NOTHING BUT WHITESPACE MAY FOLLOW A TRAILING SEPARATOR OR HYPHEN, for the same chain reason.
     s = s.replace(
-        /(?<![\d.,\p{L}\p{M}/-])(\d+(?:[.,]\d+)?)\s?[-–—]\s?(\d+(?:[.,]\d+)?)(?![\d,\p{L}\p{M}/-])/gu,
+        /(?<![\d.,\p{L}\p{M}/-])(\d+(?:[.,]\d+)?)\s?[-–—]\s?(\d+(?:[.,]\d+)?)(?![\d\p{L}\p{M}/-]|[.,]\d)/gu,
         "$1 sampè' $2",
     );
 

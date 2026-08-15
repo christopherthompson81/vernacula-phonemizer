@@ -153,7 +153,12 @@ describe("Bambara text normalization", () => {
         expect(normalizeBambara("san 1954 -1981.")).toBe("san 1954 fo 1981.");
         // ⚠ THE COMMA IS THE BRANCH WE DID NOT TAKE: Bambara writes a decimal comma ×42 (`7,62`), so a
         // trailing `,` can open the right operand's fractional part rather than close a clause.
-        expect(normalizeBambara("1965-1969, ni")).toBe("1965-1969, ni");
+                // ⚠ THE COMMA IS NOW READ, and this assertion used to pin the opposite. The argument for rejecting it
+        // was that a comma after the right operand may open a DECIMAL — true, and it only holds when a DIGIT
+        // follows. The guard is now `[.,]\d`, so a fraction is still declined and a clause comma is not.
+        // One shape, eleven layers: the same six characters were wrong in each. See test/clause-final-range.ts.
+        expect(normalizeBambara("1965-1969, ni")).toBe("1965 fo 1969, ni");
+        expect(normalizeBambara("1965-1969,5")).not.toContain(" fo "); // a DECIMAL right operand still declines
         // a decimal RIGHT operand is now claimed, and step 11 still reads its tail whole (it read `10-15 5`
         // before this change, so the joiner is the only thing that moved)
         expect(normalizeBambara("10-15.5")).toBe("10 fo 15 5");

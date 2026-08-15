@@ -142,7 +142,7 @@ const BARE_UNITS = makeBareUnitNormalizer(UNITS);
  *  pairs are ascending and digit-dash-digit, are still declined.
  *  ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA, so `5–13,7` must not be claimed
  *  with its fraction left behind. */
-const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)(\s?)[-–—]\s?(\d+)(?![,\d\p{L}\p{M}-]|\.\d)/gu;
+const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)(\s?)[-–—]\s?(\d+)(?![\d\p{L}\p{M}-]|[.,]\d)/gu;
 
 /** Era markers, sourced from the corpus text that spells them out BESIDE the abbreviation — the strongest
  *  form of attestation there is, because the source document glosses itself:

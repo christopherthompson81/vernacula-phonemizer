@@ -370,7 +370,7 @@ export function normalizeSesotho(input: string): string {
     //    guard that declines it. `\.\d` still does; a bare removal would have read the DOI as a span.
     //    ⚠ THE COMMA STAYS IN THE CLASS: this corpus writes the DECIMAL COMMA as well as the comma group,
     //    so `5–13,7` must not be claimed with its fraction left behind.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-,\d\p{L}\p{M}]|\.\d)/gu,
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${SPAN} ${b}` : whole));
 
     // 8) THE ENGLISH ORDINAL SUFFIX (`60th`, `1st`, `18th`). Sesotho writes its own ordinals as WORDS with a

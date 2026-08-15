@@ -151,7 +151,12 @@ describe("Akan (Twi) text normalization", () => {
     test("a range that ENDS A CLAUSE keeps `kosi`, and the comma is still rejected", () => {
         expect(normalizeAkan("1964-1967.")).toBe("1964 kosi 1967.");
         // the comma stays a rejection: ak writes a comma decimal (×39 tw + 13 fat) and groups with a comma
-        expect(normalizeAkan("1964-1967, Belfast")).toBe("1964-1967, Belfast");
+                // ⚠ THE COMMA IS NOW READ, and this assertion used to pin the opposite. The argument for rejecting it
+        // was that a comma after the right operand may open a DECIMAL — true, and it only holds when a DIGIT
+        // follows. The guard is now `[.,]\d`, so a fraction is still declined and a clause comma is not.
+        // One shape, eleven layers: the same six characters were wrong in each. See test/clause-final-range.ts.
+        expect(normalizeAkan("1964-1967, Belfast")).toBe("1964 kosi 1967, Belfast");
+        expect(normalizeAkan("1964-1967,5")).not.toContain(" kosi "); // a DECIMAL right operand still declines
         // a decimal RIGHT operand is now claimed, and step 9 still reads its tail whole
         expect(normalizeAkan("10-15.5")).toBe("10 kosi 15 akyiri pɔ 5");
     });
