@@ -151,9 +151,17 @@
  *  The `(?<![\d.,])` / `(?![\d.,])` guards stop a match beginning or ending inside a longer run, which is
  *  the lookbehind-AND-lookahead pair trap 28 says a lookahead alone cannot replace. */
 import { makeBareUnitNormalizer } from "../../core/normalizeSymbols.ts";
-const GROUPED_SPACE = /(?<![\d.,])(\d{1,3})((?: \d{3})+)(?![\d.,\d])/gu;
-const GROUPED_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?![\d.,])/gu;
-const GROUPED_DOT = /(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?![\d.,])/gu;
+// ⚠ THE TRAILING GUARD IS `(?!\d)`, NOT `(?![\d.,])`, AND THAT ONE CHARACTER IS TWO SEPARATE CASES. It
+// rejected every CLAUSE-FINAL grouped figure — `50 000.` came back untouched and read *pis nu zaːlem .*,
+// losing the thousand word at exactly a sentence end (playbook trap 58, reported by `review.ts`'s
+// `clause-final` check) — and it also rejected the MIXED-CONVENTION number the Sundanese layer documents,
+// where a period-group is followed by the decimal comma (`764.387,59`). Rejecting only a following DIGIT is
+// what the lookbehind-plus-lookahead pair above actually needs: a further `\d{3}` group is already consumed
+// by the `+`, so a match can still neither begin nor end inside a longer run.
+// (The space arm additionally carried a duplicated `\d` inside its class — inert, and gone with it.)
+const GROUPED_SPACE = /(?<![\d.,])(\d{1,3})((?: \d{3})+)(?!\d)/gu;
+const GROUPED_COMMA = /(?<![\d.,])(\d{1,3})((?:,\d{3})+)(?!\d)/gu;
+const GROUPED_DOT = /(?<![\d.,])(\d{1,3})((?:\.\d{3})+)(?!\d)/gu;
 
 /** ⚠ THE CURRENCY NOUN COMES BEFORE THE FIGURE IN MOORÉ, so this rule REORDERS rather than postposing, and
  *  the shared tier could not have said it (playbook §47 reason 2, the Oromo case). The position is not a

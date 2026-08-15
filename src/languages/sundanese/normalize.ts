@@ -185,7 +185,12 @@ export function normalizeSundanese(input: string): string {
     // rather than by the corpus tabulation, which counted only the two punctuation separators. The head is
     // capped at three digits and the lookbehind rejects a preceding digit, so an adjacent PAIR of numbers
     // ("taun 1990 2000") cannot be fused — a four-digit year can never be the head of a group.
-    s = s.replace(/(?<![\d.,])(\d{1,3}(?: \d{3})+)(?![\d.,])/gu, (m) => m.replaceAll(" ", ""));
+    // ⚠ AND ITS TRAILING GUARD IS `(?!\d)` TOO, for the reason spelled out three lines above — which this arm
+    // did not follow. `(?![\d.,])` rejected every clause-final grouped figure: `50 000.` came back untouched
+    // and read *lˈima pˈuluh ʔənˈol .* — "fifty, zero" — losing the thousand word at exactly a sentence end.
+    // Reported by `review.ts`'s `clause-final` check. A decimal tail is safe either way: `1 234.56` de-groups
+    // to `1234.56` and the decimal rule reads it whole.
+    s = s.replace(/(?<![\d.,])(\d{1,3}(?: \d{3})+)(?!\d)/gu, (m) => m.replaceAll(" ", ""));
 
     // ── 2. CLOCK — BEFORE the decimal rule, which would otherwise claim `7.30` as seven-point-three ──────
     // The corpus writes the hour with `jam` ×186, `tabuh` and `pukul`, and both separators (`jam 05.00`,

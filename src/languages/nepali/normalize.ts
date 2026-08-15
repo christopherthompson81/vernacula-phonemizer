@@ -98,11 +98,21 @@ const CURRENCY: Readonly<Record<string, string>> = {
     "$": "डलर", "£": "पाउन्ड", "€": "युरो", "¥": "येन",
 };
 /**
- * The number, with a trailing `(?![\d.,])` that is NOT decoration. Without it the currency rules
- * BACKTRACK to a shorter number so that the rest of the pattern can succeed: "$1000 डलर" matched `$100`
- * and emitted "एक सय डलर शून्य डलर". The magnitude had the same problem — see NOUN_TAIL.
+ * The number, with a trailing guard that is NOT decoration. Without it the currency rules BACKTRACK to a
+ * shorter number so that the rest of the pattern can succeed: "$1000 डलर" matched `$100` and emitted
+ * "एक सय डलर शून्य डलर". The magnitude had the same problem — see NOUN_TAIL.
+ *
+ * ⚠ BUT THE GUARD WAS `(?![\d.,])`, AND A BARE `.` IS A SENTENCE END FAR MORE OFTEN THAN A NUMBER'S
+ * INTERIOR. `$5.` therefore matched nothing at all and the sign was DROPPED — the currency word vanished
+ * at exactly the position a sentence ends. Playbook trap 58, and it is what `review.ts`'s `clause-final`
+ * check reports for this language: `$5` reads *pˈãt͡s ɖˈʌlʌɾ* and `$5.` read *pˈãt͡s .*
+ *
+ * The narrow form keeps the whole anti-backtracking property, because what must be rejected is a
+ * CONTINUATION of the number: another digit, or a separator with a digit after it. `$1000 डलर` still
+ * cannot match `$100` (the next character is `0`), and `$5.5` still cannot match `$5` (the next is `.5`) —
+ * while a clause-final dot is no longer mistaken for either.
  */
-const NUM = "\\d+(?:[.,]\\d+)*(?![\\d.,])";
+const NUM = "\\d+(?:[.,]\\d+)*(?![\\d]|[.,]\\d)";
 /** Magnitude words that hop over the currency sign — "£27 मिलियन" is said "…मिलियन पाउन्ड". */
 const MAGNITUDE_ALT = "मिलियन|बिलियन|ट्रिलियन|खरब|अर्ब|करोड|लाख|हजार";
 

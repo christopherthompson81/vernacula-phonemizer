@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+
 import { phonemizeWord } from "../src/languages/nepali/nepali.ts";
 import { getPhonemizer } from "../src/registry.ts";
 
@@ -131,5 +133,25 @@ describe("Nepali normalization", () => {
         expect(t("5 m")).toContain("mˈiʈʌɾ");
         expect(t("120 m³")).toContain("ɡʱˈʌn mˈiʈʌɾ");
         expect(t("802.11m")).toContain("ˈɛm");
+    });
+});
+
+
+// ⚠ TRAP 58 — a rule that is right in isolation giving up at a full stop. `review.ts`'s `clause-final` check
+// reported this on main: `$5` read *pˈãt͡s ɖˈʌlʌɾ* and `$5.` read *pˈãt͡s .*, the currency word gone at
+// exactly a sentence end. `NUM`'s trailing guard was `(?![\d.,])`, which the layer added — correctly — to
+// stop the currency rules backtracking to a shorter number, but a bare `.` is a sentence end far more often
+// than a number's interior. These pin BOTH halves: the repair, and the backtracking the guard exists for.
+describe("Nepali — a clause-final currency figure still sounds", () => {
+    test("the sign reads at a sentence end", () => {
+        expect(phonemize("$5.", "ne").trim()).toBe("pˈãt͡s ɖˈʌlʌɾ .");
+        expect(phonemize("$5,", "ne").trim()).toBe("pˈãt͡s ɖˈʌlʌɾ ,");
+        expect(phonemize("$5", "ne").trim()).toBe("pˈãt͡s ɖˈʌlʌɾ");
+    });
+    test("and the anti-backtracking property the guard was written for still holds", () => {
+        // `$1000 डलर` must not match `$100` and emit the noun twice — the defect the original guard fixed
+        expect(phonemize("$1000 डलर", "ne").trim()).toBe("ˈek ɦˈʌd͡zaɾ ɖˈʌlʌɾ");
+        // and a real decimal is still read whole rather than truncated to its integer part
+        expect(phonemize("$5.5", "ne").trim()).toBe("pˈãt͡s d̪ʌsˈʌmlʌw pˈãt͡s ɖˈʌlʌɾ");
     });
 });

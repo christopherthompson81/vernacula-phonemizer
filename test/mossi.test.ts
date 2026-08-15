@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+
 import { phonemizeWord, createMossi } from "../src/languages/mossi/mossi.ts";
 import { numberToWords } from "../src/languages/mossi/numbers.ts";
 import { normalizeMossi } from "../src/languages/mossi/normalize.ts";
@@ -207,5 +209,19 @@ describe("Mooré text normalization — de-grouping and the two sourceable curre
     test("the km key never bites a word, and sees the figure de-grouping has already joined up", () => {
         expect(normalizeMossi("kmall akm 5")).toBe("kmall akm 5");
         expect(normalizeMossi("18,476km")).toBe("kilometr 18476");
+    });
+});
+
+
+// ⚠ TRAP 58 — all three grouping arms carried `(?![\d.,])`, so a grouped figure followed by a clause comma or
+// a sentence period was declined and read as TWO numbers. 14 corpus utterances, every one a repair:
+// `5,000.` read *nu , zaːlem .* ("five, zero") and now reads *tus a nu .* ("five thousand").
+describe("Mooré — a grouped figure survives the clause mark after it", () => {
+    test("comma-grouped, then a clause mark", () => {
+        expect(phonemize("5,000.", "mos").trim()).toBe("tus a nu .");
+        expect(phonemize("5,000", "mos").trim()).toBe("tus a nu");
+    });
+    test("space-grouped, then a clause mark", () => {
+        expect(phonemize("50 000.", "mos").trim()).toBe("tus pis nu .");
     });
 });

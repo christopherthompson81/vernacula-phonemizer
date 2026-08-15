@@ -120,3 +120,15 @@ describe("Sundanese canonical IPA", () => {
         });
     });
 });
+
+
+// ⚠ TRAP 58, AND THIS FILE ALREADY CONTAINED THE ARGUMENT. The punctuation-separated grouping arms carry a
+// long comment explaining that the trailing guard must be `(?!\d)` and not `(?![\d.,])`; the SPACE arm three
+// lines below used the wrong one, so every clause-final space-grouped figure was declined — `50 000.` read
+// *lˈima pˈuluh ʔənˈol .*, "fifty, zero", losing the thousand word. Reported by `review.ts`'s `clause-final`.
+describe("Sundanese — a clause-final space-grouped figure keeps its magnitude", () => {
+    test("the space arm follows the same rule its neighbours document", () => {
+        expect(phonemize("50 000.", "su").trim()).toBe("lˈima pˈuluh rəbˈu .");
+        expect(phonemize("50 000", "su").trim()).toBe("lˈima pˈuluh rəbˈu");
+    });
+});
