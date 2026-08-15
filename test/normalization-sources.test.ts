@@ -19,6 +19,8 @@
 import { describe, expect, test } from "vitest";
 import { DROPPABLE } from "../tools/normalization/defects.ts";
 import {
+    SCALE_PROBES,
+    foldMarks,
     SOURCES_EXEMPT, context, evidenceKin, scaleNames, strippedOfComments, unitDeclaration, unitWords, type Ctx,
 } from "../tools/normalization/sources.ts";
 import { readFileSync } from "node:fs";
@@ -406,5 +408,45 @@ describe("the units row fits the reconciliation without bending it", () => {
         expect(reported.has("unit-word")).toBe(true);
         expect([...DROPPABLE].map(([k]) => k)).not.toContain("units");
         expect(Object.keys(SOURCES_EXEMPT)).not.toContain("units");
+    });
+});
+
+
+/**
+ * THE SCALE PROBES — the stems that decide whether a language has a word for the Celsius and Fahrenheit
+ * scales. Both halves of this block exist because both directions went wrong at once.
+ *
+ * ⚠ FALSE ABSENCE: the Celsius stem ended in `i`, so `Ċelsju` — what Maltese writes and what its layer
+ * EMITS — reported as no word at all, and Polish's genitive `Celsjusza` likewise. A borrowing is not always
+ * Latinate, and the class whose whole job is to say whether the word exists was saying no for languages that
+ * say it correctly.
+ *
+ * ⚠ FALSE PRESENCE, WHICH THE FIX FOR THE FIRST ONE SURFACED: a bare `faren` stem matches ordinary words in
+ * three languages, every one of them trap 37 — a real token in the wrong sense.
+ *
+ *     mos  `Fãrens`      FRANCE, in `Alencon, Farens`
+ *     lv   `farenozojs`  the PHANEROZOIC eon, in a sentence listing `proterozojs` before it
+ *     tr   `farenjit`    PHARYNGITIS /faɾenʒit/ — Turkish for Fahrenheit is *Fahrenhayt*
+ *
+ * Every genuine rendering keeps the `h` of *Fahrenheit* somewhere, so requiring it costs nothing real.
+ */
+describe("SCALE_PROBES", () => {
+    test("Celsius is recognised in a non-Latinate borrowing", () => {
+        for (const w of ["Celsius", "Ċelsju", "Celsjusza", "Selsiyis", "sentigrad"])
+            expect(SCALE_PROBES.celsius.test(foldMarks(w)), w).toBe(true);
+    });
+
+    test("Fahrenheit keeps its `h`, and the three collisions stay out", () => {
+        for (const w of ["Fahrenheit", "Farenheit", "Fārenheita", "farenhajt"])
+            expect(SCALE_PROBES.fahrenheit.test(foldMarks(w)), w).toBe(true);
+        // ⚠ the half that matters: real words that are not the scale
+        for (const w of ["Fãrens", "farenozojs", "farenjit"])
+            expect(SCALE_PROBES.fahrenheit.test(foldMarks(w)), w).toBe(false);
+    });
+
+    test("foldMarks strips diacritics without joining words", () => {
+        expect(foldMarks("Ċelsju")).toBe("Celsju");
+        expect(foldMarks("Sèlsiyis")).toBe("Selsiyis");
+        expect(foldMarks("a b")).toBe("a b"); // no space collapsing — a fold is not a tokenizer
     });
 });

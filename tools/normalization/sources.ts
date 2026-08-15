@@ -434,10 +434,29 @@ function eraPhrase(c: Ctx): Row {
  * the language. So adjacency produces CANDIDATES inside a `[??]`, never a verdict. An honest unknown is the
  * whole point: this class's job is to stop someone asserting an absence they never checked.
  */
-const SCALE_PROBES = {
-    celsius: /(?<![\p{L}\p{M}])(celsi|selsi|셀시|celzi|t͡selsi|selisi|centigrad|sentigrad)/iu,
-    fahrenheit: /(?<![\p{L}\p{M}])(fahren|faren|farengey|farenhaj)/iu,
+export const SCALE_PROBES = {
+    // ⚠ THE STEM ENDS `[ij]`, NOT `i`, BECAUSE THE BORROWING IS NOT ALWAYS LATINATE. Maltese writes the scale
+    // `Ċelsju` and the layer emits `grad Ċelsju`, which `celsi` cannot match — so this reported `[NONE]`
+    // (later `[part] Fahrenheit`) for a language that says BOTH scales correctly. A false absence in the one
+    // class whose whole job is to say whether the word exists.
+    celsius: /(?<![\p{L}\p{M}])(cels[ij]|sels[ij]|셀시|celz[ij]|t͡sels[ij]|selis[ij]|centigrad|sentigrad)/iu,
+    // ⚠ THE `h` IS LOAD-BEARING AND ITS ABSENCE WAS A LATENT FALSE POSITIVE. A bare `faren` stem matches
+    // ordinary words that have nothing to do with the scale: Mooré writes FRANCE as `Fãrens` (`Alencon,
+    // Farens` in its own corpus), which folded to `Farens` and reported Fahrenheit as attested. Trap 37 — a
+    // real token in the wrong sense, with a healthy count. Every genuine rendering keeps the `h` of
+    // *Fahrenheit* somewhere, including the two irregular ones already listed here, so requiring it costs
+    // nothing and closes the class of collision. The fold surfaced this; it did not cause it.
+    fahrenheit: /(?<![\p{L}\p{M}])(fahren|farenh|farengey|farenhaj)/iu,
 } as const;
+
+/**
+ * ⚠ AND THE HAYSTACK IS DIACRITIC-FOLDED BEFORE THE PROBE RUNS, for the same reason `review.ts`'s sourcing
+ * check folds: an orthography that writes the borrowing with a diacritic (`Ċelsju`, `Сельси`) is spelling the
+ * SAME word, and a probe keyed on the bare Latin stem reads it as absent. This is the shape the playbook
+ * records for the Arabic percent word declared with harakat against ten undiacritised corpora — a
+ * false negative produced by the tool's own normalisation, not by the language.
+ */
+export const foldMarks = (s: string): string => s.normalize("NFD").replace(/\p{M}+/gu, "");
 
 /**
  * Every string LITERAL in the layer source, with OBJECT KEYS excluded.
@@ -691,9 +710,10 @@ export function scaleNames(c: Ctx): Row {
     // 1. TEXT EVIDENCE — corpus, referee, espeak. The layer's own source is NOT a text source.
     const text = `${c.corpus}\n${c.referee}\n${c.espeak}`;
     const lits = literals(c.langSrc).join("\n");
+    const foldedText = foldMarks(text), foldedLits = foldMarks(lits);
     const found = (slot: "celsius" | "fahrenheit"): string | undefined =>
-        SCALE_PROBES[slot].test(text) ? `attested in ${HAYSTACK}`
-            : SCALE_PROBES[slot].test(lits) ? "emitted by the layer" : undefined;
+        SCALE_PROBES[slot].test(foldedText) ? `attested in ${HAYSTACK}`
+            : SCALE_PROBES[slot].test(foldedLits) ? "emitted by the layer" : undefined;
     // 2. CODE EVIDENCE, read as ARMS. Identical arms are the layer SAYING the letter is dropped.
     // ⚠ THE TWO KINDS OF EVIDENCE ARE MERGED, NOT SHORT-CIRCUITED. Returning on the first text hit cost nan
     // its Celsius: its `°C` arm emits 攝氏…度 and its corpus contains the string "Fahrenheit" exactly once — in
