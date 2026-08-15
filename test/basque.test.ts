@@ -1,5 +1,8 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
+import { normalizeBasque } from "../src/languages/basque/normalize.ts";
+
 import { phonemizeWord, createBasque } from "../src/languages/basque/basque.ts";
 
 // Canonical-IPA goldens for Basque (eu) — euskara, a LANGUAGE ISOLATE, Latin script. The hallmark is the THREE-WAY
@@ -59,5 +62,80 @@ describe("Basque (euskara) canonical IPA", () => {
         expect(eu.text("2000000")).toBe("bi milioi"); // bi milioi
         expect(eu.text("1000000000")).toBe("mila milioi"); // was a DIGIT-LEAK
         expect(eu.text("2000000000")).toBe("bi mila milioi");
+    });
+});
+
+
+// TEXT NORMALIZATION (eu) — src/languages/basque/normalize.ts. Every word's source is cited at its
+// declaration there. These pin the rules' BRANCHES rather than the corpus's instances (playbook trap 13),
+// so several cases below are shapes tools/corpus/mined/eu.jsonc does not contain, and several are shapes it
+// does contain that the layer must REFUSE.
+describe("Basque text normalization — the period groups, the comma divides, the suffix glues", () => {
+    test("the grouping PERIOD is not a sentence break", () => {
+        expect(normalizeBasque("42.262.142")).toBe("42262142");
+        expect(normalizeBasque("1.000")).toBe("1000");
+        // ⚠ a dotted CITATION is not a grouped number — its components are one and two digits
+        expect(normalizeBasque("Am 2.18.19-26")).toBe("Am 2.18.19-26");
+        // trap 58: a clause mark after a grouped figure is not a continuation of it
+        expect(normalizeBasque("41.000 urteko")).toBe("41000 urteko");
+    });
+
+    test("the decimal COMMA is `koma`, from espeak's own `_dpt`", () => {
+        expect(phonemize("93,55", "eu").trim()).toBe("lauɾoɡeita hamahiɾu koma beroɡeita hamabos̺t");
+        expect(normalizeBasque("93,55.")).toBe("93 koma 55."); // still a decimal at a sentence end
+    });
+
+    test("percent is PREFIXED, which the wiki states outright", () => {
+        expect(phonemize("% 32,1", "eu").trim()).toBe("ehuneko hoɡeita hamabi koma bat");
+        expect(phonemize("%7a", "eu").trim()).toBe("ehuneko s̻as̻pia"); // sign, figure and article together
+    });
+
+    test("units, the squared modifier and the rate denominator", () => {
+        expect(phonemize("5 km", "eu").trim()).toBe("bos̺t kilometro");
+        expect(normalizeBasque("42.262.142 km²")).toBe("42262142 kilometro karratu");
+        expect(normalizeBasque("5 km³")).toBe("5 kilometro kubiko");
+        expect(phonemize("120 km/h", "eu").trim()).toBe("ehun eta hoɡei kilometro orduko");
+    });
+
+    test("the degree sign takes its SCALE, and a bare one is refused", () => {
+        expect(phonemize("56,7 ° C", "eu").trim()).toBe("beroɡeita hamas̺ei koma s̻as̻pi ɡradu kels̺ius̺");
+        expect(normalizeBasque("26 °F")).toBe("26 gradu Fahrenheit");
+        // ⚠ THE REFUSAL: `gradu` in this corpus is the ANGULAR degree, so a bare sign is not claimed —
+        // reading it would put a temperature word on a latitude.
+        expect(normalizeBasque("23,4° ingurukoa")).toBe("23 koma 4° ingurukoa");
+    });
+
+    test("the glued case ending attaches to the LAST spoken word, and is not derived", () => {
+        expect(phonemize("1980an", "eu").trim()).toBe("mila bedeɾat͡s̻iehun eta lauɾoɡeian");
+        expect(phonemize("1980ko", "eu").trim()).toBe("mila bedeɾat͡s̻iehun eta lauɾoɡeiko");
+        expect(phonemize("25ean", "eu").trim()).toBe("hoɡeita bos̺tean");
+        // a figure may carry BOTH a sign and an ending — the tier claims the `%`, this step the ending
+        expect(normalizeBasque("% 80ko")).toBe("ehuneko 80ko".replace("80ko", "laurogeiko"));
+        // ⚠ and a DECIMAL may carry one too — the case that fell between the two rules
+        expect(phonemize("% 93,55a", "eu").trim())
+            .toBe("ehuneko lauɾoɡeita hamahiɾu koma beroɡeita hamabos̺ta");
+        // ⚠ THE ENDING LIST IS CLOSED: these are a unit and a multiplication, not case endings
+        expect(normalizeBasque("2x3")).toBe("2x3");
+    });
+
+    test("the ending also glues to the UNIT, and only where the writer marked the boundary", () => {
+        expect(normalizeBasque("44.579.000 km²ko eremua")).toBe("44579000 kilometro karratuko eremua");
+        expect(normalizeBasque("40 091 km-koa")).toBe("40091 kilometrokoa"); // space-grouped too
+        expect(normalizeBasque("kg-ko")).toBe("kilogramoko");
+        // ⚠ THE GUARD: a hyphen or an exponent must be present, or a one-letter key plus a two-letter
+        // ending would claim ordinary words. These must survive untouched.
+        expect(normalizeBasque("man")).toBe("man");
+        expect(normalizeBasque("gizonak eta emakumeak")).toBe("gizonak eta emakumeak");
+    });
+
+    test("a magnitude word between the figure and its unit keeps them adjacent", () => {
+        expect(normalizeBasque("44 milioi km²")).toBe("44 milioi kilometro karratu");
+        expect(normalizeBasque("399 milioi km-koa")).toBe("399 milioi kilometrokoa");
+    });
+
+    test("population density is refused whole — its numerator is a NOUN", () => {
+        // the entire residual `km` leak, one shape, one per country stub. `bizt.` is *biztanle*, and no unit
+        // table can name a common-noun numerator (the playbook's `Eihwohna/km²` case).
+        expect(normalizeBasque("(141 bizt./km²)")).toBe("(141 bizt./km²)");
     });
 });

@@ -2655,6 +2655,38 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "`na` is everywhere in the corpus, so the word is not the gap; the SLOT is. Shona reached "
             + "the identical conclusion from the identical evidence",
     },
+    eu: {
+        // ⚠ BASQUE IS AN ISOLATE, so there is no sibling corpus or sibling referee to lean on and every
+        // refusal below rests on eu's own evidence: the 463 retained segments of `tools/corpus/mined/eu.jsonc`
+        // (there is no FLEURS eu on disk), espeak's `dictsource/eu_list`, `attest.ts` against eu.wikipedia,
+        // and the 20,114-entry wikipron referee. All of it is argued in src/languages/basque/normalize.ts.
+        // ⚠ `minus` AND `degrees` ARE DELIBERATELY ABSENT, so `review.ts --lang eu` stays red on both. Each is
+        // a reading still to find rather than a measured absence: the corpus's `−` instances sit inside a
+        // worked arithmetic example (`2.000 – 1.000`) whose operation is spelled out in words either side, so
+        // a sign word would be sourceable from that sentence by someone willing to read it properly; and the
+        // bare `°` is not claimed only because `gradu` is attested here as the ANGULAR degree (`ekuatoretik
+        // latitude gradu bat`) and the bare instances are coordinates — `°C`/`°F` ARE read, from `gradu
+        // Celsius` ×7/6 on the wiki. Those are TODOs, and this table is not where TODOs go.
+        equals: "measured: `=` ×2 and neither is a comparison to read — both are LaTeX residue in one "
+            + "set-theory paragraph (`S = \\aleph`), which the artifact scan reports separately as "
+            + "MARKUP rather than as a dropped sign",
+        times: "measured: `×` ×2, and both are SCIENTIFIC NOTATION rather than multiplication — `5.97×10²⁴ "
+            + "kg` and `5,98x1024 kg`, the mass of the Earth written twice in the same article with the "
+            + "exponent flattened differently. The reading there is an exponent predicate, not `bider`; and "
+            + "`bider` is ×0 as a whole word in this corpus, its 6 raw hits all inside `eskubiderik` and "
+            + "kin (trap 37, a substring in the wrong sense)",
+        divide: "measured: `÷` is ×0 in the retained text. `zati` — the obvious candidate, and the word "
+            + "Basque does use for division — is ×9 whole-word here and every one is the NOUN \"part\" "
+            + "(`espektroaren zati garrantzitsutzat`, `lurrazalaren zati bat`). Attested, wrong sense",
+        "less-than": "measured: `<` is ×0 in the retained text",
+        "greater-than": "measured: `>` is ×0 in the retained text",
+        "plus-minus": "measured: `±` is ×0 in the retained text",
+        plus: "measured: `+` is ×0 in the retained text",
+        ampersand: "measured: `&` ×4 and every one is the `&nbsp;` ENTITY, which `core/markup.ts` decodes at "
+            + "the registry's dispatch point above this layer — so by the time any eu rule runs there is no "
+            + "ampersand left. The bare sign is ×0. Basque's conjunction `eta` is everywhere in the corpus, "
+            + "so the word is not the gap; there is nothing to read",
+    },
     lg: {
         // ⚠ LUGANDA'S HAYSTACK, so the strength of every "measured" below is legible. There is no FLEURS lg
         // and espeak does not ship the language at all, so `sources.ts` reports `[NONE]` or `[chk?]` for
