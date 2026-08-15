@@ -188,6 +188,16 @@ const MAG = "million|milion|miliyon|miliyɔn|milyɔn|miliyar|milyar";
  *    — 40 BC to 10 BC, which ASCENDS in time while descending in figures, so declining it is right;
  *  · the leading `[.,:]` exclusion keeps the rule out of a decimal's or a clock's tail.
  *
+ *  ⚠ THE TRAILING GUARD REJECTS A COMMA AND NOT A DOT, WHICH IS NOT A TYPO — it is the same asymmetry step 6
+ *  spells out one screen below ("a trailing guard excludes a following separator+digit, NOT a clause mark"),
+ *  and this rule did not have it. `(?![\d.,…])` declined every span that ENDS A CLAUSE: `1954 -1981.` and
+ *  `86–99.` — both of this corpus's clause-final spans, both at a reference's page range — came back
+ *  untouched and read as two juxtaposed cardinals with `fo` gone at exactly a sentence end (playbook trap 58,
+ *  reported by `review.ts`'s `clause-final` check). The COMMA STAYS, because Bambara writes a decimal comma
+ *  ×42 (`7,62`, `0,3`, `15,3`) and a trailing `,` can therefore open the right operand's fractional part. A
+ *  trailing DOT can too, but step 11 still reads it: `10-15.5` is claimed as `10 fo 15` and `15.5` reaches
+ *  the decimal rule whole, so the operand is not damaged. The dot has no defence left; the comma has one.
+ *
  *  ⚠ NO SPACED-SINGLE-DIGIT ARM IS NEEDED HERE, and that is measured: `\d - \d` with single digits on both
  *  sides is ×0 in this corpus, so the football-score hazard Lingala had to guard does not exist for bm.
  *
@@ -195,7 +205,7 @@ const MAG = "million|milion|miliyon|miliyɔn|milyɔn|miliyar|milyar";
  *  verb `fɔ` "to say" spelled without the accent (`Maninka-kan be fo Jine`). Digit-flanked `fo` is ×19 and
  *  every one is a genuine span with both operands bare: `san ba 2 fo 3`, `san 1712 fo ka se san 1861`,
  *  `dɔgɔkun 1 fo dɔgɔkun 8`, `10 fo 15 dɔrɔn %`, `1969 … fo 1992`, `304 K.Ɲ. fo san 232 K.Ɲ.`. */
-const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d.,\p{L}\p{M}-])/gu;
+const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d,\p{L}\p{M}-])/gu;
 
 /** THE ELISION APOSTROPHE, and it is this layer's largest class by an order of magnitude.
  *

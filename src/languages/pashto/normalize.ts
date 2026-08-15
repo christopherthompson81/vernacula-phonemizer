@@ -351,9 +351,20 @@ export function makePashtoNormalizer({ numeralWords }: PashtoNormalizerDeps) {
         //        ascending-only test rejects it for free.
         //    NON-ASCENDING is left as the bare juxtaposition it already was: a score or a birth–death pair
         //    reads with a different connective, so claiming it would be confidently wrong.
+        //
+        //    ⚠ THE TRAILING GUARD REJECTS THE TWO COMMAS AND NOT THE DOT, AND THE SPLIT IS MEASURED. All three
+        //    of this language's decimal separators are live (step 12: `.` ×6,387, `،` ×1,122, `٫` ×186), so a
+        //    trailing separator can genuinely open the right operand's fractional part — but a bare `.` is a
+        //    SENTENCE END far more often, and rejecting it declined every span that ends a clause. `166-200.`,
+        //    this corpus's one clause-final span, came back untouched and read as two juxtaposed cardinals with
+        //    `تر` gone at exactly a sentence end (playbook trap 58, reported by `review.ts`'s `clause-final`
+        //    check). Dropping the dot costs nothing even when it IS a decimal, because step 12 runs after this
+        //    one: `۹۰-۹۵.۵` is claimed as `۹۰ تر ۹۵` and `۹۵.۵` still reaches the decimal rule whole. The two
+        //    commas are kept because each is ALSO a grouping separator here (step 4) — evidence this rule reads
+        //    — and because the dot is the one character with nothing left to defend it.
         s = s.replace(
             new RegExp(
-                `(?<![${D}.,،:\\p{L}\\p{M}-])([${D}]+)\\s?[-–—]\\s?([${D}]+)(?![${D}.,،\\p{L}\\p{M}-])`,
+                `(?<![${D}.,،:\\p{L}\\p{M}-])([${D}]+)\\s?[-–—]\\s?([${D}]+)(?![${D},،\\p{L}\\p{M}-])`,
                 "gu",
             ),
             (whole: string, a: string, b: string) => {

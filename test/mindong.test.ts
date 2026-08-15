@@ -169,6 +169,20 @@ describe("Min Dong (cdo) text normalization — BUC out, never Han", () => {
         expect(say("ISO 639-3")).not.toContain("kɑu˨˩˧"); // an ALL-CAPS designation
     });
 
+    // TRAP 58 — the right-hand guard used to reject a following `.` or `,`, so the rule declined every span
+    // that ENDS A CLAUSE and the reading fell back to two juxtaposed cardinals. All three of the artifact's
+    // clause-final spans sit in one paragraph, and TWO of them end on a COMMA — which cdo can drop because
+    // its comma is a GROUPING mark only (step 1 has already spent it) and never a decimal.
+    test("a range that ENDS A CLAUSE keeps ⟨gáu⟩ — and the mark still reads as the pause", () => {
+        expect(say("2,000-3,000.")).toBe("lɑŋ˨˦˨ t͡sʰieŋ˥˥ kɑu˨˩˧ saŋ˥˥ t͡sʰieŋ˥˥ ."); // the dot
+        expect(say("200-300,")).toBe("lɑŋ˨˦˨ pɑʔ˨˦ kɑu˨˩˧ saŋ˥˥ pɑʔ˨˦ ,"); // the comma
+        expect(say("100 - 700 km.")).toContain("kɑu˨˩˧");
+        // ⚠ AND THE THREE GUARDS ABOVE STILL HOLD AT A SENTENCE END, which is the whole risk of the change:
+        expect(say("ISO 639-3.")).not.toContain("kɑu˨˩˧"); // still an ALL-CAPS designation
+        expect(say("«Sĕng-mêng Gé» 5:6-21.")).not.toContain("kɑu˨˩˧"); // still a Bible verse
+        expect(say("ISBN 3-88053-113-7.")).not.toContain("kɑu˨˩˧"); // still a chain
+    });
+
     test("the fraction is denominator-first, and a year pair is not a fraction", () => {
         expect(say("1/4")).toBe("sɛi˨˩˧ huŋ˥˥ t͡si˥˥ ɛiʔ˨˦"); // sé hŭng-cĭ ék — "of four parts, one"
         expect(say("2020/2021")).not.toContain("huŋ˥˥ t͡si˥˥"); // an academic year (the shared guard)

@@ -204,6 +204,23 @@ describe("Luganda normalization — the trap-12 guards and the shapes the corpus
         expect(normalizeLuganda("802.11m")).toBe("802.11m");
     });
 
+    // TRAP 58 — the range rule's right guard used to reject a following `.`, so it declined every span that
+    // ENDS A CLAUSE and the reading fell back to two juxtaposed cardinals with nothing between them. The
+    // corpus instance is *"…mu alipoota emu eri wakati wa 0–1."* (the World Bank HCI scale).
+    test("a range that ENDS A CLAUSE keeps its joiner, and the dot stays a sentence end", () => {
+        expect(normalizeLuganda("wakati wa 0–1.")).toBe("wakati wa 0 okutuuka ku 1.");
+        expect(normalizeLuganda("olwa 1775–1783.")).toBe("olwa 1775 okutuuka mu 1783.");
+        // the COMMA is deliberately still rejected: lg writes a decimal comma (`7,2`, `5,3`) and the comma is
+        // this rule's own grouping evidence, so a trailing `,` can open the right operand rather than close a
+        // clause. This asserts the branch we did NOT take.
+        expect(normalizeLuganda("olwa 1775–1783, era")).toBe("olwa 1775–1783, era");
+        // and the decimal range is still declined — by the LOOKBEHIND, which is untouched (step 7 then reads
+        // each operand's own decimal, exactly as it did before this change)
+        expect(normalizeLuganda("0.1–0.4 ha")).toBe("0 1–0 4 ha");
+        // a decimal RIGHT operand is now claimed, and its tail still reaches step 7 whole
+        expect(normalizeLuganda("5–13.7 ha")).toBe("5 okutuuka ku 13 7 ha");
+    });
+
     test("the year arm reads the GROUPING, which is why ranges run above de-grouping", () => {
         // an ungrouped four-digit pair is a year span — the temporal locative
         expect(normalizeLuganda("olwa 1775–1783")).toBe("olwa 1775 okutuuka mu 1783");

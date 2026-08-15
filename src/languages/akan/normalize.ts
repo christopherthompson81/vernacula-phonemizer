@@ -468,7 +468,20 @@ export function normalizeAkan(input: string): string {
     //      which fall out for free on the descending test;
     //    · a preceding `:` rejects the scripture and sports-time spans the clock rule deliberately does
     //      not claim.
-    s = s.replace(new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d.,\\p{L}\\p{M}\\-–—])`, "gu"),
+    //
+    //    ⚠ THE TRAILING GUARD REJECTS A COMMA AND NOT A DOT, AND THE TWO MARKS ARE NOT THE SAME QUESTION HERE.
+    //    Rejecting a following `.` declined every span that ENDS A CLAUSE — `1990-1995.` came back untouched
+    //    and read as two juxtaposed cardinals with `kosi` gone at exactly a sentence end (playbook trap 58,
+    //    reported by `review.ts`'s `clause-final` check, the same one-character guard as lt/mn/et/su/mos).
+    //    It costs nothing even where the dot IS a decimal, because step 9 runs after this one: `10-15.5` is
+    //    claimed as `10 kosi 15` and `15.5` still reaches the decimal rule whole. THE COMMA STAYS, because
+    //    this language writes a comma decimal too (×39 tw + 13 fat, step 9's second arm) and because a comma
+    //    is also its grouping mark — so a trailing `,` can open the right operand's own tail, which a dot at
+    //    a sentence end never does.
+    //    ⚠ THIS CORPUS GAINS NOTHING FROM IT, and that is stated rather than hidden: its one clause-final
+    //    span is `1964-1967, Belfast` — a COMMA — so the artifact diff is 0/237 and the repair is pinned as a
+    //    branch in `test/akan.test.ts` instead of counted as corpus movement.
+    s = s.replace(new RegExp(`(?<![\\d.,:\\p{L}\\p{M}\\-–—])(\\d+)\\s?[-–—]\\s?(\\d+)(?![\\d,\\p{L}\\p{M}\\-–—])`, "gu"),
         (whole: string, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${TO} ${b}` : whole));
 
     // 9) THE DECIMAL POINT, after every rule that needed to see a dot (steps 3, 4 and 7) and after every

@@ -301,14 +301,24 @@ export function normalizeLuganda(input: string): string {
     //    bibliography's DOI `doi:10.1186/1742-4690-3-72` matches at `1742-4690` — ascending, digit-dash-digit,
     //    with a slash rather than a digit in front. The trailing `-` guard also rejects it, so both halves are
     //    doing the job; the ISBN `978-0-7817-6299-1` is rejected by the leading one alone.
-    //    ⚠ A DOT ON EITHER SIDE IS EXCLUDED, so a DECIMAL range is declined (`0.1–0.4 ha`, `77.0–87.8 °F`):
-    //    admitting it means re-implementing step 7 inside this rule to keep the operands intact, and the same
-    //    limit is accepted in the sibling layers.
+    //    ⚠ A DOT IS EXCLUDED ON THE LEFT ONLY, AND THAT ASYMMETRY IS THE WHOLE OF IT. The DECIMAL range this
+    //    rule declines (`0.1–0.4 ha`, `77.0–87.8 °F`) is declined by the LOOKBEHIND — the right operand of
+    //    each begins after a dot — so the trailing `.` bought nothing there, and what it cost was every range
+    //    that ENDS A CLAUSE: `wakati wa 0–1.` came back untouched and read as two juxtaposed cardinals with
+    //    `okutuuka` gone at exactly a sentence end (playbook trap 58, reported by `review.ts`'s `clause-final`
+    //    check, and the same one-character guard as lt/mn/et/su/mos). A decimal RIGHT operand is now claimed
+    //    and its tail still reaches step 7 whole (`5–13.7 ha` → `5 okutuuka ku 13 7 ha`, the reading step 7
+    //    gives that figure anywhere else), so neither operand is damaged — which is the objection this note
+    //    used to raise. Admitting a decimal LEFT operand would still mean re-implementing step 7 inside this
+    //    rule, and that limit is unchanged.
+    //    ⚠ THE COMMA STAYS ON BOTH SIDES. It is this rule's own grouping evidence (see above) and lg writes a
+    //    decimal comma too (`7,2`, `5,3` in the artifact), so a trailing `,` can be the start of the right
+    //    operand's fractional part. The dot is the character with no defence; the comma has two.
     const GROUPED = String.raw`[1-9]\d{0,2}(?:,\d{3})+|\d+`;
     s = s.replace(
         new RegExp(
             String.raw`(?<![-+−–—/\d.,\p{L}\p{M}])(${GROUPED})[ \u00A0]?[-–—][ \u00A0]?(${GROUPED})`
-            + String.raw`(?![-+−/\d.,\p{L}\p{M}])`,
+            + String.raw`(?![-+−/\d,\p{L}\p{M}])`,
             "gu",
         ),
         (whole: string, a: string, b: string) => {

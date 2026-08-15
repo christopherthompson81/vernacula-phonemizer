@@ -144,6 +144,18 @@ describe("Akan (Twi) text normalization", () => {
         expect(normalizeAkan("ISBN 978-9988-1-2")).toBe("ISBN 978-9988-1-2");
     });
 
+    // TRAP 58 — the right guard used to reject a following `.`, so a span that ENDS A CLAUSE was declined and
+    // read as two juxtaposed cardinals with `kosi` gone. ⚠ THE ARTIFACT GAINS NOTHING FROM THIS (0/237): its
+    // one clause-final span is `1964-1967, Belfast`, a COMMA, and the comma is deliberately still rejected.
+    // The branch is therefore pinned here rather than counted as corpus movement.
+    test("a range that ENDS A CLAUSE keeps `kosi`, and the comma is still rejected", () => {
+        expect(normalizeAkan("1964-1967.")).toBe("1964 kosi 1967.");
+        // the comma stays a rejection: ak writes a comma decimal (×39 tw + 13 fat) and groups with a comma
+        expect(normalizeAkan("1964-1967, Belfast")).toBe("1964-1967, Belfast");
+        // a decimal RIGHT operand is now claimed, and step 9 still reads its tail whole
+        expect(normalizeAkan("10-15.5")).toBe("10 kosi 15 akyiri pɔ 5");
+    });
+
     test("units — the abbreviation, not a new word", () => {
         // The words are the corpus's own; one tw sentence glosses the abbreviation against the word
         // ("24 kilomita fi Damongo … 146 km wɔ Tamale").

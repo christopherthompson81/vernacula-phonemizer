@@ -145,6 +145,20 @@ describe("Bambara text normalization", () => {
         expect(normalizeBambara("ISBN 978-84-8168-394-3.")).toBe("ISBN 9 7 8 8 4 8 1 6 8 3 9 4 3.");
     });
 
+    // TRAP 58 — the right guard used to reject a following `.` as well, so a span that ENDS A CLAUSE was
+    // declined and read as two juxtaposed cardinals with no `fo` at all. Both of this corpus's clause-final
+    // spans are page ranges in a reference list.
+    test("a range that ENDS A CLAUSE keeps `fo`, and the comma is still rejected", () => {
+        expect(normalizeBambara("pp. 86–99.")).toBe("pp. 86 fo 99.");
+        expect(normalizeBambara("san 1954 -1981.")).toBe("san 1954 fo 1981.");
+        // ⚠ THE COMMA IS THE BRANCH WE DID NOT TAKE: Bambara writes a decimal comma ×42 (`7,62`), so a
+        // trailing `,` can open the right operand's fractional part rather than close a clause.
+        expect(normalizeBambara("1965-1969, ni")).toBe("1965-1969, ni");
+        // a decimal RIGHT operand is now claimed, and step 11 still reads its tail whole (it read `10-15 5`
+        // before this change, so the joiner is the only thing that moved)
+        expect(normalizeBambara("10-15.5")).toBe("10 fo 15 5");
+    });
+
     test("the elision apostrophe: C'V glues, V'C does not", () => {
         expect(normalizeBambara("k'a ta san 1914")).toBe("ka ta san 1914");
         expect(normalizeBambara("i n’a fɔ")).toBe("i na fɔ"); // the curly apostrophe too

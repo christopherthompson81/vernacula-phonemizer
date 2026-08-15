@@ -336,8 +336,18 @@ export function normalizeMinDong(input: string): string {
     // (`3-88053-113-7`). The single residual false positive is `ISO 639-3`, so the ONE extra guard is an
     // ALL-CAPS acronym immediately before the number — narrow, one instance, and nothing in BUC ends in a
     // capital, so it cannot bite a real range.
+    // ⚠ THE RIGHT-HAND GUARD REJECTS NEITHER `.` NOR `,`, AND ITS LEFT-HAND TWIN STILL REJECTS BOTH. The
+    // symmetric form declined every range that ENDS A CLAUSE (playbook trap 58, reported by `review.ts`'s
+    // `clause-final` check): `1990-1995.` came back untouched and read as two juxtaposed cardinals with the
+    // connective gone at exactly a sentence end. All three of this corpus's clause-final spans are in one
+    // paragraph — `200-300,` and `300-800,` (a COMMA, mid-sentence) and `2,000-3,000.` — so the comma had to
+    // go with the dot, and in cdo it can: **the comma is a GROUPING separator here and never a decimal**
+    // (`\d,\d{1,2}` is ×0 in the artifact against ×34 three-digit groups), step 1 has already de-grouped
+    // every one of them, and step 7 has already spent every decimal point. What remains beside a digit at
+    // this step is punctuation. The LEFT guard keeps both, because a match must still not BEGIN inside a
+    // number, and `:` / `/` / the dash chain — the Bible-verse, DOI and ISBN rejections above — are untouched.
     s = s.replace(
-        /(?<![\d.,:/\-–—])(\d+)\s*[-–—~～〜]\s*(\d+)(?![\d.,:/\-–—])/gu,
+        /(?<![\d.,:/\-–—])(\d+)\s*[-–—~～〜]\s*(\d+)(?![\d:/\-–—])/gu,
         (m, a: string, b: string, off: number, full: string) =>
             /(?:^|[^\p{L}\p{M}])[A-Z]{2,}[\s.]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a} gáu ${b}`,
     );

@@ -183,6 +183,18 @@ describe("pashto text normalization", () => {
         expect(normalizePashto("۷:۰۰")).toBe("۷ بجې"); // …and no "and zero minutes"
     });
 
+    // TRAP 58 — the right guard used to reject a following `.`, so a span that ENDS A CLAUSE was declined and
+    // read as two juxtaposed cardinals with `تر` gone. `166-200.` is this corpus's instance, a page range.
+    test("a range that ENDS A CLAUSE keeps `تر`, and the two commas are still rejected", () => {
+        expect(normalizePashto("166-200.")).toBe("166 تر 200.");
+        expect(normalizePashto("۱۹۶۵-۱۹۷۵.")).toBe("۱۹۶۵ تر ۱۹۷۵.");
+        // ⚠ THE BRANCH WE DID NOT TAKE: `،` and `,` are BOTH grouping marks here (×1,517 / ×1,959) and both
+        // are decimal separators at step 12, so a trailing comma can still be the right operand's own tail.
+        expect(normalizePashto("۱۹۶۵-۱۹۷۵، او")).toBe("۱۹۶۵-۱۹۷۵، او");
+        // a decimal RIGHT operand written with the DOT is now claimed, and step 12 still reads it whole
+        expect(normalizePashto("۹۰-۹۵.۵")).toBe("۹۰ تر ۹۵ اعشاريه ۵");
+    });
+
     test("units, degrees, currency, minus and fractions", () => {
         expect(normalizePashto("۵ km")).toBe("۵ کیلومتره"); // was the raw cluster [ˈʊkm]
         expect(normalizePashto("۲۴ °C")).toBe("۲۴ سانتيګراد");
