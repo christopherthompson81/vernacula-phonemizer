@@ -161,8 +161,16 @@ const BRACKET = /[(（《「『][^()（）《》「」『』]*[)）》」』]/gu
  * (`Cingciuz(清朝,1644-1911)`), issue and month spans (`daih 7-11 geiz, 2008 nienz 7-11 nyied`), an
  * elevation band (`haijbaz 1000-1500 m`) and a population span (`15-21 ik bouxyungjhu`). Every one is
  * ascending and every one is a genuine range.
+ *
+ * ⚠ THE TRAILING SEPARATOR TEST IS `[.,]\d`, NOT A BARE `[.,]`, and the difference is a whole defect class.
+ * A dot or comma with NO digit after it is not part of a number — it is the END OF THE CLAUSE — and the
+ * bare form declined every span that ends a sentence: the reference lists' `p. 137-157,` and `pp443-446.`
+ * and `pp. 8-16.` came back untouched and read as two juxtaposed cardinals with no connective at all
+ * (playbook trap 58, reported by `review.ts`'s `clause-final` check). What the exclusion exists for is a
+ * CONTINUATION of the number, which is exactly what a following digit tests: a decimal `1000-1500.5` and a
+ * grouped `1-1,000` are still refused, and so is the DOI `10.1080/…` that follows one of those spans.
  */
-const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d.,\p{L}\p{M}-])/gu;
+const RANGE = /(?<![\d.,:\p{L}\p{M}-])(\d+)\s?[-–—]\s?(\d+)(?![\d\p{L}\p{M}-]|[.,]\d)/gu;
 
 /**
  * ⚠ THE DASH ALSO FOLLOWS A DATE NOUN, AND THAT IS THE COMMONER SHAPE — trap 15's lesson generalised from

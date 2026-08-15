@@ -476,10 +476,17 @@ export function normalizeKirundi(input: string): string {
     //    all 14 dash spans are years or reigns, all 5 slash spans are measurements — so the frame needs BOTH
     //    a dash and two four-digit operands. Anything else takes the bare infix, which also keeps a future
     //    `35-40 cm` out of the year idiom without widening a guard for a shape rn has ×0 of (trap 9).
+    //    ⚠ THE SUPPRESSION LOOK-BACK MUST END IN OPTIONAL SPACE, and the clause-final repair below is what
+    //    exposed that it did not. `\S{0,10}$` can only reach the figure when `kuva` is IMMEDIATELY before it,
+    //    because an intervening word leaves a SPACE at the end of the slice that `\S` cannot absorb — so
+    //    `kuva muri 2010 – 2012` emitted the joiner's own `kuva` on top of the text's, *kuva muri **kuva**
+    //    2010 gushika 2012*, doubling a word the text already wrote (trap 12). That shape is one of the three
+    //    this suppression was written for and it never fired, because the general arm's old right guard
+    //    declined the span for its sentence period before the suppression was ever reached.
     const isYear = (a: string, b: string): boolean => /^\d{4}$/u.test(a) && /^\d{4}$/u.test(b);
     const join = (a: string, b: string, full: string, off: number, dash: boolean): string =>
         dash && isYear(a, b)
-            ? `${/(?:kuva|guhera)\s\S{0,10}$/iu.test(full.slice(Math.max(0, off - 14), off)) ? "" : `${FROM} `}${a} ${UNTIL} ${b}`
+            ? `${/(?:kuva|guhera)\s\S{0,10}\s*$/iu.test(full.slice(Math.max(0, off - 14), off)) ? "" : `${FROM} `}${a} ${UNTIL} ${b}`
             : `${a} ${UNTIL_AT} ${b}`;
 
     //    5a) A SPAN OF DEGREES, CLAIMED FIRST — `27/28 ° C`, `30/31 ° C`, `dogere 22/25`. ⚠ THIS ARM EXISTS
@@ -524,7 +531,17 @@ export function normalizeKirundi(input: string): string {
     //    measurement span at all, so rw's first arm has zero instances and writing it would be trap 9.
     //    ⚠ THE GUARD EXCLUDES A HYPHEN ON EITHER SIDE, which declines a hyphen CHAIN, and a trailing letter,
     //    which is what keeps a designation like `COVID-19` and the French `Kindergaten –2ème année` out.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d.,\p{L}\p{M}])/gu,
+    //    ⚠ AND ITS TRAILING SEPARATOR TEST IS `[.,]\d`, NOT A BARE `[.,]` — CHECKED AGAINST rn's OWN CORPUS
+    //    rather than inherited from rw, because this file diverges from its sibling deliberately (trap 55).
+    //    A separator with no digit after it is not a decimal here either; it is the end of the clause, and
+    //    the bare class declined all three of rn's clause-final spans — `Tübingen 1997–2005.`, `kuva 2005 –
+    //    2007.` and `kuva muri 2010 – 2012.` — which read as two juxtaposed cardinals with no joiner at the
+    //    exact position a sentence ends (playbook trap 58, `review.ts`'s `clause-final` check). All three are
+    //    four-digit year pairs, so they take the `kuva A gushika B` frame, and two of them supply their own
+    //    `kuva` for the suppression above to find.
+    //    ⚠ THE SEPARATOR-PLUS-DIGIT HALF STAYS because rn writes BOTH separators inside a figure
+    //    (`metero 1.500 / 1.800`, `mm 1,200 / 1,400 mm`): a right operand that continues is still refused.
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b) ? join(a, b, full, off, true) : whole);
 

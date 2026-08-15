@@ -489,7 +489,14 @@ export function normalizeSepedi(input: string): string {
     //    1969*, a navigation list read as five descending spans. Found by reading the corpus diff, which is
     //    the only instrument that could have seen it — the shape passes every unit probe.
     //    AFTER step 2, so a grouped endpoint (`33,500–32,500`) is already one run of digits.
-    s = s.replace(/(?<![-–—\d.,\p{L}\p{M}])(?<![-–—][  ])(\d+)[  ]?[-–—][  ]?(\d+)(?![-–—\d.,\p{L}\p{M}])(?![  ][-–—])/gu,
+    //    ⚠ THE RIGHT GUARD TESTS `[.,]\d`, NOT A BARE `[.,]`, and that one character was a defect: a
+    //    separator with no digit after it is not a decimal, it is the END OF THE CLAUSE. `nakong ya
+    //    1901–2012.`, `magareng ga 1950–2020,` and `ea 2020-2100.` were all declined for their sentence
+    //    punctuation and read as two juxtaposed cardinals with no connective between them — the span joiner
+    //    silent at exactly a sentence end (playbook trap 58, reported by `review.ts`'s `clause-final` check).
+    //    What the separator exclusion is for is a CONTINUATION of the number into step 9's decimal, and a
+    //    following digit is what tests that: `9.84-9.90` is still declined and so is a grouped `1-1,000`.
+    s = s.replace(/(?<![-–—\d.,\p{L}\p{M}])(?<![-–—][  ])(\d+)[  ]?[-–—][  ]?(\d+)(?![-–—\d\p{L}\p{M}]|[.,]\d)(?![  ][-–—])/gu,
         (whole: string, a: string, b: string) =>
             Math.abs(a.length - b.length) >= 2 ? whole : `${a} ${UNTIL} ${b}`);
 

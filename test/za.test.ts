@@ -97,6 +97,21 @@ describe("za normalization — text→text", () => {
         expect(n("ISBN 3-7637-5988-3")).toBe("ISBN 3-7637-5988-3");
     });
 
+    // ⚠ A SPAN THAT ENDS THE CLAUSE IS STILL A SPAN (playbook trap 58). The right guard rejected a bare
+    // `.` or `,` — a sentence end far more often than a number's interior — so the reference lists' page and
+    // year spans were declined whole and read as two juxtaposed cardinals with no `daengz` between them.
+    // The branch is pinned, not the corpus instance (trap 13).
+    test("a clause-final span keeps its joiner AND its pause", () => {
+        expect(n("p. 137-157, DOI")).toBe("p. 137 daengz 157, DOI");
+        expect(n("Vol. 5, No. 2, pp. 8-16.")).toBe("Vol. 5, No. 2, pp. 8 daengz 16.");
+        expect(n("Panzer 1926–1945.")).toBe("Panzer 1926 daengz 1945.");
+        // and the decimal half of the guard survives — a separator WITH a digit still declines
+        expect(n("1000-1500.5")).toBe("1000-1500 5");
+        // the letter guards are untouched: a glued `pp443-446.` and an ISBN chain both stay declined
+        expect(n("pp443-446.")).toBe("pp443-446.");
+        expect(n("ISBN 3-7637-5988-3.")).toBe("ISBN 3-7637-5988-3.");
+    });
+
     test("era markers — preposed `gunghyenz gonq`, spanned, and without eating a sentence period", () => {
         expect(n("259BC-210BC")).toBe("gunghyenz gonq 259 daengz gunghyenz gonq 210");
         expect(n("273 BC daengz 232BC")).toBe("gunghyenz gonq 273 daengz gunghyenz gonq 232");

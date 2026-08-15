@@ -140,6 +140,21 @@ describe("Kikuyu text normalization", () => {
         expect(normalizeKikuyu("kilo 30.9-72")).toBe("kilo 30 9-72");
     });
 
+    // ⚠ A SPAN THAT ENDS THE CLAUSE IS STILL A SPAN (playbook trap 58). The right guard rejected a bare
+    // `.` or `,`, which is a sentence end far more often than a number's interior, so `p 237–240.` came back
+    // untouched and read as two juxtaposed cardinals with no joiner at exactly the position a sentence ends.
+    // The test is on the BRANCH, not on the corpus instance (trap 13): the separator must be followed by a
+    // DIGIT to count as a continuation of the number.
+    test("a clause-final span keeps its joiner AND its pause", () => {
+        expect(normalizeKikuyu("p 237–240.")).toBe("p 237 nginya 240.");
+        expect(normalizeKikuyu("mwaka wa 1991- 2009.")).toBe("mwaka wa 1991 nginya 2009.");
+        expect(normalizeKikuyu("mwaka wa 1991-2009, na")).toBe("mwaka wa 1991 nginya 2009, na");
+        // and the decimal half of the guard is untouched — a separator WITH a digit still declines
+        expect(normalizeKikuyu("kilo 20-43.5")).toBe("kilo 20-43 5");
+        // the chess arm is unaffected: it lives in the LEFT guard
+        expect(normalizeKikuyu("(+2 -5 =2).")).toBe("(+2 -5 =2).");
+    });
+
     test("percent is `harĩ igana`, composed from the engine's own hundred word and attested in the slot", () => {
         expect(normalizeKikuyu("gĩcunjĩ kĩa 33% kĩa thĩ")).toBe("gĩcunjĩ kĩa 33 harĩ igana kĩa thĩ");
         // the corpus's own frame, with the decimal tail carried into the operand and spelled out after

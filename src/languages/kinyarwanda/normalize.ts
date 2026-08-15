@@ -532,7 +532,16 @@ export function normalizeKinyarwanda(input: string): string {
         },
     );
     //    SECOND ARM: the bare span.
-    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d.,\p{L}\p{M}])/gu,
+    //    ⚠ ITS RIGHT GUARD TESTS `[.,]\d` RATHER THAN A BARE `[.,]`, because a separator with no digit after
+    //    it is not a decimal — it is the END OF THE CLAUSE. The bare class declined every clause-final span:
+    //    `Crises 1900 – 1994,`, `hagati yimyaka 15-24.`, `Muri 2009-2010,` and `mu gihe cya 2021 - 2025.`
+    //    all came back untouched and read as two juxtaposed cardinals with nothing between them, the joiner
+    //    silent at exactly a sentence end (playbook trap 58, `review.ts`'s `clause-final` check).
+    //    ⚠ THE DECIMAL COMMA IS STILL DEFENDED, and in this corpus that matters — Kinyarwanda writes the
+    //    decimal with a comma (`2,2 kugeza kuri 2.8 ° C`, `santimetero 1,5`, `450,1hab/km2`), so a right
+    //    operand continuing into `,5` must still be refused. Requiring a DIGIT after the separator refuses it
+    //    for the reason it was ever refused — the number continues — while a clause comma no longer counts.
+    s = s.replace(/(?<![-\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} kugeza kuri ${b}` : whole));
 
     // 8) THE SHARED SYMBOL TIER — percent, currency, units, rate, exponent, ampersand. See SYMBOLS above.

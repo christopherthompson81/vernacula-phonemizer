@@ -213,6 +213,20 @@ describe("Guaraní text normalization", () => {
         expect(normalizeGuarani("1864–1870")).toBe("1864 guive 1870 peve"); // en dash too
     });
 
+    // ⚠ A SPAN THAT ENDS THE CLAUSE IS STILL A SPAN (playbook trap 58) — A BRANCH REPAIR WITH NO CORPUS
+    // INSTANCE, and said so rather than counted as a win (trap 22). The right guard rejected a bare `.` or
+    // `,`, which is a clause end far more often than a number's interior; this corpus has no clause-final
+    // FOUR-DIGIT pair, so the corpus diff is 0 and the branch is pinned here instead.
+    test("a clause-final year span keeps its joiner AND its pause", () => {
+        expect(normalizeGuarani("1816-1828.")).toBe("1816 guive 1828 peve.");
+        expect(normalizeGuarani("1932-1935, oiko")).toBe("1932 guive 1935 peve, oiko");
+        // the separator-plus-digit half is what still refuses `12-14.000`, and the cap still refuses the
+        // Spanish page range and the ISBN tail even when the sentence ends on them
+        expect(normalizeGuarani("12-14.000 ary")).toBe("12-14000 ary");
+        expect(normalizeGuarani("20: 169-180.")).toBe("20: 169-180.");
+        expect(normalizeGuarani("ISBN: 99925-68-04-06.")).toBe("ISBN: 99925-68-04-06.");
+    });
+
     // ⚠ THE MEASURED REFUSALS. Of 28 hyphen-joined digit pairs in the retained text only 9 are spans; the
     // four-digit cap and the hyphen-chain guard refuse the other 19 — ISBNs, telephone numbers, Spanish
     // page ranges and a two-date lifespan. 9 fixed, 0 broken.

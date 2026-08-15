@@ -135,6 +135,23 @@ describe("Kirundi text normalization", () => {
         expect(normalizeKirundi("2009-2005")).toBe("2009-2005"); // descending: declined
     });
 
+    // ⚠ A SPAN THAT ENDS THE CLAUSE IS STILL A SPAN (playbook trap 58), and this was checked against rn's
+    // own corpus rather than inherited from rw, which this layer diverges from deliberately (trap 55). The
+    // right guard rejected a bare `.` or `,` — a sentence end far more often than a number's interior — so
+    // all three of rn's clause-final year spans read as two juxtaposed cardinals with no `gushika`.
+    // ⚠ AND THE SUPPRESSION LOOK-BACK IS PINNED WITH THEM: `kuva muri 2010 – 2012` must not double the
+    // `kuva` the text already wrote, which the old look-back could not see across the intervening word.
+    test("a clause-final span keeps its joiner, its pause, and does not double `kuva`", () => {
+        expect(normalizeKirundi("Tübingen 1997–2005.")).toBe("Tübingen kuva 1997 gushika 2005.");
+        expect(normalizeKirundi("kuva 2005 – 2007.")).toBe("kuva 2005 gushika 2007.");
+        expect(normalizeKirundi("Mugihe co kuva muri 2010 – 2012.")).toBe("Mugihe co kuva muri 2010 gushika 2012.");
+        expect(normalizeKirundi("Kuva muri 2007 – 2008 yariko")).toBe("Kuva muri 2007 gushika 2008 yariko");
+        // a span with no `kuva` in front still gets the frame's own
+        expect(normalizeKirundi("Ivyo 1996—2003)")).toBe("Ivyo kuva 1996 gushika 2003)");
+        // and a designation that ends a sentence is still not a span
+        expect(normalizeKirundi("COVID-19.")).toBe("COVID-19.");
+    });
+
     test("a TEMPERATURE span takes `na`, not the gushika frame", () => {
         // `hagati ya 17°C na 29°C` (corpus) and `dogere selisiyusi 20 na 25` (wiki) — one noun, `na` between
         expect(normalizeKirundi("27/28 ° C")).toBe("dogere 27 na 28");

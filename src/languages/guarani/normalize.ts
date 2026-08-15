@@ -357,7 +357,16 @@ export function normalizeGuarani(input: string): string {
     // 9 fixed, 0 broken. ⚠ The edge guard rejects an adjacent HYPHEN as well as an adjacent digit, so a
     // hyphen CHAIN is an identifier and never a span; and it is on both edges of the whole match, not one
     // edge of the separator (trap 52).
-    s = s.replace(/(?<![\d.,–—-])(\d{4})\s?[-–—]\s?(\d{4})(?![\d.,–—-])/gu, "$1 guive $2 peve");
+    // ⚠ THE TRAILING SEPARATOR TEST IS `[.,]\d`, NOT A BARE `[.,]`, and this half is a BRANCH REPAIR WITH NO
+    // CORPUS INSTANCE — said so rather than counted as a win (trap 22). A dot or comma with no digit after it
+    // is a clause end, not a number's interior, so the bare class refused every span that ends a sentence
+    // (playbook trap 58, the class `review.ts`'s `clause-final` check reports). This corpus has no
+    // clause-final FOUR-DIGIT pair — its three clause-final `N-N` shapes are the Spanish page ranges
+    // `109-115.` / `169-180.` and the ISBN tail `…-04-06.`, which the four-digit cap refuses on its own
+    // grounds and still refuses — so the corpus diff is 0 and the branch is pinned as a test instead.
+    // The `[.,]\d` half is what keeps `12-14.000` refused, which is the one shape here that needs it: the
+    // decimal comma of step 9 is native to Guaraní and a right operand continuing into one is not a span.
+    s = s.replace(/(?<![\d.,–—-])(\d{4})\s?[-–—]\s?(\d{4})(?![\d–—-]|[.,]\d)/gu, "$1 guive $2 peve");
 
     // ── 11. THE CLOCK — ON THE HOUR ONLY, and the narrowness is the measurement ─────────────────────────
     // ⚠ THE CELL COUNT IS A TRAP AND THIS IS TRAP 55'S `ilo` CASE. The `clock` cell reports ×158

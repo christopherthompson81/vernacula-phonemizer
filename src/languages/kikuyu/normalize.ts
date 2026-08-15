@@ -270,8 +270,14 @@ export function normalizeKikuyu(input: string): string {
     //    ⚠ A DOT OR COMMA ON EITHER SIDE IS EXCLUDED, so a DECIMAL range is declined: `30.9-72` and
     //    `20.5-43` keep reading as two juxtaposed quantities. Admitting them means re-implementing step 9
     //    inside this rule to keep the operands intact, and the same limit is accepted in the sibling layers.
+    //    ⚠ BUT ON THE RIGHT THAT MUST BE `[.,]\d` AND NOT A BARE `[.,]`, because a separator with NO digit
+    //    after it is not a decimal — it is the END OF THE CLAUSE. `p 237–240.` and `mwaka wa 1991- 2009.`
+    //    were declined for their sentence period and read as two juxtaposed cardinals with nothing between
+    //    them, the span joiner silent at exactly a sentence end (playbook trap 58, reported by `review.ts`'s
+    //    `clause-final` check). What the decimal exclusion needs is a CONTINUATION of the number, which is
+    //    what a following digit tests; `30.9-72.5` is still declined and so is a grouped `1-1,000`.
     //    ⚠ AND A TRAILING LETTER IS EXCLUDED, which is what leaves `1960/1961` and `13-14million` alone.
-    s = s.replace(/(?<![-+−–—\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-+−\d.,\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![-+−–—\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-+−\d\p{L}\p{M}]|[.,]\d)/gu,
         (whole, a: string, b: string) => (Number(a) < Number(b) ? `${a} ${RANGE} ${b}` : whole));
 
     // 6) PERCENT → `N harĩ igana`, the one POSTPOSED reading in this layer (see the declaration for the two

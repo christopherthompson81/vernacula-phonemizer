@@ -209,6 +209,22 @@ describe("Kinyarwanda text normalization", () => {
         expect(N("Kuva 2006-Ukwakira")).toBe("Kuva 2006-Ukwakira");
     });
 
+    // ⚠ A SPAN THAT ENDS THE CLAUSE IS STILL A SPAN (playbook trap 58). The right guard rejected a bare
+    // `.` or `,`, which is a sentence end far more often than a number's interior, so `imyaka 15-24.` and
+    // `Muri 2009-2010,` were declined whole and read as two juxtaposed cardinals with no joiner. The branch
+    // is pinned rather than the corpus instance (trap 13), and the DECIMAL COMMA — which Kinyarwanda writes
+    // — is still what declines a continuing right operand, because the guard now requires a digit after it.
+    test("a clause-final span keeps its joiner AND its pause", () => {
+        expect(N("hagati yimyaka 15-24.")).toBe("hagati yimyaka 15 kugeza kuri 24.");
+        expect(N("Muri 2009-2010,")).toBe("Muri 2009 kugeza kuri 2010,");
+        expect(N("Crises 1900 – 1994,")).toBe("Crises 1900 kugeza kuri 1994,");
+        expect(N("1250-1750mm.")).toBe("milimetero 1250 kugeza kuri 1750."); // the unit arm too
+        // the decimal comma still declines the pair, exactly as before
+        expect(N("2,2-2,8")).toBe("2 2-2 8");
+        // and a hyphen chain that ends a sentence is still not a span
+        expect(N("NPK(17-17-17).")).toBe("NPK(17-17-17).");
+    });
+
     test("times — the marker identifies a clock; three fields are a duration unless a zone says otherwise", () => {
         expect(N("saa 10:00 za mbere")).toBe("saa 10 za mbere");
         expect(N("saa 3:15")).toBe("saa 3 na iminota 15");

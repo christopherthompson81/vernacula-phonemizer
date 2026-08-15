@@ -138,6 +138,21 @@ describe("Sepedi text normalization", () => {
         expect(normalizeSepedi("1970 - 1969 - 1968")).toBe("1970 - 1969 - 1968");
     });
 
+    // ⚠ A SPAN THAT ENDS THE CLAUSE IS STILL A SPAN (playbook trap 58). The right guard rejected a bare
+    // `.` or `,`, which is a sentence end far more often than a number's interior, so `nakong ya 1901–2012.`
+    // was declined whole and read as two juxtaposed cardinals with no connective between them. The branch is
+    // pinned, not the corpus instance (trap 13): the separator must carry a DIGIT to count as a number.
+    test("a clause-final span keeps its joiner AND its pause", () => {
+        expect(normalizeSepedi("nakong ya 1901–2012.")).toBe("nakong ya 1901 go ya go 2012.");
+        expect(normalizeSepedi("magareng ga 1950–2020,")).toBe("magareng ga 1950 go ya go 2020,");
+        expect(normalizeSepedi("mengwaga ye 25–34.")).toBe("mengwaga ye 25 go ya go 34.");
+        // and the decimal half of the guard survives — a separator WITH a digit is still a number
+        expect(normalizeSepedi("9.84-9.90")).toBe("9 8 4-9 9 0");
+        // every measured decline still declines when the clause ends on it
+        expect(normalizeSepedi("ISO 3166-1.")).toBe("ISO 3166-1.");
+        expect(normalizeSepedi("1970 - 1969 - 1968.")).toBe("1970 - 1969 - 1968.");
+    });
+
     test("separators — both characters carry both roles, and only the BLOCK LENGTH tells them apart", () => {
         expect(normalizeSepedi("1,600,000")).toBe("1600000");
         expect(normalizeSepedi("216.061 badudi")).toBe("216061 badudi");
