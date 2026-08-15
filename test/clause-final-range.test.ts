@@ -13,9 +13,12 @@
  * (`(?![,\d…])`) also refuses the ordinary clause mark that follows a range at the end of a sentence. The
  * rule is then correct about every range that happens not to end a clause, which is why it survives review.
  *
- * THE FIX is always the same shape and is worth stating once: reject a DIGIT, never a bare mark — `[.,]\d`
- * instead of `[.,]` in the lookahead. That keeps `1990-1995,5` and `2020-05-17` out and lets `1990-1995.`
- * and `137–151,` through. ELEVEN languages were repaired this way in one pass — ht, ln, st, tn, wo, ak, bm, et,
+ * THE FIX is always the same shape and is worth stating once: reject a DIGIT, never a bare mark — `,\d`
+ * instead of `,` in the lookahead. That keeps `1990-1995,5` and `2020-05-17` out and lets `137–151,` through.
+ * ⚠ THE COMMA IS THE ONLY CHARACTER ANY OF THEM GOT WRONG. Four of the eleven (ak, bm, et, pbt) deliberately
+ * ADMIT a dot-decimal after a range and have passing tests pinning it, so writing `[.,]\d` everywhere — the
+ * first cut of this sweep — changed behaviour those layers had chosen. Per-layer, the edit is: take the bare
+ * `,` out of the reject class, put `,\d` in the alternation, and touch nothing else. ELEVEN languages were repaired this way in one pass — ht, ln, st, tn, wo, ak, bm, et,
  * mad, pbt, yue — after their regexes turned out to carry the identical trailing class, which is the argument
  * for fixing the class rather than the language: the same six characters were wrong in eleven files.
  *
@@ -82,7 +85,20 @@ describe("a trailing clause mark never costs a language its range reading", () =
                     continue; // the engine has no path for a bare figure pair; nothing to compare
                 }
                 for (const mark of MARKS) {
-                    const lost = lostTokens(bare, phonemize(probe + mark, code).trim());
+                    /**
+                     * ⚠ THE MARKED PROBE NEEDS ITS OWN GUARD. Only the bare call was wrapped, so a language
+                     * that resolves `1990-1995` and throws on `1990-1995.` would abort the whole fleet test
+                     * with an exception instead of appearing as one entry — the opposite of a countable
+                     * backlog, and it would take every language after it down with it.
+                     */
+                    let marked: string;
+                    try {
+                        marked = phonemize(probe + mark, code).trim();
+                    } catch (e) {
+                        broken.push(`${code} ${probe}${mark} THREW: ${String(e).slice(0, 60)}`);
+                        continue;
+                    }
+                    const lost = lostTokens(bare, marked);
                     if (lost.length > 0) broken.push(`${code} ${probe}${mark} lost: ${lost.join(" ")}`);
                 }
             }
@@ -109,8 +125,13 @@ describe("a trailing clause mark never costs a language its range reading", () =
                 } catch {
                     continue;
                 }
-                for (const mark of MARKS)
-                    if (lostTokens(bare, phonemize(probe + mark, code).trim()).length > 0) fails = true;
+                for (const mark of MARKS) {
+                    try {
+                        if (lostTokens(bare, phonemize(probe + mark, code).trim()).length > 0) fails = true;
+                    } catch {
+                        fails = true; // a throw is a failure too, and keeps the entry honestly allowlisted
+                    }
+                }
             }
             if (!fails) stale.push(`${code} (now passes — delete it from NOT_YET_REPAIRED)`);
         }

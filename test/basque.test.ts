@@ -207,5 +207,8 @@ describe("Basque — the six the review found", () => {
         expect(eu.text("ugaria –700 inguru– mota").trim()).not.toContain("minus̺");
         // the case-ending hyphen must never be touched — the file's central claim
         expect(eu.text("995-ko").trim()).not.toContain("minus̺");
+        // ⚠ THE LABEL-VALUE DASH, which is SPACED. Every genuine negative in this corpus is written tight,
+        // and guarding on the left operand's class instead would have refused `-89.2 ° C` as well.
+        expect(eu.text("Bilbo - 400.000 biztanle").trim()).not.toContain("minus̺");
     });
 });

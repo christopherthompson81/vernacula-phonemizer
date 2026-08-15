@@ -315,7 +315,14 @@ export function normalizeBasque(input: string): string {
     //    became *21. minus 29.*. Both are readings, not drops, so nothing downstream would have shown them.
     //    ASCII `-` and U+2212 `−` are what the three real negatives in this corpus are written with, and the
     //    en dash is this corpus's range-and-parenthesis mark — so the character itself does the separating.
-    s = s.replace(/(?<![\d.]\s{0,3})(?<![\p{L}\p{M}.,])[−-](?=\s?\d)/gu, "minus ");
+    //    ⚠ NO SPACE BETWEEN THE SIGN AND THE FIGURE, and that is the discriminator review found was missing.
+    //    Guarding only on what is to the LEFT let the label-value dash through — `Bilbo - 400.000 biztanle`
+    //    and `Altuera - 1.234 metro`, the dash-separated shape wiki list prose is full of, have a LETTER to
+    //    the left and became *Bilbo minus 400000*. Widening the left lookbehind to letters (the obvious fix)
+    //    would have refused `baxuena -89.2 ° C` too, which is the very case this rule exists for.
+    //    What actually separates them is the writer's own spacing: all four genuine negatives in this corpus
+    //    are written TIGHT (`-89.2`, `−94,7`, `(-66`, `-2,8`), and every dash used as punctuation is spaced.
+    s = s.replace(/(?<![\d.]\s{0,3})(?<![\p{L}\p{M}.,])[−-](?=\d)/gu, "minus ");
 
     // 5) THE CASE ENDING GLUED TO A FIGURE — the largest class in this corpus at ×296, and the one that
     //    produced a stranded consonant cluster: `1980an` read *mila bederatziehun eta laurogei AN*, with the

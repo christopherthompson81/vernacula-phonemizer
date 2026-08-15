@@ -220,7 +220,12 @@ const ABBREVIATION_RE = new RegExp(
         .sort((a, b) => b.length - a.length)
         .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
         .join("|")})`,
-    "giu",
+    // ⚠ CASE-SENSITIVE, and the `i` flag was a collision waiting to happen. `T.I. Ivanovs` is a personal
+    // INITIAL PAIR — lv.wikipedia writes them — and case-insensitively it matched `t.i.`, so a surname was
+    // introduced by *tas ir*. Latvian writes all of these lower case in running text, so the flag bought
+    // nothing but the collision. The cost is a sentence-initial `Piem.`/`Plkst.`, which is left unexpanded
+    // and therefore VISIBLE to the RAW-LATIN gate rather than silently misread.
+    "gu",
 );
 
 /**
@@ -246,7 +251,28 @@ function abbreviations(text: string): string {
          * the shared currency arm's (test/core-currency-fusion.test.ts) and the same fix: separate.
          */
         .replace(/(?<![\p{L}\p{M}.])nr\.(\s*)(?=\d)/giu, (_w, gap: string) => `${NUMBER_ABBREV}${gap || " "}`)
-        .replace(ABBREVIATION_RE, (m: string) => ABBREVIATION[m.toLowerCase()] ?? m);
+        .replace(ABBREVIATION_RE, (m: string, offset: number, full: string) => {
+            const word = ABBREVIATION[m];
+            if (word === undefined) return m;
+            /**
+             * ⚠ THE ABBREVIATION'S FINAL PERIOD IS ALSO A SENTENCE'S, and swallowing it is the MIRROR of the
+             * defect this step exists to fix. Latvian does not double the dot, so `u.c.`, `utt.` and `p.m.ē.`
+             * at the end of a sentence — the commonest position for all three — lost the boundary outright
+             * and ran two sentences together: `Tas ir dārgi u.c. Nākamais teikums.` came out with no pause at
+             * all. Trading spurious breaks for a swallowed real one is not a repair.
+             *
+             * The discriminator is `ordinalPeriod`'s, three steps down, and is reused rather than reinvented:
+             * whitespace plus an UPPER-CASE letter is a sentence boundary, because a Latvian sentence does
+             * not continue in lower case. End of input counts too.
+             *
+             * ⚠ IT COSTS A FALSE PAUSE BEFORE A MID-SENTENCE PROPER NOUN (`p.m.ē. Latvijā …`), and that is the
+             * side to err on: a spurious pause is audible and recoverable, two sentences welded together are
+             * neither, and every clause after them inherits the wrong prosody.
+             */
+            const rest = full.slice(offset + m.length);
+            const endsSentence = rest === "" || /^\s+\p{Lu}/u.test(rest);
+            return m.endsWith(".") && endsSentence ? `${word}.` : word;
+        });
 }
 
 /**
@@ -370,8 +396,13 @@ function ordinalPeriod(text: string): string {
  * happens not to end a clause, which is exactly how this trap presents: `no 1990-1995. gadam` came out with
  * the hyphen raw and no `līdz` at all. Found by a fleet sweep, not by this language's own gate, which treats
  * the range probes as ungated.
+ *
+ * ⚠ A BARE TRAILING HYPHEN IS STILL REFUSED, which the first rewrite dropped: `-\d` let `1990-1995-` through
+ * as a range while the comment above still claimed a hyphen on either flank was excluded. Refusing the
+ * character rather than the character-plus-digit costs nothing — a range is never followed by a hyphen — and
+ * makes the guard match what is written about it.
  */
-const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d|[,.]\d|-\d)/gu;
+const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d|[,.]\d|-)/gu;
 
 /**
  * 7. DEGREES. `°C` and `°F` take the scale name; a bare `°` after a figure is `grādi`.

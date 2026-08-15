@@ -362,8 +362,11 @@ export function normalizeWolof(input: string): string {
     //    It framed the choice as reject-every-comma versus accept-every-comma, and took the first because
     //    Wolof writes the DECIMAL COMMA (`43,3 %`, `2,8 milyoŋ`, `9,10`, `5,5` — see the header's separator
     //    census) — paying 3 segments, all clause commas after a year span, to keep `N-N,N` out. But a comma
-    //    only makes a decimal when a DIGIT follows it: `[.,]\d` in the lookahead refuses `1939-1940,5` exactly
+    //    only makes a decimal when a DIGIT follows it: `,\d` in the lookahead refuses `1939-1940,5` exactly
     //    as the old class did, while `atum 1939–1940,` is read. The trade was real and is no longer necessary.
+    //    ⚠ THE DOT IS DELIBERATELY NOT IN THAT ALTERNATION. The old class did not carry one either, so a
+    //    clause-final dot was already admitted (`15-20.` → *15 ba 20 .*) and adding `\.\d` here would be a
+    //    second, unrelated change smuggled into a comma fix.
     //    Same shape as the clause-final period two paragraphs up, and the same trap (58) one step further on.
     s = s.replace(/(?<![-:\d.,\p{L}\p{M}])(\d+)[  ]?[-–—][  ]?(\d+)(?![-:\d\p{L}\p{M}]|,\d)/gu,
         (whole, a: string, b: string, off: number, full: string) =>

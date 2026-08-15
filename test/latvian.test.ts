@@ -181,8 +181,11 @@ describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + f
      * breaks inside one three-word phrase. Every fragment is a legal Latvian sound, so nothing could see it.
      */
     test("dotted abbreviations expand, and their periods stop being sentence ends", () => {
-        expect(lv.text("500. gads p.m.ē.").trim()).toBe("pˈiɛt͡si sˈimti ɡˈats pˈirms mˈuːsu ˈɛːras");
-        expect(lv.text("u.c.").trim()).toBe("ˈun t͡sˈiti");
+        // ⚠ THE TRAILING `.` IS KEPT because it ends the input, and therefore a sentence. This assertion used
+        // to end at `ˈɛːras` — the abbreviation rule was swallowing it. See the sentence-boundary test below.
+        expect(lv.text("500. gads p.m.ē.").trim()).toBe("pˈiɛt͡si sˈimti ɡˈats pˈirms mˈuːsu ˈɛːras .");
+        // ⚠ ALSO KEEPS ITS PERIOD, for the same reason: end of input is a sentence end.
+        expect(lv.text("u.c.").trim()).toBe("ˈun t͡sˈiti .");
         expect(lv.text("t.i., netiek").trim()).toBe("tˈas ˈir , nˈɛtiɛk");
         // a COUNTED abbreviation takes the agreement rule, and the corpus writes it with no trailing dot
         expect(lv.text("160 lpp").trim()).toBe("sˈimts sˈɛʃdɛsmit lˈappusɛs");
@@ -218,5 +221,24 @@ describe("Latvian canonical IPA — Baltic rule g2p (written palatals/length + f
         expect(century.filter((t) => t === ".")).toHaveLength(1);
         expect(century.at(-1)).toBe(".");
         expect(century).toContain("lˈiːd͡z");
+    });
+
+    /**
+     * ⚠ THE MIRROR DEFECT: the abbreviation's final period is also the SENTENCE's, and swallowing it welds
+     * two sentences together. Trading spurious breaks for a swallowed real one is not a repair.
+     */
+    test("an abbreviation that ends a sentence keeps the sentence", () => {
+        expect(lv.text("Tas ir dārgi u.c. Nākamais teikums.").trim().split(/\s+/u)).toContain(".");
+        expect(lv.text("500. gads p.m.ē. Tas bija sen.").trim()).toContain("ˈɛːras .");
+        // ...and mid-clause it still expands with no break at all
+        expect(lv.text("t.i., netiek").trim().split(/\s+/u)).not.toContain(".");
+    });
+
+    /**
+     * ⚠ PERSONAL INITIALS ARE NOT ABBREVIATIONS. Matching case-insensitively made `T.I. Ivanovs` — an initial
+     * pair lv.wikipedia writes — introduce a surname with *tas ir*. Latvian writes these lower case.
+     */
+    test("an upper-case initial pair is not the `t.i.` abbreviation", () => {
+        expect(lv.text("T.I. Ivanovs bija").trim()).not.toContain("tˈas ˈir");
     });
 });
