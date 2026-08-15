@@ -1,0 +1,296 @@
+/**
+ * Latvian (lv) TEXT NORMALIZATION — the pre-pass that turns written figures, signs and abbreviations into
+ * Latvian words before the g2p sees them. Pure text→text, wired into `latvian.ts`'s `text()`.
+ *
+ * ⚠ THE ORDER BELOW IS LOAD-BEARING and the steps are numbered for that reason. De-grouping must precede the
+ * number reader (or `29 660` is read as two numbers), the ordinal dot must precede everything that consumes a
+ * period, and the decimal comma must come LAST — the shared tier matches `7,6%` as one figure-plus-sign, and
+ * converting the comma first breaks that adjacency and drops the percent.
+ *
+ * WHAT WAS ACTUALLY WRONG, measured on the mined artifact (460 segments) before any of this existed:
+ *
+ *   `1885. gada 15. jūlijs`  → *tūkstotis … pieci . gada piecpadsmit . jūlijs*
+ *        a CARDINAL where Latvian writes an ordinal, and — worse — the ordinal period was taken for a full
+ *        stop, so a SENTENCE BREAK landed in the middle of a date. 262 dotted sites in the artifact.
+ *   `12—18 °C`               → *divpadsmit astoņpadsmit t͡s*
+ *        the range word gone, the degree sign gone, and ⟨C⟩ read as Latvian /t͡s/ — a plausible syllable
+ *        rather than audible garbage, which is playbook trap 56, the same defect Basque's `º` reached by a
+ *        different route. No leak class, no DROP and no referee can see it.
+ *   `29 660 km²`             → *divdesmit deviņi seši simti sešdesmit km*
+ *        the VALUE destroyed (29 660 read as 29 and 660), `km` raw in the IPA, `²` dropped.
+ *   `56,4°`                  → *piecdesmit seši , četri*
+ *        the decimal comma taken for a clause pause.
+ *   `$230 000`               → *divi simti trīsdesmit nulle*
+ *        the sign dropped and the value destroyed.
+ *
+ * SOURCING. espeak-ng's `lv_list` declares the sign readings directly (`%` → pRotsenti, `°` → gRa:di, `$` →
+ * dola:Ri, `€` → eiRo:, `£` → ma:Rtsin^as, `=` → viena:ds, `×` → Reiz, `÷` → dali:ts, `±` → plusmi:nuss,
+ * `_,` → komats); every unit noun and both scale names are attested on lv.wikipedia via `attest.ts`, with the
+ * counts recorded at each declaration. Where the two tiers agree they are both cited, because agreement
+ * between an independent pronunciation dictionary and running text is the strongest evidence available here.
+ */
+import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbols.ts";
+import { numberToWords } from "./numbers.ts";
+import { HEAD_NOUN, ordinalWords } from "./ordinals.ts";
+
+/**
+ * Latvian AGREEMENT for a counted noun: SINGULAR after a count ending in ...1 but NOT ...11 — *21 procents*,
+ * *101 kilometrs* — and plural otherwise. This is not a new claim: `numbers.ts` already implements exactly
+ * this rule as `agree()` for its own magnitude nouns (*tūkstotis* vs *tūkstoši*), so the tier is being handed
+ * the compositor's own agreement rather than a second opinion about it.
+ */
+const countForm = (n: number): number => (n % 10 === 1 && n % 100 !== 11 ? 0 : 1);
+
+/**
+ * `[singular, plural]`, in the order `countForm` indexes them.
+ *
+ * ⚠ NOT USED FOR `percent` OR `currency`, and that is not an inconsistency. `review.ts`'s sourcing gate reads
+ * those two declarations STATICALLY out of the source text, so a helper call it cannot evaluate makes the
+ * check pass while having verified nothing — playbook trap 57, an instrument failing toward false confidence.
+ * It reported exactly that here. Those two are written as literal arrays so the gate can see them.
+ */
+const pair = (one: string, many: string): CountForms => [one, many];
+
+/**
+ * THE UNIT NOUNS. Every singular is attested on lv.wikipedia as a whole token (`attest.ts`, tok/arts):
+ * kilometrs 9/2, metrs 8/1, centimetrs 4/2, milimetrs 6/2, kilograms 5/2, grams 6/2, hektārs 4/2, tonna 9/2.
+ * The plurals are the regular first-declension `-i` (and `tonnas`, 6/1 — `tonna` is FEMININE, which is why
+ * its plural is not `-i`; getting that from the paradigm rather than by analogy is the point of listing it).
+ *
+ * ⚠ ONE-LETTER KEYS ARE THE HAZARD (playbook trap 46). `m`, `g` and `t` are also ordinary Latvian letters and
+ * a bare `76t` is as likely to be a designation as a tonnage — the tier's own boundary guards are what make
+ * these safe, and they are declared here only because the corpus writes all three after a number: m×8, g×5,
+ * kg×7, ha×5. `s` is deliberately NOT here; it lives in `rateDenominators` for the reason that field exists.
+ */
+const UNITS: Record<string, CountForms> = {
+    km: pair("kilometrs", "kilometri"),
+    m: pair("metrs", "metri"),
+    cm: pair("centimetrs", "centimetri"),
+    mm: pair("milimetrs", "milimetri"),
+    kg: pair("kilograms", "kilogrami"),
+    g: pair("grams", "grami"),
+    ha: pair("hektārs", "hektāri"),
+    // ⚠ FOUND BY THE LEAK GATE, not by reading the corpus: `610 nm` reached the IPA as a raw Latin `nm`
+    // because the unit was simply not declared. `nanometrs` 3 tok / 2 arts.
+    nm: pair("nanometrs", "nanometri"),
+    t: pair("tonna", "tonnas"),
+};
+
+/**
+ * ⚠ THE RATE READING IS ATTESTED DEFINITIONALLY, which is the strongest form this evidence takes:
+ *   *"Kilometri stundā, saīsinājums km/h, ir ātruma mērvienība."*
+ *   — "Kilometres per hour, abbreviated km/h, is a unit of speed."
+ * The wiki states the abbreviation and its reading in one sentence. Note what that sentence shows: Latvian
+ * uses NO preposition — the denominator simply stands in the LOCATIVE (*stundā*, *sekundē*). `unitPer` is
+ * therefore the empty string, not a word; the locative IS the "per". `stundā` 9 tok / 2 arts, `sekundē` 12/2.
+ *
+ * ⚠ `sek` IS DECLARED BESIDE `s` because the corpus writes it: `71 km/sek./Mpc`. Without the longer key the
+ * denominator does not match, the whole rate fails, and `km` reaches the IPA raw — which is how this was
+ * found, as a RAW-LATIN leak rather than as a missing word.
+ */
+const RATE_DENOMINATORS: Record<string, string> = { h: "stundā", s: "sekundē", sek: "sekundē" };
+
+/**
+ * The SIGN words, all from espeak-ng `lv_list` and cross-checked against lv.wikipedia where a token exists:
+ * vienāds 6 tok / 2 arts, dalīts 5/2, reiz 8/2, mīnuss 1/1, procenti 10/3, promiles 5/2.
+ *
+ * ⚠ `plusmīnuss` IS THE ONE WORD WITH NO WIKIPEDIA TOKEN (0/0) and it is declared anyway, on espeak's
+ * `± plusmi:nuss` alone. Said rather than implied: `±` is a single code point, so no `+` rule can reach
+ * inside it, and without an entry the sign vanishes silently. A one-tier word is weaker evidence than a
+ * two-tier one and this is the only place in the file relying on it.
+ */
+const SIGN = {
+    plus: "plus",
+    minus: "mīnuss",
+    plusMinus: "plusmīnuss",
+    equals: "vienāds",
+    lessThan: "mazāks par",
+    greaterThan: "lielāks par",
+    times: "reiz",
+    dividedBy: "dalīts",
+    ampersand: "un",
+    approximately: "aptuveni",
+} as const;
+
+/**
+ * THE SCALE NAMES. `Celsija grāds (°C) ir temperatūras mērvienība` is the wiki's own defining sentence — the
+ * reading and the sign in one clause — and `Celsija` is 8 tok / 3 arts, `grāds` 10/2. Fahrenheit is
+ * `Fārenheits` 5/2 (genitive `Fārenheita`).
+ *
+ * ⚠ FAHRENHEIT IS ROBUSTNESS, NOT A MEASURED REPAIR (playbook trap 22): `°F` is ×0 in this corpus. It is
+ * declared because the arm exists for Celsius anyway and an unmatched `°F` would leave ⟨F⟩ to be read as a
+ * letter — the same class of defect as the ⟨C⟩ this step was written to stop.
+ */
+const SCALE: Record<string, CountForms> = {
+    C: pair("Celsija grāds", "Celsija grādi"),
+    F: pair("Fārenheita grāds", "Fārenheita grādi"),
+};
+const DEGREE: CountForms = pair("grāds", "grādi");
+
+const SYMBOLS = makeSymbolNormalizer({
+    // espeak `% pRotsenti`; attest procenti 10 tok / 3 arts, procentu 17/3, procents 2/1.
+    percent: ["procents", "procenti"],
+    // espeak `$ dola:Ri`, `€ eiRo:`, `£ ma:Rtsin^as`. ⚠ `eiro` is INDECLINABLE in Latvian — one form for
+    // both counts, which is why the pair repeats rather than inventing a plural.
+    currency: {
+        $: ["dolārs", "dolāri"],
+        "€": ["eiro", "eiro"],
+        "£": ["mārciņa", "mārciņas"],
+    },
+    units: UNITS,
+    // The compositor's own magnitude words (`latvian.jsonc` → numbers), so a figure separated from its unit
+    // by one of them is still adjacent to it: the corpus writes `45,46 miljardi USD` and `$1 miljards`.
+    magnitudes: ["miljardi", "miljards", "miljoni", "miljons", "tūkstoši", "tūkstotis"],
+    rateDenominators: RATE_DENOMINATORS,
+    unitPer: "",
+    /**
+     * ⚠ `compound`, NOT `after`. Latvian fuses the square word onto the front of the noun —
+     * *kvadrātkilometri*, one word (attested 2 tok / 2 arts; `kvadrātmetri` 1/1, `kubikmetri` 1/1). Declaring
+     * `after` would emit *kilometri kvadrāt*, and `before` *kvadrāt kilometri*; neither is a Latvian word.
+     */
+    exponentWords: { squared: ["kvadrāt"], cubed: ["kubik"], position: "compound" },
+    // `kvadrātā` (22 tok / 2 arts) is the PREDICATE form — *pieci kvadrātā*, "five squared" — and is a
+    // different word-shape from the modifier above, which is why the tier keeps the two fields apart.
+    bareExponent: { squared: "{n} kvadrātā", cubed: "{n} kubā", power: "{n} pakāpē {e}", negative: SIGN.minus },
+    multiply: { times: SIGN.times },
+    ampersand: SIGN.ampersand,
+    countForm,
+});
+
+/**
+ * 1. The spaces Latvian groups digits with: ASCII, NO-BREAK (U+00A0) and NARROW NO-BREAK (U+202F). Written as
+ * ESCAPES rather than literal characters — the three are indistinguishable on the page, and a rule whose
+ * correctness cannot be read off the source is a rule nobody can review.
+ */
+const GROUP_SPACE = /(?<=\d)[ \u00a0\u202f](?=\d{3}(?!\d))/gu;
+
+/**
+ * 2. THE ORDINAL PERIOD — the largest class in the language and the one that was doing real damage.
+ *
+ * Latvian marks an ordinal with a period after the figure, and the period is NOT a sentence end. Two things
+ * were wrong before this step: the figure was read as a cardinal, and the clause layer took the dot for a
+ * full stop and inserted a pause inside the date.
+ *
+ * ⚠ THE CASE IS READ OFF THE FOLLOWING NOUN, never guessed — see `ordinals.ts`. `gada` is genitive so the
+ * ordinal is `-ā`, `gadā` locative so it is `-ajā`. 205 of the artifact's 262 dotted sites (78%) are followed
+ * by one of the tabulated nouns.
+ *
+ * ⚠ WHAT THE OTHER 22% GET, and this is a deliberate, measured half-measure rather than an oversight. With no
+ * tabulated noun the case is genuinely underivable, so no ordinal is composed — but the PERIOD IS STILL
+ * REMOVED, because that it is not a full stop is a fact about Latvian orthography (a sentence does not
+ * continue in lower case) and is independent of which case the ordinal takes. The figure stays a cardinal,
+ * which is wrong; a spurious sentence boundary in mid-clause is worse, and unlike the cardinal it also
+ * corrupts every following clause's prosody. Both halves are stated here so the trade can be re-decided.
+ *
+ * ⚠ THE GUARD IS `\s+` PLUS A LOWER-CASE LETTER. A digit after the dot is a decimal point or a clock time in
+ * a foreign convention (the corpus has `$17.37 miljardiem` and `ap 16.00`), and an upper-case letter after it
+ * is an ordinary sentence boundary. Neither may be touched.
+ */
+function ordinalPeriod(text: string): string {
+    return text.replace(/(?<![\d.,])(\d{1,4})\.(\s+)(\p{Ll}[\p{L}\p{M}]*)/gu, (whole, fig: string, gap: string, next: string) => {
+        const c = HEAD_NOUN[next.toLowerCase()];
+        if (c === undefined) return `${fig}${gap}${next}`; // period dropped, figure left cardinal — see above
+        const words = ordinalWords(Number(fig), c);
+        return words === undefined ? whole : `${words}${gap}${next}`;
+    });
+}
+
+/**
+ * 3. RANGES — *54—57%*, *12—18 °C*, *1615—1684*. The word is `līdz`, which is the corpus's own: 55 standalone
+ * tokens across 102 segments, and the corpus writes the collocation `no 12—18 °C` where `no … līdz` is the
+ * ordinary frame, so the dash is standing in for exactly this word.
+ *
+ * ⚠ RUNS BEFORE THE SIGN STEP, which is what keeps `–` from being read as `mīnuss`. espeak's `lv_list` maps a
+ * bare en dash to `mi:nuss`, and that is right for an isolated sign and wrong between two figures; ordering
+ * decides it rather than a guard.
+ *
+ * ⚠ DECIMAL OPERANDS ARE ALLOWED (`0,3—0,6 mm`) because this runs above the decimal step, so the comma is
+ * still part of the figure here.
+ */
+const RANGE = /(?<![\d,.\p{L}])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?![\d,.])/gu;
+
+/**
+ * 5. DEGREES. `°C` and `°F` take the scale name; a bare `°` after a figure is `grādi`.
+ *
+ * ⚠ COORDINATES ARE LEFT ALONE, and the reason is gender. `6°44'` reads *seši grādi četrDESMIT ČETRAS
+ * minūtes* — `minūte` is feminine, and `numbers.ts` documents its numerals as masculine-default with gender
+ * explicitly deferred, so composing the minutes would emit *četri minūtes*: a confidently wrong agreement in
+ * place of a dropped mark. 4 sites in the artifact. The bare-degree arm below still reads their `°`, which is
+ * why the pattern does not require the degree to end the figure.
+ */
+function degrees(text: string): string {
+    return text.replace(/(\d+(?:,\d+)?)\s*°\s*([CF])?/gu, (_whole, fig: string, scale: string | undefined) => {
+        const forms = scale ? SCALE[scale]! : DEGREE;
+        /**
+         * ⚠ A FIGURE WITH A FRACTION TAKES THE PLURAL, whatever its integer part. `21,5` ends in ...1 by
+         * `countForm`'s arithmetic but is read *divdesmit viens komats pieci GRĀDI* — the singular agrees with
+         * a count of exactly one, and 21,5 is not one. Taking the integer part would have said *grāds*.
+         */
+        return `${fig} ${forms[fig.includes(",") ? 1 : countForm(Number(fig))]}`;
+    });
+}
+
+/**
+ * 6. THE REMAINING SIGNS. `+34,5 °C` and `+5 °C` are the corpus's shape — a sign attached to an amount rather
+ * than an operator between two — and both readings are the same word in Latvian, so no split is needed.
+ *
+ * ⚠ THE ASCII HYPHEN IS A MINUS HERE, and excluding it was a mistake `review.ts` caught: espeak maps bare `-`
+ * to *defise* ("hyphen") and `–` to *mīnuss*, so the first cut followed espeak and dropped `-5` entirely. But
+ * espeak is describing an ISOLATED mark, and a hyphen bound to a following figure at a non-digit boundary is
+ * a sign, not punctuation. The range step above has already consumed every digit-hyphen-digit, so nothing
+ * ambiguous is left for this to claim.
+ *
+ * ⚠ `=`, `<` AND `>` ARE READ RATHER THAN LEFT SILENT, which reverses this file's first draft. The argument
+ * for silence was that the corpus's sites are formulae (`I = L/4πd²`, `y = a + bx`) whose surroundings are not
+ * being read as Latvian anyway — but that argument justifies dropping the SIGN, and a dropped sign is
+ * inaudible, so nothing downstream can ever tell that the equation lost its verb. All three words are sourced
+ * (espeak `= viena:ds`, `_< m'aza:ks||p'aR`, `_> l'iela:ks||p'aR`; `vienāds` 6 tok / 2 arts and `mazāks` 1/1
+ * on the wiki, `lielāks` 0/0 — espeak-only, and said rather than implied).
+ */
+function signs(text: string): string {
+    return text
+        // `≈200 MPa`, `≈-20 °C` — the corpus writes it 4 times and the sign was vanishing outright.
+        // `aptuveni` is the corpus's and the wiki's own word for it (4 tok / 2 arts).
+        .replace(/≈\s*(?=[+−–-]?\d)/gu, `${SIGN.approximately} `)
+        .replace(/(?<![\d\p{L}])±(?=\s?\d)/gu, `${SIGN.plusMinus} `)
+        .replace(/(?<![\d\p{L}])\+(?=\s?\d)/gu, `${SIGN.plus} `)
+        .replace(/(?<![\d\p{L}])[−–-](?=\s?\d)/gu, `${SIGN.minus} `)
+        .replace(/(?<=\d)\s*÷\s*(?=\d)/gu, ` ${SIGN.dividedBy} `)
+        .replace(/\s*=\s*/gu, ` ${SIGN.equals} `)
+        .replace(/(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])/gu, ` ${SIGN.lessThan} `)
+        .replace(/(?<=[\d\p{L}])\s*>\s*(?=[\d\p{L}])/gu, ` ${SIGN.greaterThan} `);
+}
+
+/**
+ * 7. THE DECIMAL COMMA — Latvian's decimal separator, and the word is `komats` (espeak `_, komats`; attest
+ * 23 tok / 3 arts). Runs LAST: the shared tier matches `7,6%` as one figure, and converting the comma before
+ * it would break that adjacency and drop the sign.
+ *
+ * ⚠ EVERY LEADING ZERO IN THE FRACTION IS SPOKEN SEPARATELY. This is the Basque defect, found in review there
+ * and prevented here: reading the fraction as a NUMBER makes `5,09` and `5,9` identical, because `Number("09")`
+ * is 9 — the quantity wrong by a factor of ten, in perfectly well-formed text, invisible to every gate. The
+ * zeros are emitted as words and only the remainder is read as a number.
+ */
+function decimalComma(text: string): string {
+    return text.replace(/(?<![\d,.])(\d+),(\d+)(?![\d,.])/gu, (whole, head: string, frac: string) => {
+        if (head.length > 15 || frac.length > 15) return whole;
+        const zeros = /^0*/u.exec(frac)![0];
+        const rest = frac.slice(zeros.length);
+        const spoken = [...zeros].map(() => numberToWords(0));
+        if (rest !== "") spoken.push(numberToWords(Number(rest)));
+        return `${numberToWords(Number(head))} komats ${spoken.join(" ")}`.trimEnd();
+    });
+}
+
+/** The Latvian normalization pre-pass. See the numbered steps above; the order is load-bearing. */
+export function normalizeLatvian(input: string): string {
+    let s = input;
+    s = s.replace(GROUP_SPACE, ""); // 1. de-group 29 660 → 29660, before anything reads a number
+    s = ordinalPeriod(s); // 2. the ordinal period, before any step consumes a dot
+    s = s.replace(RANGE, `$1 līdz $2`); // 3. ranges, before a dash can be read as a minus
+    s = SYMBOLS(s); // 4. percent, currency, units, rates, exponents
+    s = degrees(s); // 5. ° and the scale names
+    s = signs(s); // 6. the remaining signs
+    s = decimalComma(s); // 7. the decimal comma, last — the tier needs the figure intact
+    return s;
+}
