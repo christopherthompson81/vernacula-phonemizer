@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
+import { normalizeLatvian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 /** One Latvian word → canonical IPA with fixed first-syllable stress (ˈ before the first nucleus). */
@@ -41,7 +42,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 class LatvianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeLatvian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 const words = m[2].length <= 9 ? numberToWords(Number(m[2])) : readDigits(m[2]);

@@ -1,0 +1,1041 @@
+// WIKIPEDIA WORD ATTESTATION — lv. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "lv",
+        "wiki": "lv.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "nanometrs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Nanometrs (nm) ir metra miljardā daļa. 1 m = 1 000 000 000 nm. SI gar…",
+                "…\" sāka izmantot 20. gadsimta sākumā 10-9 metru apzīmēšanai (nanometrs). == Skatīt arī == Nanotehnoloģija Nanometrs…",
+                "…u apzīmēšanai (nanometrs). == Skatīt arī == Nanotehnoloģija Nanometrs…"
+            ]
+            },
+        {
+                "word": "nanometri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…tu laiku un garumu, piemēram, 30 ns (nanosekundes), 100 nm (nanometri), vai arī elektrisko kapacitāti, 100 nF (nanofaradi). Pried…"
+            ]
+            },
+        {
+                "word": "aptuveni",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ība ar citām mērvienībām == Viens kilometrs ir: 1000 metru; aptuveni 0,621 jūdze; aptuveni 1094 jardi; aptuveni 3281 pēda. == Sa…",
+                "…ām == Viens kilometrs ir: 1000 metru; aptuveni 0,621 jūdze; aptuveni 1094 jardi; aptuveni 3281 pēda. == Saistība ar citiem fizik…",
+                "…ir: 1000 metru; aptuveni 0,621 jūdze; aptuveni 1094 jardi; aptuveni 3281 pēda. == Saistība ar citiem fizikāliem lielumiem == Ki…",
+                "…etilpst 12 mēneši. Jaunais gads pēc Gregora kalendāra sākas aptuveni martā. Lai iegūtu aptuvenu Vikram Samvat datumu, Gregora ka…"
+            ]
+            },
+        {
+                "word": "mazāks",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…varīgi ir divi nosacījumi: ja skaitlī pēc lielāka cipara ir mazāks cipars, tad tie tiek saskaitīti, bet ja mazākais cipars ir…"
+            ]
+            },
+        {
+                "word": "lielāks",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "vienāds",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…un vienā centimetrā ir desmit milimetri. Viens milimetrs ir vienāds ar 1000 mikrometriem vai 1000000 nanometriem. Tā kā colla o…",
+                "…i tiek definēta kā precīzi 25,4 milimetri, tad milimetrs ir vienāds ar precīzi 5⁄127 (≈ 0,03937) collas. Milimetros mēra dažādu…",
+                "…Izotopi (no grieķu ισος — vienāds, un τόπος — vieta) ir atomi, kuru kodolos ir vienāds skaits…",
+                "…ισος — vienāds, un τόπος — vieta) ir atomi, kuru kodolos ir vienāds skaits protonu, bet dažāds skaits neitronu. Izotopi tā ir n…",
+                "…šības. Kā piemēru var minēt ūdeņraža atomus, kuriem var būt vienāds skaits protonu, bet atšķirīgs skaits neitronu, tātad šie at…",
+                "…r veidoties viena un tā paša ķīmiskā elementa atomi, kam ir vienāds kodola lādiņš, bet dažādas atommasas. == Ārējās saites == V…"
+            ]
+            },
+        {
+                "word": "Fārenheita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Fārenheita grāds (°F) ir temperatūras mērvienība. Šo temperatūras skal…",
+                "…derlandiešu fiziķis Daniels Gabriels Fārenheits. Ilgu laiku Fārenheita temperatūras mērīšanas skala tika izmantota valstīs, kurās…",
+                "…dažās valstīs, piemēram, Kanādā tā joprojām izplatīta. Pēc Fārenheita skalas ledus kūst pie 32 °F temperatūras, bet ūdens vārās p…",
+                "…temperatūras, bet ūdens vārās pie 212 °F temperatūras. Pēc Fārenheita skalas 0 °F atbilst aptuveni −18 °C.…",
+                "…6. septembrī) bija vācu/nīderlandiešu fiziķis, pazīstams kā Fārenheita temperatūras skalas izgudrotājs. Dzimis Dancigas tirgotāja…"
+            ]
+            },
+        {
+                "word": "Fārenheits",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Daniels Gabriels Fārenheits (vācu: Daniel Gabriel Fahrenheit, dzimis 1686. gada 14. mai…",
+                "…ā vecāki saindējās ar sēnēm un nomira, bet Daniels Gabriels Fārenheits devās uz Amsterdamu, kur mācījās tirdzniecību. Pēc kāda lai…",
+                "…un kļuva par britu Karaliskās biedrības biedru. 1724. gadā Fārenheits ierosināja temperatūras skalu, kas tika nosaukta viņa vārdā…",
+                "…tēmu ir pieejami multivides faili. Skatīt: Daniels Gabriels Fārenheits. Encyclopædia Britannica raksts (angliski) Visuotinė lietuv…",
+                "…izgudroja vācu/poļu/nīderlandiešu fiziķis Daniels Gabriels Fārenheits. Ilgu laiku Fārenheita temperatūras mērīšanas skala tika iz…"
+            ]
+            },
+        {
+                "word": "minūtes",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…, kas tiek lietots aiz skaitļa, piemēram, 5′ nozīmē ‘piecas minūtes’. Minūte nav Starptautiskās mērvienību sistēmas mērvienība…"
+            ]
+            },
+        {
+                "word": "sekundes",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ēgumu dēļ. Gadā, kad starpība starp UT1 un UTC sasniedz 0,9 sekundes, tiek pievienota lieka sekunde. Tas tiek darīts 30. jūnijā…",
+                "…Earth Rotation and Reference Systems Service, IERS). Liekās sekundes pievienošana notiek šādi: kad laiks ir sasniedzis 23:59:60…",
+                "…rotācija paātrinātos, bet tas līdz šim nav novērots. Liekās sekundes pielikšana saistīta ar problēmām dažādās sistēmās, kurās pē…",
+                "…struktūras līmeņiem. Sekunžu skaitu nosaka pēc pulksteņiem. Sekundes vēsturiskā definīcija ir saistīta ar diennakts garumu. Dien…",
+                "…ennaktī ir 24 stundas, stundā — 60 minūtes, bet minūtē — 60 sekundes. Viena sekunde ir 1⁄86 400 daļa no dienas. Pašreizējā sekun…",
+                "…undes. Viena sekunde ir 1⁄86 400 daļa no dienas. Pašreizējā sekundes definīcija, kas saistīta ar cēzija izotopu 133Cs, ir spēkā…"
+            ]
+            },
+        {
+                "word": "Celsija grāds",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Celsija grāds (°C) ir temperatūras mērvienība. 100 grādos iedalīta temper…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Celsija grāds. Encyclopædia Britannica raksts (angliski) Krievijas Lielās…",
+                "…Celsijs var būt: Celsija grāds — temperatūras mērvienība. == Cilvēki ar šādu uzvārdu == An…"
+            ]
+            },
+        {
+                "word": "kilometrs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilometrs (saīsinājumā km, grieķu: χίλια (khilia) - tūkstotis un μέτρ…",
+                "…ērīšana) ir SI sistēmas garuma atvasinātā mērvienība. Viens kilometrs pamatmērvienībās ir tūkstots metru jeb zinātniskajā pieraks…",
+                "…1000 m = 1·103 m == Saistība ar citām mērvienībām == Viens kilometrs ir: 1000 metru; aptuveni 0,621 jūdze; aptuveni 1094 jardi;…",
+                "…ni 3281 pēda. == Saistība ar citiem fizikāliem lielumiem == Kilometrs tiek bieži izmantots, lai atvasinātu mērvienības citiem fiz…",
+                "…nāda ar kvadrāta laukumu, kura malu garumi ir precīzi viens kilometrs; kubikkilometrs (km3) ir tilpuma mērvienība, kura ir vienād…",
+                "…enāda ar kuba tilpumu, kura šķautņu garumi ir precīzi viens kilometrs. == Lietošana == Amerikas Savienotās Valstis un Apvienotā K…"
+            ]
+            },
+        {
+                "word": "metrs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Metrs (simbols: m) ir Starptautiskās mērvienību sistēmas (SI) gar…",
+                "…n), kas nozīmē \"mērs\", \"lineāls\". No 1889. līdz 1960. gadam metrs bija vienāds ar stieņa garumu, kas bija izgatavots no platī…",
+                "…international des poids et mesures). 1960. gadā pieņēma, ka metrs ir attālums, kurā 1 650 763,73 reizes ietilpst kriptona-86…",
+                "…tās oranžas gaismas viļņa garums. Pašreizējā definīcija, ka metrs ir attālums, ko gaisma veic vakuumā 1/299 792 458 sekundēs,…",
+                "…garuma mērvienībām == == Atvasinātās vienības == Mērvienība metrs ir dažu atvasināto mērvienību pamatā, piemēram, kvadrātmetr…",
+                "…iemēram, kvadrātmetrs (mēra laukumu), kubikmetrs (tilpumu). Metrs ir arī daļa no citu lielumu mērvienībām, piemēram, ātrumu m…"
+            ]
+            },
+        {
+                "word": "centimetrs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Centimetrs (cm) ir SI garuma mērvienība — viena simtdaļa no metra. SI…",
+                "…no metra. SI sistēmā garuma pamatmērvienība ir metrs. Vārds centimetrs ir saliktenis no vārdiem centi un metrs. Metriskajā sistēmā…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Centimetrs. Encyclopædia Britannica raksts (angliski)…",
+                "…šanai lieto prievārdu centi-, piemēram, metra simtā daļa ir centimetrs (cm), grama simtā daļa ir centigrams (cg). Kāda lieluma sim…"
+            ]
+            },
+        {
+                "word": "milimetrs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Milimetrs (mm) ir SI garuma mērvienība, kas ir vienāda ar vienu tūkst…",
+                "…is milimetru un vienā centimetrā ir desmit milimetri. Viens milimetrs ir vienāds ar 1000 mikrometriem vai 1000000 nanometriem. Tā…",
+                "…colla oficiāli tiek definēta kā precīzi 25,4 milimetri, tad milimetrs ir vienāds ar precīzi 5⁄127 (≈ 0,03937) collas. Milimetros…",
+                "…arums, ko vakuumā 1299,792,458 no sekundes pieveic gaisma\". Milimetrs ir metra 11000 daļa, tādēļ gaisma šo attālumu veic sekundes…",
+                "…Dzīvsudraba staba milimetrs (mm Hg, dz. st. mm) ir ārpussistēmas spiediena mērvienība,…",
+                "…sinsspiediena mērīšanai un citur. Viens dzīvsudraba stabiņa milimetrs ir aptuveni vienāds ar 133,3223684 paskāliem; normālais atm…"
+            ]
+            },
+        {
+                "word": "kilograms",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilograms (simbols: kg) ir Starptautiskās mērvienību sistēmas (SI) ma…",
+                "…jā (Bureau international des poids et mesures). Pirmo reizi kilograms tika noteikts 1799. gadā, kad Pjērs Simons Laplass vakuumā…",
+                "…ņu. Viena mārciņa ir 0,45359237 kg. == Kilograma etalons == Kilograms ir vienāds ar starptautiskā masas vienības etalona masu, ka…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Kilograms. Encyclopædia Britannica raksts (angliski) Krievijas Lielās…",
+                "…== 1 tonna = 1000 kg = 1 000 000 g = 10 c == Skatīt arī == Kilograms…"
+            ]
+            },
+        {
+                "word": "grams",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Grams (SI simbols: g) ir metriskā sistēmas masas mērvienība, kas…",
+                "…pie 4°C, kas ir ūdens maksimālā blīvuma temperatūra). Tagad grams ir tūkstošdaļa kilograma, ko definē Starptautiskajā mērvien…",
+                "…\"21 grams\" (angļu: 21 Grams) ir 2003. gada ASV psiholoģiskā drāmas fi…",
+                "…\"21 grams\" (angļu: 21 Grams) ir 2003. gada ASV psiholoģiskā drāmas filma, kuras režisor…",
+                "…otsa, Benisio del Toro, Melisa Leo un Šarlote Gensbūra. \"21 grams\" ir otrā filma Injaritu \"nāves\" filmu triloģijā pēc \"Mīla -…",
+                "…jas kopā vairākas sižeta līnijas nelineārā izkārtojumā. \"21 grams\" pirmizrāde notika 2003. gada 5. septembrī Venēcijas kinofe…"
+            ]
+            },
+        {
+                "word": "hektārs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Hektārs (SI simbols: ha) ir viena no metriskās sistēmas atvasinātaj…",
+                "…metriskā sistēma, ārs tika definēts kā 100 kvadrātmetri, un hektārs (\"hekto-\" + \"ārs\") tādējādi bija 100 āri jeb 1⁄100 km2 (10…",
+                "…stēma (SI), ārs netika iekļauts kā atzīta mērvienība. Tomēr hektārs paliek kā mērvienība, kas nav SI mērvienība, bet ir pieņemt…",
+                "…statute) 247,105 381 akru Attiecīgi: 1 m² = 0,000 001 km² 1 hektārs = 0,01 km² 1 kvadrātjūdze = 2,589 988 km² 1 akrs = 0,004 04…"
+            ]
+            },
+        {
+                "word": "tonna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Tonna ir standarta masas mērvienība un tā ir vienāda ar 1000 kilo…",
+                "…apzīmē ar burtu t. Tāpēc varam rakstīt 1 t = 1000 kg. Viena tonna ir apmēram vienāda ar viena kubikmetra ūdens masu 4° C temp…",
+                "…tūrā un pie normāla atmosfēras spiediena. == Sakarības == 1 tonna = 1000 kg = 1 000 000 g = 10 c == Skatīt arī == Kilograms…",
+                "…0.5 līdz 1 tonna bija viena no astoņām olimpiskajām disciplīnām, kas tika ai…",
+                "…urāšana 1900. gada vasaras olimpiskajās spēlēs — 0,5 līdz 1 tonna (Sports Reference) (angliski) Burāšana 1900. gada vasaras o…",
+                "…urāšana 1900. gada vasaras olimpiskajās spēlēs — 0,5 līdz 1 tonna (1. brauciens) (Olympedia) (angliski) Burāšana 1900. gada v…"
+            ]
+            },
+        {
+                "word": "tonnas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…1 līdz 2 tonnas bija viena no astoņām olimpiskajām disciplīnām, kas tika ai…",
+                "…Burāšana 1900. gada vasaras olimpiskajās spēlēs — 1 līdz 2 tonnas (Sports Reference) (angliski) Burāšana 1900. gada vasaras o…",
+                "…Burāšana 1900. gada vasaras olimpiskajās spēlēs — 1 līdz 2 tonnas (1. brauciens) (Olympedia) (angliski) Burāšana 1900. gada v…",
+                "…Burāšana 1900. gada vasaras olimpiskajās spēlēs — 1 līdz 2 tonnas (2. brauciens) (Olympedia) (angliski) Burāšana 1900. gada v…",
+                "…Burāšana 1900. gada vasaras olimpiskajās spēlēs — 1 līdz 2 tonnas (1. brauciens) (Olympics) (angliski) Burāšana 1900. gada va…",
+                "…Burāšana 1900. gada vasaras olimpiskajās spēlēs — 1 līdz 2 tonnas (2. brauciens) (Olympics) (angliski) Mallon, Bill. The 1900…"
+            ]
+            },
+        {
+                "word": "procents",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Procents (latīņu: pro centum — ‘uz simtu’), senāk arī nosimte, ir sk…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Procents. Krievijas Lielās enciklopēdijas raksts (2004-2017) (krievi…"
+            ]
+            },
+        {
+                "word": "grāds",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Grāds var būt: grāda simbols (°); grāds (leņķis) — leņķa mērvienī…",
+                "…Grāds var būt: grāda simbols (°); grāds (leņķis) — leņķa mērvienība; grāds (temperatūra) — temperat…",
+                "…būt: grāda simbols (°); grāds (leņķis) — leņķa mērvienība; grāds (temperatūra) — temperatūras mērvienība; Celsija grāds; Fār…",
+                "…ība; grāds (temperatūra) — temperatūras mērvienība; Celsija grāds; Fārenheita grāds; grāds (alkohols) — alkohola stipruma mēr…",
+                "…atūra) — temperatūras mērvienība; Celsija grāds; Fārenheita grāds; grāds (alkohols) — alkohola stipruma mērvienība; akadēmisk…",
+                "…— temperatūras mērvienība; Celsija grāds; Fārenheita grāds; grāds (alkohols) — alkohola stipruma mērvienība; akadēmiskais grā…"
+            ]
+            },
+        {
+                "word": "dolārs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Dolārs (bieži tiek apzīmēta ar dolāra zīmi $) ir oficiālā valūta v…",
+                "…valodīgajās zemēs dažreiz par dolāriem dēvē arī spāņu peso. Dolārs par Amerikas Savienoto Valstu oficiālo valūtu kļuva 1792. g…",
+                "…zēlandes — 1967. gadā. == Valstis, kurās oficiālā valūta ir dolārs ==…",
+                "…ASV dolārs (valūtas kods USD) ir ASV valūta. To vēl bieži saīsina kā d…",
+                "…1785. gada 6. jūlijā Konfederāciju kongresa ieviestais ASV dolārs šobrīd ir pasaulē visplašāk lietotā valūta — vairākas valst…",
+                "…, no tiem lielākā daļa ārpus ASV. == Dolāra izcelsme == ASV dolārs ir atvasināts no spāņu astoņu reālu monētas jeb spāņu dolār…"
+            ]
+            },
+        {
+                "word": "dolāri",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 2,
+                "examples": []
+            },
+        {
+                "word": "mārciņas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ISO 4217 kods ir GBP, bet pieņemtais simbols ir £. Sterliņu mārciņas sīkāka vienība ir peniji (viena mārciņa ir 100 peniji). Val…",
+                "…totas vai arī nolietotas. 1971. gadā tika ieviesta sterliņu mārciņas decimalizācija. Pirms tam viena mārciņa atbilda 20 šiliņiem…",
+                "…aistība ar citām masas mērvienībām == Lai gan pastāv dažādi mārciņas definējumi, visplašāk izmanto, ka tā ir vienāda ar 0,453592…",
+                "…lstīs lietotajām masas mērvienībām ir šāda: 1 kvarters = 28 mārciņas, 1 mārciņa = 16 unces = 7000 grani. Latvijā līdz 19. gadsim…"
+            ]
+            },
+        {
+                "word": "stunda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Stunda ir laika mērvienība. Tā nav SI mērvienība, bet ir pieņemts…",
+                "…no latīņu: hora), bet latviešu valodā izmanto arī st. Viena stunda ir 60 minūtes jeb 3600 sekundes. Tā ir aptuveni 1/24 no Zem…",
+                "…as vārda stunde. Konstantīns Karulis norāda, ka vārda forma stunda (arī stunds) ir bijusi plaši izplatīta jau pirms viduslejas…",
+                "…alodas un secina, ka tā varētu būt aizgūta no gotu valodas (stunda) vai no senskandināvu valodas (stund). == Vēsture == Dienas…",
+                "…Zemes stunda ir Pasaules dabas fonda rīkots starptautisks pasākums, kura…",
+                "…ikdienā. == Vēsture == === 2007. gads === Pirmo reizi Zemes stunda notika Sidnejā 2007. gada 31. martā, kad to aizsāka Pasaule…"
+            ]
+            },
+        {
+                "word": "stundā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…āpēc, lasot latīņu avotos, ka kaut kas noticis tādā un tādā stundā naktī, notikuma laiku jāskatās nevis pēc mūsdienu pulksteņa…",
+                "…, notikuma laiku jāskatās nevis pēc mūsdienu pulksteņa, kur stundā ir 60 minūtes, bet pēc attiecīgā gadalaika nakts garuma, sa…",
+                "…tensitātes (dozas jaudas) mērinstrumenti graduēti rentgenos stundā. Dabiskais radiācijas fons ir līdz 23 mikrorentgeniem stund…",
+                "…tundā. Dabiskais radiācijas fons ir līdz 23 mikrorentgeniem stundā (230 nanozīvertiem stundā). Gada laikā cilvēks saņem ap 200…",
+                "…s fons ir līdz 23 mikrorentgeniem stundā (230 nanozīvertiem stundā). Gada laikā cilvēks saņem ap 200 milirentgenus lielu dozu.…"
+            ]
+            },
+        {
+                "word": "sekunde",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Sekunde (simbols: s, dažreiz sek.) ir Starptautiskās mērvienību sis…",
+                "…1967. gadā Starptautiskā Mēru un svaru komiteja pieņēma, ka sekunde ir vienāda ar 1/31 556 925, 9747 no tropiskā 1900. gada ilg…",
+                "…undas, stundā — 60 minūtes, bet minūtē — 60 sekundes. Viena sekunde ir 1⁄86 400 daļa no dienas. Pašreizējā sekundes definīcija,…",
+                "…ar citām laika mērvienībām == == Atvasinātās mērvienības == Sekunde ir daudzumu fizikālu lielumu mērvienību pamatā, piemēram, ā…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Sekunde. Latvijas Nacionālās enciklopēdijas šķirklis Encyclopædia B…",
+                "…Liekā sekunde ir papildu sekunde universālajam koordinētajam laikam (UTC)…"
+            ]
+            },
+        {
+                "word": "sekundē",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Instrukcijas sekundē (angļu: instructions per second) datoru procesoru ātrdarbīb…",
+                "…ienības. Praksē biežāk lieto terminus tūkstots instrukcijas sekundē (angļu: thousand instructions per second (kIPS)), miljons i…",
+                "…usand instructions per second (kIPS)), miljons instrukcijas sekundē (angļu: million instructions per second (MIPS)) un miljards…",
+                "…on instructions per second (MIPS)) un miljards instrukcijas sekundē (angļu: billion instructions per second (GIPS)). == Skatīt…",
+                "…ērvienību pamatā, piemēram, ātruma pamatmērvienība ir metrs sekundē (m/s), spēku mēra ņūtonos (N), kas ir kilograms×metrs/sekun…",
+                "…kundē (m/s), spēku mēra ņūtonos (N), kas ir kilograms×metrs/sekundē ik sekundi (kg×m/s²), jaudu mēra vatos (W), kas ir džouls s…"
+            ]
+            },
+        {
+                "word": "kvadrātmetri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ad tika ieviesta metriskā sistēma, ārs tika definēts kā 100 kvadrātmetri, un hektārs (\"hekto-\" + \"ārs\") tādējādi bija 100 āri jeb 1⁄…"
+            ]
+            },
+        {
+                "word": "kubikmetri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…rp malkas pagalēm. Vidēji vienā sterā ir aptuveni 0,6 — 0,7 kubikmetri koksnes. == Skatīt arī == Metrs Kubs == Atsauces ==…"
+            ]
+            },
+        {
+                "word": "promiles",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…romile ir vienāda ar procenta desmitdaļu. Promili apzīmē ar promiles zīmi, ko pieraksta ‰, tā ir procenta zīme (%) ar pievienotu…",
+                "…āļumu mēra promilēs (‰). Vidējais okeānu ūdens sāļums ir 35 promiles (35 grami sāls katrā litrā ūdens).[nepieciešama atsauce] Ūd…",
+                "…skajas līcī. Baltijas jūras sāļums ir ļoti mazs — tikai 5—7 promiles,[nepieciešama atsauce] bet Rīgas līcī tas ir tikai piecas p…",
+                "…s,[nepieciešama atsauce] bet Rīgas līcī tas ir tikai piecas promiles.[nepieciešama atsauce]…"
+            ]
+            },
+        {
+                "word": "dalīts",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…1980–81, 1981–82, 1982–83, 1983–84 FA Charity Shield: 1977 (dalīts), 1979, 1980,1982, 1986 (dalīts) Eiropas kauss: 1977–78, 19…",
+                "…84 FA Charity Shield: 1977 (dalīts), 1979, 1980,1982, 1986 (dalīts) Eiropas kauss: 1977–78, 1980–81, 1983–84 Eiropas Superkaus…",
+                "…8–89 Anglijas Līgas kauss: 2011–12 FA Charity Shield: 1986 (dalīts), 1988, 1989, 1990 (dalīts) Blackburn Rovers Anglijas Premj…",
+                "…2011–12 FA Charity Shield: 1986 (dalīts), 1988, 1989, 1990 (dalīts) Blackburn Rovers Anglijas Premjerlīga: 1994–95 Celtic Skot…",
+                "…trē Beninas staciju un telekomunikāciju birojs. Domēns tiek dalīts divās kategorijās: publiskie domēni (.bj, .gouv.bj, .mil.bj…"
+            ]
+            },
+        {
+                "word": "plusmīnuss",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "divsimtais",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tūkstošais",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "divtūkstošais",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "desmitais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Desmitais tramvajs var būt: 10. tramvaju maršruts (Rīga), \"Desmitais…",
+                "…Desmitais tramvajs var būt: 10. tramvaju maršruts (Rīga), \"Desmitais tramvajs\" (Labvēlīgā tipa dziesma).…"
+            ]
+            },
+        {
+                "word": "piecpadsmitais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Piecpadsmitais Doktors ir Doktora, BBC zinātniskās fantastikas televīzijas…",
+                "…ASV Konstitūcijas piecpadsmitais grozījums (angļu: Fifteenth Amendment to the United States…",
+                "…, bet nepieciešamais štatu skaits to ratificēja 1870. gadā. Piecpadsmitais grozījums kļuva par nozīmīgu juridisko pamatu afroamerikāņu…"
+            ]
+            },
+        {
+                "word": "divdesmitajos",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "aprīļa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Aprīļa pučs bija Baltijas landesvēra vācu kareivju veidotās Trieci…",
+                "…n Reke, Arnolds fon Maidels. Apvērsuma rezultātā Latvijā no aprīļa līdz jūnijam vienlaikus bija trīs valdības: Pētera Stučkas…",
+                "…nsa fon Manteifela 600 vīru lielā landesvēra Trieciengrupa. Aprīļa sākumā fon der Golcs arī likvidēja vācu garnizona revolucio…",
+                "…tvijas iekšējās lietās. Lai iepazītos ar situāciju, Liepājā aprīļa beigās ieradās Vācijas kara ministrs Gustavs Noske un apsti…",
+                "…atsauce] Niedra piedāvāja, lai vācieši publiski nosoda 16. aprīļa puču, bet Tautas padome jaunam kandidātam uzdod veidot vald…",
+                "…programmu: Baltvācu politiskā apvienība publiski nosoda 16. aprīļa apvērsumu. Vācieši novāc posteņus no Pagaidu valdības ēkām,…"
+            ]
+            },
+        {
+                "word": "gadsimtā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…. gadsimts cilvēces vēsturē ir nozīmīgs daudzās jomās. Šajā gadsimtā strauji pieauga cilvēku skaits uz planētas. Šī iemesla dēļ…",
+                "…vēsturē ir bijusi visstraujākā, kāda jebkad ir bijusi. Šajā gadsimtā arī parādījušies jauni termini, kurus pirms tam nelietoja,…",
+                "…etalurģija, tas lika pamatus tehnoloģiskajai attīstībai 20. gadsimtā. Rūpnieciskā revolūcija aizsākās Eiropā. Viktorijas laikmet…",
+                "…e sekmēja iedzīvotāju skaita pieaugumu rietumu pasaulē. 19. gadsimtā Eiropā divkāršojās iedzīvotāju skaits — no 200 miljoniem lī…",
+                "…zīvotāju skaits — no 200 miljoniem līdz 400 miljoniem. Šajā gadsimtā vairākās pilsētās visā pasaulē iedzīvotāju skaits pārsniedz…",
+                "…61. gadā Krievijā tika atcelta dzimtbūšana. == Laikmeti 19. gadsimtā == Rūpnieciskā revolūcija un Eiropas imperiālisms Viktorija…"
+            ]
+            },
+        {
+                "word": "gadsimta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…as reformācija un turpinājās lielie ģeogrāfiskie atklājumi. Gadsimta laikā tika apgūta un daļēji kolonizēta Amerika un atklāti j…",
+                "…latīņu: Privilegium Unionis cum Magno Ducatu Lithuania). == Gadsimta celtnes == == Atsauces ==…",
+                "…ideoloģija, pasaules karš, genocīds, kodolkarš u.c. == 20. gadsimta kari == Angļu-Būru karš (1899—1902) Krievijas—Japānas karš…",
+                "…ienvidslāvijas kari (1991—2001) Kargilas karš (1999) == 20. gadsimta galvenie izgudrojumi un atklājumi ==…"
+            ]
+            },
+        {
+                "word": "gadā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…intersa (Shelley Winters), amerikāņu aktrise (dzimusi 1920. gadā) 21. janvāris — Ibrahims Rugova (Ibrahim Rugova), Kosovas p…",
+                "…s Rugova (Ibrahim Rugova), Kosovas prezidents (dzimis 1944. gadā) 27. janvāris — Johaness Rau (Johannes Rau), Vācijas prezid…",
+                "…haness Rau (Johannes Rau), Vācijas prezidents (dzimis 1931. gadā) === Februāris === 21. februāris — Genadijs Aihī (Генна́дий…",
+                "…ги́), čuvašu izcelsmes dzejnieks un tulkotājs (dzimis 1934. gadā) 23. februāris — Telmo Sarra (Telmo Zarra), Spānijas futbol…",
+                "…elmo Sarra (Telmo Zarra), Spānijas futbolists (dzimis 1921. gadā) 28. februāris — Ouens Čemberlens (Owen Chamberlain), ASV f…",
+                "…ns Čemberlens (Owen Chamberlain), ASV fiziķis (dzimis 1920. gadā) === Marts === 11. marts — Slobodans Miloševičs (Slobodan M…"
+            ]
+            },
+        {
+                "word": "gada",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…2004. gada vasaras olimpiskās spēles notika Atēnās, Grieķijā, no 2004.…",
+                "…vasaras olimpiskās spēles notika Atēnās, Grieķijā, no 2004. gada 13. augusta līdz 29. augustam. Spēlēs piedalījās 10 625 atl…",
+                "…sava olimpiskā komiteja. Tā bija arī pirmā reize kopš 1896. gada, kad olimpiāde notiek Grieķijā. == Spēļu rīkošanas vietas i…",
+                "…eķijā. == Spēļu rīkošanas vietas izvēle == Atēnas par 2004. gada olimpisko spēļu mājvietu tika izvēlētas 1997. gada 5. septe…",
+                "…ar 2004. gada olimpisko spēļu mājvietu tika izvēlētas 1997. gada 5. septembrī Starptautiskās Olimpiskās komitejas 106. sanāk…",
+                "…anhuana, Seviļa un Sanktpēterburga. == Gatavošanās == 2004. gada 13. novembrī Grieķijas valdība paziņoja kopējās izmaksas pa…"
+            ]
+            },
+        {
+                "word": "gads",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Gads ir laika mērvienība. To parasti izprot kā laika intervālu,…",
+                "…ir gada ilgums. Mūsdienās visbiežāk tiek lietots kalendāra gads, kurā ir 365 vai 366 dienas (precīzs dienu skaits nav tāpēc…",
+                "…riods ap Sauli nav vienāds ar veselu dienu skaitu). Dažkārt gads tiek saistīts arī ar citām planētām, piemēram, Marss vienu…",
+                "…is laika intervāls tiek saukts par Marsa gadu. == Kalendāra gads == Mūsdienās kalendāra gads tiek lietots visbiežāk. Kalendā…",
+                "…ts par Marsa gadu. == Kalendāra gads == Mūsdienās kalendāra gads tiek lietots visbiežāk. Kalendāra gads ir laika posms, kas…",
+                "…Mūsdienās kalendāra gads tiek lietots visbiežāk. Kalendāra gads ir laika posms, kas sākas 1. janvārī un beidzas tā paša gad…"
+            ]
+            },
+        {
+                "word": "tūkstoš deviņi simti",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "simtā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…un tās apzīmēšanai lieto prievārdu centi-, piemēram, metra simtā daļa ir centimetrs (cm), grama simtā daļa ir centigrams (cg…",
+                "…enti-, piemēram, metra simtā daļa ir centimetrs (cm), grama simtā daļa ir centigrams (cg). Kāda lieluma simtās daļas sauc par…",
+                "…vārda izcelsme nāk no latīņu vārda centum, kas nozīmē simts/simtā. 1 cm = 10 mm = 0,01 m = 0,00001 km == Imperiālajā sistēmā…"
+            ]
+            },
+        {
+                "word": "piektā gada",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "otrajā gadā",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "piektais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Piektais elements\" (angļu: The Fifth Element) ir 1997. gada Francija…",
+                "…ēdeklī. Tomēr Lilū nav parasta meitene — viņa ir galvenais (piektais) elements, bez kura ļaunumu apturēt nav iespējams. == Ārējā…",
+                "…Piektais pārnesums (angļu: Fifth Gear) bija Lielbritānijas televīzij…"
+            ]
+            },
+        {
+                "word": "piektā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Piektā deklinācija jeb -ei deklinācija ir viena no sešām lietvārdu…",
+                "…Piektā avēnija (angļu: Fifth Avenue) ir iela Manhatanas centrā, Ņu…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Piektā avēnija. Fifth Avenue Directory and Images == Atsauces ==…"
+            ]
+            },
+        {
+                "word": "piektajā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…likas politiskās sadrumstalotības, kurā dominēja centristi, Piektajā republikā līdz 1962. gadam izveidojās divu politisko pretpo…",
+                "…istēma, kas noveda pie vairāku partiju veidotām koalīcijām. Piektajā republikā ieviesa divpakāpju mažoritāro vēlēšanu sistēmu, k…"
+            ]
+            },
+        {
+                "word": "astotais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Augusts (latīņu: Augustus) ir gada astotais mēnesis, un viens no septiņiem mēnešiem, kuram ir 31 diena.…",
+                "…startē apgrieztā secībā, tātad tas, kurš sestdien finišēja astotais, svētdien startē no pirmās starta vietas, bet sestdienas uz…"
+            ]
+            },
+        {
+                "word": "astotā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Astotā klase\" (angļu: Eighth Grade) ir 2018. gada ASV komēdijdrāma…",
+                "…deo ar motivējošiem padomiem, lai palīdzētu citiem. Filmas \"Astotā klase\" pirmizrāde notika 2018. gada 19. janvārī Sandensas k…",
+                "…komēdijā\". Nacionālā kinofilmu pārraudzīšanas padome filmu \"Astotā klase\" atzina par vienu no 2018. gada labākajām filmām. Tīm…",
+                "…\"Astotā jūdze\" (angļu: 8 Mile) ir 2002. gada ASV drāmas filma, kura…"
+            ]
+            },
+        {
+                "word": "astotajā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Astotajā Pekinas olimpisko spēļu dienā sacensības norisināsies 24 sp…"
+            ]
+            },
+        {
+                "word": "septītais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Septītais zīmogs\" (zviedru: Det sjunde inseglet) ir 1957. gada Zviedr…",
+                "…\"Septītais dēls\" (angļu: Seventh Son) ir 2014. gada ASV fantāzijas fil…",
+                "…īts ar īpašām spējām un spēj uzveikt ļaunos spēkus. Filmas \"Septītais dēls\" pirmizrāde notika 2014. gada 17. decembrī un to izpla…"
+            ]
+            },
+        {
+                "word": "septītā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…\"Septītā gada drudzis\" (angļu: The Seven Year Itch) ir 1955. gada AS…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Septītā gada drudzis. IMDb profils (angliski) AllMovie profils (ang…"
+            ]
+            },
+        {
+                "word": "otrajā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…irmas kampaņā 1942. gada jūnijā — 1943. gada septembrī, bet otrajā kampaņā 1944. gada janvarī — novembrī viņi cieta sakāvi. Sa…",
+                "…et raksts (krieviski) Leiša E. Plāns \"Barbarosa\" (latviski) Otrajā pasaules karā iesaistīto valstu uniformu katalogs (angliski…"
+            ]
+            },
+        {
+                "word": "ceturtais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Ceturtais Krusta karš (1202 — 1204) tika organizēts pēc pāvesta Inoce…",
+                "…\"Ceturtais protokols\" (angļu: The Fourth Protocol) ir 1987. gada spieg…"
+            ]
+            },
+        {
+                "word": "divdesmitais",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Ardievu, divdesmitais gadsimt! \" ir Latvijas dokumentālā filma, kas izdota 2006.…"
+            ]
+            },
+        {
+                "word": "trīsdesmitajā",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tūkstoš",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…“Tūkstoš un vienas nakts pasakas” (arābu: كتاب ألف ليلة وليلة, kitāb…",
+                "…ldnieks lika šo sievieti sodīt ar nāvi. Šeherezāde ar viltu tūkstoš un vienu nakti pēc kārtas savu stāstu beidz pašā interesant…",
+                "…لة (kitāb ʾalf layla wa-layla) burtiski nozīmē “Grāmata par tūkstoš un vienu nakti”. Nosaukums jau pats par sevi norāda stāstu…",
+                "…ta daļas ar virsrakstu kitāb ḥadīth alf layla (“Grāmata par tūkstoš nakšu stāstiem”), kas apliecina īsāko, vēl bez piedēkļa wa-…",
+                "…ms savā darbā Fihrist min persiešu priekšteci hezār afsān (“Tūkstoš stāsti”), kura stāstu krājums sakrīt ar vēlākajām arābu “Tū…",
+                "…oš stāsti”), kura stāstu krājums sakrīt ar vēlākajām arābu “Tūkstoš un vienas nakts pasakām”. 12. un 13. gadsimta liecības no K…"
+            ]
+            },
+        {
+                "word": "Celsija",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Celsija grāds (°C) ir temperatūras mērvienība. 100 grādos iedalīta…",
+                "…ratūras mērīšanas skala nosaukta zviedru zinātnieka Andersa Celsija vārdā: 1742. gadā viņš piedāvāja temperatūras mērīšanai izm…",
+                "…kikrātuvē par šo tēmu ir pieejami multivides faili. Skatīt: Celsija grāds. Encyclopædia Britannica raksts (angliski) Krievijas…",
+                "…Celsijs var būt: Celsija grāds — temperatūras mērvienība. == Cilvēki ar šādu uzvārdu…",
+                "…1745. gadā Kārlis Linnejs to apgrieza, izveidojot mūsdienu Celsija temperatūras skalu. == Biogrāfija == Celsijs dzimis 1701. g…",
+                "…Celsijs dzimis 1701. gada 27. novembrī, Upsālā, Zviedrijā. Celsija tēvs — Nils, kā arī abi vectēvi Magnuss Celsijs un Anderss…"
+            ]
+            },
+        {
+                "word": "grādi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "grādu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "procenti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Procenti ir naudas summa, ko nopelna aizdevējs, tā ir atlīdzība par…",
+                "…vuma atmaksas gaidīšanas laiku. Kad cilvēks aizņemas naudu, procenti parasti tiek izmaksāti no pamatsummas. Maksas lielums proce…",
+                "…ālās bankas noteiktajām bāzes likmēm vai inflācijas līmeņa. Procenti var tikt aprēķināti pēc vienkāršo procentu vai salikto proc…",
+                "…vienkāršo procentu vai salikto procentu metodes. Vienkāršie procenti tiek aprēķināti tikai no sākotnējās pamatsummas, savukārt s…",
+                "…rēķināti tikai no sākotnējās pamatsummas, savukārt saliktie procenti tiek aprēķināti arī no iepriekš uzkrātajiem procentiem, tād…",
+                "…= 4000. Pagastā dzīvo 300 kaķi, no kuriem 75 ir melni. Cik procenti no visiem kaķiem ir melni? Atbilde: 75 = x% × 300 = (x / 10…"
+            ]
+            },
+        {
+                "word": "procentu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ocentos par aizņēmumu vai noguldījumu bankā tiek saukts par procentu likmi. Procentu likme var būt fiksēta vai mainīga. Fiksētā…",
+                "…ēmumu vai noguldījumu bankā tiek saukts par procentu likmi. Procentu likme var būt fiksēta vai mainīga. Fiksētā procentu likme s…",
+                "…likmi. Procentu likme var būt fiksēta vai mainīga. Fiksētā procentu likme saglabājas nemainīga visu aizdevuma vai noguldījuma p…",
+                "…periodu, nodrošinot stabilitāti un prognozējamību. Mainīgā procentu likme var mainīties atkarībā no tirgus apstākļiem, piemēram…",
+                "…flācijas līmeņa. Procenti var tikt aprēķināti pēc vienkāršo procentu vai salikto procentu metodes. Vienkāršie procenti tiek aprē…",
+                "…enti var tikt aprēķināti pēc vienkāršo procentu vai salikto procentu metodes. Vienkāršie procenti tiek aprēķināti tikai no sākot…"
+            ]
+            },
+        {
+                "word": "kilometri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…Kilometri stundā, saīsinājums km/h, ir ātruma mērvienība. Objekts, ka…"
+            ]
+            },
+        {
+                "word": "kilometru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 1,
+                "examples": [
+                "…rojas savienojošā līnija uz Daugavpils apvedceļa līnijas 8. kilometru. 383. kilometrā vienceļa līnija pāriet divceļu līnijā Dauga…",
+                "…trodas FUES/WILD postenis. == Vēsture == 1917. gadā apmēram kilometru no tagadējās pieturas uz Glūdas pusi atradās stacija Lone.…"
+            ]
+            },
+        {
+                "word": "centimetri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…\"Pieci centimetri sekundē\" (japāņu: 秒速5センチメートル, Byōsoku Go-Senchimētoru) ir 2…",
+                "…ā. Ja jāaprēķina, cik lielam attālumam dabā atbilst vairāki centimetri uz kartes, tad šo centimetru daudzumu reizina ar kartes mēr…"
+            ]
+            },
+        {
+                "word": "milimetri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…metrā ir tūkstotis milimetru un vienā centimetrā ir desmit milimetri. Viens milimetrs ir vienāds ar 1000 mikrometriem vai 100000…",
+                "…metriem. Tā kā colla oficiāli tiek definēta kā precīzi 25,4 milimetri, tad milimetrs ir vienāds ar precīzi 5⁄127 (≈ 0,03937) coll…",
+                "…ai bīdmēru. Uz metriskā lineāla mazākie mērījumi parasti ir milimetri. Augstas kvalitātes inženierijas lineālus var iedalīt ar so…",
+                "…normālais atmosfēras spiediens, jeb 760 dzīvsudraba stabiņa milimetri vienādi ar 101 325 paskāliem jeb 1013,25 hektopaskāliem lie…",
+                "…iegusi aptuveni 740 milimetru, kas ir vairāk par normu (667 milimetri) un krietni vairāk nekā 2015. gadā (600 milimetru). 2014. g…",
+                "…etru). 2014. gadā nokrišņu daudzums Latvijā vidēji bija 725 milimetri. Starp pēdējiem gadiem mitrākais bijis 2010. gads (855 mili…"
+            ]
+            },
+        {
+                "word": "kvadrātkilometri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…u. Lielākā ila pilsēta Artvina. Ila kopējā platība ir 7 436 kvadrātkilometri un 2010. gadā Artvinas ilā kopumā dzīvoja 164 759 iedzīvotā…",
+                "…dzīvoja 187 758 iedzīvotāju, bet tā kopējā platība ir 2 140 kvadrātkilometri. == Ārējās saites == Vikikrātuvē par šo tēmu ir pieejami mu…"
+            ]
+            },
+        {
+                "word": "komats",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Komats (,) ir pieturzīme. Pēc izskata tas ir līdzīgs apostrofam, b…",
+                "…. Šiem likumiem ir divi izņēmumi, kuru gadījumos nav jāliek komats saikļu \"un\" un \"vai\" priekšā: ja saiklis saista divus vienl…",
+                "…ierakstā skaitļa veselās daļas un decimāldaļas atdalīšanai. Komats tiek plaši izmantots daudzās programmēšanas valodās kā atda…",
+                "…Peldošais komats jeb peldošais punkts (angļu: floating point) datorzinātnē i…",
+                "…erbrace {-4} ^{\\text{kāpinātājs}}}.} == IEEE 754: peldošais komats mūsdienu datoros == Elektronikas un Elektrotehnikas inženie…",
+                "…par šo tēmu ir pieejami multivides faili. Skatīt: Peldošais komats. Encyclopædia Britannica raksts (angliski)…"
+            ]
+            },
+        {
+                "word": "kvadrātā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…rātu apvilktās riņķa līnijas rādiuss, r {\\displaystyle r} — kvadrātā ievilktās riņķa līnijas rādiuss. Kvadrāta diagonāles garums…",
+                "…agonāles garums ir d = a 2 {\\displaystyle d=a{\\sqrt {2}}} . Kvadrātā ievilktās riņķa līnijas rādiuss ir r = a 2 {\\displaystyle r…",
+                "…, kur R — ap kvadrātu apvilktās riņķa līnijas rādiuss, r — kvadrātā ievilktās riņķa līnijas rādiuss, a — kvadrāta malas garums.…",
+                "…vesela skaitļa reizinājums ar sevi. Piemēram, 9 ir skaitlis kvadrātā, jo tas ir vienāds ar 32 un to var rakstīt kā 3 × 3. Skaitļ…",
+                "…o tas ir vienāds ar 32 un to var rakstīt kā 3 × 3. Skaitļus kvadrātā n skaitlim pieraksta kā n × n vai biežāk sastopamo, kāpināt…",
+                "…s n2. Kvadrātveida skaitļi ir nenegatīvi . Tas ir, skaitlis kvadrātā vienmēr būs lielāks vai vienāds ar 0. Skaitļus sauc par ska…"
+            ]
+            },
+        {
+                "word": "mīnuss",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…mēr kļuva par turnīra uzvarētāju, bija izslēgšanas sistēmas mīnuss. 2010. gadā FIDE uzlaboja esošo izspēles sistēmu. No 2011.…"
+            ]
+            },
+        {
+                "word": "reiz",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Reiz prērijā (angļu: Home on the Range) ir 2004. gada animācijas…",
+                "…\"Reiz rietumos\" (angļu: Once Upon a Time in the West, itāļu: C'er…",
+                "…tika saīsināta no 166 līdz 145 minūtēm, bija neveiksmīga. \"Reiz rietumos\" ir pirmā filma no Leones \"reiz\" triloģijas. Tai s…",
+                "…bija neveiksmīga. \"Reiz rietumos\" ir pirmā filma no Leones \"reiz\" triloģijas. Tai sekoja Duck, You Sucker! (1971) un \"Reiz A…",
+                "…\"reiz\" triloģijas. Tai sekoja Duck, You Sucker! (1971) un \"Reiz Amerikā\" (1984). 2009. gadā filma tika iekļauta ASV Kongres…",
+                "…\"Reiz Amerikā\" (angļu: Once Upon a Time in America, itāļu: C'era…"
+            ]
+            }
+        ],
+    }
+    
