@@ -246,7 +246,13 @@ export function normalizeWelsh(input: string): string {
     //     THE OPERAND MUST END IN A DIGIT. `[\d,]*` also matches a trailing CLAUSE comma, and since this
     //     rule now re-emits the operand as words rather than `$2` verbatim, that comma was consumed rather
     //     than passed through: the corpus's `ers 1995-96, pan gyrhaeddodd` lost its pause.
-    s = s.replace(/(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])(\s?(?:km|kg|mm|cm|m)(?![\p{L}\p{M}]))?(?![%\p{Sc}])/gu,
+    // ⚠ THE RIGHT GUARD REJECTS A DIGIT AND A DOT-BEFORE-A-DIGIT, NOT A BARE DOT (playbook trap 58). It was
+    //    `(?![\d.])`, so every clause-final span was declined and fell back to two juxtaposed cardinals with
+    //    no `i` between them — `6-6.` read *χwˈeːχ χwˈeːχ*, `7-2.` read *sˈaᶦθ dˈaᶤ*. That is worse here than
+    //    in most layers, because Welsh reads a SCORE as a range on purpose (the mutation note above), so the
+    //    dot was suppressing exactly the reading this rule exists to produce. What the exclusion is for is a
+    //    CONTINUATION of the number, and a following digit is what tests that.
+    s = s.replace(/(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d]|\.\d)(\s?(?:km|kg|mm|cm|m)(?![\p{L}\p{M}]))?(?![%\p{Sc}])/gu,
         (m0, a: string, b: string, unit?: string) => {
             const n = Number(b.replace(/,/gu, ""));
             if (!Number.isSafeInteger(n)) return m0;

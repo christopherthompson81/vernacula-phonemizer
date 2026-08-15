@@ -147,3 +147,19 @@ describe("telugu text normalization", () => {
         expect(phonemize("120 m³", "te")).toContain("kjˈuːbik mˈiːʈaɾlu");
     });
 });
+
+
+// ⚠ TRAP 58 REACHED TELUGU THROUGH THE YEAR RULE — this layer has no range rule at all, and the same
+// one-character guard defect arrived by a different door. `(?![\d.,])` declined every year that ends a
+// clause, and declining did not leave silence: the numeral fell through to the plain cardinal, so the
+// REGISTER changed without any leak class being able to see it.
+describe("Telugu — a year that ends a clause is still a year", () => {
+    test("the year reading survives a trailing mark", () => {
+        const year = phonemize("1995", "te").trim();
+        expect(phonemize("1995.", "te").trim()).toBe(`${year} .`);
+        expect(phonemize("1749,", "te").trim().startsWith("pˈad̪iheːɖu")).toBe(true); // year, not the cardinal
+    });
+    test("and a decimal is still not a year — Telugu's decimal is the DOT", () => {
+        expect(phonemize("1995.5", "te").trim()).not.toBe(`${phonemize("1995", "te").trim()} . 5`);
+    });
+});

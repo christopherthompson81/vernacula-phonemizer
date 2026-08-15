@@ -213,7 +213,14 @@ export function normalizeTelugu(input: string): string {
     //    the `(?<![\d.,])` / `(?![\d.,])` guards reject it only while the comma is still there. Every
     //    bare 1100-1999 numeral in this corpus is a year (checked, 25 of them: 1469, 1644, 1912, 1966…);
     //    the 2000s already read correctly as cardinals (రెండు వేల పదకొండు), also audio-confirmed.
-    s = s.replace(/(?<![\d.,])(1[1-9]\d{2})(?![\d.,])/gu, (_m, y: string) => yearToWords(Number(y)));
+    // ⚠ THE TRAILING GUARD REJECTS A CONTINUATION, NOT A CLAUSE MARK (playbook trap 58, and this file has no
+    //    range rule — the same defect reached it through the YEAR rule instead). `(?![\d.,])` declined every
+    //    year that ends a clause, and declining did not leave silence: the numeral fell through to the plain
+    //    cardinal, so `1995` read *pˈãn̪t̪omːid̪i ʋˈãn̪d̪ala…* ("nineteen ninety-five") and `1995.` read
+    //    *ʋˈejːi t̪ˈomːid̪i ʋˈãn̪d̪ala…* ("one thousand nine hundred ninety-five") — the right number in the
+    //    wrong register, which no leak class can see. Telugu's decimal is the DOT, so `.` must still be
+    //    rejected before a digit; the comma is a grouping mark here and step 5 de-groups it just below.
+    s = s.replace(/(?<![\d.,])(1[1-9]\d{2})(?![\d]|\.\d)/gu, (_m, y: string) => yearToWords(Number(y)));
 
     // 5) DIGIT DE-GROUPING, before anything that reads punctuation. A grouping comma is otherwise clause
     //    punctuation: 17,000 was reading as "పదిహేడు <pause> సున్నా" — the pause plus a single zero,

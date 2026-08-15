@@ -183,3 +183,22 @@ describe("Welsh text normalization", () => {
         expect(phonemize("5 m", "cy")).toContain("mˈɛtr");               // the FREE word is metr ×10
     });
 });
+
+
+// ⚠ TRAP 58 — the range/score rule's right guard rejected a bare `.`, so every clause-final span was declined
+// and fell back to two juxtaposed cardinals. That is worse in Welsh than in most layers: this language reads a
+// SCORE as a range on purpose, with soft mutation on the second operand, so the dot was suppressing exactly
+// the reading the rule exists to produce. Both corpus instances, and the mutation is the half to watch.
+describe("Welsh — a score that ends the sentence is still a score", () => {
+    test("the `i` joiner and its mutation survive a full stop", () => {
+        expect(phonemize("6-6.", "cy").trim()).toBe("χwˈeːχ ˈiː χwˈeːχ .");
+        expect(phonemize("7-2.", "cy").trim()).toBe("sˈaᶦθ ˈiː ðˈaᶤ ."); // dau → ddau, the soft mutation
+        expect(phonemize("5-3", "cy").trim()).toBe("pˈɨmp ˈiː drˈiː"); // unchanged without the stop
+    });
+    test("and a decimal right operand is still declined", () => {
+        // ⚠ TESTED AS A TOKEN, NOT A SUBSTRING — `trˈiː` ("three") contains `ˈiː`, so `not.toContain` passes
+        //    or fails for the wrong reason. The same rule this repo applies to attestation: a substring match
+        //    is not a hit. `5-3.5` correctly reads *pump tri pwynt pump* with no joiner between the operands.
+        expect(phonemize("5-3.5", "cy").trim().split(/\s+/u)).not.toContain("ˈiː");
+    });
+});

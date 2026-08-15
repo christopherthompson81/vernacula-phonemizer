@@ -1450,11 +1450,28 @@ except where a sentence ends, and the layer looks finished.
   currency word gone the moment it ran. Ranges: **174 hits across 49 languages**, and that is NOT 49 defects,
   because in Slovene, Slovak and Latvian a trailing `1995.` is itself the ORDINAL marker and excluding a
   following dot may be deliberate. Printed, never failed on.
-- **AND THE RANGE CLASS WAS THEN SWEPT, ONCE THE ORDINAL WORRY WAS MEASURED AWAY.** The 49 languages were not
-  49 defects only because a trailing `1995.` might be an ordinal — so that was checked directly, by comparing
-  the numeral WORD for `5` against `5.` in all 47 whose range rule declined a clause-final dot. **ZERO read it
-  as an ordinal.** The dot was protecting nothing, and it came out of the right-hand guard in wo, su, so, sn,
-  ee and nya (2/4/4/8/3/7 segments, 0 regressions) after lg, lt, mn and et.
+- **THE RANGE CLASS WAS THEN SWEPT — AND THE PROBE THAT LICENSED THE SWEEP WAS ITSELF WRONG, WHICH IS THE
+  LESSON WORTH MORE THAN THE SWEEP.** The 49 were not 49 defects only if a trailing `1995.` might be an
+  ordinal, so that was "checked directly" by comparing the numeral WORD for `5` against `5.` across all 47.
+  It returned **zero ordinals**, and that was reported as a finding and written into four agent briefs.
+  ⚠ **IT WAS AN ARTEFACT OF THE PROBE.** `sl` and `sk` both DO implement an ordinal-dot reading, and both
+  discriminate it by the word that FOLLOWS: `sl 5. stoletju` → *pɛtɛm stɔlɛtju*, `sk 5. storočí` →
+  *pˈɪ̯atɔm stˈɔrɔt͡ʃiː*, each an ordinal in the locative. A bare `5.` has no follower, so in every language
+  it fell through to cardinal-plus-pause and the probe returned the SAME ANSWER FOR EVERY INPUT — the tell
+  this document already names for `attest.ts` in an unspaced script (trap 19) and for `sources.ts` with the
+  espeak tier disconnected. Thirteen languages, thirteen identical verdicts, and it read as a green light.
+  **A probe that cannot express the distinction it is testing reports the absence of the distinction.**
+  What saved the sweep was not the probe: each language was measured on its own corpus before being touched,
+  which is why `sl` was left alone (its range rule runs BEFORE its ordinal steps, so the dot guard currently
+  decides which rule claims `151.` — a design question, not a guard bug) and `sk` was found to be declined by
+  its LEFT guard regardless. The dot did come out in wo, su, so, sn, ee, nya, ht, tn, ln, st, jv, nso, za,
+  rw, rn, ki, cdo, lg, bm, ps and ak — each on its own diff — after lg, lt, mn and et.
+- **AND "REMOVE THE DOT" WOULD HAVE BEEN THE WRONG SWEEP: NARROW IT TO `[.,]\d`.** Sesotho is the worked
+  example. The sentence carrying `73–94.` also carries `etsa:10.1111/1469-8219.00039`, whose inner pair is
+  ascending, digit-dash-digit and preceded by `/` — which is missing from st's lookbehind, so the trailing dot
+  was the ONLY guard declining that DOI. What the exclusion is for is a CONTINUATION of the number, and a
+  following digit is what tests that; four of the five files in one batch already spell the narrow form out
+  for their own de-grouping arms, three lines above the range rule that did not follow it.
 - **THE COMMA IS A SEPARATE QUESTION AND SPLIT THREE WAYS, WHICH IS THE REUSABLE PART.** Where the language
   writes the DECIMAL COMMA (wo, su) it stays, because it is what declines a decimal right operand. Where the
   language writes the decimal POINT it can go — but only because *something else* is refusing the shapes it
