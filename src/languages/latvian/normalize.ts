@@ -180,7 +180,109 @@ const SYMBOLS = makeSymbolNormalizer({
 const GROUP_SPACE = /(?<=\d)[ \u00a0\u202f](?=\d{3}(?!\d))/gu;
 
 /**
- * 2. THE ORDINAL PERIOD — the largest class in the language and the one that was doing real damage.
+ * 2. DOTTED ABBREVIATIONS — and the reason this runs before the ordinal step is that its periods are the
+ * same periods.
+ *
+ * ⚠ EACH DOT WAS A CLAUSE BREAK AND EACH FRAGMENT A FAKE WORD. `p.m.ē.` — the era marker, ×20 in the
+ * retained text and 1,008 corpus-wide — was reading as *p . m . ēː .*: three letter-fragments and FOUR
+ * pauses inside what is one three-word phrase. `u.c.` came out *u . t͡s .*, `t.i.` as *t . i*. Nothing in the
+ * pipeline could see this: no digit leaks, no sign is dropped, and every fragment is a legal Latvian sound.
+ *
+ * ⚠ ONLY INVARIANT EXPANSIONS ARE HERE. Every entry below is a fixed phrase or an adverb that does not
+ * inflect, so expanding it claims no case. `gs.` (gadsimts), `izd.` (izdevums) and bare `sk.` are
+ * DELIBERATELY ABSENT for exactly the reason the ordinal table is closed: the abbreviation HIDES the noun's
+ * case, and `XII gs. Rietumeiropā` wants the locative while `(10.–12. gs.)` wants the nominative. Expanding
+ * to a citation form would put a real Latvian word in the wrong case — worse than the raw `gs` a RAW-LATIN
+ * gate can see. They stay red until the case is derivable.
+ *
+ * SOURCING — `attest.ts` on lv.wikipedia, tok/arts: `pirms mūsu ēras` 4/3, `mūsu ēras` 4/3, `tai skaitā` 4/3,
+ * `tamlīdzīgi` 3/3, `piemēram` 34/3, `un citi` 10/6, `un tā tālāk` 8/6, `tas ir` 4/4, `pulksten` 10/3.
+ * ⚠ THE LAST FOUR NEEDED A WIDER SAMPLE, and that is worth recording: at `--limit 3` they came back ABSENT,
+ * and at `--limit 12` all four are attested. An instrument failing toward false ABSENCE is the safe
+ * direction, but it is still a failure, and a zero from a three-article probe is not evidence.
+ */
+const ABBREVIATION: Readonly<Record<string, string>> = {
+    "p.m.ē.": "pirms mūsu ēras",
+    "m.ē.": "mūsu ēras",
+    "u.tml.": "un tamlīdzīgi",
+    "u.t.t.": "un tā tālāk",
+    "t.sk.": "tai skaitā",
+    "utt.": "un tā tālāk",
+    "u.c.": "un citi",
+    "t.i.": "tas ir",
+    "piem.": "piemēram",
+    "plkst.": "pulksten",
+};
+
+/** Longest key first, so `m.ē.` cannot claim the tail of `p.m.ē.` and `t.t.` cannot split `u.t.t.`. */
+const ABBREVIATION_RE = new RegExp(
+    `(?<![\\p{L}\\p{M}.])(?:${Object.keys(ABBREVIATION)
+        .sort((a, b) => b.length - a.length)
+        .map((k) => k.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"))
+        .join("|")})`,
+    "giu",
+);
+
+/**
+ * `lpp.` and `nr.` are counted nouns rather than fixed phrases, so they take the agreement rule — `160 lpp.`
+ * is *simts sešdesmit lappuses* and `1 lpp.` *viena lappuse*. `lappuse` 7 tok / 3 arts, `lappuses` 18/3,
+ * `numurs` 25/3. ⚠ `nr.` PRECEDES its figure (`nr. 859`) and so takes the citation nominative — there is no
+ * preceding count for it to agree with, which is why it is a plain string and not a pair.
+ */
+const PAGE: CountForms = pair("lappuse", "lappuses");
+const NUMBER_ABBREV = "numurs";
+
+function abbreviations(text: string): string {
+    return text
+        // the counted one first: it needs the figure that the generic rule would not look at
+        // ⚠ THE TRAILING DOT IS OPTIONAL, because the corpus's one instance does not write it: the
+        // bibliography line ends `— 160 lpp` with no period at all. A required dot left it as a raw leak.
+        // Safe here in a way it would not be for `nr`, since `lpp` is not a word or a plausible fragment.
+        .replace(/(?<![\p{L}\p{M}])(\d+)(\s*)lpp\.?(?![\p{L}\p{M}])/giu, (_w, fig: string, gap: string) => `${fig}${gap || " "}${PAGE[countForm(Number(fig))]}`)
+        .replace(/(?<![\p{L}\p{M}.])nr\.(?=\s*\d)/giu, NUMBER_ABBREV)
+        .replace(ABBREVIATION_RE, (m: string) => ABBREVIATION[m.toLowerCase()] ?? m);
+}
+
+/**
+ * 3. AN ORDINAL RANGE — `18.—20. gadsimtā`, `60.—70. gados`, `469.–399. gads`. Both figures are ordinals and
+ * BOTH agree with the one noun that follows, so the case is read off that noun exactly as in the single
+ * case; the dash is the range word this file already sources (`līdz`, 55 standalone tokens).
+ *
+ * ⚠ THIS RUNS ABOVE BOTH `ordinalPeriod` AND `RANGE`, and it has to. `ordinalPeriod` would claim the SECOND
+ * figure alone and leave the first as a bare cardinal with its period intact — which is what the layer did
+ * before this step, producing *astoņpadsmit . divdesmitajā gadsimtā*, a false clause break inside the range.
+ * `RANGE` would replace the dash first and destroy the shape this pattern matches on.
+ *
+ * ⚠ EVERY ONE of the 17 ordinal-range sites in the retained text is followed by a tabulated head noun
+ * (`gadsimtā`, `gadsimtu`, `gadsimtam`, `gados`, `gadu`, `gads`), which is why this is worth a step rather
+ * than a guess: the case is stated in all 17. Where it is not — `10.–12. gs.`, the abbreviation that hides
+ * its case — the whole match is refused and left alone (trap 53), not half-composed.
+ */
+const ORDINAL_RANGE = /(?<![\d.,\p{L}])(\d{1,4})\.\s*[-–—]\s*(\d{1,4})\.(\s+)(\p{Ll}[\p{L}\p{M}]*)/gu;
+
+function ordinalRange(text: string): string {
+    return text.replace(ORDINAL_RANGE, (whole, a: string, b: string, gap: string, next: string) => {
+        const c = HEAD_NOUN[next.toLowerCase()];
+        const first = c === undefined ? undefined : ordinalWords(Number(a), c);
+        const second = c === undefined ? undefined : ordinalWords(Number(b), c);
+        /**
+         * ⚠ REFUSING MEANS BOTH HALVES, AND IT MUST STILL CONSUME THE PERIODS. Returning `whole` here looked
+         * like a clean refusal and was not: the next step ran on the same text, matched the SECOND figure on
+         * its own and composed it, so `3100.–1550. gadam` — refused here because 3100 is a round hundred —
+         * came out *3100.–tūkstoš pieci simti piecdesmitajam gadam*, one figure ordinalised and the other
+         * left with its period. A refusal that the following step can undo is not a refusal (trap 53).
+         *
+         * So a refused range falls back to the SAME half-measure the single-ordinal step uses: both periods
+         * dropped, both figures left cardinal, the dash read as `līdz`. `10.—12. gs.` → *10 līdz 12 gs.* —
+         * the ordinals are not claimed, and neither are the two false sentence breaks.
+         */
+        if (first === undefined || second === undefined) return `${a} līdz ${b}${gap}${next}`;
+        return `${first} līdz ${second}${gap}${next}`;
+    });
+}
+
+/**
+ * 4. THE ORDINAL PERIOD — the largest class in the language and the one that was doing real damage.
  *
  * Latvian marks an ordinal with a period after the figure, and the period is NOT a sentence end. Two things
  * were wrong before this step: the figure was read as a cardinal, and the clause layer took the dot for a
@@ -235,7 +337,7 @@ function ordinalPeriod(text: string): string {
 }
 
 /**
- * 3. RANGES — *54—57%*, *12—18 °C*, *1615—1684*. The word is `līdz`, which is the corpus's own: 55 standalone
+ * 5. RANGES — *54—57%*, *12—18 °C*, *1615—1684*. The word is `līdz`, which is the corpus's own: 55 standalone
  * tokens across 102 segments, and the corpus writes the collocation `no 12—18 °C` where `no … līdz` is the
  * ordinary frame, so the dash is standing in for exactly this word.
  *
@@ -258,7 +360,7 @@ function ordinalPeriod(text: string): string {
 const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?![\d,.-])/gu;
 
 /**
- * 5. DEGREES. `°C` and `°F` take the scale name; a bare `°` after a figure is `grādi`.
+ * 7. DEGREES. `°C` and `°F` take the scale name; a bare `°` after a figure is `grādi`.
  *
  * ⚠ COORDINATES ARE LEFT ALONE, and the reason is gender. `6°44'` reads *seši grādi četrDESMIT ČETRAS
  * minūtes* — `minūte` is feminine, and `numbers.ts` documents its numerals as masculine-default with gender
@@ -298,7 +400,7 @@ function degrees(text: string): string {
 }
 
 /**
- * 6. THE REMAINING SIGNS. `+34,5 °C` and `+5 °C` are the corpus's shape — a sign attached to an amount rather
+ * 8. THE REMAINING SIGNS. `+34,5 °C` and `+5 °C` are the corpus's shape — a sign attached to an amount rather
  * than an operator between two — and both readings are the same word in Latvian, so no split is needed.
  *
  * ⚠ THE ASCII HYPHEN IS A MINUS HERE, and excluding it was a mistake `review.ts` caught: espeak maps bare `-`
@@ -340,7 +442,7 @@ function signs(text: string): string {
 }
 
 /**
- * 7. THE DECIMAL COMMA — Latvian's decimal separator, and the word is `komats` (espeak `_, komats`; attest
+ * 9. THE DECIMAL COMMA — Latvian's decimal separator, and the word is `komats` (espeak `_, komats`; attest
  * 23 tok / 3 arts). Runs LAST: the shared tier matches `7,6%` as one figure, and converting the comma before
  * it would break that adjacency and drop the sign.
  *
@@ -364,11 +466,13 @@ function decimalComma(text: string): string {
 export function normalizeLatvian(input: string): string {
     let s = input;
     s = s.replace(GROUP_SPACE, ""); // 1. de-group 29 660 → 29660, before anything reads a number
-    s = ordinalPeriod(s); // 2. the ordinal period, before any step consumes a dot
-    s = s.replace(RANGE, `$1 līdz $2`); // 3. ranges, before a dash can be read as a minus
-    s = SYMBOLS(s); // 4. percent, currency, units, rates, exponents
-    s = degrees(s); // 5. ° and the scale names
-    s = signs(s); // 6. the remaining signs
-    s = decimalComma(s); // 7. the decimal comma, last — the tier needs the figure intact
+    s = abbreviations(s); // 2. dotted abbreviations, whose periods are the same periods as step 4's
+    s = ordinalRange(s); // 3. N.–M. + noun, before either half can be claimed separately
+    s = ordinalPeriod(s); // 4. the ordinal period, before any step consumes a dot
+    s = s.replace(RANGE, `$1 līdz $2`); // 5. ranges, before a dash can be read as a minus
+    s = SYMBOLS(s); // 6. percent, currency, units, rates, exponents
+    s = degrees(s); // 7. ° and the scale names
+    s = signs(s); // 8. the remaining signs
+    s = decimalComma(s); // 9. the decimal comma, last — the tier needs the figure intact
     return s;
 }
