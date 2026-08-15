@@ -1,0 +1,105 @@
+// WIKIPEDIA WORD ATTESTATION — eu. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "eu",
+        "wiki": "eu.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kilometro karratu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 15,
+                "substringOnly": 1,
+                "examples": [
+                "…Geografikoki, bi uharte dira: Futuna (iparmendebaldean) (83 kilometro karratu eta 4.871 biztanle dituena) Alofi (hegoekialdean) (32 kilom…",
+                "…rratu eta 4.871 biztanle dituena) Alofi (hegoekialdean) (32 kilometro karratu eta 2 biztanle dituena). Administratiboki, Hoorn uharteetan…",
+                "…a uhartearen ekialdeko zatia eta Alofi uhartea. Orotara, 85 kilometro karratu eta 2993 biztanle ditu. Sigave edo Singave: Futuna uharteko…",
+                "…Sigave edo Singave: Futuna uharteko mendebaldeko herena, 30 kilometro karratu eta 1880 biztanle dituena. == Kanpo estekak ==…",
+                "…arpenak zirela eta, urtean, batez beste, lau metro luze eta kilometro karratu bat luze-zabal handitzen zela jotzen da (gutxi gora-behera,…",
+                "…bikoitza). Egiptoko I. dinastiaren garaietatik, delta 3000 kilometro karratu handitu da (gaur egungo munduko nazioen laurdenek duten aza…"
+            ]
+            },
+        {
+                "word": "kilometro koadro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…te koadro (sistema anglosaxoia) == Ikus, gainera == Azalera Kilometro koadro Zentimetro karratu Eskala Nazioarteko Unitate Sistema == Er…",
+                "…000 1 m2 = 10–4 m2 == Ikus, gainera == Azalera Metro koadro Kilometro koadro Zentimetro Eskala Nazioarteko Unitate Sistema == Kanpo este…",
+                "…Asiako kontinentearen artean. Gutxi gorabehera, milioi bat kilometro koadro da luze-zabalean. == Izena == Nahiz eta NBEk Japoniako itsa…",
+                "…Buenos Aires/General Carrera (Santa Cruz eta Aisén): 1.850 kilometro koadro. Lago Argentino (Santa Cruz): 1.466 kilometro koadro. Viedm…",
+                "…1.850 kilometro koadro. Lago Argentino (Santa Cruz): 1.466 kilometro koadro. Viedma (Santa Cruz eta Magallanes y la Antártica Chilena):…",
+                "…a (Santa Cruz eta Magallanes y la Antártica Chilena): 1.088 kilometro koadro. O'Higgins/San Martín (Aisén eta Santa Cruz): 1.058 kilomet…"
+            ]
+            },
+        {
+                "word": "ehuneko",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Ehunekoa (Euskaltzaindiak ehuneko izena hobetsi duen arren, portzentaje ere deitua) ikur mate…",
+                "…iokidea da, eta letraz-letra idatzita ere adierazi daiteke: ehuneko hirurogei. Hortaz, adierazpenari dagokionez hurrengo baliok…",
+                "…n duena) beste batekin alderatzeko ere erabiltzen da, hauek ehuneko moduan adieraziz 100 zenbakia izendatzaile komun bezala era…",
+                "…a, pixkanaka, hitzezko erreferentzia eguneratzen joan zen, \"ehuneko\" terminora iritsi arte. Hau egitean, kontzeptu honen laburd…",
+                "…ribu anonimo batetik etorri zen, non egileak garai hartako \"ehuneko\" hitzari (italierazko «per cento» kontzeptuari, zehazki) er…",
+                "…a batzuetan, euskara kasu, zenbakiaren aurretik jartzen da (ehuneko 5 esaten delako); ingelesez, gaztelaniaz edo frantsesez ond…"
+            ]
+            },
+        {
+                "word": "kilogramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 88,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ridiozko zilindro baten arabera definitzen zen, Nazioarteko Kilogramo Prototipoa edo Le Grand K, 1889an egina eta Parisko Saint-C…",
+                "…raian normalizatutako kilogramoaren masatik, eta, formalki, kilogramo gisa berretsi zen 1889ko Pisu eta Neurrien lehen Konferentz…",
+                "…eta Pisuen eta Neurrien Nazioarteko Bulegoan dago gordeta. Kilogramo prototipoaren kopia ofizialak eskuragarri daude, 10 urtean…",
+                "…Oraingo definizioaren arabera esan dezakegu orain 100 urte kilogramo bateko masa zuten eta ordutik hona aldatu ez diren uniberts…",
+                "…iek (Frantzian dagoen metalezko prototipoa izan ezik) orain kilogramo bat eta 50 mikrogramoko masa dutela. Hori intuizioaren aurk…",
+                "…ez da benetako kilogramoa, ez erabiltzea aholkatuta dagoen kilogramo-indarra (kgf) baino, kilopond (kp) izenaz ere ezagutua dena…"
+            ]
+            },
+        {
+                "word": "gradu Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 1,
+                "examples": [
+                "…arteko haranean kokatuta, tenperaturak normalean 21 eta 27 gradu Celsius (70 eta 80 gradu Fahrenheit) artekoak dira egunean zehar, e…",
+                "…radu Fahrenheit) artekoak dira egunean zehar, eta 10 eta 16 gradu Celsius (50 eta 60 gradu Fahrenheit) gauez. == Larrua == Cotacachi…",
+                "…ngotik 204 kilometrora. Urteko batez besteko tenperatura 26 gradu Celsius da, eta urteko batez besteko prezipitazioa 655/2296 mm-koa…",
+                "…a gazta. Gazta ondo aireztatutako geletan ontzen da, zortzi gradu Celsius inguruko tenperaturan eta % 80ko hezetasunarekin, bi hilabe…",
+                "…beharra du gelaren tenperatura hotza mantentzeko (21 eta 23 gradu Celsius artean) ordenagailu eta zerbitzarietan gain-beroketak sortu…",
+                "…o absolututik definitu dena, Kelvin da, zeinaren graduazioa gradu Celsius-en bera baita. Hurrengo sarrera bikoitzeko taulan, edozein…"
+            ]
+            }
+        ],
+    }
+    

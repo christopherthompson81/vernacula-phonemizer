@@ -8,6 +8,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { normalizeBasque } from "./normalize.ts";
 
 interface BasqueNumbers {
     ones: string[];
@@ -61,7 +62,7 @@ const SCORES = NUM.scores;
 const HUNDREDS = NUM.hundreds;
 
 /** Basque cardinal 0 ≤ n < 10¹² → the spelled-out words (space-separated). */
-function cardinalWords(n: number): string {
+export function cardinalWords(n: number): string {
     if (n < 20) return ONES[n]!;
     if (n < 100) {
         const score = Math.floor(n / 20), rem = n % 20;
@@ -115,7 +116,10 @@ class BasquePhonemizer implements Phonemizer {
     text(input: string): string {
         // NFC-normalize before tokenizing: Basque ⟨ñ ç⟩ decompose under NFD to base+combining, which fall outside the
         // [a-zñçA-ZÑÇ] token class → NFD input would shatter words and drop the letter.
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        // NORMALIZATION FIRST — see normalize.ts. The shared symbol tier is declared THERE rather than here,
+        // because this language's decimal comma and its glued case endings both have to be sequenced around
+        // it: the tier needs the figure intact, and both of those rules consume it.
+        return assembleClauses(normalizeBasque(input.normalize("NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2])); // Basque vigesimal cardinals
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
