@@ -58,10 +58,17 @@ describe("onnxruntime-node stays optional", () => {
         expect(pkg.dependencies?.["onnxruntime-node"]).toBeUndefined();
     });
 
+    // ⚠ AN EXPLICIT TIMEOUT, BECAUSE THE DEFAULT MEASURES THE WRONG THING. This is the only test in the file
+    // that cold-imports `src/index.ts`, i.e. the whole registry and every language module behind it, and at
+    // the 5 s default it fails under CPU load while passing 3/3 on a quiet machine — observed repeatedly
+    // during a four-agent batch, at `ef8f24a` and on every branch, always with the identical timeout and
+    // never with a wrong reading. What the test asserts is a FALLBACK CONTRACT (an absent optional dep must
+    // degrade, not throw); how long a cold ESM graph takes to resolve is not part of that contract, so the
+    // default turned a green gate into a coin flip and trained readers to discount a red suite.
     test("the neural paths still degrade to the sync engine, whatever ORT does", async () => {
         // The contract the indirection protects: an absent optional dep is a FALLBACK, not an error. Proven
         // against a language whose neural path is opt-in, so this holds with or without the package installed.
         const { phonemize } = await import("../src/index.ts");
         expect(phonemize("hello world", "en").trim()).toBeTruthy();
-    });
+    }, 60_000);
 });

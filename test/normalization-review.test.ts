@@ -19,7 +19,7 @@
  * the repo's own corpora.
  */
 import { describe, expect, test } from "vitest";
-import { localDeclarations, replaceCalls, stripComments, wordLiterals } from "../tools/normalization/review.ts";
+import { localDeclarations, lostTokens, replaceCalls, stripComments, wordLiterals } from "../tools/normalization/review.ts";
 
 /** A haystack whose only job is the sign-in-corpus gate — `hay.text` is what decides whether a currency
  *  name is worth checking at all. */
@@ -228,5 +228,40 @@ describe("the pieces", () => {
     test("stripComments removes both comment forms and leaves a URL alone", () => {
         expect(stripComments("const u = 'https://x/y'; // note\n/* block */ const v = 2;"))
             .toBe("const u = 'https://x/y'; \n const v = 2;");
+    });
+});
+
+
+/**
+ * The `clause-final` check — the comparison that decides whether a rule gave up at a sentence end.
+ *
+ * ⚠ THE POINT OF THESE IS THAT THE GATE CAN FAIL. It was written because the same defect shipped in four
+ * languages in a row (lg, lt, mn, et), and a check that cannot report the thing it was built for is not a
+ * check — the repo has shipped three of those. Each case below is a real reading from that batch.
+ */
+describe("lostTokens — a trailing mark may ADD a pause, never remove a reading", () => {
+    test("a clause-final figure that keeps its reading loses nothing", () => {
+        expect(lostTokens("kːumi seːⁿtimita", "kːumi seːⁿtimita .")).toEqual([]);
+        expect(lostTokens("pˈãt͡s ɖˈʌlʌɾ", "pˈãt͡s ɖˈʌlʌɾ ,")).toEqual([]);
+    });
+
+    test("it reports the word a declining guard dropped — the four shipped defects", () => {
+        // ne: the currency word vanishes when a period follows (found BY this check, on main)
+        expect(lostTokens("pˈãt͡s ɖˈʌlʌɾ", "pˈãt͡s .")).toEqual(["ɖˈʌlʌɾ"]);
+        // et: `lk 137–151.` lost its range joiner — 9 corpus segments, 0 regressions when fixed
+        expect(lostTokens("sˈɑdɑ kˈuni sˈɑdɑ", "sˈɑdɑ sˈɑdɑ .")).toEqual(["kˈuni"]);
+        // mn: `50 000.` read as "fifty, zero" — the grouping word gone
+        expect(lostTokens("tʰawəŋ maŋəɢ", "tʰæw tʰeɡ .")).toEqual(["tʰawəŋ", "maŋəɢ"]);
+    });
+
+    test("MULTISET, not set — a reading that repeats a word must not hide a real loss", () => {
+        // Slovene's `stɔ … stɔ`: if the second `stɔ` counted as already-seen, a lost `dɔ` could be masked
+        expect(lostTokens("stɔ dɔ stɔ", "stɔ stɔ .")).toEqual(["dɔ"]);
+        expect(lostTokens("stɔ stɔ", "stɔ .")).toEqual(["stɔ"]);
+    });
+
+    test("extra tokens are fine — the pause itself is an addition", () => {
+        expect(lostTokens("tˈaf", "tˈaf . ")).toEqual([]);
+        expect(lostTokens("", "tˈaf .")).toEqual([]);
     });
 });

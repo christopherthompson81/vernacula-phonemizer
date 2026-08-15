@@ -114,7 +114,23 @@ export function stripComments(src: string): string {
  * and counting them as one would mark half the tree as declaring a currency. `n % 10` is arithmetic for the
  * same reason: a `%` with whitespace on both sides is a modulo, never a regex (English's ordinal suffix
  * rule is the live instance, inside a `.replace` callback).
+ *//**
+ * Tokens the bare reading has that the CLAUSE-FINAL one lost — the comparison behind the `clause-final`
+ * check. A trailing mark may only ADD a pause token; it can never remove one, so anything missing is a rule
+ * that declined at a sentence boundary. Multiset difference, not set difference: a reading legitimately
+ * repeats a word (`sto … sto`), and treating the second one as already-seen would hide a real loss.
+ * Exported so the gate can be shown to FAIL — see `test/normalization-review.test.ts`.
  */
+export function lostTokens(bare: string, clauseFinal: string): string[] {
+    const rest = clauseFinal.split(/\s+/u).filter(Boolean), out: string[] = [];
+    for (const tok of bare.split(/\s+/u).filter(Boolean)) {
+        const i = rest.indexOf(tok);
+        if (i === -1) out.push(tok); else rest.splice(i, 1);
+    }
+    return out;
+}
+
+
 function withoutOperators(s: string): string {
     return s
         .replace(/\$\{[^{}]*\}/gu, " ")
@@ -692,6 +708,59 @@ async function main(): Promise<void> {
      * A gate that fails six correct languages to catch thirteen broken ones is not worth shipping; a documented
      * count that the sweep can act on is.
      */
+
+    // ── 4a-bis. THE CLAUSE-FINAL PROBE ────────────────────────────────────────────────────────────────
+    /**
+     * DOES THE READING SURVIVE A FULL STOP? Every probe above sits alone; real text ends sentences on
+     * figures, and a right-hand guard written `(?![\d.,…])` then declines the whole match at exactly that
+     * position. The rule looks correct in isolation and silently gives up at a clause boundary.
+     *
+     * ⚠ THIS EXISTS BECAUSE THE SAME DEFECT SHIPPED IN FOUR LANGUAGES IN A ROW, three of them in ONE batch
+     * and by authors who had read the warning: `lg` (`800 m.` kept a bare `m`), `lt` (`už $800.` read the
+     * dollar as silent), `mn` (`350 000.` read as "three hundred fifty, zero"), `et` (`lk 137–151.` lost its
+     * `kuni`, measured at 9 corpus segments gained / 0 regressed). One of them sits one line below the arm
+     * its author had just fixed for this; another sits in a file whose own comment explains the fix for the
+     * COMMA and leaves the DOT. That is the playbook's test for moving a rule off the page and into a tool.
+     *
+     * THE TEST. A trailing mark may only ADD a pause token; it can never remove one. So phonemize the probe
+     * bare and clause-final, and report any token the bare reading has that the clause-final one lost.
+     *
+     * ⚠ WHAT IS IN THE GATE AND WHAT IS ONLY PRINTED, measured over all 189 registered languages before
+     * being wired, because a gate that cries wolf gets switched off:
+     *   · SIGNS, UNITS and SPACE-GROUPING — 6 hits in 3 languages (ne `$5.` loses its currency word; su and
+     *     mos `50 000.` lose the thousand word). All three read as real defects, so these FAIL.
+     *   · RANGES — 174 hits across 49 languages, and that is NOT 49 defects. In Slovene, Slovak, Latvian and
+     *     others a trailing `1995.` is itself the ORDINAL marker, so a range rule excluding a following dot
+     *     may be deliberate and correct. Printed for a human, never failed on. Reading those 49 is a sweep
+     *     task in its own right and the count is recorded here so nobody has to re-derive it.
+     *   · `5 m.` and `50,000.` are DELIBERATELY NOT PROBED. `m.` is Monsieur in French and *metai* (year) in
+     *     Lithuanian, and the comma is the DECIMAL separator in half the fleet — in both shapes the trailing
+     *     mark genuinely changes what the string means, so a lost token is the right answer, not a defect.
+     */
+    const CLAUSE_FINAL: readonly (readonly [string, string, boolean])[] = [
+        ...signCases.map(([n, p]) => [n, p, true] as const),
+        ["unit-km", "5 km", true], ["unit-cm", "5 cm", true], ["unit-kg", "5 kg", true],
+        ["grouped-space", "50 000", true],
+        ["range", "1990-1995", false], ["range-dash", "137\u2013151", false],
+    ];
+    const clauseLost: string[] = [];
+    const clauseLines: string[] = [];
+    for (const [name, probe, gated] of CLAUSE_FINAL) {
+        const bare = say(probe);
+        if (bare === "" || bare.startsWith("THROW")) continue;
+        for (const mark of [".", ","]) {
+            const missing = lostTokens(bare, say(`${probe}${mark}`));
+            if (missing.length === 0) continue;
+            clauseLines.push(`  ${name.padEnd(13)} ${(probe + mark).padEnd(11)} ${gated ? "LOST   " : "  note "} ${missing.join(" ").slice(0, 40)}`);
+            if (gated) clauseLost.push(`${name}${mark}`);
+        }
+    }
+    if (clauseLines.length > 0) {
+        console.log(`\n── clause-final figures (a guard that declines at a sentence end) ──`);
+        for (const l of clauseLines) console.log(l);
+    }
+    note("clause-final", clauseLost.length === 0,
+        clauseLost.length === 0 ? "a trailing . or , loses no reading" : `LOST: ${clauseLost.join(" ")}`);
 
     console.log(`\n── numeral agreement (does the numeral suit its noun? judgement required) ──`);
     for (const probe of ["1:15", "2:00", "21:00", "1 km", "2 km", "5 km", "21 %"])
