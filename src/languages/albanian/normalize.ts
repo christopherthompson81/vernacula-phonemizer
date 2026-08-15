@@ -61,11 +61,26 @@ const UNITS: Record<string, CountForms> = {
     cm: pair("centimetër", "centimetra"),
     mm: pair("milimetër", "milimetra"),
     kg: pair("kilogram", "kilogramë"),
-    // ⚠ `mb` and `mhz` are the two the leak gate found reaching the IPA raw — `3,5MB`, `32MB`, `294,912 Mhz`,
-    // `714 MHz`, ×3 each and written GLUED to the figure. `megabajt` 12 tok / 6 arts; `megaherc` is 2/2, the
-    // thinner of the two and taken because the alternative is the bare Latin letters.
-    mb: pair("megabajt", "megabajtë"),
-    mhz: pair("megaherc", "megahercë"),
+    /**
+     * ⚠ `mb` and `mhz` are the two the leak gate found reaching the IPA raw — `3,5MB`, `32MB`, `294,912 Mhz`,
+     * `714 MHz`, ×3 each. `megabajt` 12 tok / 6 arts; `megaherc` is 2/2, the thinner of the two and taken
+     * because the alternative is bare Latin letters.
+     *
+     * ⚠ BOTH COUNT FORMS ARE THE SINGULAR, AND THAT IS THE ATTESTED FORM RATHER THAN A SHORTCUT. The first
+     * cut declared `megabajtë`/`megahercë` as plurals and both are INVENTIONS: `attest.ts` returns
+     * `megabajtë` **absent** (0 tok / 0 arts) and the corpus writes the singular after every count —
+     * *deri në 50 megabajt*, *1024 megabajt*, *1 megabajt ka 1024 kilobajt*. Since `countForm` returns the
+     * plural slot for every n ≠ 1, the invented word is what would have shipped for essentially all input.
+     * This is the "no form to take, only one to invent" case this file refuses for `±`, and it has to be
+     * refused here too or the refusal there is not a principle.
+     *
+     * ⚠ THESE TWO ARE ALSO READ STANDALONE, which is wider than the evidence. The tier treats a vowel-free
+     * multi-letter key as safe without a figure, so `diçka mb` becomes *diçka megabajt*. Recorded rather than
+     * worked around: it is the tier's documented behaviour, and a bare `mb` in Albanian prose is not a shape
+     * this corpus contains.
+     */
+    mb: pair("megabajt", "megabajt"),
+    mhz: pair("megaherc", "megaherc"),
 };
 
 /**
@@ -198,22 +213,33 @@ const SYMBOLS = makeSymbolNormalizer({
  * likewise; and `1,110.03 km²` — a real corpus line — was refused because its own DECIMAL tail followed the
  * group. A group is mis-segmented only if a further DIGIT follows it, so that is the only thing worth
  * rejecting; a clause mark and a decimal tail are both fine and both now pass.
+ *
+ * ⚠ THE HEAD CANNOT BE `0`, and allowing it made this rule read a PRECISION FIGURE 1000× too large. A
+ * thousands group never begins with a zero, so `0,375`, `0.500 g` and `p = 0,001` are decimals by
+ * construction — but the head was `\d{1,3}`, so they de-grouped to `0375`, `0500` and `0001`, which the
+ * number path then reads as 375, 500 and 1. A probability spoken as a thousand, with nothing leaked and
+ * nothing dropped for a gate to see.
  */
-const GROUP_SEPARATED = /(?<![\d.,])(\d{1,3})((?:[.,  ]\d{3})+)(?!\d)/gu;
+const GROUP_SEPARATED = /(?<![\d.,])([1-9]\d{0,2})((?:[.,  ]\d{3})+)(?!\d)/gu;
 
 /**
  * 6. THE DECIMAL SEPARATOR. Runs LAST, after de-grouping has removed every three-digit group and after the
  * shared tier has matched `4,167 %`-shaped figures whole — converting the mark earlier breaks the
  * number-to-sign adjacency the tier depends on, which is the playbook's standing "units before decimals".
  *
- * ⚠ ONE OR TWO FRACTION DIGITS ONLY. Anything longer either was a group (already removed above) or is not a
- * shape this corpus writes, and claiming it would re-introduce the ambiguity step 1 exists to resolve.
+ * ⚠ THE FRACTION LENGTH IS NOT CHECKED HERE AT ALL, AND THAT IS THE POINT: step 1 has already consumed every
+ * genuine thousands group, so whatever separator survives to this rule is a decimal by elimination. Two
+ * narrower guards were tried and both leaked. `\d{1,2}` alone dropped `3.14159`, which fell through with its
+ * separator intact and read as *tre . katërmbëdhjetë mijë …* — one number as two with a sentence break, the
+ * exact class this layer exists to repair. Adding `|\d{4,}` then still dropped `0,375` and `0.500`, because
+ * a zero-headed figure is refused by step 1 (a group never starts with 0) and has a three-digit fraction.
+ * Letting step 1 do the discriminating and claiming the remainder unconditionally is both simpler and right.
  *
  * ⚠ A LEADING ZERO IN THE FRACTION IS SPOKEN, the Basque defect: reading the fraction as a NUMBER makes
  * `5.09` and `5.9` identical, because `Number("09")` is 9 — the quantity wrong by a factor of ten in
  * well-formed text, and invisible to every gate.
  */
-const DECIMAL = /(?<![\d.,])(\d+)[.,](\d{1,2})(?![\d.,])/gu;
+const DECIMAL = /(?<![\d.,])(\d+)[.,](\d+)(?![\d.,])/gu;
 
 /**
  * 3. RANGES. `deri` ("until") is the corpus's and the wiki's own word — 49 tok / 6 arts — and the corpus
@@ -259,13 +285,26 @@ function degrees(text: string): string {
  * 5. THE SIGNS. `+ 24° Celsius`, `+7° Celsius` and `-38,3 °C` are the corpus's shape — a sign bound to an
  * amount rather than an operator between two — and Albanian uses the same word for both.
  *
+ * ⚠ THE MINUS IS TIGHT AND THE PLUS IS NOT, which looks like an inconsistency and is a measurement. The
+ * corpus writes `+ 24° Celsius` with a space, and it contains NO spaced minus before a figure at all: every
+ * spaced dash in it is a RANGE (`55 – 79°`, `50 - 75 %`, `10 - 18 % argjend`), a date span or an ISBN. So the
+ * spacing is the same discriminator Basque uses — tight is a sign, spaced is punctuation — and widening the
+ * minus to match the plus would claim the ranges instead. The headline defect this file repairs (`-38,3 °C`)
+ * is tight, as are all four of the corpus's negatives.
+ *
+ * ⚠ AND A SUBTRACTION BETWEEN TWO FIGURES IS NOT CLAIMED BY ANYTHING. `10 - 4 = 6` reads as *dhjetë deri
+ * katër barabart gjashtë* — the range rule takes the dash before any sign rule sees it. An ascending-only
+ * guard would separate them, and it is NOT taken: this corpus has no arithmetic subtraction (its `=` sites
+ * are `Ari i bardhë = 50 - 75 % ar`, where the dash IS a range), while it does have a descending range that
+ * such a guard would break — `624–546 p. e. s.`, a BC span, which counts backwards by nature.
+ *
  * ⚠ THE OPERAND-FLANKING AND CODE-OPERATOR GUARDS on `=`, `<` and `>` are the ones the Latvian layer's
  * self-review produced: unguarded, `a==b` says the word twice AND emits a double space, which is the
  * SLOT-GAP class the fleet audit exists to find.
  */
 function signs(text: string): string {
     return text
-        .replace(/(?<![\d\p{L}])\+(?=\s?\d)/gu, `${SIGN.plus} `)
+        .replace(/(?<![\d\p{L}])\+\s?(?=\d)/gu, `${SIGN.plus} `)
         .replace(/(?<![\d\p{L}])[−–-](?=\d)/gu, `${SIGN.minus} `)
         .replace(/(?<![=!<>])(?<=[\d\p{L}\p{M})])\s*=\s*(?=[\d\p{L}(])(?![=<>])/gu, ` ${SIGN.equals} `)
         .replace(/(?<![=!<>])(?<=[\d\p{L}])\s*<\s*(?=[\d\p{L}])(?![=<>])/gu, ` ${SIGN.lessThan} `)

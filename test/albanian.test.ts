@@ -137,4 +137,36 @@ describe("Albanian numbers", () => {
     test("a leading zero in the fraction is not swallowed", () => {
         expect(phonemize("5.09", "sq").trim()).not.toBe(phonemize("5.9", "sq").trim());
     });
+
+    /**
+     * ⚠ REGRESSION GUARDS FROM REVIEW OF #820. Each spoke a figure wrong, and none was visible to a gate.
+     */
+    test("a zero-headed figure is a decimal, never a thousands group", () => {
+        // `\d{1,3}` as the group head made `0,375` de-group to `0375`, which the number path reads as 375 —
+        // a probability or precision figure spoken a THOUSAND times too large, with nothing leaked.
+        expect(phonemize("0,375", "sq").trim()).toContain("ˈpɾɛsja");
+        expect(phonemize("p = 0,001", "sq").trim()).toContain("ˈpɾɛsja");
+        expect(phonemize("0.500 g", "sq").trim()).toContain("ˈpɾɛsja");
+    });
+
+    test("any separator surviving de-grouping is a decimal, whatever the fraction's length", () => {
+        // a 1–2 digit guard dropped π, which then read as two numbers with a sentence break between them
+        expect(phonemize("3.14159", "sq").trim().split(/\s+/u)).not.toContain(".");
+        expect(phonemize("3.14159", "sq").trim()).toContain("ˈpɾɛsja");
+    });
+
+    /**
+     * ⚠ NO FORM TO TAKE, ONLY ONE TO INVENT — the standard this file applies to `±` and had broken here.
+     * `megabajtë` is `absent` in the attestation artifact (0 tok / 0 arts) and the corpus writes the SINGULAR
+     * after every count (*deri në 50 megabajt*, *1024 megabajt*), so both count forms are the singular.
+     */
+    test("the loan units take their attested singular, not an invented plural", () => {
+        expect(phonemize("32MB", "sq").trim()).toBe("tɾiˈðjɛtə ˈɛ ˈdy mɛˈɡabajt");
+        expect(phonemize("714 MHz", "sq").trim()).toContain("mɛˈɡahɛɾt͡s");
+    });
+
+    /** ⚠ The plus rule must CONSUME the space it looks over, or it emits the SLOT-GAP double space. */
+    test("a spaced plus leaves no gap", () => {
+        expect(phonemize("+ 24° Celsius", "sq").trim()).toBe("ˈplus ˈɲəzɛt ˈɛ ˈkatəɾ ˈɡɾadə t͡sɛlˈsius");
+    });
 });
