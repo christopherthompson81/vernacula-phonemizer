@@ -199,6 +199,20 @@ const SYMBOLS = makeSymbolNormalizer({
 export function normalizeBasque(input: string): string {
     let s = input;
 
+    // 0) FOLD U+00BA `º` (MASCULINE ORDINAL INDICATOR) TO U+00B0 `°`. This corpus writes the wrong character
+    //    almost as often as the right one — `º` ×12 against `°` ×16 — and the substitution is the one the
+    //    playbook already records for Hindi and Italian (`dell'11º`). Two separate failures follow from not
+    //    folding, and the second is the one that hides:
+    //      · step 2 keys on `°`, so `0,4º C` was not matched and ⟨C⟩ read as /k/ — trap 56, the exact defect
+    //        this file's header claims to have closed, reached through the other sign;
+    //      · `º` IS `\p{L}` (category Lo), so it also satisfied step 6's trailing letter guard and the decimal
+    //        comma beside it stayed a PAUSE. `0,1-0,5º` normalised asymmetrically — first decimal repaired,
+    //        second left — which is what made it visible.
+    //    ⚠ SAFE HERE BECAUSE BASQUE DOES NOT WRITE ORDINALS THIS WAY: its ordinal is `1.`/`1go`, not `1º`, and
+    //    every instance in this corpus is angular or a scale — `58ºI`, `56ºH` (coordinates), `30º`, `7000ºK`.
+    //    Folding changes the CHARACTER, not the reading: a bare `°` is still refused (step 2).
+    s = s.replace(/\u00BA/gu, "\u00B0");
+
     // 1) THOUSANDS DE-GROUPING, first, because every later rule needs the figure to be one digit run and the
     //    grouping mark here is the PERIOD — so left alone it is read as a sentence break INSIDE a number:
     //    `42.262.142` came out *berogeita bi . berehun eta hirurogeita bi . ehun eta berogeita bi*, three
@@ -238,9 +252,27 @@ export function normalizeBasque(input: string): string {
     //    key plus a two-letter ending claims ordinary words — `m` + `an` is *man*, `m` + `en` is *men*. Basque
     //    writes the ending on an abbreviation with a hyphen precisely because the boundary is not otherwise
     //    visible, so keying on the writer's own mark costs nothing and is the only thing separating the two.
+    //    ⚠ THE BARE ENDING IS ALWAYS RIGHT HERE, WHICH IS WHY THE HYPHEN IS SAFE ON THIS SIDE AND NOT ON THE
+    //    FIGURE'S (see step 5). Every noun in `UNITS` is VOWEL-final — kilometro, metro, kilogramo, milimetro
+    //    — so Basque supplies no linking vowel and `km-koa` really is *kilometrokoa*. That is a property of
+    //    this table rather than of the language, so it is checked here rather than assumed: a consonant-final
+    //    unit noun added later would need the same guard step 5 carries.
     //    ⚠ AND THE ENDING GLUES TO THE LAST WORD EMITTED — `km²ko` is *kilometro karratuko*, not
     //    *kilometroko karratu*: the exponent modifier is the head of the phrase and carries the case.
     const unitAlt = Object.keys(UNITS).sort((a, b) => b.length - a.length).join("|");
+    const denomAlt = Object.keys(RATE_DENOMINATORS).join("|");
+    //    ⚠ THE RATE CARRIES IT TOO, and leaving that out DOUBLED the morpheme rather than stranding it. With
+    //    only `UNITS` in the alternation, `km/h-ko` fell through to the tier — whose trailing guard sees the
+    //    HYPHEN, not a letter, so it matched happily, emitted `orduko`, and the writer's own `-ko` survived
+    //    beside it: *bost kilometro orduko ko*. `km/[hs]-…` is ×3 here (`km/h-ko`, `km/h-koa`, `km/s-ko`), and
+    //    the denominator word already ends in the same `-ko` genitive, which is why the doubling reads as a
+    //    stutter rather than as an obvious leak. Matched BEFORE the bare-unit arm so `km/h-ko` cannot be
+    //    claimed as `km` plus stray text.
+    s = s.replace(
+        new RegExp(`(?<![\\p{L}\\p{M}\\d])(${unitAlt})/(${denomAlt})-(${CASE_ENDINGS.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
+        (_m, unit: string, denom: string, ending: string) =>
+            `${UNITS[unit]![0]!} ${RATE_DENOMINATORS[denom]!.replace(/ko$/u, "")}${ending === "ko" || ending === "koa" ? ending : `ko${ending}`}`,
+    );
     s = s.replace(
         new RegExp(`(?<![\\p{L}\\p{M}\\d])(${unitAlt})(?:(²|³)-?|-)(${CASE_ENDINGS.join("|")})(?![\\p{L}\\p{M}])`, "gu"),
         (_m, unit: string, exp: string | undefined, ending: string) => {
@@ -276,18 +308,29 @@ export function normalizeBasque(input: string): string {
     //    inside the number AND the ending stranded, which is both defects at once. ×8 in the corpus against
     //    ×280 integer ones. The fraction is spelled here rather than left to step 5 for the same reason the
     //    integer is: the ending has to glue to the LAST spoken word, and only this step knows which that is.
+    //    ⚠ AND THE ENDING MAY BE HYPHENATED, which the first cut did not admit: Basque writes both `1980an`
+    //    and `995-ko`, and step 3 keys on that same hyphen for units. Left out, `995-ko` read *…hamabost KO*
+    //    with the ending stranded — the very defect this step exists for, in its other written form. ×3 in
+    //    the retained text (`995-ko`, `26-en`, `18-n`), and one of them is the header's own `2.18.19-26-en`.
     const endingAlt = CASE_ENDINGS.join("|");
     s = s.replace(
-        new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+)(?:,(\\d+))?(${endingAlt})(?![\\p{L}\\p{M}])`, "gu"),
-        (whole, digits: string, frac: string | undefined, ending: string) => {
+        new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+)(?:,(\\d+))?(-?)(${endingAlt})(?![\\p{L}\\p{M}])`, "gu"),
+        (whole, digits: string, frac: string | undefined, hyphen: string, ending: string) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return whole;
             const head = cardinalWords(n);
             if (head === "") return whole;
-            if (frac === undefined) return `${head}${ending}`;
-            const f = Number(frac);
-            if (!Number.isSafeInteger(f)) return whole;
-            return `${head} ${DECIMAL_WORD} ${cardinalWords(f)}${ending}`;
+            // ⚠ A HYPHEN CHANGES THE CONTRACT, AND THIS IS THE ONE PLACE THE HEADER'S CLAIM DOES NOT HOLD.
+            // The claim is that the writer has already chosen the allomorph — true of the GLUED form, where
+            // `1980an` and `1981ean` are two different spellings. It is NOT true of the hyphenated form: the
+            // hyphen exists precisely so the ending can be written BARE and the linking vowel supplied in
+            // speech, so `995-ko` is spoken *…hamabostEKO*, not *…hamabostko*, which is not a word.
+            // Deriving that vowel is the Mongolian problem this layer was written to avoid, so instead the
+            // hyphen is accepted only where the bare ending is provably right — after a VOWEL-final word,
+            // where Basque adds nothing. `26-en` → *hogeita seien* is claimed; `995-ko` is declined and left
+            // exactly as it was. ×3 in the retained text, and this splits them 1 claimed / 2 declined.
+            if (hyphen !== "" && !/[aeiou]$/u.test(head)) return whole;
+            return frac === undefined ? `${head}${ending}` : glueFraction(head, frac, ending) ?? whole;
         },
     );
 
@@ -298,9 +341,44 @@ export function normalizeBasque(input: string): string {
     //    ⚠ THE GUARDS EXCLUDE A MULTI-COMMA RUN on both sides, which leaves a comma-separated LIST alone, and
     //    a trailing letter, which leaves an ending-carrying figure to step 4. A following clause mark is NOT
     //    excluded (trap 58) — `93,55.` at a sentence end is still a decimal.
-    s = s.replace(/(?<![\d,])(\d+),(\d+)(?![\d,\p{L}\p{M}])/gu, (_m, a: string, b: string) => `${a} ${DECIMAL_WORD} ${b}`);
+    s = s.replace(/(?<![\d,])(\d+),(\d+)(?![\d,\p{L}\p{M}])/gu,
+        (_m, a: string, b: string) => `${a} ${DECIMAL_WORD} ${fractionDigits(b)}`);
 
     return tidy(s);
+}
+
+/**
+ * ⚠ A LEADING ZERO IN THE FRACTION IS PART OF THE QUANTITY, AND DROPPING IT IS A WRONG NUMBER.
+ *
+ * The fraction is read as a NUMBER here (`93,55` is *koma berrogeita hamabost*, not five-five), which is the
+ * convention this language's corpus supports — but handing `09` to a cardinal compositor yields *bederatzi*,
+ * so `5,09` and `5,9` came out BYTE-IDENTICAL. That is trap 56 in its purest form: every word is well-formed
+ * Basque, the quantity is wrong by a factor of ten, and no leak class, DROP or referee can see it. `\d,0\d`
+ * occurs ×10 in this corpus (`5,09`, `2,09`, `6,02`, `0,08`, `0,03`).
+ *
+ * Each leading zero is spoken, then the remainder is read as a number — which keeps `0,09` distinct from
+ * `0,9` without changing how any fraction lacking a leading zero is read.
+ */
+const ZERO = "zero";
+function fractionDigits(frac: string): string {
+    const zeros = /^0*/u.exec(frac)![0].length;
+    const rest = frac.slice(zeros);
+    const lead = Array.from({ length: zeros }, () => ZERO).join(" ");
+    return rest === "" ? lead : lead === "" ? rest : `${lead} ${rest}`;
+}
+/** The same, as WORDS, for step 5 — where the ending has to glue to the last one. `undefined` declines the
+ *  match rather than guessing, and the magnitude bound mirrors the integer head's: without it a 14-digit
+ *  fraction was fed to the compositor and came back as twenty-five words. */
+function glueFraction(head: string, frac: string, ending: string): string | undefined {
+    const zeros = /^0*/u.exec(frac)![0].length;
+    const rest = frac.slice(zeros);
+    const lead = Array.from({ length: zeros }, () => ZERO);
+    if (rest === "") return `${head} ${DECIMAL_WORD} ${[...lead.slice(0, -1), `${ZERO}${ending}`].join(" ")}`;
+    const f = Number(rest);
+    if (!Number.isSafeInteger(f) || f >= 1e12) return undefined;
+    const words = cardinalWords(f);
+    if (words === "") return undefined;
+    return `${head} ${DECIMAL_WORD} ${[...lead, `${words}${ending}`].join(" ")}`;
 }
 
 /** ⚠ A padded replacement doubles a space that was already there and can leave one at an edge. SLOT-GAP is a

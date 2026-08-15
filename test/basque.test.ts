@@ -139,3 +139,53 @@ describe("Basque text normalization — the period groups, the comma divides, th
         expect(normalizeBasque("(141 bizt./km²)")).toBe("(141 bizt./km²)");
     });
 });
+
+
+/**
+ * THE REVIEW FINDINGS — six defects, and five of them produce a WRONG READING rather than a silence, so no
+ * leak class, DROP or referee could see any of them. Each fixture is a corpus shape.
+ */
+describe("Basque — the six the review found", () => {
+    test("a leading zero in the fraction is part of the quantity", () => {
+        // ⚠ `5,09` and `5,9` came out BYTE-IDENTICAL: the fraction is read as a NUMBER and `Number("09")`
+        // is 9, so the quantity was wrong by a factor of ten in well-formed Basque. ×10 in the corpus.
+        expect(phonemize("5,09", "eu").trim()).not.toBe(phonemize("5,9", "eu").trim());
+        expect(normalizeBasque("5,09")).toBe("5 koma zero 9");
+        expect(normalizeBasque("5,9")).toBe("5 koma 9");
+        expect(normalizeBasque("0,08")).toBe("0 koma zero 8");
+        // and the same in step 5's own arm, where the ending has to glue to the last word
+        expect(normalizeBasque("5,09eko")).toBe("bost koma zero bederatzieko");
+    });
+
+    test("U+00BA `º` is folded to U+00B0 `°` — the corpus writes it ×12 against ×16", () => {
+        // both defects it caused: the scale went unread (⟨C⟩ → /k/, trap 56) and `º` being \p{L} also
+        // blocked the decimal guard beside it
+        expect(normalizeBasque("0,4º C")).toBe("0 koma 4 gradu Celsius");
+        expect(normalizeBasque("0,1-0,5º")).toBe("0 koma 1-0 koma 5°"); // both decimals, not just the first
+        // ⚠ folding changes the CHARACTER, not the reading — a bare degree is still refused
+        expect(normalizeBasque("30º-ko latitudearen")).toContain("°");
+    });
+
+    test("a rate denominator takes the ending too, and must not double it", () => {
+        // the tier's trailing guard sees the HYPHEN rather than a letter, so it matched, emitted `orduko`,
+        // and the writer's own `-ko` survived beside it — a stutter, not an obvious leak
+        expect(normalizeBasque("5 km/h-ko")).toBe("5 kilometro orduko");
+        expect(normalizeBasque("120 km/h-koa")).toBe("120 kilometro ordukoa");
+        expect(normalizeBasque("300 km/s-ko")).toBe("300 kilometro segundoko");
+        expect(normalizeBasque("120 km/h")).toBe("120 kilometro orduko"); // unchanged without an ending
+    });
+
+    test("a HYPHENATED ending is claimed only after a vowel — the one place the header's claim fails", () => {
+        // the hyphen exists so the ending can be written BARE and the linking vowel supplied in speech, so
+        // the writer has NOT chosen the allomorph there. After a vowel Basque adds nothing, so it is safe;
+        // after a consonant `995-ko` would be *hamabostko*, which is not a word, and is declined instead.
+        expect(normalizeBasque("26-en")).toBe("hogeita seien");
+        expect(normalizeBasque("995-ko")).toBe("995-ko");
+        // the UNIT side is safe for the opposite reason — every noun in UNITS is vowel-final
+        expect(normalizeBasque("km-koa")).toBe("kilometrokoa");
+    });
+
+    test("the fraction is magnitude-bounded like the head, not left unguarded", () => {
+        expect(normalizeBasque("3,14159265358979a")).toBe("3,14159265358979a");
+    });
+});
