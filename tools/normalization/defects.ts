@@ -898,6 +898,39 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "or a paired measurement (`2299/925 \u101c\u1000\u103a\u1038`), never a fraction \u2014 so it takes a pause and no "
             + "fraction rule is written at all",
     },
+    hyw: {
+        // \u26a0 FOUR REFUSALS over the retained text of `tools/corpus/mined/hyw.jsonc` (444 segments of a
+        // 140,044-paragraph hyw.wikipedia dump), argued in src/languages/westarmenian/normalize.ts.
+        // `equals` is NOT among them \u2014 this language is the counter-example to trap 62, and its 44 `=`
+        // are mostly real arithmetic from the number-theory articles, so a digit-gated rule ships.
+        times: "measured: `\u00d7` \u00d76 across THREE different senses \u2014 two are AMMUNITION CALIBRES "
+            + "(`7.92\u00d733mm Kurz`, `7.62\u00d739mm M43`), two are SCIENTIFIC NOTATION (`4\u00d710\u00b9\u2070`, "
+            + "`7.8\u00b10.9\u00d710\u00b9\u2070`) and two are a product (`105=3 \u00d7 5 \u00d7 7`). No single word reads all three, "
+            + "and a calibre read as a multiplication is a defect that produces a READING (trap 56)",
+        divide: "measured: `\u00f7` \u00d72 and NEITHER is a division \u2014 one is a RANGE in the Russian tradition "
+            + "(`0.96\u00f71.41 \u0531\u0544 \u0570\u0565\u057c\u0561\u0582\u0578\u0580\u0578\u0582\u0569\u0565\u0561\u0576`, the same finding ba recorded) and the other is an ALBUM "
+            + "TITLE (`2017-\u056b \u0561\u056c\u057a\u0578\u0574\u056b\u0576\u055d \u00f7`, Ed Sheeran's). The range sense takes a pause; the album keeps the sign",
+        "plus-minus": "measured: `\u00b1` \u00d73 and all three are a TOLERANCE (`3800\u00b1200\u00b0C-\u056b\u0576`, `\u03c1 =1260\u00b170 \u0584\u056f/\u0574\u00b3`, "
+            + "`7.8\u00b10.9\u00d710\u00b9\u2070`). No Western Armenian reading is attested and dropping the sign ran the two "
+            + "figures together into one numeral, so it takes a PAUSE",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        equals: "the `=` IS read \u2014 44 instances, mostly real arithmetic, and the rule ships DIGIT-GATED "
+            + "with `\u0570\u0561\u0582\u0561\u057d\u0561\u0580`. This entry covers the probe's LETTER form (`x = y`): the gate is only "
+            + "reachable between digits, because the sign's other use here is a variable assignment in a "
+            + "physics gloss (`\u03c1 =1260\u00b170 \u0584\u056f/\u0574\u00b3`) where the reading would be wrong",
+        plus: "measured: `+` \u00d7several and every one is inside an ARITHMETIC IDENTITY already carried by "
+            + "the `=` rule (`100=47+53`, `1\u00b3 + 2\u00b3 + 3\u00b3 + 4\u00b3`) or an English album title (`I Am the Dance "
+            + "Commander + I Command You to Dance`). Omitting a summation plus is lossless where omitting "
+            + "a MINUS inverts \u2014 the minus is read, the plus is not, the same call hy makes",
+        ampersand: "measured: `&` \u00d72 and both sit inside a LATIN run (`$350& \u0574\u056c\u0576`, a dump-extraction "
+            + "artifact, and an English genre list), which reaches the engine through the Latin-run router "
+            + "and is read as English \u2014 so the reading is not Armenian's to supply",
+        exponent: "measured: `\u00b2\u00b3` on a declared unit are read; the residual 18 are a SUPERSCRIPT RUN no "
+            + "measure word reaches \u2014 an isotope mass number (`\u00b9\u2074\u2077Pm`), scientific notation (`10\u00b9\u2070`), a "
+            + "number-theory identity (`1\u00b3 + 2\u00b3 + 3\u00b3 + 4\u00b3`, `144\u2075=27\u2075+84\u2075+110`) and a bracketed square "
+            + "(`(1 + 2 + 3 + 4)\u00b2`). `bareExponent` would need a power phrase this corpus does not supply",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in

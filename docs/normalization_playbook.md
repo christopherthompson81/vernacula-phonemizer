@@ -1981,9 +1981,15 @@ rule that shipped was licensed by the same finding reached independently:
   SOUND-CHANGE ARROW (`Rhwam > Yhwam > Hyam > Cyam > Sham > Shan`); shn's hyphen-before-a-digit ×19 is a
   range, a timezone offset, a census LABEL SEPARATOR (`ၸၢႆး-1,226၊ ယိင်း-1,316`) and a level marker, and
   not once a minus.
+- **⚠ AND THE VERY NEXT LANGUAGE WAS THE COUNTER-EXAMPLE, which is what makes this a procedure and not a
+  rule of thumb.** Western Armenian has `=` **×44 and most of them ARE arithmetic** — `100=47+53`,
+  `100 = 2 + 3 + 5 + 7 + 11 + 13 + 17 + 19 + 23`, `155=2²+3!+5!+7²-11-13`, `144⁵=27⁵+84⁵+110` — because
+  hyw.wikipedia has a body of number-theory articles that none of the other five had. A digit-gated rule
+  ships there, with `հաւասար` attested in the same article type. Five confirmations did not make the
+  finding general; the sixth language settled it by being different.
 - **The procedure, not the answer, is what transfers:** print every instance of the sign with 50
-  characters of context on each side before writing any rule for it. It is one command and it has changed
-  the answer in every language it has been run in.
+  characters of context on each side before writing any rule for it. It is one command, it has changed
+  the answer in every language it has been run in, and in the sixth it changed it back.
 
 
 ## Closing a DROP is not finished until you read the READING
