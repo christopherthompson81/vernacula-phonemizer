@@ -367,7 +367,7 @@ you have already met.
 
 ### ⚠ Where a principle is ENFORCED, and why that column exists
 
-This document is 1,900 lines and 59 numbered traps. A Khmer session read it start to finish and then broke
+This document is 1,900 lines and 60 numbered traps. A Khmer session read it start to finish and then broke
 "a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
 បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
 gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
@@ -393,7 +393,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 | **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50, 59 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin; the word boundary that fixes a Latin backtrack rejects the ordinary Han case |
 | **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase |
 | **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
-| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure |
+| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58, 60 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure; an optional group on the wrong side of an alternation truncates the match instead of failing it |
 | **A differential test must hold everything but the variable still** | 18, 26 | **the same cause at two levels** — 18 is the probe (`A&B` → `AB`), 26 is real text; substitute a space, never delete |
 | **Evidence beats intuition, and the corpus arbitrates** | 3, 4, 5, 9, 12, 13, 20, 55 | the diff sees what probes cannot; tabulate before ruling; a test can pin the bug (and pinning a temporary ABSENCE has a shelf life); an unattested guard alternative misfires; a redundant symbol is a permissible drop; pin branches not instances; your emitted digits meet the number rules downstream; the closest sibling is a hypothesis |
 | **One shared source can settle a fleet-wide question, positively or negatively** | 45, 48, 35, 36, 40 | **45 and 48 are two halves of one technique** — FLEURS's shared source text finds a word AND proves an absence; ask what the language calls the thing; fold a compatibility character, never NFKC; name the slot when you have no candidate spelling |
@@ -1884,6 +1884,32 @@ found no unit after it, backtracked to `millón`, and read the plural marker as 
 - **Where to look for the next one:** any language whose plural or case suffix is a single letter that the
   same language also declares as a unit, currency code or magnitude. `s`, `n`, `a`, `t` and `m` are all
   one-letter unit keys somewhere in this fleet.
+
+
+**60. AN OPTIONAL GROUP THAT SITS ON THE WRONG SIDE OF AN ALTERNATION IS A REFUSAL THAT LOOKS LIKE A MATCH.**
+`core/normalizeSymbols.ts`'s unit pattern reads *number + unit + (rate | exponent)*, and the two arms are
+EXCLUSIVE. So a unit that carries BOTH — an exponent on the numerator and a slash after it — took the exponent
+arm, ended at the superscript, and left the rest of the notation outside the match:
+
+    9,44 м³/с   →   тугыз өтер дүрт дүрт КУБ МЕТР s        the denominator as a bare letter
+
+- **The match SUCCEEDED, which is why no gate saw it.** `DROP` counts a sign the layer never touched; this one
+  was touched, read, and truncated. Only reading the output string catches it (see "Closing a DROP is not
+  finished until you read the READING").
+- **The denominator side of the very same pattern had had its exponent for months** — added when tl's
+  `20,164 katao/km²` population-density shape was found. The twin case was simply never written, and the
+  asymmetry is invisible in the source unless you read the two arms against each other.
+- **Where it hid: it is ONE notation.** `[letter][²³]\s?/` is **26 instances across 10 mined artifacts** — ba
+  ×8, tt ×7, jv/mn/qu ×2, be/cdo/chv/lo/mt ×1 — and essentially every one is the river-discharge figure `м³/с`
+  of a geography article. A class that lives in one sentence type in one article type is exactly the class a
+  hard-set samples once and a reviewer's eye slides past.
+- **⚠ AND FIXING IT DOES NOT FIX EVERY LANGUAGE, which is the honest half of the finding.** Only the four that
+  declare a rate at all (ba, tt, jv, qu) read the denominator afterwards. be `55 м³/с` loses the unit *as
+  well*, because Belarusian never declared `м` — a per-language DATA gap that the shared fix cannot reach and
+  that this trap would misreport as fixed if it claimed the whole 26.
+- **Where to look for the next one:** any pattern in this repo whose optional suffixes are written as an
+  alternation rather than as a sequence of independent optionals. The alternation is a claim that the two
+  cannot co-occur, and that claim is almost never checked.
 
 
 ## Closing a DROP is not finished until you read the READING

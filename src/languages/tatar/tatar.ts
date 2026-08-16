@@ -9,6 +9,8 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeTatar, normalizeTatarInitialisms } from "./normalize.ts";
 
 interface TatarDef {
     consonants: Record<string, string>;
@@ -108,14 +110,80 @@ function number(digits: string): string {
     return numberToWords(n).map(phonemizeWord).join(" ");
 }
 
+/**
+ * The shared SYMBOL tier. Every word here is a tt.wikipedia TOKEN attestation whose examples were read
+ * (`tools/corpus/attest/tt.jsonc`), and three of them are glossed by the corpus's own notation:
+ *   `градус` — its OWN ARTICLE names the sign AND its sense: "Градус билгесе ((°), Unicode: U+00B0,
+ *     HTML: &deg;) — **почмакның** һәм…" ("the degree sign — of an ANGLE and…"), which is the same
+ *     finding normalize.ts reaches from the ten instances: in Tatar this sign is angular, not thermal.
+ *   `квадрат` — "**Квадра́т киломе́тр (км², кв. км, km²)** — мәйдан үлчәве берәмлеге", which fixes the
+ *     word, its POSITION (before the unit) and all three of the notations it has to match.
+ *   `доллар` — "1 доллар = 100 цент. Гадәттә **$** яки USD дип билгеләнә" — the article names the sign.
+ * `процент` ×many with a figure beside it ("65,0 процент үзенең туган телен"), `тапкыр` ("205 тапкыр —
+ * ике һәм 16 тапкыр — өч мәртәбә"), `тигез` beside its own formula ("1000 м × 1000 м = 1 000 000 м² га
+ * тигез" — ⚠ and note it governs the DATIVE there, while this layer emits the bare nominative reading a
+ * reader says for `5 = 5`), `сум` from the currency article ("тат. **сум** / sum").
+ *
+ * ⚠ NO `unitPer`, AND NO BARE `г` OR `т`. Tatar does not say "A per B": the denominator takes the
+ * possessive-dative and stands alone (*метр секундына*), which is Basque's shape — `unitPer` is the empty
+ * string and `rateDenominators` carries the inflected form. And `г`/`т` are declined outright: `В 3 т.`
+ * and `1938 г.` are Russian *том* and *года*, this corpus carries Russian bibliography in quantity, and
+ * the tier's trailing guard does not reject a dot — so declaring either key would have read every Russian
+ * volume number as a tonnage and every Russian year as a weight. Same call ba made for `г`.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["процент"],
+    currency: { "$": ["доллар"], "€": ["евро"], "£": ["фунт"], "₽": ["сум"] },
+    units: {
+        "км": ["километр"], "см": ["сантиметр"], "мм": ["миллиметр"], "кг": ["килограмм"],
+        "мг": ["миллиграмм"], "га": ["гектар"], "м": ["метр"],
+        // LATIN aliases. tt.wikipedia writes the Cyrillic abbreviation in its Cyrillic articles, but the
+        // engine's TOKEN matches Cyrillic only, so the corpus's own `4360 km²` and `9,44 m³/c` — written
+        // in Cyrillic prose, not Zamanälif — lose the unit entirely rather than merely mispronouncing it.
+        "km": ["километр"], "cm": ["сантиметр"], "mm": ["миллиметр"], "kg": ["килограмм"], "m": ["метр"],
+    },
+    unitPer: "",
+    rateDenominators: {
+        "с": "секундына", "сәг": "сәгатенә", "л": "литрына",
+        "s": "секундына", "h": "сәгатенә", "c": "секундына",
+    },
+    exponentWords: { squared: ["квадрат"], cubed: ["куб"], position: "before" },
+    multiply: { times: "тапкыр" },
+    ampersand: "һәм",
+    // Tatar writes the magnitude word after the figure and often after a DECIMAL (`17 752 мең км²`,
+    // `1360 мең км²`, `$5,7 миллиард`), so the tier must hop it to reach a unit on the far side. Turkic
+    // magnitudes do not inflect.
+    magnitudes: ["мең", "миллион", "миллиард", "триллион"],
+});
+
 // A word (Tatar Cyrillic letters) / number / punctuation token.
-const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
+// ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause
+// pause and `9,44 м³/с` reads as *тугыз , кырык дүрт* — a phrase break inside a quantity. `decimals` is
+// 33,800 corpus-wide and the retained text writes `0,6 км`, `8,6 кеше/км²`, `11,5%`, `72,9%`, `3,8 %`.
+const TOKEN = /([Ѐ-ӿ]+)|(\d+(?:,\d+)?)|([.!?…,;:])/gu;
 
 class TatarPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its clock, suffix, degree and sign steps need the figure and its written
+        // suffix still adjacent, which the tier would break — then the INITIALISM pass, then the shared
+        // symbol tier, which matches a unit only when a NUMBER is adjacent.
+        const prepared = SYMBOLS(normalizeTatarInitialisms(normalizeTatar(input)));
+        return assembleClauses(prepared, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                sink.emit(number(intPart!));
+                if (frac !== undefined) {
+                    // The decimal separator's own NAME, from tt.wikipedia's own punctuation article:
+                    // "**өтер**, нокта, нокталы өтер, ике нокта, сорау һәм өндәү билгеләре".
+                    // ⚠ THE FULL SPOKEN READING IS DECLINED, deliberately: Tatar says *биш бөтен өчдән
+                    // ун* — a "whole" word plus a tail that NAMES THE DECIMAL PLACE. The place name
+                    // cannot be composed here, and half of a two-part reading is worse than the sign's
+                    // name. Same call ba made (өтөр), uk made (кома), pl made (przecinek), be made (коска).
+                    sink.emit(phonemizeWord("өтер"));
+                    for (const dg of frac) sink.emit(number(dg));
+                }
+            }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

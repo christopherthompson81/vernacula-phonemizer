@@ -688,7 +688,21 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     const NOT_VERSION = `(?<![\\d.,])(?!(?:${DESIGNATIONS.join("|")})[a-zA-Z](?![a-zA-Z\\d]))`;
     const unitRe = d.units
         ? new RegExp(
-              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
+              // ⚠ THE NUMERATOR MAY CARRY AN EXPONENT TOO, and the rate alternative used to begin at the
+              // slash — so `9,44 м³/с` matched the EXPONENT branch, ended at the ³, and left `/с` outside
+              // the match entirely, to reach the phoneme sink as a bare letter. The DENOMINATOR side
+              // already had its exponent (the `katao/km²` population-density shape); this is its twin, and
+              // it has been missing for as long as that one has existed.
+              //
+              // ⚠ MEASURED, not assumed: `[letter][²³]\s?/` occurs **26 times across 10 mined artifacts**
+              // — ba ×8, tt ×7, jv ×2, mn ×2, qu ×2, and be, cdo, chv, lo, mt ×1 each — and is essentially
+              // ONE notation, the river-discharge `м³/с` of a geography article. Of those, every language
+              // that declares a rate at all (ba, tt, jv, qu) reads the denominator after this change and
+              // none did before: ba `3510 м³/с` was *…куб метр* with a bare [s] hanging off it. The rest
+              // still drop it, and that is a per-language DATA gap (no `с`/`s` denominator declared), not
+              // this regex — be `55 м³/с` loses the unit as well, which is a Belarusian finding, not a
+              // tier one.
+              `${NOT_VERSION}(${NUM})${magAltU}\\s?(${unitAlt})(?:\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}]))?\\s?/\\s?(${denomKeys})(\u00b2|\u00b3)?|\\s?(\u00b2|\u00b3|(?<=[a-zA-Z])[23](?![\\d\\p{L}])))?(?![${wordCont}\\p{M}\u0027\u2019\u02bc])`,
               "giu",
           )
         : null;
@@ -842,7 +856,8 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
         if (unitRe)
             s = s.replace(
                 unitRe,
-                (whole, num: string, mag: string | undefined, u: string, denom?: string, denomExp?: string, exp?: string) => {
+                (whole, num: string, mag: string | undefined, u: string, numExp?: string, denom?: string,
+                 denomExp?: string, exp?: string) => {
                     // The magnitude travels with the NUMBER and is re-emitted verbatim — ⚠ a rule that
                     // CONSUMES a word must put it back. It also governs the count form the way a LARGE COUNT
                     // does, resolved through the language's own `countForm` via MANY — the same reasoning, and
@@ -876,25 +891,34 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
                         // the match and was silently dropped (tl's largest exponent class, 13 of 35). Composed
                         // only when the language declares `exponentWords`; otherwise the old reading stands and
                         // the superscript is re-emitted where the leak gate can see it, as the head branch does.
+                        /** Attach a measure word to one side of a rate. Shared by the numerator and the
+                         *  denominator, which take the same treatment for the same reason: an exponent
+                         *  the language has no word for is re-emitted so the leak gate can see it, and
+                         *  never abandons the match. The SINGULAR form is used on both sides \u2014 inside a
+                         *  rate neither noun is what the quantity counts. */
+                        const withPower = (noun: string, sup: string): string => {
+                            const power = sup === "\u00b3" ? "cubed" : "squared";
+                            const eForms = d.exponentWords?.[power];
+                            if (eForms === undefined) return `${noun}${sup}`;
+                            const ew = eForms[0]!;
+                            const eDeclared = d.exponentWords?.position;
+                            const ePos = (typeof eDeclared === "string" ? eDeclared : eDeclared?.[power]) ?? "after";
+                            return ePos === "compound" ? `${ew}${noun}`
+                                : ePos === "suffix" ? `${noun}${ew}`
+                                : ePos === "before" ? `${ew} ${noun}`
+                                : `${noun} ${ew}`;
+                        };
                         let dPhrase = typeof dWord === "string" ? dWord : dWord[0]!;
-                        if (denomExp !== undefined) {
-                            const dPower = denomExp === "\u00b3" ? "cubed" : "squared";
-                            const dForms = d.exponentWords?.[dPower];
-                            if (dForms === undefined) dPhrase = `${dPhrase}${denomExp}`;
-                            else {
-                                const dw = dForms[0]!;
-                                const dDeclared = d.exponentWords?.position;
-                                const dPos = (typeof dDeclared === "string" ? dDeclared : dDeclared?.[dPower]) ?? "after";
-                                dPhrase = dPos === "compound" ? `${dw}${dPhrase}`
-                                    : dPos === "suffix" ? `${dPhrase}${dw}`
-                                    : dPos === "before" ? `${dw} ${dPhrase}`
-                                    : `${dPhrase} ${dw}`;
-                            }
-                        }
+                        if (denomExp !== undefined) dPhrase = withPower(dPhrase, denomExp);
+                        // \u26a0 AND THE NUMERATOR TAKES IT TOO \u2014 `9,44 \u043c\u00b3/\u0441`, the river-discharge shape, which
+                        // used to leave `/\u0441` outside the match entirely. See the regex comment above.
+                        const headPhrase = numExp === undefined ? head : withPower(head, numExp);
                         // `unitPrefix` applies here too, and forgetting it left Swahili reading
                         // "160 kilomita kwa saa" where the language writes the measure noun first. The rate is
                         // one phrase, so the whole of it hinges on the head noun's position.
-                        return d.unitPrefix ? `${head} ${q} ${per} ${dPhrase}` : `${q} ${head} ${per} ${dPhrase}`;
+                        return d.unitPrefix
+                            ? `${headPhrase} ${q} ${per} ${dPhrase}`
+                            : `${q} ${headPhrase} ${per} ${dPhrase}`;
                     }
                     if (exp !== undefined) {
                         const power = exp === "\u00b3" || exp === "3" ? "cubed" : "squared";

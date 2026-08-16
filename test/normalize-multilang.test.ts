@@ -203,6 +203,25 @@ describe("shared symbol normalizer (core)", () => {
         expect(g("30 s")).toBe("30 segundos"); // …and the one-letter unit is untouched where it is real
     });
 
+    // \u26a0 A RATE'S NUMERATOR MAY CARRY AN EXPONENT, and the rate alternative used to begin at the
+    // slash \u2014 so `9,44 \u043c\u00b3/\u0441` matched the EXPONENT branch, ended at the \u00b3, and left the
+    // denominator outside the match to reach the phoneme sink as a bare letter. The denominator side has had
+    // its own exponent since the `katao/km\u00b2` population-density shape was found in tl; this is its twin.
+    // `[letter][\u00b2\u00b3]\\s?/` is 26 instances across 10 mined artifacts \u2014 ba \u00d78, tt \u00d77 \u2014 and is
+    // essentially one notation, the river-discharge figure of a geography article.
+    test("a rate whose NUMERATOR carries an exponent keeps its denominator", () => {
+        const n = makeSymbolNormalizer({
+            units: { m: ["metr"], km: ["kilometr"] },
+            rateDenominators: { s: "sekund" },
+            unitPer: "per",
+            exponentWords: { squared: ["kvadrat"], cubed: ["kub"], position: "before" },
+        });
+        expect(n("9 m\u00b3/s")).toBe("9 kub metr per sekund");
+        expect(n("9 m\u00b2/s")).toBe("9 kvadrat metr per sekund");
+        expect(n("9 m/s")).toBe("9 metr per sekund"); // the plain rate is unchanged
+        expect(n("9 km\u00b2")).toBe("9 kvadrat kilometr"); // …and so is the plain exponent
+    });
+
     test("an unspaced magnitude still hops, and keeps its own spacing", () => {
         const n = makeSymbolNormalizer({
             percent: ["百分之"],

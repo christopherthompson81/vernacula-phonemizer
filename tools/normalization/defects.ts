@@ -799,6 +799,25 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    tt: {
+        // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/tt.jsonc`
+        // (457 segments of a 1,014,015-paragraph tt.wikipedia dump), and each argued in
+        // src/languages/tatar/normalize.ts. The `equals` one is the interesting entry: the sign is
+        // COMMON here and almost never arithmetic.
+        equals: "measured: `=` \u00d713 and TWELVE are a GLOSS SEPARATOR, not an equation \u2014 an "
+            + "etymology (`aba=\u00abölkän ir tuğan, abí\u00bb`, `bik=\u00abnıq\u00bb`), a translation "
+            + "glossary (`Cömratül-ğäqäbä (\u2026) = Zur bağana` and three more in the same list), and an "
+            + "Arabic ligature (`\u0623\u064e + \u0627 = \u0622`). The ONE arithmetic instance is "
+            + "`29+191/360=29.5305555`, so the rule that ships is DIGIT-GATED and reads exactly that one; "
+            + "`тигез` is attested (\u00d7many, beside its own formula \u201c1000 м \u00d7 1000 м = "
+            + "1 000 000 м\u00b2 га тигез\u201d) and would have been wrong on 12 of 13 without the gate",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70 in the retained text \u2014 the sign does not occur; division "
+            + "is written with the slash, and every `\\d+/\\d+` in this corpus is a document number "
+            + "(`ПБУ 19/02`), a street address (`Октябрьский городок, 1/66`) or an academic year "
+            + "(`2010/11 уку елында`), so no fraction rule is written either",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in
