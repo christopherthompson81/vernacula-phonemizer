@@ -367,7 +367,7 @@ you have already met.
 
 ### ⚠ Where a principle is ENFORCED, and why that column exists
 
-This document is 1,900 lines and 63 numbered traps. A Khmer session read it start to finish and then broke
+This document is 1,900 lines and 64 numbered traps. A Khmer session read it start to finish and then broke
 "a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
 បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
 gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
@@ -393,7 +393,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 | **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50, 59, 61 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin; the word boundary that fixes a Latin backtrack rejects the ordinary Han case; a whole language can be typed in the Latin twins of its own letters, and the majority guard that makes the fold safe is what stops it reaching the short words |
 | **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41, 62 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase; `=` is a heading, a gloss, a parallel title, a typo or a Pali definition in five languages running, and never an equation |
 | **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
-| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58, 60, 63 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure; an optional group on the wrong side of an alternation truncates the match instead of failing it; a repeated two-digit join de-groups three groups correctly and four groups into a different number |
+| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58, 60, 63, 64 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure; an optional group on the wrong side of an alternation truncates the match instead of failing it; a repeated two-digit join de-groups three groups correctly and four groups into a different number; **64 is 28/46 in mirror image** — the same adjacency guard that over-claims a dotted designation silently declines `US$` |
 | **A differential test must hold everything but the variable still** | 18, 26 | **the same cause at two levels** — 18 is the probe (`A&B` → `AB`), 26 is real text; substitute a space, never delete |
 | **Evidence beats intuition, and the corpus arbitrates** | 3, 4, 5, 9, 12, 13, 20, 55 | the diff sees what probes cannot; tabulate before ruling; a test can pin the bug (and pinning a temporary ABSENCE has a shelf life); an unattested guard alternative misfires; a redundant symbol is a permissible drop; pin branches not instances; your emitted digits meet the number rules downstream; the closest sibling is a hypothesis |
 | **One shared source can settle a fleet-wide question, positively or negatively** | 45, 48, 35, 36, 40 | **45 and 48 are two halves of one technique** — FLEURS's shared source text finds a word AND proves an absence; ask what the language calls the thing; fold a compatibility character, never NFKC; name the slot when you have no candidate spelling |
@@ -2026,6 +2026,27 @@ global scan resumes INSIDE the remainder and anchors on the last digit of the ne
 - **Where to look for the next one:** any language whose corpus carries populations, budgets or areas in
   the billions. The three-group ceiling is a fact about the sweep's sample, not about the world.
 
+
+**64. THE GUARD THAT KEEPS A CURRENCY KEY OFF A WORD ALSO KEEPS IT OFF `US$` — AND THE DEFECT IS SILENCE.**
+The shared tier wraps every currency mark in `(?<![wordCont])…(?![wordCont])`, which is right: a bare `$`
+must not be claimed inside an identifier. But the same guard declines every COMPOSITE mark a letter runs
+into, and those are the commonest way a Wikipedia writes a non-local currency:
+
+    "de mas de US$185 billons"      →  *de mas de cient uitanta i cinco billons*   — the unit is GONE
+    "entre US$ 690.000 y US$ 1.426.250"  →  two bare numbers, no currency at all
+
+- **This is the MIRROR of traps 28/46**, which are the same guard being too PERMISSIVE (a one-letter unit
+  key claiming a dotted designation). Both failures come from one boundary rule; one over-fires and one
+  under-fires, and a layer can ship with both at once.
+- **No leak gate sees it.** The sign is consumed by nothing — it is simply never matched, and the
+  surrounding letters (`US`) read as an initialism, so the output is a well-formed sentence that has lost a
+  noun. Only the artifact scan's `currency` residual count shows it, and only if you go back and read the
+  five instances rather than accepting a number that already dropped from 16.
+- **The fix is one line and the tier already supports it:** declare the composite as its own key ahead of
+  the bare one — `currency: { "US$": [...], "$": [...] }` — and let longest-first do the rest. `A$`, `R$`,
+  `NT$`, `CA$`, `HK$` and `US$` are all this shape.
+- **Where to look:** any corpus whose economics sections quote figures in a currency the language does not
+  use. Measured in an: five of sixteen currency instances, i.e. a third of the class.
 
 ## Closing a DROP is not finished until you read the READING
 

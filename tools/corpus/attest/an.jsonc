@@ -1,0 +1,1110 @@
+// WIKIPEDIA WORD ATTESTATION — an. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "an",
+        "wiki": "an.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "estausunidense",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 407,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…O cine estausunidense ye aquel que globalment ha modelau mas profundament o cine…",
+                "…corazón se troba situau en Hollywood, un barrio d'a ciudat estausunidense de Los Angeles a on se producen a mayor parti d'os programa…",
+                "…audiovisuals d'o país, incluyius los televisivos. A critica estausunidense Pauline Kael resumió en 1968 o estilo d'as cintas hollywood…",
+                "…a musica, o soniu y os efectos especials. Manimenos o cine estausunidense ye igualment una industria poderosa y muit estructurada, en…",
+                "…ye considerau como o primer vector de difusión d'a cultura estausunidense en l'exterior (chunto con as series de televisión). O cine…",
+                "…1980). Dende la decada de 1920, a industria cinematografica estausunidense ha replegau mas diners cada anyo que la de cualsiquier atro…"
+            ]
+            },
+        {
+                "word": "estausunidenses",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…paridat de poder adquisitivo (PPA). As unidaz son en dólars estausunidenses. Veyer tamién Lista de países por población, Lista de paíse…",
+                "…muitos asteroides dende o suyo treballo en os observatorios estausunidenses. == Vinclos externos == (en) Lista alfabetica d'os descubri…",
+                "…ación de 4.393,80 hab/km². Ye a ciudat numero 5 d'as ciudaz estausunidenses por o suyo numero d'habitants. == Museus == Museu d'Arte de…",
+                "…t, o Gubierno d'os Estaus Unius destina 4 millons de dólars estausunidenses ta la investigación d'os asteroides que pueden estar perigl…",
+                "…, con l'actual Mexico y muitos atros territorios actualment estausunidenses. O territorio pasó a mans d'os estausunidenses dimpués de s…",
+                "…s actualment estausunidenses. O territorio pasó a mans d'os estausunidenses dimpués de sinyar-se en 1848 o Tractau de Guadalupe Hidalgo…"
+            ]
+            },
+        {
+                "word": "kilometros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…mer orden ye formada por trianglos de costaus entre 30 y 70 kilometros. En a de segundo orden, refirmada en a de primer orden, os…",
+                "…orden, os costaus d'os trianglos varían entre os 10 y os 25 kilometros. O rete de tercer orden tien costaus de 5 a 10 kilometros.…",
+                "…5 kilometros. O rete de tercer orden tien costaus de 5 a 10 kilometros. Toz os vertices d'os rez mas grans son a la vegada vertice…",
+                "…) ye una isla de l'Oceano Atlantico, situata a mas de 2.800 kilometros de distancia d'a costa occidental d'Angola, en Africa. Admi…",
+                "…Uesca, dende l'A-23, s'endreza enta Leida y, dimpués de 110 kilometros, remata connectando con l'A-2, l'AP-2, l'A-14 y l'A-27. Den…",
+                "…lo trafico toda l'autovía, con l'ubertura d'o trampo de 12 kilometros Sietemo-Uesca, unindo asinas de camín toda la provincia. ==…"
+            ]
+            },
+        {
+                "word": "centimetros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…00 000 mm - un millón de milimetros. 100 000 cm - cient mil centimetros. 10 000 dm - diez mil decimetros. 1000 m - mil metros. 100…",
+                "…icos. En Espanya gosan estar formaus por un celindro de 120 centimetros d'altaria y 30 de diametro, refirmaus en una base cubica de…",
+                "…ón de micrometros. 1000 mm - mil milimetros. 100 cm - cient centimetros. 10 dm - diez decimetros. 0,1 dam - zero coma un decametro.…",
+                "…'hula hoop pa os ninos miden per un regular a la raya de 70 centimetros de diametro, mientres que pa os adultos miden arredol de 10…",
+                "…e diametro, mientres que pa os adultos miden arredol de 100 centimetros. == Referencias ==…",
+                "…de diametro reduciu y lonchitut variable que va dende bels centimetros dica un metro u mas. Con frecuencia se nombra asinas os tro…"
+            ]
+            },
+        {
+                "word": "milimetros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…m - mil millons de micrometros. 1 000 000 mm - un millón de milimetros. 100 000 cm - cient mil centimetros. 10 000 dm - diez mil d…",
+                "…e dos traquius d'o corazón) en o ciclo cardiaco. Se mide en milimetros de mercurio (mmHg) per dencima d'a presión atmosferica circ…",
+                "…rterial normal en reposo, en un adulto, ye a la raya de 120 milimetros de mercurio (16 kPa) sistolica y arredol de 80 milimetros d…",
+                "…0 milimetros de mercurio (16 kPa) sistolica y arredol de 80 milimetros de mercurio (11 kPa) diastolica, indicada a sobén como 120/…",
+                "…tación caye en chulio y noviembre con un promeyo de 83 y 86 milimetros respectivament, a mas baixa en febrero con un promeyo de 43…",
+                "…respectivament, a mas baixa en febrero con un promeyo de 43 milimetros. A precipitación anyal de 831 milimetros ye liucherament co…"
+            ]
+            },
+        {
+                "word": "kilogramos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'un metro u un metro y meyo y un peso d' arredol de 10 a 50 kilogramos. Manimenos, dau que os animals creixen a lo largo d'a tota…",
+                "…gosa dar una longaria de dica tres metros y un peso de 150 kilogramos. Manimenos, i hai informes d'animals significativament mas…",
+                "…mó de siluros de dica cinco metros de longaria y mas de 300 kilogramos de peso, y se diz que en 1731 se capturó en l'Oder un anima…",
+                "…z que en 1731 se capturó en l'Oder un animal que pesaba 375 kilogramos y no teneba entranyas. Istas dimensions son asumidas per cu…",
+                "…A Voyager 1 ye una sonda espacial robotica de 722 kilogramos, lanzada lo 5 de setiembre de 1977. A suya misión orichinal…",
+                "…elacionaus. En o Sistema Internacional, a masa se mesura en kilogramos. A masa se puet referir a dos conceptos: A masa inercial ye…"
+            ]
+            },
+        {
+                "word": "quilogramos",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cuadraus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…rau d'un kilometro de canto. Equivale a un millón de metros cuadraus. Se simboliza por km². 1 km² = 106 m² = 1.000.000 m² = 100…",
+                "…cuadrau. Atras unidaz de superficie son: aria - 100 metros cuadraus hectaria - 10.000 metros cuadraus kilometro cuadrau - 1.000…",
+                "…ie son: aria - 100 metros cuadraus hectaria - 10.000 metros cuadraus kilometro cuadrau - 1.000.000 metros cuadraus…",
+                "…10.000 metros cuadraus kilometro cuadrau - 1.000.000 metros cuadraus…",
+                "…sparricatos en un aria de mas de tres millons de kilometros cuadraus en l'Oceano Pacifico a lo nord-este d'Australia. Independie…",
+                "…nius. A superficie total d'o Territorio ye de 60 kilometros cuadraus.…"
+            ]
+            },
+        {
+                "word": "cuadratos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…mundo. Tien una superficie d'alto u baixo 8.300 kilometros cuadratos, o que lo converte en o mas gran d'America d'o Sud, nomás s…",
+                "…por o Laco de Maracaibo, en Venezuela, de 13.000 kilometros cuadratos, pero que muitos lo clasifican como un mar, ya que tien con…",
+                "…ia d'as islas ye variable, pueden tener dende poquez metros cuadratos dica mas de dos millons de km2, como ye o caso de Groenland…",
+                "…icas d'o Friuli y d'a Venecia Chulia. Tien 7.844 kilometros cuadratos y 1,2 millons d'habitants. As prencipals ciudaz son Trieste…",
+                "…cidat maxima de 1.992 personas y un escenario de 340 metros cuadratos. A sala s'emplega tamién como seu prencipal de congresos y…",
+                "…capacidat maxima de 429 plazas y un escenario de 120 metros cuadratos. Tamién se puet fer servir ta congresos y conferencias, ya…"
+            ]
+            },
+        {
+                "word": "cubicos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…anadá). O cabal maximo d'augua que levan ye de 5.720 metros cubicos por segundo. En verano l'aprofeitamiento hidroelectrico fa…",
+                "…feitamiento hidroelectrico fa baixar o cabal a 2.832 metros cubicos por segundo. Dende que estioron descubiertas per los coloni…",
+                "…de norte a sud y contiene alto u baixo 60 millons de metros cubicos d'arena. O suyo nombre deriva d'a parola pialat que signifi…",
+                "…erficie de 72 hectarias y una capacidat de 17,2 hectometros cubicos d'augua. Chunto a l'ibón se troba un refuchio con o mesmo n…",
+                "…m². O volumen d'o estuario ye de bels 562 millons de metros cubicos. O suyo perimetro ye de 317 kilometros. D'alcuerdo con a Of…",
+                "…964. O numero 250 se refiere a la capacidat, en centimetros cubicos, de cada cilindro. L'abreviadura GTO significa a exprisión…"
+            ]
+            },
+        {
+                "word": "habitant",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Boltanya, en a provincia de Uesca. Actualment no tien garra habitant. == Vinclos externos == (es) En http://www.despobladosenhue…",
+                "…atayú. En 1991 yera despoblato, encara que en 2018 teneba 1 habitant. == Toponimia == Provién de \"Carrera de Molina\".…",
+                "…Boltanya, en a provincia de Uesca. Actualment no tien garra habitant. Se troba a bels 4 kilometros a l'ueste de Campodarbe. == H…",
+                "…marca de l'Alto Galligo. En 2016 a suya población yera de 1 habitant. == Cheografía == O lugar de Layés se troba situato a 740 m…",
+                "…l en fornos. Se veiga cheso (material) Un chentilicio ta un habitant d'a Val d'Echo. Una fabla local aragonesa occidental. Se ve…",
+                "…icipio de Puértolas, en a Provincia de Uesca. No tien garra habitant dende en habe ya decadas. == Vinclos externos == Se veigan…"
+            ]
+            },
+        {
+                "word": "norte",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 119,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…O Norte ye o punto cardinal que indica, sobre un meridiano, a endre…",
+                "…nal que indica, sobre un meridiano, a endrecera enta o polo norte cheografico. En o hemisferio norte, se corresponde con o pu…",
+                "…a endrecera enta o polo norte cheografico. En o hemisferio norte, se corresponde con o punto de l'horizont cual perpendicula…",
+                "…r pasa por a estrela polar. A la ubicación u a la endrecera Norte le'n diz septentrional u boreal. En Aragón o viento que buf…",
+                "…diz septentrional u boreal. En Aragón o viento que bufa d'o norte se conoixe como tresmontana. == Se veiga tamién == Bruixula…",
+                "…A Huerta Norte (en catalán Horta Nord) ye una comarca valencianofablant d'…"
+            ]
+            },
+        {
+                "word": "sud",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 155,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…O Sud ye o punto cardinal que indica, sobre un meridiano, a endre…",
+                "…nal que indica, sobre un meridiano, a endrecera enta o polo sud cheografico. Ye un d'os cuatre puntos cardinals, situau dia…",
+                "…oincide con a posición d'o Sol a o meyodía; en o hemisferio sud ye, a o contrario, o punto cardinal oposau a la posición d'…",
+                "…meridiana sobre l'horizont pasa por dos puntos: o Norte y o Sud. Lo que ye d'o Sud, ye en o Sud u perteneixe a o Sud, se di…",
+                "…orizont pasa por dos puntos: o Norte y o Sud. Lo que ye d'o Sud, ye en o Sud u perteneixe a o Sud, se diz austral u meridio…",
+                "…por dos puntos: o Norte y o Sud. Lo que ye d'o Sud, ye en o Sud u perteneixe a o Sud, se diz austral u meridional. En Aragó…"
+            ]
+            },
+        {
+                "word": "este",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…erpendicular a la meridiana talla a l'horizont en os puntos Este y Ueste. También se'n diz orient u levant. Se corresponde —…",
+                "…O cantón de Biàrritz Este (en occitán canton de Biàrritz Èst, en basco Biarritz Ekial…",
+                "…Gran Este (en francés Grand Est, en alemán Großer Osten, alsaciano Gr…",
+                "…O cantón d'Aulorón Este (en occitán canton d'Auloron Davant, en francés canton d'Ol…",
+                "…O cantón de Nai Este (en occitán canton de Nai Davant; en francés canton de Nay-…",
+                "…O cantón de Pau Este (en occitán canton de Pau Davant; en francés canton de Pau-…"
+            ]
+            },
+        {
+                "word": "ueste",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…cular a la meridiana talla a l'horizont en os puntos Este y Ueste. También se'n diz occident u ponient. Como adchectivo gosa…",
+                "…A Huerta Ueste (en catalán Horta Oest) ye una comarca d'o País Valenciano…",
+                "…cia incluiba as actuals comarcas d'a Huerta Norte, a Huerta Ueste, a Huerta Sud y a ciudat de Valencia. Debito a lo creiximie…",
+                "…as istas comarcas se dividió en as cuatro actuals. A Huerta Ueste incluye antimás l'antiga comarca de Plan de Quart. Muga a l…",
+                "…O cantón de Bayona Ueste (en occitán canton de Baiona Oèst; en basco Baiona Mendebal…",
+                "…3 por fusión d'os cantons de Bayona nord-este y Bayona Nord-ueste. == Se veiga tamién == Cantons d'os Pireneus Atlanticos…"
+            ]
+            },
+        {
+                "word": "barra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Barra de las Cevenas (en francés Barre-des-Cévennes) ye una local…",
+                "…pués de trillar-lo. Ista mena d'edificios se feba servir de barra a barra d'es Pireneus, y son clamaus por iste nombre en Ara…",
+                "…trillar-lo. Ista mena d'edificios se feba servir de barra a barra d'es Pireneus, y son clamaus por iste nombre en Aragón, Cat…",
+                "…diante y actor brasilero. == Filmografía == 1957: Um Marido Barra-Limpa, de Renato Grechi. 1958: Vou Te Contá, de Alfredo Pal…",
+                "…em Que Roubou a Copa do Mundo, de Victor Lima. 1967: Marido Barra-Limpa. 1968: Agnaldo, Perigo à Vista, de Reynaldo Paes de B…",
+                "…siste en o debantamiento d'a mayor cantidat de peso con una barra en a que en os suyos extremos bi han discos. O conchunto d'…"
+            ]
+            },
+        {
+                "word": "por",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 93,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Ista ye una lista de países por población. Os datos proceden d'o CIA World Factbook 2005 y…",
+                "…ectos contimparativos. === Veyer tamién === Lista de países por superficie. Lista de países por densidat de población. List…",
+                "…tamién === Lista de países por superficie. Lista de países por densidat de población. Lista de países por continent. === V…",
+                "…Lista de países por densidat de población. Lista de países por continent. === Vinclos externos === CIA World Factbook…",
+                "…Ista ye a lista d'os países d'o mundo ordenaus por Producto Interior Bruto (PIB) a valors de paridat de poder…",
+                "…son en dólars estausunidenses. Veyer tamién Lista de países por población, Lista de países por densidat de población, Lista…"
+            ]
+            },
+        {
+                "word": "cient",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Se conoixe en a Historiografía con o nombre de Guerra d'os Cient Anyos a o periodo 1337-1453, cuan os reinos de Francia y An…",
+                "…y Chuana d'Arco se en aproveitó. Oficialment, a guerra d'os Cient Anyos remató con o tractau de paz sinyau en Picquigny (Pica…",
+                "…nos == Se veigan as imáchens de Commons sobre a Guerra d'os Cient Anyos.…",
+                "…etros. 1 000 000 mm - un millón de milimetros. 100 000 cm - cient mil centimetros. 10 000 dm - diez mil decimetros. 1000 m -…",
+                "…00 dm - diez mil decimetros. 1000 m - mil metros. 100 dam - cient decametros. 10 hm - diez hectometros. 0,1 mam - zero coma u…",
+                "…u o centenar (lat. <CENTĒNU, «centesmo» u «la uno que en fa cient») ye una agrupación de cient caracters, obchectos u cosas.…"
+            ]
+            },
+        {
+                "word": "ciento",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…che popular tamién ye común referir-se a ista cantidat como ciento u un ciento, pronunciau /ˈθiento/, u /ˈθjɛnto/ en aragonés…",
+                "…tamién ye común referir-se a ista cantidat como ciento u un ciento, pronunciau /ˈθiento/, u /ˈθjɛnto/ en aragonés central. De…",
+                "…, u /ˈθjɛnto/ en aragonés central. De manera simbolica, «un ciento» tamién puede significar una gran cantidat de caracters, ob…",
+                "…ra-te si le quereban en Uesca, que pa l'entierro en vino un ciento, Un ciento (de) gallinas be de tener, etc. == Ditos y mazad…",
+                "…quereban en Uesca, que pa l'entierro en vino un ciento, Un ciento (de) gallinas be de tener, etc. == Ditos y mazadas == «fer…",
+                "…(de) gallinas be de tener, etc. == Ditos y mazadas == «fer ciento y no'n fer una, como si no'n fizieras dinguna» == Referenci…"
+            ]
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 11,
+                "substringOnly": 9,
+                "examples": [
+                "…rte d'a Unión Europea. Os países que forman a clamada \"zona euro\" a on l'euro ye la moneda oficial son Alemanya, Austria, Be…",
+                "…s) Catalago d'as monedas d'euro. (en) (de) Heiko Otto, ed. \"Euro (billez)\". http://www.bis-ans-ende-der-welt.net/Europa-B-En…",
+                "…li. ==== Sieglo XXI ==== 2009 - Eslovaquia dentra en a zona euro. 2017 - esleyiu o portugués António Guterres en a seu d'as…",
+                "…sustituyendo a Ban Ki-moon. 2023 - Croacia dentra en a zona euro, en adoptar l'euro como moneda. == Naixencias == === Aragón…",
+                "…La Eurocopa de Fútbol 2032, Euro 2032 u Eurocopa 2032, y de nombre oficial UEFA Euro 2032, e…",
+                "…l 2032, Euro 2032 u Eurocopa 2032, y de nombre oficial UEFA Euro 2032, estará la vintena edición d'a Eurocopa de Fútbol de s…"
+            ]
+            },
+        {
+                "word": "euros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 15,
+                "substringOnly": 1,
+                "examples": [
+                "…de 10 millons de coronas suecas d'alto u baixo un milión de euros. == Relación de ganadors d'o Premio Nobel de Fisica == ===…",
+                "…n d'o mundo en Schweinfurt. Con un PIB per capita de 78.382 euros, Schweinfurt ocupa o tercer puesto en Alemanya dimpués de W…",
+                "…d'un electrón, se podría dir que si fuese una moneda de dos euros, o nuclio d'un atomo sería como un campo de futbol. O elect…",
+                "…ctiva u exceptiva), y significa \"solament\". Je n'ai que dix euros sur moi. Yo nomes tiengo que diez euros dencima. Il ne veut…",
+                "…t\". Je n'ai que dix euros sur moi. Yo nomes tiengo que diez euros dencima. Il ne veut que s'amuser. Nomes quere que divertir-…",
+                "…En a presentación d'o Gubierno d'Aragón se gastoron 176.600 euros, que posteriorment Adolfo Barrena, o portavoz d'Ezquierda U…"
+            ]
+            },
+        {
+                "word": "dolar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…meno son as monedas estausunidenses de dime, cuatreno, meyo dolar, y dollar anteriors a 1965, niquel y penique anterior a 198…",
+                "…n aviento de 2019, o tipo de cambio yera de 910 francos per dolar d'os Estaus Unius. Ruanda s'unió a la Comunidat d'Africa Or…"
+            ]
+            },
+        {
+                "word": "dólar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 16,
+                "substringOnly": 2,
+                "examples": [
+                "…O dólar ($) ye a moneda oficial de Australia, Barbados, Bahamas, Ba…",
+                "…d y Tobago y Zimbabwe. == Referencias == == Veyer tamién == Dólar estausunidense. Dólar neozelandés. Dólar australiano.…",
+                "…== Referencias == == Veyer tamién == Dólar estausunidense. Dólar neozelandés. Dólar australiano.…",
+                "…== Veyer tamién == Dólar estausunidense. Dólar neozelandés. Dólar australiano.…",
+                "…O dólar estausunidense ($ u US$) ye a moneda oficial d'Estaus Unius…",
+                "…ros países, como Ecuador y El Salvador tamién han adoptau o dólar estausunidense como moneda oficial. O codigo ISO 4217 para…"
+            ]
+            },
+        {
+                "word": "dolars",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ó a bolsa aconseguindo una valoración de 104 mil millons de dolars, a mas alta pa una empresa que empecipia a acotizar. O 9 d'…",
+                "…ril de 2012 Facebook adquirió Instagram por 1000 millons de dolars,​ y en febrero de 2014 mercó o servicio de mensachería mobi…",
+                "…ervicio de mensachería mobil WhatsApp por 16.000 millons de dolars. En marzo de 2018 Facebook teneba mas de 2200 millons d'usu…",
+                "…$) ye a moneda oficial d'Estaus Unius. Anque nomás s'emiten dolars en iste país, d'atros países, como Ecuador y El Salvador ta…",
+                "…ronavirus, as accions d'a companyía teneban una valor de 70 dolars; o 23 de marzo de 2020 valeban 160 dolars, ye decir, una ca…",
+                "…n una valor de 70 dolars; o 23 de marzo de 2020 valeban 160 dolars, ye decir, una capitalización total superior a os 44.000 mi…"
+            ]
+            },
+        {
+                "word": "dólars",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 47,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…en 1865 s'emitioron certificaus d'oro por valura de 10.000 dólars. En 1929 y 1934, con os billez de valuras normals dende 1 d…",
+                "…9 y 1934, con os billez de valuras normals dende 1 dica 100 dólars, tamién s'emitioron valuras altas, con a mesma mida y carac…",
+                "…Kinley, seguntes o estandard de 1929, equivalent a 6.375,24 dólars actuals. 1.000 $: Grover Cleveland, seguntes o estandard de…",
+                "…eland, seguntes o estandard de 1929, equivalent a 12.750,49 dólars actuals. 5.000 $: James Madison, seguntes o estandard de 19…",
+                "…dison, seguntes o estandard de 1929, equivalent a 63.752,44 dólars actuals. 10.000 $: Salmon P. Chase, seguntes o estandard de…",
+                "…hase, seguntes o estandard de 1929, equivalent a 127.504,87 dólars actuals. 100.000 $: Woodrow Wilson, seguntes o estandard de…"
+            ]
+            },
+        {
+                "word": "libra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…A libra esterlina (en anglés pound sterling) ye a divisa d'o Reino…",
+                "…abreviadura ye GBP (codigo ISO 4217) u £ (procede d'o latín libra, unidat de masa). En o Reino Unido, se distingue a moneda d…",
+                "…distingue a moneda d'a unidat de masa clamando a la primera libra esterlina (pound sterling) u simplament esterlina (sterling…",
+                "…atros metals, y con una masa de 1,555 gramos, u 1/240 d'una libra. A libra esterlina se divide en fraccions de cien peniques.…",
+                "…als, y con una masa de 1,555 gramos, u 1/240 d'una libra. A libra esterlina se divide en fraccions de cien peniques. == Refer…",
+                "…eniques. == Referencias == == Vinclos externos == (en) (de) Libra esterlina (billez)…"
+            ]
+            },
+        {
+                "word": "libras",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…ia en o Sistema Internacional d'Unidaz ye de 9,3 litros (24 libras), dende 1553: 13,93 litros (36 libras). == Referencias ==…",
+                "…ye de 9,3 litros (24 libras), dende 1553: 13,93 litros (36 libras). == Referencias ==…",
+                "…kg (12,5 kg seguntes bellas fuents), y equivale tamién a 36 libras. L'arroba s'emplegaba tamién en atros reinos ibericos y suy…",
+                "…ns, pero yeran muit diferents. En Castiella equivaleba a 25 libras (11,502 kg), en Catalunya a 26 libras (10,4 kg) y en Portug…",
+                "…iella equivaleba a 25 libras (11,502 kg), en Catalunya a 26 libras (10,4 kg) y en Portugal a 32 libras (14,688 kg). En a Penin…",
+                "…kg), en Catalunya a 26 libras (10,4 kg) y en Portugal a 32 libras (14,688 kg). En a Peninsula Iberica y en bels países de Lat…"
+            ]
+            },
+        {
+                "word": "quilometro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…cabo ta cuan agafan varios cientos de metros dica mes d'un quilometro d'altaria. A superficie ye marcata per amplas rechions de t…"
+            ]
+            },
+        {
+                "word": "kilometro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…O kilometro ye una unidat de largaria equivalent a 1000 metros. Histori…",
+                "…Un kilometro cuadrau ye a superficie que ocupa un cuadrau d'un kilometro…",
+                "…kilometro cuadrau ye a superficie que ocupa un cuadrau d'un kilometro de canto. Equivale a un millón de metros cuadraus. Se simbo…",
+                "…za por km². 1 km² = 106 m² = 1.000.000 m² = 100 hectarias O kilometro cuadrau s'emplega ta mesurar l'aria d'una nación y todas as…",
+                "…ria - 100 metros cuadraus hectaria - 10.000 metros cuadraus kilometro cuadrau - 1.000.000 metros cuadraus…",
+                "…2808 piez por segundo = 2.2369 millas por hora = 3.6 km/h O kilometro por segundo, equivalent a mil metros por segundo, ye una un…"
+            ]
+            },
+        {
+                "word": "quilometros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…da con a boca y os didos, que permite comunicarse dica tres quilometros de distancia, muito util ta comunicar-se en a cheografía es…",
+                "…turals que d'atra forma habrían de salvar-se con muitos mas quilometros de carretera u vía u que no se podrían salvar. O viaducto m…",
+                "…teristicas en traza de rayas, belunas d'ellas de cientos de quilometros de largaria, que semblan estar causatos per particlas sofla…",
+                "…norte o que pareixeba un río con una longaria de mes de 400 quilometros. Se ha contimparato con o río Nilo, muito mes largo, en a T…",
+                "…uno aon una crosta de chelo con una densidat de decenas de quilometros flota sobre un oceano global. Os descubrimientos de l'equip…",
+                "…dan de pistas de que l'oceano pueda chacer a no mes de 100 quilometros (62 millas) chus a suya superficie. O 2 de chulio de 2014,…"
+            ]
+            },
+        {
+                "word": "metro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 75,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…una unidat internacional de mesura. Ta atros usos se veiga Metro (desambigación). O metro (d'o griego μέτρον metron, mida) y…",
+                "…de mesura. Ta atros usos se veiga Metro (desambigación). O metro (d'o griego μέτρον metron, mida) ye una unidat de mida de l…",
+                "…ión Francesa, l'Academia de Ciencias de Francia establió lo metro con a finalidat d'uniformizar as unidaz de mida francesas p…",
+                "…seu en París d'a Oficina Internacional de Pesos y Midas un metro-patrón construyiu en platín iridiato. == Equivalencias == 1…",
+                "…e veiga tamién == Se veigan as imáchens de Commons sobre lo metro. Unidaz de mesura aragonesas.…",
+                "…O Metro de Roma (en italiano Metropolitana di Roma) ye o rete de fe…"
+            ]
+            },
+        {
+                "word": "metros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Os 1.500 metros lisos, en atletismo, son una cursa en a que s'ha de fer una…",
+                "…, son una cursa en a que s'ha de fer una distancia de 1.500 metros, libres d'obstaclos, o mes rapido posible. Ye la preba mes…",
+                "…significativa d'as cursas de meyo fundo y chunto a los 100 metros lisos son as cursas mes representativas en os campionatos d…",
+                "…nformación: Progresión d'o récord mundial masculín de 1.500 metros lisos. Os récords mundials son: en a categoría masculina d'…",
+                "…xternos == Se veigan as imáchens de Commons sobre los 1.500 metros lisos. (en) Récords d'aria de 1.500 m lisos a l'aire libre…",
+                "…iclo ye sobre una preba d'atletismo en una distancia de 100 metros; ta atros usos, se veiga 100 metros. Os 100 metros lisos ye…"
+            ]
+            },
+        {
+                "word": "centimetro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 12,
+                "substringOnly": 3,
+                "examples": [
+                "…O centimetro, que tiene por simbolo cm, ye una unidat de mesura derivata…",
+                "…que un metro cubico d'augua pesa una tonelada. O gramo por centimetro cubico (simbolo g/cm³) ye una atra unidat ta mesurar a dens…",
+                "…itat que fa servir o gramo (g) en cuentas d'o kilogramo y o centimetro cubico (cm³) en cuentas d'o metro cubico. Ye a unidat de de…",
+                "…tivos historicos y practicos, se gosa mesurar en gramos por centimetro cubico (g/cm3). A densidat de l'augua a 3.98 °C = 1000 kg/m…",
+                "…yons (d'o celta < *agranio) u prinyons, son esfericos, d'un centimetro de diametro alto u baixo. Se pueden minchan, encara que son…",
+                "…, una columna d'aire con un aria de sección transversal d'1 centimetro cuadrato (cm2), medida dende lo livel meyo (promeyo) d'a ma…"
+            ]
+            },
+        {
+                "word": "milimetro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 10,
+                "substringOnly": 4,
+                "examples": [
+                "…O milimetro, que ha simbolo mm, ye una unidat de mesura de lonchituz de…",
+                "…estructuras, especialment en a ferroviaria, y equivale a un milimetro de diferencia d'altura por cada metro linial recorriu, ixo…",
+                "…secuencia, un micrometro equivale a una milesima parte d'un milimetro y a mil nanometros. 1 μm = 0,000001 m = 1 · 10–6 m 1 μm = 0…",
+                "…m); ixo ye, que equivale tamién a la millonesima parte d'un milimetro (1 · 10 −6 mm), a milesima parte d'un micrometro (1 · 10 −3…",
+                "…de magnitut con longarias d'onda d'entre 700 nanometros y 1 milimetro. En teledetección a radiación infrarroya permite conoixer a…",
+                "…en un periodo determinau. Fa servir como unidat de mesura o milimetro (mm), que equivale a un litro d'augua replegada per cada me…"
+            ]
+            },
+        {
+                "word": "quilogramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…entaba diferents grupos d'unidaz como lo sistema mks (metro-quilogramo-segundo) u o sistema cgs (centimetro-gramo-segundo), que a…",
+                "…idat de fuerza necesaria en o vueito ta dar a una masa d'un quilogramo una acceleración d'un metro por segundo cada segundo. Isto…"
+            ]
+            },
+        {
+                "word": "kilogramo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…O kilogramo (simbolo kg) ye a unidat base de masa d'o Sistema Internaci…",
+                "…dat base de masa d'o Sistema Internacional d'Unidaz (SI). O kilogramo ye definito como a masa d'o prototipo internacional d'o kil…",
+                "…amo ye definito como a masa d'o prototipo internacional d'o kilogramo, que ye cuasi identica a la masa d'un litro d'augua. Ye a u…",
+                "…O kilogramo por metro cubico ye a unidat d'o SI ta a densidat y se repr…",
+                "…densidat y se representa por kg/m³ a on kg ye o simbolo de kilogramo y m³ o de metro cubico. A densidat de l'augua ye d'uns 1.00…",
+                "…mesurar a densitat que fa servir o gramo (g) en cuentas d'o kilogramo y o centimetro cubico (cm³) en cuentas d'o metro cubico. Ye…"
+            ]
+            },
+        {
+                "word": "hectarea",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cuadrau",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Un cuadrau ye un poligono de cuatre cantos iguals con anglos rectos (d…",
+                "…== Propiedaz == Ye o poligono regular de cuatre cantos. Un cuadrau ye un caso particular de rectanglo, rombo, paralelogramo, t…",
+                "…drilatero ye a la vez un rombo y un rectanglo, allora ye un cuadrau. O cuadrau tien l'aria mas gran que cualsiquier atro cuadri…",
+                "…e a la vez un rombo y un rectanglo, allora ye un cuadrau. O cuadrau tien l'aria mas gran que cualsiquier atro cuadrilatero con…",
+                "…rilatero con o mesmo perimetro. == Formulas de mida == Ta o cuadrau de canto de longaria l {\\displaystyle l} tenemos as siguien…",
+                "…Un kilometro cuadrau ye a superficie que ocupa un cuadrau d'un kilometro de cant…"
+            ]
+            },
+        {
+                "word": "cuadrato",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…a de Pitagoras diz que en un trianglo rectanglo, l'aria d'o cuadrato d'a hipotenusa (o costato de mayor largaria d'o trianglo re…",
+                "…a d'o trianglo rectanglo) ye igual a la suma d'as arias d'o cuadrato d'os catetos (os dos costatos menors d'o trianglo, los que…",
+                "…densidat de población de nomás que 6 personas por kilometro cuadrato. == Organización politico-administrativa == Cazaquistán ye…",
+                "…d'o Sistema Internacional s'exprisa en kilogramos por metro cuadrato dividito entre segundos a o cuadrato: 1 J = 1 k g ⋅ m 2 ⋅ s…",
+                "…n kilogramos por metro cuadrato dividito entre segundos a o cuadrato: 1 J = 1 k g ⋅ m 2 ⋅ s − 2 {\\displaystyle \\,1\\,\\mathrm {J}…",
+                "…ia, con unidaz SI de pascals (1 pascal = 1 newton per metro cuadrato, 1 N / m2). En promeyo, una columna d'aire con un aria de s…"
+            ]
+            },
+        {
+                "word": "cuadrado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…José Duque Cuadrado (Villalba, Espanya, 4 d'aviento de 1908 - Guadalajara, Mexi…",
+                "…e noviembre de 1987. == Vinclos externos == (es) José Duque Cuadrado. Fundación Pablo Iglesias. (es) José Duque Cuadrado en Comb…",
+                "…é Duque Cuadrado. Fundación Pablo Iglesias. (es) José Duque Cuadrado en Combatientes.es. (es) Expo Consejo de Aragón…",
+                "…el Yerri u simplament pico d'el Yerri (en castellano Mollón Cuadrado del Yerri u pico del Yerri) ye un pico de 2.671 metros d'al…",
+                "…d'os 5 \"torrollons\" d'a redolata dito como Tubo u Castillo Cuadrado. == Toponimia == Bi ha una espelunga dita Cueva Mallata. Bi…",
+                "…inal de Luis de Pablo y una dirección de fotografía de Luis Cuadrado, la produció Elías Querejeta con un montache de Pablo Gonzá…"
+            ]
+            },
+        {
+                "word": "cubico",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…O kilogramo por metro cubico ye a unidat d'o SI ta a densidat y se representa por kg/m³…",
+                "…por kg/m³ a on kg ye o simbolo de kilogramo y m³ o de metro cubico. A densidat de l'augua ye d'uns 1.000 kg/m³ (y prene exacta…",
+                "…³ (y prene exactament ista valura a 277 K), ya que un metro cubico d'augua pesa una tonelada. O gramo por centimetro cubico (s…",
+                "…ro cubico d'augua pesa una tonelada. O gramo por centimetro cubico (simbolo g/cm³) ye una atra unidat ta mesurar a densitat qu…",
+                "…servir o gramo (g) en cuentas d'o kilogramo y o centimetro cubico (cm³) en cuentas d'o metro cubico. Ye a unidat de densidat…",
+                "…kilogramo y o centimetro cubico (cm³) en cuentas d'o metro cubico. Ye a unidat de densidat d'o sistema CGS. Ta convertir g/cm…"
+            ]
+            },
+        {
+                "word": "cubica",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…ntimetros d'altaria y 30 de diametro, refirmaus en una base cubica de fornigón, tot pintau de blanco. Por un regular, se troba…",
+                "…Un dau ye un obchecto a sobén chicot y de forma cubica que s'emplega ta obtener aleatoriament un numero u un simbo…",
+                "…ras estructuras mes compactas: Chelo lc (baixa temperatura, cubica de facetas centradas, densidat alto u baixo 0,9) Chelo II (…",
+                "…lto u baixo 1,3) Chelo VII (alta temperatura, alta presión, cubica simpla, densidat alto u baixo 1'7) Chelo IX (alta presión,…",
+                "…ata) y o volumen ye una mesura de tres dimensions (longaria cubica). En muitos sistemas de mesura la longaria ye una unidat fu…",
+                "…uranio. O criptón solido ye blanco, d'estructura cristalina cubica centrata en as caras igual que a resta de gases nobles. Con…"
+            ]
+            },
+        {
+                "word": "millón",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Un millón (1000000) ye un numero natural que equivale a mil vegadas m…",
+                "…a Internacional d'Unidaz, a os multiplos que equivalen a un millón d'unidaz se les sole identificar con o prefixo mega-. Un mi…",
+                "…ón d'unidaz se les sole identificar con o prefixo mega-. Un millón = 10 6 = 1 000 000. O millón ye, además, a base de potencia…",
+                "…ificar con o prefixo mega-. Un millón = 10 6 = 1 000 000. O millón ye, además, a base de potenciación en a cual s'alazetan as…",
+                "…normalment a dita «escala larga» en a cual os multiplos d'o millón; o billón y o trillón, s'asocian respectivament a «un milló…",
+                "…illón; o billón y o trillón, s'asocian respectivament a «un millón de millons», 1012, y «un millón de billons» (u un millón de…"
+            ]
+            },
+        {
+                "word": "millons",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 75,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…cas. O chinés ye l'idioma mas charrau d'o mundo (mas de 900 millons de fablants como luenga materna) y ye tamién un d'os seis i…",
+                "…ialectos chinos ye la siguient: O mandarín (北方話 / 北方话), 836 millons de fablants. O wú (吳語 / 吴语), 77 millons O cantonés u yuè (粵…",
+                "…ín (北方話 / 北方话), 836 millons de fablants. O wú (吳語 / 吴语), 77 millons O cantonés u yuè (粵語 / 粤语), 71 millons Os dialectos mǐn (閩語…",
+                "…. O wú (吳語 / 吴语), 77 millons O cantonés u yuè (粵語 / 粤语), 71 millons Os dialectos mǐn (閩語 / 闽语), 60 millons O jìn (晉語 / 晋语), 45…",
+                "…u yuè (粵語 / 粤语), 71 millons Os dialectos mǐn (閩語 / 闽语), 60 millons O jìn (晉語 / 晋语), 45 millons O xiāng u hunanés (湘語 / 湘语), 36…",
+                "…Os dialectos mǐn (閩語 / 闽语), 60 millons O jìn (晉語 / 晋语), 45 millons O xiāng u hunanés (湘語 / 湘语), 36 millons O hakka u kèjiā (客家…"
+            ]
+            },
+        {
+                "word": "billón",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 6,
+                "substringOnly": 1,
+                "examples": [
+                "…a dita «escala larga» en a cual os multiplos d'o millón; o billón y o trillón, s'asocian respectivament a «un millón de millo…",
+                "…cultura anglosaxona) s'emplega a «escala curta», en a cual «billón» y «trillón» fan referencia a os nuestros respectives «mil…",
+                "…s respectives «mil millons», 109, y «un millón de millons» (billón), 1012. == Se veiga tamién == Potencia de diez. Billón. Tri…",
+                "…ns» (billón), 1012. == Se veiga tamién == Potencia de diez. Billón. Trillón.…",
+                "…0 pm - mil billons de picometros. 1 000 000 000 000 nm - un billón de nanometros. 1 000 000 000 μm - mil millons de micrometro…",
+                "…tín iridiato. == Equivalencias == 1 000 000 000 000 pm - un billón de picometros. 1 000 000 000 nm - mil millons de nanometros…"
+            ]
+            },
+        {
+                "word": "billons",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…1x10³ m == Equivalencias == 1 000 000 000 000 000 pm - mil billons de picometros. 1 000 000 000 000 nm - un billón de nanometr…",
+                "…ez son: cient, mil, diez mil, cient mil... un millón... mil billons, etc. == Potencias positivas == En notación decimal, potenc…",
+                "…n os que emplegan a escala curta. O trillón ye un millón de billons pa os uns y mil billons pa os atros, etc. == Potencias nega…",
+                "…la curta. O trillón ye un millón de billons pa os uns y mil billons pa os atros, etc. == Potencias negativas == A secuencia d'a…",
+                "…s Tesla, Neuralink y PayPal. Con un patrimonio neto de 19,4 billons de dólars se troba entre las cuaranta personas mas ricas d'…",
+                "…partir d'o colapso d'una gran boira molecular, fa bels 4,6 billons d'anyos, alto u baixo. Seguntes as zagueras estimacions, o…"
+            ]
+            },
+        {
+                "word": "coma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…atros usos de la parola vaiga a nava (desambigación); ta la coma como signo de puntuación, se veiga Coma (puntuación); y ta…",
+                "…sambigación); ta la coma como signo de puntuación, se veiga Coma (puntuación); y ta l'estau medico de coma se veiga Coma (me…",
+                "…tuación, se veiga Coma (puntuación); y ta l'estau medico de coma se veiga Coma (medicina). Una coma u nava ye una plana situ…",
+                "…iga Coma (puntuación); y ta l'estau medico de coma se veiga Coma (medicina). Una coma u nava ye una plana situada en un zona…",
+                "…; y ta l'estau medico de coma se veiga Coma (medicina). Una coma u nava ye una plana situada en un zona montanyosa y rodeyad…",
+                "…arredol. === Comas como combes === En francés o cognato de \"coma\" ye combe y a part d'estar una palabra d'uso corrient indic…"
+            ]
+            },
+        {
+                "word": "Cristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 104,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Chesús de Nazaret, Chesús o Nazareno, Chesucristo u Cristo (Betlem (4 aC - 30 u 33) ye a fegura central d'as relichion…",
+                "…s prencipals : Descendimiento de Chesús y Lamentación sobre Cristo muerto. Un seguiudor de Chesús, clamau Chusé d'Arimatea, so…",
+                "…de Roma inflichía penas severas a os partidarios de un tal Cristo, que heba siu supliciado bajo Poncio Pilato: os cristianos…",
+                "…Poncio Pilato: os cristianos toman o suyo nombre «de un tal Cristo, que en época de Tiberio fue ajusticiado por Poncio Pilato»…",
+                "…itoningún mal: dicen haber, simplemente, elevado cánticos a Cristo, como os que se dedican a un dios», «le cantan himnos a Cri…",
+                "…sto, como os que se dedican a un dios», «le cantan himnos a Cristo (cuasi Dios, seguntes dicen)» (Epístolas 10:96). Existen be…"
+            ]
+            },
+        {
+                "word": "antes",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…erbio ahier expresa anterioridat a l'igual que as locucions antes d'ahier y antes d'anueit. Os adverbios hue(i) y agora expre…",
+                "…esa anterioridat a l'igual que as locucions antes d'ahier y antes d'anueit. Os adverbios hue(i) y agora expresan simultaneida…",
+                "…bios de localización temporal relativa == Son los adverbios antes, dimpués, luego, tarde, encara, alavez/allora y ya, con las…",
+                "…castellano medieval toste, que se considera castellano. === Antes === Antes deriva d'o latín ANTE a l'igual que lo prefixo an…",
+                "…medieval toste, que se considera castellano. === Antes === Antes deriva d'o latín ANTE a l'igual que lo prefixo ante-. En be…",
+                "…ariant andes con sonorización dezaga de liquida. L'adverbio antes/antis fa part de locucions adverbials como antes con antes…"
+            ]
+            },
+        {
+                "word": "dimpués",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 65,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…toz os países d'Europa Occidental. Ye un periodo que plega dimpués d'o Renaiximiento, y que fue succedito por l'Arte neoclasic…",
+                "…ctual Italia, iste estilo artistico y cultural s'extendilló dimpués por atros países. Una d'as suyas caracteristicas ye estar u…",
+                "…nga, conservata nomás en a escritura durant cuantos sieglos dimpués de que a luenga fablata ya s'aleixase d'a escrita en forma…",
+                "…leixase d'a escrita en forma de cuantos dialectos, d'os que dimpués naixioron as luengas romances. Istas variedaz charradas d'o…",
+                "…ca que yera una caracteristica distinguidora en bels casos. Dimpués, por a era tardana, ista distinción de cantidat desapareixi…",
+                "…por un regular breus; y as tonicas, largas. Isto fació que dimpués que as vocals largas no apareixesen que en silabas accentua…"
+            ]
+            },
+        {
+                "word": "dempués",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…ió parte en a conquiesta d'a ciudat de Uesca, que esdevenió dempués d'a batalla d'Alcoraz (l'anyo 1096), en chunto con o chirmá…",
+                "…estratechica, escomenzó a prencipios de 1105 (poquez meses dempués que lo coronesen rei) y remató en 1107 con a conquiesta d'a…",
+                "…dor en a batalla d'Alcoraz y muerto en Val Tierra en 1110). Dempués que morise Al-Mustaín, su sobrino Abdelmalik heredó lo rein…",
+                "…eda. A enemistat que li quedó a Abdelmalik con os almurabiz dempués d'a suya expulsión d'a ciudat lo convirtió en un eventual a…",
+                "…d ibn al-Hayy heba estau lo conqueridor de Valencia en 1102 dempués que morise lo Cit Campiador, y como gubernador de Saraqusta…",
+                "…uaire mes exito que de prener-le la fortaleza de Chuslivol. Dempués que morise Ibn al-Hayy, Ibn Tifilwit ocupó lo suyo puesto,…"
+            ]
+            },
+        {
+                "word": "menos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Un país menos desarrollau u país subdesarrollau ye, seguntes a definición…",
+                "…s, habendo-se de superar os 1.086 pa superar a condición de menos desarrollau. Febleza en recursos humanos: comprobada con os…",
+                "…ants. L'Alto Representant d'as Naciones Unidas pa os Países Menos Desarrollaus (en anglés The United Nations Office of the Hi…",
+                "…ien una población de 5.416.447 habitants (2008), d'os cuals menos d'una tercera parti viven en a capital. Tien una superficie…",
+                "…o Penedés Anoya Baches Baixo Llobregat Barcelonés Berguedá, menos Gósol Garraf Maresme Osona, menos Espinelves, Vidrà y Vilad…",
+                "…egat Barcelonés Berguedá, menos Gósol Garraf Maresme Osona, menos Espinelves, Vidrà y Viladrau Vallés Occidental Vallés Orien…"
+            ]
+            },
+        {
+                "word": "lumero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ocial. En o mes de noviembre de 2020, El Gurrión plegó ta o lumero 161, justo cuan feba 40 anyadas d'o suyo nacimiento. “40 añ…",
+                "…1980-2020) En o mes d'agosto de 2025, El Gurrión plegó ta o lumero 180. A hemeroteca d'a revista cuenta con 6.848 pachinas. En…"
+            ]
+            },
+        {
+                "word": "numero",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 97,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Un numero (d'o latín < NUMERUS) ye una entidat abstracta que represen…",
+                "…numeración se les diz cifras pero por un regular a palabra numero se fa servir igual ta designar o concepto como o signo. En…",
+                "…O numero atomico ye, en quimica, o numero entero positivo que indica…",
+                "…O numero atomico ye, en quimica, o numero entero positivo que indica o numero de protons en o nuclio…",
+                "…omico ye, en quimica, o numero entero positivo que indica o numero de protons en o nuclio de l'atomo. S'indica por a letra Z.…",
+                "…a periodica. En un atomo eletricament neutro, bi ha o mesmo numero de protons que d'eletrons, o que permite saber a confegurac…"
+            ]
+            },
+        {
+                "word": "menuto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Un minuto u menuto (d'o latín minūtus) ye una unidat de tiempo que equivale a…",
+                "…O moregón menuto (nombre cientifico Sorex minutus (Linné, 1758)) ye un mamif…",
+                "…s chóvens d'o moregón cudicuadrato. A grandaria d'o moregón menuto vareya entre os 42 y 66 milimetros, con una coda dende 35 d…",
+                "…ntifico Micromys minutus (Pallas, 1771)), tamién dito ratón menuto u zorz menuto, ye un mamifero d'a orden d'os Rodentia y fam…",
+                "…ys minutus (Pallas, 1771)), tamién dito ratón menuto u zorz menuto, ye un mamifero d'a orden d'os Rodentia y familia Muridae q…",
+                "…que s'emplegan ta medir a frecuencia son as revolucions por menuto (rpm) y os radians por segundo (rad/s). Contino s'amuestran…"
+            ]
+            },
+        {
+                "word": "menutos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Os menutos son sers de forma humanoide pero d'a grandaria d'un nino ch…",
+                "…anglés Decimal Degree, DD) eixemplo 41.333- 106..500 Graus:Menutos (en anglés Degree Minute, DM) eixemplo 41:20- 106:30 Graus:…",
+                "…(en anglés Degree Minute, DM) eixemplo 41:20- 106:30 Graus:Menutos:Segundos (en anglés Degree Minute Second, DMS) eixemplo 41:…",
+                "…ncia d'oxido de fierro disuelto. == Acceso == Se troba a 10 menutos de l'ibón d'as Truitas, a on que se puet plegar en verano e…",
+                "…as, a on que se puet plegar en verano en telecadiera, en 45 menutos de puyada. Os dos ibons son o naixedero d'o río Aragón. ==…",
+                "…orías absolutas y chovenils, bi ha cuatre periodos de ueito menutos. D'atra man, en as categorías cadete, infantil, alevín y be…"
+            ]
+            },
+        {
+                "word": "segundo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…articlo ye sobre a unidat de tiempo. Ta atros usos se veiga segundo (desambigación). O segundo (s) ye una unidat de tiempo y un…",
+                "…e tiempo. Ta atros usos se veiga segundo (desambigación). O segundo (s) ye una unidat de tiempo y una d'as siet unidaz base d'o…",
+                "…rfina d'o estato fundamental d'o cesio 133. Historicament o segundo se definió com 1/86.400 d'un día solar meyo. En 1954 a 10ª…",
+                "…ecisión d'a unidat de tiempo, en 1956 o Comité redefinió lo segundo en función de l'anyo tropico 1900, ya que a traslación d'a…",
+                "…ias opticas superiors a los 9 GHz d'a definición actual d'o segundo, indican que en un futuro proximo se podrá amillorar en div…",
+                "…O termin segundo puet referir-se a: Segundo, una unidat de tiempo. Segundo,…"
+            ]
+            },
+        {
+                "word": "segundos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…r porque a fins de chunio y d'aviento d'adhiben u restan os segundos que calga (segundos blincaus, en angles, leap seconds). ==…",
+                "…hunio y d'aviento d'adhiben u restan os segundos que calga (segundos blincaus, en angles, leap seconds). == Se veiga tamién == F…",
+                "…lcio-48. A vida meyana d'o isotopo de flerovio-289 ye de 30 segundos y la d'o flerovio-288 de 2 segundos. == Vinclos externos ==…",
+                "…e flerovio-289 ye de 30 segundos y la d'o flerovio-288 de 2 segundos. == Vinclos externos == (en) webelements.com - Fl (en) Apsi…",
+                "…t de tiempo; se define como 365.25 días d'exactament 86 400 segundos (unidat base d'o SI), que suman exactament 31 557 600 segun…",
+                "…undos (unidat base d'o SI), que suman exactament 31 557 600 segundos en l'anyo astronomico juliano. La parola anyo tamién s'util…"
+            ]
+            },
+        {
+                "word": "habitants",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 71,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Vieux-Habitants (en criollo antillano Zabitan) ye una comuna francesa d'o d…",
+                "…idat Autonoma d'Aragón. En 2010 a población yera de 973.252 habitants en a provincia, 675.121 d'éls en a capital. A densidat de p…",
+                "…en a capital. A densidat de población yera en 2010 de 56,34 habitants/km². == Prencipals municipios por población == == Se veiga…",
+                "…en cada unidat de superficie, y por un regular s'expresa en habitants por km².…",
+                "…e 2016. A población total de Francia ye de 60,3 millones de habitants, d'os que 58.6 millons (97,2%) viven en Europa. L'aria tota…",
+                "…ndalucía ye dividida en ueito provincias: Almería, (701.688 habitants en o 2014). Cádiz, (1.240.175 habitants en o 2014). Cordoba…"
+            ]
+            },
+        {
+                "word": "ora",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 9,
+                "substringOnly": 3,
+                "examples": [
+                "…Auer (en italiano Ora) ye un municipio italiano de 3.648 habitants situau en a pr…",
+                "…ía d'os sers vivos, y per enchaque d'a gran deficultat a la ora de clasificar bellas especies, muitas órdens s'agrupan en s…",
+                "…ía d'os sers vivos, y per enchaque d'a gran deficultat a la ora de clasificar determinadas especies, diversas familias pued…",
+                "…logia personale. 1981: Lilít e altri racconti. 1982: Se non ora, quando?. 1984: Ad ora incerta. 1985: L'altrui mestiere. 19…",
+                "…Lilít e altri racconti. 1982: Se non ora, quando?. 1984: Ad ora incerta. 1985: L'altrui mestiere. 1986: I sommersi e i salv…",
+                "…la deixata por Benedet, que tien como principio fundamental Ora et labora, ye dicir, priega y treballa. Los monesterios ben…"
+            ]
+            },
+        {
+                "word": "oras",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…eixe principal l'Oficio Divín, tamién dito Liturchia de las oras, que se priega siet vegatas a lo diya, como Sant Benedet or…",
+                "…tiempo ta ir dende Murviedro ta Somport ye d'alto u baixo 4 oras y 10 menutos. == Trampos == == Referencias ==…"
+            ]
+            },
+        {
+                "word": "y",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 306,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…A Y (i griega u ye) ye a vintiseisena letra de l'alfabeto arago…",
+                "…griega u ye) ye a vintiseisena letra de l'alfabeto aragonés y vintiunena consonant. Perteneixe tamién a l'alfabeto latino…",
+                "…nt. Perteneixe tamién a l'alfabeto latino. == Historia == A y proviene d'a letra griega ipsilon (ὒψιλόν) —«y simple» (pa…",
+                "…istoria == A y proviene d'a letra griega ipsilon (ὒψιλόν) —«y simple» (pa distinguir d'a grafía «oi» (οι), que representa…",
+                "…griego antigo tardano),— que se pronunciaba /u/, mes tarde /y/ (como a u francesa u a ü alemana) y actualment /i/. Inicia…",
+                "…nciaba /u/, mes tarde /y/ (como a u francesa u a ü alemana) y actualment /i/. Inicialment os romanos la transcribioron co…"
+            ]
+            },
+        {
+                "word": "grau",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 95,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Grau, que d'orichen significaba cubilar u bella vegada hespital…",
+                "…esto de paso habitual en una sierra u montanya, puet estar: Grau, paso chico entre montanyas. Grau, puesto en una zona coste…",
+                "…a u montanya, puet estar: Grau, paso chico entre montanyas. Grau, puesto en una zona costera a on que se puede embarcar. Gra…",
+                "…rau, puesto en una zona costera a on que se puede embarcar. Grau, nombre de ciertas unidatz. Lo Grau municipio de lo Semonta…",
+                "…que se puede embarcar. Grau, nombre de ciertas unidatz. Lo Grau municipio de lo Semontano de Balbastro. Lo Grau de Valencia…",
+                "…unidatz. Lo Grau municipio de lo Semontano de Balbastro. Lo Grau de Valencia barrio de Valencia on yera lo puerto. Graus mun…"
+            ]
+            },
+        {
+                "word": "grado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 9,
+                "substringOnly": 2,
+                "examples": [
+                "…Grau (Grado en castellano) ye un concello d'a comunidat autonoma unipro…",
+                "…Lo Grau (El Grado en castellano) ye un municipio d'Aragón situato en a comarc…",
+                "…s enquestes: resumen de la tesis presentada para aspirar al grado de Doctor en Filosofía y Letras. Universidad de Barcelona,…",
+                "…e chirmans. Tamién se puet diferenciar a familia seguntes o grado d'a relación entre os suyos miembros: Familia nucleyar - pa…",
+                "…procedent de \"ō\" que habría d'haber estau /o/, se zarró un grado dando /u/. == Referencias == == Vinclos externos == (es) En…",
+                "…am contra Vietnam d'o Sud y os Estaus Unius, que plegó ta o grado de cheneral, y estió o vencedor de l'Exercito francés en 19…"
+            ]
+            },
+        {
+                "word": "cientos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…los Estaus Federaus de Micronesia. A rechión ye formada por cientos de chicotas islas situadas en una ampla zona d'o Pacifico u…",
+                "…sico d'os suyos procesos, en particular en a integración de cientos de mils u millons de transistors en cercuitos lochicos. O c…",
+                "…etnica entre Hutu y faccions Tutsi en Burundi propició que cientos de mils de refuchiaus se desplazasen enta atros países y de…",
+                "…ura. Mientres a Edat Antiga apareixioron y se desarrolloron cientos de civilizacions de gran importancia en toz os continents,…",
+                "…ivas y tienen una vida muito curta -de l'orden de decenas u cientos de millons d'anyos-, y la teoría actual d'a evolución estel…",
+                "…y remata en Arasanz. Chusto de frente de Montero, a poquez cientos de metros, s'alviran as enrunas d'o lugar de a Lecina. En c…"
+            ]
+            },
+        {
+                "word": "graus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 64,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Graus ye una villa y municipio de la Comunidat Autonoma d'Aragón…",
+                "…na densidat de población de 11,32 hab/km². == Cheografía == Graus ye situau dichós unas penyas de la marguin dreita de lo río…",
+                "…de 22.17 °C. == Parla y luenga == La luenga tradicional en Graus ye l'aragonés, en la suya variant ribagorzana local, una pa…",
+                "…ls como lo foncense u l'estadillano. La castellanización de Graus tamién ha influito en lo catalán de la val d'Isabana, (y en…",
+                "…a que ha recibito part de lo exodo rural d'esta comarca, en Graus tamién bi ha catalanoparlants, orichinarios de lugarons y a…",
+                "…i aragonés, trobó muerte en 1064 cuan prebaba de conquistar Graus. Los cristianos de lo reino d'Aragón reconquerioron Graus e…"
+            ]
+            },
+        {
+                "word": "grados",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…40 grados a la sombra (títol orichinal en castellano, en aragonés 40…",
+                "…ermeya entre os puntos cardinals Norte y Este (ubicada a 45 grados exactos de cadagún d'els). L'adchectivo correspondient ye n…",
+                "…ntermeya entre os puntos cardinals Sud y Este (ubicada a 45 grados exactos de cadagún d'els). L'adchectivo correspondient ye s…",
+                "…termeya entre os puntos cardinals Sud y Ueste (ubicada a 45 grados exactos de cadagún d'els). L'adchectivo correspondient ye s…",
+                "…rmeya entre os puntos cardinals Norte y Ueste (ubicada a 45 grados exactos de cadagún d'els). L'adchectivo correspondient ye n…",
+                "…sura. 1967: Sor Citroën. 1967: Amor a la española. 1967: 40 grados a la sombra. 1967: Novios 68. 1967: Operación cabaretera. 1…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…O grau Celsius u grau centigrado, representau como °C, ye una unidat de te…",
+                "…t de temperatura, y debe o suyo nombre a l'astronomo Anders Celsius (1701-1744), qui lo proposó per primera vegada en 1742. Ye…",
+                "…llición, os dos a o livel d'a mar. Una diferencia d'un grau Celsius, ye equivalent a una diferencia d'un kelvin. O zero de l'es…",
+                "…equivalent a una diferencia d'un kelvin. O zero de l'escala Celsius difiere d'o d'a escala kelvin en 273,15 unidaz. Ye dicir: T…",
+                "…ferencia Cheneral de Pesos y Midas, se decidió per o termin Celsius, millor que no atros termins que se feban servir, como cent…",
+                "…n con o prefixo centi-, y ta reconoixer o treballo d'Anders Celsius. Como curiosidat, cal decir que a -40 graus, a escala Fahre…"
+            ]
+            },
+        {
+                "word": "Fahrenheit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Fahrenheit puet referir-se a: Fahrenheit, una unidat de temperatura pr…",
+                "…Fahrenheit puet referir-se a: Fahrenheit, una unidat de temperatura proposada por Gabriel Fahrenheit…",
+                "…Fahrenheit, una unidat de temperatura proposada por Gabriel Fahrenheit en 1724. Fahrenheit, un videochuego que amaneixió en setiem…",
+                "…at de temperatura proposada por Gabriel Fahrenheit en 1724. Fahrenheit, un videochuego que amaneixió en setiembre de 2005. Fahrenh…",
+                "…renheit, un videochuego que amaneixió en setiembre de 2005. Fahrenheit, una API de graficos 3D por computador unificando Direct3D…",
+                "…de graficos 3D por computador unificando Direct3D y OpenGL. Fahrenheit, un grupo chileno de hard rock. Fahrenheit, un videochuego…"
+            ]
+            },
+        {
+                "word": "e",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 101,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…E ye a cinquena letra de l'alfabeto aragonés y a segunda d'as…",
+                "…l'alfabeto latino. == En aragonés == En aragonés o grafema <e> puet representar: En cheneral o fonema vocalico anterior (…",
+                "…neral o fonema vocalico anterior (palatal) d'apertura meya /e/, en todas as suyas realizacions: meter ([me’teɾ]), correu…",
+                "…[’ʎɛɾa]). A conchunción copulativa (< ET) se puet escribir \"e\", forma medieval que persiste en belsetán, representando a…",
+                "…ersiste en belsetán, representando a suya realización como [e]: azul e royo. == Referencias == == Vinclos externos == Se…",
+                "…n belsetán, representando a suya realización como [e]: azul e royo. == Referencias == == Vinclos externos == Se veigan as…"
+            ]
+            }
+        ],
+    }
+    

@@ -1019,6 +1019,42 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
             + "inverts and omitting a plus does not",
     },
+    an: {
+        // \u26a0 SEVEN REFUSALS over the retained text of `tools/corpus/mined/an.jsonc` (448 segments of a
+        // 255,887-paragraph an.wikipedia dump), each argued in src/languages/aragonese/normalize.ts. The
+        // `equals` entry is a SEVENTH distinct non-equation sense of the sign in this sweep, and a kind
+        // no earlier language produced: CHART MARKUP the dump extraction left behind.
+        equals: "measured: `=` \u00d710 and SIX are EasyTimeline chart directives the extraction did not "
+            + "strip \u2014 `PlotArea = width:450 height:230 left:180 bottom:35`, and five `ScaleMajor = "
+            + "unit:year increment:N start:0` lines. One more is a GREEK ETYMOLOGY GLOSS (\u201cde photos "
+            + "= luz, y graphis = debuixo\u201d) and one a raw LaTeX fragment. Only TWO are equations "
+            + "(`m = E/c\u00b2`, `hf = \u00f8 + y k`), both physics prose quoting a formula rather than "
+            + "asking for it to be read aloud",
+        "greater-than": "measured: `>` \u00d716 and every one is a SOUND-CHANGE ARROW \u2014 the etymology "
+            + "table of the arag\u00f3n\u00e9s article, Latin etymon to Aragonese reflex: `PONTE > puent`, "
+            + "`FERRU > fierro`, `FOLIA > fuella`, `SPEC\u0027LU > espiello`, `GRANDE > gran`, `IUVEN > "
+            + "choven`, `GELARE > chelar`, `FILIU > fillo`. Shan\u0027s `>` was the same sign in the same "
+            + "sense; gd\u0027s was a LaTeX fragment, tk\u0027s a typo for \u27e8\u015f\u27e9, la\u0027s a "
+            + "real comparison and oc\u0027s a taxonomic rank chain. ZERO comparisons here",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs \u00d711 and only THREE are fractions "
+            + "(`2/3`, `1/10`, `1/72`); the rest are LEGAL CITATIONS (`Lei 10/2009`, `Decreto 208/1993`, "
+            + "`Lei Organica 4/1979`), an issue number (`Fuellas, 16/93`), a sports season "
+            + "(`temporada 2004/2005`), a date (`from:30/10/1977`) and the population rate `hab/km\u00b2` "
+            + "\u2014 which IS read, as a rate. Reading a statute number as a fraction is trap 56",
+        plus: "measured: `+` \u00d73 and NONE is an addition: a PHONOLOGICAL ENVIRONMENT in the "
+            + "orthography article (\u201cch, j, g(+e), g(+i) son uniformizatas en ch\u201d \u2014 \u27e8g\u27e9 "
+            + "before \u27e8e\u27e9, before \u27e8i\u27e9), a PAGINATION in a citation (`XVIII+1022 pp.`), "
+            + "and the physics formula above. A plus does not invert its operand, so silence costs nothing",
+        "plus-minus": "measured: `\u00b1` \u00d71 and it is an APPROXIMATE GEOLOGICAL DATE \u2014 \u201cEn o "
+            + "Devoniano (fa \u00b1415 - \u00b1360 m.a.) se form\u00f3 la penya calsinera\u201d, where `m.a.` is "
+            + "*millons d\u0027anyadas* and IS claimed by the layer. The sign means \u2018about\u2019 here, not "
+            + "\u2018plus or minus\u2019, and no Aragonese word for either reading is written",
+        times: "measured: `\u00d7` \u00d71 and it is SCIENTIFIC NOTATION, not a multiplication to be read: "
+            + "\u201cuna reserva de 11.800 millons de barrils (`1.88\u00d710^9 m\u00b3`)\u201d. The caret "
+            + "exponent beside it is unread too, so emitting a multiplier alone would produce *un coma "
+            + "uitanta y ueito por diez nueu* \u2014 worse than the silence",
+    },
     pap: {
         // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/pap.jsonc` (448 segments of a
         // 31,099-paragraph pap.wikipedia dump), argued in src/languages/papiamento/normalize.ts.
