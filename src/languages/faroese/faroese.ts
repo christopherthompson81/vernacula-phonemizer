@@ -10,6 +10,8 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeFaroese } from "./normalize.ts";
 
 interface FaroeseDef {
     vowels: Record<string, [string, string]>;
@@ -176,7 +178,32 @@ function nasalPass(segs: Seg[]): void {
 }
 
 // A word (Faroese Latin letters incl. á í ó ú ý æ ø ð) / number / punctuation token.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+)|([.!?…,;:])`, "gu");
+/**
+ * The shared SYMBOL tier. Every word is a fo.wikipedia TOKEN attestation whose examples were read:
+ * `prosent` ×75, `stig`/`stigum` ×64/×59, `krónur` ×59, `dollarar` ×44, `metur` ×26, `Celsius` ×23,
+ * `kilometur` ×12, `komma` ×7.
+ *
+ * ⚠ THE CURRENCY IS POSTPOSED AND ABBREVIATED `kr.`, which normalize.ts does NOT expand: the tier's own
+ * key reads it, and expanding it there first would leave the tier with a word it does not match. The
+ * corpus writes `100 kr.`, `2,5 mió. kr.`, `11.738 mió. kr.` and `3,4 miljardir krónur` — the last one
+ * spelled out, which is what sources the reading. `evra` ×6 is thin and ships only because `€` occurs.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["prosent"],
+    currency: { "kr": ["króna", "krónur"], "$": ["dollari", "dollarar"], "€": ["evra", "evrur"] },
+    units: {
+        "km": ["kilometur", "kilometrar"], "m": ["metur", "metrar"], "cm": ["sentimetur", "sentimetrar"],
+        "mm": ["millimetur", "millimetrar"], "kg": ["kilogramm", "kilogrommum"],
+    },
+    exponentWords: { squared: ["fervent"], cubed: ["teningsmát"], position: "after" },
+    ampersand: "og",
+    magnitudes: ["túsund", "milliónir", "miljardir"],
+});
+
+// ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause
+// pause and `6,3°C` reads as *seks , tríggir* — a phrase break inside a quantity. normalize.ts has already
+// folded the dollar-figure dot decimals onto the comma, so one branch covers both. `decimals` is 3,162.
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'-")})|(\\d+(?:,\\d+)?)|([.!?\u2026,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
@@ -189,10 +216,21 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class FaroesePhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — it resolves the five jobs of the full stop and its abbreviation, degree
+        // and range steps need the figure and its mark still adjacent, which the tier would break.
+        return assembleClauses(SYMBOLS(normalizeFaroese(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: the units-first compositor (numbers.ts) → each word back through the same g2p.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                if (frac !== undefined) {
+                    // `komma` ×7 on fo.wikipedia — the separator's own name. The fractional part is read
+                    // digit by digit, the same call every other layer in this sweep makes.
+                    sink.emit(phonemizeWord("komma"));
+                    for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
+                }
+            }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

@@ -1005,6 +1005,20 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "(+ 1366 ca)`) and the LaTeX fragment above. Zero are additions; the MINUS is read, because "
             + "omitting it inverts",
     },
+    fo: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/fo.jsonc` (452 segments of a
+        // 52,355-paragraph fo.wikipedia dump), argued in src/languages/faroese/normalize.ts.
+        equals: "measured: `=` \u00d70 in the retained text \u2014 the sign does not occur",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70 in the retained text \u2014 the sign does not occur",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        plus: "measured: `+` \u00d70 as an addition. The `math-sign` residual is the FOOTBALL SCORE "
+            + "(`EB/Streymur - FC Lusitans 5-1. M\u00e1lini: 1-0: \u2026, 2-0: \u2026`), where the hyphen separates "
+            + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
+            + "inverts and omitting a plus does not",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in

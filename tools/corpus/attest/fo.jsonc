@@ -1,0 +1,662 @@
+// WIKIPEDIA WORD ATTESTATION — fo. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "fo",
+        "wiki": "fo.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "sætti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…tann triði Star Wars-filmurin ið varð gjørdur, men er tann sætti parturin í Star Wars-søguni. Filmurin varð frumsýndur 25 ma…",
+                "…r eftir George Lucas frá 2005. Revenge of the Sith var tann sætti og seinasti Star Wars-filmurin ið varð gjørdur, sum tann tr…",
+                "…aligum veðurlíkindum. Á fimta teini góvust 86 súkklarar, og sætti teinur varð fyrst styttur og síðan avlýstur. == Luttakandi…",
+                "…samtykt við 33 atkvøðum fyri og 29 ímóti. New York er tann sætti amerikanski staturin, sum viðurkennir hjúnarlag millum samk…",
+                "…seljandi fløgunum í USA nakrantíð. Eisini hevur hann verið sætti best seljandi tónleikari í heiminum, og triðbesti seljandi…",
+                "…gdu urtagørðum. Mætasti kongurin í Babylon, Hammurabi, tann sætti av ráðandi kongsættini, stýrdi frá um 1790 til 1750 f.Kr. H…"
+            ]
+            },
+        {
+                "word": "sjeyndi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…D við einum haka yvir. í tí latinska stavraðnum. Ď er tann sjeyndi bókstavurin í tí kekkiska stavraðnum og tann áttandi í tí s…",
+                "…tir amerikanska generalinum Andrew Jackson, sum seinni varð sjeyndi forseti í USA. == Sí eisini == Mississippi Sambandsríki Ame…",
+                "…ska orðinum septem, ið merkir sjey. September var nevniliga sjeyndi mánaðin í gamla rómverska kalendaranum, har árið byrjaði 1.…",
+                "…við krúnuni eftir deyða abba síns, Gustaf VI Adolf. Hann er sjeyndi kongurin av Bernadotte-ættini. Carl XVI Gustaf er giftur vi…",
+                "…rg, Suðurafrika, deyður 11. november 2021 í Høvdastaði) var sjeyndi forseti í Suðurafrika og tann seinasti forsetin í apartheid…",
+                "…ti. Hann var ríkisstjóri Finnlands í sjey mánaðir í 1919 og sjeyndi forsetin í Finnlandi frá 1944 til 1946. == Ávísingar útefti…"
+            ]
+            },
+        {
+                "word": "áttandi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…atínska orðinum octō, ið merkir átta. Oktober var nevniliga áttandi mánaðin í gamla rómverska kalendaranum, har árið byrjaði 1.…",
+                "…r tann sjeyndi bókstavurin í tí kekkiska stavraðnum og tann áttandi í tí slovakiska stavraðnum. alfabetet. Í tryktum teksti hev…",
+                "…San Diego er áttandi størsti býur í USA. Býurin liggur í statinum Kalifornia, ha…",
+                "…og violinleikari (d. 1840) 5. desember - Martin Van Buren, áttandi forsetin í USA (d. 1862) == Andlát == 1. januar - Johann Ch…",
+                "…katarska fólkið. Forseti í emirríkinum Qatar er síðan 2013 áttandi emir Tamim ibn Hamad Al Thani (تميم بن حمد بن خليفة آل ثاني…",
+                "…Fever er áttandi fløgan hjá avstralsku Kylie Minogue. Plátan varð givin út í…"
+            ]
+            },
+        {
+                "word": "níggjundi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ska orðinum novem, ið merkir níggju. November var nevniliga níggjundi mánaðin í gamla rómverska kalendaranum, har árið byrjaði 1.…",
+                "…rsti, annar, triði, fjórði, fimti, sætti, sjeyndi, áttandi, níggjundi, tíggjundi. Raðtølini, øll uttan \"annar\", bendast sum veikt…"
+            ]
+            },
+        {
+                "word": "ellivti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…inum. Hann var guvernørur í Tennessee í árunum 1839-1841 og ellivti forsetin í USA frá 4. mars 1845 til 4. mars 1849. == Ávísin…",
+                "…Edvard av Portugal (1391–1438) var ellivti kongurin í Portugal, annar kongurin í Aviz-ættini. Stjórnar…"
+            ]
+            },
+        {
+                "word": "tólvti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…Tólvti maður var útgivin sum fløga (CD) í 1998 og er ein tónleikaú…",
+                "…Rópið á skuggarnar === Uppsamlingsfløgur/plátur === 1998 - Tólvti maður 1999 - Gullfløgan 1999 - Komið øll við 1999 - Tutl 20…",
+                "…r við á hesum tónleikaútgávum === 1990 - Vit herja á 1998 - Tólvti maður (sangurin Hond í hond) 2003 - Ung um aldamótið II ==…",
+                "…ggarnar ==== Uppsamlingsfløgur/plátur (Hjarnar) ==== 1998 - Tólvti maður 1999 - Gullfløgan 1999 - Komið øll við 1999 - Tutl 20…",
+                "…syngja. Hesin sangurin var eisini útgivin í 1998 á fløguni Tólvti maður. === Útgávur === 1990 - Vit herja á, Kaj Leo syngur s…",
+                "…rja á, Kaj Leo syngur sangin Vit syngja, kasettuband 1998 - Tólvti maður, CD == Familja == Foreldrini eru Leo Hans Johannesen…"
+            ]
+            },
+        {
+                "word": "trettandi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Trettandi ella trettandadagur er heiti fyri dagin 6. januar - 13. dag…",
+                "…25. desember var rætti dagurin at hátíðarhalda Jesu føðing. Trettandi verður eisini kallaður \"gomlujól\". Hetta sipar tó helst til…",
+                "…inum (360 dagar um skotár er). Dagurin verður eisini róptur trettandi ella trettandadagur - t.e. trettandi dagurin eftir jóladag.…",
+                "…n verður eisini róptur trettandi ella trettandadagur - t.e. trettandi dagurin eftir jóladag. Dagurin kallast í kirkjuligum høpi e…",
+                "…a verður útgivin av so stórum forlagi. == Útgivið == 1978 - Trettandi mánaðin (yrkingasavn) 1984 - Pinnabrenni til sosialismuna (…"
+            ]
+            },
+        {
+                "word": "fjúrtandi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ugawa Iemochi, (徳川 家茂), føddur 17. juli 1846 í Edo var tann fjúrtandi shogun í Tokugawa-shongunatinum. Hann stýrdi frá 1858 til 1…",
+                "…áva 2011) === Yrkingar og týðingar === Eiriks-Paulina kvað (Fjúrtandi 1953. Songbók Føroya Fólks, 9. útg. nr.92). Heystkvøld (Var…",
+                "…dic Languages and Modern Linguistics 7,I. 1992). Málbrigdi (Fjúrtandi 27.10.1990-20.10.1993). Hugtøk og heiti (Málting 11/1994).…"
+            ]
+            },
+        {
+                "word": "fimtandi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…g amerikanski uttanríkisráðharrin árini 1845-1849. Hann var fimtandi forsetin í USA frá 4. mars 1857 til 4. mars 1861. James Buc…",
+                "…\", komu í gildi. == Føðingar == 23. apríl - James Buchanan, fimtandi forsetin í USA (d. 1868) 27. apríl - Samuel Morse, amerikan…",
+                "…ftirfylgjari til Iesada, men nú gjørdist hann í staðin tann fimtandi og seinasti shogunen í Tokugawashogunatinum. == Keldur ==…",
+                "…ra, og eisini søgd at vera blíðari. === Amulios === Amulios Fimtandi kongur í Alba Longa, sonur Prokas og bróðir Numitor. Prokas…"
+            ]
+            },
+        {
+                "word": "sekstandi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "seytjandi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…gar == == Føðingar == 6. juli - Jørgen Frantz Hammershaimb, seytjandi og seinasti løgmaður á Steigagarði í Sandavági. (d. 1820) =…",
+                "…ørgen Frantz Hammershaimb (6. juli 1767 - 24. mai 1820) var seytjandi og seinasti løgmaður á Steigagarði í Sandavági. Hann er fað…",
+                "…r røðin voksin við Hevndin úr havsins dýpi, Horvna rósan og Seytjandi maðurin. Steintór Rasmussen er giftur við Jóngerð Biskopstø…",
+                "…(krimiskaldsøga, 2017) Horvna rósan (krimiskaldsøga, 2017) Seytjandi maðurin (krimiskaldsøga, 2018) == Heiðurslønir == Barnament…"
+            ]
+            },
+        {
+                "word": "átjandi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ypir Louisiana-økið frá Fraklandi . 1812 - Louisiana verður átjandi statur USA. 1945 - Adolf Hitler ger sjálvmorð. 1980 - Beatr…",
+                "…ar. Í 1999 varð hann valdur av American Film Institute, sum átjandi besti mannligi sjónleikari á lista teirra 100 ár...100 stjø…"
+            ]
+            },
+        {
+                "word": "nítjandi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "tríatiundi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "fyrsta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 51,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Fyrsta Mósebók er tann fyrsti parturin í Bíbliuni. Í fyrstu Mósebó…",
+                "…g Írland. 1. august 1980 – Vigdís Finnbogadóttir verður sum fyrsta kvinna í heiminum vald til forseta, tá hon vinnur tað íslen…",
+                "…í einari roynd at finna sjóleiðina til India vestur um hav. Fyrsta ferðin hjá Kristoffuri Kolumbus er byrjað. 3. august 1914 –…",
+                "…ferðin hjá Kristoffuri Kolumbus er byrjað. 3. august 1914 – fyrsta skipið siglir ígjøgnum nýggju Panamaveitina. 3. august 1958…",
+                "…0 túsund fólk lurta eftir honum. 28. august 1985 – heimsins fyrsta roykibann kemur í gildi, tá ein matstova í Colorado, USA, b…",
+                "…, ið byrjaði á einum hósdegi. == Hendingar == 15. februar - Fyrsta bamsan (Teddy Bear) kemur á marknaðin í Amerika. 1. juli -…"
+            ]
+            },
+        {
+                "word": "triðja",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Triðja Mósebók verður í hebráisku Bíbliuni nevnd Wajiiqra. Tað mer…",
+                "…n ein leygardagur. Árið er 2005. ár eftir Krist, fimta ár í triðja ártúsund, fimta árið í 21. øld og 5 árið í 2000-árunum. ==…",
+                "…m. Árið er nummar 2008 aftaná kristi føðing, áttunda árið í triðja ártúsund, áttunda árið í 21. øld, og níggjunda árið í 2000-…",
+                "…i. Árið er nummar 2015 eftir kristi føðing, fimtanda árið í triðja ártúsund, fimtanda árið í 21. øld, og 6 árið í 2010-árunum.…",
+                "…rianska kalendaranum, ár 2017 eftir Kristi føðing, 17. ár í triðja ártúsund, 17. ár í 21. øld, og 8. ár í 2010-árunum. == Hend…",
+                "…inum mánadegi. Tað var ár 2018 eftir Kristi føðing, ár 18 í triðja ártúsund, ár 18 í 21, øld og ár 9 í 2010-árunum. == Hending…"
+            ]
+            },
+        {
+                "word": "fjórða",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…l at telja dagarnar í einum ári og til at siga eitt árstal. FJórða hvørt ár er skotár, har ein eyka dagur kemur í februar, sol…",
+                "…irnir) er ein altjóða fleir-ítróttastevna, ið verður hildin fjórða hvørt ár. Teir olympisku summarleikirnir er tann ítróttaste…",
+                "…ng um Evropameistaraheitið hevur verið fyriskipað regluliga fjórða hvørt ár síðan 1960. Til 1976 luttóku bara fýra lið í enda…",
+                "…irnir) er ein altjóða fleir-ítróttastevna, ið verður hildin fjórða hvørt ár. M.a. eru skirenning, íshockey, skílop og skoyture…",
+                "…st at fara frá so nýggja mið-vinstrasamgongan, sum gjørdist fjórða stjórnin hjá Atla Dam (Javnaðarflokkurin, Tjóðveldisflokkur…",
+                "…sjónvarpsskermarnar sum hendan kappingin, ið verður avgjørd fjórða hvørt ár. Men soleiðis hevur ikki altíð verið. == Søga == =…"
+            ]
+            },
+        {
+                "word": "stig",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 64,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Stig Rästa (føddur 24. februar 1980) er ein estiskur sangari og…",
+                "…stiga í 1742, har hann setti frystipunktið á vatni til 100 stig og kókipunktið til 0 stig. Óheftir av hvørjum øðrum broyttu…",
+                "…tti frystipunktið á vatni til 100 stig og kókipunktið til 0 stig. Óheftir av hvørjum øðrum broyttu franski alisfrøðingurin J…",
+                "…nktið á vatni, t = T − T0, har T0 = 273,15 K. Eindin eitur \"stig Celsius\", og symbolið er °C. Tíverri tosa summi um hitastig…",
+                "…til Celsius í 1985. == Stigaumrokning == Soleiðis rokna vit stig Celsius um til kelvin: TK = TC + 273,15. Soleiðis rokna vit…",
+                "…kelvin: TK = TC + 273,15. Soleiðis rokna vit kelvin um til stig Celsius: TC = TK − 273,15. Soleiðis rokna vit stig Fahrenhe…"
+            ]
+            },
+        {
+                "word": "stigum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 59,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…r - EB/Streymur vann sítt annað føroyameistaraheitið við 58 stigum, ÍF vann silvur við 54 stigum og HB vann bronsu við 45 stig…",
+                "…ð føroyameistaraheitið við 58 stigum, ÍF vann silvur við 54 stigum og HB vann bronsu við 45 stigum, sama stigatal sum KÍ og Ví…",
+                "…igum, ÍF vann silvur við 54 stigum og HB vann bronsu við 45 stigum, sama stigatal sum KÍ og Víkingur, men HB hevði betri málúr…",
+                "…en HB hevði betri málúrtøku. FC Suðuroy endaði niðast við 9 stigum og B68 endaði næstniðast við 24 stigum, sama stigatal sum T…",
+                "…endaði niðast við 9 stigum og B68 endaði næstniðast við 24 stigum, sama stigatal sum TB, men B68 hevði verri málúrtøku. Niður…",
+                "…ngarárið við enn einum føroyameistaraheiti, hesaferð við 52 stigum. Nummar tvey gjørdist B36 við 45 stigum og nummar trý gjørd…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 10,
+                "substringOnly": 2,
+                "examples": [
+                "…num. Stigin er nevndur eftir svenska vísindamanninum Anders Celsius (1701–1744). Celsius gjørdi ein stiga í 1742, har hann sett…",
+                "…r eftir svenska vísindamanninum Anders Celsius (1701–1744). Celsius gjørdi ein stiga í 1742, har hann setti frystipunktið á vat…",
+                "…á vatni, t = T − T0, har T0 = 273,15 K. Eindin eitur \"stig Celsius\", og symbolið er °C. Tíverri tosa summi um hitastig og kuld…",
+                "…Centigrade\" á enskum, men almenna heitið í dag er \"degrees Celsius\", so sum mælt er til í SI-reglunum. Veðurtíðindini frá BBC…",
+                "…-reglunum. Veðurtíðindini frá BBC skiftu frá Centigrade til Celsius í 1985. == Stigaumrokning == Soleiðis rokna vit stig Celsiu…",
+                "…elsius í 1985. == Stigaumrokning == Soleiðis rokna vit stig Celsius um til kelvin: TK = TC + 273,15. Soleiðis rokna vit kelvin…"
+            ]
+            },
+        {
+                "word": "krónur",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 59,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…lin. Tunnlarnir verða mettir at kosta góðar tvær milliardir krónur. Eysturoyartunnulin eina milliard og 50 milliónir krónur, o…",
+                "…ir krónur. Eysturoyartunnulin eina milliard og 50 milliónir krónur, og Sandoyartunnulin verður mettur at kosta 860 milliónir k…",
+                "…r, og Sandoyartunnulin verður mettur at kosta 860 milliónir krónur. Sambært uppskotinum verður koyrandi bæði í Eysturoyartunli…",
+                "…lum við akvarelmálningum, ið prýða baksíðuna á seðlunum. 50 krónur: Sumba, Suðuroy, 2001 100 krónur: Klaksvík, 2003 200 krónur…",
+                "…a baksíðuna á seðlunum. 50 krónur: Sumba, Suðuroy, 2001 100 krónur: Klaksvík, 2003 200 krónur: Tindhólmur, 2004 500 krónur: Hv…",
+                "…krónur: Sumba, Suðuroy, 2001 100 krónur: Klaksvík, 2003 200 krónur: Tindhólmur, 2004 500 krónur: Hvannasund, Viðoy, 2004 1.000…"
+            ]
+            },
+        {
+                "word": "króna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 5,
+                "substringOnly": 2,
+                "examples": [
+                "…men tá ið Føroyar ikki hava egið gjaldoyra, er ein føroysk króna tað sama sum ein donsk króna. 1 króna = 100 oyru 100 krónur…",
+                "…egið gjaldoyra, er ein føroysk króna tað sama sum ein donsk króna. 1 króna = 100 oyru 100 krónur ≈ 13,50 evrur (euro) 1 evra…",
+                "…doyra, er ein føroysk króna tað sama sum ein donsk króna. 1 króna = 100 oyru 100 krónur ≈ 13,50 evrur (euro) 1 evra ≈ 7,50 kr…",
+                "…ónuna == Undir seinna heimsbardaga varð sjálvstøðug føroysk króna stovnsett. Føroyska krónan varð við lóg ásett at vera 1/20…",
+                "…, sum ásetir, at Føroyar hava egið gjaldoyra, sum eitur ein króna. Og lutfallið millum føroysku og donsku krónuna er 1 króna…",
+                "…króna. Og lutfallið millum føroysku og donsku krónuna er 1 króna = 1 krone. Í lógini verður eisini ásett, at serligir føroys…"
+            ]
+            },
+        {
+                "word": "dollarar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 44,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…msins næstríkasti persónur. Buffet hevur mist 25 milliardir dollarar í 2008. Hann eigur kortini 37 milliardir dollarar, og er so…",
+                "…illiardir dollarar í 2008. Hann eigur kortini 37 milliardir dollarar, og er sostatt heimsins triði ríkasti persónur. Hann hevur…",
+                "…ti ognina við næstan 50 miljardum í 2007, uppí 62 miljardir dollarar. Kendi amerikanski ríkmaðurin, sum lá ovastur í 2008 við 62…",
+                "…n Carlos Slim Helú á triðja plássi bert hevur 35 milliardir dollarar eftir. Til tess at bjarga Harley Davidson hevur Warren Buff…",
+                "…vur Warren Buffet gjørt av at læna fyritøkuni 300 milliónir dollarar. Fyri hann er hetta helst smápengar, men hetta er eftir øll…",
+                "…t. Tað er, tá ein filmur selur fyri meira enn 500 milliónir dollarar í atgongumerkjum í USA. Bert tveir filmar hava megnað tað,…"
+            ]
+            },
+        {
+                "word": "evra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 2,
+                "examples": [
+                "…Gjaldoyrað evra ella euro (symbol € ella EUR) er seinnu árini innført í nóg…",
+                "…1999 kom í gildi nýtt felags ES-gjaldoyra, sum verður nevnt evra, uppkallað eftir heimspartinum. == Slóðir == Den Europæiske…",
+                "…== Slóðir == Den Europæiske Centralbank (ECB) (á danskum). Evra (peningaseðlar) (enskt) (týskt)…",
+                "…nan marknaðarbúskap. Litava hevði ætlað at gerast partur av evra-samstarvinum í ES í 2007, men orsaka av ov høgari inflatión…",
+                "…ur politikari og forsætisráðharri Danmarkar. 1981 - Patrice Evra, franskur fótbóltsleikari. 1987 - Andy Murray, skotskur ten…",
+                "…króna. 1 króna = 100 oyru 100 krónur ≈ 13,50 evrur (euro) 1 evra ≈ 7,50 krónur Síðani 1951 hevur Danski tjóðbankin prentað f…"
+            ]
+            },
+        {
+                "word": "kilometur",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Bygdin liggur millum Kvívík og Leynar, umleið hálvan annan kilometur frá báðum bygdunum. == Keldur ==…",
+                "…eisini til gongu, serliga ferðafólk. Gøtan er meira enn ein kilometur long.…",
+                "…úr New York City og grannaoyggin Liberty Island liggur ein kilometur sunnari. Onki fólk býr á hesum báðum oyggjum. Ellis Island…",
+                "…kommuna í Normandínum í Fraklandi. Oyggin liggur umleið ein kilometur uttanfyri útnyrðingsstrondin Fraklands, og uttanfyri munnan…",
+                "…metrar úr Massachusetts og grannaoyggin Nantucket liggur 24 kilometur eystari. Í 2010 var fólkatalið 16 535. Tær størstu bygdirna…",
+                "…bilum í litrum pr. míl, sum er sama eind sum desilitrar pr. kilometur. == Sí eisini == Míl Millumtjóða eindarskipanin == Referens…"
+            ]
+            },
+        {
+                "word": "metur",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…t. Oyggjaríkið Maldivurnar liggur í meðal bert hálvan annan metur omanfyri sjóarmálan, hægsta punktið í landslagnum er minni…",
+                "…an, hægsta punktið í landslagnum er minni enn hálvan triðja metur høgt. Maldivurnar vinna nógvan pening upp á ferðafólkavinnu…",
+                "…m. Heili 90 prosent av oyggjarbólkinum liggja minni enn ein metur yvir havyvirflatuni. Forsetin hevur fyrr sagt, at stjórnin…",
+                "…y-puzzle Tree) er eitt veturgrønt nálatræ ið kann gerast 40 metur høgt og 2 metur í diametur. Træið er upprunavøkstur í Suður…",
+                "…r eitt veturgrønt nálatræ ið kann gerast 40 metur høgt og 2 metur í diametur. Træið er upprunavøkstur í Suður-Mið Kili (Chile…",
+                "…arctica) er ein jarðlagdur runnur av pílafamiljuni, 1 til 2 metur langur og heldur knortlutur. Bløðini eru grágrøn og klædd v…"
+            ]
+            },
+        {
+                "word": "prosent",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 75,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…fjórðingin í 2011 vísa, at bruttotjóðarframleiðslan var 2,1 prosent størri enn í oktober ársfjórðingi í 2010. Samanborið við ja…",
+                "…Samanborið við januar ársfjórðing í 2010 var vøksturin 8,1 prosent. Hagtølini eisini vísa, at útflutningurin av ídnaðarvørum e…",
+                "…vísa, at útflutningurin av ídnaðarvørum er vaksin heili 53 prosent samanborið við januar ársfjórðing í 2010. Hinvegin er infla…",
+                "…jórðing í 2010. Hinvegin er inflasjónin framvegis stór, 5,4 prosent . == Landslutir == Harjumaa Hiiumaa Ida-Virumaa Järvamaa Jõ…",
+                "…og skilur meginlondini hvørt frá øðrum. Havið fevnir um 70 prosent av heimsins ýti og er av umleið 1,368 milliardum kubikkilom…",
+                "…ni. Miðaldýpdin í havinum er umleið 3 729 metrar; umleið 60 prosent av havinum er djúphav. Størsta dýpi er Challengerdýpið í Ma…"
+            ]
+            },
+        {
+                "word": "fyrsti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Fyrsti várdagur verður roknaður at vera 22. februar.…",
+                "…Fyrsti summardagur verður í álmanakkum vanliga sagdur at vera 25.…",
+                "…VII) var sambært gregorianska kalendaranum eitt vanligt ár. Fyrsti dagurin var ein týsdagur. == Hendingar == 1. august - 9. au…",
+                "…landi verða illa oyðilagdir av eldsbruna. Sanatoriivegurin, fyrsti koyrivegur í Føroyum, bygdur millum Havnina og Sanatorii í…",
+                "…Vegur verður gjørdur úr Havn og niðan í Hoydalar. Hetta er fyrsti vegur millum bygda í Føroyum. Stýrið í Mosambik verður skip…",
+                "…LII) var sambært gregorianska kalendaranum eitt vanligt ár. Fyrsti dagurin var ein hósdagur. == Hendingar == Víkingatoftir ver…"
+            ]
+            },
+        {
+                "word": "annar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Annar páskadagur er dagurin eftir páskadag. Annað páskakvøld er s…",
+                "…Á [ɔɑː] er annar bókstavur í tí føroyska stavraðnum.…",
+                "…di til løgfrøðiliga fyriskipan av sær sjálvum, uttan at ein annar staður hevur vald yvir tí fyiskipanini. Í politiskun høpi t…",
+                "…Beta (stóra Β, lítla β) er tann annar bókstavurin í tí grikska alfabetinum.…",
+                "…B [be] er annar bókstavur í tí latínska stavraðnum og triði bókstavur í tí…",
+                "…g forseti í lýðveldinum Texas. 20. september - Jacob Grimm (annar av Grimm brøðrunum)…"
+            ]
+            },
+        {
+                "word": "triði",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Triði heimurin: Politiskt heiti á menningarlondum í Afrika, Latín…",
+                "…B [be] er annar bókstavur í tí latínska stavraðnum og triði bókstavur í tí føroyska stavraðnum. B er hjáljóð. B kemur f…",
+                "…Concord er høvuðsstaðurin og triði størsti býur í New Hampshire. Hann hevur umleið 42 túsund í…",
+                "…g, konu kong Kristjan VII (1766 - 1808). Georg III var tann triði bretski kongurin frá Hannover Húsinum.…",
+                "…fferson City er uppkallaður eftir Thomas Jefferson, sum var triði forsetin í USA. == Myndir == == Ávísingar úteftir == Heimas…",
+                "…kur filmur, instrueraður av Richard Marquand. Hann var tann triði Star Wars-filmurin ið varð gjørdur, men er tann sætti partu…"
+            ]
+            },
+        {
+                "word": "fjórði",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ir navn, Hann fær navnið John Pávi II. 1788: Georgia verður fjórði statur USA. 1942: Seinni heimsbardagi: Japan hertekur Filip…",
+                "…tann fyrsti Star Wars-filmurin ið varð gjørdur, men er tann fjórði parturin í Star Wars-søguni.…",
+                "…Tours de France á rað frá 1991 til 1995, hann gjørdist tann fjórði súkklarin, ið hevur vunnið Tour de France fimm ferðir. Hann…",
+                "…30 í Reykjavík, Íslandi, er íslendskur UNESCO sendiharri og fjórði forseti Íslands. Hon var forseti frá 1980 til 1996 og var f…",
+                "…februar 2020) vanliga bert umrøddur sum Hosni Mubarak, var fjórði forseti Egyptalands. Han tók við sum forseti hin 14. oktobe…",
+                "…a ár. Býurin bleiv uppkallaður eftir James Madison, sum var fjórði forsetin í USA. Hann andaðist í juni mánaði í 1836. Madison…"
+            ]
+            },
+        {
+                "word": "fimti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Mai er fimti mánaði í árinum eftur tí gregorianska kalendaranum og ein a…",
+                "…James Monroe (28. apríl 1758 – 4. juli 1831), fimti forseti í USA, skrivaði í eini yvirlýsing til kongressina í…",
+                "…mur av George Lucas frá 2002. Attack of the Clones var tann fimti Star Wars-filmurin ið varð gjørdur, sum tann næsti prequel…",
+                "…ars-filmurin ið varð upptikin, hóast hann í veruleikanum er fimti parturin í Star Wars-søguni. Filmurin varð frumsýndur 21. m…",
+                "…num mikudegi. == Hendingar == 4. mars - James Monroe verður fimti forsetin í USA. 10. desember - Mississippi gerst tjúgundi l…",
+                "…) var keisari Rómverjaríkisins á árunum 161 - 180. Hann var fimti og siðsti keisarin av hinum \"fimm góðu keisarunum\", ið stýr…"
+            ]
+            },
+        {
+                "word": "tíggjundi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…ska orðinum decem, ið merkir tíggju. Desember var nevniliga tíggjundi mánaðin í gamla rómverska kalendaranum, har árið byrjaði 1.…",
+                "…Í Gamla Testamenti er Nóa (hebraiskt: Nóaḥ) tíggjundi maður eftir Ádam; tá ið Gud læt syndaflóðina oyða alt lív á…",
+                "…Shavour: Búnaðarhøgtíð um várið. Jom Kippur: Iðranardagur, tíggjundi dagur í nýggja árinum. Mesta høgtíð, fastað verður í 24 tím…",
+                "…ø Amts Hospital, sum var bygt í 1829. Christian kongur tann tíggjundi legði grundarsteinin til Drotning Alexandrines Hospital í j…",
+                "…. september 1566 við Szigetvár í Ungarn). Suleiman var tann tíggjundi og longsstýrandi sultanur í tí Osmanska ríkinum (frá 1520 t…",
+                "…aðra, eins væl og tær góðtaka kristindóm, jødadóm og islam. Tíggjundi og seinasti lærumeistarin, Gobind Rai (1675-1708), gav nógv…"
+            ]
+            },
+        {
+                "word": "tjúgundi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…rður fimti forsetin í USA. 10. desember - Mississippi gerst tjúgundi lutstatur USA. Ninko verður keisari í Japan. == Føðingar ==…",
+                "…Frakland upptekur metraskipanina. 1817 - Mississippi gerst tjúgundi statur USA. 1868 - Fyrstu ferðsluljósini verða sett upp í L…",
+                "…uart gerst Mary Skotadrotning. 1819 - Alabama gerst tvey og tjúgundi statur USA. 1896 - Undirgundsbanin í Glasgow letur upp. 190…"
+            ]
+            },
+        {
+                "word": "klokkan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Summartíð er, at klokkan summarhálvárið verður flutt ein tíma fram fyri at gagnnýta…",
+                "…ars til seinasta sunnudag í oktober. Formliga eitur tað, at klokkan 01.00 seinasta sunnudag í mars verður klokkan flutt til 02.…",
+                "…eitur tað, at klokkan 01.00 seinasta sunnudag í mars verður klokkan flutt til 02.00. Seinasta sunnudag í oktober verður flutt a…",
+                "…. Seinasta sunnudag í oktober verður flutt aftur hin vegin. Klokkan 02.00 verður klokkan flutt aftur til 01.00. Ein háttur at m…",
+                "…oktober verður flutt aftur hin vegin. Klokkan 02.00 verður klokkan flutt aftur til 01.00. Ein háttur at minnast, hvønn veg klo…",
+                "…kan flutt aftur til 01.00. Ein háttur at minnast, hvønn veg klokkan skal flytast, er at hugsa um, at vit vilja gagnnýta summarl…"
+            ]
+            },
+        {
+                "word": "fyri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 413,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Tann evropeiska undankappingin til HM í fótbólti fyri kvinnur 2019 er ein kapping, ið skal avgerða, hvør ið saman…",
+                "…g, ið varð útroknað sambært fylgjandi reglum: EM í fótbólti fyri kvinnur 2013 endaspæl og undankapping (20%) HM í fótbólti f…",
+                "…i kvinnur 2013 endaspæl og undankapping (20%) HM í fótbólti fyri kvinnur 2015 endaspæl og undankapping (40%) EM í fótbólti f…",
+                "…i kvinnur 2015 endaspæl og undankapping (40%) EM í fótbólti fyri kvinnur 2017 undankapping (40%) Tey 30 hægst mettu liðini k…",
+                "…ikatión). Notur Lið ið vórðu útvald frammanundan sum vertir fyri innleiðandi undankappingarumfarinum verða merkt við (H). Li…",
+                "…= Bólkur 1 ==== Høvuðsgrein: Undankapping til HM í fótbólti fyri kvinnur 2019, UEFA - Bólkur 1 ==== Bólkur 2 ==== Høvuðsgrei…"
+            ]
+            },
+        {
+                "word": "Kristus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…ttala av navninum Joshua, sum merkir \"Harrin er Frelsarin\") Kristus (upprunaliga grikskt orð, sum týðir \"tann salvaði\", so sum…",
+                "…menniskjanna. Navnið kristindómur kemur eisini av orðinum \"Kristus\". Vit lesa um Jesus í evangeliunum í Nýggja Testamenti. Eva…",
+                "…Boðskapurin um Jesus varð skjótt borin um alt Rómverjaríki. Kristus er eitt grikskt orð. Tað merkir kongur. Fólk, ið trúgva á J…",
+                "…itt grikskt orð. Tað merkir kongur. Fólk, ið trúgva á Jesus Kristus, verða rópt kristin. Ta kristnu trúnna nevna vit kristindóm…",
+                "…syndanna og sleppa inn í himmiríkið. Tey tala um Jesus sum Kristus, ið kemur úr grikskum máli og merkir \"hin salvaði\", ella \"M…",
+                "…Jesus verður ellivu ferðir nevndur al-Masih (Messias eller Kristus) og í Sura 3,45 verður hann nevndur Kalimatullaah (Guds orð…"
+            ]
+            },
+        {
+                "word": "eftir",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 137,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…== Sí eisini == Listi yvir heimsins størstu býir eftir íbúgvatali…",
+                "…Evangeliið eftir Markus er – eftir øllum líkindum – elsta evangeliið. Siðaar…",
+                "…Evangeliið eftir Markus er – eftir øllum líkindum – elsta evangeliið. Siðaarvurin er á einum m…",
+                "…ur hansara var samkomustaður hjá oddamonnum í kirkjuliðinum eftir hvítusunnu. Sjálvur hevur Markus havt gott samband við t.d.…",
+                "…i í sniði og bygging. Tað er tí meginpartin eitt evangelium eftir Pætur, men Markus er tulkur. Pætur verður oftari nevndur he…",
+                "…eru ymiskir á máli um tíðarfestingina, um tað var fyri ella eftir pínsludeyða Pæturs og Paulusar. Onkuntíð í 60-árunum er tað…"
+            ]
+            },
+        {
+                "word": "middag",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…r samlað og m.a. kom Smyril av Havnini við 50 gestum. Eftir middag var farið í skrúðgongu í kirkju. Føroya Próstur og amtmaður…",
+                "…°C (82-89° í miðal hvønn einasta dag. Tá ið komið er út um middag, tjúknar hann av, og regnið fer at oysa. Hetta regn heldur…",
+                "…ir. (Talan kann vera um sólarmyrkingina, sum var nakað fyri middag 30. mai í 1612.) Angist kom á teir og teir lovaðu nú øðrvís…"
+            ]
+            },
+        {
+                "word": "fer",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 59,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…eptember 2001, verður handtikin í Pakistan. 8. mars - Malta fer uppí Evropeiska Samveldið. 12. mars - WHO ávarar at SARS er…",
+                "…lert) 19. mars - Kríggið í Irak byrjar. 23. mars - Slovenia fer uppí Evropeiska Samveldið. 10. apríl - nýggja Norröna fer f…",
+                "…a fer uppí Evropeiska Samveldið. 10. apríl - nýggja Norröna fer fyri fyrstu ferð í rutusiglng. 12. apríl - Ungarn fer uppí…",
+                "…rröna fer fyri fyrstu ferð í rutusiglng. 12. apríl - Ungarn fer uppí Evropeiska Samveldið. 11. mai - Málverkið Saliera hjá…",
+                "…rður stjolið frá Kunsthistorisches Museum í Venedig. Litava fer uppí Evropeiska Samveldið. 17. mai - Slovakia fer uppí Evro…",
+                "…g. Litava fer uppí Evropeiska Samveldið. 17. mai - Slovakia fer uppí Evropeiska Samveldið. 21. mai - Ein jarðskjálvti í Alg…"
+            ]
+            },
+        {
+                "word": "komma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Eitt desimaltal er eitt tal við komma í. Vit nevna tey eisini kommatal. Ein máti at skriva tøl, s…",
+                "…anfyri kommað nevna vit desimalar, og tí eitur eitt tal við komma í eitt desimaltal. Desimaltøl verða býtt sundur í endalig d…",
+                "…í raðfylgju: Skipað talpør verða skrivað í klombrum og við komma millum tølini, til dømis ( − 3 , 5 ) {\\displaystyle (-3,5)}…",
+                "…skrivað er . Teknini, sum vit vanliga nýta, eru t.d. kolon, komma, punktum, semikolon, rópitekin, gásareygu, spurnartekin, os…",
+                "…a sett eftir føstum reglum, eru til dømis spurnartekin ella komma, her er eingin slingur í valsinum, hvar teknini skulu stand…",
+                "…so verða teldupostadressurnar sum oftast skildar sundur við komma (,) ella semikolon (;). Til ber eisini at víðarisenda eitt…"
+            ]
+            },
+        {
+                "word": "norðurbreidd",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…býur í Kekkia. Býurin hevur umleið 377.508 íbúgvar. (49°12' norðurbreidd, 16°37' eysturlongd)…",
+                "…Ostrau, Pólskt mál: Ostrawa) er ein bygd i Kekkia. (49°50' norðurbreidd, 18°17' eysturlongd) Býurin hevur umleið 297.400 íbúgvar.…",
+                "…bygd í Kekkia og hevur umleið 30 íbúgvar og liggur á 49°41' norðurbreidd, 15°21' eysturlongd. == Søgulig bygdarnøvn == 1375 - Benecz…",
+                "…Midwayoyggjar (28.12° norðurbreidd, 177.22° vesturlongd) (á hawaiianskum Pihemanu Kauihelani)…",
+                "…Alger (36° norðurbreidd, 3° eysturlongd) (arabiskt: الجزائر‎ al-Jazā’ir, franskt: A…",
+                "…Føroyar (danskt: Færøerne; 62° norðurbreidd, 7° vesturlongd) eru oyggjaland í Norðuratlantshavi. Føroya…"
+            ]
+            },
+        {
+                "word": "vesturlongd",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Midwayoyggjar (28.12° norðurbreidd, 177.22° vesturlongd) (á hawaiianskum Pihemanu Kauihelani) er ein oyggjabólkur s…",
+                "…Føroyar (danskt: Færøerne; 62° norðurbreidd, 7° vesturlongd) eru oyggjaland í Norðuratlantshavi. Føroyar eru partur av…"
+            ]
+            }
+        ],
+    }
+    

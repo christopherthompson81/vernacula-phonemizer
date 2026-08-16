@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../src/index.ts";
+import { normalizeFaroese } from "../src/languages/faroese/normalize.ts";
 
 import { phonemizeWord } from "../src/languages/faroese/faroese.ts";
 import { getPhonemizer } from "../src/registry.ts";
@@ -56,5 +58,60 @@ describe("Faroese (føroyskt) canonical IPA", () => {
     test("numbers: wired into the phonemizer", () => {
         expect(getPhonemizer("fo").text("21").trim()).toBe("aiːnɔkt͡ʃʏvʊ"); // einogtjúgu
         expect(getPhonemizer("fo").text("1000").trim()).toBe("ait tʉuːsʊnt"); // eitt túsund
+    });
+});
+
+// ── TEXT NORMALIZATION (src/languages/faroese/normalize.ts) ─────────────────────────────────────────
+//
+// Evidence: `tools/corpus/mined/fo.jsonc` (fo.wikipedia dump, 52,355 paragraph segments). The argument
+// for every case is in the normalizer's own header.
+describe("Faroese text normalization", () => {
+    const fo = { text: (s: string) => phonemize(s, "fo") };
+
+    test("⚠ THE FULL STOP DOES FIVE JOBS, and the layer resolves them in order", () => {
+        // 1. the TIME — two dots, and the only instance is the leap second.
+        expect(normalizeFaroese("23.59.60")).toBe("23 59 60");
+        // 2. the THOUSANDS GROUP — exactly three digits follow.
+        expect(normalizeFaroese("49.267")).toBe("49267");
+        expect(normalizeFaroese("11.738")).toBe("11738");
+        // 3. the DECIMAL — fewer than three, and in this corpus always a dollar figure.
+        expect(normalizeFaroese("3.00 kr")).toBe("3,00 kr");
+        expect(normalizeFaroese("4.19$")).toBe("4,19$");
+        // 4. the ORDINAL MARKER — a lowercase word follows.
+        expect(normalizeFaroese("1. juli 2011")).toBe("1 juli 2011");
+        expect(normalizeFaroese("2. og 3. ættarlið")).toBe("2 og 3 ættarlið");
+        // 5. ⚠ AND THE SENTENCE END MUST SURVIVE — an uppercase word follows.
+        expect(normalizeFaroese("Tað var 1998. Síðan kom")).toBe("Tað var 1998. Síðan kom");
+    });
+
+    test("the ORDINAL WORD is refused and the false BREAK is fixed — not the same thing", () => {
+        // The date slot takes the WEAK form (`fyrsta` ×51 against `fyrsti` ×29), and of the 31 day
+        // ordinals `sekstandi` (16), `nítjandi` (19) and every compound above 20 score ZERO. A bounded
+        // table would cover about half the month and be in the wrong case for all of it.
+        expect(fo.text("23. apríl")).toBe(fo.text("23 apríl"));
+        expect(fo.text("1. juli")).not.toContain(".");
+    });
+
+    test("the abbreviations, every expansion the corpus's own", () => {
+        // "62° norðurbreidd, 7° vesturlongd" spells out what `n.br.` abbreviates, three articles away.
+        expect(normalizeFaroese("57°71° n.br.")).toBe("57 stig 71 stig norðurbreidd.");
+        expect(normalizeFaroese("4000 f.Kr.")).toBe("4000 fyri Kristus.");
+        expect(normalizeFaroese("kl. 3 e.m.")).toBe("klokkan 3 eftir middag.");
+        expect(normalizeFaroese("2,5 mió. kr.")).toBe("2,5 milliónir kr.");
+    });
+
+    test("⚠ THE COLON IS NOT A CLOCK HERE — it is a national swimming record", () => {
+        // `9:59.91`, `14:46.33`, `2:25.36` are minutes:seconds.hundredths; the one real clock in the
+        // corpus is written `kl. 3 e.m.` with no colon at all. A clock rule would read every record as a
+        // time of day (trap 9).
+        expect(normalizeFaroese("9:59.91")).toBe("9:59,91");
+    });
+
+    test("degrees, the decimal comma and the range's pause", () => {
+        expect(fo.text("56,7 °C")).toBe("sɛksɔkfɪmtɪ kɔma ʃɛiː stiːk kɛlsɪʊs");
+        expect(fo.text("79 %")).toBe("nʊt͡ʃʊɔkʃɛitɪ pɹoːsɛnt");
+        expect(normalizeFaroese("1269–1308")).toBe("1269, 1308");
+        // ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58).
+        expect(normalizeFaroese("s. 96-100.")).toBe("s. 96, 100.");
     });
 });
