@@ -7,6 +7,8 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeLatin } from "./normalize.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
@@ -183,6 +185,32 @@ function placeStress(segs: string[]): void {
 
 // A word (Latin letters incl. macrons/diaeresis + editorial ⟨v j⟩ + combining marks like the U+0306 "common-quantity"
 // breve, which phonemizeWord strips) / number / punctuation. The combining range keeps ū̆/ī̆ inside one token.
+/**
+ * The shared SYMBOL tier. Every word is a la.wikipedia TOKEN attestation whose examples were read, and
+ * the two highest-traffic ones are glossed against their own sign inside this corpus:
+ *   `centesimae` — "electus est cum **53,79%** suffragiorum contra **46,21 centesimae** suffragiorum",
+ *     one clause carrying the sign and the word for the same quantity.
+ *   `gradus` — "Mediocris temperatura est **10.6° C** … quo **18.0 gradus Celsius**", one paragraph.
+ *
+ * ⚠ NUMBER IS DECLARED AND CASE IS NOT, which is the same limitation the ordinal refusal in normalize.ts
+ * rests on. A Latin measure word after a numeral takes the case its clause governs — `600 chiliometra`
+ * (nominative/accusative plural, the corpus's own) but `in chiliometro` (ablative singular) two lines
+ * later. `CountForms` can express the singular/plural split and nothing can express the case, so the
+ * tier emits the nominative and the reading is right in the commonest slot and uninflected elsewhere.
+ * Said here rather than left for a reader to discover.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["centesima", "centesimae"],
+    currency: { "$": ["dollarium", "dollaria"], "€": ["euro"] },
+    units: {
+        "km": ["chiliometrum", "chiliometra"], "m": ["metrum", "metra"],
+        "cm": ["centimetrum", "centimetra"], "mm": ["millimetrum", "millimetra"],
+        "kg": ["chiligramma", "chiligrammata"],
+    },
+    exponentWords: { squared: ["quadratum", "quadrata"], cubed: ["cubicum", "cubica"], position: "after" },
+    magnitudes: ["milia", "miliones", "milliones"],
+});
+
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "gu");
 
 /**
@@ -196,7 +224,10 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class LatinPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its era, degree and range steps need the figure and its mark still
+        // adjacent, which the tier would break — then the shared symbol tier, which matches a unit only
+        // when a NUMBER is adjacent.
+        return assembleClauses(SYMBOLS(normalizeLatin(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: compose the Latin cardinal phrase (subtractive x8/x9, mīlle/mīlia), then phonemize each word.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

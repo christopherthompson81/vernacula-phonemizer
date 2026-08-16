@@ -1,0 +1,389 @@
+// WIKIPEDIA WORD ATTESTATION — la. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "la",
+        "wiki": "la.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "aequat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ana antiqua passuum et 0.621 milia internationalia recentia aequat. == Notae == == Bibliographia == Bureau International des P…",
+                "…num, cuius diametrus est circiter 2325 km. Inde magnitudine aequat Plutoni, sed pondere maius obiectum zonae Kuiperi videtur.…",
+                "…m ebullitionis est temperatura ubi pressio vaporis liquoria aequat pressum aeris circumfusi illum circumdat liquorem. Punctum…",
+                "…agensimam horae partem, vel sexaginta anguli arcus secunda, aequat. In gradu temporis UTC, minutum raro 59 vel 61 secunda habe…",
+                "…lem facit per annum. Propter hoc, quamquam una dies solaris aequat 24 horas, 0 minutum, 0.0 secundum; una dies sideralis aequa…",
+                "…equat 24 horas, 0 minutum, 0.0 secundum; una dies sideralis aequat solummodo 23 horas, 56 minuta, 4.1 secunda. Id est, una die…"
+            ]
+            },
+        {
+                "word": "multiplicatum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…integrali. Fluxús electricus unitas est voltium per metrum multiplicatum (V m), vel, aequivalenter, newtonum metro quadrato multipli…",
+                "…plicatum (V m), vel, aequivalenter, newtonum metro quadrato multiplicatum per coulombum divisum (N m2 C−1). Quae unitatibus fundament…",
+                "…s puncti M ubi spatium inter M et F est e {\\displaystyle e} multiplicatum a spatium inter M et M' (linea M-M' est perpendicularis a l…",
+                "…s x, quem nescimus. Huic numero quadrato adda numerum per 5 multiplicatum, et adda 6; habebis 0.\" == Additio, multiplicatio == Quod a…"
+            ]
+            },
+        {
+                "word": "divisum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…blicae, imperii, regni. Imperium Romanum e.g. in provincias divisum erat, quarum prima Sicilia fuit. == Ordo provinciarum == Qu…",
+                "…n longitudinem patet. == Partes intestini == Intestinum est divisum in partes tres: Intestinum tenue, quod constitutum est ex D…",
+                "…retiva). A Diocletiano annis ab 296 ad 298 Imperium Romanum divisum est in duodecim dioeceses, quarum unaquaeque plures provinc…",
+                "…Regnum Legionensis ortum est cum Regnum Asturorum divisum esset anno 910. === Domus Asturiarum === Garcias I - 910-91…",
+                "…orum et gentium. == Res gestae == Anno 843, regnum Veroduni divisum est in partes tres: Ludovicus rex Regni Francorum orientali…",
+                "…enit, Oligocaeno incipiente. In quattuor aetates vel stadia divisum est, quae ab infimo ad supremum Ypresium, Lutetium, Bartoni…"
+            ]
+            },
+        {
+                "word": "maius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Cesium Maius (alia nomina: Caesium Maius) (Italiane: Cesiomaggiore) est…",
+                "…Cesium Maius (alia nomina: Caesium Maius) (Italiane: Cesiomaggiore) est oppidum Italiae et municipiu…",
+                "…Castellum Maius vel Castrum Maius (alia nomina: Castaniolus, Castaniolus Ma…",
+                "…Castellum Maius vel Castrum Maius (alia nomina: Castaniolus, Castaniolus Maior) (Italiane: Ca…",
+                "…Thomas Maius (Anglice Thomas May), anno 1594 vel 1595 natus et die 13 No…",
+                "…Privilegium maius est versio ficticia Privilegii minoris (1156) iussu Rudolph…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 79,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Firmus Minus Martinazzoli (natus in Urceis Novis die 30 Septembris 1931;…",
+                "…Talluriae et Mons Minus (Francogallice Talloires-Montmin) sunt novum commune 2 065…",
+                "…Fagetum Minus (Francogallice Petit-Fayt) est commune 283 incolarum (anno…",
+                "…8 dividitur partes duae quae hodie Fagetum Maius et Fagetum Minus == Nexus interni == Index communium praefecturae Septentrio…",
+                "…Mons Minus (Francogallice: Montmin) fuit commune Francicum 322 incolar…",
+                "…Lussinum Minus (Croatice: Mali Lošinj; Italiane: Lussinpiccolo) est urbs e…"
+            ]
+            },
+        {
+                "word": "plus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Non plus ultra vel nec plus ultra est versio Latina sententiae Graec…",
+                "…Non plus ultra vel nec plus ultra est versio Latina sententiae Graecae quam Hercules il…",
+                "…). Sunt in familia circa 600 genera et fere 9000–10 000 vel plus species (Kew Index of World Grass Species). == Bibliographi…",
+                "…earum per orbem terrarum, L. Watson et M. J. Dallwitz (1992 plus) Familiae plantarum florentium. Genera Poaecarum per orbem…",
+                "…corporum minorum quae intra 30 ad 50 unitates astronomicas plus minusve in planitie ecliptica circum Solem movuntur. Caeles…",
+                "…tellarum crinitarum illustre est ille Halley cometa.) Hodie plus quam mille corporum huius zonae novimus quorum maximi (Eris…"
+            ]
+            },
+        {
+                "word": "gradus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 56,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Gradus (-us, m.) significare potest incessus, distantia inter duos…",
+                "…ignificare potest incessus, distantia inter duos pedes (duo gradus passum faciunt), pars quae scalas format, ordo sive classis…",
+                "…assum faciunt), pars quae scalas format, ordo sive classis, gradus propinquitatis, intervallum, gradus adiectivi, mensura math…",
+                "…mat, ordo sive classis, gradus propinquitatis, intervallum, gradus adiectivi, mensura mathematica (e.g. gradus anguli, gradus…",
+                "…s, intervallum, gradus adiectivi, mensura mathematica (e.g. gradus anguli, gradus quadratus astronomiae, etc.). == Toponyma ==…",
+                "…gradus adiectivi, mensura mathematica (e.g. gradus anguli, gradus quadratus astronomiae, etc.). == Toponyma == Gradus (Italia…"
+            ]
+            },
+        {
+                "word": "centesima",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…% indicatur. Ita, 7% = 7⁄100 = 0.07. Latinitate recentiore, centesima pars aliquando locutionibus per centum, pro centum, ex cent…",
+                "…513 Centesima, olim designationibus 1903 LY, 1916 Sav, 1950 RM1, et A914…",
+                "…ium ratio epochae 4 Ianuarii 2010 constitit. Qua epocha 513 Centesima per dies 1913 circa solem movebatur. Axem orbitalem habebat…",
+                "…Centesima pars metri centimetrum appellatur et siglo cm in brevius re…",
+                "…a mk, fuit moneta Finnica ab anno 1860 usque ad annum 2002. Centesima pars marcae Finnice nominatur penni. == Nexus interni == Eu…",
+                "…xtili paraffino molli (98 centesimae), balsamo Peruviano (1 centesima), et oleo olivarum (1 centesima) tincto consistit. Haec per…"
+            ]
+            },
+        {
+                "word": "pars",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Pars, ut scribit Aegidius Forcellini, est \"unum aliquid ex iis,…",
+                "…o, membrum, μέρος\". Praeterea has res significat, quae sunt pars orbis terrarum pars numeri pars corporis partes politicae p…",
+                "…Praeterea has res significat, quae sunt pars orbis terrarum pars numeri pars corporis partes politicae partes in scaena acta…",
+                "…s res significat, quae sunt pars orbis terrarum pars numeri pars corporis partes politicae partes in scaena actae == Notae =…",
+                "…Cente(n)sima pars, seu brevius cente(n)sima, in mathematica est numerator ill…",
+                "…r. Ita, 7% = 7⁄100 = 0.07. Latinitate recentiore, centesima pars aliquando locutionibus per centum, pro centum, ex centum ex…"
+            ]
+            },
+        {
+                "word": "dollarium",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Dollarium est nomen plurium monetarum et nummorum, in primis Dollariu…",
+                "…ollarium est nomen plurium monetarum et nummorum, in primis Dollarium Civitatum Foederatarum Americae; insuper dollarium Australi…",
+                "…n primis Dollarium Civitatum Foederatarum Americae; insuper dollarium Australianum, dollarium Canadense et alia. Signum dollarium…",
+                "…atum Foederatarum Americae; insuper dollarium Australianum, dollarium Canadense et alia. Signum dollarium est $. == Notae ==…",
+                "…dollarium Australianum, dollarium Canadense et alia. Signum dollarium est $. == Notae ==…",
+                "…Dollarium Civitatum Foederatarum (Anglice et in multis linguis: dolla…"
+            ]
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 10,
+                "substringOnly": 3,
+                "examples": [
+                "…Euro (€) est moneta zonae euronis usque ab Kalendis Ianuariis 19…",
+                "…atinistae disputant quae forma declinationis adhibenda sit: euro (indecl.) vel euro, -nis, vel euronus, -i, vel fortasse eti…",
+                "…quae forma declinationis adhibenda sit: euro (indecl.) vel euro, -nis, vel euronus, -i, vel fortasse etiam euro, -us, sicut…",
+                "…ndecl.) vel euro, -nis, vel euronus, -i, vel fortasse etiam euro, -us, sicut declinatione quarta nominum Graecorum (e.g. ech…",
+                "…ūs, f.). Regulae Unionis Europaeae de declinatione vocabuli euro variant inter linguas et instituta; e.g. vox est indeclinab…",
+                "…te declinatur sicut \"město\" in lingua Bohemica (vide vocem \"euro\" in datorum repositorio terminologico Unionis Europaeae). H…"
+            ]
+            },
+        {
+                "word": "chiliometrum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…Chiliometrum sive chiliometer in Systemate Internationali est mensura lo…",
+                "…Unum chiliometrum quadratum est area quadrata cuius latus unum chiliometrum,…",
+                "…m chiliometrum quadratum est area quadrata cuius latus unum chiliometrum, i.e. 1 000 metra, habet, ergo haec area est aequalis: 1 00…",
+                "…m (-atis, f.) indicat quot homines vel numeri incolarum per chiliometrum quadratum territorii urbis, oppidi, regionis, civitatis, te…",
+                "…colae in quadam regione sunt. Mensura numerus incolarum per chiliometrum quadratum est. Numerus inversus huius numeri numerus areali…",
+                "…luricarum atmosphaerarum est; quae pro pressione in circa 1 chiliometrum altum oceanicum regnat. Haec immanis pressio extremi effect…"
+            ]
+            },
+        {
+                "word": "metrum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 69,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Metrum (-i, n.; Graece: μέτρον, via Francogallice mètre) est mensu…",
+                "…tum metrologiae scitae implicet. Post die 21 Octobris 1983, metrum definitur ut spatium a luce transitum in vacuo 299 792 458…",
+                "…458 parte secundi. == Definitio == === Vetus === Anno 1793 metrum primum definitum fit. Definitio erat metrum esse partem 1 /…",
+                "…s === Anno 1793 metrum primum definitum fit. Definitio erat metrum esse partem 1 / 40000000 {\\displaystyle 1/40000000} meridia…",
+                "…etallo orichalco factum et anno 1799 exemplar finale, quod \"metrum ordiale\" nominatur, in metallo platino funditum est. Mensur…",
+                "…iridio (10%) funditum est. Ab anno 1960 usque ad annum 1983 metrum erat pars producti 1650763 , 73 {\\displaystyle 1650763,73}…"
+            ]
+            },
+        {
+                "word": "quadratus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Gradus quadratus est unitas ex septuagesimis annis saeculi vicesimi invetera…",
+                "…tum tegere. Unitas hodierna steradians vocatur. Unus gradus quadratus aequat (π/180)2 (circiter 0.0003046174) sr (steradiantibus)…",
+                "…Numerus quadratus in mathematica, etiam quadratus perfectus appellatus, est i…",
+                "…Numerus quadratus in mathematica, etiam quadratus perfectus appellatus, est integer qui est quadratus integri…",
+                "…, etiam quadratus perfectus appellatus, est integer qui est quadratus integri, et ergo cuius radix est integer. Exempli gratia, 9…",
+                "…ergo cuius radix est integer. Exempli gratia, 9 est numerus quadratus, quia ut 3 × 3 scribi potest.. Integer positiva cui non sun…"
+            ]
+            },
+        {
+                "word": "cubicus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…areae est pollex quadratus, et mensura voluminis est pollex cubicus. Pollex est vulgarissima mensura longitudinis in CFA. == No…",
+                "…resolvitur. Forma binaria est 1111101000. 1000 est numerus cubicus, 103. In Systemate internationali unitatum, praefixum numer…",
+                "…umerus naturalis et impar inter 26 et 28. Etiam est numerus cubicus, qui in factores primos 33 resolvitur. Forma binaria est 11…",
+                "…tres modii vel octo congii vel 48 sextarii : 26,26 l = pes cubicus unus. Urna id est quatuor congii vel 24 sextarii : 13,13 l.…"
+            ]
+            },
+        {
+                "word": "ante",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Ante praesentem? (scil. annum; abbreviatio Anglica BP, Francogal…",
+                "…Ante Christum natum, locutio imminuta a.C.n. et a.Chr.n., est re…",
+                "…a.C.n. et a.Chr.n., est res compositionis anni, quae tempus ante primum aerae vulgaris annum significat. Beda \"ante incarnat…",
+                "…e tempus ante primum aerae vulgaris annum significat. Beda \"ante incarnationis dominicae tempus\" scripsit. Locutio ante aera…",
+                "…eda \"ante incarnationis dominicae tempus\" scripsit. Locutio ante aeram vulgarem eadem significationem habet. == Nexus intern…",
+                "…Aequalitas ante legem est principium maximum iurum humanorum ac ratio inter…"
+            ]
+            },
+        {
+                "word": "Christum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Ante Christum natum, locutio imminuta a.C.n. et a.Chr.n., est res composi…",
+                "…omini, plenius anno Domini nostri Iesu Christi, aliter post Christum natum, indicat numerum annorum in calendariis Iuliano et Gr…",
+                "…a.C.n./p.C.n. identicae?. Adhibetur saepe ab eis qui aut in Christum fidem non dent, aut nomen eius scribere non velint cum nece…",
+                "…iam exstant locutio aera communis (aerae communis loco post Christum natum ac ante aeram communem loco ante Christum natum) et a…",
+                "…s loco post Christum natum ac ante aeram communem loco ante Christum natum) et abbreviationes aer. comm. ac ante aer. comm. == A…",
+                "…quae, vacuefacta redemptione eiusque in homines efficacia, Christum negabat verum esse Filium Dei, ardenter oppugnavit. Quare v…"
+            ]
+            },
+        {
+                "word": "natum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 64,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Iterum natum esse, vel fortassae nove natum esse vel renatum esse, in Ch…",
+                "…Iterum natum esse, vel fortassae nove natum esse vel renatum esse, in Christianitate est regenerationem…",
+                "…astis rite assumpsit Evangelismus Monergismus, fides iterum natum esse omnino opus Dei esse (non opus hominis qui credat) Pre…",
+                "…Ante Christum natum, locutio imminuta a.C.n. et a.Chr.n., est res compositionis…",
+                "…ipis Mataya, nepte regis Ramae III Chulalongkorn, anno 1853 natum, patris successorem Chandornmondon, anno 1855 natam, 1863 m…",
+                "…don, anno 1855 natam, 1863 mortuam Chaturonrasmi, anno 1856 natum, proavum familiae Chakrabandhu Bhanurangsri, anno 1860 natu…"
+            ]
+            },
+        {
+                "word": "post",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 99,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…The Washington Post ('Cursus Publicus Vasingtoniensis'), saepe the Post appella…",
+                "…hington Post ('Cursus Publicus Vasingtoniensis'), saepe the Post appellatum et vulgo WaPo scriptum, est diarium quotidianum…",
+                "…m est. == Notae == == Bibliographia == Jaffe, Harry. 2008. \"Post Watch: Family Dynasty Continues with Katharine II.\" Washing…",
+                "…gtonian, 26 Februarii, 2008. Kelly, Tom. 1983. The imperial Post: The Meyers, the Grahams, and the paper that rules Washingt…",
+                "…is, Norman P. 2011. \"Morning Miracle: Inside the Washington Post: A Great Newspaper Fights for Its Life.\" Journalism and Mas…",
+                "…. 1989. In the shadow of power: the story of the Washington Post. Seven Locks Press. Sherman, Scott 2002. \"Donald Graham's W…"
+            ]
+            },
+        {
+                "word": "saeculum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 104,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Saeculum (-i, n.) est spatium temporis variae quantitatis: Spatium t…",
+                "…lustra Spatium mille annorum, id est millennium (sed raro). Saeculum etiam est mundus ipse, praesertim (lingua Christiana) quod…",
+                "…unde usus solitus verbi \"saecularis.\" Secundum Censorinum, saeculum fuit \"spatium vitae humanae longissimum partu et morte defi…",
+                "…nem saeculi, inceptionemque novi saeculi indicaverunt; tale saeculum non semper centum annorum sed inter 50 et 200 annos compreh…",
+                "…Saeculum 4 saeculum est quod annos 301–400 comprehendit. == Eventa =…",
+                "…Saeculum 4 saeculum est quod annos 301–400 comprehendit. == Eventa == Eventa hu…"
+            ]
+            },
+        {
+                "word": "cetera",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…vitales vivere possunt, sicut animalia, plantae, fungi, et cetera. Contrarium terrae mare est. Terra vel Tellus, planeta Syst…",
+                "…ltatum mentis (sicut telepathia, telecinesis, sesanatio, et cetera), vigoris (energia corporis), et cetera. Meditatio pars mag…",
+                "…esis, sesanatio, et cetera), vigoris (energia corporis), et cetera. Meditatio pars magna spiritualitatis est quia conscientia…",
+                "…cutum energeticum, permotio spatialis, arma progressiva, et cetera) et architectura spiritualis, amoena, spira, sive progressi…",
+                "…, cum aliquando constitutionales respublicae ducerentur, et cetera duos honores fuderunt, cum systema praesidentiale gubernare…",
+                "…ublicae, de scientia, de ludicra corporis exercitatione, et cetera. Originem diariorum reperiunt alii in actis diurnis et jing…"
+            ]
+            },
+        {
+                "word": "per",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 61,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Iter per Larium lacum a Brigantio usque ad Comum et Mediolanum per d…",
+                "…r per Larium lacum a Brigantio usque ad Comum et Mediolanum per duas vias Romanas in Itinerario Antonini describitur, mensu…",
+                "…describitur, mensuris haud veris, sub titulis \"A Brigantia per lacum Mediolanium\" et \"alio itinere a Brigantia Comum\" (277…",
+                "…olanium\" et \"alio itinere a Brigantia Comum\" (277,4-279,1). Per Tarvessedo milia passuum 195 enumerantur; idem iter in Tabu…",
+                "…Notatio partium-per in scientia et arte ingeniaria, est copia unitatum falsarum…",
+                "…massae) adhibita. Quia hae partes sunt mensurae quantitatis per quantitatem, eae sunt numeri purae, coniunctionibus unitatu…"
+            ]
+            },
+        {
+                "word": "pro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 63,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Pro Ligario est oratio a Marco Tullio Cicerone anno 46 a.C.n. h…",
+                "…ne anno 46 a.C.n. habita, Caesare Lepidoque consulibus. Cum Pro Marcello et Pro rege Deiotaro inter orationes Caesarianas n…",
+                "…. habita, Caesare Lepidoque consulibus. Cum Pro Marcello et Pro rege Deiotaro inter orationes Caesarianas numeratur, quas C…",
+                "…Pro Plancio est oratio Ciceronis anno 54 a.C.n. mense Augusto e…",
+                "…are erga optimates veteresque amicos conatur. Quae defensio pro domo praecipua causa fuisse videtur cur oratio Pro Plancio…",
+                "…defensio pro domo praecipua causa fuisse videtur cur oratio Pro Plancio tam cito publicata sit. == Editio critica recens ==…"
+            ]
+            }
+        ],
+    }
+    

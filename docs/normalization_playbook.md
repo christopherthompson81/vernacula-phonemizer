@@ -367,7 +367,7 @@ you have already met.
 
 ### ⚠ Where a principle is ENFORCED, and why that column exists
 
-This document is 1,900 lines and 62 numbered traps. A Khmer session read it start to finish and then broke
+This document is 1,900 lines and 63 numbered traps. A Khmer session read it start to finish and then broke
 "a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
 បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
 gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
@@ -393,7 +393,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 | **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50, 59, 61 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin; the word boundary that fixes a Latin backtrack rejects the ordinary Han case; a whole language can be typed in the Latin twins of its own letters, and the majority guard that makes the fold safe is what stops it reaching the short words |
 | **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41, 62 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase; `=` is a heading, a gloss, a parallel title, a typo or a Pali definition in five languages running, and never an equation |
 | **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
-| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58, 60 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure; an optional group on the wrong side of an alternation truncates the match instead of failing it |
+| **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58, 60, 63 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure; an optional group on the wrong side of an alternation truncates the match instead of failing it; a repeated two-digit join de-groups three groups correctly and four groups into a different number |
 | **A differential test must hold everything but the variable still** | 18, 26 | **the same cause at two levels** — 18 is the probe (`A&B` → `AB`), 26 is real text; substitute a space, never delete |
 | **Evidence beats intuition, and the corpus arbitrates** | 3, 4, 5, 9, 12, 13, 20, 55 | the diff sees what probes cannot; tabulate before ruling; a test can pin the bug (and pinning a temporary ABSENCE has a shelf life); an unattested guard alternative misfires; a redundant symbol is a permissible drop; pin branches not instances; your emitted digits meet the number rules downstream; the closest sibling is a hypothesis |
 | **One shared source can settle a fleet-wide question, positively or negatively** | 45, 48, 35, 36, 40 | **45 and 48 are two halves of one technique** — FLEURS's shared source text finds a word AND proves an absence; ask what the language calls the thing; fold a compatibility character, never NFKC; name the slot when you have no candidate spelling |
@@ -1990,6 +1990,30 @@ rule that shipped was licensed by the same finding reached independently:
 - **The procedure, not the answer, is what transfers:** print every instance of the sign with 50
   characters of context on each side before writing any rule for it. It is one command, it has changed
   the answer in every language it has been run in, and in the sixth it changed it back.
+
+
+**63. THE DE-GROUPING IDIOM THIS SWEEP USES EVERYWHERE IS SILENTLY WRONG AT FOUR GROUPS.** Every layer that
+joins a space-grouped number does it the same way — `s.replace(/(\d)[ ](\d{3})(?!\d)/gu, "$1$2")`, run two
+or three times. It is correct up to THREE groups and wrong at four, because after the first replacement the
+global scan resumes INSIDE the remainder and anchors on the last digit of the next group:
+
+    "1 320 000 000"  →  pass 1 joins `1 320`, then matches `0 000` from the middle  →  "1320 000000"
+                     →  reads as *mille trecenti viginti* + *nihil*, a well-formed numeral for 1,320 and 0
+
+- **No gate can see it.** Nothing is dropped, no raw character survives, and the output is a grammatical
+  numeral in the target language — DIGIT, RAWMARK, DROP and the referee are all silent.
+- **The fix is to match the whole number in one go**, not one join per pass:
+  `/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[ \u00a0]\d{3})+)(?!\d)(?![.,]\d)/gu` with a callback that strips the
+  separators from the captured tail.
+- **⚠ AND THE TRAILING GUARD MUST REJECT A DIGIT, NOT A DOT — trap 58 again, and `review.ts` catches it.**
+  Writing `(?![\d.,])` declines every clause-final figure (`1 320 000,`) and loses the whole grouping. What
+  has to be excluded is a separator CONTINUING the number: `(?!\d)(?![.,]\d)`.
+- **Where it has bitten and where it has not, measured:** four-or-more-group numbers occur **twice in la
+  and once in ba** across the seven artifacts this sweep has touched, and nowhere in tt, chv, tk, shn or
+  hyw. That is why the idiom held everywhere it was used before Latin — the shape is rare, and rarity is
+  exactly what lets a silent defect ship.
+- **Where to look for the next one:** any language whose corpus carries populations, budgets or areas in
+  the billions. The three-group ceiling is a fact about the sweep's sample, not about the world.
 
 
 ## Closing a DROP is not finished until you read the READING

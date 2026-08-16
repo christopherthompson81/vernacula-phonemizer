@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { normalizeLatin } from "../src/languages/latin/normalize.ts";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/latin/latin.ts";
@@ -92,5 +93,64 @@ describe("Latin numbers", () => {
         expect(phonemize("18", "la")).toBe("duɔdeːwiːˈɡɪntiː"); // duodēvīgintī — the subtractive 18
         expect(phonemize("19", "la")).toBe("uːndeːwiːˈɡɪntiː"); // ūndēvīgintī — the subtractive 19
         expect(phonemize("1000", "la")).toBe("ˈmiːllɛ"); // mīlle
+    });
+});
+
+// ── TEXT NORMALIZATION (src/languages/latin/normalize.ts) ───────────────────────────────────────────
+//
+// Evidence: `tools/corpus/mined/la.jsonc` (la.wikipedia dump, 557,823 paragraph segments). The argument
+// for every case, and for the two large refusals, is in the normalizer's own header.
+describe("Latin text normalization", () => {
+    const la = { text: (s: string) => phonemize(s, "la") };
+
+    test("DE-GROUPING, and ⚠ the four-group case the sweep's usual idiom gets silently wrong", () => {
+        // `&nbsp;` is this corpus's thousands separator; core/markup.ts folds it to a space first.
+        expect(normalizeLatin("25 000 000")).toBe("25000000");
+        // ⚠ The repeat-a-two-digit-join idiom (two or three passes) is correct to THREE groups and wrong
+        // at four: it leaves `1320 000000`, which reads as a well-formed Latin numeral for a completely
+        // different quantity. Matching the whole number at once is what fixes it.
+        expect(normalizeLatin("1 320 000 000")).toBe("1320000000");
+        expect(la.text("1 320 000 000")).toBe("miːlliˈardũː trɛˈkɛntiː wiːˈɡɪntiː miːlliˈoːneːs");
+        // ⚠ AND THE TRAILING GUARD REJECTS A DIGIT, NOT A DOT (trap 58) — `(?![\d.,])` lost the whole
+        // grouping on a clause-final figure, and review.ts's own probe is what caught it.
+        expect(normalizeLatin("25 000 000,")).toBe("25000000,");
+        expect(normalizeLatin("25 000 000.")).toBe("25000000.");
+    });
+
+    test("the ERA, which is its own expansion", () => {
+        expect(normalizeLatin("anno 31 a.C.n.")).toBe("anno 31 ante Christum natum.");
+        expect(normalizeLatin("saeculi II p.C.n. auctor")).toBe("saeculi II post Christum natum auctor");
+        // ⚠ THE LONGER FORM FIRST, or the two-letter rule eats its prefix and strands the `n.`
+        expect(normalizeLatin("a.C. 500")).toBe("ante Christum 500");
+    });
+
+    test("the corpus glosses its own notation, and those are the only words emitted", () => {
+        // "Mediocris temperatura est 10.6° C … quo 18.0 gradus Celsius" — one paragraph, both forms.
+        expect(la.text("10.6° C")).toBe(la.text("10.6 gradus Celsius"));
+        expect(la.text("43,5°")).toBe(la.text("43,5 gradus"));
+        // "electus est cum 53,79% suffragiorum contra 46,21 centesimae suffragiorum" — one clause.
+        expect(la.text("97%")).toBe(la.text("97 centesimae"));
+        // `&c.` is the ligature of et + c(etera), ×2 in the corpus and spelled out in the same artifact.
+        expect(normalizeLatin("Thesei, &c.")).toBe("Thesei, et cetera");
+    });
+
+    test("RANGES take a pause — and ⚠ an ISBN is not a range", () => {
+        expect(normalizeLatin("1732-1735")).toBe("1732, 1735");
+        expect(normalizeLatin("pp. 1-43")).toBe("pp. 1, 43");
+        // Four and five hyphen-joined groups: a span has exactly two operands, so the rule refuses these
+        // rather than filling an identifier with false pauses.
+        expect(normalizeLatin("ISBN 978-3-8273-7360-1")).toBe("ISBN 978-3-8273-7360-1");
+        expect(normalizeLatin("0-333-75088-8")).toBe("0-333-75088-8");
+    });
+
+    test("⚠ WHAT IS REFUSED — and here the signs are REAL, which is why", () => {
+        // la.wikipedia has arithmetic articles written in Latin. The blocker is AGREEMENT, not sense:
+        // `aequat`, `multiplicatum per`, `divisum per` all govern cases this layer cannot supply.
+        expect(normalizeLatin("6/3 = 2")).toBe("6/3 = 2");
+        expect(normalizeLatin("73 = 5 × 14 + 3")).toBe("73 = 5 × 14 + 3");
+        // …and the Roman numerals stay CARDINAL, because Latin ordinals decline for five cases × three
+        // genders and this corpus's own instances span the paradigm (`liber II`, `saeculi II`,
+        // `XIV Februario`) — while `libri III` is a cardinal outright.
+        expect(la.text("liber II")).toBe("ˈlɪbɛr ˈduɔ");
     });
 });

@@ -931,6 +931,38 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "number-theory identity (`1\u00b3 + 2\u00b3 + 3\u00b3 + 4\u00b3`, `144\u2075=27\u2075+84\u2075+110`) and a bracketed square "
             + "(`(1 + 2 + 3 + 4)\u00b2`). `bareExponent` would need a power phrase this corpus does not supply",
     },
+    la: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/la.jsonc` (461 segments of a
+        // 557,823-paragraph la.wikipedia dump), argued in src/languages/latin/normalize.ts. Unlike every
+        // other entry in this table, the signs here are REAL \u2014 la.wikipedia has articles on arithmetic
+        // written in Latin \u2014 and the blocker is AGREEMENT, not sense.
+        equals: "measured: `=` is contentful and dense (`6/3 = 2`, `73 = 5 \u00d7 14 + 3`, "
+            + "`1/2 = 2/4 = 3/6 = 4/8 = 5/10`) \u2014 hyw's counter-example to trap 62 repeated. `aequat` is "
+            + "attested \u00d725, but the corpus's own arithmetic article writes its prose AROUND the signs and "
+            + "never spells one out, and a Latin verb dropped between two operands this layer also cannot "
+            + "decline is two guesses stacked. The sign stays visible to the leak gates",
+        times: "measured: `\u00d7` occurs in the same arithmetic identities (`73 = 5 \u00d7 14 + 3`, "
+            + "`232.3\u00b2 = 232.3 \u00d7 232.3`). `multiplicatum` \u00d74 is attested but takes `per` plus the "
+            + "ABLATIVE of its operand, which this layer cannot supply \u2014 the same agreement wall the "
+            + "Roman-ordinal refusal rests on",
+        divide: "measured: `\u00f7` \u00d70; the DIVISION is written with a slash (`6/3 = 2`) and the same slash is "
+            + "also the FRACTION (`1/2 est reducta`, `1/3 = 2/6 = 3/9 = 4/12`) in the same paragraph. "
+            + "Nothing distinguishes them but the surrounding prose, and `divisum` takes the ablative too",
+        "greater-than": "measured: `>` \u00d71 and it IS a comparison (`si summa > 11 sit`) \u2014 the first real "
+            + "one in this sweep, gd's and shn's having been LaTeX and a sound-change arrow. `maius` \u00d730 "
+            + "is attested and governs `quam` plus a nominative; one instance does not license the rule",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        plus: "measured: `+` appears only inside the arithmetic identities above, where the `=` refusal "
+            + "already leaves the whole expression unread. Omitting a summation plus is lossless where "
+            + "omitting a MINUS inverts \u2014 the minus is read, the plus is not",
+        ampersand: "measured: the `ampersand` cell is **30,613 corpus-wide, the largest in the fleet, and it "
+            + "is an HTML ENTITY** \u2014 `&nbsp;`, this corpus's THOUSANDS SEPARATOR (`1&nbsp;320&nbsp;000&nbsp;"
+            + "000 km\u00b3`), which core/markup.ts folds before the layer runs. The BARE `&` is \u00d722 in the "
+            + "retained text and none is Latin prose: English book titles (`Astronomy & Astrophysics`, "
+            + "`Harper & Row`) and a French film title, all of which reach the engine through the Latin-run "
+            + "router and are read in their own language. The two that ARE Latin are `&c.`, which IS read",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in
