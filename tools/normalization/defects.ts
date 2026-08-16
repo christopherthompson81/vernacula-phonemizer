@@ -799,6 +799,22 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    be: {
+        // ⚠ NOT A MISSING RULE — a DIGIT-GATED one, and the gate is the whole point. `=` is ×9 in the
+        // retained text of `tools/corpus/mined/be.jsonc` and SEVEN of them are BIBLIOGRAPHIC TITLE
+        // SEPARATORS in Belarusian's own citation style: `Запісы = Zapisy`, `Беларускі гістарычны зборнік =
+        // Białoruskie Zeszyty Historyczne`, `Беларусіка = Albaruthenica`, `Время действий и преобразований
+        // = The region`. An eighth is raw LaTeX the dump extraction left in. Reading `ёсць` there would
+        // assert an equation about a TRANSLATION — the Lithuanian lesson, in the same class.
+        // The two real equations both carry a digit (`1 аўстр. дол. = 0,71 дол. ЗША`, `фунт стэрлінгаў =
+        // 100 пенсаў`), so `normalize.ts` step 10 requires one on either side and BOTH read correctly. The
+        // probe here is `x = y`, letters on both sides, which is exactly the shape being refused.
+        // The word itself is sourced: be.wikipedia's multiplication article reads the notation aloud —
+        // "2 ⋅ 3 = 6 … чытаецца «два памножыць на тры роўна шасці», або проста «два на тры ёсць шэсць»".
+        equals: "measured: `=` ×9 in the retained text, of which 7 are bibliographic title separators and "
+            + "1 is raw LaTeX; the 2 real equations both have a DIGIT beside the sign and are read. The "
+            + "refusal is the letter-flanked shape only, not the class",
+    },
     lt: {
         // ⚠ EVERY COUNT BELOW IS OVER THE RETAINED TEXT OF `tools/corpus/mined/lt.jsonc` — 464 segments
         // (264 hard + 200 sample) out of a 1,193,488-paragraph lt.wikipedia dump — with the artifact's

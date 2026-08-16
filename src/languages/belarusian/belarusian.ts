@@ -15,6 +15,8 @@ import { renderNumber, spellDigits } from "../../core/numbers.ts";
 // table (the croatian←serbian pattern): uk and be share the grammar and differ only in their words.
 import { eastSlavicNumberWords, type EastSlavicNumbers } from "../ukrainian/numbers.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
+import { normalizeBelarusian, normalizeBelarusianInitialisms } from "./normalize.ts";
 
 interface BelarusianDef {
     vowels: Record<string, string>;
@@ -23,7 +25,7 @@ interface BelarusianDef {
     vowelLetters: readonly string[];
     consonants: Record<string, string>;
     voicing: { toVoiceless: Record<string, string>; toVoiced: Record<string, string> };
-    numbers: EastSlavicNumbers; // Western/Slavic base table + the magnitude count forms and feminine 1/2
+    numbers: EastSlavicNumbers & { decimalConnector: string }; // + the magnitude count forms, feminine 1/2, and the decimal-comma name
     clausePunctuation: Record<string, string>;
 }
 const DEF = loadManifest<BelarusianDef>(import.meta.url, "belarusian.jsonc");
@@ -153,13 +155,103 @@ function number(digits: string): string {
 }
 
 const CYRILLIC = "\\u0400-\\u04FF";
-const TOKEN = new RegExp(`([${CYRILLIC}'’ʼ]+)|(\\d+)|([.?!,;:…—])`, "gu");
+// ⚠ THE NUMBER TOKEN SPANS THE DECIMAL COMMA. Without it the comma is clause punctuation and `5,3 %`
+// read as *пяць , тры* — a phrase break inside a quantity, on 64,420 corpus instances.
+const TOKEN = new RegExp(`([${CYRILLIC}'’ʼ]+)|(\\d+(?:,\\d+)?)|([.?!,;:…—])`, "gu");
+
+
+/**
+ * SYMBOL NORMALIZATION — Belarusian. Every word is a be.wikipedia TOKEN attestation whose examples were
+ * read (see normalize.ts's header and docs/investigations/be_normalization_investigation.md, run 3):
+ *   `працэнт` ×16/13 — its own article writes the sign and the word in one sentence: "гулец, які кідае на
+ *     33 %, пападае кожны трэці кідок. Працэнт апісвае некалькі дыскрэтных падзей."
+ *     ⚠ `адсотак` scored HIGHER (×20/20) and was declined: every one of its twenty hits is the same
+ *     copy-pasted football-table legend (`% = Адсотак перамог`). Twenty articles carrying one template is
+ *     one source, not twenty — a count is a lead, never a finding.
+ *   `долар` ×101/16 — the currency article, "Долар — назва валют мноства краін, першапачаткова ЗША".
+ *     ⚠ `даляр` (the тарашкевіца spelling) is ×12 and every hit is a PLACE or a PERSON — "чыгуначная
+ *     станцыя Даляр" in Azerbaijan, and a character name. A false attestation of exactly the shape the
+ *     header warns about, so the наркамаўка spelling is what ships.
+ *   `еўра` ×71 · `кіламетраў` ×31 · `кілаграм` ×27 · `сантыметраў` ×32 · `міліметраў` ×31 ·
+ *   `квадратны кіламетр` ×21 ("395 чалавек на адзін квадратны кіламетр") · `кубічных` ×25 ·
+ *   `мільярдаў` ×45 · `тысяч` ×71 · `мінус` (be.wikipedia renders the film title `ゴジラ -1.0` as
+ *   «Гадзіла мінус адзін» — the sign read aloud before a numeral) · `плюс-мінус` ×4.
+ *
+ * ⚠ THREE ONE-LETTER KEYS ARE DELIBERATELY NOT DECLARED, each on a counted corpus fact:
+ *   `г` is *год* in 7 of its 8 digit-adjacent instances, not *грам*; `с` is *старонка* in every one of its
+ *   bibliography instances, not *секунда*; `т` is *том*. Declaring any of them would misread the language's
+ *   own citation style and its years. `м` is claimed in normalize.ts instead, with an explicit guard.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["працэнт", "працэнты", "працэнтаў", "працэнта"],
+    currency: {
+        "€": ["еўра"], // indeclinable
+        "$": ["долар", "долары", "долараў", "долара"],
+        "£": ["фунт", "фунты", "фунтаў", "фунта"],
+        "₽": ["рубель", "рублі", "рублёў", "рубля"],
+    },
+    units: {
+        "км": ["кіламетр", "кіламетры", "кіламетраў", "кіламетра"],
+        "см": ["сантыметр", "сантыметры", "сантыметраў", "сантыметра"],
+        "мм": ["міліметр", "міліметры", "міліметраў", "міліметра"],
+        "кг": ["кілаграм", "кілаграмы", "кілаграмаў", "кілаграма"],
+        "га": ["гектар", "гектары", "гектараў", "гектара"],
+        "ггц": ["гігагерц", "гігагерцы", "гігагерцаў", "гігагерца"],
+        // LATIN aliases. be.wikipedia writes the Cyrillic abbreviation throughout, but the engine's TOKEN
+        // matches Cyrillic only, so a foreign-sourced `120 km` loses the unit entirely rather than merely
+        // mispronouncing it — the same reasoning as Russian's and Ukrainian's aliases.
+        "km": ["кіламетр", "кіламетры", "кіламетраў", "кіламетра"],
+        "cm": ["сантыметр", "сантыметры", "сантыметраў", "сантыметра"],
+        "mm": ["міліметр", "міліметры", "міліметраў", "міліметра"],
+        "kg": ["кілаграм", "кілаграмы", "кілаграмаў", "кілаграма"],
+    },
+    unitPer: "на", // км/гадз → кіламетраў НА гадзіну
+    rateDenominators: { "гадз": "гадзіну", "год": "гадзіну", "h": "гадзіну", "s": "секунду" },
+    // Belarusian puts the measure adjective BEFORE the noun as a separate agreeing word — квадратных
+    // кіламетраў — the East-Slavic shape, not Swedish's fused compound.
+    exponentWords: {
+        squared: ["квадратны", "квадратныя", "квадратных", "квадратнага"],
+        cubed: ["кубічны", "кубічныя", "кубічных", "кубічнага"],
+        position: "before",
+    },
+    // A BARE power — `5²`, with no unit noun for the exponent to modify — was dropped outright.
+    // ⚠ ONLY `squared` IS DECLARED, and the asymmetry is the evidence. `у квадраце` is ×10/8 and one hit is
+    // exactly this slot — "ват дзяліць на метр у квадраце". Against that, `у кубе` is ×1/1 (a lead, not a
+    // finding) and `у ступені` ×5/3 is a FALSE attestation: its hits are the ORDER-OF-MERIT sense,
+    // "у ступені «Вялікі крыж»". An undeclared power leaves the superscript where the RAWMARK gate can see
+    // it, which is strictly better than inventing a reading for it.
+    bareExponent: { squared: "{n} у квадраце" },
+    // `×` and `&`. The multiplication article reads the notation aloud and gives the SHORT register —
+    // «два на тры ёсць шэсць» — which is also the register `=` takes in normalize.ts step 10. Every `×`
+    // in this corpus is a dimension (`270×18 метраў`, `9×19mm Parabellum`, the orbit `215×939`), so one
+    // word serves and `by` defaults to it.
+    multiply: { times: "на" },
+    ampersand: "і",
+    // Inflected forms too, because running text writes the one its numeral governs (2 мільёны, 5 мільёнаў).
+    magnitudes: ["тысячы", "тысяч", "мільён", "мільёна", "мільёны", "мільёнаў",
+        "мільярд", "мільярда", "мільярды", "мільярдаў"],
+    // A DECIMAL governs the GENITIVE SINGULAR — 2,4 працэнта — a fourth form, because the 2–4 slot here is
+    // the nominative plural (два працэнты) and so cannot serve. Same shape as Ukrainian.
+    countForm: (n) => (Number.isInteger(n) ? slavicCountForm(n) : 3),
+});
 
 class BelarusianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST (its ordinal, clock, era, year and range steps need the number and its suffix
+        // still adjacent, which the tier would break), then the INITIALISM pass, then the shared symbol
+        // tier — the initialism pass must not see a `$` glued to a caps run, and the tier matches a unit
+        // only when a NUMBER is adjacent, which is why the degree and clock rules run before it.
+        const prepared = SYMBOLS(normalizeBelarusianInitialisms(normalizeBelarusian(input)));
+        return assembleClauses(prepared, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                sink.emit(number(intPart!));
+                if (frac !== undefined) {
+                    sink.emit(phonemizeWord(DEF.numbers.decimalConnector));
+                    for (const dg of frac) sink.emit(number(dg));
+                }
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

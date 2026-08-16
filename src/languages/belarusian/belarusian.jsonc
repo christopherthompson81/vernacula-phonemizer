@@ -68,6 +68,17 @@
         },
         // тысяча is FEMININE → адна тысяча, дзве тысячы (never *два тысяча). адна = fem of адзін
         // (en.wiktionary.org/wiki/адзін); дзве = fem of два (en.wiktionary.org/wiki/два#Belarusian).
-        "feminine": { "one": "адна", "two": "дзве" }
+        "feminine": { "one": "адна", "two": "дзве" },
+
+        // The name of the decimal COMMA, emitted between the integer and fractional parts (belarusian.ts).
+        // ⚠ SOURCED FROM be.wikipedia's «Коска» ARTICLE, which both names the sign and reads a number with
+        // it: "у беларускай форме запіса дзесятковых дробаў коска аддзяляе цэлую і дробную часткі ліку
+        // (дзесятковая коска), напрыклад: 5,7 — пяць цэлых сем дзесятых".
+        // ⚠ AND THE PUNCTUATION NAME IS CHOSEN OVER THAT FULL READING, deliberately and lossily: «цэлых»
+        // AGREES (адна цэлая / дзве цэлыя / пяць цэлых) and the fractional tail names the place
+        // (дзесятых / сотых / тысячных), neither of which the number path has anywhere to carry. The same
+        // call uk made (кома) and pl made (przecinek). Before this the comma was clause punctuation, so
+        // `5,3 %` read as *пяць , тры*.
+        "decimalConnector": "коска"
     }
 }

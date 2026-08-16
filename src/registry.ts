@@ -193,6 +193,7 @@ import { ROMAN_POLICY as romanCa } from "./languages/catalan/romanOrdinals.ts";
 import { ROMAN_POLICY as romanRu } from "./languages/russian/romanOrdinals.ts";
 import { ROMAN_POLICY as romanPl } from "./languages/polish/romanOrdinals.ts";
 import { ROMAN_POLICY as romanUk } from "./languages/ukrainian/romanOrdinals.ts";
+import { ROMAN_POLICY as romanBe } from "./languages/belarusian/romanOrdinals.ts";
 import { ROMAN_POLICY as romanHu } from "./languages/hungarian/romanOrdinals.ts";
 import { ROMAN_POLICY as romanAz } from "./languages/azerbaijani/romanOrdinals.ts";
 import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
@@ -221,7 +222,7 @@ export interface Phonemizer {
 const ROMAN_POLICIES: Readonly<Record<string, RomanPolicy>> = {
     es: romanEs, "es-419": romanEs419, pt: romanPt, "pt-BR": romanPtBr,
     it: romanIt, ro: romanRo, ca: romanCa,
-    ru: romanRu, pl: romanPl, uk: romanUk, hu: romanHu,
+    ru: romanRu, pl: romanPl, uk: romanUk, be: romanBe, hu: romanHu,
     az: romanAz, kk: romanKk, uz: romanUz,
 };
 
