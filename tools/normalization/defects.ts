@@ -799,6 +799,29 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    gd: {
+        // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
+        // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in
+        // src/languages/scottishgaelic/normalize.ts. None is a missing rule; all four are missing WORDS
+        // with the wrong candidate already ruled out, or a sign this corpus does not use as a sign.
+        degrees: "measured: the Gaelic word is `ceum` and ALL 43 of its gd.wikipedia attestations are the "
+            + "ACADEMIC degree (\"rinn e ceum ann am matamataig\", \"Thug e ceum bho Oilthigh Uppsala\"). "
+            + "`ceum Celsius`, `ceumannan Celsius` and `ìre Celsius` all score 0. The Fula `tere` shape — a "
+            + "real word in the wrong sense — so the 358 degrees stay unread rather than being told to say "
+            + "\"university degree Celsius\"",
+        times: "measured: `×` ×10 and they ARE arithmetic (`7 × ( 14 + 9 – 4) = (7 × 14) + …`, the "
+            + "distributive law), but the plausible word `uiread` ×36 is \"quantity/amount\" in every hit "
+            + "(\"'s e uiread neo-aithnichte\" — an unknown quantity), never \"times\"",
+        equals: "measured: `=` ×50, and they are WIKI HEADING MARKERS (`== Hallstatt agus La Tène ==`) and "
+            + "raw LaTeX (`y = r sin(φ) sin(θ)`). Zero are equations in Gaelic prose",
+        plus: "measured: `+` occurs only inside BBC video timestamps (`agallamhan-bhideo 3:58+4:21`), "
+            + "which is a list separator rather than an addition, and no Gaelic plus word is attested",
+        "plus-minus": "measured: `±` ×0 in the retained text — the sign does not occur",
+        "less-than": "measured: `<` ×0 in the retained text — the sign does not occur",
+        "greater-than": "measured: `>` ×1, inside the raw LaTeX fragment `a - b, & : a > b \\quad` the dump "
+            + "extraction left in. Zero occur in Gaelic prose",
+        divide: "measured: `÷` ×0 in the retained text — the sign does not occur",
+    },
     ba: {
         // ⚠ FOUR CLASSES, ONE MEASUREMENT EACH, over the retained text of `tools/corpus/mined/ba.jsonc`
         // (460 segments of a 618,078-paragraph ba.wikipedia dump). Bashkir Wikipedia carries a great deal

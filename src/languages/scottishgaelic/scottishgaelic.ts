@@ -16,6 +16,8 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { makeNumberToWords, type GaelicNumbers } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeScottishGaelic } from "./normalize.ts";
 
 interface GaelicManifest {
     slenderVowels: string;
@@ -138,6 +140,50 @@ export function phonemizeWord(word: string): string {
 }
 
 const CLAUSE_MARK = M.clausePunctuation;
+
+/**
+ * SYMBOL NORMALIZATION — Scottish Gaelic. Every word is a gd.wikipedia TOKEN attestation whose examples
+ * were read (see normalize.ts's header and docs/investigations/gd_normalization_investigation.md):
+ *   `sa cheud` ×7/4 — "Tha a' Ghàidhlig aig **deich sa cheud** duine", "**10 sa cheud** dhiubh"
+ *   `not` ×19 — and the currency article names the sign: "Punnd Sasannach (**GB£**, “**not**”)"
+ *   `ceàrnagach` ×26/20 — and the corpus glosses its own abbreviation in one sentence: "an fharsaingeachd
+ *     de 551,695 **cilemeatair ceàrnagach (km²)**", which fixes the word AND its position, after the noun
+ *   `cilemeatair` ×35 · `meatair` ×42 · `cileagram` ×5 · `dolar` ×11
+ *
+ * ⚠ GAELIC HAS NO NUMBER AGREEMENT ON A COUNTED NOUN — it stays singular after any numeral (`còig
+ * cilemeatair`, never *còig cilemeatairean*) — so every entry is a ONE-element `CountForms` array and the
+ * tier's default `countForm` always picks it. Same shape as the Turkic layers, not the Romance ones.
+ *
+ * ⚠ AND `ceum` IS NOT DECLARED FOR DEGREES. All 43 of its attestations are the ACADEMIC degree ("rinn e
+ * ceum ann am matamataig"); `ceum Celsius`, `ceumannan Celsius` and `ìre Celsius` all score 0. The 358
+ * degrees stay unread and visible to the RAWMARK gate rather than acquiring a reading that means
+ * "university degree Celsius" — the Fula `tere` lesson.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["sa cheud"],
+    // ⚠ `Euro` IS THE CORPUS'S OWN SPELLING, not an invented Gaelicisation: `eòro` scores 0 everywhere
+    // (corpus, artifact, referee, lexicon, wikipedia) and the sourcing gate said so. The corpus's currency
+    // list writes it in the English form — "Dolar (US$) Euro Punnd Sasannach (GB£, “not”)" — the same
+    // sentence that sources `not`, so that is what ships. `€` ×3 in the retained text.
+    currency: { "£": ["not"], "$": ["dolar"], "€": ["Euro"] },
+    units: {
+        km: ["cilemeatair"], cm: ["ceudameatair"], mm: ["milemeatair"], kg: ["cileagram"],
+        m: ["meatair"], g: ["gram"],
+    },
+    // Gaelic puts the measure adjective AFTER the noun — *cilemeatair ceàrnagach* — the corpus's own gloss.
+    exponentWords: { squared: ["ceàrnagach"], cubed: ["ciùbach"], position: "after" },
+    // THE RATE, and both halves are sourced with the notation glossed beside them:
+    //   `san uair` ×2 — "a bha air siubhal aig deich air fhichead mile 'san uair" (thirty miles per hour)
+    //   `diog` ×29 — and the physics article reads the sign: "aonadan de meatairean anns an diog (m/s)"
+    // `san` is the contraction of `anns an`, which is the form that second quotation writes out.
+    unitPer: "san",
+    rateDenominators: { h: "uair", u: "uair", s: "diog" },
+    // `&` ×13 in the retained text, of which 12 are HTML entities the markup pass leaves behind
+    // (`&gamma;`, `&nbsp;`) and one is a real bibliographic conjunction — "Ross, R.J. & J. Hendry (deas.)".
+    // `agus` is the language's own "and" and is everywhere in this corpus.
+    ampersand: "agus",
+    magnitudes: ["muillean", "billean"],
+});
 /** Integer → Scottish Gaelic numeral words (counting/attributive series + lenition; see numbers.ts). */
 export const numberToWords = makeNumberToWords(M.numbers);
 const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "", "'’-")})|(\\d+)|([.!?…,;:])`, "gu");
@@ -153,7 +199,10 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class ScottishGaelicPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its de-grouping, ordinal and decimal steps need the figure and its written
+        // suffix still adjacent, which the tier would break — then the shared symbol tier, which matches a
+        // unit only when a NUMBER is adjacent.
+        return assembleClauses(SYMBOLS(normalizeScottishGaelic(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Numbers: compose the Gaelic numeral phrase, then phonemize each word through the same g2p.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

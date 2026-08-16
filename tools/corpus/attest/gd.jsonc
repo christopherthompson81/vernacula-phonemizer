@@ -1,0 +1,506 @@
+// WIKIPEDIA WORD ATTESTATION — gd. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "gd",
+        "wiki": "gd.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "san uair",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…carbad-smuid a bha air siubhal aig deich air fhichead mile 'san uair, agus a' taruinn treana de ceithir fichead tunna air rathad…",
+                "…' ann anns a' bhaile a chaidh teothachd as àirde na dùthcha san uair (40.2 °C) a clàradh ann an 2003. Chaidh oilthigh a stèidhea…"
+            ]
+            },
+        {
+                "word": "mìltean san uair",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "diog",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…rè ùine. Tomhaisear luaths le aonadan de meatairean anns an diog (m/s). Mar sin, tomhaisear luathachadh (atharrachadh de lua…",
+                "…Mar sin, tomhaisear luathachadh (atharrachadh de luaths rè diog) an aonadan de (meatairean/diog)/diog (m/s/s). == Mìnichead…",
+                "…(atharrachadh de luaths rè diog) an aonadan de (meatairean/diog)/diog (m/s/s). == Mìnicheadh == 'S e a tha ann an Newton: A…",
+                "…rrachadh de luaths rè diog) an aonadan de (meatairean/diog)/diog (m/s/s). == Mìnicheadh == 'S e a tha ann an Newton: Am fors…",
+                "…Newton: Am forsa a dh'aobhrachas: luathachadh de 1 meatair/diog/diog, an rian na forsa, cho fàd 's a bhitheas e a gnàthadh…",
+                "…on: Am forsa a dh'aobhrachas: luathachadh de 1 meatair/diog/diog, an rian na forsa, cho fàd 's a bhitheas e a gnàthadh air c…"
+            ]
+            },
+        {
+                "word": "ceumannan Celsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ìre Celsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "puing deicheach",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ceum Celsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…igiche agus matamataigear às an t-Suain a bh' ann an Anders Celsius (Uppsala 27 an t-Samhain 1701 - ibidem 25 an Giblean 1744).…",
+                "…ir feadh na Roinn-Eòrpa. B' e esan a dhealbhaich an siostam Celsius a tha sinn a' cleachdadh an latha an-diugh. == Obair == 172…",
+                "…tasan == == Breithean == == Bàsan == 25 an Giblean - Anders Celsius, ann an Uppsala reul-eòlaiche, fiosaigiche agus matamataige…",
+                "…a bliadhna. == Tachartasan == == Breithean == 1701 - Anders Celsius, ann an Uppsala. Reul-eòlaiche, fiosaigiche agus matamataig…",
+                "…sson Jöns Jacob Berzelius Hans Blix Hjalmar Branting Anders Celsius Per Teodor Cleve Johan Gadolin Johan Gottlieb Gahn Allvar G…",
+                "…chdar e ann an saidheans ach mar as trice cleachdar an raon Celsius far a bheil an teothachd leaghaidh de dh'uisge aig 0 °C agu…"
+            ]
+            },
+        {
+                "word": "ceàrnagach",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…,561,200, agus tha an fharsaingeachd de 551,695 cilemeatair ceàrnagach (km²) mar sin tha an dùmhlachd-sluaigh aice mu 109.8 daoine…",
+                "…ha an dùmhlachd-sluaigh aice mu 109.8 daoine le cilemeatair ceàrnagach.…",
+                "…t-siostaim eadar-nàiseanta (an siostam SI) agus am meatair ceàrnagach (m2) aonad na farsaingeachd. === Aonadan iomadail cumanta =…",
+                "…farsaingeachd. === Aonadan iomadail cumanta === cilemeatair ceàrnagach (km2) = 106 m2. heactair (ha) = 104 m2. aire (a) = 102 m2.…",
+                "…= 102 m2. === Aonadan fo-iomadail cumanta === ciadameatair ceàrnagach (cm2) = 10-4 m2. milemeatair ceàrnagach (mm2) = 10-6 m2. ==…",
+                "…ta === ciadameatair ceàrnagach (cm2) = 10-4 m2. milemeatair ceàrnagach (mm2) = 10-6 m2. === Aonadan Ìmpireil === slat ceàrnagach ≅…"
+            ]
+            },
+        {
+                "word": "ciùbach",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…}]{256}}} . ’S e 3 {\\displaystyle {\\sqrt[{3}]{}}} am freumh ciùbach ach chan eil briathran sònraichte aig a’ chòrr. Canar an ce…"
+            ]
+            },
+        {
+                "word": "àireamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 73,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…’S e àireamh a ni mìneachadh air uimhir. Ma tha trì ùbhlan againn, tha a…",
+                "…achadh a dhèanamh bho fhigearan Ròmanach. Ach tha e cumanta àireamh a ràdh an àite figeir agus tha na briathran àireamhan Araba…",
+                "…ha e cudromach eadar-sgaradh a dhèanamh nar n-inntinn eadar àireamh mar fhigear agus àireamh mar uimhir. Nar cainnt làitheil, t…",
+                "…adh a dhèanamh nar n-inntinn eadar àireamh mar fhigear agus àireamh mar uimhir. Nar cainnt làitheil, tha àireamhan air an cur g…",
+                "…reamhan fòn, àireamhan cataloig). Tha seo a’ cur òrdugh nan àireamh ris na rudan sin ged nach fhaod an t-òrdugh a bhith follais…",
+                "…fichead, ach bho seo a-mach cumaidh an siostam deicheach an àireamh àrdail le chèile (me. fichead ’s a h-aon bà, trithead ’s a…"
+            ]
+            },
+        {
+                "word": "mìneas",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "uiread",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…heòmair is tha e glè phuinnseanach agus rèidio-bheò. Lorgar uiread chrìon Po-210 ann an nàdair. Tha e a' dol à seargadh-beta B…",
+                "…Ann am matamataig, 's e uiread neo-aithnichte, agus le comas atharrachadh, a th' ann an ca…",
+                "…sgaradh air a dhèanamh eadar caochladair agus cunbhal. ’S e uiread a tha aithnichte agus neo-caochlaideach a th' ann an cunbha…",
+                "…id de na lighiche, leis cho foghlaimte 's a tha iad agus an uiread airgid am faigh iad mar thuarastal. == Lighichean à Alba ==…",
+                "…d de 100 °C agus bruthachd caighdeanachd (760mm Hg) mu 1400 uiread toirt an uisge aig a h-aon teasad. == An t-Inneal Teine de…",
+                "…tha mion-chuid ann le Ruisis (16.27%). Ged a bha fàs ann an uiread dhaoine a bha a' fuireach ann an Zhytomyr sa chiad leth dhe…"
+            ]
+            },
+        {
+                "word": "agus mar sin air adhart",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…an giorrachaidhean mar \"m.e.\" (\"mar eisimpleir\"), \"m.s.a\" (\"agus mar sin air adhart\") a tha ann an stad-phuing. Sa Bheurla Breatannach full sto…",
+                "…on marcachd, slaodadh chairtean, tarraing chrann-treabhaidh agus mar sin air adhart. Tha an dàimh eadar an each agus cinne-daonna gu math dlùth…",
+                "…heint air an latha sin, 2 choinneil air an ath Dhidòmhnaich agus mar sin air adhart chun na Nollaige. Anns na h-eaglaisean ceart-creideamhach,…",
+                "…gh-cluiche ann an Innis Tìle, opara Innis Tìle, telebhisean agus mar sin air adhart sa dùthaich aice fhèin. Bha i na bhall-pàrlamaid san Alþing…",
+                "…ann: àbhachdas, aoir, gràdh, cogadh, creideamh, poilitigs, agus mar sin air adhart. Cuideachd gheibhear san leabhar: roimh-fhacal fiosrachail…",
+                "…hdadh airson cunntaidh. ’S e seo na h-àireamhan 1, 2, 3, 4, agus mar sin air adhart, ris an canar na h-àireamhan nàdarra ann am matamataig. Ach…"
+            ]
+            },
+        {
+                "word": "sa cheud",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…irle Earra-Ghàidheal agus Bhòid. Tha a' Ghàidhlig aig deich sa cheud duine anns a' bhaile is cha do rugadh dà sa cheud den dhaoi…",
+                "…aig deich sa cheud duine anns a' bhaile is cha do rugadh dà sa cheud den dhaoine seo ann an Alba. 'S e port cudromach a th' ann…",
+                "…reas cuid de na cuirean-fodha rè a' Chogaidh Fhuair agus 10 sa cheud dhiubh an dèidh a' Chogaidh Fhuair ach ath-mheasgachadh air…",
+                "…dh riaghaltasan deamocratach a shuidheachadh an lorg air 12 sa cheud de chuirean-fodha a' Chogaidh Fhuair agus 40 sa cheud de na…",
+                "…ir 12 sa cheud de chuirean-fodha a' Chogaidh Fhuair agus 40 sa cheud de na cuirean-fodha an dèidh a' Chogaidh Fhuair. == Ro-fhio…",
+                "…far a bheil a' Ghàidhlig as làidire. Ann an 2001, bha 78.2 sa cheud de na daoine nan luchd-labhairt na Gàidhlig. Tha cròileagan…"
+            ]
+            },
+        {
+                "word": "às a' cheud",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…. Tha an suidheachadh gu math èiginneach le còrr is fichead às a' cheud anns an t-sluagh a' fulang leatha. == Spòrs == 'S e criogai…",
+                "…òr ann am Brandenburg, chan eil obair aig gu bhith sia deug às a’ cheud de na daoine gu lèir. Bha 2,553,648 daoine a’ fuireach ann…"
+            ]
+            },
+        {
+                "word": "ceudad",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…chean fulangach cha robh i aig 50.5% dhen t-sluaigh. Bha an ceudad a b' àirde ann an Gipuzkoa (49.1% de labhraichean) agus an…",
+                "…a b' àirde ann an Gipuzkoa (49.1% de labhraichean) agus an ceudad a b' ìsle ann an Araba (14.2%). Seo meudachadh an coimeas r…",
+                "…nn an 2001, 27.7% ann an 1996 is 24.1% ann an 1991). Tha an ceudad as àirde de labhraichean sa bhann aoise 16-24 a-nis (57.5%)…",
+                "…6% nan labhraichean fulangach is 68.9% gun Bhasgais. Bha an ceudad a b' àirde ann an Lapurdi is Zuberoa (55.5%) agus a b' ìsle…",
+                "…n àireamhan (24.8% ann an 2001 is 26.4 ann an 1996). Bha an ceudad a bu mhotha sa bhann aoise 65+ (32.4%) agus an ceudad a b'…",
+                "…ha an ceudad a bu mhotha sa bhann aoise 65+ (32.4%) agus an ceudad a b' ìsle sa bhann 25-35 (11.6%). Ge-tà, bha àrdachadh beag…"
+            ]
+            },
+        {
+                "word": "puing",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…ues Curie is lorg iad piezoelectricity. Lorg e cuideachd am Puing Curie, an tèothachd aig a bheil feartan magnaiteach an stut…",
+                "…ladh polonium is radium. Dh'ainmicheadh curium orra agus am puing Curie, far a bheil na feartan magnaiteach de stuth a' mùtha…",
+                "…ana, gu h-àraid plastaig trìd-shoilleir. Bithidh \"làr\" (neo puing làraich) sgrìobta aig meadhan a' chearcaill agus ceuman (ao…",
+                "…ractair na laighe air (aon) cas de an uilne, Comharraichear puing an làr air a' phàipear - le peansail biorach neo prìne, agu…",
+                "…àipear - le peansail biorach neo prìne, agus comharraichear puing eile aig riomb a' phrotractair, tomhaiste le sgal nan ceum.…",
+                "…àireamhan seo a' tomhas an astair eadar an dara phuing agus puing eile a-rèir siostam cho-chomharran air choreigin. 'S e seo…"
+            ]
+            },
+        {
+                "word": "ceum",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…oir. Chanar \"Innealtoir Proifeasanta\" ris a tha air cosnadh ceum oilthigh ann an sgoil-innleadaireachd. Nuair a bhitheas an…",
+                "…an stoidhle \"innleadair proifeiseanta\" air innleadairean le ceum an innleadaireachd. == innleadairean Ainmeil == Kirkpatrick…",
+                "…2011). Rugadh is thogadh e ann an Eabhraig Nuadh is rinn e ceum ann am matamataig aig Oilthigh Cholumbia. Chaidh e sa' chab…",
+                "…1891 agus chaochail e ann an Stockholm ann an 1974. Thug e ceum bho Oilthigh Uppsala. Bhuannaich e an Duais Nobel ann an Li…",
+                "…anndach agus thogadh e ann an Rata Mhurchais. Thug e a-mach ceum ann an Ceiltis ann an Obar Dheathain agus an uairsin ann am…",
+                "…1983 far an robh e fad 23 bliadhna agus far an dug e a-mach ceum ollamhachd ann an 1988 le obair rannsachaidh air Gàidhlig Ì…"
+            ]
+            },
+        {
+                "word": "cilemeatair",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…hraing de 60,561,200, agus tha an fharsaingeachd de 551,695 cilemeatair ceàrnagach (km²) mar sin tha an dùmhlachd-sluaigh aice mu 1…",
+                "…²) mar sin tha an dùmhlachd-sluaigh aice mu 109.8 daoine le cilemeatair ceàrnagach.…",
+                "…aerffili ann an Caerffili, a' Chuimrigh. Tha e 6.7 mi (10.8 cilemeatair) bho Caerdydd, agus 132.8 mi (213.8 cilemeatair) bho Lunnai…",
+                "….7 mi (10.8 cilemeatair) bho Caerdydd, agus 132.8 mi (213.8 cilemeatair) bho Lunnainn. A rèir a' chunntais-shluaigh ann an 2011 bha…",
+                "…nns na Crìochan a tha ann an Swinton. Tha e suidhichte mu 8 cilemeatair (5 mìltean) san earra-dheas air na Dùintean faisg air crìoc…",
+                "…on House a chaidh a thogail anns an 18mh linn mu mhìle (1.6 cilemeatair) iar air a' bhaile. Tha e dìonta mar \"category A listed bui…"
+            ]
+            },
+        {
+                "word": "meatair",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e aonad mheudachaidh airson fad a th'ann am meatair (Greugais: μέτρον, a tha a' ciallachadh meud). 'S e an t-as…",
+                "…naiteach Siostam Eadar-nàiseanta (SI) nam Meud a th' ann am meatair cuideachd. Chaidh am meatair a chruthachadh le coimisean ea…",
+                "…nta (SI) nam Meud a th' ann am meatair cuideachd. Chaidh am meatair a chruthachadh le coimisean eadar-nàiseanta ann an 1791, an…",
+                "…56° 26′ 10.02″ Tuath is 6° 20′ 33.07″ Iar. Tha Stafa mu 200 meatair a dh’ fhad agus 600 meatair a leud le 33 heactair ceàrnagac…",
+                "…0′ 33.07″ Iar. Tha Stafa mu 200 meatair a dh’ fhad agus 600 meatair a leud le 33 heactair ceàrnagach de mheud. Tha an t-àite as…",
+                "…33 heactair ceàrnagach de mheud. Tha an t-àite as àirde 42 meatair (138 troigh) os cionn na mara. Bhon bhliadhna 1968 tha Staf…"
+            ]
+            },
+        {
+                "word": "cileagram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…direachd a thàladh iom-tharraingeach ri buill eile. 'S e an cileagram a tha anns an t-aonad SI airson tomaid. == Iomraidhean ==…",
+                "…nn an falamhantas, re dail tím de 1/299 792 458 de diog. an cileagram (kg), 's an t-aonad de thomad a tha anns an cileagram. Tha…",
+                "…g. an cileagram (kg), 's an t-aonad de thomad a tha anns an cileagram. Tha màs a’ chileagram co-ionnan ri màs den ro-shamhuil ead…",
+                "…irean co-ionnan ris an àireamh de dh'ataman a tha ann 0.012 cileagram de charbon-12. Nuair a thèid cleachdadh air an mòl, b’fheud…",
+                "…d, àireamh agus soillearad. Is iad na bun-aonadan: meatair, cileagram, diog, Ceilbhin, Ampere, mòl, agus candela. Tha ainmean agu…"
+            ]
+            },
+        {
+                "word": "not",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 12,
+                "substringOnly": 1,
+                "examples": [
+                "…‘S e còmhlan-ciùil ròc Ceilteach a th’ ann an Sunrise Not Secular, a bhuineas do Leòdhas agus a sheinneas an dà chuid…",
+                "…Turas - EP le ceithir òrain. == Ceangail a-muigh == Sunrise Not Secular…",
+                "…eadar-nàiseanta == Dolar (US$) Euro Punnd Sasannach (GB£, “not”) Yen (¥) Yuan == Feallsanaichean is eaconamaichean == Keyn…",
+                "…har, 2023). == Clàran == The Lion and the Cobra (1987) I Do Not Want What I Haven't Got (1990) Am I Not Your Girl? (1992) U…",
+                "…e Cobra (1987) I Do Not Want What I Haven't Got (1990) Am I Not Your Girl? (1992) Universal Mother (1994) Faith and Courage…",
+                "…ology (2007) How About I Be Me (and You Be You)? (2012) I'm Not Bossy, I'm the Boss (2014)…"
+            ]
+            },
+        {
+                "word": "dolar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e an dolar aonad airgead nan Stàitean Aonaichte (Aimeiriceidh). B' e a…",
+                "…(Aimeiriceidh). B' e aonad airgid Spainteach a bha anns an dolar bho thus, air an robh luach de 6 tasdan agus 8 sgillin den…",
+                "…Aonaichte air an leasachadh seo agus dluth-cheangaileadh an Dolar ri pris oir sios gu 1931 nuair a chaidh bochdadh air an lui…",
+                "…h airgid nan Eòrpach, a gabhail malairt aig prisean (air an dolar) eadar £ 0.33 agus £1. Aig Sultain 2010, is luach an dolair…",
+                "…'S e ceimigear à Sloibhìnia a th’ ann an Davorin Dolar (1921 - 2005). == Aistean Co-cheangailte == == Iomraidhean…",
+                "…'S dòcha gu bheil thu a' lorg \"dolar\" ($) 'S e baile ann am Meadhan na h-Alba a th' ann an Dolai…"
+            ]
+            },
+        {
+                "word": "eòro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ceathramh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e baile ann an Siorrachd Aonghais a tha ann an Ceathramh Mhoire (Beurla: Kirriemuir, ainm goirid: Kirrie) neo Cearan…",
+                "…ranachd ann an 1458. Rugadh Sir James Matthew Barrie ann an Ceathramh Mhoire air 9 an Cèitean 1860. Bha e na reactar air Oilthigh…",
+                "…rie am baile faoinsgeulach “Thrums” sna nobhailean aige air Ceathramh Mhoire. == Iomraidhean ==…",
+                "…'S e an Giblean an ceathramh mìos anns a' bhliadhna. Tha 30 latha sa mhìos.…",
+                "…ri Venkatraman Ramakrishnan agus Thomas A. Steitz. Is i an ceathramh boireannach a choisinn an duais seo. == Aistean Co-cheangai…",
+                "…, eadar 1 am Faoilleach 1840 is 31 an Dùbhlachd 1849. Se na ceathramh deich-bliadhna den linn 1840 1841 1842 1843 1844 1845 1846…"
+            ]
+            },
+        {
+                "word": "còigeamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e Còigeamh na h-Èireann a tha ann an Còigeamh Chonnacht (Gaeilge: Cúig…",
+                "…'S e Còigeamh na h-Èireann a tha ann an Còigeamh Chonnacht (Gaeilge: Cúige Chonnacht). Tha e suidhichte air…",
+                "…'S e Còigeamh na h-Èireann a tha ann an Còigeamh Laighean (Gaeilge: Cúige…",
+                "…'S e Còigeamh na h-Èireann a tha ann an Còigeamh Laighean (Gaeilge: Cúige Laighean). Tha e suidhichte air an…",
+                "…'S e Còigeamh na h-Èireann a tha ann an Còigeamh Uladh (Gaeilge: Cúige Ul…",
+                "…'S e Còigeamh na h-Èireann a tha ann an Còigeamh Uladh (Gaeilge: Cúige Uladh). Tha e suidhichte ann an ceann…"
+            ]
+            },
+        {
+                "word": "siathamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e an t-Ògmhios neo Meadhan-Samhraidh an siathamh mìos sa bhliadhna. Tha 30 latha sa mhìos.…",
+                "…geachd anns a' bhliadhna 1943. A bharrachd air sin, 's e an siathamh Iùdhach a choisinn an Duais Nobel ann an Ceimigeachd a-riam…",
+                "…eadar 1 am Faoilleach 1860 is 31 an Dùbhlachd 1869. 'S e an siathamh deichead den linn. 1860 1861 1862 1863 1864 1865 1866 1867…",
+                "…B’ e F an t-siathamh litir den aibidil Laidinneach Tha seann-ainm aige sa Ghàidh…",
+                "…B’ e Z an t-siathamh litir air fhichead den aibidil Laidinneach agus am fear mu…",
+                "…'S e Zeta (Ζ, ζ) an siathamh litir den aibidil Ghreugach. Tha e co-ionnan ri Z san aibid…"
+            ]
+            },
+        {
+                "word": "seachdamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e an t-Iuchar an seachdamh mìos sa bhliadhna. Tha 31 latha sa mhìos.…",
+                "…’S e Q an t-seachdamh litir deug den aibidil Laidinneach.…",
+                "…eadar 1 am Faoilleach 1870 is 31 an Dùbhlachd 1879. 'S e na seachdamh deich-bliadhna den linn. 1870 1871 1872 1873 1874 1875 1876…",
+                "…B' e an seachdamh ceann-suidhe nan Stàitean Aonaichte (1829–1837) a bha ann a…",
+                "…'S e Rho (Ρ, ρ) an seachdamh litir deug den aibidil Ghreugach. Tha e co-ionnan ri R san…",
+                "…B' e an seachdamh ceann-suidhe deug nan Stàitean Aonaichte (1865–1869), a bha…"
+            ]
+            },
+        {
+                "word": "ochdamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e an Lùnastal neo an Lùnasdal an t-ochdamh mìos den bhliadhna. Tha 31 latha sa mhìos.…",
+                "…dar 1 am Faoilleach 1880 is 31 an Dùbhlachd 1889. 'S e na h-ochdamh deich-bliadhna den linn. 1880 1881 1882 1883 1884 1885 1886…",
+                "…Tha chet/het/heth (ח) na ochdamh litir den aibidil Eabhra. Tha e co-ionnan ri “h”…",
+                "…'S e Sigma (Σ, σ, ς) an ochdamh litir deug den aibidil Ghreugach. Tha e co-ionnan ri S san…",
+                "…B'e an ochdamh ceann-suidhe deug nan Stàitean Aonaichte (An Giblean 27, 18…",
+                "…'S e Theta (Θ, θ) an ochdamh litir den aibidil Ghreugach. Tha e co-ionnan ri “th” sa Bhe…"
+            ]
+            },
+        {
+                "word": "naoidheamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e an t-Sultain an naoidheamh mìos sa bhliadhna. Tha 30 latha sa mhìos.…",
+                "…eadar 1 am Faoilleach 1890 is 31 an Dùbhlachd 1899. 'S e na naoidheamh deich-bliadhna den linn. 1890 1891 1892 1893 1894 1895 1896…",
+                "…B' e an naoidheamh ceann-suidhe deug nan Stàitean Aonaichte (1877–1881) a bha…",
+                "…'S e Iota (Ι, ι) an naoidheamh litir den aibidil Ghreugach. Tha e co-ionnan ri I san aibid…",
+                "…'S e Tau (Τ, τ) an naoidheamh litir deug den aibidil Ghreugach. Tha e co-ionnan ri T san…",
+                "…Tha tet (ט) na naoidheamh litir den aibidil Eabhra. Tha e co-ionnan ri I sa aibidil a…"
+            ]
+            },
+        {
+                "word": "deicheamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e an Dàmhair an deicheamh mìos den bhliadhna. Tha 31 latha sa mhìos.…",
+                "…B’ e J an deicheamh litir den aibidil Laidinneach, leis am fuaim \"di\" neo \"de\".…",
+                "…B' e an deicheamh ceann-suidhe nan Stàitean Aonaichte (1841 - 1845) a bha ann…",
+                "…B’ e L an dàrna litir deug den aibidil Laidinneach, agus an deicheamh ann an aibidil na Gaidhlig. Tha seann-ainm aige sa Ghàidhli…",
+                "…lorg Kappa (Iapan) neo Kappa (aodach) 'S e Kappa (Κ, κ) an deicheamh litir den aibidil Ghreugach. Tha e co-ionnan ri K neo C san…",
+                "…. == Rugadh == 6 an t-Samhain - Süleyman I, ann an Trabzon. Deicheamh cheannard Impireachd nan Otomanach. == Chaochail ==…"
+            ]
+            },
+        {
+                "word": "ficheadamh",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…'S e Upsilon (Υ, υ) am ficheadamh litir den aibidil Ghreugach. Tha e co-ionnan ri U san aibid…",
+                "…'S e Omega (Ω, ω) an ceithir-ficheadamh litir den aibidil Ghreugach. Tha e co-ionnan ri o (fada) sa…",
+                "…B' e am ficheadamh ceann-suidhe deug nan Stàitean Aonaichte (Am Mart 4, 1881 –…",
+                "…'S e 20 am Faoilleach am ficheadamh latha dhen bhliadhna a rèir a' Mhìosachain Ghriogaraich. Th…",
+                "…'S e prìomh-ùghdar Gàidhlig Èirinn na ficheadamh linn a bh' ann an Máirtín Ó Cadhain. Sgrìobh e nobhailean m…",
+                "…achd Impireachd nan Otomanach mu dheas ach, aig toiseach na ficheadamh linne, bha iad fo bhuaidh Rìoghachd na h-Ostaire 's na h-Un…"
+            ]
+            },
+        {
+                "word": "deug",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…irson cloinne a tha mu dhà bhliadhna dheug a dh’aois gu sia deug, neo ochd deug. Roimhe, tha bun-sgoil, agus an dèidh làimhe…",
+                "…tha mu dhà bhliadhna dheug a dh’aois gu sia deug, neo ochd deug. Roimhe, tha bun-sgoil, agus an dèidh làimhe, tha oilthigh.…",
+                "…'S e an t-Samhain an t-aona mìos deug den bhliadhna. Tha 30 latha sa mhìos.…",
+                "…mh ann a bhith a’ dol timcheall air a’ ghrèin. Tha dà mhìos deug ann, agus 365 làithean ann (366 aig bliadhna leum). Ged a t…",
+                "…B' e S an naoidheamh litir deug den aibidil Laidinneach agus an t-siathamh litir deug ann a…",
+                "…litir deug den aibidil Laidinneach agus an t-siathamh litir deug ann an aibidil na Gàidhlig. Tha seann-ainm aige sa Ghàidhli…"
+            ]
+            }
+        ],
+    }
+    
