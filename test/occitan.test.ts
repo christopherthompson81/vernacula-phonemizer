@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { phonemize } from "../src/index.ts";
+import { normalizeOccitan } from "../src/languages/occitan/normalize.ts";
 
 import { createOccitan, phonemizeWord } from "../src/languages/occitan/occitan.ts";
 import { numberToWords } from "../src/languages/occitan/numbers.ts";
@@ -65,5 +67,53 @@ describe("Occitan (Languedocien) canonical IPA — Gallo-Romance g2p", () => {
         expect(oc.text("21").trim()).toBe("bint e y"); // ⟨v⟩→b (betacism), final ⟨n⟩ drops
         expect(oc.text("100").trim()).toBe("sent"); // cent
         expect(oc.text("1000").trim()).toBe("milɔ"); // mila — final ⟨a⟩ → ɔ
+    });
+});
+
+// ── TEXT NORMALIZATION (src/languages/occitan/normalize.ts) ─────────────────────────────────────────
+//
+// Evidence: `tools/corpus/mined/oc.jsonc` (oc.wikipedia dump, 393,961 paragraph segments). The argument
+// for every case is in the normalizer's own header.
+describe("Occitan text normalization", () => {
+    const oc = { text: (s: string) => phonemize(s, "oc") };
+
+    test("the separators — SPACE groups, BOTH marks decimate, and that is NOT Asturian's rule", () => {
+        expect(normalizeOccitan("19 042 936")).toBe("19042936");
+        expect(normalizeOccitan("1 275 207")).toBe("1275207");
+        // ⚠ No dot in this corpus ever groups, so the three-digit test Asturian needs would be wrong here.
+        expect(normalizeOccitan("1640.93")).toBe("1640,93");
+        expect(oc.text("13,1°C")).toBe("tɾet͡se biɾɡylɔ y ɡɾaws selsiws");
+    });
+
+    test("the ERA — and ⚠ it was never a LEAK, which is why no gate saw it", () => {
+        // Occitan's TOKEN treats a letter run as a word, so `abC` reached the g2p as the syllable [abk].
+        expect(normalizeOccitan("3500 abC")).toBe("3500 abans Crist");
+        expect(normalizeOccitan("484-425 avC")).toBe("484, 425 abans Crist"); // the Provençal spelling
+        expect(oc.text("3500 abC")).toContain("abans");
+    });
+
+    test("⚠ ONE DEGREE SIGN IS A BOOK SIZE, and the lookbehind has to span the whole figure", () => {
+        // `2 in-12°` is DUODECIMO. Written `(?<!in-)` the guard tests the three characters before the
+        // LAST DIGIT — `n-1` — and passes, which is how the first version still read *dotze graus*.
+        expect(normalizeOccitan("2 in-12°")).toBe("2 in-12°");
+        expect(normalizeOccitan("100°C")).toBe("100 graus Celsius");
+        expect(normalizeOccitan("250°")).toBe("250 graus "); // the dog's field of vision; the pad is collapsed downstream
+    });
+
+    test("the clock, the minus and the range's pause", () => {
+        expect(normalizeOccitan("12:30 h")).toBe("12 30 h"); // the writer supplies the `h`
+        expect(normalizeOccitan("-20,4°C")).toBe("mens 20,4 graus Celsius");
+        expect(normalizeOccitan("1909-2006")).toBe("1909, 2006");
+        // ⚠ NOTHING MAY BE REQUIRED AFTER THE SECOND NUMBER (trap 58).
+        expect(normalizeOccitan("18-20).")).toBe("18, 20).");
+    });
+
+    test("⚠ WHAT IS REFUSED — `>` is a taxonomic rank chain, a FIFTH sense in this sweep", () => {
+        expect(normalizeOccitan("Eucariòtas > Metazoaris")).toBe("Eucariòtas > Metazoaris");
+    });
+
+    test("the symbol tier — and ⚠ `gras` ×156 is the word for FAT, not for degree", () => {
+        expect(oc.text("50 %")).toBe("sinkwantɔ pe sent");
+        expect(oc.text("9 km")).toBe("nɔw kilumɛtɾes");
     });
 });

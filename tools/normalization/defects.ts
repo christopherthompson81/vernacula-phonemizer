@@ -986,6 +986,25 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "keys on what FOLLOWS. Sixteen instances qualify as degrees; this one does not, and is left "
             + "unread rather than told to say *cinco graos presidente* (trap 56)",
     },
+    oc: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/oc.jsonc` (453 segments of a
+        // 393,961-paragraph oc.wikipedia dump), argued in src/languages/occitan/normalize.ts.
+        "greater-than": "measured: `>` \u00d747 and ALL of them are ONE STRING \u2014 a TAXONOMIC RANK CHAIN "
+            + "repeated down a mammal article's classification box: `Eucari\u00f2tas > Metazoaris > Cordats > "
+            + "Craniats > vertebrats > Euteleost\u00f2ms > Mamif\u00e8rs > Euteriats > Carnivora > Fissipedia > "
+            + "Canidae`. Zero are comparisons. That is a FIFTH distinct sense of this sign in the sweep: "
+            + "gd's was a LaTeX fragment, tk's a typo for \u015f, shn's a SOUND-CHANGE ARROW, la's a genuine "
+            + "comparison, and this is a rank separator",
+        equals: "measured: `=` \u00d71 and it is inside a raw LaTeX fragment the dump extraction left in "
+            + "(`l'eq\u00fcacion \\ x^n +y^n = z^n`, Fermat's last theorem). Zero are equations in Occitan prose",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        plus: "measured: `+` \u00d72 and both are a bibliographic FLORUIT marker (`Jean de Roquetaillade "
+            + "(+ 1366 ca)`) and the LaTeX fragment above. Zero are additions; the MINUS is read, because "
+            + "omitting it inverts",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in

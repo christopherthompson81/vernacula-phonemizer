@@ -16,6 +16,8 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeOccitan } from "./normalize.ts";
 
 interface OccitanDef {
     digraphs: Record<string, string>;
@@ -127,7 +129,31 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Occitan Latin letters incl. the accents + ç) / number / punctuation token.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'·-")})|(\\d+)|([.!?…,;:])`, "gu");
+/**
+ * The shared SYMBOL tier. Every word is an oc.wikipedia TOKEN attestation whose examples were read:
+ * `sègle` ×182, `per` ×123, `oras` ×107, `Crist` ×98, `mètre` ×83, `èuro` ×80, `Celsius` ×73,
+ * `quilograma` ×72, `cubic` ×36, `cent` ×36, `virgula` ×36, `quilomètre` ×25, `graus` ×17.
+ *
+ * ⚠ `gras` SCORES ×156 AND IS NOT USED. It is the homograph meaning "fat" — the Fula `tere` shape, for
+ * the sixth time in this sweep. The degree word is `grau`/`graus`, the attested plural and its
+ * transparent singular.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["per cent"],
+    currency: { "€": ["èuro", "èuros"], "$": ["dolar", "dolars"], "£": ["liura", "liuras"] },
+    units: {
+        "km": ["quilomètre", "quilomètres"], "m": ["mètre", "mètres"], "cm": ["centimètre", "centimètres"],
+        "mm": ["millimètre", "millimètres"], "kg": ["quilograma", "quilogramas"], "ha": ["ectara", "ectaras"],
+    },
+    exponentWords: { squared: ["quadrat", "quadrats"], cubed: ["cubic", "cubics"], position: "after" },
+    ampersand: "e",
+    magnitudes: ["milion", "milions", "miliard", "miliards"],
+});
+
+// ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause
+// pause and `13,1°C` reads as *tretze , un* — a phrase break inside a quantity. normalize.ts has already
+// folded the dot decimals onto the comma, so one branch covers both. `decimals` is 8,826 corpus-wide.
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'\u00b7-")})|(\\d+(?:,\\d+)?)|([.!?\u2026,;:])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
@@ -140,10 +166,21 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class OccitanPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its separator, era, clock, sign and degree steps need the figure and its
+        // mark still adjacent, which the tier would break — then the shared symbol tier.
+        return assembleClauses(SYMBOLS(normalizeOccitan(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Occitan number WORDS, each phonemized like any other word.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                if (frac !== undefined) {
+                    // `virgula` ×36 on oc.wikipedia — the separator's own name, the same call every other
+                    // layer in this sweep makes. The fractional part is read digit by digit.
+                    sink.emit(phonemizeWord("virgula"));
+                    for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
+                }
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

@@ -1,0 +1,358 @@
+// WIKIPEDIA WORD ATTESTATION — oc. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "oc",
+        "wiki": "oc.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "cent",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Les Cent-Acres es una comuna francesa, situada dins lo departament d…",
+                "…La Guèrra de Cent Ans foguèt lo conflicte que se debanèt entre lei reiaumes d…",
+                "…la fònt d'unei guèrras a la fin dau sègle XV. La Guèrra de Cent Ans causèt tanben l'aparicion d'un sentiment nacionau fòrt…",
+                "…u fòrt en França e en Anglatèrra. == Causas == La Guèrra de Cent Ans es l'expression de la rivalitat existent entre lei reia…",
+                "…Lei consequéncias territorialas principalas de la Guèrra de Cent Ans son una aumentacion de la talha dei territòris contrarò…",
+                "…ma per lei consequéncias politicas, l'efèct de la Guèrra de Cent Ans foguèt diferent per França e Anglatèrra. D'efèct, l'eco…"
+            ]
+            },
+        {
+                "word": "gras",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 156,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Graàs (en francés Gras) es una comuna occitana de Vivarés, situada dins lo departa…",
+                "…== Comunas vesinas === == Toponimia == La prononciacion es [gras] : [a'nèn vej'gras], a Vauvinhièra, [a'nèn a gras], a Sant…",
+                "…acion es [gras] : [a'nèn vej'gras], a Vauvinhièra, [a'nèn a gras], a Sant Thomé (dos òmes, coneissança passiva, un competent…",
+                "…neissança passiva, un competent, lo segond pas tan segur) . Gras representariá *Grassus (fundum) (o puslèu *Crassus (fundum)…",
+                "…ografia justificariá pas. I a en Bas Vivarés un *Plan delhs Gras, qu'a de segur una autra explicacion. Lo nom es atestat en…",
+                "…Les Gras es una comuna francesa, situada dins lo departament de Dobs…"
+            ]
+            },
+        {
+                "word": "graus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Graus es un municipi de la província d'Òsca e de la Comunautat Au…",
+                "…n es constituït de sabla e entrecopat de passatges nomenats graus, que permeton la comunicacion de la lòna amb la mar. Lo tèr…",
+                "…nals estreches amb fòrts corrents d’aiga durant las marèas (graus). Dins la tranquillitat de las sieunas aigas se trapa soven…",
+                "…er las aigas de las Corbièras e dobèrt dins la mar per tres graus amb pòrtas. Activitats: pesca aqüacultura ustras torisme: p…",
+                "…lus est une espècia de la costiera que pòu passar dins leis graus lei rius. Es un peis gregari que viu au fons de l'aiga, sus…",
+                "…a nau. Los gavitèl (gavitèl tribòrd balisant la drecha dels graus dins la zona geografica \"A\", venant de la mar cap a tèrra s…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 73,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…== Patronim == Lo nom de Celsius es aquel de plusors personalitats (per ordre cronologic) :…",
+                "…usors personalitats (per ordre cronologic) : Magnus Nicolai Celsius (1621-1679), matematician suedés ; Nils Celsius (1658-1724)…",
+                "…nus Nicolai Celsius (1621-1679), matematician suedés ; Nils Celsius (1658-1724), astronòm, filh del precedent ; Olof Celsius l'…",
+                "…ls Celsius (1658-1724), astronòm, filh del precedent ; Olof Celsius l'ancian (1670-1756), botanista, teologian e orientalista s…",
+                "…logian e orientalista suedés, fraire del precedent ; Anders Celsius (1701-1744), sabent suedés, inventor en 1742 d’una de las p…",
+                "…ras escalas centigradas de temperatura que l'unitat, lo gra Celsius (°C) onora son nom, filh de Nils Celsius ; Olof Celsius lo…"
+            ]
+            },
+        {
+                "word": "èuro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 80,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…as pèças). Los bilhets an una maqueta comuna a tota la zòna èuro. Los ponts, pòrtas e fenèstras dels bilhets simbolizan la d…",
+                "…stinadas a la circulacion. L'article Plaquetas e cofrets en èuro repren la descripcion dels cofrets FDC e BU oficials, d'ext…",
+                "…respectius. Mas las bancas centralas dels estats de la zòna èuro contunhan d’acceptar los bilhets e pèças de las ancianas mo…",
+                "…la moneda unica al taus de cambi de 15,6466 unitats per un èuro (taus que prevaliá precedentament). Quitament, lo litas lit…",
+                "…n a conservat sa paritat fàcia a l’èuro (3,4528 litas per 1 èuro). Quant a la moneda eslovèna, lo tolar, son cors pivòt es e…",
+                "…lar, son cors pivòt es estat fixat a 239,640 unitats per un èuro. Aquelas tres devisas devon ara (2004) se mantenir dins una…"
+            ]
+            },
+        {
+                "word": "quilomètre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Lo quilomètre (/kiluˈmɛtre/; simbòl: km, amb k minuscula) es una unitat d…",
+                "…Lo quilomètre carrat es una unitat de superfícia dau Sistèma Internaciona…",
+                "…definís coma l'aira d'un carrat que sei costats mesuran un quilomètre de longor. Lo quilomètre carrat fa partida deis unitats der…",
+                "…carrat que sei costats mesuran un quilomètre de longor. Lo quilomètre carrat fa partida deis unitats derivadas dau Sistèma Intern…",
+                "…eografia == Aquela municipalitat a situat a una trentena de quilomètre de Roazhon aital coma un trenten quilomètre de Redon Cette…",
+                "…una trentena de quilomètre de Roazhon aital coma un trenten quilomètre de Redon Cette commune est située a une trentaine de kilomè…"
+            ]
+            },
+        {
+                "word": "mètre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 83,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Lo mètre (simbòl : m) es l'unitat de basa de longor dau Sistèma Inte…",
+                "…referit. == Istòria == === Lei premierei definicions === Lo mètre foguèt definit inicialament en 1791 per l'Acadèmia dei Scié…",
+                "…ura de longor oficiala. Quauqueis annadas puei, en 1799, un mètre escandau de platin foguèt creat a partir d'aquela definicio…",
+                "…rcelona. Aquò permetriá d'establir precisament la valor dau mètre. En 1793, sus la còla de Montjuïc, Méchain s'avisèt d'una d…",
+                "…; en 1799, ne rendèt còmpte en fraudant sei resultats : lo mètre serà tròp cort de 0,2 mm ; la « frauda » serà descubèrta pe…",
+                "…lo Burèu Internacionau dei Pes e Mesuras tornèt definir lo mètre coma la distància entre dos ponchs sus una barra d'un aliat…"
+            ]
+            },
+        {
+                "word": "centimètre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…ité de pression del sistèma CGS. Una baria val una dina par centimètre carrat o 0,1 Pa. Una baria representava donc una valor de p…",
+                "…tre carrat (100 kN/m2 = 100 kPa) donc tanben 10 newtons per centimètre carrat (1 daN/cm2). De biais abusiu, se considèra qu'un bar…",
+                "…abusiu, se considèra qu'un bar val un quilograma-fòrça per centimètre carrat (kgf/cm2). Aquò es pas qu'una aproximacion veraia a…",
+                "…a de las grandors fisicas, que las unitats de basa son : lo centimètre per las longors; lo grama per las massas; la segonda per lo…",
+                "…ilizats e fondats sus l'usatge d'unitats coma lo grama ò lo centimètre. == Denominacions e simbòls deis unitats == Per convencion,…",
+                "…en Euròpa e cap al sud èst en Asia a une velocitat de 0,95 centimètre par an o encara a una velocitat de rotacion de 0,8591° par…"
+            ]
+            },
+        {
+                "word": "quilograma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 72,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Lo quilograma (simbòl: kg) es l'unitat de basa de massa del Sistèma Inter…",
+                "…basa de massa del Sistèma Internacional d'Unitats (SI). Lo quilograma se definís coma la massa del prototipe internacional del qu…",
+                "…ma se definís coma la massa del prototipe internacional del quilograma qu'es gaireben identica a la massa d'un litre d'aiga. Es l'…",
+                "…relacion a un artefacte. == Istòria == === La creacion del quilograma === La creacion del quilograma aguèt luòc dins l'encastre d…",
+                "…tòria == === La creacion del quilograma === La creacion del quilograma aguèt luòc dins l'encastre de la del sistèma metric al come…",
+                "…cubic d'aiga pesava alara una tona e un decimètre d'aiga un quilograma. Lo grama es atal introdutz lo 7 d'abril de 1795 coma essen…"
+            ]
+            },
+        {
+                "word": "quadrat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…l de Cerdà se modifiquèt substancialament. Lo Carrat d'aur (Quadrat d'or en catalan) es la zòna de l'Aishamplatge de Barcelona…",
+                "…emplirà l'aira del cercle, e alara que un poligòn pòt èsser quadrat, vòl dire que lo cercle pòt èsser quadrat. Pasmens èran de…",
+                "…poligòn pòt èsser quadrat, vòl dire que lo cercle pòt èsser quadrat. Pasmens èran de sceptics (Eudemus) que postulavan que las…",
+                "…bastiguèt Angkor Thom, la nòva ciutat tancada per un barri quadrat de prèp de tres quilomètres de costat amb cinc pòrtas de di…",
+                "…t lo restaurat a l'estatge nòble de Milà e l'exposicion del Quadrat d'or dedicada a l'arquitectura modernista del centre de l'e…",
+                "…visme èran la barra rectangulara e lo canton triangular, lo quadrat e lo cercle. El Lizzitsky, dins las seunas serias Prouns, a…"
+            ]
+            },
+        {
+                "word": "cubic",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Lo mètre cubic (simbèu : m3) qu'ei l'unitat de mesura de volum du Sistèma…",
+                "…itat derivada del Sistèma Internacional d'Unitats, lo mètre cubic. Las formas matematicas plaçadas dins l'espaci donan luòc a…",
+                "…l'arèsta qu'a la longor donada. Per exemple, un centimètre cubic (cm³) es lo volum del cube que las arestas mesuran 1 cm de…",
+                "…al d'Unitats (SI), l'unitat estandard de volum es lo mèstre cubic (m³). Lo sistèma metric tanben inclutz lo litre (l) coma un…",
+                "…lo volum d'un cube d'arèsta detz centimetres (un decimetre cubic). Alara: 1 litre = (10 cm)³ = 1000 centimetres cubics = 0.0…",
+                "…0 centimetres cubics = 0.001 metres cubics, llavors 1 metre cubic = 1000 litres Las quantitats pichonas de liquid se meruran…"
+            ]
+            },
+        {
+                "word": "Crist",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 98,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Lo Crist pantocrator es un Crist en glòria, es la representacion art…",
+                "…Lo Crist pantocrator es un Crist en glòria, es la representacion artistica de Jèsus Crist di…",
+                "…un Crist en glòria, es la representacion artistica de Jèsus Crist dins son còs gloriós per oposicion a las representacions ma…",
+                "…gloriós per oposicion a las representacions mai umanas del Crist sofrissent la Passion sus la crotz, o aquela de l'enfant Jè…",
+                "…nt Jèsus. S'agís d'una representacion escatologica de Jèsus-Crist pendent la segonda parosia a la fin dels temps après lo jut…",
+                "…de simbòls coma las letras grèga: α e ω (alfa e omega). Lo Crist Pantocrator es una representacion privilegiada de l'art biz…"
+            ]
+            },
+        {
+                "word": "abans",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 53,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "….vanguard (\"abans garda\", en anglés) es un nom de domeni generic. Es en servi…",
+                "…onciacion == === Vocalas === a: [aː] en sillabas tonas, [a] abans una consonanta dobla e en sillabas atonas ä, ae: [ɛː] en si…",
+                "…s de diferéncia amb e ([eː]): Käse ['kɛ:zə] o ['ke:zə]. [ɛ] abans una consonanta dobla e en sillabas atonas e: [eː] en sillab…",
+                "…illabas atonas e: [eː] en sillabas tonas, [e], [ɛ] oder [ə] abans una consonanta dobla e en sillabas atonas; [ɐ] dins la comb…",
+                "…n del mot Sattel coma Zatl). i: [i:] en sillabas tonas, [ɪ] abans una consonanta dobla e en sillabas atonas o: [o:] (coma lo…",
+                "…nas o: [o:] (coma lo francés bureau) en sillabas tonas, [ɔ] abans una consonanta dobla e en sillabas atonas ö, oe: [øː] (coma…"
+            ]
+            },
+        {
+                "word": "après",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 72,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Robots après tout (robòt aprèp tot) es l'ochen album del cantaire francé…",
+                "…se-moi (3:36) Qu'est-ce qu'il a dit ? (2:35) 78.2008 (2:48) Après moi (2:40) 11 septembre (5:10)…",
+                "…il-Bacley #èsser lo teatre d'un eveniment dramatic. S'èsser après vist refusé del lach en una granja, de las SS en déroute #a…",
+                "…éroute #assassinar sièis joves filhas d'aquela granja #que, après aquel refús, avián aculhit éclaireurs canadiens amb flors.…",
+                "…de presoèrs alemands #que i i aviá agut de victimas [...]», Après «aver-los faches creuser los sieus pròpris cavòts». Lors de…",
+                "…le Mesnil-Bacley fut le théâtre d'un événement dramatique. Après s'être vu refusé du lait dans une ferme, des SS en déroute…"
+            ]
+            },
+        {
+                "word": "virgula",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…La virgula (comunament «pichona bròca» o «pichona verga»), es un signe…",
+                "…ontuacion. == Lingüistica e tipografia == En tipografia, la virgula es un signe de pontuacion permetent, a l'origina, d'inserir…",
+                "…los grops sintaxics. Per exemple, dins una enumeracion, la virgula separa los tèrmes enumerats. == En matematicas e dins l'esc…",
+                "…escritura dels nombres == Dins l'escritura dels nombres, la virgula pòt servir de separator decimal. L'utilizacion de l'escritu…",
+                "…on de l'escritura decimala (amb un separator que vendra una virgula mai tard) data del sègle XVI e foguèt popularizada, en part…",
+                "…escritura per fraccions. == Informatica == En Smalltalk, la virgula es pas un element sintaxic. Es un messatge binari qui perme…"
+            ]
+            },
+        {
+                "word": "ora",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 94,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ndas. Son simbòl es h. Per demandar l'ora: Quala/quau/quina ora/òras es?, Quanta ora/òra es?, Quantas oras/òras son?, Quant…",
+                "…. Per demandar l'ora: Quala/quau/quina ora/òras es?, Quanta ora/òra es?, Quantas oras/òras son?, Quant es d'ora(s)/òra(s) ?…",
+                "…òra(s) ?, Quant son d’oras/òras? (en auvernhat tanben: Quau ora ei 'cò?, 'Quanha ora z-es ?) == Quarts d'ora == Son uèit or…",
+                "…’oras/òras? (en auvernhat tanben: Quau ora ei 'cò?, 'Quanha ora z-es ?) == Quarts d'ora == Son uèit ora passadas del quart.…",
+                "…ra ei 'cò?, 'Quanha ora z-es ?) == Quarts d'ora == Son uèit ora passadas del quart.…",
+                "…païses consistissent a ajustar l’ora oficiala, apondent una ora a l'ora del fus orari (ora locala) per un periòde anant de…"
+            ]
+            },
+        {
+                "word": "oras",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 107,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…La prononciacion qu'ei [ɔ'ras]. Las fòrmas ancianas que son Oras en 1105-1119, 1385, 1442 e au sègle XVau, Oros, au sègle XV…",
+                "…e XVau, Orres au sègle XVau, Horas en 1538, Horaas en 1548, Oras (mapa de Cassini, a la fin deu sègle XVIIIau), Oràas en 186…",
+                "…La Guèrra de Cent Oras, tanben dicha Guèrra dau Fotbòl, se debanèt entre Lo Salvad…",
+                "…situa al caireforc dels grands aisses europèus. Situada a 2 oras de Brusselles, 2 oras de París e 3 oras de Londres, possedí…",
+                "…s grands aisses europèus. Situada a 2 oras de Brusselles, 2 oras de París e 3 oras de Londres, possedís lo sieu échangeur d'…",
+                "…ropèus. Situada a 2 oras de Brusselles, 2 oras de París e 3 oras de Londres, possedís lo sieu échangeur d'accès e una granda…"
+            ]
+            },
+        {
+                "word": "sègle",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 182,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Un sègle (var. segle) es ara un periòde de cent ans. Lo mot ven del…",
+                "…meses (d'ont benlèu l'edat del Crist?). Fòrt rapidament, lo sègle a significat una durada de 100 ans. Dètz sègles forman un m…",
+                "…t una durada de 100 ans. Dètz sègles forman un millenni. Lo sègle I de l'èra crestiana comença lo 1èr de genièr de l'an 1 per…",
+                "…dins lo calendièr gregorian ni dins lo calendièr julian. Lo sègle II comença lo 1èr de genièr de 101 perque 1 + 100 = 101 {\\d…",
+                "…0 = 101 {\\displaystyle 1+100=101} e atal de seguida fins al sègle XXI que comença lo 1èr de genièr de 2001 (2001 = 1 + 20 × 1…",
+                "…× 100). Es una error fòrça correnta que de far començar lo sègle amb un an d'avança. Atal, Victor Hugo el meteis s'enganèt.…"
+            ]
+            },
+        {
+                "word": "menuta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ctualizades damb freqüéncia. Coneishètz era Wikipèdia en ua menuta liegent er article desplegant Wikipèdia. Eth nòstre projèct…",
+                "…Ei ua mòstra des sòns prumèrs experiments. A ua durada d'ua menuta e ena scèna aparéishen tres senhors jogant a cartes ar exte…",
+                "…es, coma es autes que se hègen ena epòca. Quauques duren ua menuta o quate, e tanben ne pòden durar sèt o o dotze, mès non sub…"
+            ]
+            },
+        {
+                "word": "segonda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 72,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…La segonda (simbòl : s) es l'unitat fondamentala de temps dins lo Sist…",
+                "…n, en 1967, foguèt adoptada la definicion « atomica » de la segonda qu'es actualament en vigor. == Istòria == === Origina de la…",
+                "…finicion sexagesimala ==== La definicion sexagesimala de la segonda foguèt utilizada durant l'Antiquitat e l'Edat Mejana. Sa va…",
+                "…a valor es generalament donada per la relacion seguenta : 1 segonda = 1 j o r n 60 X 60 {\\displaystyle {\\text{1 segonda}}={\\fra…",
+                "…nta : 1 segonda = 1 j o r n 60 X 60 {\\displaystyle {\\text{1 segonda}}={\\frac {1jorn}{60X60}}} Es un sistèma fòrça diferent de l…",
+                "…Es un sistèma fòrça diferent de la definicion modèrna de la segonda car lei relòtges dau periòde podián sovent pas mesurar d'un…"
+            ]
+            },
+        {
+                "word": "per",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 123,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Per Noste qu'ei ua associacion fondada en 1960 dab lo nom de Pe…",
+                "…er Noste qu'ei ua associacion fondada en 1960 dab lo nom de Per Nouste dens la mira de deféner e promóver la lenga e la civ…",
+                "…ga e la civilizacion occitanas de Gasconha. == Prumerias de Per Noste == Rogèr Lapassada qu'estó lo fondator de l'associaci…",
+                "…de la République qui anóncia un estagi pedagogic organizat per ua associacion inconeguda : l’Institut d’Estudis Occitans.…",
+                "…Joan Bodon), catalans (Batista i Roca)... Qu’ei esmiraglat per l’arsec e la sapiéncia d’aqueths òmis, la màger part ensenh…",
+                "…(Maria Guichot, Maria Vignalet e Michèle Lafítte). Ahiscats per Bèc e Lafont que decidín de crear ua seccion IEO dens las «…"
+            ]
+            }
+        ],
+    }
+    
