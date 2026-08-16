@@ -1,0 +1,434 @@
+// WIKIPEDIA WORD ATTESTATION — ast. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ast",
+        "wiki": "ast.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "cientu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 78,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…100 partes iguales. Tamién se-y llama comúnmente tanto per cientu onde per cientu significa «de cada cien unidaes». Usar pa d…",
+                "…les. Tamién se-y llama comúnmente tanto per cientu onde per cientu significa «de cada cien unidaes». Usar pa definir rellacion…",
+                "…r rellaciones ente dos cantidaes, de forma que el tanto per cientu d'una cantidá, onde tanto ye un númberu, referir a la parte…",
+                "…xando un espaciu de separación. Por casu, «trenta y dos per cientu represéntase por aciu 32 % y significa ‘trenta y dos de cad…",
+                "…plificaes a les centenes. === Evolución === La idea de «per cientu» surde de la necesidá d'embrivir l'usu de les fraiciones na…",
+                "…oise actualizando la referencia falada hasta llegar al «per cientu» al faelo nació la necesidá d'afigurar la nueva abreviación…"
+            ]
+            },
+        {
+                "word": "grau",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 105,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Grau ye un conceyu d'Asturies, una parroquia de dichu conceyu y…",
+                "…que ye evidente ye que n'aquella época lo qu'entendemos por Grau nun constituyía una unidá, ya que lo que güei se conoz como…",
+                "…nun constituyía una unidá, ya que lo que güei se conoz como Grau repartíase ente trés territorios mui estremaos: Prámaro, Sa…",
+                "…te trés territorios mui estremaos: Prámaro, Salcéu y Vayu o Grau. Nun sería hasta'l sieglu XIII, cuando se constituya la pue…",
+                "…con diferentes conceyos y rexones próximes. Nel sieglu XIV, Grau nun pudo quedar fuera de la influyencia de los grandes seño…",
+                "…destacable son los cambeos na configuración alministrativa. Grau adquier a finales del sieglu XIX la mesma configuración d'a…"
+            ]
+            },
+        {
+                "word": "graos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 140,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Los graos decimales espresen les coordenaes xeográfiques de llatitú y…",
+                "…llatitú y llonxitú como fraiciones decimales d'un grau. Los graos decimales utilícense en munchos sistemes d'información xeog…",
+                "…nes de mapes web como OpenStreetMap y dispositivos GPS. Los graos decimales son una alternativa al usu de graos sesaxesimales…",
+                "…ivos GPS. Los graos decimales son una alternativa al usu de graos sesaxesimales (graos, minutos y segundos - DMS). Al igual q…",
+                "…ecimales son una alternativa al usu de graos sesaxesimales (graos, minutos y segundos - DMS). Al igual que cola llatitú y la…",
+                "…infinita dividida n'intervalos d'un grau, na que 0°C (cero graos) yera la temperatura a la que se conxelaba l'agua y 100°C e…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 64,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…El grau Celsius, denomáu tamién grau centigrau ente 1750 y 1948, y tamién a…",
+                "…alantes, representáu como °C, ye la unidá creada por Anders Celsius pa la so escala de temperatura. Tomóse como base pal Kelvin…",
+                "…e en 100 partes iguales, caúna d'elles definida como 1 grau Celsius. == Historia == La escala centigrada o centesimal foi inven…",
+                "…La escala centigrada o centesimal foi inventada por Anders Celsius (1701-1744). Orixinalmente definióse como una escala infini…",
+                "…l Ekström, que fabricó los más de los termómetros usaos por Celsius). Muncha xente más, amestando al suecu Per Elvius el Vieyu…",
+                "…demuestren. En 1948 camudóse-y oficialmente'l nome a escala Celsius, en parte n'honra d'esti científicu y en parte pola controv…"
+            ]
+            },
+        {
+                "word": "euru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 256,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…a so cara nacional, son válides en tolos países de la \"zona euru\". El diseñu de los billetes ye de Robert Kalina del Bancu C…",
+                "…monetaria europea (European Currency Unit). El símbolu del euru (€), creáu pola Comisión Europea, inspírase na lletra épsil…",
+                "…paraleles faen referencia a la estabilidá dientro del área euru. L'abreviatura internacional oficial pal euru, según la nor…",
+                "…ntro del área euru. L'abreviatura internacional oficial pal euru, según la norma ISO 4217 ye EUR. Nun hai símbolu oficial pa…",
+                "…istemes independientes les monedes de los países de la zona euru: Alemaña, Austria, Bélxica, España, Finlandia, Francia, Irl…",
+                "…1 % de los votantes se manifestaron escontra l'adopción del euru. En Suecia tamién celebróse ún el 14 d'avientu de 2003, díe…"
+            ]
+            },
+        {
+                "word": "euros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 57,
+                "articles": 16,
+                "substringOnly": 1,
+                "examples": [
+                "…la llingua. Los billetes —de 5, 10, 20, 50, 100, 200 y 500 euros — son idénticos pa los doce países. Les monedes —de 1, 2, 5…",
+                "…íses. Les monedes —de 1, 2, 5, 10, 20 y 50 céntimos y 1 y 2 euros— tienen la mesma \"cruz\" en tolos países pero una \"cara\" est…",
+                "…rín, y el Vaticanu, que tamién decidieron usallu, emitiendo euros propios cola so cara nacional. Montenegru y Kosovu na antig…",
+                "…4 maravedinos. Yá que el valor del oru anguaño ronda los 30 euros el gramu, l'equivalente d'un escudu sería d'unos 102 euros…",
+                "…euros el gramu, l'equivalente d'un escudu sería d'unos 102 euros actuales, y el del maravedín d'aproximao 0,1875 euros. Un r…",
+                "…s 102 euros actuales, y el del maravedín d'aproximao 0,1875 euros. Un real de plata equivalía a 34 maravedinos, por tanto'l s…"
+            ]
+            },
+        {
+                "word": "llibra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 109,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Llibra puede referise a: Llibra, una de les doce constelaciones de…",
+                "…Llibra puede referise a: Llibra, una de les doce constelaciones del zodiacu. Llibra, unidá…",
+                "…rise a: Llibra, una de les doce constelaciones del zodiacu. Llibra, unidá de midida emplegada en dalgunos países. Llibra, divi…",
+                "…iacu. Llibra, unidá de midida emplegada en dalgunos países. Llibra, divisa oficial de dalgunos estaos. == Referencies == == En…",
+                "…nos == Wikimedia Commons tien conteníu multimedia tocante a Llibra.…",
+                "…La llibra (lb) anguaño ye una unidá de masa, usada dende l'Antigua Ro…"
+            ]
+            },
+        {
+                "word": "quilómetru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…El quilómetru o kilómetru ye una unidá de llonxitú qu'equival a 1.000 met…",
+                "…lu ye km, ensin puntu al final. 1 km = 1.000 m = 1x10³ m Un quilómetru ye aproximadamente igual a: 0,621371192 milles 1093,613298…",
+                "…ernos == Wikimedia Commons acueye conteníu multimedia sobre Quilómetru.…",
+                "…Un quilómetru cuadráu (km²) ye la superficie qu'ocupa un cuadráu d'un qui…",
+                "…tru cuadráu (km²) ye la superficie qu'ocupa un cuadráu d'un quilómetru de llau. Equival a un millón de metros cuadraos. 1 km² = 10…",
+                "…cuadraos. 1 km² = 10⁶ m² = 1.000.000 m² = 100 hectárees. El quilómetru cuadráu utilízase pa midir l'area d'una nación y les sos di…"
+            ]
+            },
+        {
+                "word": "metru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 47,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…El metru ye la unidá de llonxitú del Sistema Internacional d'Unidaes…",
+                "…dómina había en cada rexón. == Múltiplos y submúltiplos del metru == Los múltiplos y divisiones más usaos del metru son los q…",
+                "…iplos del metru == Los múltiplos y divisiones más usaos del metru son los que vienen darréu: miriámetru (mam) = 10000 m quiló…",
+                "…Un metru por segundu ye una unidá derivada del sistema internacional…",
+                "…nos == Wikimedia Commons tien conteníu multimedia tocante a Metru per segundu.…",
+                "…Un metru cuadráu ye, por definición, l'área encerrada nun cuadráu on…"
+            ]
+            },
+        {
+                "word": "quilogramu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…El quilogramu ye la unidá de masa del sistema internacional d'unidaes, y…",
+                "…agua tien la mayor densidá a presión atmosférica normal. Un quilogramu equival a 1.000 gramos. Tamién ye común que s'utilice como…",
+                "…de fuercia nel Sistema Téunicu, anque ha faese sol nome de quilogramu-fuercia o quilopondiu, definiéndose como'l pesu, aproximada…",
+                "…definiéndose como'l pesu, aproximadamente, d'una masa d'un quilogramu allugada na superficie terrestre al nivel del mar. La defin…",
+                "…r de la gravedá. Los múltiplos y submúltiplos más usaos del quilogramu y el gramu son los que vienen darréu: Tonelada (Tm) o Megag…",
+                "…ernos == Wikimedia Commons acueye conteníu multimedia sobre Quilogramu.…"
+            ]
+            },
+        {
+                "word": "cuadráu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 66,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Na xeometría euclidiana, un cuadráu ye un polígonu regular de cuatro llaos. Esto ye, una figura…",
+                "…s na que los cuatro ángulos internos tamién son iguales. Un cuadráu tien los sos llaos opuestos paralelos y por tanto ye un par…",
+                "…én un exemplu de rectángulu (anque non tou rectángulu ye un cuadráu). De mou asemeyáu, al tener los cuatro llaos iguales, ye un…",
+                "…llaos iguales, ye una mena de rombu (anque non tou rombu ye cuadráu). == Referencies == == Enllaces esternos ==…",
+                "…Un quilómetru cuadráu (km²) ye la superficie qu'ocupa un cuadráu d'un quilómetru…",
+                "…Un quilómetru cuadráu (km²) ye la superficie qu'ocupa un cuadráu d'un quilómetru de llau. Equival a un millón de metros cuad…"
+            ]
+            },
+        {
+                "word": "cúbicu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 51,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…El quilómetru cúbicu ye una unidá de volume. Correspuéndese col volume d'un cubu…",
+                "…media Commons tien conteníu multimedia tocante a Quilómetru cúbicu.…",
+                "…El metru cúbicu (simbolizáu m³) ye una unidá volume. Correspuende al volume…",
+                "…nos múltiplos y submúltiplos d'esta unidá son el centímetru cúbicu (cm³), l'hectómetru cúbicu (hm³) o el quilómetru cúbicu (km…",
+                "…s d'esta unidá son el centímetru cúbicu (cm³), l'hectómetru cúbicu (hm³) o el quilómetru cúbicu (km³). == Referencies == == En…",
+                "…tru cúbicu (cm³), l'hectómetru cúbicu (hm³) o el quilómetru cúbicu (km³). == Referencies == == Enllaces esternos == Wikimedia…"
+            ]
+            },
+        {
+                "word": "Cristu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 142,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…El términu enantes de Cristu emplégase pa datar los años y sieglos anteriores a la era c…",
+                "…a esi momentu desígnense siguíos pola espresión enantes de Cristu, y los posteriores, si ye necesaria l'aclaración pol contes…",
+                "…aración pol contestu nel qu'apaez la fecha, como dempués de Cristu. Nun hai añu 0 nesti esquema, polo que dempués del añu 1 en…",
+                "…añu 0 nesti esquema, polo que dempués del añu 1 enantes de Cristu vien el añu 1 dempués de Cristu. Este sistema estableciolu…",
+                "…empués del añu 1 enantes de Cristu vien el añu 1 dempués de Cristu. Este sistema estableciolu Dionisiu l'Exiguu, por encargu d…",
+                "…El Cristu Redentor o Cristu de Corcováu ye una enorme estatua de 30,1…"
+            ]
+            },
+        {
+                "word": "enantes",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…El términu enantes de Cristu emplégase pa datar los años y sieglos anteriores…",
+                "…anteriores a esi momentu desígnense siguíos pola espresión enantes de Cristu, y los posteriores, si ye necesaria l'aclaración…",
+                "…tu. Nun hai añu 0 nesti esquema, polo que dempués del añu 1 enantes de Cristu vien el añu 1 dempués de Cristu. Este sistema est…",
+                "…Enantes del presente (abreviáu munches veces coles sigles AP, y tam…",
+                "…Dómina común (DC o d. c.) y enantes de la dómina común (EDC o e. d. c.) son nomes alternativos…",
+                "…e Cristu» (dC), en llatín anno Domini (‘añu del Siñor’), y «enantes de Cristu» (e.C.). Estes designaciones son usaes por dalgun…"
+            ]
+            },
+        {
+                "word": "dempués",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 107,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…va d'emerxencia, píldora del día siguiente, píldora del día dempués o píldora Postday faen referencia a un grupu amenorgáu d'an…",
+                "…tes, dende les primeres hores y hasta los 3 díes (72 hores) dempués de tener rellaciones sexuales ensin proteición. La eficacia…",
+                "…la OMS, del 52 al 94%, y ye más eficaz cuanto antes tómese dempués de la rellación sexual. L'acetatu d'ulipristal y el levonor…",
+                "…icacia como anticonceutivu d'emerxencia. La píldora del día dempués, como asocede con tolos anticonceutivos orales, nun protexe…",
+                "…izu, baxa la so efeutividá si retrásase'l so alministración dempués del coitu, amás de causar más efeutos secundarios que'l mét…",
+                "…un efeutu importante sobre'l endometriu, y nun ye efeutivu dempués d'empecipiada la implantación del cigotu, pero puede evital…"
+            ]
+            },
+        {
+                "word": "coma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 75,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…El términu coma pue facer referencia a: La coma, un signu de puntuación. El…",
+                "…El términu coma pue facer referencia a: La coma, un signu de puntuación. El coma, un estáu médicu. == Refer…",
+                "…pue facer referencia a: La coma, un signu de puntuación. El coma, un estáu médicu. == Referencies ==…",
+                "…En medicina, el coma (del gr. koma, que quier dicir suañu profundu, ye un estáu…",
+                "…hiposia. Les causes metabóliques son les más habituales. El coma ye un síntoma y non una enfermedá. Na Clasificación Interna…",
+                "…-10) asígnase-y la lletra \"R\" (síntomes y diagnósticos). El coma ye una manifestación d'un trestornu fuerte de les funcioens…"
+            ]
+            },
+        {
+                "word": "hores",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 151,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Les 24 Hores de Le Mans (24 Heures du Mans) ye una carrera de resistenci…",
+                "…ncedor ye aquel vehículu que cubra la mayor distancia en 24 hores de carrera siguida. Esta regla, que paez obvia, fixo qu'en…",
+                "…de la prueba, hai que cruciar la llinia de meta tres les 24 hores de carrera. Esto fai que, n'ocasiones, vehículos estropiaos…",
+                "…ngan cerca de la llinia de meta y, una vegada pasaes les 24 hores, vuelvan ponese en marcha pa percorrer los pocos metros que…",
+                "…el conductor: Los pilotos nun pueden conducir más de cuatro hores consecutives y nengún pilotu va poder conducir más de cator…",
+                "…nsecutives y nengún pilotu va poder conducir más de catorce hores en total; amenorgando la fatiga del conductor mientres les…"
+            ]
+            },
+        {
+                "word": "sieglu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 181,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Un sieglu ye una unidá de tiempu qu'equival a un periodu de 100 años.…",
+                "…dá de tiempu qu'equival a un periodu de 100 años. == Ver == Sieglu XXI - Tabla añal Sieglu XX - Tabla añal Sieglu XIX - Tabla…",
+                "…a un periodu de 100 años. == Ver == Sieglu XXI - Tabla añal Sieglu XX - Tabla añal Sieglu XIX - Tabla añal Sieglu XVIII - Tabl…",
+                "…s. == Ver == Sieglu XXI - Tabla añal Sieglu XX - Tabla añal Sieglu XIX - Tabla añal Sieglu XVIII - Tabla añal Sieglu XVII - Ta…",
+                "…- Tabla añal Sieglu XX - Tabla añal Sieglu XIX - Tabla añal Sieglu XVIII - Tabla añal Sieglu XVII - Tabla añal Sieglu XVI - Ta…",
+                "…abla añal Sieglu XIX - Tabla añal Sieglu XVIII - Tabla añal Sieglu XVII - Tabla añal Sieglu XVI - Tabla añal Sieglu XV - Tabla…"
+            ]
+            },
+        {
+                "word": "vixésimu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…tianos y non cristianos. 1817 – Mississippi conviértese nel vixésimu estáu de los Estaos Xuníos. 1901 – Primer entrega de los Pr…"
+            ]
+            },
+        {
+                "word": "décimu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Décimu Xunu Xuvenal (en llatín Decimus Iunius Iuvenalis, Aquino, a…",
+                "…nported. Wikimedia Commons acueye conteníu multimedia sobre Décimu Xunu Xuvenal. Wikiquote tien frases célebres suyes o que fa…",
+                "…ikiquote tien frases célebres suyes o que faen referencia a Décimu Xunu Xuvenal. Biografíes y vides. llacuada-en_la_satira_rom…",
+                "…Décimu Laberio (circa , Antigua Roma – circa , valor desconocíu) f…",
+                "…El sieglu X d. C. (sieglu décimu dempués de Cristu) o sieglu X EC (sieglu décimu de la era c…",
+                "…C. (sieglu décimu dempués de Cristu) o sieglu X EC (sieglu décimu de la era común) empezó'l 1 de xineru de 901 y terminó'l 31…"
+            ]
+            },
+        {
+                "word": "dieciochu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…esta por un cercu de metal preciosu y pedrería, decoráu con dieciochu puntes ellaboraes col mesmu metal que la base y remataes no…",
+                "…o primer trabayu entituláu «Tuenda», espublizáu por Tierra, dieciochu de los diecinueve cantares pertenecen al Archivu de tradici…",
+                "…de la competición. == Sistema de competición == Participan dieciochu clubes nun grupu. Xugarán toos escontra toos en dos ocasion…",
+                "…mer volume d'\"El Capital\" nun verá la lluz hasta 1867, tres dieciochu años de trabayu. Amás de preparar la publicación, Marx coll…"
+            ]
+            },
+        {
+                "word": "marzu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 57,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…Marzu ye'l tercer mes del añu nel calendariu gregorianu y tien 31…",
+                "…ernos == Wikimedia Commons acueye conteníu multimedia sobre Marzu. Wikcionariu tien definiciones y otra información tocante a…",
+                "…Wikcionariu tien definiciones y otra información tocante a marzu.…",
+                "…El 12 de marzu ye'l setentenu primer día del añu (setentenu segundu nos añ…",
+                "…ndu nos años bisiestos) del calendariu gregorianu. El 12 de marzu queden 294 díes p'acabar l'añu. == Fechos == 538 - Vitiges,…",
+                "…Los atentaos del 11 de marzu de 2004, conocíos pol numerónimo 11M, fueron una serie d'at…"
+            ]
+            },
+        {
+                "word": "ochobre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ochobre ye'l décimu mes del añu nel calendariu gregorianu y tien 31…",
+                "…ernos == Wikimedia Commons acueye conteníu multimedia sobre Ochobre. Wikcionariu tien definiciones y otra información tocante a…",
+                "…Wikcionariu tien definiciones y otra información tocante a ochobre.…",
+                "…ena ABC, derivada (spin-off) de The Practice, emitida dende ochobre de 2004 hasta avientu de 2008. La serie foi creada por Davi…",
+                "…llamentariu de Junts pel Sí. y presidente de Cataluña hasta ochobre de 2017. == Biografía == Cursó los estudios básicos y el ba…",
+                "…Milonia Cesonia (ochobre de 24 – 24 de xineru de 41, Palatine Hill (en) ) foi la cua…"
+            ]
+            },
+        {
+                "word": "avientu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Avientu o diciembre ye l'últimu mes del añu nel calendariu gregoria…",
+                "…ernos == Wikimedia Commons acueye conteníu multimedia sobre Avientu. Wikcionariu tien definiciones y otra información tocante a…",
+                "…Wikcionariu tien definiciones y otra información tocante a avientu.…",
+                "…Avientu foi un grupu de rock de Riosa (Asturies). == Historia == El…",
+                "…ientu por parte del públicu nes sos apariciones en direuto, Avientu decide, en 1995, aventuráse a grabar el so primer trabayu d…",
+                "…rtante reconocimientu por parte del públicu, lo que anima a Avientu a llanzase a la grabación d'un segundu discu, \"¿Y agora qué…"
+            ]
+            },
+        {
+                "word": "xineru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Xineru ye'l primer mes del añu nel calendariu gregorianu y tien 31…",
+                "…ernos == Wikimedia Commons acueye conteníu multimedia sobre Xineru. Wikcionariu tien definiciones y otra información tocante a…",
+                "…Wikcionariu tien definiciones y otra información tocante a xineru.…",
+                "…El 29 de xineru ye'l 29ᵘ día del añu del calendariu gregorianu. El 29 de xi…",
+                "…ru ye'l 29ᵘ día del añu del calendariu gregorianu. El 29 de xineru queden 336 díes p'acabar l'añu (337 nos años bisiestos). ==…",
+                "…El 22 de xineru ye'l 22ᵘ día del añu del calendariu gregorianu. El 22 de xi…"
+            ]
+            },
+        {
+                "word": "por",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 78,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…El llistáu d'elementos por nome ta codificáu por colores según la serie química a la q…",
+                "…El llistáu d'elementos por nome ta codificáu por colores según la serie química a la que pertenez cada eleme…",
+                "…El llistáu d'elementos por símbolu ta codificáu por colores según la serie química a l…",
+                "…El llistáu d'elementos por símbolu ta codificáu por colores según la serie química a la que pertenez cada eleme…",
+                "…El llistáu d'elementos por densidá ta codificáu por colores según la serie química a l…",
+                "…El llistáu d'elementos por densidá ta codificáu por colores según la serie química a la que pertenez cada eleme…"
+            ]
+            }
+        ],
+    }
+    

@@ -963,6 +963,29 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "`Harper & Row`) and a French film title, all of which reach the engine through the Latin-run "
             + "router and are read in their own language. The two that ARE Latin are `&c.`, which IS read",
     },
+    ast: {
+        // \u26a0 FIVE REFUSALS over the retained text of `tools/corpus/mined/ast.jsonc` (460 segments of
+        // the fleet's largest artifact, 1,343,097 paragraphs), argued in src/languages/asturian/normalize.ts.
+        equals: "measured: `=` \u00d70 in Asturian prose. The `math-sign` residual is a LaTeX fragment "
+            + "(`2y^- + BiO^{-}_{3(s)} \\to Bi^{3+}_{(aq)}`) and a reconstructed Proto-Indo-European root "
+            + "written with the linguists' asterisk (`*Steu-r`), neither of which is arithmetic",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs and is NOT a fraction: `\u00ab\u00eda f\u00f3rmula dentaria I 3/3, "
+            + "C 0-1/0-1, P 3-4/3 M 3/3\u00bb is a DENTAL FORMULA in the mammal articles \u2014 Roman-letter tooth "
+            + "classes with slashed counts. A fraction rule lands on it, and so does a range rule",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        plus: "measured: `+` \u00d71 and it is inside a LaTeX fragment the dump extraction left raw "
+            + "(`2y^- + BiO^{-}_{3(s)}`). Zero occur as a signed number or an addition in Asturian prose; "
+            + "the MINUS is read, because omitting it inverts, and omitting a plus does not",
+        degrees: "the degree IS read \u2014 this entry covers the ONE residual, `1758 - James Monroe, 5\u00b0 "
+            + "presidente de los Estaos Xun\u00edos`, where the DEGREE SIGN is used for an ORDINAL. This corpus "
+            + "swaps `\u00b0` U+00B0 and `\u00ba` U+00BA in both directions (`23\u00baC` and `30\u00ba de media` are degrees "
+            + "written with the ordinal indicator), so neither codepoint identifies the sense and the rule "
+            + "keys on what FOLLOWS. Sixteen instances qualify as degrees; this one does not, and is left "
+            + "unread rather than told to say *cinco graos presidente* (trap 56)",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in

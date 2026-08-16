@@ -14,6 +14,8 @@ import { latinPhone } from "../../core/latinPhones.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeAsturian } from "./normalize.ts";
 
 interface AsturianDef {
     digraphs: Record<string, string>;
@@ -80,7 +82,33 @@ export function phonemizeWord(word: string): string {
 }
 
 // A word (Asturian Latin letters incl. ñ, the accents, ü, and the ḷḷ/ḥ dialect marks) / number / punctuation token.
-const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'·")})|(\\d+)|([.!?…,;:])`, "gu");
+/**
+ * The shared SYMBOL tier. Every word is an ast.wikipedia TOKEN attestation whose examples were read:
+ * `cientu` ×78, `grau`/`graos` ×105/×140, `Celsius` ×64, `euru` ×256, `llibra` ×109, `quilómetru` ×49,
+ * `metru` ×47, `quilogramu` ×42, `cuadráu` ×66, `cúbicu` ×51.
+ *
+ * ⚠ THE CURRENCY IS POSTPOSED AND THE CORPUS PROVES IT — `21.035 € en 2012`, `unes ventes de 1.012.292
+ * €`, `sobre 86.000£ millones`, `un PIB per cápita de 16.900£`. Every instance has the sign AFTER the
+ * figure, which is the tier's default and is worth stating because the neighbouring Ibero-Romance layers
+ * in this repo see `$` prefixed in their own corpora.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["por cientu"],
+    currency: { "€": ["euru", "euros"], "£": ["llibra", "llibres"], "$": ["dólar", "dólares"] },
+    units: {
+        "km": ["quilómetru", "quilómetros"], "m": ["metru", "metros"], "cm": ["centímetru", "centímetros"],
+        "mm": ["milímetru", "milímetros"], "kg": ["quilogramu", "quilogramos"], "ha": ["hectárea", "hectárees"],
+    },
+    exponentWords: { squared: ["cuadráu", "cuadraos"], cubed: ["cúbicu", "cúbicos"], position: "after" },
+    ampersand: "y",
+    magnitudes: ["millón", "millones", "billón", "billones"],
+});
+
+// ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause
+// pause and `0,54%` reads as *cero , cincuenta y cuatro* — a phrase break inside a quantity. normalize.ts
+// has already folded the short dot-decimals (`132.46`) onto the comma, so one branch covers both.
+// `decimals` is 71,505 corpus-wide, the third-largest class in the artifact.
+const TOKEN = new RegExp(`(${hostWordRun(["Latin"], "'\u00b7")})|(\\d+(?:,\\d+)?)|([.!?\u2026,;:])`, "gu");
 
 /**
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
@@ -98,10 +126,23 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class AsturianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its separator, era, Roman-month, clock and degree steps need the figure
+        // and its mark still adjacent, which the tier would break — then the shared symbol tier, which
+        // matches a unit only when a NUMBER is adjacent.
+        return assembleClauses(SYMBOLS(normalizeAsturian(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Asturian number WORDS, each phonemized like any other word.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                if (frac !== undefined) {
+                    // `coma` ×75 on ast.wikipedia — the separator's own name, the same call every other
+                    // layer in this sweep makes. The fractional part is read digit by digit, which is
+                    // what a reader does and what avoids composing a place name this layer cannot source.
+                    sink.emit(phonemizeWord("coma"));
+                    for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
+                }
+            }
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
