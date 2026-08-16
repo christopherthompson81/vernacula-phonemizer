@@ -1,0 +1,748 @@
+// WIKIPEDIA WORD ATTESTATION — tk. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "tk",
+        "wiki": "tk.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "wergul",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "otyr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…n düzmeli goşma sözlemde-de, deňdeş agzaly sözlemdäki ýaly, otyr we baglaýjy kömekçiler gelip bilerler. Ýöne düzmeli goşma s…",
+                "…algadyp „köpriň“ golaýyna gelýärler. „Köprüde bolsa „möjek“ otyr. Gazlar ondan köprüden geçirmegini haýyş edýärler. Möjek bo…",
+                "…ýerlerňe, Geçirdim bir gije, Bir gündiz wagtym. Gaňňaly hem otyr öňki ýerinde, Toraňňy hem otyr öňki ýerinde, Şol derýa hem…",
+                "…r gündiz wagtym. Gaňňaly hem otyr öňki ýerinde, Toraňňy hem otyr öňki ýerinde, Şol derýa hem ýatyr öňki ýerinde. Bir tapmady…",
+                "…aň atasy agtyklarymyň sany hem, Hudaýa şükür, köpelip gidip otyr. Ýazyw pozuwa ýedi ýaşymda başladym. Geň görmäň, döredijili…",
+                "…, ol şöhläniň ortasynda bir uly gyz bar eken. Onuň ýeke özi otyr eken. Ol gaty gözel gyz eken. Onuň kellesinde edil Daň ýyld…"
+            ]
+            },
+        {
+                "word": "nokat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…Nokat (.) — dyngy belgisi. göçürme kitaplary we internet habarlar…",
+                "…itaplary we internet habarlary üçin ulanyň. == Ulanylýar == Nokat ähli ugurlarda ulanylýar. Mysal üçin: 1.iýiň. 2.gezelenje g…",
+                "…Uly şäherler — iri ilatly nokat, onuň ýaşaýjlary, kada bolşy ýaly, oba hojalygyndan daşgary…",
+                "…de ölçeglerini hasaba almazlyk mümkin bolan jisime material nokat diýilýär. Jisimiň dynçlykda diýip şertli kabul edilen başga…",
+                "…an abzallardan durýan sistema hasaplama sistemasy diýilýär. Nokat hereket edende nähilidir bir çyzyk, ýagny yz galdyrýar. Oňa…",
+                "…-urgy), mehaniki impuls-mehaniki hereketiň ölçegi; material nokat üçin bu nokadyň massasyny m onuň tizligi V köpeltmek hasyly…"
+            ]
+            },
+        {
+                "word": "bütin",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a we güýç, maddanyň herekedi ýaly zatlary öwrenýar. Maksady bütin älemiň syrlaryny öwrenmek. Onuň başy grek alymy Aristotel t…",
+                "…in tejribe bilen tassyklanmasy gerekdigini aýdyp geçýar. Bu bütin ylym kanunlary üçin geçerli bolyar. Klassik fizikanyň esasy…",
+                "…ýpalary köpçülikleýin gatnaşypdyrlar. Ol uruşlar Horezmi we bütin Orta Aziýany Rus döwleti bilen baglanyşdyrýan söwda ýo llar…",
+                "…UTC±00:00 — bütin dünýä wagty, ýagny Londondaky Grinwiç diýen ýeriň wagt hasa…",
+                "…Türkiye dünýäde birinji orunlaryň birini eýeleýär. Bu ýerde bütin günorta-gündogar Aziýa boýunça daş we goňur kömrüň iň iri ý…",
+                "…adymy grekçeden tapawutlanýar, ýöne kökleri bar. Grek dili, bütin taryhynda grek elipbiýinde ýazylypdyr we bu ýazuw ulgamy he…"
+            ]
+            },
+        {
+                "word": "otur",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…beýleki agaç lardan tapawutly arça agajy elmydama gök öwsüp otur ýar. Ol gurakçylyga çydamly, toprak dannamaýan ösümlikdir.…",
+                "…eý dertliň – heser zaryň başynda, Sendigiňi bilýänçäm, gel, otur sen gaşymda. Syýawuş beýle işiň birinji gezek bolýandygyny,…",
+                "…asy ýokar, ýamana ýanaşsaň — belasy.Gaty görseň, gaty ýerde otur.Garyp adam ýamanar, ýamanar-da guwanar.Gürrüň süýji, samanç…"
+            ]
+            },
+        {
+                "word": "Selsi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…《K》harp bilen belgilenýär. 0 K (Kelwin)= -273,15°C (gradus Selsi) -dir başgaça aýdanymyzda: 0°C= 273,15 K-dyr.…"
+            ]
+            },
+        {
+                "word": "plus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 2,
+                "examples": [
+                "…mots/Aujourd'hui je fais la fête/Je veux chanter/Je ne peux plus attendre (super 45 RPM, Festival) 1962: Le ciel du port/Les…",
+                "…(super 45 RPM, Festival) 1965: Tous les enfants/Aujourd'hui/Plus jamais/Un jour (super 45 RPM, Festival) 1967: Frida Boccara…",
+                "…Brokkeniň \"Voorgoed voorbij\" we Belgiýanyň Mony Markyň \"Le plus beau jour de ma vie\" aýdymlaryndan öň dokuzynjy orny eýeled…",
+                "…olm. John (1821), Histoire de la Perse depuis les temps les plus anciens jusqu'à l'époque açtuelle,Pillet aîné s.93 (fransuz…",
+                "…n sözlerden gelip çykyp, tekizligi ölçemek diýmek aňladýar. Plus – uly diýmegi aňladýan “plus” diýen latyn sözünden gelip çy…",
+                "…zligi ölçemek diýmek aňladýar. Plus – uly diýmegi aňladýan “plus” diýen latyn sözünden gelip çykýar. Postulat – latyn “postu…"
+            ]
+            },
+        {
+                "word": "goşmak",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 25,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ululyklaryň uly topary wektor ululyklardyr. Durmuşda olary goşmak, aýyrmak zerurlygy ýüze çykýar. == Wektorlary goşmak == Goý…",
+                "…olary goşmak, aýyrmak zerurlygy ýüze çykýar. == Wektorlary goşmak == Goý, a we b wektorlary goşmak talap edilsin. Ol wektorla…",
+                "…ýüze çykýar. == Wektorlary goşmak == Goý, a we b wektorlary goşmak talap edilsin. Ol wektorlaryň uzynylyklaryny we ugurlaryny…",
+                "…iň şeýle usul bilen tapylşyna parallelogram düzgüni boýunça goşmak diýilýär. Indi a we b wektorlaryň tapawudyny tapalyň. a we…",
+                "…ti, miladydan öňki 3-nji müňýyllygyň Eblan siwilizasiýasyny goşmak bilen birnäçe gadymy patyşalygyň we imperiýanyň ýerlerini ö…",
+                "…s giň manysynda algebra diýlip, matematikanyň sanlary adaty goşmak we köpeltmek amallaryny umumylaşdyrýan erkin tebigatyň köpl…"
+            ]
+            },
+        {
+                "word": "eramyzdan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 72,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…şáher bolupdyr == Urşuň sebäpleri we başlananlygy == Biziň eramyzdan öň VI asryň ahyrlarynda gerek polisleri üçin Ahemeniler tar…",
+                "…öwletleriniň ykbaly çözülmelidi. Grek – pars uruşlary biziň eramyzdan öň 500-449-njy ýyllarda bolupdyr. Uruş hereketleri üznüksiz…",
+                "…dyr. Bu uruşda, esasan, 5 döwür tapawutlandyrylypdyr: Biziň eramyzdan öň 500-494ý. Milletiň we Kiçi Aziýanyň şäherleriniň pars ag…",
+                "…synyň ýerlerine parslaryň ilkinji grek aralaşmaklary. Biziň eramyzdan öň 480-479ý – Kserksiň Gresiýa ýörişi – grek – pars uruşlar…",
+                "…ýörişi – grek – pars uruşlarynyň iň üitileşen döwri. Biziň eramyzdan oň 478-459ý urşuň häsiýetiniň üýtgemegi, inisiatiwanyň grek…",
+                "…alaryň azat edilmegi, afiny harby kuwwatynyň artmagy, Biziň eramyzdan öň 459-449ý. Afinynyň we onuň bilelişigine girýänligiň Müsü…"
+            ]
+            },
+        {
+                "word": "sagatda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Menzil - kerweniñ ýarym günde (12 sagatda) geçýän ýoly, takmynan 30–35 km…",
+                "…ki zaman howa menzili jemi 17 milliondan gowrak adama ýa-da sagatda 2000-e golaý ýolagça hyzmat etmäge mümkinçilik berer. Ýük t…",
+                "…rurlygy ýüze çykanda, hyzmat ediş terminalynyň mümkinçiligi sagatda 4800 ýolagça ýetip biler. Ýolagçy terminalynda jemi 30 trap…",
+                "…ra howa menzili işleýär. Türkmenbaşy şäherinde bina edilen, sagatda 800 ýolagça hyzmat edýän Halkara howa menziliniň ähmiýeti u…",
+                "…aeroportynyň 350 müň kwadrat metr ýerde ýerleşdirilip, her sagatda 1600 ýolagçyny kabul etmäge ukyply boljagy aýdylýar. “Oguz…",
+                "…roportyň-da ýolagçylaryň sany boýunça geçirijilik ukyby her sagatda 1600 adamdan ybarat. 1994-nji ýylda gurulan Aşgabadyň halka…"
+            ]
+            },
+        {
+                "word": "sekuntda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…ktýabr aýynyň 5-den 6-syna geçilýän gije 1 sagat 12 minut 5 sekuntda Aşgabatda hem-de onuň golaýyndaky etraplarda ägirt güýçli ý…",
+                "…lsa, beýleki binalara hüjüm eder. 2 adamlyk orty tutyar. 15 sekuntda ösýär. Iň ýokary derejesi 9 derejedir. Şar: Top we minomýot…",
+                "…ndan täzeden jan berilip bilinmez. Tutýan ýeri 5 birlik. 30 sekuntda ösýär. Iň ýokary 10 dereje. Jadygöý: Ilkinji 3 derejedäki o…",
+                "…olem-Pekka hüjümlerinde ulanylýar. Tutýan orny 4 birlik. 30 sekuntda ösýär. Iň ýokary derejesi 9 derejedir. Tebip (Şypa beriji):…",
+                "…yň topary (4100 urgy). Oýundaky iň gowy zyýan beriji bölüm (sekuntda 340 zeper). Bu howanyň birligi. 16 minut 40 sekuntda 25 meý…",
+                "…bölüm (sekuntda 340 zeper). Bu howanyň birligi. 16 minut 40 sekuntda 25 meýdany bolan “Dragon Rider”. “Electro Titan”: 32 meýdan…"
+            ]
+            },
+        {
+                "word": "ýarym",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Ýarym ada üç tarapdan suw bilen gurşalan we diňe materik ýa-da bi…",
+                "…da bir tarapdaky ada bilen baglanyşykly ýer bölegi. Köplenç ýarym ada geologiki taýdan materik bilen tutuşlygyna bolýar. Mas,…",
+                "…nyp durýar. Bu beýniniň agramy ortaça 1350-1400 g-a ýetýär. Ýarym şarlaryň üsti çal madda bilen örtülen, ol yarym şarlaryn ga…",
+                "…n ösüntgilerinden emele gelendir. Bu ösüntgilerin süýümleri ýarym şarlary kelle beýnisiniň sütüni we beýnijigi bilen hem-de o…",
+                "…ýlelikde, ol süýümler geçirijilik işini yerine yetirýärler. Ýarym şarlaryň özlerini bolsa bir-biri bilen aýratyn süyümler bir…",
+                "…ni bolsa bir-biri bilen aýratyn süyümler birleşdirýär. Olar ýarym şarlaryn arasynda ýaý şekilli germew emele getirýärler. Ýar…"
+            ]
+            },
+        {
+                "word": "gradus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…dir. Ol 《K》harp bilen belgilenýär. 0 K (Kelwin)= -273,15°C (gradus Selsi) -dir başgaça aýdanymyzda: 0°C= 273,15 K-dyr.…",
+                "…mşarynda ýerleşýän ýyldyz toplumy. Ol asmanda 255,9 kwadrat gradus ýer eýeleýär we onuň ýönekeý göz bilen görülýän 25 sany ýyl…",
+                "…hem-de gurak bolýar. Iýul aýynda ortaça temperatura +27-29 gradus, käwagtlar +43-44 gradus hem bolýar. Bu welaýatyň territori…",
+                "…l aýynda ortaça temperatura +27-29 gradus, käwagtlar +43-44 gradus hem bolýar. Bu welaýatyň territoriýasy Türkmenistanda ygaly…",
+                "…ere ýa-da küýzelere guýulýar. Onuň üstüne turşulygy 100-150 gradus Terner bolan önümçilik gönezligi ýa-da dogry 1:1 atylýar, s…",
+                "…ar. Bu ýagdaýda süýdüň turşulygy 30 minudyň dowamynda 60-70 gradus Ternere çenli ýokarlanýar. Şol wagt kazein we köpürjik görn…"
+            ]
+            },
+        {
+                "word": "Selsiý",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "minut",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…. Otel şäher merkezine örän ýakyndyr we aeoroporda bolsa 20 minut uzaklykdadayr.…",
+                "…5.256363 Öz daşyndan aýlawyny tamamlaýan wagty: 23 sagat 56 minut 4.1 sekunt Günden uzaklygy: 149 598 261 km == salgylanma ==…",
+                "…ňsat bolýa): Listening – Diňleme ukyplylygy, dowamlylygy 40 minut, 3 bölümden ybarat. Her diňleme bölümi bir gezek diňledilýä…",
+                "…k bolýar. Reading – Okap düşünme ukyplylygy, dowamlylygy 60 minut, 3 bölümden ybarat, jemi 40 sorag. Jogaplary bellär ýaly aý…",
+                "…lýar. Ahyrynda 13-14 sorag. Writing – Ýazuw, dowamlylygy 60 minut, 2 bölümden ybarat. Bölümleriň arasynda aýratyn wagt berile…",
+                "…, ýöne maslahat berilýän wagt bölünşigi 1-nji bölüm üçin 20 minut, 2-nji bölüm üçin 40 minut. 1-nji bölüm – Berilen tablisa ý…"
+            ]
+            },
+        {
+                "word": "sekunt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…z daşyndan aýlawyny tamamlaýan wagty: 23 sagat 56 minut 4.1 sekunt Günden uzaklygy: 149 598 261 km == salgylanma == http://www…",
+                "…traplarda ägirt güýçli ýer ýer yranmasy boldy. Bary-ýogy 10 sekunt dowam eden, ýöne güýji 9 10 ortolyk baldan hem geçen elhenç…",
+                "…uwwat, Nýuton (N) birligi. \" t {\\displaystyle t\\,} \": wagt, Sekunt (s) birligi. \" I → {\\displaystyle {\\overrightarrow {I}}} \":…",
+                "…I → {\\displaystyle {\\overrightarrow {I}}} \": Impuls, Nýuton*sekunt birligi. Impuls;\" I → {\\displaystyle {\\overrightarrow {I}}}…",
+                "…y erkin çapyşyklarda: iki ýaşlaryňky 1000 metr- 1minut 03,5 sekunt, üç ýaşar 2000 metre – 2 minut 11,5 sekunt, 2400 metre -2 m…",
+                "…etr- 1minut 03,5 sekunt, üç ýaşar 2000 metre – 2 minut 11,5 sekunt, 2400 metre -2 minut 42 sekunt. Bütin dünýäde giňden ýaýran…"
+            ]
+            },
+        {
+                "word": "kilometr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ugrynda ýerleşýän bäş ýyldyzy bolan Aşgabat aeoroportyna 18 kilometr we Aşgabat Wokzalyna bolsa 12 kilometr uzaklykda ýerleşýänd…",
+                "…abat aeoroportyna 18 kilometr we Aşgabat Wokzalyna bolsa 12 kilometr uzaklykda ýerleşýändir. 2004-nji ýylda gurylan myhmanhana,…",
+                "…ndir. 2004-nji ýylda gurylan myhmanhana, şäher merkezine 10 kilometr uzaklykdadyr. Otel şäheriñ iñ bir owadan seýilgähinde ýerle…",
+                "…bap we ýokary tizlikli ulanylýan awtoýolydyr. Uzynlygy 25.5 kilometr we ini 30 metrdir.…",
+                "…Aziyanyň iň osen sibitidir bu sebitin umumy meydany 11,4mln kilometr kadratdyr. Bu sebitde Hytay Yaponya Koreya Respublikasy Kor…",
+                "…yň, Owganystanyň tebigy araçägi hasaplanýar. Uzynlygy 1 415 kilometr, goşandy Penj derýasy bilen 2 540 kilometr. Onuň 1 000 kilo…"
+            ]
+            },
+        {
+                "word": "metr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 53,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ky aýdyň şöhlelenmesidir. Bitaraplyk binasynyň beýikligi 83 metr, heýkeliň beýikligi 12 metr bolup, jemi 95 metrdir. Bu sanl…",
+                "…taraplyk binasynyň beýikligi 83 metr, heýkeliň beýikligi 12 metr bolup, jemi 95 metrdir. Bu sanlar döwletimiziň Bitaraplyk d…",
+                "…Aşgabatdaky pasyrdaýan baýdagyñ uzynlygy 133 metr bolup, ol dünýäde pasyrdaýan iñ uly 4-nji baýdakdyr.Ol 2008…",
+                "…nden geçýär. Amyderýanyň suwunyň ortaça mukdary 2 000-2 200 metr kub/s, ol gyşyna 500 metr kub/s-a çenli azalýar. Ol Mart aý…",
+                "…uwunyň ortaça mukdary 2 000-2 200 metr kub/s, ol gyşyna 500 metr kub/s-a çenli azalýar. Ol Mart aýynda köpelip başlaýar we İ…",
+                "…we İyun-İyul aýlarynda iň ýokary derejä ýetip, 4 000-6 000 metr kub/s-a çenli köpelýär. Amyderýanyň suwunyň şeýle düzgüni o…"
+            ]
+            },
+        {
+                "word": "millimetr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…) jisimlere aýdylýar. Bu jisimler ägirt uly ölçeglerden mm (millimetr) hasabyna çenli hatda ondan hem kiçi ululykda bolup bilýär.…",
+                "…yk ortaça temperatura 15,4°C (59,7°C). Her ýyl takmynan 434 millimetr (17.09 inç) ýagyş düşýär. == Salgylanmalar == Photos of Tal…",
+                "…am. Adam gözüniň ululygy hemmeler üçin deňdir, diňe birnäçe millimetr bilen tapawutlanýar. == Salgylanmalar == 3D Interactive Hum…",
+                "…ir ýylda ýagýan ygal mukdary 100 millimetre ýetmeýär. 86-98 millimetr bolýar. Welaýatyň klimaty bu ýerde şaly, orta süýümli gowaç…",
+                "…ir ýylda ýagýan ygal mukdary 100 millimetre ýetmeýär. 86-98 millimetr bolýar. Welaýatyň klimaty bu ýerde şaly, orta süýümli gowaç…",
+                "…zegärleriň diwarlarynyň galyňlygy köplenç bary-ýogy birnäçe millimetr bolan gap-gaçlary öndürmegi başarandygyna geň galyp oturmal…"
+            ]
+            },
+        {
+                "word": "santimetr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…yr ýugurmaly. Yarym, bir sagat geçenden soň, hamyry 1,0-1,5 santimetr galyňlykda ýaýmaly we 2,5-3,0 sm. möçberde pişme görnüşinde…",
+                "…ýoly, aýal jyns agzalarynyň içki böleginde uzynlygy birnäçe santimetr bolup, jyns agzalarynyň daşky bölegine girelge bar. Wagina…",
+                "…üniñ höwürtgesini barmasy kyn bolan batgalyk, çuñlugy 30-40 santimetr bolan suwly ýerlerde gurýarlar. Höwürtgesini dürli otlardan…",
+                "…ar tarapynda, diwarda, belent diňiň depesinde, beýikligi 35 santimetr töweregi, ini bolsa 15 santimetre golaý deşik bardy. Şol de…",
+                "…. Jaýlaryň diwarlary kerpije kän meňzemeýän, uzynlygy 60-70 santimetr böleklerden ybarat süýnmek görnüşli laýdan biri-biriniň üst…",
+                "…dil häzirki türkmen halylaryna meňzeş. Onuň möçberi 183×200 santimetr, 1 inedördül dm. syklygy 3600 çitimden ybaratdyr. Häzirki w…"
+            ]
+            },
+        {
+                "word": "kilogram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…n, sirke sepişdirip, saçaga geçirmeli. Taýýarlamak üçin 2,2 kilogram goýun eti, 200 gram sogan, 8 sany ýumurtga, 500 gram gök so…",
+                "…p, saçaga eltäýmeli. Taýýarlamak üçin 1 goýnuň gapyrgasy, 1 kilogram sogan, 500 gram nar, duz, burç, 1 bogun ukrop, petruşka, gö…",
+                "…p ojar ýa-da sazak közünde bişirilýär. Taýýarlamak üçin 1,8 kilogram et, 150 gram sogan, gök sogan, ukrop, duz we burç gerek.…",
+                "…uýs Anderson Jynsy: Aýal Boýy: 160 sm Ýurdy: ABŞ Agramy: 54 kilogram çykyş edýän ugry: snoubord == Karýerasy == Sporta ir ýaşlar…",
+                "…en iýmitlenýärler. Žiraflar bir-gije gündiziň dowamynda 100 kilogram çemesi iymit iýýärler. Žiraflaryň tegmilleri ýapraklaryň re…",
+                "…apar dünýäde iň güýçli diýip saýlanyldy. Altymyrat 66 we 72 kilogram agramlykda çykyş etdi. 1992-nji ýylda Barselonada bolan Oli…"
+            ]
+            },
+        {
+                "word": "gektar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…y uniwersitetlerin biri hasap edilýär. Tutýan meýdany 4,500 gektar, tokaýynyň meýdany bolsa 3,043 gektara barabardyr. Ol Ankar…",
+                "…gowy uniwersitetlerin biri hasap edilýär. Tutýan meýdany 50 gektar, tokaýynyň meýdany bolsa 37 gektara barabardyr. Kastamonu u…",
+                "…öni diňe goraghana degişli ýerleriň tutýan meýdany 49,7 müň gektar. Bu ýerde iki sany Kalinin (15 müň gektar) we Mäne-Çäçe (60…",
+                "…meýdany 49,7 müň gektar. Bu ýerde iki sany Kalinin (15 müň gektar) we Mäne-Çäçe (60 müň gektar) zakaznikleri, şeýle hem gorag…",
+                "…ýerde iki sany Kalinin (15 müň gektar) we Mäne-Çäçe (60 müň gektar) zakaznikleri, şeýle hem gorag zolagy (32,8 müň gektar) we…",
+                "…müň gektar) zakaznikleri, şeýle hem gorag zolagy (32,8 müň gektar) we iki sany Garaýalçy we Çarlyk ýadygärlikleri bar. Merkez…"
+            ]
+            },
+        {
+                "word": "göterim",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 57,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…Göterim swopy (iňlis dilinden interest rate swap, IRS) — belli bir…",
+                "…yndaky ylalaşyk görnüşindäki ýasama maliýe guraly. Geljekki göterim stawkasy baradaky ylalaşyk (iňlis dilinden Forward Rate Agr…",
+                "…(iňlis dilinden Forward Rate Agreement) — standartizirlenen göterim swopy. Göterim swoplary adatça fiksirlenen stawkalary üýtgä…",
+                "…Forward Rate Agreement) — standartizirlenen göterim swopy. Göterim swoplary adatça fiksirlenen stawkalary üýtgäp durýanlara öz…",
+                "…em passiwler bilen amallar ätiýaçlandyrylanda ulanylýarlar. Göterim swopy boýunça pozisiýa şertnamanyň taraplary üçin göterim w…",
+                "…. Göterim swopy boýunça pozisiýa şertnamanyň taraplary üçin göterim we karz töwekgelçiliklerini öz içinde saklaýar. == Ulanmakl…"
+            ]
+            },
+        {
+                "word": "prosent",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Yslamda prosent almak, bermek haram. Banka göterimi bilen pul goýmak, bankd…",
+                "…lmak, bermek haram. Banka göterimi bilen pul goýmak, bankda prosent işlemek we ş.m. günä.…",
+                "…lam goragy üçin söweşilýän döwürde uruşdan gaçmak, göterim; prosent (süýthorlyk), jadygöýlik bilen meşgullanmak, aldaw; ýalan,…",
+                "…z we zeýtun ýaglarynyňkydan pes däldir.Pissäniň maňzynda 24 prosent beloklar bar. Pisse hozjagazlary şol durşuna we duzlanan gö…",
+                "…tmagyna görä Sid diýen täze dogyp ölen çagaň beýnesini 60 % prosent neýronlaryny skanirlenýär. Sid öldi, ýöne onuň elektron beý…",
+                "…synda alnyp-satylýan, bank, şereket ýa-da döwlet tarapyndan prosent bilen karzyna pul tapmak üçin çykarylan nominal gymmatlykla…"
+            ]
+            },
+        {
+                "word": "dollar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Dollar, ABŞ-nyň pul birligi. Dollar sözi orta asyrlarda 1519-njy ý…",
+                "…Dollar, ABŞ-nyň pul birligi. Dollar sözi orta asyrlarda 1519-njy ýylda Germaniýada teňňe ady \"T…",
+                "…ABŞ hökümeti ýurduň resmi pul birligini jar etmeli bolanda dollar adyny saýlaýar. 192-nji ýylda esasy meseleleriň biri bolup…",
+                "…düşürildi. II Jahan urşyndan soň Marşal şertnamasy astynda dollar ABŞ-nyň Ýewropa maýa goýumlary arkaly Ýewropada ýörgünli pu…",
+                "…altynyň unsiýasynyň bahasy 38 dollara galdy. 1973-nji ýylda dollar 10 göterime çenli dewalýuasiýa (hümmeti peseltmek) edildi.…",
+                "…synyň bahasy 150 dollara çykdy. Aradan geçen 100 ýyl içinde dollar 10 esse arzanlady. Dollar ABŞ-dan başga 26 döwletiň resmi p…"
+            ]
+            },
+        {
+                "word": "manat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 17,
+                "substringOnly": 1,
+                "examples": [
+                "…Manat — Türkmenistanyň pul birligi. «Türkmenistanyň Merkezi banky…",
+                "…nistanyň Kanunyna laýyklykda Türkmenistanda milli pul bolup manat durýar, bir manat 100 teňňä deňdir. Manat resmi pul hökmünd…",
+                "…laýyklykda Türkmenistanda milli pul bolup manat durýar, bir manat 100 teňňä deňdir. Manat resmi pul hökmünde 1993-nji ýylyň n…",
+                "…a milli pul bolup manat durýar, bir manat 100 teňňä deňdir. Manat resmi pul hökmünde 1993-nji ýylyň noýabryndan başlap, Türkm…",
+                "…yndan başlap, Türkmenistanyň çäginde dolanyşyga goýberildi. Manat barada kanunçylyk Manat Türkmenistanyň çäginde ýeke-täk kan…",
+                "…anyň çäginde dolanyşyga goýberildi. Manat barada kanunçylyk Manat Türkmenistanyň çäginde ýeke-täk kanuny töleg serişdesi bolu…"
+            ]
+            },
+        {
+                "word": "ýewro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 11,
+                "substringOnly": 5,
+                "examples": [
+                "…. Klub 2013-14 ýylynda dünýäniň iň gymmat ýagny 2,5 milýard ýewro we iň kän gazanýan ýagny 549,5 milýon ýewro, futbol komando…",
+                "…gny 2,5 milýard ýewro we iň kän gazanýan ýagny 549,5 milýon ýewro, futbol komandosy seçilendir.[1] Archived 2015-01-22 at the…",
+                "…baýram: 12-nji oktýabr – Ispan milletiniň güni Pul birligi: Ýewro Iň belent nokady: Teýde wulkany (3718 m) Agalyk ediji dini:…",
+                "…Häzirki wagtda ABŞ-nyň dollary, Iňlis funty, ýapon ýeni we ýewro, 2002-nji ýylyň ýanwar aýynda dolanyşyga girizilen Ýewropa…",
+                "…aýda dogulýar ,takmynan 1030-njy yylda aradan çykýar.Alymyň Ýewro-pada latynça ady Abilhasan Hali ben Ahmad Nasuenis diýlip a…",
+                "…ylyň ýanwar aýynda Gresiýa drahmany ulanyp başlady we ony 1 ýewro hümmeti bilen ýewro çalyşdy. Gresiýa şeýle hem Halkara Walý…"
+            ]
+            },
+        {
+                "word": "inedördül",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…n bilen serhetleşýär. Ýurduň umumy tutýan meýdany 447,9 müň inedördül kilometre barabar. Onun 425,4 müň inedördül kilometrini gur…",
+                "…ýdany 447,9 müň inedördül kilometre barabar. Onun 425,4 müň inedördül kilometrini guryýer, 22 müň inedördül kilometrini bolsa suw…",
+                "…rabar. Onun 425,4 müň inedördül kilometrini guryýer, 22 müň inedördül kilometrini bolsa suw tutýar. Özbegistanyň guryýer serhedin…",
+                "…y çagalar sport toplumy, 20 oba lukman öýleri we 6083,4 müň inedördül kilometr ýaşaýyş jaýlary guruldy. Geçen ýylyň tomsunda ýurd…",
+                "…zi we Mermer deňzi. Türkiýeniň umumy tutýan meýdany 814,578 inedördül kilometr bolup, şonuň 790,200 inedördül kilometri Kiçi Aziý…",
+                "…ýan meýdany 814,578 inedördül kilometr bolup, şonuň 790,200 inedördül kilometri Kiçi Aziýa ýarym adasynda, galan 24 müň inedördül…"
+            ]
+            },
+        {
+                "word": "kub",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 14,
+                "substringOnly": 1,
+                "examples": [
+                "…geçýär. Amyderýanyň suwunyň ortaça mukdary 2 000-2 200 metr kub/s, ol gyşyna 500 metr kub/s-a çenli azalýar. Ol Mart aýynda…",
+                "…ň ortaça mukdary 2 000-2 200 metr kub/s, ol gyşyna 500 metr kub/s-a çenli azalýar. Ol Mart aýynda köpelip başlaýar we İyun-…",
+                "…yun-İyul aýlarynda iň ýokary derejä ýetip, 4 000-6 000 metr kub/s-a çenli köpelýär. Amyderýanyň suwunyň şeýle düzgüni oba-h…",
+                "…Derýanyň ýyllyk suwunyň akymynyň ortaça mukdary 64 kilometr kub. Amyderýa gözbaşyny Owganystandaky belentligi 4900 metr bol…",
+                "…erýa dünýäde iň bulanyk suwly derýalaryň biridir.Onuň1 metr kub suwunyň düzüminde 3kilograma çenli gyrmynça bardyr,derýa jo…",
+                "…rmez şäherinden Aral deňzine çenli gämi gatnaýar.Onuň 1metr kub suwunyň düzüminde 3 kilograma çenli gyrmança bardyr, derýa…"
+            ]
+            },
+        {
+                "word": "belgi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 11,
+                "substringOnly": 1,
+                "examples": [
+                "…aryň gözüne görünýän barlykdyr. Ýagtylyk tizligi fizikada c belgi bilen belgilenýär. Ýagtylygyň tizligi Älem-jahandaky iň çal…",
+                "…haỳwanlardan ybaratdyr. Tutem diňe bir at bolman eỳsem bir belgi we simwoldyr. Diňe bir belgi ỳa simwol hem bolman eỳsem bel…",
+                "…m diňe bir at bolman eỳsem bir belgi we simwoldyr. Diňe bir belgi ỳa simwol hem bolman eỳsem belli bir mukaddes barlyk tipidi…",
+                "…bulutlaryň arasynda köşleriniň bardygyna ynanylýar. On iki belgi bolsa halkyň rowaýatlaryndan gelip çykýar. Ýewreýlerde on i…",
+                "…i. Platonyň pelsepesinde 5 sany teoriýa jemlenipdir. Bular «belgi,maglumat», «ideal, many, mantyk», «ruhuň bakylygy», «Kosmog…",
+                "…ertnama bilen Real Madride doly geçýär. Bu toparda ol 9-luk belgi bilen çykyş edýär. Oňa 9-luk belgili köýnekçäni Real Madrid…"
+            ]
+            },
+        {
+                "word": "bölek",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Jebraýyl perişdä Jebraýyl perişde bolsa Muhammed pygamber ﷺ bölek-bölek görnüşde, birde aýat görnüşde, birde bolsa sura görnü…",
+                "…yl perişdä Jebraýyl perişde bolsa Muhammed pygamber ﷺ bölek-bölek görnüşde, birde aýat görnüşde, birde bolsa sura görnüşde in…",
+                "…Hizb (arap. حِزْب‎‎ — partiýa, bölek) — Kuranyň bölekleri. Kuran 60 hizba bölünen, ýagny 60 günd…",
+                "…Juz (arap. جُزْء‎‎ — bölek) — Kuranyň bölekleri. Kuran 30 juza bölünen, ýagny 30 günde…",
+                "…nyň Bender Türkmen etrabynyň Merkez etrapçasyna degişli bir bölek. Bu bölegiň merkezi Süyjiwal obasydyr bölegiň raýatynyň san…",
+                "…shq-abad), Türkmenistanyň paýtagty we aýratyn administratiw bölek. Welayatlar bilen deň statusy bar. Häzirki wagtda \"ak şäher…"
+            ]
+            },
+        {
+                "word": "esse",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…de bolýar. Onuň diametri Ýeriň ekwatorial diametrinden 3,88 esse uly bolup, 49500 km-e deňdir. Onuň göwrümi Ýeriň göwrüminde…",
+                "…bolup, 49500 km-e deňdir. Onuň göwrümi Ýeriň göwrüminden 57 esse uly. Massasy Ýeriň 17,28 massasyna deň bolup, ortaça dykyzl…",
+                "…de bolýar. Onuň diametri Ýeriň ekwatorial diametrinden 3,88 esse uly bolup, 49500 km-e deňdir. Onuň göwrümi Ýeriň göwrüminde…",
+                "…bolup, 49500 km-e deňdir. Onuň göwrümi Ýeriň göwrüminden 57 esse uly. Massasy Ýeriň 17,28 massasyna deň bolup, ortaça dykyzl…",
+                "…daky gurşunyñ konsentrasiýasy rugsat edilen çäkden 10-larça esse ýokarydyr. Bu ýerde ýetişýän däneli ösümlikleriñ düzümindäk…",
+                "…ösümlikleriñ düzümindäki gurşunyñ konsentrasiýasy bolsa 24 esse ýokarydyr.…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ertleri goraýar. Fewral aýynda howanyň ortaça temperaturasy minus 10 dereje bolýar. Heýkeltaraşlar gardan esasan dünýä belli…",
+                "…nut – “minuta” (örän az) diýen latyn sözünden gelip çykýar. Minus – “minus” (az) diýen latyn sözünden gelip çykandyr. Minimum…",
+                "…nuta” (örän az) diýen latyn sözünden gelip çykýar. Minus – “minus” (az) diýen latyn sözünden gelip çykandyr. Minimum – “minim…",
+                "…il we dostlary, haýranlykdan ýaña doñup galdylar. Talyplary minus 20 ° - da, howanyñ doñduryjy sowuklygynda, ýarym ýalañaç we…"
+            ]
+            },
+        {
+                "word": "plýus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "we",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 265,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Bosniýa we Hersegowina Respublikasy (bosn. we horw. Bosna i Hercegovin…",
+                "…Bosniýa we Hersegowina Respublikasy (bosn. we horw. Bosna i Hercegovina, BiH, serb. Босна и Херцеговина,…",
+                "…dasynyň merkezi bölegindäki konfederatiw döwlet. Ol Bosniýa we Gersegowina Federasiýasy, Serb Respublikasy we Brçko okrugy…",
+                "…. Ol Bosniýa we Gersegowina Federasiýasy, Serb Respublikasy we Brçko okrugy diýen awtonom administratiw birliklerden emele…",
+                "…liklerden emele gelýär. Ýurduň ady Bosna derýasynyň adyndan we nemes tituly bolan \"hersog\" sözünden gelip çykýar. Ol günba…",
+                "…tituly bolan \"hersog\" sözünden gelip çykýar. Ol günbatarda we demirgazykda Horwatiýa, gündogarda Serbiýa, günorta-gündoga…"
+            ]
+            },
+        {
+                "word": "asyr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…19-njy asyr | 20-nji asyr | 21-nji asyr 1901 1902 1903 1904 1905 1906 1…",
+                "…19-njy asyr | 20-nji asyr | 21-nji asyr 1901 1902 1903 1904 1905 1906 1907 1908 1909…",
+                "…19-njy asyr | 20-nji asyr | 21-nji asyr 1901 1902 1903 1904 1905 1906 1907 1908 1909 1910 1911 1912…",
+                "…20-njy asyr | 21-nji asyr | 22-nji asyr 2001 2002 2003 2004 2005 2006 2…",
+                "…20-njy asyr | 21-nji asyr | 22-nji asyr 2001 2002 2003 2004 2005 2006 2007 2008 2009…",
+                "…20-njy asyr | 21-nji asyr | 22-nji asyr 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012…"
+            ]
+            },
+        {
+                "word": "ýyl",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 84,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…Täze ýyl arçasynyň bezegleri — Täze ýyl arçasyny bezeýän şarlar ýa-d…",
+                "…Täze ýyl arçasynyň bezegleri — Täze ýyl arçasyny bezeýän şarlar ýa-da jandarlaryň, adamlaryň we ş.m…",
+                "…== Wakalar we ykdysadyýet == 1602-nji ýyl: Horezmiň hany Hajymuhammet hanyň ölümi. 1602-1621-nji ýyll…",
+                "…häkimiýeti eýelemek maksady bilen alnyp barlypdyr. 1606-njy ýyl-Garajaoglanyň (şahyr) dünýä inmegi. 1606 - njy ýylda Žitwat…",
+                "…y goşunynyň güýjüne daýanyp häkimiýeti berkitmegi. 1626-njy ýyl: Hindistanyň türkmen hökümdary bolan Abdyrahym Baýram han o…",
+                "…ökümdary bolan Abdyrahym Baýram han oglynyň ölümi. 1645-nji ýyl: Çingiz hanyň neslinden bolan Abylgazynyň Hywada häkimiýet…"
+            ]
+            },
+        {
+                "word": "eramyz",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "birinji",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Birinji jahan urşy, 1914-1918-nji ýyllar arasynda bolup geçen Ýewro…",
+                "…. == Urşuň gidişi == === Uruşýan toparlaryň maksatlary. === Birinji jahan urşy özüniň häsiýeti boýunça basybalyjylykly, adalats…",
+                "…çiler ýeterlikdi. === 1914-nji ýyldaky uruş hereketleri === Birinji jahan urşy Germaniýanyň ýolbaşçylarynyň pikiriçe gysga wagt…",
+                "…nly imperiýasy, Bolgariýa) öwrüldi. === Himiki ýaraglar === Birinji jahan urşy döwründe täze-täze ýaraglar, söweş tilsimleri ul…",
+                "…ňişli hüjümleriniň başlangyjy boldy. === Ýutland söweşi === Birinji jahan urşunyň gidişinde deňizdäki uruşlaryň iň ulusy ýutlan…",
+                "…k suwasty urşuna başlady. === ABŞ-yň urşa goşulmagy === ABŞ birinji jahan urşy döwründe uzak wagtlap urşa goşulmady. Ol uruşýan…"
+            ]
+            },
+        {
+                "word": "ikinji",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Meýilnama: Ikinji jahan urşunyň başlanmagynyň sebäpleri, Urşuň häsiýeti. Faşi…",
+                "…aklamaga synanyşmaklary netijesinde dörän gapma-garşylyklar ikinji jahan urşuna getirdi. Parahatçylyk söýüji demokratik döwlet…",
+                "…jemgyýetçiligi urşa garşy agsybir göreşi gurap bilmediler. Ikinji jahan urşunyň başlanmagynyň gönüden göni sebäpkärleri bolan…",
+                "…aýynda Polşany goldap, Germaniýa garşy uruş yglan etdiler. Ikinji jahan urşy başlandy. Polşanyň halky gowy ýaraglanan we san…",
+                "…ngliýanyň tarapynda uruşýan ýurt diýlip yglan edildi. Eýran ikinji jahan urşunyň başynda özüniň uruşda bitaraplygyny jar edipd…",
+                "…ýanyň demirgazygyna amerikan-iňlis goşunlarynyň düşürilmegi-ikinji söweş ugrynyň açylmagy barada ylalaşdylar. Uruş gutarandan…"
+            ]
+            },
+        {
+                "word": "üçünji",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Üçünji Koalisiýa Urşy 1805-nji ýylda Awstriýanyň, Portugaliýanyň,…",
+                "…(449 964 km²) Şwesiýa Günbatar Ýewropa ýurtlarynyň arasynda üçünji, tutuş Ýewropa ýurtlarynyň arasynda bolsa, bäşinji orny eýe…",
+                "…Hindi okeany Ýer şarynyň ululygy boýunça üçünji okeany. Onuň meýdany 76,2 mln km² ybaratdyr; göwrümi — 210…",
+                "…n soň) we ilaty boýunça ( Braziliýadan we Kolumbiýadan soň) üçünji döwlet.…",
+                "…; Russiýadan we Kanadadan soň territoriýasy boýunça dünýäde üçünji orunda durýar. Goňşy döwletler: Ýaponiýa, Russiýa, Demirgaz…",
+                "…iş gurady. Birinji ýörişde 100 müň, ikinji ýörişde 200 müň, üçünji-de-300 müň, dördünjide-500 müň esger Sowet obalaryna garşy…"
+            ]
+            },
+        {
+                "word": "dördünji",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Gurbansoltan, Ýylyň dördünji aýy.…",
+                "…ik okean) — Antarktidany gurşap alýan, ölçegi boýunça Ýeriň dördünji okeany. Meýdany 20 327 müň kw. km (okeanyň demirgazyk serhe…",
+                "…y boýunça ýedinji,göwrümi boýunça üçünji we massasy boýunça dördünji planetasy. 1781-nji ýylda iňlis astronomy Wilýam Gerşel tar…",
+                "…respublikalarynda Moskwa , Sankt-Peterburg we Kiýewden soň dördünji uly şäherdir. 1966-njy ýylda bolan weýrançylykly ýer titrem…",
+                "…km². Tutýan meýdany boýunça Dünýäde 51-nji, Ýewropada bolsa dördünji ýerde durýar. (Rossiýa, Ukraina we Fransiýadan soňra). Ilat…",
+                "…Pil guşlary — dördünji döwürde Madagaskarda ýaşan beýik uçuşsyz guş maşgalasyna de…"
+            ]
+            },
+        {
+                "word": "onunjy",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…m bilünýänine çenli, Dekabr aýy Rim Kalendarynda laýyklykda onunjy aý hökmünde hasaplanýardy.…",
+                "…TAHMASP II (144) – Sefewi onunjy şasydyr. Ol dokuzynjy hökümdar Hüseýin şanyň ogludyr. Ol 17…",
+                "…inji orunda durýar we Google-da instagram meşhurlyk boýunça onunjy ýerde durýar…",
+                "…ňra 3 günläp gutlanýan dini baýram. Hijri kalendarynda göra onunjy aý bolan Şewwal aýynyň ilkinji üç güni bellenilýär. Hijri ý…",
+                "…oupée de son\" aýdymy bilen Ýewrowideniýe aýdym bäsleşiginiň onunjy tapgyrynyň ýeňijisi boldy. Soňra karýerasynda ol 1976 ýylda…",
+                "…- 1008 - 1007 - 1006 - 1005 - 1004 - 1003 - 1002 - 1001 == Onunjy asyr == 1000 - 999 - 998 - 997 - 996 - 995 - 994 - 993 - 99…"
+            ]
+            },
+        {
+                "word": "ýüzünji",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "müňünji",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "otuzynjy",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…runow çeper terjimeçilik işinde-de ilkinjileriň biri bolup, otuzynjy ýyllaryň türkmen edebiýatyny baýlaşdyrdy. Ol W.Şekspiriň „O…",
+                "…» işleýär. == Oýnan spektakllary == «Ak lotos», «Gögeýin», «Otuzynjy ýyllar», «Murgabyň kenarynda», «Derňewçi», «Synag», «Garagu…",
+                "…yşyklarydy”. B. Seýtäkow döredijilik işine çynlakaý suratda otuzynjy ýyllaryň ikinji ýarymyndan başlaýar. Ýazyjy Beýik Watançyly…",
+                "…kowyň çeper prozadaky ilkinji synanyşyklary öz başlangyjyny otuzynjy ýyllardan alyp gaýdýar. Uruş ýyllaryna çenli ýazyjy “Garaço…",
+                "…«Odalar we başga goşgular» diýlip atlandyrylýardy. Ömrüniň otuzynjy ýylynda Gýugo eýýäm «Gündogar äheňleri», «Güýz ýapraklary»…",
+                "…balaryny derbi-dagyn etmek isleýärdi. Sowet obalaryna garşy otuzynjy ýyllaryň birinji ýarymynda bäş gezek uly ýöriş gurady. Biri…"
+            ]
+            },
+        {
+                "word": "ellinji",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…t edýär. Şeýlelikde, ol çeper döredijilige ymykly girişýär. Ellinji ýyllaryň ahyrlaryna çenli ençeme hekaýalaryny, «Ak derek»,…",
+                "…menistanyň halk ýazyjysy Kerim Gurbannepesow şeýle ýazýar: «Ellinji ýyllaryň or tasynda Berdinazar Hudaýnazarowyň biziň edebiýa…"
+            ]
+            },
+        {
+                "word": "sagat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…&\" diymek “we” diymek, \"||\" diymek “ya-da” diymek. Meselem, sagat 5 yada 6 bolsa: if( sagat==5 || sagat==6 ) ady meret bolsa…",
+                "…\" diymek “ya-da” diymek. Meselem, sagat 5 yada 6 bolsa: if( sagat==5 || sagat==6 ) ady meret bolsa we sagat 7 bolsa: if( ady=…",
+                "…-da” diymek. Meselem, sagat 5 yada 6 bolsa: if( sagat==5 || sagat==6 ) ady meret bolsa we sagat 7 bolsa: if( ady==”meret” &&…",
+                "…yada 6 bolsa: if( sagat==5 || sagat==6 ) ady meret bolsa we sagat 7 bolsa: if( ady==”meret” && sagat==7 ) \"&&\" ulanan wagtyn,…",
+                "…==6 ) ady meret bolsa we sagat 7 bolsa: if( ady==”meret” && sagat==7 ) \"&&\" ulanan wagtyn, 2 tarapy hem dogry bolsa, onda if…",
+                "…aysy hem bolsa biri yada ikisi hem dogry bolsa onda giryar; Sagat==5 || sagat==6 diyen wagtyn, sagat 5 bolsa yada sagat 6 bol…"
+            ]
+            },
+        {
+                "word": "sekunda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…r. ADSL 12Mbit/sek tizlikde işlap bilyan bolsa ADSL2 24Mbit/sekunda çykyp bilyar.…"
+            ]
+            }
+        ],
+    }
+    

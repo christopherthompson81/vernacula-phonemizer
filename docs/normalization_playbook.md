@@ -1944,6 +1944,18 @@ both. The block-range tokenizer split **3,424 words** and handed the strays to t
 - **Where to look for the next one:** any alphabet whose letters have Latin twins that sit on a common
   keyboard layout — Chuvash ⟨ă ĕ ç ü⟩, Azerbaijani-Cyrillic ⟨ə⟩, Serbian ⟨ј⟩, Ukrainian ⟨і⟩. Count the
   codepoints in the artifact before trusting any reading of that language.
+- **⚠ THE PREDICTION WAS TESTED ON THE VERY NEXT LANGUAGE AND HELD — WITH A DIFFERENT FAILURE MODE, which
+  is the part worth carrying forward.** Turkmen writes the Spanish ⟨ñ⟩ U+00F1 for its own ⟨ň⟩ U+0148 **157
+  times against 1,892** (and ⟨ÿ⟩ for ⟨ý⟩ ×6) — 161 words, an 8% substitution rate on the letter that
+  carries the GENITIVE suffix `-yň`. But BOTH letters are Latin and the token class is Latin, so **nothing
+  splits**: the grapheme scan simply has no rule for ⟨ñ⟩ and drops to a plain [n], deleting one phoneme
+  and leaving a word that is still a word. `öñ` → *ˈøn* where `öň` → *ˈøŋ*. Same cause, and even less
+  visible than the Chuvash case, because there is not even a stray letter-name in the output to notice.
+- **And a same-script substitution stays LOCAL.** ⟨ă ĕ ç ü⟩ inside a Cyrillic word cannot be a Latin word,
+  which is what licensed a shared-table row; ⟨ñ⟩ inside a Latin word can be Spanish, Basque or Galician,
+  three languages this fleet serves. So the Turkmen fold lives in its own `normalize.ts` behind an
+  "every other letter is one this alphabet uses" guard — and that guard's reach is finite: it protects
+  `München` (⟨c⟩ is not Turkmen) and not `señor`. Measured cost in the corpus: zero. Say so in the file.
 
 
 ## Closing a DROP is not finished until you read the READING

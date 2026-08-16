@@ -10,6 +10,9 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
+import { turkmenNumberWords } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeTurkmen, normalizeTurkmenInitialisms } from "./normalize.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 
@@ -73,40 +76,6 @@ export function phonemizeWord(word: string): string {
     return segs.join("").normalize("NFC");
 }
 
-/**
- * TURKMEN number composition (Oghuz Turkic, thousands-scaled decimal). Every round ten is its own lexeme (10 = on
- * sits in `tens`), and the parts are simply JUXTAPOSED with no connector: on bir (11), ýigrimi bäş (25),
- * ýüz ýigrimi bir (121). The multiplier "bir" is DROPPED before ýüz (100 = ýüz) but KEPT before müň and
- * million/milliard — the cited grammar's worked example is "bir müň dokuz ýüz togsan iki" (1992), the same
- * asymmetry Kazakh shows (жүз vs бір мың). Data + provenance: turkmen.jsonc `numbers`.
- */
-function turkmenNumberWords(n: number, d: NumbersDef): (string | null)[] {
-    if (n < 10) return [d.units[n]!];
-    if (n < 100) {
-        const t = Math.floor(n / 10) * 10,
-            u = n % 10;
-        return [d.tens[String(t)]!, ...(u ? [d.units[u]!] : [])];
-    }
-    if (n < 1000) {
-        const h = Math.floor(n / 100),
-            r = n % 100;
-        return [...(h > 1 ? [d.units[h]!] : []), d.magnitudes.hundred, ...(r ? turkmenNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000) {
-        const th = Math.floor(n / 1000),
-            r = n % 1000;
-        return [...turkmenNumberWords(th, d), d.magnitudes.thousand, ...(r ? turkmenNumberWords(r, d) : [])];
-    }
-    if (n < 1_000_000_000) {
-        const m = Math.floor(n / 1_000_000),
-            r = n % 1_000_000;
-        return [...turkmenNumberWords(m, d), d.magnitudes.million!, ...(r ? turkmenNumberWords(r, d) : [])];
-    }
-    const b = Math.floor(n / 1_000_000_000),
-        r = n % 1_000_000_000;
-    return [...turkmenNumberWords(b, d), d.magnitudes.billion!, ...(r ? turkmenNumberWords(r, d) : [])];
-}
-
 /** A digit run → spoken Turkmen, phonemized through the same grapheme scan. */
 function number(digits: string): string {
     const n = Number(digits);
@@ -120,6 +89,44 @@ function number(digits: string): string {
 }
 
 // A word (Turkmen Latin letters incl. ä ç ž ň ö ş ü ý) / number / punctuation token.
+/**
+ * The shared SYMBOL tier. Every word here is a tk.wikipedia TOKEN attestation whose examples were read
+ * (`tools/corpus/attest/tk.jsonc`), and `inedördül` comes from the corpus's own prose — "ýaşaýyş jaý
+ * meýdany bilen üpjünçilik 1 adama hasaplananda 19,0 **inedördül metre** deň" — which fixes the word AND
+ * its position, before the unit.
+ *
+ * ⚠ NO BARE `g` OR `t`, AND NO `s`. This corpus carries Russian and English bibliography (`2nd ed.`,
+ * `Русский перевод Корана … .pdf`) where a one-letter key would claim an initial, and Turkmen's own `-s`
+ * is a possessive. `sm` (santimetr) IS declared, because the corpus writes `Gar örtügi 5-8 sm` and the
+ * two-letter key cannot collide with anything.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["göterim"],
+    currency: { "$": ["dollar"], "€": ["ýewro"], "₼": ["manat"] },
+    units: {
+        "km": ["kilometr"], "sm": ["santimetr"], "mm": ["millimetr"], "kg": ["kilogram"],
+        "ga": ["gektar"], "m": ["metr"], "cm": ["santimetr"],
+    },
+    // Turkmen does not say "A per B": the denominator takes the locative and stands alone (*sagatda*),
+    // which is Basque's shape — `unitPer` is the empty string and `rateDenominators` carries the form.
+    unitPer: "",
+    rateDenominators: { "sag": "sagatda", "h": "sagatda", "s": "sekuntda" },
+    exponentWords: { squared: ["inedördül"], cubed: ["kub"], position: "before" },
+    ampersand: "we",
+    // Turkmen writes the magnitude word after the figure and often after a DECIMAL (`30,3 million km²`,
+    // `132,8 müň okuwçy`), so the tier must hop it to reach a unit on the far side. Turkic magnitudes do
+    // not inflect. `müň` is the native thousand; `million`/`milliard` arrive from step 2's expansion.
+    magnitudes: ["müň", "million", "milliard"],
+});
+
+// ⚠ THE DECIMAL COMMA IS **NOT** SPANNED HERE, AND THAT IS A MEASURED REFUSAL RATHER THAN AN OVERSIGHT.
+// Every other layer in this sweep spans it and emits the separator's own NAME — ba `өтөр`, tt `өтер`,
+// chv `хӳрешке`, uk `кома`, pl `przecinek`, be `коска` — and Turkmen has no such word that this corpus
+// will source. `otur` ×3 and `otyr` ×7 are the VERB "sit" ("gel, otur sen gaşymda", "gaty ýerde otur"),
+// the Fula `tere` shape for the fourth time in this sweep; `wergul` scores 0; and `nokat` ×21 names the
+// DOT, not the comma — its own article reads "Nokat (.) — dyngy belgisi". So the comma stays a CLAUSE
+// PAUSE, which keeps the two halves audibly separate and invents nothing. The shared tier is unaffected:
+// it matches `132,8` as one quantity in the TEXT, before this tokenizer ever sees it.
 const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.!?…,;:])`, "giu");
 
 /**
@@ -133,7 +140,11 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class TurkmenPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its tilde fold, ordinal, degree and sign steps need the figure and its
+        // written suffix still adjacent, which the tier would break — then the INITIALISM pass, then the
+        // shared symbol tier, which matches a unit only when a NUMBER is adjacent.
+        const prepared = SYMBOLS(normalizeTurkmenInitialisms(normalizeTurkmen(input)));
+        return assembleClauses(prepared, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {

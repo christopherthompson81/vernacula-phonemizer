@@ -841,6 +841,28 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "written for them, but only where the noun `пай` follows \u2014 six of the nine slashes are a "
             + "Pi-day date, a year span (`1608/09`), two street addresses and a citation",
     },
+    tk: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/tk.jsonc` (430 segments of a
+        // 28,836-paragraph tk.wikipedia dump), each argued in src/languages/turkmen/normalize.ts. The
+        // `times` entry is the interesting one: the sign is COMMON here and it is not arithmetic.
+        times: "measured: `\u00d7` \u00d711 and every one is a BRICK DIMENSION in an archaeology article \u2014 "
+            + "`31\u00d731\u00d77 sm`, `27\u00d727\u00d75 sm`, `23\u00d725\u00d76 sm`, `340\u00d7560 metr`, `26,5 \u00d7?\u00d75 sm` \u2014 a "
+            + "three-term size specification, not a product. The Turkmen word for a multiplicative fold is "
+            + "`esse` \u00d741, but no source in this corpus reads a DIMENSION with it, and emitting a product "
+            + "word between the three terms of a brick's measurements would be confidently wrong \u00d711",
+        equals: "measured: `=` \u00d713 and only ONE is prose arithmetic (`859+4050 = 4909`). The rest are a "
+            + "TYPO for a hyphen (`1963=nji \u00fdyly\u0148`), raw LaTeX (`I = \\int_0^\\infty f(x)`), a unit-"
+            + "equivalence chain (`1 uzel=sagatda 1 de\u0148iz mili=1,852 km/sag`), a byte-size table "
+            + "(`1 Kba\u00fdt = 210 ba\u00fdt = 1 024 ba\u00fdt`, \u00d74) and a Quran citation in Russian and Arabic",
+        divide: "measured: `\u00f7` \u00d70 in the retained text. The slash IS used for fractions and a rule is "
+            + "written for them, but bounded: this corpus writes the Turkic DENOMINATOR-FIRST order "
+            + "(`10/1 b\u00f6legini` = one tenth) and the ordinary order (`3/4`, `1/9`, `1/8`) in the same 430 "
+            + "segments, and the only separator is that every reversed instance has numerator > denominator",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d71 and it is a TYPO inside `immunizasiyany\u0148 ge\u00e7irmegine gar\u015f> "
+            + "g\u00f6rk`, where the writer meant `\u015f`. Zero occur as a comparison",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in
