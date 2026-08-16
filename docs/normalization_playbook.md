@@ -367,7 +367,7 @@ you have already met.
 
 ### ⚠ Where a principle is ENFORCED, and why that column exists
 
-This document is 1,780 lines and 57 numbered traps. A Khmer session read it start to finish and then broke
+This document is 1,900 lines and 59 numbered traps. A Khmer session read it start to finish and then broke
 "a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
 បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
 gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
@@ -390,7 +390,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 
 | principle | traps | in one line |
 |---|---|---|
-| **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin |
+| **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50, 59 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin; the word boundary that fixes a Latin backtrack rejects the ordinary Han case |
 | **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase |
 | **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
 | **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure |
@@ -1852,6 +1852,39 @@ Three rules follow:
 that guard produced a change that **typechecked, ran, and did nothing** — the guard rejected `Ä°zmir` before any
 arm saw it. Caught only because the probe printed its input back unchanged. Whenever a function screens input
 before matching it, the screen and the matcher are one pattern in two places.
+
+**59. LONGEST-FIRST IS DEFEATED BY BACKTRACKING THE MOMENT THE STRANDED SUFFIX IS ITSELF A VALID KEY.**
+`core/normalizeSymbols.ts` sorts its magnitude and currency alternations longest-first, and its comment says
+why: a shorter magnitude is often a prefix of a longer inflected one, and in declaration order the short form
+matches first and strands the suffix (`*пять миллион долларовов*`). Sorting fixes the ORDER the engine tries
+alternatives in. It does not stop the engine trying the short one anyway when the long one fails later in the
+pattern — and Galician is where that came due: `millóns` / `millón` declared as magnitudes, `s` declared as the
+seconds unit (it is needed for `m/s`), and a pattern of *number + magnitude + unit*. The engine tried `millóns`,
+found no unit after it, backtracked to `millón`, and read the plural marker as the unit.
+
+    5 millóns de euros   →   θˈiŋko miʎˈoŋ seɣˈundos de ˈeᶷɾos      "five million SECONDS of euros"
+
+- **Catalan carries the same declaration and escapes by accident of morphology.** `milions`/`milió` strands
+  `ns`, which is nobody's unit key; `millóns`/`millón` strands `s`, which is everybody's. So the hazard is
+  invisible until a language's inflection happens to line up with a one-letter key, and no amount of testing
+  the other language finds it.
+- **The fix is a word boundary after the alternation, not a re-sort** — and it is narrowing-only, so what it
+  stops matching is precisely a key that ran into the middle of a word.
+- **⚠ AND THE BOUNDARY IS ITSELF A TRAP 19/27, WHICH IS WHY IT IS EMITTED CONDITIONALLY.** Applied
+  unconditionally it rejects the ORDINARY case in an unspaced script, where a Latin letter after a Han
+  magnitude is a token boundary by script change and not a continuation: `1350亿m³` stopped hopping its
+  magnitude and dropped the unit, and the suite said so within one run. The first fix gated it on
+  `unspacedScript` and **that was wrong too** — the failing test builds the normalizer directly and never
+  sets that flag, so the gate silently did nothing and the suite stayed red. Gate it on the HAZARD instead:
+  emit the assertion only when one declared magnitude is a strict PREFIX of another, which is the exact
+  condition under which backtracking can strand a suffix. `万`/`亿` are not prefixes of each other, so the
+  Chinese pattern is unchanged by construction rather than by a flag someone has to remember to set.
+- **A guard gated on a language FLAG is only as reliable as every caller setting that flag.** A guard gated
+  on the DATA cannot be forgotten.
+- **Where to look for the next one:** any language whose plural or case suffix is a single letter that the
+  same language also declares as a unit, currency code or magnitude. `s`, `n`, `a`, `t` and `m` are all
+  one-letter unit keys somewhere in this fleet.
+
 
 ## Closing a DROP is not finished until you read the READING
 

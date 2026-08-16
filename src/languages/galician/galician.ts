@@ -7,8 +7,10 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeGalician } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const NASALS = new Set(MANIFEST.nasals);
@@ -114,9 +116,55 @@ function wordIpa(word: string): string {
     return FUNCTION_WORDS.has(word.toLowerCase()) ? ipa.replace("ˈ", "") : ipa;
 }
 
+/**
+ * SYMBOL NORMALIZATION — Galician. Every word here is a gl.wikipedia TOKEN attestation whose examples were
+ * read (see normalize.ts's header and docs/investigations/gl_normalization_investigation.md, run 2):
+ *   `por cento` ×7 — the *Porcentaxe* article, "Tamén se lle chama comunmente tanto por cento"
+ *   `euro` ×298 / `dólar` ×641 / `libras` ×41 / `ien` ×59 — the euro and ien articles NAME their sign
+ *   `cadrado` ×219 / `cúbico` ×21 — "O metro cúbico é unha unidade de volume", "Quilómetro cúbico"
+ *   `multiplicado por` ×10 — "dobre equivale a multiplicado por dous"; the bare `por` is the dimension idiom
+ * `units` is excluded from the sourcing gate by design (kilogram and millimetre are absent from most
+ * corpora and perfectly correct), but the corpus does write `110 g`, `4.500 kg`, `24 km`, `1540 m`,
+ * `3.000 toneladas` and spells `quilómetros`, `metros`, `gramos`, `toneladas` out beside numbers.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["por cento"],
+    currency: {
+        "€": ["euro", "euros"], "$": ["dólar", "dólares"],
+        "£": ["libra", "libras"], "¥": ["ien", "iens"],
+    },
+    units: {
+        km: ["quilómetro", "quilómetros"], cm: ["centímetro", "centímetros"],
+        mm: ["milímetro", "milímetros"], kg: ["quilogramo", "quilogramos"],
+        t: ["tonelada", "toneladas"], g: ["gramo", "gramos"], l: ["litro", "litros"],
+        ha: ["hectárea", "hectáreas"], h: ["hora", "horas"], s: ["segundo", "segundos"],
+        m: ["metro", "metros"],
+    },
+    unitPer: "por", // 120 km/h → cento vinte quilómetros POR hora; the /h was dropped outright
+    exponentWords: { squared: ["cadrado", "cadrados"], cubed: ["cúbico", "cúbicos"] },
+    // A BARE power — `5²`, with no unit noun for the exponent to modify — was dropped outright.
+    // ⚠ ONLY `squared` IS DECLARED, and the asymmetry is the evidence, not an oversight. `ao cadrado` is
+    // ×13/5 and gl.wikipedia states the notation itself: "un número x ao cadrado represéntase x2", "escrito
+    // como n², e equivale a n × n. A operación alxébrica de elevar ao cadrado un número n". Against that,
+    // `ao cubo` scores **0** and `elevado a` scores ×1 whose single hit is "foi elevado a cardeal" — raised
+    // to the rank, not to the power, i.e. a false attestation of exactly the shape this file's header
+    // warns about. An undeclared power leaves the superscript where the RAWMARK gate can see it, which is
+    // strictly better than inventing a reading for it.
+    bareExponent: { squared: "{n} ao cadrado" },
+    // `×` performs a product; an unspaced ASCII `x` between digits is the `4x4` dimension idiom, which
+    // Galician says with the bare preposition. Declaring `multiply` is also what makes ASCII `x` reachable.
+    multiply: { times: "multiplicado por", by: "por" },
+    ampersand: "e", // the corpus's `&` are all bibliographic — "Thames & Hudson", "Bendor-Samuel & Hartell"
+    magnitudes: ["millóns", "millón"],
+    magnitudeConnective: "de", // cinco millóns DE dólares
+});
+
 class GalicianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal, clock, era and range steps
+        // need the number and its suffix still adjacent, which the tier would break; and the tier matches a
+        // unit only when a NUMBER is adjacent, which is why the degree and clock rules run before it.
+        return assembleClauses(SYMBOLS(normalizeGalician(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2])
                 sink.emit(

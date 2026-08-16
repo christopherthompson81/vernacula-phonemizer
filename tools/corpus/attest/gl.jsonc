@@ -1,0 +1,801 @@
+// WIKIPEDIA WORD ATTESTATION — gl. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "gl",
+        "wiki": "gl.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "ao cadrado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…corresponden ao diámetro dunha circunferencia circunscrita ao cadrado, e esa ten área π / 2 {\\displaystyle \\pi /2} veces maior qu…",
+                "…ro por si mesmo. Represéntase por un 2 elevado: un número x ao cadrado represéntase x2. Se x é un número real positivo, o valor de…",
+                "…O metro por segundo ao cadrado ou m/s2 é unha unidade derivada do Sistema Internacional de…",
+                "…rito como m·s−2, ou simplemente m s−2. Un metro por segundo ao cadrado equivale a 3,2808399 pés por segundo ao cadrado. A acelerac…",
+                "…por segundo ao cadrado equivale a 3,2808399 pés por segundo ao cadrado. A aceleración dun corpo influenciado pola gravidade na sup…",
+                "…omo n², e equivale a n × n. A operación alxébrica de elevar ao cadrado un número n proporciónanos a área dun cadrado xeométrico cu…"
+            ]
+            },
+        {
+                "word": "ao cubo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "elevado a",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…e o seu pasamento. Fillo dunha irmá do papa Urbano III, foi elevado a cardeal por Gregorio IX en 1227.…"
+            ]
+            },
+        {
+                "word": "elevado ao cadrado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ración coñécese como elevar ao cadrado. Un número natural n elevado ao cadrado pódese linearizar por medio da seguinte expresión: n 2 = ∑…",
+                "…entes posúen nomes específicos: a2 acostuma ser lido como a elevado ao cadrado e a3 como a elevado ao cubo. A potencia an tamén pode ser d…",
+                "…sentacións gráficas frecuentemente represéntase só o módulo elevado ao cadrado deste número, e o gráfico resultante coñécese como espectro…"
+            ]
+            },
+        {
+                "word": "cuarto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 94,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Un cuarto, peza ou estancia, do latín quartus, -a, -um, en arquitectu…",
+                "…abiques e destinados a durmir, comer etc. == Situación == O cuarto adoita estar separado doutros espazos interiores mediante p…",
+                "…O cuarto de dólar colombiano, tamén coñecido como cuarto de dólar is…",
+                "…O cuarto de dólar colombiano, tamén coñecido como cuarto de dólar isabelino, é unha moeda de prata conmemorativa est…",
+                "…s de Cristovo Colón ao Novo Mundo, o que lle deu o nome de \"cuarto de dólar isabelino\" (Isabella quarter). O reverso amosa unh…",
+                "…zo previo do gravador axudante George T Morgan. O deseño do cuarto de dólar colombiano non gozou dun bo acollemento na prensa…"
+            ]
+            },
+        {
+                "word": "sexto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…En baloncesto, o sexto home é un xogador que non é titular, pero sae dende o banco…",
+                "…dende o banco moito máis acotío que os outros suplentes. O sexto home moitas veces xoga o mesmo ou máis tempo que algúns dos…",
+                "…stituídos máis acotío. Por exemplo, Kevin McHale, un famoso sexto home que xogou para os Boston Celtics na década dos 80s, po…",
+                "…podía xogar coma pivote ou aleiro-pivote. A presenza dun bo sexto home adoita ser un signo de fortaleza. Adoita significar qu…",
+                "…r que un equipo ten unha boa profundidade de banco, e que o sexto home está capacitado para xogar de inicio na maioría dos eq…",
+                "…oría dos equipos. Unha estratexia moi común é introducir ao sexto home cando o quinteto do outro equipo atópase con fatiga ou…"
+            ]
+            },
+        {
+                "word": "sétimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…A Igrexa adventista do sétimo día é unha denominación cristiá protestante, distinguida po…",
+                "…novos líderes, forman a Asociación Xeral dos Adventistas do Sétimo Día, con rexións máis pequenas administradas por divisións,…",
+                "…ábado como día de repouso, crenza adoptada dos Baptistas do Sétimo Día, e pronto aceptada polos líderes do movemento adventist…",
+                "…eek, Míchigan, escolleron ser coñecidos como adventistas do sétimo día. A organización oficial da igrexa realizouse o 21 de ma…",
+                "…1863, ao constituírse a Asociación Xeral dos Adventistas do Sétimo Día, que contaba inicialmente con 3500 membros, distribuído…",
+                "…to como igrexa protestante. == Crenzas == Os adventistas do sétimo día basean a súa doutrina nas cinco soas que resumen as cre…"
+            ]
+            },
+        {
+                "word": "oitavo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…atoacústico, nervio auditivo ou nervio vestibulococlear é o oitavo dos doce pares craniais. O seu nome débese á súa dobre func…",
+                "…douscentos. En maiúscula serve tamén para designar o décimo oitavo canto da Ilíada de Homero e en minúscula o décimo oitavo da…",
+                "…mo oitavo canto da Ilíada de Homero e en minúscula o décimo oitavo da Odisea. == Véxase tamén == === Outros artigos === Ʃ…",
+                "…Patriarca de Constantinopla. == Nacementos == Ali ar-Rida, oitavo imán xiíta (m. 16 de maio de 818), Harun al-Rashid - quinto…",
+                "…presentaba o nove. En maiúscula serve tamén para designar o oitavo canto da Ilíada de Homero e en minúscula o oitavo da Odisea…",
+                "…esignar o oitavo canto da Ilíada de Homero e en minúscula o oitavo da Odisea. == Véxase tamén == === Outros artigos === Theta…"
+            ]
+            },
+        {
+                "word": "noveno",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…O nervio glosofarínxeo é o noveno par cranial (IX). A súa orixe atópase no bulbo raquídeo do…",
+                "…trescentos. En maiúscula serve tamén para designar o décimo noveno canto da Ilíada de Homero e en minúscula o décimo noveno da…",
+                "…mo noveno canto da Ilíada de Homero e en minúscula o décimo noveno da Odisea.…",
+                "…epresentaba o dez. En maiúscula serve tamén para designar o noveno canto da Ilíada de Homero e en minúscula o noveno da Odisea…",
+                "…esignar o noveno canto da Ilíada de Homero e en minúscula o noveno da Odisea. En canto ao chamado iota subscrito ou mudo ver o…",
+                "…e rematou o 20 de maio de 1974. O FC Barcelona logrou o seu noveno campionato, rompendo unha seca ligueira de catorce anos. ==…"
+            ]
+            },
+        {
+                "word": "décimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Décimo (do latín decìmus / decùmus,a,um) significa a décima parte…",
+                "…ordinal do número dez. Tamén pode referirse a: o imposto do décimo; cada unha das partes nas que se divide un billete de loter…",
+                "…Ecuador, son moedas de prata ou de cobre; o militar romano Décimo Xunio Bruto, participante nas campañas da Gallaecia; Décimo…",
+                "…Décimo Xunio Bruto, participante nas campañas da Gallaecia; Décimo Magno Ausonio, poeta e retórico do século IV;…",
+                "…Décimo (do latín decimus/decumus,a,um 'décimo, décima parte') sign…",
+                "…Décimo (do latín decimus/decumus,a,um 'décimo, décima parte') significa a décima parte de algo, paga volu…"
+            ]
+            },
+        {
+                "word": "vixésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…Omega é a vixésimo cuarta letra do alfabeto grego (ὦ μέγα); equivale ao /o:/,…",
+                "…taba o oitocentos. En maiúscula serve tamén para designar o vixésimo cuarto canto da Ilíada de Homero e en minúscula o vixésimo…",
+                "…vixésimo cuarto canto da Ilíada de Homero e en minúscula o vixésimo cuarto da Odisea. == Véxase tamén == === Outros artigos ===…",
+                "…Psi é o nome da vixésimo terceira letra do alfabeto grego (ψῖ); equivale ao /ps/. Mi…",
+                "…taba o setecentos. En maiúscula serve tamén para designar o vixésimo terceiro canto da Ilíada de Homero e en minúscula o vixésim…",
+                "…ixésimo terceiro canto da Ilíada de Homero e en minúscula o vixésimo terceiro da Odisea. Psi é tamén a abreviatura do monosacári…"
+            ]
+            },
+        {
+                "word": "trixésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…En 1999, Calvados contabilizaba 648 299 habitantes, sendo o trixésimo departamento máis poboado de Francia. == Véxase tamén == ==…",
+                "…cirílico. É a vixésimo novena letra no alfabeto búlgaro, a trixésimo primeira no alfabeto belaruso, e a trixésimo segunda no alf…",
+                "…eto búlgaro, a trixésimo primeira no alfabeto belaruso, e a trixésimo segunda no alfabeto ruso e ucraíno. == Orixes == Á parte da…",
+                "…entre o 18 de setembro de 2021 e 19 de xuño de 2022, foi a trixésimo novena da máxima categoría do baloncesto español desde a cr…",
+                "…ampión desta edición foi o Real Madrid, que conseguiu o seu trixésimo sexto título de liga, décimo cuarto desde a fundación da Li…",
+                "…meiro, segundo, terceiro,...) ou por máis (vixésimo cuarto, trixésimo quinto, centésimo décimo primeiro,...). Nas unidades de tem…"
+            ]
+            },
+        {
+                "word": "cuadraxésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…o cuadraxésima sétima edición do Gran Premio do Brasil, e o cuadraxésimo sexta vez que a carreira disputouse como unha proba do Camp…",
+                "…módromo de Plesetsk. == Características == Kosmos 458 foi o cuadraxésimo oitavo membro da serie de satélites DS-P1-Yu e o cuadraxési…",
+                "…adraxésimo oitavo membro da serie de satélites DS-P1-Yu e o cuadraxésimo segundo lanzado con éxito tralo fracaso dos lanzamentos do…",
+                "…nzamentos do segundo, vixésimo terceiro, trixésimo segundo, cuadraxésimo e cuadraxésimo cuarto membros da serie. Estaba adicado a se…",
+                "…gundo, vixésimo terceiro, trixésimo segundo, cuadraxésimo e cuadraxésimo cuarto membros da serie. Estaba adicado a servir como obxec…",
+                "…módromo de Plesetsk. == Características == Kosmos 467 foi o cuadraxésimo noveno membro da serie de satélites DS-P1-Yu e o cuadraxési…"
+            ]
+            },
+        {
+                "word": "quincuaxésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a de Pentecoste Pentecoste (do grego pentekosté (heméra) \"o quincuaxésimo día\") describe a festa do quincuaxésimo día logo da Pascua…",
+                "…tekosté (heméra) \"o quincuaxésimo día\") describe a festa do quincuaxésimo día logo da Pascua (Domingo de Resurrección) e que pon term…",
+                "…mada Shavuot (festa das semanas), durante a cal celébrase o quincuaxésimo día da aparición de Deus no monte Sinaí, polo tanto no día…",
+                "…módromo de Plesetsk. == Características == Kosmos 524 foi o quincuaxésimo oitavo membro da serie de satélites DS-P1-Yu e o quincuaxés…",
+                "…ncuaxésimo oitavo membro da serie de satélites DS-P1-Yu e o quincuaxésimo primeiro lanzado con éxito tralo fracaso dos lanzamentos do…",
+                "…iro, trixésimo segundo, cuadraxésimo, cuadraxésimo cuarto e quincuaxésimo cuarto membros da serie. Estaba adicado a servir como obxec…"
+            ]
+            },
+        {
+                "word": "sexaxésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…módromo de Plesetsk. == Características == Kosmos 634 foi o sexaxésimo noveno membro da serie de satélites DS-P1-Yu e o sexaxésimo…",
+                "…sexaxésimo noveno membro da serie de satélites DS-P1-Yu e o sexaxésimo segundo lanzado con éxito tralo fracaso dos lanzamentos do…",
+                "…módromo de Plesetsk. == Características == Kosmos 633 foi o sexaxésimo oitavo membro da serie de satélites DS-P1-Yu e o sexaxésimo…",
+                "…sexaxésimo oitavo membro da serie de satélites DS-P1-Yu e o sexaxésimo primeiro lanzado con éxito tralo fracaso dos lanzamentos do…",
+                "…módromo de Plesetsk. == Características == Kosmos 611 foi o sexaxésimo sétimo membro da serie de satélites DS-P1-Yu e o sexaxésimo…",
+                "…sexaxésimo sétimo membro da serie de satélites DS-P1-Yu e o sexaxésimo lanzado con éxito tralo fracaso dos lanzamentos do segundo,…"
+            ]
+            },
+        {
+                "word": "septuaxésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…módromo de Plesetsk. == Características == Kosmos 850 foi o septuaxésimo noveno e último membro da serie de satélites DS-P1-Yu e o s…",
+                "…o noveno e último membro da serie de satélites DS-P1-Yu e o septuaxésimo primeiro lanzado con éxito tralo fracaso dos lanzamentos do…",
+                "…, cuadraxésimo, cuadraxésimo cuarto, quincuaxésimo cuarto e septuaxésimo membros da serie. Estaba adicado a servir como obxectivo pa…",
+                "…módromo de Plesetsk. == Características == Kosmos 818 foi o septuaxésimo oitavo membro da serie de satélites DS-P1-Yu e o septuaxési…",
+                "…ptuaxésimo oitavo membro da serie de satélites DS-P1-Yu e o septuaxésimo lanzado con éxito tralo fracaso dos lanzamentos do segundo,…",
+                "…, cuadraxésimo, cuadraxésimo cuarto, quincuaxésimo cuarto e septuaxésimo membros da serie. Estaba adicado a servir como obxectivo pa…"
+            ]
+            },
+        {
+                "word": "octoxésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…recolle oito temas interpretados pola banda Los Tamara. É a octoxésimo primeira casete da colección Fonoteca 92, foi publicado en…",
+                "…A octoxésimo quinta casete da colección Fonoteca 92 é un EP que recolle…",
+                "…A octoxésimo oitava casete da colección Fonoteca 92 é un EP que recolle…",
+                "…ca tradicional extraídos do repertorio de Xacarandaina. É a octoxésimo sexta casete da colección Fonoteca 92, foi publicado en 199…",
+                "…A octoxésimo sétima casete da colección Fonoteca 92 é un EP que recolle…",
+                "…A octoxésimo cuarta casete da colección Fonoteca 92 é un EP que recolle…"
+            ]
+            },
+        {
+                "word": "nonaxésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…cun status especial, o Territorio de Belfort converteuse no nonaxésimo departamento francés en 1922. == Demografía == A principal…",
+                "…gos, consiste nunha selección de cancións da colección. É a nonaxésimo segunda e derradeira casete da colección Fonoteca 92, foi p…",
+                "…go. Cando é posíbel, é mellor expresar a media e o décimo e nonaxésimo percentil, aínda que esta información non está sempre dispo…",
+                "…A nonaxésimo primeira casete da colección Fonoteca 92 é un EP que recoll…",
+                "…6 de novembro de 2005, catorce días antes de celebrar o seu nonaxésimo aniversario (90 anos). == Investigacións científicas == Os…",
+                "…ntra California en 1972. === Profesional === Foi elixido na nonaxésimo sexta posición do Draft da NBA de 1973 por Atlanta Hawks, m…"
+            ]
+            },
+        {
+                "word": "centésimo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 47,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…O centésimo de lira (ou céntimo de lira) foi a moeda de menor valor fac…",
+                "…eca onde se producían todas as moedas do reino. A moeda dun centésimo pesaba 2,1 gramos, tiña un diámetro de 19,5 milímetros e es…",
+                "…milímetros e estaba feita dunha aliaxe de cobre de 950 ‰. O centésimo cuñouse oficialmente ata 1813, pero é probable que a súa em…",
+                "…as de moeda de Milán e Venecia comezaron a cuñar moedas dun centésimo de lira austríaca, que tiñan tamaños diferentes aos napoleó…",
+                "…uel I. No Reino da Sardeña, a cuñaxe de moedas de cobre dun centésimo de lira comezou en 1826 baixo o mando de Carlos Félix; a mo…",
+                "…fundación do Reino de Italia. En 1842, cuñáronse moedas dun centésimo para a circulación en Sardeña, que medían 15 mm de diámetro…"
+            ]
+            },
+        {
+                "word": "milésimo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ducentésimo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "quinxentésimo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "significa maior que",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…eriva do posterior (OURO < AURUM). En Matemáticas o signo > significa maior que (3 > 0) e < significa menor que (2 < 5), podendo combinarse…"
+            ]
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 298,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…O euro (EUR ou €) é a moeda usada polas institucións da Unión Euro…",
+                "…ados europeos teñen acordos coa Unión Europea para o uso do euro como moeda: Andorra, Cidade do Vaticano, Mónaco e San Marin…",
+                "…Cidade do Vaticano, Mónaco e San Marino. Por outra banda, o euro foi adoptado de maneira unilateral por Montenegro e Kosovo.…",
+                "…millóns de persoas ao redor do mundo usan moedas fixadas ao euro, incluíndo máis de 190 millóns de africanos.[Cómpre referen…",
+                "…índo máis de 190 millóns de africanos.[Cómpre referencia] O euro é a segunda moeda de reserva así como a segunda moeda máis…",
+                "…de 2019, con máis de 1,3 billóns de euros en circulación, o euro ten un dos valores combinados de billetes e moedas máis alt…"
+            ]
+            },
+        {
+                "word": "dólar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 641,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…== Unidade monetaria == O nome dólar emprégase para moedas de diversos países e en varias épocas…",
+                "…mprégase para moedas de diversos países e en varias épocas: Dólar australiano, moeda de Australia e doutros estados independe…",
+                "…a de Australia e doutros estados independentes do Pacífico. Dólar bahamés, moeda das Bahamas. Dólar de Barbados, moeda de Bar…",
+                "…ndependentes do Pacífico. Dólar bahamés, moeda das Bahamas. Dólar de Barbados, moeda de Barbados. Dólar de Belize, moeda de B…",
+                "…s, moeda das Bahamas. Dólar de Barbados, moeda de Barbados. Dólar de Belize, moeda de Belize. Dólar bermudano, moeda das Berm…",
+                "…bados, moeda de Barbados. Dólar de Belize, moeda de Belize. Dólar bermudano, moeda das Bermudas. Dólar de Brunei, moeda de Br…"
+            ]
+            },
+        {
+                "word": "é igual a",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 1,
+                "examples": []
+            },
+        {
+                "word": "signo igual",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…O signo igual (=) é un símbolo matemático empregado para indicar a iguald…",
+                "…=== O símbolo empregado para a relación \"non é igual\" é un signo igual cunha barra (\"≠\"). === Identidade === Símbolos utilizados p…",
+                "…\"≝\", \":=\" ou \"≘\". === Menor ou igual e maior ou igual === O signo igual pode combinarse cos signos \"menor que\" ( < ) e \"maior que\"…",
+                "…9 xa aparecen estes dous signos. Robert Recorde, creador do signo igual introduciu estes símbolos en Inglaterra e 1557. == Signo má…",
+                "…> 0) e < significa menor que (2 < 5), podendo combinarse co signo igual: ≤ ou ≥. == Notas == == Véxase tamén == === Bibliografía ==…",
+                "…xpresións matemáticas, denominadas membros e separadas polo signo igual, nas que aparecen elementos coñecidos e datos descoñecidos…"
+            ]
+            },
+        {
+                "word": "é menor que",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "é maior que",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "é maior ca",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 1,
+                "examples": [
+                "…cidade dunha parábola é 1. A excentricidade dunha hipérbole é maior ca 1. == Astronomía == Os corpos ligados gravitacionalmente en…",
+                "…s micelas só se forman cando a concentración do surfactante é maior ca a concentración crítica de micelas, e a temperatura do sist…",
+                "…oncentración crítica de micelas, e a temperatura do sistema é maior ca a temperatura crítica de micelas ou temperatura de Krafft.…",
+                "…moi grande, supera en tamaño ao tamén xigante mimivirus, e é maior ca moitas bacterias. == Descubrimento == Os primeiros informes…"
+            ]
+            },
+        {
+                "word": "é menor ca",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 6,
+                "substringOnly": 4,
+                "examples": [
+                "…mna das unidades, tendo en conta que se a cifra do minuendo é menor ca do subtraendo, súmanse á cifra 10 unidades, colocando na li…",
+                "…o caso das decenas, temos 1 – 5 e, como a cifra do minuendo é menor ca do subtraendo, restamos unha unidade das centenas do minuen…",
+                "…o caso das decenas, temos 1 – 5, e como a cifra do minuendo é menor ca do subtraendo, sumamos unha unidad ás centenas do subtraend…",
+                "…Cando un líquido flúe ao través dunha rexión onde a presión é menor ca súa presión de vapor, o líquido ferve e forma burbullas de…",
+                "…unha superficie cando a temperatura da devandita superficie é menor ca a temperatura do vapor. Durante este proceso a molécula de…",
+                "…ancés e o inglés a correspondencia entre fonemas e grafemas é menor ca noutras linguas coma o finés, o español ou o galego. Pódese…"
+            ]
+            },
+        {
+                "word": "menos-máis",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…amén noutros campos. Outro símbolo relacionado con este é o menos-máis (∓). == Historia == Unha versión do signo, coa palabra fran…"
+            ]
+            },
+        {
+                "word": "máis-menos",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…O sinal máis-menos (±) é un símbolo matemático empregado con distintos signifi…",
+                "…Alan Coulson publicasen o seu traballo sobre secuenciación máis-menos, A secuenciación de Maxam e Gilbert fíxose rapidamente máis…",
+                "…scribir consecutivamente cada unha delas, unidas polo sinal máis-menos. Por exemplo: Ctrl+C ou Ctrl-C, para a combinación de tecla…"
+            ]
+            },
+        {
+                "word": "dividido entre",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…distrito administrado por Cambridgeshire, e Yorkshire está dividido entre Yorkshire do Leste, do Norte, do Sur, e do Oeste. O sufixo…",
+                "…nha nación e defende a unidade do pobo lezguio, no presente dividido entre Rusia e Azerbaidján. O nacionalismo lezguio ten connotación…",
+                "…o á Zapateira (Elviña, A Coruña). O monte da Zapateira está dividido entre tres concellos: Arteixo, A Coruña e Culleredo. == Lugares e…",
+                "…oncello coruñés de Vilasantar, na comarca de Betanzos. Está dividido entre as parroquias de Mezonzo e Vilasantar. Segundo o Instituto…",
+                "…tos, que falan oseto. O actual territorio de Osetia atópase dividido entre Osetia do Norte-Alania (Rusia) e Osetia do Sur (Xeorxia). O…",
+                "…oncello coruñés de Vilasantar, na comarca de Betanzos. Está dividido entre as parroquias de Mezonzo e Vilasantar. Segundo o Instituto…"
+            ]
+            },
+        {
+                "word": "multiplicado por",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…ntas veces como indica outro número. Así, 4×3 (léase \"catro multiplicado por tres\" ou, simplemente, \"catro por tres\") é igual a sumar tr…",
+                "…ten un elemento neutro que é o 1. === Cero === Todo número multiplicado por cero dá cero. == Conexión coa xeometría == Desde un punto d…",
+                "…calquera número negativo non é máis que un número positivo multiplicado por -1. Polo que a multiplicación de enteiros se pode represent…",
+                "…tir de dous: dobre, triplo etc. Por tanto, dobre equivale a multiplicado por dous, triplo a multiplicado por tres etc. == Lista de múlti…",
+                "…Por tanto, dobre equivale a multiplicado por dous, triplo a multiplicado por tres etc. == Lista de múltiplos == Os múltiplos con forma p…",
+                "…duto de números binarios é especialmente simple, xa que o 0 multiplicado por calquera cousa resulta 0, e o 1 é o elemento neutro do prod…"
+            ]
+            },
+        {
+                "word": "graos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…º = 60′ 1′ = 60″ === Notación decimal === Unha cantidade en graos pódese expresar tranquilamente en forma decimal, sen recorr…",
+                "…Notación sesaxesimal === Podemos expresar unha cantidade en graos, minutos e segundos, expresando as partes de grao inferiore…",
+                "…/60)° + 23(1/3600)° ≈ 12,25639° == Relación entre radiáns e graos == Partido de que unha circunferencia completa ten 2 π {\\di…",
+                "…ogo: 360 g r a o s = 2 π r a d {\\displaystyle {\\rm {{360}\\;{graos}={2\\pi }\\;{rad}}}} 180 g r a o s = π r a d {\\displaystyle {…",
+                "…ad}}}} 180 g r a o s = π r a d {\\displaystyle {\\rm {{180}\\;{graos}={\\pi }\\;{rad}}}} Facendo unha regra de tres chégase a que…",
+                "…nha regra de tres chégase a que a relación de conversión de graos a radiáns é: π 180 ⋅ r a d g r a o s {\\displaystyle {\\frac…"
+            ]
+            },
+        {
+                "word": "por cento",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…o 100 como denominador. Tamén se lle chama comunmente tanto por cento, onde por cento significa \"de cada cen unidades\". Úsase par…",
+                "…inador. Tamén se lle chama comunmente tanto por cento, onde por cento significa \"de cada cen unidades\". Úsase para definir relaci…",
+                "…finir relacións entre dúas cantidades, de forma que o tanto por cento dunha cantidade, onde tanto é un número, refírese á parte p…",
+                "…o un espazo de separación. == Representación == === O tanto por cento como fracción === O tanto por cento divídese entre 100 e si…",
+                "…entación == === O tanto por cento como fracción === O tanto por cento divídese entre 100 e simplifícase a fracción. Exemplo: Para…",
+                "…cfrac {1}{10}}={\\cfrac {10}{100}}=10\\,\\%} == Obter un tanto por cento dun número == Para obter un tanto por cento dun número simp…"
+            ]
+            },
+        {
+                "word": "quilómetros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…instalados en cada quilómetro, cun máis destacado cada dez quilómetros. == Galería de imaxes == == Véxase tamén == === Bibliografí…",
+                "…ulos que poden ofrecer riscos ata a distancia de douscentos quilómetros aproximadamente. No caso de naves de guerra, existen radare…",
+                "…radares de defensa antiaérea con alcance de ata douscentos quilómetros para captar aeronaves inimigas orientando as defensas na sú…",
+                "…máis específicos con detección de obxectivos ata trescentos quilómetros para avións en grande altitude, e alcance de ata trinta qui…",
+                "…ros para avións en grande altitude, e alcance de ata trinta quilómetros para aeronaves voando en baixa altitude. Os radares de dire…",
+                "…desta forma, onde existen radares con alcance de ata 4.000 quilómetros, que interligados cobren os 8,5 millóns de km² do territori…"
+            ]
+            },
+        {
+                "word": "millóns",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…en Wayback Machine., a produción mundial en 2012 foi de 873 millóns de toneladas de millo, 671 millóns de trigo e 738 de arroz.…",
+                "…ndial en 2012 foi de 873 millóns de toneladas de millo, 671 millóns de trigo e 738 de arroz. O cultivo de millo na forma ancest…",
+                "…ción == A produción de millo en Galicia foi superior ós 2,2 millóns de toneladas en 2021, e os agricultores esperaban chegar ós…",
+                "…oneladas en 2021, e os agricultores esperaban chegar ós 2,5 millóns no 2022. A superficie cultivada en Galicia foi de 65.691 he…",
+                "…es dunha importante actividade volcánica na Terra hai 4 mil millóns de anos, a cal tería liberado á atmosfera dióxido de carbon…",
+                "…houbo un período de grandes erupcións volcánicas hai 4 mil millóns de anos, que seguramente liberaron cara a atmosfera dióxido…"
+            ]
+            },
+        {
+                "word": "dólares",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 388,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…nco central da nación e que tamén se encarga da emisión dos dólares. O código ISO 4217 para esta moeda é USD. Esta divisa creou…",
+                "…pañol e a autoridade para a cuñaxe de moedas denominadas en dólares e centavos. O dólar estadounidense, cuxa cor máis caracterí…",
+                "…prata fina ou, desde 1837, en 1.505 gramos de ouro ou 20.67 dólares por onza troy. A Gold Standard Act de 1900 rompeu co bimeta…",
+                "…al. En 1934, revisouse a súa equivalencia co ouro ata os 35 dólares por onza troy, valor que mantería ao longo de varias década…",
+                "…facto, nunha moeda fiat. Aínda que a emisión desta clase de dólares só faise nos Estados Unidos, catorce países máis usan o nom…",
+                "…internacionais de ouro ou petróleo. Dos 700.000 millóns de dólares en circulación en 2004 entre a metade e os dous terzos está…"
+            ]
+            },
+        {
+                "word": "euros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 301,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…dounidense. En decembro de 2019, con máis de 1,3 billóns de euros en circulación, o euro ten un dos valores combinados de bil…",
+                "…ngua. Os billetes de euro —de 5, 10, 20, 50, 100, 200 e 500 euros— son idénticos para todos os países. As moedas de euro —de…",
+                "…s. As moedas de euro —de 1, 2, 5, 10, 20 e 50 cents e 1 e 2 euros— teñen o mesmo anverso en todos os países, pero distinto re…",
+                "…ión Europea permite acuñar todos os anos unha moeda de dous euros conmemorativa —dúas moedas ao ano desde 2013— en cada país…",
+                "…nome común e debe escribirse con minúscula. O seu plural é euros. O código internacional para o euro é EUR e foi rexistrado…",
+                "…so legal ata que se introduciron novos billetes e moedas en euros o 1 de xaneiro de 2002, cando foron substituídas por billet…"
+            ]
+            },
+        {
+                "word": "libras",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…nd) para o seu uso en Inglaterra e máis Gales. Hai diversas libras equivalentes emitidas noutras partes das Illas Británicas e…",
+                "…Circulan moedas de 1, 2, 5, 10, 20 e 50 peniques e de 1 e 2 libras, e billetes de 5, 10, 20 e 50 libras. O billete de 1 libra…",
+                "…50 peniques e de 1 e 2 libras, e billetes de 5, 10, 20 e 50 libras. O billete de 1 libra retirouse da circulación en 1984, con…",
+                "…quilogramos e á súa vez un quilogramo é igual a 2,20462262 libras. == Historia == Moito despois da caída do Imperio Romano Oc…",
+                "…acabar co problema, Antoine Lavoisier propuxo substituír as libras e outras antigas unidades en toda Europa, polo gramo, os se…",
+                "…rto Rico, O Salvador, Guatemala, Cuba, Ecuador e Panamá. == Libras de uso == Os estadounidenses aínda usan dous tipos de libra…"
+            ]
+            },
+        {
+                "word": "ien",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 59,
+                "articles": 13,
+                "substringOnly": 1,
+                "examples": [
+                "…O ien (円, えん, en Rōmaji Yen, ¥, pronúnciase como \"en\") é a moeda…",
+                "…kugawa, baseado no ryō (両). O símbolo gráfico latinizado do ien é ￥ ; mais en xaponés escríbese 円, unha forma simplificada…",
+                "…forma simplificada da antiga grafía 圓. O código ISO 4217 do ien é JPY. O ien foi legalmente definido como 26,956 gramos de…",
+                "…icada da antiga grafía 圓. O código ISO 4217 do ien é JPY. O ien foi legalmente definido como 26,956 gramos de prata, unha d…",
+                "…2007, un euro vale arredor de 157 iens (JPY). En xaponés, «ien» (円) é apenas «en», pronunciado [ɛn]. A pronuncia \"ien\"/\"ye…",
+                "…és, «ien» (円) é apenas «en», pronunciado [ɛn]. A pronuncia \"ien\"/\"yen\", corrente en moitas linguas, provén da romanización…"
+            ]
+            },
+        {
+                "word": "cadrado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 219,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Un cadrado é un cuadrilátero (polígono regular de 4 lados). == Fórmula…",
+                "…egular de 4 lados). == Fórmulas métricas == O perímetro dun cadrado de lado l é: p = 4l. Ou p = 2 2 d {\\displaystyle p=2{\\sqrt…",
+                "…isplaystyle p=2{\\sqrt {2}}d} , d = diagonal. E a área deste cadrado é: A = l2. Tamén A = d 2 2 {\\displaystyle A={\\frac {d^{2}}{…",
+                "…{\\displaystyle A={\\frac {d^{2}}{2}}} == Clasificacións == O cadrado é: un paralelogramo, pois os seus lados son paralelos dous…",
+                "…s diagonais posúen as mesmas medidas. == Propiedades == Nun cadrado, as súas diagonais son 2 {\\displaystyle {\\sqrt {2}}} veces…",
+                "…rresponden ao diámetro dunha circunferencia circunscrita ao cadrado, e esa ten área π / 2 {\\displaystyle \\pi /2} veces maior qu…"
+            ]
+            },
+        {
+                "word": "cúbico",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…O metro cúbico é unha unidade de volume. Correspóndese co volume dun cubo…",
+                "…00 000 001 km³ 1.000 l == Múltiplos e submúltiplos do metro cúbico == Múltiplos Decámetro cúbico Hectómetro cúbico Quilómetro…",
+                "…iplos e submúltiplos do metro cúbico == Múltiplos Decámetro cúbico Hectómetro cúbico Quilómetro cúbico Submúltiplos Decímetro…",
+                "…os do metro cúbico == Múltiplos Decámetro cúbico Hectómetro cúbico Quilómetro cúbico Submúltiplos Decímetro cúbico Centímetro…",
+                "…== Múltiplos Decámetro cúbico Hectómetro cúbico Quilómetro cúbico Submúltiplos Decímetro cúbico Centímetro cúbico Milímetro c…",
+                "…Hectómetro cúbico Quilómetro cúbico Submúltiplos Decímetro cúbico Centímetro cúbico Milímetro cúbico == Véxase tamén == === O…"
+            ]
+            },
+        {
+                "word": "dividido por",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…de ser menor que o divisor. O resultado é o seguinte: 8593 dividido por 23 dá un cociente de 373 e un resto de 14; onde se ha de ve…"
+            ]
+            },
+        {
+                "word": "igual a",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…ocrático—, este concepto subliñaba que as leis vinculan por igual a gobernantes e cidadáns, evitando o goberno arbitrario. O pr…"
+            ]
+            },
+        {
+                "word": "maior que",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…65-1700). De tal feito naceu sen dúbida o alcume de Colexio Maior que se aplicaba ironicamente a esa institución. Non se librou d…"
+            ]
+            },
+        {
+                "word": "menor que",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "menos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 42,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…O sinal máis-menos (±) é un símbolo matemático empregado con distintos signifi…",
+                "…amén noutros campos. Outro símbolo relacionado con este é o menos-máis (∓). == Historia == Unha versión do signo, coa palabra…",
+                "…xogador negro. == Notas == == Véxase tamén == Signos máis e menos Símbolos matemáticos…",
+                "…Os signos de máis e menos (+ e −) son símbolos matemáticos empregados para representa…",
+                "…bitualmente. Os símbolos p̄ para più (máis) e m̄ para meno (menos) apareceron na obra Summa de arithmetica, geometria, propor…",
+                "…mpregarse para denotar unha operación conmutativa. == Signo menos == O signo menos ten tres usos principais en Matemáticas: C…"
+            ]
+            },
+        {
+                "word": "máis",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 114,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Nunca Máis é unha plataforma creada en 2002 poucos días despois de se…",
+                "…Contra o lume == O 11 de agosto de 2006 a Plataforma Nunca Máis anunciou a súa reactivación para facer fronte á vaga de inc…",
+                "…lo sinistro do Prestige. == Integrantes da plataforma Nunca Máis == == Notas == == Véxase tamén == === Bibliografía === Loba…",
+                "…=== Bibliografía === Lobato, Xurxo (2003). No país do Nunca Máis. Vigo: Editorial Galaxia. ISBN 84-8288-616-9. Xavier Paz e…",
+                "…8-616-9. Xavier Paz e Alba Vázquez Carpentier (2007). Nunca Máis. A voz da cidadanía II. Ourense: Difusora. ISBN 978-84-9359…",
+                "…contra a Burla Negra === Ligazóns externas === Web de Nunca Máis…"
+            ]
+            },
+        {
+                "word": "número",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 284,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Se busca o significado deste termo aplicado nas linguas, v. Número gramatical. Un número, en ciencia, é unha abstracción que r…",
+                "…deste termo aplicado nas linguas, v. Número gramatical. Un número, en ciencia, é unha abstracción que representa unha cantida…",
+                "…resenta unha cantidade ou unha magnitude. En matemáticas un número pode representar unha cantidade métrica ou máis xeralmente…",
+                "…a ou máis xeralmente un elemento dun sistema numérico ou un número ordinal que representará unha posición dentro dunha orde du…",
+                "…ido aos números reais que á súa vez ampliaron o concepto de número ordinal. Sobre todo, un número real resolve o problema de c…",
+                "…vez ampliaron o concepto de número ordinal. Sobre todo, un número real resolve o problema de comparación de dúas medidas: tan…"
+            ]
+            },
+        {
+                "word": "antes de Cristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…A expresión antes de Cristo empregase para referirse e datar os anos e séculos anterior…",
+                "…que esa data podería estar situada entre o ano 7 e o ano 4 antes de Cristo. == Abreviaturas usuais == As abreviaturas creadas de acord…",
+                "…cordo coas regras de formación de abreviaturas son: a. C. (-antes de Cristo-), quizais a abreviatura máis utilizada. a. de C. (-antes d…",
+                "…Cristo-), quizais a abreviatura máis utilizada. a. de C. (-antes de Cristo-), menos usual. a. de X. C. (-antes de Xesucristo-) menos u…",
+                "…vulgar) e e.v. (da era vulgar), como alternativa laica ao «antes de Cristo» e «logo de Cristo». a. n. e. (-antes de nosa era-), ídem a…",
+                "…antes da encarnación verdadeira do Señor), equivalente ao \"antes de Cristo\", para identificar os anos anteriores ao primeiro ano desta…"
+            ]
+            },
+        {
+                "word": "despois de Cristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…contemporáneo emprégase con máis frecuencia o equivalente «despois de Cristo» (do grego Χριστός [jristós, o Unxido], referido a Xesús) a…",
+                "…o, no canto de \"Anno Domini\", úsase xeralmente a expresión \"despois de Cristo\", abreviada como \"d.C.\". === Era común === Para evitar expl…",
+                "…. == Notas == == Véxase tamén == Anno Domini (equivalente a Despois de Cristo) Era común…",
+                "…Período de tempo dende o ano 301 ata o ano 400 despois de Cristo. == Acontecementos importantes == === Europa === 301: Armen…",
+                "…n Roma c. 45, foi un xeógrafo hispano que viviu no século I despois de Cristo. == Traxectoria == Naceu en Tingentera (Alxeciras), e escri…",
+                "….) son designacións alternativas ao emprego das expresións «despois de Cristo» (d. C.) e «antes de Cristo» (a. C.), respectivamente. Nalg…"
+            ]
+            }
+        ],
+    }
+    

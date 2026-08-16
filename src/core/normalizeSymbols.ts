@@ -554,8 +554,27 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // without spaces, so `1350亿m³` is the ordinary form; with `\s+` the number is not adjacent to the
     // magnitude, the match fails, and `m³` reaches the IPA as the English letter name. The group is re-emitted
     // verbatim, so it carries its own leading space or none, and can never match empty.
+    // ⚠ AND WHERE ONE MAGNITUDE IS A PREFIX OF ANOTHER, IT MUST END AT A WORD BOUNDARY — because there,
+    // and only there, longest-first is defeated by BACKTRACKING. Galician declares `millóns`/`millón` and
+    // the one-letter unit `s` (seconds, which `m/s` needs). The engine tried `millóns`, found no unit after
+    // it, fell back to `millón`, and read the stranded plural marker as the unit:
+    //     `5 millóns de euros`  →  *θˈiŋko miʎˈoŋ seɣˈundos de ˈeᶷɾos*   "five million SECONDS of euros"
+    // Sorting cannot prevent that; sorting fixes the ORDER the alternatives are tried in, not whether the
+    // short one is tried at all once the long one fails later in the pattern. Catalan carries the identical
+    // declaration and escapes only by accident of morphology — `milions`/`milió` strands `ns`, which is
+    // nobody's unit key. See playbook trap 59.
+    //
+    // ⚠ GATED ON THE PREFIX RELATION RATHER THAN APPLIED ALWAYS, and the gate is what keeps it safe in an
+    // unspaced script. A blanket "not followed by a letter" rejects the ORDINARY Chinese case, where a Latin
+    // letter after a Han magnitude is a token boundary by script change and not a continuation — `1350亿m³`
+    // stopped hopping its magnitude and dropped the unit. `万`/`亿` are not prefixes of each other, so the
+    // hazard cannot arise there and the assertion is simply not emitted. Where it IS emitted the change is
+    // narrowing-only: what it stops matching is a magnitude that ran into the middle of a word.
+    const magList = d.magnitudes ?? [];
+    const magPrefixHazard = magList.some((a) => magList.some((b) => b !== a && b.startsWith(a)));
+    const MAG_END = magPrefixHazard ? "(?![\\p{L}\\p{M}])" : "";
     const magAlt = d.magnitudes?.length
-        ? `(\\s*(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")}))?`
+        ? `(\\s*(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")})${MAG_END})?`
         : "()?";
     // For the UNIT path the magnitude may be followed by its connective, already present in the text
     // (`2,2 milions de km²`): two words separate the number from the unit, breaking the adjacency this tier
@@ -565,7 +584,7 @@ export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // magnitude's own capture group and re-emitted by the callback.
     const magAltU =
         d.magnitudes?.length && d.magnitudeConnective !== undefined
-            ? `(\\s*(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")})(?:\\s+${d.magnitudeConnective.replace(
+            ? `(\\s*(?:${[...d.magnitudes].sort((a, b) => b.length - a.length).join("|")})${MAG_END}(?:\\s+${d.magnitudeConnective.replace(
                   /[.*+?^${}()|[\]\\]/gu,
                   "\\$&",
               )})?)?`

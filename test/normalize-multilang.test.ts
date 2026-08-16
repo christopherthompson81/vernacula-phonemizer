@@ -187,6 +187,22 @@ describe("shared symbol normalizer (core)", () => {
         expect(c("$1.5"), "and nothing is added when nothing follows").toBe("1.5 dollar");
     });
 
+    // ⚠ LONGEST-FIRST IS DEFEATED BY BACKTRACKING when the stranded suffix is itself a declared key, which
+    // is why the alternation carries a word-boundary assertion whenever one magnitude is a PREFIX of
+    // another. Galician found it: `millóns`/`millón` declared, plus the one-letter unit `s` that `m/s`
+    // needs, so the engine tried `millóns`, found no unit after it, fell back to `millón` and read the
+    // plural marker as SECONDS. Playbook trap 59.
+    test("a magnitude that is a prefix of its own plural does not strand the suffix onto a unit", () => {
+        const g = makeSymbolNormalizer({
+            units: { s: ["segundo", "segundos"], m: ["metro", "metros"] },
+            magnitudes: ["millóns", "millón"],
+            magnitudeConnective: "de",
+        });
+        expect(g("5 millóns de euros")).toBe("5 millóns de euros");
+        expect(g("1 millón de m")).toBe("1 millón de metros"); // the magnitude hop itself still works
+        expect(g("30 s")).toBe("30 segundos"); // …and the one-letter unit is untouched where it is real
+    });
+
     test("an unspaced magnitude still hops, and keeps its own spacing", () => {
         const n = makeSymbolNormalizer({
             percent: ["百分之"],
