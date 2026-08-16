@@ -1019,6 +1019,22 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
             + "inverts and omitting a plus does not",
     },
+    pap: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/pap.jsonc` (448 segments of a
+        // 31,099-paragraph pap.wikipedia dump), argued in src/languages/papiamento/normalize.ts.
+        equals: "measured: `=` \u00d71 and it is inside a raw LaTeX fragment the dump extraction left in "
+            + "(`1 Pa = \\frac{1N}{m^2}`). Zero are equations in Papiamento prose",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs and is a FLAG SPECIFICATION \u2014 `E streanan tin "
+            + "diameter di 1/6 i 2/9 di e haltura`, the proportions of the Cura\u00e7ao flag \u2014 beside the "
+            + "stripe RATIO `5:1:2` in the same sentence. Neither is a fraction to be read aloud as one",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        plus: "measured: `+` \u00d70 as an addition; the `math-sign` residual is a TIMEZONE OFFSET in a "
+            + "daylight-saving note. The MINUS is read, because omitting it inverts and omitting a plus "
+            + "does not",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in

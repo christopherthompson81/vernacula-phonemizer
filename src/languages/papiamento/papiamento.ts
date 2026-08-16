@@ -11,6 +11,8 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizePapiamento } from "./normalize.ts";
 
 interface PapiamentoDef {
     digraphs: [string, string][];
@@ -82,7 +84,37 @@ export function phonemizeWord(word: string): string {
 }
 
 // Papiamentu Latin — a-z + the accented/open letters. Word / number / punctuation.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
+/**
+ * The shared SYMBOL tier. Every word is a pap.wikipedia TOKEN attestation whose examples were read:
+ * `promé` ×129, `florin` ×112, `meter` ×75, `grado` ×41, `kilometer` ×38, `dollar` ×35, `euro` ×34,
+ * `porshento` ×28, `kuadrá` ×23, `koma` ×18, `Celsius` ×10, `kubiko` ×3.
+ *
+ * ⚠ EVERY ONE OF THEM IS CURAÇAOAN, AND THAT IS NOT A CHOICE — the Aruban spellings `porcento` and
+ * `cuadrado` score **zero** on the same wiki, even though a third of this corpus is written in Aruban
+ * orthography (see normalize.ts). So the measure words are phonological where the surrounding article may
+ * be etymological. A small, real cost, stated rather than discovered.
+ *
+ * ⚠ AND THE FLORIN IS THE LOCAL CURRENCY, ×112 — more than the dollar and the euro together. The corpus
+ * writes it beside its code: "un tarifa oficial fiho di AWG 1,79 pa cada US$ 1".
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["porshento"],
+    currency: { "$": ["dollar", "dollarnan"], "€": ["euro", "euronan"], "ƒ": ["florin", "florinnan"] },
+    units: {
+        "km": ["kilometer", "kilometernan"], "m": ["meter", "meternan"],
+        "cm": ["sentimeter", "sentimeternan"], "mm": ["milimeter", "milimeternan"],
+        "kg": ["kilo", "kilonan"],
+    },
+    exponentWords: { squared: ["kuadrá"], cubed: ["kubiko"], position: "after" },
+    ampersand: "i",
+    magnitudes: ["mil", "mion", "miyon", "biyon"],
+});
+
+// ⚠ THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause
+// pause and `24,6%` reads as *bintikuater , seis* — a phrase break inside a quantity. normalize.ts has
+// already folded the dot decimals onto the comma, so one branch covers both orthographies' conventions.
+// `decimals` is 1,951 corpus-wide.
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?:,\\d+)?)|([.?!,;:\u2026])`, "gu");
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
@@ -95,10 +127,21 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class PapiamentoPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its separator, era, sign and degree steps need the figure and its mark
+        // still adjacent, which the tier would break — then the shared symbol tier.
+        return assembleClauses(SYMBOLS(normalizePapiamento(input.normalize("NFC"))), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Papiamentu number WORDS, each phonemized like any other word.
-            else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                for (const wd of numberToWords(Number(intPart)).split(" ")) sink.emit(phonemizeWord(wd));
+                if (frac !== undefined) {
+                    // `koma` ×18 on pap.wikipedia — the separator's own name. The fractional part is read
+                    // digit by digit, the same call every other layer in this sweep makes.
+                    sink.emit(phonemizeWord("koma"));
+                    for (const dg of frac) for (const wd of numberToWords(Number(dg)).split(" ")) sink.emit(phonemizeWord(wd));
+                }
+            }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

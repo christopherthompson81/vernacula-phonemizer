@@ -1,0 +1,355 @@
+// WIKIPEDIA WORD ATTESTATION — pap. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "pap",
+        "wiki": "pap.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "porshento",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…mundo. == Lexico == Mayoria di su palabranan ta bin ochenta porshento di Latin. Tambe ta contene binti porshento di pro-Romano, A…",
+                "…n ta bin ochenta porshento di Latin. Tambe ta contene binti porshento di pro-Romano, Arabe y Alemán. Despues di tempo e lexico a…",
+                "…00 kilometer kuadrá, e ta kubri aproksimadamente binti-seis porshento di e superfisie di tera. E prome parti di su nomber ta refe…",
+                "…ke sentral riba isla di Bahrain ku ta forma alrededor di 83 porshento di e tera di e pais. Bahrain ta situá entre Qatar i e kosta…",
+                "…iru, por ehempel, e suèldu mínimo lo mester subi ku kasi 30 porshento di 1236 pa 1750 dòler. == A nase == 1931 - Jacques Hermelij…",
+                "…estimá di 286,174 residente e siudat ta konstituí mas ku 40 porshento di e poblashon total di e estado; solamente New York tin un…"
+            ]
+            },
+        {
+                "word": "porcento",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "grado",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…au ta un condecoracion real Hulandes cu ta consisti di seis grado. Un nombramento den e orden ta ser otorga den casonan di pr…",
+                "…a gratitud pa e esfuerso y meritonan di su ciudadanonan. == Grado == E orden ta conta cu seis grado desde su reforma na 1994.…",
+                "…an di su ciudadanonan. == Grado == E orden ta conta cu seis grado desde su reforma na 1994. Esakinan ta: Cabayero Gran Cruz (…",
+                "…u ta reemplasa e antiguo titulo honorario). Banda di e seis grado aki tin e grado di Gran Maestro cu ta reserva pa e monarka…",
+                "…antiguo titulo honorario). Banda di e seis grado aki tin e grado di Gran Maestro cu ta reserva pa e monarka di Reino Hulande…",
+                "…Maestria (na ingles i hulandes: Master) ta un grado akadémiko ku ta indiká ku un persona a sigui un 'masterople…"
+            ]
+            },
+        {
+                "word": "gradonan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…sientífiko i ehekutá investigashon sientífiko. E ta otorgá gradonan akadémiko den vários disiplina akadémiko. E palabra univers…",
+                "…premio Cola Debrot. == Biografia == Jay Haviser a optené e gradonan di bachelor i master na Florida State University i a promov…",
+                "…a 2005, ta enseñansa den turismo y hospitalidad, ofreciendo gradonan ADA y MBA. Facultad Arte y Ciencia (FAS) – funda na 2009, c…",
+                "…tereno i e resistensia di su habitantenan, loke ta splika e gradonan variabel di asimilashon di e manera di biba romano. == Épok…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 10,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Celsius (simbolo: °C) ta un scala di temperatura yama pa e astronom…",
+                "…ta un scala di temperatura yama pa e astronomo Sueco Anders Celsius (1701–1744). Na 1742, A. Celsius a propone pa e thermometer…",
+                "…a e astronomo Sueco Anders Celsius (1701–1744). Na 1742, A. Celsius a propone pa e thermometer ta parti den 100 grado, y el a s…",
+                "…eru. Temperaturanan normalmente ta move entre 20 i 30 grado Celsius. == Historia == Havana a ser fundá dia 16 di novèmber 1519…",
+                "…, likido (awa), y gas (damp di awa). E scala di temperatura Celsius ta basa riba e transicion entre e fasenan aki: na 0 °C ijs…",
+                "…ergia pa aumenta temperatura di un liter di awa cu un grado Celsius. E propiedad aki ta permiti sistemanan cu hopi awa, manera…"
+            ]
+            },
+        {
+                "word": "florin",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 112,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Florin arubiano ta e nomber ofisial di e moneda di e isla di Aruba…",
+                "…neda di e isla di Aruba. E denominashon bankario ofisial di florin di Aruba ta AWG. Den práktika ta usa e símbolo Aƒ. E florin…",
+                "…florin di Aruba ta AWG. Den práktika ta usa e símbolo Aƒ. E florin arubiano a wòrdu introdusí dia promé di yanüari 1986, na mo…",
+                "…tu ku Aruba a sali foi e konstelashon di Antias Hulandes. E florin arubiano a remplasá e florin antiano. == Historia == E pala…",
+                "…telashon di Antias Hulandes. E florin arubiano a remplasá e florin antiano. == Historia == E palabra florin ta derivá for di e…",
+                "…biano a remplasá e florin antiano. == Historia == E palabra florin ta derivá for di e pueblo di Florenza (òf Firenze) na Itali…"
+            ]
+            },
+        {
+                "word": "dollar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…E dollar Mericano of dollar Estadounidense (Kòrsou: Dòler merikano;…",
+                "…E dollar Mericano of dollar Estadounidense (Kòrsou: Dòler merikano; Ingles: United Stat…",
+                "…tadounidense (Kòrsou: Dòler merikano; Ingles: United States dollar simbolo: $; codigo: USD; tambe abrevia US$ of US Dollar pa…",
+                "…tes dollar simbolo: $; codigo: USD; tambe abrevia US$ of US Dollar pa distingui su mes di otro denominacion di dollar), ta e m…",
+                "…S$ of US Dollar pa distingui su mes di otro denominacion di dollar), ta e moneda oficial di Merca y su teritorionan desde e Co…",
+                "…ial di Merca y su teritorionan desde e Conaige Act 1792. Un dollar ta dividi den 100 cen (simbolo: ¢), of den 1000 mills (simb…"
+            ]
+            },
+        {
+                "word": "euro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Euro (simbolo €) ta e moneda ku ta wòrdu usa komo moneda di pago…",
+                "…Union Oropeo. E grupo di estado aki ta konosí komo \"Zona di Euro\". E kódigo ofisial di Euro ta EUR. Euro a wordu introdusi 1…",
+                "…tado aki ta konosí komo \"Zona di Euro\". E kódigo ofisial di Euro ta EUR. Euro a wordu introdusi 1 di yanüari 2002. E siguien…",
+                "…onosí komo \"Zona di Euro\". E kódigo ofisial di Euro ta EUR. Euro a wordu introdusi 1 di yanüari 2002. E siguiente paisnan de…",
+                "…usi 1 di yanüari 2002. E siguiente paisnan den Oropa ta usa Euro: Andorra Alemania Austria Bélgika Chipre Estonia Finlandia…",
+                "…San Marino Siudat Vatikano == Imagen == == Link eksterno == Euro (Biyete). Konsultá dia 24 òktober 2017.…"
+            ]
+            },
+        {
+                "word": "kilometer",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…E kilometer (simbolo: km) ta un unidad di largura y deriva di e Sistema…",
+                "…eriva di e Sistema Internacional di Unidad (sistema-SI). Un kilometer ta igual na 1.000 meter. Desde e introducion di e sistema m…",
+                "…na 1.000 meter. Desde e introducion di e sistema metrico, e kilometer tabata e unidad standard pa indica distancia riba tera. Den…",
+                "…a riba tera. Den algun pais e miya ta wordo uza en bes di e kilometer. Un kilometer ta aproximadamente igual na: 0,621 371 192 mi…",
+                "…en algun pais e miya ta wordo uza en bes di e kilometer. Un kilometer ta aproximadamente igual na: 0,621 371 192 miya ingles 0,54…",
+                "…Kilometer kuadrá (simbolo km²) ta e unidat di midi pa superfisie, ku…"
+            ]
+            },
+        {
+                "word": "kilometro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Ártiko té Cabo Horn, un distansia di mas o menos di 15 000 kilometro. E su extremo ost insular (no-kontinental) ta situá na Groe…",
+                "…i India ta midi un 7,517 kilometer na largura, di kua 5,423 kilometro ta di India peninsular i 2,094 kilometer ta di e islanan ku…",
+                "…eshon atmosferika tin un haltura di eksala di mas o menos 8 kilometro na e superfisio di mundu. E kapa di ozono di mundu ta hunga…",
+                "…% di e superfisie di mundu (un area di mas o menos 361 mion kilometro kuadrado) ta kubri dor di oceanonan, un kurpa kontinuoso ku…"
+            ]
+            },
+        {
+                "word": "meter",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 75,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…internashonal di unidat. 1 km² ta ekivalente na: 1,000,000 meter kuadrá (m²) 100 hèktar (ha) E kilometer kuadrá ta aproksima…",
+                "…ustralia na parti wèst, i Merka na parti ost. Na 169.2 mion meter kuadrá kua area, e ta e divishon di e oséano mundial - i na…",
+                "…asífiko i na mundu, yegando un profundidat di mas ku 10.911 meter.…",
+                "…tin un solo pista di direkshon 11/29 ku un largura di 3.410 meter i 60 meter di hanchura. 3.410 meter ta sufisiente pa por ak…",
+                "…pista di direkshon 11/29 ku un largura di 3.410 meter i 60 meter di hanchura. 3.410 meter ta sufisiente pa por akapará tur t…",
+                "…ku un largura di 3.410 meter i 60 meter di hanchura. 3.410 meter ta sufisiente pa por akapará tur tipo di avion den tur tipo…"
+            ]
+            },
+        {
+                "word": "kuadrá",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilometer kuadrá (simbolo km²) ta e unidat di midi pa superfisie, ku ta kore…",
+                "…nashonal di unidat. 1 km² ta ekivalente na: 1,000,000 meter kuadrá (m²) 100 hèktar (ha) E kilometer kuadrá ta aproksimadamente…",
+                "…na: 1,000,000 meter kuadrá (m²) 100 hèktar (ha) E kilometer kuadrá ta aproksimadamente ekivalente na: 0.3861 mia kuadrá…",
+                "…ometer kuadrá ta aproksimadamente ekivalente na: 0.3861 mia kuadrá…",
+                "…erfisie. Esaki ta wòrdu ekspresá den habitante pa kilometer kuadrá. == Mira tambe == Lista di país segun poblashon Lista di pa…",
+                "…poblá. Su densidat ta mas of menos 9 habitante pa kilometer kuadrá, ku ta tambe un di esunnan mas abou den Union Oropeo. == Mi…"
+            ]
+            },
+        {
+                "word": "cuadrado",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kubiko",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…mannan mas chikitu. E oséano munidalmente ta karga 134 bion kubiko kilometer di awa, kual ta mas o menos 97% di e reserva di a…",
+                "…ordinal. Cuadrada i cubida ta alternativanan pa kuadrado i kubiko: Tre a potia du es nove. – Tres pa e poder di dos ta nuebe.…"
+            ]
+            },
+        {
+                "word": "koma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ao Medical Center na november 2023. Despues di a bai den un koma, el a rekuperá pero no por a reanuda su trabou como parlame…",
+                "…Marketing & Management na Hogeschool Utrecht. El a traha pa KOMA Models na Aruba pa cuater aña. Tambe el a competi na Aruba…",
+                "…iku i largu. Komplikashonnan den termino kortiku ta inklui, koma i morto. Riba termino largu komplikashonnan manera atake se…",
+                "…i e operashon na Sint-Elisabeth Hospital, Komproe a kai den koma i no tabata konsiente mas. El a fayesé dia 11 di òktober 20…",
+                "…e frase. Den e kasonan aki, e opheto mester ta siguí pa un koma, i un pronòmber pa e opheto ku ta wòrdu usa despues di e ve…",
+                "…é den matemátika. Un virgula pare nesesada per claria. – Un koma ta parse nesesario pa mas klaridat. Un adjektivo òf determi…"
+            ]
+            },
+        {
+                "word": "ora",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 58,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Den teoria e subida ta sigui direkshon ost inkrementá ku un ora kada 15°, te ku e liña internashonal di fecha (longitut 180…",
+                "…a internashonal di fecha (longitut 180°). I e ta baha ku un ora kada 15° na direkshon te ora e yega e liña internashonal di…",
+                "…gitut 180°). I e ta baha ku un ora kada 15° na direkshon te ora e yega e liña internashonal di fecha atrobe. == Introduksho…",
+                "…zona di tempu di zomer) ta inklui un kambio (tipikamente +1 ora) pa daylight saving time. Zona di tempu standaart por wordu…",
+                "…meridiaan. Na kada 15° e zonanan bisiña lo diferensia ku 1 ora. Pa rasonan politiko, geografiko i pa ta mas kombiniente pa…",
+                "…iregular. Tambe, na un par di region, diferensianan di mei ora of kuart di ora ta na efekto. Promé ku e intrudukson di zon…"
+            ]
+            },
+        {
+                "word": "oranan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…- Natalee Holloway, un studiante merikano, ta disparse den oranan di anochi na Aruba. Yüni Yüli Ougùstùs Sèptèmber 23 - Na Ar…",
+                "…Dependiendo di sirkumstansia e restrikshon por ensera tantu oranan di anochi komo e restu di e dia. Basikamente e ta un limita…",
+                "…a papia tokante e bunitesa i e tristesa di Kòrsou durante e oranan di atardi. Na 2014 Plaate ta risibí e Tapushi di Oro. Na 20…",
+                "…tiendo pa bisti esaki na ocacionnan festivo, hopi biaha den oranan di anochi y acompaña pa paña apropiá. == Mira tambe == List…",
+                "…mart 1942 dor di frater Andreas (1897-1980), kende pafó di oranan di skol tabata dirigí e ekipo di futbòl eskolar di St. Thom…",
+                "…umbrá den e sede di gobièrnu na ofisina di gezaghebber. Den oranan di mainta personanan bistí kolorido ku nan kara tras di un…"
+            ]
+            },
+        {
+                "word": "Cristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 17,
+                "substringOnly": 1,
+                "examples": [
+                "…a). == Comienso di un milenio == E prome milenio despues di Cristo ta conta mil aña, esta di 1 di januari di aña 1 te 31 di de…",
+                "…iká ta morto, ma e don di grasia di Dios ta bida etèrno den Cristo Jesus, nos Señor. == Linknan eksterno == https://got.m.wiki…",
+                "…y un scol practico pa ofishi (SPO). Na 1955 e misa catolico Cristo Rey a wordo consagra pa monseñor van der Veen Zeppenfelt. =…",
+                "…ta un nomber masha popular uza. Nan ta yam'e Hesucristo of Cristo. E nomber Cristo ta bin di Griego cu nifica \"e prome marca…",
+                "…ha popular uza. Nan ta yam'e Hesucristo of Cristo. E nomber Cristo ta bin di Griego cu nifica \"e prome marca riba cabes cu zet…",
+                "…di Port of Spain. == Parokia, misa i kapèl == Aruba Brasil: Cristo Rey Dakota: La Birgen di Fatima Madiki: Kapèl Cristo Sufrie…"
+            ]
+            },
+        {
+                "word": "promé",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 129,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Promé Minister ta un título ku ta usa pa e indiká e lider di un g…",
+                "…stado. Na sierto pais, manera e paisnan den Reino Hulandes, promé minister ta un sinónimo pa minister-presidente of premier,…",
+                "…ais e títulonan aki ta wòrdu usa pa vários otro funshon. == Promé minister == Antias Hulandes Mira artíkulo: Lista di promé m…",
+                "…= Promé minister == Antias Hulandes Mira artíkulo: Lista di promé minister di Antias Hulandes Aruba Mira artíkulo: Promé mini…",
+                "…a di promé minister di Antias Hulandes Aruba Mira artíkulo: Promé minister di Aruba Australia Mira artíkulo: Promé minister d…",
+                "…artíkulo: Promé minister di Aruba Australia Mira artíkulo: Promé minister di Australia Fransia (6 di mei 2002 - 31 di mei 20…"
+            ]
+            },
+        {
+                "word": "despues",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 133,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…poblashon nativo merikano aki a wòrdu redusi dramátikamente despues di malesa i gueranan despues di kontakto oropeo. En prinsip…",
+                "…a wòrdu redusi dramátikamente despues di malesa i gueranan despues di kontakto oropeo. En prinsipio, Merka a wòrdu formá dor d…",
+                "…iko. Dia 4 di yüli 1776, nan a deklará nan independensia, i despues di e Revolushon merikano kontra e Imperio britániko, a logr…",
+                "…an Uni komo repúblika ku un gobièrnu fuerte sentral. Un aña despues e dokumento a wòrdu ratifiká, i den 1791 e akta di derechin…",
+                "…a establese un gobiernu federal swak ku a opera te ku 1789. Despues ku nan a gana kontra Gran Bretania e forsa merikano a yuda…",
+                "…nan siudadano, i e di diessinku a duna nan derecho di vota. Despues di e asesinato di Lincoln rekonstrukshon radikal di e repub…"
+            ]
+            },
+        {
+                "word": "antes",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ta den uso desde ku Julio César a establesé esaki na aña 46 antes di Kristu i tabata en esensia un kalènder egipto, e promé k…",
+                "…: République centrafricain, sango: Ködörösêse tî Bêafrîka), antes Ubangi-Shari, ta un pais sin frontera marítimo den sentro d…",
+                "…ital ta Hanoi i su siudat mas grandi ta Siudat Ho Chi Minh (antes Saigon). Vietnam tin un área di 332.698 kilometer kuadrá i…",
+                "…Zambia, ofisialmente Repúblika di Zambia i antes konosí komo Nort-Rodesia, ta un pais den Afrika. E tin fron…",
+                "…erá kompletamente for di laman situá den Asia Sentral, anto antes tabata forma parti di e Union Sovietiko. E ta grens ta Kaza…",
+                "…Zimbabwe, ofisialmente Repúblika di Zimbabwe, (antes yamá Rhodesia i Sur Rhodesia) ta un pais den Afrika, ku tin…"
+            ]
+            },
+        {
+                "word": "mia",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 16,
+                "substringOnly": 1,
+                "examples": [
+                "…Mia Amor Mottley (☆ 1 di òktober 1965) ta un abogado i politiko…",
+                "…kilometer kuadrá ta aproksimadamente ekivalente na: 0.3861 mia kuadrá…",
+                "…itor italiano. == Diskografia == === Album === 2009 - Sulla mia pelle (#3 Italia - #44 Oropa) 2010 - Sulla mia pelle (Delux…",
+                "…2009 - Sulla mia pelle (#3 Italia - #44 Oropa) 2010 - Sulla mia pelle (Deluxe Edition) (#3 Italia - #42 Oropa) 2011 - Rosso…",
+                "…vita == Tour == 2009 - Noemi tour Italia 2009/2010 - Sulla mia pelle tour I Italia 2010 - Sulla mia pelle tour II Italia,…",
+                "…alia 2009/2010 - Sulla mia pelle tour I Italia 2010 - Sulla mia pelle tour II Italia, Slovenia 2011 - RossoNoemi tour Itali…"
+            ]
+            }
+        ],
+    }
+    
