@@ -188,7 +188,17 @@ export function normalizeTurkmen(input: string): string {
     // 1) DIGIT DE-GROUPING — a grouping space is otherwise read as a separate number and every later rule
     //    needs the figure whole. This corpus groups with a space or a no-break space: `75 400 km²`,
     //    `25 müň adam`. TWO passes, because adjacent groups share the digit the first consumes.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[    ](\d{3})(?!\d)/gu, "$1$2");
+    //    ⚠ THE WHOLE NUMBER IS MATCHED AT ONCE, NOT ONE JOIN PER PASS — playbook trap 63. The repeated
+    //    two-digit join this sweep used at first is correct to THREE groups and silently wrong at four:
+    //    the global scan resumes INSIDE the remainder and anchors on the last digit of the next group,
+    //    so `80 239 800 000` became `80239 800000` — a well-formed numeral for a different quantity, and
+    //    invisible to DIGIT, RAWMARK, DROP and the referee alike. ⚠ THE TRAILING GUARD REJECTS A DIGIT
+    //    AND NOTHING ELSE: `(?![.,]\d)` looks right and costs `3 779,8` — a space-grouped integer with a
+    //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
+    //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
+    //    fraction, so `(?!\d)` is the whole guard.
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
+        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
     s = s.replace(/[   ]/gu, " ");
 
     // 2) THE MAGNITUDE ABBREVIATIONS, before any single-dot rule. `30,3 mln km²`, `2 mln. 361,8 müň`,

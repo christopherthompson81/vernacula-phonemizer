@@ -86,7 +86,7 @@ export function normalizeLatin(input: string): string {
     //    clause-final probe after I wrote `(?![\d.,])` and lost the whole grouping on `1 320 000,`. A
     //    guard carrying a bare `.` or `,` declines every clause-final figure; what it has to exclude is a
     //    separator that is CONTINUING the number (`.5`), which is `(?![.,]\d)`.
-    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)(?![.,]\d)/gu,
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
         (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
     s = s.replace(/[   ]/gu, " ");
 

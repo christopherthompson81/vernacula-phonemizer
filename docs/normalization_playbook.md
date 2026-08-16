@@ -2008,6 +2008,17 @@ global scan resumes INSIDE the remainder and anchors on the last digit of the ne
 - **⚠ AND THE TRAILING GUARD MUST REJECT A DIGIT, NOT A DOT — trap 58 again, and `review.ts` catches it.**
   Writing `(?![\d.,])` declines every clause-final figure (`1 320 000,`) and loses the whole grouping. What
   has to be excluded is a separator CONTINUING the number: `(?!\d)(?![.,]\d)`.
+- **⚠ AND THE OBVIOUS TRAILING GUARD IS ALSO WRONG.** `(?![.,]\d)` looks like the right way to keep the
+  rule off a decimal and costs `3 779,8` — a space-grouped integer WITH a decimal tail, which Chuvash's
+  corpus writes. The separator is a SPACE and a decimal never has one before its fraction, so `(?!\d)` is
+  the whole guard. Both wrong versions were written and both were caught by re-running the corpus diff:
+  the strict one changed 3 utterances in ba and 2 each in chv and shn; the correct one changes exactly 1
+  in ba, which is the defect being fixed.
+- **⚠ AND THE SPACE GROUPS THE FRACTION TOO, SI-style** — `0,000 001` is 0.000001, and the integer-side
+  rule cannot reach it, because its leading guard correctly rejects a group sitting behind a decimal
+  separator (that is what keeps `1.234 567` from being read as grouping). The fractional side needs its
+  own pass anchored on the separator. One instance, in chv's square-millimetre article, and the old
+  broken idiom had been getting it right BY ACCIDENT — which is how the regression surfaced.
 - **Where it has bitten and where it has not, measured:** four-or-more-group numbers occur **twice in la
   and once in ba** across the seven artifacts this sweep has touched, and nowhere in tt, chv, tk, shn or
   hyw. That is why the idiom held everywhere it was used before Latin — the shape is rare, and rarity is

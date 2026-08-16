@@ -165,7 +165,17 @@ export function normalizeBashkir(input: string): string {
     //    rule needs the figure whole. `3 000 000` read as *өс нуль нуль*, "three zero zero", and the
     //    corpus's own `2 626 613-ө` and `1 042,4 мең` both depend on this running first. Two passes,
     //    because adjacent groups share the digit the first consumes.
-    for (let i = 0; i < 2; i++) s = s.replace(/(\d)[    ](\d{3})(?!\d)/gu, "$1$2");
+    //    ⚠ THE WHOLE NUMBER IS MATCHED AT ONCE, NOT ONE JOIN PER PASS — playbook trap 63. The repeated
+    //    two-digit join this sweep used at first is correct to THREE groups and silently wrong at four:
+    //    the global scan resumes INSIDE the remainder and anchors on the last digit of the next group,
+    //    so `80 239 800 000` became `80239 800000` — a well-formed numeral for a different quantity, and
+    //    invisible to DIGIT, RAWMARK, DROP and the referee alike. ⚠ THE TRAILING GUARD REJECTS A DIGIT
+    //    AND NOTHING ELSE: `(?![.,]\d)` looks right and costs `3 779,8` — a space-grouped integer with a
+    //    decimal tail, which this corpus writes — while a bare `(?![\d.,])` declines every clause-final
+    //    figure (trap 58). The separator here is a SPACE, and a decimal never has one before its
+    //    fraction, so `(?!\d)` is the whole guard.
+    s = s.replace(/(?<!\d)(?<![\d][.,])(\d{1,3})((?:[    ]\d{3})+)(?!\d)/gu,
+        (_m, head: string, rest: string) => head + rest.replace(/[    ]/gu, ""));
     s = s.replace(/[   ]/gu, " ");
 
     // 1) MULTI-DOT ABBREVIATIONS, before any single-dot rule. `б. э. т.` = *беҙҙең эраға тиклем* (BC) and
