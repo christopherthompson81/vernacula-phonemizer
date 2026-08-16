@@ -9,6 +9,8 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeChuvash, normalizeChuvashInitialisms, spellAttributive } from "./normalize.ts";
 
 interface ChuvashDef {
     onset: Record<string, string>;
@@ -127,17 +129,83 @@ function number(digits: string): string {
     return numberToWords(n).map(phonemizeWord).join(" ");
 }
 
+/**
+ * The shared SYMBOL tier. Every word is a cv.wikipedia TOKEN attestation whose examples were read
+ * (`tools/corpus/attest/chv.jsonc`).
+ *
+ * \u26a0 NO BARE `\u0433` OR `\u0442` AND NO `\u0441`. This corpus carries Russian bibliography in quantity
+ * (`\u2013 255 \u0441. : \u0438\u043b., \u043f\u043e\u0440\u0442\u0440.`, `\u0423\u0447. \u0437\u0430\u043f. \u0427\u041d\u0418\u0418, \u0432\u044b\u043f. 49`, `1000 \u044d\u043a\u0437.`), where `\u0441.` is
+ * \u0441\u0442\u0440\u0430\u043d\u0438\u0446 and `\u0433.` is \u0433\u043e\u0434\u0430 \u2014 and the tier's trailing guard does not reject a dot, so declaring
+ * either key would read every Russian page count as a second and every Russian year as a gram. Same call
+ * ba and tt made. `\u04ab` IS declared as a rate denominator, because the slash position rules the other
+ * reading out: the corpus's `2,8 \u043c/\u00e7` is metres per second.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["процент"],
+    currency: { "$": ["доллар"], "€": ["евро"], "₽": ["тенкӗ"] },
+    units: {
+        "км": ["километр"], "см": ["сантиметр"], "мм": ["миллиметр"], "кг": ["килограмм"],
+        "га": ["гектар"], "м": ["метр"],
+        // LATIN aliases. cv.wikipedia writes the Cyrillic abbreviation in most articles, but its Turkish
+        // province stubs write `8 413 km²` and `12 235 km²` in otherwise-Chuvash prose, and the
+        // engine's TOKEN matches Cyrillic only — so those lose the unit entirely.
+        "km": ["километр"], "cm": ["сантиметр"], "mm": ["миллиметр"], "m": ["метр"],
+    },
+    // Chuvash does not say "A per B": the denominator takes the possessive-locative and stands alone
+    // (*метр ҫеккунтра*), which is Basque's shape — `unitPer` is the empty string.
+    unitPer: "",
+    rateDenominators: { "ҫ": "ҫеккунтра", "ç": "ҫеккунтра", "s": "ҫеккунтра", "h": "сехетре" },
+    exponentWords: { squared: ["тӑваткал"], cubed: ["куб"], position: "before" },
+    ampersand: "тата", // ×52 — "Лот тата Гаронна", "4 округ, 40 кантон тата 319 коммуна кĕреççĕ"
+    // ⚠ NO `multiply`, AND THE CANDIDATE IS THE REASON. `хут` ×78 is PAPER in every one of its
+    // attestations ("Хут — çулçă евĕр целлюлозăран хатĕрлесе тунă çыру материалĕ") — the Fula `tere`
+    // shape. The frequency word is `хутчен` ("тăваттă хутчен Совет Союзĕн Паттăрĕ", "Виç хутчен
+    // чĕрĕлнĕскер"), which is "on four occasions" rather than an arithmetic product. This corpus's `×`
+    // is ×0 and its `=` is a library catalogue's parallel-title mark, so nothing is lost by declining.
+    // Chuvash writes the magnitude word after the figure and often after a DECIMAL (`13,3 пин км²`,
+    // `1,3 миллион ҫын`), so the tier must hop it to reach a unit on the far side. Turkic
+    // magnitudes do not inflect.
+    magnitudes: ["пин", "миллион", "миллиард", "триллион"],
+});
+
 // A Chuvash Cyrillic word / number / punctuation.
-const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
+// \u26a0 THE DECIMAL COMMA IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `,` claims it as a clause
+// pause and `+18,7\u00b0\u0421` reads as *\u0432\u0443\u043d\u043d\u04d1 \u0441\u0430\u043a\u043a\u04d1\u0440 , \u04ab\u0438\u0447\u0447\u04d7* \u2014 a phrase break inside a temperature. `decimals` is
+// 10,743 corpus-wide and the retained text writes 143 of them, mostly climate readings.
+const TOKEN = /([Ѐ-ӿ]+)|(\d+(?:,\d+)?)|([.!?…,;:])/gu;
 
 class ChuvashPhonemizer implements Phonemizer {
     text(input: string): string {
         // NFC-normalize BEFORE tokenizing: Chuvash ⟨ӑ ӗ ӳ⟩ decompose under NFD to base+combining (U+0306/U+030B), and
         // those combining marks fall OUTSIDE the [Ѐ-ӿ] token class — so NFD input would shatter words mid-token and
         // drop the reduction mark (чӑваш → "t͡ɕa ʋaʂ"). phonemizeWord re-normalizes, but the split has already happened.
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its clock, ordinal, degree and sign steps need the figure and its written
+        // suffix still adjacent, which the tier would break — then the INITIALISM pass, then the shared
+        // symbol tier, which matches a unit only when a NUMBER is adjacent. And `spellAttributive` LAST,
+        // because the question it answers (is a noun coming?) has no answer until the tier has turned
+        // `км` into `километр` — see normalize.ts.
+        const prepared = spellAttributive(SYMBOLS(normalizeChuvashInitialisms(normalizeChuvash(input.normalize("NFC")))));
+        return assembleClauses(prepared, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                sink.emit(number(intPart!));
+                if (frac !== undefined) {
+                    // The decimal separator's own NAME, and ⚠ IT IS SOURCED BY A TRANSLATION GLOSS
+                    // RATHER THAN BY A COUNT. `хӳрешке` is ×2 in cv.wikipedia and both are the same film
+                    // title — but that title is glossed against the Russian in its own lead, "Пăнчă,
+                    // пăнчă, хӳрешке... (выр. Точка, точка, запятая...)", which names the comma directly.
+                    // ⚠ AND THE OBVIOUS CANDIDATE IS A FALSE ATTESTATION: `запятой` scores ×7 and all
+                    // seven are inside RUSSIAN-language reference titles ("Орфографические правила
+                    // употребления запятой"), the Fula `tere` shape. THE FULL SPOKEN READING IS DECLINED,
+                    // deliberately: Chuvash says the whole-part word plus a tail that NAMES THE DECIMAL
+                    // PLACE, and the place name cannot be composed here — half of a two-part reading is
+                    // worse than the sign's name. Same call ba made (өтөр), tt made (өтер), uk made
+                    // (кома), pl made (przecinek) and be made (коска).
+                    sink.emit(phonemizeWord("хӳрешке"));
+                    for (const dg of frac) sink.emit(number(dg));
+                }
+            }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

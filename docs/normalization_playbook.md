@@ -367,7 +367,7 @@ you have already met.
 
 ### ⚠ Where a principle is ENFORCED, and why that column exists
 
-This document is 1,900 lines and 60 numbered traps. A Khmer session read it start to finish and then broke
+This document is 1,900 lines and 61 numbered traps. A Khmer session read it start to finish and then broke
 "a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
 បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
 gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
@@ -390,7 +390,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 
 | principle | traps | in one line |
 |---|---|---|
-| **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50, 59 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin; the word boundary that fixes a Latin backtrack rejects the ordinary Han case |
+| **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50, 59, 61 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin; the word boundary that fixes a Latin backtrack rejects the ordinary Han case; a whole language can be typed in the Latin twins of its own letters, and the majority guard that makes the fold safe is what stops it reaching the short words |
 | **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase |
 | **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
 | **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58, 60 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure; an optional group on the wrong side of an alternation truncates the match instead of failing it |
@@ -1910,6 +1910,40 @@ arm, ended at the superscript, and left the rest of the notation outside the mat
 - **Where to look for the next one:** any pattern in this repo whose optional suffixes are written as an
   alternation rather than as a sequence of independent optionals. The alternation is a claim that the two
   cannot co-occur, and that claim is almost never checked.
+
+
+**61. A LANGUAGE CAN BE WRITTEN PREDOMINANTLY IN THE WRONG CODEPOINTS, AND THE MAJORITY GUARD THAT MAKES A
+CONFUSABLE FOLD SAFE IS EXACTLY WHAT STOPS IT REACHING THE SHORT WORDS.** `foldCyrillicConfusables` existed,
+`chv` was already in `CYRILLIC_HOSTS`, and the fold still did nothing for Chuvash, because its map had no
+rows for ⟨ă ĕ ç ü⟩ (U+0103/0115/00E7/00FC) — the Latin twins of ⟨ӑ ӗ ҫ ӳ⟩. cv.wikipedia writes the Latin ones
+**4,936 times against 918** for the real letters, a 5.4:1 ratio the wrong way, with 28 of 454 segments using
+both. The block-range tokenizer split **3,424 words** and handed the strays to the English reader:
+
+    çĕр   →   sˈɛp        "sep"        (ҫӗр, one of the commonest words in the language)
+    пĕрремĕш → p ˈiː ˈrːem ˈiː ʂ       five tokens
+
+- **This is invisible to every gate.** Nothing is dropped and no raw character survives, so `DROP` and the
+  leak checks are both silent, and the corpus diff only shows it once you fix it (395/453 utterances, 87%).
+- **⚠ AND THE MAJORITY GUARD REFUSES THE SHORT WORDS, WHICH ARE THE COMMON ONES.** `çĕр` is two Latin
+  letters against one Cyrillic, so `lat > cyr` and the fold declines — as it must for ASCII look-alikes,
+  where a word carrying several genuinely may BE Latin. Measured: the words the majority rule refuses and a
+  PRESENCE test would fold are **76 in chv** (`ăшă`, `çĕр`, `çĕнĕ`, `виççĕ`, `Кĕçĕн`) against **one**
+  across the other fourteen Cyrillic hosts.
+- **The split is principled, not convenient.** An ASCII look-alike is a real letter of the Latin alphabet;
+  ⟨ă ĕ ç ü⟩ standing beside a Cyrillic letter is not a Latin word. So those rows fold on PRESENCE and the
+  ASCII rows keep MAJORITY. ⚠ ⟨ç⟩ and ⟨ü⟩ are ordinary letters in Turkish, French and German, so the
+  fleet-wide risk was **measured before the table was touched**: 3,356 hits in chv, one anywhere else.
+- **⚠ AND THE PRE-PASS ORDER IS PART OF THE TRAP.** `romanPass` runs BEFORE the character folds, so a
+  `romanOrdinals.ts` CONTEXT regex sees the writer's codepoints, not the folded ones. Written for the
+  Cyrillic spelling alone it matched nothing and `XVIII ĕмĕр` stayed *вун саккӑр ĕмĕр*, "eighteen
+  centuries", with every gate green. Trap 16 says check whether the seam exists; this says check WHERE.
+- **⚠ AND THE INSTRUMENT LIES IN THE SAME DIRECTION.** `attest.ts --lang chv` reported `ӗмӗр` **ABSENT**
+  from cv.wikipedia — a confident negative manufactured by the very defect under investigation, for a word
+  that is on every history page. Its Latin-spelled twin scores ×61. Probe BOTH spellings whenever a
+  language has a confusable pair, or the sourcing gate will refuse words the language uses constantly.
+- **Where to look for the next one:** any alphabet whose letters have Latin twins that sit on a common
+  keyboard layout — Chuvash ⟨ă ĕ ç ü⟩, Azerbaijani-Cyrillic ⟨ə⟩, Serbian ⟨ј⟩, Ukrainian ⟨і⟩. Count the
+  codepoints in the artifact before trusting any reading of that language.
 
 
 ## Closing a DROP is not finished until you read the READING

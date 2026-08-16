@@ -818,6 +818,29 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "(`ПБУ 19/02`), a street address (`Октябрьский городок, 1/66`) or an academic year "
             + "(`2010/11 уку елында`), so no fraction rule is written either",
     },
+    chv: {
+        // \u26a0 FIVE REFUSALS over the retained text of `tools/corpus/mined/chv.jsonc` (454 segments of a
+        // 232,373-paragraph cv.wikipedia dump), each argued in src/languages/chuvash/normalize.ts. The
+        // `equals` entry is a THIRD distinct non-equation sense of the sign in this sweep.
+        equals: "measured: `=` \u00d714 and TEN are the ISBD PARALLEL-TITLE MARK of a library catalogue entry "
+            + "\u2014 `Хал\u0103х шкул\u0115 = Народная школа` (\u00d74), `Tšuvassilais-suomalainen sanakirja = "
+            + "Ч\u0103вашла-финла словарь`, `Reverse dictionary of Chuvash. = Обратный словарь` \u2014 plus one raw "
+            + "LaTeX fragment. Three ARE equations (`1 мм\u00b2=0,000 001 м\u00b2`, `1 километр = 1000 метр`, "
+            + "`\\pi = 3,1415926`). \u26a0 AND THE WORD IS THE SECOND REASON: `тан` is attested as \u201cequal\u201d but "
+            + "POSTPOSITIONALLY (\u201cабсолютл\u0103 нул\u0115пе п\u0115р тан\u201d), and the tier can only place a connective "
+            + "BETWEEN the operands \u2014 so even the three real ones could not be read correctly here. "
+            + "gd's `=` was wiki headings and tt's was etymology glosses; this is a third sense",
+        times: "measured: `\u00d7` \u00d70 in the retained text, and the candidate word is a Fula `tere` trap: `хут` "
+            + "\u00d778 is PAPER in every attestation (\u201cХут \u2014 \u00e7ул\u00e7\u0103 ев\u0115р целлюлозăран хат\u0115рлесе тун\u0103 "
+            + "\u00e7ыру материал\u0115\u201d). The frequency word is `хутчен` (\u201cт\u0103ватт\u0103 хутчен Совет Союз\u0115н "
+            + "Патт\u0103р\u0115\u201d) \u2014 \u201con four occasions\u201d, not an arithmetic product",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70 in the retained text. The slash IS used for fractions and a rule is "
+            + "written for them, but only where the noun `пай` follows \u2014 six of the nine slashes are a "
+            + "Pi-day date, a year span (`1608/09`), two street addresses and a citation",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in

@@ -247,10 +247,28 @@ export function foldLatinConfusables(s: string): string {
  * Russian cannot type them.
  */
 const CYRILLIC_CONFUSABLE: Readonly<Record<string, string>> = {
-    a: "а", c: "с", e: "е", i: "і", j: "ј", o: "о", p: "р", s: "ѕ", x: "х", y: "у",
-    A: "А", B: "В", C: "С", E: "Е", H: "Н", I: "І", J: "Ј", K: "К", M: "М",
-    O: "О", P: "Р", S: "Ѕ", T: "Т", X: "Х", Y: "У",
+    a: "\u0430", c: "\u0441", e: "\u0435", i: "\u0456", j: "\u0458", o: "\u043e", p: "\u0440", s: "\u0455", x: "\u0445", y: "\u0443",
+    A: "\u0410", B: "\u0412", C: "\u0421", E: "\u0415", H: "\u041d", I: "\u0406", J: "\u0408", K: "\u041a", M: "\u041c",
+    O: "\u041e", P: "\u0420", S: "\u0405", T: "\u0422", X: "\u0425", Y: "\u0423",
+    // ⚠ THE FOUR CHUVASH LETTERS, and they are the largest instance of this defect in the fleet by two orders
+    // of magnitude. \u04d1 \u04d7 \u04ab \u04f3 (U+04D1/04D7/04AB/04F3) have Latin twins that render identically in most fonts
+    // and sit on a Turkish or Romanian keyboard, and cv.wikipedia is written predominantly with the LATIN
+    // ones: measured over the retained text of `tools/corpus/mined/chv.jsonc`, \u0103 \u0115 \u00e7 \u00fc occur **4,916
+    // times against 918** for the real letters — a 5.4:1 ratio the wrong way, with 28 segments using both.
+    // The cost was total: `\u00e7\u0115\u0440` (\u0441\u0435\u0440\u0440 "hundred/earth") read *s\u02c8\u025bp*, English "sep"; `\u0432\u0103\u0442\u0430\u043c` split into three
+    // tokens; `\u043f\u0115\u0440\u0440\u0435\u043c\u0115\u0448` into five. **3,424 words** in that one artifact carry the defect.
+    //
+    // ⚠ FLEET-SAFE BY MEASUREMENT, not by assumption: across all 15 CYRILLIC_HOSTS artifacts, a
+    // Cyrillic-majority word containing one of these four Latin letters occurs 3,356 times in chv and
+    // **once** anywhere else (ba `\u0430\u0440\u0103\u043c`, itself the same typo). \u00e7 and \u00fc are common in Turkish, French
+    // and German names, so this row was the one worth checking rather than assuming; the majority guard
+    // above is what keeps `f\u00fcr`, `M\u00fcnchen` and `g\u00f6\u011fs\u00fcm` untouched, and it does.
 };
+const CHUVASH_CONFUSABLE: Readonly<Record<string, string>> = {
+    "\u0103": "\u04d1", "\u0115": "\u04d7", "\u00e7": "\u04ab", "\u00fc": "\u04f3",
+    "\u0102": "\u04d0", "\u0114": "\u04d6", "\u00c7": "\u04aa", "\u00dc": "\u04f2",
+};
+const CHV_KEYS = new RegExp(`[${Object.keys(CHUVASH_CONFUSABLE).join("")}]`, "gu");
 const CYR_KEYS = new RegExp(`[${Object.keys(CYRILLIC_CONFUSABLE).join("")}]`, "gu");
 const WORDISH = /[\p{L}\p{M}\p{Nd}]+/gu;
 
@@ -283,7 +301,21 @@ export function foldCyrillicConfusables(s: string, hostIsCyrillic = false): stri
             if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
             else if (/\p{Script=Latin}/u.test(ch)) lat++;
         }
-        if (cyr === 0 || lat === 0 || lat > cyr) return w; // Latin-majority word — leave it to the Latin fold
+        if (cyr === 0 || lat === 0) return w;
+        // \u26a0 THE CHUVASH ROWS ARE APPLIED ON PRESENCE, NOT MAJORITY, and the asymmetry is the point. An
+        // ASCII look-alike is a REAL LETTER OF THE LATIN ALPHABET, so a word carrying several of them may
+        // genuinely be a Latin word and the majority test is what protects it. \u0103 \u0115 \u00e7 \u00fc standing beside a
+        // Cyrillic letter cannot be: measured over all 15 CYRILLIC_HOSTS artifacts, the words the majority
+        // rule REFUSES and presence would fold are **76 in chv** \u2014 `\u0103\u0448\u0103` (warm), `\u00e7\u0115\u0440`, `\u00e7\u0115\u043d\u0115` (new),
+        // `\u0432\u0438\u00e7\u00e7\u0115` (three), all short words where two Latin twins outvote one Cyrillic letter \u2014 against
+        // **one** anywhere else (tt `k\u00fcbr\u04d9`, itself already broken). Without this, `\u00e7\u0115\u0440` stayed *s\u02c8\u025bp*.
+        w = w.replace(CHV_KEYS, (c) => CHUVASH_CONFUSABLE[c]!);
+        cyr = 0; lat = 0;
+        for (const ch of w) {
+            if (/\p{Script=Cyrillic}/u.test(ch)) cyr++;
+            else if (/\p{Script=Latin}/u.test(ch)) lat++;
+        }
+        if (lat === 0 || lat > cyr) return w; // Latin-majority word — leave it to the Latin fold
         if (lat === cyr && !hostIsCyrillic) return w; // an even split, and no host evidence to tip it
         CYR_KEYS.lastIndex = 0;
         return w.replace(CYR_KEYS, (c) => CYRILLIC_CONFUSABLE[c]!);

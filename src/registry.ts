@@ -196,6 +196,7 @@ import { ROMAN_POLICY as romanUk } from "./languages/ukrainian/romanOrdinals.ts"
 import { ROMAN_POLICY as romanBe } from "./languages/belarusian/romanOrdinals.ts";
 import { ROMAN_POLICY as romanBa } from "./languages/bashkir/romanOrdinals.ts";
 import { ROMAN_POLICY as romanTt } from "./languages/tatar/romanOrdinals.ts";
+import { ROMAN_POLICY as romanChv } from "./languages/chuvash/romanOrdinals.ts";
 import { ROMAN_POLICY as romanHu } from "./languages/hungarian/romanOrdinals.ts";
 import { ROMAN_POLICY as romanAz } from "./languages/azerbaijani/romanOrdinals.ts";
 import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
@@ -225,7 +226,7 @@ const ROMAN_POLICIES: Readonly<Record<string, RomanPolicy>> = {
     es: romanEs, "es-419": romanEs419, pt: romanPt, "pt-BR": romanPtBr,
     it: romanIt, ro: romanRo, ca: romanCa,
     ru: romanRu, pl: romanPl, uk: romanUk, be: romanBe, hu: romanHu,
-    az: romanAz, kk: romanKk, uz: romanUz, ba: romanBa, tt: romanTt,
+    az: romanAz, kk: romanKk, uz: romanUz, ba: romanBa, tt: romanTt, chv: romanChv,
 };
 
 // Embedded FOREIGN runs (a brand name, acronym or code-switched phrase in a script the engine does not
