@@ -7,6 +7,8 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeBashkir, normalizeBashkirInitialisms } from "./normalize.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { phonemizeWord as russianWord } from "../russian/russian.ts";
 import { numberToWords } from "./numbers.ts";
@@ -112,13 +114,78 @@ function number(digits: string): string {
 }
 
 // A Bashkir Cyrillic word / number / punctuation.
-const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
+// ⚠ THE NUMBER TOKEN SPANS THE DECIMAL COMMA. Without it the comma is clause punctuation and `5,3 %`
+// read as *биш , өс* — a phrase break inside a quantity, on 24,214 corpus instances. The DOT is
+// deliberately not spanned: this corpus's 98 dot-decimals are percent-encoded wiki anchors, a lens
+// aperture and a page range, and not one is a number (see normalize.ts's header).
+const TOKEN = /([Ѐ-ӿ]+)|(\d+(?:,\d+)?)|([.!?…,;:])/gu;
+
+
+/**
+ * SYMBOL NORMALIZATION — Bashkir. Every word is a ba.wikipedia TOKEN attestation whose examples were read
+ * (see normalize.ts's header and docs/investigations/ba_normalization_investigation.md, run 3):
+ *   `процент` ×206 · `километр` ×69 · `килограмм` ×65 · `доллар` ×221 · `евро` ×87 ·
+ *   `һум` ×142 ("Һум — Рәсәй Федерацияһының милли аҡсаһы") · `квадрат` ×165 · `куб` ×35 · `тапҡыр` ×103.
+ * The corpus's own text supplies the exponent slot verbatim — "майҙаны 130 395 квадрат километр" — which
+ * also fixes the WORD ORDER: Bashkir puts the measure adjective BEFORE the noun, like the East Slavic
+ * layers and unlike Swedish's fused compound.
+ *
+ * ⚠ TURKIC AGREEMENT IS NOT SLAVIC AGREEMENT, and this is the one place a Slavic template would mislead:
+ * a Turkic counted noun stays SINGULAR after a numeral (`5 километр`, never *5 километрҙар*), so every
+ * entry here is a ONE-element `CountForms` array. The tier's default `countForm` then always picks it.
+ *
+ * ⚠ THREE KEYS ARE DELIBERATELY NOT DECLARED, each on a counted corpus fact:
+ *   `г` — `1938 г.` is Russian *года* and `3,300 г` is the gram; the DOT separates them and the tier's
+ *     trailing guard does not reject a dot, so the gram is claimed in normalize.ts step 7 instead.
+ *   `с` — every standalone `с.` is Russian *страниц* in a bibliography (`80 с.`, `707 с.`). It survives
+ *     only as a rate denominator, which is the one Bashkir sense the corpus shows (`м³/с`).
+ *   `т` — *том* in the same bibliographies, not the tonne.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    percent: ["процент"],
+    currency: { "$": ["доллар"], "€": ["евро"], "₽": ["һум"], "£": ["фунт"] },
+    units: {
+        "км": ["километр"], "см": ["сантиметр"], "мм": ["миллиметр"], "кг": ["килограмм"],
+        "мг": ["миллиграмм"], "га": ["гектар"], "м": ["метр"],
+        // LATIN aliases. ba.wikipedia writes the Cyrillic abbreviation, but the engine's TOKEN matches
+        // Cyrillic only, so a foreign-sourced `120 km` loses the unit entirely rather than merely
+        // mispronouncing it — the same reasoning as Russian's and Ukrainian's aliases.
+        "km": ["километр"], "cm": ["сантиметр"], "mm": ["миллиметр"], "kg": ["килограмм"], "m": ["метр"],
+    },
+    unitPer: "бер", // м³/с → куб метр БЕР секунд
+    rateDenominators: { "с": "секунд", "сәғ": "сәғәт", "s": "секунд", "h": "сәғәт" },
+    exponentWords: { squared: ["квадрат"], cubed: ["куб"], position: "before" },
+    multiply: { times: "тапҡыр" },
+    ampersand: "һәм",
+    // Bashkir writes the magnitude word after the figure and often after a DECIMAL (`1 042,4 мең кеше`),
+    // so the tier must hop it to reach a unit on the far side. Turkic magnitudes do not inflect.
+    magnitudes: ["мең", "миллион", "миллиард", "триллион"],
+});
 
 class BashkirPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its ordinal, clock, degree and suffix steps need the figure and its written
+        // suffix still adjacent, which the tier would break — then the INITIALISM pass, then the shared
+        // symbol tier, which matches a unit only when a NUMBER is adjacent.
+        const prepared = SYMBOLS(normalizeBashkirInitialisms(normalizeBashkir(input)));
+        return assembleClauses(prepared, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
-            else if (m[2]) sink.emit(number(m[2]));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(",");
+                sink.emit(number(intPart!));
+                if (frac !== undefined) {
+                    // The decimal separator's own NAME, from ba.wikipedia's article on it: "Өтөр — тыныш
+                    // билдәһе" ("comma — a punctuation mark"), ×27 in 17 articles.
+                    // ⚠ THE FULL SPOKEN READING IS DECLINED, deliberately: Bashkir says *биш бөтөн өс
+                    // ундан* — `бөтөн` ("whole", ×207 and attested in exactly this numeric domain,
+                    // "Бөтөн һандар" = the integers) plus a tail that NAMES THE DECIMAL PLACE
+                    // (ундан / йөҙҙән / меңдән). The place name cannot be composed here, and half of a
+                    // two-part reading is worse than the sign's name. Same call uk made (кома), pl made
+                    // (przecinek) and be made (коска).
+                    sink.emit(phonemizeWord("өтөр"));
+                    for (const dg of frac) sink.emit(number(dg));
+                }
+            }
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");
         });
     }

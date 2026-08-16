@@ -799,6 +799,24 @@ export const CITED_WORDS: Readonly<Record<string, Readonly<Record<string, string
  * The reason string is printed by both tools, so the justification travels with the exemption.
  */
 export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+    ba: {
+        // ⚠ FOUR CLASSES, ONE MEASUREMENT EACH, over the retained text of `tools/corpus/mined/ba.jsonc`
+        // (460 segments of a 618,078-paragraph ba.wikipedia dump). Bashkir Wikipedia carries a great deal
+        // of RUSSIAN-language material — bibliographies, archival citations, quoted decrees — and raw
+        // LaTeX the dump extraction left in, and that is what these four signs are made of.
+        // Every refusal comes green the day a real Bashkir instance appears; none of them is a missing word.
+        equals: "measured: `=` ×17, of which 16 are LaTeX (`a*a^{-1}=a^{-1}*a=e`, `\\aleph_0=\\hbar`), a "
+            + "formula the dump left raw, or a typo inside Russian text (`1996=2006`). The ONE real "
+            + "equation (`рН = 6,4÷6,7`) carries a digit, and normalize.ts step 8 reads it — the word "
+            + "`тигеҙ` is sourced ×350 beside its own formula. The refusal is the letter-flanked probe only",
+        "less-than": "measured: `<` ×0 in the retained text — the sign does not occur at all",
+        "greater-than": "measured: `>` ×1, and it is a THAI REDUPLICATION ARROW in a linguistics example "
+            + "(`เด็ก (dek, «бала») --> เด็กๆ`), not a comparison. One instance of the wrong sense is not "
+            + "evidence for the sign",
+        divide: "measured: `÷` ×1, and it is a RANGE in the Russian convention rather than a division — "
+            + "`рН = 6,4÷6,7` means pH from 6.4 to 6.7. Reading it as a division would assert an "
+            + "arithmetic operation the sentence does not perform",
+    },
     be: {
         // ⚠ NOT A MISSING RULE — a DIGIT-GATED one, and the gate is the whole point. `=` is ×9 in the
         // retained text of `tools/corpus/mined/be.jsonc` and SEVEN of them are BIBLIOGRAPHIC TITLE
