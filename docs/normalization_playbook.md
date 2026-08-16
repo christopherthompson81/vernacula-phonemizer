@@ -367,7 +367,7 @@ you have already met.
 
 ### ⚠ Where a principle is ENFORCED, and why that column exists
 
-This document is 1,900 lines and 61 numbered traps. A Khmer session read it start to finish and then broke
+This document is 1,900 lines and 62 numbered traps. A Khmer session read it start to finish and then broke
 "a count is a lead, never a finding" **three times in a row** — យ័ន (521 hits, every one inside another word),
 បូកដក ("attested ×4", every hit spanning a space the tool had removed), and a threshold justified as "0.46% of
 gold" that was suppressing 7,250 real words. The rule was on the page. The page was not where the decision
@@ -391,7 +391,7 @@ So prefer moving a rule into a TOOL or a TEST over writing it here again, and re
 | principle | traps | in one line |
 |---|---|---|
 | **A guard written for one writing system is blind in another** | 1, 7, 19, 23, 27, 50, 59, 61 | `\b` is ASCII; a case-sensitive class halves an alphabet; word boundaries do not exist in Khmer or Han; `\p{L}` is not a word end in an abugida; a space-assuming guard rejects the ordinary case; batch by encoded length or die only in non-Latin; the word boundary that fixes a Latin backtrack rejects the ordinary Han case; a whole language can be typed in the Latin twins of its own letters, and the majority guard that makes the fold safe is what stops it reaching the short words |
-| **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase |
+| **A count is a lead, never a finding — read the instances** | 2, 8, 21, 25, 34, 37, 41, 62 | loose patterns over-count; zero instances is not correctness; a plausible number deserves the same suspicion as an absurd one; a filled cell is a lead; a small-wiki hit is not evidence about the language; count the collocation, not the bare modifier; test a phrase as a phrase; `=` is a heading, a gloss, a parallel title, a typo or a Pali definition in five languages running, and never an equation |
 | **A refusal needs a check, not a feeling** | 16, 17, 24, 38, 47, 53 | the seam may already exist; "too big" is a count; your own refusal deserves the same scrutiny; an alias may need no new vocabulary; ask whether the tier CAN say it; a refusal is not neutral — price it against the half-declared reading |
 | **A rule must put back what it consumes, and order decides** | 10, 39, 44, 28, 46, 52, 58, 60 | re-emit the consumed word; a rule depending on a character runs before the rule spending it; a slashed key outranks the rate path; **28 and 46 are the same trap twice** — a one-letter unit key claims a dotted designation, and corpus-clean is not safe; a lookbehind rejects a POSITION, so the engine starts later; a guard carrying `.` declines every clause-final figure; an optional group on the wrong side of an alternation truncates the match instead of failing it |
 | **A differential test must hold everything but the variable still** | 18, 26 | **the same cause at two levels** — 18 is the probe (`A&B` → `AB`), 26 is real text; substitute a space, never delete |
@@ -1956,6 +1956,34 @@ both. The block-range tokenizer split **3,424 words** and handed the strays to t
   three languages this fleet serves. So the Turkmen fold lives in its own `normalize.ts` behind an
   "every other letter is one this alphabet uses" guard — and that guard's reach is finite: it protects
   `München` (⟨c⟩ is not Turkmen) and not `señor`. Measured cost in the corpus: zero. Say so in the file.
+
+
+**62. `=` IS ALMOST NEVER AN EQUALS SIGN, AND EACH LANGUAGE'S NON-EQUATION SENSE IS ITS OWN.** Five
+consecutive rounds each printed every instance of `=` in their artifact, and five times the digit-gated
+rule that shipped was licensed by the same finding reached independently:
+
+| language | `=` count | what it actually is | equations |
+|---|---|---|---|
+| gd  | ×50 | wiki HEADING MARKERS (`== Hallstatt agus La Tène ==`) and raw LaTeX | 0 |
+| tt  | ×13 | ETYMOLOGY entries (`aba=«ölkän ir tuğan»`) and a translation glossary | 1 |
+| chv | ×14 | the ISBD PARALLEL-TITLE mark of a library catalogue (`Халăх шкулĕ = Народная школа`) | 3 |
+| tk  | ×13 | a TYPO for a hyphen (`1963=nji ýylyň`), LaTeX, a byte-size table, a unit-equivalence chain | 1 |
+| shn | ×23 | a PALI GLOSS separating a canonical term from its Shan meaning (`ပၼ်ထၵ=ၵေႃႉၵိူတ်ႇၸွမ်းတၢင်း`) | 0 |
+
+- **The rule that survives all five is DIGIT-GATED** — require a digit on at least one side. It takes the
+  five real equations across 113 instances and refuses the other 108.
+- **⚠ AND THE WORD IS OFTEN THE SECOND, INDEPENDENT REASON TO DECLINE.** chv's `тан` is attested as
+  "equal" but POSTPOSITIONALLY, and the tier can only place a connective BETWEEN its operands — so even
+  the three real equations could not have been read correctly there. Check the syntax of the candidate
+  word, not only its existence.
+- **The same holds for the neighbouring signs, and their senses are just as language-specific.** tk's `×`
+  ×11 is a BRICK DIMENSION in archaeology prose (`31×31×7 sm`) rather than a product; shn's `>` ×10 is a
+  SOUND-CHANGE ARROW (`Rhwam > Yhwam > Hyam > Cyam > Sham > Shan`); shn's hyphen-before-a-digit ×19 is a
+  range, a timezone offset, a census LABEL SEPARATOR (`ၸၢႆး-1,226၊ ယိင်း-1,316`) and a level marker, and
+  not once a minus.
+- **The procedure, not the answer, is what transfers:** print every instance of the sign with 50
+  characters of context on each side before writing any rule for it. It is one command and it has changed
+  the answer in every language it has been run in.
 
 
 ## Closing a DROP is not finished until you read the READING

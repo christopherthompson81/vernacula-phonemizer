@@ -863,6 +863,41 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         "greater-than": "measured: `>` \u00d71 and it is a TYPO inside `immunizasiyany\u0148 ge\u00e7irmegine gar\u015f> "
             + "g\u00f6rk`, where the writer meant `\u015f`. Zero occur as a comparison",
     },
+    shn: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/shn.jsonc` (407 segments of a
+        // 43,435-paragraph shn.wikipedia dump), argued in src/languages/shan/normalize.ts. Two of them are
+        // signs used for something no other language in this sweep used them for.
+        percent: "measured: `%` \u00d715 and the class is REAL \u2014 but no readable Shan word for it exists. The "
+            + "obvious compound `\u1050\u1030\u101d\u103a\u1015\u1062\u1000\u103a\u1087` (\u201chead-hundred\u201d) is the word for CENTURY, and this corpus "
+            + "glosses it in English to prove it: \u201c\u1015\u102e\u1050\u1030\u101d\u103a\u1015\u1062\u1000\u103a\u1087 15 (15th Century AD)\u201d, \u201c\u1015\u102e\u1050\u1030\u101d\u103a\u1015\u1062\u1000\u103a\u1087 6 "
+            + "(6th Century AD)\u201d. Two other candidates score 0 and a third came back with no readable "
+            + "example \u2014 which in an UNSPACED script is not evidence, as attest.ts says itself",
+        equals: "measured: `=` \u00d723 and every one is a PALI GLOSS SEPARATOR in the Buddhist-canon articles, "
+            + "which gloss a Pali term against its Shan meaning \u2014 `\u101e\u1031\u101b\u102d\u101d\u101d\u102c\u1066\u102d\u1aa1=\u1000\u1030\u1075\u103a\u1038\u1075\u103c\u103a\u1019\u1062\u1000\u103a\u1087\u1015\u103d\u103c\u1038\u1010\u102e\u1038`, "
+            + "`\u1015\u1075\u1011\u1000=\u1000\u1031\u102c\u1103\u103a\u1000\u102d\u1030\u1010\u103a\u1087\u1078\u103d\u1019\u103a\u1038\u1010\u1062\u1004\u103a\u1038`, `\u113b\u1031\u101d\u1aae\u1019\u103a\u1019=\u1010\u103c\u1062\u1038\u107d\u102e`. ZERO are equations. gd's `=` was wiki headings, tt's "
+            + "etymology glosses, chv's a library catalogue's parallel titles \u2014 this is a fourth sense",
+        "greater-than": "measured: `>` \u00d710 and every one is a SOUND-CHANGE ARROW in the historical-"
+            + "linguistics prose \u2014 `\u101e\u103b\u103c\u102c\u1087\u1019 > \u101e\u103b\u1062\u1019\u103a\u1087 > \u101e\u103b\u1062\u1019\u103a\u1038 (Shan)`, `Rhwam > Yhwam > Hyam > Cyam > "
+            + "Sham > Shan`. Zero are comparisons",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        minus: "measured: `-` before a digit \u00d719 and NOT ONE IS A NEGATIVE. They are ranges "
+            + "(`33-38\u00b0N`, `17 -18`), a timezone offset (`UTC -12`), a LABEL SEPARATOR in census figures "
+            + "(`\u1078\u1062\u103b\u1038-1,226\u104a \u101a\u102d\u1004\u103a\u1038-1,316` \u2014 \u201cmale-1,226, female-1,316\u201d) and a level marker "
+            + "(`\u1078\u1075\u1010\u103a\u1087-5`, `\u1010\u1015\u103a\u1019\u101f\u102c-\u1046`). The range rule requires a DIGIT before the hyphen, so the "
+            + "label and level forms are untouched; no minus word is needed or attested",
+        plus: "measured: `+` \u00d72 and both are a TIMEZONE OFFSET (`UTC +12`, `UTC +6:30`), not an addition",
+        "plus-minus": "measured: `\u00b1` \u00d71 (`4.5672 \u00b1 0.0006 \u103f\u102e\u1087\u101c\u102e\u1087\u101a\u1062\u1071\u103a\u1087\u1015\u102e`). No Shan reading is attested, and "
+            + "dropping it ran the value and its tolerance together into one ten-digit string \u2014 so it takes "
+            + "a PAUSE, which keeps them apart and invents nothing",
+        exponent: "measured: `\u00b2` \u00d72 (`2.5 \u1075\u1019\u00b2`, `7770 km\u00b2`) and no Shan measure word for a squared "
+            + "unit is attested. `exponentWords` is undeclared, so the tier emits the unit and hands the "
+            + "superscript back where the leak gate can see it \u2014 a visible missing WORD rather than an "
+            + "invisible missing reading",
+        divide: "measured: `\u00f7` \u00d70. The slash IS used, and it is a D/M/Y DATE (`10/1/1990`, `9-18/5/1962`) "
+            + "or a paired measurement (`2299/925 \u101c\u1000\u103a\u1038`), never a fraction \u2014 so it takes a pause and no "
+            + "fraction rule is written at all",
+    },
     gd: {
         // ⚠ FOUR REFUSALS, each a measurement over the retained text of `tools/corpus/mined/gd.jsonc`
         // (441 segments of a 49,150-paragraph gd.wikipedia dump), and each argued in

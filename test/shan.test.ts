@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { normalizeShan } from "../src/languages/shan/normalize.ts";
 
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/shan/shan.ts";
@@ -103,5 +104,76 @@ describe("Shan (shn) — the characters that used to read as nothing", () => {
         // inventory — ⟨င တ ထ ပ မ ယ ရ လ ဝ သ⟩ are shared and excluded — so this is a property, not a sample.
         for (const w of ["တႆး", "မိူင်းတႆး", "ၵိၼ်", "ႁတ်းႁၢၼ်"])
             expect(phonemize(w, "shn"), w).toBe(phonemizeWord(w));
+    });
+});
+
+// ── TEXT NORMALIZATION (src/languages/shan/normalize.ts) ────────────────────────────────────────────
+//
+// The evidence for every case is `tools/corpus/mined/shn.jsonc` (shn.wikipedia dump, 43,435 paragraph
+// segments) and the argument is in the normalizer's own header. This layer is SMALL on purpose: the
+// artifact is dense with figures and thin with words for them, and four of its classes are refusals.
+describe("Shan text normalization", () => {
+    const shn = { text: (s: string) => phonemize(s, "shn") };
+
+    test("THE SEPARATOR CONVENTION IS THE ENGLISH ONE, and the dot is free to be a decimal point", () => {
+        // Shan ends sentences with ။, not with the ASCII dot — so `4.54` needed no trade-off, where ba
+        // declined a dot-decimal rule outright and tt found 17 of its 18 were figure references.
+        expect(shn.text("4.54")).toBe("sʰiː˩ haː˧˧˨ sʰiː˩"); // was "four ⟨sentence break⟩ fifty-four"
+        // ⚠ AND THE COMMA GROUPS. `2,759 ထတ်း` sits beside `4300 ထတ်း` in the same sentence.
+        expect(shn.text("2,759")).toBe("sʰɔŋ˨˦ heŋ˨˦ t͡ɕet̚˥ paːk̚˩ haː˧˧˨ sʰip̚˥ kaw˧˧˨");
+        // ⚠ AND THE NATIVE DIGITS ARE FOLDED BY THIS LAYER, not by the engine — `shan.ts` folds at the
+        // top of text(), i.e. AFTER this pass, so a de-grouping rule written there would never see them.
+        expect(shn.text("၉၂၄,၆၀၈")).toBe(shn.text("924,608"));
+        expect(shn.text("၇၀၅၄.၃၇")).toBe(shn.text("7054.37"));
+    });
+
+    test("THE COORDINATE, which this corpus writes BOTH ways in one publication", () => {
+        // "19 ၻီႇၵရီႇ 45 မိၼိတ်ႉ" in words, `၁၈° ၀'` in signs — the gloss is the source.
+        expect(shn.text("၁၈° ၀'")).toBe(shn.text("18 ၻီႇၵရီႇ 0 မိၼိတ်ႉ"));
+        expect(shn.text("၉၄° ၄၀'")).toBe(shn.text("94 ၻီႇၵရီႇ 40 မိၼိတ်ႉ"));
+        // ⚠ The scale name is NOT emitted — no Shan word for Celsius is attested — but the ⟨C⟩ is
+        // consumed rather than left to read as the ENGLISH letter name, which is what it was doing.
+        expect(shn.text("70°C")).toBe(shn.text("70 ၻီႇၵရီႇ"));
+    });
+
+    test("the CLOCK, and the word the corpus already wrote", () => {
+        expect(shn.text("5:23")).toBe(shn.text("5 မူင်း 23 မိၼိတ်ႉ")); // was "five ⟨pause⟩ twenty-three"
+        expect(shn.text("10:00")).toBe(shn.text("10 မူင်း")); // a zero minute is dropped
+        // ⚠ AND IT MUST NOT DOUBLE. `09:00 – 10:00 မူင်း` puts one မူင်း after the whole span.
+        expect(shn.text("10:00 မူင်း")).toBe(shn.text("10 မူင်း"));
+    });
+
+    test("the ERA MARKER is claimed for A.D and REFUSED for B.C, which is what the evidence says", () => {
+        // `ပီၶရိတ်ႉ` is in this corpus's own prose; the negative compound is not, and three instances do
+        // not license inventing one.
+        expect(shn.text("A.D 739")).toBe(shn.text("ပီၶရိတ်ႉ 739"));
+        expect(normalizeShan("(1434 A.D.)")).toBe("(1434 ပီၶရိတ်ႉ)");
+        expect(normalizeShan("B.C 1122")).toBe("B.C 1122");
+    });
+
+    test("ranges, dates and the ± all take a PAUSE, and no connective is invented", () => {
+        expect(normalizeShan("400-500")).toBe("400, 500");
+        expect(normalizeShan("10/1/1990")).toBe("10, 1, 1990"); // a D/M/Y date, never a fraction here
+        expect(normalizeShan("4.5672 ± 0.0006")).toBe("4.5672, 0.0006");
+        // ⚠ THE HYPHEN IS A LABEL SEPARATOR IN CENSUS FIGURES — `ၸၢႆး-1,226၊ ယိင်း-1,316` — so the range
+        // rule requires a DIGIT before it and leaves those alone.
+        expect(normalizeShan("ၸၢႆး-1,226")).toBe("ၸၢႆး-1226");
+        expect(normalizeShan("ၸၼ်ႉ-5")).toBe("ၸၼ်ႉ-5");
+    });
+
+    test("the country-prefixed currency sign, and the tier the corpus glossed", () => {
+        // "50 လၢၼ်ႉၻေႃႇလႃႇ($50 million)" — the corpus names its own sign.
+        expect(shn.text("US$70")).toBe(shn.text("70 တေႃႇလႃႇ"));
+        expect(shn.text("$579")).toBe(shn.text("579 တေႃႇလႃႇ"));
+        expect(shn.text("5950 km")).toBe(shn.text("5950 ၵီႇလူဝ်ႇမီႇတႃႇ"));
+    });
+
+    test("what is REFUSED — and the refusal is the finding", () => {
+        // PERCENT: the obvious compound ႁူဝ်ပၢၵ်ႇ is the word for CENTURY, which this corpus glosses in
+        // English to prove it ("ပီႁူဝ်ပၢၵ်ႇ 15 (15th Century AD)").
+        expect(normalizeShan("10%")).toBe("10%");
+        // `=` is a PALI GLOSS SEPARATOR ×23, zero equations; `>` is a SOUND-CHANGE ARROW ×10.
+        expect(normalizeShan("ပၼ်ထၵ=ၵေႃႉၵိူတ်ႇၸွမ်းတၢင်း")).toBe("ပၼ်ထၵ=ၵေႃႉၵိူတ်ႇၸွမ်းတၢင်း");
+        expect(normalizeShan("Rhwam > Yhwam")).toBe("Rhwam > Yhwam");
     });
 });

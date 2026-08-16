@@ -8,6 +8,8 @@
 import { foldNativeDigits } from "../../core/unicode.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { normalizeShan } from "./normalize.ts";
 import { readForeignRun } from "../../core/foreign.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 
@@ -187,7 +189,27 @@ function numberToShanWords(n: number): string[] {
 // lives, along with the Shan Pali letters ⟨ꧠ ꧡ ꧣ ꧤ⟩. So `ႁတ်းꧦႁၢၼ်ꧦဝႃႈ` tokenized as three separate words
 // with the marks stranded in the gap, and no reduplication rule inside `phonemizeWord` could ever have seen
 // one. The token class and the grapheme table both had a hole, and only fixing both shows a change.
-const TOKEN = /([က-၉၌-ႏႚ-႟ꧠ-꧿ꩠ-ꩿ]+)|(\d+|[႐-႙]+)|([၊။.!?…,;:])/gu;
+/**
+ * The shared SYMBOL tier — DELIBERATELY SMALL. Only the four things this corpus supplies a readable word
+ * for: the dollar (glossed by the corpus itself, "50 လၢၼ်ႉၻေႃႇလႃႇ($50 million)"), the kilometre (glossed
+ * the same way, "2299/925 လၵ်း (5950 km)"), the metre, and the conjunction for `&`.
+ *
+ * ⚠ NO `percent`, NO `exponentWords`, NO `multiply`, NO `bareExponent` — every one of them needs a word
+ * this language's corpus and the wiki probe both decline to supply, and the probe cannot help here
+ * because Shan is unspaced and its counts are substring counts (see normalize.ts). A declared key with an
+ * invented word would read 108 percent signs wrong; an undeclared one leaves them where the leak gates
+ * can see them, which is the whole argument of trap 47's second half.
+ */
+const SYMBOLS = makeSymbolNormalizer({
+    currency: { "$": ["တေႃႇလႃႇ"] },
+    units: { "km": ["ၵီႇလူဝ်ႇမီႇတႃႇ"], "m": ["မီႇတႃႇ"] },
+    ampersand: "လႄႈ",
+});
+
+// ⚠ THE DECIMAL DOT IS SPANNED BY THE NUMBER BRANCH, or the tokenizer's own `.` claims it as a FULL STOP
+// and `4.54` reads as "four ⟨sentence break⟩ fifty-four". Shan ends sentences with `။`, not with the ASCII
+// dot, so nothing is lost by taking it here. `decimals` is 1,967 corpus-wide.
+const TOKEN = /([က-၉၌-ႏႚ-႟ꧠ-꧿ꩠ-ꩿ]+)|(\d+(?:\.\d+)?|[႐-႙]+)|([၊။.!?…,;:])/gu;
 
 /**
  * BURMESE-ONLY CONSONANTS — the letters of the Myanmar block that the SHAN alphabet does not use.
@@ -218,7 +240,10 @@ class ShanPhonemizer implements Phonemizer {
         // Shan digits (U+1090–1099) fold to ASCII up front (core/unicode.ts), so a Shan-digit run composes
         // exactly like a Western one. The token class still admits ႐-႙ so an unfolded digit could never
         // fall between the WORD ranges and vanish.
-        return assembleClauses(foldNativeDigits(input), TOKEN, (m, sink) => {
+        // normalize.ts FIRST — it folds the native digits itself (the engine's own fold runs too late for a
+        // de-grouping rule to see them) and its clock, degree and era steps need the figures still adjacent
+        // to their marks — then the shared symbol tier, which matches a unit only when a NUMBER is adjacent.
+        return assembleClauses(SYMBOLS(normalizeShan(input)), TOKEN, (m, sink) => {
             if (m[1]) {
                 // ⚠ THE ROUTER FIRST, THE OLD BEHAVIOUR AS THE FALLBACK. `readForeignRun` declines when no
                 // router is registered — which is what a direct `import` of this module in a test looks
@@ -228,7 +253,17 @@ class ShanPhonemizer implements Phonemizer {
                 if (foreign !== undefined) { if (foreign !== "") sink.emit(foreign); return; }
                 sink.emit(phonemizeWord(m[1]));
             }
-            else if (m[2]) for (const wd of numberToShanWords(Number(m[2]))) sink.emit(phonemizeWord(wd));
+            else if (m[2]) {
+                const [intPart, frac] = m[2].split(".");
+                for (const wd of numberToShanWords(Number(intPart))) sink.emit(phonemizeWord(wd));
+                // ⚠ NO SEPARATOR WORD, AND THAT IS A MEASURED REFUSAL. Every other layer in this sweep
+                // emits the decimal point's own name — ba өтөр, tt өтер, chv хӳрешке, uk кома — and Shan
+                // has none this corpus will source: `မၢၵ်ႉ` ×116 is the given name *Mark* and the shop
+                // *City Mart*. The fractional digits are read ONE AT A TIME, which is what a reader does
+                // anyway, and the sentence break the ASCII dot was producing is gone.
+                if (frac !== undefined)
+                    for (const dg of frac) for (const wd of numberToShanWords(Number(dg))) sink.emit(phonemizeWord(wd));
+            }
             else if (m[3]) sink.pause(m[3] === "။" || m[3] === "." || m[3] === "!" || m[3] === "?" ? "." : ",");
         });
     }
