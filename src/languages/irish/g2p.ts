@@ -6,6 +6,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const SLENDER_V = MANIFEST.slenderVowels;
 const BROAD_V = MANIFEST.broadVowels;
@@ -102,7 +103,17 @@ export function toSegments(word: string): Seg[] {
         // --- single consonants: broad or slender ---
         const map = consonantSlender(w, i) ? SLENDER : BROAD;
         if (map[c]) cons(map[c]!);
-        else if (/[a-z]/.test(c)) cons(c); // unknown letter: pass through; apostrophe/hyphen/punct → skip
+        else {
+            // ⚠ This used to push the RAW ORTHOGRAPHIC CHARACTER into the phone stream, which is what
+            // core/latinPhones.ts exists to prevent. Irish leaked THREE letters, more than any other
+            // engine with this branch: ⟨q⟩ as the IPA uvular stop /q/ (piquet, Albuquerque), ⟨x⟩, and
+            // ⟨y⟩ — and ⟨y⟩ is the nastiest of the three, because it is a perfectly good IPA symbol for
+            // a close front ROUNDED VOWEL, so an orthographic y silently became a vowel. Found by
+            // scanning the FLEURS IPA for characters this language cannot emit.
+            const p = latinPhone(c, { initial: segs.length === 0, includeH: false });
+            if (p !== undefined) cons(p);
+            else if (/[a-z]/.test(c)) cons(c); // shared reading declined; apostrophe/hyphen/punct → skip
+        }
         i++;
     }
     return segs;

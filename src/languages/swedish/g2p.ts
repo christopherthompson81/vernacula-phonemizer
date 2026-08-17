@@ -8,6 +8,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const VOWELS = "aeiouyåäöé"; // é (idé, armé, kafé) is an always-long /eː/ loanword vowel
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
@@ -204,8 +205,13 @@ export function toSegments(
             continue;
         }
 
-        // unknown grapheme — pass through
-        push(c);
+        // ⚠ unknown grapheme. This used to push the RAW ORTHOGRAPHIC CHARACTER into the phone stream,
+        // which is what core/latinPhones.ts exists to prevent — a ⟨q⟩ survived as the IPA symbol /q/, a
+        // uvular stop Swedish does not have, in Qing / Qatar / Kalaallit. (⟨qu⟩ was already handled, so
+        // `square` was fine and only the bare letter leaked, which is why it went unnoticed.) Found by
+        // scanning the FLEURS IPA for characters this language cannot emit.
+        const p = latinPhone(c, { initial: segs.length === 0, includeH: false });
+        push(p !== undefined ? p : c); // still pass through if even the shared reading declines
         i++;
     }
 

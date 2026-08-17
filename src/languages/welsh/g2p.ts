@@ -7,6 +7,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const DIGRAPHS = MANIFEST.digraphs;
 const NASAL_MUTATION = MANIFEST.nasalMutation;
@@ -142,7 +143,15 @@ export function toSegments(word: string): Seg[] {
 
         // --- single consonants ---
         if (CONSONANTS[c]) segs.push({ ph: CONSONANTS[c]!, nucleus: false });
-        else if (/[a-z]/.test(c)) segs.push({ ph: c, nucleus: false }); // unknown letter: pass through
+        else {
+            // ⚠ This used to push the RAW ORTHOGRAPHIC CHARACTER into the phone stream, which is what
+            // core/latinPhones.ts exists to prevent — a ⟨q⟩ survived as the IPA symbol /q/, a uvular stop
+            // Welsh does not have, in Qing / piquet / Joaquim. Found by scanning the FLEURS IPA for
+            // characters this language cannot emit.
+            const p = latinPhone(c, { initial: segs.length === 0, includeH: false });
+            if (p !== undefined) segs.push({ ph: p, nucleus: false });
+            else if (/[a-z]/.test(c)) segs.push({ ph: c, nucleus: false }); // shared reading declined
+        }
         // apostrophe / hyphen / punctuation: skip
         i += 1;
     }

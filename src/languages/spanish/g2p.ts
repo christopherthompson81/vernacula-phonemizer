@@ -6,6 +6,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 // Vowel classes + the accented→base map are DATA (spanish.jsonc).
 const STRONG = MANIFEST.vowels.strong; // strong vowels (each is its own nucleus; two adjacent = hiatus)
@@ -205,9 +206,16 @@ export function toSegments(word: string): Seg[] {
                     cons("s");
                 }
                 break; // word-initial x → s (xenón); else ks
-            default:
-                if (/[a-zñ]/.test(c)) cons(c);
-                break; // unknown letter: pass through
+            default: {
+                // ⚠ This used to push the RAW ORTHOGRAPHIC CHARACTER into the phone stream, which is
+                // exactly what core/latinPhones.ts exists to prevent — a ⟨q⟩ survived as the IPA symbol
+                // /q/, a uvular stop Spanish does not have, in Qing / Qatar / Kalaallit. Found by
+                // scanning the FLEURS IPA for characters this language cannot emit.
+                const p = latinPhone(c, { initial: segs.length === 0, includeH: false });
+                if (p !== undefined) cons(p);
+                else if (/[a-zñ]/.test(c)) cons(c);
+                break; // still pass through if even the shared reading declines: a typed letter is content
+            }
         }
         i++;
     }

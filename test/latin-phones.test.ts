@@ -63,3 +63,52 @@ describe("input repairs deliver the character that was meant", () => {
         expect(phonemize("ƒoto", "ha")).toBe(phonemize("foto", "ha"));
     });
 });
+
+/**
+ * ⚠ SIX ENGINES NEVER REACHED THE FLOOR ABOVE. Their unknown-letter branch pushed the RAW
+ * ORTHOGRAPHIC CHARACTER into the phone stream instead of calling latinPhone, so the letter did not
+ * fall through to the floor -- it walked straight past it into the output. 46 engines import
+ * latinPhone; welsh, irish, swedish, spanish, catalan and galician did not.
+ *
+ * The tell was a ⟨q⟩ standing in the IPA of five languages that have no /q/ (a uvular stop): cy ×38,
+ * ga ×33, sv ×13, es ×9, ca ×5 in the FLEURS corpora, all of them Qing / Qatar / piquet /
+ * Albuquerque / Joaquim / Kalaallit. It was found by scanning each language's IPA output for
+ * characters that language's engine should not be able to emit -- the same defect shape as fula's
+ * literal "sh", and equally invisible to any distance metric, because /q/ is a perfectly ordinary
+ * phone and only WRONG FOR THIS LANGUAGE.
+ *
+ * ⚠ Swedish is why the class survived review: ⟨qu⟩ already had a rule, so `square` was correct and
+ * only the BARE letter leaked.
+ *
+ * Irish leaked three, and ⟨y⟩ is the nastiest of them: it is a valid IPA symbol for a close front
+ * ROUNDED VOWEL, so an orthographic y did not look wrong at all -- it silently became a vowel.
+ */
+describe("the six engines that bypassed the floor now reach it", () => {
+    const LEAKY = ["cy", "ga", "sv", "es", "ca", "gl"] as const;
+
+    test("no engine emits a raw ⟨q⟩ for the letter q", async () => {
+        for (const lang of LEAKY) {
+            const out = await phonemize("aqa", lang);
+            expect(out, `${lang} still leaks a raw q`).not.toContain("q");
+        }
+    });
+
+    test("the names that exposed it read with /k/", async () => {
+        expect(await phonemize("Qing", "cy")).toBe("kˈiŋ");
+        expect(await phonemize("Qing", "ca")).toBe("kˈiŋ");
+        expect(await phonemize("Qatar", "sv")).toBe("katˈɑːr");
+        expect(await phonemize("piquet", "cy")).toBe("pikˈɨɛt");
+        expect(await phonemize("Albuquerque", "ga")).toBe("ˈal̪ˠbˠəkəəɾʲkəə");
+    });
+
+    test("Irish also leaked ⟨x⟩ and ⟨y⟩, and ⟨y⟩ is a REAL IPA vowel so it looked fine", async () => {
+        expect(await phonemize("axa", "ga")).not.toContain("x");
+        expect(await phonemize("aya", "ga")).not.toContain("y");
+    });
+
+    // ⚠ THE REGRESSION GUARD. Swedish ⟨qu⟩ had its own rule and was always correct; the fix must not
+    // reach past the bare letter and disturb it.
+    test("a digraph that already had a rule is untouched", async () => {
+        expect(await phonemize("square", "sv")).toBe("skvˈɑ̀ːrɛ");
+    });
+});
