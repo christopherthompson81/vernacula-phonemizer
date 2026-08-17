@@ -245,11 +245,19 @@ describe("Xhosa text normalization", () => {
 describe("embedded English words route to the foreign reader instead of becoming clicks", () => {
     const CLICK = /[ǀǁǃǂ]/u;
 
-    test("an English word with a click letter is read as English", () => {
-        for (const w of ["china", "arctic", "microsoft", "california", "hurricane"]) {
+    test("an English word with a click letter AND a non-Nguni shape is read as English", () => {
+        // Each of these carries a cluster or a consonant ending Nguni does not license, so it cannot be a
+        // Nguni word and routing is unambiguous.
+        for (const w of ["arctic", "microsoft", "hurricane", "district", "electric", "atlantic"]) {
             const out = phonemize(`nge ${w} yakhe`, "xh");
             expect(out, `${w} still has a click`).not.toMatch(CLICK);
         }
+    });
+
+    test("...but a vowel-final CV English word stays NATIVE, and that is the deliberate trade", () => {
+        // `china` and `cima` are indistinguishable as orthography, so routing on shape alone would take
+        // Nguni words with it. These keep a wrong click; the alternative was reading `xhosa` as English.
+        expect(phonemize("nge china yakhe", "xh")).toMatch(CLICK);
     });
 
     test("...but NATIVE words keep their clicks — c/q/x are real Nguni letters", () => {
@@ -266,4 +274,17 @@ describe("embedded English words route to the foreign reader instead of becoming
         const native = phonemize("uma ngo ama kahle yonke kuba moya", "xh");
         expect(native).not.toMatch(/ɹ|æ|ɚ/u); // no English phones leaked in
     });
+});
+
+// ⚠ REGRESSION GUARD for the review finding: signals 1+2 alone (click letter + English dictionary) routed
+// six real Nguni words to English, because CMUdict carries them as names or brands. `cha` occurs in the
+// zu FLEURS corpus, so this was live corruption rather than a hypothesis.
+describe("Nguni words that collide with the English dictionary stay native", () => {
+    test.each([["cha"], ["cela"], ["caba"], ["cima"], ["coca"], ["xhosa"]])(
+        "%s is not routed to English",
+        (w) => {
+            const out = phonemize(w, "xh");
+            expect(out, `${w} was routed to English`).toMatch(/[ǀǁǃǂ]/u);
+        },
+    );
 });

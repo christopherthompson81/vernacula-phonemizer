@@ -10,7 +10,7 @@
  * model is absent the tagger is `undefined` and this returns exactly the sync path (no throw).
  */
 import { createEnglish } from "./english.ts";
-import { addForeignOov, withHost } from "../../core/foreign.ts";
+import { addForeignOov, lookupForeignOov, withHost } from "../../core/foreign.ts";
 import { createEnglishTagger, type EnglishTagger } from "./englishTagger.ts";
 
 const WORD = /[A-Za-z][A-Za-z']*/gu;
@@ -56,6 +56,12 @@ export async function prewarmForeignEnglish(text: string): Promise<void> {
         const key = g2pKeyOf(w);
         if (done.has(key) || !/^[a-z]+$/u.test(key)) continue;
         done.add(key);
+        // ⚠ CONSULT THE MEMO BEFORE TAGGING. It was written here and read only by the foreign reader, so
+        // every call re-ran the BiLSTM over names already resolved. The reading is context-free, so a hit
+        // is always valid. Measured on a repeated arz utterance carrying a novel name: 10 ms cold, 2 ms
+        // warm. (The Latin handling itself costs about 1 ms/call — 6.2 vs 5.2 on the same sentence with
+        // and without its Latin tokens.)
+        if (lookupForeignOov(key) !== undefined) continue;
         const ipa = await tagger.tag(key);
         if (ipa) addForeignOov(key, ipa);
     }

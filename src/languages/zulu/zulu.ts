@@ -134,26 +134,46 @@ const SYMBOLS = makeSymbolNormalizer({
 export type ForeignPhonemizer = (latin: string) => string;
 
 /**
- * Is this token foreign? BOTH signals are required, and the conjunction is the whole design:
+ * Nguni onsets — singles, digraphs and trigraphs. Used only by `isNguniPossible` below.
+ */
+const NGUNI_ONSET: ReadonlySet<string> = new Set([
+    ..."bcdfghjklmnpqrstvwxyz".split(""),
+    "bh", "ch", "dl", "dy", "fy", "gc", "gq", "gx", "hl", "kh", "kw", "gw", "hw", "mb", "mf", "mp",
+    "mv", "nc", "nd", "ng", "nj", "nk", "nq", "nt", "nx", "ny", "nz", "ph", "qh", "sh", "th", "ts",
+    "tsh", "tj", "ty", "xh", "zw", "sw", "shw", "bw", "ngc", "ngq", "ngx", "ntsh", "nkw", "ngw",
+    "mbw", "ndw", "njw", "nyw", "hh", "dw", "tw", "kl", "pl", "qw", "cw", "xw",
+]);
+
+/** Could this be a Nguni word at all? Vowel-final, and every consonant run a legal onset. */
+function isNguniPossible(word: string): boolean {
+    if (!/[aeiou]$/u.test(word)) return false;
+    return word.split(/[aeiou]+/u).filter(Boolean).every((run) => NGUNI_ONSET.has(run));
+}
+
+/**
+ * Is this token foreign? THREE signals, all required, and each one is load-bearing:
  *
  *   1. it contains c, q or x — the click letters, i.e. the letters whose misreading is the actual defect;
- *   2. it is a known ENGLISH word — supplied by the registry as the CMUdict lookup.
+ *   2. it is a known ENGLISH word — the CMUdict lookup, supplied by the registry;
+ *   3. it could NOT be a Nguni word — not vowel-final, or carrying a cluster Nguni does not license.
  *
- * Neither alone is safe. Signal 2 alone is badly unsafe: the most frequent English-dictionary hits in
- * these corpora are ordinary Nguni words — `uma` ×105, `ngo` ×95, `ama` ×67, `kahle`, `yonke`, `kuba`,
- * `moya` — and routing those to English would be far worse than the clicks. Signal 1 alone is unsafe in
- * the other direction, since c/q/x are native click letters (`ukucula`, `iqiniso`, `ixesha`).
+ * Signal 2 alone is badly unsafe: the most frequent English-dictionary hits in these corpora are ordinary
+ * Nguni words — `uma` ×105, `ngo` ×95, `ama` ×67, `kahle`, `yonke` — and routing those would be far worse
+ * than the clicks. Signal 1 alone fails the other way, c/q/x being native click letters.
  *
- * Together they are precise. Over both corpora the conjunction selects 477 distinct tokens — china,
- * atlantic, hurricane, francisco, iraq, microsoft, xinhua, albuquerque — and NOT ONE Nguni word.
+ * ⚠ SIGNAL 3 WAS ADDED IN REVIEW, and it is not optional. Signals 1+2 alone routed six real Nguni words to
+ * English — `cha` ("no"), `cela`, `caba`, `cima`, `coca` and, worst, **`xhosa`** — because CMUdict carries
+ * all of them as names or brands. `cha` occurs in the zu corpus, so this was live corruption, not a
+ * hypothetical. Requiring the token to be phonotactically impossible in Nguni removes every one.
  *
- * ⚠ A word WITHOUT a click letter is deliberately left to the Nguni g2p. `visa`, `asia`, `tsunami`,
- * `europe` read as reasonable nativisations there, which is what the OmniVoice ASR probe measured readers
- * actually doing; sending them to English would import an accent the audio does not have. This routes only
- * where staying native is not merely accented but wrong.
+ * ⚠ IT COSTS COVERAGE, DELIBERATELY. A vowel-final CV English name is shaped exactly like a Nguni word —
+ * `china` and `cima` are indistinguishable orthographically — so 46 tokens / 65 occurrences (china, chile,
+ * canada, mexico, congo, cuba) stay native and keep a wrong click. That is the trade this repo already
+ * makes elsewhere: a wrong high-traffic word is worse than a missing one, and `xhosa` read as English is
+ * about as wrong as this language gets. 435 tokens / 604 occurrences still route.
  */
 export function isForeignNguniWord(word: string, isEnglishWord: (w: string) => boolean): boolean {
-    return /[cqx]/u.test(word) && isEnglishWord(word);
+    return /[cqx]/u.test(word) && !isNguniPossible(word) && isEnglishWord(word);
 }
 
 class ZuluPhonemizer implements Phonemizer {
