@@ -539,9 +539,9 @@ function build(lang: string): Phonemizer {
         case "tg":
             return createTajik();
         case "zu":
-            return createZulu();
+            return createZulu(readAsEnglish, (w) => (getPhonemizer("en") as EnglishPhonemizer).knownWord(w) !== undefined);
         case "xh":
-            return createXhosa();
+            return createXhosa(readAsEnglish, (w) => (getPhonemizer("en") as EnglishPhonemizer).knownWord(w) !== undefined);
         case "sr":
             return createSerbian();
         // Croatian (hrvatski) — a THIN module that REUSES the Serbian engine's Serbo-Croatian g2p (identical

@@ -236,3 +236,34 @@ describe("Xhosa text normalization", () => {
             expect(normalizeXhosa(probe)).not.toMatch(/^\s|\s$|\s\s/u);
     });
 });
+
+// ⚠ NGUNI IS WRITTEN IN LATIN, so its tokenizer claims embedded English outright — there is no unclaimed
+// gap for core/foreign.ts to fill, the way there is for a non-Latin-script host. The g2p then reads the
+// English word, and c/q/x are CLICK letters, so the result is confidently wrong rather than merely
+// accented: `hurricane center` read [hurrikǀˈaːnɛ kǀˈɛːntʼɛr]. 19.2% of xh and 14.8% of zu FLEURS
+// utterances carry such a word.
+describe("embedded English words route to the foreign reader instead of becoming clicks", () => {
+    const CLICK = /[ǀǁǃǂ]/u;
+
+    test("an English word with a click letter is read as English", () => {
+        for (const w of ["china", "arctic", "microsoft", "california", "hurricane"]) {
+            const out = phonemize(`nge ${w} yakhe`, "xh");
+            expect(out, `${w} still has a click`).not.toMatch(CLICK);
+        }
+    });
+
+    test("...but NATIVE words keep their clicks — c/q/x are real Nguni letters", () => {
+        // Each of these is an ordinary Xhosa word whose c/q/x IS a click. Routing them would be a far
+        // worse error than the one this fixes.
+        for (const w of ["ukucula", "iqiniso", "ixesha"]) {
+            expect(phonemize(w, "xh"), `${w} lost its click`).toMatch(CLICK);
+        }
+    });
+
+    test("...and English-dictionary COLLISIONS are left alone, which is why both signals are required", () => {
+        // The most frequent CMUdict hits in these corpora are Nguni words — uma ×105, ngo ×95, ama ×67.
+        // The click-letter signal is what keeps them native; the English-word signal alone would wreck them.
+        const native = phonemize("uma ngo ama kahle yonke kuba moya", "xh");
+        expect(native).not.toMatch(/ɹ|æ|ɚ/u); // no English phones leaked in
+    });
+});

@@ -121,7 +121,47 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["skwele"], position: "after" },
 });
 
+/**
+ * Reader for an embedded FOREIGN word, wired to English by the registry.
+ *
+ * ⚠ WHY THIS LANGUAGE NEEDS ONE AT ALL. The engines that get foreign runs for free are the ones whose
+ * tokenizer matches only their own script: the Latin they do not claim becomes a gap and `emitUnclaimed`
+ * fills it (core/foreign.ts). Nguni is written in Latin, so it claims embedded English outright and the
+ * g2p reads it — and c, q and x are CLICK letters, so the result is confidently wrong rather than merely
+ * accented: `hurricane center` read [hurrikǀˈaːnɛ kǀˈɛːntʼɛr], `china` [kǀʰˈiːna].
+ * Measured on the OmniVoice FLEURS corpora: 19.2% of xh and 14.8% of zu utterances carry such a word.
+ */
+export type ForeignPhonemizer = (latin: string) => string;
+
+/**
+ * Is this token foreign? BOTH signals are required, and the conjunction is the whole design:
+ *
+ *   1. it contains c, q or x — the click letters, i.e. the letters whose misreading is the actual defect;
+ *   2. it is a known ENGLISH word — supplied by the registry as the CMUdict lookup.
+ *
+ * Neither alone is safe. Signal 2 alone is badly unsafe: the most frequent English-dictionary hits in
+ * these corpora are ordinary Nguni words — `uma` ×105, `ngo` ×95, `ama` ×67, `kahle`, `yonke`, `kuba`,
+ * `moya` — and routing those to English would be far worse than the clicks. Signal 1 alone is unsafe in
+ * the other direction, since c/q/x are native click letters (`ukucula`, `iqiniso`, `ixesha`).
+ *
+ * Together they are precise. Over both corpora the conjunction selects 477 distinct tokens — china,
+ * atlantic, hurricane, francisco, iraq, microsoft, xinhua, albuquerque — and NOT ONE Nguni word.
+ *
+ * ⚠ A word WITHOUT a click letter is deliberately left to the Nguni g2p. `visa`, `asia`, `tsunami`,
+ * `europe` read as reasonable nativisations there, which is what the OmniVoice ASR probe measured readers
+ * actually doing; sending them to English would import an accent the audio does not have. This routes only
+ * where staying native is not merely accented but wrong.
+ */
+export function isForeignNguniWord(word: string, isEnglishWord: (w: string) => boolean): boolean {
+    return /[cqx]/u.test(word) && isEnglishWord(word);
+}
+
 class ZuluPhonemizer implements Phonemizer {
+    constructor(
+        private foreign?: ForeignPhonemizer,
+        private isEnglishWord?: (w: string) => boolean,
+    ) {}
+
     text(input: string): string {
         // normalize.ts FIRST, then the shared symbol tier — the era, clock, range, rate and degree steps
         // all need the number and its neighbour still adjacent, which the tier would break. The one rule
@@ -129,7 +169,13 @@ class ZuluPhonemizer implements Phonemizer {
         return assembleClauses(SYMBOLS(normalizeZulu(input)), TOKEN, (m, sink) => {
             // Compound (noun-class prefix + Titlecase stem, eNingizimu / INingizimu) splits before an internal
             // Titlecase run; a full-word tone-lexicon hit is threaded across the parts.
-            if (m[1]) for (const part of phonemizeCompound(nat(m[1]))) sink.emit(part);
+            if (m[1]) {
+                // Foreign FIRST: a click letter inside an English word is not a click.
+                if (this.foreign !== undefined && this.isEnglishWord !== undefined &&
+                    isForeignNguniWord(m[1].toLowerCase(), this.isEnglishWord))
+                    sink.emit(this.foreign(m[1]));
+                else for (const part of phonemizeCompound(nat(m[1]))) sink.emit(part);
+            }
             // Numbers are ordinary Zulu nouns: tone them via the lexicon like any other word (ishumi→toned)
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))
@@ -141,6 +187,6 @@ class ZuluPhonemizer implements Phonemizer {
         });
     }
 }
-export function createZulu(): Phonemizer {
-    return new ZuluPhonemizer();
+export function createZulu(foreign?: ForeignPhonemizer, isEnglishWord?: (w: string) => boolean): Phonemizer {
+    return new ZuluPhonemizer(foreign, isEnglishWord);
 }

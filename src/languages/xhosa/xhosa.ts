@@ -84,13 +84,59 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["isikwere", "izikwere"], position: "after" },
 });
 
+/**
+ * Reader for an embedded FOREIGN word, wired to English by the registry.
+ *
+ * ⚠ WHY THIS LANGUAGE NEEDS ONE AT ALL. The engines that get foreign runs for free are the ones whose
+ * tokenizer matches only their own script: the Latin they do not claim becomes a gap and `emitUnclaimed`
+ * fills it (core/foreign.ts). Nguni is written in Latin, so it claims embedded English outright and the
+ * g2p reads it — and c, q and x are CLICK letters, so the result is confidently wrong rather than merely
+ * accented: `hurricane center` read [hurrikǀˈaːnɛ kǀˈɛːntʼɛr], `china` [kǀʰˈiːna].
+ * Measured on the OmniVoice FLEURS corpora: 19.2% of xh and 14.8% of zu utterances carry such a word.
+ */
+export type ForeignPhonemizer = (latin: string) => string;
+
+/**
+ * Is this token foreign? BOTH signals are required, and the conjunction is the whole design:
+ *
+ *   1. it contains c, q or x — the click letters, i.e. the letters whose misreading is the actual defect;
+ *   2. it is a known ENGLISH word — supplied by the registry as the CMUdict lookup.
+ *
+ * Neither alone is safe. Signal 2 alone is badly unsafe: the most frequent English-dictionary hits in
+ * these corpora are ordinary Nguni words — `uma` ×105, `ngo` ×95, `ama` ×67, `kahle`, `yonke`, `kuba`,
+ * `moya` — and routing those to English would be far worse than the clicks. Signal 1 alone is unsafe in
+ * the other direction, since c/q/x are native click letters (`ukucula`, `iqiniso`, `ixesha`).
+ *
+ * Together they are precise. Over both corpora the conjunction selects 477 distinct tokens — china,
+ * atlantic, hurricane, francisco, iraq, microsoft, xinhua, albuquerque — and NOT ONE Nguni word.
+ *
+ * ⚠ A word WITHOUT a click letter is deliberately left to the Nguni g2p. `visa`, `asia`, `tsunami`,
+ * `europe` read as reasonable nativisations there, which is what the OmniVoice ASR probe measured readers
+ * actually doing; sending them to English would import an accent the audio does not have. This routes only
+ * where staying native is not merely accented but wrong.
+ */
+export function isForeignNguniWord(word: string, isEnglishWord: (w: string) => boolean): boolean {
+    return /[cqx]/u.test(word) && isEnglishWord(word);
+}
+
 class XhosaPhonemizer implements Phonemizer {
+    constructor(
+        private foreign?: ForeignPhonemizer,
+        private isEnglishWord?: (w: string) => boolean,
+    ) {}
+
     text(input: string): string {
         // normalize.ts runs BEFORE the shared tier, and leaves every operand as DIGITS precisely so the
         // tier can still see number–unit adjacency (the one exception is the clock, which must produce
         // words for the `na-` connective and therefore claims its own marker and timezone).
         return assembleClauses(SYMBOLS(normalizeXhosa(input)), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
+            if (m[1]) {
+                // Foreign FIRST: a click letter in an English word is not a click.
+                if (this.foreign !== undefined && this.isEnglishWord !== undefined &&
+                    isForeignNguniWord(m[1].toLowerCase(), this.isEnglishWord))
+                    sink.emit(this.foreign(m[1]));
+                else sink.emit(phonemizeWord(nat(m[1])));
+            }
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) {
@@ -102,6 +148,6 @@ class XhosaPhonemizer implements Phonemizer {
 }
 
 /** Build the Xhosa phonemizer (shared Nguni g2p + penultimate stress; tone deferred). */
-export function createXhosa(): Phonemizer {
-    return new XhosaPhonemizer();
+export function createXhosa(foreign?: ForeignPhonemizer, isEnglishWord?: (w: string) => boolean): Phonemizer {
+    return new XhosaPhonemizer(foreign, isEnglishWord);
 }
