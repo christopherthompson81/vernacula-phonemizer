@@ -1,0 +1,1528 @@
+// WIKIPEDIA WORD ATTESTATION — bs. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "bs",
+        "wiki": "bs.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "prvi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…Prvi svjetski rat bio je globalni rat uglavnom vođen na teritori…",
+                "…an je jednostavno svjetski rat ili Veliki rat, a nakon toga Prvi svjetski rat, termin koji se uglavnom i koristi. U Americi…",
+                "…. rekao: \"Neki ratovi imaju ime. Ovo je Veliki rat\". Izraz \"Prvi svjetski rat\" je prvi put korišten u septembru 1914. od str…",
+                "…imaju ime. Ovo je Veliki rat\". Izraz \"Prvi svjetski rat\" je prvi put korišten u septembru 1914. od strane njemačkog filozofa…",
+                "…da \"nema sumnje da će tok i karakter Evropskog rata postati Prvi svjetski rat u punom smislu te riječi\". Nakon početka Drugo…",
+                "…početka Drugog svjetskog rata 1939, smisao Svjetski rat ili Prvi svjetski rat je postao standard. == Pozadina == === Politič…"
+            ]
+            },
+        {
+                "word": "drugi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…Drugi svjetski rat bio je svjetski rat, koji je trajao od 1939. d…",
+                "…središta i jedine dvije upotrebe nuklearnog oružja u ratu. Drugi svjetski rat bio je daleko najsmrtonosniji sukob u ljudskoj…",
+                "…kih i japanskih čelnika vođena su suđenja za ratne zločine. Drugi svjetski rat općenito je započeo 1. septembra 1939. kada je…",
+                "…945, čime su Saveznici zabilježili potpunu pobjedu u Aziji. Drugi svjetski rat promijenio je politički poredak i društvenu st…",
+                "…trećine (engleske) Kraljevske mornarice. Italija započinje drugi italo-abisinijski rat 3. oktobra, vršeći invaziju na Etiopi…",
+                "…ivanja pakta, Hitler napao Poljsku, čime formalno započinje Drugi svjetski rat. === Azija === Za vrijeme 1920-tih godina čini…"
+            ]
+            },
+        {
+                "word": "treći",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…Treći desni gornji kutnjak (lat. dens molaris tercius superior s.…",
+                "…koja se obilježavaju na sljedeći način: stalni gornji desni treći kutnjak – 18; stalni gornji lijevi treći kutnjak – 28. Umnj…",
+                "…talni gornji desni treći kutnjak – 18; stalni gornji lijevi treći kutnjak – 28. Umnjak pokazuje pravilan znak ugla i luka i d…",
+                "…preostale države i ponovo osvoje Jeruzalem, organizirali i Treći krstaški rat. Njemačko-rimski car Fridrih I Barbarossa uspi…",
+                "…ca, te dakako između kršćana i muslimana. Nedovršeni članak Treći krstaški rat koji govori o historiji treba dopuniti. Dopuni…",
+                "…Njemačka, poznata i kao Nacionalsocijalistička Njemačka ili Treći rajh (njemački: Drittes Reich), zvanično Njemački rajh (193…"
+            ]
+            },
+        {
+                "word": "četvrti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…Četvrti krstaški rat (1202. - 1204.) je je bio zapadnoevropska oruž…",
+                "…su Nikeja, Trapezund i Epir, su povratili Konstantinopolj. Četvrti križarski rat se smatra jednim od konačnih djela crkvenog r…",
+                "…Četvrti korpus Armije Republike Bosne i Hercegovine bio je jedan od…",
+                "…dine komandant korpusa je bio Arif Pašalić. == Historija == Četvrti korpus je osnovan 17. novembra 1992. godine naredbom načeln…",
+                "…Četvrti bosanskohercegovački pješadijski regiment poznatiji pod naz…",
+                "…nije, u alpsko selo Log pod Mangartom 1916. godine došao je Četvrti bošnjački regiment. Bošnjaci su bili poznati kao neustrašiv…"
+            ]
+            },
+        {
+                "word": "peti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…Peti korpus Armije Republike Bosne i Hercegovine bio je jedan od…",
+                "…a. Tokom operacije \"Sana '95\", vođene u jesen 1995. godine, Peti korpus je u potpunosti porazio Abdićeve snage i zauzeo Veli…",
+                "…== Naoružanje na dan formiranja korpusa == Danom formiranja Peti korpus je u svom naoružanju posjedovao ukupno 2140 cijevi o…",
+                "…viteške (502. i 505). == Reference == == Vanjski linkovi == Peti korpus Armije RBiH 1992-1995 Vojska.net: Peti korpus Armije…",
+                "…ki linkovi == Peti korpus Armije RBiH 1992-1995 Vojska.net: Peti korpus Armije RBiH Vojska.net: 501. brigada Petog korpusa A…",
+                "…Peti mješoviti artiljerijski divizion formiran je 25. februara 1…"
+            ]
+            },
+        {
+                "word": "šesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 54,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Šesti kongres Komunističke partije Jugoslavije (makedonski: Шеста…",
+                "…онгрес на Комунистичката партија на Југославија; slovenski: Šesti kongres Komunistične partije Jugoslavije) održan je od 2. d…",
+                "…Šesti korpus Armije Republike Bosne i Hercegovine je bio jedan od…",
+                "…NBA Šesti igrač godine jest nagrada koju NBA liga dodjeljuje najkoris…",
+                "…Šesti igrač u košarci nije starter, ali ulazi s klupe mnogo više…",
+                "…d njih. Njegove statistike slične su statistikama startera. Šesti igrač obično je igrač koji može igrati na više pozicija, št…"
+            ]
+            },
+        {
+                "word": "sedmi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Sedmi korpus Armije Republike Bosne i Hercegovine je bio jedan od…",
+                "…Sedmi pečat (švedski: Det sjunde inseglet) jest švedski historijs…",
+                "…dnosi na odlomak iz biblije koji kaže: \"Kad Jaganjac otvori sedmi pečat, nasta muk na nebu oko pola sata\". Sedmi pečat se sma…",
+                "…anjac otvori sedmi pečat, nasta muk na nebu oko pola sata\". Sedmi pečat se smatra svjetskim klasikom i jednim od najboljih fi…",
+                "…isere. == Napomene == == Reference == == Vanjski linkovi == Sedmi pečat na IMDb-ju Sedmi pečat na AllMovieju Sedmi pečat na F…",
+                "…= Reference == == Vanjski linkovi == Sedmi pečat na IMDb-ju Sedmi pečat na AllMovieju Sedmi pečat na Filmskoj banci podataka…"
+            ]
+            },
+        {
+                "word": "osmi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Osmi krstaški rat (1270.) je bio jedan u nizu ratova koje su pov…",
+                "…Osmi putnik (en. Alien) jest naučnofantastični horor režisera Ri…",
+                "…4 Jenson Button - 50. mjesta grid kazna - koristiti sedmi i osmi motora, sedmi i osmi MGU-K, osmi i deveti turbopunjača, osm…",
+                "…mjesta grid kazna - koristiti sedmi i osmi motora, sedmi i osmi MGU-K, osmi i deveti turbopunjača, osmi i deveti MGU-H. ^5…",
+                "…kazna - koristiti sedmi i osmi motora, sedmi i osmi MGU-K, osmi i deveti turbopunjača, osmi i deveti MGU-H. ^5 Fernando Alo…",
+                "…smi motora, sedmi i osmi MGU-K, osmi i deveti turbopunjača, osmi i deveti MGU-H. ^5 Fernando Alonso - 55. mjesta grid kazna…"
+            ]
+            },
+        {
+                "word": "deveti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Deveti krstaški rat, ponekad spajan i smatran osmim krstaškim rato…",
+                "…ra i njegovog pokušaja da uništi preostale krstaške zemlje. Deveti po redu rat protiv muslimana je dobro zapečeo za engleskog…",
+                "…Deveti saziv Narodne skupštine Republike Srpske konstituisan je 24…",
+                "…o Alonso - 35. mjesta grid kazna - koristiti deseti motora, deveti i deseti turbopunjača, deveti i deseti MGU-H, sedmi elektro…",
+                "…na - koristiti deseti motora, deveti i deseti turbopunjača, deveti i deseti MGU-H, sedmi elektronske kontrolne kutije. ^2 Robe…",
+                "…ne od 20 mjesta - koristio jedanaesti turbopunjača i MGU-H, deveti motor. ^4 Stoffel Vandoorne - kazne od 35 mjesta - koristio…"
+            ]
+            },
+        {
+                "word": "deseti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…ek je period od 901. do 1000. godine Julijanskog kalendara. Deseti vijek se smatra jednim od najmračnijih perioda u evropskoj…",
+                "…. trka za Veliku nagradu Brazila. Lewis Hamilton osvojio je deseti pol poziciju ove sezone i 82. put u karijeri. Vozač Mercede…",
+                "…put u karijeri. Vozač Mercedesa Lewis Hamilton pobijedio je deseti put u sezoni i 72. u karijeri. Na drugom mjestu završio je…",
+                "…volu za trku od stjuarda. 70. mjesta grid kazna - koristiti deseti i jedanaesti motora; deseti, jedanaesti i dvanaesti turbopu…",
+                "…. mjesta grid kazna - koristiti deseti i jedanaesti motora; deseti, jedanaesti i dvanaesti turbopunjača; deseti, jedanaesti i…",
+                "…naesti motora; deseti, jedanaesti i dvanaesti turbopunjača; deseti, jedanaesti i dvanaesti MGU-H; deveti i deseti MGU-K; šesti…"
+            ]
+            },
+        {
+                "word": "jedanaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…ača. ^2 Fernando Alonso - 15. mjesta grid kazna - koristiti jedanaesti motora i zamjena mjenjača. ^3 Jenson Button nije sudjelovao…",
+                "…rku od stjuarda. 70. mjesta grid kazna - koristiti deseti i jedanaesti motora; deseti, jedanaesti i dvanaesti turbopunjača; deseti…",
+                "…grid kazna - koristiti deseti i jedanaesti motora; deseti, jedanaesti i dvanaesti turbopunjača; deseti, jedanaesti i dvanaesti MG…",
+                "…otora; deseti, jedanaesti i dvanaesti turbopunjača; deseti, jedanaesti i dvanaesti MGU-H; deveti i deseti MGU-K; šesti elektronske…",
+                "…ka za Veliku nagradu Abu Dhabija. Lewis Hamilton osvojio je jedanaesti pol poziciju ove sezone i 83. put u karijeri. Vozač Mercede…",
+                "…put u karijeri. Vozač Mercedesa Lewis Hamilton pobijedio je jedanaesti put u sezoni i 73. u karijeri. Na drugom mjestu završio je…"
+            ]
+            },
+        {
+                "word": "dvanaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…koristiti deseti i jedanaesti motora; deseti, jedanaesti i dvanaesti turbopunjača; deseti, jedanaesti i dvanaesti MGU-H; deveti…",
+                "…, jedanaesti i dvanaesti turbopunjača; deseti, jedanaesti i dvanaesti MGU-H; deveti i deseti MGU-K; šesti elektronske kontrolne k…",
+                "…odnog imama, sa izuzetkom Husejna, koji je bio brat Hasana. Dvanaesti i posljednji imam je Muhammed el-Mehdi, za kojeg dvanaestoi…",
+                "…ja. Lewis Hamilton osvojio je 61. pol pozicija u karijeri i dvanaesti ove sezone. Hamilton pobijedio je u Abu Dabiju, ostvarijo 5…",
+                "…Elara (lat. Elar) je dvanaesti, poznati, Jupiterov satelit. Po grčkoj mitologiji, Elara je…",
+                "…0. augusta 2015. predstavljalo troje atletičara. Ovo je bio dvanaesti nastup atletičara iz Bosne i Hercegovine na Svjetskim prven…"
+            ]
+            },
+        {
+                "word": "trinaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…ertoto kupa 2000. U Serie A proveo je 39 sezona, po čemu je trinaesti. Tradicionalna boja je crno-bijela. Domaće utakmice igra na…",
+                "…Ananka (lat. Ananke) je trinaesti, poznati, Jupiterov satelit. Po rimskoj mitologiji, Ananka…",
+                "…Eurosong 1968. bio je trinaesti Eurosong, održan 6. aprila 1968. Pobjednik je bila španska…",
+                "…na tajanstvenoj pustari (engl. Five Go to Mystery Moor) je trinaesti u nizu romana iz dječijeg serijala Pet prijatelja, britansk…",
+                "…om. Bilo koji mjesec koji započinje nedjeljom imat će petak trinaesti (nesretni dan u nekim društvima). U mnogim državama, uključ…",
+                "…meru u Norveškoj. U ovoj sezoni, takmičenja su održavana po trinaesti put u ženskoj konkurenciji. Takmičenja u muškoj konkurencij…"
+            ]
+            },
+        {
+                "word": "četrnaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 1,
+                "examples": [
+                "…ovi zvijezda predstavljaju trinaest malezijskih teritorija (četrnaesti predstavlja Singapur, bivšu malezijsku teritoriju). Ispod š…",
+                "…Karma (lat. Carme) je četrnaesti, poznati, Jupiterov satelit. Po grčkoj mitologiji Karma je,…",
+                "…Pasifaja (lat. Pasiphae) je četrnaesti, poznati, Jupiterov satelit. Po grčkoj mitologiji Pasifaja…",
+                "…lzenu u Austrija. U ovoj sezoni, takmičenja su održavana po četrnaesti put u ženskoj konkurenciji. Takmičenja u muškoj konkurencij…",
+                "…rijatelja mali detektivi (engl. Five Have Plenty of Fun) je četrnaesti u nizu romana iz dječijeg serijala Pet prijatelja, britansk…",
+                "…Eurosong 1969. bio je četrnaesti Eurosong po redu. Četiri zemlje su se našle na pobjedničkom…"
+            ]
+            },
+        {
+                "word": "petnaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…ibirsku u Rusiji. U ovoj sezoni, takmičenja su održavana po petnaesti put u ženskoj konkurenciji. Takmičenja u muškoj konkurencij…",
+                "…Eurovizija 1970. bio je petnaesti Eurosong, održan 21. marta 1970. u RAI Congrescentrumu u Am…",
+                "…Schiphol je peti po redu najprometniji evropski aerodrom, a petnaesti u svijetu. U 2010. godini kroz aerodrom je prošlo 45.3 mili…",
+                "…cembra 2014), 1937. na listi aktivnih evropskih šahista, te petnaesti najbolji bosanskohercegovački šahist. == Biografija == Mila…"
+            ]
+            },
+        {
+                "word": "šesnaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…eskom i mnogim drugim jezicima označava rednim brojem (npr. šesnaesti vijek). == Pregled == Pošto slijed prirodnih brojeva počinj…",
+                "…ori). Prvi sastav je izabran 1949. godine, trenutno zasjeda šesnaesti sastav. Članove Kneseta mogu birati svi građani stariji od…",
+                "…deveti najmasivniji objekt koji direktno kruži oko Sunca, i šesnaesti najmasivniji u Sunčevom sistemu, zato što je nekoliko plane…",
+                "…lja u službi avijacije (engl. Five Go to Billycock Hill) je šesnaesti u nizu romana iz dječijeg serijala Pet prijatelja, britansk…",
+                "…te je razriješen svećeništva i ekskomuniciran. 25. april – Šesnaesti sabor u Toledu: Ergica saziva crkveni sabor koji bi se bavi…",
+                "…Eurosong 1971. bio je šesnaesti Eurosong, održan u Dublinu, Irska 3. aprila 1971. Pobjeda M…"
+            ]
+            },
+        {
+                "word": "sedamnaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Eurosong 1972. bio je sedamnaesti Eurosong, održan u Edinburghu, Ujedinjena Kraljevina 25. ma…",
+                "…odnositi na: Sveti Urban, Urban I, rimokatolički svetitelj, sedamnaesti papa, nasljednik Kalista I. od 222. do 230. godine Hrvatska…",
+                "…festival je održan na Đurđevdan 1994. godine u Banjoj Luci. Sedamnaesti po redu međunarodni Đurđevndanski festival dječje pjesme Ba…"
+            ]
+            },
+        {
+                "word": "osamnaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Eurosong 1973. bio je osamnaesti Eurosong, održan u Luxembourgu, Luksemburga 7. aprila 1973.…",
+                "…kvotu za učestvovanje. Sportisti iz Argentine učestvuju po osamnaesti put na Zimskim olimpijskim igrama. Na svečanom otvaranju za…",
+                "…prijatelja čuvari starina (engl. Five On Finniston Farm) je osamnaesti u nizu romana iz dječijeg serijala Pet prijatelja, britansk…"
+            ]
+            },
+        {
+                "word": "devetnaesti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…lva (rođen 15. jula 1938. u gradu Boliqueime, Portugal), je devetnaesti i aktuelni predsjednik Portugala. Dužnost predsjednika obav…",
+                "…Eurosong 1974. bio je devetnaesti Eurosong, održan u ljetovalištu Brightonu na južnom dijelu…",
+                "…odilačke borbe i političar u SR Bosni i Hercegovini. Bio je devetnaesti gradonačelnik Sarajeva. == Biografija == Rođen je 1919. u m…"
+            ]
+            },
+        {
+                "word": "dvadeseti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…a da kaže kako će radi tih njegovih djela možda jednog dana dvadeseti vijek biti nazvan Deleuzovim vijekom. == Također pogledajte…",
+                "…e zamjenjuju novima, posebno na prijelazu iz devetnaestog u dvadeseti vijek. Primjenom registara orgulje mogu oponašati sve boje…",
+                "…u podzemnoj riznici (engl. Five Have a Mystery to Solve) je dvadeseti u nizu romana iz dječijeg serijala Pet prijatelja, britansk…",
+                "…je utemeljila početak novog vijeka 1. januara 1900. godine. Dvadeseti vijek je moderna era, obilježena imperijalizmom i dva svjet…",
+                "…Eurosong 1975. bio je dvadeseti Eurosong koji je organizirao Sveriges Radio i koja je održa…",
+                "…o je prvi azijski vozač koji je osvojio Indianapolis 500, i dvadeseti vozač koji je pobijedio u utrci više puta. Prije nego što j…"
+            ]
+            },
+        {
+                "word": "trideseti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Eurosong 1985. bio je trideseti Eurosong, održan 4. maja 1985. u Göteborgu, Švedska. Vodite…"
+            ]
+            },
+        {
+                "word": "četrdeseti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 1,
+                "examples": [
+                "…Eurosong 1995. bio je četrdeseti Eurosong, održan 13. maja 1995. u Point Theatreu u Dublinu,…",
+                "…= Visina nisaba == Zekat se obično daje uz Ramazan. Daje se četrdeseti dio, u novcu ili robi muslimanskoj sirotinji. == Svrha zeka…"
+            ]
+            },
+        {
+                "word": "pedeseti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Eurosong 2005., bio je pedeseti Eurosong, održan u Kijevu, Ukrajina. Oba takmičenja, polufi…"
+            ]
+            },
+        {
+                "word": "šezdeseti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…Eurovizija 2015 bio je šezdeseti Eurosong, održan u Beču, Austriji, poslije pobjede Conchite…"
+            ]
+            },
+        {
+                "word": "sedamdeseti",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 1,
+                "examples": []
+            },
+        {
+                "word": "osamdeseti",
+                "verdict": "substring-only",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 3,
+                "examples": []
+            },
+        {
+                "word": "devedeseti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…je spavao sa ženom a da nije i platio za njene usluge. Svoj devedeseti rođendan odlučuje proslaviti u javnoj kući s mladom, petnae…"
+            ]
+            },
+        {
+                "word": "stoti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Postotak (od lat. i ital. percent, procent - stoti dio) je pojam koji označava stoti dio nečeg, te se koristi…",
+                "…ital. percent, procent - stoti dio) je pojam koji označava stoti dio nečeg, te se koristi za predstavljanje i upoređivanje v…",
+                "…ac {p}{100}}\\end{matrix}}} == Primjeri == Jedan postotak je stoti dio : 1 % = 1 100 = 0 , 01 {\\displaystyle 1\\,\\%={\\frac {1}{…",
+                "…Ujedinjenih Arapskih Emirata hiljaditi dio libijskog dinara stoti dio katarskog rijala deseti dio jordanskog dinara stoti dio…",
+                "…ara stoti dio katarskog rijala deseti dio jordanskog dinara stoti dio Tadžikistanskog somona (diram) === Historija === Riječ…",
+                "…iste centimetre) centimetar ili 1 cm = 1 * 10−2 metara (ili stoti dio jednog metra) decimetar ili 1 dm = 1 * 10−1 metara (ili…"
+            ]
+            },
+        {
+                "word": "hiljaditi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…Gram (simbol g) je jedinica za masu. Gram predstavlja hiljaditi dio kilograma. Gram je prvobitno bio definisan kao \"apsolut…",
+                "…nanotehnologija) milimetar ili 1 mm = 1 * 10−3 metara (ili hiljaditi dio jednog metra) - tehnički nacrti (mašinstvo - građevinar…",
+                "…(engleski: thou) ili mil je jedinica za dužinu koja iznosi hiljaditi dio inča. Upotrebljava se u mašinstvu i mehanici, za preciz…",
+                "…jući: Marokanski dirhem dirhem Ujedinjenih Arapskih Emirata hiljaditi dio libijskog dinara stoti dio katarskog rijala deseti dio…",
+                "…Mg - hemijski simbol za magnezijum mg - oznaka za miligram (hiljaditi dio grama)…",
+                "…gustoću (anomalija vode). Nova definicija gram označuje kao hiljaditi dio normne jedinice kilograma (po SI-u) ili kao 1×10-3 kg.…"
+            ]
+            },
+        {
+                "word": "prvog",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 66,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…= Njemačke snage u Belgiji i Francuskoj === Nakon izbijanja Prvog svjetskog rata, njemačka vojska je izvršila modificiranu ve…",
+                "…ovnik Paul von Lettow-Vorbeck, vodile su gerilski rat tokom Prvog svjetskog rata i jedini su se predali dvije sedmice nakon p…",
+                "…avu Armije Republike Bosne i Hercegovine. Zona odgovornosti Prvog korpusa tokom rata u BiH bilo je područje Sarajeva. Kako je…",
+                "…o 110. slavna brdska brigada == Priznanja == Tri pripadnika Prvog korpusa Armije Republike Bosne i Hercegovine (Enver Šehović…",
+                "…i nagib korijena. Kao i kod drugih molara, osnovna funkcija prvog kutnjaka je mljevenje hrane. == Kruna zuba == Kruna zuba (l…",
+                "…Službe prvog odgovora (engleski: first responder) predstavljaju organizi…"
+            ]
+            },
+        {
+                "word": "drugog",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…zroci i porijeklo rata == === Evropa === Kao uzroci početka Drugog svjetskog rata u Evropi se može izložiti govor Adolfa Hitle…",
+                "…dan preuzimanja vlasti, koji se u tadašnjoj državi do kraja Drugog svjetskog rata slavi kao praznik, 30. januara 1930, Hitler…",
+                "…o obuke i specializacije pilota i vrsta aviona. Pri početku Drugog svjetskog rata, Njemačka ima već odlično, u takozvanim spor…",
+                "…eptembra 1939. napada Poljsku. Ovaj dan se uzima za početak Drugog svjetskog rata u Evropi. === Azija === Kolonijalistička pol…",
+                "…storijski ne uzima kao jedan od uzroka ili šta više početka Drugog svjetskog rata u Aziji. Ali, gledajući na osvojenja i terit…",
+                "…dajući na osvojenja i teritorijalne dobitke su pravi počeci Drugog svjetskog rata utemeljeni napadima Japana na Indokinu 30-ti…"
+            ]
+            },
+        {
+                "word": "petog",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…92. godine je izdao naredbu br. 02-111-738/92 za formiranje Petog korpusa Armije Republike Bosne i Hercegovine za čije sjediš…",
+                "…rmije Republike Bosne i Hercegovine, na poziciju komandanta Petog korpusa Armije Republike Bosne i Hercegovine 1. novembra 19…",
+                "…pa kalibra 82 mm. == Borbena dejstva == Prema dokumentaciji Petog korpusa tokom rata u Bosni i Hercegovini snage korpusa su u…",
+                "…ojska.net: Peti korpus Armije RBiH Vojska.net: 501. brigada Petog korpusa Armije RBiH Vojska.net: 505. brigada Petog korpusa…",
+                "…brigada Petog korpusa Armije RBiH Vojska.net: 505. brigada Petog korpusa Armije RBiH…",
+                "…i Hercegovini bio je okosnica artiljerijske podrške snagama Petog korpusa Armije Republike Bosne i Hercegovine u čijem sastav…"
+            ]
+            },
+        {
+                "word": "sedamdesetih",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ck), kraće pank, jest muzički žanr koji se pojavio sredinom sedamdesetih godina 20. stoljeća. Ukorijenjene u garažnom roku šezdeseti…",
+                "…pank-grupe odbacile su uočene viškove glavne struje roka iz sedamdesetih. Obično su stvarale kratke, brze pjesme s oštrim melodijama…",
+                "…jedan od osnivača Prve Divizije. Klub je svoj vrhunac imao sedamdesetih godina 20. vijeka, kada je osvojio dvije titule prvaka Engl…",
+                "…Simbolizam je umjetnički pravac koji se se pojavio sedamdesetih godina 19. vijeka u Francuskoj, Belgiji i Rusiji u književn…",
+                "…čko, u kojoj se takmičio sve do njene reorganizacije krajem sedamdesetih godina, kada je formirana Semberska liga. Tih sedamdesetih…",
+                "…sedamdesetih godina, kada je formirana Semberska liga. Tih sedamdesetih godina za Mladost su nastupali: Stanko Spasojević, Marko Ja…"
+            ]
+            },
+        {
+                "word": "osamdesetih",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ra sa statičnom grafikom. Vodeći žanr između sedamdesetih i osamdesetih godina su bile tekstualne avanture. Prva tekstualna avantur…",
+                "…Ukupna dužina obalne linije iznosi oko 1 km. Nastalo krajem osamdesetih godina prošlog vijeka akumulacijom vode na napuštenom rudni…",
+                "…rajem 1970-ih godina. Njegov prvi bend je bio Epitaf. Tokom osamdesetih godina nastupao je sa nekoliko lokalnih grupa, kao što su:…",
+                "…a, kao što su: Jesen, Band, No. 1, Brod i Animatori. Krajem osamdesetih godina sarađivao je i sa sarajevskom rock grupom Zabranjeno…",
+                "…cegovina. == Stanovništvo == == Kultura == U ovom mjestu je osamdesetih godina 20. vijeka sniman film \"Povratak Katarine Kožul\", ta…",
+                "…oducent i scenarist. Najznačajnija pojava u američkom filmu osamdesetih godina 20. vijeka. Komentirajući svoj film Američki grafiti…"
+            ]
+            },
+        {
+                "word": "devedesete",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Devedesete je deseti studijski album pjevača i tekstopisca Đorđa Balaš…",
+                "…rontirajući se sa demonstrantima. Sa gađenjem se osvrnuo na devedesete u pjesmi \"Devedesete\", prema kojem je album i dobio naziv,…",
+                "…onstrantima. Sa gađenjem se osvrnuo na devedesete u pjesmi \"Devedesete\", prema kojem je album i dobio naziv, upoređujući ih s bolj…",
+                "…isak pjesama == == Reference == == Vanjski linkovi == Album Devedesete na Discogsu Petar Janjatović, EX YU ROCK enciklopedija 1960…",
+                "…\"Godine lete\", \"Ja nisam kao drugi\", \"Kad zatvorim oči\" i \"Devedesete\". Godine 2006. Aleksandar Čović obnavlja saradnju sa pjevač…",
+                "…r Čović) 1999 - Kada zatvorim oči (Aleksandar Čović) 2000 - Devedesete (Aleksandar Čović) 2006 - Sve mogu ja 2009 - Vrijeme je 201…"
+            ]
+            },
+        {
+                "word": "sat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 143,
+                "articles": 18,
+                "substringOnly": 2,
+                "examples": [
+                "…Sat (simbol: h) je mjerna jedinica za vrijeme. Sat nije SI jedi…",
+                "…Sat (simbol: h) je mjerna jedinica za vrijeme. Sat nije SI jedinica, no prihvaćena je upotreba sata u SI siste…",
+                "…u. == Definicija == 1 h = 60 minuta= 3600 s == Historija == Sat je prvi put definiran u starom Egiptu kao 1/24 dana, prema…",
+                "…rna jedinica za vrijeme jednaka 60 minuta ili 3600 sekundi. Sat je približno jednak 1/24 srednjeg Sunčevog dana na Zemlji.…",
+                "…3 ili 4 smjene. Kasnije je i noć podijeljena u 12 dijelova. Sat koji je pokazivao ovo vrijeme morao se svaki dan mijenjati…",
+                "…Biološki sat ili biološki oscilator kod većine vrsta živih bića omogućav…"
+            ]
+            },
+        {
+                "word": "sata",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 120,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…Serial ATA ili SATA je računarska sabirnica namijenjena za hard diskove. SATA j…",
+                "…i SATA je računarska sabirnica namijenjena za hard diskove. SATA je nasljednik IDE (ili PATA (Parallel ATA)) sabirnice, i nu…",
+                "…i nudi teoretski znatno veću brzinu prijenosa podataka. == SATA == Prva generacija SATA uređaja (SATA/150) su koristili 8B/…",
+                "…veću brzinu prijenosa podataka. == SATA == Prva generacija SATA uređaja (SATA/150) su koristili 8B/10B enkodiranje. To je z…",
+                "…rijenosa podataka. == SATA == Prva generacija SATA uređaja (SATA/150) su koristili 8B/10B enkodiranje. To je značilo teorets…",
+                "…spajanja gdje se koriste posebni, manji, praktičniji i duži SATA priključci, za razliku od starih PATA priključaka, kao i re…"
+            ]
+            },
+        {
+                "word": "sati",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 49,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…d izlaska do zalaska Sunca Prema ovoj definiciju, ljetni su sati bili duži, a zimski kraći. Dužina sati je, osim o geografsk…",
+                "…efiniciju, ljetni su sati bili duži, a zimski kraći. Dužina sati je, osim o geografskoj širini, ovisila čak i o vremskim pri…",
+                "…kcije, a time i na vremena izlaska i zalaska Sunca). Ovi se sati zbog roga ponekad nazivaju nejednaki sati. Stari Rimljani i…",
+                "…ka Sunca). Ovi se sati zbog roga ponekad nazivaju nejednaki sati. Stari Rimljani i Grci slijedili su ovu definiciju i podije…",
+                "…ka Sunca i slično. Kao posljedica ovakvog definiranja sata, sati su se vrlo polahko mijenjali tokom godine, s promjenama tra…",
+                "…Također pogledajte == sekunda minuta dan godina Babilonski sati…"
+            ]
+            },
+        {
+                "word": "minut",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 7,
+                "examples": [
+                "…ispred timskog kolege Daniel Ricciardo. Pre trke održan je minut šutnje u znak sjećanja na vozača Marussia Jules Bianchi, ko…",
+                "…proći najviše u 15 sekundi razmaka imače se dobija kazneni minut na postignuto vrijeme. Od 2004. ova disciplina je ukinuta n…",
+                "…između prolaza, na primjer, ravnodnevnice prema sjeveru, za minut ili dvije, iz nekoliko razloga objašnjenih u nastavku. Zbog…",
+                "…i spretno zabija za udvostručenje nigerijskog vodstva. Samo minut prije isteka prvog dijela utakmice, sreća je ponovo pomazil…"
+            ]
+            },
+        {
+                "word": "minuta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 13,
+                "substringOnly": 1,
+                "examples": [
+                "…Minuta je mjerna jedinica za vrijeme i ugao. 1 minuta = 60 sekunda…",
+                "…Minuta je mjerna jedinica za vrijeme i ugao. 1 minuta = 60 sekunda 1 sat = 60 minuta == Vrijeme == Ponekad se, zb…",
+                "…edinica za vrijeme i ugao. 1 minuta = 60 sekunda 1 sat = 60 minuta == Vrijeme == Ponekad se, zbog usklađivanja dogovorenog vre…",
+                "…estupna sekunda), pa te minute traju 59 odnosno 61 sekundu. Minuta nije jedinica SI sistema, ali je priznata izvedena jedinica…",
+                "…Mesopotamije (današnjeg Iraka) prvi su podijelili sat na 60 minuta, a minute na 60 sekundi. Učinili su to oko 3000. p. n. e. B…",
+                "…4. Oznaka za minutu je min. == Geometrija == U geometriji, minuta je jedna jedinica ugla. A oznaka je (′) . == Etimologija ==…"
+            ]
+            },
+        {
+                "word": "stepen",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 70,
+                "articles": 17,
+                "substringOnly": 3,
+                "examples": [
+                "…Stepen može značiti: Stepen (ugao), (oznaka: °) je mjerna jedinica…",
+                "…Stepen može značiti: Stepen (ugao), (oznaka: °) je mjerna jedinica za ugao Stepen Celzi…",
+                "…čiti: Stepen (ugao), (oznaka: °) je mjerna jedinica za ugao Stepen Celzijus, (oznaka: °C) je mjerna jedinica za temperaturu St…",
+                "…en Celzijus, (oznaka: °C) je mjerna jedinica za temperaturu Stepen zakrivljenosti Stepen (matematika) - nekoliko značenja u ma…",
+                "…°C) je mjerna jedinica za temperaturu Stepen zakrivljenosti Stepen (matematika) - nekoliko značenja u matematici Akademski ste…",
+                "…pen (matematika) - nekoliko značenja u matematici Akademski stepen Stepen (muzika) Stepen (simbol) (°), tipografski simbol, ko…"
+            ]
+            },
+        {
+                "word": "stepena",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 58,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…e u računu, se često koriste i druge jedinice za ugao. Osim stepena, postoje i druge mjerne jedinice za ugao: radijan (rad) gra…",
+                "…Stepena funkcija se može odnositi na: Statistička snaga Monom Stepe…",
+                "…epena funkcija se može odnositi na: Statistička snaga Monom Stepena funkcija: Funkcija oblika f ( x ) = x a {\\displaystyle f(x)…",
+                "…Atrioventrikulski blok prvog stepena (AV blok) je bolest sistema električne provodljivosti srca…",
+                "…ikulski čvor (AV čvor) sporije nego normalno. AV blok prvog stepena uglavnom ne uzrokuje nikakve simptome, ali može napredovati…",
+                "…og bloka kao što su drugog- i atrioventrikulski blok trećeg stepena. Dijagnosticira se pomoću elektrokardiograma i definira se…"
+            ]
+            },
+        {
+                "word": "stepeni",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 10,
+                "substringOnly": 1,
+                "examples": [
+                "…a skala dizajnirana je tako da tačka smrzavanja vode bude 0 stepeni, a tačka ključanja 100 stepeni pri standardnom atmosferskom…",
+                "…tačka smrzavanja vode bude 0 stepeni, a tačka ključanja 100 stepeni pri standardnom atmosferskom pritisku (1 bar ili 1 atm). Ne…",
+                "…g koordiniranog vremena (UTC ). Pošto dan ima 24 sata i 360 stepeni u krugu, Sunce se kreće po nebu brzinom od 15 stepeni na sa…",
+                "…i 360 stepeni u krugu, Sunce se kreće po nebu brzinom od 15 stepeni na sat (360° ÷ 24 sata = 15° na sat). Dakle, ako je vremens…",
+                "…minuta su izraženi decimalnim zapisom, dakle: 23° 27,5′ E. Stepeni se također mogu izraziti kao decimalni razlomak: 23,45833°…",
+                "…U matematici, potencijalni red (ili stepeni red) (jedne promjenljive) je red oblika f ( x ) = ∑ n = 0 ∞…"
+            ]
+            },
+        {
+                "word": "metar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 55,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Metar je osnovna SI jedinica za dužinu. Definicija mu glasi: \"Jed…",
+                "…osnovna SI jedinica za dužinu. Definicija mu glasi: \"Jedan metar jednak je putu koji svjetlost pređe u vakuumu za 1/299.792.…",
+                "…kuumu za 1/299.792.458 dio sekunde.\" Osim osnovnog oblika - metar, često se koriste i izvedenice: nanometar ili 1 nm = 1 * 10…",
+                "…Kvadratni metar (oznaka m2) je mjerna jedinica za površinu u Međunarodnom s…",
+                "…og metra tvore tako da se prefiksi primijenjuju na jedinicu metar: kvadratni milimetar ili 1 mm2 = 1×10−6 (ili 1/1 000 000) k…",
+                "…ivima ar i hektar. == Reference == == Također pogledajte == Metar Kubni metar SI prefiksi…"
+            ]
+            },
+        {
+                "word": "metra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…etar ili 1 nm = 1 * 10−9 metara (ili milijarditi dio jednog metra) - npr. za mjerenje talasnih dužina vidljive svjetlosti (40…",
+                "…ometar ili 1 μm = 1 * 10−6 metara (ili milioniti dio jednog metra) - u elektronici (obzirom kako se već proizvode čipovi u 90…",
+                "…imetar ili 1 mm = 1 * 10−3 metara (ili hiljaditi dio jednog metra) - tehnički nacrti (mašinstvo - građevinari kao mjeru koris…",
+                "…centimetar ili 1 cm = 1 * 10−2 metara (ili stoti dio jednog metra) decimetar ili 1 dm = 1 * 10−1 metara (ili deseti dio jedno…",
+                "…decimetar ili 1 dm = 1 * 10−1 metara (ili deseti dio jednog metra) kilometar ili 1 km = 1 * 103 metara (ili hiljadu metara) -…",
+                "…ijelu Riličkog polja (Kupres), na nadmorskoj visini od 1132 metra. Dužina jezera je oko 190 metara, širina oko 100 metara, a…"
+            ]
+            },
+        {
+                "word": "metara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…a odstojanja između stanica, koja iznose u prosjeku oko 500 metara. == Historija == Prva linija (Porte de Vincennes – Porte Ma…",
+                "…esto se koriste i izvedenice: nanometar ili 1 nm = 1 * 10−9 metara (ili milijarditi dio jednog metra) - npr. za mjerenje talas…",
+                "…jive svjetlosti (400-760 nm) mikrometar ili 1 μm = 1 * 10−6 metara (ili milioniti dio jednog metra) - u elektronici (obzirom k…",
+                "…će zavladati nanotehnologija) milimetar ili 1 mm = 1 * 10−3 metara (ili hiljaditi dio jednog metra) - tehnički nacrti (mašinst…",
+                "…ao mjeru koriste centimetre) centimetar ili 1 cm = 1 * 10−2 metara (ili stoti dio jednog metra) decimetar ili 1 dm = 1 * 10−1…",
+                "…(ili stoti dio jednog metra) decimetar ili 1 dm = 1 * 10−1 metara (ili deseti dio jednog metra) kilometar ili 1 km = 1 * 103…"
+            ]
+            },
+        {
+                "word": "kilometar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilometar (simbol: km) jeste jedinica za dužinu u metričkom sistemu m…",
+                "…ih jedinica Kubni metar Prefiksi mjernih jedinica Kvadratni kilometar == Reference == == Vanjski linkovi ==…",
+                "…Kvadratni kilometar (naziv koji koristi Međunarodni biro za tegove i mjere), si…",
+                "…metra, i jedna je od SI izvedenih jedinica. Jedan kvadratni kilometar jednak je: 1.000.000 m2 100 ha (hektar) Također je približn…",
+                "…na milja = 2.5899km2 Bilješka: \"km2\" znači (km)2, kvadratni kilometar ili kilometar kvadratni. Na primjer, 3 km2 je jednako 3×(1,…",
+                "…899km2 Bilješka: \"km2\" znači (km)2, kvadratni kilometar ili kilometar kvadratni. Na primjer, 3 km2 je jednako 3×(1,000m)2 = 3,000…"
+            ]
+            },
+        {
+                "word": "kilometra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…površina 25 km2. == Primjeri površine od jednog kvadratnog kilometra == === Mreža topografske karte === Mreže topografskih karti…",
+                "…eličina; neki zauzimaju područje od tačno jednog kvadratnog kilometra. Ovo su neki primjeri: Riverside Country Park, UK. Brierley…",
+                "…imjeri terena koji uključuju površinu oko jednog kvadratnog kilometra: Manchester Golf Club, UK. Northop Country Park, Vels, UK.…",
+                "…Australija. === Ostala područja površine jednog kvadratnog kilometra ili približno === Stari grad Jerusalem ima površinu skoro 1…",
+                "…ljadu metara) - od trčanja na 5 ili 10 kilometara do 42,125 kilometra (maraton) gigametar ili 1 Gm = 1 * 109 metara (ili milion k…",
+                "…područje pokriva otprilike 1.516 km2. U Savu se ulijeva tri kilometra sjeverno od naselja Koraće, odnosno isto toliko južnije od…"
+            ]
+            },
+        {
+                "word": "kilometara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 47,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…,000m)2 = 3,000,000 m2. Ako je jedan komad zemlje širok pet kilometara, a ima oblik kvadrata i strana kvadrata duga je pet kilomet…",
+                "…ometara, a ima oblik kvadrata i strana kvadrata duga je pet kilometara, to znači da mu je površina 25 km2. == Primjeri površine od…",
+                "…površina terena treba da iznosi 80 hektara (0.8 kvadratnih kilometara). Primjeri terena koji uključuju površinu oko jednog kvadra…",
+                "…redni centar na crnomorskom primorju. Grad Soči zauzima 105 kilometara morske obale. U Soči i Krasnoj poljani, koja se nalazi 37 k…",
+                "…a morske obale. U Soči i Krasnoj poljani, koja se nalazi 37 kilometara daleko od Soči, biće provedene Zimske olimpijske igre 2014.…",
+                "…* 103 metara (ili hiljadu metara) - od trčanja na 5 ili 10 kilometara do 42,125 kilometra (maraton) gigametar ili 1 Gm = 1 * 109…"
+            ]
+            },
+        {
+                "word": "milimetar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Milimetar je jedinica za dužinu u metričkom sistemu jedinica. Jedan m…",
+                "…r je jedinica za dužinu u metričkom sistemu jedinica. Jedan milimetar je hiljaditi dio metra, osnovne jedinice za dužinu u Međuna…",
+                "…unarodnom sistemu mjernih jedinica (SI). Skraćena oznaka za milimetar je mm. Prefiks mili- označava red veličine od (10−3). Prefi…",
+                "…tlost u vakuumu pređe za 1/299,792,458 dio sekunde.\" Dakle, milimetar, kao 1/1000 dio metra, je put koji svjetlost u vakuumu pređ…",
+                "…== Primjeri i mjerenje == Odgovarajuća površinska mjera je milimetar kvadratni (mm2), a zapreminska milimetar kubni (mm3). U jed…",
+                "…ovršinska mjera je milimetar kvadratni (mm2), a zapreminska milimetar kubni (mm3). U jedan milimetar stane tačno 1.000 mikrometar…"
+            ]
+            },
+        {
+                "word": "milimetra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…dimenzije pravilnih tijela s preciznošću do desetog dijela milimetra. Sastoji se štapa s upisanim skalama (na donjem dijelu je u…",
+                "…rečnika stabala). == Historija == Tačnost do desetog dijela milimetra postignuta je upotrebom noniusa, posebne skale koju je još…",
+                "…ene dužine milimetarske skale. Pomicanjem noniusa desetinku milimetra udesno poklopit će se oznaka 1 noniusa s crticom koja označ…",
+                "…na milimetarskoj skali, i tako dalje. Pomakom klizača n/10 milimetra udesno, n-ta će se podjela noniusa poklopiti s jednom od po…",
+                "…koliko želimo dobiti mjerilo preciznosti bolje od desetinke milimetra, skala noniusa se podijeli na više dijelova. Pomična mjeril…",
+                "…m se smatra patuljasti moljac s rasponom krila od svega dva milimetra, dok najveću površinu krila ima Attacus atlas L. iz jugoist…"
+            ]
+            },
+        {
+                "word": "milimetara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…u kasnije identificirane kao elektroni velikih brzina. Šest milimetara aluminija je potrebno da bi se zaustavila većina beta-česti…",
+                "…potrebno da bi se zaustavila većina beta-čestica. Nekoliko milimetara olova je potrebno da bi se zaustavile gama-zrake, za koje j…",
+                "…me prethodnika, tj. na najdebljem mjestu iznosio je samo 13 milimetara. Tokom gradnje novijih modela to je ispravljeno njegovim po…",
+                "…a sat. Osnovno oružje svih Panzera II je bio top kalibra 20 milimetara. Sveukupno je bilo proizvedeno nešto manje od dvije hiljade…",
+                "…mjesto kupole se sada stavlja protutenkovski top kalibra 75 milimetara. Tim načinom je stvoreno protutenkovsko oklopno vozilo imen…",
+                "…pnih mjeseci bez padavina, aridne zemlje imaju manje od 250 milimetara godišnje, a semiaridne zemlje imaju srednju godišnju količi…"
+            ]
+            },
+        {
+                "word": "centimetar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Centimetar (simbol: cm) jedinica je za dužinu u metričkom sistemu mjer…",
+                "…elu metra, koji je osnovna jedinica za dužinu u SI sistemu. Centimetar je otprilike dug koliko i širina kažiprsta prosječne odrasl…",
+                "…ažiprsta prosječne odrasle osobe. Po zapremini, jedan kubni centimetar je jednak jednom mililitru. == Također pogledajte == Pretva…",
+                "…mm2 = 1×10−6 (ili 1/1 000 000) kvadratnih metara kvadratni centimetar ili 1 cm2 = 1×10−4 (ili 1/10 000) kvadratnih metara kvadrat…",
+                "…== Jedan međunarodni inč je jednak: 2,54 centimetara (jedan centimetar je jednak oko 0,3937 međunarodnih inča) 1.000 touova (jedan…",
+                "…snaga, sila) je mjerna jedinica za silu određenu u sistemu centimetar-gram-sekunda (CGS), prethodniku današnjeg modernog SI siste…"
+            ]
+            },
+        {
+                "word": "centimetra",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…180 centimetara. Razmak između pritki se kreće od 42 do 52 centimetra zavisno od vježbača. Kao i krugovi paralelne šipke razboja…",
+                "…sil iz proterozojskg eona. Organizam, veličine preko jednog centimetra i konzistentnog oblika, mogao je biti divovska bakterija, k…",
+                "…ram koja po staroj definiciji odgovara težini jednog kubnog centimetra vode na temperaturi od 4 °C, kada voda ima najveću gustoću…",
+                "…ila da se ubrza masa od jednog grama sa ubrzanjem od jednog centimetra po sekundi na kvadrat\". Din po centimentru je mjera koja se…",
+                "…zije. Odlika riba ovoga roda su dva izdužena, tri do četiri centimetra duga pipka koji se nalaze odmah uz grudna peraja, a koji pr…",
+                "…prenosi na Mjesec, čije se kretanje godišnje udaljuje za 4 centimetra od Zemlje. Ova pojava je utvrđena laserskim mjerenjima 1995…"
+            ]
+            },
+        {
+                "word": "centimetara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 51,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…kompleksnosti. === Konj s hvataljkama === Visina iznosi 105 centimetara od vrha strunjače ili od tla 115 centimetara. Dužina na vrh…",
+                "…ina iznosi 105 centimetara od vrha strunjače ili od tla 115 centimetara. Dužina na vrhu je 160 centimetara, dok razmak između hvata…",
+                "…strunjače ili od tla 115 centimetara. Dužina na vrhu je 160 centimetara, dok razmak između hvataljki se kreće u zavisnosti od vježb…",
+                "…eđu hvataljki se kreće u zavisnosti od vježbača je 40 do 45 centimetara. Vježbe na konju s hvataljkama moraju se izvoditi dinamično…",
+                "…ke === Visina krugova od vrha strunjače iznosi najmanje 260 centimetara. Vježbe na krugovima se moraju sastojati od različitih pokr…",
+                "…orne aktivnosti. === Preskok === Visina preskoka iznosi 135 centimetara. Dužina preskoka iznosi 120 centimetara, a širina je 95 cen…"
+            ]
+            },
+        {
+                "word": "kilogram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Kilogram (simbol kg) je osnovna SI jedinica za masu. Kilogram je jed…",
+                "…Kilogram (simbol kg) je osnovna SI jedinica za masu. Kilogram je jedina osnovna jedinica koja sadrži prefiks kilo (1 k =…",
+                "…da se veličina kilograma definiše preko Plankove konstante. Kilogram je osnovna SI jedinica, definirana u konačnici pomoću tri d…",
+                "…e mase, kao što je Kibbleova vaga, kao primarni standard za kilogram mase. Kilogram je prvobitno definisan 1795. godine tokom Fr…",
+                "…je Kibbleova vaga, kao primarni standard za kilogram mase. Kilogram je prvobitno definisan 1795. godine tokom Francuske revoluc…",
+                "…inkovi == https://www.nist.gov/pml/owm/si-units-temperature Kilogram na Wikimedia Commonsu…"
+            ]
+            },
+        {
+                "word": "kilograma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…od većih jedinica često koristi jedinica tona (t) – hiljadu kilograma. Do maja 2019 kao Etalon za masu koristio se prototip kilog…",
+                "…grama. Do maja 2019 kao Etalon za masu koristio se prototip kilograma koji se čuvao u Sevresu u Francuskoj. Sada se veličina kilo…",
+                "…rama koji se čuvao u Sevresu u Francuskoj. Sada se veličina kilograma definiše preko Plankove konstante. Kilogram je osnovna SI j…",
+                "…ne maksimalne gustoće, približno 4 °C). Trenutna definicija kilograma slaže se s ovom originalnom definicijom s tačnošću od 30 di…",
+                "…indar napravljen od platine i iridija, Međunarodni prototip kilograma (IPK), postao je standard jedinice mase za metrički sistem…",
+                "…starofrancuske riječi tonne. Metrička tona jednaka je 1.000 kilograma. To je jedinica izvan SI sistema, koja je prihvaćena za kor…"
+            ]
+            },
+        {
+                "word": "milja",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 215,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…Milja je jedinica za dužinu. Sa miljom obilježavamo više jedinica…",
+                "…nu. Sa miljom obilježavamo više jedinica, u Engleskoj jedna milja iznosi 1760 jarda, što je oko 1609 m. Nautička milja jednak…",
+                "…jedna milja iznosi 1760 jarda, što je oko 1609 m. Nautička milja jednaka je 1852 m. Milja se prvi put javlja u starom Rimu i…",
+                "…jarda, što je oko 1609 m. Nautička milja jednaka je 1852 m. Milja se prvi put javlja u starom Rimu i određuje udaljenost od 1…",
+                "…dnosno 2000 koraka, gdje je dvokorak imao pet stopa. Rimska milja je iznosila oko 1480 metara. Današnja kopnena milja je prec…",
+                "…Rimska milja je iznosila oko 1480 metara. Današnja kopnena milja je precizno definirana i unificirana 1959. godine dogovorom…"
+            ]
+            },
+        {
+                "word": "milje",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…Milje se može odnositi na: Milja, jedinica za dužinu Bosna i Herc…",
+                "…odnositi na: Milja, jedinica za dužinu Bosna i Hercegovina: Milje (Trnovo, Federacija Bosne i Hercegovine), naselje u općini…",
+                "…), naselje u općini Trnovo (Federacija Bosne i Hercegovine) Milje (Trnovo, Republika Srpska), naselje u općini Trnovo (Republ…",
+                "…ska), naselje u općini Trnovo (Republika Srpska) Slovenija: Milje (Šenčur), naselje u općini Šenčur, regija Gorenjska…",
+                "…Milje su naseljeno mjesto u općini Trnovo, Republika Srpska, Bosn…",
+                "…ost u vezi s dužinom obima, postoje razlike u dužini morske milje. Na internacionalnoj hidrografskoj konferenciji 1929. odluč…"
+            ]
+            },
+        {
+                "word": "gigaherc",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 5,
+                "examples": [
+                "…1 kHz = 1×103 Hz) megaherc, milion herca (1 MHz = 1×106 Hz) gigaherc, milijarda herca (1 GHz = 1×109 Hz) teraherc, bilion herca…"
+            ]
+            },
+        {
+                "word": "gigaherca",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…imetar do kilometar odnosno frekvencije od 3 Hz do 300 GHz (gigaherca;1 GHz = 1×109 Hz). == Nastanak == Radiotalasi nastaju u ant…",
+                "…i, T-zraci, i THz, pokrivaju spektralno područje između 300 gigaherca (3x1011 Hz) do 3 teraherca (3x1012 Hz), što odgovara talasn…",
+                "…g radio frekvencija u elektromagnetnom spektru od 30 do 300 gigaherca (GHz). Leži između opsega super visoke frekvencije i daleko…",
+                "…o iskustvo sa malim djelićima sekunde je mikroprocesor od 1 gigaherca koji ima vrijeme ciklusa od 1 nanosekunde. Brzine zatvarača…",
+                "…azvučni uređaji rade na frekvencijama od 20 kHz do nekoliko gigaherca. Medicinski ultrazvuk se obično koristi za dijagnostiku i l…"
+            ]
+            },
+        {
+                "word": "megabit",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…MB, Mb, mB, mb se može odnositi na: Megabit, informatička jedinica Megabajt, informatička jedinica Mili…",
+                "…jednaka sa: 1.000 bita po sekundi 125 bajta po sekundi === Megabit po sekundi === Megabit po sekundi (simbol Mbit/s ili Mb/s,…",
+                "…po sekundi 125 bajta po sekundi === Megabit po sekundi === Megabit po sekundi (simbol Mbit/s ili Mb/s, često skraćeno \"Mbps\")…"
+            ]
+            },
+        {
+                "word": "megabita",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…no \"Gbps\") jest jedinica prenosa podataka jednaka sa: 1.000 megabita po sekundi 1.000.000 kilobita po sekundi 1.000.000.000 bita…",
+                "…sa podataka jednaka sa: 1.000 gigabita po sekundi 1.000.000 megabita po sekundi 1.000.000.000 kilobita po sekundi 1.000.000.000.…",
+                "…ndi 1.000.000 bajta po sekundi 1.000 kilobajta po sekundi 8 megabita po sekundi === Gigabajt po sekundi === Gigabajt po sekundi…",
+                "…, iako postoje i mrežne kartice koje mogu prenositi samo 10 megabita u sekundi, ali se one polako zamjenjuju, čak i sa najnoviji…",
+                "…zračunata je približna propusnost ljudske mrežnječe od 8,75 megabita u sekundi, dok ona kod zamorca prenosi 875 kilobita. Na Uni…",
+                "…\"LTE Advanced\", koja pruža najveću teoretsku brzinu do 500 megabita po sekundi, spomenuti Androidi mogu se povezati duplo brže,…"
+            ]
+            },
+        {
+                "word": "sekundi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 183,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…4 sata, zatim 1 sata na 60 minuta i na kraju 1 minute na 60 sekundi (24 × 60 × 60 = 86400) Sadašnja i formalna definicija u Međ…",
+                "…gitalni satovi i ručni satovi često imaju dvocifreni brojač sekundi. SI prefiksi se često kombinuju sa riječi sekunda da bi ozn…",
+                "…ranje višekratnika sekunde, kao što su kilosekunde (hiljade sekundi), takve jedinice se rijetko koriste u praksi. Svakodnevno i…",
+                "…postoje decimalni prefiksi koji predstavljaju 10−30 do 1030 sekundi. Neke uobičajene jedinice vremena u sekundama su: minuta je…",
+                "…ke uobičajene jedinice vremena u sekundama su: minuta je 60 sekundi; sat je 3.600 sekundi; dan je 86.400 sekundi; sedmica je 60…",
+                "…vremena u sekundama su: minuta je 60 sekundi; sat je 3.600 sekundi; dan je 86.400 sekundi; sedmica je 604.800 sekundi; godina…"
+            ]
+            },
+        {
+                "word": "sekunda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…Sekunda (simbol s) je mjerna jedinica za vrijeme, jedna od 7 osnovn…",
+                "…jeme, jedna od 7 osnovnih jedinica SI sistema. Historijski, sekunda je definisana kao 1⁄86400 dana – ovaj faktor je izveden iz…",
+                "…inicija u Međunarodnom sistemu jedinica (SI) je preciznija: Sekunda je trajanje od 9 192 631 770 perioda zračenja koje odgovara…",
+                "…na Zemljine rotacije varira i lagano se usporava, prestupna sekunda se dodaje u nepravilnim intervalima vremenu kako bi satovi…",
+                "…ni brojač sekundi. SI prefiksi se često kombinuju sa riječi sekunda da bi označili podjele sekunde: milisekunde (hiljaditi dio…",
+                "…a na preciznost koja mu je svojstvena. To znači da će svaka sekunda, minuta i svaka druga podjela vremena koju broji sat imati…"
+            ]
+            },
+        {
+                "word": "posto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 101,
+                "articles": 13,
+                "substringOnly": 3,
+                "examples": [
+                "…i plin je fosilno gorivo koje se najvećim dijelom (85 do 95 posto) sastoji od metana (CH4), koji je najjednostavniji ugljikov…",
+                "…a. Lahko je zapaljiv i eksplozivan. Preostali udio (5 do 15 posto) su složeniji ugljikovodici, dušik i ugljik-dioksid. Kao fo…",
+                "…mjer udio metana u prirodnom plinu u Rusiji se kreće oko 98 posto dok je u Holandiji taj udio od 80 do 85 posto. == Upotreba…",
+                "…kreće oko 98 posto dok je u Holandiji taj udio od 80 do 85 posto. == Upotreba i iskorištenje == Upotreba prirodnog plina je…",
+                "…= 0 , 01 {\\displaystyle 1\\,\\%={\\frac {1}{100}}=0{,}01} Sto posto je jedno cijelo: 100 % = 100 100 = 1 {\\displaystyle 100\\,\\%…",
+                "…100 100 = 1 {\\displaystyle 100\\,\\%={\\frac {100}{100}}=1} 75 posto su tri četvrtine: 75 % = 75 100 = 3 4 = 0 , 75 {\\displaysty…"
+            ]
+            },
+        {
+                "word": "procenata",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…ivreda == Od industrije je razvijena industrija mlijeka (90 procenata putera i sira Japana se proizvodi na ovom ostrvu), a Išikar…",
+                "…se proizvodi na ovom ostrvu), a Išikari polja proizvode 30 procenata uglja Japana. Tamo se nalaze i nalazišta željeza i mangana.…",
+                "…relativno nisku energiju ionizacije te, pored toga čini 80 procenata međuzvjezdane materije, svijetli najsjajnije u karakteristi…",
+                "…za (građevinski materijal DNK) i predstavlja između 6 i 6,5 procenata ukupne DNK u ćeliji. == Genomika == Dužina hromosoma je ~ 1…",
+                "…ka i Rano Kau. Ima 3.304 stanovnika (popis 2002), što je 87 procenata od ukupne populacije ostrva. Većim dijelom dvadesetog vijek…",
+                "…helm Ostwald 1902. godine. Smjesa zraka sa 10% zapreminskih procenata amonijaka se zagrijava na 850 °C pod pritiskom 5 atm i prop…"
+            ]
+            },
+        {
+                "word": "zarez",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 12,
+                "substringOnly": 5,
+                "examples": [
+                "…Zarez su bile hrvatske novine, dvonedjeljnik za kulturna i društv…",
+                "…ske poveznice == Službena stranica (nova adresa) http://www.zarez.hr Zarez (stara adresa) Zarez Popis arhiva == Reference ==…",
+                "…nice == Službena stranica (nova adresa) http://www.zarez.hr Zarez (stara adresa) Zarez Popis arhiva == Reference ==…",
+                "…nica (nova adresa) http://www.zarez.hr Zarez (stara adresa) Zarez Popis arhiva == Reference ==…",
+                "…t različitih cifara (znamenki) i decimalnu tačku (decimalni zarez) za zapis veličine broja. Ovo su znakovi koji se koriste za…",
+                "…risti decimalna tačka, dok se u ekonomiji koristi decimalni zarez pošto se u velikim brojevima tačkom razdvajaju po tri cifre…"
+            ]
+            },
+        {
+                "word": "puta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 69,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…a Drosophila do ljudi. Okarakterizirana su tri Wnt signalna puta: kanonski Wnt put, nekanonski planarni put ćelijske polarno…",
+                "…ćelijske polarnosti i nekanonski Wnt/kalcijski put. Sva tri puta se aktiviraju vezivanjem liganda Wnt-proteina poodice uvoji…",
+                "…ju otkrivena je kada su genetičke mutacije u proteinima Wnt puta proizvele abnormalne embrione Drosophila melanogaster. Kasn…",
+                "…tanoj srži, koži i crijevima odraslih. Klinički značaj ovog puta dokazan je mutacijama koje dovode do različitih bolesti, uk…",
+                "…godina prijavlena je prva uspješna upotreba inhibitora Wnt puta u mišjim modelima bolesti. == Proteini == Wnt sadrži raznol…",
+                "…raskrsnica stajalište tramvaja ili autobusa je dio površine puta namijenjen zaustavljanju tramvaja, odnosno autobusa radi ul…"
+            ]
+            },
+        {
+                "word": "plus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 52,
+                "articles": 15,
+                "substringOnly": 1,
+                "examples": [
+                "…C++ (C plus plus) je programski jezik visokog nivoa kojeg je kreirao da…",
+                "…C++ (C plus plus) je programski jezik visokog nivoa kojeg je kreirao danski…",
+                "…Snuker plus je bilijarska igra zasnovana na snukeru. Kreirao ju je Joe…",
+                "…Apple II Plus je bio drugi model Apple II serije ličnih računara koje je…",
+                "…ličnih računara koje je proizvela kompanija Apple. Apple II Plus je imao Applesoftov BASIC programski jezik sadržan u ROM me…",
+                "…rence == == Vanjski linkovi == Vintage Computers - Apple II Plus Arhivirano 12. 10. 2007. na Wayback Machine (en) Službena w…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 71,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…. Negativni brojevi u svojoj notaciji imaju ispred predznak minus (-) i oni su manji od 0. Pozitivni brojevi imaju predznak p…",
+                "…nanje kao da nije ni bilo zagrade. Ako ispred zagrade stoji minus, zagrada se briše i svi znakovi u zagradi se mijenjaju. (Ak…",
+                "…se briše i svi znakovi u zagradi se mijenjaju. (Ako je bio minus onda će biti plus, a ako je bio plus ispred broja, onda će…",
+                "…će biti plus, a ako je bio plus ispred broja, onda će biti minus). Naprimjer: 4+(8-3+2)-1=4+8-3+2-1=10 4-(8-3+2)-1=4-8+3-2-1…",
+                "…psolutne vrijednosti, i ispred tog zbroja se stavi predznak minus (-). Ako se trebaju sabrati negativan i pozitivan cijeli br…",
+                "…va (pred)znaka, onda treba slijediti slijedeća tri pravila: Minus(-) i minus(-) daju plus(+) Plus(+) i plus(+) daju plus(+) M…"
+            ]
+            },
+        {
+                "word": "jednako",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 16,
+                "substringOnly": 0,
+                "examples": [
+                "…tni kilometar ili kilometar kvadratni. Na primjer, 3 km2 je jednako 3×(1,000m)2 = 3,000,000 m2. Ako je jedan komad zemlje širok…",
+                "…režiji Andyja Wilsona, sigurno ih neće razočarati: priča je jednako napeta, a scenografija jednako raskošna, oba filma snimana…",
+                "…ih neće razočarati: priča je jednako napeta, a scenografija jednako raskošna, oba filma snimana su na istom brodu, dok slavnog…",
+                "…ednog volta. U SI sistemu veber iznosi kg·m2·s−2·A−1. To je jednako volt-sekundi (V·s). Veber je snažna jedinica jednaka 1 T m2…",
+                "…ca omotanih oko malih feromagnetnih jezgri, imale su gotovo jednako vrijeme pristupa. Osnovna zamisao koja se nalazi iza cijevn…",
+                "…. Neka alternativna rješenja za pohranu podataka nisu imala jednako vrijeme pristupa, pa smo tako imali cijevi ispunjene živom…"
+            ]
+            },
+        {
+                "word": "podijeljeno",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…erna i Srednja Amerika / CONCACAF = Ukupno 17 ekipa bilo je podijeljeno u tri grupe. Pobjednici grupa kvalificirani zu za završni f…",
+                "…== Finalna grupa == = Azija / AFC = Ukupno 27 ekipa bilo je podijeljeno u dvije zone: zapadnu i istočnu zonu. Pobjednici zona direk…",
+                "…inale === = Afrika / CAF = Ukupno 29 afričkih ekipa bilo je podijeljeno u dvije grupe. Sistem takmičenja je bio kup, sa dvije utakm…",
+                "…rang iznad roda, a ispod porodice i podporodice. Ponekad je podijeljeno u potplemena (subtribuse). U zoologiji, neki primjeri su: p…",
+                "…na ove kategorije je -ini. Pleme Hominini je, prema nekima, podijeljeno u subplemena u kojem su i Hominina, koje uključuje \"ljude\".…",
+                "…avu stare općine Litija. 1995. godine, naselje je ukinuto i podijeljeno na dva nova naseljena mjesta: Bogenšperk i Dvor. == Stanovn…"
+            ]
+            },
+        {
+                "word": "dolar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 141,
+                "articles": 18,
+                "substringOnly": 2,
+                "examples": [
+                "…Dolar (često označavan kao $) je naziv za zvaničnu valutu u nekol…",
+                "…ija i drugih regija. == Trenutno aktivni dolari == Američki dolar Australski dolar Bahamski dolar Belizejski dolar Bermudski…",
+                "…ja. == Trenutno aktivni dolari == Američki dolar Australski dolar Bahamski dolar Belizejski dolar Bermudski dolar Brunejski d…",
+                "…aktivni dolari == Američki dolar Australski dolar Bahamski dolar Belizejski dolar Bermudski dolar Brunejski dolar Fidžijski…",
+                "…= Američki dolar Australski dolar Bahamski dolar Belizejski dolar Bermudski dolar Brunejski dolar Fidžijski dolar Gvajanski d…",
+                "…Australski dolar Bahamski dolar Belizejski dolar Bermudski dolar Brunejski dolar Fidžijski dolar Gvajanski dolar Hongkonški…"
+            ]
+            },
+        {
+                "word": "dolara",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 144,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…Djevojka od milion dolara (engleski: Million Dollar Baby) jest sportska drama snimlje…",
+                "…y Boydove knjige:. \"Majmunski izgled\", \"Djevojka od million dolara\" i \"Zamrznuta voda\" Ashley Judd je imala ponudu za ulogu Ma…",
+                "…ar == Reference == == Vanjski linkovi == Djevojka od milion dolara na IMDb-ju Detaljan opis radnje filma Sadržaj 170 kritika f…",
+                "…o nedecimalnu australsku funtu, sa kursom konverzije od dva dolara za funtu (£A1 = A$2). Podijeljen je na 100 centi. Simbol $…",
+                "…ljiva. U 2023, u opticaju je bilo 4,4 milijarde australskih dolara u kovanicama i 101,3 milijarde australskih dolara u novčani…",
+                "…stralskih dolara u kovanicama i 101,3 milijarde australskih dolara u novčanicama, ili oko 6.700 australskih dolara po osobi u…"
+            ]
+            },
+        {
+                "word": "Celzijusa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…do aerodroma zapadno. Temperatura je između 13 i 33 stepena celzijusa. Padavina je 117 mm godišnje. == Reference == == Vanjski li…",
+                "…ne klime. Prosječna godišnja temperatura iznosi 9,2 stepena Celzijusa, a srednja godišnja količina padavina 578 mm. Najtopliji mj…",
+                "…ust, sa prosječnim temepraturama između 16,6 i 18,4 stepeni Celzijusa, a najhladniji mjeseci decembar, januar i februar sa prosje…",
+                "…ebruar sa prosječnim temepraturama između 0,5 i 1,8 stepeni Celzijusa. == Stanovništvo == Prema podacima iz 2015. godine, čak 14,…",
+                "…, sunčana i stabilna, s temperaturom između 25 i 30 stepeni Celzijusa. == Vanjski linkovi == http://www.rgs.org/OurWork/Schools/G…",
+                "…rene grnčarske peći na temperaturama od 800 do 1000 stepeni Celzijusa. U slučaju pocakljivanja u otopinama metalnih oksida, postu…"
+            ]
+            },
+        {
+                "word": "Farenhajta",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…io je da je u stanju da izmeri temperaturu do 1⁄200 stepena Farenhajta (3 mK). Takva preciznost je svakako bila neuobičajena u sav…"
+            ]
+            },
+        {
+                "word": "kvadratni",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 79,
+                "articles": 18,
+                "substringOnly": 2,
+                "examples": [
+                "…Kvadratni metar (oznaka m2) je mjerna jedinica za površinu u Međunaro…",
+                "…a tvore tako da se prefiksi primijenjuju na jedinicu metar: kvadratni milimetar ili 1 mm2 = 1×10−6 (ili 1/1 000 000) kvadratnih m…",
+                "…etar ili 1 mm2 = 1×10−6 (ili 1/1 000 000) kvadratnih metara kvadratni centimetar ili 1 cm2 = 1×10−4 (ili 1/10 000) kvadratnih met…",
+                "…timetar ili 1 cm2 = 1×10−4 (ili 1/10 000) kvadratnih metara kvadratni decimetar ili 1 dm2 = 1×10−2 (ili 1/100) kvadratnih metara…",
+                "…decimetar ili 1 dm2 = 1×10−2 (ili 1/100) kvadratnih metara kvadratni dekametar ili 1 dam2 = 1×102 (ili 100) kvadratnih metara kv…",
+                "…hektometar ili 1 hm2 = 1×104 (ili 10 000) kvadratnih metara kvadratni kilometar ili 1 km2 = 1×106 (ili 1 000 000) kvadratnih meta…"
+            ]
+            },
+        {
+                "word": "kvadratna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…no: 1 m2 = 0,000001 (10−6) km2 1 hektar = 0,01 (10−2) km2 1 kvadratna milja = 2.5899km2 Bilješka: \"km2\" znači (km)2, kvadratni ki…",
+                "…jen pozitivnog broja, međutim, je samo jedan od njegova dva kvadratna korijena. Svaki pozitivan broj x ima dva kvadratna korijena…",
+                "…gova dva kvadratna korijena. Svaki pozitivan broj x ima dva kvadratna korijena. Jedan od njih je x {\\displaystyle \\scriptstyle {\\…",
+                "…Pojam kvadratna jednačina u matematici označava jednačinu drugog stepena, t…",
+                "…tom,u kojoj se nepoznata kvadrirana (x2). U osnovnom obliku kvadratna jednačina izgleda ovako: a x 2 + b x + c = 0 {\\displaystyle…",
+                "…, tj. kada je a = 0 radi se o linearnoj jednačini. Često se kvadratna jednačina izrazuje u normiranom obliku, gdje a = 1. Do tog…"
+            ]
+            },
+        {
+                "word": "kvadratnih",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…r: kvadratni milimetar ili 1 mm2 = 1×10−6 (ili 1/1 000 000) kvadratnih metara kvadratni centimetar ili 1 cm2 = 1×10−4 (ili 1/10 00…",
+                "…tara kvadratni centimetar ili 1 cm2 = 1×10−4 (ili 1/10 000) kvadratnih metara kvadratni decimetar ili 1 dm2 = 1×10−2 (ili 1/100) k…",
+                "…h metara kvadratni decimetar ili 1 dm2 = 1×10−2 (ili 1/100) kvadratnih metara kvadratni dekametar ili 1 dam2 = 1×102 (ili 100) kva…",
+                "…nih metara kvadratni dekametar ili 1 dam2 = 1×102 (ili 100) kvadratnih metara kvadrtni hektometar ili 1 hm2 = 1×104 (ili 10 000) k…",
+                "…h metara kvadrtni hektometar ili 1 hm2 = 1×104 (ili 10 000) kvadratnih metara kvadratni kilometar ili 1 km2 = 1×106 (ili 1 000 000…",
+                "…etara kvadratni kilometar ili 1 km2 = 1×106 (ili 1 000 000) kvadratnih metara U praksi se umjesto kvadratnog dekametra i kvadratno…"
+            ]
+            },
+        {
+                "word": "kubni",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 13,
+                "substringOnly": 2,
+                "examples": [
+                "…U matematici, kubni korijen broja, u oznaci x 3 {\\displaystyle {\\sqrt[{3}]{x}}}…",
+                "…vrijedi a3 = x. Svi realni brojevi imaju tačno jedan realan kubni korijen i par konjugovano kompleksnih korijena, a svi kompl…",
+                "…u tri različita komleksna kubna korijena. Naprimjer, realan kubni korijen od 8 je 2, jer je 23 = 8. Svi kubni korijeni od −27…",
+                "…primjer, realan kubni korijen od 8 je 2, jer je 23 = 8. Svi kubni korijeni od −27i su − 27 i 3 = { 3 i 3 3 2 − 3 2 i − 3 3 2…",
+                "…i\\\\-4-4{\\sqrt {3}}i.\\end{cases}}} == Formalna definicija == Kubni korijen broja x su brojevi y koji zadovoljavaju jednačinu y…",
+                "…voljavaju jednačinu y 3 = x . {\\displaystyle y^{3}=x.\\ } == Kubni korjen i parabola == Kada se suočimo sa jednačinama trećeg…"
+            ]
+            },
+        {
+                "word": "kubna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…U matematici, kubna funkcija je funkcija oblika f ( x ) = a x 3 + b x 2 + c x +…",
+                "…Quadratic, cubic and quartic equations on MacTutor archive. Kubna formula na PlanetMath-u Cardano solution calculator as java…",
+                "…i brojevi, različiti od nule, imaju tri različita komleksna kubna korijena. Naprimjer, realan kubni korijen od 8 je 2, jer je…",
+                "…pa sve do tačke topljenja na 1534 °C, prostorno centrirana kubna rešetka je ponovo stabilnija forma delta-ferita (δ-Fe). Sam…",
+                "…šetka ima više slobodnog prostora nego prostorno centrirana kubna rešetka, što mu omogućuje da se više ugljika rastvori u nje…",
+                "…ednačina Nejednakost Linearna jednačina Kvadratna jednačina Kubna jednačina Kvartna jednačina Kvintna jednačina Neodređena je…"
+            ]
+            },
+        {
+                "word": "kubnih",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…jedinice za volumen su: kubni milimetar ili 1 mm3 = 1×10-9 kubnih metara kubni centimetar ili 1 cm3 = 1×10-6 kubnih metara ku…",
+                "…= 1×10-9 kubnih metara kubni centimetar ili 1 cm3 = 1×10-6 kubnih metara kubni decimetar ili 1 dm3 = 1×10-3 kubnih metara kub…",
+                "…3 = 1×10-6 kubnih metara kubni decimetar ili 1 dm3 = 1×10-3 kubnih metara kubni kilometar ili 1 km3 = 1×109 kubnih metara == P…",
+                "…m3 = 1×10-3 kubnih metara kubni kilometar ili 1 km3 = 1×109 kubnih metara == Pretvaranja u ine jedinice == 1 kubni metar je is…",
+                "…edinice == 1 kubni metar je istovjetan: 1.000 litara ≈ 35,3 kubnih stopa (približno); 1 kubična stopa = 0,028 316 846 592 m3 (…",
+                "…je da nikakvim dopunama do kvadrata ne možemo naći korjene kubnih jednačina, pa je zato neophodno da pribjegnemo drugačijim r…"
+            ]
+            },
+        {
+                "word": "takozvani",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ojim je prekrivena. U porođajnoj sali se pored ovog uradi i takozvani Apgar test. Po urađenim postupcima poželjno je dijete dati…",
+                "…iru navodi 5 mišljenja od kojih navodi kao najjače da su to takozvani \"Mutešabih\" ajeti. A poznati moderni mufessir Sejid Kutb u…",
+                "…ahov prijatelj\". === Šejtanova hutba === U suri se spominje takozvani \"Šejtanov govor\" (22. ajet) koji će biti održan na Sudnjem…",
+                "…dostaje jedan ili više funkcionalnih komponenti u odnosu na takozvani \"divlji tip\" ili normalni fenotip. Molekulska biologija je…",
+                "…00 K. Zvijezde glavnog niza su zvijezde V svjetlosne klase, takozvani patuljci koji čine oko 90% svih zvijezda. Sunce se nalazi u…",
+                "…oj boji čija je talasna dužine 656 nm. Ove linije se i zovu takozvani Hα (fon. \"Ha alfa\") linije. Ostale linije u vidljivom spekt…"
+            ]
+            },
+        {
+                "word": "doktor",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 68,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Doktor se može odnositi na: Doktor (titula), najviša akademska tit…",
+                "…Doktor se može odnositi na: Doktor (titula), najviša akademska titula Ljekar ili liječnik, čes…",
+                "…, najviša akademska titula Ljekar ili liječnik, često zvani doktor, osoba koja se bavi medicinom…",
+                "…Doktor (nauka) jest visoka akademska titula koju pojedinac stiče n…",
+                "…koj obrazovnoj instituciji, najčešće fakultetu. == Ljekar i doktor == U bosanskom društvu se ljekari i stomatolozi nepravilno…",
+                "…daju još i nekada korištene titule za ljekara opće prakse - doktor medicine (za razliku doktora medicinskih nauka koji je odbr…"
+            ]
+            },
+        {
+                "word": "strana",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Strana (ital. Strana) je naseljeno mjesto u sastavu grada Buzeta,…",
+                "…Strana (ital. Strana) je naseljeno mjesto u sastavu grada Buzeta, Istarska župan…",
+                "…et. == Stanovništvo == Na popisu stanovništva 2011. godine, Strana je imala 56 stanovnika. Napomena: U 1921. i 1931. podaci su…",
+                "…. === Na popisu stanovništva 1991. godine, naseljeno mjesto Strana je imalo 43 stanovnika, sljedećeg nacionalnog sastava: == L…",
+                "…-9; == Reference == == Vanjski linkovi == Nedovršeni članak Strana (Buzet) koji govori o naselju u Hrvatskoj treba dopuniti. D…",
+                "…Maslina Strana je naseljeno mjesto u općini Glamoč, Bosna i Hercegovina. =…"
+            ]
+            },
+        {
+                "word": "prije",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 89,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Ništa više nije kao prije je treći studijski album grupe Nervozni poštar iz 1987. god…",
+                "…ta Ej, Maro, Marice Ljuljaj, ne ljuljaj Ništa više nije kao prije Vojnička rapsodija Poštar u finalu, jaro u kanalu (Šljivovi…",
+                "…na biljka. Preci cvjetnica su se odvojila od golosjemenjača prije oko 202-245 miliona godina, a za prve cvjetnice se zna da p…",
+                "…45 miliona godina, a za prve cvjetnice se zna da postoje od prije 160 miliona godina. One su bile veoma raznovrsne u donjoj k…",
+                "…raznovrsne u donjoj kredi i postale široko rasprostranjene prije oko 120 miliona godina, ali su četinare kao dominantna stab…",
+                "…na godina, ali su četinare kao dominantna stabla zamijenile prije svega oko 60-100 miliona godina. == Izvedene osobenosti ang…"
+            ]
+            },
+        {
+                "word": "nove",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 12,
+                "substringOnly": 4,
+                "examples": [
+                "…ast potpisan je tek 1998. godine. === Grb i zastava === Grb Nove Kaledonije je crne boje i sastoji se od školjke iza koje se…",
+                "…a strijele koja se nalazi na krovovima Kanak kuća). Zastava Nove Kaledonije je nezvanična zastava koja je u upotrebi od 1980…",
+                "…. To je zastava stranke \"FLNKS\" koja se bori za nezavisnost Nove Kaledonije. Zastava je horizontalna trobojka plavo (nebo i…",
+                "…= == Reference == == Vanjski linkovi == Službeni sajt vlade Nove Kaledonije Nedovršeni članak Nova Kaledonija koji govori o…",
+                "…tek krajem 19. vijeka, kad je južnu polovinu današnje Papue Nove Gvineje zauzela Velika Britanija, a sjevernu Njemačka. Toko…",
+                "…vropljani su prvi put stupili u neke dijelove unutrašnjosti Nove Gvineje tek u 30-im godinama 20. vijeka, otkrivši brojne no…"
+            ]
+            },
+        {
+                "word": "ere",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 39,
+                "articles": 13,
+                "substringOnly": 5,
+                "examples": [
+                "…vljaju tri glavna stadija u razvoju fosilnih tragova. Te su ere razdvojene vremenskim granicama katastrofalnog izumiranja:…",
+                "…. Hadij, arhaik i proterozoik čine neformalne prakambrijske ere. U geološkoj historiji, one traju četiri milijarde godina p…",
+                "…lijarde godina prije nastanka tvrdoljušturnih životinja. == Ere geološke skale == Uspostavljeno je deset geoloških era, gru…",
+                "…i podijeljena u 22 perioda (hedijski eon nije podijeljen na ere, a ere arhajskog eona nisu podijeljene na periode): Primjer…",
+                "…eljena u 22 perioda (hedijski eon nije podijeljen na ere, a ere arhajskog eona nisu podijeljene na periode): Primjer: Eon f…",
+                "…ne na periode): Primjer: Eon fanerozoik podijeljen je u tri ere: paleozoik, mezozoik i kenozoik. Kenozojska era je podijelj…"
+            ]
+            },
+        {
+                "word": "četvrtine",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…gleski kralj Edvard VII. Sastoji se od štita podijeljenog u četvrtine oko kojeg se nalaze ptica dodo (koja danas obitava samo na…",
+                "…ila == Cilj igre je postići više pogodaka. Na početku svake četvrtine po jedan igrač svake ekipe pliva prema sredini igrališta na…",
+                "…liva do lopte prva kreće u napad. Utakmica se igra u četiri četvrtine, čija dužina je 7, 8 ili 9 minuta (zavisno o pravilima orga…",
+                "…izam ili pripada ovoj religiji Jevreji su većinski (oko tri četvrtine) narod nacije Izraelaca. == Jevreji u Bosni i Hercegovini =…",
+                "…e./429. p. n. e. - Atinska kuga koja ubija između trećine i četvrtine stanovnika Atine . == Ličnosti == === Rođeni === === Umrli…",
+                "…da su dodali oko dva miliona korisnika u SAD-u tokom zadnje četvrtine 2012. godine što je činilo ukupno 27,1 miliona korisnika se…"
+            ]
+            },
+        {
+                "word": "pola",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 45,
+                "articles": 11,
+                "substringOnly": 1,
+                "examples": [
+                "…znat zbog zapisa o svom putovanju kroz Kinu. == Život Marca Pola == Nikola, Marcov otac i njegov brat Marco, poduzetni trgov…",
+                "…a Mongoliji 1271, poveli su sa sobom i 17-o godišnjeg Marca Pola. Nakon četiri godine putovanja, stigli su do Kublaja 1275.…",
+                "…središnje Azije)... otkrića mnogih zemalja zasluga su Marca Pola... obale tih zemalja nedavno su oplovili Kolumbo i Amerigo…",
+                "…ji i leži antipodno na suprotnoj strani Zemlje od Sjevernog pola, i to na udaljenosti od 20.004 km u svim smjerovima. To je…",
+                "…ivna. Geografski južni pol razlikuje se od Južnog magnetnog pola, čiji je položaj definisan na osnovu Zemljinog magnetnog po…",
+                "…e datume kada su Roald Amundsen i Robert F. Scott stigli do Pola, nakon čega slijedi kratki citat svakoga od njih; te daje n…"
+            ]
+            },
+        {
+                "word": "polovina",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Dr. Himzo Polovina (11. mart 1927 – 5. august 1986) bio je poznati bosanskoher…",
+                "…ta 1927. u Mostaru, Bosna i Hercegovina. Njegov otac, Mušan Polovina, bio je austrougarski vojnik za vrijeme Prvog svjetskog rat…",
+                "…u vodili računa da od Himze naprave vrsnog umjetnika. Himzo Polovina je u pjevačkoj karijeri proveo više od trideset godina. Nas…",
+                "…ma za napuštenu djecu, klubovima lječenih alkoholičara itd. Polovina je pet godina pauzirao na Radio Sarajevu zbog nesporazuma s…",
+                "…a te kuće. Slušaocima je za tih pet godina nedostajao Himzo Polovina. Tražili su ga i upućivali žalbe Radio Sarajevu. U Radio Sa…",
+                "…ko šalji me na vodu == Diskografija == === Albumi === HImzo Polovina (1970) Narodne pjesme iz Bosne i Hercegovine (novembar 1972…"
+            ]
+            },
+        {
+                "word": "sjeverno",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 41,
+                "articles": 7,
+                "substringOnly": 8,
+                "examples": [
+                "…Sjeverno more- rubno more Atlantskog okeana pored obala sjeverozapad…",
+                "…jeveroistočnim dijelom Atlantskog okeana i Norveškim morem. Sjeverno more je jedan od važnijih trgovačkih puteva i služi kao put…",
+                "…Baltičkog mora. == Geografija == === Položaj i pružanje === Sjeverno more se najvećim dijelom prostire na evropskom kontinentaln…",
+                "…uskog područja u sjevernom dijelu mora u blizini Norveške. Sjeverno more je zapljuskuje obalu Britanskih ostrva (Engleska i Ško…",
+                "…ija (jug) te Belgija i Francuska (jugozapad). Na jugozapadu Sjeverno more je preko Doverskih vrata povezano sa kanalom La Manche…",
+                "…okeana. Osim očiglednih granica na obalama okolnih država, Sjeverno more je od moreuza Skragerrak ograničeno zamišljenom linijo…"
+            ]
+            },
+        {
+                "word": "južno",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 6,
+                "substringOnly": 6,
+                "examples": [
+                "…ili južna polutka je onaj dio Zemljine kugle koji se nalazi južno od ekvatora. Nasuprot nje nalazi se sjeverna hemisfera Astr…",
+                "…Južno kinesko more (kineski 南海, Nán Hǎi, \"južno more\", vijetnamsk…",
+                "…Južno kinesko more (kineski 南海, Nán Hǎi, \"južno more\", vijetnamski Biển Đông, \"istočno more\") je rubno more…",
+                "…dajte == Istočno kinesko more == Vanjski linkovi == ASEAN i Južno kinesko more: Produbljivanje podjela Q&A with Ian J. Storey…",
+                "…th China Sea Tropski istraživački i konzervacisjki centar - Južno kinesko more Reversing Environmental Degradation Trends in…",
+                "…ksimalnu dubinu Južnog okeana, koristeći definiciju da leži južno od 60. paralele, izmjerila je ekspedicija Pet dubina početk…"
+            ]
+            },
+        {
+                "word": "istočno",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 106,
+                "articles": 11,
+                "substringOnly": 6,
+                "examples": [
+                "…Regija Istočno Sarajevo je jedna od nodalno-funkcionalnih regija Republike…",
+                "…onalnih podjela Republike Srpske, a u gotovo svakoj od njih Istočno Sarajevo predstavlja centar jedne od regija. == Teritorija…",
+                "…nisana kao mezoregija i obuhvata sljedeće gradove i općine: Istočno Sarajevo Istočna Ilidža Istočno Novo Sarajevo Pale Sokolac…",
+                "…sljedeće gradove i općine: Istočno Sarajevo Istočna Ilidža Istočno Novo Sarajevo Pale Sokolac Istočni Stari Grad Trnovo Rogati…",
+                "…Grad Istočno Sarajevo je teritorijalno najveći grad u Republici Srpskoj,…",
+                "…od 1996. do 2005. 'grad Srpsko Sarajevo', a od 2005. 'grad Istočno Sarajevo'. Jedini je grad u Republici Srpskoj koji obuhvata…"
+            ]
+            },
+        {
+                "word": "zapadno",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 9,
+                "substringOnly": 4,
+                "examples": [
+                "…Zapadno Rimsko Carstvo (naziv je novijeg porijekla; prema savremeno…",
+                "…adni dio dobio Flavije August Honorije, a istočni Arkadije. Zapadno rimsko carstvo je propalo već 476. godine kad je Odoakar, g…",
+                "…taknuta. == Historija == ==== Vrijeme Honorija ==== Iako je Zapadno rimsko carstvo trajalo samo 81 godinu, imalo je ukupno 12 p…",
+                "…aktivno djelovati na spasavanju carstva koje se raspadalo. Zapadno rimsko carstvo je u sljedećem razdoblju gubilo sve veća pod…",
+                "…a oni na kraju ipak pobjeđuju. Finansijski i vojno to je za Zapadno rimsko carstvo bila katastrofa. Bezuspješan je bio i pohod…",
+                "…umjerenim uspjehom. U međuvremenu, Vandali su kontrolirali zapadno Sredozemlje. Na kraju, i situacija u Rimu se okreće protiv…"
+            ]
+            },
+        {
+                "word": "manje",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 17,
+                "substringOnly": 1,
+                "examples": [
+                "…Ovo je članak o manje važnim zlim čarobnjacima u seriji romana o Harry Potteru. =…",
+                "…ri u Hogwartsu jesu profesori koji se samo spominju, ili su manje relevantni unutar Harry Potter franšize. Važniji profesori…",
+                "…vi navedeni u ovom članku su pretežno spomenuti u knjigama, manje ili nikako se pojavljuju u filmovima o Harry Potteru. == Pr…",
+                "…Ovo je članak o manje važnim djelatnicima Ministarstva Magije iz serije romana J.…",
+                "…a je podijeljeno na nekoliko raznih sazviježđa. Razni drugi manje službeni znakovi su postojali pored sazviježđa zvanih aster…",
+                "…atoru, sve više zvijezda počinje izlaziti i zalaziti, a sve manje ih je vidljivo tokom cijele noći. Zvijezde i drugi objekti…"
+            ]
+            },
+        {
+                "word": "veće",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 30,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ušne neutronske zvijezde (koje su zapravo mrtve zvijezde ne veće od nekog gradića), supergigante (veledivove) kakvi su Sjeve…",
+                "…tako dvojne zvijezde (binarne zvijezde). Također postoje i veće zvjezdane skupine poznate kao zvjezdana jata ili klasteri.…",
+                "…zde nisu jednoliko raspršene u Svemiru već se grupišu u još veće zvjezdane skupove poznate kao galaktike. Običnu galaktiku s…",
+                "…eći faktor refleksije. Crveno zrake se teže odražavaju zbog veće talasne dužine. Poznata odrazna maglina je Merope koja se n…",
+                "…tipa G5 oko koje kruže tri džinovske planete (mese 10 puta veće od mase Zemlje). HD 12661, kao i zvijezda HIP 14810, je zvi…",
+                "…dokazi o razbacanim britskim naseljima u tom području, prvo veće naselje su osnovali Rimljani 43. godine nove ere. Trajalo j…"
+            ]
+            }
+        ],
+    }
+    

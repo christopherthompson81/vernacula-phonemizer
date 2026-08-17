@@ -913,8 +913,33 @@ async function main(): Promise<void> {
         // A currency name is only worth checking if its SIGN is in the corpus: a language that never writes ¥
         // never speaks its yen word, so its attestation cannot affect a reading. Checking all of them reported
         // yen/euro/jen across fifteen languages — true, and useless.
-        const used = (block: string): string => block.split(/,(?=\s*"[^"]*"\s*:)/u)
-            .filter((entry) => { const sign = /"([^"]+)"\s*:/u.exec(entry)?.[1]; return sign !== undefined && hay.text.includes(sign); })
+        /** Every `currency: { … }` body in `src`, brace-matched so a nested object or a `}` inside a comment
+         *  cannot truncate it. */
+        const currencyBlocks = (src: string): string[] => {
+            const out: string[] = [];
+            for (const m of src.matchAll(/currency:\s*\{/gu)) {
+                let depth = 0;
+                for (let i = m.index + m[0].length - 1; i < src.length; i++) {
+                    if (src[i] === "{") depth++;
+                    else if (src[i] === "}" && --depth === 0) { out.push(src.slice(m.index + m[0].length, i)); break; }
+                }
+            }
+            return out;
+        };
+        // ⚠ THE KEY MAY BE UNQUOTED, AND FOR 42 LANGUAGES IT IS. `currency: { $: [...], "\u00a5": [...] }` is
+        // valid TypeScript and the house style in about a quarter of the fleet, but the first version of
+        // this split and filtered on a QUOTED key only — so a shorthand entry matched neither the split
+        // lookahead nor the sign extractor, and was dropped whole. Serbian declares `{ $: ["dolar",
+        // "dolara", "dolara"], "\u00a5": [...] }`; the gate checked `jen`/`jena` and never once looked at
+        // `dolar`. That is the same "check went blind" failure the Hausa comment below records, one key
+        // shape further along, and it is worse than the bug it sits beside because it reports GREEN.
+        const KEY = '(?:"([^"]+)"|([^\\s"{},:]+))\\s*:';
+        const used = (block: string): string => block.split(new RegExp(`,(?=\\s*${KEY})`, "u"))
+            .filter((entry) => {
+                const m = new RegExp(`^\\s*${KEY}`, "u").exec(entry);
+                const sign = m?.[1] ?? m?.[2];
+                return sign !== undefined && hay.text.includes(sign);
+            })
             .join(" ");
         // The language's .jsonc files, read ONCE — both the manifest-symbols arm and the decimalWord arm
         // below consume this list, so the file-selection rule cannot drift between them.
@@ -958,7 +983,11 @@ async function main(): Promise<void> {
         };
         const decl = [
             ...[...tier.matchAll(/percent:\s*(\[[^\]]*\])/gu)].map((m) => m[1]!),
-            ...[...tier.matchAll(/currency:\s*\{([^}]*)\}/gu)].map((m) => used(m[1]!)),
+            // ⚠ BRACE-MATCHED, NOT `[^}]*`. That class stops at the FIRST `}`, so a nested object or a
+            // comment containing one truncates the block and silently drops every entry after it — the
+            // same shape the `parseJsonc` comment below records for the manifest arm. No shipped language
+            // trips it today (measured), which is exactly why it would ship unnoticed when one does.
+            ...currencyBlocks(tier).map((b) => used(b)),
             ...manifestSymbols().map((w) => `["${w.replace(/"/gu, "")}"]`),
             ...jsoncSrcs.flatMap((src) =>
                 [...src.matchAll(/"decimal(?:Word|Connector)"\s*:\s*"([^"]+)"/gu)].map((m) => `["${m[1]!}"]`)),
