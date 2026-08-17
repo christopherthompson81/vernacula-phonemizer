@@ -103,7 +103,13 @@ function tonogenesis(ipa: string): string {
 /** Variety options. Saraiki (skr) is the NON-tonal Lahnda sibling: it never underwent Punjabi's tonogenesis (it
  *  kept the voiced aspirates AND its aspirated sonorants — لھ→lʰ), and it writes retroflex ɳ explicitly (ݨ), so
  *  the plain-ن→ɳ infinitive heuristic must not fire. One declarative flag toggles all three (ADR-2). */
-export interface PunjabiOpts { saraiki?: boolean }
+export interface PunjabiOpts {
+    saraiki?: boolean;
+    /** The variety's OWN pre-tokenizer pass, replacing the Punjabi one. Saraiki supplies
+     *  `normalizeSaraiki`; without it the `saraiki` flag leaves the text unnormalized (which is what it did
+     *  before that layer existed — see the comment on `normalize` below). */
+    normalize?: (text: string) => string;
+}
 
 export function makeNativePunjabi(
     def: PunjabiDef,
@@ -186,8 +192,11 @@ export function makeNativePunjabi(
     // corpus counts and the step-by-step ordering couplings.
     //
     // GATED OFF FOR SARAIKI. skr builds on this same factory (saraiki.ts) and would inherit the whole pass,
-    // but the pass EMITS PUNJABI WORDS — ਪ੍ਰਤੀਸ਼ਤ, ਡਾਲਰ, ਡਿਗਰੀ, ਈਸਾ ਪੂਰਵ
-    const normalize = opts.saraiki ? (s: string) => s : makePunjabiNormalizer(def.numbers);
+    // but the pass EMITS PUNJABI WORDS — ਪ੍ਰਤੀਸ਼ਤ, ਡਾਲਰ, ਡਿਗਰੀ, ਈਸਾ ਪੂਰਵ. ⚠ THE VARIETY MAY NOW SUPPLY ITS
+    // OWN, which is what `opts.normalize` is for: Saraiki passes `normalizeSaraiki` (Shahmukhi words,
+    // three digit sets, the Arabic comma), and the identity fallback is the behaviour that shipped while
+    // that layer did not exist.
+    const normalize = opts.normalize ?? (opts.saraiki ? (s: string) => s : makePunjabiNormalizer(def.numbers));
 
     function text(input: string): string {
         // Fold this script's own digits to ASCII first: the number token is `\d+`, which JavaScript

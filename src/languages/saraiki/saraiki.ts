@@ -25,6 +25,7 @@ import {
     loadPunjabiManifest,
     type ForeignPhonemizer,
 } from "../punjabi/punjabi.ts";
+import { normalizeSaraiki } from "./normalize.ts";
 
 let SKR: ReturnType<typeof makeNativePunjabi> | undefined;
 function engine() {
@@ -50,5 +51,5 @@ export function phonemizeWord(w: string): string {
 
 /** Build the Saraiki phonemizer. `foreign` handles embedded Latin. */
 export function createSaraiki(foreign?: ForeignPhonemizer): { text(input: string): string } {
-    return makeNativePunjabi(loadPunjabiManifest(), loadSharedPhonology(), foreign, { saraiki: true });
+    return makeNativePunjabi(loadPunjabiManifest(), loadSharedPhonology(), foreign, { saraiki: true, normalize: normalizeSaraiki });
 }

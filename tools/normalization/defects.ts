@@ -1019,6 +1019,48 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
             + "inverts and omitting a plus does not",
     },
+    skr: {
+        // \u26a0 EIGHT REFUSALS over the retained text of `tools/corpus/mined/skr.jsonc` (436 segments of a
+        // 120,763-paragraph skr.wikipedia dump), each argued in src/languages/saraiki/normalize.ts. \u26a0 THE
+        // `equals` ENTRY IS THE FIRST IN THIS SWEEP WHERE ARITHMETIC IS THE MAJORITY SENSE \u2014 and it is
+        // still refused, for the reason Chuvash gave: the WORD IS POSTPOSITIONAL and the tier can only
+        // place a connective BETWEEN operands.
+        equals: "measured: `=` \u00d712, and SIX ARE GENUINE ARITHMETIC \u2014 the Rubik\u0027s-cube article\u0027s "
+            + "piece counts (`2\u00d72\u00d72 = 8`, `3\u00d73\u00d73= 27`, `4\u00d74\u00d74= 64`, `5\u00d75\u00d75= 125`, "
+            + "`7\u00d77\u00d77=483`, the last of which the corpus gets wrong) and one satirical couplet "
+            + "(`\u0688\u0648 + \u0686\u0627\u0631 = \u0686\u06be \u062f\u0627\u0646\u0634\u0648\u0631\u0627\u06ba`). The rest are two physics formulas "
+            + "(`F = ma`, `E=mc^2`), two ETYMOLOGICAL GLOSSES (`\u0627\u0646\u0648\u0627\u0621 = \u0646\u0648\u0621 \u062f\u06cc \u062c\u0645\u0639 \u06c1\u06d2`, "
+            + "`\u06c1\u0627\u0626\u0688\u0631\u0648 = \u067e\u0627\u0645\u0679\u06cc`), one angle assignment (`\u03b8 = 0\u00b0`) and one WIKI TEMPLATE PARAMETER "
+            + "the extraction left in (`\u0631\u0628\u0637= \u06af\u0631\u06cc\u0646\u0688 \u06a9\u0631\u0627\u0633`). \u26a0 AND THE WORD IS WHY THE MAJORITY DOES NOT "
+            + "CARRY IT: `\u0628\u0631\u0627\u0628\u0631` \u00d745 is attested and is exactly \u2018equal\u2019, but POSTPOSITIONALLY \u2014 the "
+            + "corpus writes \u201c2.43 \u00d7 10\u207b\u00b9\u00b2 \u0645\u06cc\u0679\u0631 \u062f\u06d2 \u0628\u0631\u0627\u0628\u0631 \u06c1\u06d2\u201d, *is equal TO x*, and the tier can only "
+            + "place a connective between operands. Same refusal as chv, same reason",
+        times: "measured: `\u00d7` \u00d711 with THREE SENSES and no clean majority: the cube dimensions above "
+            + "(`9\u00d79\u00d79\u060c 11\u00d711\u00d711 \u062a\u06d2 17\u00d717\u00d717 \u0645\u06a9\u0639\u0628`), SCIENTIFIC NOTATION (`2.43 \u00d7 10\u207b\u00b9\u00b2 "
+            + "\u0645\u06cc\u0679\u0631`) and a PHYSICS LAW (`\u0642\u0648\u062a = \u06a9\u0645\u06cc\u062a \u00d7 \u062a\u06a9\u0648\u0646 (F = ma)`) \u2014 plus PAPER DIMENSIONS "
+            + "written with an ASCII \u27e8x\u27e9 (`A4; 297x210 mm`, `\u06f3x\u06f3 \u06c1\u062a\u06be`), which is why `\u06f3x\u06f3` reads "
+            + "*tin eks tin* today. \u26a0 AND THE WORD IS THE FULA SHAPE: `\u0636\u0631\u0628` \u00d745 on the wiki is "
+            + "`\u0636\u0631\u0628 \u0627\u0644\u0645\u062b\u0644`, \u2018proverb\u2019, in every example read",
+        plus: "measured: `+` \u00d72 and ONE IS AN ORTHOGRAPHIC DECOMPOSITION rather than an addition \u2014 "
+            + "`\u0632\u0628\u0631+\u06cc+ \u0654 \u06c1\u06d2`, the article on how \u27e8\u0626\u27e9 is built from zabar plus ye plus hamza. The other "
+            + "is the satirical couplet counted under `equals`. A plus does not invert its operand, so "
+            + "silence costs nothing",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        "less-than": "measured: `<` \u00d71 and it is an APPROXIMATION MARKER inside a currency parenthetical, "
+            + "not a comparison to read aloud: `2 \u0628\u0644\u06cc\u0646 \u06cc\u0646 (<US$20 \u0645\u0644\u06cc\u0646)`, \u2018under twenty million "
+            + "dollars\u2019. \u26a0 The figure beside it IS read \u2014 `US$` is declared as its own currency key "
+            + "(trap 64) \u2014 so what is dropped is the hedge, not the quantity",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs and is a CITATION (`\u0645\u0639\u062c\u0645 \u0627\u0644\u0628\u0644\u062f\u0627\u0646 \u06f4/\u06f1\u06f5\u06f0`, "
+            + "volume over page; `213-276/828-889`, Hijri over Gregorian), a RATE (`h/m\u2091c`) or a date "
+            + "(`5/1987 to 12/1995`). No fraction rule is written",
+        exponent: "measured: \u00d716, and NONE has a unit noun for a power to attach to. They are "
+            + "SCIENTIFIC NOTATION (`2.43 \u00d7 10\u207b\u00b9\u00b2`), an inline negative exponent "
+            + "(`10\u221250 cm4 s photon\u22121`), a caret (`E=mc^2`) and a SUBSCRIPT variable (`h/m\u2091c`). "
+            + "\u26a0 `units` IS FOUR CORPUS-WIDE in 120,763 segments \u2014 this language spells its measures out "
+            + "(`\u0645\u0631\u0628\u0639 \u06a9\u0644\u0648\u0645\u06cc\u0679\u0631`, `\u0645\u0631\u0628\u0639 \u0645\u06cc\u0644`, `\u0645\u06a9\u0639\u0628`) \u2014 so there is no unit table here for an "
+            + "exponent to modify, and the squared/cubed words would have nothing to attach to",
+    },
     an: {
         // \u26a0 SEVEN REFUSALS over the retained text of `tools/corpus/mined/an.jsonc` (448 segments of a
         // 255,887-paragraph an.wikipedia dump), each argued in src/languages/aragonese/normalize.ts. The

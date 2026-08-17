@@ -1366,6 +1366,17 @@ there is a candidate, and copying it is how a working layer ships a confidently 
   once, so rw's trailing de-grouping guard left its commonest numeric shape (`1,964.54` ×9) ungrouped; hil had
   to run ranges ABOVE decimals where ceb does not, or `3.5-3.8 bilyon` becomes a backwards span inside a
   number.
+- **an vs ast** (`3c5e558`), the first round run EXPLICITLY as a test of this trap, with each of the
+  sibling's six findings carried over as a claim and re-measured. **Four held and two did not.** The whole
+  separator machinery ported (dot groups / comma decimates / dot ALSO decimates under three digits / space
+  groups) and so did the `°`-vs-`º` discriminator; the CURRENCY ORDER refuted (ast is postposed without
+  exception, an prefixes twelve of sixteen), and the Roman-numeral MONTH is simply absent from Aragonese.
+  ⚠ **And one guard needed a one-character change that no count would have surfaced**: ast's degree tail
+  allow-lists the compass letters `NSEW`, but Aragonese west is *ueste* and the corpus writes `11°U y 12°E`.
+  A ported `W` matches nothing in the language and misses every western longitude.
+- **The ratio is the useful number, not the verdict.** Four of six, seven of ten (rn), three of four (hil):
+  a sibling is right most of the time, which is exactly what makes copying it dangerous — the failures are a
+  minority and they are invisible unless every rule is re-measured.
 - **What transfers is the PROCEDURE, never the table** — this document's opening premise, arriving one
   taxonomic level down. The sibling is worth reading precisely because it tells you which questions to ask.
 

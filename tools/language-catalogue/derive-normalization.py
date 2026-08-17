@@ -67,7 +67,15 @@ def main():
         norm = open(os.path.join(dp, "normalize.ts"), encoding="utf8").read()
         names = [n for n in re.findall(r"export function ((?:normalize|make|create)\w+)", norm)
                  if n.startswith("normalize") or "Normalizer" in n]
-        if any(re.search(rf"\b{re.escape(n)}\s*\(", engine_src(dp)) for n in names):
+        # ⚠ A NORMALIZER MAY BE WIRED BY REFERENCE, NOT ONLY BY CALL. Saraiki does not invoke its own pass:
+        # it builds on the Punjabi factory and hands the function over as an option (`normalize:
+        # normalizeSaraiki`), which the factory then calls. A call-site-only test reported that as
+        # `partial` — "the file exists but the engine does not call it" — which is the opposite of true.
+        # The second alternative is deliberately narrow (the `normalize` KEY, not any property) so this
+        # stays a wiring test rather than an import test.
+        src = engine_src(dp)
+        if any(re.search(rf"\b{re.escape(n)}\s*\(", src)
+               or re.search(rf"\bnormalize\s*:\s*{re.escape(n)}\b", src) for n in names):
             is_wired.add(d)
 
     # ⚠ THEN FOLLOW DELEGATION. A wrapper directory has no normalize.ts and does not need one: it calls another
