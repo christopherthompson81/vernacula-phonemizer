@@ -36,6 +36,14 @@
         ["ai", "aⁱ", true],
         ["au", "aᵘ", true],
         ["sh", "ʃ", false],
+        // ⚠ Standard Hausa spells native /t͡ʃ/ as a BARE ⟨c⟩, so this table never needed a ⟨ch⟩ entry for
+        // Hausa words — and every one of the 182 corpus rows containing ⟨ch⟩ therefore read c→t͡ʃ then
+        // h→h and emitted the impossible cluster t͡ʃh. They are almost all foreign proper nouns (china,
+        // charles, chile, richard, ovechkin, gingrich), which reach this table rather than a foreign
+        // reader because NATIVE_CLASS in hausa.ts accepts all of a-z: a plain-ASCII name carries no
+        // letter Hausa lacks, so nothing marks it as foreign. Reading it as /t͡ʃ/ is what a Hausa reader
+        // does with the spelling, which is the nativising the audio says they do.
+        ["ch", "t͡ʃ", false],
         ["ts", "t͡sʼ", false],
         ["kw", "kʷ", false],
         ["gw", "ɡʷ", false],
