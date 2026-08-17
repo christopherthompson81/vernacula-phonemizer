@@ -382,6 +382,69 @@ after fix (1), and green before and after fix (3). Only reading the probe output
 
 ---
 
+## Run 7 — 2026-08-16 — trap 58: the range's second endpoint, and what a Bosnian year span actually reads as
+
+**Command.** `npx vitest run test/clause-final-range.test.ts` (a fleet-wide CI test this round's own gates
+never ran), then the corpus.
+
+    FAIL  trap 58 — a range rule declined a clause mark:  bs 1990-1995. lost: pet
+
+**Question.** Nothing is DROPPED here — the second endpoint flips from the cardinal `pet` to the ordinal
+`pete` when a clause mark follows, so `1990-1995.` read *hiljadu devetsto devedeset* **do** *hiljadu devetsto
+devedeset pete*. Which of the three readings is Bosnian's, and where does the mixed one come from?
+
+**Raw finding — the corpus answers, and it answers twice.**
+
+1. There are **5 year–year dash spans** in the 1,976 utterances and **four carry no ordinal period at all**:
+
+       (AD 1000–1300).      (1894-1895), Qing vlada     (1469–1539) u 15. vijeku     (1644-1912) preuzele
+
+   The fifth is `Ta abeceda je osmišljena 1444. godine … (1418-1450. godine)` — the period IS written on the
+   second endpoint **and the licensing noun is written after it**. Not one instance in the corpus has a year
+   span whose period is clause-final. So the ordinal reading of a span endpoint is licensed by **what
+   follows the dot**, never by the dot alone — the identical discipline steps 4, 6, 10 and 11 already use.
+2. And when it IS licensed, **both endpoints are ordinal**. The corpus writes the connective out longhand
+   twice and marks both endpoints each time: `u sezoni od 1995. do 1996. godine` and `u 2015. ili 2016.
+   godini`. A span is *of* those years and the elision governs the pair.
+
+So the answer is the coordinator's candidate **3** at the top level (conditioned on what follows), resolving
+to candidate **1** in the licensed frame and candidate **2** at a clause end.
+
+**Where the mixed reading came from — an ORDERING, not a guard class.** Serbian and Croatian both run the
+range rule BEFORE the ordinal rules, so `1000-1300. godine` still has a digit on its right when the ordinal
+fires; this file inherited that order. The cost is that by the time the elided-year arm runs, the dash its
+own lookbehind `(?<![\d.,\-])` was written to reject is **gone** — the text already says `1990 do 1995.` —
+so only the second endpoint was promoted. ⚠ The defect was **live in the corpus, not only in the probe**:
+`(1418-1450. godine)` was reading as *hiljadu četiristo osamnaest do hiljadu četiristo pedesete*, cardinal
+then ordinal. No counter sees a mixed reading (trap 56), and the corpus diff was identical before and after
+the repair.
+
+**The repair, three parts.**
+
+- **New step 9**, ahead of everything that touches a range: a YEAR–YEAR span whose second endpoint carries
+  the ordinal period **and is followed by a lowercase word** is claimed as a UNIT — both endpoints f.gen
+  ordinal, joined by `do`, the dot consumed. This is the licensed frame, and it fixes the ×1 corpus instance.
+- **The general range rule moves BELOW both ordinal rules** (now step 11b). Step 9 having taken the licensed
+  span means the reason for the sibling ordering no longer applies, and the elided-year arm's dash guard now
+  sees the dash it was written for. Residual: a NON-year range whose right endpoint is a licensed ordinal
+  (`4-5. kategorije`) — ×0 in this corpus, so step 10's lookbehind is left alone rather than widened on
+  nothing.
+- **The year arm's reject class gains the en dash and the em dash**: `[\d.,\-]` → `[\d.,\-–—]`. This is trap
+  58's canonical shape restated for a rule whose trailing context is an ordinal arm rather than a lookahead
+  class — the old class was right about `COVID-19.` and blind to `1990–1995.`, while the same corpus writes
+  its spans with both dashes (`7–2`, `1469–1539`, `AD 1000–1300`).
+
+**bs was NOT added to `NOT_YET_REPAIRED`.** The header rules that out: the allowlist is a backlog, entries
+leave it by fixing the language, and "no corpus instances" is explicitly not an argument (trap 8). The
+language was fixed instead.
+
+**Implication.** The gate that caught this is one no per-language instrument runs — `review.ts`'s own
+clause-final line reported `[ ok ]` throughout, because its two RANGE probes are declared ungated. That is
+the third instrument in this round to fail toward false confidence (see Run 6), and the first to be caught
+by CI rather than by reading output.
+
+---
+
 ## Gates
 
 | gate | before | after |
@@ -400,7 +463,8 @@ after fix (1), and green before and after fix (3). Only reading the probe output
 | `review.ts --lang bs` — artifact tracked | n/a | **[FAIL] `tools/corpus/mined/bs.jsonc` missing — EXPECTED**, bs is FLEURS-only and no artifact was created |
 | `referee-eval bs` | **does not exist** | still does not exist — `eval.ts` has no `bs`. The gate is VACUOUS, not green, and cannot regress |
 | utterances changed | — | 301 / 1,976 = **15.2 %** |
-| `npx vitest run` | 4652 passing | **4651 passed, 1 failed** — `test/languageCatalogue.test.ts`, `1 cell(s) differ`, exactly the expected one-cell drift from adding a normalizer (regenerated centrally) |
+| `test/clause-final-range.test.ts` (fleet CI, trap 58) | **red on bs** | **green**, and `bs` is NOT in `NOT_YET_REPAIRED` — see Run 7 |
+| `npx vitest run` | 4652 passing | **4653 passed, 1 failed** — `test/languageCatalogue.test.ts`, `1 cell(s) differ`, exactly the expected one-cell drift from adding a normalizer (regenerated centrally) |
 | `npx tsc --noEmit` | clean | **clean** |
 
 ---

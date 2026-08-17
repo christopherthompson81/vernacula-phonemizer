@@ -490,14 +490,31 @@ export function normalizeBosnian(input: string): string {
             return mv === 0 ? head : `${head} i ${numberToWords(mv)} ${counted(mv, MINUT)}`;
         });
 
-    // 9) NUMERIC RANGES — ×13. The dash was dropped outright, fusing the endpoints into one run of words
-    //    (`120-160` read *sto dvadeset sto šezdeset*). Digits on BOTH sides keeps `COVID-19`, `XDR-TB`,
-    //    `Il-76` and `A1GP` out. Runs AFTER step 6 (which needs the hyphen) and BEFORE step 10, so
-    //    `(1418-1450. godine)` still has a digit on the right when this fires and the ordinal rule can then
-    //    claim the second endpoint.
-    //    Known false positives: SCORES (`7–2`, `5-3`) where *do* is the wrong connective — but the
-    //    endpoints were fusing there too, so no reading is lost, only a wrong-ish connective gained.
-    s = s.replace(/(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
+    // 9) A YEAR–YEAR SPAN WHOSE SECOND ENDPOINT CARRIES THE ORDINAL PERIOD, claimed as a UNIT and BEFORE
+    //    everything else that touches a range. This is trap 58's Bosnian shape, and it is a LANGUAGE
+    //    question that the corpus answers twice.
+    //
+    //    ⚠ WHAT THE CORPUS SAYS. There are 5 year–year dash spans in the 1,976 utterances, and FOUR of them
+    //    carry NO ordinal period at all — `(1894-1895)`, `(1644-1912)`, `(1469–1539)`, `(AD 1000–1300)`.
+    //    The fifth is `Ta abeceda je osmišljena 1444. godine … (1418-1450. godine)`, where the period IS
+    //    written on the second endpoint and the licensing noun is written after it. So the ordinal reading
+    //    of a span endpoint is licensed by WHAT FOLLOWS THE DOT, never by the dot alone — the same
+    //    discipline steps 10 and 11 already use, and the same discipline steps 4 and 6 use for `SAD-a` and
+    //    `1970-ih` (the written mark names the reading).
+    //    ⚠ AND WHEN IT IS LICENSED, BOTH ENDPOINTS ARE ORDINAL. The corpus writes the connective out
+    //    longhand twice and marks both endpoints each time: `u sezoni od 1995. do 1996. godine` and
+    //    `u 2015. ili 2016. godini`. A span is *of* those years and the elision governs the pair, so
+    //    `1418-1450. godine` is *hiljadu četiristo osamnaeste DO hiljadu četiristo pedesete godine*.
+    //    ⚠ THE READING THIS REPLACES WAS INDEFENSIBLE UNDER EITHER ANALYSIS, and it was live in the corpus
+    //    rather than only in a probe: the general range rule ran first, so step 11 saw a bare `1450.` and
+    //    produced CARDINAL-then-ORDINAL — *hiljadu četiristo osamnaest do hiljadu četiristo pedesete*.
+    //    Neither "both cardinal" nor "both ordinal", and no counter sees a mixed reading (trap 56).
+    s = s.replace(/(?<![\d.,])(1\d{3}|20\d{2}|2100)\s?[-–—]\s?(1\d{3}|20\d{2}|2100)\.(?=\s+\p{Ll})/gu,
+        (whole, from: string, to: string) => {
+            const a = ordinalBase(Number(from)), b = ordinalBase(Number(to));
+            if (a === undefined || b === undefined) return whole; // round thousands — see ordinalBase
+            return `${inflect(a, "f.gen")!} do ${inflect(b, "f.gen")!}`;
+        });
 
     // 10) THE `N.` ORDINAL — the rule this file mostly exists for (see the header and LICENSOR). Claimed
     //     ONLY when a licensing word from the closed list follows, and only when that word is LOWERCASE.
@@ -527,9 +544,14 @@ export function normalizeBosnian(input: string): string {
     //     end (utterance end, or a capitalised word after it); mid-sentence it is the ordinal marker.
     //     ⚠ THE EXCLUSIONS EARN THEMSELVES IN THIS CORPUS. The 12 utterance-final `N.` include
     //     `zbog zabrinutosti vezane za COVID-19.`, `prizemljila Il-76.`, `savršen dan za ragbi 7.`,
-    //     `osobe koje već imaju dijabetesa tipa 1.` and `rezultat bio 6:6.` — the `(?<![\d.,\-])` lookbehind
-    //     rejects the first two and the 1000–2100 range rejects the rest.
-    s = s.replace(/(?<![\d.,\-])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
+    //     `osobe koje već imaju dijabetesa tipa 1.` and `rezultat bio 6:6.` — the lookbehind rejects the
+    //     first two and the 1000–2100 range rejects the rest.
+    //     ⚠ THE LOOKBEHIND REJECTS ALL THREE DASHES, NOT ONLY THE ASCII HYPHEN, and that is trap 58's
+    //     canonical shape stated for a rule whose trailing context is an ordinal arm rather than a
+    //     lookahead class. The class was `[\d.,\-]`, which is right for `COVID-19.` and blind to
+    //     `1990–1995.`; the en dash and the em dash join the same corpus's range shapes (`7–2`, `1469–1539`,
+    //     `AD 1000–1300`) and had to join this guard with them.
+    s = s.replace(/(?<![\d.,\-–—])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
         const base = ordinalBase(Number(digits));
         if (base === undefined) return whole;
         const year = inflect(base, "f.gen");
@@ -538,6 +560,23 @@ export function normalizeBosnian(input: string): string {
         const sentenceEnd = rest === "" || /^[\p{Lu}]/u.test(rest);
         return `${year}${sentenceEnd ? "." : ""}`;
     });
+
+    // 11b) THE GENERAL NUMERIC RANGE — ×13. The dash was dropped outright, fusing the endpoints into one
+    //      run of words (`120-160` read *sto dvadeset sto šezdeset*). Digits on BOTH sides keeps
+    //      `COVID-19`, `XDR-TB`, `Il-76` and `A1GP` out. Runs AFTER step 6, which needs the hyphen.
+    //      ⚠ AND AFTER THE TWO ORDINAL RULES, WHICH IS THE ORDERING TRAP 58 TURNS ON HERE. Serbian and
+    //      Croatian both run the range rule BEFORE the ordinal rules, so that `1000-1300. godine` still
+    //      has a digit on its right when the ordinal fires. The cost of that order is that by the time
+    //      step 11 runs the dash its own lookbehind was written to reject is GONE — the text already says
+    //      `1990 do 1995.` — so a clause-final `1990-1995.` had its SECOND endpoint silently promoted to
+    //      an ordinal while the first stayed cardinal. Step 9 claims the LICENSED year span as a unit,
+    //      which is what lets this rule move below the ordinals and lets step 11's dash guard do the job
+    //      it was written for. The residual is a NON-year range whose right endpoint is a licensed
+    //      ordinal (`4-5. kategorije`): ×0 in this corpus, so step 10's lookbehind is left alone rather
+    //      than widened on nothing.
+    //      Known false positives: SCORES (`7–2`, `5-3`) where *do* is the wrong connective — but the
+    //      endpoints were fusing there too, so no reading is lost, only a wrong-ish connective gained.
+    s = s.replace(/(\d)\s?[-–—]\s?(?=\d)/gu, "$1 do ");
 
     // 12) THE SHARED SYMBOL TIER — %, currency, units, rates, `&`, `×`/`x`, the exponent. It must see the
     //     number still ADJACENT to its unit and still carrying its decimal comma (`3,50 m`, `2,4 GHz`), so

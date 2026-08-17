@@ -170,6 +170,37 @@ describe("Bosnian text normalization", () => {
             .toBe("izmed͡ʑu deset sati do jedanaest sati uʋet͡ʃe");
     });
 
+    // ⚠ TRAP 58, and in Bosnian it is a QUESTION ABOUT ORDINALS rather than about a trailing guard class.
+    // The corpus has 5 year–year dash spans and FOUR carry no ordinal period at all — `(1894-1895)`,
+    // `(1644-1912)`, `(1469–1539)`, `(AD 1000–1300)`. So a clause-final `1990-1995.` has no licensor, the
+    // dot is a sentence end, and the trailing mark may only ADD a pause. What shipped first did worse than
+    // decline: the general range rule ran ahead of the ordinal rules (Serbian's and Croatian's order), so
+    // the elided-year arm saw a bare `1995.` with its dash already rewritten to ` do ` and promoted ONLY
+    // the second endpoint — cardinal-then-ordinal, which is not a reading any analysis of Bosnian gives.
+    test("a trailing clause mark never changes a range's reading — it only adds the pause", () => {
+        const bare = "xiʎadu deʋetsto deʋedeset do xiʎadu deʋetsto deʋedeset pet";
+        expect(say("1990-1995")).toBe(bare);
+        expect(say("1990-1995.")).toBe(`${bare} .`);
+        expect(say("1990-1995,")).toBe(`${bare} ,`);
+        // The EN DASH too: the year guard's reject class was `[\d.,\-]`, right for `COVID-19.` and blind to
+        // this, while the corpus's own spans are written with both dashes (`7–2`, `1469–1539`).
+        expect(say("1990–1995.")).toBe(`${bare} .`);
+    });
+
+    // …and the other half of the same language question: when the span's dot IS licensed, BOTH endpoints
+    // are ordinal, because the corpus writes the connective out longhand and marks both each time —
+    // `u sezoni od 1995. do 1996. godine`, `u 2015. ili 2016. godini`. The dash-written span must agree
+    // with those, which is the ×1 corpus instance below (and the one that was reading as a mixed pair).
+    test("a year span whose dot IS licensed reads ORDINAL on BOTH endpoints, like the written-out form", () => {
+        expect(say("kralja Sejonga (1418-1450. godine)."))
+            .toBe("kraʎa sejonɡa xiʎadu t͡ʃetiristo osamnaeste do xiʎadu t͡ʃetiristo pedesete ɡodine .");
+        expect(say("u sezoni od 1995. do 1996. godine"))
+            .toBe("u sezoni od xiʎadu deʋetsto deʋedeset pete do xiʎadu deʋetsto deʋedeset ʃeste ɡodine");
+        // …and an UNDOTTED year span stays cardinal: the writer marked nothing, so nothing is claimed.
+        expect(say("ratu (1894-1895), Qing vlada"))
+            .toBe("ratu xiʎadu osamsto deʋedeset t͡ʃetiri do xiʎadu osamsto deʋedeset pet , inɡ ʋlada");
+    });
+
     test("the hyphen + case suffix resolves through the ordinal paradigm, not by concatenation", () => {
         // `normalizacija odnosa između SAD-a i Kine krajem 1970-ih` — ×13, all decades.
         expect(say("krajem 1970-ih")).toBe("krajem xiʎadu deʋetsto sedamdesetix");
