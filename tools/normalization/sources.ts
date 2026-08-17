@@ -38,6 +38,7 @@ import { join } from "node:path";
 // which is a pure module (`candidates.ts` and `review.ts` both import it from there). One copy, no drift.
 import { sistersOf } from "./defects.ts";
 import { pathToFileURL } from "node:url";
+import { espeakRoot } from "./espeak.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -46,8 +47,14 @@ const arg = (n: string): string | undefined => {
 };
 const has = (n: string): boolean => argv.includes(`--${n}`);
 
-const ESPEAK = process.env["ESPEAK_NG"] ?? ""; // set ESPEAK_NG to an espeak-ng checkout to enable the dictsource tier
-const DICT = join(ESPEAK, "dictsource");
+// ⚠ RESOLVED, NOT READ FROM THE ENVIRONMENT — see tools/normalization/espeak.ts for why. An explicit
+// `$ESPEAK_NG` still wins; the difference is that a sibling checkout no longer has to be announced, so the
+// tier stops reporting a confident negative in every fresh shell. The three-state honesty below is
+// unchanged: `ESPEAK_OFF` still means the tier was NOT consulted, and the message still names what the
+// reader has to change.
+const ESPEAK_FOUND = espeakRoot();
+const ESPEAK = ESPEAK_FOUND.root;
+const DICT = ESPEAK_FOUND.dict;
 
 /**
  * ⚠ IS THE ESPEAK TIER EVEN CONNECTED? Three states, and this tool used to collapse two of them into the
@@ -65,19 +72,17 @@ const DICT = join(ESPEAK, "dictsource");
  * The distinction is NOT "not probed" versus "probed and absent", which is still a sentence about the data.
  * It names the VARIABLE, because that is the thing the reader has to change.
  */
-const ESPEAK_OFF = ESPEAK === "" || !existsSync(DICT);
+const ESPEAK_OFF = DICT === "" || !existsSync(DICT);
 /** ⚠ TWO WAYS TO BE OFF, AND THEY NEED DIFFERENT FIXES: the variable is missing, or it points somewhere with
  *  no `dictsource/`. The first cut of this change printed the UNSET text for both, so a reader who HAD
  *  exported it was told to export it — the same "one string for two states" defect this whole change exists
  *  to remove, made one level down. `ESPEAK_SHORT` is the inline/footer form. */
-const ESPEAK_SHORT = ESPEAK === "" ? "$ESPEAK_NG unset" : `no dictsource/ under $ESPEAK_NG (${ESPEAK})`;
+const ESPEAK_SHORT = ESPEAK_OFF ? ESPEAK_FOUND.note : `espeak dictsource (${ESPEAK})`;
 /** The haystack these messages may honestly claim to have searched. `review.ts`'s sourcing line already makes
  *  this distinction — *nobody has probed this* and *the probe ran and the word is absent there too* must not
  *  read the same — and a class that names espeak while the tier is disconnected is making the same mistake. */
 const HAYSTACK = ESPEAK_OFF ? "corpus/referee (espeak NOT consulted)" : "corpus/referee/espeak";
-const ESPEAK_OFF_NOTE = ESPEAK === ""
-    ? "⚠ $ESPEAK_NG IS UNSET — the espeak tier was not consulted at all"
-    : `⚠ $ESPEAK_NG IS SET BUT HAS NO dictsource/ (${ESPEAK}) — the espeak tier was not consulted at all`;
+const ESPEAK_OFF_NOTE = ESPEAK_FOUND.note;
 const CORPUS_ROOT = process.env["FLEURS"] ?? "";
 const REFEREES = "tools/referee-eval/referees";
 

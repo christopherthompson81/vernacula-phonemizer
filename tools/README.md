@@ -45,7 +45,7 @@ itself; they matter only when regenerating a committed artifact.
 |---|---|---|
 | `FLEURS` | the FLEURS transcript tree (`<corpus>/<split>.tsv`) | `normalization/` — mining, coverage, review |
 | `DUMPS` | a directory of downloaded kaikki/wiktionary dumps and reference TSVs | `gen/`, `sindhi/`, `perso-arabic/` |
-| `ESPEAK_NG` | an `espeak-ng` checkout, for its `dictsource/` tier | `normalization/sources.ts` |
+| `ESPEAK_NG` | an `espeak-ng` checkout, for its `dictsource/` tier. **Optional** — `normalization/espeak.ts` finds a sibling checkout (`../espeak-ng`), `~/espeak-ng` or the usual system prefixes on its own, and reports which. Set this only to override. | `normalization/sources.ts`, `normalization/review.ts` |
 | `ESPEAK_PORTABLE` | the reference-engine checkout some one-off distillations were built against | `gen/build-{ca,ga,sv,cs,cy,th}-*` |
 | `AUDIO_CACHE` | the FLEURS audio cache | `corpus/fetch-fleurs-audio.py` |
 | `CMUDICT` | a CMUdict `cmudict.dict` file (public domain) | `english/en_g2p_ngram.ts` |

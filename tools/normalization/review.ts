@@ -31,6 +31,7 @@ import { join } from "node:path";
 import { CELLS, staleness } from "./cells.ts";
 import { ACCEPTED_SIGN_SILENCE, CITED_WORDS, DROPPABLE, SIGN_CASES, sistersOf } from "./defects.ts";
 import { pathToFileURL } from "node:url";
+import { espeakRoot } from "./espeak.ts";
 
 /**
  * ⚠ THE CLI MUST NOT RUN ON IMPORT — the fifth file in this directory to need this guard, after `mine.ts`,
@@ -842,8 +843,11 @@ async function main(): Promise<void> {
     // ⚠ `=== undefined` LEAVES A HOLE: `export ESPEAK_NG=` sets it to the EMPTY STRING, which is not undefined,
     // and `join("", "dictsource")` is the RELATIVE path `dictsource` — resolved against whatever the cwd
     // happens to be. Falsy, not undefined, is the test; and the path must exist before it counts as searched.
-    const ESPEAK_ROOT = process.env["ESPEAK_NG"] ?? "";
-    const ESPEAK_DICT = ESPEAK_ROOT === "" ? "" : join(ESPEAK_ROOT, "dictsource");
+    // ⚠ RESOLVED, NOT READ FROM THE ENVIRONMENT — see tools/normalization/espeak.ts. The tier answers the
+    // two classes that block rounds most often, and it was disconnected in every fresh shell.
+    const ESPEAK_FOUND = espeakRoot();
+    const ESPEAK_ROOT = ESPEAK_FOUND.root;
+    const ESPEAK_DICT = ESPEAK_FOUND.dict;
     function attestationHaystack(): { tokens: ReadonlySet<string>; text: string } {
         let hay = "";
         const add = (f: string): void => { try { hay += readFileSync(f, "utf8"); } catch { /* absent source */ } };
@@ -1056,7 +1060,7 @@ async function main(): Promise<void> {
         // Two ways to be off and they need different fixes, so name the one that applies rather than asserting
         // the commoner one — a reader who HAD exported the variable must not be told to export it.
         const espeakSearched = ESPEAK_DICT !== "" && existsSync(ESPEAK_DICT);
-        const espeakWhy = ESPEAK_ROOT === "" ? "$ESPEAK_NG is unset" : `$ESPEAK_NG has no dictsource/ (${ESPEAK_ROOT})`;
+        const espeakWhy = ESPEAK_FOUND.note;
         const verdictOf = (w: string): string => {
             const p = probed(w);
             return `${w} — in NO source (corpus, artifact, referee, lexicon`
