@@ -111,6 +111,54 @@ function saidBefore(full: string, offset: number, word: string): boolean {
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 
 /** Normalize one Xhosa input string. Steps are ORDER-DEPENDENT; each states its coupling. */
+/**
+ * ENGLISH LETTER NAMES SPELLED IN NGUNI ORTHOGRAPHY, for reading initialisms.
+ *
+ * ⚠ WHY THIS EXISTS AND WHY IT IS SPELLED, NOT TRANSCRIBED. c, q and x are CLICK letters, so an acronym
+ * reaching the g2p raw is confidently wrong rather than merely mute — `UTC` read [ˈuːtʼkǀ], a word ending
+ * in a dental click, and `PBS` read [pʼɓs]. The header's refusal ("no letter names, for want of a source")
+ * left that in place. The source question is answerable in one direction: acronyms in isiZulu/isiXhosa are
+ * English borrowings, kept in capitals, and read with the English letter names — so what is needed is not
+ * an indigenous letter-name series but the English one, ADAPTED. Writing each name in Nguni orthography
+ * and letting this language's own g2p read it is what produces the adaptation, rather than splicing in
+ * American English phonology (which the OmniVoice ASR probe measured readers as NOT doing).
+ *
+ * ⚠ EVERY SPELLING AVOIDS c, q AND x, or it would reintroduce the exact click bug it exists to fix — hence
+ * `si` for C, `khyu` for Q, `eksi` for X. And aspirated `bh/ph/th/kh` rather than bare `b/p/t/k`, because
+ * bare b is the IMPLOSIVE /ɓ/ and bare p/t/k are ejective; English letter names have the pulmonic ones.
+ * Verified through this engine — all 26 render click-free: b→b̤ˈiː, c→sˈiː, q→kʰjˈuː, x→ˈɛːkʼsi,
+ * w→d̤ab̤ulˈiːju, h→ɛjˈiːt͡ʃʼi.
+ */
+const NGUNI_LETTER_NAME: Readonly<Record<string, string>> = {
+    A: "eyi", B: "bhi", C: "si", D: "di", E: "i", F: "efu", G: "ji", H: "eyitshi", I: "ayi",
+    J: "jeyi", K: "kheyi", L: "eli", M: "emu", N: "eni", O: "o", P: "phi", Q: "khyu", R: "a",
+    S: "esi", T: "thi", U: "yu", V: "vi", W: "dabhuliyu", X: "eksi", Y: "wayi", Z: "zedi",
+};
+
+/**
+ * All-caps runs → letter names. Gated on the text containing lowercase, since an all-caps DOCUMENT carries
+ * no initialism signal (core/initialisms.ts makes the same exemption). Flanked by neither letter nor digit,
+ * which leaves mixed alphanumeric codes alone.
+ *
+ * ⚠ THE LOOKBEHIND MUST ALLOW A LOWERCASE LETTER, unlike the general rule: Nguni glues its concord to the
+ * borrowed acronym (`i-PBS`, `weNPWS`, `kwiTV`), so requiring a non-letter on the left would decline exactly
+ * the forms this language writes. A concord followed by capitals is the normal shape here.
+ */
+/** Acronyms said as WORDS, not letters — the same exemption core/initialisms.ts keeps for every other
+ *  language that wires this. COVID is /ˈkoʊvɪd/, never C-O-V-I-D, and `i-COVID-19` proved it. */
+const WORD_ACRONYMS: ReadonlySet<string> = new Set([
+    "covid", "nato", "fifa", "opec", "unesco", "unicef", "aids", "laser", "sars", "eskom", "sadc",
+]);
+
+function spellNguniInitialisms(s: string): string {
+    if (!/\p{Ll}/u.test(s) && /\s/u.test(s.trim())) return s;
+    // ⚠ `$` in the trailing guard: `US$`/`AUD$` are MULTI-CHARACTER CURRENCY KEYS owned by the ENGINE
+    // tier (zulu.ts/xhosa.ts), not by this pass. Spelling `US` here strips the tier's key and the
+    // amount loses its "amadola" — which is exactly what happened before this guard.
+    return s.replace(/(?<![\p{Lu}\p{M}\d])[A-Z]{2,6}(?![\p{L}\p{M}\d$])/gu, (run) =>
+        WORD_ACRONYMS.has(run.toLowerCase()) ? run : [...run].map((c) => NGUNI_LETTER_NAME[c] ?? c).join(" "));
+}
+
 export function normalizeXhosa(input: string): string {
     let s = input;
 
@@ -298,6 +346,10 @@ export function normalizeXhosa(input: string): string {
     //     swallowed.
     s = s.replace(/(?<![\d.,])(\d+)\.(\d+)(?![\d])/gu, (_m, int: string, frac: string) => spell(int, frac));
     s = s.replace(/(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, int: string, frac: string) => spell(int, frac));
+
+    // INITIALISMS LAST. Every rule above owns capitals of its own — `US$`, `°C`, `B.C.`, `sq mi` — and
+    // spelling them out first would take those away, which is exactly what happened when this ran early.
+    s = spellNguniInitialisms(s);
 
     // ⚠ A padded replacement (` kunye `, `letters `) doubles a space that was already there and can leave one
     // at an edge. SLOT-GAP is a corpus-diff defect class; this pass must not feed it.

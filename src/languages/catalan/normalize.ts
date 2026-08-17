@@ -93,13 +93,17 @@ export const isUnreadableCatalan = makeUnreadableTest({
     legalOnsets: new Set([
         "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "ps", "sk", "sl", "sm",
         "sn", "sp", "st", "tr", "ts",
+        "ll", "ny", "tx", "gn", "mn",
     ]),
     legalCodas: new Set([
         "b", "bs", "cc", "ck", "ct", "ds", "ft", "ks", "kt", "lc", "ld", "lf", "lg", "lk", "ll",
         "lm", "lp", "ls", "lt", "mp", "ms", "mt", "nc", "nd", "ng", "nk", "ns", "nt", "nz", "ps",
         "pt", "rc", "rd", "rf", "rg", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "sc", "sk", "sp",
         "ss", "st", "ts", "tz", "xt", "ny", "ll", "l·l",
+        "mb", "ys", "cs", "gs", "nx",
     ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["ll", "ny", "qu", "gu", "tx", "ix", "ig", "rr", "ss", "tj", "tg", "tz"]),
 });
 
 /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. */

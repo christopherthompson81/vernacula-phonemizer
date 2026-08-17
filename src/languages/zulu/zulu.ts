@@ -121,7 +121,67 @@ const SYMBOLS = makeSymbolNormalizer({
     exponentWords: { squared: ["skwele"], position: "after" },
 });
 
+/**
+ * Reader for an embedded FOREIGN word, wired to English by the registry.
+ *
+ * ⚠ WHY THIS LANGUAGE NEEDS ONE AT ALL. The engines that get foreign runs for free are the ones whose
+ * tokenizer matches only their own script: the Latin they do not claim becomes a gap and `emitUnclaimed`
+ * fills it (core/foreign.ts). Nguni is written in Latin, so it claims embedded English outright and the
+ * g2p reads it — and c, q and x are CLICK letters, so the result is confidently wrong rather than merely
+ * accented: `hurricane center` read [hurrikǀˈaːnɛ kǀˈɛːntʼɛr], `china` [kǀʰˈiːna].
+ * Measured on the OmniVoice FLEURS corpora: 19.2% of xh and 14.8% of zu utterances carry such a word.
+ */
+export type ForeignPhonemizer = (latin: string) => string;
+
+/**
+ * Nguni onsets — singles, digraphs and trigraphs. Used only by `isNguniPossible` below.
+ */
+const NGUNI_ONSET: ReadonlySet<string> = new Set([
+    ..."bcdfghjklmnpqrstvwxyz".split(""),
+    "bh", "ch", "dl", "dy", "fy", "gc", "gq", "gx", "hl", "kh", "kw", "gw", "hw", "mb", "mf", "mp",
+    "mv", "nc", "nd", "ng", "nj", "nk", "nq", "nt", "nx", "ny", "nz", "ph", "qh", "sh", "th", "ts",
+    "tsh", "tj", "ty", "xh", "zw", "sw", "shw", "bw", "ngc", "ngq", "ngx", "ntsh", "nkw", "ngw",
+    "mbw", "ndw", "njw", "nyw", "hh", "dw", "tw", "kl", "pl", "qw", "cw", "xw",
+]);
+
+/** Could this be a Nguni word at all? Vowel-final, and every consonant run a legal onset. */
+function isNguniPossible(word: string): boolean {
+    if (!/[aeiou]$/u.test(word)) return false;
+    return word.split(/[aeiou]+/u).filter(Boolean).every((run) => NGUNI_ONSET.has(run));
+}
+
+/**
+ * Is this token foreign? THREE signals, all required, and each one is load-bearing:
+ *
+ *   1. it contains c, q or x — the click letters, i.e. the letters whose misreading is the actual defect;
+ *   2. it is a known ENGLISH word — the CMUdict lookup, supplied by the registry;
+ *   3. it could NOT be a Nguni word — not vowel-final, or carrying a cluster Nguni does not license.
+ *
+ * Signal 2 alone is badly unsafe: the most frequent English-dictionary hits in these corpora are ordinary
+ * Nguni words — `uma` ×105, `ngo` ×95, `ama` ×67, `kahle`, `yonke` — and routing those would be far worse
+ * than the clicks. Signal 1 alone fails the other way, c/q/x being native click letters.
+ *
+ * ⚠ SIGNAL 3 WAS ADDED IN REVIEW, and it is not optional. Signals 1+2 alone routed six real Nguni words to
+ * English — `cha` ("no"), `cela`, `caba`, `cima`, `coca` and, worst, **`xhosa`** — because CMUdict carries
+ * all of them as names or brands. `cha` occurs in the zu corpus, so this was live corruption, not a
+ * hypothetical. Requiring the token to be phonotactically impossible in Nguni removes every one.
+ *
+ * ⚠ IT COSTS COVERAGE, DELIBERATELY. A vowel-final CV English name is shaped exactly like a Nguni word —
+ * `china` and `cima` are indistinguishable orthographically — so 46 tokens / 65 occurrences (china, chile,
+ * canada, mexico, congo, cuba) stay native and keep a wrong click. That is the trade this repo already
+ * makes elsewhere: a wrong high-traffic word is worse than a missing one, and `xhosa` read as English is
+ * about as wrong as this language gets. 435 tokens / 604 occurrences still route.
+ */
+export function isForeignNguniWord(word: string, isEnglishWord: (w: string) => boolean): boolean {
+    return /[cqx]/u.test(word) && !isNguniPossible(word) && isEnglishWord(word);
+}
+
 class ZuluPhonemizer implements Phonemizer {
+    constructor(
+        private foreign?: ForeignPhonemizer,
+        private isEnglishWord?: (w: string) => boolean,
+    ) {}
+
     text(input: string): string {
         // normalize.ts FIRST, then the shared symbol tier — the era, clock, range, rate and degree steps
         // all need the number and its neighbour still adjacent, which the tier would break. The one rule
@@ -129,7 +189,13 @@ class ZuluPhonemizer implements Phonemizer {
         return assembleClauses(SYMBOLS(normalizeZulu(input)), TOKEN, (m, sink) => {
             // Compound (noun-class prefix + Titlecase stem, eNingizimu / INingizimu) splits before an internal
             // Titlecase run; a full-word tone-lexicon hit is threaded across the parts.
-            if (m[1]) for (const part of phonemizeCompound(nat(m[1]))) sink.emit(part);
+            if (m[1]) {
+                // Foreign FIRST: a click letter inside an English word is not a click.
+                if (this.foreign !== undefined && this.isEnglishWord !== undefined &&
+                    isForeignNguniWord(m[1].toLowerCase(), this.isEnglishWord))
+                    sink.emit(this.foreign(m[1]));
+                else for (const part of phonemizeCompound(nat(m[1]))) sink.emit(part);
+            }
             // Numbers are ordinary Zulu nouns: tone them via the lexicon like any other word (ishumi→toned)
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" "))
@@ -141,6 +207,6 @@ class ZuluPhonemizer implements Phonemizer {
         });
     }
 }
-export function createZulu(): Phonemizer {
-    return new ZuluPhonemizer();
+export function createZulu(foreign?: ForeignPhonemizer, isEnglishWord?: (w: string) => boolean): Phonemizer {
+    return new ZuluPhonemizer(foreign, isEnglishWord);
 }

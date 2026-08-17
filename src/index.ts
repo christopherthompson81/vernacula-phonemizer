@@ -6,6 +6,18 @@
  */
 import { getPhonemizer } from "./registry.ts";
 import { getNeuralPhonemizer } from "./neuralRegistry.ts";
+import { prewarmForeignEnglish } from "./languages/english/englishNeural.ts";
+
+/**
+ * Does `text` mix a Latin run into a non-Latin script? Then the host's tokenizer will not claim the Latin and it
+ * becomes a FOREIGN RUN, delegated to English (core/foreign.ts) — so its OOV words are worth prewarming.
+ *
+ * The gate is on the TEXT, not a table of host scripts, because that is what the delegation actually keys on, and
+ * because it keeps the prewarm off the languages that would waste it: a Latin-script host (en, vi, tr, …) reads
+ * its own words, so an all-Latin text needs nothing tagged for the foreign path.
+ */
+const MIXED_LATIN = (text: string): boolean =>
+    /\p{Script=Latin}/u.test(text) && /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Arabic}\p{Script=Cyrillic}\p{Script=Devanagari}\p{Script=Tamil}\p{Script=Ethiopic}\p{Script=Hebrew}\p{Script=Bengali}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Gujarati}\p{Script=Gurmukhi}\p{Script=Sinhala}\p{Script=Khmer}\p{Script=Lao}\p{Script=Myanmar}\p{Script=Georgian}\p{Script=Armenian}\p{Script=Greek}\p{Script=Tibetan}\p{Script=Oriya}\p{Script=Thaana}\p{Script=Syriac}\p{Script=Cherokee}]/u.test(text);
 
 export { getPhonemizer, type Phonemizer } from "./registry.ts";
 
@@ -32,6 +44,17 @@ export function phonemize(text: string, lang: string): string {
  *  never reached the wrapper `getPhonemizer` installs. `getNeuralPhonemizer` applies them now; see the note
  *  there, and `test/phonemizeAsync.test.ts` for the invariant that keeps the two in step. */
 export async function phonemizeAsync(text: string, lang: string): Promise<string> {
+    // FOREIGN RUNS FIRST. An embedded Latin run is read by a synchronous reader (core/foreign.ts), so its OOV
+    // words have to be tagged BEFORE the host renders — there is no await available once the host's tokenizer is
+    // running. Skipped for English itself, whose entry tags its own OOV tail. Never throws the host's render:
+    // the memo is an optimisation, and an empty one is the pre-existing behaviour.
+    if (lang !== "en" && MIXED_LATIN(text)) {
+        try {
+            await prewarmForeignEnglish(text);
+        } catch {
+            // A missing model or a tagger failure must not take the utterance down.
+        }
+    }
     const neural = getNeuralPhonemizer(lang);
     return neural ? neural(text) : phonemize(text, lang);
 }

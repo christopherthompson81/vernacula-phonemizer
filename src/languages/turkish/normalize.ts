@@ -134,10 +134,12 @@ export const isUnreadableTurkish = makeUnreadableTest({
     legalOnsets: new Set([
         "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr", "ps", "sk", "sl", "sm",
         "sn", "sp", "st", "tr",
+        "ch", "yl", "sf",
     ]),
     legalCodas: new Set([
         "ft", "kt", "ks", "lç", "lf", "lk", "lm", "lp", "ls", "lt", "nç", "nk", "ns", "nt", "nz",
         "pt", "rç", "rd", "rf", "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sk", "st", "şt",
+        "zm", "ng", "lg", "ht", "ny", "nc",
     ]),
 });
 

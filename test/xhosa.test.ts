@@ -64,7 +64,7 @@ describe("Xhosa text normalization", () => {
         expect(normalizeXhosa("ne-¥130,000, yaye")).toBe("ne-¥130000, yaye");
         expect(normalizeXhosa("nayi-2,207.")).toBe("nayi-2207.");
         expect(normalizeXhosa("abangama-6 500.")).toBe("abangama-6500.");
-        expect(normalizeXhosa("ne-10 000 BCE")).toBe("ne-10000 BCE");
+        expect(normalizeXhosa("ne-10 000 BCE")).toBe("ne-10000 bhi si i");
         // A four-digit tail is a DATE comma (Novemba 26,2008), not grouping.
         expect(normalizeXhosa("Novemba 26,2008")).toBe("Novemba 26,2008");
         // A partial grouped match must not be taken (`1,234` inside `1,234,5`).
@@ -86,8 +86,8 @@ describe("Xhosa text normalization", () => {
         expect(normalizeXhosa("nge-8: 30 p.m.")).toBe("nge-isibhozo namashumi amathathu emva kwemini");
         expect(normalizeXhosa("ngo-11:20,amapolisa")).toBe("ngo-ishumi nanye namashumi amabini,amapolisa");
         // The DOT clock, which needs its timezone to be distinguishable from a decimal.
-        expect(normalizeXhosa("ngo-12.00 GMT")).toBe("ngo-ishumi nambini GMT");
-        expect(normalizeXhosa("(15.00 UTC)")).toBe("(ishumi nanhlanu UTC)");
+        expect(normalizeXhosa("ngo-12.00 GMT")).toBe("ngo-ishumi nambini ji emu thi");
+        expect(normalizeXhosa("(15.00 UTC)")).toBe("(ishumi nanhlanu yu thi si)");
         // A SPORTS TIME IS NOT A CLOCK — a third field. All three corpus paces must fall through.
         expect(normalizeXhosa("le-4: 41.30")).toBe("le-4: 41 3 0");
         expect(normalizeXhosa("eyi-1: 09.02")).toBe("eyi-1: 09 0 2");
@@ -178,14 +178,14 @@ describe("Xhosa text normalization", () => {
 
     test("dotted abbreviations — the final dot survives a sentence end but not a continuation", () => {
         // Glued next word: separate it, no period.
-        expect(normalizeXhosa("yi-U.S.Geological Survey")).toBe("yi-US Geological Survey");
+        expect(normalizeXhosa("yi-U.S.Geological Survey")).toBe("yi-yu esi Geological Survey");
         // Mid-sentence: the dot goes.
-        expect(normalizeXhosa("ne-1000 B.C.E., ama-Asiriya")).toBe("ne-1000 BCE, ama-Asiriya");
+        expect(normalizeXhosa("ne-1000 B.C.E., ama-Asiriya")).toBe("ne-1000 bhi si i, ama-Asiriya");
         // End of input, and a new capitalised sentence: the SENTENCE break must be kept, or three pauses
         // are silently deleted (the Swahili `expandDotted` lesson).
-        expect(normalizeXhosa("yase U.S.")).toBe("yase US.");
-        expect(normalizeXhosa("yase U.S. Ngoko ke")).toBe("yase US. Ngoko ke");
-        expect(normalizeXhosa("kwi-U.S House")).toBe("kwi-US House");
+        expect(normalizeXhosa("yase U.S.")).toBe("yase yu esi.");
+        expect(normalizeXhosa("yase U.S. Ngoko ke")).toBe("yase yu esi. Ngoko ke");
+        expect(normalizeXhosa("kwi-U.S House")).toBe("kwi-yu esi House");
         expect(normalizeXhosa("uN.Wayne Hale Jr. uthe")).toBe("uN Wayne Hale Jr uthe");
         expect(normalizeXhosa("UMnu. Costello uthe")).toBe("UMnumzana Costello uthe");
         expect(normalizeXhosa("watsho uMnu Costello.")).toBe("watsho uMnumzana Costello.");
@@ -217,7 +217,7 @@ describe("Xhosa text normalization", () => {
         expect(normalizeXhosa("+5")).toBe("plas 5");
         expect(normalizeXhosa("-5")).toBe("thabatha 5");
         // `UTC+1` is the corpus's one operator-position plus.
-        expect(normalizeXhosa("lalapha( UTC+1) e")).toBe("lalapha( UTC plas 1) e");
+        expect(normalizeXhosa("lalapha( UTC+1) e")).toBe("lalapha( yu thi si plas 1) e");
         // THE STRAY DASH. The corpus's one ` -N` is a hyphen, not a negative: the English original reads
         // "winds blowing at 40 mph". Reading it as *thabatha* would be confidently wrong, so the guard
         // rejects a dash whose space follows a word — and the ` -` here must stay unread.
@@ -235,4 +235,56 @@ describe("Xhosa text normalization", () => {
         for (const probe of ["Arts & Sciences", "leUS$30", "+30°C", "yase U.S.", "9:30 a.m."])
             expect(normalizeXhosa(probe)).not.toMatch(/^\s|\s$|\s\s/u);
     });
+});
+
+// ⚠ NGUNI IS WRITTEN IN LATIN, so its tokenizer claims embedded English outright — there is no unclaimed
+// gap for core/foreign.ts to fill, the way there is for a non-Latin-script host. The g2p then reads the
+// English word, and c/q/x are CLICK letters, so the result is confidently wrong rather than merely
+// accented: `hurricane center` read [hurrikǀˈaːnɛ kǀˈɛːntʼɛr]. 19.2% of xh and 14.8% of zu FLEURS
+// utterances carry such a word.
+describe("embedded English words route to the foreign reader instead of becoming clicks", () => {
+    const CLICK = /[ǀǁǃǂ]/u;
+
+    test("an English word with a click letter AND a non-Nguni shape is read as English", () => {
+        // Each of these carries a cluster or a consonant ending Nguni does not license, so it cannot be a
+        // Nguni word and routing is unambiguous.
+        for (const w of ["arctic", "microsoft", "hurricane", "district", "electric", "atlantic"]) {
+            const out = phonemize(`nge ${w} yakhe`, "xh");
+            expect(out, `${w} still has a click`).not.toMatch(CLICK);
+        }
+    });
+
+    test("...but a vowel-final CV English word stays NATIVE, and that is the deliberate trade", () => {
+        // `china` and `cima` are indistinguishable as orthography, so routing on shape alone would take
+        // Nguni words with it. These keep a wrong click; the alternative was reading `xhosa` as English.
+        expect(phonemize("nge china yakhe", "xh")).toMatch(CLICK);
+    });
+
+    test("...but NATIVE words keep their clicks — c/q/x are real Nguni letters", () => {
+        // Each of these is an ordinary Xhosa word whose c/q/x IS a click. Routing them would be a far
+        // worse error than the one this fixes.
+        for (const w of ["ukucula", "iqiniso", "ixesha"]) {
+            expect(phonemize(w, "xh"), `${w} lost its click`).toMatch(CLICK);
+        }
+    });
+
+    test("...and English-dictionary COLLISIONS are left alone, which is why both signals are required", () => {
+        // The most frequent CMUdict hits in these corpora are Nguni words — uma ×105, ngo ×95, ama ×67.
+        // The click-letter signal is what keeps them native; the English-word signal alone would wreck them.
+        const native = phonemize("uma ngo ama kahle yonke kuba moya", "xh");
+        expect(native).not.toMatch(/ɹ|æ|ɚ/u); // no English phones leaked in
+    });
+});
+
+// ⚠ REGRESSION GUARD for the review finding: signals 1+2 alone (click letter + English dictionary) routed
+// six real Nguni words to English, because CMUdict carries them as names or brands. `cha` occurs in the
+// zu FLEURS corpus, so this was live corruption rather than a hypothesis.
+describe("Nguni words that collide with the English dictionary stay native", () => {
+    test.each([["cha"], ["cela"], ["caba"], ["cima"], ["coca"], ["xhosa"]])(
+        "%s is not routed to English",
+        (w) => {
+            const out = phonemize(w, "xh");
+            expect(out, `${w} was routed to English`).toMatch(/[ǀǁǃǂ]/u);
+        },
+    );
 });

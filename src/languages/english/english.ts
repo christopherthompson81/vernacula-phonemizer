@@ -108,6 +108,18 @@ export class EnglishPhonemizer {
         return this.lexicon.get(lower) ?? this.heteronyms.get(lower)?.default;
     }
 
+    /** `text` with an `oovOverride`, for the registry's FOREIGN reader (core/foreign.ts) — the path that reads an
+     *  embedded Latin run inside another language, which needs the prewarmed neural readings.
+     *
+     *  ⚠ A SEPARATE METHOD, and it calls the PROTOTYPE's `text` rather than `this.text`, for the same one reason:
+     *  `getPhonemizer` shadows `text` as an OWN property on this instance with a one-argument wrapper
+     *  (registry.ts, so the shared pre-passes run at a single dispatch point). `this.text` therefore resolves to
+     *  that wrapper, which silently drops arguments two and three — the override went missing with no error.
+     *  The prototype method is the real implementation. The caller applies `foldPass`/`withHost` in its place. */
+    textWithOov(input: string, oovOverride: (g2pKey: string) => string | undefined): string {
+        return EnglishPhonemizer.prototype.text.call(this, input, undefined, oovOverride);
+    }
+
     /** One orthographic word → canonical IPA, given its POS expectation. `oovOverride` (async neural path only,
      *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram engine —
      *  the sync path passes nothing, so behaviour is byte-identical. */

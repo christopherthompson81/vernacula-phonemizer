@@ -72,17 +72,21 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
  *  onset/coda sets are generous ON PURPOSE — the work is done by the no-vowel test (GPS, DVD, GMT, TV) and the
  *  run/onset tests (DSLR, QVC, USGS), not by cluster policing. */
 export const isUnreadableCzech = makeUnreadableTest({
-    vowels: /[aeiouyáéíóúůýě]/u,
+    vowels: /[aeiouyáéíóúůýrl]/u,
     legalOnsets: new Set([
         "bl", "br", "bz", "čt", "čv", "čl", "čm", "čn", "čr", "dl", "dr", "dv", "gl", "gr", "gn",
         "kl", "kn", "kr", "kv", "ml", "mn", "mr", "pl", "pn", "pr", "ps", "pt", "rv", "sk", "sl",
         "sm", "sn", "sp", "st", "sv", "sw", "šk", "šl", "šm", "šn", "šp", "št", "šv", "tl", "tr", "tv",
         "vz", "vl", "vn", "vr", "zl", "zn", "zv", "žl", "žn",
+        "js", "kd", "zd", "dn", "hr", "lz", "kt", "zh", "jd", "hm", "zb", "zk", "hl", "tm", "km",
     ]),
     legalCodas: new Set([
         "rk", "rt", "rd", "rb", "rs", "rn", "rl", "rm", "rv", "rž", "št", "st", "sk", "zd", "zl",
         "zn", "zm", "čt", "ck", "ct", "dn", "tn",
+        "ch", "dl", "tl", "ng", "ns", "sm", "dm", "kt",
     ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["ch", "dž", "dz", "ct"]),
 });
 
 /** LEXICAL: acronyms Czech spells out although the letters could be read as a word. Authored in czech.jsonc
@@ -126,6 +130,7 @@ const DOTTED: Readonly<Record<string, string>> = {
     aj: "a jiné", tzn: "to znamená", tj: "to jest",
     dr: "doktor", jr: "junior", sv: "svatý", st: "svatý",
     co: "společnost", inc: "společnost", mil: "milionů", s: "strana",
+    cca: "cirka",  // corpus: `rychlosti cca 83 km/h`; read as the cluster [t͡st͡sˈa] before this
 };
 const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join("|");
 

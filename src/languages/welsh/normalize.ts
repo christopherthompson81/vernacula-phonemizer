@@ -62,7 +62,10 @@ export const isUnreadableWelsh = makeUnreadableTest({
     legalCodas: new Set([
         "b", "d", "f", "g", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y", "x", "ch", "dd", "ff",
         "ll", "ng", "ph", "th", "nt", "st", "nt", "mb", "nd", "rd", "ld", "mp", "nc", "ng",
+        "bl", "ml", "dl", "fl", "gl", "tl", "fn", "lt", "sg", "rn", "sb", "tr", "str",
     ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["ch", "dd", "ff", "ng", "ll", "ph", "rh", "th", "si", "nh", "mh", "ngh"]),
 });
 
 /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. */
