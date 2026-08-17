@@ -1401,6 +1401,52 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "normalize.ts's unit rules exclude `km` before `\u00b2`/`\u00b3` on purpose, which keeps the real gap "
             + "reportable instead of silently swallowing the power with the unit (trap 51's floor)",
     },
+    kam: {
+        // \u26a0 SEVEN REFUSALS over FLEURS `kam_ke` \u2014 4,505 rows deduped to 1,992 unique cased utterances
+        // (column 3). Each is argued in src/languages/kamba/normalize.ts. There is NO mined artifact for
+        // this language, so every count below is a grep over that corpus rather than over a hard-set.
+        // \u26a0 THE SOURCING FLOOR IS THE WHOLE STORY HERE AND IT IS MEASURED, not assumed (trap 51):
+        // `attest.ts --lang kam` answers \u201ckam.wikipedia.org does not respond as a wiki\u201d \u2014 Kamba has no
+        // Wikipedia at all \u2014 and `sources.ts --lang kam` reports `espeak does not ship this language`, so
+        // there is no `_dpt`, no letter table and no dictsource. The haystack for a sign word is the corpus
+        // and the repo's own 5-word referee, and nothing else. What the corpus DOES supply is claimed:
+        // `percenti`, `ndola`, `sikwea`, `kubik`, `ndikilii`, `na` and the unit nouns all read.
+        minus: "measured: the ASCII hyphen is \u00d7105 (\u26a0 and it is the ONLY dash in the corpus \u2014 en-dash and "
+            + "em-dash are \u00d70, so Karakalpak's copula em-dash cannot arise here). Fourteen sit between "
+            + "digits and NOT ONE is a negative: nine are ascending spans (`2-3`, `2-5`, `120-160`, "
+            + "`100-200`, `1000-1300`, `1418-1450`, `1469-1539`, `1644-1912`, `1894-1895`), four are "
+            + "ice-hockey/tennis SCORES or a truncated season (`6-6`, `7-2`, `26 - 00`, `1955-96`) and one "
+            + "is a clock range (`saa 10:00-11:000`); the other 91 are compound names and designations "
+            + "(`COVID-19`, `XDR-TB`, `Kwazulu-Natal`, `T-Rex`, `Super-G`, `Mohenjo-daro`, `e-mail`). The "
+            + "corpus contains no negative quantity of any kind. \u26a0 AND IT CONTAINS THE ONE SHAPE NO GUARD "
+            + "CAN REJECT \u2014 word, space, hyphen, digit: \u201cRussia kwa ivinda ikuvi \u2026 II -76 yithiitwe\u201d, the "
+            + "Ilyushin, whose `II` `core/roman.ts` has already turned into a `2` by the time any rule in "
+            + "this layer sees it. That is exactly the test `src/languages/swahili/normalize.ts` states and "
+            + "PASSES, and this corpus FAILS \u2014 so the neighbour's minus rule does not carry (trap 55). A "
+            + "word is unsourceable besides: no negative/subtraction term is spelled out anywhere in the "
+            + "corpus and there is no wiki to ask",
+        plus: "measured: `+` \u00d72, and both are already-covered redundancies rather than arithmetic. "
+            + "\u201cuvyuvu wa ndikilii +30\u00b0C\u201d writes the DEGREE WORD immediately before the sign, and a plus "
+            + "does not invert its operand \u2014 `+30\u00b0` and `30\u00b0` are the same temperature \u2014 so the silence "
+            + "costs nothing there (the crh asymmetry, stated the same way). The second is `saa 11:00 "
+            + "(UTC+1)`, which IS contentful, and nothing attests how to say it: this corpus never spells a "
+            + "sign out, espeak ships no Kamba and there is no kam.wikipedia to probe. A wrong plus word is "
+            + "worse than a dropped sign",
+        "plus-minus": "measured: `\u00b1` \u00d70 \u2014 the sign does not occur. It could not be composed anyway: the "
+            + "plus half is unsourceable (see `plus`) and so is the minus half",
+        equals: "measured: `=` \u00d70 \u2014 the sign does not occur. Sixth consecutive round to reach this class "
+            + "with no equation to read, and the fourth to reach it with no sign at all",
+        "less-than": "measured: `<` \u00d70 \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70 \u2014 the sign does not occur. The SLASH occurs \u00d720 and is never a "
+            + "division: eight are RATES the unit tier now reads (`480 km/h`, `133 m/s`, `160km/h`, "
+            + "`165km/h`, `83km/h`), five are the and/or conjunction (`na/kana`) or a gloss pair "
+            + "(`yati/mita`, `m\u0169the\u0169/\u0169nga\u0129`, `ukwatany'a/nguluvu`), three are FRACTIONS (`1/5 inzi`, and "
+            + "the mangled `inzi 293/4` / `inzi 241/2`, i.e. 29\u00be and 24\u00bd inches) and the rest are proper "
+            + "names (`Jakar/Bumthang`). \u26a0 NO FRACTION RULE IS WRITTEN EITHER: `sources.ts` reports "
+            + "`fraction-series [NONE] \u2014 fraction occurs, no series to compose from`, and the corpus's one "
+            + "candidate denominator word, `nusu` \u00d710 (half), never stands beside a numerator",
+    },
     crh: {
         // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/crh.jsonc` (415 segments of a
         // 35,437-paragraph crh.wikipedia dump), each argued in src/languages/crimeantatar/normalize.ts.
