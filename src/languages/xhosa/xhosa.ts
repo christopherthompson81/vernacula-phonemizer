@@ -9,6 +9,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "../zulu/g2p.ts";
+import { NGUNI_LOANS, deClick } from "../zulu/nguniLoans.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeXhosa, MAGNITUDES } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -151,8 +152,14 @@ class XhosaPhonemizer implements Phonemizer {
         // words for the `na-` connective and therefore claims its own marker and timezone).
         return assembleClauses(SYMBOLS(normalizeXhosa(input)), TOKEN, (m, sink) => {
             if (m[1]) {
+                // ⚠ THE LOAN LEXICON RUNS BEFORE THE PHONOTACTIC TEST, because it exists precisely for
+                // the words that test cannot decide — `canada` is shaped exactly like a Nguni word.
+                // See zulu/nguniLoans.ts for the evidence behind each entry and its verdict.
+                const loan = NGUNI_LOANS.get(m[1].toLowerCase());
+                if (loan === "foreign" && this.foreign !== undefined) sink.emit(this.foreign(m[1]));
+                else if (loan === "declick") sink.emit(phonemizeWord(nat(deClick(m[1].toLowerCase()))));
                 // Foreign FIRST: a click letter in an English word is not a click.
-                if (this.foreign !== undefined && this.isEnglishWord !== undefined &&
+                else if (this.foreign !== undefined && this.isEnglishWord !== undefined &&
                     isForeignNguniWord(m[1].toLowerCase(), this.isEnglishWord))
                     sink.emit(this.foreign(m[1]));
                 else sink.emit(phonemizeWord(nat(m[1])));
