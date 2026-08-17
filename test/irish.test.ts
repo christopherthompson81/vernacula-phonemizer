@@ -199,3 +199,12 @@ describe("Irish text normalization", () => {
         expect(phonemize("100m agus 200m", "ga")).toContain("mʲˈeːd̪ˠəɾˠ ˈaɡəsˠ");
     });
 });
+
+// The abbreviations FLEURS strips the dots from, found by the corpus QC pass. Each previously reached the
+// g2p as a consonant cluster plus a leaked phrase break.
+describe("dotted abbreviations the corpus writes without their dot", () => {
+    test("srl. is agus araile", () => {
+        expect(phonemize("iompar ar thalamh srl", "ga")).toContain("ˈaɡəsˠ əɾˠˈalʲə");
+        expect(phonemize("iompar ar thalamh, srl.", "ga")).toContain("ˈaɡəsˠ əɾˠˈalʲə");
+    });
+});
