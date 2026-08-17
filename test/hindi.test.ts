@@ -208,3 +208,36 @@ describe("Hindi ordinal suffix boundary", () => {
         expect(phonemize("शहर में", "hi")).toBe("ʃˈɛɦɛɾ mˈeː̃");
     });
 });
+
+/**
+ * ⚠ ज्ञ IS NOT ITS PARTS. Composed literally the ligature is ज (d͡ʒ) + halant + ञ (ɲ) → `d͡ʒɲ`, which
+ * is not how Modern Standard Hindi says it. It is /ɡj/ — gyaan, vigyaan, vaigyaanik, gyaat.
+ *
+ * 73 of 73 FLEURS hi_in rows containing ज्ञ were wrong. The recognizer settled it: for ज्ञात we wrote
+ * `d͡ʒɲˈaːt̪` and the audio came back `ɡ i a t`.
+ *
+ * ⚠ SCOPED TO HINDI ON PURPOSE. Marathi reads the SAME ligature as `dnya`, so this cannot move to the
+ * shared Devanagari layer — the mr expectations below are the guard on that.
+ */
+describe("the ज्ञ ligature reads /ɡj/, not its component letters", () => {
+    test("every shape it takes in the corpus", async () => {
+        expect(await phonemize("ज्ञान", "hi")).toBe("ɡjˈaːn");
+        expect(await phonemize("विज्ञान", "hi")).toBe("ʋɪɡjˈaːn");
+        expect(await phonemize("वैज्ञानिक", "hi")).toBe("ʋˈɛːɡjaːnɪk");
+        expect(await phonemize("ज्ञात", "hi")).toBe("ɡjˈaːt̪");
+        expect(await phonemize("अज्ञात", "hi")).toBe("əɡjˈaːt̪");
+        // word-final, where the schwa has already gone
+        expect(await phonemize("विशेषज्ञ", "hi")).toBe("ʋɪʃeːʃˈəɡj");
+        expect(await phonemize("गणितज्ञ", "hi")).toBe("ɡəɳɪt̪ˈəɡj");
+    });
+
+    test("a plain ज is untouched", async () => {
+        expect(await phonemize("जान", "hi")).toBe("d͡ʒˈaːn");
+        expect(await phonemize("जाना", "hi")).toBe("d͡ʒˈaːnaː");
+    });
+
+    test("⚠ Marathi says dnya and must NOT inherit this", async () => {
+        expect(await phonemize("ज्ञान", "mr")).not.toContain("ɡj");
+        expect(await phonemize("विज्ञान", "mr")).not.toContain("ɡj");
+    });
+});

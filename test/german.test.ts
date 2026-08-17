@@ -326,6 +326,15 @@ describe("german normalization", () => {
         expect(phonemize("genau 500. Dann", "de")).toContain(" . ");
     });
 
+    test("a BARE number before a month is still a date ordinal", () => {
+        // Corpora that strip punctuation have no dot to key on, and the reader still says the ordinal:
+        // the OmniVoice audit heard *vierundzwanzigsten september* where we read the cardinal.
+        expect(phonemize("am 24 september 1759", "de")).toContain("fiːʁʊntt͡svˈant͡sɪçstən");
+        expect(phonemize("der 3 mai", "de")).toContain("dʁˈɪtə");
+        // A number NOT before a month stays a cardinal.
+        expect(phonemize("es waren 24 stunden", "de")).toContain("fiːʁʊntt͡svˈant͡sɪç ʃt");
+    });
+
     test("...and LOWERCASED input gets the same ordinal, because lowercased input is real input", () => {
         // FLEURS ships its German transcripts lowercased, so the month test — case-sensitive until now — matched
         // nothing and these read as a cardinal plus a leaked phrase break. 103 utterances in the OmniVoice de_de

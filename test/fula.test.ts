@@ -141,4 +141,34 @@ describe("Fula text normalization", () => {
         expect(phonemize("120 m³", "ff")).toContain("mˈetɾe kˈubik");
         expect(phonemize("160 km/h", "ff")).toContain("kilomˈetɾe ˈe wakːˈati");
     });
+
+    // ⚠ THE sh / ch DIGRAPHS. Fula writes /t͡ʃ/ as bare ⟨c⟩, so a ⟨ch⟩ spelling used to scan as c→t͡ʃ then
+    // h→h and emit the impossible cluster t͡ʃh (514 of 530 corpus rows containing ⟨ch⟩); ⟨sh⟩ had no rule
+    // at all and fell through to s + h, leaving the LITERAL two-letter sequence "sh" in an IPA stream
+    // (280 of 280 rows). Both were found by the wav2vec2 alignment sweep over FLEURS ff_sn. The Adlam
+    // block in fula.jsonc had declared the loan letter 𞥃 → "sh" as something "the Latin engine already
+    // uses" — it did not, so the second script transliterated into the same dead end.
+    it("reads the sh and ch digraphs", () => {
+        expect(phonemizeWord("shiri")).toBe("ʃˈiɾi");
+        expect(phonemizeWord("karshe")).toBe("kˈaɾʃe");
+        expect(phonemizeWord("tasha")).toBe("tˈaʃa");
+        expect(phonemizeWord("chede")).toBe("t͡ʃˈede");
+        expect(phonemizeWord("chanjata")).toBe("t͡ʃaⁿd͡ʒˈata");
+        expect(phonemizeWord("march")).toBe("mˈaɾt͡ʃ");
+        // and NO stray h survives either digraph
+        for (const w of ["shiri", "karshe", "chede", "march"]) expect(phonemizeWord(w)).not.toContain("h");
+    });
+
+    // ⟨cch⟩ is the geminate of ⟨ch⟩, and it fails one level up: cc→t͡ʃː matches first, then the h is left
+    // over. 25 corpus rows — acchugo, yeccheta, picchu, bocchi — so it needs a rule ordered before ⟨ch⟩.
+    it("reads the cch geminate without a leftover h", () => {
+        expect(phonemizeWord("acchugo")).toBe("at͡ʃːˈuɡo");
+        expect(phonemizeWord("yeccheta")).toBe("jet͡ʃːˈeta");
+        expect(phonemizeWord("picchu")).toBe("pˈit͡ʃːu");
+        // the plain geminates are untouched by the new ordering
+        expect(phonemizeWord("haccu")).toBe("hˈat͡ʃːu");
+        expect(phonemizeWord("sanne")).toBe("sˈanːe");
+        expect(phonemizeWord("njamndi")).toBe("ⁿd͡ʒˈamⁿdi");
+    });
+
 });

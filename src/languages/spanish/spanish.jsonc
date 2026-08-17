@@ -14,7 +14,7 @@
     // Spanish has no pronunciation dictionary here (the g2p is fully rule-based and reads any letter
     // string), so this list and the OOV rule are the only two signals available.
     "acronymLetters": [
-        "aol", "dni", "iva", "pib", "rae", "cni", "ine", "afp", "bbc", "cnn", "fbi", "eeuu",
+        "aol", "dni", "iva", "pib", "rae", "irm", "cni", "ine", "afp", "bbc", "cnn", "fbi", "eeuu",
         "adn", "arn", "vih", "tdt", "usb", "pvc", "led", "gps", "utc", "url", "tic", "pyme",
     ],
 

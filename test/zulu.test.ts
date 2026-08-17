@@ -246,3 +246,13 @@ describe("Zulu text normalization", () => {
         expect(normalizeZulu("izinga elingu-35°F")).toBe("izinga elingu-amazinga angu-35 Fahrenheit");
     });
 });
+
+// Abbreviations found by the corpus QC pass; FLEURS strips the dot, so both spellings must work.
+describe("njll. and udkt. — corpus abbreviations", () => {
+    it("njll. is njalonjalo (et cetera)", () => {
+        expect(phonemize("zokuthutha njll kuzo", "zu")).toContain("ɲd\u0361\u0292\u0324alɔɲd\u0361\u0292\u0324ˈaːlɔ");
+    });
+    it("udkt. is udokotela", () => {
+        expect(phonemize("kwazulu natal udkt toni", "zu")).toContain("d\u0324ɔ");
+    });
+});

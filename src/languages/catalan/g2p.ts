@@ -6,6 +6,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const V = MANIFEST.vowels;
 const ACCENTED = MANIFEST.accentedVowels;
@@ -136,7 +137,14 @@ export function toSegments(word: string): Seg[] {
             }
             case "y": cons("j"); break;
             case "z": cons("z"); break;
-            default: if (/[a-zç]/.test(c)) cons(c); break; // unknown letter: pass through
+            // ⚠ Was pushing the RAW ORTHOGRAPHIC CHARACTER into the phone stream — see the note in
+            // spanish/g2p.ts. A ⟨q⟩ survived as the IPA uvular stop /q/ (Qing, Qatar, Kalaallit).
+            default: {
+                const p = latinPhone(c, { initial: segs.length === 0, includeH: false });
+                if (p !== undefined) cons(p);
+                else if (/[a-zç]/.test(c)) cons(c);
+                break; // still pass through if even the shared reading declines
+            }
         }
         i++;
     }

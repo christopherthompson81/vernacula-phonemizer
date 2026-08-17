@@ -8,6 +8,7 @@
  */
 
 import { MANIFEST } from "./manifest.ts";
+import { latinPhone } from "../../core/latinPhones.ts";
 
 const VOWELS = "aeiouyåäöé"; // é (idé, armé, kafé) is an always-long /eː/ loanword vowel
 const isV = (c: string): boolean => c !== "" && VOWELS.includes(c);
@@ -171,8 +172,23 @@ export function toSegments(
         if (c === nx && !isV(c)) {
             if (c === "g") push("ɡː");
             else if (c === "k") push("kː");
+            // ⚠ ⟨cc⟩ IS NOT A GEMINATE. It is the Latin/Italian loan cluster, and it does not lengthen:
+            // before a front vowel it is /ks/ (vaccin, vaccineras, acceptera, acceptabelt), elsewhere a
+            // plain /k/ (piccolo, cappuccino). It landed here because ⟨c⟩ is contextual and so is absent
+            // from CONS, which sent it to the `else` below — and that pushed the RAW LETTER, leaving a
+            // bare `c` standing in the IPA (`acɛptˈeːra`, `pˈɪ̀cɔlɔ`). Unlike the single ⟨c⟩ softening
+            // this is NOT gated on the stressed onset: the cluster of `acceptera` is not first-syllable
+            // and is still /ks/.
+            else if (c === "c") {
+                // ⚠ ⟨é⟩ is front (succé → sɵksˈeː) but is deliberately NOT in MANIFEST.frontVowels,
+                // which also drives k/g softening — widening that set has no corpus evidence behind it
+                // and would reach ⟨ké⟩/⟨gé⟩ too, so the exception is scoped to this cluster.
+                const after = w[i + 2] ?? "";
+                if (isFront(after) || after === "é") { push("k"); push("s"); } else push("k");
+            }
             else if (CONS[c]) push(CONS[c]! + "ː");
-            else push(c);
+            // any other doubled letter with no rule: the shared floor, never the raw character.
+            else { const p = latinPhone(c, { initial: i === 0, includeH: false }); push(p !== undefined ? p + "ː" : c); }
             i += 2;
             continue;
         }
@@ -204,8 +220,13 @@ export function toSegments(
             continue;
         }
 
-        // unknown grapheme — pass through
-        push(c);
+        // ⚠ unknown grapheme. This used to push the RAW ORTHOGRAPHIC CHARACTER into the phone stream,
+        // which is what core/latinPhones.ts exists to prevent — a ⟨q⟩ survived as the IPA symbol /q/, a
+        // uvular stop Swedish does not have, in Qing / Qatar / Kalaallit. (⟨qu⟩ was already handled, so
+        // `square` was fine and only the bare letter leaked, which is why it went unnoticed.) Found by
+        // scanning the FLEURS IPA for characters this language cannot emit.
+        const p = latinPhone(c, { initial: segs.length === 0, includeH: false });
+        push(p !== undefined ? p : c); // still pass through if even the shared reading declines
         i++;
     }
 

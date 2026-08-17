@@ -55,6 +55,31 @@ export function toSegments(word: string): Seg[] {
             segs.push({ ph: "ɫ", nucleus: false });
             continue;
         }
+        // ⚠ THE SIGNS ARE NOT SEGMENTS. ⟨ь⟩ and ⟨ъ⟩ were both mapped to ʔ in kazakh.jsonc, which put a
+        // GLOTTAL STOP into 408 corpus rows — миль `mˈəjɫʔ`, гольф `ɡˈoɫʔf`, пальма `pɑɫʔmˈɑ`, Нью
+        // `nʔjˈu`, премьер `premʔˈer`. Neither sign denotes a sound in any reading. They reach Kazakh
+        // only in Russian loans and names, and there they do opposite jobs:
+        //   ь (soft)  palatalises the consonant BEFORE it            миль → mˈəjlʲ, Чарльз → t͡ʃˈɑrlʲz
+        //   ъ (hard)  separates, giving a /j/ onset to what follows   объектив → objektˈiv
+        if (c === "ь") {
+            const prev = segs[segs.length - 1];
+            if (prev !== undefined && !prev.nucleus && !prev.ph.endsWith("ʲ")) {
+                // a palatalised l is LIGHT by definition, so it also escapes the ɫ that л emits above —
+                // the word-wide harmony pass in kazakh.ts only lightens, so setting it here is safe.
+                if (prev.ph === "ɫ") prev.ph = "l";
+                prev.ph += "ʲ";
+            }
+            continue;
+        }
+        if (c === "ъ") {
+            // ⚠ Only when there is something to SEPARATE FROM. The hard sign's whole job is to stop the
+            // preceding consonant from swallowing a following iotated vowel (объектив → objektˈiv), so
+            // with nothing after it there is no /j/ to emit — a bare `абъ` was otherwise picking up a
+            // stray glide out of a letter that denotes no sound.
+            if (next in VOWEL_IPA || next in GLIDE_IPA) segs.push({ ph: "j", nucleus: false });
+            continue;
+        }
+
         const cons = CONS_IPA[c];
         if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
         // else: unknown char (punctuation) → skip

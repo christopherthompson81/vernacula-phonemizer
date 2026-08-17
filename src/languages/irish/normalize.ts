@@ -178,6 +178,9 @@ export function normalizeIrish(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}])\d[\d,]*\s+BC(?![\p{L}\p{M}])/giu, (m0) => m0.replace(/BC/giu, "roimh Chríost"));
     s = s.replace(/(?<![\p{L}\p{M}])N\.A\.(?![\p{L}\p{M}])/giu, "Náisiúin Aontaithe");
     s = s.replace(/(?<![\p{L}\p{M}])S\.A\.(?![\p{L}\p{M}])/giu, "Stáit Aontaithe");
+    // `srl.` is *agus araile* ("et cetera") — corpus: `iompar ar thalamh, srl.`, previously the
+    // cluster [sˠɾˠl̪ˠ] plus a leaked phrase break. The dot is optional because FLEURS strips it.
+    s = s.replace(/(?<![\p{L}\p{M}])srl\.?(?![\p{L}\p{M}])/giu, "agus araile");
 
     // 1b) CURRENCY PREFIXES — `US$14.7`, `US$11,000`, `US$30`. The corpus's glued US$ names the
     //     currency (dollar); the bare `$` is the tier's. The `$` is REQUIRED so `US` alone (without a

@@ -16,7 +16,7 @@
     // corpus) and TV (x13) are the frequent ones; the pronunciation lexicon here is a CORRECTION table
     // rather than a wordlist, so it cannot serve as the "is this recorded" test.
     "acronymLetters": [
-        "eua", "tv", "aol", "oha", "us", "url", "pib", "cpf", "cnpj", "ong", "dvd", "cd", "gps",
+        "eua", "tv", "aol", "oha", "us", "url", "pib", "irm", "cpf", "cnpj", "ong", "dvd", "cd", "gps",
         "utc", "pbs", "bbc", "cnn", "fbi", "adn", "dna", "sms", "led", "usb", "pdf", "iptu"
     ],
 

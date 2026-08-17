@@ -108,4 +108,24 @@ describe("Hausa — the unit symbol BEFORE its numeral, which is Hausa's own ord
         expect(ph("5 km")).toBe("bˈi˩ja˥r kilomˈita");
         expect(ph("100 km/h")).toBe("ɗˈa˩ri˥ kilomˈita ˈa ˈa˥wa˩");
     });
+
+    // ⚠ THE ⟨ch⟩ DIGRAPH. Standard Hausa spells native /t͡ʃ/ as a BARE ⟨c⟩, so the rule table never
+    // needed a ⟨ch⟩ entry for Hausa words — and every one of the 182 FLEURS ha_ng rows containing ⟨ch⟩
+    // therefore scanned as c→t͡ʃ then h→h and emitted the impossible cluster t͡ʃh. 182 of 182: a total
+    // failure, not a sampling artifact. They are almost all foreign proper nouns, which reach this
+    // table rather than a foreign reader because NATIVE_CLASS accepts all of a-z — a plain-ASCII name
+    // carries no letter Hausa lacks, so nothing marks it foreign. Reading ⟨ch⟩ as /t͡ʃ/ is what a Hausa
+    // reader does with the spelling. Same defect and same shape as fula's, found the same way.
+    it("reads the ch digraph rather than emitting t͡ʃ + h", () => {
+        expect(phonemizeWord("china")).toBe("t͡ʃˈina");
+        expect(phonemizeWord("richard")).toBe("rˈit͡ʃard");
+        expect(phonemizeWord("gingrich")).toBe("ɡˈiŋɡrit͡ʃ");
+        for (const w of ["china", "charles", "chile", "richard"]) expect(phonemizeWord(w)).not.toContain("h");
+        // ⟨sh⟩ already had a rule and must stay; and the ⟨cc⟩ geminate must not be captured by ⟨ch⟩,
+        // since native wacce / wadataccen are /t͡ʃt͡ʃ/ and have no h in them at all.
+        expect(phonemizeWord("shiri")).toBe("ʃˈiri");
+        expect(phonemizeWord("wacce")).toBe("wˈat͡ʃt͡ʃe");
+        expect(phonemizeWord("wadataccen")).toBe("wadatˈat͡ʃt͡ʃen");
+    });
+
 });

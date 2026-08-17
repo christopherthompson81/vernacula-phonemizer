@@ -124,7 +124,11 @@
     // listed: UNESCO [unesko], NASA, COVID, OPEC, ACTA [akta], REM, ASUS, SWAPO.
     "acronymLetters": [
         "usa", "osn", "fbi", "dna", "cep", "oha", "nsa", "usoc", "usaf", "ucla", "mri", "aol",
-        "add", "utc", "im", "mip", "rspca"
+        "add", "utc", "im", "mip", "rspca",
+        // Roztroušená skleróza (multiple sclerosis) — readable in Czech, since syllabic r makes
+        // [r̩s] a possible word, and therefore invisible to the phonotactic test. Corpus:
+        // `pravděpodobnost výskytu RS než u mužů`.
+        "rs"
     ],
 
     // Cardinal number words. tens+units concatenate (dvacetjeden = 21); hundreds/thousands are space-separated.

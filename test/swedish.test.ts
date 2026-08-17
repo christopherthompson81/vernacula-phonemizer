@@ -352,3 +352,46 @@ describe("swedish text normalization", () => {
         expect(phonemize("Il-76:or", "sv")).not.toContain("mˈèːɡabɪt");
     });
 });
+
+/**
+ * ⚠ ⟨cc⟩ IS NOT A GEMINATE, and treating it as one left a RAW LETTER in the IPA.
+ *
+ * The geminate branch fires on any doubled consonant, but ⟨c⟩ is contextual in Swedish (/s/ in a
+ * softening onset, /k/ otherwise) and so is absent from CONS — which dropped ⟨cc⟩ into the branch's
+ * `else`, and that pushed the orthographic character. `acceptera` came out `acɛptˈeːra` and `piccolo`
+ * `pˈɪ̀cɔlɔ`, with a bare `c` standing in the phone stream. Found by scanning the FLEURS sv_se IPA
+ * for characters the engine should not be able to emit — the same pass that found the ⟨q⟩ leak.
+ *
+ * The cluster is the Latin/Italian loan pattern and does not lengthen: /ks/ before a front vowel,
+ * plain /k/ elsewhere. ⚠ It is NOT gated on the stressed onset the way single ⟨c⟩ is — the cluster in
+ * `acceptera` is not first-syllable and is still /ks/.
+ */
+describe("⟨cc⟩ is a loan cluster, not a geminate", () => {
+    test("/ks/ before a front vowel", async () => {
+        expect(await phonemize("vaccin", "sv")).toBe("vaksˈiːn");
+        expect(await phonemize("vaccineras", "sv")).toBe("vaksɪnˈeːras");
+        expect(await phonemize("acceptera", "sv")).toBe("aksɛptˈeːra");
+        expect(await phonemize("acceptabelt", "sv")).toBe("aksɛptˈɑːbɛlt");
+    });
+
+    test("plain /k/ elsewhere", async () => {
+        expect(await phonemize("piccolo", "sv")).toBe("pˈɪ̀kɔlɔ");
+        expect(await phonemize("cappuccino", "sv")).toBe("kapːɵksˈiːnɔ");
+    });
+
+    // ⟨é⟩ is front but is deliberately kept out of MANIFEST.frontVowels, which also drives k/g
+    // softening; the exception is scoped to this cluster, so the other ⟨é⟩ words must not move.
+    test("⟨é⟩ counts as front for this cluster only", async () => {
+        expect(await phonemize("succé", "sv")).toBe("sɵksˈeː");
+        expect(await phonemize("kafé", "sv")).toBe("kafˈeː");
+        expect(await phonemize("idé", "sv")).toBe("ɪdˈeː");
+    });
+
+    test("real geminates and single ⟨c⟩ are untouched", async () => {
+        expect(await phonemize("flicka", "sv")).toBe("flˈɪ̀kːa");
+        expect(await phonemize("kall", "sv")).toBe("kalː");
+        expect(await phonemize("sitta", "sv")).toBe("sˈɪ̀tːa");
+        expect(await phonemize("cirkus", "sv")).toBe("sˈɪrkɵs");
+        expect(await phonemize("camping", "sv")).toBe("kˈampɪŋ");
+    });
+});

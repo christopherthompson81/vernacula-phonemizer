@@ -193,6 +193,9 @@ export function normalizeXhosa(input: string): string {
     //    untouched: it is an English place name (St James Gate).
     s = s.replace(/(?<![\p{L}\p{M}])(u?)Mnu\.?(?=[  ]\p{Lu})/giu, "$1Mnumzana");
     s = s.replace(/(?<![\p{L}\p{M}])Jr\.(?=[  ]\p{Ll})/gu, "Jr");
+    // `njl.` / `njll.` is *njalonjalo* ("et cetera") — corpus: `izinto zokuthutha, njll.`, previously
+    // the cluster [ɲd͡ʒ̤l] plus a leaked break. Dot optional: FLEURS strips it.
+    s = s.replace(/(?<![\p{L}\p{M}])njll?\.?(?![\p{L}\p{M}])/giu, "njalonjalo");
 
     // 4) THOUSANDS DE-GROUPING, before anything else numeric: the grouping comma reads as clause punctuation
     //    and the tail as a separate number, so `11,000` ends in *iqanda* ("egg"). Exactly three digits per

@@ -141,6 +141,20 @@ export function normalizeGerman(input: string): string {
         return `${prev ?? ""}${sp ?? ""}${stem}${ending}`;
     });
 
+    // 2b) A BARE NUMBER BEFORE A MONTH is still a date, and German reads a date ordinal. The rule above
+    //     needs the dot German writes (`am 16. Februar`); corpora that strip punctuation do not have it,
+    //     and the reader still says the ordinal — the OmniVoice audit heard *vierundzwanzigSTEN september*
+    //     where we read the cardinal *vierundzwanzig*. Safe without the dot precisely because a month name
+    //     follows: a number in that position is a day, never a quantity. Same <= 31 guard, same endings.
+    s = s.replace(
+        new RegExp(`(?:(\\p{L}+)(\\s+))?(\\d{1,2})(\\s+)(?=(?:${MONTHS})(?![\\p{L}\\p{M}]))`, "giu"),
+        (whole, prev: string | undefined, sp: string | undefined, digits: string, sp2: string) => {
+            const stem = ordinalStem(Number(digits));
+            if (stem === undefined) return whole;
+            const ending = prev !== undefined && WEAK_EN.has(prev.toLowerCase()) ? "en" : "e";
+            return `${prev ?? ""}${sp ?? ""}${stem}${ending}${sp2}`;
+        });
+
     // 3) DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
     //    NOT AFTER ANOTHER INITIAL. `s.` is *Seite*, so `J. S. Bach` expanded to "J Seite Bach" — the

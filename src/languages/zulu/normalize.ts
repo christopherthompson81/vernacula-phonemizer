@@ -338,6 +338,11 @@ export function normalizeZulu(input: string): string {
     //     two numbers: the rugby score `26 -00` must keep its bare juxtaposition rather than gain a
     //     spurious pause.
     s = s.replace(/(?<!\d)[  ]+[-–—]+[  ]+(?!\d)/gu, ", ");
+    // `njl.` / `njll.` is *njalonjalo* ("et cetera") — corpus: `izinto zokuthutha, njll.`, previously
+    // the cluster [ɲd͡ʒ̤l] plus a leaked break. Dot optional: FLEURS strips it.
+    s = s.replace(/(?<![\p{L}\p{M}])njll?\.?(?![\p{L}\p{M}])/giu, "njalonjalo");
+    // `udkt.` is *udokotela* (Doctor) — corpus: `KwaZulu-Natal. udkt …`, previously [ˈuːd̤kʼtʼ].
+    s = s.replace(/(?<![\p{L}\p{M}])u?dkt\.?(?![\p{L}\p{M}])/giu, "udokotela");
 
     // INITIALISMS LAST. Every rule above owns capitals of its own — `US$`, `°C`, `B.C.`, `sq mi` — and
     // spelling them out first would take those away, which is exactly what happened when this ran early.
