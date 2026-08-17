@@ -59,3 +59,6 @@ tools/perso-arabic/silver.espeak-ps.tsv
 # regenerates from one documented flag and must never be mistaken for a shipped artifact. Ignored so a
 # `git add -A` after a measurement run cannot commit it — which is exactly how it slipped into #797.
 tools/perso-arabic/lexicon.*.noref.tsv
+
+# Agent worktrees (created by parallel Claude Code agents; never source).
+.claude/worktrees/

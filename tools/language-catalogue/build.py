@@ -28,6 +28,18 @@ def rows_of(path):
     return cols, out
 
 
+def _seed_fleurs() -> set[str]:
+    """The FLEURS-102 roster, read out of `gen-seed.py` WITHOUT importing it — that file writes
+    catalogue.tsv at import time in some invocations, and this check must never have a side effect."""
+    import re
+    src = open(os.path.join(HERE, "gen-seed.py"), encoding="utf8").read()
+    m = re.search(r'FLEURS = set\("""(.*?)"""', src, re.S)
+    return set(m.group(1).split()) if m else set()
+
+
+SEED_FLEURS = _seed_fleurs()
+
+
 def build(db_path):
     with open(os.path.join(HERE,"schema.sql")) as f:
         schema = f.read()
@@ -41,6 +53,7 @@ def build(db_path):
     con.executescript(schema)
 
     con.execute("BEGIN")            # one transaction, so the DEFERRED served_by check runs at COMMIT
+    fleurs_seen: set[str] = set()
     with open(os.path.join(HERE,"catalogue.tsv")) as f:
         reader = csv.DictReader(f, delimiter="\t")
         cols = reader.fieldnames
@@ -57,8 +70,29 @@ def build(db_path):
                     vals[c] = v
             placeholders = ",".join(":"+c for c in cols)
             con.execute(f"INSERT INTO languages ({','.join(cols)}) VALUES ({placeholders})", vals)
+            if vals.get("fleurs") == 1:
+                fleurs_seen.add(row["code"])
             n += 1
     con.commit()
+
+    # ⚠ THE `fleurs` COLUMN IS CROSS-CHECKED AGAINST ITS OWN GENERATOR, because it drifted silently and
+    # then MISLED A PLANNING QUERY. `gen-seed.py` carries the FLEURS-102 roster mapped to our codes by the
+    # benchmark's actual recorded variety, and that block is correct — all 102 configs resolve. But
+    # catalogue.tsv had ELEVEN extra rows flagged `1`, nine of them for languages FLEURS does not contain
+    # at all (ab crh eu hyw kaa ltg naq pap rup). The residual query "which implemented language still has
+    # no normalizer" reads this column to decide whether a corpus exists, so a false 1 sends the next round
+    # looking for a corpus that was never published. A wrong flag is worse than a missing one here.
+    #
+    # The two that remain above 102 are DUPLICATE REPRESENTATION rather than error: `pbt` shares `ps_af`
+    # with `ps`, and `pt-BR` shares `pt_br` with `pt`. Both name a real config; which row should own it is
+    # a modelling question, not a fact, so the check tolerates a code whose FLEURS twin is also flagged.
+    # ⚠ NAMED, NOT INFERRED. A prefix heuristic would tolerate `pt-BR` (prefix `pt`) and still flag `pbt`,
+    # which shares `ps_af` with `ps` and has no shared prefix at all — so the pairs are written down.
+    FLEURS_TWIN = {"pt-BR": "pt", "pbt": "ps"}
+    extra = fleurs_seen - SEED_FLEURS
+    unexplained = {c for c in extra if FLEURS_TWIN.get(c) not in SEED_FLEURS}
+    if unexplained:
+        print(f"  ⚠ fleurs=1 but absent from gen-seed.py's FLEURS-102 roster: {' '.join(sorted(unexplained))}")
 
     tot = con.execute("SELECT COUNT(*) FROM languages").fetchone()[0]
     by = dict(con.execute("SELECT decision, COUNT(*) FROM languages GROUP BY decision").fetchall())
