@@ -162,6 +162,11 @@
     // is the fleet-wide Indic convention; the offglide + अय→ɛ are systematic Hindi realizations.
     "postRules": [
         {
+            "from": "d͡ʒɲ",
+            "to": "ɡj",
+            "note": "⚠ ज्ञ IS NOT ITS PARTS. Composing ज (d͡ʒ) + ् + ञ (ɲ) literally gives d͡ʒɲ, which is not how Modern Standard Hindi says this ligature — it is /ɡj/: ज्ञान gyaan, विज्ञान vigyaan, वैज्ञानिक vaigyaanik, ज्ञात gyaat, विशेषज्ञ visheshagya. 73 of 73 FLEURS hi_in rows containing ज्ञ were wrong, and the recognizer heard `ɡ i a t` where we wrote `d͡ʒɲˈaːt̪`. ⚠ SCOPED TO HINDI DELIBERATELY: Marathi reads the same ligature as `dnya` (dnyaan), so this must not move to the shared Devanagari layer or to marathi.jsonc. Awadhi/Bhojpuri/Magahi likely pattern with Hindi but have no corpus evidence here, so they are left alone.",
+        },
+        {
             "from": "((?:t͡ʃʰ|d͡ʒʱ|t͡ʃ|d͡ʒ|t̪ʰ|d̪ʱ|[kɡptbmnlʃsɳŋɽ]ʰ?ʱ?|t̪|d̪))\\1(?!͡)",
             "to": "$1ː",
             "note": "geminate → single + length (क्क→kː, च्च→t͡ʃː)",
