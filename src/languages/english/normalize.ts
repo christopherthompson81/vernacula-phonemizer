@@ -288,7 +288,13 @@ export function normalizeEnglish(input: string): string {
     s = s.replace(/\b([ap])\.\s?m\./gi, (_m, ap: string) => (ap.toLowerCase() === "a" ? "ay em" : "pee em"));
     //     Other dotted initialisms (U.S., U.K.) — strip the interior dots so they cannot become pause marks,
     //     leaving the letters for the initialism pass or the dictionary.
-    s = s.replace(/\b([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)/g, (m0) => m0.replace(/\./g, ""));
+    //     ⚠ AND UPPERCASED, because a contiguous dotted letter run IS an initialism by construction, while
+    //     the pass that spells one out is gated on capitals. On lowercased input the two collide whenever
+    //     the stripped result is itself a word: `u.s.` became `us` and was read as the WORD *ʌs*, which the
+    //     corpus audit caught — the reader said "U-S". (`u.k.` escaped only because "uk" is not a word,
+    //     which is why this never showed up before.) Uppercasing is safe here precisely because the dots
+    //     have already proved what the run is.
+    s = s.replace(/\b([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)/g, (m0) => m0.replace(/\./g, "").toUpperCase());
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".

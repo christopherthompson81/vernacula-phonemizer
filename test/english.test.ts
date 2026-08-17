@@ -66,3 +66,16 @@ describe("space-grouped numbers are not joined across a boundary that is not one
         expect(phonemize("a population of 2 008 400 people", "en")).toContain("mˈɪɫjən");
     });
 });
+
+// ⚠ ALSO FROM THE AUDIT. `u.s.` stripped to `us`, which is an English WORD, so the initialism pass — gated
+// on capitals — could not claim it and the dictionary read it as *ʌs*. The reader said "U-S". `u.k.`
+// escaped only because "uk" is not a word, which is why this hid for so long.
+describe("a dotted letter run is an initialism whatever its case", () => {
+    test("u.s. reads as letter names, not as the word 'us'", () => {
+        expect(phonemize("former u.s. speaker of the house", "en")).toContain("jˈuː ˈɛs");
+        expect(phonemize("former u.s. speaker of the house", "en")).not.toContain("ɚ ˈʌs ");
+    });
+    test("and the capitalised form is unchanged", () => {
+        expect(phonemize("former U.S. speaker", "en")).toContain("jˈuː ˈɛs");
+    });
+});
