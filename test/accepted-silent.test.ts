@@ -242,7 +242,24 @@ describe("ACCEPTED_SILENT is a baseline, not a suppression", () => {
         // omitting a plus is lossless, and Wikidata's bo label for subtraction is the operation NOUN
         // `འཕྲི་རྩིས` rather than anything a reader says between two operands. `review.ts --lang bo` stays red.
 
-        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bal", "bar", "bm", "bo", "cdo", "ceb", "cjy", "gan", "gu", "hak", "he", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mos", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "sn", "so", "su", "syl", "ta", "ti", "tl", "ug", "wuu", "xh", "za"]);
+        // ⚠ chr's TWO SPANS ARE HERE FOR A PURELY MECHANICAL REASON, and each names a different blind spot
+        // in `acceptedSignClass` rather than a weakness in the refusal — the class-level arguments and their
+        // counts are all in ACCEPTED_SIGN_SILENCE, where every one of the thirteen probed sign classes is
+        // registered (chr.wikipedia is 734 paragraphs and attests no percent word, no currency name, no unit
+        // word and no exponent word, so the Cherokee layer declares no shared tier at all).
+        //   · CURRENCY — the corpus's only currency sign is `¥` while `SIGN_CASES`'s currency probe is keyed
+        //     on `$`, so the class test never sees a currency in the line at all. The reading is ALREADY
+        //     correct, which is what licenses the accept: `ᎤᎾᏤᎵ ᎠᏕᎳ ᏣᏆᏂ ᎠᏕᎳ (¥)` reads *unat͡seli atela
+        //     t͡sakʷani atela*, "their money, Japan money" — the writer names the currency twice in his own
+        //     words and a third naming from the sign would be the defect (trap 12).
+        //   · MINUS — the DROPPABLE minus pattern requires a digit AFTER the sign, which a bare `-` handed
+        //     to `covered.test(ch)` can never satisfy; the tl/wuu/mad limitation, one language further on.
+        //     The instance is `(????-844)`, a reign span whose birth year is typed as four question marks.
+        //     ⚠ THE ACCEPT IS SAFE HERE IN A WAY IT IS NOT FOR ln/rw/sn/bo, and the reason is a measurement,
+        //     not a convention: the ASCII hyphen is ×101 in this corpus and there is NOT ONE negative number
+        //     among them — it is the -Ꭿ/-Ꮒ enclitic, a compound numeral (`ᏦᏍᎪᎯ-ᏐᏁᎳ (39)`, glossed by its
+        //     own digits), an ISBN and English compounds. There is no true positive to hide.
+        expect(Object.keys(ACCEPTED_SILENT).sort()).toEqual(["ak", "bal", "bar", "bm", "bo", "cdo", "ceb", "chr", "cjy", "gan", "gu", "hak", "he", "hi", "hsn", "ht", "jv", "km", "kmr", "kn", "ln", "lo", "mad", "mg", "mos", "mr", "my", "nan", "nya", "ps", "rn", "rw", "si", "sn", "so", "su", "syl", "ta", "ti", "tl", "ug", "wuu", "xh", "za"]);
         // Every entry is a non-empty list of LITERAL strings — a pattern here would defeat the point.
         for (const byClass of Object.values(ACCEPTED_SILENT))
             for (const forms of Object.values(byClass)) {
