@@ -60,6 +60,18 @@
         ["nj", "ⁿd͡ʒ", false],
         ["ng", "ᵑɡ", false],
         ["ny", "ɲ", false],
+        // ⚠ ch / sh MUST precede the bare c / s. Fula writes /t͡ʃ/ as bare ⟨c⟩, so without a ⟨ch⟩ rule the
+        // scan reads c→t͡ʃ and then h→h, emitting the impossible cluster t͡ʃh; and ⟨sh⟩ fell through to
+        // s + h, leaving the literal two-letter sequence "sh" sitting in an IPA stream. The Adlam block
+        // above already declares the loan letter 𞥃 → "sh" as something "the Latin engine already uses" —
+        // it did not. Corpus evidence (Nigerian/Adamawa Fulfulde, Hausa-influenced): shiri, karshe, kashi,
+        // shafi, tasha, shawara + the English loans spanish/british/washington are all /ʃ/, with no
+        // counterexample; chede, chaka, chanji, china, march are all /t͡ʃ/.
+        // ⟨cch⟩ is the geminate of ⟨ch⟩ and must precede BOTH (else cc→t͡ʃː then a stray h): acchugo,
+        // yeccheta, picchu, bocchi.
+        ["cch", "t͡ʃː", false],
+        ["ch", "t͡ʃ", false],
+        ["sh", "ʃ", false],
         ["aa", "aː", true],
         ["ee", "eː", true],
         ["ii", "iː", true],
