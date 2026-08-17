@@ -297,8 +297,25 @@ export function normalizeEnglish(input: string): string {
 
     // 0d) DIGIT GROUPING with a space (SI style, "1 356"). The number token cannot span a space, so these
     //     read as two numbers with the thousand lost. Twice, because adjacent groups share a digit.
-    s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
-    s = s.replace(/(\d)[  ](\d{3})(?!\d)/gu, "$1$2");
+    //
+    // ⚠ TWO GUARDS, BOTH FROM THE AUDIO. The wav2vec2 pass over the corpus caught this rule joining numbers
+    //     that were never one number, and English has no genuine space-grouped instance to trade against:
+    //     across en_us the pattern matched twice and BOTH were false merges.
+    //
+    //       `the 2008 400 richest americans`  -> 2008400, read *two million eight thousand four hundred*
+    //                                            the reader said "two thousand and eight ... four hundred"
+    //       `july 21 356 bce`                 -> 21356,   read *twenty-one thousand three hundred fifty-six*
+    //
+    //     LEADING GROUP 1-3 DIGITS is the shape of SI grouping itself: 2,008,400 is written `2 008 400`,
+    //     never `2008 400`, so a four-digit head is proof the space is not a separator. That alone fixes
+    //     the first. NOT AFTER A MONTH NAME fixes the second, where the left number is a day and the right
+    //     a year — the one context in which two bare numbers legitimately sit adjacent.
+    //     Matched as ONE WHOLE RUN rather than pairwise-twice, which is also what the comma rule in
+    //     core/sinitic.ts does. Pairwise cannot carry the leading-group constraint: after `2 008 400`
+    //     merges its first pair the head is four digits, so the second pass would refuse its own output.
+    const SPACE_GROUP = new RegExp(
+        `(?<!(?:${MONTH_ALT})[  ])(?<![\\d.,])\\d{1,3}(?:[  ]\\d{3})+(?![\\d])`, "giu");
+    s = s.replace(SPACE_GROUP, (m0) => m0.replace(/[  ]/gu, ""));
 
     // 0e) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
     //     ORDERING IS THE WHOLE REASON THIS IS SEPARATE FROM 6b rather than the same rule.

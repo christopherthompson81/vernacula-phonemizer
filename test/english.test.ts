@@ -45,3 +45,24 @@ describe("english canonical IPA", () => {
         expect(phonemize("0.5", "en")).toBe("zˈɪɹoᶷ pʰɔᶦnt fˈaᶦv"); // decimal separator is a de-accented connector
     });
 });
+
+// ⚠ FOUND BY LISTENING, not by reading. The wav2vec2 pass over the FLEURS corpus caught the space-grouping
+// rule joining numbers that were never one number — a defect no text-vs-text gate can see, because both
+// readings are well-formed English. Across en_us the pattern matched twice and BOTH were false merges.
+describe("space-grouped numbers are not joined across a boundary that is not one", () => {
+    test("a four-digit head is proof the space is not a separator", () => {
+        // 2,008,400 is written `2 008 400`, never `2008 400`. The reader said "two thousand and eight …
+        // four hundred"; we had read *two million eight thousand four hundred*.
+        expect(phonemize("the 2008 400 richest americans", "en")).toContain("θˈaᶷzənd ˈeᶦt fˈɔːɹ hˈʌndɹəd");
+        expect(phonemize("the 2008 400 richest americans", "en")).not.toContain("mˈɪɫjən");
+    });
+
+    test("a day followed by a year is two numbers, not a grouped one", () => {
+        // `july 21 356 bce` had merged to 21356.
+        expect(phonemize("destroyed on july 21 356 bce", "en")).not.toContain("θˈaᶷzənd θɹˈiː hˈʌndɹəd");
+    });
+
+    test("...but real SI grouping still merges, including multi-group", () => {
+        expect(phonemize("a population of 2 008 400 people", "en")).toContain("mˈɪɫjən");
+    });
+});
