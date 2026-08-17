@@ -326,6 +326,21 @@ describe("german normalization", () => {
         expect(phonemize("genau 500. Dann", "de")).toContain(" . ");
     });
 
+    test("...and LOWERCASED input gets the same ordinal, because lowercased input is real input", () => {
+        // FLEURS ships its German transcripts lowercased, so the month test — case-sensitive until now — matched
+        // nothing and these read as a cardinal plus a leaked phrase break. 103 utterances in the OmniVoice de_de
+        // corpus. Each of these must equal its capitalised sibling above.
+        expect(phonemize("am 16. februar", "de")).toBe("am zˈɛçt͡seːntən fˈeːbʁuaːɐ̯");
+        expect(phonemize("der 3. mai", "de")).toBe("deːɐ̯ dʁˈɪtə maɪ̯");
+        expect(phonemize("des 16. jahrhunderts", "de")).toBe("dəs zˈɛçt͡seːntən jaːɐ̯hˈʊndɐts");
+        // The relaxation must not reach a SENTENCE BOUNDARY. A German day/century ordinal is ≤ 31, so a bigger
+        // number before a month is a year ending a sentence — and stays a pause. (True of the capitalised form
+        // too: `1998. Mai` over-fired before the ≤ 31 guard.)
+        expect(phonemize("im jahr 1998. mai war warm", "de")).toContain(" . ");
+        expect(phonemize("im Jahr 1998. Mai war warm", "de")).toContain(" . ");
+        expect(phonemize("es waren 16. dann kamen mehr", "de")).toContain(" . ");
+    });
+
     test("the period is thousands grouping, the comma is the decimal", () => {
         // The number token accepted either as a DECIMAL, so "1.000" read as *eins komma null null null*.
         expect(phonemize("1.000 Menschen", "de")).toBe("ˈaɪ̯ntaʊ̯zənt mˈɛnʃən");

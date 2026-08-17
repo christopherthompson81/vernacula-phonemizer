@@ -108,7 +108,23 @@ export function normalizeGerman(input: string): string {
     //    capitalised noun follows. A sentence-final "N." satisfies neither.
     const ORD = new RegExp(`(?:(\\p{L}+)(\\s+))?(\\d{1,4})\\.(?=\\s+(\\p{L}+))`, "gu");
     s = s.replace(ORD, (whole, prev: string | undefined, sp: string | undefined, digits: string, next: string) => {
-        const licensed = new RegExp(`^(?:${ORDINAL_NOUN})$`, "u").test(next)
+        // ⚠ CASE-INSENSITIVE on the noun condition, because LOWERCASED INPUT IS REAL INPUT: FLEURS ships its
+        // German transcripts lowercased, so `am 16. februar` matched nothing and read as a cardinal plus a
+        // leaked phrase break (*zˈɛçt͡sen . fˈeːbʁuaːɐ̯*) while `am 16. Februar` was already correct. 103
+        // utterances in the OmniVoice de_de corpus. Safe to fold: every name in ORDINAL_NOUN is a month or
+        // Jahrhundert, and none of them has a lowercase German homograph that could be licensed by mistake.
+        //
+        // The SECOND condition still requires a capitalised noun, and deliberately: it is the one that has to
+        // reject a sentence-final "N.", and on lowercased text capitalisation is the only signal separating the
+        // two (the same wall the English st./dr. fix hit). So lowercased input gets the noun condition only —
+        // which the corpus says is ~100 of the 109 cases anyway.
+        // AND ≤ 31 on that condition, which is what stops the relaxation from reaching a SENTENCE BOUNDARY:
+        // `im Jahr 1998. Mai war warm` otherwise reads 1998 as an ordinal. A German day is 1–31 and a century
+        // likewise, so a larger number before a month or Jahrhundert is not a date. Checked against the corpus:
+        // all 100 such ordinals are ≤ 31, so the guard costs nothing real. (This over-fire pre-dates the
+        // case fold — `1998. Mai` hit it too — the guard just closes both at once.)
+        const day = Number(digits);
+        const licensed = (day <= 31 && new RegExp(`^(?:${ORDINAL_NOUN})$`, "iu").test(next))
             || (prev !== undefined && LICENSER.has(prev.toLowerCase()) && /^\p{Lu}/u.test(next));
         if (!licensed) return whole;
         const stem = ordinalStem(Number(digits));
