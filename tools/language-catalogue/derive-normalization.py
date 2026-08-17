@@ -15,6 +15,11 @@ to `done`.
 
 The values:
     done       the engine directory has a normalize.ts and the engine calls it
+    separators the layer is the CORPUS-INDEPENDENT SUBSET and nothing else — it calls `separatorHygiene`
+               and declares no tier, so it spends marks and emits no word. ⚠ This is NOT `done`, and the
+               distinction is the whole reason the value exists: eight languages have no corpus at all, and
+               rounding their punctuation pass up to `done` would delete them from the planning query that
+               found them in the first place. Every class that needs evidence is still open.
     partial    the file exists but the engine does not call it — a wired-up job left unfinished
     inherited  no layer of its own, but the engine DELEGATES to one that has it — either through the catalogue's
                `served_by`, or because the directory is a wrapper that calls another language's factory
@@ -184,7 +189,14 @@ def main():
         # when a layer written for them was running. `served_by` says which ENGINE serves the row, and that engine
         # may be this row's own.
         elif d in is_wired:
-            v = "done"
+            # ⚠ A SEPARATOR-ONLY LAYER IS NOT A TREATED LANGUAGE. `src/core/separatorHygiene.ts` is the subset
+            # that needs no vocabulary, written for the languages with no text to source vocabulary FROM. A
+            # layer that calls it and declares no symbol tier has fixed the false sentence break in a grouped
+            # figure and decided nothing else — reporting that as `done` hides real remaining work behind a
+            # word that means the opposite.
+            norm = open(os.path.join(SRC, d, "normalize.ts"), encoding="utf8").read()
+            only_hygiene = "separatorHygiene" in norm and "makeSymbolNormalizer" not in norm
+            v = "separators" if only_hygiene else "done"
         elif d in has_file:
             v = "partial"
         elif normalizes(d) or (served and served != "native" and normalizes(dirs.get(served, ""))):

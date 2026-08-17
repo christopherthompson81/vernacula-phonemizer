@@ -9,6 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeAncientGreek } from "./normalize.ts";
 
 interface AncientGreekDef {
     vowels: Record<string, [string, string]>;
@@ -117,7 +118,7 @@ const TOKEN = /([Ͱ-Ͽἀ-῿̀-ͯ]+)|(\d+)|([.·;!?;·,:])/gu;
 
 class AncientGreekPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeAncientGreek(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             // Numbers: compose the Greek numeral phrase (καὶ-linked, myriad-grouped), then phonemize each word.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

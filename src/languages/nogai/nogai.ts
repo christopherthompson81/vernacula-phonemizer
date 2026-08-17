@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeNogai } from "./normalize.ts";
 
 interface NogaiDef {
     consonants: Record<string, string>;
@@ -111,7 +112,7 @@ const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
 
 class NogaiPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeNogai(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

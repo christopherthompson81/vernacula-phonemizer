@@ -66,7 +66,11 @@ CREATE TABLE languages (
     -- ⚠ `done` MAY MEAN A SHARED LAYER. Four directories serve sixteen codes — `arabic` alone serves ten dialect
     -- codes — so `done` says a normalizer RUNS for this code, not that one was written for it specifically.
     normalization    TEXT
-                       CHECK (normalization IS NULL OR normalization IN ('done','partial','inherited')),
+                       -- ⚠ `separators` IS NOT `done`. It marks a layer that is the corpus-independent
+                       -- subset and nothing else — `core/separatorHygiene.ts`, which spends marks and emits
+                       -- no word — written for the eight languages with no text to source vocabulary from.
+                       -- Rounding it up to `done` would delete them from the planning query that found them.
+                       CHECK (normalization IS NULL OR normalization IN ('done','separators','partial','inherited')),
 
     -- If this language is served by ANOTHER language's engine as a labelled approximation (rather than a bespoke
     -- module), the code of that sibling — e.g. Magahi (mag) served_by 'bho'. NULL = its own bespoke module (or

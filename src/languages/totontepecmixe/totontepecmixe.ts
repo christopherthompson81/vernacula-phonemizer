@@ -11,6 +11,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { normalizeTotontepecMixe } from "./normalize.ts";
 
 interface TotontepecMixeDef {
     digraphs: [string, string][];
@@ -109,7 +110,7 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class TotontepecMixePhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeTotontepecMixe(input.normalize("NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

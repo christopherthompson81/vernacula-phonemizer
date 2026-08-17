@@ -10,6 +10,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { normalizeKalaallisut } from "./normalize.ts";
 
 interface KalaallisutDef {
     vowels: Record<string, string>;
@@ -59,7 +60,7 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class KalaallisutPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        return assembleClauses(normalizeKalaallisut(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 // ≤12 digits stays inside the attested range (< 10¹²); longer reads the raw digit string so the

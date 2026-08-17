@@ -11,6 +11,7 @@ import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
+import { normalizeNama } from "./normalize.ts";
 
 interface NamaDef {
     clicks: readonly string[];
@@ -84,7 +85,7 @@ const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)|([.?!,;:…])`, "gu");
 
 class NamaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeNama(input.normalize("NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {
                 // Cardinals 1 … 10¹²−1 compose natively; 0 emits the flagged Afrikaans stopgap `nul` and anything

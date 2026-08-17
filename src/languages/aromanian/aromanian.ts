@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeAromanian } from "./normalize.ts";
 
 interface AromanianDef {
     digraphs: [string, string][];
@@ -105,7 +106,7 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class AromanianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        return assembleClauses(normalizeAromanian(input.normalize("NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Aromanian number WORDS, each phonemized like any other word.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
