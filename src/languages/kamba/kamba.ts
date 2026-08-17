@@ -10,6 +10,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeKamba } from "./normalize.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -60,7 +61,9 @@ const TOKEN = /(['’ʼ]?\p{Script=Latin}[\p{Script=Latin}\p{M}'’ʼ]*)|(\d+)|(
 
 class KambaPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // The pre-tokenizer normalization pass (normalize.ts): separators, units, signs, the clock, and the
+        // ⟨î û í ú⟩ → ⟨ĩ ũ⟩ confusable fold — all of it text→text, before TOKEN ever runs.
+        return assembleClauses(normalizeKamba(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1].replace(/[’ʼ]/gu, "'"))); // normalise ’ / ʼ → ' so the ⟨ng'⟩ key matches
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
