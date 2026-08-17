@@ -1,0 +1,512 @@
+// WIKIPEDIA WORD ATTESTATION — rup. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "rup",
+        "wiki": "roa-rup.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "dupã Hristo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dupu Hristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…anji 50-60 dupu Hristolu). Makedonji di ninti di anji 50-70 dupu Hristo, iarau poligami (un mascul avea ma multi nveasti) sh polite…"
+            ]
+            },
+        {
+                "word": "ninti di Hristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ljelu thimiljusitoru ali Machedonia fu Caranos. Tu anlu 800 ninti di Hristo, Vãsãlia Machedonã mutã Hlambura ei. Tu anlu 168 ninti di H…",
+                "…di Hristo, Vãsãlia Machedonã mutã Hlambura ei. Tu anlu 168 ninti di Hristo Machedonia cãdzu sum aumbra Amirãriei Romani ditu Ascãpitat…"
+            ]
+            },
+        {
+                "word": "patrat",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "pãtrat",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cubic",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…shi nãstricut lucru. == Nau vidzutã == Definitiv volumenlu cubic tu formã di anclis bloc cu ubor di nuntru, s-pari ca obiect…"
+            ]
+            },
+        {
+                "word": "lasutã",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "procentu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…e, ntrã cari creshtin-i shi evrei, ama aestea reprezintã un procentu multu njicu dit populatsie. Statul algerian garanteadzã lib…"
+            ]
+            },
+        {
+                "word": "sutã",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ã sh-alãsatã unu chiro si s-aprindã. Ari 7-16 pãrtsã tu-unã sutã shpirtu. == Vedz shi == Auã Mustu Tu frândza aestâ ari text…",
+                "…i 2001 easte atsel di fãrã relighie, tsi crishce pi 19,1 la sutã. Crishcinizmo spunea unã crishcire negativã nai ma multu la…",
+                "…lisã pãzari cãnãscutã ca Zeleni Venats, cari s-afla pi vãrã sutã di metri aproepea di strada Prizrensca. === Cafine Marea Sã…"
+            ]
+            },
+        {
+                "word": "gradu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gradi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…0. Membru titularu ali Academia Romãnã, 8 Brumaru 2004. === Gradi didactitsi === 1950-1951, preparator. 1950-1958, asistentu.…",
+                "…xameni di admiteri la ma multi Faculteti, adrati cathi anu. Gradi Didactitsi I (misurati 70) durusiti a dascalloru di Liceu d…"
+            ]
+            },
+        {
+                "word": "Celsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Hristo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 10,
+                "substringOnly": 1,
+                "examples": [
+                "…Crãciunlu icã Amintari a lui Isa Hristo suntu dzãlili di-tu an (25-li tu 27-li di Andreu) tsi crish…",
+                "…miljusitoru ali Machedonia fu Caranos. Tu anlu 800 ninti di Hristo, Vãsãlia Machedonã mutã Hlambura ei. Tu anlu 168 ninti di H…",
+                "…o, Vãsãlia Machedonã mutã Hlambura ei. Tu anlu 168 ninti di Hristo Machedonia cãdzu sum aumbra Amirãriei Romani ditu Ascãpitat…",
+                "…29-li di Cirișaru, Roma, Italia) eara unu apostolu alu Isa Hristo, frati cu Sântul Andrei.…",
+                "…rtolomeu (17 d.Hr. - 69-71 d.Hr.) eara unu apostolu alu Isa Hristo. == Bibliografii ==…",
+                "…30-li di Brumaru, Patras, Gârția) eara unu apostolu alu Isa Hristo, frati cu Sântul Chetru. == Adeturi Armâneașți == Armânjlji…"
+            ]
+            },
+        {
+                "word": "nãinti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 12,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…ãnicã. Sãmbãta Mari easti Sãmbãta dit Stãmãna Mari, dzua di nãinti di Pashti. Etimologie: sabbatum (l.lat.) icã sambatum = sab…",
+                "…ercuri shi Vinjiri. Gioea Mari easti gioea dit siptãmãna di nãinti di Pashti, dit stãmãna-a Pashtilui. Etimologie: Jovis dies…",
+                "…Fatsa easti partea di nãinti di-tu caplu a omlui (cu oclji, nari, gurã etc.). == Vedz sh…",
+                "…njiri, scriatã shi Stãvinjiri easti: Vinjirea Mari, dzua di nãinti di Pashti, cãndu s-yiurtiseashti moartea-a Hristolui pri cr…",
+                "…rea; alas (agãrshescu) atseali tsi s-featsirã sh-trag calea nãinti) {ro: foaie de hîrtie; foaie (pagină) de caRTE/ziar} Frãndz…",
+                "…mãdularlu tsi s-aflã tu partea di nafoarã, di nghios sh-di nãinti a truplui di om (pravdã) tsi lu-aleadzi bãrbatlu di muljari…"
+            ]
+            },
+        {
+                "word": "ninti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ljelu thimiljusitoru ali Machedonia fu Caranos. Tu anlu 800 ninti di Hristo, Vãsãlia Machedonã mutã Hlambura ei. Tu anlu 168…",
+                "…di Hristo, Vãsãlia Machedonã mutã Hlambura ei. Tu anlu 168 ninti di Hristo Machedonia cãdzu sum aumbra Amirãriei Romani ditu…",
+                "…Homeru fu unu poetu grecu tsi bãnã seculu VIII ninti di Hristolu.…",
+                "…anda tu inimã, nuntru, Un geanu uvrescu nica ari caimo, Sh ninti cãtã Apiritã, Un oclu nica aveagli cãtã Sion, Nãdia noastã…",
+                "…una izvurashti tu Ghirmanii i treatsi prit ma multi craturi ninti ca s-agiungã tu Rumãnia, tra si s-vearsã tu-Amarea Lae.…",
+                "…yini dupã glãcã (gãrgãlanu), tu cari s-hunipseashti mãcarea ninti ca s-treacã tu pãntica cu matsã. Tu frândza aestâ ari textu…"
+            ]
+            },
+        {
+                "word": "dupã",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…i == Luguria murnã-aroshi tsi u-acatsã herlu (sh-lu-aroadi) dupã tsi sta niheamã chiro dizvilit tu nutii s-cljeamã arudzinã.…",
+                "…Andreu easti meslu a anlui tsi yini dupã Brumaru shi s'aflã nãintea-a Yinarlui. Mesu aestu ari 31 di…",
+                "…Alunaru easti anshaptilu mesu a anlui (tsi yini dupã Chirisharu shi s'aflã nãintea-a Avgustlui); Mesu aestu ari…",
+                "…ma easti bueaua tsi u-aspuni tu videari unu lucru lunjinat (dupã cum bati lunjina). Ari ma multi zboarã trã hromã, ca bunãoa…",
+                "…iutatu di arhiereulu Deceneu, s-adrã protlu stateto-dacian. Dupã asasinarea a lu Burebishta tru 44 d.C., regatlu s-ampulisi,…",
+                "…an Cuza dizvãrtearea-a reformelor di modernizare a statlui. Dupã abdicarea al Cuza, Carol di Hohenzollern-Sigmaringen agiund…"
+            ]
+            },
+        {
+                "word": "dupu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 56,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…(numiru atomicu 50, Sn) easti unu elementu chimicu. Numili dupu gãrtseascã easti cositoriu.…",
+                "…km² di fatsa-a loclui, a easte cama mare sade di Australia. Dupu numirlu di bãnãtori cai bãneadzã tu Europa, nãsã easte al t…",
+                "…nãtori cai bãneadzã tu Europa, nãsã easte al treia di aradã dupu Asia shi Africa cu 799,466,000 di bãnãtori, icã mas u-videm…",
+                "…iscusiuri. Azã nãsã s-mindueashce cã easte di Muntile Ural, dupu atsea pi Datlu easte Arãolu Ural shi Laclu Caspic shi depoi…",
+                "…hi Laclu Caspic shi depoia yinã pi budzãle-a Amariljei Lae. Dupu atsea tutã Cavcazia easte tu Azia, alla dupu trendurle poli…",
+                "…Amariljei Lae. Dupu atsea tutã Cavcazia easte tu Azia, alla dupu trendurle polititse multsã di staturle di Cavcazia sãntu tu…"
+            ]
+            },
+        {
+                "word": "numir",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…cã (Indo yine di subcontinentulu indescu) u-are nai ma mare numir di zburãtori di familiile di limbe pricunuscute tu lume di…",
+                "…multsãi Makedonji ditu lumi suntu Crishtinji, ma ari sh unu numir njicu tsi suntu pistimenji a Islamolui. == Makedonji Crisht…",
+                "…multsãi armãnji di adzã anyrãpsescu cu yramiolu latinu. Un numir cama njicu anyrãpseashti cu yramiolu elini. Alfabetu armãne…",
+                "…ara natsionalizatã shi tu ea eara bãgati scamnili a ma mari numir di partiili polititsi di stat, Unia sotsialisticã a tinirlo…",
+                "…unii shi multi alti. Azã aestã casã easti scamnu a ma marli numir di partii polititsi, ashi ca nica nu s-shtii desi aestã cas…",
+                "…Scamnul a organizatsiiljei s-aflã pi strada Majke Jerosine numir 21/5 ãn Beligrad, a organizatsia easti fundatã la anlu 1991…"
+            ]
+            },
+        {
+                "word": "numãr",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "chilometru",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…kilits = burduşel kilo = baniţe, 2-3 kilodhramu = kilogram kilometru = kilometru kilumi, kilunj = covor kilunge = burlan kilunge…",
+                "…rduşel kilo = baniţe, 2-3 kilodhramu = kilogram kilometru = kilometru kilumi, kilunj = covor kilunge = burlan kilunge = picior, f…"
+            ]
+            },
+        {
+                "word": "metru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…sãntu melodia shi harmonia), rithmo (tu cai sântu tempo shi metru) shi cualitãtsile sonore di articulatsia, dinamica shi text…",
+                "…Metura easti unã hãlati (di-aradã lungã di vãrã metru, faptã di-unã coadã tsi s-tsãni cu mãna shi di-un mãnucljiu…",
+                "…1885 O, rămâi - 1884 Epigonii - 1884 Şi dacă - 1883 Odă (în metru antic) - 1883 Mai am un singur dor - 1883 La Steaua - 1886…",
+                "…pãduri tsi sh-u-adutsi cu cãnili. Luplu easti lungu di vãrã metru sh-giumitati, cu guna murnã, zverca largã, caplu mari shi c…",
+                "…lună - timp mesu = menstruaţie metalu = metal meti = chiar metru = măsură metru = metru metsi = deşi metsi = cu toate că met…",
+                "…su = menstruaţie metalu = metal meti = chiar metru = măsură metru = metru metsi = deşi metsi = cu toate că metsi = fie metsi…"
+            ]
+            },
+        {
+                "word": "chilogramu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hectar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…la anlu 1948 , a cu numa Pelisterlu cu teritorii di 17.150 hectar shi pozitsii alui 40°57’ LGN shi 21°14’ LGA. LA parclu nats…",
+                "…apublica Machedonia di Nord shi easti cu lardzimu di 17.150 hectar. Promovat easti anlu 1948 ca prota aparata aveari naturala…",
+                "…mlu di meslu ANDREU anlu 2007 a prilungat shi cu nali 6.500 hectar . Caracteristic ti parkul suntu mamultu chipits cu analtimi…"
+            ]
+            },
+        {
+                "word": "milion",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ezistenţa armată continuă 30 de ani şi se încheie cu 1/2 de milion de refugiaţi şi 100.000 de morţi, la mijloc fiind interesel…",
+                "…edunii shi tu xeani, a spectaculile lji au vidzuta pisti un milion di mutritori. Biblioteca natsionala shi univerziteta \"Gotse…",
+                "…i = leşin milii = leşin militsâ = scutec miliunâ, miliuni = milion miliunistru = milionar miljioru = miel de 2 ani miludhii =…"
+            ]
+            },
+        {
+                "word": "milioani",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…alticã la njiadzãnoapti. Pulunia ari unã populatsie di 38,4 milioani (2016) di bãnãtori, nai ma multsi tu cãsãbadzli ma mari, ca…",
+                "…siri di informatsii anamisa calculatoarile di-tu alumi. Ari milioani di retsele sh-situri domestice, academice, di business sh-a…",
+                "…scã) easti unã limbã Indo-Evropeanã zburatã di aproapea 7.6 milioani di oamini, nai ma multsilji di-tu Arbinishii, Kosovo, Repub…",
+                "…utslji oaminj tu Evropã. Cãndu muri alãsã etinj pradz 80 di milioani di forinti di asimi shi 29 di latifundi cu 241 735 iutri di…"
+            ]
+            },
+        {
+                "word": "miliardzã",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…di azã, a limbile aiste sãntu zburate di anvãrligã di trei miliardzã di zburãtori nativi. Di 20 top limbe moderne, dupu zburãtor…",
+                "…heascã, Limba pungeabescã shi Limba urdu cai au cama di 1,6 miliardzã di zburãtori. Limbile indoiranitse u-formeadzã nai ma mare…"
+            ]
+            },
+        {
+                "word": "bãnãtori",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 38,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…apti. Pulunia ari unã populatsie di 38,4 milioani (2016) di bãnãtori, nai ma multsi tu cãsãbadzli ma mari, ca cum capitala istor…",
+                "…oclui, a easte cama mare sade di Australia. Dupu numirlu di bãnãtori cai bãneadzã tu Europa, nãsã easte al treia di aradã dupu A…",
+                "…te al treia di aradã dupu Asia shi Africa cu 799,466,000 di bãnãtori, icã mas u-videm cama global, tu Europa bãneadzã 1/8 di bãn…",
+                "…e statu ilandã tu Unia europeanã tu Europa. == Geografie == bãnãtori: 242,495 km2 populatsia: 65,648,100 (2016) Cãsãbãlu capital…",
+                "…iunea Plovdiv, Vãryãrie. Tu anlu 1992, cãsãbãlu avea 341058 bãnãtori sh-tu 2001: 340638. Estimarea trã anlu 2005 fu cã Plovdiv a…",
+                "…1: 340638. Estimarea trã anlu 2005 fu cã Plovdiv ari 341473 bãnãtori.…"
+            ]
+            },
+        {
+                "word": "grãtseascã",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Buzuchea easti unã soi di chitarã ma njicã (grãtseascã). Tu Armãnie ari numa di cobzã.…",
+                "…Arhimede di Siracuza (grãtseascã: Αρχιμήδης; 287 n.Hr. –212 d.Hr.) fu unu omu de shtiintsã d…"
+            ]
+            },
+        {
+                "word": "doctor",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…liti. Tu Ianina Coletti lucreadzã ca vindicãtor a lji easti doctor particular shi secretar al Ali Pasha di Ianina. Dit unã sit…",
+                "…rigi tu Anglii, a dupu atsea shi Berlin, iu u amintã titula doctor di shtintsã ti hemia shi fizica. Cariera a lui ca profesor…",
+                "…a Aliansãljei americheascã ti developari a shtintsãljei shi doctor di tinjii la 18 di Univerzitãts. Tu a lui tinjii, di la anl…",
+                "…la anlu 1984 pãnã la anlu 1990 lucra ca profesor, a titula doctor di shtintsã u amintã tu sfera di lingvistica cu teza: lexic…",
+                "…ntului ti terapii intenzivã shi yitripseari. Disertatsia ti doctor di shtintsã sum titlul “Detectsii a problemilor tserebrali…"
+            ]
+            },
+        {
+                "word": "virgulã",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…di vil novul ûğûk Ûğûp (lağinesc: Libellus vere aureus, nec minus salutaris quam festivus, De optimo rei publicae statu deque…",
+                "…a fi, v nghii = iute nghii = repede nghiosu = jos nghiosu = minus nghiosu = puţin nghiosura = jos, în nghisari = visare nghis…"
+            ]
+            },
+        {
+                "word": "nord",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…Machedonia di Nord (limba Machedonescã: Северна Македонија) easte un stat tu E…",
+                "…bili asburãti pi Terra == Izvuri di Nafoarã == Macédoine du Nord (Fr) Hãrtsã di la Republica Machedonia di Nord == Biblioyra…",
+                "…Macédoine du Nord (Fr) Hãrtsã di la Republica Machedonia di Nord == Biblioyrathilj ==…",
+                "…America di Nord easti unu continentu. == Stats == Canada Statili Uniti ali…",
+                "…arbinisheashti: Krushevë) easti un cãsãbã tu Machedonia di Nord. Ira adratã di armãnjlji vinits di Moscopole, tu seculu XVI…",
+                "…ia Sterie Petrașincu Pitu Guli == Vedz shi == Machidunii di Nord…"
+            ]
+            },
+        {
+                "word": "sud",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…uropean modernu. == Gheoyrafilj == Romãnia easti aflatã tru sud-estul Europãllei, di acãtsã majoritatea a partillei di nord…",
+                "…uri cu Ucraina la nord shi est, Moldova la est, Bulgaria la sud, Sarbia la sud-vest, iar Ungaria la apus. Romãnia ari shi u…",
+                "…la nord shi est, Moldova la est, Bulgaria la sud, Sarbia la sud-vest, iar Ungaria la apus. Romãnia ari shi unã litoralã di…",
+                "…omãnia ari shi unã litoralã di mardzina ali Amarea Lae cãtã sud-est, di asiguripseashti intrarea tru comertsul maritim. Top…",
+                "…shi platoasili subcarpits, cari trec tru largul plaiu ditu sud shi apus, nica shi fitillu plaiu Vlachic shi bazinlu a arãu…",
+                "…Transilvania tru tsentru, Moldova tru nord-est, Vlãchia tru sud, Dobruja pi coasta ali Amarea Lae, iara regiunile Banat shi…"
+            ]
+            },
+        {
+                "word": "datã",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…achedonia di Nord shi Vurgaria tu Arațili shi cu Turchia tu Datã. == Stat == Elladhã: loc 131,957 km² populatsia 10,768,477…",
+                "…rãndzi tsi facu unã cãrunã largã deavãrliga a truplui. numa datã a ma multoru arburi fanuminji di pãduri, analtsã, cu lemnul…",
+                "…Tindilina (Hypericum perforatum) easti numa datã la unã di dauãli turlii di erburi (jumeari) analti (nu shti…",
+                "…Tsindilinã galbilã (Melilotus officinalis) numã datã la dauã turlii di erburi (jumeari) tsi crescu prit pãshunj,…",
+                "…Tatã-a nostru easte nai ma cunuscutã plãcãrie crishcinescã datã di tu Hristolu pi cãftare a Apostoljlor ta s-lji ãnvetsã cu…",
+                "…a-a industriiljei ti textil tu Saxonia, shi a doilor ãl-ira datã titulã di nobilitate di Vãsiljelu Frederic Augustus al Trei…"
+            ]
+            },
+        {
+                "word": "anlu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 85,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…2001 (MMI) easte an tu Seculu XXI. Elu fu shi prota anlu tu Seculu XXI. == Muriri == 11 di Apriir: Zahu Panã 29 Yizm…",
+                "…aitsa, Lichtenstein shi easte membrã ali Unia europeanã dit anlu 1995. Cãsãbãlu capital easte Viena.…",
+                "…= 1906 S-aflã Ioryi Merca tu hoarã Livãdz, Gãrtsia shi muri anlu 1992 tu Bucureshci 19 di Brumar muri Nicolae (Cola) Caratan…",
+                "…tsialã tu Rumãnii easti limba romãneascã. Populatsia fu (tu anlu 2011) 21 000 000. Prezidentulu a statlui easti Nicușor Dan.…",
+                "…ei sum Dicebalus, cari s-ncuntra la expansiunea romanã. Tru anlu 106, amirãlu Trajan u cãndãsi Dacia, integrãnda-u tru Imper…",
+                "…lovachia tu Notlu. Republica cecã easte membrã ali NATO dit anlu 1999 shi ali Unia europeanã dit anlu 2004. Idghia ashitse e…"
+            ]
+            },
+        {
+                "word": "pãnã",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 29,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a dzuã icã dzãuã poate hi: chirolu tsi s'tindi ditu apirita pãnã tu ascãpitata a soarilui; sãhãtsli (24) tsi trec di la unã…",
+                "…a a soarilui; sãhãtsli (24) tsi trec di la unã njadzãnoapti pãnã la alantã njadzãnoapti di dupã ea; Tu frândza aestâ ari tex…",
+                "…multu mari fu adratã, cai si tindea di la Gãrtsia modernã, pãnã tu Egiptu, Iranu shi sinurli cu India. Tu anlu 2004, tu Gãr…",
+                "…u Burebishta tru 44 d.C., regatlu s-ampulisi, agiungãndalui pãnã tru sonea a cipitãljei sum Dicebalus, cari s-ncuntra la exp…",
+                "…gratsie, ntrã cari goți, hun-i, slavi, maghiari shi tatari. Pãnã la Evul Mediu, principatele Vlachiei (1310 shi Moldovãlle (…",
+                "…shi fauni, di la pãduri alpine shi pãduri dese ditu Carpats pãnã la ecosisteme di steape shi di locãri udate ditu plaiuri sh…"
+            ]
+            },
+        {
+                "word": "shi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 140,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ia, scriitoru armãneascu. Dictsionarlu ari 1134 di frãndzã, shi tritsearea pri romãneashti, frãntseascã shi englezã (anglic…",
+                "…134 di frãndzã, shi tritsearea pri romãneashti, frãntseascã shi englezã (anglicheascã) trã tuti zboarã li. Fu scosu tu padi…",
+                "…, Rãmãnie (rumãnã: România) easti un stat tu Unia europeanã shi tu Ivropi. Bucureshci easti nai ma mari cãsãbã shi cãsãbãlu…",
+                "…uropeanã shi tu Ivropi. Bucureshci easti nai ma mari cãsãbã shi cãsãbãlu capital. Limba ofitsialã tu Rumãnii easti limba ro…",
+                "…i == Istoria Romãniei cuprinde reghiunea, popoarele a ljei, shi formarea statului modern. Originile a romãn-ilor arãmãn deb…",
+                "…ama triburile veclliime di-tru zonã, inclusiv a Dacien-ilor shi a Ghesheilor, fãtsea parte din grupulu indo-european a trac…"
+            ]
+            }
+        ],
+    }
+    

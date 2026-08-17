@@ -1188,6 +1188,46 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "600Mbits/s`. Not one is a fraction, and the rate's numerator `Mbits` has no Dholuo word "
             + "either, so `unitPer` would have nothing to join",
     },
+    rup: {
+        // \u26a0 SEVEN REFUSALS over the retained text of `tools/corpus/mined/rup.jsonc` (481 segments of a
+        // roa-rup.wikipedia API fetch \u2014 1,000 random intros plus a cell fill over a 1,389-article wiki),
+        // each argued in src/languages/aromanian/normalize.ts.
+        equals: "measured: `=` \u00d717 and every one is a DEFINITIONAL GLOSS, because this wiki carries "
+            + "Aromanian\u2013Romanian DICTIONARY pages and that is where the sign lives: "
+            + "`giuvair = lucru mushat, scumpu`, `Dies Dominus (l.lat.) = Dz\u0169u\u00e3-alu Dumidz\u00e3`, "
+            + "`b\u00e3nedz ca tu gr\u00e3dina alu Dumnidz\u00e3 = ducu un\u00e3 ban\u00e3 multu bun\u00e3`, and long runs of "
+            + "`metru = m\u0103sur\u0103 metru = metru`. Not one is an equation. \u26a0 The same pages are why "
+            + "`minus` and `kilometru` came back attested \u2014 a bilingual glossary line is a definition, not "
+            + "running prose, and the two had to be told apart by reading them",
+        minus: "measured: `-` \u00d71 digit-adjacent and it is a LIST DASH, not a sign: `aesti grupi "
+            + "relighiozi: Ortodoxi - 97,94%, Muslimanj -1,15%, alts\u00e3 - 0,87%`. \u26a0 AND THE WORD IS THE "
+            + "SECOND REASON: `minus` \u00d72 on the wiki is a LATIN BOOK TITLE (`nec minus salutaris quam "
+            + "festivus`) and a Romanian\u2013Aromanian dictionary line (`nghiosu = minus`). Neither is "
+            + "arithmetic, so there is nothing to read the sign with even where it is one",
+        degrees: "measured: `\u00b0` \u00d73 and ALL THREE ARE COORDINATES \u2014 `47\u00b018\u2032N, 22\u00b048\u2032E`, "
+            + "`40\u00b057\u2019 LGN shi 21\u00b014\u2019 LGA`, `41\u00b019\u203248\u2033N, 19\u00b049\u203212\u2033E (41.33\u00b0N, 19.82\u00b0E)`. \u26a0 AND THE "
+            + "DEGREE WORD IS A FULA CASE: `gradi` \u00d72 is `Gradi didactitsi`, the teaching grades in an "
+            + "academic CV, and `gradu` and `Celsius` are both \u00d70. No word, so the sign, the prime and the "
+            + "compass letter all stay unread rather than half-read",
+        exponent: "measured: \u00d73 \u2014 `km\u00b2` \u00d72 and the ASCII `km2` \u00d73, all areas. `patrat` and "
+            + "`p\u00e3trat` are BOTH \u00d70 on this wiki and `cubic` \u00d71 is architectural (`volumenlu cubic tu "
+            + "form\u00e3 di anclis bloc`), so there is no square word to attach. The unit noun IS read; only "
+            + "the power is dropped",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs and is a LEGAL CITATION (`Ledzea nr. 53/2013`, "
+            + "`fimirid\u0103 ofitsial\u0103 ali RM nr.21/98`), which is also why the range rule carries a "
+            + "slash guard. No fraction rule is written",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        plus: "measured: `+` \u00d70 in the retained text \u2014 the sign does not occur",
+        "less-than": "measured: `<` \u00d71 and it is RAW WIKITABLE MARKUP the extraction did not strip: "
+            + "`<th <!\u2014Stil a c\u00e3mpulor ad\u00e3vgati -->><!\u2014C\u00e3mptu ad\u00e3vgat 1 -->`. An HTML tag and a "
+            + "wiki comment, not a comparison",
+        "greater-than": "measured: `>` \u00d71 and it is the CLOSING half of that same wikitable fragment",
+        currency: "measured: a currency sign \u00d71, and the segment carrying it is KEYBOARD-MASH "
+            + "VANDALISM (`GGTGRYFF3RGTEEE3W23EU3IUWIQIUEU3UUE3U2U 22ND 273R7RQ7FF RD FOR RT \u2026`). The "
+            + "`currency` cell mined EMPTY over 1,492 segments, so no key is declared at all: a key "
+            + "declared on that instance is a key declared on nothing",
+    },
     haw: {
         // \u26a0 SEVEN REFUSALS over the retained text of `tools/corpus/mined/haw.jsonc` (423 segments of a
         // 7,735-paragraph haw.wikipedia dump), each argued in src/languages/hawaiian/normalize.ts.
