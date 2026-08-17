@@ -1019,6 +1019,38 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
             + "inverts and omitting a plus does not",
     },
+    crh: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/crh.jsonc` (415 segments of a
+        // 35,437-paragraph crh.wikipedia dump), each argued in src/languages/crimeantatar/normalize.ts.
+        // `minus` is NOT here \u2014 it is claimed, and the PLUS is refused instead, which is the round's
+        // asymmetry: a minus inverts its operand and a plus does not.
+        equals: "measured: `=` \u00d711 and ALL ELEVEN ARE MARKUP \u2014 the cleanest refusal of this sign in the "
+            + "sweep. Eight are EasyTimeline chart directives (`PlotArea = left:50 right:20 top:25 "
+            + "bottom:30`, `ScaleMajor = unit:year increment:5000 start:0`, `ScaleMinor = \u2026`), two are a "
+            + "MediaWiki URL parameter (`preload=Template:Standard content for new page`) and one is a "
+            + "section heading (`== Bağlantılar ==`). \u26a0 The EasyTimeline sense RECURS from Aragonese, "
+            + "which had six of them one round earlier \u2014 chart markup is a property of dump-sourced "
+            + "artifacts, not a quirk of one wiki",
+        plus: "measured: `+` \u00d713, and TWELVE ARE TEMPERATURES in the climate paragraphs (`+3 \u2013 +4\u00b0C`, "
+            + "`+24,6\u00b0C`, `+2,8 \u00b0C`, `+0,4 \u00b0C`, `+21,7 \u00b0C`, `+22 \u2013 +28\u00b0C`\u2026); the thirteenth is a "
+            + "party abbreviation, `VF+` (South Africa\u0027s Freedom Front Plus), declined by the digit "
+            + "lookahead. \u26a0 THE REFUSAL IS ABOUT THE WORD, NOT THE SIGN: `pl\u00fcs` \u00d75 is entirely RUSSIAN "
+            + "FILM TITLES (\u201cPl\u00fcs odin\u201d, \u201cTri pl\u00fcs dva\u201d), `artı` \u00d79 is the postposition "
+            + "\u2018beyond/behind\u2019 (`deñiz artı departamentı`, `Evniñ artı bağça`) and `eksi` is ABSENT. \u26a0 A "
+            + "PLUS DOES NOT INVERT ITS OPERAND, so `+24\u00b0C` reads as twenty-four degrees either way and "
+            + "the silence costs nothing \u2014 which is exactly why the MINUS, whose word the corpus does "
+            + "gloss (\u201cgecede minus 16\u00b0\u0421-ge yaqın ve k\u00fcnd\u00fcz minus 11\u00b0\u0421\u201d), IS claimed",
+        "plus-minus": "measured: `\u00b1` \u00d71 \u2014 `İon deñizindeki Kalipso çuqurlığında 5109 \u00b1 1 m teşkil "
+            + "ete`, a sounding tolerance. One instance, and no word: the plus half is unsourceable (see "
+            + "`plus`) so a \u2018plus or minus\u2019 reading cannot be composed from what this wiki attests",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs and is a DATE ALTERNATIVE (`m.e. 754/753 seneleri`, "
+            + "two candidate foundation years for Rome), a UNIT FRACTION in the time-unit articles "
+            + "(`bir saatnıñ 1/60-ine ve 60 saniyege teñ`) and a RATE (`Ortalama debit 2 m\u00b3/sn`). No "
+            + "fraction rule is written",
+    },
     kaa: {
         // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/kaa.jsonc` (443 segments of a
         // 63,415-paragraph kaa.wikipedia dump), each argued in src/languages/karakalpak/normalize.ts.

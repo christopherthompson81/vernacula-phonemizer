@@ -1,0 +1,540 @@
+// WIKIPEDIA WORD ATTESTATION — crh. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "crh",
+        "wiki": "crh.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "protsent",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "faiz",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…ealisi 5 millionğa keçken olsa kerek. Amma şu cümleden qaç faiz bugüngece öz Qırımtatar kimligini saqladı kene de belli deg…",
+                "…esi içün qullanıla: bĭrĭnşĭ, tĭlĭmĭz, i arfi uzun [i] içün: faiz, ciddiy (Qırımda em uzun [i], em qısqa [ɪ] i arfinen işaret…",
+                "…n [i], em qısqa [ɪ] i arfinen işaretlene: birinci, tilimiz, faiz, ciddiy). w arfi [w] sesi içün qullanıla: aluw, qawğa, v ar…",
+                "…esi içün qullanıla: bĭrĭncĭ, tĭlĭmĭz, i arfi uzun [i] içün: faiz, ciddiy (Qırımda em uzun [i], em qısqa [ɪ] i arfinen işaret…",
+                "…n [i], em qısqa [ɪ] i arfinen işaretlene: birinci, tilimiz, faiz, ciddiy). w arfi [w] sesi içün qullanıla: aluw, kawga, v ar…",
+                "…esi içün qullanıla: bĭrĭnşĭ, tĭlĭmĭz, i arfi uzun [i] içün: faiz, ciddiy (Qırımda em uzun [i], em qısqa [ɪ] i arfinen işaret…"
+            ]
+            },
+        {
+                "word": "paycha",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "foiz",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "procent",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "yüzde",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ldürüldüğü iddia ediliyor. Bu oran'da yaşayanların yaklaşık yüzde 15'i kadardı. Dizgin kelimesi Cilo kelimesinden gelir. Cilo…",
+                "…taqımı qullanır. Meselâ, ştrihkod oquğan bir sistema ayrıca yüzde tırnaq yarası ya da bozma olıp olmağanınnı teşkere ve işlen…"
+            ]
+            },
+        {
+                "word": "derece",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…alşı\" aşıq kemiginiñ qırıntılı olğan yan betidir. Eñ yüksek derece ondadır. \"Talşı\"nıñ qarşısı \"Tav\"dır. Ekinci yüksek derece…",
+                "…derece ondadır. \"Talşı\"nıñ qarşısı \"Tav\"dır. Ekinci yüksek derece ondadır. Aşıq kemigi bet üstü turğanda \"Bük\" olur, sırt üst…",
+                "…urğanda \"Bük\" olur, sırt üstü turğanda \"Şıq\" olur. Eñ tüşük derece \"şıq\"tır. Aşıq kemigi yerge bızıq tüşerse \"Dişir\" olur, oyu…",
+                "…giniñ yararlıq alâmeti; 2001 senesi - \"Hızmetleri içün\" III derece nişan; 2002 senesi - \"Cemiyet itirafı fondu\" Halqara hayriy…",
+                "…tirafı Yararlıq alâmeti; 2004 senesi - \"Hızmetleri içün\" II derece nişan; 2006 senesi - \"Hızmetleri içün\" I derece nişan; Mima…",
+                "…ri içün\" II derece nişan; 2006 senesi - \"Hızmetleri içün\" I derece nişan; Mimarlıq saasında Ukraina Devlet mukâfatı; 2007 sene…"
+            ]
+            },
+        {
+                "word": "gradus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Selsiy",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Nulevoy kilometr (rusça Нулевой километр) — 2007 s. çıqqan Rusiyenıñ filmi,…",
+                "…lana Hodçenkova == Atıflar == == Tış Bağlantılar == Nulevoy kilometr(ing.) in Internet Movie Database…",
+                "…101-y kilometr (rusça 101-й километр) — 2001 s. çıqqan Rusiyenıñ filmi, re…",
+                "…Yevgeniy Kosırev == Atıflar == == Tış Bağlantılar == 101-y kilometr(ing.) in Internet Movie Database…",
+                "…anından sebep, onıñ ziyareti sıñırlanğan. Demir Qapıdan eki kilometr uzaqlığında Qırım dağlarınıñ dörtünci eñ yüksek töpesi olğa…",
+                "…Afrikada bir özen, dünyanıñ eñ uzun özenidir. Uzunlığı 6650 kilometr. Nil milletlerara özen, suv resursları on bir memleket aras…"
+            ]
+            },
+        {
+                "word": "metr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…оединок) — 1910 s. çıqqan Rusiyenıñ filmi, rejissör – Andre Metr. == Roller == A. Lesnogorskiy — Romaşov Z. Mamonova — Nikol…",
+                "…engen göl ve sifonlar. Qobada suvlu ve quru galereyalar, 80 metr uzunlığında, 60 metr keñliginde ve 40 metr yüksekliginde za…",
+                "…. Qobada suvlu ve quru galereyalar, 80 metr uzunlığında, 60 metr keñliginde ve 40 metr yüksekliginde zallar bar. Bir çoq çeş…",
+                "…galereyalar, 80 metr uzunlığında, 60 metr keñliginde ve 40 metr yüksekliginde zallar bar. Bir çoq çeşit renkli taşlamalar b…",
+                "…аренина) — 1911 s. çıqqan Rusiyenıñ filmi, rejissör – Moris Metr. == Roller == Mariya Sorohtina — Anna Karenina Nikolay Vasi…",
+                "…eykeltraş Elguca Amaşukeliniñ yapqan alümin eykeli, yigirmi metr yüksekliginde, gürci milliy urbası içinde bir qadın figuras…"
+            ]
+            },
+        {
+                "word": "santimetr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…an. 6000-den ziyade türü tapıla, çoqularnıñ boyları bir qaç santimetr arasında, faqat komodo ejderi adlı türleri 3 metrge qadar u…",
+                "…mpiadası altın medalistı (Yapon Memleketi içün). Boyu - 181 santimetr, massası - 72 kg. 1984 senede professional oldı. 2001-2005,…",
+                "…rgda sankt-peterburgdaki sankt-peterburgdan sanlarini sanli santimetr santimetri santiraç santraç santıraç sançıldı sançildilar s…"
+            ]
+            },
+        {
+                "word": "millimetr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…turmaq qabiliyetidir. Ağaçnıñ qattılığını 0,444 düym (11,28 millimetr) diametrli maden topnı numüneniñ yüzüne 5,64 mm terenlikke…"
+            ]
+            },
+        {
+                "word": "kilogramm",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…dam körip olğan, cihaz kontrastsız bir tasvir bergen ve 500 kilogramm çekken. Ogüst, yañı yani olarnıñ öz cihazınen birinci olıp…"
+            ]
+            },
+        {
+                "word": "million",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…cratique du Congo) - merkeziy Afrikada bir memlekettir. 2,3 million km² meydanlığı ile Afrikanıñ ekinci büyük memleketidir (tek…",
+                "…ğa ketiren diger cumhuriyetlerni de ihtiva ete. Qararnen 13 million km²'lik bir meydanlıqqa saiptir. Sibir bölgesinde 30 millio…",
+                "…illion km²'lik bir meydanlıqqa saiptir. Sibir bölgesinde 30 million civarında kişi yaşay. Sırtta Arktik okean, küntuvarda Tınç…",
+                "…yaşağan halqnıñ isimi. Umumiy halqınıñ sayısı yaqınca 20-25 million, tilleri İran tilleriniñ bir şivesidir. Türkiyede 12 millio…",
+                "…illion, tilleri İran tilleriniñ bir şivesidir. Türkiyede 12 million kürt yaşay, ondan soñ Iraq, Suriye ve İran kibi yerlerde de…",
+                "…sebebinen okeanğa \"Tınç\" adını bergendir. Meydanlığı 179,7 million km². Eñ teren yeri 11 034 m ile Mariana çuqurı olıp bu aynı…"
+            ]
+            },
+        {
+                "word": "milliard",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 19,
+                "articles": 8,
+                "substringOnly": 1,
+                "examples": [
+                "…reditleri == 1994: Meksika; Meksikada iqtisadiy buhran — 18 milliard dollar. 1997: Asiya; Asiya maliye buhranı — 36 milliard dol…",
+                "…18 milliard dollar. 1997: Asiya; Asiya maliye buhranı — 36 milliard dollar. 1998: Rusiye Federatsiyası; 1998 senesi Rusiye defo…",
+                "…98: Rusiye Federatsiyası; 1998 senesi Rusiye defoltı — 22,6 milliard dollar. 1998: Brazil — 41,5 milliard dollar. 2000: Türkiye…",
+                "…Rusiye defoltı — 22,6 milliard dollar. 1998: Brazil — 41,5 milliard dollar. 2000: Türkiye — 11 milliard dollar. 2001: Argentina…",
+                "…ar. 1998: Brazil — 41,5 milliard dollar. 2000: Türkiye — 11 milliard dollar. 2001: Argentina; Argentina iqtisadiy buhranı — 21,6…",
+                "…dollar. 2001: Argentina; Argentina iqtisadiy buhranı — 21,6 milliard dollar. 2010: Yunanistan; Yunanistan borc buhranı — 139,73…"
+            ]
+            },
+        {
+                "word": "saniye",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…Saniye - 1 daqqanıñ 1/60-ine teñ olğan zaman birlemidir (60 Saniye…",
+                "…Saniye - 1 daqqanıñ 1/60-ine teñ olğan zaman birlemidir (60 Saniye = 1 Daqqa).…",
+                "…tnıñ 1/60-ine ve 60 saniyege teñ olğan zaman birlemidir (60 Saniye = 1 Daqqa, 60 Daqqa = 1 Saat). Aynı zamanda 1 dereceniñ 1/6…",
+                "…rm. azırlıq E. А. Stahov. — K.: «Kartografiya», 2010. — 112 saniye. == Bağlantılar == Mermer qobası (foto) (ukraince) (Ukr.) U…",
+                "…emova, “Ömürlik yanımdasıñ”, “Baş yazısı”, “Nişan yüzügi”, “Saniye”, “Başımnıñ ucundasın”, “Anam”, “Yürek ateşi”, “Aydın geced…",
+                "…ndığıma sani saninda sanini saniniñ saninspektor sanitariya saniye saniyede saniyeden saniyege saniyelergece saniyenen saniyen…"
+            ]
+            },
+        {
+                "word": "saat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Saat - künniñ 1/24-ne teñ olğan zaman birlemidir. Saat 60 daqqad…",
+                "…Saat - künniñ 1/24-ne teñ olğan zaman birlemidir. Saat 60 daqqadan ibaret, 24 saat bir künni teşkil ete.…",
+                "…-ne teñ olğan zaman birlemidir. Saat 60 daqqadan ibaret, 24 saat bir künni teşkil ete.…",
+                "…Saat quşaqları — aynı yerli vaqıtnı qabul etken dünyanıñ regionl…",
+                "…ta küneş vaqtı, 1972-den berli qullanıla. Bugün qullanılğan Saat quşaqları, UTC vaqtına bağlıdır.…",
+                "…raq esasen UTC-ge bağlı (UTC+3:00, UTC-5:00 kibi) uyğun bir saat quşağınıñ vaqtı qullanıla. Evelleri yerli vaqıt olaraq küne…"
+            ]
+            },
+        {
+                "word": "daqqa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 1,
+                "examples": [
+                "…Daqqa - bir saatnıñ 1/60-ine ve 60 saniyege teñ olğan zaman birle…",
+                "…ne ve 60 saniyege teñ olğan zaman birlemidir (60 Saniye = 1 Daqqa, 60 Daqqa = 1 Saat). Aynı zamanda 1 dereceniñ 1/60-ini de i…",
+                "…aniyege teñ olğan zaman birlemidir (60 Saniye = 1 Daqqa, 60 Daqqa = 1 Saat). Aynı zamanda 1 dereceniñ 1/60-ini de ifade ete.…",
+                "…daqqanıñ 1/60-ine teñ olğan zaman birlemidir (60 Saniye = 1 Daqqa).…",
+                "…apılğan, köterilip olğan yük 3000 tonna, köteriliş vaqtı 30 daqqa) == Tüpyazılar ==…",
+                "…ni daqiqasi daqiqasında daqiqaçiq daqiqaçiq daqiqağa daqiqa daqqa daqqada daqqalar daqqalarimni daqqañizni daqqañız dar-dünya…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…vuq arktik tsiklon ya da Sibir antitsiklonı kelgende araret minus derecege alçaqlaşuvınıñ ihtimalı bar. 2006 senesiniñ yanvar…",
+                "…ün tarihınıñ vaqtı içün eñ alçaq araret belgilendi — gecede minus 16°С-ge yaqın ve kündüz minus 11°С. Qar örtüsi yılda tek bi…",
+                "…aq araret belgilendi — gecede minus 16°С-ge yaqın ve kündüz minus 11°С. Qar örtüsi yılda tek bir qaç kün tutula. Adetince Yal…"
+            ]
+            },
+        {
+                "word": "plüs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…Plüs odin (rusça Плюс один) — 2008 s. çıqqan Rusiyenıñ filmi, re…",
+                "…abrailova Cetro Skinner == Atıflar == == Tış Bağlantılar == Plüs odin(ing.) in Internet Movie Database…",
+                "…Tri plüs dva (rusça Три плюс два) — 1963 s. çıqqan ŞSCBnıñ filmi, re…",
+                "…ustinskaya — Nataşa == Atıflar == == Tış Bağlantılar == Tri plüs dva(ing.) in Internet Movie Database…",
+                "…dı. == Filmografiya == 1961 — Priklüçeniya Kroşa 1963 — Tri plüs dva == Atıflar ==…"
+            ]
+            },
+        {
+                "word": "artı",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…adethanesi - Frenkistannıñ İnd Okeanınıñ cenüp-ğarbiy deñiz artı departamentı Reyunyon adasında İnduizm dini ibadethanesidir…",
+                "…ep yaza öz hatralarında sağ qalgan bir frenk askeri — Köpür artı maallede bütün köy boyunca bir qartta bir köpeçik qalğan ek…",
+                "…e baqıñız, Köterilsin başıñız, Ezan navrezim mubarek. Evniñ artı bağça, Aqtar-tontar boğça, Balalarğa beş (yımırta) aqça, Ez…",
+                "…iy Qıbrız (de-fakto devlet) ve Büyük Britaniyanıñ eki deñiz artı territoriyası (Akrotiri ve Dekeliya ve Cebelitarıq) da Aq d…",
+                "…ışçı munasebetlerde bulunma devridir. Bunıñnen aynı zamanda artı kesilmegen icret esnası, topraq ğayıpları, gizlice ya da aç…",
+                "…erip, Tanavından qan kelip, Tırpayıp tursa, körersiz! Qazan artı boz qamış, Boz qamış ta nar qamış, Büginden başlap siz onı…"
+            ]
+            },
+        {
+                "word": "eksi",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "milât",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…Milât bayramı arfesi gece (rusça Ночь перед Рождеством) — 1913 s.…",
+                "…vimov Pavel Knorr — Çub == Atıflar == == Tış Bağlantılar == Milât bayramı arfesi gece(ing.) in Internet Movie Database…",
+                "…Milât bayramı arfesi gece (rusça Ночь перед Рождеством) — 1951 s.…",
+                "…Gribkov Aleksey Jiltsov == Atıflar == == Tış Bağlantılar == Milât bayramı arfesi gece(ing.) in Internet Movie Database…",
+                "…Ay — bir zaman birlemi. Milât ve icret taqvimlerinde on eki ay bar. == Milât taqviminiñ a…",
+                "…man birlemi. Milât ve icret taqvimlerinde on eki ay bar. == Milât taqviminiñ ayları == == İcret taqviminiñ ayları == Muharrem…"
+            ]
+            },
+        {
+                "word": "evel",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Tarihtan evel zamanları, daa Tarihtan evel vaqıtları, Tarih evelsi - insa…",
+                "…Tarihtan evel zamanları, daa Tarihtan evel vaqıtları, Tarih evelsi - insaniyet tarihınıñ başlanğıç dev…",
+                "…ihınıñ başlanğıç devri, ilklemci cemiyetniñ tarihı, yazıdan evel tarihı. == Qısqa tasvir etüvi == Tarih evelsi, sıq, göminin…",
+                "…asvir etüvi == Tarih evelsi, sıq, gömininlernen 3.3 mln yıl evel ilk taş aletlerini qullanuv ve yazuv sistemalarnı işlep çıq…",
+                "…ıñ işleriniñ sayesinde peyda olıp inkişaf etilgen. Tarihtan evel zamanlarnıñ menbaları atiqiyat, paleocoğrafiya, geoatiqiyat…",
+                "…şeriyat, arheoayvaniyat, qavmiyat ve lisaniyat ola. Yazıdan evel tarihı, paleolit, mezolit, neolit, halkolit, tunç devirden…"
+            ]
+            },
+        {
+                "word": "soñ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Soñ Hayun (korece 송하윤, 1986 s. dekabr 2 doğ.) — Cenübiy Koreyal…",
+                "…r == == Doğumlar == Aya Utida Zlata Ogneviç Lenara Osmanova Soñ Hayun == Ölümler == Yusuf Bolat…",
+                "…Soñ Ce-gi (Koreyaca: 성재기;成在基; 1966 s. Sentâbr 11, Daegu, Cenübi…",
+                "…r ve ruhaniyler qullana ediler. Roma İmperiyasınıñ yıqılğan soñ, halqnıñ Latin tili Frenk, İspan, İtalyan, Portugal, Romen…",
+                "…ygisiz Atabayev, sovet siyasetçi Cüneyit Han, Türkmenlerniñ soñ qaramanı, Hive Hanı == İhtar ==…",
+                "…aa tapılmağan. Ayderniñ qardaşı I Meñli Geray tahtqa çıqqan soñ Ayder Sudaq qalesine apiske tüşti. Osmanlılar 1475 senesi c…"
+            ]
+            },
+        {
+                "word": "şimaliy",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 33,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…‌ Şimaliy Makedoniya, resmiy adı Şimaliy Makedoniya Cumhuriyeti (make…",
+                "…‌ Şimaliy Makedoniya, resmiy adı Şimaliy Makedoniya Cumhuriyeti (makedonca Северна Македонија, Репуб…",
+                "…Şimaliy Amerika – şimaliy yarım kürrede bulunğan bir qıtadır. Şimal…",
+                "…Şimaliy Amerika – şimaliy yarım kürrede bulunğan bir qıtadır. Şimalinde Arktik okean,…",
+                "…‌ Şimaliy Qıbrız Türk Cumhuriyeti, ŞQTC (türkçe Kuzey Kıbrıs Türk Cum…",
+                "…s Türk Cumhuriyeti, KKTC) - ğarbiy Asiyada, Qıbrız adasınıñ şimaliy parçasındaki bir memleket. Tek Türkiye tarafından tanılğan.…"
+            ]
+            },
+        {
+                "word": "ğarbiy",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 23,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Ğarbiy Sahra - Afrikada bir memleket.…",
+                "…Ğarbiy Pomeraniya voyevodalığı (lehçe Województwo zachodniopomorsk…",
+                "…a voyevodalığı (lehçe Województwo zachodniopomorskie) şimal-ğarbiy Lehistanda bir voyevodalıq (vilâyet). Ğarbiy Pomeraniyaniñ…",
+                "…morskie) şimal-ğarbiy Lehistanda bir voyevodalıq (vilâyet). Ğarbiy Pomeraniyaniñ merkezi Şçeçin şeeri.…",
+                "…Ğarbiy Virginiya (inglizce West Virginia) — şimal-ğarbiy Amerika Q…",
+                "…Ğarbiy Virginiya (inglizce West Virginia) — şimal-ğarbiy Amerika Qoşma Ştatlarında bir ştat. Paytahtı — Çarlston.…"
+            ]
+            },
+        {
+                "word": "şarqiy",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…‌ Şarqiy Timor, resmiy adı Şarqiy Timor Demokratik Cumhuriyeti (tetu…",
+                "…‌ Şarqiy Timor, resmiy adı Şarqiy Timor Demokratik Cumhuriyeti (tetunca Republika Demokratika…",
+                "…e, portugalca República Democrática de Timor-Leste) - cenüp-şarqiy Asiyada Timor adasınıñ şarqiy parçasındaki bir memleket. ==…",
+                "…ática de Timor-Leste) - cenüp-şarqiy Asiyada Timor adasınıñ şarqiy parçasındaki bir memleket. == Atıflar ==…",
+                "…Şarqiy Türkistan (uyğurca شەرقىي تۈركىستان‎) – Uyğurlarnıñ ana Vat…",
+                "…ەرقىي تۈركىستان‎) – Uyğurlarnıñ ana Vatanı ve Orta Asiyanıñ Şarqiy tarafında, Çinniñ Şincañ Uyğur Muhtar Rayonında yer ala. ==…"
+            ]
+            },
+        {
+                "word": "enlik",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "boyluq",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dollar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 17,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…merika Birleşken Devletleri dolları (inglizce United States dollar) - Amerika Birleşken Devletleriniñ para birlemi. == Kâğıt p…",
+                "…== 1994: Meksika; Meksikada iqtisadiy buhran — 18 milliard dollar. 1997: Asiya; Asiya maliye buhranı — 36 milliard dollar. 19…",
+                "…ard dollar. 1997: Asiya; Asiya maliye buhranı — 36 milliard dollar. 1998: Rusiye Federatsiyası; 1998 senesi Rusiye defoltı — 2…",
+                "…e Federatsiyası; 1998 senesi Rusiye defoltı — 22,6 milliard dollar. 1998: Brazil — 41,5 milliard dollar. 2000: Türkiye — 11 mi…",
+                "…efoltı — 22,6 milliard dollar. 1998: Brazil — 41,5 milliard dollar. 2000: Türkiye — 11 milliard dollar. 2001: Argentina; Argen…",
+                "…Brazil — 41,5 milliard dollar. 2000: Türkiye — 11 milliard dollar. 2001: Argentina; Argentina iqtisadiy buhranı — 21,6 millia…"
+            ]
+            },
+        {
+                "word": "evro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kvadrat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…Çörnıy kvadrat (rusça Чёрный квадрат) — 1992 s. çıqqan Rusiyenıñ filmi, re…",
+                "…atyana Kravçenko == Atıflar == == Tış Bağlantılar == Çörnıy kvadrat(ing.) in Internet Movie Database…",
+                "…- İndoneziyada Malang şeeriniñ ğarbında Tidar degen yerde 5 kvadrat km qaplağan VIII asır İnduizm ibadethanesidir (Çandi).…",
+                "…malde ise - Norveg deñizi ile. Deñizniñ meydanlığı, 565 biñ kvadrat metri (Skagerrak aqımınen beraber); terenligi - 809 m qadar…",
+                "…igi 74 metrge yete. Onıñ temelinde 95 merden ziyade taraflı kvadrat platforması tura. Dürbeniñ köşelerinde dört minaresi bar. D…",
+                "…adar yete (Aqmescit ve Yalta arasında). Meydanlığı – 10 biñ kvadrat km-ge yaqın (Ukraina mendanlığından 1 faizden az). Çoqusı o…"
+            ]
+            },
+        {
+                "word": "kub",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Mimarlıq == Binanıñ esas qısmı taş ve toladan qurulğan bir kub. Töpesinde on eki haneli bir qubbe bar. Cami yanındaki mina…",
+                "…tlarniñ krovatniñ krovatta krovattan kroççi kroççi krımskiy kub kubandaki kubatura kubnı kubnıñ kubometr kubğa kugultin kug…"
+            ]
+            },
+        {
+                "word": "ve",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 64,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "….ve - Venesuelanıñ üst seviye internet domeni.…",
+                "…‌ Bosna ve Hersek (bosnakça, sırbca, hırvatça: Bosna i Hercegovina) –…",
+                "…‌ Antigua ve Barbuda (inglizce Antigua and Barbuda) - Şimaliy Amerikada…",
+                "…‌ Sent Kitts ve Nevis - Şimaliy Amerikada bir devlet.…",
+                "…‌ San Tome ve Prinsipi – Afrikada bir memleket.…",
+                "…Okeaniya – Tınç Okeandaki bir çoq ada ülkelerinden ve Avstraliyadan ibaret bir qıtadır. Asiyanıñ cenüp ve cenüp-ş…"
+            ]
+            },
+        {
+                "word": "biñ",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ainanıñ Lugansk vilâyetinde bir şeer. Ealisiniñ sayısı 61,5 biñ kişi.…",
+                "…Ukrainanıñ Donetsk vilâyetinde bir şeer. Ealisiniñ sayısı 1 biñ kişi (2023 senesi).…",
+                "…Ukrainanıñ İlbav vilâyetinde bir şeer. Ealisiniñ sayısı 20 biñ kişi.…",
+                "…ainanıñ Donetsk vilâyetinde bir şeer. Ealisiniñ sayısı 1550 biñ kişi (2026 senesi).…",
+                "…rainanıñ İlbav vilâyetinde bir qasaba. Ealisiniñ sayısı 3,5 biñ kişi (1996 senesi).…",
+                "…inanıñ Harkiv vilâyetinde bir qasaba. Ealisiniñ sayısı 22,3 biñ kişi (2012 senesi).…"
+            ]
+            },
+        {
+                "word": "nokta",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ülüş",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    

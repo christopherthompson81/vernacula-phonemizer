@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeCrimeanTatar } from "./normalize.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 
@@ -83,7 +84,10 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class CrimeanTatarPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input.normalize("NFC"), TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its percent-suffix, separator, era, coordinate, range, sign and degree
+        // steps need the figure and its mark still adjacent, which the shared tier would break; the tier
+        // itself runs inside that pass, between the percent step and the de-grouping (see normalize.ts).
+        return assembleClauses(normalizeCrimeanTatar(input.normalize("NFC")), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) sink.pause(m[3] === "." || m[3] === "!" || m[3] === "?" ? m[3] : ",");

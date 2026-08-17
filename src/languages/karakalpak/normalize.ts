@@ -129,8 +129,8 @@ export function normalizeKarakalpak(input: string): string {
     //    DOT IS OPTIONAL in this corpus ("9,5 mln adam", "$205,539 mlrd (2018)" beside "21 mln. jılı",
     //    "23,3 mlrd. kvt/saat"), and `139,2 mln.ga` puts the unit straight after the dot. Expanded before
     //    the tier, that becomes "139,2 million ga" and the tier's magnitude arm can then reach `ga`.
-    s = s.replace(new RegExp(`${NOT_BEFORE}mln\\s?\\.`, "gu"), "million ");
-    s = s.replace(new RegExp(`${NOT_BEFORE}mlrd\\s?\\.`, "gu"), "milliard ");
+    s = s.replace(new RegExp(`${NOT_BEFORE}mln\\s?\\.\\s?`, "gu"), "million ");
+    s = s.replace(new RegExp(`${NOT_BEFORE}mlrd\\s?\\.\\s?`, "gu"), "milliard ");
     s = s.replace(new RegExp(`${NOT_BEFORE}mln${NOT_AFTER}`, "gu"), "million");
     s = s.replace(new RegExp(`${NOT_BEFORE}mlrd${NOT_AFTER}`, "gu"), "milliard");
     s = s.replace(new RegExp(`${NOT_BEFORE}m\\s?\\.\\s?kv\\s?\\.`, "gu"), "kvadrat metr");
