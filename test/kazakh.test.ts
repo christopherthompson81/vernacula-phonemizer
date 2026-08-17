@@ -195,6 +195,10 @@ describe("the Cyrillic signs denote no sound of their own", () => {
 
     it("⟨ъ⟩ separates instead, giving a /j/ onset to what follows", async () => {
         expect(await phonemize("объектив", "kk")).toBe("objˈektəjv");
+        expect(await phonemize("съезд", "kk")).toBe("sjˈezd");
+        // ⚠ …but ONLY when there is something to separate FROM. With nothing following, a letter that
+        // denotes no sound must contribute none: `абъ` was picking up a stray glide.
+        expect(await phonemize("абъ", "kk")).toBe("ˈɑb");
     });
 
     // ⚠ A palatalised l is LIGHT by definition, so ⟨ль⟩ must also escape the dark ɫ that ⟨л⟩ emits for

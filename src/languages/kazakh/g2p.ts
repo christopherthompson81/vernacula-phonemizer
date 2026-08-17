@@ -72,7 +72,11 @@ export function toSegments(word: string): Seg[] {
             continue;
         }
         if (c === "ъ") {
-            segs.push({ ph: "j", nucleus: false });
+            // ⚠ Only when there is something to SEPARATE FROM. The hard sign's whole job is to stop the
+            // preceding consonant from swallowing a following iotated vowel (объектив → objektˈiv), so
+            // with nothing after it there is no /j/ to emit — a bare `абъ` was otherwise picking up a
+            // stray glide out of a letter that denotes no sound.
+            if (next in VOWEL_IPA || next in GLIDE_IPA) segs.push({ ph: "j", nucleus: false });
             continue;
         }
 
