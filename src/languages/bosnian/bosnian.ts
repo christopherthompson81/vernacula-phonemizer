@@ -12,6 +12,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { phonemizeWord } from "../serbian/serbian.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeBosnian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -35,7 +36,11 @@ const nat = makeNativiser(NATIVE_CLASS, "iu");
 
 class BosnianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its de-grouping, ordinal, clock, degree and range steps all need the figure
+        // and its mark still ADJACENT, which the tokenizer's clause split would break (the grouping dot and
+        // the ordinal period are both `.`, i.e. clause punctuation, until this pass removes them). The
+        // shared symbol tier runs inside that pass, in the ordered position its neighbours require.
+        return assembleClauses(normalizeBosnian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]))); // shared Serbo-Croatian g2p
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd)); // Bosnian numbers
