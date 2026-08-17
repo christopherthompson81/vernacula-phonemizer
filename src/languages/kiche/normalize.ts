@@ -14,12 +14,13 @@
  *
  * ⚠ THE SPANISH TO MEASURE AGAINST IS `es-419`, NOT `es` — Latin-American Spanish is the contact language
  * for the indigenous languages of the region, and it is a treated row in this repo. ⚠ BUT IT CANNOT BE
- * PORTED, AND THE REASON IS MEASURED: `es-419` currently inherits SPAIN's separator convention whole. Its
- * `americas` flag changes one thing (`el primero de enero`) and does not touch the number token, so
- * `es-419` reads `1,234` as *uno coma dos tres cuatro* and `1.5` as *quince* — fifteen. Guatemala, like
- * Mexico and most of Central America, groups with the COMMA and decimates with the DOT; Argentina, Chile
- * and Uruguay do not, which is why one `es-419` locale cannot be right for both and why the reference has
- * to be re-measured rather than copied.
+ * PORTED, AND THE REASON IS MEASURED: `es-419` DOES NOT USE THE CONVENTION CLDR
+ * ASCRIBES TO IT. CLDR formats it `1,234,567.89`, but its own 1,948-utterance FLEURS corpus writes
+ * dot-grouping ×5 (`17.000 islas`), comma-decimals ×10, dot-decimals ×15 and comma-grouping ZERO — both
+ * marks decimate, only the dot groups, and the three-digit test is what separates them (fixed there, see
+ * `src/languages/spanish/normalize.ts` step 0b, which was reading `2.3 millones` as *veintitrés millones*).
+ * Guatemala's own practice is a third question again: Mexico and Central America group with the COMMA
+ * while Argentina and Chile do not, so neither CLDR nor `es-419`'s corpus answers it for K'iche'.
  *
  * That is the single most valuable thing a K'iche' corpus would settle, and it is exactly why the shared
  * pass leaves an ambiguous single group (`1.234`, `1,234`) ALONE rather than joining it: guessing the

@@ -109,3 +109,32 @@ describe("Spanish Roman-numeral policy — centuries cardinal, prenominal events
         expect(phonemize("vigésimo quinto festival", "es")).toBe("bixˈesimo kˈinto festiβˈal");
     });
 });
+
+// ── THE DOT DECIMATES TOO (src/languages/spanish/normalize.ts step 0b) ──────────────────────────────
+// Spanish groups thousands with a period, and the number token reads that — but both corpora also write
+// dot-DECIMALS, and the token was spanning them as groups. `2.3 millones` read as *veintitrés millones*:
+// twenty-three million for two point three, silently, in a sentence that sits in the `es` mined artifact
+// and the `es_419` FLEURS split alike. The three-digit test tells them apart; the comma is left alone.
+describe("Spanish: the dot groups AND decimates", () => {
+    test("one or two digits after the dot is a DECIMAL", () => {
+        expect(phonemize("2.3 millones", "es").trim()).toContain("d\u02c8os k\u02c8oma t\u027e\u02c8es");
+        expect(phonemize("6.34 pulgadas", "es").trim()).toContain("k\u02c8oma");
+    });
+    test("exactly three digits after the dot is still GROUPING", () => {
+        expect(phonemize("17.000 islas", "es").trim()).toContain("m\u02c8il");
+        expect(phonemize("1.234.567", "es").trim()).toContain("mi\u028e\u02c8on");
+    });
+    test("\u26a0 the COMMA is untouched — a three-place decimal must not become an integer", () => {
+        expect(phonemize("3,141", "es").trim()).toContain("k\u02c8oma");
+    });
+    test("\u26a0 a following letter or a preceding colon blocks it", () => {
+        // `802.11n` is a standard number, `2.4Ghz` a clock speed, `4:41.30` a sports time
+        expect(phonemize("802.11n", "es").trim()).not.toContain("k\u02c8oma");
+        expect(phonemize("2.4Ghz", "es").trim()).not.toContain("k\u02c8oma");
+        expect(phonemize("4:41.30", "es").trim()).not.toContain("k\u02c8oma");
+    });
+    test("es-419 gets the same treatment — CLDR formats it US-style, the corpus writes both", () => {
+        expect(phonemize("2.3 millones", "es-419").trim()).toContain("d\u02c8os k\u02c8oma t\u027e\u02c8es");
+        expect(phonemize("17.000 islas", "es-419").trim()).toContain("m\u02c8il");
+    });
+});

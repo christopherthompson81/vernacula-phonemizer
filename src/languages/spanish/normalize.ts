@@ -144,6 +144,22 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     s = s.replace(new RegExp(`(\\d)[${GROUP_SPACE}](\\d{3})(?!\\d)`, "gu"), "$1$2");
     s = s.replace(/[   ]/gu, " ");
 
+    // 0b) ⚠ THE DOT ALSO DECIMATES, AND THE THREE-DIGIT TEST TELLS THE TWO APART. Spanish groups thousands
+    //     with a period and the number token reads that (`17.000` → diecisiete mil), but BOTH corpora carry
+    //     dot-DECIMALS too and the token spans them as if they were groups: `2.3 millones de galones` read
+    //     as *veintitrés millones* — twenty-three million for two point three, a silent 10× error, and the
+    //     same sentence sits in the `es` mined artifact and the `es_419` FLEURS split alike.
+    //     Measured over es_419's 1,948 utterances: dot+3 digits ×5 (all grouping, `17.000 islas`), dot+1–2
+    //     ×15 (all decimal, `2.3 millones`), comma+1–2 ×10 (decimal), comma+3 digits ×0.
+    //     ⚠ SO THE COMMA IS LEFT ALONE. The same test applied to it would turn a three-place decimal
+    //     (`3,141`) into 3141, and neither corpus writes a comma-grouped figure at all — trap 9's shape: an
+    //     alternative with no instances behind it is a misfire generator, not a completeness win. ⚠ CLDR
+    //     formats `es-419` as `1,234,567.89`, but CLDR describes OUTPUT and this describes what is written;
+    //     where they disagree the corpus decides, which is why this is a three-digit test and not a swap.
+    //     ⚠ AND A FOLLOWING LETTER BLOCKS IT — `802.11n`, `2.4Ghz`, `5.0Ghz` are a standard number and two
+    //     clock speeds; a preceding colon blocks the sports times (`4:41.30`, `2:11.60`).
+    s = s.replace(/(?<![\d.,:])(?<!:\d\d)(\d+)\.(\d{1,2})(?![\d.,\p{L}])/gu, "$1,$2");
+
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first. Usually
     //    written with a space in the corpus ("356 a. C.", 9 of 11 occurrences).
     s = s.replace(/\ba\.\s?de\s?C\.|\ba\.\s?C\./giu, "antes de Cristo");
