@@ -89,7 +89,14 @@ const SYMBOLS = makeSymbolNormalizer({
     // ⚠ CONTRAST or, WHICH HAS THE SAME SENTENCE AND WHOSE READER OMITS THE CURRENCY: or's `¥7,000` decodes as
     // `… m u l j o p r a j o  s a t o h z e r  h e b a …` — "mūlya prāya sāta hazāra", the bare number. So the
     // silence is right for or and wrong for pa, and neither could be settled from text.
-    currency: { "$": ["ਡਾਲਰ"], "¥": ["ਯੇਨ"] },
+    // ⚠ `US$` IS ITS OWN KEY, AND THE BARE `$` CANNOT REACH IT (trap 64). The shared tier wraps every
+    // currency key in `(?<![\p{L}\p{M}])…`, so a sign a LETTER runs into is never matched — and nothing
+    // reports it, because the sign is not dropped, it is simply never seen. The corpus writes `US$130`,
+    // `US$1,500` and `US$500 ملین` (×3), and all three read as a bare number with the letters spoken as
+    // letter names: `قیمت US$130 بلیئن` was *qˈiːmət̪ jˈuː ˈɛs ˈɪkː sˈɔː t̪ˈiːɦ bəliːˈiːn* — "US" recited,
+    // no currency noun anywhere. THE SAME WORD, not a new one: this is the reuse case, since the corpus's
+    // `$` already reads ਡਾਲਰ and a US dollar is that dollar. Nothing new is sourced here.
+    currency: { "US$": ["ਡਾਲਰ"], "$": ["ਡਾਲਰ"], "¥": ["ਯੇਨ"] },
     magnitudes: ["ਹਜ਼ਾਰ", "ਲੱਖ", "ਕਰੋੜ", "ਮਿਲੀਅਨ", "ਅਰਬ"],
 });
 

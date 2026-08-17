@@ -140,8 +140,17 @@ const SYMBOLS = makeSymbolNormalizer({
      */
     percent: ["pasent"],
     percentPrefix: true,
-    /** The word FOLLOWS the number here (`nde naira`, "million naira"), which is the tier's default. */
-    currency: { "₦": ["naira"], $: ["dollar"] },
+    /**
+     * The word FOLLOWS the number here (`nde naira`, "million naira"), which is the tier's default.
+     *
+     * ⚠ `US$` IS ITS OWN KEY BECAUSE THE BARE `$` IS LETTER-BOUNDED ON THE LEFT (trap 64) and so can never
+     * match inside a code prefix — the sign is not dropped, it is never seen, which is why no probe reported
+     * it. ×1 in the artifact (`totalled approximately US$170,000`), and ⚠ THAT INSTANCE IS AN ENGLISH
+     * SENTENCE the ig wiki left untranslated, so it is evidence that the NOTATION occurs in this artifact
+     * rather than evidence about Igbo register. THE SAME WORD, not a new one: `$` already reads `dollar`
+     * here and a US dollar is that dollar, so nothing is sourced that was not sourced before.
+     */
+    currency: { "₦": ["naira"], "US$": ["dollar"], $: ["dollar"] },
     /** Derived from the ONE table above, so the tier and rule 2b can never disagree about which keys exist. */
     units: Object.fromEntries(Object.entries(UNIT).map(([k, w]) => [k, [w]])),
     /**
