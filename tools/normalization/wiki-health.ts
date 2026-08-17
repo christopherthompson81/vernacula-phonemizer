@@ -37,6 +37,7 @@ import { pathToFileURL } from "node:url";
 import { segment, segmentFile, selectCells, type SegmentMode } from "./mine.ts";
 import { CELLS } from "./cells.ts";
 import { repairDoubleEncoded } from "../../src/core/unicode.ts";
+import { fleursRoot } from "./corpusRoot.ts";
 
 /** ⚠ Only dispatch when this file IS the entry point — the same guard `mine.ts` carries, and for the same
  *  reason: without it the CLI runs on import and `process.exit(2)` kills the importer before it gets a chance
@@ -527,7 +528,7 @@ const REUSE_STABLE_AT = 3000;
 // ── CLI ────────────────────────────────────────────────────────────────────────────────────────────
 /** The known-good side of the symbol histogram: a FLEURS corpus read the way corpus-diff.ts reads it. */
 function baselineSegments(corpus: string): string[] {
-    const root = process.env["FLEURS"] ?? "";
+    const root = fleursRoot().root; // resolved, not read from the env — see corpusRoot.ts
     const dir = join(root, corpus);
     const seen = new Set<string>();
     for (const f of readdirSync(dir).filter((x) => x.endsWith(".tsv")))

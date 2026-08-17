@@ -33,8 +33,12 @@ import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { join } from "node:path";
 import { CELLS } from "./cells.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
+import { fleursRoot } from "./corpusRoot.ts";
 
-const CORPUS_ROOT = process.env["FLEURS"] ?? "";
+// ⚠ RESOLVED, NOT READ FROM THE ENVIRONMENT — see tools/normalization/corpusRoot.ts. An explicit
+// `$FLEURS` still wins; the five FLEURS-only languages have no mined artifact to fall back to, so an
+// unset variable there is not a smaller ruler but no ruler at all.
+const CORPUS_ROOT = fleursRoot().root;
 const TEXT_COLUMN = 2;
 
 /**

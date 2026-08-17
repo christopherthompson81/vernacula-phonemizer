@@ -40,8 +40,12 @@ import { repairDoubleEncoded } from "../../src/core/unicode.ts";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { fleursRoot } from "./corpusRoot.ts";
 
-const CORPUS_ROOT = process.env["FLEURS"] ?? "";
+// ⚠ RESOLVED, NOT READ FROM THE ENVIRONMENT — see tools/normalization/corpusRoot.ts. An explicit
+// `$FLEURS` still wins; the five FLEURS-only languages have no mined artifact to fall back to, so an
+// unset variable there is not a smaller ruler but no ruler at all.
+const CORPUS_ROOT = fleursRoot().root;
 /** FLEURS transcript column 3 is the ORIGINAL cased text; column 4 is lowercased and stripped of the
  *  punctuation this layer exists to read. Normalization must always be judged on column 3. */
 const TEXT_COLUMN = 2; // 0-indexed

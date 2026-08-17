@@ -39,6 +39,7 @@ import { join } from "node:path";
 import { sistersOf } from "./defects.ts";
 import { pathToFileURL } from "node:url";
 import { espeakRoot } from "./espeak.ts";
+import { fleursRoot } from "./corpusRoot.ts";
 
 const argv = process.argv.slice(2);
 const arg = (n: string): string | undefined => {
@@ -83,7 +84,10 @@ const ESPEAK_SHORT = ESPEAK_OFF ? ESPEAK_FOUND.note : `espeak dictsource (${ESPE
  *  read the same — and a class that names espeak while the tier is disconnected is making the same mistake. */
 const HAYSTACK = ESPEAK_OFF ? "corpus/referee (espeak NOT consulted)" : "corpus/referee/espeak";
 const ESPEAK_OFF_NOTE = ESPEAK_FOUND.note;
-const CORPUS_ROOT = process.env["FLEURS"] ?? "";
+// ⚠ RESOLVED, NOT READ FROM THE ENVIRONMENT — see tools/normalization/corpusRoot.ts. An explicit
+// `$FLEURS` still wins; the five FLEURS-only languages have no mined artifact to fall back to, so an
+// unset variable there is not a smaller ruler but no ruler at all.
+const CORPUS_ROOT = fleursRoot().root;
 const REFEREES = "tools/referee-eval/referees";
 
 /** The registry source, read once. `langDir` is called per code and `evidenceKin` calls it once per code in

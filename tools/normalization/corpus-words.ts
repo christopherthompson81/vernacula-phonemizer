@@ -39,8 +39,12 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { parseJsonc } from "../../src/core/jsonc.ts";
 import { dominantScript } from "./scripts.ts";
 import { join } from "node:path";
+import { fleursRoot } from "./corpusRoot.ts";
 
-const CORPUS_ROOT = process.env["FLEURS"] ?? "";
+// ⚠ RESOLVED, NOT READ FROM THE ENVIRONMENT — see tools/normalization/corpusRoot.ts. An explicit
+// `$FLEURS` still wins; the five FLEURS-only languages have no mined artifact to fall back to, so an
+// unset variable there is not a smaller ruler but no ruler at all.
+const CORPUS_ROOT = fleursRoot().root;
 
 const argv = process.argv.slice(2);
 const arg = (n: string, d?: string): string | undefined => {

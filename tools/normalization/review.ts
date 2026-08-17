@@ -32,6 +32,7 @@ import { CELLS, staleness } from "./cells.ts";
 import { ACCEPTED_SIGN_SILENCE, CITED_WORDS, DROPPABLE, SIGN_CASES, sistersOf } from "./defects.ts";
 import { pathToFileURL } from "node:url";
 import { espeakRoot } from "./espeak.ts";
+import { fleursRoot } from "./corpusRoot.ts";
 
 /**
  * ⚠ THE CLI MUST NOT RUN ON IMPORT — the fifth file in this directory to need this guard, after `mine.ts`,
@@ -452,7 +453,7 @@ async function main(): Promise<void> {
     }
     const dir: string = dirArg;
 
-    const CORPUS_ROOT = process.env["FLEURS"] ?? "";
+    const CORPUS_ROOT = fleursRoot().root; // resolved, not read from the env — see corpusRoot.ts
     /**
      * PLURICENTRIC SETS — codes that are STANDARDS OF ONE LANGUAGE, whose sources attest for each other. Not
      * "related languages": the test is whether a speaker of one would recognise the other's word as their own.

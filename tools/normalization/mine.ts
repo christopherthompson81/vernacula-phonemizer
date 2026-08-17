@@ -42,6 +42,7 @@ import { pathToFileURL } from "node:url";
 import { DROPPABLE, LEAK_CLASSES, acceptedSignClass, allOccurrencesForeign, allOccurrencesInMarkup, dropsIn, isAcceptedSilent, makeContribution, rawLatinIn, silentCharsIn } from "./defects.ts";
 import { CELLS, type Cell, staleness } from "./cells.ts";
 import { dominantScript, isNativeSegment, SCRIPTS } from "./scripts.ts";
+import { fleursRoot } from "./corpusRoot.ts";
 
 // NOT A CELL, though it was tried: "a bound suffix written with a SPACE" (Oromo, `bara 1945 tti`).
 // Every per-sentence regex for it — `\p{Nd} \p{Ll}{1,4}` and narrower — also matches `5 km`, `3 hari`,
@@ -360,7 +361,10 @@ const arg = (n: string, d?: string): string | undefined => {
     return i === -1 ? d : argv[i + 1];
 };
 const has = (n: string): boolean => argv.includes(`--${n}`);
-const FLEURS_ROOT = process.env["FLEURS"] ?? "";
+// ⚠ RESOLVED, NOT READ FROM THE ENVIRONMENT — see tools/normalization/corpusRoot.ts. An explicit
+// `$FLEURS` still wins; the five FLEURS-only languages have no mined artifact to fall back to, so an
+// unset variable there is not a smaller ruler but no ruler at all.
+const FLEURS_ROOT = fleursRoot().root;
 const UA = "vernacula-phonemizer-corpus-probe/0.1 (https://github.com/christopherthompson81/vernacula-phonemizer)";
 
 const delay = (ms: number): Promise<void> => new Promise((res) => { setTimeout(res, ms); });
