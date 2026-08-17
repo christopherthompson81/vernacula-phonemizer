@@ -1359,6 +1359,51 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "(\u201cstavkasin plyus yamasa minus funttaǵi 3 pensqa \u00f3zgertiw\u201d, \u201c\u00e1piwayı ǵana «plyus\u2013minus» "
             + "dep ataladı\u201d) \u2014 which is what sources the two separate signs this layer DOES claim",
     },
+    kea: {
+        // \u26a0 EIGHT REFUSALS over the 1,931 UNIQUE utterances of FLEURS kea_cv (3,945 rows; FLEURS repeats
+        // each sentence per speaker). There is NO mined artifact for kea, so these were measured by hand
+        // over column 3 of the TSVs and each is argued in src/languages/kabuverdianu/normalize.ts.
+        //
+        // \u26a0 THE SOURCING FLOOR IS WHAT MAKES THESE PERMANENT-LOOKING RATHER THAN PROVISIONAL, and it is
+        // worse than trap 51's: `attest.ts --lang kea` exits 3 with "kea.wikipedia.org does not respond as
+        // a wiki" (Kabuverdianu has no Wikipedia in mainspace); espeak-ng ships no `kea_list`; and the
+        // referee is SEVEN kaikki words. So for a sign whose reading is absent from written text BY
+        // CONSTRUCTION, the corpus is not merely the best evidence \u2014 it is all of it. The lexifier is not
+        // a substitute (trap 55, and the ckb/fa key lesson of trap 38).
+        minus: "measured: ZERO negatives in 1,931 utterances. All 14 digit-flanked hyphens are a RANGE or a "
+            + "SCORE \u2014 `kubertu pa 2-3 km di j\u00e9lu`, `vit\u00f3ria di Washington pa 5-3 kontra Atlanta "
+            + "Thrashers`, `reinadu di rei Sejong (1418 - 1450)`, `din\u00e1stia Qing (1644-1912)`, "
+            + "`(10-60 minotu)`, `35-40 mph (56-64 km/h)`, `un vit\u00f3ria konfortavel di 26 - 00`, "
+            + "`fosil di Australopithecus di 4,2-3,9 milhon di anu` \u2014 plus four written with a DOUBLED "
+            + "ASCII hyphen (`120--160 m\u00e9trus k\u00fabikus`, `Guru Nanak (1469--1539)`, `di 7--2`, "
+            + "`desdi 1995--96`). The range rule claims every one of them and spends the dash on a PAUSE. "
+            + "\u26a0 AND THE WORD IS THE SECOND REASON: `menus` \u00d71 is the comparative `Menus di ki mil "
+            + "kazus`, \u201cfewer than\u201d, never the sign; there is nothing to say even if a negative appeared",
+        plus: "measured: `+` \u00d72, the whole math-sign inventory of this corpus, and NEITHER is arithmetic. "
+            + "`tenperaturas riba di +30\u00b0C \u00e9 kumun` is the playbook's own trap-48 shape \u2014 `riba di` IS "
+            + "\u2018above\u2019, so the sign is REDUNDANT with the preposition the writer already chose, and "
+            + "dropping it is lossless (`+30\u00b0` and `30\u00b0` are the same temperature). The other is "
+            + "`kumesa pa volta di 11:00 \u00f3ra lokal (UTC+1)`, which IS contentful \u2014 that one instance is "
+            + "the stated price. \u26a0 AND NO WORD EXISTS TO PAY IT WITH: `mais` \u00d70, and `m\u00e1s` \u00d7many is the "
+            + "comparative \u2018more\u2019 (`m\u00e1s grandi`, `m\u00e1s tardi`), which is the wrong slot entirely",
+        "plus-minus": "measured: `\u00b1` \u00d70 in 1,931 utterances \u2014 the sign does not occur, and the reading "
+            + "would have to compose two words neither of which is attested",
+        equals: "measured: `=` \u00d70 in 1,931 utterances. The sixth consecutive round to print every "
+            + "instance of this sign before writing a rule for it (trap 62) and the first to find NONE at "
+            + "all \u2014 no wiki heading markers, no etymology gloss, no parallel title, because FLEURS is "
+            + "read-aloud news rather than an encyclopedia dump. Nothing to gate on, and no word to gate",
+        "less-than": "measured: `<` \u00d70 in 1,931 utterances \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in 1,931 utterances \u2014 the sign does not occur",
+        times: "measured: `\u00d7` \u00d70 and digit-flanked ASCII `x` \u00d70 in 1,931 utterances. The corpus DOES "
+            + "write two dimension crosses and it writes them as a WORD \u2014 `un formatu di 6 pa 6 cm`, "
+            + "`negativu di 36 pur 24 mm` \u2014 so the sign is absent because the language spells the "
+            + "notation out, which is a stronger negative than a bare zero",
+        divide: "measured: `\u00f7` \u00d70 in 1,931 utterances. The slash IS used, 24 times, and 23 of those are "
+            + "between WORDS (`bilheti di ida/volta`, `y/\u00f4 dizejus`, `agu/\u00e1rias di p\u00e1ntanu`, "
+            + "`Jakar/Bumthang`) or inside a rate the shared tier reads (`480 km/h`, `133 m/s`). The one "
+            + "digit-flanked slash is a FRACTION, `5 mm (1/5 polegadas)`, and it gets its own rule from "
+            + "denominators the corpus attests in the fraction sense (`un tersu`, `un kintu`, `un kuartu`)",
+    },
     skr: {
         // \u26a0 EIGHT REFUSALS over the retained text of `tools/corpus/mined/skr.jsonc` (436 segments of a
         // 120,763-paragraph skr.wikipedia dump), each argued in src/languages/saraiki/normalize.ts. \u26a0 THE
