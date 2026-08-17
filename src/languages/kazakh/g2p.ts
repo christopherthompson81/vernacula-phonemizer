@@ -55,6 +55,27 @@ export function toSegments(word: string): Seg[] {
             segs.push({ ph: "ɫ", nucleus: false });
             continue;
         }
+        // ⚠ THE SIGNS ARE NOT SEGMENTS. ⟨ь⟩ and ⟨ъ⟩ were both mapped to ʔ in kazakh.jsonc, which put a
+        // GLOTTAL STOP into 408 corpus rows — миль `mˈəjɫʔ`, гольф `ɡˈoɫʔf`, пальма `pɑɫʔmˈɑ`, Нью
+        // `nʔjˈu`, премьер `premʔˈer`. Neither sign denotes a sound in any reading. They reach Kazakh
+        // only in Russian loans and names, and there they do opposite jobs:
+        //   ь (soft)  palatalises the consonant BEFORE it            миль → mˈəjlʲ, Чарльз → t͡ʃˈɑrlʲz
+        //   ъ (hard)  separates, giving a /j/ onset to what follows   объектив → objektˈiv
+        if (c === "ь") {
+            const prev = segs[segs.length - 1];
+            if (prev !== undefined && !prev.nucleus && !prev.ph.endsWith("ʲ")) {
+                // a palatalised l is LIGHT by definition, so it also escapes the ɫ that л emits above —
+                // the word-wide harmony pass in kazakh.ts only lightens, so setting it here is safe.
+                if (prev.ph === "ɫ") prev.ph = "l";
+                prev.ph += "ʲ";
+            }
+            continue;
+        }
+        if (c === "ъ") {
+            segs.push({ ph: "j", nucleus: false });
+            continue;
+        }
+
         const cons = CONS_IPA[c];
         if (cons !== undefined) segs.push({ ph: cons, nucleus: false });
         // else: unknown char (punctuation) → skip

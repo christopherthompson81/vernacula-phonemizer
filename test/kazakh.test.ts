@@ -78,7 +78,9 @@ describe("Kazakh roman-numeral ordinals", () => {
 
     it("the ordinal reading phonemizes in context", () => {
         expect(phonemize("он тоғызыншы ғасыр", "kk").trim()).toBe("ˈon tˈoʁəzənʃə ʁˈɑsər");
-        expect(phonemize("елуінші съезд", "kk").trim()).toBe("jelwɪnʃˈɪ sʔˈezd");
+        // ⚠ was `sʔˈezd`: this expectation had the ъ→ʔ defect baked into it. съезд is /sjest/ —
+        // the hard sign SEPARATES, giving the /j/ onset. Corrected with the g2p, not around it.
+        expect(phonemize("елуінші съезд", "kk").trim()).toBe("jelwɪnʃˈɪ sjˈezd");
     });
 
     it("a bare roman numeral still reads as a CARDINAL", () => {
@@ -147,7 +149,9 @@ describe("Kazakh text normalization", () => {
 
     it("era markers, degrees, roman ordinals and percent read their Kazakh words", () => {
         expect(ph("б.д.д. 356 жылы")).toBe("bɪzdˈɪŋ dæwɪrɡˈe dejˈɪn ˈʏʃʒˈʏz jˈelwˈɑɫtə ʒˈəɫə");
-        expect(ph("+ 30 °C-тан")).toBe("pɫjˈus ˈotəz ɡrˈɑdws t͡sˈelʔsəjjden"); // цельсийден
+        // ⚠ was `t͡sˈelʔsəjjden`: same ь→ʔ defect. Цельсий is /tsɛlʲsij/ — the soft sign
+        // palatalises the л, and a palatalised l is light.
+        expect(ph("+ 30 °C-тан")).toBe("pɫjˈus ˈotəz ɡrˈɑdws t͡sˈelʲsəjjden"); // цельсийден
         expect(ph("35°W")).toBe("ˈotəz bˈes ɡrˈɑdws bˈɑtəs"); // градус батыс
         expect(ph("XVI ғасырда")).toBe("ˈon ˈɑɫtənʃə ʁˈɑsərdɑ"); // он алтыншы ғасырда
         expect(ph("80%")).toBe("seksˈen pˈɑjəz");
@@ -167,5 +171,43 @@ describe("Kazakh text normalization", () => {
     // ⚠ One instance of each: acted on because the alternative is a silently dropped sign.
     it("the numero sign reads нөмір", () => {
         expect(phonemize("«№ 11 ғарышкер»", "kk")).toContain("nɵmˈɪr ˈonbˈɪr");
+    });
+});
+
+/**
+ * ⚠ ⟨ь⟩ AND ⟨ъ⟩ ARE SIGNS, NOT SEGMENTS — and both were mapped to ʔ, putting a GLOTTAL STOP into 408
+ * FLEURS kk_kz rows: миль `mˈəjɫʔ`, гольф `ɡˈoɫʔf`, пальма `pɑɫʔmˈɑ`, Нью `nʔjˈu`, премьер
+ * `premʔˈer`, Чарльз `t͡ʃˈɑrɫʔz`. Kazakh is Turkic and meets these letters only in Russian loans and
+ * names, where they do OPPOSITE jobs — which is why one map entry for both was never going to work.
+ *
+ * Found by reading the kk_kz investigate queue: `коньки` came out `kˈonʔkəjʃɪnɪŋ` while the recognizer
+ * heard `k a n ɡ iː t ʃ n ə ŋ`, with no glottal anywhere.
+ */
+describe("the Cyrillic signs denote no sound of their own", () => {
+    it("⟨ь⟩ palatalises the consonant before it", async () => {
+        expect(await phonemize("миль", "kk")).toBe("mˈəjlʲ");
+        expect(await phonemize("гольф", "kk")).toBe("ɡˈolʲf");
+        expect(await phonemize("пальма", "kk")).toBe("pɑlʲmˈɑ");
+        expect(await phonemize("чарльз", "kk")).toBe("t͡ʃˈɑrlʲz");
+        expect(await phonemize("цинь", "kk")).toBe("t͡sˈəjnʲ");
+        expect(await phonemize("нью", "kk")).toBe("nʲjˈu");
+    });
+
+    it("⟨ъ⟩ separates instead, giving a /j/ onset to what follows", async () => {
+        expect(await phonemize("объектив", "kk")).toBe("objˈektəjv");
+    });
+
+    // ⚠ A palatalised l is LIGHT by definition, so ⟨ль⟩ must also escape the dark ɫ that ⟨л⟩ emits for
+    // vowel harmony — while a native back-vowel word keeps its ɫ untouched.
+    it("⟨ль⟩ is light, and native harmony is unaffected", async () => {
+        expect(await phonemize("король", "kk")).toBe("korˈolʲ");
+        expect(await phonemize("корольдік", "kk")).toBe("korolʲdˈɪk");
+        expect(await phonemize("алма", "kk")).toBe("ɑɫmˈɑ");
+        expect(await phonemize("бала", "kk")).toBe("bɑɫˈɑ");
+    });
+
+    it("no glottal stop survives anywhere", async () => {
+        for (const w of ["миль", "гольф", "пальма", "нью", "премьер", "объектив"])
+            expect(await phonemize(w, "kk"), w).not.toContain("ʔ");
     });
 });

@@ -62,8 +62,9 @@
         "ч": "t͡ʃ",
         "ш": "ʃ",
         "щ": "ʃʃ",
-        "ъ": "ʔ",
-        "ь": "ʔ",
+        // ⚠ ⟨ъ⟩ and ⟨ь⟩ are DELIBERATELY ABSENT from this map. They are orthographic signs, not
+        // segments, and mapping them to ʔ put a glottal stop in 408 corpus rows. g2p.ts handles both
+        // before this lookup: ь palatalises the preceding consonant, ъ emits a separating /j/.
     },
 
     // Front vowels — their presence anywhere in a token lightens ALL its dark ɫ → l (vowel harmony).
