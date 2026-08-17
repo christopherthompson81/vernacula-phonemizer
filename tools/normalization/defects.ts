@@ -1019,6 +1019,64 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
             + "inverts and omitting a plus does not",
     },
+    ltg: {
+        // \u26a0 EIGHT REFUSALS over the retained text of `tools/corpus/mined/ltg.jsonc` (394 segments of a
+        // 3,444-paragraph ltg.wikipedia dump), each argued in src/languages/latgalian/normalize.ts.
+        // \u26a0 NO ARITHMETIC SIGN WORD IS SOURCEABLE AT ALL for this language: `m\u012bnuss`, `m\u012bnus`, `plyus`
+        // and `dal\u012bts` are ALL \u00d70 on ltg.wikipedia, and the one `plus` \u00d71 sits inside an ENGLISH
+        // sentence on the IT-glossary page (\u201ctranslates common terms of IT (plus some Wikipedia specific
+        // ones) into Latgalian\u201d) while `plyusmuos` \u00d71 is *pl\u016bsma*, a FLOW. So the refusals below are a
+        // vocabulary floor, not a set of independent judgements \u2014 except `equals`, which has a second and
+        // stronger reason of its own.
+        minus: "measured: `-` \u00d76 across THREE encodings \u2014 ASCII in `-7\u00b0C` and `sasamazynuos par -7%`, "
+            + "U+2212 in `nu \u22123.5 \u00b0C soluos da \u22127.6 \u00b0C`, and EN DASH in `(\u201343 gradi C)` \u00d72 \u2014 and "
+            + "\u26a0 THIS REFUSAL COSTS, exactly as haw's does: a minus INVERTS its operand, so Daugpils's "
+            + "record low reads as +43 and the Estonian January means read as positive. There is no word "
+            + "to read it with (see the header note above). \u26a0 AND THE EM DASH IS NOT A WAY ROUND IT: `\u2014` "
+            + "is \u00d7169 here and is the COPULA standing in for the absent verb (`Bolvi () \u2014 m\u012bsts p\u016bstumu "
+            + "Latgol\u0101`, `Golvysm\u012bsts \u2014 Santjago`), which is Karakalpak's finding arriving from the "
+            + "other side; the ONE em dash that is a minus (`temperatura beja \u2014 43\u00b0 C`) cannot be "
+            + "separated from the other 168. Registered with the price stated rather than papered over",
+        plus: "measured: `+` \u00d75. Four are the temperature sign (`+17\u00b0C`, `+36\u00b0 C`, `(+36 gradi C)` "
+            + "\u00d72) and the fifth is English text (`Baltic language + samogitian = bat-smg`). A plus does "
+            + "not invert its operand \u2014 `+36\u00b0` and `36\u00b0` are the same temperature \u2014 so unlike the minus "
+            + "above this silence is lossless",
+        equals: "measured: `=` \u00d714 and ONE is arithmetic (`26*26=676`). Five are EASYTIMELINE CHART "
+            + "MARKUP the extraction left in (`PlotArea = left:50 right:20`, `ScaleMajor = unit:year "
+            + "increment:6000000`, `ScaleMinor = \u2026` \u00d73), two are formula assignments (`x = log(1)`, "
+            + "`y = log(69971)`), one is an English sentence, three are CURRENCY EQUIVALENCES whose right "
+            + "operand is a word (`1 eura (EUR) = apm\u0101ram 0,702804 latu (LVL)`, `1 lats (LVL) = "
+            + "apm\u0101ram 1,422872 euru`) and two are GOTHIC NUMERAL GLOSSES (`\u2022\ud800\udf39\ud800\udf31\u2022 = 12`, "
+            + "`\ud800\udf39\ud800\udf31 = 12`). A digit gate would take three of the fourteen. \u26a0 AND THE WORD IS THE "
+            + "SECOND, INDEPENDENT REASON: `v\u012bnaids` \u00d73 is attested and is exactly \u2018equal\u2019, but it is an "
+            + "ADJECTIVE that takes its complement with `ar` (\u201cteik v\u012bnaids ar breivuos kris\u0161onys "
+            + "padreiz\u012bni\u201d), and the tier can only place a connective BETWEEN the operands \u2014 so even "
+            + "those three could not be read correctly here. chv's `\u0442\u0430\u043d`, kaa's `te\u0144` and haw's "
+            + "`huinahelu` are the same shape; this is the fourth",
+        "greater-than": "measured: `>` \u00d74 and THREE ARE AN ARROW rather than a comparison \u2014 a "
+            + "sound-change/derivation arrow (`\u201cder Baum\u201d (k\u016bks) -> \u201cdie B\u00e4ume\u201d (k\u016bki)`) and a "
+            + "TERM-GLOSSARY mapping in the IT wordlist (`computer science: informatika > datorzineiba`, "
+            + "\u00d72). The one real comparison is `Daugpi\u013cs dzeivuotuoju lelumam (>80%)`. `leluoks` \u00d77 is "
+            + "attested as \u2018bigger\u2019 and takes `kai` for \u2018than\u2019 (`10\u201420 rei\u017eu leluoks kai st\u012bp\u0161onuos "
+            + "iztvereiba`), but it is an ADJECTIVE agreeing with its subject, and here the sense is the "
+            + "adverbial \u2018more than 80%\u2019 \u2014 one instance is not worth a confidently wrong agreement",
+        "less-than": "measured: `<` \u00d71 and it is an ETYMOLOGY ARROW, not a comparison: `Aluviskuos "
+            + "n\u016bs\u0101dys aba aluvejs (nu lati\u0146u alluvius < alluere \u2014 \u2018skoluot, skoluot\u012bs\u2019)`. Same "
+            + "sense as shn's `>` sound-change arrow, in the sister sign",
+        divide: "measured: `\u00f7` \u00d70 in the retained text \u2014 the sign does not occur, and `dalejums` "
+            + "\u00d724/20, the obvious candidate, is the ADMINISTRATIVE division in every single example "
+            + "(`Latvejis administrativais teritoriskais dalejums`, `N\u016bvodi i teritoriskuo dalejuma`). "
+            + "The slash occurs \u00d712 and is a SEASON (`2003/2004 g. sezon\u0101`, \u00d77), a standard number "
+            + "(`ISO 639/2`), a density denominator (`899 dzeiv/km\u00b2`) or a publisher mark (`P/s Latga\u013cu "
+            + "izdevn\u012bceiba`), never a fraction, so no fraction rule is written either",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        currency: "measured: `$` \u00d70 in the retained text \u2014 the only currency sign this corpus writes is "
+            + "`\u20ac`, once (`va\u013csteibys bud\u017eets tur \u20ac151 miljonu viersejumu`), and it IS read as "
+            + "`eura`/`euru` (5 and 8 tokens over 2 articles each, from the euro's own ltg.wikipedia "
+            + "article). `dolaru` \u00d73 is attested but only as the genitive plural of a currency this "
+            + "corpus names in WORDS and never by its sign (`32,7 tri\u013cjonim ASV dolaru`), so declaring "
+            + "the key would buy nothing and risk a wrong count form. The gate's probe is a bare `$5`",
+    },
     haw: {
         // \u26a0 SEVEN REFUSALS over the retained text of `tools/corpus/mined/haw.jsonc` (423 segments of a
         // 7,735-paragraph haw.wikipedia dump), each argued in src/languages/hawaiian/normalize.ts.
