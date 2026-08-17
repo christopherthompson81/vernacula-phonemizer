@@ -12,6 +12,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeHawaiian } from "./normalize.ts";
 
 interface HawaiianDef {
     graphemes: Record<string, string>;
@@ -48,7 +49,10 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class HawaiianPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its separator, coordinate, degree, clock and range steps need the figure
+        // and its mark still adjacent, which the shared tier would break; the tier itself runs inside that
+        // pass, ahead of the de-grouping (see normalize.ts).
+        return assembleClauses(normalizeHawaiian(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // Cardinal numbers (numbers.ts) — emitted one word at a time, as for ordinary text.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

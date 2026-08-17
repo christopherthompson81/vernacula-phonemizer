@@ -1019,6 +1019,47 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
             + "inverts and omitting a plus does not",
     },
+    haw: {
+        // \u26a0 SEVEN REFUSALS over the retained text of `tools/corpus/mined/haw.jsonc` (423 segments of a
+        // 7,735-paragraph haw.wikipedia dump), each argued in src/languages/hawaiian/normalize.ts.
+        // \u26a0 THE CORPUS NAMES ALL FOUR ARITHMETIC SIGNS IN ONE SENTENCE, and that sentence is the reason
+        // none of them is read: the names are NOUNS FOR THE OPERATIONS, not connectives.
+        //
+        //   "Ma ka makemakika, aia \u02bbeh\u0101 hana ma\u02bbamau: ka huinahelu (+), ka lawenahelu (\u2212),
+        //    ka ho\u02bbonui (\u00d7), a me ka m\u0101hele (\u00f7)."
+        //   \u2014 four common operations: ADDITION (+), SUBTRACTION (\u2212), MULTIPLICATION (\u00d7), DIVISION (\u00f7)
+        //
+        // *huinahelu* is \u2018addition\u2019, not \u2018plus\u2019; the tier can only place a connective BETWEEN
+        // operands, so `4 huinahelu 5` would read *four addition five*. Same shape as chv\u0027s `\u0442\u0430\u043d`,
+        // skr\u0027s `\u0628\u0631\u0627\u0628\u0631` and kaa\u0027s `te\u0148` \u2014 the fourth time in this sweep, and the first where
+        // the corpus supplies the whole glossary at once.
+        minus: "measured: `-` \u00d76, and \u26a0 THIS REFUSAL COSTS, unlike the plus refused in crh one round "
+            + "earlier: a minus INVERTS its operand, so `-19.7\u02daC i -19.9\u02daC` (Eureka, Nunavut) reads as "
+            + "POSITIVE nineteen degrees. There is no word to read it with. `maina` and `m\u012bnuke` are "
+            + "ABSENT from haw.wikipedia; `koena` \u00d718 is \u2018the remainder/the rest of\u2019 in every example; "
+            + "`emi` is the verb \u2018to decrease\u2019; and the integers article names the CLASS rather than the "
+            + "sign (\u201cn\u0101 helu piha \u02bbi\u02bbo \u02bbole\u201d, non-positive integers), which is an adjectival phrase "
+            + "the tier cannot place. Registered with the price stated rather than papered over",
+        plus: "measured: `+` \u00d72. One is the arithmetic glossary above, which names the sign as "
+            + "*huinahelu*, \u2018addition\u2019; the other is `+6` inside a machine-translated climate paragraph "
+            + "whose surrounding prose is not Hawaiian. A plus does not invert its operand, so unlike the "
+            + "minus this silence costs nothing",
+        times: "measured: `\u00d7` \u00d72. One is the glossary (*ho\u02bbonui*, \u2018multiplication\u2019, a noun); the "
+            + "other is a CARTRIDGE DESIGNATION \u2014 `n\u0101 p\u014dk\u0101 7.62\u00d739mm` in the Kalashnikov article, where "
+            + "the sign is part of a name and not an operation at all",
+        divide: "measured: `\u00f7` \u00d71 and it is the glossary entry itself (*m\u0101hele*, \u2018division\u2019). The "
+            + "slash occurs separately and is a RATING (`me ka helu waena 8.6/10`) or an IP-address path; "
+            + "no fraction rule is written",
+        equals: "measured: `=` \u00d711 and TEN ARE EASYTIMELINE CHART MARKUP the extraction left in \u2014 "
+            + "`PlotArea = left:50 right:20 top:25 bottom:30`, `ScaleMajor = unit:year increment:6000000`, "
+            + "`TimeAxis = orientation:horizontal format:yyyy`, `ImageSize = width:640 height:auto`. The "
+            + "eleventh is a run-together sentence (`\u02bbO death forever= Ballspielverein Borussia 09`). "
+            + "\u26a0 THIRD LANGUAGE RUNNING for the EasyTimeline sense, after an and crh \u2014 chart markup is a "
+            + "property of dump-sourced artifacts, not a quirk of one wiki",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+    },
     crh: {
         // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/crh.jsonc` (415 segments of a
         // 35,437-paragraph crh.wikipedia dump), each argued in src/languages/crimeantatar/normalize.ts.

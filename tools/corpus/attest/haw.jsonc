@@ -1,0 +1,517 @@
+// WIKIPEDIA WORD ATTESTATION — haw. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "haw",
+        "wiki": "haw.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kēkelē",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 37,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Hawaiʻi. Aia ʻo ia ma 28°25′ʻĀ, 178°20′K (ʻiwakāluakūmāwalu kēkelē ʻiwakāluakūmālima minuke hūbaōunaʻmō ʻākau lakikū cuīamīahi…",
+                "…ākau lakikū cuīamīahi a me hoʻokahi haneli kanahikukūmāwalu kēkelē ʻiwakālua minuke komohana lonikū). Aia ka laina helu lā ma…",
+                "…ana ʻākau o Hawaiʻi ma 28°12′ʻĀ 177°21′K (ʻiwakāluakūmāwalu kēkelē ʻumikūmālua minuke ʻākau latitū a me hoʻokahi haneli kanahi…",
+                "…a minuke ʻākau latitū a me hoʻokahi haneli kanahikukūmāhiku kēkelē ʻiwakāluakūmākahi minuke komohana lonitū). == Nā kūmole ==…",
+                "…ana ʻĀkau o Hawaiʻi ma 27°48′ʻĀ 175°51′K (ʻiwakāluakūmāhiku kēkelē kanahākūmāwalu minuke ʻākau latitū a me hoʻokahi haneli kan…",
+                "…u minuke ʻākau latitū a me hoʻokahi haneli kanahikukūmālima kēkelē, kanalimakūmākahi minuke komohana lonitū). == Nā kūmole ==…"
+            ]
+            },
+        {
+                "word": "maina",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mīnuke",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hapa",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 56,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…le hapalua • Hua mele hapahā • Hua mele hapawalu • Hua mele hapa ʻumikūmāono • Hua mele hapa kanakolukūmālua • Hua mele hapa…",
+                "…• Hua mele hapawalu • Hua mele hapa ʻumikūmāono • Hua mele hapa kanakolukūmālua • Hua mele hapa kanaonokūmāhā • Hua mele ha…",
+                "…hapa ʻumikūmāono • Hua mele hapa kanakolukūmālua • Hua mele hapa kanaonokūmāhā • Hua mele hapa hanelekūmāiwakāluakūmāwalu…",
+                "…pa kanakolukūmālua • Hua mele hapa kanaonokūmāhā • Hua mele hapa hanelekūmāiwakāluakūmāwalu…",
+                "…le hapalua • Hua mele hapahā • Hua mele hapawalu • Hua mele hapa ʻumikūmāono • Hua mele hapa kanakolukūmālua • Hua mele hapa…",
+                "…• Hua mele hapawalu • Hua mele hapa ʻumikūmāono • Hua mele hapa kanakolukūmālua • Hua mele hapa kanaonokūmāhā • Hua mele ha…"
+            ]
+            },
+        {
+                "word": "piha",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 154,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ʻO nā helu piha nā hua helu kumu me ka helu 0 (1, 2, 3, ...) a me nā helu p…",
+                "…a nā hua helu kumu me ka helu 0 (1, 2, 3, ...) a me nā helu piha ʻiʻo ʻole (0, -1, -2, -3, ...). Nā laʻana: he mau helu piha…",
+                "…piha ʻiʻo ʻole (0, -1, -2, -3, ...). Nā laʻana: he mau helu piha nā helu 65, 7, a me -756; ʻaʻole nā helu 1.6 a me 1½ he mau…",
+                "…lu 65, 7, a me -756; ʻaʻole nā helu 1.6 a me 1½ he mau helu piha.…",
+                "…Sepania wokimī i nā mea i ke kapikala mai kela iaʻu ka helu piha ma ka helu mea uamaiʻakomi ka makahiki ma pukalani. === Nā…",
+                "…nte da República Portuguesa) — he makahiki ma pukalani helu piha ma ka hakakā maikaʻi naīkauālamaiōuna ʻoihana i wahi ka mok…"
+            ]
+            },
+        {
+                "word": "ʻāpana",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 30,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ua mai na hana hanau mea hoʻohana ma pukalani ka hakakā. He ʻāpana ʻo mahainaluna cīunālamōuna — ka hakakā inā pahuhopu nui ka…",
+                "…i ka makahiki pukalani ka hakakā maikaʻi ka ʻoihana hou. He ʻāpana ʻo ia mai ka helu piha nā kānaka paʻlaʻalshai meakanu nā, n…",
+                "…opa a me ʻĀkia. ʻO Mokekao ke kapikala o Rūsia. Wokel 2025, ʻāpana aku la sīuakawa ke: Mokekao, Pikeni, Nowokinisi, Lekanekinu…",
+                "…ka ma ka wā kahiko. ʻO ka helu ʻana paha, ua pili pū kekahi ʻāpana o ka heluna i nā kānaka. ʻO ka ʻāpana ʻākau o Pokukala i no…",
+                "…ha, ua pili pū kekahi ʻāpana o ka heluna i nā kānaka. ʻO ka ʻāpana ʻākau o Pokukala i noho ʻia e ka, nā ousimāuni a me nā ʻoha…",
+                "…a paʻakikī i hiki. == Hāmapīau == Ke ʻo nā kūlana makauhale ʻāpana a mea kākau i ke kapikala ka helu piha nā helu ame nā moʻol…"
+            ]
+            },
+        {
+                "word": "hola",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 4,
+                "substringOnly": 3,
+                "examples": [
+                "…hili. He ikaika loa ka makani pāhili - he 118 kilomika o ka hola a ʻoi.…",
+                "…ahiki 38 ma ka Queen's Medical Center ma Honolulu Hawaii ka hola 12:18 ʻo Iune 26, 1997, mai hāʻule hanu. == Nā kūmole ==…",
+                "…kahiko mai ka makahiki 1894, me kona hōʻailona kaulana, ka hola Hattori Mitsukoshi - He hale kūʻai nui me nā pōhaku liona ʻ…",
+                "…= Ke ala hele == I kēlā me kēia Pōʻaono a me Lāpule, mai ka hola 12:00 awakea a ka hola 5:00 ahiahi, ua pani ʻia ke alanui n…",
+                "…me kēia Pōʻaono a me Lāpule, mai ka hola 12:00 awakea a ka hola 5:00 ahiahi, ua pani ʻia ke alanui nui no nā kaʻa. Kapa ʻia…",
+                "…o (1988), he ʻuhane nui i hoʻoulu ʻia e ka tanuki (ka ʻīlio hola) a me nā pōpoki. == Ka Inoa == Ua koho ʻia ka inoa \"Ghibli\"…"
+            ]
+            },
+        {
+                "word": "pākēneka",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…0 sq km). He ʻāina kuahiwi ʻo Kōlea Hema, a ma kahi o 70–75 pākēneka o kona ʻāina ua uhi ʻia e nā kuahiwi. == Aniau == Ma ke kap…",
+                "…ma ke kūlana o ke aupuni a pau ma ka nui o nā kānaka. He 81 pākēneka o ka heluna kānaka e noho ma ka wahi kiwikā. Ma ka ʻāina Ko…",
+                "…, he 213,849 kānaka ʻōlelo Te Reo Maori. He 4.3% wale nō ka pākēneka o nā kanaka noho ma Aotearoa i hiki ke ʻōlelo Te Reo Maori,…",
+                "…i paha paha, i kapa ʻia he kanaka Buda (Buddhist). He 4% ka pākēneka o ke kanaka o ka honua poepoe i manaʻo ʻia he kanaka Buda.…",
+                "…hāʻawi i ka palekana kūikawā i kona poʻe, aia ma kahi o 25 pākēneka o ka heluna kanaka Hawaiʻi i ka makahiki 1896. Ua paipai ke…",
+                "…me ka Warren Easton High School ma New Orleans. He mea hana pākēneka pū ʻo ia. Ua nona nā hale ʻaina ʻelua ma Austin, Texas - Wa…"
+            ]
+            },
+        {
+                "word": "pakeneka",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…kauhale ʻo Wakikana i ka Katolika Roma a he hoʻokahi haneli pakeneka Katolika. ʻAʻole ia he mea kupanaha e like me ka pope ʻo ke…",
+                "…iki kū waena ma Palakila, a loaʻa he pelamika hoʻēmi. He 88 pakeneka o nā kānaka e noho kiwikā ana. == Akino == Nele i Palakila…",
+                "…kūpuna. He 90%-99% mau kānaka ʻōiwi i noho paʻa, a he 1.45% pakeneka i nā kānaka haole i noho ma ʻAikupika. == Moʻomeheu == Ua k…"
+            ]
+            },
+        {
+                "word": "kekelē",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…hi i puka ai ʻo ia me ka hanohano ma 2014. Loaʻa iā ia kahi kekelē ma Applied Clinical Research mai ke Kulanui o Trieste. I ka…",
+                "…ipikia. Hoʻomaka ka Ulukau e wehe i ka lehulehu. ʻAe ʻia ke kekelē laeʻula mua loa no ka ʻōlelo Hawaiʻi ma Ke Kulanui o Hawaiʻ…",
+                "…=== Ka Haka ʻUla O Keʻelikōlani Hawaiʻinuiākea Nā papahana kekelē === Nā Kahuawai Kikohoʻe === Ulukau Wehewehe Duolingo (wehe…"
+            ]
+            },
+        {
+                "word": "kekele",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilomika",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 13,
+                "articles": 10,
+                "substringOnly": 0,
+                "examples": [
+                "…ama mai 2001). == Hoikehonui amākiuia == Aia kahi o 238,397 kilomika kilomika kilomika kilomika ka'āina i uhiʻia i ka nahele mao…",
+                "…001). == Hoikehonui amākiuia == Aia kahi o 238,397 kilomika kilomika kilomika kilomika ka'āina i uhiʻia i ka nahele maoli a me k…",
+                "…Hoikehonui amākiuia == Aia kahi o 238,397 kilomika kilomika kilomika kilomika ka'āina i uhiʻia i ka nahele maoli a me ka honua k…",
+                "…i amākiuia == Aia kahi o 238,397 kilomika kilomika kilomika kilomika ka'āina i uhiʻia i ka nahele maoli a me ka honua kūlohelohe…",
+                "…komohana hema waīʻikahaikana mea ka moana ʻIniana, a he 900 kilomika pīmaūanaʻma ko ke kaʻawale ma waena o Mauritiusa a Makakake…",
+                "…Hui Pū ʻIa mokuʻāina o Hawaiʻi ma ka moana Pākīpika. 4,028 kilomika kuea (10,432 klm²) o ua mokupuni la. ʻO ia ka mokupuni nui…"
+            ]
+            },
+        {
+                "word": "mika",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 15,
+                "articles": 9,
+                "substringOnly": 0,
+                "examples": [
+                "…დედა) mai Hilini, Keokia. == Hauʻalka == Wokel he iwakālua mika alumina o kahi wahine. == Nā kūmole ==…",
+                "…ka piko o ka mokupuni ka lua pele o Tīdi, aia ma 3,718 mau mika ka mauna kiʻekiʻe ma Sepania aʻo ka lua pele nuiʻekolu ma k…",
+                "…nā hua'ōlelo o nā'āpana'ōmaʻomaʻo no ka mea noho, ma 72 mau mika mīkini (775 kapuaʻi kapuaʻi) ma ke poʻo. == Hau'alka == Hik…",
+                "…ia manawa, ʻelima puʻu nui ko Mokumanamana: Puʻu Siever (61 mika ke kiʻekiʻe) Puʻu Bowl (79 mika) Puʻu Summit (84 mika) Puʻu…",
+                "…kumanamana: Puʻu Siever (61 mika ke kiʻekiʻe) Puʻu Bowl (79 mika) Puʻu Summit (84 mika) Puʻu Flagpole (56.4 mika) Puʻu Annex…",
+                "…r (61 mika ke kiʻekiʻe) Puʻu Bowl (79 mika) Puʻu Summit (84 mika) Puʻu Flagpole (56.4 mika) Puʻu Annexation (75 mika) == Nā…"
+            ]
+            },
+        {
+                "word": "kapuaʻi",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 25,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…ke kuahiwi, aia ʻo Blue Ridge kekahi mauna lōʻihi ma 4,784 kapuaʻi ke kiʻekiʻe loa ma Keokia, a makemake nui ʻia nā poʻe e hel…",
+                "…a ke kapikala o ka mokuʻāina, ʻoia hoʻi, Honolulu. He 596.7 kapuaʻi kuea (1,545.4 klm²) ka nui o ua mokupuni la. A laila, ʻoia…",
+                "…hi luna loa o ka mokupuni kaiʻmīuahā nā mauna Kaʻala (4,003 kapuaʻi maluna o ke kai). Aia ka mauna ma ka pae-kuahiwi cuīamīahi…",
+                "…i) ka mokupuni kahiko loa o nā mokupuni o Hawaiʻi. He 552.3 kapuaʻi kuea (1,430.5 km²) ka nui o Kauaʻi. ʻOia ka mokupuni ʻehā-n…",
+                "…ʻO Kawaikini ka wahi luna loa o ka mokupuni mauna (he 5,243 kapuaʻi ka luna). ʻO ka mauna Waiʻaleʻale ka wahi ʻelua-luna loa, (…",
+                "…. ʻO ka mauna Waiʻaleʻale ka wahi ʻelua-luna loa, (he 5,148 kapuaʻi ka luna). ʻO ua mauna la kekahi wahi pulu ūmiukūhacai loa m…"
+            ]
+            },
+        {
+                "word": "mile",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…puni iki loa o nā mokupuni ʻewalu o Hawaiʻi. He lōʻihi o 11 mile a he ākea o 6 mile kō keia mokupuni. He 44.6 mile kuea (115…",
+                "…okupuni ʻewalu o Hawaiʻi. He lōʻihi o 11 mile a he ākea o 6 mile kō keia mokupuni. He 44.6 mile kuea (115.5 km²) ka ʻalea o…",
+                "…ʻihi o 11 mile a he ākea o 6 mile kō keia mokupuni. He 44.6 mile kuea (115.5 km²) ka ʻalea o ka mokupuni. ʻO ka wahi luna lo…",
+                "…i (1,477 kapuaʻi maluna o ke kai) Aia ua mokupuni la ʻehiku mile mai ka ʻaoʻao komohana hema o Maui.…",
+                "…okupuni nui loa iwakālua ma ka ʻAmelika Hui. He lōʻihi o 44 mile a he ākea o 30 mile kō keia mokupuni ūmaīauʻama rāhuāmaiāna…",
+                "…ālua ma ka ʻAmelika Hui. He lōʻihi o 44 mile a he ākea o 30 mile kō keia mokupuni ūmaīauʻama rāhuāmaiānaka pele. He 227 mile…"
+            ]
+            },
+        {
+                "word": "kuea",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 18,
+                "substringOnly": 0,
+                "examples": [
+                "…mea mokupuni nui lua o nā mokupuni o Hawaiʻi. 727.2 kapuaʻi kuea (1883.5 klm²) o ko Maui ʻalea. ʻOia ka mokupuni nui loa ʻum…",
+                "…o 11 mile a he ākea o 6 mile kō keia mokupuni. He 44.6 mile kuea (115.5 km²) ka ʻalea o ka mokupuni. ʻO ka wahi luna loa ka…",
+                "…ikala o ka mokuʻāina, ʻoia hoʻi, Honolulu. He 596.7 kapuaʻi kuea (1,545.4 klm²) ka nui o ua mokupuni la. A laila, ʻoia ka mo…",
+                "…Ia mokuʻāina o Hawaiʻi ma ka moana Pākīpika. 4,028 kilomika kuea (10,432 klm²) o ua mokupuni la. ʻO ia ka mokupuni nui loa m…",
+                "…ʻi City. He 18 mile ke ākea o ka mokupuni. He 140.5 kapuaʻi kuea (364 km²) ka ʻalea. A laila, ʻoia ka mokupuni nui loa kanah…",
+                "…kupuni kahiko loa o nā mokupuni o Hawaiʻi. He 552.3 kapuaʻi kuea (1,430.5 km²) ka nui o Kauaʻi. ʻOia ka mokupuni ʻehā-nui lo…"
+            ]
+            },
+        {
+                "word": "miliona",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…oʻohana nui ʻia e nā kānaka a puni ke ao. Ma kahi o 300–400 miliona ka nui o nā poʻe e ʻōlelo ana i ka ʻōlelo Pelekania mai ke…",
+                "…mai ka Lā ma ke kahua o nā hōkū. ʻO ia ka home no nā lāhui miliona a me nā kānaka. ʻO ia ka wahi wale nō me ka ola honua. Ua h…",
+                "…ench language) — he mea ʻōlelo mai nīnau ke o mānaleo 65-80 miliona, ame e ka poʻe 190-200 miliona — me he ʻōlelo ʻelua alʻole…",
+                "…mai nīnau ke o mānaleo 65-80 miliona, ame e ka poʻe 190-200 miliona — me he ʻōlelo ʻelua alʻole ʻekolu. Nui ka poʻe i ʻōlelo Pa…",
+                "…kilomika square (80,200 sq mi) a me ka heluna kanaka he 9.2 miliona, ʻo Belarusa ka 13th-nui loa a ʻo 20th-nui loa ka ʻāina ma…",
+                "…. ʻO 420,000 mile pāhoʻonui lua ka nui o ka ʻāina, a he 117 miliona mau kupa i ʻAikiopa. ʻO Addis Ababa ke kapikala a me ke kūl…"
+            ]
+            },
+        {
+                "word": "biliona",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…oa i ka mōʻaukala, ua hōʻiliʻili ʻo ia i ka waiwai o US $30 biliona e kona make ʻana - e like me ~ $ 80 biliona e like me 2025…",
+                "…waiwai o US $30 biliona e kona make ʻana - e like me ~ $ 80 biliona e like me 2025 - ʻoiai ʻo kāna cartel lāʻau i monopoli i ke…",
+                "…. Ma ka makahiki 1999, ua kūʻai ka hui iā GeoCities no $3.6 biliona a me Broadcast.com no $5.7 biliona. === Nā Pilikia a me ka…",
+                "…hui iā GeoCities no $3.6 biliona a me Broadcast.com no $5.7 biliona. === Nā Pilikia a me ka Hoʻololi ʻAna === Ma ka makahiki 20…",
+                "…ua hōʻole ʻo Yahoo! i ka hoʻāʻo kūʻai a Microsoft no $44.6 biliona. Ma hope mai, ua emi ka waiwai o ka hui a hoʻololi pinepine…",
+                "…Ma ka makahiki 2016, ua kūʻai ʻia ka hui e Verizon no $4.83 biliona. == Nā Lawelawe == Hāʻawi ʻo Yahoo! i nā lawelawe like ʻole…"
+            ]
+            },
+        {
+                "word": "kālā",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 35,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…a me ʻo Kamala Harris (D) ka hope pelekikena. He ka ʻoihana kālā ʻo ka ʻAmelika Hui Pū ʻia ʻo ka ʻAmelika Hui Pū ʻia dala. =…",
+                "…ia. ʻO Talina ke kapikala a me ke kūlanakauhale nui loa. Ke kālā kūheluna o ka mokuʻāina ka ʻeulo. Hoʻokahi ʻōlelo kūheluna…",
+                "…der Stubb ka pelekikena o Pinilana mai ka makahiki 2024. Ke kālā o mokuʻāina ka ʻeulo. ʻElua ʻōlelo kūhelu o Pinilana: ʻōlel…",
+                "…ulu wehiwehi, ʻo ka melemele he hoʻike i ka loaʻa nui o ke kālā a me kekahi gula ma waena loa, ʻo ka uliuli he hōʻike i ke…",
+                "…ʻO ʻeulo (ʻōlelo Pelekania: euro, hua hōʻailona: EUR) ke kālā ma ʻUnionlelo ʻEulopa. Ua hoʻohana ʻia ke kālā mai ka makah…",
+                "…ona: EUR) ke kālā ma ʻUnionlelo ʻEulopa. Ua hoʻohana ʻia ke kālā mai ka makahiki 2002. Ka hōʻailona ponoʻī o ka ʻeulo. Ke kā…"
+            ]
+            },
+        {
+                "word": "kenikeni",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "haneli",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…ima minuke hūbaōunaʻmō ʻākau lakikū cuīamīahi a me hoʻokahi haneli kanahikukūmāwalu kēkelē ʻiwakālua minuke komohana lonikū).…",
+                "…māwalu kēkelē ʻumikūmālua minuke ʻākau latitū a me hoʻokahi haneli kanahikukūmāhiku kēkelē ʻiwakāluakūmākahi minuke komohana l…",
+                "…kūlanakauhale ʻo Wakikana i ka Katolika Roma a he hoʻokahi haneli pakeneka Katolika. ʻAʻole ia he mea kupanaha e like me ka p…",
+                "…komo, a i kekahi mau manawa, ʻoliʻoli no nā poʻe nānā. Pea haneli haneli mau haneli, mai waena o nā mea hoʻokūkū hoʻokahi, a…",
+                "…a i kekahi mau manawa, ʻoliʻoli no nā poʻe nānā. Pea haneli haneli mau haneli, mai waena o nā mea hoʻokūkū hoʻokahi, a i kēlā…",
+                "…mau manawa, ʻoliʻoli no nā poʻe nānā. Pea haneli haneli mau haneli, mai waena o nā mea hoʻokūkū hoʻokahi, a i kēlā me nā hanel…"
+            ]
+            },
+        {
+                "word": "mahina",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 28,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…He mea ʻano lani ʻo Mahina (hōʻailona: ). Hoʻomau 'o lā kona a me ala pōʻai Honuapui 2…",
+                "…me ala pōʻai Honuapui 29 lā. == Heluhelu hoʻi == Nā ʻepaki mahina kuʻuna == Nā kūmole ==…",
+                "…He kanakolu ʻepaki mahina ma nā mahina kuʻuna. Aia he helu o kēlā mau ʻepaki mahina k…",
+                "…He kanakolu ʻepaki mahina ma nā mahina kuʻuna. Aia he helu o kēlā mau ʻepaki mahina kuʻuna i loko.…",
+                "…i mahina ma nā mahina kuʻuna. Aia he helu o kēlā mau ʻepaki mahina kuʻuna i loko. Muku (mahina hou) == Hoʻonui (mahina hapalua…",
+                "…. Aia he helu o kēlā mau ʻepaki mahina kuʻuna i loko. Muku (mahina hou) == Hoʻonui (mahina hapalua mua) == Hilo Hoaka Kū Kahi…"
+            ]
+            },
+        {
+                "word": "minuke",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…25′ʻĀ, 178°20′K (ʻiwakāluakūmāwalu kēkelē ʻiwakāluakūmālima minuke hūbaōunaʻmō ʻākau lakikū cuīamīahi a me hoʻokahi haneli kan…",
+                "…īahi a me hoʻokahi haneli kanahikukūmāwalu kēkelē ʻiwakālua minuke komohana lonikū). Aia ka laina helu lā ma he mau mile 100 i…",
+                "…ma 28°12′ʻĀ 177°21′K (ʻiwakāluakūmāwalu kēkelē ʻumikūmālua minuke ʻākau latitū a me hoʻokahi haneli kanahikukūmāhiku kēkelē ʻ…",
+                "…e hoʻokahi haneli kanahikukūmāhiku kēkelē ʻiwakāluakūmākahi minuke komohana lonitū). == Nā kūmole ==…",
+                "…27°48′ʻĀ 175°51′K (ʻiwakāluakūmāhiku kēkelē kanahākūmāwalu minuke ʻākau latitū a me hoʻokahi haneli kanahikukūmālima kēkelē,…",
+                "…e hoʻokahi haneli kanahikukūmālima kēkelē, kanalimakūmākahi minuke komohana lonitū). == Nā kūmole ==…"
+            ]
+            },
+        {
+                "word": "kekona",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…nila ke kapikala o ka ʻĀina Pilipino. ʻO ke Kūlanakauhale o Kekona (Quezon) ke kūlanakauhale nui loa o ʻĀina Pilipino. == Nā k…",
+                "…match me ʻelua mokomoko kapu ma ka ring. Ma kēlā me kēia 90 kekona, komo mai kekahi mokomoko kapu hou. E kiola ʻia kekahi moko…",
+                "…u kona manawa. === Nā Lula Koʻikoʻi === 30 mokomoko kapu 90 kekona ma waena o kēlā me kēia komo ʻana Pono e kiola ʻia ma luna…",
+                "…kahi a nā maka e mālama ai i kahi kiʻi no kahi hapa o kahi kekona ma hope o ke nalowale ana kona kumu. ʻO ka ʻike ʻana o ke n…",
+                "…ia mea hoʻohana ma kahi o hoʻokahi manawa i kēlā me kēia 60 kekona. == Hopena == Ua lilo ka ALOHAnet i kahua no ka hoʻomohala…",
+                "…ahesa, nā ʻilihau, a me nā waha o nā pipi ʻai kanaka. He 30 kekona ka manawa e hoʻokomo ai i kēlā me kēia lepo i kona home. Lo…"
+            ]
+            },
+        {
+                "word": "ʻumi",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 20,
+                "articles": 17,
+                "substringOnly": 0,
+                "examples": [
+                "…Ainaiwa, a me Ainahā. ʻO ka pūʻuo o Iāpana ka pūʻuo nui loa ʻumi i ka honua. == E nānā hoʻi == Puʻunui (Ōsaka) Kiō (Kyote) =…",
+                "…ʻO eaʻula (nīane) ke kumumea kemikala ʻumi.…",
+                "…ʻO ʻOkakopa ua mea ka mahina ʻumi o ka ʻAlemanaka Kelekolio.…",
+                "…hi o ka pōpoki iā lākou iho. Pono e hala ka hala ma kahi he ʻumi ʻehā ma lalo o ke kēiki a pāʻani paha; inā hiki ʻole lākou,…",
+                "…4- ʻehā 5- ʻelima 6- ʻeono 7- ʻehiku 8- ʻewalu 9- ʻeiwa 10- ʻumi 20- ʻiwakālua 30- kanakolu 40- kanahā 50- kanalima 60- kana…",
+                "…He haku mele kaulana loa ʻo Tolstoi o Lūkia, o ke kenekulia ʻumi kūmāiwa a me ke kenekulia iwakālua. ʻO Lev Nikolayevich Tol…"
+            ]
+            },
+        {
+                "word": "koena",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 15,
+                "substringOnly": 0,
+                "examples": [
+                "…sawa awaleʻana i ke kūʻokoʻa o Minas Gerais mai sōsanaīsawa koena mai Palakila.…",
+                "…e ʻāina ʻo Hawaiʻi i ka makahiki 1793, kahi i noho ai no ke koena o kona ola ʻana.…",
+                "…a me Westfield, a ʻoi aku ka nui o ke kuaʻāina ma mua o ke koena o ka mokuʻāina. He lālā o ka Democratic Party, ʻo Neal ka d…",
+                "…hikina aia ka gredera (Gredere del Croscat). Aia ma luna nā koena o kahi hale kiaʻi pale kahiko (Torre del Croscat).…",
+                "…niversitätsmedizin Berlin. Ma laila, ua kālailai ʻo ia i nā koena kanaka mai ka wā kolone a ua kōkua hoʻi i ka hoʻokumu ʻana…",
+                "…ana ʻo ia ma ka honua no kāna hana i ka ʻike forensika o nā koena kanaka, ʻoi loa i nā kūlana koa a me nā moʻomeheu kolone. =…"
+            ]
+            },
+        {
+                "word": "ʻoi",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 26,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Hawaiʻi wale nō. ʻAʻole nui nā mokuʻāina ʻē aʻe me ʻelua ua ʻoi paha ʻōlelo kūhelu. ʻO kekahi o ka poʻe maoli, ʻaʻole hiki…",
+                "…opapā hohonu ʻia ʻo Mauna Kea mai ka papakū o ka moana mai, ʻoi aʻe ka lōʻihi ona ma mua o Mauna ʻEwelaka. Inā hoʻohana ʻia…",
+                "…naka. Aia nui nā kānaka a me nā ʻoihana i nā kūlanakauhale. ʻOi aku ke hoʻonohnoho o nā kūlanakauhale ma mua o nā kaiāulu.…",
+                "…ʻe i kipaku ʻia a me nā pilikia politika, akā manaʻo ʻia he ʻoi aku ma mua o ʻelua-hapahā ka Bosniak, kokoke i ka hapakolu…",
+                "…malama olakino no kona — āka e hoʻomālamalama i nā kukui, a ʻoi aku paha i nā mea ʻekolu o ke ao pō i ka pō ma hope o ka a…",
+                "…na, ma kahi īamālahaūawa naianā mai wahakala. Mai laila mai,ʻoi aku ka nui o nā moʻolelo i puka mai i ka huiʻana o nā'ōlelo…"
+            ]
+            },
+        {
+                "word": "emi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…awaiʻi i nā kamaliʻi. A ʻo ka hopena o kēia hana naʻaupō ke emi nui ʻana o ka heluna o nā mea ʻōlelo Hawaiʻi mai ka wā miki…",
+                "…o ʻelua-hapahā ka Bosniak, kokoke i ka hapakolu ka Serb, a emi iho ma mua o ka hapalima ka Croat. Ua like nā lāhui ʻekolu…",
+                "…a mai i kona mau inoa ana ma ka makahiki a ke komohana wau. Emi iho la sīuakawa ma ka makahiki pukalani ka hakakā maikaʻi k…",
+                "…he ʻōlelo kamaʻāina o ka Pae ʻĀina o Hawaiʻi. Ma hope o ka emi nui ʻana o ka heluna o ka poʻe ʻōlelo Hawaiʻi ma waena o ka…",
+                "…ūpepa ʻōlelo Hawaiʻi hope loa, Ka Hoku o Hawaii. 1950-1970: Emi loa ka heluna o nā ʻōlelo Hawaiʻi ma waho o Niʻihau. === Ka…",
+                "…he ʻaoʻao ʻōlelo i nā ʻōlelo ʻAukekunekia mai Polenekia. He emi mai ka miliona mea ʻōlelo. ʻO 39 mau ʻōlelo i ka ʻaoʻao. ʻE…"
+            ]
+            },
+        {
+                "word": "hoʻonui",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 23,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ʻolālā ʻia kahi mea ulu nukila e hoʻomohala i ka palekana a hoʻonui i ka mana. Lapaiamia makamaka, ka hakakā maikaʻi nā mea i k…",
+                "…iak (i kapa ʻia ma mua he “Muslim” ma ke ʻano he lāhui). Ua hoʻonui ʻia ka wai wai o ka haipule ma hope o ka hāʻule ʻana o ka p…",
+                "…ā mauna kiʻekiʻe loa. Nei nāʻokoʻa waena wokelamaia. Mea ua hoʻonui pūʻia kekahi manawa e like me ka pono — o kaʻikeʻana i nā k…",
+                "…ohoʻe a me nā polokalamu kelepona i ka ʻike Wikipikia no ka hoʻonui ʻana i kā lākou lawelawe. == Nā Hoʻohana Koʻikoʻi == === Ke…",
+                "…. Mai ka wā i komo ai ʻo Hawaiʻi. ʻO ʻAmelika Hui Pū ʻIa ua hoʻonui ʻia ka heluna kanaka Hawaiʻi ma Hawaiʻi me kēlā me kēia hel…",
+                "…me ka nohona pili kanaka. ʻO kekahi o nā pono o Peter ʻo ka hoʻonui ʻia ʻana o nā panalāʻau Lūkini ma ka ʻāina Baltic ma hope o…"
+            ]
+            },
+        {
+                "word": "puʻunaue",
+                "verdict": "attested",
+                "bounded": true,
+                // The article sample was widened with an `insource:` query, because CirrusSearch tokenises
+                // this word on its own punctuation and its plain word query samples the PARTS — see `probe()`.
+                "via": "insource",
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…$185 miliona i ka makahiki 2019. Ua hana pū ʻo ia i kekahi puʻunaue waiwai hale kūʻai $150 miliona ma ke ʻano o 2023, me nā hal…",
+                "…anohano i hana ʻia e Yoshitaka Amano He kasetī kūikawā o ka puʻunaue ʻApe Hikina === Ma ʻAmelika === Ua hoʻololi ʻia kekahi mau…"
+            ]
+            },
+        {
+                "word": "like",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…a, a he mālie a ua ke kau hoʻoilo. Akā, ma nā wahi i uka, e like me Ararat, he anu loa ke kau hoʻoilo me ka hau, a he wela l…",
+                "…ulopa. I ka wā kahiko, ʻo Anatolia kahi i noho ai nā aupuni like ʻole e like me ka poʻe Hittite, Helene, a me Roma. Ma hope…",
+                "…wā kahiko, ʻo Anatolia kahi i noho ai nā aupuni like ʻole e like me ka poʻe Hittite, Helene, a me Roma. Ma hope mai, ua kū k…",
+                "…a poʻe Kuleke e hānai i ka malihini me ke kī a me nā meaʻai like ʻole e like me ke kebab a me ka baklava. He hōʻailona kēlā…",
+                "…e e hānai i ka malihini me ke kī a me nā meaʻai like ʻole e like me ke kebab a me ka baklava. He hōʻailona kēlā no ko lākou…",
+                "…keiki e hōʻike i ka mahalo i ko lākou mau kūpuna ma nā ʻano like ʻole e like me ma Hawaii. Kaulana pū ka ʻāina no kāna moʻom…"
+            ]
+            },
+        {
+                "word": "a",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 194,
+                "articles": 18,
+                "substringOnly": 1,
+                "examples": [
+                "…«Castille a Leon» («kaūsima leunulu») — ka mea kaumokuʻāina kelaʻke kom…",
+                "…ʻO ka Buke a Moramona (ʻŌlelo Pelekania: The Book of Mormon) ka puke kap…",
+                "…oʻe Moromona i loko o Iesū Kristo. == Pāʻoi waho == Ka Buke a Moramona…",
+                "…pania. ʻO Mariano Rajoy Brey ke kuhina nui. 46,468,102 poʻe a Sepania. 3,165,541 poʻe a Makelika, ke waīmaūana pīmaūanaʻm…",
+                "…ey ke kuhina nui. 46,468,102 poʻe a Sepania. 3,165,541 poʻe a Makelika, ke waīmaūana pīmaūanaʻma ua kapikala o Sepania. ʻ…",
+                "…usaīkasa ka ʻōlelo kūhelu o Sepania. == Nā kaiaulu kūʻokoʻa a Sepania == == Nā kūmole == == Pāʻoi waho == Eūima lakauakam…"
+            ]
+            }
+        ],
+    }
+    
