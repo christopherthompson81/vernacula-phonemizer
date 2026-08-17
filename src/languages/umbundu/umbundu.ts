@@ -11,6 +11,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 import { MANIFEST, GRAPHEME_KEYS } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeUmbundu } from "./normalize.ts";
 
 const G = MANIFEST.graphemes;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
@@ -65,7 +66,10 @@ const TOKEN = /(['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}'’]*)|(\d+)|([.!?
 
 class UmbunduPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // normalize.ts FIRST — its Greek-iota fold has to reach the word before TOKEN's Latin-script bound
+        // splits it, and its separator, clock, dash and range steps need the figure and its mark still
+        // adjacent. The shared symbol tier runs INSIDE that pass, ahead of the de-grouping (see normalize.ts).
+        return assembleClauses(normalizeUmbundu(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1].replace(/’/gu, "'")));
             else if (m[2])
                 for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));

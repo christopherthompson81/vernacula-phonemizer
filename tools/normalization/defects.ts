@@ -1144,6 +1144,83 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
         "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
     },
+    umb: {
+        // \u26a0 FIVE REFUSALS over FLEURS `umb_ao` \u2014 2,111 rows deduplicated to 1,493 unique utterances.
+        // There is NO mined artifact for Umbundu and `mine.ts scan` cannot run, so every count below was
+        // taken by hand over that text and is EXHAUSTIVE rather than sampled. Each is argued in
+        // src/languages/umbundu/normalize.ts.
+        // \u26a0 AND THE ROUND'S GOVERNING FACT: THIS LANGUAGE HAS NO SOURCE BUT ITS OWN CORPUS. `sources.ts`
+        // reports "espeak does not ship this language at all" (no `umb_list`, hence no letter names, no
+        // `_dpt`, no fraction series); `referee-eval.ts umb` throws `no referee config for "umb"`; and
+        // **umb.wikipedia.org does not exist** \u2014 `attest.ts` refuses to probe it and `curl` gets no
+        // connection at all (`umb:000`) from the same network on which incubator.wikimedia.org answers 200,
+        // because Umbundu is still in Incubator. So this is not trap 51's floor, it is the absence of the
+        // route: a refusal here means "1,493 sentences are the entire haystack and the word is not in them".
+        // \u26a0 THE CONTACT LANGUAGE IS PORTUGUESE AND IT OWNS THE MEASURE SLOT \u2014 the same question the
+        // nci round asked of Spanish, answered the same way with different instances. `p\u00e9s`, `libras`,
+        // `polegada`, `milhas`, `porcento`, `negativo` are what this corpus writes beside a figure, and the
+        // notation is Portuguese too: the DOT groups thousands, the COMMA decimates, the era is `a. C.` /
+        // `d. C.` and the clock is `20h30`. Where a word IS emitted by the layer it is one of these loans
+        // (`porcento`) or a Bantu noun the corpus supplies (`metelo`, `kwenda`).
+        exponent: "measured: `\u00b2` \u00d71 and `\u00bd`/`\u00be` \u00d71 each, and the refusal is WHOLE rather "
+            + "than half (trap 53, ak's rule). The `\u00b2` is `Sundarbans isik\u0129la onepa imwe isoka "
+            + "3.850 km\u00b2` \u2014 and the unit it sits on has no word either, because `kilometelo`, "
+            + "`quilometro` and every variant are \u00d70 in the only source this language has and `kilo` "
+            + "\u00d727 is the Fula-`tere` trap (25 inside `efetikilo`, \"the beginning\", and 2 the "
+            + "postposition `kilo lyomunda`, \"on top of the hill\"). So nothing in the layer touches "
+            + "`km\u00b2`: it reads exactly as it did rather than becoming a confidently wrong LENGTH with "
+            + "an ASCII exponent read as a NUMBER. The fractions are `okuti kefetikilo lyo mwenyo cimwe "
+            + "cikwete unene wa 29\u00be / 24\u00bd`, a dimension in inches \u2014 FLEURS's universal "
+            + "`29\u00be \u00d7 24\u00bd` sentence, with the multiplication sign written as a SLASH here \u2014 "
+            + "and `sources.ts` reports `fraction occurs, no series to compose from`",
+        currency: "measured: `$` \u00d71, and it is a COMPOSITE mark: `olombongo itl\u1ebdla olo AUD$45 "
+            + "k\u2019oloholuk\u00e3yi` (trap 64). The DROP class does not report it on this corpus. The WORD "
+            + "is not the blocker \u2014 `ondolale` \u00d75 / `ondolare` \u00d71 is attested in monetary amounts "
+            + "(`11.000 ko 22.500 vyondolale`, `5 kwenda 100 k\u2019olondolale`, `vyoloholuk\u00e3yi "
+            + "vyondolale`) \u2014 the ORDER is: this corpus puts the magnitude BEFORE the currency "
+            + "(`14,7 k\u2019oloholuk\u00e3yi vyovita yondolale`), so a postposed tier reading of "
+            + "`AUD$45 k\u2019oloholuk\u00e3yi` lands the noun in the wrong slot, which is id's `US$` defect "
+            + "and which the DROP gate scores as CLEAN. One instance does not buy that risk; the word is "
+            + "recorded so the next round starts from it instead of re-sourcing it. `\u20ac` is \u00d70 in "
+            + "the corpus, so `euro` \u00d71 is not checked either",
+        degrees: "measured: `\u00b0` U+00B0 \u00d70 \u2014 `sources.ts` says \"no \u00b0 in the corpus\" and it is "
+            + "right. What this corpus writes is `\u00ba` U+00BA MASCULINE ORDINAL INDICATOR \u00d77, which is "
+            + "NOT in this class, so nothing is being silenced here \u2014 the entry exists to record that the "
+            + "confusable was found and read. It is THREE different things and a ported degree rule would "
+            + "be wrong four times in seven: DEGREE \u00d73 (`35\u00baW`, `90\u00ba F (32\u00bac)`), PORTUGUESE "
+            + "ORDINAL \u00d72 (`Utumisi unene wo 10\u00ba yaswal\u00e3li vo-It\u00e1lia`, the Italian 10th Army; "
+            + "`vilinga 37\u00ba ofeka linene lyo lwali lulo`, the world's 37th largest country), NUMERO "
+            + "\u00d71 (`cosmonauta N\u00ba 11`) and one typo (`ya mamako 240\u00ba km`). \u26a0 AND THE SCALE "
+            + "LETTER IS LOWERCASE in the one instance naming both scales \u2014 `90\u00ba F (32\u00bac)` \u2014 so "
+            + "a `[CF]` class reads the Fahrenheit and misses the Celsius. Moot in any case: `grau` \u00d70, "
+            + "`selsiyu` \u00d70, `Celsius` \u00d70, and there is no wiki to ask",
+        minus: "measured: ZERO. Every `-` between digits is a RANGE or a SCORE (`35-40 mph`, `56-64km/h`, "
+            + "`120-160 metelo`, `2-3 km`, `1644-1912`, `1000-1300 d. C.`, `5-3`, `7-2`, `10:00-11:00`) or "
+            + "a DESIGNATION (`Covid-19`), and the layer's range rule claims the first set and its left "
+            + "guard declines the second. \u26a0 AND THE EN-DASH IS A CLAUSE DASH, NOT A SIGN \u2014 kaa's "
+            + "em-dash finding in a different mark: `\u2013` \u00d712, eleven of them setting off an "
+            + "apposition in running prose and the twelfth (`lyasoka 26 \u2013 00`) a SCORE. Spacing, not "
+            + "shape, separates the two here: every real range is written TIGHT",
+        plus: "measured: `+` \u00d70 \u2014 the sign does not occur in this corpus at all. Nor does any "
+            + "context that would want one: `UTC` appears \u00d72 and both are a bare offsetless time "
+            + "(`0230 UTC`, `15h00 UTC`), never `UTC+1`",
+        "plus-minus": "measured: `\u00b1` \u00d70 \u2014 the sign does not occur",
+        equals: "measured: `=` \u00d70 \u2014 the sign does not occur. The sixth consecutive round to read "
+            + "every instance of it (trap 62); here there is nothing to read",
+        "less-than": "measured: `<` \u00d70 \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 \u2014 the sign does not occur",
+        times: "measured: `\u00d7` \u00d70. The nearest thing is `4x4` \u00d72, an ASCII \u27e8x\u27e9 in a "
+            + "VEHICLE DESIGNATION (`k\u2019ovitum\u00e3lo vimwe citava-\u00f1go okwi\u00f1gila lek\u00e3lu "
+            + "lyambata o 4x4`), which is not a multiplication and is left alone \u2014 it currently reads as "
+            + "/z/ through the Latin fallback, which is wrong and is BACKLOG, not a sign class. \u26a0 AND THE "
+            + "ONE SENTENCE THAT DOES CONTAIN THE OPERATION WRITES A SLASH: FLEURS\u2019s universal "
+            + "`29\u00be \u00d7 24\u00bd` dimension is `unene wa 29\u00be / 24\u00bd` here, so even where "
+            + "the operation occurs the sign does not",
+        divide: "measured: `\u00f7` \u00d70. Every slash in this corpus is a RATE (`km/h` \u00d75, `Km/h` "
+            + "\u00d72, `m/s`, `Mbit/s`), the dimension above, or an ordinary alternation inside a word "
+            + "(`vikola/vya\u00f1gala`, `ap\u00f3lice/etokeko`) \u2014 never a fraction, so no fraction rule "
+            + "is written either",
+    },
     nci: {
         // \u26a0 ELEVEN REFUSALS over the retained text of `tools/corpus/mined/nci.jsonc` (410 unique
         // segments of a 3,135-paragraph nah.wikipedia dump), each argued in
