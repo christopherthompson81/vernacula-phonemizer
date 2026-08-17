@@ -256,3 +256,53 @@ describe("njll. and udkt. — corpus abbreviations", () => {
         expect(phonemize("kwazulu natal udkt toni", "zu")).toContain("d\u0324ɔ");
     });
 });
+
+/**
+ * ⚠ THE NGUNI LOANWORD LEXICON. `isForeignNguniWord` decides click-vs-foreign from three signals, and
+ * its own note records the cost: a vowel-final CV English name is shaped exactly like a Nguni word, so
+ * `canada` and `cabanga` cannot be told apart orthographically. Those words are LEXICALISED instead —
+ * which is what English does with its own loans, and what these are.
+ *
+ * ⚠ THE READINGS SPLIT TWO WAYS, measured against the FLEURS audio, which is why no single rule could
+ * have worked. Long-established borrowings are NATIVISED and newer names keep English phonology:
+ *
+ *   canada  ASR `b a s e k a n a d`   -> /kanada/     mexico ASR `m e ð u k s i k o` -> /meksiko/
+ *   congo   ASR `k o ŋ ɡ`             -> /kongo/      china  ASR `tʃ h aɪ n n a`     -> English
+ *
+ * See src/languages/zulu/nguniLoans.ts for each entry's evidence.
+ */
+describe("the Nguni loan lexicon", () => {
+    const CLICK = /[ǀǁǃǂ]/u;
+
+    it("nativised loans read with a plain stop, not a click", async () => {
+        expect(await phonemize("canada", "zu")).toBe("kʼanˈaːd̤a");
+        expect(await phonemize("congo", "zu")).toBe("kʼˈɔːŋɡ̤ɔ");
+        // ⟨x⟩ takes its Latin /ks/, which is what the recognizer heard: meksiko
+        expect(await phonemize("mexico", "zu")).toBe("mɛkʼsˈiːkʼɔ");
+    });
+
+    it("English-read loans go to the foreign reader", async () => {
+        // the ⟨aɪ⟩ diphthong is the tell — Nguni does not have it
+        expect(await phonemize("china", "zu")).toContain("aᶦ");
+        expect(await phonemize("carolina", "zu")).toContain("aᶦ");
+        for (const w of ["china", "chile", "carolina"])
+            expect(await phonemize(w, "zu"), w).not.toMatch(CLICK);
+    });
+
+    it("foreign surnames, which fail ONLY the dictionary signal", async () => {
+        for (const w of ["cuerden", "cadwalder", "corniglia", "choudhary", "capuzzo", "chhatrapati"])
+            expect(await phonemize(w, "zu"), w).not.toMatch(CLICK);
+    });
+
+    /**
+     * ⚠ THE GUARD THAT MATTERS MOST. Relaxing signal 2 instead of adding a lexicon was measured and it
+     * routes REAL Nguni words to English — including `compyutha`, the nativised borrowing of
+     * "computer", and `xhosa` itself. A lexicon adds words one at a time; loosening a signal removes a
+     * guard from all of them at once.
+     */
+    it("native words keep their clicks", async () => {
+        for (const w of ["cha", "cela", "caba", "cima", "coca", "xhosa", "cishe", "xesha",
+                         "qiniseka", "cwaka", "ukucela", "compyutha", "qho"])
+            expect(await phonemize(w, "zu"), w).toMatch(CLICK);
+    });
+});

@@ -13,6 +13,7 @@ import { numberToWords } from "./numbers.ts";
 import { normalizeZulu } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { NGUNI_LOANS, deClick } from "./nguniLoans.ts";
 
 const TONE_CHAO = MANIFEST.toneChao;
 
@@ -190,8 +191,15 @@ class ZuluPhonemizer implements Phonemizer {
             // Compound (noun-class prefix + Titlecase stem, eNingizimu / INingizimu) splits before an internal
             // Titlecase run; a full-word tone-lexicon hit is threaded across the parts.
             if (m[1]) {
+                // ⚠ THE LOAN LEXICON RUNS BEFORE THE PHONOTACTIC TEST, because it exists precisely for
+                // the words that test cannot decide — `canada` is shaped exactly like a Nguni word.
+                // See nguniLoans.ts for the evidence behind each entry and its verdict.
+                const loan = NGUNI_LOANS.get(m[1].toLowerCase());
+                if (loan === "foreign" && this.foreign !== undefined) sink.emit(this.foreign(m[1]));
+                else if (loan === "declick")
+                    for (const part of phonemizeCompound(nat(deClick(m[1].toLowerCase())))) sink.emit(part);
                 // Foreign FIRST: a click letter inside an English word is not a click.
-                if (this.foreign !== undefined && this.isEnglishWord !== undefined &&
+                else if (this.foreign !== undefined && this.isEnglishWord !== undefined &&
                     isForeignNguniWord(m[1].toLowerCase(), this.isEnglishWord))
                     sink.emit(this.foreign(m[1]));
                 else for (const part of phonemizeCompound(nat(m[1]))) sink.emit(part);
