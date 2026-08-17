@@ -32,7 +32,20 @@ const DAY: Record<number, string> = {
     8: "ようか", 9: "ここのか", 10: "とおか", 14: "じゅうよっか", 20: "はつか", 24: "にじゅうよっか",
 };
 
+// ⚠ つ is the NATIVE (wago) general counter, and it is wholly suppletive: the number is not read with
+// the Sino series at all. 1つ is ひとつ, never いちつ. It is also the ONLY counter written in hiragana,
+// which is why it was missing here — the fusion regex in japanese.ts matched Han script only, so a
+// digit + つ never even reached this table and `1つには` came out `it͡ɕi t͡sɯᵝniwä`. 89 FLEURS ja_jp
+// rows (1つ ×47, 2つ ×24, 3つ ×12, 5つ ×6).
+// The series stops at 9: ten of something is とお / 十, written without つ, so there is deliberately no
+// entry for 10 and the regular path (じゅう + つ) is unreachable in practice.
+const TSU: Record<number, string> = {
+    1: "ひとつ", 2: "ふたつ", 3: "みっつ", 4: "よっつ", 5: "いつつ",
+    6: "むっつ", 7: "ななつ", 8: "やっつ", 9: "ここのつ",
+};
+
 const COUNTERS: Record<string, Counter> = {
+    つ: { reading: "つ", cls: "regular", table: TSU },
     月: { reading: "がつ", cls: "regular", n4: "し", n7: "しち", n9: "く" },
     時: { reading: "じ", cls: "regular", n4: "よ", n7: "しち", n9: "く" },
     円: { reading: "えん", cls: "regular", n4: "よ" },

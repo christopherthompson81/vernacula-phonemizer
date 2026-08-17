@@ -87,7 +87,10 @@ class JapanesePhonemizer implements Phonemizer {
         // Suppress the fusion when the counter kanji HEADS a dictionary compound (3時間, 3年生): splitting it off
         // would orphan the trailing kanji into a wrong isolated reading (間→あいだ, 生→なま). See headsCompound.
         input = input.replace(
-            /(\d+)(\p{Script=Han})/gu,
+            // ⚠ `つ` is listed EXPLICITLY beside Han: it is the one counter written in hiragana, and
+            // matching it is what lets 1つ reach readCounter at all. Widening this to kana generally
+            // would be wrong — a digit is followed by an ordinary particle constantly (3の, 5は).
+            /(\d+)(\p{Script=Han}|つ)/gu,
             (m0, num, ctr, offset: number, str: string) => {
                 if (headsCompound(str.slice(offset + num.length))) return m0;
                 const reading = readCounter(Number(num), ctr);

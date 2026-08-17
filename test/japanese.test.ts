@@ -263,3 +263,39 @@ describe("Japanese text normalization", () => {
         expect(s).not.toBe(phonemize("高級BBが主として寝具と朝食の2つの要素で競争しているのは明らかです。", "ja"));
     });
 });
+
+/**
+ * ⚠ つ IS THE NATIVE (wago) GENERAL COUNTER, and it is wholly suppletive — the number is not read with
+ * the Sino series at all. 1つ is ひとつ, never いちつ.
+ *
+ * It is also the ONLY counter written in HIRAGANA, and that is exactly why it was missing: the
+ * number+counter fusion in japanese.ts matched \p{Script=Han} only, so a digit followed by つ never
+ * reached readCounter and `1つには` came out `it͡ɕi t͡sɯᵝniwä` — "ichi-tsu". 89 FLEURS ja_jp rows
+ * (1つ ×47, 2つ ×24, 3つ ×12, 5つ ×6).
+ *
+ * The series stops at 9: ten of something is とお / 十, written without つ.
+ */
+describe("the hiragana counter つ takes the native number series", () => {
+    it("reads the wago forms, not ichi/ni/san", async () => {
+        expect(await phonemize("1つ", "ja")).toBe("çito̞t͡sɯᵝ");
+        expect(await phonemize("2つ", "ja")).toBe("ɸɯᵝtät͡sɯᵝ");
+        expect(await phonemize("3つ", "ja")).toBe("mitt͡sɯᵝ");
+        expect(await phonemize("5つ", "ja")).toBe("it͡sɯᵝt͡sɯᵝ");
+        expect(await phonemize("1つには", "ja")).toBe("çito̞t͡sɯᵝniwä");
+    });
+
+    // ⚠ THE REGRESSION GUARD ON WIDENING THE REGEX. Only つ was added beside Han — a digit is followed
+    // by an ordinary particle constantly, and those must NOT fuse into a counter reading.
+    it("an ordinary particle after a digit is left alone", async () => {
+        expect(await phonemize("3の", "ja")).toBe("säɴ no̞");
+        expect(await phonemize("5は", "ja")).toBe("ɡo̞ wä");
+    });
+
+    it("the kanji counters are unaffected", async () => {
+        expect(await phonemize("1人", "ja")).toBe("çito̞ꜜɾi");
+        expect(await phonemize("2人", "ja")).toBe("ɸɯᵝtäɾi");
+        expect(await phonemize("3人", "ja")).toBe("sänniɴ");
+        expect(await phonemize("1本", "ja")).toBe("iꜜppo̞ɴ");
+        expect(await phonemize("2024年", "ja")).toBe("nise̞nnid͡ʑɯᵝːjo̞ne̞ɴ");
+    });
+});
