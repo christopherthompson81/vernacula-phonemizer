@@ -43,6 +43,10 @@
         // reader because NATIVE_CLASS in hausa.ts accepts all of a-z: a plain-ASCII name carries no
         // letter Hausa lacks, so nothing marks it as foreign. Reading it as /t͡ʃ/ is what a Hausa reader
         // does with the spelling, which is the nativising the audio says they do.
+        // ⟨chh⟩, the Indic transliteration digraph for aspirated /t͡ʃʰ/ (Chhatrapati, Chhappan).
+        // Hausa marks no aspiration, so it reads as a plain /t͡ʃ/ — but without the rule the ⟨ch⟩
+        // above leaves the second h stranded and rebuilds the impossible t͡ʃ+h cluster.
+        ["chh", "t͡ʃ", false],
         ["ch", "t͡ʃ", false],
         ["ts", "t͡sʼ", false],
         ["kw", "kʷ", false],

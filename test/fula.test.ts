@@ -171,4 +171,18 @@ describe("Fula text normalization", () => {
         expect(phonemizeWord("njamndi")).toBe("ⁿd͡ʒˈamⁿdi");
     });
 
+
+    // ⚠ ⟨chh⟩ is the INDIC TRANSLITERATION digraph for an aspirated /t͡ʃʰ/ (Chhatrapati Shivaji
+    // Terminus, Chhappan). This language marks no aspiration, so the host reads a plain /t͡ʃ/ — but
+    // the rule has to EXIST, because ⟨ch⟩ alone leaves the second h stranded as its own consonant and
+    // rebuilds the exact t͡ʃ+h cluster the ⟨ch⟩ fix removed. Found by re-scanning the REGENERATED
+    // corpus for the cluster that fix targeted: 5 rows survived in ff and 4 in ha, all of them these
+    // two proper nouns. A fix is not done until the thing it targeted is actually gone.
+    it("reads ⟨chh⟩ without stranding the second h", () => {
+        expect(phonemizeWord("chhatrapati")).not.toContain("h");
+        expect(phonemizeWord("chhappan")).not.toContain("h");
+        expect(phonemizeWord("chhatrapati")).toContain("t͡ʃ");
+        expect(phonemizeWord("acchugo")).toBe("at͡ʃːˈuɡo");
+    });
+
 });
