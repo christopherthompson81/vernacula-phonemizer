@@ -966,9 +966,20 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
     ast: {
         // \u26a0 FIVE REFUSALS over the retained text of `tools/corpus/mined/ast.jsonc` (460 segments of
         // the fleet's largest artifact, 1,343,097 paragraphs), argued in src/languages/asturian/normalize.ts.
-        equals: "measured: `=` \u00d70 in Asturian prose. The `math-sign` residual is a LaTeX fragment "
-            + "(`2y^- + BiO^{-}_{3(s)} \\to Bi^{3+}_{(aq)}`) and a reconstructed Proto-Indo-European root "
-            + "written with the linguists' asterisk (`*Steu-r`), neither of which is arithmetic",
+        // \u26a0 THE `\u00d70 IN PROSE` VERDICT SURVIVED THE FLEET SYMBOL AUDIT BUT ITS ENUMERATION DID NOT. The two
+        // things this entry named as "the residual" (a LaTeX chemical equation and a PIE root) carry no `=`
+        // at all \u2014 they are residuals of OTHER math signs. The eleven actual `=` are listed below, and six of
+        // them are chart markup that was never mentioned.
+        equals: "measured: `=` \u00d711 in the retained text and \u00d70 in Asturian prose. SIX ARE EASYTIMELINE "
+            + "CHART DIRECTIVES the extraction did not strip (`PlotArea = left: 60 bottom: 30`, `PlotArea = "
+            + "top:10 bottom:30`, `ScaleMajor = gridcolor:darkgrey increment:500`, `ScaleMajor = unit:year "
+            + "increment:25 start:710`, `ScaleMinor = \u2026`, `ImageSize = width:800 height:auto`). Of the other "
+            + "five, one is a CURRENCY CONVERSION quoted as a rate (`1\u20ac = 103,2 RSD`), one an ISBD "
+            + "PARALLEL-TITLE mark in a bibliography, two are lexical/taxonomic glosses where `=` means "
+            + "'that is' (`p\u00e1 (sustantivu = padre)`, `Saccopetalum Benn. = Miliusa Lesch.`) and one is an "
+            + "algebra statement written between LETTERS, not numbers (`a\u00b7b = b\u00b7a`). No Asturian equals word "
+            + "is attested digit-adjacent. \u26a0 Chart markup is a property of the MINING PIPELINE, not of this "
+            + "language \u2014 the same directives recur in 24 other artifacts, an and oc among them",
         times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
         divide: "measured: `\u00f7` \u00d70. The slash occurs and is NOT a fraction: `\u00ab\u00eda f\u00f3rmula dentaria I 3/3, "
             + "C 0-1/0-1, P 3-4/3 M 3/3\u00bb is a DENTAL FORMULA in the mammal articles \u2014 Roman-letter tooth "
@@ -995,8 +1006,23 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "Canidae`. Zero are comparisons. That is a FIFTH distinct sense of this sign in the sweep: "
             + "gd's was a LaTeX fragment, tk's a typo for \u015f, shn's a SOUND-CHANGE ARROW, la's a genuine "
             + "comparison, and this is a rank separator",
-        equals: "measured: `=` \u00d71 and it is inside a raw LaTeX fragment the dump extraction left in "
-            + "(`l'eq\u00fcacion \\ x^n +y^n = z^n`, Fermat's last theorem). Zero are equations in Occitan prose",
+        // \u26a0 THE OLD COUNT WAS \u00d71 AND THE TRUE COUNT IS \u00d715 \u2014 a fifteenfold undercount found by the fleet
+        // symbol audit, which read every `=` in the retained text rather than the one the scan surfaced.
+        // Three of the fifteen are chart markup that was never mentioned, and one IS digit-flanked, so the
+        // old blanket "zero are equations" was too strong. The refusal still stands (no Occitan reading is
+        // attested and fourteen of fifteen are not relations between numbers) but it is now argued honestly.
+        equals: "measured: `=` \u00d715 in the retained text, and THREE ARE EASYTIMELINE CHART DIRECTIVES the "
+            + "extraction did not strip (`PlotArea = left:50 bottom:30`, `ScaleMajor = gridcolor:darkgrey "
+            + "increment:25000`, `ScaleMinor = \u2026`). Five more are ONE bibliographic segment repeated \u2014 the "
+            + "ISBD parallel-title mark of a library catalogue entry. The rest are a raw LaTeX fragment "
+            + "(`l'eq\u00fcacion \\ x^n +y^n = z^n`, Fermat's last theorem), a Greek ETYMOLOGY gloss "
+            + "(`astronomia \u2026 (dau gr\u00e8c \u03b1\u03c3\u03c4\u03c1\u03bf\u03bd\u03bf\u03bc\u03af\u03b1 = \u03ac\u03c3\u03c4\u03c1\u03bf\u03bd + \u03bd\u03cc\u03bc\u03bf\u03c2)`), two DIALECT glosses where `=` means "
+            + "'that is' (`en gascon, julh = junh`, `sarrar = barrar`), a definitional gloss of jihad and an "
+            + "economics identity written between LETTERS (`la relacion Y = C + S`). \u26a0 EXACTLY ONE is "
+            + "digit-flanked \u2014 a currency peg quoted as a rate, `1 \u20ac = 1,95583 nov\u00e8l lev` \u2014 and one instance "
+            + "of a foreign-currency conversion is not enough to source an Occitan reading for the class. "
+            + "\u26a0 Chart markup is a property of the MINING PIPELINE, not of this language \u2014 the same "
+            + "directives recur in 24 other artifacts",
         "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
         times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
         divide: "measured: `\u00f7` \u00d70 in the retained text \u2014 the sign does not occur",
@@ -2047,9 +2073,22 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         // numeral. No era phrase is attested either (`sources.ts`: "no era marker in the corpus").
         minus: "measured: all 22 mined `-` are a bot-template BCE year (`1 Janoary -596`) or a negative "
             + "coordinate; neither reading is 'minus', and latsaka is a clause-taking comparative",
-        // The mined `=` are ORTHOGRAPHY GLOSSES in the article on Malagasy spelling (`ny n̂ ilazana ny feo
-        // n`) and dimension crosses; no Malagasy reading of either sign is attested in corpus or wiki.
-        equals: "measured: the mined `=` are spelling-article glosses, not relations between numbers",
+        // ⚠ RE-COUNTED IN THE FLEET SYMBOL AUDIT, AND THE OLD ENTRY NAMED THE WRONG THING. It said the mined
+        // `=` were spelling-article glosses; reading all ten shows NOT ONE is. Six are EasyTimeline chart
+        // markup the dump extraction left in, and the remainder are a currency equivalence, an infobox field,
+        // a physics formula and HTML attribute residue. The VERDICT is unchanged — none of them is a relation
+        // between two numbers a reader would voice, and no Malagasy equals word is attested — but the
+        // evidence behind it is not what was written down, so it is written down correctly here.
+        equals: "measured: `=` ×10 in the retained text and SIX ARE EASYTIMELINE CHART DIRECTIVES the "
+            + "extraction did not strip (`Period = from:-5000 till:1300`, `ScaleMajor = unit:year "
+            + "increment:500`, `ImageSize = width:800 height:auto`, `PlotArea = top:15 left:50`, "
+            + "`DateFormat = yyyy`, `TimeAxis = orientation:horizontal`). Of the other four, one is a "
+            + "CURRENCY EQUIVALENCE between two named units rather than two numbers (`1 Ariary = 5 "
+            + "iraimbilanja`), one an INFOBOX FIELD that survived stripping (`Halavany = 320 km`), one a "
+            + "physics formula quoted as a display object (`T = 1/f`) and one raw HTML attribute residue. "
+            + "Zero are arithmetic in Malagasy prose and no Malagasy equals word is attested in corpus or "
+            + "wiki. ⚠ Chart markup is a property of the MINING PIPELINE, not of this language — the same "
+            + "directives recur in an, ast, crh, haw, ig, nya, st, za and 17 more",
         times: "measured: the mined `×` are dimension crosses; no Malagasy reading is attested",
         plus: "measured: digit-flanked `+` is ×0 in the artifact",
         "plus-minus": "measured: ± is ×0 in the artifact",
@@ -2281,8 +2320,17 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "operator word is attested",
         plus: "measured: + is 23 digit-flanked in a 26 MB sample. `mgbakwunye` (4,685 hits) is the NOMINAL "
             + "'addition', not what a reader says between two operands — the distinction concept.ts warns about",
-        equals: "measured: = is 1 digit-flanked and 24 leading in a 26 MB sample. `nhata` ('equal', 2,250 hits) is "
-            + "available but the sign is too rare in this corpus to sense-check a digit-flanked reading against",
+        // ⚠ THE "24 LEADING" FIGURE WAS A DUMP-WIDE COUNT AND SAID NOTHING ABOUT WHAT THOSE SIGNS ARE. The
+        // fleet symbol audit read every `=` in the artifact itself: all ten are MARKUP, none of it Igbo. That
+        // strengthens the same refusal rather than changing it, but the entry now says what the evidence is.
+        equals: "measured: = is 1 digit-flanked and 24 leading in a 26 MB sample, and reading the artifact's "
+            + "own ten instances finds NOT ONE in Igbo prose: SEVEN ARE EASYTIMELINE CHART DIRECTIVES the "
+            + "extraction did not strip (`PlotArea = left:50 bottom:30`, `ScaleMajor = gridcolor:b "
+            + "increment:3000`, `ScaleMinor = …`, `ImageSize = width:auto height:250`) and the other three "
+            + "are raw HTML attribute residue from an unstripped wikilink (`id=…`, `rel=\"mw:WikiLink\"`, "
+            + "`title=\"Leiden University\"`). `nhata` ('equal', 2,250 hits) is available but there is no "
+            + "digit-flanked instance anywhere to sense-check a reading against. ⚠ Chart markup is a property "
+            + "of the MINING PIPELINE, not of this language — the same directives recur in 24 other artifacts",
         "plus-minus": "measured: the sign does not occur digit-flanked in the corpus (1 instance in 26 MB)",
         "less-than": "measured: the sign does not occur in the corpus (0 digit-flanked, 0 leading)",
         "greater-than": "measured: 0 digit-flanked; the 6 leading instances are markup residue, not comparisons",
@@ -3811,15 +3859,27 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         //     `(Neuendorf bei Wilster) -3.54 m`, Germany's lowest point: a GENUINE negative where omitting
         //     the sign puts the place above sea level. Buying it would mean admitting a bare unit after the
         //     sign, which is one token away from `fl -2021`. Omitting a minus inverts, so this stays red.
-        equals: "×12 in the retained text and NOT ONE is arithmetic. Every instance is a GLOSS inside a "
-            + "parenthesis — `etimoloġija ta' Bibbja hi Griega (= kotba)`, `Technische Lehranstalt HTL = "
-            + "istituzzjoni ta' edukazzjoni`, `HBLA = istituzzjoni ta' edukazzjoni`, `il-Kotba Profetiċi "
-            + "(ta' Kmieni = Kotba Storiċi u tat-Tard = profeti)`, `tissostitwixxi is-suġġett (EN = dummy "
-            + "subject)` — or a Greek ETYMOLOGY quoted verbatim (`astronomija (Grieg: αστρονομία = άστρον "
-            + "+ νόμος, astronomia = astron + nomos)`). The sign is a typographic 'means' between a term "
-            + "and its explanation, not an operator between two operands, and the sentences read correctly "
-            + "with it silent. This is not a sourcing gap either: the artifact cell reports `arithmetic` "
-            + "×318 whole-corpus and that figure is measuring the same three shapes",
+        // ⚠ THE COUNT WAS RIGHT AND TWO OF THE CLAIMS AROUND IT WERE NOT, found by the fleet symbol audit
+        // reading all twelve rather than the enumerated nine. "Every instance is a GLOSS" was false for the
+        // last two, which are EasyTimeline chart markup, and "NOT ONE is arithmetic" was false for the
+        // election tally, which really is an addition. The refusal survives on the corrected evidence — ten
+        // of twelve are a typographic 'means' and the twelfth is markup — but it is no longer overclaimed.
+        equals: "×12 in the retained text. NINE are a GLOSS inside a parenthesis — `etimoloġija ta' Bibbja "
+            + "hi Griega (= kotba)`, `Technische Lehranstalt HTL = istituzzjoni ta' edukazzjoni`, `HBLA = "
+            + "istituzzjoni ta' edukazzjoni`, `il-Kotba Profetiċi (ta' Kmieni = Kotba Storiċi u tat-Tard = "
+            + "profeti)`, `tissostitwixxi is-suġġett (EN = dummy subject)` — or a Greek ETYMOLOGY quoted "
+            + "verbatim (`astronomija (Grieg: αστρονομία = άστρον + νόμος, astronomia = astron + nomos)`). "
+            + "⚠ TWO ARE EASYTIMELINE CHART DIRECTIVES the extraction did not strip (`PlotArea = left:50 "
+            + "bottom:50`, `ScaleMajor = gridcolor:darkgrey increment:5000`) — not text anyone reads aloud, "
+            + "and a property of the MINING PIPELINE rather than of Maltese; the same directives recur in 24 "
+            + "other artifacts. ⚠ AND EXACTLY ONE IS ARITHMETIC, which this entry used to deny outright: an "
+            + "election seat tally, `Siġġijiet - PN 26( +4 = 30)`. One addition inside one parenthesised "
+            + "results line is not enough to source a Maltese operator word — and the same instance is the "
+            + "unenumerated eleventh `+` in the `plus` entry below. For the other eleven the sign is a "
+            + "typographic 'means' between a term and its explanation, not an operator between two operands, "
+            + "and the sentences read correctly with it silent. This is not a sourcing gap either: the "
+            + "artifact cell reports `arithmetic` ×318 whole-corpus and that figure is measuring the same "
+            + "shapes",
         plus: "×10 in the retained text and, like `equals`, not one is an operator. Six are the Greek "
             + "etymology above (`άστρον + νόμος`, `astron + nomos`), three are a TELEPHONE COUNTRY CODE "
             + "(`biex iċempel lil xi ħadd barra l-Ġermanja jkollu iċempel +49 89 123456`), and one is a "

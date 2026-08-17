@@ -429,6 +429,14 @@ const SYMBOLS = makeSymbolNormalizer({
         // both reported `DROP currency` until this key existed. It reads the same word: the corpus's own
         // gloss is `ᱢᱟᱨᱠᱤᱱ ᱰᱚᱞᱟᱨ` ("American dollar"), and `ᱢᱟᱨᱠᱤᱱ` is already in the text where it matters.
         "US$": ["ᱰᱚᱞᱟᱨ"],
+        // ⚠ `HK$` IS THE SAME TRAP AS `US$` AND WAS MISSED WITH IT (trap 64). The corpus writes the Hong
+        // Kong bank's balance sheet twice in one sentence — `HK$᱓᱒᱗ ᱵᱤᱞᱤᱭᱚᱱ ᱥᱚᱢᱯᱚᱛᱤ ᱟᱨ HK$᱒᱙ ᱵᱤᱞᱤᱭᱚᱱ ᱞᱟᱵᱷ`
+        // — and both read as a bare number with the code recited as English letter names
+        // (*ˈeᶦt͡ʃ kʰˈeᶦ pe saj bar ɡel ejaj bilijɔn*), the currency noun absent. THE SAME WORD, on this
+        // entry's own precedent: `US$` above already emits the plain ᱰᱚᱞᱟᱨ rather than a nation-specific
+        // phrase, so the generic dollar noun is what this corpus is established to say for a coded dollar.
+        // No Santali name for the Hong Kong dollar specifically is attested, and none is invented here.
+        "HK$": ["ᱰᱚᱞᱟᱨ"],
         $: ["ᱰᱚᱞᱟᱨ"],
         "৳": ["ᱴᱟᱠᱟ"],
         "₹": ["ᱴᱟᱠᱟ"],
