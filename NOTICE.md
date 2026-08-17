@@ -12,6 +12,10 @@ determinations is [`LICENSES/licencing_posture.md`](LICENSES/licencing_posture.m
 below refer to that map. The full text of every license named here is in
 [`LICENSES/`](LICENSES/).
 
+Good-Faith Notice: If you are a rights holder and believe that your content has been included in the
+data and wish to request its exclusion, please contact me. Reasonable efforts will be made to review
+and address such requests.
+
 ---
 
 ## Attributions required by name
