@@ -1019,6 +1019,37 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "goals and is given a pause by the range rule. The MINUS is read, because omitting it "
             + "inverts and omitting a plus does not",
     },
+    kaa: {
+        // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/kaa.jsonc` (443 segments of a
+        // 63,415-paragraph kaa.wikipedia dump), each argued in src/languages/karakalpak/normalize.ts.
+        // `plus` and `minus` are NOT here \u2014 both are claimed, and the guard that made the plus safe is
+        // the interesting part of the round (`C++` never puts a digit after the sign).
+        equals: "measured: `=` \u00d78 and FIVE are real equivalences \u2014 the unit-conversion lines "
+            + "(`1 pikosekund = 1/1,000,000,000,000 sekund`, `1 femtosecond = \u2026`, `1 jıl = 12 ay = 365 "
+            + "k\u00fan`, `1 bazis punkt = 0,01 %`) and `E=mc^2`. The other three are not: a raw LaTeX "
+            + "fragment, an ETYMOLOGICAL GLOSS (`helios = quyash`) and \u26a0 a TAXONOMIC SYNONYMY \u2014 "
+            + "`Elaeagnus orientalis = Elaeagnus angustifolia var. orientalis`, the botanists\u0027 \u2018is a "
+            + "synonym of\u2019, which is a sense no earlier language in this sweep produced. \u26a0 AND THE WORD "
+            + "IS WHY THE MAJORITY DOES NOT CARRY IT: `teń` \u00d7104 is attested and is exactly \u2018equal\u2019, "
+            + "but POSTPOSITIONALLY \u2014 \u201c10-12 metrge teń\u201d, \u201cbasıp \u00f3tken jolına teń\u201d \u2014 and the tier "
+            + "can only place a connective BETWEEN operands. Third language to refuse it on these grounds, "
+            + "after chv and skr",
+        times: "measured: `\u00d7` \u00d71 and it is SCIENTIFIC NOTATION, not a multiplication to be read: "
+            + "\u201cunikal giltler sanı sonshelli \u00falken (2\u00b9\u00b2\u2078 yamasa 3,4028\u00d710\u00b3\u2078)\u201d, the AES key space. The "
+            + "superscript exponent beside it is unread too, so a multiplier alone would produce *\u00fash \u00fatir "
+            + "t\u00f3rt nol eki segiz kerete on* \u2014 worse than the silence",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs and is a UNIT FRACTION inside those same "
+            + "conversion lines (`1/1,000,000,000,000 sekund`), an IP PREFIX LENGTH (`198.51.100.0/24`), a "
+            + "COMPOUND UNIT (`kvt/saat`, `kilovatt/saat` \u2014 kilowatt-HOURS, a product rather than a rate, "
+            + "which is why this layer expands it without a \u2018per\u2019 word) and a density "
+            + "(`24,9 adam/km\u00b2`). No fraction rule is written",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur. \u26a0 The WORDS "
+            + "do: `plyus` \u00d714 and `minus` \u00d76, and the corpus writes the PAIR out in prose "
+            + "(\u201cstavkasin plyus yamasa minus funttaǵi 3 pensqa \u00f3zgertiw\u201d, \u201c\u00e1piwayı ǵana «plyus\u2013minus» "
+            + "dep ataladı\u201d) \u2014 which is what sources the two separate signs this layer DOES claim",
+    },
     skr: {
         // \u26a0 EIGHT REFUSALS over the retained text of `tools/corpus/mined/skr.jsonc` (436 segments of a
         // 120,763-paragraph skr.wikipedia dump), each argued in src/languages/saraiki/normalize.ts. \u26a0 THE

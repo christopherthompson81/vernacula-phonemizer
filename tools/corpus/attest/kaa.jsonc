@@ -1,0 +1,675 @@
+// WIKIPEDIA WORD ATTESTATION — kaa. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "kaa",
+        "wiki": "kaa.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "biziń",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…i astında qalǵan. Madagaskardaǵı alǵashqı adamzat mákánları biziń eramızǵa shekemgi 350-jıllar menen biziń eramızǵa shekemgi…",
+                "…adamzat mákánları biziń eramızǵa shekemgi 350-jıllar menen biziń eramızǵa shekemgi 550-jıllar aralıǵında payda bolǵan dep qa…",
+                "…Zond atawları yamasa Filippinnen kelgenligi boljaw etiledi. Biziń eramızdıń 1000-jılları átirapında olarǵa Mozambik buǵazın k…",
+                "…e, yaǵnıy siyshembide baslanatuǵın kabisa emes jıl. Bul jıl biziń eramızdıń 1991-jılı, II mıń jıllıqtıń 991-jılı, 20-ásirdiń…",
+                "…úninde, yaǵnıy jumada baslanatuǵın kabisa emes jıl. Bul jıl biziń eramızdıń 1993-jılı, II mıń jıllıqtıń 993-jılı, 20-ásirdiń…",
+                "…e, yaǵnıy sárshembide baslanatuǵın kabisa emes jıl. Bul jıl biziń eramızdıń 1890-jılı, II mıń jıllıqtıń 890-jılı, 19-ásirdiń…"
+            ]
+            },
+        {
+                "word": "shekem",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 105,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…dı. Bul shegara Arqa-Qubla tárepke Rossiyada Ural tawlarına shekem, Ural daryası boylap Kaspiy teńizine hám Kavkaz tawları arq…",
+                "…ylap Kaspiy teńizine hám Kavkaz tawları arqalı Qara teńizge shekem dawam etedi. Rossiyanıń tórtten úsh bólimi Aziada, al qalǵa…",
+                "…ısda Kaspiy teńizi qırǵaqlarınan shıǵısda Qıtay shegarasına shekem, arqada batıs Sibir tegisliginen, qublada Nishapur, Safedko…",
+                "…liginen, qublada Nishapur, Safedkoh hám Hindukush tawlarına shekem sozılǵan iri tábiyiy geografik úlke. úlkeniń batıs shegaras…",
+                "…Kaspiy teńiziniń shıǵıs qırǵaǵı arqalı Mangishlaq qoltıǵına shekem, onnan Usturtdiń arqa-batıs shinki boylap, Dongıztaw, shogr…",
+                "…km.ge barǵannan keyin arqaǵa burıladı hám Jetiqara qalasına shekem, odan keyin Qostanay qalası arqalı Atırawǵa shekem baradı.…"
+            ]
+            },
+        {
+                "word": "mıń",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 163,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Mıń bir tún (arabsha كتاب ألف ليلة وليلة - kitāb 'alf layla wa-…",
+                "…xalıq kitapları tarqala basladı. Olardıń arasında ásirese \"Mıń bir tún\" (Alif Láyla wá Láyla) ayrıqsha orındı iyeleydi. Bu…",
+                "…iniń \"Arab klassikalıq ádebiyatı\" - dep atalǵan miynetinde \"Mıń bir tún\" hind, arab, Iran hám túrk syujetleriniń qosılıspas…",
+                "…da bolǵan. \"Alif Láyla wá Láyla\"daǵı aytılǵan syujetler bir mıń bir túnge sozılıp ketken bir mıń bir dástan. Álbette bundaǵ…",
+                "…aǵı aytılǵan syujetler bir mıń bir túnge sozılıp ketken bir mıń bir dástan. Álbette bundaǵı ertek yaki dástan túrindegi ráw…",
+                "…ytadan tárbiyalaw ushın da xızmet etedi. Kópshilik alımlar \"Mıń bir tún\"di ertek dep esaplaǵan menen de bul shıǵarmanıń syu…"
+            ]
+            },
+        {
+                "word": "funt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 59,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…kúni baǵdarlamaları Sotbis sıyaqlı aukcion úylerinde 35,000 funt sterlingten aslamǵa satılǵan. XX ásirdiń basındaǵı xyorling…",
+                "…matchı ushın bolıp, aytıwlarına qaraǵanda, 2016-jılı 15,000 funt sterlingke satılǵan. Angliya ligası futbolında oyın kúni ba…",
+                "…66-jılǵı baǵdarlamadan da siyrek ushırasadı hám ádette 1000 funt sterlingten qımbatqa satıladı. 1924-jılǵı Angliya Kubogı Fi…",
+                "…ı. 2017-jılı aukcionǵa qoyılǵan bir nusqası 3,500 hám 4,500 funt sterling arasında bahalandı. 1958-jıl fevral ayındaǵı Myunx…",
+                "…ıń saqlanıp qalǵan siyrek nusqalarınan biri 2024-jılı 7,500 funt sterlingke satıldı. «Manchester Yunayted»tiń jáne bir itiba…",
+                "…ns» arasındaǵı oyınnıń futbol baǵdarlaması aukcionda 35,250 funt sterlinglik dúnya rekordı menen satıldı. Baǵdarlama 2013-jı…"
+            ]
+            },
+        {
+                "word": "ıqlım",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 32,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…xu hám basqa Háreketdegi vulkanlar kóp. Íqlımı tropik teńiz ıqlım. Eń ıssı ay — avgusttıń ortasha temperaturası 21— 25°, fevr…",
+                "…asha jıllıq jawın 3500-4000 mm. Turizm hám dem alıw zonası; ıqlım kurortlari bar. == Derekler ==…",
+                "…eńiz jaǵasındaǵı port, temirjol stanciyası, balneologiyalıq ıqlım kurortı. Xalqı 75 mıń adam shamasında (2001). Feodosiyaǵa e…",
+                "…ı, qısı jıllı, jılına 360 mm jawın jawadı. Emlew quralları: ıqlım, teńizde shomılıw, mineral bulaq suwınan ishiw, Ajikól bals…",
+                "…ligi hám ot oramı tur quramınıń hártúrliligi, túrli topıraq ıqlım sharayatlarında jaylasqanlıǵı menen ajralıp turadı (qarań J…",
+                "…dıń dinamikasın, bul dinamikanıń dáreklerin (faktorların) — ıqlım ózgeriwi, tektonikalıq háreketlerdi úyreniwshi pán. == Dere…"
+            ]
+            },
+        {
+                "word": "payda",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 195,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ısınıń túrkiy tiller toparına kiredi. Qaraqalpaq milletiniń payda bolıwı menen onıń tili de qáliplesti. Qaraqalpaq milleti ya…",
+                "…q ataması XIV–XVI ásirlerde Noǵaylı Ordasınıń tarqawı menen payda boldı. == Geografiyalıq tarqalıwı == Qaraqalpaq tilinde, ti…",
+                "…ǵıs /ʃ/ (sh) ushın /tʃ/ (ch) bar. Qaraqalpaq milliy tiliniń payda bolıwı menen ádebiy tiliniń jazba túri de qáliplesti. Ádebi…",
+                "…Orta Aziya xalıqları ushın ortaq shaǵatay jazıwı tiykarında payda boldı. Biraq bul jazba ádebiy til jergilikli xalıqtıń basım…",
+                "…i 4-3-mıń jıllıqlarda (eneolit dáwiri) jaylaw sharwashılıǵı payda boldı. Eramızģa shekemgi I mıń jıllıq ortalarında hind-iran…",
+                "…tshilik hám sawda orayları bolǵan qalalar (Taraz hám basqa) payda boldı. 8-10-ásirlerde Qazaqstan qublasında islam dini tarqa…"
+            ]
+            },
+        {
+                "word": "procent",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…da maylılıǵı boyınsha birinshi orında turadı. Dáninde 50-60 procent may bar. Onıń mayı awqatqa, medicinada, konserva hám kondit…",
+                "…Kúydirmey preslew arqalı mayın alǵandaǵı qaldıq quramında 8 procent may hám 40 procent belok boladı. Ol konditer sanaatında qol…",
+                "…rqalı mayın alǵandaǵı qaldıq quramında 8 procent may hám 40 procent belok boladı. Ol konditer sanaatında qollanıladı. Dándi kúy…",
+                "…islep shıǵarıw hám basqa mútajlikleri ushın málim múddetke, procent tólewleri menen qaytarıw shártida qarızǵa beriw munasábetle…",
+                "…yman) — pul qarjları, tavar hám xızmetlerdi kelisim ústeme (procent) tolıqb qaytarıp beriw shárti menen málim múddetlerge qarız…",
+                "…centner, cement, cex, cirkul, concert, docent, kontituciya, procent, cilindr t.b. Al, ketse, jetse, tartsa, jatsa, ótse t.b. sı…"
+            ]
+            },
+        {
+                "word": "protsent",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 16,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…siya – bul menshiktiń dálili; obligatsiya iyesi ol boyınsha protsent aladı. Ol belgilengen hám anıqlanǵan. Bul bahalı qaǵaz onda…",
+                "…iye. Obligatsiya bir qatar shártli elementlerge: nominalǵa, protsent stavkasına, tólew haqqında rejege, támiyinleniwge, emissiya…",
+                "…ngen aqsha summa, onı iyesi ótew múddeti kelgen kúni aladı. Protsent stavkası. Emitent hár jılı tólewge tiyisli bolgan nominal b…",
+                "…ewge tiyisli bolgan nominal bahasınıń kelisilgen protsenti. Protsent stavkası jıllıq etip belgilenedi, ol bólip – bólip, máselen…",
+                "…ydarǵa obligatsiya nominalına barabar summanı qaytaradı hám protsent tólewdi toqtatadı. Emissiya haqqında shártnama – obligatsiy…",
+                "…ıń punkti, oǵan muwapıq emitent arnawlı ótew fondın dúzedi, protsent hám nominal baha onnan tólenedi. Bul fond trast kompaniyası…"
+            ]
+            },
+        {
+                "word": "payız",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…a qarsılaslarsız qatnastı hám 2010-jılǵı ulıwma saylawda 84 payız dawıs penen jeńiske eristi. 2022-jılı ol qayta saylawǵa qat…",
+                "…Taverna» oqıwshıları tárepinen jaratılǵan Tina hám Milo 53 payız dawıs penen jeńiske eristi. Konkurs «Milano Cortina 2026 Fo…",
+                "…unday taslar kelip túsedi. Biraq Jer betiniń shama menen 70 payız suw menen qaplanǵanlıǵın itibarǵa alsaq, bul taslardıń 350…",
+                "…ardı, sonday-aq ózleriniń aqsha qárejetlerin qarızǵa berip, payız alıw ushın paydalana baslaydı. Sóytip, ayırbaslawshılar az-…",
+                "…onda qaray operatsiyaları: amanatlardı qabıllaw jáne olarǵa payız tólew operatsiyalarınıń jasalatuǵın eske sala ketedi. Bunda…",
+                "…keyin shıǵıp ketti. 2013-jıl dekabr ayında Durov óziniń 12 payız aksiyasın Ivan Tavringe satıwǵa qarar qabılladı(sol waqıtta…"
+            ]
+            },
+        {
+                "word": "payiz",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gradus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…ı suwıq, jazi, ıssı. Yanvar ayiniń ortasha temparaturasi -5 gradus atirapinda boladi, al iyul ayinda bolsa +40 gradus atirapı.…",
+                "…urasi -5 gradus atirapinda boladi, al iyul ayinda bolsa +40 gradus atirapı. Jıllıq jawın-shashinniń muǵdarı 117 mm atirapinda.…",
+                "…, jazı qurǵaq ıssı. Yanvar ayınıń ortasha temparaturası -10 gradus átirapında boladı, al iyul ayında bolsa +40 gradus átirapın…",
+                "…rası -10 gradus átirapında boladı, al iyul ayında bolsa +40 gradus átirapında. Jıllıq jawın-shashınnınń muǵdarı 115 mm átirapı…",
+                "…ya — jıllılıqtı unatıwshı gúl. Onı úy sharayatında +15+20°С gradus temperaturada saqlaǵan maqul. Qısqı waqıtta bolsa +15°С gra…",
+                "…dus temperaturada saqlaǵan maqul. Qısqı waqıtta bolsa +15°С gradus temperaturadan tómen bolmawı tiyis. Biraq jılıtıwshı batare…"
+            ]
+            },
+        {
+                "word": "Selsiy",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…a shekem (Quyash tik kelgen jerlerde +480 gradusqa shekem – Selsiy shkalasında) kóterilgen túrinde, keshte –180 gradusqa pásey…"
+            ]
+            },
+        {
+                "word": "Selsiya",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Farengeyt",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…er júzindegi eń uzın buǵaz bolıp, uzınlıǵı shama menen 1760 kilometr, buǵazdıń eń tar jerindegi eni - 422 kilometr, eń kishi tal…",
+                "…ma menen 1760 kilometr, buǵazdıń eń tar jerindegi eni - 422 kilometr, eń kishi talveg tereńligi - 117 metr, eń úlken tereńligi -…",
+                "…Shıǵıstan batısqa 100 kilometrden zıyat, arqadan qublaǵa 40 kilometr. Barlıq jer maydanı Ámiwdaryanıń oń jaǵına jaylasqan bolıp,…",
+                "…Ámiwdaryanıń oń jaǵına jaylasqan bolıp, ol 130 mıń kvadrat kilometr jerdi iyeleydi. Rayonnıń 26 mıń gektarǵa shamalas yegislik…",
+                "…ında jaylasqan, yamasa okean jaǵalarınan bir neshe júzlegen kilometr qashıqlıqtaǵı kontinentlerde jaylasqan. Tektonik plitalar T…",
+                "…leydi (Antarktikadan keyin). Onıń maydanı 9,065,000 kvadrat kilometr átirapında. Geybir ilimpazlar onı 2.5 million jıldan beri b…"
+            ]
+            },
+        {
+                "word": "metr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 91,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…Metr (belgileniwi: m; grekshe μέτρον — ólshew) — SI degi uzunlıq…",
+                "…rekshe μέτρον — ólshew) — SI degi uzunlıq ólshew birligi. 1 metr — jaqtılıq nurınıń vakuumda, 1/299 792 458 sekund ishinde b…",
+                "…1790-jıl 8-may — frantsuz milliy qurultayı qararı menen, 1 metr — 1 sekundta 45° múyesh astında terbelip atırǵan yarım dáwi…",
+                "…ayı, frantsuz ilimler akademiyası talaplarına baylanıslı, 1 metr — Parij meridianınıń 40 millionnan bir bólimine teń dep alı…",
+                "…ir bólimine teń dep alındı. 1795-jıl — waqtınshalı latunnan metr etalonın islep shıǵılıwı. 1799-jıl 10-dekabr — frantsuz mil…",
+                "…y qurultayı nızamı menen, 1799 jıl 23-iyulda qayta islengen metr etalonı islengen kóshirme esaplanıp mámleket arxivine joyla…"
+            ]
+            },
+        {
+                "word": "santimetr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…toqtap ótemiz. Yarus mádeniy qatlamları 30 santimetrden 178 santimetr aralıǵında jaylasqan. Bul jerden 8 m.kv. maydan ashılıp, qa…",
+                "…ottıń izleri, kúlge, aǵash kómirine tolǵan, diametri 15-20 santimetr shuqır tabıldı. Edenlerdiń mádeniy qatlamlarınan tabılǵan 1…",
+                "…stirilgen bolıwı kerek. II yarus mádeniy qatlamları 178-380 santimetr aralıqtı óz ishine aladı. 12 m.kv. maydan qazıp tekserildi.…",
+                "…ıqları ashıldı, jay diywalları kvadrat formadaǵı (30x32x5-6 santimetr) qam gerbishlerden órilgen. Gerbishler kúl aralasqan ılayda…",
+                "…diń sınıqları tabıldı. III yarus mádeniy qatlamları 380-400 santimetr aralıqta jaylasqan. Bul yarusta 20 m.kv. jer ashılıp izertl…",
+                "…ı. Turaq jaylardıń diywallarınıń ólshemleri 28-30x28-31x5-6 santimetr bolǵan qam gerbishlerden órilgen. Jaydıń edenleri saban qos…"
+            ]
+            },
+        {
+                "word": "millimetr",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 68,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…jaylasqan. Musammannıń keri ushları arasındaǵı aralıq — 57 millimetr. Nurlar taralǵan sheńberdiń diametri — 52 millimetr. Ordenn…",
+                "…ıq — 57 millimetr. Nurlar taralǵan sheńberdiń diametri — 52 millimetr. Ordenniń orayında at mingen Ámir Temurdıń túsi gúmis reńde…",
+                "…n súwretlengen. Musamman taralǵan maydannıń diametri — 10,5 millimetr. Yarım ay hám de bes qırlı juldız taralǵan maydanlarınıń di…",
+                "…juldız taralǵan maydanlarınıń diametrleri tiyislishe — 5,0 millimetr hám 2,6 millimetr. Sheńberdiń joqarı bóleginde aq reńli ema…",
+                "…aydanlarınıń diametrleri tiyislishe — 5,0 millimetr hám 2,6 millimetr. Sheńberdiń joqarı bóleginde aq reńli emal tábiyat kórinisi…",
+                "…zumrud reń emal menen oralǵan. Háriplerdiń bálentligi — 2,5 millimetr. Sheńber bastan ayaǵına shekem marjanlı naǵıslar menen oral…"
+            ]
+            },
+        {
+                "word": "kilogramm",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 26,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…n gúres boyınsha Aziya chempionatında hayallar ortasında 59 kilogramm salmaq qatlamında gúmis medal iyesi boldı. 2019 -jılda Kita…",
+                "…eziyanıń Jakarta qalasında bolıp ótken Aziya oyınlarında 57 kilogramm salmaq qatlamında qatnasqan. Nabira Esenbaeva dáslepki ushı…",
+                "…res boyınsha óspirimler ortasındaǵı jáhán chempionatında 62 kilogramm salmaq qatlamında gúmis medaldı qolǵa kirgizdi. 2019-jılı K…",
+                "…qalasında ótkerilgen gúres boyınsha jáhán chempionatında 62 kilogramm salmaq qatlamında qatnasqan. Ol óziniń dáslepki ushırasıwın…",
+                "…irligi (1 metr), waqıt birligi (1 sekund), massa birligi (1 kilogramm-massa) alinadı]; 2) texnik sistema [uzınlıq, waqıt birligi…",
+                "…texnik sistema [uzınlıq, waqıt birligi hám kúsh birligi (1 kilogramm-kúsh)]. Dinamikada ulıwma noqatlar hám sistemalardıń háreke…"
+            ]
+            },
+        {
+                "word": "tonna",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 95,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Gov (Arqa aymaq) dan qazıp alınadı. 1994-1995-jıl Ill mln. tonna temir rudası, 202 mln. tonna tas kómir, 32,9 mln. tonna nef…",
+                "…lınadı. 1994-1995-jıl Ill mln. tonna temir rudası, 202 mln. tonna tas kómir, 32,9 mln. tonna neft, 20,7 mlrd. kub-metr tábiyi…",
+                "…ln. tonna temir rudası, 202 mln. tonna tas kómir, 32,9 mln. tonna neft, 20,7 mlrd. kub-metr tábiyiy gaz, 256 tonna altın qazı…",
+                "…32,9 mln. tonna neft, 20,7 mlrd. kub-metr tábiyiy gaz, 256 tonna altın qazıp alınǵan. Sanaatta mashina qurılısı, metallurgiy…",
+                "…islew tarmaqları ústemlik etedi. 1994-1995-jılları 6,2 mln. tonna polat, 237 mıń tonna mıs, 211 mıń tonna qalayı, 1,2 mln. to…",
+                "…mlik etedi. 1994-1995-jılları 6,2 mln. tonna polat, 237 mıń tonna mıs, 211 mıń tonna qalayı, 1,2 mln. tonna alyuminiy hám 360…"
+            ]
+            },
+        {
+                "word": "gektar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 40,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ina-traktor parkı xizmet kórsetedi. Qońırat rayonında 40mıń gektar jer suwǵarıladı. 4 mıń gektar jerge paxta, 4 mıń gektar jer…",
+                "…tedi. Qońırat rayonında 40mıń gektar jer suwǵarıladı. 4 mıń gektar jerge paxta, 4 mıń gektar jerge shalı, 5,6 mıń gektar jerge…",
+                "…mıń gektar jer suwǵarıladı. 4 mıń gektar jerge paxta, 4 mıń gektar jerge shalı, 5,6 mıń gektar jerge biyday, 500 mıń ga jerge,…",
+                "…4 mıń gektar jerge paxta, 4 mıń gektar jerge shalı, 5,6 mıń gektar jerge biyday, 500 mıń ga jerge, mákke, jáweri, hám basqa aw…",
+                "…Terisken ósimligi 11,7 mıń gektar jerdi iyeleydi. Sonıń menen birge, onıń ortasha qalıńlıǵı b…",
+                "…rdi iyeleydi. Sonıń menen birge, onıń ortasha qalıńlıǵı bir gektar jerge 1200-1500 túpke shekem tuwra keledi. Bul ósimlikke kl…"
+            ]
+            },
+        {
+                "word": "million",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 85,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…geologiyalıq waqıt aralıǵı [2]. Paleozoy bunnan 538,8 ± 0,2 million jıl aldın baslanǵan hám 251,902 ± 0,024 million jıl aldın t…",
+                "…538,8 ± 0,2 million jıl aldın baslanǵan hám 251,902 ± 0,024 million jıl aldın tawsılǵan[2]. Solay etip, ol shama menen 287 mill…",
+                "…lion jıl aldın tawsılǵan[2]. Solay etip, ol shama menen 287 million jıl dawam etti. Bul era 6 dáwirge bólinedi[3][4]: Kembriy;…",
+                "…rek. μέσος - \"orta\", ζωή - \"ómir\") — bunnan 251,902 ± 0,024 million jıl aldın baslanǵan hám 66,0 million jıl aldın tawsılǵan, j…",
+                "…bunnan 251,902 ± 0,024 million jıl aldın baslanǵan hám 66,0 million jıl aldın tawsılǵan, jámi shama menen 186 million jıl dawam…",
+                "…hám 66,0 million jıl aldın tawsılǵan, jámi shama menen 186 million jıl dawam etken geologiyalıq era. Bul eranı birinshi ret 18…"
+            ]
+            },
+        {
+                "word": "milliard",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 50,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…eologiyalıq era, proterozoydıń bir bólegi bolıp, bunnan 2,5 milliard jıl aldın baslanǵan hám 1,6 milliard jıl aldın tawsılǵan. G…",
+                "…legi bolıp, bunnan 2,5 milliard jıl aldın baslanǵan hám 1,6 milliard jıl aldın tawsılǵan. Geologiyalıq waqıt aralıǵı. Paleoprote…",
+                "…— geologiyalıq era, proterozoydıń bir bólegi. Ol bunnan 1,6 milliard jıl aldın baslanıp, 1 milliard jıl aldın tawsılǵan. geologi…",
+                "…ıń bir bólegi. Ol bunnan 1,6 milliard jıl aldın baslanıp, 1 milliard jıl aldın tawsılǵan. geologiyalıq waqıt aralıǵı [2]. Mezopr…",
+                "…) — arxey eonınıń ekinshi geologiyalıq erası. Ol bunnan 3,6 milliard jıllardan 3,2 milliard jıllar aldınǵı dáwirdi óz ishine ala…",
+                "…hi geologiyalıq erası. Ol bunnan 3,6 milliard jıllardan 3,2 milliard jıllar aldınǵı dáwirdi óz ishine aladı. geologiyalıq waqıt…"
+            ]
+            },
+        {
+                "word": "kilovatt",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 13,
+                "substringOnly": 0,
+                "examples": [
+                "…ı sózlerde jazılsa, al bazıbir jaǵdaylarda sózdiń aqırında: kilovatt t.b. sózlerde ekewi qatar, saqlanıp jazıladı. == Derek ==…",
+                "…elf bóleginen neft hám tábiyiy gaz alınadı. Jılına 914 mln. kilovatt/saat elektr energiyası payda etiledi. Gabon okume aǵashın t…",
+                "…islep shıǵaratuǵın kishi kárxanalar bar. Bir jılda 929 mln. kilovatt/saat elektr energiyası islep shıǵarıladı. == Transportı ==…",
+                "…it, marganes rudası qazıp alınadı, jılına ortasha 6,1 mlrd. kilovatt/saat elektr energiyası payda etiledi. Teńiz jaǵası lagunala…",
+                "…yadan ibarat Razdan kaskadi islep turıptı. Jılına 9,5 mlrd. Kilovatt-saat elektr energiyası islep shıǵarıladı. Tiykarǵı sanaat o…",
+                "…pyuter Ferranti Mark I 4050 klapındı óz ishine alǵan hám 25 kilovatt quwat sarplaǵan. Salıstırıw ushın, birinshi tranzistorlı ko…"
+            ]
+            },
+        {
+                "word": "saat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 77,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Aqilli saat (inglizshe”smart watch”), sonıń menen birge Aqilli saat yam…",
+                "…lli saat (inglizshe”smart watch”), sonıń menen birge Aqilli saat yamasa saat telefonı — rawajlanǵan funktsional múmkinshilik…",
+                "…glizshe”smart watch”), sonıń menen birge Aqilli saat yamasa saat telefonı — rawajlanǵan funktsional múmkinshiliklerge iye ko…",
+                "…m jeterli argumentler hám jámiyet bolǵanı ushın 26-may kúni saat 13:22de óz aldına sayt retinde jaratıldı. 2008-jıl 17-iyund…",
+                "…tezligi tómendegi ólshem birliklerde ólsheniwi múmkin: mil/saat (m/saat), kilometr/saat (km/saat) metr/sekund (m/s), bul te…",
+                "…tómendegi ólshem birliklerde ólsheniwi múmkin: mil/saat (m/saat), kilometr/saat (km/saat) metr/sekund (m/s), bul tezliktiń…"
+            ]
+            },
+        {
+                "word": "minut",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…hápte ≈ 30 kún 1 hápte = 7 kún 1 kún = 24 saat 1 saat = 60 minut 1 minut = 60 sekund 1 sekund = 100 santisekund 1 sekund = 1…",
+                "…30 kún 1 hápte = 7 kún 1 kún = 24 saat 1 saat = 60 minut 1 minut = 60 sekund 1 sekund = 100 santisekund 1 sekund = 1000 mill…",
+                "…nutqa shekem) hám jeke erkin baǵdarlamasın (áyeller ushın 4 minut, er adamlar ushın 5 minut) orınlawdı quraydı. Jup halda ush…",
+                "…in baǵdarlamasın (áyeller ushın 4 minut, er adamlar ushın 5 minut) orınlawdı quraydı. Jup halda ushıw qısqa baǵdarlama (6 máj…",
+                "…r; 3 minutqa shekem dawam etedi) hám erkin baǵdarlamadan (5 minut) ibarat. Sport oyınları baǵdarlamasında 3 májburiy, origina…",
+                "…ta birdey bolatuǵın 2 komanda oynaydı. Oyınnıń uzaqlıǵı ~15 minut. Ilaq oyınına paydalanǵan (ortaǵa taslanǵan) serkeniń eti e…"
+            ]
+            },
+        {
+                "word": "sekund",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Xorologiya dep ataladı. Waqıttıń xalıqaralıq ólshem birligi sekund esaplanadı hám ol s penen belgilenedi. == Waqıt birlikleri…",
+                "…ápte = 7 kún 1 kún = 24 saat 1 saat = 60 minut 1 minut = 60 sekund 1 sekund = 100 santisekund 1 sekund = 1000 millisekund 1 de…",
+                "…kún 1 kún = 24 saat 1 saat = 60 minut 1 minut = 60 sekund 1 sekund = 100 santisekund 1 sekund = 1000 millisekund 1 decisekund…",
+                "…= 60 minut 1 minut = 60 sekund 1 sekund = 100 santisekund 1 sekund = 1000 millisekund 1 decisekund = 10 santisekund 1 santisek…",
+                "…sekund = 1000 pikosekund 1 pikosekund = 1/1,000,000,000,000 sekund 1 femtosecond = 1/1,000,000,000,000,000 sekund…",
+                "…,000,000,000 sekund 1 femtosecond = 1/1,000,000,000,000,000 sekund…"
+            ]
+            },
+        {
+                "word": "dollar",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 74,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Dollar Point — Amerika Qurama Shtatlarınıń Kaliforniya shtatında j…",
+                "…orniya shtatında jaylasqan xalıq punkti. == Geografiyası == Dollar Point xalıq punktiniń maydanı — 4,234924 km². Statistikalıq…",
+                "…azaqstanǵa dúnyanıń 120 dan aslam mámleketinen 330 milliard dollar sırt el investiciyası tartıldı. Jáhán Bankiniń «Biznes júrg…",
+                "…a aylanısı jıldan-jılǵa ósip barmaqta: 1995-jılı 9 milliard dollar bolǵan bolsa, 2008-jılı 109 milliard dollarǵa jetti. Tiykar…",
+                "…ciyaları kólemi 137 mlrd. dollardı quradı. Eksport (92 mlrd dollar) importtan eki ese kóp (45 mlrd dollar). Eksporttıń 75 proc…",
+                "…dı. Eksport (92 mlrd dollar) importtan eki ese kóp (45 mlrd dollar). Eksporttıń 75 procenti mineral resurslar, eń úlken bólegi…"
+            ]
+            },
+        {
+                "word": "evro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 46,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…i menen belgilenedı. == Sırtqı siltemeler == {{{editor}}}: «Evro (Banknotalar)» (de,en). Qaraldı: 2017-jıl 24-avgust. (Nemis…",
+                "…ildi.2010-jili 30%ke tústi. 2007-jili BMSh Kosovoǵa 150 mln evro insanparwarliq jardemin kórsetti. Kosovo JIÓsi 1,2mlrd$ eks…",
+                "…— 674,687 km². Xalqı- 66 561 000 adam (2024). Pul birligi — Evro (EUR). Parij eń úlken qalası hám paytaxtı esaplanadı. Hákim…",
+                "…chempionati, rásmiy Evropa chempionati hám rásmiy bolmaǵan Evro dep atalatuǵın Evropa Futbol Assotsiatsiyalari Birlespesi (…",
+                "…hi eń kóp tamasha etiletuǵin futbol turniri bolıp tabıladı. Evro-2012 finalin 300 million átirapında tamashagóyler tamasha e…",
+                "…vID-19 pandemiyasi sebepli ol 2021-jılǵa qaldırılǵan, biraq Evro-2020 atı saqlanıp qalǵan.Turnir 1968-jıldan házirgi atına ó…"
+            ]
+            },
+        {
+                "word": "som",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 12,
+                "substringOnly": 1,
+                "examples": [
+                "…orınǵa shıqtı. Onıń dáslepki dan tilindegi versiyası «Smuk som et stjerneskud» tuwılǵan jeri Daniyada birinshi orınlı xit…",
+                "…anǵanlıǵın ańlatadı; bul tema dan tilindegi originalı «Smuk som et stjerneskud»ta jáne de ayqınraq kórsetilgen. Olsen Broth…",
+                "…== 2000-jılı 19-fevralda Olsen Brothers atqarıwındaǵı «Smuk som et stjerneskud» «Úlgi:Esccnty» «Dansk Melodi Grand Prix» mi…",
+                "…ay monoklinal kóterilmesi menen shegaralanǵan. Arqa-batısta Som batıǵı menen tutasqan. Qubla -shıǵıstan,arqa-batısqa sozılǵ…",
+                "…Irmã Lavínia 2007 - Desejo Proibido - Ana Fernandes 2008 - Som Brasil - Se 2009 - Caminho das Índias - Yvone Magalhães 200…",
+                "…arıwshısı Agnetha Fältskog qosıqtı shved tilinde 1970-jılǵı Som jag är atlı jeńil (solo) albomında «Sov gott, min lilla vän…"
+            ]
+            },
+        {
+                "word": "manat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 1,
+                "examples": [
+                "…ası sezilerli dárejede ósken. Akciyalarnıń nominal bahası 2 manat bolǵanına qaramay, birja sawdalarında olar 3,27 manatqa she…",
+                "…inamikasın kórsetti. 2022-jılda operacion dáramatlar 51 mıń manat bolǵan bolsa, 2023-jılda bul kórsetkish 703 mıń manatqa jet…",
+                "…ǵaw Fondınan Sumqayıt Qalalıq Hákimiyatına dáslep 5 million manat ajratıldı. Ázerbayjan Respublikasınıń Prezidenti Ilham Alie…",
+                "…sırtqı sawdasındaǵı úlesiniń 1,3% in quradı. Pul birligi — manat. == Medicinalıq xızmeti == Mámleketke qaraslı medicina máke…",
+                "…trubaları bar. Bakuda Metropoliten qurılǵan. Pul birligi — manat. == Qalalar hám wálayatlar == • Baku qalası • Naxichevan Av…",
+                "…aǵaları bar. Haq niyetli militsiya xızmetkeri Nazardı «mıń manat para aldı» dep jala jawıp qamatıp jiberedi. Oǵan bul ótirik…"
+            ]
+            },
+        {
+                "word": "minus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…alıp taslaw arqalı esaplanadı hám geyde ápiwayı ǵana «plyus–minus» dep ataladı. Gol ayırmashılıǵı birinshi ret futbolda, 1970…",
+                "…ulıwma tásir (unamlı hám unamsız reakciyalardıń qosındısı) minus polyarlıq (unamlı hám unamsız reakciyalar arasındaǵı absoly…",
+                "…netug`un daramat salig`inin` bazaliq stavkasin plyus yamasa minus funttag`i 3 pensqa o`zgertiw kushine iye, biraq bul kush el…",
+                "…qta. Lagos ekonomikasınıń globallasıwı GaWC tárepinen \"beta minus\" dep bahalanadı. Bul Ullı Britaniyadaǵı Manchester yamasa E…",
+                "…ine alǵan veb-betlerdi izlew, mısalı marathon AND runner - (minus belgisi) – Sóz yamasa sóz dizbegin alıp taslaw, mısalı «app…",
+                "…aǵdarlamanıń belgishesiniń múyeshinde payda bolatugın qızıl minus sheńberin basıw arqalı baǵdarlamanı májbúriy jabıwǵa ruqsat…"
+            ]
+            },
+        {
+                "word": "plyus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…he sherikles shólkemler menen birlesip, olardıń sóylesiwler-plyus-auditoriya-jámiyet-oylasıw formatın sherikles jıynalısların…",
+                "…sanın alıp taslaw arqalı esaplanadı hám geyde ápiwayı ǵana «plyus–minus» dep ataladı. Gol ayırmashılıǵı birinshi ret futbolda…",
+                "…17-jıldan), «Universal» (1916-jıldan), «Uno maye uno» («Bir plyus bir», 1977-jıldan), «Ekselsior» (1917-jıldan), «Eraldo de M…",
+                "…úlesi sheriklik túrine baylanıslı ózgeredi: Premium Partner Plyus Premium Partner Associaciyalanǵan Partner Associaciyalanǵan…",
+                "…qı dúnya menen baylanıstı óz moynına aladı. Premium Partner Plyus kompaniyaları túrli texnikalıq, shólkemlestiriw hám kúndeli…",
+                "…dı beredi hám solay etip basqarıwdı ámelge asıradı. Bul 50% plyus bir akciya sıńar kompaniya dúziw ushın jetkilikli degen keń…"
+            ]
+            },
+        {
+                "word": "kvadrat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 53,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…dratqa aylansa, nátiyjedegi figura tuwrı múyeshli prizmanıń kvadrat tuwrı múyeshli parallelepiped dep atalatuǵın jáne bir arnaw…",
+                "…izma grafı retinde kórsetiliwi múmkin. Altı jaǵınıń barlıǵı kvadrat bolǵan jaǵdayda, nátiyjesi kub boladı. Eger tuwrı múyeshli…",
+                "…ındı iyeleydi (Antarktikadan keyin). Onıń maydanı 9,065,000 kvadrat kilometr átirapında. Geybir ilimpazlar onı 2.5 million jıld…",
+                "…hám qalalardıń kórsetkishleri == Birliktegi maǵlıwmatlar : kvadrat kilometrge adam Dakka - 44 000 (2014-jıl esabı) Mumbai - 32…",
+                "…2013-jıl jaǵdayına kóre berilgen . Birliktegi maǵlıwmatlar: kvadrat kilometrge xalıqtıń qatnası. Bangladesh - 1087 Palestina ay…",
+                "…shańaraqta 41 204 xalıq jasaydı, xalıq tıǵızlıǵı bolsa har kvadrat kilometrge 214 adamdı quraydı. Qalanıń ulıwma maydanı 192,7…"
+            ]
+            },
+        {
+                "word": "kub",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 43,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…salıstırǵanda 3 mln ga ósti. Ámiwdárya hám Sırdáryanıń 64,6 kub metr suwdı suwǵarıw ushın paydalanıldı. 1957-jılı 58 gektar…",
+                "…shın suwları menen toyınadı. Aral teńiziniń suw resursı 127 kub km quraydı. 1970-jılları dáryanıń suwǵarmalı jerlerge payda…",
+                "…ulıwma suw menen támiyinleniw sisteması joqarı aǵısı 22 km kub, ortasha aǵıs 10–12 km kub, tómengi 10 km kub. 1930-40-jıll…",
+                "…niw sisteması joqarı aǵısı 22 km kub, ortasha aǵıs 10–12 km kub, tómengi 10 km kub. 1930-40-jılları dárya suwınıń ortasha m…",
+                "…ı aǵısı 22 km kub, ortasha aǵıs 10–12 km kub, tómengi 10 km kub. 1930-40-jılları dárya suwınıń ortasha minerallıǵı 0,25 ml/…",
+                "…rǵa ketedi. Ámiwdárya 1934-60-jılları Aral teńizine 38,6 km kub di quyǵan. Házirgi waqıtta 2–4 km kub suwdı jılına quyadı.…"
+            ]
+            },
+        {
+                "word": "jıl",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 202,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Jıl- waqıt ólshem birligi: Jerdiń Quyash átirapında bir márte t…",
+                "…na ilimpazlar áyyemnen qızıqqan. Áyyemgi Qıtay hám Egipette jıl ádewir anıq esaplanǵan. Grek alımı Gipparx b.e.sh. II ásird…",
+                "…dewir anıq esaplanǵan. Grek alımı Gipparx b.e.sh. II ásirde jıl \"1/300 kún kem 365 1/4 kún\" ekenligin anıqlaǵan. Bul bolsa…",
+                "…arıq qıladı (qarań: Kabisa jılı). Házirgi waqıtta hár qıylı jıl túsinikleri qollanıladı. Mısalı, Quyashtıń kórinetuǵın qozǵ…",
+                "…noqatınan izbe-iz 2 márte ótiwi arasındaǵı dáwir tropikalıq jıl delinedi, ol 365,242196 ortasha sutkaǵa teń. Bunnan basqa,…",
+                "…5,242196 ortasha sutkaǵa teń. Bunnan basqa, anomalistikalıq jıl — Quyashtıń perigeliyden izbe-iz 2 márte ótiwi arasındaǵı d…"
+            ]
+            },
+        {
+                "word": "eramız",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…o hám Dongye (arqa Ye) payda bolǵan. == Úsh xanlıq == Biziń eramız basında Choson mámleketi bóleklengeninen keyin qáwim birles…"
+            ]
+            },
+        {
+                "word": "nomer",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…tları toparınıń shıǵıwı tez arada úlken tabısqa eristi. Bul nomer kóplegen mámleketlerde gastrolda boldı hár túrli sıylıqlarǵ…",
+                "…Evrovideniede === Jiva «Just Go» qosıǵın tikkeley efirde 2-nomer astında atqardı. Dawıs beriw dáwirinen soń, Ázerbayjan úlke…",
+                "…7 procenti bar. Suriyalıq qashqınshılar daǵdarısı menen bul nomer sezilerli dárejede kemeydi. Krizis dáwirinde kóplegen Suriy…",
+                "…Evrovidenie 2026da Albaniya wákili Alisten aldın, tórtinshi nomer menen saxnaǵa shıqtı. 36 ball jıynap, qosıq finalda jigirma…",
+                "…asida belgilengen pul esap birlikleri muǵdarın kórsetetuǵın nomer bolıp tabıladı hám kóbinese hátte shifrlanbaǵan, sonıń mene…",
+                "…ámel etedi, eger onıń jıl gruppaları atları klasstan keyin nomer qoyıladı : Mısalı, Qospa Shtatlardaǵı «Birinshi klass» emes…"
+            ]
+            },
+        {
+                "word": "teń",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 104,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ń vakuumda, 1/299 792 458 sekund ishinde basıp ótken jolına teń. == Kelip shıǵatuǵın birlikler == === Pikometr === Pikometr…",
+                "…=== Pikometr === Pikometr (belgileniwi: pm) — 10-12 metrge teń. Mısalı: Gyeliy atomı radiusı 31 pm. === Nanometr === Nanom…",
+                "…. === Nanometr === Nanometr (belgileniwi: nm) — 10-9 metrge teń. Yaǵnıy, 1 metrdiń milliarddan bir bólimi. Mısalı: Qattı za…",
+                "…=== Mikrometr === Mikrometr (belgileniwi: µm) — 10-6 metrge teń. Yaǵnıy, 1 metrdiń millionnan bir bólimi. Mısalı: Shudring…",
+                "…bir bólimi. Mısalı: Shudring tamshısı shama menen 10 µm ge teń. === Millimetr === Millimetr (belgileniwi: mm) — 10-3 metrg…",
+                "…=== Millimetr === Millimetr (belgileniwi: mm) — 10-3 metrge teń. Yaǵnıy, 1 metrdiń mıńnan bir bólimi. === Santimetr === San…"
+            ]
+            },
+        {
+                "word": "bólip",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 36,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…ul eranı birinshi ret 1841-jılda inglis geologı Jon Fillips bólip kórsetken. Mezozoy paleozoydan keyin hám kaynozoydan aldın…",
+                "…óbinese orgazm menen birge boladı. == Process == Erkeklerde bólip shıǵarıw procesi tómendegishe ámelge asadı: Dáslep fizikalı…",
+                "…. Jınısıy qozǵaw (fizikalıq hám psixologiyalıq) Qattıwlanıw Bólip shıǵarıw Bosańlasıw == Mashqalalar == Bólip shıǵarıw fiziol…",
+                "…ıq) Qattıwlanıw Bólip shıǵarıw Bosańlasıw == Mashqalalar == Bólip shıǵarıw fiziologiyalıq kózqarastan ápiwayı, biraq gormonal…",
+                "…m medicinada aneyakulyaciya dep ataladı. == Payda bolıwı == Bólip shıǵarıw prostata beziniń ayırım mashqalaları sebepli, geyd…",
+                "…lar nátiyjesinde júzege keliwi múmkin. Bul jaǵday da uyqıda bólip shıǵarıw dep ataladı. Uyqıda bólip shıǵarıw tek erkeklerde…"
+            ]
+            },
+        {
+                "word": "kóbeytiw",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…. Jámiyettiń ustavlıq kapitalı akciyalardıń nominal bahasın kóbeytiw yamasa qosımsha akciyalardı jaylastırıw jolı menen kóbeytil…",
+                "…jolı menen kóbeytiliwi múmkin. Akciyalardıń nominal bahasın kóbeytiw jolı menen jámiyettiń ustavlıq kapitalın kóbeytiw haqqında…",
+                "…l bahasın kóbeytiw jolı menen jámiyettiń ustavlıq kapitalın kóbeytiw haqqında hám jámiyettiń ustavına tiyisli ózgerisler kirgizi…",
+                "…ciyalardı jaylastırıw jolı menen jámiyettiń ustavlıq fondın kóbeytiw haqqında sheshim akcionerlerdiń ulıwma jıynalısında yamasa…",
+                "…iyalardı jaylastırıw jolı menen jámiyettiń, ustavlıq fondın kóbeytiw haqqındaǵı sheshim menen belgilengen bolıwı tiyis. Akcioner…",
+                "…er sol buyrıqtan aldın kórsetiledi. Mısalı, postfiks jazıwı kóbeytiw, 2, 3 (prefiks yamasa Polyak jazıwı) yamasa 2 kóbeytiw 3 (i…"
+            ]
+            },
+        {
+                "word": "noqat",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 31,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…anda keńisliktegi awhalınıń ózgeriwine aytamız. Materiallıq noqat-belgili bir jaǵdayda ólshemlerin esapqa almasada bolatuǵın…",
+                "…ńil avtomobildi, usı joldı basıp ótiw dawamında materiallıq noqat sıpatında qarawǵa boladı. Ilgerilemeli háreket-bul deneniń…",
+                "…iledi. úyreniletuǵın obyektdiń bólimlerine qarap: 1) moddiy noqat hám moddiy noqatlar sisteması Dinamikası; 2) qattıdene Dina…",
+                "…ika, aerodinamika, gáz dinamikası) boladı. Dinamikada aldın noqat háreket qaǵıydaları anıqlanadı, keyin noqatlar sisteması us…",
+                "…rensial teńlemeler tiykarında anıqlanadı. Dinamikada ulıwma noqat tebrenbe háreketin teksiriw ushın differensial teńlemelerde…",
+                "…piste, ǵoza, jiyde, qızılgúl (shipovnik), qulpınay, lobiya, noqat, jer ǵozalar kiredi.…"
+            ]
+            },
+        {
+                "word": "pút",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    
