@@ -1187,6 +1187,63 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "(`bir saatnıñ 1/60-ine ve 60 saniyege teñ`) and a RATE (`Ortalama debit 2 m\u00b3/sn`). No "
             + "fraction rule is written",
     },
+    chr: {
+        // \u26a0 TWELVE REFUSALS \u2014 every sign class this repo probes \u2014 over the retained text of
+        // `tools/corpus/mined/chr.jsonc` (315 segments of a 734-paragraph chr.wikipedia dump, the SMALLEST
+        // corpus in the fleet), each argued in src/languages/cherokee/normalize.ts. This is the round where
+        // trap 51's floor is the whole result: the layer that ships reads three SEPARATORS (a grouping
+        // comma, a decimal dot, a span dash) and declares no shared symbol tier at all, because
+        // chr.wikipedia attests no percent word, no currency name, no unit word and no exponent word.
+        // \u26a0 THE SOURCING FLOOR IS MEASURED, not assumed: `espeak-ng/dictsource/chr_list` is ZERO LINES
+        // long (espeak ships 324 lines of `chr_rules` over a ROMANIZATION and not one dictionary entry), and
+        // `attest.ts --after` on six Cherokee numerals returns FOUR followers across the whole wiki, none a
+        // measure word \u2014 this wiki essentially never spells a numeral out beside a unit.
+        percent: "measured: `%` \u00d76 and every one is a genuine percentage in Cherokee prose "
+            + "(\u13c2\u13aa\u13af\u13b8 \u13a4\u13c1\u13cd\u13d3\u13b3 98% \u13a6\u13d9\u13af "
+            + "\u13d7\u13da\u13dd\u13a2, \u13e2 95% \u13a2\u13a6 \u13a1\u13b6\u13af, plus the two spans "
+            + "`20\u201325%` and `10\u201315%`). \u26a0 THERE IS NO CANDIDATE WORD: \u13cd\u13aa\u13af\u13e5\u13c6 "
+            + "(100) is attested \u00d71 in \u00d71 article and its one example is a COUNT OF PEOPLE in a "
+            + "narrative rather than a proportion, and \u13cd\u13aa\u13af\u13e5\u13c6 \u13a2\u13f3\u13d3\u13b5 "
+            + "(\u2018per hundred\u2019) is \u00d70. Composing one would be Fula\u2019s `e teemedere` only if the "
+            + "preposition were attested in that frame, and it is not",
+        currency: "measured: `\u00a5` \u00d71 and it is a TRAP-12 REDUNDANT DROP, not a gap. The corpus\u2019s only "
+            + "currency sign is \u13a4\u13be\u13e4\u13b5 \u13a0\u13d5\u13b3 \u13e3\u13c6\u13c2 \u13a0\u13d5\u13b3 "
+            + "(\u00a5) \u2014 \u2018their money, Japan money (\u00a5)\u2019 \u2014 so the Cherokee word "
+            + "\u13a0\u13d5\u13b3 (money) is ALREADY WRITTEN twice beside the sign, and saying it a third time is "
+            + "what would be wrong. `attest.ts` finds the same gloss shape for the euro on this wiki, which "
+            + "confirms the construction independently: \u13f3\u13b3\u13db (\u20ac) \u13a0\u13d5\u13b3 "
+            + "\u13be\u13bf European Union. No yen name is attested in any source",
+        minus: "measured: the ASCII hyphen is \u00d7101 in the retained text and NOT ONE is a negative. `mine.ts "
+            + "scan` reports `DROP minus \u00d71`; read, the instance is \u13b9\u13f1\u13a9\u13b5 I "
+            + "\u13b3\u13c2\u13a6\u13c7 (????-844) \u2014 a reign span whose start year is unknown, written as "
+            + "four question marks. \u26a0 THE HYPHEN IS A CHEROKEE WORD-JOINER: the -\u13af/-\u13c2 enclitic "
+            + "(\u13e7\u13f4\u13e2 \u13a0\u13b9\u13f0\u13b5-\u13af, \u13a1\u13b6\u13af-\u13c2), a COMPOUND NUMERAL "
+            + "(\u13e6\u13cd\u13aa\u13af-\u13d0\u13c1\u13b3 (39), which the writer glosses with its own digits in "
+            + "the same clause), an ISBN separator (\u00d79 hyphens over 3 citations) and English compounds \u2014 "
+            + "against THREE genuine spans. Only `\u2013` and `\u2014` are claimed by this layer",
+        plus: "measured: `+` \u00d70 in the retained text \u2014 the sign does not occur",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        equals: "measured: `=` \u00d70 in the retained text \u2014 the sign does not occur. Trap 62 says print every "
+            + "instance with its context before writing a rule for it; here there is nothing to print, which is "
+            + "trap 48\u2019s definitive negative rather than a deferral",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
+        times: "measured: `\u00d7` \u00d70 in the retained text \u2014 the sign does not occur",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs \u00d73 and every instance sits inside ENGLISH text in "
+            + "the citation apparatus \u2014 a page range ((1897/98: pt.1)), a dictionary title (English/Cherokee "
+            + "Glossary) and a spaced apposition (for Cherokee / Tsalagi). No fraction rule and no rate rule is "
+            + "written",
+        degrees: "measured: `\u00b0` \u00d70 and `\u2103`/`\u2109` \u00d70 \u2014 the sign does not occur, and "
+            + "neither does any temperature figure anywhere in this corpus. The artifact\u2019s `degrees` cell is 0",
+        ampersand: "measured: `&` \u00d73 and NOT ONE is a Cherokee conjunction. Two are the unexpanded HTML entity "
+            + "`&ndash;` ((1914&ndash;1972), (1961&ndash;1989)), which this layer folds to the real dash so the "
+            + "span rule can read it; the third is Ben & Jerry's \u13a4\u13db\u13c1\u13a2 "
+            + "\u13a4\u13a6\u13be\u13cd\u13d7 Holdings Inc., an English brand name inside a Cherokee sentence. "
+            + "\u26a0 THE WORD WOULD HAVE BEEN EASY \u2014 \u13a0\u13b4 (\u2018and\u2019) is \u00d7255 over 20 "
+            + "articles and is this corpus\u2019s ordinary conjunction \u2014 and it is refused because splicing a "
+            + "Cherokee word into an English trade name is a defect this layer would have INTRODUCED rather than "
+            + "inherited (trap 56)",
+    },
     kaa: {
         // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/kaa.jsonc` (443 segments of a
         // 63,415-paragraph kaa.wikipedia dump), each argued in src/languages/karakalpak/normalize.ts.
@@ -3807,6 +3864,25 @@ export const SIGN_CASES: readonly (readonly [string, string, RegExp])[] = [
  * ⚠ THIS LIST IS EVIDENCE, NOT A TODO. Do not "fix" an entry by making its hyphen audible.
  */
 export const ACCEPTED_SILENT: Readonly<Record<string, Readonly<Record<string, readonly string[]>>>> = {
+    chr: {
+        // ⚠ TWO INSTANCES THE CLASS-LEVEL REFUSAL CANNOT REACH, and each fails `acceptedSignClass` for its
+        // own mechanical reason rather than because the refusal is weak — the arguments and their counts are
+        // in `ACCEPTED_SIGN_SILENCE` above.
+        //   · the CURRENCY sign is `¥`, and `SIGN_CASES`'s currency probe is keyed on `$`, so the class
+        //     test never sees a currency in this line at all;
+        //   · the MINUS pattern requires a digit AFTER the sign, which a single bare `-` handed to
+        //     `covered.test(ch)` can never satisfy, so the class test finds nothing relevant either.
+        //
+        // ⚠ WHAT IS ASSERTED IS THAT THE READING IS ALREADY CORRECT, not merely that the drop is harmless.
+        // The yen line is trap 12 in its purest form: `ᎤᎾᏤᎵ ᎠᏕᎳ
+        // ᏣᏆᏂ ᎠᏕᎳ (¥)` reads *unat͡seli atela t͡sakʷani
+        // atela* — ‘their money, Japan money’ — so the currency is NAMED, twice, by the
+        // writer's own words, and a third naming from the sign would be the defect. The reign span's hyphen
+        // is a designation joining a KNOWN death year to an UNKNOWN birth year typed as four question marks;
+        // there is no negative number anywhere in this corpus.
+        currency: ["ᏣᏆᏂ ᎠᏕᎳ (¥)"],
+        minus: ["ᎳᏂᎦᏇ (????-844)"],
+    },
     mos: {
         // ⚠ TWO OF THE THREE, AND THE THIRD IS THE WHOLE REASON THIS IS AN INSTANCE LIST AND NOT A CLASS
         // ENTRY. The Mooré artifact has exactly three matches of the `minus` shape. Two are RANGES written
