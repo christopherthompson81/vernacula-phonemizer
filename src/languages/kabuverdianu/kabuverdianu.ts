@@ -12,6 +12,7 @@ import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { IPA_VOWEL } from "../../core/ipa.ts";
 import { numberToWords } from "./numbers.ts";
+import { normalizeKabuverdianu } from "./normalize.ts";
 
 interface KabuverdianuDef {
     digraphs: Record<string, string>;
@@ -121,7 +122,10 @@ const nat = makeNativiser(NATIVE_CLASS, "u");
 
 class KabuverdianuPhonemizer implements Phonemizer {
     text(input: string): string {
-        return assembleClauses(input, TOKEN, (m, sink) => {
+        // TEXT NORMALIZATION runs BEFORE tokenization — see normalize.ts. Its flagship job here is the
+        // grouping DOT, which this tokenizer otherwise reads as a full stop (`1.000 libras` → "one, zero
+        // pounds"), and the clock colon, which `clausePunctuation` maps to a pause mid-quantity.
+        return assembleClauses(normalizeKabuverdianu(input), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             // A digit run reads as Kabuverdianu number WORDS, each phonemized like any other word.
             else if (m[2]) for (const wd of numberToWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(wd));
