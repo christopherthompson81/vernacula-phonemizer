@@ -130,6 +130,7 @@ const DOTTED: Readonly<Record<string, string>> = {
     aj: "a jiné", tzn: "to znamená", tj: "to jest",
     dr: "doktor", jr: "junior", sv: "svatý", st: "svatý",
     co: "společnost", inc: "společnost", mil: "milionů", s: "strana",
+    cca: "cirka",  // corpus: `rychlosti cca 83 km/h`; read as the cluster [t͡st͡sˈa] before this
 };
 const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join("|");
 

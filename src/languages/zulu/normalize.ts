@@ -30,6 +30,8 @@
 const UNIT_WORD: Record<string, string> = {
     km: "amakhilomitha", m: "amamitha", mm: "amamilimitha", cm: "amasentimitha",
     kg: "amakhilogremu", mi: "amamayela", ft: "amafidi",
+    // The corpus's own spelling of km (`ongama-1600 kma kusuka`), read as [kʼmˈaː] before this.
+    kma: "amakhilomitha",
 };
 
 /** Rate denominators. `ngehora` = nga- + ihora. Both are ONE agglutinated word, which is why the rate cannot

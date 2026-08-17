@@ -164,8 +164,10 @@ const TERMINAL: KeepFinal = "terminal";
 const ABBREV: readonly (readonly [RegExp, string, KeepFinal?])[] = [
     [/(?<![\p{L}\p{M}])f\.v\.t\./giu, "före vår tidräkning", TERMINAL], // 3
     [/(?<![\p{L}\p{M}])t\.o\.m\./giu, "till och med"], //        1
-    [/(?<![\p{L}\p{M}])f\.\s?Kr\./gu, "före Kristus", TERMINAL], //  3
-    [/(?<![\p{L}\p{M}])e\.\s?Kr\./gu, "efter Kristus", TERMINAL], // 2
+    // ⚠ CASE-INSENSITIVE, same reason as German's era rules: FLEURS lowercases, so `1000 f.kr` matched
+    // nothing and reached the g2p as the cluster [kr].
+    [/(?<![\p{L}\p{M}])f\.\s?Kr\./giu, "före Kristus", TERMINAL], //  3
+    [/(?<![\p{L}\p{M}])e\.\s?Kr\./giu, "efter Kristus", TERMINAL], // 2
     [/(?<![\p{L}\p{M}])t\.\s?ex\./giu, "till exempel"], //       8
     [/(?<![\p{L}\p{M}])s\.\s?k\./giu, "så kallad"], //           2
     [/(?<![\p{L}\p{M}])dvs\.?/giu, "det vill säga"], //          2

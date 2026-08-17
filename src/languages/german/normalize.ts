@@ -99,8 +99,12 @@ export function normalizeGerman(input: string): string {
 
     // 1) ERA and the multi-dot abbreviations, before the single-dot rule so their interior dots are not
     //    left behind as phrase breaks. `v. Chr.` ×11, `z. B.` ×11.
-    s = s.replace(/\bv\.\s?Chr\./gu, "vor Christus");
-    s = s.replace(/\bn\.\s?Chr\./gu, "nach Christus");
+    // ⚠ CASE-INSENSITIVE: FLEURS ships German lowercased, so `356 v. chr.` matched nothing and read as
+    // *f . kʁ* — a consonant cluster plus two phrase breaks. Same wall as the ordinal rule below and the
+    // English st./dr. work: lowercased input is real input. `v. chr.` has no lowercase homograph to catch
+    // by mistake.
+    s = s.replace(/\bv\.\s?Chr\./giu, "vor Christus");
+    s = s.replace(/\bn\.\s?Chr\./giu, "nach Christus");
     s = s.replace(/\bz\.\s?B\./gu, "zum Beispiel");
     s = s.replace(/\bd\.\s?h\./gu, "das heißt");
     s = s.replace(/\bu\.\s?a\./gu, "unter anderem");
