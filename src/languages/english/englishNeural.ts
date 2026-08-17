@@ -10,7 +10,7 @@
  * model is absent the tagger is `undefined` and this returns exactly the sync path (no throw).
  */
 import { createEnglish } from "./english.ts";
-import { withHost } from "../../core/foreign.ts";
+import { addForeignOov, withHost } from "../../core/foreign.ts";
 import { createEnglishTagger, type EnglishTagger } from "./englishTagger.ts";
 
 const WORD = /[A-Za-z][A-Za-z']*/gu;
@@ -26,6 +26,39 @@ function g2pKeyOf(word: string): string {
     if (lower.endsWith("'s") && lower.length > 2) lookup = lower.slice(0, -2);
     else if (lower.endsWith("'") && lower.length > 2 && lower[lower.length - 2] === "s") lookup = lower.slice(0, -1);
     return lookup.replace(/'/gu, "");
+}
+
+/**
+ * Tag the OOV words of `text` and record them for the FOREIGN reader (core/foreign.ts), for a host language that
+ * is about to delegate an embedded Latin run to English.
+ *
+ * This is the async half the delegation could not have on its own: `defaultForeign` is typed synchronous, so a
+ * host's run reached English's n-gram OOV G2P even under `phonemizeAsync`. Called from `phonemizeAsync` BEFORE the
+ * host's render, so by the time the (synchronous) reader asks, the readings are already memoized.
+ *
+ * The words tagged are every Latin word in the host's text, which is a SUPERSET of the words the host will
+ * actually delegate — the tokenizer decides that, deep inside `emitUnclaimed`, and asking it would mean rendering
+ * twice. A superset only costs surplus tagger calls, and `phonemizeAsync` gates on mixed script so a Latin-script
+ * host (whose own tokenizer claims its words) never gets here at all.
+ *
+ * Silent no-op without a model / `onnxruntime-node`: the memo stays empty and the reader falls back to the n-gram
+ * engine, which is the pre-existing behaviour.
+ */
+export async function prewarmForeignEnglish(text: string): Promise<void> {
+    if (taggerP === undefined) taggerP = createEnglishTagger();
+    const tagger = await taggerP;
+    if (!tagger) return;
+    const E = enEngine();
+    const done = new Set<string>();
+    for (const m of text.matchAll(WORD)) {
+        const w = m[0];
+        if (E.knownWord(w) !== undefined) continue; // dict / heteronym → the sync path is authoritative
+        const key = g2pKeyOf(w);
+        if (done.has(key) || !/^[a-z]+$/u.test(key)) continue;
+        done.add(key);
+        const ipa = await tagger.tag(key);
+        if (ipa) addForeignOov(key, ipa);
+    }
 }
 
 /**

@@ -89,3 +89,42 @@ export function readForeignRun(run: string): string | undefined {
     if (scriptReader === undefined || host === undefined || hosts.length > 3) return undefined;
     return scriptReader(run, host);
 }
+
+/**
+ * NEURAL OOV READINGS for words inside embedded foreign runs, resolved by the async entries and consulted by
+ * the default (English) foreign reader.
+ *
+ * ⚠ WHY THIS EXISTS: `defaultForeign` is typed synchronous, so a delegated run got English's SYNC engine —
+ * lexicon + n-gram OOV — even under `phonemizeAsync`. The neural BiLSTM never saw it, and delegated runs are
+ * mostly proper nouns, i.e. exactly the OOV tail the BiLSTM exists for. Measured on the OmniVoice FLEURS
+ * corpora, the sync reader deletes and invents phones the async one does not:
+ *
+ *     liguria      async ləɡjˈʊɹiʲə          sync lˈaᶦʊɹiʲə        (the ɡ is gone)
+ *     adekoya      async æd̬əkʰˈɔᶦə           sync ˈædŋkoᶷjˌɑː      (ˈædŋ is not an English onset)
+ *     sezen        async sˈɛzən              sync sˈɑːʃɛn
+ *
+ * A PLAIN MEMO, deliberately — not a scoped override like `withHost` above. The tagger reads a bare lowercased
+ * g2pKey, so a reading is context-free and deterministic: there is nothing to restore, hence none of the
+ * async-interleaving hazard that forces the host stack to stay inside one synchronous turn. Consulted ONLY on
+ * the foreign path, so `phonemize(text, "en")` stays byte-identical no matter what ran before it.
+ */
+const foreignOov = new Map<string, string>();
+
+/** Cap the memo. Readings are tiny and reused across utterances, but a long-lived process phonemizing an
+ *  unbounded stream of documents should not grow one forever. Oldest-first eviction; a re-tag costs one
+ *  BiLSTM call, so a miss is cheap and correctness never depends on a hit. */
+const FOREIGN_OOV_MAX = 20_000;
+
+/** Record one neural reading for `g2pKey`. Called by the async entries' pre-pass. */
+export function addForeignOov(g2pKey: string, ipa: string): void {
+    if (foreignOov.size >= FOREIGN_OOV_MAX) {
+        const oldest = foreignOov.keys().next();
+        if (!oldest.done) foreignOov.delete(oldest.value);
+    }
+    foreignOov.set(g2pKey, ipa);
+}
+
+/** The neural reading for `g2pKey`, or `undefined` — the shape English's `oovOverride` expects. */
+export function lookupForeignOov(g2pKey: string): string | undefined {
+    return foreignOov.get(g2pKey);
+}

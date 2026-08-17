@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { scriptOf } from "../src/core/scripts.ts";
 
-import { phonemize } from "../src/index.ts";
+import { phonemize, phonemizeAsync } from "../src/index.ts";
 
 // ⚠ AN ENGINE'S TOKENIZER ONLY MATCHES ITS OWN SCRIPT, and assembleClauses SKIPS whatever the tokenizer does
 // not claim — so without a fallback every engine drops embedded Latin outright (a brand name, acronym,
@@ -197,5 +197,49 @@ describe("script routing covers every script the README exercises", () => {
             const withWord = phonemize(`The word ${word} here`, "en");
             expect(withWord, `${lang} ${word} vanished`).not.toBe(phonemize("The word here", "en"));
         }
+    });
+});
+
+// ⚠ A DELEGATED RUN USED TO GET ENGLISH'S *SYNC* OOV G2P even under `phonemizeAsync`. Every English reader for
+// embedded text is typed synchronous (core/foreign.ts), so the BiLSTM tagger never saw the run — and delegated
+// runs are overwhelmingly proper nouns, i.e. precisely the OOV tail the tagger exists for. The n-gram fallback
+// deleted and invented phones on them: `liguria` lost its ⟨g⟩, `adekoya` gained the non-English onset ˈædŋ.
+// `phonemizeAsync` now prewarms those readings into a memo the sync reader consults.
+describe("embedded foreign runs use the NEURAL English OOV reader under phonemizeAsync", () => {
+    // OOV in CMUdict, and each one the sync n-gram reads differently from the tagger — a word both paths agree
+    // on would pass whether or not the prewarm ran.
+    const NAMES = ["liguria", "adekoya", "riomaggiore", "caboolture", "sezen"];
+
+    // Hosts across the three delegation paths: the script-router's Latin target (th, ko), and an engine that
+    // claims Latin itself and is handed the reader at construction (hi).
+    const HOSTS: Array<[string, (w: string) => string]> = [
+        ["th", (w) => `ในเขต ${w} ประเทศ`],
+        ["ko", (w) => `터키의 ${w} 가수`],
+        ["hi", (w) => `भारत ${w} देश`],
+    ];
+
+    test.each(HOSTS)("%s delegates to the same reading English itself gives", async (lang, wrap) => {
+        for (const name of NAMES) {
+            const alone = await phonemizeAsync(name, "en");
+            const embedded = await phonemizeAsync(wrap(name), lang);
+            expect(embedded, `${lang}: ${name} did not get the neural reading`).toContain(alone);
+        }
+    });
+
+    test("and the SYNC path is left byte-identical — the memo is foreign-path only", async () => {
+        // Populate the memo, then assert `phonemize` has not moved. Sync output must never depend on whether an
+        // async call happened earlier in the process.
+        const before = NAMES.map((n) => phonemize(n, "en"));
+        for (const n of NAMES) await phonemizeAsync(`ในเขต ${n} ประเทศ`, "th");
+        expect(NAMES.map((n) => phonemize(n, "en"))).toEqual(before);
+    });
+
+    test("the two readings genuinely differ, so the tests above can fail", async () => {
+        // Guards the guard: if the tagger were absent, sync and async would agree and everything would pass
+        // vacuously. Skips rather than fails when there is no model, which is a supported configuration.
+        const differing = (await Promise.all(NAMES.map(async (n) => phonemize(n, "en") !== await phonemizeAsync(n, "en"))))
+            .filter(Boolean).length;
+        if (differing === 0) return; // no ONNX model / onnxruntime-node in this environment
+        expect(differing).toBe(NAMES.length);
     });
 });

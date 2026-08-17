@@ -203,7 +203,7 @@ import { ROMAN_POLICY as romanAz } from "./languages/azerbaijani/romanOrdinals.t
 import { ROMAN_POLICY as romanKk } from "./languages/kazakh/romanOrdinals.ts";
 import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 
-import { setDefaultForeign, setScriptReader, withHost } from "./core/foreign.ts";
+import { lookupForeignOov, setDefaultForeign, setScriptReader, withHost } from "./core/foreign.ts";
 import { CYRILLIC_HOSTS, readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
 import { foldCaretExponents, foldCyrillicConfusables, foldCyrillicStressMarks, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
@@ -234,7 +234,29 @@ const ROMAN_POLICIES: Readonly<Record<string, RomanPolicy>> = {
 // own) are read as English — the same choice the engines that already handle Latin make. Registered
 // here rather than imported by core/, so core keeps its no-dependency position. Without this, the 47
 // engines whose tokenizer matches only their own script DROP such text silently (core/foreign.ts).
-setDefaultForeign((text) => getPhonemizer("en").text(text));
+/**
+ * Read a foreign run as ENGLISH, with whatever NEURAL OOV readings the async entries prewarmed (core/foreign.ts).
+ *
+ * ⚠ `textWithOov`, not `text`. Both English-reading paths below are typed SYNCHRONOUS, so before this a delegated
+ * run got the n-gram OOV G2P even under `phonemizeAsync` — and delegated runs are overwhelmingly proper nouns,
+ * i.e. exactly the OOV tail the BiLSTM exists for. Going through `getPhonemizer("en").text` is what loses the
+ * third argument (that shadow is one-arg), so `foldPass` + `withHost` reproduce here what the shadow would have
+ * applied; `romanPass` is a no-op, `en` being ROMAN_NATIVE. The memo is empty on the sync path, so `phonemize`
+ * stays byte-identical.
+ *
+ * THE ONE ENGLISH READER FOR EMBEDDED TEXT, used from all three places a foreign run can be read, because
+ * fixing only one of them fixes almost nothing:
+ *   1. `setDefaultForeign` below — the fallback for runs the script router declines;
+ *   2. `setScriptReader`'s Latin target — where an embedded Latin run ACTUALLY goes, the router being asked first;
+ *   3. the `readAsEnglish` argument threaded into the ~46 engines that claim Latin themselves (mandarin, hindi,
+ *      sindhi, amharic, vietnamese, …) — those never reach 1 or 2 at all.
+ */
+function readAsEnglish(text: string): string {
+    return withHost("en", () =>
+        (getPhonemizer("en") as EnglishPhonemizer).textWithOov(foldPass("en", text), lookupForeignOov));
+}
+
+setDefaultForeign(readAsEnglish);
 
 // SCRIPT ROUTING (core/scripts.ts). The line above reads every foreign run as ENGLISH, which is correct
 // for Latin and wrong for every other script — and in practice a non-Latin run never reached it at all,
@@ -248,7 +270,10 @@ setScriptReader((run, host) => {
     if (routed === undefined) return undefined;
     const { target, text } = routed;
     try {
-        return getPhonemizer(target).text(text);
+        // A LATIN run routes here, not to `setDefaultForeign` — `emitUnclaimed` asks the router first and
+        // `SCRIPT_TARGET.Latin` is "en", so this is the path that actually reads embedded Latin. It therefore
+        // needs the prewarmed OOV readings too; without this the fix reached only the runs the router declined.
+        return target === "en" ? readAsEnglish(text) : getPhonemizer(target).text(text);
     } catch {
         // An unbuilt or unknown target must not take the whole utterance down; declining here falls back
         // to the Latin-to-English path, which is what happened before this existed.
@@ -423,7 +448,7 @@ function build(lang: string): Phonemizer {
             return createEnglishIN();
         // Embedded Latin in Chinese text routes to the English phonemizer (lazy — loaded only if it appears).
         case "cmn":
-            return createMandarin((latin) => getPhonemizer("en").text(latin));
+            return createMandarin(readAsEnglish);
         case "es":
             return createSpanish();
         // Latin-American Spanish (neutral/pan-American) — Castilian engine + seseo (θ→s) + yeísmo (ʎ→ʝ).
@@ -474,7 +499,7 @@ function build(lang: string): Phonemizer {
         case "mg":
             return createMalagasy();
         case "vi":
-            return createVietnamese((latin) => getPhonemizer("en").text(latin));
+            return createVietnamese(readAsEnglish);
         case "ta":
             return createTamil();
         case "sv":
@@ -548,13 +573,13 @@ function build(lang: string): Phonemizer {
             return createCzech();
         // Embedded Latin in Hindi text routes to the English phonemizer (lazy — loaded only if it appears).
         case "hi":
-            return createHindi((latin) => getPhonemizer("en").text(latin));
+            return createHindi(readAsEnglish);
         case "bn":
-            return createBengali((latin) => getPhonemizer("en").text(latin));
+            return createBengali(readAsEnglish);
         case "as":
-            return createAssamese((latin) => getPhonemizer("en").text(latin));
+            return createAssamese(readAsEnglish);
         case "bpy":
-            return createBishnupriya((latin) => getPhonemizer("en").text(latin));
+            return createBishnupriya(readAsEnglish);
         case "so":
             return createSomali();
         case "ceb":
@@ -564,9 +589,9 @@ function build(lang: string): Phonemizer {
         case "ilo":
             return createIlocano();
         case "ur":
-            return createUrdu((latin) => getPhonemizer("en").text(latin));
+            return createUrdu(readAsEnglish);
         case "id":
-            return createIndonesian((latin) => getPhonemizer("en").text(latin));
+            return createIndonesian(readAsEnglish);
         // Standard Malay (Malaysian/Bruneian) — ALIAS to the Indonesian engine as a labelled approximation. Malay and
         // Indonesian are mutually intelligible standardisations of the same Malayic language, sharing the reformed
         // Latin orthography and largely the same grapheme→IPA phonology. There is no independent Malay referee wired,
@@ -583,26 +608,26 @@ function build(lang: string): Phonemizer {
         // iterated the artifacts reported Malay as unreachable while `zsm` had been working the whole time.
         case "ms":
         case "zsm":
-            return createMalay((latin) => getPhonemizer("en").text(latin));
+            return createMalay(readAsEnglish);
         case "pa":
-            return createPunjabi((latin) => getPhonemizer("en").text(latin));
+            return createPunjabi(readAsEnglish);
         // Western Punjabi / Lahnda (Shahmukhi, Pakistan) — the SAME Punjabi engine; the scanner auto-detects the
         // Perso-Arabic script and applies the shared phonology (tonogenesis, gemination, nasal assimilation).
         case "pnb":
-            return createPunjabi((latin) => getPhonemizer("en").text(latin));
+            return createPunjabi(readAsEnglish);
         // Saraiki (Shahmukhi, Pakistan) — the NON-tonal Lahnda sibling of Punjabi: reuses the shared Shahmukhi
         // front-end + Lahnda phonology but keeps the voiced aspirates & aspirated sonorants (no tonogenesis) and
         // adds the four implosives ٻɓ ڄʄ ڳɠ ݙɗ.
         case "ro":
             return createRomanian();
         case "skr":
-            return createSaraiki((latin) => getPhonemizer("en").text(latin));
+            return createSaraiki(readAsEnglish);
         case "mr":
-            return createMarathi((latin) => getPhonemizer("en").text(latin));
+            return createMarathi(readAsEnglish);
         case "te":
-            return createTelugu((latin) => getPhonemizer("en").text(latin));
+            return createTelugu(readAsEnglish);
         case "yue":
-            return createCantonese((latin) => getPhonemizer("en").text(latin));
+            return createCantonese(readAsEnglish);
         case "tl":
             return createTagalog();
         case "om":
@@ -610,13 +635,13 @@ function build(lang: string): Phonemizer {
             // Latin-script is exactly what made this necessary, not what made it unnecessary. Oromo's word group
             // claims Latin text, so an accented foreign NAME was claimed and then mangled by a g2p with no rule
             // for the letter — `São Paulo` read *s ˈə ˈo paˈulo*.
-            return createOromo((latin) => getPhonemizer("en").text(latin));
+            return createOromo(readAsEnglish);
         case "pl":
             return createPolish();
         case "sd":
-            return createSindhi((latin) => getPhonemizer("en").text(latin));
+            return createSindhi(readAsEnglish);
         case "fa":
-            return createPersian((latin) => getPhonemizer("en").text(latin));
+            return createPersian(readAsEnglish);
         case "it":
             return createItalian();
         // Naija is English-lexified: a known-English word is nativised (English dict IPA → Naija phonology), an
@@ -627,20 +652,20 @@ function build(lang: string): Phonemizer {
             );
         // Embedded Latin in Wu text routes to the English phonemizer (lazy — loaded only if it appears).
         case "wuu":
-            return createWu((latin) => getPhonemizer("en").text(latin));
+            return createWu(readAsEnglish);
         // Jin Chinese (Taiyuan) — Han → Sinological IPA + Chao tones; embedded Latin routes to English.
         case "cjy":
-            return createJin((latin) => getPhonemizer("en").text(latin));
+            return createJin(readAsEnglish);
         // Hakka Chinese (Meixian) — same shared Han-dict engine; embedded Latin routes to English.
         case "hak":
-            return createHakka((latin) => getPhonemizer("en").text(latin));
+            return createHakka(readAsEnglish);
         // Xiang Chinese (Changsha) — same shared Han-dict engine; embedded Latin routes to English.
         case "hsn":
-            return createXiang((latin) => getPhonemizer("en").text(latin));
+            return createXiang(readAsEnglish);
         case "gan":
-            return createGan((latin) => getPhonemizer("en").text(latin));
+            return createGan(readAsEnglish);
         // ⚠ NO FOREIGN READER, AND THE ABSENCE IS THE DECISION. This case read
-        // `createAkan((latin) => getPhonemizer("en").text(latin))` and `createAkan` never referenced the
+        // `createAkan(readAsEnglish)` and `createAkan` never referenced the
         // argument — wiring with no routing behind it. Akan IS written in Latin, so its tokenizer claims
         // every Latin run and NATIVISES it; there is no unclaimed-run seam for a reader to sit in, and
         // handing one in would need a discriminator ("is this word Akan?") that no lexicon in this repo can
@@ -657,7 +682,7 @@ function build(lang: string): Phonemizer {
         case "sw":
             return createSwahili();
         case "gu":
-            return createGujarati((latin) => getPhonemizer("en").text(latin));
+            return createGujarati(readAsEnglish);
         // ⚠ `ps`/`pus` IS A MACROLANGUAGE AND THIS ENGINE IS ONE OF ITS MEMBERS. ISO 639-3 `pus` covers pbt
         // (Southern/Kandahari), pbu (Northern/Peshawar) and pst (Central/Waziri), and pashto.ts implements
         // exactly one: "Dialect: ښ/ږ = Kandahari retroflex ʂ/ʐ". `pbt` is therefore the accurate code and is
@@ -668,19 +693,19 @@ function build(lang: string): Phonemizer {
         // orthography and no single engine can be right for both.
         case "ps":
         case "pbt":
-            return createPashto((latin) => getPhonemizer("en").text(latin));
+            return createPashto(readAsEnglish);
         case "kn":
-            return createKannada((latin) => getPhonemizer("en").text(latin));
+            return createKannada(readAsEnglish);
         case "ml":
-            return createMalayalam((latin) => getPhonemizer("en").text(latin));
+            return createMalayalam(readAsEnglish);
         case "or":
-            return createOdia((latin) => getPhonemizer("en").text(latin));
+            return createOdia(readAsEnglish);
         case "uz":
             return createUzbek();
         case "am":
-            return createAmharic((latin) => getPhonemizer("en").text(latin));
+            return createAmharic(readAsEnglish);
         case "ti":
-            return createTigrinya((latin) => getPhonemizer("en").text(latin));
+            return createTigrinya(readAsEnglish);
         case "bg":
             return createBulgarian();
         // Macedonian (македонски) — South Slavic, Cyrillic; phonemic g2p + fixed antepenultimate stress.
@@ -707,7 +732,7 @@ function build(lang: string): Phonemizer {
         case "haw":
             return createHawaiian();
         case "mi":
-            return createMaori((latin) => getPhonemizer("en").text(latin));
+            return createMaori(readAsEnglish);
         // Quechua (Runasimi) — Southern Quechua; 3 vowels, overt 3-way stop series (plain/aspirate/ejective), penult stress.
         case "qu":
             return createQuechua();
@@ -788,7 +813,7 @@ function build(lang: string): Phonemizer {
             return createHaitian();
         // Rangpuri (KRNB) — Eastern Indo-Aryan, Devanagari; reuses the Hindi abugida engine + a KRNB manifest.
         case "rkt":
-            return createRangpuri((latin) => getPhonemizer("en").text(latin));
+            return createRangpuri(readAsEnglish);
         // Bavarian (Boarisch) — Upper German (Austro-Bavarian), Latin; greedy scan + falling diphthongs + r-vocalization.
         case "bar":
             return createBavarian();
@@ -802,19 +827,19 @@ function build(lang: string): Phonemizer {
         case "shi":
             return createTashelhit();
         case "ckb":
-            return createCentralKurdish((latin) => getPhonemizer("en").text(latin));
+            return createCentralKurdish(readAsEnglish);
         // Balochi (Southern) — NW Iranian, Balochi Arabic script. Authored (Jahani & Korn). ⚠ THE ORTHOGRAPHY IS
         // DEFECTIVE for this purpose: short vowels are unwritten and و/ی each conflate two long vowels
         // (uː/oː, iː/eː), so those distinctions are not recoverable from the spelling. Fills the retroflex-Iranian census gap.
         case "bal":
-            return createBalochi((latin) => getPhonemizer("en").text(latin));
+            return createBalochi(readAsEnglish);
         case "bho":
-            return createBhojpuri((latin) => getPhonemizer("en").text(latin));
+            return createBhojpuri(readAsEnglish);
         // Magahi (Magadhan, Bihar) — BESPOKE (was a mag→bho alias). Shares the Bihari core with Bhojpuri (no vowel
         // length, श/ष→s, ण/ञ→n) but the comparative phonology (Vinod Kumar 2026) documents a Magahi-specific GLIDE
         // HARDENING — word-initial व→[b], य→[d͡ʒ] — that the alias got wrong, so it earns its own module.
         case "mag":
-            return createMagahi((latin) => getPhonemizer("en").text(latin));
+            return createMagahi(readAsEnglish);
         // Haryanvi (Bangaru — Western Hindi, Haryana) — ALIAS to the Hindi engine. Haryanvi is segmentally ~Hindi
         // (same 28–30 consonants / 4-way stop contrast); its documented differences (vowel free-variation a~e,
         // a marked retroflexion tendency, intonation) are allophonic/prosodic, NOT a categorical grapheme→IPA
@@ -826,17 +851,17 @@ function build(lang: string): Phonemizer {
         // consistent with this being a labelled approximation served via `hi` in the first place. Recorded so
         // nobody re-investigates a settled refusal; a KRNB-style divergence check would need a Haryanvi source.
         case "bgc":
-            return createHindi((latin) => getPhonemizer("en").text(latin));
+            return createHindi(readAsEnglish);
         // Chhattisgarhi (Eastern Hindi) — ⚠ an unverified stub on the shared Hindi engine.
         case "hne":
-            return createChhattisgarhi((latin) => getPhonemizer("en").text(latin));
+            return createChhattisgarhi(readAsEnglish);
         case "za":
             return createZhuang();
         // Awadhi (Eastern Hindi) — a Saksena-sourced ⚠ unverified stub on the shared Hindi engine.
         case "awa":
-            return createAwadhi((latin) => getPhonemizer("en").text(latin));
+            return createAwadhi(readAsEnglish);
         case "mai":
-            return createMaithili((latin) => getPhonemizer("en").text(latin));
+            return createMaithili(readAsEnglish);
         case "uk":
             return createUkrainian();
         case "be":
@@ -853,19 +878,19 @@ function build(lang: string): Phonemizer {
         case "su":
             return createSundanese();
         case "ne":
-            return createNepali((latin) => getPhonemizer("en").text(latin));
+            return createNepali(readAsEnglish);
         case "nan":
-            return createMinnan((latin) => getPhonemizer("en").text(latin));
+            return createMinnan(readAsEnglish);
         case "mn":
             return createMongolian();
         case "umb":
             return createUmbundu();
         case "yo":
-            return createYoruba((latin) => getPhonemizer("en").text(latin));
+            return createYoruba(readAsEnglish);
         case "ig":
-            return createIgbo((latin) => getPhonemizer("en").text(latin));
+            return createIgbo(readAsEnglish);
         case "my":
-            return createBurmese((latin) => getPhonemizer("en").text(latin));
+            return createBurmese(readAsEnglish);
         case "sn":
             return createShona();
         case "rw":
