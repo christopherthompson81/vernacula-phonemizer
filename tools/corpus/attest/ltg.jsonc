@@ -1,0 +1,827 @@
+// WIKIPEDIA WORD ATTESTATION — ltg. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "ltg",
+        "wiki": "ltg.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "kvadratkilometru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…s beja vacmīsta (Vacreigys) rūbežūs, kura pluots viņ nazcik kvadratkilometru. Leidz 1774 godam mīsta teritoreja pasalelynuoja nazcik rei…",
+                "…kņu. Saski dzeivoj vīnā vītā, vīns saskys izlītoj apmāram 1 kvadratkilometru lelu pluotu. Vosorā saski dzeivoj saimē, a zīmā pa vīnam. S…"
+            ]
+            },
+        {
+                "word": "kvadratmetru",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kvadrata",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…solys centrā. Cierkva pastateita 1836. godā ampira stilī — kvadrata forma ar četrim portikim, kas skaistyunuoti ar boltom kolon…"
+            ]
+            },
+        {
+                "word": "kvadratu",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kubikmetru",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kubs",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Celseja",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…m gon buorgs. Vydyskuo temperatura jaunagods mienesī -9° pa Celseja skolai, sīna mienesī +18° pa Celseja skolai. Bezsola period…",
+                "…unagods mienesī -9° pa Celseja skolai, sīna mienesī +18° pa Celseja skolai. Bezsola periods saīt 135 dīnys godā. Solsaimesteiba…",
+                "…); 2008 - gaisa temperatura Daugpilī sasnēdz +29,3 gradu pa Celseja skolai. === Latvejā === === Pasaulī === 1822 – Brazileja pa…"
+            ]
+            },
+        {
+                "word": "Krystus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 20,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Jezus Krystus aba Jezus nu Nazaretys (pīdzims 7-2 godā pyrma Krystus, nūm…",
+                "…ezus Krystus aba Jezus nu Nazaretys (pīdzims 7-2 godā pyrma Krystus, nūmyrs 30-33 godā) irā centralais objekts kristeigajuo tic…",
+                "…svieteij zīmys saulis grīžus ci kristeigojā pasauļī — Jezus Krystus pīdzimšonu. == Nūruodis == Atīdami Zīmyssvātki. Zīmys miene…",
+                "…ys svātkim damāruoti kristīšu svātki, kuri simbolizej Jezus Krystus augšanceļšonūs nu myrūņu piec pīkaļšonys krystā, kai aizrak…",
+                "…aizraksteits Jaunajā Testamentā. Tys nūtics trešā dīnā piec Krystus mieršonys (nuovis dīnu skaitūt kai pyrmū dīnu). Leldīne lel…",
+                "…dāla īveicis par smierti. Nazcik saprasmēs svareiguoka irā Krystus mieršonys, a na augšonceļšonuos dīna, partū ka taišni mierd…"
+            ]
+            },
+        {
+                "word": "mīnus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dalejums",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 24,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…eimeibys mīstūs. == Latvejis administrativais teritoriskais dalejums == === Vaļsts mīsti === === Nūvodi i teritoriskuo dalejuma…",
+                "…== ==== V ==== == Verīs taipoš == Latgolys administrativais dalejums…",
+                "…vysā Latvejā) īsadareja jauns administrativi teritoriskais dalejums. Latgolys kulturviesturiskuo teritoreja daleita 22 nūvodūs…",
+                "…leita 22 nūvodūs i 3 republikys mīstūs. == Administrativais dalejums == === Republikys mīsti === === Nūvodi i teritoriskuo dalej…",
+                "…s taipoš == Latgola Latvejis administrativais teritoriskais dalejums…",
+                "…Rēzeknes novads) — Latvejis administrativais teritoriskais dalejums Latgolā, kas sasadora nu 25 pogostim. == Nūruodis ==…"
+            ]
+            },
+        {
+                "word": "mozuoks",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…teibu. Pošmozais puorteciejums septembra mienesī – 9 reizes mozuoks kai gods vydyskais. == Nūruodis i olūti == Nazcik faktu ap…",
+                "…kod nakod īceļoj.. == Aproksts == Sibira seiļs nazcik reižu mozuoks i smuidruoks kai seiļs. Jis irā vīns nu pošu mozū putnu vuo…"
+            ]
+            },
+        {
+                "word": "leluoks",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…a — process, kura īmā subjekts, objekts ci pasaruodīņs teik leluoks, iņteņsivuoks, lobuoks, izsaceiguoks, a voi damāruotuoks ja…",
+                "…mehanisku soveibu — betona styprums spīdīnī irā 10—20 reižu leluoks kai stīpšonuos iztvereiba, dieļ tuo styprynuojums irā eipaš…",
+                "…pavasar i juļa mienesī iudiņa puorteciejums teik div reizis leluoks par vydyskū vierteibu. Pošmozais puorteciejums septembra mi…",
+                "…māram 15% (~16 tyukstūšys), tok latgalisku ciļmi tur labtik leluoks procents daugpilīšu. == Viesture == XII gs. — viesturis olū…",
+                "…s. XIX gs. beiguos i XX gs. suokuos Pīterpilī apsadzeivuoja leluoks skaits latgalīšu, i nu 1879 da 1917 godam Pīterpiļs beja sv…",
+                "…tāvaini labtik leluoki kai muotainis. Tāvaiņu svors ūtratik leluoks kai muotaiņu, auguma garums kūna treštik garuoks. Saska gar…"
+            ]
+            },
+        {
+                "word": "cyti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 19,
+                "substringOnly": 1,
+                "examples": [
+                "…1% lītauniki, 6,0% puoli, 4,8% krīvi, 1,1% boltkrīvi i 5,0% cyti. == Verīs taipoš == Lietuva.lt…",
+                "…ugāļis mīsti == Demografeja == 96,87%% — portugalīši, 3,13% cyti. == Verīs taipoš == Portugal.gov.pt…",
+                "…1% — latvīši, 26,9% krīvi, 3,3% boltkrīvi, 2,2% puoli, 5,5% cyti. == Verīs taipoš == Latvija.lv == Nūruodis i olūti ==…",
+                "…) irā vīneiga zvaigzne Saulis sistemā, apleik kurai grīžās cyti ituos sistemys objekti: planetys i tū paceļnīki, pundurplan…",
+                "…vītai vajadzeiguos strukturys – sātys, taiseitovys, tūrni, cyti kuormi i statnis, infrastrukturys objekti i tt.…",
+                "…jū irā cytu Skaņdinavejis ci Europys vaļsteibu ļauds, cikom cyti pa lelumam irā nu Tiveimim Reitim i Afrikys vaļsteibom. ==…"
+            ]
+            },
+        {
+                "word": "apmāram",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…4 Eiropys Savīneibys oficialūs volūdu. Latvīšu volūdā runoj apmāram div miļjoni cylvāku (nu kurim leluokuo daļa dzeivoj Latvejā…",
+                "…lvāku (nu kurim leluokuo daļa dzeivoj Latvejā), tymā skaitā apmāram 1,5 miļjoni, kas jū runoj kai dzymtū volūdu. Pyrmī raksteit…",
+                "…badivejus terminus: kaupris (latvīšu: paugurs) — pasacālums apmāram da 300 m; kolns (latvīšu: kalns) — pasacālums suocūt nu apm…",
+                "…ram da 300 m; kolns (latvīšu: kalns) — pasacālums suocūt nu apmāram 300 m i augšuok. Tok praktiskajā lītuošonā skaidrys rūbežs…",
+                "…lvāku. Bez tuo Praņcūzu volūdu vuicuos kai svešvolūdu leidz apmāram 200 milijonim cylvāku, padorūt jū par ūtrū vysuvairuok pīso…",
+                "…pasauka vairuokim sinotibetīšu volūdim, kurys irā dzymtuos apmāram 1,3 miljardim cylvāku, vysuvaira Ķīnā.…"
+            ]
+            },
+        {
+                "word": "tyukstūša",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…s azaru zemi, Azarzemi. Regiona līknēs izalikaliejuse kaida tyukstūša azaru, nu jūs pošlelī – Lubuons (viersa plotums 8070 ha) i…"
+            ]
+            },
+        {
+                "word": "ceņtimetri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ceņtimetru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…ejs medeibys dzeivinīks. == Izavierīņs == Vylki byun da 150 ceņtimetru garuma, placu augstums 0,6—0,95 metri i svors 30—65 kilogra…",
+                "…vom. Augumā drupeit mozuoka kai Boltuo žugure. Augums 52-58 ceņtimetru augsts, svors vydyskai 3 kilogrami. Golva, koklys, pakakle,…"
+            ]
+            },
+        {
+                "word": "milimetri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "milimetru",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hektars",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hektari",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hektaru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…a. 1862. godā vacuoku zeme teik sadaleita, Andryvs daboj 15 hektaru i suok patstuoveigas dorba gaitys. 18 godu vacumā (1863. go…"
+            ]
+            },
+        {
+                "word": "grami",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gramu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ežys malnuo jūsleņa na tik spūdra kai tāvainim. Svors 16-17 gramu. == Dzeivisvīta == Dzeivoj vysaižūs mežūs, apleikmīstūs, pa…"
+            ]
+            },
+        {
+                "word": "tonnys",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kvadratkilometri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kvadratmetri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kubikmetri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kvadratā",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "grads",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Rēznis 5 vydsškolu (1986), Daugpiļs Universitetu (bakalaura grads 1993, magistra grads 1996). Nu 1993 gods dora Daugpiļs Univ…",
+                "…986), Daugpiļs Universitetu (bakalaura grads 1993, magistra grads 1996). Nu 1993 gods dora Daugpiļs Universitetā par vuiceitu…"
+            ]
+            },
+        {
+                "word": "gradu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…(dz. 1881); 2008 - gaisa temperatura Daugpilī sasnēdz +29,3 gradu pa Celseja skolai. === Latvejā === === Pasaulī === 1822 – B…",
+                "…itim šyupeļom, kuramuos sportists raudzej apsagrīzt par 360 gradu. == Verīs taipoš == Igaunejis mīstu saroksts == Nūruodis i…",
+                "…iejuse Rēznis Augstškolā, jū beiguse 1996 godā ar bakalaura gradu filologejā. Nu 2007 gods da 2010 godam studiejuse Reigys St…"
+            ]
+            },
+        {
+                "word": "Celsijs",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "Farenheits",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "komata",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "punkts",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 18,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…s padalīņs Vydzemē. Pogostā dora Zīmara pamatškola, feļčeru punkts, pogosta buoreņtīsa, Muoreņkolna biblioteka i tautys noms,…",
+                "…tys noms, pogosta ciļtsarokstu atdale, turizma informacejis punkts, socialuo dīnaste i 29 Zīmaru mazpulks. == Viesture == Zīma…",
+                "…stā dora tautys noms, pamatskūla, katuoļu bazneica, feļčeru punkts, biblioteka. Pogostā kasgods nūteik Latgolys rysaku sasavei…",
+                "…ms — 32 m). Pa vyscaureigajam augstumam nūvoda vysuaugstais punkts — Vabaļu kolns (172 m augšuok jiuru leidzīņa). ==== Klimats…",
+                "…a, muzikys i dailis skūla, tautys noms, biblioteka, feļčeru punkts i dzeļžaceļa rūbežkontrolis punkts. Indrys pogostā div bazņ…",
+                "…oms, biblioteka, feļčeru punkts i dzeļžaceļa rūbežkontrolis punkts. Indrys pogostā div bazņeicys — Baļbynovys katuoļu i Indrei…"
+            ]
+            },
+        {
+                "word": "mīnuss",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "plyus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "vīnaids",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ns breivajā krisšonā, a voi lītyna atspaida padreizīņs teik vīnaids ar breivuos krisšonys padreizīni. Bezsvorā irā sevkurs orbi…",
+                "…boltkrīvi). Itymā laikā latvīšu i krīvu procents Reigā tyka vīnaids (atsateikūši 42,3 i 41,7 procenti). == Zeimeigi ļauds == Re…",
+                "…ra atīšona (Leluo dīna) sveiteita, kod dīnys i nakts garums vīnaids (pavasara ekvinokceja) i tys saīt pavasara mieneša 20 ci 21…"
+            ]
+            },
+        {
+                "word": "dalīts",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "lappuse",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "stuņdis",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 5,
+                "substringOnly": 0,
+                "examples": [
+                "…a zīmā tik 14—25%. Vydyskai saule par godu Reigā speid 1812 stuņdis — julī vydyskai 282 stuņdis, a dekabrī — 25 stuņdis. == Adm…",
+                "…saule par godu Reigā speid 1812 stuņdis — julī vydyskai 282 stuņdis, a dekabrī — 25 stuņdis. == Administrativais dalejums == Le…",
+                "…id 1812 stuņdis — julī vydyskai 282 stuņdis, a dekabrī — 25 stuņdis. == Administrativais dalejums == Leidz XIII godusymtam Reig…",
+                "…ar 15° (±7,5° nu ituos meridianys), taidā ceļā taisūt vīnys stuņdis izškireibu iz vyds sūpluoku laika zonu. A vys, vīnys stuņdi…",
+                "…tuņdis izškireibu iz vyds sūpluoku laika zonu. A vys, vīnys stuņdis atdalejums nav universals, i parostai laika zonu rūbeži ir…",
+                "…ļu bazneickungu seminareja, kuramā vāluok atsarūn i latgaļu stuņdis. 1899 godā izīt Pītera Smeļtera folklora izlaseite, pyrmū r…"
+            ]
+            },
+        {
+                "word": "sekundes",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 11,
+                "articles": 11,
+                "substringOnly": 0,
+                "examples": [
+                "…s. Atsarūn Žemaitejis kulturviesturiskuo nūvoda reitūs, 210 kilometru iz zīmeļvokorim nu vaļsts golvysmīsta Viļnis.…",
+                "…s. Atsarūn Žemaitejis kulturviesturiskuo nūvoda reitūs, 331 kilometru iz zīmeļvokorim nu vaļsts golvysmīsta Viļnis.…",
+                "…meļūs. Atsarūn Žemaitejis kulturviesturiskuo nūvoda reitūs, kilometru 240 iz zīmeļvokorim nu vaļsts golvysmīsta Viļnis.…",
+                "…eļūs. Atsarūn Žemaitejis kulturviesturiskuo nūvoda vakarūs, kilometru iz 313 km zīmeļvokorim nu vaļsts golvysmīsta Viļnis. == Nūr…",
+                "…eļūs. Atsarūn Žemaitejis kulturviesturiskuo nūvoda vakarūs, kilometru iz 294 km zīmeļvokorim nu vaļsts golvysmīsta Viļnis. == Nūr…",
+                "…nāta 1128 godā. == Geografeja == Minhene acarūn aptuveni 50 kilometru ottuolumā iz zīmeļim nu Aļpim i tamdieļ mīsta apkuortnī bīž…"
+            ]
+            },
+        {
+                "word": "metru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…eireļu leidzonainēs. Reļjefs — smiļkšuojs, leidzonaine 1—10 metru augšuok jiuru leidzīņa. Viesturiskais centrys irā kairajā D…",
+                "…ormi Uoraišūs ciersti vīns pi ūtra 5 rynduos iz vairuok kai metru augsta kūka pamatu. Ustobys nalelys. Pi kotrys vēļ mozuoka…",
+                "…Austreju acarūn Bavārejis Aļpi, kuri sasnīdz ļeidz pot 3000 metru augstumu. Nūvodā iraid gandreiž 1600 dažaida ļeluma azari,…"
+            ]
+            },
+        {
+                "word": "procentu",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ļmuižys pogosts turēja pošu leluokū skaiteigūs dzeivuotuoju procentu Latgolā. Nautrānu nūvoda kulturapleicei XIX i XX gs. bejuse…"
+            ]
+            },
+        {
+                "word": "dolaru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…uorvaļdeitūs aktivu, kūpā ar vaira nakai 32,7 triļjonim ASV dolaru, saleidzynojūt ar Zīmeļamerikys 27,1 triļjonim ASV dolaru.…",
+                "…V dolaru, saleidzynojūt ar Zīmeļamerikys 27,1 triļjonim ASV dolaru. 2009. godā kūpejī puorvaļdeitī aktivi Eiropā veiduoja treš…",
+                "…I, Mission P-91 Apmiereiguo programys vērte: 5 milijoni ASV dolaru Darbeibys ilgums: 4-5 godi (NiCad Battery pack life) Golvon…"
+            ]
+            },
+        {
+                "word": "pyrma",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 12,
+                "substringOnly": 0,
+                "examples": [
+                "…Jezus Krystus aba Jezus nu Nazaretys (pīdzims 7-2 godā pyrma Krystus, nūmyrs 30-33 godā) irā centralais objekts kristeig…",
+                "…apgabaļūs. Pādejī ladslaiki beja kvartara periodā i beidzēs pyrma apmāram 10 tyukstūšu godu. Ladslaiku periodi geologiskajā v…",
+                "…atzare, sasīta ar jiuru iudiņu ekonomisku izlītuošonu (vysu pyrma, ar jiuru transportu i ziveibu). == Jiuru arhitektura == Sp…",
+                "…Daneju nu Švedejis, Skageraka jiuru šauris – nu Norvegejis. Pyrma Kīļa kanala izkasšonys, vīneigais kuģu ceļš nu Baļtejis jiu…",
+                "…ai. Pylda dasys na cīši styngrai. Cap ceplī, cikom gotovys. Pyrma cepšonys var apvirt i paturēt zam slūga.…",
+                "…, kuru sarokstu sataiseja Aņtipatris nu Sidona II godusymtā pyrma Krystus. Vāluok, plotūtīs oikumenai i raistūtīs pasauļa paz…"
+            ]
+            },
+        {
+                "word": "procents",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…pīstuovu (ukraini, boltkrīvi). Itymā laikā latvīšu i krīvu procents Reigā tyka vīnaids (atsateikūši 42,3 i 41,7 procenti). == Z…",
+                "…% (~16 tyukstūšys), tok latgalisku ciļmi tur labtik leluoks procents daugpilīšu. == Viesture == XII gs. — viesturis olūtūs pīmyn…"
+            ]
+            },
+        {
+                "word": "procenti",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…krīvu procents Reigā tyka vīnaids (atsateikūši 42,3 i 41,7 procenti). == Zeimeigi ļauds == Reigā dzymuši: Helmuts Baļders — hok…"
+            ]
+            },
+        {
+                "word": "eura",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…Eura (latvīšu: eiro, eira; anglīšu: euro) irā Europys Savīneibys…",
+                "…. Valutys zeime: € Vydtautyskais valutys kods: EUR Vērte: 1 eura (EUR) = apmāram 0,702804 latu (LVL); 1 lats (LVL) = apmāram…",
+                "…2804 latu (LVL); 1 lats (LVL) = apmāram 1,422872 euru (EUR) Eura aizvoduota kai atsaskaitīņu leidzieklis 1999 godā, atmejūt…",
+                "…šonu vysuos eurys zonys vaļsteibuos. == Nūruodis i olūti == Eura (banknotai) (anglīšu) (vuocīšu)…",
+                "…oficialais atsaskaitīņu leidzieklis Igaunejis Republikā irā eura. == Geografeja == Igaunejis rūbežs ar Latveju dīnavydūs irā…"
+            ]
+            },
+        {
+                "word": "euru",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 8,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…pmāram 0,702804 latu (LVL); 1 lats (LVL) = apmāram 1,422872 euru (EUR) Eura aizvoduota kai atsaskaitīņu leidzieklis 1999 god…",
+                "…2002 godā. 2006 gods beiguos apgrūzā beja jau 610 milijardi euru, i juos beja vīneiguo valuta vaira kai 317 milijonim europī…",
+                "…juos beja vīneiguo valuta vaira kai 317 milijonim europīšu. Euru volda Vuocejis mīstā Frankfurtā pi Maina asūšais Europys ce…",
+                "…tur tīseibu nūstateit ES monetariskū politiku, jis dasaver euru banknotu druku, euru monetu kaļšonu, taipoš euru plateišonu…",
+                "…t ES monetariskū politiku, jis dasaver euru banknotu druku, euru monetu kaļšonu, taipoš euru plateišonu i lītuošonu vysuos e…",
+                "…is dasaver euru banknotu druku, euru monetu kaļšonu, taipoš euru plateišonu i lītuošonu vysuos eurys zonys vaļsteibuos. == N…"
+            ]
+            },
+        {
+                "word": "dolars",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "dolari",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometrs",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilometri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…dobys pīminieklis Rēznis nūvoda Nautrānu pogostā. Vīta – 2 kilometri iz PR nu Rogoukys, iz vyds Rogoukys – Mežvydu i Rogoukys –…",
+                "…rūs. Perekļu atostumam tam nu tuo vajagbyut na tyvuok kai 6 kilometri. Malnuos žuguris cīši koņservativys i sovu perekli lītoj da…",
+                "…u, Šveicareju i Čekeju. Kūpiejais rūbežys gorums iraid 2705 kilometri. Cauri nūvodam tak divys ļelys upis - Donava i Maina. Bavār…"
+            ]
+            },
+        {
+                "word": "metrs",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "metri",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 7,
+                "substringOnly": 0,
+                "examples": [
+                "…ereigajam augstumam — augšuok apleicīnis jis pasaceļ par 89 metri.…",
+                "…eigys mīsta teritoreja irā labtik zamai. Vydyskais augstums metri augšuok jiuru leidzīņa viņ 3—6 metri. Pats augstuokais punk…",
+                "…ai. Vydyskais augstums metri augšuok jiuru leidzīņa viņ 3—6 metri. Pats augstuokais punkts — Dzagužkolns (28 metri ajl.) ===…",
+                "…ņa viņ 3—6 metri. Pats augstuokais punkts — Dzagužkolns (28 metri ajl.) === Klimats === Reigys klimatu i gaisu nūsoka Atlaņte…",
+                "…zjam Dzierkaļu kolns, jis pasaceļ augšuok apleicīnis par 89 metri. Latgolys sauc i par Zylūs azaru zemi, Azarzemi. Regiona lī…",
+                "…ylki byun da 150 ceņtimetru garuma, placu augstums 0,6—0,95 metri i svors 30—65 kilogrami (rekords — 79 kilogrami). Augums ap…"
+            ]
+            },
+        {
+                "word": "centimetri",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilogrami",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…timetru garuma, placu augstums 0,6—0,95 metri i svors 30—65 kilogrami (rekords — 79 kilogrami). Augums apaug ar rupim palākim mot…",
+                "…gstums 0,6—0,95 metri i svors 30—65 kilogrami (rekords — 79 kilogrami). Augums apaug ar rupim palākim motim, tok byun taipoš i ma…",
+                "…uo žugure. Augums 52-58 ceņtimetru augsts, svors vydyskai 3 kilogrami. Golva, koklys, pakakle, auguma viersejuo puse malna ar paz…"
+            ]
+            },
+        {
+                "word": "gradi",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 6,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…. Dagdā i Daugpilī registrāta vysuzamuokuo temperatura (–43 gradi C), i Daugpilī – absoļutuo vysuaugstuokuo (+36 gradi C). De…",
+                "…a (–43 gradi C), i Daugpilī – absoļutuo vysuaugstuokuo (+36 gradi C). Deļ plotuo iudiņbaseina Latgolā lela iudiņa putnu, iudi…",
+                "…kys. Dagdā i Daugpilī registrāta vysuzamuo temperatura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). == D…",
+                "…ura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). == Dzeivinīku pasauļs == Deļ plotuo iudiņbaseina Latgol…",
+                "…kys. Dagdā i Daugpilī registrāta vysuzamuo temperatura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). Deļ…",
+                "…ura (–43 gradi C), i Daugpilī – absoluotuo vysuaugstuo (+36 gradi C). Deļ plotuo iudiņbaseina Latgolā lela iudiņa putnu, iudi…"
+            ]
+            },
+        {
+                "word": "Celsija",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kvadrats",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "komats",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "minus",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "plus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…s Glossary of IT terminology translates common terms of IT (plus some Wikipedia specific ones) into Latgalian; these terms m…"
+            ]
+            },
+        {
+                "word": "vinaids",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "reiz",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…akstejums == Kaitys snāgs irā diveju komandu kaitaunīkim 15 reiz 4 m pluota laukumeņā pa ailei voda metaliņus bumbuleišus ra…"
+            ]
+            },
+        {
+                "word": "Kristus",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…) Satanisms Tautas īnaidnīks Malnais Lukičs Managers (solo) Kristus iz pogolma Mahno (solo) KING KONGS…",
+                "…– Kuzja UO 1989 — 1990 – Čygoni i es nu Iļiča 1990, 1999 – Kristus iz pogolma 1997 — Mahno…",
+                "…unu Gods ==== 2004 — Kuzma i Žopa Jauna Gods === Kuzja UO i Kristus iz pogolma === 1989 — Tram-ta-ra-ra-ra-ra-ram 1990 — Tei ir…",
+                "…a Armeja (1989) Čygoni i es nu Iļiča (1989-1990) Kuzja UO i Kristus iz pogolma (1989-1990) Jegors i Opizdenevšije (1990-1993) M…"
+            ]
+            },
+        {
+                "word": "tonna",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "jiudze",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "stunda",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "sekunde",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            }
+        ],
+    }
+    
