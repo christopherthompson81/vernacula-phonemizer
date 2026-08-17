@@ -1,0 +1,654 @@
+// WIKIPEDIA WORD ATTESTATION — nci. Written by tools/normalization/attest.ts.
+    //
+    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+    // idiolect — so `articles` is recorded beside `tokenHits`: one hit in one article is a LEAD, not a finding.
+    //
+    // `substringOnly` is the column that matters when tokenHits is 0. It is the count of articles where the
+    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+    // lb's `Yen` in `Libyen`, xh's `iiyeni` in `yeNintendo`. A substring-only verdict is a NEGATIVE result.
+    //
+    // `bounded` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+    // exists to test, so `tokenHits` is a substring count and the verdict is written `attested*`. The precision
+    // that makes `Libyen` fail for `Yen` is simply unavailable — a Han hit can always be part of a longer
+    // compound — so for those the examples are not a courtesy, they are the entire finding.
+    //
+    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+    // speech and the sense against the examples before using any of this to justify a reading.
+    {
+        "language": "nci",
+        "wiki": "nah.wikipedia.org",
+        "tier": "wikipedia",
+        "findings": [
+        {
+                "word": "menos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 21,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…a === Achto tlācatl cēntechpa: Nehhuātl (Neh) Posesivo: No- menos la terminación de la palabra: \"Nocal\" (No- + Cal-li) Activo…",
+                "…la palabra: \"Nocal\" (No- + Cal-li) Activo: Ni- más el verbo menos vocal larga final o vocal inicial opcional: \"Nitlālia\" (Ni-…",
+                "…nal: \"Nitlālia\" (Ni- + Tlāli(ā)) Objeto: Nēch- más el verbo menos vocal larga final o vocal inicial opcional: \"Tinēchtlālia\")…",
+                "…li(ā)) Ōnto tlācatl cēntechpa: Tehhuātl (Teh) Posesivo: Mo- menos la terminación de la palabra: \"Mocal\" (Mo- + Cal-li) Activo…",
+                "…la palabra: \"Mocal\" (Mo- + Cal-li) Activo: Ti- más el verbo menos vocal larga final o vocal inicial opcional: \"Titlālia\" (Ti-…",
+                "…nal: \"Titlālia\" (Ti- + Tlāli(ā)) Objeto: Mitz- más el verbo menos vocal larga final o vocal inicial opcional: \"Nimitztlālia\")…"
+            ]
+            },
+        {
+                "word": "negativo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "veces",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "igual",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…ipedia caxtilcopa es la edición en español de Wikipedia. Al igual que las versiones de Wikipedia que existen en otros idiomas…"
+            ]
+            },
+        {
+                "word": "más",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 34,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…Más negro que la noche (caxtillāntlahtōlcopa Achi tlīltic in am…",
+                "…rminación de la palabra: \"Nocal\" (No- + Cal-li) Activo: Ni- más el verbo menos vocal larga final o vocal inicial opcional:…",
+                "…inicial opcional: \"Nitlālia\" (Ni- + Tlāli(ā)) Objeto: Nēch- más el verbo menos vocal larga final o vocal inicial opcional:…",
+                "…rminación de la palabra: \"Mocal\" (Mo- + Cal-li) Activo: Ti- más el verbo menos vocal larga final o vocal inicial opcional:…",
+                "…inicial opcional: \"Titlālia\" (Ti- + Tlāli(ā)) Objeto: Mitz- más el verbo menos vocal larga final o vocal inicial opcional:…",
+                "…o vocal inicial opcional: \"Tlālia\" (Tlāli(ā)) Objeto: Qui- más el verbo menos vocal larga final o vocal inicial opcional:…"
+            ]
+            },
+        {
+                "word": "punto",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "coma",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "celsius",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "centígrados",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "fahrenheit",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kelvin",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "por",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 27,
+                "articles": 14,
+                "substringOnly": 0,
+                "examples": [
+                "…o en el concurso de la Asociación de Escritores y Artistas, por su cuento Un día después del sábado (1955). Premio de la No…",
+                "…Un día después del sábado (1955). Premio de la Novela ESSO por La mala hora (1961). Doctor honoris causa de la Universidad…",
+                "…ional Neustadt de Literatura (1972). Premio Rómulo Gallegos por Cien años de soledad (1972). Premio Jorge Dimitrov por la P…",
+                "…egos por Cien años de soledad (1972). Premio Jorge Dimitrov por la Paz (1979). Medalla de la Legión de Honor ipan Paris, Fr…",
+                "…ño\" (Conētl) \"One, Two, Three, Go!\" (Cē, Ōme, Yēi, ¡Yāuh!) \"Por Ti\" (Tehpampa) \"Rosa Pastel\" \"Soñar\" \"Suele Pasar\" \"Toma Mi…",
+                "…n\" \"Bye Bye\" (Aneh Aneh) \"Dulce Fantasía\" \"Paso El Tiempo\" \"Por Esta Vez\" \"Rockstar\" \"Vestida De Azul\"…"
+            ]
+            },
+        {
+                "word": "hrs",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…āyōtl V, tlamatoquiliztli tlālli īpan Tlachicuēiti 21, 4:00 hrs. Īpan Tlalyacatl Yucatán 35 km tlāpcopa Chetumal, Quintana…",
+                "…II, tlamātoquiliztli tlalli occēpa mēxihcatlālli īpan 12:14 hrs Tecolotlan, Veracruz, huitztlāmpa Tochpan. Itemoh tlatectli…"
+            ]
+            },
+        {
+                "word": "horā",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ahmo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 56,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…lantae. Yeceh inin yolqui ca centlamamanquizqui. Ce xihuitl ahmo ce cuahuitl, ahmono ceh nanacatl. Inin yolli tlacati, mozca…",
+                "…yotl, quilyolohtli, xocotl, achtli nozo achelli. In xochitl ahmo quipiya izhuatl, nelhuatl nozo quiyotl, quemah in xihuitl n…",
+                "…eh, huizzōya, cāhualōya, calaquilōya, ahxihuaya īhuān mochi ahmo cualli in īmahcēhual, in īicnopil mochīhuaya, zan teuhtli,…",
+                "…alli tlahco: achi tētolīnih īhuān achi cualli. Auh in āquin ahmo īpan mihmatiya in ahtle quittaya, īxkich quipoloāya inic cu…",
+                "…īteōuh, tlatta huitztlāmpa. == Cē Ācatl == Auh inic mihtoā: ahmo yēccān, in āquin īpan tlācatiya, pilli ahzo māzēhualli, aht…",
+                "…cualcān, yēccān īpan machōya īca oncān nehuauhtīlōya, inic ahmo zan ye nō mozōmāz, monehnequiz, ca iuh mihtoāya, in āquin q…"
+            ]
+            },
+        {
+                "word": "amo",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 66,
+                "articles": 19,
+                "substringOnly": 0,
+                "examples": [
+                "…novelas ejemplares, in amatlacuiolme seki novelas tein achi amo uehueike.…",
+                "…ás negro que la noche (caxtillāntlahtōlcopa Achi tlīltic in amo yohualli) ītōcā cē mēxihcatl īxiptlayōlli otlachiuh ipampa…",
+                "…iliskia nopa escuelas ma tlateuikaj tla inintlamachtijkauaj amo kikixtiskiaj inin tlatsakuili tlen ika tlaneltokayayaj, tle…",
+                "…ah). Nopa kippot kiixpanok se tlanauatili tlen kiijtouayaya amo ma kitlalikaj inintsontekon ipan nopa tlali, kej kiijtoua n…",
+                "…nopa tlali, kej kiijtoua nopa IHSA, pero nopa tlamachtianij amo kinekiyayaj ma tlauisokikaj tlaj amo kipixtoyaj. Inijuantij…",
+                "…ero nopa tlamachtianij amo kinekiyayaj ma tlauisokikaj tlaj amo kipixtoyaj. Inijuantij, ininuaya inintatajuan uan inintlama…"
+            ]
+            },
+        {
+                "word": "tlazalōliztli",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cuadrada",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cúbica",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "billones",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…oogle Search. Ipan enero 2024, YouTube kipixtoya kipano 2.7 billones monthly active users, tlen sansejko kiitayayaj kipano se bi…"
+            ]
+            },
+        {
+                "word": "billón",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…es monthly active users, tlen sansejko kiitayayaj kipano se billón horas tlen videos mojmostla. Nemachiyōtīlli:As of, videos t…"
+            ]
+            },
+        {
+                "word": "segundo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "grado",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "porciento",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "porcentaje",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "ciento",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "grados",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…tiliztli ītech occēqui tlālolīliztli zā tēpan ōcatca in 8.0 grados īpan octacatl Richter in tlein īpan miércoles ōquitzetzeloh…"
+            ]
+            },
+        {
+                "word": "kilometro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…mixmati in iuh in altepetl Ain Karim itech catqui chicuace kilometro ihuan ixelihuian itech in icihuatlampa in Jerusalen. In ahc…"
+            ]
+            },
+        {
+                "word": "kilómetro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilómetros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…n Tonatiuh ihuan in Tlacticpactli itzalan in ic 149 600 000 kilómetros cah auh ītlanēx nehnemi inīn octacāyōtl īpan 8 minutos īhuā…"
+            ]
+            },
+        {
+                "word": "metro",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 1,
+                "examples": [
+                "…eh in iyolcameh tlaltitech. Huel ahci ce ioctacayo inic 5.8 metro ihuan ce etiliztli ca monehnecuiloa itzalan 750 ihuan 1.600…"
+            ]
+            },
+        {
+                "word": "metros",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…Quin caxtōlli minutos in ācuecueyōtl ōahcic īxquichica ēyi metros īīxpan in huēyatēncō Chiyapan.…"
+            ]
+            },
+        {
+                "word": "centímetro",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "centímetros",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "hora",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 3,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…ués del sábado (1955). Premio de la Novela ESSO por La mala hora (1961). Doctor honoris causa de la Universidad de Columbia…",
+                "…moxtli == Varia invención, 1949 Confabulario total, 1962 La hora de todos, 1954 Bestiario, 1959 La feria, 1963 == Tetlauhtil…",
+                "…nic quittaz Teōpixcatlatoāni. 71. Auh azo ya ipan matlactli hora in onecencahualoc inic omocac Misa, ihuan otepohualoc, in h…"
+            ]
+            },
+        {
+                "word": "horas",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…hly active users, tlen sansejko kiitayayaj kipano se billón horas tlen videos mojmostla. Nemachiyōtīlli:As of, videos tlen ki…",
+                "…f, videos tlen kitlaliyayaj ipan nopa plataforma ika se 500 horas tlen contenido por minuto, == Occe neihcuiloliztli == YouTu…",
+                "…pera el alba (1947) Vivir sin estar viviendo (1949) Con las horas contadas (1956) Desolación de la Quimera (1962) === Toquili…",
+                "…liztli Iceltiyōtl (PRA). Ahmo quinamaca \"immantli-tlācatl\" (horas-hombre) quemeh occē tlanechicōliztli tlen \"consultoría\"; Li…"
+            ]
+            },
+        {
+                "word": "cuadrado",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cuadrados",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cúbico",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "cúbicos",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "millones",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 9,
+                "articles": 6,
+                "substringOnly": 0,
+                "examples": [
+                "…moj majti kej kimikti miak toknihua, kijtohua kej mijke 25 millones (sempoual uan makuil millones) nej Europa, okse taixmatilis…",
+                "…knihua, kijtohua kej mijke 25 millones (sempoual uan makuil millones) nej Europa, okse taixmatilis kijtohua kej mijke 40 uan 60…",
+                "…) nej Europa, okse taixmatilis kijtohua kej mijke 40 uan 60 millones nej euyi altepet Asia. Miajke kijtohua kej ne in kokolis pe…",
+                "…, tlachiyalizneneuhcatica G2, in ōyōcox 4567.9 īhuān 4570.1 millones xihuitl auh yez in tāchcauh tlatocalco achi oc 5000 millone…",
+                "…illones xihuitl auh yez in tāchcauh tlatocalco achi oc 5000 millones xihuitl. == Yollotlahtolli == Tonatiuh huala itech tonatia…",
+                "…mahtlāctli tlanexxihuitl. Ōmochīuhquh cencah ye quēzqui 100 millones xihuitl, īpan in Tlahcoyōlcāhuitl īpan in Tālticpactli, ōmo…"
+            ]
+            },
+        {
+                "word": "millón",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "mil",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 5,
+                "articles": 4,
+                "substringOnly": 0,
+                "examples": [
+                "…nave del olvido, 1985 La llama y la arena, 1985 Los treinta mil ausentes, 1985 De la imposible ausente, 1996 == Toquilizteq…",
+                "…mahtlactetl metztli, in ixiuhtzin in toteucyo inic centetl mil ommacuiltetl cien ompohualtetl chicome, cuatequiloc Miguel,…",
+                "…quitepiquihca izquin. Oilactzontequililoc inic macoz ontetl mil cuauhtolli, teixnahuatiliztli ca ahmo neltiz ipampa ca mieq…",
+                "…ētl quipiya caxtōlli oncenxiquipilli īpan mācuīltzontli(130 mil) neminih, ca yehhuātl ōquihtoh, ōquitlamatiltih: \"(Pisco) T…",
+                "…asia) Itlazoh in Madhi (La favorita del Mahdi, 1887) Ontetl mil legua itzintlan América (Duemila leghe sotto l'America, ini…"
+            ]
+            },
+        {
+                "word": "tomin",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 14,
+                "articles": 8,
+                "substringOnly": 0,
+                "examples": [
+                "…scal, virrey (ahnozo visurey); occequin: firma, peso, tomín>tomin, interrogatorio>telocatolio, imagen>magen; huan miac tlacat…",
+                "…keman kisak in tajkuilol, in tokniuj Sir Arthur ki makakej tomin, tein kiliaj 25 Libras Esterlinas. In tajkuilol kuali kitak…",
+                "…cohuah ipan tianquizco. Naman ipatiuh cetzin $40 pesos tlen tomin. Miyac macehualmeh tenekmeh ihuan nahuameh, otomimeh, tepeh…",
+                "…intik itech in xiuit 1888. Ni tatuan tein Watson, ki piayaj tomin, uan nochimej kin ixmatiaj uan kin takachiuayan. I nan tein…",
+                "…Nmeik tech Inglaterra miak xiujmej uan keman amo ki piayaok tomin sepa mo kalpatak itech 1881, yeijka ki ixmatk in Sherlock H…",
+                "…pan 1947. === Mēxihco === Ihcuāc Luis Buñuel catca ōnen īca tomin, occē xihuitl, īcopa cē cena ōmpa René Clair īchān ītech, c…"
+            ]
+            },
+        {
+                "word": "peso",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 4,
+                "articles": 3,
+                "substringOnly": 0,
+                "examples": [
+                "…caxtillānarabiatlahtōlpa: ṯúmn, 'cē īpan chicuēyi' ītech cē peso ahnozo 'cē real') ahnozo tlacōhualōni, tequīzqui tlamantli,…",
+                "…lahcuilōni. == Tetlauhtilli == Finalista Premio Planeta, El peso de las sombras, 1994. Premio Fernando Lara , Un largo silen…",
+                "…lisabeth, emperatriz de Austria-Hungría o el hada. 1993. El peso de las sombras. 1994. Finalista XLIII Premio Planeta 1994.…",
+                "…lexitol), fiscal, virrey (ahnozo visurey); occequin: firma, peso, tomín>tomin, interrogatorio>telocatolio, imagen>magen; hua…"
+            ]
+            },
+        {
+                "word": "pesos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…hualmeh quicohuah ipan tianquizco. Naman ipatiuh cetzin $40 pesos tlen tomin. Miyac macehualmeh tenekmeh ihuan nahuameh, otom…"
+            ]
+            },
+        {
+                "word": "īhuān",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 112,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…In Tlācatiyān Tlatlālīlōyān ītech Tlapōuhyelizyōtl īhuān Tlāllacuilōliztli ahnōzo INEGI īpampa ītōca in caxtillāntla…",
+                "…afía) cē āltepētlaolōlli nenahuātīliztica tlaīxnēxtīlizzōtl īhuān tlatēquiliztli, yelizyōtlatzontequiliztica īca īxcoyān īāxc…",
+                "…zyōtlatzontequiliztica īca īxcoyān īāxcā, tlein tlanāhuatia īhuān centēca in Tlācatiyān Tlaolōlli ītech Tlapōuhyelizyōtl īhuā…",
+                "…huān centēca in Tlācatiyān Tlaolōlli ītech Tlapōuhyelizyōtl īhuān Tlāllacuilōlizzōtl Tlanōnōtzaliztli. No mochīhua: In tlācat…",
+                "…lapōhualiz. In tlamachiyōtiliztli Tlapatiyōtl in Tlacōhuani īhuān in Tlachīhuani. == Tlahtōllōtl == Ōquitzintih īpampa tlahto…",
+                "…yān Tlatlālīlōyān ītech Tlapōuhyelizyōtl, Tlāllacuilōliztli īhuān Tlanōnōtzaliztli (caxtillāntlahtōltica: Instituto Nacional…"
+            ]
+            },
+        {
+                "word": "ihuan",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 514,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…hematica, Greciatlahtolli: μαθηματική) itoca in tlapohualli ihuan zan cualli tlatamachihualli tlamatiliztli. == Tenonotzallin…",
+                "…nozo centli. == Cintli petlayoh == Inin cintli tlen huactoc ihuan quipiya nocca ixihuiyo. Motocaxtia petlayoh pampa quipiya m…",
+                "…lamantli. Quemmantzin motequihuia ica tlipitzah macehualmeh ihuan quemmantzin ica tamalpiquih. == Cintli mocatl == Inin cintl…",
+                "…a tamalpiquih. == Cintli mocatl == Inin cintli tlen huactoc ihuan quipiya zan nican ayohcanah quipiya ixihuiyo. Motocaxtia mo…",
+                "…itl. Tictocayotia cuahuitl, xihuitl, nanacatl in tlein yoli ihuan mozcaltia tlalticpac intla pohui in itech in tlahtocayotl p…",
+                "…no ceh nanacatl. Inin yolli tlacati, mozcaltia, tlacachihua ihuan miqui. Cequi itlacotonyo nozo icentlamanyo in xihuitl: xoch…"
+            ]
+            },
+        {
+                "word": "kilogramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "kilogramos",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "gramo",
+                "verdict": "absent",
+                "bounded": true,
+                "tokenHits": 0,
+                "articles": 0,
+                "substringOnly": 0,
+                "examples": []
+            },
+        {
+                "word": "minuto",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…aj ipan nopa plataforma ika se 500 horas tlen contenido por minuto, == Occe neihcuiloliztli == YouTube āchcāuhzāzanilli…"
+            ]
+            },
+        {
+                "word": "minutos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 2,
+                "articles": 2,
+                "substringOnly": 0,
+                "examples": [
+                "…0 kilómetros cah auh ītlanēx nehnemi inīn octacāyōtl īpan 8 minutos īhuān 19 segundos. In Tonatiuh ichicahuaca, iuhqui tōnametl…",
+                "…Nicanahuac, Panamah, Honduras īhuān Ecuador. Quin caxtōlli minutos in ācuecueyōtl ōahcic īxquichica ēyi metros īīxpan in huēya…"
+            ]
+            },
+        {
+                "word": "segundos",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 1,
+                "articles": 1,
+                "substringOnly": 0,
+                "examples": [
+                "…auh ītlanēx nehnemi inīn octacāyōtl īpan 8 minutos īhuān 19 segundos. In Tonatiuh ichicahuaca, iuhqui tōnametl, īnenca achi moch…"
+            ]
+            },
+        {
+                "word": "tlapōhualli",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 22,
+                "articles": 20,
+                "substringOnly": 0,
+                "examples": [
+                "…Tlapōhualli ītōcā tlahtōl ic tlapōhua. == Tlapohualli == == Ohcequin tl…",
+                "…Chicuacē (chic + ua + cē) ītōca cē tlapōhualli auh mohcuiloa \"6\". == Occequīntīn tōcāitl == Chicuacen Chic…",
+                "…== Occe neihcuiloliztli == Nemachiyōtīlli:En - zompist.com: Tlapōhualli Ixachitlahtōlcopa Nemachiyōtīlli:En - Ixachitlān tōnalpōhua…",
+                "…Cēmpōhualli (cēm + pōhualli) ītōcā cē tlapōhualli auh mohcuiloa \"20\". == Occē tōcāitl == == Oc no xiquitta ==…",
+                "…Mācuīlpōhualli (mācuīl + pōhualli) ītōcā cē tlapōhualli auh mohcuiloa \"100\". == Occē tōcāitl == == Oc no xiquitta =…",
+                "…Yēmpōhualli (yēm + pōhualli) ītōcā cē tlapōhualli auh mohcuiloa \"60\". == Occē tōcāitl == == Oc no xiquitta ==…"
+            ]
+            },
+        {
+                "word": "pōhualli",
+                "verdict": "attested",
+                "bounded": true,
+                "tokenHits": 7,
+                "articles": 6,
+                "substringOnly": 1,
+                "examples": [
+                "…Cēmpōhualli (cēm + pōhualli) ītōcā cē tlapōhualli auh mohcuiloa \"20\". == Occē tōcāitl =…",
+                "…Yēmpōhualli (yēm + pōhualli) ītōcā cē tlapōhualli auh mohcuiloa \"60\". == Occē tōcāitl =…",
+                "…Ōmpōhualli (ōm + pōhualli) ītōca cē tlapōhualli auh mohcuiloa \"40\". == Occē tōcāitl =…",
+                "…Mācuīlpōhualli (mācuīl + pōhualli) ītōcā cē tlapōhualli auh mohcuiloa \"100\". == Occē tōcāitl…",
+                "…Nāuhpōhualli (nāuh + pōhualli) ītōcā cē tlapōhualli auh mohcuiloa \"80\". == Occē tōcāitl =…",
+                "…n Judío-tlācah ihuān in īteōyō motētēnēhuah icuānō chicuacē-pōhualli-xihuitl Praga. Īpan in chicuacē-pōhualli-cē-xihuitl, in tla…"
+            ]
+            }
+        ],
+    }
+    

@@ -1060,6 +1060,101 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
         "greater-than": "measured: `>` \u00d70 in the retained text \u2014 the sign does not occur",
         "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
     },
+    nci: {
+        // \u26a0 ELEVEN REFUSALS over the retained text of `tools/corpus/mined/nci.jsonc` (410 unique
+        // segments of a 3,135-paragraph nah.wikipedia dump), each argued in
+        // src/languages/nahuatl/normalize.ts. This is the sweep's smallest corpus so far and every
+        // instance of every sign below was read; the counts are exhaustive, not sampled.
+        // \u26a0 THE WIKI IS FILED UNDER `nah`, NOT `nci` \u2014 the artifact's own provenance line says
+        // `nci.wikipedia.org`, which does not resolve, so every attestation cited here was taken with
+        // `attest.ts --lang nci --wiki nah`. Without it the tool returns a page of false absences and
+        // every refusal below would have looked better-founded than it is.
+        // \u26a0 AND THE ROUND'S GOVERNING FACT: THIS CORPUS WRITES ITS MEASURE WORDS IN SPANISH.
+        // `kil\u00f3metros`, `metros`, `minutos`, `segundos`, `millones`, `mil`, `pesos`, `horas` are what
+        // nah.wikipedia puts beside a figure; the Nahuatl nouns for them do not exist in running text.
+        // So a refusal here is never "the language has no word" \u2014 it is "neither language's word is
+        // attested in this slot", which is a stronger claim and the reason each entry names its probes.
+        plus: "measured: `+` \u00d724 and TWENTY-TWO ARE A MORPHEME BOUNDARY inside nah.wikipedia's own "
+            + "NUMERAL articles, which decompose a vigesimal word and then state its digits \u2014 "
+            + "\u201cC\u0113mp\u014dhualom\u0113yi (c\u0113m + p\u014dhual + on + \u0113yi) \u012bt\u014dc\u0101 c\u0113 tlap\u014dhualli auh mohcuiloa \u201c23\u201d\u201d, "
+            + "\u201cCaxt\u014dlonn\u0101hui (caxt\u014dl-li + on- + n\u0101hui) \u2026 \u201c19\u201d\u201d, \u201c\u014cmp\u014dhualmahtl\u0101ctli om\u014dme (\u014dm + p\u014dhual + "
+            + "mahtl\u0101ctli + om + \u014dme) \u2026 \u201c52\u201d\u201d, across eight numeral stubs. Reading the sign turns a "
+            + "morphological gloss into *c\u0113m plus p\u014dhual plus on plus \u0113yi* \u2014 a defect that produces a "
+            + "READING and one this layer would have INTRODUCED. The other two are an imported Spanish "
+            + "chemistry infobox (`Estados de oxidaci\u00f3n (\u00f3xido) +2`) and a decay-mode column "
+            + "(`0,012% 8,125 h \u03b5 \u03b2 + 0,854`). Zero arithmetic plus signs in Nahuatl prose, and `m\u00e1s` "
+            + "\u00d734 on nah.wikipedia is Spanish film titles (`M\u00e1s negro que la noche`) and the same grammar "
+            + "table `menos` comes from",
+        minus: "measured: `-` before a digit \u00d72, and \u26a0 THIS REFUSAL COSTS \u2014 `-1\u00b0 C` (the freezing "
+            + "point, in the sand-filtration article) and `(-120\u00a0\u00b0C)` are TRUE NEGATIVES and a dropped "
+            + "minus INVERTS them. There is nothing to read them with: `menos` \u00d721 on nah.wikipedia is "
+            + "ENTIRELY INSIDE ONE SPANISH GRAMMAR TABLE in the Nahuatl-morphology article \u2014 \u201cNi- m\u00e1s el "
+            + "verbo menos vocal larga final o vocal inicial opcional\u201d, repeated once per person and "
+            + "voice \u2014 where it is the preposition *without* describing a morphological subtraction and "
+            + "never stands before a number; `negativo` is \u00d70. \u26a0 The corpus also writes one of its "
+            + "negatives with a LETTER O for the zero (`(-2O\u00b0C)`), which is a separate reason this class "
+            + "cannot be repaired by a rule. Registered with the price stated rather than papered over",
+        equals: "measured: `=` \u00d712 and ELEVEN ARE NOT EQUATIONS. Six are imported Spanish infobox "
+            + "key=value rows (`TC= 647,096 K PC= 22,0664MPa d=322kg/m\u00b3`, twice); three are a calendar "
+            + "table's LABEL column (`\u012apan helenotl\u0101cah: 2, a, 12, 24 = moch\u012bhualiztli: N\u0101hui "
+            + "Tlap\u0113uhc\u0101y\u014dtl`, and the same shape for `yudiotl\u0101cah` and `n\u0101huatl\u0101cah`); two are a GREEK "
+            + "GLOSS (`\u03b8\u03b1\u03bd\u03b1\u03c4\u03bf\u03c3=miquiztli, \u0395\u03c1\u03c9\u03c3=tlazohtlaliztli`). Exactly ONE is an equation, and it "
+            + "defines a calendar unit rather than computing anything: `1 N\u0113mont\u0113mi = 5 nozo 6 T\u014dnalli`. "
+            + "\u26a0 AND THE WORD FAILS ITS EXAMPLES TOO, which is the second leg: `igual` scores \u00d71 on "
+            + "nah.wikipedia and the one hit is Spanish `Al igual que las versiones de Wikipedia que "
+            + "existen en otros idiomas` \u2014 *just like*, not *equals*. A fifth distinct non-equation sense "
+            + "for this sign in the sweep, after gd's wiki headings, tt's etymology glosses, chv's ISBD "
+            + "parallel titles and ny/za's EasyTimeline markup",
+        times: "measured: `\u00d7` \u00d74 and ALL FOUR ARE SCIENTIFIC NOTATION \u2014 `1.4\u00d710\u00b2\u00b9 kg` and `5.1\u00d710\u00b9\u2078 kg` "
+            + "(the mass of the atmosphere and of the oceans, in Nahuatl prose), `1,67262 \u00d7 10\u201327 kg` and "
+            + "`1,602 176 487(40) \u00d7 10-19 culombios` (the proton article's imported Spanish figures). The "
+            + "corpus writes the same operation with ASCII `x` three more times, always inside the Spanish "
+            + "infoboxes (`>1,2 x 10\u00b9\u2075 a`, `2,144 x10\u2076 a`, `7,61 x 10\u2076 m\u207b\u00b9\u00b7\u03a9\u207b\u00b9`). No language reads "
+            + "scientific notation in this fleet, and `veces` is \u00d70 on nah.wikipedia besides",
+        divide: "measured: `\u00f7` \u00d70 in the retained text \u2014 the sign does not occur. The slash occurs and is "
+            + "not a division either: `4970 m/s` and `322kg/m\u00b3` are rates in Spanish infoboxes, "
+            + "`1494-1524/1525` and `1563/64?` are regnal and publication alternatives, and the three real "
+            + "fractions are SELF-GLOSSED (see `currency` below), so no fraction rule is written",
+        "less-than": "measured: `<` \u00d70 in the retained text \u2014 the sign does not occur",
+        "greater-than": "measured: `>` \u00d71 and it is the leading bound of a HALF-LIFE in the imported "
+            + "Spanish tantalum infobox \u2014 `180m Ta {Sin} >1,2 x 10\u00b9\u2075 a \u03b2 - \u03b5 0,075 \u00b9\u2078\u2070W 180 Hf`. Not a "
+            + "relation between two quantities in any Nahuatl sentence, and no comparison word is attested",
+        "plus-minus": "measured: `\u00b1` \u00d70 in the retained text \u2014 the sign does not occur",
+        ampersand: "measured: `&` \u00d718 and NOT ONE JOINS TWO NAHUATL WORDS, \u26a0 which is the interesting "
+            + "half because the WORD IS EVERYWHERE: `ihuan` \u00d7514 / `\u012bhu\u0101n` \u00d7112 on nah.wikipedia. Ten are "
+            + "the literal HTML entity `&nbsp;` the dump extractor left in text (`25&nbsp;\u00b0C`, "
+            + "`133&nbsp;km`, `45.9&nbsp;km`) \u2014 markup, not a sign, and normalize.ts step 2 turns it back "
+            + "into the space it is. The other eight are FOREIGN PROPER NAMES: English band and label "
+            + "credits (`Queen & David Bowie`, `Blank & Jones`, `Jo & Co`, `Ward Lock & Co`), German "
+            + "publisher imprints (`Schuster & Loeffler`, `Fretz & Wasmuth`), and the Spanish decay-mode "
+            + "column `FE & \u03b1`. Emitting the conjunction would speak a Nahuatl word inside an English "
+            + "band name",
+        percent: "measured: `%` \u00d717 and the class is REAL \u2014 nine are Nahuatl prose (`mochihua in 78% ic "
+            + "ehecatehuiltic, 21% ic ehecayoh ihuan 1% ic arg\u00f3n`, `in 96.5% in mochi \u0101tl ca`, `piya in "
+            + "1.72%`, `in cotoctic 0.04%`, `in 71% in Tl\u0101lticpactli \u012btla\u012bxpayo`, `quichihua in 99.86% in "
+            + "ipipinca in Tonatiuh`) and eight are the Spanish isotope tables. \u26a0 BUT NO PERCENT WORD "
+            + "EXISTS IN EITHER LANGUAGE HERE: `porciento` \u00d70, `porcentaje` \u00d70 AND `ciento` \u00d70 on "
+            + "nah.wikipedia \u2014 and `ciento` at zero is what also rules out the two-token Spanish `por "
+            + "ciento`, since its head noun would have to appear somewhere in 20 articles' worth of "
+            + "examples. The Tashelhit case: a wrong percent word is worse than a dropped sign, so "
+            + "`makeSymbolNormalizer`'s `percent` field is not declared \u2014 nor is the tier itself",
+        currency: "measured: `$` \u00d71, and \u26a0 THE WRITER HAS ALREADY SAID IT: \u201cNaman ipatiuh cetzin $40 "
+            + "pesos tlen tomin\u201d \u2014 *now its price is forty pesos of money*. The Spanish noun `pesos` and "
+            + "the Nahuatl money word `tomin` (\u00d714, from Arabic *\u1e6f\u00famn* via Spanish, per nah.wikipedia's "
+            + "own article on it) are both in the sentence, so expanding the sign says the noun twice. "
+            + "One instance, self-glossed, declined \u2014 the same shape as this corpus's three FRACTIONS, "
+            + "which the Moon article also glosses in full (`\u012bnn\u0101hui c\u0113 (1/4)`, `\u012bmmahtl\u0101ctli onc\u0113 c\u0113 "
+            + "(1/11)`, `\u012bn\u014dmp\u014dhualli ommahtl\u0101ctli c\u0113 (1/50)`). \u20ac \u00a3 \u00a5 are \u00d70",
+        exponent: "measured: the superscript runs are \u00d715 and THIRTEEN ARE NOT EXPONENTS \u2014 they are "
+            + "ISOTOPE MASS NUMBERS and ELECTRON CONFIGURATIONS in the imported Spanish chemistry "
+            + "infoboxes (`\u2075\u2078Ni`, `\u2076\u00b3Cu`, `\u00b9\u2078\u2070Ta`, `\u00b2\u00b3\u2077Np`, `Configuraci\u00f3n electr\u00f3nica [ Xe ] 4f\u00b9\u2074 5d\u00b3 "
+            + "6s\u00b2`, `10\u2076 m\u207b\u00b9\u00b7\u03a9\u207b\u00b9`), for which a squared/cubed reading is nonsense. \u26a0 THE TWO GENUINE "
+            + "ONES ARE DELIBERATELY LEFT UNREAD AND VISIBLE: `(37,932,330 km\u00b2)` and `(21,860,000,000 "
+            + "km\u00b3)` in the Moon article. `cuadrado`, `cuadrada`, `c\u00fabico` and `c\u00fabica` are all \u00d70 on "
+            + "nah.wikipedia \u2014 this wiki's Spanish measure vocabulary stops at the base nouns \u2014 so "
+            + "normalize.ts's unit rules exclude `km` before `\u00b2`/`\u00b3` on purpose, which keeps the real gap "
+            + "reportable instead of silently swallowing the power with the unit (trap 51's floor)",
+    },
     crh: {
         // \u26a0 SIX REFUSALS over the retained text of `tools/corpus/mined/crh.jsonc` (415 segments of a
         // 35,437-paragraph crh.wikipedia dump), each argued in src/languages/crimeantatar/normalize.ts.
