@@ -39,12 +39,16 @@ export const isUnreadableIrish = makeUnreadableTest({
         "bh", "ch", "dh", "fh", "gh", "mh", "ph", "sh", "th", "bhf", "gc", "bp", "dt", "nd",
         "mb", "ng", "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "pl", "pr", "sc", "sk",
         "sl", "sm", "sn", "sp", "st", "tr", "ts",
+        "cn", "gn", "sr", "dl",
     ]),
     legalCodas: new Set([
         "b", "d", "f", "g", "l", "m", "n", "p", "r", "s", "t", "v", "x", "bh", "ch", "dh", "fh",
         "gh", "mh", "ph", "sh", "th", "cht", "rt", "rd", "st", "nd", "nc", "nt", "mp", "mb", "ng",
         "lth", "rth", "nn", "ll", "rr", "nn",
+        "ht", "sc", "lt", "rb", "rm", "rp", "nm", "ns", "rc", "rg", "sk",
     ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["bh", "ch", "dh", "fh", "gh", "mh", "ph", "sh", "th", "bhf", "dt", "gc", "nd", "mb", "ng", "ts"]),
 });
 
 /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. */

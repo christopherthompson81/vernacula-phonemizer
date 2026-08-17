@@ -44,8 +44,14 @@ const LETTER_NAME: Readonly<Record<string, string>> = {
  *  The few clusters listed are the ones the corpus's own words actually begin with. */
 export const isUnreadableOromo = makeUnreadableTest({
     vowels: /[aeiou]/u,
-    legalOnsets: new Set(["dh", "ch", "ny", "ph", "sh"]),
-    legalCodas: new Set(["rk", "rt", "rs", "nt", "nd", "mb", "lt", "st"]),
+    legalOnsets: new Set([
+        "ch", "dh", "ny", "ph", "sh", "ts",
+    ]),
+    legalCodas: new Set(["rk", "rt", "rs", "nt", "nd", "mb", "lt", "st",
+        "kn", "ks", "rd", "dn", "rj", "ch", "ft", "ns", "ts", "tt", "ll", "nn",
+    ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["ch", "dh", "ny", "sh", "ph", "ts"]),
 });
 
 /**

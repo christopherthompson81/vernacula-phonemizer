@@ -68,12 +68,16 @@ export const isUnreadableGerman = makeUnreadableTest({
     legalOnsets: new Set([
         "bl", "br", "ch", "dr", "fl", "fr", "gl", "gr", "kl", "kn", "kr", "pf", "pl", "pr", "ps",
         "qu", "sc", "sch", "sh", "sk", "sl", "sm", "sn", "sp", "st", "sw", "th", "tr", "tw", "vl", "vr", "zw",
+        "ph", "gn", "schw", "wl",
     ]),
     legalCodas: new Set([
         "ch", "ck", "ft", "ht", "lb", "ld", "lf", "lk", "lm", "ln", "lp", "ls", "lt", "lz", "mm",
         "mp", "ms", "nd", "nf", "ng", "nk", "ns", "nt", "nz", "pf", "ps", "rb", "rd", "rf", "rg",
         "rk", "rl", "rm", "rn", "rp", "rs", "rt", "rz", "sch", "sk", "sp", "st", "ss", "tt", "tz", "ts", "ks",
+        "nn", "bt", "hl", "gt", "hr", "kt", "hn", "zt", "hm", "mt", "ll", "rr", "cht", "ngt",
     ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["ch", "sch", "tz", "ck", "ph", "th", "ng", "qu", "ss", "sh"]),
 });
 
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);

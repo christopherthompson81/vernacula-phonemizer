@@ -163,6 +163,26 @@ export interface PhonotacticsData {
      * will fire on every 3-consonant run it meets.
      */
     liquids?: RegExp;
+    /**
+     * DIGRAPHS: two letters spelling ONE consonant phoneme. Declaring them fixes a systematic over-firing,
+     * because every test below counts LETTERS while the phonotactics it is modelling is about PHONEMES.
+     *
+     * Measured over the 28 OmniVoice FLEURS corpora, this one omission was the single largest source of
+     * false "unreadable" verdicts on ordinary native vocabulary:
+     *
+     *     de  nicht, nacht   `cht` looked like a 3-consonant run; ⟨ch⟩ is /x/, so it is C+C
+     *     ga  bhfuil         `bhf` likewise; ⟨bh⟩ is one lenited phoneme
+     *     ca  anys           `nys` likewise; ⟨ny⟩ is /ɲ/
+     *     cs  jejich         coda `ch` is /x/ — one phoneme, so not a cluster needing a licence
+     *     ca  lloc           onset `ll` is /ʎ/
+     *     cy  nhw            onset `nh` is the nasal mutation of /n/
+     *
+     * A declared digraph does three things: it collapses to a single consonant before the run test, and it
+     * counts as automatically legal in onset and coda position — because a single phoneme needs no cluster
+     * licence. So `legalOnsets`/`legalCodas` stay lists of genuine two-PHONEME clusters, which is what they
+     * were always meant to be.
+     */
+    digraphs?: ReadonlySet<string>;
 }
 
 /**
@@ -210,15 +230,48 @@ export const LIQUIDS = /[lrлр]/u;
 export function makeUnreadableTest(d: PhonotacticsData): (word: string) => boolean {
     const consonantRun = new RegExp(`[^${d.vowels.source.replace(/^\[|\]$/g, "")}]{3,}`, "u");
     const isConsonant = (ch: string): boolean => /\p{L}/u.test(ch) && !d.vowels.test(ch);
+    const digraphs = d.digraphs;
+    /**
+     * Rewrite each declared digraph to a single placeholder consonant, so the run test counts PHONEMES.
+     * The placeholder is ⟨ẋ⟩ — a consonant in no language's vowel set and in no liquid set, so it neither
+     * satisfies the vowel test nor accidentally licenses a run. Longest-first, so a language declaring both
+     * `ng` and `ngh` collapses the longer one.
+     */
+    const collapse = (w: string): string => {
+        if (digraphs === undefined || digraphs.size === 0) return w;
+        let out = "";
+        outer: for (let i = 0; i < w.length; ) {
+            for (let n = 3; n >= 2; n--) {
+                if (digraphs.has(w.slice(i, i + n))) {
+                    out += "ẋ";
+                    i += n;
+                    continue outer;
+                }
+            }
+            out += w[i];
+            i += 1;
+        }
+        return out;
+    };
     return (word: string): boolean => {
         const w = word.toLowerCase();
         if (!d.vowels.test(w)) return true;
-        const run = consonantRun.exec(w);
+        // ⚠ The run test sees the COLLAPSED form. Counting letters here is what made `nicht` (de) and
+        // `bhfuil` (ga) look unsyllabifiable — see `digraphs`.
+        const run = consonantRun.exec(collapse(w));
         if (run !== null && !(d.liquids ?? LIQUIDS).test(run[0])) return true;
-        if (w.length >= 2 && isConsonant(w[0]!) && isConsonant(w[1]!) && !d.legalOnsets.has(w.slice(0, 2)))
+        // A digraph in onset or coda position is ONE phoneme, so it needs no cluster licence.
+        const head = w.slice(0, 2);
+        if (
+            w.length >= 2 && isConsonant(w[0]!) && isConsonant(w[1]!) &&
+            !d.legalOnsets.has(head) && !digraphs?.has(head)
+        )
             return true;
         const tail = w.slice(-2);
-        if (tail.length === 2 && isConsonant(tail[0]!) && isConsonant(tail[1]!) && !d.legalCodas.has(tail))
+        if (
+            tail.length === 2 && isConsonant(tail[0]!) && isConsonant(tail[1]!) &&
+            !d.legalCodas.has(tail) && !digraphs?.has(tail)
+        )
             return true;
         return false;
     };

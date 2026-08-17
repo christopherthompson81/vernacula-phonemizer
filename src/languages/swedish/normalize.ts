@@ -218,7 +218,10 @@ export const isUnreadableSwedish = makeUnreadableTest({
         "lm", "lp", "ls", "lt", "lv", "mm", "mp", "ms", "mt", "nd", "ng", "nk", "nn", "ns", "nt", "pp",
         "ps", "pt", "rd", "rg", "rk", "rl", "rm", "rn", "rp", "rr", "rs", "rt", "rv", "sk", "sp", "ss",
         "st", "tt", "ts",
+        "gt", "bt", "mn", "vs", "sm", "ln", "ds", "gs", "lj", "ch", "vt",
     ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["sj", "sk", "stj", "skj", "tj", "kj", "ng", "ch", "sh", "rs"]),
 });
 
 /**

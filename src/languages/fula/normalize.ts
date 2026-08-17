@@ -37,11 +37,15 @@ export const isUnreadableFula = makeUnreadableTest({
     legalOnsets: new Set([
         "mb", "nd", "nj", "ng", "ny", "ƴ", "ɓ", "ɗ", "h", "j", "k", "l", "m", "n", "p", "r",
         "s", "t", "w", "y",
+        "ch", "sh", "ts", "dy", "kw", "br", "gr", "pr", "tr", "sk", "fr", "st",
     ]),
     legalCodas: new Set([
         "b", "d", "f", "g", "h", "k", "l", "m", "n", "p", "r", "s", "t", "w", "y", "mb", "nd",
         "ng", "nj", "ny",
+        "ks", "sk", "ns", "ms", "ls", "sh", "ll", "st", "ts",
     ]),
+    // ONE phoneme each — see PhonotacticsData.digraphs.
+    digraphs: new Set(["mb", "nd", "ng", "nj", "ny", "ch", "sh", "ɓ", "ɗ", "ƴ"]),
 });
 
 /** Lexical: acronyms READ AS WORDS despite being unreadable by phonotactics. */
