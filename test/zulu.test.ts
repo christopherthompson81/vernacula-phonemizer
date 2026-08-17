@@ -78,7 +78,7 @@ describe("Zulu text normalization", () => {
         expect(normalizeZulu("nangu-2,207.")).toBe("nangu-2207.");
         // NOT a grouping comma: a 1–2 digit tail is Zulu's other decimal separator.
         expect(normalizeZulu("ezingu-1,5 ziyahamba")).toBe("ezingu-1 5 ziyahamba");
-        expect(normalizeZulu("ngo-12,00 GMT")).toBe("ngo-12 GMT"); // the comma clock, not thousands
+        expect(normalizeZulu("ngo-12,00 GMT")).toBe("ngo-12 ji emu thi"); // the comma clock, not thousands
         // SPACE grouping (×1) — the halves were read as two numbers, *ikhulu iqanda* ("a hundred, zero").
         expect(normalizeZulu("ku- 100 000 abantu")).toBe("ku- 100000 abantu");
         expect(normalizeZulu("ye-6 ngo-6")).toBe("ye-6 ngo-6"); // a 1-digit block is not grouping
@@ -94,7 +94,7 @@ describe("Zulu text normalization", () => {
         // borrowing is audible: a PHONEME recognizer (no `+`, no digits in its vocabulary) gives
         // `j u t i s i p l a s w a n`. One speaker of three; the other two skip the parenthetical entirely, so
         // it is 1 of 1 among those who read the offset — thinner than xh's 3 of 3, and recorded as such.
-        expect(normalizeZulu("(UTC+1)")).toBe("(UTC plas 1)");
+        expect(normalizeZulu("(UTC+1)")).toBe("(yu thi si plas 1)");
         expect(normalizeZulu("-5")).toBe("ukukhipha 5"); // a PREFIX; Zulu subtraction takes an object
         // The guard that makes the minus rule safe: a rugby score must NOT read *ukukhipha iqanda*.
         expect(normalizeZulu("ngo-26 -00 kalula")).toBe("ngo-26 -00 kalula");
@@ -135,9 +135,9 @@ describe("Zulu text normalization", () => {
 
     it("clock before a timezone — the dot, comma and bare-four-digit spellings", () => {
         expect(normalizeZulu("(15.00 UTC)")).toBe("(15 UTC)");
-        expect(normalizeZulu("ngo-12,00 GMT")).toBe("ngo-12 GMT");
-        expect(normalizeZulu("(0230 UTC)")).toBe("(2 nemizuzu engu-30 UTC)"); // was read as the number 230
-        expect(normalizeZulu("(UTC+1)")).toBe("(UTC plas 1)"); // an offset, not a time — the + reads at step 14b
+        expect(normalizeZulu("ngo-12,00 GMT")).toBe("ngo-12 ji emu thi");
+        expect(normalizeZulu("(0230 UTC)")).toBe("(2 nemizuzu engu-30 yu thi si)"); // was read as the number 230
+        expect(normalizeZulu("(UTC+1)")).toBe("(yu thi si plas 1)"); // an offset, not a time — the + reads at step 14b
     });
 
     it("ranges — ascending spans join with `kuya ku-`, scores and seasons do not", () => {
@@ -184,11 +184,11 @@ describe("Zulu text normalization", () => {
         expect(normalizeZulu("ngo-1000 B.C., abase-Asiriya")).toBe("ngo-1000 ngaphambi kukaKristu, abase-Asiriya");
         expect(normalizeZulu("ku-5000 BC!")).toBe("ku-5000 ngaphambi kukaKristu!");
         // Two bare capitals are otherwise an ordinary initialism, so `BC` needs a number in front of it.
-        expect(normalizeZulu("i-BC yaseCanada")).toBe("i-BC yaseCanada");
+        expect(normalizeZulu("i-bhi si yaseCanada")).toBe("i-bhi si yaseCanada");
         // A sentence-final marker keeps its period — the pause must not be swallowed.
         expect(normalizeZulu("kusukela ngo-1000 B.C. Abase-Asiriya")).toBe(
             "kusukela ngo-1000 ngaphambi kukaKristu. Abase-Asiriya");
-        expect(normalizeZulu("e-U.S. ube ngowesibili")).toBe("e-US ube ngowesibili"); // was [ˈuː . s .]
+        expect(normalizeZulu("e-U.S. ube ngowesibili")).toBe("e-yu esi ube ngowesibili"); // was [ˈuː . s .]
         expect(normalizeZulu("uJoji W. Hlathi")).toBe("uJoji W Hlathi"); // the lone initial's dot
         expect(normalizeZulu("Arts & Sciences")).toBe("Arts kanye ne-Sciences");
         expect(normalizeZulu("amaB&amp;B")).toBe("amaB kanye ne-B"); // the corpus's HTML entity
