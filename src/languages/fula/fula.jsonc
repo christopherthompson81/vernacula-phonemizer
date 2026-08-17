@@ -69,6 +69,12 @@
         // counterexample; chede, chaka, chanji, china, march are all /t͡ʃ/.
         // ⟨cch⟩ is the geminate of ⟨ch⟩ and must precede BOTH (else cc→t͡ʃː then a stray h): acchugo,
         // yeccheta, picchu, bocchi.
+        // ⟨chh⟩ is the INDIC TRANSLITERATION digraph for an aspirated /t͡ʃʰ/ (Chhatrapati, Chhappan).
+        // Fula has no aspiration contrast, so the host reads it as a plain /t͡ʃ/ — but it must be
+        // listed, because ⟨ch⟩ alone leaves the second h stranded as its own consonant and rebuilds
+        // the impossible t͡ʃ+h cluster this table was fixed to remove. Residue found by re-scanning
+        // the regenerated corpus for the very cluster the ⟨ch⟩ fix targeted.
+        ["chh", "t͡ʃ", false],
         ["cch", "t͡ʃː", false],
         ["ch", "t͡ʃ", false],
         ["sh", "ʃ", false],
