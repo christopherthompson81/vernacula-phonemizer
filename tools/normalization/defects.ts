@@ -1271,6 +1271,41 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "(`bir saatnıñ 1/60-ine ve 60 saniyege teñ`) and a RATE (`Ortalama debit 2 m\u00b3/sn`). No "
             + "fraction rule is written",
     },
+    bs: {
+        // \u26a0 FIVE REFUSALS, each measured over the 1,976 DEDUPLICATED utterances of FLEURS `bs_ba` and
+        // each argued in src/languages/bosnian/normalize.ts. Bosnian is the fleet's trap-55 case: it has
+        // TWO treated siblings and BOTH of them declare all five of these signs. hr/sr were measured over
+        // WIKI dumps, where arithmetic markup, chart directives and formula fragments are common; bs has no
+        // mined artifact and its only corpus is READ-ALOUD NEWS, in which none of these five glyphs occurs
+        // even once. So the refusals are not a claim about the Bosnian LANGUAGE \u2014 every word is
+        // attested on bs.wikipedia (`jednako` \u00d727 in 16 articles, `podijeljeno` \u00d732/18, `manje`
+        // \u00d728/17, `ve\u0107e` \u00d730/19, `plus` \u00d752/15, `minus` \u00d771/19, the last two
+        // glossed together in the Negativni-brojevi article) \u2014 they are a refusal to ship a rule this
+        // round cannot measure.
+        // \u26a0 `minus` IS NOT HERE, and the asymmetry is deliberate: a dropped plus is lossless and a
+        // dropped minus INVERTS its operand, so the guarded minus ships even though its candidate count is
+        // also \u00d70. `times` is likewise absent \u2014 `\u00d7` is \u00d70 but ASCII `x` between digits
+        // is \u00d74 (`6x6 cm`, `56x56 mm`), so `multiply` is declared and the class reads.
+        "plus-minus": "measured: `\u00b1` \u00d70 in the 1,976 FLEURS bs_ba utterances. The `+` occurs "
+            + "\u00d72 and NEITHER is arithmetic \u2014 `temperature iznad + 30 \u00b0C su "
+            + "uobi\u010dajene` is a positive temperature and `po lokalnom vremenu (UTC+1)` is a zone "
+            + "offset \u2014 so this corpus holds no tolerance frame from which the two-word reading "
+            + "could be composed and checked",
+        equals: "measured: `=` \u00d70 in the 1,976 FLEURS bs_ba utterances. \u26a0 THE SIGN'S ABSENCE IS "
+            + "A PROPERTY OF THE SOURCE, not of the language: this corpus is read-aloud news, and every "
+            + "non-equation sense the sweep has catalogued for `=` (tt's etymology glosses, chv's ISBD "
+            + "parallel-title marks, crh's EasyTimeline directives, gd's wiki headings) is a WIKI-DUMP "
+            + "artifact. Croatian and Serbian both declare the sign from wiki-sourced corpora; porting "
+            + "their rule here would be an unmeasured import, which is the whole subject of trap 55",
+        "less-than": "measured: `<` \u00d70 in the 1,976 FLEURS bs_ba utterances \u2014 it does not occur",
+        "greater-than": "measured: `>` \u00d70 in the 1,976 FLEURS bs_ba utterances \u2014 does not occur",
+        divide: "measured: `\u00f7` \u00d70 in the 1,976 FLEURS bs_ba utterances, and the SLASH is not "
+            + "division here either: all 16 of its instances are RATES (`160 km/h`, `133 m/s`, "
+            + "`600Mbit/s`, `100-200 milja/sat`, `35-40 mi/h`), which the tier and two local rules "
+            + "already read. The `\\d+/\\d+` fraction shape is \u00d70, so no fraction rule is written "
+            + "for the slash \u2014 the two vulgar-fraction GLYPHS that do occur (`29\u00be in\u010da sa "
+            + "24\u00bd in\u010da`) are read directly",
+    },
     chr: {
         // \u26a0 TWELVE REFUSALS \u2014 every sign class this repo probes \u2014 over the retained text of
         // `tools/corpus/mined/chr.jsonc` (315 segments of a 734-paragraph chr.wikipedia dump, the SMALLEST
