@@ -1103,6 +1103,91 @@ export const ACCEPTED_SIGN_SILENCE: Readonly<Record<string, Readonly<Record<stri
             + "corpus names in WORDS and never by its sign (`32,7 tri\u013cjonim ASV dolaru`), so declaring "
             + "the key would buy nothing and risk a wrong count form. The gate's probe is a bare `$5`",
     },
+    luo: {
+        // \u26a0 TWELVE REFUSALS, and \u26a0 NONE OF THEM IS MEASURED OVER AN ARTIFACT \u2014 Luo / Dholuo has no
+        // mined artifact and `mine.ts scan` cannot run for it. Every count below is over column 3 of
+        // $FLEURS/luo_ke/{train,dev,test}.tsv, deduplicated: 2,742 rows \u2192 1,660 UNIQUE cased utterances.
+        // Each refusal is argued at length in src/languages/luo/normalize.ts.
+        //
+        // \u26a0 THE HAYSTACK IS THREE THINGS, WHICH IS WHY THESE REFUSALS ARE SHORTER-ARMED THAN MOST.
+        // espeak-ng ships NO Luo at all (`sources.ts`: "espeak does not ship this language"), so there is
+        // no letter-name table and `core/initialisms.ts` is structurally a no-op here; and
+        // **luo.wikipedia.org does not exist** \u2014 `attest.ts` refuses to probe it outright. The Incubator
+        // project Wp/luo was probed by hand and is below any useful floor (trap 51 with the floor removed):
+        // a CONTROL on the commonest words in the language returns `piny` 10 articles, `dhano` 4, `higa` 5,
+        // `nyaka` 3, while `dola`, `nukta`, `pasent`, `asilimia` and `digri` every one return 0. Those
+        // zeros are UNKNOWN, not negative. What is left is the FLEURS corpus, a 17-word en.wiktionary
+        // referee and the engine's own number data.
+        //
+        // \u26a0 AND THE NEIGHBOUR WAS TESTED AND REJECTED. Swahili is treated in this tree and Dholuo is in
+        // daily contact with it, so sw's layer was taken as a hypothesis (trap 55): THIRTEEN of the
+        // fourteen words it emits or is built on score ZERO here \u2014 `hadi` (range), `asilimia` (percent),
+        // `mraba` (square), `maili`, `pauni`, `aunsi`, `galoni`, `milioni`, `bilioni`, `karne`, `elfu`,
+        // `kwa`, `sifuri`. Where the two agree the word is a settled loan (`saa`, `dakika`, `kilomita`,
+        // `mita`); where they differ, Dholuo takes the ENGLISH word (`mail`/`mails` with an English plural
+        // -s, `paund`, `ounce`, `galons`, `squeya`, `senchari`, `milion`, `bilion`). Porting sw would have
+        // shipped six confidently wrong readings into the classes below.
+        percent: "measured: `%` \u00d72 over 1,660 unique utterances \u2014 `oriwo 3% mar pinyno` and `Nadal ne "
+            + "oyudo point 88% e tugo no` \u2014 and NO percent word exists in any source this language has. "
+            + "The corpus's 5 `mia` are the numeral 100; `asilimia` (the Swahili word) is \u00d70; espeak "
+            + "ships no Luo; there is no wiki to ask. \u26a0 A CANDIDATE IS NAMED AND DELIBERATELY NOT "
+            + "SHIPPED: `kuom mia achiel` ('out of one hundred') is composable entirely from attested "
+            + "pieces \u2014 the Fula `e teemedere` move \u2014 because `kuom` is this corpus's own partitive in a "
+            + "NUMERIC RATIO (`ondik nyinge e thuolo mar 190 kuom ji 400`, 190 out of 400 people) and "
+            + "`mia achiel` is 100 in the engine's numbers.ts. Two instances do not buy a phrase nobody "
+            + "has been observed writing, and with no wiki there is no way to sense-check it. Price of "
+            + "the refusal: both figures read as bare numerals, the sign silent",
+        degrees: "measured: `\u00b0` \u00d72 (`liet medorega nyaka rang'iny moloyo +30\u00b0C` and `e yimbo mar 35\u00b0 "
+            + "Ugwe`, 35\u00b0 West) and \u26a0 THE CORPUS'S ONLY `digri` IS THE ACADEMIC DEGREE: `nosomo "
+            + "historia moyude moyudo 2:2 (digri man piny, clas mar ariyo)` \u2014 a British lower-second-"
+            + "class honours degree. That is the ki `digirii` \u00d74 trap arriving again, and it is the whole "
+            + "refusal. No Celsius or Fahrenheit name occurs in the corpus, the 17-word referee or espeak "
+            + "(which does not ship Luo); `sources.ts` reports the degree-adjacent tokens as Ugwe\u00d72 "
+            + "ugwe\u00d72, which is the compass word WEST. \u26a0 THE REFUSAL IS WHOLE, NEVER HALF (trap 53): "
+            + "the sign is left in place rather than consumed, so `+30\u00b0C` reads exactly as it did before "
+            + "this layer existed \u2014 including its `C` going through the Dholuo \u27e8c\u27e9 \u2192 t\u0361\u0283 grapheme rule, "
+            + "a trap-56 reading defect this round RECORDS rather than deepens. \u26a0 AND NO CONFUSABLE IS "
+            + "INVOLVED, which is worth stating because three recent rounds each found one: checked byte "
+            + "by byte, both signs are `\u00b0` U+00B0 and the scale letter is ASCII `C` U+0043 \u2014 no `\u00ba` "
+            + "U+00BA, no `\u02da` U+02DA, no `\u2103`, no Cyrillic `\u0421`",
+        plus: "measured: `+` \u00d72, and trap 48 describes both exactly. `liet medorega nyaka rang'iny "
+            + "moloyo +30\u00b0C` puts the sign after the comparative `moloyo` ('more than'), so it is "
+            + "REDUNDANT with the preposition and the silence is LOSSLESS \u2014 a plus does not invert its "
+            + "operand. The other is `(UTC+1)`, which the fleet sweep found is the one contentful plus "
+            + "and the one nothing attests: no plus word in the corpus, the referee or espeak, and no "
+            + "wiki to ask. Naming one would be the Fula `tere` failure",
+        minus: "measured: `-` between digits \u00d717 and NOT ONE IS A NEGATIVE. Every instance is a span "
+            + "(`1469-1539`, `1644-1912`, `1894-1895`, `120-160`, `35-40`, `56-64`, `10-11`, `2-5`, "
+            + "`4.2-3.9`, `(1418 - 1450)`, `(dakika 10 -60)`), a sports score (`5-3`, `7-2`, `6-6`, "
+            + "`26-00`), a season (`1995-96`) or a clock range (`10:00-11:00`) \u2014 and normalize.ts step 5 "
+            + "claims them with the corpus's OWN joiner `nyaka`, attested \u00d76 between numerals in both "
+            + "directions. There is nothing here for a minus rule to read, and no Dholuo negative word "
+            + "in any of the three sources this language has",
+        ampersand: "measured: `&` \u00d71 \u2014 `Gikone, ute nindo mag B&Bs piem ga mana ne gik moko ariyo`, an "
+            + "English business abbreviation. `kod` is Dholuo for 'and' and is everywhere in the corpus, "
+            + "but `B kod Bs` is not how anyone reads `B&B`, and one instance of an English term is not "
+            + "grounds for a rule",
+        exponent: "measured: `\u00b2` and `\u00b3` \u00d70 \u2014 no superscript of any kind occurs in 1,660 utterances. "
+            + "The corpus writes ONE ASCII exponent, `mar 35 mm negative (3136 mm2 versus \u2026)`, and it is "
+            + "refused WHOLE rather than half (trap 53): `mm` has no Dholuo word in any source, so "
+            + "nothing claims the unit and the `2` reads exactly as it did rather than becoming "
+            + "*3136 millimetres TWO*. \u26a0 The square word itself IS attested \u2014 `squeya` \u00d71, in "
+            + "`chiegni kilomita squeya tara ariyo nukta ariyo` \u2014 but with no `\u00b2` anywhere and no "
+            + "readable unit noun for it to modify there is nothing for it to attach to",
+        equals: "measured: `=` \u00d70 \u2014 the sign does not occur in 1,660 unique utterances",
+        "less-than": "measured: `<` \u00d70 \u2014 the sign does not occur in 1,660 unique utterances",
+        "greater-than": "measured: `>` \u00d70 \u2014 the sign does not occur in 1,660 unique utterances",
+        "plus-minus": "measured: `\u00b1` \u00d70 \u2014 the sign does not occur, and a \u00b1 reading would have to "
+            + "compose two words neither of which is attested (see `plus` and `minus` above)",
+        times: "measured: `\u00d7` \u00d70, and the `x` between digits does not occur either. The corpus's one "
+            + "dimension statement is written in WORDS \u2014 `en aena 36mm e lach gi 24mm e bor`, 36mm in "
+            + "width and 24mm in height \u2014 which is the reading a `\u00d7` rule would have had to produce",
+        divide: "measured: `\u00f7` \u00d70. The slash occurs \u00d74 and every instance was read: a letter-pair "
+            + "gloss (`nyukta achiel ma \u201c\u00d5/\u00f5\u201d bende nomedi`), a word pair (`koro maler/nyasaye`), the "
+            + "season pair (`kinde mar oro/chieng'`) and ONE genuine rate, `ng'wech man malo mar "
+            + "600Mbits/s`. Not one is a fraction, and the rate's numerator `Mbits` has no Dholuo word "
+            + "either, so `unitPer` would have nothing to join",
+    },
     haw: {
         // \u26a0 SEVEN REFUSALS over the retained text of `tools/corpus/mined/haw.jsonc` (423 segments of a
         // 7,735-paragraph haw.wikipedia dump), each argued in src/languages/hawaiian/normalize.ts.
