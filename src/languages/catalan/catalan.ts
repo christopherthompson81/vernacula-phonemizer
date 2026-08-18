@@ -37,6 +37,36 @@ const FINAL_DEVOICE = MANIFEST.finalDevoice;
 const PALATALS = new Set(MANIFEST.palatals);
 const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
 
+/**
+ * ⚠ SPIRANTIZATION IS POST-LEXICAL — it does not stop at the word edge, and `spirantize()` above cannot
+ * see past one. Its `i === 0` guard is WORD-initial, because a per-word function has no other context,
+ * so the identical environment read two ways depending on which side of a space it fell: `cabota` →
+ * kəβˈɔtə but `la bota` → ɫə bˈotə. That INTERNAL INCONSISTENCY is the defect.
+ *
+ * Measured for Spanish, which had the same gap and the same fix: 1,292 of 1,500 FLEURS rows moved
+ * CLOSER to the recogniser and 36 further (35.9:1).
+ *
+ * ⚠ CATALAN'S CONDITIONS ARE NOT SPANISH'S, and both extra ones carry across the boundary too:
+ * only /d/ stays occlusive after a lateral (`alga` → aɫɣə keeps the fricative for /ɡ/), and a stop
+ * before a sibilant stays occlusive (`examen` → əɡzamən). The sibilant now sits in the FOLLOWING word,
+ * which is precisely the context the assembled string exposes.
+ */
+// ⚠ THE SIBILANT IS A LOOKAHEAD, NOT A CAPTURE. Consuming it advanced past the character that the NEXT
+// word needs as its own left context, so a second stop in the same clause was silently missed:
+// `segons de vídeo` came out `səɣˈons ðə bˈiðəu` — the /d/ spirantized and the /b/ one word later did
+// not. Non-overlapping replacement makes any consumed right-context a bug of exactly this shape.
+const CROSS_WORD_STOP = /([^\s])(\s+)([bdɡ])(?=([^\s]?))/gu;
+
+function spirantizeAcrossWords(ipa: string): string {
+    return ipa.replace(CROSS_WORD_STOP, (m, prev: string, gap: string, stop: string, next: string) => {
+        if (NASALS.has(prev)) return m;
+        if (stop === "d" && (prev === "ɫ" || prev === "ʎ")) return m;   // homorganic, /d/ only
+        if (next === "z" || next === "s" || next === "ʃ" || next === "ʒ") return m;  // before a sibilant
+        if (!/[\p{L}\p{M}ˈˌ]/u.test(prev)) return m;                    // after a pause
+        return prev + gap + (STOP_TO_FRIC[stop] ?? stop);
+    });
+}
+
 /** Index of the stressed nucleus: written accent, else the Catalan 2R rule — penult when the word ends in a
  *  vowel, a vowel+s, or -en/-in; else final. */
 function stressedNucleus(word: string, segs: Seg[]): number {
@@ -250,14 +280,14 @@ class CatalanPhonemizer implements Phonemizer {
     text(input: string): string {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal/clock/era steps need the
         // number and its suffix still adjacent, which the tier would break.
-        return assembleClauses(SYMBOLS(normalizeCatalan(input)), TOKEN, (m, sink) => {
+        return spirantizeAcrossWords(assembleClauses(SYMBOLS(normalizeCatalan(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2]) sink.emit(numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
-        });
+        }));
     }
 }
 

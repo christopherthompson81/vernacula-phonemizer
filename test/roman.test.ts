@@ -74,7 +74,7 @@ describe("Roman numerals (core/roman.ts)", () => {
         expect(phonemize("xix век", "ru").split(" ").length).toBeGreaterThan(1);
         // Spanish reads centuries as CARDINALS (RAE: "del siglo XI en adelante, solo es normal su
         // lectura como cardinales"), so this is the correct register for it — not a fallback.
-        expect(phonemize("siglo xix", "es")).toContain("djeθinwˈeβe");
+        expect(phonemize("siglo xix", "es")).toContain("ðjeθinwˈeβe");
         // Italian reads them as ORDINALS, including regnal names, per its own policy (Treccani).
         expect(phonemize("papa giovanni xxiii", "it")).toContain("ventitreezˈimo");
         expect(phonemize("xix secolo", "it")).toContain("dit͡ʃannovezˈimo");

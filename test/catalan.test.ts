@@ -105,11 +105,11 @@ describe("catalan canonical IPA", () => {
         expect(phonemize("31", "ca")).toBe("tɾˈɛntə un"); // trenta-un
         expect(phonemize("100", "ca")).toBe("sˈen"); // cent
         expect(phonemize("200", "ca")).toBe("dˈos sˈens"); // dos-cents → two words (hyphen split)
-        expect(phonemize("2024", "ca")).toBe("dˈos mˈiɫ bˈin i kwˈatɾə");
+        expect(phonemize("2024", "ca")).toBe("dˈos mˈiɫ βˈin i kwˈatɾə");
     });
 
     test("text: reduction + function-word destressing + punctuation", () => {
-        expect(phonemize("El gat menja peix.", "ca")).toBe("əɫ ɡˈat mˈeɲʒə pˈeʃ ."); // el reduces: proclitic [ə], not the citation ɛɫ
+        expect(phonemize("El gat menja peix.", "ca")).toBe("əɫ ɣˈat mˈeɲʒə pˈeʃ ."); // el reduces: proclitic [ə], not the citation ɛɫ
     });
 });
 
@@ -118,17 +118,17 @@ describe("catalan canonical IPA", () => {
 // (el → ɛɫ, where running text needs əɫ). The reduction has to know the word is a clitic before it reduces.
 describe("Catalan proclitic reduction", () => {
     test("clitics reduce in running text", () => {
-        expect(phonemize("el gat", "ca")).toBe("əɫ ɡˈat");
+        expect(phonemize("el gat", "ca")).toBe("əɫ ɣˈat");
         expect(phonemize("del mar", "ca")).toBe("dəɫ mˈaɾ");
         expect(phonemize("es posa", "ca")).toBe("əs pˈɔzə");
-        expect(phonemize("que ve", "ca")).toBe("kə bˈe");
+        expect(phonemize("que ve", "ca")).toBe("kə βˈe");
         expect(phonemize("ho fa", "ca")).toBe("u fˈa"); // ho — the famously [u] pronoun
     });
 
     test("keep-vowel function words lose only the mark", () => {
         // the conjunction "o" resists reduction (contrast with u; referee: o → "o"), as do no/com.
         expect(phonemize("blanc o negre", "ca")).toBe("bɫˈaŋ o nˈɛɣɾə");
-        expect(phonemize("no ve", "ca")).toBe("no bˈe");
+        expect(phonemize("no ve", "ca")).toBe("no βˈe");
     });
 
     test("content monosyllables keep their stressed vowel", () => {
@@ -152,7 +152,7 @@ describe("Catalan Roman-numeral policy — centuries cardinal, prenominal events
     test("a century stays a CARDINAL (the century noun is not a trigger)", () => {
         expect(ROMAN_POLICY.ordinalBefore).toBeUndefined();
         expect(ROMAN_POLICY.ordinalAfter?.test("segle")).toBe(false);
-        expect(phonemize("segle xix", "ca")).toBe('sˈeɡːɫə dinˈɔw');
+        expect(phonemize("segle xix", "ca")).toBe('sˈeɡːɫə ðinˈɔw');
     });
 
     test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
@@ -197,29 +197,29 @@ describe("Catalan text normalization", () => {
     test("trap pins: 4t (quart), the s-decade, and the B&Bs plural", () => {
         // 4t is the quart series; 20t is NOT a Catalan form (20è) and must not fire.
         expect(normalizeCatalan("el 4t dia")).toBe("el quart dia");
-        expect(ph("el 4t dia")).toBe("əɫ kwˈaɾt dˈiə");
+        expect(ph("el 4t dia")).toBe("əɫ kwˈaɾt ðˈiə");
         expect(ph("20t")).toBe("bˈin t");
         // the s-decade must not reach the tier's `s` unit (nineteen-twenty SECONDS).
         expect(normalizeCatalan("Durant els anys 1920s")).toBe("Durant els anys 1920");
-        expect(ph("Durant els anys 1920s")).toBe("duɾˈan əɫs ˈaɲs mˈiɫ nˈɔw sˈens bˈin");
+        expect(ph("Durant els anys 1920s")).toBe("duɾˈan əɫs ˈaɲs mˈiɫ nˈɔw sˈens βˈin");
         // B&Bs — the plural s lands on the last letter name.
-        expect(ph("els B&Bs")).toBe("əɫs bˈe i bˈes");
+        expect(ph("els B&Bs")).toBe("əɫs βˈe i βˈes");
     });
 
     test("the Nè/Na/Nr ordinal reads the Catalan ordinal (masculine/feminine)", () => {
-        expect(ph("7è de rugbi")).toBe("sətˈɛ də rˈuɣβi"); // setè
+        expect(ph("7è de rugbi")).toBe("sətˈɛ ðə rˈuɣβi"); // setè
         expect(ph("la 7a illa")).toBe("ɫə sətˈɛnə ˈiʎə"); // setena (feminine)
-        expect(ph("el 1r dia")).toBe("əɫ pɾimˈe dˈiə"); // primer
+        expect(ph("el 1r dia")).toBe("əɫ pɾimˈe ðˈiə"); // primer
     });
 
     test("dot-thousands stay grouped; 1-2 digit fractions are decimals/versions (punt)", () => {
         expect(ph("1.400 persones")).toBe("mˈiɫ kwˈatɾə sˈens pəɾsˈonəs"); // 1400
         // The bare `m` was the RAW LETTER here until `metre`/`metres` were declared — this corpus's only
         // digit-adjacent bare `m`, and a genuine metre ("un màxim de 4.892 m del Mont Vinson").
-        expect(ph("4.892 m")).toBe("kwˈatɾə mˈiɫ bˈujt sˈens nuɾˈantə dˈos mˈɛtɾəs"); // 4892 m
+        expect(ph("4.892 m")).toBe("kwˈatɾə mˈiɫ βˈujt sˈens nuɾˈantə ðˈos mˈɛtɾəs"); // 4892 m
         expect(ph("1.5 milions")).toBe("un pˈun sˈiŋ miɫiˈons"); // 1.5 → punt
         expect(ph("2.4 Ghz")).toBe("dˈos pˈun kwˈatɾə ʒiɣəˈɛɾsis");
-        expect(ph("802.11n")).toBe("bˈujt sˈens dˈos pˈun ˈonzə n");
+        expect(ph("802.11n")).toBe("bˈujt sˈens ðˈos pˈun ˈonzə n");
     });
 
     test("clocks read hour [minute] with AM/PM letter-spelled", () => {
@@ -228,17 +228,17 @@ describe("Catalan text normalization", () => {
     });
 
     test("era markers expand (aC/dC) and fractions use the ordinal (un cinquè)", () => {
-        expect(ph("segle III aC")).toBe("sˈeɡːɫə tɾˈɛs əβˈans də kɾˈist"); // abans de Crist
-        expect(ph("1.300 dC")).toBe("mˈiɫ tɾˈɛs sˈens dəspɾˈes də kɾˈist"); // després de Crist
+        expect(ph("segle III aC")).toBe("sˈeɡːɫə tɾˈɛs əβˈans ðə kɾˈist"); // abans de Crist
+        expect(ph("1.300 dC")).toBe("mˈiɫ tɾˈɛs sˈens ðəspɾˈes ðə kɾˈist"); // després de Crist
         expect(ph("1/5 polzades")).toBe("un siŋkˈɛ puɫzˈaðəs"); // un cinquè
         expect(ph("29¾ polzades")).toBe("bˈin i nˈɔw i tɾˈɛs kwˈaɾs puɫzˈaðəs");
     });
 
     test("degrees, currency (¥), abbreviations and dotted initials expand", () => {
-        expect(ph("30 °C")).toBe("tɾˈɛntə ɡɾˈaws səɫsˈiws");
+        expect(ph("30 °C")).toBe("tɾˈɛntə ɣɾˈaws səɫsˈiws");
         expect(ph("2.500 ¥")).toBe("dˈos mˈiɫ sˈiŋ sˈens jˈɛns");
         expect(ph("Dr. Moll")).toBe("duktˈo mˈɔʎ");
-        expect(ph("George W. Bush")).toBe("ʒəˈɔɾʒə w bˈus");
+        expect(ph("George W. Bush")).toBe("ʒəˈɔɾʒə w βˈus");
         expect(ph("etc.")).toBe("ətsˈɛtəɾə .");
     });
 
@@ -252,7 +252,7 @@ describe("Catalan text normalization", () => {
         expect(ordinalWords(200)).toBe("dos centè");
         expect(ordinalWords(900, true)).toBe("nou centena");
         expect(ordinalWords(102)).toBe("cent dosè");
-        expect(ph("el 60è de la temporada")).toBe("əɫ səʃəntˈɛ də ɫə təmpuɾˈaðə"); // was *seixantaè*
+        expect(ph("el 60è de la temporada")).toBe("əɫ səʃəntˈɛ ðə ɫə təmpuɾˈaðə"); // was *seixantaè*
         expect(ph("la 190a posició")).toBe("ɫə sˈen nuɾəntˈɛnə puzisiˈo"); // was *cent norantaena*
     });
 
@@ -267,7 +267,7 @@ describe("Catalan text normalization", () => {
     test("only a DECADE loses its plural s; a unit keeps it", () => {
         expect(normalizeCatalan("els anys 1920s")).toBe("els anys 1920");
         expect(normalizeCatalan("els anys 90s")).toBe("els anys 90");
-        expect(ph("45s de vídeo")).toBe("kwəɾˈantə sˈiŋ səɣˈons də bˈiðəu"); // seconds, not *quaranta-cinc*
+        expect(ph("45s de vídeo")).toBe("kwəɾˈantə sˈiŋ səɣˈons ðə βˈiðəu"); // seconds, not *quaranta-cinc*
     });
 
     test("the compass degree carries S too, and no rule leaves a double space", () => {
@@ -278,6 +278,28 @@ describe("Catalan text normalization", () => {
     test("initialisms letter-spell (EUA); ONU stays the word; B&B reads be i be", () => {
         expect(ph("els EUA")).toBe("əɫs ˈɛ ˈu ə");
         expect(ph("l'ONU")).toBe("ɫ ˈɔnu");
-        expect(ph("B&B")).toBe("bˈe i bˈe");
+        expect(ph("B&B")).toBe("bˈe i βˈe");
+    });
+});
+
+/**
+ * ⚠ SPIRANTIZATION CROSSES THE WORD BOUNDARY — see the note in spanish.ts. Catalan's CONDITIONS are
+ * not Spanish's, and both extra ones carry across the space: only /d/ stays occlusive after a lateral
+ * (`alga` → aɫɣə keeps the fricative for /ɡ/), and a stop before a sibilant stays occlusive.
+ */
+describe("Catalan spirantization crosses the word boundary", () => {
+    test("across a space, with Catalan's own conditions", async () => {
+        expect(await phonemize("la bota", "ca")).toBe("ɫə βˈotə");
+        expect(await phonemize("la dona", "ca")).toBe("ɫə ðˈɔnə");
+        expect(await phonemize("el gat", "ca")).toBe("əɫ ɣˈat");   // /ɡ/ DOES spirantize after a lateral
+        expect(await phonemize("un dia", "ca")).toBe("un dˈiə");   // nasal keeps the stop
+        expect(await phonemize("el dia", "ca")).toBe("əɫ dˈiə");   // only /d/ stays after a lateral
+    });
+
+    // ⚠ THE BUG THE LOOKAHEAD FIXED. The sibilant test captured its character instead of looking ahead,
+    // consuming the left context the NEXT word needed — so a second stop in the same clause was
+    // silently missed: `segons de vídeo` came out `ðə bˈiðəu`.
+    test("a second stop in the same clause is not swallowed", async () => {
+        expect(await phonemize("segons de vídeo", "ca")).toBe("səɣˈons ðə βˈiðəu");
     });
 });

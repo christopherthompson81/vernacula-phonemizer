@@ -46,7 +46,7 @@ describe("spanish canonical IPA", () => {
             "ˈola , kˈomo estˈas ?",
         );
         expect(phonemize("Me llamo Juan.", "es")).toBe("me ʎˈamo xwˈan ."); // 'me' clitic de-accented
-        expect(phonemize("el gato", "es")).toBe("el ɡˈato"); // 'el' article de-accented
+        expect(phonemize("el gato", "es")).toBe("el ɣˈato"); // 'el' article de-accented
     });
 
     // Regression tests for review-caught defects.
@@ -83,7 +83,7 @@ describe("Spanish Roman-numeral policy — centuries cardinal, prenominal events
     test("a century stays a CARDINAL (the century noun is not a trigger)", () => {
         expect(ROMAN_POLICY.ordinalBefore).toBeUndefined();
         expect(ROMAN_POLICY.ordinalAfter?.test("siglo")).toBe(false);
-        expect(phonemize("siglo xix", "es")).toBe('sˈiɣlo djeθinwˈeβe');
+        expect(phonemize("siglo xix", "es")).toBe('sˈiɣlo ðjeθinwˈeβe');
     });
 
     test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
@@ -136,5 +136,45 @@ describe("Spanish: the dot groups AND decimates", () => {
     test("es-419 gets the same treatment — CLDR formats it US-style, the corpus writes both", () => {
         expect(phonemize("2.3 millones", "es-419").trim()).toContain("d\u02c8os k\u02c8oma t\u027e\u02c8es");
         expect(phonemize("17.000 islas", "es-419").trim()).toContain("m\u02c8il");
+    });
+});
+
+/**
+ * ⚠ SPIRANTIZATION IS POST-LEXICAL — it does not stop at the word edge.
+ *
+ * `spirantize()` guards on `i === 0`, which is WORD-initial, because a per-word function has no other
+ * context. Its own comment says "except utterance-initial". So the identical environment was read two
+ * ways depending on which side of a space it fell: `nada` → nˈaða but `la duda` → la dˈuða.
+ *
+ * That INTERNAL INCONSISTENCY is the defect — the engine has already committed to marking allophony.
+ *
+ * ⚠ VALIDATED AGAINST THE AUDIO, not just against theory. Re-scoring 1,500 FLEURS es_419 rows against
+ * the wav2vec2 phones: 1,292 moved CLOSER, 36 further — 35.9 : 1, median skeleton distance
+ * 0.146 → 0.103. Our `d` was being heard as [ð] in 2,278 aligned positions, 60% after a vowel.
+ */
+describe("spirantization crosses the word boundary", () => {
+    test("after a vowel or a continuant, across a space", async () => {
+        expect(await phonemize("la duda", "es-419")).toBe("la ðˈuða");
+        expect(await phonemize("los datos", "es-419")).toBe("los ðˈatos");
+        expect(await phonemize("la boca", "es-419")).toBe("la βˈoka");
+        expect(await phonemize("la gata", "es-419")).toBe("la ɣˈata");
+    });
+
+    // the guards `spirantize()` already states, now applied across the boundary too
+    test("a nasal, and /d/ after /l/, keep the STOP", async () => {
+        expect(await phonemize("un dato", "es-419")).toBe("un dˈato");
+        expect(await phonemize("el dato", "es-419")).toBe("el dˈato");
+    });
+
+    // ⚠ utterance-initial is still a stop — this is the case a naive rewrite gets wrong
+    test("utterance-initial stays a stop", async () => {
+        expect(await phonemize("datos", "es-419")).toBe("dˈatos");
+        expect(await phonemize("boca", "es-419")).toBe("bˈoka");
+    });
+
+    // ⚠ CHAINING. Non-overlapping replacement must not consume the character the NEXT word needs as
+    // its own left context — the Catalan version did, and `segons de vídeo` silently missed its /b/.
+    test("consecutive stops all spirantize", async () => {
+        expect(await phonemize("los datos de barcelona", "es-419")).toBe("los ðˈatos ðe βaɾselˈona");
     });
 });

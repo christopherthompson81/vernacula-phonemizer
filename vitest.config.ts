@@ -17,5 +17,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
     test: {
         include: ["test/**/*.test.ts"],
+        // ⚠ FULL VALUES IN FAILURE MESSAGES. The default truncates a long expected/actual to ~40 chars
+        // with an ellipsis, which is fine for reading and useless for MECHANICALLY correcting a
+        // large expectation change — a phonemizer diff is one character inside a 60-character IPA
+        // string, and the ellipsis hides exactly which. 0 disables the cutoff.
+        chaiConfig: { truncateThreshold: 0 },
     },
 });

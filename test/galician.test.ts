@@ -20,7 +20,7 @@ describe("Galician canonical IPA — Spanish-shaped Ibero-Romance engine + Galic
         expect(phonemizeWord("baixo")).toBe("bˈaᶦʃo"); // "low/under"
     });
 
-    test("⟨g⟩ is always the velar stop ɡ (no jota); intervocalic → spirant ɣ", () => {
+    test("⟨g⟩ is always the velar stop ɣ (no jota); intervocalic → spirant ɣ", () => {
         expect(phonemizeWord("galego")).toBe("ɡalˈeɣo"); // "Galician" — initial ɡ, intervocalic ɣ
         expect(phonemizeWord("xénero")).toBe("ʃˈeneɾo"); // ⟨g⟩-free but shows x=ʃ + é stress
     });
@@ -70,7 +70,7 @@ describe("Galician canonical IPA — Spanish-shaped Ibero-Romance engine + Galic
     });
 
     test("clause assembly", () => {
-        expect(gl.text("Bo día, Galicia!").trim()).toBe("bˈo dˈia , ɡalˈiθja !");
+        expect(gl.text("Bo día, Galicia!").trim()).toBe("bˈo ðˈia , ɡalˈiθja !");
     });
 });
 
@@ -125,14 +125,14 @@ describe("galician text normalization", () => {
     test("percent, currency and the unit tier — each word attested on gl.wikipedia", () => {
         expect(gl.text("35 %").trim()).toBe("tɾˈinta e θˈiŋko poɾ θˈento");
         expect(gl.text("100 €").trim()).toBe("θˈeŋ ˈeᶷɾos");
-        expect(gl.text("US$ 500").trim()).toBe("θiŋkoθˈentos dˈolaɾes"); // the code folds to the sign
+        expect(gl.text("US$ 500").trim()).toBe("θiŋkoθˈentos ðˈolaɾes"); // the code folds to the sign
         expect(gl.text("R$ 30").trim()).toBe("tɾˈinta rˈeaᶦs");
         expect(gl.text("12,5 km").trim()).toBe("dˈoθe kˈoma θˈiŋko kilˈometɾos");
-        expect(gl.text("120 km/h").trim()).toBe("θˈento bˈinte kilˈometɾos poɾ ˈoɾa");
+        expect(gl.text("120 km/h").trim()).toBe("θˈento βˈinte kilˈometɾos poɾ ˈoɾa");
         // ⚠ THE MAGNITUDE MUST END AT A WORD BOUNDARY. `millóns` = `millón` + `s`, and `s` is this
         // language's declared seconds unit, so the tier backtracked and read the plural marker as the
         // unit: *cinco millón SEGUNDOS de euros*. Fixed in core/normalizeSymbols.ts.
-        expect(gl.text("5 millóns de euros").trim()).toBe("θˈiŋko miʎˈoŋs de ˈeᶷɾos");
+        expect(gl.text("5 millóns de euros").trim()).toBe("θˈiŋko miʎˈoŋs ðe ˈeᶷɾos");
         expect(gl.text("1 millón de km²").trim()).toBe("uŋ miʎˈoŋ de kilˈometɾos kaðɾˈaðos");
     });
 
@@ -218,6 +218,6 @@ describe("galician text normalization", () => {
         // pass in this file's step 12 ever saw it, it would spell it *xis uve*, which is exactly what the
         // raw engine does.
         expect(phonemize("século XV", "gl").trim()).toBe("sˈekulo kˈinθe");
-        expect(phonemize("século XIX", "gl").trim()).toBe("sˈekulo deθanˈoβe"); // a century is a CARDINAL
+        expect(phonemize("século XIX", "gl").trim()).toBe("sˈekulo ðeθanˈoβe"); // a century is a CARDINAL
     });
 });
