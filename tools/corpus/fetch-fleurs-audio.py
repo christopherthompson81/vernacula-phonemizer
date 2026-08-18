@@ -23,9 +23,74 @@ Usage:
   # default: every language present in --transcripts but absent from <root>/data, plus any whose
   # train.tar.gz is missing or short.
 """
-import argparse, os, sys, time
+import argparse, multiprocessing as mp, os, queue, sys, time
 
 REPO = "google/fleurs"
+
+# ⚠ A STALL WATCHDOG, ADDED AFTER ONE. A sibling downloader sat on a single language for ELEVEN AND A HALF
+# HOURS: the process alive and asleep, the partial file frozen, nothing in the log. `hf_hub_download` has a
+# 10s read timeout (hub 1.8.0) and it did not help — a dead-but-open socket, or the library's own retry
+# backoff, leaves the call blocked with no way for the caller to notice.
+#
+# So the caller watches the BYTES instead of trusting the call. The download runs in a child process while
+# the parent polls the destination tree; if it has not grown in STALL_S the child is terminated and retried.
+# Watching PROGRESS rather than imposing a deadline is the point — a genuinely slow link keeps its time and
+# only a frozen one is cut. Nothing is lost either way: hf_hub_download is content-addressed and resumes,
+# and the size check above re-verifies the result.
+STALL_S = 300      # no new bytes for this long → assume the socket is dead
+POLL_S = 30
+RETRIES = 3
+
+
+def _tree_bytes(root: str) -> int:
+    total = 0
+    for dirpath, _dirs, files in os.walk(root):
+        for f in files:
+            try:
+                total += os.path.getsize(os.path.join(dirpath, f))
+            except OSError:  # a file can vanish mid-walk as the downloader renames it into place
+                pass
+    return total
+
+
+def _child(path: str, root: str, q) -> None:
+    from huggingface_hub import hf_hub_download
+    try:
+        q.put(("ok", hf_hub_download(REPO, path, repo_type="dataset", local_dir=root)))
+    except Exception as e:  # noqa: BLE001 — reported verbatim to the parent
+        q.put(("err", f"{type(e).__name__}: {e}"))
+
+
+def fetch_watched(path: str, root: str) -> str:
+    """Download one file, aborting and retrying if the byte count stops moving."""
+    last_err = "no attempt"
+    for _attempt in range(RETRIES):
+        q = mp.Queue()
+        proc = mp.Process(target=_child, args=(path, root, q), daemon=True)
+        proc.start()
+        size, changed = _tree_bytes(root), time.monotonic()
+        try:
+            while proc.is_alive():
+                proc.join(POLL_S)
+                if not q.empty():
+                    break
+                now = _tree_bytes(root)
+                if now != size:
+                    size, changed = now, time.monotonic()
+                elif time.monotonic() - changed > STALL_S:
+                    raise TimeoutError(f"no new bytes for {STALL_S}s")
+            kind, payload = q.get_nowait()
+        except (TimeoutError, queue.Empty) as e:
+            last_err = str(e) or "child exited without reporting"
+            continue
+        finally:
+            if proc.is_alive():
+                proc.terminate()
+                proc.join(10)
+        if kind == "ok":
+            return payload
+        last_err = payload
+    raise RuntimeError(f"gave up after {RETRIES} attempts: {last_err}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -84,7 +149,7 @@ def main() -> None:
     for i, (lang, sp) in enumerate(todo, 1):
         t0 = time.time()
         try:
-            hf_hub_download(REPO, f"data/{lang}/audio/{sp}.tar.gz", repo_type="dataset", local_dir=a.root)
+            fetch_watched(f"data/{lang}/audio/{sp}.tar.gz", a.root)
             n = os.path.getsize(os.path.join(have_dir, lang, "audio", f"{sp}.tar.gz"))
             got += n
             ok = abs(n - sizes[(lang, sp)]) < 1024
