@@ -8,9 +8,13 @@
  *   - short ⟨e⟩→[æ] stressed / [ə] reduced (Belsch→bælʃ, Decken→dækən), geminate collapse (Flott→flot);
  *   - DEVOICING: word-final + regressive before a voiceless obstruent (Hand→hant, Abt→apt), final ⟨g⟩→[χ] after a
  *     vowel (Dag→daːχ) / [k] after a consonant (Alg→alk); ⟨n⟩→[ŋ] before a velar (Bankrott→baŋkrot);
- *   - intervocalic g-spirantization ⟨g⟩→[ʁ] (Lager→laʁər).
+ *   - intervocalic g-spirantization ⟨g⟩→[ʁ] (Lager→lˈaʁər).
+ * PRIMARY STRESS is emitted — the first nucleus, or the second past an unstressed ⟨ge/be/ver/er/ze⟩ prefix. The
+ * engine has always computed this (the short-⟨e⟩ [æ]/[ə] choice is conditioned on it); it just never wrote the
+ * mark. See realizeE for the placement and its measured accuracy.
  * Vowel LENGTH (open/closed-syllable-conditioned) is folded/deferred; the French-loan tail (Aubergine, Avion) + the
- * Romance penult-stress class are not modelled.
+ * Romance penult-stress class are not modelled — and the latter is a KNOWN source of misplaced stress
+ * (Meloun, Televisioun, reflexiv take the penult, we give them σ1).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -39,8 +43,8 @@ const DEVOICE: Record<string, string> = { b: "p", d: "t", ɡ: "k", z: "s", v: "f
 const VOICELESS_OBSTR = new Set(DEF.voicelessObstruents); // triggers regressive devoicing
 
 /** One scan token: the IPA phones for a grapheme + flags marking a single ⟨s⟩ (may voice to [z]) or a single ⟨e⟩
- *  (realized [æ] when stressed, [ə] when not — see realizeE). */
-interface Tok { ph: string; sVar?: boolean; eVar?: boolean }
+ *  (realized [æ] when stressed, [ə] when not — see realizeE), plus the STRESSED nucleus itself. */
+interface Tok { ph: string; sVar?: boolean; eVar?: boolean; stress?: boolean }
 
 /** Scan a lowercased Luxembourgish word into phone tokens (longest-match digraphs, then single graphemes). */
 function scan(word: string): Tok[] {
@@ -66,13 +70,39 @@ function scan(word: string): Tok[] {
 }
 
 // Unstressed one-syllable prefixes: the stress falls on the FOLLOWING syllable (gefollegt, verhalen, erbaarmen…).
-// A heuristic — it can't tell a real prefix from a root that happens to start the same way (besser, Erd), so a
-// disyllabic ⟨be/er⟩-root gets its stress mislocated; measured net +3.9pp over always-first-syllable, so kept.
-const UNSTRESSED_PREFIX = /^(ge|be|ver|er|zer|ze)[^aeiouyäëéô]/u;
+// A heuristic — it can't tell a real prefix from a root that happens to start the same way (Becher, Bensin,
+// Zebra), so those get their stress mislocated. Measured against the referee's own vowel quality over the words
+// where it actually fires: 261/272 = 96.0% right, against 4.0% for always-first-syllable on the same words.
+// ⚠ ⟨ver⟩ IS EXEMPT FROM THE CONSONANT GUARD, and that is measured too. The guard exists to stop a root being
+// read as prefix+vowel, but ⟨ver⟩ before a vowel is the prefix essentially always, and requiring a consonant
+// cost 8 words the referee is unanimous about (Veräin, vereenegen, veränneren, veruechten… — every one written
+// with a reduced [e]/[ɐ] first vowel, 8/8). Checked out of sample too, since 8 words is thin: all 65 ver+vowel
+// forms in the FLEURS lb_lu transcripts (314 tokens — verursaacht, verantwortlech, Veranstaltungen…) are real
+// prefixed words, ZERO root collisions. The other five prefixes keep the guard, where the collision is real
+// and constant (Becher, Bett, Zebra).
+const UNSTRESSED_PREFIX = /^(ge|be|er|zer|ze)[^aeiouyäëéô]|^ver/u;
 
-/** Short ⟨e⟩ realizes as [æ] in the STRESSED syllable but reduces to schwa [ə] elsewhere (Belsch→bælʃ, Decken→dækən
- *  but the ⟨-en⟩ ending →ə; Gemeng→ɡəmæŋ with the ⟨ge-⟩ prefix unstressed). Stress ≈ the first vowel, past an
- *  unstressed ⟨ge/be/ver/er⟩ prefix — the Germanic default (Romance-loan penult stress is not modelled). */
+/**
+ * PLACE THE STRESS, and realize short ⟨e⟩ off it. These are ONE decision, which is why they are one function:
+ * ⟨e⟩ is [æ] in the STRESSED syllable and reduces to schwa [ə] elsewhere (Belsch→bˈælʃ, Decken→dˈækən but the
+ * ⟨-en⟩ ending →ə; Gemeng→ɡəmˈæŋ with the ⟨ge-⟩ prefix unstressed). Stress ≈ the first vowel, past an unstressed
+ * ⟨ge/be/ver/er⟩ prefix — the Germanic default (Romance-loan penult stress is not modelled).
+ *
+ * ⚠ THE MARK IS EMITTED, and the reason it is safe to emit is that this placement was ALREADY load-bearing.
+ * The æ/ə choice above has been conditioned on `stressTok` since the engine was written, and that choice IS
+ * visible to the referee — so the placement has been under measurement all along, just refracted through vowel
+ * quality instead of stated outright. Writing the mark exposes a decision already being made; it adds no new
+ * claim. (Contrast the two engines this audit fixed before it: is had no stress concept at all, af computed one
+ * and discarded it.)
+ *
+ * ⚠ THE PREFIX TEST IS A HEURISTIC AND IT IS WRONG SOME OF THE TIME — measured, not assumed. The referee
+ * cannot check stress directly (wikipron ltz_latn_broad has ZERO marks in all 3893 rows, and referee-eval
+ * strips [ˈˌ] from both sides anyway), but it CAN be checked through the same vowel quality the rule drives: a
+ * reduced first vowel [ɐ ə e] means the referee agrees the syllable is unstressed, a full one means it does
+ * not. Over the words where the rule actually shifts the stress it agrees 93.2%, and every miss is the failure
+ * mode named below — a root that merely BEGINS with the prefix letters. See
+ * docs/investigations/luxembourgish_stress_investigation.md.
+ */
 function realizeE(word: string, toks: Tok[]): void {
     const vowelIdx = toks.map((t, i) => (startsWithVowel(t.ph) ? i : -1)).filter((i) => i >= 0);
     const stressOrdinal = UNSTRESSED_PREFIX.test(word.toLowerCase()) && vowelIdx.length > 1 ? 1 : 0;
@@ -80,6 +110,9 @@ function realizeE(word: string, toks: Tok[]): void {
     for (let i = 0; i < toks.length; i++) {
         if (toks[i]!.eVar) toks[i]!.ph = i === stressTok ? "æ" : "ə";
     }
+    // The mark rides the TOKEN, not an index: degeminate() splices tokens out downstream and would shift any
+    // index we saved here. It only ever removes a non-vowel duplicate, so the stressed nucleus survives.
+    if (stressTok !== undefined) toks[stressTok]!.stress = true;
 }
 
 /** ⟨s⟩ → [z] as a voiced ONSET: word-initial before a vowel, or intervocalic (Sonn→zon, Iesel→iəzel). ⟨ss⟩ (already
@@ -149,7 +182,7 @@ function degeminate(toks: Tok[]): void {
     }
 }
 
-/** Phonemize a single Luxembourgish word to canonical IPA (segmental; vowel length folded/deferred). */
+/** Phonemize a single Luxembourgish word to canonical IPA (segmental + primary stress; vowel length folded/deferred). */
 export function phonemizeWord(word: string): string {
     const toks = scan(word);
     realizeE(word, toks);
@@ -159,7 +192,9 @@ export function phonemizeWord(word: string): string {
     velarNasal(toks);
     spirantizeG(toks);
     applyDevoicing(toks);
-    return toks.map((t) => t.ph).join("");
+    // The mark goes before the NUCLEUS, not the onset — the repo convention (nˈaða, not ˈnaða). The flagged
+    // token IS the nucleus, so this is a prefix on that token rather than a scan for one.
+    return toks.map((t) => (t.stress === true ? "ˈ" : "") + t.ph).join("");
 }
 
 // A word (Luxembourgish Latin letters incl. é ë ä + the loan vowels) / number / punctuation token.
