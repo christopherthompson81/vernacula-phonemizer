@@ -39,7 +39,7 @@ const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 // word moves: þríeyki → θrijeicɪ. It is NOT what keeps erkiengill glideless — that is the ⟨í⟩-only
 // trigger set (hiatusGlideVowels in icelandic.jsonc), which came later and does the heavier lifting.
 // Keep the two straight: the trigger set decides WHICH vowel glides, this decides what counts as a
-// vowel to glide INTO. docs/icelandic_hiatus_investigation.md.
+// vowel to glide INTO. docs/investigations/icelandic_hiatus_investigation.md.
 const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for intervocalic + glide tests)
 // ⚠ NOT VOWEL_PH, AND THE DIFFERENCE IS THE ONE CHARACTER ⟨e⟩. Two different questions again: VOWEL_PH asks
 // "can the hiatus glide land next to this phone", and it omits ⟨e⟩ on purpose so that the ⟨ei ey⟩ diphthong
