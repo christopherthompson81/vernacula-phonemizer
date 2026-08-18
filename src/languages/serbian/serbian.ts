@@ -2,17 +2,16 @@
  * Serbian (sr, српски) phonemizer — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully phonemic.
  * A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj dj⟩
  * first, then the single Cyrillic OR Latin letters — every grapheme is one phoneme, no vowel reduction. Serbian's
- * lexical PITCH ACCENT (4-way) + length are unwritten and DEFERRED — no stress/tone mark is emitted (the referee
- * eval folds them). ⚠ THE SOURCE IS IDENTIFIED, so this is a work item and not a dead end: the kaikki
- * Serbo-Croatian dump carries 49585 accented headwords (97.8% of its IPA entries), in BOTH scripts, with the
- * caron/circumflex rising-falling contrast intact — i.e. the four-way accent itself, not just position — and it
- * covers 83.3% of sr_rs corpus tokens. The hard part is OOV: South Slavic accent is MOBILE within a paradigm,
- * so an af-style affix rule will not transfer. docs/investigations/south_slavic_stress_sources_investigation.md.
- * text() tokenizes words / numbers / punctuation.
+ * lexical PITCH ACCENT is unwritten in ordinary text, so its POSITION comes from stress.tsv (101965 entries,
+ * both scripts, from kaikki/Wiktionary) and is emitted as ˈ before the nucleus. The TONE (4-way rising/falling)
+ * and length remain folded. Croatian and Bosnian import phonemizeWord from here, so all three share the lexicon
+ * — which is the shape of the source too: Wiktionary ships one unified Serbo-Croatian dump.
+ * docs/investigations/south_slavic_stress_investigation.md. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { hostWordRun, makeNativiser } from "../../core/hostWord.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { numberToWords } from "./numbers.ts";
 import { normalizeSerbian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -21,23 +20,79 @@ const DIGRAPHS = MANIFEST.digraphs;
 const LETTERS = MANIFEST.letters;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
-/** Phonemize a single Serbian word (either script) to canonical IPA. Digraphs are longest-match; every other
- *  grapheme is a one-letter lookup. No accent/length is emitted (deferred). */
+/**
+ * Lexical stress: word → 0-based ordinal of the stressed NUCLEUS. Same shape and same source family as Russian's
+ * stress.tsv (kaikki/Wiktionary), and it feeds the g2p that Serbian, Croatian AND Bosnian all share — hr/bs
+ * import phonemizeWord from this file, so one lexicon lights up three engines, which is exactly the shape of the
+ * source: Wiktionary does not split sr/hr/bs and ships them as one unified "Serbo-Croatian" dump.
+ * Built by tools/serbian/build_sh_stress_lexicon.py from the ACCENTED ORTHOGRAPHY (rijéka) rather than the IPA
+ * (/rjěːka/) — the two do not have the same nucleus count under the Ijekavian ⟨ije⟩ reflex, and this g2p, being
+ * one-grapheme-one-phoneme, follows the spelling. The ordinal is therefore script-independent: the Latin↔Cyrillic
+ * mapping is a bijection whose digraphs ⟨lj nj dž⟩ are all consonants.
+ */
+let STRESS: Map<string, number> | undefined;
+function stressDict(): Map<string, number> {
+    if (STRESS === undefined) STRESS = loadTsvMap(import.meta.url, "stress.tsv", Number, { optional: true });
+    return STRESS;
+}
+
+// The letters that head a syllable, derived from the manifest rather than restated — a vowel letter is one whose
+// IPA value is a vowel, in either script, so this cannot drift from the table above.
+const VOWEL_LETTER = new Set(
+    Object.keys(LETTERS).filter((c) => "aeiou".includes(LETTERS[c]!)),
+);
+// ⟨r⟩ is a nucleus when it has no vowel beside it — the syllabic r of kȓv, pȑst, sȑce, dr̀žava.
+const RHOTIC_LETTER = new Set(["r", "р"]);
+function isNucleus(w: string, i: number): boolean {
+    const c = w[i]!;
+    if (VOWEL_LETTER.has(c)) return true;
+    if (!RHOTIC_LETTER.has(c)) return false;
+    return !VOWEL_LETTER.has(w[i - 1] ?? "") && !VOWEL_LETTER.has(w[i + 1] ?? "");
+}
+
+/**
+ * Phonemize a single Serbian word (either script) to canonical IPA, with PRIMARY STRESS. Digraphs are
+ * longest-match; every other grapheme is a one-letter lookup.
+ *
+ * Stress is LEXICAL in this language and unwritten in ordinary text, so it comes from stress.tsv and cannot be
+ * derived. The mark goes before the NUCLEUS (the repo convention: nˈaða, not ˈnaða), which here is free — the
+ * lexicon stores a nucleus ordinal, so the splice point is the nucleus by construction.
+ *
+ * ⚠ A MONOSYLLABLE CARRIES NO MARK, following Russian — the other lexicon-driven Slavic engine in the fleet,
+ * whose stress.tsv this file's format copies. The mark would carry no information there, and it buys something
+ * real besides: Serbo-Croatian's proclitics (je, se, li, ga, mu, su, sam, bi…) are prosodically unstressed but
+ * the dictionary gives them citation accents, and they are almost all monosyllabic — so skipping monosyllables
+ * declines to assert a stress the running utterance does not have.
+ *
+ * ⚠ OOV FALLS BACK TO THE FIRST NUCLEUS, and for a disyllable that is a RULE rather than a guess: the standard
+ * language does not accent the final syllable of a polysyllabic word, so a disyllable must be initial-stressed.
+ * The lexicon agrees on 98.9% of its own 2-nucleus entries. Beyond two syllables it degrades to a default —
+ * 78.1% of 3-nucleus entries, 42.4% of 4-nucleus. Frequency-weighted over the FLEURS corpora the fallback lands
+ * right on ~83–86% of tokens, because the long words are the rare ones.
+ * docs/investigations/south_slavic_stress_investigation.md.
+ */
 export function phonemizeWord(word: string): string {
     const w = word.toLowerCase();
     let out = "";
+    const nucleusAt: number[] = []; // output offset of each nucleus, in order
     for (let i = 0; i < w.length; ) {
         const two = w.slice(i, i + 2);
         if (DIGRAPHS[two]) {
-            out += DIGRAPHS[two];
+            out += DIGRAPHS[two]; // ⟨lj nj dž⟩ are consonants — never a nucleus
             i += 2;
             continue;
         }
         const c = w[i]!;
-        if (LETTERS[c] !== undefined) out += LETTERS[c];
+        if (LETTERS[c] !== undefined) {
+            if (isNucleus(w, i)) nucleusAt.push(out.length);
+            out += LETTERS[c];
+        }
         i++; // unknown char (punctuation) → skip
     }
-    return out;
+    if (nucleusAt.length < 2) return out;
+    const k = stressDict().get(w) ?? 0;
+    const at = nucleusAt[Math.min(k, nucleusAt.length - 1)]!;
+    return out.slice(0, at) + "ˈ" + out.slice(at);
 }
 
 // A word (Serbian Cyrillic + Latin incl. diacritics) / number / punctuation token.
