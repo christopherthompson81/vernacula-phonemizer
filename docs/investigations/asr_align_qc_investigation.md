@@ -501,3 +501,84 @@ tests. Still open, and now the top of the queue:
 - Embedded English in German (Run 5) is untouched — 20 of the 23 `de_de` rows, and a large open feature
   rather than a bug fix.
 - `sl_si` stress (handoff §4) has not been started.
+
+## Run 8 — 2026-08-18 15:45 — the review, and the regression it caught
+
+`/code-review 837 high` returned seven findings. Two were mine and serious.
+
+### 8a. The year rule ran before the symbol tier and ate its input
+
+The worst finding, and a regression this branch introduced rather than a pre-existing gap. Every symbol
+rule in German — the degree arm in `normalize.ts`, and `%` / `€` / `$` / `×` in the shared
+`normalizeSymbols` tier — is keyed on a **digit adjacent to the symbol**. `normalizeGerman` runs before
+that tier, so rewriting a year's digits to words left the symbol with nothing to attach to, and it was
+dropped in silence:
+
+    1200 % der Fälle   →  t͡svˈœlfhʊndɐt deːɐ̯ fˈɛlə          Prozent gone
+    1500 €             →  fˈʏnft͡seːnhʊndɐt                   Euro gone
+    1500 $             →  fˈʏnft͡seːnhʊndɐt                   Dollar gone
+    ein Winkel von 1200 °  →  … t͡svˈœlfhʊndɐt                Grad gone
+    1200 x 800         →  t͡svˈœlfhʊndɐt ks ˈaxthʊndɐt        mal → the letter ks
+
+Not a wrong reading — a **deleted** one, which is the failure shape §1 of the handoff is about. The rule
+is now its own exported pass, `normalizeGermanYears`, run after `SYMBOLS` in the German pipeline. That
+also improves the guard: by the time it runs the symbols are already spelled out, so it inspects
+*Prozent*, *Euro*, *Kilometer*, *mal* rather than `%`, `€`, `km`, `×` — one form per unit instead of two.
+
+### 8b. Every symbol alternative in the guard was dead, and the words were uninflected
+
+Two more holes in the same guard, both from `\b`:
+
+- `\b` is a **word**-boundary assertion, so after a non-word character it only holds when a word character
+  follows. `%\b`, `°\b`, `€\b`, `\$\b` therefore never matched anything at all. Every symbol alternative I
+  wrote into that list was inert from the start — the `1500 €` case above would have failed even with the
+  ordering right.
+- German inflects its measure nouns, and `Einwohner\b` fails on the dative `-n`. *mit 1200 Einwohnern*
+  read as a year. The guard is a **stem** list with a trailing `\p{L}*` now, and it gained the nouns that
+  were simply missing: Prozent, Jahr, Million/Milliarde, mal, Stück, Meile, Volt, Hektar and the rest.
+
+### 8c. Five more sites where the blanket flag widened the wrong thing
+
+Run 7c already caught Crimean Tatar's `\p{Ll}` suffix capture folding under `i`. The review found five
+more of the same shape — a lowercase-only sub-pattern sitting beside the scale letter:
+
+    fi   `[a-zåäö]+`  case suffix        ba/tk/tg  SFX / SUFFIX      hyw  ARM_LOWER
+
+and one of them was observably broken: `ba "20 °C-ТА"` took the suffixed arm it should not have and
+**lost the Celsius word** (`jɪɡɪɾˈmɪ ɡɾɑdusˈtɑ` against `… t͡sɪlˈsij ɡɾɑduˈsɯ ˈtɑ`). All five now put the
+lowercase scale letters in the character class and drop the flag, which is what the languages that were
+already correct here (Bosnian `[CFСcf]`, Croatian `[CFcf]`) do.
+
+Hungarian was the mirror image: its suffixed arm got the `.toUpperCase()` half of the fix and not the flag
+half, so `20 °c-a` fell through to the plain arm and `-a` was stranded as its own stressed word — exactly
+the "half the fix" failure the test file's own header warns about.
+
+**The fleet test missed all of this because it probed only `30 °C`.** Several languages claim a suffixed
+or signed degree with a separate, earlier rule, and only that rule keeps the suffix attached. The test now
+probes `20 °C-a`, `-5 °C` and `20 °C-den` as well.
+
+### 8d. The curated builder was not reproducible
+
+`build-de-c-affricate.mts` keys on our `k` where kaikki has `t͡s` — but `phonemizeWord` lazily loads
+`consonant.tsv`, which is the file the curated list is merged into. Re-running it once the 84 rows were in
+place made `ou[i] === "k"` false for every one of them and emitted a nearly empty list: the class would
+have silently disappeared on the next regeneration. It truncates `consonant.tsv` first now, exactly as
+`build-de-consonant.mts` does, and the header states the run order. Verified byte-identical across a
+re-run — which is why the file's header is generated rather than hand-written.
+
+### 8e. The screen's stale-verdict clear leaked two ways
+
+`status <> 'investigate'` is NULL, not true, for a row at status NULL — the rows the README warns are
+"invisible to any exclusion gate". And a row still flagged whose `dist` was cleared never enters the
+grouping loop at all, so nothing re-derives its verdict and nothing removed it either. Both disappear if
+the column is blanked first and then written, which is what it does. Re-derives 6,442 / 749 / 1,176
+exactly.
+
+### What to take from this round
+
+The two findings that mattered were both **deletions**, not wrong answers: a symbol dropped from the
+output, and a lexicon class that would empty itself on the next build. Neither moved a test. §1 of the
+handoff says the failure mode here is a stage that quietly does not run; the same is true of a rule that
+quietly stops matching, and `\b` after a non-word character is a very good way to write one.
+
+`npm run ci`: 250 files, 4,827 tests.
