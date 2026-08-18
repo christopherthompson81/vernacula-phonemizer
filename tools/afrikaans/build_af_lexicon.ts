@@ -134,34 +134,49 @@ function editDistance(a: string, b: string): number {
  *
  * Repair where the rule is authoritative and the entry's lexical content survives; DROP where it does not.
  */
+/** Segments only — the shape tests below compare PRONUNCIATION, and a stress mark is not a segment. */
+const seg = (s: string): string => s.replace(/[\u02c8\u02cc.]/gu, "");
+
 function vet(w: string, entry: string): { ipa?: string; why?: string } {
     const r = phonemizeWordRules(w);
     const prim = PRIMARY.get(w);
     if (prim && prim.includes(primaryFold(r))) return { why: "primary corroborates the rules" };
+    // ⚠ EVERY SHAPE TEST BELOW RUNS ON `seg`, NOT ON THE RAW STRINGS, AND THAT IS LOAD-BEARING SINCE THE
+    // ENGINE STARTED EMITTING STRESS. Both sides now carry a `ˈ`, and when the two disagree about WHERE it
+    // goes that costs two edits — one deletion, one insertion — against a threshold of three or four. The
+    // plausibility guard then throws the row away.
+    //
+    // Which is exactly backwards: a row whose mark differs from the rules' is the row the lexicon exists to
+    // supply. It cost 198 entries, and among them beter, beker, faset, kapel and plato — after which the
+    // rules mis-stressed all five AND, because Afrikaans conditions vowel quality on stress, corrupted their
+    // vowels too (biətər → bətˈɛr). This guard is for segmental nonsense (tsaar → sɑːr); a prosodic
+    // disagreement is not nonsense, it is data.
+    const rSeg = seg(r);
     // 1. LENGTH, and ONLY for the long vowels this source CANNOT WRITE. ⚠ "rules have ː and the entry does
     //    not" is the wrong test: it also drops every entry that correctly says SHORT where our rules
     //    over-apply length (kanon — RCRL ka.ˈnɔn against our kɑːnɔn — is exactly the kind of row a lexicon
     //    exists to fix). The source HAS ɑː, øː and ɔː, so a short value there is a real lexical claim; it has
     //    no ɛː, œː or yː at all, so a short value there is an inventory gap. MISSING_LONG is derived from the
     //    file rather than typed out, so it cannot drift from the data it describes.
-    for (const long of MISSING_LONG) if (r.includes(long) && !entry.includes(long)) return { why: "length" };
+    for (const long of MISSING_LONG) if (rSeg.includes(long) && !seg(entry).includes(long)) return { why: "length" };
     // 2. FINAL DEVOICING: keep the entry, take the engine's coda. Both referees and the rule agree.
     let ipa = entry;
     const voiced: Record<string, string> = { b: "p", d: "t", z: "s", v: "f", ɡ: "χ" };
     const last = [...ipa].at(-1)!;
-    if (voiced[last] && [...r].at(-1) === voiced[last]) ipa = ipa.slice(0, -last.length) + voiced[last];
+    if (voiced[last] && [...rSeg].at(-1) === voiced[last]) ipa = ipa.slice(0, -last.length) + voiced[last];
     // 3. EPENTHESIS: if deleting ONE schwa yields the rule output, the entry is the narrow reading. Take ours.
-    if (ipa !== r && ipa.length === r.length + 1) {
-        for (let i = 0; i < ipa.length; i++)
-            if (ipa[i] === "ə" && ipa.slice(0, i) + ipa.slice(i + 1) === r) return { ipa: r };
+    if (seg(ipa) !== rSeg && seg(ipa).length === rSeg.length + 1) {
+        const b = seg(ipa);
+        for (let i = 0; i < b.length; i++)
+            if (b[i] === "ə" && b.slice(0, i) + b.slice(i + 1) === rSeg) return { ipa: r };
     }
     // 3b. A DROPPED ONSET is a source error, not a lexical fact, and it is too small for the distance guard
     //     below to see: RCRL writes tsaar sɑːr, i.e. the rule output minus its first phone (ours tsɑːr, the
     //     primary t͡sɑːr). One deleted leading consonant is edit-distance 1.
-    if (ipa !== r && r.slice(1) === ipa) return { ipa: r };
+    if (seg(ipa) !== rSeg && rSeg.slice(1) === seg(ipa)) return { ipa: r };
     // 4. PLAUSIBILITY: a row too far from the rules is a source error, not lexical knowledge — RCRL has
     //    tsaar → sɑːr (the /t/ of ⟨ts⟩ simply absent) and abe → əib, which no analysis of that spelling yields.
-    if (editDistance(ipa, r) > Math.max(3, Math.ceil(r.length * 0.5))) return { why: "implausible" };
+    if (editDistance(seg(ipa), rSeg) > Math.max(3, Math.ceil(rSeg.length * 0.5))) return { why: "implausible" };
     return { ipa };
 }
 
