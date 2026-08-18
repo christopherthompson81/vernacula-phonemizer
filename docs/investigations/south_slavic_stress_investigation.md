@@ -236,3 +236,63 @@ reading. Worth recording because the damage was invisible in the diff: the line 
   emitting length on it makes the gap more visible than it was.
 - **Post-accentual length.** The macron is in the source and is not emitted.
 - **`sl`.** Slovene has its own dump and no shared g2p. Untouched.
+
+
+## Run 10 — 2026-08-18 — what the OOV residual actually is, and what it needs
+
+Question: 57% of polysyllabic tokens are OOV. Is a neural tagger the right tool?
+
+**First, what the residual is.** The commonest OOV words are `godine`, `može`, `ima`, `bila`, `bili`, `imaju`,
+`rekao` — inflected forms of lemmas that ARE in the lexicon. So this is a morphology problem before it is a
+prediction problem.
+
+**Is the accent even stable within a paradigm?** Over 56 899 lemmas carrying ≥2 accented forms:
+
+| | |
+|---|---|
+| position identical across the paradigm | **88.0%** |
+| position moves | 12.0% |
+| tone identical | 84.8% |
+
+**And the movement is systematic, not noise.** Look at what moves:
+
+    abažur   1 SR  →  abažura   2 LR
+    abonman  1 SR  →  abonmana  2 LR
+    plural   0 SR  →  plurala   1 LR
+    abesinac 2 LR  →  abesinaca 1 SR
+
+The genitive `-a` shifts the accent one syllable right and lengthens it; other endings shift left. The
+conditioner is **the ending**, which means the right model is one that predicts a *transition* — (stem accent,
+ending) → (shift, new tone) — not a value.
+
+**Measured, on a held-out 80/20 split of the 36 248 form/stem pairs the lexicon already contains:**
+
+| | position | tone |
+|---|---|---|
+| first-nucleus (what ships today) | 66.8% | — |
+| naive stem propagation | 76.9% | 49.5% |
+| **suffix-conditioned transition table** | **83.7%** | **63.7%** |
+
+3 764 learned (ending, stem-tone) contexts. A lookup table, no network.
+
+**Coverage it would add:** stem-matching reaches +24pp of polysyllabic tokens on top of the lexicon —
+sr 43.7 → **68.0%**, hr 43.2 → **66.7%**, bs 44.1 → **68.1%**.
+
+### Recommendation
+
+**Not a tagger first.** A suffix-conditioned transition table is the next tier: it captures the systematic part
+of the residual, adds ~24pp of coverage at 83.7% position accuracy, and is inspectable — every prediction
+traces to a countable (ending, stem-tone) context, which matters for a phenomenon where the failure mode is a
+plausible-looking wrong accent.
+
+**A tagger is the right THIRD tier**, and the house shape already exists: Danish runs lexicon → perceptron
+tagger → rules, and `tools/bilstm_training` is a shared core used by en/nb/da/fr. Train on the 102k lexicon
+plus the 36k stem pairs, and evaluate on this same held-out split so the gain over 83.7% is known before it
+ships — the Danish tagger was worth +15pp over its rule tier, but that tier was at 30%, not 84%.
+
+**Tone stays the weak point** even with the table (63.7%). The abstention mechanism built in Run 8 is exactly
+the right tool: emit the position, withhold the contour below a confidence threshold, so the output never
+asserts a coin flip. That posture should carry into whatever model comes next.
+
+**The linguistically principled version** — modelling Daničić accent paradigms rather than learning endings —
+needs paradigm-class labels the dump does not carry. Worth naming as the ceiling, not as the next step.
