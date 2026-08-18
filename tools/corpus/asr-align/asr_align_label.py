@@ -208,8 +208,11 @@ def sibling_screen(db: sqlite3.Connection) -> None:
         tally[mark] += len(flagged)
         for wav, _st, _ipa in flagged:
             db.execute("UPDATE utt SET sibling=? WHERE lang=? AND wav=?", (mark, lang, wav))
-    # Anything no longer flagged must not keep a stale screen from an earlier round.
-    db.execute("UPDATE utt SET sibling=NULL WHERE status<>'investigate' AND sibling IS NOT NULL")
+    # ⚠ Anything no longer flagged must not keep a stale screen from an earlier round — and the comparison
+    # has to be NULL-SAFE. `status <> 'investigate'` is NULL, not true, for a row sitting at status NULL,
+    # so the plain form leaves exactly the rows this harness has twice been bitten by (README: "no label →
+    # rows sit at `status NULL`, invisible to any exclusion gate") carrying a verdict from a previous round.
+    db.execute("UPDATE utt SET sibling=NULL WHERE status IS NOT 'investigate' AND sibling IS NOT NULL")
     db.commit()
     total = sum(tally.values())
     print(f"  sibling screen: {total} flagged — "
