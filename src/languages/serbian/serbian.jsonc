@@ -13,7 +13,7 @@
     "convention": {
         "phonemic": "one grapheme = one phoneme; no vowel reduction; the two scripts map to the same IPA",
         "signature": "⟨в/v⟩→ʋ (labiodental approximant), ⟨ђ⟩→d͡ʑ ⟨ћ⟩→t͡ɕ (alveolo-palatal), ⟨џ/dž⟩→d͡ʒ ⟨ч/č⟩→t͡ʃ, ⟨љ/lj⟩→ʎ ⟨њ/nj⟩→ɲ, ⟨х/h⟩→x",
-        "accent": "lexical pitch accent (4-way) + length — unwritten, DEFERRED (no stress/tone mark emitted)",
+        "accent": "lexical pitch accent (4-way) + length. POSITION is now emitted (ˈ before the nucleus) from stress.tsv, 102186 entries built from kaikki's accented orthography; a monosyllable carries no mark and OOV falls back to the first nucleus. The TONE (rising/falling) and length are still folded — the lexicon carries the four-way contrast, emitting it would add symbols to the inventory, and that is the next step, not this one.",
     },
 
     // Latin DIGRAPHS (tried before the single letters). ⟨dj⟩ is deliberately NOT included: modern Serbian writes

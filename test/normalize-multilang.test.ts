@@ -602,7 +602,7 @@ describe("currency signs were dropped silently in five languages", () => {
     test("each of the five now says its own currency word", () => {
         expect(phonemize("$5", "fa")).toBe("pˈand͡ʒ dolˈaːɾ");        // دلار ×18
         expect(phonemize("$5", "hu")).toBe("ˈøt ˈdolːaːr");            // dollár ×6
-        expect(phonemize("$5", "sr")).toBe("pet dolara");              // долара ×17
+        expect(phonemize("$5", "sr")).toBe("pet dˈolara");              // долара ×17
         expect(phonemize("$5", "th")).toBe("hˈaː˥˩ dˈɔ˧nlaː˥˩");      // ดอลลาร์ ×28
         expect(phonemize("$5", "yue")).toBe("ŋ̩˩˧ mei˩˧ jyːn˨˩");     // 美元 ×8
     });
@@ -615,9 +615,9 @@ describe("currency signs were dropped silently in five languages", () => {
     });
 
     test("Serbian selects its count form, as its unit table does", () => {
-        expect(phonemize("$1", "sr")).toBe("jedan dolar");    // nominative singular
-        expect(phonemize("$3", "sr")).toBe("tri dolara");     // paucal
-        expect(phonemize("$5", "sr")).toBe("pet dolara");     // genitive plural
+        expect(phonemize("$1", "sr")).toBe("jˈedan dˈolar");    // nominative singular
+        expect(phonemize("$3", "sr")).toBe("tri dˈolara");     // paucal
+        expect(phonemize("$5", "sr")).toBe("pet dˈolara");     // genitive plural
     });
 
     test("Thai and Cantonese need `unspacedScript`, or the ordinary case drops", () => {
@@ -972,7 +972,7 @@ describe("a unit symbol standing alone", () => {
         // exported pass, so both routes are pinned here.
         const bare: Record<string, string> = {
             de: "kilomˈeːtɐ", pl: "kilˈɔmɛtr", tr: "ciɫometɾˈe", rw: "kilometeɾo", cy: "kilˈɔmɛdr",
-            id: "kilomətˈər", sr: "kilometar", mad: "kilɔmɛtəɾ",
+            id: "kilomətˈər", sr: "kˈilometar", mad: "kilɔmɛtəɾ",
             ht: "kilomɛt", ro: "kilomeˈtri",
         };
         for (const [l, ipa] of Object.entries(bare)) {

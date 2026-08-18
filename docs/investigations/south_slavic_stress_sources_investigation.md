@@ -20,7 +20,12 @@ language:
 | **wikipron** (broad *and* narrow) | stripped — `hu.wikipron-hun-narrow` 1/64286, every broad file 0 |
 
 Every referee committed for these four languages is wikipron: `sl.wikipron-slv-broad`,
-`sr.wikipron-hbs-latn`, `sr.epitran-srp-latn`; `hr` and `bs` have none at all. So "no stress-marked
+`sr.wikipron-hbs-latn`, `sr.epitran-srp-latn`; `hr` and `bs` have none at all.
+
+⚠ **AND `sr.wikipron-hbs-latn` MARKS THE ACCENT AFTER ALL** — as `â ǎ ê ô` on its own vowels, 26126 of 26486
+rows, which its committed header states outright. It does not use `ˈ`, so the same wrong instrument missed it.
+The claim "no stress-marked source committed" was therefore wrong about the working tree too, not only about
+Wiktionary. `tools/serbian/eval_stress_placement.mts` now reads those marks. So "no stress-marked
 source is committed" was a statement about **which extraction we happened to commit**, not about what
 Wiktionary holds. The kaikki family is already the repo's answer to this exact problem in 30+ other
 languages.
@@ -83,8 +88,14 @@ position — which is what `serbian.ts` names as deferred.
 **Script.** The sh dump is 28190 Latin + 24875 Cyrillic headwords. The Serbian engine is dual-script
 and needs both; Croatian and Bosnian are Latin-only. One dump covers all three.
 
-**Coverage of running text** — the number that decides whether this is worth building. Measured
-against the FLEURS transcripts (all splits), lowercased exact match:
+**Coverage of running text** — the number that decides whether this is worth building.
+
+⚠ **THE TABLE BELOW IS WRONG AND IS KEPT FOR THE RECORD.** FLEURS TSVs have seven columns and column 5 is
+CHARACTER-SEPARATED (`i m a m o | j e d n o g o…`); reading the whole file with a word regex made every
+individual letter a token, and single letters (`i a u o e`) are all in the lexicon as one-letter words. The
+real figures, measured from column 3 only, are **43.7% / 43.2% / 44.1%** for sr/hr/bs — see
+`south_slavic_stress_investigation.md` Run 4. The conclusion survives (43% still exceeds the 37.2% that
+justified #828) but the margin is much smaller than claimed here.
 
 | corpus | tokens | lemma-tier coverage | + inflected forms |
 |---|---|---|---|
