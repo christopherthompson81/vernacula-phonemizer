@@ -108,6 +108,9 @@ function deriveAccent(w: string): Accent | undefined {
         const stem = lex.get(w.slice(0, -c));
         if (stem === undefined) continue;
         const tr = transitions().get(`${w.slice(w.length - c)}|${stem.tone}`);
+        // Give up rather than trying a longer ending, which keeps inference identical to how the builder
+        // selects a stem (shortest cut wins). Measured: carrying on instead answers 6 more words out of 7250
+        // and moves accuracy not at all, so the simpler invariant wins.
         if (tr === undefined) return undefined;
         // ⚠ ABSTENTION PROPAGATES. If the stem's own contour was withheld, a contour derived from it would be
         // laundering an unknown into a known, whatever the ending's statistics say.
