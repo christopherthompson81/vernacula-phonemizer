@@ -2,7 +2,7 @@
  * Serbian (sr, српски) phonemizer — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully phonemic.
  * A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj dj⟩
  * first, then the single Cyrillic OR Latin letters — every grapheme is one phoneme, no vowel reduction. Serbian's
- * lexical PITCH ACCENT is unwritten in ordinary text, so its POSITION comes from stress.tsv (102186 entries,
+ * lexical PITCH ACCENT is unwritten in ordinary text, so its POSITION comes from stress.tsv (101965 entries,
  * both scripts, from kaikki/Wiktionary) and is emitted as ˈ before the nucleus. The TONE (4-way rising/falling)
  * and length remain folded. Croatian and Bosnian import phonemizeWord from here, so all three share the lexicon
  * — which is the shape of the source too: Wiktionary ships one unified Serbo-Croatian dump.

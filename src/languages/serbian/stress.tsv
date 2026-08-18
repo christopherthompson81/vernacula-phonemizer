@@ -3,15 +3,6 @@
 # From kaikki.org Serbo-Croatian (Wiktionary extract, CC-BY-SA) — built from the ACCENTED
 # ORTHOGRAPHY (rijéka), not the IPA (/rjěːka/), which has a different nucleus count under the
 # Ijekavian ⟨ije⟩ reflex. Both scripts. See tools/serbian/build_sh_stress_lexicon.py.
--ajlija	0
--irajući	0
--iranje	0
--lagati	0
--logija	0
--ložiti	0
--ајлија	0
--лагати	0
--логија	0
 a	0
 abad	0
 abadžija	0
@@ -558,7 +549,6 @@ akvarelistkinja	2
 akvarij	0
 akvila	0
 akvizicija	2
-akăl	1
 akšam	0
 ala	0
 alabama	2
@@ -648,9 +638,6 @@ alergolozi	2
 alergološki	2
 aleutski	1
 alfa	0
-alfa-zrak	0
-alfa-zraka	0
-alfa-zrake	0
 alfabet	1
 alfabeta	2
 alfabetizam	3
@@ -888,7 +875,6 @@ amnestirati	2
 amnestiravši	2
 amnezija	0
 amo	0
-amo-tamo	0
 amoder	0
 amonijev	1
 amoralan	0
@@ -1762,7 +1748,6 @@ austrijanac	3
 austrijanaca	2
 austrijanka	2
 austrijanski	2
-austro-ugarska	0
 austrougarski	3
 autarhija	2
 autarkija	2
@@ -1903,7 +1888,6 @@ azerbejdžanac	3
 azerbejdžanka	2
 azerbejdžanski	2
 azerski	0
-azgăn	1
 azija	0
 azijac	1
 azijat	1
@@ -2353,7 +2337,6 @@ bačvar	0
 bačvi	0
 bađav	1
 baš	0
-baš-čaršija	0
 baša	0
 baševi	0
 baškom	1
@@ -3723,7 +3706,6 @@ bogatašev	2
 bogateći	0
 bogati	0
 bogatiti	0
-bogatlăk	2
 bogato	0
 bogatstava	1
 bogatstva	1
@@ -4366,7 +4348,6 @@ brukajući	0
 brukanje	0
 brukati	0
 brukva	0
-brunada(?)	0
 brunda	0
 brundama	0
 brunde	0
@@ -4771,14 +4752,6 @@ bušin	0
 bušiti	0
 bušotina	0
 buža	0
-băndzov	1
-băzdeja	1
-băzdejeći	1
-băzdela	1
-băzdenje	1
-băzdež	1
-băzdim	1
-băška	1
 cajhnati	0
 cajtnot	0
 caka	0
@@ -4983,7 +4956,6 @@ cevčica	0
 cezij	0
 cezura	1
 ceđ	0
-ceśmina	1
 cicija	0
 cicije	0
 cifara	0
@@ -5434,11 +5406,6 @@ cvrčak	0
 cvrčaka	0
 cvrčci	0
 cvrčka	0
-căvteja	1
-căvtela	1
-căvtenje	1
-căvtim	1
-căvtiv	1
 cмалаксавши	1
 cмалаксајући	1
 dabar	0
@@ -6201,7 +6168,6 @@ dimove	0
 dimovi	0
 dimovima	0
 dimu	0
-din-dušman	1
 dina	0
 dinamika	1
 dinamit	1
@@ -6722,7 +6688,6 @@ dolaziti	0
 dolaženje	0
 dole	0
 dolečina	2
-dolečăk	1
 doli	0
 dolikovanje	0
 dolikovati	0
@@ -6809,7 +6774,6 @@ doodija	2
 doodila	2
 doodim	1
 doodiv	1
-doodlăk	2
 dopadajući	0
 dopadanje	0
 dopadati	0
@@ -6984,7 +6948,6 @@ dostupni	0
 dostupnost	0
 dostupnosti	0
 dostupnošću	0
-dosăg	1
 dotad	0
 dotada	0
 dotiskati	0
@@ -6998,7 +6961,6 @@ dotrčavajući	2
 dotrčavanje	2
 dotrčavati	2
 dotrčavši	1
-dotăg	1
 doušnici	0
 doušnik	0
 doušniče	0
@@ -7080,7 +7042,6 @@ dođošem	0
 dođoši	0
 dođošima	0
 dođošu	0
-dośetka	0
 došašće	1
 došja	1
 došljaci	1
@@ -7676,14 +7637,9 @@ dvoumica	0
 dvousneni	0
 dvovidan	0
 dvovidni	0
-dvośed	0
 dvoženstava	0
 dvoženstva	0
 dvoženstvo	0
-dăni	0
-dănovi	0
-dănăs	1
-dănăske	1
 džaba	0
 džabe	0
 džak	0
@@ -8195,7 +8151,6 @@ ezoterični	2
 ezoterično	2
 ećim	0
 ečmen	1
-ečăm	1
 ešarpa	0
 ešarpi	0
 ešek	0
@@ -9672,8 +9627,6 @@ gordijski	0
 gordo	0
 gordost	0
 gore	0
-gore-dole	0
-gore-dolje	0
 gorenje	0
 goreti	0
 goreći	0
@@ -9836,7 +9789,6 @@ graciozan	0
 graciozni	0
 graciozno	0
 grad	0
-grad-država	0
 grada	0
 gradac	0
 grade	0
@@ -10348,11 +10300,9 @@ hagiografija	3
 hagiografski	2
 hahar	0
 haićanski	1
-haj'	0
 hajanje	0
 hajati	0
 hajci	0
-hajd'	0
 hajde	0
 hajdemo	0
 hajdmo	0
@@ -10511,12 +10461,6 @@ heraldika	1
 herc	0
 herca	0
 herceg	0
-herceg-bosna	0
-herceg-bosne	0
-herceg-bosni	0
-herceg-bosno	0
-herceg-bosnom	0
-herceg-bosnu	0
 hercegovac	0
 hercegovački	0
 hercegovci	0
@@ -13632,7 +13576,6 @@ jedro	0
 jedući	0
 jedva	0
 jedvaj	0
-jedăn	1
 jeftin	0
 jeftini	0
 jeftino	0
@@ -13703,7 +13646,6 @@ jesen	0
 jesenas	1
 jesenji	0
 jesenski	0
-jesenăske	2
 jesetara	0
 jesetra	0
 jesetri	0
@@ -13715,9 +13657,6 @@ jestivi	0
 jestivo	0
 jestvenik	1
 jestvina	0
-jestăk	1
-jestăče	1
-jestăčiki	1
 jetara	0
 jetki	0
 jetra	0
@@ -13848,7 +13787,6 @@ jozo	0
 još	0
 jošić	0
 joško	0
-joškăd	1
 jošt	0
 jošte	0
 jožica	0
@@ -15375,7 +15313,6 @@ kolijevku	0
 kolijevčica	0
 koliki	1
 koliko	1
-koliko-toliko	1
 količina	2
 količinama	2
 količino	0
@@ -15653,8 +15590,6 @@ kongenijalan	0
 kongenijalni	0
 kongenijalno	0
 kongo	0
-kongo-brazavil	0
-kongo-kinšasa	0
 kongregacija	2
 kongregacionalizam	6
 kongregacionalizma	6
@@ -16871,7 +16806,6 @@ krilnici	0
 krilnik	0
 krilniče	0
 krilo	0
-krilo-jesenice	0
 krim	0
 krimen	0
 kriminal	1
@@ -18447,7 +18381,6 @@ levka	0
 levkova	0
 levkovi	0
 levo	0
-levo-desno	0
 levoruk	1
 levoruki	1
 levče	0
@@ -18605,7 +18538,6 @@ lijevci	1
 lijevi	1
 lijevka	1
 lijevo	1
-lijevo-desno	1
 lijevče	1
 liječenje	1
 liječeći	1
@@ -19398,8 +19330,6 @@ luđenje	0
 luđi	0
 lužina	0
 lužički	0
-lăsan	0
-lăsno	0
 lоjtre	0
 ma	0
 maca	0
@@ -21813,7 +21743,6 @@ naizmeničnik	2
 naizmjeničan	2
 naizmjenični	2
 naišavši	1
-naj-	0
 najahati	0
 najahavši	0
 najam	0
@@ -26139,7 +26068,6 @@ ontološki	1
 onu	0
 onud	0
 onuda	0
-onăj	1
 opadajući	1
 opadanje	1
 opadati	0
@@ -27152,9 +27080,6 @@ ovsik	0
 ovu	0
 ovud	0
 ovuda	0
-ovăg-onăg	1
-ovăj	1
-ovăs	1
 ovčar	0
 ovčara	1
 ovčarem	1
@@ -27259,7 +27184,6 @@ očuvanje	2
 očuvati	1
 očuvavši	1
 ođe	0
-ośetiti	0
 ošamariti	1
 ošamarivši	1
 ošišati	1
@@ -27819,7 +27743,6 @@ paun	0
 paunica	1
 paunov	0
 paus	0
-paus-papir	0
 pauza	0
 pauče	0
 paučina	0
@@ -27868,7 +27791,6 @@ pačica	0
 pačić	0
 pačji	0
 paša	0
-pašalăk	2
 pašanac	1
 pašanaca	0
 pašanca	1
@@ -28199,7 +28121,6 @@ petrčane	0
 petsto	0
 petu	0
 petunija	0
-petăl	1
 pev	0
 pevac	0
 pevaca	0
@@ -28277,7 +28198,6 @@ pijanistica	1
 pijanistkinja	1
 pijanka	0
 pijanki	0
-pijanlăk	2
 pijano	0
 pijanstvo	1
 pijanče	0
@@ -29639,7 +29559,6 @@ pokvarivši	1
 pokvarljiv	1
 pokvasiti	0
 pokvasivši	0
-pokẹhdọb	2
 pol	0
 pola	0
 polagan	1
@@ -29796,9 +29715,6 @@ polutka	0
 polutki	0
 poluvodič	2
 poluvreme	2
-polăk	1
-polăčka	1
-polăčke	1
 pomada	1
 pomaganje	1
 pomagati	1
@@ -30568,8 +30484,6 @@ potpredsednica	1
 potpredsednik	1
 potpredsjednica	1
 potpredsjednik	1
-potpredśednica	1
-potpredśednik	1
 potpukovnik	0
 potpun	0
 potpuni	0
@@ -30825,9 +30739,6 @@ počinjući	0
 počinuti	0
 počistiti	0
 počistivši	0
-pośet	0
-pośetiti	0
-pośetivši	0
 pošada	0
 pošast	0
 pošavši	0
@@ -30846,7 +30757,6 @@ pošteđivanje	2
 pošteđivati	2
 pošteđujući	1
 pošto	0
-pošto-poto	0
 poštovalac	1
 poštovan	0
 poštovani	0
@@ -31238,11 +31148,9 @@ predziđe	0
 predznaci	0
 predznak	0
 predznanje	1
-predśednik	0
 predškola	0
 predživot	0
 predživota	2
-pred̄aka	0
 prefekata	0
 prefekt	0
 prefektura	2
@@ -33994,7 +33902,6 @@ raguima	1
 raguom	1
 raguu	1
 raguzejski	1
-rahat-lokum	0
 raj	0
 raja	0
 rajc	0
@@ -34413,7 +34320,6 @@ ravnopravnost	2
 ravnopravnosti	2
 ravnopravnošću	2
 ravnoteža	2
-raz-	0
 razabiranje	1
 razabirati	1
 razabirući	1
@@ -36078,7 +35984,6 @@ ručnik	0
 ručnika	1
 ručno	0
 ručurda	0
-ručăk	1
 ruđenje	0
 rušenje	0
 ruševan	0
@@ -36127,7 +36032,6 @@ rđo	0
 rđom	0
 rđu	0
 ršum	0
-ržănj	1
 sabah	0
 sabalja	0
 sabat	0
@@ -41120,9 +41024,6 @@ svukavši	0
 svukud	0
 svukuda	0
 svući	0
-svăki	0
-săgăšănj	1
-sănovi	0
 sаhatоvа	2
 sаtove	0
 sаtovi	0
@@ -41325,7 +41226,6 @@ tamnoplav	0
 tamnoput	1
 tamnoputi	1
 tamo	0
-tamo-amo	0
 tamošnji	0
 tampon	0
 tampona	1
@@ -41912,7 +41812,6 @@ tiskati	0
 tiskovina	0
 tisno	0
 tisutnjik	0
-tisutnjîk	0
 tisuća	0
 tisućama	0
 tisuće	0
@@ -43165,14 +43064,6 @@ tvrđa	0
 tvrđava	0
 tvrđenje	0
 tvrđi	0
-tăcaja	1
-tăcala	1
-tăcam	0
-tăcanje	1
-tăga	0
-tăknem	0
-tăknuja	1
-tăknula	1
 u	0
 ualen	1
 ualenje	2
@@ -43191,7 +43082,6 @@ ubadača	1
 ubav	0
 ubavilo	2
 ubavinja	2
-ubavăčăk	0
 ubica	0
 ubijajući	1
 ubijanje	1
@@ -45071,12 +44961,6 @@ važni	0
 važno	0
 važnost	0
 važući	0
-ve-ce	0
-ve-cea	1
-ve-cei	1
-ve-ceima	1
-ve-ceom	1
-ve-ceu	1
 vedar	0
 vedran	0
 vedri	0
@@ -46394,7 +46278,6 @@ vučica	0
 vučić	0
 vučji	0
 vučković	0
-văzdăn	0
 zabadajući	1
 zabadanje	1
 zabadati	1
@@ -47597,7 +47480,6 @@ zbrajajući	0
 zbrajanje	0
 zbrajati	0
 zbrci	0
-zbrda-zdola	0
 zbrinjavajući	1
 zbrinjavanje	1
 zbrinjavati	1
@@ -48330,11 +48212,6 @@ zvučiti	0
 zvučni	0
 zvučnik	0
 zvučno	0
-zălva	0
-ðakovo	0
-ðorđević	0
-ðаково	0
-ðорђевић	0
 ćaba	0
 ćacad	0
 ćaci	0
@@ -49098,7 +48975,6 @@ zălva	0
 čuperaka	0
 čuperci	1
 čuperka	1
-čuruklăk	2
 čuti	0
 čutura	0
 čuvajući	0
@@ -49243,16 +49119,6 @@ zălva	0
 đurđijo	0
 đurđijom	0
 đurđiju	0
-śedenje	0
-śedeći	0
-śekira	0
-śekirica	0
-śesti	0
-śever	0
-śevši	0
-śećanje	0
-śeđeti	0
-śutra	0
 šabac	0
 šaban	0
 šabana	1
@@ -49422,7 +49288,6 @@ zălva	0
 šašavi	0
 šašavo	0
 šaševi	0
-šaškăn	1
 šeer	0
 šef	0
 šefalja	0
@@ -50009,7 +49874,6 @@ zălva	0
 špedicija	1
 špeher	0
 špek	0
-špek-fileki	0
 špekula	0
 špekulacija	2
 špekulant	1
@@ -50113,7 +49977,6 @@ zălva	0
 šraubncijer	0
 šrek	0
 šrekšus	0
-šrenc-papir	0
 šrot	0
 šta	0
 štab	0
@@ -50513,7 +50376,6 @@ zălva	0
 švrlanje	0
 švrljati	0
 švung	0
-šăškăn	1
 šćepan	0
 šćepanović	1
 šćipetar	0
@@ -50583,7 +50445,6 @@ zălva	0
 žapci	0
 žapče	0
 žar	0
-žar-ptica	0
 žardinijera	3
 žargon	0
 žargona	1
@@ -51693,7 +51554,6 @@ zălva	0
 алунирајући	2
 алунирање	2
 алфа	0
-алфа-зрака	0
 алфабет	1
 алфабета	2
 алфабетизам	3
@@ -51796,7 +51656,6 @@ zălva	0
 амнестирање	2
 амнестија	1
 амо	0
-амо-тамо	0
 амодер	0
 амонијев	1
 аморалан	0
@@ -52689,7 +52548,6 @@ zălva	0
 аустријанаца	2
 аустријанка	2
 аустријански	2
-аустро-угарска	0
 аустроугарски	3
 аутаркија	2
 аутархија	2
@@ -53249,7 +53107,6 @@ zălva	0
 бачки	0
 бачкој	0
 баш	0
-баш-чаршија	0
 баша	0
 башеви	0
 башком	1
@@ -55628,14 +55485,6 @@ zălva	0
 буџетски	0
 буџету	1
 буџован	1
-бьздеж	0
-бьздела	0
-бьздеја	0
-бьздејећи	0
-бьздење	0
-бьздим	0
-бьнѕов	0
-бьшка	0
 бјанкарија	1
 бјанкаријама	1
 бјанкарије	1
@@ -55912,12 +55761,6 @@ zălva	0
 вањкуш	0
 вањски	0
 вањштина	1
-ве-це	0
-ве-цеа	1
-ве-цеи	1
-ве-цеима	1
-ве-цеом	1
-ве-цеу	1
 веверица	0
 вегетаријанац	4
 вегетаријанаца	3
@@ -57989,8 +57832,6 @@ zălva	0
 гордо	0
 гордост	0
 горе	0
-горе-доле	0
-горе-доље	0
 горети	0
 горење	0
 горећи	0
@@ -58143,7 +57984,6 @@ zălva	0
 гравитирајући	2
 гравитирање	2
 град	0
-град-држава	0
 града	0
 градац	0
 граде	0
@@ -58979,7 +58819,6 @@ zălva	0
 дворник	0
 дворови	0
 дворски	0
-двос́ед	0
 двосед	0
 двосложан	0
 двосложни	0
@@ -59527,7 +59366,6 @@ zălva	0
 димљење	0
 димњак	0
 димњачар	0
-дин-душман	1
 дина	0
 динамика	1
 динамит	1
@@ -59983,7 +59821,6 @@ zălva	0
 долар	0
 доле	0
 долечина	2
-долечьк	1
 доли	0
 доликовати	0
 доликовање	0
@@ -60091,7 +59928,6 @@ zălva	0
 допловивши	1
 допловити	1
 доподне	1
-допр̄ијвши	0
 допрвши	0
 допревши	0
 допремати	1
@@ -60142,7 +59978,6 @@ zălva	0
 доручковати	0
 доручковање	0
 доручкујући	0
-дос́етка	0
 досад	0
 досада	0
 досадан	0
@@ -61442,7 +61277,6 @@ zălva	0
 жапци	0
 жапче	0
 жар	0
-жар-птица	0
 жаргон	0
 жаргона	1
 жардинијера	3
@@ -61819,7 +61653,6 @@ zălva	0
 жљебови	0
 жљебовима	1
 зaпeшће	0
-за(д)ци	0
 забава	0
 забаван	0
 забавивши	0
@@ -62911,7 +62744,6 @@ zălva	0
 зачахуривши	1
 зачахурити	1
 зачахурујући	2
-заче(т)ци	1
 зачевши	0
 зачеп	0
 зачепљење	2
@@ -63023,7 +62855,6 @@ zălva	0
 збрајати	0
 збрајајући	0
 збрајање	0
-збрда-здола	0
 збринувши	0
 збринути	0
 збрисавши	0
@@ -63759,7 +63590,6 @@ zălva	0
 зјеница	0
 зјенични	0
 и	0
-и(т)ко	0
 иако	0
 ибар	0
 ибер	0
@@ -67277,7 +67107,6 @@ zălva	0
 колибрић	0
 колики	1
 колико	1
-колико-толико	1
 колица	1
 количина	2
 количинама	2
@@ -67529,8 +67358,6 @@ zălva	0
 конгенијални	0
 конгенијално	0
 конго	0
-конго-бразавил	0
-конго-киншаса	0
 конгрегационализам	6
 конгрегационализма	6
 конгрегација	2
@@ -68047,7 +67874,6 @@ zălva	0
 коцкање	0
 коцки	0
 коцу	0
-коч̄ева	0
 кочеве	0
 кочеви	0
 кочевима	0
@@ -68800,7 +68626,6 @@ zălva	0
 крилници	0
 крилниче	0
 крило	0
-крило-јесенице	0
 крилца	0
 крилце	0
 крилцета	0
@@ -69359,7 +69184,6 @@ zălva	0
 ксенофобија	2
 ксеркс	0
 ксилофон	0
-ку(т)ци	0
 куба	0
 кубанац	1
 кубанаца	0
@@ -70002,7 +69826,6 @@ zălva	0
 лаћати	0
 лаћајући	0
 лаћање	0
-ле(д)ци	0
 лебац	0
 лебделица	0
 лебдети	0
@@ -70027,7 +69850,6 @@ zălva	0
 левкова	0
 левкови	0
 лево	0
-лево-десно	0
 леворук	1
 леворуки	1
 левци	0
@@ -70615,7 +70437,6 @@ zălva	0
 лијеви	1
 лијевка	1
 лијево	1
-лијево-десно	1
 лијевци	1
 лијевче	1
 лијегати	1
@@ -74239,7 +74060,6 @@ zălva	0
 наштанцати	0
 наштребати	1
 нашу	0
-нај-	0
 најава	0
 најавивши	1
 најавити	1
@@ -74301,7 +74121,6 @@ zălva	0
 наџивљавати	2
 наџивљавајући	2
 наџивљавање	2
-не(т)ко	0
 неадекватан	0
 неадекватни	0
 неактиван	0
@@ -75522,7 +75341,6 @@ zălva	0
 несхватљиви	1
 несхваћен	0
 несхваћени	0
-несьм	0
 нетактичан	1
 нетактични	1
 нетактично	1
@@ -75808,7 +75626,6 @@ zălva	0
 нећете	0
 нећеш	0
 нећу	0
-ни(т)ко	0
 ниво	0
 нивоа	1
 нивои	1
@@ -78293,7 +78110,6 @@ zălva	0
 орјашицом	1
 орјашицу	1
 ос	0
-ос́етити	0
 оса	0
 осакативши	1
 осакатити	1
@@ -79448,7 +79264,6 @@ zălva	0
 пауница	1
 паунов	0
 паус	0
-паус-папир	0
 пауци	0
 пауцима	0
 пауче	0
@@ -80734,7 +80549,6 @@ zălva	0
 погубни	0
 под	0
 пода	0
-пода(т)ци	1
 поданик	0
 поданица	0
 подао	0
@@ -81304,7 +81118,6 @@ zălva	0
 покуњивши	1
 покуњити	1
 покућство	0
-покẹхдọб	2
 пол	0
 пола	0
 полаган	1
@@ -81531,7 +81344,6 @@ zălva	0
 понашати	1
 понашајући	1
 понашање	1
-понаѕрнѕити	2
 понајвише	0
 понајпре	0
 понајприје	0
@@ -81829,8 +81641,6 @@ zălva	0
 порушивши	0
 порушити	0
 поруџбина	0
-пос́ет	0
-пос́етити	0
 посада	0
 посадивши	1
 посадити	1
@@ -82212,8 +82022,6 @@ zălva	0
 потплаћујући	1
 потпора	0
 потпоручник	0
-потпредс́едник	1
-потпредс́едница	1
 потпредседник	1
 потпредседница	1
 потпредсједник	1
@@ -82343,7 +82151,6 @@ zălva	0
 поштеђујући	1
 поштење	1
 пошто	0
-пошто-пото	0
 поштовавши	1
 поштовалац	1
 поштован	0
@@ -85675,7 +85482,6 @@ zălva	0
 ражњи	0
 ражњима	0
 ражњу	0
-раз-	0
 разабирати	1
 разабирање	1
 разабирући	1
@@ -86639,7 +86445,6 @@ zălva	0
 рафинирати	2
 рафинирајући	2
 рафинирање	2
-рахат-локум	0
 рационалан	0
 рационализам	4
 рационализација	5
@@ -87794,13 +87599,6 @@ zălva	0
 сeдло	0
 сeдлом	0
 сeдлу	0
-с́евер	0
-с́екира	0
-с́екирица	0
-с́ести	0
-с́еђети	0
-с́ећање	0
-с́утра	0
 сабат	0
 сабах	0
 сабаља	0
@@ -88061,7 +87859,6 @@ zălva	0
 сажаљевати	2
 сажаљевајући	2
 сажаљевање	2
-саже(т)ци	1
 сажевши	0
 сажет	0
 сажетак	1
@@ -92961,7 +92758,6 @@ zălva	0
 тамнопут	1
 тамнопути	1
 тамо	0
-тамо-амо	0
 тамошњи	0
 тампон	0
 тампона	1
@@ -93651,7 +93447,6 @@ zălva	0
 тискање	0
 тисковина	0
 тисно	0
-тисутњîк	0
 тисутњик	0
 тисућа	0
 тисућама	0
@@ -94843,11 +94638,6 @@ zălva	0
 туљан	0
 туњевина	0
 тући	0
-тькнула	0
-тькнуја	0
-тьцала	0
-тьцаја	0
-тьцање	0
 тједан	0
 тједни	0
 тједник	0
@@ -94891,7 +94681,6 @@ zălva	0
 убав	0
 убавило	2
 убавиња	2
-убавьчьк	0
 убадати	1
 убадача	1
 убадајући	1
@@ -97457,7 +97246,6 @@ zălva	0
 хајати	0
 хајање	0
 хајвар	0
-хајд'	0
 хајде	0
 хајдемо	0
 хајдмо	0
@@ -97553,7 +97341,6 @@ zălva	0
 херц	0
 херца	0
 херцег	0
-херцег-босна	0
 херцеговац	0
 херцеговачки	0
 херцеговина	0
@@ -97585,7 +97372,6 @@ zălva	0
 хељда	0
 хећим	0
 хећима	0
-хи(т)ци	0
 хибернација	2
 хибрид	0
 хибрида	1
@@ -98784,11 +98570,6 @@ zălva	0
 цурећи	0
 цурити	0
 цурица	0
-цьвтела	0
-цьвтеја	0
-цьвтење	0
-цьвтив	0
-цьвтим	0
 цјевака	0
 цјеваница	1
 цјевовод	0
@@ -100292,7 +100073,6 @@ zălva	0
 шпањур	0
 шпедиција	1
 шпек	0
-шпек-филеки	0
 шпеквуршт	0
 шпекула	0
 шпекулант	1
@@ -100398,7 +100178,6 @@ zălva	0
 шрајбтиш	0
 шрек	0
 шрекшус	0
-шренц-папир	0
 шрот	0
 шта	0
 штаб	0

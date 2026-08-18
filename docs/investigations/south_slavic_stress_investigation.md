@@ -56,7 +56,7 @@ consonants) adds 4 363 keys and closes the gap to **43.7%**. Its one ambiguity �
 not на+џивети — is benign: it produces a key that spells no Serbian word, so it is never looked up, and an
 existing Cyrillic key from the dump always wins.
 
-Final: **102 186 rows**, both scripts.
+Final: **101 965 rows**, both scripts.
 
 ## Run 4 — 2026-08-17 — ⚠ the coverage figure in the previous investigation was wrong
 
@@ -106,6 +106,19 @@ The 167 genuine disagreements are the sr/hr norm split on loans (`Pakistan`, `Ka
 ⚠ **The 36.8% OOV figure does not generalize** and is labelled as such in the tool's own output: only 302 rows
 are OOV, because the referee and the lexicon are both Wiktionary, and what remains is the long rare tail where
 first-nucleus is weakest. The frequency-weighted corpus figure (83–86%) is the one that describes running text.
+
+
+## Run 6 — 2026-08-17 — the clamp was hiding 34 rows
+
+`phonemizeWord` clamps a lexicon ordinal to the last nucleus it actually found. Asking how often that fires is
+the adversarial version of "does the builder's nucleus rule match the engine's": **34 of 102 186 rows (0.033%)**,
+every one a Torlakian dialect entry spelled with ⟨ă⟩ — a letter the engine's table has no rule for, so it is
+dropped outright and `akăl` comes out as `akl`, one nucleus short.
+
+None of them spells anything in standard sr/hr/bs, so the fix is to not ship them: the builder now keeps only
+keys made entirely of the engine's own alphabet (read out of `serbian.jsonc`, so it cannot drift) and drops
+Wiktionary's affix entries (`-ajlija`, `-irajući`) too. 101 965 rows, and the out-of-range count is **0**. The
+clamp stays as a seatbelt; it is no longer also a storage place for known-bad data.
 
 ## Design decisions, and why
 

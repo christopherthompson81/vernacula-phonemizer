@@ -119,6 +119,19 @@ def to_cyrillic(word: str) -> str | None:
     return "".join(out)
 
 
+# The engine's own alphabet, read from serbian.jsonc rather than restated — a key with any other character is
+# one the g2p cannot pronounce, so an ordinal into it would not line up.
+def _alphabet() -> str:
+    import re as _re
+    src = open(os.path.join(HERE, "..", "..", "src", "languages", "serbian", "serbian.jsonc"),
+               encoding="utf-8").read()
+    body = src[src.index('"letters"'):]
+    return "".join(_re.findall(r'"(\w)":', body[:body.index("}")]))
+
+
+ALPHABET = _alphabet()
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dump", default=DUMP)
@@ -151,6 +164,15 @@ def main() -> int:
     # count them rather than inventing a tie-break — the engine has no way to disambiguate anyway.
     ambiguous = {k for k, v in conflict.items() if len(v) > 1}
     rows = {k: v for k, v in best.items() if k not in ambiguous}
+
+    # ⚠ KEEP ONLY WHAT THE G2P CAN READ. The dump carries Torlakian dialect entries spelled with ⟨ă⟩ (akăl,
+    # băzdim, bogatlăk) and Wiktionary AFFIX entries (-ajlija, -irajući). The engine's letter table has no ⟨ă⟩,
+    # so it drops the letter outright and the word comes out with one nucleus fewer than the ordinal expects —
+    # 34 rows where the lookup would index past the end. The engine clamps, but a clamp is a seatbelt, not a
+    # place to store known-bad data: these spell nothing in standard sr/hr/bs and are dropped here instead.
+    alphabet = set(ALPHABET)
+    rows = {k: v for k, v in rows.items() if not k.startswith("-") and not k.endswith("-")
+            and all(c in alphabet for c in k)}
 
     # Transliterate the Latin keys into Cyrillic, without overwriting a Cyrillic key the dump gave directly.
     added = 0
