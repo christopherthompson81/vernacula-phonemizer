@@ -159,3 +159,80 @@ question rather than a sourcing one.
   is 43% and not 90%. Deriving them needs the accent paradigm, which is real linguistic work.
 - **`sl`.** Slovene has its own dump (5 380 accented headwords, 56.8% token coverage) and a separate engine
   with no shared g2p. Not done here.
+
+
+## Run 7 — 2026-08-18 — tone: is there a fallback, and what notation?
+
+The stress work left tone carried-but-not-emitted, with two open questions.
+
+**Is there a positional fallback?** Serbo-Croatian's textbook constraint is that a *falling* accent occurs
+only word-initially. Tested against the dump:
+
+| accent sits on | rising | falling |
+|---|---|---|
+| the FIRST nucleus | 19 297 | 16 882 |
+| a LATER nucleus | 20 609 | **346 (1.65%)** |
+
+The constraint holds at 98.35%. But it buys nothing here: our OOV fallback puts the accent on σ1, and σ1 is
+exactly where the split is a 53/47 coin flip. **So there is no usable tone fallback for OOV** — which is a real
+difference from stress, where first-nucleus is a rule for disyllables.
+
+The house answer to partial pitch annotation already exists: `japanese/pitch.ts` ships a partial lexicon,
+renders OOV unmarked, and exports `pitchLexiconHas` precisely because an OOV-defaulted-flat reading is
+indistinguishable in the output from a genuine one. Copied, with one honest difference recorded in the code:
+in Japanese "unmarked" is *heiban*, a real category, whereas Serbo-Croatian has no toneless words, so an absent
+tone letter here means **not in the lexicon**, never *no accent*. `accentLexiconHas()` is the predicate.
+
+**What notation?** The sources write the accent as a combining caron (rising) / circumflex (falling) on the
+vowel — `ǎbdaːl`, `ôːn` — and so does the committed referee. Every *other* tone language in this fleet writes
+Chao tone letters after the nucleus instead (`kʰˈaː˥˩w`, `mˈaː˧˥`). Chao letters win: one notation for tone
+across 190 languages beats one notation per philological tradition, and it turns out to cost nothing —
+
+    ˩˥  already emitted by lingala, zulu, hausa, xhosa
+    ˥˩  already emitted by thai, burmese, minnan, punjabi
+
+**zero new symbols enter the fleet inventory**, which was the entire reason tone had been held back.
+
+Emitted shape: `onset + ˈ + nucleus + ː(if long) + tone letter + coda`. Accented-syllable length is emitted
+because the four-way contrast *is* tone × length; post-accentual length (the macron of `àbdāl`) stays folded.
+
+**Monosyllables take their tone though they take no ˈ.** The reason ˈ is skipped — no information on one
+syllable — simply does not apply to the contour, which is phonemic there: `grâd` "city" vs `grȁd` "hail".
+
+## Run 8 — 2026-08-18 — the homograph check the first build only half-did
+
+The stress build dropped keys with conflicting *positions* (989). Asking the same question about *contours*
+found a much commoner case: **366 entry-keys (2486 rows after inflected forms and both scripts) have the same
+position and two different contours** — `grad`, `alat`, `bar`, `ada` — and first-wins had been shipping a coin
+flip as fact.
+
+Fixed by abstaining: the ordinal stands, the tone becomes `--`, and the engine emits `ˈ` with no tone letter.
+Same posture as OOV, for the same reason. Measured effect, against the referee's own caron/circumflex marks:
+
+| | before abstention | after |
+|---|---|---|
+| contour | 99.2% (25 244 words) | **99.7%** (24 407) |
+| length | 99.4% | **99.8%** |
+| position | 99.3% | 99.3% (unchanged) |
+
+## Run 9 — 2026-08-18 — two review findings
+
+**Clitics were being treated inconsistently.** The exclusion list suppressed the *tone* but still let a
+polysyllabic clitic take its `ˈ` — so `je`/`se` came out bare (monosyllables take no mark anyway) while
+`ćemo`/`bismo`/`biste` were marked. An enclitic is unstressed whatever its length, so a clitic now returns
+unmarked outright.
+
+**And the edit that made that change broke the list.** Reformatting the set put a `//` comment mid-line, which
+swallowed `"o", "po", "za", "od", "do", "iz", "s", "sa", "k", "ka", "uz", "niz"` — every Latin preposition
+silently left the set and `od` came back as `o˥˩d`. Caught by the suite (9 failures across three files), not by
+reading. Worth recording because the damage was invisible in the diff: the line still *looked* like a list.
+
+## Still open, after tone
+
+- **Paradigmatic accent** — unchanged and still the ceiling: 303 134 of the dump's 455 000 inflected forms
+  carry no accent, which is why coverage is 43% and not 90%.
+- **Syllabic ⟨r⟩ is not marked as syllabic.** `krv → krː˥˩ʋ` — the length and tone attach to the ⟨r⟩ correctly,
+  but nothing says it is the nucleus. The referee writes `r̩`. Pre-existing (the engine never marked it), but
+  emitting length on it makes the gap more visible than it was.
+- **Post-accentual length.** The macron is in the source and is not emitted.
+- **`sl`.** Slovene has its own dump and no shared g2p. Untouched.

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemizeWord, createSerbian } from "../src/languages/serbian/serbian.ts";
+import { accentLexiconHas, phonemizeWord, createSerbian } from "../src/languages/serbian/serbian.ts";
 
 // Canonical-IPA goldens for Serbian / српски (sr) — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully
 // phonemic. Both scripts map to the same IPA. Signature: ⟨в/v⟩→ʋ (labiodental approximant), ⟨ђ⟩→d͡ʑ / ⟨ћ⟩→t͡ɕ
@@ -10,29 +10,29 @@ import { phonemizeWord, createSerbian } from "../src/languages/serbian/serbian.t
 describe("Serbian canonical IPA", () => {
     test("Latin: v→ʋ, the alveolo-palatal + palatal series, syllabic r", () => {
         expect(phonemizeWord("voda")).toBe("ʋˈoda"); // v → ʋ
-        expect(phonemizeWord("ljubav")).toBe("ʎˈubaʋ"); // lj → ʎ
+        expect(phonemizeWord("ljubav")).toBe("ʎˈuː˩˥baʋ"); // lj → ʎ
         expect(phonemizeWord("čovek")).toBe("t͡ʃˈoʋek"); // č → t͡ʃ
-        expect(phonemizeWord("đak")).toBe("d͡ʑak"); // đ → d͡ʑ
-        expect(phonemizeWord("ćao")).toBe("t͡ɕˈao"); // ć → t͡ɕ
-        expect(phonemizeWord("džep")).toBe("d͡ʒep"); // dž → d͡ʒ
-        expect(phonemizeWord("srce")).toBe("sˈrt͡se"); // syllabic r + c → t͡s
-        expect(phonemizeWord("njega")).toBe("ɲˈeɡa"); // nj → ɲ
+        expect(phonemizeWord("đak")).toBe("d͡ʑaː˥˩k"); // đ → d͡ʑ
+        expect(phonemizeWord("ćao")).toBe("t͡ɕˈaː˥˩o"); // ć → t͡ɕ
+        expect(phonemizeWord("džep")).toBe("d͡ʒe˥˩p"); // dž → d͡ʒ
+        expect(phonemizeWord("srce")).toBe("sˈr˥˩t͡se"); // syllabic r + c → t͡s
+        expect(phonemizeWord("njega")).toBe("ɲˈe˥˩ɡa"); // nj → ɲ
     });
 
     test("Cyrillic maps to the SAME IPA", () => {
         expect(phonemizeWord("вода")).toBe("ʋˈoda");
-        expect(phonemizeWord("љубав")).toBe("ʎˈubaʋ");
-        expect(phonemizeWord("ђак")).toBe("d͡ʑak"); // ђ → d͡ʑ
-        expect(phonemizeWord("срце")).toBe("sˈrt͡se");
-        expect(phonemizeWord("хвала")).toBe("xʋˈala"); // х → x
+        expect(phonemizeWord("љубав")).toBe("ʎˈuː˩˥baʋ");
+        expect(phonemizeWord("ђак")).toBe("d͡ʑaː˥˩k"); // ђ → d͡ʑ
+        expect(phonemizeWord("срце")).toBe("sˈr˥˩t͡se");
+        expect(phonemizeWord("хвала")).toBe("xʋˈaː˩˥la"); // х → x
     });
 
     test("numbers (Slavic count agreement on hiljada)", () => {
         const d = createSerbian();
-        expect(d.text("21").trim()).toBe("dʋˈadeset jˈedan"); // dvadeset jedan
-        expect(d.text("234").trim()).toBe("dʋˈesta trˈideset t͡ʃˈetiri"); // dvesta trideset četiri
+        expect(d.text("21").trim()).toBe("dʋˈaː˩˥deset jˈe˩˥dan"); // dvadeset jedan
+        expect(d.text("234").trim()).toBe("dʋˈe˥˩sta trˈiː˩˥deset t͡ʃˈe˩˥tiri"); // dvesta trideset četiri
         expect(d.text("1000").trim()).toBe("xˈiʎadu"); // hiljadu
-        expect(d.text("5000").trim()).toBe("pet xˈiʎada"); // pet hiljada (5+ → many)
+        expect(d.text("5000").trim()).toBe("peː˥˩t xˈiʎada"); // pet hiljada (5+ → many)
     });
 
     // GENDER on the magnitude noun: hiljada is FEMININE, so the multiplier is dve / jedna (Serbian is ekavian →
@@ -40,11 +40,11 @@ describe("Serbian canonical IPA", () => {
     test("numbers: gender agreement on the FEMININE hiljada", () => {
         const d = createSerbian();
         expect(d.text("1000").trim()).toBe("xˈiʎadu"); // hiljadu — the standalone form
-        expect(d.text("2000").trim()).toBe("dʋe xˈiʎade"); // dve hiljade — FEM two (not *dva hiljade)
-        expect(d.text("5000").trim()).toBe("pet xˈiʎada"); // pet hiljada — gen.pl
-        expect(d.text("21000").trim()).toBe("dʋˈadeset jˈedna xˈiʎada"); // dvadeset jedna hiljada — …1 → fem sg
-        expect(d.text("1000000").trim()).toBe("jˈedan milˈion"); // jedan milion — masculine
-        expect(d.text("2000000").trim()).toBe("dʋa mˈiliona"); // dva miliona — masculine keeps dva
+        expect(d.text("2000").trim()).toBe("dʋeː˥˩ xˈiʎade"); // dve hiljade — FEM two (not *dva hiljade)
+        expect(d.text("5000").trim()).toBe("peː˥˩t xˈiʎada"); // pet hiljada — gen.pl
+        expect(d.text("21000").trim()).toBe("dʋˈaː˩˥deset jˈedna xˈiʎada"); // dvadeset jedna hiljada — …1 → fem sg
+        expect(d.text("1000000").trim()).toBe("jˈe˩˥dan milˈi˩˥on"); // jedan milion — masculine
+        expect(d.text("2000000").trim()).toBe("dʋaː˥˩ mˈiliona"); // dva miliona — masculine keeps dva
     });
 });
 
@@ -58,12 +58,12 @@ describe("Serbian normalization", () => {
     // The dominant defect (×211): Serbian writes an ordinal as numeral + PERIOD, and the engine read the
     // digits as a cardinal and the period as a sentence break.
     test("N. ordinals — the case is chosen by the licensing word", () => {
-        expect(say("1624. године")).toBe("xˈiʎadu ʃˈeststo dʋˈadeset t͡ʃˈetʋrte ɡˈodine"); // f.gen
-        expect(say("у 54. години")).toBe("u pedˈeset t͡ʃˈetʋrtoj ɡˈodini"); // f.dat/loc
-        expect(say("за 2020. годину")).toBe("za dʋe xˈiʎade dʋˈadesetu ɡˈodinu"); // f.acc
+        expect(say("1624. године")).toBe("xˈiʎadu ʃˈeː˥˩ststo dʋˈaː˩˥deset t͡ʃˈetʋrte ɡˈodine"); // f.gen
+        expect(say("у 54. години")).toBe("u pedˈe˩˥set t͡ʃˈetʋrtoj ɡˈodini"); // f.dat/loc
+        expect(say("за 2020. годину")).toBe("za dʋeː˥˩ xˈiʎade dʋˈadesetu ɡˈodinu"); // f.acc
         expect(say("16. века")).toBe("ʃˈesnaestoɡ ʋˈeka"); // m.gen — corpus: двадесетог века
         expect(say("у 20. веку")).toBe("u dʋˈadesetom ʋˈeku"); // m.loc — corpus: двадесетом веку
-        expect(say("21. јула")).toBe("dʋˈadeset pˈrʋoɡ jˈula"); // month genitive
+        expect(say("21. јула")).toBe("dʋˈaː˩˥deset pˈrʋoɡ jˈula"); // month genitive
         expect(say("3. августа")).toBe("trˈet͡ɕeɡ ˈaʋɡusta"); // treći is the one SOFT stem: trećeg, not *trećog
         expect(say("400. године")).toBe("t͡ʃˈetiristote ɡˈodine"); // round hundred → the hundreds ordinal
     });
@@ -71,53 +71,53 @@ describe("Serbian normalization", () => {
     // The guard that makes the rule safe. Nothing outside the licensor list is claimed, so every
     // sentence-final period survives — measured over the whole corpus as ZERO pauses lost.
     test("N. that is NOT an ordinal keeps its sentence pause", () => {
-        expect(say("типа 1.")).toBe("tˈipa jˈedan ."); // a model number at a sentence end
-        expect(say("1770. Некад")).toBe("xˈiʎadu sˈedamsto sedamdˈeset . nˈekad"); // capitalised ⇒ a new sentence
-        expect(say("прича, итд.)")).toBe("prˈit͡ʃa , i tˈako dˈaʎe ."); // `)` is not a pause, so the dot stays
+        expect(say("типа 1.")).toBe("tˈipa jˈe˩˥dan ."); // a model number at a sentence end
+        expect(say("1770. Некад")).toBe("xˈiʎadu sˈe˥˩damsto sedamdˈe˩˥set . nˈe˥˩kad"); // capitalised ⇒ a new sentence
+        expect(say("прича, итд.)")).toBe("prˈiː˥˩t͡ʃa , i tˈa˩˥ko dˈa˥˩ʎe ."); // `)` is not a pause, so the dot stays
     });
 
     // Serbian groups thousands with a PERIOD, which split the number AND inserted a phrase break.
     test("period-grouped thousands", () => {
-        expect(say("1.400 људи")).toBe("xˈiʎadu t͡ʃˈetiristo ʎˈudi");
-        expect(say("5.000.000")).toBe("pet mˈiliona"); // adjacent groups share a digit ⇒ two passes
+        expect(say("1.400 људи")).toBe("xˈiʎadu t͡ʃˈe˥˩tiristo ʎˈudi");
+        expect(say("5.000.000")).toBe("peː˥˩t mˈiliona"); // adjacent groups share a digit ⇒ two passes
     });
 
     // Both count slots are corpus-attested: 2–4 takes the GENITIVE SINGULAR (83 метра, 24 сата, 32
     // процента), 5+ the genitive plural (48 сати, 50 километара) — Russian's selector, not Polish's.
     test("units and the three-way count agreement", () => {
-        expect(say("70 km")).toBe("sedamdˈeset kˈilometara"); // gen.pl
-        expect(say("83 km")).toBe("osamdˈeset tri kˈilometra"); // gen.sg — …3
-        expect(say("24 mm")).toBe("dʋˈadeset t͡ʃˈetiri mˈilimetra");
-        expect(say("88%")).toBe("osamdˈeset ˈosam pˈosto"); // posto is INDECLINABLE (corpus ×57)
-        expect(say("19.500 km²")).toBe("deʋˈetnaest xˈiʎada pˈetsto kʋˈadratnix kˈilometara");
+        expect(say("70 km")).toBe("sedamdˈe˩˥set kˈilometara"); // gen.pl
+        expect(say("83 km")).toBe("osamdˈe˩˥set triː˥˩ kˈilometra"); // gen.sg — …3
+        expect(say("24 mm")).toBe("dʋˈaː˩˥deset t͡ʃˈe˩˥tiri mˈilimetra");
+        expect(say("88%")).toBe("osamdˈe˩˥set ˈo˥˩sam pˈo˥˩sto"); // posto is INDECLINABLE (corpus ×57)
+        expect(say("19.500 km²")).toBe("deʋˈe˩˥tnaest xˈiʎada pˈeː˥˩tsto kʋˈadratnix kˈilometara");
     });
 
     // The rate preposition is NOT one word: the corpus writes `240 километара НА сат` but `1,5
     // километара У СЕКУНДИ`, so `/h` goes through the shared `unitPer` and `/s` is composed locally.
     test("rates take two different prepositions", () => {
-        expect(say("480 km/h")).toBe("t͡ʃˈetiristo osamdˈeset kˈilometara na sat");
-        expect(say("133 m/s")).toBe("sto trˈideset tri mˈetra u sekˈundi");
+        expect(say("480 km/h")).toBe("t͡ʃˈe˥˩tiristo osamdˈe˩˥set kˈilometara na saː˥˩t");
+        expect(say("133 m/s")).toBe("stoː˥˩ trˈiː˩˥deset triː˥˩ mˈetra u sekˈuː˩˥ndi");
     });
 
     test("clock, decimals and signs", () => {
-        expect(say("11:00")).toBe("jedˈanaest sˈati");
-        expect(say("22:08")).toBe("dʋˈadeset dʋa sˈata i ˈosam minˈuta");
-        expect(say("5:3")).toBe("pet , tri"); // a SCORE — one-digit minutes are not a clock
-        expect(say("1,5 сати")).toBe("jˈedan zˈarez pet sˈati"); // was a phrase break between the digits
-        expect(say("4x4")).toBe("t͡ʃˈetiri pˈuta t͡ʃˈetiri");
+        expect(say("11:00")).toBe("jedˈa˩˥naest sˈati");
+        expect(say("22:08")).toBe("dʋˈaː˩˥deset dʋaː˥˩ sˈaː˥˩ta i ˈo˥˩sam minˈuː˩˥ta");
+        expect(say("5:3")).toBe("peː˥˩t , triː˥˩"); // a SCORE — one-digit minutes are not a clock
+        expect(say("1,5 сати")).toBe("jˈe˩˥dan zˈarez peː˥˩t sˈati"); // was a phrase break between the digits
+        expect(say("4x4")).toBe("t͡ʃˈe˩˥tiri pˈuta t͡ʃˈe˩˥tiri");
         // NO minus rule: the corpus has zero negative numbers and eleven punctuation dashes, one of them
         // before a numeral. Reading it as a sign was confidently wrong.
-        expect(say("низак – 6000")).toBe("nˈizak ʃest xˈiʎada");
+        expect(say("низак – 6000")).toBe("nˈi˥˩zak ʃeː˥˩st xˈiʎada");
     });
 
     // The suffix is the last letters of the INFLECTED ordinal, so the rule generates the paradigm and
     // keeps the form that actually ends with them. Written in CYRILLIC on a LATIN-emitted ordinal, which
     // is why the captured suffix is transliterated first.
     test("numeral + hyphen + case suffix, across scripts", () => {
-        expect(say("1970-их")).toBe("xˈiʎadu dˈeʋetsto sˈedamdesetix");
+        expect(say("1970-их")).toBe("xˈiʎadu dˈe˥˩ʋetsto sˈedamdesetix");
         expect(say("15-ог века")).toBe("pˈetnaestoɡ ʋˈeka");
         expect(say("11-ом веку")).toBe("jˈedanaestom ʋˈeku");
-        expect(say("11-годишња")).toBe("jedˈanaest ɡˈodiʃɲa"); // a COMPOUND adjective — deliberately not claimed
+        expect(say("11-годишња")).toBe("jedˈa˩˥naest ɡˈodiʃɲa"); // a COMPOUND adjective — deliberately not claimed
     });
 
     // Serbian is DIGRAPHIC: a rule keyed on Latin spellings alone is a no-op on Cyrillic prose, which is
@@ -125,20 +125,20 @@ describe("Serbian normalization", () => {
     test("digraphia — the same rule fires in either script", () => {
         expect(say("1624. godine")).toBe(say("1624. године"));
         expect(say("итд.")).toBe(say("itd."));
-        expect(say("323. године п. н. е.")).toBe("trˈista dʋˈadeset trˈet͡ɕe ɡˈodine pre nˈoʋe ˈere .");
+        expect(say("323. године п. н. е.")).toBe("trˈi˥˩sta dʋˈaː˩˥deset trˈet͡ɕe ɡˈodine pre˥˩ nˈoʋe ˈere .");
         // The era marker's final dot is ALSO the sentence end when a capital follows — it must not be eaten.
-        expect(say("Око 1000. п. н. е. Асирци")).toBe("ˈoko xˈiʎadite pre nˈoʋe ˈere . asˈirt͡si");
+        expect(say("Око 1000. п. н. е. Асирци")).toBe("ˈo˥˩ko xˈiʎadite pre˥˩ nˈoʋe ˈere . asˈiː˩˥rt͡si");
     });
 
     test("degrees consume the degree noun the text already wrote", () => {
-        expect(say("32 °C степена")).toBe("trˈideset dʋa stˈepena t͡sˈelzijusa");
-        expect(say("90 °F")).toBe("deʋedˈeset stˈepeni fˈarenxajta");
+        expect(say("32 °C степена")).toBe("trˈiː˩˥deset dʋaː˥˩ stˈepena t͡sˈelzijusa");
+        expect(say("90 °F")).toBe("deʋedˈe˩˥set stˈepeni fˈarenxajta");
         // ⚠ A BARE ° MUST STILL READ THE DEGREE NOUN, with numeral agreement and no scale word. Declining it
         // outright protects the scale word (Celsius/Fahrenheit, which the C/F arm supplies) but throws the
         // degree noun away with it — and a LONGITUDE then loses the word that makes it one.
         // ⚠ The compass `W` is still unread, and deliberately: `јужне` is ×0 in this corpus, so a four-way
         // table would have to invent its missing quarter. Only the recoverable half is fixed.
-        expect(say("35°W")).toBe("trˈideset pet stˈepeni");
+        expect(say("35°W")).toBe("trˈiː˩˥deset peː˥˩t stˈepeni");
     });
     // PRIMARY STRESS — lexical, from stress.tsv (kaikki/Wiktionary), shared with the hr and bs engines because
     // they import this g2p. Validated against the COMMITTED wikipron referee, which has carried the pitch accent
@@ -146,26 +146,54 @@ describe("Serbian normalization", () => {
     // 24254 lexicon-covered rows once the ⟨ije⟩ counting convention is separated out.
     // tools/serbian/eval_stress_placement.mts.
     test("lexical stress: from the lexicon, before the nucleus, in both scripts", () => {
-        expect(phonemizeWord("jezik")).toBe("jˈezik"); // jèzik — σ1
-        expect(phonemizeWord("beograd")).toBe("beˈoɡrad"); // Beògrad — σ2, not derivable from spelling
-        expect(phonemizeWord("pedeset")).toBe("pedˈeset"); // pedèsēt — and 20/30 differ: dvádeset is σ1
-        expect(phonemizeWord("dvadeset")).toBe("dʋˈadeset");
-        expect(phonemizeWord("Србијанка")).toBe("srbˈijanka"); // Cyrillic key; the ⟨р⟩ is nucleus 0
+        expect(phonemizeWord("jezik")).toBe("jˈe˩˥zik"); // jèzik — σ1
+        expect(phonemizeWord("beograd")).toBe("beˈo˩˥ɡrad"); // Beògrad — σ2, not derivable from spelling
+        expect(phonemizeWord("pedeset")).toBe("pedˈe˩˥set"); // pedèsēt — and 20/30 differ: dvádeset is σ1
+        expect(phonemizeWord("dvadeset")).toBe("dʋˈaː˩˥deset");
+        expect(phonemizeWord("Србијанка")).toBe("srbˈi˩˥janka"); // Cyrillic key; the ⟨р⟩ is nucleus 0
         // ⚠ SYLLABIC ⟨r⟩ IS A NUCLEUS and can carry the accent (sȑce, dr̀žava, kȓv).
-        expect(phonemizeWord("srce")).toBe("sˈrt͡se");
-        expect(phonemizeWord("država")).toBe("dˈrʒaʋa");
-        expect(phonemizeWord("trgovati")).toBe("trɡˈoʋati"); // trgòvati — σ2, past the syllabic r
+        expect(phonemizeWord("srce")).toBe("sˈr˥˩t͡se");
+        expect(phonemizeWord("država")).toBe("dˈr˩˥ʒaʋa");
+        expect(phonemizeWord("trgovati")).toBe("trɡˈo˩˥ʋati"); // trgòvati — σ2, past the syllabic r
         // ⚠ THE IJEKAVIAN ⟨ije⟩. The lexicon is built from the accented SPELLING (rijéka), not the IPA
         // (/rjěːka/) whose ⟨i⟩ is the glide /j/ — this g2p emits /i/, so the ordinals must count spelling.
-        expect(phonemizeWord("rijeka")).toBe("rijˈeka");
-        expect(phonemizeWord("mlijeko")).toBe("mlijˈeko");
+        expect(phonemizeWord("rijeka")).toBe("rijˈeː˩˥ka");
+        expect(phonemizeWord("mlijeko")).toBe("mlijˈeː˩˥ko");
         // ⚠ NO MARK ON A MONOSYLLABLE (the Russian convention). It also declines to assert a stress the
         // proclitics do not have: je/se/li/ga/su are unstressed in running speech but dictionaried with one.
-        expect(phonemizeWord("krv")).toBe("krʋ");
+        expect(phonemizeWord("krv")).toBe("krː˥˩ʋ");
         expect(phonemizeWord("je")).toBe("je");
-        // OOV → the first nucleus. For a DISYLLABLE that is a rule, not a guess: the standard language does not
-        // accent the final syllable of a polysyllable. `godine` is the corpus's commonest OOV word.
+        // OOV → the first nucleus, and NO TONE. The tone has no fallback: on the first nucleus the lexicon
+        // splits 19297 rising / 16882 falling, a coin flip. An absent tone letter means "not in the lexicon",
+        // never "no accent" — accentLexiconHas() exists so an eval can tell those apart.
+        // `godine` is the corpus's commonest OOV word.
         expect(phonemizeWord("godine")).toBe("ɡˈodine");
+    });
+
+    // THE FOUR-WAY PITCH ACCENT — short/long × rising/falling, emitted as a Chao tone letter immediately after
+    // the nucleus, exactly where Vietnamese and Thai put theirs (kʰˈaː˥˩w, mˈaː˧˥). ⚠ NOT the caron/circumflex
+    // the Serbo-Croatian sources use: every other tone language in this fleet writes Chao letters, and choosing
+    // them adds ZERO new symbols to the inventory — ˩˥ is already emitted by Lingala/Zulu/Hausa/Xhosa and ˥˩ by
+    // Thai/Burmese/Minnan/Punjabi. Validated against the referee's own caron/circumflex marks: contour 99.7%,
+    // length 99.8% over 24407 words. tools/serbian/eval_stress_placement.mts.
+    test("the four-way pitch accent: contour after the nucleus, length on it", () => {
+        expect(phonemizeWord("jezik")).toBe("jˈe˩˥zik"); // jèzik — short rising
+        expect(phonemizeWord("beograd")).toBe("beˈo˩˥ɡrad"); // Beògrad — short rising, σ2
+        expect(phonemizeWord("rijeka")).toBe("rijˈeː˩˥ka"); // rijéka — LONG rising, so the ː comes too
+        expect(phonemizeWord("srce")).toBe("sˈr˥˩t͡se"); // sȑce — short falling, on the syllabic r
+        // ⚠ A MONOSYLLABLE TAKES NO ˈ BUT DOES TAKE ITS TONE. The falling contrast is phonemic here — grâd
+        // "city" against grȁd "hail" — so dropping it would delete a minimal pair, and the reason ˈ is skipped
+        // (it carries no information on one syllable) simply does not apply to the tone.
+        expect(phonemizeWord("noć")).toBe("noː˥˩t͡ɕ"); // nȏć — long falling
+        // ⚠ …AND WHEN THE SPELLING HAS TWO CONTOURS RECORDED, THE LEXICON ABSTAINS. `grad` is exactly the
+        // grâd/grȁd pair: the position is known, the contour is not, so ˈ-and-no-tone rather than a coin flip.
+        // 2486 keys are marked this way; withholding them moved measured contour accuracy 99.2% → 99.7%.
+        expect(phonemizeWord("grad")).toBe("ɡrad");
+        // Clitics carry no accent of their own in a phrase, whatever citation form the dictionary gives them.
+        expect(phonemizeWord("je")).toBe("je");
+        expect(phonemizeWord("od")).toBe("od");
+        expect(accentLexiconHas("jezik")).toBe(true);
+        expect(accentLexiconHas("godine")).toBe(false); // OOV: the missing tone is missing DATA
     });
 
 });

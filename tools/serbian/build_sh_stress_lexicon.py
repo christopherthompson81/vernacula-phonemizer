@@ -43,7 +43,7 @@ DUMP = "/mnt/data/kaikki-SerboCroatian.jsonl"
 
 # The four ORTHOGRAPHIC accent marks. ⚠ The macron U+0304 is deliberately absent: it writes post-accentual
 # LENGTH (àbdāl), not the accent, and treating it as one would move the mark off the accented syllable.
-ACCENT = {0x300: "short-rising", 0x301: "long-rising", 0x30F: "short-falling", 0x311: "long-falling"}
+ACCENT = {0x300: "SR", 0x301: "LR", 0x30F: "SF", 0x311: "LF"}  # short/long × rising/falling
 LENGTH = 0x304
 VOWELS = set("aeiouаеиоу")
 RHOTIC = set("rр")  # a syllabic ⟨r⟩ is a nucleus (kȓv, pȑst, sȑce, dr̀žava)
@@ -156,14 +156,22 @@ def main() -> int:
                 continue
             got = True
             tones[tone] += 1
-            conflict[key.lower()].add(ordinal)
-            best.setdefault(key.lower(), ordinal)
+            conflict[key.lower()].add((ordinal, tone))
+            best.setdefault(key.lower(), (ordinal, tone))
         stat["with an accented form" if got else "no accented form"] += 1
 
-    # A word with two recorded placements is a genuine homograph (or a dialect split). Keep the first and
-    # count them rather than inventing a tie-break — the engine has no way to disambiguate anyway.
-    ambiguous = {k for k, v in conflict.items() if len(v) > 1}
+    # A word with two recorded PLACEMENTS is a genuine homograph (or a dialect split). Drop it rather than
+    # inventing a tie-break — the engine has no way to disambiguate anyway.
+    ambiguous = {k for k, v in conflict.items() if len({x[0] for x in v}) > 1}
     rows = {k: v for k, v in best.items() if k not in ambiguous}
+
+    # ⚠ SAME PLACEMENT, DIFFERENT CONTOUR is a SEPARATE and much commoner case (366 keys vs 77), and a
+    # first-wins would have shipped a coin-flip as fact — Serbo-Croatian is full of tone minimal pairs
+    # (grâd "city" vs grȁd "hail"). We know where the accent is and not which contour it has, so record
+    # exactly that: the ordinal stands, the tone becomes "--" and the engine emits ˈ with no tone letter.
+    # Abstaining is the same posture as an OOV word, and for the same reason.
+    toneless = {k for k, v in conflict.items() if k not in ambiguous and len({x[1] for x in v}) > 1}
+    rows = {k: (v[0], "--" if k in toneless else v[1]) for k, v in rows.items()}
 
     # ⚠ KEEP ONLY WHAT THE G2P CAN READ. The dump carries Torlakian dialect entries spelled with ⟨ă⟩ (akăl,
     # băzdim, bogatlăk) and Wiktionary AFFIX entries (-ajlija, -irajući). The engine's letter table has no ⟨ă⟩,
@@ -186,11 +194,12 @@ def main() -> int:
         for k, v in stat.most_common():
             print(f"  {k:<26} {v}", file=sys.stderr)
         print(f"  {'distinct keys':<26} {len(best)}", file=sys.stderr)
-        print(f"  {'dropped, ambiguous':<26} {len(ambiguous)}", file=sys.stderr)
+        print(f"  {'dropped, position conflict':<26} {len(ambiguous)}", file=sys.stderr)
+        print(f"  {'tone withheld, contour conflict':<26} {len(toneless)}", file=sys.stderr)
         print(f"  tones {tones.most_common()}", file=sys.stderr)
         print(f"  {'Cyrillic keys added':<26} {added}", file=sys.stderr)
         by_n = collections.Counter()
-        for k, v in rows.items():
+        for k, (v, _t) in rows.items():
             by_n[(len(nuclei(k)), v)] += 1
         for n in (1, 2, 3, 4):
             tot = sum(c for (nn, _), c in by_n.items() if nn == n)
@@ -201,13 +210,17 @@ def main() -> int:
 
     path = os.path.normpath(OUT)
     with open(path, "w", encoding="utf-8") as fh:
-        fh.write("# Serbo-Croatian stress lexicon — word<TAB>stressed-nucleus ordinal (0-based). Shared by the\n")
-        fh.write("# sr / hr / bs engines, which all run serbian.ts's g2p. A nucleus is a vowel OR a syllabic ⟨r⟩.\n")
+        fh.write("# Serbo-Croatian accent lexicon — word<TAB>stressed-nucleus ordinal (0-based)<TAB>accent.\n")
+        fh.write("# The accent is the four-way pitch system: SR short-rising, LR long-rising, SF short-falling,\n")
+        fh.write("# LF long-falling, and `--` = the position is known but two contours are recorded for this\n")
+        fh.write("# spelling (grâd/grȁd), so the engine emits ˈ and withholds the tone rather than guessing.\n")
+        fh.write("# Position is emitted as ˈ; the accent becomes a Chao tone letter + length.\n")
+        fh.write("# Shared by the sr / hr / bs engines, which all run serbian.ts's g2p. A nucleus is a vowel OR a syllabic ⟨r⟩.\n")
         fh.write("# From kaikki.org Serbo-Croatian (Wiktionary extract, CC-BY-SA) — built from the ACCENTED\n")
         fh.write("# ORTHOGRAPHY (rijéka), not the IPA (/rjěːka/), which has a different nucleus count under the\n")
         fh.write("# Ijekavian ⟨ije⟩ reflex. Both scripts. See tools/serbian/build_sh_stress_lexicon.py.\n")
         for k in sorted(rows):
-            fh.write(f"{k}\t{rows[k]}\n")
+            fh.write(f"{k}\t{rows[k][0]}\t{rows[k][1]}\n")
     print(f"wrote {path}: {len(rows)} rows", file=sys.stderr)
     return 0
 

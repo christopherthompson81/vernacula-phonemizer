@@ -2,10 +2,11 @@
  * Serbian (sr, српски) phonemizer — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully phonemic.
  * A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj dj⟩
  * first, then the single Cyrillic OR Latin letters — every grapheme is one phoneme, no vowel reduction. Serbian's
- * lexical PITCH ACCENT is unwritten in ordinary text, so its POSITION comes from stress.tsv (101965 entries,
- * both scripts, from kaikki/Wiktionary) and is emitted as ˈ before the nucleus. The TONE (4-way rising/falling)
- * and length remain folded. Croatian and Bosnian import phonemizeWord from here, so all three share the lexicon
- * — which is the shape of the source too: Wiktionary ships one unified Serbo-Croatian dump.
+ * lexical PITCH ACCENT is unwritten in ordinary text, so it comes from stress.tsv (101965 entries, both
+ * scripts, from kaikki/Wiktionary): POSITION as ˈ before the nucleus, and the FOUR-WAY CONTOUR as a Chao tone
+ * letter after it (˩˥ rising, ˥˩ falling) with ː for the accented syllable's length. Post-accentual length
+ * stays folded. Croatian and Bosnian import phonemizeWord from here, so all three share the lexicon — which is
+ * the shape of the source too: Wiktionary ships one unified Serbo-Croatian dump.
  * docs/investigations/south_slavic_stress_investigation.md. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -30,11 +31,55 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
  * one-grapheme-one-phoneme, follows the spelling. The ordinal is therefore script-independent: the Latin↔Cyrillic
  * mapping is a bijection whose digraphs ⟨lj nj dž⟩ are all consonants.
  */
-let STRESS: Map<string, number> | undefined;
-function stressDict(): Map<string, number> {
-    if (STRESS === undefined) STRESS = loadTsvMap(import.meta.url, "stress.tsv", Number, { optional: true });
+interface Accent { at: number; tone: "SR" | "LR" | "SF" | "LF" | "--" }
+let STRESS: Map<string, Accent> | undefined;
+function stressDict(): Map<string, Accent> {
+    if (STRESS === undefined)
+        STRESS = loadTsvMap(import.meta.url, "stress.tsv", (v) => {
+            const [n, t] = v.split("\t");
+            const at = Number(n);
+            // ⚠ "--" IS A REAL VALUE, not a parse failure: the position is known but the spelling has two
+            // recorded contours (grâd "city" vs grȁd "hail"), so the lexicon withholds the tone on purpose.
+            return Number.isInteger(at) && (t === "SR" || t === "LR" || t === "SF" || t === "LF" || t === "--")
+                ? { at, tone: t }
+                : undefined;
+        }, { optional: true });
     return STRESS;
 }
+
+/** Whether the lexicon knows this word's accent. ⚠ NEEDED BECAUSE ABSENCE IS AMBIGUOUS IN OUTPUT: an OOV word
+ *  is emitted with a fallback ˈ and NO tone, which looks the same as any other untoned word. Serbo-Croatian has
+ *  no toneless words, so the missing tone means "not in the lexicon", never "no accent" — and an eval has to be
+ *  able to tell those apart. Same reason japanese/pitch.ts exports pitchLexiconHas. */
+export function accentLexiconHas(word: string): boolean {
+    return stressDict().has(word.toLowerCase());
+}
+
+// The four-way accent, in the fleet's tone notation: a Chao tone letter immediately after the nucleus, exactly
+// where Vietnamese and Thai put theirs (kʰˈaː˥˩w, mˈaː˧˥). ⚠ NOT the combining caron/circumflex the sources use
+// (ǎ, â) — that is the Serbo-Croatian philological convention, and every OTHER tone language in this fleet
+// writes Chao letters. One notation for tone across 190 languages beats one notation per tradition.
+const TONE: Record<Accent["tone"], string> = { SR: "˩˥", LR: "˩˥", SF: "˥˩", LF: "˥˩", "--": "" };
+const LONG = new Set(["LR", "LF"]); // "--" is not here: withholding the contour withholds its length too
+
+/**
+ * PROCLITICS AND ENCLITICS — the closed class that carries no accent of its own in a running phrase, though the
+ * dictionary gives each a citation form. They were harmless while only ˈ was emitted (all monosyllabic, and a
+ * monosyllable takes no ˈ); a tone letter would assert an accent the utterance does not have. Standard list:
+ * the verbal and pronominal enclitics, the question particle, negation, and the monosyllabic prepositions and
+ * conjunctions. ⚠ Only the forms that are ALWAYS clitic — `mi`/`ti`/`nas`/`vas` are omitted deliberately,
+ * since each is also a full stressed pronoun and the spelling does not say which.
+ */
+const CLITIC = new Set([
+    "sam", "si", "je", "smo", "ste", "su", "ću", "ćeš", "će", "ćemo", "ćete", "bih", "bi", "bismo", "biste",
+    // ⟨te⟩ is both the enclitic pronoun and the conjunction; it is listed once.
+    "me", "te", "ga", "mu", "joj", "ih", "im", "se", "li", "ne",
+    "i", "a", "ni", "da", "u", "na", "o", "po", "za", "od", "do", "iz", "s", "sa", "k", "ka", "uz", "niz",
+    // the same list in Cyrillic — a word is one script, and the corpus for sr is written in the other one
+    "сам", "си", "је", "смо", "сте", "су", "ћу", "ћеш", "ће", "ћемо", "ћете", "бих", "би", "бисмо", "бисте",
+    "ме", "те", "га", "му", "јој", "их", "им", "се", "ли", "не",
+    "и", "а", "ни", "да", "у", "на", "о", "по", "за", "од", "до", "из", "с", "са", "к", "ка", "уз", "низ",
+]);
 
 // The letters that head a syllable, derived from the manifest rather than restated — a vowel letter is one whose
 // IPA value is a vowel, in either script, so this cannot drift from the table above.
@@ -74,7 +119,7 @@ function isNucleus(w: string, i: number): boolean {
 export function phonemizeWord(word: string): string {
     const w = word.toLowerCase();
     let out = "";
-    const nucleusAt: number[] = []; // output offset of each nucleus, in order
+    const nuclei: { start: number; end: number }[] = []; // output span of each nucleus, in order
     for (let i = 0; i < w.length; ) {
         const two = w.slice(i, i + 2);
         if (DIGRAPHS[two]) {
@@ -84,15 +129,24 @@ export function phonemizeWord(word: string): string {
         }
         const c = w[i]!;
         if (LETTERS[c] !== undefined) {
-            if (isNucleus(w, i)) nucleusAt.push(out.length);
+            const start = out.length;
             out += LETTERS[c];
+            if (isNucleus(w, i)) nuclei.push({ start, end: out.length });
         }
         i++; // unknown char (punctuation) → skip
     }
-    if (nucleusAt.length < 2) return out;
-    const k = stressDict().get(w) ?? 0;
-    const at = nucleusAt[Math.min(k, nucleusAt.length - 1)]!;
-    return out.slice(0, at) + "ˈ" + out.slice(at);
+    if (nuclei.length === 0) return out;
+    // ⚠ A CLITIC GETS NOTHING AT ALL, not merely no tone. Most are monosyllabic and so were already unmarked,
+    // but ćemo/ćete/bismo/biste are not — marking those and not the rest would be an inconsistency with no
+    // basis in the language, since an enclitic is unstressed whatever its length.
+    if (CLITIC.has(w)) return out;
+    const acc = stressDict().get(w);
+    const k = Math.min(acc?.at ?? 0, nuclei.length - 1);
+    const n = nuclei[k]!;
+    const mark = nuclei.length > 1 ? "ˈ" : ""; // a monosyllable takes no ˈ — but it DOES take its tone
+    const tail = acc === undefined ? "" : (LONG.has(acc.tone) ? "ː" : "") + TONE[acc.tone];
+    if (mark === "" && tail === "") return out;
+    return out.slice(0, n.start) + mark + out.slice(n.start, n.end) + tail + out.slice(n.end);
 }
 
 // A word (Serbian Cyrillic + Latin incl. diacritics) / number / punctuation token.

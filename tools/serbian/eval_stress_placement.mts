@@ -38,6 +38,10 @@ for (const l of readFileSync(LEX, "utf8").split("\n")) {
 }
 
 let inLex = 0, covOk = 0, oov = 0, oovOk = 0, mono = 0, noAcc = 0;
+// TONE. The referee writes the accent as caron = RISING / circumflex = FALLING on the nucleus, with ː for
+// length — the same four-way system the lexicon carries and we now emit as a Chao letter (˩˥ / ˥˩) plus ː.
+let toneN = 0, toneOk = 0, lenOk = 0;
+const toneMiss: string[] = [];
 const misses: { w: string; ours: number; ref: number }[] = [];
 for (const line of readFileSync(REF, "utf8").split("\n")) {
     if (!line || line.startsWith("#")) continue;
@@ -52,6 +56,32 @@ for (const line of readFileSync(REF, "utf8").split("\n")) {
         if (!isNuc) continue;
         if (hasAcc(d)) k = n;
         n++;
+    }
+    // referee tone/length on the accented nucleus, read before the monosyllable skip (a monosyllable's
+    // falling accent is phonemic here: grâd "city" vs grȁd "hail")
+    let refTone = "", refLong = false;
+    {
+        let m = 0;
+        for (const seg of ipa.split(" ").filter(Boolean)) {
+            const d = seg.normalize("NFD");
+            const base = [...d].filter((c) => !ACC.has(c.codePointAt(0)!) && c !== "ː" && c !== "̩" && c !== "̍");
+            const isNuc = V.has(base[0] ?? "") || (base[0] === "r" && (d.includes("̩") || d.includes("̍")));
+            if (!isNuc) continue;
+            if (hasAcc(d)) {
+                refTone = d.includes("\u030c") || d.includes("\u0306") ? "rising" : "falling";
+                refLong = seg.includes("ː");
+            }
+            m++;
+        }
+    }
+    if (refTone) {
+        const out2 = phonemizeWord(word);
+        if (out2.includes("˩˥") || out2.includes("˥˩")) {
+            toneN++;
+            const ours = out2.includes("˩˥") ? "rising" : "falling";
+            if (ours === refTone) toneOk++; else if (toneMiss.length < 10) toneMiss.push(`${word}: ours ${ours}, ref ${refTone}`);
+            if (out2.includes("ː") === refLong) lenOk++;
+        }
     }
     if (n < 2) { mono++; continue; }
     if (k < 0) { noAcc++; continue; }
@@ -82,6 +112,10 @@ console.log(`  lexicon-covered      ${covOk}/${inLex} = ${((100 * covOk) / inLex
 console.log(`    of ${misses.length} misses, ${ije} are the ⟨ije⟩ counting convention (same vowel, different ordinal)`);
 console.log(`    genuine disagreement ${real}/${inLex} = ${((100 * real) / inLex).toFixed(1)}%  → agreement ${(100 - (100 * real) / inLex).toFixed(1)}%`);
 console.log(`  OOV first-nucleus    ${oovOk}/${oov} = ${((100 * oovOk) / oov).toFixed(1)}%`);
+console.log(`  TONE  (rising vs falling, where we emit one and the referee marks one)`);
+console.log(`    contour ${toneOk}/${toneN} = ${((100 * toneOk) / toneN).toFixed(1)}%`);
+console.log(`    length  ${lenOk}/${toneN} = ${((100 * lenOk) / toneN).toFixed(1)}%`);
+toneMiss.forEach((m) => console.log(`      ${m}`));
 console.log(`    ⚠ only ${oov} rows — the referee and the lexicon are both Wiktionary, so almost nothing is OOV here`);
 console.log(`    and what IS left is the long rare tail, where first-nucleus is weakest. The corpus-weighted`);
 console.log(`    figure (FLEURS, frequency-weighted) is the one that describes running text.`);
