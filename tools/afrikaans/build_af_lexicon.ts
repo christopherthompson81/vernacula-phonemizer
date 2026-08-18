@@ -34,9 +34,42 @@ const NORMALIZE: readonly (readonly [RegExp, string])[] = [
     [/æ/gu, "ɛ"], // ⟨e⟩ before /r l/: RCRL narrow-transcribes the lowered allophone; we do not
     [/ʊ/gu, "u"], // the ⟨oo⟩ centering-diphthong onset [ʊə]~[uə]
     [/ɡ/gu, "χ"], // ⟨g⟩ in the few rows RCRL writes as a stop; the engine has no /ɡ/
-    [/[ˈˌ.]/gu, ""], // ⚠ STRESS AND SYLLABLE DOTS ARE STRIPPED — the engine emits neither, and a lexicon that
-    // carried them would make shipped output inconsistent with every word the rules produce.
+    // ⚠ SYLLABLE DOTS ARE STRIPPED; PRIMARY STRESS IS KEPT AND RE-ANCHORED.
+    //
+    // This previously dropped `ˈ` as well, on the reasoning that "the engine emits neither, and a
+    // lexicon that carried them would make shipped output inconsistent with every word the rules
+    // produce". That reasoning was sound and the conclusion followed from it — but the premise was the
+    // thing to fix. The engine ALREADY COMPUTES stress placement (`stressedNucleus`: first syllable,
+    // past an unstressed prefix, with derived loan-suffix overrides) and used it only to pick vowel
+    // quality. It now emits the mark, so keeping the lexicon's is the consistent choice, not the
+    // inconsistent one.
+    //
+    // Measured: the rule alone places stress on the same syllable as RCRL for 75.3% of 25,550 words;
+    // the lexicon covers 37.2% of af_za corpus tokens outright. Effective accuracy on the corpus is
+    // ~84.5%, against 0% when no mark is emitted at all.
+    //
+    // ⚠ AND THE TWO CONVENTIONS DIFFER. RCRL marks before the syllable ONSET (`a.fri.ˈkɑːns`), this
+    // repo before the NUCLEUS (`nˈaða`, `kˈaða` — see spanish.ts). Un-stripping without re-anchoring
+    // would ship a second convention inside one lexicon. `reanchorStress` below moves the mark across
+    // the onset to sit immediately before its vowel.
+    [/[ˌ.]/gu, ""],
 ];
+
+/**
+ * Move a primary-stress mark from before the syllable ONSET to before its NUCLEUS — the convention this
+ * repo's engines emit (`nˈaða`, not `ˈnaða`). Applied AFTER the dots are gone, so the onset is simply
+ * the consonant run between the mark and the next vowel.
+ */
+const IPA_VOWEL = /[aeiouyøœəɛɔɑæɪʊ]/u;
+function reanchorStress(v: string): string {
+    const i = v.indexOf("\u02c8");
+    if (i < 0) return v;
+    const rest = v.slice(i + 1);
+    let k = 0;
+    while (k < rest.length && !IPA_VOWEL.test(rest[k]!)) k += 1;
+    if (k === 0 || k >= rest.length) return v;           // already at a vowel, or no vowel follows
+    return v.slice(0, i) + rest.slice(0, k) + "\u02c8" + rest.slice(k);
+}
 
 const rows = readFileSync(join(REPO, "tools/referee-eval/referees/af.rcrl-apd.tsv"), "utf8")
     .split("\n").filter((l) => l.trim() && !l.startsWith("#")).map((l) => l.split("\t"));
@@ -160,6 +193,7 @@ for (const [word, ipa] of rows) {
     if ([...w].length === 1) { droppedLetter++; continue; }
     let v = ipa.normalize("NFC");
     for (const [re, rep] of NORMALIZE) v = v.replace(re, rep);
+    v = reanchorStress(v);
     // ⚠ WORD-INITIAL ⟨v⟩ IS [f], and the 2.8% of rows that write [v] are transcription noise we must not ship.
     // Both sources agree overwhelmingly — RCRL 2363:69, en.wiktionary 184:13 — and Run 6 established that the
     // f→v miss class is noise rather than a rule. A dictionary's per-word value normally beats a majority rule,

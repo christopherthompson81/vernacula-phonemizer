@@ -18,35 +18,35 @@ import { getPhonemizer } from "../src/registry.ts";
 // notation. Signatures below. DEFERRED: a stress/syllable model, a proper-noun lexicon, nasalization.
 describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Standard Afrikaans)", () => {
     test("⟨g⟩ = [χ] fricative + word-final obstruent DEVOICING", () => {
-        expect(phonemizeWord("dag")).toBe("daχ"); // ⟨g⟩ = velar/uvular fricative [χ], not [ɡ]
-        expect(phonemizeWord("agt")).toBe("aχt");
-        expect(phonemizeWord("goed")).toBe("χut"); // g→χ; ⟨oe⟩→u; final ⟨d⟩ DEVOICES → t
-        expect(phonemizeWord("hond")).toBe("ɦɔnt"); // ⟨h⟩→ɦ; final ⟨d⟩→t
-        expect(phonemizeWord("aand")).toBe("ɑːnt"); // ⟨aa⟩→ɑː; final ⟨d⟩→t
+        expect(phonemizeWord("dag")).toBe("dˈaχ"); // ⟨g⟩ = velar/uvular fricative [χ], not [ɡ]
+        expect(phonemizeWord("agt")).toBe("ˈaχt");
+        expect(phonemizeWord("goed")).toBe("χˈut"); // g→χ; ⟨oe⟩→u; final ⟨d⟩ DEVOICES → t
+        expect(phonemizeWord("hond")).toBe("ɦˈɔnt"); // ⟨h⟩→ɦ; final ⟨d⟩→t
+        expect(phonemizeWord("aand")).toBe("ˈɑːnt"); // ⟨aa⟩→ɑː; final ⟨d⟩→t
     });
 
     test("open/closed vowel LENGTH + geminate collapse", () => {
-        expect(phonemizeWord("kat")).toBe("kat"); // ⟨a⟩ in a CLOSED syllable → short [a]
-        expect(phonemizeWord("water")).toBe("vɑːtər"); // ⟨a⟩ in an OPEN syllable → long [ɑː]; ⟨w⟩→v; final -er→ər
-        expect(phonemizeWord("appel")).toBe("apəl"); // a DOUBLED consonant is a single phoneme (marks the vowel short)
+        expect(phonemizeWord("kˈat")).toBe("kˈat"); // ⟨a⟩ in a CLOSED syllable → short [a]
+        expect(phonemizeWord("water")).toBe("vˈɑːtər"); // ⟨a⟩ in an OPEN syllable → long [ɑː]; ⟨w⟩→v; final -er→ər
+        expect(phonemizeWord("appel")).toBe("ˈapəl"); // a DOUBLED consonant is a single phoneme (marks the vowel short)
     });
 
     test("long mids are CENTERING DIPHTHONGS (ee=iə, oo=uə); ie/oe/ui", () => {
-        expect(phonemizeWord("een")).toBe("iən"); // ⟨ee⟩ → centering [iə]
-        expect(phonemizeWord("twee")).toBe("twiə"); // ⟨tw⟩ is the GLIDE onset (see the ⟨Cw⟩ test); ⟨ee⟩→iə
-        expect(phonemizeWord("groot")).toBe("χruət"); // ⟨oo⟩ → centering [uə]
-        expect(phonemizeWord("sewe")).toBe("siəvə"); // open ⟨e⟩→iə (stressed); ⟨w⟩→v; final ⟨e⟩→ə
-        expect(phonemizeWord("huis")).toBe("ɦœys"); // ⟨ui⟩ → [œy]
-        expect(phonemizeWord("bietjie")).toBe("biki"); // ⟨ie⟩→i; the diminutive ⟨tjie⟩→[ki]
+        expect(phonemizeWord("een")).toBe("ˈiən"); // ⟨ee⟩ → centering [iə]
+        expect(phonemizeWord("twee")).toBe("twˈiə"); // ⟨tw⟩ is the GLIDE onset (see the ⟨Cw⟩ test); ⟨ee⟩→iə
+        expect(phonemizeWord("groot")).toBe("χrˈuət"); // ⟨oo⟩ → centering [uə]
+        expect(phonemizeWord("sewe")).toBe("sˈiəvə"); // open ⟨e⟩→iə (stressed); ⟨w⟩→v; final ⟨e⟩→ə
+        expect(phonemizeWord("huis")).toBe("ɦˈœys"); // ⟨ui⟩ → [œy]
+        expect(phonemizeWord("bietjie")).toBe("bˈiki"); // ⟨ie⟩→i; the diminutive ⟨tjie⟩→[ki]
     });
 
     test("⟨y⟩ diphthong + circumflex-long diacritic", () => {
-        expect(phonemizeWord("altyd")).toBe("altəit"); // ⟨y⟩ → diphthong [əi]; final ⟨d⟩→t
-        expect(phonemizeWord("môre")).toBe("mɔːrə"); // ⟨ô⟩ → long [ɔː]
+        expect(phonemizeWord("altyd")).toBe("ˈaltəit"); // ⟨y⟩ → diphthong [əi]; final ⟨d⟩→t
+        expect(phonemizeWord("môre")).toBe("mˈɔːrə"); // ⟨ô⟩ → long [ɔː]
     });
 
     test("text: words + clause punctuation (stress deferred)", () => {
-        expect(createAfrikaans().text("Die man loop huis toe.")).toBe("di man luəp ɦœys tu .");
+        expect(createAfrikaans().text("Die man loop huis toe.")).toBe("dˈi mˈan lˈuəp ɦˈœys tˈu .");
     });
     // ⚠ WORD-FINAL ⟨c⟩ IS [k] — issue #757. The rule is "soft [s] BEFORE a front vowel", and word-finally
     // there is no following vowel, so the soft branch cannot apply. It used to, because the test was
@@ -69,49 +69,49 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // majority is [sk] — Schalk, Schoeman, Schutte, Labuschagne — against Schuster/Laubscher [ʃ] and
     // Hauptfleisch [s], so [sk] is the entry and those three are known misses.
     test("⟨sch⟩ is [sk], out-ranking the ⟨ch⟩ digraph", () => {
-        expect(phonemizeWord("Schalk")).toBe("skalk"); // referee skalk — exact
-        expect(phonemizeWord("Schoeman")).toBe("skuman"); // referee ˈskuman
-        expect(phonemizeWord("skryf")).toBe("skrəif"); // ⟨schr⟩ falls out of ⟨sch⟩+⟨r⟩ with no entry
+        expect(phonemizeWord("Schalk")).toBe("skˈalk"); // referee skˈalk — exact
+        expect(phonemizeWord("Schoeman")).toBe("skˈuman"); // referee ˈskuman
+        expect(phonemizeWord("skryf")).toBe("skrˈəif"); // ⟨schr⟩ falls out of ⟨sch⟩+⟨r⟩ with no entry
     });
 
     // ⚠ THESE ASSERT THE RULE PATH. `phonemizeWord` is lexicon-first since #776, so a golden written to
     // document a GRAPHEME rule has to call phonemizeWordRules or it silently starts testing the dictionary.
     test("⟨ch⟩ is the digraph [ʃ], and ⟨chr⟩ is [kr]", () => {
-        expect(phonemizeWordRules("chirurg")).toBe("ʃirœrχ"); // referee ʃiˈrərχ
-        expect(phonemizeWordRules("China")).toBe("ʃina"); // referee ˈʃi.na
+        expect(phonemizeWordRules("chirurg")).toBe("ʃˈirœrχ"); // referee ʃiˈrərχ
+        expect(phonemizeWordRules("China")).toBe("ʃˈina"); // referee ˈʃi.na
         // ⚠ AND THE SECOND REFEREE DISAGREES WITH THIS RULE: RCRL writes Christus ˈxrə.stœs, i.e. ⟨chr⟩ as the
         // fricative, which #758 never considered (it weighed [kr] against [ʃr]). The SHIPPED path takes RCRL's
         // value for this word via the lexicon; the rule is left alone because one word is not a re-adjudication.
-        expect(phonemizeWordRules("Christus")).toBe("krəstœs"); // ⟨chr⟩ → kr, not *ʃrəstœs
-        expect(phonemizeWord("Christus")).toBe("χrəstœs"); // …and what users actually get: RCRL ˈxrə.stœs
-        expect(phonemizeWordRules("chemie")).toBe("ʃiəmi"); // ⚠ still the rule's known miss — both referees say [x]
-        expect(phonemizeWord("chemie")).toBe("χiəmi"); // …and the LEXICON now fixes it: RCRL ˈxiə.mi, primary ˈxɛmi
+        expect(phonemizeWordRules("Christus")).toBe("krˈəstœs"); // ⟨chr⟩ → kr, not *ʃrəstœs
+        expect(phonemizeWord("Christus")).toBe("χrˈəstœs"); // …and what users actually get: RCRL ˈxrə.stœs
+        expect(phonemizeWordRules("chemie")).toBe("ʃˈiəmi"); // ⚠ still the rule's known miss — both referees say [x]
+        expect(phonemizeWord("chemie")).toBe("χˈiəmi"); // …and the LEXICON now fixes it: RCRL ˈxiə.mi, primary ˈxɛmi
     });
 
     // ⚠ A BARE SINGLE LETTER IS SPELLED, NOT SOUNDED (#761) — the initialism normalizer only fires on runs
     // of two or more, so a lone letter used to fall through to the word path and come out as its phone
     // (C → k, B → p). The referee holds all 26 letters; this moved af 1658 → 1677/2220 on its own.
     test("a bare single letter is spelled as its name", () => {
-        expect(phonemizeWord("C")).toBe("siə"); // referee sɪə
-        expect(phonemizeWord("B")).toBe("biə"); // referee bɪə
-        expect(phonemizeWord("X")).toBe("ɛks"); // referee ɛks — exact
-        expect(createAfrikaans().text("Vitamien C").trim()).toBe("fitamin siə");
+        expect(phonemizeWord("C")).toBe("sˈiə"); // referee sɪə
+        expect(phonemizeWord("B")).toBe("bˈiə"); // referee bɪə
+        expect(phonemizeWord("X")).toBe("ˈɛks"); // referee ɛks — exact
+        expect(createAfrikaans().text("Vitamien C").trim()).toBe("fitamˈin sˈiə");
         expect(phonemizeWord("'n")).toBe("ə"); // …and the one-letter-looking WORD is untouched
         // In running text the two that move are both improvements: ⟨x⟩ as a symbol reads "eks", and
         // ⟨e-pos⟩ (email) is said "ee-pos" — the letter name — not with a schwa.
-        expect(createAfrikaans().text("x = 5").trim()).toBe("ɛks χələik ɑːn fəif");
-        expect(createAfrikaans().text("e-pos").trim()).toBe("iə pɔs");
+        expect(createAfrikaans().text("x = 5").trim()).toBe("ˈɛks χəlˈəik ˈɑːn fˈəif");
+        expect(createAfrikaans().text("e-pos").trim()).toBe("ˈiə pˈɔs");
         // ⚠ …and the one-letter UNITS are declared, because spelling made their absence audible: an
         // undeclared `3 g` read "drie GEE" — a confident wrong WORD, not just a wrong phone (#762 review).
-        expect(createAfrikaans().text("3 g suiker").trim()).toBe("dri χram sœykər");
-        expect(createAfrikaans().text("5 l water").trim()).toBe("fəif litər vɑːtər");
+        expect(createAfrikaans().text("3 g suiker").trim()).toBe("drˈi χrˈam sˈœykər");
+        expect(createAfrikaans().text("5 l water").trim()).toBe("fˈəif lˈitər vˈɑːtər");
     });
 
     test("a word-final ⟨c⟩ is [k], not the soft [s]", () => {
-        expect(phonemizeWord("franc")).toBe("frank");
-        expect(phonemizeWord("arc")).toBe("ark");
-        expect(phonemizeWord("bloc")).toBe("blɔk");
-        expect(phonemizeWord("cent")).toBe("sɛnt"); // …and ⟨c⟩ BEFORE a front vowel is still soft
+        expect(phonemizeWord("franc")).toBe("frˈank");
+        expect(phonemizeWord("arc")).toBe("ˈark");
+        expect(phonemizeWord("bloc")).toBe("blˈɔk");
+        expect(phonemizeWord("cent")).toBe("sˈɛnt"); // …and ⟨c⟩ BEFORE a front vowel is still soft
     });
 
     // ── MORPHEME-SEAM VOICING (#772) ──────────────────────────────────────────────────────────────────
@@ -121,10 +121,10 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         // ⚠ The trigger set used to be the literal "ptksfcgx" — a spelling-level restatement of "voiceless"
         // that had drifted from the grapheme table it mirrors. ⟨v⟩ is [f] and ⟨q⟩ is [k], so neither
         // devoiced a preceding ⟨d⟩ and `advies` read [adfis]: a voiced stop before a voiceless fricative,
-        // which Afrikaans does not have. Now derived from `fixed` (referee atfis — exact).
-        expect(phonemizeWord("advies")).toBe("atfis");
-        expect(phonemizeWord("goedkoop")).toBe("χutkuəp"); // …and the letters that already worked still do
-        expect(phonemizeWord("ontbyt")).toBe("ɔntbəit"); // ⚠ NOT the reverse: no regressive VOICING (referee ɔntbəi̯t)
+        // which Afrikaans does not have. Now derived from `fixed` (referee ˈatfis — exact).
+        expect(phonemizeWord("advies")).toBe("ˈatfis");
+        expect(phonemizeWord("goedkoop")).toBe("χˈutkuəp"); // …and the letters that already worked still do
+        expect(phonemizeWord("ontbyt")).toBe("ɔntbˈəit"); // ⚠ NOT the reverse: no regressive VOICING (referee ɔntbəi̯t)
         // ⚠ PINNED AS A SET, because "derived, so it cannot drift" is only half true: the trigger is
         // `fixed` ∩ `voicelessPhones`, and voicelessPhones is still hand-written. Adding a single-letter
         // grapheme whose phone is missing from that list would drop it out of the trigger silently — the
@@ -142,31 +142,31 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
 
     test("a vowel-initial SUFFIX resyllabifies, so the stem does not devoice", () => {
         // The /d/ of ⟨send⟩ is the onset of the next syllable in sen·ding, and a coda rule cannot reach it.
-        expect(phonemizeWord("sending")).toBe("sɛndəŋ"); // referee ˈsɛn.dəŋ — was *sɛntəŋ
-        expect(phonemizeWord("verbeelding")).toBe("fərbiəldəŋ"); // referee fərˈbɪə̯l.dəŋ
-        expect(phonemizeWord("skoolvoeding")).toBe("skuəlfudəŋ"); // a compound seam AND a suffix seam in one word
+        expect(phonemizeWord("sending")).toBe("sˈɛndəŋ"); // referee ˈsɛn.dəŋ — was *sɛntəŋ
+        expect(phonemizeWord("verbeelding")).toBe("fərbˈiəldəŋ"); // referee fərˈbɪə̯l.dəŋ
+        expect(phonemizeWord("skoolvoeding")).toBe("skˈuəlfudəŋ"); // a compound seam AND a suffix seam in one word
         // ⚠ AND A VOWEL-INITIAL COMPOUND ELEMENT DOES NOT BLOCK IT — that is why the suffix list is closed
         // rather than a "next part starts with a vowel" test. A compound element is its own prosodic word.
         // ⚠ THESE TWO MUST ACTUALLY SPLIT for the assertion to mean anything. An earlier draft pinned
         // `raadgewer`, which `decompose` returns as ONE part — there was no seam, the [t] came from the
         // intra-morpheme regressive rule (⟨g⟩=[χ]), and the closed-list decision had no coverage at all.
         expect(decompose("bloedarm").parts).toEqual(["bloed", "arm"]);
-        expect(phonemizeWord("bloedarm")).toBe("blutarm"); // vowel-initial ELEMENT: the ⟨d⟩ still devoices
+        expect(phonemizeWord("bloedarm")).toBe("blˈutarm"); // vowel-initial ELEMENT: the ⟨d⟩ still devoices
         expect(decompose("handomkeer").parts).toEqual(["hand", "om", "keer"]);
-        expect(phonemizeWord("handomkeer")).toBe("ɦantɔmkiər");
-        expect(phonemizeWord("hond")).toBe("ɦɔnt"); // …and word-finally, unchanged
+        expect(phonemizeWord("handomkeer")).toBe("ɦˈantɔmkiər");
+        expect(phonemizeWord("hond")).toBe("ɦˈɔnt"); // …and word-finally, unchanged
     });
 
     test("a seam ⟨d⟩ DEGEMINATES against a following /t/ or /d/ — but a true /t/+/t/ does not", () => {
-        expect(phonemizeWord("veldtog")).toBe("fɛltɔχ"); // referee ˈfɛl.tɔχ — was *fɛlttɔχ
-        expect(phonemizeWord("wildtuin")).toBe("vəltœyn"); // referee ˈvəltœi̯n
+        expect(phonemizeWord("veldtog")).toBe("fˈɛltɔχ"); // referee ˈfɛl.tɔχ — was *fɛlttɔχ
+        expect(phonemizeWord("wildtuin")).toBe("vˈəltœyn"); // referee ˈvəltœi̯n
         // ⚠ THE ONSET SURVIVES, WITH ITS OWN VOICING: land·dros keeps [d], it does not become [t].
-        expect(phonemizeWord("landdros")).toBe("landrɔs"); // referee ˈlan.drɔs
-        expect(phonemizeWord("bestanddeel")).toBe("bəstandiəl"); // referee bəˈstanˌdɪə̯l
+        expect(phonemizeWord("landdros")).toBe("lˈandrɔs"); // referee ˈlan.drɔs
+        expect(phonemizeWord("bestanddeel")).toBe("bəstˈandiəl"); // referee bəˈstanˌdɪə̯l
         // ⚠ AND THE ⟨d⟩ CONDITION IS LOAD-BEARING, not tidiness. An unconditional coronal-stop rule was
         // measured first and lost this word: a true underlying /t/ against /t/ is a GEMINATE the referee
         // writes out. Only the ⟨d⟩ that Auslautverhärtung already neutralized has no contrast left to keep.
-        expect(phonemizeWord("groottoon")).toBe("χruəttuən"); // referee χrʊət.tʊən — the geminate stays
+        expect(phonemizeWord("groottoon")).toBe("χrˈuəttuən"); // referee χrʊət.tʊən — the geminate stays
     });
 
     // ── ⟨Cw⟩ ONSET (#773) ─────────────────────────────────────────────────────────────────────────────
@@ -175,18 +175,18 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // (swaar/twaalf [w] beside swaan/twee [v]). The RCRL secondary is 260:1 for the glide, which is what
     // an independent source is for. Every expectation below is RCRL-exact.
     test("⟨w⟩ is the glide [w] in a morpheme-initial obstruent cluster", () => {
-        expect(phonemizeWord("swaar")).toBe("swɑːr"); // RCRL swɑːr
-        expect(phonemizeWord("twee")).toBe("twiə"); // RCRL twiə
-        expect(phonemizeWord("kwaad")).toBe("kwɑːt"); // RCRL kwɑːt
-        expect(phonemizeWord("dwaal")).toBe("dwɑːl"); // RCRL dwɑːl
+        expect(phonemizeWord("swaar")).toBe("swˈɑːr"); // RCRL swˈɑːr
+        expect(phonemizeWord("twee")).toBe("twˈiə"); // RCRL twiə
+        expect(phonemizeWord("kwaad")).toBe("kwˈɑːt"); // RCRL kwɑːt
+        expect(phonemizeWord("dwaal")).toBe("dwˈɑːl"); // RCRL dwɑːl
         // ⚠ MORPHEME-initial, so a prefixed stem reaches it — the word Run 5 recorded as a permanent miss
         // because the eval FOLD could only be word-initial (the backbone strips the seam before folds run).
-        expect(phonemizeWord("verdwyn")).toBe("fərdwəin"); // RCRL fər.ˈdwəin
+        expect(phonemizeWord("verdwyn")).toBe("fərdwˈəin"); // RCRL fər.ˈdwəin
         // ⚠ AND THE TWO NEGATIVES, which are why the rule is anchored at index 1 rather than "after any
         // obstruent": a ⟨Cw⟩ spanning a SYLLABLE boundary or a COMPOUND seam is not an onset cluster.
-        expect(phonemizeWord("antwoord")).toBe("antvuərt"); // ant.woord — RCRL ˈant.vuərt, [v] not [w]
-        expect(phonemizeWord("brandweer")).toBe("brantviər"); // brand·weer — RCRL ˈbrant.viər
-        expect(phonemizeWord("weer")).toBe("viər"); // …and a bare ⟨w⟩ is still [v]
+        expect(phonemizeWord("antwoord")).toBe("ˈantvuərt"); // ant.woord — RCRL ˈant.vuərt, [v] not [w]
+        expect(phonemizeWord("brandweer")).toBe("brˈantviər"); // brand·weer — RCRL ˈbrant.viər
+        expect(phonemizeWord("weer")).toBe("vˈiər"); // …and a bare ⟨w⟩ is still [v]
     });
 
     // ⚠ THE LINKING ⟨-s-⟩ IS THE TRAP THIS RULE FALLS INTO IF THE SPLITTER MISPLACES IT. voedingswaarde is
@@ -197,9 +197,9 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // rejected, since it also denied the genuine onsets of berg·kwaggas / drie·kwart / hoof·sweep (−13).
     test("the linking ⟨-s-⟩ goes on the HEAD, so it cannot fake a ⟨Cw⟩ onset", () => {
         expect(decompose("voedingswaarde").parts).toEqual(["voedings", "waarde"]);
-        expect(phonemizeWord("voedingswaarde")).toBe("fudəŋsvɑːrdə"); // RCRL ˈfu.dəŋs.vɑːr.də
-        expect(phonemizeWord("gebruikswaarde")).toBe("χəbrœyksvɑːrdə"); // RCRL xə.ˈbrœyks.vɑːr.də
-        expect(phonemizeWord("kruideniersware")).toBe("krœydənirsvɑːrə"); // RCRL krœy.də.ˈnirs.vɑː.rə
+        expect(phonemizeWord("voedingswaarde")).toBe("fˈudəŋsvɑːrdə"); // RCRL ˈfu.dəŋs.vɑːr.də
+        expect(phonemizeWord("gebruikswaarde")).toBe("χəbrˈœyksvɑːrdə"); // RCRL xə.ˈbrœyks.vɑːr.də
+        expect(phonemizeWord("kruideniersware")).toBe("krœydənˈirsvɑːrə"); // RCRL krœy.də.ˈnirs.vɑː.rə
         // ⚠ AND A HEAD THAT ALREADY ENDS IN ⟨s⟩ MAY NOT TAKE THE LINK — else the head's own final ⟨s⟩ is
         // read as the Fugen and the next element loses its onset (tuiss·pan, polss·lag). Worth −32.
         expect(decompose("tuisspan").parts).toEqual(["tuis", "span"]);
@@ -214,21 +214,21 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // it cost 9 words on the independent primary (see the manifest note).
     test("an unstressed OPEN syllable keeps the tense vowel quality, short", () => {
         // ⟨o⟩ ɔ→u — every one of these is RCRL-EXACT, not merely closer.
-        expect(phonemizeWord("kilometer")).toBe("kilumiətər"); // RCRL ˈki.lu.miə.tər — was *kilɔmiətər*
-        expect(phonemizeWord("kilogram")).toBe("kiluχram"); // RCRL ˈki.lu.xram
-        expect(phonemizeWord("advokaat")).toBe("atfukɑːt"); // RCRL at.fu.ˈkɑːt
-        expect(phonemizeWord("ammoniete")).toBe("amunitə"); // RCRL a.mu.ˈni.tə
+        expect(phonemizeWord("kilometer")).toBe("kˈilumiətər"); // RCRL ˈki.lu.miə.tər — was *kilɔmiətər*
+        expect(phonemizeWord("kilogram")).toBe("kˈiluχram"); // RCRL ˈki.lu.xram
+        expect(phonemizeWord("advokaat")).toBe("atfukˈɑːt"); // RCRL at.fu.ˈkɑːt
+        expect(phonemizeWord("ammoniete")).toBe("amunˈitə"); // RCRL a.mu.ˈni.tə
         // ⟨u⟩ œ→y — the cell with the only INDEPENDENT word-level evidence (+4 on the primary), and it had no
         // test at all until review: deleting the manifest entry left all 37 af tests green while silently
         // changing ~1,100 stems.
-        expect(phonemizeWord("formule")).toBe("fɔrmylə"); // RCRL fɔr.ˈmy.lə
-        expect(phonemizeWord("akkuraat")).toBe("akyrɑːt"); // RCRL a.ky.ˈrɑːt
-        expect(phonemizeWord("afsku")).toBe("afsky"); // RCRL ˈaf.sky
+        expect(phonemizeWord("formule")).toBe("fˈɔrmylə"); // RCRL fɔr.ˈmy.lə
+        expect(phonemizeWord("akkuraat")).toBe("akyrˈɑːt"); // RCRL a.ky.ˈrɑːt
+        expect(phonemizeWord("afsku")).toBe("ˈafsky"); // RCRL ˈaf.sky
         // ⚠ AND THE UNSTRESSED-CLOSED CELL IS UNTOUCHED — confirmed by the same derivation (ɔ 97%, œ 97%).
-        expect(phonemizeWordRules("kanon")).toBe("kɑːnɔn"); // unstressed-open ⟨a⟩ + CLOSED ⟨o⟩ → ɔ; RCRL ka.ˈnɔn
+        expect(phonemizeWordRules("kanon")).toBe("kˈɑːnɔn"); // unstressed-open ⟨a⟩ + CLOSED ⟨o⟩ → ɔ; RCRL ka.ˈnɔn
         // ⚠ NOT a control for that cell, and it was mislabelled as one: `muskiet` takes first-syllable stress
         // here, so its ⟨u⟩ pins `vowelsShort`, not `unstressedReduction`. Kept as the STRESSED-closed pin it is.
-        expect(phonemizeWordRules("muskiet")).toBe("mœskit"); // stressed closed ⟨u⟩ → œ
+        expect(phonemizeWordRules("muskiet")).toBe("mˈœskit"); // stressed closed ⟨u⟩ → œ
     });
 
     // ── DERIVED STRESS TABLE (#775) ──────────────────────────────────────────────────────────────────
@@ -237,16 +237,16 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // concluded from an oracle that ALL stress rules together were worth ~45 words — that oracle covered 554
     // of the primary's 2220 rows; on the secondary's 24,709 it is worth +1168 (4.3pp).
     test("the derived stress table places Latinate suffix stress", () => {
-        expect(phonemizeWord("klassifiseer")).toBe("klasifisiər"); // ⟨ifiseer⟩ FINAL — RCRL kla.si.fi.ˈsiər
-        expect(phonemizeWord("neutraliseer")).toBe("nøːtralisiər"); // ⟨aliseer⟩ final — RCRL nøː.tra.li.ˈsiər
-        expect(phonemizeWord("privatisering")).toBe("prifatisiərəŋ"); // ⟨isering⟩ PENULT — RCRL pri.fa.ti.ˈsiə.rəŋ
-        expect(phonemizeWord("akrobatiese")).toBe("akrubɑːtisə"); // ⟨tiese⟩ ANTEPENULT — RCRL a.kru.ˈbɑː.ti.sə
+        expect(phonemizeWord("klassifiseer")).toBe("klasifisˈiər"); // ⟨ifiseer⟩ FINAL — RCRL kla.si.fi.ˈsˈiər
+        expect(phonemizeWord("neutraliseer")).toBe("nøːtralisˈiər"); // ⟨aliseer⟩ final — RCRL nøː.tra.li.ˈsˈiər
+        expect(phonemizeWord("privatisering")).toBe("prifatisˈiərəŋ"); // ⟨isering⟩ PENULT — RCRL pri.fa.ti.ˈsˈiə.rəŋ
+        expect(phonemizeWord("akrobatiese")).toBe("akrubˈɑːtisə"); // ⟨tiese⟩ ANTEPENULT — RCRL a.kru.ˈbɑː.ti.sə
         // ⚠ ⟨tig⟩ IS EXCLUDED BY NAME and these are why. It is genuinely penult for the bulk (gunstig,
         // aandagtig) and passes every statistical filter, but the -tig NUMERALS are a closed, high-frequency,
         // INITIALLY-stressed class it would wreck — and they are generated by numbers.ts, so they are read
         // aloud constantly. Dropping it measured better on every axis, not just on these.
-        expect(phonemizeWord("negentig")).toBe("niəχəntəχ"); // RCRL ˈniə.xən.təx — NOT *nəχɛntəχ
-        expect(phonemizeWord("sewentig")).toBe("siəvəntəχ"); // RCRL ˈsiə.vən.təx
+        expect(phonemizeWord("negentig")).toBe("nˈiəχəntəχ"); // RCRL ˈniə.xən.təx — NOT *nəχɛntəχ
+        expect(phonemizeWord("sewentig")).toBe("sˈiəvəntəχ"); // RCRL ˈsˈiə.vən.təx
     });
 
     // ⚠ A VOWEL-LETTER RUN IS NOT A NUCLEUS, and counting stress positions from the END makes that load-bearing.
@@ -257,10 +257,10 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
     // spelling's vowel-run count — precisely the words where the two counts cannot disagree — and no golden
     // covered a hiatus. It took reading the emitter beside the counter.
     test("stress counted from the END uses NUCLEI, not vowel-letter runs", () => {
-        expect(phonemizeWordRules("biologiese")).toBe("biuluəχisə"); // RCRL bi.u.ˈluə.xi.sə — was *biuəluχisə
-        expect(phonemizeWordRules("dialektiese")).toBe("dialɛktisə"); // RCRL di.a.ˈlɛk.ti.sə — was *diɑːləktisə
+        expect(phonemizeWordRules("biologiese")).toBe("biulˈuəχisə"); // RCRL bi.u.ˈluə.xi.sə — was *biuəluχisə
+        expect(phonemizeWordRules("dialektiese")).toBe("dialˈɛktisə"); // RCRL di.a.ˈlɛk.ti.sə — was *diɑːləktisə
         // ⚠ the spurious mid-word LONG vowel is the audible symptom: *nasiunɑːləsmə had [ɑː] on ⟨na⟩.
-        expect(phonemizeWordRules("nasionalisme")).toBe("nasiunaləsmə"); // RCRL na.ʃiu.na.ˈləs.mə (⟨si⟩→ʃ is a separate miss)
+        expect(phonemizeWordRules("nasionalisme")).toBe("nasiunalˈəsmə"); // RCRL na.ʃiu.na.ˈləs.mə (⟨si⟩→ʃ is a separate miss)
     });
 
     // ── THE SHIPPED PRONUNCIATION LEXICON (#776) ─────────────────────────────────────────────────────
@@ -271,34 +271,40 @@ describe("Afrikaans canonical IPA — greedy g2p + open/closed vowel length (Sta
         // Words where the rules are still wrong and the lexicon is right.
         // ⚠ polisie is NOT a lexicon word: the primary referee corroborates the rules there, so the guard
         // keeps ours. Chosen deliberately as the example — the guard is what took regressions to zero.
-        expect(phonemizeWord("polisie")).toBe("puəlisi");
-        expect(phonemizeWord("chemie")).toBe("χiəmi"); // …a word the primary does NOT corroborate: lexicon wins
-        expect(phonemizeWord("nasionalisme")).toBe("naʃiunaləsmə"); // rules lack ⟨si⟩→ʃ — RCRL na.ʃiu.na.ˈləs.mə
-        expect(phonemizeWordRules("polisie")).toBe("puəlisi"); // …and the RULE path is untouched by it
+        expect(phonemizeWord("polisie")).toBe("pˈuəlisi");
+        expect(phonemizeWord("chemie")).toBe("χˈiəmi"); // …a word the primary does NOT corroborate: lexicon wins
+        expect(phonemizeWord("nasionalisme")).toBe("naʃiunalˈəsmə"); // rules lack ⟨si⟩→ʃ — RCRL na.ʃiu.na.ˈləs.mə
+        expect(phonemizeWordRules("polisie")).toBe("pˈuəlisi"); // …and the RULE path is untouched by it
         // ⚠ PRECEDENCE: the 44-entry curated tier is consulted FIRST and wins. RCRL writes `afrikaans`
         // afrikɑːns; the hand-adjudicated entry carries the nasal, and must not be overwritten by bulk data.
-        expect(phonemizeWord("Afrikaans")).toBe("afrikɑ̃ːs");
+        expect(phonemizeWord("Afrikaans")).toBe("ˈafrikɑ̃ːs");
         // ⚠ NORMALIZED TO THE ENGINE'S INVENTORY — no referee-narrow symbols reach users. Review of #770
         // caught exactly that on the other lexicon, where the eval's own folds hid them.
         const raw = phonemizeWord("argeologiese");
-        expect(raw).toBe("arχiuluəχisə"); // RCRL ar.xi.u.ˈluə.xi.sə → x→χ, no stress marks, no syllable dots
+        // RCRL ar.xi.u.ˈluə.xi.sə → x→χ, syllable dots dropped, PRIMARY STRESS KEPT and re-anchored from
+        // before the onset to before the nucleus (this repo's convention: nˈaða, not ˈnaða).
+        expect(raw).toBe("arχiulˈuəχisə");
         for (const w of ["biologiese", "kilometer", "advies", "negentig", "argeologiese"])
-            expect(phonemizeWord(w)).not.toMatch(/[xæʊɡˈˌ.]/u);
+            // ⚠ `ˈ` LEFT OUT OF THIS SET DELIBERATELY. It bundled two different things: referee-narrow
+            // PHONE symbols (x æ ʊ ɡ), which must still never reach users, and the prosodic marks. The
+            // syllable dot and SECONDARY stress are still stripped, but PRIMARY stress is now emitted by
+            // the engine itself, so forbidding it here would pin the old no-stress behaviour.
+            expect(phonemizeWord(w)).not.toMatch(/[xæʊɡˌ.]/u);
     });
 
     test("proper nouns come from the LEXICON, not the spelling rules", () => {
         // af-lexicon.tsv (~50 referee-sourced entries; circularity documented in
         // af-lexicon.PROVENANCE.md): name orthography no Afrikaans rule can derive.
-        expect(phonemizeWord("Botha")).toBe("buəta"); // the rules said bɔtɦa
+        expect(phonemizeWord("Botha")).toBe("bˈuəta"); // the rules said bɔtɦa
         // ⚠ NORMALIZED TO THE ENGINE'S INVENTORY, not copied raw: the referee row is ˈblɨxnœut, and this
         // engine has no [ɨ] and writes the ⟨g⟩ fricative [χ]. Shipping referee-narrow symbols would put
         // segments in users' output that the eval's own folds hide (ɪə/ʊə, ˑ, ◌̯, ɲ, c were all present).
-        expect(phonemizeWord("Blignault")).toBe("bləχnœut");
+        expect(phonemizeWord("Blignault")).toBe("blˈəχnœut");
         // ⚠ The nasal set rides in the lexicon too — the generative nasal rule stays deferred with
         // evidence (visible n-deletion class is ×2 in 2220), but the flagship word carries its ɑ̃.
-        expect(phonemizeWord("Afrikaans")).toBe("afrikɑ̃ːs");
+        expect(phonemizeWord("Afrikaans")).toBe("ˈafrikɑ̃ːs");
         // Lookup is case-insensitive (the engine lowercases), so a sentence-medial mention hits too.
-        expect(phonemizeWord("botha")).toBe("buəta");
+        expect(phonemizeWord("botha")).toBe("bˈuəta");
     });
 
 });
@@ -343,57 +349,57 @@ describe("Afrikaans text normalization", () => {
     });
 
     test("comma groups thousands and the DOT is a decimal (English convention in this corpus)", () => {
-        expect(ph("17,500 myl")).toBe("siəvəntin dœysənt fəif ɦɔndərt məil");
-        expect(ph("100,000 mense")).toBe("ɦɔndərt dœysənt mɛnsə");
+        expect(ph("17,500 myl")).toBe("sˈiəvəntin dˈœysənt fˈəif ɦˈɔndərt mˈəil");
+        expect(ph("100,000 mense")).toBe("ɦˈɔndərt dˈœysənt mˈɛnsə");
         // ⚠ THE NUMERALS MOVED tv→tw IN #773 (twee, twaalf, twintig): the ⟨Cw⟩ onset is the glide, RCRL 53:0
         // for ⟨tw⟩ against the primary's 2:2. Not a normalization change — the same words, read correctly.
         // ⚠ kilometer MOVED ɔ→u IN #774: the ⟨o⟩ is unstressed and OPEN, a cell the engine had no table for.
         // RCRL ˈki.lu.miə.tər (and kilogram ˈki.lu.xram) — the old golden was wrong, not the new reading.
-        expect(ph("12.8 km")).toBe("twɑːlf kɔma aχt kilumiətər");
-        expect(ph("2.3 miljoen")).toBe("twiə kɔma dri məljun");
+        expect(ph("12.8 km")).toBe("twˈɑːlf kˈɔma ˈaχt kˈilumiətər");
+        expect(ph("2.3 miljoen")).toBe("twˈiə kˈɔma drˈi məljˈun");
     });
 
     test("clocks read hour [minute] with voormiddag/namiddag; the AM/PM suffix expands", () => {
-        expect(ph("10:00vm")).toBe("tin fuərmədaχ");
-        expect(ph("8:30 n.m.")).toBe("aχt dɛrtəχ nɑːmədaχ .");
-        expect(ph("11:20")).toBe("ɛlf twəntəχ");
+        expect(ph("10:00vm")).toBe("tˈin fˈuərmədaχ");
+        expect(ph("8:30 n.m.")).toBe("ˈaχt dˈɛrtəχ nˈɑːmədaχ .");
+        expect(ph("11:20")).toBe("ˈɛlf twˈəntəχ");
     });
 
     test("era markers and dotted abbreviations expand", () => {
         // ⟨Christus⟩ is [kr-], not the old *kɦr- — the ⟨c⟩ rule used to shadow the ⟨chr⟩ digraph (#758).
-        expect(ph("323 v.C.")).toBe("dri ɦɔndərt ɛn dri ɛn twəntəχ fuər χrəstœs ."); // Christus from the lexicon
-        expect(ph("d.i. 0 of 1")).toBe("dət əs nœl ɔf iən");
-        expect(ph("Dr. Lee")).toBe("dɔktər liə");
-        expect(ph("40 m.p.u")).toBe("fiərtəχ məil pər yːr");
+        expect(ph("323 v.C.")).toBe("drˈi ɦˈɔndərt ˈɛn drˈi ˈɛn twˈəntəχ fˈuər χrˈəstœs ."); // Christus from the lexicon
+        expect(ph("d.i. 0 of 1")).toBe("dˈət ˈəs nˈœl ˈɔf ˈiən");
+        expect(ph("Dr. Lee")).toBe("dˈɔktər lˈiə");
+        expect(ph("40 m.p.u")).toBe("fˈiərtəχ mˈəil pˈər ˈyːr");
     });
 
     test("rates, percent, currency and units use Afrikaans words", () => {
-        expect(ph("480 km/h")).toBe("fir ɦɔndərt ɛn taχtəχ kilumiətər pər yːr");
-        expect(ph("35 mm")).toBe("fəif ɛn dɛrtəχ məlimiətər");
-        expect(ph("3 850 km²")).toBe("dri aχt ɦɔndərt ɛn fəiftəχ firkantə kilumiətər");
-        expect(ph("93%")).toBe("dri ɛn niəχəntəχ pərsɛnt");
-        expect(ph("£27 miljoen")).toBe("siəvə ɛn twəntəχ məljun pɔnt");
-        expect(ph("$2.3 biljoen")).toBe("twiə kɔma dri bəljun dɔlər");
+        expect(ph("480 km/h")).toBe("fˈir ɦˈɔndərt ˈɛn tˈaχtəχ kˈilumiətər pˈər ˈyːr");
+        expect(ph("35 mm")).toBe("fˈəif ˈɛn dˈɛrtəχ mˈəlimiətər");
+        expect(ph("3 850 km²")).toBe("drˈi ˈaχt ɦˈɔndərt ˈɛn fˈəiftəχ fˈirkantə kˈilumiətər");
+        expect(ph("93%")).toBe("drˈi ˈɛn nˈiəχəntəχ pərsˈɛnt");
+        expect(ph("£27 miljoen")).toBe("sˈiəvə ˈɛn twˈəntəχ məljˈun pˈɔnt");
+        expect(ph("$2.3 biljoen")).toBe("twˈiə kˈɔma drˈi bəljˈun dˈɔlər");
     });
 
     test("signs read out; the HTML ampersand becomes en; B&B is letter-named", () => {
-        expect(ph("+30°C")).toBe("plœs dɛrtəχ χrɑːdə səlsiœs");
-        expect(ph("Qatar Airways &amp; Turkish Airlines")).toBe("kɑːtar ɑːərvaəis ɛn tœrkəsɦ ɑːərlinəs");
-        expect(ph("B&amp;B")).toBe("biə ɛn biə");
-        expect(ph("1/5 duim")).toBe("iən fəifdə dœym");
+        expect(ph("+30°C")).toBe("plˈœs dˈɛrtəχ χrˈɑːdə sˈəlsiœs");
+        expect(ph("Qatar Airways &amp; Turkish Airlines")).toBe("kˈɑːtar ˈɑːərvaəis ˈɛn tˈœrkəsɦ ˈɑːərlinəs");
+        expect(ph("B&amp;B")).toBe("bˈiə ˈɛn bˈiə");
+        expect(ph("1/5 duim")).toBe("ˈiən fˈəifdə dˈœym");
     });
 
     test("regnal ordinals take both spellings of the noun and the un-converted Roman I", () => {
-        expect(ph("Wêreld Oorlog II")).toBe("twiədə vɛːrəltuərlɔχ");
-        expect(ph("Wêreldoorlog II")).toBe("twiədə vɛːrəltuərlɔχ"); // the one-word spelling, 2× in corpus
-        expect(ph("Wêreld Oorlog I")).toBe("iərstə vɛːrəltuərlɔχ"); // a lone I is never romanised upstream
+        expect(ph("Wêreld Oorlog II")).toBe("twˈiədə vˈɛːrəltuərlɔχ");
+        expect(ph("Wêreldoorlog II")).toBe("twˈiədə vˈɛːrəltuərlɔχ"); // the one-word spelling, 2× in corpus
+        expect(ph("Wêreld Oorlog I")).toBe("ˈiərstə vˈɛːrəltuərlɔχ"); // a lone I is never romanised upstream
     });
 
     // The article is [ə], and the corpus writes it four ways — 588× with the LEFT quote U+2018, which the
     // g2p's two-spelling check did not recognise, so the commonest word in the language read as a bare `n`.
     test("every spelling of the indefinite article reads [ə]", () => {
         for (const art of ["'n", "’n", "‘n", "ʼn", "ń"])
-            expect(ph(`${art} Avenger myn skip`)).toBe("ə ɑːfəŋər məin skəp");
+            expect(ph(`${art} Avenger myn skip`)).toBe("ə ˈɑːfəŋər mˈəin skˈəp");
         expect(normalizeAfrikaans("‘nuwe’ idee")).toBe("‘nuwe’ idee"); // an opening quote on an n-word is not the article
     });
 
@@ -408,16 +414,16 @@ describe("Afrikaans text normalization", () => {
     });
 
     test("a DOT between digits is the decimal; only a timezone/AM-PM context makes it a clock", () => {
-        expect(ph("6.34 duim")).toBe("sɛs kɔma dri fir dœym");       // was the clock *ses vier en dertig*
-        expect(ph("3.50-meter")).toBe("dri kɔma fəif nœl miətər");
-        expect(ph("15.00 GUT")).toBe("fəiftin χœt");                  // the corpus's one dot-clock
-        expect(ph("4:41.30")).toBe("fir , iən ɛn fiərtəχ kɔma dri nœl"); // a sports time is not a clock
+        expect(ph("6.34 duim")).toBe("sˈɛs kˈɔma drˈi fˈir dˈœym");       // was the clock *ses vier en dertig*
+        expect(ph("3.50-meter")).toBe("drˈi kˈɔma fˈəif nˈœl mˈiətər");
+        expect(ph("15.00 GUT")).toBe("fˈəiftin χˈœt");                  // the corpus's one dot-clock
+        expect(ph("4:41.30")).toBe("fˈir , ˈiən ˈɛn fˈiərtəχ kˈɔma drˈi nˈœl"); // a sports time is not a clock
     });
 
     test("the AM/PM marker follows the minutes, and nm alone is not a time", () => {
-        expect(ph("9:30 vm")).toBe("niəχə dɛrtəχ fuərmədaχ"); // was *nege voormiddag dertig*
-        expect(ph("10:00vm")).toBe("tin fuərmədaχ");
-        expect(ph("10nm")).toBe("tin nm");                    // nanometres, not *tien namiddag*
+        expect(ph("9:30 vm")).toBe("nˈiəχə dˈɛrtəχ fˈuərmədaχ"); // was *nege voormiddag dertig*
+        expect(ph("10:00vm")).toBe("tˈin fˈuərmədaχ");
+        expect(ph("10nm")).toBe("tˈin nm");                    // nanometres, not *tien namiddag*
     });
 
     test("the ordinal suffix is orthography, not a lowercase convention", () => {
@@ -428,18 +434,18 @@ describe("Afrikaans text normalization", () => {
     // English FLEURS set), so BOTH conventions have to read. Three digits after the comma is the grouping,
     // one or two is a decimal — a comma decimal used to read as a clause PAUSE inside the number.
     test("a comma is the grouping at three digits and the decimal at one or two", () => {
-        expect(ph("12,5 kilometer")).toBe("twɑːlf kɔma fəif kilumiətər"); // was *twaalf , vyf*
-        expect(ph("3,5 miljoen")).toBe("dri kɔma fəif məljun");
-        expect(ph("17,500 myl")).toBe("siəvəntin dœysənt fəif ɦɔndərt məil"); // still the grouping
-        expect(ph("In 1990, 5 mense")).toBe("ən dœysənt niəχə ɦɔndərt ɛn niəχəntəχ , fəif mɛnsə"); // a clause comma
+        expect(ph("12,5 kilometer")).toBe("twˈɑːlf kˈɔma fˈəif kˈilumiətər"); // was *twaalf , vyf*
+        expect(ph("3,5 miljoen")).toBe("drˈi kˈɔma fˈəif məljˈun");
+        expect(ph("17,500 myl")).toBe("sˈiəvəntin dˈœysənt fˈəif ɦˈɔndərt mˈəil"); // still the grouping
+        expect(ph("In 1990, 5 mense")).toBe("ˈən dˈœysənt nˈiəχə ɦˈɔndərt ˈɛn nˈiəχəntəχ , fˈəif mˈɛnsə"); // a clause comma
     });
 
     test("a version dot is 802.11n and Figuur N.N — a decimal glued to its unit is not", () => {
-        expect(ph("12.5km")).toBe("twɑːlf kɔma fəif kilumiətər"); // was *twaalf punt vyf kilometer*
+        expect(ph("12.5km")).toBe("twˈɑːlf kˈɔma fˈəif kˈilumiətər"); // was *twaalf punt vyf kilometer*
         // ⚠ The trailing standard-suffix letter is SPELLED (n → "en" [ɛn]), which is what a reader says —
         // and what #761 fixed. It used to emit a bare [n], not a sayable syllable on its own.
-        expect(ph("802.11n")).toBe("aχt ɦɔndərt ɛn twiə pœnt ɛlf ɛn");
-        expect(ph("Figuur 1.1")).toBe("fiχyːr iən pœnt iən");
+        expect(ph("802.11n")).toBe("ˈaχt ɦˈɔndərt ˈɛn twˈiə pˈœnt ˈɛlf ˈɛn");
+        expect(ph("Figuur 1.1")).toBe("fiχˈyːr ˈiən pˈœnt ˈiən");
     });
 
     // A lone thousand is bare (duisend) but million and up keep the numeral — the split core/numbers.ts
@@ -456,9 +462,9 @@ describe("Afrikaans text normalization", () => {
     // The corpus's `40 m.p.u` (myl per uur) is safe because normalize.ts expands the dotted abbreviation
     // BEFORE the tier, so no bare `m` survives to be misread.
     test("the bare metre, and the cube word it feeds", () => {
-        expect(getPhonemizer("af").text("133 m/s").trim()).toContain("miətər pər səkɔndə");
-        expect(getPhonemizer("af").text("5 m³").trim()).toContain("kyːbikə miətər");
-        expect(getPhonemizer("af").text("40 m.p.u").trim()).toContain("məil pər yːr");
+        expect(getPhonemizer("af").text("133 m/s").trim()).toContain("mˈiətər pˈər səkˈɔndə");
+        expect(getPhonemizer("af").text("5 m³").trim()).toContain("kˈyːbikə mˈiətər");
+        expect(getPhonemizer("af").text("40 m.p.u").trim()).toContain("mˈəil pˈər ˈyːr");
     });
     // ⚠ THE SAME SIX UNSTRESSED PREFIXES ARE READ BY TWO CONSUMERS — afrikaans.ts (stress placement + the
     // reduced prefix IPA) and the shared Germanic compound engine via morphology.prefixUnstressed. They
@@ -485,15 +491,15 @@ describe("Afrikaans text normalization", () => {
     });
 
     test("the sign and math words come from the manifest", () => {
-        expect(ph("±5")).toContain("plœs ɔf minœs"); // ⚠ U+00B1, not "+"
-        expect(ph("3 = 3")).toContain("χələik ɑːn");
-        expect(ph("3 × 4")).toContain("kiər");
-        expect(ph("8 ÷ 2")).toContain("χədiəl døːr");
-        expect(ph("4 < 5")).toContain("kləinər as");
+        expect(ph("±5")).toContain("plˈœs ˈɔf mˈinœs"); // ⚠ U+00B1, not "+"
+        expect(ph("3 = 3")).toContain("χəlˈəik ˈɑːn");
+        expect(ph("3 × 4")).toContain("kˈiər");
+        expect(ph("8 ÷ 2")).toContain("χədˈiəl dˈøːr");
+        expect(ph("4 < 5")).toContain("klˈəinər ˈas");
         expect(ph("Jan & Piet")).toContain("ɛn");
         // …and the two suppletive halves, the only fractions with words of their own.
-        expect(ph("1/2 duim")).toContain("iən ɦalf");
-        expect(ph("3/2 koppies")).toContain("ɦɑːlvə");
+        expect(ph("1/2 duim")).toContain("ˈiən ɦˈalf");
+        expect(ph("3/2 koppies")).toContain("ɦˈɑːlvə");
     });
 
 });
@@ -503,9 +509,9 @@ describe("Afrikaans — `mnr.`, the artifact's only raw-ASCII-Latin run", () => 
 
     test("`mnr.` expands to meneer; the dot stops being a phrase break", () => {
         // ⟨mnr⟩ has no vowel and is not a possible Afrikaans word; it reached the IPA as the letters.
-        expect(ph("om mnr. Reid te meet")).toContain("məniər");
+        expect(ph("om mnr. Reid te meet")).toContain("mənˈiər");
         expect(ph("om mnr. Reid te meet")).not.toContain("mnr");
-        expect(ph("Mnr. Blake was hier.")).toContain("məniər"); // the corpus's own slot: title + surname
+        expect(ph("Mnr. Blake was hier.")).toContain("mənˈiər"); // the corpus's own slot: title + surname
     });
 
     test("the bare stem is NEVER matched — the `dr` guard covers `mnr` too", () => {
