@@ -190,15 +190,20 @@ function stressedNucleus(w: string): number {
  *  `finalDevoice = false` suppresses only the FINAL (positional) half of the devoicing rule, for a stem whose last
  *  consonant is resyllabified as the onset of a following suffix (send·ing → sɛndəŋ). The REGRESSIVE half — a voiced
  *  obstruent before a voiceless one — is unaffected, since it depends on what follows, not on where the morpheme ends. */
-function phonemizeMorpheme(word: string, finalDevoice = true): string {
+function phonemizeMorpheme(word: string, finalDevoice = true, emitStress = true): string {
     const w = foldForeignLetters(word.normalize("NFC").toLowerCase());
     const stressNucleus = stressedNucleus(w); // primary-stress nucleus (native first-syllable + loan-suffix overrides)
     let out = "";
     let i = 0;
     let nucleus = 0; // count of vowel nuclei emitted so far
+    // ⚠ ONE INSERTION POINT, NOT THREE. A nucleus is emitted from three different branches (diacritic,
+    // digraph table, bare vowel), so marking stress inside each would be three copies of one rule — the
+    // shape this file already warns about for prefixIpa. Record the OUTPUT OFFSET at which the stressed
+    // nucleus starts and splice the mark in once at the end.
+    let stressAt = -1;
     while (i < w.length) {
         const c = w[i]!;
-        if (DIA[c]) { out += DIA[c]; i += 1; nucleus += 1; continue; } // diacritic vowel (single char)
+        if (DIA[c]) { if (nucleus === stressNucleus && stressAt < 0) stressAt = out.length; out += DIA[c]; i += 1; nucleus += 1; continue; } // diacritic vowel (single char)
         // Code rules that must beat the fixed table:
         if (!VOWEL_LETTER.has(c) && w[i + 1] === c && c !== "'") { i += 1; continue; } // doubled consonant = single phoneme (appel→ˈapəl)
         if (c === "c") {
@@ -241,6 +246,7 @@ function phonemizeMorpheme(word: string, finalDevoice = true): string {
                 // devoicing: a voiced obstruent devoices word-finally OR before a VOICELESS consonant (aandklok→ɑnt);
                 // it stays voiced before a vowel or a voiced consonant.
                 const devoiceHere = next === undefined ? finalDevoice : VOICELESS_NEXT.has(next);
+                if (VOWEL_LETTER.has(key[0]!) && nucleus === stressNucleus && stressAt < 0) stressAt = out.length;
                 out += (devoiceHere && DEVOICE[key]) ? DEVOICE[key]! : FIXED[key]!;
                 if (VOWEL_LETTER.has(key[0]!)) nucleus += 1; // a vowel digraph is a nucleus
                 i += key.length;
@@ -251,6 +257,7 @@ function phonemizeMorpheme(word: string, finalDevoice = true): string {
         if (matched) continue;
         if (BARE_VOWELS.has(c)) {
             const stressed = nucleus === stressNucleus;
+            if (stressed && stressAt < 0) stressAt = out.length;
             if (c === "e" && i === w.length - 1) out += "ə"; // final unstressed ⟨e⟩ → schwa
             // ⚠ ⟨i⟩ is tense [i] / lax [ə] BY SYLLABLE, not by stress — kept as its own rule after the data sweep
             // (Run 12) rejected folding it into the tables: RCRL prefers [ə] unstressed-open, but that costs 9
@@ -264,7 +271,11 @@ function phonemizeMorpheme(word: string, finalDevoice = true): string {
         }
         i += 1; // unknown char → skip
     }
-    return out;
+    // ⚠ ONE PRIMARY MARK PER WORD, NOT PER ELEMENT. A compound is phonemized element by element, so
+    // emitting unconditionally gave `handomkeer` THREE primary marks (ɦˈantˈɔmkˈiər). `decompose`
+    // already knows which element carries the word's stress (`stressPart`); the caller passes that in
+    // and every other element emits none.
+    return emitStress && stressAt >= 0 ? out.slice(0, stressAt) + "ˈ" + out.slice(stressAt) : out;
 }
 
 // Reduced IPA per unstressed prefix (afrikaans.jsonc). Separable prefixes (aan/af…) carry stress and take
@@ -335,6 +346,34 @@ export function afrikaansRuleReserved(word: string): boolean {
     return w === "'n" || w === "’n" || [...w].length === 1;
 }
 
+
+/**
+ * ⚠ EVERY TIER MUST CARRY THE MARK, OR THE TIERS DISAGREE WITH EACH OTHER. `phonemizeWord` serves a
+ * reading from four places — the curated lexicon, the RCRL lexicon, the neural OOV tagger, and the
+ * rules — and only the rules compute stress. Leaving the others unmarked made the async/neural path
+ * byte-DIFFERENT from the sync path, which afNeural.test.ts and phonemizeAsync.test.ts assert against.
+ *
+ * So any reading that arrives without a primary mark gets one at the position the rule computes. The
+ * RCRL lexicon supplies its own (re-anchored at build time) and is left alone; the curated 44-entry
+ * tier and the tagger do not, and are filled in here.
+ */
+function withStress(ipa: string, word: string): string {
+    if (ipa === "" || ipa.includes("\u02c8")) return ipa;
+    const target = stressedNucleus(foldForeignLetters(word.normalize("NFC").toLowerCase()));
+    let seen = -1;
+    for (let i = 0; i < ipa.length; i += 1) {
+        const isVowel = IPA_NUCLEUS.test(ipa[i]!);
+        if (!isVowel) continue;
+        seen += 1;
+        if (seen === target) return ipa.slice(0, i) + "\u02c8" + ipa.slice(i);
+        while (i + 1 < ipa.length && IPA_NUCLEUS.test(ipa[i + 1]!)) i += 1; // one nucleus, not per letter
+    }
+    return ipa;
+}
+
+/** Vowel symbols the Afrikaans engine emits — the nucleus test for `withStress`. */
+const IPA_NUCLEUS = /[aeiouyɑɛɔœəøæɪʊ]/u;
+
 export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     const w = word.normalize("NFC").toLowerCase();
     // ⚠ PROPER NOUNS AND OPAQUE LOANS (af-lexicon.tsv — referee-sourced: Botha→buəta, Blignault-class
@@ -349,7 +388,7 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     // phonemizeWordRules below (what the eval calls) skips them — house pattern, same as en-GB/tl/ilo.
     // Provenance + the single-source circularity note: af-lexicon.PROVENANCE.md.
     const pinned = lexicon().get(w);
-    if (pinned !== undefined) return pinned;
+    if (pinned !== undefined) return withStress(pinned, w);
     // ⚠ THEN THE 27k RCRL LEXICON, AND ONLY THEN THE RULES. Order matters against the tier above: RCRL writes
     // `afrikaans` afrikɑːns, while the curated file carries the nasal afrikɑ̃ːs — the hand-adjudicated entry has
     // to win, so the small curated tier is consulted first and this one fills in behind it.
@@ -357,12 +396,12 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     // rules are ~87% exact, but RCRL covers ~86% of running-text TOKENS, so serving those authoritatively fixes
     // ≈10pp of everything read aloud — the largest single lever left, and the same tiering da/nb/fr/en use.
     const dict = rcrl().get(w);
-    if (dict !== undefined) return dict;
+    if (dict !== undefined) return withStress(dict, w);
     // ⚠ THE NEURAL TIER'S SEAM — after both dictionaries, before the rules. Supplied only by the async path
     // (afrikaansNeural.ts); the sync engine never sets it, so `phonemize(text, "af")` is unchanged.
     // ⚠ AND IT MAY NOT CLAIM THE RULE PATH'S SPECIAL CASES — see afrikaansRuleReserved.
     const oov = afrikaansRuleReserved(w) ? undefined : oovOverride?.(w);
-    if (oov !== undefined && oov !== "") return oov;
+    if (oov !== undefined && oov !== "") return withStress(oov, w);
     return phonemizeWordRules(w);
 }
 
@@ -390,9 +429,9 @@ export function phonemizeWordRules(word: string): string {
         src: p,
         ipa:
             d.kinds[idx] === "prefix" && idx < d.stressPart
-                ? (PREFIX_IPA[p] ?? phonemizeMorpheme(p))
+                ? (PREFIX_IPA[p] ?? phonemizeMorpheme(p, true, false))
                 // A RESYLLABIFYING SUFFIX blocks this element's final devoicing — its coda is the suffix's onset.
-                : phonemizeMorpheme(p, !RESYLLABIFY.has(d.parts[idx + 1] ?? "")),
+                : phonemizeMorpheme(p, !RESYLLABIFY.has(d.parts[idx + 1] ?? ""), idx === d.stressPart),
     }));
     return joinSeams(parts);
 }
