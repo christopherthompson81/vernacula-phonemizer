@@ -8,6 +8,7 @@
  *   - the EPENTHETIC-STOP clusters ⟨ll⟩→[tl], ⟨rl⟩→[rtl], ⟨rn⟩→[rtn]; ⟨nn⟩→[tn] after a long/accented vowel or a
  *     diphthong (Steinn→steitn) but [n] after a short vowel (Anna→ana); geminate stops collapse;
  *   - a glide [j] between ⟨í⟩ and a following vowel (Biblía→pɪplija) — ⟨í⟩ ALONE, measured; ⟨f⟩→[v]/[p]/[f].
+ * PRIMARY STRESS is emitted on the FIRST syllable of every word (dagur→tˈaɣʏr) — see stressInitial.
  * Vowel LENGTH, ASPIRATION (pre/post), and DEVOICED SONORANTS are folded/deferred.
  */
 import type { Phonemizer } from "../../registry.ts";
@@ -40,6 +41,12 @@ const ORDER = Object.keys(DIGRAPHS).sort((a, b) => b.length - a.length);
 // Keep the two straight: the trigger set decides WHICH vowel glides, this decides what counts as a
 // vowel to glide INTO. docs/icelandic_hiatus_investigation.md.
 const VOWEL_PH = new Set([..."aɛɪiɔouʏœøy"]); // IPA vowel heads (for intervocalic + glide tests)
+// ⚠ NOT VOWEL_PH, AND THE DIFFERENCE IS THE ONE CHARACTER ⟨e⟩. Two different questions again: VOWEL_PH asks
+// "can the hiatus glide land next to this phone", and it omits ⟨e⟩ on purpose so that the ⟨ei ey⟩ diphthong
+// does not attract a glide (see above). This set asks "is this character a syllable NUCLEUS", and the ⟨ei⟩
+// diphthong plainly is one — ein must be ˈein, not stress-less. Adding ⟨e⟩ to VOWEL_PH instead would silently
+// re-arm the glide rule the comment above spent a run measuring away.
+const NUCLEUS_CH = new Set([...VOWEL_PH, "e"]);
 // Grapheme-level front vowels that PALATALIZE a preceding ⟨k g⟩ → [c] (kýr→ciːr, gelda→cɛlta, Bylgja→pɪlca) — incl.
 // ⟨e é⟩ and the ⟨ei ey⟩ diphthong (the referee majority palatalizes: geipa→ceipa; the un-palatalized Geir→keir is
 // the minority we over-palatalize to ceir). The four letter classes are in icelandic.jsonc.
@@ -179,7 +186,36 @@ function realizeF(toks: Tok[]): void {
     }
 }
 
-/** Phonemize a single Icelandic word to canonical IPA (segmental; length + aspiration + sonorant-devoicing folded). */
+/**
+ * PRIMARY STRESS → the first syllable. Icelandic is the easy case in the fleet: stress is fixed on the initial
+ * syllable of the word, with no lexical exceptions to look up and no prefix class to except (contrast Afrikaans,
+ * where ver-/ont-/ge- push it off σ1 and the placement had to be learned from a stressed lexicon). Loanwords are
+ * nativised to initial stress too (banani → pˈananɪ), so there is nothing to dictionary.
+ *
+ * The mark goes before the NUCLEUS, not before the onset — the repo convention (nˈaða, not ˈnaða). That is why
+ * this scans for the first nucleus CHARACTER rather than prefixing the word: ⟨é⟩ scans to the two-character
+ * value "jɛ" whose [j] is an onset glide inside the grapheme, so ég is jˈɛɣ; a preaspirated Hekla is hˈɛhkla.
+ *
+ * ⚠ NOT VALIDATED AGAINST THE REFEREE, AND IT CANNOT BE. The only Icelandic referee is wikipron isl_latn_broad,
+ * which carries ZERO stress marks in all 10093 rows — the wikipron broad scrape strips them universally — and
+ * `tools/referee-eval/config.ts` strips [ˈˌ] from both sides anyway, so the eval is blind to this by
+ * construction. The score is expected to be byte-identical before and after (8091/10093); what the tests below
+ * pin instead is that stripping the mark reproduces the previous output exactly, i.e. that the rule ADDS a mark
+ * and changes nothing else. Correctness of the placement rests on the fixed-initial generalization, which needs
+ * no corpus.
+ *
+ * ⚠ SECONDARY STRESS IS NOT EMITTED, and this one IS a real deferral. Icelandic gives later compound members
+ * their own (secondary) stress — the placement is a function of the compound seam, and this engine has no
+ * decomposer to find it. Guessing a trochaic ˌ on odd syllables the way Czech can (Czech has no such seam
+ * dependence) would put marks inside morphemes. It waits on a compound splitter, not on a decision.
+ */
+function stressInitial(ipa: string): string {
+    const ch = [...ipa];
+    const i = ch.findIndex((c) => NUCLEUS_CH.has(c));
+    return i < 0 ? ipa : ch.slice(0, i).join("") + "ˈ" + ch.slice(i).join(""); // no nucleus (bare consonants) → no mark
+}
+
+/** Phonemize a single Icelandic word to canonical IPA (segmental + initial stress; length + aspiration + sonorant-devoicing folded). */
 export function phonemizeWord(word: string): string {
     const toks = scan(word);
     velarNasal(toks);
@@ -187,7 +223,7 @@ export function phonemizeWord(word: string): string {
     preaspirate(toks);
     glideJ(toks);
     realizeF(toks);
-    return toks.map((t) => t.ph).join("");
+    return stressInitial(toks.map((t) => t.ph).join(""));
 }
 
 // A word (Icelandic Latin letters incl. á é í ó ú ý þ ð æ ö) / number / punctuation token.

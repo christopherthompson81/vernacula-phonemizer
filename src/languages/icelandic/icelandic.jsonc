@@ -2,7 +2,10 @@
 // (~330k), Latin script + ⟨þ ð æ ö⟩. One of the DEEPEST orthographies in the fleet: no voicing
 // contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k]; famous epenthetic-stop
 // clusters ⟨ll⟩→[tl] ⟨rl⟩→[rtl] ⟨rn⟩→[rtn]; rich vowel values (á→au, ó→ou, æ→ai, au→øy). Aspiration + length are
-// folded (run 1). Engine: icelandic.ts.
+// folded (run 1). PRIMARY STRESS is fixed on the first syllable and IS emitted (dagur→tˈaɣʏr) — no table here
+// because there is nothing to tabulate: the rule has no lexical exceptions and no prefix class. SECONDARY
+// stress (later compound members) is not emitted; it needs a compound splitter this engine does not have.
+// docs/investigations/icelandic_stress_investigation.md. Engine: icelandic.ts.
 {
     "language": "is",
     "name": "Icelandic (íslenska)",
