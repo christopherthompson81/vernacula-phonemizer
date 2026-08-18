@@ -195,10 +195,19 @@ export function normalizeGerman(input: string): string {
         // German writes it solid, and inserts nothing for a lo under ten: 1905 → neunzehnhundertfünf.
         return `${numberToWords(hi)}hundert${lo === 0 ? "" : numberToWords(lo)}`;
     };
-    const YEAR_NOT_COUNT = "(?!\\s*(?:km|cm|mm|kg|mg|ha|m|g|l|L|t|°|%|Euro|EUR|Dollar|USD|Franken|Mann|"
-        + "Menschen|Einwohner|Personen|Soldaten|Mitarbeiter|Kilometer|Meter|Tonnen|Quadratkilometer)\\b)";
-    // The DECADE form first, so `1980er` is not consumed as a bare year: *neunzehnhundertachtziger(n)*.
-    s = s.replace(/(?<![\d.,])(1[1-9]\d\d)(er[ns]?)\b/gu,
+    //     ⚠ YEAR_NOT_COUNT IS A PURE LOOKAHEAD and must stay one: it is appended AFTER the digits, so a
+    //     lookbehind written into it would test the last digit rather than what precedes the figure. The
+    //     currency symbols that make a figure an amount (`€1500`) are guarded in the LEADING lookbehind.
+    //     ⚠ AND A FIGURE GLUED TO A LETTER IS NOT A BARE YEAR. The decade arm above claims ⟨er⟩/⟨ern⟩; what
+    //     is left (`1980ers`) must stay a numeral rather than have the year rule take the digits and leave
+    //     the suffix stranded as *neunzehnhundertachtzigers*.
+    const YEAR_NOT_COUNT = "(?!\\s*(?:km|cm|mm|kg|mg|ha|m|g|l|L|t|°|%|€|\\$|Euro|EUR|Dollar|"
+        + "USD|Franken|Mann|Menschen|Einwohner|Personen|Soldaten|Mitarbeiter|Kilometer|Meter|Tonnen|"
+        + "Quadratkilometer)\\b)";
+    //     The DECADE form first, so `1980er` is not consumed as a bare year: *neunzehnhundertachtziger(n)*.
+    //     ⚠ ONLY ⟨er⟩ and ⟨ern⟩ — the two German forms. A looser `er[ns]?` also takes the English plural in
+    //     `1980ers` and emits *neunzehnhundertachtzigers*, which is not a word in either language.
+    s = s.replace(/(?<![\d.,])(1[1-9]\d\d)(ern?)(?![\p{L}\p{M}])/gu,
         (_m, y: string, suf: string) => `${yearWords(Number(y))}${suf}`);
     //     ⚠ THE GUARD IS CASE-INSENSITIVE. Lowercased running text is not an edge case, and a capitalised
     //     noun list lets `1200 menschen` read as *zwölfhundert Menschen*.
@@ -206,7 +215,7 @@ export function normalizeGerman(input: string): string {
     //     figure (`1995.50`, `1,995`) but NOT a year that ends a clause. The strict form takes `1990-1995.`
     //     apart — first endpoint to words, second left a numeral — and the range rule, seeing no pair,
     //     then drops the reading entirely (trap 58, test/clause-final-range.test.ts).
-    s = s.replace(new RegExp(`(?<![\\d.,])(1[1-9]\\d\\d)(?![.,]?\\d)${YEAR_NOT_COUNT}`, "giu"),
+    s = s.replace(new RegExp(`(?<![\\d.,€$£¥₽₴])(1[1-9]\\d\\d)(?![.,]?\\d)(?![\\p{L}\\p{M}])${YEAR_NOT_COUNT}`, "giu"),
         (_m, y: string) => yearWords(Number(y)));
 
     // 5) UNITS the shared tier cannot express, and the degree signs.

@@ -393,6 +393,13 @@ describe("german normalization", () => {
         expect(phonemize("1200 Menschen", "de")).toBe("ˈaɪ̯ntaʊ̯zənt t͡svˈaɪ̯hʊndɐt mˈɛnʃən");
         expect(phonemize("1200 menschen", "de")).toBe("ˈaɪ̯ntaʊ̯zənt t͡svˈaɪ̯hʊndɐt mˈɛnʃən");
         expect(phonemize("1500 Euro", "de")).toBe("ˈaɪ̯ntaʊ̯zənt fˈʏnfhʊndɐt ˈɔʏ̯ʁo");
+        // ⚠ A CURRENCY SYMBOL SITS TO THE LEFT, where the unit list cannot see it — `€1500` is an amount.
+        //   The guard for it belongs in the leading lookbehind; written into YEAR_NOT_COUNT (a lookahead
+        //   appended AFTER the digits) it would test the last digit instead.
+        expect(phonemize("€1500", "de")).toBe("ˈaɪ̯ntaʊ̯zənt fˈʏnfhʊndɐt ˈɔʏ̯ʁo");
+        // ⚠ ⟨er⟩/⟨ern⟩ ONLY. A figure glued to any other letter run stays a numeral, or the year rule takes
+        //   the digits and strands the suffix as *neunzehnhundertachtzigers*.
+        expect(phonemize("1980ers", "de")).toBe("ˈaɪ̯ntaʊ̯zənt nˈɔʏ̯nhʊndɐtaxtt͡sɪç eːɐ̯s");
     });
 
     test("initialisms, units, signs and fractions", () => {
