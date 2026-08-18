@@ -3,7 +3,12 @@
  * A digraph-aware left-to-right scan (g2p reads serbian.jsonc): the Latin digraphs ⟨dž lj nj dj⟩
  * first, then the single Cyrillic OR Latin letters — every grapheme is one phoneme, no vowel reduction. Serbian's
  * lexical PITCH ACCENT (4-way) + length are unwritten and DEFERRED — no stress/tone mark is emitted (the referee
- * eval folds them). text() tokenizes words / numbers / punctuation.
+ * eval folds them). ⚠ THE SOURCE IS IDENTIFIED, so this is a work item and not a dead end: the kaikki
+ * Serbo-Croatian dump carries 49585 accented headwords (97.8% of its IPA entries), in BOTH scripts, with the
+ * caron/circumflex rising-falling contrast intact — i.e. the four-way accent itself, not just position — and it
+ * covers 83.3% of sr_rs corpus tokens. The hard part is OOV: South Slavic accent is MOBILE within a paradigm,
+ * so an af-style affix rule will not transfer. docs/investigations/south_slavic_stress_sources_investigation.md.
+ * text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

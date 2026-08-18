@@ -4,7 +4,9 @@
  * IDENTICAL, so this module reuses the Serbian engine's word g2p (phonemizeWord) directly. The only Croatian-specific
  * delta is the CARDINAL NUMBER WORDS (Croatian tisuća/milijun/dvjesto vs Serbian hiljada/milion/dvesta) — a thin
  * numbers override (numbers.ts) over the shared agreement compositor. Croatian is written exclusively in Latin, so
- * the tokenizer is Latin-only. Pitch accent is unwritten and DEFERRED (as in Serbian).
+ * the tokenizer is Latin-only. Pitch accent is unwritten and DEFERRED (as in Serbian) — with an identified
+ * source: the kaikki Serbo-Croatian dump is unified across sr/hr/bs and covers 84.2% of hr_hr corpus tokens.
+ * docs/investigations/south_slavic_stress_sources_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
