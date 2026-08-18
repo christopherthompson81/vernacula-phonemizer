@@ -15,49 +15,73 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
     const lb = createLuxembourgish();
 
     test("the diphthong system: ⟨ei/ai⟩→ai̯, ⟨au⟩→æu̯, ⟨ou⟩→əu̯, ⟨éi⟩→ei̯", () => {
-        expect(phonemizeWord("Haus")).toBe("hæu̯s"); // ⟨au⟩ → æu̯ ("house")
-        expect(phonemizeWord("Kou")).toBe("kəu̯"); // ⟨ou⟩ → əu̯ ("cow")
-        expect(phonemizeWord("Dréi")).toBe("drei̯"); // ⟨éi⟩ → ei̯ ("turn")
-        expect(phonemizeWord("Méi")).toBe("mei̯"); // ⟨éi⟩ → ei̯ ("more")
+        expect(phonemizeWord("Haus")).toBe("hˈæu̯s"); // ⟨au⟩ → æu̯ ("house")
+        expect(phonemizeWord("Kou")).toBe("kˈəu̯"); // ⟨ou⟩ → əu̯ ("cow")
+        expect(phonemizeWord("Dréi")).toBe("drˈei̯"); // ⟨éi⟩ → ei̯ ("turn")
+        expect(phonemizeWord("Méi")).toBe("mˈei̯"); // ⟨éi⟩ → ei̯ ("more")
     });
 
     test("the German-style consonants: ⟨w⟩→v, ⟨ch⟩→χ, ⟨z⟩→t͡s, ⟨qu⟩→kv, ⟨é⟩ alone→eː", () => {
-        expect(phonemizeWord("Waasser")).toBe("vaːsər"); // ⟨w⟩→v, ⟨aa⟩→aː ("water")
-        expect(phonemizeWord("Buch")).toBe("buχ"); // ⟨ch⟩ → χ ("book")
-        expect(phonemizeWord("zéng")).toBe("t͡seːŋ"); // ⟨z⟩→t͡s, ⟨é⟩ alone→eː, ⟨ng⟩→ŋ ("ten")
-        expect(phonemizeWord("Quell")).toBe("kvæl"); // ⟨qu⟩→kv, ⟨e⟩→æ, ⟨ll⟩ collapse ("spring")
-        expect(phonemizeWord("Been")).toBe("beːn"); // ⟨ee⟩ → eː ("leg")
+        expect(phonemizeWord("Waasser")).toBe("vˈaːsər"); // ⟨w⟩→v, ⟨aa⟩→aː ("water")
+        expect(phonemizeWord("Buch")).toBe("bˈuχ"); // ⟨ch⟩ → χ ("book")
+        expect(phonemizeWord("zéng")).toBe("t͡sˈeːŋ"); // ⟨z⟩→t͡s, ⟨é⟩ alone→eː, ⟨ng⟩→ŋ ("ten")
+        expect(phonemizeWord("Quell")).toBe("kvˈæl"); // ⟨qu⟩→kv, ⟨e⟩→æ, ⟨ll⟩ collapse ("spring")
+        expect(phonemizeWord("Been")).toBe("bˈeːn"); // ⟨ee⟩ → eː ("leg")
     });
 
     test("initial ⟨st/sp⟩ → [ʃt ʃp] + single ⟨s⟩ → [z] as an onset (⟨ss⟩ stays [s])", () => {
-        expect(phonemizeWord("Strooss")).toBe("ʃtroːs"); // initial st→ʃt, ⟨oo⟩→oː, ⟨ss⟩→s ("street")
-        expect(phonemizeWord("Spill")).toBe("ʃpil"); // initial sp→ʃp ("game")
-        expect(phonemizeWord("Sonn")).toBe("zon"); // onset ⟨s⟩→z, ⟨nn⟩ collapse ("sun")
-        expect(phonemizeWord("Iesel")).toBe("iəzəl"); // ⟨ie⟩→iə, intervocalic ⟨s⟩→z ("donkey")
+        expect(phonemizeWord("Strooss")).toBe("ʃtrˈoːs"); // initial st→ʃt, ⟨oo⟩→oː, ⟨ss⟩→s ("street")
+        expect(phonemizeWord("Spill")).toBe("ʃpˈil"); // initial sp→ʃp ("game")
+        expect(phonemizeWord("Sonn")).toBe("zˈon"); // onset ⟨s⟩→z, ⟨nn⟩ collapse ("sun")
+        expect(phonemizeWord("Iesel")).toBe("ˈiəzəl"); // ⟨ie⟩→iə, intervocalic ⟨s⟩→z ("donkey")
     });
 
     test("short stressed ⟨e⟩ → [æ], reduced ⟨e⟩ → [ə] (the ⟨-en⟩ ending + the ⟨ge-⟩ prefix)", () => {
-        expect(phonemizeWord("Belsch")).toBe("bælʃ"); // monosyllable → stressed [æ] ("Belgium")
-        expect(phonemizeWord("Decken")).toBe("dækən"); // stressed e→æ, ⟨-en⟩ ending→ə ("blankets")
-        expect(phonemizeWord("Gemeng")).toBe("ɡəmæŋ"); // ⟨ge-⟩ prefix unstressed→ə, stressed e→æ ("municipality")
+        expect(phonemizeWord("Belsch")).toBe("bˈælʃ"); // monosyllable → stressed [æ] ("Belgium")
+        expect(phonemizeWord("Decken")).toBe("dˈækən"); // stressed e→æ, ⟨-en⟩ ending→ə ("blankets")
+        expect(phonemizeWord("Gemeng")).toBe("ɡəmˈæŋ"); // ⟨ge-⟩ prefix unstressed→ə, stressed e→æ ("municipality")
+    });
+
+    // PRIMARY STRESS — the mark the engine was already computing for the æ/ə choice above, now emitted.
+    // Placement: the first nucleus, or the second past an unstressed ⟨ge/be/ver/er/ze⟩ prefix. The mark goes
+    // before the NUCLEUS (repo convention: nˈaða, not ˈnaða).
+    // ⚠ THE REFEREE CANNOT CHECK THE MARK. lb.wikipron-ltz-broad carries ZERO stress marks in all 3893 rows,
+    // and referee-eval strips [ˈˌ] from both sides anyway. It CAN check the placement indirectly, through the
+    // vowel quality the same decision drives: over the 280 words where the rule shifts the stress it agrees
+    // 269/280 = 96.1%, vs 3.9% for always-first-syllable on that same population.
+    test("primary stress: first nucleus, or the second past an unstressed prefix", () => {
+        expect(phonemizeWord("Belsch")).toBe("bˈælʃ"); // no prefix → the first nucleus
+        expect(phonemizeWord("Gemeng")).toBe("ɡəmˈæŋ"); // ⟨ge-⟩ shifts it to σ2
+        expect(phonemizeWord("erfuerdert")).toBe("ərfˈuərdərt"); // ⟨er-⟩ likewise ("requires")
+        // ⚠ ⟨ver⟩ BEFORE A VOWEL — exempt from the consonant guard the other prefixes keep. Requiring a
+        // consonant cost 8 referee words the source is unanimous about (it writes them f e r… / f ɐ…).
+        expect(phonemizeWord("veränneren")).toBe("fərˈænərən"); // "to change"
+        // A MONOSYLLABIC root is protected by the vowel-count guard even though it matches the prefix letters.
+        expect(phonemizeWord("Bett")).toBe("bˈæt"); // one nucleus → no shift ("bed")
+        // ⚠ THE KNOWN FAILURE MODE, PINNED RATHER THAN HIDDEN. A disyllabic root that merely BEGINS with the
+        // prefix letters is mislocated; the referee says b æ χ e ʀ. It is 11 of 280 (4%), and fixing it needs
+        // a morpheme lexicon, not a better regex.
+        expect(phonemizeWord("Becher")).toBe("bəχˈær"); // WRONG, and measured — "cup"
+        // No nucleus, no mark: the two clitics in the referee are the whole of this class.
+        expect(phonemizeWord("'t")).toBe("t");
     });
 
     test("geminate collapse + devoicing (word-final, regressive, and ⟨g⟩→χ/k)", () => {
-        expect(phonemizeWord("Flott")).toBe("flot"); // ⟨tt⟩ → single ("nice")
-        expect(phonemizeWord("Hand")).toBe("hant"); // word-final ⟨d⟩ → t ("hand")
-        expect(phonemizeWord("Abt")).toBe("apt"); // regressive: ⟨b⟩ → p before [t] ("abbot")
-        expect(phonemizeWord("Dag")).toBe("daχ"); // final ⟨g⟩ → χ after a vowel ("day")
-        expect(phonemizeWord("Alg")).toBe("alk"); // final ⟨g⟩ → k after a consonant ("alga")
+        expect(phonemizeWord("Flott")).toBe("flˈot"); // ⟨tt⟩ → single ("nice")
+        expect(phonemizeWord("Hand")).toBe("hˈant"); // word-final ⟨d⟩ → t ("hand")
+        expect(phonemizeWord("Abt")).toBe("ˈapt"); // regressive: ⟨b⟩ → p before [t] ("abbot")
+        expect(phonemizeWord("Dag")).toBe("dˈaχ"); // final ⟨g⟩ → χ after a vowel ("day")
+        expect(phonemizeWord("Alg")).toBe("ˈalk"); // final ⟨g⟩ → k after a consonant ("alga")
     });
 
     test("⟨n⟩→[ŋ] before a velar + intervocalic g-spirantization ⟨g⟩→[ʁ]", () => {
-        expect(phonemizeWord("Bankrott")).toBe("baŋkrot"); // n→ŋ before [k] ("bankruptcy")
-        expect(phonemizeWord("Lager")).toBe("laʁər"); // intervocalic ⟨g⟩ → [ʁ] ("camp/store")
-        expect(phonemizeWord("Dag")).toBe("daχ"); // word-final ⟨g⟩ still → [χ] (not spirantized)
+        expect(phonemizeWord("Bankrott")).toBe("bˈaŋkrot"); // n→ŋ before [k] ("bankruptcy")
+        expect(phonemizeWord("Lager")).toBe("lˈaʁər"); // intervocalic ⟨g⟩ → [ʁ] ("camp/store")
+        expect(phonemizeWord("Dag")).toBe("dˈaχ"); // word-final ⟨g⟩ still → [χ] (not spirantized)
     });
 
     test("clause assembly", () => {
-        expect(lb.text("Ech schwätzen Lëtzebuergesch.").trim()).toBe("æχ ʃvæt͡sən lət͡səbuərɡəʃ .");
+        expect(lb.text("Ech schwätzen Lëtzebuergesch.").trim()).toBe("ˈæχ ʃvˈæt͡sən lˈət͡səbuərɡəʃ .");
     });
 
     // CARDINAL NUMBERS — units-FIRST and fused like German, with the EIFELER REGEL on the connector: "an" survives
@@ -86,8 +110,8 @@ describe("Luxembourgish canonical IPA — grapheme g2p + the diphthong system + 
     });
 
     test("numbers: wired into the phonemizer", () => {
-        expect(lb.text("21").trim()).toBe("eːnant͡svant͡səχ"); // eenanzwanzeg
-        expect(lb.text("45").trim()).toBe("fənəfafei̯ərt͡səχ"); // fënnefavéierzeg (n-deleted)
+        expect(lb.text("21").trim()).toBe("ˈeːnant͡svant͡səχ"); // eenanzwanzeg
+        expect(lb.text("45").trim()).toBe("fˈənəfafei̯ərt͡səχ"); // fënnefavéierzeg (n-deleted)
     });
 
 });
@@ -176,7 +200,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
         expect(N("55 000 Barrellen")).toBe("55000 Barrellen"); // plain space
         expect(N("9 000 Leit")).toBe("9000 Leit"); // NBSP
         expect(N("4 830 Kilometer")).toBe("4830 Kilometer"); // NARROW NBSP
-        expect(lb.text("9 000").trim()).toBe("neːŋdæu̯zənt"); // NBSP again, end-to-end; was *néng null*
+        expect(lb.text("9 000").trim()).toBe("nˈeːŋdæu̯zənt"); // NBSP again, end-to-end; was *néng null*
     });
 
     test("decimals: the comma is the decimal point, the fraction is read digit by digit", () => {
@@ -272,7 +296,7 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
     test("a parenthetical en dash is a pause, not silence", () => {
         const lb = getPhonemizer("lb");
         expect(lb.text("Kloteren a Sprangen – erfuerdert awer Training.").trim())
-            .toBe("klotərən a ʃpraŋən , ərfuərdərt avər trai̯niŋ .");
+            .toBe("klˈotərən ˈa ʃprˈaŋən , ərfˈuərdərt ˈavər trˈai̯niŋ .");
         // A numeric range never reaches the tokenizer as a dash, so this must still be `bis`.
         expect(normalizeLuxembourgish("vun 2 – 3 km")).toContain("bis");
     });
@@ -282,14 +306,14 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
     // cases and wrong in the ordinary one. 9 corpus utterances, all on *siwen*.
     test("a cardinal's unstressed -en obeys the Eifeler Regel before the next word", () => {
         const lb = getPhonemizer("lb");
-        expect(lb.text("Et sinn 7 Kilometer.").trim()).toBe("æt zin zivə kilomətər ."); // dropped before K
-        expect(lb.text("Et sinn 7 Deeg.").trim()).toBe("æt zin zivən deːχ ."); // kept before d
-        expect(lb.text("Et sinn 7 Auer.").trim()).toBe("æt zin zivən æu̯ər ."); // kept before a vowel
+        expect(lb.text("Et sinn 7 Kilometer.").trim()).toBe("ˈæt zˈin zˈivə kˈilomətər ."); // dropped before K
+        expect(lb.text("Et sinn 7 Deeg.").trim()).toBe("ˈæt zˈin zˈivən dˈeːχ ."); // kept before d
+        expect(lb.text("Et sinn 7 Auer.").trim()).toBe("ˈæt zˈin zˈivən ˈæu̯ər ."); // kept before a vowel
         // BEFORE A PAUSE THE ⟨n⟩ IS RETAINED. Trimming whitespace alone handed the rule a `.`, which is
         // outside the keeper set, so the sandhi fired across a sentence boundary and said *siwe*.
-        expect(lb.text("Et sinn 7.").trim()).toBe("æt zin zivən .");
+        expect(lb.text("Et sinn 7.").trim()).toBe("ˈæt zˈin zˈivən .");
         // THE STEM OF *Millioun* IS NOT AN INFLECTIONAL ⟨-en⟩ — a bare final-n test read *eng Milliou*.
-        expect(lb.text("Et sinn 1000000 Kilometer.").trim()).toBe("æt zin æŋ miliəu̯n kilomətər .");
+        expect(lb.text("Et sinn 1000000 Kilometer.").trim()).toBe("ˈæt zˈin ˈæŋ mˈiliəu̯n kˈilomətər .");
     });
 
     // A MAGNITUDE BETWEEN THE NUMBER AND ITS UNIT left `km` entirely raw, because the shared tier needs the
@@ -298,6 +322,6 @@ describe("Luxembourgish normalization — the period's four jobs + the Eifeler R
     test("a magnitude between the number and the unit", () => {
         const lb = getPhonemizer("lb");
         expect(lb.text("iwwer 2,2 Millioune km² vum Ozean").trim())
-            .toBe("ivər t͡sveː koma t͡sveː miliəu̯nə kvadratkilomətər fum ot͡səan");
+            .toBe("ˈivər t͡svˈeː kˈoma t͡svˈeː mˈiliəu̯nə kvˈadratkilomətər fˈum ˈot͡səan");
     });
 });
