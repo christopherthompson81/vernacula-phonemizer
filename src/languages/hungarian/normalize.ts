@@ -474,7 +474,12 @@ export function normalizeHungarian(input: string): string {
     //    The suffixed form (`35°-tól`, a longitude) is claimed FIRST, for the reason step 4 exists: the
     //    plain rule would emit *fok* and leave `-tól` to become its own stressed word.
     s = s.replace(
-        new RegExp(`(\\d)\\s?°\\s?([CF])?-([${LOWER}]+)`, "gu"),
+        // ⚠ THE LOWERCASE SCALE LETTERS GO IN THE CLASS, NOT IN AN `i` FLAG. `LOWER` is the Hungarian
+        //    lowercase alphabet and the suffix is genuinely lowercase-only, so `i` would fix the scale
+        //    letter and silently widen the suffix capture. Leaving this arm case-sensitive while the plain
+        //    arms below are not is worse still: `20 °c-a` falls through to them and `-a` is stranded as
+        //    its own stressed word, which is the whole reason this arm is claimed first.
+        new RegExp(`(\\d)\\s?°\\s?([CFcf])?-([${LOWER}]+)`, "gu"),
         (_m, d: string, scale: string | undefined, suf: string) =>
             `${d} ${scale?.toUpperCase() === "C" ? "Celsius-" : scale?.toUpperCase() === "F" ? "Fahrenheit-" : ""}fok${suf}`,
     );

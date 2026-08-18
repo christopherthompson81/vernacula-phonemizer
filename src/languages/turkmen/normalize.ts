@@ -284,7 +284,9 @@ export function normalizeTurkmen(input: string): string {
     //    what ships: it scores 0 and `Selsi` is what the language actually writes.
     //    ⚠ AND THE CASE SUFFIX SITS ON THE SCALE LETTER — `50 ° C-e ýetýär` ("reaches 50 °C"). Without
     //    this branch the ⟨C⟩ was read as [k] and the suffix stranded as its own word.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?C\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gui"), "$1 gradus Selsi$2");
+    // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
+    //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[Cc]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 gradus Selsi$2");
     s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 gradus Selsi");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 gradus Farengeýt");
     //    ⚠ AND THE ABLATIVE SITS ON THE SIGN — `+10° dan demirgazyga` ("from +10° northward"). Glued, or

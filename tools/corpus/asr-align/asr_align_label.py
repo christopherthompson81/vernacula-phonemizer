@@ -188,6 +188,13 @@ def sibling_screen(db: sqlite3.Connection) -> None:
       all-flagged  every recording of this sentence is flagged — the strongest signal in the corpus
       no-sibling   the sentence was recorded once; the screen has nothing to say
     """
+    # ⚠ CLEAR THE WHOLE COLUMN FIRST, then write. A verdict is only meaningful if THIS pass derived it, and
+    # every "clear what is no longer flagged" formulation leaks: `status <> 'investigate'` is NULL (not
+    # true) for a row at status NULL — the rows the README warns about, "invisible to any exclusion gate" —
+    # and a row still flagged but whose `dist` was cleared never enters the loop below at all, so nothing
+    # re-derives its verdict and nothing removes it either. Blanking first cannot miss either case.
+    db.execute("UPDATE utt SET sibling=NULL WHERE sibling IS NOT NULL")
+
     groups: dict[tuple[str, str], list[tuple[str, str, str]]] = {}
     for lang, sid, wav, st, ipa in db.execute(
             "SELECT lang,sentence_id,wav,status,ipa FROM utt WHERE dist IS NOT NULL"):
@@ -208,11 +215,6 @@ def sibling_screen(db: sqlite3.Connection) -> None:
         tally[mark] += len(flagged)
         for wav, _st, _ipa in flagged:
             db.execute("UPDATE utt SET sibling=? WHERE lang=? AND wav=?", (mark, lang, wav))
-    # ⚠ Anything no longer flagged must not keep a stale screen from an earlier round — and the comparison
-    # has to be NULL-SAFE. `status <> 'investigate'` is NULL, not true, for a row sitting at status NULL,
-    # so the plain form leaves exactly the rows this harness has twice been bitten by (README: "no label →
-    # rows sit at `status NULL`, invisible to any exclusion gate") carrying a verdict from a previous round.
-    db.execute("UPDATE utt SET sibling=NULL WHERE status IS NOT 'investigate' AND sibling IS NOT NULL")
     db.commit()
     total = sum(tally.values())
     print(f"  sibling screen: {total} flagged — "

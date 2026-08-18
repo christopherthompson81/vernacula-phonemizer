@@ -212,8 +212,10 @@ export function normalizeWestArmenian(input: string): string {
     //    ("0 սելսիուս աստիճանին", "-1,8 սելսիուս աստիճանին", "-16,2 սելսիուս աստիճանին") and inverts it
     //    once ("– 93,2 աստիճան սելսիուս"); the majority form ships.
     //    ⚠ AND THE CASE SUFFIX SITS ON THE SIGN — `3800±200°C-ին`, `104 °F-ը`, `40°-ին`, `13.2 °C-էն`.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CС]\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gui"), "$1 սելսիուս աստիճան$2");
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?F\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gui"), "$1 ֆարենհայթ աստիճան$2");
+    // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
+    //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 սելսիուս աստիճան$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[Ff]\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 ֆարենհայթ աստիճան$2");
     s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gui"), "$1 աստիճան$2");
     s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 սելսիուս աստիճան");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ֆարենհայթ աստիճան");

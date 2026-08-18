@@ -81,6 +81,27 @@ describe("a lowercased °c / °f reads as the scale, not as a loose letter", () 
      * inserted its flag in the middle, leaving `/i℉/gu`. Twelve languages silently stopped normalising ℉,
      * and every one of the 4,821 tests still passed. This is the assertion that would have caught it.
      */
+    /**
+     * ⚠ THE BARE `30 °C` PROBE IS NOT ENOUGH, and a review caught this file passing while two languages
+     * were broken. Several languages claim a SUFFIXED or SIGNED degree with a separate, earlier rule —
+     * Hungarian `20 °C-a`, Bashkir `20 °C-ТА`, Crimean Tatar `23 °C-den`, West Armenian `104 °F-ը` — and
+     * only that rule keeps the case suffix attached to the degree noun. Fix the plain arm alone and the
+     * suffixed input falls through to it, stranding `-a` as its own stressed word or dropping the scale
+     * word entirely. Probe the shapes each language's own rules distinguish, not just the simplest one.
+     */
+    test("a suffixed or signed degree is case-insensitive too", () => {
+        const broken: string[] = [];
+        for (const code of treated) {
+            for (const [up, lo] of [["20 °C-a", "20 °c-a"], ["-5 °C", "-5 °c"], ["20 °C-den", "20 °c-den"]] as const) {
+                let a: string, b: string;
+                try { a = phonemize(up, code).trim(); } catch { continue; }
+                try { b = phonemize(lo, code).trim(); } catch { broken.push(`${code} ${lo} THREW`); continue; }
+                if (a !== b) broken.push(`${code}: ${up} → ${a}   but   ${lo} → ${b}`);
+            }
+        }
+        expect(broken, `a lowercased scale letter changed a suffixed reading:\n${broken.join("\n")}`).toEqual([]);
+    });
+
     test("the ℃ and ℉ ligatures read exactly as °C and °F", () => {
         const broken: string[] = [];
         for (const code of treated) {

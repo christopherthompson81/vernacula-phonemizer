@@ -469,7 +469,9 @@ export function normalizeFinnish(input: string): string {
     //    suffix has to be glued to the last LETTER NAME (`CIA:n` → *see ii aan*), which does not exist
     //    until the letters have been spelled.
     t = t.replace(/(?<=\d)\s*:(?=[a-zåäö])/gu, "");
-    t = t.replace(/(?<=[%²³]|°[CF])\s*:[a-zåäö]+(?![\p{L}\p{M}])/gui, "");
+    // ⚠ `[a-zåäö]` is the Finnish case suffix and is lowercase-only; `i` folds it, so the lowercase
+    //    scale letters go in the lookbehind's class instead of into the flags.
+    t = t.replace(/(?<=[%²³]|°[CFcf])\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
     t = t.replace(/(?<=\d\s?(?:kg|km|cm|mm|m))\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
 
     // 8) THE APOSTROPHE GENITIVE (4 in the retained text; the `quote-letter` cell is 87). Finnish joins a

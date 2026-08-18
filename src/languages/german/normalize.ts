@@ -94,6 +94,58 @@ export function normalizeGermanInitialisms(text: string): string {
 }
 
 /** Normalize one German input string. Pure text→text. */
+/** A 4-digit year → the hundreds form German reads it in: 1945 → *neunzehnhundertfünfundvierzig*.
+ *
+ *  ⚠ RUNS AFTER THE SHARED SYMBOL TIER, not inside normalizeGerman, and the ordering is load-bearing in
+ *  both directions. Every symbol rule — the degree arm here, and `%`/`€`/`$`/`×` in the shared tier — is
+ *  keyed on a DIGIT next to the symbol. Rewriting the digits to words first leaves the symbol with nothing
+ *  to attach to and it is dropped in silence: `1500 €` read as *fünfzehnhundert*, the currency simply gone.
+ *  Running last also means this guard inspects SPELLED-OUT words (*Prozent*, *Euro*, *Kilometer*, *mal*)
+ *  rather than the symbols and abbreviations they came from, which is one form per unit instead of two.
+ *
+ *  ⚠ THE RANGE STOPS AT 1999 AND AT 1100, and both bounds are real. German switched forms at the
+ *  millennium — 2008 is *zweitausendacht*, never *zwanzighundertacht* — so a 20xx year takes the plain
+ *  cardinal the number path already gives it. Below 1100 there is no hundreds form either: 1066 is
+ *  *tausendsechsundsechzig*, not *zehnhundertsechsundsechzig*.
+ *
+ *  ⚠ NO CONTEXT CUE, deliberately, and this is where German differs from English. English gates its year
+ *  rule on `in|of|since|…` because "2011 people died" is a live ambiguity; German writes a count of that
+ *  size with a measure noun and writes a year bare — after a noun (*Festung 1620*), after a verb, at a
+ *  sentence start. A preposition list reaches none of those. So the year reading is the default and
+ *  NOT_A_YEAR carries the exceptions; widen that guard, not the cue. */
+const MEASURE_STEM = [
+    // ⚠ STEMS, matched with a trailing `\p{L}*`, because GERMAN INFLECTS THESE and an exact match with a
+    //   `\b` misses every oblique case: *mit 1200 Einwohnern* is a count, and `Einwohner\b` fails on the
+    //   dative -n. The stem list is what the shared tier and the unit table already spell out.
+    "Prozent", "Grad", "Euro", "Cent", "Dollar", "Pfund", "Franken", "Kilometer", "Meter", "Zentimeter",
+    "Millimeter", "Meile", "Kilogramm", "Gramm", "Tonne", "Liter", "Hektar", "Quadrat", "Kubik", "Volt",
+    "Watt", "Stück", "Mal", "mal", "Million", "Milliarde", "Jahr", "Monat", "Tag", "Stunde", "Minute",
+    "Sekunde", "Mann", "Mensch", "Einwohner", "Person", "Soldat", "Mitarbeiter", "Teilnehmer", "Besucher",
+].join("|");
+// ⚠ NO `\b` AFTER THE ALTERNATION and no bare symbols in it. `\b` is a WORD-boundary assertion, so after a
+//   non-word character (`%`, `°`, `€`, `$`) it only holds when a word character follows — `%\b` never
+//   matches `1200 %` at all, and every symbol alternative written that way is dead. Symbols are already
+//   spelled out by the time this runs, so the guard needs only the words.
+const NOT_A_YEAR = `(?!\\s*(?:${MEASURE_STEM})\\p{L}*)`;
+const YEAR_RE = new RegExp(`(?<![\\d.,€$£¥₽₴])(1[1-9]\\d\\d)(?![.,]?\\d)(?![\\p{L}\\p{M}])${NOT_A_YEAR}`, "giu");
+// The DECADE form, claimed first so `1980er` is not consumed as a bare year.
+// ⚠ ONLY ⟨er⟩ and ⟨ern⟩ — the two German forms. A looser `er[ns]?` also takes the English plural in
+//   `1980ers` and emits *neunzehnhundertachtzigers*, which is not a word in either language. What is left
+//   over must then stay a numeral, or the bare arm takes the digits and strands the suffix.
+const DECADE_RE = /(?<![\d.,])(1[1-9]\d\d)(ern?)(?![\p{L}\p{M}])/gu;
+
+function yearWords(y: number): string {
+    const hi = Math.floor(y / 100), lo = y % 100;
+    // German writes it solid, and inserts nothing for a lo under ten: 1905 → neunzehnhundertfünf.
+    return `${numberToWords(hi)}hundert${lo === 0 ? "" : numberToWords(lo)}`;
+}
+
+export function normalizeGermanYears(input: string): string {
+    return input
+        .replace(DECADE_RE, (_m, y: string, suf: string) => `${yearWords(Number(y))}${suf}`)
+        .replace(YEAR_RE, (_m, y: string) => yearWords(Number(y)));
+}
+
 export function normalizeGerman(input: string): string {
     let s = input;
 
@@ -176,47 +228,6 @@ export function normalizeGerman(input: string): string {
             const head = `${numberToWords(Number(h))}${uhr ?? " Uhr"}`;
             return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min))}`;
         });
-
-    // 4b) YEARS. German reads a year in 1100–1999 in the HUNDREDS form: *neunzehnhundertfünfundvierzig*,
-    //     not *eintausendneunhundertfünfundvierzig*.
-    //
-    //     ⚠ THE RANGE STOPS AT 1999 AND AT 1100, and both bounds are real. German switched forms at the
-    //     millennium — 2008 is *zweitausendacht*, never *zwanzighundertacht* — so a 20xx year takes the
-    //     plain cardinal the number path already gives it. Below 1100 there is no hundreds form either:
-    //     1066 is *tausendsechsundsechzig*, not *zehnhundertsechsundsechzig*.
-    //
-    //     ⚠ NO CONTEXT CUE, deliberately, and this is where German differs from English. English gates its
-    //     year rule on `in|of|since|…` because "2011 people died" is a live ambiguity; German writes a count
-    //     of that size with a unit or measure noun after it, and writes a year bare — after a noun (*Festung
-    //     1620*), after a verb, at a sentence start. A preposition list reaches none of those. So the year
-    //     reading is the default and YEAR_NOT_COUNT carries the exceptions; widen that guard, not the cue.
-    const yearWords = (y: number): string => {
-        const hi = Math.floor(y / 100), lo = y % 100;
-        // German writes it solid, and inserts nothing for a lo under ten: 1905 → neunzehnhundertfünf.
-        return `${numberToWords(hi)}hundert${lo === 0 ? "" : numberToWords(lo)}`;
-    };
-    //     ⚠ YEAR_NOT_COUNT IS A PURE LOOKAHEAD and must stay one: it is appended AFTER the digits, so a
-    //     lookbehind written into it would test the last digit rather than what precedes the figure. The
-    //     currency symbols that make a figure an amount (`€1500`) are guarded in the LEADING lookbehind.
-    //     ⚠ AND A FIGURE GLUED TO A LETTER IS NOT A BARE YEAR. The decade arm above claims ⟨er⟩/⟨ern⟩; what
-    //     is left (`1980ers`) must stay a numeral rather than have the year rule take the digits and leave
-    //     the suffix stranded as *neunzehnhundertachtzigers*.
-    const YEAR_NOT_COUNT = "(?!\\s*(?:km|cm|mm|kg|mg|ha|m|g|l|L|t|°|%|€|\\$|Euro|EUR|Dollar|"
-        + "USD|Franken|Mann|Menschen|Einwohner|Personen|Soldaten|Mitarbeiter|Kilometer|Meter|Tonnen|"
-        + "Quadratkilometer)\\b)";
-    //     The DECADE form first, so `1980er` is not consumed as a bare year: *neunzehnhundertachtziger(n)*.
-    //     ⚠ ONLY ⟨er⟩ and ⟨ern⟩ — the two German forms. A looser `er[ns]?` also takes the English plural in
-    //     `1980ers` and emits *neunzehnhundertachtzigers*, which is not a word in either language.
-    s = s.replace(/(?<![\d.,])(1[1-9]\d\d)(ern?)(?![\p{L}\p{M}])/gu,
-        (_m, y: string, suf: string) => `${yearWords(Number(y))}${suf}`);
-    //     ⚠ THE GUARD IS CASE-INSENSITIVE. Lowercased running text is not an edge case, and a capitalised
-    //     noun list lets `1200 menschen` read as *zwölfhundert Menschen*.
-    //     ⚠ THE TRAILING GUARD IS `[.,]?\d`, NOT `[\d.,]`: it must reject a decimal or a digit-grouped
-    //     figure (`1995.50`, `1,995`) but NOT a year that ends a clause. The strict form takes `1990-1995.`
-    //     apart — first endpoint to words, second left a numeral — and the range rule, seeing no pair,
-    //     then drops the reading entirely (trap 58, test/clause-final-range.test.ts).
-    s = s.replace(new RegExp(`(?<![\\d.,€$£¥₽₴])(1[1-9]\\d\\d)(?![.,]?\\d)(?![\\p{L}\\p{M}])${YEAR_NOT_COUNT}`, "giu"),
-        (_m, y: string) => yearWords(Number(y)));
 
     // 5) UNITS the shared tier cannot express, and the degree signs.
     s = s.replace(/(\d)\s?km\/h\b/gu, "$1 Kilometer pro Stunde");

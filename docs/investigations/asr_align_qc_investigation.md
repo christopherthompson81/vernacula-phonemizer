@@ -447,7 +447,7 @@ turned to words and its second left a numeral, and the range rule then dropped t
 written with capitalised nouns, so `1200 menschen` sailed through as *zwölfhundert* — the identical
 case-sensitivity bug this same session found in the degree rule, reintroduced one screen away from it.
 
-### 7c. The `°C` / `°F` case sweep — 191 languages, and a fleet test to hold it
+### 7c. The `°C` / `°F` case sweep — every registry code, and a fleet test to hold it
 
     lowercase °c/°f  298      uppercase °C/°F  151     (all 102 FLEURS train splits)
 
@@ -458,7 +458,7 @@ scale letter** (`scale === "C" ? Celsius : Fahrenheit`, `SCALE[sc]`). Adding `i`
 lookup misses and a literal `undefined` reaches the IPA. Setswana actually produced `undɪfinɪd` mid-run,
 and Latvian and Sylheti threw outright, before the lookups were made case-folding.
 
-Final state: **191 of 191 language codes read `°c` exactly as `°C`**, no flips, no `undefined` leaks.
+Final state: **all 192 registry codes read `°c` exactly as `°C`**, no flips, no `undefined` leaks.
 `test/degree-scale-case.test.ts` asserts all four properties fleet-wide off the language catalogue.
 
 ⚠ **A self-inflicted failure worth recording, because it nearly shipped.** The sweep's second pass matched

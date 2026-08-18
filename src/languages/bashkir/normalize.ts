@@ -277,8 +277,10 @@ export function normalizeBashkir(input: string): string {
     //    градусы*, whose possessive -ы needs a linking -н- before a case ending that the writer did not
     //    type (they wrote `-тан`, the allomorph bare *градус* takes). Emitting `градустан` is what the
     //    writer's own choice implies; `Цельсий градусытан` is not a word. Honest lossiness, not an oversight.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CС]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gui"), "$1 градус$2");
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gui"), "$1 градус$2");
+    // ⚠ THE LOWERCASE SCALE LETTER GOES IN THE CLASS, NOT IN AN `i` FLAG — the suffix class beside it
+    //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
     //    ⚠ AND THE CORPUS ALSO WRITES THE SIGN AFTER THE LETTER — `−41 С°`, `+35С°`, `0С° аҙағында`. That
     //    is a typo for `°С` and it is the only reason the degree class still reported after the rules above
     //    were in; claimed here on the same terms, letter first.
