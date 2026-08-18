@@ -444,7 +444,7 @@ export function normalizeArmenian(input: string): string {
         new RegExp(`(\\d)\\s?°\\s?[CСc]?\\s?[-\\u2013](${ARM_LOWER}+)${NOT_LETTER_AFTER}`, "gu"),
         "$1 աստիճան$2",
     );
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gu, "$1 Ցելսիուսի աստիճան");
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Ցելսիուսի աստիճան");
     s = s.replace(/(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 աստիճան");
 
     // ── 12. MINUS — narrow, and the narrowness is the whole argument (trap 24). Every minus-shaped

@@ -310,7 +310,7 @@ export function normalizeThai(input: string): string {
 
     // ── 9. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° (else the C is left behind and routes to the English phonemizer as "sˈiː").
-    s = s.replace(/\s*°\s*C(?![A-Za-z])/gu, " องศาเซลเซียส");
+    s = s.replace(/\s*°\s*C(?![A-Za-z])/gui, " องศาเซลเซียส");
     s = s.replace(/\s*°/gu, " องศา");
 
     // ── 10. all-caps Latin initialisms → Thai letter names ───────────────────────────────────────

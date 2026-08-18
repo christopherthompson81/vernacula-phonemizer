@@ -195,8 +195,12 @@ export function normalizeRussian(input: string): string {
     // 5) UNITS the shared tier cannot express: the Cyrillic slash unit and the degree signs.
     s = s.replace(/(\d)\s?км\/ч(?![а-яё])/giu, "$1 километров в час");
     s = s.replace(/(\d)\s?м\/с(?![а-яё])/giu, "$1 метров в секунду");
-    s = s.replace(/(\d)\s?°\s?[CСc](?![а-яё])/gu, "$1 градусов Цельсия");
-    s = s.replace(/(\d)\s?°\s?[FФf](?![а-яё])/gu, "$1 градусов Фаренгейта");
+    // ⚠ THE LOWERCASE SCALE LETTERS GO IN THE CLASS, NOT IN AN `i` FLAG. `[а-яё]` is the guard against a
+    //    SPELLED-OUT scale name (`30 °Cельсия` — the ⟨C⟩ is the word's first letter, not the symbol), and
+    //    under `i` that property folds to reject uppercase Cyrillic too, quietly narrowing what the rule
+    //    will claim. The class carries both cases of both alphabets instead.
+    s = s.replace(/(\d)\s?°\s?[CСcс](?![а-яё])/gu, "$1 градусов Цельсия");
+    s = s.replace(/(\d)\s?°\s?[FФfф](?![а-яё])/gu, "$1 градусов Фаренгейта");
     s = s.replace(/(\d)\s?°/gu, "$1 градусов");
 
     // 6) CLOCK. The colon was a clause mark, so "11:00" read as "одиннадцать , ноль". час and минута take

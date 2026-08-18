@@ -469,7 +469,9 @@ export function normalizeFinnish(input: string): string {
     //    suffix has to be glued to the last LETTER NAME (`CIA:n` → *see ii aan*), which does not exist
     //    until the letters have been spelled.
     t = t.replace(/(?<=\d)\s*:(?=[a-zåäö])/gu, "");
-    t = t.replace(/(?<=[%²³]|°[CF])\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
+    // ⚠ `[a-zåäö]` is the Finnish case suffix and is lowercase-only; `i` folds it, so the lowercase
+    //    scale letters go in the lookbehind's class instead of into the flags.
+    t = t.replace(/(?<=[%²³]|°[CFcf])\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
     t = t.replace(/(?<=\d\s?(?:kg|km|cm|mm|m))\s*:[a-zåäö]+(?![\p{L}\p{M}])/gu, "");
 
     // 8) THE APOSTROPHE GENITIVE (4 in the retained text; the `quote-letter` cell is 87). Finnish joins a
@@ -508,8 +510,8 @@ export function normalizeFinnish(input: string): string {
     //     improves the degree and leaves that pre-existing gap exactly as it was rather than half-closing
     //     it (trap 53: refuse the whole match, never half of it).
     t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    t = t.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gu, "$1 astetta");
-    t = t.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gu, "$1 astetta fahrenheitia");
+    t = t.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 astetta");
+    t = t.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 astetta fahrenheitia");
     t = t.replace(/(\d)\s*°/gu, "$1 astetta");
 
     // 11) THE MINUS AND PLUS SIGNS. The FLEET SHAPE, and the width is a MEASUREMENT rather than a habit

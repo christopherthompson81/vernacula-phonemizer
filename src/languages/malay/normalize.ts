@@ -216,8 +216,8 @@ export function normalizeMalay(input: string): string {
 
     // 10) DEGREES. Malay `darjah` (×3, incl. the angular `beberapa darjah di utara khatulistiwa`), not
     //     Indonesian's `derajat`. The compass arm fixes `35°W` → `dərˈad͡ʒatw`, a glued non-word.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 darjah Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 darjah Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 darjah Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 darjah Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEWnsew])(?![\p{L}\p{M}])/gu,
         (_m, d: string, c: string) => `${d} darjah ${COMPASS[c.toLowerCase()]!}`);
     s = s.replace(/(\d)\s?°/gu, "$1 darjah");

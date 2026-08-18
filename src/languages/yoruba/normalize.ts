@@ -144,7 +144,7 @@ const UNIT_WORDS: Record<string, string> = { km: "kìlómítà", ha: "hẹ́kít
 const SQ_UNITS: Record<string, string> = { mi: "máìlì", ft: "ẹsẹ̀ bàtà" };
 const UNIT_SQUARED = /(?<![\p{L}\p{M}])(km|ha)\s*²/gu;
 /** `38°C`, `79.63 °F` — a number, the sign, and a scale letter. The bare ° is refused; see the header. */
-const SCALED_DEGREE = /(\d+(?:\.\d+)?)\s*°\s*([CFK])(?![\p{L}\p{M}])/gu;
+const SCALED_DEGREE = /(\d+(?:\.\d+)?)\s*°\s*([CFK])(?![\p{L}\p{M}])/gui;
 /** A digit-flanked ×: relay legs, dimensions and resolutions. */
 const TIMES = /(\d)\s*×\s*(?=\d)/gu;
 const DECIMAL = /(\d)\.(\d+)/gu;

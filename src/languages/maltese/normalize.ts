@@ -468,11 +468,11 @@ function minusSign(text: string): string {
  */
 function degrees(text: string): string {
     return text.replace(
-        /(\p{Nd}[\p{Nd}.,]*)\s?°\s?([CF])(?![\p{L}\p{M}])/gu,
+        /(\p{Nd}[\p{Nd}.,]*)\s?°\s?([CF])(?![\p{L}\p{M}])/gui,
         (_m, num: string, scale: string) => {
             const n = numeralValue(num);
             const word = Number.isNaN(n) || countForm(n) === 1 ? DEGREE_PL : DEGREE_SG;
-            return `${num} ${word} ${scale === "C" ? CELSIUS : FAHRENHEIT}`;
+            return `${num} ${word} ${scale.toUpperCase() === "C" ? CELSIUS : FAHRENHEIT}`;
         },
     );
 }

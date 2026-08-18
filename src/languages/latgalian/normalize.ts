@@ -268,7 +268,7 @@ function degrees(text: string): string {
             .replace(new RegExp(`(\\d[\\d.,]*\\s+gradi)\\s+C${NOT_AFTER}`, "gu"), "$1 pa Celseja skolai")
             // `°C` / `° C` — the scale phrase is POSTPOSED and prepositional, which is why it is spelled
             // out here rather than declared as a tier modifier: "…temperatura … -9° pa Celseja skolai".
-            .replace(new RegExp(`(\\d)\\s?°\\s?C${NOT_AFTER}`, "gu"), "$1 gradi pa Celseja skolai")
+            .replace(new RegExp(`(\\d)\\s?°\\s?C${NOT_AFTER}`, "gui"), "$1 gradi pa Celseja skolai")
             // …and the bare sign: `56,4°`, `9,6° augšuok horizonta`, and the coordinate `55° 53′ 0″ N`.
             // ⚠ THE LOOKAHEAD STOPS A DOUBLING where the sentence already writes the word.
             .replace(/(\d)\s?°(?!\s*gradi)/gu, "$1 gradi ")

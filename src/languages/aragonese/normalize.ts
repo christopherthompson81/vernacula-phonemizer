@@ -160,8 +160,8 @@ export function normalizeAragonese(input: string): string {
     //    ⚠ `Graus` IS ALSO A TOWN IN ARAGON and outscores the measure word on the wiki — but unlike
     //    Occitan's `gras`/`graus` pair it is the SAME WORD PHONETICALLY, so the homograph costs nothing
     //    here. Worth stating because the identical-looking check went the other way one round ago.
-    s = s.replace(/(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gu,
-        (_m, d: string, scale: string) => `${d} graus ${scale === "C" ? "Celsius" : "Fahrenheit"}`);
+    s = s.replace(/(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gui,
+        (_m, d: string, scale: string) => `${d} graus ${scale.toUpperCase() === "C" ? "Celsius" : "Fahrenheit"}`);
     s = s.replace(/(\d)\s?[°º]\s?(\d+)\s?[′']/gu, "$1 graus $2 menutos ");
     //    …and the compass letter is spelled, because a bare `N` after a degree is unambiguous and the
     //    alternative is the letter name. `19° y 37°N`, `12° N`, `11°U y 12°E`, `60° de latitut sud`.

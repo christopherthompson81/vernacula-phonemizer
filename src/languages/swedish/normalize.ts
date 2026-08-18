@@ -455,8 +455,8 @@ export function normalizeSwedish(input: string): string {
     //     [v]. `°V` is a LONGITUDE (väst), not a temperature scale; it is the corpus's only compass
     //     instance, and N / S / Ö are deliberately not added (0 instances each — see the PR).
     t = t.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    t = t.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gu, "$1 grader celsius");
-    t = t.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gu, "$1 grader fahrenheit");
+    t = t.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 grader celsius");
+    t = t.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 grader fahrenheit");
     t = t.replace(/(\d)\s*°\s*V(?![\p{L}\p{M}])/gu, "$1 grader väst");
     t = t.replace(/(\d)\s*°/gu, "$1 grader");
 

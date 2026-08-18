@@ -825,7 +825,7 @@ export function normalizeEstonian(input: string): string {
     //    `saidNear` for the three ways the equivalent Luganda guard was wrong before review.
     const degree = (w: string, n: string, off: number, all: string): string =>
         saidNear(all, off, off + w.length, "kraad") ? n : `${n} ${DEGREE_WORD}`;
-    t = t.replace(/(\d)\s*°\s*[CF](?![\p{L}\p{M}])/gu, degree);
+    t = t.replace(/(\d)\s*°\s*[CF](?![\p{L}\p{M}])/gui, degree);
     t = t.replace(/(\d)\s*°(?!\s*\d+\s*['’′])/gu, degree);
 
     // 10) THE MINUS SIGN (18,727 `signed-number` whole-corpus; 8 in the retained text), AFTER the range rule

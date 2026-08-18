@@ -106,7 +106,7 @@ export function normalizeMaori(input: string): string {
 
     // ⚠ `putu` (degree) and `pūtu` (boots) differ only by vowel length — the macron is the whole distinction.
     // °F is not declared: no Māori form for Fahrenheit, and this file does not invent one (cf. `mm` above).
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 putu Herehiūhu");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 putu Herehiūhu");
     s = s.replace(/(\d)\s?°/gu, "$1 putu");
 
     // Everything else this language needs is declared data, not a local rule.

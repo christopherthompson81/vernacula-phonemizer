@@ -119,8 +119,8 @@ export function normalizeLatin(input: string): string {
     //    and the words for it. ANGULAR: "inter 36° et 43,5° gradus latitudinis septentrionalis".
     //    The scale letter is claimed first so it is not left to `core/foreign.ts` and the English letter
     //    name, which is what `°C` and `°F` were doing ([k] and [f] here, since Latin reads them natively).
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 gradus Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 gradus Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 gradus Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 gradus Fahrenheit");
     //    ⚠ WITH A TRAILING SPACE, because the corpus writes the sign glued to a following word this rule
     //    does not claim (`43,5° gradus latitudinis`). The final space-collapse removes the doubling.
     s = s.replace(/(\d)\s?°(?!\s*gradus)/gu, "$1 gradus ");

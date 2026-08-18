@@ -217,8 +217,8 @@ export function makePersianNormalizer(numbers: NumbersDef): (text: string) => st
         //      through with them: `20 °C` read *bist si* — the sign dropped and the C spoken as an English letter
         //      name. Persian puts the unit AFTER the number, so unlike Korean's 섭씨 this rule reorders nothing
         //      and cannot strand a sign to its left.
-        s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 درجه سانتی‌گراد");
-        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 درجه فارنهایت");
+        s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 درجه سانتی‌گراد");
+        s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 درجه فارنهایت");
         s = s.replace(/(\d)\s?°/gu, "$1 درجه");
 
         // 7c1) THE MINUS AND ±, both dropped before, so `-5 °C` read as five degrees above zero.

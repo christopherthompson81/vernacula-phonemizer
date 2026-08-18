@@ -288,8 +288,8 @@ export function normalizeMadurese(input: string): string {
     // ⚠ THE TRAILING SPACE ON THE BARE ARM IS LOAD-BEARING: a coordinate glues its compass word straight
     // onto the sign, so without it `6°LU` becomes one unreadable token. The clause sink trims the
     // duplicate-space case.
-    s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/gu, "$1 derajat celcius");
-    s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/gu, "$1 derajat fahrenheit");
+    s = s.replace(/(\d)\s?[°º]\s?C(?![\p{L}\p{M}])/gui, "$1 derajat celcius");
+    s = s.replace(/(\d)\s?[°º]\s?F(?![\p{L}\p{M}])/gui, "$1 derajat fahrenheit");
     s = s.replace(/(\d)\s?[°º]\s?/gu, "$1 derajat ");
 
     // ── 5. `±` IS "ABOUT", NOT A TOLERANCE — and the corpus glosses it itself ──────────────────────

@@ -144,8 +144,8 @@ const RANGE = new RegExp(String.raw`(\d[\d.,]*\d|\d)${SP}*[–—]${SP}*(?=\d)`,
 /** ⚠ NOT tier data — declaring `meile` as a unit is a defect; see step 11. `Meilen an der Stonn` is the
  *  language's own phrase, and the ⟨n⟩ survives because `an` begins with a vowel. */
 const MPH = new RegExp(String.raw`(\d)${SP}?(?:mph|Meilen?${SP}?/${SP}?h)(?![\p{L}\p{M}])`, "gu");
-const DEG_C = new RegExp(String.raw`(\d)${SP}?°${SP}?C(?![\p{L}\p{M}])`, "gu");
-const DEG_F = new RegExp(String.raw`(\d)${SP}?°${SP}?F(?![\p{L}\p{M}])`, "gu");
+const DEG_C = new RegExp(String.raw`(\d)${SP}?°${SP}?C(?![\p{L}\p{M}])`, "gui");
+const DEG_F = new RegExp(String.raw`(\d)${SP}?°${SP}?F(?![\p{L}\p{M}])`, "gui");
 const DEG_BARE = new RegExp(String.raw`(\d)${SP}?°${SP}?`, "gu");
 const MINUS = /(^|[\s(])[-−](\d)/gu;
 const PLUS_AFTER_WORD = new RegExp(String.raw`(\S)\+${SP}?(\d)`, "gu");

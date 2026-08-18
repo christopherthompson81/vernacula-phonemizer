@@ -139,8 +139,8 @@ export function normalizeAsturian(input: string): string {
     //    are used for each other's job in this corpus, so the sign is read as a degree only before one of
     //    the shapes that follows a real degree here, and the lone ordinal (`5° presidente`) falls through
     //    unread rather than becoming *cinco graos presidente*.
-    s = s.replace(/(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gu,
-        (_m, d: string, scale: string) => `${d} graos ${scale === "C" ? "Celsius" : "Fahrenheit"}`);
+    s = s.replace(/(\d)\s?[°º]\s?([CF])(?![\p{L}\p{M}])/gui,
+        (_m, d: string, scale: string) => `${d} graos ${scale.toUpperCase() === "C" ? "Celsius" : "Fahrenheit"}`);
     s = s.replace(/(\d)\s?[°º]\s?(\d+)\s?[′']/gu, "$1 graos $2 minutos ");
     s = s.replace(new RegExp(`(\\d)\\s?[°º](?=${DEGREE_TAIL})`, "gu"), "$1 graos ");
 

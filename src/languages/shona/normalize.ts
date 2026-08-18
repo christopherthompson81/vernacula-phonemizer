@@ -333,9 +333,9 @@ export function normalizeShonaPost(input: string): string {
     const degreeBody = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, DEGREE) ? n : `${DEGREE} ${n}`;
     const DEG = "(?:[  ]?°|[  ]o)";
-    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}[  ]?([CF])(?![\\p{L}\\p{M}])`, "gu"),
+    s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}[  ]?([CF])(?![\\p{L}\\p{M}])`, "gui"),
         (w, n: string, c: string, off: number, full: string) =>
-            `${degreeBody(n, off, off + w.length, full)} ${SCALE[c]!}`);
+            `${degreeBody(n, off, off + w.length, full)} ${SCALE[c.toUpperCase()]!}`);
     s = s.replace(new RegExp(`(?<![\\d.,])(\\d+(?:[.,]\\d+)?)${DEG}(?![\\p{L}\\p{M}])`, "gu"),
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full));
 

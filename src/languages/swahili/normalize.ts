@@ -164,8 +164,8 @@ export function normalizeSwahili(input: string): string {
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "hasi ");
     s = s.replace(/(\S)\+\s?(?=\d)/gu, "$1 plas ");
     s = s.replace(/(^|\s)\+\s?(?=\d)/gu, "$1plas ");
-    s = s.replace(/(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gu, "nyuzi joto $1 Selsiasi");
-    s = s.replace(/([+-]?)(\d[\d.,]*)\s?°\s?F(?![\p{L}\p{M}])/gu, "nyuzi joto $2 Fahrenheit");
+    s = s.replace(/(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gui, "nyuzi joto $1 Selsiasi");
+    s = s.replace(/([+-]?)(\d[\d.,]*)\s?°\s?F(?![\p{L}\p{M}])/gui, "nyuzi joto $2 Fahrenheit");
     s = s.replace(/([+-]?)(\d[\d.,]*)\s?°/gu, "nyuzi joto $2");
 
     // 6) RANGES → `hadi` ("until/up to"), which the corpus itself uses for spans written in words

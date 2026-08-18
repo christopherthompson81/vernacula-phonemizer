@@ -524,9 +524,9 @@ export function normalizeGeorgian(input: string): string {
     //    noun. ⚠ ⟨C⟩ was reaching the IPA as the ENGLISH letter *sˈiː*, so this is a wrong reading being
     //    replaced, not merely a silence (trap 56).
     const DEG = `(?:\\s*-?(${WRITTEN_ALT})${NOT_LETTER_AFTER})?`;
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?C${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
+    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?C${DEG}`, "gui"), (_m, d: string, sfx: string | undefined) =>
         attach(`${figureToWords(d)} გრადუსი ცელსიუსი`, sfx));
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?F${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>
+    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?F${DEG}`, "gui"), (_m, d: string, sfx: string | undefined) =>
         attach(`${figureToWords(d)} გრადუსი ფარენჰაიტი`, sfx));
     //    A BARE degree — the coordinate/declination form (`41,5° განედსა`, `მინუს 7.2°`), ×3 after step 0.
     s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°${DEG}`, "gu"), (_m, d: string, sfx: string | undefined) =>

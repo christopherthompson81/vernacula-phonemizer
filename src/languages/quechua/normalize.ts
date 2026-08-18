@@ -369,7 +369,7 @@ export function normalizeQuechua(input: string): string {
     // ⚠ AND A REDUNDANCY GUARD, because this corpus's own sentences write BOTH the word and the sign
     // (playbook trap 12): five of the eight `°` instances sit inside `… isqun chunka k'atma (90° N)`.
     // Where the word is already there the sign is dropped and nothing is doubled.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+)\s?°(?![CF])/gu, (whole, n: string, at: number) => {
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+)\s?°(?![CF])/gui, (whole, n: string, at: number) => {
         const near = s.slice(Math.max(0, at - 40), at + whole.length + 40);
         return near.includes("k'atma") ? n : `${n} k'atma`;
     });

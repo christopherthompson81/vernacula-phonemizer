@@ -111,6 +111,13 @@ describe("bashkir text normalization", async () => {
         expect(normalizeBashkir("+0,3 °C-тан")).toBe("плюс 0,3 градустан");
         expect(normalizeBashkir("+2,8 °C-ҡа тиклем")).toBe("плюс 2,8 градусҡа тиклем");
         expect(normalizeBashkir("5°-ҡа тиклем")).toBe("5 градусҡа тиклем");
+        // ⚠ THE CASE SUFFIX IS LOWERCASE-ONLY AND MUST STAY SO. Making the scale letter case-
+        //   insensitive with an `i` flag folds this language's suffix class too, so an UPPERCASE
+        //   run after the hyphen starts being captured as a suffix. The scale letter goes in the
+        //   character class instead; these pin both halves.
+        expect(normalizeBashkir("+0,3 °c-тан")).toBe("плюс 0,3 градустан");   // lowercase scale letter
+        expect(normalizeBashkir("35 С°-тан")).toBe("35 градустан");            // letter-first arm
+        expect(normalizeBashkir("35 С°-ТАН")).toBe("35 Цельсий градусы-ТАН");   // uppercase: NOT a suffix
         // ⚠ THE SCALE NAME IS DROPPED WHEN A SUFFIX FOLLOWS: the sourced compound is *Цельсий градусы*,
         // whose possessive -ы needs a linking -н- before the case ending the writer did NOT type. They
         // wrote `-тан`, the allomorph bare *градус* takes. Honest lossiness, not an oversight.

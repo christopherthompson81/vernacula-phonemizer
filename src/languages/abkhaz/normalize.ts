@@ -220,8 +220,8 @@ export function normalizeAbkhaz(text: string): string {
     //    WORD starting with C/F/K suppressed the rule ("60° Кырҭтәыла" kept its raw °). ⟨°F⟩/⟨°Ф⟩ and
     //    Kelvin still fall through deliberately: no Fahrenheit word is attested, and Kelvin is written
     //    unsigned ("135 K") — a standalone letter after ° stays untouched, a word does not.
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}])/gu, (_m, d: string) => `${d} ${MANIFEST.symbols.celsius}`);
-    s = s.replace(/(\d)\s?°(?!\s?[CFKКСФ](?![\p{L}]))/gu, (_m, d: string) => `${d} ${MANIFEST.symbols.degree}`);
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}])/gui, (_m, d: string) => `${d} ${MANIFEST.symbols.celsius}`);
+    s = s.replace(/(\d)\s?°(?!\s?[CFKКСФ](?![\p{L}]))/gui, (_m, d: string) => `${d} ${MANIFEST.symbols.degree}`);
 
     //    3c) SCALE ABBREVIATIONS (млрд/млн: "$1,86 млрд", "€ 30 млн") — BEFORE the symbol tier, so the
     //    currency rule can hop the SPELLED scale word and land the currency name LAST, in the attested

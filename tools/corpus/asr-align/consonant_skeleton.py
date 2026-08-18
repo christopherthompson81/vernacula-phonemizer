@@ -48,7 +48,11 @@ import statistics
 import sys
 from difflib import SequenceMatcher
 
-sys.path.insert(0, "/mnt/data/Programming/vernacula/scripts/omnivoice_ipa")
+# ⚠ Import the SIBLING copy of the scorer, not whatever `asr_align_report` a caller's cwd resolves
+# to. This module moved here from another repo (#836) and the old absolute path it inserted no
+# longer holds the file — it worked only because the script directory happens to be on sys.path,
+# and it would have silently imported a STALE fold() the moment that path regrew one.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from asr_align_report import dist, fold  # noqa: E402
 
 DB = os.environ.get("ASR_ALIGN_ROOT", "/mnt/data/omnivoice_ipa") + "/work/asr_align/align.sqlite"

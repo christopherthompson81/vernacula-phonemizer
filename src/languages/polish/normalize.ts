@@ -336,9 +336,9 @@ export function normalizePolish(input: string): string {
     s = s.replace(/(\d)\s?[–—-]\s?(?=\d)/gu, "$1 do ");
 
     // 10) SIGNS. Degrees take the same three-way agreement; the corpus instance is "+30°C".
-    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Celsjusza`);
-    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
     // THE MINUS. ⚠ THE CORPUS CONTAINS NO TRUE NEGATIVE — every `-<digit>` in it is a RANGE

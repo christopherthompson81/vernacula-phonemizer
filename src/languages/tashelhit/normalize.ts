@@ -378,7 +378,7 @@ export function normalizeTashelhit(input: string): string {
     //    ⚠ TRAP 12: WHERE THE SCALE WORD IS ALREADY WRITTEN the sign must not add a second one — `°Silsyus`
     //    emits only the degree noun and leaves the author's word in place.
     s = s.replace(/°(?=[Ss]ils)/gu, " taskflt n ");
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 taskflt n Silsyus");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 taskflt n Silsyus");
     //    ⚠ AND THE BARE `°` IS CLAIMED ONLY WHERE IT IS A TEMPERATURE. Of the 18 digit-adjacent degree signs,
     //    ~11 are temperatures (`19° d 23° ɣ uzal`, `28°`, `40°C`) and ~5 are COORDINATES
     //    (`31° 57′ 51″ N`, `34°51'15 anẓul`, `51°27'52" agmuḍ`, `37°21' agafa`) plus `7° Ouest`. The

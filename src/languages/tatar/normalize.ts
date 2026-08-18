@@ -332,8 +332,8 @@ export function normalizeTatar(input: string): string {
     //    a stated assumption. It ships because it is letter-gated and cannot misfire on anything this
     //    corpus contains, and because without it a `°C` loses the sign AND reads the ⟨C⟩ as the ENGLISH
     //    letter name via core/foreign.ts. The assumption is written down rather than left to look measured.
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gu, "$1 Цельсий градусы");
-    s = s.replace(/(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gu, "$1 Фаренгейт градусы");
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
+    s = s.replace(/(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусы");
     //    WITH A TRAILING SPACE, because the sign is written glued to letters this rule does not claim;
     //    the final space-collapse removes the doubling in the ordinary case.
     s = s.replace(/(\d)\s?°/gu, "$1 градус ");

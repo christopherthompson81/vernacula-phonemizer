@@ -257,8 +257,8 @@ export function normalizeChuvash(input: string): string {
     //    the Latin one falls to core/foreign.ts and is read as the ENGLISH letter name.
     //    ⚠ THE SCALE NAME FOLLOWS THE NOUN — *Цельси градусӗ*, the possessive compound, which is the same
     //    order Bashkir's corpus glosses and the opposite of the Russian *градус Цельсия*.
-    s = s.replace(/(\d)\s?°\s?[CСс](?![\p{L}\p{M}])/gu, "$1 Цельси градусӗ");
-    s = s.replace(/(\d)\s?°\s?[FФф](?![\p{L}\p{M}])/gu, "$1 Фаренгейт градусӗ");
+    s = s.replace(/(\d)\s?°\s?[CСс](?![\p{L}\p{M}])/gui, "$1 Цельси градусӗ");
+    s = s.replace(/(\d)\s?°\s?[FФф](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусӗ");
     //    WITH A TRAILING SPACE, because the sign is written glued to letters this rule does not claim;
     //    the final space-collapse removes the doubling in the ordinary case.
     s = s.replace(/(\d)\s?°/gu, "$1 градус ");

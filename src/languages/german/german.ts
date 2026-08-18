@@ -12,7 +12,7 @@ import { toSegments } from "./g2p.ts";
 import { decompose, PREFIX_IPA, SUFFIX_IPA } from "./morphology.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
-import { normalizeGerman, normalizeGermanInitialisms } from "./normalize.ts";
+import { normalizeGerman, normalizeGermanInitialisms, normalizeGermanYears } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 
 // Stress dictionary: word → 0-based ordinal of the stressed syllable nucleus (loanwords / exceptions).
@@ -161,8 +161,13 @@ function applyQuality(ipa: string, spec: string | undefined): string {
 function applyConsonant(ipa: string, spec: string | undefined): string {
     if (!spec) return ipa;
     const corr = new Map<number, string>();
-    for (const c of spec.split(","))
-        if (c) corr.set(Number(c.slice(0, -1)), c.slice(-1));
+    // ⚠ THE TARGET IS NOT ONE CHARACTER. `c.slice(-1)` cannot express an affricate, and `k → t͡s` is a real
+    // correction this table carries (Celsius, circa, Calcium — the ⟨c⟩-before-a-front-vowel loans). Ordinal,
+    // then everything after it. Single-character entries parse identically, so no existing row moves.
+    for (const c of spec.split(",")) {
+        const m = /^(\d+)(.+)$/u.exec(c);
+        if (m) corr.set(Number(m[1]), m[2]!);
+    }
     let out = "", ci = 0;
     for (let i = 0; i < ipa.length; i++) {
         const ch = ipa[i]!;
@@ -446,8 +451,11 @@ const SYMBOLS = makeSymbolNormalizer({
 class GermanPhonemizer implements Phonemizer {
     text(input: string): string {
         // ORDER: German rewrites (era, abbreviations, ORDINALS, clock, units) → INITIALISMS →
-        // the shared symbol tier. The clock and the ordinals must precede the number tokenizer.
-        const normalized = SYMBOLS(normalizeGermanInitialisms(normalizeGerman(input)));
+        // the shared symbol tier → YEARS. The clock and the ordinals must precede the number tokenizer.
+        // ⚠ YEARS RUN LAST, after every symbol rule. Those rules are keyed on a digit beside the symbol,
+        // so rewriting a year's digits to words first leaves `%`, `°`, `€`, `$` and `×` with nothing to
+        // attach to and they vanish from the output — `1500 €` read as *fünfzehnhundert*.
+        const normalized = normalizeGermanYears(SYMBOLS(normalizeGermanInitialisms(normalizeGerman(input))));
         return assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2]) {

@@ -34,7 +34,11 @@ import time
 import urllib.error
 import urllib.request
 
-sys.path.insert(0, "/mnt/data/Programming/vernacula/scripts/omnivoice_ipa")
+# ⚠ Import the SIBLING copy of the scorer, not whatever `asr_align_report` a caller's cwd resolves
+# to. This module moved here from another repo (#836) and the old absolute path it inserted no
+# longer holds the file — it worked only because the script directory happens to be on sys.path,
+# and it would have silently imported a STALE fold() the moment that path regrew one.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from asr_align_report import fold as _fold
 
 # Corpus root. Defaults to the tree these tools were written against; override with ASR_ALIGN_ROOT.

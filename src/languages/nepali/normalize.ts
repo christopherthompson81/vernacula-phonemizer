@@ -322,8 +322,8 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         s = s.replace(/\s?=\s?/gu, " बराबर ");
         s = s.replace(/\s?÷\s?/gu, " विभाजन ");
 
-        s = s.replace(/(\d)\s?°\s?C(?![A-Za-z])/gu, "$1 डिग्री सेल्सियस ");
-        s = s.replace(/(\d)\s?°\s?F(?![A-Za-z])/gu, "$1 डिग्री फरेनहाइट ");
+        s = s.replace(/(\d)\s?°\s?C(?![A-Za-z])/gui, "$1 डिग्री सेल्सियस ");
+        s = s.replace(/(\d)\s?°\s?F(?![A-Za-z])/gui, "$1 डिग्री फरेनहाइट ");
         s = s.replace(/(\d)\s?°\s?N(?![A-Za-z])/gu, "$1 डिग्री उत्तर ");
         s = s.replace(/(\d)\s?°\s?S(?![A-Za-z])/gu, "$1 डिग्री दक्षिण ");
         s = s.replace(/(\d)\s?°\s?E(?![A-Za-z])/gu, "$1 डिग्री पूर्व ");

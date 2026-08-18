@@ -324,7 +324,7 @@ export function normalizeKamba(input: string): string {
     //     slot (`˚` U+02DA in Hawaiian, `º` U+00BA in Swahili, a Cyrillic ⟨С⟩ in Karakalpak); this corpus's
     //     whole non-ASCII census is 21 characters and contains U+00B0 once and no relative of it. The
     //     confusable this round DID find is in the vowels instead (step 1).
-    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?[CF]?${NOT_AFTER}`, "gu"),
+    s = s.replace(new RegExp(`(\\d[\\d.,]*)\\s?°\\s?[CF]?${NOT_AFTER}`, "gui"),
         (_m: string, num: string, offset: number, full: string) =>
             /ndikilii\s*[+\-−]?\s*$/iu.test(full.slice(0, offset)) ? num : `ndikilii ${num}`);
 

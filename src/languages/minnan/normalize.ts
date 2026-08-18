@@ -207,7 +207,7 @@ export function normalizeMinNan(input: string): string {
     // ⚠ THE LEFT ENDPOINT MAY CARRY ITS UNIT — `25℃~30℃` puts the mark after the SIGN, not after a digit,
     // so a `(\d)` pattern never reaches it and the range vanished while both halves still read. Captured and
     // RE-EMITTED (playbook trap 10) so step 3 still sees `25°C` intact and gives it its Liap-sī reading.
-    s = s.replace(/(\d)((?:\s*°\s*C|℃|\s*°|%)?)\s*[–~〜]\s*(?=\d)/gu, "$1$2 到 ");
+    s = s.replace(/(\d)((?:\s*°\s*C|℃|\s*°|%)?)\s*[–~〜]\s*(?=\d)/gui, "$1$2 到 ");
 
     // ── 3. coordinates, then the temperature, then the bare degree ───────────────────────────────
     // ⚠ COORDINATES FIRST: `tang-keng 118°04'04"`, `pak-hūi 24°26'46"`, `118°24′`, `25°10′` — the minute

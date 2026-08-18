@@ -253,8 +253,8 @@ export function normalizeGalician(input: string): string {
     // 8) DEGREES, BEFORE the unit tier so the bare sign is not left behind and before the sign rules so a
     //    negative temperature still finds its `°`. `graos` is sourced from the corpus's own gloss of the
     //    same figure: "un ángulo de 104,45 graos entre si" is the artifact's `104,45°` sentence written out.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 graos Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 graos Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 graos Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 graos Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEO])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
         `${d} graos ${({ N: "norte", S: "sur", E: "leste", O: "oeste" } as Record<string, string>)[c]!}`);
     s = s.replace(/(\d)\s?°/gu, "$1 graos");

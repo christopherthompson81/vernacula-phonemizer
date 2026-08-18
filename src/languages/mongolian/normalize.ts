@@ -420,7 +420,7 @@ const MAGNITUDE_SUFFIXED = new RegExp(`(?:${MAGNITUDES.join("|")})[\\p{L}\\p{M}]
 // members are ROBUSTNESS for plausible input rather than a measured repair (trap 22's discipline), and they
 // cost nothing because the trailing guard already demands a LONE letter and neither script has a one-letter
 // Mongolian word.
-const DEGREE_SCALE = /(\d)\s?°\s?([СсCcFf])(?![\p{L}\p{M}])/gu;
+const DEGREE_SCALE = /(\d)\s?°\s?([СсCcFf])(?![\p{L}\p{M}])/gui;
 // The bare arm refuses a following DIGIT (a coordinate's arc-minutes — `47°49'` ×6) and a following LONE
 // letter (a scale letter the scale arm has just declined — `212 °F`), but not a following WORD: `-18.4°
 // хүйтэн` and `15° дулаан` are ordinary temperatures and are 3 of the 5 bare instances. The optional space

@@ -260,9 +260,9 @@ export function normalizeSylheti(input: string): string {
     //    it also catches the ℃/℉ that `registry.ts` folds to `°C`/`°F` before any engine sees them, which
     //    52 languages were losing whole. Zero corpus instances is not evidence of correctness.
     s = s.replace(new RegExp(`(\\p{Nd})\\s*°\\s*(ꠍꠦ|ꠚꠣ)\\.?(?!${S})`, "gu"),
-        (_m, n: string, sc: string) => `${n} ${DEGREE_WORD} ${SCALE[sc]}`);
-    s = s.replace(/(\p{Nd})\s*°\s*([CF])(?![\p{L}\p{M}])/gu,
-        (_m, n: string, sc: string) => `${n} ${DEGREE_WORD} ${sc === "C" ? SCALE["ꠍꠦ"] : SCALE["ꠚꠣ"]}`);
+        (_m, n: string, sc: string) => `${n} ${DEGREE_WORD} ${SCALE[sc.toUpperCase()]}`);
+    s = s.replace(/(\p{Nd})\s*°\s*([CF])(?![\p{L}\p{M}])/gui,
+        (_m, n: string, sc: string) => `${n} ${DEGREE_WORD} ${sc.toUpperCase() === "C" ? SCALE["ꠍꠦ"] : SCALE["ꠚꠣ"]}`);
     s = s.replace(/(\p{Nd})\s*°/gu, `$1 ${DEGREE_WORD}`);
 
     // 8. DECIMAL POINT. ⚠ THE GUARD REJECTS A DOI/URL, which is the only other digit.digit shape here:

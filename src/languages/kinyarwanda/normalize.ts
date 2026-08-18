@@ -421,23 +421,23 @@ export function normalizeKinyarwanda(input: string): string {
     //    reading for the sign (`munsi ya zeru`, postposed; see BELOW_ZERO), and it is worth having because
     //    omitting a minus INVERTS the value where omitting a plus is lossless. All three ASCII/typographic
     //    forms of the sign are accepted; the corpus uses U+2212 and U+2013 and never the ASCII hyphen here.
-    s = s.replace(/(?<![\p{L}\p{M}\d])[-−–][  ]?(\d+(?:[.,]\d+)?)[  ]?°[  ]?([CF])(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}\d])[-−–][  ]?(\d+(?:[.,]\d+)?)[  ]?°[  ]?([CF])(?![\p{L}\p{M}])/gui,
         (w, n: string, sc: string, off: number, full: string) =>
-            `${degreeBody(n, off, off + w.length, full, sc === "C" ? `${CELSIUS} ` : "")} ${BELOW_ZERO}`);
+            `${degreeBody(n, off, off + w.length, full, sc?.toUpperCase() === "C" ? `${CELSIUS} ` : "")} ${BELOW_ZERO}`);
     //    4b) A RANGE OF DEGREES — `40-42 °`, and rw.wikipedia's `dogere selisiyusi 26-28`. Claimed HERE and
     //    not by step 7, because the noun heads the whole span in Kinyarwanda (`dogere selisiyusi 26-28`, one
     //    noun for two figures) and step 7 runs later — left to itself the general range rule would split the
     //    pair and the degree arm would then attach the noun to the SECOND operand only (`40 kugeza kuri
     //    dogere 42`). Trap 14's ordering half: order by who needs the words first.
-    s = s.replace(/(?<![\p{L}\p{M}\d.,-])(\d+)[  ]?[-–—][  ]?(\d+)[  ]?°[  ]?([CF])?(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}\d.,-])(\d+)[  ]?[-–—][  ]?(\d+)[  ]?°[  ]?([CF])?(?![\p{L}\p{M}])/gui,
         (w, a: string, b: string, sc: string | undefined, off: number, full: string) =>
             Number(a) < Number(b)
-                ? `${degreeBody(a, off, off + w.length, full, sc === "C" ? `${CELSIUS} ` : "")} kugeza kuri ${b}`
+                ? `${degreeBody(a, off, off + w.length, full, sc?.toUpperCase() === "C" ? `${CELSIUS} ` : "")} kugeza kuri ${b}`
                 : w);
     //    4c) A SCALE TEMPERATURE.
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?°[  ]?([CF])(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?°[  ]?([CF])(?![\p{L}\p{M}])/gui,
         (w, n: string, sc: string, off: number, full: string) =>
-            degreeBody(n, off, off + w.length, full, sc === "C" ? `${CELSIUS} ` : ""));
+            degreeBody(n, off, off + w.length, full, sc?.toUpperCase() === "C" ? `${CELSIUS} ` : ""));
     //    4d) A COORDINATE — `2° 36′ 58″ S`, `1.867 ° S`, `30°33′27″ E`. The compass letter is a DIRECTION,
     //    not a scale; the prime/double-prime marks are left as they are (they carry no reading this repo has
     //    sourced) but the degree and its direction are now spoken.

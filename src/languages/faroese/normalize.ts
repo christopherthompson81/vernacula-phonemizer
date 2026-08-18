@@ -109,8 +109,8 @@ export function normalizeFaroese(input: string): string {
     // 6) DEGREES. `stig` ×64 / `stigum` ×59 is the Faroese degree; `Celsius` ×23. The corpus's angular
     //    instances are coordinates (`62° norðurbreidd`, `57°71° … n.br.`, `47° and 50° N`) and its
     //    thermal ones carry the scale letter (`11 °C (52 °F)`, `56,7 °C (134 °F)`).
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 stig Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 stig Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 stig Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 stig Fahrenheit");
     s = s.replace(/(\d)\s?°/gu, "$1 stig ");
 
     // 7) SIGNS, before the range rule spends the hyphen.

@@ -362,7 +362,7 @@ export function normalizeHmong(input: string): string {
     //    CONTENTFUL where a scale name beside `° C` is redundant with nothing — dropping it would be a real
     //    loss, so that instance is deliberately left alone (its `N` still reaches the IPA raw, ×1).
     //    ⚠ BEFORE STEP 11, so the operand still carries its decimal tail (`+45,4 ° C`, `116,6 ° C`).
-    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?[CF](?![\p{L}\p{M}])/gu, "$1");
+    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?[CF](?![\p{L}\p{M}])/gui, "$1");
 
     // 9) RANGES → `mus rau`, the connective the corpus itself writes between two numerals (header). AFTER
     //    step 6 so a percent span is already carrying its word, and AFTER step 4 so a grouped endpoint is one

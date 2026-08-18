@@ -478,8 +478,8 @@ export function normalizeKyrgyz(input: string): string {
     //     lifetime). ⚠ The em dash is in the alternation because this corpus writes the minus as one twice
     //     (`—5°Сден`, `—40°С`) — same character it uses for apposition, told apart by the same guard.
     const NO_SIGN_LEFT = `(?<![\\d°′'\u2032\\p{L}\\p{M}])`;
-    s = s.replace(new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?[.…]{2,3}\\s?[-−–—]\\s?\\d+\\s?°)`, "gu"), "минус $1");
-    s = s.replace(new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?°)`, "gu"), "минус $1");
+    s = s.replace(new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?[.…]{2,3}\\s?[-−–—]\\s?\\d+\\s?°)`, "gui"), "минус $1");
+    s = s.replace(new RegExp(`${NO_SIGN_LEFT}[-−–—]\\s?(\\d+(?:,\\d+)?)(?=\\s?°)`, "gui"), "минус $1");
 
     // 9) DEGREES. `+4 °Cдан`, `−10 °Cга`, `-18°Сден`, `26°Сге`, `20-26°С`, `39°11′–43°16′`, `990оС`.
     //    44 degree signs in 456 segments, and 21 of them carry a bound case suffix — nearly half.
@@ -495,7 +495,11 @@ export function normalizeKyrgyz(input: string): string {
     //    deeper form). The scale letter is therefore CONSUMED and not spoken — a redundancy the corpus's own
     //    prose also drops (trap 12).
     const suffixArm = `(?:-?(${SUFFIX_RE}))?${NOT_WORD}`;
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСF]${suffixArm}`, "gu"), (_m, d: string, tail: string | undefined) =>
+    // ⚠ THE LOWERCASE SCALE LETTERS GO IN THE CLASS, NOT IN AN `i` FLAG. `suffixArm` embeds SUFFIX_RE,
+    //    which is lowercase Cyrillic only; under `i` it captures an UPPERCASE suffix, `suffixKind` then
+    //    fails to recognise it and the `?? CASE.loc` fallback substitutes the wrong case in silence —
+    //    `30 °C-ДАН` (ablative) read as the locative *градуста*.
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСFcсf]${suffixArm}`, "gu"), (_m, d: string, tail: string | undefined) =>
         `${d} градус${tail === undefined ? "" : suffix("градус", suffixKind(tail) ?? CASE.loc)}`);
     //    A COORDINATE's arc-minute and arc-second, whose words come from the same градус article defining
     //    them: «1°=60'=3600", мында 1'— минут … 1" — секунда». Without this `39°11′` lost the degree and left

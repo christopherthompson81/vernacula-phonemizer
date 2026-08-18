@@ -178,8 +178,8 @@ export function normalizeItalian(input: string): string {
     //    below claims every remaining `\d°`. Temperature (`30°C`, `90 °F`) and coordinate (`35°W`) are
     //    identified by the LETTER glued to the sign; the ordinal never has one (`1° gennaio` has a space).
     //    This also has to run before the shared unit tier, which would otherwise leave the bare sign behind.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 gradi Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 gradi Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 gradi Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 gradi Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu,
         (_m, d: string, dir: string) => `${d} gradi ${COMPASS[dir.toLowerCase()]!}`);
 

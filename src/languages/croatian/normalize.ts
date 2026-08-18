@@ -190,7 +190,7 @@ export function normalizeCroatian(input: string): string {
         });
 
     // 5) DEGREES. `90 °F`, `+30°C`, `35° W` (a LONGITUDE — the bare-degree rule must not claim it).
-    s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])/gu, (_m, n: string, u: string) =>
+    s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])/gui, (_m, n: string, u: string) =>
         `${n} ${/[Ff]/u.test(u) ? "stupnjeva Farenhajta" : "stupnjeva Celzija"}`);
     s = s.replace(/(\d+)\s?°\s?([NSEWnsew])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string) =>
         `${n} stupnjeva ${({ N: "sjeverno", S: "južno", E: "istočno", W: "zapadno" } as Record<string, string>)[c.toUpperCase()]!}`);

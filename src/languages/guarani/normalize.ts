@@ -251,8 +251,8 @@ export function normalizeGuarani(input: string): string {
     // stray [k]. Half-declaring here cannot invent a quantity the way ig's `790 km2` did (trap 53), because
     // there is no numeral left over to misread. If a later run sources the degree word, this rule takes it
     // in one edit; the counts above are the re-check.
-    s = s.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gu, "$1 Celsius");
-    s = s.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gu, "$1 Fahrenheit");
+    s = s.replace(/(\d)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 Celsius");
+    s = s.replace(/(\d)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 Fahrenheit");
 
     // ── 6. DE-GROUP THOUSANDS — the single biggest defect this layer repairs ────────────────────────────
     // `grouped` ×1,350 whole-corpus, and this corpus writes the separator THREE ways at once, which is the

@@ -361,8 +361,8 @@ export function normalizeBavarian(input: string): string {
     //    ⚠ The arc-minute and arc-second of a coordinate are LEFT UNREAD. `47°16′15″` has no sourced Bavarian
     //    word for ′/″ anywhere probed, and reading the degree while dropping the minute is the honest state.
     s = s.replace(/℃/gu, "°C").replace(/℉/gu, "°F");
-    s = s.replace(/(\p{Nd})\s*°\s*C(?![\p{L}\p{M}])/gu, "$1 Grad Celsius");
-    s = s.replace(/(\p{Nd})\s*°\s*F(?![\p{L}\p{M}])/gu, "$1 Grad Fahrenheit");
+    s = s.replace(/(\p{Nd})\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 Grad Celsius");
+    s = s.replace(/(\p{Nd})\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 Grad Fahrenheit");
     //    ⚠ THE COMPOUND HYPHEN IS CONSUMED, and reading the output is what caught this too. `90°-Winkl` is a
     //    German-style compound ("a 90-degree angle"), and this engine's TOKEN admits `-` inside a word run, so
     //    emitting `90 Grad-Winkl` FUSED the two into one token: *ɡ̥rɑd̥ʋiŋɡ̥l*, where before the rule existed
