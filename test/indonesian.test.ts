@@ -141,3 +141,56 @@ describe("indonesian normalization", () => {
         expect(phonemize("Cañitas", "ms")).toBe(phonemize("Cañitas", "id"));
     });
 });
+
+/**
+ * ⚠ AN ALL-CAPS RUN IS NOT AUTOMATICALLY AN ACRONYM. The branch that spells a capital run by its
+ * Indonesian letter names had NO readability test, so it claimed every capital run there is — and the
+ * acronyms that are actually PRONOUNCED as words were spelled out letter by letter:
+ *
+ *     UNESCO -> uɛneɛst͡ʃeo   (u-e-en-e-es-che-o)   instead of /unɛsko/
+ *     NATO   -> ɛnateo                              instead of /nato/
+ *     ASEAN  -> aɛseaɛn                             instead of /asəan/
+ *
+ * ASEAN and UNESCO are not marginal vocabulary in Indonesian or Malay. An ordinary word in caps was
+ * spelled out too (`RUMAH` -> ɛruɛmaha).
+ *
+ * This is the discrimination core/initialisms.ts already makes for the rest of the fleet; Indonesian
+ * never went through that pass so it never got the test. Malay delegates to this engine, so it
+ * inherited both the defect and the fix.
+ */
+describe("a capital run is spelled out only if it cannot be a word", () => {
+    test("word-pronounced acronyms are read as words", async () => {
+        // ⚠ LEXICALISED, because native ⟨c⟩ is /t͡ʃ/ and these borrowings keep the /k/ of their source
+        // spelling — read by rule, UNESCO would be *unəst͡ʃˈo*. Attested in the FLEURS id_id audio:
+        // unesco `o n i a o n i s k o`, covid `k ɔ f i t`, acta `ŋ a n a t a` — all with /k/.
+        expect(await phonemize("UNESCO", "id")).toBe("unˈɛsko");
+        expect(await phonemize("COVID", "id")).toBe("kˈovid");
+        expect(await phonemize("ACTA", "id")).toBe("ˈakta");
+        expect(await phonemize("NATO", "id")).toBe("nˈato");
+        expect(await phonemize("ASEAN", "id")).toBe("asəˈan");
+        expect(await phonemize("NATO", "ms")).toBe("nˈato");   // Malay delegates here
+    });
+
+    // Indonesian syllables are (C)V(C) with a short coda inventory, so these are unreadable by
+    // construction — no vowel at all, or a cluster the language does not license.
+    test("letter-run acronyms are still spelled", async () => {
+        expect(await phonemize("TV", "id")).toBe("tefe");
+        expect(await phonemize("DVD", "id")).toBe("defede");
+        expect(await phonemize("GPS", "id")).toBe("ɡepeɛs");
+        expect(await phonemize("PBB", "id")).toBe("pebebe");
+        expect(await phonemize("BBM", "id")).toBe("bebeɛm");
+    });
+
+    // ⚠ "readability is not convention" — core/initialisms.ts says so itself. `AS` (Amerika Serikat)
+    // and `REM` are perfectly pronounceable and still said letter by letter, so shape alone is not
+    // enough and they are listed.
+    test("readable-but-conventionally-spelled acronyms stay spelled", async () => {
+        expect(await phonemize("AS", "id")).toBe("aɛs");
+        expect(await phonemize("REM", "id")).toBe("ɛreɛm");
+    });
+
+    test("an ordinary word in caps reads as that word", async () => {
+        for (const w of ["RUMAH", "YANG", "BESAR", "DENGAN"])
+            expect(await phonemize(w, "id"), w).toBe(await phonemize(w.toLowerCase(), "id"));
+    });
+});
