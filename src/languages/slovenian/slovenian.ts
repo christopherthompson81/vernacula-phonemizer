@@ -2,7 +2,9 @@
  * Slovenian (sl) phonemizer — canonical IPA, slovenščina. Rule g2p (g2p.ts): consonant scan +
  * l-vocalization + lj/nj + syllabic-r + voicing/devoicing. NO stress mark is emitted — Slovene stress is free/lexical
  * and unwritten (a stress lexicon is the deferred fix), and the vowel quality/length/pitch the referee carries are
- * all unwritten too. text() tokenizes words / numbers / punctuation.
+ * all unwritten too. ⚠ THE LEXICON'S SOURCE IS IDENTIFIED: the kaikki Slovene dump, 5380 headwords carrying the
+ * acute/grave pitch diacritic on the stressed vowel (97.8% of its IPA entries), covering 56.8% of sl_si corpus
+ * tokens. docs/investigations/south_slavic_stress_sources_investigation.md. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

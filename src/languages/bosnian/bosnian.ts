@@ -5,7 +5,9 @@
  * module reuses the Serbian engine's word g2p (phonemizeWord) directly. Bosnian is written in BOTH Gaj's Latin
  * (predominant) and Cyrillic, so the tokenizer admits both scripts. The only Bosnian-specific delta is the CARDINAL
  * NUMBER WORDS (Serbian hiljada/milion lexemes + the ijekavian dvjesta — numbers.ts) over the shared agreement
- * compositor. Pitch accent is unwritten and DEFERRED (as in Serbian/Croatian).
+ * compositor. Pitch accent is unwritten and DEFERRED (as in Serbian/Croatian) — with an identified source: the
+ * kaikki Serbo-Croatian dump is unified across sr/hr/bs and covers 84.2% of bs_ba corpus tokens.
+ * docs/investigations/south_slavic_stress_sources_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
