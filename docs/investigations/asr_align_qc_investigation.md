@@ -738,3 +738,52 @@ plus the 20 of 23 `de_de` rows from Run 5 that are the same class.
   (`s ɛ ts ɑ̃ k a t o n t`, `m i l k a t r v ɛ t ʁ`). The same phenomenon as 10a in the other direction,
   and it is why `ln_cd` is 33/37 digits. Whether to follow the readers here is a policy question, not a
   bug — but the number class in this queue is not one defect, it is at least two.
+
+## Run 11 — 2026-08-18 17:10 — the digit class is the SAME defect, and it is not ours
+
+Run 10 called numbers "the largest tractable class" at 45% of the residual. That was the wrong frame.
+Reading `ceb_ph`'s digit rows makes it obvious — the readers say the numerals in **English**
+(`s e v e n a n d ɹ i d d e t ɾ i t aʊ z a n d`, `t w ɛ n t i f ɔ ɹ s t`) while we emit the native
+Cebuano numerals (`pˈito kˈa ɡˈatos ʔˈuɡ kawalˈoʔan…`). It is 10a again, applied to numerals.
+
+Tested it the same way: phonemize each digit-bearing all-flagged row twice — natively, and with the digit
+runs alone read by another engine — and score both against the recognized phones.
+
+    lang       n   native      →en      →es      →fr    sourced target
+    ceb_ph    22   0.6028   0.4643   0.5214   0.5188    en   (Δ +0.1385)
+    fil_ph    13   0.5519   0.4677   0.5147   0.4965    en   (Δ +0.0842)
+    sn_zw     22   0.5407   0.4026   0.4527   0.4586    en   (Δ +0.1381)
+    ln_cd     33   0.5333   0.4925   0.4413   0.3729    fr   (Δ +0.1604)
+
+    85 of 90 rows closer — 94%
+
+⚠ **THE TARGET LANGUAGE IS SOURCED, NOT ASSUMED**, and that mattered. Cebuano and Tagalog have three
+numeral systems in use — native, Spanish-derived and English — so "English" was a hypothesis with a real
+competitor, not a given. The audio refutes Spanish for both (`ceb` 0.521 against 0.464, `fil` 0.515
+against 0.468). Each language lands on the language of its own administrative history, and each beats
+both alternatives rather than merely beating native.
+
+### What this does to the queue
+
+The two largest classes in the 747-row residual collapse into one phenomenon:
+
+    same-script prose  384 (51.4%)   — includes the fr/de embedded-English rows (10a)
+    contains digits    337 (45.1%)   — numeral code-switching, this run
+
+Neither is a phonemizer defect. Both are the same missing capability — **a span-level language signal**,
+which `docs/OpenLID-fastText.scratch.md` is already scoped for. The prize is now measured on two
+independent slices: −11% mean distance on French prose spans, −25% on numerals across four languages.
+
+⚠ **And the priority ordering in Run 10 was wrong.** It offered "work the digit rows" and "treat
+code-switching as its own project" as alternatives. They are the same work; the digit rows are not a
+separate pile of bugs. What remains genuinely unexplained in this queue is the same-script prose that is
+NOT embedded foreign material — which is where `hr_hr` (2.81× lift) and `bs_ba` (2.37×) sit.
+
+### A tooling trap worth recording
+
+The first `fil_ph` run died with `no phonemizer registered for "fil"`. The probe derived the engine code by
+splitting the FLEURS code on `_`, which is right for 97 of 102 languages and wrong for five — the corpus
+tooling already carries the mapping (`VARIETY` in `phonemize-fleurs.mts`: `fil_ph→tl`, `ar_eg→arz`,
+`es_419→es-419`, `pt_br→pt-BR`, `ny_mw→nya`). **Re-derive nothing the corpus tooling already states**; a
+one-off analysis script that guesses the code will be wrong exactly on the languages whose code is
+interesting.
