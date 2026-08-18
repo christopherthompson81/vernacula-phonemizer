@@ -35,9 +35,9 @@ describe("Croatian (hr) canonical IPA", () => {
         expect(phonemize("1000", "hr").trim()).toBe("tˈisut͡ɕu"); // tisuću — the standalone form
         expect(phonemize("2000", "hr").trim()).toBe("dʋˈi˥˩je tˈi˥˩sut͡ɕe"); // dvije tisuće (not *dva tisuće)
         expect(phonemize("5000", "hr").trim()).toBe("peː˥˩t tˈisut͡ɕa"); // pet tisuća — gen.pl
-        expect(phonemize("21000", "hr").trim()).toBe("dʋˈaː˩˥deset jˈedna tˈisut͡ɕa"); // dvadeset jedna tisuća
+        expect(phonemize("21000", "hr").trim()).toBe("dʋˈaː˩˥deset jednˈa tˈisut͡ɕa"); // dvadeset jedna tisuća
         expect(phonemize("1000000", "hr").trim()).toBe("jˈe˩˥dan milˈi˩˥jun"); // masculine
-        expect(phonemize("2000000", "hr").trim()).toBe("dʋaː˥˩ mˈilijuna"); // dva milijuna — masculine keeps dva
+        expect(phonemize("2000000", "hr").trim()).toBe("dʋaː˥˩ milijˈuna"); // dva milijuna — masculine keeps dva
     });
 });
 
@@ -59,7 +59,7 @@ describe("Croatian text normalization", () => {
         expect(normalizeCroatian("zauzeo 190. mjesto")).toBe("zauzeo sto devedeseto mjesto");
         expect(normalizeCroatian("oluja 4. kategorije")).toBe("oluja četvrte kategorije");
         expect(ph("7. najvećim")).toBe("sˈedmom nˈajʋet͡ɕim");
-        expect(ph("15. stoljeća")).toBe("pˈetnaestoɡ stˈoʎet͡ɕa"); // neuter genitive
+        expect(ph("15. stoljeća")).toBe("petnˈaestoɡ stˈoʎet͡ɕa"); // neuter genitive
     });
 
     test("period-thousands de-group; comma-decimals read zarez", () => {
@@ -79,9 +79,9 @@ describe("Croatian text normalization", () => {
         expect(ph("n. e.")).toBe("nˈoʋe ˈere .");
         expect(ph("p.n.e.")).toBe("prˈi˥˩je nˈoʋe ˈere .");
         // trap pins: the g. n. e. / g. pr. Kr. forms (400. g. n. e., 1000. g. pr. Kr.)
-        expect(ph("od 400. g. n. e.")).toBe("od t͡ʃˈetiristote nˈoʋe ˈere .");
-        expect(ph("1000. g. pr. Kr. Asirci")).toBe("tˈisut͡ɕite prˈi˥˩je krˈista asˈiː˩˥rt͡si");
-        expect(ph("I. svjetskog rata")).toBe("pˈrʋoɡ sʋjˈetskoɡ rˈata");
+        expect(ph("od 400. g. n. e.")).toBe("od t͡ʃetˈiristote nˈoʋe ˈere .");
+        expect(ph("1000. g. pr. Kr. Asirci")).toBe("tisˈut͡ɕite prˈi˥˩je krˈista asˈiː˩˥rt͡si");
+        expect(ph("I. svjetskog rata")).toBe("pˈr˩˥ʋoɡ sʋjˈetskoɡ rˈata");
         expect(ph("II. svjetskom ratu")).toBe("drˈuː˥˩ɡom sʋjˈetskom rˈatu");
         expect(ph("itd.")).toBe("i tˈa˩˥ko dˈa˥˩ʎe .");
         expect(ph("Dr. Moll")).toBe("dˈo˥˩ktor moll");

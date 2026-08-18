@@ -42,9 +42,9 @@ describe("Serbian canonical IPA", () => {
         expect(d.text("1000").trim()).toBe("xˈiʎadu"); // hiljadu — the standalone form
         expect(d.text("2000").trim()).toBe("dʋeː˥˩ xˈiʎade"); // dve hiljade — FEM two (not *dva hiljade)
         expect(d.text("5000").trim()).toBe("peː˥˩t xˈiʎada"); // pet hiljada — gen.pl
-        expect(d.text("21000").trim()).toBe("dʋˈaː˩˥deset jˈedna xˈiʎada"); // dvadeset jedna hiljada — …1 → fem sg
+        expect(d.text("21000").trim()).toBe("dʋˈaː˩˥deset jednˈa xˈiʎada"); // dvadeset jedna hiljada — …1 → fem sg
         expect(d.text("1000000").trim()).toBe("jˈe˩˥dan milˈi˩˥on"); // jedan milion — masculine
-        expect(d.text("2000000").trim()).toBe("dʋaː˥˩ mˈiliona"); // dva miliona — masculine keeps dva
+        expect(d.text("2000000").trim()).toBe("dʋaː˥˩ miliˈona"); // dva miliona — masculine keeps dva
     });
 });
 
@@ -60,12 +60,12 @@ describe("Serbian normalization", () => {
     test("N. ordinals — the case is chosen by the licensing word", () => {
         expect(say("1624. године")).toBe("xˈiʎadu ʃˈeː˥˩ststo dʋˈaː˩˥deset t͡ʃˈetʋrte ɡˈodine"); // f.gen
         expect(say("у 54. години")).toBe("u pedˈe˩˥set t͡ʃˈetʋrtoj ɡˈodini"); // f.dat/loc
-        expect(say("за 2020. годину")).toBe("za dʋeː˥˩ xˈiʎade dʋˈadesetu ɡˈodinu"); // f.acc
-        expect(say("16. века")).toBe("ʃˈesnaestoɡ ʋˈeka"); // m.gen — corpus: двадесетог века
-        expect(say("у 20. веку")).toBe("u dʋˈadesetom ʋˈeku"); // m.loc — corpus: двадесетом веку
-        expect(say("21. јула")).toBe("dʋˈaː˩˥deset pˈrʋoɡ jˈula"); // month genitive
-        expect(say("3. августа")).toBe("trˈet͡ɕeɡ ˈaʋɡusta"); // treći is the one SOFT stem: trećeg, not *trećog
-        expect(say("400. године")).toBe("t͡ʃˈetiristote ɡˈodine"); // round hundred → the hundreds ordinal
+        expect(say("за 2020. годину")).toBe("za dʋeː˥˩ xˈiʎade dʋˈaː˩˥desetu ɡˈodinu"); // f.acc
+        expect(say("16. века")).toBe("ʃesnˈaestoɡ ʋˈeka"); // m.gen — corpus: двадесетог века
+        expect(say("у 20. веку")).toBe("u dʋˈaː˩˥desetom ʋˈeku"); // m.loc — corpus: двадесетом веку
+        expect(say("21. јула")).toBe("dʋˈaː˩˥deset pˈr˩˥ʋoɡ jˈula"); // month genitive
+        expect(say("3. августа")).toBe("trˈet͡ɕeɡ aʋɡˈusta"); // treći is the one SOFT stem: trećeg, not *trećog
+        expect(say("400. године")).toBe("t͡ʃetˈiristote ɡˈodine"); // round hundred → the hundreds ordinal
     });
 
     // The guard that makes the rule safe. Nothing outside the licensor list is claimed, so every
@@ -79,7 +79,7 @@ describe("Serbian normalization", () => {
     // Serbian groups thousands with a PERIOD, which split the number AND inserted a phrase break.
     test("period-grouped thousands", () => {
         expect(say("1.400 људи")).toBe("xˈiʎadu t͡ʃˈe˥˩tiristo ʎˈudi");
-        expect(say("5.000.000")).toBe("peː˥˩t mˈiliona"); // adjacent groups share a digit ⇒ two passes
+        expect(say("5.000.000")).toBe("peː˥˩t miliˈona"); // adjacent groups share a digit ⇒ two passes
     });
 
     // Both count slots are corpus-attested: 2–4 takes the GENITIVE SINGULAR (83 метра, 24 сата, 32
@@ -89,7 +89,7 @@ describe("Serbian normalization", () => {
         expect(say("83 km")).toBe("osamdˈe˩˥set triː˥˩ kˈilometra"); // gen.sg — …3
         expect(say("24 mm")).toBe("dʋˈaː˩˥deset t͡ʃˈe˩˥tiri mˈilimetra");
         expect(say("88%")).toBe("osamdˈe˩˥set ˈo˥˩sam pˈo˥˩sto"); // posto is INDECLINABLE (corpus ×57)
-        expect(say("19.500 km²")).toBe("deʋˈe˩˥tnaest xˈiʎada pˈeː˥˩tsto kʋˈadratnix kˈilometara");
+        expect(say("19.500 km²")).toBe("deʋˈe˩˥tnaest xˈiʎada pˈeː˥˩tsto kʋˈa˩˥dratnix kˈilometara");
     });
 
     // The rate preposition is NOT one word: the corpus writes `240 километара НА сат` but `1,5
@@ -114,9 +114,9 @@ describe("Serbian normalization", () => {
     // keeps the form that actually ends with them. Written in CYRILLIC on a LATIN-emitted ordinal, which
     // is why the captured suffix is transliterated first.
     test("numeral + hyphen + case suffix, across scripts", () => {
-        expect(say("1970-их")).toBe("xˈiʎadu dˈe˥˩ʋetsto sˈedamdesetix");
-        expect(say("15-ог века")).toBe("pˈetnaestoɡ ʋˈeka");
-        expect(say("11-ом веку")).toBe("jˈedanaestom ʋˈeku");
+        expect(say("1970-их")).toBe("xˈiʎadu dˈe˥˩ʋetsto sedamdˈe˩˥setix");
+        expect(say("15-ог века")).toBe("petnˈaestoɡ ʋˈeka");
+        expect(say("11-ом веку")).toBe("jedanˈaestom ʋˈeku");
         expect(say("11-годишња")).toBe("jedˈa˩˥naest ɡˈodiʃɲa"); // a COMPOUND adjective — deliberately not claimed
     });
 
@@ -132,7 +132,7 @@ describe("Serbian normalization", () => {
 
     test("degrees consume the degree noun the text already wrote", () => {
         expect(say("32 °C степена")).toBe("trˈiː˩˥deset dʋaː˥˩ stˈepena t͡sˈelzijusa");
-        expect(say("90 °F")).toBe("deʋedˈe˩˥set stˈepeni fˈarenxajta");
+        expect(say("90 °F")).toBe("deʋedˈe˩˥set stˈe˥˩peni fˈarenxajta");
         // ⚠ A BARE ° MUST STILL READ THE DEGREE NOUN, with numeral agreement and no scale word. Declining it
         // outright protects the scale word (Celsius/Fahrenheit, which the C/F arm supplies) but throws the
         // degree noun away with it — and a LONGITUDE then loses the word that makes it one.
@@ -194,6 +194,26 @@ describe("Serbian normalization", () => {
         expect(phonemizeWord("od")).toBe("od");
         expect(accentLexiconHas("jezik")).toBe(true);
         expect(accentLexiconHas("godine")).toBe(false); // OOV: the missing tone is missing DATA
+    });
+
+    // THE OOV TIER — accent-transitions.tsv. The lexicon reaches ~43% of polysyllabic corpus tokens; the rest is
+    // mostly INFLECTED FORMS of lemmas it already has, so the table transforms a KNOWN stem accent rather than
+    // predicting one from nothing: key (ending, stem tone) → (nucleus shift, resulting tone).
+    // Held-out 83.7% position against the 66.8% first-nucleus fallback it replaces.
+    test("OOV: the accent transitions off a known stem, rather than defaulting", () => {
+        // ⚠ THE CASE THAT MOTIVATES THE TIER. `sedamdeset` is in the lexicon on σ3 (sedamdèsēt); the genitive
+        // plural is not, and the fallback put it on σ1 — a syllable the base never stresses.
+        expect(phonemizeWord("sedamdeset")).toBe("sedamdˈe˩˥set");
+        expect(accentLexiconHas("sedamdesetih")).toBe(false);
+        expect(phonemizeWord("sedamdesetih")).toBe("sedamdˈe˩˥setix"); // stem's ordinal carried across
+        // ⚠ THE TONE GATE IS TIGHTER THAN THE POSITION ONE, and asymmetrically so on purpose: position always
+        // beats its alternative, tone has no such floor. `godina` is in the lexicon and keeps its contour;
+        // `godine` is derived and the ending's context does not clear support≥5 ∧ agreement≥90, so the position
+        // is emitted and the contour withheld. An absent tone letter never means "no accent".
+        expect(phonemizeWord("godina")).toBe("ɡˈo˥˩dina");
+        expect(phonemizeWord("godine")).toBe("ɡˈodine");
+        // A derived contour that DOES clear the gate is emitted — measured at 98.3%, i.e. lexicon-grade.
+        expect(phonemizeWord("stepeni")).toBe("stˈe˥˩peni"); // stȅpenī, from stepen
     });
 
 });
