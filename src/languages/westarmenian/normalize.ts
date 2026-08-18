@@ -216,7 +216,9 @@ export function normalizeWestArmenian(input: string): string {
     //    is genuinely lowercase-only, and `i` folds it so the flag would widen the suffix capture too.
     s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CСcс]\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 սելսիուս աստիճան$2");
     s = s.replace(new RegExp(`(\\d)\\s?°\\s?[Ff]\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 ֆարենհայթ աստիճան$2");
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gui"), "$1 աստիճան$2");
+    // ⚠ NO SCALE LETTER IN THIS ARM, so a case-insensitive flag fixes nothing and only folds ARM_LOWER
+    //    into matching uppercase Armenian: `20 °-Ը` would match where it must not.
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${ARM_LOWER}+)${NOT_AFTER}`, "gu"), "$1 աստիճան$2");
     s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 սելսիուս աստիճան");
     s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ֆարենհայթ աստիճան");
     s = s.replace(/(\d)\s?°/gu, "$1 աստիճան ");

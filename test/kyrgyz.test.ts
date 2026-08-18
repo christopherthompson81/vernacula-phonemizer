@@ -92,6 +92,13 @@ describe("Kyrgyz normalization — normalize.ts", () => {
         expect(say("80%ке")).toBe("seksen pɑjɯzʁɑ"); // пайыз takes -га, never the written -ке
         expect(say("20 °C")).toBe("d͡ʒɯjɯrmɑ ʁrɑdus"); // Latin C — was the ENGLISH letter name *sˈiː*
         expect(say("-18°Сден")).toBe("minus on seɡiz ʁrɑdustɑn"); // CYRILLIC С — was a bare [s]; -тан, not -тон (back /у/ takes the LOW а)
+        // ⚠ THE CASE SUFFIX IS LOWERCASE-ONLY AND MUST STAY SO. Making the scale letter
+        //   case-insensitive with an `i` flag folds this language's suffix class too, so an
+        //   UPPERCASE run after the hyphen starts being captured as a suffix. The scale letter
+        //   belongs in the character class instead; these pin both halves.
+        expect(say("30 °c")).toBe(say("30 °C"));               // lowercased text is the majority form
+        expect(say("30 °C-дан")).toBe("otuz ʁrɑdustɑn");        // ablative, absorbed by the suffix arm
+        expect(say("30 °C-ДАН")).toBe(say("30 °-ДАН"));         // uppercase: NOT a suffix, in either arm
     });
 
     test("the minus is read ONLY where the corpus can tell it from a range (trap 24)", () => {

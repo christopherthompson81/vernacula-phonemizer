@@ -212,8 +212,8 @@ Implemented over `sentence_id`, asserting the sibling IPAs really are identical 
 Two sibling recordings of one sentence, scored against one identical IPA string, can differ by up to
 **0.73**. That number is the queue's noise floor, and it is larger than most of the signal in it.
 
-**Residual: 1,925 rows** — 1,176 with no sibling, and **749 where every recording of the sentence is
-flagged**. That second set is the high-value one: multiple independent readers all disagreeing with our
+**Residual: 1,925 rows** — 1,178 with no sibling, and **747 where every recording of the sentence is
+flagged**. (Run 8e corrects those two figures from 1,176 / 749.) That second set is the high-value one: multiple independent readers all disagreeing with our
 IPA of the same text. Written to `residual_queue.tsv`.
 
     residual by language: bn_in 71, pa_in 55, fil_ph 43, ny_mw 43, sn_zw 42, he_il 41, en_us 37,
@@ -496,7 +496,7 @@ flag gaining `i` or a `.toUpperCase()` on a scale lookup.
 All three items from the handoff's follow-on list are done. `npm run ci` is green — 250 files, 4,825
 tests. Still open, and now the top of the queue:
 
-- The `all-flagged` residual (Run 4) is 749 rows and only `de_de`'s 23 have been read. `ln_cd` (37, none
+- The `all-flagged` residual (Run 4) is 747 rows and only `de_de`'s 23 have been read. `ln_cd` (37, none
   with a sibling), `sn_zw` (30), `he_il` (25) and `ceb_ph` (24) are next by size.
 - Embedded English in German (Run 5) is untouched — 20 of the 23 `de_de` rows, and a large open feature
   rather than a bug fix.
@@ -571,8 +571,7 @@ re-run — which is why the file's header is generated rather than hand-written.
 `status <> 'investigate'` is NULL, not true, for a row at status NULL — the rows the README warns are
 "invisible to any exclusion gate". And a row still flagged whose `dist` was cleared never enters the
 grouping loop at all, so nothing re-derives its verdict and nothing removed it either. Both disappear if
-the column is blanked first and then written, which is what it does. Re-derives 6,442 / 749 / 1,176
-exactly.
+the column is blanked first and then written, which is what it does.
 
 ### What to take from this round
 
@@ -580,5 +579,69 @@ The two findings that mattered were both **deletions**, not wrong answers: a sym
 output, and a lexicon class that would empty itself on the next build. Neither moved a test. §1 of the
 handoff says the failure mode here is a stage that quietly does not run; the same is true of a rule that
 quietly stops matching, and `\b` after a non-word character is a very good way to write one.
+
+`npm run ci`: 250 files, 4,827 tests.
+
+## Run 9 — 2026-08-18 16:05 — the second review round
+
+Re-ran `/code-review 837 high` against the fixed branch. Six findings, and the pattern in them is the
+useful part: **three were sibling arms of rules I had already fixed, in files I had already touched.**
+
+### 9a. Three more suffix arms, in the same three files
+
+Run 8c fixed the `i`-widening in Bashkir, Turkmen, Tajik, West Armenian and Finnish. Each of those files
+has more than one degree rule, and I fixed the one the earlier grep surfaced:
+
+    ky   line 498   `suffixArm` embeds SUFFIX_RE, lowercase Cyrillic only
+    ba   line 287   the LETTER-FIRST arm (`С°-суффикс`), sibling of the one fixed at 282
+    hyw  line 219   the BARE-degree suffix arm — which contains no scale letter at all,
+                    so the flag was pure widening with no fix attached to it
+
+Kyrgyz was the one with teeth. The widened capture took an uppercase suffix, `suffixKind()` then failed to
+recognise it, and the `?? CASE.loc` fallback substituted **the wrong grammatical case in silence**:
+
+    30 °C-ДАН   (ablative, "from 30 degrees")   read as   otuz ʁrɑdustɑ   (locative, "at 30 degrees")
+
+Not a dropped word — a wrong one, and plausible enough to survive a reading. All three now put the
+lowercase scale letters in the character class and drop the flag.
+
+**The lesson is about the sweep, not the languages: a per-line grep finds the rule, not the RULE FAMILY.**
+Bashkir has four degree arms and West Armenian five. Having fixed one arm in a file, the others need
+reading — the comment sitting directly above Bashkir's line 287 states the very invariant that line broke.
+
+### 9b. `all-flagged` was the else of "no sibling is verified"
+
+A real logic defect in the screen, in its highest-value category. `recognizer_short` and `defective_audio`
+mean the comparison **did not happen** — the recognizer returned almost nothing, or the audio is broken —
+so such a row says nothing about our IPA in either direction. Treating "not verified" as agreement
+promoted a sentence with one flagged recording and one *silent* one into `all-flagged`, which the README
+sends a reviewer to read first as the strongest signal in the corpus.
+
+Only comparably scored siblings (`verified` / `investigate`) are evidence now; hand verdicts are excluded
+on the same reasoning. Blast radius measured before fixing: **2 of 749 rows**. Small today and structural
+— it grows with every defective_audio row the sweep finds.
+
+    exonerated 6,442 · all-flagged 749 → 747 · no-sibling 1,176 → 1,178
+
+### 9c. The generated table no longer rebuilt byte-identically
+
+The two header lines about the curated ⟨c⟩ list were added by the merge step, not by
+`build-de-consonant.mts`, so re-running the generator silently dropped them — breaking the property
+`LICENSES/PROVENANCE.md` relies on for every other generated artefact. The generator's `hdr` owns them now.
+
+### 9d. The new fleet test could not reach any of 9a
+
+Its suffix probes were `20 °C-a`, `-5 °C`, `20 °C-den` — all ASCII Latin, while the classes that fold are
+Cyrillic and Armenian. Cross-script probes added there; and the three languages got concrete anchors in
+their own test files, which is the better instrument for this — `ky "30 °C-ДАН"` must read as
+`ky "30 °-ДАН"` does, and `ba "35 С°-ТАН"` must keep its hyphen.
+
+### The shape of both review rounds
+
+Thirteen findings over two rounds, and **not one of them moved a test**. They divide almost evenly into
+things that stopped matching (`\b` after a non-word character, an uppercase-only rule, a builder reading
+its own output) and things that started matching (five `i`-widened suffix classes). Both halves are
+invisible to a green suite, and both were found by reading the diff against what the code is *for* rather
+than by running it.
 
 `npm run ci`: 250 files, 4,827 tests.

@@ -67,6 +67,13 @@ describe("Western Armenian text normalization", () => {
         // ⚠ THE SCALE COMPOUND IS «սելսիուս աստիճան» — scale FIRST and no genitive, where Eastern writes
         // «Ցելսիուսի աստիճան». The wiki puts it in the slot three times ("0 սելսիուս աստիճանին").
         expect(hyw.text("20 °C")).toBe(hyw.text("20 սելսիուս աստիճան"));
+        // ⚠ THE CASE SUFFIX IS LOWERCASE-ONLY AND MUST STAY SO. Making the scale letter case-
+        //   insensitive with an `i` flag folds this language's suffix class too, so an UPPERCASE
+        //   run after the hyphen starts being captured as a suffix. The scale letter goes in the
+        //   character class instead; these pin both halves.
+        expect(hyw.text("20 °c")).toBe(hyw.text("20 °C"));       // lowercase scale letter
+        expect(hyw.text("20 °-ը")).toBe(hyw.text("20 աստիճանը")); // lowercase suffix IS absorbed
+        expect(hyw.text("20 °-Ը")).not.toBe(hyw.text("20 աստիճանԸ")); // uppercase is NOT a suffix
         // ⚠ AND THE OBLIQUE "TWO" IS երկուք-, not Eastern's երկուս- (երկուք ×17 against երկուս ×1).
         expect(ordinalWords(2)).toBe("երկրորդ");
         expect(normalizeWestArmenian("22-ին")).toBe("քսան երկուքին");

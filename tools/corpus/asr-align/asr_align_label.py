@@ -204,11 +204,19 @@ def sibling_screen(db: sqlite3.Connection) -> None:
         flagged = [x for x in v if x[1] == "investigate"]
         if not flagged:
             continue
+        # ⚠ ONLY A COMPARABLY SCORED SIBLING IS EVIDENCE, and `all-flagged` must not be the mere ELSE of
+        # "no sibling is verified". `recognizer_short` and `defective_audio` mean the comparison did not
+        # happen — the recognizer returned almost nothing, or the audio is broken — so such a row says
+        # NOTHING about our IPA in either direction. Counting it as agreement promotes a sentence with one
+        # flagged recording and one silent one into `all-flagged`, which the README sends a reviewer to
+        # read FIRST as the strongest signal in the corpus. Hand verdicts are excluded for the same reason:
+        # a human already ruled on those and the automatic screen should not re-interpret them.
+        comparable = [x for x in v if x[1] in ("verified", "investigate")]
         # ⚠ CONFIRM THE IPA REALLY IS IDENTICAL before trusting the sibling. The whole argument rests on
         # it, and a re-phonemization landing mid-round would quietly break it without changing a count.
-        if len(v) < 2 or len({x[2] for x in v}) != 1:
+        if len(comparable) < 2 or len({x[2] for x in comparable}) != 1:
             mark = "no-sibling"
-        elif any(y[1] == "verified" for y in v):
+        elif any(y[1] == "verified" for y in comparable):
             mark = "exonerated"
         else:
             mark = "all-flagged"
