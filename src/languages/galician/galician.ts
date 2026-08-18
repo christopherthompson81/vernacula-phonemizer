@@ -50,6 +50,30 @@ function spirantize(segs: Seg[]): void {
     }
 }
 
+/**
+ * ⚠ SPIRANTIZATION IS POST-LEXICAL — it does not stop at the word edge, and `spirantize()` above cannot
+ * see past one. Its `i === 0` guard is WORD-initial, because a per-word function has no other context,
+ * so the identical environment read two different ways depending on which side of a space it fell:
+ * word-internally spirantized, across a boundary not. That INTERNAL INCONSISTENCY is the defect — the
+ * engine has already committed to marking allophony.
+ *
+ * Measured for Spanish against the FLEURS audio, where the same fix moved 1,292 of 1,500 rows CLOSER
+ * to the recogniser and 36 further (35.9:1), median skeleton distance 0.146 -> 0.103.
+ *
+ * "Utterance-initial" here means after a pause mark or at the start — which is exactly what the
+ * assembled clause string makes visible.
+ */
+const CROSS_WORD_STOP = /([^\s])(\s+)([bdɡ])/gu;
+
+function spirantizeAcrossWords(ipa: string): string {
+    return ipa.replace(CROSS_WORD_STOP, (m, prev: string, gap: string, stop: string) => {
+        if (NASALS.has(prev)) return m;                   // nasal + stop stays occlusive
+        if (stop === "d" && prev === "l") return m;       // homorganic: only /d/ after /l/
+        if (!/[\p{L}\p{M}ˈˌ]/u.test(prev)) return m;      // after a pause = utterance-initial
+        return prev + gap + (STOP_TO_FRIC[stop] ?? stop);
+    });
+}
+
 /** Index of the stressed nucleus: the written accent, else penultimate (word ends in a syllabic vowel / n / s)
  *  or final. The "ends in a vowel" test is on the last SEGMENT being a nucleus — a word ending in a falling
  *  diphthong is glide-final (cantou→[kanˈtow], amei→[aˈmej]), so it takes oxytone stress, not penult. */
@@ -164,7 +188,7 @@ class GalicianPhonemizer implements Phonemizer {
         // normalize.ts FIRST, then the shared symbol tier — normalize's ordinal, clock, era and range steps
         // need the number and its suffix still adjacent, which the tier would break; and the tier matches a
         // unit only when a NUMBER is adjacent, which is why the degree and clock rules run before it.
-        return assembleClauses(SYMBOLS(normalizeGalician(input)), TOKEN, (m, sink) => {
+        return spirantizeAcrossWords(assembleClauses(SYMBOLS(normalizeGalician(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2])
                 sink.emit(
@@ -174,7 +198,7 @@ class GalicianPhonemizer implements Phonemizer {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
-        });
+        }));
     }
 }
 

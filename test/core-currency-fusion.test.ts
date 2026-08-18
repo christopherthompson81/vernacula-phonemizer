@@ -41,7 +41,7 @@ describe("a currency noun does not fuse with the token after the number", () => 
         expect(phonemize("$3million", "ig").trim()).toContain("dollaɾ million");
         // de / es — Latin scripts, same shape
         expect(phonemize("$110m", "de").trim()).toBe("ˈaɪ̯nhʊndɐtt͡seːn dˈɔlaɐ̯ m");
-        expect(phonemize("$110m", "es").trim()).toBe("θjˈento djˈeθ dˈolaɾes m");
+        expect(phonemize("$110m", "es").trim()).toBe("θjˈento ðjˈeθ ðˈolaɾes m");
     });
 
     test("English is unaffected — its own layer reads the magnitude before the tier", () => {

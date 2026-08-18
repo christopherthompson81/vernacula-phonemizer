@@ -29,6 +29,33 @@ function spirantize(segs: Seg[]): void {
     }
 }
 
+/**
+ * ⚠ SPIRANTIZATION IS POST-LEXICAL — it does not stop at the word edge, and `spirantize()` above cannot
+ * see past one. Its own comment says "except utterance-initial", but the code it describes tests
+ * `i === 0`, which is WORD-initial, because a per-word function has no other context. So `nada` came
+ * out `nˈaða` while `la duda` came out `la dˈuða` — the identical environment, one word later, read
+ * two different ways. Measured against the FLEURS es_419 audio, our `d` is heard as [ð] in 2,278
+ * aligned positions, 60% of them after a vowel and 30% after `s`.
+ *
+ * That INTERNAL INCONSISTENCY is the defect. The engine has already committed to marking allophony;
+ * applying it in one environment and not the same environment across a space is what has to be fixed.
+ *
+ * The rule is the same one `spirantize()` states: keep the STOP utterance-initially, after a nasal,
+ * and for `d` after `l`; spirantize otherwise. Here "utterance-initially" means after a pause mark or
+ * at the start, which is exactly the context the assembled clause string makes visible.
+ */
+const CROSS_WORD_STOP = /([^\s])(\s+)([bdɡ])/gu;
+
+function spirantizeAcrossWords(ipa: string): string {
+    return ipa.replace(CROSS_WORD_STOP, (m, prev: string, gap: string, stop: string) => {
+        if (NASALS.has(prev)) return m;                    // un dato, con base
+        if (stop === "ɡ" && prev === "n") return m;        // (covered above, kept explicit)
+        if (stop === "d" && prev === "l") return m;        // el dato
+        if (!/[\p{L}\p{M}ˈˌ]/u.test(prev)) return m;       // after a pause mark = utterance-initial
+        return prev + gap + (STOP_TO_FRIC[stop] ?? stop);
+    });
+}
+
 /** Index of the stressed nucleus: the written accent, else penultimate (word ends vowel/n/s) or final. */
 function stressedNucleus(word: string, segs: Seg[]): number {
     const nuclei = segs
@@ -147,7 +174,7 @@ class SpanishPhonemizer implements Phonemizer {
         // upstream has already claimed the hour. Roman numerals need no ordering care here: `es` is not in
         // the registry's ROMAN_NATIVE set, so the shared pass has already converted them before text().
         const normalized = SYMBOLS(normalizeSpanishInitialisms(normalizeSpanish(input, { americas: this.americas })));
-        return assembleClauses(normalized, TOKEN, (m, sink) => {
+        return spirantizeAcrossWords(assembleClauses(normalized, TOKEN, (m, sink) => {
             if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2])
                 sink.emit(
@@ -157,7 +184,7 @@ class SpanishPhonemizer implements Phonemizer {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);
             }
-        });
+        }));
     }
 }
 

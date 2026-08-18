@@ -344,10 +344,10 @@ describe("symbol normalization — FLEURS-priority round", () => {
      * matched nothing whatsoever, so "5 millions $" dropped the sign outright -- silent content loss.
      */
     test("a magnitude takes its connective, in the languages that need one", () => {
-        expect(phonemize("$5 millones", "es")).toContain("miʎˈones de dˈolaɾes");
+        expect(phonemize("$5 millones", "es")).toContain("miʎˈones ðe ðˈolaɾes");
         expect(phonemize("$5 milhões", "pt")).toContain("miʎˈõj̃ʃ de dˈɔlɐɾɨʃ");
         expect(phonemize("$5 millions", "fr")).toContain("miljɔ̃ də dɔlˈaʁ");
-        expect(phonemize("$5 milions", "ca")).toContain("miɫiˈons də dˈɔɫəɾs");
+        expect(phonemize("$5 milions", "ca")).toContain("miɫiˈons ðə ðˈɔɫəɾs");
         // …and NOT in the languages that take none.
         expect(phonemize("$5 Millionen", "de")).toContain("mɪli̯ˈoːnən dˈɔlaɐ̯");
         expect(phonemize("$5 miljoner", "sv")).toContain("mɪljˈuːnɛr dˈɔlːar");
@@ -358,7 +358,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
     test("a postposed currency sign survives a magnitude word", () => {
         // Was dropped entirely: the postposed pattern had no magnitude slot, so it matched nothing.
         expect(phonemize("5 millions $", "fr")).toContain("miljɔ̃ də dɔlˈaʁ");
-        expect(phonemize("5 millones $", "es")).toContain("miʎˈones de dˈolaɾes");
+        expect(phonemize("5 millones $", "es")).toContain("miʎˈones ðe ðˈolaɾes");
         expect(phonemize("5 milhões $", "pt")).toContain("miʎˈõj̃ʃ de dˈɔlɐɾɨʃ");
     });
 
@@ -407,7 +407,7 @@ describe("symbol normalization — FLEURS-priority round", () => {
 
     /** Personal initials — claimed by contiguity, which is what makes a lone one safe to leave. */
     test("initials are spelled, and the abbreviation dot is not a pause", () => {
-        expect(phonemize("George W. Bush", "es")).toContain("dˈoβle ˈuβe"); // was the raw letter "w ."
+        expect(phonemize("George W. Bush", "es")).toContain("ðˈoβle ˈuβe"); // was the raw letter "w ."
         expect(phonemize("George W. Bush", "de")).toContain("veː");         // was "f ."
         expect(phonemize("J. R. R. Tolkien", "en")).not.toContain(" . ");
         expect(phonemize("J. S. Bach", "de")).toContain("jɔt ɛs");          // was "J Seite Bach"
@@ -855,8 +855,8 @@ describe("℃ is folded fleet-wide, and the guards it exposed", () => {
         expect(phonemize("2,2 millones de km²", "es")).toContain("kilˈometɾos kwaðɾˈaðos");
         expect(phonemize("2,2 millions de km²", "fr")).toContain("kilɔmɛtʁ kaʁˈe");
         // The currency hop still emits exactly one connective.
-        expect(phonemize("$5 milions", "ca")).toBe("sˈiŋ miɫiˈons də dˈɔɫəɾs");
-        expect(phonemize("$5 millones", "es")).toContain("miʎˈones de dˈolaɾes");
+        expect(phonemize("$5 milions", "ca")).toBe("sˈiŋ miɫiˈons ðə ðˈɔɫəɾs");
+        expect(phonemize("$5 millones", "es")).toContain("miʎˈones ðe ðˈolaɾes");
     });
 
     /** French typography spaces the degree sign; the tier reads `°C` through a unit KEY, which needs the two
