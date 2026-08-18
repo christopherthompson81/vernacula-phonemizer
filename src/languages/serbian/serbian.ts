@@ -72,8 +72,9 @@ const LONG = new Set(["LR", "LF"]); // "--" is not here: withholding the contour
  */
 const CLITIC = new Set([
     "sam", "si", "je", "smo", "ste", "su", "ću", "ćeš", "će", "ćemo", "ćete", "bih", "bi", "bismo", "biste",
+    // ⟨te⟩ is both the enclitic pronoun and the conjunction; it is listed once.
     "me", "te", "ga", "mu", "joj", "ih", "im", "se", "li", "ne",
-    "i", "a", "ni", "da", "te", "u", "na", "o", "po", "za", "od", "do", "iz", "s", "sa", "k", "ka", "uz", "niz",
+    "i", "a", "ni", "da", "u", "na", "o", "po", "za", "od", "do", "iz", "s", "sa", "k", "ka", "uz", "niz",
     // the same list in Cyrillic — a word is one script, and the corpus for sr is written in the other one
     "сам", "си", "је", "смо", "сте", "су", "ћу", "ћеш", "ће", "ћемо", "ћете", "бих", "би", "бисмо", "бисте",
     "ме", "те", "га", "му", "јој", "их", "им", "се", "ли", "не",
@@ -135,7 +136,11 @@ export function phonemizeWord(word: string): string {
         i++; // unknown char (punctuation) → skip
     }
     if (nuclei.length === 0) return out;
-    const acc = CLITIC.has(w) ? undefined : stressDict().get(w);
+    // ⚠ A CLITIC GETS NOTHING AT ALL, not merely no tone. Most are monosyllabic and so were already unmarked,
+    // but ćemo/ćete/bismo/biste are not — marking those and not the rest would be an inconsistency with no
+    // basis in the language, since an enclitic is unstressed whatever its length.
+    if (CLITIC.has(w)) return out;
+    const acc = stressDict().get(w);
     const k = Math.min(acc?.at ?? 0, nuclei.length - 1);
     const n = nuclei[k]!;
     const mark = nuclei.length > 1 ? "ˈ" : ""; // a monosyllable takes no ˈ — but it DOES take its tone

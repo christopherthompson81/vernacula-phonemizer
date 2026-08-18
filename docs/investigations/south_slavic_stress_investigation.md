@@ -215,9 +215,24 @@ Same posture as OOV, for the same reason. Measured effect, against the referee's
 | length | 99.4% | **99.8%** |
 | position | 99.3% | 99.3% (unchanged) |
 
+## Run 9 — 2026-08-18 — two review findings
+
+**Clitics were being treated inconsistently.** The exclusion list suppressed the *tone* but still let a
+polysyllabic clitic take its `ˈ` — so `je`/`se` came out bare (monosyllables take no mark anyway) while
+`ćemo`/`bismo`/`biste` were marked. An enclitic is unstressed whatever its length, so a clitic now returns
+unmarked outright.
+
+**And the edit that made that change broke the list.** Reformatting the set put a `//` comment mid-line, which
+swallowed `"o", "po", "za", "od", "do", "iz", "s", "sa", "k", "ka", "uz", "niz"` — every Latin preposition
+silently left the set and `od` came back as `o˥˩d`. Caught by the suite (9 failures across three files), not by
+reading. Worth recording because the damage was invisible in the diff: the line still *looked* like a list.
+
 ## Still open, after tone
 
 - **Paradigmatic accent** — unchanged and still the ceiling: 303 134 of the dump's 455 000 inflected forms
   carry no accent, which is why coverage is 43% and not 90%.
+- **Syllabic ⟨r⟩ is not marked as syllabic.** `krv → krː˥˩ʋ` — the length and tone attach to the ⟨r⟩ correctly,
+  but nothing says it is the nucleus. The referee writes `r̩`. Pre-existing (the engine never marked it), but
+  emitting length on it makes the gap more visible than it was.
 - **Post-accentual length.** The macron is in the source and is not emitted.
 - **`sl`.** Slovene has its own dump and no shared g2p. Untouched.
