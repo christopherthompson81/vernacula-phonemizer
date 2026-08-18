@@ -76,7 +76,10 @@ function scan(word: string): Tok[] {
 // ⚠ ⟨ver⟩ IS EXEMPT FROM THE CONSONANT GUARD, and that is measured too. The guard exists to stop a root being
 // read as prefix+vowel, but ⟨ver⟩ before a vowel is the prefix essentially always, and requiring a consonant
 // cost 8 words the referee is unanimous about (Veräin, vereenegen, veränneren, veruechten… — every one written
-// with a reduced [e]/[ɐ] first vowel, 8/8). The other five keep the guard, where the root collision is real.
+// with a reduced [e]/[ɐ] first vowel, 8/8). Checked out of sample too, since 8 words is thin: all 65 ver+vowel
+// forms in the FLEURS lb_lu transcripts (314 tokens — verursaacht, verantwortlech, Veranstaltungen…) are real
+// prefixed words, ZERO root collisions. The other five prefixes keep the guard, where the collision is real
+// and constant (Becher, Bett, Zebra).
 const UNSTRESSED_PREFIX = /^(ge|be|er|zer|ze)[^aeiouyäëéô]|^ver/u;
 
 /**

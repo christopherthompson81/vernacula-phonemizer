@@ -105,6 +105,21 @@ The score moves by only +3 because the eval sees this change only where an ⟨e�
 placement improvement is larger than the score gain and invisible to the harness, which is the whole
 reason the vowel-quality probe above exists. Post-change placement agreement: **269/280 = 96.1%**.
 
+### The out-of-sample risk, checked against real text
+
+The referee only has 8 ver+vowel words, which is thin evidence for removing a guard. The guard exists
+to stop a *root* being read as prefix+vowel, so the question is whether such roots exist. Counting
+every ver+vowel form in the FLEURS `lb_lu` transcripts (all three splits): **65 distinct forms, 314
+tokens**, and every one is a genuine `ver-` prefixed word — `verursaacht` ×34, `verännert` ×20,
+`verantwortlech` ×18, `verëffentlecht` ×16, `Vereenegte` ×14, `verurteelt`, `veraarbecht`,
+`Veranstaltungen`, `Veräin`… **Zero root collisions.**
+
+The only forms where the shift is not clearly right are `verifizéiert` ×4 and `Verifikatiounen` ×2 —
+Latin `verus`, not the Germanic prefix, and stressed on `-éi-`/`-ou-`. But always-σ1 is wrong on those
+too, so it is a wash, not a regression. This is why the exemption is ⟨ver⟩ **only**: `be`/`ze`/`ge`
+before a consonant collide with real roots constantly (`Becher`, `Bett`, `Zebra`), and ⟨ver⟩ before a
+vowel does not collide at all.
+
 The other 5 complement hits are not bugs to fix here: `Meloun`, `Televisioun`, `reflexiv` are the
 Romance penult-stress class the engine header already declares un-modelled, and `mer`/`se` are
 unstressed function words — sentence prosody, not lexical stress.
