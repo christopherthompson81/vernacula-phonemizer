@@ -661,3 +661,80 @@ it was not a live defect. Given both cases of both alphabets in the class and th
 output byte-identical across all eight scale-letter spellings. **Remaining fold hazards in the tree: 0.**
 
 `npm run ci`: 250 files, 4,827 tests.
+
+## Run 10 — 2026-08-18 16:40 — working the `all-flagged` queue: what 747 rows are made of
+
+With the screen corrected (Run 9b) the residual is **747 rows**. Prioritised by lift over each language's
+own median rather than by raw count, because a language the recognizer finds easy showing an all-flagged
+cluster is the stronger signal:
+
+    lang    n   median  all-flagged  ratio        lang    n   median  all-flagged  ratio
+    fr_fr  20   0.085     0.279      3.26         ceb_ph 24   0.246     0.603      2.46
+    hr_hr  17   0.137     0.386      2.81         sn_zw  30   0.219     0.539      2.46
+    ln_cd  37   0.189     0.530      2.80         bs_ba  11   0.157     0.372      2.37
+
+Classified all 747 by what the text contains:
+
+    384  (51.4%)  same-script prose
+    337  (45.1%)  contains digits
+     26  ( 3.5%)  ≥10% of letters in a script the language does not own
+
+**Numbers are the largest tractable class**, and they concentrate hard: `ln_cd` 33 of 37, `ceb_ph` 22 of
+24, `sn_zw` 22 of 30, `fil_ph` 13 of 17. The script test under-counts the second class badly — French and
+German embedded English is *same-script*, so it lands in "prose".
+
+### 10a. Code-switching is what the readers do, and it is measurable
+
+The user's read of the French cases: a professional reader code-switches into English for an embedded
+English run rather than applying French letter-to-sound — speaker-dependent, but that is the target.
+
+Tested it. Took the nine `fr_fr` all-flagged rows carrying a hand-marked English span, phonemized each
+twice — French throughout, and with the span read by the **English** engine — and scored both against the
+recognized phones:
+
+    French throughout   mean 0.3092
+    code-switched       mean 0.2760          closer in 7 of 9 rows
+
+Grouped by sentence, the speaker-dependence shows up exactly as predicted:
+
+    sentence 222  "…à la crown court de birmingham…"        M 0.321→0.284  F 0.236→0.200  M 0.558→0.487
+    sentence 1464 "…« wonders of the african world »…"       F 0.306→0.248  F 0.287→0.214
+    sentence 818  "…le running tours barcelona…"             F 0.300→0.233  F 0.252→0.305   SPLIT
+    sentence 954  "…airlines such as emirates etihad…"       F 0.245→0.227  F 0.278→0.286   SPLIT
+
+Unanimous on the two sentences whose English is an institutional proper name (*crown court*, a programme
+title); **split between two readers of the identical sentence** on the two that are running English prose.
+So code-switching is the right default and the residual disagreement is genuine reader variation, not a
+defect to engineer away.
+
+⚠ **This also validates the screen.** These rows are `all-flagged` — every recording of the sentence
+disagrees with our IPA — and the fix improves the majority of them. The category is doing what it claims:
+pointing at systematic gaps rather than at reader noise.
+
+### 10b. Why the foreign-run host does not already do this
+
+`src/core/foreign.ts` routes unclaimed runs by **script**. French owns Latin, so its own tokenizer claims
+`crown court` and there is no unclaimed run for the host to see. Same-script code-switching needs a
+LANGUAGE signal, not a script one — which is what `docs/OpenLID-fastText.scratch.md` is already scoped
+for, span output included ("mixed-language input described as runs of language over input offsets").
+
+Not attempted here: a span-level language identifier is its own piece of infrastructure, not a queue fix.
+What this run contributes is a **number to size it by** — −11% mean distance on the affected French rows,
+plus the 20 of 23 `de_de` rows from Run 5 that are the same class.
+
+### 10c. Two smaller things seen in passing, both recorded rather than fixed
+
+- The **French neural OOV tagger emits `nŋ`** — `birmingham → biʁminŋˈam`, `buckingham → bukinŋˈam`,
+  `kingston → kinŋstˈɔ̃` — tagging both letters of ⟨ng⟩ as a consonant. No French analysis produces a
+  coronal-plus-velar nasal cluster, and the sync rules do not (they give `biʁmɛ̃ɡˈɑ̃`, a full French
+  spelling-pronunciation). Only ~5 tokens in the corpus, so it is a tagger artefact rather than a defect
+  class; `el_gr` shows the same shape more often (145: `ɾaninŋɡ`, `bumeɾanŋɡ`, `xanŋɡul`). ⚠ Most
+  `nasal+nasal` sequences corpus-wide are LEGITIMATE — Korean and Thai syllable boundaries (`tˈoŋmuɭ`),
+  Nguni nasal-plus-click (`mŋǀ`), Swedish `dɛsˈɪŋn` — so this must be counted as `nŋ`/`ŋn` specifically,
+  not as any nasal cluster. A first pass that did not distinguish them "found" 17,687 rows, nearly all
+  correct.
+- **Lingala readers code-switch into French for numerals.** `783 562 kilomètres carrés` — we emit the
+  Lingala number words (`bi˩lu˥ⁿdu˩ sa˩ᵐbo˩ na˩ mi˩ko˩ko˩…`) and the readers say French
+  (`s ɛ ts ɑ̃ k a t o n t`, `m i l k a t r v ɛ t ʁ`). The same phenomenon as 10a in the other direction,
+  and it is why `ln_cd` is 33/37 digits. Whether to follow the readers here is a policy question, not a
+  bug — but the number class in this queue is not one defect, it is at least two.
