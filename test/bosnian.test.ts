@@ -40,7 +40,7 @@ describe("Bosnian canonical IPA — shared Serbo-Croatian g2p + Bosnian deltas",
     test("cardinal numbers: Serbian hiljada/milion lexemes + the ijekavian dvjesta", () => {
         expect(bs.text("275").trim()).toBe("dʋjˈesta sedamdˈe˩˥set peː˥˩t"); // dvjesta (ijekavian, not ekavian dvesta)
         expect(bs.text("1200").trim()).toBe("xˈiʎadu dʋjˈesta"); // hiljadu (Serbian lexeme, not Croatian tisuću)
-        expect(bs.text("3000000").trim()).toBe("triː˥˩ mˈiliona"); // milion (Serbian, not Croatian milijun)
+        expect(bs.text("3000000").trim()).toBe("triː˥˩ miliˈona"); // milion (Serbian, not Croatian milijun)
     });
 
     // GENDER on the magnitude noun: hiljada is FEMININE, so the multiplier agrees — and Bosnian is IJEKAVIAN,
@@ -49,9 +49,9 @@ describe("Bosnian canonical IPA — shared Serbo-Croatian g2p + Bosnian deltas",
         expect(bs.text("1000").trim()).toBe("xˈiʎadu"); // hiljadu — the standalone form
         expect(bs.text("2000").trim()).toBe("dʋˈi˥˩je xˈiʎade"); // dvije hiljade (not *dva hiljade / *dve hiljade)
         expect(bs.text("5000").trim()).toBe("peː˥˩t xˈiʎada"); // pet hiljada — gen.pl
-        expect(bs.text("21000").trim()).toBe("dʋˈaː˩˥deset jˈedna xˈiʎada"); // dvadeset jedna hiljada — …1 → fem sg
+        expect(bs.text("21000").trim()).toBe("dʋˈaː˩˥deset jednˈa xˈiʎada"); // dvadeset jedna hiljada — …1 → fem sg
         expect(bs.text("1000000").trim()).toBe("jˈe˩˥dan milˈi˩˥on"); // masculine
-        expect(bs.text("2000000").trim()).toBe("dʋaː˥˩ mˈiliona"); // dva miliona — masculine keeps dva
+        expect(bs.text("2000000").trim()).toBe("dʋaː˥˩ miliˈona"); // dva miliona — masculine keeps dva
     });
 
     test("clause assembly", () => {
@@ -75,14 +75,14 @@ describe("Bosnian text normalization", () => {
     // spurious clause boundary. The licensor list claims 197 of them; the elided-year rule claims 13.
     test("the `N.` ordinal reads as an ordinal, not a cardinal plus a phrase break", () => {
         // `u januaru 2017. godine iz brazilskog kluba` — godine ×125, the commonest licensor by far.
-        expect(say("2017. godine")).toBe("dʋˈi˥˩je xˈiʎade sˈedamnaeste ɡˈodine");
+        expect(say("2017. godine")).toBe("dʋˈi˥˩je xˈiʎade sedˈamnaeste ɡˈodine");
         // `srušen 21. jula 356. godine p.n.e.` — a day number before a month GENITIVE.
-        expect(say("21. jula")).toBe("dʋˈaː˩˥deset pˈrʋoɡ jˈula");
+        expect(say("21. jula")).toBe("dʋˈaː˩˥deset pˈr˩˥ʋoɡ jˈula");
         // `oluja 4. kategorije po Saffir-Simpsonovoj skali` — f.gen, and a follower neither sibling's
         // ORIGINAL list had; Croatian added it from its own tabulation and it recurs verbatim here.
         expect(say("oluja 4. kategorije")).toBe("olˈuː˩˥ja t͡ʃˈetʋrte kˈateɡorije");
         // `Batten je svrstan na 190. mjesto` — n.nom, so the ending is -o, not -i.
-        expect(say("190. mjesto")).toBe("stoː˥˩ dˈeʋedeseto mjˈe˥˩sto");
+        expect(say("190. mjesto")).toBe("stoː˥˩ deʋedˈe˩˥seto mjˈe˥˩sto");
     });
 
     // ⚠ DIVERGENCE — SERBIAN'S LICENSOR LIST LICENSES ZERO OF THE 14 `stoljeć-` INSTANCES, and Croatian's
@@ -91,21 +91,21 @@ describe("Bosnian text normalization", () => {
     // occurs anywhere in the corpus. The list that ships is neither sibling's.
     test("DIVERGENCE: both century words and the international months, which neither sibling covers", () => {
         // `dostigao je vrhunac između 10. i 11. stoljeća` — Serbian has no stoljeć- entry at all.
-        expect(say("11. stoljeća")).toBe("jˈedanaestoɡ stˈoʎet͡ɕa");
-        expect(say("15. stoljeću")).toBe("pˈetnaestom stˈoʎet͡ɕu");
+        expect(say("11. stoljeća")).toBe("jedanˈaestoɡ stˈoʎet͡ɕa");
+        expect(say("15. stoljeću")).toBe("petnˈaestom stˈoʎet͡ɕu");
         // `skijanje datira najmanje iz 17. vijeka` — the other century word, in the same corpus.
-        expect(say("17. vijeka")).toBe("sˈedamnaestoɡ ʋˈijeka");
+        expect(say("17. vijeka")).toBe("sedamnˈaestoɡ ʋijˈeka");
         // `Arthur Guinness je 24. septembra 1759. godine potpisao zakup` — septembra ×7, jula ×7,
         // avgusta ×6. Croatian would license none of these.
         expect(say("24. septembra")).toBe("dʋˈaː˩˥deset t͡ʃˈetʋrtoɡ sˈeptembra");
-        expect(say("10. avgusta")).toBe("dˈesetoɡ ˈaʋɡusta"); // `Kopija je stigla u London 10. avgusta.`
+        expect(say("10. avgusta")).toBe("dˈesetoɡ aʋɡˈusta"); // `Kopija je stigla u London 10. avgusta.`
     });
 
     // ⚠ DIVERGENCE — the ORDINAL TABLE ITSELF is one cell from each sibling. Serbian's hundreds are
     // ekavian (dvestoti) and Croatian's thousand is the wrong lexeme (tisućiti); Bosnian needs Croatian's
     // dvjestoti with Serbian's hiljaditi, which is a combination that exists in neither file.
     test("DIVERGENCE: the ordinal table is ijekavian hundreds + the hiljada lexeme", () => {
-        expect(say("200. godine")).toBe("dʋjˈestote ɡˈodine"); // NOT Serbian's *dvestote
+        expect(say("200. godine")).toBe("dʋjestˈote ɡˈodine"); // NOT Serbian's *dvestote
         expect(say("1000. godine")).toBe("xˈiʎadite ɡˈodine"); // NOT Croatian's *tisućite
     });
 
@@ -113,9 +113,9 @@ describe("Bosnian text normalization", () => {
     // licensing *godine* ELIDED, so the closed list cannot see them. A year is an ordinal in the feminine
     // genitive agreeing with the unwritten noun. The period survives only where it is ALSO a sentence end.
     test("a YEAR with `godine` elided is still an ordinal — and the period's two jobs stay apart", () => {
-        expect(say("Godine 1990. dodan je na spisak")).toBe("ɡˈodine xˈiʎadu dˈe˥˩ʋetsto dˈeʋedesete dˈodan je na spˈi˥˩sak");
+        expect(say("Godine 1990. dodan je na spisak")).toBe("ɡˈodine xˈiʎadu dˈe˥˩ʋetsto deʋedˈesete dˈodan je na spˈi˥˩sak");
         // `sjeverno od grada 1770. S vremena na vrijeme…` — the ONE capital follower: ordinal AND sentence end.
-        expect(say("od grada 1770. S vremena")).toBe("od ɡrˈada xˈiʎadu sˈe˥˩damsto sˈedamdesete . s ʋrˈemena");
+        expect(say("od grada 1770. S vremena")).toBe("od ɡrˈada xˈiʎadu sˈe˥˩damsto sedamdˈesete . s ʋremˈena");
         // `zvaničnu prijestolnicu Samoe od 1959.` — utterance-final: the pause must survive.
         expect(say("Samoe od 1959.")).toBe("sˈamoe od xˈiʎadu dˈe˥˩ʋetsto pedˈe˩˥set dˈeʋete .");
     });
@@ -125,7 +125,7 @@ describe("Bosnian text normalization", () => {
         expect(say("vezane za COVID-19.")).toBe("ʋˈezane za t͡sˈoʋid deʋˈe˩˥tnaest ."); // hyphen lookbehind
         expect(say("prizemljila Il-76.")).toBe("prˈizemʎila il sedamdˈe˩˥set ʃeː˥˩st ."); // out of the year range
         expect(say("rezultat bio 6:6.")).toBe("rezˈu˩˥ltat bˈi˥˩o ʃeː˥˩st , ʃeː˥˩st ."); // a SCORE, not a clock
-        expect(say("dijabetesa tipa 1.")).toBe("dˈijabetesa tˈipa jˈe˩˥dan .");
+        expect(say("dijabetesa tipa 1.")).toBe("dijabetˈesa tˈipa jˈe˩˥dan .");
     });
 
     // ── the clock ────────────────────────────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ describe("Bosnian text normalization", () => {
         // `Program je počeo u 20:30 sati po lokalnom vremenu (15:00 UTC).` — one clock with the noun and
         // one without, in the same sentence.
         expect(say("u 20:30 sati po lokalnom vremenu (15:00 UTC)"))
-            .toBe("u dʋˈaː˩˥deset sˈati i trˈiː˩˥deset minˈuː˩˥ta po lˈokalnom ʋrˈemenu pˈe˩˥tnaest sˈati utt͡s");
+            .toBe("u dʋˈaː˩˥deset sˈati i trˈiː˩˥deset minˈuː˩˥ta po lokˈalnom ʋrˈemenu pˈe˩˥tnaest sˈati utt͡s");
     });
 
     test("the hour guard keeps the corpus's football score out of the clock rule", () => {
@@ -163,7 +163,7 @@ describe("Bosnian text normalization", () => {
 
     test("a numeric span reads with `do` instead of fusing its endpoints", () => {
         // `Unutrašnjost Antarktika je … ledom dubokim 2-3 km.`
-        expect(say("dubokim 2-3 km")).toBe("dˈubokim dʋaː˥˩ do triː˥˩ kˈilometra");
+        expect(say("dubokim 2-3 km")).toBe("dˈu˩˥bokim dʋaː˥˩ do triː˥˩ kˈilometra");
         // `Između 10:00 - 11:00 sati uveče` — ORDERING: the clock rule must run BEFORE the range rule, or
         // the range eats the clock's own digits.
         expect(say("Između 10:00 - 11:00 sati uveče"))
@@ -193,7 +193,7 @@ describe("Bosnian text normalization", () => {
     // with those, which is the ×1 corpus instance below (and the one that was reading as a mixed pair).
     test("a year span whose dot IS licensed reads ORDINAL on BOTH endpoints, like the written-out form", () => {
         expect(say("kralja Sejonga (1418-1450. godine)."))
-            .toBe("krˈaː˩˥ʎa sˈejonɡa xˈiʎadu t͡ʃˈe˥˩tiristo ˈosamnaeste do xˈiʎadu t͡ʃˈe˥˩tiristo pˈedesete ɡˈodine .");
+            .toBe("krˈaː˩˥ʎa sˈejonɡa xˈiʎadu t͡ʃˈe˥˩tiristo osˈamnaeste do xˈiʎadu t͡ʃˈe˥˩tiristo pedˈesete ɡˈodine .");
         expect(say("u sezoni od 1995. do 1996. godine"))
             .toBe("u sˈezoni od xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set pˈete do xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set ʃˈeste ɡˈodine");
         // …and an UNDOTTED year span stays cardinal: the writer marked nothing, so nothing is claimed.
@@ -203,28 +203,28 @@ describe("Bosnian text normalization", () => {
 
     test("the hyphen + case suffix resolves through the ordinal paradigm, not by concatenation", () => {
         // `normalizacija odnosa između SAD-a i Kine krajem 1970-ih` — ×13, all decades.
-        expect(say("krajem 1970-ih")).toBe("krˈa˥˩jem xˈiʎadu dˈe˥˩ʋetsto sˈedamdesetix");
+        expect(say("krajem 1970-ih")).toBe("krˈa˥˩jem xˈiʎadu dˈe˥˩ʋetsto sedamdˈe˩˥setix");
         // ⚠ Serbian's trailing guard, not Croatian's: Croatian declines when ANY character follows, and
         // the corpus writes `krajem 1970-ih;` and `1850-ih i predstavlja`.
-        expect(say("krajem 1970-ih; iranska")).toBe("krˈa˥˩jem xˈiʎadu dˈe˥˩ʋetsto sˈedamdesetix , ˈiranska");
+        expect(say("krajem 1970-ih; iranska")).toBe("krˈa˥˩jem xˈiʎadu dˈe˥˩ʋetsto sedamdˈe˩˥setix , ˈiranska");
     });
 
     // ── signs and units ──────────────────────────────────────────────────────────────────────────────
     test("units are read as words rather than leaking or being read as Bosnian words", () => {
         expect(say("3,50 m")).toBe("triː˥˩ zˈarez pedˈe˩˥set mˈetra"); // decimal comma ×16, and `m` was raw
         // ⚠ `cm` was read as a WORD by the g2p (c→/t͡s/), which is trap 56: no counter sees it.
-        expect(say("6x6 cm")).toBe("ʃeː˥˩st sa ʃeː˥˩st t͡sˈentimetara");
+        expect(say("6x6 cm")).toBe("ʃeː˥˩st sa ʃeː˥˩st t͡sentˈimetara");
         // ⚠ and `kg` likewise — `(90kg)` read as *kɡ*, not leaked.
         expect(say("teži 200 funti (90kg)")).toBe("tˈe˥˩ʒi dʋjˈesta fˈuː˥˩nti deʋedˈe˩˥set kˈiloɡrama");
         // `Park se prostire na 19.500 km²` — grouping dot AND the exponent, in one figure.
-        expect(say("na 19.500 km²")).toBe("na deʋˈe˩˥tnaest xˈiʎada pˈeː˥˩tsto kʋˈadratnix kˈilometara");
+        expect(say("na 19.500 km²")).toBe("na deʋˈe˩˥tnaest xˈiʎada pˈeː˥˩tsto kʋˈa˩˥dratnix kˈilometara");
     });
 
     // ⚠ DIVERGENCE — `by` is `sa`, which neither sibling declares. Both declare only `times` (*puta*) and
     // let `by` default to it; the Bosnian corpus writes the dimension out longhand in the SAME sentences
     // that write it with an `x` — `36 mm širine SA 24 mm visine`, `(29¾ inča SA 24½ inča)`.
     test("DIVERGENCE: a dimension is `sa`, a product is `puta`", () => {
-        expect(say("negativ od 56x56 mm")).toBe("nˈeɡatiʋ od pedˈe˩˥set ʃeː˥˩st sa pedˈe˩˥set ʃeː˥˩st mˈilimetara");
+        expect(say("negativ od 56x56 mm")).toBe("neɡatˈiʋ od pedˈe˩˥set ʃeː˥˩st sa pedˈe˩˥set ʃeː˥˩st milˈimetara");
         expect(say("6 × 6")).toBe("ʃeː˥˩st pˈuta ʃeː˥˩st");
     });
 
@@ -240,9 +240,9 @@ describe("Bosnian text normalization", () => {
     // matches NOTHING here: the corpus's one bare degree is `uragan zabilježen istočno od 35°Z`. This is
     // the an→ast `°U` finding one language over — a ported letter that the language does not use.
     test("DIVERGENCE: the compass letter after a degree sign is Z, not W", () => {
-        expect(say("istočno od 35°Z")).toBe("ˈi˩˥stot͡ʃno od trˈiː˩˥deset peː˥˩t stˈepeni zˈaː˥˩padno");
+        expect(say("istočno od 35°Z")).toBe("ˈi˩˥stot͡ʃno od trˈiː˩˥deset peː˥˩t stˈe˥˩peni zˈaː˥˩padno");
         // `temperature iznad + 30 °C su uobičajene` — the C/F arm, and the spaced positive `+`.
-        expect(say("iznad + 30 °C su")).toBe("ˈi˥˩znad plus trˈiː˩˥deset stˈepeni t͡sˈelzijusa su");
+        expect(say("iznad + 30 °C su")).toBe("ˈi˥˩znad plus trˈiː˩˥deset stˈe˥˩peni t͡sˈelzijusa su");
     });
 
     test("the signs the corpus actually has are read; the five it has none of are refused", () => {
@@ -287,7 +287,7 @@ describe("Bosnian text normalization", () => {
     // as the ordinary Bosnian ADVERB *sad* ("now"). `trupe SAD-a napustiti Siriju` came out as a plausible
     // sentence with the wrong word in it, and no counter sees that. ×10, all genitive.
     test("`SAD-a` is the USA in the genitive, not the adverb `sad`", () => {
-        expect(say("trupe SAD-a napustiti")).toBe("trˈupe sjˈediɲenix ˈamerit͡ʃkix dˈr˩˥ʒaʋa napˈu˩˥stiti");
+        expect(say("trupe SAD-a napustiti")).toBe("trˈupe sjˈediɲenix amˈe˩˥rit͡ʃkix dˈr˩˥ʒaʋa napˈu˩˥stiti");
         // Bare `SAD` is REFUSED — its instances are locative, accusative and a bare apposition, and one
         // expansion cannot serve three cases (Serbian's `Св.` refusal). It must stay untouched.
         expect(say("u SAD živi")).toBe("u sad ʒˈiː˥˩ʋi");

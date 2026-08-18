@@ -296,3 +296,62 @@ asserts a coin flip. That posture should carry into whatever model comes next.
 
 **The linguistically principled version** — modelling Daničić accent paradigms rather than learning endings —
 needs paradigm-class labels the dump does not carry. Worth naming as the ceiling, not as the next step.
+
+
+## Run 11 — 2026-08-18 — building the transition tier, and the measurement that changed its shape
+
+Built as recommended in Run 10: `tools/serbian/build_sh_accent_transitions.py` learns
+`(ending, stem tone) → (shift, resulting tone, agreement, support)` from the 36 248 stem/form pairs the
+lexicon already contains, and `deriveAccent()` applies it to any OOV word whose longest ≤3-character-stripped
+stem is itself a lexicon key. 3 764 contexts. `a|SR → shift 1, LR, 72% agreement, support 1505` is the genitive
+`-a` pattern, learned cleanly.
+
+**Suffix length was measured, not chosen.** Against the 66.8% first-nucleus baseline, each setting is worth
+coverage × (accuracy − baseline):
+
+| max ending | held-out position | tone | extra sr coverage | net gain |
+|---|---|---|---|---|
+| 2 | 84.0% | 65.0% | +19.5pp | 3.4pp |
+| **3** | **83.7%** | 63.7% | **+24.3pp** | **4.1pp** |
+| 4 | 82.3% | 61.1% | +27.0pp | 4.2pp |
+| 6 | 77.9% | 57.3% | +30.5pp | 3.4pp |
+
+3 and 4 are the joint optimum and within noise; 3 is taken for the higher per-prediction accuracy, since a
+wrong transition *asserts* an accent while a fallback error is a default already known to be unreliable.
+
+### ⚠ The frequency-weighted number is much smaller than the type-level one
+
+Type-level, the tier looks like +16.9pp of position accuracy (83.7% vs 66.8%). Weighted by how often the
+held-out words actually occur in the corpus:
+
+    POSITION  frequency-weighted 88.6%   (first-nucleus baseline 87.1%)   →  +1.5pp
+    TONE      at θ≥0.70: answers 28.2% of the mass, right 73.6%           (type-level said 82.6%)
+
+The frequent words are **short**, and short words are overwhelmingly σ1-stressed, so the fallback is already
+87.1% on running text — the tier's type-level win sits on the rare long tail. This is worth stating plainly:
+the tier is a real improvement for arbitrary text and a modest one for this corpus, and reporting only the
+83.7% would have oversold it.
+
+### The tone gate was set from that sweep, and the support floor mattered more than the threshold
+
+    support≥1  θ≥0.80   answers 18.5% of the OOV mass, right 86.4%
+    support≥1  θ≥1.00   answers  4.2%,                 right 62.8%   ← collapses: n=1 contexts, not signal
+    support≥5  θ≥0.80   answers 15.9%,                 right 93.9%
+    support≥5  θ≥0.90   answers 11.0%,                 right 98.3%   ← shipped
+
+At 98.3% the derived contour is lexicon-grade (the lexicon tier is 99.7%), so it extends the tone stream
+without diluting it: blended precision ≈99.6%, tone coverage 43.7 → 46.4% of polysyllabic tokens. The looser
+gate would have bought 5pp more coverage at 94%, which is the wrong direction for a stream whose design rule
+has been to abstain rather than assert a coin flip. Abstention also **propagates**: a stem whose own contour
+was withheld yields a withheld contour, whatever the ending's statistics say.
+
+Referee check afterwards: OOV placement 36.8% → **41.3%**, and contour/length held at 99.6%/99.8% — the tier
+added reach without costing precision.
+
+### Where this leaves the tagger
+
+The Run 10 recommendation stands, with one correction to its premise: a tagger would be arguing with **88.6%**
+on running text, not 66.8%. The remaining headroom on this corpus is small, and most of it is in tone
+coverage — 46.4% of polysyllabic tokens carry a contour, and the rest is genuinely unknown rather than
+defaulted. That is the number a tagger should be asked to move, and it should be measured
+frequency-weighted from the start.

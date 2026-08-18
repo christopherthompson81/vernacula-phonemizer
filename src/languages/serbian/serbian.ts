@@ -5,7 +5,8 @@
  * lexical PITCH ACCENT is unwritten in ordinary text, so it comes from stress.tsv (101965 entries, both
  * scripts, from kaikki/Wiktionary): POSITION as ˈ before the nucleus, and the FOUR-WAY CONTOUR as a Chao tone
  * letter after it (˩˥ rising, ˥˩ falling) with ː for the accented syllable's length. Post-accentual length
- * stays folded. Croatian and Bosnian import phonemizeWord from here, so all three share the lexicon — which is
+ * stays folded. Out of lexicon, accent-transitions.tsv shifts a KNOWN stem's accent by its ending rather than
+ * defaulting — see deriveAccent. Croatian and Bosnian import phonemizeWord from here, so all three share the lexicon — which is
  * the shape of the source too: Wiktionary ships one unified Serbo-Croatian dump.
  * docs/investigations/south_slavic_stress_investigation.md. text() tokenizes words / numbers / punctuation.
  */
@@ -45,6 +46,76 @@ function stressDict(): Map<string, Accent> {
                 : undefined;
         }, { optional: true });
     return STRESS;
+}
+
+/**
+ * OOV TIER — the accent TRANSITION table (accent-transitions.tsv, built by
+ * tools/serbian/build_sh_accent_transitions.py). Key `<ending>|<stem tone>`, value shift + resulting tone +
+ * the tone's agreement + its support.
+ *
+ * ⚠ IT TRANSFORMS A KNOWN ACCENT; IT DOES NOT PREDICT ONE FROM NOTHING. The lexicon misses are overwhelmingly
+ * inflected forms of lemmas it HAS (godine, može, bila, rekao), and across the 56899 lemmas carrying two or
+ * more accented forms the accent sits on the same nucleus in 88.0%. Where it moves, the ENDING is what moves
+ * it — the genitive -a shifts one nucleus right and lengthens (abažur 1 SR → abažura 2 LR) — so what is
+ * learned is the shift, applied to a stem that is itself a lexicon entry.
+ *
+ * Held-out 80/20 over the 36248 stem/form pairs the lexicon already contains: POSITION 83.7%, against 66.8%
+ * for the first-nucleus fallback it replaces. It reaches roughly a further 24pp of polysyllabic corpus tokens
+ * (sr 43.7 → 68.0%).
+ */
+let TRANS: Map<string, { shift: number; tone: Accent["tone"]; agree: number; support: number }> | undefined;
+function transitions() {
+    if (TRANS === undefined)
+        TRANS = loadTsvMap(import.meta.url, "accent-transitions.tsv", (v) => {
+            const [d, t, ag, sup] = v.split("\t");
+            const shift = Number(d);
+            return Number.isInteger(shift) && t !== undefined
+                ? { shift, tone: t as Accent["tone"], agree: Number(ag), support: Number(sup) }
+                : undefined;
+        }, { optional: true });
+    return TRANS;
+}
+
+/**
+ * ⚠ THE TONE GATE, AND WHY IT IS TIGHT. Position is always worth taking — its alternative is a fallback
+ * measured at 66.8% — but tone has no such floor, so a low-confidence contour is withheld exactly as a
+ * homograph's is.
+ *
+ * ⚠ AND THE THRESHOLD WAS SET FROM THE FREQUENCY-WEIGHTED SWEEP, NOT THE TYPE-LEVEL ONE, because the two
+ * disagree sharply. By type, tone at θ≥0.7 looked 82.6% correct; weighted by how often the words actually
+ * occur it is 73.6%, since the frequent words are short and the tier's type-level win sits on the rare long
+ * tail. A support floor then matters more than the threshold — θ≥1.00 alone COLLAPSES to 62.8%, which is
+ * single-observation contexts, not signal:
+ *
+ *     support≥1  θ≥0.80   answers 18.5% of the OOV mass, right 86.4%
+ *     support≥5  θ≥0.80   answers 15.9%,                 right 93.9%
+ *     support≥5  θ≥0.90   answers 11.0%,                 right 98.3%   ← here
+ *
+ * At 98.3% the derived contour is lexicon-grade (the lexicon tier measures 99.7%), so it extends the tone
+ * without diluting it: blended precision 99.6%, tone coverage 43.7 → 46.4% of polysyllabic tokens. Taking the
+ * looser gate would have bought 5pp more coverage at 94%, which is the wrong direction for a stream whose
+ * whole design rule has been to abstain rather than assert a coin flip.
+ */
+const TONE_AGREEMENT = 90;
+const MIN_SUPPORT = 5;
+const MAX_CUT = 3; // ending length; measured against reach in the builder's header
+
+/** Derive an OOV word's accent from the longest stem that IS in the lexicon, plus the ending's transition. */
+function deriveAccent(w: string): Accent | undefined {
+    const lex = stressDict();
+    for (let c = 1; c <= MAX_CUT; c++) {
+        if (w.length - c < 3) break;
+        const stem = lex.get(w.slice(0, -c));
+        if (stem === undefined) continue;
+        const tr = transitions().get(`${w.slice(w.length - c)}|${stem.tone}`);
+        if (tr === undefined) return undefined;
+        // ⚠ ABSTENTION PROPAGATES. If the stem's own contour was withheld, a contour derived from it would be
+        // laundering an unknown into a known, whatever the ending's statistics say.
+        const tone =
+            stem.tone === "--" || tr.agree < TONE_AGREEMENT || tr.support < MIN_SUPPORT ? "--" : tr.tone;
+        return { at: Math.max(0, stem.at + tr.shift), tone };
+    }
+    return undefined;
 }
 
 /** Whether the lexicon knows this word's accent. ⚠ NEEDED BECAUSE ABSENCE IS AMBIGUOUS IN OUTPUT: an OOV word
@@ -140,7 +211,7 @@ export function phonemizeWord(word: string): string {
     // but ćemo/ćete/bismo/biste are not — marking those and not the rest would be an inconsistency with no
     // basis in the language, since an enclitic is unstressed whatever its length.
     if (CLITIC.has(w)) return out;
-    const acc = stressDict().get(w);
+    const acc = stressDict().get(w) ?? deriveAccent(w);
     const k = Math.min(acc?.at ?? 0, nuclei.length - 1);
     const n = nuclei[k]!;
     const mark = nuclei.length > 1 ? "ˈ" : ""; // a monosyllable takes no ˈ — but it DOES take its tone
