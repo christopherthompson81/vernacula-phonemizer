@@ -580,6 +580,14 @@ output, and a lexicon class that would empty itself on the next build. Neither m
 handoff says the failure mode here is a stage that quietly does not run; the same is true of a rule that
 quietly stops matching, and `\b` after a non-word character is a very good way to write one.
 
+### 9e. Swept the class rather than waiting for round three
+
+Rather than let a third review find a fourth sibling arm, audited every remaining `i`-flagged degree rule
+in the tree for a lowercase-only class or property beside the scale letter. One left — Russian, where the
+fold makes a NEGATIVE guard (`(?![а-яё])`, against a spelled-out *Cельсия*) stricter rather than looser, so
+it was not a live defect. Given both cases of both alphabets in the class and the flag dropped anyway;
+output byte-identical across all eight scale-letter spellings. **Remaining fold hazards in the tree: 0.**
+
 `npm run ci`: 250 files, 4,827 tests.
 
 ## Run 9 — 2026-08-18 16:05 — the second review round
@@ -643,5 +651,13 @@ things that stopped matching (`\b` after a non-word character, an uppercase-only
 its own output) and things that started matching (five `i`-widened suffix classes). Both halves are
 invisible to a green suite, and both were found by reading the diff against what the code is *for* rather
 than by running it.
+
+### 9e. Swept the class rather than waiting for round three
+
+Rather than let a third review find a fourth sibling arm, audited every remaining `i`-flagged degree rule
+in the tree for a lowercase-only class or property beside the scale letter. One left — Russian, where the
+fold makes a NEGATIVE guard (`(?![а-яё])`, against a spelled-out *Cельсия*) stricter rather than looser, so
+it was not a live defect. Given both cases of both alphabets in the class and the flag dropped anyway;
+output byte-identical across all eight scale-letter spellings. **Remaining fold hazards in the tree: 0.**
 
 `npm run ci`: 250 files, 4,827 tests.
