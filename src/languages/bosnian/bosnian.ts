@@ -6,7 +6,7 @@
  * (predominant) and Cyrillic, so the tokenizer admits both scripts. The only Bosnian-specific delta is the CARDINAL
  * NUMBER WORDS (Serbian hiljada/milion lexemes + the ijekavian dvjesta — numbers.ts) over the shared agreement
  * compositor. STRESS POSITION arrives with the shared g2p — phonemizeWord is Serbian's, and it now reads the
- * unified Serbo-Croatian stress lexicon. Tone and length stay folded.
+ * unified Serbo-Croatian accent lexicon, including the four-way contour.
  * docs/investigations/south_slavic_stress_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";

@@ -16,28 +16,28 @@ describe("Croatian (hr) canonical IPA", () => {
     });
 
     test("Croatian-specific grapheme→IPA (Gaj's Latin, Ijekavian read as letters)", () => {
-        expect(phonemize("mlijeko", "hr").trim()).toBe("mlijˈeko"); // Ijekavian "milk"
-        expect(phonemize("đak", "hr").trim()).toBe("d͡ʑak"); // ⟨đ⟩ → d͡ʑ
-        expect(phonemize("ljubav", "hr").trim()).toBe("ʎˈubaʋ"); // ⟨lj⟩ → ʎ, ⟨v⟩ → ʋ
+        expect(phonemize("mlijeko", "hr").trim()).toBe("mlijˈeː˩˥ko"); // Ijekavian "milk"
+        expect(phonemize("đak", "hr").trim()).toBe("d͡ʑaː˥˩k"); // ⟨đ⟩ → d͡ʑ
+        expect(phonemize("ljubav", "hr").trim()).toBe("ʎˈuː˩˥baʋ"); // ⟨lj⟩ → ʎ, ⟨v⟩ → ʋ
         expect(phonemize("čovjek", "hr").trim()).toBe("t͡ʃˈoʋjek"); // ⟨č⟩ → t͡ʃ
     });
 
     test("CROATIAN cardinal numbers (tisuća/milijun/dvjesto ≠ Serbian hiljada/milion/dvesta)", () => {
         expect(phonemize("1000", "hr").trim()).toBe("tˈisut͡ɕu"); // tisuću (NOT Serbian hiljadu)
-        expect(phonemize("2000", "hr").trim()).toBe("dʋˈije tˈisut͡ɕe"); // dvije tisuće
-        expect(phonemize("200", "hr").trim()).toBe("dʋjˈesto"); // dvjesto (NOT Serbian dvesta)
-        expect(phonemize("1000000", "hr").trim()).toBe("jˈedan milˈijun"); // milijun (NOT Serbian milion)
+        expect(phonemize("2000", "hr").trim()).toBe("dʋˈi˥˩je tˈi˥˩sut͡ɕe"); // dvije tisuće
+        expect(phonemize("200", "hr").trim()).toBe("dʋjˈe˥˩sto"); // dvjesto (NOT Serbian dvesta)
+        expect(phonemize("1000000", "hr").trim()).toBe("jˈe˩˥dan milˈi˩˥jun"); // milijun (NOT Serbian milion)
     });
 
     // GENDER on the magnitude noun: tisuća is FEMININE, so the multiplier is the IJEKAVIAN feminine dvije /
     // jedna (Serbian uses ekavian dve). milijun is masculine and keeps dva.
     test("numbers: gender agreement on the FEMININE tisuća (ijekavian dvije)", () => {
         expect(phonemize("1000", "hr").trim()).toBe("tˈisut͡ɕu"); // tisuću — the standalone form
-        expect(phonemize("2000", "hr").trim()).toBe("dʋˈije tˈisut͡ɕe"); // dvije tisuće (not *dva tisuće)
-        expect(phonemize("5000", "hr").trim()).toBe("pet tˈisut͡ɕa"); // pet tisuća — gen.pl
-        expect(phonemize("21000", "hr").trim()).toBe("dʋˈadeset jˈedna tˈisut͡ɕa"); // dvadeset jedna tisuća
-        expect(phonemize("1000000", "hr").trim()).toBe("jˈedan milˈijun"); // masculine
-        expect(phonemize("2000000", "hr").trim()).toBe("dʋa mˈilijuna"); // dva milijuna — masculine keeps dva
+        expect(phonemize("2000", "hr").trim()).toBe("dʋˈi˥˩je tˈi˥˩sut͡ɕe"); // dvije tisuće (not *dva tisuće)
+        expect(phonemize("5000", "hr").trim()).toBe("peː˥˩t tˈisut͡ɕa"); // pet tisuća — gen.pl
+        expect(phonemize("21000", "hr").trim()).toBe("dʋˈaː˩˥deset jˈedna tˈisut͡ɕa"); // dvadeset jedna tisuća
+        expect(phonemize("1000000", "hr").trim()).toBe("jˈe˩˥dan milˈi˩˥jun"); // masculine
+        expect(phonemize("2000000", "hr").trim()).toBe("dʋaː˥˩ mˈilijuna"); // dva milijuna — masculine keeps dva
     });
 });
 
@@ -63,28 +63,28 @@ describe("Croatian text normalization", () => {
     });
 
     test("period-thousands de-group; comma-decimals read zarez", () => {
-        expect(ph("2.500 ¥")).toBe("dʋˈije tˈisut͡ɕe pˈetsto jen");
-        expect(ph("40.000")).toBe("t͡ʃetrdˈeset tˈisut͡ɕa");
-        expect(ph("2,4 Ghz")).toBe("dʋa zˈarez t͡ʃˈetiri ɡˈiɡaxert͡sa");
+        expect(ph("2.500 ¥")).toBe("dʋˈi˥˩je tˈi˥˩sut͡ɕe pˈeː˥˩tsto jen");
+        expect(ph("40.000")).toBe("t͡ʃetrdˈe˩˥set tˈisut͡ɕa");
+        expect(ph("2,4 Ghz")).toBe("dʋaː˥˩ zˈarez t͡ʃˈe˩˥tiri ɡˈiɡaxert͡sa");
     });
 
     test("clocks read the h-suffix; rates use na sat", () => {
-        expect(ph("22:00 i 23:00 h")).toBe("dʋˈadeset dʋa sˈata i dʋˈadeset tri sˈata");
-        expect(ph("23:35 h")).toBe("dʋˈadeset tri sˈata i trˈideset pet minˈuta");
-        expect(ph("70 km/h")).toBe("sedamdˈeset kˈilometara na sat");
-        expect(ph("40 milja/h")).toBe("t͡ʃetrdˈeset mˈiʎa na sat");
+        expect(ph("22:00 i 23:00 h")).toBe("dʋˈaː˩˥deset dʋaː˥˩ sˈaː˥˩ta i dʋˈaː˩˥deset triː˥˩ sˈaː˥˩ta");
+        expect(ph("23:35 h")).toBe("dʋˈaː˩˥deset triː˥˩ sˈaː˥˩ta i trˈiː˩˥deset peː˥˩t minˈuː˩˥ta");
+        expect(ph("70 km/h")).toBe("sedamdˈe˩˥set kˈilometara na saː˥˩t");
+        expect(ph("40 milja/h")).toBe("t͡ʃetrdˈe˩˥set mˈiː˥˩ʎa na saː˥˩t");
     });
 
     test("era markers expand; roman ordinals inflect; initialisms expand", () => {
         expect(ph("n. e.")).toBe("nˈoʋe ˈere .");
-        expect(ph("p.n.e.")).toBe("prˈije nˈoʋe ˈere .");
+        expect(ph("p.n.e.")).toBe("prˈi˥˩je nˈoʋe ˈere .");
         // trap pins: the g. n. e. / g. pr. Kr. forms (400. g. n. e., 1000. g. pr. Kr.)
         expect(ph("od 400. g. n. e.")).toBe("od t͡ʃˈetiristote nˈoʋe ˈere .");
-        expect(ph("1000. g. pr. Kr. Asirci")).toBe("tˈisut͡ɕite prˈije krˈista asˈirt͡si");
+        expect(ph("1000. g. pr. Kr. Asirci")).toBe("tˈisut͡ɕite prˈi˥˩je krˈista asˈiː˩˥rt͡si");
         expect(ph("I. svjetskog rata")).toBe("pˈrʋoɡ sʋjˈetskoɡ rˈata");
-        expect(ph("II. svjetskom ratu")).toBe("drˈuɡom sʋjˈetskom rˈatu");
-        expect(ph("itd.")).toBe("i tˈako dˈaʎe .");
-        expect(ph("Dr. Moll")).toBe("dˈoktor moll");
+        expect(ph("II. svjetskom ratu")).toBe("drˈuː˥˩ɡom sʋjˈetskom rˈatu");
+        expect(ph("itd.")).toBe("i tˈa˩˥ko dˈa˥˩ʎe .");
+        expect(ph("Dr. Moll")).toBe("dˈo˥˩ktor moll");
         // ⚠ GOLDEN CHANGED, and it was pinning a DELETION. ⟨W⟩ is outside Gaj's Latin, the shared g2p had
         // no rule for it, and the middle initial simply vanished (`ɡeorɡe busx`). It now folds to ⟨v⟩ —
         // the reading Croatian gives the letter in *Velšani*, *velški* — so the initial is audible.
@@ -96,12 +96,12 @@ describe("Croatian text normalization", () => {
     });
 
     test("degrees, fractions, ranges and signs read their Croatian words", () => {
-        expect(ph("90 °F")).toBe("deʋedˈeset stˈupɲeʋa fˈarenxajta");
-        expect(ph("35° W")).toBe("trˈideset pet stˈupɲeʋa zˈapadno");
-        expect(ph("1/5 inča")).toBe("jˈedan pˈeti ˈint͡ʃa");
+        expect(ph("90 °F")).toBe("deʋedˈe˩˥set stˈupɲeʋa fˈarenxajta");
+        expect(ph("35° W")).toBe("trˈiː˩˥deset peː˥˩t stˈupɲeʋa zˈaː˥˩padno");
+        expect(ph("1/5 inča")).toBe("jˈe˩˥dan pˈeti ˈiː˥˩nt͡ʃa");
         expect(ph("1990-1995")).toContain("do");
-        expect(ph("4×4")).toBe("t͡ʃˈetiri pˈuta t͡ʃˈetiri");
-        expect(ph("-5")).toBe("mˈinus pet");
-        expect(ph("UTC+1")).toBe("utt͡s plus jˈedan");
+        expect(ph("4×4")).toBe("t͡ʃˈe˩˥tiri pˈuta t͡ʃˈe˩˥tiri");
+        expect(ph("-5")).toBe("mˈiː˩˥nus peː˥˩t");
+        expect(ph("UTC+1")).toBe("utt͡s plus jˈe˩˥dan");
     });
 });
