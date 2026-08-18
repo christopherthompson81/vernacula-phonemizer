@@ -195,8 +195,8 @@ export function normalizeRussian(input: string): string {
     // 5) UNITS the shared tier cannot express: the Cyrillic slash unit and the degree signs.
     s = s.replace(/(\d)\s?км\/ч(?![а-яё])/giu, "$1 километров в час");
     s = s.replace(/(\d)\s?м\/с(?![а-яё])/giu, "$1 метров в секунду");
-    s = s.replace(/(\d)\s?°\s?[CСc](?![а-яё])/gu, "$1 градусов Цельсия");
-    s = s.replace(/(\d)\s?°\s?[FФf](?![а-яё])/gu, "$1 градусов Фаренгейта");
+    s = s.replace(/(\d)\s?°\s?[CСc](?![а-яё])/gui, "$1 градусов Цельсия");
+    s = s.replace(/(\d)\s?°\s?[FФf](?![а-яё])/gui, "$1 градусов Фаренгейта");
     s = s.replace(/(\d)\s?°/gu, "$1 градусов");
 
     // 6) CLOCK. The colon was a clause mark, so "11:00" read as "одиннадцать , ноль". час and минута take

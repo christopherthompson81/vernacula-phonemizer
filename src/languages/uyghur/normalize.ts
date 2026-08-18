@@ -450,7 +450,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //    name (`مىنۇس بەلگىسى`, "the minus sign") and, which is the one that matters, as a reading in
         //    front of a quantity: `يىللىق خاتالىق مىنۇس 0.9 دەقىقە` ("the annual error is minus 0.9
         //    minutes"). PREPOSED in every instance.
-        s = s.replace(new RegExp(`(^|[\\s(\\[])[-−–]\\s?(${NUM})(?=\\s?°\\s?[CF])`, "gu"), "$1مىنۇس $2");
+        s = s.replace(new RegExp(`(^|[\\s(\\[])[-−–]\\s?(${NUM})(?=\\s?°\\s?[CF])`, "gui"), "$1مىنۇس $2");
 
         // 10) DEGREES. `°C` BEFORE the bare `°`, or the scale letter is stranded and read as the ENGLISH
         //     letter name — which is what happens today: `11.3℃` → `ʔon bir . ʔyt͡ʃ sˈiː`. (`℃` itself is
@@ -466,7 +466,7 @@ export function makeUyghurNormalizer({ numeralWords }: UyghurNormalizerDeps) {
         //     confidently wrong English letter, which is the trade ps made for the same class.
         //     ⚠ AND THE ARC-MINUTE IS LEFT UNREAD. `113°53` is 113°53′; the minutes get no word, because
         //     none is attested. Same partial as ps's bare `°`, in the other half of the class.
-        s = s.replace(new RegExp(`(?<![${D}.,،])(${NUM})\\s?°\\s?[CF]${NW_A}`, "gu"), "$1 گرادۇس");
+        s = s.replace(new RegExp(`(?<![${D}.,،])(${NUM})\\s?°\\s?[CF]${NW_A}`, "gui"), "$1 گرادۇس");
         s = s.replace(new RegExp(`(?<![${D}.,،])(${NUM})\\s?°`, "gu"), "$1 گرادۇس ");
 
         // 11) PERCENT — ×129 signs in 429 segments and every one of them is silent today.

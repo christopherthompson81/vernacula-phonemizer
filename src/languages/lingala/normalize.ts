@@ -295,7 +295,7 @@ export function normalizeLingala(input: string): string {
     //    ⚠ SAME DECIMAL-TAIL COUPLING AS STEP 5, and the corpus proves it: `-273,15 °C` matched on `15 °C`
     //    alone and read *… kámá míbalé na túku sambo na mísáto , CELSIUS zómi na mítáno* — the number cut
     //    in two at the comma, which is precisely the defect this layer exists to remove.
-    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gu, "Celsius $1");
+    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, "Celsius $1");
 
     // 7) RANGES, before percent — `20%-40%` and `2-3% ya batu` are ranges OF percents, so the range must be
     //    claimed while both operands are still bare digits; once step 8 has inserted `likolo ya mokama`

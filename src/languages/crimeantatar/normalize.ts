@@ -186,8 +186,8 @@ export function normalizeCrimeanTatar(input: string): string {
     // 10) DEGREES. ⚠ THE SCALE LETTER MAY BE CYRILLIC (U+0421) and it MAY CARRY A CASE SUFFIX through a
     //    hyphen — "suv arareti +23 °C-den +26 °C-ge qadar deñişe", "minus 16°С-ge yaqın". The suffix
     //    belongs on `derece`, which is where it goes.
-    s = s.replace(/(\d)\s?°\s?[CС]\s?-\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 derece$2");
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gu, "$1 derece");
+    s = s.replace(/(\d)\s?°\s?[CС]\s?-\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gui, "$1 derece$2");
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 derece");
     s = s.replace(/(\d)\s?°\s?-\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 derece$2");
     s = s.replace(/(\d)\s?°/gu, "$1 derece ");
 

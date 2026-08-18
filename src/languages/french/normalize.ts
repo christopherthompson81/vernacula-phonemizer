@@ -160,7 +160,7 @@ export function normalizeFrench(input: string, isWord: (lower: string) => boolea
     //     the whole `° C` was DROPPED: the sentence read "trente-deux" with no unit at all. Closed up here
     //     rather than by loosening the tier's key, because a key is a spelling and this is whitespace.
     //     Only between a DIGIT and the scale letter, so an ordinary `°` (bearings, `n°`) is untouched.
-    s = s.replace(/(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))/gu, "$1°");
+    s = s.replace(/(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))/gui, "$1°");
 
     // 2) NUMÉRO: n° / nº before a number.
     s = s.replace(/\bn[°º]\s*(?=\d)/giu, "numéro ");

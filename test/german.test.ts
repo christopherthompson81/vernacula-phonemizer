@@ -371,11 +371,59 @@ describe("german normalization", () => {
         expect(phonemize("356 v. Chr.", "de")).toBe("dʁˈaɪ̯ʊndɐtzɛçzʊntfʏnft͡sɪç foːɐ̯ kʁˈɪstʊs");
     });
 
+    // GERMAN READS A YEAR IN 1100–1999 IN THE HUNDREDS FORM and we emitted the plain cardinal for every
+    // one. Found from FLEURS audio: two readers of `diesen trat er 1945 bei` both say
+    // *neunzehnhundertfünfundvierzig*. Re-scored against the recognized phones over the 110 de_de
+    // utterances carrying an 11xx–19xx number: 104 closer to what the reader said, 4 further, 2 unchanged;
+    // mean distance 0.266 → 0.234.
+    test("years read in the hundreds form, and only where German uses it", () => {
+        expect(phonemize("im Jahr 1945", "de")).toBe("ɪm jaːɐ̯ nˈɔʏ̯nt͡seːnhʊndɐtfʏnfʊntfiːɐ̯t͡sɪç");
+        expect(phonemize("1900", "de")).toBe("nˈɔʏ̯nt͡seːnhʊndɐt");   // no tens: bare …hundert
+        expect(phonemize("1905", "de")).toBe("nˈɔʏ̯nt͡seːnhʊndɐtfʏnf"); // German inserts no "oh"
+        expect(phonemize("die 1980er Jahre", "de")).toBe("diː nˈɔʏ̯nt͡seːnhʊndɐtaxt͡siːɡɐ jˈaːʁə");
+        // ⚠ 20xx IS ALREADY CORRECT AND MUST NOT MOVE. German switched forms at the millennium — the audio
+        //   is unanimous: over utterances with one 4-digit number and a recognisable reading, 11xx–19xx is
+        //   37 hundreds / 6 tausend while 20xx is 0 hundreds / 67 tausend.
+        expect(phonemize("im Jahr 2019", "de")).toBe("ɪm jaːɐ̯ t͡svˈaɪ̯taʊ̯zənt nˈɔʏ̯nt͡seːn");
+        // ⚠ AND 10xx STAYS A CARDINAL: German says *tausendsechsundsechzig*, never *zehnhundert…*.
+        expect(phonemize("1066", "de")).toBe("ˈaɪ̯ntaʊ̯zənt zˈɛçsʊntzɛçt͡sɪç");
+        // COUNTS, not years. The rule defaults to the year reading because in this corpus only 2 of the 176
+        // four-digit 1100–1999 numbers are count-like — so the guard carries the burden, and it is a
+        // measure/quantity-noun list, deliberately case-insensitive.
+        expect(phonemize("1200 Menschen", "de")).toBe("ˈaɪ̯ntaʊ̯zənt t͡svˈaɪ̯hʊndɐt mˈɛnʃən");
+        expect(phonemize("1200 menschen", "de")).toBe("ˈaɪ̯ntaʊ̯zənt t͡svˈaɪ̯hʊndɐt mˈɛnʃən");
+        expect(phonemize("1500 Euro", "de")).toBe("ˈaɪ̯ntaʊ̯zənt fˈʏnfhʊndɐt ˈɔʏ̯ʁo");
+    });
+
     test("initialisms, units, signs and fractions", () => {
         expect(phonemize("die USA", "de")).toBe("diː uː ɛs aː"); // was the word [ˈuːzaː]
         expect(phonemize("AOL", "de")).toBe("aː oː ɛl");
         expect(phonemize("120 km/h", "de")).toBe("ˈaɪ̯nhʊndɐtt͡svant͡sɪç kilomˈeːtɐ pʁoː ʃtˈʊndə"); // /h was a letter
-        expect(phonemize("20 °C", "de")).toBe("t͡svˈant͡sɪç ɡʁaːt kˈɛlzi̯ʊs");
+        expect(phonemize("20 °C", "de")).toBe("t͡svˈant͡sɪç ɡʁaːt t͡sˈɛlzi̯ʊs");
+        // ⚠ LOWERCASED text is the majority form, not an edge case: across the 102 FLEURS train splits
+        //   `°c`/`°f` outnumber `°C`/`°F` 298 to 151. The scale rule was uppercase-only, so `32 °c` fell
+        //   through to the bare-degree rule and left a loose `c` for the g2p (`c → k` context-free),
+        //   reading *zweiunddreissig Grad k*. Caught by two readers of one FLEURS utterance saying
+        //   "Grad Celsius" and "Grad Fahrenheit"; see docs/investigations/asr_align_qc_investigation.md.
+        expect(phonemize("32 °c", "de")).toBe("t͡svaɪ̯ʊndʁˈaɪ̯sɪç ɡʁaːt t͡sˈɛlzi̯ʊs");
+        expect(phonemize("90 °f", "de")).toBe("nˈɔʏ̯nt͡sɪç ɡʁaːt fˈaːʁənhaɪ̯t");
+    });
+
+    // ⟨C⟩ BEFORE A FRONT VOWEL IS /t͡s/, and it is a LIST rather than a rule: only 98 of the 249 kaikki
+    // words spelled with a bare ⟨c⟩ before a front vowel take /t͡s/, the rest being loans where /k/ or /s/
+    // is right. So the known words sit in consonant.tsv (via tools/gen/de-consonant-curated.tsv) and /k/
+    // stays the OOV default. 84 words changed, all 84 closer to the gold, none worse; the independent
+    // wikipron deu referee moves 2313 → 2314 and the kaikki primary 3711 → 3717.
+    test("⟨c⟩ before a front vowel is the affricate, by lexicon", () => {
+        expect(phonemize("Celsius", "de")).toBe("t͡sˈɛlzi̯ʊs");
+        expect(phonemize("circa", "de")).toBe("t͡sˈɪɐ̯ka");
+        expect(phonemize("Mercedes", "de")).toBe("mɛɐ̯t͡sˈeːdəs");
+        // ⚠ AND THE OOV DEFAULT MUST STAY /k/ — these are the 60% a rule would have broken. `Calcium` is
+        //   the honest case: it is absent from the kaikki extract (only its compounds are there), so it
+        //   is genuinely OOV and reads /k/, which is what a list-not-a-rule design is supposed to do.
+        expect(phonemize("Cafe", "de")).toBe("kafˈeː");
+        expect(phonemize("Computer", "de")).toBe("kɔmpˈuːtɐ");
+        expect(phonemize("Calcium", "de")).toBe("kˈalki̯uːm");
         expect(phonemize("+3 Grad", "de")).toBe("plʊs dʁaɪ̯ ɡʁaːt");
         expect(phonemize("1/5", "de")).toBe("aɪ̯n fˈʏnftəl"); // ordinal stem + -el
     });

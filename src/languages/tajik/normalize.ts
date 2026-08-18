@@ -318,9 +318,9 @@ export function normalizeTajik(input: string): string {
     //     аз 25 дараҷаи Селсий то 40 дараҷа» — one article, which is a lead rather than a broad finding, and
     //     it is the only source there is. The bare `дараҷа` in that same sentence is corroborated at 122
     //     articles by `/[0-9] дараҷа/`.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CС](?:-(${SUFFIX}))?(?![\\p{L}\\p{M}])`, "gu"),
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CС](?:-(${SUFFIX}))?(?![\\p{L}\\p{M}])`, "gui"),
         (_m, d: string, sfx: string) => `${d} дараҷаи Селсий${sfx ?? ""}`);
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 дараҷаи Фаренгейт");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 дараҷаи Фаренгейт");
     //     A COORDINATE's direction letter is Latin and the language's own words are Tajik; the corpus writes
     //     the spelled form beside the sign (`38° арзи шимолӣ`, `68° тули шарқӣ`), which is where these come
     //     from. Without it `75.0°E` lost the degree AND glued a raw `E` into the reading.

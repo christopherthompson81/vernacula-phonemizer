@@ -309,8 +309,8 @@ export function normalizeMacedonian(input: string): string {
 
     // 12) DEGREES — `90°F`, `35° W`, and a bare `N°`. The corpus's own spelled-out form is
     //     "30 степени целзиусови", so °C/°F use the "по" construction; `° W`/`° E` are coordinates.
-    s = s.replace(/(\d+)\s*°\s*C(?![\p{L}\p{M}])/gu, "$1 степени по Целзиус");
-    s = s.replace(/(\d+)\s*°\s*F(?![\p{L}\p{M}])/gu, "$1 степени по Фаренхајт");
+    s = s.replace(/(\d+)\s*°\s*C(?![\p{L}\p{M}])/gui, "$1 степени по Целзиус");
+    s = s.replace(/(\d+)\s*°\s*F(?![\p{L}\p{M}])/gui, "$1 степени по Фаренхајт");
     s = s.replace(/(\d+)\s*°\s*W(?![\p{L}\p{M}])/gu, "$1 степени запад");
     s = s.replace(/(\d+)\s*°\s*E(?![\p{L}\p{M}])/gu, "$1 степени исток");
     s = s.replace(/(\d+)\s*°/gu, "$1 степени");

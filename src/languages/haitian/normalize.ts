@@ -385,7 +385,7 @@ export function normalizeHaitian(input: string): string {
     //    ⚠ `°F` IS NOT CLAIMED: its scale name is written `Farenheit` ×1 and `Farennayt` ×1, two spellings
     //    with one instance each, which is not a source. 6 instances, left as they were.
     //    ⚠ SAME DECIMAL-TAIL COUPLING AS STEP 5 — `-272.5 ° C` must match whole or the number is cut in two.
-    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 degre Sèlsiyis");
+    s = s.replace(/(?<![\d.,])(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 degre Sèlsiyis");
     //    ⚠ AND ONLY THEN THE BARE `°`, as `degre` — attested in exactly this measure slot (`kiltive ant 60
     //    degre latitid nò ak 40 degre latitid sid`, `40 a 50 degre Farenheit`). ⚠ Bare `degre` ×180 is
     //    mostly the abstract "degree/extent" (`yon gwo degre nan pouvwa politik`), so it is the COLLOCATION

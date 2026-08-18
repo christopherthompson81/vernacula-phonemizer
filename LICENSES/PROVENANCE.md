@@ -132,6 +132,14 @@ dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `englis
 **CC BY 3.0** (DAC / CSIR / NWU via SADiLaR); sidecar. Training input for the af tagger only — NOT a
 referee (96.6% identical to RCRL on their overlap, same lineage).
 
+**tools-only (de build input):** `tools/gen/de-consonant-curated.tsv` — 84 rows, `word<TAB>ordinal+t͡s`,
+derived from the kaikki German extract by `tools/gen/build-de-c-affricate.mts` and merged into the shipped
+`german/consonant.tsv` (listed above, same CC-BY-SA terms and same source). It carries only the
+⟨c⟩-before-a-front-vowel affricate class, which the ordinal alignment in `build-de-consonant.mts` cannot
+learn: kaikki writes the affricate with a tie bar, which that builder counts as two consonants against our
+one, so every such word fails its length check. No IPA strings are copied — each row is an ordinal and a
+target phone.
+
 **tools-only (ps variety referees):** `pashto/kaikki-pashto-sounds.jsonl` — a 92 KB two-field extract
 (`word`, `sounds[].{ipa,tags}`) of kaikki's Pashto dump, from which the four tag-derived variety referees
 (`ps.kaikki-{pbt,pbu,pst}-tagged.tsv`, `ps.kaikki-untagged.tsv`) rebuild byte-identically; sidecar.

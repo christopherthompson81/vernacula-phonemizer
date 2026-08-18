@@ -267,12 +267,12 @@ const RANGE = /(?<![\d.,\p{L}-])(\d+(?:[.,]\d+)?)\s*[-–—]\s*(\d+(?:[.,]\d+)?
  * and did not recognise the word as already said, so the output was *gradë Celsius elsius* — the word added
  * AND the original truncated. Two defects from one missing lookahead.
  */
-const DEGREE_SIGN = /(\d+(?:[.,]\d+)?)\s*°(?:\s*([CF])(?![\p{L}\p{M}]))?/gu;
+const DEGREE_SIGN = /(\d+(?:[.,]\d+)?)\s*°(?:\s*([CF])(?![\p{L}\p{M}]))?/gui;
 
 function degrees(text: string): string {
     return text.replace(DEGREE_SIGN, (whole: string, fig: string, scale: string | undefined, offset: number, full: string) => {
         const rest = full.slice(offset + whole.length);
-        const named = scale !== undefined ? SCALE[scale]! : undefined;
+        const named = scale !== undefined ? SCALE[scale.toUpperCase()]! : undefined;
         // the writer may have spelled the scale out already — `+7° Celsius`
         const alreadySaid = /^\s*(?:Celsius|Fahrenheit)\b/iu.test(rest);
         const word = named !== undefined && !alreadySaid ? `${DEGREE} ${named}` : DEGREE;

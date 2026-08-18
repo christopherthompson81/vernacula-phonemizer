@@ -88,8 +88,8 @@ export function normalizePapiamento(input: string): string {
     //    `10° nort di e ekuator i 84° wèst`, `longitut 180°`), an interior angle (`kada ángulo di e strea
     //    ta 36°`) and the temperatures (`entre 24 i 36°C`, `27.3°C`, `te 32°C`). `grado` ×41 /
     //    `gradonan` ×4, `Celsius` ×10.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 grado Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 grado Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grado Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grado Fahrenheit");
     s = s.replace(/(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 grado $2 minüt ");
     s = s.replace(/(\d)\s?°/gu, "$1 grado ");
 

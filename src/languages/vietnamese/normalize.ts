@@ -112,8 +112,8 @@ export function normalizeVietnamese(input: string): string {
     // ── 5. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° — otherwise the C is stranded and routes to the English phonemizer as "sˈiː".
     // "xê" and "ép" are the Vietnamese letter names (same table as step 12).
-    s = s.replace(/\s*°\s*C(?![\p{L}\p{M}])/gu, " độ xê");
-    s = s.replace(/\s*°\s*F(?![\p{L}\p{M}])/gu, " độ ép");
+    s = s.replace(/\s*°\s*C(?![\p{L}\p{M}])/gui, " độ xê");
+    s = s.replace(/\s*°\s*F(?![\p{L}\p{M}])/gui, " độ ép");
     s = s.replace(/\s*°/gu, " độ");
 
     // ── 6. de-group thousands ────────────────────────────────────────────────────────────────────

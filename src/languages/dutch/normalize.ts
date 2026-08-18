@@ -208,8 +208,8 @@ export function normalizeDutch(input: string): string {
     //    The compass letters are expanded only DIRECTLY after a degree sign, where they cannot be anything
     //    else. AFTER the 6-7 tier composition so `m/s` is already gone, and after the clock (step 5) so no
     //    `°` rule sees a time.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 graden Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 graden Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 graden Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 graden Fahrenheit");
     s = s.replace(/(\d)\s?°\s?([NOZW])(?![\p{L}\p{M}])/gu, (_m, d: string, c: string) =>
         `${d} graden ${({ N: "noord", O: "oost", Z: "zuid", W: "west" } as Record<string, string>)[c]!}`);
     s = s.replace(/(\d)\s?°/gu, "$1 graden");

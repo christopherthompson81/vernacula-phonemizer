@@ -161,8 +161,13 @@ function applyQuality(ipa: string, spec: string | undefined): string {
 function applyConsonant(ipa: string, spec: string | undefined): string {
     if (!spec) return ipa;
     const corr = new Map<number, string>();
-    for (const c of spec.split(","))
-        if (c) corr.set(Number(c.slice(0, -1)), c.slice(-1));
+    // ⚠ THE TARGET IS NOT ONE CHARACTER. `c.slice(-1)` cannot express an affricate, and `k → t͡s` is a real
+    // correction this table carries (Celsius, circa, Calcium — the ⟨c⟩-before-a-front-vowel loans). Ordinal,
+    // then everything after it. Single-character entries parse identically, so no existing row moves.
+    for (const c of spec.split(",")) {
+        const m = /^(\d+)(.+)$/u.exec(c);
+        if (m) corr.set(Number(m[1]), m[2]!);
+    }
     let out = "", ci = 0;
     for (let i = 0; i < ipa.length; i++) {
         const ch = ipa[i]!;

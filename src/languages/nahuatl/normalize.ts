@@ -199,7 +199,7 @@ export function normalizeNahuatl(input: string): string {
     //    ⚠ THE SCALE LETTER CLASS IS `C` ALONE, because `°F` is ×0 here — every degree in this corpus is
     //    Celsius (`17 °C`, `0 °C`, `100 °C`, `-1° C`, `-120 °C`) and an unattested `F` arm is a misfire
     //    generator for nothing (trap 9).
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 grados");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grados");
     s = s.replace(/(\d)\s?°/gu, "$1 grados ");
 
     // 8) THE TWO UNITS, WITH THE SPACE REQUIRED — the reason this layer declares no shared tier; see the

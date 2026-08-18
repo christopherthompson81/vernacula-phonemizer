@@ -403,8 +403,8 @@ export function normalizeIlocano(input: string): string {
     // ⚠ THE ARC-MINUTE `'` IS LEFT UNREAD. It is ×138 beside a degree sign and no Ilocano word for it is
     // attested anywhere; see defects.ts. It survives as the manifest's glottal, which is a residual, not a
     // reading — recorded rather than guessed.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 grado Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 grado Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grado Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grado Fahrenheit");
     s = s.replace(/(\d)\s?°/gu, "$1 grado ");
 
     // ── 7. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────

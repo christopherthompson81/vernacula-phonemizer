@@ -373,8 +373,8 @@ export function normalizeBelarusian(input: string): string {
     //    carry both ⟨C⟩ and ⟨С⟩, which are different characters that render identically.
     //    `градусаў Цэльсія` ×31/×50, in the exact slot: "тэмпература 25 градусаў Цэльсія", "−182.5
     //    градусаў Цэльсія"; and the Цэльсія article names the sign ("за 100° — тэмпература кіпення").
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gu, "$1 градусаў Цэльсія");
-    s = s.replace(/(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gu, "$1 градусаў Фарэнгейта");
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 градусаў Цэльсія");
+    s = s.replace(/(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 градусаў Фарэнгейта");
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
 
     // 8) CLOCK. The colon is clause punctuation in belarusian.jsonc, so `23:59` read as *дваццаць тры ,

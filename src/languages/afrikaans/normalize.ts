@@ -250,8 +250,8 @@ export function normalizeAfrikaans(input: string): string {
     // 10) DEGREES. `+30°C` came out as the bare consonant *s*; `90 ° F-hitte` dropped the sign and left a
     //     lone F. The scale letters are expanded only DIRECTLY after a degree sign, where they cannot be
     //     anything else. AFTER the rates so no `°` rule sees a speed, and after the clock.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 grade Celsius");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 grade Fahrenheit");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grade Celsius");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grade Fahrenheit");
     s = s.replace(/(\d)\s?°(?![\p{L}\p{M}])/gu, "$1 grade");
 
     // 11) SIGNS. `+30°C`, `UTC+1` — the plus was dropped outright. `&` → *en* (Afrikaans "en" = and); the

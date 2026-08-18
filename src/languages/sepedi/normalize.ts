@@ -458,9 +458,9 @@ export function normalizeSepedi(input: string): string {
     //    would leave every one of them raw in the IPA.
     const degreeC = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, CELSIUS) ? n : `${n} ${CELSIUS}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gui,
         (w: string, n: string, off: number, full: string) => degreeC(n, off, off + w.length, full));
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gu, "$1");
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gui, "$1");
     s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?[°º][  ]?([NSEW])(?![\p{L}\p{M}])/gu,
         (_w, n: string, c: string) => `${n} ${COMPASS[c]!}`);
     s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?[°º](?![\p{L}\p{M}])/gu, "$1");

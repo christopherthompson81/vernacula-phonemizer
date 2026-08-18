@@ -418,7 +418,7 @@ export function normalizeBosnian(input: string): string {
     // 5) DEGREES, three arms, and the middle one is the round's an→ast moment.
     //    5a) `°C` / `°F` supplies both the degree noun and the scale name; the count agrees with the
     //        numeral (30 → gen.pl stepeni). Corpus: `temperature iznad + 30 °C su uobičajene`.
-    s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])/gu, (_m, n: string, unit: string) =>
+    s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])/gui, (_m, n: string, unit: string) =>
         `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
     //    5b) ⚠ THE COMPASS LETTERS ARE `S J I Z`, NOT `N S E W`. Croatian allow-lists `[NSEWnsew]` and that
     //        matches NOTHING in Bosnian: the corpus's one bare degree is `tek treći veliki uragan

@@ -152,6 +152,9 @@ def main() -> None:
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--langs", nargs="*")
     ap.add_argument("--top", type=int, default=30, help="investigate rows kept per language")
+    ap.add_argument("--with-exonerated", action="store_true",
+                    help="keep rows a same-text sibling exonerates (they are dropped from the queue "
+                         "by default; see the sibling screen below)")
     a = ap.parse_args()
 
     db = sqlite3.connect(f"file:{a.db}?mode=ro", uri=True)
@@ -162,7 +165,7 @@ def main() -> None:
     queue_path = f"{a.out}/investigate.tsv"
     short_path = f"{a.out}/recognizer_short.tsv"
     with open(queue_path, "w", encoding="utf8") as q, open(short_path, "w", encoding="utf8") as sh:
-        q.write("lang\tsentence_id\twav\tz\tdist\tmedian\ttext\tipa\tphones\n")
+        q.write("lang\tsentence_id\twav\tz\tdist\tmedian\tsibling\ttext\tipa\tphones\n")
         sh.write("lang\tsentence_id\twav\tn_ipa\tn_heard\ttext\tphones\n")
         for lang in langs:
             rows = list(db.execute(
@@ -188,12 +191,49 @@ def main() -> None:
             med = statistics.median(ds)
             # MAD, not stdev: the tail we are hunting is exactly what would inflate stdev and hide itself.
             mad = statistics.median([abs(d - med) for d in ds]) or 1e-9
+            # ⚠ THE SIBLING SCREEN, AND IT REMOVES 77% OF THIS QUEUE. FLEURS records the same sentence
+            # more than once with different readers, and our IPA for a sentence is a pure function of its
+            # text — those recordings are scored against a BYTE-IDENTICAL string. So when one of them
+            # lands inside the bulk and another in the tail, the difference cannot be the IPA. It is the
+            # reader, the audio, or the recognizer. That is a construction, not a judgement call, and it
+            # is the only thing in this harness that can say "not ours" with certainty.
+            #
+            # Corpus-wide: 6,442 of 8,367 flagged rows have a same-text sibling inside the bulk. Two
+            # recordings of one sentence, one identical IPA string, differ by as much as 0.73 — bigger
+            # than most of the signal the unscreened queue was carrying.
+            #
+            # ⚠ AND IT IS WHY THE PER-LANGUAGE TOTALS MISLED. bn_in led at 12.7% of its split, and 379 of
+            # its 382 flags are one gender against 0.33% for the other. hu_hu settles it: its female
+            # median distance is BETTER than its male (0.303 vs 0.342) and female rows still supply 293 of
+            # its 313 flags. A phonemizer does not know who read the sentence.
+            #
+            # ⚠ The identical-IPA check is not ceremonial. The whole argument rests on it, and a
+            # re-phonemization landing mid-round would break it without changing any count.
+            by_sentence: dict[str, list[tuple[float, str]]] = {}
+            for d, sid, wav, _t, ipa, _p in scored:
+                by_sentence.setdefault(sid, []).append((d, ipa or ""))
+            def screen(d: float, sid: str) -> str:
+                sibs = by_sentence.get(sid, ())
+                if len(sibs) < 2 or len({i for _, i in sibs}) != 1:
+                    return "no-sibling"
+                if any(0.6745 * (sd - med) / mad <= 3.0 for sd, _ in sibs):
+                    return "exonerated"
+                return "all-flagged"
+
             scored.sort(key=lambda s: -s[0])
-            worst = scored[: a.top]
-            for d, sid, wav, txt, ipa, ph in worst:
+            # ⚠ SCREEN THE TAIL ONLY. A row inside the bulk is its own exonerating sibling, so screening
+            # everything would drop bulk rows from the queue for a reason that says nothing — and the
+            # top-N cut reaches into the bulk in the quiet languages.
+            marked = [(d, sid, wav, txt, ipa, ph,
+                       screen(d, sid) if 0.6745 * (d - med) / mad > 3.0 else "")
+                      for d, sid, wav, txt, ipa, ph in scored]
+            keep = marked if a.with_exonerated else [r for r in marked if r[6] != "exonerated"]
+            worst = keep[: a.top]
+            for d, sid, wav, txt, ipa, ph, sib in worst:
                 z = 0.6745 * (d - med) / mad
-                q.write(f"{lang}\t{sid}\t{wav}\t{z:.2f}\t{d:.3f}\t{med:.3f}\t"
+                q.write(f"{lang}\t{sid}\t{wav}\t{z:.2f}\t{d:.3f}\t{med:.3f}\t{sib}\t"
                         f"{(txt or '')[:160]}\t{(ipa or '')[:160]}\t{(ph or '')[:160]}\n")
+            dropped = sum(1 for r in marked if r[6] == "exonerated")
             # "Good" = within the bulk of this language's own distribution.
             good = sum(1 for d in ds if 0.6745 * (d - med) / mad <= 3.0)
             summary.append((lang, len(rows), len(short), med, statistics.mean(ds), good,
@@ -201,8 +241,8 @@ def main() -> None:
             for sid, wav, txt, ipa, ph, ni, np in short:
                 sh.write(f"{lang}\t{sid}\t{wav}\t{ni}\t{np}\t{(txt or '')[:120]}\t{(ph or '')[:80]}\n")
             print(f"{lang:<14} n={len(rows):<5} short={len(short):<4} median={med:.3f} "
-                  f"within-3MAD={good} ({100*good/len(scored):.1f}%)  investigate={len(scored)-good}",
-                  file=sys.stderr)
+                  f"within-3MAD={good} ({100*good/len(scored):.1f}%)  investigate={len(scored)-good}"
+                  f"  sibling-exonerated={dropped}", file=sys.stderr)
 
     with open(f"{a.out}/summary.tsv", "w", encoding="utf8") as f:
         f.write("lang\tn\trecognizer_short\tmedian_dist\tmean_dist\twithin_3mad\tinvestigate\n")

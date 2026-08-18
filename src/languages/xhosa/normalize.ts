@@ -301,7 +301,7 @@ export function normalizeXhosa(input: string): string {
     //     minus. Unguarded, `kwi-30°C` — an ordinary Xhosa spelling — reads *kwi thabatha amaqondo 30*, "in
     //     minus thirty degrees".
     //     BEFORE step 13, which needs the digits intact.
-    s = s.replace(/(?<![\p{L}\p{M}\d])([+-])?(\d+)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}\d])([+-])?(\d+)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gui,
         (_m, sign: string | undefined, n: string, off: number, full: string) => {
             const body = saidBefore(full, off, "maqondo") ? n : `amaqondo ${n}`;
             if (sign === "+") return `plas ${body}`;

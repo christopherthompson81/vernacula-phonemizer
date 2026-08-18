@@ -277,15 +277,15 @@ export function normalizeBashkir(input: string): string {
     //    градусы*, whose possessive -ы needs a linking -н- before a case ending that the writer did not
     //    type (they wrote `-тан`, the allomorph bare *градус* takes). Emitting `градустан` is what the
     //    writer's own choice implies; `Цельсий градусытан` is not a word. Honest lossiness, not an oversight.
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CС]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
-    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?[CС]\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gui"), "$1 градус$2");
+    s = s.replace(new RegExp(`(\\d)\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gui"), "$1 градус$2");
     //    ⚠ AND THE CORPUS ALSO WRITES THE SIGN AFTER THE LETTER — `−41 С°`, `+35С°`, `0С° аҙағында`. That
     //    is a typo for `°С` and it is the only reason the degree class still reported after the rules above
     //    were in; claimed here on the same terms, letter first.
-    s = s.replace(new RegExp(`(\\d)\\s?[CС]\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gu"), "$1 градус$2");
-    s = s.replace(/(\d)\s?[CС]\s?°(?![\p{L}\p{M}])/gu, "$1 Цельсий градусы");
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gu, "$1 Цельсий градусы");
-    s = s.replace(/(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gu, "$1 Фаренгейт градусы");
+    s = s.replace(new RegExp(`(\\d)\\s?[CС]\\s?°\\s?-\\s?(${SFX}{1,4})${NOT_LETTER}`, "gui"), "$1 градус$2");
+    s = s.replace(/(\d)\s?[CС]\s?°(?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1 Цельсий градусы");
+    s = s.replace(/(\d)\s?°\s?[FФ](?![\p{L}\p{M}])/gui, "$1 Фаренгейт градусы");
     //    ⚠ WITH A TRAILING SPACE, because the sign is written GLUED to letters this rule does not claim:
     //    `17—19 °Т` (degrees Turner, a dairy acidity unit) fused into *градуст*, one impossible word. The
     //    final space-collapse below removes the doubling in the ordinary case.

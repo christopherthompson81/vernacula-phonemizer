@@ -226,7 +226,7 @@ export function normalizeChichewa(input: string): string {
     //    BEFORE step 10, which needs `104.0` intact to be recognised as the Fahrenheit reading's operand.
     const degreeBody = (n: string, off: number, end: number, full: string): string =>
         saidNear(full, off, end, DEGREE) ? n : `${DEGREE} ${n}`;
-    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gui,
         (w, n: string, off: number, full: string) => degreeBody(n, off, off + w.length, full));
     s = s.replace(/(?<![\p{L}\p{M}])(\d+(?:[.,]\d+)?)[  ]?°[  ]?([NSEW])(?![\p{L}\p{M}])/gu,
         (w, n: string, c: string, off: number, full: string) =>

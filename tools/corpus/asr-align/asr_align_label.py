@@ -41,6 +41,7 @@ import os
 import sqlite3
 import statistics
 import sys
+from collections import Counter
 
 # Corpus root. Defaults to the tree these tools were written against; override with ASR_ALIGN_ROOT
 # so the tooling is not a statement about one machine.
@@ -77,12 +78,22 @@ def ensure_columns(db: sqlite3.Connection) -> None:
     if "dist" not in cols:
         # Cached so a hand review can sort and filter without recomputing the fold every time.
         db.execute("ALTER TABLE utt ADD COLUMN dist REAL")
+    if "sibling" not in cols:
+        # The sibling screen (see `sibling_screen`). Kept as its own column rather than folded into
+        # `status`, because it is orthogonal to it: it says whether the flag can be BLAMED on our IPA,
+        # not how bad the row is.
+        db.execute("ALTER TABLE utt ADD COLUMN sibling TEXT")
     db.execute("CREATE INDEX IF NOT EXISTS utt_status ON utt(status)")
+    db.execute("CREATE INDEX IF NOT EXISTS utt_sibling ON utt(sibling)")
     db.commit()
 
 
 def apply_auto(db: sqlite3.Connection) -> None:
-    sys.path.insert(0, "/mnt/data/Programming/vernacula/scripts/omnivoice_ipa")
+    # ⚠ The scorer HAS to be the copy sitting next to this file. The absolute path this used to
+    # insert pointed at the repo these tools moved out of (#836), which no longer holds it — the
+    # import survived only because the script directory is already on sys.path, and would have
+    # silently picked up a stale fold() if that path ever regrew one.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from asr_align_report import dist, fold
 
     langs = [r[0] for r in db.execute("SELECT DISTINCT lang FROM utt ORDER BY lang")]
@@ -154,6 +165,58 @@ def apply_auto(db: sqlite3.Connection) -> None:
         print(f"  {lang}: {len(scored)} scored, {len(short)} short", file=sys.stderr)
 
 
+def sibling_screen(db: sqlite3.Connection) -> None:
+    """Mark every `investigate` row that a SIBLING RECORDING of the same sentence exonerates.
+
+    FLEURS records the same sentence more than once, with different readers. Our IPA for a sentence is a
+    pure function of its text, so those recordings are scored against a BYTE-IDENTICAL string. If one of
+    them lands in `verified` and another in `investigate`, the difference cannot be the IPA — it is the
+    audio, the reader, or the recognizer. That is a construction, not an inference, and it is the only
+    part of this harness that can say "not ours" with certainty.
+
+    ⚠ IT REMOVES 77% OF THE QUEUE. 6,442 of 8,367 flagged rows have a verified same-text sibling. Two
+    recordings of one sentence, one identical IPA, differ by up to 0.73 — larger than most of the signal
+    the queue was carrying. Reading the queue without this screen is mostly reading reader variation.
+
+    ⚠ AND IT IS WHY THE PER-LANGUAGE TOTALS WERE MISLEADING. bn_in led the queue at 12.7% of its split;
+    379 of its 382 flagged rows are one gender, against 0.33% for the other. hu_hu is the proof: its
+    female median distance is BETTER than its male (0.303 vs 0.342) and yet female rows supply 293 of
+    its 313 flags. A phonemizer does not know who read the sentence.
+
+    Three values, and the middle one is the worklist:
+      exonerated   a same-text sibling scored `verified` — our IPA is demonstrably not the cause
+      all-flagged  every recording of this sentence is flagged — the strongest signal in the corpus
+      no-sibling   the sentence was recorded once; the screen has nothing to say
+    """
+    groups: dict[tuple[str, str], list[tuple[str, str, str]]] = {}
+    for lang, sid, wav, st, ipa in db.execute(
+            "SELECT lang,sentence_id,wav,status,ipa FROM utt WHERE dist IS NOT NULL"):
+        groups.setdefault((lang, sid), []).append((wav, st, ipa or ""))
+    tally: Counter = Counter()
+    for (lang, _sid), v in groups.items():
+        flagged = [x for x in v if x[1] == "investigate"]
+        if not flagged:
+            continue
+        # ⚠ CONFIRM THE IPA REALLY IS IDENTICAL before trusting the sibling. The whole argument rests on
+        # it, and a re-phonemization landing mid-round would quietly break it without changing a count.
+        if len(v) < 2 or len({x[2] for x in v}) != 1:
+            mark = "no-sibling"
+        elif any(y[1] == "verified" for y in v):
+            mark = "exonerated"
+        else:
+            mark = "all-flagged"
+        tally[mark] += len(flagged)
+        for wav, _st, _ipa in flagged:
+            db.execute("UPDATE utt SET sibling=? WHERE lang=? AND wav=?", (mark, lang, wav))
+    # Anything no longer flagged must not keep a stale screen from an earlier round.
+    db.execute("UPDATE utt SET sibling=NULL WHERE status<>'investigate' AND sibling IS NOT NULL")
+    db.commit()
+    total = sum(tally.values())
+    print(f"  sibling screen: {total} flagged — "
+          f"exonerated {tally['exonerated']}, all-flagged {tally['all-flagged']}, "
+          f"no-sibling {tally['no-sibling']}", file=sys.stderr)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=DB)
@@ -171,6 +234,10 @@ def main() -> None:
 
     if a.apply:
         apply_auto(db)
+        # ⚠ AFTER apply_auto, never before: the screen reads `status`, so running it first would
+        #   screen last round's labels and read as a clean result. Same ordering hazard as the
+        #   silent-audio sweep, one stage further along.
+        sibling_screen(db)
     if a.set:
         if not a.lang or not (a.id or a.wav):
             sys.exit("--set needs --lang and (--id or --wav)")

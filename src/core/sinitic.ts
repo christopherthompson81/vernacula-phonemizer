@@ -172,8 +172,8 @@ export interface DegreeData {
 const DEG_NUM = "(\\d+(?:\\.\\d+)?)";
 export function readDegrees(s: string, d: DegreeData): string {
     let out = s;
-    if (d.celsius) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*C(?![\\p{sc=Latn}])`, "gu"), (_m, n: string) => d.celsius!(n));
-    if (d.fahrenheit) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*F(?![\\p{sc=Latn}])`, "gu"), (_m, n: string) => d.fahrenheit!(n));
+    if (d.celsius) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*C(?![\\p{sc=Latn}])`, "gui"), (_m, n: string) => d.celsius!(n));
+    if (d.fahrenheit) out = out.replace(new RegExp(`${DEG_NUM}\\s*°\\s*F(?![\\p{sc=Latn}])`, "gui"), (_m, n: string) => d.fahrenheit!(n));
     if (d.bare) out = out.replace(new RegExp(`${DEG_NUM}\\s*°`, "gu"), (_m, n: string) => d.bare!(n));
     return out;
 }

@@ -390,7 +390,7 @@ export function normalizeSantali(input: string): string {
     // ⚠ `°F` ×2 AND THE COORDINATE `°N/E/S/W` ×6 ARE DELIBERATELY NOT CLAIMED — no Fahrenheit word and no
     // sourced direction words, and half a reading is worse than none (trap 53). The whole match is refused,
     // so those keep exactly the reading they had; the sign stays visible to the leak gates.
-    s = s.replace(new RegExp(`(${D})\\s*°\\s*C(?![\\p{sc=Latn}])`, "gu"), "$1 ᱰᱤᱜᱨᱤ ᱥᱮᱞᱥᱤᱭᱚᱥ");
+    s = s.replace(new RegExp(`(${D})\\s*°\\s*C(?![\\p{sc=Latn}])`, "gui"), "$1 ᱰᱤᱜᱨᱤ ᱥᱮᱞᱥᱤᱭᱚᱥ");
     // ── 9b. THE BARE `°`, WHERE THE NOUN AFTER IT IS ALREADY SANTALI ──────────────────────────────────
     // ⚠ FOUND BY THE SCAN AFTER 9 LANDED, WHICH IS THE NORMAL ORDER — a cell can hide behind itself.
     // The corpus's DOMINANT temperature and coordinate shape is not `°C` at all; it is a bare `°` with the

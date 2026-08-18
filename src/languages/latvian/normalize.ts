@@ -422,11 +422,11 @@ const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d
  * as the scale and left *elsija* behind — a truncated word reaching the g2p. With the boundary the group
  * simply declines, and the bare-degree arm reads it as *20 grādi Celsija skalā*, which is the right sentence.
  */
-const DEGREE_SIGN = /(\d+(?:,\d+)?)\s*°(?:\s*([CF])(?![\p{L}\p{M}]))?/gu;
+const DEGREE_SIGN = /(\d+(?:,\d+)?)\s*°(?:\s*([CF])(?![\p{L}\p{M}]))?/gui;
 
 function degrees(text: string): string {
     return text.replace(DEGREE_SIGN, (whole: string, fig: string, scale: string | undefined, offset: number, full: string) => {
-        const forms = scale ? SCALE[scale]! : DEGREE;
+        const forms = scale ? SCALE[scale.toUpperCase()]! : DEGREE;
         /**
          * ⚠ A FIGURE WITH A FRACTION TAKES THE PLURAL, whatever its integer part. `21,5` ends in ...1 by
          * `countForm`'s arithmetic but is read *divdesmit viens komats pieci GRĀDI* — the singular agrees with

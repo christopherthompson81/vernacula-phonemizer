@@ -125,8 +125,8 @@ export function normalizeSaraiki(input: string): string {
     //    ⚠ AND THE BARE BRANCH IS DELIBERATELY LEFT TO RUN INTO A FOLLOWING WORD: `44.7° سینٹی گریڈ`
     //    becomes "44.7 ڈگری سینٹی گریڈ", which is what the corpus writes elsewhere, and `60° درجہ دار قوس`
     //    becomes "60 ڈگری درجہ دار قوس" — *a sixty-degree graded arc*, which is what it means.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 ڈگری سینٹی گریڈ");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 ڈگری فارن ہائیٹ");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 ڈگری سینٹی گریڈ");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 ڈگری فارن ہائیٹ");
     s = s.replace(/(\d)\s?°/gu, "$1 ڈگری ");
 
     // 4) THE MINUS SIGN, before the range rule spends the hyphen. ⚠ THE WORD IS SOURCED FROM THE RETAINED

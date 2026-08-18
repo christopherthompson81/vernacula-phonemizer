@@ -476,10 +476,10 @@ export function normalizeHungarian(input: string): string {
     s = s.replace(
         new RegExp(`(\\d)\\s?°\\s?([CF])?-([${LOWER}]+)`, "gu"),
         (_m, d: string, scale: string | undefined, suf: string) =>
-            `${d} ${scale === "C" ? "Celsius-" : scale === "F" ? "Fahrenheit-" : ""}fok${suf}`,
+            `${d} ${scale?.toUpperCase() === "C" ? "Celsius-" : scale?.toUpperCase() === "F" ? "Fahrenheit-" : ""}fok${suf}`,
     );
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 Celsius-fok");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 Fahrenheit-fok");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 Celsius-fok");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 Fahrenheit-fok");
     s = s.replace(/(\d)\s?°/gu, "$1 fok");
     // THE MINUS. ⚠ EVERY `-<digit>` in Hungarian text of this kind is a RANGE or a score, not a negative, so
     // a bare leading-dash rule would read date ranges as arithmetic. Restricted to positions a range cannot

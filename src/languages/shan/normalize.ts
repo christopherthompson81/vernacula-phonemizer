@@ -110,7 +110,7 @@ export function normalizeShan(input: string): string {
     //    lose the reader's trust. The ⟨C⟩ and ⟨F⟩ are consumed rather than left to be read as English
     //    letter names, which is what they were doing.
     s = s.replace(/(\d)\s?°\s?(\d+)\s?['′]/gu, "$1 ၻီႇၵရီႇ $2 မိၼိတ်ႉ ");
-    s = s.replace(/(\d)\s?°\s?[CF](?![\p{L}\p{M}])/gu, "$1 ၻီႇၵရီႇ ");
+    s = s.replace(/(\d)\s?°\s?[CF](?![\p{L}\p{M}])/gui, "$1 ၻီႇၵရီႇ ");
     s = s.replace(/(\d)\s?°/gu, "$1 ၻီႇၵရီႇ ");
 
     // 5) THE COUNTRY-PREFIXED CURRENCY SIGN — `US$70`, `US$50`, `US$30 ပီႇလီႇယႅၼ်ႇ`, `AU$10.6million`.

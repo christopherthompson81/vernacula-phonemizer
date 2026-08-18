@@ -388,8 +388,8 @@ export function normalizeGreek(input: string): string {
 
     // 10) DEGREES. `°C` was reading as the English letter C. Nominative plural is used; the case Greek
     //     would actually give it depends on the governing preposition and is not recoverable here.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 βαθμοί Κελσίου");
-    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gu, "$1 βαθμοί Φαρενάιτ");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 βαθμοί Κελσίου");
+    s = s.replace(/(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 βαθμοί Φαρενάιτ");
     s = s.replace(/(\d)\s?°/gu, "$1 βαθμοί");
 
     // 11) SIGNS and VULGAR FRACTIONS. `(UTC +1)`; and `29¾ επί 24½ ίντσες`, where the elided noun is

@@ -338,8 +338,8 @@ export function normalizeCzech(input: string): string {
 
     // 15) SIGNS. Degrees take the same three-way agreement. `×` between numbers reads as "krát"
     //     (6 × 6 cm = šest krát šest centimetrů), `+` before a number as "plus".
-    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Celsia`);
-    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
+    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Celsia`);
+    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)} Fahrenheita`);
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it. It needs
     //    its own rule or the sign is dropped in silence; ordering against the `+` rule is free. The

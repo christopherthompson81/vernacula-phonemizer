@@ -881,11 +881,11 @@ export function normalizeSlovenian(input: string): string {
     //    bare *stopinj* would make `90 °F` and `90 °C` read identically — confidently wrong, which is the
     //    one outcome that cannot be right.
     s = s.replace(
-        /(\d+(?:,\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gu,
+        /(\d+(?:,\d+)?)\s?°\s?C(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(intOf(n), STOPINJA())} Celzija`,
     );
     s = s.replace(
-        /(\d+(?:,\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gu,
+        /(\d+(?:,\d+)?)\s?°\s?F(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(intOf(n), STOPINJA())} Fahrenheita`,
     );
     s = s.replace(/(\d+(?:,\d+)?)\s?°/gu, (_m, n: string) => `${n} ${counted(intOf(n), STOPINJA())}`);

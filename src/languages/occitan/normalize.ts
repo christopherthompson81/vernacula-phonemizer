@@ -85,8 +85,8 @@ export function normalizeOccitan(input: string): string {
     //    version still read *dotze graus*. `(?<!in-\d{0,3})` is variable-length, which V8 allows.
     //    `graus` ×17 is the attested plural; `grau` is its transparent singular. ⚠ `gras` ×156 scores far
     //    higher and is NOT used: it is the homograph meaning "fat", the Fula `tere` shape.
-    s = s.replace(/(?<!in-\d{0,3})(\d)\s?°\s?([CF])(?![\p{L}\p{M}])/gu,
-        (_m, d: string, scale: string) => `${d} graus ${scale === "C" ? "Celsius" : "Fahrenheit"}`);
+    s = s.replace(/(?<!in-\d{0,3})(\d)\s?°\s?([CF])(?![\p{L}\p{M}])/gui,
+        (_m, d: string, scale: string) => `${d} graus ${scale.toUpperCase() === "C" ? "Celsius" : "Fahrenheit"}`);
     s = s.replace(/(?<!in-\d{0,3})(\d)\s?°\s?(\d+)\s?[′']/gu, "$1 graus $2 minutas ");
     s = s.replace(/(?<!in-\d{0,3})(\d)\s?°/gu, "$1 graus ");
 

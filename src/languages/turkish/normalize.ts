@@ -205,7 +205,7 @@ export function normalizeTurkish(input: string): string {
     s = s.replace(/(\d+(?:[.,]\d+)?)\s?m\s?\/\s?s(?![\p{L}\p{M}])/gu, "saniyede $1 metre");
 
     // 5) DEGREE. `°` was dropped outright and a trailing C was read as Turkish c → d͡ʒ.
-    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gu, "$1 derece");
+    s = s.replace(/(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 derece");
     s = s.replace(/(\d)\s?°/gu, "$1 derece");
 
     // 6) SIGNS. `UTC+1` ×1 — the sign vanished entirely.

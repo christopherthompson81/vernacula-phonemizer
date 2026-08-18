@@ -33,6 +33,38 @@ sits at median 0.480 and still flags 3.7% of its utterances — more than `gl_es
 What comes out is a *candidate* queue that splits three ways — our bugs, reader divergence, and recognizer
 artefacts — and only the first is ours to fix.
 
+## The sibling screen — 77% of the queue is not about our IPA
+
+FLEURS records the same sentence more than once, with different readers, and our IPA for a sentence is a
+pure function of its text: those recordings are scored against a **byte-identical string**. So when one of
+them lands inside the bulk and another in the tail, the IPA cannot be the difference. That is a
+construction, not a judgement, and it is the only thing here that can say "not ours" with certainty.
+
+    8,367 flagged  ·  7,191 have a same-text sibling  ·  6,442 exonerated by one  =  77.0%
+
+Two recordings of one sentence, one identical IPA string, differ by as much as **0.73** — larger than most
+of the signal the unscreened queue carried. `asr_align_report.py` therefore drops exonerated rows from
+`investigate.tsv` by default (`--with-exonerated` keeps them) and writes the verdict as a `sibling` column;
+`asr_align_label.py` stores the same verdict on the row. Three values:
+
+| `sibling` | meaning |
+|---|---|
+| `exonerated` | a same-text sibling scored inside the bulk — our IPA is demonstrably not the cause |
+| `all-flagged` | **every** recording of this sentence is flagged — the strongest signal in the corpus |
+| `no-sibling` | recorded once; the screen has nothing to say |
+
+⚠ **Read `all-flagged` first.** Its 689 rows are where multiple independent readers all disagree with the
+same IPA. Reading `de_de`'s produced both German defects found so far — the year reading, and the
+uppercase-only `°C` rule.
+
+⚠ **And this is why per-language totals mislead.** `bn_in` led the queue at 12.7% of its split; **379 of
+its 382 flags are one gender**, against 0.33% for the other. Corpus-wide there is no gender effect at all
+(3.46% female vs 2.66% male, 55 of 101 languages skewing female), and the skew runs both ways — `en_us`,
+`kn_in`, `pt_br` are male-skewed. `hu_hu` settles it: its female median distance is *better* than its male
+(0.303 vs 0.342) and female rows still supply 293 of its 313 flags. A phonemizer does not know who read
+the sentence. Gender is standing in for speaker here; the sibling screen is the exact version of the
+same argument.
+
 ## The recognizer cannot hear 3.67% of what we write
 
 Measured over 221,469 aligned utterances: 30 phones we emit ≥2,000 times each are returned by

@@ -177,11 +177,47 @@ export function normalizeGerman(input: string): string {
             return Number(min) === 0 ? head : `${head} ${numberToWords(Number(min))}`;
         });
 
+    // 4b) YEARS. German reads a year in 1100–1999 in the HUNDREDS form: *neunzehnhundertfünfundvierzig*,
+    //     not *eintausendneunhundertfünfundvierzig*.
+    //
+    //     ⚠ THE RANGE STOPS AT 1999 AND AT 1100, and both bounds are real. German switched forms at the
+    //     millennium — 2008 is *zweitausendacht*, never *zwanzighundertacht* — so a 20xx year takes the
+    //     plain cardinal the number path already gives it. Below 1100 there is no hundreds form either:
+    //     1066 is *tausendsechsundsechzig*, not *zehnhundertsechsundsechzig*.
+    //
+    //     ⚠ NO CONTEXT CUE, deliberately, and this is where German differs from English. English gates its
+    //     year rule on `in|of|since|…` because "2011 people died" is a live ambiguity; German writes a count
+    //     of that size with a unit or measure noun after it, and writes a year bare — after a noun (*Festung
+    //     1620*), after a verb, at a sentence start. A preposition list reaches none of those. So the year
+    //     reading is the default and YEAR_NOT_COUNT carries the exceptions; widen that guard, not the cue.
+    const yearWords = (y: number): string => {
+        const hi = Math.floor(y / 100), lo = y % 100;
+        // German writes it solid, and inserts nothing for a lo under ten: 1905 → neunzehnhundertfünf.
+        return `${numberToWords(hi)}hundert${lo === 0 ? "" : numberToWords(lo)}`;
+    };
+    const YEAR_NOT_COUNT = "(?!\\s*(?:km|cm|mm|kg|mg|ha|m|g|l|L|t|°|%|Euro|EUR|Dollar|USD|Franken|Mann|"
+        + "Menschen|Einwohner|Personen|Soldaten|Mitarbeiter|Kilometer|Meter|Tonnen|Quadratkilometer)\\b)";
+    // The DECADE form first, so `1980er` is not consumed as a bare year: *neunzehnhundertachtziger(n)*.
+    s = s.replace(/(?<![\d.,])(1[1-9]\d\d)(er[ns]?)\b/gu,
+        (_m, y: string, suf: string) => `${yearWords(Number(y))}${suf}`);
+    //     ⚠ THE GUARD IS CASE-INSENSITIVE. Lowercased running text is not an edge case, and a capitalised
+    //     noun list lets `1200 menschen` read as *zwölfhundert Menschen*.
+    //     ⚠ THE TRAILING GUARD IS `[.,]?\d`, NOT `[\d.,]`: it must reject a decimal or a digit-grouped
+    //     figure (`1995.50`, `1,995`) but NOT a year that ends a clause. The strict form takes `1990-1995.`
+    //     apart — first endpoint to words, second left a numeral — and the range rule, seeing no pair,
+    //     then drops the reading entirely (trap 58, test/clause-final-range.test.ts).
+    s = s.replace(new RegExp(`(?<![\\d.,])(1[1-9]\\d\\d)(?![.,]?\\d)${YEAR_NOT_COUNT}`, "giu"),
+        (_m, y: string) => yearWords(Number(y)));
+
     // 5) UNITS the shared tier cannot express, and the degree signs.
     s = s.replace(/(\d)\s?km\/h\b/gu, "$1 Kilometer pro Stunde");
     s = s.replace(/(\d)\s?m\/s\b/gu, "$1 Meter pro Sekunde");
-    s = s.replace(/(\d)\s?°\s?C\b/gu, "$1 Grad Celsius");
-    s = s.replace(/(\d)\s?°\s?F\b/gu, "$1 Grad Fahrenheit");
+    // ⚠ THE SCALE LETTER MUST BE MATCHED CASE-INSENSITIVELY. Case-folded text writes `32 °c`, and an
+    //    uppercase-only rule drops it through to the bare-`°` arm below, leaving the `c` as a loose
+    //    letter for the g2p (`c` → /k/ context-free): *zweiunddreissig Grad k*. Fleet-wide invariant,
+    //    asserted in test/degree-scale-case.test.ts.
+    s = s.replace(/(\d)\s?°\s?C\b/giu, "$1 Grad Celsius");
+    s = s.replace(/(\d)\s?°\s?F\b/giu, "$1 Grad Fahrenheit");
     s = s.replace(/(\d)\s?°/gu, "$1 Grad");
 
     // 6) SIGNS.

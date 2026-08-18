@@ -79,6 +79,39 @@ for (const [w, kipa] of rows) {
     }
     if (cs.length) out.push([w, cs.join(",")]);
 }
+// ⚠ MERGE THE CURATED ⟨c⟩→/t͡s/ LIST. Those words cannot be learned by the alignment above at all: kaikki's
+// affricate counts as two consonants against our one, so Celsius is 4 slots against 5 and falls out on the
+// length check before PAIRS is consulted. Collapsing the affricate here fixes them and REGRESSES the table
+// overall (independent wikipron deu 2313 → 2305), so the collapse lives in build-de-c-affricate.mts, which
+// only has to align that one class. Curated wins on a conflict — it is the hand-checked side.
+const CURATED = "tools/gen/de-consonant-curated.tsv";
+let curated = 0;
+try {
+    const byWord = new Map(out);
+    for (const line of readFileSync(CURATED, "utf8").split("\n")) {
+        if (!line || line.startsWith("#")) continue;
+        const [w, spec] = line.split("\t");
+        if (!w || !spec) continue;
+        // Merge per ORDINAL, so a word that also carries a learned v/s correction keeps it.
+        const merged = new Map<string, string>();
+        for (const c of (byWord.get(w) ?? "").split(",")) {
+            const m = /^(\d+)(.+)$/u.exec(c);
+            if (m) merged.set(m[1]!, m[2]!);
+        }
+        for (const c of spec.split(",")) {
+            const m = /^(\d+)(.+)$/u.exec(c);
+            if (m) merged.set(m[1]!, m[2]!);
+        }
+        byWord.set(w, [...merged.entries()].sort((x, y) => Number(x[0]) - Number(y[0]))
+            .map(([o, t]) => `${o}${t}`).join(","));
+        curated++;
+    }
+    out.length = 0;
+    out.push(...byWord.entries());
+} catch {
+    console.warn(`(no ${CURATED} — building without the curated c→t͡s list)`);
+}
+
 out.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 
 const hdr =

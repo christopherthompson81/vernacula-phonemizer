@@ -494,9 +494,9 @@ export function normalizeSlovak(input: string): string {
 
     // 10) SIGNS that must be read BEFORE the shared tier, because they sit between the number and its
     //     unit or change what the number is. Degrees take the three-way agreement (30 → stupňov).
-    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d+)\s?°\s?C(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), STUPEN)} Celzia`);
-    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui,
         (_m, n: string) => `${n} ${counted(Number(n), STUPEN)} Fahrenheita`);
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), STUPEN)}`);
     s = s.replace(/(?<=\d)\s?[x×]\s?(?=\d)/gu, " krát ");

@@ -216,8 +216,8 @@ export function normalizeKarakalpak(input: string): string {
     //    ⚠ AND THE CORPUS GLOSSES ITS OWN SIGN, so the word is NOT emitted twice: "Onı úy sharayatında
     //    +15+20°С gradus temperaturada saqlaǵan maqul" writes the sign and the word together, and without
     //    the lookahead it reads *gradus gradus*. Same shape as Turkmen's `+11° gradus`.
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])(?!\s*gradus)/gu, "$1 gradus");
-    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gu, "$1");
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])(?!\s*gradus)/gui, "$1 gradus");
+    s = s.replace(/(\d)\s?°\s?[CС](?![\p{L}\p{M}])/gui, "$1");
     s = s.replace(/(\d)\s?°(?!\s*gradus)/gu, "$1 gradus ");
     s = s.replace(/(\d)\s?°/gu, "$1");
 

@@ -484,11 +484,11 @@ export function normalizeLithuanian(input: string): string {
     //    which is trap 56 rather than a visible leak, and no DROP class can see it. 31 instances.
     //    ℃ (U+2103) is folded to `°C` at the registry's dispatch point, above this layer (trap 36).
     t = t.replace(
-        new RegExp(`${NUM}${SP}*°${SP}*C${NW}`, "gu"),
+        new RegExp(`${NUM}${SP}*°${SP}*C${NW}`, "gui"),
         (_m, num: string) => `${quantity(num, N.degree)} ${W.celsius}`,
     );
     t = t.replace(
-        new RegExp(`${NUM}${SP}*°${SP}*F${NW}`, "gu"),
+        new RegExp(`${NUM}${SP}*°${SP}*F${NW}`, "gui"),
         (_m, num: string) => `${quantity(num, N.degree)} ${W.fahrenheit}`,
     );
 

@@ -355,7 +355,7 @@ export function normalizeHebrew(input: string): string {
     //    `מינוס 273.15 מעלות צלזיוס`, `מינוס 38 מעלות`, `מינוס 4 מעלות צלזיוס`, `מינוס 14.2 מעלות`. It is
     //    ×0 in the mined corpus, which is the ordinary shape for a SIGN's word (a writer types the glyph).
     s = s.replace(
-        new RegExp(`(?<![0-9.,])(${NUM})(\\s?°\\s?[CF])\\s?[-−–]`, "gu"),
+        new RegExp(`(?<![0-9.,])(${NUM})(\\s?°\\s?[CF])\\s?[-−–]`, "gui"),
         "מִינוּס $1$2",
     );
 
@@ -371,7 +371,7 @@ export function normalizeHebrew(input: string): string {
     //     (`קו הרוחב 78° דרום`, `קו רוחב 40°`, `זווית קשר של 104.5°`), where מעלות is the same word. The
     //     ARC-MINUTE is left unread: `36°30′` is ×2 and no minutes word is attested — the same partial ug
     //     and ps both shipped, stated rather than guessed at.
-    s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°\\s?[CF]${NW_A}`, "gu"), "$1 מַעֲלוֹת צֶלְזִיוּס ");
+    s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°\\s?[CF]${NW_A}`, "gui"), "$1 מַעֲלוֹת צֶלְזִיוּס ");
     s = s.replace(new RegExp(`(?<![0-9.,])(${NUM})\\s?°`, "gu"), "$1 מַעֲלוֹת ");
 
     // 11) THE EXPONENT, and the corpus glosses its own symbol TWICE — the strongest attestation available

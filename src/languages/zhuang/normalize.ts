@@ -403,7 +403,7 @@ export function normalizeZhuang(input: string): string {
     //    real onset. `ACCEPTED_SIGN_SILENCE.za.degrees` records the refusal so the gate stays honest.
     //    ⚠ AFTER STEP 5, because `°C` is not a unit key and the unit rule's trailing guard would otherwise
     //    have to know about it; and the bare `°` is left alone — it has no instances here beyond these.
-    s = s.replace(/(?<![\d.,])(\d+(?:\.\d+)?)\s?(?:°\s?[CF]|[℃℉])(?![\p{L}\p{M}])/gu, "$1");
+    s = s.replace(/(?<![\d.,])(\d+(?:\.\d+)?)\s?(?:°\s?[CF]|[℃℉])(?![\p{L}\p{M}])/gui, "$1");
 
     // 7) PERCENT — ×68, the layer's highest-traffic symbol rule and its THINNEST SOURCING, stated here
     //    rather than buried. The corpus never spells `%` out. What it does spell out is the FRACTION

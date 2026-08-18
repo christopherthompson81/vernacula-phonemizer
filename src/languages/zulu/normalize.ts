@@ -239,9 +239,9 @@ export function normalizeZulu(input: string): string {
         /amazinga[^.!?;]*$/u.test(before);
     const deg = (whole: string, digits: string, tail: string, offset: number, full: string): string =>
         `${saidDegrees(full.slice(0, offset)) ? "" : "amazinga angu-"}${digits}${tail}`;
-    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?C(?![\p{L}\p{M}])/gui,
         (m0, d: string, off: number, full: string) => deg(m0, d, "", off, full));
-    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(\d[\d.,]*)[  ]?[°º][  ]?F(?![\p{L}\p{M}])/gui,
         (m0, d: string, off: number, full: string) => deg(m0, d, " Fahrenheit", off, full));
     s = s.replace(/[+]?(\d[\d.,]*)[  ]?[°º][  ]?([NSEW])(?![\p{L}\p{M}])/gu,
         (m0, d: string, c: string, off: number, full: string) =>

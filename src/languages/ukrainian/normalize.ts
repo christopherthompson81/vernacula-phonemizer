@@ -340,8 +340,8 @@ export function normalizeUkrainian(input: string): string {
         (_m, n: string) => `${n} ${counted(Math.trunc(Number(n.replace(",", "."))), METRE)}`);
     //      The 3-letter lookbehind is what keeps this off `км/год`, which the shared tier composes itself.
     s = s.replace(/(?<=[\p{L}\p{M}]{3})\s?\/\s?год(?![\p{L}\p{M}])/gu, " на годину");
-    s = s.replace(/(\d)\s?°\s?[CСc](?![\p{L}\p{M}])/gu, (_m, n: string) => `${n} градусів Цельсія`);
-    s = s.replace(/(\d)\s?°\s?[FФf](?![\p{L}\p{M}])/gu, (_m, n: string) => `${n} градусів Фаренгейта`);
+    s = s.replace(/(\d)\s?°\s?[CСc](?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} градусів Цельсія`);
+    s = s.replace(/(\d)\s?°\s?[FФf](?![\p{L}\p{M}])/gui, (_m, n: string) => `${n} градусів Фаренгейта`);
     s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), DEGREE)}`);
 
     // 7) CLOCK. The colon is clause punctuation in ukrainian.jsonc, so `20:30` read as *двадцять ,

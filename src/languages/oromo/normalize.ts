@@ -261,7 +261,7 @@ export function normalizeOromo(input: string): string {
     // 11) DEGREES — `35°W` (×1), a longitude. *digirii* is corpus-attested
     s = s.replace(/(\d+)\s?[°º]\s?([NSEW])(?![\p{L}\p{M}])/gu,
         (_m, n: string, c: string) => `digirii ${n} ${COMPASS[c]!}`);
-    s = s.replace(/(\d+)\s?[°º]\s?[CF]?(?![\p{L}\p{M}])/gu, "digirii $1");
+    s = s.replace(/(\d+)\s?[°º]\s?[CF]?(?![\p{L}\p{M}])/gui, "digirii $1");
 
     // 12) UNITS — emitted BEFORE the number (fact 1), which is why they are not declared to the shared
     //     tier: it can only postpose them. The corpus writes the abbreviation on either side

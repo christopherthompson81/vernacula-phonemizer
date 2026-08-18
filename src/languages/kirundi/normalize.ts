@@ -503,7 +503,7 @@ export function normalizeKirundi(input: string): string {
     //    `27/28 ° C`, and `dogere 22/25` where the corpus's own noun stands in front. The second emits no
     //    noun — it is already there — and the first suppresses it via the same `saidNear` redundancy guard.
     const spanDeg = (a: string, b: string): string => `${a} ${DEGREE_AND} ${b}`;
-    s = s.replace(/(?<![\p{L}\p{M}\d.,:/-])(\d+)[  ]?[-–—/][  ]?(\d+)[  ]?°[  ]?[CF]?(?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}\d.,:/-])(\d+)[  ]?[-–—/][  ]?(\d+)[  ]?°[  ]?[CF]?(?![\p{L}\p{M}])/gui,
         (w, a: string, b: string, off: number, full: string) =>
             Number(a) < Number(b)
                 ? `${saidNear(full, off, off + w.length, DEGREE) ? "" : `${DEGREE} `}${spanDeg(a, b)}`
@@ -571,7 +571,7 @@ export function normalizeKirundi(input: string): string {
     //    6a) A SCALE TEMPERATURE — `30 ° C`, `17°C`, `0,6 ° C`, `16 °C`. The `F` letter is CLAIMED so it
     //    cannot reach the phoneme stream raw, but NO Fahrenheit name is emitted: `farenheti` is 0/0 on
     //    rn.wikipedia and `°F` is ×0 in this corpus, so there is nothing to say and nothing is invented.
-    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gu,
+    s = s.replace(/(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[  ]?°[  ]?[CF](?![\p{L}\p{M}])/gui,
         (w, sg: string, n: string, off: number, full: string) => degreeBody(sg, n, off, off + w.length, full));
     //    6b) A COORDINATE — `9°55'`, `10°40'`, `1°05'`, `0°15'`. ⚠ NO COMPASS TABLE, and that is another rw
     //    divergence: Kinyarwanda writes the bare letter (`1.867 ° S`) and needs one, while Kirundi SPELLS THE

@@ -330,7 +330,7 @@ export function normalizeJavanese(input: string): string {
     // `nganti 33 drajat Celcius`, `sautara 29 drajat celcius`. ℃ arrives already folded to `°C`.
     // ⚠ The bare arm covers the COORDINATE, which is what most of `degrees: 456` is: `6°LU-11°LS`,
     // `95°BT-141°BT`. The compass letters are left for the Latin path; only the sign is read.
-    s = s.replace(/(\d+)\s*°\s*C(?![\p{L}])/gu, "$1 drajat celsius");
+    s = s.replace(/(\d+)\s*°\s*C(?![\p{L}])/gui, "$1 drajat celsius");
     // ⚠ THE TRAILING SPACE IS LOAD-BEARING. Without it `6°LU` became `6 drajatLU` — one token, read
     // *d̪rad͡ʒˈat̪lu* — because a coordinate glues its compass letters straight onto the sign. The
     // duplicate-space case is harmless (the clause sink trims; the corpus diff reports SLOT-GAP 0).

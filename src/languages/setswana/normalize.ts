@@ -243,11 +243,11 @@ export function normalizeSetswanaPre(input: string): string {
     //    letter so a range's second operand cannot be read as a negative; rejected there, the engine simply
     //    starts later and matches the bare number (trap 52), which is the safe outcome rather than a miss.
     s = s.replace(
-        /(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[  ]?°[  ]?([CF])(?![\p{L}\p{M}])/gu,
+        /(?<![\p{L}\p{M}\d])([-−–]?)(\d+(?:[.,]\d+)?)[  ]?°[  ]?([CF])(?![\p{L}\p{M}])/gui,
         (_w, sign: string, n: string, sc: string) =>
             sign === ""
-                ? `${DEGREE} tsa ${SCALE[sc]!} di le ${n}`
-                : `${DEGREE} tsa ${SCALE[sc]!} tse di ${BELOW_ZERO} di le ${n}`,
+                ? `${DEGREE} tsa ${SCALE[sc.toUpperCase()]!} di le ${n}`
+                : `${DEGREE} tsa ${SCALE[sc.toUpperCase()]!} tse di ${BELOW_ZERO} di le ${n}`,
     );
     //    A BARE degree — a coordinate (`21° 57' 0"`, `(26°)`) or the open end of a temperature span
     //    (`17° go ya go 31 °C`). `º` (U+00BA) is accepted beside `°` because it stands in for it in

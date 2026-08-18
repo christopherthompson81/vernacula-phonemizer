@@ -311,7 +311,7 @@ export function normalizeSerbian(input: string): string {
     // 4) DEGREES, two arms. The first claims `°C` / `°F` and supplies both the degree noun and the scale
     //    name. A WRITTEN degree noun is CONSUMED when present (`32 °C степена`), or the word is emitted
     //    twice; the count agrees with the numeral (32 → gen.sg stepena), not with what was written.
-    s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gu,
+    s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
         (_m, n: string, unit: string, _written: string | undefined) =>
             `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
     //    4b) THE BARE DEGREE emits the degree noun ONLY, no scale word — right for a longitude (`35°W`) and
