@@ -9,6 +9,7 @@
 import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { latinPhone } from "../src/core/latinPhones.ts";
+import { repairDoubleEncoded } from "../src/core/unicode.ts";
 
 describe("a letter the g2p cannot read still gets a sound", () => {
     test("⟨x⟩ is /ks/ medially and /z/ word-initially", () => {
@@ -110,5 +111,52 @@ describe("the six engines that bypassed the floor now reach it", () => {
     // reach past the bare letter and disturb it.
     test("a digraph that already had a rule is untouched", async () => {
         expect(await phonemize("square", "sv")).toBe("skvˈɑ̀ːrɛ");
+    });
+});
+
+/**
+ * ⚠ LOWERCASING DESTROYS THE MOJIBAKE SIGNATURE — the casing wall, a third time.
+ *
+ * The double-encoding repair keys on the UTF-8 lead bytes `Ã` / `Â`. A corpus that has been case-folded
+ * — FLEURS is — turns those into `ã` / `â`, the repair stops matching, and the whole token falls through
+ * to raw passthrough: id_id's `guaycurãº` (from `Guaycurú`) reached the IPA as the literal letters
+ * `gˈuaycuraº`. The UPPERCASE form in the same corpus repaired correctly, which is what made it visible.
+ *
+ * The arithmetic does not care about case (`ã & 0x1f` and `Ã & 0x1f` are both 0x03), so the fix is to
+ * add the folded leads. Measured across all 102 FLEURS corpora: 63 occurrences of the signature (id_id
+ * 44, fil_ph 17, ceb_ph 2), every distinct pair decoding to an obviously correct character, against
+ * 57,516 legitimate uses of the same letters — which are untouched, because a real letter never follows
+ * them out of U+0080–U+00BF.
+ */
+describe("mojibake repair survives a lowercased corpus", () => {
+    test("the folded lead repairs exactly as the uppercase one does", () => {
+        expect(repairDoubleEncoded("guaycurãº")).toBe("guaycurú");
+        expect(repairDoubleEncoded("guaycurÃº")).toBe("guaycurú");
+    });
+
+    test("every distinct pair the 102 corpora actually contain", () => {
+        expect(repairDoubleEncoded("â£27")).toBe("£27");
+        expect(repairDoubleEncoded("â¥2,500")).toBe("¥2,500");
+        expect(repairDoubleEncoded("35â°w")).toBe("35°w");
+        expect(repairDoubleEncoded("3.850 kmâ²")).toBe("3.850 km²");
+        expect(repairDoubleEncoded("sã£o paulo")).toBe("são paulo");
+        expect(repairDoubleEncoded("barã§a")).toBe("barça");
+        expect(repairDoubleEncoded("jimã©nez")).toBe("jiménez");
+        expect(repairDoubleEncoded("repãºblica")).toBe("república");
+        expect(repairDoubleEncoded("gyã¶ngyi")).toBe("gyöngyi");
+    });
+
+    /**
+     * ⚠ `å` IS NOT A LEAD, and this is the guard on that. Norwegian `for nå».` is "nå" (now) followed by a
+     * legitimate `»` closing quote — and `»` sits inside the continuation range, so admitting `å` would
+     * corrupt Norwegian to repair nothing. nb_no was the only language the wider rule "found".
+     */
+    test("Nordic å and ordinary ã/â before real letters are untouched", () => {
+        expect(repairDoubleEncoded("for nå».")).toBe("for nå».");
+        expect(repairDoubleEncoded("nå« og")).toBe("nå« og");
+        expect(repairDoubleEncoded("Grã-Bretanha")).toBe("Grã-Bretanha");
+        expect(repairDoubleEncoded("são")).toBe("são");
+        expect(repairDoubleEncoded("château")).toBe("château");
+        expect(repairDoubleEncoded("não")).toBe("não");
     });
 });
