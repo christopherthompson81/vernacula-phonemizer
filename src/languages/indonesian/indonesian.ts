@@ -9,6 +9,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { makeUnreadableTest } from "../../core/initialisms.ts";
 import { normalizeIndonesian } from "./normalize.ts";
 
 interface NumbersDef {
@@ -95,14 +96,81 @@ function stressIndex(segs: Seg[]): number {
     return penult;
 }
 
+/**
+ * Can this letter run be an Indonesian word at all? Indonesian syllables are simple — (C)V(C) with a
+ * short coda inventory — so a capital run with no vowel, or with a cluster the language does not
+ * license, is an acronym and nothing else.
+ */
+const isUnreadableIndonesian = makeUnreadableTest({
+    vowels: /[aeiou]/u,
+    digraphs: new Set(["ng", "ny", "sy", "kh"]),
+    legalOnsets: new Set([
+        "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w",
+        "y", "z", "ng", "ny", "sy", "kh",
+        // the borrowed clusters the reformed orthography admits
+        "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl", "kr", "pl", "pr", "sl", "sp", "st", "sk",
+        "tr", "sw", "ps", "kw",
+    ]),
+    legalCodas: new Set(["b", "d", "f", "h", "k", "l", "m", "n", "ng", "p", "r", "s", "t", "kh"]),
+    liquids: /[lr]/u,
+});
+
+/**
+ * ⚠ READABLE AND STILL SPELLED OUT — the cases the phonotactic test gets wrong in the other direction.
+ * `core/initialisms.ts` states the principle: "readability is not convention". `AS` (Amerika Serikat)
+ * and `REM` are perfectly pronounceable Indonesian shapes and are still said letter by letter, so a
+ * test on shape alone would read them as words. Evidence: the FLEURS id_id audio has `as` as
+ * `a e s` and `aol` as `a o e l` — spelled, in both cases.
+ */
+const SPELLED_ANYWAY = new Set(["as", "rem", "oha", "aol"]);
+
+/**
+ * ⚠ ACRONYM LEXICON — the word-pronounced borrowings whose reading is NOT derivable from Indonesian
+ * orthography, and so has to be listed rather than computed.
+ *
+ * The readability gate above decides the right QUESTION (word, not letters), but the answer then comes
+ * from the native rules — and native ⟨c⟩ is /t͡ʃ/, so `UNESCO` read as an Indonesian word gives
+ * *unəst͡ʃˈo*. These borrowings keep the /k/ of their source spelling. That is a fact about each word,
+ * not about its shape, which is what a lexicon is for — the same reasoning as the Nguni loan list.
+ *
+ * ATTESTED IN THE FLEURS id_id AUDIO, not assumed:
+ *     unesco   ASR `o n i a o n i s k o`   -> …nesko, with /k/
+ *     covid    ASR `k ɔ f i t`             -> /kovid/, with /k/
+ *     acta     ASR `ŋ a n a t a`           -> /akta/, with /k/
+ *
+ * Acronyms WITHOUT a ⟨c⟩ need no entry: `NATO` and `ASEAN` fall through the readability gate and the
+ * native rules already read them correctly (nˈato, asəˈan).
+ */
+const ACRONYM_LEXICON: ReadonlyMap<string, string> = new Map([
+    ["unesco", "unˈɛsko"],
+    ["covid", "kˈovid"],
+    ["acta", "ˈakta"],
+]);
+
 /** One Indonesian word → canonical IPA, RULE-ENGINE ONLY (no ⟨e⟩ lexicon). The honest, non-circular engine
  *  signal used by the referee eval; the shipped phonemizeWord layers the consensus ⟨e⟩ lexicon on top. */
 export function phonemizeWordRules(word: string): string {
     // All-caps acronym → spell each letter by its Indonesian name (BBM → be-be-em → bebeem).
-    if (/^[A-Z]{2,}$/.test(word))
-        return [...word.toLowerCase()]
-            .map((c) => DEF.letterNames[c] ?? "")
-            .join("");
+    //
+    // ⚠ ONLY IF IT CANNOT BE READ AS A WORD, and omitting that test spelled out every acronym that is
+    // actually PRONOUNCED as one: `UNESCO` came out `uɛneɛst͡ʃeo` (u-e-en-e-es-che-o) instead of
+    // /unɛsko/, and `NATO`, `ASEAN`, `COVID`, `ACTA` the same way. ASEAN and UNESCO are not marginal
+    // vocabulary in Indonesian or Malay. The bare `/^[A-Z]{2,}$/` claimed any capital run, so an
+    // ordinary word in caps — `RUMAH` — was spelled out too.
+    //
+    // This is the discrimination `core/initialisms.ts` already makes for the rest of the fleet
+    // (`isUnreadable`, plus a listed-exception set for the readable-but-still-spelled cases). Indonesian
+    // never went through that pass, so it never got the test. Indonesian phonotactics make it clean:
+    // TV / DVD / GPS / PBB have no vowel at all and are unreadable by construction, while NATO / ASEAN /
+    // UNESCO syllabify without trouble.
+    if (/^[A-Z]{2,}$/.test(word)) {
+        const low = word.toLowerCase();
+        const lex = ACRONYM_LEXICON.get(low);
+        if (lex !== undefined) return lex;               // listed borrowing: its own attested reading
+        if (SPELLED_ANYWAY.has(low) || isUnreadableIndonesian(low))
+            return [...low].map((c) => DEF.letterNames[c] ?? "").join("");
+        // readable, unlisted → fall through and read it as an ordinary word
+    }
     const segs = scan(word.toLowerCase());
     if (segs.length === 0) return "";
     // Syllable-final /k/ → glottal stop [ʔ] (coda k, before a consonant or word end).
