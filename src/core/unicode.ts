@@ -415,7 +415,7 @@ export function repairDoubleEncoded(s: string): string {
     // The lead bytes the arms below can repair. This must stay in step with them: it was `[\u00c2\u00c3\u00e2]`
     // when the two-byte arms were C2/C3-only, and widening the arm to C5 without widening this fast path left
     // `\u00c4\u00b0zmir` returning EARLY and unrepaired \u2014 the fix silently did nothing.
-    if (!/[\u00c2-\u00c5\u00e2]/u.test(s)) return s;
+    if (!/[\u00c2-\u00c5\u00e2\u00e3]/u.test(s)) return s;
     return s
         // THREE-BYTE first, or the two-byte arms below would eat its lead. `E2 XX YY` encodes U+0800–U+FFFF;
         // the lead nibble of 0xE2 is 2, so the code point is 0x2000 plus the two continuation payloads — which
@@ -468,7 +468,35 @@ export function repairDoubleEncoded(s: string): string {
         // BOUNDED BY MEASUREMENT, on the same standard as the arms above. `[C4C5]` + a continuation byte occurs
         // **twice across all 67 corpora, both `\u00c4\u00b0` in id_id**, and the next range up, `[C6-CF]`, occurs ZERO
         // times \u2014 so stopping at C5 costs nothing and every character this newly repairs is a real one.
-        .replace(/([\u00c2-\u00c5])([\u0080-\u00bf])/gu, (_m, lead: string, c: string) =>
+        // ⚠ THE LOWERCASED LEADS `\u00e3` / `\u00e2` ARE HERE BECAUSE LOWERCASING DESTROYS THE SIGNATURE.
+        // A corpus that has been case-folded — FLEURS is — turns the mojibake lead `\u00c3` into `\u00e3` and
+        // `\u00c2` into `\u00e2`, and the repair above then does not match, so the whole token falls through
+        // to the raw passthrough: id_id's `guaycur\u00e3\u00ba` (from `Guaycur\u00fa`) came out of the g2p as the literal
+        // letters `g\u02c8uaycura\u00ba`. The uppercase form in the SAME corpus repairs correctly, which is what
+        // made it visible. This is the casing wall a third time, after the initialism pass and the dotted
+        // abbreviations.
+        //
+        // THE ARITHMETIC IS UNCHANGED because the mask does not care about case: `\u00e3 & 0x1f` and
+        // `\u00c3 & 0x1f` are both 0x03, as are `\u00e2` and `\u00c2` at 0x02.
+        //
+        // ⚠ SAFE BY MEASUREMENT, AND `\u00e5` IS DELIBERATELY EXCLUDED. Across all 102 FLEURS corpora the
+        // signature `[\u00e3\u00e2]` + a continuation character occurs 63 times — id_id 44, fil_ph 17, ceb_ph 2 — and
+        // EVERY distinct pair decodes to an obviously correct character (`\u00e2\u00a3`→`£`, `\u00e2\u00a5`→`¥`, `\u00e2\u00b0`→`°`,
+        // `\u00e2\u00b2`→`²`, `\u00e3\u00a7`→`ç`, `\u00e3\u00a9`→`é`, `\u00e3\u00ba`→`ú`, `\u00e3\u00bc`→`ü`). The same letters followed by
+        // anything else — ordinary Portuguese and French — occur 57,516 times and are untouched, because a
+        // real letter never follows them out of U+0080–U+00BF.
+        //
+        // `\u00e5` (from `\u00c5`) is NOT a lead here: it is an ordinary Nordic letter, and nb_no's `for n\u00e5».` is
+        // "n\u00e5" (now) followed by a legitimate `»` closing quote, which sits in the continuation range. Adding
+        // it would corrupt Norwegian to repair nothing.
+        //
+        // ⚠ KNOWN RESIDUE, PRE-EXISTING AND UNCHANGED BY THIS: a trailing byte that CP1252 maps OUT of
+        // U+0080–U+00BF is still not matched, because this arm decodes the character directly instead of
+        // going through `sourceByte()` the way the three-byte arm does. `\u00c3\u0153r\u00c3\u00bcmqi` (Ürümqi) half-repairs to
+        // `\u00c3\u0153r\u00fcmqi` on main and does so identically here — byte 0x9C is `\u0153` in CP1252. Widening the trailing
+        // class to reach it would pull in en-dashes and curly quotes, which occur constantly in running
+        // text, to repair ONE token in 102 corpora. Not worth the blast radius; recorded instead.
+        .replace(/([\u00c2-\u00c5\u00e2\u00e3])([\u0080-\u00bf])/gu, (_m, lead: string, c: string) =>
             String.fromCodePoint(((lead.codePointAt(0)! & 0x1f) << 6) | (c.codePointAt(0)! & 0x3f)));
 }
 
