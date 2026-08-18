@@ -262,7 +262,8 @@ describe("Bosnian text normalization", () => {
     // `(James i dr. 1995)`, the academic *et al.* A ported rule reads that as *doktor hiljadu devetsto
     // devedeset pet*. One flag is the whole fix.
     test("DIVERGENCE: `Dr.` is a doctor and lowercase `dr.` is `et al.`", () => {
-        expect(say("Dr. Moll misli")).toBe("dˈo˥˩ktor moll mˈisli");
+        // ⚠ `mol` — the geminate this used to pin is not a BCS phoneme; see the hr degemination test.
+        expect(say("Dr. Moll misli")).toBe("dˈo˥˩ktor mol mˈisli");
         expect(say("James i dr. 1995")).toBe("jˈames i dr . xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set peː˥˩t");
     });
 

@@ -202,6 +202,23 @@ export function phonemizeWord(word: string): string {
             continue;
         }
         const c = w[i]!;
+        // ⚠ DEGEMINATE, AND DO IT HERE RATHER THAN AFTER THE SCAN. BCS has no phonemic geminates: a doubled
+        // consonant letter reaches this engine only in a loan or a foreign name (Costello, Guinness,
+        // Danielle, running, Ellsworth) and is read single. Collapsing it afterwards would shift every
+        // `nuclei` span recorded above and land the accent on the wrong vowel; skipping the letter keeps
+        // the spans correct by construction.
+        // ⚠ VOWELS ARE NOT COLLAPSED — ⟨oo⟩ in a loan is two syllables, not a long vowel.
+        // ⚠ NO EXCEPTION FOR THE SUPERLATIVE SEAM, and that is measured rather than assumed. `naj-` before
+        //   a ⟨j⟩-initial stem (najjednostavniji, najjeftiniji) is the one doubled consonant BCS writes
+        //   natively, and it was exempted here on that reasoning — but the readers say a single /j/:
+        //   `n aː j e d n o s t a v n i`, with the length on the prefix vowel, not the consonant. The
+        //   corpus has no other native class (175 distinct doubled-consonant types, every other a loan),
+        //   and the prefix seams a grammar would predict — podd-, izz-, nuzz- — appear in neither the
+        //   corpus nor the referee, so there is nothing to carve out and no evidence to carve it from.
+        if (c === w[i - 1] && !VOWEL_LETTER.has(c) && LETTERS[c] !== undefined) {
+            i++;
+            continue;
+        }
         if (LETTERS[c] !== undefined) {
             const start = out.length;
             out += LETTERS[c];

@@ -15,6 +15,31 @@ describe("Croatian (hr) canonical IPA", () => {
         }
     });
 
+    /**
+     * BCS HAS NO PHONEMIC GEMINATES, and a doubled consonant letter reaches this engine only in a loan or
+     * a foreign name — 175 distinct such word types across the hr/bs/sr corpus, every one of them a loan.
+     * Re-scored against the recognized phones over the 609 geminate-bearing utterances: 544 closer to what
+     * the reader said, 39 further, mean distance 0.1858 → 0.1822.
+     *
+     * ⚠ THE SUPERLATIVE SEAM IS NOT AN EXCEPTION, and it was written as one before the audio was checked.
+     * `naj-` before a ⟨j⟩-initial stem is the one doubled consonant BCS writes natively, so exempting it
+     * looked obviously right — but the readers say a single /j/ (`n aː j e d n o s t a v n i`), with the
+     * length on the prefix vowel instead. The prefix seams a grammar would predict (podd-, izz-, nuzz-)
+     * appear in neither the corpus nor the referee, so there is nothing to carve out either.
+     *
+     * ⚠ THE REFEREE CANNOT ADJUDICATE THIS — it holds four such words and contradicts itself on them: the
+     * same human set keeps `Matteo`'s Italian geminate and drops `inšallah`'s (`ǐ n ʃ a l aː x`, which is
+     * what we now emit). Net −2 of 26,486 on the primary. The audio is the instrument that can decide it.
+     */
+    test("doubled consonants degeminate; doubled VOWELS do not", () => {
+        expect(phonemize("Anna", "hr")).toBe("ˈana");
+        expect(phonemize("Holland", "hr")).toBe("xˈoland");
+        expect(phonemize("Ellsworth", "hr")).toBe("ˈelsʋortx");
+        expect(phonemize("najjednostavniji", "hr")).toBe("nˈajednostaʋniji");
+        // ⚠ A DOUBLED VOWEL IS TWO SYLLABLES in a loan, not a long vowel — only consonants collapse.
+        expect(phonemize("zoo", "hr")).toBe("zˈoo");
+    });
+
     test("Croatian-specific grapheme→IPA (Gaj's Latin, Ijekavian read as letters)", () => {
         expect(phonemize("mlijeko", "hr").trim()).toBe("mlijˈeː˩˥ko"); // Ijekavian "milk"
         expect(phonemize("đak", "hr").trim()).toBe("d͡ʑaː˥˩k"); // ⟨đ⟩ → d͡ʑ
@@ -84,7 +109,9 @@ describe("Croatian text normalization", () => {
         expect(ph("I. svjetskog rata")).toBe("pˈr˩˥ʋoɡ sʋjˈetskoɡ rˈata");
         expect(ph("II. svjetskom ratu")).toBe("drˈuː˥˩ɡom sʋjˈetskom rˈatu");
         expect(ph("itd.")).toBe("i tˈa˩˥ko dˈa˥˩ʎe .");
-        expect(ph("Dr. Moll")).toBe("dˈo˥˩ktor moll");
+        // ⚠ `mol`, not `moll` — this golden pinned a geminate the language does not have. The reader of
+        //   this very utterance says a single /l/ (`m o l o t k r e`); see the degemination test above.
+        expect(ph("Dr. Moll")).toBe("dˈo˥˩ktor mol");
         // ⚠ GOLDEN CHANGED, and it was pinning a DELETION. ⟨W⟩ is outside Gaj's Latin, the shared g2p had
         // no rule for it, and the middle initial simply vanished (`ɡeorɡe busx`). It now folds to ⟨v⟩ —
         // the reading Croatian gives the letter in *Velšani*, *velški* — so the initial is audible.

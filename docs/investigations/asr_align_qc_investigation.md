@@ -787,3 +787,65 @@ tooling already carries the mapping (`VARIETY` in `phonemize-fleurs.mts`: `fil_p
 `es_419→es-419`, `pt_br→pt-BR`, `ny_mw→nya`). **Re-derive nothing the corpus tooling already states**; a
 one-off analysis script that guesses the code will be wrong exactly on the languages whose code is
 interesting.
+
+## Run 12 — 2026-08-18 17:40 — the first genuine phonemizer defect out of this queue: BCS geminates
+
+`hr_hr` sits at 2.81× lift and its all-flagged rows are same-script prose, so it survives the Run 10/11
+finding that most of the queue is code-switching. Reading them:
+
+    ellsworth land regija je južno od otoka okružena bellingshausenovim morem
+      OURS  ˈellsʋortx land rˈeː˥˩ɡija … bˈellinɡsxausenoʋim mˈorem
+      HEAR  ɛ l z w ə θ l ɛ n d r e ɡ h i a … b ɛ l i ŋ s h aʊ z ə n ɔ v i m m o r ə m
+
+**Every doubled consonant letter was emitted as a geminate**, and BCS has none. Confirmed across the
+shared engine — `anna → ˈanna`, `emma → ˈemma`, `holland → xˈolland`, `hobbit → xˈobbit`, `jazz → jazz`.
+
+    hr_hr  344/3461 rows (9.9%) carry a geminate
+    bs_ba  237/3091 rows (7.7%)
+    sr_rs   28/2944 rows (1.0%)   ← Cyrillic, so foreign names arrive already transliterated
+
+175 distinct source-word types, **every one a loan or a foreign name** (costello, guinness, danielle,
+running, buffalo, whitehall, apple, ellsworth).
+
+### The exception I wrote, and the audio taking it away
+
+`naj-` before a ⟨j⟩-initial stem is the one doubled consonant BCS writes natively —
+*najjednostavniji*, *najjeftiniji* — so I exempted it. Then checked what the readers say:
+
+    n aː j e d n o s t a v n i        n aɪ j e f t i n i        n aː j a n u s t a v n i
+
+**A single /j/**, with the length on the prefix vowel rather than the consonant. The exemption was removed.
+The prefix seams a grammar would predict next — `podd-`, `izz-`, `nuzz-` — appear in neither the corpus nor
+the referee, so there is nothing to carve out and nothing to carve it from. Degemination is unconditional
+for consonants; **vowels are untouched**, since ⟨oo⟩ in a loan is two syllables (`zoo → zˈoo`).
+
+### Why the referee could not decide this, and the audio could
+
+The wikipron/epitran sets hold **four** doubled-consonant words between them, and the human referee
+contradicts itself across two of them — it keeps `Matteo`'s Italian geminate and drops `inšallah`'s
+(`ǐ n ʃ a l aː x`, exactly what we now emit). Net referee movement: **−2 of 26,486** primary, −4 secondary,
+all of it `Matteo`.
+
+Against the audio, over every geminate-bearing utterance in the three languages:
+
+    bs_ba  n=237   0.1895 → 0.1858    better 218, worse 12
+    hr_hr  n=344   0.1846 → 0.1807    better 318, worse 18
+    sr_rs  n= 28   0.1697 → 0.1698    better   8, worse  9   ← abbreviations, not loans; a wash
+    TOTAL  n=609   0.1858 → 0.1822    better 544, worse 39
+
+14:1 in favour. The absolute movement is small because one collapsed phone sits in a hundred-phone
+utterance; the ratio is the signal.
+
+⚠ **IMPLEMENTED IN THE SCAN, NOT AFTER IT.** `phonemizeWord` records each nucleus as a span into the output
+string and places the pitch accent by that index. Collapsing geminates in a post-pass shifts every span
+after the first one and lands the accent on the wrong vowel. Skipping the duplicate letter during the scan
+keeps the spans correct by construction.
+
+Two goldens were pinning the defect (`Dr. Moll → …moll` in the hr and bs tests) and are updated — the
+reader of that very utterance says `m o l o t k r e`, a single /l/.
+
+### Also seen, not fixed
+
+`sr`/`bs` **drop ⟨w⟩ entirely** where `hr` maps it to /ʋ/ — `watt → at` against `ʋat`, `ellsworth → ˈelsortx`
+against `ˈelsʋortx`. A deletion rather than a mis-mapping, and the hr side already has the fix, so this is
+a straightforward next item rather than an open question.
