@@ -2339,3 +2339,43 @@ the minute-noun we deliberately withhold. The distance cannot reward what this c
 
 This also revises a decision twice: the test first pinned the raw dot ("the pause it already had stands"),
 then two bare cardinals from Run 34's interim repair. Both are gone.
+
+## Run 35 — 2026-08-19 — `read_text`: the corpus now records what was actually read
+
+⚠ **`utt.text` WAS NOT THE PHONEMIZER'S INPUT, AND ITS SCHEMA COMMENT SAID IT WAS.** The corpus pass repairs
+the transcript before reading it — `restoreInitialismCasing` → `restoreAbbreviationDots` →
+`restoreNguniConcordAcronyms`, then the numeral register — and that repaired string was **transient**. So
+`ipa` was derived from a string the database never held. **19,511 of 270,106 rows (7.2%) differ**, which
+makes this a systemic inconsistency rather than a corner: for 7% of the corpus the `(text, ipa)` pair a
+trainer reads does not describe itself, a reviewer cannot see why a row's IPA has capitals the transcript
+lacks, and no single row could be corrected.
+
+`read_text` + `read_text_src` (`auto` | `hand`) fix all three. The auto pass **excludes `hand` rows from its
+SELECT**, not merely from its UPDATE — a human edit is never even recomputed — the same guarantee
+`apply_auto` gives a hand verdict in `status`.
+
+⚠ **AND IT IS WHERE A READER'S JUDGEMENT BELONGS.** A phonemizer reads the text it is given; it cannot make
+the choices a reader makes. Maltese `8:46 ta' filgħodu` is read *fid-disgħa nieqes kwart* — quarter TO nine,
+needing a round of :46 to :45 **and** an increment of the hour. Run 34b declined to derive that and was
+right to: one attestation cannot license inventing arithmetic. But declining left the reading nowhere to
+live, and the three rows now carry it as a hand-authored `read_text`. **The rule stays honest and the
+corpus stays correct** — which is only possible once the two are separate columns.
+
+    text       preċiżament fit-8:46 ta' filgħodu …
+    read_text  preċiżament fid-disgħa nieqes kwart ta' filgħodu …
+    src        hand
+
+### ⚠ And my own Run 31 refresh had been writing degraded rows
+
+The refresh in Run 31 re-phonemized 7,676 rows with `phonemizeAsync` + `numeralSegments` but **skipped all
+three text repairs**, because I reimplemented the pipeline instead of calling it. Those rows sat in the
+corpus without their casing repair until this run. Repaired here by re-deriving 33,850 rows — every language
+I had touched, plus every language containing one of the nine new initialisms — through a script that
+mirrors `phonemize-fleurs.mts` exactly; 3,784 changed.
+
+That mistake is also an argument for the column: had `read_text` existed, the missing repair would have been
+visible as a diff instead of invisible inside a transient string. **A pipeline whose intermediate is not
+stored cannot be audited**, and I could not audit it.
+
+    status after re-label:  verified 259,759 · investigate 8,274 · defective_audio 1,248
+                            recognizer_short 797 · reader_divergence 21 · defect 6 · convention 1

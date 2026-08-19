@@ -92,6 +92,7 @@ Two folds were proposed and refused, both recorded at the fold site so they are 
 | `asr_align_corpus.py` | GPU pass: audio → recognized phones, into SQLite beside our IPA |
 | `asr_align_report.py` | the scoring — `fold`, `coarsen`, `dist`, and the per-language 3×MAD queues |
 | `asr_align_label.py` | the durable record: `status` on each row (verified / investigate / defective_audio) |
+| `read_text.py` + `.mts` | the text the phonemizer ACTUALLY READ — `read_text`, `read_text_src` (auto/hand) |
 | `scan_silent_audio.py` | measures the WAVEFORM — the one defect the phone comparison cannot see |
 | `consonant_skeleton.py` | consonant-only distance; `--validate` scores it against the full distance |
 | `confusion_pairs.py` | which phone substitutions dominate, investigate vs verified |
@@ -121,3 +122,33 @@ from "no defects found". Sweep before label, never after.
 `build_webdataset.py`, `sampling_budget.py`, `exclude_defective.py`, `corpus_filter.py`, `ingest_fleurs.py`,
 `publish_hf*.py` — these answer *which pairs do we train on*, which is training-corpus policy, not
 phonemizer correctness. They consume this tooling's output the same way they consume any other referee.
+
+
+## `read_text` — what was actually read
+
+⚠ **`utt.text` IS THE FLEURS TRANSCRIPT, NOT THE PHONEMIZER'S INPUT**, and the schema comment used to say
+otherwise. The corpus pass repairs the text before reading it — `restoreInitialismCasing` →
+`restoreAbbreviationDots` → `restoreNguniConcordAcronyms`, then the numeral register — and that repaired
+string was transient. So `ipa` was derived from a string the database did not hold. **19,511 of 270,106 rows
+(7.2%)** differ, so this was not a corner case: for 7% of the corpus the `(text, ipa)` pair a trainer reads
+was internally inconsistent.
+
+`read_text` stores it. `read_text_src` is `auto` for the derived repair and `hand` for a human edit, and the
+auto pass **skips `hand` rows entirely** — not merely declining to overwrite them, but never recomputing
+them — so a correction survives every re-run. Same guarantee `apply_auto` gives a hand verdict in `status`.
+
+⚠ **AND IT IS WHERE A READER'S JUDGEMENT LIVES.** A phonemizer reads the text it is given; it cannot make
+the choices a reader makes. Maltese `8:46 ta' filgħodu` is read *fid-disgħa nieqes kwart* — quarter TO nine,
+which needs rounding :46 to :45 *and* incrementing the hour. No rule should invent that, and
+`maltese/normalize.ts` deliberately does not. The row now carries the reading as a hand-authored
+`read_text`, which is the only place it can correctly live:
+
+    text       preċiżament fit-8:46 ta' filgħodu …
+    read_text  preċiżament fid-disgħa nieqes kwart ta' filgħodu …
+    src        hand
+
+```bash
+python3 read_text.py --apply [lang…]                 # derive and store the auto repair
+python3 read_text.py --set mt_mt <wav> "<reading>"   # record what the reader actually said
+python3 read_text.py --stats
+```
