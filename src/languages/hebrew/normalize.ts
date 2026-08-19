@@ -124,7 +124,9 @@ const GERSHAYIM = "[\"״]";
  * עֶשְׂרִים, עֶשֶׂר — and because it is the form the manifest's own note about unmodelled morphophonology
  * ("the u-/va- morphophonology before labials is not modelled") already licenses as this file's register.
  */
-const PROCLITIC: Record<string, string> = {
+/** The vocalized form of each one-letter proclitic. Exported for the neural path, which meets the
+ *  same particles as a maqaf half (`ה־בית`) where this file meets them before a digit. */
+export const PROCLITIC: Record<string, string> = {
     "ב": "בְּ", "כ": "כְּ", "ל": "לְ", "ו": "וְ", "מ": "מֵ", "ה": "הַ", "ש": "שֶׁ",
 };
 /** The six that the corpus writes before a DIGIT or a Latin run. ש is absent from that position (×0) and is

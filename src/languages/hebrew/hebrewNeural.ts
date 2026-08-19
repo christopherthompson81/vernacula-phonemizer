@@ -13,7 +13,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { withHost } from "../../core/foreign.ts";
 import { phonemizeWord } from "./hebrew.ts";
 import { lexiconLookup } from "./lexicon.ts";
-import { normalizeHebrew } from "./normalize.ts";
+import { normalizeHebrew, PROCLITIC } from "./normalize.ts";
 import { createHebrewTagger, type HebrewTagger } from "./hebrewTagger.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToIpa } from "./numbers.ts";
@@ -22,12 +22,19 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // ⚠ KEPT IDENTICAL TO `hebrew.ts`'s TOKEN, including the word-MEDIAL geresh — see the note there. This class
 // used to admit the apostrophe only after the first letter, so `בייג'ינג` split where `ג'יימס` did not.
 const TOKEN = /([א-ת][֑-ׇ־'׳’]*(?:[א-ת][֑-ׇ'׳’]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
-// ⚠ U+05BE MAQAF IS EXCLUDED, and it is inside the [֑-ׇ] block. TOKEN admits the maqaf inside a word, so
-// with it in this class a bare maqaf-joined compound tested as "already vocalized": it went straight to the
-// rule engine as a skeleton AND flushed the clause run around it — `בית־ספר גדול` → *vjtsfʁ ɡadol* where the
-// tagger reads *bet sefeʁ ɡadol*. That is the same "one word costs its vowels" shape this module now guards
-// against everywhere else. A maqaf word is bare, so it belongs on the tagger path like any other.
-const NIQQUD = /[\u0591-\u05BD\u05BF-\u05C7]/u; // U+0591–U+05C7 minus U+05BE, written as escapes on purpose
+// "Is this word already vocalized?" — i.e. does it carry niqqud, in which case the rule g2p reads it
+// deterministically and the tagger would choke on the marks.
+// ⚠ TESTED AS "HAS A COMBINING MARK", NOT AS A CODE-POINT RANGE. The obvious range [U+0591–U+05C7] is the
+// Hebrew block's marks AND its punctuation: U+05BE MAQAF, U+05C0 PASEQ, U+05C3 SOF PASUQ and U+05C6 NUN
+// HAFUKHA are all in it and none of them is niqqud. TOKEN admits them inside a word, so with the range
+// test a word ending in any of the four claimed to be "already vocalized": it went to the rule engine as
+// a skeleton AND flushed the clause run around it — `שלום עולם׃ מה שלומך` → *ʃalom ʔvlm ma ʃlomχa*, and
+// the sof pasuq's declared clause pause never fired either. Asking for \p{Mn} says what is meant and
+// cannot drift as the block gains code points.
+const NIQQUD = /\p{Mn}/u;
+// The Hebrew-block punctuation TOKEN admits INSIDE a word, none of which is in the tagger's charset:
+// U+05BE maqaf (joiner), U+05C0 paseq, U+05C3 sof pasuq, U+05C6 nun hafukha.
+const WORD_PUNCT = /[\u05BE\u05C0\u05C3\u05C6]/u;
 const MAX_CHARS = 200; // keep clauses in-distribution (the tagger trained on ≤220-char runs)
 
 let taggerP: Promise<HebrewTagger | undefined> | undefined;
@@ -78,20 +85,33 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
         // whole reason clauses are batched — it is what resolves the homographs the module doc names (ספר
         // sefeʁ/sifeʁ, קרא kaʁa/koʁa) — so a word-at-a-time retry would recover the vowels and lose the
         // readings. `canRead` finds those words with NO model call, so this costs two or three inferences.
+        // ⚠ NOTHING TO SPLIT ON — every word is readable, so the mismatch is the tagger predicting a SPACE
+        // tag mid-word and no re-issue of the same clause can repair it (the model is deterministic).
+        // ⚠ BUT STILL PER WORD, NOT PER CLAUSE. Sending the whole run to the rule engine is the unbounded
+        // blast radius this module exists to remove, and one mispredicted tag should cost one word. A
+        // per-word call is a DIFFERENT call, so unlike re-issuing the clause it can succeed. Latent today
+        // — instrumented over the corpus, this branch fires zero times — which is exactly why it should
+        // not be the one path left that behaves the old way.
         if (words.every((w) => tagger.canRead(w))) {
-            // ⚠ NOTHING TO SPLIT ON, so do NOT re-issue the identical call. The model is deterministic and
-            // the clause just failed; a retry is a guaranteed-wasted inference. The mismatch here is the
-            // tagger predicting a SPACE tag mid-word, which no split can repair.
-            for (const w of words) queue.push(bare(w));
+            for (const w of words) {
+                const one = await restore([w]);
+                queue.push(one ? one[0]! : bare(w));
+            }
             return;
         }
-
         let seg: string[] = [];
         const flushSeg = async (): Promise<void> => {
             if (!seg.length) return;
             const out = await restore(seg);
+            // ⚠ PER WORD ON MISMATCH, matching the branch above. Every word here is readable — the segment
+            // was built from `canRead` — so a mismatch is a mispredicted SPACE tag, and a per-word call is
+            // a different call that can still succeed. Skeletonizing the segment would leave one more path
+            // where a single bad prediction costs a whole sentence.
             if (out) queue.push(...out);
-            else for (const w of seg) queue.push(bare(w));
+            else for (const w of seg) {
+                const one = await restore([w]);
+                queue.push(one ? one[0]! : bare(w));
+            }
             seg = [];
         };
         for (const w of words) {
@@ -103,9 +123,24 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
             // TOKEN match — pushing two for one input word shifts every later word and drops the last.
             // ⚠ AND THE REJOIN IS VALIDATED. Checking only that the restore is non-empty lets a half whose
             // reading is empty vanish inside the join: `ה־בית גדול` came out as *bet ɡadol*, the `ה` gone.
-            const parts = w.split("\u05BE");
-            if (parts.length > 1 && parts.every((x) => x && tagger.canRead(x))) {
-                const halves = await restore(parts);
+            // ⚠ SPLIT ON HEBREW PUNCTUATION INSIDE A WORD, not on the maqaf alone. TOKEN admits four such
+            // characters mid-word and the tagger's charset has none of them: U+05BE MAQAF (a word joiner),
+            // U+05C0 PASEQ, U+05C3 SOF PASUQ and U+05C6 NUN HAFUKHA. Any of them made the whole token
+            // undecodable — `עולם׃` came back a skeleton and flushed its clause — though the letters on
+            // either side are perfectly readable.
+            // ⚠ EMPTY PARTS ARE DROPPED BEFORE THE GUARD. A word-final joiner (`בית־`, the construct form
+            // normalize.ts names) yields a trailing "" and used to fail `every`, sending a fully readable
+            // word to the rule engine as a skeleton.
+            const parts = w.split(WORD_PUNCT).filter(Boolean);
+            if (parts.length && (parts.length > 1 || parts[0] !== w) && parts.every((x) => tagger.canRead(x))) {
+                // ⚠ A ONE-LETTER HALF IS A PROCLITIC AND BYPASSES THE TAGGER. It reads `ה` as nothing and
+                // `ב` as a bare consonant, so joining gave "bet" with the definite article gone, or
+                // "v bet". normalize.ts carries the vocalized form of each — it applies the same table
+                // before a digit or a Latin run — and `phonemizeWord` reads THAT deterministically:
+                // ה־ → ha, ב־ → be, ל־ → le. It cannot go through `restore`, whose charset has no niqqud.
+                const lead = parts.length > 1 && parts[0]!.length === 1 ? PROCLITIC[parts[0]!] : undefined;
+                const rest = lead ? parts.slice(1) : parts;
+                const halves = rest.length ? await restore(rest) : [];
                 if (halves) {
                     // ⚠ THE SEGMENT STILL FLUSHES HERE, and that is a known limit rather than an
                     // oversight. The compound is its own model call, so the words before and after it end
@@ -118,7 +153,7 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
                     // joining it leaves a stray space that `emit()` passes through: `ה־בית גדול` came out
                     // as " bet ɡadol", `גדול ה־בית` as "ɡadol  bet". The prefixed particles ה־ ב־ ל־ are
                     // exactly the halves that read empty, and normalize.ts leaves them un-rewritten.
-                    queue.push(halves.filter(Boolean).join(" "));
+                    queue.push([lead ? phonemizeWord(lead) : "", ...halves].filter(Boolean).join(" "));
                     continue;
                 }
             }

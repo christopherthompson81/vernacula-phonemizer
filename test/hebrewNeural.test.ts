@@ -104,8 +104,15 @@ describe("hebrew neural vowel restoration", () => {
             // ⚠ AND A HALF WHOSE READING IS GENUINELY EMPTY LEAVES NO GAP. `ה־` `ב־` `ל־` are the
             //   prefixed particles, they phonemize to nothing, and normalize.ts leaves them attached — so
             //   joining the halves unfiltered emitted a stray space that `emit()` passed straight through.
-            expect(await phonemizeHebrewNeural("ה־בית גדול")).toBe("bet ɡadol");
-            expect(await phonemizeHebrewNeural("גדול ה־בית")).toBe("ɡadol bet");
+            // ⚠ AND A ONE-LETTER HALF IS A PROCLITIC, VOCALIZED RATHER THAN DROPPED. The tagger reads `ה`
+            //   as nothing and `ב` as a bare consonant, so filtering the empty half merely deleted the
+            //   definite article. normalize.ts already carries the vocalized form of each — it applies the
+            //   same table before a digit — and the rule engine reads THAT: ה־ → ha, ב־ → be, ל־ → le.
+            //   It cannot go through the tagger, whose charset has no niqqud.
+            expect(await phonemizeHebrewNeural("ה־בית גדול")).toBe("ha bet ɡadol");
+            expect(await phonemizeHebrewNeural("גדול ה־בית")).toBe("ɡadol ha bet");
+            expect(await phonemizeHebrewNeural("ב־בית גדול")).toBe("be bet ɡadol");
+            expect(await phonemizeHebrewNeural("ל־ירושלים גדולה")).toBe("le jʁuʃalajim ɡdola");
         });
 
         /**
@@ -115,6 +122,24 @@ describe("hebrew neural vowel restoration", () => {
          * skeleton this module replaced. Any punctuation- or digit-bounded geresh name takes this path,
          * and those are common in the corpus.
          */
+        /**
+         * ⚠ THE HEBREW BLOCK'S PUNCTUATION IS NOT NIQQUD, and TOKEN admits four of them INSIDE a word:
+         * U+05BE maqaf, U+05C0 paseq, U+05C3 sof pasuq, U+05C6 nun hafukha. None is in the tagger's
+         * charset, so any of them made the whole token undecodable — `עולם׃` came back a skeleton and
+         * flushed the clause around it — although the letters either side are perfectly readable. A
+         * word-final joiner (`בית־`, the construct form) is the same shape and used to fail the guard on
+         * its empty trailing part.
+         */
+        test("word-internal Hebrew punctuation splits rather than skeletonizing", async () => {
+            expect(await phonemizeHebrewNeural("שלום עולם׃ מה שלומך")).toBe("ʃalom ʔolam ma ʃlomχa");
+            expect(await phonemizeHebrewNeural("שלום׀ עולם")).toBe("ʃalom ʔolam");
+            expect(await phonemizeHebrewNeural("בית־")).toBe("bet");
+            // ⚠ AND A TOKEN THAT IS ONLY PUNCTUATION LEAVES NOTHING TO SPLIT. `filter(Boolean)` empties
+            //   the parts array, so the guard must short-circuit before indexing it.
+            expect(await phonemizeHebrewNeural("־")).toBe("");
+            expect(await phonemizeHebrewNeural("שלום ־ עולם")).toBe("ʃalom ʔolam");
+        });
+
         test("a declined single-word run falls back, it does not disappear", async () => {
             expect(await phonemizeHebrewNeural("ג'ון")).toBe("d͡ʒvn");
             expect(await phonemizeHebrewNeural("ג'ון, ראש הממשלה אמר")).toContain("d͡ʒvn");
