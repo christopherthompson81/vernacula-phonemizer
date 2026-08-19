@@ -2725,3 +2725,83 @@ Also re-measured with both fixes in: the residual's wrong-slot class **halved**,
 **Method note.** Three of the four were things I had written down myself and not re-read after the numbers
 moved. Prose asserting a measurement goes stale the moment the measurement is repeated; the review that
 matters is the one that re-derives the claims rather than re-reading them.
+
+## Run 43 — 2026-08-19 — the packing rollout: what could be retrained, and what could not
+
+Run 41 fixed `tools/bilstm_training/tagger.py` but retrained only ckb. Rolling the fix out to the other nine.
+
+**Five of the nine needed no code change** — nb, en, da, fr and af all sit on the shared core, so the Run 41
+fix reaches them the moment they are retrained. Four are standalone and were patched the same way (sd, bn, he,
+fa). ⚠ In bn and he the HELD-OUT pass was padded and unpacked too, so those languages' reported accuracies had
+never described the served model; both are packed now, which changes what the number means as well as what the
+model is.
+
+**Data, not code, is the gate.** A retrain is only comparable if it runs on the corpus the committed artifact
+was trained on:
+
+| | corpus | on disk | retrained |
+|---|---|---|---|
+| af | `tools/afrikaans/af-g2p-data.tsv` (32.5k) | yes | ✅ |
+| sd | `tools/sindhi/sd_tagger_data_marked.tsv` (9.3k) | yes | ✅ |
+| bn | Google `language-resources/bn`, refetched → 60.0k rows | yes (rebuilt) | ✅ |
+| fr | `src/languages/french/lexicon.tsv` (125k) | yes | ✅ |
+| en | `src/languages/english/g2p-dict.tsv` (117k CMUdict) | yes | ✅ |
+| nb | NST 199k dump (`/tmp/nb_train.tsv`) | **no** | ❌ |
+| da | NST 199k dump (`/tmp/da_train.tsv`) | **no** | ❌ |
+| he | `/tmp/hebrew_diacritized` corpus | **no** | ❌ |
+| fa | homorich parquet → `homorich_ipa_clean.tsv` | **no** | ❌ |
+
+⚠ For nb/da the committed `src/languages/*/[nd][ba]-lexicon.tsv` are the ~38k SHIPPING subsets, not the 199k
+training dumps. Retraining on those would produce a different, smaller model and call it a bug fix. Left
+alone, with the padding damage documented in the shared core rather than papered over.
+
+**Protocol per language.** Measure the baseline by temporarily reverting the packing in that file, discard its
+artifacts, restore packing, retrain, compare on the SAME split and seed. Only then export. ⚠ The first attempt
+at af skipped the baseline and exported straight over the shipped model — restored from git and redone. A
+retrain with no before-number is not a measurement.
+
+**af — done. 90.5% → 92.0% whole-set held-out** (n=4,096, same md5 split, same seed), dictionary-gold subset
+91.4% → 93.0%. ⚠ The baseline reproduced the committed 90.5% to the decimal, which is the check that makes the
+pairing trustworthy: the difference is the packing and nothing else. +1.5pp, the same figure ckb saw.
+
+**Every baseline reproduced its committed number to the decimal.** That is the check that makes each pairing a
+measurement of the packing and nothing else — not a different seed, a re-fetched corpus, or a drifted aligner:
+
+| | committed figure | baseline reproduction |
+|---|---|---|
+| af | 90.5% whole-set held-out | 90.5% |
+| bn | 90.5% ɔ/o on 11,993 OOV | 90.5% |
+| fr | 94.9% word-exact / 99.1% symbol | 94.9% / 99.1% |
+| en | 68.4% word-exact (stress-independent) | 68.4% |
+
+**⚠ bn's first pairing was CONFOUNDED and had to be redone.** Its held-out pass was padded-and-unpacked too,
+so packing it changed the *measurement* at the same time as the model — 86.4% → 86.7% full-word conflates the
+two. Re-run with training unpacked and the held-out pass packed to isolate the training effect. The lesson
+generalises: when a fix touches both the trainer and the evaluator, the naive before/after measures their sum.
+
+**Results — five retrained, every one better.** Paired on the same split and seed, baseline first:
+
+| | metric | unpacked | **packed** | Δ |
+|---|---|---|---|---|
+| **en** | word-exact (stress-indep) | 68.4% | **71.5%** | **+3.1** |
+| **sd** | slot accuracy (5-fold) | 78.3% | **80.3%** | **+2.0** |
+| **af** | word-exact | 90.5% | **92.0%** | +1.5 |
+| ckb | word-exact (Run 41) | 95.1% | 96.6% | +1.5 |
+| **fr** | word-exact | 94.9% | **96.3%** | +1.4 |
+| **bn** | full-word (both arms packed-eval) | 85.5% | **86.7%** | +1.2 |
+
+**The effect size tracks how much of a language's signal sits at the END of the word**, which is what the
+mechanism predicts and is worth stating because it makes the finding falsifiable. English leads because its
+tag alphabet carries STRESS, placed by the suffix; Sindhi is next because 81.4% of its word-final slots are
+the retained grammatical -ʊ, the whole reason its tagger beats always-ə; Bengali moves least because ɔ/o
+raising is distributed through the word. No language got worse.
+
+**Two artifacts were shipping stale and nearly stayed that way.** `fr_g2p_bilstm.py` and `en_g2p_bilstm.py`
+export only fp32, but what ships is the `int8`. A retrain that ends at "[production] exported" leaves the
+served model untouched — fr's int8 was still dated 25 July after a successful production run. Quantized
+separately, 400/400 argmax parity against fp32 in both cases. ⚠ Anyone repeating this campaign must check the
+mtime of the file the language actually loads, not the one the script prints.
+
+**he and fa are patched but unrun**, their corpora being absent; nb and da are neither. The four keep the
+padding damage, and the shared core now documents that at `Tagger.forward` so it is not rediscovered as a
+mystery.

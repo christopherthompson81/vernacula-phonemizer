@@ -16,7 +16,24 @@ whole-word context. On the seed-0 20% held-out (OOV) split the three architectur
 |---|---|---|---|---|
 | joint n-gram (Bisani-Ney) | 59.3% | 55.7% | — | light |
 | seq2seq (BiLSTM enc + attn dec) | 86.1% | 79.4% | possible (এক→ækok) | enc+dec, decode loop |
-| **BiLSTM tagger (this model)** | **90.5%** | **86.4%** | **impossible** | one graph, one pass |
+| **BiLSTM tagger (this model)** | **90.5%** | **86.7%** | **impossible** | one graph, one pass |
+
+⚠ **RETRAINED 2026-08-19 WITH PACKED SEQUENCES, AND THE OLD NUMBER WAS ALSO MEASURED WRONG.** Training ran the
+BiLSTM over padded batches without `pack_padded_sequence`, so the backward direction crossed the padding before
+reaching each word's last grapheme, while serving (`bengaliTagger.ts`) is batch=1 and unpadded — damage at the
+END of the word. ⚠ The HELD-OUT pass was padded and unpacked too, so the published figure did not describe the
+served model either. Decomposed on the same seed-0 split, with the held-out pass made serving-faithful in both
+arms:
+
+| | held-out ɔ/o | full-word |
+|---|---|---|
+| unpacked training (the old model, measured honestly) | 89.6% | 85.5% |
+| **packed training (this model)** | **90.5%** | **86.7%** |
+
+So the training fix is worth **+0.9pp ɔ/o and +1.2pp full-word** — and the historical 90.5%/86.4% was ~0.9pp
+optimistic, because it scored the old model under a padding condition serving never presents. The naive
+before/after (86.4% → 86.7%) conflates the two changes and understates the fix; it is recorded here as the
+reason to decompose rather than to trust an unpaired comparison. See investigation Runs 41 and 43.
 
 The n-gram is left-to-right and cannot see whole-word structure, so it drops non-locally-determined inherent vowels
 (−27pp). The tagger *beats* the seq2seq because the monotone one-tag-per-grapheme constraint is a correct inductive

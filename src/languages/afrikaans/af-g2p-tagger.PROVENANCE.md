@@ -30,11 +30,21 @@ honest split is reproducible rather than reconstructed.
 
 | held-out subset | | rule engine | **BiLSTM tagger** |
 |---|---|---|---|
-| **dictionary-gold — the honest comparison** | n=3,873 | 63.5% / 93.5% symbol | **91.4% / 98.7% symbol** |
-| rule-substituted gold | n=223 | 100% *(by construction)* | 74.4% |
-| whole set | n=4,096 | 65.5% | 90.5% |
+| **dictionary-gold — the honest comparison** | n=3,873 | 63.5% / 93.5% symbol | **93.0% / 99.0% symbol** |
+| rule-substituted gold | n=223 | 100% *(by construction)* | 74.0% |
+| whole set | n=4,096 | 65.5% | **92.0% / 98.8% symbol** |
 
-**A 76% relative reduction in word error** on the dictionary-gold rows. ⚠ The rule engine's number here is *lower* than its 79.5%
+⚠ **These are the PACKED-TRAINING numbers (2026-08-19).** The model shipped before that date was trained on
+padded batches without `pack_padded_sequence`, so the BiLSTM's backward direction crossed the padding before
+reaching each word's last grapheme while serving (batch=1) starts it cleanly there — damage concentrated at
+the END of the word. Same split, same seed, same data: **90.5% → 92.0%** whole-set, 91.4% → 93.0% on
+dictionary-gold (98.7% → 99.0% symbol). ⚠ The pre-fix baseline reproduced the historical 90.5% to the decimal,
+which is what makes the pairing trustworthy — the difference is the packing and nothing else. That earlier
+number was not a worse dataset or a worse architecture, it is this model trained through a plumbing bug. See
+`tools/bilstm_training/tagger.py` and investigation Runs 41 and 43.
+
+**An 81% relative reduction in word error** on the dictionary-gold rows (36.5% → 7.0%; it was 76% before the
+packing fix). ⚠ The rule engine's number here is *lower* than its 79.5%
 referee score because this split is dictionary-shaped — long, rare, Latinate words — which is exactly the
 population the OOV tier serves.
 

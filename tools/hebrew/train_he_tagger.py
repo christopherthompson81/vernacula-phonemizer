@@ -52,7 +52,16 @@ class Tagger(nn.Module):
         super().__init__(); s.e = nn.Embedding(nc, emb, 0)
         s.lstm = nn.LSTM(emb, h, L, batch_first=True, bidirectional=True, dropout=0.2 if L > 1 else 0)
         s.o = nn.Linear(2 * h, nl)
-    def forward(s, x): return s.o(s.lstm(s.e(x))[0])
+    def forward(s, x, lengths=None):
+        """⚠ PASS `lengths` FOR A PADDED BATCH. Unpacked, the BiLSTM's BACKWARD direction crosses the pad steps
+        before reaching each word's last real symbol, so that symbol depends on the batch's longest word —
+        while serving is batch=1 and unpadded. The damage lands at the END of the word. See Run 41."""
+        h = s.e(x)
+        if lengths is None:
+            return s.o(s.lstm(h)[0])
+        pk = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(s.lstm(pk)[0], batch_first=True, total_length=x.size(1))
+        return s.o(out)
 
 m = Tagger(len(cv), len(lv)).to(dev); opt = torch.optim.Adam(m.parameters(), 1e-3)
 crit = nn.CrossEntropyLoss(ignore_index=0)
@@ -64,7 +73,7 @@ for ep in range(15):
         b = enc[k:k + 256]; mx = max(len(x[0]) for x in b)
         X = torch.zeros(len(b), mx, dtype=torch.long); Y = torch.zeros(len(b), mx, dtype=torch.long)
         for r, (gi, ti) in enumerate(b): X[r, :len(gi)] = torch.tensor(gi); Y[r, :len(ti)] = torch.tensor(ti)
-        lo = m(X.to(dev)); loss = crit(lo.reshape(-1, len(lv)), Y.to(dev).reshape(-1))
+        lo = m(X.to(dev), torch.tensor([len(gi) for gi, _ in b])); loss = crit(lo.reshape(-1, len(lv)), Y.to(dev).reshape(-1))
         opt.zero_grad(); loss.backward(); nn.utils.clip_grad_norm_(m.parameters(), 5); opt.step()
     print(f"# epoch {ep+1}/15 done", file=sys.stderr, flush=True)
 
@@ -76,7 +85,8 @@ with torch.no_grad():
     for k in range(0, N, 512):
         b = hold[k:k + 512]; mx = max(len(r[0]) for r in b); X = torch.zeros(len(b), mx, dtype=torch.long)
         for r, row in enumerate(b): X[r, :len(row[0])] = torch.tensor(genc(row[0]))
-        lo = m(X.to(dev)).cpu()
+        # ⚠ the HELD-OUT pass is padded too — unpacked it scored under a condition serving never presents.
+        lo = m(X.to(dev), torch.tensor([len(r[0]) for r in b])).cpu()
         for r, (sk, tg, _msk) in enumerate(b):
             pred = []
             for i, c in enumerate(sk):

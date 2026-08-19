@@ -33,11 +33,26 @@ See `tools/sindhi/PROVENANCE.md`.
 **Consequence: this model must NOT be used to fill inherent slots** — measured 11.4% vs 76.5% for simply leaving
 ə (Phase 10). It has no gradient there by construction. Its job is the OOV path only.
 
-## Measured (5-fold CV, trustworthy labels)
+## Measured (5-fold CV)
+
+⚠ **RETRAINED 2026-08-19 WITH PACKED SEQUENCES — the largest gain in the fleet, and predictably so.** Training
+ran the BiLSTM over padded batches without `pack_padded_sequence`, so its backward direction crossed the
+padding before reaching each word's last letter, while serving (`sindhiTagger.ts`) is batch=1 and unpadded.
+The damage lands at the END of the word — and Sindhi's entire signal is word-final: **81.4% of word-final
+slots** are the retained grammatical -ʊ, which is the whole reason this tagger beats always-ə. Same 5-fold
+split, same seed:
+
+| 5-fold CV mean | unpacked training | **packed training** |
+|---|---|---|
+| slot accuracy | 78.3% | **80.3%** |
+| word-exact | 68.3% | **69.8%** |
+
+⚠ The historical 77.0%/67.4% below were measured on a "trustworthy labels" subset, so they are NOT the same
+denominator as this pair and the comparison to make is 78.3 → 80.3 within it. See investigation Runs 41, 43.
 | | |
 |---|---|
-| **tagger slot-accuracy** | **77.0%** |
-| tagger word-exact | 67.4% |
+| **tagger slot-accuracy** | **80.3%** |
+| tagger word-exact | 69.8% |
 | next-letter bigram baseline | 71.4% |
 | per-letter + is-final | 67.9% |
 | per-letter majority | 66.2% |

@@ -178,7 +178,16 @@ class Tagger(nn.Module):
                          bidirectional=True, dropout=0.2)
         s.o = nn.Linear(2 * h, nl)
 
-    def forward(s, x): return s.o(s.lstm(s.e(x))[0])
+    def forward(s, x, lengths=None):
+        """⚠ PASS `lengths` FOR A PADDED BATCH. Unpacked, the BiLSTM's BACKWARD direction crosses the pad steps
+        before reaching each word's last real symbol, so that symbol depends on the batch's longest word —
+        while serving is batch=1 and unpadded. The damage lands at the END of the word. See Run 41."""
+        h = s.e(x)
+        if lengths is None:
+            return s.o(s.lstm(h)[0])
+        pk = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(s.lstm(pk)[0], batch_first=True, total_length=x.size(1))
+        return s.o(out)
 
 
 m = Tagger(len(cv), len(lv)).to(dev)
@@ -196,7 +205,7 @@ for ep in range(20):
         for r, (gi, ti) in enumerate(b):
             X[r, :len(gi)] = torch.tensor(gi)
             Y[r, :len(ti)] = torch.tensor(ti)
-        lo = m(X.to(dev))
+        lo = m(X.to(dev), torch.tensor([len(gi) for gi, _ in b]))
         loss = crit(lo.reshape(-1, len(lv)), Y.to(dev).reshape(-1))
         opt.zero_grad()
         loss.backward()
@@ -218,7 +227,9 @@ with torch.no_grad():
         X = torch.zeros(len(b), mx, dtype=torch.long)
         for r, row in enumerate(b):
             X[r, :len(row[0])] = torch.tensor(genc(list(row[0])))
-        lo = m(X.to(dev)).cpu()
+        # ⚠ the HELD-OUT pass is padded too — unpacked it scored the model under a condition serving never
+        # presents, so the reported number was not the served one. Packed here for the same reason.
+        lo = m(X.to(dev), torch.tensor([len(r[0]) for r in b])).cpu()
         for r, row in enumerate(b):
             G = list(row[0])
             out = []

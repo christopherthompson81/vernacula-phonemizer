@@ -67,8 +67,16 @@ class Tagger(nn.Module):
         self.lstm = nn.LSTM(EMB, HID, LAYERS, batch_first=True, bidirectional=True, dropout=DROP)
         self.o = nn.Linear(2 * HID, ntag)
 
-    def forward(self, x):
-        return self.o(self.lstm(self.e(x))[0])
+    def forward(self, x, lengths=None):
+        """⚠ PASS `lengths` FOR A PADDED BATCH — unpacked, the backward direction crosses the padding before
+        reaching the word's last letter, and Sindhi's whole signal (the retained grammatical -ʊ) is word-final.
+        `evaluate()` below already runs batch-of-1, so only TRAINING was affected. See Run 41."""
+        h = self.e(x)
+        if lengths is None:
+            return self.o(self.lstm(h)[0])
+        pk = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(self.lstm(pk)[0], batch_first=True, total_length=x.size(1))
+        return self.o(out)
 
 
 def batches(X, Y, bs, shuffle=True):
@@ -83,7 +91,7 @@ def batches(X, Y, bs, shuffle=True):
         for r, j in enumerate(chunk):
             xb[r, :len(X[j])] = torch.tensor(X[j])
             yb[r, :len(Y[j])] = torch.tensor(Y[j])
-        yield xb, yb
+        yield xb, yb, torch.tensor([len(X[j]) for j in chunk])
 
 
 def is_decision(tag: str) -> bool:
@@ -146,10 +154,10 @@ def run_split(rows, src, tags, tag2id, char_tags, tr_idx, te_idx, dev, verbose=T
     for ep in range(EPOCHS):
         model.train()
         tot = nb = 0
-        for xb, yb in batches(Xtr, Ytr, BS):
+        for xb, yb, lens in batches(Xtr, Ytr, BS):
             xb, yb = xb.to(dev), yb.to(dev)
             opt.zero_grad()
-            loss = crit(model(xb).reshape(-1, len(tags)), yb.reshape(-1))
+            loss = crit(model(xb, lens).reshape(-1, len(tags)), yb.reshape(-1))
             loss.backward()
             opt.step()
             tot += loss.item()
