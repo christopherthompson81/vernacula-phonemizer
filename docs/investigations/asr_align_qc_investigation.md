@@ -2252,3 +2252,53 @@ past. 8 distinct words in de_de, but the mechanism is fleet-wide.
 
 Next by measured damage: **ps_af** (11.25%, a quantified deferral), the **German lowercase-initialism**
 class, then **mt_mt** (1.08% plus the `id-9.30` decimal bug from Run 31).
+
+## Run 34 — 2026-08-19 — the backlog: the casing wall, and what the reader actually says at a clock
+
+### The initialism class — one fix, nine tokens, two languages
+
+Run 33's German finding (`dvd` → *tft*) and Run 18's Pashto one (`qvc` → *kvk*) are the same wall: FLEURS
+lowercases every transcript, and `core/initialisms.ts` matches `\p{Lu}{2,}`. The engine is already right —
+`DVD` → *deː faʊ̯ deː*, `QVC` → *kjˈuː vˈiː sˈiː* — so only the corpus text needs repairing, which is
+exactly what `initialism_casing.mts` exists for.
+
+⚠ **AND ENGLISH HID THE WHOLE CLASS.** English reads most of these as letters ALREADY (dvd → *dˌiːviːdˈiː*,
+tv → *tʰˈiːvˈiː*, mri → *ˌɛmɑːɹˈaᶦ*), so the English-only casing differential that produced the earlier
+tranches was **inert for every one of them**. Re-running it with de/sv/cs/tr/xh as the host is what surfaced
+them — and that same inertness is why the repair is free in English, the argument the list already makes
+for `usa`.
+
+Added: `dvd` (spread 381), `tv` (301), `mri` (240), `abc` (179), `http` (129), `tb` (116), `ms` (88),
+`aol` (584), `mrt` (23). Collision-checked across the 30 languages each appears in — every lowercase form
+is unpronounceable (*tf*, *tp*, *tβ*, *t̪ˠvˠ*, *mˠsˠ*, *tʼɓ*) and every uppercase gives that language's
+letter names, including Mandarin's *aⁱ˥˩ mu˨˩˦ aⁱ˥˩ sɹ̩˥˥* for MS. Contexts read individually: `ms` is
+multiple sclerosis, `abc` the broadcaster, `tb` tuberculosis inside `xdr-tb`, `mrt` the German/Swedish MRI.
+
+### The Maltese clock — and the reader disagrees with BOTH readings
+
+`decimalPoint` correctly refuses `9.30 am` as a decimal, but handed the string back with its dot intact and
+the clause layer read that as sentence punctuation: *ɪt dɪsa **.** tlɛtɪn am*, a prosodic break inside a
+clock time. The existing test pinned this deliberately — "the pause it already had stands" — and reversing
+it is deliberate too: **refusing did not produce nothing, it produced a pause**, which is as much an
+assertion as a reading and one no reader makes.
+
+⚠ **BUT THE FIX IS NOT THE READING, AND THE AUDIO SAYS SO.** Asked what the reader actually does, both
+recordings answer the same way:
+
+    text     madwar id-9.30 am ħin lokali
+    reader   m a d w a r · e d i s a · u n o s t a · f i l o t o · h i l l o k a l i
+                            id-disgħa   u nofs ta'   filgħodu
+
+**id-disgħa u nofs ta' filgħodu** — half past nine in the morning. The reader does not say the minutes as a
+number at all (30 is *nofs*, half) and reads `am` as *ta' filgħodu*, not as letters. So "disgħa tletin" is
+wrong too; this change removes the pause and nothing more.
+
+⚠ **AND THAT IS THE ATTESTATION THE CLOCK FRAME WAS SAID TO LACK.** `punt` was admitted into this engine on
+espeak plus two wikipedia articles. Here the corpus AUDIO supplies the frame directly, twice, for a
+construction the file had no textual evidence for. A real clock reader —
+`hour (u nofs | u kwart | u N) [ta' filgħodu | ta' waranofsinhar]` — is therefore buildable on evidence
+rather than invention. Not attempted for 3 corpus rows, but no longer blocked on evidence.
+
+This is the same shape as Run 19's Lingala note (*onze juste* for `11:00`), and it generalises: **the
+recognizer is a source of attestation for spoken frames that text corpora do not record.** The numeral
+register already quantified the prize at ~115 rows across five languages for clocks and decimals alone.

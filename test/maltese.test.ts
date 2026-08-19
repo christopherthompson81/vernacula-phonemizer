@@ -142,11 +142,24 @@ describe("Maltese text normalization — the rules' branches", () => {
     // and the clock refusal.
     test("decimal point: the rewrite, and the CLOCK left exactly as it was", () => {
         expect(normalizeMaltese("12.5%")).toBe("12 punt 5 fil-mija");
-        // Maltese writes a time of day with a dot. 4 instances against 181 decimals, so the clock is REFUSED
-        // WHOLE (trap 53) rather than read as *disgħa punt erbgħin* — the pause it already had stands.
-        expect(normalizeMaltese("9.40am")).toBe("9.40am");
-        expect(normalizeMaltese("8.30 p.m.")).toBe("8.30 p.m.");
-        expect(normalizeMaltese("fl-4.00 ta' filgħodu")).toBe("fl-4.00 ta' filgħodu");
+        // Maltese writes a time of day with a dot, so the clock is REFUSED as a decimal (trap 53) rather
+        // than read as *disgħa punt erbgħin*.
+        //
+        // ⚠ THIS TEST USED TO PIN THE DOT ITSELF, on the reasoning that "the pause it already had stands".
+        //   That was wrong, and reversing it is deliberate: refusing did not produce *nothing*, it produced
+        //   a bare `.` that the clause layer downstream reads as SENTENCE PUNCTUATION — `id-9.30 am` came
+        //   out *ɪt dɪsa . tlɛtɪn am*, a prosodic break inside a clock time. A pause is as much an
+        //   assertion as a reading, and it is one no reader makes. The separator is now dropped, which
+        //   asserts nothing new: two cardinals, *disgħa tletin*.
+        //
+        //   Scale honestly: 3 corpus rows, all one sentence recorded three times, and the reading is STILL
+        //   WRONG — the audio has the reader saying *id-disgħa u nofs ta' filgħodu*, "half past nine in the
+        //   morning", so 30 is *nofs* and `am` is *ta' filgħodu*. This removes the pause and nothing more.
+        //   The recognizer output is however the ATTESTATION the clock frame was said to lack, so a real
+        //   clock reader is now buildable on evidence — see the note in normalize.ts.
+        expect(normalizeMaltese("9.40am")).toBe("9 40am");
+        expect(normalizeMaltese("8.30 p.m.")).toBe("8 30 p.m.");
+        expect(normalizeMaltese("fl-4.00 ta' filgħodu")).toBe("fl-4 00 ta' filgħodu");
         // …and the guard must be the RIGHT context, because the SHAPE cannot tell these two apart.
         // ⚠ THE AGREEMENT HERE USED TO BE `dollari` AND THAT WAS THE DOCUMENTED RESIDUE, not the target: a
         // magnitude governs the SINGULAR in Maltese, and the shared tier resolved every magnitude as a fixed
@@ -388,5 +401,29 @@ describe("Maltese — a magnitude takes the singular, a small count still takes 
         expect(phonemize("$5", "mt").trim()).toBe("ħamsa dɔllarɪ"); // n ≤ 10 → plural
         expect(phonemize("$11", "mt").trim()).toBe("ħdaʃ dɔllaru"); // n ≥ 11 → singular
         expect(phonemize("3.6 km", "mt").trim()).toBe("tlɪta punt sɪtta kɪlɔmɛtrɪ"); // a fraction → plural
+    });
+});
+
+/**
+ * ⚠ A CLOCK IS NOT A DECIMAL, BUT RETURNING IT UNTOUCHED WAS WORSE THAN EITHER READING. `decimalPoint`
+ * correctly declines `9.30 am` — *disgħa punt tletin* would be wrong — but it handed the string back with
+ * its dot intact, and the clause layer downstream reads a bare `.` as SENTENCE PUNCTUATION: `id-9.30 am`
+ * came out *ɪt dɪsa . tlɛtɪn am*, a prosodic break inside a clock time. Dropping the separator gives two
+ * cardinals and no pause. The idiomatic `u` connective (*id-disgħa u tletin*) is deliberately not invented.
+ */
+describe("Maltese — a clock time carries no clause break", () => {
+    test("a decimal followed by a clock tail loses the separator, not gains a pause", () => {
+        expect(phonemize("id-9.30 am", "mt")).toBe("ɪt dɪsa tlɛtɪn am");
+        expect(phonemize("id-9.30 am", "mt")).not.toContain(".");
+        expect(phonemize("fis-2.30 pm", "mt")).not.toContain(".");
+    });
+
+    test("an ordinary decimal still reads punt", () => {
+        expect(phonemize("9.30", "mt")).toBe("dɪsa punt tlɛtɪn");
+        expect(phonemize("1.5 miljun", "mt")).toContain("punt");
+    });
+
+    test("the version-dot refusal is untouched", () => {
+        expect(phonemize("802.11n", "mt")).toContain("punt"); // 802.11n reads as a dotted designation
     });
 });

@@ -645,7 +645,26 @@ function decimalPoint(text: string): string {
     return text.replace(
         /(\p{Nd})\.(\p{Nd}+)/gu,
         (m, a: string, b: string, offset: number, full: string) =>
-            CLOCK_TAIL.test(full.slice(offset + m.length)) ? m : `${a} ${DECIMAL_POINT} ${b}`,
+            // ⚠ A CLOCK IS NOT A DECIMAL, BUT RETURNING IT UNTOUCHED WAS WORSE THAN EITHER READING. The
+            // guard correctly declines `9.30 am` — *disgħa punt tletin* would be wrong — but it handed the
+            // string back with its dot intact, and the clause layer downstream reads a bare `.` as SENTENCE
+            // PUNCTUATION. `id-9.30 am` came out *ɪt dɪsa . tlɛtɪn am*: a prosodic break inside a clock
+            // time, which for a training corpus is worse than any wrong-but-pronounceable reading. Dropping
+            // the separator gives *disgħa tletin* — two cardinals, no pause.
+            //
+            // ⚠ THE READING IS STILL WRONG, AND THE AUDIO SAYS SO — this only removes the pause. Both
+            // recordings of the corpus's one dotted-clock sentence read `id-9.30 am` as
+            // **id-disgħa u nofs ta' filgħodu**, "half past nine in the morning": the recognizer returns
+            // `e d i s a · u n o s t a · f i l o t o` (and `f i d i s aʊ · n o s t a · f e l o d o`). So the
+            // reader does not say the minutes as a NUMBER at all — 30 is *nofs*, half — and reads `am` as
+            // *ta' filgħodu*, not as letters. Two cardinals is not what a Maltese reader produces.
+            //
+            // ⚠ THAT IS THE ATTESTATION THIS FILE SAID THE CLOCK FRAME LACKED. `punt` was admitted on
+            // espeak plus two wikipedia articles; here the corpus AUDIO supplies the frame directly, twice.
+            // A real clock reader — `hour (u nofs | u kwart | u N) [ta' filgħodu | ta' waranofsinhar]` —
+            // is therefore buildable on evidence rather than invention, and is the right fix. It is not
+            // attempted for 3 corpus rows; this is the pause repair only, which asserts nothing new.
+            CLOCK_TAIL.test(full.slice(offset + m.length)) ? `${a} ${b}` : `${a} ${DECIMAL_POINT} ${b}`,
     );
 }
 
