@@ -1227,3 +1227,175 @@ running rather than merging on a green number.
 
     final   skeletons 216 → 0   median 0.3520 → 0.3402   333 better / 31 worse
             all-flagged 0.800 → 0.456    investigate 0.796 → 0.570
+
+## Run 19 — 2026-08-19 — mi_nz, and the numeral register measured across 14 languages
+
+`mi_nz` was next by lift (2.5×) and is what sent this session to the LID work: 12 of its 15 all-flagged
+rows carry digits. Its non-digit row turned out to be one sentence read three times, whose only
+disagreements are recognizer-inventory noise (`ɾ→r`, `e→i`, `u→y`, `o→u`) — `ɸ→f` is already in `COARSEN`,
+so `confusion_pairs.py` reporting it is a pre-fold artifact. **No phonemizer defect in Māori.**
+
+So the question became the numeral register, and Run 11 had only measured four languages. Measuring all 14
+with ≥8 digit-bearing all-flagged rows, against every plausible register rather than an assumed one:
+
+    lang      n    native    →best    closer/further   register
+    sn_zw    400   0.3213   0.2599     381/19   95.2%   CLEAN → en
+    ny_mw    400   0.4726   0.3996     378/19   95.2%   CLEAN → en
+    zu_za    400   0.4631   0.3854     379/21   94.8%   CLEAN → en
+    xh_za    400   0.4889   0.4353     362/38   90.5%   CLEAN → en
+    ln_cd    400   0.2902     —           89%          CLEAN → fr
+    ceb_ph   400   0.3393   0.2982     339/61   84.8%   mixed → en
+    ig_ng    400   0.4055   0.3875     263/131  66.8%   mixed → en
+    mi_nz    400   0.3180   0.2985     254/146  63.5%   mixed → en
+    fil_ph   388   0.3119   0.2938     241/146  62.3%   mixed → en
+    bn_in    400   0.3762   0.4078      38/306  11.0%   NATIVE
+    ckb_iq   400   0.3582   0.3811      16/151   9.6%   NATIVE
+    mt_mt    400   0.3387   0.4015      17/381   4.3%   NATIVE
+    de_de    400   0.2088   0.2807      10/390   2.5%   NATIVE
+    fr_fr    400   0.1118   0.2147       3/397   0.8%   NATIVE
+
+⚠ **THE REGISTER MUST BE SOURCED PER LANGUAGE, NOT ASSUMED FROM THE REGION.** `ln_cd` reads 66% for English
+and **89% for French** — testing only English would have called it "mixed" and applied the wrong language.
+Maltese is native under all three registers (fr 6%, en 4%, es 4%), so a low English score does not imply
+some other foreign register; it implies the language reads its own numerals.
+
+⚠ **AND FIVE OF THE FOURTEEN ARE NATIVE.** de_de, fr_fr, bn_in, ckb_iq and mt_mt already read numerals
+correctly and applying a register would regress them badly — fr_fr 3 closer against 397 further. Any
+implementation must be a per-language opt-in, never a default with exceptions.
+
+### Three tiers, and only the first is actionable now
+
+- **CLEAN (≥90%)** — sn_zw, ny_mw, zu_za, xh_za → en; ln_cd → fr. A per-language setting is safe here and
+  is worth ~1,900 rows across the four English ones alone.
+- **MIXED (60–85%)** — ceb_ph, ig_ng, mi_nz, fil_ph. Net positive but a third of rows get worse. `mi_nz`
+  splits 58–69% across small integers, years and large grouped numbers alike, so it is genuine
+  reader-to-reader variation rather than a shape rule waiting to be found. Applying it is a judgement
+  about mean-versus-variance, not a correctness fix.
+- **NATIVE** — leave alone.
+
+This is the same shape as the code-switching finding one level down: the phenomenon is real, the mean
+improves, and a naive global rule does harm. The difference is that here the safe subset is identifiable
+in advance and measurable per language.
+
+## Run 20 — 2026-08-19 — the year reading, and where the engine already knew the answer
+
+The largest of the three findings deferred out of #840's review: the register was reading `1998` as its
+cardinal, *one thousand nine hundred ninety eight*, where an English-register reader says
+*nineteen ninety-eight*. Bare 4-digit runs are **1,349 of the 4,679 digit runs (29%)** in the five wired
+languages, so the shape is worth measuring rather than assuming.
+
+    lang    bare 4d   1000–1099   1100–1999   2000–2099
+    ln_cd     298        14          168         116
+    xh_za     331        20          184         127
+    zu_za     260        12          143         105
+    ny_mw     234         6          136          92
+    sn_zw     226         7          131          88
+
+⚠ **THE ENGINE ALREADY HAS THE YEAR RULE, AND IT CANNOT FIRE HERE.** `src/languages/english/normalize.ts`
+`yearWords` reads years pair-wise and handles every irregular shape — `1905` → "19 oh 5", `1900` →
+"19 hundred", `2007` → "2 thousand 7", `2011` → "20 11". But the rule that calls it is gated on an **English
+context word** (`in|since|from|…|circa|year`, or a month name), on purpose: "2011 people died" must not read
+*twenty eleven people*. The context around a digit run in a Zulu sentence is Zulu, so the gate never opens.
+The register has to decide year-ness itself.
+
+⚠ **AND IT EMITS THE ENGINE'S TOKENS, NOT WORDS.** `yearWords` returns digit-pair tokens the number path
+then expands (`1998` → `"19 98"`). Handing that string to the `en` segment round-trips exactly —
+`19 98` → *nˈaᶦntˈiːn nˈaᶦnti ˈeᶦt* — so the pair-wise reading is composed by the English number path rather
+than by a second compositor in `numeral_register.mts`. Only the 4-line shape rule is duplicated.
+
+### Measured on the 681 rows the rule changes
+
+    lang    n     before → after     closer/further
+    nya    156   0.4164 → 0.3696       145 / 11
+    sn     148   0.3001 → 0.2545       132 / 16
+    xh     210   0.4435 → 0.4078       173 / 37
+    zu     167   0.4090 → 0.3662       150 / 17
+    ALL    681   0.3977 → 0.3555       600 / 81   (88%)
+
+Over the whole digit-bearing corpus: mean 0.3160 → 0.3141, better 2,926 → 2,938, worse 322 → 312. Every one
+of the four English-register languages improves and none regresses.
+
+⚠ **`ln` IS UNAFFECTED AND CORRECTLY SO.** French reads a year as its cardinal — `1998` is
+*mil neuf cent quatre-vingt-dix-huit* — which is exactly what the register already emitted. The engine
+normalises both `mil` and `mille` to `mil`, so the existing `frWords` output is already the year form. A
+"years read pair-wise" rule applied by analogy across all five wired languages would have damaged Lingala;
+scoring it separately is what showed there was nothing to do. **Same lesson as Run 19's `ln → fr`, one level
+down.**
+
+### The shape guards, and the honest size of the evidence for them
+
+Bucketing the 681 changed rows by shape:
+
+    plain year               306 rows   280 closer /  26 further
+    plural decade (`ma 1700`) 32 rows    30 closer /   2 further
+    unit follows (`1600 km`)   2 rows     0 closer /   2 further
+
+- **Range 1100–2099**, the engine's own. Excludes `1000` (26 occurrences), where "one thousand" is right.
+- **A following unit declines the year reading.** The corpus's `1600 km` trail is *one thousand six hundred
+  kilometres*, not *sixteen hundred*. ⚠ **The independent evidence here is 2 rows.** Both move further from
+  the audio under a year reading, which is consistent but is not a measurement; the guard is carried over
+  from the engine's rule on principle, and is recorded as such rather than dressed up as a finding.
+- **`ma 1700` stays a year.** The plural-decade shape ("muzaka zama 1700", the 1700s) reads *seventeen
+  hundred* and scores 30 closer against 2. No separate rule needed — a negative result worth keeping,
+  since a "decades are different" rule looked plausible before it was checked.
+
+### Tests, mutation-checked
+
+Three mutations, each caught by a different assertion: disabling the year rule, removing the unit guard, and
+widening the range to any 4-digit run. This matters more than usual here — **three tests earlier in this
+session laundered away the bugs they were written for** (a `toContain` that could not fail, a `- 1`
+tolerance, and a key list compared against a hardcoded copy of itself), so a new test now has to be shown
+failing against a deliberately broken implementation before it counts.
+
+### Still open from the #840 review
+
+- **Adjacent 3-digit runs merge.** `783,562 300,948` is read as one 12-digit number, because the grouping
+  rule accepts a space before three digits. 4 occurrences.
+- **~30 rows declined by the punctuation lookahead**, where a digit run is followed by sentence punctuation.
+
+## Run 21 — 2026-08-19 — the last two review items, both exact
+
+Both remaining #840 findings turned out to be enumerable rather than estimated, so each was fixed against a
+known row set rather than a guess.
+
+**1. Two grouped numbers merged into one.** `GROUPED` treated `,` and the space separators as
+interchangeable *within a single run*, so `783,562 300,948` — two 6-digit figures side by side — matched as
+one 12-digit number and read as *seven hundred eighty three billion…*. Exactly 4 rows, all this shape, all
+two 6-digit figures. Anchoring the separator to whichever the run opened with (`\d{1,3}(?:,\d{3})+` OR
+`\d{1,3}(?:[  ]\d{3})+`, never a mix) splits them. ⚠ Genuine space grouping had to survive: `ln` writes its
+thousands that way and there are **153 space-grouped runs** (`104 500`, `24 000`, `1 000`), so a fix that
+simply dropped the space separator would have been far more expensive than the bug.
+
+⚠ **AND `800 500` REMAINS UNRESOLVABLE.** Two adjacent 3-digit numbers and one space-grouped 6-digit number
+are the same string. The mixed-separator case is decidable and is now decided; the same-separator case is
+not, and no rule was invented for it.
+
+**2. Sentence punctuation read as a decimal point.** The trailing lookahead refused any run touching `.` or
+`,`, which also refused every run at the end of a clause — `na 1992.`, `kv62.`, `1469-1539.`,
+`ngo1624,inkampani` — **28 rows** of ordinary cardinals declined for a shape they did not have. Only
+`.`/`,` *followed by a digit* is a decimal; `:` stays refused unconditionally, a trailing colon in this
+corpus being a clock.
+
+Together, on the 33 rows they change:
+
+    lang    n     before → after     closer/further
+    ln     13   0.2850 → 0.2622        11 /  2
+    zu      6   0.4766 → 0.4036         6 /  0
+    sn      6   0.3196 → 0.2492         6 /  0
+    nya     4   0.3973 → 0.3129         4 /  0
+    xh      4   0.3922 → 0.3183         4 /  0
+    ALL    33   0.3527 → 0.2985        31 /  2
+
+⚠ **BOTH REGRESSIONS ARE FRENCH ORDINALS, AND ARE LEFT ALONE.** `ekeke ya 19.` is the *19th* century and
+`mbiu 21.` a clause-final age; French says *dix-neuvième*, not *dix-neuf*. Recognising an ordinal from
+Lingala context is a different problem from the one this change is solving, and 2 rows against 31 does not
+justify starting it here. Recorded rather than fixed.
+
+Whole digit-bearing corpus after both: mean 0.3160 → **0.3140**, better 2,938 → **2,946**, worse 312 → 313.
+
+Three more mutations, each caught by a different assertion: separators made interchangeable again, the old
+lookahead restored, and the decimal guard dropped entirely. Suite 251 files / 4,849 tests.
+
+**Nothing from the #840 review is now outstanding.** The register's remaining known gap is the one Run 19
+already quantified and declined on principle: clock times and decimals have no correct reading implemented
+in the register language, worth ~115 rows, and are refused rather than approximated.
