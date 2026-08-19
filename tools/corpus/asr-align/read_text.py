@@ -57,6 +57,14 @@ def apply(db: sqlite3.Connection, langs: list[str]) -> None:
 
 
 def stats(db: sqlite3.Connection) -> None:
+    """⚠ ALWAYS reports rows pending re-derivation, not just under --stale. `--set` clears `ipa`, and every
+    scoring query in asr_align_report.py / asr_align_label.py filters `ipa IS NOT NULL` — so a cleared row is
+    SILENTLY DROPPED from the QC corpus rather than erroring. Visible-by-default beats a flag nobody runs."""
+    (pending,) = db.execute(
+        "SELECT COUNT(*) FROM utt WHERE read_text IS NOT NULL AND ipa IS NULL").fetchone()
+    if pending:
+        print(f"⚠ {pending} row(s) have a read_text but NO ipa — EXCLUDED from scoring until re-derived "
+              f"(--stale to list by language)", file=sys.stderr)
     for src, n, diff in db.execute(
             "SELECT COALESCE(read_text_src,'(none)'), COUNT(*), "
             "SUM(CASE WHEN read_text IS NOT NULL AND read_text<>text THEN 1 ELSE 0 END) "
@@ -117,7 +125,8 @@ def main() -> int:
         n = db.execute("UPDATE utt SET read_text=?, read_text_src='hand', ipa=NULL WHERE lang=? AND wav=?",
                        (text, lang, wav)).rowcount
         db.commit()
-        print(f"{n} row(s) set by hand; ipa CLEARED — re-derive it before the row is scored", file=sys.stderr)
+        print(f"{n} row(s) set by hand; ipa CLEARED — the row is now EXCLUDED from scoring "
+              f"(every scorer filters `ipa IS NOT NULL`) until it is re-derived", file=sys.stderr)
     if a.apply is not None:
         apply(db, a.apply)
     if a.stale:

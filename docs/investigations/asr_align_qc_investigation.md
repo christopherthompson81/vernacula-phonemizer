@@ -2805,3 +2805,30 @@ mtime of the file the language actually loads, not the one the script prints.
 **he and fa are patched but unrun**, their corpora being absent; nb and da are neither. The four keep the
 padding damage, and the shared core now documents that at `Tagger.forward` so it is not rediscovered as a
 mystery.
+
+## Run 44 — 2026-08-19 — PR review of the rollout: what a green CI did not catch
+
+**1. Two trainers were patched and CANNOT be run here, so nothing tested them.** he and fa have no corpus on
+disk; their packing fix was committed on a reading, not a run. Extracted each `Tagger` by AST and exercised
+`forward` directly against the shared core's invariant — padded-and-packed must equal the same word alone, and
+unpacked must differ at the word end. All five standalone trainers pass. **This is now check 9 in
+`smoke_test.py`**, so an edit to an unrunnable trainer is still verifiable; mutation-checked by reverting
+Hebrew's packing, which fails it. A fix nobody can execute needs a test that does not need the corpus.
+
+**2. `--set` clearing `ipa` SILENTLY DROPS THE ROW FROM SCORING.** Both `asr_align_report.py` and
+`asr_align_label.py` filter `ipa IS NOT NULL`, so a cleared row does not error — it vanishes from the QC
+corpus. That is the right failure mode (a wrong ipa is worse than none) but the wrong visibility, and it was
+reachable only via an opt-in `--stale`. `stats()` now reports pending rows on every invocation, and `--set`
+says the row is EXCLUDED rather than merely "re-derive it". Verified end-to-end on a copy of the DB: the
+broadcast warning fires on exactly the pattern that caused the mt_mt defect.
+
+**3. bn's `meta.json` stopped reproducing byte-for-byte.** Content identical — `src`, `tags` and `charTags`
+all compare equal, which incidentally confirms the re-fetched Google corpus matches the original — but
+`json.dump`'s default separators put a space after every `:` and `,`, inflating the shipped file 24%
+(3,985 → 4,933 bytes) for zero semantic change. Minified in the exporter and the artifact restored to
+byte-identical with `main`. ⚠ A rebuild that does not reproduce the committed artifact makes every provenance
+claim about it unfalsifiable; the size drift was the only visible symptom.
+
+**Method note.** All three were found by reading the diff for things CI cannot express: code with no possible
+test, a change whose failure mode is silence, and an artifact whose bytes moved for a reason nobody stated.
+Green CI answers "did anything I already test break", never "is this change sound".

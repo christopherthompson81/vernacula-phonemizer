@@ -49,8 +49,11 @@ for c, ci in cv.items():
                          if cm[ci, i].item() > -1e8 and i != 0]
 meta = {"src": cv, "tags": {
     str(i): t for i, t in ilv.items()}, "charTags": charTags}
-json.dump(meta, open(f"{OUT}/bn-g2p-tagger.meta.json",
-          "w"), ensure_ascii=False)
+# ⚠ `separators` MINIFIED, matching every other shipped meta. json.dump's default puts a space after each
+# `:` and `,`, which inflated this file 24% (3,985 → 4,933 bytes) on the 2026-08-19 retrain for zero content
+# change — a rebuild that does not reproduce the committed artifact byte-for-byte makes provenance unfalsifiable.
+json.dump(meta, open(f"{OUT}/bn-g2p-tagger.meta.json", "w", encoding="utf-8"),
+          ensure_ascii=False, separators=(",", ":"))
 
 quantize_dynamic(fp32, f"{OUT}/bn-g2p-tagger.int8.onnx",
                  weight_type=QuantType.QInt8)
