@@ -199,6 +199,13 @@ export function normalizeHebrew(input: string): string {
     //    fraction of its instances — trap 11. The g2p NFCs again downstream, so this costs nothing.
     let s = input.normalize("NFC");
 
+    // 1b) ⚠ THE SOF PASUQ IS A CLAUSE MARK AND MUST NOT BE GLUED TO THE WORD. `׃` is declared in
+    //     `clausePunctuation` (→ "."), but the word tokenizer admits it inside a word — it sits in the
+    //     [U+0591–U+05C7] mark class the token pattern uses — so `עולם׃` matches as ONE word and the
+    //     punctuation alternative never sees it. The declared pause was silently dropped, and the mark
+    //     rode into the g2p. Separating it lets the existing rule do what it already says it does.
+    s = s.replace(/\u05C3/gu, " \u05C3 ");
+
     // 2) ⚠ BIDI FORMAT CONTROLS — ×27, and this is the concrete form of the RTL hazard. Every one is
     //    U+200F RLM, dropped by a Hebrew author to stop a Latin gloss from reordering:
     //        `Terry Andrew Davis;‏ 15 בדצמבר 1969`   `Elle Chapman; ‏26 במאי 1999`   `Borduas‏: 1 בנובמבר`

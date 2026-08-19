@@ -1042,3 +1042,188 @@ word must be attached, and only its lowercase form is that word* — and it appl
 engines.
 
     whole corpus, steady across rounds 3–5: 716 better, 148 worse over 9,496 rows
+
+## Run 16 — 2026-08-19 — he_il: one unreadable word was costing the sentence its vowels
+
+`he_il` sat at 2.32× its own median with 25 all-flagged rows, all same-script prose, so it survives Run
+11's finding that most of the queue is code-switching.
+
+Reading them showed two behaviours in the same language. Some rows are properly vocalized
+(`leχevʁat … jeʃ ʃte maχlkot beʁiχvot hanosʔim`); others are a bare consonant skeleton
+(`hfjʁmjd hɡdvl hvkm lχvvd fʁʔ` — the Hebrew letters transliterated with no vowels at all).
+
+    he_il rows 3,242
+      consonant skeleton   216  (6.6%)   median dist 0.649   59 of the 120 investigate rows, 14 of 25 all-flagged
+      vocalized          3,027           median dist 0.342
+
+⚠ **Deterministic, not a transient batch failure** — re-running the six worst reproduced every skeleton.
+And two of them were PARTIALLY vocalized (`sidʁat ha …` then skeleton; `basvivot ʔaχat ʔesʁe …` then
+skeleton), which located the failure at the CLAUSE, not the row.
+
+### The cause: an alignment guard that turns a partial failure into a total one
+
+`hebrewNeural.ts` batches consecutive bare words into a clause for cross-word context, then:
+
+    if (out.length === run.length) queue.push(...out);
+    else for (const w of run) queue.push(phonemizeWord(w));   // ← the whole run, to the rule engine
+
+On unvocalized input the rule engine IS the skeleton. So any mismatch cost every vowel in the sentence.
+Instrumented it: **7.6% of clause runs tripped the guard, and the tagger returned exactly ONE token every
+time** — `in 24 → out 1`. Not a misalignment; an empty string.
+
+    צ'מברס → ""      ג'ון → ""      ח'ופו → ""      ד"ר → ""
+    אלוהים → ʔelohim   תבע → tava    ישראל → jisʁaʔel
+
+**The geresh and gershayim.** The marks Hebrew writes foreign consonants with — צ׳ /t͡ʃ/, ג׳ /d͡ʒ/, ז׳ /ʒ/ —
+which is to say every transliterated name. The tagger's charset has none of them.
+
+⚠ **Not a character-normalisation problem, which was the first hypothesis and the cheap fix.** The model
+fails on the ASCII apostrophe AND on U+05F3/U+05F4 alike, and reads the same word fine with the mark
+removed. Only retraining fixes the word. What is fixable is the blast radius.
+
+Retrying word by word instead of abandoning the clause:
+
+    skeleton rows  216 → 0        median 0.3520 → 0.3408      mean 0.3854 → 0.3641
+    330 rows closer to what the reader said, 28 further
+
+⚠ **The family was checked before a review could.** Persian has the same clause-batching shape but its
+mismatch path already retries THROUGH THE MODEL per word rather than falling to the sync engine. Swept
+every language in the corpus for the same bimodal signature — a sub-population whose vowel fraction sits
+well below that language's own median — and `he_il` is the only one.
+
+## Run 16b — is the recognizer cutting off? No, and this validates the instrument
+
+The largest single regression in the Hebrew set (+0.478) had a correct new reading whose recognized phones
+stopped short of the text tail, which raises a question about every measurement in this log: if wav2vec2
+truncates its output, then longer and more complete IPA is systematically penalised.
+
+`asr_align_corpus.py` has no length cap, but it batches with `padding=True` and decodes `argmax` over the
+full padded length, so both truncation and padding contamination were worth ruling out. Measured recognized
+phone count against audio duration over every scored row:
+
+    decile   duration        OUR phones/s   THEIR phones/s   ratio
+    D1      1.7-  7.5s          9.63            9.02         0.937
+    D5     11.0- 12.1s          9.20            8.68         0.943
+    D10    19.7-256.4s          6.79            6.57         0.968
+
+**The ratio is flat.** Our phone rate — which the recognizer cannot influence, being derived from the
+transcript — declines in lockstep with theirs, 9.63 → 6.79 against 9.02 → 6.57. So the falling
+phones-per-second is real speaking-rate variation (longer utterances carry more pauses), not the model
+giving up. Pushed into the extreme tail, where a cap would show first:
+
+    20- 30s  n=21691  ratio 0.961      45- 80s  n=319  ratio 1.051
+    30- 45s  n= 3210  ratio 1.002      80-300s  n= 11  ratio 1.548
+
+It rises above 1.0 rather than collapsing. **No truncation, no cap, no padding contamination of the short
+clips** (D1's ratio matches D5's), so there is nothing to re-run. The +0.478 row is a single-row artefact
+of a length-normalised distance against a partially-covered reference, not a symptom.
+
+That is worth more than the row it came from: the recognizer's coverage is duration-independent across
+1.7–256s, which is the assumption every measurement in Runs 1–16 rests on and had not been tested.
+
+## Run 17 — 2026-08-19 — the Hebrew review rounds, and what the fix did to the queue
+
+Three review rounds on #839, and the recurring finding was my own: each round I patched the branch in
+front of me and the next round found the hole that patch opened. Round two's was the sharpest — my
+`out.every(Boolean)` guard reintroduced the exact defect the PR fixes, because some Hebrew words
+legitimately phonemize to nothing (`phonemizeWord("ה") === ""`, likewise `ע`) and `emit()` drops an empty
+string harmlessly. So one unrelated one-letter word condemned its whole clause: `ה בית הגדול` lost `bet`
+to `vjt`.
+
+**The word-COUNT mismatch was always the only real failure signal.** It catches the all-or-nothing decline
+too, since that returns `""` → one token against N. After three rounds in the same function I rewrote it
+rather than patch again; it reads in one screen now, and the review's other findings fell out of the
+rewrite:
+
+- the segment retry re-issued the **byte-identical call** against a deterministic model when no word was
+  unreadable — a guaranteed-wasted inference, then the original blast radius anyway. `ה בית הגדול` went
+  from two model calls to one.
+- the maqaf rejoin was unvalidated, so a half whose reading is empty vanished inside the join
+  (`ה־בית גדול` → *bet ɡadol*, the `ה` gone).
+
+⚠ **One finding acknowledged as a limit rather than fixed**, and stated at the site: the segment still
+flushes at a maqaf compound, so the words on either side lose context across it. Deferring needs a
+placeholder entry filled in after the fact — real surgery for 28 rows, when the compound itself already
+restores correctly.
+
+### The invariant, finally asserted rather than exemplified
+
+Every branch of `flush` must push **exactly one queue entry per input word**, because `assembleClauses`
+draws one entry per TOKEN match. A branch that pushes two shifts every later word and silently drops the
+last — which is how `ɡadol` disappeared when I pushed the maqaf halves separately. Nothing in the output
+shape reveals it; only the missing tail does. It is now a test with one case per branch, and checked
+against 600 real corpus rows (no dropped words).
+
+### What it did to the queue
+
+    he_il                 n     median before → after    better / worse
+    all-flagged          25       0.800 → 0.456             16 / 2
+    investigate         120       0.796 → 0.570             73 / 5
+    whole language     3242       0.352 → 0.340            327 / 31   · skeletons 216 → 0
+
+The effect concentrates on exactly the rows the screen flagged, which is the queue working as designed —
+`he_il` reached the top of the residual by lift (2.32×), and the defect behind it turned out to be one
+guard in one function.
+
+⚠ **The three iterations are within noise of each other on the audio** — word-by-word 0.3408, segment-split
+0.3402, rewritten 0.3402. The metric cannot separate them because a homograph vowel barely moves a
+sentence-level folded distance. The case for the segment split is linguistic: `הוא קרא ספר של ג'ון טוב`
+reads `hu kaʁa sefeʁ` where word-at-a-time gives `koʁa`/`sifeʁ`, and those are the module's own documented
+homographs. Recorded because it is the clearest case in this log of the instrument being blind to a real
+improvement — the opposite of Run 13a, where it was blind to a real regression.
+
+## Run 18 — 2026-08-19 — six review rounds on one function, and what actually stopped the bleeding
+
+#839 went through six review rounds. The finding count barely fell (3, 2, 4, 8, 8, 4) and **the majority
+were defects introduced by the previous round's fix**, not pre-existing ones. That is worth recording as a
+process result, because the code is now correct and the process that got it there was not.
+
+    round 2   `out.every(Boolean)` — my round-1 guard condemned clauses whose word legitimately reads ""
+    round 3   a declined SINGLE-word run emitted "" and the word vanished — worse than the skeleton
+    round 4   my maqaf split fused `בֵּית־סֵפֶר`; my niqqud range pasted U+05FD for U+05BD
+    round 5   my proclitic split misread BOTH the clitic and its host (`ha bet` for `habajit`)
+    round 6   my particle patch was applied at one call site and not its sibling
+
+### What each of the two structural moves actually bought
+
+Two changes broke the cycle, and neither was a bug fix:
+
+1. **Rewriting the function instead of patching it** (after round 3). Three rounds of accreted branches had
+   made each fix land in one arm and miss the others. The rewrite fit on a screen and rounds 4–5 found
+   fewer *structural* holes as a result — though they still found holes.
+
+2. **Moving the repair to where the reading is produced** (round 6). The particle patch had been applied at
+   one of four `restore` call sites. Putting it *inside* `restore` makes omitting it impossible rather than
+   merely unlikely. That is the difference between fixing an instance and removing a class, and it is the
+   move I should have made in round 5 when the same shape had already appeared twice.
+
+Applied the same reasoning unprompted to the one remaining inconsistency — a `|| bare(w)` fallback present
+at three call sites and missing at the fourth — rather than waiting for round 7 to report it.
+
+### The tests were part of the problem, twice
+
+Two tests I wrote *specifically to catch dropped words* were shaped so they could not see one:
+
+- `toContain("bet haɡadol")` passes whether or not the article survives.
+- the invariant test's `>= words - 1` slack was exactly one word wide.
+
+**A test that normalises its input before asserting cannot see the class of bug it was written for**, and
+`trim()` / `filter(Boolean)` / a tolerance are all forms of normalising. Both now assert whole strings.
+
+A third shape showed up in round 6: every branch was covered *individually* and the bug lived in a branch
+*combination* — it takes a clause holding both an unreadable word and a standalone particle to route
+through the segment path with something to patch. The case list now combines branches deliberately.
+
+### Where the measurement was and was not useful
+
+The audio metric drove the original finding (216 skeleton rows at 0.649 against 0.342) and confirmed the
+fix. It was **blind to almost every defect the reviews found** — a dropped one-letter article, a fused
+compound, a wrong clitic vowel — because a sentence-level folded distance does not move on one segment.
+Across six rounds the corpus number never shifted outside 0.3402–0.3408.
+
+That is the honest summary of this PR's instrumentation: the metric found the disease and could not see
+the complications of the cure. Both facts matter, and the second is why six review rounds were worth
+running rather than merging on a green number.
+
+    final   skeletons 216 → 0   median 0.3520 → 0.3402   333 better / 31 worse
+            all-flagged 0.800 → 0.456    investigate 0.796 → 0.570
