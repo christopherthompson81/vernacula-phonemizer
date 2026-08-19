@@ -101,6 +101,24 @@ describe("hebrew neural vowel restoration", () => {
          *  the join — `ה־בית גדול` came out as *bet ɡadol* with the `ה` gone. */
         test("a maqaf half with an empty reading is not swallowed", async () => {
             expect(await phonemizeHebrewNeural("ע־בית גדול")).toBe("ʔa bet ɡadol");
+            // ⚠ AND A HALF WHOSE READING IS GENUINELY EMPTY LEAVES NO GAP. `ה־` `ב־` `ל־` are the
+            //   prefixed particles, they phonemize to nothing, and normalize.ts leaves them attached — so
+            //   joining the halves unfiltered emitted a stray space that `emit()` passed straight through.
+            expect(await phonemizeHebrewNeural("ה־בית גדול")).toBe("bet ɡadol");
+            expect(await phonemizeHebrewNeural("גדול ה־בית")).toBe("ɡadol bet");
+        });
+
+        /**
+         * ⚠ A ONE-WORD RUN THE TAGGER DECLINES MUST NOT VANISH. `""` is the decline signal and
+         * `"".split(" ")` has length 1, so a single-word decline passed the count check, was pushed as an
+         * empty string, and `emit()` swallowed it — the word gone outright, which is worse than the
+         * skeleton this module replaced. Any punctuation- or digit-bounded geresh name takes this path,
+         * and those are common in the corpus.
+         */
+        test("a declined single-word run falls back, it does not disappear", async () => {
+            expect(await phonemizeHebrewNeural("ג'ון")).toBe("d͡ʒvn");
+            expect(await phonemizeHebrewNeural("ג'ון, ראש הממשלה אמר")).toContain("d͡ʒvn");
+            expect(await phonemizeHebrewNeural("ג'ון 5")).toContain("d͡ʒvn");
         });
 
         test("a maqaf compound restores, and does not shift the words after it", async () => {
@@ -127,10 +145,14 @@ describe("hebrew neural vowel restoration", () => {
                 "צ'מברס תבע את אלוהים בגין",   // leading unreadable word
             ];
             for (const c of cases) {
-                const out = (await phonemizeHebrewNeural(c)).trim();
-                // the LAST word must survive: a shift drops the tail, never the head
-                expect(out, `tail lost for: ${c}`).not.toBe("");
-                expect(out.split(/\s+/u).filter(Boolean).length,
+                const out = await phonemizeHebrewNeural(c);
+                // ⚠ NO `.trim()` AND NO `filter(Boolean)` HERE. An earlier version of this test normalised
+                //   the whitespace away and thereby hid two live defects — a dropped word and a stray
+                //   double space from joining an empty maqaf half. A test that launders its input cannot
+                //   see the class of bug it was written for.
+                expect(out, `leading/trailing space for: ${c}`).toBe(out.trim());
+                expect(out, `doubled space for: ${c}`).not.toMatch(/\s\s/u);
+                expect(out.split(" ").length,
                     `word count collapsed for: ${c}`).toBeGreaterThanOrEqual(c.split(" ").length - 1);
             }
         });

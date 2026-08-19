@@ -58,7 +58,13 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
         // clause because of an unrelated one-letter word: `ה בית הגדול` lost `bet` to `vjt`. The
         // all-or-nothing decline shows up as a mismatch too (it returns `""` → one token), so the count
         // test alone catches everything the truthiness test was there for.
+        // ⚠ THE DECLINE MUST BE TESTED BEFORE THE COUNT, because `""` is the decline signal and
+        // `"".split(" ")` has length 1 — so a ONE-WORD run that the tagger declines passes a count check
+        // and emits an empty string, and `emit()` swallows it. The word disappears outright, which is
+        // worse than the skeleton this module set out to replace: `ג'ון` → "", `ג'ון, ראש הממשלה אמר` →
+        // *ʁoʃ hamemʃala ʔamaʁ* with the name simply gone. `canRead` answers it with no model call.
         const restore = async (ws: string[]): Promise<string[] | undefined> => {
+            if (!ws.every((w) => tagger.canRead(w))) return undefined;
             const out = (await tagger.restore(ws.join(" "))).split(" ");
             return out.length === ws.length ? out : undefined;
         };
@@ -108,7 +114,11 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
                     // maqaf-heavy language needs it, but `על־ידי`/`בין־לאומי`/`בית־ספר` are 28 rows here
                     // and the restored compound itself is already right.
                     await flushSeg();
-                    queue.push(halves.join(" "));
+                    // ⚠ `filter(Boolean)` — a count check cannot catch a half whose READING is empty, and
+                    // joining it leaves a stray space that `emit()` passes through: `ה־בית גדול` came out
+                    // as " bet ɡadol", `גדול ה־בית` as "ɡadol  bet". The prefixed particles ה־ ב־ ל־ are
+                    // exactly the halves that read empty, and normalize.ts leaves them un-rewritten.
+                    queue.push(halves.filter(Boolean).join(" "));
                     continue;
                 }
             }
