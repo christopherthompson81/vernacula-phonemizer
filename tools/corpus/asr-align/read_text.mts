@@ -23,10 +23,10 @@
  * human edit; the auto pass skips `hand` rows, exactly as `asr_align_label.py`'s `apply_auto` skips a hand
  * verdict in `status`. Re-running this tool is therefore always safe.
  *
- * ⚠ THIS FILE IS THE TEXT TRANSFORM ONLY; `read_text.py` owns the database. Node has no SQLite here
- * (`node:sqlite` is absent on this runtime and nothing in node_modules provides one), and every other
- * DB-touching tool in this directory is Python already — so the split follows the one
- * `phonemize-fleurs.mts` + `asr_align_corpus.py` already use: TypeScript computes, Python persists.
+ * ⚠ THIS FILE IS THE TEXT TRANSFORM ONLY; `read_text.py` owns the database. `node:sqlite` exists on this
+ * runtime only behind `--experimental-sqlite`, and every other DB-touching tool in this directory is
+ * Python already — so the split follows the one `phonemize-fleurs.mts` + `asr_align_corpus.py` use:
+ * TypeScript computes the text, Python persists it. Not worth an experimental-flag dependency to collapse.
  *
  *   read_text.py --apply [lang…]                      derive and store `auto` read_text
  *   read_text.py --set <lang> <wav> "<text>"          record a hand correction
