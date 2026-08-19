@@ -56,13 +56,64 @@ export function stressLexiconHas(word: string): boolean {
  * A monosyllable takes no mark — position carries no information there, and marking every one would put a
  * stress on the clitics (v, in, na, ki, za) that carry most of the OOV misses.
  */
+const MIN_SUFFIX = 6;
+
+/**
+ * A COMPOUND takes its last element's own stress, shifted right by the nuclei in front of it. Slovene builds
+ * numerals this way — *petintrídeset* is pet+in+trídeset, *štiriintrídeset* likewise — and the arithmetic is
+ * checkable against the lexicon: `dvajset` is stored at 0 and `enaindvajset` at 3, which is 0 plus the three
+ * nuclei of "enain". So the rule is not inferred from the compounds it fixes.
+ *
+ * ⚠ THE 6-CHARACTER MINIMUM IS MEASURED, NOT CHOSEN. Held out 4,000 polysyllabic lexicon words:
+ *
+ *     minsuf   covers   rule    penultimate on the SAME words   net gain
+ *        4     20.2%   63.8%              45.4%                  +3.73pp
+ *        5     10.2%   87.5%              46.5%                  +4.20pp
+ *        6      6.8%   96.3%              36.5%                  +4.05pp
+ *
+ * 5 and 6 are within noise on net gain and 6 is taken, for the reason `serbian.ts` gives for the same
+ * choice: a wrong rule prediction ASSERTS a stress, while a fallback error is a default already known to be
+ * unreliable. 96.3% against 87.5% is the difference that matters. Requiring the PREFIX to be a known word
+ * too — a stricter "real compound" test — collapses coverage to 3.6% and is not worth it; the prefixes here
+ * are bound forms (*petin-*, *štiriin-*) that are not words on their own.
+ */
+function bySuffix(w: string, nucleiCount: number): number | undefined {
+    const lex = stressDict();
+    for (let cut = w.length - MIN_SUFFIX; cut > 0; cut--) {
+        const suffix = w.slice(cut);
+        const at = lex.get(suffix);
+        if (at === undefined) continue;
+        const prefixNuclei = countNuclei(w.slice(0, cut));
+        if (prefixNuclei < 1) continue;
+        const shifted = prefixNuclei + at;
+        return shifted < nucleiCount ? shifted : undefined;
+    }
+    return undefined;
+}
+
+/** Nuclei in a bare SPELLING, counted the way `toSegments` will: a vowel, or a syllabic ⟨r⟩ (no vowel
+ *  neighbour), which `g2p.ts` turns into the ə that carries the syllable. */
+function countNuclei(w: string): number {
+    let n = 0;
+    for (let i = 0; i < w.length; i++) {
+        const c = w[i]!;
+        if ("aeiou".includes(c)) n++;
+        else if (c === "r" && !"aeiou".includes(w[i - 1] ?? "") && !"aeiou".includes(w[i + 1] ?? "")) n++;
+    }
+    return n;
+}
+
 export function phonemizeWord(word: string): string {
     const segs = toSegments(word);
     const nuclei: number[] = [];
     for (let i = 0; i < segs.length; i++) if (segs[i]!.nucleus) nuclei.push(i);
     if (nuclei.length < 2) return segs.map((s) => s.ph).join("");
-    const known = stressDict().get(word.toLowerCase());
-    const at = known !== undefined && known < nuclei.length ? known : nuclei.length - 2;
+    const lower = word.toLowerCase();
+    const known = stressDict().get(lower);
+    const at =
+        known !== undefined && known < nuclei.length
+            ? known
+            : (bySuffix(lower, nuclei.length) ?? nuclei.length - 2);
     const mark = nuclei[at]!;
     return segs.map((s, i) => (i === mark ? "ˈ" + s.ph : s.ph)).join("");
 }

@@ -908,6 +908,31 @@ export function normalizeSlovenian(input: string): string {
     //     reading is *u te ce plus ena* and not a dropped offset.
     s = s.replace(/(?<=\p{Lu})\+(?=\d)/gu, " plus ");
 
+    // 11z) NUMERAL-INITIAL COMPOUNDS (`21-letni`, `24-urne`, `8-krat`, `100-metrska`, `35-milimetrski`) —
+    //      36 corpus instances. Slovene writes these as ONE word once the numeral is spelled out
+    //      (enaindvajsetletni), and the hyphen is only there because the numeral is in digits.
+    //
+    //      ⚠ THIS EXISTS BECAUSE THE ENGINE NOW EMITS STRESS. While it emitted none, leaving the hyphen to
+    //      split the token was phonemically identical and the ×14 was deferred on exactly that argument —
+    //      slovenian.test.ts pinned the claim and VERIFIED it rather than asserting it. A compound takes ONE
+    //      primary stress; split, each half took its own (`21-letni` → ɛnaindʋˈajsɛt lˈɛtni against
+    //      ɛnaindʋajsɛtlˈɛtni joined). Joining restores the single stress.
+    //
+    //      ⚠ AND THE OTHER TWO SHAPES ARE ALREADY CLAIMED, WHICH IS WHY THIS RULE CAN BE BLUNT. A unit
+    //      abbreviation (`360-km`, `35-mm`) is read by the unit tier and an inflectional ending (`1830-ih`,
+    //      `5-ih`) by the ordinal/case rules, both BEFORE this point, so what is left is the compound case.
+    //      The ≥4-letter guard is the belt: every attested compound suffix is 4+ (krat, urne, letni,
+    //      metrska, stopinjski, milimetrski) and every ending and unit is ≤3 (ih, ega, im, km, mm).
+    s = s.replace(/(?<![\d.,-])(\d+)-(\p{Ll}{4,})/gu, (m0, n: string, tail: string) => {
+        const v = Number(n);
+        if (!Number.isSafeInteger(v)) return m0;
+        const words = numberToWords(v);
+        // The numeral spells to several words (*sto*, *enaindvajset*); only the LAST one fuses with the
+        // tail, the rest stay separate — *sto metrska* would be wrong, *stometrska* is the word.
+        const cut = words.lastIndexOf(" ");
+        return cut < 0 ? words + tail : `${words.slice(0, cut)} ${words.slice(cut + 1)}${tail}`;
+    });
+
     // 12) THE SPELLED-OUT MILE RATE ×2 (`pogosto 100–200 milj/uro`, `3000 milj/uro`). `milj` is already the
     //     Slovene genitive plural of *milja*, so only the `/uro` denominator needs reading, and the corpus
     //     spells the idiom out five times (`105 milj na uro`, `240 kilometrov na uro`). The tier's unit

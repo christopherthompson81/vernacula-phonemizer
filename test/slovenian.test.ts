@@ -48,14 +48,11 @@ describe("Slovenian canonical IPA — Slovak-shaped South Slavic engine + Sloven
 
     test("cardinal numbers: unit-IN-ten inversion (21=enaindvajset) + GENDERED agreement (dva/trije milijoni, dve milijardi)", () => {
         expect(sl.text("21").trim()).toBe("ɛnaindʋˈajsɛt"); // ena + in + dvajset (one-and-twenty)
-        // ⚠ KNOWN FALLBACK ERROR, PINNED AS SUCH: petintrídeset is stressed on the ⟨i⟩ of trideset
-        //   (nucleus 2), and `petintrideset` is not in stress.tsv, so the penultimate fallback puts it on
-        //   nucleus 3. The rule that would fix it is exact and is NOT implemented here: a composed numeral
-        //   takes its LAST element's own stress, offset by the nuclei before it — dvajset is lexicon-0 and
-        //   `enaindvajset` is lexicon-3, which is 0 + the three nuclei of "enain", so the arithmetic checks
-        //   out against the entries we do have. See the investigation doc.
-        expect(sl.text("35").trim()).toBe("pɛtintridˈɛsɛt"); // pet + in + trideset
-        expect(sl.text("234").trim()).toBe("dʋˈɛstɔ ʃtiriintridˈɛsɛt"); // dvésto ✓; štiriintrideset is the same fallback error
+        // ⚠ WAS A PINNED FALLBACK ERROR, NOW CORRECT. petintrídeset is stressed on the ⟨i⟩ of trideset and
+        //   the penultimate fallback put it a syllable later; the compound-suffix rule (see bySuffix)
+        //   recovers it from the known `trideset` plus the two nuclei of "petin".
+        expect(sl.text("35").trim()).toBe("pɛtintrˈidɛsɛt"); // pet + in + trídeset
+        expect(sl.text("234").trim()).toBe("dʋˈɛstɔ ʃtiriintrˈidɛsɛt"); // dvésto + štiriintrídeset
         expect(sl.text("2000000").trim()).toBe("dʋa milijˈɔna"); // masc dual: dva milijona
         expect(sl.text("3000000").trim()).toBe("trˈijɛ milijˈɔni"); // masc paucal numeral: trije (not tri)
         expect(sl.text("2000000000").trim()).toBe("dʋɛ milijˈardi"); // fem dual: DVE milijardi (milijarda is feminine)
@@ -313,10 +310,10 @@ describe("Slovenian — end-to-end through the real phonemizer", () => {
     test("the readings the layer exists to fix, as IPA", () => {
         expect(sl.text("Park pokriva 19.500 km².").trim())
             .toBe("park pɔkrˈiʋa dɛʋˈɛtnajst tˈisɔt͡ʃ pˈɛtstɔ kʋadrˈatnix kilɔmˈɛtrɔʋ .");
-        expect(sl.text("ima 93 % prebivalstva").trim()).toBe("imˈa triindɛʋɛddˈɛsɛt ɔtstˈɔtkɔʋ prɛbiʋˈalstʋa");
-        expect(sl.text("ob 23.35").trim()).toBe("ɔp triindʋajsˈɛti ˈuri pɛtintridˈɛsɛt");
+        expect(sl.text("ima 93 % prebivalstva").trim()).toBe("imˈa triindɛʋˈɛddɛsɛt ɔtstˈɔtkɔʋ prɛbiʋˈalstʋa");
+        expect(sl.text("ob 23.35").trim()).toBe("ɔp triindʋajsˈɛti ˈuri pɛtintrˈidɛsɛt");
         // the sentence pause a year-ordinal rule would have destroyed, 26 times over
-        expect(sl.text("do leta 1945.").trim()).toBe("dɔ lˈɛta tˈisɔt͡ʃ dɛʋˈɛtstɔ pɛtinʃtiridˈɛsɛt .");
+        expect(sl.text("do leta 1945.").trim()).toBe("dɔ lˈɛta tˈisɔt͡ʃ dɛʋˈɛtstɔ pɛtinʃtˈiridɛsɛt .");
     });
 
     // A FOUR-DIGIT MILITARY TIME licensed by a zone label. Deferred in the PR as a core seam, because the
@@ -334,32 +331,31 @@ describe("Slovenian — end-to-end through the real phonemizer", () => {
     });
 
     /**
-     * ⚠ THE ×14 DEFERRAL'S PREMISE NO LONGER HOLDS, AND THIS TEST IS WHY WE KNOW. It read: the ×14 hyphen
-     * compounds (`21-letni`, `24-urne`, `100-metrska`, `8-krat`) are safe to split "on the claim that this
-     * engine emits no stress, so splitting the compound is phonemically identical", and it VERIFIED that
-     * rather than asserting it, "because if any word-boundary phonology existed the claim would be false."
+     * ⚠ THE CLAIM HOLDS AGAIN, BUT NOT FOR THE REASON IT USED TO. This test read: the numeral-initial
+     * hyphen compounds (`21-letni`, `24-urne`, `100-metrska`, `8-krat`) are safe to leave split "on the
+     * claim that this engine emits no stress, so splitting the compound is phonemically identical", and it
+     * VERIFIED that rather than asserting it, "because if any word-boundary phonology existed the claim
+     * would be false."
      *
-     * Emitting stress made it false. A Slovene compound takes ONE primary stress, but the split form
-     * phonemizes each half as its own word and stresses both: `21-letni` → ɛnaindʋˈajsɛt lˈɛtni against
-     * ɛnaindʋajsɛtlˈɛtni joined. Two of the four differ this way (`8-krat` and `100-metrska` happen not to,
-     * because their first element's stress falls in the same place either way).
-     *
-     * So the SEGMENTAL claim still holds and is still pinned below; the PROSODIC one is now a real, small
-     * defect — 14 corpus instances carrying one spurious stress mark. Joining the compound is the fix and
-     * lives downstream of normalize.ts, which leaves `21-letni` untouched. Recorded rather than papered
-     * over, and this test keeps its job: it detects word-boundary phonology, which is exactly what it just
-     * did.
+     * Emitting stress made it false — a Slovene compound takes ONE primary stress and the split form took
+     * two (`21-letni` → ɛnaindʋˈajsɛt lˈɛtni against ɛnaindʋajsɛtlˈɛtni). This test is how that was found.
+     * normalize.ts now JOINS them (rule 11z), so identity is restored by construction rather than by the
+     * absence of prosody, and the assertion below is worth more than it was: it now pins that the join
+     * produces exactly the word the spelled-out form produces.
      */
-    test("splitting a hyphen compound is SEGMENTALLY identical; the stress now differs", () => {
-        const p = getPhonemizer("sl");
-        const bare = (x: string): string => p.text(x).replace(/[\sˈ]+/gu, "");
+    test("a numeral-initial hyphen compound reads as the joined word", () => {
         const same = (a: string, b: string): void => {
-            expect(bare(a)).toBe(bare(b));
+            const p = getPhonemizer("sl");
+            expect(p.text(a).replace(/\s+/gu, "")).toBe(p.text(b).replace(/\s+/gu, ""));
         };
-        // the prosodic divergence the deferral now owns
-        expect(p.text("21-letni").replace(/\s+/gu, "")).not.toBe(p.text("enaindvajsetletni"));
-        expect((p.text("21-letni").match(/ˈ/gu) ?? []).length).toBe(2); // one per half
-        expect((p.text("enaindvajsetletni").match(/ˈ/gu) ?? []).length).toBe(1);
+        // ⚠ ONE stress mark, not one per half — the property the join exists for.
+        expect((getPhonemizer("sl").text("21-letni").match(/ˈ/gu) ?? []).length).toBe(1);
+        // ⚠ AND THE OTHER TWO HYPHEN SHAPES MUST NOT BE JOINED: a unit abbreviation is read by the unit
+        //   tier and an inflectional ending by the case rules, both before rule 11z.
+        //   Asserted as the PROPERTY (still several words, the unit/ending read out) rather than a pinned
+        //   IPA string — the stress inside them is the fallback's business, not this test's.
+        expect(getPhonemizer("sl").text("360-km").trim().split(/\s+/u).length).toBeGreaterThan(1);
+        expect(getPhonemizer("sl").text("1830-ih").trim().split(/\s+/u).length).toBeGreaterThan(1);
         same("21-letni", "enaindvajsetletni");
         same("24-urne", "štiriindvajseturne");
         same("100-metrska", "stometrska");
