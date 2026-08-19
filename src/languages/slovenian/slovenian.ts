@@ -1,25 +1,70 @@
 /**
  * Slovenian (sl) phonemizer — canonical IPA, slovenščina. Rule g2p (g2p.ts): consonant scan +
- * l-vocalization + lj/nj + syllabic-r + voicing/devoicing. NO stress mark is emitted — Slovene stress is free/lexical
- * and unwritten (a stress lexicon is the deferred fix), and the vowel quality/length/pitch the referee carries are
- * all unwritten too. ⚠ THE LEXICON'S SOURCE IS IDENTIFIED: the kaikki Slovene dump, 5380 headwords carrying the
- * acute/grave pitch diacritic on the stressed vowel (97.8% of its IPA entries), covering 56.8% of sl_si corpus
- * tokens. docs/investigations/south_slavic_stress_sources_investigation.md. text() tokenizes words / numbers / punctuation.
+ * l-vocalization + lj/nj + syllabic-r + voicing/devoicing. STRESS is emitted as ˈ before the stressed nucleus,
+ * from stress.tsv (37340 words, kaikki/Wiktionary), reaching 42.6% of polysyllabic sl_si corpus tokens, with a PENULTIMATE fallback out of lexicon. Vowel
+ * quality/length are still unwritten and unfolded.
+ *
+ * ⚠ STRESS ONLY, NO TONE — AND THE SOURCE SETTLES THAT RATHER THAN A JUDGEMENT CALL. Slovene has two accepted
+ * standard norms, and the kaikki dump labels every pronunciation with which one it is ("phoneme, tonal variety"
+ * against "phoneme, non-tonal variety"). The non-tonal (stress + length) norm is the broadcast standard and what
+ * most speakers use; the tonemic norm is a minority standard. So unlike the sibling sr/hr/bs engine — where the
+ * four-way pitch accent IS the system and is emitted as Chao letters — Slovene gets position and nothing else.
+ * docs/investigations/south_slavic_stress_sources_investigation.md. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments } from "./g2p.ts";
 import { numberToWords, readDigits } from "./numbers.ts";
 import { normalizeSlovenian } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
-/** One Slovene word → canonical IPA (segments joined; stress deferred). */
+/**
+ * Lexical stress: word → 0-based ordinal of the stressed NUCLEUS. Built by
+ * tools/slovenian/build_sl_stress_lexicon.py from the ACCENTED ORTHOGRAPHY (robót, rávən) in the kaikki
+ * Slovene dump, not from its IPA — the mark already sits on the letter this g2p will pronounce, so the two
+ * cannot drift apart on nucleus count.
+ */
+let STRESS: Map<string, number> | undefined;
+function stressDict(): Map<string, number> {
+    if (STRESS === undefined) STRESS = loadTsvMap(import.meta.url, "stress.tsv", (v) => Number(v));
+    return STRESS;
+}
+
+/** Whether the lexicon knows this word's stress. ⚠ EXPORTED BECAUSE ABSENCE IS INVISIBLE IN THE OUTPUT: an
+ *  OOV polysyllable is emitted with a FALLBACK ˈ that looks exactly like a lexicon one, so an eval cannot
+ *  otherwise separate "known" from "guessed". Same reason serbian.ts exports accentLexiconHas. */
+export function stressLexiconHas(word: string): boolean {
+    return stressDict().has(word.toLowerCase());
+}
+
+/**
+ * One Slovene word → canonical IPA, with ˈ before the stressed nucleus.
+ *
+ * ⚠ THE FALLBACK IS PENULTIMATE, AND THAT WAS MEASURED RATHER THAN INHERITED. The sibling Serbo-Croatian
+ * engine falls back to the FIRST nucleus, which is right for it (66.8% baseline there) and wrong here:
+ * against this lexicon, first-nucleus scores 43.5% by type / 51.7% by token where penultimate scores
+ * **57.2% / 76.1%**. Antepenultimate ties by type (56.8%) and is far worse by token (56.7%); last-nucleus is
+ * 6%. Copying the sibling's rule would have cost 24 points of token accuracy.
+ *
+ * ⚠ THE TOKEN FIGURE IS MEASURED ON LEXICON-COVERED WORDS, so it is a frequent-word number and the OOV
+ * population it actually applies to is likelier to behave like the 57.2% type figure. Both are stated
+ * because the optimistic one is not the one the fallback will be judged on.
+ *
+ * A monosyllable takes no mark — position carries no information there, and marking every one would put a
+ * stress on the clitics (v, in, na, ki, za) that carry most of the OOV misses.
+ */
 export function phonemizeWord(word: string): string {
-    return toSegments(word)
-        .map((s) => s.ph)
-        .join("");
+    const segs = toSegments(word);
+    const nuclei: number[] = [];
+    for (let i = 0; i < segs.length; i++) if (segs[i]!.nucleus) nuclei.push(i);
+    if (nuclei.length < 2) return segs.map((s) => s.ph).join("");
+    const known = stressDict().get(word.toLowerCase());
+    const at = known !== undefined && known < nuclei.length ? known : nuclei.length - 2;
+    const mark = nuclei[at]!;
+    return segs.map((s, i) => (i === mark ? "ˈ" + s.ph : s.ph)).join("");
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;

@@ -5,7 +5,7 @@
 // vowel-length letters. Slovene-specific rules (in g2p.ts): ⟨l⟩-vocalization (coda ⟨l⟩→ʋ), ⟨lj/nj⟩ (→l+j/n+j before a
 // vowel, →l/n in coda), syllabic ⟨r⟩→ər, ⟨v⟩→ʋ.
 //   g2p.ts       — the scan (digraphs, l-vocalization, lj/nj, syllabic-r), then voicing/devoicing
-//   slovenian.ts — assembly (NO stress mark: Slovene stress is free/lexical → deferred), tokenizer
+//   slovenian.ts — assembly (stress ˈ from stress.tsv + penultimate fallback; no tone), tokenizer
 //   numbers.ts   — the cardinal compositor (Germanic-style unit-in-ten inversion: 21 = enaindvajset)
 // Format: plain JSONC. Every phoneme value is CANONICAL IPA.
 {
@@ -22,7 +22,7 @@
         "v": "⟨v⟩ → ʋ everywhere (the coda [w]/[u̯] realization is narrow → folded); ʋ is sonorant-inert to voicing",
         "syllabicR": "⟨r⟩ with no vowel neighbour → ər (prst→pərst, vrt→ʋərt)",
         "voicing": "regressive assimilation within obstruent clusters + word-final devoicing (grad→ɡrat, glasba→ɡlazba)",
-        "stress": "free/lexical + unwritten → NOT emitted (deferred; a stress lexicon is the future fix). Pitch accent likewise unwritten.",
+        "stress": "free/lexical + unwritten → EMITTED as ˈ before the nucleus, from stress.tsv (37340 words, kaikki accented orthography; 42.6% of polysyllabic corpus tokens) with a PENULTIMATE fallback (57.2% by type / 76.1% by token, against 43.5/51.7 for the sibling sr/hr/bs first-nucleus rule). TONE is NOT emitted: the kaikki dump labels each pronunciation tonal/non-tonal variety and the non-tonal norm is the broadcast standard.",
     },
 
     // Vowels: the five orthographic vowels → open-mid quality default (no length letters — Slovene writes none).

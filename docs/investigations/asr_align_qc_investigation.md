@@ -1879,3 +1879,88 @@ needs holam MALE, the mater on the vav itself: חוֹוִים, שׁוּוִי, �
 and χoim/ʃui/χoe without it. **Third time this session** a test sat outside the domain of the rule it
 guarded (German ⟨rh⟩ medial-vs-edge, the German sed hitting two rules, this). The pattern is always the
 same: the example is *about* the right feature but not *in* the branch under test.
+
+## Run 29 — 2026-08-19 — sl_si: the stress deferral closed, and why the sibling's fallback was wrong
+
+The last item from the original handoff (§4): `sl_si` has its own kaikki dump and a separate engine, "same
+treatment as sr/hr/bs, not yet done". Slovene emitted **no stress at all** across 2,512 corpus rows, and
+`slovenian.jsonc` recorded it as deferred pending a lexicon.
+
+⚠ **NEITHER INSTRUMENT CAN MEASURE THIS, AND BOTH CONFIRM IT DID NO HARM.** `fold()` strips ˈ for the ASR
+distance and the referee's BACKBONE strips it too, so a stress addition is invisible to each. Verified
+rather than assumed: after the change the referee is **4995/5177, identical**, and the corpus is
+**mean 0.3161 / median 0.3103, 0 better 0 worse** — bit-identical. Validation is therefore held-out
+accuracy against the lexicon, the same standard the sr/hr/bs work used.
+
+### Stress only, and the DUMP decides that
+
+Slovene has two accepted standard norms, and I was about to pick between them on judgement. The dump does
+it instead: kaikki labels every Slovene pronunciation `"phoneme, tonal variety"` or `"phoneme, non-tonal
+variety"`. The non-tonal (stress + length) norm is the broadcast standard; the tonemic one is a minority
+standard. So unlike sr/hr/bs — where the four-way pitch accent IS the system and is emitted as Chao letters
+— Slovene gets position and no contour.
+
+### Two bugs in my own builder, both silent
+
+⚠ **⟨r⟩ IS A NUCLEUS ONLY WHEN SYLLABIC.** I copied the Serbo-Croatian builder's one-line "a vowel or ⟨r⟩"
+rule without checking it against this g2p, which inserts the schwa only for an r with no vowel neighbour
+(prst → pərst). Counting every ⟨r⟩ puts a phantom nucleus before the real one: *robót* indexed 2 where the
+engine has 1, and the mark would have landed a syllable late in every word containing an ordinary r.
+
+⚠ **AND STRIPPING "EVERY COMBINING MARK" DESTROYS ⟨š č ž⟩.** They decompose to s/c/z + U+030C, so *država*
+was stored under the key `drzava`, which no corpus token can ever match. Coverage of polysyllabic tokens
+went **35.0% → 42.6%** on fixing it. Only the five accents plus the quality dot (U+0323) and the macron
+come off. The same trap the Serbo-Croatian builder documents for ⟨ć⟩, hit from the other direction.
+
+    marks on the accented forms:  U+0301 74,788   U+030C 42,590   U+0311 15,253   U+0302 10,192
+                                  U+0323  8,461   U+0300  7,059   U+0304  3,427   U+030F  2,436
+
+U+030C is the second-commonest mark in the file and is almost entirely ⟨š č ž⟩ — reading it as an accent
+would have "stressed" a consonant.
+
+### The fallback is penultimate, and copying the sibling would have been 24 points worse
+
+    fallback          by type    by token
+    first nucleus       43.5%      51.7%     <- what serbian.ts uses (correctly, for itself: 66.8% there)
+    penultimate         57.2%      76.1%     <- taken
+    antepenultimate     56.8%      56.7%
+    last nucleus         6.2%       9.0%
+
+⚠ The token figure is measured on lexicon-COVERED words, so it is a frequent-word number; the OOV
+population it actually applies to is likelier to behave like 57.2%. Both are recorded, because the
+optimistic one is not the one the fallback will be judged on.
+
+37,340 words, 42.6% of polysyllabic corpus tokens exact, the rest at ~57–76%. The out-of-lexicon misses are
+overwhelmingly monosyllabic clitics (v, in, na, ki, za), which take no mark at all.
+
+### What the change broke, and the test that caught it
+
+⚠ **THE ×14 HYPHEN-COMPOUND DEFERRAL RESTED ON THIS ENGINE EMITTING NO STRESS.** Its test said so in
+as many words — the compounds are safe to split "on the claim that this engine emits no stress, so
+splitting the compound is phonemically identical", and it **verified** that rather than asserting it,
+"because if any word-boundary phonology existed the claim would be false."
+
+It is now false. A Slovene compound takes one primary stress, but the split form stresses both halves:
+`21-letni` → *ɛnaindʋˈajsɛt lˈɛtni* against *ɛnaindʋajsɛtlˈɛtni* joined. Two of the four differ (`8-krat`
+and `100-metrska` happen not to). The segmental claim still holds and is still pinned; the prosodic one is
+now a small real defect — 14 corpus instances with one spurious mark — and joining the compound is the fix,
+downstream of normalize.ts, which leaves `21-letni` untouched. **A test written to detect exactly this did
+exactly that**, five months after it was written.
+
+### And I laundered eight goldens before catching myself
+
+Nine existing tests failed because every polysyllabic gold now carries a mark. I bulk-replaced expected
+with actual — which is the gold-laundering failure this session has been fighting — and then checked each
+against the accented spelling: *pólje, glázba, člôvek, Ljubljána, Abhazíja, vôda, dóber, čevápi, dvésto,
+drúgo, svetóvno, vójno, pokríva, devétnajst, tísoč, pétsto, kvadrátnih, kilométrov* all correct.
+
+Two were not, and one was worse than wrong:
+
+- ⚠ **THE BULK REPLACE HIT AN INPUT.** `phonemizeWord("banja")` became `phonemizeWord("bˈanja")` — a
+  stress-marked input compared to itself, a test that cannot fail. It matched because the input and the
+  old expected value were the same string.
+- **`petintrideset` / `štiriintrideset` are fallback errors** and are now pinned AS fallback errors, with
+  the correct form and the rule that would fix it named. A composed numeral takes its last element's own
+  stress offset by the preceding nuclei: dvajset is lexicon-0 and enaindvajset is lexicon-3, which is
+  0 + the three nuclei of "enain" — the arithmetic checks out against the entries we have, so the rule is
+  known-good and simply not implemented. Left for its own change.
