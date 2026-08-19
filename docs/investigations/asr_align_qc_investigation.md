@@ -2466,3 +2466,262 @@ is genuinely homographic needs word-aligned audio, and this corpus's proportiona
 neighbouring words' vowels, so the per-spelling distributions it yields are too noisy to settle it.
 
 **Reverted.** The deferral stands and now carries its numbers, so it is not re-tried a third time.
+
+## Run 38 — 2026-08-19 — why the referee could not move, and how much of the bizroke class we actually reached
+
+**Question.** Run 37 shipped 2,517 bizroke entries yet the referee score did not change. If words that were
+missing a vowel now have one, why is the referee flat?
+
+**Command.**
+
+    cat tools/referee-eval/langs/ckb.jsonc
+
+**Finding.** The last fold in the file is `{ "pattern": "[əɪ]", "replace": "" }` — the bizroke axis is folded
+to nothing on *both* sides before the comparison. The referee is blind to this change by construction, and was
+made blind deliberately in the ckb bring-up, because the two human referees disagree on the vowel's *quality*
+(wikipron writes ɪ, kaikki writes ə) and scoring that disagreement would have been noise. Flat is the only
+result it could have produced. Nothing to diagnose.
+
+**The instrument gap this exposes.** Counting the vowels in each shipped entry:
+
+    entries 2517 | all-vowels-are-bizroke 97 | more than one bizroke 403
+
+Only **97 of 2,517 (3.9%)** of the class is visible to `output_anomalies.py`, because the no-nucleus check
+fires only when a word has *no* vowel at all, and 96% of bizroke words carry a written long vowel elsewhere
+(`کوردستان` = *kʊɾdəstaːn* — the ⟨ا⟩ is written, the ə is not). The 1.13% → 0.19% no-nucleus improvement was
+therefore the tip, not the measure. Combined with the referee fold and the ASR's Sorani under-transcription
+(0.929 of our folded phone count), **there is no instrument in this repo that can score the bizroke.** The
+held-out split of the source is the only one available, which is a real constraint on anything built next.
+
+**Corpus reach.**
+
+    ckb corpus: 9993 types, 55873 tokens
+    lexicon hits: 641 types (6.4%), 5128 tokens (9.2%)
+
+The lexicon lands on 9.2% of tokens — better than its 6.4% type share, so it is catching frequent words —
+but the source vocabulary says the bizroke rate among words we transcribe correctly otherwise is
+2517/(2517+6870) = **26.8%**. Scaling that to the corpus puts roughly 2,000 word types still unvoweled.
+**Implication:** the lexicon closed about a quarter of the class by type. The remainder is OOV and needs a
+model, not more lexicon — the source is exhausted at 10,041 words.
+
+## Run 39 — 2026-08-19 — the bizroke tagger: the class IS learnable, and a builder bug found on the way
+
+**Question.** Run 38 left ~2,000 ckb corpus types the exhausted lexicon cannot reach. Run 37 concluded the
+class is "LEXICAL … not positionally predictable" — but that was measured of a *fixed epenthesis rule*, not of
+a model. Does a BiLSTM conditioned on the whole skeleton do better than the never-insert prior?
+
+**A builder bug, found while rebuilding the training data.** `engine_says.mts` called `phonemizeWord` — the
+SHIPPED path, which since Run 37 consults the very lexicon it is used to build. Re-running
+`build_ckb_lexicon.py` today would have classified all 2,517 entries as "already agrees" and rewritten
+`lexicon.tsv` EMPTY. Switched to `phonemizeWordRules`; the rebuilt file is byte-identical to the shipped one
+and the classification reproduces exactly (`6870 agree, 2517 bizroke-only, 654 other`). The same
+lexicon-vs-rules distinction that keeps the referee honest turns out to keep the *builder* honest too, and
+only one of the two was wired.
+
+**Command.**
+
+    .venv/bin/python tools/central-kurdish/train_ckb_bizroke.py --src <clone> --eval-only
+
+**Finding.**
+
+    10041 source pairs -> 9387 trainable (2517 carry a bizroke)
+    stem-blind held-out: train 8426 / test 961 words
+      never-insert baseline : 73.8%
+      tagger word-exact     : 95.1%
+
+The class is learnable. Error 4.9% against the prior's 26.2% — a 5.3× reduction — and this is word-exact, so
+one misplaced vowel anywhere in a word counts against it. **The split is stem-blind** (grouped by the first 5
+characters) because Sorani's inflected families would otherwise straddle it; a random split reads 96.5%, and
+the 1.4pp gap is the size of the lie a random split would have told.
+
+**What Run 37 actually established, restated.** Not that the bizroke is unpredictable — that *one insertion
+after the first consonant* is unpredictable. سفر is *safar*: the rule is right that a vowel is missing and
+wrong about how many and which. Conditioning on the whole skeleton is a different question and it has a
+different answer. Worth remembering the next time a "not tabulable" finding is reached for as a reason not to
+model something.
+
+**The shape, and why it is unusual.** The tagger's input is `phonemizeWordRules` output, not the orthography,
+so every tag is either a symbol or that symbol + ɪ. Two consequences: the consonant-consistency mask makes
+altering the skeleton *structurally* impossible (the test asserts the round-trip — strip ɪ, get the rule
+reading back), and the referee path stays non-circular. A tagger reading the abjad directly would have had
+neither property.
+
+**Corpus impact**, `phonemize` vs `phonemizeAsync` over all 3,040 ckb rows: 5,350 of 58,704 tokens change
+(9.1%), all by an inserted ɪ. No-nucleus barely moves (3.72% → 3.61%) — exactly as Run 38 predicted, since
+only 3.9% of the class is visible to that detector. **The 9.1% is the measure; the no-nucleus delta is not.**
+
+**A fleet-wide arity hazard, found by the test suite.** Adding the `oovOverride` parameter to
+`phonemizeWord(word, oov?)` broke `test/bignum-fallback.test.ts` with "oov is not a function":
+`core/numbers.ts` `spellDigits` did `.map(word)`, and `Array.map` passes `(value, index, array)` — so the
+index arrived as the OOV resolver. Fixed to `.map((w) => word(w))` in the shared helper rather than at the ckb
+call site, since **every** engine's word reader passes through there and any of them could grow a second
+parameter next.
+
+**Instrument note.** Neither the referee nor the audio can score this tier (Run 38). The stem-blind split is
+the whole instrument, and is reported as such in `ckb-bizroke-tagger.PROVENANCE.md`.
+
+## Run 40 — 2026-08-19 — fold the bizroke to a VOWEL, and the residual starts talking
+
+**Question.** With the vowel restored by lexicon + tagger, is `[əɪ] → ""` still the right fold? And if the
+referee becomes an instrument again, what does its residual say we should fix?
+
+**The fold was wrong, and wrong in a specific way.** The two referees disagree about the bizroke's QUALITY
+(wikipron ɪ, kaikki ə). The fold that disagreement justifies is *normalise the quality*. What was there
+instead **deleted the vowel from both sides**, which additionally scores its PRESENCE as free — so rules,
+lexicon and tagger all read identically and Run 37's flat referee was "no instrument", not "no effect".
+Changing `replace` from `""` to `"ə"`:
+
+| ckb tier (folded backbone) | wikipron | kaikki |
+|---|---|---|
+| rules only | 72.3% | 71.2% |
+| + bizroke lexicon | 74.8% | 73.6% |
+| + bizroke tagger | **85.4%** | **84.9%** |
+
+The tagger is worth 4.4× the lexicon, which is what an exhausted 2,517-word source against ~2,000 remaining
+corpus types predicts. **This is the external confirmation the held-out split could not give** — both referees
+are independent of AsoSoft. The eval's ckb entry now runs the whole shipped tier (lexicon → tagger → rules)
+rather than the lexicon path, which is only legible because the fold stopped hiding it.
+
+⚠ The regression floor in `test/referee-eval.test.ts` moved **down**, 0.92 → 0.80, while the engine got
+better. The old 94.9% was measured with Sorani's one unwritten vowel deleted from both sides.
+
+**⚠ THE TWO REFEREES ARE NOT INDEPENDENT OF EACH OTHER.** Checked directly: all 972 wikipron headwords appear
+in kaikki, and after folds the two agree on **964 (99.2%)** — 5 bizroke placements and 3 other segments apart.
+Both scrape en.wiktionary; kaikki is a near-superset adding 65 words. The ckb headers called them "TWO
+independent HUMAN referees" and that overstates one upstream measured twice. Corrected in `ckb.jsonc`, the
+engine header, the provenance doc and the eval test. They remain independent *of AsoSoft*, which is the axis
+that matters here — but the answer to "is there dialectal intermixing between the referees" is no: there is
+barely a second referee.
+
+**Residual classification** (142 wikipron / 157 kaikki misses, by whether the consonant skeleton matches —
+measured on the pre-packing model; Run 41 re-measures it at 144/154 with the wrong-slot class halved to 3/4):
+
+|  | wikipron | kaikki |
+|---|---|---|
+| bizroke-only (skeleton exact) | 92 | 105 |
+| — we omit a vowel the referee has | 53 | 62 |
+| — we add one it does not | 33 | 37 |
+| — right count, wrong slot | **6** | **6** |
+| skeleton differs | 50 | 52 |
+
+Two readings. Omission and over-insertion are **near-balanced**, so what is left is placement rather than a
+bias — a systematically over-eager model would be lopsided. And only **6** misses put the right *number* of
+vowels in the wrong *slot*: when the model knows a vowel belongs, it nearly always knows where. The
+skeleton-differs half is pharyngeal ħ/ʕ~h, uvular χ~x, long-vowel quality, and kaikki letter-name rows
+(⟨و⟩ → *waw*) — outside this tier.
+
+**Two bugs the residual surfaced.**
+
+1. **The palatal fold was voicing-blind.** `[cɟ] → k` sent the referee's [ɟ] to k while our ɡ stayed ɡ, so all
+   12 ⟨گ⟩ palatalisations (گیتار *ɟiːtaːɾ*, گیان, گیسک, گیا…) were scored wrong for a distinction *neither
+   side wrote*. Split into `c → k` and `ɟ → ɡ`: **+0.8 / +0.7**.
+2. **Word-final ɪ is a model artifact, and measurably so.** Only **9 of the 9,387 training words (0.1%)** end
+   in a bizroke, but the tagger emits a final one on **2.4%** of referee vocabulary and **1.1%** of FLEURS ckb
+   types — 10–24× its own data. It is generalising the cluster-breaking vowel into a position AsoSoft almost
+   never puts it (ئاشت *aʃtɪ* for *aʃt*, بیست *biːstɪ* for *biːst*). Suppressed in the tagger's `postprocess`:
+   **+1.9 / +2.1**, 18 and 21 words. ⚠ The base-rate check is what makes this a correction rather than
+   referee-fitting — the training data and the referee agree against the model. The 9 legitimate cases are
+   lexicon entries and the lexicon is consulted first, so they are untouched.
+
+**Implication for the training data.** Nothing to fix in it: the balance of omissions to over-insertions says
+the model is not biased, the 6 wrong-slot cases say placement is nearly solved, and the one systematic error
+was the model departing from its data rather than following it. The remaining lever is *more* data of the same
+kind, and AsoSoft is exhausted — so the next real gain in ckb is a second word list, not a better model.
+
+## Run 41 — 2026-08-19 — the word-final artifact was the TRAINING METHOD, not the data
+
+**Question.** Run 40 measured the tagger emitting a word-final ɪ 24× more often than its training data ever
+does, and patched it with a `postprocess` strip. It also concluded "nothing to fix in the training data" —
+which does not license "nothing to fix". If the data does not contain the behaviour, where did the model get
+it?
+
+**Finding — no packing.** `Tagger.forward` ran the BiLSTM over padded batches with no
+`pack_padded_sequence`. The BACKWARD direction therefore crosses the pad steps *before* it reaches a word's
+last real symbol, so that symbol's representation is contaminated — by a varying amount, since it depends on
+the batch's longest word. Serving is batch=1 and unpadded, where the backward pass starts cleanly at the true
+final symbol: a condition training barely presented. **The damage lands precisely at the end of the word**,
+which is exactly and only where the artifact appeared.
+
+**Command.**
+
+    .venv/bin/python tools/central-kurdish/train_ckb_bizroke.py --src <clone>
+
+| | before | after packing |
+|---|---|---|
+| held-out word-exact (stem-blind) | 95.1% | **96.6%** |
+| word-final ɪ, referee vocabulary | 2.4% | **0.1%** |
+| word-final ɪ, FLEURS ckb types | 1.1% | **0.0%** |
+| referee, wikipron / kaikki | 82.7 / 82.1 | **85.2 / 85.0** |
+| random-split held-out (same probe) | 96.5 → | 98.2% vs 96.7% stem-blind |
+
+The final-ɪ rate lands on the training data's own 0.1%. Error rate 4.9% → 3.4%, a 30% reduction, from a
+change that touches no data and no hyperparameter.
+
+**Verified before touching anything else, at the user's instruction.** Full CI green; `test/ckbNeural.test.ts`
+still passes unchanged, including the round-trip assertion that stripping ɪ from any tagger reading returns
+`phonemizeWordRules` exactly (so the retrain did not loosen the safety property). Corpus effect 9.1% → 9.2% of
+ckb tokens, no-nucleus 3.61% → 3.59%. A new smoke check asserts the packing invariant directly — packed logits
+are independent of trailing padding, a padded row equals the same word alone, and (the mutation guard) the
+unpacked path really does differ at the word end; reverting the packing fails the first two and keeps the
+third.
+
+**The Run 40 postprocess is removed.** On the fixed model it is worth ONE word and would suppress the genuine
+final bizroke. It was treating a symptom; the note stays in `centralKurdishTagger.ts` because the next person
+to see a position-specific artifact should suspect the padding before the data.
+
+⚠ **EVERY BiLSTM TRAINER IN THIS REPO HAD IT.** Checked all ten — `tools/bilstm_training/tagger.py` (the
+shared core for nb/en/da/fr) and the standalone trainers for sd, bn, af, he, fa: none packed. The shared core
+is now fixed so the bug cannot propagate to the next language, but **every committed `.onnx` except ckb's was
+trained under it** and carries some amount of word-final damage.
+
+**Not retrained wholesale, on purpose.** Each of those nine has a measured provenance table and a regression
+floor in `test/referee-eval.test.ts`; a retrain moves both and needs its own before/after against its own
+referee, and a couple (sd's inherent-vowel masking, fa's encoder/decoder pair) have training-time subtleties
+that do not survive a blind rerun. It is a campaign, not a sweep. ckb is the cleanest possible demonstration
+of the size of the prize — a tagger that decides exactly one thing, so the effect is not confounded — and
+1.5pp word-exact is what it was worth there.
+
+**Method note.** The base-rate check in Run 40 (model 2.4% vs data 0.1%) is what made this findable. A
+divergence between what a model does and what its data contains is a bug in the *machinery* until proven
+otherwise; "the data is fine" and "the training is fine" are different claims and Run 40 conflated them.
+
+## Run 42 — 2026-08-19 — PR review: four defects, three of them in things I had already written down
+
+Reviewing the ckb branch before merge, rather than trusting it because CI was green.
+
+**1. The `ckb` floor needed the OPTIONAL ONNX runtime, and would have cried regression without it.**
+`onnxruntime-node` is in `optionalDependencies`. The eval's ckb entry is the whole shipped stack and the
+tagger self-falls-back, so on a machine without the runtime the score drops to the LEXICON-ONLY 74.8% and the
+0.80 floor fails — reported as a linguistic regression in a suite whose header says floors are sized for
+"ordinary churn". A 10-point cliff is not churn. Fixed two ways: the test skips ckb's floor when the model or
+the runtime is missing (verified by moving the .onnx aside — 170 passed, 1 skipped, no failure), and
+`eval.ts` prints a warning instead of quietly reporting a lower tier's number under this tier's name. ⚠ And
+the first draft of both said "rules-only 72.3%" — running it showed 74.8%, because the lexicon lookup happens
+BEFORE the tagger and still fires. Wrong number in a warning is worse than no warning.
+
+**2. A test that passed for the wrong reason.** `tag("ⵣⵣ") === ""` was meant to cover the out-of-vocab
+DECLINE path. But `phonemizeWordRules("ⵣⵣ")` is `""`, so the factory returns at its `T === 0` early exit and
+never consults the vocab. Checking properly: **the decline path is unreachable from real Sorani** — every
+symbol this engine can emit is in the model's 35-symbol `src`. So the test was replaced with the invariant
+that actually matters: add a grapheme to `central-kurdish.jsonc` without retraining and the tier silently
+declines every word containing it, no error and no failure. Mutation-checked by deleting ɫ from the vocab.
+The `T === 0` case is now its own test so neither can stand in for the other again.
+
+**3. Two self-contradictions in the ckb engine header** — the same file that establishes wikipron and kaikki
+are one upstream also said "THE TWO INDEPENDENT REFEREES" and, in the paragraph justifying the override of the
+audio, "THREE INDEPENDENT HUMAN SOURCES AGREE". It is two: AsoSoft and Wiktionary. That overcount was
+load-bearing — it is the argument for shipping against the ASR — so it is corrected rather than softened.
+
+**4. Stale numbers throughout**, because the packing fix landed after the prose: the tagger header's "a random
+split reads 2pp higher" (measured 1.5pp), the fold note's ladder (pre-fix values), the provenance residual
+table (pre-packing), and the claim that the referee eval "runs `phonemizeWordRules`" — no longer true, since
+the eval now runs the whole tier. That last one is not cosmetic: it is the file's non-circularity argument,
+which changed from by-tier to by-source, and a future reader "fixing" the eval to rules-only by analogy with
+sd/bn/af would silently stop measuring the tier. Now says so explicitly.
+
+Also re-measured with both fixes in: the residual's wrong-slot class **halved**, 6 → 3 (wikipron) and 6 → 4
+(kaikki). Two fixes found by reading a residual, and the residual is smaller and better-shaped for it.
+
+**Method note.** Three of the four were things I had written down myself and not re-read after the numbers
+moved. Prose asserting a measurement goes stale the moment the measurement is repeated; the review that
+matters is the one that re-derives the claims rather than re-reading them.

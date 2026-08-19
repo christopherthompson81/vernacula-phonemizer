@@ -345,6 +345,9 @@ export function spellDigits(digits: string, d: NumbersDef, word: (w: string) => 
     return [...digits]
         .map((c) => (c >= "0" && c <= "9" ? d.units[Number(c)] : undefined))
         .filter((w): w is string => w !== undefined && w !== "")
-        .map(word)
+        // ⚠ `.map((w) => word(w))`, NOT `.map(word)`: Array.map passes (value, index, array), so a bare
+        // reference hands the INDEX to any `word` with a second parameter — ckb's `phonemizeWord(word, oov?)`
+        // received `0` as its OOV resolver and threw. Every engine's word reader passes through here.
+        .map((w) => word(w))
         .join(" ");
 }

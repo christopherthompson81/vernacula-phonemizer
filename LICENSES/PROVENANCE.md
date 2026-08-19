@@ -83,6 +83,12 @@ Both were carried as unversioned "CC-BY" until an audit on 2026-08-06:
    narrower, the artifact is removed on request. Only the 2,517 rows that differ from our own rule output
    by the unwritten /ɪ/ alone are taken — the consonant skeleton in every row is this engine's, so the
    upstream's transcription *system* is not reproduced, only the one vowel fact per word.
+   ⚠ **`central-kurdish/ckb-bizroke-tagger.int8.onnx` derives from the same source** and is covered by the
+   same LicenseRef and the same good-faith undertaking. It is model WEIGHTS, not data: no source row is
+   recoverable from it, and its tag alphabet is "this symbol" / "this symbol + ɪ" — it cannot emit anything
+   the upstream wrote that our own rule engine did not already produce. Trained on the 9,387 pairs whose
+   consonant skeleton we independently reproduce (see `tools/central-kurdish/train_ckb_bizroke.py`), which
+   is a superset of the 2,517 written to the lexicon; the training corpus itself is not redistributed.
    Broad, permissive, and attribution-mandatory; the named attribution to **Amar Fayaz Buriro** is in
    NOTICE. If a downstream consumer needs a standard-licensed path, the Sindhi tier can be rebuilt
    from kaikki/Wiktionary (CC-BY-SA, §3) at ~1/10 the scale.

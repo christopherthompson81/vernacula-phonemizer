@@ -17,6 +17,7 @@ import { phonemizeKmNeural } from "./languages/khmer/khmerNeural.ts";
 import { phonemizeRiderNeural } from "./languages/perso-arabic/riderNeural.ts";
 import { phonemizeSdNeural } from "./languages/sindhi/sindhiNeural.ts";
 import { phonemizeAfNeural } from "./languages/afrikaans/afrikaansNeural.ts";
+import { phonemizeCkbNeural } from "./languages/central-kurdish/centralKurdishNeural.ts";
 
 // Arabic ISO code → engine variety (mirrors the sync registry); every key routes bare text
 // through the async diacritizer.
@@ -32,6 +33,15 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     // on a dictionary-gold held-out split, because af's residual is stress-conditioned vowel quality — contextual, not tabulable
     af: phonemizeAfNeural,
     bn: phonemizeBnNeural,
+    // BiLSTM placing the BIZROKE — Sorani's one unwritten vowel — on the words the AsoSoft-derived lexicon
+    // misses. 96.6% word-exact against a 73.8% never-insert baseline on a stem-blind held-out split; the
+    // AsoSoft source is 10,041 words and exhausted, leaving ~2,000 corpus types the lexicon cannot reach.
+    // ⚠ The audio cannot score this (the ASR under-transcribes Sorani — 0.929 of our folded phone count,
+    // against 0.987 de / 0.998 fr) and the referee could not either until ckb.jsonc stopped folding [əɪ] to
+    // NOTHING, which scored the vowel's presence as free. Normalising it to ə instead — the referees agree on
+    // presence and position, only quality differs — makes the tier visible: 85.2%/85.0% (wikipron/kaikki)
+    // against the lexicon-only 74.8%/73.6% and rules-only 72.3%/71.2%.
+    ckb: phonemizeCkbNeural,
     da: phonemizeDaNeural,
     nb: phonemizeNbNeural,
     fr: phonemizeFrNeural,

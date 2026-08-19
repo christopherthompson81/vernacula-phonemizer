@@ -99,6 +99,28 @@ def main():
         got = (mod.HID, mod.BATCH, mod.LOG_EVERY)
         check(f"{rel} keeps hid/batch/log_every {want}", got == want, f"got {got}")
 
+    # 8. THE PACKING INVARIANT. Unpacked, a padded batch runs the BiLSTM's BACKWARD direction over the pad
+    #    steps before it reaches each word's last real symbol, so a short word's word-FINAL logits depend on
+    #    whatever the longest word in its batch happened to be — while serving is batch=1 and unpadded. That
+    #    mismatch cost ckb 1.5pp word-exact and produced a word-final vowel at 24× its training rate
+    #    (investigation Run 41). The fix is `lengths`; this asserts it actually decouples the batch, and that
+    #    a padded row now matches what the same word gets alone.
+    torch.manual_seed(0)
+    m = Tagger(10, 4).eval()
+    short = torch.tensor([[3, 4, 5]])
+    with torch.no_grad():
+        alone = m(short)
+        pad_lots = m(torch.tensor([[3, 4, 5, 0, 0, 0, 0]]), torch.tensor([3]))[:, :3]
+        pad_few = m(torch.tensor([[3, 4, 5, 0]]), torch.tensor([3]))[:, :3]
+        unpacked = m(torch.tensor([[3, 4, 5, 0, 0, 0, 0]]))[:, :3]
+    check("packed logits are independent of how much padding follows",
+          torch.allclose(pad_lots, pad_few, atol=1e-5), "padding still leaks into the packed path")
+    check("packed padded row == the same word alone (what serving does)",
+          torch.allclose(pad_lots, alone, atol=1e-5), "packed training differs from batch-1 serving")
+    check("the bug this guards is real (unpacked DOES differ at the word end)",
+          not torch.allclose(unpacked[:, -1], alone[:, -1], atol=1e-5),
+          "unpacked matched — the invariant above proves nothing")
+
     print()
     if FAILED:
         print(f"FAILED: {len(FAILED)} — " + "; ".join(FAILED))

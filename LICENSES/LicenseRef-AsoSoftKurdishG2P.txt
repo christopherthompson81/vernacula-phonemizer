@@ -21,12 +21,23 @@ Mandatory attribution (the repository asks for citation of both source papers):
   and Low-Resource Language Information Processing (TALLIP), 18(2), 18.
     — the source of the 5,041 "Wergor-words" list (https://github.com/sinaahmadi/wergor).
 
+Derived artifacts in this repository:
+  src/languages/central-kurdish/lexicon.tsv            2,517 rows — one vowel fact per word
+  src/languages/central-kurdish/ckb-bizroke-tagger.int8.onnx   BiLSTM weights (2.3 MB)
+  src/languages/central-kurdish/ckb-bizroke-tagger.meta.json   its symbol/tag tables
+
+  Both are restricted to the ONE fact this project lacks: where Sorani's unwritten short /ɪ/ falls.
+  The consonant skeleton in every lexicon row is this engine's own rule output, and the tagger's
+  entire tag alphabet is "this symbol" / "this symbol + ɪ" — so neither reproduces the upstream's
+  transcription SYSTEM, and no source row is recoverable from the model weights. The source lists
+  themselves are NOT redistributed here; clone the repository above to rebuild either artifact.
+
 Good-faith undertaking:
   "Other (Open)" is an assertion of openness without stated conditions, so this use rests on the
   publisher's evident intent rather than on a granted licence text. If the publisher or either cited
   author informs this project that the intent was narrower than the derived use here, the derived
-  artifact will be removed on request, without argument. The artifact is fenced so that removal is a
-  single-file operation.
+  artifacts will be removed on request, without argument. They are fenced so that removal is a
+  three-file operation; every tool that builds them names this file in its header.
 
 No warranty:
   Provided as-is; suitability for any downstream purpose is the user's to validate.

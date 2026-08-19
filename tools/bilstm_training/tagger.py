@@ -13,6 +13,12 @@ passes its own explicitly rather than relying on a default:
     da  hid=256  batch=256  log_every=10
     fr  hid=256  batch=256  log_every=10
 Changing a default here does not silently change what a retrain produces; changing a call site does.
+
+⚠ AND ONE THING HERE DID CHANGE WHAT A RETRAIN PRODUCES, DELIBERATELY: `train()` now PACKS its padded batches
+(2026-08-19). Unpacked, the BiLSTM's backward direction crossed the padding before reaching each word's last
+real symbol, corrupting word-final predictions relative to batch=1 serving — worth 1.5pp word-exact on ckb,
+the one tagger narrow enough to isolate it. Every committed .onnx except ckb's predates the fix. See
+`Tagger.forward` and investigation Run 41.
 """
 import random
 
@@ -31,8 +37,27 @@ class Tagger(nn.Module):
         self.lstm = nn.LSTM(emb, hid, num_layers=2, bidirectional=True, batch_first=True, dropout=0.3)
         self.head = nn.Linear(2 * hid, n_tags)
 
-    def forward(self, x):
-        return self.head(self.lstm(self.emb(x))[0])
+    def forward(self, x, lengths=None):
+        """⚠ PASS `lengths` FOR ANY PADDED BATCH. Without packing, the BACKWARD direction of the BiLSTM runs
+        over the pad steps BEFORE it reaches a word's last real symbol, so that symbol's representation is
+        contaminated — by a varying amount, since it depends on the batch's longest word. Serving is batch=1
+        and unpadded, where the backward pass starts cleanly at the true final symbol: a condition training
+        barely presented. The damage lands precisely at the END OF THE WORD. Measured on ckb, whose tagger
+        decides one thing (where an unwritten vowel goes) and so isolates the effect cleanly: it emitted a
+        word-final vowel on 2.4% of referee vocabulary against 0.1% in its own training data, and packing took
+        that to 0.1% and held-out word-exact from 95.1% to 96.6%. See
+        docs/investigations/asr_align_qc_investigation.md Run 41.
+
+        ⚠ EVERY .onnx ARTIFACT IN THIS REPO PREDATES THIS FIX except ckb's, so each of nb/en/da/fr/sd/bn/af/
+        he/fa carries some amount of the same word-final damage and would need a retrain + re-measure against
+        its own referee to clear it. Not done wholesale: each has a measured provenance table and a regression
+        floor that a retrain moves."""
+        h = self.emb(x)
+        if lengths is None:
+            return self.head(self.lstm(h)[0])
+        packed = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(self.lstm(packed)[0], batch_first=True, total_length=x.size(1))
+        return self.head(out)
 
 
 def build_vocab(aligned):
@@ -74,8 +99,9 @@ def train(model, X, Y, epochs=40, batch=256, lr=2e-3, log_every=5, dev=None):
             bi = idx[b:b + batch]
             xb = pad_sequence([X[i] for i in bi], batch_first=True, padding_value=PAD).to(dev)
             yb = pad_sequence([Y[i] for i in bi], batch_first=True, padding_value=PAD).to(dev)
+            lens = torch.tensor([len(X[i]) for i in bi])
             opt.zero_grad()
-            out = model(xb)
+            out = model(xb, lens)  # packed — see Tagger.forward; unpacked padding corrupts word-final positions
             loss = loss_fn(out.reshape(-1, out.size(-1)), yb.reshape(-1))
             loss.backward(); opt.step(); tot += loss.item()
         sched.step()

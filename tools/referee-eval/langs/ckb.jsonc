@@ -1,9 +1,15 @@
 // Central Kurdish / Sorani (ckb) — Iranian (NW), the Sorani Perso-Arabic alphabet. Read by a native greedy scan.
-// TWO independent HUMAN referees: wikipron ckb_arab_broad (PRIMARY) + kaikki ckb (SECONDARY). (epitran ckb-Arab
-// exists but its Sorani transcription diverges far too heavily — ~25% — to be a usable corroborator, so it is not
-// used.) The ONE systematic fold = the UNWRITTEN short /ɪ/ (the "bizroke"): Sorani writes all the long vowels + the
-// short /a/ (ە) but NOT the short /ɪ/, which is epenthetic in clusters and not positionally predictable → strip ə/ɪ
-// on both sides (the abjad short-vowel wall, but MUCH smaller — only one vowel). Also folds: the inconsistent
+// Two HUMAN referees, ⚠ NOT INDEPENDENT OF EACH OTHER: wikipron ckb_arab_broad (PRIMARY) + kaikki ckb
+// (SECONDARY) both scrape en.wiktionary — all 972 wikipron headwords are in kaikki and the two agree on 964
+// (99.2%) after these folds, so the secondary adds 65 words rather than a second opinion. They ARE independent
+// of AsoSoft, which is what lets the eval score the whole shipped lexicon+tagger tier rather than rules only.
+// (epitran ckb-Arab exists but its Sorani transcription diverges far too heavily — ~25% — to be a usable
+// corroborator, so it is not used.) The signature fold = the UNWRITTEN short /ɪ/ (the "bizroke"): Sorani writes all the long vowels + the
+// short /a/ (ە) but NOT the short /ɪ/, and the two referees agree it exists and where it falls while disagreeing
+// on its QUALITY (wikipron writes ɪ, kaikki ə) → normalise BOTH sides to ə. ⚠ THIS FOLD USED TO DELETE THE VOWEL
+// RATHER THAN NORMALISE IT, which made the referee blind to the single axis this engine's Sorani work is about:
+// every tier — rules, lexicon, tagger — scored identically, and the flat referee reading after the lexicon
+// shipped was mistaken for "no effect" instead of "no instrument". Also folds: the inconsistent
 // glottal onset ʔ, the tap~trill r~ɾ (the referee mixes them for ⟨ر⟩), the long-vowel narrow lowerings (e̞ː~eː,
 // o̞ː~oː, ɑː~aː, ɔː~oː), æ~a, ʊ~u, the u̯/i̯ offglides, and the rare palatal allophones c/ɟ~k/ɡ.
 {
@@ -19,11 +25,12 @@
         { "pattern": "ɔ", "replace": "o", "note": "the ⟨ۆ⟩ open-o variant [ɔ] ~ /o/" },
         { "pattern": "æ", "replace": "a", "note": "the ⟨ە⟩ short front open [æ] ~ /a/" },
         { "pattern": "ʊ", "replace": "u", "note": "short-u lax [ʊ] ~ /u/" },
-        { "pattern": "[cɟ]", "replace": "k", "note": "rare palatal allophones [c]/[ɟ] of /k/,/ɡ/ before front vowels (the k~ɡ voicing residual is negligible)" },
+        { "pattern": "c", "replace": "k", "note": "the rare palatal allophone [c] of /k/ before a front vowel" },
+        { "pattern": "ɟ", "replace": "ɡ", "note": "the rare palatal allophone [ɟ] of /ɡ/ before a front vowel. ⚠ MUST NOT fold to k — [cɟ]→k was one rule, so the referee's گیتار ɟiːtaːɾ became kitaɾ against our ɡitaɾ and every one of the 12 ⟨گ⟩ palatalisations was scored wrong for a VOICING difference neither side wrote" },
         { "pattern": "ʔ", "replace": "", "note": "the word-initial glottal onset ⟨ئ⟩ — the referee marks it INCONSISTENTLY (ئارد→ʔaːɾd yet ئاواز→ɑːwɑːz); drop on both sides" },
         { "pattern": "r", "replace": "ɾ", "note": "the referee mixes the trill [r] (⟨ڕ⟩) and tap [ɾ] (⟨ر⟩) freely — unify to ɾ" },
         { "pattern": "j", "replace": "i", "note": "the ⟨ی⟩ matres lectionis: glide [j] ~ high vowel [i] — the referee (and offglide [i̯], its diacritic already stripped) does not distinguish them reliably" },
         { "pattern": "w", "replace": "u", "note": "the ⟨و⟩ matres lectionis: glide [w] ~ high vowel [u] — likewise not reliably distinguished (offglide [u̯] diacritic already stripped)" },
-        { "pattern": "[əɪ]", "replace": "", "note": "the UNWRITTEN short /ɪ/ (bizroke): Sorani does not write it, it is epenthetic in clusters and not positionally predictable → fold on both sides (the abjad short-vowel wall, but only ONE vowel)" }
+        { "pattern": "[əɪ]", "replace": "ə", "note": "the UNWRITTEN short /ɪ/ (bizroke): the referees agree on its PRESENCE and POSITION and differ only on quality (wikipron ɪ, kaikki ə) → normalise to ə on both sides. ⚠ NOT \"\" — deleting it scores presence as free, which hid a 13pp gap: rules 72.3/71.2, +lexicon 74.8/73.6, +tagger 85.2/85.0 (wikipron/kaikki)" }
     ]
 }
