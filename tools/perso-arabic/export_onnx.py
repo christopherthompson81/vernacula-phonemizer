@@ -13,8 +13,11 @@ import onnxruntime as ort
 from onnxruntime.quantization import quantize_dynamic, QuantType
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CKPT = "$ARDIAC/bilstm_multilingual.pt"
-DEST = os.path.join(HERE, "..", "..", "src", "core")  # beside riderDiacritizer.ts
+CKPT = os.environ.get("RIDER_CKPT", os.path.expandvars("$ARDIAC/bilstm_multilingual.pt"))
+# ⚠ STALE PATH FIXED 2026-08-19: this said `src/core`, where riderDiacritizer.ts has not lived for some time.
+# A successful-looking export wrote two ORPHAN files into src/core while the model the runtime loads stayed
+# untouched — the same shape of failure as fr/en exporting fp32 while the int8 ships (Run 43).
+DEST = os.path.join(HERE, "..", "..", "src", "languages", "perso-arabic")  # beside riderDiacritizer.ts
 FP32 = "/tmp/rider_diac.fp32.onnx"
 INT8 = os.path.join(DEST, "riderDiacritizer.onnx")
 META = os.path.join(DEST, "riderDiacritizer.meta.json")

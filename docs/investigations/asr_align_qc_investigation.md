@@ -2832,3 +2832,56 @@ claim about it unfalsifiable; the size drift was the only visible symptom.
 **Method note.** All three were found by reading the diff for things CI cannot express: code with no possible
 test, a change whose failure mode is silence, and an artifact whose bytes moved for a reason nobody stated.
 Green CI answers "did anything I already test break", never "is this change sound".
+
+## Run 45 — 2026-08-19 — the sweep was incomplete, the rider was retrainable, and the corpora were all findable
+
+**Question, from the user: have we retrained all affected BiLSTMs?** No — and the survey behind that claim was
+itself wrong.
+
+**The first sweep searched for `*tagger*` trainers.** Re-grepping for `nn.LSTM(… bidirectional=True)` over a
+padded batch finds four more SHIPPED models the rollout never touched: `km-segmenter`, the perso-arabic
+`riderDiacritizer` (serves ur + pnb), `fa-vowel-restorer` and `fa-context-restorer`. Corrected count: **6 of
+13 in-repo models**, not "all ten trainers". ⚠ The lesson is the search key: a naming convention is not a
+type. Grep the construct, not the filename.
+
+**And the two Arabic diacritizers are affected as well — their trainer is just in another repo.** Recorded as
+"unknown" until the user pointed at `/mnt/data`, where the whole training rig turned out to be sitting:
+`train.sh` drives `~/Programming/espeak-ng-portable/tools/diacritization/train_bilstm_sent.py`, with
+`/mnt/data/ar-diac` (silver 320k, train 310k, val 5k) and `/mnt/data/arz-diac` (350k). That trainer is
+bidirectional over a `pad_sequence` collate with `def forward(s, x)` — and ⚠ **its collate already returns
+`torch.tensor([len(x) for x in xs])`, computed and then never passed.** The lengths were plumbed and dropped.
+Since the rider is a direct descendant of this file, that is almost certainly where the entire family
+inherited the defect, and it means the fix upstream is one line plus using the third tuple element.
+Not applied here: it is another repository, and the rider warm-starts FROM the Arabic base, so the two must be
+retrained in that order or the comparison is meaningless. Recorded in `tools/CORPORA.md` as a deliberate
+follow-up rather than done as a side effect of a phonemizer PR.
+
+**The rider was retrainable all along** — `train.tsv`/`eval.tsv`/charvocab are committed and the Arabic
+warm-start sits in `$ARDIAC`. Retrained.
+
+**And it reproduced the bn confound, this time reversing the sign of the conclusion.** The naive comparison
+said the retrain was WORSE (best rider-DER 7.43% → 7.53%), because the DER pass is padded too and each arm was
+scored under its own evaluator. Added `--eval-ckpt` to re-score a saved checkpoint without retraining, and
+under the identical packed eval:
+
+    unpacked training   RIDER-DER 8.18%   ur 8.85%  fa 7.67%  ps 17.58%
+    packed   training   RIDER-DER 7.53%   ur 8.21%  fa 6.88%  ps 16.41%
+
+A 0.65pp DER improvement, not a regression. End-to-end on `ur.cle-speech` (n=5,667): **2,319 → 2,342** exact
+words, async-only-right 238 → 265, and the registry's async-beats-sync decision survives (41.3% vs 39.7%).
+**Twice now the naive before/after has been not merely imprecise but sign-wrong.** When a fix touches the
+evaluator, decompose or do not report.
+
+**`export_onnx.py` wrote to a path the module left long ago** (`src/core/`), so a successful-looking export
+produced two orphan files while the served model stayed untouched — the same shape as fr/en exporting fp32
+while the int8 ships (Run 43). Third instance of "the script reported success on a file nothing loads".
+
+**Every missing corpus was found in under an hour.** nb/da = NST (CC0, both archives checksummed), he =
+Nakdimon `hebrew_diacritized` (MIT, permissive subset only), fa = HomoRich (CC0), km = a kmwiki dump (CC BY-SA).
+Four models had been left carrying a known defect purely for want of a download URL. Now
+`tools/CORPORA.md` + `tools/fetch_corpora.sh` (checksum-verified; tested end-to-end on da).
+
+⚠ **Not committing the corpora, deliberately.** 280 MB+ raw, and `.gitignore` excludes two sources for
+LICENCE reasons — the Urdu HF/Dakshina silver and the Khmer aakanee dictionary are CC BY-NC-SA. A blanket
+"commit the training data" would push encumbered material to a public remote. The record of how to fetch and
+rebuild is the substitute, and it is the thing whose absence actually cost us.

@@ -48,3 +48,31 @@ pa 8.52%), fp32→int8 with 5/5 argmax parity. The neural now ENCODES the short 
 دنیا→دُنیا, ستاره→سِتاره (was bare). CAVEAT: as the flip side of vocalizing more, it slightly OVER-predicts kasra
 on a few bare-vowel words on the async neural path (زن→zen); the SYNC shipped `phonemizeWord` does not use the
 neural, so default output is unaffected (زن→zan, and covered words go through the lexicon).
+
+## 2026-08-19 — retrained with PACKED sequences
+
+Training ran the BiLSTM over padded batches without `pack_padded_sequence`, so the backward direction crossed
+the pad steps before reaching each sentence's last real character, while serving (`riderNeural.ts`) is one
+sentence at a time, unpadded. This is a SENTENCE-level model, so the affected span is the final word or two of
+every clause rather than one letter. ⚠ The DER pass was padded-and-unpacked too, so the published number did
+not describe the served model either.
+
+**The naive before/after said the retrain was WORSE (7.43% → 7.53% best rider-DER) and that reading was
+wrong** — it compares each arm under its own evaluator, so it measures the training change and the measurement
+change together. Scored under the identical serving-faithful (packed) eval via the new `--eval-ckpt`:
+
+| rider-DER, same packed eval | overall | ur | pa | fa | ps | ar |
+|---|---|---|---|---|---|---|
+| unpacked training | 8.18% | 8.85% | 6.37% | 7.67% | 17.58% | 11.30% |
+| **packed training (this model)** | **7.53%** | **8.21%** | 6.37% | **6.88%** | **16.41%** | **11.13%** |
+
+**End-to-end on the language it serves**, `ur.cle-speech` (n=5,667), unfolded exact match through
+`phonemizeAsync`: **2,319 → 2,342** words (40.9% → 41.3%), async-only-right 238 → 265. The registry decision
+(async beats sync for ur) survives the retrain: 41.3% against sync's 39.7%.
+
+⚠ `export_onnx.py` wrote to `src/core/`, where `riderDiacritizer.ts` has not lived for some time — a
+successful-looking export left two orphan files there while the model the runtime loads stayed untouched.
+Path fixed; check the mtime of the file the runtime actually loads.
+
+Retrain: see `tools/CORPORA.md` (the train/eval manifests are committed; the Arabic warm-start checkpoint is
+not). Investigation Runs 41, 43, 45.

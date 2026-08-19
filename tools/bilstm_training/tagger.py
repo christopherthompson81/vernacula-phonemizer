@@ -48,10 +48,15 @@ class Tagger(nn.Module):
         that to 0.1% and held-out word-exact from 95.1% to 96.6%. See
         docs/investigations/asr_align_qc_investigation.md Run 41.
 
-        ⚠ EVERY .onnx ARTIFACT IN THIS REPO PREDATES THIS FIX except ckb's, so each of nb/en/da/fr/sd/bn/af/
-        he/fa carries some amount of the same word-final damage and would need a retrain + re-measure against
-        its own referee to clear it. Not done wholesale: each has a measured provenance table and a regression
-        floor that a retrain moves."""
+        ⚠ THE AFFECTED SET IS EVERY BIDIRECTIONAL LSTM IN THE REPO THAT TRAINS ON PADDED BATCHES, which is
+        wider than this module's four callers and wider than the first sweep found. Retrained 2026-08-19:
+        ckb, en, sd, af, fr, bn, and the perso-arabic rider (+0.65pp DER, serves ur/pnb). STILL AFFECTED, all
+        for want of a corpus rather than a decision: nb, da, he, fa-tagger, fa-vowel-restorer,
+        fa-context-restorer, km-segmenter. `tools/CORPORA.md` now records how to fetch every one of those —
+        the first sweep missed km/rider/fa-restorers because it searched for `*tagger*` trainers, so grep for
+        `nn.LSTM(... bidirectional=True)` instead. The two Arabic diacritizers are AFFECTED TOO — their
+        trainer lives in espeak-ng-portable and its collate already computes the lengths its forward never
+        passes, which is very likely where this whole family inherited the bug. See tools/CORPORA.md."""
         h = self.emb(x)
         if lengths is None:
             return self.head(self.lstm(h)[0])

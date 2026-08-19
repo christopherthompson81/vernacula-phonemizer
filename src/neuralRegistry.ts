@@ -51,7 +51,11 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     // corrupts the reading 54.6% of the time, measured on writer-typed U+200B junctions
     km: phonemizeKmNeural,
     // ur: the rider EARNS its place here — 66.3% against sync's 64.2% on ur.cle-speech (n=5,667), with
-    // async-only-right 178 against sync-only 62. Measured, not assumed.
+    // async-only-right 178 against sync-only 62. Measured, not assumed. ⚠ RE-VERIFIED 2026-08-19 after the
+    // rider was retrained with packed sequences: on the same referee, unfolded exact, async 41.3% against
+    // sync 39.7% with async-only 265 vs sync-only 173 — the margin survives, and the retrain moved the
+    // shipped ur outcome 2,319 → 2,342 exact words. (The absolute % differs from the 66.3/64.2 above because
+    // that pair is scored under the config folds; the DIRECTION is the claim.)
     ur: (t) => phonemizeRiderNeural(t, "ur"),
     // ⚠ `ps` IS DELIBERATELY ABSENT, so `phonemizeAsync` falls through to the sync engine. The same rider
     // that helps Urdu is NET-NEGATIVE for Pashto, and it always was: `ps_neural_restoration_investigation.md`
