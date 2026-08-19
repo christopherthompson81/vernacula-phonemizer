@@ -101,6 +101,11 @@ describe("hebrew neural vowel restoration", () => {
             //   the bare letter reads as "", which `emit()` discards; alone the same tagger says `ha`. 95
             //   such particles stand alone in this corpus, so it is attested rather than hypothetical.
             expect(await phonemizeHebrewNeural("ה בית הגדול")).toBe("ha bet haɡadol");
+            // ⚠ AND ON THE SEGMENT PATH TOO. The patch was applied at the whole-clause call site only, so a
+            //   clause that ALSO held an unreadable word took the other branch and dropped the article.
+            //   It lives inside `restore` now, where no call site can omit it.
+            expect(await phonemizeHebrewNeural("ג'ון ה בית הגדול")).toBe("d͡ʒvn ha bet haɡadol");
+            expect(await phonemizeHebrewNeural("בית־ספר ה גדול")).toBe("bet sefeʁ ha ɡadol");
         });
 
         /** ⚠ And the rejoined maqaf halves are VALIDATED, or a half whose reading is empty vanishes inside
@@ -129,6 +134,11 @@ describe("hebrew neural vowel restoration", () => {
             // ⚠ A compound whose second half the tagger cannot read still SPLITS, rather than fusing into
             //   one skeleton — `ה־ג'ון` was *hd͡ʒvn*.
             expect(await phonemizeHebrewNeural("ה־ג'ון")).toBe("ha d͡ʒvn");
+            // ⚠ AND THE PROCLITIC JOINS TO ITS FIRST HOST ONLY. Removing every joiner in the token fused
+            //   `ל־בית־ספר` into *levetsfeʁ* — the one-nonexistent-word outcome the compound rule exists to
+            //   avoid. The clitic binds to the word beside it; the compound boundary after it survives.
+            expect(await phonemizeHebrewNeural("ל־בית־ספר גדול")).toBe("levet sefeʁ ɡadol");
+            expect(await phonemizeHebrewNeural("ב־בית־ספר גדול")).toBe("bevet sefeʁ ɡadol");
         });
 
         /**
@@ -188,12 +198,20 @@ describe("hebrew neural vowel restoration", () => {
          * empty-reading word, and an unsplittable failure.
          */
         test("every branch emits one entry per input word", async () => {
+            // ⚠ THE CASES MUST COMBINE BRANCHES, NOT JUST VISIT THEM ONE AT A TIME. Every branch was
+            //   covered individually and the particle patch was still missing from `flushSeg` — it takes a
+            //   clause holding BOTH an unreadable word and a standalone particle to route through the
+            //   segment path with something to patch. `ג'ון ה בית הגדול` is that case, and it emitted 3
+            //   words for 4 inputs until the patch moved inside `restore`.
             const cases = [
                 "הוא קרא ספר של דוד",          // clean clause
                 "הוא קרא ספר של ג'ון טוב",     // geresh → segment split
                 "הוא קרא בית־ספר של דוד",      // maqaf → rejoin
                 "ה בית הגדול",                 // a word whose reading is empty
                 "צ'מברס תבע את אלוהים בגין",   // leading unreadable word
+                "ג'ון ה בית הגדול",            // unreadable word AND a particle → the segment path
+                "בית־ספר ה גדול",              // maqaf rejoin AND a particle
+                "ל־בית־ספר גדול",              // a proclitic ON a compound
             ];
             for (const c of cases) {
                 const out = await phonemizeHebrewNeural(c);

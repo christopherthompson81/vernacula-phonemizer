@@ -1171,3 +1171,59 @@ sentence-level folded distance. The case for the segment split is linguistic: `�
 reads `hu kaʁa sefeʁ` where word-at-a-time gives `koʁa`/`sifeʁ`, and those are the module's own documented
 homographs. Recorded because it is the clearest case in this log of the instrument being blind to a real
 improvement — the opposite of Run 13a, where it was blind to a real regression.
+
+## Run 18 — 2026-08-19 — six review rounds on one function, and what actually stopped the bleeding
+
+#839 went through six review rounds. The finding count barely fell (3, 2, 4, 8, 8, 4) and **the majority
+were defects introduced by the previous round's fix**, not pre-existing ones. That is worth recording as a
+process result, because the code is now correct and the process that got it there was not.
+
+    round 2   `out.every(Boolean)` — my round-1 guard condemned clauses whose word legitimately reads ""
+    round 3   a declined SINGLE-word run emitted "" and the word vanished — worse than the skeleton
+    round 4   my maqaf split fused `בֵּית־סֵפֶר`; my niqqud range pasted U+05FD for U+05BD
+    round 5   my proclitic split misread BOTH the clitic and its host (`ha bet` for `habajit`)
+    round 6   my particle patch was applied at one call site and not its sibling
+
+### What each of the two structural moves actually bought
+
+Two changes broke the cycle, and neither was a bug fix:
+
+1. **Rewriting the function instead of patching it** (after round 3). Three rounds of accreted branches had
+   made each fix land in one arm and miss the others. The rewrite fit on a screen and rounds 4–5 found
+   fewer *structural* holes as a result — though they still found holes.
+
+2. **Moving the repair to where the reading is produced** (round 6). The particle patch had been applied at
+   one of four `restore` call sites. Putting it *inside* `restore` makes omitting it impossible rather than
+   merely unlikely. That is the difference between fixing an instance and removing a class, and it is the
+   move I should have made in round 5 when the same shape had already appeared twice.
+
+Applied the same reasoning unprompted to the one remaining inconsistency — a `|| bare(w)` fallback present
+at three call sites and missing at the fourth — rather than waiting for round 7 to report it.
+
+### The tests were part of the problem, twice
+
+Two tests I wrote *specifically to catch dropped words* were shaped so they could not see one:
+
+- `toContain("bet haɡadol")` passes whether or not the article survives.
+- the invariant test's `>= words - 1` slack was exactly one word wide.
+
+**A test that normalises its input before asserting cannot see the class of bug it was written for**, and
+`trim()` / `filter(Boolean)` / a tolerance are all forms of normalising. Both now assert whole strings.
+
+A third shape showed up in round 6: every branch was covered *individually* and the bug lived in a branch
+*combination* — it takes a clause holding both an unreadable word and a standalone particle to route
+through the segment path with something to patch. The case list now combines branches deliberately.
+
+### Where the measurement was and was not useful
+
+The audio metric drove the original finding (216 skeleton rows at 0.649 against 0.342) and confirmed the
+fix. It was **blind to almost every defect the reviews found** — a dropped one-letter article, a fused
+compound, a wrong clitic vowel — because a sentence-level folded distance does not move on one segment.
+Across six rounds the corpus number never shifted outside 0.3402–0.3408.
+
+That is the honest summary of this PR's instrumentation: the metric found the disease and could not see
+the complications of the cure. Both facts matter, and the second is why six review rounds were worth
+running rather than merging on a green number.
+
+    final   skeletons 216 → 0   median 0.3520 → 0.3402   333 better / 31 worse
+            all-flagged 0.800 → 0.456    investigate 0.796 → 0.570
