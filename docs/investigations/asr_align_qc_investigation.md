@@ -2034,3 +2034,78 @@ runs, in a file whose sibling module imports that very tool eight lines from the
 same failure the `south_slavic_stress_sources_investigation.md` header records for the stress audit — "the
 grep found nothing" promoted to "the data does not exist" — arriving as "the fix needs X" promoted to
 "X does not exist".
+
+## Run 31 — 2026-08-19 — the corpus re-scored, and the queue re-prioritised
+
+Nine languages' engines moved this session and the fold moved for all of them, so the DB was stale in two
+independent ways. Refreshed: **7,676 of 26,667 re-phonemized rows changed** (`ipa_prev` preserved, DB backed
+up to `align.sqlite.bak-pre-refresh`), then `asr_align_label.py --apply`, which recomputes `dist` with the
+current fold and redoes the sibling screen.
+
+⚠ **THE RECOGNIZER PASS WAS NOT RE-RUN AND MUST NOT BE.** `phones` is what the audio says; only our side
+moved. `asr_align_corpus.py` would re-run wav2vec2 over 104 GB for no change.
+
+    all-flagged rows   747 -> 682   (-65, -8.7%)
+    investigate rows 8,367 -> 8,297
+
+    sn_zw  30 -> 8    ln_cd 37 -> 17   he_il 25 -> 13   de_de 23 -> 15
+    zu_za  13 -> 8    hu_hu 16 -> 12   xh_za 10 ->  7
+
+⚠ **AND `ny_mw` ROSE, 11 → 20, BECAUSE IT GOT BETTER.** Its median improved 0.3385 → 0.3258; a tighter
+distribution moves the 3×MAD threshold down, so rows that used to sit inside it no longer do. `xh_za` did
+the same (flagged 95 → 107 on a median of 0.4063 → 0.3947). This is the relative-scoring design working:
+**fixing a systematic error sharpens the outlier detector on what remains.** Six of Chichewa's nine
+all-flagged sentences are new and are prose, not digits — genuine new signal.
+
+⚠ **`sl_si` IS UNCHANGED — 45 → 46 flagged, median 0.3103 both sides.** Predicted, and worth having
+confirmed on the real pipeline rather than in a probe: stress is folded out, so the whole Slovene run is
+invisible here and its validation had to be the held-out lexicon table.
+
+### The by-lift ordering is now misleading
+
+    lang          af  sent  digit%  latin%   status
+    bn_in         31    15    42%     6%     CLEAN — investigated, no defect
+    ceb_ph        24    10    92%     0%     not examined
+    ny_mw         20     9    20%     0%     fixed this session
+    fr_fr         20     9    40%     0%     CLEAN — investigated, no defect
+    hy_am         19     9    21%     0%     CLEAN — investigated, no defect
+    cmn_hans_cn   19     9    21%    32%     not examined
+    ln_cd         17     7    76%     0%     fixed this session
+    hr_hr         17     8    41%     0%     not examined
+    fil_ph        17     8    76%     0%     not examined
+    mt_mt         16     7    75%     0%     not examined
+    ckb_iq        16     7    50%    50%     not examined
+    mi_nz         15     7    80%     0%     not examined
+
+**Three of the top five are known-clean** — bn_in, fr_fr and hy_am account for 70 all-flagged rows that
+have each been read and found correct. Working the list by size sends the next person straight back into
+them. The queue needs a "examined, no defect" mark; until it has one, this table is the mark.
+
+### The unexamined tier is mostly one already-made decision
+
+⚠ **ceb_ph, fil_ph, mi_nz AND ig_ng ARE THE FOUR "MIXED" NUMERAL-REGISTER LANGUAGES FROM RUN 19** — measured
+at 84.8% / 62.3% / 63.5% / 66.8% and declined because a third of their rows would get worse. Their
+all-flagged queues are 71–92% digit-bearing *because of that decision*, not because nobody has looked.
+Re-opening them means re-opening the mean-versus-variance judgement, not finding a bug.
+
+`mt_mt` is the one that is genuinely different: Run 19 measured Maltese **NATIVE** (4.3% English, 6% French,
+4% Spanish — it reads its own numerals), so its 75% digit-bearing queue is not a register question at all.
+
+### And that pointed straight at a real defect
+
+    9.30            ->  dɪsa punt tlɛtɪn        correct — "punt" is the decimal point
+    id-9.30 am      ->  ɪt dɪsa . tlɛtɪn am     the period reaches the IPA as a CLAUSE MARK
+
+The decimal rule's left boundary is defeated by the Maltese article-hyphen (`id-`, `fis-`, `il-`), so the
+number splits and the `.` is read as sentence punctuation — a spurious pause inside a clock time. 9 rows.
+Small, exact, and the kind of thing only a re-scored queue surfaces.
+
+### What to do next, in order
+
+1. **`mt_mt`** — the article-hyphen decimal bug above, plus the rest of its 75% digit queue, which is the
+   only unexamined digit-heavy language that is not a settled register decision.
+2. **`hr_hr` (17, 41% digit)** — unexamined, not a register language, and it shares `serbian.ts`'s g2p, so
+   a finding there lights up three engines.
+3. **`cmn_hans_cn` / `ckb_iq` / `fa_ir`** — 21–50% Latin, i.e. the code-switching class already measured as
+   net harmful for French. Expect no defect; confirm cheaply rather than working them.
+4. **NOT bn_in / fr_fr / hy_am** — read, measured, clean. Their 70 rows are the queue's floor, not its lead.
