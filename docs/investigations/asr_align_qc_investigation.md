@@ -1472,3 +1472,82 @@ corpus makes the corpus look stale when it is current. Verified: re-running a fl
 **No phonemizer defect in bn_in.** Its largest residual class is real, is the same class both instruments
 report, and is lexical. Two candidates recorded above rather than acted on. Next by lift: hu_hu (16),
 hy_am (15), de_de (13), fr_fr (12), he_il (12).
+
+## Run 23 — 2026-08-19 — hu_hu: a missing fold hid the queue, and behind it a real defect class
+
+### The instrument first
+
+`hu_hu`'s 16 all-flagged rows are 8 distinct sentences and none of them contains an error — Hungarian's
+hard parts are all right in the flagged output (`fotózásban` → *ˈfotoːzaːʒbɒn*, regressive voicing;
+`köztársaságot` → *ˈkøstaːrʃɒʃaːɡot*). The aggregate said why: after `coarsen`, **30% of every substitution
+in the language involves `ɒ`** — ɒ→ɔ 11.7%, ɒ→a 7.6%, ɒ→o 5.7%, ɒ→ɑ 4.8%.
+
+⚠ **`ɒ` MET THE `COARSEN` CRITERION OUTRIGHT AND WAS NOT IN THE MAP.** We write it 52,582 times across the
+corpus; the recognizer writes it **zero** times in 270,106 utterances — not "under 1%", none. Only three
+languages emit it, and for two of them it is the plain ⟨a⟩/⟨o⟩ vowel, so a third of every Hungarian
+utterance was being scored against a symbol the recognizer cannot produce.
+
+    median      hu_hu    uz_uz    da_dk
+    current    0.3117   0.3394   0.5258
+    ɒ -> ɔ     0.2810   0.3134   0.5167     <- best for each, none worse
+    ɒ -> a     0.2897   0.3369   0.5258
+    ɒ -> o     0.2984   0.3168   0.5243
+    ɒ -> ɑ     0.2957   0.3381   0.5258
+
+No other language can be affected, and that is provable rather than swept: `coarsen` applies to both sides
+and the recognizer's ɒ count is 0, so the entry is unreachable outside these three.
+
+⚠ **IT DOES COST DANISH ONE THING.** da_dk emits both ɒ (2,859) and ɔ (2,897), so the fold merges a contrast
+it makes: a Danish row writing ɒ where ɔ belongs currently scores as a miss and now will not. That is the ʔ
+argument from the COARSEN docstring pointing the other way. Accepted because the recognizer has no ɒ at all
+— the comparison was never able to *judge* the symbol, only to penalise it — and da_dk still improves.
+Recorded so it is not discovered later as a surprise.
+
+### What the corrected queue surfaced
+
+Re-deriving hu_hu's queue in memory under the fixed fold moved the median 0.3117 → 0.2810 and changed the
+all-flagged set: **six new sentences**, and they share one defect.
+
+⟨sch⟩ and ⟨ch⟩ are foreign spellings Hungarian orthography has no rule for, so the longest-match scan took
+⟨c⟩→[t͡s] and then a bare ⟨h⟩ — producing *t͡sh*, a sound no reading of these words yields:
+
+    charles     ˈt͡shɒrlɛʃ        schumacher  ˈʃt͡ʃ- (⟨s⟩ alone, then ⟨ch⟩)
+    nicholas    ˈnit͡sholɒʃ       zachary     ˈzɒt͡shɒri
+    canyoning   ˈt͡sɒɲoniŋɡ       cuddeback   ˈt͡sudːɛbɒt͡sk
+
+173 tokens across 66 distinct words, essentially all proper names.
+
+⚠ **[t͡ʃ] IS THE MEASURED DEFAULT AND [x] WAS THE OBVIOUS ONE.** Hungarian's own learned vocabulary reads
+⟨ch⟩ as [x] — technológia, hierarchia, jacht — so [x] was the first candidate. Against the audio it is
+**net negative: 103 rows closer against 149 further.** The corpus is name-dominated (≈140 foreign tokens
+against ≈33 learned), and [t͡ʃ] scores **142 closer against 13 further** on the 155 rows it changes, mean
+0.3253 → 0.3168. A `chn → xn` carve-out for the techn- family was tried too and measured very slightly
+WORSE than leaving it out, so it is not there.
+
+### The trap, and why the whole thing had to be measured
+
+The unguarded rule looked clean at 174/78. Twelve of those 78 were one native class:
+
+⚠ **⟨c⟩ + ⟨h⟩ ACROSS A MORPHEME BOUNDARY.** *harminchat* (36) is harminc+hat, not harmin-csat — and **every
+one of the 12 regressed rows came from OUR OWN numeral compositor**, not from corpus text, which contains
+no native c+h word at all. This is the same failure the ⟨csz⟩ skip in `hungarian.ts` already exists for
+(*kilencszáz*), found the same way. The guard covers the numeral compounds and also the productive allative
+`-hoz/-hez` on any c-final noun (*archoz*, *tánchoz*, *perchez*) — unattested here, guarded anyway, because
+a silent regression on ordinary inflection would outweigh what the names gain.
+
+Guarding cost 3 rows that had scored *better* under the wrong reading — the "phonetically overlapping by
+accident" case the numeral register's docstring names. Final: 171 better / 69 worse corpus-wide,
+142 / 13 on the changed rows.
+
+⚠ **A SECOND INSTRUMENT AGREES.** The wikipron hu referee gains 13 words (59,568 → 59,581 of 64,286) — an
+independent source, not the audio the rule was tuned against.
+
+### Left alone
+
+Bare ⟨c⟩ before a back vowel in a foreign word (*canyoning* → ˈt͡sɒɲoniŋɡ, *cuddeback*, *costello*, *covid*)
+is still [t͡s]. Unlike ⟨ch⟩ there is no orthographic discriminator: native *cukor*, *cella*, *célja* need
+[t͡s] in the same shape. That is the German ⟨c⟩ problem again and it is lexical, not contextual.
+
+⟨ck⟩ looked like a clean rule — Hungarian "has no native ⟨ck⟩" — and is not: *palackok*, *kockázat*,
+*arcképét*, *építőkockáiként* are ordinary Hungarian where [t͡sk] is correct. ~58 foreign tokens against
+~12 native ones is not a rule, and checking the word list before writing it is what stopped it.

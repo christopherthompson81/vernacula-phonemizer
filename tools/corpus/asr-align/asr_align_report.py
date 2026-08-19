@@ -116,7 +116,28 @@ def fold(ipa: str) -> list[str]:
 # the recognizer writes `c` 10,292 times against our 49,987 — a fifth, not a hundredth. It is emitted, `tʃ`/`dʒ`
 # are contrastive in many of these languages, and folding c→tʃ globally would destroy a distinction the
 # recognizer does make. Generalising from one language was the error; the DB-wide count is the check.
+# ⚠ `ɒ` WAS MISSING AND MET THE CRITERION OUTRIGHT: we write it 52,582 times and the recognizer writes it
+# ZERO times in all 270,106 utterances — not "under 1%", none. Only three languages emit it (hu_hu 31,974,
+# uz_uz 17,749, da_dk 2,859) and for the first two it is the plain ⟨a⟩/⟨o⟩ vowel, so a third of every
+# Hungarian utterance was scored against a symbol the recognizer cannot produce. It substitutes ɔ more
+# often than anything else, and mapping there beats a, o and ɑ for ALL THREE languages:
+#
+#     median      hu_hu    uz_uz    da_dk
+#     current    0.3117   0.3394   0.5258
+#     ɒ -> ɔ     0.2810   0.3134   0.5167      <- best for each, none worse
+#     ɒ -> a     0.2897   0.3369   0.5258
+#     ɒ -> o     0.2984   0.3168   0.5243
+#
+# ⚠ NO OTHER LANGUAGE CAN BE AFFECTED, and that is provable rather than swept: coarsen applies to both
+# sides, and the recognizer's ɒ count is 0, so the map is unreachable outside these three.
+#
+# ⚠ IT DOES COST DANISH ONE THING. da_dk emits both ɒ (2,859) and ɔ (2,897), so folding merges a contrast
+# it makes: a Danish row writing ɒ where ɔ belongs currently scores as a miss and afterwards will not. That
+# is the ʔ argument from below pointing the other way, and it is accepted here because the recognizer has
+# no ɒ at all — the comparison was never able to judge the symbol, only to penalise it — and because da_dk
+# still improves. Recorded so the loss is not discovered later as a surprise.
 COARSEN = {
+    "ɒ": "ɔ",
     "ʋ": "v", "ɦ": "h", "ɫ": "l", "ʈ": "t", "ʂ": "s", "ɖ": "d", "ɳ": "n", "ɽ": "r",
     "ɓ": "b", "ɗ": "d", "ʄ": "j", "ɠ": "ɡ", "ᶑ": "d", "χ": "x", "ʑ": "ʒ", "ɸ": "f",
     "ʝ": "ʃ", "ɴ": "n", "ɻ": "r", "ɮ": "l",

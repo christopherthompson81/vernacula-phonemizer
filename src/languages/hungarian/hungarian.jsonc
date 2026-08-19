@@ -37,6 +37,23 @@
         ["ssz", "sː", false],
         ["tty", "cː", false],
         ["zzs", "ʒː", false],
+        // ⚠ ⟨sch⟩ AND ⟨ch⟩ ARE FOREIGN SPELLINGS, and Hungarian has no rule for either — so the scan took
+        // ⟨c⟩→[t͡s] and then a bare ⟨h⟩, giving *t͡sh*, a sound no reading of these words produces:
+        // *charles* → ˈt͡shɒrlɛʃ, *canyoning* → ˈt͡sɒɲoniŋɡ, *cuddeback* → ˈt͡sudːɛbɒt͡sk. 173 tokens across
+        // 66 distinct words in the hu_hu corpus, essentially all proper names.
+        //
+        // ⚠ [t͡ʃ] IS THE MEASURED DEFAULT, NOT THE OBVIOUS ONE. Hungarian's own learned vocabulary reads
+        // ⟨ch⟩ as [x] (technológia, hierarchia, jacht) and that was the first candidate; against the audio
+        // it is NET NEGATIVE — 103 rows closer against 149 further — because the corpus is name-dominated.
+        // [t͡ʃ] scores 145 closer against 22 further on the 167 rows it changes. A `chn → xn` carve-out for
+        // the techn- family was also tried and measured very slightly WORSE than leaving it out, so it is
+        // not here. ⟨sch⟩ is German/Dutch and never native, hence its own entry above ⟨ch⟩ — without it the
+        // ⟨s⟩ matches alone and *schumacher* comes out ʃt͡ʃ-.
+        //
+        // ⚠ THE MORPHEME BOUNDARY IS GUARDED IN hungarian.ts, NOT HERE. See the ⟨ch⟩ skip beside the
+        // ⟨csz⟩ one — *harminchat* is c+h and must not become harmin-CSAT.
+        ["sch", "ʃ", false],
+        ["ch", "t͡ʃ", false],
         ["cs", "t͡ʃ", false],
         ["dz", "d͡z", false],
         ["gy", "ɟ", false],

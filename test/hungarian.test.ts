@@ -202,3 +202,50 @@ describe("Hungarian — `mp`, the second, as a unit NUMERATOR", () => {
         expect(say("480 km/h")).toBe("ˈneːcsaːzɲolt͡svɒn ˈkilomeːtɛr ˈpɛr ˈoːrɒ");
     });
 });
+
+/**
+ * ⟨sch⟩ and ⟨ch⟩ — FOREIGN SPELLINGS Hungarian orthography has no rule for. The scan took ⟨c⟩→[t͡s] then a
+ * bare ⟨h⟩, producing *t͡sh*, a sound no reading of these words yields (*charles* → ˈt͡shɒrlɛʃ). 173 tokens
+ * across 66 distinct words in the hu_hu corpus, essentially all proper names.
+ *
+ * ⚠ [t͡ʃ] IS THE MEASURED DEFAULT, NOT THE OBVIOUS ONE. Hungarian's own learned vocabulary reads ⟨ch⟩ as [x]
+ * (technológia, hierarchia, jacht), and against the audio that candidate is NET NEGATIVE — 103 rows closer
+ * against 149 further. [t͡ʃ] scores 142 closer against 13 further on the 155 rows it changes, and the
+ * wikipron referee independently gains 13 words.
+ */
+describe("Hungarian — the foreign ⟨sch⟩/⟨ch⟩ digraphs", () => {
+    test("⟨ch⟩ is [t͡ʃ], not ⟨c⟩ plus a bare ⟨h⟩", () => {
+        expect(phonemizeWord("charles")).toBe("ˈt͡ʃɒrlɛʃ");
+        expect(phonemizeWord("zachary")).toBe("ˈzɒt͡ʃɒri");
+        expect(phonemizeWord("nicholas")).toBe("ˈnit͡ʃolɒʃ");
+        // ⚠ ⟨sch⟩ NEEDS ITS OWN ENTRY, ahead of ⟨ch⟩: otherwise the ⟨s⟩ matches alone and Schumacher comes
+        //   out ʃt͡ʃ-, two sibilants where the German spelling has one.
+        expect(phonemizeWord("schumacher")).toBe("ˈʃumɒt͡ʃɛr");
+        expect(phonemizeWord("schneider")).toBe("ˈʃnɛidɛr");
+    });
+
+    /**
+     * ⚠ THE MORPHEME BOUNDARY. Two native shapes put ⟨c⟩ next to ⟨h⟩, and the digraph must not swallow
+     * either — the same failure the ⟨csz⟩ skip in hungarian.ts exists for, found the same way. Every one of
+     * the 12 rows that regressed before this guard came from OUR OWN numeral compositor; the corpus text
+     * contains no native c+h word at all.
+     */
+    test("a c-final stem before an h-initial one stays c + h", () => {
+        // a numeral compound: harminc + hat, NOT harmin-csat
+        expect(phonemizeWord("harminchat")).toBe("ˈhɒrmint͡shɒt");
+        expect(phonemizeWord("harminchárom")).toBe("ˈhɒrmint͡shaːrom");
+        // the productive allative -hoz/-hez on any c-final noun. Not attested in this corpus; guarded
+        // anyway, because a silent regression on ordinary inflection outweighs what the names gain.
+        expect(phonemizeWord("archoz")).toBe("ˈɒrt͡shoz");
+        expect(phonemizeWord("tánchoz")).toBe("ˈtaːnt͡shoz");
+        expect(phonemizeWord("perchez")).toBe("ˈpɛrt͡shɛz");
+    });
+
+    test("the native ⟨c⟩ and ⟨cs⟩ readings are untouched", () => {
+        expect(phonemizeWord("cukor")).toBe("ˈt͡sukor");
+        expect(phonemizeWord("kilenc")).toBe("ˈkilɛnt͡s");
+        expect(phonemizeWord("csak")).toBe("ˈt͡ʃɒk");
+        expect(phonemizeWord("meccs")).toBe("ˈmɛt͡ʃː");
+        expect(phonemizeWord("kilencszáz")).toBe("ˈkilɛnt͡ssaːz"); // the ⟨csz⟩ skip still holds
+    });
+});

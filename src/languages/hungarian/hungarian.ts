@@ -36,6 +36,22 @@ function toSegments(word: string): Seg[] {
             // the same boundary; cs+z needs a cs-final stem before a z-initial one and is vanishingly
             // rare. Skipping the digraph here lets ⟨c⟩ then ⟨sz⟩ match from the manifest table.
             if (orth === "cs" && w.startsWith("csz", i)) continue;
+            // ⚠ ⟨ch⟩ IS c + h ACROSS A MORPHEME BOUNDARY in two native shapes, and the digraph added for
+            // foreign names (see hungarian.jsonc) would swallow both. Same failure as ⟨csz⟩ above, found
+            // the same way — by measuring: 12 rows regressed on *harminchat* / *harmincharom* before this
+            // guard existed, and every one of them came from OUR OWN numeral compositor rather than the
+            // corpus text, which contains no native c+h word at all.
+            //   · a c-final numeral stem before an h-initial one — harminc+hat, harminc+harom, kilenc+het
+            //   · the productive allative -hoz/-hez/-hoz on any c-final noun — arc+hoz, tanc+hoz, perc+hez.
+            //     Not attested in this corpus; guarded anyway, because a silent regression on ordinary
+            //     inflection would cost more than the foreign names gain.
+            if (
+                orth === "ch" &&
+                (/(?:harmin|kilen)c$/u.test(w.slice(0, i + 1)) ||
+                    /^ch(?:oz|ez|öz)$/u.test(w.slice(i)))
+            )
+                continue;
+
             if (w.startsWith(orth, i)) {
                 segs.push({ ph: ipa, v });
                 i += orth.length;
