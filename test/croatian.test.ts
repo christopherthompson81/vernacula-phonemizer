@@ -51,6 +51,17 @@ describe("Croatian (hr) canonical IPA", () => {
         expect(phonemize("ANNA", "hr")).toBe(phonemize("Anna", "hr"));
     });
 
+    // ⚠ THE BEARING AMBIGUITY GUARD IS CASE-SENSITIVE. `s` is the preposition "with" and `S` is *južno*;
+    //   only the lowercase letter needs to be attached to the degree, or a spaced uppercase latitude stops
+    //   reading. Croatian gained a bare-degree arm at the same time: while the compass arm swallowed a
+    //   spaced ⟨s⟩ there was no unclaimed bare degree in this corpus, and requiring attachment creates one.
+    test("a degree bearing: lowercase is a word, uppercase is a bearing", () => {
+        expect(phonemize("35° s padavinama", "hr")).toContain("stˈupɲeʋa s ");
+        expect(phonemize("35° S od ekvatora", "hr")).toContain("jˈu˥˩ʒno");
+        expect(phonemize("35° w", "hr")).toContain("zˈaː˥˩padno");
+        expect(phonemize("35°", "hr")).toBe("trˈiː˩˥deset peː˥˩t stˈupɲeʋa");
+    });
+
     test("Croatian-specific grapheme→IPA (Gaj's Latin, Ijekavian read as letters)", () => {
         expect(phonemize("mlijeko", "hr").trim()).toBe("mlijˈeː˩˥ko"); // Ijekavian "milk"
         expect(phonemize("đak", "hr").trim()).toBe("d͡ʑaː˥˩k"); // ⟨đ⟩ → d͡ʑ

@@ -430,11 +430,12 @@ export function normalizeBosnian(input: string): string {
     //        ⚠ ATTACHMENT IS REQUIRED ONLY OF THE AMBIGUOUS BEARINGS. `i` "and" and `s` "with" are two of
     //        the commonest words in Bosnian as well as bearings, so spaced off the degree they must not be
     //        claimed — `temperatura 35° i padavine` was reading the conjunction as *istočno* and deleting
-    //        it. J and Z are letters no Bosnian sentence uses alone, so a space is safe there.
+    //        it. ⚠ CASE-SENSITIVE, though: only the LOWERCASE letter is the word, and a spaced uppercase
+    //        `35° S` is an ordinary latitude. J Z N E W are letters no Bosnian sentence uses alone at all.
     //        ⚠ N AND E ARE READ, NOT DROPPED. The imported English-convention bearings are unambiguous in
     //        either system and their words are already in this table, so reading them beats deleting them.
-    s = s.replace(/(\d+)\s?°(?:\s?([JZNEjzne])|([SIsi]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
-        `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno", N: "sjeverno", E: "istočno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
+    s = s.replace(/(\d+)\s?°(?:\s?([JZNEWSIjznew])|([si]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
+        `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno", N: "sjeverno", E: "istočno", W: "zapadno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
     //    5c) THE BARE DEGREE emits the degree noun only. Safe unguarded because 5a/5b have already consumed
     //        the qualified forms.
     //        ⚠ IT ALSO CONSUMES A FOREIGN BEARING LETTER, and it must. `W X Y Q` are outside Gaj's Latin,
@@ -443,14 +444,15 @@ export function normalizeBosnian(input: string): string {
     //        them, so an unconsumed `W` glues onto the noun as *stepeniʋ* — and the stress lookup then
     //        runs on the nonexistent word `stepeniv`, misses stress.tsv and loses the pitch accent. The
     //        imported `35°W` form is what this catches; `35°Z` is still read as *zapadno* by 5b above.
-    //        ⚠ IT ALSO CONSUMES THE LETTERS 5b HAS NO WORD FOR — W X Y Q, outside Gaj's Latin and so
-    //        unclaimable by the bearing table above. They used to be harmless only because the g2p had no
+    //        ⚠ IT ALSO CONSUMES THE LETTERS 5b HAS NO WORD FOR — X Y Q, outside Gaj's Latin and with no
+    //        bearing sense at all. ⟨W⟩ is NOT among them: *zapadno* is already in 5b's table, and deleting
+    //        a letter whose reading sits in the adjacent arm is the weaker of the two available fixes. They used to be harmless only because the g2p had no
     //        rule for them; the shared `foreignLetters` fold now maps them, so an unconsumed one glues
     //        onto the noun and the stress lookup then runs on a nonexistent word and loses the accent.
     //        None is a BCS word on its own, so a space before them is safe.
     //        ⚠ AND THE WHITESPACE IS INSIDE THE OPTIONAL GROUP: outside it, `\s?` is consumed even when the
     //        group matches empty, and `35° od ekvatora` glues to *stepeniod*.
-    s = s.replace(/(\d+)\s?°(?:\s?[WXYQwxyq](?![\p{L}\p{M}]))?/gu,
+    s = s.replace(/(\d+)\s?°(?:\s?[XYQxyq](?![\p{L}\p{M}]))?/gu,
         (_m, n: string) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih` ×13, all decades). As in Russian, the written suffix is

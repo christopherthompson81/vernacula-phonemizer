@@ -249,6 +249,13 @@ export function phonemizeWord(word: string): string {
             out += LETTERS[c];
             prevLetter = c;
             if (isNucleus(w, i)) nuclei.push({ start, end: out.length });
+        } else {
+            // ⚠ AN UNKNOWN CHARACTER BREAKS THE ADJACENCY. Without this reset the two letters either side
+            // of a hyphen look doubled and the second is deleted — `pop-pevač` → *popevač*, `jal-lah` →
+            // *jalah*. The three engines' tokenizers exclude `-`, so this is unreachable through them, but
+            // `phonemizeWord` is exported and the referee eval scores it directly over entries that can be
+            // hyphenated.
+            prevLetter = "";
         }
         i++; // unknown char (punctuation) → skip
     }

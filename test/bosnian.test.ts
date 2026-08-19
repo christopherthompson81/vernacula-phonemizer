@@ -268,7 +268,7 @@ describe("Bosnian text normalization", () => {
         //   Latin so the compass arm's `[SJIZsjiz]` cannot claim them; once the shared fold maps the
         //   letter, an unconsumed one glues onto the noun as *stepeniʋ* and the stress lookup then runs on
         //   the nonexistent word `stepeniv` and loses the pitch accent.
-        expect(say("35°W")).toBe(say("35 stepeni"));
+        expect(say("35°W")).toContain("zˈaː˥˩padno");   // read, not consumed — the word is in 5b's table
         expect(say("35°Z")).toContain("zˈaː˥˩padno");   // the compass arm still reads its own letters
         // ⚠ N AND E ARE READ, NOT DELETED. They fell through both arms and glued; the words are already in
         //   5b's table and the imported English-convention bearings are unambiguous in either system, so
@@ -278,6 +278,10 @@ describe("Bosnian text normalization", () => {
         // ⚠ AND A SPACE IS ALLOWED FOR THE UNAMBIGUOUS BEARINGS ONLY. `i` and `s` are function words, so
         //   they must be attached; J Z N E are letters no Bosnian sentence uses alone.
         expect(say("35° Z")).toContain("zˈaː˥˩padno");
+        // ⚠ AND THE AMBIGUITY GUARD IS CASE-SENSITIVE. Only the LOWERCASE letter is the function word, so a
+        //   spaced UPPERCASE bearing is an ordinary latitude and must still read.
+        expect(say("35° S")).toContain("sjˈe˥˩ʋerno");
+        expect(say("35° I")).toContain("ˈi˩˥stot͡ʃno");
         // ⚠ ATTACHED ONLY — `i` "and" and `s` "with" are bearings AND function words, and a space-tolerant
         //   rule read `35° i padavine` as *istočno* and deleted the conjunction.
         expect(say("temperatura 35° i padavine")).toContain(" i ");

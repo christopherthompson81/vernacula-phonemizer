@@ -192,11 +192,13 @@ export function normalizeCroatian(input: string): string {
     // 5) DEGREES. `90 °F`, `+30°C`, `35° W` (a LONGITUDE — the bare-degree rule must not claim it).
     s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])/gui, (_m, n: string, u: string) =>
         `${n} ${/[Ff]/u.test(u) ? "stupnjeva Farenhajta" : "stupnjeva Celzija"}`);
-    // ⚠ ATTACHMENT IS REQUIRED OF ⟨s⟩ AND ONLY OF ⟨s⟩. `S` is *južno* and `s` is the preposition "with",
+    // ⚠ ATTACHMENT IS REQUIRED OF LOWERCASE ⟨s⟩ AND ONLY OF IT. `S` is *južno* and `s` is the preposition "with",
     //   so spaced off the degree the bearing arm was deleting a common word and inventing a bearing:
     //   `35° s padavinama` read as *trideset pet stupnjeva JUŽNO padavinama`. N, E and W are letters no
     //   Croatian sentence uses alone, so `35° w` — the form this corpus actually writes — still reads.
-    s = s.replace(/(\d+)\s?°(?:\s?([NEWnew])|([Ss]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
+    //   ⚠ AND THE GUARD IS CASE-SENSITIVE: only the LOWERCASE letter is the word. A spaced uppercase `35° S`
+    //   is an ordinary way to write a latitude and must keep reading as *južno*.
+    s = s.replace(/(\d+)\s?°(?:\s?([NEWSnew])|([s]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
         `${n} stupnjeva ${({ N: "sjeverno", S: "južno", E: "istočno", W: "zapadno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
 
     // 5b) THE BARE DEGREE. ⚠ ADDED BECAUSE THE ARM ABOVE STOPPED CLAIMING EVERYTHING. While the compass

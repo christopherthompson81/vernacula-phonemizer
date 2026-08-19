@@ -351,7 +351,9 @@ export function normalizeSerbian(input: string): string {
     //    so those four may not be spaced off the degree or the rule eats them. Every other bearing —
     //    N E W J Z, Ј З — is a letter no BCS sentence uses on its own, so a space is safe there and
     //    `35° W` still reads. Latin ⟨I⟩ (istok) belongs in the list too; leaving it out let `35°I` glue.
-    s = s.replace(/(\d+)\s?°(?:(?:\s?[NEWJZnewjzЈЗјз]|[SIsiСИси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
+    //    ⚠ CASE-SENSITIVE: only the LOWERCASE letter is the function word, so a spaced uppercase bearing
+    //    (`35° S`, `35° И`) still reads. Only `s i с и` need the attachment.
+    s = s.replace(/(\d+)\s?°(?:(?:\s?[NEWJZSInewjzЈЗЅИјз]|[siси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
         (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written
