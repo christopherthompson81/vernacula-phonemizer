@@ -166,7 +166,18 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
     for (const m of text.matchAll(TOKEN)) {
         if (m[1]) {
             const w = m[1];
-            if (NIQQUD.test(w)) { await flush(); queue.push(phonemizeWord(w)); continue; } // already vocalized → the rule engine reads it directly
+            if (NIQQUD.test(w)) {
+                await flush();
+                // ⚠ A JOINER STILL SEPARATES TWO WORDS WHEN THEY ARE VOCALIZED. `phonemizeWord` scans a
+                // token as ONE word, so a maqaf compound fuses: `בֵּית־סֵפֶר` → *betsefeʁ*, one nonexistent
+                // word where the reading is *bet sefeʁ*. The bare path already splits on WORD_PUNCT; the
+                // vocalized path has to as well, or the same input is right unpointed and wrong pointed.
+                // ⚠ `hebrew.ts`'s own sync `text()` has the same fusion and is NOT fixed here — it is a
+                // different entry point, outside this change's scope, and the corpus has 0 vocalized maqaf
+                // compounds (32 maqaf words, all bare). Stated so it is not read as already handled.
+                queue.push(w.split(WORD_PUNCT).filter(Boolean).map(phonemizeWord).filter(Boolean).join(" "));
+                continue;
+            }
             const curLen = run.reduce((a, x) => a + x.length + 1, 0);
             if (run.length && curLen + w.length > MAX_CHARS) await flush(); // length-cap chunker at a word boundary
             run.push(w);

@@ -138,6 +138,10 @@ describe("hebrew neural vowel restoration", () => {
             //   the parts array, so the guard must short-circuit before indexing it.
             expect(await phonemizeHebrewNeural("־")).toBe("");
             expect(await phonemizeHebrewNeural("שלום ־ עולם")).toBe("ʃalom ʔolam");
+            // ⚠ AND A VOCALIZED COMPOUND SPLITS TOO, or the same input is right unpointed and wrong
+            //   pointed. A pointed word skips the tagger and goes straight to `phonemizeWord`, which scans
+            //   a token as ONE word — so the joiner fused two into a nonexistent one: *betsefeʁ*.
+            expect(await phonemizeHebrewNeural("בֵּית־סֵפֶר גָּדוֹל")).toBe("bet sefeʁ ɡadol");
         });
 
         test("a declined single-word run falls back, it does not disappear", async () => {
