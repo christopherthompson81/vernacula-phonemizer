@@ -936,3 +936,65 @@ Nineteen findings, **not one of which moved a test**. The recurring shape is no 
 applied to one member of a shared-engine family leaves the siblings holding the same defect, and the
 measurement instrument that justifies the fix is blind to short tokens. Both are arguments for reading the
 whole family and for checking a per-token diff, not only an aggregate.
+
+## Run 14 — 2026-08-18 19:15 — the third round, and a design lesson about my own change
+
+Eight findings. **The three HIGH ones were all mine, all in the same rule, and all introduced by the
+previous round's fix.** That is worth recording as a pattern rather than as three bugs.
+
+### 14a. The degree arm was wrong in three ways at once
+
+    whitespace outside the group   око 35° од екватора  →  …stepeniод екватора
+    Cyrillic bearing class         температура 35° и падавине  →  the conjunction DELETED
+    Latin bearings missing         35°Z, 35°J glued; bs 35°N, 35°E fell through both arms
+
+The second is the ugly one. `и` ("and") and `с` ("with") are two of the commonest words in Serbian **and**
+they are compass bearings, so a rule that tolerates a space before the bearing letter eats them. The same
+shape existed **pre-existing** in the siblings: `bs 35° i padavine` read the conjunction as *istočno*, and
+`sr 35° с падавинама` read the preposition as *Celsius* via the scale arm.
+
+The unifying fix is one constraint: **a bearing must be attached to the degree sign.** Every bearing in
+this corpus is written that way — `35°w`, `35°z` — so requiring it costs nothing and removes the ambiguity
+at the root instead of enumerating exceptions. Cyrillic ⟨С⟩ left the scale class with it, on the same
+reasoning: Cyrillic scale letters are ×0 in the corpus, so between keeping an unattested reading and
+deleting a common preposition, the unattested one goes.
+
+### 14b. The all-caps guard made the phonemizer case-sensitive
+
+Run 13's initialism guard used "no vowel **or** all caps". The second arm fires on any all-caps token:
+
+    Holland → xˈoland        HOLLAND → xˈolland
+    Anna    → ˈana           ANNA    → ˈanna
+
+So every all-caps proper noun and every headline kept a geminate the language does not have. **A
+phonological rule must not depend on capitalisation.** The no-vowel signature alone identifies a letter run
+(`sssr`, `mmf`, `www`, `bbc`), and it cannot fire on a real BCS word: the words carrying a geminate are all
+loans, and loans have vowels. A vowel-bearing initialism (`ADD`) is read as the pseudo-word this engine
+already treats it as — the pre-existing absence of an initialism speller, not this rule's to fix.
+
+### 14c. The lesson: the weak half of the change forced the risky half
+
+Worth stating plainly, because it is a design observation and not a bug. The degree-arm surgery exists
+**only** because the `foreignLetters` fold makes a stray bearing letter audible — before it, the letter was
+silently dropped by the g2p and nothing needed to consume it. And the fold is the half of this work whose
+evidence is weak: `qu` is 23-4, but `w` is 93-67 and `y` 107-91, both confounded by code-switching.
+
+So the strongly-evidenced change (degemination, 544-39) needed no rule surgery at all, while the
+weakly-evidenced one (the ⟨w⟩/⟨y⟩ fold) has now cost three HIGH regressions across two review rounds in
+three different files. **A change that is merely defensible should not be allowed to drag a change that is
+well-measured into risk.** If the fold's ⟨w⟩/⟨y⟩ arms were deferred until span-level LID exists, the degree
+arms in all three languages could be left exactly as they were.
+
+Recorded rather than acted on: the fold also removes real deletions (`Qing → inɡ`), the degree arms are now
+correct and tested, and the pre-existing conjunction bugs it surfaced are worth having found. But the next
+time a weakly-supported fold wants to ride along with a strong fix, split the commit.
+
+    whole corpus, unchanged by this round: 716 better, 148 worse over 9,496 rows
+    every corpus degree form still reads: 35°z, 35°w, 30 °c, +30°c, 35° w, 90 °f
+
+### Four rounds
+
+Twenty-seven findings, none of which moved a test. The three recurring shapes are now nameable: a fix
+applied to one member of a shared-engine family leaves the siblings holding the same defect; a measurement
+instrument that scores whole sentences is blind to a deleted letter in a short token; and a rule written to
+consume one thing will consume its neighbours unless the anchor is tight.
