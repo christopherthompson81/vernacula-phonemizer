@@ -268,3 +268,21 @@ describe("Pashto — every word has a nucleus", () => {
         expect(phonemizeWord("لاس")).toBe("lˈɑs");
     });
 });
+
+/**
+ * ⚠ A LEXICON ENTRY THAT VOCALIZES TO NOTHING IS REJECTED AT LOAD (core/harakatLexicon.ts). This lexicon
+ * exists to supply the vowels an abjad leaves unwritten, so a value with no harakat and a sukun on every
+ * consonant asserts the opposite — and is strictly WORSE than no entry, because a miss falls through to the
+ * g2p, which at least inserts the default short vowel. 26 such rows are in lexicon.tsv, all in one
+ * alphabetical run (بر…/بز…) — residue of the loose-fold mining Run 11 fixed at scale.
+ */
+describe("Pashto — a lexicon entry cannot suppress every vowel", () => {
+    test("an all-sukun entry is ignored and the rules supply the zwarakay", () => {
+        expect(phonemizeWord("بزنس")).toBe("bəznˈəs"); // entry بْزْنْس would give *bzns; Ohala then drops the medial ə
+        expect(phonemizeWord("برتخت")).toBe("bərət̪xˈət̪"); // entry بْرْتْخْت would give *brt̪xt̪
+    });
+
+    test("a PARTIAL sukun is still honoured — it is a real statement about one consonant", () => {
+        expect(phonemizeWord("کړ")).toBe("kɻ"); // lexicon کْړ: sukun on ک only, deliberate
+    });
+});

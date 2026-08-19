@@ -18,8 +18,33 @@ export const HARAKAT_G = /[ً-ْٰ]/gu;
 export const stripHarakat = (word: string): string => word.replace(HARAKAT_G, "");
 
 /** Load a rider's `skeleton⇥vocalized` restoration lexicon beside its module. Optional: absent → empty Map. */
+/**
+ * ⚠ AN ENTRY THAT VOCALIZES TO NOTHING IS REJECTED AT LOAD. This lexicon exists to supply the short vowels
+ * an abjad leaves unwritten, so a row whose value carries NO harakat and a sukun on every consonant asserts
+ * the opposite — that the word has no vowels at all — and is self-contradictory. It is also strictly worse
+ * than having no entry: a miss falls through to the g2p, which at least inserts the default short vowel,
+ * whereas the entry suppresses it and the word comes out unpronounceable (بزنس → *bzns*, برتخت → *brt̪xt̪*).
+ *
+ * 26 such rows are in `pashto/lexicon.tsv`, all in one alphabetical run (بر…/بز…) — the residue of the
+ * loose-fold mining that `ps_neural_restoration_investigation.md` Run 11 identified and fixed at scale
+ * ("ps silver was 78% all-bare"). fa/ur/pnb have none, so this costs them nothing; the guard lives here so
+ * a re-mine cannot reintroduce the class into any of the four.
+ */
+const SUKUN = "\u0652";
+const ARABIC_LETTER = /[\u0621-\u06D3]/u;
+
+function vocalizesToNothing(value: string): boolean {
+    if (/[\u064B-\u0650\u0670]/u.test(value)) return false; // carries a real vowel mark
+    const consonants = [...value].filter((c) => ARABIC_LETTER.test(c) && c !== SUKUN).length;
+    const sukuns = [...value].filter((c) => c === SUKUN).length;
+    return sukuns >= 2 && sukuns >= consonants - 1;
+}
+
 export function loadHarakatLexicon(metaUrl: string): ReadonlyMap<string, string> {
-    return loadTsvMap(metaUrl, "lexicon.tsv", undefined, { optional: true });
+    const raw = loadTsvMap(metaUrl, "lexicon.tsv", undefined, { optional: true });
+    const out = new Map<string, string>();
+    for (const [k, v] of raw) if (!vocalizesToNothing(v)) out.set(k, v);
+    return out;
 }
 
 /**

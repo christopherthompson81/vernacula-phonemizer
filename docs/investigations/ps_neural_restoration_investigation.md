@@ -1046,7 +1046,15 @@ it, and the ASR corpus is built with `phonemizeAsync`. Re-measured across all NI
     wikipron pbt/pbu/pst/pus        ~0.5pp apart              8          1
 
 Sync ≥ async on every one and worse on none. The rider was corrupting words the rules get right — تر
-*t̪ˈər*→*t̪r*, شک *ʃˈək*→*ʃk*, رنځ *rənˈəd͡z*→*ksdɹ*, کې *kˈe*→*d̪* — 381 of the 7,310.
+*t̪ˈər*→*t̪r*, شک *ʃˈək*→*ʃk*, کش *kˈəʃ*→*kʃ*, ژر *ʒˈər*→*ʒr* — 381 of the 7,310.
+
+⚠ **TWO OF THE EXAMPLES I FIRST GAVE WERE MY OWN PROBE'S ARTIFACT.** I also reported رنځ *rənˈəd͡z*→*ksdɹ*
+and کې *kˈe*→*d̪*. Both are wrong: the corpus holds *rənˈəd͡z* for رنځ on the async path too, and کې is
+rendered with its [e] in all 1,033 aligned occurrences. They came from zipping `text.split()` against
+`ipa.split()` positionally in a row where the two differ in length (54 words against 55 IPA tokens), so the
+pairing drifts and attributes one word's IPA to another. The four examples above are from a DIRECT
+sync-vs-async call on the isolated word, which cannot drift, and the 381-token aggregate is computed
+without alignment — those stand.
 
 ⚠ **AND THIS IS `ps`-ONLY, NOT A VERDICT ON THE RIDER.** The same model helps Urdu: on `ur.cle-speech`
 (n=5,667) async scores **66.3% against sync's 64.2%**, async-only-right 178 against sync-only 62. `ur`
@@ -1056,8 +1064,9 @@ keeps its entry and now carries the number; `ps` is removed with the reason writ
 
     4,415  د     -> d̪      the genitive particle, the commonest word in Pashto
       370  هم هر مهم بهر ذهن زهر نهر  -> hm hr mhm …   medial ⟨ه⟩
-       30  کړ    -> kɻ      lexicon.tsv sukun's it to کْړ deliberately — left alone
-        ~8  loans and single letters
+       47  کړ    -> kɻ      lexicon.tsv sukun's it to کْړ — a PARTIAL sukun, honoured (see below)
+        ~4  بزنس  -> bzns    a DEFECTIVE lexicon entry (below)
+       ~15  a1gp qvc ndp sq → ɡp kvk ndp sk   Latin acronyms, the initialism class
 
 - **A one-consonant word cannot reach the zwarakay rule**, which is conditioned on a FOLLOWING consonant.
 - **The ⟨ه⟩ branch emitted [h] and returned**, never consulting the zwarakay; and the consonant branch
@@ -1078,3 +1087,28 @@ letter.
 **Not viable and not needed.** Run 11's negative result stands and this run strengthens it: the rider is
 strictly dominated for `ps` on every referee. The vowel-less class was never a restoration problem — it was
 15 word types and two conditionals, one of which is the commonest word in the language.
+
+### 3. And the residue is not "loans" — I mislabelled it
+
+Of the 63 tokens left, only 4 are a loanword. The rest split three ways, and only one is a defect:
+
+⚠ **26 LEXICON ENTRIES VOCALIZE TO NOTHING** — no harakat and a sukun on every consonant, i.e. asserting
+the word has no vowels. That is self-contradictory for a lexicon whose whole job is to supply the unwritten
+ones, and **strictly worse than having no entry at all**: a miss falls through to the g2p, which inserts the
+zwarakay, while the entry suppresses it. بزنس → *bzns*, برتخت → *brt̪xt̪* (five consonants, no vowel). All 26
+sit in one alphabetical run (بر…/بز…) — residue of the loose-fold mining Run 11 identified ("ps silver was
+78% all-bare") and fixed at scale.
+
+Rejected at LOAD in `core/harakatLexicon.ts` rather than deleted from the data, so a re-mine cannot
+reintroduce the class. fa/ur/pnb have none, so the guard costs them nothing. Only 4 of the 26 words occur
+in FLEURS, so the corpus effect is small (0.103% → 0.097%); the value is that the class cannot come back.
+
+**⟨کړ⟩ (47 tokens) is NOT in that class and is left alone.** Its entry کْړ carries a PARTIAL sukun — on ک
+only — which is a real statement about one consonant, not a claim that the word has no vowels. Whether
+[kɻ] or [kəɻ] is right for the bare stem is a genuine question (وکړ is *ˈokəɻ* and کړل is *kəɻˈəl*, both
+with the vowel, which argues for consistency; but the referee's کړل is [kṛəl], which argues the sukun is
+correct and our کړل is the odd one). Not resolved here — it needs a Pashto judgement, not a rule.
+
+**~15 are Latin acronyms inside Pashto text** — a1gp → *ɡp*, qvc → *kvk*, ndp → *ndp*, `sq mi` → *sk mˈiː*.
+The foreign-run reader maps the letters to phones instead of spelling them out. Identical to the German
+lowercase-initialism class in Run 33; one fix would serve both.
