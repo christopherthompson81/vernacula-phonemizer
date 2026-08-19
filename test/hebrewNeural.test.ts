@@ -85,6 +85,24 @@ describe("hebrew neural vowel restoration", () => {
          * pushing two for one input word shifts every later word and drops the last — the same alignment
          * failure the length guard exists to catch. `ɡadol` is the canary.
          */
+        /**
+         * ⚠ AN EMPTY READING IS NOT A FAILURE SIGNAL. Some Hebrew words legitimately phonemize to nothing
+         * — `phonemizeWord("ה") === ""`, likewise `ע` — and `emit()` drops an empty string harmlessly. A
+         * truthiness check on the tagger's output therefore condemned a perfectly good clause because of
+         * an unrelated one-letter word, sending it to the rule engine as a skeleton: `ה בית הגדול` lost
+         * `bet` to `vjt`. The word-COUNT mismatch is the only failure signal, and it catches the
+         * all-or-nothing decline too (that returns "" → one token against N).
+         */
+        test("a word whose reading is empty does not skeletonize its clause", async () => {
+            expect(await phonemizeHebrewNeural("ה בית הגדול")).toContain("bet haɡadol");
+        });
+
+        /** ⚠ And the rejoined maqaf halves are VALIDATED, or a half whose reading is empty vanishes inside
+         *  the join — `ה־בית גדול` came out as *bet ɡadol* with the `ה` gone. */
+        test("a maqaf half with an empty reading is not swallowed", async () => {
+            expect(await phonemizeHebrewNeural("ע־בית גדול")).toBe("ʔa bet ɡadol");
+        });
+
         test("a maqaf compound restores, and does not shift the words after it", async () => {
             expect(await phonemizeHebrewNeural("בית־ספר גדול")).toBe("bet sefeʁ ɡadol");
             expect(await phonemizeHebrewNeural("בית־ספר ותיק מאוד")).toBe("bet sefeʁ vatik meod");

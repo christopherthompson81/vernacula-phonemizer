@@ -46,68 +46,79 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
     // (context); a vocalized word or a digit/punctuation break flushes the run; vocalized words → the rule engine, inline.
     const queue: string[] = [];
     let run: string[] = [];
+    /** Restore one clause run into `queue`, one entry per input word. */
     const flush = async (): Promise<void> => {
         if (!run.length) return;
-        const out = (await tagger.restore(run.join(" "))).split(" ");
-        if (out.length === run.length && out.every(Boolean)) { queue.push(...out); run = []; return; }
-        {
-            // ⚠ RETRY WORD BY WORD RATHER THAN ABANDONING THE CLAUSE. The guard used to send the WHOLE run
-            // to the rule engine, which on unvocalized input is a bare consonant skeleton — so one
-            // unreadable word cost every vowel in the sentence. It is not a rare shape: the tagger returns
-            // an EMPTY STRING for any word carrying a geresh or gershayim (צ׳מברס, ג׳ון, ח׳ופו, ד״ר), the
-            // marks Hebrew uses to write foreign consonants, and those are everywhere in transliterated
-            // names. Measured over the he_il corpus: 7.6% of clause runs tripped this, 6.6% of all rows
-            // came out as skeletons, and their median distance against the recognized phones was 0.649
-            // where the vocalized rows sat at 0.342.
-            // ⚠ NOT A CHARACTER-NORMALISATION PROBLEM — the model fails on the ASCII apostrophe AND on
-            // U+05F3/U+05F4 alike, and reads the same word fine with the mark removed. Its charset has no
-            // geresh; only retraining fixes the word itself. What is fixable here is the blast radius.
-            // ⚠ The per-word pass loses the cross-word context that is the reason clauses are batched at
-            // all, so a recovered word may be vocalized less well than a clean clause pass would manage.
-            // That is still the better of the two outcomes: one degraded word against a whole degraded
-            // sentence.
-            // ⚠ SPLIT AT THE UNREADABLE WORDS AND RE-RUN THE SEGMENTS AS CLAUSES, rather than dropping to
-            // word-at-a-time for the whole run. Cross-word context is the entire reason clauses are batched
-            // — it is what resolves the homographs the module doc names (ספר sefeʁ/sifeʁ, קרא kaʁa/koʁa) —
-            // and a word-by-word retry throws it away for every word, not just the broken one. `canRead`
-            // answers which words those are with NO model call, so this costs two or three inferences
-            // instead of N+1 and keeps `הוא קרא ספר של` batched around the name that broke it.
-            let seg: string[] = [];
-            const flushSeg = async (): Promise<void> => {
-                if (!seg.length) return;
-                const o = (await tagger.restore(seg.join(" "))).split(" ");
-                if (o.length === seg.length && o.every(Boolean)) queue.push(...o);
-                else for (const w of seg) queue.push(lexiconLookup(w) ?? phonemizeWord(w));
-                seg = [];
-            };
-            for (const w of run) {
-                if (tagger.canRead(w)) { seg.push(w); continue; }
-                // ⚠ A MAQAF IS A WORD JOINER, so split on it rather than declining the compound. U+05BE is
-                // not in the tagger's charset, but each half is: `בית־ספר` → `bet sefeʁ`, where declining
-                // gives the skeleton *vjtsfʁ*. Splitting also keeps the halves inside the segment, so they
-                // still get the cross-word context of the clause around them. 28 he_il rows carry one.
-                await flushSeg();
-                // ⚠ A MAQAF IS A WORD JOINER, so split on it rather than declining the compound. U+05BE is
-                // not in the tagger's charset but each half is: `בית־ספר` → `bet sefeʁ`, where declining
-                // gives the skeleton *vjtsfʁ*. 28 he_il rows carry one.
-                // ⚠ AND THE HALVES REJOIN INTO ONE QUEUE ENTRY. `assembleClauses` below draws exactly one
-                // entry per TOKEN match, so pushing two for one input word shifts every later word and
-                // silently drops the last one — which is the very failure the length guard above exists to
-                // catch, reintroduced one branch down.
-                const parts = w.split("\u05BE");
-                if (parts.length > 1 && parts.every((x) => x && tagger.canRead(x))) {
-                    const joined = (await tagger.restore(parts.join(" "))).trim();
-                    queue.push(joined || (lexiconLookup(w) ?? phonemizeWord(w)));
+        const words = run;
+        run = [];
+
+        // ⚠ THE ONLY FAILURE SIGNAL IS A WORD-COUNT MISMATCH, never an empty entry. Some Hebrew words
+        // legitimately phonemize to nothing — `phonemizeWord("ה") === ""`, likewise `ע` — and `emit()`
+        // drops an empty string harmlessly. Testing `every(Boolean)` therefore condemned a perfectly good
+        // clause because of an unrelated one-letter word: `ה בית הגדול` lost `bet` to `vjt`. The
+        // all-or-nothing decline shows up as a mismatch too (it returns `""` → one token), so the count
+        // test alone catches everything the truthiness test was there for.
+        const restore = async (ws: string[]): Promise<string[] | undefined> => {
+            const out = (await tagger.restore(ws.join(" "))).split(" ");
+            return out.length === ws.length ? out : undefined;
+        };
+        /** The rule engine, through the lexicon layer the tagger's own tail applies. */
+        const bare = (w: string): string => lexiconLookup(w) ?? phonemizeWord(w);
+
+        const whole = await restore(words);
+        if (whole) { queue.push(...whole); return; }
+
+        // ⚠ SPLIT AT THE WORDS THE TAGGER CANNOT READ AND KEEP THE REST BATCHED. Cross-word context is the
+        // whole reason clauses are batched — it is what resolves the homographs the module doc names (ספר
+        // sefeʁ/sifeʁ, קרא kaʁa/koʁa) — so a word-at-a-time retry would recover the vowels and lose the
+        // readings. `canRead` finds those words with NO model call, so this costs two or three inferences.
+        const unreadable = words.filter((w) => !tagger.canRead(w));
+        if (!unreadable.length) {
+            // ⚠ NOTHING TO SPLIT ON, so do NOT re-issue the identical call. The model is deterministic and
+            // the clause just failed; a retry is a guaranteed-wasted inference. The mismatch here is the
+            // tagger predicting a SPACE tag mid-word, which no split can repair.
+            for (const w of words) queue.push(bare(w));
+            return;
+        }
+
+        let seg: string[] = [];
+        const flushSeg = async (): Promise<void> => {
+            if (!seg.length) return;
+            const out = await restore(seg);
+            if (out) queue.push(...out);
+            else for (const w of seg) queue.push(bare(w));
+            seg = [];
+        };
+        for (const w of words) {
+            if (tagger.canRead(w)) { seg.push(w); continue; }
+            // ⚠ A MAQAF IS A WORD JOINER, so split on it rather than declining the compound. U+05BE is not
+            // in the tagger's charset but each half is: `בית־ספר` → `bet sefeʁ`, where declining gives the
+            // skeleton *vjtsfʁ*. 28 he_il rows carry one.
+            // ⚠ THE HALVES REJOIN INTO ONE QUEUE ENTRY, because assembleClauses draws exactly one entry per
+            // TOKEN match — pushing two for one input word shifts every later word and drops the last.
+            // ⚠ AND THE REJOIN IS VALIDATED. Checking only that the restore is non-empty lets a half whose
+            // reading is empty vanish inside the join: `ה־בית גדול` came out as *bet ɡadol*, the `ה` gone.
+            const parts = w.split("\u05BE");
+            if (parts.length > 1 && parts.every((x) => x && tagger.canRead(x))) {
+                const halves = await restore(parts);
+                if (halves) {
+                    // ⚠ THE SEGMENT STILL FLUSHES HERE, and that is a known limit rather than an
+                    // oversight. The compound is its own model call, so the words before and after it end
+                    // up in different segments and lose context across the maqaf. Deferring would need the
+                    // segment to carry a placeholder whose entry is filled in later — worth doing when a
+                    // maqaf-heavy language needs it, but `על־ידי`/`בין־לאומי`/`בית־ספר` are 28 rows here
+                    // and the restored compound itself is already right.
+                    await flushSeg();
+                    queue.push(halves.join(" "));
                     continue;
                 }
-                // ⚠ THROUGH THE LEXICON FIRST, as the tagger's own tail does. Reaching straight for
-                // `phonemizeWord` skips the layer that gives a known skeleton its curated reading.
-                queue.push(lexiconLookup(w) ?? phonemizeWord(w));
             }
             await flushSeg();
+            queue.push(bare(w));
         }
-        run = [];
+        await flushSeg();
     };
+
     for (const m of text.matchAll(TOKEN)) {
         if (m[1]) {
             const w = m[1];
