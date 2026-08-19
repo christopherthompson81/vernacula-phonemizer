@@ -87,7 +87,7 @@ import { phonemizeWord as ceb } from "../../src/languages/cebuano/cebuano.ts";
 import { phonemizeWord as hil } from "../../src/languages/hiligaynon/hiligaynon.ts";
 import { phonemizeWordRules as ilo } from "../../src/languages/ilocano/ilocano.ts"; // RULE-ONLY: the shipped phonemizeWord consults a referee-derived lexicon → eval on rules only to stay non-circular
 import { phonemizeWord as xh } from "../../src/languages/xhosa/xhosa.ts";
-import { phonemizeWord as sr } from "../../src/languages/serbian/serbian.ts";
+import { foreignLetters as srFold, phonemizeWord as srWord } from "../../src/languages/serbian/serbian.ts";
 import { phonemizeWord as hu } from "../../src/languages/hungarian/hungarian.ts";
 import { phonemizeWord as kmr } from "../../src/languages/kurmanji/kurmanji.ts";
 import { phonemizeWord as za } from "../../src/languages/zhuang/zhuang.ts";
@@ -299,7 +299,11 @@ const PHON: Record<string, (w: string) => string | Promise<string>> = {
     hil,
     ilo,
     xh,
-    sr,
+    // ⚠ THROUGH THE SPELLING FOLD, so the eval measures what the ENGINE emits. `phonemizeWord` alone skips
+    //   `foreignLetters`, which every BCS engine applies per word before it — the eval would score
+    //   `Ellsworth → ˈelsortx` where the engine says `ˈelsʋortx`. A no-op on today's referees (both hold
+    //   zero ⟨q w x y⟩ words) and correct as soon as one does not.
+    sr: (w: string) => srWord(srFold(w)),
     hu,
     kmr,
     za,

@@ -44,6 +44,11 @@ describe("Croatian (hr) canonical IPA", () => {
         //   geminate can trip: they are all loans, and loans have vowels.
         expect(phonemize("BBC", "hr")).toBe("bbt͡s");
         expect(phonemize("www", "hr")).toBe("ʋʋʋ");
+        // ⚠ AND THE GUARD IS CASE-INDEPENDENT. An "all caps" signature was tried and is wrong — it makes
+        //   degemination depend on capitalisation for ordinary words, so a headline or an all-caps proper
+        //   noun keeps a geminate the language does not have.
+        expect(phonemize("HOLLAND", "hr")).toBe(phonemize("Holland", "hr"));
+        expect(phonemize("ANNA", "hr")).toBe(phonemize("Anna", "hr"));
     });
 
     test("Croatian-specific grapheme→IPA (Gaj's Latin, Ijekavian read as letters)", () => {

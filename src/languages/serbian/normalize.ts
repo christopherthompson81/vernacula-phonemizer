@@ -311,7 +311,11 @@ export function normalizeSerbian(input: string): string {
     // 4) DEGREES, two arms. The first claims `°C` / `°F` and supplies both the degree noun and the scale
     //    name. A WRITTEN degree noun is CONSUMED when present (`32 °C степена`), or the word is emitted
     //    twice; the count agrees with the numeral (32 → gen.sg stepena), not with what was written.
-    s = s.replace(/(\d+)\s?°\s?([CFСcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
+    //    ⚠ NO CYRILLIC ⟨С⟩ IN THIS CLASS. It is the preposition `с` "with", and with a space allowed before
+    //    the letter `35° с падавинама` was read as Celsius and the preposition deleted. Cyrillic scale
+    //    letters are ×0 in this corpus — only Latin `w f c z` follow a degree anywhere in hr/bs/sr — so the
+    //    class that costs a common word to keep is the one to drop.
+    s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
         (_m, n: string, unit: string, _written: string | undefined) =>
             `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
     //    4b) THE BARE DEGREE emits the degree noun ONLY, no scale word — right for a longitude (`35°W`) and
@@ -332,7 +336,15 @@ export function normalizeSerbian(input: string): string {
     //    ⚠ AND THE CLASS CARRIES BOTH SCRIPTS. A Latin-only `[NSEWnsew]` matches nothing in Cyrillic text —
     //    the trap bosnian/normalize.ts already records against Croatian's list. Cyrillic bearings are
     //    С Ј И З (север/juг/исток/запад), not N S E W.
-    s = s.replace(/(\d+)\s?°\s?(?:[NSEWnsewСЈИЗсјиз](?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
+    //    ⚠ THE BEARING MUST BE ATTACHED TO THE `°`, WITH NO SPACE, and that is what makes the rule safe.
+    //    The BCS bearings are С Ј И З / S J I Z, and two of them are among the commonest words in the
+    //    language — `и` "and" and `с` "with". A rule that allows a space before the letter eats them:
+    //    `температура 35° и падавине` loses the conjunction outright. Every bearing in this corpus is
+    //    written attached (`35°w`, `35°z`), so requiring it costs nothing and closes the ambiguity.
+    //    ⚠ AND THE WHITESPACE LIVES INSIDE THE OPTIONAL GROUP. Outside it, `\s?` is consumed even when the
+    //    group matches empty, so `око 35° од екватора` glued to *stepeniод* — the very defect this arm was
+    //    changed to prevent, reintroduced for the general case.
+    s = s.replace(/(\d+)\s?°(?:[NSEWJZnsewjzСЈИЗсјиз](?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
         (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written

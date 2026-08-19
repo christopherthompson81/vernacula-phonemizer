@@ -270,6 +270,13 @@ describe("Bosnian text normalization", () => {
         //   the nonexistent word `stepeniv` and loses the pitch accent.
         expect(say("35°W")).toBe(say("35 stepeni"));
         expect(say("35°Z")).toContain("zˈaː˥˩padno");   // the compass arm still reads its own letters
+        expect(say("35°N")).toBe(say("35 stepeni"));    // N and E fell through BOTH arms and glued
+        expect(say("35°E")).toBe(say("35 stepeni"));
+        // ⚠ ATTACHED ONLY — `i` "and" and `s` "with" are bearings AND function words, and a space-tolerant
+        //   rule read `35° i padavine` as *istočno* and deleted the conjunction.
+        expect(say("temperatura 35° i padavine")).toContain(" i ");
+        expect(say("35° s vjetrom")).toContain(" s ");
+        expect(say("35° od ekvatora")).toContain("stˈe˥˩peni od");
         expect(say("MMF")).toBe("mmf");                 // and an initialism keeps its doubled letter
         expect(say("James i dr. 1995")).toBe("jˈames i dr . xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set peː˥˩t");
     });

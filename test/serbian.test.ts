@@ -150,6 +150,17 @@ describe("Serbian normalization", () => {
         //   `35°З` read as *trideset pet z*. That is the Cyrillic west-bearing, the form a Cyrillic corpus
         //   actually writes, so the class carries both scripts (С Ј И З, not only N S E W).
         expect(say("35°З")).toBe(say("35 stepeni"));
+        expect(say("35°Z")).toBe(say("35 stepeni"));   // the LATIN bearings too — jug, zapad
+        expect(say("35°J")).toBe(say("35 stepeni"));
+        // ⚠ A BEARING MUST BE ATTACHED TO THE `°`. Two of them — `и` "and" and `с` "with" — are among the
+        //   commonest words in the language, so a rule that allows a space before the letter DELETES them.
+        //   Every bearing in this corpus is written attached (`35°w`), so requiring it costs nothing.
+        expect(say("температура 35° и падавине")).toContain(" i ");
+        expect(say("35° с падавинама")).toContain(" s ");   // and ⟨с⟩ is not Celsius either
+        // ⚠ THE WHITESPACE LIVES INSIDE THE OPTIONAL GROUP. Outside it, `\s?` is eaten even when the group
+        //   matches empty, and the next word glues onto the noun — *stepeniод*, which then misses
+        //   stress.tsv and loses the pitch accent, the very defect this arm exists to prevent.
+        expect(say("око 35° од екватора")).toContain("stˈe˥˩peni od");
         expect(say("35°C")).toContain("t͡sˈelzijusa");   // the scale arm still claims its own letter
         // ⚠ INITIALISMS keep their doubled letters — see the hr degemination test.
         expect(say("СССР")).toBe("sssr");

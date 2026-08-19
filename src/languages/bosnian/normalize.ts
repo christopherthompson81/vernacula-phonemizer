@@ -427,7 +427,11 @@ export function normalizeBosnian(input: string): string {
     //        other three complete the same four-way closed system and are declared with it.
     //        The bearing noun is corpus-attested in the same frame: `tek nekoliko stepeni SJEVERNO od
     //        ekvatora`.
-    s = s.replace(/(\d+)\s?°\s?([SJIZsjiz])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string) =>
+    //        ⚠ ATTACHED ONLY, NO SPACE BEFORE THE LETTER. Two of these bearings are among the commonest
+    //        words in Bosnian — `i` "and" and `s` "with" — so allowing a space read
+    //        `temperatura 35° i padavine` as *istočno* and deleted the conjunction. Every bearing in this
+    //        corpus is written attached (`35°z`), so requiring it costs nothing.
+    s = s.replace(/(\d+)\s?°([SJIZsjiz])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string) =>
         `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno" } as Record<string, string>)[c.toUpperCase()]!}`);
     //    5c) THE BARE DEGREE emits the degree noun only. Safe unguarded because 5a/5b have already consumed
     //        the qualified forms.
@@ -437,7 +441,11 @@ export function normalizeBosnian(input: string): string {
     //        them, so an unconsumed `W` glues onto the noun as *stepeniʋ* — and the stress lookup then
     //        runs on the nonexistent word `stepeniv`, misses stress.tsv and loses the pitch accent. The
     //        imported `35°W` form is what this catches; `35°Z` is still read as *zapadno* by 5b above.
-    s = s.replace(/(\d+)\s?°\s?(?:[WXYQwxyq](?![\p{L}\p{M}]))?/gu,
+    //        ⚠ THE CLASS COVERS EVERY LATIN BEARING 5b CANNOT — N and E as well as W X Y Q. 5b allows only
+    //        `S J I Z`, so `35°N` and `35°E` fell through both arms and glued.
+    //        ⚠ AND THE WHITESPACE IS INSIDE THE OPTIONAL GROUP: outside it, `\s?` is consumed even when the
+    //        group matches empty, and `35° od ekvatora` glues to *stepeniod*.
+    s = s.replace(/(\d+)\s?°(?:[WXYQNEwxyqne](?![\p{L}\p{M}]))?/gu,
         (_m, n: string) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih` ×13, all decades). As in Russian, the written suffix is

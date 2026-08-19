@@ -196,11 +196,14 @@ export function phonemizeWord(word: string): string {
     // doubled consonant, which is right for a loan and destroys an acronym: СССР → *sr*, MMF → *mf*,
     // BBC → *bt͡s*, www → *ʋ*. Two signatures, either of which is enough, and neither can fire on a real
     // BCS word carrying a geminate (they are all loans, and loans have vowels):
-    //   · NO VOWEL LETTER at all — sssr, mmf, www, bbc, cctld. A native vowelless word (krv, prst, crn)
-    //     takes its nucleus from a syllabic ⟨r⟩ and never doubles a consonant.
-    //   · ALL CAPS and at least two letters — ADD, MMF, SSSR, which the vowel test alone would miss.
-    const isLetterRun = word.length >= 2
-        && (!/[aeiouаеиоуAEIOUАЕИОУ]/u.test(word) || (word === word.toUpperCase() && /\p{L}/u.test(word)));
+    // The signature is NO VOWEL LETTER at all — sssr, mmf, www, bbc, cctld. A native vowelless word (krv,
+    // prst, crn) takes its nucleus from a syllabic ⟨r⟩ and never doubles a consonant, so this cannot fire
+    // on real BCS: the words carrying a geminate are all loans, and loans have vowels.
+    // ⚠ NOT "ALL CAPS", which was tried and is wrong: it makes degemination CASE-DEPENDENT for ordinary
+    // words — `Holland` → xˈoland but `HOLLAND` → xˈolland, and likewise every all-caps proper noun or
+    // headline. A vowel-bearing initialism (ADD) is therefore read as the pseudo-word this engine already
+    // treats it as; that is the pre-existing gap of having no initialism speller, not this rule's to fix.
+    const isLetterRun = word.length >= 2 && !/[aeiouаеиоуAEIOUАЕИОУ]/u.test(word);
     let out = "";
     const nuclei: { start: number; end: number }[] = []; // output span of each nucleus, in order
     for (let i = 0; i < w.length; ) {
@@ -300,25 +303,17 @@ export function createSerbian(): Phonemizer {
 }
 
 const FOREIGN_LETTER = /qu|[qwxy]/giu;
-/** The ⟨q w x y⟩ spelling fold, shared by all three BCS engines. A SPELLING fold applied per word BEFORE `nat`, never a g2p rule: it must
- *  not change `phonemizeWord`, which all three share.
- *
- *  ⚠ WITHOUT IT THE LETTER IS DELETED OUTRIGHT — `watt` read as *at*, `Ellsworth` as *ˈelsortx* — which is
- *  silent content loss, the worst of the available errors and the reason this is applied rather than left.
- *
- *  ⚠ THE AUDIO SUPPORT IS WEAK FOR ⟨w⟩ AND ⟨y⟩, AND THE REASON IS KNOWN. Over the 364 Bosnian utterances
- *  carrying one of these letters the fold is net positive on all four mappings but only decisive on one:
- *      qu/q → kv/k   23 better / 4 worse        x → ks   25 / 13
- *      w → v         93 better / 67 worse       y → i|j  107 / 91
- *  The ⟨w⟩ and ⟨y⟩ words are overwhelmingly English — web, world, new, Disney, city, beauty — and the
- *  readers CODE-SWITCH on them, so neither the folded nor the deleted form matches what was said. ⟨q⟩ words
- *  (piquet, Qing, cirque) are nativised, which is why that arm is clean. Re-measure ⟨w⟩/⟨y⟩ once a
- *  span-level language signal exists; the confound is the measurement's, not the fold's.
- *
- *  ⚠ NEITHER REFEREE CAN ADJUDICATE THIS: wikipron hbs_latn and epitran srp-Latn contain ZERO words with
- *  any of these letters, so extending the fold moves them by exactly nothing. */
 /**
  * ⟨q w x y⟩ — THE FOUR LETTERS GAJ'S LATIN DOES NOT HAVE, AND THIS ENGINE WAS DELETING.
+ *
+ * ⚠ THE AUDIO SUPPORT IS WEAK FOR ⟨w⟩ AND ⟨y⟩, AND THE REASON IS KNOWN. Over the 364 Bosnian utterances
+ * carrying one of these letters the fold is net positive on all four mappings but decisive on only one:
+ *     qu/q → kv/k   23 better / 4 worse        x → ks   25 / 13
+ *     w → v         93 better / 67 worse       y → i|j  107 / 91
+ * The ⟨w⟩ and ⟨y⟩ words are overwhelmingly English — web, world, new, Disney, city, beauty — and the
+ * readers CODE-SWITCH on them, so neither the folded nor the deleted form matches what was said. ⟨q⟩ words
+ * (piquet, Qing, cirque) are nativised, which is why that arm is clean. Re-measure ⟨w⟩/⟨y⟩ once a
+ * span-level language signal exists; the confound is the measurement's, not the fold's.
  *
  * Found by `silentCharsIn`: ⟨w⟩ ×19 and ⟨y⟩ ×10 in the mined artifact, inert — `Downing → doninɡ`,
  * `Whitehallu → xitexallu`, `web → eb`, `Toyota → toota`, `Dylana → dlana`. Reading the same corpus by hand
