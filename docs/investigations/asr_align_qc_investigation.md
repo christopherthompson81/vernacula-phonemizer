@@ -849,3 +849,77 @@ reader of that very utterance says `m o l o t k r e`, a single /l/.
 `sr`/`bs` **drop ⟨w⟩ entirely** where `hr` maps it to /ʋ/ — `watt → at` against `ʋat`, `ellsworth → ˈelsortx`
 against `ˈelsʋortx`. A deletion rather than a mis-mapping, and the hr side already has the fix, so this is
 a straightforward next item rather than an open question.
+
+## Run 13 — 2026-08-18 18:30 — the #838 review: two more silent deletions
+
+Six findings. The pattern from Run 9 repeated exactly — **the fix for one language reintroduced the same
+defect in its sibling**, and the two serious findings were both deletions no test could see.
+
+### 13a. Degemination was deleting letters from initialisms
+
+The rule fired on any doubled consonant in any word, and this pipeline reads an acronym as a letter run
+rather than spelling it out:
+
+    СССР → sr        SSSR → sr        MMF → mf        BBC → bt͡s        www → ʋ
+
+`СССР`/`SSSR` and `MMF` are high-frequency in BCS news prose. ⚠ **And the distance metric cannot see this**
+— a deleted letter in a four-letter acronym barely moves a sentence-level score, which is precisely why the
+`sr_rs` result in Run 12 read as an uninformative wash (8 better / 9 worse) instead of as this. The audio
+instrument has a floor, and a short token is under it.
+
+Guarded on two signatures, either sufficient: **no vowel letter** (`sssr`, `mmf`, `www`, `bbc`, `cctld`) or
+**all caps with ≥2 letters** (`ADD`). Neither can fire on a real BCS word carrying a geminate — they are all
+loans, and loans have vowels. A native vowelless word (`krv`, `prst`, `crn`) takes its nucleus from a
+syllabic ⟨r⟩ and never doubles a consonant.
+
+### 13b. The `stepeniW` defect was fixed for Serbian and introduced in Bosnian
+
+Run 12 found and fixed this for `sr`. Bosnian's compass arm allows only `[SJIZsjiz]`, so `W X Y Q` survived,
+and once the shared fold started mapping the letter it glued onto the noun — `stˈepeniʋ`, with the stress
+lookup then running on the nonexistent `stepeniv` and losing the pitch accent. The identical failure, in the
+file next door, created by the very change that fixed it elsewhere.
+
+### 13c. And the Serbian guard I added scoped to the whole match
+
+`(?![\p{L}\p{M}])` on the end of the rule made a degree followed by **any** other letter fail outright,
+taking the degree noun with it:
+
+    35°З   main  trˈiː˩˥deset peː˥˩t stˈepeniz   →   HEAD  trˈiː˩˥deset peː˥˩t z
+
+`З` is the Cyrillic west-bearing — the form a Cyrillic corpus actually writes, so this was a regression on
+the only script that matters for `sr`. The lookahead now scopes to the compass letter alone, and the class
+carries both scripts (`С Ј И З`), which is the trap `bosnian/normalize.ts` already records against
+Croatian's Latin-only list.
+
+### 13d. Documentation that outlived its code
+
+The 40-line JSDoc sourcing the ⟨q w x y⟩ readings stayed in `croatian.ts` when the code moved to
+`serbian.ts`. It lexically re-attached to `export const SYMBOLS` and its "⚠ WHAT THIS DELIBERATELY DOES NOT
+DO … It does not touch `serbian/serbian.ts`" paragraph asserted the opposite of the change that moved it.
+A `See FOREIGN_LETTER` cross-reference dangled at an identifier no longer in the file. **Moving a definition
+means moving its rationale**, and a lifted block does not error — it silently documents the wrong thing.
+
+### 13e. The seams I named were not the productive ones
+
+The comment cited `podd-`, `izz-`, `nuzz-` as the classes checked and absent. The productive native seams
+are `van-`/`izvan-` + n and `nad-`/`pod-` + d — *vannastavni*, *izvannastavni*, *naddržavni*,
+*poddijalekt* — and they **are** collapsed. Restated as the stated limit it is: absent from the corpus and
+from both referees, and the one native class that *could* be measured (`naj-` + j) degeminated in the
+readers' speech against every expectation, so carving out an unmeasured class after that would be guessing
+twice.
+
+### Deliberately left
+
+Cyrillic scale letters after a degree (`°Ц`, `°Ф`) still glue onto the noun, as on main. Counted what
+follows a degree sign anywhere in the BCS corpus: only Latin `w f c z`. Adding Cyrillic scale letters would
+invent behaviour for a population the artifact does not contain.
+
+    whole corpus after the fixes:  716 better, 148 worse over 9,496 rows   (was 719 / 165)
+    hr_hr worse 18 → 11 — the removed cases were the deleted letters
+
+### Across three review rounds now
+
+Nineteen findings, **not one of which moved a test**. The recurring shape is no longer surprising: a fix
+applied to one member of a shared-engine family leaves the siblings holding the same defect, and the
+measurement instrument that justifies the fix is blind to short tokens. Both are arguments for reading the
+whole family and for checking a per-token diff, not only an aggregate.
