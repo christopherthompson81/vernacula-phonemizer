@@ -74,6 +74,21 @@ export const INITIALISM_UPPERCASE: readonly string[] = [
     // Members of Parliament
     "mps",
 
+    // ── Added 2026-08-19 from the no-nucleus sweep (output_anomalies.py). That check found German
+    //    abbreviations rendering as consonant clusters — `dvd` → *tft* (final devoicing applied to an
+    //    acronym), `tv` → *tf*, `mrt` → *mʁt* — which is this casing wall in a language where the letters
+    //    are illegal. English hides the class: it reads most of these as letters ALREADY, so the
+    //    English-only differential that produced the earlier tranches was inert for every one of them.
+    //    Re-running it with de/sv/cs/tr/xh as the host is what surfaced them.
+    //
+    //    Each passes the same two gates as the rest of this list: cross-language spread, and the collision
+    //    test that uppercasing must not damage a language where the token is a WORD. English is inert for
+    //    all but `mrt` (which it reads as *Marty*), so the repair is free there — the `usa` argument.
+    //    Contexts were read one by one: `ms` is multiple sclerosis (zh, de), `abc` the broadcaster (ca, zh),
+    //    `tb` is tuberculosis inside `xdr-tb` (am, ar — and `xdr` is already above), `mrt` is the German and
+    //    Swedish name for an MRI scan.
+    "dvd", "tv", "mri", "mrt", "abc", "aol", "http", "tb", "ms",
+
     // ── Added after the local-model sweep of the 1,408 low-spread candidates (Run 34). The model
     // proposed 52 LETTERS; these are the ones that survived reading them in context. Most are
     // language-local abbreviations, which is exactly the class cross-language spread cannot find:
