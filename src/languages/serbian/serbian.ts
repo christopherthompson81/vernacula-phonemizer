@@ -192,6 +192,15 @@ function isNucleus(w: string, i: number): boolean {
  */
 export function phonemizeWord(word: string): string {
     const w = word.toLowerCase();
+    // ⚠ AN INITIALISM IS A LETTER RUN, NOT A WORD, AND MUST NOT BE DEGEMINATED. The rule below collapses a
+    // doubled consonant, which is right for a loan and destroys an acronym: СССР → *sr*, MMF → *mf*,
+    // BBC → *bt͡s*, www → *ʋ*. Two signatures, either of which is enough, and neither can fire on a real
+    // BCS word carrying a geminate (they are all loans, and loans have vowels):
+    //   · NO VOWEL LETTER at all — sssr, mmf, www, bbc, cctld. A native vowelless word (krv, prst, crn)
+    //     takes its nucleus from a syllabic ⟨r⟩ and never doubles a consonant.
+    //   · ALL CAPS and at least two letters — ADD, MMF, SSSR, which the vowel test alone would miss.
+    const isLetterRun = word.length >= 2
+        && (!/[aeiouаеиоуAEIOUАЕИОУ]/u.test(word) || (word === word.toUpperCase() && /\p{L}/u.test(word)));
     let out = "";
     const nuclei: { start: number; end: number }[] = []; // output span of each nucleus, in order
     for (let i = 0; i < w.length; ) {
@@ -212,10 +221,15 @@ export function phonemizeWord(word: string): string {
         //   a ⟨j⟩-initial stem (najjednostavniji, najjeftiniji) is the one doubled consonant BCS writes
         //   natively, and it was exempted here on that reasoning — but the readers say a single /j/:
         //   `n aː j e d n o s t a v n i`, with the length on the prefix vowel, not the consonant. The
-        //   corpus has no other native class (175 distinct doubled-consonant types, every other a loan),
-        //   and the prefix seams a grammar would predict — podd-, izz-, nuzz- — appear in neither the
-        //   corpus nor the referee, so there is nothing to carve out and no evidence to carve it from.
-        if (c === w[i - 1] && !VOWEL_LETTER.has(c) && LETTERS[c] !== undefined) {
+        //   corpus has no other native class: 175 distinct doubled-consonant types across hr/bs/sr, every
+        //   other one a loan.
+        // ⚠ THE PRODUCTIVE NATIVE SEAMS ARE `van-`/`izvan-` + n AND `nad-`/`pod-` + d — vannastavni,
+        //   izvannastavni, naddržavni, poddijalekt — and they ARE collapsed here. That is a stated limit,
+        //   not an oversight: they appear in neither the corpus nor either referee, so there is nothing to
+        //   measure the exception against, and the one native class that COULD be measured (naj- + j)
+        //   turned out to degeminate in the readers' speech against every expectation. Carving out an
+        //   unmeasured class after that would be guessing twice.
+        if (!isLetterRun && c === w[i - 1] && !VOWEL_LETTER.has(c) && LETTERS[c] !== undefined) {
             i++;
             continue;
         }
@@ -286,8 +300,7 @@ export function createSerbian(): Phonemizer {
 }
 
 const FOREIGN_LETTER = /qu|[qwxy]/giu;
-/** The ⟨q w x y⟩ spelling fold, shared by all three BCS engines — see the block comment in croatian.ts
- *  for the orthographic sourcing. A SPELLING fold applied per word BEFORE `nat`, never a g2p rule: it must
+/** The ⟨q w x y⟩ spelling fold, shared by all three BCS engines. A SPELLING fold applied per word BEFORE `nat`, never a g2p rule: it must
  *  not change `phonemizeWord`, which all three share.
  *
  *  ⚠ WITHOUT IT THE LETTER IS DELETED OUTRIGHT — `watt` read as *at*, `Ellsworth` as *ˈelsortx* — which is
@@ -304,6 +317,57 @@ const FOREIGN_LETTER = /qu|[qwxy]/giu;
  *
  *  ⚠ NEITHER REFEREE CAN ADJUDICATE THIS: wikipron hbs_latn and epitran srp-Latn contain ZERO words with
  *  any of these letters, so extending the fold moves them by exactly nothing. */
+/**
+ * ⟨q w x y⟩ — THE FOUR LETTERS GAJ'S LATIN DOES NOT HAVE, AND THIS ENGINE WAS DELETING.
+ *
+ * Found by `silentCharsIn`: ⟨w⟩ ×19 and ⟨y⟩ ×10 in the mined artifact, inert — `Downing → doninɡ`,
+ * `Whitehallu → xitexallu`, `web → eb`, `Toyota → toota`, `Dylana → dlana`. Reading the same corpus by hand
+ * finds the other two behaving identically: `taxi → tai`, `quiz → uiz`. One family, four letters.
+ *
+ * ⚠ WHY THE NATIVISER DOES NOT CATCH THEM, which is the part worth recording. `NATIVE_CLASS` above is
+ * `[a-zčćšžđ]`, so ⟨q w x y⟩ are inside it and the token is never judged foreign; and even if they were
+ * outside it, `foldLatinToBase` only strips ACCENTS — `w` folds to `w`, which the shared g2p still has no
+ * rule for. The nativiser handles the letter that is a decorated native letter; this is the letter that is
+ * simply not in the alphabet, and that needs a reading.
+ *
+ * ⚠ THE FLEET ALREADY AGREES, WHICH IS HOW LARGE THE HOLE IS. The same four probes across the neighbours:
+ *
+ *     hr  Downing → doninɡ   taxi → tai     quiz → uiz     New York → ne ork      ← this engine, before
+ *     sl  Downing → dɔʋnink  taxi → taksi   quiz → kuis    New York → nɛʋ iɔrk
+ *     cs  Downing → dˈovɲɪŋk taxi → tˈaksɪ  quiz → kˈuɪs   New York → nˈɛf ˈɪjork
+ *     pl  Downing → dˈɔvɲiŋk taxi → tˈaksi  quiz → kˈuis   New York → nˈɛf ˈɨɔrk
+ *
+ * ⚠ THE READINGS ARE THE ORTHOGRAPHY'S OWN, taken from what Croatian writes when it DOES adapt the
+ * spelling — which is the least speculative evidence available for how the letter is read:
+ *
+ *     w → v     `Wales` keeps its ⟨W⟩ but the derivatives are *Velšani*, *velški* (hr.wikipedia, Gajica)
+ *     x → ks    `taxi` → *taksi*, `boxing` → *boks*
+ *     qu → kv   `quiz` → *kviz*, `quality` → *kvaliteta*, `quart` → *kvart*
+ *     q → k     the residue, when no ⟨u⟩ follows
+ *     y → i     `Dylan` → *Dilan*, `Barry` → *Bari*
+ *
+ * The letters themselves are documented as outside the alphabet and used only in foreign material —
+ * *Hrvatski pravopis* (pravopis.hr/slova): "Pri abecediranju q dolazi iza p, a w, x, y iza v", "U pisanju
+ * stranih imena i stranih riječi"; hr.wikipedia (Gajica): "Slova Ww, Yy i Qq u hrvatskom jeziku koriste se
+ * samo pri pisanju stranih vlastitih imena i stranih zemljopisnih imena."
+ *
+ * ⚠ ⟨y⟩ IS THE ONE WITH A CONDITION, and it is taken NARROWLY. Croatian reads final ⟨-ay -ey -oy⟩ as a /j/
+ * offglide — *Nestroy*, *Gray*, *Hemingway* (jezicni-savjeti.com.hr, on why no epenthetic ⟨j⟩ is inserted
+ * in their oblique cases: "ni kad se završno y izgovara kao j"). Everywhere else it is the vowel /i/. So:
+ * ⟨y⟩ after a vowel → ⟨j⟩, otherwise → ⟨i⟩. `Toyota` → *tojota*, `Dylana` → *dilana*.
+ *
+ * ⚠ IT IS A SPELLING FOLD, NOT A G2P RULE, and `phonemizeWord` must stay byte-identical for its three
+ * callers: it is applied per word, before `nat`, by hr, bs and sr alike. It lived in croatian.ts first and
+ * was scoped there because "sr and bs are two other languages' referees"; those referees turn out to hold
+ * ZERO words with any of these letters, so extending it moves them by exactly nothing.
+ *
+ * ⚠ WITHOUT IT THE LETTER IS DELETED OUTRIGHT — `watt` → *at*, `Ellsworth` → *ˈelsortx*, `Qing` → *inɡ* —
+ * which is silent content loss, the worst of the available errors and the reason it is applied at all.
+ * ⚠ AND IT WILL BE WRONG ON FRENCH ⟨qu⟩ (`Québec` is *kebek*, not *kvebek*). That is a source-language
+ * override on a proper name, a much smaller and rarer error than deleting the letter, and inventing a
+ * French-name detector here would be guessing at a population the artifact does not contain.
+ */
+
 export const foreignLetters = (w: string): string =>
     w.replace(FOREIGN_LETTER, (m, at: number, s: string) => {
         const lower = m.toLowerCase();

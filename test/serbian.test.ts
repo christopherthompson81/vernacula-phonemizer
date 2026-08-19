@@ -145,6 +145,15 @@ describe("Serbian normalization", () => {
         // `stˈe˥˩peni`. A stray letter glued to a word silently changes which word is looked up.
         expect(say("35°W")).toBe("trˈiː˩˥deset peː˥˩t stˈe˥˩peni");
         expect(say("35°")).toBe(say("35 stepeni"));   // and all routes to the noun now agree
+        // ⚠ THE GUARD SCOPES TO THE COMPASS LETTER, NEVER THE WHOLE MATCH. A trailing lookahead on the rule
+        //   made a degree followed by any other letter fail outright and took the degree NOUN with it —
+        //   `35°З` read as *trideset pet z*. That is the Cyrillic west-bearing, the form a Cyrillic corpus
+        //   actually writes, so the class carries both scripts (С Ј И З, not only N S E W).
+        expect(say("35°З")).toBe(say("35 stepeni"));
+        expect(say("35°C")).toContain("t͡sˈelzijusa");   // the scale arm still claims its own letter
+        // ⚠ INITIALISMS keep their doubled letters — see the hr degemination test.
+        expect(say("СССР")).toBe("sssr");
+        expect(say("SSSR")).toBe("sssr");   // both scripts, and the doubled letters survive
     });
     // PRIMARY STRESS — lexical, from stress.tsv (kaikki/Wiktionary), shared with the hr and bs engines because
     // they import this g2p. Validated against the COMMITTED wikipron referee, which has carried the pitch accent

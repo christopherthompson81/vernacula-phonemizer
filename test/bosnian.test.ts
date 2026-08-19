@@ -264,6 +264,13 @@ describe("Bosnian text normalization", () => {
     test("DIVERGENCE: `Dr.` is a doctor and lowercase `dr.` is `et al.`", () => {
         // ⚠ `mol` — the geminate this used to pin is not a BCS phoneme; see the hr degemination test.
         expect(say("Dr. Moll misli")).toBe("dˈo˥˩ktor mol mˈisli");
+        // ⚠ A FOREIGN BEARING LETTER MUST BE CONSUMED BY THE DEGREE RULE. ⟨W X Y Q⟩ are outside Gaj's
+        //   Latin so the compass arm's `[SJIZsjiz]` cannot claim them; once the shared fold maps the
+        //   letter, an unconsumed one glues onto the noun as *stepeniʋ* and the stress lookup then runs on
+        //   the nonexistent word `stepeniv` and loses the pitch accent.
+        expect(say("35°W")).toBe(say("35 stepeni"));
+        expect(say("35°Z")).toContain("zˈaː˥˩padno");   // the compass arm still reads its own letters
+        expect(say("MMF")).toBe("mmf");                 // and an initialism keeps its doubled letter
         expect(say("James i dr. 1995")).toBe("jˈames i dr . xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set peː˥˩t");
     });
 

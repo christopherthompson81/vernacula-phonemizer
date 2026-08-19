@@ -431,7 +431,14 @@ export function normalizeBosnian(input: string): string {
         `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno" } as Record<string, string>)[c.toUpperCase()]!}`);
     //    5c) THE BARE DEGREE emits the degree noun only. Safe unguarded because 5a/5b have already consumed
     //        the qualified forms.
-    s = s.replace(/(\d+)\s?°/gu, (_m, n: string) => `${n} ${counted(Number(n), STEPEN)}`);
+    //        ⚠ IT ALSO CONSUMES A FOREIGN BEARING LETTER, and it must. `W X Y Q` are outside Gaj's Latin,
+    //        so 5b's `[SJIZsjiz]` cannot claim them and they used to be harmless only because the g2p had
+    //        no rule for the letter and silently dropped it. The shared `foreignLetters` fold now maps
+    //        them, so an unconsumed `W` glues onto the noun as *stepeniʋ* — and the stress lookup then
+    //        runs on the nonexistent word `stepeniv`, misses stress.tsv and loses the pitch accent. The
+    //        imported `35°W` form is what this catches; `35°Z` is still read as *zapadno* by 5b above.
+    s = s.replace(/(\d+)\s?°\s?(?:[WXYQwxyq](?![\p{L}\p{M}]))?/gu,
+        (_m, n: string) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih` ×13, all decades). As in Russian, the written suffix is
     //    the LAST LETTERS of the inflected ordinal, not an appendable marker, so the rule generates every

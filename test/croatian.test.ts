@@ -38,6 +38,12 @@ describe("Croatian (hr) canonical IPA", () => {
         expect(phonemize("najjednostavniji", "hr")).toBe("nˈajednostaʋniji");
         // ⚠ A DOUBLED VOWEL IS TWO SYLLABLES in a loan, not a long vowel — only consonants collapse.
         expect(phonemize("zoo", "hr")).toBe("zˈoo");
+        // ⚠ AND AN INITIALISM IS A LETTER RUN, NOT A WORD. Collapsing there DELETES a letter — `BBC` read
+        //   as *bt͡s*, `www` as a single *ʋ*, and in the sibling engines `СССР` as *sr* and `MMF` as *mf*.
+        //   Guarded by two signatures, no-vowel and all-caps, neither of which a real BCS word with a
+        //   geminate can trip: they are all loans, and loans have vowels.
+        expect(phonemize("BBC", "hr")).toBe("bbt͡s");
+        expect(phonemize("www", "hr")).toBe("ʋʋʋ");
     });
 
     test("Croatian-specific grapheme→IPA (Gaj's Latin, Ijekavian read as letters)", () => {

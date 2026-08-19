@@ -325,7 +325,14 @@ export function normalizeSerbian(input: string): string {
     //    shared `foreignLetters` fold maps it (⟨w⟩ → /ʋ/), an unconsumed `W` glues onto the degree noun as
     //    *stepeniʋ*. The limit stated above is a decision, so it is enforced here rather than left to
     //    depend on a deletion elsewhere in the stack.
-    s = s.replace(/(\d+)\s?°\s?[NSEWnsew]?(\s*(?:степен[аи]|stepen[ai]))?(?![\p{L}\p{M}])/gu,
+    //    ⚠ THE GUARD SCOPES TO THE COMPASS LETTER ONLY, never to the whole match. Written as a trailing
+    //    `(?![\p{L}\p{M}])` on the rule it made a degree followed by ANY other letter fail outright, and
+    //    the degree noun then vanished with it — `35°З` read as *trideset pet z*, losing *stepeni*. That is
+    //    the Cyrillic west-bearing, i.e. exactly the form a Cyrillic corpus writes.
+    //    ⚠ AND THE CLASS CARRIES BOTH SCRIPTS. A Latin-only `[NSEWnsew]` matches nothing in Cyrillic text —
+    //    the trap bosnian/normalize.ts already records against Croatian's list. Cyrillic bearings are
+    //    С Ј И З (север/juг/исток/запад), not N S E W.
+    s = s.replace(/(\d+)\s?°\s?(?:[NSEWnsewСЈИЗсјиз](?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
         (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written
