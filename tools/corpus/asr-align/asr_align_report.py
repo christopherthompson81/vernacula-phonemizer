@@ -136,7 +136,17 @@ def fold(ipa: str) -> list[str]:
 # is the ʔ argument from below pointing the other way, and it is accepted here because the recognizer has
 # no ɒ at all — the comparison was never able to judge the symbol, only to penalise it — and because da_dk
 # still improves. Recorded so the loss is not discovered later as a surprise.
+# ⚠ `ɜ` RUNS THE OTHER WAY: a phone WE have no symbol for, mapped onto what we write instead. The map's
+# stated purpose is our-side-unhearable phones, but the penalty is symmetric — the recognizer writes `ɜ`
+# 31,657 times and the fleet writes it ZERO times, so every one was an unavoidable miss. It lands mostly on
+# our `ɐ` (5,345) and `ə` (2,801), and `ɐ` is the better target by measurement: swept over all 87 languages
+# whose recognizer output contains `ɜ`, **4 improved, 83 unchanged, 0 worse** (de_de 0.1789 → 0.1660,
+# da_dk 0.5167 → 0.5075). `ɜ → ə` was tried and makes da_dk worse; `ɜ → ɛ` makes da_dk and th_th worse.
+#
+# ⚠ AND IT MERGES NOTHING ON OUR SIDE, unlike `ɒ` below — no language in the fleet emits `ɜ`, so there is
+# no contrast to lose and no language-specific cost to record.
 COARSEN = {
+    "ɜ": "ɐ",
     "ɒ": "ɔ",
     "ʋ": "v", "ɦ": "h", "ɫ": "l", "ʈ": "t", "ʂ": "s", "ɖ": "d", "ɳ": "n", "ɽ": "r",
     "ɓ": "b", "ɗ": "d", "ʄ": "j", "ɠ": "ɡ", "ᶑ": "d", "χ": "x", "ʑ": "ʒ", "ɸ": "f",
