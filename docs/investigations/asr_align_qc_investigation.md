@@ -1042,3 +1042,81 @@ word must be attached, and only its lowercase form is that word* — and it appl
 engines.
 
     whole corpus, steady across rounds 3–5: 716 better, 148 worse over 9,496 rows
+
+## Run 16 — 2026-08-19 — he_il: one unreadable word was costing the sentence its vowels
+
+`he_il` sat at 2.32× its own median with 25 all-flagged rows, all same-script prose, so it survives Run
+11's finding that most of the queue is code-switching.
+
+Reading them showed two behaviours in the same language. Some rows are properly vocalized
+(`leχevʁat … jeʃ ʃte maχlkot beʁiχvot hanosʔim`); others are a bare consonant skeleton
+(`hfjʁmjd hɡdvl hvkm lχvvd fʁʔ` — the Hebrew letters transliterated with no vowels at all).
+
+    he_il rows 3,242
+      consonant skeleton   216  (6.6%)   median dist 0.649   59 of the 120 investigate rows, 14 of 25 all-flagged
+      vocalized          3,027           median dist 0.342
+
+⚠ **Deterministic, not a transient batch failure** — re-running the six worst reproduced every skeleton.
+And two of them were PARTIALLY vocalized (`sidʁat ha …` then skeleton; `basvivot ʔaχat ʔesʁe …` then
+skeleton), which located the failure at the CLAUSE, not the row.
+
+### The cause: an alignment guard that turns a partial failure into a total one
+
+`hebrewNeural.ts` batches consecutive bare words into a clause for cross-word context, then:
+
+    if (out.length === run.length) queue.push(...out);
+    else for (const w of run) queue.push(phonemizeWord(w));   // ← the whole run, to the rule engine
+
+On unvocalized input the rule engine IS the skeleton. So any mismatch cost every vowel in the sentence.
+Instrumented it: **7.6% of clause runs tripped the guard, and the tagger returned exactly ONE token every
+time** — `in 24 → out 1`. Not a misalignment; an empty string.
+
+    צ'מברס → ""      ג'ון → ""      ח'ופו → ""      ד"ר → ""
+    אלוהים → ʔelohim   תבע → tava    ישראל → jisʁaʔel
+
+**The geresh and gershayim.** The marks Hebrew writes foreign consonants with — צ׳ /t͡ʃ/, ג׳ /d͡ʒ/, ז׳ /ʒ/ —
+which is to say every transliterated name. The tagger's charset has none of them.
+
+⚠ **Not a character-normalisation problem, which was the first hypothesis and the cheap fix.** The model
+fails on the ASCII apostrophe AND on U+05F3/U+05F4 alike, and reads the same word fine with the mark
+removed. Only retraining fixes the word. What is fixable is the blast radius.
+
+Retrying word by word instead of abandoning the clause:
+
+    skeleton rows  216 → 0        median 0.3520 → 0.3408      mean 0.3854 → 0.3641
+    330 rows closer to what the reader said, 28 further
+
+⚠ **The family was checked before a review could.** Persian has the same clause-batching shape but its
+mismatch path already retries THROUGH THE MODEL per word rather than falling to the sync engine. Swept
+every language in the corpus for the same bimodal signature — a sub-population whose vowel fraction sits
+well below that language's own median — and `he_il` is the only one.
+
+## Run 16b — is the recognizer cutting off? No, and this validates the instrument
+
+The largest single regression in the Hebrew set (+0.478) had a correct new reading whose recognized phones
+stopped short of the text tail, which raises a question about every measurement in this log: if wav2vec2
+truncates its output, then longer and more complete IPA is systematically penalised.
+
+`asr_align_corpus.py` has no length cap, but it batches with `padding=True` and decodes `argmax` over the
+full padded length, so both truncation and padding contamination were worth ruling out. Measured recognized
+phone count against audio duration over every scored row:
+
+    decile   duration        OUR phones/s   THEIR phones/s   ratio
+    D1      1.7-  7.5s          9.63            9.02         0.937
+    D5     11.0- 12.1s          9.20            8.68         0.943
+    D10    19.7-256.4s          6.79            6.57         0.968
+
+**The ratio is flat.** Our phone rate — which the recognizer cannot influence, being derived from the
+transcript — declines in lockstep with theirs, 9.63 → 6.79 against 9.02 → 6.57. So the falling
+phones-per-second is real speaking-rate variation (longer utterances carry more pauses), not the model
+giving up. Pushed into the extreme tail, where a cap would show first:
+
+    20- 30s  n=21691  ratio 0.961      45- 80s  n=319  ratio 1.051
+    30- 45s  n= 3210  ratio 1.002      80-300s  n= 11  ratio 1.548
+
+It rises above 1.0 rather than collapsing. **No truncation, no cap, no padding contamination of the short
+clips** (D1's ratio matches D5's), so there is nothing to re-run. The +0.478 row is a single-row artefact
+of a length-normalised distance against a partially-covered reference, not a symptom.
+
+That is worth more than the row it came from: the recognizer's coverage is duration-independent across
+1.7–256s, which is the assumption every measurement in Runs 1–16 rests on and had not been tested.
