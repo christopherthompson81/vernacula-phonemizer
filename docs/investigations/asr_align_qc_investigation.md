@@ -2206,7 +2206,26 @@ belongs in the default run. One qualifies outright: **a word with no nucleus can
     he_il            407    56638    0.72%   d͡ʒvn knd͡ʒʁ t͡ʃʁls
 
 **`ps_af` at 11.25% — one Pashto word in nine is unpronounceable.** `pashto.ts` already records a "deferred
-short-vowel-restoration subsystem", so this is a known deferral; what is new is the NUMBER. The detector's
+short-vowel-restoration subsystem", so this is a known deferral; what is new is the NUMBER.
+
+⚠ **AND PASHTO IS THE ONE LANGUAGE WHERE A NUMBER LIKE THIS NORMALLY CANNOT BE TRUSTED.** It is a
+macro-language, the referees are multi-dialectal, and the dialect segregation of the referee data is
+imperfect (Kandahari is the variety this engine targets — `ښ/ږ` = retroflex ʂ/ʐ — and the referee records
+other dialects' readings for a significant share of headwords). `pashto.ts` says as much in a double-⚠:
+do not quote the referee score without the caveat, because the coverage lexicon was mined from the
+referees and the shipped 69.6% is substantially circular against a rules-only 46.9%.
+
+**None of that touches this measurement.** The no-nucleus check uses no referee, no audio and no dialect
+assumption: *هم* is [ham] in Kandahari, Yusufzai and Wazirwola alike, and `hm` is not a possible reading in
+any of them. That is precisely why the check is worth having in a language whose comparison-based numbers
+are confounded — it is the one instrument the dialect problem cannot reach.
+
+What the 5,091 alignable tokens are, mechanically: only **8%** involve the ⟨ه⟩ branch (which returns [h]
+without ever inserting the inherent vowel); the other **92%** are ordinary short words — *د, تر, شک, تش,
+کش, ژر, کړ* — where the zwarakay insertion does not fire. The insertion at `pashto.ts:218` is conditioned
+on a FOLLOWING consonant, so it cannot serve a word's last consonant, and `کړ` is additionally in
+`lexicon.tsv` as `کْړ`, sukun'd to no vowel on purpose. Diagnosing the remainder properly needs a session
+on that engine and is not attempted here — the finding is the measured cost, not the fix. The detector's
 real value is turning "deferred" into a measured cost and ranking the fleet's deferrals by how much output
 each actually damages. Nothing in 33 runs of distance work surfaced this, because a language that is
 uniformly bad has no outliers — the same degeneracy the README records for `ga_ie`.
