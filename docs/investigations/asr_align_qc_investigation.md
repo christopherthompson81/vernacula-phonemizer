@@ -917,6 +917,19 @@ invent behaviour for a population the artifact does not contain.
     whole corpus after the fixes:  716 better, 148 worse over 9,496 rows   (was 719 / 165)
     hr_hr worse 18 → 11 — the removed cases were the deleted letters
 
+### Checking the third sibling before a third round could
+
+Run 9's lesson applied to this change: having fixed the degree arm in `sr` and `bs`, read Croatian's.
+It has the same shape and no bare-degree arm at all — `35°` drops the noun outright, and `35°Q` leaks a
+stray `k`. Pre-existing, not introduced (only `croatian.ts` is touched here, never its `normalize.ts`).
+
+**Left alone, and the corpus is the reason.** Counting bare degrees not already claimed by the C/F or
+compass arm across `hr_hr`: **zero**. Its only bare degrees are `35° w`, a longitude the compass arm claims
+through its `\s?` — which is what the rule's own comment says it is for ("a LONGITUDE — the bare-degree
+rule must not claim it"). Adding an arm there would invent behaviour for a population the artifact does not
+contain, the same reason the Cyrillic scale letters were left. Recorded so it is not mistaken for an
+oversight the next time this family is read.
+
 ### Across three review rounds now
 
 Nineteen findings, **not one of which moved a test**. The recurring shape is no longer surprising: a fix
