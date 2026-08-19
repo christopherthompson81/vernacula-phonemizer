@@ -1799,9 +1799,19 @@ conservative [ɛ]. Both are real French; the corpus this engine feeds is speech,
 convention the code already names. **No change.**
 
 Worth stating plainly because it inverts the usual precedence: through Runs 22–26 the referee was the
-arbiter and the audio the corroboration. Here they conflict outright, and the reason to trust the audio is
-not that it is a better instrument but that it is the *right* one for the question — what a reader says,
-not what a dictionary prints.
+arbiter and the audio the corroboration. Here they conflict outright.
+
+⚠ **AND THE FIRST REASON I GAVE FOR SIDING WITH THE AUDIO WAS WRONG.** I argued the FLEURS readers are the
+professional register the project targets, so the audio directly witnesses it. The user, who has listened
+to the recordings, corrected that: in English they sound like university-affiliated readers, not news
+anchors. **No instrument in this corpus witnesses the anchor register** — the audio shows what one set of
+non-professional readers did, and a dictionary referee records a transcription convention.
+
+The decision is unchanged, on the surviving argument: [ɛ] is the CONSERVATIVE, careful variant and [e] the
+neutralised one, and careful is the better bet for the target register. The audio agreeing is corroboration
+from a different population, not proof of register. Both readings are real French, so per project policy
+this is a convention choice rather than a defect — and the burden is on a change to beat the incumbent,
+which [e] does not.
 
 ### Left alone
 
