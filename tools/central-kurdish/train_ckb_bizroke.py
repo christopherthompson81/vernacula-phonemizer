@@ -165,13 +165,13 @@ def fit(rows, src, tags, quiet=False):
 def word_exact(m, rows, src, tags, mask):
     """Masked-argmax word-exact accuracy, the same decode core/structuralTagger.ts runs at serving."""
     m.eval(); good = 0
+    itag = {v: k for k, v in tags.items()}
     for _, cps, tgs in rows:
         ids = [src.get(c) for c in cps]
         if any(i is None for i in ids):
-            continue  # declines at serving too — counted as wrong, which is the honest reading
+            continue  # would DECLINE at serving; counted against the denominator, not skipped (see held_out)
         lg = m(torch.tensor([ids]).to(DEV))[0]
         pred = [max(mask[i], key=lambda t: lg[k][t].item()) for k, i in enumerate(ids)]
-        itag = {v: k for k, v in tags.items()}
         good += int([itag[p] for p in pred] == tgs)
     return good / len(rows)
 
@@ -187,9 +187,13 @@ def held_out(rows):
     te = [r for r in rows if r[0][:5] in held]
     src, tags, mask = vocab(tr)
     m, _, _ = fit(tr, src, tags, quiet=True)
-    te = [r for r in te if all(c in src for c in r[1])]
+    # ⚠ OOV-SYMBOL words stay in the denominator. The serving decoder DECLINES them (no `src` entry → the rule
+    # reading stands), so dropping them here would quietly score the model on a friendlier set than it faces.
+    # Reported rather than assumed: it has been 0 of 961 every run, the Sorani symbol inventory being small.
+    oov = [r for r in te if any(c not in src for c in r[1])]
     base = sum(1 for _, _, tgs in te if all(len(t) == 1 for t in tgs)) / len(te)
-    print(f"stem-blind held-out: train {len(tr)} / test {len(te)} words", file=sys.stderr)
+    print(f"stem-blind held-out: train {len(tr)} / test {len(te)} words "
+          f"({len(oov)} contain a symbol absent from train → decline at serving, counted wrong)", file=sys.stderr)
     print(f"  never-insert baseline : {base:.1%}", file=sys.stderr)
     print(f"  tagger word-exact     : {word_exact(m, te, src, tags, mask):.1%}", file=sys.stderr)
 

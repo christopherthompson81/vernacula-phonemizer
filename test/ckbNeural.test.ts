@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, test } from "vitest";
@@ -55,10 +55,30 @@ describe("central kurdish bizroke tagger", () => {
             }
         });
 
-        // An unseen symbol has no entry in the model's `src`, so the shared factory declines the whole word and
-        // the rule reading stands. There is no `<unk>` here — unlike sd/bn, no tag is worth guessing.
-        test("a word whose rule reading contains an unseen symbol declines to the rules", async () => {
+        // ⚠ THIS REPLACED A TEST THAT PASSED FOR THE WRONG REASON. It asserted that a non-Sorani word declines
+        // (`tag("ⵣⵣ") === ""`) — but `phonemizeWordRules("ⵣⵣ")` is "", so the factory returns at its `T === 0`
+        // early exit and never consults the vocab. The decline path it meant to cover turns out to be
+        // UNREACHABLE from real Sorani, because every symbol this engine can emit is in the model's `src`.
+        // That is the property actually worth guarding: add a grapheme to central-kurdish.jsonc without
+        // retraining and the tier would silently start declining every word containing it, with no error and
+        // no test failure — just the bizroke quietly missing from a slice of the vocabulary.
+        test("every symbol the engine can emit is in the model vocab (else the tier silently declines)", async () => {
+            const meta = JSON.parse(
+                readFileSync(join(import.meta.dirname, "../src/languages/central-kurdish/ckb-bizroke-tagger.meta.json"), "utf8"),
+            ) as { src: Record<string, number> };
+            const def = JSON.parse(
+                readFileSync(join(import.meta.dirname, "../src/languages/central-kurdish/central-kurdish.jsonc"), "utf8")
+                    .replace(/^\s*\/\/.*$/gmu, ""),
+            ) as { consonants: Record<string, string>; vowels: Record<string, string> };
+            const emitted = new Set([...Object.values(def.consonants), ...Object.values(def.vowels)].flatMap((v) => [...v]));
+            expect([...emitted].filter((c) => !(c in meta.src)).sort()).toEqual([]);
+        });
+
+        // The `T === 0` early exit: nothing to tag, so nothing to say. Distinct from a decline, and asserted
+        // separately so neither can stand in for the other again.
+        test("a word the rule engine reads as nothing yields nothing", async () => {
             const tagger = await createCentralKurdishTagger();
+            expect(phonemizeWordRules("ⵣⵣ")).toBe("");
             expect(await tagger!.tag("ⵣⵣ")).toBe("");
         });
     });

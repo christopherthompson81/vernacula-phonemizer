@@ -1,3 +1,7 @@
+import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 import { evaluate } from "../tools/referee-eval/eval.ts";
 import { CONFIG } from "../tools/referee-eval/config.ts";
@@ -188,8 +192,17 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     // their floors (en 30%, en-GB 38%, ar 62%) have ample headroom for the extra sampling variance.
     // (it.concurrent does not help: the neural G2P is synchronous CPU work Node can't parallelise within a worker.)
     const NEURAL = new Set(["en", "en-GB", "ar"]);
+    // ⚠ ckb's floor MEASURES A TIER THAT NEEDS THE OPTIONAL ONNX RUNTIME. Its eval entry is the whole shipped
+    // stack (lexicon → bizroke tagger → rules), and the tagger self-falls-back to rules when the model or
+    // `onnxruntime-node` (an OPTIONAL dependency) is absent — which drops the score from 85.2% to the
+    // lexicon-only 74.8% and would fail an 0.80 floor. That is a MISSING INSTRUMENT, not a linguistic
+    // regression, and a 10-point cliff is nothing like the "ordinary churn" the floors above are sized for.
+    // Skip rather than lower: an 0.70 floor that always passes would stop guarding what it exists to guard.
+    const haveCkbModel = existsSync(
+        join(import.meta.dirname, "../src/languages/central-kurdish/ckb-bizroke-tagger.int8.onnx"),
+    ) && (() => { try { createRequire(import.meta.url).resolve("onnxruntime-node"); return true; } catch { return false; } })();
     for (const [lang, floor] of Object.entries(floors)) {
-        it(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of its primary referee`, async () => {
+        it.skipIf(lang === "ckb" && !haveCkbModel)(`${lang} backbone ≥ ${(floor * 100).toFixed(0)}% of its primary referee`, async () => {
             const primary = (await evaluate(lang, true, NEURAL.has(lang) ? 3000 : 5000)).find(
                 (r) => r.role === "primary",
             );

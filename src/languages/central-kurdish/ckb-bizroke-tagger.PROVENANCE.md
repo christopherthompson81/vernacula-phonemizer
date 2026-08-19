@@ -81,21 +81,25 @@ the two agree on 964 of them (99.2%) after folds; both scrape en.wiktionary. kai
 65 words, not a second opinion. Read the two columns as one source measured twice.
 
 ### What the residual is made of
-Classifying the 142 / 157 remaining misses by whether the consonant skeleton matches:
+Classifying the 144 / 154 remaining misses by whether the consonant skeleton matches:
 
 | | wikipron | kaikki |
 |---|---|---|
-| bizroke-only (skeleton exact, vowel differs) | 92 | 105 |
-| — we omit a vowel the referee has | 53 | 62 |
-| — we add one it does not | 33 | 37 |
-| — same count, different slot | 6 | 6 |
-| skeleton differs (not this tier's business) | 50 | 52 |
+| bizroke-only (skeleton exact, vowel differs) | 103 | 110 |
+| — we omit a vowel the referee has | 43 | 49 |
+| — we add one it does not | 57 | 57 |
+| — same count, different slot | **3** | **4** |
+| skeleton differs (not this tier's business) | 41 | 44 |
 
-Two things worth noting. **Omission and over-insertion are near-balanced** (53 vs 33, 62 vs 37) — a
-systematically over-eager model would be lopsided, so what is left is placement, not bias. And **only 6 misses
-put the right NUMBER of vowels in the wrong SLOT**: when the model knows a vowel belongs, it almost always
-knows where. The skeleton-differs half is a mix of pharyngeal ħ/ʕ~h, uvular χ~x, kaikki letter-name rows
-(⟨و⟩ → *waw*), and long-vowel quality — all outside the bizroke question.
+Two things worth noting. **Omission and over-insertion are near-balanced** (43 vs 57, 49 vs 57) — a
+systematically over-eager model would be lopsided, so what is left is placement, not bias. And **3–4 misses
+put the right NUMBER of vowels in the wrong SLOT**: when the model knows a vowel belongs, it nearly always
+knows where. The skeleton-differs remainder is pharyngeal ħ/ʕ~h, uvular χ~x, long-vowel quality, and kaikki
+letter-name rows (⟨و⟩ → *waw*) — all outside the bizroke question.
+
+⚠ These counts are for the SHIPPED (packed) model with the split `c → k` / `ɟ → ɡ` fold. Measured before
+either fix they read 92/105 bizroke-only with 6 wrong-slot each, so both fixes moved real words and the
+wrong-slot class halved.
 
 ⚠ **The audio still cannot score this tier.** The ASR recognizer under-transcribes Sorani: 0.929 of our folded
 phone count, against 0.987 for German and 0.998 for French, so it charges us for phones it never emits. See

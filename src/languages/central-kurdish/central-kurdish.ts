@@ -18,7 +18,7 @@
  * and after the lexicon) and the flat reading was mistaken for "no effect" rather than "no instrument". The
  * fold is now `[əɪ] → ə`: the referees agree on the vowel's PRESENCE and POSITION and differ only on its
  * QUALITY, so normalising quality is the fold the disagreement actually justifies. Scoring presence as free
- * was hiding an 11-point gap — see the ladder at the bottom of this header.
+ * was hiding a 13-point gap — see the ladder further down this header.
  *
  * ⚠ THE REASON IT FAILS IS LEXICAL, NOT POSITIONAL. A single epenthesis models cluster-breaking, but many of
  * these words are ordinary multi-vowel words written with none of them: سفر is *safar*, and one inserted
@@ -30,8 +30,9 @@
  * ⚠ THE LEXICON MEASURES WORSE AGAINST THE AUDIO AND IS SHIPPED ANYWAY — 148 rows closer, 2,231 further.
  * That is the largest deliberate override in this repo, so the reasoning is spelled out:
  *
- *   · THREE INDEPENDENT HUMAN SOURCES AGREE THE VOWEL IS THERE, AND AGREE WHERE. AsoSoft (the lexicon's
- *     source), wikipron and kaikki: تر is *t ɪ ɾ*, من is *m ɪ n*, مردن is *m ə ɾ d ə n* (two vowels, the
+ *   · TWO INDEPENDENT HUMAN SOURCES AGREE THE VOWEL IS THERE, AND AGREE WHERE — AsoSoft (the lexicon's
+ *     source) and Wiktionary, the latter reaching us as both wikipron and kaikki, which are one upstream and
+ *     not two (see below). Read as three, it was overcounted: تر is *t ɪ ɾ*, من is *m ɪ n*, مردن is *m ə ɾ d ə n* (two vowels, the
  *     positions this lexicon gives), کوردستان is *k ʊ ɾ d ə s t aː n* (ours: kuɾdɪstaːn, same slot). They
  *     differ only on QUALITY — ɪ against ə — which is precisely why `ckb.jsonc` normalises `[əɪ] → ə`.
  *   · THE RECOGNIZER UNDER-TRANSCRIBES THIS LANGUAGE. Its folded phone count is 0.929 of ours for ckb
@@ -44,9 +45,9 @@
  * vowel" — that is not a matter of reader variation. If a later run finds the ASR was right, the lexicon
  * is one file.
  *
- * ⚠ AND WITH THE FOLD FIXED, THE TWO INDEPENDENT REFEREES NOW SAY SO DIRECTLY (folded backbone,
- * wikipron ckb_arab_broad / kaikki ckb — neither had any part in building either tier, both of which come
- * from AsoSoft):
+ * ⚠ AND WITH THE FOLD FIXED, THE REFEREES NOW SAY SO DIRECTLY (folded backbone, wikipron ckb_arab_broad /
+ * kaikki ckb — neither had any part in building either tier, both of which come from AsoSoft; deltas are
+ * against the rules row):
  *
  *     rules only                   72.3%  /  71.2%
  *     + bizroke lexicon            74.8%  /  73.6%      (+2.5 / +2.4)
@@ -102,9 +103,10 @@ const VOWEL_LETTERS = new Set(DEF.vowelLetters);
  * differs from this engine's own rule output by inserted /ɪ/ and nothing else, so a hit changes only the
  * vowel and never the consonant skeleton.
  *
- * ⚠ APPLIED ON THE SHIPPED PATH ONLY, never inside `phonemizeWordRules`, which keeps the referee signal
- * non-circular the way `bengali.ts` and `pashto.ts` do. Here it also happens to be non-circular by source:
- * the lexicon is built from AsoSoft, and the referees are wikipron and kaikki.
+ * ⚠ APPLIED ON THE SHIPPED PATH ONLY, never inside `phonemizeWordRules`. Unlike `bengali.ts` and `pashto.ts`
+ * that split is NOT what keeps the referee honest here — non-circularity is by SOURCE: the lexicon is built
+ * from AsoSoft and the referees are wikipron and kaikki, so the eval runs the whole shipped stack. The split
+ * earns its keep as the rules-only baseline in the ladder below, and as the tagger's input.
  */
 let LEXICON: ReadonlyMap<string, string> | undefined;
 const lexicon = (): ReadonlyMap<string, string> =>
@@ -165,7 +167,9 @@ function number(digits: string): string {
     return renderNumber(n, DEF.numbers, phonemizeWord, iranianNumberWords);
 }
 
-// A word (Sorani Perso-Arabic letters, U+0600–U+06FF incl. ZWNJ) / number / punctuation token.
+// A word (Sorani Perso-Arabic letters, U+0620–U+06FF incl. ZWNJ) / number / punctuation token.
+// ⚠ centralKurdishNeural.ts KEYS ITS PRE-PASS OFF THE SAME CLASS — keep the two in step or the tagger's
+// readings are filed under words this tokenizer never asks for.
 import { normalizeCentralKurdish } from "./normalize.ts";
 
 const TOKEN = /([ؠ-ۿ‌]+)|(\d+)|([،؛؟.!?…,:])/gu;

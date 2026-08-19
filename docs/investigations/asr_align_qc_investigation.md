@@ -2593,7 +2593,8 @@ engine header, the provenance doc and the eval test. They remain independent *of
 that matters here — but the answer to "is there dialectal intermixing between the referees" is no: there is
 barely a second referee.
 
-**Residual classification** (142 wikipron / 157 kaikki misses, by whether the consonant skeleton matches):
+**Residual classification** (142 wikipron / 157 kaikki misses, by whether the consonant skeleton matches —
+measured on the pre-packing model; Run 41 re-measures it at 144/154 with the wrong-slot class halved to 3/4):
 
 |  | wikipron | kaikki |
 |---|---|---|
@@ -2683,3 +2684,44 @@ of the size of the prize — a tagger that decides exactly one thing, so the eff
 **Method note.** The base-rate check in Run 40 (model 2.4% vs data 0.1%) is what made this findable. A
 divergence between what a model does and what its data contains is a bug in the *machinery* until proven
 otherwise; "the data is fine" and "the training is fine" are different claims and Run 40 conflated them.
+
+## Run 42 — 2026-08-19 — PR review: four defects, three of them in things I had already written down
+
+Reviewing the ckb branch before merge, rather than trusting it because CI was green.
+
+**1. The `ckb` floor needed the OPTIONAL ONNX runtime, and would have cried regression without it.**
+`onnxruntime-node` is in `optionalDependencies`. The eval's ckb entry is the whole shipped stack and the
+tagger self-falls-back, so on a machine without the runtime the score drops to the LEXICON-ONLY 74.8% and the
+0.80 floor fails — reported as a linguistic regression in a suite whose header says floors are sized for
+"ordinary churn". A 10-point cliff is not churn. Fixed two ways: the test skips ckb's floor when the model or
+the runtime is missing (verified by moving the .onnx aside — 170 passed, 1 skipped, no failure), and
+`eval.ts` prints a warning instead of quietly reporting a lower tier's number under this tier's name. ⚠ And
+the first draft of both said "rules-only 72.3%" — running it showed 74.8%, because the lexicon lookup happens
+BEFORE the tagger and still fires. Wrong number in a warning is worse than no warning.
+
+**2. A test that passed for the wrong reason.** `tag("ⵣⵣ") === ""` was meant to cover the out-of-vocab
+DECLINE path. But `phonemizeWordRules("ⵣⵣ")` is `""`, so the factory returns at its `T === 0` early exit and
+never consults the vocab. Checking properly: **the decline path is unreachable from real Sorani** — every
+symbol this engine can emit is in the model's 35-symbol `src`. So the test was replaced with the invariant
+that actually matters: add a grapheme to `central-kurdish.jsonc` without retraining and the tier silently
+declines every word containing it, no error and no failure. Mutation-checked by deleting ɫ from the vocab.
+The `T === 0` case is now its own test so neither can stand in for the other again.
+
+**3. Two self-contradictions in the ckb engine header** — the same file that establishes wikipron and kaikki
+are one upstream also said "THE TWO INDEPENDENT REFEREES" and, in the paragraph justifying the override of the
+audio, "THREE INDEPENDENT HUMAN SOURCES AGREE". It is two: AsoSoft and Wiktionary. That overcount was
+load-bearing — it is the argument for shipping against the ASR — so it is corrected rather than softened.
+
+**4. Stale numbers throughout**, because the packing fix landed after the prose: the tagger header's "a random
+split reads 2pp higher" (measured 1.5pp), the fold note's ladder (pre-fix values), the provenance residual
+table (pre-packing), and the claim that the referee eval "runs `phonemizeWordRules`" — no longer true, since
+the eval now runs the whole tier. That last one is not cosmetic: it is the file's non-circularity argument,
+which changed from by-tier to by-source, and a future reader "fixing" the eval to rules-only by analogy with
+sd/bn/af would silently stop measuring the tier. Now says so explicitly.
+
+Also re-measured with both fixes in: the residual's wrong-slot class **halved**, 6 → 3 (wikipron) and 6 → 4
+(kaikki). Two fixes found by reading a residual, and the residual is smaller and better-shaped for it.
+
+**Method note.** Three of the four were things I had written down myself and not re-read after the numbers
+moved. Prose asserting a measurement goes stale the moment the measurement is repeated; the review that
+matters is the one that re-derives the claims rather than re-reading them.

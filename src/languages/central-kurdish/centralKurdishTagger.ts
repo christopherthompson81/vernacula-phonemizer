@@ -7,18 +7,26 @@
  * twice over. The consonant-consistency mask in core/structuralTagger.ts limits every symbol to the tags it
  * emitted in training, and the only tags any symbol ever emitted are itself and itself+ɪ: the model therefore
  * CANNOT alter, delete, or reorder a consonant — the single decision it is capable of making is where the
- * bizroke goes. And because the rules path is the input rather than the lexicon path, the ckb referee eval
- * (which runs `phonemizeWordRules`) stays non-circular.
+ * bizroke goes. And it composes with the rule engine without an alignment step, since its input IS that
+ * engine's output.
+ *
+ * ⚠ NON-CIRCULARITY HERE IS BY SOURCE, NOT BY TIER. The ckb referee eval runs this whole stack — lexicon,
+ * tagger, rules — rather than `phonemizeWordRules` alone, which is the usual arrangement for a language whose
+ * lexicon was mined from its referee. It can, because nothing in this tier comes from wikipron or kaikki: the
+ * lexicon and the training pairs are both AsoSoft. Do not "fix" the eval to rules-only by analogy with
+ * sd/bn/af — it would stop measuring the tier without buying any independence.
  *
  * Precedence is lexicon → tagger → rules: a word the AsoSoft-derived lexicon covers is served from there.
  * The tagger's target is the ~2,000 corpus word types beyond it — the source is 10,041 words and exhausted.
  *
- * Measured 96.6% word-exact against a 73.8% never-insert baseline on a STEM-BLIND held-out split (a random
- * split reads 2pp higher and is a lie — Sorani's inflected families would straddle it). CONFIRMED EXTERNALLY
+ * Measured 96.6% word-exact against a 73.8% never-insert baseline on a STEM-BLIND held-out split (grouped by
+ * the first 5 characters, so Sorani's inflected families cannot straddle it — a random split reads 98.2%
+ * against 96.7% measured the same way, and that 1.5pp is leakage). CONFIRMED EXTERNALLY
  * once `ckb.jsonc` stopped folding `[əɪ]` to nothing and started normalising it to ə: on the folded backbone
  * this tier scores 85.2% (wikipron) / 85.0% (kaikki) against the lexicon-only 74.8% / 73.6% and the rules-only
  * 72.3% / 71.2% — referees that had no part in building it (though not, it turns out, independent of each
- * other: both scrape en.wiktionary and agree with each other on 99.2% of the 972 words they share). See ckb-bizroke-tagger.PROVENANCE.md.
+ * other: both scrape en.wiktionary and agree with each other on 99.2% of the 972 words they share).
+ * See ckb-bizroke-tagger.PROVENANCE.md.
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx — is absent,
  * createCentralKurdishTagger() resolves to `undefined` and callers fall back to the sync engine (no throw).

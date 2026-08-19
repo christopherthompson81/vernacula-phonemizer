@@ -234,10 +234,23 @@ const hi = (w: string): string => hiP.text(w);
  * see the one thing this engine's Sorani work has been about.
  */
 let ckbTaggerP: Promise<CentralKurdishTagger | undefined> | undefined;
+let ckbWarned = false;
 const ckb = async (w: string): Promise<string> => {
     if (bizrokeLexiconHas(w)) return ckbLex(w);
     ckbTaggerP ??= createCentralKurdishTagger();
-    return (await (await ckbTaggerP)?.tag(w)) || ckbRules(w);
+    const tagger = await ckbTaggerP;
+    if (!tagger) {
+        // ⚠ SAY SO. `onnxruntime-node` is an OPTIONAL dependency and the tagger self-falls-back, so without it
+        // this reports the LEXICON-ONLY score (74.8% against the tier's 85.2% — the lexicon lookup above still
+        // fires) under the tier's name: a missing instrument that reads exactly like a 10-point regression.
+        // The referee-eval test skips ckb's floor in this state; a human running eval.ts by hand gets this.
+        if (!ckbWarned) {
+            ckbWarned = true;
+            console.error("⚠ ckb: no bizroke tagger (missing model or onnxruntime-node) — reporting LEXICON-ONLY, not the shipped tier");
+        }
+        return ckbRules(w);
+    }
+    return (await tagger.tag(w)) || ckbRules(w);
 };
 
 const PHON: Record<string, (w: string) => string | Promise<string>> = {
