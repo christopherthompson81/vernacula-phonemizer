@@ -1758,3 +1758,59 @@ they were the sed's collateral damage. Re-run against the h rule alone, exactly 
 The literal is now `FULL_VOWEL`, named once. The two rules genuinely share the concept — reducible ⟨e i⟩
 against everything else — so naming it keeps them from drifting and makes an edit to one visibly not an
 edit to both.
+
+## Run 27 — 2026-08-19 — fr_fr: two referees against the audio, and the audio wins
+
+`fr_fr` is the best-scoring language in the corpus by a wide margin (median **0.089**; the next best, de_de,
+is 0.166). Its all-flagged set is 9 distinct sentences and **every one of them is English inside French** —
+*crown court de birmingham*, *running tours barcelona*, *wonders of the african world*, *airlines such as
+emirates etihad airways*, *walt disney world*. That is the code-switching class this session already
+measured and declined for French specifically (293 worse against 67 better). The per-row queue has nothing
+new, so this run is entirely about the aggregate.
+
+### One systematic class, and one that only looks like one
+
+    ɔ -> o   4174  20.9%      ɛ -> e   1565  7.8%      e -> ɛ   1294  6.5%
+
+⚠ **`ɔ/o` IS THE BIGGEST PAIR AND IS NOT A DEFECT.** Against the 3,000-word frequency-ranked gold it splits
+**13 one way and 17 the other** — balanced, so it is word-by-word lexical variation, not a rule error. The
+near-balance in the ASR tally (7.8% against 6.5% for ɛ/e) says the same thing a second way.
+
+`e/ɛ` is different: **87 words where we write ɛ and the gold has e, against 9 the other way.** By spelling:
+⟨ai⟩ 40 (jamais, vraiment, maison, raison), bare pretonic ⟨e⟩ 35 (médecin, terrible, mettez, verra,
+professeur), ⟨ei⟩ 9, ⟨ê/è⟩ 3.
+
+⚠ **AND THE TWO REFEREES CORROBORATE IT.** Of the words present in BOTH the adjudicated gold and wikipron,
+6 fall in this class and **all 6 agree against us, with zero dissent** — vraiment vʁɛmɑ̃→vʁemɑ̃, terrible
+tɛʁibl→teʁibl, mettons mɛtɔ̃→metɔ̃, terreur, plaisanterie, plus destruction in the other direction. The
+harness's "≥2 independent sources" bar is met. Both encode the neutralised pretonic mid vowel.
+
+### The third instrument says no
+
+The ⟨ai⟩ half is a single line with a named source: *"ai → ɛ (laine, mais, vraiment, maison) — the Lexique
+convention renders it ɛ across positions."* Flipping it to [e] is the cleanest possible test of the whole
+hypothesis, and against the audio:
+
+    ai -> e     40 rows closer,  99 further
+
+⚠ **TWO DICTIONARY REFEREES AGREED AND THE SPEECH DISAGREED, 2.5:1.** The referees encode a transcription
+convention — neutralised pretonic mid vowels, the modern descriptive norm — and FLEURS readers produce the
+conservative [ɛ]. Both are real French; the corpus this engine feeds is speech, and Lexique is the
+convention the code already names. **No change.**
+
+Worth stating plainly because it inverts the usual precedence: through Runs 22–26 the referee was the
+arbiter and the audio the corroboration. Here they conflict outright, and the reason to trust the audio is
+not that it is a better instrument but that it is the *right* one for the question — what a reader says,
+not what a dictionary prints.
+
+### Left alone
+
+The bare-⟨e⟩ half (35 words) would need a THIRD category the engine does not have: `case "e"` emits `ɛ` in a
+closed syllable and `ə` in an open one, with no pretonic [e], and adding one would interact with the schwa
+deletion machinery. Given the ⟨ai⟩ result went 40/99 against the same hypothesis, the prior is now against
+it and the cost is high. Recorded, not attempted.
+
+### Verdict
+
+**No phonemizer defect in fr_fr, and no change made.** Three languages of the last four have come back
+clean — bn_in, hy_am, fr_fr — each with a large aggregate class that turned out to be correct as designed.
