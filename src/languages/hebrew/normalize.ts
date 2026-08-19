@@ -124,9 +124,7 @@ const GERSHAYIM = "[\"״]";
  * עֶשְׂרִים, עֶשֶׂר — and because it is the form the manifest's own note about unmodelled morphophonology
  * ("the u-/va- morphophonology before labials is not modelled") already licenses as this file's register.
  */
-/** The vocalized form of each one-letter proclitic. Exported for the neural path, which meets the
- *  same particles as a maqaf half (`ה־בית`) where this file meets them before a digit. */
-export const PROCLITIC: Record<string, string> = {
+const PROCLITIC: Record<string, string> = {
     "ב": "בְּ", "כ": "כְּ", "ל": "לְ", "ו": "וְ", "מ": "מֵ", "ה": "הַ", "ש": "שֶׁ",
 };
 /** The six that the corpus writes before a DIGIT or a Latin run. ש is absent from that position (×0) and is
@@ -200,6 +198,13 @@ export function normalizeHebrew(input: string): string {
     //    every pointed letter is decomposed by NFC), so a rule keyed on a literal would otherwise match a
     //    fraction of its instances — trap 11. The g2p NFCs again downstream, so this costs nothing.
     let s = input.normalize("NFC");
+
+    // 1b) ⚠ THE SOF PASUQ IS A CLAUSE MARK AND MUST NOT BE GLUED TO THE WORD. `׃` is declared in
+    //     `clausePunctuation` (→ "."), but the word tokenizer admits it inside a word — it sits in the
+    //     [U+0591–U+05C7] mark class the token pattern uses — so `עולם׃` matches as ONE word and the
+    //     punctuation alternative never sees it. The declared pause was silently dropped, and the mark
+    //     rode into the g2p. Separating it lets the existing rule do what it already says it does.
+    s = s.replace(/\u05C3/gu, " \u05C3 ");
 
     // 2) ⚠ BIDI FORMAT CONTROLS — ×27, and this is the concrete form of the RTL hazard. Every one is
     //    U+200F RLM, dropped by a Hebrew author to stop a Latin gloss from reordering:

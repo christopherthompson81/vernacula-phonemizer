@@ -122,6 +122,11 @@ export function phonemizeWord(word: string): string {
 // word-MEDIAL digraph — splits at the geresh into two vowel-less fragments. Here the same class was missing
 // it entirely: every one of the corpus's 183 geresh digraphs split its word (`ג'יימס` → *ɡ jjms*).
 const TOKEN = /([א-ת][֑-ׇ־'׳’]*(?:[א-ת][֑-ׇ'׳’]*)*)|(\d+(?:\.\d+)?)|([.!?…,;:׃])/gu;
+/** The Hebrew-block punctuation TOKEN admits INSIDE a word — U+05BE maqaf (a word joiner), U+05C0 paseq,
+ *  U+05C3 sof pasuq, U+05C6 nun hafukha. Each separates two words that must be read separately. */
+const WORD_PUNCT = /[\u05BE\u05C0\u05C3\u05C6]/u;
+const WORD_JOINER_SPLIT = (w: string): string =>
+    w.split(WORD_PUNCT).filter(Boolean).map(phonemizeWord).filter(Boolean).join(" ");
 
 /** Per-call OOV resolver: word → IPA, or undefined to fall back to the rule g2p. Used by the async neural path
  *  (hebrewNeural.ts) to inject the neural tagger's reading for UNVOCALIZED words. */
@@ -132,7 +137,11 @@ class HebrewPhonemizer implements Phonemizer {
         // The normalization pass runs BEFORE tokenization — see normalize.ts. Pure text→text: everything it
         // emits is Hebrew (with niqqud) or digits, and reaches the IPA through this same g2p (trap 6).
         return assembleClauses(normalizeHebrew(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(oovOverride?.(m[1]) ?? phonemizeWord(m[1]));
+            // ⚠ SPLIT AT A JOINER FIRST. `phonemizeWord` scans a token as ONE word, and TOKEN admits the
+            //   maqaf (and paseq / sof pasuq / nun hafukha) inside one — so a compound fused into a word
+            //   that does not exist: `בֵּית־סֵפֶר` → *betsefeʁ* where the reading is *bet sefeʁ*. The OOV
+            //   override still sees the whole token, since that is the key a lexicon would be built on.
+            if (m[1]) sink.emit(oovOverride?.(m[1]) ?? WORD_JOINER_SPLIT(m[1]));
             else if (m[2]) sink.emit(numberToIpa(m[2])); // cardinal → IPA (numbers.ts)
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

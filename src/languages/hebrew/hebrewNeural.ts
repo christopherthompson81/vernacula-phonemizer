@@ -13,7 +13,7 @@ import { assembleClauses } from "../../core/clauses.ts";
 import { withHost } from "../../core/foreign.ts";
 import { phonemizeWord } from "./hebrew.ts";
 import { lexiconLookup } from "./lexicon.ts";
-import { normalizeHebrew, PROCLITIC } from "./normalize.ts";
+import { normalizeHebrew } from "./normalize.ts";
 import { createHebrewTagger, type HebrewTagger } from "./hebrewTagger.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToIpa } from "./numbers.ts";
@@ -35,6 +35,9 @@ const NIQQUD = /\p{Mn}/u;
 // The Hebrew-block punctuation TOKEN admits INSIDE a word, none of which is in the tagger's charset:
 // U+05BE maqaf (joiner), U+05C0 paseq, U+05C3 sof pasuq, U+05C6 nun hafukha.
 const WORD_PUNCT = /[\u05BE\u05C0\u05C3\u05C6]/u;
+/** The one-letter proclitics that attach across a maqaf — the same set normalize.ts measured for
+ *  this position. A proclitic is not a separate phonological word; anything else across a joiner is. */
+const PRO_DASH = /^[בכלמוה]$/u;
 const MAX_CHARS = 200; // keep clauses in-distribution (the tagger trained on ≤220-char runs)
 
 let taggerP: Promise<HebrewTagger | undefined> | undefined;
@@ -77,9 +80,19 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
         };
         /** The rule engine, through the lexicon layer the tagger's own tail applies. */
         const bare = (w: string): string => lexiconLookup(w) ?? phonemizeWord(w);
+        /** ⚠ A STANDALONE ONE-LETTER PROCLITIC READS AS EMPTY IN CLAUSE CONTEXT AND MUST NOT BE DROPPED.
+         *  The tagger tags a lone `ה` BARE, `phonemizeWord` gives "" for the bare letter, and `emit()`
+         *  discards it — so `ה בית הגדול` came out *bet haɡadol* with the article gone. Alone the same
+         *  tagger reads it `ha`, so the single-word call is the repair. 95 such particles stand alone in
+         *  this corpus (usually a space where the orthography would attach the clitic), so it is attested
+         *  rather than hypothetical. Only the particles are patched; an empty reading is legitimate for
+         *  other words and testing every entry for truthiness is what broke a whole clause two rounds ago. */
+        const patchParticles = async (ws: string[], out: string[]): Promise<string[]> =>
+            Promise.all(out.map(async (o, i) =>
+                o === "" && PRO_DASH.test(ws[i]!) ? (await restore([ws[i]!]))?.[0] || o : o));
 
         const whole = await restore(words);
-        if (whole) { queue.push(...whole); return; }
+        if (whole) { queue.push(...(await patchParticles(words, whole))); return; }
 
         // ⚠ SPLIT AT THE WORDS THE TAGGER CANNOT READ AND KEEP THE REST BATCHED. Cross-word context is the
         // whole reason clauses are batched — it is what resolves the homographs the module doc names (ספר
@@ -94,8 +107,12 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
         // not be the one path left that behaves the old way.
         if (words.every((w) => tagger.canRead(w))) {
             for (const w of words) {
+                // ⚠ AN EMPTY RESTORE IS A FAILURE HERE, unlike in a multi-word clause. `restore([w])`
+                // returns [""] on a decline — length 1 against 1, so the count check passes — and also
+                // when the g2p reading is genuinely empty. Either way pushing "" drops the word, so the
+                // single-word case falls back rather than trusting the count.
                 const one = await restore([w]);
-                queue.push(one ? one[0]! : bare(w));
+                queue.push(one?.[0] || bare(w));
             }
             return;
         }
@@ -110,7 +127,7 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
             if (out) queue.push(...out);
             else for (const w of seg) {
                 const one = await restore([w]);
-                queue.push(one ? one[0]! : bare(w));
+                queue.push(one?.[0] || bare(w)); // same single-word caveat as above
             }
             seg = [];
         };
@@ -133,14 +150,23 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
             // word to the rule engine as a skeleton.
             const parts = w.split(WORD_PUNCT).filter(Boolean);
             if (parts.length && (parts.length > 1 || parts[0] !== w) && parts.every((x) => tagger.canRead(x))) {
-                // ⚠ A ONE-LETTER HALF IS A PROCLITIC AND BYPASSES THE TAGGER. It reads `ה` as nothing and
-                // `ב` as a bare consonant, so joining gave "bet" with the definite article gone, or
-                // "v bet". normalize.ts carries the vocalized form of each — it applies the same table
-                // before a digit or a Latin run — and `phonemizeWord` reads THAT deterministically:
-                // ה־ → ha, ב־ → be, ל־ → le. It cannot go through `restore`, whose charset has no niqqud.
-                const lead = parts.length > 1 && parts[0]!.length === 1 ? PROCLITIC[parts[0]!] : undefined;
-                const rest = lead ? parts.slice(1) : parts;
-                const halves = rest.length ? await restore(rest) : [];
+                // ⚠ A ONE-LETTER FIRST PART IS A PROCLITIC, AND A PROCLITIC IS NOT A SEPARATE WORD. The
+                // maqaf only spells the clitic boundary, so splitting there and reading the host in
+                // isolation changes BOTH vowels — the host takes its construct form and the clitic its
+                // citation one. Measured against the model: `ה־בית` split gives *ha bet*, joined *habajit*;
+                // `ל־ירושלים` split *le jʁuʃalajim*, joined *liʁuʃalajim*; `ב־בית` split *be bet*, joined
+                // *bevet*. The joined skeleton is what the tagger reads correctly, so the joiner is simply
+                // removed and the whole thing restored as one word.
+                // ⚠ AND THE OPPOSITE HOLDS FOR A TWO-WORD COMPOUND, which is why the length test decides
+                // rather than a table: `בית־ספר` joined is *bejitspeʁ* and split is *bet sefeʁ*;
+                // `בין־לאומי` joined *benlumi*, split *ben leumi*. Join a compound and you get one
+                // nonexistent word; split a proclitic and you get two wrong ones.
+                // ⚠ THE PARTICLE SET IS NAMED, NOT INFERRED FROM LENGTH. `ע` is a one-letter word and NOT
+                // a proclitic, so a length test joined `ע־בית` into the nonexistent *ʔaveta*.
+                // normalize.ts measured this same position and uses [בכלמוה]; ⟨ה⟩ the article is included
+                // and ⟨ש⟩ excluded there at ×0 attestations, which is the list adopted here.
+                const proclitic = parts.length > 1 && PRO_DASH.test(parts[0]!);
+                const halves = proclitic ? await restore([parts.join("")]) : await restore(parts);
                 if (halves) {
                     // ⚠ THE SEGMENT STILL FLUSHES HERE, and that is a known limit rather than an
                     // oversight. The compound is its own model call, so the words before and after it end
@@ -153,9 +179,22 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
                     // joining it leaves a stray space that `emit()` passes through: `ה־בית גדול` came out
                     // as " bet ɡadol", `גדול ה־בית` as "ɡadol  bet". The prefixed particles ה־ ב־ ל־ are
                     // exactly the halves that read empty, and normalize.ts leaves them un-rewritten.
-                    queue.push([lead ? phonemizeWord(lead) : "", ...halves].filter(Boolean).join(" "));
+                    queue.push(halves.filter(Boolean).join(" "));
                     continue;
                 }
+            }
+            // ⚠ A COMPOUND WITH ONE UNREADABLE HALF STILL SPLITS. Falling straight to `bare(w)` fuses it
+            // into a single skeleton — `ה־ג'ון` → *hd͡ʒvn* — discarding the boundary the rest of this
+            // branch exists to honour. Each half takes the best path available to it.
+            if (parts.length > 1) {
+                await flushSeg();
+                const read = await Promise.all(parts.map(async (x) => {
+                    if (!tagger.canRead(x)) return bare(x);
+                    const one = await restore([x]);
+                    return one?.[0] || bare(x);
+                }));
+                queue.push(read.filter(Boolean).join(" "));
+                continue;
             }
             await flushSeg();
             queue.push(bare(w));
@@ -175,7 +214,7 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
                 // ⚠ `hebrew.ts`'s own sync `text()` has the same fusion and is NOT fixed here — it is a
                 // different entry point, outside this change's scope, and the corpus has 0 vocalized maqaf
                 // compounds (32 maqaf words, all bare). Stated so it is not read as already handled.
-                queue.push(w.split(WORD_PUNCT).filter(Boolean).map(phonemizeWord).filter(Boolean).join(" "));
+                queue.push(vocalized(w));
                 continue;
             }
             const curLen = run.reduce((a, x) => a + x.length + 1, 0);
@@ -197,9 +236,18 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
 }
 
 /** The sync rule-engine path (vocalized-only) — the model-absent fallback. */
+/** A pointed word, read by the rule g2p — SPLIT AT ANY JOINER FIRST.
+ *  ⚠ `phonemizeWord` scans a token as ONE word, so a maqaf compound fuses: `בֵּית־סֵפֶר` → *betsefeʁ*.
+ *  ⚠ AND BOTH PATHS MUST USE THIS. Splitting only in the neural branch made the output depend on whether
+ *  the ONNX model happens to be installed, which breaks this module's stated contract that the
+ *  model-absent path "returns exactly the sync path". */
+function vocalized(w: string): string {
+    return w.split(WORD_PUNCT).filter(Boolean).map(phonemizeWord).filter(Boolean).join(" ");
+}
+
 function sync(text: string): string {
     return withHost("he", () => assembleClauses(text, TOKEN, (m, sink) => {
-        if (m[1]) sink.emit(phonemizeWord(m[1]));
+        if (m[1]) sink.emit(vocalized(m[1]));
         else if (m[2]) sink.emit(numberToIpa(m[2]));
         else if (m[3]) { const mk = CLAUSE_MARK[m[3]]; if (mk) sink.pause(mk); }
     }));

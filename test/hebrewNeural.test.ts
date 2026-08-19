@@ -94,7 +94,13 @@ describe("hebrew neural vowel restoration", () => {
          * all-or-nothing decline too (that returns "" → one token against N).
          */
         test("a word whose reading is empty does not skeletonize its clause", async () => {
-            expect(await phonemizeHebrewNeural("ה בית הגדול")).toContain("bet haɡadol");
+            // ⚠ ASSERTED WHOLE, NOT `toContain`. The loose form passed while the article was being DROPPED
+            //   — `bet haɡadol` contains the substring either way — so the assertion could not see the
+            //   defect it sat next to.
+            // ⚠ AND A STANDALONE ONE-LETTER PROCLITIC IS NOT DROPPED. The tagger tags a lone `ה` BARE and
+            //   the bare letter reads as "", which `emit()` discards; alone the same tagger says `ha`. 95
+            //   such particles stand alone in this corpus, so it is attested rather than hypothetical.
+            expect(await phonemizeHebrewNeural("ה בית הגדול")).toBe("ha bet haɡadol");
         });
 
         /** ⚠ And the rejoined maqaf halves are VALIDATED, or a half whose reading is empty vanishes inside
@@ -109,10 +115,20 @@ describe("hebrew neural vowel restoration", () => {
             //   definite article. normalize.ts already carries the vocalized form of each — it applies the
             //   same table before a digit — and the rule engine reads THAT: ה־ → ha, ב־ → be, ל־ → le.
             //   It cannot go through the tagger, whose charset has no niqqud.
-            expect(await phonemizeHebrewNeural("ה־בית גדול")).toBe("ha bet ɡadol");
-            expect(await phonemizeHebrewNeural("גדול ה־בית")).toBe("ɡadol ha bet");
-            expect(await phonemizeHebrewNeural("ב־בית גדול")).toBe("be bet ɡadol");
-            expect(await phonemizeHebrewNeural("ל־ירושלים גדולה")).toBe("le jʁuʃalajim ɡdola");
+            // ⚠ A ONE-LETTER PROCLITIC IS NOT A SEPARATE WORD, so the joiner is REMOVED and the whole
+            //   thing read as one. Splitting there changes both vowels — the host takes its construct form
+            //   and the clitic its citation one: `ה־בית` split is *ha bet*, joined *habajit*; `ל־ירושלים`
+            //   split *le jʁuʃalajim*, joined *liʁuʃalajim*.
+            // ⚠ AND THE OPPOSITE HOLDS FOR A TWO-WORD COMPOUND, which is why the length of the first part
+            //   decides rather than a particle table: `בית־ספר` joined is the nonexistent *bejitspeʁ* and
+            //   split is *bet sefeʁ*; `בין־לאומי` joined *benlumi*, split *ben leumi*.
+            expect(await phonemizeHebrewNeural("ה־בית גדול")).toBe("habajit ɡadol");
+            expect(await phonemizeHebrewNeural("ב־בית גדול")).toBe("bevet ɡadol");
+            expect(await phonemizeHebrewNeural("ל־ירושלים גדולה")).toBe("liʁuʃalajim ɡdola");
+            expect(await phonemizeHebrewNeural("בית־ספר גדול")).toBe("bet sefeʁ ɡadol");
+            // ⚠ A compound whose second half the tagger cannot read still SPLITS, rather than fusing into
+            //   one skeleton — `ה־ג'ון` was *hd͡ʒvn*.
+            expect(await phonemizeHebrewNeural("ה־ג'ון")).toBe("ha d͡ʒvn");
         });
 
         /**
@@ -131,7 +147,13 @@ describe("hebrew neural vowel restoration", () => {
          * its empty trailing part.
          */
         test("word-internal Hebrew punctuation splits rather than skeletonizing", async () => {
-            expect(await phonemizeHebrewNeural("שלום עולם׃ מה שלומך")).toBe("ʃalom ʔolam ma ʃlomχa");
+            // ⚠ AND THE SOF PASUQ EMITS ITS DECLARED CLAUSE PAUSE. `׃` is in `clausePunctuation` (→ "."),
+            //   but the word tokenizer swallowed it — it is inside the mark class the token pattern uses —
+            //   so the punctuation alternative never saw it and the pause was silently dropped. The
+            //   normalizer separates it now, which is what lets the existing rule fire.
+            expect(await phonemizeHebrewNeural("שלום עולם׃ מה שלומך")).toBe("ʃalom ʔolam . ma ʃlomχa");
+            expect(await phonemizeHebrewNeural("שלום עולם׃ מה שלומך"))
+                .toBe(await phonemizeHebrewNeural("שלום עולם. מה שלומך"));
             expect(await phonemizeHebrewNeural("שלום׀ עולם")).toBe("ʃalom ʔolam");
             expect(await phonemizeHebrewNeural("בית־")).toBe("bet");
             // ⚠ AND A TOKEN THAT IS ONLY PUNCTUATION LEAVES NOTHING TO SPLIT. `filter(Boolean)` empties
@@ -181,8 +203,11 @@ describe("hebrew neural vowel restoration", () => {
                 //   see the class of bug it was written for.
                 expect(out, `leading/trailing space for: ${c}`).toBe(out.trim());
                 expect(out, `doubled space for: ${c}`).not.toMatch(/\s\s/u);
+                // ⚠ NO SLACK. An earlier `- 1` tolerance was exactly wide enough to hide a dropped word,
+                //   which is the defect this test exists to catch. Every case below emits one IPA word per
+                //   input word; the maqaf compound emits two for its one token, hence `>=`.
                 expect(out.split(" ").length,
-                    `word count collapsed for: ${c}`).toBeGreaterThanOrEqual(c.split(" ").length - 1);
+                    `word count collapsed for: ${c}`).toBeGreaterThanOrEqual(c.split(" ").length);
             }
         });
     });
