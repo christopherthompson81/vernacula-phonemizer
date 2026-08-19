@@ -2559,3 +2559,127 @@ parameter next.
 
 **Instrument note.** Neither the referee nor the audio can score this tier (Run 38). The stem-blind split is
 the whole instrument, and is reported as such in `ckb-bizroke-tagger.PROVENANCE.md`.
+
+## Run 40 — 2026-08-19 — fold the bizroke to a VOWEL, and the residual starts talking
+
+**Question.** With the vowel restored by lexicon + tagger, is `[əɪ] → ""` still the right fold? And if the
+referee becomes an instrument again, what does its residual say we should fix?
+
+**The fold was wrong, and wrong in a specific way.** The two referees disagree about the bizroke's QUALITY
+(wikipron ɪ, kaikki ə). The fold that disagreement justifies is *normalise the quality*. What was there
+instead **deleted the vowel from both sides**, which additionally scores its PRESENCE as free — so rules,
+lexicon and tagger all read identically and Run 37's flat referee was "no instrument", not "no effect".
+Changing `replace` from `""` to `"ə"`:
+
+| ckb tier (folded backbone) | wikipron | kaikki |
+|---|---|---|
+| rules only | 72.3% | 71.2% |
+| + bizroke lexicon | 74.8% | 73.6% |
+| + bizroke tagger | **85.4%** | **84.9%** |
+
+The tagger is worth 4.4× the lexicon, which is what an exhausted 2,517-word source against ~2,000 remaining
+corpus types predicts. **This is the external confirmation the held-out split could not give** — both referees
+are independent of AsoSoft. The eval's ckb entry now runs the whole shipped tier (lexicon → tagger → rules)
+rather than the lexicon path, which is only legible because the fold stopped hiding it.
+
+⚠ The regression floor in `test/referee-eval.test.ts` moved **down**, 0.92 → 0.80, while the engine got
+better. The old 94.9% was measured with Sorani's one unwritten vowel deleted from both sides.
+
+**⚠ THE TWO REFEREES ARE NOT INDEPENDENT OF EACH OTHER.** Checked directly: all 972 wikipron headwords appear
+in kaikki, and after folds the two agree on **964 (99.2%)** — 5 bizroke placements and 3 other segments apart.
+Both scrape en.wiktionary; kaikki is a near-superset adding 65 words. The ckb headers called them "TWO
+independent HUMAN referees" and that overstates one upstream measured twice. Corrected in `ckb.jsonc`, the
+engine header, the provenance doc and the eval test. They remain independent *of AsoSoft*, which is the axis
+that matters here — but the answer to "is there dialectal intermixing between the referees" is no: there is
+barely a second referee.
+
+**Residual classification** (142 wikipron / 157 kaikki misses, by whether the consonant skeleton matches):
+
+|  | wikipron | kaikki |
+|---|---|---|
+| bizroke-only (skeleton exact) | 92 | 105 |
+| — we omit a vowel the referee has | 53 | 62 |
+| — we add one it does not | 33 | 37 |
+| — right count, wrong slot | **6** | **6** |
+| skeleton differs | 50 | 52 |
+
+Two readings. Omission and over-insertion are **near-balanced**, so what is left is placement rather than a
+bias — a systematically over-eager model would be lopsided. And only **6** misses put the right *number* of
+vowels in the wrong *slot*: when the model knows a vowel belongs, it nearly always knows where. The
+skeleton-differs half is pharyngeal ħ/ʕ~h, uvular χ~x, long-vowel quality, and kaikki letter-name rows
+(⟨و⟩ → *waw*) — outside this tier.
+
+**Two bugs the residual surfaced.**
+
+1. **The palatal fold was voicing-blind.** `[cɟ] → k` sent the referee's [ɟ] to k while our ɡ stayed ɡ, so all
+   12 ⟨گ⟩ palatalisations (گیتار *ɟiːtaːɾ*, گیان, گیسک, گیا…) were scored wrong for a distinction *neither
+   side wrote*. Split into `c → k` and `ɟ → ɡ`: **+0.8 / +0.7**.
+2. **Word-final ɪ is a model artifact, and measurably so.** Only **9 of the 9,387 training words (0.1%)** end
+   in a bizroke, but the tagger emits a final one on **2.4%** of referee vocabulary and **1.1%** of FLEURS ckb
+   types — 10–24× its own data. It is generalising the cluster-breaking vowel into a position AsoSoft almost
+   never puts it (ئاشت *aʃtɪ* for *aʃt*, بیست *biːstɪ* for *biːst*). Suppressed in the tagger's `postprocess`:
+   **+1.9 / +2.1**, 18 and 21 words. ⚠ The base-rate check is what makes this a correction rather than
+   referee-fitting — the training data and the referee agree against the model. The 9 legitimate cases are
+   lexicon entries and the lexicon is consulted first, so they are untouched.
+
+**Implication for the training data.** Nothing to fix in it: the balance of omissions to over-insertions says
+the model is not biased, the 6 wrong-slot cases say placement is nearly solved, and the one systematic error
+was the model departing from its data rather than following it. The remaining lever is *more* data of the same
+kind, and AsoSoft is exhausted — so the next real gain in ckb is a second word list, not a better model.
+
+## Run 41 — 2026-08-19 — the word-final artifact was the TRAINING METHOD, not the data
+
+**Question.** Run 40 measured the tagger emitting a word-final ɪ 24× more often than its training data ever
+does, and patched it with a `postprocess` strip. It also concluded "nothing to fix in the training data" —
+which does not license "nothing to fix". If the data does not contain the behaviour, where did the model get
+it?
+
+**Finding — no packing.** `Tagger.forward` ran the BiLSTM over padded batches with no
+`pack_padded_sequence`. The BACKWARD direction therefore crosses the pad steps *before* it reaches a word's
+last real symbol, so that symbol's representation is contaminated — by a varying amount, since it depends on
+the batch's longest word. Serving is batch=1 and unpadded, where the backward pass starts cleanly at the true
+final symbol: a condition training barely presented. **The damage lands precisely at the end of the word**,
+which is exactly and only where the artifact appeared.
+
+**Command.**
+
+    .venv/bin/python tools/central-kurdish/train_ckb_bizroke.py --src <clone>
+
+| | before | after packing |
+|---|---|---|
+| held-out word-exact (stem-blind) | 95.1% | **96.6%** |
+| word-final ɪ, referee vocabulary | 2.4% | **0.1%** |
+| word-final ɪ, FLEURS ckb types | 1.1% | **0.0%** |
+| referee, wikipron / kaikki | 82.7 / 82.1 | **85.2 / 85.0** |
+| random-split held-out (same probe) | 96.5 → | 98.2% vs 96.7% stem-blind |
+
+The final-ɪ rate lands on the training data's own 0.1%. Error rate 4.9% → 3.4%, a 30% reduction, from a
+change that touches no data and no hyperparameter.
+
+**Verified before touching anything else, at the user's instruction.** Full CI green; `test/ckbNeural.test.ts`
+still passes unchanged, including the round-trip assertion that stripping ɪ from any tagger reading returns
+`phonemizeWordRules` exactly (so the retrain did not loosen the safety property). Corpus effect 9.1% → 9.2% of
+ckb tokens, no-nucleus 3.61% → 3.59%. A new smoke check asserts the packing invariant directly — packed logits
+are independent of trailing padding, a padded row equals the same word alone, and (the mutation guard) the
+unpacked path really does differ at the word end; reverting the packing fails the first two and keeps the
+third.
+
+**The Run 40 postprocess is removed.** On the fixed model it is worth ONE word and would suppress the genuine
+final bizroke. It was treating a symptom; the note stays in `centralKurdishTagger.ts` because the next person
+to see a position-specific artifact should suspect the padding before the data.
+
+⚠ **EVERY BiLSTM TRAINER IN THIS REPO HAD IT.** Checked all ten — `tools/bilstm_training/tagger.py` (the
+shared core for nb/en/da/fr) and the standalone trainers for sd, bn, af, he, fa: none packed. The shared core
+is now fixed so the bug cannot propagate to the next language, but **every committed `.onnx` except ckb's was
+trained under it** and carries some amount of word-final damage.
+
+**Not retrained wholesale, on purpose.** Each of those nine has a measured provenance table and a regression
+floor in `test/referee-eval.test.ts`; a retrain moves both and needs its own before/after against its own
+referee, and a couple (sd's inherent-vowel masking, fa's encoder/decoder pair) have training-time subtleties
+that do not survive a blind rerun. It is a campaign, not a sweep. ckb is the cleanest possible demonstration
+of the size of the prize — a tagger that decides exactly one thing, so the effect is not confounded — and
+1.5pp word-exact is what it was worth there.
+
+**Method note.** The base-rate check in Run 40 (model 2.4% vs data 0.1%) is what made this findable. A
+divergence between what a model does and what its data contains is a bug in the *machinery* until proven
+otherwise; "the data is fine" and "the training is fine" are different claims and Run 40 conflated them.

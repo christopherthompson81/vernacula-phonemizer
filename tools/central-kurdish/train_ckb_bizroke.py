@@ -6,8 +6,8 @@ built from it (build_ckb_lexicon.py) reaches 6.4% of FLEURS ckb word TYPES, whil
 26.8% of the words this engine otherwise transcribes correctly are missing a bizroke. ~2,000 corpus types are
 left. A fixed epenthesis rule was measured at every quality and is net negative (Run 37), because one
 insertion after the first consonant is right that a vowel is missing and wrong about how many and which —
-سفر is *safar*. A model conditioned on the WHOLE skeleton is a different instrument, and it works: 96.5%
-word-exact on a STEM-BLIND held-out split against a 73.8% never-insert baseline (Run 39).
+سفر is *safar*. A model conditioned on the WHOLE skeleton is a different instrument, and it works: 96.6%
+word-exact on a STEM-BLIND held-out split against a 73.8% never-insert baseline (Runs 39, 41).
 
 ⚠ THE INPUT IS OUR OWN RULE OUTPUT, NOT THE ORTHOGRAPHY. `preprocess` on the serving side is
 `phonemizeWordRules`, so the tagger reads the IPA this engine already produces and labels each code point
@@ -16,11 +16,13 @@ core/structuralTagger.ts then makes it STRUCTURALLY IMPOSSIBLE for the model to 
 tags any symbol ever emitted are itself and itself+ɪ — and the rules-only referee path is untouched, so the
 ckb referee eval stays non-circular.
 
-⚠ THE REFEREE CANNOT SCORE THIS AND NEITHER CAN THE AUDIO. ckb.jsonc folds `[əɪ]` to nothing on both sides
-(the two human referees disagree on the vowel's QUALITY), and the ASR under-transcribes Sorani — 0.929 of our
-folded phone count, against 0.987 de / 0.998 fr — so it charges us for phones it never emits. The held-out
-split below is the ONLY instrument. That is why the split is stem-blind: a random split lets ئابووری train
-and ئابوورییان test, and the number stops meaning anything (98.5% random vs 96.5% stem-blind).
+⚠ THE AUDIO CANNOT SCORE THIS, AND THE REFEREE COULD NOT UNTIL ITS FOLD WAS FIXED. The ASR under-transcribes
+Sorani — 0.929 of our folded phone count, against 0.987 de / 0.998 fr — so it charges us for phones it never
+emits. ckb.jsonc used to fold `[əɪ]` to NOTHING, which deletes the vowel from both sides and scores its
+presence as free; it now normalises to ə (the referees agree on presence and position, only quality differs),
+and the tier reads 85.2%/85.0% wikipron/kaikki against lexicon-only 74.8%/73.6% and rules-only 72.3%/71.2%.
+The held-out split below is still the training-time instrument, and it is stem-blind because a random split
+lets ئابووری train and ئابوورییان test — the number stops meaning anything (98.2% random against 96.7% stem-blind, measured the same way).
 
 ⚠ NO `<unk>`. Unlike the sd/bn taggers, an unseen input symbol DECLINES the word (serving falls back to the
 rule reading) rather than permitting every tag. There is no tag here worth guessing.
@@ -57,14 +59,28 @@ DEV = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class Tagger(nn.Module):
+    """⚠ `lengths` IS NOT OPTIONAL POLISH — IT IS THE FIX FOR A WORD-FINAL ARTIFACT. Without packing, a padded
+    batch runs the BACKWARD direction of the BiLSTM over the pad steps BEFORE it reaches the word's last real
+    symbol, so that symbol's representation is contaminated by padding — and by a varying amount, since it
+    depends on the batch's longest word. Serving is batch=1 with no padding, where the backward pass starts
+    cleanly at the true final symbol: a condition training rarely presented. The damage lands precisely at the
+    end of the word, and it showed up as the tagger emitting a word-final ɪ on 2.4% of referee vocabulary
+    against 0.1% in its own training data. Pass `lengths` whenever the batch is padded; the export path (batch
+    of one, unpadded) omits it and the two agree there by construction."""
+
     def __init__(self, nsrc: int, ntag: int):
         super().__init__()
         self.e = nn.Embedding(nsrc, EMB, padding_idx=0)
         self.lstm = nn.LSTM(EMB, HID, LAYERS, batch_first=True, bidirectional=True, dropout=DROP)
         self.o = nn.Linear(2 * HID, ntag)
 
-    def forward(self, x):
-        return self.o(self.lstm(self.e(x))[0])
+    def forward(self, x, lengths=None):
+        h = self.e(x)
+        if lengths is None:
+            return self.o(self.lstm(h)[0])
+        packed = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(self.lstm(packed)[0], batch_first=True, total_length=x.size(1))
+        return self.o(out)
 
 
 def load_rows(src_dir: str) -> list[tuple[str, list[str], list[str]]]:
@@ -135,8 +151,9 @@ def fit(rows, src, tags, quiet=False):
             for r, j in enumerate(ch):
                 xb[r, :len(X[j])] = torch.tensor(X[j])
                 yb[r, :len(Y[j])] = torch.tensor(Y[j])
+            lens = torch.tensor([len(X[j]) for j in ch])
             opt.zero_grad()
-            loss = crit(m(xb.to(DEV)).reshape(-1, len(tags)), yb.to(DEV).reshape(-1))
+            loss = crit(m(xb.to(DEV), lens).reshape(-1, len(tags)), yb.to(DEV).reshape(-1))
             loss.backward(); opt.step(); tot += loss.item(); nb += 1
         sched.step()
         if not quiet and (ep + 1) % 10 == 0:

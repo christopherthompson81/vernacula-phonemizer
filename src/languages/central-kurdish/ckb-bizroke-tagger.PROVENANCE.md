@@ -48,20 +48,55 @@ repository to rebuild. Rebuild: `tools/central-kurdish/train_ckb_bizroke.py --sr
 ## Measured
 | | |
 |---|---|
-| **tagger word-exact (stem-blind held-out)** | **95.1%** |
+| **tagger word-exact (stem-blind held-out)** | **96.6%** |
 | never-insert baseline, same split | 73.8% |
-| tagger word-exact, random split | 96.5% |
+| tagger word-exact, random split | 98.2% |
 | fp32 ONNX argmax parity vs torch | 400/400 |
 | int8 vs fp32 word-level agreement | 400/400 |
 
 ⚠ **The split is stem-blind — grouped by the first 5 characters of the Kurdish word — because Sorani's
-inflected families would otherwise straddle it** (ئابووری / ئابوورییان / ئابوورییەوە). The random split reads
-1.4pp higher and means less.
+inflected families would otherwise straddle it** (ئابووری / ئابوورییان / ئابوورییەوە). Measured the same way,
+a random split reads 98.2% against the stem-blind 96.7% — 1.5pp of leakage, which is the size of the lie a
+random split would tell here.
 
-⚠ **Neither the referee nor the audio can score this tier.** `tools/referee-eval/langs/ckb.jsonc` folds
-`[əɪ]` to nothing on *both* sides, because its two human referees agree the vowel exists and where it goes but
-disagree on its QUALITY (wikipron writes ɪ, kaikki ə) — the referee is blind here by design. And the ASR
-recognizer under-transcribes Sorani: 0.929 of our folded phone count, against 0.987 for German and 0.998 for
-French, so it charges us for phones it never emits. The held-out split above is the entire instrument, which
-is why it is reported honestly rather than favourably. See
-`docs/investigations/asr_align_qc_investigation.md` Runs 37–39.
+### Confirmed externally, once the referee fold was fixed
+`tools/referee-eval/langs/ckb.jsonc` used to fold `[əɪ]` **to nothing** on both sides. That deletes the vowel
+from our reading and the referee's alike, so it scores the vowel's *presence* as free and every tier — rules,
+lexicon, tagger — reads identically. It was put there because the two referees disagree on the vowel's
+QUALITY (wikipron ɪ, kaikki ə), but the fold that disagreement justifies is *normalise the quality*, not
+*delete the vowel*. Under `[əɪ] → ə`:
+
+| ckb tier (folded backbone) | wikipron ckb_arab_broad | kaikki ckb |
+|---|---|---|
+| rules only | 72.3% | 71.2% |
+| + bizroke lexicon | 74.8% | 73.6% |
+| **+ bizroke tagger** | **85.2%** | **85.0%** |
+
+Both referees are independent of AsoSoft, so this is external confirmation of a tier the internal split could
+only self-report. The tagger is worth 4.4× the lexicon because the lexicon is 2,517 words and most of the
+referee vocabulary falls outside it.
+
+⚠ **The two referees are not independent of each other.** All 972 wikipron headwords also appear in kaikki and
+the two agree on 964 of them (99.2%) after folds; both scrape en.wiktionary. kaikki is a near-superset adding
+65 words, not a second opinion. Read the two columns as one source measured twice.
+
+### What the residual is made of
+Classifying the 142 / 157 remaining misses by whether the consonant skeleton matches:
+
+| | wikipron | kaikki |
+|---|---|---|
+| bizroke-only (skeleton exact, vowel differs) | 92 | 105 |
+| — we omit a vowel the referee has | 53 | 62 |
+| — we add one it does not | 33 | 37 |
+| — same count, different slot | 6 | 6 |
+| skeleton differs (not this tier's business) | 50 | 52 |
+
+Two things worth noting. **Omission and over-insertion are near-balanced** (53 vs 33, 62 vs 37) — a
+systematically over-eager model would be lopsided, so what is left is placement, not bias. And **only 6 misses
+put the right NUMBER of vowels in the wrong SLOT**: when the model knows a vowel belongs, it almost always
+knows where. The skeleton-differs half is a mix of pharyngeal ħ/ʕ~h, uvular χ~x, kaikki letter-name rows
+(⟨و⟩ → *waw*), and long-vowel quality — all outside the bizroke question.
+
+⚠ **The audio still cannot score this tier.** The ASR recognizer under-transcribes Sorani: 0.929 of our folded
+phone count, against 0.987 for German and 0.998 for French, so it charges us for phones it never emits. See
+`docs/investigations/asr_align_qc_investigation.md` Runs 37–40.

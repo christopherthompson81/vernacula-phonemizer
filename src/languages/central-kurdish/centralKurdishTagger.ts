@@ -13,10 +13,12 @@
  * Precedence is lexicon → tagger → rules: a word the AsoSoft-derived lexicon covers is served from there.
  * The tagger's target is the ~2,000 corpus word types beyond it — the source is 10,041 words and exhausted.
  *
- * Measured 95.1% word-exact against a 73.8% never-insert baseline on a STEM-BLIND held-out split (a random
- * split reads 2pp higher and is a lie — Sorani's inflected families would straddle it). That split is the ONLY
- * instrument available: ckb.jsonc folds `[əɪ]` on both sides because the two human referees disagree on the
- * vowel's quality, and the ASR under-transcribes Sorani. See ckb-bizroke-tagger.PROVENANCE.md.
+ * Measured 96.6% word-exact against a 73.8% never-insert baseline on a STEM-BLIND held-out split (a random
+ * split reads 2pp higher and is a lie — Sorani's inflected families would straddle it). CONFIRMED EXTERNALLY
+ * once `ckb.jsonc` stopped folding `[əɪ]` to nothing and started normalising it to ə: on the folded backbone
+ * this tier scores 85.2% (wikipron) / 85.0% (kaikki) against the lexicon-only 74.8% / 73.6% and the rules-only
+ * 72.3% / 71.2% — referees that had no part in building it (though not, it turns out, independent of each
+ * other: both scrape en.wiktionary and agree with each other on 99.2% of the 972 words they share). See ckb-bizroke-tagger.PROVENANCE.md.
  *
  * `onnxruntime-node` is an OPTIONAL dependency, imported lazily; if it — or the .onnx — is absent,
  * createCentralKurdishTagger() resolves to `undefined` and callers fall back to the sync engine (no throw).
@@ -40,5 +42,14 @@ export function createCentralKurdishTagger(basename = "ckb-bizroke-tagger"): Pro
         // ⚠ the tagger reads IPA, not orthography — see the header. An unseen symbol has no entry in `src`,
         // so the shared factory declines the word and the rule reading stands.
         preprocess: phonemizeWordRules,
+        // ⚠ NO `postprocess` STRIPPING WORD-FINAL ɪ, AND THE REASON IS WORTH KEEPING. The first model emitted
+        // a word-final bizroke on 2.4% of referee vocabulary and 1.1% of FLEURS ckb types against 0.1% in its
+        // own training data, and a `.replace(/ɪ$/, "")` here bought +1.9pp. That was a symptom: the trainer
+        // ran the BiLSTM over PADDED batches without pack_padded_sequence, so the backward direction crossed
+        // pad steps before reaching each word's last real symbol while serving (batch=1, unpadded) starts it
+        // cleanly there — damage landing precisely at the end of the word. Packing the sequences took the
+        // final-ɪ rate to 0.1% / 0.0%, i.e. to the training data's own rate, and held-out word-exact from
+        // 95.1% to 96.6%. With the cause fixed the strip is worth ONE word and would suppress the genuine
+        // final bizroke, so it is gone. Treat the cause.
     });
 }

@@ -199,7 +199,12 @@ import { phonemizeWord as kn } from "../../src/languages/kannada/kannada.ts";
 import { phonemizeWord as am } from "../../src/languages/amharic/amharic.ts";
 import { phonemizeWord as ti } from "../../src/languages/tigrinya/tigrinya.ts";
 import { phonemizeWord as bg } from "../../src/languages/bulgarian/bulgarian.ts";
-import { phonemizeWord as ckb } from "../../src/languages/central-kurdish/central-kurdish.ts";
+// ckb: the SHIPPED path, lexicon -> BIZROKE TAGGER -> rules, assembled below. Non-circular by SOURCE rather
+// than by tier: both the lexicon and the tagger come from AsoSoft, and the referees are wikipron and kaikki.
+import {
+    bizrokeLexiconHas, phonemizeWord as ckbLex, phonemizeWordRules as ckbRules,
+} from "../../src/languages/central-kurdish/central-kurdish.ts";
+import { createCentralKurdishTagger, type CentralKurdishTagger } from "../../src/languages/central-kurdish/centralKurdishTagger.ts";
 import { phonemizeWord as yo } from "../../src/languages/yoruba/yoruba.ts";
 import { phonemizeWord as my } from "../../src/languages/burmese/burmese.ts";
 // RULE-ONLY for jv: the shipped phonemizeWord adds a cross-script ⟨e⟩ lexicon sourced from the Aksara referee;
@@ -222,6 +227,19 @@ const enP = createEnglish();
 const en = (w: string): string => enP.text(w);
 const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
+/**
+ * ckb — the whole shipped tier: lexicon -> tagger -> rules, which is what `phonemizeAsync("…", "ckb")` runs.
+ * ⚠ THIS ONLY MEANS ANYTHING BECAUSE `ckb.jsonc` NOW FOLDS THE BIZROKE TO ə RATHER THAN TO NOTHING. Under the
+ * old fold the vowel was deleted from both sides, so every tier scored identically and the referee could not
+ * see the one thing this engine's Sorani work has been about.
+ */
+let ckbTaggerP: Promise<CentralKurdishTagger | undefined> | undefined;
+const ckb = async (w: string): Promise<string> => {
+    if (bizrokeLexiconHas(w)) return ckbLex(w);
+    ckbTaggerP ??= createCentralKurdishTagger();
+    return (await (await ckbTaggerP)?.tag(w)) || ckbRules(w);
+};
+
 const PHON: Record<string, (w: string) => string | Promise<string>> = {
     ar,
     // RULE-ONLY (lexicon:false): the shipped path adds an Egyptian short-vowel lexicon MINED FROM kaikki, which

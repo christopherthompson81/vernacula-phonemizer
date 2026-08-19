@@ -13,9 +13,12 @@
  *     insert ɪ   52 closer / 500 further        insert e   160 / 392
  *     insert i  133 / 419                       insert ə   106 / 446
  *
- * ⚠ AND THE REFEREE CANNOT ARBITRATE, which is why the audio is the only witness: `ckb.jsonc` folds
- * `[əɪ] → ""` on both sides precisely because the bizroke "is not positionally predictable", so the eval is
- * blind to the change by construction — 922/972 and 977/1037 before and after, byte-identical.
+ * ⚠ THE REFEREE COULD NOT ARBITRATE UNTIL THE FOLD WAS FIXED. `ckb.jsonc` used to fold `[əɪ] → ""`, deleting
+ * the bizroke from BOTH sides — so every tier scored identically (922/972 and 977/1037, byte-identical before
+ * and after the lexicon) and the flat reading was mistaken for "no effect" rather than "no instrument". The
+ * fold is now `[əɪ] → ə`: the referees agree on the vowel's PRESENCE and POSITION and differ only on its
+ * QUALITY, so normalising quality is the fold the disagreement actually justifies. Scoring presence as free
+ * was hiding an 11-point gap — see the ladder at the bottom of this header.
  *
  * ⚠ THE REASON IT FAILS IS LEXICAL, NOT POSITIONAL. A single epenthesis models cluster-breaking, but many of
  * these words are ordinary multi-vowel words written with none of them: سفر is *safar*, and one inserted
@@ -30,7 +33,7 @@
  *   · THREE INDEPENDENT HUMAN SOURCES AGREE THE VOWEL IS THERE, AND AGREE WHERE. AsoSoft (the lexicon's
  *     source), wikipron and kaikki: تر is *t ɪ ɾ*, من is *m ɪ n*, مردن is *m ə ɾ d ə n* (two vowels, the
  *     positions this lexicon gives), کوردستان is *k ʊ ɾ d ə s t aː n* (ours: kuɾdɪstaːn, same slot). They
- *     differ only on QUALITY — ɪ against ə — which is precisely why `ckb.jsonc` folds `[əɪ] → ""`.
+ *     differ only on QUALITY — ɪ against ə — which is precisely why `ckb.jsonc` normalises `[əɪ] → ə`.
  *   · THE RECOGNIZER UNDER-TRANSCRIBES THIS LANGUAGE. Its folded phone count is 0.929 of ours for ckb
  *     against 0.987 for de and 0.998 for fr, so it is short by ~7% before anything is added; adding a
  *     phone it does not emit is charged against us whether or not the phone is real.
@@ -40,6 +43,23 @@
  * The audio is one degraded witness against three human ones on a question — "does this word have a
  * vowel" — that is not a matter of reader variation. If a later run finds the ASR was right, the lexicon
  * is one file.
+ *
+ * ⚠ AND WITH THE FOLD FIXED, THE TWO INDEPENDENT REFEREES NOW SAY SO DIRECTLY (folded backbone,
+ * wikipron ckb_arab_broad / kaikki ckb — neither had any part in building either tier, both of which come
+ * from AsoSoft):
+ *
+ *     rules only                   72.3%  /  71.2%
+ *     + bizroke lexicon            74.8%  /  73.6%      (+2.5 / +2.4)
+ *     + bizroke tagger             85.2%  /  85.0%      (+12.9 / +13.8)
+ *
+ * The tagger is worth 4.4× the lexicon because the lexicon is 2,517 words and most of the referee vocabulary
+ * falls outside it. This is the external confirmation the audio could not give.
+ *
+ * ⚠ THE TWO REFEREES ARE NOT INDEPENDENT OF EACH OTHER, whatever the file headers used to imply. All 972
+ * wikipron headwords also appear in kaikki, and after the folds the two agree on 964 of them (99.2%) —
+ * disagreeing on 5 bizroke placements and 3 other segments. Both scrape en.wiktionary; kaikki is a
+ * near-superset adding 65 words, not a second opinion. They ARE independent of AsoSoft, which is what makes
+ * the ladder above meaningful, but "two referees corroborate" overstates a single upstream.
  *
  * ⚠ AND A LEXICON HERE MUST BE HOMOGRAPH-AWARE, which is the abjad's standing trap: a defectively-written
  * form can be several words, and a whole-word entry silently picks one. Sorani is BETTER placed than Arabic

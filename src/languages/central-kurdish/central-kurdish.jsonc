@@ -3,12 +3,17 @@
 // the Arabic/Persian/Urdu ABJADS — is a nearly FULL alphabet: it writes all the LONG vowels (ا→aː, ێ→eː, ۆ→oː,
 // وو→uː, ی→iː) AND the short /a/ (ە). The ONE vowel it does NOT write is the short /ɪ/ (the "bizroke"), which is
 // epenthetic in consonant clusters (ئاسن→ʔaːsɪn) — so, like the abjad short-vowel wall (sd/ur/skr) but MUCH
-// smaller, that short /ɪ/ is folded in the referee eval. Complements the Latin-script Kurmanji (kmr).
+// smaller. This scan cannot derive it: it is supplied by the AsoSoft-derived bizroke lexicon and, on the async
+// path, the bizroke tagger. The referee eval NORMALISES its quality (ə/ɪ→ə) rather than deleting it — deleting
+// it scored the vowel's presence as free. Complements the Latin-script Kurmanji (kmr).
 //
 // Signatures: the PHARYNGEALS ح→ħ, ع→ʕ; the velarised ڵ→ɫ vs plain ل→l; the trill ڕ→r vs the tap ر→ɾ; ئ→ʔ (the
 // word-initial hamza/glottal onset); ق→q, غ→ɣ, x→خ; ژ→ʒ, چ→t͡ʃ, ج→d͡ʒ. Read by a left-to-right greedy scan (the وو
 // digraph, then single letters) + the و/ی glide resolution + н→ŋ before a velar. Validated against wikipron
-// ckb_arab_broad (94.1%) + kaikki ckb (93.4%), both human.
+// ckb_arab_broad + kaikki ckb, both human: on the folded backbone this scan alone is 72.3%/71.2%, the bizroke
+// lexicon takes it to 74.8%/73.6% and the tagger to 85.2%/85.0%. (The pre-2026-08-19 figures of 94.1%/93.4%
+// were read under a fold that DELETED the bizroke from both sides, so they scored the one vowel Sorani does
+// not write as free — they are not comparable to these.)
 {
     "language": "ckb",
     "name": "Central Kurdish (Sorani)",
