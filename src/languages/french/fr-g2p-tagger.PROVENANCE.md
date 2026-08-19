@@ -14,7 +14,15 @@ Lexique 90/10 held-out (12,586 words):
 | model (held-out) | WORD-exact | symbol accuracy (1−PER) |
 |---|---|---|
 | rule g2p (`toIpa`) | 76.6% | 94.3% |
-| **BiLSTM tagger (this model)** | **94.9%** | **99.1%** (PER 0.9% vs 5.7% — 84% fewer phone errors) |
+| **BiLSTM tagger (this model)** | **96.3%** | **99.3%** (PER 0.7% vs 5.7% — 88% fewer phone errors) |
+
+⚠ **RETRAINED 2026-08-19 WITH PACKED SEQUENCES.** Training ran the BiLSTM over padded batches without
+`pack_padded_sequence`, so its backward direction crossed the padding before reaching each word's last
+grapheme, while serving (`frenchTagger.ts`) is batch=1 and unpadded — damage at the END of the word, which in
+French is where the silent-vs-pronounced final consonant and the `-ent` verb ending live. Same Lexique 90/10
+split, same seed: **94.9% → 96.3%** word-exact, 99.1% → 99.3% symbol. ⚠ The pre-fix baseline reproduced the
+historical 94.9%/99.1% exactly, so the delta is the packing and nothing else. See
+`tools/bilstm_training/tagger.py` and investigation Runs 41 and 43.
 
 The biggest rule gap it fixes is the **silent 3rd-person-plural `-ent`/`-aient` verb ending** the rules wrongly voice
 as `[ɑ̃]` (the noun/adjective `-ent`=[ɑ̃] vs verb `-ent`=silent homograph, undecidable without morphology): the tagger

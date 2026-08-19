@@ -114,7 +114,16 @@ char_mask=char_mask.to(dev)
 class Tagger(nn.Module):
     def __init__(s,nc,nl,emb=128,h=256):
         super().__init__(); s.e=nn.Embedding(nc,emb,0); s.lstm=nn.LSTM(emb,h,2,batch_first=True,bidirectional=True,dropout=0.2); s.o=nn.Linear(2*h,nl)
-    def forward(s,x): return s.o(s.lstm(s.e(x))[0])
+    def forward(s,x,lengths=None):
+        """⚠ PASS `lengths` FOR A PADDED BATCH. Unpacked, the BiLSTM's BACKWARD direction crosses the pad steps
+        before reaching each word's last real symbol, so that symbol depends on the batch's longest word —
+        while serving is batch=1 and unpadded. The damage lands at the END of the word. See Run 41."""
+        h = s.e(x)
+        if lengths is None:
+            return s.o(s.lstm(h)[0])
+        pk = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(s.lstm(pk)[0], batch_first=True, total_length=x.size(1))
+        return s.o(out)
 m=Tagger(len(cv),len(lv)).to(dev); opt=torch.optim.Adam(m.parameters(),1e-3); crit=nn.CrossEntropyLoss(ignore_index=PAD)
 Tr=[( [cid(c) for c in ch], [lid(t) for t in lb]) for ch,lb in train]
 def batches(N):
@@ -138,7 +147,8 @@ for e in range(EPOCHS):
         X=torch.zeros(len(b),mx,dtype=torch.long); Y=torch.zeros(len(b),mx,dtype=torch.long)
         for r,i in enumerate(b):
             X[r,:len(Tr[i][0])]=torch.tensor(Tr[i][0]); Y[r,:len(Tr[i][1])]=torch.tensor(Tr[i][1])
-        X,Y=X.to(dev),Y.to(dev); lo=m(X)+char_mask[X]; loss=crit(lo.reshape(-1,len(lv)),Y.reshape(-1))
+        ln=torch.tensor([len(Tr[i][0]) for i in b])
+        X,Y=X.to(dev),Y.to(dev); lo=m(X,ln)+char_mask[X]; loss=crit(lo.reshape(-1,len(lv)),Y.reshape(-1))
         opt.zero_grad(); loss.backward(); opt.step(); tl+=loss.item(); nb+=1
     print(f"# epoch {e+1}/{EPOCHS} loss {tl/nb:.3f} {time.time()-te:.0f}s", file=sys.stderr, flush=True)
 # SAVE the trained model + vocabs so all downstream analysis (miss dumps, taxonomy, aligner tweaks that only touch

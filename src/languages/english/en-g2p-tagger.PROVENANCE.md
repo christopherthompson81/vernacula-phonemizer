@@ -16,7 +16,23 @@ the noisy wikipron referee couldn't even measure it. On a CLEAN CMUdict 90/10 he
 | model (held-out, stress-independent phones) | WORD-exact | PHONE-accuracy (1−PER) |
 |---|---|---|
 | current pipeline (compound→morph→n-gram) | 42.7% | 81.8% |
-| **BiLSTM tagger (this model)** | **68.4%** | **92.6%** (PER 7.4% vs 18.2% — 59% fewer phone errors) |
+| **BiLSTM tagger (this model)** | **71.5%** | **93.4%** (PER 6.6% vs 18.2% — 64% fewer phone errors) |
+
+⚠ **RETRAINED 2026-08-19 WITH PACKED SEQUENCES — the largest gain in the fleet (+3.1pp).** Training ran the
+BiLSTM over padded batches without `pack_padded_sequence`, so its backward direction crossed the padding
+before reaching each word's last letter, while serving (`englishNeural.ts`) is batch=1 and unpadded. The damage
+lands at the END of the word, and English concentrates two things there that this tag alphabet must get right:
+the suffix that determines STRESS placement, and the final-consonant/vowel-reduction pattern. Same CMUdict
+90/10 split, same seed:
+
+| | unpacked training | **packed training** |
+|---|---|---|
+| WORD-exact, stress-independent | 68.4% | **71.5%** |
+| WORD-exact, including stress | 63.2% | **66.3%** |
+| phone accuracy (1−PER) | 92.6% | **93.4%** |
+
+⚠ The pre-fix baseline reproduced the historical 68.4% exactly, so the delta is the packing and nothing else.
+See `tools/bilstm_training/tagger.py` and investigation Runs 41 and 43.
 
 Concretely it reads proper nouns the n-gram mangles: Zelensky → zəlɛnski (n-gram: …aɪzɪlɛnski). Precedence is
 lexicon → heteronym → possessive → **tagger** → n-gram (the tagger only fires on genuinely-OOV alpha words; dict text

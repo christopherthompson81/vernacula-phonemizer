@@ -41,8 +41,18 @@ class Tagger(nn.Module):
         self.lstm = nn.LSTM(EMB, HID, LAYERS, batch_first=True, bidirectional=True, dropout=DROP)
         self.o = nn.Linear(2 * HID, ntag)
 
-    def forward(self, x):
-        return self.o(self.lstm(self.e(x))[0])
+    def forward(self, x, lengths=None):
+        """⚠ PASS `lengths` FOR A PADDED BATCH. Unpacked, the BiLSTM's BACKWARD direction crosses the pad steps
+        before it reaches each word's last real letter, so that letter's representation depends on the batch's
+        longest word — while serving (sindhiTagger.ts) is batch=1 and unpadded. The damage lands at the END of
+        the word, which for Sindhi is the position that matters most: the retained grammatical -ʊ is word-final
+        and is the whole reason this tagger beats always-ə. See investigation Run 41."""
+        h = self.e(x)
+        if lengths is None:
+            return self.o(self.lstm(h)[0])
+        packed = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(self.lstm(packed)[0], batch_first=True, total_length=x.size(1))
+        return self.o(out)
 
 
 def main():
@@ -76,9 +86,10 @@ def main():
             for r, j in enumerate(ch):
                 xb[r, :len(X[j])] = torch.tensor(X[j])
                 yb[r, :len(Y[j])] = torch.tensor(Y[j])
+            lens = torch.tensor([len(X[j]) for j in ch])
             xb, yb = xb.to(dev), yb.to(dev)
             opt.zero_grad()
-            loss = crit(model(xb).reshape(-1, len(tags)), yb.reshape(-1))
+            loss = crit(model(xb, lens).reshape(-1, len(tags)), yb.reshape(-1))
             loss.backward(); opt.step()
             tot += loss.item(); nb += 1
         if (ep + 1) % 10 == 0:

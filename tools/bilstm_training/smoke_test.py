@@ -121,6 +121,38 @@ def main():
           not torch.allclose(unpacked[:, -1], alone[:, -1], atol=1e-5),
           "unpacked matched — the invariant above proves nothing")
 
+    # 9. THE PACKING INVARIANT ACROSS EVERY STANDALONE TRAINER. sd/bn/he/fa do NOT use the shared Tagger, and
+    #    two of them (he, fa) CANNOT BE RUN in this repo — their corpora are not on disk (investigation Run
+    #    43). So their packing fix has no end-to-end test and never will; this exercises each `forward`
+    #    directly, extracted by AST so no corpus or import side-effects are needed. Without it, a future edit
+    #    to an unrunnable trainer is unverifiable.
+    import ast
+    STANDALONE = {
+        "hebrew/train_he_tagger.py": dict(nc=10, nl=4),
+        "persian/train_tagger.py": dict(nc=10, nl=4),
+        "bengali/train_bn_tagger.py": dict(nc=10, nl=4),
+        "sindhi/train_sd_tagger_masked.py": dict(nsrc=10, ntag=4),
+        "sindhi/export_sd_tagger_onnx.py": dict(nsrc=10, ntag=4),
+    }
+    for rel, kw in STANDALONE.items():
+        path = os.path.join(HERE, "..", rel)
+        cls = next((n for n in ast.parse(open(path, encoding="utf8").read()).body
+                    if isinstance(n, ast.ClassDef) and n.name == "Tagger"), None)
+        if cls is None:
+            check(f"{rel} defines a Tagger", False, "no class Tagger — did the file move?")
+            continue
+        g = {"nn": torch.nn, "torch": torch, "EMB": 32, "HID": 16, "LAYERS": 2, "DROP": 0.3}
+        exec(compile(ast.fix_missing_locations(ast.Module(body=[cls], type_ignores=[])), path, "exec"), g)
+        torch.manual_seed(0)
+        mm = g["Tagger"](**kw).eval()
+        with torch.no_grad():
+            alone = mm(torch.tensor([[3, 4, 5]]))
+            lots = mm(torch.tensor([[3, 4, 5, 0, 0, 0, 0]]), torch.tensor([3]))[:, :3]
+            few = mm(torch.tensor([[3, 4, 5, 0]]), torch.tensor([3]))[:, :3]
+        check(f"{rel} packs (padding-independent, == batch-1 serving)",
+              torch.allclose(lots, few, atol=1e-5) and torch.allclose(lots, alone, atol=1e-5),
+              "padded training does not match what serving does — see Tagger.forward")
+
     print()
     if FAILED:
         print(f"FAILED: {len(FAILED)} — " + "; ".join(FAILED))
