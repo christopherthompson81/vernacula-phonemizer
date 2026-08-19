@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeWord, createHebrew } from "../src/languages/hebrew/hebrew.ts";
+import { phonemizeWord, createHebrew , phonemizeAligned} from "../src/languages/hebrew/hebrew.ts";
 
 // Canonical-IPA goldens for Hebrew (he) — Afro-Asiatic (Semitic), the Hebrew abjad, MODERN ISRAELI pronunciation.
 // A niqqud→IPA segmental g2p over VOCALIZED (pointed) input; UNVOCALIZED text is restored first by the neural
@@ -129,10 +129,13 @@ describe("Hebrew text normalization", () => {
     // neural path's own token class still got wrong.
     test("geresh digraphs ג׳ צ׳ ז׳, in every position", () => {
         expect(phonemizeWord("ג'וֹן")).toBe("d͡ʒon"); // onset, with the holam male the vocalized path supplies
-        expect(phonemizeWord("בייג'ינג")).toBe("vjjd͡ʒjnɡ"); // word-MEDIAL (bare skeleton: soft ⟨ב⟩, no niqqud)
+        // ⚠ ONE ⟨j⟩, not two: ⟨יי⟩ is the ktiv-male digraph for a single consonant (Beijing = bejd͡ʒiŋ), so
+        //   this gold moved from *vjjd͡ʒjnɡ* when that was fixed. What it pins — the geresh surviving
+        //   word-MEDIALLY — is unchanged.
+        expect(phonemizeWord("בייג'ינג")).toBe("vjd͡ʒjnɡ"); // word-MEDIAL (bare skeleton: soft ⟨ב⟩, no niqqud)
         expect(phonemizeWord("ג'ורג'")).toBe("d͡ʒvʁd͡ʒ"); // and word-FINAL
         expect(phonemizeWord("צ'רלי")).toBe("t͡ʃʁlj");
-        expect(phonemizeWord("סמיונוביץ'")).toBe("smjvnvvjt͡ʃ"); // final ץ׳
+        expect(phonemizeWord("סמיונוביץ'")).toBe("smjvnvvjt͡ʃ"); // final ץ׳ — ⟨וו⟩ here is mater+consonant
         expect(phonemizeWord("ז'אן")).toBe("ʒn");
         // …and a geresh on any OTHER letter contributes nothing but must still not split the word.
         expect(phonemizeWord("נורת'")).toBe("nvʁt");
@@ -143,5 +146,52 @@ describe("Hebrew text normalization", () => {
     test("the furtive patach does not fire on a one-letter word", () => {
         expect(phonemizeWord("הַ")).toBe("ha");
         expect(phonemizeWord("מָשִׁיחַ")).toBe("maʃiaχ"); // …and still fires where it should
+    });
+});
+
+/**
+ * KTIV MALE DOUBLES ⟨ו⟩ AND ⟨י⟩ FOR A SINGLE CONSONANT. Unvocalized spelling writes consonantal /v/ and /j/
+ * doubled to separate them from the mater reading (שווה, חייל, בניין, טלוויזיה); pointed spelling uses one
+ * letter with a dagesh. The scan is niqqud-driven, so it emitted both — שווה → *ʃvev*, חייל → *χajajl*,
+ * טלוויזיה → *televivjzja*. That is not a variant reading: Hebrew has no identical-consonant clusters.
+ *
+ * 973 of the corpus's 1,312 such clusters are this pair, across 24% of he_il rows. Fixing it is 1,107 rows
+ * closer to the audio and 31 further.
+ */
+describe("Hebrew — the ktiv-male ⟨וו⟩/⟨יי⟩ digraphs", () => {
+    // ⚠ ASSERTED ON THE BARE SKELETON (`phonemizeWord`, no niqqud), which isolates THIS rule: the vowels in
+    //   real output come from the neural tagger on the async path, and pinning those here would make the
+    //   test a tagger golden instead. What matters is the consonant count.
+    test("a doubled vav or yod is ONE consonant", () => {
+        expect(phonemizeWord("חייל")).toBe("χjl"); // was χjjl
+        expect(phonemizeWord("בניין")).toBe("vnjn"); // was vnjjn
+        expect(phonemizeWord("טלוויזיה")).toBe("tlvjzj"); // was tlvvjzj
+        expect(phonemizeWord("שווה")).toBe("ʃv"); // was ʃvv
+    });
+
+    /**
+     * ⚠ THE FIRST LETTER MUST HAVE RESOLVED TO THE CONSONANT. ⟨ו⟩ is also the holam/shuruk mater and ⟨י⟩ the
+     * hiriq/tsere mater, so an adjacent pair is not automatically a digraph: vocalized חֹווִים is [o]+[v].
+     * Without this guard the collapse DELETED the [v] — χovim → *χoim* — and corpus regressions ran 72
+     * instead of 31.
+     */
+    test("a mater followed by the consonant is not a digraph", () => {
+        // ⚠ THE HOLAM/SHURUK MUST SIT ON THE ⟨ו⟩ ITSELF (holam MALE), or this test cannot fail: in חֹווִים
+        //   the holam is on the ⟨ח⟩, so the first vav IS the consonant and the guard is never consulted.
+        //   That version passed against a build with the guard deleted.
+        expect(phonemizeWord("חוֹוִים")).toBe("χovim"); // without the guard: χoim, the [v] deleted outright
+        expect(phonemizeWord("שׁוּוִי")).toBe("ʃuvi"); //  without the guard: ʃui
+        expect(phonemizeWord("חוֹוֶה")).toBe("χove"); //  without the guard: χoe
+    });
+
+    /**
+     * ⚠ THE CHUNK ALIGNMENT MUST STAY 1:1 WITH THE SKELETON. `phonemizeAligned` is the TAGGER'S TRAINING
+     * ALIGNMENT (tools/hebrew/build_tagger_data.ts reads cons → ipa), so the collapsed letter keeps its
+     * chunk with an empty consonant — the same shape the silent maters use — rather than being dropped.
+     */
+    test("the collapsed letter keeps its chunk, for the tagger alignment", () => {
+        const chunks = phonemizeAligned("חייל");
+        expect(chunks.map((c) => c.cons).join("")).toBe("חייל");
+        expect(chunks.map((c) => c.ipa).join("")).toBe("χjl");
     });
 });

@@ -1824,3 +1824,58 @@ it and the cost is high. Recorded, not attempted.
 
 **No phonemizer defect in fr_fr, and no change made.** Three languages of the last four have come back
 clean — bn_in, hy_am, fr_fr — each with a large aggregate class that turned out to be correct as designed.
+
+## Run 28 — 2026-08-19 — he_il: ktiv male writes one consonant with two letters
+
+`he_il` scores worst of the languages worked this session (median 0.340) and its all-flagged rows are again
+Latin-in-Hebrew. But its deletion tally is unlike any other language's: **`ʔ` 7,928 and `h` 7,118 deleted**,
+far above any substitution pair. `ʔ` is the documented deliberate exclusion from `COARSEN` (dropping it
+scored 1.8:1 against 4.6:1 in the skeleton work, and it is the evidence for the Kazakh spurious-glottal
+defect), and word-final ⟨ה⟩ is already correctly silent (תורה → *toʁa*). Neither was the lead.
+
+The lead was a shape no other language in this corpus has:
+
+    identical-consonant clusters in he_il output: 1,312 across 783 of 3,242 rows (24%)
+        jj 599    vv 374    ll 83    mm 60    nn 32    χχ 31    tt 29    ʃʃ 27    dd 25
+
+⚠ **KTIV MALE WRITES A SINGLE CONSONANT WITH TWO LETTERS.** Unvocalized Hebrew doubles ⟨ו⟩ and ⟨י⟩ to mark
+the consonantal /v/ and /j/ apart from the mater reading; pointed spelling uses one letter with a dagesh.
+The scan is niqqud-driven, so it read both:
+
+    שווה      ʃvev            חייל      χajajl          בניין   binjajn
+    טלוויזיה  televivjzja     תיירות    tajajʁut        אווירה  ʔavivjʁa
+
+**This is not a variant reading** — Hebrew has no identical-consonant clusters, and no reader of any
+register produces *χajajl* for חייל. 973 of the 1,312 clusters are this one pair.
+
+    1,107 rows closer / 31 further      (mean 0.3637 → 0.3620, median 0.3402 → 0.3379)
+
+⚠ **AND THE REFEREE IS UNTOUCHED, WHICH IS THE POINT.** Only **31 of 3,242** corpus rows carry niqqud while
+the referee is entirely vocalized — the two exercise different paths. The referee moves 2,264 → 2,265, so
+the change is provably confined to unvocalized input rather than merely appearing safe.
+
+### The guard that took regressions from 72 to 31
+
+⟨ו⟩ is also the holam/shuruk mater and ⟨י⟩ the hiriq/tsere mater, so an adjacent pair is not automatically
+a digraph. The first version collapsed on the letters alone and **deleted a real [v]**: חווים is [o]+[v],
+and it came out *χoim* for [χavim]. Requiring the previous chunk to have resolved to the CONSONANT (its IPA
+starts with v/j) separates the two.
+
+⚠ **THE COLLAPSED LETTER KEEPS ITS CHUNK.** `phonemizeAligned` is the tagger's TRAINING ALIGNMENT —
+`tools/hebrew/build_tagger_data.ts` reads the cons→ipa pairing — so dropping a chunk would desynchronise it
+from the skeleton. The letter keeps its chunk with the consonant removed and the vowel retained, the same
+shape the silent maters already use. It has to keep the vowel because the tagger puts it on whichever of
+the pair it chooses.
+
+### A pre-existing gold moved, and a test of mine could not fail
+
+`בייג'ינג` → *vjjd͡ʒjnɡ* was pinned by the geresh test; Beijing is [bejd͡ʒiŋ] with ONE [j], so the gold
+encoded the bug. Updated to *vjd͡ʒjnɡ*; what that test exists to pin — the geresh surviving word-medially —
+is unchanged.
+
+⚠ **AND MY MATER-GUARD TEST PASSED AGAINST A BUILD WITH THE GUARD DELETED.** I wrote it with חֹווִים, where
+the holam sits on the ⟨ח⟩ — so the first vav IS the consonant and the guard is never consulted. The case
+needs holam MALE, the mater on the vav itself: חוֹוִים, שׁוּוִי, חוֹוֶה, which go χovim/ʃuvi/χove with the guard
+and χoim/ʃui/χoe without it. **Third time this session** a test sat outside the domain of the rule it
+guarded (German ⟨rh⟩ medial-vs-edge, the German sed hitting two rules, this). The pattern is always the
+same: the example is *about* the right feature but not *in* the branch under test.

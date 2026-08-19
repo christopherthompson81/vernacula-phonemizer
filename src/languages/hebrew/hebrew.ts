@@ -63,6 +63,33 @@ export function phonemizeAligned(word: string): HebrewChunk[] {
         const sheva = has(SHEVA);
         const emit = (ipa: string, v: string): void => { chunks.push({ cons: c, ipa }); prevVowel = v; k = j; };
 
+        // ⚠ KTIV MALE DOUBLES ⟨ו⟩ AND ⟨י⟩ FOR A SINGLE CONSONANT, and reading both is not a variant — it is
+        // a cluster Hebrew does not have. Unvocalized spelling writes consonantal /v/ and /j/ doubled to
+        // separate them from the mater reading (שווה, חייל, בניין, טלוויזיה), where pointed spelling uses
+        // one letter with a dagesh. The scan is niqqud-driven, so both letters emitted: שווה → *ʃvev*,
+        // חייל → *χajajl*, טלוויזיה → *televivjzja*. 973 of the corpus's 1,312 identical-consonant clusters
+        // are this, across 24% of he_il rows.
+        //
+        // ⚠ THE SECOND LETTER KEEPS ITS VOWEL AND LOSES ONLY THE CONSONANT. Dropping the chunk outright
+        // would break two things: `phonemizeAligned`'s chunks are the TAGGER'S TRAINING ALIGNMENT and must
+        // stay 1:1 with the skeleton (hence a chunk with an empty consonant, the same shape the silent
+        // maters above use), and the tagger puts the vowel on whichever of the pair it chooses — חייל comes
+        // back χa·ja·j·l with the vowel on the FIRST, טלוויזיה as …vi·v… likewise, but the rule cannot
+        // assume that. Keeping the vowel and dropping the consonant is correct either way.
+        // ⚠ THE FIRST LETTER MUST HAVE RESOLVED TO THE CONSONANT, not to a vowel. ⟨ו⟩ is also the holam/
+        // shuruk mater and ⟨י⟩ the hiriq/tsere mater, so an adjacent pair is not automatically a digraph:
+        // חווים is [o]+[v] (χavim) and מתכוונים likewise, and collapsing those DELETED the [v] outright —
+        // χovim → *χoim*. Requiring the previous chunk to start with the consonant itself separates the
+        // two, and is what took the regressions from 72 to a handful.
+        const prevIpa = chunks[chunks.length - 1]?.ipa ?? "";
+        const prevIsCons = prevIpa.startsWith(c === "ו" ? "v" : "j");
+        if ((c === "ו" || c === "י") && chunks[chunks.length - 1]?.cons === c && prevIsCons && !has(DAGESH)) {
+            const v2 = vowel ? VOW[vowel]! : "";
+            chunks.push({ cons: c, ipa: v2 });
+            if (v2) prevVowel = v2;
+            k = j;
+            continue;
+        }
         // ⟨ו⟩ vav: shuruk (וּ) = [u], holam male (וֹ) = [o], else consonant [v] (+ its vowel, or [e] for proclitic וְ)
         if (c === "ו") {
             if (has(DAGESH) && !vowel) { emit("u", "u"); continue; }
