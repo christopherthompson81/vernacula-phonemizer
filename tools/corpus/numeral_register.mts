@@ -113,14 +113,43 @@ function frWords(n: number): string {
  * Rewrite each digit run in `text` into the register language's WORDS, or return `text` unchanged when the
  * language has no measured register.
  *
- * ⚠ IT EMITS WORDS, NOT IPA, so the host engine still phonemizes them — which is what a reader does: a Shona
- * speaker saying "four hundred eighty" produces English words in a Shona phonetic setting, not English
- * phonemes. Emitting IPA here would also break the host's clause assembly, which counts tokens.
+ * ⚠ IT RETURNS SEGMENTS, so each is phonemized by the engine that owns it and the IPA is joined afterwards.
+ * Two simpler shapes were tried and both are wrong:
+ *
+ *   · emitting the register's SPELLING into the host text — the host then applies its own grapheme rules,
+ *     which is a misreading rather than an accent: `eight` → *ˈɛːiɡ̤htʼ* in Zulu (letter by letter), `mille`
+ *     → *mi˩lle˩* in Lingala, and Shona has no rule for the letters at all so raw `thousaⁿd` reached the IPA.
+ *   · splicing IPA into the host text — the host tokenizes and RE-READS it, destroying it outright
+ *     (`fˈɔːɹ` came back as *f o*). IPA cannot travel through a text channel the host will re-parse.
+ *
+ * Segments avoid both: the register's own engine reads its own words, and nothing re-reads the result.
  */
-export function applyNumeralRegister(text: string, registryCode: string): string {
+export interface Segment {
+    readonly text: string;
+    /** `undefined` = the host language reads this segment. */
+    readonly lang?: "en" | "fr";
+}
+
+/** Split `text` into segments, digit runs carrying their register. One segment when nothing applies. */
+export function numeralSegments(text: string, registryCode: string): readonly Segment[] {
     const reg = NUMERAL_REGISTER[registryCode];
-    if (reg === undefined || !/\d/u.test(text)) return text;
-    return text.replace(DIGIT_RUN, (run) => {
+    if (reg === undefined || !/\d/u.test(text)) return [{ text }];
+    const out: Segment[] = [];
+    let last = 0;
+    for (const m of text.matchAll(DIGIT_RUN)) {
+        const words = registerWords(m[0], reg);
+        if (words === undefined) continue;
+        if (m.index > last) out.push({ text: text.slice(last, m.index) });
+        out.push({ text: words, lang: reg });
+        last = m.index + m[0].length;
+    }
+    if (last < text.length) out.push({ text: text.slice(last) });
+    return out.length ? out : [{ text }];
+}
+
+/** The register reading of one digit run, or `undefined` for a shape the register does not claim. */
+function registerWords(run: string, reg: "en" | "fr"): string | undefined {
+    {
         const digits = run.replace(/[  ,]/gu, "");
         const n = Number(digits);
         // ⚠ A LEADING ZERO IS NOT A CARDINAL. `007`, `00` and `000-160` are identifiers or the tail of a
@@ -128,10 +157,10 @@ export function applyNumeralRegister(text: string, registryCode: string): string
         //   in the wired languages contain one.
         // ⚠ AND THE COMPOSITORS ARE BOUNDED: above 999,999,999,999 both stop composing, so hand back the
         //   digits rather than emit a truncated reading.
-        if (digits.length > 1 && digits.startsWith("0")) return run;
-        if (!Number.isSafeInteger(n) || n < 0 || n > 999_999_999_999) return run;
-        return ` ${reg === "fr" ? frWords(n) : enWords(n)} `;
-    });
+        if (digits.length > 1 && digits.startsWith("0")) return undefined;
+        if (!Number.isSafeInteger(n) || n < 0 || n > 999_999_999_999) return undefined;
+        return reg === "fr" ? frWords(n) : enWords(n);
+    }
 }
 
 /** The languages with a measured register, for the corpus tooling to report what it applied. */

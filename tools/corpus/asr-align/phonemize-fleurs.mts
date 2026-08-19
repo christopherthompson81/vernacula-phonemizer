@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 
 import { join } from "node:path";
 import { phonemizeAsync } from "../../../src/index.ts";
 import { restoreAbbreviationDots, restoreInitialismCasing, restoreNguniConcordAcronyms } from "./initialism_casing.mts";
-import { applyNumeralRegister } from "../numeral_register.mts";
+import { numeralSegments } from "../numeral_register.mts";
 
 // Override with ASR_ALIGN_ROOT; the default is the tree these tools were written against.
 const ROOT = process.env.ASR_ALIGN_ROOT ?? "/mnt/data/omnivoice_ipa";
@@ -100,8 +100,12 @@ async function run(lang: string, limit: number): Promise<void> {
       // Chichewa word. Wiring it into the registry was tried and reverted — it overrode each language's
       // own cardinal compositor and broke 31 gold tests encoding real noun-class work. Rendering choices
       // are training-corpus policy; see the header of tools/corpus/numeral_register.mts.
-      const ipa = (await phonemizeAsync(applyNumeralRegister(repaired, code), code))
-        .replace(/[\r\n]+/g, " ").trim();
+      // ⚠ PHONEMIZE PER SEGMENT AND JOIN THE IPA. Handing the host the register's SPELLING instead makes it
+      // apply its own grapheme rules — a misreading, not an accent (`eight` → *ˈɛːiɡ̤htʼ* in Zulu) — and
+      // splicing IPA into the text is worse still, because the host re-parses and destroys it.
+      const segs = numeralSegments(repaired, code);
+      const ipa = (await Promise.all(segs.map((sg) => phonemizeAsync(sg.text, sg.lang ?? code))))
+        .filter(Boolean).join(" ").replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
       if (ipa) { lines.push(`${id}\t${ipa}`); ok++; }
       else errs.push(`${id}\tEMPTY`);
     } catch (e) {

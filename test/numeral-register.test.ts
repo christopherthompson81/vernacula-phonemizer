@@ -9,36 +9,51 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { applyNumeralRegister, NUMERAL_REGISTER_LANGS } from "../tools/corpus/numeral_register.mts";
+import { numeralSegments, NUMERAL_REGISTER_LANGS } from "../tools/corpus/numeral_register.mts";
+
+/** Render segments the way the corpus tool does: each by the engine that owns it, IPA joined. */
+const render = (text: string, code: string): string =>
+    numeralSegments(text, code).map((s) => phonemize(s.text, s.lang ?? code)).filter(Boolean).join(" ")
+        .replace(/\s+/gu, " ").trim();
+/** The register's word output for a text, for asserting WHICH words were chosen. */
+const words = (text: string, code: string): string =>
+    numeralSegments(text, code).map((s) => s.text).join("|");
 
 describe("numeral register (corpus rendering policy)", () => {
-    test("only the measured languages are wired, by REGISTRY code", () => {
-        // ⚠ FLEURS writes `ny_mw`; this registry ships Chichewa as `nya`. A key that is not a registered
-        //   code is silently dead — it can never match — so the codes are pinned here.
-        expect([...NUMERAL_REGISTER_LANGS].sort()).toEqual(["ln", "nya", "sn", "xh", "zu"]);
+    /**
+     * ⚠ ASSERTED AGAINST THE REGISTRY, NOT A HARDCODED LIST. Comparing the keys to a literal array cannot
+     * catch the bug it exists for: renaming `nya` to `ny` in BOTH the table and the array keeps it green
+     * while the entry goes silently dead, since `ny` is not a registered code. The first version of this
+     * table shipped four such dead keys (`sna`, `zul`, `xho`, `ny`).
+     */
+    test("every wired key is a live registry code", () => {
+        expect(NUMERAL_REGISTER_LANGS.length).toBe(5);
+        for (const code of NUMERAL_REGISTER_LANGS) {
+            expect(() => phonemize("test", code), `dead key: ${code}`).not.toThrow();
+        }
     });
 
     test("a wired language voices digits in its measured register", () => {
-        expect(applyNumeralRegister("makore 480 apfuura", "sn")).toContain("four hundred eighty");
-        expect(applyNumeralRegister("zaka 100 zapitazo", "nya")).toContain("one hundred");
+        expect(words("makore 480 apfuura", "sn")).toContain("four hundred eighty");
+        expect(words("zaka 100 zapitazo", "nya")).toContain("one hundred");
         // ⚠ `ln` IS FRENCH, not English. It scores 66% for English against 89% for French, so wiring it to
         //   English by analogy with the other African languages would have applied the wrong language at a
         //   rate that still looked like an improvement.
-        expect(applyNumeralRegister("na 1998", "ln")).toContain("mille neuf cent quatre-vingt-dix-huit");
-        expect(applyNumeralRegister("na 1998", "ln")).not.toContain("thousand");
+        expect(words("na 1998", "ln")).toContain("mille neuf cent quatre-vingt-dix-huit");
+        expect(words("na 1998", "ln")).not.toContain("thousand");
     });
 
     test("an unwired language is untouched, and that is on evidence", () => {
         // de/fr/bn/ckb/mt read their own numerals — fr scored 3 closer against 397 further — so this is an
         // opt-in table, never a default with exceptions.
         for (const l of ["fr", "de", "bn", "mt", "ckb", "en", "ceb", "mi"]) {
-            expect(applyNumeralRegister("480 x", l)).toBe("480 x");
+            expect(words("480 x", l)).toBe("480 x");
         }
     });
 
     test("grouped thousands are one number, not three fragments", () => {
-        expect(applyNumeralRegister("783 562 km", "ln")).toContain("cinq cent soixante-deux");
-        expect(applyNumeralRegister("3,980 x", "sn")).toContain("three thousand nine hundred eighty");
+        expect(words("783 562 km", "ln")).toContain("cinq cent soixante-deux");
+        expect(words("3,980 x", "sn")).toContain("three thousand nine hundred eighty");
     });
 
     /**
@@ -48,23 +63,23 @@ describe("numeral register (corpus rendering policy)", () => {
      */
     test("unmeasured number shapes are declined", () => {
         // 42 rows. A EUROPEAN DECIMAL COMMA, not grouping — read as grouping, `1,5` comes out *fifteen*.
-        expect(applyNumeralRegister("ezingu-1,5", "zu")).toBe("ezingu-1,5");
-        expect(applyNumeralRegister("2,8", "sn")).toBe("2,8");
+        expect(words("ezingu-1,5", "zu")).toBe("ezingu-1,5");
+        expect(words("2,8", "sn")).toBe("2,8");
         // 109 rows. A clock time, not two cardinals.
-        expect(applyNumeralRegister("dza10:08", "sn")).toBe("dza10:08");
-        expect(applyNumeralRegister("11:20", "zu")).toBe("11:20");
+        expect(words("dza10:08", "sn")).toBe("dza10:08");
+        expect(words("11:20", "zu")).toBe("11:20");
         // 252 rows. A leading zero is an identifier or a grouped tail; `Number()` drops the zeros, so
         // `007` would read *seven*.
-        expect(applyNumeralRegister("007", "sn")).toBe("007");
-        expect(applyNumeralRegister("00", "sn")).toBe("00");
+        expect(words("007", "sn")).toBe("007");
+        expect(words("00", "sn")).toBe("00");
         // A decimal has its own reading in every language.
-        expect(applyNumeralRegister("versie 1.5", "sn")).toBe("versie 1.5");
+        expect(words("versie 1.5", "sn")).toBe("versie 1.5");
         // Past the compositors' range, hand back the digits rather than a truncated reading.
-        expect(applyNumeralRegister("9007199254740993", "sn")).toBe("9007199254740993");
+        expect(words("9007199254740993", "sn")).toBe("9007199254740993");
     });
 
     test("text with no digits is returned unchanged", () => {
-        expect(applyNumeralRegister("makore apfuura", "sn")).toBe("makore apfuura");
+        expect(words("makore apfuura", "sn")).toBe("makore apfuura");
     });
 
     /**
