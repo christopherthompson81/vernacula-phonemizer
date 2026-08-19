@@ -282,6 +282,7 @@ describe("Bosnian text normalization", () => {
         //   spaced UPPERCASE bearing is an ordinary latitude and must still read.
         expect(say("35° S")).toContain("sjˈe˥˩ʋerno");
         expect(say("35° I")).toContain("ˈi˩˥stot͡ʃno");
+        expect(say("300°K je")).toContain("stˈe˥˩peni k");   // the replacement's trailing space, not a class
         // ⚠ ATTACHED ONLY — `i` "and" and `s` "with" are bearings AND function words, and a space-tolerant
         //   rule read `35° i padavine` as *istočno* and deleted the conjunction.
         expect(say("temperatura 35° i padavine")).toContain(" i ");

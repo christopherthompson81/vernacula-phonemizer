@@ -353,8 +353,11 @@ export function normalizeSerbian(input: string): string {
     //    `35° W` still reads. Latin ⟨I⟩ (istok) belongs in the list too; leaving it out let `35°I` glue.
     //    ⚠ CASE-SENSITIVE: only the LOWERCASE letter is the function word, so a spaced uppercase bearing
     //    (`35° S`, `35° И`) still reads. Only `s i с и` need the attachment.
-    s = s.replace(/(\d+)\s?°(?:(?:\s?[NEWJZSInewjzЈЗЅИјз]|[siси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
-        (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
+    s = s.replace(/(\d+)\s?°(?:(?:\s?[NEWJZSIXYQnewjzxyqЈЗСИјз]|[siси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
+        //    ⚠ TRAILING SPACE — any letter this arm does not consume would otherwise glue onto the noun
+        //    (`300°K` → *stepenik*), and the stress lookup then runs on a word that does not exist. A
+        //    letter class cannot cover that: the class is finite and the alphabet is not.
+        (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)} `);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written
     //    suffix is the LAST LETTERS of the inflected ordinal, not an appendable marker, so the rule generates

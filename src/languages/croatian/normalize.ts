@@ -113,6 +113,7 @@ const SAT = ["sat", "sata", "sati"] as const; // 22 sata · 23 sata · 15 sati
 const MINUT = ["minut", "minuta", "minuta"] as const;
 const METAR = ["metar", "metra", "metara"] as const;
 const MILJA = ["milja", "milje", "milja"] as const;
+const STUPANJ = ["stupanj", "stupnja", "stupnjeva"] as const; // 1 stupanj · 2 stupnja · 5 stupnjeva
 
 /** Integer part of a Croatian-written number ("2,4" → 2), for the local count-agreement calls. */
 function intOf(n: string): number {
@@ -206,7 +207,14 @@ export function normalizeCroatian(input: string): string {
     //     none was needed; requiring attachment for ⟨s⟩ creates one — `35° s padavinama` now reaches here,
     //     and without this arm the degree noun disappears entirely. It also consumes ⟨q x y⟩, which Gaj's
     //     Latin has no bearing word for and which `foreignLetters` would otherwise make audible.
-    s = s.replace(/(\d+)\s?°(?:\s?[QXYqxy](?![\p{L}\p{M}]))?/gu, "$1 stupnjeva");
+    //     ⚠ COUNT AGREEMENT, like every other counted noun in this file — `1 stupanj`, `2 stupnja`,
+    //     `5 stupnjeva`. The genitive plural is only right from five up.
+    //     ⚠ AND A TRAILING SPACE, which is what stops the next character gluing onto the noun. Any letter
+    //     this arm does not consume — `300°K` — would otherwise land inside the word, and the stress
+    //     lookup then runs on `stupnjevak`, misses the dictionary and loses the pitch accent. Consuming a
+    //     letter class cannot cover this: the class is finite and the alphabet is not.
+    s = s.replace(/(\d+)\s?°(?:\s?[QXYqxy](?![\p{L}\p{M}]))?/gu,
+        (_m, n: string) => `${n} ${counted(intOf(n), STUPANJ)} `);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih`, `15-og`). The suffix is the LAST LETTERS of the
     //    inflected ordinal. Runs before the range rule.

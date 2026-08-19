@@ -60,6 +60,14 @@ describe("Croatian (hr) canonical IPA", () => {
         expect(phonemize("35° S od ekvatora", "hr")).toContain("jˈu˥˩ʒno");
         expect(phonemize("35° w", "hr")).toContain("zˈaː˥˩padno");
         expect(phonemize("35°", "hr")).toBe("trˈiː˩˥deset peː˥˩t stˈupɲeʋa");
+        // ⚠ COUNT AGREEMENT, like every other counted noun in this file. The genitive plural is only right
+        //   from five up, and the arm was hardcoding it.
+        expect(phonemize("1°", "hr")).toContain("stˈuː˥˩paɲ");
+        expect(phonemize("2°", "hr")).toContain("stˈupɲa");
+        // ⚠ AND THE REPLACEMENT ENDS IN A SPACE. Consuming a letter class cannot stop the gluing — the
+        //   class is finite and the alphabet is not — so `300°K` landed inside the noun as *stupnjevak*,
+        //   sending the stress lookup to a word that does not exist.
+        expect(phonemize("Temperatura 300°K je", "hr")).toContain("stˈupɲeʋa k");
     });
 
     test("Croatian-specific grapheme→IPA (Gaj's Latin, Ijekavian read as letters)", () => {

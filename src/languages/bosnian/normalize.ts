@@ -436,24 +436,20 @@ export function normalizeBosnian(input: string): string {
     //        either system and their words are already in this table, so reading them beats deleting them.
     s = s.replace(/(\d+)\s?°(?:\s?([JZNEWSIjznew])|([si]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
         `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno", N: "sjeverno", E: "istočno", W: "zapadno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
-    //    5c) THE BARE DEGREE emits the degree noun only. Safe unguarded because 5a/5b have already consumed
-    //        the qualified forms.
-    //        ⚠ IT ALSO CONSUMES A FOREIGN BEARING LETTER, and it must. `W X Y Q` are outside Gaj's Latin,
-    //        so 5b's `[SJIZsjiz]` cannot claim them and they used to be harmless only because the g2p had
-    //        no rule for the letter and silently dropped it. The shared `foreignLetters` fold now maps
-    //        them, so an unconsumed `W` glues onto the noun as *stepeniʋ* — and the stress lookup then
-    //        runs on the nonexistent word `stepeniv`, misses stress.tsv and loses the pitch accent. The
-    //        imported `35°W` form is what this catches; `35°Z` is still read as *zapadno* by 5b above.
-    //        ⚠ IT ALSO CONSUMES THE LETTERS 5b HAS NO WORD FOR — X Y Q, outside Gaj's Latin and with no
-    //        bearing sense at all. ⟨W⟩ is NOT among them: *zapadno* is already in 5b's table, and deleting
-    //        a letter whose reading sits in the adjacent arm is the weaker of the two available fixes. They used to be harmless only because the g2p had no
-    //        rule for them; the shared `foreignLetters` fold now maps them, so an unconsumed one glues
-    //        onto the noun and the stress lookup then runs on a nonexistent word and loses the accent.
-    //        None is a BCS word on its own, so a space before them is safe.
-    //        ⚠ AND THE WHITESPACE IS INSIDE THE OPTIONAL GROUP: outside it, `\s?` is consumed even when the
+    //    5c) THE BARE DEGREE emits the degree noun only. Safe unguarded because 5a/5b have already
+    //        consumed the scale and bearing forms.
+    //        ⚠ IT CONSUMES ⟨X Y Q⟩ AND NOTHING ELSE. Those three are outside Gaj's Latin and have no
+    //        bearing sense, so 5b has no word for them; ⟨W⟩ is deliberately NOT here, because *zapadno*
+    //        IS in 5b's table and deleting a letter whose reading sits in the adjacent arm is the weaker
+    //        of the two available fixes. None of X Y Q is a Bosnian word alone, so a space before them
+    //        is safe.
+    //        ⚠ THE WHITESPACE IS INSIDE THE OPTIONAL GROUP: outside it, `\s?` is consumed even when the
     //        group matches empty, and `35° od ekvatora` glues to *stepeniod*.
+    //        ⚠ AND THE REPLACEMENT ENDS IN A SPACE, which is what actually stops the gluing. Consuming a
+    //        letter class cannot: the class is finite and the alphabet is not, so `300°K` would still
+    //        land inside the noun and send the stress lookup to a word that does not exist.
     s = s.replace(/(\d+)\s?°(?:\s?[XYQxyq](?![\p{L}\p{M}]))?/gu,
-        (_m, n: string) => `${n} ${counted(Number(n), STEPEN)}`);
+        (_m, n: string) => `${n} ${counted(Number(n), STEPEN)} `);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih` ×13, all decades). As in Russian, the written suffix is
     //    the LAST LETTERS of the inflected ordinal, not an appendable marker, so the rule generates every

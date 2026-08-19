@@ -159,6 +159,13 @@ describe("Serbian normalization", () => {
         //   correct reading into a silent omission. Attachment separates the two cleanly.
         expect(say("температура 35°С")).toContain("t͡sˈelzijusa");
         expect(say("35 °С")).toContain("t͡sˈelzijusa");
+        // ⚠ CYRILLIC ⟨С⟩ IS U+0421, NOT ⟨Ѕ⟩ U+0405. The bearing class was typed with DZE, a homoglyph, so
+        //   the north bearing never matched and `35° С` left a stray /s/ in the output.
+        expect(say("Тачка на 35° С је ту.")).not.toContain(" s ");
+        // ⚠ X Y Q are consumed here too, as in the sibling engines — `foreignLetters` now makes them
+        //   audible, so an unconsumed one is a spurious syllable rather than a silent drop.
+        expect(say("35°X je tu.")).toContain("stˈe˥˩peni je");
+        expect(say("300°K je")).toContain("stˈe˥˩peni k");   // and nothing glues onto the noun
         // ⚠ A BEARING MUST BE ATTACHED TO THE `°`. Two of them — `и` "and" and `с` "with" — are among the
         //   commonest words in the language, so a rule that allows a space before the letter DELETES them.
         //   Every bearing in this corpus is written attached (`35°w`), so requiring it costs nothing.
