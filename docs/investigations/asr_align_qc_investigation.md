@@ -2430,3 +2430,39 @@ that is true.
 The letter names are the native default and are **not** Slovene's: a stop or ⟨v z⟩ takes a following -e
 (*be ce de ge pe te ve ze*), a continuant a preceding e- (*ef el em en er es eš*). Copying the sibling's
 uniform table would have been wrong on half the alphabet.
+
+## Run 37 — 2026-08-19 — ckb: the bizroke is real, emitting it is net negative, and the referee cannot say
+
+`ckb_iq` was next on both instruments — 16 all-flagged and the highest remaining no-nucleus rate. The
+structural check found the class immediately: **634 tokens across 54 word types with no nucleus at all**
+(1.13%), all ordinary high-frequency words — کرد *kɾd*, گشت *ɡʃt*, تر *tɾ*, من *mn*, پشت *pʃt*. Sorani
+writes every long vowel and the short /a/, but not the short /ɪ/ (the *bizroke*), and
+`central-kurdish.ts` records that as a deliberate deferral: "not emitted here, and folded in the eval."
+
+Inserting one vowel after the first consonant removes **every one** of them, 1.13% → 0.00%. Against the
+audio, every quality is worse:
+
+    insert ɪ    52 closer / 500 further        insert e   160 / 392
+    insert i   133 / 419                       insert ə   106 / 446
+
+⚠ **AND THE REFEREE CANNOT ARBITRATE — IT IS BLIND BY CONSTRUCTION.** `ckb.jsonc` folds `[əɪ] → ""` on both
+sides, precisely because the bizroke "is not positionally predictable". Before and after are byte-identical
+(922/972 and 977/1037). I briefly misread those two referee lines as a before/after drop; they are two
+different referees. The audio is the only witness available, and it says no.
+
+⚠ **THE FAILURE IS LEXICAL, NOT POSITIONAL**, which the mid-90s referee already implies: at 94.9% the
+residue is word-specific, so a positional rule has nothing left to win. The shape of the failure shows it —
+سفر is *safar*, an ordinary two-vowel word written with neither, and one insertion after the first consonant
+gives *sɪfɾ*: right that a vowel is missing, wrong about how many and which. The recognizer agrees the vowel
+is usually audible (something between the ⟨k⟩ and the rhotic of کرد in 71% of instances) but reports it as
+`e` 32, `a` 26, `i` 9, `ə` 7, nothing 29 — no single quality to insert.
+
+⚠ **AND A LEXICON MUST BE HOMOGRAPH-AWARE.** An abjad's defective spelling can be several words, and a
+whole-word entry silently picks one. Sorani is better placed than Arabic or Persian — it writes ⟨و⟩ and
+⟨ی⟩, so *Kurd* کورد is distinct from *kird* کرد — but the Pashto file already shows the failure shape,
+sukun-ing `کْړ` to no vowel because that reading is contested. Any ckb lexicon needs that abstention
+mechanism, not a bare spelling→pronunciation map. **Not quantified here**: measuring how much of the class
+is genuinely homographic needs word-aligned audio, and this corpus's proportional windowing catches
+neighbouring words' vowels, so the per-spelling distributions it yields are too noisy to settle it.
+
+**Reverted.** The deferral stands and now carries its numbers, so it is not re-tried a third time.

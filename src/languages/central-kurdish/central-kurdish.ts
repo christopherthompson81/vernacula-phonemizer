@@ -2,7 +2,38 @@
  * Native Central Kurdish / Sorani (ckb) text phonemizer — canonical IPA. Iranian (NW), written
  * in the SORANI Perso-Arabic alphabet. Unlike the Arabic/Persian/Urdu abjads, Sorani writes all the LONG vowels
  * (ا→aː, ێ→eː, ۆ→oː, وو→uː, ی→iː) + the short /a/ (ە); only the short /ɪ/ (bizroke) is unwritten (epenthetic in
- * clusters) → not emitted here, and folded in the eval. A left-to-right greedy scan (وو digraph, then single
+ * clusters) → not emitted here, and folded in the eval.
+ *
+ * ⚠ EMITTING IT WAS TRIED AND IS NET NEGATIVE — 2026-08-19, and the numbers are here so it is not tried a
+ * third time. The cost of NOT emitting it is real and measurable: 634 corpus tokens across 54 word types
+ * come out with NO NUCLEUS AT ALL (کرد *kɾd*, گشت *ɡʃt*, تر *tɾ*, من *mn*), 1.13% of the language, all of
+ * them ordinary high-frequency words. Inserting one vowel after the first consonant removes every one of
+ * them (1.13% → 0.00%). Against the audio, every quality is worse:
+ *
+ *     insert ɪ   52 closer / 500 further        insert e   160 / 392
+ *     insert i  133 / 419                       insert ə   106 / 446
+ *
+ * ⚠ AND THE REFEREE CANNOT ARBITRATE, which is why the audio is the only witness: `ckb.jsonc` folds
+ * `[əɪ] → ""` on both sides precisely because the bizroke "is not positionally predictable", so the eval is
+ * blind to the change by construction — 922/972 and 977/1037 before and after, byte-identical.
+ *
+ * ⚠ THE REASON IT FAILS IS LEXICAL, NOT POSITIONAL. A single epenthesis models cluster-breaking, but many of
+ * these words are ordinary multi-vowel words written with none of them: سفر is *safar*, and one inserted
+ * vowel after the first consonant gives *sɪfɾ* — right about there being a vowel, wrong about how many and
+ * which. The recognizer agrees the vowel is usually AUDIBLE (between the ⟨k⟩ and the rhotic of کرد it hears
+ * something in 71% of instances) but reports it as `e` 32, `a` 26, `i` 9, `ə` 7 and nothing 29 — no single
+ * quality to insert. This wants a coverage lexicon of the Pashto `harakatLexicon` kind, not a rule.
+ *
+ * ⚠ AND A LEXICON HERE MUST BE HOMOGRAPH-AWARE, which is the abjad's standing trap: a defectively-written
+ * form can be several words, and a whole-word entry silently picks one. Sorani is BETTER placed than Arabic
+ * or Persian for this — it writes ⟨و⟩ and ⟨ی⟩, so *Kurd* is کورد and distinct from *kird* کرد — but "better"
+ * is not "safe", and the Pashto file already carries the shape of the failure: `کْړ` is sukun'd to no vowel
+ * on purpose because that spelling's reading is genuinely contested. Any ckb lexicon needs the same
+ * abstention mechanism — record the position, withhold the quality where the spelling is ambiguous — rather
+ * than a bare spelling→pronunciation map. ⚠ NOT QUANTIFIED HERE: measuring how much of this class is
+ * genuinely homographic needs word-aligned audio, and the proportional windowing available in this corpus
+ * catches neighbouring words' vowels, so the per-spelling vowel distributions it produces are too noisy to
+ * settle it. Stated as a design constraint, not as a finding. A left-to-right greedy scan (وو digraph, then single
  * letters) resolves the و/ی matres lectionis (glide [w]/[j] next to a vowel, else the vowel [u]/[iː]); ئ→ʔ is the
  * word-initial glottal onset; н→ŋ before a velar. Signatures: pharyngeals ħ/ʕ, velarised ڵ→ɫ, trill ڕ→r vs tap
  * ر→ɾ. Cardinals use the Iranian decimal compositor with the enclitic -u connective (numbers.ts).
