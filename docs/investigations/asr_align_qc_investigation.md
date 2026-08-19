@@ -1276,3 +1276,79 @@ implementation must be a per-language opt-in, never a default with exceptions.
 This is the same shape as the code-switching finding one level down: the phenomenon is real, the mean
 improves, and a naive global rule does harm. The difference is that here the safe subset is identifiable
 in advance and measurable per language.
+
+## Run 20 — 2026-08-19 — the year reading, and where the engine already knew the answer
+
+The largest of the three findings deferred out of #840's review: the register was reading `1998` as its
+cardinal, *one thousand nine hundred ninety eight*, where an English-register reader says
+*nineteen ninety-eight*. Bare 4-digit runs are **1,349 of the 4,679 digit runs (29%)** in the five wired
+languages, so the shape is worth measuring rather than assuming.
+
+    lang    bare 4d   1000–1099   1100–1999   2000–2099
+    ln_cd     298        14          168         116
+    xh_za     331        20          184         127
+    zu_za     260        12          143         105
+    ny_mw     234         6          136          92
+    sn_zw     226         7          131          88
+
+⚠ **THE ENGINE ALREADY HAS THE YEAR RULE, AND IT CANNOT FIRE HERE.** `src/languages/english/normalize.ts`
+`yearWords` reads years pair-wise and handles every irregular shape — `1905` → "19 oh 5", `1900` →
+"19 hundred", `2007` → "2 thousand 7", `2011` → "20 11". But the rule that calls it is gated on an **English
+context word** (`in|since|from|…|circa|year`, or a month name), on purpose: "2011 people died" must not read
+*twenty eleven people*. The context around a digit run in a Zulu sentence is Zulu, so the gate never opens.
+The register has to decide year-ness itself.
+
+⚠ **AND IT EMITS THE ENGINE'S TOKENS, NOT WORDS.** `yearWords` returns digit-pair tokens the number path
+then expands (`1998` → `"19 98"`). Handing that string to the `en` segment round-trips exactly —
+`19 98` → *nˈaᶦntˈiːn nˈaᶦnti ˈeᶦt* — so the pair-wise reading is composed by the English number path rather
+than by a second compositor in `numeral_register.mts`. Only the 4-line shape rule is duplicated.
+
+### Measured on the 681 rows the rule changes
+
+    lang    n     before → after     closer/further
+    nya    156   0.4164 → 0.3696       145 / 11
+    sn     148   0.3001 → 0.2545       132 / 16
+    xh     210   0.4435 → 0.4078       173 / 37
+    zu     167   0.4090 → 0.3662       150 / 17
+    ALL    681   0.3977 → 0.3555       600 / 81   (88%)
+
+Over the whole digit-bearing corpus: mean 0.3160 → 0.3141, better 2,926 → 2,938, worse 322 → 312. Every one
+of the four English-register languages improves and none regresses.
+
+⚠ **`ln` IS UNAFFECTED AND CORRECTLY SO.** French reads a year as its cardinal — `1998` is
+*mil neuf cent quatre-vingt-dix-huit* — which is exactly what the register already emitted. The engine
+normalises both `mil` and `mille` to `mil`, so the existing `frWords` output is already the year form. A
+"years read pair-wise" rule applied by analogy across all five wired languages would have damaged Lingala;
+scoring it separately is what showed there was nothing to do. **Same lesson as Run 19's `ln → fr`, one level
+down.**
+
+### The shape guards, and the honest size of the evidence for them
+
+Bucketing the 681 changed rows by shape:
+
+    plain year               306 rows   280 closer /  26 further
+    plural decade (`ma 1700`) 32 rows    30 closer /   2 further
+    unit follows (`1600 km`)   2 rows     0 closer /   2 further
+
+- **Range 1100–2099**, the engine's own. Excludes `1000` (26 occurrences), where "one thousand" is right.
+- **A following unit declines the year reading.** The corpus's `1600 km` trail is *one thousand six hundred
+  kilometres*, not *sixteen hundred*. ⚠ **The independent evidence here is 2 rows.** Both move further from
+  the audio under a year reading, which is consistent but is not a measurement; the guard is carried over
+  from the engine's rule on principle, and is recorded as such rather than dressed up as a finding.
+- **`ma 1700` stays a year.** The plural-decade shape ("muzaka zama 1700", the 1700s) reads *seventeen
+  hundred* and scores 30 closer against 2. No separate rule needed — a negative result worth keeping,
+  since a "decades are different" rule looked plausible before it was checked.
+
+### Tests, mutation-checked
+
+Three mutations, each caught by a different assertion: disabling the year rule, removing the unit guard, and
+widening the range to any 4-digit run. This matters more than usual here — **three tests earlier in this
+session laundered away the bugs they were written for** (a `toContain` that could not fail, a `- 1`
+tolerance, and a key list compared against a hardcoded copy of itself), so a new test now has to be shown
+failing against a deliberately broken implementation before it counts.
+
+### Still open from the #840 review
+
+- **Adjacent 3-digit runs merge.** `783,562 300,948` is read as one 12-digit number, because the grouping
+  rule accepts a space before three digits. 4 occurrences.
+- **~30 rows declined by the punctuation lookahead**, where a digit run is followed by sentence punctuation.

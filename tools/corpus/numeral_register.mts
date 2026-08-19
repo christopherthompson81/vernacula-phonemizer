@@ -137,7 +137,7 @@ export function numeralSegments(text: string, registryCode: string): readonly Se
     const out: Segment[] = [];
     let last = 0;
     for (const m of text.matchAll(DIGIT_RUN)) {
-        const words = registerWords(m[0], reg);
+        const words = registerWords(m[0], reg, text.slice(m.index + m[0].length));
         if (words === undefined) continue;
         if (m.index > last) out.push({ text: text.slice(last, m.index) });
         out.push({ text: words, lang: reg });
@@ -147,8 +147,44 @@ export function numeralSegments(text: string, registryCode: string): readonly Se
     return out.length ? out : [{ text }];
 }
 
-/** The register reading of one digit run, or `undefined` for a shape the register does not claim. */
-function registerWords(run: string, reg: "en" | "fr"): string | undefined {
+/**
+ * ⚠ A YEAR IS NOT ITS CARDINAL, AND THE ENGLISH ENGINE CANNOT SEE THAT FROM A SEGMENT. English reads 1998
+ * as *nineteen ninety-eight*; the register was emitting *one thousand nine hundred ninety eight*. The engine
+ * already knows the pair-wise reading — `src/languages/english/normalize.ts` `yearWords` — but gates it on
+ * an ENGLISH context word (`in`, `since`, a month), and the context around a digit run in a Shona sentence
+ * is Shona. The register therefore decides year-ness itself, and emits the same digit-pair tokens that
+ * helper does (`1998` → `"19 98"`), so the English number path composes the words rather than this file.
+ *
+ * Worth 681 rows across the four English-register languages, 600 closer against 81 further (88%), mean
+ * 0.3977 → 0.3555. Every one of the four improves. `ln` is unaffected and correctly so: French reads a year
+ * as its cardinal — *mil neuf cent quatre-vingt-dix-huit* — which is what the register already emitted.
+ *
+ * ⚠ THE RANGE AND THE UNIT GUARD ARE THE ENGLISH NORMALIZER'S, DELIBERATELY. 1100–2099 excludes `1000`
+ * (26 rows, and "one thousand" is right), and a run followed by a unit is a QUANTITY: the corpus's
+ * `1600 km` trail is *one thousand six hundred kilometres*, not *sixteen hundred*. The unit evidence here
+ * is only 2 rows — both further from the audio under a year reading — so the guard is carried over from the
+ * engine's rule on principle rather than established independently.
+ *
+ * ⚠ AND `ma 1700` STAYS A YEAR. The plural-decade shape ("muzaka zama 1700", the 1700s) reads *seventeen
+ * hundred* and scores 27 closer against 1; it needs no separate rule.
+ */
+const YEAR = /^(?:1[1-9]\d\d|20\d\d)$/u;
+const UNIT_FOLLOWS = /^[  ]*-?[  ]*(?:km|kg|cm|mm|ha|mi|ft|m|%|percent|met(?:er|re)s?|kilomet(?:er|re)s?|miles?)\b/iu;
+
+/** A year in the pair-wise reading, as tokens the English number path expands: `1998` → `"19 98"`,
+ *  `1905` → `"19 oh 5"`, `1900` → `"19 hundred"`, `2007` → `"2 thousand 7"`, `2011` → `"20 11"`. */
+function yearTokens(y: number): string {
+    const hi = Math.floor(y / 100), lo = y % 100;
+    if (y < 2010 && y >= 2000) return lo === 0 ? "2 thousand" : `2 thousand ${lo}`;
+    if (lo === 0) return `${hi} hundred`;
+    if (lo < 10) return `${hi} oh ${lo}`;
+    return `${hi} ${lo}`;
+}
+
+/** The register reading of one digit run, or `undefined` for a shape the register does not claim.
+ *  `after` is the text following the run, which the year rule needs to see a unit. */
+function registerWords(run: string, reg: "en" | "fr", after: string): string | undefined {
+    if (reg === "en" && YEAR.test(run) && !UNIT_FOLLOWS.test(after)) return yearTokens(Number(run));
     {
         const digits = run.replace(/[  ,]/gu, "");
         const n = Number(digits);

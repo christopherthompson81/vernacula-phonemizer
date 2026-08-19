@@ -78,6 +78,40 @@ describe("numeral register (corpus rendering policy)", () => {
         expect(words("9007199254740993", "sn")).toBe("9007199254740993");
     });
 
+    /**
+     * ⚠ A YEAR IS NOT ITS CARDINAL. The register emitted *one thousand nine hundred ninety eight* for 1998
+     * where an English-register reader says *nineteen ninety-eight* — 681 rows, 600 of which moved closer to
+     * the audio once fixed. The engine's own year rule cannot fire here: it is gated on an English context
+     * word and the context around a digit run in a Zulu sentence is Zulu.
+     */
+    test("an English-register year reads pair-wise, not as a cardinal", () => {
+        // Emitted as the digit-pair tokens `src/languages/english/normalize.ts` uses, so the English number
+        // path composes the words rather than this module.
+        expect(words("ngo-1998", "zu")).toContain("19 98");
+        expect(render("ngo-1998", "zu")).toContain("nˈaᶦntˈiːn");     // nineteen
+        expect(render("ngo-1998", "zu")).not.toContain("θˈaᶷzənd");   // …not "thousand"
+        // The four irregular shapes of the pair-wise reading.
+        expect(words("mu 1905", "nya")).toContain("19 oh 5");
+        expect(words("mu 1900", "nya")).toContain("19 hundred");
+        expect(words("mu 2007", "nya")).toContain("2 thousand 7");
+        expect(words("mu 2011", "nya")).toContain("20 11");
+    });
+
+    /**
+     * ⚠ THE RANGE AND UNIT GUARDS ARE THE ENGLISH NORMALIZER'S. Outside 1100–2099 a 4-digit number is a
+     * quantity, and so is one carrying a unit: the corpus's `1600 km` trail is *one thousand six hundred
+     * kilometres*, not *sixteen hundred*.
+     */
+    test("a quantity that merely looks like a year is not read as one", () => {
+        expect(words("1600 km", "xh")).toContain("one thousand six hundred");
+        expect(words("we-1600 km", "xh")).toContain("one thousand six hundred");
+        expect(words("zaka 1000", "nya")).toContain("one thousand");   // 26 rows; not the year 1000
+        expect(words("2500 x", "sn")).toContain("two thousand five hundred");
+        // ⚠ `ln` IS FRENCH AND MUST NOT ACQUIRE A YEAR RULE. French reads a year as its cardinal
+        //   — *mil neuf cent quatre-vingt-dix-huit* — which is what the register already emitted.
+        expect(words("na 1998", "ln")).toContain("mille neuf cent quatre-vingt-dix-huit");
+    });
+
     test("text with no digits is returned unchanged", () => {
         expect(words("makore apfuura", "sn")).toBe("makore apfuura");
     });
