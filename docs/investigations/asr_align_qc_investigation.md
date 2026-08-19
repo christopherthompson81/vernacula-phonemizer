@@ -2109,3 +2109,60 @@ Small, exact, and the kind of thing only a re-scored queue surfaces.
 3. **`cmn_hans_cn` / `ckb_iq` / `fa_ir`** — 21–50% Latin, i.e. the code-switching class already measured as
    net harmful for French. Expect no defect; confirm cheaply rather than working them.
 4. **NOT bn_in / fr_fr / hy_am** — read, measured, clean. Their 70 rows are the queue's floor, not its lead.
+
+## Run 32 — 2026-08-19 — marking what was actually examined, and what the marking exposed
+
+The queue has no "examined, no defect" state, so Run 31's known-clean rows would sit at the top forever.
+`asr_align_label.py --set` writes a hand verdict into `status`, and `apply_auto` carries an explicit
+`⚠ Never clobber a hand verdict` guard — its UPDATE only touches NULL/verified/investigate/
+recognizer_short — so a hand verdict is durable across re-labelling. The sibling screen excludes them too,
+so a marked row neither exonerates nor all-flags its siblings.
+
+### The bar, and why most of the "clean" rows failed it
+
+I was about to mark bn_in's 31 and hy_am's 19 on the strength of Runs 22 and 24. Before doing it, a
+measurable test: what fraction of each row's post-`coarsen` substitutions are pairs that dominate the
+WHOLE language (i.e. inventory/notation noise rather than anything about this row)?
+
+    bn_in   7% – 52%   (most rows ~20%)
+    hy_am  36% – 58%
+
+⚠ **NOT ONE ROW IS EXPLAINED BY KNOWN NOISE, SO NOT ONE WAS MARKED.** Runs 22 and 24 concluded "no
+phonemizer defect in this language" — a statement about the CLASS (Bengali's ɔ/o is lexical; Armenian's
+medial epenthesis is refuted on both instruments). That is not the same claim as "this row's IPA is
+right", and the distance these rows carry is still unaccounted for. Marking them would have converted a
+class-level finding into 50 row-level certifications I cannot support.
+
+### What was marked: fr_fr, all 20 rows, on per-row evidence
+
+Every fr_fr all-flagged sentence carries a foreign run, and the recognizer shows the reader producing the
+SOURCE language while we applied French rules — the same shape as the corpus's existing hand verdict
+(`cinque terre: we read French, reader code-switched to Italian`). The evidence is per row, not per class:
+
+    running       ours ʁyniŋ            heard ɹɛnɪŋ
+    wonders of…   ours wɔ̃dɛʁ ɔf t       heard wɔndəz ʌv ði     ← a real /ð/
+    birmingham    ours biʁminŋam        heard bœmɪŋhæm
+    nixon         ours niksɔ̃            heard nɪksən
+    airlines      ours ɛʁlin            heard ɛʁlaɪns
+    kanjar        ours kɑ̃ʒaʁ            heard kandʒaʁ          ← Indian name, not English
+
+8 sentences → `reader_divergence`. **fr_fr's all-flagged queue is now 0.**
+
+### ⚠ AND CERTIFYING THE ROWS FOUND A BUG THAT READING THEM HAD NOT
+
+Sentence 82 does not fit the pattern, and checking instead of assuming is what showed it:
+
+    hesperonychus    ours ɛspeʁoniʃy     heard ɛsperonikus
+    dromaeosauridae  ours dʁomozoʁid     heard tʁomaʊsaʁidaɪ
+
+These are LATIN BINOMIALS, not English, and ⟨ch⟩ in the Greek-derived class is [k] in French. The engine
+knows that — *psychologie* psikoloʒi, *archéologie* aʁkeoloʒi, *orchestre* ɔʁkɛstʁ, *écho* ekɔ, *chorale*
+koʁal are all correct, and *chimie*/*machine*/*chat* correctly keep [ʃ] — so the class is lexicon-driven
+and this genus is simply OOV. Marked `defect`, not `reader_divergence`.
+
+In Run 27 I had counted this row among fr_fr's "English institution names" and moved on. It is neither
+English nor a reader divergence; it is ours. **The act of writing a per-row justification caught what
+reading the same row twice had not** — which is the argument for the verdict column carrying a reason
+string rather than just a label.
+
+    all-flagged  747 (session start) -> 682 (re-scored) -> 662 (hand verdicts)
