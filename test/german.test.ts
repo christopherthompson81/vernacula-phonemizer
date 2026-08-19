@@ -502,3 +502,38 @@ describe("German — the word-edge ⟨th⟩ digraph", () => {
         expect(phonemizeWord("flughafen")).toContain("h");
     });
 });
+
+/**
+ * ⟨h⟩ AFTER A VOWEL AT A PREFIX BOUNDARY. The h rule treats a post-vowel h as a silent length marker
+ * (sehen, Uhr, fahren) — correct, except where a prefix puts a real onset there. That exception existed but
+ * was gated to ⟨hö⟩ alone (ge·hör, be·hörde), so be·haglich, vor·be·halten and ent·halten lost their h.
+ * Widening ⟨ö⟩ to the full-vowel set is 39 rows closer to the audio and 0 further.
+ */
+describe("German — post-vowel ⟨h⟩ at a prefix boundary", () => {
+    test("a prefix before h + a full vowel keeps the h", () => {
+        expect(phonemizeWord("behaglich")).toBe("bəhˈaːɡlɪç");
+        expect(phonemizeWord("vorbehalten")).toBe("fˈoːɐ̯bəhaltən");
+        expect(phonemizeWord("enthalten")).toBe("ɛnthˈaltən");
+        expect(phonemizeWord("gehör")).toBe("ɡəhˈøːɐ̯"); // the ⟨ö⟩ case this generalises from
+    });
+
+    /**
+     * ⚠ THE PREFIX TEST IS WHAT MAKES IT SAFE, and dropping it is NET NEGATIVE — 80 rows closer against 138
+     * further. The referee alone suggests otherwise (post-vowel h before a full vowel is pronounced 24 of
+     * 28 times in kaikki), but real German is full of compounds where the h ENDS the first morpheme:
+     * Dreh·arbeit, Roh·öl, Ein·weihung, Erzieh·ung. These must keep the silent h.
+     */
+    test("h ending a morpheme before a vowel stays silent", () => {
+        expect(phonemizeWord("dreharbeit")).toBe("dʁˈeːaɐ̯baɪ̯t");
+        expect(phonemizeWord("rohöl")).toBe("ʁˈoːøːl");
+        expect(phonemizeWord("einweihung")).toBe("ˈaɪ̯nvaɪ̯ʊŋ");
+    });
+
+    test("the ordinary silent-h environments are untouched", () => {
+        expect(phonemizeWord("gehen")).toBe("ɡˈeːən"); // prefix-shaped but h + ⟨e⟩, a length marker
+        expect(phonemizeWord("sehen")).toBe("zˈeːən");
+        expect(phonemizeWord("uhr")).toBe("uːɐ̯");
+        expect(phonemizeWord("fahren")).toBe("fˈaːʁən");
+        expect(phonemizeWord("ruhig")).toBe("ʁˈuːɪç");
+    });
+});

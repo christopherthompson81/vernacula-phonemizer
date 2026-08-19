@@ -1699,3 +1699,62 @@ session.
 *bəˈaːɡlɪç*, *vorbehalten* → *fˈoːɐ̯bəaltən*, *Balsaholz*, *Johannes*. 19 words in the kaikki referee. The
 frequent ones (*behalten*) are rescued by the lexicon; the rule under-generates and the dictionary covers
 it, the same architecture Bengali uses for ɔ/o. Worth its own run with a prefix/compound test.
+
+## Run 26 — 2026-08-19 — de_de: the ⟨h⟩ morpheme-boundary loss, and the half of it that is fixable
+
+Run 25 recorded ⟨h⟩ being deleted across morpheme boundaries and moved on. Taking it properly.
+
+The rule treats a post-vowel ⟨h⟩ as a silent length marker (sehen, Uhr, fahren) — correct — with one
+exception for ⟨hö⟩ after a prefix (ge·hör, be·hörde). Everything else at a boundary lost its h.
+
+### The referee suggests a rule, and the corpus overturns it
+
+Bucketing every kaikki word with exactly one post-vowel ⟨h⟩ (so the referee's h-presence is unambiguous)
+by the FOLLOWING letter:
+
+    h + r   78    pronounced   0 (0%)        h + a   11    pronounced  9 (82%)
+    h + l   41                 0 (0%)        h + o    7                7 (100%)
+    h + n   37                 0 (0%)        h + ä    5                5 (100%)
+    h + m   15                 0 (0%)        h + u    5                3 (60%)
+    h + s    7                 0 (0%)        h + e   40                7 (18%)
+    h + #    6                 0 (0%)        h + i   15                4 (27%)
+
+That is the *Dehnungs-h* distinction stated in orthography: h is a length marker before a consonant, a word
+edge, or a REDUCIBLE vowel (⟨e⟩ → schwa in -en/-e, ⟨i⟩ → [ɪ] in -ig), and a real onset before a full vowel.
+24 of 28 in the full-vowel buckets. It looks like the rule.
+
+⚠ **AND ON THE CORPUS IT IS NET NEGATIVE: 80 rows closer against 138 FURTHER.** Restricting to the
+strongest buckets (a/o/ä only) is no better — 66 against 123. Real German text is full of compounds where
+the h ENDS the first morpheme and the next one starts with the vowel: *Dreh·arbeit*, *Roh·öl*,
+*Ein·weihung*, *Erzieh·ung*. The dictionary sample under-represents them; the corpus does not.
+
+⚠ **THE PREFIX TEST IS WHAT IDENTIFIES A BOUNDARY WITH h ON THE RIGHT OF IT.** Keeping it and widening only
+the vowel — ⟨ö⟩ → the full-vowel set — is **39 rows closer and 0 further**. So the original author's gate
+was the load-bearing half and the ⟨ö⟩ was the incidental half; that is the opposite of how it reads.
+
+    be·haglich      bəˈaːɡlɪç      -> bəhˈaːɡlɪç
+    vor·be·halten   fˈoːɐ̯bəaltən   -> fˈoːɐ̯bəhaltən
+    ent·halten      ɛntˈaltən      -> ɛnthˈaltən
+
+and the protected cases are untouched: gehen ɡˈeːən, sehen zˈeːən, rohöl ʁˈoːøːl, dreharbeit dʁˈeːaɐ̯baɪ̯t,
+einweihung ˈaɪ̯nvaɪ̯ʊŋ, ruhig ʁˈuːɪç, Uhr uːɐ̯.
+
+Referee: kaikki 3,727 → 3,732, wikipron 2,319 → 2,324.
+
+### Half fixed, and the half that is not
+
+Compound boundaries still lose their h — *Gänse·haut* ɡˈɛnzəaʊ̯t, *Balsa·holz*, *Johannes*. A prefix is a
+closed list; a compound's first element is not. This wants the same compound detector the medial ⟨th⟩ note
+in Run 25 wants, and `lexicon.tsv`'s `k` compound-constituent flag is the obvious input for both. **Two
+findings now point at the same missing tool**, which is a better argument for building it than either alone.
+
+### A mutation that lied, for the second time in two runs
+
+⚠ **MY FIRST MUTATION HIT TWO RULES.** `sed`-ing the bare literal `"aouäöü"` also changed line 262 — the
+⟨i⟩-glide rule in medial hiatus uses the same character set — so "revert the h gate" actually reverted two
+unrelated rules and failed 6 tests. The 5 extra failures looked like my change breaking pre-existing tests;
+they were the sed's collateral damage. Re-run against the h rule alone, exactly 1 test fails, the right one.
+
+The literal is now `FULL_VOWEL`, named once. The two rules genuinely share the concept — reducible ⟨e i⟩
+against everything else — so naming it keeps them from drifting and makes an edit to one visibly not an
+edit to both.

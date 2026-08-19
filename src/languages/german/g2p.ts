@@ -34,6 +34,13 @@ function consRun(w: string, j: number): number {
 
 // Short-vowel function words + long-⟨ch⟩ stems (exception lists from german.jsonc).
 const SHORT_MONO = new Set(MANIFEST.shortMonosyllables);
+/** The vowels that are always FULL in German orthography — ⟨e⟩ and ⟨i⟩ are excluded because they are the
+ *  two that reduce (schwa in -en/-e, [ɪ] in -ig). Two rules turn on exactly this distinction: the ⟨i⟩-glide
+ *  in medial hiatus (Liberia → …ʁi̯a) and the post-vowel ⟨h⟩ at a prefix boundary (be·haglich keeps its h,
+ *  ge·hen does not). Named so the two cannot drift apart, and so an edit to one is not silently an edit to
+ *  both — a sed over the bare literal hit both rules at once while this was being written. */
+const FULL_VOWEL = "aouäöü";
+
 const LONG_CH = MANIFEST.longCh;
 // Words where a leading ⟨ge⟩/⟨er⟩ is NOT a prefix → ⟨st⟩ stays alveolar (gestern, erst); see german.jsonc.
 const ST_KEEP = new Set(MANIFEST.morphology.stKeepWords);
@@ -259,7 +266,7 @@ export function toSegments(word: string): Seg[] {
             // crucially the many proper-noun -ia/-io: Liberia → …ʁi.a, Ontario, Ohio — kaikki keeps those syllabic).
             // Excludes ⟨ie⟩ (handled above → iː) and word-initial ⟨i⟩ (Ion, Iota — seenVowel guards). The following
             // vowel carries the syllable's stress, so the glide i̯ is never itself stressed.
-            if (c === "i" && "aouäöü".includes(nx) && seenVowel && i + 2 < n) {
+            if (c === "i" && FULL_VOWEL.includes(nx) && seenVowel && i + 2 < n) {
                 push("i̯", i);
                 i++;
                 continue;
@@ -323,9 +330,25 @@ export function toSegments(word: string): Seg[] {
             // exception. ⟨gh⟩ is 0 of 12. Both were checked before assuming, and both stay untouched.
             if (w[i - 1] === "t" && (i === 1 || i === w.length - 1)) {
                 /* word-edge ⟨th⟩: silent */
+            // ⚠ THE PREFIX GATE IS LOAD-BEARING; THE VOWEL RESTRICTION WAS NOT. This exception was written
+            // for ⟨hö⟩ alone (ge·hör, be·hörde) but the same boundary carries every full vowel —
+            // be·haglich, vor·be·halten, ent·halten were all losing their h. Widening ⟨ö⟩ to the full-vowel
+            // set is 39 rows closer and 0 further.
+            //
+            // ⚠ AND DROPPING THE PREFIX TEST INSTEAD IS NET NEGATIVE, which the referee alone would not
+            // have shown. In the kaikki sample, post-vowel ⟨h⟩ before a full vowel is pronounced 24 of 28
+            // times (h+o 7/7, h+ä 5/5, h+a 9/11) against h+e 7/40 and h+i 4/15 — so "h before a full vowel
+            // is an onset" looks like the rule. On the corpus it scores 80 closer / 138 FURTHER, because
+            // real German is full of compounds where the h ENDS the first morpheme and the next one begins
+            // with the vowel: Dreh·arbeit, Roh·öl, Ein·weihung, Erzieh·ung. The prefix is what identifies a
+            // boundary with h on the RIGHT of it.
+            //
+            // Compound boundaries are therefore still wrong — Gänse·haut, Balsa·holz, Johannes keep losing
+            // their h — and need the same compound detector the medial ⟨th⟩ note above wants.
             } else if (
                 !isV(w[i - 1] ?? "") ||
-                (nx === "ö" &&
+                (nx !== undefined &&
+                    FULL_VOWEL.includes(nx) &&
                     /(be|ge|ver|zer|er|vor|zu|un|emp|ent|miss)$/.test(w.slice(0, i)))
             )
                 push("h", i);
