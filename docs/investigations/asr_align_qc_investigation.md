@@ -1120,3 +1120,54 @@ of a length-normalised distance against a partially-covered reference, not a sym
 
 That is worth more than the row it came from: the recognizer's coverage is duration-independent across
 1.7–256s, which is the assumption every measurement in Runs 1–16 rests on and had not been tested.
+
+## Run 17 — 2026-08-19 — the Hebrew review rounds, and what the fix did to the queue
+
+Three review rounds on #839, and the recurring finding was my own: each round I patched the branch in
+front of me and the next round found the hole that patch opened. Round two's was the sharpest — my
+`out.every(Boolean)` guard reintroduced the exact defect the PR fixes, because some Hebrew words
+legitimately phonemize to nothing (`phonemizeWord("ה") === ""`, likewise `ע`) and `emit()` drops an empty
+string harmlessly. So one unrelated one-letter word condemned its whole clause: `ה בית הגדול` lost `bet`
+to `vjt`.
+
+**The word-COUNT mismatch was always the only real failure signal.** It catches the all-or-nothing decline
+too, since that returns `""` → one token against N. After three rounds in the same function I rewrote it
+rather than patch again; it reads in one screen now, and the review's other findings fell out of the
+rewrite:
+
+- the segment retry re-issued the **byte-identical call** against a deterministic model when no word was
+  unreadable — a guaranteed-wasted inference, then the original blast radius anyway. `ה בית הגדול` went
+  from two model calls to one.
+- the maqaf rejoin was unvalidated, so a half whose reading is empty vanished inside the join
+  (`ה־בית גדול` → *bet ɡadol*, the `ה` gone).
+
+⚠ **One finding acknowledged as a limit rather than fixed**, and stated at the site: the segment still
+flushes at a maqaf compound, so the words on either side lose context across it. Deferring needs a
+placeholder entry filled in after the fact — real surgery for 28 rows, when the compound itself already
+restores correctly.
+
+### The invariant, finally asserted rather than exemplified
+
+Every branch of `flush` must push **exactly one queue entry per input word**, because `assembleClauses`
+draws one entry per TOKEN match. A branch that pushes two shifts every later word and silently drops the
+last — which is how `ɡadol` disappeared when I pushed the maqaf halves separately. Nothing in the output
+shape reveals it; only the missing tail does. It is now a test with one case per branch, and checked
+against 600 real corpus rows (no dropped words).
+
+### What it did to the queue
+
+    he_il                 n     median before → after    better / worse
+    all-flagged          25       0.800 → 0.456             16 / 2
+    investigate         120       0.796 → 0.570             73 / 5
+    whole language     3242       0.352 → 0.340            327 / 31   · skeletons 216 → 0
+
+The effect concentrates on exactly the rows the screen flagged, which is the queue working as designed —
+`he_il` reached the top of the residual by lift (2.32×), and the defect behind it turned out to be one
+guard in one function.
+
+⚠ **The three iterations are within noise of each other on the audio** — word-by-word 0.3408, segment-split
+0.3402, rewritten 0.3402. The metric cannot separate them because a homograph vowel barely moves a
+sentence-level folded distance. The case for the segment split is linguistic: `הוא קרא ספר של ג'ון טוב`
+reads `hu kaʁa sefeʁ` where word-at-a-time gives `koʁa`/`sifeʁ`, and those are the module's own documented
+homographs. Recorded because it is the clearest case in this log of the instrument being blind to a real
+improvement — the opposite of Run 13a, where it was blind to a real regression.
