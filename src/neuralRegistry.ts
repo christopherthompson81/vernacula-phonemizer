@@ -17,6 +17,7 @@ import { phonemizeKmNeural } from "./languages/khmer/khmerNeural.ts";
 import { phonemizeRiderNeural } from "./languages/perso-arabic/riderNeural.ts";
 import { phonemizeSdNeural } from "./languages/sindhi/sindhiNeural.ts";
 import { phonemizeAfNeural } from "./languages/afrikaans/afrikaansNeural.ts";
+import { phonemizeCkbNeural } from "./languages/central-kurdish/centralKurdishNeural.ts";
 
 // Arabic ISO code → engine variety (mirrors the sync registry); every key routes bare text
 // through the async diacritizer.
@@ -32,6 +33,13 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     // on a dictionary-gold held-out split, because af's residual is stress-conditioned vowel quality — contextual, not tabulable
     af: phonemizeAfNeural,
     bn: phonemizeBnNeural,
+    // BiLSTM placing the BIZROKE — Sorani's one unwritten vowel — on the words the AsoSoft-derived lexicon
+    // misses. 95.1% word-exact against a 73.8% never-insert baseline on a stem-blind held-out split; the
+    // AsoSoft source is 10,041 words and exhausted, leaving ~2,000 corpus types the lexicon cannot reach.
+    // ⚠ Neither the referee nor the audio can score this — ckb.jsonc folds [əɪ] on both sides because the two
+    // human referees disagree on the vowel's QUALITY, and the ASR under-transcribes Sorani (0.929 of our
+    // folded phone count, against 0.987 de / 0.998 fr). The held-out split is the whole instrument.
+    ckb: phonemizeCkbNeural,
     da: phonemizeDaNeural,
     nb: phonemizeNbNeural,
     fr: phonemizeFrNeural,

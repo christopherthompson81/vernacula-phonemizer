@@ -101,10 +101,14 @@ export function phonemizeWordRules(word: string): string {
     return scanWord(word);
 }
 
-/** Phonemize a single Sorani word to canonical IPA. The bizroke comes from the lexicon; everything else
- *  from the scan. */
-export function phonemizeWord(word: string): string {
-    return lexicon().get(word) ?? scanWord(word);
+/** Resolve an OOV word to IPA. Consulted BETWEEN the lexicon and the rule scan (lexicon → oovOverride →
+ *  rules); used only by the async neural path (`centralKurdishNeural.ts`), so the sync engine is unchanged. */
+export type OovResolver = (word: string) => string | undefined;
+
+/** Phonemize a single Sorani word to canonical IPA. The bizroke comes from the lexicon (or, on the async
+ *  path, the tagger); everything else from the scan. */
+export function phonemizeWord(word: string, oov?: OovResolver): string {
+    return lexicon().get(word) ?? oov?.(word) ?? scanWord(word);
 }
 
 function scanWord(word: string): string {
@@ -150,13 +154,13 @@ export type ForeignPhonemizer = (latin: string) => string;
 
 class CentralKurdishPhonemizer implements Phonemizer {
     constructor(private foreign?: ForeignPhonemizer) {}
-    text(input: string): string {
+    text(input: string, oovOverride?: OovResolver): string {
         // Everything the g2p cannot read is rewritten FIRST — see normalize.ts.
         // ⚠ MOST IMPORTANTLY THE ARABIC-INDIC DIGITS ARE FOLDED TO ASCII THERE. The letter class above is
         // U+0620–U+06FF, which CONTAINS U+0660–U+0669, so without the fold a native digit run is claimed by
         // the LETTER branch and read as an empty string — and those are the majority digit system in Kurdish.
         return assembleClauses(normalizeCentralKurdish(input), TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(phonemizeWord(m[1]));
+            if (m[1]) sink.emit(phonemizeWord(m[1], oovOverride));
             else if (m[2]) sink.emit(number(m[2]));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -169,4 +173,9 @@ class CentralKurdishPhonemizer implements Phonemizer {
 /** Build the Central Kurdish (Sorani) phonemizer. `foreign` handles embedded Latin runs; numbers via numbers.ts. */
 export function createCentralKurdish(foreign?: ForeignPhonemizer): Phonemizer {
     return new CentralKurdishPhonemizer(foreign);
+}
+
+/** Build the Central Kurdish engine with a per-call `oovOverride` hook (the async neural path). */
+export function createCentralKurdishEngine(): { text: (input: string, oov?: OovResolver) => string } {
+    return new CentralKurdishPhonemizer();
 }

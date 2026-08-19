@@ -2466,3 +2466,96 @@ is genuinely homographic needs word-aligned audio, and this corpus's proportiona
 neighbouring words' vowels, so the per-spelling distributions it yields are too noisy to settle it.
 
 **Reverted.** The deferral stands and now carries its numbers, so it is not re-tried a third time.
+
+## Run 38 — 2026-08-19 — why the referee could not move, and how much of the bizroke class we actually reached
+
+**Question.** Run 37 shipped 2,517 bizroke entries yet the referee score did not change. If words that were
+missing a vowel now have one, why is the referee flat?
+
+**Command.**
+
+    cat tools/referee-eval/langs/ckb.jsonc
+
+**Finding.** The last fold in the file is `{ "pattern": "[əɪ]", "replace": "" }` — the bizroke axis is folded
+to nothing on *both* sides before the comparison. The referee is blind to this change by construction, and was
+made blind deliberately in the ckb bring-up, because the two human referees disagree on the vowel's *quality*
+(wikipron writes ɪ, kaikki writes ə) and scoring that disagreement would have been noise. Flat is the only
+result it could have produced. Nothing to diagnose.
+
+**The instrument gap this exposes.** Counting the vowels in each shipped entry:
+
+    entries 2517 | all-vowels-are-bizroke 97 | more than one bizroke 403
+
+Only **97 of 2,517 (3.9%)** of the class is visible to `output_anomalies.py`, because the no-nucleus check
+fires only when a word has *no* vowel at all, and 96% of bizroke words carry a written long vowel elsewhere
+(`کوردستان` = *kʊɾdəstaːn* — the ⟨ا⟩ is written, the ə is not). The 1.13% → 0.19% no-nucleus improvement was
+therefore the tip, not the measure. Combined with the referee fold and the ASR's Sorani under-transcription
+(0.929 of our folded phone count), **there is no instrument in this repo that can score the bizroke.** The
+held-out split of the source is the only one available, which is a real constraint on anything built next.
+
+**Corpus reach.**
+
+    ckb corpus: 9993 types, 55873 tokens
+    lexicon hits: 641 types (6.4%), 5128 tokens (9.2%)
+
+The lexicon lands on 9.2% of tokens — better than its 6.4% type share, so it is catching frequent words —
+but the source vocabulary says the bizroke rate among words we transcribe correctly otherwise is
+2517/(2517+6870) = **26.8%**. Scaling that to the corpus puts roughly 2,000 word types still unvoweled.
+**Implication:** the lexicon closed about a quarter of the class by type. The remainder is OOV and needs a
+model, not more lexicon — the source is exhausted at 10,041 words.
+
+## Run 39 — 2026-08-19 — the bizroke tagger: the class IS learnable, and a builder bug found on the way
+
+**Question.** Run 38 left ~2,000 ckb corpus types the exhausted lexicon cannot reach. Run 37 concluded the
+class is "LEXICAL … not positionally predictable" — but that was measured of a *fixed epenthesis rule*, not of
+a model. Does a BiLSTM conditioned on the whole skeleton do better than the never-insert prior?
+
+**A builder bug, found while rebuilding the training data.** `engine_says.mts` called `phonemizeWord` — the
+SHIPPED path, which since Run 37 consults the very lexicon it is used to build. Re-running
+`build_ckb_lexicon.py` today would have classified all 2,517 entries as "already agrees" and rewritten
+`lexicon.tsv` EMPTY. Switched to `phonemizeWordRules`; the rebuilt file is byte-identical to the shipped one
+and the classification reproduces exactly (`6870 agree, 2517 bizroke-only, 654 other`). The same
+lexicon-vs-rules distinction that keeps the referee honest turns out to keep the *builder* honest too, and
+only one of the two was wired.
+
+**Command.**
+
+    .venv/bin/python tools/central-kurdish/train_ckb_bizroke.py --src <clone> --eval-only
+
+**Finding.**
+
+    10041 source pairs -> 9387 trainable (2517 carry a bizroke)
+    stem-blind held-out: train 8426 / test 961 words
+      never-insert baseline : 73.8%
+      tagger word-exact     : 95.1%
+
+The class is learnable. Error 4.9% against the prior's 26.2% — a 5.3× reduction — and this is word-exact, so
+one misplaced vowel anywhere in a word counts against it. **The split is stem-blind** (grouped by the first 5
+characters) because Sorani's inflected families would otherwise straddle it; a random split reads 96.5%, and
+the 1.4pp gap is the size of the lie a random split would have told.
+
+**What Run 37 actually established, restated.** Not that the bizroke is unpredictable — that *one insertion
+after the first consonant* is unpredictable. سفر is *safar*: the rule is right that a vowel is missing and
+wrong about how many and which. Conditioning on the whole skeleton is a different question and it has a
+different answer. Worth remembering the next time a "not tabulable" finding is reached for as a reason not to
+model something.
+
+**The shape, and why it is unusual.** The tagger's input is `phonemizeWordRules` output, not the orthography,
+so every tag is either a symbol or that symbol + ɪ. Two consequences: the consonant-consistency mask makes
+altering the skeleton *structurally* impossible (the test asserts the round-trip — strip ɪ, get the rule
+reading back), and the referee path stays non-circular. A tagger reading the abjad directly would have had
+neither property.
+
+**Corpus impact**, `phonemize` vs `phonemizeAsync` over all 3,040 ckb rows: 5,350 of 58,704 tokens change
+(9.1%), all by an inserted ɪ. No-nucleus barely moves (3.72% → 3.61%) — exactly as Run 38 predicted, since
+only 3.9% of the class is visible to that detector. **The 9.1% is the measure; the no-nucleus delta is not.**
+
+**A fleet-wide arity hazard, found by the test suite.** Adding the `oovOverride` parameter to
+`phonemizeWord(word, oov?)` broke `test/bignum-fallback.test.ts` with "oov is not a function":
+`core/numbers.ts` `spellDigits` did `.map(word)`, and `Array.map` passes `(value, index, array)` — so the
+index arrived as the OOV resolver. Fixed to `.map((w) => word(w))` in the shared helper rather than at the ckb
+call site, since **every** engine's word reader passes through there and any of them could grow a second
+parameter next.
+
+**Instrument note.** Neither the referee nor the audio can score this tier (Run 38). The stem-blind split is
+the whole instrument, and is reported as such in `ckb-bizroke-tagger.PROVENANCE.md`.

@@ -27,6 +27,10 @@ tools/sindhi/*.pt
 tools/perso-arabic/pa_restorer.pt
 tools/sindhi/sd-g2p-tagger.onnx
 tools/sindhi/sd-g2p-tagger.int8.onnx
+# ckb bizroke tagger — the export tool writes fp32 + int8 + meta here and copies the shipped pair to src/
+tools/central-kurdish/ckb-bizroke-tagger.onnx
+tools/central-kurdish/ckb-bizroke-tagger.int8.onnx
+tools/central-kurdish/ckb-bizroke-tagger.meta.json
 tools/sindhi/sd-g2p-tagger.meta.json
 tools/sindhi/sd_tagger_data*.tsv
 tools/sindhi/sd_tagger_meta*.json
