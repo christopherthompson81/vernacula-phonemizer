@@ -41,8 +41,26 @@ describe("numeral register (corpus rendering policy)", () => {
         expect(applyNumeralRegister("3,980 x", "sn")).toContain("three thousand nine hundred eighty");
     });
 
-    test("a decimal is left alone — it has its own reading in every language", () => {
+    /**
+     * ⚠ THE SHAPES THE REGISTER WAS NOT MEASURED ON MUST BE DECLINED, and each of these is attested in the
+     * five wired languages — they are not hypothetical corners. A cardinal compositor mangles all of them
+     * silently, which is the failure mode that matters: the output is plausible and wrong.
+     */
+    test("unmeasured number shapes are declined", () => {
+        // 42 rows. A EUROPEAN DECIMAL COMMA, not grouping — read as grouping, `1,5` comes out *fifteen*.
+        expect(applyNumeralRegister("ezingu-1,5", "zu")).toBe("ezingu-1,5");
+        expect(applyNumeralRegister("2,8", "sn")).toBe("2,8");
+        // 109 rows. A clock time, not two cardinals.
+        expect(applyNumeralRegister("dza10:08", "sn")).toBe("dza10:08");
+        expect(applyNumeralRegister("11:20", "zu")).toBe("11:20");
+        // 252 rows. A leading zero is an identifier or a grouped tail; `Number()` drops the zeros, so
+        // `007` would read *seven*.
+        expect(applyNumeralRegister("007", "sn")).toBe("007");
+        expect(applyNumeralRegister("00", "sn")).toBe("00");
+        // A decimal has its own reading in every language.
         expect(applyNumeralRegister("versie 1.5", "sn")).toBe("versie 1.5");
+        // Past the compositors' range, hand back the digits rather than a truncated reading.
+        expect(applyNumeralRegister("9007199254740993", "sn")).toBe("9007199254740993");
     });
 
     test("text with no digits is returned unchanged", () => {

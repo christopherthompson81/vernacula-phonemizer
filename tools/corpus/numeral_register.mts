@@ -39,8 +39,35 @@ const NUMERAL_REGISTER: Readonly<Record<string, "en" | "fr">> = {
 };
 
 /** A bare digit run. Grouping separators and a decimal point stay inside it so the target's own compositor
- *  sees `1,234` whole rather than three fragments. */
-const DIGIT_RUN = /\d[\d.,  ]*\d|\d/gu;
+/**
+ * A bare digit run, with grouping separators kept inside it so the target's compositor sees `1,234` whole.
+ *
+ * ⚠ IT MUST DECLINE EVERY SHAPE THE REGISTER WAS NOT MEASURED ON. The measurement covered plain cardinals;
+ * the corpus contains other readings that a cardinal compositor silently mangles, all attested in the five
+ * wired languages:
+ *
+ *     clock       `dza10:08`, `kuma9:30`, `11:20`   109 rows — a time, not two cardinals
+ *     dec comma   `2,8`, `3,5`, `ezingu-1,5`         42 rows — EUROPEAN DECIMAL, not grouping. Read as
+ *                                                             grouping, `1,5` comes out *fifteen*.
+ *     decimal     `1.5`, `1:09.2`                             its own reading in every language
+ *
+ * So a separator only joins when EXACTLY three digits follow it — `1,5` and `2,8` fall through untouched —
+ * and a run adjacent to `:` or `.` is refused outright.
+ *
+ * ⚠ DECLINING THESE COSTS ~115 ROWS ON THE DISTANCE METRIC, AND IS STILL RIGHT. Reading them as bare
+ * cardinals scores BETTER than declining — for clock times, 102 rows beat the baseline against 16 — because
+ * a wrong reading still overlaps the audio more than the host's native one does. But it IS wrong: the
+ * recognizer shows Lingala readers saying `11:00` as *onz ʒyst* (onze juste) and `11:20` as *uz vent*
+ * (onze vingt), real French clock readings rather than two cardinals. Emitting "onze vingt" as
+ * "eleven twenty" would score well for the wrong reason. The metric cannot separate "right" from
+ * "phonetically overlapping by accident", so a shape whose CORRECT reading is not implemented is declined
+ * rather than approximated.
+ *
+ * The opportunity is real and quantified: a proper clock and decimal reading in the register language is
+ * worth roughly 115 rows across the five wired languages.
+ */
+const GROUPED = String.raw`\d{1,3}(?:[  ,]\d{3})+`;
+const DIGIT_RUN = new RegExp(String.raw`(?<![\d:.,])(?:${GROUPED}|\d+)(?![\d:.,])`, "gu");
 
 const EN_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
     "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
@@ -94,10 +121,15 @@ export function applyNumeralRegister(text: string, registryCode: string): string
     const reg = NUMERAL_REGISTER[registryCode];
     if (reg === undefined || !/\d/u.test(text)) return text;
     return text.replace(DIGIT_RUN, (run) => {
-        const n = Number(run.replace(/[  ,]/gu, ""));
-        // ⚠ INTEGERS ONLY. A decimal, a version number or a date fragment has its own reading in every
-        // language and is not what the register was measured on.
-        if (!Number.isSafeInteger(n) || n < 0 || run.includes(".")) return run;
+        const digits = run.replace(/[  ,]/gu, "");
+        const n = Number(digits);
+        // ⚠ A LEADING ZERO IS NOT A CARDINAL. `007`, `00` and `000-160` are identifiers or the tail of a
+        //   grouped number, and `Number()` silently drops the zeros — `007` would read *seven*. 252 rows
+        //   in the wired languages contain one.
+        // ⚠ AND THE COMPOSITORS ARE BOUNDED: above 999,999,999,999 both stop composing, so hand back the
+        //   digits rather than emit a truncated reading.
+        if (digits.length > 1 && digits.startsWith("0")) return run;
+        if (!Number.isSafeInteger(n) || n < 0 || n > 999_999_999_999) return run;
         return ` ${reg === "fr" ? frWords(n) : enWords(n)} `;
     });
 }
