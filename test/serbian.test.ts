@@ -152,6 +152,13 @@ describe("Serbian normalization", () => {
         expect(say("35°З")).toBe(say("35 stepeni"));
         expect(say("35°Z")).toBe(say("35 stepeni"));   // the LATIN bearings too — jug, zapad
         expect(say("35°J")).toBe(say("35 stepeni"));
+        expect(say("35°I")).toBe(say("35 stepeni"));   // Latin istok — omitting it let `35°I` glue
+        expect(say("35° W")).toBe(say("35 stepeni")); // a space is fine for an UNAMBIGUOUS bearing
+        // ⚠ THE CYRILLIC SCALE LETTER IS ATTACHED-ONLY, AND MUST STILL READ. `°С` is the natural Cyrillic
+        //   spelling of a temperature; dropping it from the scale class to dodge the preposition turned a
+        //   correct reading into a silent omission. Attachment separates the two cleanly.
+        expect(say("температура 35°С")).toContain("t͡sˈelzijusa");
+        expect(say("35 °С")).toContain("t͡sˈelzijusa");
         // ⚠ A BEARING MUST BE ATTACHED TO THE `°`. Two of them — `и` "and" and `с` "with" — are among the
         //   commonest words in the language, so a rule that allows a space before the letter DELETES them.
         //   Every bearing in this corpus is written attached (`35°w`), so requiring it costs nothing.

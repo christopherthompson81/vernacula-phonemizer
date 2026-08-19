@@ -311,13 +311,15 @@ export function normalizeSerbian(input: string): string {
     // 4) DEGREES, two arms. The first claims `°C` / `°F` and supplies both the degree noun and the scale
     //    name. A WRITTEN degree noun is CONSUMED when present (`32 °C степена`), or the word is emitted
     //    twice; the count agrees with the numeral (32 → gen.sg stepena), not with what was written.
-    //    ⚠ NO CYRILLIC ⟨С⟩ IN THIS CLASS. It is the preposition `с` "with", and with a space allowed before
-    //    the letter `35° с падавинама` was read as Celsius and the preposition deleted. Cyrillic scale
-    //    letters are ×0 in this corpus — only Latin `w f c z` follow a degree anywhere in hr/bs/sr — so the
-    //    class that costs a common word to keep is the one to drop.
-    s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
-        (_m, n: string, unit: string, _written: string | undefined) =>
-            `${n} ${counted(Number(n), STEPEN)} ${/[Ff]/u.test(unit) ? "Farenhajta" : "Celzijusa"}`);
+    //    ⚠ THE CYRILLIC SCALE LETTER IS ATTACHED-ONLY, and the Latin one is not. `°С` is the natural
+    //    Cyrillic spelling of a temperature and must keep reading as Celsius — but ⟨с⟩ spaced off the
+    //    degree is the preposition "with", so `35° с падавинама` would read as Celsius and delete the
+    //    word. Attachment separates them: `35°С` is the scale, `35° с` is the preposition. Latin ⟨c⟩ has
+    //    no such collision and the corpus writes it spaced (`32 °c`), so that arm keeps its `\s?`.
+    s = s.replace(/(\d+)\s?°(?:\s?([CFcf])|([СЦФсцф]))(?![\p{L}\p{M}])(\s*(?:степен[аи]|stepen[ai]))?/gui,
+        (_m, n: string, lat: string | undefined, cyr: string | undefined, _written: string | undefined) =>
+            `${n} ${counted(Number(n), STEPEN)} `
+            + (/[FfФф]/u.test(lat ?? cyr ?? "") ? "Farenhajta" : "Celzijusa"));
     //    4b) THE BARE DEGREE emits the degree noun ONLY, no scale word — right for a longitude (`35°W`) and
     //    harmless for a bare temperature. Safe unguarded because the C/F arm above has already consumed
     //    those forms. It consumes a written degree noun for the same reason the C/F arm does.
@@ -344,7 +346,12 @@ export function normalizeSerbian(input: string): string {
     //    ⚠ AND THE WHITESPACE LIVES INSIDE THE OPTIONAL GROUP. Outside it, `\s?` is consumed even when the
     //    group matches empty, so `око 35° од екватора` glued to *stepeniод* — the very defect this arm was
     //    changed to prevent, reintroduced for the general case.
-    s = s.replace(/(\d+)\s?°(?:[NSEWJZnsewjzСЈИЗсјиз](?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
+    //    ⚠ ATTACHMENT IS REQUIRED ONLY OF THE AMBIGUOUS BEARINGS, which is the whole rule in one line.
+    //    ⟨s⟩/⟨с⟩ ("with") and ⟨i⟩/⟨и⟩ ("and") are bearings AND two of the commonest words in the language,
+    //    so those four may not be spaced off the degree or the rule eats them. Every other bearing —
+    //    N E W J Z, Ј З — is a letter no BCS sentence uses on its own, so a space is safe there and
+    //    `35° W` still reads. Latin ⟨I⟩ (istok) belongs in the list too; leaving it out let `35°I` glue.
+    s = s.replace(/(\d+)\s?°(?:(?:\s?[NEWJZnewjzЈЗјз]|[SIsiСИси])(?![\p{L}\p{M}]))?(\s*(?:степен[аи]|stepen[ai]))?/gu,
         (_m, n: string, _written: string | undefined) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 5) NUMERAL + HYPHEN + CASE SUFFIX (`1970-их`, `15-ог`, `11-ом`, `13-то`). As in Russian, the written

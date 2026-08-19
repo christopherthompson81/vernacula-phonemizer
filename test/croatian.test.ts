@@ -40,8 +40,8 @@ describe("Croatian (hr) canonical IPA", () => {
         expect(phonemize("zoo", "hr")).toBe("zˈoo");
         // ⚠ AND AN INITIALISM IS A LETTER RUN, NOT A WORD. Collapsing there DELETES a letter — `BBC` read
         //   as *bt͡s*, `www` as a single *ʋ*, and in the sibling engines `СССР` as *sr* and `MMF` as *mf*.
-        //   Guarded by two signatures, no-vowel and all-caps, neither of which a real BCS word with a
-        //   geminate can trip: they are all loans, and loans have vowels.
+        //   Guarded on the no-vowel signature, which a real BCS word carrying a geminate cannot trip:
+        //   they are all loans, and loans have vowels.
         expect(phonemize("BBC", "hr")).toBe("bbt͡s");
         expect(phonemize("www", "hr")).toBe("ʋʋʋ");
         // ⚠ AND THE GUARD IS CASE-INDEPENDENT. An "all caps" signature was tried and is wrong — it makes
@@ -128,7 +128,7 @@ describe("Croatian text normalization", () => {
         // the reading Croatian gives the letter in *Velšani*, *velški* — so the initial is audible.
         // ⚠ AND IT IS NOT A NEW CONVENTION, IT IS THE EXISTING ONE. This engine already reads a lone
         // initial as its bare phone rather than its letter name: `V.` → *ʋ*, `B.` → *b*. ⟨W⟩ now joins
-        // them instead of being the one initial that disappears. See FOREIGN_LETTER in croatian.ts.
+        // them instead of being the one initial that disappears. See `foreignLetters` in serbian.ts.
         expect(ph("George W. Bush")).toBe("ɡˈeorɡe ʋ busx");
         expect(ph("George V. Bush")).toBe("ɡˈeorɡe ʋ busx"); // the native letter, for the comparison
     });

@@ -194,8 +194,7 @@ export function phonemizeWord(word: string): string {
     const w = word.toLowerCase();
     // ⚠ AN INITIALISM IS A LETTER RUN, NOT A WORD, AND MUST NOT BE DEGEMINATED. The rule below collapses a
     // doubled consonant, which is right for a loan and destroys an acronym: СССР → *sr*, MMF → *mf*,
-    // BBC → *bt͡s*, www → *ʋ*. Two signatures, either of which is enough, and neither can fire on a real
-    // BCS word carrying a geminate (they are all loans, and loans have vowels):
+    // BBC → *bt͡s*, www → *ʋ*.
     // The signature is NO VOWEL LETTER at all — sssr, mmf, www, bbc, cctld. A native vowelless word (krv,
     // prst, crn) takes its nucleus from a syllabic ⟨r⟩ and never doubles a consonant, so this cannot fire
     // on real BCS: the words carrying a geminate are all loans, and loans have vowels.
@@ -203,13 +202,18 @@ export function phonemizeWord(word: string): string {
     // words — `Holland` → xˈoland but `HOLLAND` → xˈolland, and likewise every all-caps proper noun or
     // headline. A vowel-bearing initialism (ADD) is therefore read as the pseudo-word this engine already
     // treats it as; that is the pre-existing gap of having no initialism speller, not this rule's to fix.
-    const isLetterRun = word.length >= 2 && !/[aeiouаеиоуAEIOUАЕИОУ]/u.test(word);
+    // ⚠ THE VOWEL TEST COMES FROM VOWEL_LETTER, not a literal — that set is derived from the manifest
+    //   precisely so it "cannot drift from the table above", and a hardcoded copy would silently un-guard
+    //   initialisms the day a vowel letter is added to serbian.jsonc.
+    const isLetterRun = word.length >= 2 && ![...word].some((ch) => VOWEL_LETTER.has(ch.toLowerCase()));
     let out = "";
+    let prevLetter = ""; // the last single letter this scan emitted; a digraph resets it (see the skip below)
     const nuclei: { start: number; end: number }[] = []; // output span of each nucleus, in order
     for (let i = 0; i < w.length; ) {
         const two = w.slice(i, i + 2);
         if (DIGRAPHS[two]) {
             out += DIGRAPHS[two]; // ⟨lj nj dž⟩ are consonants — never a nucleus
+            prevLetter = "";
             i += 2;
             continue;
         }
@@ -232,13 +236,18 @@ export function phonemizeWord(word: string): string {
         //   measure the exception against, and the one native class that COULD be measured (naj- + j)
         //   turned out to degeminate in the readers' speech against every expectation. Carving out an
         //   unmeasured class after that would be guessing twice.
-        if (!isLetterRun && c === w[i - 1] && !VOWEL_LETTER.has(c) && LETTERS[c] !== undefined) {
+        // ⚠ AGAINST THE LAST LETTER THIS SCAN EMITTED, not against `w[i-1]`. The previous input character
+        //   may be the tail of a digraph already consumed as one segment, and then the comparison sees a
+        //   geminate that never reached the output: `ljjubav` dropped its third ⟨j⟩ because `w[i-1]` was
+        //   the ⟨j⟩ of ⟨lj⟩. Unattested in BCS, but the wrong quantity to compare.
+        if (!isLetterRun && c === prevLetter && !VOWEL_LETTER.has(c) && LETTERS[c] !== undefined) {
             i++;
             continue;
         }
         if (LETTERS[c] !== undefined) {
             const start = out.length;
             out += LETTERS[c];
+            prevLetter = c;
             if (isNucleus(w, i)) nuclei.push({ start, end: out.length });
         }
         i++; // unknown char (punctuation) → skip
@@ -302,7 +311,10 @@ export function createSerbian(): Phonemizer {
     return new SerbianPhonemizer();
 }
 
-const FOREIGN_LETTER = /qu|[qwxy]/giu;
+// ⚠ `xx` IS ONE CLUSTER. Expanding each ⟨x⟩ independently gives `Exxon` → *ekskson*, and the
+//   doubling is invisible to degemination because it happens after this fold, in a pair the
+//   scan never sees as a repeated LETTER.
+const FOREIGN_LETTER = /qu|xx|[qwxy]/giu;
 /**
  * ⟨q w x y⟩ — THE FOUR LETTERS GAJ'S LATIN DOES NOT HAVE, AND THIS ENGINE WAS DELETING.
  *
@@ -369,7 +381,7 @@ export const foreignLetters = (w: string): string =>
         if (lower === "qu") return "kv";
         if (lower === "q") return "k";
         if (lower === "w") return "v";
-        if (lower === "x") return "ks";
+        if (lower === "x" || lower === "xx") return "ks";
         // ⟨y⟩: the /j/ offglide after a vowel, the vowel /i/ otherwise.
         return /[aeiouAEIOU]/u.test(s[at - 1] ?? "") ? "j" : "i";
     });

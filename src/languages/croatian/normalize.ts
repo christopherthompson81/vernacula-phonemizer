@@ -192,8 +192,19 @@ export function normalizeCroatian(input: string): string {
     // 5) DEGREES. `90 °F`, `+30°C`, `35° W` (a LONGITUDE — the bare-degree rule must not claim it).
     s = s.replace(/(\d+)\s?°\s?([CFcf])(?![\p{L}\p{M}])/gui, (_m, n: string, u: string) =>
         `${n} ${/[Ff]/u.test(u) ? "stupnjeva Farenhajta" : "stupnjeva Celzija"}`);
-    s = s.replace(/(\d+)\s?°\s?([NSEWnsew])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string) =>
-        `${n} stupnjeva ${({ N: "sjeverno", S: "južno", E: "istočno", W: "zapadno" } as Record<string, string>)[c.toUpperCase()]!}`);
+    // ⚠ ATTACHMENT IS REQUIRED OF ⟨s⟩ AND ONLY OF ⟨s⟩. `S` is *južno* and `s` is the preposition "with",
+    //   so spaced off the degree the bearing arm was deleting a common word and inventing a bearing:
+    //   `35° s padavinama` read as *trideset pet stupnjeva JUŽNO padavinama`. N, E and W are letters no
+    //   Croatian sentence uses alone, so `35° w` — the form this corpus actually writes — still reads.
+    s = s.replace(/(\d+)\s?°(?:\s?([NEWnew])|([Ss]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
+        `${n} stupnjeva ${({ N: "sjeverno", S: "južno", E: "istočno", W: "zapadno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
+
+    // 5b) THE BARE DEGREE. ⚠ ADDED BECAUSE THE ARM ABOVE STOPPED CLAIMING EVERYTHING. While the compass
+    //     arm swallowed a spaced ⟨s⟩ there was no such thing as an unclaimed bare degree in this corpus, so
+    //     none was needed; requiring attachment for ⟨s⟩ creates one — `35° s padavinama` now reaches here,
+    //     and without this arm the degree noun disappears entirely. It also consumes ⟨q x y⟩, which Gaj's
+    //     Latin has no bearing word for and which `foreignLetters` would otherwise make audible.
+    s = s.replace(/(\d+)\s?°(?:\s?[QXYqxy](?![\p{L}\p{M}]))?/gu, "$1 stupnjeva");
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih`, `15-og`). The suffix is the LAST LETTERS of the
     //    inflected ordinal. Runs before the range rule.

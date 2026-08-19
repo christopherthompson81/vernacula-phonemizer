@@ -427,12 +427,14 @@ export function normalizeBosnian(input: string): string {
     //        other three complete the same four-way closed system and are declared with it.
     //        The bearing noun is corpus-attested in the same frame: `tek nekoliko stepeni SJEVERNO od
     //        ekvatora`.
-    //        ⚠ ATTACHED ONLY, NO SPACE BEFORE THE LETTER. Two of these bearings are among the commonest
-    //        words in Bosnian — `i` "and" and `s` "with" — so allowing a space read
-    //        `temperatura 35° i padavine` as *istočno* and deleted the conjunction. Every bearing in this
-    //        corpus is written attached (`35°z`), so requiring it costs nothing.
-    s = s.replace(/(\d+)\s?°([SJIZsjiz])(?![\p{L}\p{M}])/gu, (_m, n: string, c: string) =>
-        `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno" } as Record<string, string>)[c.toUpperCase()]!}`);
+    //        ⚠ ATTACHMENT IS REQUIRED ONLY OF THE AMBIGUOUS BEARINGS. `i` "and" and `s` "with" are two of
+    //        the commonest words in Bosnian as well as bearings, so spaced off the degree they must not be
+    //        claimed — `temperatura 35° i padavine` was reading the conjunction as *istočno* and deleting
+    //        it. J and Z are letters no Bosnian sentence uses alone, so a space is safe there.
+    //        ⚠ N AND E ARE READ, NOT DROPPED. The imported English-convention bearings are unambiguous in
+    //        either system and their words are already in this table, so reading them beats deleting them.
+    s = s.replace(/(\d+)\s?°(?:\s?([JZNEjzne])|([SIsi]))(?![\p{L}\p{M}])/gu, (_m, n: string, spaced: string | undefined, tight: string | undefined) =>
+        `${n} ${counted(Number(n), STEPEN)} ${({ S: "sjeverno", J: "južno", I: "istočno", Z: "zapadno", N: "sjeverno", E: "istočno" } as Record<string, string>)[(spaced ?? tight)!.toUpperCase()]!}`);
     //    5c) THE BARE DEGREE emits the degree noun only. Safe unguarded because 5a/5b have already consumed
     //        the qualified forms.
     //        ⚠ IT ALSO CONSUMES A FOREIGN BEARING LETTER, and it must. `W X Y Q` are outside Gaj's Latin,
@@ -441,11 +443,14 @@ export function normalizeBosnian(input: string): string {
     //        them, so an unconsumed `W` glues onto the noun as *stepeniʋ* — and the stress lookup then
     //        runs on the nonexistent word `stepeniv`, misses stress.tsv and loses the pitch accent. The
     //        imported `35°W` form is what this catches; `35°Z` is still read as *zapadno* by 5b above.
-    //        ⚠ THE CLASS COVERS EVERY LATIN BEARING 5b CANNOT — N and E as well as W X Y Q. 5b allows only
-    //        `S J I Z`, so `35°N` and `35°E` fell through both arms and glued.
+    //        ⚠ IT ALSO CONSUMES THE LETTERS 5b HAS NO WORD FOR — W X Y Q, outside Gaj's Latin and so
+    //        unclaimable by the bearing table above. They used to be harmless only because the g2p had no
+    //        rule for them; the shared `foreignLetters` fold now maps them, so an unconsumed one glues
+    //        onto the noun and the stress lookup then runs on a nonexistent word and loses the accent.
+    //        None is a BCS word on its own, so a space before them is safe.
     //        ⚠ AND THE WHITESPACE IS INSIDE THE OPTIONAL GROUP: outside it, `\s?` is consumed even when the
     //        group matches empty, and `35° od ekvatora` glues to *stepeniod*.
-    s = s.replace(/(\d+)\s?°(?:[WXYQNEwxyqne](?![\p{L}\p{M}]))?/gu,
+    s = s.replace(/(\d+)\s?°(?:\s?[WXYQwxyq](?![\p{L}\p{M}]))?/gu,
         (_m, n: string) => `${n} ${counted(Number(n), STEPEN)}`);
 
     // 6) NUMERAL + HYPHEN + CASE SUFFIX (`1970-ih` ×13, all decades). As in Russian, the written suffix is
