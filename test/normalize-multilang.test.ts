@@ -720,10 +720,11 @@ describe("unit abbreviations in the tier-less languages", () => {
 
     test("ckb: its own native abbreviations, guarded by a preceding numeral", () => {
         // ckb_iq writes کم ×30 and سم ×2, every one after a numeral.
-        expect(phonemize("12.8 کم", "ckb")).toBe("dwaːnza xaːɫ haʃt kiːloːmatɾ");
+        // ⚠ MOVED: کیلۆمەتر is *kîlometir* — the bizroke lexicon supplies the unwritten vowel.
+        expect(phonemize("12.8 کم", "ckb")).toBe("dwaːnza xaːɫ haʃt kiːloːmatɪɾ");
         expect(phonemize("6 سم", "ckb")).toBe("ʃaʃ saːntiːmatɾ");
         // The exponent needs no rule: the corpus already writes it as the WORD دووجا after the unit.
-        expect(phonemize("19500 کم دووجا", "ckb")).toContain("kiːloːmatɾ duːd͡ʒaː");
+        expect(phonemize("19500 کم دووجا", "ckb")).toContain("kiːloːmatɪɾ duːd͡ʒaː");
     });
 
     test("fa: the SAME graphemes are ordinary words, so nothing is declared", () => {

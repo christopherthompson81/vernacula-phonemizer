@@ -74,6 +74,15 @@ Both were carried as unversioned "CC-BY" until an audit on 2026-08-06:
 
 1. **Sindhi Open Lexicon** — a bespoke license, not CC-BY. Text:
    `LICENSES/LicenseRef-SindhiOpenLexicon.txt` (no SPDX identifier exists, hence `LicenseRef-`).
+   ⚠ **`central-kurdish/lexicon.tsv` is the second of this kind** and a weaker case, recorded as such:
+   `LICENSES/LicenseRef-AsoSoftKurdishG2P.txt`. The Zenodo deposit says only "Other (Open). No further
+   description." and the GitHub repo carries no LICENSE at all, so this rests on the publisher's evident
+   intent, not on a granted licence text. Two papers are cited as mandatory attribution (Veisi et al. 2020
+   for the AsoSoft frequency list, Ahmadi 2019 for the Wergor list). The derived file is FENCED and the
+   LicenseRef carries a good-faith undertaking: if the publisher or either author says the intent was
+   narrower, the artifact is removed on request. Only the 2,517 rows that differ from our own rule output
+   by the unwritten /ɪ/ alone are taken — the consonant skeleton in every row is this engine's, so the
+   upstream's transcription *system* is not reproduced, only the one vowel fact per word.
    Broad, permissive, and attribution-mandatory; the named attribution to **Amar Fayaz Buriro** is in
    NOTICE. If a downstream consumer needs a standard-licensed path, the Sindhi tier can be rebuilt
    from kaikki/Wiktionary (CC-BY-SA, §3) at ~1/10 the scale.

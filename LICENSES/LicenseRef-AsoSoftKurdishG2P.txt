@@ -1,0 +1,32 @@
+AsoSoft Kurdish-G2P-dataset — Central Kurdish (Sorani) grapheme-to-phoneme pairs
+
+Publisher / repository:
+  https://github.com/AsoSoft/Kurdish-G2P-dataset
+  Zenodo deposit: https://doi.org/10.5281/zenodo.4399769
+  Author of the deposit: Aso Mahmudi
+
+License as declared:
+  The Zenodo record states "License: Other (Open). No further description."
+  The GitHub repository carries NO LICENSE file. The declared terms are therefore an assertion of
+  openness WITHOUT specific conditions — which is why this LicenseRef exists rather than an SPDX id.
+
+Mandatory attribution (the repository asks for citation of both source papers):
+
+  Veisi, H., MohammadAmini, M., & Hosseini, H. (2020). "Toward Kurdish language processing:
+  Experiments in collecting and processing the AsoSoft text corpus". Digital Scholarship in the
+  Humanities, 35(1), 176-193. Oxford University Press.
+    — the source of the "AsoSoft-top5K" list (the 5,000 most frequent corpus tokens).
+
+  Ahmadi, S. (2019). "A Rule-Based Kurdish Text Transliteration System". ACM Transactions on Asian
+  and Low-Resource Language Information Processing (TALLIP), 18(2), 18.
+    — the source of the 5,041 "Wergor-words" list (https://github.com/sinaahmadi/wergor).
+
+Good-faith undertaking:
+  "Other (Open)" is an assertion of openness without stated conditions, so this use rests on the
+  publisher's evident intent rather than on a granted licence text. If the publisher or either cited
+  author informs this project that the intent was narrower than the derived use here, the derived
+  artifact will be removed on request, without argument. The artifact is fenced so that removal is a
+  single-file operation.
+
+No warranty:
+  Provided as-is; suitability for any downstream purpose is the user's to validate.

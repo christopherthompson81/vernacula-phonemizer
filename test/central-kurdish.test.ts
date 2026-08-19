@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { normalizeCentralKurdish } from "../src/languages/central-kurdish/normalize.ts";
 
-import { phonemizeWord } from "../src/languages/central-kurdish/central-kurdish.ts";
+import { phonemizeWord, phonemizeWordRules, bizrokeLexiconHas } from "../src/languages/central-kurdish/central-kurdish.ts";
 
 // Canonical-IPA goldens for Central Kurdish / Sorani / کوردیی ناوەندی (ckb) — Iranian, the Sorani Perso-Arabic
 // alphabet (a near-FULL alphabet: writes all long vowels + short /a/, only the short /ɪ/ bizroke unwritten).
@@ -74,12 +74,14 @@ describe("central kurdish normalization", () => {
     // read correctly. The two measure words are the corpus's own and both FOLLOW the noun — دووجا ×4 from
     // "پارکەکە 19500 کم دووجا", سێجا ×3 from "لونۆ 120-160 مەتر سێجا".
     test("Latin unit aliases and the exponent words", () => {
-        expect(phonemize("19500 km²", "ckb")).toContain("kiːloːmatɾ duːd͡ʒaː");
-        expect(phonemize("120 m³", "ckb")).toContain("matɾ seːd͡ʒaː");
-        expect(phonemize("5 km", "ckb")).toContain("kiːloːmatɾ"); // was the cluster [ˈʊkm]
+        // ⚠ MOVED by the bizroke lexicon: کیلۆمەتر is *kîlometir* and کاتژمێر *katjimêr* — both were
+        //   missing the unwritten vowel. See the bizroke describe-block below.
+        expect(phonemize("19500 km²", "ckb")).toContain("kiːloːmatɪɾ duːd͡ʒaː");
+        expect(phonemize("120 m³", "ckb")).toContain("matɪɾ seːd͡ʒaː");
+        expect(phonemize("5 km", "ckb")).toContain("kiːloːmatɪɾ"); // was the cluster [ˈʊkm]
         // The Perso-Arabic path is untouched, including the corpus's own already-spelled exponent.
-        expect(phonemize("19500 کم دووجا", "ckb")).toContain("kiːloːmatɾ duːd͡ʒaː");
-        expect(phonemize("12.8 کم", "ckb")).toContain("xaːɫ haʃt kiːloːmatɾ");
+        expect(phonemize("19500 کم دووجا", "ckb")).toContain("kiːloːmatɪɾ duːd͡ʒaː");
+        expect(phonemize("12.8 کم", "ckb")).toContain("xaːɫ haʃt kiːloːmatɪɾ");
         // ORDERING: this rule must precede the decimal rule, which rewrites the dot as the word خاڵ and
         // would leave the version guard nothing to reject. `802.11m` is a designation, not 11 metres.
         expect(phonemize("802.11m", "ckb")).toContain("jak jak ˈɛm");
@@ -92,10 +94,50 @@ describe("central kurdish normalization", () => {
     // ABOVE the decimal rule so the version dot survives — a rule that depends on a character an earlier rule
     // has already rewritten will never fire — and `کم` → `کیلۆمەتر` happens further down.
     test("the rate, in both scripts", () => {
-        expect(phonemize("120 کم/کاتژمێر", "ckb")).toContain("kiːloːmatɾ la kaːtʒmeːɾ");
-        expect(phonemize("120 مەتر/چرکە", "ckb")).toContain("matɾ la t͡ʃɾka");
-        expect(phonemize("120 km/h", "ckb")).toContain("kiːloːmatɾ la kaːtʒmeːɾ");
-        expect(phonemize("133 m/s", "ckb")).toContain("matɾ la t͡ʃɾka");
-        expect(phonemize("12.8 کم", "ckb")).toContain("xaːɫ haʃt kiːloːmatɾ"); // decimal still intact
+        expect(phonemize("120 کم/کاتژمێر", "ckb")).toContain("kiːloːmatɪɾ la kaːtʒɪmeːɾ");
+        expect(phonemize("120 مەتر/چرکە", "ckb")).toContain("matɪɾ la t͡ʃɾka");
+        expect(phonemize("120 km/h", "ckb")).toContain("kiːloːmatɪɾ la kaːtʒɪmeːɾ");
+        expect(phonemize("133 m/s", "ckb")).toContain("matɪɾ la t͡ʃɾka");
+        expect(phonemize("12.8 کم", "ckb")).toContain("xaːɫ haʃt kiːloːmatɪɾ"); // decimal still intact
+    });
+});
+
+/**
+ * THE BIZROKE — Sorani's unwritten short /ɪ/, supplied by `lexicon.tsv` (2,517 entries built from the
+ * AsoSoft G2P dataset). Without it 634 corpus tokens across 54 word types had NO nucleus at all.
+ *
+ * ⚠ A RULE CANNOT DO THIS, which is why the lexicon exists: مردن needs TWO vowels (*mɪɾdɪn*) and سفر is
+ * *safar*, an ordinary two-vowel word written with neither. One epenthesis after the first consonant is
+ * right that a vowel is missing and wrong about how many and which — measured net negative at every
+ * quality against the audio (ɪ 52/500, i 133/419, e 160/392, ə 106/446).
+ */
+describe("Central Kurdish — the bizroke lexicon", () => {
+    test("a lexicon word gets its unwritten vowel", () => {
+        expect(phonemizeWord("کرد")).toBe("kɪɾd");
+        expect(phonemizeWord("گشت")).toBe("ɡɪʃt");
+        expect(phonemizeWord("من")).toBe("mɪn");
+        expect(phonemizeWord("کوردستان")).toBe("kuɾdɪstaːn");
+        expect(phonemizeWord("مردن")).toBe("mɪɾdɪn"); // TWO vowels — beyond any single-epenthesis rule
+    });
+
+    /** ⚠ THE ENTRIES CHANGE THE VOWEL AND NOTHING ELSE. Every row differs from this engine's own rule
+     *  output by inserted /ɪ/ alone, so a hit can never rewrite the consonant skeleton — the builder
+     *  filters on exactly that, and it is what makes an outside source safe to consume here. */
+    test("the consonant skeleton is ours, not the source's", () => {
+        for (const w of ["کرد", "گشت", "کوردستان", "مردن"])
+            expect(phonemizeWord(w).replace(/ɪ/gu, "")).toBe(phonemizeWordRules(w));
+    });
+
+    /** ⚠ RULES-ONLY STAYS CLEAN, so the referee signal is non-circular the way bn/ps do it. */
+    test("the rule engine is untouched by the lexicon", () => {
+        expect(phonemizeWordRules("کرد")).toBe("kɾd");
+        expect(bizrokeLexiconHas("کرد")).toBe(true);
+        expect(bizrokeLexiconHas("زۆر")).toBe(false); // already has a written vowel
+    });
+
+    test("words with written vowels are unaffected", () => {
+        expect(phonemizeWord("زۆر")).toBe("zoːɾ");
+        expect(phonemizeWord("ماڵ")).toBe("maːɫ");
+        expect(phonemizeWord("ئێمە")).toBe("ʔeːma");
     });
 });

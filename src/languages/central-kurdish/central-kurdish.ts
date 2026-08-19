@@ -4,8 +4,8 @@
  * (ا→aː, ێ→eː, ۆ→oː, وو→uː, ی→iː) + the short /a/ (ە); only the short /ɪ/ (bizroke) is unwritten (epenthetic in
  * clusters) → not emitted here, and folded in the eval.
  *
- * ⚠ EMITTING IT WAS TRIED AND IS NET NEGATIVE — 2026-08-19, and the numbers are here so it is not tried a
- * third time. The cost of NOT emitting it is real and measurable: 634 corpus tokens across 54 word types
+ * ⚠ IT IS NOW SUPPLIED BY A LEXICON (`lexicon.tsv`, 2,517 entries), NOT BY A RULE. Emitting it by rule was
+ * tried first and is net negative at every quality; the numbers are kept below so it is not tried again. The cost of NOT emitting it is real and measurable: 634 corpus tokens across 54 word types
  * come out with NO NUCLEUS AT ALL (کرد *kɾd*, گشت *ɡʃt*, تر *tɾ*, من *mn*), 1.13% of the language, all of
  * them ordinary high-frequency words. Inserting one vowel after the first consonant removes every one of
  * them (1.13% → 0.00%). Against the audio, every quality is worse:
@@ -23,6 +23,23 @@
  * which. The recognizer agrees the vowel is usually AUDIBLE (between the ⟨k⟩ and the rhotic of کرد it hears
  * something in 71% of instances) but reports it as `e` 32, `a` 26, `i` 9, `ə` 7 and nothing 29 — no single
  * quality to insert. This wants a coverage lexicon of the Pashto `harakatLexicon` kind, not a rule.
+ *
+ * ⚠ THE LEXICON MEASURES WORSE AGAINST THE AUDIO AND IS SHIPPED ANYWAY — 148 rows closer, 2,231 further.
+ * That is the largest deliberate override in this repo, so the reasoning is spelled out:
+ *
+ *   · THREE INDEPENDENT HUMAN SOURCES AGREE THE VOWEL IS THERE, AND AGREE WHERE. AsoSoft (the lexicon's
+ *     source), wikipron and kaikki: تر is *t ɪ ɾ*, من is *m ɪ n*, مردن is *m ə ɾ d ə n* (two vowels, the
+ *     positions this lexicon gives), کوردستان is *k ʊ ɾ d ə s t aː n* (ours: kuɾdɪstaːn, same slot). They
+ *     differ only on QUALITY — ɪ against ə — which is precisely why `ckb.jsonc` folds `[əɪ] → ""`.
+ *   · THE RECOGNIZER UNDER-TRANSCRIBES THIS LANGUAGE. Its folded phone count is 0.929 of ours for ckb
+ *     against 0.987 for de and 0.998 for fr, so it is short by ~7% before anything is added; adding a
+ *     phone it does not emit is charged against us whether or not the phone is real.
+ *   · AND THE OUTPUT WAS NOT A VARIANT, IT WAS IMPOSSIBLE. ملیۆن came out *mljoːn* and درووست *dɾust* —
+ *     no nucleus, unsayable under any analysis. 1.13% → 0.19% of word tokens.
+ *
+ * The audio is one degraded witness against three human ones on a question — "does this word have a
+ * vowel" — that is not a matter of reader variation. If a later run finds the ASR was right, the lexicon
+ * is one file.
  *
  * ⚠ AND A LEXICON HERE MUST BE HOMOGRAPH-AWARE, which is the abjad's standing trap: a defectively-written
  * form can be several words, and a whole-word entry silently picks one. Sorani is BETTER placed than Arabic
@@ -42,6 +59,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { loadTsvMap } from "../../core/loadTsv.ts";
 import { renderNumber, spellDigits } from "../../core/numbers.ts";
 import { iranianNumberWords, type CkbNumbersDef } from "./numbers.ts";
 
@@ -59,8 +77,37 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 // Letters that carry a vowel (so an adjacent و/ی is a glide, not a syllabic vowel).
 const VOWEL_LETTERS = new Set(DEF.vowelLetters);
 
-/** Phonemize a single Sorani word to canonical IPA (full written vowels; the unwritten short /ɪ/ is not emitted). */
+/**
+ * The BIZROKE lexicon — the unwritten short /ɪ/, which no rule derives (see the header). Every entry
+ * differs from this engine's own rule output by inserted /ɪ/ and nothing else, so a hit changes only the
+ * vowel and never the consonant skeleton.
+ *
+ * ⚠ APPLIED ON THE SHIPPED PATH ONLY, never inside `phonemizeWordRules`, which keeps the referee signal
+ * non-circular the way `bengali.ts` and `pashto.ts` do. Here it also happens to be non-circular by source:
+ * the lexicon is built from AsoSoft, and the referees are wikipron and kaikki.
+ */
+let LEXICON: ReadonlyMap<string, string> | undefined;
+const lexicon = (): ReadonlyMap<string, string> =>
+    (LEXICON ??= loadTsvMap(import.meta.url, "lexicon.tsv", (v) => v, { optional: true }));
+
+/** Whether the bizroke lexicon knows this word. ⚠ EXPORTED because absence is invisible in the output —
+ *  a rule-derived word and a lexicon hit look identical, so an eval cannot otherwise separate them. */
+export function bizrokeLexiconHas(word: string): boolean {
+    return lexicon().has(word);
+}
+
+/** Pure RULE-ENGINE word→IPA (no lexicon): the honest signal for the referee eval. */
+export function phonemizeWordRules(word: string): string {
+    return scanWord(word);
+}
+
+/** Phonemize a single Sorani word to canonical IPA. The bizroke comes from the lexicon; everything else
+ *  from the scan. */
 export function phonemizeWord(word: string): string {
+    return lexicon().get(word) ?? scanWord(word);
+}
+
+function scanWord(word: string): string {
     const w = [...word.replace(/[‌ـ]/gu, "")]; // strip ZWNJ + tatweel
     const toks: string[] = [];
     for (let i = 0; i < w.length; i++) {
