@@ -112,6 +112,34 @@ describe("numeral register (corpus rendering policy)", () => {
         expect(words("na 1998", "ln")).toContain("mille neuf cent quatre-vingt-dix-huit");
     });
 
+    /**
+     * ⚠ A GROUPED NUMBER USES ONE SEPARATOR THROUGHOUT. With `,` and the spaces interchangeable within a
+     * single run, two 6-digit figures sitting side by side in a table matched as ONE 12-digit number.
+     */
+    test("two grouped numbers side by side stay two numbers", () => {
+        const w = words("783,562 300,948 x", "nya");
+        expect(w).toContain("seven hundred eighty three thousand five hundred sixty two");
+        expect(w).toContain("three hundred thousand nine hundred forty eight");
+        expect(w).not.toContain("billion");
+        // …while genuine space grouping, which is how `ln` writes its thousands, still joins.
+        expect(words("104 500 ya", "ln")).toContain("cent quatre mille cinq cents");
+    });
+
+    /**
+     * ⚠ SENTENCE PUNCTUATION IS NOT A DECIMAL POINT. Refusing any run that touched `.` or `,` also refused
+     * every run at the end of a clause — 28 rows of ordinary cardinals, 31 of the 33 affected moving closer
+     * to the audio once read. Only `.`/`,` FOLLOWED BY A DIGIT is a decimal.
+     */
+    test("a run at the end of a clause is read, not declined", () => {
+        expect(words("na 1992.", "ln")).toContain("mille neuf cent quatre-vingt-douze");
+        expect(words("mu 1998, ndipo", "nya")).toContain("19 98");
+        expect(words("kv62. kv62", "sn")).toContain("sixty two");
+        // …and the decimal readings this lookahead exists for are still refused.
+        expect(words("ezingu-1,5", "zu")).toBe("ezingu-1,5");
+        expect(words("versie 1.5", "sn")).toBe("versie 1.5");
+        expect(words("11:20", "zu")).toBe("11:20");
+    });
+
     test("text with no digits is returned unchanged", () => {
         expect(words("makore apfuura", "sn")).toBe("makore apfuura");
     });

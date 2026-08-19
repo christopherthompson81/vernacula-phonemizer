@@ -38,7 +38,6 @@ const NUMERAL_REGISTER: Readonly<Record<string, "en" | "fr">> = {
     sn: "en", nya: "en", zu: "en", xh: "en", ln: "fr",
 };
 
-/** A bare digit run. Grouping separators and a decimal point stay inside it so the target's own compositor
 /**
  * A bare digit run, with grouping separators kept inside it so the target's compositor sees `1,234` whole.
  *
@@ -52,7 +51,17 @@ const NUMERAL_REGISTER: Readonly<Record<string, "en" | "fr">> = {
  *     decimal     `1.5`, `1:09.2`                             its own reading in every language
  *
  * So a separator only joins when EXACTLY three digits follow it — `1,5` and `2,8` fall through untouched —
- * and a run adjacent to `:` or `.` is refused outright.
+ * and a run whose next character makes it a clock or a decimal is refused outright.
+ *
+ * ⚠ A GROUPED NUMBER USES ONE SEPARATOR THROUGHOUT, and saying so is what keeps two of them apart. With the
+ * separators interchangeable, `783,562 300,948` — two 6-digit figures in a table — matched as a SINGLE
+ * 12-digit run and read as *seven hundred eighty three billion…*. Anchoring the separator to whichever one
+ * the run opened with splits it back into two numbers. 4 rows, all of this shape.
+ *
+ * ⚠ SENTENCE PUNCTUATION IS NOT A DECIMAL POINT. The lookahead used to refuse any run touching `.` or `,`,
+ * which also refused every run at the end of a clause — `na 1992.`, `kv62.`, `1469-1539.` — 28 rows of
+ * ordinary cardinals declined for a shape they did not have. Only `.`/`,` FOLLOWED BY A DIGIT is a decimal;
+ * `:` stays refused unconditionally, since a trailing colon in this corpus is a clock.
  *
  * ⚠ DECLINING THESE COSTS ~115 ROWS ON THE DISTANCE METRIC, AND IS STILL RIGHT. Reading them as bare
  * cardinals scores BETTER than declining — for clock times, 102 rows beat the baseline against 16 — because
@@ -66,8 +75,8 @@ const NUMERAL_REGISTER: Readonly<Record<string, "en" | "fr">> = {
  * The opportunity is real and quantified: a proper clock and decimal reading in the register language is
  * worth roughly 115 rows across the five wired languages.
  */
-const GROUPED = String.raw`\d{1,3}(?:[  ,]\d{3})+`;
-const DIGIT_RUN = new RegExp(String.raw`(?<![\d:.,])(?:${GROUPED}|\d+)(?![\d:.,])`, "gu");
+const GROUPED = String.raw`\d{1,3}(?:,\d{3})+|\d{1,3}(?:[  ]\d{3})+`;
+const DIGIT_RUN = new RegExp(String.raw`(?<![\d:.,])(?:${GROUPED}|\d+)(?![\d:])(?![.,]\d)`, "gu");
 
 const EN_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
     "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];

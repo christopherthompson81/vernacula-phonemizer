@@ -1352,3 +1352,50 @@ failing against a deliberately broken implementation before it counts.
 - **Adjacent 3-digit runs merge.** `783,562 300,948` is read as one 12-digit number, because the grouping
   rule accepts a space before three digits. 4 occurrences.
 - **~30 rows declined by the punctuation lookahead**, where a digit run is followed by sentence punctuation.
+
+## Run 21 — 2026-08-19 — the last two review items, both exact
+
+Both remaining #840 findings turned out to be enumerable rather than estimated, so each was fixed against a
+known row set rather than a guess.
+
+**1. Two grouped numbers merged into one.** `GROUPED` treated `,` and the space separators as
+interchangeable *within a single run*, so `783,562 300,948` — two 6-digit figures side by side — matched as
+one 12-digit number and read as *seven hundred eighty three billion…*. Exactly 4 rows, all this shape, all
+two 6-digit figures. Anchoring the separator to whichever the run opened with (`\d{1,3}(?:,\d{3})+` OR
+`\d{1,3}(?:[  ]\d{3})+`, never a mix) splits them. ⚠ Genuine space grouping had to survive: `ln` writes its
+thousands that way and there are **153 space-grouped runs** (`104 500`, `24 000`, `1 000`), so a fix that
+simply dropped the space separator would have been far more expensive than the bug.
+
+⚠ **AND `800 500` REMAINS UNRESOLVABLE.** Two adjacent 3-digit numbers and one space-grouped 6-digit number
+are the same string. The mixed-separator case is decidable and is now decided; the same-separator case is
+not, and no rule was invented for it.
+
+**2. Sentence punctuation read as a decimal point.** The trailing lookahead refused any run touching `.` or
+`,`, which also refused every run at the end of a clause — `na 1992.`, `kv62.`, `1469-1539.`,
+`ngo1624,inkampani` — **28 rows** of ordinary cardinals declined for a shape they did not have. Only
+`.`/`,` *followed by a digit* is a decimal; `:` stays refused unconditionally, a trailing colon in this
+corpus being a clock.
+
+Together, on the 33 rows they change:
+
+    lang    n     before → after     closer/further
+    ln     13   0.2850 → 0.2622        11 /  2
+    zu      6   0.4766 → 0.4036         6 /  0
+    sn      6   0.3196 → 0.2492         6 /  0
+    nya     4   0.3973 → 0.3129         4 /  0
+    xh      4   0.3922 → 0.3183         4 /  0
+    ALL    33   0.3527 → 0.2985        31 /  2
+
+⚠ **BOTH REGRESSIONS ARE FRENCH ORDINALS, AND ARE LEFT ALONE.** `ekeke ya 19.` is the *19th* century and
+`mbiu 21.` a clause-final age; French says *dix-neuvième*, not *dix-neuf*. Recognising an ordinal from
+Lingala context is a different problem from the one this change is solving, and 2 rows against 31 does not
+justify starting it here. Recorded rather than fixed.
+
+Whole digit-bearing corpus after both: mean 0.3160 → **0.3140**, better 2,938 → **2,946**, worse 312 → 313.
+
+Three more mutations, each caught by a different assertion: separators made interchangeable again, the old
+lookahead restored, and the decimal guard dropped entirely. Suite 251 files / 4,849 tests.
+
+**Nothing from the #840 review is now outstanding.** The register's remaining known gap is the one Run 19
+already quantified and declined on principle: clock times and decimals have no correct reading implemented
+in the register language, worth ~115 rows, and are refused rather than approximated.
