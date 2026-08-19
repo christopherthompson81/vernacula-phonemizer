@@ -28,8 +28,16 @@ having written this down.
 
 ```sh
 python3 tools/norwegian/build_nb_data.py --pron <nor030224NST.pron> --freq <no_50k.txt>
-NB_LEX=/tmp/nb_train.tsv .venv/bin/python -u tools/norwegian/train_nb_bilstm.py
+#   → /tmp/nb_train_stress.tsv  (the --train-out DEFAULT; note the _stress suffix)
+NB_LEX=/tmp/nb_train_stress.tsv NB_KEEP_STRESS=1 NB_SUBSAMPLE=0 \
+    .venv/bin/python -u tools/norwegian/train_nb_bilstm.py
 ```
+
+⚠ **All three environment settings are load-bearing** and the loader's defaults are wrong for a production
+retrain: `NB_LEX` defaults to `/tmp/nb_train.tsv` (a path the builder does not write), `NB_KEEP_STRESS`
+defaults to OFF — and nb's tag alphabet EMBEDS ˈ/ˌ, so training without it yields a tagger that cannot place
+stress — and `NB_SUBSAMPLE` defaults to **150000**, i.e. a quarter of the ~630k lexicon. The first draft of
+this file omitted all three and would have produced a materially worse model while calling it a reproduction.
 
 ⚠ `src/languages/norwegian/nb-lexicon.tsv` is the ~38k SHIPPING subset, **not** the ~814k training dump.
 Training on it produces a smaller, different model — do not substitute it.

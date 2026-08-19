@@ -34,10 +34,16 @@ for lang in "${@:-none}"; do case "$lang" in
       get https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/da/da_50k.txt SKIP da_50k.txt
       tar xzf "$DEST/da_leksikon.tar.gz" -C "$DEST" && echo "  → $(find "$DEST" -name 'dan*NST.pron' | head -1)" ;;
   he) echo "he — Nakdimon hebrew_diacritized (MIT; PERMISSIVE SUBSET ONLY — see CORPORA.md)"
+      # ⚠ CHECK OUT THE PIN, do not merely print it. The first draft cloned HEAD and echoed the recorded hash
+      # beside it, which reads like verification and is not: a corpus that has moved since would rebuild a
+      # DIFFERENT model under the same instructions. HE_REF=HEAD to deliberately take current upstream.
+      ref="${HE_REF:-1211c8f3edafd601922d4be473f678ff79c5a12c}"
       [ -d "$DEST/hebrew_diacritized" ] || git clone -q https://github.com/elazarg/hebrew_diacritized "$DEST/hebrew_diacritized"
-      echo "  ok  hebrew_diacritized @ $(git -C "$DEST/hebrew_diacritized" rev-parse --short HEAD)" \
-           "(pinned in CORPORA.md: 1211c8f)" ;;
+      git -C "$DEST/hebrew_diacritized" fetch -q --depth 1 origin "$ref" 2>/dev/null || git -C "$DEST/hebrew_diacritized" fetch -q origin
+      git -C "$DEST/hebrew_diacritized" checkout -q "$ref"
+      echo "  ok  hebrew_diacritized @ $(git -C "$DEST/hebrew_diacritized" rev-parse --short HEAD) (pin checked out)" ;;
   fa) echo "fa — HomoRich (CC0)"
+      command -v huggingface-cli >/dev/null || { echo "  need: pip install huggingface_hub[cli]" >&2; exit 3; }
       huggingface-cli download MahtaFetrat/HomoRich-G2P-Persian --repo-type dataset --local-dir "$DEST/homorich" >/dev/null
       echo "  ok  $(find "$DEST/homorich" -name '*.parquet' | head -1)" ;;
   km) echo "km — kmwiki dump (CC BY-SA). ⚠ 'latest' is NOT the dump the committed model saw."

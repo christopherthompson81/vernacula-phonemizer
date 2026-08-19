@@ -2885,3 +2885,36 @@ Four models had been left carrying a known defect purely for want of a download 
 LICENCE reasons — the Urdu HF/Dakshina silver and the Khmer aakanee dictionary are CC BY-NC-SA. A blanket
 "commit the training data" would push encumbered material to a public remote. The record of how to fetch and
 rebuild is the substitute, and it is the thing whose absence actually cost us.
+
+## Run 46 — 2026-08-19 — PR review: the rebuild doc's own command was wrong
+
+Reviewing #843. The file's entire purpose is "follow this and you get the committed model back", so the review
+that matters is checking each documented command against the script it invokes rather than re-reading prose.
+
+**1. The nb rebuild command was wrong three ways, and would have shipped a worse model as a "reproduction".**
+
+    documented:  NB_LEX=/tmp/nb_train.tsv .venv/bin/python -u tools/norwegian/train_nb_bilstm.py
+    correct:     NB_LEX=/tmp/nb_train_stress.tsv NB_KEEP_STRESS=1 NB_SUBSAMPLE=0 …
+
+`build_nb_data.py --train-out` defaults to `/tmp/nb_train_**stress**.tsv`, a path the documented command does
+not name. `NB_KEEP_STRESS` defaults OFF and **nb's tag alphabet embeds ˈ/ˌ** — training without it yields a
+tagger that cannot place stress at all. `NB_SUBSAMPLE` defaults to **150000**, roughly a quarter of the ~630k
+lexicon. Every one of the loader's defaults is wrong for a production retrain, which is presumably why the
+trainer's own docstring spells all three out — and why copying the *builder* invocation without the *loader*
+environment was the easy mistake to make. The other five languages' commands were checked the same way and
+are correct (da's `DA_LEX` default already matches `--train-out`; km's `train_km_segmenter.py` needs
+`km-wordfreq.tsv` in its OUTDIR, which is committed).
+
+**2. `fetch_corpora.sh` claimed a pin it did not enforce.** The he branch cloned HEAD and echoed the recorded
+commit hash beside it — which reads like verification and is not. If upstream has moved, that rebuilds a
+DIFFERENT corpus under instructions that assert reproducibility. Now checks the ref out (`HE_REF=HEAD` to opt
+into current upstream deliberately). Verified: `hebrew_diacritized @ 1211c8f (pin checked out)`.
+
+**3. Failure paths exercised rather than assumed.** Corrupted an archive → `CHECKSUM MISMATCH`, exit 1; unknown
+corpus name → exit 2; no args → usage, exit 0. Also guarded the fa branch on `huggingface-cli` being installed
+instead of failing inside the download.
+
+**Method note.** A reproducibility document is executable prose, and the failure mode is that it looks right.
+Three of the four defects across this and Run 44 were things that *read* correctly — a pin that was printed
+not checked, a warning with the wrong number in it, a command with plausible defaults. Diff-reading does not
+catch those; running them does.
