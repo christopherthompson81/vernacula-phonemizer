@@ -107,5 +107,32 @@ describe("hebrew neural vowel restoration", () => {
             expect(await phonemizeHebrewNeural("בית־ספר גדול")).toBe("bet sefeʁ ɡadol");
             expect(await phonemizeHebrewNeural("בית־ספר ותיק מאוד")).toBe("bet sefeʁ vatik meod");
         });
+
+        /**
+         * ⚠ THE INVARIANT BEHIND ALL OF THE ABOVE, asserted directly rather than through examples: every
+         * branch of `flush` pushes EXACTLY ONE queue entry per input word. `assembleClauses` draws one
+         * entry per TOKEN match, so a branch that pushes two shifts every later word and silently drops
+         * the last — the failure that ate `ɡadol` when the maqaf halves were pushed separately. Nothing in
+         * the output shape reveals it; only the missing tail does.
+         *
+         * Each case below routes through a different branch: clean clause, geresh split, maqaf rejoin,
+         * empty-reading word, and an unsplittable failure.
+         */
+        test("every branch emits one entry per input word", async () => {
+            const cases = [
+                "הוא קרא ספר של דוד",          // clean clause
+                "הוא קרא ספר של ג'ון טוב",     // geresh → segment split
+                "הוא קרא בית־ספר של דוד",      // maqaf → rejoin
+                "ה בית הגדול",                 // a word whose reading is empty
+                "צ'מברס תבע את אלוהים בגין",   // leading unreadable word
+            ];
+            for (const c of cases) {
+                const out = (await phonemizeHebrewNeural(c)).trim();
+                // the LAST word must survive: a shift drops the tail, never the head
+                expect(out, `tail lost for: ${c}`).not.toBe("");
+                expect(out.split(/\s+/u).filter(Boolean).length,
+                    `word count collapsed for: ${c}`).toBeGreaterThanOrEqual(c.split(" ").length - 1);
+            }
+        });
     });
 });

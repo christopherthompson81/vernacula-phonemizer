@@ -72,8 +72,7 @@ export async function phonemizeHebrewNeural(input: string): Promise<string> {
         // whole reason clauses are batched — it is what resolves the homographs the module doc names (ספר
         // sefeʁ/sifeʁ, קרא kaʁa/koʁa) — so a word-at-a-time retry would recover the vowels and lose the
         // readings. `canRead` finds those words with NO model call, so this costs two or three inferences.
-        const unreadable = words.filter((w) => !tagger.canRead(w));
-        if (!unreadable.length) {
+        if (words.every((w) => tagger.canRead(w))) {
             // ⚠ NOTHING TO SPLIT ON, so do NOT re-issue the identical call. The model is deterministic and
             // the clause just failed; a retry is a guaranteed-wasted inference. The mismatch here is the
             // tagger predicting a SPACE tag mid-word, which no split can repair.
