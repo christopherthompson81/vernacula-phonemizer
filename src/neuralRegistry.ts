@@ -40,8 +40,25 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     // per-character BiLSTM restoring the WORD BOUNDARIES Khmer does not write: joining two words
     // corrupts the reading 54.6% of the time, measured on writer-typed U+200B junctions
     km: phonemizeKmNeural,
+    // ur: the rider EARNS its place here — 66.3% against sync's 64.2% on ur.cle-speech (n=5,667), with
+    // async-only-right 178 against sync-only 62. Measured, not assumed.
     ur: (t) => phonemizeRiderNeural(t, "ur"),
-    ps: (t) => phonemizeRiderNeural(t, "ps"),
+    // ⚠ `ps` IS DELIBERATELY ABSENT, so `phonemizeAsync` falls through to the sync engine. The same rider
+    // that helps Urdu is NET-NEGATIVE for Pashto, and it always was: `ps_neural_restoration_investigation.md`
+    // Run 11 measured it in 2026-07 (sync 45.3% / neural 44.0%) and its DECISION was "do NOT retrain/wire
+    // the neural" — but the entry stayed here, so the async path shipped the losing side. Re-measured
+    // 2026-08-19 across all NINE ps referees, sync is >= async on every one and worse on none:
+    //
+    //     pbt (Kandahari, the variety this engine targets)  79.4% / 79.4%   sync-only 0   async-only 0
+    //     kaikki-pus                                        72.3% / 71.7%   sync-only 10  async-only 3
+    //     kaikki-untagged                                   74.3% / 73.5%   sync-only 12  async-only 4
+    //     wikipron pbt / pbu / pst / pus                    ~0.5pp apart    sync-only 8   async-only 1
+    //
+    // ⚠ AND IT MATTERS MORE THAN THE HALF-POINT SUGGESTS, because the ASR corpus is built with
+    // `phonemizeAsync`: the rider was corrupting words the rules get right — تر t̪ˈər→t̪r, شک ʃˈək→ʃk,
+    // رنځ rənˈəd͡z→ksdɹ, کې kˈe→d̪ — i.e. deleting the zwarakay and, in places, the word. 381 of the
+    // corpus's 7,310 vowel-less Pashto tokens are this. The remaining 6,929 are a rules gap, tracked
+    // separately.
     // Western Punjabi (Shahmukhi) is registry code `pnb`, but the rider keys its Perso-Arabic
     // Punjabi as `pa` (the Gurmukhi `pa` is fully voweled → not a rider; it passes through sync).
     pnb: (t) => phonemizeRiderNeural(t, "pa"),

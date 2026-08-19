@@ -94,7 +94,8 @@ describe("pashto canonical IPA", () => {
         expect(phonemize("25", "ps")).toBe("pənd͡zˈə ˈojʃət̪"); // پنځه ویشت
         expect(phonemize("31", "ps")).toBe("ˈiʊ d̪ˈerəʃ"); // یو دېرش — units-first, no connector
         expect(phonemize("71", "ps")).toBe("ˈiʊ ojˈɑ"); // یو اویا
-        expect(phonemize("99", "ps")).toBe("nhˈə nˈoɪ"); // نهه نوی
+        // ⚠ نهه was *nhˈə — a vowel-less first syllable from the medial-⟨ه⟩ gap. [nəhə] is the reading.
+        expect(phonemize("99", "ps")).toBe("nəhˈə nˈoɪ"); // نهه نوی
     });
 
     test("numbers: hundreds, thousands, and the میلیون / میلیارد magnitudes", () => {
@@ -226,5 +227,44 @@ describe("pashto text normalization", () => {
         expect(phonemize("۱۹مه نېټه", "ps")).toBe("nˈoləsmə nˈeʈə"); // one word, not نولس + مه
         expect(phonemize("۲۵٪", "ps")).toContain("səlnˈə");
         expect(phonemize("۷۸.۸", "ps")).toContain("aʔʃˈɑrjə"); // اعشاريه — the ع is [ʔ], per this g2p
+    });
+});
+
+/**
+ * NO WORD MAY COME OUT WITHOUT A NUCLEUS. Pashto leaves its short vowels unwritten and the engine stands a
+ * default zwarakay [ə] in, but that rule is conditioned on a FOLLOWING consonant — so it could not serve a
+ * word's last consonant, and the ⟨ه⟩ branch returned [h] without ever consulting it. 11.25% of the corpus's
+ * Pashto word tokens were unpronounceable; after these two guards, 0.10%.
+ *
+ * ⚠ The check that found this needs no referee and no audio, which matters here more than anywhere: Pashto
+ * is a macro-language whose referees are multi-dialectal, and `pashto.ts` warns that its referee score is
+ * substantially circular. *هم* is [ham] in Kandahari, Yusufzai and Wazirwola alike and *hm* is a possible
+ * reading in none of them.
+ */
+describe("Pashto — every word has a nucleus", () => {
+    test("a one-consonant word takes the zwarakay", () => {
+        // ⟨د⟩, the genitive particle, is the commonest word in Pashto — 4,415 corpus tokens, all bare *d̪*.
+        expect(phonemizeWord("د")).toBe("d̪ˈə");
+    });
+
+    test("a medial ⟨ه⟩ is a consonant and takes the zwarakay like one", () => {
+        expect(phonemizeWord("هم")).toBe("hˈəm");
+        expect(phonemizeWord("هر")).toBe("hˈər");
+        expect(phonemizeWord("مهم")).toBe("məhˈəm");
+        expect(phonemizeWord("بهر")).toBe("bəhˈər");
+    });
+
+    /** ⚠ A WORD-FINAL ⟨ه⟩ IS THE VOWEL ITSELF (ښه→ʂə) and must not gain a second one — that exclusion is
+     *  the reason the medial case was skipped, and narrowing it to word-final is the fix. */
+    test("a word-final ⟨ه⟩ is still the vowel, not [h] plus one", () => {
+        expect(phonemizeWord("ښه")).toBe("ʂˈə");
+        expect(phonemizeWord("لاره")).toBe("lˈɑrə");
+    });
+
+    test("ordinary words are untouched", () => {
+        expect(phonemizeWord("کور")).toBe("kˈor");
+        expect(phonemizeWord("بند")).toBe("bˈand̪");
+        expect(phonemizeWord("پښتو")).toBe("paʂt̪ˈo");
+        expect(phonemizeWord("لاس")).toBe("lˈɑs");
     });
 });

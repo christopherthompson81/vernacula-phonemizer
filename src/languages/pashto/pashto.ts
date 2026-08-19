@@ -136,7 +136,17 @@ function g2p(word: string): string {
         // ه / ھ: word-final → the schwa [ə] (ښه→ʂə); before a consonant when it can't be a vowel → [h].
         if (ch === HE || ch === HE_DO) {
             if (i === n - 1 && out && !endsInVowel(out)) out += "ə";
-            else out += "h";
+            else {
+                // ⚠ A MEDIAL ⟨ه⟩ IS A CONSONANT AND TAKES THE ZWARAKAY LIKE ONE. This branch emitted [h] and
+                // returned, so a word whose only other letters are consonants came out with NO NUCLEUS AT
+                // ALL: هم *hm, هر *hr, مهم *mhm, بهر *bhr, ذهن *zhn — unpronounceable in any dialect. 370
+                // corpus tokens. The condition mirrors the consonant branch below.
+                out += "h";
+                const nx = s[i + 1];
+                if (nx !== undefined && !isVowelCarrier(nx) && HARAKAT[nx] === undefined
+                    && nx !== DEF.sukun && !(nx === HE || nx === HE_DO) && nx in C)
+                    out += INH;
+            }
             i++;
             continue;
         }
@@ -216,13 +226,35 @@ function g2p(word: string): string {
             else if (hk !== undefined) { out += hk; i++; }
             else {
                 // A following vowel-carrier letter is the nucleus; otherwise insert the default short vowel [ə].
+                // ⚠ ⟨ه⟩ IS EXCLUDED ONLY WHEN IT IS WORD-FINAL, where it IS the vowel (ښه→ʂə) and an
+                // inherent vowel before it would double up. A MEDIAL ⟨ه⟩ is [h], an ordinary consonant, and
+                // skipping the zwarakay before it is what left مهم as *mhm.
                 const next = s[i];
-                if (next !== undefined && !isVowelCarrier(next) && next !== HE && next !== HE_DO)
-                    out += INH;
+                const finalHe = (next === HE || next === HE_DO) && i === n - 1;
+                if (next !== undefined && !isVowelCarrier(next) && !finalHe) out += INH;
             }
             continue;
         }
         i++; // unknown / diacritic → skip
+    }
+    // ⚠ A ONE-CONSONANT WORD CANNOT REACH THE ZWARAKAY RULE, because that rule is conditioned on a
+    // FOLLOWING consonant — so it has nothing to attach to and the word comes out with no nucleus at all.
+    // That is not a rare corner: ⟨د⟩, the genitive particle, is the single commonest word in Pashto and was
+    // rendering as bare *d̪* in 4,415 corpus tokens (91% of every vowel-less Pashto token). It is [də].
+    //
+    // ⚠ SCOPED TO ONE CONSONANT ON PURPOSE. A general "no nucleus → append ə" guard would also rewrite
+    // ⟨کړ⟩, which `lexicon.tsv` sukun's to کْړ deliberately, and loans like ⟨بزنس⟩ where the missing vowels
+    // are interior rather than final. Those are a different problem and are left to the lexicon.
+    //
+    // ⚠ AND IT COSTS THE ALPHABET, WHICH IS WHY THE REFEREE LOOKS WORSE THAN IT IS. wikipron lists every
+    // letter as a headword against its bare consonant (⟨ب⟩ = b, ⟨ت⟩ = t …), so this guard "loses" 39 of
+    // them and the raw score reads 69.6% → 67.5%. Excluding letter names — which is the methodology
+    // `ps_neural_restoration_investigation.md` Run 11 already used, "ex letter-names, 1306 words" — it is
+    // **71.7% → 72.7%**, and kaikki-pus 72.3% → 73.5% with the Kandahari-tagged slice flat at 79.4%.
+    // The trade is 4,415 corpus tokens of the genitive particle against citation forms of the alphabet.
+    if (out && !/[aeiouɑɐɒɔəɛɪʊʌeo]/u.test(out)) {
+        const letters = [...s].filter((c) => c in C || c === HE || c === HE_DO);
+        if (letters.length === 1) out += INH;
     }
     return out.normalize("NFC");
 }

@@ -1024,3 +1024,57 @@ noise, but with no case for the change. Reverted: engine, goldens, and the claim
 ⚠ **The lesson is not "check for circularity", which Run 11 already said. It is that a NEW measurement built
 from a source already feeding the lexicon is circular BY DEFAULT, and the tell is a suspiciously large win.**
 83.8% against a 71.8% baseline should have been the trigger to check, not to celebrate.
+
+## Run 18 — 2026-08-19 — the async path was shipping the losing side, and the vowel-less class is two rules
+
+Found by `output_anomalies.py` (no referee, no audio): **11.25% of the corpus's Pashto word tokens had no
+nucleus at all** — 7,310 of 65,005. That instrument matters more here than anywhere, because Pashto is a
+macro-language whose referees are multi-dialectal and imperfectly segregated, and Run 11 already showed the
+referee score is substantially circular. *هم* is [ham] in Kandahari, Yusufzai and Wazirwola alike; *hm* is a
+reading in none of them, so no dialect judgement is needed to call it wrong.
+
+### 1. The neural rider was wired for `ps` despite Run 11's own decision
+
+Run 11 measured the rider net-negative (sync 45.3% / neural 44.0%) and concluded **"DECISION: do NOT
+retrain/wire the neural"** — but the `ps` entry stayed in `neuralRegistry.ts`, so `phonemizeAsync` shipped
+it, and the ASR corpus is built with `phonemizeAsync`. Re-measured across all NINE ps referees:
+
+    referee                          sync      async     sync-only  async-only
+    kaikki-pbt (Kandahari, target)   79.4%     79.4%          0          0
+    kaikki-pus                       72.3%     71.7%         10          3
+    kaikki-untagged                  74.3%     73.5%         12          4
+    wikipron pbt/pbu/pst/pus        ~0.5pp apart              8          1
+
+Sync ≥ async on every one and worse on none. The rider was corrupting words the rules get right — تر
+*t̪ˈər*→*t̪r*, شک *ʃˈək*→*ʃk*, رنځ *rənˈəd͡z*→*ksdɹ*, کې *kˈe*→*d̪* — 381 of the 7,310.
+
+⚠ **AND THIS IS `ps`-ONLY, NOT A VERDICT ON THE RIDER.** The same model helps Urdu: on `ur.cle-speech`
+(n=5,667) async scores **66.3% against sync's 64.2%**, async-only-right 178 against sync-only 62. `ur`
+keeps its entry and now carries the number; `ps` is removed with the reason written down.
+
+### 2. The remaining 6,929 are two rule gaps, and 15 word types
+
+    4,415  د     -> d̪      the genitive particle, the commonest word in Pashto
+      370  هم هر مهم بهر ذهن زهر نهر  -> hm hr mhm …   medial ⟨ه⟩
+       30  کړ    -> kɻ      lexicon.tsv sukun's it to کْړ deliberately — left alone
+        ~8  loans and single letters
+
+- **A one-consonant word cannot reach the zwarakay rule**, which is conditioned on a FOLLOWING consonant.
+- **The ⟨ه⟩ branch emitted [h] and returned**, never consulting the zwarakay; and the consonant branch
+  excluded ⟨ه⟩ from insertion in *any* position, where only a WORD-FINAL ⟨ه⟩ is itself the vowel (ښه→ʂə).
+
+Both fixed. **11.25% → 0.10%** (7,310 → 67 vowel-less tokens).
+
+⚠ **AND THE REFEREE APPEARS TO DROP, WHICH IS THE ALPHABET.** wikipron lists every letter as a headword
+against its bare consonant, so the one-consonant guard "loses" 39 of them and the raw score reads
+69.6% → 67.5%. Excluding letter names — Run 11's own methodology, "ex letter-names, 1306 words" — it is
+**71.7% → 72.7%**, with kaikki-pus 72.3% → 73.5% and the Kandahari slice flat at 79.4%. The trade is 4,415
+corpus tokens of the genitive particle against citation forms of the alphabet. ⟨د⟩ is in that referee
+*twice*, once as the letter (ref `d`) and once as the word (ref `də`) — we now win the word and lose the
+letter.
+
+### Verdict on the tagger question
+
+**Not viable and not needed.** Run 11's negative result stands and this run strengthens it: the rider is
+strictly dominated for `ps` on every referee. The vowel-less class was never a restoration problem — it was
+15 word types and two conditionals, one of which is the commonest word in the language.
