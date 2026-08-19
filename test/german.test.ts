@@ -537,3 +537,27 @@ describe("German — post-vowel ⟨h⟩ at a prefix boundary", () => {
         expect(phonemizeWord("ruhig")).toBe("ʁˈuːɪç");
     });
 });
+
+/**
+ * ⚠ A COMPOUND THAT DECOMPOSES IS ALREADY SAFE FROM THE ⟨th⟩ QUESTION, and pinning that is what stops the
+ * medial extension from being re-proposed as "just add a compound detector". `phonemizeWord` calls
+ * `decompose()` and g2p's each morpheme SEPARATELY, so a word that splits never presents ⟨th⟩ as a unit:
+ * Gasthaus is read as "gast" + "haus". The words that regress under a medial rule are the ones decompose
+ * CANNOT split, and each is a lexicon-coverage gap (rat is under the ≥4 leading-constituent floor; trut,
+ * balsa, gänse are absent; heit strips only when the remainder is a known word).
+ */
+describe("German — compound decomposition already protects the ⟨th⟩ seam", () => {
+    test("a decomposing compound keeps its [h], because the halves are read separately", () => {
+        expect(phonemizeWord("gasthaus")).toBe("ɡˈasthaʊ̯s");
+        expect(phonemizeWord("kunsthändler")).toBe("kˈʊnsthɛndlɐ");
+        expect(phonemizeWord("achthundert")).toBe("ˈaxthʊndɐt");
+        expect(phonemizeWord("schönheit")).toBe("ʃˈøːnhaɪ̯t"); // ⟨heit⟩ strips: schön is a known word
+    });
+
+    test("the ones it cannot split are the ones a medial rule would break", () => {
+        // Correct TODAY only because the base rule pronounces h after any consonant.
+        expect(phonemizeWord("rathaus")).toContain("th"); // `rat` is 3 letters, under the split floor
+        expect(phonemizeWord("truthahn")).toContain("th"); // `trut` absent from lexicon.tsv
+        expect(phonemizeWord("vertrautheit")).toContain("th"); // `traut` absent, so ⟨heit⟩ cannot strip
+    });
+});

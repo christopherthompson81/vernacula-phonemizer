@@ -319,11 +319,25 @@ export function toSegments(word: string): Seg[] {
             // 34/52 — so the edges are a rule and the middle is not. Measured on the corpus: this costs
             // nothing and gains 88 rows (88 closer, 0 further).
             //
-            // Extending it medially scores 186 closer / 24 further, which is net positive and NOT taken:
-            // the 24 are ordinary German compounds plus English in German text (parenthood, south), and
-            // deciding those needs a compound detector — `lexicon.tsv` carries a `k` compound-constituent
-            // flag that could drive one — rather than a list of second elements, which German compounding
-            // would outrun.
+            // Extending it medially scores 186 closer / 24 further, net positive and NOT taken.
+            //
+            // ⚠ AND THE REASON IS NOT A MISSING COMPOUND DETECTOR, which is what this note used to say.
+            // One already exists and was already running when that was measured: `phonemizeWord` calls
+            // `decompose()` and g2p's each morpheme SEPARATELY, so a word that splits never presents ⟨th⟩
+            // as a unit at all — gasthaus is g2p'd as "gast" + "haus", kunsthändler as "kunst" + "händler",
+            // achthundert as "acht" + "hundert". Those are already safe and are not among the 24.
+            //
+            // The 24 are the words `decompose` CANNOT split, and every one is a lexicon-coverage gap rather
+            // than an algorithm gap:
+            //   · rathaus — `rat` is 3 letters and splitCompound floors a leading constituent at 4. That
+            //     floor is load-bearing (measured −143 on Afrikaans at 3), so it is not movable for this.
+            //   · truthahn, balsaholz, gänsehaut — `trut`, `balsa`, `gänse` are absent from lexicon.tsv.
+            //   · vertrautheit, bejahrtheit — ⟨heit⟩ IS a listed suffix, but it only strips when the
+            //     remainder is a known word: schön/frei/gesund/krank split, traut/bejahrt/mehr do not.
+            //   · parenthood, south, ninth — English inside German, where [θ] is right and neither tier helps.
+            // Widening lexicon.tsv is generated-data work (kaikki ∩ frequency), not a rule change, and the
+            // trade without it is bad in kind rather than in count: the 24 DELETE a consonant from ordinary
+            // nouns (Rathaus → *ʁaːtaʊ̯s*) while the 186 remove a spurious [h] from loanwords.
             //
             // ⚠ AND ⟨rh⟩ IS NOT THE SAME CASE, though it looks identical. Only 3 of 47 kaikki ⟨rh⟩ words
             // drop the h: Jahrhundert, Mehrheit, verhandlung, fieberhaft are the norm and Rhythmus the

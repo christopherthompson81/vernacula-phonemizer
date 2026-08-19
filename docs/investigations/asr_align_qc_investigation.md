@@ -1964,3 +1964,73 @@ Two were not, and one was worse than wrong:
   stress offset by the preceding nuclei: dvajset is lexicon-0 and enaindvajset is lexicon-3, which is
   0 + the three nuclei of "enain" — the arithmetic checks out against the entries we have, so the rule is
   known-good and simply not implemented. Left for its own change.
+
+## Run 30 — 2026-08-19 — the three open items; two land, and the third's premise was wrong
+
+### 1. Slovene compound stress — landed
+
+A compound takes its LAST element's own stress, shifted right by the nuclei in front of it. Checkable
+against the lexicon rather than inferred from the words it fixes: `dvajset` is stored at 0 and
+`enaindvajset` at 3 = 0 + the three nuclei of *enain*. Held out 4,000 polysyllabic lexicon words:
+
+    minsuf   covers   rule     penultimate on the SAME words   net
+       4     20.2%   63.8%               45.4%                 +3.73pp
+       5     10.2%   87.5%               46.5%                 +4.20pp
+       6      6.8%   96.3%               36.5%                 +4.05pp
+
+5 and 6 are within noise on net; **6** is taken for the reason `serbian.ts` gives for the same choice — a
+wrong rule prediction ASSERTS a stress, a fallback error is a default already known unreliable. Requiring
+the PREFIX to be a known word too (a stricter "real compound" test) collapses coverage to 3.6%: the
+prefixes here are bound forms (*petin-*, *štiriin-*) that are not words.
+
+It corrected four numerals the penultimate fallback had put a syllable late — *petintrídeset*,
+*štiriintrídeset*, *petinštírideset*, *triindevétdeset* — two of which were pinned as known-wrong goldens
+one run earlier.
+
+### 2. Slovene numeral-initial hyphen compounds — landed
+
+`normalize.ts` rule 11z joins them (36 corpus instances). ⚠ **THE OTHER TWO HYPHEN SHAPES WERE ALREADY
+CLAIMED UPSTREAM**, which is what lets the rule be blunt: a unit abbreviation (`360-km`, `35-mm`) is read
+by the unit tier and an inflectional ending (`1830-ih`, `5-ih`) by the case rules, both before this point.
+Checking that first is why the rule is four lines instead of a classifier. The ≥4-letter guard is the belt:
+every attested compound suffix is 4+ (krat, urne, letni, metrska, stopinjski, milimetrski), every ending
+and unit ≤3.
+
+The ×14 deferral is closed, and `slovenian.test.ts` now pins that the joined and split forms agree — the
+same assertion as before, but true by construction rather than by the absence of prosody.
+
+### 3. The German compound detector — IT ALREADY EXISTS, AND WAS ALREADY RUNNING
+
+⚠ **THE PREMISE OF THIS ITEM WAS WRONG AND I WROTE IT TWICE.** Runs 25 and 26 both concluded that the
+medial ⟨th⟩ extension (186 closer / 24 further) and the compound-boundary ⟨h⟩ loss "need a compound
+detector", and named `lexicon.tsv`'s `k` flag as the input for one. There is a full decomposer already —
+`morphology.ts` over `core/germanicMorphology.ts` — `phonemizeWord` calls it and g2p's each morpheme
+SEPARATELY, and it was doing so during the 186/24 measurement. A word that splits never presents ⟨th⟩ as a
+unit at all: *Gasthaus* is read as "gast" + "haus", *Kunsthändler* as "kunst" + "händler", *achthundert*
+as "acht" + "hundert". Those are already safe and are not among the 24.
+
+The 24 are exactly the words `decompose` cannot split, and every one is a LEXICON-COVERAGE gap:
+
+    rathaus                  `rat` is 3 letters; splitCompound floors a leading constituent at 4, and
+                             that floor is load-bearing (measured −143 on Afrikaans at 3)
+    truthahn, balsaholz,     `trut`, `balsa`, `gänse` absent from lexicon.tsv
+      gänsehaut
+    vertrautheit,            ⟨heit⟩ IS a listed suffix but strips only when the remainder is a known word:
+      bejahrtheit            schön/frei/gesund/krank split, traut/bejahrt/mehr do not
+    parenthood, south,       English inside German, where [θ] is right and no tier helps
+      ninth
+
+**So the extension stays unshipped, for a better reason than before.** Widening `lexicon.tsv` is
+generated-data work (kaikki ∩ frequency), not a rule change. And the trade is bad in KIND, not merely in
+count: the 24 DELETE a consonant from ordinary nouns (*Rathaus* → *ʁaːtaʊ̯s*) while the 186 remove a
+spurious [h] from loanwords. By the project's own test — would a professional reader ever say this? — the
+24 are misreadings and the 186 are variants.
+
+The `g2p.ts` note now says this instead of asking for a detector, and a test pins the mechanism so the
+item is not re-proposed a third time.
+
+⚠ **THE LESSON FOR MYSELF: I ASKED FOR A TOOL WITHOUT CHECKING WHETHER IT EXISTED**, in two consecutive
+runs, in a file whose sibling module imports that very tool eight lines from the code I was editing. The
+same failure the `south_slavic_stress_sources_investigation.md` header records for the stress audit — "the
+grep found nothing" promoted to "the data does not exist" — arriving as "the fix needs X" promoted to
+"X does not exist".
