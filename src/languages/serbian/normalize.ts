@@ -18,10 +18,33 @@
  * entry — Serbian writes `1,5 километара`, the genitive plural, which is where `numValue` already maps a
  * fraction.
  *
+ * ⚠ INITIALISMS ARE NOW SPELLED OUT, BUT NOT FOR THE REASON A FIRST PASS SUGGESTED. This file used to
+ * defer them: "whether Serbian reads a foreign Latin acronym with Serbian or English letter names is a
+ * LEXICAL fact, and inventing it would be confidently wrong rather than merely raw." That caution was
+ * right, and better founded than it looked.
+ *
+ * Hand-decoding the first occurrence of a dozen acronyms gave Serbo-Croatian names 10 times against English
+ * 3 — DVD *de-ve-de*, GPS *ge-pe-es*, GMT *ge-em-te*, UTC *u-te-ce*, SSSR *es-es-es-er*. ⚠ **COUNTING THE
+ * WHOLE CORPUS INSTEAD REVERSES IT**: English names are the majority in every variety —
+ *
+ *     hr  Serbo-Croatian 15, English 22        sr  SC 7, English 15        bs  SC 11, English 12
+ *
+ * and the varieties differ from each other on the same token: `sr` says *di-vi-di* for DVD where `hr` says
+ * *de-ve-de*, `bs` says *dʒi-pi-es* for GPS where `hr` says *ge-pe-es*. A hand-picked first-occurrence
+ * sample is not a measurement, and this one pointed the wrong way.
+ *
+ * ⚠ SO THE WIN IS SPELLING OUT AT ALL, NOT THE CHOICE OF NAMES. `DVD` reached the g2p as *dʋd* — no vowel,
+ * unpronounceable, wrong under EITHER convention — and any letter-by-letter reading is far closer to what
+ * the reader says than that cluster is: *de-ve-de* against *di-vi-di* differs in two vowels, *dʋd* differs
+ * in everything. Measured, that is 171 rows closer against 141 further across the three (hr 76/50,
+ * sr 36/48, bs 59/43) — thin, and the thinness is the English-name split showing through. The
+ * Serbo-Croatian names are used because they are the native default, not because the corpus prefers them.
+ *
+ * ⚠ AND THE NAMES ARE NOT SLOVENE'S: a stop or ⟨v z⟩ takes a following -e (*be ce de ge pe te ve ze*), a
+ * continuant a preceding e- (*ef el em en er es eš*), a vowel is itself. sl's uniform *be ce de … se* would
+ * be wrong on half the alphabet.
+ *
  * Deliberately absent:
- *   · INITIALISMS. Latin acronyms (FBI, GPS, CCTV) reach the g2p as unreadable clusters, but whether Serbian
- *     reads a foreign Latin acronym with Serbian or English letter names is a LEXICAL fact, and inventing it
- *     would be confidently wrong rather than merely raw. No `acronymLetters`/`letterName` data is declared.
  *   · `Св.` — the saint's name occurs in three different CASES, and one expansion cannot serve all three.
  *   · Roman numerals arrive already converted to digits at the registry seam (sr is not in `ROMAN_NATIVE`),
  *     so the roman-vs-initialism ordering hazard cannot arise here.
@@ -30,6 +53,7 @@
  * characters and finds none against Cyrillic — the trap that made `core/initialisms.ts` a total no-op for
  * Russian (США → [sʂa]).
  */
+import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -431,7 +455,9 @@ export function normalizeSerbian(input: string): string {
     s = s.replace(/(?<=\d)\s?[x×]\s?(?=\d)/gu, " puta ");
     s = s.replace(/(^|[\s(])\+\s?(\d)/gu, "$1plus $2");
 
-    return s;
+    // 12) INITIALISMS, LAST — after every numeric rule, so a spelled-out letter run can no longer be
+    //     mistaken for one of their operands. See the header for the audio attestation.
+    return normalizeSerbianInitialisms(s);
 }
 
 /** Integer part of a Serbian-written number ("3,50" → 3), for the local count-agreement calls. */
@@ -451,4 +477,65 @@ function replaceEra(words: string): (m: string, sp: string, next: string) => str
         if (/\p{Lu}/u.test(next)) return `${words}.${sp}${next}`;
         return `${words}${sp}${next}`;
     };
+}
+
+
+// ---------------------------------------------------------------------------------------------------
+// INITIALISMS — see the header for the attestation
+// ---------------------------------------------------------------------------------------------------
+
+/** Serbo-Croatian letter names, both scripts. A stop or ⟨v z⟩ takes a following -e; a continuant takes a
+ *  preceding e-; a vowel is itself. Attested against the corpus audio — see the header. */
+const LETTER_NAME: Readonly<Record<string, string>> = {
+    a: "a", b: "be", c: "ce", č: "če", ć: "će", d: "de", đ: "đe", e: "e", f: "ef", g: "ge",
+    h: "ha", i: "i", j: "je", k: "ka", l: "el", m: "em", n: "en", o: "o", p: "pe", r: "er",
+    s: "es", š: "eš", t: "te", u: "u", v: "ve", z: "ze", ž: "že",
+    // ⚠ NOT IN THE NATIVE ALPHABET but present in every corpus that writes a foreign acronym.
+    q: "ku", w: "dublve", x: "iks", y: "ipsilon",
+    // Cyrillic, same names — `sr` writes both scripts and the pass is keyed on the LETTER.
+    а: "a", б: "be", ц: "ce", ч: "če", ћ: "će", д: "de", ђ: "đe", е: "e", ф: "ef", г: "ge",
+    х: "ha", и: "i", ј: "je", к: "ka", л: "el", м: "em", н: "en", о: "o", п: "pe", р: "er",
+    с: "es", ш: "eš", т: "te", у: "u", в: "ve", з: "ze", ж: "že",
+};
+
+/**
+ * Serbo-Croatian phonotactics for the OOV test. ⚠ GENEROUS ON PURPOSE, and more so than the Slovene
+ * sibling's: BCS licenses onsets no other language here does (*mn* mnogo, *pš* pšenica, *tk* tko, *zv*
+ * zvijezda, *hlj* hljeb), so policing clusters would reject ordinary vocabulary. The work is done by the
+ * NO-VOWEL test — DVD, GPS, GMT, TV, VPN, DNK, BDP, SSSR are all vowel-less — and by the coda test.
+ *
+ * ⚠ AND SYLLABIC ⟨r⟩ IS WHY THE RUN TEST CANNOT BE TIGHTENED. *krv*, *smrt*, *prst*, *crn* are ordinary
+ * words whose nucleus is an ⟨r⟩; the shared test already exempts a run containing a liquid, which is
+ * exactly what keeps those out of this net.
+ */
+export const isUnreadableSerbian = makeUnreadableTest({
+    vowels: /[aeiouаеиоу]/u,
+    legalOnsets: new Set([
+        "bl", "br", "cr", "cv", "čl", "čr", "čv", "dj", "dr", "dv", "fl", "fr", "gl", "gn", "gr",
+        "hl", "hr", "hv", "jd", "kl", "kn", "kr", "kt", "kv", "ml", "mn", "mr", "pč", "pl", "pn",
+        "pr", "ps", "pš", "pt", "sf", "sk", "sl", "sm", "sn", "sp", "sr", "st", "sv", "šć", "šk",
+        "šl", "šm", "šn", "šp", "št", "šv", "tk", "tl", "tr", "tv", "vl", "vr", "zb", "zd", "zg",
+        "zl", "zm", "zn", "zr", "zv", "žd", "žl", "žm", "žv",
+    ]),
+    legalCodas: new Set([
+        "jd", "jn", "jt", "kt", "lj", "ls", "lt", "mp", "nc", "nd", "ng", "nj", "nk", "ns", "nt",
+        "rc", "rd", "rf", "rk", "rn", "rs", "rt", "rv", "rz", "sk", "sl", "sm", "sn", "sp", "st",
+        "šć", "št", "zd", "zm", "zn",
+    ]),
+    digraphs: new Set(["dž", "lj", "nj"]),
+});
+
+/**
+ * Spell an all-caps letter run. ⚠ RUNS LAST in `normalizeSerbian`, after the number and abbreviation steps,
+ * for the reason `core/initialisms.ts` states: a Roman numeral is an all-caps letter run too. Serbian is
+ * not in `ROMAN_NATIVE`, so `core/roman.ts` has already converted those to digits at the registry seam —
+ * the hazard cannot arise here, and the ordering is kept anyway so it cannot start to.
+ */
+export function normalizeSerbianInitialisms(text: string): string {
+    return makeInitialismNormalizer({
+        letterName: (l) => LETTER_NAME[l],
+        acronymLetters: new Set(MANIFEST.acronymLetters ?? []),
+        isRecorded: () => false,
+        isUnreadable: isUnreadableSerbian,
+    })(text);
 }

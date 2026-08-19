@@ -20,6 +20,11 @@
     // ⟨đ⟩ directly, and the native ⟨d⟩+⟨j⟩ sequence across a prefix boundary (od·jek→od͡jek, pod·jednako) is far more
     // common than the ASCII ⟨dj⟩-for-đ fallback — so ⟨dj⟩ scans as two phonemes. (The ⟨dž⟩/⟨nj⟩ prefix-boundary
     // cases nad·živeti / in·jekcija stay a small residual — a prefix guard would break odžak/konj/konjak.)
+    // Vowel-bearing runs still spelled out letter by letter — the class the phonotactic test cannot
+    // derive. Each is ATTESTED in the corpus audio with Serbo-Croatian letter names: UTC *u-te-ce*,
+    // ADT *a-de-te*, AOL *a-o-el*, SSSR *es-es-es-er*. `sad` is the country (SAD = USA) and is the
+    // one collision to watch — it is also the adverb "now", so it is DELIBERATELY ABSENT.
+    "acronymLetters": ["utc", "adt", "aol", "sssr", "nsa", "gmt", "eu", "un", "ai"],
     "digraphs": { "dž": "d͡ʒ", "lj": "ʎ", "nj": "ɲ" },
 
     // Single letters → IPA. Both scripts in one table (a word is one script; the maps don't collide). Every value

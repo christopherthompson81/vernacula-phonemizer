@@ -142,7 +142,8 @@ describe("Bosnian text normalization", () => {
         // `Program je počeo u 20:30 sati po lokalnom vremenu (15:00 UTC).` — one clock with the noun and
         // one without, in the same sentence.
         expect(say("u 20:30 sati po lokalnom vremenu (15:00 UTC)"))
-            .toBe("u dʋˈaː˩˥deset sˈati i trˈiː˩˥deset minˈuː˩˥ta po lokˈalnom ʋrˈemenu pˈe˩˥tnaest sˈati utt͡s");
+        // ⚠ MOVED when the initialism pass landed: the run is now SPELLED OUT (see serbian/normalize.ts).
+            .toBe("u dʋˈaː˩˥deset sˈati i trˈiː˩˥deset minˈuː˩˥ta po lokˈalnom ʋrˈemenu pˈe˩˥tnaest sˈati u te t͡se");
     });
 
     test("the hour guard keeps the corpus's football score out of the clock rule", () => {
@@ -288,7 +289,8 @@ describe("Bosnian text normalization", () => {
         expect(say("temperatura 35° i padavine")).toContain(" i ");
         expect(say("35° s vjetrom")).toContain(" s ");
         expect(say("35° od ekvatora")).toContain("stˈe˥˩peni od");
-        expect(say("MMF")).toBe("mmf");                 // and an initialism keeps its doubled letter
+        // ⚠ MOVED when the initialism pass landed: the run is now SPELLED OUT (see serbian/normalize.ts).
+        expect(say("MMF")).toBe("em em ef");                 // and an initialism keeps its doubled letter
         expect(say("James i dr. 1995")).toBe("jˈames i dr . xˈiʎadu dˈe˥˩ʋetsto deʋedˈe˩˥set peː˥˩t");
     });
 

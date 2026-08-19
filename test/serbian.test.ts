@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { phonemize } from "../src/index.ts";
 import { accentLexiconHas, phonemizeWord, createSerbian } from "../src/languages/serbian/serbian.ts";
 
 // Canonical-IPA goldens for Serbian / српски (sr) — South Slavic, DUAL SCRIPT (Cyrillic + Gaj's Latin), fully
@@ -176,9 +177,11 @@ describe("Serbian normalization", () => {
         //   stress.tsv and loses the pitch accent, the very defect this arm exists to prevent.
         expect(say("око 35° од екватора")).toContain("stˈe˥˩peni od");
         expect(say("35°C")).toContain("t͡sˈelzijusa");   // the scale arm still claims its own letter
-        // ⚠ INITIALISMS keep their doubled letters — see the hr degemination test.
-        expect(say("СССР")).toBe("sssr");
-        expect(say("SSSR")).toBe("sssr");   // both scripts, and the doubled letters survive
+        // ⚠ INITIALISMS keep their doubled letters — see the hr degemination test. The initialism pass now
+        //   spells the run out, so the property shows as THREE letter names rather than three ⟨s⟩: what the
+        //   degemination guard exists to prevent is *sr* / *es er*, one ⟨s⟩ swallowing the others.
+        expect(say("СССР")).toBe("es es es er");
+        expect(say("SSSR")).toBe("es es es er"); // both scripts, and all three ⟨s⟩ survive
     });
     // PRIMARY STRESS — lexical, from stress.tsv (kaikki/Wiktionary), shared with the hr and bs engines because
     // they import this g2p. Validated against the COMMITTED wikipron referee, which has carried the pitch accent
@@ -256,4 +259,58 @@ describe("Serbian normalization", () => {
         expect(phonemizeWord("stepeni")).toBe("stˈe˥˩peni"); // stȅpenī, from stepen
     });
 
+});
+
+/**
+ * INITIALISMS — `DVD` reached the g2p as *dʋd*, an unpronounceable cluster, in all three varieties.
+ *
+ * ⚠ THE WIN IS SPELLING OUT AT ALL, NOT THE CHOICE OF LETTER NAMES, and a first pass got that backwards.
+ * Hand-decoding a dozen acronyms suggested Serbo-Croatian names 10 to 3; counting the whole corpus reverses
+ * it — English names are the majority in every variety (hr 15/22, sr 7/15, bs 11/12), and the varieties
+ * disagree on the same token (`sr` *di-vi-di* for DVD where `hr` says *de-ve-de*). The old deferral's
+ * caution was right. What is NOT in doubt is that *dʋd* is wrong under either convention, and that any
+ * letter-by-letter reading is far closer to the audio than a vowel-less cluster. See normalize.ts.
+ */
+describe("Serbo-Croatian — initialisms, on the attested letter names", () => {
+    test("a vowel-less letter run is spelled out", () => {
+        expect(phonemize("DVD", "sr")).toBe("de ʋe de");
+        expect(phonemize("GPS", "sr")).toBe("ɡe pe es");
+        expect(phonemize("TV", "sr")).toBe("te ʋe");
+        expect(phonemize("SSSR", "sr")).toBe("es es es er");
+    });
+
+    /** ⚠ THE NAMES ARE NOT SLOVENE'S. A stop or ⟨v z⟩ takes a following -e, a CONTINUANT a preceding e-
+     *  (*es*, not *se*; *em*, not *me*), a vowel is itself — the native default. Copying the sibling's
+     *  uniform table would have been wrong on half the alphabet. */
+    test("continuants take the vowel FIRST", () => {
+        expect(phonemize("GMT", "sr")).toBe("ɡe em te"); // em, not me
+        expect(phonemize("AOL", "sr")).toBe("a o el"); //   el, not le
+    });
+
+    /** ⚠ ONE TABLE, THREE ENGINES. hr/bs run serbian.ts's g2p, and each has its OWN normalizer — the pass
+     *  was added to serbian/normalize.ts and `hr` was unaffected until it was wired there too. */
+    test("Croatian and Bosnian get the same reading", () => {
+        for (const l of ["hr", "bs"] as const) {
+            expect(phonemize("DVD", l)).toBe("de ʋe de");
+            expect(phonemize("UTC", l)).toBe("u te t͡se");
+        }
+    });
+
+    /** ⚠ ORDINARY VOWEL-LESS WORDS MUST SURVIVE. BCS takes its nucleus from a syllabic ⟨r⟩, so the words
+     *  that look like letter runs to a naive test are real vocabulary — and the shared unreadable test
+     *  exempts a run containing a liquid, which is what keeps them out. */
+    test("syllabic-r words and licit clusters are untouched", () => {
+        expect(phonemize("krv", "sr")).toBe("krː˥˩ʋ");
+        expect(phonemize("smrt", "sr")).toBe("smr˥˩t");
+        expect(phonemize("prst", "sr")).toBe("pr˥˩st");
+        expect(phonemize("pšenica", "sr")).toBe("pʃˈenit͡sa"); // an onset no other engine here licenses
+        expect(phonemize("tko", "hr")).toBe("tko˥˩");
+    });
+
+    /** ⚠ A PRONOUNCEABLE ALL-CAPS WORD IS NOT AN INITIALISM. `НАТО` is a word and `САД` is also the adverb
+     *  "now" — deliberately absent from `acronymLetters` for that collision. */
+    test("a pronounceable acronym is read as a word", () => {
+        expect(phonemize("НАТО", "sr")).toBe("nˈato");
+        expect(phonemize("САД", "sr")).toBe("sad");
+    });
 });

@@ -54,6 +54,7 @@
  * ⚠ Every boundary in this file is an explicit lookaround, never `\b`. `\b` is ASCII-defined and finds none
  * against `č ć š ž đ` or against Cyrillic — the trap that made `core/initialisms.ts` a no-op for Russian.
  */
+import { normalizeSerbianInitialisms } from "../serbian/normalize.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -631,7 +632,11 @@ export function normalizeBosnian(input: string): string {
     s = s.replace(/(?<![\p{L}\p{M}\p{Nd}])[-−–](?=\d)/gu, (m0: string, off: number, whole: string) =>
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "minus ");
 
-    return s;
+    // ⚠ INITIALISMS, LAST, AND SHARED WITH SERBIAN. hr/bs run serbian.ts's g2p, so they must run its
+    //   letter-name table too or the same `DVD` → *dʋd* cluster survives here — which it did: the pass was
+    //   added to serbian/normalize.ts and `hr` was unaffected until this line, because each variety has its
+    //   own normalizer. One table, three engines; see the attestation in serbian/normalize.ts's header.
+    return normalizeSerbianInitialisms(s);
 }
 
 /** Integer part of a Bosnian-written number ("3,50" → 3), for the local count-agreement calls. */

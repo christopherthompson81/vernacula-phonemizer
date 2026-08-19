@@ -42,7 +42,8 @@ describe("Croatian (hr) canonical IPA", () => {
         //   as *bt͡s*, `www` as a single *ʋ*, and in the sibling engines `СССР` as *sr* and `MMF` as *mf*.
         //   Guarded on the no-vowel signature, which a real BCS word carrying a geminate cannot trip:
         //   they are all loans, and loans have vowels.
-        expect(phonemize("BBC", "hr")).toBe("bbt͡s");
+        // ⚠ MOVED when the initialism pass landed: the run is now SPELLED OUT (see serbian/normalize.ts).
+        expect(phonemize("BBC", "hr")).toBe("be be t͡se");
         expect(phonemize("www", "hr")).toBe("ʋʋʋ");
         // ⚠ AND THE GUARD IS CASE-INDEPENDENT. An "all caps" signature was tried and is wrong — it makes
         //   degemination depend on capitalisation for ordinary words, so a headline or an all-caps proper
@@ -159,6 +160,7 @@ describe("Croatian text normalization", () => {
         expect(ph("1990-1995")).toContain("do");
         expect(ph("4×4")).toBe("t͡ʃˈe˩˥tiri pˈuta t͡ʃˈe˩˥tiri");
         expect(ph("-5")).toBe("mˈiː˩˥nus peː˥˩t");
-        expect(ph("UTC+1")).toBe("utt͡s plus jˈe˩˥dan");
+        // ⚠ MOVED when the initialism pass landed: the run is now SPELLED OUT (see serbian/normalize.ts).
+        expect(ph("UTC+1")).toBe("u te t͡se plus jˈe˩˥dan");
     });
 });

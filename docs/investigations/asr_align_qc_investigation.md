@@ -2379,3 +2379,54 @@ stored cannot be audited**, and I could not audit it.
 
     status after re-label:  verified 259,759 · investigate 8,274 · defective_audio 1,248
                             recognizer_short 797 · reader_divergence 21 · defect 6 · convention 1
+
+## Run 36 — 2026-08-19 — sr/hr/bs initialisms, and a per-variety split the shared engine hid
+
+`hr_hr` was next in the queue. Its all-flagged rows are English proper names, but the **no-nucleus** check
+pointed at something else: `DVD` → *dʋd*, `GPS` → *ɡps*, `TV` → *tʋ*, `SSSR` → *sssr* — unpronounceable in
+all three varieties. `serbian/normalize.ts` declared the class deferred, and gave the reason:
+
+> INITIALISMS. Latin acronyms (FBI, GPS, CCTV) reach the g2p as unreadable clusters, but whether Serbian
+> reads a foreign Latin acronym with Serbian or English letter names is a LEXICAL fact, and inventing it
+> would be confidently wrong rather than merely raw.
+
+⚠ **AND THE FIRST MEASUREMENT I MADE SAID THE DEFERRAL WAS OVERCAUTIOUS. IT WAS NOT.** Hand-decoding the
+first occurrence of a dozen acronyms gave Serbo-Croatian names 10 against English 3 — *de-ve-de*,
+*ge-pe-es*, *ge-em-te*, *u-te-ce*, *es-es-es-er* — and I wrote that into the code as settled. Counting the
+WHOLE corpus reverses it:
+
+    hr_hr   Serbo-Croatian 15, English 22
+    sr_rs   Serbo-Croatian  7, English 15
+    bs_ba   Serbo-Croatian 11, English 12
+
+**A hand-picked first-occurrence sample is not a measurement**, and this one pointed the wrong way. Same
+failure as the German ⟨ch⟩ candidate in Run 23, where the examples were consistent because they were the
+cases the rule would fix.
+
+⚠ **AND THE VARIETIES DISAGREE WITH EACH OTHER ON THE SAME TOKEN**, which the shared engine had no way to
+express: `sr` says *di-vi-di* for DVD where `hr` says *de-ve-de*; `bs` says *dʒi-pi-es* for GPS where `hr`
+says *ge-pe-es*. Three engines, one g2p, three conventions. That is a real finding about the language pair
+and not about this change.
+
+### Shipped anyway, for a narrower reason than I first wrote
+
+The choice of names is contested; that **the run is spelled out at all** is not. *dʋd* has no vowel and is
+wrong under either convention, while *de-ve-de* and *di-vi-di* differ from each other in two vowels. Any
+letter-by-letter reading is far closer to the audio than the cluster.
+
+    hr 76 closer / 50 further      sr 36 / 48      bs 59 / 43      net +30 of 312 rows changed
+
+Thin, and the thinness IS the English-name split showing through — `sr`, the most English-reading variety,
+is the one that measures negative. Every token the pass claims was checked and is a genuine initialism
+(ABC ADT AOL DVD FBI GMT GPS HTTP NBA NHC NSA PBS PNG PSTN RSPCA SSSR TB TT TV UN UTC VPN…); nothing fires
+on ordinary vocabulary, and the syllabic-⟨r⟩ words the naive test would claim — *krv*, *smrt*, *prst*,
+*crn* — are exempted by the shared run test's liquid rule.
+
+⚠ **ONE TABLE, THREE ENGINES, AND THREE NORMALIZERS.** hr/bs run `serbian.ts`'s g2p but each has its own
+`normalize.ts`, so adding the pass to Serbian left Croatian unchanged until it was wired in all three —
+worth knowing, because "they share the g2p" reads as "a fix there lights up three engines" and only half of
+that is true.
+
+The letter names are the native default and are **not** Slovene's: a stop or ⟨v z⟩ takes a following -e
+(*be ce de ge pe te ve ze*), a continuant a preceding e- (*ef el em en er es eš*). Copying the sibling's
+uniform table would have been wrong on half the alphabet.

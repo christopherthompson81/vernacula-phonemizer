@@ -15,6 +15,7 @@
  * ⚠ Every boundary here is an explicit lookaround, never `\b`, which is ASCII-defined and finds none against
  * the Croatian diacritics.
  */
+import { normalizeSerbianInitialisms } from "../serbian/normalize.ts";
 import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { numberToWords } from "./numbers.ts";
 import { SYMBOLS } from "./croatian.ts";
@@ -321,5 +322,9 @@ export function normalizeCroatian(input: string): string {
     //      independently gives the same verb here ("omjer … dijeli se s dvanaest").
     s = s.replace(/(\S)\s*÷\s*(\S)/gu, "$1 podijeljeno s $2");
 
-    return s;
+    // ⚠ INITIALISMS, LAST, AND SHARED WITH SERBIAN. hr/bs run serbian.ts's g2p, so they must run its
+    //   letter-name table too or the same `DVD` → *dʋd* cluster survives here — which it did: the pass was
+    //   added to serbian/normalize.ts and `hr` was unaffected until this line, because each variety has its
+    //   own normalizer. One table, three engines; see the attestation in serbian/normalize.ts's header.
+    return normalizeSerbianInitialisms(s);
 }

@@ -19,6 +19,10 @@ interface SlavicMagnitude {
 }
 
 export interface SerbianManifest {
+    /** Vowel-BEARING runs that are still spelled out letter by letter — the class the phonotactic test
+     *  cannot derive, because they are perfectly pronounceable (`core/initialisms.ts`: "readability is not
+     *  convention"). Attested against the corpus audio; see the initialism note in normalize.ts. */
+    acronymLetters: string[];
     digraphs: Record<string, string>;
     letters: Record<string, string>;
     clausePunctuation: Record<string, string>;
