@@ -161,3 +161,50 @@ Single-word foreign material is a **lexical** problem, not a classification one:
 So the routing design is: **LID on phrase-length segments only, never on words; single foreign tokens by
 lexicon.** That also explains why the digit half of the queue needs no model — a digit run is the extreme
 case of the same principle, where the span is exact and the reading is a per-language fact.
+
+## Run 7 — the intruder task is much easier than 102-way LID, and that decides the size
+
+The size/accuracy curve in Run 5 grades **102-way classification**. That is not the router's job. The job
+is: *given a segment, is it the host language or an intruder (in practice English)?* Built a grounded
+benchmark for exactly that — real English segments from `en_us` against real host segments from each
+language's own `status='verified'` rows, 4 words each:
+
+    model                recall   precision   false-English on host text
+    full   1687 MB        96.3%     100.0%        0.0%
+    PQ 500k  71 MB        93.7%     100.0%        0.0%
+    PQ 100k  16 MB        94.8%     100.0%        0.0%
+    PQ  50k  9.3 MB       94.0%     100.0%        0.0%
+
+⚠ **PRECISION IS 100% AND FALSE-ENGLISH IS 0.0% AT EVERY SIZE.** The 4.6pp the 9.3 MB model loses on
+102-way accuracy is spent almost entirely on the confusable pairs (bos/hrv, yue/cmn, srp) — distinctions
+the router does not need to make. Recall varies 93.7–96.3% with no monotone relationship to size; the
+71 MB model is *worse* than the 16 MB one here, which is noise at this sample size and the point stands:
+**for this task the size choice is nearly free, so take the small one.**
+
+That reverses Run 5's recommendation. 71 MB was the knee for general LID; **9.3 MB is the pick for the
+router**, and it is the size the OpenLID `.ftz` precedent set.
+
+## Run 8 — the safety threshold, in words
+
+Same benchmark, 9.3 MB model, varying segment width. The number that matters is not recall but
+**false-English on host text**, because a false positive corrupts correct monolingual output:
+
+    width    recall    FALSE-English on host
+    1 word    45.9%          3.3%      ← unusable
+    2 words   71.4%          1.6%
+    3 words   85.0%          0.2%      ← safe
+    4 words   92.6%          0.2%
+    6 words   96.8%          0.0%
+    8 words   98.4%          0.0%
+
+**Route at 3+ words.** Below that the damage rate exceeds the benefit: at 1 word the model finds fewer than
+half the real intruders while corrupting 3.3% of correct host text, and Run 6 showed the general per-word
+false-positive rate against *any* label is 34%.
+
+### The design, settled by measurement
+
+    digit runs        → per-language numeral register     (exact span, no model)     42% of the queue
+    1–2 word spans    → lexicon                           (proper nouns; LID unsafe)
+    3+ word spans     → GlotLID PQ 9.3 MB, English arm    (0.2% false positive)
+
+Each tier is chosen because the tier above it is *measurably wrong* at that input, not by preference.
