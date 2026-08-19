@@ -1399,3 +1399,76 @@ lookahead restored, and the decimal guard dropped entirely. Suite 251 files / 4,
 **Nothing from the #840 review is now outstanding.** The register's remaining known gap is the one Run 19
 already quantified and declined on principle: clock times and decimals have no correct reading implemented
 in the register language, worth ~115 rows, and are refused rather than approximated.
+
+## Run 22 — 2026-08-19 — bn_in: the largest residual class in the language, and it is correctly lexical
+
+`bn_in` was next by lift: 31 all-flagged rows, which collapse to **15 distinct sentences** (each recorded
+2–3×, every recording flagged). Reading all 15 found no defect — the recognizer's Bengali output is
+fragmented and insertion-heavy, and rows whose numerals are demonstrably RIGHT still score badly
+(`৭৮৩,৫৬২` → *ʃat̪ lakʰ t̪iɾaʃi ɦad͡ʒaɾ pãt͡ʃ ʃɔt̪ baʃɔʈʈi*, correct Indian lakh grouping, heard back
+almost phone-for-phone, and the row still sits at 0.741). So the per-row queue had nothing to give and the
+question moved to the aggregate.
+
+### Two instruments, one class
+
+`confusion_pairs.py` reports pre-`coarsen` counts, so its top rows (`ɦ→h`, `ʈ→t`, `ɖ→d`) are pairs the
+distance ALREADY folds. Re-running the alignment after `coarsen`, the real tally is:
+
+    ɾ -> r  8438  13.6%      ɔ -> o  5950   9.6%      ɾ -> l  2145  3.5%      o -> u  1845  3.0%
+
+⚠ **`ɾ → r` IS NOT A CANDIDATE FOR `COARSEN`, AND THE COUNT IS WHY IT LOOKS LIKE ONE.** The recognizer
+writes `ɾ` 253,498 times corpus-wide against our 660,205 — 38%, not the <1% that put `ʈ ɖ ɦ ɫ` in the map.
+It HAS the symbol and uses it; folding ɾ→r globally would erase a contrast it makes. Same argument the
+COARSEN docstring already records for `c`.
+
+That leaves `ɔ → o`. The referee harness independently points at the same thing: of 6,666 wikipron words,
+**610 differ from our rule engine by ɔ/o ALONE** — 9.2% of the referee and **17% of all its misses**, the
+single largest identifiable class in the language.
+
+### The measurement that settled it
+
+For every position where the rule engine writes `ɔ`, what does the human referee write there (same-length
+pairs only, so positions index the same segment — 5,004 of 6,666):
+
+    context                        n     referee o        ɔ
+    ɔ + 1C #  (final closed syll) 602    244  (41%)     358
+    ɔ + 2C +i (medial)            105     66  (63%)      39
+    ɔ + 2C #                      101     45  (45%)      56
+    ɔ + 1C +a                     255     40  (16%)     215
+    ɔ + 1C +ɔ                     231     21   (9%)     210
+    ɔ #  (word-final vowel)        40      1   (3%)      39
+
+⚠ **THE BIGGEST CELL IS A COIN FLIP. 41% / 59% over 602 positions is not a rule** — defaulting to [o] in a
+final closed syllable would break 358 words to fix 244. `bengali-lexicon.tsv`'s header already asserts this
+and gives the proof I could not improve on: **মন [mon] against কম [kɔm]** — identical shape, opposite
+outcome, an etymological tatsama/tadbhava split. The existing design (rule engine + a 331-entry adjudicated
+lexicon, override applied only on the shipped path so the referee signal stays non-circular) is right, and
+this run is the number behind the claim rather than a change to it.
+
+⚠ **AND THE LEXICON CANNOT ADJUDICATE ITS OWN CLASS.** In the final-closed-syllable cell it reads 79 [o]
+against 4 [ɔ], which looks like overwhelming corroboration and is worth nothing: an override list contains
+only the words the rules got WRONG, so it is selection-biased by construction and cannot estimate a base
+rate. Checking what the file is made of is what stopped that number from being quoted as evidence.
+
+### Left open, deliberately
+
+`ɔ + 2C + [i u]` — 63% [o] in wikipron (n=105) — is the one cell with a majority. Our harmony rule fires
+only across exactly one consonant (Ferguson & Chowdhury 1960: an open syllable; a coda blocks it), so we
+write `ɔ` there. 63% against a documented phonological description, from a referee `bn.jsonc` itself calls
+"noisy on the inherent-vowel ɔ/o", is a candidate and not a finding. The harness's own rule — corroborate
+across ≥2 INDEPENDENT sources — cannot be satisfied here, because the only other source is the lexicon and
+the lexicon was built partly from wikipron.
+
+### A trap for the next probe
+
+⚠ **BENGALI'S SYNC AND ASYNC ENTRIES DISAGREE, AND ONLY THE ASYNC ONE IS THE CORPUS.** `phonemize("হয়নি",
+"bn")` gives *ɦɔjoni*; `phonemizeAsync` gives *ɦɔeni*, which is what the DB holds — the language ships a
+neural tagger reachable only from the async entry. Probing with the sync entry and diffing against the
+corpus makes the corpus look stale when it is current. Verified: re-running a flagged sentence through
+`phonemizeAsync` reproduces its stored IPA byte for byte.
+
+### Verdict
+
+**No phonemizer defect in bn_in.** Its largest residual class is real, is the same class both instruments
+report, and is lexical. Two candidates recorded above rather than acted on. Next by lift: hu_hu (16),
+hy_am (15), de_de (13), fr_fr (12), he_il (12).
