@@ -301,7 +301,29 @@ export function toSegments(word: string): Seg[] {
             // Onset h is pronounced; h after a vowel is silent (sehen, Uhr, fröhlich) — EXCEPT the ⟨hör⟩ root after
             // a prefix (ge·hör, be·hörde, zu·be·hör → ɡəhøːɐ̯), where h is a real onset. Gated to ⟨hö⟩ + a preceding
             // prefix, so gehen (h→e, silent) and rohöl (roh, not a prefix) are unaffected.
-            if (
+            // ⚠ ⟨th⟩ AT A WORD EDGE IS A LOAN DIGRAPH, and German has no [th] sequence at all: Thema is
+            // [ˈteːma], Theater [teˈaːtɐ], Ruth [ʁuːt]. The rule below pronounces h after any consonant, so
+            // every one of these carried a spurious [h].
+            //
+            // ⚠ THE EDGE RESTRICTION IS THE WHOLE SAFETY ARGUMENT. Medially, ⟨th⟩ is just as often a
+            // COMPOUND BOUNDARY where the h is real — Rathaus, Schlachthof, Aufenthalt, Truthahn, and the
+            // productive `-heit` suffix on any -t adjective (Vertrautheit, Bejahrtheit). In the kaikki
+            // referee, word-initial ⟨th⟩ is 8/8 silent and word-final 3/3 silent, while MEDIAL is only
+            // 34/52 — so the edges are a rule and the middle is not. Measured on the corpus: this costs
+            // nothing and gains 88 rows (88 closer, 0 further).
+            //
+            // Extending it medially scores 186 closer / 24 further, which is net positive and NOT taken:
+            // the 24 are ordinary German compounds plus English in German text (parenthood, south), and
+            // deciding those needs a compound detector — `lexicon.tsv` carries a `k` compound-constituent
+            // flag that could drive one — rather than a list of second elements, which German compounding
+            // would outrun.
+            //
+            // ⚠ AND ⟨rh⟩ IS NOT THE SAME CASE, though it looks identical. Only 3 of 47 kaikki ⟨rh⟩ words
+            // drop the h: Jahrhundert, Mehrheit, verhandlung, fieberhaft are the norm and Rhythmus the
+            // exception. ⟨gh⟩ is 0 of 12. Both were checked before assuming, and both stay untouched.
+            if (w[i - 1] === "t" && (i === 1 || i === w.length - 1)) {
+                /* word-edge ⟨th⟩: silent */
+            } else if (
                 !isV(w[i - 1] ?? "") ||
                 (nx === "ö" &&
                     /(be|ge|ver|zer|er|vor|zu|un|emp|ent|miss)$/.test(w.slice(0, i)))

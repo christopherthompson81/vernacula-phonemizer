@@ -459,3 +459,46 @@ describe("german normalization", () => {
         expect(phonemize("802.11g", "de")).not.toContain("ɡʁam");
     });
 });
+
+/**
+ * ⟨th⟩ AT A WORD EDGE — a loan digraph, and German has no [th] sequence at all. The h rule pronounces h
+ * after any consonant, so *Thema* carried a spurious one: thˈeːma for [ˈteːma].
+ *
+ * ⚠ THE EDGE RESTRICTION IS THE WHOLE SAFETY ARGUMENT. Medially, ⟨th⟩ is as often a COMPOUND BOUNDARY
+ * where the h is real. In the kaikki referee, word-initial ⟨th⟩ is 8/8 silent and word-final 3/3, while
+ * medial is only 34/52. On the corpus the edge rule is 88 closer / 0 further; extending it medially is
+ * 186/24, net positive and not taken — the 24 are ordinary compounds and English-in-German.
+ */
+describe("German — the word-edge ⟨th⟩ digraph", () => {
+    test("initial and final ⟨th⟩ are [t], with no [h]", () => {
+        expect(phonemizeWord("thema")).toBe("tˈeːma");
+        expect(phonemizeWord("theater")).toBe("teˈaːtɐ");
+        expect(phonemizeWord("theresa")).toBe("teʁˈeːza");
+    });
+
+    /**
+     * ⚠ MEDIAL ⟨th⟩ KEEPS ITS h ON PURPOSE. These are the words the restriction protects — the second
+     * element of a compound, and the productive `-heit` suffix on any -t adjective, both of which have a
+     * real [h]. The loan words in the same position (Apotheke, Mathematik) are knowingly given up with it.
+     */
+    test("medial ⟨th⟩ is left alone, because it is as often a compound boundary", () => {
+        expect(phonemizeWord("rathaus")).toContain("thaʊ̯s");
+        expect(phonemizeWord("vertrautheit")).toContain("thaɪ̯t");
+        expect(phonemizeWord("apotheke")).toContain("th"); // knowingly wrong; see the note above
+    });
+
+    /**
+     * ⚠ ⟨rh⟩ AND ⟨gh⟩ ARE NOT THE SAME CASE, though they look identical. Only 3 of 47 kaikki ⟨rh⟩ words
+     * drop the h — Jahrhundert, Mehrheit, verhandlung are the norm and Rhythmus the exception — and ⟨gh⟩
+     * is 0 of 12. Both were checked before assuming, and both stay untouched.
+     */
+    test("⟨rh⟩ and ⟨gh⟩ keep their h, at a word edge too", () => {
+        // ⚠ WORD-INITIAL examples, or this test cannot fail: the rule it guards is edge-only, so medial
+        //   Jahrhundert/Mehrheit would pass against an ⟨rh⟩ fold that is actually wrong.
+        expect(phonemizeWord("rhythmus")).toContain("h");
+        expect(phonemizeWord("rhein")).toContain("h");
+        expect(phonemizeWord("jahrhundert")).toContain("h");
+        expect(phonemizeWord("mehrheit")).toContain("h");
+        expect(phonemizeWord("flughafen")).toContain("h");
+    });
+});

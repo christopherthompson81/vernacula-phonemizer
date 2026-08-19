@@ -1624,3 +1624,78 @@ with `consonant_skeleton.py`.
 **Two languages in a row with no defect found.** bn_in and hy_am both had a large, real, aggregate-visible
 residual class, and in both cases the class turned out to be correctly designed. That is worth noting about
 the queue's remaining yield rather than only about these two languages.
+
+## Run 25 — 2026-08-19 — de_de: a second fold, and the ⟨th⟩ digraph at a word edge
+
+`de_de` is the best-scoring language in the corpus (median 0.183, all-flagged mean 0.371 against an
+exonerated mean of 0.364 — the flagged rows are barely distinguishable from the exonerated ones).
+
+### `ɜ`, the mirror of Run 23's `ɒ`
+
+`ɐ → ɜ` was 8.0% of substitutions. `ɐ` itself is not foldable (the recognizer writes it 21% as often as we
+do), but `ɜ` is the reverse case: **the recognizer writes it 31,657 times and no language in the fleet
+writes it at all**, so every occurrence was an unavoidable miss. The map's stated purpose is our-side
+phones the recognizer lacks; the penalty is symmetric, and naming that is the extension.
+
+It lands mostly on our `ɐ` (5,345) and `ə` (2,801). Swept over **all 87 languages whose recognizer output
+contains `ɜ`: 4 improved, 83 unchanged, 0 worse** — the standard the docstring sets. de_de 0.1789 → 0.1660,
+da_dk 0.5167 → 0.5075. `ɜ → ə` makes da_dk worse; `ɜ → ɛ` makes da_dk and th_th worse. Unlike `ɒ` it merges
+nothing on our side, so there is no per-language cost to record.
+
+### What the flagged rows are, and what they are not
+
+The all-flagged set is dominated by **English institution names in German sentences** — *ronald reagan ucla
+medical center*, *college of arts & sciences*, *united states geological survey*, *royal society for the
+prevention of cruelty to animals*. The recognizer plainly hears them in English (`ucla` → *j uː s iː l eɪ*,
+the letters spelled out; `society` → *s ʊ s aɪ ə t i*) while we read them with German rules (*zˈoːkiːtyː*).
+This is the code-switching class the LID work already measured as **net harmful** to act on for French, and
+`core/hostWord.ts` already records why the existing router cannot help: routing fires across SCRIPTS, and
+English-in-German is Latin-in-Latin. Left alone.
+
+⚠ **AND THE GERMAN ⟨c⟩ QUESTION IS ALREADY SETTLED WITH DATA.** *sciences* → *skˈiːnkəs* and *society* →
+*zˈoːkiːtyː* look like an OOV-rule bug, and `tools/gen/de-consonant-curated.tsv`'s header answers it:
+"of the 249 kaikki words spelled with a bare ⟨c⟩ before a front vowel only 98 take /t͡s/ … so /k/ stays the
+OOV default and the known words are named here." 39% is not a rule. Same shape as Bengali's ɔ/o.
+
+### The real defect: ⟨th⟩
+
+German has no [th] sequence — *Thema* is [ˈteːma], *Theater* [teˈaːtɐ], *Ruth* [ʁuːt] — but the h rule
+pronounces h after any consonant, so every one carried a spurious [h]. Position decides whether it is safe
+to remove, and the kaikki referee gives the split cleanly:
+
+    word-initial ⟨th⟩    8 silent /  0 kept   (100%)
+    word-final   ⟨th⟩    3 silent /  0 kept   (100%)
+    medial       ⟨th⟩   34 silent / 18 kept    (65%)
+
+Medially, ⟨th⟩ is as often a COMPOUND BOUNDARY with a real [h]: *Rathaus*, *Schlachthof*, *Aufenthalt*,
+*Truthahn*, *Lufthansa*, and the productive **`-heit` suffix on any -t adjective** (Vertrautheit,
+Bejahrtheit). The edges are a rule; the middle is not.
+
+    edge only (shipped)   88 closer /  0 further
+    plus medial           186 closer / 24 further
+
+⚠ **THE MEDIAL EXTENSION IS NET POSITIVE AND IS NOT TAKEN.** +162 is a real gain, but the 24 are ordinary
+German compounds plus English-in-German (*parenthood*, *south*, *ninth*), and deciding them needs a
+compound detector rather than a list of second elements — German compounding would outrun any list.
+`lexicon.tsv` already carries a `k` compound-constituent flag that could drive one. Recorded as the next
+step with its numbers attached.
+
+⚠ **⟨rh⟩ LOOKS IDENTICAL AND IS THE OPPOSITE.** Only **3 of 47** kaikki ⟨rh⟩ words drop the h — Jahrhundert,
+Mehrheit, verhandlung, fieberhaft are the norm and Rhythmus the exception — and ⟨gh⟩ is **0 of 12**
+(Birmingham, Flughafen, Recklinghausen). Checking the base rate before generalising is the only reason
+⟨rh⟩ is not in this change.
+
+Referee: kaikki 3,717 → 3,727 of 4,744.
+
+⚠ **AND ONE OF MY THREE MUTATIONS DID NOT FAIL.** The "⟨rh⟩ keeps its h" test used *Jahrhundert* and
+*Mehrheit* — both MEDIAL — so an edge-only ⟨rh⟩ fold sailed past it. The rule under test is edge-only, so
+the test has to be too; it now leads with *Rhythmus* and *Rhein*. A test whose examples sit outside the
+rule's domain cannot fail against a wrong rule, which is the fourth version of this same mistake this
+session.
+
+### Also seen, not acted on
+
+⟨h⟩ is deleted after a vowel across a MORPHEME boundary — *Gänsehaut* → *ɡɛnzəaʊ̯t*, *behaglich* →
+*bəˈaːɡlɪç*, *vorbehalten* → *fˈoːɐ̯bəaltən*, *Balsaholz*, *Johannes*. 19 words in the kaikki referee. The
+frequent ones (*behalten*) are rescued by the lexicon; the rule under-generates and the dictionary covers
+it, the same architecture Bengali uses for ɔ/o. Worth its own run with a prefix/compound test.
