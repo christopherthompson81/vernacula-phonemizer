@@ -998,3 +998,47 @@ Twenty-seven findings, none of which moved a test. The three recurring shapes ar
 applied to one member of a shared-engine family leaves the siblings holding the same defect; a measurement
 instrument that scores whole sentences is blind to a deleted letter in a short token; and a rule written to
 consume one thing will consume its neighbours unless the anchor is tight.
+
+## Run 15 — 2026-08-18 20:10 — round five, and the split question answered by measurement
+
+Six findings. The three MEDIUM ones share one cause: round four's attachment rule was **case-blind**.
+`s` is the preposition "with" and `S` is *južno*; `i` is "and" and `I` is *istok*. Only the LOWERCASE
+letter is ever a word, so requiring attachment of both removed the spaced uppercase bearing — an ordinary
+way to write a latitude. `35° S od ekvatora` stopped reading and left a bare `s` phone.
+
+Also: ⟨W⟩ was being consumed in Bosnian while N and E were read, though *zapadno* sits in the same table;
+and `prevLetter` was not reset on an unknown character, so degemination reached across a separator —
+`pop-pevač` → *popevač*. Unreachable through the engines (their tokenizers exclude `-`) but reachable
+through the exported `phonemizeWord`, which the referee eval now scores directly.
+
+**Two findings did not reproduce**, recorded because a non-reproducing report is still information:
+
+- Roman numerals (`XX. stoljeća` → *ks*) are correct in all three ENGINES — the registry's Roman pass runs
+  before the word path, so the fold never sees them. Measured against `phonemizeWord` in isolation.
+- Cyrillic ⟨С⟩ resolving to Celsius rather than *север* is the intended priority: `°С` on a figure is
+  overwhelmingly a temperature, arm 4 runs first by design, and the corpus holds no Cyrillic latitude.
+
+### The split question, and why the answer is no
+
+Five rounds, and **every** HIGH/MEDIUM finding has been in the bearing arms or the fold; **zero** in
+degemination. That trajectory (HIGH → HIGH → MEDIUM) is converging, but it was reason enough to ask whether
+the weakly-evidenced half should be pulled out and the strong half shipped alone.
+
+Checked it rather than argued it — ran the collisions against `main` in a worktree:
+
+    MAIN bs  "temperatura 35° i padavine"  →  … stˈe˥˩peni ˈi˩˥stot͡ʃno pˈa˥˩daʋine   conjunction DELETED
+    MAIN bs  "35° s vjetrom"               →  … stˈe˥˩peni sjˈe˥˩ʋerno ʋjˈe˥˩trom      preposition DELETED
+    MAIN hr  "35° s padavinama"            →  … stˈupɲeʋa jˈu˥˩ʒno pˈadaʋinama         preposition DELETED
+
+**Three of them are live on `main` today and have nothing to do with the fold.** A rule that deletes one of
+the commonest words in the language and invents a compass bearing in its place is a real user-facing defect,
+and the degree-arm work is what fixes it. Reverting the fold would take those fixes with it.
+
+So the answer is no split — not because the risk was imaginary, but because the work the risk bought turns
+out to stand on its own. What the five rounds actually cost was **process**, not correctness: the same
+family was patched five times because each round fixed the member in front of it instead of the principle.
+The principle, arrived at last rather than first, is one line — *a bearing letter that is also a function
+word must be attached, and only its lowercase form is that word* — and it applies unchanged to all three
+engines.
+
+    whole corpus, steady across rounds 3–5: 716 better, 148 worse over 9,496 rows
