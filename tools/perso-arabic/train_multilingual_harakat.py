@@ -30,6 +30,12 @@ ap.add_argument("--patience", type=int, default=5)
 ap.add_argument("--emb", type=int, default=128)
 ap.add_argument("--hidden", type=int, default=512)
 ap.add_argument("--layers", type=int, default=3)
+# ⚠ RE-SCORE A SAVED CHECKPOINT WITHOUT RETRAINING. Added to compare two rider models on the SAME measurement:
+# the 2026-08-19 packing change touched the DER pass as well as training, so each arm was otherwise scored under
+# its own evaluator and the comparison was of their sum (the same confound that misread bn — Run 43).
+# `--eval-unpacked` reproduces the pre-fix measurement deliberately, for exactly that decomposition.
+ap.add_argument("--eval-ckpt", help="load this checkpoint, report DER, and exit (no training)")
+ap.add_argument("--eval-unpacked", action="store_true", help="score with the OLD padded-unpacked eval pass")
 ap.add_argument("--dropout", type=float, default=0.3)
 args = ap.parse_args()
 dev = "cuda" if torch.cuda.is_available() else "cpu"
@@ -124,7 +130,8 @@ print(f"# reps {reps_of}  train {len(train_rows)} → {len(train_enc)}  eval {le
 def collate(b):
     xs, ys, lg = zip(*b)
     return (pad_sequence(xs, batch_first=True, padding_value=0),
-            pad_sequence(ys, batch_first=True, padding_value=-100), lg)
+            pad_sequence(ys, batch_first=True, padding_value=-100), lg,
+            torch.tensor([len(x) for x in xs]))
 
 
 class BiLSTM(nn.Module):
@@ -133,7 +140,18 @@ class BiLSTM(nn.Module):
         s.emb = nn.Embedding(nc, emb, padding_idx=0)
         s.lstm = nn.LSTM(emb, h, num_layers=ly, batch_first=True, bidirectional=True, dropout=args.dropout)
         s.fc = nn.Linear(2 * h, nl)
-    def forward(s, x): return s.fc(s.lstm(s.emb(x))[0])
+    def forward(s, x, lengths=None):
+        """⚠ PASS `lengths` FOR A PADDED BATCH. Unpacked, the BACKWARD direction of the BiLSTM crosses the pad
+        steps before it reaches each sentence's last real character, so that character's representation depends
+        on the batch's longest sentence — while serving (riderNeural.ts) is one sentence at a time, unpadded.
+        The damage lands at the END of the sentence. This is a SENTENCE-level model, so the affected span is
+        the final word or two of every clause, not one letter. See investigation Run 45."""
+        h = s.emb(x)
+        if lengths is None:
+            return s.fc(s.lstm(h)[0])
+        pk = nn.utils.rnn.pack_padded_sequence(h, lengths, batch_first=True, enforce_sorted=False)
+        out, _ = nn.utils.rnn.pad_packed_sequence(s.lstm(pk)[0], batch_first=True, total_length=x.size(1))
+        return s.fc(out)
 
 
 model = BiLSTM(len(chars), len(labels), args.emb, args.hidden, args.layers).to(dev)
@@ -158,6 +176,7 @@ print(f"# warm-start: copied {copied} lstm/fc tensors + {n_emb} embedding rows f
       file=sys.stderr)
 print(f"# params {sum(p.numel() for p in model.parameters())/1e6:.1f}M", file=sys.stderr)
 
+
 opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
 sched = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, factor=0.5, patience=2)
 crit = nn.CrossEntropyLoss(ignore_index=-100)
@@ -171,9 +190,11 @@ def der_per_lang(rows):
     err = {l: 0 for l in LANGS}; tot = {l: 0 for l in LANGS}
     dl = torch.utils.data.DataLoader(rows, batch_size=256, shuffle=False, collate_fn=collate)
     with torch.no_grad():
-        for X, Y, lg in dl:
+        for X, Y, lg, ln in dl:
             X, Y = X.to(dev), Y.to(dev)
-            pred = model(X).argmax(-1)
+            # ⚠ the DER pass is padded too — unpacked it scored the model under a condition serving never
+            # presents, so the reported DER did not describe the served model either.
+            pred = model(X, None if args.eval_unpacked else ln).argmax(-1)
             mask = Y != -100
             wrong = (pred != Y) & mask
             for b, lang in enumerate(lg):
@@ -182,13 +203,22 @@ def der_per_lang(rows):
 
 
 best = 1e9; best_state = None; since = 0
+if args.eval_ckpt:
+    _ck = torch.load(args.eval_ckpt, map_location=dev, weights_only=False)
+    model.load_state_dict(_ck["state"])
+    _d = der_per_lang(eval_enc)
+    _rd = sum(_d[l][0] * _d[l][1] for l in RIDERS) / max(sum(_d[l][1] for l in RIDERS), 1)
+    print(f"# {os.path.basename(args.eval_ckpt)}  eval={'unpacked' if args.eval_unpacked else 'packed'}  "
+          f"RIDER-DER {_rd:.2f}%  " + " ".join(f"{l} {_d[l][0]:.2f}%" for l in LANGS), file=sys.stderr)
+    sys.exit(0)
+
 for ep in range(args.epochs):
     model.train(); tl = 0.0
-    for X, Y, lg in tdl:
+    for X, Y, lg, ln in tdl:
         X, Y = X.to(dev), Y.to(dev)
         opt.zero_grad()
         with torch.autocast("cuda", dtype=torch.float16, enabled=use_amp):
-            loss = crit(model(X).reshape(-1, len(labels)), Y.reshape(-1))
+            loss = crit(model(X, ln).reshape(-1, len(labels)), Y.reshape(-1))
         scaler.scale(loss).backward(); scaler.step(opt); scaler.update(); tl += loss.item()
     d = der_per_lang(eval_enc)
     rider_der = sum(d[l][0] * d[l][1] for l in RIDERS) / max(sum(d[l][1] for l in RIDERS), 1)
